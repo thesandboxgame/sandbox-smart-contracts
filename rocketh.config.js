@@ -51,6 +51,7 @@ module.exports = {
         genesisMinter: "sandAdmin",
         assetUpgrader: "sandAdmin",
         orbsBeneficiary: "sandAdmin",
+        wallet: '0x86d2fc11be873eca93a083c5cabc38ec59bbc222',
         others: {
             default: "from:3",
             deployments: ""

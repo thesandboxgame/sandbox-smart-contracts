@@ -195,6 +195,7 @@ module.exports = {
   toHex: web3.utils.toHex,
   padLeft: web3.utils.padLeft,
   toWei: web3.utils.toWei,
+  fromWei: web3.utils.fromWei,
   getBalance: web3.eth.getBalance,
   getBlockNumber: web3.eth.getBlockNumber,
   getBlock: web3.eth.getBlock,
