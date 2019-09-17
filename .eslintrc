@@ -1,0 +1,41 @@
+{
+  "extends": [
+      "xo",
+      "xo/esnext"
+  ],
+  "env": {
+      "node": true
+  },
+  "plugins": [
+      "babel"
+  ],
+  "parser": "babel-eslint",
+  "parserOptions": {
+      "ecmaVersion": 6,
+      "sourceType": "module"
+  },
+  "rules": {
+      "valid-jsdoc": 2,
+      "indent": ["error", 4, {
+          "SwitchCase": 1
+      }],
+      "prefer-destructuring":"off",
+      "arrow-parens": ["error", "always"],
+      "capitalized-comments": "off",
+      "default-case": "off",
+      "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+      "no-multi-spaces": ["error", { "exceptions": { "VariableDeclarator": true } }],
+      "no-else-return": ["error", {"allowElseIf": true}],
+      "max-params": ["error", 8],
+      "eol-last": "off",
+      "no-await-in-loop": "off",
+      "no-throw-literal": "off",
+      "comma-dangle": ["error", "only-multiline"],
+      "no-useless-concat": "off",
+      "no-negated-condition": "off",
+  },
+  "globals": {
+      "artifacts": false,
+      "web3": false
+  }
+}

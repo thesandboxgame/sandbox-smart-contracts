@@ -1,0 +1,3 @@
+[submodule "contracts_common"]
+	path = contracts_common
+	url = git@github.com:pixowl/contracts_common.git
