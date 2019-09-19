@@ -1,22 +1,38 @@
 const rocketh = require('rocketh');
 const Web3 = require('web3');
-const web3 = new Web3(rocketh.ethereum);
-const {deployAndRegister, getDeployedContract} = require('../lib');
+const {
+    deployIfDifferent,
+    getDeployedContract,
+} = require('rocketh-web3')(rocketh, Web3);
+const {guard} = require('../lib');
 
-const chainId = rocketh.chainId;
-const LandInfo = rocketh.contractInfo('Land');
-
-module.exports = async ({accounts, registerDeployment}) => {
-    if (chainId == 1 || chainId == 4 || chainId == 18) { // TODO remove
-        return;
+module.exports = async ({namedAccounts, initialRun}) => {
+    function log(...args) {
+        if (initialRun) {
+            console.log(...args);
+        }
     }
+
+    const {
+        deployer,
+    } = namedAccounts;
+
     const sandContract = getDeployedContract('Sand');
-    await deployAndRegister(
-        web3,
-        accounts,
-        registerDeployment,
+    if (!sandContract) {
+        throw new Error('no SAND contract deployed');
+    }
+
+    const deployResult = await deployIfDifferent(['data'],
         'Land',
-        LandInfo,
+        {from: deployer, gas: 1000000},
+        'Land',
         sandContract.options.address
     );
+
+    if (deployResult.newlyDeployed) {
+        log(' - Land deployed at : ' + deployResult.contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
+    } else {
+        log('reusing Land at ' + deployResult.contract.options.address);
+    }
 };
+module.exports.skip = guard(['1', '4']);

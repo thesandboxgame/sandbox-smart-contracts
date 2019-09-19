@@ -1,64 +1,69 @@
 const Web3 = require('web3');
 const rocketh = require('rocketh');
 const {
+    deploy,
     deployIfDifferent,
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);
-
-const chainId = rocketh.chainId;
-
-const gas = 6721975; // 7500000
+const {guard} = require('../lib');
 
 module.exports = async ({namedAccounts, initialRun}) => {
+    function log(...args) {
+        if (initialRun) {
+            console.log(...args);
+        }
+    }
+
     const {
         sandAdmin,
         deployer,
-        wallet,
+        sandSaleBeneficiary,
     } = namedAccounts;
 
-    if (chainId === 1) {
-        return;
+    const sandContract = getDeployedContract('Sand');
+    if (!sandContract) {
+        throw new Error('no SAND contract deployed');
     }
 
-    const sandContract = getDeployedContract('Sand');
-
-    let sandSaleDeployResult;
-
-    const fakeMedianizer = await deployIfDifferent(
-        ['data'],
-        'FakeMedianizer', {
-            from: deployer,
-            gas,
-        },
-        'FakeMedianizer',
-    );
-
-    const fakeDai = await deployIfDifferent(
-        ['data'],
-        'FakeDai', {
-            from: deployer,
-            gas,
-        },
-        'FakeDai',
-    );
-
-    try {
-        sandSaleDeployResult = await deployIfDifferent(['data'],
-            'SandSale',
-            {from: deployer, gas},
-            'SandSale',
-            fakeMedianizer.contract.options.address,
-            sandContract.options.address,
-            fakeDai.contract.options.address,
-            sandAdmin,
-            wallet,
+    let daiMedianizer = getDeployedContract('DAIMedianizer');
+    if (!daiMedianizer) {
+        log('setting up a fake DAI medianizer');
+        const daiMedianizerDeployResult = await deploy(
+            'DAIMedianizer',
+            {from: deployer, gas: 6721975},
+            'FakeMedianizer',
         );
+        daiMedianizer = daiMedianizerDeployResult.contract;
+    }
 
-        if (initialRun) {
-            console.log('gas used for SandSale : ' + sandSaleDeployResult.receipt.gasUsed);
-        }
-    } catch (e) {
-        console.error('error deploying SandSale', e);
-        process.exit(1);
+    let dai = getDeployedContract('DAI');
+    if (!dai) {
+        log('setting up a fake DAI');
+        const daiDeployResult = await deploy(
+            'DAI', {
+                from: deployer,
+                gas: 6721975,
+            },
+            'FakeDai',
+        );
+        dai = daiDeployResult.contract;
+    }
+
+    const sandSaleDeployResult = await deployIfDifferent(['data'],
+        'SandSale',
+        {from: deployer, gas: 1000000},
+        'SandSale',
+        daiMedianizer.options.address,
+        sandContract.options.address,
+        dai.options.address,
+        sandAdmin,
+        sandSaleBeneficiary,
+    );
+
+    if (sandSaleDeployResult.newlyDeployed) {
+        log(' - SandSale deployed at : ' + sandSaleDeployResult.contract.options.address + ' for gas : ' + sandSaleDeployResult.receipt.gasUsed);
+    } else {
+        log('reusing SandSale at ' + sandSaleDeployResult.contract.options.address);
     }
 };
+module.exports.skip = guard(['1', '4'], 'SandSale');

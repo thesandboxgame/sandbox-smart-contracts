@@ -4,7 +4,6 @@ const {
     tx,
     deployIfDifferent,
     getDeployedContract,
-    call,
 } = require('rocketh-web3')(rocketh, Web3);
 const {guard} = require('../lib');
 
@@ -17,8 +16,6 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const {
         deployer,
-        genesisBouncerAdmin,
-        genesisMinter,
     } = namedAccounts;
 
     const asset = getDeployedContract('Asset');
@@ -27,18 +24,17 @@ module.exports = async ({namedAccounts, initialRun}) => {
     }
 
     const deployResult = await deployIfDifferent(['data'],
-        'GenesisBouncer',
+        'TestBouncer',
         {from: deployer, gas: 1000000},
-        'GenesisBouncer',
+        'TestBouncer',
         asset.options.address,
-        genesisBouncerAdmin,
-        genesisMinter
     );
 
     if (deployResult.newlyDeployed) {
-        log(' - GenesisBouncer deployed at : ' + deployResult.contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
+        log(' - TestBouncer deployed at : ' + deployResult.contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
     } else {
-        log('reusing GenesisBouncer at ' + deployResult.contract.options.address);
+        log('reusing TestBouncer at ' + deployResult.contract.options.address);
     }
 };
-module.exports.skip = guard(['1', '4'], 'GenesisBouncer');
+module.exports.skip = guard(['1']);
+

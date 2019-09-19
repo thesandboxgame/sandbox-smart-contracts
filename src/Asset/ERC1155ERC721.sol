@@ -107,6 +107,13 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         emit Bouncer(bouncer, enabled);
     }
 
+    /// @notice check whether address `who` is given minting bouncer rights.
+    /// @param who The address to query.
+    /// @return whether the address has minting rights.
+    function isBouncer(address who) external view returns(bool) {
+        return _bouncers[who];
+    }
+
     event MetaTransactionProcessor(address metaTransactionProcessor, bool enabled);
 
     /// @notice Enable or disable the ability of `metaTransactionProcessor` to perform meta-tx (metaTransactionProcessor rights).
@@ -119,6 +126,13 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         );
         _metaTransactionContracts[metaTransactionProcessor] = enabled;
         emit MetaTransactionProcessor(metaTransactionProcessor, enabled);
+    }
+
+    /// @notice check whether address `who` is given meta-transaction execution rights.
+    /// @param who The address to query.
+    /// @return whether the address has meta-transaction execution rights.
+    function isMetaTransactionProcessor(address who) external view returns(bool) {
+        return _metaTransactionContracts[who];
     }
 
     /// @notice Mint a token type for `creator` on slot `packId`.

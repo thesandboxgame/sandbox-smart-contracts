@@ -1,20 +1,11 @@
 const Web3 = require('web3');
 const rocketh = require('rocketh');
 const {
-    fetchIfDifferent,
     deployIfDifferent,
-    getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);
-
-const chainId = rocketh.chainId;
-
-const gas = 6000000;
+const {guard} = require('../lib');
 
 module.exports = async ({namedAccounts, initialRun}) => {
-    if (chainId == 1) { // || chainId == 4) { // || chainId === 18) { // TODO remove
-        return;
-    }
-
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -27,27 +18,19 @@ module.exports = async ({namedAccounts, initialRun}) => {
         deployer,
     } = namedAccounts;
 
-    const different = await fetchIfDifferent(['data'],
+    const deployResult = await deployIfDifferent(['data'],
         'Sand',
-        {from: deployer, gas},
+        {from: deployer, gas: 2000000},
         'Sand',
         sandAdmin,
         sandAdmin,
         sandBeneficiary
     );
 
-    if (different) {
-        const deployResult = await deployIfDifferent(['data'],
-            'Sand',
-            {from: deployer, gas},
-            'Sand',
-            sandAdmin,
-            sandAdmin,
-            sandBeneficiary
-        );
-        log('gas used for SAND : ' + deployResult.receipt.gasUsed);
+    if (deployResult.newlyDeployed) {
+        log(' - Sand deployed at : ' + deployResult.contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
     } else {
-        const sand = getDeployedContract('Sand');
-        log('reusing Sand at ' + sand.options.address);
+        log('reusing Sand at ' + deployResult.contract.options.address);
     }
 };
+module.exports.skip = guard(['1', '4'], 'Sand');

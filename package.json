@@ -6,7 +6,7 @@
     "solium": "solium -d src",
     "prettier:solidity": "prettier --write src/**/*.sol",
     "solhint": "solhint -f table src/**/*.sol",
-    "test-localhost": "rocketh launch -n http://localhost:8545 \"tap -T test/**/test*\"",
+    "test-localhost": "rocketh launch -n http://localhost:8545 \"tap -T -j 1 -R spec test/**/test*\"",
     "test": "rocketh launch \"tap -T -j 1 -R spec test/**/test*\"",
     "test-sand": "rocketh launch \"yarn tap -T -j 1 -R spec test/sand/testSand.js\"",
     "test-sandSale": "rocketh launch \"yarn tap -T -j 1 -R spec test/sandSale/SandSale.test.js\"",
@@ -38,7 +38,7 @@
     "minimist": "^1.2.0",
     "prettier": "^1.18.2",
     "prettier-plugin-solidity": "^1.0.0-alpha.30",
-    "rocketh": "^0.3.0",
+    "rocketh": "^0.3.5",
     "solc": "0.5.9",
     "solhint": "^2.1.2",
     "solhint-plugin-prettier": "^0.0.3",
@@ -50,6 +50,6 @@
     "base32.js": "^0.1.0",
     "commander": "^3.0.0",
     "ganache-core": "^2.5.5",
-    "rocketh-web3": "^0.2.10"
+    "rocketh-web3": "^0.2.13"
   }
 }

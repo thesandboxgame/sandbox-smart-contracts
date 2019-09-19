@@ -4,7 +4,6 @@ const {
     tx,
     deployIfDifferent,
     getDeployedContract,
-    call,
 } = require('rocketh-web3')(rocketh, Web3);
 const {guard} = require('../lib');
 
@@ -17,28 +16,28 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const {
         deployer,
-        genesisBouncerAdmin,
-        genesisMinter,
     } = namedAccounts;
 
     const asset = getDeployedContract('Asset');
     if (!asset) {
         throw new Error('no Asset contract deployed');
     }
+    const sandContract = getDeployedContract('Sand');
+    if (!sandContract) {
+        throw new Error('no SAND contract deployed');
+    }
 
     const deployResult = await deployIfDifferent(['data'],
-        'GenesisBouncer',
-        {from: deployer, gas: 1000000},
-        'GenesisBouncer',
-        asset.options.address,
-        genesisBouncerAdmin,
-        genesisMinter
+        'AssetSignedAuction',
+        {from: deployer, gas: 2000000},
+        'AssetSignedAuction',
+        sandContract.options.address,
+        asset.options.address
     );
-
     if (deployResult.newlyDeployed) {
-        log(' - GenesisBouncer deployed at : ' + deployResult.contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
+        log(' - AssetSignedAuction deployed at : ' + deployResult.contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
     } else {
-        log('reusing GenesisBouncer at ' + deployResult.contract.options.address);
+        log('reusing AssetSignedAuction at ' + deployResult.contract.options.address);
     }
 };
-module.exports.skip = guard(['1', '4'], 'GenesisBouncer');
+module.exports.skip = guard(['1', '4']);

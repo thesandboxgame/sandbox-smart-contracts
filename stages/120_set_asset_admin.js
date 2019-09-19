@@ -6,7 +6,6 @@ const {
     call,
 } = require('rocketh-web3')(rocketh, Web3);
 
-
 module.exports = async ({namedAccounts, initialRun}) => {
     const {
         deployer,
@@ -15,41 +14,41 @@ module.exports = async ({namedAccounts, initialRun}) => {
     } = namedAccounts;
 
     const assetContract = getDeployedContract('Asset');
-    if (assetContract) {
-        let currentAdmin;
-        try {
-            currentAdmin = await call(assetContract, 'getAdmin');
-        } catch (e) {
+    if (!assetContract) {
+        throw new Error('no ASSET contract deployed');
+    }
 
-        }
-        if (currentAdmin) {
-            if (currentAdmin.toLowerCase() !== assetAdmin.toLowerCase()) {
-                if (initialRun) {
-                    console.log('setting asset admin', currentAdmin, assetAdmin);
-                }
-                await tx({from: deployer, gas: 1000000}, assetContract, 'changeAdmin', assetAdmin);
+    let currentAdmin;
+    try {
+        currentAdmin = await call(assetContract, 'getAdmin');
+    } catch (e) {
+
+    }
+    if (currentAdmin) {
+        if (currentAdmin.toLowerCase() !== assetAdmin.toLowerCase()) {
+            if (initialRun) {
+                console.log('setting asset admin', currentAdmin, assetAdmin);
             }
-        } else {
-            console.log('current Asset impl do not support admin');
+            await tx({from: deployer, gas: 1000000}, assetContract, 'changeAdmin', assetAdmin);
         }
+    } else {
+        console.log('current Asset impl do not support admin');
+    }
 
-        let currentBouncerAdmin;
-        try {
-            currentBouncerAdmin = await call(assetContract, 'getBouncerAdmin');
-        } catch (e) {
+    let currentBouncerAdmin;
+    try {
+        currentBouncerAdmin = await call(assetContract, 'getBouncerAdmin');
+    } catch (e) {
 
-        }
-        if (currentBouncerAdmin) {
-            if (currentBouncerAdmin.toLowerCase() !== assetBouncerAdmin.toLowerCase()) {
-                if (initialRun) {
-                    console.log('setting asset bouncer admin', currentBouncerAdmin, assetBouncerAdmin);
-                }
-                await tx({from: deployer, gas: 1000000}, assetContract, 'changeBouncerAdmin', assetBouncerAdmin);
+    }
+    if (currentBouncerAdmin) {
+        if (currentBouncerAdmin.toLowerCase() !== assetBouncerAdmin.toLowerCase()) {
+            if (initialRun) {
+                console.log('setting asset bouncer admin', currentBouncerAdmin, assetBouncerAdmin);
             }
-        } else {
-            console.log('current Asset impl do not support bouncerAdmin');
+            await tx({from: deployer, gas: 1000000}, assetContract, 'changeBouncerAdmin', assetBouncerAdmin);
         }
-    } else if (initialRun) {
-        console.log('no Asset deployed');
+    } else {
+        console.log('current Asset impl do not support bouncerAdmin');
     }
 };

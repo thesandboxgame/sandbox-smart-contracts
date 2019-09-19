@@ -41,8 +41,8 @@ t.test('Normal behavior', async (t) => {
     let sandSale;
 
     t.test('Should get the deployed contracts', async () => {
-        medianizer = await getDeployedContract('FakeMedianizer');
-        dai = await getDeployedContract('FakeDai');
+        medianizer = await getDeployedContract('DAIMedianizer');
+        dai = await getDeployedContract('DAI');
         sand = await getDeployedContract('Sand');
         sandSale = await getDeployedContract('SandSale');
     });

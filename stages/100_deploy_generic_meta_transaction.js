@@ -1,20 +1,31 @@
 const Web3 = require('web3');
 const rocketh = require('rocketh');
-const web3 = new Web3(rocketh.ethereum);
-const {deployAndRegister} = require('../lib');
+const {
+    deployIfDifferent,
+} = require('rocketh-web3')(rocketh, Web3);
+const {guard} = require('../lib');
 
-const chainId = rocketh.chainId;
-const GenericMetaTransactionInfo = rocketh.contractInfo('GenericMetaTransaction');
-
-module.exports = async ({accounts, registerDeployment}) => {
-    if (chainId == 1 || chainId == 4 || chainId == 18) { // TODO remove
-        return;
+module.exports = async ({namedAccounts, initialRun}) => {
+    function log(...args) {
+        if (initialRun) {
+            console.log(...args);
+        }
     }
-    await deployAndRegister(
-        web3,
-        accounts,
-        registerDeployment,
+
+    const {
+        deployer,
+    } = namedAccounts;
+
+    const deployResult = await deployIfDifferent(['data'],
         'GenericMetaTransaction',
-        GenericMetaTransactionInfo
+        {from: deployer, gas: 2000000},
+        'GenericMetaTransaction',
     );
+
+    if (deployResult.newlyDeployed) {
+        log('GenericMetaTransaction deployed at : ' + deployResult.contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
+    } else {
+        log('reusing GenericMetaTransaction at ' + deployResult.contract.options.address);
+    }
 };
+module.exports.skip = guard(['1', '4']);

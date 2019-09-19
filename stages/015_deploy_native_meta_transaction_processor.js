@@ -1,21 +1,13 @@
 const Web3 = require('web3');
 const rocketh = require('rocketh');
 const {
-    fetchIfDifferent,
     deployIfDifferent,
     getDeployedContract,
     tx,
 } = require('rocketh-web3')(rocketh, Web3);
-
-const chainId = rocketh.chainId;
-
-const gas = 6000000;
+const {guard} = require('../lib');
 
 module.exports = async ({namedAccounts, initialRun}) => {
-    if (chainId == 1) { // || chainId == 4) { // || chainId == 18) { // TODO remove
-        return;
-    }
-
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -27,28 +19,21 @@ module.exports = async ({namedAccounts, initialRun}) => {
     } = namedAccounts;
 
     const sand = getDeployedContract('Sand');
+    if (!sand) {
+        throw new Error('no SAND contract deployed');
+    }
 
-    const different = await fetchIfDifferent(['data'],
+    const deployResult = await deployIfDifferent(['data'],
         'NativeMetaTransactionProcessor',
-        {from: deployer, gas},
+        {from: deployer, gas: 2000000},
         'NativeMetaTransactionProcessor',
         sand.options.address,
     );
 
-    if (different) {
-        await deployIfDifferent(['data'],
-            'NativeMetaTransactionProcessor',
-            {from: deployer, gas},
-            'NativeMetaTransactionProcessor',
-            sand.options.address,
-        );
-
-        // TODO outside with if checks to make idempotent
-        const metaTxProcessor = getDeployedContract('NativeMetaTransactionProcessor');
-        await tx({from: deployer, gas}, sand, 'setSuperOperator', metaTxProcessor.options.address, true);
-        await tx({from: deployer, gas}, sand, 'setExecutionOperator', metaTxProcessor.options.address, true);
+    if (deployResult.newlyDeployed) {
+        log(' - NativeMetaTransactionProcessor deployed at : ' + deployResult.contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
     } else {
-        const metaTxProcessor = getDeployedContract('NativeMetaTransactionProcessor');
-        log('reusing MetaTxProcessor at ' + metaTxProcessor.options.address);
+        log('reusing NativeMetaTransactionProcessor at ' + deployResult.contract.options.address);
     }
 };
+module.exports.skip = guard(['1', '4'], 'NativeMetaTransactionProcessor');
