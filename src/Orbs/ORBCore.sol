@@ -20,8 +20,7 @@ contract ORBCore is SuperOperators, ERC1155 {
     mapping(address => mapping(address => bool)) operatorsForAll;
 
     mapping(address => bool) metaTransactionContracts; // native meta-transaction support
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-
+    
     uint256[3] totalSupplies;
     ERC20ORB[3] erc20s;
     event ORB(ERC20ORB orb);
@@ -232,8 +231,6 @@ contract ORBCore is SuperOperators, ERC1155 {
         return balances;
     }
 
-    // Operators /////////////////////////////////////////////////////////////////////////////////////
-
     function setApprovalForAllFor(
         address _sender,
         address _operator,
@@ -270,14 +267,11 @@ contract ORBCore is SuperOperators, ERC1155 {
         return operatorsForAll[_owner][_operator] || _superOperators[_operator];
     }
 
-    ///////////////////////////////////
-
     function supportsInterface(bytes4 id) external view returns (bool) {
         //ERC165            // ERC1155
         return id == 0x01ffc9a7 || id == 0xd9b67a26;
     }
 
-    ///////////////////////////////////////// INTERNAL //////////////////////////////////////////////
     bytes4 private constant ERC1155_IS_RECEIVER = 0x4e2312e0;
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
