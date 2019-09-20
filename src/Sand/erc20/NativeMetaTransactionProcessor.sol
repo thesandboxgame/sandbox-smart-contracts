@@ -95,7 +95,7 @@ contract NativeMetaTransactionProcessor is ERC1654Constants, ERC1271Constants, T
         address tokenReceiver,
         SignatureType signatureType
     ) external returns (bool success, bytes memory returnData) {
-        ensureParametersValidity(from, amount, params, relayer);
+        ensureParametersValidity(from, params, relayer);
         ensureCorrectSigner(
             from,
             to,
@@ -141,7 +141,7 @@ contract NativeMetaTransactionProcessor is ERC1654Constants, ERC1271Constants, T
         address tokenReceiver,
         SignatureType signatureType
     ) external returns (bool, bytes memory) {
-        ensureParametersValidity(from, amount, params, relayer);
+        ensureParametersValidity(from, params, relayer);
         ensureCorrectSignerViaBasicSignature(
             from,
             to,
@@ -166,7 +166,6 @@ contract NativeMetaTransactionProcessor is ERC1654Constants, ERC1271Constants, T
 
     function ensureParametersValidity(
         address from,
-        uint256 amount,
         uint256[5] memory params, // nonce, minGasPrice, txGas, baseGas, tokenGasPrice
         address relayer
     ) internal view {
