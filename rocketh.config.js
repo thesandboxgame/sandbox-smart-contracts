@@ -7,16 +7,6 @@ module.exports = {
         vmErrorsOnRPCResponse: true,
         gasLimit: '0x7a1200', // 8000000
     },
-    stages: {
-        // default: {
-        //     matchRule: "startsWith",
-        //     list: ["010_", "015_", "020_", "021_", "110_", "120_"]
-        // },
-        1: {
-            matchRule: 'startsWith',
-            list: ['010_', '015_', '020_', '021_', '110_', '120_', 'testingFolder/']
-        }
-    },
     accounts: {
         default: {
             type: 'mnemonic',
