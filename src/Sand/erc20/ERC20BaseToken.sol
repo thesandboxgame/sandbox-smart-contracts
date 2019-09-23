@@ -8,6 +8,7 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
     uint256 internal _totalSupply;
     mapping(address => uint256) internal _balances;
     mapping(address => mapping(address => uint256)) internal _allowances;
+    mapping(address => mapping(address => bool)) internal _approvalLocks;
 
     /// @notice Gets the total number of tokens in existence.
     /// @return the total number of tokens in existence.
@@ -126,11 +127,12 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
             owner != address(0) && spender != address(0),
             "Cannot approve with 0x0"
         );
+        require(!_approvalLocks[owner][spender], "allowance locked");
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }
 
-    function _approveForWithoutEvent(
+    function _activateTemporaryApproval(
         address owner,
         address spender,
         uint256 amount
@@ -140,6 +142,20 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
             "Cannot approve with 0x0"
         );
         _allowances[owner][spender] = amount;
+        _approvalLocks[owner][spender] = true; // this is to ensure Approval cannot be out of sync if executed as part of a meta-tx
+    }
+
+    function _deactivateTemporaryApproval(
+        address owner,
+        address spender,
+        uint256 before
+    ) internal {
+        require(
+            owner != address(0) && spender != address(0),
+            "Cannot approve with 0x0"
+        );
+        _allowances[owner][spender] = before;
+        _approvalLocks[owner][spender] = false;
     }
 
     function _transfer(address from, address to, uint256 amount) internal {

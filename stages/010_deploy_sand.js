@@ -20,7 +20,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const deployResult = await deployIfDifferent(['data'],
         'Sand',
-        {from: deployer, gas: 2300000},
+        {from: deployer, gas: 3000000},
         'Sand',
         sandAdmin,
         sandAdmin,

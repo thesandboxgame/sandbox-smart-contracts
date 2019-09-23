@@ -164,7 +164,7 @@ contract ERC20ExecuteExtension {
             before = allowance(from, to);
             if (before != 2**256 - 1) {
                 allowanceChanged = true;
-                _approveForWithoutEvent(from, to, amount);
+                _activateTemporaryApproval(from, to, amount);
             }
         }
 
@@ -172,20 +172,14 @@ contract ERC20ExecuteExtension {
         require(gasleft() > gasLimit / 63, "not enough gas provided"); // TODO use EIP-1930
 
         if (allowanceChanged) {
-            _approveForWithoutEvent(from, to, before);
+            _deactivateTemporaryApproval(from, to, before);
         }
     }
 
 
     function isSuperOperator(address who) public view returns (bool);
-    function allowance(address _owner, address _spender)
-        public
-        view
-        returns (uint256 remaining);
-    function _approveForWithoutEvent(
-        address _owner,
-        address _target,
-        uint256 _amount
-    ) internal;
-    function _transfer(address _from, address _to, uint256 _amount) internal;
+    function allowance(address owner, address spender) public view returns (uint256 remaining);
+    function _activateTemporaryApproval(address owner, address target, uint256 amount) internal;
+    function _deactivateTemporaryApproval(address owner, address spender, uint256 before) internal;
+    function _transfer(address from, address to, uint256 amount) internal;
 }
