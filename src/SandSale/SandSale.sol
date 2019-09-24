@@ -16,7 +16,7 @@ contract SandSale {
 
     address public admin;
     address payable public wallet;
-    bool public isPaused = true;
+    bool public isPaused;
 
     /* We set the USD price here, 1 SAND = 0.007 USD */
     uint256 constant private sandPriceInUsd = 7000000000000000;

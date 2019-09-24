@@ -1,6 +1,7 @@
 const t = require('tap');
 const {assert} = require('chai');
 const rocketh = require('rocketh');
+const BN = require('bn.js');
 
 const {getDeployedContract} = require('../../lib');
 
@@ -10,7 +11,7 @@ const {
 
 const {
     sandAdmin,
-    wallet,
+    sandSaleBeneficiary,
 } = rocketh.namedAccounts;
 
 const {
@@ -33,6 +34,9 @@ const craig = toChecksumAddress(accounts[3]);
 
 const fakeMedianizerPair = 171.415;
 const sandUsdPrice = 0.007;
+
+let beforeBalance;
+let beforeDAIBalance;
 
 t.test('Normal behavior', async (t) => {
     let medianizer;
@@ -111,22 +115,13 @@ t.test('Normal behavior', async (t) => {
         assert.equal(fromWei(sandAmount.toString()), expectedAmount, 'Expected amount of SAND with ETH is wrong');
     });
 
-    t.test('Should check if SandSale contract is paused', async () => {
-        const isPaused = await sandSale.methods.isPaused().call();
-        assert.equal(isPaused, true, 'Contract state is wrong');
-    });
-
-    t.test('Should unpause the contract', async () => {
-        await sandSale.methods.togglePause().send({
-            from: sandAdmin,
-            gas,
-        });
-
+    t.test('Should check if SandSale contract is unpaused', async () => {
         const isPaused = await sandSale.methods.isPaused().call();
         assert.equal(isPaused, false, 'Contract state is wrong');
     });
 
     t.test('Should buy 0.1 ETH worth of SAND tokens', async () => {
+        beforeBalance = new BN(await getBalance(sandSaleBeneficiary));
         await sandSale.methods.buySandWithEther(alice).send({
             from: alice,
             value: toWei('0.1', 'ether'),
@@ -138,9 +133,10 @@ t.test('Normal behavior', async (t) => {
         assert.equal(fromWei(balance.toString()), expectedAmount, 'alice SAND balance is wrong');
     });
 
-    t.test('Should find 0.1 ETH in the wallet account', async () => {
-        const balance = await getBalance(wallet);
-        assert.equal(fromWei(balance.toString()), '0.1', 'Wallet acccount ETH balance is wrong');
+    t.test('Should find 0.1 ETH in the sandSaleBeneficiary account', async () => {
+        const balance = new BN(await getBalance(sandSaleBeneficiary));
+        const balanceDiff = balance.sub(beforeBalance);
+        assert.equal(fromWei(balanceDiff.toString(10)), '0.1', 'sandSaleBeneficiary acccount ETH balance is wrong');
     });
 
     t.test('Should check bob DAI balance and send 100 DAI', async () => {
@@ -164,6 +160,8 @@ t.test('Normal behavior', async (t) => {
             gas,
         });
 
+        beforeDAIBalance = await getERC20Balance(dai, sandSaleBeneficiary);
+
         await sandSale.methods.buySandWithDai(
             toWei(daiAmount.toString()),
             bob,
@@ -177,9 +175,10 @@ t.test('Normal behavior', async (t) => {
         assert.equal(fromWei(balance.toString()).substring(0, 17), expectedAmount, 'bob SAND balance is wrong');
     });
 
-    t.test('Should find 20 DAI in the Wallet account balance', async () => {
-        const balance = await getERC20Balance(dai, wallet);
-        assert.equal(balance.toString(), toWei('20'), 'Wallet DAI balance is wrong');
+    t.test('Should find 20 DAI in the sandSaleBeneficiary account balance', async () => {
+        const balance = await getERC20Balance(dai, sandSaleBeneficiary);
+        const balanceDiff = balance.sub(beforeDAIBalance);
+        assert.equal(balanceDiff.toString(10), toWei('20'), 'sandSaleBeneficiary DAI balance is wrong');
     });
 
     t.test('Should revert when craig tries to withdraw SAND balance', async () => {
@@ -229,6 +228,16 @@ t.test('Normal behavior', async (t) => {
 
         const isPaused = await sandSale.methods.isPaused().call();
         assert.equal(isPaused, true, 'Contract state is wrong');
+    });
+
+    t.test('Should unpause the contract', async () => {
+        await sandSale.methods.togglePause().send({
+            from: sandAdmin,
+            gas,
+        });
+
+        const isPaused = await sandSale.methods.isPaused().call();
+        assert.equal(isPaused, false, 'Contract state is wrong');
     });
 
 });
