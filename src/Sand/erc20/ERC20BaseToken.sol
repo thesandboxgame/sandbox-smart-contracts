@@ -114,7 +114,7 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
     {
         require(
             msg.sender == owner || _superOperators[msg.sender],
-            "msg.sender != from || superOperator"
+            "msg.sender != from && !superOperator"
         );
         _approveFor(owner, spender, amount);
         return true;
@@ -159,7 +159,6 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
     }
 
     function _transfer(address from, address to, uint256 amount) internal {
-        require(amount > 0, "can't transfer 0 token");
         _transferBalance(from, to, amount);
         _emitTransferEvent(from, to, amount);
     }

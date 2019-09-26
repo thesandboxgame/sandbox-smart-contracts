@@ -32,8 +32,8 @@ const alice = toChecksumAddress(accounts[1]);
 const bob = toChecksumAddress(accounts[2]);
 const craig = toChecksumAddress(accounts[3]);
 
-const fakeMedianizerPair = 171.415;
-const sandUsdPrice = 0.007;
+const fakeMedianizerPair = new BN('171415000000000000000');
+const sandUsdPrice = new BN('7000000000000000');
 
 let beforeBalance;
 let beforeDAIBalance;
@@ -103,16 +103,16 @@ t.test('Normal behavior', async (t) => {
 
     t.test('Should get the ETHUSD pair', async () => {
         const pair = await medianizer.methods.read().call();
-        assert.equal(fromWei(pair), fakeMedianizerPair, 'ETHUSD pair is wrong');
+        assert.equal((new BN(pair.substr(2), 16)).toString(), fakeMedianizerPair.toString(), 'ETHUSD pair is wrong');
     });
 
     t.test('Should check the amount of SAND for a specific amount of ETH', async () => {
-        const ethAmount = 0.1;
-        const expectedAmount = ethAmount * fakeMedianizerPair / sandUsdPrice;
+        const ethAmount = '0.1';
+        const expectedAmount = (new BN(toWei(ethAmount))).mul(fakeMedianizerPair).div(sandUsdPrice);
 
         const sandAmount = await sandSale.methods.getSandAmountWithEther(toWei(ethAmount.toString())).call();
 
-        assert.equal(fromWei(sandAmount.toString()), expectedAmount, 'Expected amount of SAND with ETH is wrong');
+        assert.equal(sandAmount.toString(), expectedAmount.toString(), 'Expected amount of SAND with ETH is wrong');
     });
 
     t.test('Should check if SandSale contract is unpaused', async () => {
@@ -129,8 +129,8 @@ t.test('Normal behavior', async (t) => {
         });
 
         const balance = await getERC20Balance(sand, alice);
-        const expectedAmount = 0.1 * fakeMedianizerPair / sandUsdPrice;
-        assert.equal(fromWei(balance.toString()), expectedAmount, 'alice SAND balance is wrong');
+        const expectedAmount = (new BN(toWei('0.1'))).mul(fakeMedianizerPair).div(sandUsdPrice);
+        assert.equal(balance.toString(), expectedAmount.toString(), 'alice SAND balance is wrong');
     });
 
     t.test('Should find 0.1 ETH in the sandSaleBeneficiary account', async () => {
@@ -153,7 +153,7 @@ t.test('Normal behavior', async (t) => {
     });
 
     t.test('Should buy 20 DAI worth of SAND tokens from bob account', async () => {
-        const daiAmount = 20;
+        const daiAmount = toWei('20');
 
         await dai.methods.approve(sandSale.options.address, toWei('100')).send({
             from: bob,
@@ -163,7 +163,7 @@ t.test('Normal behavior', async (t) => {
         beforeDAIBalance = await getERC20Balance(dai, sandSaleBeneficiary);
 
         await sandSale.methods.buySandWithDai(
-            toWei(daiAmount.toString()),
+            daiAmount,
             bob,
         ).send({
             from: bob,
@@ -171,8 +171,8 @@ t.test('Normal behavior', async (t) => {
         });
 
         const balance = await getERC20Balance(sand, bob);
-        const expectedAmount =  daiAmount / sandUsdPrice;
-        assert.equal(fromWei(balance.toString()).substring(0, 17), expectedAmount, 'bob SAND balance is wrong');
+        const expectedAmount =  new BN(daiAmount).div(new BN(sandUsdPrice));
+        assert.equal(balance.toString(), expectedAmount.toString(), 'bob SAND balance is wrong');
     });
 
     t.test('Should find 20 DAI in the sandSaleBeneficiary account balance', async () => {
