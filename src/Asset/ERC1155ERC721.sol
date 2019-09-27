@@ -1271,12 +1271,12 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     {
         require(to != address(0), "Invalid to");
         require(id & IS_NFT == 0, "Not an ERC1155 Token");
-        uint32 collectionIndex = _nextCollectionIndex[id];
+        uint32 tokenCollectionIndex = _nextCollectionIndex[id];
         newId = id +
             IS_NFT +
-            (collectionIndex) *
+            (tokenCollectionIndex) *
             2**NFT_INDEX_OFFSET;
-        _nextCollectionIndex[id] = collectionIndex + 1;
+        _nextCollectionIndex[id] = tokenCollectionIndex + 1;
         _burnERC1155(operator, sender, id, 1);
         _mint(
             _metadataHash[id & URI_ID],

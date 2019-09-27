@@ -1,11 +1,13 @@
 pragma solidity 0.5.9;
 
 import "./Land/erc721/ERC721BaseToken.sol";
+import "./Sand.sol";
+import "../contracts_common/src/BaseWithStorage/ProxyImplementation.sol";
 
-contract Land is ERC721BaseToken {
+contract Land is ProxyImplementation, ERC721BaseToken {
     uint256 lastId;
 
-    constructor(address _sandContract) public ERC721BaseToken(_sandContract) {
+    constructor(Sand _sandContract) public ERC721BaseToken(_sandContract) {
         lastId = 1;
     }
 
