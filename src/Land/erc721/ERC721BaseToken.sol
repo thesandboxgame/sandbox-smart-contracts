@@ -3,11 +3,15 @@
 pragma solidity 0.5.9;
 
 import "../../../contracts_common/src/Interfaces/ERC721Events.sol";
-
 import "../../Sand.sol";
 
 
+/**
+ * @title Land
+ * @notice This contract is the core of our lands
+ */
 contract ERC721BaseToken is ERC721Events {
+    // Our grid contains 408 * 408 lands
     uint256 private constant SIZE = 408;
 
     uint256 private constant LAYER = 0xFF00000000000000000000000000000000000000000000000000000000000000;
@@ -34,6 +38,7 @@ contract ERC721BaseToken is ERC721Events {
 
     function _transferFrom(address _from, address _to, uint256 _id) internal {
         require(_to != address(0), "Invalid to address");
+
         if (_from != msg.sender && msg.sender != address(sandContract)) {
             require(
                 operatorsForAll[_from][msg.sender] ||
@@ -77,8 +82,8 @@ contract ERC721BaseToken is ERC721Events {
             require(false, "invalid size");
         }
 
-        for (uint16 xi = x; xi < x+size; xi++) {
-            for (uint16 yi = y; yi < y+size; yi++) {
+        for (uint16 xi = x; xi < x + size; xi += 1) {
+            for (uint16 yi = y; yi < y + size; yi += 1) {
                 uint256 id1x1 = xi + yi * SIZE;
                 require(_ownerOf(id1x1) == address(0), "already exists");
                 emit Transfer(address(0), to, id1x1);
@@ -86,7 +91,7 @@ contract ERC721BaseToken is ERC721Events {
         }
 
         owners[blockId] = to;
-        numNFTPerAddress[to] += size*size;
+        numNFTPerAddress[to] += size * size;
     }
 
     function _ownerOf(uint256 _id) internal view returns (address) {
