@@ -15,14 +15,13 @@ contract CommonMinter is MetaTransactionReceiver {
     address _feeReceiver;
     ERC20 _sand;
 
-    constructor(ERC1155ERC721 asset, ERC20 sand, address feeReceiver, address admin, address firstMetaTxProcessor)
+    constructor(ERC1155ERC721 asset, ERC20 sand, address feeReceiver)
         public
     {
         _sand = sand;
         _asset = asset;
-        _admin = admin;
         _feeReceiver = feeReceiver;
-        setMetaTransactionProcessor(firstMetaTxProcessor, true);
+        _setMetaTransactionProcessor(address(sand), true);
     }
 
     function mintFor(
