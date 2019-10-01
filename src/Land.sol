@@ -8,6 +8,6 @@ import "../contracts_common/src/BaseWithStorage/ProxyImplementation.sol";
 
 
 contract Land is ProxyImplementation, LandBaseToken {
-    constructor(address _sandContract) public LandBaseToken(_sandContract) {
+    constructor(Sand _sandContract) public LandBaseToken(_sandContract) {
     }
 }

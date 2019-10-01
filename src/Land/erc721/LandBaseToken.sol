@@ -28,16 +28,16 @@ contract LandBaseToken is ERC721Events {
     mapping (uint256 => string) public metadataURIs;
     Sand public sandContract;
 
-    constructor(address sandAddress) public {
-        initERC721BaseToken(sandAddress);
+    constructor(Sand initialSandContract) public {
+        initERC721BaseToken(initialSandContract);
     }
 
     /**
      * @dev Initialize the LAND contract
-     * @param sandAddress The address of the SAND contract
+     * @param initialSandContract The SAND contract
      */
-    function initERC721BaseToken(address sandAddress) public {
-        sandContract = Sand(sandAddress);
+    function initERC721BaseToken(Sand initialSandContract) public {
+        sandContract = initialSandContract;
     }
 
     /**
