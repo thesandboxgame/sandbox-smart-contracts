@@ -12,13 +12,10 @@ import "../../contracts_common/src/Interfaces/ERC721TokenReceiver.sol";
 import "../../contracts_common/src/BaseWithStorage/SuperOperators.sol";
 
 contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
-    // LIBRARIES /////////////////////////////////////////////////////////////////////////
     using AddressUtils for address;
     using ObjectLib32 for ObjectLib32.Operations;
     using ObjectLib32 for uint256;
-    ///////////////////////////////////////////////////////////////////////////////////////////////
 
-    // CONSTANTS //////////////////////////////////////////////////////////////////////////////////
     bytes4 private constant ERC1155_IS_RECEIVER = 0x4e2312e0;
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
@@ -37,7 +34,6 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     uint256 private constant PACK_INDEX = 0x0000000000000000000000000000000000000000000000000000000000007FFF;
 
     uint256 private constant MAX_SUPPLY = uint256(2)**32 - 1;
-    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     event CreatorshipTransfer(
         address indexed original,
@@ -45,7 +41,6 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         address indexed to
     );
 
-    // STORAGE /////////////////////////////////////////////////////////////////////////////////////
     mapping(address => uint256) private _numNFTPerAddress; // erc721
     mapping(uint256 => address) private _owners; // erc721
     mapping(address => mapping(uint256 => uint256)) private _packedTokenBalance; // erc1155
@@ -61,7 +56,6 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     mapping(address => bool) private _metaTransactionContracts; // native meta-transaction support
 
     address private _bouncerAdmin;
-    ///////////////////////////////////////////////////////////////////////////////////////////////
 
     constructor(
         address metaTransactionContract,
@@ -675,8 +669,6 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         emit CreatorshipTransfer(original, current, to);
     }
 
-    // Operators /////////////////////////////////////////////////////////////////////////////////////
-
     /// @notice Enable or disable approval for `operator` to manage all `sender`'s tokens.
     /// @dev used for Meta Transaction (from metaTransactionContract).
     /// @param sender address which grant approval.
@@ -728,9 +720,6 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     {
         return _operatorsForAll[owner][operator] || _superOperators[operator];
     }
-    //////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    // ERC721 ///////////////////////////////////////
 
     /// @notice Count all NFTs assigned to `owner`.
     /// @param owner address for whom to query the balance.
@@ -1001,7 +990,6 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
 
         return string(bstr);
     }
-    ////////////////////////////////////////////////////////////////////////////////////////////////////
 
     /// @notice Query if a contract implements interface `id`.
     /// @param id the interface identifier, as specified in ERC-165.
@@ -1015,7 +1003,6 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
             id == 0x0e89341c; // ERC1155 metadata
     }
 
-    ///////////////////////////////////////// INTERNAL //////////////////////////////////////////////
     bytes4 constant ERC165ID = 0x01ffc9a7;
     function checkIsERC1155Receiver(address _contract)
         internal
@@ -1128,8 +1115,6 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
             ) ==
             ERC721_RECEIVED);
     }
-
-    ////////////////////////////// ERC721 EXTRACTION AND UPDATE ///////////////////////////////
 
     event Extraction(uint256 indexed fromId, uint256 toId);
     event AssetUpdate(uint256 indexed fromId, uint256 toId);

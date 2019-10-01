@@ -5,6 +5,10 @@ const {
 } = require('./native_meta_transactions');
 
 const {
+    runERC20BasicApproveExtensionTests
+} = require('./erc20_basic_approve_extension');
+
+const {
     runERC20Tests,
 } = require('../erc20_tests');
 
@@ -30,3 +34,4 @@ async function deployMetaTxTokenContracts() {
 
 runERC20Tests('SAND', erc20Token, {testBurn: true, initialOwner: sandBeneficiary, totalSupply: '3000000000000000000000000000' });
 runMetaTxExtensionTests('SAND', deployMetaTxTokenContracts);
+runERC20BasicApproveExtensionTests('SAND', erc20Token);

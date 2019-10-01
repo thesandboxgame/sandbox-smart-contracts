@@ -1,6 +1,6 @@
 pragma solidity 0.5.9;
 
-import "../../contracts_common/src/Libraries/SafeMath.sol";
+import "../../contracts_common/src/Libraries/SafeMathWithRequire.sol";
 import "../../contracts_common/src/Interfaces/ERC20.sol";
 import "../../contracts_common/src/Interfaces/Medianizer.sol";
 
@@ -10,16 +10,17 @@ import "../../contracts_common/src/Interfaces/Medianizer.sol";
  * @notice This contract is used to sell SAND tokens (accepts ETH and DAI) at a fixed USD price
  */
 contract SandSale {
+    using SafeMathWithRequire for uint256;
     Medianizer public medianizer;
     ERC20 public sand;
     ERC20 public dai;
 
     address public admin;
     address payable public wallet;
-    bool public isPaused = true;
+    bool public isPaused;
 
-    /* We set the USD price here, 1 SAND = 0.007 USD */
-    uint256 constant private sandPriceInUsd = 7000000000000000;
+    /* We set the USD price here, 1 SAND = 0.0072 USD */
+    uint256 constant private sandPriceInUsd = 7200000000000000;
 
     /**
      * @notice Initializes the contract
@@ -98,8 +99,8 @@ contract SandSale {
     function getSandAmountWithEther(uint256 ethAmount) public view returns (uint256) {
         uint256 ethUsdPair = getEthUsdPair();
 
-        uint256 usdAmount = SafeMath.mul(ethAmount, ethUsdPair);
-        uint256 sandAmount = SafeMath.div(usdAmount, sandPriceInUsd);
+        uint256 usdAmount = ethAmount.mul(ethUsdPair);
+        uint256 sandAmount = usdAmount.div(sandPriceInUsd);
 
         return sandAmount;
     }
@@ -110,9 +111,7 @@ contract SandSale {
      * @return The amount of SAND
      */
     function getSandAmountWithDai(uint256 daiAmount) public view returns (uint256) {
-        uint256 daiAmountWithFactor = SafeMath.mul(daiAmount, 10 ** 18);
-        uint256 sandAmount = SafeMath.div(daiAmountWithFactor, sandPriceInUsd);
-
+        uint256 sandAmount = daiAmount.div(sandPriceInUsd);
         return sandAmount;
     }
 
@@ -142,7 +141,7 @@ contract SandSale {
     }
 
     modifier onlyAdmin() {
-        require (msg.sender == admin);
+        require (msg.sender == admin, "only admin allowed");
         _;
     }
 

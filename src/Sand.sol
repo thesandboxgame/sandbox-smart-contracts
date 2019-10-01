@@ -2,8 +2,9 @@ pragma solidity 0.5.9;
 
 import "./Sand/erc20/ERC20ExecuteExtension.sol";
 import "./Sand/erc20/ERC20BaseToken.sol";
+import "./Sand/erc20/ERC20BasicApproveExtension.sol";
 
-contract Sand is ERC20ExecuteExtension, ERC20BaseToken {
+contract Sand is ERC20ExecuteExtension, ERC20BasicApproveExtension, ERC20BaseToken {
 
     constructor(address sandAdmin, address executionAdmin, address beneficiary) public {
         _admin = sandAdmin;
