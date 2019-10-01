@@ -29,6 +29,10 @@ async function mint(contract, creator) {
     return receipt.events.Transfer.returnValues._tokenId;
 }
 
+async function mintBlock(contract, to, size, x, y, options) {
+    return contract.methods.mintBlock(to, size, x, y).send(options);
+}
+
 t.test('Running LAND tests', async (t) => {
     let land;
 
@@ -36,8 +40,8 @@ t.test('Running LAND tests', async (t) => {
         land = await deployLand();
     });
 
-    t.test('Should mint a block for account 1', async () => {
-        await land.methods.mintBlock(accounts[1], 3, 0, 0).send({
+    t.test('Should mint a 3x3 block for account 1', async () => {
+        await mintBlock(land, accounts[1], 3, 0, 0, {
             from: accounts[1],
             gas,
         });
@@ -46,9 +50,29 @@ t.test('Running LAND tests', async (t) => {
         assert.equal(balance, 9, 'Account 1 balance is wrong');
     });
 
-    t.test('Should not transfer a token from an empty balance', async () => {
-        expectThrow(
-            await transferFrom(land, accounts[1], accounts[2], 0, {
+    t.test('Should not transfer a token if not owner / without approval', async () => {
+        await land.methods.mintBlock(accounts[0], 1, 0, 0).send({
+            from: accounts[0],
+            gas,
+        });
+
+        await expectThrow(
+            transferFrom(land, accounts[0], accounts[1], 0, {
+                from: accounts[1],
+                gas,
+            }),
+        );
+    });
+
+    t.test('Should give account 1 approval for account 0 tokens', async () => {
+
+        await land.methods.mintBlock(accounts[0], 1, 0, 0).send({
+            from: accounts[0],
+            gas,
+        });
+
+        await expectThrow(
+            transferFrom(land, accounts[0], accounts[1], 0, {
                 from: accounts[1],
                 gas,
             }),
@@ -61,8 +85,8 @@ t.test('Running LAND tests', async (t) => {
             gas,
         });
 
-        expectThrow(
-            await land.methods.mintBlock(accounts[0], 1, 1, 1).send({
+        await expectThrow(
+            land.methods.mintBlock(accounts[0], 1, 1, 1).send({
                 from: accounts[0],
                 gas,
             })
