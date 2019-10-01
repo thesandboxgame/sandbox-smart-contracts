@@ -3,9 +3,16 @@ const rocketh = require('rocketh');
 const {assert} = require('chai');
 const {getDeployedContract} = require('../../lib');
 const {runERC721tests} = require('../erc721_tests');
+
+const {
+    transferFrom,
+    balanceOf,
+} = require('../erc721');
+
 const {
     tx,
-    gas
+    gas,
+    expectThrow,
 } = require('../utils');
 
 const {
@@ -22,39 +29,44 @@ async function mint(contract, creator) {
     return receipt.events.Transfer.returnValues._tokenId;
 }
 
-t.test('Normal behavior', async (t) => {
+t.test('Running LAND tests', async (t) => {
     let land;
 
-    t.test('Should deploy the Land contract', async () => {
-        await rocketh.runStages();
-        land = await getDeployedContract('Land');
+    t.beforeEach(async () => {
+        land = await deployLand();
     });
 
-    t.test('Should try to mint a block for account 1', async () => {
-        const size = 3;
-
-        await land.methods.mintBlock(accounts[1], size, 0, 0).send({
+    t.test('Should mint a block for account 1', async () => {
+        await land.methods.mintBlock(accounts[1], 3, 0, 0).send({
             from: accounts[1],
             gas,
         });
 
-        const balance = await land.methods.balanceOf(accounts[1]).call();
-        assert.equal(balance, size * size, 'Account 0 balance is wrong');
+        const balance = await balanceOf(land, accounts[1]);
+        assert.equal(balance, 9, 'Account 1 balance is wrong');
     });
 
-    t.test('Should try to mint a block for account 0', async () => {
-        const size = 1;
+    t.test('Should not transfer a token from an empty balance', async () => {
+        expectThrow(
+            await transferFrom(land, accounts[1], accounts[2], 0, {
+                from: accounts[1],
+                gas,
+            }),
+        );
+    });
 
-        await land.methods.mintBlock(accounts[0], size, 1, 1).send({
-            from: accounts[0],
+    t.test('Should not mint a land on top of another one', async () => {
+        await land.methods.mintBlock(accounts[1], 3, 0, 0).send({
+            from: accounts[1],
             gas,
         });
 
-        const balance = await land.methods.balanceOf(accounts[0]).call();
-        assert.equal(balance, size * size, 'Account 0 balance is wrong');
-
-        const balance2 = await land.methods.balanceOf(accounts[1]).call();
-        assert.equal(balance2, 9, 'Account 0 balance is wrong');
+        expectThrow(
+            await land.methods.mintBlock(accounts[0], 1, 1, 1).send({
+                from: accounts[0],
+                gas,
+            })
+        );
     });
 });
 
