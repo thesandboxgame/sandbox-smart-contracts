@@ -7,10 +7,10 @@ import "../../Sand.sol";
 
 
 /**
- * @title Land
- * @notice This contract is the core of our lands
+ * @title LandBaseToken
+ * @notice This contract is the base of our lands
  */
-contract ERC721BaseToken is ERC721Events {
+contract LandBaseToken is ERC721Events {
     // Our grid contains 408 * 408 lands
     uint256 private constant SIZE = 408;
 
