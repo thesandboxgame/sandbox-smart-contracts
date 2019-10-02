@@ -1,4 +1,4 @@
-/* solhint-disable func-order */
+/* solhint-disable func-order, code-complexity */
 
 pragma solidity 0.5.9;
 
@@ -11,8 +11,8 @@ import "../../Sand.sol";
  * @notice This contract is the base of our lands
  */
 contract LandBaseToken is ERC721Events {
-    // Our grid contains 408 * 408 lands
-    uint256 private constant SIZE = 408;
+    // Our grid is 408 x 408 lands
+    uint256 private constant GRID_SIZE = 408;
 
     uint256 private constant LAYER = 0xFF00000000000000000000000000000000000000000000000000000000000000;
     uint256 private constant LAYER_1x1 = 0x0000000000000000000000000000000000000000000000000000000000000000;
@@ -84,11 +84,12 @@ contract LandBaseToken is ERC721Events {
      * @param y The y coordinate of the new block
      */
     function mintBlock(address to, uint8 size, uint16 x, uint16 y) external {
-        require(x % size == 0 && y % size == 0, "invalid coordinates");
-        require(x < SIZE && y < SIZE, "out of bounds");
+        // QUESTION: Should we check if the recipient address is different than 0x0?
+        require(x % size == 0 && y % size == 0, "Invalid coordinates");
+        require(x < GRID_SIZE && y < GRID_SIZE, "Out of bounds");
 
         uint256 blockId;
-        uint256 id = x + y * SIZE;
+        uint256 id = x + y * GRID_SIZE;
 
         if (size == 1) {
             blockId = id;
@@ -101,13 +102,13 @@ contract LandBaseToken is ERC721Events {
         } else if (size == 24) {
             blockId = LAYER_24x24 + id;
         } else {
-            require(false, "invalid size");
+            require(false, "Invalid size");
         }
 
         // WARNING: Potential issue here, it seems possible mint multiple times with within the same area
         for (uint16 xi = x; xi < x + size; xi += 1) {
             for (uint16 yi = y; yi < y + size; yi += 1) {
-                uint256 id1x1 = xi + yi * SIZE;
+                uint256 id1x1 = xi + yi * GRID_SIZE;
                 require(_ownerOf(id1x1) == address(0), "already exists");
                 emit Transfer(address(0), to, id1x1);
             }
@@ -123,26 +124,26 @@ contract LandBaseToken is ERC721Events {
      * @return The address of the owner
      */
     function _ownerOf(uint256 _id) internal view returns (address) {
-        uint256 x = _id % SIZE;
-        uint256 y = _id / SIZE;
+        uint256 x = _id % GRID_SIZE;
+        uint256 y = _id / GRID_SIZE;
         address owner1x1 = owners[_id];
 
         if (owner1x1 != address(0)) {
             return owner1x1;
         } else {
-            address owner3x3 = owners[LAYER_3x3 + x + y * SIZE];
+            address owner3x3 = owners[LAYER_3x3 + x + y * GRID_SIZE];
             if (owner3x3 != address(0)) {
                 return owner3x3;
             } else {
-                address owner6x6 = owners[LAYER_6x6 + x + y * SIZE];
+                address owner6x6 = owners[LAYER_6x6 + x + y * GRID_SIZE];
                 if (owner6x6 != address(0)) {
                     return owner6x6;
                 } else {
-                    address owner12x12 = owners[LAYER_12x12 + x + y * SIZE];
+                    address owner12x12 = owners[LAYER_12x12 + x + y * GRID_SIZE];
                     if (owner12x12 != address(0)) {
                         return owner12x12;
                     } else {
-                        return owners[LAYER_24x24 + x + y * SIZE];
+                        return owners[LAYER_24x24 + x + y * GRID_SIZE];
                     }
                 }
             }
@@ -155,9 +156,9 @@ contract LandBaseToken is ERC721Events {
      * @return The address of the owner
      */
     function ownerOf(uint256 _id) external view returns (address _owner) {
-        require(_id & LAYER == 0, "invalid token id");
+        require(_id & LAYER == 0, "Invalid token id");
         _owner = _ownerOf(_id);
-        require(_owner != address(0), "does not exist");
+        require(_owner != address(0), "Id does not exist");
     }
 
     /**
