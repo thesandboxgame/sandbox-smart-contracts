@@ -1,0 +1,62 @@
+{
+    "name": "Magic Stones",
+    "description": "Some Magical Stones",
+    "image": "ipfs://QmWQG5r5NXcZwnrEPKrgjvBANfCagYroGj69pjFLcLRkh9",
+    "animation_url": "ipfs://QmZtfWf26m8UCGf9pA8j2aQy5aazK2tvuHrjXDNsEuooJV",
+    "external_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/",
+    "properties": [
+        {
+            "trait_type": "power",
+            "display_type": "ranking",
+            "value": 20, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "defense",
+            "display_type": "ranking",
+            "value": 0, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "magic",
+            "display_type": "ranking",
+            "value": 50, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "speed",
+            "display_type": "ranking",
+            "value": 0, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "luck",
+            "display_type": "ranking",
+            "value": 30, 
+            "max_value": 100
+        }
+    ],
+    "sandbox": {
+        "creator": "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
+        "version": 1,
+        "classification": {
+            "type": "Asset",
+            "theme": "Magic",
+            "categories": ["Decoration", "Tool"] 
+        },
+        "preview_2d":{
+            "multihash": "QmWQG5r5NXcZwnrEPKrgjvBANfCagYroGj69pjFLcLRkh9",
+            "ext": "png"
+        },
+        "preview_3d":{
+            "multihash": "QmZtfWf26m8UCGf9pA8j2aQy5aazK2tvuHrjXDNsEuooJV",
+            "ext": "gltf"
+        },
+        "voxel_model": {
+            "multihash": "QmZ8WkN7UCqLE9RTgzYYEKpnRa1ezUsKPDWS4C5Bn3Afmq",
+            "ext": "vxr"
+        },
+        "creator_profile_url": "https://beta.sandbox.game/creator/12344",
+        "asset_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/"
+    }
+}

@@ -1,0 +1,62 @@
+{
+    "name": "Helicopter",
+    "description": "A Speedy Helicopter",
+    "image": "ipfs://Qmaqx5H82RBhL53MhfJ997Ve26t1ksfM7wKVdWGzidoz5m",
+    "animation_url": "ipfs://QmPy9dpeYJ2JuMmnmxD9541kFsCBF9Xr8bZZj56QD1yYhi",
+    "external_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/",
+    "properties": [
+        {
+            "trait_type": "power",
+            "display_type": "ranking",
+            "value": 30, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "defense",
+            "display_type": "ranking",
+            "value": 40, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "magic",
+            "display_type": "ranking",
+            "value": 0, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "speed",
+            "display_type": "ranking",
+            "value": 75, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "luck",
+            "display_type": "ranking",
+            "value": 5, 
+            "max_value": 100
+        }
+    ],
+    "sandbox": {
+        "creator": "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
+        "version": 1,
+        "classification": {
+            "type": "Asset",
+            "theme": "City",
+            "categories": ["Vehicle"]
+        },
+        "preview_2d":{
+            "multihash": "Qmaqx5H82RBhL53MhfJ997Ve26t1ksfM7wKVdWGzidoz5m",
+            "ext": "png"
+        },
+        "preview_3d":{
+            "multihash": "QmPy9dpeYJ2JuMmnmxD9541kFsCBF9Xr8bZZj56QD1yYhi",
+            "ext": "gltf"
+        },
+        "voxel_model": {
+            "multihash": "QmNix11oZTpSXuz5fBGKeGQ8L67y58GXakS5eHZBKm4ZWz",
+            "ext": "vxr"
+        },
+        "creator_profile_url": "https://beta.sandbox.game/creator/12344",
+        "asset_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/"
+    }
+}

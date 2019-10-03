@@ -1,0 +1,62 @@
+{
+    "name": "Hugo",
+    "description": "The One And Only One Hugo",
+    "image": "ipfs://QmSxFiSaUDQrwP16u56GSSHEL5iyaCyDZcb5rJHhZLhNBj",
+    "animation_url": "ipfs://QmS3vfu1ZVwoyBcr5as9xHqFmk1L3c6bGfUSyrgmRHzRKF",
+    "external_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/",
+    "properties": [
+        {
+            "trait_type": "power",
+            "display_type": "ranking",
+            "value": 80, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "defense",
+            "display_type": "ranking",
+            "value": 50, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "magic",
+            "display_type": "ranking",
+            "value": 20, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "speed",
+            "display_type": "ranking",
+            "value": 90, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "luck",
+            "display_type": "ranking",
+            "value": 10, 
+            "max_value": 100
+        }
+    ],
+    "sandbox": {
+        "creator": "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
+        "version": 1,
+        "classification": {
+            "type": "Asset",
+            "theme": "City",
+            "categories": ["Humanoid"]
+        },
+        "preview_2d":{
+            "multihash": "QmSxFiSaUDQrwP16u56GSSHEL5iyaCyDZcb5rJHhZLhNBj",
+            "ext": "png"
+        },
+        "preview_3d":{
+            "multihash": "QmS3vfu1ZVwoyBcr5as9xHqFmk1L3c6bGfUSyrgmRHzRKF",
+            "ext": "gltf"
+        },
+        "voxel_model": {
+            "multihash": "QmfMY6mp8Ly1QU8JpPUecyKhsrCn5kSG1YcL139EAq5RH4",
+            "ext": "vxr"
+        },
+        "creator_profile_url": "https://beta.sandbox.game/creator/12344",
+        "asset_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/"
+    }
+}
