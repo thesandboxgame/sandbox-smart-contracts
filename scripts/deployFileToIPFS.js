@@ -16,11 +16,11 @@ program
         } catch (e) {
 
         }
+
         if (tokenFileS) {
             jsonResponse = JSON.parse(tokenFileS);
         }
-        const tokenTime = new Date(jsonResponse.expire).getTime();
-        if (Date.now() > (tokenTime + (20 * 60 * 60 * 1000))) {
+        if (!jsonResponse || Date.now() > (new Date(jsonResponse.expire).getTime() + (20 * 60 * 60 * 1000))) {
             console.log('renewing token...');
             let response;
             try {
