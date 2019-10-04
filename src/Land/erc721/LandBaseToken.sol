@@ -72,7 +72,7 @@ contract LandBaseToken is ERC721Events {
     function balanceOf(address _owner) external view returns (
         uint256 _balance
     ) {
-        require(_owner != address(0), "zero owner");
+        require(_owner != address(0), "Zero owner");
         return numNFTPerAddress[_owner];
     }
 
@@ -84,8 +84,8 @@ contract LandBaseToken is ERC721Events {
      * @param y The y coordinate of the new block
      */
     function mintBlock(address to, uint8 size, uint16 x, uint16 y) external {
-        require(x % size == 0 && y % size == 0, "invalid coordinates");
-        require(x < SIZE-size && y < SIZE-size, "out of bounds");
+        require(x % size == 0 && y % size == 0, "Invalid coordinates");
+        require(x < GRID_SIZE - size && y < GRID_SIZE - size, "Out of bounds");
 
         uint256 blockId;
         uint256 id = x + y * GRID_SIZE;
@@ -104,47 +104,50 @@ contract LandBaseToken is ERC721Events {
             require(false, "Invalid size");
         }
 
-        require(owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * SIZE] == address(0), "already minted as 24x24");
+        require(owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE] == address(0), "Already minted as 24x24");
 
         uint256 toX = x+size;
         uint256 toY = y+size;
-        if(size <= 12) {
-            require(owners[LAYER_12x12 + (x/12) * 12 + ((y/12) * 12) * SIZE] == address(0), "already minted as 12x12");
+        if (size <= 12) {
+            require(
+                owners[LAYER_12x12 + (x/12) * 12 + ((y/12) * 12) * GRID_SIZE] == address(0),
+                "Already minted as 12x12"
+            );
         } else {
-            for(uint16 x12i = x; x12i < toX; x12i += 12) {
-                for(uint16 y12i = y; y12i < toY; y12i += 12) {
-                    uint256 id12x12 = LAYER_12x12 + x12i + y12i * SIZE;
-                    require(owners[id12x12] == address(0), "already minted as 12x12");
+            for (uint16 x12i = x; x12i < toX; x12i += 12) {
+                for (uint16 y12i = y; y12i < toY; y12i += 12) {
+                    uint256 id12x12 = LAYER_12x12 + x12i + y12i * GRID_SIZE;
+                    require(owners[id12x12] == address(0), "Already minted as 12x12");
                 }
             }
         }
 
-        if(size <= 6) {
-            require(owners[LAYER_6x6 + (x/6) * 6 + ((y/6) * 6) * SIZE] == address(0), "already minted as 6x6");
+        if ( size <= 6) {
+            require(owners[LAYER_6x6 + (x/6) * 6 + ((y/6) * 6) * GRID_SIZE] == address(0), "Already minted as 6x6");
         } else {
-            for(uint16 x6i = x; x6i < toX; x6i += 6) {
-                for(uint16 y6i = y; y6i < toY; y6i += 6) {
-                    uint256 id6x6 = LAYER_6x6 + x6i + y6i * SIZE;
-                    require(owners[id6x6] == address(0), "already minted as 6x6");
+            for (uint16 x6i = x; x6i < toX; x6i += 6) {
+                for (uint16 y6i = y; y6i < toY; y6i += 6) {
+                    uint256 id6x6 = LAYER_6x6 + x6i + y6i * GRID_SIZE;
+                    require(owners[id6x6] == address(0), "Already minted as 6x6");
                 }
             }
         }
 
-        if(size <= 3) {
-            require(owners[LAYER_3x3 + (x/3) * 3 + ((y/3) * 3) * SIZE] == address(0), "already minted as 3x3");
+        if (size <= 3) {
+            require(owners[LAYER_3x3 + (x/3) * 3 + ((y/3) * 3) * GRID_SIZE] == address(0), "Already minted as 3x3");
         } else {
-            for(uint16 x3i = x; x3i < toX; x3i += 3) {
-                for(uint16 y3i = y; y3i < toY; y3i += 3) {
-                    uint256 id3x3 = LAYER_3x3 + x3i + y3i * SIZE;
-                    require(owners[id3x3] == address(0), "already minted as 3x3");
+            for (uint16 x3i = x; x3i < toX; x3i += 3) {
+                for (uint16 y3i = y; y3i < toY; y3i += 3) {
+                    uint256 id3x3 = LAYER_3x3 + x3i + y3i * GRID_SIZE;
+                    require(owners[id3x3] == address(0), "Already minted as 3x3");
                 }
             }
         }
 
-        for(uint16 xi = x; xi < x+size; xi++) {
-            for(uint16 yi = y; yi < y+size; yi++) {
-                uint256 id1x1 = xi + yi * SIZE;
-                require(owners[id1x1] == address(0), "already exists");
+        for (uint16 xi = x; xi < x+size; xi++) {
+            for (uint16 yi = y; yi < y+size; yi++) {
+                uint256 id1x1 = xi + yi * GRID_SIZE;
+                require(owners[id1x1] == address(0), "Already exists");
                 emit Transfer(address(0), to, id1x1);
             }
         }
@@ -210,9 +213,9 @@ contract LandBaseToken is ERC721Events {
         require(_id & LAYER == 0, "invalid token id");
         require(
             msg.sender == _sender || msg.sender == address(sandContract),
-            "only msg.sender or sandContract can act on behalf of sender"
+            "Only msg.sender or sandContract can act on behalf of sender"
         );
-        require(_ownerOf(_id) == _sender, "only owner can change operator");
+        require(_ownerOf(_id) == _sender, "Only owner can change operator");
 
         operators[_id] = _operator;
         emit Approval(_sender, _operator, _id);
@@ -224,8 +227,8 @@ contract LandBaseToken is ERC721Events {
      * @param _id The id of the token
      */
     function approve(address _operator, uint256 _id) external {
-        require(_id & LAYER == 0, "invalid token id");
-        require(_ownerOf(_id) == msg.sender, "only owner can change operator");
+        require(_id & LAYER == 0, "Invalid token id");
+        require(_ownerOf(_id) == msg.sender, "Only owner can change operator");
 
         operators[_id] = _operator;
         emit Approval(msg.sender, _operator, _id);
@@ -237,8 +240,8 @@ contract LandBaseToken is ERC721Events {
      * @return The address of the operator
      */
     function getApproved(uint256 _id) external view returns (address _operator) {
-        require(_id & LAYER == 0, "invalid token id");
-        require(_ownerOf(_id) != address(0), "does not exist");
+        require(_id & LAYER == 0, "Invalid token id");
+        require(_ownerOf(_id) != address(0), "Does not exist");
         return operators[_id];
     }
 
@@ -249,10 +252,10 @@ contract LandBaseToken is ERC721Events {
      * @param _id The id of the token
      */
     function transferFrom(address _from, address _to, uint256 _id) external {
-        require(_id & LAYER == 0, "invalid token id");
+        require(_id & LAYER == 0, "Invalid token id");
         address owner = _ownerOf(_id);
-        require(owner != address(0), "not an NFT");
-        require(owner == _from, "only owner can change operator");
+        require(owner != address(0), "Not an NFT");
+        require(owner == _from, "Only owner can change operator");
         _transferFrom(_from, _to, _id);
     }
 
@@ -264,10 +267,10 @@ contract LandBaseToken is ERC721Events {
      * @param _data Additional data
      */
     function transferFrom(address _from, address _to, uint256 _id, bytes calldata _data) external {
-        require(_id & LAYER == 0, "invalid token id");
+        require(_id & LAYER == 0, "Invalid token id");
         address owner = _ownerOf(_id);
-        require(owner != address(0), "not an NFT");
-        require(owner == _from, "only owner can change operator");
+        require(owner != address(0), "Not an NFT");
+        require(owner == _from, "Only owner can change operator");
         _transferFrom(_from, _to, _id); // TODO _data
     }
 
@@ -279,10 +282,10 @@ contract LandBaseToken is ERC721Events {
      * @param _data Additional data
      */
     function safeTransferFrom(address _from, address _to, uint256 _id, bytes calldata _data) external {
-        require(_id & LAYER == 0, "invalid token id");
+        require(_id & LAYER == 0, "Invalid token id");
         address owner = _ownerOf(_id);
-        require(owner != address(0), "not an NFT");
-        require(owner == _from, "only owner can change operator");
+        require(owner != address(0), "Not an NFT");
+        require(owner == _from, "Only owner can change operator");
         _transferFrom(_from, _to, _id); // TODO _data + safe
     }
 
@@ -293,10 +296,10 @@ contract LandBaseToken is ERC721Events {
      * @param _id The id of the token
      */
     function safeTransferFrom(address _from, address _to, uint256 _id) external {
-        require(_id & LAYER == 0, "invalid token id");
+        require(_id & LAYER == 0, "Invalid token id");
         address owner = _ownerOf(_id);
-        require(owner != address(0), "not an NFT");
-        require(owner == _from, "only owner can change operator");
+        require(owner != address(0), "Not an NFT");
+        require(owner == _from, "Only owner can change operator");
         _transferFrom(_from, _to, _id); // TODO safe
     }
 
@@ -322,7 +325,7 @@ contract LandBaseToken is ERC721Events {
      * @return The URI of the token
      */
     function tokenURI(uint256 _id) public view returns (string memory) {
-        require(_id & LAYER == 0, "invalid token id");
+        require(_id & LAYER == 0, "Invalid token id");
         require(_ownerOf(_id) != address(0));
         return string(metadataURIs[_id]);
     }
@@ -345,7 +348,7 @@ contract LandBaseToken is ERC721Events {
     ) external {
         require(
             msg.sender == _sender || msg.sender == address(sandContract),
-            "only msg.sender or _sandContract can act on behalf of sender"
+            "Only msg.sender or _sandContract can act on behalf of sender"
         );
 
         _setApprovalForAll(_sender, _operator, _approved);
@@ -388,5 +391,27 @@ contract LandBaseToken is ERC721Events {
         returns (bool isOperator)
     {
         return operatorsForAll[_owner][_operator];
+    }
+
+    /**
+     * @dev Internal function to invoke `onERC721Received` on a target address.
+     * The call is not executed if the target address is not a contract.
+     *
+     * This function is deprecated.
+     * @param from address representing the previous owner of the given token ID
+     * @param to target address that will receive the tokens
+     * @param tokenId uint256 ID of the token to be transferred
+     * @param _data bytes optional data to send along with the call
+     * @return bool whether the call correctly returned the expected magic value
+     */
+    function _checkOnERC721Received(address from, address to, uint256 tokenId, bytes memory _data)
+        internal returns (bool)
+    {
+        if (!to.isContract()) {
+            return true;
+        }
+
+        bytes4 retval = IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, _data);
+        return (retval == _ERC721_RECEIVED);
     }
 }
