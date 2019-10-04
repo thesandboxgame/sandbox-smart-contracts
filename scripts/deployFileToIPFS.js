@@ -7,6 +7,7 @@ const program = require('commander');
 program
     .command('publish <path>')
     .option('-t, --test', 'only hash')
+    .option('-d, --dev', 'dev')
     .description('publish to ipfs')
     .action(async (folderPath, cmdObj) => {
         let tokenFileS;
@@ -47,7 +48,7 @@ program
             fs.writeFileSync('.temporal_token', JSON.stringify(jsonResponse));
         }
         const jwt = jsonResponse.token.toString();
-        await upload(jwt, {test: cmdObj.test, folderPath});
+        await upload(jwt, {test: cmdObj.test, folderPath, dev: cmdObj.dev});
     });
 
 function traverse(dir, result = [], topDir) {
@@ -64,16 +65,17 @@ function traverse(dir, result = [], topDir) {
     return result;
 }
 
-async function upload(jwt, {test, folderPath}) {
-    const ipfs = ipfsClient({
-        host: 'api.ipfs.temporal.cloud', // 'dev.api.ipfs.temporal.cloud',
+async function upload(jwt, {test, folderPath, dev}) {
+    const ipfsConfig = {
+        host: dev ? 'dev.api.ipfs.temporal.cloud' : 'api.ipfs.temporal.cloud',
         port: '443',
         'api-path': '/api/v0/',
         protocol: 'https',
         headers: {
             authorization: 'Bearer ' + jwt
         }
-    });
+    };
+    const ipfs = ipfsClient(ipfsConfig);
 
     const filesInFolder = traverse(folderPath);
     const files = [{
@@ -93,20 +95,38 @@ async function upload(jwt, {test, folderPath}) {
         }
     }
 
+    const options = {
+        cidVersion: 1,
+        // cidBase: 'base32',
+        onlyHash: test,
+        // recursive: true,
+        // wrapWithDirectory : true,
+    };
+
+    // await ipfs.add(files, options, (e, res) => {
+    //     if (e) {
+    //         console.error('ipfs.add', e);
+    //         ipfsConfig.headers.authorization = ipfsConfig.headers.authorization.substr(0, 7) + '<jwt>';
+    //         console.log('IPFS CONFIG', JSON.stringify(ipfsConfig, null, '  '));
+    //         console.log('FILES', JSON.stringify(files, null, '  '));
+    //         console.log('OPTIONS', JSON.stringify(options, null, '  '));
+    //     } else {
+    //         console.log(JSON.stringify(res, null, '  '));
+    //     }
+    // });
+
     try {
         const res = await ipfs.add(
             files,
-            {
-                cidVersion: 1,
-                // cidBase: 'base32',
-                onlyHash: test,
-                // recursive: true,
-                // wrapWithDirectory : true,
-            }
+            options
         );
         console.log(JSON.stringify(res, null, '  '));
     } catch (e) {
         console.error('ipfs.add', e);
+        ipfsConfig.headers.authorization = ipfsConfig.headers.authorization.substr(0, 7) + '<jwt>';
+        console.log('IPFS CONFIG', JSON.stringify(ipfsConfig, null, '  '));
+        console.log('FILES', JSON.stringify(files, null, '  '));
+        console.log('OPTIONS', JSON.stringify(options, null, '  '));
     }
 }
 
