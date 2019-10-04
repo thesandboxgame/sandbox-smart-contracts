@@ -33,6 +33,16 @@ async function mintBlock(contract, to, size, x, y, options) {
     return contract.methods.mintBlock(to, size, x, y).send(options);
 }
 
+const possibleSizes = [
+    1,
+    3,
+    6,
+    12,
+    24,
+];
+
+const gridSize = 408;
+
 t.test('Running LAND tests', async (t) => {
     let land;
 
@@ -40,14 +50,37 @@ t.test('Running LAND tests', async (t) => {
         land = await deployLand();
     });
 
-    t.test('Should mint a 3x3 block for account 1', async () => {
-        await mintBlock(land, accounts[1], 3, 0, 0, {
+    for (let i = 0; i < possibleSizes.length; i += 1) {
+        const size = possibleSizes[i];
+
+        t.test(`Should mint a ${size}x${size} block for account 1`, async () => {
+            await mintBlock(land, accounts[1], size, 0, 0, {
+                from: accounts[1],
+                gas,
+            });
+
+            const balance = await balanceOf(land, accounts[1]);
+            assert.equal(balance, size * size, 'Account 1 balance is wrong');
+        });
+    }
+
+    t.test('Should mint a 24x24 block', async () => {
+        await mintBlock(land, accounts[1], 24, 0, 0, {
             from: accounts[1],
             gas,
         });
 
         const balance = await balanceOf(land, accounts[1]);
-        assert.equal(balance, 9, 'Account 1 balance is wrong');
+        assert.equal(balance, 24 * 24, 'Account 1 balance is wrong');
+    });
+
+    t.test('Should not mint a block out of bounds', async () => {
+        await expectThrow(
+            mintBlock(land, accounts[1], 1, gridSize, gridSize, {
+                from: accounts[1],
+                gas,
+            }),
+        );
     });
 
     t.test('Should not transfer a token if not owner / without approval', async () => {
@@ -65,7 +98,6 @@ t.test('Running LAND tests', async (t) => {
     });
 
     t.test('Should give account 1 approval for account 0 tokens', async () => {
-
         await land.methods.mintBlock(accounts[0], 1, 0, 0).send({
             from: accounts[0],
             gas,
@@ -80,13 +112,13 @@ t.test('Running LAND tests', async (t) => {
     });
 
     t.test('Should not mint a land on top of another one', async () => {
-        await land.methods.mintBlock(accounts[1], 3, 0, 0).send({
+        await land.methods.mintBlock(accounts[1], 1, 0, 0).send({
             from: accounts[1],
             gas,
         });
 
         await expectThrow(
-            land.methods.mintBlock(accounts[0], 1, 1, 1).send({
+            land.methods.mintBlock(accounts[0], 3, 0, 0).send({
                 from: accounts[0],
                 gas,
             })
