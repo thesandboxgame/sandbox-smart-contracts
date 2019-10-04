@@ -10,7 +10,7 @@
     "test": "rocketh launch \"tap -T -j 1 -R spec test/**/test*\"",
     "test-sand": "rocketh launch \"yarn tap -T -j 1 -R spec test/sand/testSand.js\"",
     "test-sandSale": "rocketh launch \"yarn tap -T -j 1 -R spec test/sandSale/SandSale.test.js\"",
-    "test-land": "rocketh launch \"yarn tap -T -j 1 -R spec test/land/Land.test.js\"",
+    "test-land": "rocketh launch \"yarn tap -T -j 1 -R spec test/land/testLand.js\"",
     "ganache": "ganache-cli --seed 04624df17c837dc2113f0c65554551f2 -a 21 --gasLimit 19000000",
     "export-sand": "node export-sand.js",
     "export-asset": "node export-asset.js",

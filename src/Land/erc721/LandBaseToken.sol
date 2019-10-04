@@ -84,9 +84,8 @@ contract LandBaseToken is ERC721Events {
      * @param y The y coordinate of the new block
      */
     function mintBlock(address to, uint8 size, uint16 x, uint16 y) external {
-        // QUESTION: Should we check if the recipient address is different than 0x0?
-        require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        require(x < GRID_SIZE && y < GRID_SIZE, "Out of bounds");
+        require(x % size == 0 && y % size == 0, "invalid coordinates");
+        require(x < SIZE-size && y < SIZE-size, "out of bounds");
 
         uint256 blockId;
         uint256 id = x + y * GRID_SIZE;
@@ -105,11 +104,47 @@ contract LandBaseToken is ERC721Events {
             require(false, "Invalid size");
         }
 
-        // WARNING: Potential issue here, it seems possible mint multiple times with within the same area
-        for (uint16 xi = x; xi < x + size; xi += 1) {
-            for (uint16 yi = y; yi < y + size; yi += 1) {
-                uint256 id1x1 = xi + yi * GRID_SIZE;
-                require(_ownerOf(id1x1) == address(0), "already exists");
+        require(owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * SIZE] == address(0), "already minted as 24x24");
+
+        uint256 toX = x+size;
+        uint256 toY = y+size;
+        if(size <= 12) {
+            require(owners[LAYER_12x12 + (x/12) * 12 + ((y/12) * 12) * SIZE] == address(0), "already minted as 12x12");
+        } else {
+            for(uint16 x12i = x; x12i < toX; x12i += 12) {
+                for(uint16 y12i = y; y12i < toY; y12i += 12) {
+                    uint256 id12x12 = LAYER_12x12 + x12i + y12i * SIZE;
+                    require(owners[id12x12] == address(0), "already minted as 12x12");
+                }
+            }
+        }
+
+        if(size <= 6) {
+            require(owners[LAYER_6x6 + (x/6) * 6 + ((y/6) * 6) * SIZE] == address(0), "already minted as 6x6");
+        } else {
+            for(uint16 x6i = x; x6i < toX; x6i += 6) {
+                for(uint16 y6i = y; y6i < toY; y6i += 6) {
+                    uint256 id6x6 = LAYER_6x6 + x6i + y6i * SIZE;
+                    require(owners[id6x6] == address(0), "already minted as 6x6");
+                }
+            }
+        }
+
+        if(size <= 3) {
+            require(owners[LAYER_3x3 + (x/3) * 3 + ((y/3) * 3) * SIZE] == address(0), "already minted as 3x3");
+        } else {
+            for(uint16 x3i = x; x3i < toX; x3i += 3) {
+                for(uint16 y3i = y; y3i < toY; y3i += 3) {
+                    uint256 id3x3 = LAYER_3x3 + x3i + y3i * SIZE;
+                    require(owners[id3x3] == address(0), "already minted as 3x3");
+                }
+            }
+        }
+
+        for(uint16 xi = x; xi < x+size; xi++) {
+            for(uint16 yi = y; yi < y+size; yi++) {
+                uint256 id1x1 = xi + yi * SIZE;
+                require(owners[id1x1] == address(0), "already exists");
                 emit Transfer(address(0), to, id1x1);
             }
         }
