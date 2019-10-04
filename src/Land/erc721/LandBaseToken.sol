@@ -1,7 +1,9 @@
-/* solhint-disable func-order, code-complexity */
+/* solhint-disable func-order, code-complexity, reason-string */
 
 pragma solidity 0.5.9;
 
+import "../../../contracts_common/src/Libraries/AddressUtils.sol";
+import "../../../contracts_common/src/Interfaces/ERC721TokenReceiver.sol";
 import "../../../contracts_common/src/Interfaces/ERC721Events.sol";
 import "../../Sand.sol";
 
@@ -11,6 +13,12 @@ import "../../Sand.sol";
  * @notice This contract is the base of our lands
  */
 contract LandBaseToken is ERC721Events {
+    using AddressUtils for address;
+
+    // Equals to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
+    // which can be also obtained as `IERC721Receiver(0).onERC721Received.selector`
+    bytes4 private constant _ERC721_RECEIVED = 0x150b7a02;
+
     // Our grid is 408 x 408 lands
     uint256 private constant GRID_SIZE = 408;
 
@@ -286,7 +294,12 @@ contract LandBaseToken is ERC721Events {
         address owner = _ownerOf(_id);
         require(owner != address(0), "Not an NFT");
         require(owner == _from, "Only owner can change operator");
-        _transferFrom(_from, _to, _id); // TODO _data + safe
+        require(
+            _checkOnERC721Received(_from, _to, _id, _data),
+            "ERC721: transfer to non ERC721Receiver implementer"
+        );
+
+        _transferFrom(_from, _to, _id); // TODO _data
     }
 
     /**
@@ -300,7 +313,12 @@ contract LandBaseToken is ERC721Events {
         address owner = _ownerOf(_id);
         require(owner != address(0), "Not an NFT");
         require(owner == _from, "Only owner can change operator");
-        _transferFrom(_from, _to, _id); // TODO safe
+        require(
+            _checkOnERC721Received(_from, _to, _id, ""),
+            "ERC721: transfer to non ERC721Receiver implementer"
+        );
+
+        _transferFrom(_from, _to, _id);
     }
 
     /**
@@ -330,9 +348,16 @@ contract LandBaseToken is ERC721Events {
         return string(metadataURIs[_id]);
     }
 
-    function supportsInterface(bytes4) external view returns (bool) {
-        // TODO _interfaceId)
-        return true; // TODO
+    /**
+     * @dev Check if the contract supports an interface
+     * 0x01ffc9a7 is ERC-165
+     * 0x80ac58cd is ERC-721
+     * 0x5b5e139f is ERC-721 metadata
+     * @param id The id of the interface
+     * @return True if the interface is supported
+     */
+    function supportsInterface(bytes4 id) external pure returns (bool) {
+        return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
     }
 
     /**
@@ -396,8 +421,6 @@ contract LandBaseToken is ERC721Events {
     /**
      * @dev Internal function to invoke `onERC721Received` on a target address.
      * The call is not executed if the target address is not a contract.
-     *
-     * This function is deprecated.
      * @param from address representing the previous owner of the given token ID
      * @param to target address that will receive the tokens
      * @param tokenId uint256 ID of the token to be transferred
@@ -411,7 +434,7 @@ contract LandBaseToken is ERC721Events {
             return true;
         }
 
-        bytes4 retval = IERC721Receiver(to).onERC721Received(msg.sender, from, tokenId, _data);
+        bytes4 retval = ERC721TokenReceiver(to).onERC721Received(msg.sender, from, tokenId, _data);
         return (retval == _ERC721_RECEIVED);
     }
 }
