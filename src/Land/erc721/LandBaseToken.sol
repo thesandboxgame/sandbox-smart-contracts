@@ -130,7 +130,7 @@ contract LandBaseToken is ERC721Events {
             }
         }
 
-        if ( size <= 6) {
+        if (size <= 6) {
             require(owners[LAYER_6x6 + (x/6) * 6 + ((y/6) * 6) * GRID_SIZE] == address(0), "Already minted as 6x6");
         } else {
             for (uint16 x6i = x; x6i < toX; x6i += 6) {
