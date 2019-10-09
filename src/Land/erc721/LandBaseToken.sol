@@ -91,7 +91,7 @@ contract LandBaseToken is ERC721Events {
      * @param x The x coordinate of the new block
      * @param y The y coordinate of the new block
      */
-    function mintBlock(address to, uint8 size, uint16 x, uint16 y) external {
+    function mintBlock(address to, uint16 size, uint16 x, uint16 y) external {
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         require(x < GRID_SIZE - size && y < GRID_SIZE - size, "Out of bounds");
 
