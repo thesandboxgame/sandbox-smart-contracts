@@ -46,6 +46,7 @@ module.exports = {
             default: 0,
             1: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06', // TODO use another wallet ?
         },
+        landAdmin: 'sandAdmin',
         others: {
             default: 'from:3',
             deployments: ''
