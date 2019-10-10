@@ -5,14 +5,15 @@ pragma solidity 0.5.9;
 import "../../../contracts_common/src/Libraries/AddressUtils.sol";
 import "../../../contracts_common/src/Interfaces/ERC721TokenReceiver.sol";
 import "../../../contracts_common/src/Interfaces/ERC721Events.sol";
-import "../../Sand.sol";
+import "../../../contracts_common/src/BaseWithStorage/SuperOperators.sol";
+import "../../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 
 
 /**
  * @title LandBaseToken
  * @notice This contract is the base of our lands
  */
-contract LandBaseToken is ERC721Events {
+contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver {
     using AddressUtils for address;
 
     // Equals to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
@@ -34,18 +35,13 @@ contract LandBaseToken is ERC721Events {
     mapping (address => mapping(address => bool)) public operatorsForAll;
     mapping (uint256 => address) public operators;
     mapping (uint256 => string) public metadataURIs;
-    Sand public sandContract;
 
-    constructor(Sand initialSandContract) public {
-        initERC721BaseToken(initialSandContract);
-    }
-
-    /**
-     * @dev Initialize the LAND contract
-     * @param initialSandContract The SAND contract
-     */
-    function initERC721BaseToken(Sand initialSandContract) public {
-        sandContract = initialSandContract;
+    constructor(
+        address metaTransactionContract,
+        address admin
+    ) public {
+        _metaTransactionContracts[metaTransactionContract] = true;
+        _superOperators[admin] = true;
     }
 
     /**
@@ -57,10 +53,11 @@ contract LandBaseToken is ERC721Events {
     function _transferFrom(address _from, address _to, uint256 _id) internal {
         require(_to != address(0), "Invalid to address");
 
-        if (_from != msg.sender && msg.sender != address(sandContract)) {
+        if (_from != msg.sender && !_metaTransactionContracts[msg.sender]) {
             require(
+                _superOperators[msg.sender] ||
                 operatorsForAll[_from][msg.sender] ||
-                    operators[_id] == msg.sender,
+                operators[_id] == msg.sender,
                 "Operator not approved"
             );
         }
@@ -92,6 +89,10 @@ contract LandBaseToken is ERC721Events {
      * @param y The y coordinate of the new block
      */
     function mintBlock(address to, uint16 size, uint16 x, uint16 y) external {
+        require(
+            isSuperOperator(msg.sender),
+            "Sender is not a super operator"
+        );
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         require(x < GRID_SIZE - size && y < GRID_SIZE - size, "Out of bounds");
 
@@ -220,7 +221,7 @@ contract LandBaseToken is ERC721Events {
     ) external {
         require(_id & LAYER == 0, "invalid token id");
         require(
-            msg.sender == _sender || msg.sender == address(sandContract),
+            msg.sender == _sender || !_metaTransactionContracts[msg.sender],
             "Only msg.sender or sandContract can act on behalf of sender"
         );
         require(_ownerOf(_id) == _sender, "Only owner can change operator");
@@ -372,7 +373,7 @@ contract LandBaseToken is ERC721Events {
         bool _approved
     ) external {
         require(
-            msg.sender == _sender || msg.sender == address(sandContract),
+            msg.sender == _sender || !_metaTransactionContracts[msg.sender],
             "Only msg.sender or _sandContract can act on behalf of sender"
         );
 

@@ -15,6 +15,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const {
         deployer,
+        landAdmin,
     } = namedAccounts;
 
     const sandContract = getDeployedContract('Sand');
@@ -26,7 +27,8 @@ module.exports = async ({namedAccounts, initialRun}) => {
         'Land',
         {from: deployer, gas: 8000000},
         'Land',
-        sandContract.options.address
+        sandContract.options.address,
+        landAdmin,
     );
 
     if (deployResult.newlyDeployed) {
