@@ -158,28 +158,14 @@ contract ERC20ExecuteExtension {
         bytes memory data
     ) internal returns (bool success, bytes memory returnData) {
 
-        bool allowanceChanged = false;
-        uint256 before = 0;
-        if (amount > 0 && !isSuperOperator(to)) {
-            before = allowance(from, to);
-            if (before != 2**256 - 1) {
-                allowanceChanged = true;
-                _activateTemporaryApproval(from, to, amount);
-            }
+        if (amount > 0) {
+            _addAllowanceIfNeeded(from, to, amount);
         }
-
         (success, returnData) = to.call.gas(gasLimit)(data);
         require(gasleft() > gasLimit / 63, "not enough gas provided"); // TODO use EIP-1930
-
-        if (allowanceChanged) {
-            _deactivateTemporaryApproval(from, to, before);
-        }
     }
 
 
-    function isSuperOperator(address who) public view returns (bool);
-    function allowance(address owner, address spender) public view returns (uint256 remaining);
-    function _activateTemporaryApproval(address owner, address target, uint256 amount) internal;
-    function _deactivateTemporaryApproval(address owner, address spender, uint256 before) internal;
     function _transfer(address from, address to, uint256 amount) internal;
+    function _addAllowanceIfNeeded(address owner, address spender, uint256 amountNeeded) internal;
 }
