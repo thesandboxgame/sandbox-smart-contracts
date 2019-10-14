@@ -7228,10 +7228,10 @@ rlp@2.1.0, rlp@^2.0.0:
   dependencies:
     safe-buffer "^5.1.1"
 
-rocketh-web3@^0.2.14:
-  version "0.2.14"
-  resolved "https://registry.yarnpkg.com/rocketh-web3/-/rocketh-web3-0.2.14.tgz#b675d63f9c3ec05ce9797395c6d04ad8f8daf79d"
-  integrity sha512-rbzbaMYMeGgC8LvheuQ+63YrayEZEsrp95k07eTKSo3Z/d8mrYFcZJcpuqK/Fe4SMdMSKUYuV+/JrEwkcvgrdQ==
+rocketh-web3@^0.2.15:
+  version "0.2.15"
+  resolved "https://registry.yarnpkg.com/rocketh-web3/-/rocketh-web3-0.2.15.tgz#6941f2b54fb5a70341af5e34023a8c3e578fb25b"
+  integrity sha512-o2NW1UWgOoBPPy5TpffN9e1Cy6rG6pll2dpjS7H+Jfu39DoB1DMjsGDbIh6n/F6Gn/t1ABUtxUYbdZ93HPVJWQ==
 
 rocketh@^0.3.19:
   version "0.3.19"

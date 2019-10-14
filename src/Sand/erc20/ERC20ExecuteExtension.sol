@@ -53,7 +53,7 @@ contract ERC20ExecuteExtension {
     function executeWithSpecificGas(address to, uint256 gasLimit, bytes calldata data) external returns (bool success, bytes memory returnData) {
         require(_executionOperators[msg.sender], "only execution operators allowed to execute on SAND behalf");
         (success, returnData) = to.call.gas(gasLimit)(data);
-        require(gasleft() > gasLimit / 63, "not enough gas provided"); // TODO use EIP-1930
+        assert(gasleft() > gasLimit / 63); // not enough gas provided, assert to throw all gas // TODO use EIP-1930
     }
 
     /// @notice approve a specific amount of token for `from` and execute on behalf of the contract.
@@ -162,7 +162,7 @@ contract ERC20ExecuteExtension {
             _addAllowanceIfNeeded(from, to, amount);
         }
         (success, returnData) = to.call.gas(gasLimit)(data);
-        require(gasleft() > gasLimit / 63, "not enough gas provided"); // TODO use EIP-1930
+        assert(gasleft() > gasLimit / 63); // not enough gas provided, assert to throw all gas // TODO use EIP-1930
     }
 
 

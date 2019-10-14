@@ -9,3 +9,4 @@ tmp_deployments/
 .bitski*
 .mythx_credentials*
 .mnemonic*
+.temporal*
