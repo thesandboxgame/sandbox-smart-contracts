@@ -100,33 +100,30 @@ async function upload(jwt, {test, folderPath, dev}) {
         // wrapWithDirectory : true,
     };
 
-    // await ipfs.add(files, options, (e, res) => {
-    //     if (e) {
-    //         console.error('ipfs.add', e);
-    //         ipfsConfig.headers.authorization = ipfsConfig.headers.authorization.substr(0, 7) + '<jwt>';
-    //         console.log('IPFS CONFIG', JSON.stringify(ipfsConfig, null, '  '));
-    //         console.log('FILES', JSON.stringify(files, null, '  '));
-    //         console.log('OPTIONS', JSON.stringify(options, null, '  '));
-    //     } else {
-    //         console.log(JSON.stringify(res, null, '  '));
-    //     }
-    // });
-
     try {
+        options.headers = {
+            authorization: 'Bearer ' + jwt
+        };
         const res = await ipfs.add(
             files,
             options
         );
-        console.log(JSON.stringify(res, null, '  '));
+        // console.log(JSON.stringify(res, null, '  '));
+        for (const file of res) {
+            if (file.path === '') {
+                return file.hash;
+            }
+        }
+        return res[res.length - 1].hash;
     } catch (e) {
         console.error('ipfs.add', e);
         ipfsConfig.headers.authorization = ipfsConfig.headers.authorization.substr(0, 7) + '<jwt>';
+        options.headers.authorization = ipfsConfig.headers.authorization.substr(0, 7) + '<jwt>';
         console.log('IPFS CONFIG', JSON.stringify(ipfsConfig, null, '  '));
         console.log('FILES', JSON.stringify(files, null, '  '));
         console.log('OPTIONS', JSON.stringify(options, null, '  '));
         throw {ipfsConfig, files, options};
     }
-    // TODO return 
 }
 
 module.exports = {

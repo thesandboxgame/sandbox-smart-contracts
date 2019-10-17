@@ -89,7 +89,6 @@ program
     .option('-n, --nonce <nonce>', 'nonce')
     .option('-r, --real', 'real')
     .action(async (filePath, cmdObj) => {
-        console.log({filePath});
         if (cmdObj.real) {
             Bouncer = getDeployedContract('GenesisBouncer');
         }
@@ -130,6 +129,7 @@ program
         rimraf.sync(ipfsFoldersFolder);
         fs.mkdirSync(ipfsFoldersFolder);
         const folderCreated = {};
+        const batches = [];
         for (const creator of Object.keys(assetsPerCreator)) {
             if (!folderCreated[creator]) {
                 try {
@@ -158,9 +158,7 @@ program
                 raritiesPack = generateRaritiesPack(rarityArray);
             }
 
-            // TODO loop the ipfs upload first, so transactions can be redone separatly 
             let cidv1;
-            // 'bafybeih6rvyphidjoekzedidlmvpeeh4esobdpzu6475zdlddqre533ufq'; // TODO pin to ipfs
             try {
                 cidv1 = await deployToIPFS(path.join('__ipfs__', creator), {dev: false, test: false});
             } catch (e) {
@@ -171,15 +169,25 @@ program
             const hash = hashFromCIDv1(cidv1);
             const owner = creator;
             const packId = cmdObj.packId || 0;
-            console.log({creator, packId, cidv1, hash, suppliesArr, raritiesPack, owner});
-            // if (!testMode) {
-            //     try {
-            //         const receipt = await tx({from: operator, nonce: cmdObj.nonce, gas: cmdObj.gas || 1000000}, Bouncer, 'mintMultipleFor', creator, packId, hash, suppliesArr, raritiesPack, owner);
-            //         console.log('success', {txHash: receipt.transactionHash, gasUsed: receipt.gasUsed});
-            //     } catch (e) {
-            //         reportErrorAndExit(e);
-            //     }
-            // }
+
+            batches.push(
+                {creator, packId, cidv1, hash, suppliesArr, raritiesPack, owner}
+            );
+        }
+        if (!testMode) {
+            console.log('MINTING...');
+            for (const batch of batches) {
+                const {creator, packId, cidv1, hash, suppliesArr, raritiesPack, owner} = batch;
+                console.log({creator, packId, cidv1, hash, suppliesArr, raritiesPack, owner});
+                try {
+                    // TODO save txHash // TODO save progress
+                    const receipt = await tx({from: operator, nonce: cmdObj.nonce, gas: cmdObj.gas || 1000000}, Bouncer, 'mintMultipleFor', creator, packId, hash, suppliesArr, raritiesPack, owner);
+                    // TODO save progress
+                    console.log('success', {txHash: receipt.transactionHash, gasUsed: receipt.gasUsed});
+                } catch (e) {
+                    reportErrorAndExit(e);
+                }
+            }
         }
     });
 
