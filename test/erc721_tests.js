@@ -2,7 +2,6 @@ const BN = require('bn.js');
 const tap = require('tap');
 const assert = require('assert');
 const rocketh = require('rocketh');
-const accounts = rocketh.accounts;
 
 const {
     getEventsFromReceipt,
@@ -23,7 +22,16 @@ const {
     ApprovalForAllEvent,
 } = require('./erc721');
 
-const creator = accounts[0];
+const {
+    namedAccounts,
+    accounts,
+} = rocketh;
+
+const {
+    landAdmin,
+} = namedAccounts;
+
+const creator = landAdmin;
 const user1 = accounts[1];
 const user2 = accounts[2];
 const user3 = accounts[3];
@@ -125,12 +133,12 @@ function runERC721tests(title, contractStore) {
         t.test('minting', async (t) => {
             t.test('mint result in a transfer from 0 event', async () => {
                 const blockNumber = await getBlockNumber();
-                const newTokenId = await contractStore.mintERC721(user1);
+                const newTokenId = await contractStore.mintERC721(creator);
                 const eventsMatching = await getPastEvents(contract, TransferEvent, {fromBlock: blockNumber + 1});
                 assert.equal(eventsMatching.length, 1);
                 const transferEvent = eventsMatching[0];
                 assert.equal(transferEvent.returnValues[0], zeroAddress);
-                assert.equal(transferEvent.returnValues[1], user1);
+                assert.equal(transferEvent.returnValues[1], creator);
                 assert.equal(transferEvent.returnValues[2], newTokenId);
             });
 
@@ -145,9 +153,9 @@ function runERC721tests(title, contractStore) {
             // });
 
             t.test('mint for gives correct owner', async () => {
-                const tokenId = await contractStore.mintERC721(user1);
+                const tokenId = await contractStore.mintERC721(creator);
                 const owner = await call(contract, 'ownerOf', null, tokenId);
-                assert.equal(owner, user1);
+                assert.equal(owner, creator);
             });
 
             // mint 2 ids
@@ -156,14 +164,14 @@ function runERC721tests(title, contractStore) {
         if (contractStore.burnERC721) {
             t.test('burning', async (t) => {
                 t.test('burn result in a transfer to 0 event', async () => {
-                    const tokenId = await contractStore.mintERC721(user1);
+                    const tokenId = await contractStore.mintERC721(creator);
 
                     const blockNumber = await getBlockNumber();
-                    await contractStore.burnERC721(user1, tokenId);
+                    await contractStore.burnERC721(creator, tokenId);
                     const eventsMatching = await getPastEvents(contract, TransferEvent, {fromBlock: blockNumber + 1});
                     assert.equal(eventsMatching.length, 1);
                     const transferEvent = eventsMatching[0];
-                    assert.equal(transferEvent.returnValues[0], user1);
+                    assert.equal(transferEvent.returnValues[0], creator);
                     assert.equal(transferEvent.returnValues[1], zeroAddress);
                     assert.equal(transferEvent.returnValues[2], tokenId);
                 });
@@ -323,7 +331,7 @@ function runERC721tests(title, contractStore) {
                 assert.equal(eventValues[2], tokenId);
             });
 
-            t.test('removeing approval emit Approval event', async () => {
+            t.test('removing approval emit Approval event', async () => {
                 await tx(contract, 'approve', {from: creator, gas}, user1, tokenId);
                 const receipt = await tx(contract, 'approve', {from: creator, gas}, zeroAddress, tokenId);
                 const eventsMatching = await getEventsFromReceipt(contract, ApprovalEvent, receipt);
@@ -373,9 +381,11 @@ function runERC721tests(title, contractStore) {
             });
 
             t.test('approval by operator works', async () => {
-                await tx(contract, 'setApprovalForAll', {from: creator, gas}, user1, true);
-                await tx(contract, 'approve', {from: user1, gas}, user2, tokenId);
-                await tx(contract, 'transferFrom', {from: user2, gas}, creator, user3, tokenId);
+                await tx(contract, 'transferFrom', {from: creator, gas}, creator, user1, tokenId);
+
+                await tx(contract, 'setApprovalForAllFor', {from: creator, gas}, user1, user2, true);
+                // await tx(contract, 'approve', {from: user1, gas}, user2, tokenId);
+                await tx(contract, 'transferFrom', {from: user2, gas}, user1, user3, tokenId);
                 const newOwner = await call(contract, 'ownerOf', null, tokenId);
                 assert.equal(newOwner, user3);
             });
@@ -444,9 +454,12 @@ function runERC721tests(title, contractStore) {
             });
 
             t.test('approval for all allow to set individual nft approve', async () => {
-                await tx(contract, 'setApprovalForAll', {from: creator, gas}, user1, true);
-                await tx(contract, 'approve', {from: user1, gas}, user2, tokenId);
-                await tx(contract, 'transferFrom', {from: user2, gas}, creator, user3, tokenId);
+                await tx(contract, 'transferFrom', {from: creator, gas}, creator, user1, tokenId);
+
+                await tx(contract, 'setApprovalForAll', {from: user1, gas}, user2, true);
+
+                // await tx(contract, 'approve', {from: user1, gas}, user2, tokenId);
+                await tx(contract, 'transferFrom', {from: user2, gas}, user1, user3, tokenId);
                 const newOwner = await call(contract, 'ownerOf', null, tokenId);
                 assert.equal(newOwner, user3);
             });
