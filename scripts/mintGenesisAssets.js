@@ -1,3 +1,4 @@
+const Ajv = require('ajv');
 const base32 = require('base32.js');
 const Web3 = require('web3');
 const rocketh = require('rocketh');
@@ -5,14 +6,28 @@ const program = require('commander');
 const fs = require('fs');
 const path = require('path');
 const rimraf = require('rimraf');
+const {deployToIPFS} = require('./ipfs');
 const {
     getDeployedContract,
     tx,
 } = require('rocketh-web3')(rocketh, Web3);
 
-let Bouncer = getDeployedContract('TestBouncer');
+let Bouncer;
+let operator;
+let testMode = false;
+try {
+    Bouncer = getDeployedContract('TestBouncer');
+} catch (e) {
+    console.log('cannot get Bouncer, continue in test mode');
+    testMode = true;
+}
 
-const operator = rocketh.accounts[0];
+try {
+    operator = rocketh.accounts[0];
+} catch (e) {
+    console.log('cannot get operator, continue in test mode');
+    testMode = true;
+}
 
 function hashFromCIDv1(cidv1) {
     const decoder = new base32.Decoder();
@@ -27,17 +42,17 @@ function hashFromCIDv1(cidv1) {
 //         traverse        
 //     });
 
-function reportError(e) {
+function reportErrorAndExit(e) {
     console.error(e);
     process.exit(1);
 }
 function access(obj, fieldName, cond) {
     if (!obj[fieldName]) {
-        reportError('no field ' + fieldName);
+        reportErrorAndExit('no field ' + fieldName);
     }
     const v = obj[fieldName];
     if (cond && !cond(v)) {
-        reportError(`field ${fieldName} failed condition`);
+        reportErrorAndExit(`field ${fieldName} failed condition`);
     }
     return v;
 }
@@ -61,66 +76,58 @@ function generateRaritiesPack(raritiesArr) {
     return raritiesPack;
 }
 
+const schemaS = fs.readFileSync(path.join(__dirname, 'assetMetadataSchema.json'));
+const schema = JSON.parse(schemaS);
+const ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}
+const validate = ajv.compile(schema);
+
 program
-    .command('mintFromFile <filePath>')
+    .command('mintBatchFromFile <filePath>')
     .description('mint assets specified in the file')
-    .option('-g, --gas', 'gas limit')
+    .option('-g, --gas <gas>', 'gas limit')
+    .option('-p, --packId <packId>', 'packId')
+    .option('-n, --nonce <nonce>', 'nonce')
     .option('-r, --real', 'real')
     .action(async (filePath, cmdObj) => {
-        if (!cmdObj.real) {
+        console.log({filePath});
+        if (cmdObj.real) {
             Bouncer = getDeployedContract('GenesisBouncer');
         }
         let data;
         try {
             data = JSON.parse(fs.readFileSync(filePath).toString());
         } catch (e) {
-            reportError(e);
+            reportErrorAndExit(e);
             return;
         }
         let numAssets = 0;
         const assetsPerCreator = {};
         for (const assetData of data) {
-            const creator = assetData.creator || assetData.sandbox.creator;
-            if (!creator) {
-                reportError('creator not found for asset\n' + JSON.stringify(assetData, null, '  '));
+            if (!assetData.metadata || !validate(assetData.metadata)) {
+                reportErrorAndExit('error in metadata, does not follow schema!');
             }
+            if (typeof assetData.rarity !== 'number' || !Number.isInteger(assetData.rarity)) {
+                reportErrorAndExit('rarity needs to be a integer number');
+            }
+            if (assetData.rarity < 0 || assetData.rarity > 3) {
+                reportErrorAndExit('rarity can only be 0 (common), 1 (rare), 2 (epic) or 3 (lengendary)');
+            }
+
+            if (typeof assetData.supply !== 'number' || !Number.isInteger(assetData.supply)) {
+                reportErrorAndExit('supply needs to be a integer number');
+            }
+
+            const creator = assetData.metadata.sandbox.creator;
             const assetList = assetsPerCreator[creator] || [];
             assetsPerCreator[creator] = assetList;
-            const assetMetadata = {
-                name: access(assetData, 'name'),
-                description: access(assetData, 'description'),
-                image: access(assetData, 'image'),
-                animation_url: access(assetData, 'animation_url'),
-                external_url: access(assetData, 'external_url'),
-                properties: access(assetData, 'properties'), // TODO check values
-                sandbox: {
-                    creator: access(assetData.sandbox, 'creator'),
-                    version: access(assetData.sandbox, 'version', (v) => v === 1),
-                    asset_type: access(assetData.sandbox, 'asset_type'),
-                    categories: access(assetData.sandbox, 'categories'),
-                    preview2d: access(assetData.sandbox, 'preview2d'),
-                    preview3d: access(assetData.sandbox, 'preview3d'),
-                    voxel_model: access(assetData.sandbox, 'voxel_model'),
-                    creator_profile_url: access(assetData.sandbox, 'creator_profile_url'),
-                    asset_url: access(assetData.sandbox, 'asset_url', (v) => v === assetData.external_url),
-                    // platform_policy: access(asset.sandbox, 'platform_policy', (v) => v === 'TODO'),
-                },
-                // license: {
-
-                // }
-            };
-            assetList.push({
-                metadata: assetMetadata,
-                supply: access(assetData, 'supply'),
-                rarity: access(assetData, 'rarity'),
-            });
+            assetList.push(assetData);
             numAssets++;
         }
 
         console.log(`${numAssets} assets across ${Object.keys(assetsPerCreator).length} creators ready to be processed`);
 
         const ipfsFoldersFolder = '__ipfs__';
-        rimraf(ipfsFoldersFolder);
+        rimraf.sync(ipfsFoldersFolder);
         fs.mkdirSync(ipfsFoldersFolder);
         const folderCreated = {};
         for (const creator of Object.keys(assetsPerCreator)) {
@@ -151,16 +158,27 @@ program
                 raritiesPack = generateRaritiesPack(rarityArray);
             }
 
-            const cidv1 = 'bafybeih6rvyphidjoekzedidlmvpeeh4esobdpzu6475zdlddqre533ufq'; // TODO pin to ipfs
+            // TODO loop the ipfs upload first, so transactions can be redone separatly 
+            let cidv1;
+            // 'bafybeih6rvyphidjoekzedidlmvpeeh4esobdpzu6475zdlddqre533ufq'; // TODO pin to ipfs
+            try {
+                cidv1 = await deployToIPFS(path.join('__ipfs__', creator), {dev: false, test: false});
+            } catch (e) {
+                console.error(e);
+                reportErrorAndExit('failed to upload to ipfs'); // TODO remove what is already deployed
+            }
+
             const hash = hashFromCIDv1(cidv1);
             const owner = creator;
-            const packId = 0;
+            const packId = cmdObj.packId || 0;
             console.log({creator, packId, cidv1, hash, suppliesArr, raritiesPack, owner});
-            // try {
-            //     const receipt = await tx({from: operator, gas: cmdObj.gas || 1000000}, Bouncer, 'mintMultipleFor', creator, packId, hash, suppliesArr, raritiesPack, owner);
-            //     console.log('success', {txHash: receipt.transactionHash, gasUsed: receipt.gasUsed});
-            // } catch (e) {
-            //     reportError(e);
+            // if (!testMode) {
+            //     try {
+            //         const receipt = await tx({from: operator, nonce: cmdObj.nonce, gas: cmdObj.gas || 1000000}, Bouncer, 'mintMultipleFor', creator, packId, hash, suppliesArr, raritiesPack, owner);
+            //         console.log('success', {txHash: receipt.transactionHash, gasUsed: receipt.gasUsed});
+            //     } catch (e) {
+            //         reportErrorAndExit(e);
+            //     }
             // }
         }
     });

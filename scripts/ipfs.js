@@ -2,55 +2,51 @@ const fetch = require('node-fetch');
 const ipfsClient = require('ipfs-http-client');
 const fs = require('fs');
 const path = require('path');
-const program = require('commander');
+const deployToIPFS = async (folderPath, cmdObj) => {
+    const dev = cmdObj.dev;
+    let tokenFileS;
+    let jsonResponse;
+    try {
+        tokenFileS = fs.readFileSync('.temporal_' + (dev ? 'dev_' : '') + 'token').toString();
+    } catch (e) {
 
-program
-    .command('publish <path>')
-    .option('-t, --test', 'only hash')
-    .option('-d, --dev', 'dev')
-    .description('publish to ipfs')
-    .action(async (folderPath, cmdObj) => {
-        const dev = cmdObj.dev;
-        let tokenFileS;
-        let jsonResponse;
+    }
+
+    if (tokenFileS) {
+        jsonResponse = JSON.parse(tokenFileS);
+    }
+    if (!jsonResponse || Date.now() > (new Date(jsonResponse.expire).getTime() + (20 * 60 * 60 * 1000))) {
+        console.log('renewing token...');
+        let response;
         try {
-            tokenFileS = fs.readFileSync('.' + (dev ? 'dev_' : '') + 'temporal_token').toString();
+            response = await fetch(dev ? 'https://dev.api.temporal.cloud/v2/auth/login' : 'https://api.temporal.cloud/v2/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'text/plain'
+                },
+                body: JSON.stringify({
+                    username: 'TheSandbox',
+                    password: fs.readFileSync('.temporal').toString(),
+                })
+            });
         } catch (e) {
-
+            console.error('fetch', e);
+            process.exit(1);
         }
-
-        if (tokenFileS) {
-            jsonResponse = JSON.parse(tokenFileS);
+        try {
+            jsonResponse = await response.json();
+        } catch (e) {
+            console.error('response.json', e);
+            process.exit(1);
         }
-        if (!jsonResponse || Date.now() > (new Date(jsonResponse.expire).getTime() + (20 * 60 * 60 * 1000))) {
-            console.log('renewing token...');
-            let response;
-            try {
-                response = await fetch(dev ? 'https://dev.api.temporal.cloud/v2/auth/login' : 'https://api.temporal.cloud/v2/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'text/plain'
-                    },
-                    body: JSON.stringify({
-                        username: 'TheSandbox',
-                        password: fs.readFileSync('.temporal').toString(),
-                    })
-                });
-            } catch (e) {
-                console.error('fetch', e);
-                process.exit(1);
-            }
-            try {
-                jsonResponse = await response.json();
-            } catch (e) {
-                console.error('response.json', e);
-                process.exit(1);
-            }
-            fs.writeFileSync('.temporal_token', JSON.stringify(jsonResponse));
+        if (!jsonResponse.token) {
+            throw new Error('cannot get token ' + jsonResponse.message);
         }
-        const jwt = jsonResponse.token.toString();
-        await upload(jwt, {test: cmdObj.test, folderPath, dev: cmdObj.dev});
-    });
+        fs.writeFileSync('.temporal_' + (dev ? 'dev_' : '') + 'token', JSON.stringify(jsonResponse));
+    }
+    const jwt = jsonResponse.token.toString();
+    return upload(jwt, {test: cmdObj.test, folderPath, dev: cmdObj.dev});
+};
 
 function traverse(dir, result = [], topDir) {
     fs.readdirSync(dir).forEach((name) => {
@@ -128,7 +124,11 @@ async function upload(jwt, {test, folderPath, dev}) {
         console.log('IPFS CONFIG', JSON.stringify(ipfsConfig, null, '  '));
         console.log('FILES', JSON.stringify(files, null, '  '));
         console.log('OPTIONS', JSON.stringify(options, null, '  '));
+        throw {ipfsConfig, files, options};
     }
+    // TODO return 
 }
 
-program.parse(process.argv);
+module.exports = {
+    deployToIPFS
+};

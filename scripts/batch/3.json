@@ -1,8 +1,8 @@
 {
     "name": "Spaceship",
     "description": "a spaceship",
-    "image": "ipfs://QmesxYGh26ffgGUcdpkyKpj6g33DgexGnF2FRnMuf4a8iu",
-    "animation_url": "ipfs://QmbGCGc8EX9CEUTeDE6c32eDN3RzJiaTfLteAwQ2e5EyZT",
+    "image": "ipfs://QmXswSjVTjL1pZ7KVuvBnPf7EZ2j6WjHjtEsEY6Kv3jc8U/Spaceship.png",
+    "animation_url": "ipfs://QmXswSjVTjL1pZ7KVuvBnPf7EZ2j6WjHjtEsEY6Kv3jc8U/Spaceship.gltf",
     "external_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/",
     "properties": [
         {
@@ -44,19 +44,7 @@
             "theme": "Sci-Fi",
             "categories": ["Vehicle"] 
         },
-        "preview_2d":{
-            "multihash": "QmesxYGh26ffgGUcdpkyKpj6g33DgexGnF2FRnMuf4a8iu",
-            "ext": "png"
-        },
-        "preview_3d":{
-            "multihash": "QmbGCGc8EX9CEUTeDE6c32eDN3RzJiaTfLteAwQ2e5EyZT",
-            "ext": "gltf"
-        },
-        "voxel_model": {
-            "multihash": "QmZiRjrhTESVa6NYJ2i8uYmB4SFT4xr2ZXZeqq4wzJHE6v",
-            "ext": "vxr"
-        },
-        "creator_profile_url": "https://beta.sandbox.game/creator/12344",
-        "asset_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/"
+        "voxel_model": "ipfs://QmXswSjVTjL1pZ7KVuvBnPf7EZ2j6WjHjtEsEY6Kv3jc8U/Spaceship.vxr",
+        "creator_profile_url": "https://beta.sandbox.game/creator/12344"
     }
 }

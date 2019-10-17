@@ -1,8 +1,8 @@
 {
     "name": "Zebra",
     "description": "A Zebra",
-    "image": "ipfs://QmcybbF1c9e54X3Uxxk3nRyjeeGHUZStdKeLKaEt3jgifG",
-    "animation_url": "ipfs://QmUA6oP2rvqD8CA7x8ofNDNuJaBRnmWM9HMsfEyES9xQmW",
+    "image": "ipfs://QmVD7zMpW3rcGhqpc5tqh51DCC9WCwGqiDrzziaotXhZ2x/Zebra.png",
+    "animation_url": "ipfs://QmVD7zMpW3rcGhqpc5tqh51DCC9WCwGqiDrzziaotXhZ2x/Zebra.gltf",
     "external_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/",
     "properties": [
         {
@@ -44,19 +44,7 @@
             "theme": "Nature",
             "categories": ["Animal"]
         },
-        "preview_2d":{
-            "multihash": "QmcybbF1c9e54X3Uxxk3nRyjeeGHUZStdKeLKaEt3jgifG",
-            "ext": "png"
-        },
-        "preview_3d":{
-            "multihash": "QmUA6oP2rvqD8CA7x8ofNDNuJaBRnmWM9HMsfEyES9xQmW",
-            "ext": "gltf"
-        },
-        "voxel_model": {
-            "multihash": "QmQVFhpsmwcor88bwJmkbMjhQzvcyfSgZfViGtLk6xp4k2",
-            "ext": "vxr"
-        },
-        "creator_profile_url": "https://beta.sandbox.game/creator/12344",
-        "asset_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/"
+        "voxel_model": "ipfs://QmVD7zMpW3rcGhqpc5tqh51DCC9WCwGqiDrzziaotXhZ2x/Zebra.vxr",
+        "creator_profile_url": "https://beta.sandbox.game/creator/12344"
     }
 }
