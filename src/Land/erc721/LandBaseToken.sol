@@ -51,7 +51,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
      * @param _id The id of the token
      */
     function _transferFrom(address _from, address _to, uint256 _id) internal {
-        require(_to != address(0), "Invalid to address");
+        require(_to != address(0), "Invalid recipient address");
 
         if (_from != msg.sender && !_metaTransactionContracts[msg.sender]) {
             require(
@@ -77,7 +77,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     function balanceOf(address _owner) external view returns (
         uint256 _balance
     ) {
-        require(_owner != address(0), "Zero owner");
+        require(_owner != address(0), "Owner address is invalid");
         return numNFTPerAddress[_owner];
     }
 
@@ -91,7 +91,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     function mintBlock(address to, uint16 size, uint16 x, uint16 y) external {
         require(
             isSuperOperator(msg.sender),
-            "Sender is not a super operator"
+            "Only a super operator can mint"
         );
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         require(x < GRID_SIZE - size && y < GRID_SIZE - size, "Out of bounds");
@@ -222,9 +222,9 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
         require(_id & LAYER == 0, "invalid token id");
         require(
             msg.sender == _sender || !_metaTransactionContracts[msg.sender],
-            "Only msg.sender or sandContract can act on behalf of sender"
+            "Only the owner or a super operator can manage this approval"
         );
-        require(_ownerOf(_id) == _sender, "Only owner can change operator");
+        require(_ownerOf(_id) == _sender, "Specified owner is not the real owner");
 
         operators[_id] = _operator;
         emit Approval(_sender, _operator, _id);
@@ -237,7 +237,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
      */
     function approve(address _operator, uint256 _id) external {
         require(_id & LAYER == 0, "Invalid token id");
-        require(_ownerOf(_id) == msg.sender, "Only owner can change operator");
+        require(_ownerOf(_id) == msg.sender, "Sender does not own the specified token");
 
         operators[_id] = _operator;
         emit Approval(msg.sender, _operator, _id);
@@ -250,7 +250,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
      */
     function getApproved(uint256 _id) external view returns (address _operator) {
         require(_id & LAYER == 0, "Invalid token id");
-        require(_ownerOf(_id) != address(0), "Does not exist");
+        require(_ownerOf(_id) != address(0), "Id does not exist");
         return operators[_id];
     }
 
@@ -263,8 +263,8 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     function transferFrom(address _from, address _to, uint256 _id) external {
         require(_id & LAYER == 0, "Invalid token id");
         address owner = _ownerOf(_id);
-        require(owner != address(0), "Not an NFT");
-        require(owner == _from, "Only owner can change operator");
+        require(owner != address(0), "Id does not exist");
+        require(owner == _from, "Specified owner is not the real owner");
         _transferFrom(_from, _to, _id);
     }
 
@@ -278,8 +278,8 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     function transferFrom(address _from, address _to, uint256 _id, bytes calldata _data) external {
         require(_id & LAYER == 0, "Invalid token id");
         address owner = _ownerOf(_id);
-        require(owner != address(0), "Not an NFT");
-        require(owner == _from, "Only owner can change operator");
+        require(owner != address(0), "Id does not exist");
+        require(owner == _from, "Specified owner is not the real owner");
         _transferFrom(_from, _to, _id); // TODO _data
     }
 
@@ -293,8 +293,8 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     function safeTransferFrom(address _from, address _to, uint256 _id, bytes calldata _data) external {
         require(_id & LAYER == 0, "Invalid token id");
         address owner = _ownerOf(_id);
-        require(owner != address(0), "Not an NFT");
-        require(owner == _from, "Only owner can change operator");
+        require(owner != address(0), "Id does not exist");
+        require(owner == _from, "Specified owner is not the real owner");
         require(
             _checkOnERC721Received(_from, _to, _id, _data),
             "ERC721: transfer to non ERC721Receiver implementer"
@@ -312,8 +312,8 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     function safeTransferFrom(address _from, address _to, uint256 _id) external {
         require(_id & LAYER == 0, "Invalid token id");
         address owner = _ownerOf(_id);
-        require(owner != address(0), "Not an NFT");
-        require(owner == _from, "Only owner can change operator");
+        require(owner != address(0), "Id does not exist");
+        require(owner == _from, "Specified owner is not the real owner");
         require(
             _checkOnERC721Received(_from, _to, _id, ""),
             "ERC721: transfer to non ERC721Receiver implementer"
@@ -345,7 +345,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
      */
     function tokenURI(uint256 _id) public view returns (string memory) {
         require(_id & LAYER == 0, "Invalid token id");
-        require(_ownerOf(_id) != address(0));
+        require(_ownerOf(_id) != address(0), "Id does not exist");
         return string(metadataURIs[_id]);
     }
 
@@ -374,7 +374,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     ) external {
         require(
             msg.sender == _sender || !_metaTransactionContracts[msg.sender],
-            "Only msg.sender or _sandContract can act on behalf of sender"
+            "Only the owner or a super operator can manage this approval"
         );
 
         _setApprovalForAll(_sender, _operator, _approved);
