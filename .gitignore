@@ -10,3 +10,4 @@ tmp_deployments/
 .mythx_credentials*
 .mnemonic*
 .temporal*
+__ipfs__/

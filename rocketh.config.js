@@ -13,7 +13,8 @@ module.exports = {
             num: 10,
         },
         4: { // ethereum rinkeby testnet
-            type: 'bitski'
+            // type: 'bitski'
+            type: 'mnemonic',
         },
         1: { // ethereum mainnet
             type: 'bitski'

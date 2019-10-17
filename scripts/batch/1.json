@@ -1,0 +1,50 @@
+{
+    "name": "Zebra",
+    "description": "A Zebra",
+    "image": "ipfs://QmVD7zMpW3rcGhqpc5tqh51DCC9WCwGqiDrzziaotXhZ2x/Zebra.png",
+    "animation_url": "ipfs://QmVD7zMpW3rcGhqpc5tqh51DCC9WCwGqiDrzziaotXhZ2x/Zebra.gltf",
+    "external_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/",
+    "properties": [
+        {
+            "trait_type": "power",
+            "display_type": "ranking",
+            "value": 0, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "defense",
+            "display_type": "ranking",
+            "value": 10, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "magic",
+            "display_type": "ranking",
+            "value": 0, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "speed",
+            "display_type": "ranking",
+            "value": 30, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "luck",
+            "display_type": "ranking",
+            "value": 10, 
+            "max_value": 100
+        }
+    ],
+    "sandbox": {
+        "creator": "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
+        "version": 1,
+        "classification": {
+            "type": "Asset",
+            "theme": "Nature",
+            "categories": ["Animal"]
+        },
+        "voxel_model": "ipfs://QmVD7zMpW3rcGhqpc5tqh51DCC9WCwGqiDrzziaotXhZ2x/Zebra.vxr",
+        "creator_profile_url": "https://beta.sandbox.game/creator/12344"
+    }
+}
