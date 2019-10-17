@@ -35,6 +35,11 @@ function runQuadTreeTests(title, deployLand) {
             land = await deployLand();
         });
 
+        t.test('Check the super operators', async () => {
+            const isAdminSuperOperator = await land.methods.isSuperOperator(landAdmin).call();
+            assert.equal(isAdminSuperOperator, true, 'LandAdmin should be SuperOperator');
+        });
+
         t.test('Block minting with correct sizes', async (t) => {
             for (let i = 0; i < availableSizes.length; i += 1) {
                 const size = availableSizes[i];
@@ -55,7 +60,7 @@ function runQuadTreeTests(title, deployLand) {
             skip: true,
         }, async (t) => {
             for (let x = 0; x < gridSize - 1; x += 1) {
-                for (let y = 0; y < 1; y += 1) {
+                for (let y = 0; y < gridSize - 1; y += 1) {
                     const size = 1;
 
                     t.test(`Should mint a ${size}x${size} block for account 0 at ${x} ${y}`, async () => {
@@ -115,7 +120,7 @@ function runQuadTreeTests(title, deployLand) {
             assert.equal(balance, 0, 'Account 0 balance is wrong');
         });
 
-        t.test('Should not mint a land on top of another one', async () => {
+        t.test('Should not mint a land on top of another one (from small size to big)', async () => {
             await mintBlock(land, accounts[0], 1, 0, 0, {
                 from: landAdmin,
                 gas,
@@ -131,6 +136,33 @@ function runQuadTreeTests(title, deployLand) {
                     })
                 );
             }
+        });
+
+        t.test('Should not mint a land on top of another one (from big size to small)', async () => {
+            await mintBlock(land, accounts[0], 24, 0, 0, {
+                from: landAdmin,
+                gas,
+            });
+
+            for (let i = availableSizes.length - 1; i >= 0; i -= 1) {
+                const size = availableSizes[i];
+
+                await expectThrow(
+                    mintBlock(land, accounts[0], size, 0, 0, {
+                        from: landAdmin,
+                        gas,
+                    })
+                );
+            }
+        });
+
+        t.test('Should not mint if not SuperOperator', async () => {
+            await expectThrow(
+                mintBlock(land, accounts[1], 1, 0, 0, {
+                    from: accounts[1],
+                    gas,
+                }),
+            );
         });
     });
 }
