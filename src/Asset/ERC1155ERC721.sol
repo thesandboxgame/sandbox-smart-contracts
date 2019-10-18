@@ -396,7 +396,6 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         }
 
         if (id & IS_NFT > 0) {
-            require(_owners[id] == from, "not owner");
             require(value == 1, "cannot transfer nft if amount not 1");
             _numNFTPerAddress[from]--;
             _numNFTPerAddress[to]++;
@@ -435,8 +434,11 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         uint256 value,
         bytes calldata data
     ) external {
+        if (id & IS_NFT > 0) {
+            require(_owners[id] == from, "not owner");
+        }
         _transferFrom(from, to, id, value);
-        require( // solium-disable-line error-reason
+        require(
             _checkERC1155AndCallSafeTransfer(
                 _metaTransactionContracts[msg.sender] ? from : msg.sender,
                 from,
@@ -795,6 +797,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     /// @param to the new owner.
     /// @param id the NFT to transfer.
     function transferFrom(address from, address to, uint256 id) external {
+        require(_owners[id] == from, "not owner");
         _transferFrom(from, to, id, 1);
         require( // solium-disable-line error-reason
             _checkERC1155AndCallSafeTransfer(
@@ -831,6 +834,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         uint256 id,
         bytes memory data
     ) public {
+        require(_owners[id] == from, "not owner");
         _transferFrom(from, to, id, 1);
         require( // solium-disable-line error-reason
             _checkERC1155AndCallSafeTransfer(
