@@ -33,6 +33,7 @@
       "comma-dangle": ["error", "only-multiline"],
       "no-useless-concat": "off",
       "no-negated-condition": "off",
+      "complexity":"off"
   },
   "globals": {
       "artifacts": false,

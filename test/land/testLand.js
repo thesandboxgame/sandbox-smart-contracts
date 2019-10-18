@@ -8,6 +8,8 @@ const {
     gas,
 } = require('../utils');
 
+const { deployer } = rocketh.namedAccounts;
+
 async function deployLand() {
     await rocketh.runStages();
     return getDeployedContract('Land');
@@ -16,14 +18,16 @@ async function deployLand() {
 function ERC721Contract() {
     this.counter = 0;
     this.contract = null;
+    this.minter = deployer;
 }
 ERC721Contract.prototype.resetContract = async function () {
     this.contract = await deployLand();
+    await tx(this.contract, 'setMinter', {from: deployer, gas}, this.minter, true);
     return this.contract;
 };
 ERC721Contract.prototype.mintERC721 = async function (creator) {
     this.counter++;
-    const receipt = await tx(this.contract, 'mintBlock', {from: creator, gas}, creator, 1, this.counter, this.counter); // diagonal
+    const receipt = await tx(this.contract, 'mintBlock', {from: this.minter, gas}, creator, 1, this.counter, this.counter); // diagonal
     return receipt.events.Transfer.returnValues._tokenId;
 };
 // ERC721Contract.prototype.burnERC721 = function (from, tokenId) {
@@ -32,4 +36,4 @@ ERC721Contract.prototype.mintERC721 = async function (creator) {
 // };
 
 runERC721tests('Land', new ERC721Contract());
-runQuadTreeTests('Land', deployLand);
+runQuadTreeTests('Land', new ERC721Contract());

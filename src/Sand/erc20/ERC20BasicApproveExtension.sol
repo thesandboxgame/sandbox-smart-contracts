@@ -42,30 +42,17 @@ contract ERC20BasicApproveExtension {
             "first param != sender"
         );
 
-        uint256 before = 0;
-        bool allowanceChanged = false;
-        if (amount > 0 && !isSuperOperator(target)) {
-            before = allowance(msg.sender, target);
-            if (before != 2**256 - 1) { // assume https://github.com/ethereum/EIPs/issues/717
-                allowanceChanged = true;
-                _activateTemporaryApproval(msg.sender, target, amount);
-            }
+        if (amount > 0) {
+            _addAllowanceIfNeeded(msg.sender, target, amount);
         }
 
         // solium-disable-next-line security/no-call-value
         (bool success, bytes memory returnData) = target.call.value(msg.value)(data);
         require(success, string(returnData));
 
-        if (allowanceChanged) {
-            _deactivateTemporaryApproval(msg.sender, target, before);
-        }
-
         return returnData;
     }
 
-    function isSuperOperator(address who) public view returns (bool);
     function _approveFor(address owner, address target, uint256 amount) internal;
-    function allowance(address _owner, address _spender) public view returns (uint256 remaining);
-    function _activateTemporaryApproval(address owner, address target, uint256 amount) internal;
-    function _deactivateTemporaryApproval(address owner, address spender, uint256 before) internal;
+    function _addAllowanceIfNeeded(address owner, address spender, uint256 amountNeeded) internal;
 }
