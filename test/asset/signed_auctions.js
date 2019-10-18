@@ -29,11 +29,11 @@ const {
     TransferSingleEvent,
     TransferBatchEvent,
     URIEvent
-} = require('../erc1155')
+} = require('../erc1155');
 
 const {
     TransferEvent
-} = require('../erc20')
+} = require('../erc20');
 
 const {
     ExtractionEvent,
@@ -52,8 +52,7 @@ const ipfsHashString = '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5
 const ipfsUrl = 'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy';
 
 function runSignedAuctionsTests(title, resetContracts) {
-    tap.test(title + ' signed auctions', async (t)=> {
-        
+    tap.test(title + ' signed auctions', async (t) => {
         const privateKey = ethUtil.sha3('cow');
         const testAddress = toChecksumAddress(ethUtil.privateToAddress(privateKey).toString('hex'));
 
@@ -74,7 +73,7 @@ function runSignedAuctionsTests(title, resetContracts) {
             {name: 'ids', type: 'bytes'},
             {name: 'amounts', type: 'bytes'},
         ];
-        
+
         let ids;
         let offerId;
         let startedAt;
@@ -126,13 +125,13 @@ function runSignedAuctionsTests(title, resetContracts) {
         function getSignature() {
             return ethSigUtil.signTypedData(privateKey, {
                 data: {
-                types: {
-                    EIP712Domain: domainType,
-                    Auction: auctionType
-                },
-                domain: getDomainData(),
-                primaryType: 'Auction',
-                message: getAuctionData()
+                    types: {
+                        EIP712Domain: domainType,
+                        Auction: auctionType
+                    },
+                    domain: getDomainData(),
+                    primaryType: 'Auction',
+                    message: getAuctionData()
                 }
             });
         }
@@ -161,7 +160,7 @@ function runSignedAuctionsTests(title, resetContracts) {
         function sandBalanceOf(...args) {
             return call(contracts.Sand, 'balanceOf', {gas}, ...args);
         }
-        
+
         t.beforeEach(async () => {
             contracts = await resetContracts();
 
@@ -178,12 +177,12 @@ function runSignedAuctionsTests(title, resetContracts) {
             startedAt = Math.floor(Date.now() / 1000);
             await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, creator, testAddress, ids, [100, 200], emptyBytes);
         });
-  
-        
+
+
         t.test('should be able to claim seller offer in ETH', async () => {
             const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
             const signature = await getSignature();
-            
+
             const receipt = await claimSellerOffer({from: user1, value: endingPrice, gas},
                 user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature);
 
@@ -192,15 +191,15 @@ function runSignedAuctionsTests(title, resetContracts) {
             assert.equal(transferReceipts.length, 1);
             assert.equal(transferReceipts[0].returnValues.ids.length, 2);
         });
-    
+
         t.test('should be able to claim seller offer in SAND', async () => {
             token = contracts.Sand.options.address;
             const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
-        
+
             await giveSandAndApproveAsset(user1, endingPrice);
-        
+
             const signature = await getSignature();
-            
+
             const receipt = await claimSellerOffer({from: user1, value: 0, gas},
                 user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature);
 
@@ -210,31 +209,31 @@ function runSignedAuctionsTests(title, resetContracts) {
             assert.equal(transferReceipts.length, 1);
             assert.equal(transferReceipts[0].returnValues.ids.length, 2);
         });
-    
+
         t.test('should own the amount of tokens bought', async () => {
             const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
             const signature = await getSignature();
-            
-            await claimSellerOffer({from: user1, value: endingPrice, gas}, 
+
+            await claimSellerOffer({from: user1, value: endingPrice, gas},
                 user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature);
-        
+
             for (let i = 0; i < ids.length; i++) {
                 const tokenBalance = await assetBalanceOf(user1, ids[i]);
                 assert.equal(tokenBalance, buyAmount * amounts[i]);
             }
         });
-    
+
         t.test('should seller have correct ETH balance', async () => {
             packs = 100;
             buyAmount = 5;
             const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
-        
+
             const balanceBefore = await getBalance(testAddress);
             const signature = await getSignature();
-            
+
             await claimSellerOffer({from: user1, value: endingPrice * buyAmount, gas},
                 user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature);
-            
+
             const balanceAfter = await getBalance(testAddress);
             const balance = new BN(balanceAfter).sub(new BN(balanceBefore));
             const packValueMin = new BN(startingPrice).mul(new BN(buyAmount));
@@ -242,21 +241,21 @@ function runSignedAuctionsTests(title, resetContracts) {
             assert(balance.gte(packValueMin));
             assert(balance.lte(packValueMax));
         });
-    
+
         t.test('should seller have correct SAND balance', async () => {
             packs = 100;
             buyAmount = 5;
             token = contracts.Sand.options.address;
             const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
-        
+
             await giveSandAndApproveAsset(user1, endingPrice * buyAmount);
-        
+
             const balanceBefore = await sandBalanceOf(testAddress);
             const signature = await getSignature();
-            
+
             await claimSellerOffer({from: user1, value: 0, gas},
                 user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature);
-            
+
             const balanceAfter = await sandBalanceOf(testAddress);
             const balance = new BN(balanceAfter).sub(new BN(balanceBefore));
             const packValueMin = new BN(startingPrice).mul(new BN(buyAmount));
@@ -264,39 +263,39 @@ function runSignedAuctionsTests(title, resetContracts) {
             assert(balance.gte(packValueMin));
             assert(balance.lte(packValueMax));
         });
-    
+
         t.test('should be able to cancel offer', async () => {
             const receipt = await tx(contracts.AssetSignedAuction, 'cancelSellerOffer', {from: creator, gas}, offerId);
             assert.equal((await getEventsFromReceipt(contracts.AssetSignedAuction, OfferCancelledEvent, receipt)).length, 1);
         });
-    
+
         t.test('should NOT be able to claim more offers than what it was signed', async () => {
             buyAmount = 2;
             const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
             const signature = await getSignature();
             await expectThrow(claimSellerOffer({from: user1, value: endingPrice, gas},
                 user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature));
-                // .then(() => assert(false, 'was able to claim offer'))
-                // .catch((err) => assert(err.toString().includes('Buy amount exceeds sell amount'), 'Error message does not match. ' + err.toString()));
+            // .then(() => assert(false, 'was able to claim offer'))
+            // .catch((err) => assert(err.toString().includes('Buy amount exceeds sell amount'), 'Error message does not match. ' + err.toString()));
         });
-    
+
         t.test('should NOT be able to claim cancelled offer', async () => {
             // add balance to testAddress
             await sendTransaction({from: creator, to: testAddress, value: toWei('1', 'ether'), gas});
             // cancel offer through signed transaction
             await sendSignedTransaction(encodeCall(contracts.AssetSignedAuction, 'cancelSellerOffer', offerId), contracts.AssetSignedAuction.options.address, privateKey);
-        
+
             const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
             const signature = await getSignature();
-        
+
             await expectThrow(
                 claimSellerOffer({from: user1, value: endingPrice, gas},
                     user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature)
             );
-                // .then(() => assert(false, 'was able to claim offer'))
-                // .catch((err) => assert(err.toString().includes('Auction cancelled'), 'Error message does not match. ' + err.toString()));
+            // .then(() => assert(false, 'was able to claim offer'))
+            // .catch((err) => assert(err.toString().includes('Auction cancelled'), 'Error message does not match. ' + err.toString()));
         });
-    
+
         t.test('should NOT be able to claim offer without sending ETH', async () => {
             const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
             const signature = await getSignature();
@@ -305,18 +304,18 @@ function runSignedAuctionsTests(title, resetContracts) {
                     user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature)
             );
         });
-    
+
         t.test('should NOT be able to claim offer without enough SAND', async () => {
             token = contracts.Sand.options.address;
             const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
-        
+
             const signature = await getSignature();
             await expectThrow(
                 claimSellerOffer({from: user1, gas},
                     user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature)
             );
         });
-    
+
         t.test('should NOT be able to claim offer if signature mismatches', async () => {
             const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
             const signature = await getSignature();
@@ -325,10 +324,10 @@ function runSignedAuctionsTests(title, resetContracts) {
                 claimSellerOffer({from: user1, gas},
                     user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature)
             );
-                // .then(() => assert(false, 'was able to claim offer'))
-                // .catch((err) => assert(err.toString().includes('Signature mismatches'), 'Error message does not match. ' + err.toString()));
+            // .then(() => assert(false, 'was able to claim offer'))
+            // .catch((err) => assert(err.toString().includes('Signature mismatches'), 'Error message does not match. ' + err.toString()));
         });
-    
+
         t.test('should NOT be able to claim offer if it did not start yet', async () => {
             startedAt = Math.floor(Date.now() / 1000) + 1000;
             const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
@@ -337,10 +336,10 @@ function runSignedAuctionsTests(title, resetContracts) {
                 claimSellerOffer({from: user1, gas},
                     user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature)
             );
-                // .then(() => assert(false, 'was able to claim offer'))
-                // .catch((err) => assert(err.toString().includes('Auction didn\'t start yet'), 'Error message does not match. ' + err.toString()));
+            // .then(() => assert(false, 'was able to claim offer'))
+            // .catch((err) => assert(err.toString().includes('Auction didn\'t start yet'), 'Error message does not match. ' + err.toString()));
         });
-    
+
         t.test('should NOT be able to claim offer if it already ended', async () => {
             startedAt = Math.floor(Date.now() / 1000) - 10000;
             const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
@@ -349,13 +348,12 @@ function runSignedAuctionsTests(title, resetContracts) {
                 claimSellerOffer({from: user1, gas},
                     user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature)
             );
-                // .then(() => assert(false, 'was able to claim offer'))
-                // .catch((err) => assert(err.toString().includes('Auction finished'), 'Error message does not match. ' + err.toString()));
+            // .then(() => assert(false, 'was able to claim offer'))
+            // .catch((err) => assert(err.toString().includes('Auction finished'), 'Error message does not match. ' + err.toString()));
         });
-        
     });
 }
 
 module.exports = {
     runSignedAuctionsTests
-}
+};
