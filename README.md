@@ -1,6 +1,6 @@
-Smart-Contracts for [The Sandbox](https://sandbox.game)
+Smart-Contracts for [The Sandbox](https://www.sandbox.game)
 ==================================
-[www.sandbox.game](https://sandbox.game)
+[www.sandbox.game](https://www.sandbox.game)
 
 The Sandbox is a user-generated content (UGC) gaming platform that will empower creators through digital ownership and monetization of 3D voxel creations made and shared by users around the world.
 
