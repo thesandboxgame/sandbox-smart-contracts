@@ -1,0 +1,272 @@
+[
+    {
+        "supply": 5,
+        "rarity": 2,
+        "metadata": {
+            "name": "Helicopter",
+            "description": "A Speedy Helicopter",
+            "image": "ipfs://QmRKiVGdNG8wgamGfzRCh9LPzWjwpDJsKSAmw3u6TrDYQe/Helicopter.png",
+            "animation_url": "ipfs://QmRKiVGdNG8wgamGfzRCh9LPzWjwpDJsKSAmw3u6TrDYQe/Helicopter.gltf",
+            "external_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/",
+            "properties": [
+                {
+                    "trait_type": "power",
+                    "display_type": "ranking",
+                    "value": 30, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "defense",
+                    "display_type": "ranking",
+                    "value": 40, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "magic",
+                    "display_type": "ranking",
+                    "value": 0, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "speed",
+                    "display_type": "ranking",
+                    "value": 75, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "luck",
+                    "display_type": "ranking",
+                    "value": 5, 
+                    "max_value": 100
+                }
+            ],
+            "sandbox": {
+                "creator": "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
+                "version": 1,
+                "classification": {
+                    "type": "Asset",
+                    "theme": "City",
+                    "categories": ["Vehicle"]
+                },
+                "voxel_model": "ipfs://QmRKiVGdNG8wgamGfzRCh9LPzWjwpDJsKSAmw3u6TrDYQe/Helicopter.vxr",
+                "creator_profile_url": "https://beta.sandbox.game/creator/12344"
+            }
+        }
+    },
+    {
+        "supply": 1000,
+        "rarity": 0,
+        "metadata": {
+            "name": "Zebra",
+            "description": "A Zebra",
+            "image": "ipfs://QmVD7zMpW3rcGhqpc5tqh51DCC9WCwGqiDrzziaotXhZ2x/Zebra.png",
+            "animation_url": "ipfs://QmVD7zMpW3rcGhqpc5tqh51DCC9WCwGqiDrzziaotXhZ2x/Zebra.gltf",
+            "external_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/",
+            "properties": [
+                {
+                    "trait_type": "power",
+                    "display_type": "ranking",
+                    "value": 0, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "defense",
+                    "display_type": "ranking",
+                    "value": 10, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "magic",
+                    "display_type": "ranking",
+                    "value": 0, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "speed",
+                    "display_type": "ranking",
+                    "value": 30, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "luck",
+                    "display_type": "ranking",
+                    "value": 10, 
+                    "max_value": 100
+                }
+            ],
+            "sandbox": {
+                "creator": "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
+                "version": 1,
+                "classification": {
+                    "type": "Asset",
+                    "theme": "Nature",
+                    "categories": ["Animal"]
+                },
+                "voxel_model": "ipfs://QmVD7zMpW3rcGhqpc5tqh51DCC9WCwGqiDrzziaotXhZ2x/Zebra.vxr",
+                "creator_profile_url": "https://beta.sandbox.game/creator/12344"
+            }
+        }
+    },
+    {
+        "supply": 11,
+        "rarity": 1,
+        "metadata": {
+            "name": "Magic Stones",
+            "description": "Some Magical Stones",
+            "image": "ipfs://QmRapnVPhqjS7BRhkjAAfwwRVbrjFFdKAQYFi9y15MNWsS/MagicStones.png",
+            "animation_url": "ipfs://QmRapnVPhqjS7BRhkjAAfwwRVbrjFFdKAQYFi9y15MNWsS/MagicStones.gltf",
+            "external_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/",
+            "properties": [
+                {
+                    "trait_type": "power",
+                    "display_type": "ranking",
+                    "value": 20, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "defense",
+                    "display_type": "ranking",
+                    "value": 0, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "magic",
+                    "display_type": "ranking",
+                    "value": 50, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "speed",
+                    "display_type": "ranking",
+                    "value": 0, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "luck",
+                    "display_type": "ranking",
+                    "value": 30, 
+                    "max_value": 100
+                }
+            ],
+            "sandbox": {
+                "creator": "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
+                "version": 1,
+                "classification": {
+                    "type": "Asset",
+                    "theme": "Magic",
+                    "categories": ["Decoration", "Tool"] 
+                },
+                "voxel_model": "ipfs://QmRapnVPhqjS7BRhkjAAfwwRVbrjFFdKAQYFi9y15MNWsS/MagicStones.vxr",
+                "creator_profile_url": "https://beta.sandbox.game/creator/12344"
+            }
+        }
+    },
+    {
+        "supply": 101,
+        "rarity": 0,
+        "metadata": {
+            "name": "Spaceship",
+            "description": "a spaceship",
+            "image": "ipfs://QmXswSjVTjL1pZ7KVuvBnPf7EZ2j6WjHjtEsEY6Kv3jc8U/Spaceship.png",
+            "animation_url": "ipfs://QmXswSjVTjL1pZ7KVuvBnPf7EZ2j6WjHjtEsEY6Kv3jc8U/Spaceship.gltf",
+            "external_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/",
+            "properties": [
+                {
+                    "trait_type": "power",
+                    "display_type": "ranking",
+                    "value": 30, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "defense",
+                    "display_type": "ranking",
+                    "value": 10, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "magic",
+                    "display_type": "ranking",
+                    "value": 0, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "speed",
+                    "display_type": "ranking",
+                    "value": 10, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "luck",
+                    "display_type": "ranking",
+                    "value": 0, 
+                    "max_value": 100
+                }
+            ],
+            "sandbox": {
+                "creator": "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
+                "version": 1,
+                "classification": {
+                    "type": "Asset",
+                    "theme": "Sci-Fi",
+                    "categories": ["Vehicle"] 
+                },
+                "voxel_model": "ipfs://QmXswSjVTjL1pZ7KVuvBnPf7EZ2j6WjHjtEsEY6Kv3jc8U/Spaceship.vxr",
+                "creator_profile_url": "https://beta.sandbox.game/creator/12344"
+            }
+        }
+    },
+    {
+        "supply": 1,
+        "rarity": 3,
+        "metadata": {
+            "name": "Hugo",
+            "description": "The One And Only One Hugo",
+            "image": "ipfs://QmdSvvJnGdTThTLiyHzmZCavLnpAHRncut1M7xV8oFWYrV/Hugo.png",
+            "animation_url": "ipfs://QmdSvvJnGdTThTLiyHzmZCavLnpAHRncut1M7xV8oFWYrV/Hugo.gltf",
+            "external_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/",
+            "properties": [
+                {
+                    "trait_type": "power",
+                    "display_type": "ranking",
+                    "value": 80, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "defense",
+                    "display_type": "ranking",
+                    "value": 50, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "magic",
+                    "display_type": "ranking",
+                    "value": 20, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "speed",
+                    "display_type": "ranking",
+                    "value": 90, 
+                    "max_value": 100
+                },
+                {
+                    "trait_type": "luck",
+                    "display_type": "ranking",
+                    "value": 10, 
+                    "max_value": 100
+                }
+            ],
+            "sandbox": {
+                "creator": "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
+                "version": 1,
+                "classification": {
+                    "type": "Asset",
+                    "theme": "City",
+                    "categories": ["Humanoid"]
+                },
+                "voxel_model": "ipfs://QmdSvvJnGdTThTLiyHzmZCavLnpAHRncut1M7xV8oFWYrV/Hugo.vxr",
+                "creator_profile_url": "https://beta.sandbox.game/creator/12344"
+            }
+        }
+    }
+]

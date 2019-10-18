@@ -1,0 +1,50 @@
+{
+    "name": "Magic Stones",
+    "description": "Some Magical Stones",
+    "image": "ipfs://QmRapnVPhqjS7BRhkjAAfwwRVbrjFFdKAQYFi9y15MNWsS/MagicStones.png",
+    "animation_url": "ipfs://QmRapnVPhqjS7BRhkjAAfwwRVbrjFFdKAQYFi9y15MNWsS/MagicStones.gltf",
+    "external_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/",
+    "properties": [
+        {
+            "trait_type": "power",
+            "display_type": "ranking",
+            "value": 20, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "defense",
+            "display_type": "ranking",
+            "value": 0, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "magic",
+            "display_type": "ranking",
+            "value": 50, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "speed",
+            "display_type": "ranking",
+            "value": 0, 
+            "max_value": 100
+        },
+        {
+            "trait_type": "luck",
+            "display_type": "ranking",
+            "value": 30, 
+            "max_value": 100
+        }
+    ],
+    "sandbox": {
+        "creator": "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
+        "version": 1,
+        "classification": {
+            "type": "Asset",
+            "theme": "Magic",
+            "categories": ["Decoration", "Tool"] 
+        },
+        "voxel_model": "ipfs://QmRapnVPhqjS7BRhkjAAfwwRVbrjFFdKAQYFi9y15MNWsS/MagicStones.vxr",
+        "creator_profile_url": "https://beta.sandbox.game/creator/12344"
+    }
+}

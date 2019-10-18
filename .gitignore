@@ -11,3 +11,4 @@ tmp_deployments/
 .mnemonic*
 .DS_Store
 .temporal*
+__ipfs__/
