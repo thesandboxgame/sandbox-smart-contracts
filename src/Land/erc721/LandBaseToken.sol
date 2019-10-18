@@ -1,5 +1,5 @@
 /* solhint-disable func-order, code-complexity, reason-string */
-
+// TODO rename underscore param in non underscore + rename state variable into underscore
 pragma solidity 0.5.9;
 
 import "../../../contracts_common/src/Libraries/AddressUtils.sol";
@@ -34,14 +34,36 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     mapping (uint256 => address) public owners;
     mapping (address => mapping(address => bool)) public operatorsForAll;
     mapping (uint256 => address) public operators;
-    mapping (uint256 => string) public metadataURIs;
+
+    mapping(address => bool) internal _minters;
+    event Minter(address superOperator, bool enabled);
+
+    /// @notice Enable or disable the ability of `minter` to mint tokens
+    /// @param minter address that will be given/removed minter right.
+    /// @param enabled set whether the minter is enabled or disabled.
+    function setMinter(address minter, bool enabled) external {
+        require(
+            msg.sender == _admin,
+            "only admin is allowed to add minters"
+        );
+        _minters[minter] = enabled;
+        emit Minter(minter, enabled);
+    }
+
+    /// @notice check whether address `who` is given minter rights.
+    /// @param who The address to query.
+    /// @return whether the address has minter rights.
+    function isMinter(address who) public view returns (bool) {
+        return _minters[who];
+    }
 
     constructor(
         address metaTransactionContract,
         address admin
     ) public {
+        _admin = admin;
         _metaTransactionContracts[metaTransactionContract] = true;
-        _superOperators[admin] = true;
+        emit MetaTransactionProcessor(metaTransactionContract, true);
     }
 
     /**
@@ -51,9 +73,12 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
      * @param _id The id of the token
      */
     function _transferFrom(address _from, address _to, uint256 _id) internal {
-        require(_to != address(0), "Invalid recipient address");
-
-        if (_from != msg.sender && !_metaTransactionContracts[msg.sender]) {
+        require(_id & LAYER == 0, "Invalid token id");
+        address owner = _ownerOf(_id);
+        require(owner != address(0), "Id does not exist");
+        require(owner == _from, "Specified owner is not the real owner");
+        require(_to != address(0), "can't send to zero address");
+        if (msg.sender != _from && !_metaTransactionContracts[msg.sender]) {
             require(
                 _superOperators[msg.sender] ||
                 operatorsForAll[_from][msg.sender] ||
@@ -61,7 +86,6 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
                 "Operator not approved"
             );
         }
-
         numNFTPerAddress[_from]--;
         numNFTPerAddress[_to]++;
         owners[_id] = _to;
@@ -90,8 +114,8 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
      */
     function mintBlock(address to, uint16 size, uint16 x, uint16 y) external {
         require(
-            isSuperOperator(msg.sender),
-            "Only a super operator can mint"
+            isMinter(msg.sender),
+            "Only a minter can mint"
         );
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         require(x < GRID_SIZE - size && y < GRID_SIZE - size, "Out of bounds");
@@ -220,11 +244,16 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
         uint256 _id
     ) external {
         require(_id & LAYER == 0, "invalid token id");
+        address owner = _ownerOf(_id);
+        require(_sender != address(0), "Invalid sender address");
         require(
-            msg.sender == _sender || !_metaTransactionContracts[msg.sender],
-            "Only the owner or a super operator can manage this approval"
-        );
-        require(_ownerOf(_id) == _sender, "Specified owner is not the real owner");
+            msg.sender == _sender ||
+            _metaTransactionContracts[msg.sender] ||
+            _superOperators[msg.sender] ||
+            operatorsForAll[_sender][msg.sender],
+            "require operators"
+        ); // solium-disable-line max-len
+        require(owner == _sender); // solium-disable-line error-reason
 
         operators[_id] = _operator;
         emit Approval(_sender, _operator, _id);
@@ -237,8 +266,13 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
      */
     function approve(address _operator, uint256 _id) external {
         require(_id & LAYER == 0, "Invalid token id");
-        require(_ownerOf(_id) == msg.sender, "Sender does not own the specified token");
-
+        address owner = _ownerOf(_id);
+        require(owner != address(0), "token does not exist");
+        require( // solium-disable-line error-reason
+            owner == msg.sender ||
+            _superOperators[msg.sender] ||
+            operatorsForAll[owner][msg.sender]
+        );
         operators[_id] = _operator;
         emit Approval(msg.sender, _operator, _id);
     }
@@ -259,12 +293,8 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
      * @param _from The send of the token
      * @param _to The recipient of the token
      * @param _id The id of the token
-     */
+    */
     function transferFrom(address _from, address _to, uint256 _id) external {
-        require(_id & LAYER == 0, "Invalid token id");
-        address owner = _ownerOf(_id);
-        require(owner != address(0), "Id does not exist");
-        require(owner == _from, "Specified owner is not the real owner");
         _transferFrom(_from, _to, _id);
     }
 
@@ -275,32 +305,12 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
      * @param _id The id of the token
      * @param _data Additional data
      */
-    function transferFrom(address _from, address _to, uint256 _id, bytes calldata _data) external {
-        require(_id & LAYER == 0, "Invalid token id");
-        address owner = _ownerOf(_id);
-        require(owner != address(0), "Id does not exist");
-        require(owner == _from, "Specified owner is not the real owner");
-        _transferFrom(_from, _to, _id); // TODO _data
-    }
-
-    /**
-     * @dev Transfer a token between 2 addresses
-     * @param _from The send of the token
-     * @param _to The recipient of the token
-     * @param _id The id of the token
-     * @param _data Additional data
-     */
-    function safeTransferFrom(address _from, address _to, uint256 _id, bytes calldata _data) external {
-        require(_id & LAYER == 0, "Invalid token id");
-        address owner = _ownerOf(_id);
-        require(owner != address(0), "Id does not exist");
-        require(owner == _from, "Specified owner is not the real owner");
+    function safeTransferFrom(address _from, address _to, uint256 _id, bytes memory _data) public {
+        _transferFrom(_from, _to, _id);
         require(
             _checkOnERC721Received(_from, _to, _id, _data),
-            "ERC721: transfer to non ERC721Receiver implementer"
+            "ERC721: transfer rejected" // TODO test order as the check need to happen after transfer
         );
-
-        _transferFrom(_from, _to, _id); // TODO _data
     }
 
     /**
@@ -310,16 +320,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
      * @param _id The id of the token
      */
     function safeTransferFrom(address _from, address _to, uint256 _id) external {
-        require(_id & LAYER == 0, "Invalid token id");
-        address owner = _ownerOf(_id);
-        require(owner != address(0), "Id does not exist");
-        require(owner == _from, "Specified owner is not the real owner");
-        require(
-            _checkOnERC721Received(_from, _to, _id, ""),
-            "ERC721: transfer to non ERC721Receiver implementer"
-        );
-
-        _transferFrom(_from, _to, _id);
+        safeTransferFrom(_from, _to, _id, "");
     }
 
     /**
@@ -327,7 +328,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
      * @return The name of the token contract
      */
     function name() external pure returns (string memory _name) {
-        return "SANDBOX LAND";
+        return "Sandbox's LANDs";
     }
 
     /**
@@ -335,7 +336,27 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
      * @return The symbol of the token contract
      */
     function symbol() external pure returns (string memory _symbol) {
-        return "SLD"; // TODO define symbol
+        return "LAND";
+    }
+
+    // solium-disable-next-line security/no-assign-params
+    function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
+        }
+        uint j = _i;
+        uint len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+        bytes memory bstr = new bytes(len);
+        uint k = len - 1;
+        while (_i != 0) {
+            bstr[k--] = byte(uint8(48 + _i % 10));
+            _i /= 10;
+        }
+        return string(bstr);
     }
 
     /**
@@ -346,7 +367,14 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     function tokenURI(uint256 _id) public view returns (string memory) {
         require(_id & LAYER == 0, "Invalid token id");
         require(_ownerOf(_id) != address(0), "Id does not exist");
-        return string(metadataURIs[_id]);
+        return
+            string(
+                abi.encodePacked(
+                    "https://sandbox.game/land/",
+                    uint2str(_id),
+                    ".json"
+                )
+            );
     }
 
     /**
@@ -372,9 +400,12 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
         address _operator,
         bool _approved
     ) external {
+        require(_sender != address(0), "Invalid sender address");
         require(
-            msg.sender == _sender || !_metaTransactionContracts[msg.sender],
-            "Only the owner or a super operator can manage this approval"
+            msg.sender == _sender ||
+            _metaTransactionContracts[msg.sender] ||
+            _superOperators[msg.sender],
+            "require meta approval" // TODO tests
         );
 
         _setApprovalForAll(_sender, _operator, _approved);
@@ -400,6 +431,10 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
         address _operator,
         bool _approved
     ) internal {
+        require(
+            !_superOperators[_operator],
+            "super operator can't have their approvalForAll changed" // TODO test
+        );
         operatorsForAll[_sender][_operator] = _approved;
 
         emit ApprovalForAll(_sender, _operator, _approved);
@@ -416,7 +451,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
         view
         returns (bool isOperator)
     {
-        return operatorsForAll[_owner][_operator];
+        return operatorsForAll[_owner][_operator] || _superOperators[_operator]; // TODO add test for superOperators
     }
 
     /**
