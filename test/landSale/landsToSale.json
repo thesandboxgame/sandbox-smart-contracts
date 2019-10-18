@@ -2,6 +2,29 @@
   {
     "x": 0,
     "y": 0,
-    "size": 1
+    "size": 1,
+    "sandPrice": "1000",
+    "ethPrice": "1"
+  },
+  {
+    "x": 10,
+    "y": 10,
+    "size": 3,
+    "sandPrice": "2000",
+    "ethPrice": "2"
+  },
+  {
+    "x": 20,
+    "y": 20,
+    "size": 3,
+    "sandPrice": "3000",
+    "ethPrice": "3"
+  },
+  {
+    "x": 100,
+    "y": 100,
+    "size": 24,
+    "sandPrice": "4000",
+    "ethPrice": "4"
   }
 ]

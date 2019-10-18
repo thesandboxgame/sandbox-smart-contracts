@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this, camelcase */
 
-import {sha256} from 'js-sha256';
+const Web3 = require('web3');
 
 class MerkleTree {
     constructor(data) {
@@ -28,11 +28,11 @@ class MerkleTree {
     }
 
     calculateLeaves(data) {
-        return data.map((d) => sha256(d.toString()));
+        return data.map((d) => Web3.utils.soliditySha3(d));
     }
 
     calculateNewNode(left, right) {
-        return sha256(left + right);
+        return Web3.utils.soliditySha3(left + right);
     }
 
     reduceNodes(nodes) {
@@ -69,4 +69,4 @@ class MerkleTree {
     }
 }
 
-export default MerkleTree;
+module.exports = MerkleTree;
