@@ -389,8 +389,8 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         if (from != msg.sender && !_metaTransactionContracts[msg.sender]) {
             require(
                 _superOperators[msg.sender] ||
-                    _operatorsForAll[from][msg.sender] ||
-                    _erc721operators[id] == msg.sender,
+                _operatorsForAll[from][msg.sender] ||
+                _erc721operators[id] == msg.sender,
                 "Operator not approved"
             );
         }
@@ -771,8 +771,8 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         require(owner != address(0), "token does not exist");
         require( // solium-disable-line error-reason
             owner == msg.sender ||
-                _superOperators[msg.sender] ||
-                _operatorsForAll[owner][msg.sender]
+            _superOperators[msg.sender] ||
+            _operatorsForAll[owner][msg.sender]
         );
         _erc721operators[id] = operator;
         emit Approval(owner, operator, id);
@@ -795,17 +795,6 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     /// @param to the new owner.
     /// @param id the NFT to transfer.
     function transferFrom(address from, address to, uint256 id) external {
-        require(to != address(0)); // solium-disable-line error-reason
-        require(from != address(0), "Invalid from address");
-        require(_owners[id] == from, "not owned by from"); // solium-disable-line error-reason
-        if (msg.sender != from && !_metaTransactionContracts[msg.sender]) {
-            require(
-                _operatorsForAll[from][msg.sender] ||
-                    _erc721operators[id] == msg.sender ||
-                    _superOperators[msg.sender],
-                "Operator not approved"
-            );
-        }
         _transferFrom(from, to, id, 1);
         require( // solium-disable-line error-reason
             _checkERC1155AndCallSafeTransfer(
@@ -842,17 +831,6 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         uint256 id,
         bytes memory data
     ) public {
-        require(to != address(0)); // solium-disable-line error-reason
-        require(from != address(0), "Invalid from address");
-        require(_owners[id] == from, "not owned by from"); // solium-disable-line error-reason
-        if (msg.sender != from && !_metaTransactionContracts[msg.sender]) {
-            require(
-                _operatorsForAll[from][msg.sender] ||
-                    _erc721operators[id] == msg.sender ||
-                    _superOperators[msg.sender],
-                "Operator not approved"
-            );
-        }
         _transferFrom(from, to, id, 1);
         require( // solium-disable-line error-reason
             _checkERC1155AndCallSafeTransfer(
@@ -871,7 +849,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     /// @notice A descriptive name for the collection of tokens in this contract.
     /// @return the name of the tokens.
     function name() external pure returns (string memory _name) {
-        return "Sandbox's Asset";
+        return "Sandbox's ASSETs";
     }
 
     /// @notice An abbreviated name for the collection of tokens in this contract.
