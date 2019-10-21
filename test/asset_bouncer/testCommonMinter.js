@@ -54,7 +54,7 @@ tap.test('CommonMinter', async (t) => {
         t.test('can mint if provide Sand', async () => {
             await tx({from: sandBeneficiary, gas: 500000}, contracts.Sand, 'transfer', creator1, '100000000000000000000');
             await tx({from: creator1, gas: 500000}, contracts.Sand, 'approve', contracts.CommonMinter.options.address, '100000000000000000000');
-            const receipt = await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintFor', creator1, 0, ipfsHashString, 100, creator1, emptyBytes);
+            const receipt = await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintFor', creator1, 0, ipfsHashString, 100, creator1, emptyBytes, '1000000000000000000');
             const eventsMatching = await getEventsFromReceipt(contracts.Asset, TransferSingleEvent, receipt);
             assert.equal(eventsMatching.length, 1);
             const tokenId = generateTokenId(creator1, 100, 1, 0);
@@ -65,10 +65,10 @@ tap.test('CommonMinter', async (t) => {
         t.test('can mint if provide Sand for NFT', async () => {
             await tx({from: sandBeneficiary, gas: 500000}, contracts.Sand, 'transfer', creator1, '100000000000000000000');
             await tx({from: creator1, gas: 500000}, contracts.Sand, 'approve', contracts.CommonMinter.options.address, '1000000000000000000');
-            const receipt = await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintFor', creator1, 0, ipfsHashString, 1, creator1, emptyBytes);
+            const receipt = await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintFor', creator1, 0, ipfsHashString, 1, creator1, emptyBytes, '1000000000000000000');
             const eventsMatching = await getEventsFromReceipt(contracts.Asset, TransferSingleEvent, receipt);
             assert.equal(eventsMatching.length, 1);
-            const tokenId = generateTokenId(creator1, 1, 1, 0);
+            const tokenId = generateTokenId(creator1, 1, 0, 0);
             const balance = await call(contracts.Asset, 'balanceOf', creator1, tokenId);
             assert.equal(balance, 1);
             const owner = await call(contracts.Asset, 'ownerOf', tokenId);
@@ -78,13 +78,13 @@ tap.test('CommonMinter', async (t) => {
         t.test('cannot mint if does not provide enough Sand', async () => {
             await tx({from: sandBeneficiary, gas: 500000}, contracts.Sand, 'transfer', creator1, '100000000000000000000');
             await tx({from: creator1, gas: 500000}, contracts.Sand, 'approve', contracts.CommonMinter.options.address, '100000000000000000000');
-            await expectThrow(tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintFor', creator1, 0, ipfsHashString, 101, creator1, emptyBytes));
+            await expectThrow(tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintFor', creator1, 0, ipfsHashString, 101, creator1, emptyBytes, '1000000000000000000'));
         });
 
         t.test('cannot mint if does not provide enough Sand for NFT', async () => {
             await tx({from: sandBeneficiary, gas: 500000}, contracts.Sand, 'transfer', creator1, '100000000000000000000');
             await tx({from: creator1, gas: 500000}, contracts.Sand, 'approve', contracts.CommonMinter.options.address, '900000000000000000');
-            await expectThrow(tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintFor', creator1, 0, ipfsHashString, 1, creator1, emptyBytes));
+            await expectThrow(tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintFor', creator1, 0, ipfsHashString, 1, creator1, emptyBytes, '1000000000000000000'));
         });
     });
 
@@ -92,7 +92,7 @@ tap.test('CommonMinter', async (t) => {
         t.test('can mint if provide Sand', async () => {
             await tx({from: sandBeneficiary, gas: 500000}, contracts.Sand, 'transfer', creator1, '100000000000000000000');
             await tx({from: creator1, gas: 500000}, contracts.Sand, 'approve', contracts.CommonMinter.options.address, '100000000000000000000');
-            const receipt = await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintMultipleFor', creator1, 0, ipfsHashString, [100], creator1, emptyBytes);
+            const receipt = await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintMultipleFor', creator1, 0, ipfsHashString, [100], creator1, emptyBytes, '1000000000000000000');
             const eventsMatching = await getEventsFromReceipt(contracts.Asset, TransferBatchEvent, receipt);
             assert.equal(eventsMatching.length, 1);
             const tokenId = generateTokenId(creator1, 100, 1, 0);
@@ -103,31 +103,31 @@ tap.test('CommonMinter', async (t) => {
         t.test('cannot mint if does not provide enough Sand', async () => {
             await tx({from: sandBeneficiary, gas: 500000}, contracts.Sand, 'transfer', creator1, '100000000000000000000');
             await tx({from: creator1, gas: 500000}, contracts.Sand, 'approve', contracts.CommonMinter.options.address, '100000000000000000000');
-            await expectThrow(tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintMultipleFor', creator1, 0, ipfsHashString, [101], creator1, emptyBytes));
+            await expectThrow(tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintMultipleFor', creator1, 0, ipfsHashString, [101], creator1, emptyBytes, '1000000000000000000'));
         });
 
         t.test('can mint if provide Sand enough for the various supplies', async () => {
             await tx({from: sandBeneficiary, gas: 500000}, contracts.Sand, 'transfer', creator1, '100000000000000000000');
             await tx({from: creator1, gas: 500000}, contracts.Sand, 'approve', contracts.CommonMinter.options.address, '100000000000000000000');
-            await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintMultipleFor', creator1, 0, ipfsHashString, [20, 29, 51], creator1, emptyBytes);
+            await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintMultipleFor', creator1, 0, ipfsHashString, [20, 29, 51], creator1, emptyBytes, '1000000000000000000');
         });
 
         t.test('cannot mint if does not provide enough Sand for the total supplies', async () => {
             await tx({from: sandBeneficiary, gas: 500000}, contracts.Sand, 'transfer', creator1, '100000000000000000000');
             await tx({from: creator1, gas: 500000}, contracts.Sand, 'approve', contracts.CommonMinter.options.address, '100000000000000000000');
-            await expectThrow(tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintMultipleFor', creator1, 0, ipfsHashString, [20, 29, 52], creator1, emptyBytes));
+            await expectThrow(tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintMultipleFor', creator1, 0, ipfsHashString, [20, 29, 52], creator1, emptyBytes, '1000000000000000000'));
         });
 
         t.test('can mint if provide Sand enough for the various supplies with NFTs', async () => {
             await tx({from: sandBeneficiary, gas: 500000}, contracts.Sand, 'transfer', creator1, '100000000000000000000');
             await tx({from: creator1, gas: 500000}, contracts.Sand, 'approve', contracts.CommonMinter.options.address, '100000000000000000000');
-            await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintMultipleFor', creator1, 0, ipfsHashString, [20, 27, 50, 1, 1, 1], creator1, emptyBytes);
+            await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintMultipleFor', creator1, 0, ipfsHashString, [20, 27, 50, 1, 1, 1], creator1, emptyBytes, '1000000000000000000');
         });
 
         t.test('cannot mint if does not provide enough Sand for the total supplies with NFTs', async () => {
             await tx({from: sandBeneficiary, gas: 500000}, contracts.Sand, 'transfer', creator1, '100000000000000000000');
             await tx({from: creator1, gas: 500000}, contracts.Sand, 'approve', contracts.CommonMinter.options.address, '100000000000000000000');
-            await expectThrow(tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintMultipleFor', creator1, 0, ipfsHashString, [20, 51, 28, 1, 1], creator1, emptyBytes));
+            await expectThrow(tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintMultipleFor', creator1, 0, ipfsHashString, [20, 51, 28, 1, 1], creator1, emptyBytes, '1000000000000000000'));
         });
     });
 
@@ -135,7 +135,7 @@ tap.test('CommonMinter', async (t) => {
         t.test('rarity is zero for token minted with supply > 1', async () => {
             await tx({from: sandBeneficiary, gas: 500000}, contracts.Sand, 'transfer', creator1, '100000000000000000000');
             await tx({from: creator1, gas: 500000}, contracts.Sand, 'approve', contracts.CommonMinter.options.address, '100000000000000000000');
-            await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintFor', creator1, 0, ipfsHashString, 100, creator1, emptyBytes);
+            await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintFor', creator1, 0, ipfsHashString, 100, creator1, emptyBytes, '1000000000000000000');
             const tokenId = generateTokenId(creator1, 100, 1, 0);
             const rarity = await call(contracts.Asset, 'rarity', tokenId);
             assert.equal(rarity, 0);
@@ -144,8 +144,8 @@ tap.test('CommonMinter', async (t) => {
         t.test('rarity is zero for token minted with supply == 1', async () => {
             await tx({from: sandBeneficiary, gas: 500000}, contracts.Sand, 'transfer', creator1, '100000000000000000000');
             await tx({from: creator1, gas: 500000}, contracts.Sand, 'approve', contracts.CommonMinter.options.address, '100000000000000000000');
-            await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintFor', creator1, 0, ipfsHashString, 1, creator1, emptyBytes);
-            const tokenId = generateTokenId(creator1, 1, 1, 0);
+            await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintFor', creator1, 0, ipfsHashString, 1, creator1, emptyBytes, '1000000000000000000');
+            const tokenId = generateTokenId(creator1, 1, 0, 0);
             const rarity = await call(contracts.Asset, 'rarity', tokenId);
             assert.equal(rarity, 0);
         });
@@ -153,7 +153,7 @@ tap.test('CommonMinter', async (t) => {
         t.test('rarity is zero for multiple token minted with supply > 1', async () => {
             await tx({from: sandBeneficiary, gas: 500000}, contracts.Sand, 'transfer', creator1, '100000000000000000000');
             await tx({from: creator1, gas: 500000}, contracts.Sand, 'approve', contracts.CommonMinter.options.address, '100000000000000000000');
-            await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintMultipleFor', creator1, 0, ipfsHashString, [20, 30, 40], creator1, emptyBytes);
+            await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintMultipleFor', creator1, 0, ipfsHashString, [20, 30, 40], creator1, emptyBytes, '1000000000000000000');
 
             const tokenId1 = generateTokenId(creator1, 20, 3, 0, 0);
             const rarity1 = await call(contracts.Asset, 'rarity', tokenId1);
@@ -171,17 +171,17 @@ tap.test('CommonMinter', async (t) => {
         t.test('rarity is zero for multi token with a mix of NFT', async () => {
             await tx({from: sandBeneficiary, gas: 500000}, contracts.Sand, 'transfer', creator1, '100000000000000000000');
             await tx({from: creator1, gas: 500000}, contracts.Sand, 'approve', contracts.CommonMinter.options.address, '100000000000000000000');
-            await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintMultipleFor', creator1, 0, ipfsHashString, [20, 30, 1], creator1, emptyBytes);
+            await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintMultipleFor', creator1, 0, ipfsHashString, [20, 30, 1], creator1, emptyBytes, '1000000000000000000');
 
-            const tokenId1 = generateTokenId(creator1, 20, 3, 0, 0);
+            const tokenId1 = generateTokenId(creator1, 20, 2, 0, 0);
             const rarity1 = await call(contracts.Asset, 'rarity', tokenId1);
             assert.equal(rarity1, 0);
 
-            const tokenId2 = generateTokenId(creator1, 30, 3, 0, 1);
+            const tokenId2 = generateTokenId(creator1, 30, 2, 0, 1);
             const rarity2 = await call(contracts.Asset, 'rarity', tokenId2);
             assert.equal(rarity2, 0);
 
-            const tokenId3 = generateTokenId(creator1, 1, 3, 0, 2);
+            const tokenId3 = generateTokenId(creator1, 1, 2, 0, 2);
             const rarity3 = await call(contracts.Asset, 'rarity', tokenId3);
             assert.equal(rarity3, 0);
         });
@@ -206,7 +206,7 @@ tap.test('CommonMinter', async (t) => {
                 {nonce: 1, minGasPrice: 1, txGas: 2000000, baseGas: 112000, tokenGasPrice: 0, relayer: executor, tokenDeposit: executor},
                 contracts.CommonMinter,
                 '100000000000000000000',
-                'mintFor', signingAcount.address, 0, ipfsHashString, 100, signingAcount.address, emptyBytes);
+                'mintFor', signingAcount.address, 0, ipfsHashString, 100, signingAcount.address, emptyBytes, '1000000000000000000');
             const eventsMatching = await getEventsFromReceipt(contracts.Asset, TransferSingleEvent, receipt);
             assert.equal(eventsMatching.length, 1);
             const tokenId = generateTokenId(signingAcount.address, 100, 1, 0);
@@ -222,12 +222,11 @@ tap.test('CommonMinter', async (t) => {
                 {nonce: 1, minGasPrice: 1, txGas: 2000000, baseGas: 112000, tokenGasPrice: 0, relayer: executor, tokenDeposit: executor},
                 contracts.CommonMinter,
                 '100000000000000000000',
-                'mintFor', signingAcount.address, 0, ipfsHashString, 100, signingAcount.address, emptyBytes);
+                'mintFor', signingAcount.address, 0, ipfsHashString, 100, signingAcount.address, emptyBytes, '1000000000000000000');
             const eventsMatching = await getEventsFromReceipt(contracts.Asset, TransferSingleEvent, receipt);
             assert.equal(eventsMatching.length, 0);
             const tokenId = generateTokenId(signingAcount.address, 100, 1, 0);
-            const balance = await call(contracts.Asset, 'balanceOf', signingAcount.address, tokenId);
-            assert.equal(balance, 0);
+            await expectThrow(call(contracts.Asset, 'balanceOf', signingAcount.address, tokenId));
         });
     });
 });

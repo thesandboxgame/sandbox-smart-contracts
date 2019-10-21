@@ -40,6 +40,7 @@ module.exports = {
         assetAdmin: 'sandAdmin', // can add super operator and change admin to Asset
         assetBouncerAdmin: 'sandAdmin',
         genesisBouncerAdmin: 'sandAdmin',
+        commonMinterAdmin: 'sandAdmin',
         genesisMinter: 'sandAdmin',
         assetUpgrader: 'sandAdmin',
         orbsBeneficiary: 'sandAdmin',

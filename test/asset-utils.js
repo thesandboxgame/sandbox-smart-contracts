@@ -179,13 +179,14 @@ module.exports = {
     OfferClaimedEvent,
     OfferCancelledEvent,
     ExtractionEvent,
-    generateTokenId(creator, supply, packSize, fixedID = 0, index = 0, nftIndex = 0) {
+    generateTokenId(creator, supply, numFTs, fixedID = 0, index = 0, nftIndex = 0) {
         // console.log('creator', new BN(creator.slice(2), 16).mul(new BN('1000000000000000000000000', 16)).toString(10));
         // TODO rarity
         return ((new BN(creator.slice(2), 16)).mul(new BN('1000000000000000000000000', 16)))
             .add((supply === 1) ? new BN('800000000000000000000000', 16) : new BN(0))
             .add(new BN(nftIndex).mul(new BN('8000000000000000', 16)))
-            .add(new BN(fixedID).mul(new BN('8000', 16)))
+            .add(new BN(fixedID).mul(new BN('800000', 16)))
+            .add(new BN(numFTs).mul(new BN('800', 16)))
             .add(new BN(index)).toString(10);
     },
     // generateTokenId(creator, supply, fixedID=0, index=0, nftIndex = 0) {

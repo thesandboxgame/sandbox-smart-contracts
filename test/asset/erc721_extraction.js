@@ -213,13 +213,22 @@ function runERC721ExtractionTests(title, resetContracts) {
             assert.equal(new BN(nftTokenId, 10).toString(16), new BN(generateTokenId(creator, 1, 1, 0, 0, 0), 10).toString(16));
         });
 
+        t.test('extracted token from a multiMint minted FT should be index 0', async () => {
+            const tokenIds = await mintMultipleAndReturnTokenIds(contracts.AssetBouncer, ipfsHashString, [10, 101, 23, 1], creator);
+            assert.equal(tokenIds[0], generateTokenId(creator, 10, 3, 0));
+            const receipt = await tx(contracts.Asset, 'extractERC721From', {from: creator, gas}, creator, tokenIds[0], creator);
+            const eventsMatching = await getEventsFromReceipt(contracts.Asset, ExtractionEvent, receipt);
+            const nftTokenId = eventsMatching[0].returnValues[1];
+            assert.equal(new BN(nftTokenId, 10).toString(16), new BN(generateTokenId(creator, 1, 3, 0, 0, 0), 10).toString(16));
+        });
+
         t.test('extracted token should be of collectionIndex 0', async () => {
             const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 10, creator);
             assert.equal(tokenId, generateTokenId(creator, 10, 1, 0));
             const receipt = await tx(contracts.Asset, 'extractERC721From', {from: creator, gas}, creator, tokenId, creator);
             const eventsMatching = await getEventsFromReceipt(contracts.Asset, ExtractionEvent, receipt);
             const nftTokenId = eventsMatching[0].returnValues[1];
-            const collectionIndex = await call(contracts.Asset, 'collectionIndex', null, nftTokenId);
+            const collectionIndex = await call(contracts.Asset, 'collectionIndexOf', null, nftTokenId);
             assert.equal(collectionIndex, '0');
         });
 
@@ -229,7 +238,7 @@ function runERC721ExtractionTests(title, resetContracts) {
             const receipt = await tx(contracts.Asset, 'extractERC721From', {from: creator, gas}, creator, tokenId, creator);
             const eventsMatching = await getEventsFromReceipt(contracts.Asset, ExtractionEvent, receipt);
             const nftTokenId = eventsMatching[0].returnValues[1];
-            const collection = await call(contracts.Asset, 'collection', null, nftTokenId);
+            const collection = await call(contracts.Asset, 'collectionOf', null, nftTokenId);
             assert.equal(collection, tokenId);
         });
 
@@ -237,7 +246,7 @@ function runERC721ExtractionTests(title, resetContracts) {
             const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 10, creator);
             assert.equal(tokenId, generateTokenId(creator, 10, 1, 0));
             await tx(contracts.Asset, 'extractERC721From', {from: creator, gas}, creator, tokenId, creator);
-            await expectThrow(call(contracts.Asset, 'collection', null, tokenId));
+            await expectThrow(call(contracts.Asset, 'collectionOf', null, tokenId));
         });
 
         t.test('second extracted token should be index 1', async () => {
@@ -257,7 +266,7 @@ function runERC721ExtractionTests(title, resetContracts) {
             const receipt = await tx(contracts.Asset, 'extractERC721From', {from: creator, gas}, creator, tokenId, creator);
             const eventsMatching = await getEventsFromReceipt(contracts.Asset, ExtractionEvent, receipt);
             const nftTokenId = eventsMatching[0].returnValues[1];
-            const collectionIndex = await call(contracts.Asset, 'collectionIndex', null, nftTokenId);
+            const collectionIndex = await call(contracts.Asset, 'collectionIndexOf', null, nftTokenId);
             assert.equal(collectionIndex, '1');
         });
 
@@ -268,7 +277,7 @@ function runERC721ExtractionTests(title, resetContracts) {
             const receipt = await tx(contracts.Asset, 'extractERC721From', {from: creator, gas}, creator, tokenId, creator);
             const eventsMatching = await getEventsFromReceipt(contracts.Asset, ExtractionEvent, receipt);
             const nftTokenId = eventsMatching[0].returnValues[1];
-            const collection = await call(contracts.Asset, 'collection', null, nftTokenId);
+            const collection = await call(contracts.Asset, 'collectionOf', null, nftTokenId);
             assert.equal(collection, tokenId);
         });
 
