@@ -151,7 +151,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         address owner,
         bytes calldata data
     ) external returns (uint256 id) {
-        require(hash != 0, "hash is zerp");
+        require(hash != 0, "hash is zero");
         require(_bouncers[msg.sender], "only bouncer allowed to mint");
         require(owner != address(0), "destination is zero address");
         id = generateTokenId(creator, supply, packId, supply == 1 ? 0 : 1, 0);
@@ -297,7 +297,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
                     numNFTs = uint16(numTokenTypes - i);
                 }
             } else {
-                require(supplies[i] == 1, "nft need to be put at the end");
+                require(supplies[i] == 1, "NFTs need to be put at the end");
             }
         }
         uint16 numFTs = numTokenTypes - numNFTs;
@@ -670,8 +670,8 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     ) external {
         require(
             msg.sender == sender ||
-                _metaTransactionContracts[msg.sender] ||
-                _superOperators[msg.sender],
+            _metaTransactionContracts[msg.sender] ||
+            _superOperators[msg.sender],
             "require meta approval"
         );
         require(sender != address(0), "sender is zero address");
