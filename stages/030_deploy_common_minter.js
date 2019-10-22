@@ -15,6 +15,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const {
         deployer,
+        commonMinterAdmin,
         mintingFeeCollector,
     } = namedAccounts;
 
@@ -29,10 +30,12 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const deployResult = await deployIfDifferent(['data'],
         'CommonMinter',
-        {from: deployer, gas: 1000000},
+        {from: deployer, gas: 2000000},
         'CommonMinter',
         asset.options.address,
         sand.options.address,
+        '1000000000000000000',
+        commonMinterAdmin,
         mintingFeeCollector,
     );
 

@@ -96,6 +96,18 @@ function runERC1155tests(title, contractStore) {
                 assert.equal(values[4], 2);
             });
 
+            t.test('transfer zero instance of an item results in erc1155 transferSingle event', async () => {
+                const receipt = await tx(contract, 'safeTransferFrom', {from: creator, gas}, creator, user1, assetsId[1], 0, emptyBytes);
+                const eventsMatching = await getEventsFromReceipt(contract, TransferSingleEvent, receipt);
+                assert.equal(eventsMatching.length, 1);
+                const values = eventsMatching[0].returnValues;
+                assert.equal(values[0], creator);
+                assert.equal(values[1], creator);
+                assert.equal(values[2], user1);
+                assert.equal(values[3], assetsId[1]);
+                assert.equal(values[4], 0);
+            });
+
             t.test('transfer a item with 1 supply do NOT results in erc1155 transferBatch event', async () => {
                 const receipt = await tx(contract, 'safeTransferFrom', {from: creator, gas}, creator, user1, assetsId[1], 1, emptyBytes);
                 const eventsMatching = await getEventsFromReceipt(contract, TransferBatchEvent, receipt);
@@ -187,6 +199,30 @@ function runERC1155tests(title, contractStore) {
                 assert.equal(eventValues[4][0], 3);
             });
 
+            t.test('transferring zero item with 1 supply results in erc1155 transferBatch event', async () => {
+                const receipt = await tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, creator, user1, [assetsId[1]], [0], emptyBytes);
+                const eventsMatching = await getEventsFromReceipt(contract, TransferBatchEvent, receipt);
+                assert.equal(eventsMatching.length, 1);
+                const eventValues = eventsMatching[0].returnValues;
+                assert.equal(eventValues[0], creator);
+                assert.equal(eventValues[1], creator);
+                assert.equal(eventValues[2], user1);
+                assert.equal(eventValues[3][0], assetsId[1]);
+                assert.equal(eventValues[4][0], 0);
+            });
+
+            t.test('transferring empty list results in erc1155 transferBatch event', async () => {
+                const receipt = await tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, creator, user1, [], [], emptyBytes);
+                const eventsMatching = await getEventsFromReceipt(contract, TransferBatchEvent, receipt);
+                assert.equal(eventsMatching.length, 1);
+                const eventValues = eventsMatching[0].returnValues;
+                assert.equal(eventValues[0], creator);
+                assert.equal(eventValues[1], creator);
+                assert.equal(eventValues[2], user1);
+                assert.equal(eventValues[3].length, 0);
+                assert.equal(eventValues[4].length, 0);
+            });
+
             t.test('transfer multiple items with results one erc1155 transferBatch event', async () => {
                 const receipt = await tx(contract, 'safeBatchTransferFrom', {from: creator, gas},
                     creator,
@@ -209,6 +245,31 @@ function runERC1155tests(title, contractStore) {
                 assert.equal(eventValues[4][1], 4);
                 assert.equal(eventValues[4][2], 1);
                 assert.equal(eventValues[4][3], 1);
+                assert.equal(eventValues[4][4], 3);
+            });
+
+            t.test('transfer multiple items including zero amount results one erc1155 transferBatch event', async () => {
+                const receipt = await tx(contract, 'safeBatchTransferFrom', {from: creator, gas},
+                    creator,
+                    user1,
+                    [assetsId[0], assetsId[2], assetsId[1], assetsId[3], assetsId[4]],
+                    [3, 0, 1, 0, 3],
+                    emptyBytes);
+                const eventsMatching = await getEventsFromReceipt(contract, TransferBatchEvent, receipt);
+                assert.equal(eventsMatching.length, 1);
+                const eventValues = eventsMatching[0].returnValues;
+                assert.equal(eventValues[0], creator);
+                assert.equal(eventValues[1], creator);
+                assert.equal(eventValues[2], user1);
+                assert.equal(eventValues[3][0], assetsId[0]);
+                assert.equal(eventValues[3][1], assetsId[2]);
+                assert.equal(eventValues[3][2], assetsId[1]);
+                assert.equal(eventValues[3][3], assetsId[3]);
+                assert.equal(eventValues[3][4], assetsId[4]);
+                assert.equal(eventValues[4][0], 3);
+                assert.equal(eventValues[4][1], 0);
+                assert.equal(eventValues[4][2], 1);
+                assert.equal(eventValues[4][3], 0);
                 assert.equal(eventValues[4][4], 3);
             });
 
@@ -314,13 +375,14 @@ function runERC1155tests(title, contractStore) {
                         balancesToTransfer.push(amounts[order[i]]);
                     }
                 }
-                await tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, creator, user1, tokenIdsToTransfer, balancesToTransfer, emptyBytes);
+                const receipt = await tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, creator, user1, tokenIdsToTransfer, balancesToTransfer, emptyBytes);
                 for (let i = 0; i < tokenIdsToTransfer.length; i++) {
                     const tokenId = tokenIdsToTransfer[i];
                     const expectedbalance = balancesToTransfer[i];
                     const balance = await call(contract, 'balanceOf', null, user1, tokenId);
                     assert.equal(balance, expectedbalance);
                 }
+                return receipt;
             }
 
             async function testOrder2(amounts, order, balancesToTransfer, order2, balancesToTransfer2) {
@@ -350,7 +412,7 @@ function runERC1155tests(title, contractStore) {
             }
 
             t.test('transfer empty array', async () => {
-                await expectThrow(testOrder([10, 5, 8, 9, 10, 6, 8, 8, 10, 12, 1, 1, 1], []));
+                await testOrder([10, 5, 8, 9, 10, 6, 8, 8, 10, 12, 1, 1, 1], []);
             });
 
             t.test('transfer multiple items in any order ', async () => {

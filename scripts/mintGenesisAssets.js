@@ -16,9 +16,9 @@ let Bouncer;
 let operator;
 let testMode = false;
 try {
-    Bouncer = getDeployedContract('TestBouncer');
+    Bouncer = getDeployedContract('GenesisBouncer');
 } catch (e) {
-    console.log('cannot get Bouncer, continue in test mode');
+    console.log('cannot get GenesisBouncer, continue in test mode');
     testMode = true;
 }
 
@@ -87,11 +87,7 @@ program
     .option('-g, --gas <gas>', 'gas limit')
     .option('-p, --packId <packId>', 'packId')
     .option('-n, --nonce <nonce>', 'nonce')
-    .option('-r, --real', 'real')
     .action(async (filePath, cmdObj) => {
-        if (cmdObj.real) {
-            Bouncer = getDeployedContract('GenesisBouncer');
-        }
         let data;
         try {
             data = JSON.parse(fs.readFileSync(filePath).toString());

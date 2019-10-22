@@ -1,0 +1,44 @@
+@startuml
+!include C4_Context.puml
+
+title Sandbox's Smart Contracts
+
+Person(User, "User", "A User")
+
+System(BundleSandSale, "BundleSandSale", "Starter Pack Sale")
+
+System(SAND, "SAND", "ERC20 Token")
+
+System(LAND, "LAND", "LAND ERC721 Token")
+System(LandSale, "LandSale", "LandSale")
+
+System(ASSET, "ASSET", "ASSET ERC721/ERC1155 Token")
+System(AssetSale, "AssetSale", "AssetSale")
+
+System(SandboxWallet, "SandboxWallet", "Wallet receiving payments")
+System(Backend, "Backend", "Backend")
+System(MetaTxProcessor, "MetaTxProcessor", "Meta Tx Processor")
+
+Rel(User, Backend, "sign: Purchase Starter Pack in ETH")
+Rel(Backend, MetaTxProcessor, "transaction: Purchase Starter Pack in ETH")
+Rel(MetaTxProcessor, BundleSandSale, "Purchase Starter Pack in ETH")
+Rel(BundleSandSale, ASSET,  "transfer Assets to User")
+Rel(BundleSandSale, SAND,  "transfer SAND to User")
+Rel(BundleSandSale, SandboxWallet,  "transfer ETH for payment")
+
+
+Rel(User, Backend, "sign: purchase LAND in SAND")
+Rel(Backend, MetaTxProcessor, "transaction: purchase LAND in SAND")
+Rel(MetaTxProcessor, LandSale, "purchase Land in SAND")
+Rel(LandSale, LAND,  "transfer LAND to User")
+Rel(LandSale, SAND,  "transfer SAND to Sandbox")
+
+Rel(User, Backend, "sign: purchase Assets in SAND")
+Rel(Backend, MetaTxProcessor, "transaction: purchase Assets in SAND")
+Rel(MetaTxProcessor, AssetSale, "purchase Assets in SAND")
+Rel(AssetSale, SAND,  "transfer SAND fee to Sandbox")
+Rel(AssetSale, SAND,  "transfer SAND to seller")
+Rel(AssetSale, ASSET,  "transfer Assets to buyer")
+
+
+@enduml

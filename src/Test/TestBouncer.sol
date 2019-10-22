@@ -14,7 +14,7 @@ contract TestBouncer is AssetBouncer {
 
     function mintFor(
         address _creator,
-        uint48 _packId,
+        uint40 _packId,
         bytes32 _hash,
         uint32 _supply,
         uint8 _rarity,
@@ -26,7 +26,7 @@ contract TestBouncer is AssetBouncer {
 
     function mintMultipleFor(
         address _creator,
-        uint48 _packId,
+        uint40 _packId,
         bytes32 _hash,
         uint256[] memory _supplies,
         bytes memory _rarityPack,
@@ -47,7 +47,7 @@ contract TestBouncer is AssetBouncer {
     function updateERC721(
         address _from,
         uint256 _tokenId,
-        uint48 _packId,
+        uint40 _packId,
         bytes32 _hash,
         uint8 _newRarity,
         address _to
