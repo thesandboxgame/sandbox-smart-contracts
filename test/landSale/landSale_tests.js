@@ -1,7 +1,10 @@
 const tap = require('tap');
 const rocketh = require('rocketh');
-const {assert} = require('chai');
 const {getDeployedContract} = require('../../lib');
+
+const {
+    runMerkleTreeTest,
+} = require('./merkleTreeTests');
 
 const {
     balanceOf,
@@ -13,6 +16,9 @@ const {
     expectThrow,
 } = require('../utils');
 
+runMerkleTreeTest();
+
+/*
 tap.test('Running LandSale tests', async (t) => {
     let landSale;
 
@@ -21,3 +27,4 @@ tap.test('Running LandSale tests', async (t) => {
         landSale = getDeployedContract('LandSale');
     });
 });
+*/

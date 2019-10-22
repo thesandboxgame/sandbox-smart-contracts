@@ -1,6 +1,5 @@
 /* eslint-disable camelcase */
 
-const tap = require('tap');
 const assert = require('assert');
 const Web3 = require('web3');
 
@@ -61,21 +60,17 @@ function createDummyLands(amount) {
 }
 
 function runMerkleTreeTest() {
-    tap.test('Testing the Merkle tree', (t) => {
-        t.test('Should validate the data', () => {
-            const lands = createDummyLands(5);
-            const data = createDataArray(lands);
-            const tree = new MerkleTree(data);
+    const lands = createDummyLands(100);
+    const data = createDataArray(lands);
+    const tree = new MerkleTree(data);
 
-            for (let i = 0; i < data.length; i += 1) {
-                const d = data[i];
-                const proof = tree.getProof(d);
-                const isValid = tree.isDataValid(d, proof);
+    for (let i = 0; i < data.length; i += 1) {
+        const d = data[i];
+        const proof = tree.getProof(d);
+        const isValid = tree.isDataValid(d, proof);
 
-                assert.equal(isValid, true, 'Data should be valid');
-            }
-        });
-    });
+        assert.equal(isValid, true, 'Data should be valid');
+    }
 }
 
 module.exports = {
