@@ -198,8 +198,9 @@ async function main(accounts) {
     await mintMultipleNFTsGas(300);
     // await mintMultipleNFTsGas(329);
 
-    await metaMintGas(1000);
-    await metaMintGas(2);
+    // TODO reenable with NativeMetaTransactionProcessor
+    // await metaMintGas(1000);
+    // await metaMintGas(2);
 
     // Make the node process quit for some reason (happen in web3 lib)
     // await metaMintGas(1);
