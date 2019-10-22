@@ -502,7 +502,6 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         uint256[] memory values
     ) internal {
         uint256 numItems = ids.length;
-        require(numItems > 0, "need at least one id");
         require(
             numItems == values.length,
             "Inconsistent array length between args"
@@ -532,7 +531,6 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
                     require(values[i] == 1, "cannot transfer nft if amount not 1");
                     require(_owners[ids[i]] == from, "not owner");
                     numNFTs++;
-                    _numNFTPerAddress[to]++;
                     _owners[ids[i]] = to;
                     _erc721operators[ids[i]] = address(0);
                     emit Transfer(from, to, ids[i]);
@@ -589,6 +587,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         }
         if (numNFTs > 0) {
             _numNFTPerAddress[from] -= numNFTs;
+            _numNFTPerAddress[to] += numNFTs;
         }
 
         if (bin != 0) { // if needed
