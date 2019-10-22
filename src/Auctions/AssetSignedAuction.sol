@@ -6,25 +6,20 @@ import "../Sand.sol";
 import "../Asset.sol";
 import "../../../contracts_common/src/Interfaces/ERC20.sol";
 import "../TheSandbox712.sol";
+import "../../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 
-contract AssetSignedAuction is TheSandbox712 {
+contract AssetSignedAuction is TheSandbox712, MetaTransactionReceiver {
     bytes32 constant AUCTION_TYPEHASH = keccak256(
         "Auction(address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)"
     );
 
-    // TODO: review event values
-    // TODO remove underscore
     event OfferClaimed(
-        address indexed _seller,
-        address indexed _buyer,
-        address _token,
-        uint256 _buyAmount,
-        uint256[] _auctionData,
-        uint256[] ids,
-        uint256[] amounts,
-        bytes _signature // TODO remove and use offerId
+        address indexed seller,
+        address indexed buyer,
+        uint256 indexed offerId,
+        uint256 amount
     );
-    event OfferCancelled(address indexed _seller, uint256 _offerId);
+    event OfferCancelled(address indexed seller, uint256 indexed offerId);
 
     uint256 constant MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
@@ -39,125 +34,154 @@ contract AssetSignedAuction is TheSandbox712 {
 
     mapping(address => mapping(uint256 => uint256)) claimed;
 
-    Asset asset;
-    Sand sand;
-    constructor(Sand _sand, Asset _asset) public {
-        asset = _asset;
-        sand = _sand;
+    Asset _asset;
+    uint256 _tax10000th = 0;
+    address payable _taxCollector;
+
+    event TaxSetup(address taxCollector, uint256 tax10000th);
+
+    constructor(Asset asset, address admin, address initialMetaTx, address payable taxCollector, uint256 tax10000th) public {
+        _asset = asset;
+        _taxCollector = taxCollector;
+        _tax10000th = tax10000th;
+        emit TaxSetup(taxCollector, tax10000th);
+        _admin = admin;
+        _setMetaTransactionProcessor(initialMetaTx, true);
         init712();
     }
 
-    function claimSellerOffer(
+    function setTax(address payable taxCollector, uint256 tax10000th) external {
+        require(msg.sender == _admin, "only admin can change tax");
+        _taxCollector = taxCollector;
+        _tax10000th = tax10000th;
+        emit TaxSetup(taxCollector, tax10000th);
+    }
+
+    function _verifyParameters(
         address buyer,
         address payable seller,
         address token,
         uint256 buyAmount,
-        uint256[] calldata auctionData,
-        uint256[] calldata ids,
-        uint256[] calldata amounts,
-        bytes calldata signature
-    ) external payable {
+        uint256[] memory auctionData,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory signature
+    ) internal {
+        require(buyer == msg.sender || (token != address(0) && _metaTransactionContracts[msg.sender]), "not authorized");
         require(
-            msg.sender == buyer || msg.sender == address(sand),
-            "invalid buyer"
-        );
-
-        // TODO: do we remove seller from the argument list? and recover it ?
-        require(
+            // TODO: do we remove seller from the argument list? and recover it ?
             seller == recover(token, auctionData, ids, amounts, signature),
             "Signature mismatches"
         );
+        uint256 amountAlreadyClaimed = claimed[seller][auctionData[AuctionData_OfferId]];
+        require(amountAlreadyClaimed != MAX_UINT256, "Auction cancelled");
 
-        require(
-            claimed[seller][auctionData[AuctionData_OfferId]] != MAX_UINT256,
-            "Auction cancelled"
-        );
-        require(
-            SafeMath.add(
-                    claimed[seller][auctionData[AuctionData_OfferId]],
-                    buyAmount
-                ) <=
-                auctionData[AuctionData_Packs],
-            "Buy amount exceeds sell amount"
-        );
+        uint256 total = amountAlreadyClaimed + buyAmount;
+        require(total >= amountAlreadyClaimed, "overflow");
+        require(total <= auctionData[AuctionData_Packs], "Buy amount exceeds sell amount");
 
         require(
             auctionData[AuctionData_StartedAt] <= block.timestamp,
             "Auction didn't start yet"
         );
         require(
-            auctionData[AuctionData_StartedAt] +
-                    auctionData[AuctionData_Duration] >
-                block.timestamp,
+            auctionData[AuctionData_StartedAt] + auctionData[AuctionData_Duration] > block.timestamp,
             "Auction finished"
         );
 
-        _executeDeal(
-            token,
+    }
+
+    function claimSellerOffer(
+        address buyer,
+        address payable seller,
+        address token,
+        uint256[] calldata purchase, // buyAmount, maxTokenAmount
+        uint256[] calldata auctionData,
+        uint256[] calldata ids,
+        uint256[] calldata amounts,
+        bytes calldata signature
+    ) external payable {
+        _verifyParameters(
             buyer,
             seller,
-            auctionData,
-            ids,
-            amounts,
-            buyAmount
-        );
-        emit OfferClaimed(
-            seller,
-            buyer,
             token,
-            buyAmount,
+            purchase[0],
             auctionData,
             ids,
             amounts,
             signature
         );
+        _executeDeal(
+            token,
+            purchase,
+            buyer,
+            seller,
+            auctionData,
+            ids,
+            amounts
+        );
     }
 
     function _executeDeal(
         address token,
+        uint256[] memory purchase,
         address buyer,
         address payable seller,
         uint256[] memory auctionData,
         uint256[] memory ids,
-        uint256[] memory amounts,
-        uint256 buyAmount
+        uint256[] memory amounts
     ) internal {
         uint256 offer = PriceUtil.calculateCurrentPrice(
                 auctionData[AuctionData_StartingPrice],
                 auctionData[AuctionData_EndingPrice],
                 auctionData[AuctionData_Duration],
                 block.timestamp - auctionData[AuctionData_StartedAt]
-            ) *
-            buyAmount;
+            ) * purchase[0];
+        claimed[seller][auctionData[AuctionData_OfferId]] += purchase[0];
 
-        claimed[seller][auctionData[AuctionData_OfferId]] += buyAmount;
+        uint256 tax = 0;
+        if(_tax10000th > 0) {
+            tax = PriceUtil.calculateTax(offer, _tax10000th);
+        }
+
+        require(offer+tax <= purchase[1], "offer exceeds nax amount to spend");
 
         if (token != address(0)) {
-            ERC20(token).transferFrom(buyer, seller, offer); // require approval/ for SAND we can add it to the list of defaultOperators / superOperators
+            require(ERC20(token).transferFrom(buyer, seller, offer), "failed to transfer token price");
+            if(tax > 0) {
+                require(ERC20(token).transferFrom(buyer, _taxCollector, tax), "failed to collect tax");
+            }
         } else {
-            require(
-                buyer == msg.sender,
-                "for ETH based offers, the buyer need to be the sender"
-            );
-            require(msg.value >= offer, "not enough ETH"); // in case the aucction could store ETH for other reasons
+            require(msg.value >= offer + tax, "ETH < offer+tax");
+            if(msg.value > offer+tax) {
+                msg.sender.transfer(msg.value - (offer+tax));
+            }
             seller.transfer(offer);
-            msg.sender.transfer(msg.value - offer);
+            if(tax > 0) {
+                _taxCollector.transfer(tax);
+            }
         }
 
         uint256[] memory packAmounts = new uint256[](amounts.length);
         for (uint256 i = 0; i < packAmounts.length; i++) {
-            packAmounts[i] = amounts[i] * buyAmount;
+            packAmounts[i] = amounts[i] * purchase[0];
         }
-        asset.safeBatchTransferFrom(seller, buyer, ids, packAmounts, "");
+        _asset.safeBatchTransferFrom(seller, buyer, ids, packAmounts, "");
+        emit OfferClaimed(
+            seller,
+            buyer,
+            auctionData[AuctionData_OfferId],
+            purchase[0]
+        );
     }
 
     function cancelSellerOffer(uint256 offerId) external {
         claimed[msg.sender][offerId] = MAX_UINT256;
-
         emit OfferCancelled(msg.sender, offerId);
     }
 
-    // Make public for testing
+    // TODO support basic signature
+
     function recover(
         address token,
         uint256[] memory auctionData,

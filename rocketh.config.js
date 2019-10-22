@@ -41,6 +41,8 @@ module.exports = {
         assetBouncerAdmin: 'sandAdmin',
         genesisBouncerAdmin: 'sandAdmin',
         commonMinterAdmin: 'sandAdmin',
+        assetAuctionAdmin: 'sandAdmin',
+        assetAuctionTaxCollector: 'sandAdmin',
         genesisMinter: 'sandAdmin',
         assetUpgrader: 'sandAdmin',
         orbsBeneficiary: 'sandAdmin',

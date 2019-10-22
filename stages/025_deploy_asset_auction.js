@@ -16,7 +16,11 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const {
         deployer,
+        assetAuctionAdmin,
+        assetAuctionTaxCollector
     } = namedAccounts;
+
+    const assetAuctionTax10000th = 0; // 5000; // 5%
 
     const asset = getDeployedContract('Asset');
     if (!asset) {
@@ -31,8 +35,11 @@ module.exports = async ({namedAccounts, initialRun}) => {
         'AssetSignedAuction',
         {from: deployer, gas: 2000000},
         'AssetSignedAuction',
+        asset.options.address,
+        assetAuctionAdmin,
         sandContract.options.address,
-        asset.options.address
+        assetAuctionTaxCollector,
+        assetAuctionTax10000th
     );
     if (deployResult.newlyDeployed) {
         log(' - AssetSignedAuction deployed at : ' + deployResult.contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);

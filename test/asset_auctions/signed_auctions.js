@@ -14,7 +14,6 @@ const {
     gas,
     expectThrow,
     toChecksumAddress,
-    soliditySha3,
     toHex,
     padLeft,
     toWei,
@@ -26,9 +25,7 @@ const {
 } = require('../utils');
 
 const {
-    TransferSingleEvent,
     TransferBatchEvent,
-    URIEvent
 } = require('../erc1155');
 
 const {
@@ -36,20 +33,27 @@ const {
 } = require('../erc20');
 
 const {
-    ExtractionEvent,
     OfferCancelledEvent,
     OfferClaimedEvent,
     mintAndReturnTokenId,
-    mintMultipleAndReturnTokenIds,
-    mintTokensWithSameURIAndSupply,
-    mintTokensIncludingNFTWithSameURI,
 } = require('../asset-utils');
 
-const creator = accounts[0];
-const user1 = accounts[1];
+const {
+    executeMetaTx,
+} = require('../sand-utils');
+
+const {
+    deployer,
+    sandBeneficiary,
+    assetAuctionAdmin,
+    assetAuctionTaxCollector,
+    others
+} = rocketh.namedAccounts;
+
+const creator = others[0];
+const user1 = others[1];
 
 const ipfsHashString = '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
-const ipfsUrl = 'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy';
 
 function runSignedAuctionsTests(title, resetContracts) {
     tap.test(title + ' signed auctions', async (t) => {
@@ -137,16 +141,7 @@ function runSignedAuctionsTests(title, resetContracts) {
         }
 
         function giveSand(to, amount) {
-            return tx(contracts.Sand, 'transfer', {from: creator, gas}, to, amount);
-        }
-
-        function approveAsset(from, amount) {
-            return tx(contracts.Sand, 'approve', {from, gas}, contracts.Asset.options.address, amount);
-        }
-
-        async function giveSandAndApproveAsset(to, amount) {
-            await giveSand(to, amount);
-            return approveAsset(to, amount);
+            return tx(contracts.Sand, 'transfer', {from: sandBeneficiary, gas}, to, amount);
         }
 
         function claimSellerOffer(options, ...args) {
@@ -178,13 +173,12 @@ function runSignedAuctionsTests(title, resetContracts) {
             await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, creator, testAddress, ids, [100, 200], emptyBytes);
         });
 
-
         t.test('should be able to claim seller offer in ETH', async () => {
             const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
             const signature = await getSignature();
 
             const receipt = await claimSellerOffer({from: user1, value: endingPrice, gas},
-                user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature);
+                user1, testAddress, token, [buyAmount, buyAmount * endingPrice], auctionData, ids, amounts, signature);
 
             assert.equal((await getEventsFromReceipt(contracts.AssetSignedAuction, OfferClaimedEvent, receipt)).length, 1);
             const transferReceipts = await getEventsFromReceipt(contracts.Asset, TransferBatchEvent, receipt);
@@ -196,12 +190,12 @@ function runSignedAuctionsTests(title, resetContracts) {
             token = contracts.Sand.options.address;
             const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
 
-            await giveSandAndApproveAsset(user1, endingPrice);
+            await giveSand(user1, endingPrice);
 
             const signature = await getSignature();
 
             const receipt = await claimSellerOffer({from: user1, value: 0, gas},
-                user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature);
+                user1, testAddress, token, [buyAmount, buyAmount * endingPrice], auctionData, ids, amounts, signature);
 
             assert.equal((await getEventsFromReceipt(contracts.Sand, TransferEvent, receipt)).length, 1);
             assert.equal((await getEventsFromReceipt(contracts.AssetSignedAuction, OfferClaimedEvent, receipt)).length, 1);
@@ -215,7 +209,7 @@ function runSignedAuctionsTests(title, resetContracts) {
             const signature = await getSignature();
 
             await claimSellerOffer({from: user1, value: endingPrice, gas},
-                user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature);
+                user1, testAddress, token, [buyAmount, buyAmount * endingPrice], auctionData, ids, amounts, signature);
 
             for (let i = 0; i < ids.length; i++) {
                 const tokenBalance = await assetBalanceOf(user1, ids[i]);
@@ -232,7 +226,7 @@ function runSignedAuctionsTests(title, resetContracts) {
             const signature = await getSignature();
 
             await claimSellerOffer({from: user1, value: endingPrice * buyAmount, gas},
-                user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature);
+                user1, testAddress, token, [buyAmount, endingPrice * buyAmount], auctionData, ids, amounts, signature);
 
             const balanceAfter = await getBalance(testAddress);
             const balance = new BN(balanceAfter).sub(new BN(balanceBefore));
@@ -248,13 +242,13 @@ function runSignedAuctionsTests(title, resetContracts) {
             token = contracts.Sand.options.address;
             const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
 
-            await giveSandAndApproveAsset(user1, endingPrice * buyAmount);
+            await giveSand(user1, endingPrice * buyAmount);
 
             const balanceBefore = await sandBalanceOf(testAddress);
             const signature = await getSignature();
 
             await claimSellerOffer({from: user1, value: 0, gas},
-                user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature);
+                user1, testAddress, token, [buyAmount, endingPrice * buyAmount], auctionData, ids, amounts, signature);
 
             const balanceAfter = await sandBalanceOf(testAddress);
             const balance = new BN(balanceAfter).sub(new BN(balanceBefore));
@@ -273,15 +267,15 @@ function runSignedAuctionsTests(title, resetContracts) {
             buyAmount = 2;
             const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
             const signature = await getSignature();
-            await expectThrow(claimSellerOffer({from: user1, value: endingPrice, gas},
-                user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature));
+            await expectThrow(claimSellerOffer({from: user1, value: buyAmount * endingPrice, gas},
+                user1, testAddress, token, [buyAmount, buyAmount * endingPrice], auctionData, ids, amounts, signature));
             // .then(() => assert(false, 'was able to claim offer'))
             // .catch((err) => assert(err.toString().includes('Buy amount exceeds sell amount'), 'Error message does not match. ' + err.toString()));
         });
 
         t.test('should NOT be able to claim cancelled offer', async () => {
             // add balance to testAddress
-            await sendTransaction({from: creator, to: testAddress, value: toWei('1', 'ether'), gas});
+            await sendTransaction({from: accounts[0], to: testAddress, value: toWei('1', 'ether'), gas});
             // cancel offer through signed transaction
             await sendSignedTransaction(encodeCall(contracts.AssetSignedAuction, 'cancelSellerOffer', offerId), contracts.AssetSignedAuction.options.address, privateKey);
 
@@ -289,8 +283,8 @@ function runSignedAuctionsTests(title, resetContracts) {
             const signature = await getSignature();
 
             await expectThrow(
-                claimSellerOffer({from: user1, value: endingPrice, gas},
-                    user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature)
+                claimSellerOffer({from: user1, value: buyAmount * endingPrice, gas},
+                    user1, testAddress, token, [buyAmount, buyAmount * endingPrice], auctionData, ids, amounts, signature)
             );
             // .then(() => assert(false, 'was able to claim offer'))
             // .catch((err) => assert(err.toString().includes('Auction cancelled'), 'Error message does not match. ' + err.toString()));
@@ -301,7 +295,7 @@ function runSignedAuctionsTests(title, resetContracts) {
             const signature = await getSignature();
             await expectThrow(
                 claimSellerOffer({from: user1, value: 0, gas},
-                    user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature)
+                    user1, testAddress, token, [buyAmount, buyAmount * endingPrice], auctionData, ids, amounts, signature)
             );
         });
 
@@ -312,7 +306,19 @@ function runSignedAuctionsTests(title, resetContracts) {
             const signature = await getSignature();
             await expectThrow(
                 claimSellerOffer({from: user1, gas},
-                    user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature)
+                    user1, testAddress, token, [buyAmount, buyAmount * endingPrice], auctionData, ids, amounts, signature)
+            );
+        });
+
+        t.test('should NOT be able to claim offer without enough SAND when tax', async () => {
+            await tx(contracts.AssetSignedAuction, 'setTax', {from: assetAuctionAdmin, gas}, assetAuctionTaxCollector, 5000);
+            token = contracts.Sand.options.address;
+            const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
+
+            const signature = await getSignature();
+            await expectThrow(
+                claimSellerOffer({from: user1, gas},
+                    user1, testAddress, token, [buyAmount, buyAmount * endingPrice], auctionData, ids, amounts, signature)
             );
         });
 
@@ -322,7 +328,7 @@ function runSignedAuctionsTests(title, resetContracts) {
             auctionData[0] = '12398764192673412346';
             await expectThrow(
                 claimSellerOffer({from: user1, gas},
-                    user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature)
+                    user1, testAddress, token, [buyAmount, buyAmount * endingPrice], auctionData, ids, amounts, signature)
             );
             // .then(() => assert(false, 'was able to claim offer'))
             // .catch((err) => assert(err.toString().includes('Signature mismatches'), 'Error message does not match. ' + err.toString()));
@@ -334,7 +340,7 @@ function runSignedAuctionsTests(title, resetContracts) {
             const signature = await getSignature();
             await expectThrow(
                 claimSellerOffer({from: user1, gas},
-                    user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature)
+                    user1, testAddress, token, [buyAmount, buyAmount * endingPrice], auctionData, ids, amounts, signature)
             );
             // .then(() => assert(false, 'was able to claim offer'))
             // .catch((err) => assert(err.toString().includes('Auction didn\'t start yet'), 'Error message does not match. ' + err.toString()));
@@ -346,10 +352,58 @@ function runSignedAuctionsTests(title, resetContracts) {
             const signature = await getSignature();
             await expectThrow(
                 claimSellerOffer({from: user1, gas},
-                    user1, testAddress, token, buyAmount, auctionData, ids, amounts, signature)
+                    user1, testAddress, token, [buyAmount, buyAmount * endingPrice], auctionData, ids, amounts, signature)
             );
             // .then(() => assert(false, 'was able to claim offer'))
             // .catch((err) => assert(err.toString().includes('Auction finished'), 'Error message does not match. ' + err.toString()));
+        });
+
+        t.test('meta tx', async (t) => {
+            const signingAccount = {
+                address: '0xFA8A6079E7B85d1be95B6f6DE1aAE903b6F40c00',
+                privateKey: '0xeee5270a5c46e5b92510d70fa4d445a8cdd5010dde5b1fccc6a2bd1a9df8f5c0'
+            };
+            // const otherSigner = {
+            //     address: '0x75aE6abE03070a906d7a9d5C1607605DE73a0880',
+            //     privateKey: '0x3c42a6c587e8a82474031cc06f1e6af7f5301bb2417b89d98eb3023d0ce659f6'
+            // };
+            const executor = deployer;
+
+            t.test('claim offer in SAND success', async () => {
+                await tx(contracts.Sand, 'transfer', {from: sandBeneficiary, gas: 500000}, signingAccount.address, '100000000000000000000');
+                token = contracts.Sand.options.address;
+                const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
+                const signature = await getSignature();
+
+                const receipt = await executeMetaTx(signingAccount,
+                    contracts.NativeMetaTransactionProcessor,
+                    {from: executor, gas: 1000000, gasPrice: 1},
+                    {nonce: 1, minGasPrice: 1, txGas: 2000000, baseGas: 112000, tokenGasPrice: 0, relayer: executor, tokenDeposit: executor},
+                    contracts.AssetSignedAuction,
+                    '100000000000000000000',
+                    'claimSellerOffer', signingAccount.address, testAddress, token, [buyAmount, buyAmount * endingPrice], auctionData, ids, amounts, signature);
+
+                assert.equal((await getEventsFromReceipt(contracts.Sand, TransferEvent, receipt)).length, 1);
+                assert.equal((await getEventsFromReceipt(contracts.AssetSignedAuction, OfferClaimedEvent, receipt)).length, 1);
+                const transferReceipts = await getEventsFromReceipt(contracts.Asset, TransferBatchEvent, receipt);
+                assert.equal(transferReceipts.length, 1);
+                assert.equal(transferReceipts[0].returnValues.ids.length, 2);
+            });
+
+            t.test('claim offer in SAND fails from different sender', async () => {
+                await tx(contracts.Sand, 'transfer', {from: sandBeneficiary, gas: 500000}, signingAccount.address, '100000000000000000000');
+                token = contracts.Sand.options.address;
+                const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
+                const signature = await getSignature();
+
+                await expectThrow(executeMetaTx(signingAccount,
+                    contracts.NativeMetaTransactionProcessor,
+                    {from: executor, gas: 1000000, gasPrice: 1},
+                    {nonce: 1, minGasPrice: 1, txGas: 2000000, baseGas: 112000, tokenGasPrice: 0, relayer: executor, tokenDeposit: executor},
+                    contracts.AssetSignedAuction,
+                    '100000000000000000000',
+                    'claimSellerOffer', user1, testAddress, token, [buyAmount, buyAmount * endingPrice], auctionData, ids, amounts, signature));
+            });
         });
     });
 }
