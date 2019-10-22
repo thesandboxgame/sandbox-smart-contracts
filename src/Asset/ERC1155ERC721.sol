@@ -909,7 +909,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     function collectionOf(uint256 id) public view returns (uint256) {
         require(_owners[id] != address(0), "NFT does not exist");
         uint256 collectionId = id & NOT_NFT_INDEX & NOT_IS_NFT;
-        require(exists(collectionId), "collection does not exist");
+        require(exists(collectionId), "no collection for that token");
         return collectionId;
     }
 
