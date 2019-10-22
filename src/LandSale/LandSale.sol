@@ -35,29 +35,23 @@ contract LandSale {
         wallet = initialWalletAddress;
     }
 
-    function buyLandWithEther(
+    function buyLand(
         address to,
-        uint16 size,
         uint16 x,
         uint16 y,
-        uint256 landId,
-        bytes32 landHash,
-        uint256 price
+        uint16 size,
+        uint256 price,
+        bytes32[] calldata proof,
+        bytes32 root
     ) external payable whenNotPaused() {
-        require(msg.value == price, "Insufficient funds");
+        bytes32 landHash = generateLandHash(x, y, size, price);
+        bytes32 leaf = keccak256(abi.encodePacked(landHash));
 
-        land.mintBlock(to, size, x, y);
-    }
+        require(
+            verify(proof, root, leaf),
+            "Invalid land provided"
+        );
 
-    function buyLandWithSand(
-        address to,
-        uint16 size,
-        uint16 x,
-        uint16 y,
-        uint256 landId,
-        bytes32 landHash,
-        uint256 price
-    ) external whenNotPaused() {
         require(
             sand.transferFrom(
                 msg.sender,
@@ -85,6 +79,55 @@ contract LandSale {
         isPaused = !isPaused;
     }
 
+    /**
+     * @notice Generates the hash of a land (different from the id)
+     * @param x The x position of the land
+     * @param y The y position of the land
+     * @param size The size of the land
+     * @param price The price of the land
+     * @return The hash of the land
+     */
+    function generateLandHash(
+        uint16 x,
+        uint16 y,
+        uint16 size,
+        uint256 price
+    ) private pure returns (
+        bytes32
+    ) {
+        return keccak256(
+            abi.encodePacked(
+                x,
+                y,
+                size,
+                price
+            )
+        );
+    }
+
+    /**
+     * @notice Verifies if a leaf is part of a Merkle tree
+     * @param proof The proof for the leaf
+     * @param root The root of the Merkle tree
+     * @param leaf The leaf to verify
+     * @return True if the leaf is valid
+     */
+    function verify(bytes32[] memory proof, bytes32 root, bytes32 leaf) private pure returns (bool) {
+        bytes32 computedHash = leaf;
+
+        for (uint256 i = 0; i < proof.length; i++) {
+            bytes32 proofElement = proof[i];
+
+            if (computedHash < proofElement) {
+                computedHash = keccak256(abi.encodePacked(computedHash, proofElement));
+            } else {
+                computedHash = keccak256(abi.encodePacked(proofElement, computedHash));
+            }
+        }
+
+        return computedHash == root;
+    }
+
     modifier onlyAdmin() {
         require(msg.sender == admin, "Sender is not the admin");
         _;
@@ -99,4 +142,5 @@ contract LandSale {
         require(isPaused == true, "Contract is not paused");
         _;
     }
+
 }
