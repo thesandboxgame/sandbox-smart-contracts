@@ -187,7 +187,10 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                 //     generateTokenId(creator, 10, 8, 1006,0),
                 //     generateTokenId(creator, 10, 8, 1006,1),
                 // ].map((id) => new BN(id).toString(16)));
-                await expectThrow(call(contracts.Asset, 'balanceOf', {}, creator, generateTokenId(creator, 10, 8, 1000, 0)));
+
+                // Do not throw any more on balanceOF
+                // await expectThrow(call(contracts.Asset, 'balanceOf', {}, creator, generateTokenId(creator, 10, 8, 1000, 0)));
+
                 assert.equal(await call(contracts.Asset, 'balanceOf', {}, creator, generateTokenId(creator, 10, 8, 1006, 0)), 10);
                 assert.equal(await call(contracts.Asset, 'balanceOf', {}, creator, generateTokenId(creator, 10, 8, 1006, 1)), 10);
                 assert.equal(await call(contracts.Asset, 'balanceOf', {}, creator, generateTokenId(creator, 10, 8, 1006, 2)), 10);

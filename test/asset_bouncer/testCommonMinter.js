@@ -226,7 +226,8 @@ tap.test('CommonMinter', async (t) => {
             const eventsMatching = await getEventsFromReceipt(contracts.Asset, TransferSingleEvent, receipt);
             assert.equal(eventsMatching.length, 0);
             const tokenId = generateTokenId(signingAcount.address, 100, 1, 0);
-            await expectThrow(call(contracts.Asset, 'balanceOf', signingAcount.address, tokenId));
+            const balance = await call(contracts.Asset, 'balanceOf', signingAcount.address, tokenId);
+            assert.equal(balance, 0);
         });
     });
 });
