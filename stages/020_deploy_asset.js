@@ -1,7 +1,6 @@
 const Web3 = require('web3');
 const rocketh = require('rocketh');
 const {
-    tx,
     deployIfDifferent,
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);

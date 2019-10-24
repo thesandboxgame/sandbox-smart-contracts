@@ -30,7 +30,12 @@ module.exports = async ({namedAccounts, initialRun}) => {
     const isBouncer = await call(asset, 'isBouncer', bouncer.options.address);
     if (!isBouncer) {
         log('setting ORB Bouncer as bouncer');
-        await tx({from: deployer, gas: 1000000}, asset, 'setBouncer', bouncer.options.address, true);
+        const currentBouncerAdmin = await call(asset, 'getBouncerAdmin');
+        if (currentBouncerAdmin.toLowerCase() !== deployer.toLowerCase()) {
+            throw new Error('deployer ' + deployer + ' has no right to set bouncer');
+        } else {
+            await tx({from: deployer, gas: 1000000}, asset, 'setBouncer', bouncer.options.address, true);
+        }
     }
 };
-module.exports.skip = guard(['1', '4']);
+module.exports.skip = guard(['1', '4']); // TODO

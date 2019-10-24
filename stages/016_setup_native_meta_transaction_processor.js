@@ -5,7 +5,6 @@ const {
     getDeployedContract,
     call,
 } = require('rocketh-web3')(rocketh, Web3);
-const {guard} = require('../lib');
 
 module.exports = async ({namedAccounts, initialRun}) => {
     function log(...args) {
@@ -27,15 +26,28 @@ module.exports = async ({namedAccounts, initialRun}) => {
         throw new Error('no NativeMetaTransactionProcessor contract deployed');
     }
 
+    const currentSandAdmin = await call(sand, 'getAdmin');
+    async function checkSandAdmin(errorMessage, exec) {
+        if (currentSandAdmin.toLowerCase() !== deployer.toLowerCase()) {
+            throw new Error('deployer ' + deployer + ' has no right to ' + errorMessage);
+        } else {
+            await exec();
+        }
+    }
+
     const isSuperOperator = await call(sand, 'isSuperOperator', metaTxProcessor.options.address);
     if (!isSuperOperator) {
         log('setting NativeMetaTransactionProcessor as super operator');
-        await tx({from: deployer, gas: 100000}, sand, 'setSuperOperator', metaTxProcessor.options.address, true);
+        await checkSandAdmin('setSuperOperator', async () => {
+            await tx({from: deployer, gas: 100000}, sand, 'setSuperOperator', metaTxProcessor.options.address, true);
+        });
     }
 
     const isExecutionOperator = await call(sand, 'isExecutionOperator', metaTxProcessor.options.address);
     if (!isExecutionOperator) {
         log('setting NativeMetaTransactionProcessor as execution operator');
-        await tx({from: deployer, gas: 100000}, sand, 'setExecutionOperator', metaTxProcessor.options.address, true);
+        await checkSandAdmin('setExecutionOperator', async () => {
+            await tx({from: deployer, gas: 100000}, sand, 'setExecutionOperator', metaTxProcessor.options.address, true);
+        });
     }
 };
