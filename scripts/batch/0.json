@@ -1,9 +1,9 @@
 {
     "name": "Helicopter",
     "description": "A Speedy Helicopter",
-    "image": "ipfs://QmRKiVGdNG8wgamGfzRCh9LPzWjwpDJsKSAmw3u6TrDYQe/Helicopter.png",
-    "animation_url": "ipfs://QmRKiVGdNG8wgamGfzRCh9LPzWjwpDJsKSAmw3u6TrDYQe/Helicopter.gltf",
-    "external_url": "https://beta.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/",
+    "image": "ipfs://QmWUM3d73PcFBVBJf8JsKDgw4rUqHQLhUXw5LEqtQP6Whp/Helicopter.png",
+    "animation_url": "ipfs://QmWUM3d73PcFBVBJf8JsKDgw4rUqHQLhUXw5LEqtQP6Whp/Helicopter.gltf",
+    "external_url": "https://www.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/",
     "properties": [
         {
             "trait_type": "power",
@@ -40,11 +40,11 @@
         "creator": "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
         "version": 1,
         "classification": {
-            "type": "Asset",
+            "type": "Entity",
             "theme": "City",
             "categories": ["Vehicle"]
         },
-        "voxel_model": "ipfs://QmRKiVGdNG8wgamGfzRCh9LPzWjwpDJsKSAmw3u6TrDYQe/Helicopter.vxr",
-        "creator_profile_url": "https://beta.sandbox.game/creator/12344"
+        "voxel_model": "ipfs://QmWUM3d73PcFBVBJf8JsKDgw4rUqHQLhUXw5LEqtQP6Whp/Helicopter.vxr",
+        "creator_profile_url": "https://www.sandbox.game/en/users/wighawagtest/8dcf3f37-ca1c-4b10-8b9d-fb46abe2785b/"
     }
 }
