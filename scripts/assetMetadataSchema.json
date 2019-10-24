@@ -46,7 +46,7 @@
 			"examples": [
 				"ipfs://QmRKiVGdNG8wgamGfzRCh9LPzWjwpDJsKSAmw3u6TrDYQe/Helicopter.png"
 			],
-			"pattern": "^ipfs://(.*)$"
+			"pattern": "^ipfs://(.*).png$"
 		},
 		"animation_url": {
 			"$id": "#/properties/animation_url",
@@ -56,7 +56,7 @@
 			"examples": [
 				"ipfs://QmRKiVGdNG8wgamGfzRCh9LPzWjwpDJsKSAmw3u6TrDYQe/Helicopter.gltf"
 			],
-			"pattern": "^ipfs://(.*)$"
+			"pattern": "^ipfs://(.*).gltf$"
 		},
 		"external_url": {
 			"$id": "#/properties/external_url",
@@ -215,9 +215,9 @@
 					"title": "The Voxel_model Schema",
 					"default": "",
 					"examples": [
-						"ipfs://QmRKiVGdNG8wgamGfzRCh9LPzWjwpDJsKSAmw3u6TrDYQe/Helicopter.vxr"
+						"ipfs://QmRKiVGdNG8wgamGfzRCh9LPzWjwpDJsKSAmw3u6TrDYQe/Helicopter.vxc"
 					],
-					"pattern": "^ipfs://(.*)$"
+					"pattern": "^ipfs://(.*).vxc$"
 				},
 				"creator_profile_url": {
 					"$id": "#/properties/sandbox/properties/creator_profile_url",
