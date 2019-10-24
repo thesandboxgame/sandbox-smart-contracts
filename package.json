@@ -14,7 +14,9 @@
     "ganache": "ganache-cli --seed 04624df17c837dc2113f0c65554551f2 -a 21 --gasLimit 19000000",
     "export-sand": "node export-sand.js",
     "export-asset": "node export-asset.js",
-    "smartcheck": "smartcheck -p ."
+    "smartcheck": "smartcheck -p .",
+    "deploy-rinkeby": "rocketh launch -n https://rinkeby.infura.io/v3/ced8eecc03984939b556332468325813",
+    "deploy-mainnet": "cli-confirm \"Do you really want to deploy to mainnet\" && rocketh launch -n https://mainnet.infura.io/v3/ced8eecc03984939b556332468325813 || echo ok"
   },
   "license": "UNLICENSED",
   "private": true,
@@ -25,6 +27,7 @@
     "babel-eslint": "^8.2.5",
     "bn.js": "^4.11.8",
     "chai": "^4.2.0",
+    "cli-confirm": "^1.0.1",
     "copy": "^0.3.2",
     "copy-dir": "^0.4.0",
     "cross-env": "^5.2.0",
