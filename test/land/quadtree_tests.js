@@ -4,9 +4,13 @@ const {assert} = require('chai');
 
 const {
     balanceOf,
+    TransferEvent,
 } = require('../erc721');
 
 const {
+    getEventsFromReceipt,
+    tx,
+    call,
     gas,
     expectThrow,
 } = require('../utils');
@@ -29,9 +33,14 @@ async function mintBlock(contract, to, size, x, y, options) {
     return contract.methods.mintBlock(to, size, x, y).send(options);
 }
 
+function landId(x, y) {
+    return x + (y * gridSize);
+}
+
 function runQuadTreeTests(title, landDeployer) {
     const landMinter = landDeployer.minter;
     tap.test(title + ' : Quad Tree tests ', async (t) => {
+        // t.runOnly = true;
         let land;
 
         t.beforeEach(async () => {
@@ -50,6 +59,10 @@ function runQuadTreeTests(title, landDeployer) {
 
                     const balance = await balanceOf(land, user0);
                     assert.equal(balance, size * size, 'user balance is wrong');
+
+                    const tokenId = landId(size - 1, size - 1);
+                    const ownerOfToken = await call(land, 'ownerOf', null, tokenId); // check the land at the extreme boundary
+                    assert.equal(ownerOfToken, user0);
                 });
             }
         });
@@ -134,6 +147,46 @@ function runQuadTreeTests(title, landDeployer) {
                     })
                 );
             }
+        });
+
+        t.test('can transfer multiple Land and still preserve original Land owner for the rest of the block', async () => {
+            await mintBlock(land, user0, 3, 3, 6, {
+                from: landMinter,
+                gas,
+            });
+            const tokenIds = [landId(4, 7), landId(4, 8), landId(3, 7)];
+            const receipt = await tx(land, 'batchTransferFrom', {from: user0, gas}, user0, user1, tokenIds);
+            const eventsMatching = await getEventsFromReceipt(land, TransferEvent, receipt);
+            assert.equal(eventsMatching.length, 3);
+            const transferEvent = eventsMatching[0];
+            assert.equal(transferEvent.returnValues[0], user0);
+            assert.equal(transferEvent.returnValues[1], user1);
+            assert.equal(transferEvent.returnValues[2], tokenIds[0]);
+
+            const ownerOfTokenTransfered = await call(land, 'ownerOf', null, tokenIds[0]);
+            assert.equal(ownerOfTokenTransfered, user1);
+            const ownerOfAnotherPart = await call(land, 'ownerOf', null, landId(5, 8));
+            assert.equal(ownerOfAnotherPart, user0);
+        });
+
+        t.test('can transfer one Land and still preserve other Land owner', async () => {
+            await mintBlock(land, user0, 3, 3, 6, {
+                from: landMinter,
+                gas,
+            });
+            const tokenId = landId(4, 7);
+            const receipt = await tx(land, 'transferFrom', {from: user0, gas}, user0, user1, tokenId);
+            const eventsMatching = await getEventsFromReceipt(land, TransferEvent, receipt);
+            assert.equal(eventsMatching.length, 1);
+            const transferEvent = eventsMatching[0];
+            assert.equal(transferEvent.returnValues[0], user0);
+            assert.equal(transferEvent.returnValues[1], user1);
+            assert.equal(transferEvent.returnValues[2], tokenId);
+
+            const ownerOfTokenTransfered = await call(land, 'ownerOf', null, tokenId);
+            assert.equal(ownerOfTokenTransfered, user1);
+            const ownerOfAnotherPart = await call(land, 'ownerOf', null, landId(4, 8));
+            assert.equal(ownerOfAnotherPart, user0);
         });
 
         t.test('Should not mint a land on top of another one (from big size to small)', async () => {

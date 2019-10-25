@@ -202,19 +202,19 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
         if (owner1x1 != 0) {
             return address(owner1x1); // cast to zero
         } else {
-            address owner3x3 = address(_owners[LAYER_3x3 + x + y * GRID_SIZE]);
+            address owner3x3 = address(_owners[LAYER_3x3 + (x/3) * 3 + ((y/3) * 3) * GRID_SIZE]);
             if (owner3x3 != address(0)) {
                 return owner3x3;
             } else {
-                address owner6x6 = address(_owners[LAYER_6x6 + x + y * GRID_SIZE]);
+                address owner6x6 = address(_owners[LAYER_6x6 + (x/6) * 6 + ((y/6) * 6) * GRID_SIZE]);
                 if (owner6x6 != address(0)) {
                     return owner6x6;
                 } else {
-                    address owner12x12 = address(_owners[LAYER_12x12 + x + y * GRID_SIZE]);
+                    address owner12x12 = address(_owners[LAYER_12x12 + (x/12) * 12 + ((y/12) * 12) * GRID_SIZE]);
                     if (owner12x12 != address(0)) {
                         return owner12x12;
                     } else {
-                        return address(_owners[LAYER_24x24 + x + y * GRID_SIZE]);
+                        return address(_owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE]);
                     }
                 }
             }
