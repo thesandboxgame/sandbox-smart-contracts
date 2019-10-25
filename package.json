@@ -13,6 +13,7 @@
     "test-landSale": "rocketh launch \"yarn tap -T -j 1 -R spec test/landSale/landSale_tests.js\"",
     "test-land": "rocketh launch \"yarn tap -T -j 1 -R spec test/land/testLand.js\"",
     "test-commonMinter": "rocketh launch \"yarn tap -T -j 1 -R spec test/asset_bouncer/testCommonMinter.js\"",
+    "test-asset": "rocketh launch \"tap -T -j 1 -R spec test/asset/testAsset.js\"",
     "ganache": "ganache-cli --seed 04624df17c837dc2113f0c65554551f2 -a 21 --gasLimit 19000000",
     "export-sand": "node export-sand.js",
     "export-asset": "node export-asset.js",
