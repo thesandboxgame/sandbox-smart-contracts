@@ -65,7 +65,7 @@ function runFixedIDAssetTests(title, resetContracts) {
 
         t.test('minting a NFT with fixed id return the id', async () => {
             const tokenID = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString,1,creator, 4);
-            assert.equal(tokenID, generateTokenId(creator, 1, 1, 4, 0));
+            assert.equal(tokenID, generateTokenId(creator, 1, 0, 4, 0));
         });
 
         t.test('minting a NFT with same id twice fails', async () => {
@@ -150,12 +150,12 @@ function runFixedIDAssetTests(title, resetContracts) {
             //     ).map((id) => new BN(id).toString(16)));
             assert.deepStrictEqual(
                 tokenIDs,
-                Array(7+7).fill().map(
+                Array(7 + 7).fill().map(
                     (_, i) => {
-                        if(i < 7) {
-                            return generateTokenId(creator, 1234, 14, 101, i);
+                        if (i < 7) {
+                            return generateTokenId(creator, 1234, 7, 101, i);
                         } else {
-                            return generateTokenId(creator, 1, 14, 101, i);
+                            return generateTokenId(creator, 1, 7, 101, i);
                         }
                     }
                 )
@@ -168,10 +168,11 @@ function runFixedIDAssetTests(title, resetContracts) {
             await expectThrow(mintTokensIncludingNFTWithSameURI(contracts.AssetBouncer, 7, ipfsHashString, 10, 7, creator, 101));
         });
 
-        t.test('minting multiple Assets then minting NFT with existing packID fails', async () => {
-            await mintTokensIncludingNFTWithSameURI(contracts.AssetBouncer, 7, ipfsHashString, 1234, 0, creator, 101);
-            await expectThrow(mintTokensIncludingNFTWithSameURI(contracts.AssetBouncer, 0, ipfsHashString, 0, 7, creator, 101));
-        });
+        // packId = packId + numFTs
+        // t.test('minting multiple Assets then minting NFT with existing packID fails', async () => {
+        //     await mintTokensIncludingNFTWithSameURI(contracts.AssetBouncer, 7, ipfsHashString, 1234, 0, creator, 101);
+        //     await expectThrow(mintTokensIncludingNFTWithSameURI(contracts.AssetBouncer, 0, ipfsHashString, 0, 7, creator, 101));
+        // });
 
         // t.test('minting multiple Assets then minting with existing id fails', async () => {
         //     const tokenIds = await mintTokensIncludingNFTWithSameURI(contracts.AssetBouncer, 7, ipfsHashString, 1234, 7, creator, 101);

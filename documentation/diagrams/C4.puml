@@ -1,0 +1,175 @@
+' C4-PlantUML, version 1.0.0
+' https://github.com/RicardoNiepel/C4-PlantUML
+
+' Colors
+' ##################################
+
+!global $ELEMENT_FONT_COLOR = "#FFFFFF"
+
+' Styling
+' ##################################
+
+!global $TECHN_FONT_SIZE = 12
+
+skinparam defaultTextAlignment center
+
+skinparam wrapWidth 200
+skinparam maxMessageSize 150
+
+skinparam rectangle {
+    StereotypeFontSize 12
+    shadowing false
+}
+
+skinparam database {
+    StereotypeFontSize 12
+    shadowing false
+}
+
+skinparam Arrow {
+    Color #666666
+    FontColor #666666
+    FontSize 12
+}
+
+skinparam rectangle<<boundary>> {
+    Shadowing false
+    StereotypeFontSize 0
+    FontColor #444444
+    BorderColor #444444
+    BorderStyle dashed
+}
+
+' Layout
+' ##################################
+
+!function LAYOUT_AS_SKETCH()
+skinparam backgroundColor #EEEBDC
+skinparam handwritten true
+skinparam defaultFontName "Comic Sans MS"
+center footer <font color=red>Warning:</font> Created for discussion, needs to be validated
+!endfunction
+
+!function LAYOUT_TOP_DOWN()
+top to bottom direction
+!endfunction
+
+!function LAYOUT_LEFT_RIGHT() 
+left to right direction
+!endfunction
+
+' Boundaries
+' ##################################
+
+!unquoted function Boundary($alias, $label)
+!return 'rectangle "=='+$label+'" <<boundary>> as '+$alias
+!endfunction
+!unquoted function Boundary($alias, $label, $type)
+!return 'rectangle "=='+$label+'\n<size:'+$TECHN_FONT_SIZE+'>['+$type+']</size>" <<boundary>> as '+$alias
+!endfunction
+
+' Relationship
+' ##################################
+
+!unquoted function Rel_($alias1, $alias2, $label, $direction="")
+$alias1 $direction $alias2 : **$label**
+!endfunction
+!unquoted function Rel_($alias1, $alias2, $label, $techn, $direction="")
+$alias1 $direction $alias2 : **$label**\n//<size:$TECHN_FONT_SIZE>[$techn]</size>//
+!endfunction
+
+!unquoted function Rel($from, $to, $label)
+Rel_($from, $to, $label, "-->")
+!endfunction
+!unquoted function Rel($from, $to, $label, $techn)
+Rel_($from, $to, $label, $techn, "-->")
+!endfunction
+
+!unquoted function Rel_Back($from, $to, $label)
+Rel_($from, $to, $label, "<--")
+!endfunction
+!unquoted function Rel_Back($from, $to, $label, $techn)
+Rel_($from, $to, $label, $techn, "<--")
+!endfunction
+
+!unquoted function Rel_Neighbor($from, $to, $label)
+Rel_($from, $to, $label, "->")
+!endfunction
+!unquoted function Rel_Neighbor($from, $to, $label, $techn)
+Rel_($from, $to, $label, $techn, "->")
+!endfunction
+
+!unquoted function Rel_Back_Neighbor($from, $to, $label)
+Rel_($from, $to, $label, "<-")
+!endfunction
+!unquoted function Rel_Back_Neighbor($from, $to, $label, $techn)
+Rel_($from, $to, $label, $techn, "<-")
+!endfunction
+
+!unquoted function Rel_D($from, $to, $label)
+Rel_($from, $to, $label, "-DOWN->")
+!endfunction
+!unquoted function Rel_D($from, $to, $label, $techn)
+Rel_($from, $to, $label, $techn, "-DOWN->")
+!endfunction
+!unquoted function Rel_Down($from, $to, $label)
+Rel_($from, $to, $label, "-DOWN->")
+!endfunction
+!unquoted function Rel_Down($from, $to, $label, $techn)
+Rel_($from, $to, $label, $techn, "-DOWN->")
+!endfunction
+
+!unquoted function Rel_U($from, $to, $label)
+Rel_($from, $to, $label, "-UP->")
+!endfunction
+!unquoted function Rel_U($from, $to, $label, $techn)
+Rel_($from, $to, $label, $techn, "-UP->")
+!endfunction
+!unquoted function Rel_Up($from, $to, $label)
+Rel_($from, $to, $label, "-UP->")
+!endfunction
+!unquoted function Rel_Up($from, $to, $label, $techn)
+Rel_($from, $to, $label, $techn, "-UP->")
+!endfunction
+
+!unquoted function Rel_L($from, $to, $label)
+Rel_($from, $to, $label, "-LEFT->")
+!endfunction
+!unquoted function Rel_L($from, $to, $label, $techn)
+Rel_($from, $to, $label, $techn, "-LEFT->")
+!endfunction
+!unquoted function Rel_Left($from, $to, $label)
+Rel_($from, $to, $label, "-LEFT->")
+!endfunction
+!unquoted function Rel_Left($from, $to, $label, $techn)
+Rel_($from, $to, $label, $techn, "-LEFT->")
+!endfunction
+
+!unquoted function Rel_R($from, $to, $label)
+Rel_($from, $to, $label, "-RIGHT->")
+!endfunction
+!unquoted function Rel_R($from, $to, $label, $techn)
+Rel_($from, $to, $label, $techn, "-RIGHT->")
+!endfunction
+!unquoted function Rel_Right($from, $to, $label)
+Rel_($from, $to, $label, "-RIGHT->")
+!endfunction
+!unquoted function Rel_Right($from, $to, $label, $techn)
+Rel_($from, $to, $label, $techn, "-RIGHT->")
+!endfunction
+
+' Layout Helpers
+' ##################################
+
+!unquoted function Lay_D($from, $to)
+$from -[hidden]D- $to
+!endfunction
+!unquoted function Lay_U($from, $to)
+$from -[hidden]U- $to
+!endfunction
+!unquoted function Lay_R($from, $to)
+$from -[hidden]R- $to
+!endfunction
+!unquoted function Lay_L($from, $to)
+$from -[hidden]L- $to
+!endfunction

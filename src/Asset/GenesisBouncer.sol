@@ -24,7 +24,7 @@ contract GenesisBouncer is Admin {
 
     function mintFor(
         address creator,
-        uint48 packId,
+        uint40 packId,
         bytes32 hash,
         uint32 supply,
         uint8 rarity,
@@ -37,7 +37,7 @@ contract GenesisBouncer is Admin {
 
     function mintMultipleFor(
         address creator,
-        uint48 packId,
+        uint40 packId,
         bytes32 hash,
         uint256[] memory supplies,
         bytes memory rarityPack,

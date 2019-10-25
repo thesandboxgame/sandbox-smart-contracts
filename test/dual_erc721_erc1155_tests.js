@@ -150,6 +150,12 @@ function runDualERC1155ERC721tests(title, resetContracts, mintDual) {
                 const eventsMatching = await getEventsFromReceipt(contracts.Asset, TransferEvent, receipt);
                 assert.equal(eventsMatching.length, 2);
             });
+            t.test('transfering 2 NFT via batch transfer results in erc721 balanceOf update', async () => {
+                await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, 
+                    creator, user1, [assetsId[1], assetsId[3], assetsId[4]], [1, 1, 10], emptyBytes);
+                const erc721Balance = await call(contracts.Asset, 'balanceOf', null, user1);
+                assert.equal(erc721Balance, 2);
+            });
         });
         
         t.test('NFT approvalForAll', async (t) => {

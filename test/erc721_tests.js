@@ -175,6 +175,12 @@ function runERC721tests(title, contractStore) {
                     assert.equal(transferEvent.returnValues[1], zeroAddress);
                     assert.equal(transferEvent.returnValues[2], tokenId);
                 });
+                t.test('burn result in ownerOf throwing', async () => {
+                    const tokenId = await contractStore.mintERC721(user1);
+                    await call(contract, 'ownerOf', null, tokenId);
+                    await contractStore.burnERC721(user1, tokenId);
+                    await expectThrow(call(contract, 'ownerOf', null, tokenId));
+                });
             });
         }
 

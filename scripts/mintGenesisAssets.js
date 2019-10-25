@@ -13,21 +13,17 @@ const {
 } = require('rocketh-web3')(rocketh, Web3);
 
 let Bouncer;
-let operator;
 let testMode = false;
 try {
-    Bouncer = getDeployedContract('TestBouncer');
+    Bouncer = getDeployedContract('GenesisBouncer');
 } catch (e) {
-    console.log('cannot get Bouncer, continue in test mode');
+    console.log('cannot get GenesisBouncer, continue in test mode');
     testMode = true;
 }
 
-try {
-    operator = rocketh.accounts[0];
-} catch (e) {
-    console.log('cannot get operator, continue in test mode');
-    testMode = true;
-}
+const {
+    genesisMinter
+} = rocketh.namedAccounts;
 
 function hashFromCIDv1(cidv1) {
     const decoder = new base32.Decoder();
@@ -35,27 +31,11 @@ function hashFromCIDv1(cidv1) {
     return '0x' + binary.substr(8);
 }
 
-// program
-//     .command('mintAll <folderPath>')
-//     .description('mint all assets in each creator folders')
-//     .action(async (folderPath, cmdObj) => {
-//         traverse        
-//     });
-
 function reportErrorAndExit(e) {
     console.error(e);
     process.exit(1);
 }
-function access(obj, fieldName, cond) {
-    if (!obj[fieldName]) {
-        reportErrorAndExit('no field ' + fieldName);
-    }
-    const v = obj[fieldName];
-    if (cond && !cond(v)) {
-        reportErrorAndExit(`field ${fieldName} failed condition`);
-    }
-    return v;
-}
+
 function generateRaritiesPack(raritiesArr) {
     let raritiesPack = '0x';
     for (let i = 0; i < raritiesArr.length; i += 4) {
@@ -87,17 +67,20 @@ program
     .option('-g, --gas <gas>', 'gas limit')
     .option('-p, --packId <packId>', 'packId')
     .option('-n, --nonce <nonce>', 'nonce')
-    .option('-r, --real', 'real')
+    .option('-t, --test', 'testMode')
     .action(async (filePath, cmdObj) => {
-        if (cmdObj.real) {
-            Bouncer = getDeployedContract('GenesisBouncer');
-        }
         let data;
         try {
             data = JSON.parse(fs.readFileSync(filePath).toString());
         } catch (e) {
             reportErrorAndExit(e);
             return;
+        }
+        if (cmdObj.test) {
+            testMode = true;
+        }
+        if (testMode) {
+            console.log('test mode, no tx...');
         }
         let numAssets = 0;
         const assetsPerCreator = {};
@@ -181,7 +164,7 @@ program
                 console.log({creator, packId, cidv1, hash, suppliesArr, raritiesPack, owner});
                 try {
                     // TODO save txHash // TODO save progress
-                    const receipt = await tx({from: operator, nonce: cmdObj.nonce, gas: cmdObj.gas || 1000000}, Bouncer, 'mintMultipleFor', creator, packId, hash, suppliesArr, raritiesPack, owner);
+                    const receipt = await tx({from: genesisMinter, nonce: cmdObj.nonce, gas: cmdObj.gas || 1000000}, Bouncer, 'mintMultipleFor', creator, packId, hash, suppliesArr, raritiesPack, owner);
                     // TODO save progress
                     console.log('success', {txHash: receipt.transactionHash, gasUsed: receipt.gasUsed});
                 } catch (e) {
@@ -201,7 +184,7 @@ program
 
         console.log({creator, packId, cidv1, hash, supply, rarity, owner, cmdObj});
         // try {
-        //     const receipt = await tx({from: operator, gas: cmdObj.gas || 1000000}, Bouncer, 'mintFor', creator, packId, hash, supply, rarity, owner);
+        //     const receipt = await tx({from: genesisMinter, gas: cmdObj.gas || 1000000}, Bouncer, 'mintFor', creator, packId, hash, supply, rarity, owner);
         //     console.log('success', {txHash: receipt.transactionHash, gasUsed: receipt.gasUsed});
         // } catch (e) {
         //     console.error(e);
@@ -220,7 +203,7 @@ program
 
         console.log({creator, packId, cidv1, hash, suppliesArr, raritiesPack, owner});
         // try {
-        //     const receipt = await tx({from: operator, gas: cmdObj.gas || 1000000}, Bouncer, 'mintMultipleFor', creator, packId, hash, suppliesArr, raritiesPack, owner);
+        //     const receipt = await tx({from: genesisMinter, gas: cmdObj.gas || 1000000}, Bouncer, 'mintMultipleFor', creator, packId, hash, suppliesArr, raritiesPack, owner);
         //     console.log('success', {txHash: receipt.transactionHash, gasUsed: receipt.gasUsed});
         // } catch (e) {
         //     console.error(e);

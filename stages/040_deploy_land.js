@@ -37,4 +37,4 @@ module.exports = async ({namedAccounts, initialRun}) => {
         log('reusing Land at ' + deployResult.contract.options.address);
     }
 };
-module.exports.skip = guard(['1', '4']);
+module.exports.skip = guard(['1', '4']); // TODO

@@ -11,7 +11,20 @@ Sand smart contract is the ERC-20 token that will be used for
 - Voting decisions
 
 Sand implements the ERC-20 standard
-It also implement a mechanism to be extended in the future.
-While this introduce a centralization point, we plan to remove that possibility once the platform has all the ingredients to make it easy to use.
 
-Through this mechanism we implements the current [EIP-1776 DRAFT](https://github.com/ethereum/EIPs/issues/1776), a proposal we put forward to standardize native meta-transactions that allow users of EOA based wallet (like metamask and most current wallets) to perform actions on ethereum without the need to own ether.
+Sand was originally deployed in April 2019 and while we started to distribute the tokens to early investors. We made the decision to re-deploy a better version.
+The new version has been audited by Solidified (see [./sand_audit.pdf](./sand_audit.pdf))
+
+The original Sand was made upgradeable as we wanted to be sure we could adapt to new standard.
+the 2 main reasons was:
+
+1) ERC-777 (an improvement over ERC-20) was still in the work. We wanted to make sure we could support it later. For that our SAND smart contract was emitting ERC-777 events for transfer. This way we could switch to an ERC-777 implementation down the line.
+
+2) We were also working on [EIP-1776](https://github.com/ethereum/EIPs/issues/1776), a meta transaction draft proposal. Since the standard was likely to evolve we needed a way to upgrade our smart contract
+
+But as time passed it became clear that 1) was not that strong a reason. ERC-777 is not going to get traction any time soon and the advantages it provides are not so clear cut. Plus the cost of upgradeability is not null and the extra cost of emitting ERC-777 events was not small.
+
+Secondly, we found out we could design meta-transaction outside of the SAND contract, while preserving efficiency.
+
+The new contract can be found here : [src/Sand.sol](src/Sand.sol)
+It implements Hooks so that our meta transaction implementation remains efficient. But our overall system also support for external meta transaction processor, including external one such as [GSN](https://gsn.openzeppelin.com)

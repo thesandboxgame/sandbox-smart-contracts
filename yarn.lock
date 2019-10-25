@@ -2075,6 +2075,11 @@ cli-boxes@^2.2.0:
   resolved "https://registry.yarnpkg.com/cli-boxes/-/cli-boxes-2.2.0.tgz#538ecae8f9c6ca508e3c3c95b453fe93cb4c168d"
   integrity sha512-gpaBrMAizVEANOpfZp/EEUixTXDyGt7DFzdK5hU+UbWt/J0lB0w20ncZj59Z9a93xHb9u12zF5BS6i9RKbtg4w==
 
+cli-confirm@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/cli-confirm/-/cli-confirm-1.0.1.tgz#a3cfb7a9de71d6b5cc34df9e7b8a73d73d77970a"
+  integrity sha512-AF9fOBZPflNFm2wtq5BNqLr2ZmOB0nwgYQn0tgfbk5OYDMmLFbP+FrelmGK5apvp67ybbpUVTBZZffgR2yv+CQ==
+
 cli-cursor@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/cli-cursor/-/cli-cursor-2.1.0.tgz#b35dac376479facc3e94747d41d0d0f5238ffcb5"

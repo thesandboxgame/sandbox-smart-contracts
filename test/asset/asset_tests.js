@@ -187,7 +187,10 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                 //     generateTokenId(creator, 10, 8, 1006,0),
                 //     generateTokenId(creator, 10, 8, 1006,1),
                 // ].map((id) => new BN(id).toString(16)));
-                assert.equal(await call(contracts.Asset, 'balanceOf', {}, creator, generateTokenId(creator, 10, 8, 1000, 0)), 0);
+
+                // Do not throw any more on balanceOF
+                // await expectThrow(call(contracts.Asset, 'balanceOf', {}, creator, generateTokenId(creator, 10, 8, 1000, 0)));
+
                 assert.equal(await call(contracts.Asset, 'balanceOf', {}, creator, generateTokenId(creator, 10, 8, 1006, 0)), 10);
                 assert.equal(await call(contracts.Asset, 'balanceOf', {}, creator, generateTokenId(creator, 10, 8, 1006, 1)), 10);
                 assert.equal(await call(contracts.Asset, 'balanceOf', {}, creator, generateTokenId(creator, 10, 8, 1006, 2)), 10);
@@ -247,28 +250,34 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                 }
             });
 
-            t.test('minting a FT then an NFT with the same id fails', async () => {
-                await tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 10, creator, emptyBytes);
-                await expectThrow(tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 1, creator, emptyBytes));
-            });
+            // minting FT and NFT are on different URI_ID
+            // t.test('minting a FT then an NFT with the same id fails', async () => {
+            //     await tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 10, creator, emptyBytes);
+            //     await expectThrow(tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 1, creator, emptyBytes));
+            // });
 
-            t.test('minting a NFT then an FT with the same id fails', async () => {
-                await tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 1, creator, emptyBytes);
-                await expectThrow(tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 10, creator, emptyBytes));
-            });
+            // minting FT and NFT are on different URI_ID
+            // t.test('minting a NFT then an FT with the same id fails', async () => {
+            //     await tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 1, creator, emptyBytes);
+            //     await expectThrow(tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 10, creator, emptyBytes));
+            // });
 
             t.test('minting a multiple FT twice with the same id fails', async () => {
                 await mintTokensWithSameURIAndSupply(contracts.AssetBouncer, 8, ipfsHashString, 10, creator, fixedID);
                 await expectThrow(mintTokensWithSameURIAndSupply(contracts.AssetBouncer, 8, ipfsHashString, 10, creator, fixedID));
             });
-            t.test('minting a multiple FT then an NFT with the same id fails', async () => {
-                await mintTokensWithSameURIAndSupply(contracts.AssetBouncer, 8, ipfsHashString, 10, creator, fixedID);
-                await expectThrow(tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 1, creator, emptyBytes));
-            });
-            t.test('minting a NFT then an multiple FT with the same id fails', async () => {
-                await tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 1, creator, emptyBytes);
-                await expectThrow(mintTokensWithSameURIAndSupply(contracts.AssetBouncer, 8, ipfsHashString, 10, creator, fixedID));
-            });
+
+            // minting FT and NFT are on different URI_ID
+            // t.test('minting a multiple FT then an NFT with the same id fails', async () => {
+            //     await mintTokensWithSameURIAndSupply(contracts.AssetBouncer, 8, ipfsHashString, 10, creator, fixedID);
+            //     await expectThrow(tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 1, creator, emptyBytes));
+            // });
+
+            // minting FT and NFT are on different URI_ID
+            // t.test('minting a NFT then an multiple FT with the same id fails', async () => {
+            //     await tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 1, creator, emptyBytes);
+            //     await expectThrow(mintTokensWithSameURIAndSupply(contracts.AssetBouncer, 8, ipfsHashString, 10, creator, fixedID));
+            // });
 
             t.test('after minting a MCFT I can retrieve the uri via getter', async () => {
                 const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 4, creator, fixedID);
@@ -399,6 +408,26 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
             });
         });
 
+        t.test('erc721 operators', async (t) => {
+            t.test('erc1155 transfer should work if operator approved', async () => {
+                const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 1, creator, fixedID);
+                const operator = user2;
+                await tx(contracts.Asset, 'approve', {from: creator, gas}, operator, tokenId);
+                await tx(contracts.Asset, 'safeTransferFrom', {from: operator, gas}, creator, user1, tokenId, 1, emptyBytes);
+                const balance = await call(contracts.Asset, 'balanceOf', null, user1, tokenId);
+                assert.equal(balance, '1');
+            });
+
+            t.test('erc1155 zero transfer should work if operator approved', async () => {
+                const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 1, creator, fixedID);
+                const operator = user2;
+                await tx(contracts.Asset, 'approve', {from: creator, gas}, operator, tokenId);
+                await tx(contracts.Asset, 'safeTransferFrom', {from: operator, gas}, creator, user1, tokenId, 0, emptyBytes);
+                const balance = await call(contracts.Asset, 'balanceOf', null, user1, tokenId);
+                assert.equal(balance, '0');
+            });
+        });
+
         t.test('super operators', async (t) => {
             t.test('erc1155 transfer from creator should work', async () => {
                 const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 4, creator, fixedID);
@@ -471,12 +500,12 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
 
         t.test('creatorship', async (t) => {
             // t.runOnly = true;
-            // t.test('creator for non existing items fail', async (t) => {
-            //     await tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 4, creator, emptyBytes);
-            //     assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 4, 1, fixedID)), creator);
+            t.test('creator for non existing items fail', async (t) => {
+                await tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 4, creator, emptyBytes);
+                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 4, 1, fixedID)), creator);
 
-            //     await expectThrow(call(contracts.Asset, 'creatorOf', {}, old_generateTokenId(creator, 4, fixedID)));
-            // });
+                await expectThrow(call(contracts.Asset, 'creatorOf', {}, old_generateTokenId(creator, 4, fixedID)));
+            });
 
             t.test('initial creator', async (t) => {
                 await tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 4, creator, emptyBytes);
@@ -507,17 +536,15 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                     emptyBytes
                 );
 
-                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 4, 5, fixedID + 2, 0)), creator);
-                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 5, 5, fixedID + 2, 1)), creator);
-                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 10, 5, fixedID + 2, 2)), creator);
+                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 4, 3, fixedID + 2, 0)), creator);
+                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 5, 3, fixedID + 2, 1)), creator);
+                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 10, 3, fixedID + 2, 2)), creator);
 
-                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 1, 5, fixedID + 2, 3)), creator);
-                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 1, 5, fixedID + 2, 4)), creator);
-
-                assert.equal(generateTokenId(creator, 11, 5, fixedID + 2, 2), generateTokenId(creator, 10, 5, fixedID + 2, 2));
+                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 1, 3, fixedID + 2, 3)), creator);
+                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 1, 3, fixedID + 2, 4)), creator);
 
                 // comment out as now existence cannot be established
-                // await expectThrow(call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 10, 3, fixedID+2, 2)));
+                await expectThrow(call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 10, 2, fixedID + 2, 2)));
             });
 
             t.test('transfer creator', async (t) => {
@@ -549,17 +576,17 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                 assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 4, 3, fixedID + 1, 0)), user1);
                 assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 5, 3, fixedID + 1, 1)), user1);
                 assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 10, 3, fixedID + 1, 2)), user1);
-                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 4, 5, fixedID + 2, 0)), user1);
-                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 5, 5, fixedID + 2, 1)), user1);
-                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 10, 5, fixedID + 2, 2)), user1);
-                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 1, 5, fixedID + 2, 3)), user1);
-                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 1, 5, fixedID + 2, 4)), user1);
+                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 4, 3, fixedID + 2, 0)), user1);
+                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 5, 3, fixedID + 2, 1)), user1);
+                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 10, 3, fixedID + 2, 2)), user1);
+                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 1, 3, fixedID + 2, 3)), user1);
+                assert.equal(await call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 1, 3, fixedID + 2, 4)), user1);
 
                 // comment out as now existence cannot be established
-                // await expectThrow(call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 4, 3, fixedID)));
-                // await expectThrow(call(contracts.Asset, 'creatorOf'9, {}, generateTokenId(creator, 10, 3, fixedID+2, 2)));
+                await expectThrow(call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 4, 3, fixedID)));
+                await expectThrow(call(contracts.Asset, 'creatorOf', {}, generateTokenId(creator, 10, 4, fixedID + 2, 2)));
 
-                assert.equal(generateTokenId(creator, 11, 5, fixedID + 2, 2), generateTokenId(creator, 10, 5, fixedID + 2, 2));
+                // assert.equal(generateTokenId(creator, 11, 3, fixedID + 2, 2), generateTokenId(creator, 10, 3, fixedID + 2, 2));
             });
         });
 
@@ -578,13 +605,20 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                 await expectThrow(call(contracts.Asset, 'ownerOf', null, tokenId));
             });
 
+            t.test('update token reduce balance to zero', async (t) => {
+                const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 1, creator, fixedID);
+                await tx(Bouncer, 'updateERC721', {from: creator, gas}, creator, tokenId, fixedID + 1, ipfsHashString, 2, creator);
+                const balance = await call(contracts.Asset, 'balanceOf', null, creator, tokenId);
+                assert.equal(balance, '0');
+            });
+
             t.test('update token use new rarity value', async (t) => {
                 const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 1, creator, fixedID);
                 const oldRarity = await call(contracts.Asset, 'rarity', null, tokenId);
                 assert.equal(oldRarity, '0');
                 await tx(Bouncer, 'updateERC721', {from: creator, gas}, creator, tokenId, fixedID + 1, ipfsHashString, 2, creator);
 
-                const newTokenId = generateTokenId(creator, 1, 1, fixedID + 1);
+                const newTokenId = generateTokenId(creator, 1, 0, fixedID + 1);
                 const rarity = await call(contracts.Asset, 'rarity', null, newTokenId);
                 assert.equal(rarity, '2');
             });
@@ -606,7 +640,6 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                 assert.equal(eventsMatching.length, 1);
             });
         });
-
 
         t.test('burn token', async (t) => {
             t.test('cannot burn more token that you ownn', async (t) => {
@@ -651,6 +684,13 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                 await tx(contracts.Asset, 'burnFrom', {from: creator, gas}, creator, tokenId, 2);
                 const balance = await call(contracts.Asset, 'balanceOf', null, creator, tokenId);
                 assert.equal(balance, '3');
+            });
+
+            t.test('burning of FT reduce balance (even to zero)', async (t) => {
+                const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 5, creator, fixedID);
+                await tx(contracts.Asset, 'burnFrom', {from: creator, gas}, creator, tokenId, 5);
+                const balance = await call(contracts.Asset, 'balanceOf', null, creator, tokenId);
+                assert.equal(balance, '0');
             });
 
         });
