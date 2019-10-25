@@ -66,7 +66,7 @@
 			"examples": [
 				"https://www.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/"
 			],
-			"pattern": "^(.*)/en/assets/(.*)/(.{36})/$"
+			"pattern": "^https://www.sandbox.game/en/assets/(.*)/(.{36})/$"
 		},
 		"properties": {
 			"$id": "#/properties/properties",
@@ -104,9 +104,9 @@
 					"value": {
 						"$id": "#/properties/properties/items/properties/value",
 						"type": [
-                          "integer",
-                          "string"
-                        ],
+                        	"integer",
+                        	"string"
+						],
 						"title": "The value of the attribute",
 						"default": 0,
 						"examples": [
@@ -178,7 +178,13 @@
 							"examples": [
 								"Entity"
 							],
-							"pattern": "^(.*)$"
+							"pattern": "^(.*)$",
+							"enum": [
+								"Avatar",
+								"Entity",
+								"Equipment",
+								"Block"
+							]
 						},
 						"theme": {
 							"$id": "#/properties/sandbox/properties/classification/properties/theme",
@@ -188,7 +194,13 @@
 							"examples": [
 								"City"
 							],
-							"pattern": "^(.*)$"
+							"pattern": "^(.*)$",
+							"enum": [
+								"City",
+								"Nature",
+								"Magic",
+								"Sci-Fi"
+							]
 						},
 						"categories": {
 							"$id": "#/properties/sandbox/properties/classification/properties/categories",
@@ -202,7 +214,22 @@
 								"examples": [
 									"Vehicle"
 								],
-								"pattern": "^(.*)$"
+								"pattern": "^(.*)$",
+								"enum": [
+									"Animal",
+									"Building",
+									"City",
+									"Decoration",
+									"Furniture",
+									"Machine",
+									"Magic",
+									"Nature",
+									"Sports",
+									"Technology",
+									"Tool",
+									"Vehicle",
+									"Weapon"
+								]
 							}
 						}
 					}
@@ -225,7 +252,7 @@
 					"examples": [
 						"https://www.sandbox.game/en/users/12344"
 					],
-					"pattern": "^(.*)/en/users/(.*)/(.{36})/$"
+					"pattern": "^https://www.sandbox.game/en/users/(.*)/(.{36})/$"
 				}
 			}
 		}
