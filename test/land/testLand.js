@@ -30,10 +30,9 @@ ERC721Contract.prototype.mintERC721 = async function (creator) {
     const receipt = await tx(this.contract, 'mintBlock', {from: this.minter, gas}, creator, 1, this.counter, this.counter); // diagonal
     return receipt.events.Transfer.returnValues._tokenId;
 };
-// ERC721Contract.prototype.burnERC721 = function (from, tokenId) {
-//     this.counter++;
-//     return this.contract.methods.burnFrom(from, tokenId, 1).send({from, gas: 3000000});
-// };
+ERC721Contract.prototype.burnERC721 = function (from, tokenId) {
+    return this.contract.methods.burnFrom(from, tokenId).send({from, gas: 3000000});
+};
 
 runERC721tests('Land', new ERC721Contract());
 runQuadTreeTests('Land', new ERC721Contract());
