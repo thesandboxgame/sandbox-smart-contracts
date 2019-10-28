@@ -1,7 +1,7 @@
 const Web3 = require('web3');
 const rocketh = require('rocketh');
 const {
-    tx,
+    txOnlyFrom,
     getDeployedContract,
     call,
 } = require('rocketh-web3')(rocketh, Web3);
@@ -30,10 +30,6 @@ module.exports = async ({namedAccounts, initialRun}) => {
     if (!isBouncer) {
         log('setting genesis bouncer as Asset bouncer');
         const currentBouncerAdmin = await call(asset, 'getBouncerAdmin');
-        if (currentBouncerAdmin.toLowerCase() !== deployer.toLowerCase()) {
-            throw new Error('deployer ' + deployer + ' has no right to set bouncer');
-        } else {
-            await tx({from: deployer, gas: 1000000}, asset, 'setBouncer', genesisBouncer.options.address, true);
-        }
+        await txOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000}, asset, 'setBouncer', genesisBouncer.options.address, true);
     }
 };

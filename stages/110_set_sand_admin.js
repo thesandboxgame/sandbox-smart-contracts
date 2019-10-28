@@ -1,7 +1,7 @@
 const Web3 = require('web3');
 const rocketh = require('rocketh');
 const {
-    tx,
+    txOnlyFrom,
     getDeployedContract,
     call,
 } = require('rocketh-web3')(rocketh, Web3);
@@ -24,11 +24,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
     }
     const currentAdmin = await call(sandContract, 'getAdmin');
     if (currentAdmin.toLowerCase() !== sandAdmin.toLowerCase()) {
-        if (currentAdmin.toLowerCase() !== deployer.toLowerCase()) {
-            throw new Error('deployer ' + deployer + ' has no right to change admin for Sand');
-        } else {
-            log('setting sand admin', currentAdmin, sandAdmin);
-            await tx({from: deployer, gas: 1000000}, sandContract, 'changeAdmin', sandAdmin);
-        }
+        log('setting Sand Admin');
+        await txOnlyFrom(currentAdmin, {from: deployer, gas: 1000000}, sandContract, 'changeAdmin', sandAdmin);
     }
 };

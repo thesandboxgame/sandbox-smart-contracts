@@ -30,6 +30,7 @@ module.exports = {
             default: 0,
             // 4: "0x5b4c9eae565c1ba9eb65365aa02ee9fb0a653ce5",
             1: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06', // multi sig wallet
+            4: '0xcbc70EcCd52bF3910CDC1455E6D2Bd45725F573D' // test multi sig wallet
         },
 
         // metaTransactionFundOwner: 0, // TODO
