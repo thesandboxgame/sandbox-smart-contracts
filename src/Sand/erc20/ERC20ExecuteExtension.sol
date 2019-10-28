@@ -16,7 +16,7 @@ contract ERC20ExecuteExtension {
 
     /// @notice change the execution adminstrator to be `newAdmin`.
     /// @param newAdmin address of the new administrator.
-    function changeExecutionAdminAdmin(address newAdmin) external {
+    function changeExecutionAdmin(address newAdmin) external {
         require(msg.sender == _executionAdmin, "only executionAdmin can change executionAdmin");
         emit ExecutionAdminAdminChanged(_executionAdmin, newAdmin);
         _executionAdmin = newAdmin;
