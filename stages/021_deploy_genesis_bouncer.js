@@ -26,7 +26,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const deployResult = await deployIfDifferent(['data'],
         'GenesisBouncer',
-        {from: deployer, gas: 1000000},
+        {from: deployer, gas: 2000000},
         'GenesisBouncer',
         asset.options.address,
         genesisBouncerAdmin,

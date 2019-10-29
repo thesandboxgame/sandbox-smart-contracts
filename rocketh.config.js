@@ -17,7 +17,9 @@ module.exports = {
             type: 'mnemonic',
         },
         1: { // ethereum mainnet
-            type: 'bitski'
+            // type: 'bitski'
+            type: 'mnemonic',
+            path: '.mnemonic_for_deployment'
         },
         18: { // thundercore testnet
             type: 'mnemonic',
