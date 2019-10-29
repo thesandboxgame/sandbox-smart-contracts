@@ -69,6 +69,7 @@ function runSignedAuctionsTests(title, resetContracts) {
             {name: 'verifyingContract', type: 'address'}
         ];
         const auctionType = [
+            {name: 'from', type: 'address'},
             {name: 'token', type: 'address'},
             {name: 'offerId', type: 'uint256'},
             {name: 'startingPrice', type: 'uint256'},
@@ -88,6 +89,7 @@ function runSignedAuctionsTests(title, resetContracts) {
         let amounts;
         let buyAmount;
         let token;
+        let from = testAddress;
         const startingPrice = toWei('0.25', 'ether');
         const endingPrice = toWei('0.50', 'ether');
 
@@ -116,6 +118,7 @@ function runSignedAuctionsTests(title, resetContracts) {
         function getAuctionData() {
             const concats = getConcatIdsAndAmounts();
             return {
+                from,
                 token,
                 offerId,
                 startingPrice,
@@ -166,6 +169,7 @@ function runSignedAuctionsTests(title, resetContracts) {
             amounts = [1, 2];
             buyAmount = 1;
             token = '0x0000000000000000000000000000000000000000';
+            from = testAddress;
             ids = [
                 await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 100, creator, 1),
                 await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 200, creator, 2)
@@ -386,6 +390,7 @@ function runSignedAuctionsTests(title, resetContracts) {
 
                 await tx(contracts.Sand, 'transfer', {from: sandBeneficiary, gas: 500000}, user1, '100000000000000000000');
                 token = contracts.Sand.options.address;
+                from = identityAddress;
                 const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
                 const signature = await ethSigUtil.signTypedData(ethUtil.toBuffer(signingAccount.privateKey), {
                     data: {

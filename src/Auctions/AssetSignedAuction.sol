@@ -17,7 +17,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
     enum SignatureType { DIRECT, EIP1654, EIP1271 }
 
     bytes32 constant AUCTION_TYPEHASH = keccak256(
-        "Auction(address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)"
+        "Auction(address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)"
     );
 
     event OfferClaimed(
@@ -111,7 +111,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
             ids,
             amounts
         );
-        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.DIRECT);
+        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.DIRECT, true);
         _executeDeal(
             token,
             purchase,
@@ -142,7 +142,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
             ids,
             amounts
         );
-        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.EIP1271);
+        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.EIP1271, true);
         _executeDeal(
             token,
             purchase,
@@ -173,7 +173,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
             ids,
             amounts
         );
-        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.EIP1654);
+        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.EIP1654, true);
         _executeDeal(
             token,
             purchase,
@@ -207,7 +207,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
             tax = PriceUtil.calculateTax(offer, _tax10000th);
         }
 
-        require(offer+tax <= purchase[1], "offer exceeds nax amount to spend");
+        require(offer+tax <= purchase[1], "offer exceeds max amount to spend");
 
         if (token != address(0)) {
             require(ERC20(token).transferFrom(buyer, seller, offer), "failed to transfer token price");
@@ -252,13 +252,20 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         uint256[] memory ids,
         uint256[] memory amounts,
         bytes memory signature,
-        SignatureType signatureType
+        SignatureType signatureType,
+        bool eip712
     ) internal view returns (address) {
-        bytes memory dataToHash = abi.encodePacked(
-            "\x19\x01",
-            domainSeparator(),
-            hashAuction(token, auctionData, ids, amounts)
-        );
+        bytes memory dataToHash;
+
+        if(eip712) {
+            dataToHash = abi.encodePacked(
+                "\x19\x01",
+                domainSeparator(),
+                _hashAuction(from, token, auctionData, ids, amounts)
+            );
+        } else {
+            dataToHash = _encodeBasicSignatureHash(from, token, auctionData, ids, amounts);
+        }
 
         if (signatureType == SignatureType.EIP1271) {
             require(
@@ -276,7 +283,31 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         }
     }
 
-    function hashAuction(
+    function _encodeBasicSignatureHash(
+        address from,
+        address token,
+        uint256[] memory auctionData,
+        uint256[] memory ids,
+        uint256[] memory amounts
+    ) internal view returns (bytes memory) {
+        return SigUtil.prefixed(keccak256(abi.encodePacked(
+                address(this),
+                AUCTION_TYPEHASH,
+                from,
+                token,
+                auctionData[AuctionData_OfferId],
+                auctionData[AuctionData_StartingPrice],
+                auctionData[AuctionData_EndingPrice],
+                auctionData[AuctionData_StartedAt],
+                auctionData[AuctionData_Duration],
+                auctionData[AuctionData_Packs],
+                keccak256(abi.encodePacked(ids)),
+                keccak256(abi.encodePacked(amounts))
+            )));
+    }
+
+    function _hashAuction(
+        address from,
         address token,
         uint256[] memory auctionData,
         uint256[] memory ids,
@@ -286,6 +317,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
             keccak256(
                 abi.encode(
                     AUCTION_TYPEHASH,
+                    from,
                     token,
                     auctionData[AuctionData_OfferId],
                     auctionData[AuctionData_StartingPrice],
