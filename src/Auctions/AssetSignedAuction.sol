@@ -8,7 +8,14 @@ import "../../../contracts_common/src/Interfaces/ERC20.sol";
 import "../TheSandbox712.sol";
 import "../../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 
-contract AssetSignedAuction is TheSandbox712, MetaTransactionReceiver {
+import "../../../contracts_common/src/Interfaces/ERC1271.sol";
+import "../../../contracts_common/src/Interfaces/ERC1271Constants.sol";
+import "../../../contracts_common/src/Interfaces/ERC1654.sol";
+import "../../../contracts_common/src/Interfaces/ERC1654Constants.sol";
+
+contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712, MetaTransactionReceiver {
+    enum SignatureType { DIRECT, EIP1654, EIP1271 }
+
     bytes32 constant AUCTION_TYPEHASH = keccak256(
         "Auction(address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)"
     );
@@ -64,15 +71,9 @@ contract AssetSignedAuction is TheSandbox712, MetaTransactionReceiver {
         uint256 buyAmount,
         uint256[] memory auctionData,
         uint256[] memory ids,
-        uint256[] memory amounts,
-        bytes memory signature
+        uint256[] memory amounts
     ) internal {
         require(buyer == msg.sender || (token != address(0) && _metaTransactionContracts[msg.sender]), "not authorized");
-        require(
-            // TODO: do we remove seller from the argument list? and recover it ?
-            seller == recover(token, auctionData, ids, amounts, signature),
-            "Signature mismatches"
-        );
         uint256 amountAlreadyClaimed = claimed[seller][auctionData[AuctionData_OfferId]];
         require(amountAlreadyClaimed != MAX_UINT256, "Auction cancelled");
 
@@ -108,9 +109,71 @@ contract AssetSignedAuction is TheSandbox712, MetaTransactionReceiver {
             purchase[0],
             auctionData,
             ids,
-            amounts,
-            signature
+            amounts
         );
+        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.DIRECT);
+        _executeDeal(
+            token,
+            purchase,
+            buyer,
+            seller,
+            auctionData,
+            ids,
+            amounts
+        );
+    }
+
+    function claimSellerOfferViaEIP1271(
+        address buyer,
+        address payable seller,
+        address token,
+        uint256[] calldata purchase, // buyAmount, maxTokenAmount
+        uint256[] calldata auctionData,
+        uint256[] calldata ids,
+        uint256[] calldata amounts,
+        bytes calldata signature
+    ) external payable {
+        _verifyParameters(
+            buyer,
+            seller,
+            token,
+            purchase[0],
+            auctionData,
+            ids,
+            amounts
+        );
+        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.EIP1271);
+        _executeDeal(
+            token,
+            purchase,
+            buyer,
+            seller,
+            auctionData,
+            ids,
+            amounts
+        );
+    }
+
+    function claimSellerOfferViaEIP1654(
+        address buyer,
+        address payable seller,
+        address token,
+        uint256[] calldata purchase, // buyAmount, maxTokenAmount
+        uint256[] calldata auctionData,
+        uint256[] calldata ids,
+        uint256[] calldata amounts,
+        bytes calldata signature
+    ) external payable {
+        _verifyParameters(
+            buyer,
+            seller,
+            token,
+            purchase[0],
+            auctionData,
+            ids,
+            amounts
+        );
+        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.EIP1654);
         _executeDeal(
             token,
             purchase,
@@ -182,25 +245,35 @@ contract AssetSignedAuction is TheSandbox712, MetaTransactionReceiver {
 
     // TODO support basic signature
 
-    function recover(
+    function _ensureCorrectSigner(
+        address from,
         address token,
         uint256[] memory auctionData,
         uint256[] memory ids,
         uint256[] memory amounts,
-        bytes memory signature
+        bytes memory signature,
+        SignatureType signatureType
     ) internal view returns (address) {
-        return
-            SigUtil.recover(
-                // This recreates the message that was signed on the client.
-                keccak256(
-                    abi.encodePacked(
-                        "\x19\x01",
-                        domainSeparator(),
-                        hashAuction(token, auctionData, ids, amounts)
-                    )
-                ),
-                signature
+        bytes memory dataToHash = abi.encodePacked(
+            "\x19\x01",
+            domainSeparator(),
+            hashAuction(token, auctionData, ids, amounts)
+        );
+
+        if (signatureType == SignatureType.EIP1271) {
+            require(
+                ERC1271(from).isValidSignature(dataToHash, signature) == ERC1271_MAGICVALUE,
+                "invalid 1271 signature"
             );
+        } else if(signatureType == SignatureType.EIP1654){
+            require(
+                ERC1654(from).isValidSignature(keccak256(dataToHash), signature) == ERC1654_MAGICVALUE,
+                "invalid 1654 signature"
+            );
+        } else {
+            address signer = SigUtil.recover(keccak256(dataToHash), signature);
+            require(signer == from, "signer != from");
+        }
     }
 
     function hashAuction(

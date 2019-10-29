@@ -22,7 +22,11 @@ const {
     sendSignedTransaction,
     encodeCall,
     emptyBytes,
+    deployContract,
 } = require('../utils');
+
+const rockethWeb3 = require('rocketh-web3')(rocketh, require('web3'));
+const web3Tx = rockethWeb3.tx;
 
 const {
     TransferBatchEvent,
@@ -57,6 +61,7 @@ const ipfsHashString = '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5
 
 function runSignedAuctionsTests(title, resetContracts) {
     tap.test(title + ' signed auctions', async (t) => {
+        t.runOnly = true;
         const privateKey = ethUtil.sha3('cow');
         const testAddress = toChecksumAddress(ethUtil.privateToAddress(privateKey).toString('hex'));
 
@@ -356,6 +361,55 @@ function runSignedAuctionsTests(title, resetContracts) {
             );
             // .then(() => assert(false, 'was able to claim offer'))
             // .catch((err) => assert(err.toString().includes('Auction finished'), 'Error message does not match. ' + err.toString()));
+        });
+
+        t.only('smart contract wallet', async (t) => {
+            const signingAccount = {
+                address: '0xFA8A6079E7B85d1be95B6f6DE1aAE903b6F40c00',
+                privateKey: '0xeee5270a5c46e5b92510d70fa4d445a8cdd5010dde5b1fccc6a2bd1a9df8f5c0'
+            };
+
+            t.test('claim offer in SAND success', async () => {
+                const IdentityContract = await deployContract(deployer, 'ERC1271WalletWithERC1155', signingAccount.address);
+                const identityAddress = IdentityContract.options.address;
+
+                duration = 1000;
+                packs = 1;
+                amounts = [1, 2];
+                buyAmount = 1;
+                token = '0x0000000000000000000000000000000000000000';
+                ids = [
+                    await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 100, creator, 3),
+                    await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 200, creator, 4)
+                ];
+                offerId = new BN(crypto.randomBytes(32), 16).toString(10);
+                startedAt = Math.floor(Date.now() / 1000);
+
+                await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, creator, identityAddress, ids, [100, 200], emptyBytes);
+
+                await tx(contracts.Sand, 'transfer', {from: sandBeneficiary, gas: 500000}, user1, '100000000000000000000');
+                token = contracts.Sand.options.address;
+                const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
+                const signature = await ethSigUtil.signTypedData(ethUtil.toBuffer(signingAccount.privateKey), {
+                    data: {
+                        types: {
+                            EIP712Domain: domainType,
+                            Auction: auctionType
+                        },
+                        domain: getDomainData(),
+                        primaryType: 'Auction',
+                        message: getAuctionData()
+                    }
+                });
+                const receipt = await tx(contracts.AssetSignedAuction, 'claimSellerOfferViaEIP1271', {from: user1, value: 0, gas},
+                    user1, identityAddress, token, [buyAmount, buyAmount * endingPrice], auctionData, ids, amounts, signature);
+
+                assert.equal((await getEventsFromReceipt(contracts.Sand, TransferEvent, receipt)).length, 1);
+                assert.equal((await getEventsFromReceipt(contracts.AssetSignedAuction, OfferClaimedEvent, receipt)).length, 1);
+                const transferReceipts = await getEventsFromReceipt(contracts.Asset, TransferBatchEvent, receipt);
+                assert.equal(transferReceipts.length, 1);
+                assert.equal(transferReceipts[0].returnValues.ids.length, 2);
+            });
         });
 
         t.test('meta tx', async (t) => {

@@ -44,6 +44,7 @@ module.exports = {
         commonMinterAdmin: 'sandAdmin', // can change the fees
         genesisMinter: 'sandAdmin', // the first account allowed to mint genesis Assets
         assetAuctionTaxCollector: 'sandAdmin',
+        assetAuctionAdmin: 'sandAdmin',
         orbsBeneficiary: 'sandAdmin',
         sandSaleBeneficiary: {
             default: 0,
