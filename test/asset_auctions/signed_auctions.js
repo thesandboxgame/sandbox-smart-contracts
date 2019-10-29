@@ -25,9 +25,6 @@ const {
     deployContract,
 } = require('../utils');
 
-const rockethWeb3 = require('rocketh-web3')(rocketh, require('web3'));
-const web3Tx = rockethWeb3.tx;
-
 const {
     TransferBatchEvent,
 } = require('../erc1155');
@@ -61,7 +58,7 @@ const ipfsHashString = '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5
 
 function runSignedAuctionsTests(title, resetContracts) {
     tap.test(title + ' signed auctions', async (t) => {
-        t.runOnly = true;
+        // t.runOnly = true;
         const privateKey = ethUtil.sha3('cow');
         const testAddress = toChecksumAddress(ethUtil.privateToAddress(privateKey).toString('hex'));
 
@@ -363,14 +360,14 @@ function runSignedAuctionsTests(title, resetContracts) {
             // .catch((err) => assert(err.toString().includes('Auction finished'), 'Error message does not match. ' + err.toString()));
         });
 
-        t.only('smart contract wallet', async (t) => {
+        t.test('smart contract wallet', async (t) => {
             const signingAccount = {
                 address: '0xFA8A6079E7B85d1be95B6f6DE1aAE903b6F40c00',
                 privateKey: '0xeee5270a5c46e5b92510d70fa4d445a8cdd5010dde5b1fccc6a2bd1a9df8f5c0'
             };
 
             t.test('claim offer in SAND success', async () => {
-                const IdentityContract = await deployContract(deployer, 'ERC1271WalletWithERC1155', signingAccount.address);
+                const IdentityContract = await deployContract(deployer, 'ERC1271WalletWithERC1155Receiver', signingAccount.address);
                 const identityAddress = IdentityContract.options.address;
 
                 duration = 1000;
