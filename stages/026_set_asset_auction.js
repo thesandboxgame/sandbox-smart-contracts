@@ -1,7 +1,7 @@
 const Web3 = require('web3');
 const rocketh = require('rocketh');
 const {
-    tx,
+    txOnlyFrom,
     getDeployedContract,
     call,
 } = require('rocketh-web3')(rocketh, Web3);
@@ -34,13 +34,15 @@ module.exports = async ({namedAccounts, initialRun}) => {
     const isSandSuperOperator = await call(sand, 'isSuperOperator', assetAuction.options.address);
     if (!isSandSuperOperator) {
         log('setting AssetSignedAuction as super operator for Sand');
-        await tx({from: deployer, gas: 100000}, sand, 'setSuperOperator', assetAuction.options.address, true);
+        const currentSandAdmin = await call(sand, 'getAdmin');
+        await txOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000}, sand, 'setSuperOperator', assetAuction.options.address, true);
     }
 
     const isAssetSuperOperator = await call(asset, 'isSuperOperator', assetAuction.options.address);
     if (!isAssetSuperOperator) {
         log('setting AssetSignedAuction as super operator for Asset');
-        await tx({from: deployer, gas: 100000}, asset, 'setSuperOperator', assetAuction.options.address, true);
+        const currentAssetAdmin = await call(asset, 'getAdmin');
+        await txOnlyFrom(currentAssetAdmin, {from: deployer, gas: 100000}, asset, 'setSuperOperator', assetAuction.options.address, true);
     }
 };
-module.exports.skip = guard(['1', '4']);
+module.exports.skip = guard(['1', '4']); // TODO

@@ -53,7 +53,7 @@ tap.test('CommonMinter', async (t) => {
     t.test('mintFor', async (t) => {
         t.test('can mint if provide Sand', async () => {
             await tx({from: sandBeneficiary, gas: 500000}, contracts.Sand, 'transfer', creator1, '100000000000000000000');
-            await tx({from: creator1, gas: 500000}, contracts.Sand, 'approve', contracts.CommonMinter.options.address, '100000000000000000000');
+            // await tx({from: creator1, gas: 500000}, contracts.Sand, 'approve', contracts.CommonMinter.options.address, '100000000000000000000');
             const receipt = await tx({from: creator1, gas: 3000000}, contracts.CommonMinter, 'mintFor', creator1, 0, ipfsHashString, 100, creator1, emptyBytes, '1000000000000000000');
             const eventsMatching = await getEventsFromReceipt(contracts.Asset, TransferSingleEvent, receipt);
             assert.equal(eventsMatching.length, 1);
@@ -226,7 +226,8 @@ tap.test('CommonMinter', async (t) => {
             const eventsMatching = await getEventsFromReceipt(contracts.Asset, TransferSingleEvent, receipt);
             assert.equal(eventsMatching.length, 0);
             const tokenId = generateTokenId(signingAcount.address, 100, 1, 0);
-            await expectThrow(call(contracts.Asset, 'balanceOf', signingAcount.address, tokenId));
+            const balance = await call(contracts.Asset, 'balanceOf', signingAcount.address, tokenId);
+            assert.equal(balance, 0);
         });
     });
 });

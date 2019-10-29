@@ -1,7 +1,6 @@
 const Web3 = require('web3');
 const rocketh = require('rocketh');
 const {
-    tx,
     deployIfDifferent,
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);
@@ -47,4 +46,4 @@ module.exports = async ({namedAccounts, initialRun}) => {
         log('reusing AssetSignedAuction at ' + deployResult.contract.options.address);
     }
 };
-module.exports.skip = guard(['1', '4']);
+module.exports.skip = guard(['1', '4']); // TODO

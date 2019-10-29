@@ -30,26 +30,27 @@ module.exports = {
             default: 0,
             // 4: "0x5b4c9eae565c1ba9eb65365aa02ee9fb0a653ce5",
             1: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06', // multi sig wallet
+            4: '0xcbc70EcCd52bF3910CDC1455E6D2Bd45725F573D' // test multi sig wallet
         },
 
-        metaTransactionFundOwner: 0, // TODO
-        metaTransactionExecutor: 0, // TODO
+        // metaTransactionFundOwner: 0, // TODO
+        // metaTransactionExecutor: 0, // TODO
         mintingFeeCollector: 'sandAdmin', // will receiver the fee from Asset minting
         sandBeneficiary: 'sandAdmin', // will be the owner of all initial SAND
-        sandUpgrader: 'sandAdmin', // can upgrade the Sand smart contract and change the upgrader
         assetAdmin: 'sandAdmin', // can add super operator and change admin to Asset
-        assetBouncerAdmin: 'sandAdmin',
-        genesisBouncerAdmin: 'sandAdmin',
-        commonMinterAdmin: 'sandAdmin',
-        assetAuctionAdmin: 'sandAdmin',
+        assetBouncerAdmin: 'sandAdmin', // setup the contract allowed to mint Assets
+        sandSaleAdmin: 'sandAdmin', // can pause the sandSale and withdraw SAND
+        genesisBouncerAdmin: 'sandAdmin', // can set who is allowed to mint
+        commonMinterAdmin: 'sandAdmin', // can change the fees
+        genesisMinter: 'sandAdmin', // the first account allowed to mint genesis Assets
         assetAuctionTaxCollector: 'sandAdmin',
-        genesisMinter: 'sandAdmin',
-        assetUpgrader: 'sandAdmin',
         orbsBeneficiary: 'sandAdmin',
         sandSaleBeneficiary: {
             default: 0,
-            1: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06', // TODO use another wallet ?
+            1: '0x9695ed5020BB47880738Db356678fe8cBc8FF60b', // TODO use another wallet ?
         },
+
+        // testing
         others: {
             default: 'from:3',
             deployments: ''

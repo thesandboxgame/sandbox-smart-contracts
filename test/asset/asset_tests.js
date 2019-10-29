@@ -187,7 +187,10 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                 //     generateTokenId(creator, 10, 8, 1006,0),
                 //     generateTokenId(creator, 10, 8, 1006,1),
                 // ].map((id) => new BN(id).toString(16)));
-                await expectThrow(call(contracts.Asset, 'balanceOf', {}, creator, generateTokenId(creator, 10, 8, 1000, 0)));
+
+                // Do not throw any more on balanceOF
+                // await expectThrow(call(contracts.Asset, 'balanceOf', {}, creator, generateTokenId(creator, 10, 8, 1000, 0)));
+
                 assert.equal(await call(contracts.Asset, 'balanceOf', {}, creator, generateTokenId(creator, 10, 8, 1006, 0)), 10);
                 assert.equal(await call(contracts.Asset, 'balanceOf', {}, creator, generateTokenId(creator, 10, 8, 1006, 1)), 10);
                 assert.equal(await call(contracts.Asset, 'balanceOf', {}, creator, generateTokenId(creator, 10, 8, 1006, 2)), 10);
@@ -602,6 +605,13 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                 await expectThrow(call(contracts.Asset, 'ownerOf', null, tokenId));
             });
 
+            t.test('update token reduce balance to zero', async (t) => {
+                const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 1, creator, fixedID);
+                await tx(Bouncer, 'updateERC721', {from: creator, gas}, creator, tokenId, fixedID + 1, ipfsHashString, 2, creator);
+                const balance = await call(contracts.Asset, 'balanceOf', null, creator, tokenId);
+                assert.equal(balance, '0');
+            });
+
             t.test('update token use new rarity value', async (t) => {
                 const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 1, creator, fixedID);
                 const oldRarity = await call(contracts.Asset, 'rarity', null, tokenId);
@@ -630,7 +640,6 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                 assert.equal(eventsMatching.length, 1);
             });
         });
-
 
         t.test('burn token', async (t) => {
             t.test('cannot burn more token that you ownn', async (t) => {
@@ -675,6 +684,13 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                 await tx(contracts.Asset, 'burnFrom', {from: creator, gas}, creator, tokenId, 2);
                 const balance = await call(contracts.Asset, 'balanceOf', null, creator, tokenId);
                 assert.equal(balance, '3');
+            });
+
+            t.test('burning of FT reduce balance (even to zero)', async (t) => {
+                const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 5, creator, fixedID);
+                await tx(contracts.Asset, 'burnFrom', {from: creator, gas}, creator, tokenId, 5);
+                const balance = await call(contracts.Asset, 'balanceOf', null, creator, tokenId);
+                assert.equal(balance, '0');
             });
 
         });

@@ -1,7 +1,6 @@
 const Web3 = require('web3');
 const rocketh = require('rocketh');
 const {
-    tx,
     deployIfDifferent,
     instantiateAndRegisterContract,
 } = require('rocketh-web3')(rocketh, Web3);
@@ -74,4 +73,4 @@ module.exports = async ({namedAccounts, initialRun}) => {
         2
     );
 };
-module.exports.skip = guard(['1', '4']);
+module.exports.skip = guard(['1', '4']); // TODO

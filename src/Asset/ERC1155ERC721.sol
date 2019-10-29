@@ -46,7 +46,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     );
 
     mapping(address => uint256) private _numNFTPerAddress; // erc721
-    mapping(uint256 => address) private _owners; // erc721
+    mapping(uint256 => uint256) private _owners; // erc721
     mapping(address => mapping(uint256 => uint256)) private _packedTokenBalance; // erc1155
     mapping(address => mapping(address => bool)) private _operatorsForAll; // erc721 and erc1155
     mapping(uint256 => address) private _erc721operators; // erc721
@@ -206,7 +206,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         if (supply == 1) {
             // ERC721
             _numNFTPerAddress[owner]++;
-            _owners[id] = owner;
+            _owners[id] = uint256(owner);
             emit Transfer(address(0), owner, id);
         } else {
             (uint256 bin, uint256 index) = id.getTokenBinIndex();
@@ -358,7 +358,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     ) internal {
         for (uint16 i = 0; i < numNFTs; i++) {
             uint256 id = ids[i + offset];
-            _owners[id] = owner;
+            _owners[id] = uint256(owner);
             emit Transfer(address(0), owner, id);
         }
         _numNFTPerAddress[owner] += numNFTs;
@@ -410,7 +410,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
                 require(value == 1, "cannot transfer nft if amount not 1");
                 _numNFTPerAddress[from]--;
                 _numNFTPerAddress[to]++;
-                _owners[id] = to;
+                _owners[id] = uint256(to);
                 _erc721operators[id] = address(0);
                 emit Transfer(from, to, id);
             }
@@ -449,7 +449,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         bytes calldata data
     ) external {
         if (id & IS_NFT > 0) {
-            require(_owners[id] == from, "not owner");
+            require(_ownerOf(id) == from, "not owner");
         }
         _transferFrom(from, to, id, value);
         require(
@@ -529,9 +529,9 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
                 );
                 if(values[i] > 0) {
                     require(values[i] == 1, "cannot transfer nft if amount not 1");
-                    require(_owners[ids[i]] == from, "not owner");
+                    require(_ownerOf(ids[i]) == from, "not owner");
                     numNFTs++;
-                    _owners[ids[i]] = to;
+                    _owners[ids[i]] = uint256(to);
                     _erc721operators[ids[i]] = address(0);
                     emit Transfer(from, to, ids[i]);
                 }
@@ -614,9 +614,10 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         view
         returns (uint256)
     {
-        require(exists(id), "token does not exist");
+        // do not check for existence, balance is zero if never minted
+        // require(wasEverMinted(id), "token was never minted");
         if (id & IS_NFT > 0) {
-            if (_owners[id] == owner) {
+            if (_ownerOf(id) == owner) {
                 return 1;
             } else {
                 return 0;
@@ -649,7 +650,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     /// @param id the id of the token to get the creator of.
     /// @return the creator of the token type `id`.
     function creatorOf(uint256 id) external view returns (address) {
-        require(exists(id), "does not exist");
+        require(wasEverMinted(id), "token was never minted");
         address originalCreator = address(id / CREATOR_OFFSET_MULTIPLIER);
         address newCreator = _creatorship[originalCreator];
         if (newCreator != address(0)) {
@@ -760,8 +761,12 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     /// @param id the identifier for an NFT.
     /// @return the address of the owner of the NFT.
     function ownerOf(uint256 id) external view returns (address owner) {
-        owner = _owners[id];
+        owner = _ownerOf(id);
         require(owner != address(0), "NFT does not exist");
+    }
+
+    function _ownerOf(uint256 id) internal view returns (address) {
+        return address(_owners[id]);
     }
 
     /// @notice Change or reaffirm the approved address for an NFT for `sender`.
@@ -772,7 +777,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     function approveFor(address sender, address operator, uint256 id)
         external
     {
-        address owner = _owners[id];
+        address owner = _ownerOf(id);
         require(sender != address(0), "sender is zero address");
         require(
             msg.sender == sender ||
@@ -790,7 +795,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     /// @param operator the address to approve as NFT controller.
     /// @param id the id of the NFT to approve.
     function approve(address operator, uint256 id) external {
-        address owner = _owners[id];
+        address owner = _ownerOf(id);
         require(owner != address(0), "NFT does not exist");
         require(
             owner == msg.sender ||
@@ -810,7 +815,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         view
         returns (address operator)
     {
-        require(_owners[id] != address(0), "NFT does not exist");
+        require(_ownerOf(id) != address(0), "NFT does not exist");
         return _erc721operators[id];
     }
 
@@ -819,7 +824,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     /// @param to the new owner.
     /// @param id the NFT to transfer.
     function transferFrom(address from, address to, uint256 id) external {
-        require(_owners[id] == from, "not owner");
+        require(_ownerOf(id) == from, "not owner");
         _transferFrom(from, to, id, 1);
         require(
             _checkERC1155AndCallSafeTransfer(
@@ -857,7 +862,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         uint256 id,
         bytes memory data
     ) public {
-        require(_owners[id] == from, "not owner");
+        require(_ownerOf(id) == from, "not owner");
         _transferFrom(from, to, id, 1);
         require(
             _checkERC1155AndCallSafeTransfer(
@@ -890,7 +895,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     /// @param id the token type to get the rarity of.
     /// @return the rarity power(between 0 and 3).
     function rarity(uint256 id) public view returns (uint256) {
-        require(exists(id), "token does not exist");
+        require(wasEverMinted(id), "token was never minted");
         bytes storage rarityPack = _rarityPacks[id & URI_ID];
         uint256 packIndex = id & PACK_INDEX;
         if (packIndex / 4 >= rarityPack.length) {
@@ -906,9 +911,9 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     /// @param id the token to get the collection of.
     /// @return the collection the NFT is part of.
     function collectionOf(uint256 id) public view returns (uint256) {
-        require(_owners[id] != address(0), "NFT does not exist");
+        require(_ownerOf(id) != address(0), "NFT does not exist");
         uint256 collectionId = id & NOT_NFT_INDEX & NOT_IS_NFT;
-        require(exists(collectionId), "no collection for that token");
+        require(wasEverMinted(collectionId), "no collection ever minted for that token");
         return collectionId;
     }
 
@@ -917,14 +922,14 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     /// @return whether the id is a collection.
     function isCollection(uint256 id) public view returns (bool) {
         uint256 collectionId = id & NOT_NFT_INDEX & NOT_IS_NFT;
-        return exists(collectionId);
+        return wasEverMinted(collectionId);
     }
 
     /// @notice Gives the index at which an NFT was minted in a collection : first of a collection get the zero index.
     /// @param id the token to get the index of.
     /// @return the index/order at which the token `id` was minted in a collection.
     function collectionIndexOf(uint256 id) public view returns (uint256) {
-        collectionOf(id); // this check if id and collection indeed exists
+        collectionOf(id); // this check if id and collection indeed was ever minted
         return uint32((id & NFT_INDEX) >> NFT_INDEX_OFFSET);
     }
 
@@ -945,9 +950,9 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
             );
     }
 
-    function exists(uint256 id) public view returns(bool) {
+    function wasEverMinted(uint256 id) public view returns(bool) {
         if ((id & IS_NFT) > 0) {
-            return _owners[id] != address(0);
+            return _owners[id] != 0;
         } else {
             return
                 ((id & PACK_INDEX) < ((id & PACK_NUM_FT_TYPES) / PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
@@ -959,7 +964,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     /// @param id token to get the uri of.
     /// @return URI string
     function uri(uint256 id) public view returns (string memory) {
-        require(exists(id), "token does not exist");
+        require(wasEverMinted(id), "token was never minted"); // prevent returning invalid uri
         return toFullURI(_metadataHash[id & URI_ID], id);
     }
 
@@ -967,7 +972,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     /// @param id token to get the uri of.
     /// @return URI string
     function tokenURI(uint256 id) public view returns (string memory) {
-        require(_owners[id] != address(0), "NFT does not exist");
+        require(_ownerOf(id) != address(0), "NFT does not exist");
         return toFullURI(_metadataHash[id & URI_ID], id);
     }
 
@@ -1160,8 +1165,8 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     function _burnERC721(address operator, address from, uint256 id)
         internal
     {
-        require(from == _owners[id], "not owner");
-        _owners[id] = address(0);
+        require(from == _ownerOf(id), "not owner");
+        _owners[id] = 2**160; // equivalent to zero address when casted but ensure we track minted status
         _numNFTPerAddress[from]--;
         emit Transfer(from, address(0), id);
         emit TransferSingle(operator, from, address(0), id, 1);
