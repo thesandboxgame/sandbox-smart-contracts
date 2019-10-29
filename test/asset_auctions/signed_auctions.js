@@ -23,6 +23,8 @@ const {
     encodeCall,
     emptyBytes,
     deployContract,
+    ethSign,
+    soliditySha3,
 } = require('../utils');
 
 const {
@@ -53,6 +55,7 @@ const {
 
 const creator = others[0];
 const user1 = others[1];
+const user2 = others[2];
 
 const ipfsHashString = '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
 
@@ -145,8 +148,32 @@ function runSignedAuctionsTests(title, resetContracts) {
             });
         }
 
+        function getBasicSignature() {
+            const auctionData = getAuctionData();
+            const typeHash = soliditySha3({type: 'string', value: 'Auction(address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)'});
+            const hash = soliditySha3(
+                {type: 'address', value: contracts.AssetSignedAuction.options.address},
+                {type: 'bytes32', value: typeHash},
+                {type: 'address', value: auctionData.from},
+                {type: 'address', value: auctionData.token},
+                {type: 'uint256', value: auctionData.offerId},
+                {type: 'uint256', value: auctionData.startingPrice},
+                {type: 'uint256', value: auctionData.endingPrice},
+                {type: 'uint256', value: auctionData.startedAt},
+                {type: 'uint256', value: auctionData.duration},
+                {type: 'uint256', value: auctionData.packs},
+                {type: 'bytes32', value: soliditySha3({type: 'bytes', value: auctionData.ids})},
+                {type: 'bytes32', value: soliditySha3({type: 'bytes', value: auctionData.amounts})},
+            );
+            return ethSign(hash, from);
+        }
+
         function giveSand(to, amount) {
             return tx(contracts.Sand, 'transfer', {from: sandBeneficiary, gas}, to, amount);
+        }
+
+        function claimSellerOfferUsingBasicSig(options, ...args) {
+            return tx(contracts.AssetSignedAuction, 'claimSellerOfferUsingBasicSig', options, ...args);
         }
 
         function claimSellerOffer(options, ...args) {
@@ -202,6 +229,30 @@ function runSignedAuctionsTests(title, resetContracts) {
 
             const receipt = await claimSellerOffer({from: user1, value: 0, gas},
                 user1, testAddress, token, [buyAmount, buyAmount * endingPrice], auctionData, ids, amounts, signature);
+
+            assert.equal((await getEventsFromReceipt(contracts.Sand, TransferEvent, receipt)).length, 1);
+            assert.equal((await getEventsFromReceipt(contracts.AssetSignedAuction, OfferClaimedEvent, receipt)).length, 1);
+            const transferReceipts = await getEventsFromReceipt(contracts.Asset, TransferBatchEvent, receipt);
+            assert.equal(transferReceipts.length, 1);
+            assert.equal(transferReceipts[0].returnValues.ids.length, 2);
+        });
+
+        t.test('should be able to claim seller offer in SAND via basic sig', async () => {
+            token = contracts.Sand.options.address;
+            const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
+
+            await giveSand(user1, endingPrice);
+            from = user2;
+            ids = [
+                await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 100, creator, 3),
+                await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 200, creator, 4)
+            ];
+            await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, creator, user2, ids, [100, 200], emptyBytes);
+
+            const signature = await getBasicSignature();
+
+            const receipt = await claimSellerOfferUsingBasicSig({from: user1, value: 0, gas},
+                user1, user2, token, [buyAmount, buyAmount * endingPrice], auctionData, ids, amounts, signature);
 
             assert.equal((await getEventsFromReceipt(contracts.Sand, TransferEvent, receipt)).length, 1);
             assert.equal((await getEventsFromReceipt(contracts.AssetSignedAuction, OfferClaimedEvent, receipt)).length, 1);

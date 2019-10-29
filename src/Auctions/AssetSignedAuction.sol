@@ -185,6 +185,99 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         );
     }
 
+    function claimSellerOfferUsingBasicSig(
+        address buyer,
+        address payable seller,
+        address token,
+        uint256[] calldata purchase, // buyAmount, maxTokenAmount
+        uint256[] calldata auctionData,
+        uint256[] calldata ids,
+        uint256[] calldata amounts,
+        bytes calldata signature
+    ) external payable {
+        _verifyParameters(
+            buyer,
+            seller,
+            token,
+            purchase[0],
+            auctionData,
+            ids,
+            amounts
+        );
+        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.DIRECT, false);
+        _executeDeal(
+            token,
+            purchase,
+            buyer,
+            seller,
+            auctionData,
+            ids,
+            amounts
+        );
+    }
+
+    function claimSellerOfferUsingBasicSigViaEIP1271(
+        address buyer,
+        address payable seller,
+        address token,
+        uint256[] calldata purchase, // buyAmount, maxTokenAmount
+        uint256[] calldata auctionData,
+        uint256[] calldata ids,
+        uint256[] calldata amounts,
+        bytes calldata signature
+    ) external payable {
+        _verifyParameters(
+            buyer,
+            seller,
+            token,
+            purchase[0],
+            auctionData,
+            ids,
+            amounts
+        );
+        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.EIP1271, false);
+        _executeDeal(
+            token,
+            purchase,
+            buyer,
+            seller,
+            auctionData,
+            ids,
+            amounts
+        );
+    }
+
+    function claimSellerOfferUsingBasicSigViaEIP1654(
+        address buyer,
+        address payable seller,
+        address token,
+        uint256[] calldata purchase, // buyAmount, maxTokenAmount
+        uint256[] calldata auctionData,
+        uint256[] calldata ids,
+        uint256[] calldata amounts,
+        bytes calldata signature
+    ) external payable {
+        _verifyParameters(
+            buyer,
+            seller,
+            token,
+            purchase[0],
+            auctionData,
+            ids,
+            amounts
+        );
+        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.EIP1654, false);
+        _executeDeal(
+            token,
+            purchase,
+            buyer,
+            seller,
+            auctionData,
+            ids,
+            amounts
+        );
+    }
+
     function _executeDeal(
         address token,
         uint256[] memory purchase,

@@ -32,7 +32,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const deployResult = await deployIfDifferent(['data'],
         'AssetSignedAuction',
-        {from: deployer, gas: 3000000},
+        {from: deployer, gas: 4000000},
         'AssetSignedAuction',
         asset.options.address,
         assetAuctionAdmin,
