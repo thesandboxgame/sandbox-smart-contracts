@@ -2,12 +2,7 @@ const rocketh = require('rocketh');
 const {getDeployedContract} = require('../../lib');
 const {mintAndReturnTokenId, mintMultipleAndReturnTokenIds} = require('../asset-utils');
 
-const {runERC721tests} = require('../erc721_tests');
-const {runDualERC1155ERC721tests} = require('../dual_erc721_erc1155_tests');
-const {runERC1155tests} = require('../erc1155_tests');
-const {runAssetTests} = require('./asset_tests');
-const {runFixedIDAssetTests} = require('./fixed_id_tests');
-const {runERC721ExtractionTests} = require('./erc721_extraction');
+const {runSignedAuctionsTests} = require('./signed_auctions');
 
 async function deployContracts() {
     await rocketh.runStages();
@@ -17,17 +12,12 @@ async function deployContracts() {
         GenesisBouncer: getDeployedContract('GenesisBouncer'),
         Sand: getDeployedContract('Sand'),
         AssetSignedAuction: getDeployedContract('AssetSignedAuction'),
+        NativeMetaTransactionProcessor: getDeployedContract('NativeMetaTransactionProcessor'),
     };
     return deployedContracts;
 }
 
 const ipfsHashString = '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
-
-let counter = 0;
-function mintDual(contract, creator, amount, ipfsS) {
-    counter++;
-    return mintAndReturnTokenId(contract, ipfsS || ipfsHashString, amount, creator, counter);
-}
 
 function AssetContract() {
     this.counter = 0;
@@ -71,10 +61,4 @@ ERC721Contract.prototype.burnERC721 = function (from, tokenId) {
     return this.contract.methods.burnFrom(from, tokenId, 1).send({from, gas: 3000000});
 };
 
-runERC721tests('Asset', new ERC721Contract());
-runDualERC1155ERC721tests('Asset', deployContracts, mintDual);
-runAssetTests('Asset', deployContracts);
-runAssetTests('Asset', deployContracts, 101);
-runFixedIDAssetTests('Asset', deployContracts);
-runERC1155tests('Asset', new AssetContract());
-runERC721ExtractionTests('Asset', deployContracts);
+runSignedAuctionsTests('Asset', deployContracts);

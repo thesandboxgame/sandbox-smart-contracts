@@ -1,7 +1,7 @@
 const Web3 = require('web3');
 const rocketh = require('rocketh');
 const {
-    tx,
+    txOnlyFrom,
     getDeployedContract,
     call,
 } = require('rocketh-web3')(rocketh, Web3);
@@ -30,7 +30,8 @@ module.exports = async ({namedAccounts, initialRun}) => {
     const isBouncer = await call(asset, 'isBouncer', bouncer.options.address);
     if (!isBouncer) {
         log('setting ORB Bouncer as bouncer');
-        await tx({from: deployer, gas: 1000000}, asset, 'setBouncer', bouncer.options.address, true);
+        const currentBouncerAdmin = await call(asset, 'getBouncerAdmin');
+        await txOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000}, asset, 'setBouncer', bouncer.options.address, true);
     }
 };
-module.exports.skip = guard(['1', '4']);
+module.exports.skip = guard(['1', '4']); // TODO

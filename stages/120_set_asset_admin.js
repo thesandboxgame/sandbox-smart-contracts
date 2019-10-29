@@ -1,7 +1,7 @@
 const Web3 = require('web3');
 const rocketh = require('rocketh');
 const {
-    tx,
+    txOnlyFrom,
     getDeployedContract,
     call,
 } = require('rocketh-web3')(rocketh, Web3);
@@ -32,12 +32,8 @@ module.exports = async ({namedAccounts, initialRun}) => {
     }
     if (currentAdmin) {
         if (currentAdmin.toLowerCase() !== assetAdmin.toLowerCase()) {
-            if (currentAdmin.toLowerCase() !== deployer.toLowerCase()) {
-                throw new Error('deployer ' + deployer + ' has no right to change admin for Asset ');
-            } else {
-                log('setting asset admin', currentAdmin, assetAdmin);
-                await tx({from: deployer, gas: 1000000}, assetContract, 'changeAdmin', assetAdmin);
-            }
+            log('setting Asset Admin');
+            await txOnlyFrom(currentAdmin, {from: deployer, gas: 1000000}, assetContract, 'changeAdmin', assetAdmin);
         }
     } else {
         log('current Asset impl do not support admin');
@@ -51,12 +47,8 @@ module.exports = async ({namedAccounts, initialRun}) => {
     }
     if (currentBouncerAdmin) {
         if (currentBouncerAdmin.toLowerCase() !== assetBouncerAdmin.toLowerCase()) {
-            if (currentBouncerAdmin.toLowerCase() !== deployer.toLowerCase()) {
-                throw new Error('deployer ' + deployer + ' has no right to change bouncer admin for Asset ');
-            } else {
-                log('setting asset bouncer admin', currentBouncerAdmin, assetBouncerAdmin);
-                await tx({from: deployer, gas: 1000000}, assetContract, 'changeBouncerAdmin', assetBouncerAdmin);
-            }
+            log('setting Asset Bouncer Admin');
+            await txOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000}, assetContract, 'changeBouncerAdmin', assetBouncerAdmin);
         }
     } else {
         log('current Asset impl do not support bouncerAdmin');

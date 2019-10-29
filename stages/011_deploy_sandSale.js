@@ -15,7 +15,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
     }
 
     const {
-        sandAdmin,
+        sandSaleAdmin,
         deployer,
         sandSaleBeneficiary,
     } = namedAccounts;
@@ -56,7 +56,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
         daiMedianizer.options.address,
         sandContract.options.address,
         dai.options.address,
-        sandAdmin,
+        sandSaleAdmin,
         sandSaleBeneficiary,
     );
 

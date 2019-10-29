@@ -1,10 +1,8 @@
 const Web3 = require('web3');
 const rocketh = require('rocketh');
 const {
-    tx,
     deployIfDifferent,
     getDeployedContract,
-    call,
 } = require('rocketh-web3')(rocketh, Web3);
 const {guard} = require('../lib');
 
@@ -41,4 +39,4 @@ module.exports = async ({namedAccounts, initialRun}) => {
         log('reusing GenesisBouncer at ' + deployResult.contract.options.address);
     }
 };
-// module.exports.skip = guard(['1', '4'], 'GenesisBiuncer', 'args'); // only redeploy based on args
+module.exports.skip = guard(['1', '4'], 'GenesisBouncer');

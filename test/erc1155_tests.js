@@ -288,6 +288,15 @@ function runERC1155tests(title, contractStore) {
             t.test('pass if sending to normal address address', async () => {
                 await tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, creator, user1, [assetsId[0]], [3], emptyBytes);
             });
+
+            t.test('should throw if sending token twice exceeding amount owned', async () => {
+                await expectThrow(tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, creator, user1, [assetsId[0], assetsId[1], assetsId[0]], [2, 1, 1000], emptyBytes));
+            });
+
+            t.test('should pass if sending token twice', async () => {
+                await tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, creator, user1, [assetsId[0], assetsId[1], assetsId[0]], [2, 1, 1], emptyBytes);
+            });
+
             t.test('should throw if sending to zero address', async () => {
                 await expectThrow(tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, creator, zeroAddress, [assetsId[0]], [3], emptyBytes));
             });

@@ -3,7 +3,6 @@ const rocketh = require('rocketh');
 const {
     deployIfDifferent,
     getDeployedContract,
-    tx,
 } = require('rocketh-web3')(rocketh, Web3);
 const {guard} = require('../lib');
 
