@@ -7,6 +7,10 @@ const {
 } = require('./merkleTreeTests');
 
 const {
+    runLandSaleTests
+} = require('./landSale_tests');
+
+const {
     balanceOf,
 } = require('../erc721');
 
@@ -16,6 +20,16 @@ const {
     expectThrow,
 } = require('../utils');
 
+function LandSaleContract() {
+    this.contract = null;
+}
+LandSaleContract.prototype.resetContract = async function () {
+    await rocketh.runStages();
+    this.contract = getDeployedContract('LandSale');
+    return this.contract;
+};
+
+runLandSaleTests('LandSale', new LandSaleContract());
 runMerkleTreeTest();
 
 /*

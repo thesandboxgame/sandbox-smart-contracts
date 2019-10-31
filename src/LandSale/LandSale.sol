@@ -8,15 +8,14 @@ import "../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
  * @title Land Sale contract
  * @notice This contract mananges the sale of our lands
  */
-contract LandSale is MetaTransactionReceiver {
-    Land public _land;
-    ERC20 public _erc20;
+contract LandSale is Admin, MetaTransactionReceiver {
+    Land private _land;
+    ERC20 private _erc20;
 
-    address public _admin;
-    address payable public _wallet;
-    bool public _isPaused = false;
+    address payable private _wallet;
+    bool private _isPaused = false;
 
-    bytes32 _merkleRoot;
+    bytes32 private _merkleRoot;
 
     /**
      * @notice Initializes the contract
@@ -42,6 +41,10 @@ contract LandSale is MetaTransactionReceiver {
         _merkleRoot = merkleRoot;
     }
 
+    function merkleRoot() external view returns(bytes32) {
+        return _merkleRoot;
+    }
+
     function buyLand(
         address buyer,
         address to,
@@ -50,7 +53,7 @@ contract LandSale is MetaTransactionReceiver {
         uint16 size,
         uint256 price,
         bytes32[] calldata proof
-    ) external payable whenNotPaused() {
+    ) external whenNotPaused() {
         require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "not authorized");
         bytes32 landHash = _generateLandHash(x, y, size, price);
         bytes32 leaf = keccak256(abi.encodePacked(landHash));
@@ -85,6 +88,10 @@ contract LandSale is MetaTransactionReceiver {
      */
     function togglePause() external onlyAdmin() {
         _isPaused = !_isPaused;
+    }
+
+    function isPaused() external view returns(bool) {
+        return _isPaused;
     }
 
     /**
