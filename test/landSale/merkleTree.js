@@ -5,13 +5,16 @@ const Web3 = require('web3');
 class MerkleTree {
     constructor(data) {
         this.leaves = this.buildLeaves(data);
-        this.levels = this.computeMerkleTree(this.leaves);
+        this.tree = this.computeMerkleTree(this.leaves);
+
+        this.levels = this.tree.levels;
+        this.sortedLevels = this.tree.sortedLevels;
     }
 
     /**
      * @description Returns an array with an even amount of values
      * @param {array} elements An array
-     * @returns {array} An new array
+     * @returns {array} A new array
      */
     makeEvenElements(elements) {
         if (elements.length === 0) {
@@ -30,6 +33,16 @@ class MerkleTree {
     }
 
     /**
+     * @description Sorts an array (ascending order)
+     * @param {array} arrayToSort The array to sort
+     * @returns {array} The sorted array
+     */
+    sort(arrayToSort) {
+        const sortedArray = [...arrayToSort];
+        return sortedArray.sort((a, b) => Web3.utils.toBN(a).gt(Web3.utils.toBN(b)));
+    }
+
+    /**
      * @description Hashes data to create leaves
      * @param {array} data An array
      * @return {array} A new array containing hashed values
@@ -38,10 +51,15 @@ class MerkleTree {
         return data.map((d) => Web3.utils.soliditySha3(d));
     }
 
+    /**
+     * @description Builds the leaves of a Merkle tree
+     * @param {array} data An array of data
+     * @returns {array} The leaves of the Merkle tree (as an even and sorted array)
+     */
     buildLeaves(data) {
         const evenLeaves = this.makeEvenElements(data);
         const hashedLeaves = this.hashLeaves(evenLeaves);
-        return hashedLeaves.sort((a, b) => parseInt(a, 16) - parseInt(b, 16));
+        return this.sort(hashedLeaves);
     }
 
     /**
@@ -51,6 +69,7 @@ class MerkleTree {
      * @returns {string} The new node (hash)
      */
     calculateParentNode(left, right) {
+        // If a node doesn't have a sibling, it will be hashed with itself
         if (left === undefined || right === undefined) {
             return Web3.utils.soliditySha3({
                 type: 'bytes',
@@ -80,7 +99,6 @@ class MerkleTree {
 
         for (let i = 0; i < nodes.length; i += 2) {
             const node = this.calculateParentNode(nodes[i], nodes[i + 1]);
-
             parentsNodes.push(node);
         }
 
@@ -94,15 +112,21 @@ class MerkleTree {
      */
     computeMerkleTree(leaves) {
         const levels = [];
+        const sortedLevels = [];
 
         let nodes = leaves;
 
         while (nodes.length > 1) {
             nodes = this.createParentNodes(nodes);
             levels.push(nodes);
+            sortedLevels.push(this.sort(nodes));
+            nodes = this.sort(nodes);
         }
 
-        return levels;
+        return {
+            levels,
+            sortedLevels,
+        };
     }
 
     /**
@@ -119,6 +143,14 @@ class MerkleTree {
      */
     getLevels() {
         return this.levels;
+    }
+
+    /**
+     * @description Returns the sorted levels of the merkle tree
+     * @returns {array} The sorted levels as an array
+     */
+    getSortedLevels() {
+        return this.sortedLevels;
     }
 
     /**
@@ -139,7 +171,7 @@ class MerkleTree {
 
     /**
      * @description Returns the proof of a specific leaf
-     * @param {string} data The data to be proved
+     * @param {string} data The data to be proven
      * @returns {array} The array of proofs for the leaf
      */
     getProof(data) {
@@ -158,42 +190,36 @@ class MerkleTree {
             path.push(this.leaves[index - 1]);
         }
 
-        let parentIndex = Math.floor(index / 2);
+        let currentIndex = index;
 
         for (let i = 0; i < this.levels.length - 1; i += 1) {
-            if (parentIndex % 2 === 0) {
-                if (this.levels[i][parentIndex + 1] === undefined) {
-                    path.push(this.levels[i][parentIndex]);
+            const parentIndex = Math.floor(currentIndex / 2);
+            const parentHash = this.levels[i][parentIndex];
+
+            const sortedParentIndex = this.sortedLevels[i].indexOf(parentHash);
+            currentIndex = sortedParentIndex;
+
+            if (sortedParentIndex % 2 === 0) {
+                if (this.sortedLevels[i][sortedParentIndex + 1] === undefined) {
+                    path.push(this.sortedLevels[i][sortedParentIndex]);
                 } else {
-                    path.push(this.levels[i][parentIndex + 1]);
+                    path.push(this.sortedLevels[i][sortedParentIndex + 1]);
                 }
             } else {
-                path.push(this.levels[i][parentIndex - 1]);
+                path.push(this.sortedLevels[i][sortedParentIndex - 1]);
             }
-
-            parentIndex = Math.floor(parentIndex / 2);
         }
 
         return path;
     }
 
     isDataValid(data, proof) {
-        console.log('Validating:', data);
-
         const leaf = Web3.utils.soliditySha3(data);
-        console.log('Data leaf is:', leaf);
 
-        const index = this.leaves.indexOf(leaf);
-
-        if (index === -1) {
-            throw new Error('Data not found...');
-        }
-
-        console.log('Data index is:', index);
         let potentialRoot = leaf;
 
         for (let i = 0; i < proof.length; i += 1) {
-            if (parseInt(potentialRoot, 16) < parseInt(proof[i], 16)) {
+            if (Web3.utils.toBN(potentialRoot).lt(Web3.utils.toBN(proof[i]))) {
                 potentialRoot = Web3.utils.soliditySha3({
                     type: 'bytes',
                     value: potentialRoot,
