@@ -8,7 +8,7 @@ import "../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
  * @title Land Sale contract
  * @notice This contract mananges the sale of our lands
  */
-contract LandSale is Admin, MetaTransactionReceiver {
+contract LandSale is MetaTransactionReceiver {
     Land private _land;
     ERC20 private _erc20;
 
@@ -76,14 +76,6 @@ contract LandSale is Admin, MetaTransactionReceiver {
     }
 
     /**
-     * @notice Changes the address of the admin
-     * @param newAdmin The address of the new admin
-     */
-    function changeAdmin(address newAdmin) external onlyAdmin() {
-        _admin = newAdmin;
-    }
-
-    /**
      * @notice Toggles the current pause state
      */
     function togglePause() external onlyAdmin() {
@@ -140,11 +132,6 @@ contract LandSale is Admin, MetaTransactionReceiver {
         }
 
         return computedHash == _merkleRoot;
-    }
-
-    modifier onlyAdmin() {
-        require(msg.sender == _admin, "Sender is not the admin");
-        _;
     }
 
     modifier whenNotPaused() {
