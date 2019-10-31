@@ -86,6 +86,7 @@ program
         const assetsPerCreator = {};
         for (const assetData of data) {
             if (!assetData.metadata || !validate(assetData.metadata)) {
+                console.error(validate.errors);
                 reportErrorAndExit('error in metadata, does not follow schema!');
             }
             if (typeof assetData.rarity !== 'number' || !Number.isInteger(assetData.rarity)) {
@@ -161,7 +162,7 @@ program
             console.log('MINTING...');
             for (const batch of batches) {
                 const {creator, packId, cidv1, hash, suppliesArr, raritiesPack, owner} = batch;
-                console.log({creator, packId, cidv1, hash, suppliesArr, raritiesPack, owner});
+                console.log({genesisMinter, creator, packId, cidv1, hash, suppliesArr, raritiesPack, owner});
                 try {
                     // TODO save txHash // TODO save progress
                     const receipt = await tx({from: genesisMinter, nonce: cmdObj.nonce, gas: cmdObj.gas || 1000000}, Bouncer, 'mintMultipleFor', creator, packId, hash, suppliesArr, raritiesPack, owner);

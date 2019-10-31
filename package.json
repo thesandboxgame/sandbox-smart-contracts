@@ -18,7 +18,8 @@
     "export-asset": "node export-asset.js",
     "smartcheck": "smartcheck -p .",
     "deploy-rinkeby": "rocketh launch -n https://rinkeby.infura.io/v3/ced8eecc03984939b556332468325813",
-    "deploy-mainnet": "cli-confirm \"Do you really want to deploy to mainnet\" && rocketh launch -n https://mainnet.infura.io/v3/ced8eecc03984939b556332468325813 || echo ok"
+    "deploy-mainnet": "cli-confirm \"Do you really want to deploy to mainnet\" && rocketh launch -n https://mainnet.infura.io/v3/ced8eecc03984939b556332468325813 || echo ok",
+    "attach-mainnet": "rocketh attach https://mainnet.infura.io/v3/ced8eecc03984939b556332468325813"
   },
   "license": "UNLICENSED",
   "private": true,
@@ -44,7 +45,7 @@
     "minimist": "^1.2.0",
     "prettier": "^1.18.2",
     "prettier-plugin-solidity": "^1.0.0-alpha.30",
-    "rocketh": "^0.3.26",
+    "rocketh": "^0.4.7",
     "solc": "0.5.9",
     "solhint": "^2.1.2",
     "solhint-plugin-prettier": "^0.0.3",

@@ -16,6 +16,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
     const {
         deployer,
         sandAdmin,
+        sandExecutionAdmin,
     } = namedAccounts;
 
     const sandContract = getDeployedContract('Sand');
@@ -26,5 +27,10 @@ module.exports = async ({namedAccounts, initialRun}) => {
     if (currentAdmin.toLowerCase() !== sandAdmin.toLowerCase()) {
         log('setting Sand Admin');
         await txOnlyFrom(currentAdmin, {from: deployer, gas: 1000000}, sandContract, 'changeAdmin', sandAdmin);
+    }
+    const currentExecutionAdmin = await call(sandContract, 'getExecutionAdmin');
+    if (currentExecutionAdmin.toLowerCase() !== sandExecutionAdmin.toLowerCase()) {
+        log('setting Sand Admin');
+        await txOnlyFrom(currentExecutionAdmin, {from: deployer, gas: 1000000}, sandContract, 'changeExecutionAdmin', sandExecutionAdmin);
     }
 };
