@@ -1,5 +1,4 @@
-/* solhint-disable func-order, code-complexity, reason-string */
-// TODO rename underscore param in non underscore + rename state variable into underscore
+/* solhint-disable func-order, code-complexity */
 pragma solidity 0.5.9;
 
 import "../../../contracts_common/src/Libraries/AddressUtils.sol";
@@ -18,17 +17,17 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
 
     // Equals to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
     // which can be also obtained as `IERC721Receiver(0).onERC721Received.selector`
-    bytes4 private constant _ERC721_RECEIVED = 0x150b7a02;
+    bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
 
     // Our grid is 408 x 408 lands
-    uint256 private constant GRID_SIZE = 408;
+    uint256 internal constant GRID_SIZE = 408;
 
-    uint256 private constant LAYER =          0xFF00000000000000000000000000000000000000000000000000000000000000;
-    uint256 private constant LAYER_1x1 =      0x0000000000000000000000000000000000000000000000000000000000000000;
-    uint256 private constant LAYER_3x3 =      0x0100000000000000000000000000000000000000000000000000000000000000;
-    uint256 private constant LAYER_6x6 =      0x0200000000000000000000000000000000000000000000000000000000000000;
-    uint256 private constant LAYER_12x12 =    0x0300000000000000000000000000000000000000000000000000000000000000;
-    uint256 private constant LAYER_24x24 =    0x0400000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER =          0xFF00000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_1x1 =      0x0000000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_3x3 =      0x0100000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_6x6 =      0x0200000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_12x12 =    0x0300000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_24x24 =    0x0400000000000000000000000000000000000000000000000000000000000000;
 
     mapping (address => uint256) public _numNFTPerAddress;
     mapping (uint256 => uint256) public _owners;
@@ -62,8 +61,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
         address admin
     ) public {
         _admin = admin;
-        _metaTransactionContracts[metaTransactionContract] = true;
-        emit MetaTransactionProcessor(metaTransactionContract, true);
+        _setMetaTransactionProcessor(metaTransactionContract, true);
     }
 
     /**
@@ -75,7 +73,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     function _transferFrom(address from, address to, uint256 id) internal {
         require(id & LAYER == 0, "Invalid token id");
         address owner = _ownerOf(id);
-        require(owner != address(0), "Id does not exist");
+        require(owner != address(0), "token does not exist");
         require(owner == from, "Specified owner is not the real owner");
         require(to != address(0), "can't send to zero address");
         if (msg.sender != from && !_metaTransactionContracts[msg.sender]) {
@@ -83,7 +81,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
                 _superOperators[msg.sender] ||
                 _operatorsForAll[from][msg.sender] ||
                 _operators[id] == msg.sender,
-                "Operator not approved"
+                "Operator not approved to transfer"
             );
         }
         _numNFTPerAddress[from]--;
@@ -101,7 +99,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     function balanceOf(address owner) external view returns (
         uint256 _balance
     ) {
-        require(owner != address(0), "Owner address is invalid");
+        require(owner != address(0), "owner is zero address");
         return _numNFTPerAddress[owner];
     }
 
@@ -230,7 +228,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     function ownerOf(uint256 id) external view returns (address owner) {
         require(id & LAYER == 0, "Invalid token id");
         owner = _ownerOf(id);
-        require(owner != address(0), "Id does not exist");
+        require(owner != address(0), "token does not exist");
     }
 
     /**
@@ -246,15 +244,15 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     ) external {
         require(id & LAYER == 0, "invalid token id");
         address owner = _ownerOf(id);
-        require(sender != address(0), "Invalid sender address");
+        require(sender != address(0), "sender is zero address");
         require(
             msg.sender == sender ||
             _metaTransactionContracts[msg.sender] ||
             _superOperators[msg.sender] ||
             _operatorsForAll[sender][msg.sender],
-            "require operators"
-        ); // solium-disable-line max-len
-        require(owner == sender); // solium-disable-line error-reason
+            "not authorized to approve"
+        );
+        require(owner == sender, "owner != sender");
 
         _operators[id] = operator;
         emit Approval(sender, operator, id);
@@ -269,10 +267,11 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
         require(id & LAYER == 0, "Invalid token id");
         address owner = _ownerOf(id);
         require(owner != address(0), "token does not exist");
-        require( // solium-disable-line error-reason
+        require(
             owner == msg.sender ||
             _superOperators[msg.sender] ||
-            _operatorsForAll[owner][msg.sender]
+            _operatorsForAll[owner][msg.sender],
+            "not authorized to approve"
         );
         _operators[id] = operator;
         emit Approval(msg.sender, operator, id);
@@ -285,7 +284,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
      */
     function getApproved(uint256 id) external view returns (address) {
         require(id & LAYER == 0, "Invalid token id");
-        require(_ownerOf(id) != address(0), "Id does not exist");
+        require(_ownerOf(id) != address(0), "token does not exist");
         return _operators[id];
     }
 
@@ -300,7 +299,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     }
 
     /**
-     * @notice Transfer a token between 2 addresses
+     * @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
      * @param from The sender of the token
      * @param to The recipient of the token
      * @param id The id of the token
@@ -310,14 +309,22 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
         _transferFrom(from, to, id);
         require(
             _checkOnERC721Received(from, to, id, data),
-            "ERC721: transfer rejected" // TODO test order as the check need to happen after transfer
+            "ERC721: transfer rejected"
         );
     }
 
-    // no safe version ? (as )this would require to call _checkOnERC721Received on all of them)
-    // TODO add test for batch
     /**
-     * @notice Transfer many token between 2 addresses
+     * @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
+     * @param from The send of the token
+     * @param to The recipient of the token
+     * @param id The id of the token
+     */
+    function safeTransferFrom(address from, address to, uint256 id) external {
+        safeTransferFrom(from, to, id, "");
+    }
+
+    /**
+     * @notice Transfer many tokens between 2 addresses
      * @param from The sender of the token
      * @param to The recipient of the token
      * @param ids The ids of the tokens
@@ -347,83 +354,15 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
         _numNFTPerAddress[to] += numTokens;
     }
 
-
-    /**
-     * @notice Transfer a token between 2 addresses
-     * @param from The send of the token
-     * @param to The recipient of the token
-     * @param id The id of the token
-     */
-    function safeTransferFrom(address from, address to, uint256 id) external {
-        safeTransferFrom(from, to, id, "");
-    }
-
-    // TODO burn
-
-    /**
-     * @notice Return the name of the token contract
-     * @return The name of the token contract
-     */
-    function name() external pure returns (string memory) {
-        return "Sandbox's LANDs";
-    }
-
-    /**
-     * @notice Return the symbol of the token contract
-     * @return The symbol of the token contract
-     */
-    function symbol() external pure returns (string memory) {
-        return "LAND";
-    }
-
-    // solium-disable-next-line security/no-assign-params
-    function uint2str(uint _i) internal pure returns (string memory) {
-        if (_i == 0) {
-            return "0";
-        }
-        uint j = _i;
-        uint len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-        bytes memory bstr = new bytes(len);
-        uint k = len - 1;
-        while (_i != 0) {
-            bstr[k--] = byte(uint8(48 + _i % 10));
-            _i /= 10;
-        }
-        return string(bstr);
-    }
-
-    /**
-     * @notice Return the URI of a specific token
-     * @param id The id of the token
-     * @return The URI of the token
-     */
-    function tokenURI(uint256 id) public view returns (string memory) {
-        require(id & LAYER == 0, "Invalid token id");
-        require(_ownerOf(id) != address(0), "Id does not exist");
-        return
-            string(
-                abi.encodePacked(
-                    "https://sandbox.game/land/",
-                    uint2str(id),
-                    ".json"
-                )
-            );
-    }
-
     /**
      * @notice Check if the contract supports an interface
      * 0x01ffc9a7 is ERC-165
      * 0x80ac58cd is ERC-721
-     * 0x5b5e139f is ERC-721 metadata
      * @param id The id of the interface
      * @return True if the interface is supported
      */
     function supportsInterface(bytes4 id) external pure returns (bool) {
-        return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
+        return id == 0x01ffc9a7 || id == 0x80ac58cd;
     }
 
     /**
@@ -442,7 +381,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
             msg.sender == sender ||
             _metaTransactionContracts[msg.sender] ||
             _superOperators[msg.sender],
-            "require meta approval" // TODO tests
+            "not authorized to approve for all"
         );
 
         _setApprovalForAll(sender, operator, approved);
@@ -470,7 +409,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     ) internal {
         require(
             !_superOperators[operator],
-            "super operator can't have their approvalForAll changed" // TODO test
+            "super operator can't have their approvalForAll changed"
         );
         _operatorsForAll[sender][operator] = approved;
 
@@ -488,7 +427,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
         view
         returns (bool isOperator)
     {
-        return _operatorsForAll[owner][operator] || _superOperators[operator]; // TODO add test for superOperators
+        return _operatorsForAll[owner][operator] || _superOperators[operator];
     }
 
     function _burn(address from, uint256 id) public {
@@ -508,13 +447,13 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     /// @param from address whose token is to be burnt.
     /// @param id token which will be burnt.
     function burnFrom(address from, uint256 id) external {
-        require(from != address(0), "invalid from");
+        require(from != address(0), "from is zero address");
         require(
             msg.sender == from ||
             _metaTransactionContracts[msg.sender] ||
             _superOperators[msg.sender] ||
             _operatorsForAll[from][msg.sender],
-            "require meta approval"
+            "not authorized to burn"
         );
         _burn(from, id);
     }

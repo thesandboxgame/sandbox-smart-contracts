@@ -15,7 +15,8 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const {
         deployer,
-        landAdmin,
+        landSaleAdmin,
+        landSaleBeneficiary,
     } = namedAccounts;
 
     const sandContract = getDeployedContract('Sand');
@@ -29,14 +30,18 @@ module.exports = async ({namedAccounts, initialRun}) => {
         throw new Error('no LAND contract deployed');
     }
 
+    const merkleRoot = '0x1111111111111111111111111111111111111111111111111111111111111111'; // TODO
+
     const deployResult = await deployIfDifferent(['data'],
         'LandSale',
         {from: deployer, gas: 8000000},
         'LandSale',
         landContract.options.address,
         sandContract.options.address,
-        landAdmin,
-        landAdmin,
+        sandContract.options.address,
+        landSaleAdmin,
+        landSaleBeneficiary,
+        merkleRoot
     );
 
     if (deployResult.newlyDeployed) {

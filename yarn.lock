@@ -3466,7 +3466,7 @@ ethereumjs-wallet@0.6.2:
     utf8 "^3.0.0"
     uuid "^3.3.2"
 
-ethers@^5.0.0-beta.157:
+ethers@^5.0.0-beta.159:
   version "5.0.0-beta.159"
   resolved "https://registry.yarnpkg.com/ethers/-/ethers-5.0.0-beta.159.tgz#d1bc621256b181f3cdeba25bca70a6d728dde053"
   integrity sha512-tq7aeKZ0XSKz/43KowNreraz3cC3TBkSBI0ncQ7md037qORvYWFCWnePPBz+yTErSaqZA4yOwI/0aZoI81zKrw==
@@ -7609,10 +7609,10 @@ rocketh-web3@^0.2.17:
   resolved "https://registry.yarnpkg.com/rocketh-web3/-/rocketh-web3-0.2.17.tgz#264afdac98bfa783472bc735682e0116575ad14c"
   integrity sha512-2tECHGd6ZejtNQn/FcBe+U3wg2vtY1/sx5iBVpd4jt85D0B41cn1pD50g3yI/QAdxp7yECPJXp7/TjbbLDen5g==
 
-rocketh@^0.3.26:
-  version "0.3.26"
-  resolved "https://registry.yarnpkg.com/rocketh/-/rocketh-0.3.26.tgz#5ec7d3de23e47df57abd6a43a386602e39baac65"
-  integrity sha512-aD6kSoE9EMFgopsMVF0f+TdQHKK7PDNF4j/pXbVxWcuKsJwUF3mkJt3WIzTWlVSJ1e3bhd++7MlRKXkrQlyDvg==
+rocketh@^0.4.7:
+  version "0.4.7"
+  resolved "https://registry.yarnpkg.com/rocketh/-/rocketh-0.4.7.tgz#aa66c6412afe62036ec2b3a5c85a69e38b14fdbc"
+  integrity sha512-XxkXC5qfCQOR5uHqv+nk8HcK1wsDFGP6mZh3UzBUsNapw2yo/Lv0ZasCEdFNFVvQSNPf4zGvOfSwM29g8RaV0A==
   dependencies:
     "@rauschma/stringio" "^1.4.0"
     bip39 "^2.5.0"
@@ -7622,7 +7622,7 @@ rocketh@^0.3.26:
     commander "^3.0.1"
     cross-spawn "^6.0.5"
     deepmerge "^4.0.0"
-    ethers "^5.0.0-beta.157"
+    ethers "^5.0.0-beta.159"
     mythxjs "^1.3.1"
     portfinder "^1.0.20"
     rimraf "^2.6.3"

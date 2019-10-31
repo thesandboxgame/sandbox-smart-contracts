@@ -12,14 +12,17 @@ contract GenesisBouncer is Admin {
     {
         _asset = asset;
         _admin = genesisAdmin;
-        setMinter(firstMinter, true);
+        _setMinter(firstMinter, true);
     }
 
     event MinterUpdated(address minter, bool allowed);
-    function setMinter(address minter, bool allowed) public {
-        require(msg.sender == _admin, "only admin can allocate minter");
+    function _setMinter(address minter, bool allowed) internal {
         _minters[minter] = allowed;
         emit MinterUpdated(minter, allowed);
+    }
+    function setMinter(address minter, bool allowed) external {
+        require(msg.sender == _admin, "only admin can allocate minter");
+        _setMinter(minter, allowed);
     }
 
     function mintFor(
