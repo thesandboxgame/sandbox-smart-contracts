@@ -52,6 +52,8 @@ module.exports = {
             default: 0,
             1: '0x9695ed5020BB47880738Db356678fe8cBc8FF60b', // TODO use another wallet ?
         },
+        bundleSandSaleAdmin: 'sandAdmin',
+        bundleSandSaleBeneficiary: 'sandSaleBeneficiary',
 
         // testing
         others: {

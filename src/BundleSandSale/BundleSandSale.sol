@@ -3,84 +3,90 @@ pragma solidity 0.5.9;
 import "../../contracts_common/src/Libraries/SafeMathWithRequire.sol";
 import "../../contracts_common/src/Interfaces/ERC20.sol";
 import "../../contracts_common/src/Interfaces/Medianizer.sol";
+import "../../contracts_common/src/BaseWithStorage/Admin.sol";
 import "../Asset/ERC1155ERC721.sol";
 
-contract BundleSandSale {
+
+contract BundleSandSale is Admin {
     using SafeMathWithRequire for uint256;
-    Medianizer public medianizer;
-    ERC20 public sand;
-    ERC20 public dai;
+
+    Medianizer private _medianizer;
+    ERC20 private _sand;
+    ERC20 private _dai;
     ERC1155ERC721 _asset;
 
-    address public admin;
-    address payable public wallet;
-    bool public isPaused;
+    address payable private _receivingWallet;
     uint256[] _packIds;
     uint256[] _packAmounts;
-    uint256 _packSand;
-    uint256 _sandPriceInUsd;
+    uint256 _sandAmountPerPack;
+    uint256 _priceUSDPerPack;
 
-    /**
-     * @notice Initializes the contract
-     * @param medianizerContractAddress The address of the Medianizer contract
-     * @param sandTokenContractAddress The address of the SAND token contract
-     * @param daiTokenContractAddress The address of the DAI token contract
-     * @param initialAdmin The address of the admin of the contract
-     * @param initialWallet the address of the wallet that will receive the funds
-     */
     constructor(
         address sandTokenContractAddress,
         address assetTokenContractAddress,
         address medianizerContractAddress,
         address daiTokenContractAddress,
-        address initialAdmin,
+        address admin,
         address payable initialWallet,
         uint256[] memory packIds,
         uint256[] memory packAmounts,
-        uint256 packSand,
-        uint256 sandPriceInUsd
+        uint256 sandAmountPerPack,
+        uint256 priceUSDPerPack
     ) public {
         require(initialWallet != address(0), "need a wallet to receive funds");
-        medianizer = Medianizer(medianizerContractAddress);
-        sand = ERC20(sandTokenContractAddress);
+        _medianizer = Medianizer(medianizerContractAddress);
+        _sand = ERC20(sandTokenContractAddress);
         _asset = ERC1155ERC721(assetTokenContractAddress);
-        dai = ERC20(daiTokenContractAddress);
-        admin = initialAdmin;
-        wallet = initialWallet;
+        _dai = ERC20(daiTokenContractAddress);
+        _admin = admin;
+        _receivingWallet = initialWallet;
         _packIds = packIds;
         _packIds = packAmounts;
-        _packSand = packSand;
-        _sandPriceInUsd = sandPriceInUsd;
+        _sandAmountPerPack = sandAmountPerPack;
+        _priceUSDPerPack = priceUSDPerPack;
+    }
+
+    function _transferPack(uint256 numPacks, address to) internal {
+        require(
+            _sand.transferFrom(address(this), to, _sandAmountPerPack.mul(numPacks)),
+            "Transfer failed"
+        );
+        uint256 numIds = _packAmounts.length;
+        uint256[] memory packAmounts = new uint256[](numIds);
+        for (uint256 i = 0; i< numIds; i++) {
+            packAmounts[i] = _packAmounts[i].mul(numPacks);
+        }
+        _asset.safeBatchTransferFrom(address(this), to, _packIds, packAmounts, "");
     }
 
     /**
      * @notice Buys Sand Bundle with Ether
+     * @param numPacks the amount of packs to buy
      * @param to The address that will receive the SAND
      */
-    function buyBundleWithEther(address to) external payable whenNotPaused() {
-        // require(
-        //     sand.transferFrom(address(this), to, sandAmount),
-        //     "Transfer failed"
-        // );
+    function buyBundleWithEther(uint256 numPacks, address to) external payable {
+        uint256 USDRequired = numPacks.mul(_priceUSDPerPack);
+        uint256 ETHRequired = getEtherAmountWithUSD(USDRequired);
+        require(msg.value >= ETHRequired, "not enough ether sent");
+        uint256 leftOver = msg.value - ETHRequired;
+        if(leftOver > 0) {
+            msg.sender.transfer(leftOver); // refund extra
+        }
+        
+        _transferPack(numPacks, to);
 
-        // address(wallet).transfer(msg.value);
+        address(_receivingWallet).transfer(ETHRequired);
     }
 
     /**
      * @notice Buys Sand Bundle with DAI
-     * @param daiAmount The amount of DAI
+     * @param numPacks the amount of packs to buy
      * @param to The address that will receive the SAND
      */
-    function buyBundleWithDai(uint256 daiAmount, address to) external whenNotPaused() {
-        // require(
-        //     dai.transferFrom(msg.sender, wallet, daiAmount),
-        //     "Transfer failed"
-        // );
-
-        // require(
-        //     sand.transferFrom(address(this), to, sandAmount),
-        //     "Transfer failed"
-        // );
+    function buyBundleWithDai(uint256 numPacks, address to) external {
+        uint256 USDRequired = numPacks.mul(_priceUSDPerPack);
+        require(_dai.transferFrom(msg.sender, _receivingWallet, USDRequired), "failed to transfer dai");        
+        _transferPack(numPacks, to);
     }
 
     /**
@@ -90,7 +96,7 @@ contract BundleSandSale {
      */
     function withdrawSand(address to, uint256 amount) external onlyAdmin() {
         require(
-            sand.transferFrom(address(this), to, amount),
+            _sand.transferFrom(address(this), to, amount),
             "Transfer failed"
         );
     }
@@ -116,42 +122,21 @@ contract BundleSandSale {
     }
 
     /**
-     * @notice Changes the address of the admin
-     * @param newAdmin The address of the new admin
+     * @notice Returns the amount of ETH for a specific amount of USD
+     * @param usdAmount An amount of USD
+     * @return The amount of ETH
      */
-    function changeAdmin(address newAdmin) external onlyAdmin() {
-         admin = newAdmin;
-    }
-
-    /**
-     * @notice Toggles the current pause state
-     */
-    function togglePause() external onlyAdmin() {
-        isPaused = !isPaused;
+    function getEtherAmountWithUSD(uint256 usdAmount) public view returns (uint256) {
+        uint256 ethUsdPair = getEthUsdPair();
+        return usdAmount.div(ethUsdPair);
     }
 
     /**
      * @notice Gets the ETHUSD pair from the Medianizer contract
      * @return The pair as an uint256
      */
-    function getEthUsdPair() private view returns (uint256) {
-        bytes32 pair = medianizer.read();
-
+    function getEthUsdPair() internal view returns (uint256) {
+        bytes32 pair = _medianizer.read();
         return uint256(pair);
-    }
-
-    modifier onlyAdmin() {
-        require (msg.sender == admin, "only admin allowed");
-        _;
-    }
-
-    modifier whenNotPaused() {
-        require (isPaused == false, "Contract is paused");
-        _;
-    }
-
-    modifier whenPaused() {
-        require (isPaused == true, "Contract is not paused");
-        _;
     }
 }
