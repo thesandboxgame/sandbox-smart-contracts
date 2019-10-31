@@ -11,6 +11,15 @@ contract BundleSandSale is Admin {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
 
+    event BundleSale(
+        uint256 index,
+        uint256[] ids,
+        uint256[] amounts,
+        uint256 sandAmount,
+        uint256 priceUSD,
+        uint256 numPacks
+    );
+
     using SafeMathWithRequire for uint256;
 
     Medianizer private _medianizer;
@@ -19,10 +28,16 @@ contract BundleSandSale is Admin {
     ERC1155ERC721 _asset;
 
     address payable private _receivingWallet;
-    uint256[] _packIds;
-    uint256[] _packAmounts;
-    uint256 _sandAmountPerPack;
-    uint256 _priceUSDPerPack;
+
+    struct Sale {
+        uint256[] ids;
+        uint256[] amounts;
+        uint256 sandAmount;
+        uint256 priceUSD;
+        uint256 numPacksLeft;
+    }
+
+    Sale[] sales;
 
     constructor(
         address sandTokenContractAddress,
@@ -30,36 +45,30 @@ contract BundleSandSale is Admin {
         address medianizerContractAddress,
         address daiTokenContractAddress,
         address admin,
-        address payable initialWallet,
-        uint256[] memory packIds,
-        uint256[] memory packAmounts,
-        uint256 sandAmountPerPack,
-        uint256 priceUSDPerPack
+        address payable receivingWallet
     ) public {
-        require(initialWallet != address(0), "need a wallet to receive funds");
+        require(receivingWallet != address(0), "need a wallet to receive funds");
         _medianizer = Medianizer(medianizerContractAddress);
         _sand = ERC20(sandTokenContractAddress);
         _asset = ERC1155ERC721(assetTokenContractAddress);
         _dai = ERC20(daiTokenContractAddress);
         _admin = admin;
-        _receivingWallet = initialWallet;
-        _packIds = packIds;
-        _packIds = packAmounts;
-        _sandAmountPerPack = sandAmountPerPack;
-        _priceUSDPerPack = priceUSDPerPack;
+        _receivingWallet = receivingWallet;
     }
 
-    function _transferPack(uint256 numPacks, address to) internal {
+    function _transferPack(uint256 saleIndex, uint256 numPacks, address to) internal {
+        uint256 sandAmountPerPack = sales[saleIndex].sandAmount;
         require(
-            _sand.transferFrom(address(this), to, _sandAmountPerPack.mul(numPacks)),
-            "Transfer failed"
+            _sand.transferFrom(address(this), to, sandAmountPerPack.mul(numPacks)),
+            "Sand Transfer failed"
         );
-        uint256 numIds = _packAmounts.length;
-        uint256[] memory packAmounts = new uint256[](numIds);
-        for (uint256 i = 0; i< numIds; i++) {
-            packAmounts[i] = _packAmounts[i].mul(numPacks);
+        uint256[] memory ids = sales[saleIndex].ids;
+        uint256[] memory amounts = sales[saleIndex].amounts;
+        uint256 numIds = ids.length;
+        for (uint256 i = 0; i < numIds; i++) {
+            amounts[i] = amounts[i].mul(numPacks);
         }
-        _asset.safeBatchTransferFrom(address(this), to, _packIds, packAmounts, "");
+        _asset.safeBatchTransferFrom(address(this), to, ids, amounts, "");
     }
 
     /**
@@ -67,18 +76,20 @@ contract BundleSandSale is Admin {
      * @param numPacks the amount of packs to buy
      * @param to The address that will receive the SAND
      */
-    function buyBundleWithEther(uint256 numPacks, address to) external payable {
-        uint256 USDRequired = numPacks.mul(_priceUSDPerPack);
+    function buyBundleWithEther(uint256 bundleIndex, uint256 numPacks, address to) external payable {
+        uint256 numPacksLeft = sales[bundleIndex].numPacksLeft;
+        require(numPacksLeft >= numPacks, "not enough packs on sale");
+        sales[bundleIndex].numPacksLeft = numPacksLeft - numPacks;
+
+        uint256 USDRequired = numPacks.mul(sales[bundleIndex].priceUSD);
         uint256 ETHRequired = getEtherAmountWithUSD(USDRequired);
         require(msg.value >= ETHRequired, "not enough ether sent");
         uint256 leftOver = msg.value - ETHRequired;
         if(leftOver > 0) {
             msg.sender.transfer(leftOver); // refund extra
         }
-        
-        _transferPack(numPacks, to);
-
         address(_receivingWallet).transfer(ETHRequired);
+        _transferPack(bundleIndex, numPacks, to);
     }
 
     /**
@@ -86,38 +97,32 @@ contract BundleSandSale is Admin {
      * @param numPacks the amount of packs to buy
      * @param to The address that will receive the SAND
      */
-    function buyBundleWithDai(uint256 numPacks, address to) external {
-        uint256 USDRequired = numPacks.mul(_priceUSDPerPack);
-        require(_dai.transferFrom(msg.sender, _receivingWallet, USDRequired), "failed to transfer dai");        
-        _transferPack(numPacks, to);
+    function buyBundleWithDai(uint256 saleIndex, uint256 numPacks, address to) external {
+        uint256 numPacksLeft = sales[saleIndex].numPacksLeft;
+        require(numPacksLeft >= numPacks, "not enough packs on sale");
+        sales[saleIndex].numPacksLeft = numPacksLeft - numPacks;
+
+        uint256 USDRequired = numPacks.mul(sales[saleIndex].priceUSD);
+        require(_dai.transferFrom(msg.sender, _receivingWallet, USDRequired), "failed to transfer dai");
+        _transferPack(saleIndex, numPacks, to);
     }
 
-    /**
-     * @notice Transfers the SAND balance from this contract to another address
-     * @param to The address that will receive the funds
-     * @param amount The amount to transfer
-     */
-    function withdrawSand(address to, uint256 amount) external onlyAdmin() {
-        require(
-            _sand.transferFrom(address(this), to, amount),
-            "Transfer failed"
-        );
+    function getSaleInfo(uint256 saleIndex) external view returns(uint256 priceUSD, uint256 numPacksLeft) {
+        priceUSD = sales[saleIndex].priceUSD;
+        numPacksLeft = sales[saleIndex].numPacksLeft;
     }
 
-    function withdrawERC20(ERC20 token, address to, uint256 amount) external onlyAdmin() {
-        require(
-            token.transferFrom(address(this), to, amount),
-            "Transfer failed"
-        );
-    }
+    function withdrawSale(uint256 saleIndex, address to) external onlyAdmin() {
+        uint256 numPacksLeft = sales[saleIndex].numPacksLeft;
+        sales[saleIndex].numPacksLeft = 0;
 
-    /**
-     * @notice Transfers Assets from this contract to another address
-     * @param to The address that will receive the funds
-     * @param ids ids of the Asset to transfer
-     * @param amounts The amounts to transfer
-     */
-    function withdrawAssets(address to, uint256[] calldata ids, uint256[] calldata amounts) external onlyAdmin() {
+        uint256[] memory ids = sales[saleIndex].ids;
+        uint256[] memory amounts = sales[saleIndex].amounts;
+        uint256 numIds = ids.length;
+        for (uint256 i = 0; i < numIds; i++) {
+            amounts[i] = amounts[i].mul(numPacksLeft);
+        }
+        require(_sand.transferFrom(address(this), to, numPacksLeft.mul(sales[saleIndex].sandAmount)), "transfer fo Sand failed");
         _asset.safeBatchTransferFrom(address(this), to, ids, amounts, "");
     }
 
@@ -151,30 +156,83 @@ contract BundleSandSale is Admin {
     }
 
     function onERC1155Received(
-        address _operator,
-        address _from,
-        uint256 _id,
-        uint256 _value,
-        bytes calldata _data
+        address operator,
+        address from,
+        uint256 id,
+        uint256 value,
+        bytes calldata data
     ) external returns (bytes4) {
         require(
             address(_asset) == msg.sender,
             "only accept asset as sender"
         );
-        return ERC1155_RECEIVED;
+        require(data.length > 0, "data need to contains the sale data");
+
+        (
+            uint256 numPacks,
+            uint256 sandAmountPerPack,
+            address sandFrom,
+            uint256 priceUSDPerPack
+        ) = abi.decode(data, (uint256, uint256, address, uint256));
+
+        uint256 amount = value.div(numPacks);
+        require(amount.mul(numPacks) == value, "invalid amounts, not divisible by numPacks");
+        require(_sand.transferFrom(sandFrom, address(this), sandAmountPerPack.mul(numPacks)), "failed to transfer Sand");
+        uint256[] memory amounts = new uint256[](1);
+        amounts[0] = amount;
+        uint256[] memory ids = new uint256[](1);
+        ids[0] = id;
+        _setupBundle(sandFrom, sandAmountPerPack, numPacks, ids, amounts, priceUSDPerPack);
+        return ERC1155_BATCH_RECEIVED;
     }
 
     function onERC1155BatchReceived(
-        address _operator,
-        address _from,
-        uint256[] calldata _ids,
-        uint256[] calldata _values,
-        bytes calldata _data
+        address operator,
+        address from,
+        uint256[] calldata ids,
+        uint256[] calldata values,
+        bytes calldata data
     ) external returns (bytes4) {
         require(
             address(_asset) == msg.sender,
             "only accept asset as sender"
         );
+        require(data.length > 0, "data need to contains the sale data");
+
+        (
+            uint256 numPacks,
+            uint256 sandAmountPerPack,
+            address sandFrom,
+            uint256 priceUSDPerPack
+        ) = abi.decode(data, (uint256, uint256, address, uint256));
+
+        uint256[] memory amounts = new uint256[](ids.length); // TODO
+        for(uint256 i = 0; i < amounts.length; i ++) {
+            uint256 amount = values[i].div(numPacks);
+            require(amount.mul(numPacks) == values[i], "invalid amounts, not divisible by numPacks");
+            amounts[i] = amount;
+        }
+
+        _setupBundle(sandFrom, sandAmountPerPack, numPacks, ids, amounts, priceUSDPerPack);
         return ERC1155_BATCH_RECEIVED;
+    }
+
+    function _setupBundle(
+        address sandFrom,
+        uint256 sandAmountPerPack,
+        uint256 numPacks,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        uint256 priceUSDPerPack
+    ) internal {
+        require(_sand.transferFrom(sandFrom, address(this), sandAmountPerPack.mul(numPacks)), "failed to transfer Sand");
+        uint256 saleIndex = sales.push(Sale({
+            ids: ids,
+            amounts : amounts,
+            sandAmount: sandAmountPerPack,
+            priceUSD: priceUSDPerPack,
+            numPacksLeft: numPacks
+        }));
+        emit BundleSale(saleIndex, ids, amounts, sandAmountPerPack, priceUSDPerPack, numPacks);
     }
 }

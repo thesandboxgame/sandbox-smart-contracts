@@ -53,11 +53,6 @@ module.exports = async ({namedAccounts, initialRun}) => {
         dai = daiDeployResult.contract;
     }
 
-    const packIds = []; // TODO
-    const packAmounts = []; // TODO
-    const sandAmountPerPack = '1000000000000000000'; // TODO
-    const priceUDSPerPack = '1000000000000000000'; // TODO
-
     const bundleSandSaleDeployResult = await deployIfDifferent(['data'],
         'BundleSandSale',
         {from: deployer, gas: 2000000},
@@ -67,11 +62,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
         daiMedianizer.options.address,
         dai.options.address,
         bundleSandSaleAdmin,
-        bundleSandSaleBeneficiary,
-        packIds,
-        packAmounts,
-        sandAmountPerPack,
-        priceUDSPerPack
+        bundleSandSaleBeneficiary
     );
 
     if (bundleSandSaleDeployResult.newlyDeployed) {
