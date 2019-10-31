@@ -12,6 +12,7 @@
     "test-sandSale": "rocketh launch \"yarn tap -T -j 1 -R spec test/sandSale/SandSale.test.js\"",
     "test-commonMinter": "rocketh launch \"yarn tap -T -j 1 -R spec test/asset_bouncer/testCommonMinter.js\"",
     "test-assetAuctions": "rocketh launch \"yarn tap -T -j 1 -R spec test/asset_auctions/testAssetAuctions.js\"",
+    "test-bundleSandSale": "rocketh launch \"yarn tap -T -j 1 -R spec test/bundleSandSale/testBundleSandSale.js\"",
     "test-asset": "rocketh launch \"tap -T -j 1 -R spec test/asset/testAsset.js\"",
     "ganache": "ganache-cli --seed 04624df17c837dc2113f0c65554551f2 -a 21 --gasLimit 19000000",
     "export-sand": "node export-sand.js",

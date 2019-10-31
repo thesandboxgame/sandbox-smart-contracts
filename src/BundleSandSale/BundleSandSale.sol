@@ -8,11 +8,14 @@ import "../Asset/ERC1155ERC721.sol";
 
 
 contract BundleSandSale is Admin {
+    bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
+    bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
+
     using SafeMathWithRequire for uint256;
 
     Medianizer private _medianizer;
-    ERC20 private _sand;
     ERC20 private _dai;
+    ERC20 private _sand;
     ERC1155ERC721 _asset;
 
     address payable private _receivingWallet;
@@ -101,6 +104,13 @@ contract BundleSandSale is Admin {
         );
     }
 
+    function withdrawERC20(ERC20 token, address to, uint256 amount) external onlyAdmin() {
+        require(
+            token.transferFrom(address(this), to, amount),
+            "Transfer failed"
+        );
+    }
+
     /**
      * @notice Transfers Assets from this contract to another address
      * @param to The address that will receive the funds
@@ -138,5 +148,33 @@ contract BundleSandSale is Admin {
     function getEthUsdPair() internal view returns (uint256) {
         bytes32 pair = _medianizer.read();
         return uint256(pair);
+    }
+
+    function onERC1155Received(
+        address _operator,
+        address _from,
+        uint256 _id,
+        uint256 _value,
+        bytes calldata _data
+    ) external returns (bytes4) {
+        require(
+            address(_asset) == msg.sender,
+            "only accept asset as sender"
+        );
+        return ERC1155_RECEIVED;
+    }
+
+    function onERC1155BatchReceived(
+        address _operator,
+        address _from,
+        uint256[] calldata _ids,
+        uint256[] calldata _values,
+        bytes calldata _data
+    ) external returns (bytes4) {
+        require(
+            address(_asset) == msg.sender,
+            "only accept asset as sender"
+        );
+        return ERC1155_BATCH_RECEIVED;
     }
 }
