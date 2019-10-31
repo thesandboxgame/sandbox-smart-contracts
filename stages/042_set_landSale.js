@@ -40,7 +40,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const isSandSuperOperator = await call(sand, 'isSuperOperator', landSale.options.address);
     if (!isSandSuperOperator) {
-        log('setting AssetSignedAuction as super operator for Sand');
+        log('setting LandSale as super operator for Sand');
         const currentSandAdmin = await call(sand, 'getAdmin');
         await txOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000}, sand, 'setSuperOperator', landSale.options.address, true);
     }

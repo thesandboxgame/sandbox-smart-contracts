@@ -36,6 +36,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
         'LandSale',
         landContract.options.address,
         sandContract.options.address,
+        sandContract.options.address,
         landSaleAdmin,
         landSaleBeneficiary,
     );
