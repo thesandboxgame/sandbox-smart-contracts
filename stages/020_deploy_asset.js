@@ -24,7 +24,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const deployResult = await deployIfDifferent(['data'],
         'Asset',
-        {from: deployer, gas: 6500000},
+        {from: deployer, gas: 6500000}, // , gasPrice: '10000000000'},
         'Asset',
         sandContract.options.address,
         deployer, // is set to assetAdmin in a later stage

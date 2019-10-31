@@ -22,8 +22,8 @@ module.exports = async ({namedAccounts, initialRun}) => {
         'Sand',
         {from: deployer, gas: 3000000},
         'Sand',
-        sandAdmin,
-        sandAdmin,
+        deployer,
+        deployer,
         sandBeneficiary
     );
 

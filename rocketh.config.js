@@ -17,7 +17,9 @@ module.exports = {
             type: 'mnemonic',
         },
         1: { // ethereum mainnet
-            type: 'bitski'
+            // type: 'bitski'
+            type: 'mnemonic',
+            path: '.mnemonic_for_deployment'
         },
         18: { // thundercore testnet
             type: 'mnemonic',
@@ -32,7 +34,7 @@ module.exports = {
             1: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06', // multi sig wallet
             4: '0xcbc70EcCd52bF3910CDC1455E6D2Bd45725F573D' // test multi sig wallet
         },
-
+        sandExecutionAdmin: 'sandAdmin',
         // metaTransactionFundOwner: 0, // TODO
         // metaTransactionExecutor: 0, // TODO
         mintingFeeCollector: 'sandAdmin', // will receiver the fee from Asset minting
@@ -42,8 +44,10 @@ module.exports = {
         sandSaleAdmin: 'sandAdmin', // can pause the sandSale and withdraw SAND
         genesisBouncerAdmin: 'sandAdmin', // can set who is allowed to mint
         commonMinterAdmin: 'sandAdmin', // can change the fees
-        genesisMinter: 'sandAdmin', // the first account allowed to mint genesis Assets
-        orbsBeneficiary: 'sandAdmin',
+        genesisMinter: 'deployer', // the first account allowed to mint genesis Assets
+        assetAuctionTaxCollector: 'sandSaleBeneficiary',
+        assetAuctionAdmin: 'sandAdmin',
+        orbsBeneficiary: 'sandSaleBeneficiary',
         sandSaleBeneficiary: {
             default: 0,
             1: '0x9695ed5020BB47880738Db356678fe8cBc8FF60b', // TODO use another wallet ?
