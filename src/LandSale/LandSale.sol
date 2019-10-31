@@ -16,6 +16,8 @@ contract LandSale is MetaTransactionReceiver {
     address payable public _wallet;
     bool public _isPaused = false;
 
+    bytes32 _merkleRoot;
+
     /**
      * @notice Initializes the contract
      * @param landAddress The address of the land contract
@@ -29,13 +31,15 @@ contract LandSale is MetaTransactionReceiver {
         address erc20ContractAddress,
         address initialMetaTx,
         address admin,
-        address payable initialWalletAddress
+        address payable initialWalletAddress,
+        bytes32 merkleRoot
     ) public {
         _land = Land(landAddress);
         _erc20 = ERC20(erc20ContractAddress);
         _setMetaTransactionProcessor(initialMetaTx, true);
         _admin = admin;
         _wallet = initialWalletAddress;
+        _merkleRoot = merkleRoot;
     }
 
     function buyLand(
@@ -45,15 +49,14 @@ contract LandSale is MetaTransactionReceiver {
         uint16 y,
         uint16 size,
         uint256 price,
-        bytes32[] calldata proof,
-        bytes32 root
+        bytes32[] calldata proof
     ) external payable whenNotPaused() {
         require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "not authorized");
         bytes32 landHash = _generateLandHash(x, y, size, price);
         bytes32 leaf = keccak256(abi.encodePacked(landHash));
 
         require(
-            _verify(proof, root, leaf),
+            _verify(proof, leaf),
             "Invalid land provided"
         );
 
@@ -63,7 +66,7 @@ contract LandSale is MetaTransactionReceiver {
                 _wallet,
                 price
             ),
-            "Insufficient funds"
+            "erc20 transfer failed"
         );
 
         _land.mintBlock(to, size, x, y);
@@ -113,11 +116,10 @@ contract LandSale is MetaTransactionReceiver {
     /**
      * @notice Verifies if a leaf is part of a Merkle tree
      * @param proof The proof for the leaf
-     * @param root The root of the Merkle tree
      * @param leaf The leaf to verify
      * @return True if the leaf is valid
      */
-    function _verify(bytes32[] memory proof, bytes32 root, bytes32 leaf) private pure returns (bool) {
+    function _verify(bytes32[] memory proof, bytes32 leaf) private view returns (bool) {
         bytes32 computedHash = leaf;
 
         for (uint256 i = 0; i < proof.length; i++) {
@@ -130,7 +132,7 @@ contract LandSale is MetaTransactionReceiver {
             }
         }
 
-        return computedHash == root;
+        return computedHash == _merkleRoot;
     }
 
     modifier onlyAdmin() {

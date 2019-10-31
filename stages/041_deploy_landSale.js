@@ -30,6 +30,8 @@ module.exports = async ({namedAccounts, initialRun}) => {
         throw new Error('no LAND contract deployed');
     }
 
+    const merkleRoot = '0x1111111111111111111111111111111111111111111111111111111111111111'; // TODO
+
     const deployResult = await deployIfDifferent(['data'],
         'LandSale',
         {from: deployer, gas: 8000000},
@@ -39,6 +41,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
         sandContract.options.address,
         landSaleAdmin,
         landSaleBeneficiary,
+        merkleRoot
     );
 
     if (deployResult.newlyDeployed) {
