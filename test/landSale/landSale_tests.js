@@ -11,7 +11,7 @@ const {
 
 const {
     sandBeneficiary,
-    landSaleAdmin,
+    landAdmin,
     others,
 } = rocketh.namedAccounts
 
@@ -33,16 +33,6 @@ function runLandSaleTests(title, contactStore) {
             await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[0], '1000000000000000000000');
         });
 
-        t.test('non-admin CANNOT togglePause', async (t) => {
-            await expectThrow(tx(contracts.LandSale, 'togglePause', {from: others[0], gas}));
-        });
-
-        t.test('can togglePause after being constructed', async (t) => {
-            await tx(contracts.LandSale, 'togglePause', {from: landSaleAdmin, gas});
-            const paused = await call(contracts.LandSale, 'isPaused', {});
-            assert.equal(paused, true);
-        });
-
         t.test('can buy Land', async (t) => {
             const proof = tree.getProof(calculateLandHash({
                 x: 400,
@@ -59,8 +49,8 @@ function runLandSaleTests(title, contactStore) {
             );
         });
 
-        t.test('CANNOT buy Land when paused', async (t) => {
-            await tx(contracts.LandSale, 'togglePause', {from: landSaleAdmin, gas});
+        t.test('CANNOT buy Land when minter rights revoked', async (t) => {
+            await tx(contracts.Land, 'setMinter', {from: landAdmin, gas}, contracts.LandSale.options.address, false);
             const proof = tree.getProof(calculateLandHash({
                 x: 400,
                 y: 106,

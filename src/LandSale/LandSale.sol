@@ -11,9 +11,7 @@ import "../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 contract LandSale is MetaTransactionReceiver {
     Land internal _land;
     ERC20 internal _erc20;
-
     address payable internal _wallet;
-    bool internal _isPaused = false;
 
     bytes32 internal _merkleRoot;
 
@@ -56,7 +54,7 @@ contract LandSale is MetaTransactionReceiver {
         uint16 size,
         uint256 price,
         bytes32[] calldata proof
-    ) external whenNotPaused() {
+    ) external {
         require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "not authorized");
         bytes32 leaf = _generateLandHash(x, y, size, price);
 
@@ -75,21 +73,6 @@ contract LandSale is MetaTransactionReceiver {
         );
 
         _land.mintBlock(to, size, x, y);
-    }
-
-    /**
-     * @notice Toggles the current pause state
-     */
-    function togglePause() external onlyAdmin() {
-        _isPaused = !_isPaused;
-    }
-
-    /**
-     * @notice return whether the sale is paused
-     * @return whether the sale is paused
-     */
-    function isPaused() external view returns(bool) {
-        return _isPaused;
     }
 
     function _generateLandHash(
@@ -125,15 +108,4 @@ contract LandSale is MetaTransactionReceiver {
 
         return computedHash == _merkleRoot;
     }
-
-    modifier whenNotPaused() {
-        require(_isPaused == false, "Contract is paused");
-        _;
-    }
-
-    modifier whenPaused() {
-        require(_isPaused == true, "Contract is not paused");
-        _;
-    }
-
 }
