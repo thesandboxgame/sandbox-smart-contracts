@@ -9,7 +9,7 @@ const MerkleTree = require('../lib/merkleTree');
 const {createDataArray} = require('../lib/merkleTreeHelper');
 const landsForSales = require('../data/land_presale_001.json');
 
-module.exports = async ({namedAccounts, initialRun, deploy, contractInfo, registerDeployment, fetchIfDifferent}) => {
+module.exports = async ({namedAccounts, initialRun, deployIfDifferent}) => {
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -36,36 +36,21 @@ module.exports = async ({namedAccounts, initialRun, deploy, contractInfo, regist
     const tree = new MerkleTree(createDataArray(landsForSales));
     const merkleRootHash = tree.getRoot().hash;
 
-    const args = [
+    const deployResult = await deployIfDifferent(['data'],
+        'LandSale',
+        {from: deployer, gas: 8000000, associatedData: landsForSales},
+        'LandSale',
         landContract.options.address,
         sandContract.options.address,
         sandContract.options.address,
         landSaleAdmin,
         landSaleBeneficiary,
         merkleRootHash
-    ];
-    const isDifferent = await fetchIfDifferent(['data'],
-        {from: deployer, gas: 8000000},
-        'LandSale',
-        ...args
     );
-    if (isDifferent) {
-        const deployResult = await deploy({from: deployer, gas: 8000000},
-            'LandSale',
-            ...args
-        );
-        const landSaleContractInfo = contractInfo('LandSale');
-        registerDeployment('LandSale', {
-            contractInfo: landSaleContractInfo,
-            args,
-            transactionHash: deployResult.transactionHash,
-            address: deployResult.contract.address,
-            data: landsForSales
-        });
-        const contract = getDeployedContract('LandSale');
+    const contract = getDeployedContract('LandSale');
+    if (deployResult.newlyDeployed) {
         log(' - LandSale deployed at : ' + contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
     } else {
-        const contract = getDeployedContract('LandSale');
         log('reusing LandSale at ' + contract.options.address);
     }
 };

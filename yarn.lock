@@ -7609,10 +7609,10 @@ rocketh-web3@^0.2.17:
   resolved "https://registry.yarnpkg.com/rocketh-web3/-/rocketh-web3-0.2.17.tgz#264afdac98bfa783472bc735682e0116575ad14c"
   integrity sha512-2tECHGd6ZejtNQn/FcBe+U3wg2vtY1/sx5iBVpd4jt85D0B41cn1pD50g3yI/QAdxp7yECPJXp7/TjbbLDen5g==
 
-rocketh@^0.4.8:
-  version "0.4.8"
-  resolved "https://registry.yarnpkg.com/rocketh/-/rocketh-0.4.8.tgz#31a7e9717de9a2a1b69a9e257f91c5b3f7ed8faa"
-  integrity sha512-spswsTvBjy7LV4Plrw2ia6kDBVrVTNj4HbHi7oXjHrHjhl9zGj8HDZ2cIiPqL6bnnY2NRvAGUV4Yh8A+HUKkPA==
+rocketh@^0.4.9:
+  version "0.4.9"
+  resolved "https://registry.yarnpkg.com/rocketh/-/rocketh-0.4.9.tgz#c4f66771343de10b7641445e25d05753043eb05a"
+  integrity sha512-RWKGseCwKh53COrQywVYVKGAhfvmmuMHKq+4hS0LiH3jn80kQgJPng5c+qpUpY75NUDqqSq+ytFndlJhd454Xg==
   dependencies:
     "@rauschma/stringio" "^1.4.0"
     bip39 "^2.5.0"
