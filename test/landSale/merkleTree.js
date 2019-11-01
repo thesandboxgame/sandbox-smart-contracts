@@ -1,14 +1,5 @@
 /* eslint-disable class-methods-use-this, camelcase */
-
 const Web3 = require('web3');
-
-// console.log(Web3.utils.soliditySha3({
-//     type: 'bytes32',
-//     value: '0xc79af0aec7e5798c71f0f299a546aa54603d1bf9f55f12b39bfd163937c7a178',
-// }, {
-//     type: 'bytes32',
-//     value: '0xc79af0aec7e5798c71f0f299a546aa54603d1bf9f55f12b39bfd163937c7a178',
-// }));
 
 class MerkleTree {
     constructor(data) {
@@ -16,7 +7,6 @@ class MerkleTree {
         this.leaves = this.buildLeaves(data);
         for (const leaf of this.leaves) {
             this.leavesByHash[leaf.hash] = leaf;
-            console.log(leaf.hash);
         }
         this.root = this.computeMerkleTree(this.leaves);
     }
@@ -37,7 +27,6 @@ class MerkleTree {
             even.push(
                 even[even.length - 1],
             );
-            console.log('pushing same');
         }
 
         return even;
@@ -135,11 +124,7 @@ class MerkleTree {
 
         while (nodes.length > 1) {
             nodes = this.createParentNodes(nodes);
-            try {
-                nodes = this.sort(nodes);
-            } catch (e) {
-                console.log('sortedArray', JSON.stringify(nodes, ['hash'], '  '));
-            }
+            nodes = this.sort(nodes);
         }
 
         return nodes[0];
@@ -169,14 +154,11 @@ class MerkleTree {
     getProof(leafHash) {
         let leaf = this.leavesByHash[leafHash];
 
-        console.log('leaf hash', leaf.hash);
         const path = [];
         while (leaf.parent) {
             if (leaf.parent.left === leaf) {
-                console.log('take right of', leaf.parent.hash);
                 path.push(leaf.parent.right ? leaf.parent.right.hash : leaf.parent.left.hash);
             } else {
-                console.log('take left of', leaf.parent.hash);
                 path.push(leaf.parent.left ? leaf.parent.left.hash : leaf.parent.right.hash);
             }
             leaf = leaf.parent;
@@ -185,14 +167,10 @@ class MerkleTree {
         return path;
     }
 
-    isDataValid(data, proof) {
-        const leaf = data; //Web3.utils.soliditySha3(data);
-
+    isDataValid(leaf, proof) {
         let potentialRoot = leaf;
-
         for (let i = 0; i < proof.length; i += 1) {
             if (Web3.utils.toBN(potentialRoot).lt(Web3.utils.toBN(proof[i]))) {
-                console.log(potentialRoot, '<', proof[i]);
                 potentialRoot = Web3.utils.soliditySha3({
                     type: 'bytes32',
                     value: potentialRoot,
@@ -200,9 +178,7 @@ class MerkleTree {
                     type: 'bytes32',
                     value: proof[i],
                 });
-                console.log('potentialRoot using proof as right', potentialRoot);
             } else {
-                console.log(potentialRoot, '>=', proof[i]);
                 potentialRoot = Web3.utils.soliditySha3({
                     type: 'bytes32',
                     value: proof[i],
@@ -210,7 +186,6 @@ class MerkleTree {
                     type: 'bytes32',
                     value: potentialRoot,
                 });
-                console.log('potentialRoot using proof as left', potentialRoot);
             }
         }
 
