@@ -722,6 +722,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         bool approved
     ) internal {
         require(sender != address(0), "sender is zero address");
+        require(sender != operator, "sender = operator");
         require(operator != address(0), "operator is zero address");
         require(
             !_superOperators[operator],
