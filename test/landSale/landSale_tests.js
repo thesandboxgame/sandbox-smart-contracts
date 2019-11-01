@@ -22,10 +22,14 @@ function runLandSaleTests(title, contactStore) {
     tap.test(title + ' tests', async (t)=> {
         let contracts;
         let tree;
+        let lands;
+        let landHashArray;
         t.beforeEach(async () => {
             contracts = await contactStore.resetContracts();
             const deployment = rocketh.deployment('LandSale');
-            tree = new MerkleTree(createDataArray(deployment.data));
+            lands = deployment.data;
+            landHashArray = createDataArray(lands);
+            tree = new MerkleTree(landHashArray);
             await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[0], '1000000000000000000000');
         });
 
@@ -72,8 +76,31 @@ function runLandSaleTests(title, contactStore) {
             ));
         });
 
+        t.test('CANNOT buy Land twice', async (t) => {
+            const proof = tree.getProof(calculateLandHash({
+                x: 400,
+                y: 106,
+                size: 1,
+                price: '4047'
+            }));
+            await tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
+                others[0],
+                others[0],
+                400, 106, 1,
+                4047,
+                proof
+            );
+            await expectThrow(tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
+                others[0],
+                others[0],
+                400, 106, 1,
+                4047,
+                proof
+            ));
+        });
+
         t.test('CANNOT generate proof for Land not on sale', async (t) => {
-            assert.throws(tree.getProof(calculateLandHash({
+            assert.throws(() => tree.getProof(calculateLandHash({
                 x: 400,
                 y: 106,
                 size: 3,
@@ -98,10 +125,10 @@ function runLandSaleTests(title, contactStore) {
 
         t.test('CANNOT buy Land with wrong proof', async (t) => {
             const proof = tree.getProof(calculateLandHash({
-                x: 399,
-                y: 250,
+                x: 288,
+                y: 144,
                 size: 12,
-                price: '2773'
+                price: '1358'
             }));
             await expectThrow(tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
                 others[0],
@@ -112,13 +139,42 @@ function runLandSaleTests(title, contactStore) {
             ));
         });
 
-        t.todo('can buy all Lands specified in json', async (t) => {
-            // TODO
+        t.test('after buying user own all Land bought', async (t) => {
+            const proof = tree.getProof(calculateLandHash({
+                x: 288,
+                y: 144,
+                size: 12,
+                price: '1358'
+            }));
+            await tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
+                others[0],
+                others[0],
+                288, 144, 12,
+                '1358',
+                proof
+            );
+            for (let x = 288; x < 288 + 12; x++) {
+                for (let y = 144; y < 144 + 12; y++) {
+                    const owner = await call(contracts.Land, 'ownerOf', null, x + (y * 408));
+                    assert.equal(owner, others[0]);
+                }
+            }
         });
 
-        t.todo('cannot buy Lands not specified in json', async (t) => {
-            // TODO
+        t.test('can buy all Lands specified in json', async (t) => {
+            for (const land of lands) {
+                const landHash = calculateLandHash(land);
+                const proof = tree.getProof(landHash);
+                await tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
+                    others[0],
+                    others[0],
+                    land.x, land.y, land.size,
+                    land.price,
+                    proof
+                );
+            }
         });
+
     });
 }
 
