@@ -8,10 +8,6 @@ import "../../../contracts_common/src/BaseWithStorage/SuperOperators.sol";
 import "../../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 
 
-/**
- * @title LandBaseToken
- * @notice This contract is the base of our lands
- */
 contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver {
     using AddressUtils for address;
 
@@ -64,12 +60,6 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
         _setMetaTransactionProcessor(metaTransactionContract, true);
     }
 
-    /**
-     * @notice Transfer a token between 2 addresses
-     * @param from The send of the token
-     * @param to The recipient of the token
-     * @param id The id of the token
-     */
     function _transferFrom(address from, address to, uint256 id) internal {
         require(id & LAYER == 0, "Invalid token id");
         address owner = _ownerOf(id);
@@ -92,9 +82,9 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     }
 
     /**
-     * @notice Return the balance of an address
+     * @notice Return the number of Land owned by an address
      * @param owner The address to look for
-     * @return The balance of the address
+     * @return The number of Land token owned by the address
      */
     function balanceOf(address owner) external view returns (
         uint256 _balance
@@ -187,11 +177,6 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
         _numNFTPerAddress[to] += size * size;
     }
 
-    /**
-     * @notice Return the owner of a token
-     * @param id The id of the token
-     * @return The address of the owner
-     */
     function _ownerOf(uint256 id) internal view returns (address) {
         uint256 x = id % GRID_SIZE;
         uint256 y = id / GRID_SIZE;
@@ -221,8 +206,8 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
     }
 
     /**
-     * @notice Return the owner of a token
-     * @param id The id of the token
+     * @notice Return the owner of a Land
+     * @param id The id of the Land
      * @return The address of the owner
      */
     function ownerOf(uint256 id) external view returns (address owner) {
@@ -396,12 +381,7 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
         _setApprovalForAll(msg.sender, operator, approved);
     }
 
-    /**
-     * @notice Set the approval for an operator to manage all the tokens of the sender
-     * @param sender The address giving the approval
-     * @param operator The address receiving the approval
-     * @param approved The determination of the approval
-     */
+
     function _setApprovalForAll(
         address sender,
         address operator,
@@ -458,15 +438,6 @@ contract LandBaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver 
         _burn(from, id);
     }
 
-    /**
-     * @notice Internal function to invoke `onERC721Received` on a target address.
-     * The call is not executed if the target address is not a contract.
-     * @param from address representing the previous owner of the given token ID
-     * @param to target address that will receive the tokens
-     * @param tokenId uint256 ID of the token to be transferred
-     * @param _data bytes optional data to send along with the call
-     * @return bool whether the call correctly returned the expected magic value
-     */
     function _checkOnERC721Received(address from, address to, uint256 tokenId, bytes memory _data)
         internal returns (bool)
     {
