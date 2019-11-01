@@ -30,15 +30,3 @@ LandSaleContract.prototype.resetContract = async function () {
 };
 
 runLandSaleTests('LandSale', new LandSaleContract());
-runMerkleTreeTest();
-
-/*
-tap.test('Running LandSale tests', async (t) => {
-    let landSale;
-
-    t.beforeEach(async () => {
-        await rocketh.runStages();
-        landSale = getDeployedContract('LandSale');
-    });
-});
-*/
