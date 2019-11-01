@@ -9,22 +9,14 @@ import "../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
  * @notice This contract mananges the sale of our lands
  */
 contract LandSale is MetaTransactionReceiver {
-    Land private _land;
-    ERC20 private _erc20;
+    Land internal _land;
+    ERC20 internal _erc20;
 
-    address payable private _wallet;
-    bool private _isPaused = false;
+    address payable internal _wallet;
+    bool internal _isPaused = false;
 
-    bytes32 private _merkleRoot;
+    bytes32 internal _merkleRoot;
 
-    /**
-     * @notice Initializes the contract
-     * @param landAddress The address of the land contract
-     * @param erc20ContractAddress The address of the erc20 token for payment
-     * @param initialMetaTx initial mettx processor
-     * @param admin The address of the admin
-     * @param initialWalletAddress The address of the recipient wallet
-     */
     constructor(
         address landAddress,
         address erc20ContractAddress,
@@ -45,6 +37,17 @@ contract LandSale is MetaTransactionReceiver {
         return _merkleRoot;
     }
 
+    /**
+     * @notice buy Land using the merkle proof associated with it
+     * @param buyer address that perform the payment
+     * @param to address that will owne the Land purchased
+     * @param x x coordinate of the Land
+     * @param y  coordinayte of the Land
+     * @param size size of the pack of Land to purchase
+     * @param price amount of Sand to purchase that Land
+     * @param proof merkleProof for that particular Land
+     * @return The address of the operator
+     */
     function buyLand(
         address buyer,
         address to,
@@ -64,7 +67,7 @@ contract LandSale is MetaTransactionReceiver {
 
         require(
             _erc20.transferFrom(
-                msg.sender,
+                buyer,
                 _wallet,
                 price
             ),
@@ -81,24 +84,20 @@ contract LandSale is MetaTransactionReceiver {
         _isPaused = !_isPaused;
     }
 
+    /**
+     * @notice return whether the sale is paused
+     * @return whether the sale is paused
+     */
     function isPaused() external view returns(bool) {
         return _isPaused;
     }
 
-    /**
-     * @notice Generates the hash of a land (different from the id)
-     * @param x The x position of the land
-     * @param y The y position of the land
-     * @param size The size of the land
-     * @param price The price of the land
-     * @return The hash of the land
-     */
     function _generateLandHash(
         uint16 x,
         uint16 y,
         uint16 size,
         uint256 price
-    ) private pure returns (
+    ) internal pure returns (
         bytes32
     ) {
         return keccak256(
@@ -111,13 +110,7 @@ contract LandSale is MetaTransactionReceiver {
         );
     }
 
-    /**
-     * @notice Verifies if a leaf is part of a Merkle tree
-     * @param proof The proof for the leaf
-     * @param leaf The leaf to verify
-     * @return True if the leaf is valid
-     */
-    function _verify(bytes32[] memory proof, bytes32 leaf) private view returns (bool) {
+    function _verify(bytes32[] memory proof, bytes32 leaf) internal view returns (bool) {
         bytes32 computedHash = leaf;
 
         for (uint256 i = 0; i < proof.length; i++) {
