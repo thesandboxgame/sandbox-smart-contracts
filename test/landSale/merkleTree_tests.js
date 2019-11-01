@@ -4,7 +4,7 @@ const tap = require('tap');
 const assert = require('assert');
 const Web3 = require('web3');
 
-const MerkleTree = require('./merkleTree');
+const MerkleTree = require('../../lib/merkleTree');
 
 function calculateLandHash(land) {
     return Web3.utils.soliditySha3({
