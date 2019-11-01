@@ -1,5 +1,5 @@
 const {
     runMerkleTreeTest,
-} = require('./merkleTreeTests');
+} = require('./merkleTree_tests');
 
 runMerkleTreeTest();
