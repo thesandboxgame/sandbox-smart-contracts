@@ -3,30 +3,17 @@ const rocketh = require('rocketh');
 const {getDeployedContract} = require('../../lib');
 
 const {
-    runMerkleTreeTest,
-} = require('./merkleTreeTests');
-
-const {
     runLandSaleTests
 } = require('./landSale_tests');
 
-const {
-    balanceOf,
-} = require('../erc721');
-
-const {
-    tx,
-    gas,
-    expectThrow,
-} = require('../utils');
-
-function LandSaleContract() {
-    this.contract = null;
+function ContractStore() {
 }
-LandSaleContract.prototype.resetContract = async function () {
+ContractStore.prototype.resetContracts = async function () {
     await rocketh.runStages();
-    this.contract = getDeployedContract('LandSale');
-    return this.contract;
+    return {
+        LandSale: getDeployedContract('LandSale'),
+        Sand: getDeployedContract('Sand')
+    };
 };
 
-runLandSaleTests('LandSale', new LandSaleContract());
+runLandSaleTests('LandSale', new ContractStore());

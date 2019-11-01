@@ -1,12 +1,15 @@
 const rocketh = require('rocketh');
 const Web3 = require('web3');
 const {
-    deployIfDifferent,
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);
 const {guard} = require('../lib');
 
-module.exports = async ({namedAccounts, initialRun}) => {
+const MerkleTree = require('../lib/merkleTree');
+const {createDataArray} = require('../lib/merkleTreeHelper');
+const landsForSales = require('../data/land_presale_001.json');
+
+module.exports = async ({namedAccounts, initialRun, deploy, contractInfo, registerDeployment, fetchIfDifferent}) => {
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -30,24 +33,40 @@ module.exports = async ({namedAccounts, initialRun}) => {
         throw new Error('no LAND contract deployed');
     }
 
-    const merkleRoot = '0x1111111111111111111111111111111111111111111111111111111111111111'; // TODO
+    const tree = new MerkleTree(createDataArray(landsForSales));
+    const merkleRootHash = tree.getRoot().hash;
 
-    const deployResult = await deployIfDifferent(['data'],
-        'LandSale',
-        {from: deployer, gas: 8000000},
-        'LandSale',
+    const args = [
         landContract.options.address,
         sandContract.options.address,
         sandContract.options.address,
         landSaleAdmin,
         landSaleBeneficiary,
-        merkleRoot
+        merkleRootHash
+    ];
+    const isDifferent = await fetchIfDifferent(['data'],
+        {from: deployer, gas: 8000000},
+        'LandSale',
+        ...args
     );
-
-    if (deployResult.newlyDeployed) {
-        log(' - LandSale deployed at : ' + deployResult.contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
+    if (isDifferent) {
+        const deployResult = await deploy({from: deployer, gas: 8000000},
+            'LandSale',
+            ...args
+        );
+        const landSaleContractInfo = contractInfo('LandSale');
+        registerDeployment('LandSale', {
+            contractInfo: landSaleContractInfo,
+            args,
+            transactionHash: deployResult.transactionHash,
+            address: deployResult.contract.address,
+            data: landsForSales
+        });
+        const contract = getDeployedContract('LandSale');
+        log(' - LandSale deployed at : ' + contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
     } else {
-        log('reusing LandSale at ' + deployResult.contract.options.address);
+        const contract = getDeployedContract('LandSale');
+        log('reusing LandSale at ' + contract.options.address);
     }
 };
 module.exports.skip = guard(['1', '4']);
