@@ -61,9 +61,9 @@ contract Land is LandBaseToken {
         return
             string(
                 abi.encodePacked(
-                    "https://sandbox.game/land/",
+                    "https://api.sandbox.game/land/",
                     uint2str(id),
-                    ".json"
+                    "/metadata.json"
                 )
             );
     }

@@ -3,7 +3,7 @@ const Web3 = require('web3');
 const {
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);
-const {guard} = require('../lib');
+const {guard, multiGuards} = require('../lib');
 
 const MerkleTree = require('../lib/merkleTree');
 const {createDataArray} = require('../lib/merkleTreeHelper');
@@ -38,7 +38,7 @@ module.exports = async ({namedAccounts, initialRun, deployIfDifferent}) => {
 
     const deployResult = await deployIfDifferent(['data'],
         'LandSale',
-        {from: deployer, gas: 8000000, associatedData: landsForSales},
+        {from: deployer, gas: 1000000, associatedData: landsForSales},
         'LandSale',
         landContract.options.address,
         sandContract.options.address,
@@ -54,4 +54,4 @@ module.exports = async ({namedAccounts, initialRun, deployIfDifferent}) => {
         log('reusing LandSale at ' + contract.options.address);
     }
 };
-module.exports.skip = guard(['1', '4']);
+module.exports.skip = multiGuards([guard(['4'], 'LandSale'), guard(['1'])]);
