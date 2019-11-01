@@ -55,8 +55,7 @@ contract LandSale is MetaTransactionReceiver {
         bytes32[] calldata proof
     ) external whenNotPaused() {
         require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "not authorized");
-        bytes32 landHash = _generateLandHash(x, y, size, price);
-        bytes32 leaf = keccak256(abi.encodePacked(landHash));
+        bytes32 leaf = _generateLandHash(x, y, size, price);
 
         require(
             _verify(proof, leaf),

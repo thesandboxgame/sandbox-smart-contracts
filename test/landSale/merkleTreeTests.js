@@ -172,22 +172,25 @@ function runMerkleTreeTest() {
     tap.test('Testing the Merkle tree', async (t) => {
         t.test('Should validate the data', async () => {
             for (let i = 8; i < 37; i += 1) {
-                const lands = createDummyLands(i);
+                const lands = bugLand; // createDummyLands(i);
 
                 const data = createDataArray(lands);
                 const tree = new MerkleTree(data);
 
                 for (let i = 0; i < data.length; i += 1) {
                     const d = data[i];
-                    const proof = tree.getProof(d);
+                    console.log('leaf to verify:', d);
+                    let isValid = false;
+                    let proof;
+                    try {
+                        proof = tree.getProof(d);
+                        isValid = tree.isDataValid(d, proof);
+                    } catch (e) {
+                        console.error(e);
+                    }
 
-                    const isValid = tree.isDataValid(d, proof);
                     if (!isValid) {
-                        // console.log(JSON.stringify(lands, null, '  '));
-
-                        console.log('Leaves:', tree.getLeaves());
-                        console.log('Levels:', tree.getLevels());
-                        console.log('Sorted levels:', tree.getSortedLevels());
+                        console.log('Root:', JSON.stringify(tree.getRoot(), (['left', 'right', 'hash']), '  '));
                         console.log('Proof:', proof);
                     }
 
