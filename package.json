@@ -47,7 +47,7 @@
     "minimist": "^1.2.0",
     "prettier": "^1.18.2",
     "prettier-plugin-solidity": "^1.0.0-alpha.30",
-    "rocketh": "^0.4.10",
+    "rocketh": "^0.4.11",
     "solc": "0.5.9",
     "solhint": "^2.1.2",
     "solhint-plugin-prettier": "^0.0.3",
