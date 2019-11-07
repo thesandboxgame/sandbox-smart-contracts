@@ -25,7 +25,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const deployResult = await deployIfDifferent(['data'],
         'Land',
-        {from: deployer, gas: 4000000},
+        {from: deployer, gas: 5000000},
         'Land',
         sandContract.options.address,
         landAdmin,

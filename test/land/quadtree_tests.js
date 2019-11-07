@@ -37,6 +37,16 @@ function landId(x, y) {
     return x + (y * gridSize);
 }
 
+function landIds(x, y, size) {
+    const arr = [];
+    for (let xi = x; xi < x + size; xi++) {
+        for (let yi = y; yi < y + size; yi++) {
+            arr.push(landId(xi, yi));
+        }
+    }
+    return arr;
+}
+
 function runQuadTreeTests(title, landDeployer) {
     const landMinter = landDeployer.minter;
     tap.test(title + ' : Quad Tree tests ', async (t) => {
@@ -45,6 +55,48 @@ function runQuadTreeTests(title, landDeployer) {
 
         t.beforeEach(async () => {
             land = await landDeployer.resetContract();
+        });
+
+        // cannot be done in one block
+        // t.only('24 x 24 batch transfer', async (t) => {
+        //     const size = 24;
+        //     await mintBlock(land, user0, size, 0, 0, {
+        //         from: landMinter,
+        //         gas,
+        //     });
+        //     await tx(land, 'batchTransferFrom', {from: user0, gas: 8000000}, user0, user1, landIds(0, 0, size));
+        //     const balance = await balanceOf(land, user1);
+        //     assert.equal(balance, size * size, 'user balance is wrong');
+        // });
+
+        // TODO
+        // t.only('24 x 24 block transfer', async (t) => {
+        //     const size = 24;
+        //     await mintBlock(land, user0, size, 0, 0, {
+        //         from: landMinter,
+        //         gas,
+        //     });
+        //     await tx(land, 'transferBlock', {from: user0, gas: 8000000}, user0, user1, size, 0, 0);
+        //     const balance = await balanceOf(land, user1);
+        //     assert.equal(balance, size * size, 'user balance is wrong');
+        // });
+
+        t.test('24 x 24 block transferFormedBlock', async (t) => {
+            const size = 24;
+            await mintBlock(land, user0, size, 0, 0, {
+                from: landMinter,
+                gas,
+            });
+            await tx(land, 'transferFormedBlock', {from: user0, gas: 8000000}, user0, user1, size, 0, 0);
+            const balance = await balanceOf(land, user1);
+            assert.equal(balance, size * size, 'user balance is wrong');
+            for (let x = 0; x < size; x++) {
+                for (let y = 0; y < size; y++) {
+                    const tokenId = landId(0 + x, 0 + y);
+                    const ownerOfToken = await call(land, 'ownerOf', null, tokenId); // check the land at the extreme boundary
+                    assert.equal(ownerOfToken, user1);
+                }
+            }
         });
 
         t.test('Block minting with correct sizes', async (t) => {
