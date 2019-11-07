@@ -6,14 +6,16 @@ import "../../../contracts_common/src/Interfaces/ERC721TokenReceiver.sol";
 import "../../../contracts_common/src/Interfaces/ERC721Events.sol";
 import "../../../contracts_common/src/BaseWithStorage/SuperOperators.sol";
 import "../../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
-
+import "../../../contracts_common/src/Interfaces/ERC721MandatoryTokenReceiver.sol";
 
 contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver {
     using AddressUtils for address;
 
-    // Equals to `bytes4(keccak256("onERC721Received(address,address,uint256,bytes)"))`
-    // which can be also obtained as `IERC721Receiver(0).onERC721Received.selector`
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
+    bytes4 internal constant _ERC721_BATCH_RECEIVED = 0x4b808c46;
+
+    bytes4 internal constant ERC165ID = 0x01ffc9a7;
+    bytes4 internal constant ERC721_MANDATORY_RECEIVER = 0x5e8bf644;
 
     mapping (address => uint256) public _numNFTPerAddress;
     mapping (uint256 => uint256) public _owners;
@@ -29,18 +31,6 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
     }
 
     function _transferFrom(address from, address to, uint256 id) internal {
-        address owner = _ownerOf(id);
-        require(owner != address(0), "token does not exist");
-        require(owner == from, "Specified owner is not the real owner");
-        require(to != address(0), "can't send to zero address");
-        if (msg.sender != from && !_metaTransactionContracts[msg.sender]) {
-            require(
-                _superOperators[msg.sender] ||
-                _operatorsForAll[from][msg.sender] ||
-                _operators[id] == msg.sender,
-                "Operator not approved to transfer"
-            );
-        }
         _numNFTPerAddress[from]--;
         _numNFTPerAddress[to]++;
         _owners[id] = uint256(to);
@@ -129,6 +119,54 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         return _operators[id];
     }
 
+    function _checkTransfer(address from, address to, uint256 id) internal returns (bool isMetaTx) {
+        address owner = _ownerOf(id);
+        require(owner != address(0), "token does not exist");
+        require(owner == from, "Specified owner is not the real owner");
+        require(to != address(0), "can't send to zero address");
+        isMetaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
+        if (msg.sender != from && !isMetaTx) {
+            require(
+                _superOperators[msg.sender] ||
+                _operatorsForAll[from][msg.sender] ||
+                _operators[id] == msg.sender,
+                "Operator not approved to transfer"
+            );
+        }
+    }
+
+    function _checkInterfaceWith10000Gas(address _contract, bytes4 interfaceId)
+        internal
+        view
+        returns (bool)
+    {
+        bool success;
+        bool result;
+        bytes memory call_data = abi.encodeWithSelector(
+            ERC165ID,
+            interfaceId
+        );
+        // solium-disable-next-line security/no-inline-assembly
+        assembly {
+            let call_ptr := add(0x20, call_data)
+            let call_size := mload(call_data)
+            let output := mload(0x40) // Find empty storage location using "free memory pointer"
+            mstore(output, 0x0)
+            success := staticcall(
+                10000,
+                _contract,
+                call_ptr,
+                call_size,
+                output,
+                0x20
+            ) // 32 bytes
+            result := mload(output)
+        }
+        // (10000 / 63) "not enough for supportsInterface(...)" // consume all gas, so caller can potentially know that there was not enough gas
+        assert(gasleft() > 158);
+        return success && result;
+    }
+
     /**
      * @notice Transfer a token between 2 addresses
      * @param from The sender of the token
@@ -136,7 +174,14 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
      * @param id The id of the token
     */
     function transferFrom(address from, address to, uint256 id) external {
+        bool metaTx = _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
+        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+            require(
+                _checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, ""),
+                "erc721 transfer rejected by to"
+            );
+        }
     }
 
     /**
@@ -147,11 +192,14 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
      * @param data Additional data
      */
     function safeTransferFrom(address from, address to, uint256 id, bytes memory data) public {
+        bool metaTx = _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
-        require(
-            _checkOnERC721Received(from, to, id, data),
-            "ERC721: transfer rejected"
-        );
+        if (to.isContract()) {
+            require(
+                _checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, data),
+                "ERC721: transfer rejected by to"
+            );
+        }
     }
 
     /**
@@ -170,9 +218,10 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
      * @param to The recipient of the token
      * @param ids The ids of the tokens
     */
-    function batchTransferFrom(address from, address to, uint256[] calldata ids) external {
+    function batchTransferFrom(address from, address to, uint256[] calldata ids, bytes calldata data) external {
+        bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
         bool authorized = msg.sender == from ||
-            _metaTransactionContracts[msg.sender] ||
+            metaTx ||
             _superOperators[msg.sender] ||
             _operatorsForAll[from][msg.sender];
 
@@ -192,6 +241,13 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
 
         _numNFTPerAddress[from] -= numTokens;
         _numNFTPerAddress[to] += numTokens;
+
+        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+            require(
+                _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, data),
+                "erc721 batch transfer rejected by to"
+            );
+        }
     }
 
     /**
@@ -293,14 +349,17 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         _burn(from, id);
     }
 
-    function _checkOnERC721Received(address from, address to, uint256 tokenId, bytes memory _data)
+    function _checkOnERC721Received(address operator, address from, address to, uint256 tokenId, bytes memory _data)
         internal returns (bool)
     {
-        if (!to.isContract()) {
-            return true;
-        }
-
-        bytes4 retval = ERC721TokenReceiver(to).onERC721Received(msg.sender, from, tokenId, _data);
+        bytes4 retval = ERC721TokenReceiver(to).onERC721Received(operator, from, tokenId, _data);
         return (retval == _ERC721_RECEIVED);
+    }
+
+    function _checkOnERC721BatchReceived(address operator, address from, address to, uint256[] memory ids, bytes memory _data)
+        internal returns (bool)
+    {
+        bytes4 retval = ERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);
+        return (retval == _ERC721_BATCH_RECEIVED);
     }
 }

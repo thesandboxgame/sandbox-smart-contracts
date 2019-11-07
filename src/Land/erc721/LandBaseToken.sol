@@ -42,20 +42,7 @@ contract LandBaseToken is ERC721BaseToken {
     ) public ERC721BaseToken(metaTransactionContract, admin) {
     }
 
-
-    function transferFormedBlock(address from, address to, uint16 size, uint16 x, uint16 y) external {
-        require(from != address(0), "token does not exist");
-        require(to != address(0), "can't send to zero address");
-        if (msg.sender != from && !_metaTransactionContracts[msg.sender]) {
-            require(
-                _superOperators[msg.sender] ||
-                _operatorsForAll[from][msg.sender],
-                "Operator not approved to transferFormedBlock"
-            );
-        }
-        require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        require(x < GRID_SIZE - size && y < GRID_SIZE - size, "Out of bounds");
-
+    function _checkAndTransferOwnershipOnBlock(address from, address to, uint16 size, uint16 x, uint16 y) internal {
         uint256 blockId;
         uint256 topCornerId = x + y * GRID_SIZE;
 
@@ -71,7 +58,7 @@ contract LandBaseToken is ERC721BaseToken {
             require(false, "Invalid size, not 3|6|12|24");
         }
 
-        require(_owners[blockId] == uint256(from), "not owner of block");
+        require(_owners[blockId] == uint256(from), "not owner of block"); // invalid topCornerId will be rejected here
 
         uint256 toX = x+size;
         uint256 toY = y+size;
@@ -107,22 +94,54 @@ contract LandBaseToken is ERC721BaseToken {
         }
 
         _owners[blockId] = uint256(to);
+    }
 
+    function transferFormedBlock(address from, address to, uint16 size, uint16 x, uint16 y) external {
+        require(from != address(0), "from is zero address");
+        require(to != address(0), "can't send to zero address");
+        bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
+        if (msg.sender != from && !metaTx) {
+            require(
+                _superOperators[msg.sender] ||
+                _operatorsForAll[from][msg.sender],
+                "Operator not approved to transferFormedBlock"
+            );
+        }
+        require(x % size == 0 && y % size == 0, "Invalid coordinates");
+        require(x < GRID_SIZE - size && y < GRID_SIZE - size, "Out of bounds");
+
+        _checkAndTransferOwnershipOnBlock(from, to, size, x, y);
         for (uint16 xi = x; xi < x+size; xi++) {
             for (uint16 yi = y; yi < y+size; yi++) {
                 uint256 id1x1 = xi + yi * GRID_SIZE;
+                _operators[id1x1] = address(0);
                 emit Transfer(from, to, id1x1);
             }
         }
         _numNFTPerAddress[from] -= size * size;
         _numNFTPerAddress[to] += size * size;
 
+        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+            uint256[] memory ids = new uint256[](size*size);
+            for (uint256 i = 0; i < size*size; i++) {
+                if(i % 2 == 0) { // alow ids to follow a path
+                    ids[i] = (x + (i%size)) + ((y + (i/size)) * GRID_SIZE);
+                } else {
+                    ids[i] = ((x + size) - (1 + i%size)) + ((y + (i/size)) * GRID_SIZE);
+                }
+            }
+            require(
+                _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, ""), // TODO data
+                "erc721 batch transfer rejected by to"
+            );
+        }
     }
 
     function transferBlock(address from, address to, uint16 size, uint16 x, uint16 y) external {
-        require(from != address(0), "token does not exist");
+        require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
-        if (msg.sender != from && !_metaTransactionContracts[msg.sender]) {
+        bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
+        if (msg.sender != from && !metaTx) {
             require(
                 _superOperators[msg.sender] ||
                 _operatorsForAll[from][msg.sender],
@@ -133,11 +152,27 @@ contract LandBaseToken is ERC721BaseToken {
         for (uint16 xi = x; xi < x+size; xi++) {
             for (uint16 yi = y; yi < y+size; yi++) {
                 uint256 id1x1 = xi + yi * GRID_SIZE;
+                _operators[id1x1] = address(0);
                 emit Transfer(from, to, id1x1);
             }
         }
         _numNFTPerAddress[from] -= size * size;
         _numNFTPerAddress[to] += size * size;
+
+        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+            uint256[] memory ids = new uint256[](size*size);
+            for (uint256 i = 0; i < size*size; i++) {
+                if(i % 2 == 0) { // alow ids to follow a path
+                    ids[i] = (x + (i%size)) + ((y + (i/size)) * GRID_SIZE);
+                } else {
+                    ids[i] = ((x + size) - (1 + i%size)) + ((y + (i/size)) * GRID_SIZE);
+                }
+            }
+            require(
+                _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, ""), // TODO data
+                "erc721 batch transfer rejected by to"
+            );
+        }
     }
 
     function regroup(address from, uint16 size, uint16 x, uint16 y) external {
@@ -189,7 +224,7 @@ contract LandBaseToken is ERC721BaseToken {
             }
         }
         if(set) {
-            require(ownerOfAtLeastOne, "not owner of sub blocks");
+            require(ownerOfAtLeastOne || _owners[blockId] == uint256(from), "not owner of sub blocks nor block");
             _owners[blockId] = uint256(to);
         }
         return ownerOfAtLeastOne;
@@ -204,7 +239,7 @@ contract LandBaseToken is ERC721BaseToken {
             }
         }
         if(set) {
-            require(ownerOfAtLeastOne, "not owner of sub blocks");
+            require(ownerOfAtLeastOne || _owners[blockId] == uint256(from), "not owner of sub blocks nor block");
             _owners[blockId] = uint256(to);
         }
         return ownerOfAtLeastOne;
@@ -219,7 +254,7 @@ contract LandBaseToken is ERC721BaseToken {
             }
         }
         if(set) {
-            require(ownerOfAtLeastOne, "not owner of sub blocks");
+            require(ownerOfAtLeastOne || _owners[blockId] == uint256(from), "not owner of sub blocks nor block");
             _owners[blockId] = uint256(to);
         }
         return ownerOfAtLeastOne;
@@ -234,7 +269,7 @@ contract LandBaseToken is ERC721BaseToken {
             }
         }
         if(set) {
-            require(ownerOfAtLeastOne, "not owner of sub blocks");
+            require(ownerOfAtLeastOne || _owners[blockId] == uint256(from), "not owner of sub blocks nor block");
             _owners[blockId] = uint256(to);
         }
         return ownerOfAtLeastOne;

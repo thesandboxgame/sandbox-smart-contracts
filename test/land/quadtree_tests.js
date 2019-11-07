@@ -13,6 +13,7 @@ const {
     call,
     gas,
     expectThrow,
+    emptyBytes
 } = require('../utils');
 
 const {
@@ -207,7 +208,7 @@ function runQuadTreeTests(title, landDeployer) {
                 gas,
             });
             const tokenIds = [landId(4, 7), landId(4, 8), landId(3, 7)];
-            const receipt = await tx(land, 'batchTransferFrom', {from: user0, gas}, user0, user1, tokenIds);
+            const receipt = await tx(land, 'batchTransferFrom', {from: user0, gas}, user0, user1, tokenIds, emptyBytes);
             const eventsMatching = await getEventsFromReceipt(land, TransferEvent, receipt);
             assert.equal(eventsMatching.length, 3);
             const transferEvent = eventsMatching[0];
