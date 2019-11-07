@@ -82,19 +82,54 @@ function runQuadTreeTests(title, landDeployer) {
         //     assert.equal(balance, size * size, 'user balance is wrong');
         // });
 
-        t.test('24 x 24 block transferFormedBlock', async (t) => {
+        t.test('already formed 24 x 24 transferBlock', async (t) => {
             const size = 24;
             await mintBlock(land, user0, size, 0, 0, {
                 from: landMinter,
                 gas,
             });
-            await tx(land, 'transferFormedBlock', {from: user0, gas: 8000000}, user0, user1, size, 0, 0);
+            const receipt = await tx(land, 'transferBlock', {from: user0, gas: 8000000}, user0, user1, size, 0, 0, emptyBytes);
+            console.log('gasUsed for formed transferBlock = ' + receipt.gasUsed);
             const balance = await balanceOf(land, user1);
             assert.equal(balance, size * size, 'user balance is wrong');
             for (let x = 0; x < size; x++) {
                 for (let y = 0; y < size; y++) {
                     const tokenId = landId(0 + x, 0 + y);
                     const ownerOfToken = await call(land, 'ownerOf', null, tokenId); // check the land at the extreme boundary
+                    assert.equal(ownerOfToken, user1);
+                }
+            }
+        });
+
+        t.test('broken 24 x 24 transferBlock', async (t) => {
+            const x = 0;
+            const y = 0;
+            const size = 24;
+            await mintBlock(land, user0, size, x, y, {
+                from: landMinter,
+                gas,
+            });
+            // await tx(land, 'transferFrom', {from: user0, gas: 8000000}, user0, user1, landId(1, 1));
+            // await tx(land, 'transferFrom', {from: user1, gas: 8000000}, user1, user0, landId(1, 1));
+            const landIdsToTransfer = [
+                landId(1, 1),
+                landId(23, 23),
+                landId(6, 5),
+                landId(15, 15),
+            ];
+            await tx(land, 'batchTransferFrom', {from: user0, gas: 8000000}, user0, user1, landIdsToTransfer, emptyBytes);
+            await tx(land, 'batchTransferFrom', {from: user1, gas: 8000000}, user1, user0, landIdsToTransfer, emptyBytes);
+            const receipt = await tx(land, 'transferBlock', {from: user0, gas: 8000000}, user0, user1, size, 0, 0, emptyBytes);
+            console.log('gasUsed for broken transferBlock = ' + receipt.gasUsed);
+            const balance = await balanceOf(land, user1);
+            assert.equal(balance, size * size, 'user balance is wrong');
+            for (let ix = x; ix < size; ix++) {
+                for (let iy = y; iy < size; iy++) {
+                    const tokenId = landId(ix, iy);
+                    const ownerOfToken = await call(land, 'ownerOf', null, tokenId); // check the land at the extreme boundary
+                    if (ownerOfToken != user1) {
+                        console.log(tokenId);
+                    }
                     assert.equal(ownerOfToken, user1);
                 }
             }

@@ -42,102 +42,7 @@ contract LandBaseToken is ERC721BaseToken {
     ) public ERC721BaseToken(metaTransactionContract, admin) {
     }
 
-    function _checkAndTransferOwnershipOnBlock(address from, address to, uint16 size, uint16 x, uint16 y) internal {
-        uint256 blockId;
-        uint256 topCornerId = x + y * GRID_SIZE;
-
-        if (size == 3) {
-            blockId = LAYER_3x3 + topCornerId;
-        } else if (size == 6) {
-            blockId = LAYER_6x6 + topCornerId;
-        } else if (size == 12) {
-            blockId = LAYER_12x12 + topCornerId;
-        } else if (size == 24) {
-            blockId = LAYER_24x24 + topCornerId;
-        } else {
-            require(false, "Invalid size, not 3|6|12|24");
-        }
-
-        require(_owners[blockId] == uint256(from), "not owner of block"); // invalid topCornerId will be rejected here
-
-        uint256 toX = x+size;
-        uint256 toY = y+size;
-
-        for (uint16 xi = x; xi < toX; xi++) {
-            for (uint16 yi = y; yi < toY; yi++) {
-                require(_owners[xi + yi * GRID_SIZE] == 0, "already broken");
-            }
-        }
-
-        if (size > 3) {
-            for (uint16 x3i = x; x3i < toX; x3i += 3) {
-                for (uint16 y3i = y; y3i < toY; y3i += 3) {
-                    require(_owners[LAYER_3x3 + x3i + y3i * GRID_SIZE] == 0, "already broken");
-                }
-            }
-        }
-
-        if (size > 6) {
-            for (uint16 x6i = x; x6i < toX; x6i += 6) {
-                for (uint16 y6i = y; y6i < toY; y6i += 6) {
-                    require(_owners[LAYER_6x6 + x6i + y6i * GRID_SIZE] == 0, "already broken");
-                }
-            }
-        }
-
-        if (size > 12) {
-            for (uint16 x12i = x; x12i < toX; x12i += 12) {
-                for (uint16 y12i = y; y12i < toY; y12i += 12) {
-                    require(_owners[LAYER_12x12 + x12i + y12i * GRID_SIZE] == 0, "already broken");
-                }
-            }
-        }
-
-        _owners[blockId] = uint256(to);
-    }
-
-    function transferFormedBlock(address from, address to, uint16 size, uint16 x, uint16 y) external {
-        require(from != address(0), "from is zero address");
-        require(to != address(0), "can't send to zero address");
-        bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
-        if (msg.sender != from && !metaTx) {
-            require(
-                _superOperators[msg.sender] ||
-                _operatorsForAll[from][msg.sender],
-                "Operator not approved to transferFormedBlock"
-            );
-        }
-        require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        require(x < GRID_SIZE - size && y < GRID_SIZE - size, "Out of bounds");
-
-        _checkAndTransferOwnershipOnBlock(from, to, size, x, y);
-        for (uint16 xi = x; xi < x+size; xi++) {
-            for (uint16 yi = y; yi < y+size; yi++) {
-                uint256 id1x1 = xi + yi * GRID_SIZE;
-                _operators[id1x1] = address(0);
-                emit Transfer(from, to, id1x1);
-            }
-        }
-        _numNFTPerAddress[from] -= size * size;
-        _numNFTPerAddress[to] += size * size;
-
-        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-            uint256[] memory ids = new uint256[](size*size);
-            for (uint256 i = 0; i < size*size; i++) {
-                if(i % 2 == 0) { // alow ids to follow a path
-                    ids[i] = (x + (i%size)) + ((y + (i/size)) * GRID_SIZE);
-                } else {
-                    ids[i] = ((x + size) - (1 + i%size)) + ((y + (i/size)) * GRID_SIZE);
-                }
-            }
-            require(
-                _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, ""), // TODO data
-                "erc721 batch transfer rejected by to"
-            );
-        }
-    }
-
-    function transferBlock(address from, address to, uint16 size, uint16 x, uint16 y) external {
+    function transferBlock(address from, address to, uint16 size, uint16 x, uint16 y, bytes calldata data) external {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
         bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
@@ -169,12 +74,13 @@ contract LandBaseToken is ERC721BaseToken {
                 }
             }
             require(
-                _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, ""), // TODO data
+                _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, data),
                 "erc721 batch transfer rejected by to"
             );
         }
     }
 
+    // does not need to be there, really
     function regroup(address from, uint16 size, uint16 x, uint16 y) external {
         require(from != address(0), "token does not exist");
         if (msg.sender != from && !_metaTransactionContracts[msg.sender]) {
@@ -230,12 +136,13 @@ contract LandBaseToken is ERC721BaseToken {
         return ownerOfAtLeastOne;
     }
     function _regroup6x6(address from, address to,  uint16 x, uint16 y, bool set) internal returns (bool) {
-        bool ownerOfAtLeastOne = _regroup3x3(from, to, x, y, false);
+        bool ownerOfAtLeastOne = false;
         uint256 id = x + y * GRID_SIZE;
         uint256 blockId = LAYER_6x6 + id;
         for (uint16 xi = x; xi < x+6; xi += 3) {
             for (uint16 yi = y; yi < y+6; yi += 3) {
-                ownerOfAtLeastOne = !_checkAndClear(from, xi + yi * GRID_SIZE) || ownerOfAtLeastOne;
+                ownerOfAtLeastOne = _regroup3x3(from, to, xi, yi, false) || ownerOfAtLeastOne;
+                ownerOfAtLeastOne = !_checkAndClear(from, LAYER_3x3 + xi + yi * GRID_SIZE) || ownerOfAtLeastOne;
             }
         }
         if(set) {
@@ -245,12 +152,13 @@ contract LandBaseToken is ERC721BaseToken {
         return ownerOfAtLeastOne;
     }
     function _regroup12x12(address from, address to,  uint16 x, uint16 y, bool set) internal returns (bool) {
-        bool ownerOfAtLeastOne = _regroup6x6(from, to, x, y, false);
+        bool ownerOfAtLeastOne = false;
         uint256 id = x + y * GRID_SIZE;
         uint256 blockId = LAYER_12x12 + id;
         for (uint16 xi = x; xi < x+12; xi += 6) {
             for (uint16 yi = y; yi < y+12; yi += 6) {
-                ownerOfAtLeastOne = !_checkAndClear(from, xi + yi * GRID_SIZE) || ownerOfAtLeastOne;
+                ownerOfAtLeastOne = _regroup6x6(from, to, xi, yi, false) || ownerOfAtLeastOne;
+                ownerOfAtLeastOne = !_checkAndClear(from, LAYER_6x6 + xi + yi * GRID_SIZE) || ownerOfAtLeastOne;
             }
         }
         if(set) {
@@ -260,12 +168,13 @@ contract LandBaseToken is ERC721BaseToken {
         return ownerOfAtLeastOne;
     }
     function _regroup24x24(address from, address to,  uint16 x, uint16 y, bool set) internal returns (bool) {
-        bool ownerOfAtLeastOne = _regroup12x12(from, to, x, y, false);
+        bool ownerOfAtLeastOne = false;
         uint256 id = x + y * GRID_SIZE;
         uint256 blockId = LAYER_24x24 + id;
         for (uint16 xi = x; xi < x+24; xi += 12) {
             for (uint16 yi = y; yi < y+24; yi += 12) {
-                ownerOfAtLeastOne = !_checkAndClear(from, xi + yi * GRID_SIZE) || ownerOfAtLeastOne;
+                ownerOfAtLeastOne = _regroup12x12(from, to, xi, yi, false) || ownerOfAtLeastOne;
+                ownerOfAtLeastOne = !_checkAndClear(from, LAYER_12x12 + xi + yi * GRID_SIZE) || ownerOfAtLeastOne;
             }
         }
         if(set) {

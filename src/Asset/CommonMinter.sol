@@ -26,6 +26,8 @@ contract CommonMinter is MetaTransactionReceiver {
         _setMetaTransactionProcessor(address(sand), true);
     }
 
+    // TODO allow to change feeReceiver
+
     function setFeePerCopy(uint256 newFee) external {
         require(msg.sender == _admin, "only admin allowed to set fee");
         _feePerCopy = newFee;

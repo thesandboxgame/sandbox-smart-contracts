@@ -130,7 +130,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
                 _superOperators[msg.sender] ||
                 _operatorsForAll[from][msg.sender] ||
                 _operators[id] == msg.sender,
-                "Operator not approved to transfer"
+                "not approved to transfer"
             );
         }
     }
