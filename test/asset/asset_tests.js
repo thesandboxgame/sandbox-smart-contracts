@@ -435,6 +435,20 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                 await expectThrow(tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, creator, user1, [tokenId, tokenId2, tokenId], [1, 2, 1], emptyBytes));
             });
 
+            t.test('erc1155 batch transfer of same NFT ids emit multiple events if from == to', async () => {
+                const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 1, creator, fixedID);
+                const tokenId2 = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 4, creator, fixedID + 1);
+                const receipt = await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, creator, creator, [tokenId, tokenId2, tokenId], [1, 2, 1], emptyBytes);
+                const eventsMatching = await getEventsFromReceipt(contracts.Asset, TransferEvent, receipt);
+                assert.equal(eventsMatching.length, 2);
+                assert.equal(eventsMatching[0].returnValues[0], creator);
+                assert.equal(eventsMatching[0].returnValues[1], creator);
+                assert.equal(eventsMatching[0].returnValues[2], tokenId);
+                assert.equal(eventsMatching[1].returnValues[0], creator);
+                assert.equal(eventsMatching[1].returnValues[1], creator);
+                assert.equal(eventsMatching[1].returnValues[2], tokenId);
+            });
+
             t.test('erc1155 batch transfer of different ids is fine', async () => {
                 const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 1, creator, fixedID);
                 const tokenId2 = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 4, creator, fixedID + 1);

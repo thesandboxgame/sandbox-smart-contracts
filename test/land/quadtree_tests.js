@@ -83,6 +83,167 @@ function runQuadTreeTests(title, landDeployer) {
         //     assert.equal(balance, size * size, 'user balance is wrong');
         // });
 
+        t.test('transferQuad 1x1 of non minted fails', async (t) => {
+            const x = 311;
+            const y = 295;
+            const size = 1;
+            await expectThrow(tx(land, 'transferQuad', {from: user0, gas: 8000000}, user0, user1, size, x, y, emptyBytes));
+        });
+
+        t.test('transferQuad 6x6 of non minted fails', async (t) => {
+            const x = 312;
+            const y = 294;
+            const size = 6;
+            await expectThrow(tx(land, 'transferQuad', {from: user0, gas: 8000000}, user0, user1, size, x, y, emptyBytes));
+        });
+
+        t.test('transferQuad of non minted fails', async (t) => {
+            const x = 312;
+            const y = 288;
+            const size = 24;
+            await expectThrow(tx(land, 'transferQuad', {from: user0, gas: 8000000}, user0, user1, size, x, y, emptyBytes));
+        });
+
+        t.test('transferQuad subset of a higher quad', async (t) => {
+            const px = 312;
+            const py = 288;
+            const psize = 24;
+            await mintQuad(land, user0, psize, px, py, {
+                from: landMinter,
+                gas,
+            });
+            const x = px + 12;
+            const y = py + 18;
+            const size = 6;
+            const receipt = await tx(land, 'transferQuad', {from: user0, gas: 8000000}, user0, user1, size, x, y, emptyBytes);
+            console.log('gasUsed for formed transferQuad 6x6 = ' + receipt.gasUsed);
+            const balance = await balanceOf(land, user1);
+            assert.equal(balance, size * size, 'user balance is wrong');
+            for (let ix = x; ix < x + size; ix++) {
+                for (let iy = y; iy < y + size; iy++) {
+                    const tokenId = landId(ix, iy);
+                    const ownerOfToken = await call(land, 'ownerOf', null, tokenId);
+                    assert.equal(ownerOfToken, user1);
+                }
+            }
+            for (let ix = px; ix < px + psize; ix++) {
+                for (let iy = py; iy < py + psize; iy++) {
+                    if ((ix < x || ix >= x + size) && (iy < y || iy >= y + size)) {
+                        const tokenId = landId(ix, iy);
+                        const ownerOfToken = await call(land, 'ownerOf', null, tokenId);
+                        assert.equal(ownerOfToken, user0);
+                    }
+                }
+            }
+        });
+
+        t.test('transferQuad 1x1 of a higher quad', async (t) => {
+            const px = 312;
+            const py = 288;
+            const psize = 12;
+            await mintQuad(land, user0, psize, px, py, {
+                from: landMinter,
+                gas,
+            });
+            const x = px + 7;
+            const y = py + 2;
+            const size = 1;
+            const receipt = await tx(land, 'transferQuad', {from: user0, gas: 8000000}, user0, user1, size, x, y, emptyBytes);
+            console.log('gasUsed for formed transferQuad 1x1 = ' + receipt.gasUsed);
+            const balance = await balanceOf(land, user1);
+            assert.equal(balance, size * size, 'user balance is wrong');
+            for (let ix = x; ix < x + size; ix++) {
+                for (let iy = y; iy < y + size; iy++) {
+                    const tokenId = landId(ix, iy);
+                    const ownerOfToken = await call(land, 'ownerOf', null, tokenId);
+                    assert.equal(ownerOfToken, user1);
+                }
+            }
+            for (let ix = px; ix < px + psize; ix++) {
+                for (let iy = py; iy < py + psize; iy++) {
+                    if ((ix < x || ix >= x + size) && (iy < y || iy >= y + size)) {
+                        const tokenId = landId(ix, iy);
+                        const ownerOfToken = await call(land, 'ownerOf', null, tokenId);
+                        assert.equal(ownerOfToken, user0);
+                    }
+                }
+            }
+        });
+
+        t.test('batchTransferQuad 12x12+ 2* 6x6', async (t) => {
+            const px = 312;
+            const py = 288;
+            const psize = 24;
+            await mintQuad(land, user0, psize, px, py, {
+                from: landMinter,
+                gas,
+            });
+            const sizes = [12, 6, 6];
+            const xs = [px + 12, px + 6, px + 12];
+            const ys = [py, py, py + 12];
+            const receipt = await tx(land, 'batchTransferQuad', {from: user0, gas: 8000000}, user0, user1,
+                sizes,
+                xs,
+                ys,
+                emptyBytes
+            );
+            console.log('gasUsed for 12x12+ 2* 6x6 batchTransferQuad = ' + receipt.gasUsed);
+            const balance = await balanceOf(land, user1);
+            assert.equal(balance, (12 * 12) + (2 * (6 * 6)), 'user balance is wrong');
+            for (let j = 0; j < sizes.length; j++) {
+                for (let ix = xs[j]; ix < sizes[j]; ix++) {
+                    for (let iy = ys[j]; iy < sizes[j]; iy++) {
+                        const tokenId = landId(ix, iy);
+                        const ownerOfToken = await call(land, 'ownerOf', null, tokenId); // check the land at the extreme boundary
+                        assert.equal(ownerOfToken, user1);
+                    }
+                }
+            }
+        });
+
+        t.test('batchTransferQuad 6x6+ 2* 3x3 + 1x1', async (t) => {
+            const px = 312;
+            const py = 288;
+            const psize = 12;
+            await mintQuad(land, user0, psize, px, py, {
+                from: landMinter,
+                gas,
+            });
+            const sizes = [3, 6, 1, 3];
+            const xs = [px + 3, px + 6, px + 2, px + 3];
+            const ys = [py + 6, py + 6, py + 3, py + 3];
+            const receipt = await tx(land, 'batchTransferQuad', {from: user0, gas: 8000000}, user0, user1,
+                sizes,
+                xs,
+                ys,
+                emptyBytes
+            );
+            console.log('gasUsed for 6x6+ 2* 3x3 + 1x1 batchTransferQuad = ' + receipt.gasUsed);
+            const balance = await balanceOf(land, user1);
+            assert.equal(balance, (6 * 6) + (2 * (3 * 3)) + 1, 'user balance is wrong');
+
+            const tokens = {};
+            for (let ix = px; ix < psize; ix++) {
+                for (let iy = py; iy < psize; iy++) {
+                    const tokenId = landId(ix, iy);
+                    tokens[tokenId] = user0;
+                }
+            }
+            for (let j = 0; j < sizes.length; j++) {
+                for (let ix = xs[j]; ix < sizes[j]; ix++) {
+                    for (let iy = ys[j]; iy < sizes[j]; iy++) {
+                        const tokenId = landId(ix, iy);
+                        tokens[tokenId] = user1;
+                    }
+                }
+            }
+
+            for (const tokenId of Object.keys(tokens)) {
+                const ownerOfToken = await call(land, 'ownerOf', null, tokenId); // check the land at the extreme boundary
+                assert.equal(ownerOfToken, tokens[tokenId]);
+            }
+        });
+
         t.test('already formed 24 x 24 transferQuad', async (t) => {
             const x = 312;
             const y = 288;
@@ -224,12 +385,61 @@ function runQuadTreeTests(title, landDeployer) {
             }
         });
 
-        t.test('Quad minting all over the grid', {
-            skip: true,
-        }, async (t) => {
-            for (let x = 0; x < gridSize - 1; x += 1) {
-                for (let y = 0; y < gridSize - 1; y += 1) {
+        t.skip('Quad 1x1 minting all over the grid', async (t) => {
+            for (let x = 0; x < gridSize; x += 1) {
+                for (let y = 0; y < gridSize; y += 1) {
                     const size = 1;
+
+                    t.test(`Should mint a ${size}x${size} quad for user at ${x} ${y}`, async () => {
+                        await mintQuad(land, user0, size, x, y, {
+                            from: landMinter,
+                            gas,
+                        });
+
+                        const balance = await balanceOf(land, user0);
+                        assert.equal(balance, size * size, 'user balance is wrong');
+                    });
+                }
+            }
+        });
+
+        t.skip('Quad 24x24 minting all over the grid', async (t) => {
+            for (let x = 0; x < gridSize; x += 24) {
+                for (let y = 0; y < gridSize; y += 24) {
+                    const size = 24;
+
+                    t.test(`Should mint a ${size}x${size} quad for user at ${x} ${y}`, async () => {
+                        await mintQuad(land, user0, size, x, y, {
+                            from: landMinter,
+                            gas,
+                        });
+
+                        const balance = await balanceOf(land, user0);
+                        assert.equal(balance, size * size, 'user balance is wrong');
+                    });
+                }
+            }
+        });
+
+        t.test('full Quad 24x24 minting all over the grid', async (t) => {
+            for (let x = 0; x < gridSize; x += 24) {
+                for (let y = 0; y < gridSize; y += 24) {
+                    const size = 24;
+
+                    await mintQuad(land, user0, size, x, y, {
+                        from: landMinter,
+                        gas,
+                    });
+                }
+            }
+            const balance = await balanceOf(land, user0);
+            assert.equal(balance, gridSize * gridSize, 'user balance is wrong');
+        });
+
+        t.skip('Quad 12x12 minting all over the grid', async (t) => {
+            for (let x = 0; x < gridSize; x += 12) {
+                for (let y = 0; y < gridSize; y += 12) {
+                    const size = 24;
 
                     t.test(`Should mint a ${size}x${size} quad for user at ${x} ${y}`, async () => {
                         await mintQuad(land, user0, size, x, y, {

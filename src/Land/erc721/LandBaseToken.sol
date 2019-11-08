@@ -42,7 +42,40 @@ contract LandBaseToken is ERC721BaseToken {
     ) public ERC721BaseToken(metaTransactionContract, admin) {
     }
 
-    function transferMultiQuads(
+    /// @notice total width of the map
+    /// @return width
+    function width() external returns(uint256) {
+        return GRID_SIZE;
+    }
+
+    /// @notice total height of the map
+    /// @return height
+    function height() external returns(uint256) {
+        return GRID_SIZE;
+    }
+
+    /// @notice x coordinate of Land token
+    /// @param id tokenId
+    /// @return the x coordinates
+    function x(uint256 id) external returns(uint256) {
+        return id % GRID_SIZE;
+    }
+
+    /// @notice y coordinate of Land token
+    /// @param id tokenId
+    /// @return the y coordinates
+    function y(uint256 id) external returns(uint256) {
+        return id / GRID_SIZE;
+    }
+
+    /// @notice transfer multiple quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
+    /// @param from current owner of the quad
+    /// @param to destination
+    /// @param sizes list of sizes for each quad
+    /// @param xs list of x top coordinates for each quad
+    /// @param ys list of y top coordinates for each quad
+    /// @param data additional data
+    function batchTransferQuad(
         address from,
         address to,
         uint16[] calldata sizes,
@@ -58,7 +91,7 @@ contract LandBaseToken is ERC721BaseToken {
             require(
                 _superOperators[msg.sender] ||
                 _operatorsForAll[from][msg.sender],
-                "Operator not approved to transferQuad"
+                "Operator not approved to transferMultiQuads"
             );
         }
         uint256 numTokensTransfered = 0;
@@ -93,6 +126,13 @@ contract LandBaseToken is ERC721BaseToken {
         }
     }
 
+    /// @notice transfer one quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
+    /// @param from current owner of the quad
+    /// @param to destination
+    /// @param size size of the quad
+    /// @param x x top coordinates of the quad
+    /// @param y y top coordinates of the quad
+    /// @param data additional data
     function transferQuad(address from, address to, uint16 size, uint16 x, uint16 y, bytes calldata data) external {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
@@ -125,7 +165,15 @@ contract LandBaseToken is ERC721BaseToken {
     }
 
     function _transferQuad(address from, address to, uint16 size, uint16 x, uint16 y) internal {
-        _regroup(from, to, size, x, y);
+        if (size == 1) {
+            uint256 id1x1 = x + y * GRID_SIZE;
+            address owner = _ownerOf(id1x1);
+            require(owner != address(0), "token does not exist");
+            require(owner == from, "Specified owner is not the real owner");
+            _owners[id1x1] = uint256(to);
+        } else {
+            _regroup(from, to, size, x, y);
+        }
         for (uint16 xi = x; xi < x+size; xi++) {
             for (uint16 yi = y; yi < y+size; yi++) {
                 uint256 id1x1 = xi + yi * GRID_SIZE;
@@ -135,6 +183,11 @@ contract LandBaseToken is ERC721BaseToken {
         }
     }
 
+    /// @notice regroup Land into a quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
+    /// @param from current owner of the quad
+    /// @param size size of the quad
+    /// @param x x top coordinates of the quad
+    /// @param y y top coordinates of the quad
     function regroup(address from, uint16 size, uint16 x, uint16 y) external {
         require(from != address(0), "token does not exist");
         if (msg.sender != from && !_metaTransactionContracts[msg.sender]) {
@@ -269,7 +322,7 @@ contract LandBaseToken is ERC721BaseToken {
     }
 
     /**
-     * @notice Mint a new quad
+     * @notice Mint a new quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
      * @param to The recipient of the new quad
      * @param size The size of the new quad
      * @param x The x coordinate of the new quad
