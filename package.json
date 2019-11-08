@@ -15,10 +15,11 @@
     "test-commonMinter": "rocketh launch \"yarn tap -T -j 1 -R spec test/asset_bouncer/testCommonMinter.js\"",
     "test-assetAuctions": "rocketh launch \"yarn tap -T -j 1 -R spec test/asset_auctions/testAssetAuctions.js\"",
     "test-asset": "rocketh launch \"tap -T -j 1 -R spec test/asset/testAsset.js\"",
-    "ganache": "ganache-cli --seed 04624df17c837dc2113f0c65554551f2 -a 21 --gasLimit 19000000",
+    "ganache": "ganache-cli --seed 04624df17c837dc2113f0c65554551f2 -a 21 --gasLimit 19000000 -i 1572533425564",
     "export-sand": "node export-sand.js",
     "export-asset": "node export-asset.js",
     "smartcheck": "smartcheck -p .",
+    "deploy-local": "rocketh launch -n http://localhost:8545",
     "deploy-rinkeby": "rocketh launch -n https://rinkeby.infura.io/v3/ced8eecc03984939b556332468325813",
     "deploy-mainnet": "cli-confirm \"Do you really want to deploy to mainnet\" && rocketh launch -n https://mainnet.infura.io/v3/ced8eecc03984939b556332468325813 || echo ok",
     "attach-mainnet": "rocketh attach https://mainnet.infura.io/v3/ced8eecc03984939b556332468325813"
