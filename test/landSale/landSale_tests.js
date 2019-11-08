@@ -7,19 +7,83 @@ const {
     call,
     gas,
     expectThrow,
+    zeroAddress,
+    deployContract
 } = require('../utils');
 
 const {
+    deployer,
+    landSaleAdmin,
+    landSaleBeneficiary,
     sandBeneficiary,
     landAdmin,
+    sandAdmin,
     others,
-} = rocketh.namedAccounts
+} = rocketh.namedAccounts;
 
 const MerkleTree = require('../../lib/merkleTree');
 const {createDataArray, calculateLandHash} = require('../../lib/merkleTreeHelper');
 
+const testLands = [
+    {
+        x: 400,
+        y: 106,
+        size: 1,
+        price: '4047',
+        reserved: others[1]
+    },
+    {
+        x: 120,
+        y: 144,
+        size: 12,
+        price: '2773'
+    },
+    {
+        x: 288,
+        y: 144,
+        size: 12,
+        price: '1358'
+    },
+    {
+        x: 36,
+        y: 114,
+        size: 6,
+        price: '3169'
+    },
+    {
+        x: 308,
+        y: 282,
+        size: 1,
+        price: '8465'
+    },
+    {
+        x: 308,
+        y: 281,
+        size: 1,
+        price: '8465'
+    }
+];
+
+async function setupTestLandSale(contracts) {
+    const landHashArray = createDataArray(testLands);
+    const tree = new MerkleTree(landHashArray);
+    const contract = await deployContract(
+        deployer,
+        'LandSale',
+        contracts.Land.options.address,
+        contracts.Sand.options.address,
+        contracts.Sand.options.address,
+        landSaleAdmin,
+        landSaleBeneficiary,
+        tree.getRoot().hash
+    );
+    await tx(contracts.Land, 'setMinter', {from: landAdmin, gas: 1000000}, contract.options.address, true);
+    await tx(contracts.Sand, 'setSuperOperator', {from: sandAdmin, gas: 1000000}, contract.options.address, true);
+    return {contract, tree};
+}
+
 function runLandSaleTests(title, contactStore) {
-    tap.test(title + ' tests', async (t)=> {
+    tap.test(title + ' tests', async (t) => {
         let contracts;
         let tree;
         let lands;
@@ -31,6 +95,7 @@ function runLandSaleTests(title, contactStore) {
             landHashArray = createDataArray(lands);
             tree = new MerkleTree(landHashArray);
             await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[0], '1000000000000000000000');
+            await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[1], '1000000000000000000000');
         });
 
         t.test('can buy Land', async (t) => {
@@ -43,10 +108,68 @@ function runLandSaleTests(title, contactStore) {
             await tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
                 others[0],
                 others[0],
+                zeroAddress,
                 400, 106, 1,
                 4047,
                 proof
             );
+        });
+
+        t.test('cannot buy Land from a non reserved Land with reserved param', async (t) => {
+            const proof = tree.getProof(calculateLandHash({
+                x: 400,
+                y: 106,
+                size: 1,
+                price: '4047'
+            }));
+            await expectThrow(tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
+                others[0],
+                others[0],
+                others[0],
+                400, 106, 1,
+                4047,
+                proof
+            ));
+        });
+
+        t.test('cannot buy Land from a reserved Land of a different address,', async (t) => {
+            const {contract, tree} = await setupTestLandSale(contracts);
+            const proof = tree.getProof(calculateLandHash({
+                x: 400,
+                y: 106,
+                size: 1,
+                price: '4047',
+                reserved: others[1]
+            }));
+            await expectThrow(tx(contract, 'buyLand', {from: others[0], gas},
+                others[0],
+                others[0],
+                others[0],
+                400, 106, 1,
+                4047,
+                proof
+            ));
+        });
+
+        t.test('can buy Land from a reserved Land if matching address,', async (t) => {
+            const {contract, tree} = await setupTestLandSale(contracts);
+            const proof = tree.getProof(calculateLandHash({
+                x: 400,
+                y: 106,
+                size: 1,
+                price: '4047',
+                reserved: others[1]
+            }));
+            await tx(contract, 'buyLand', {from: others[1], gas},
+                others[1],
+                others[1],
+                others[1],
+                400, 106, 1,
+                4047,
+                proof
+            );
+            const owner = await call(contracts.Land, 'ownerOf', null, 400 + (106 * 408));
+            assert.equal(owner, others[1]);
         });
 
         t.test('CANNOT buy Land when minter rights revoked', async (t) => {
@@ -60,6 +183,7 @@ function runLandSaleTests(title, contactStore) {
             await expectThrow(tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
                 others[0],
                 others[0],
+                zeroAddress,
                 400, 106, 1,
                 4047,
                 proof
@@ -76,6 +200,7 @@ function runLandSaleTests(title, contactStore) {
             await tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
                 others[0],
                 others[0],
+                zeroAddress,
                 400, 106, 1,
                 4047,
                 proof
@@ -83,6 +208,7 @@ function runLandSaleTests(title, contactStore) {
             await expectThrow(tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
                 others[0],
                 others[0],
+                zeroAddress,
                 400, 106, 1,
                 4047,
                 proof
@@ -107,6 +233,7 @@ function runLandSaleTests(title, contactStore) {
             await expectThrow(tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
                 others[0],
                 others[0],
+                zeroAddress,
                 400, 106, 1,
                 4047,
                 proof
@@ -123,6 +250,7 @@ function runLandSaleTests(title, contactStore) {
             await expectThrow(tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
                 others[0],
                 others[0],
+                zeroAddress,
                 400, 106, 1,
                 4047,
                 proof
@@ -139,6 +267,7 @@ function runLandSaleTests(title, contactStore) {
             await tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
                 others[0],
                 others[0],
+                zeroAddress,
                 288, 144, 12,
                 '1358',
                 proof
@@ -158,13 +287,13 @@ function runLandSaleTests(title, contactStore) {
                 await tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
                     others[0],
                     others[0],
+                    zeroAddress,
                     land.x, land.y, land.size,
                     land.price,
                     proof
                 );
             }
         });
-
     });
 }
 

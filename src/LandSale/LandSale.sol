@@ -49,6 +49,7 @@ contract LandSale is MetaTransactionReceiver {
     function buyLand(
         address buyer,
         address to,
+        address reserved,
         uint16 x,
         uint16 y,
         uint16 size,
@@ -56,7 +57,8 @@ contract LandSale is MetaTransactionReceiver {
         bytes32[] calldata proof
     ) external {
         require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "not authorized");
-        bytes32 leaf = _generateLandHash(x, y, size, price);
+        require(reserved == address(0) || reserved == buyer, "cannot buy reserved Land");
+        bytes32 leaf = _generateLandHash(x, y, size, price, reserved);
 
         require(
             _verify(proof, leaf),
@@ -72,14 +74,15 @@ contract LandSale is MetaTransactionReceiver {
             "erc20 transfer failed"
         );
 
-        _land.mintBlock(to, size, x, y);
+        _land.mintQuad(to, size, x, y);
     }
 
     function _generateLandHash(
         uint16 x,
         uint16 y,
         uint16 size,
-        uint256 price
+        uint256 price,
+        address reserved
     ) internal pure returns (
         bytes32
     ) {
@@ -88,7 +91,8 @@ contract LandSale is MetaTransactionReceiver {
                 x,
                 y,
                 size,
-                price
+                price,
+                reserved
             )
         );
     }
