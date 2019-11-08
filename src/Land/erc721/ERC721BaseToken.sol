@@ -217,6 +217,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
      * @param from The sender of the token
      * @param to The recipient of the token
      * @param ids The ids of the tokens
+     * @param data additional data
     */
     function batchTransferFrom(address from, address to, uint256[] calldata ids, bytes calldata data) external {
         bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
@@ -324,6 +325,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
     function _burn(address from, uint256 id) public {
         require(from == _ownerOf(id), "not owner");
         _owners[id] = 2**160; // cannot mint it again
+        _operators[id] = address(0);
         _numNFTPerAddress[from]--;
         emit Transfer(from, address(0), id);
     }

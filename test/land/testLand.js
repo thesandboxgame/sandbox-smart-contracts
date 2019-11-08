@@ -27,7 +27,7 @@ ERC721Contract.prototype.resetContract = async function () {
 };
 ERC721Contract.prototype.mintERC721 = async function (creator) {
     this.counter++;
-    const receipt = await tx(this.contract, 'mintBlock', {from: this.minter, gas}, creator, 1, this.counter, this.counter); // diagonal
+    const receipt = await tx(this.contract, 'mintQuad', {from: this.minter, gas}, creator, 1, this.counter, this.counter); // diagonal
     return receipt.events.Transfer.returnValues._tokenId;
 };
 ERC721Contract.prototype.burnERC721 = function (from, tokenId) {
