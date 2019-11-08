@@ -91,7 +91,7 @@ contract LandBaseToken is ERC721BaseToken {
             require(
                 _superOperators[msg.sender] ||
                 _operatorsForAll[from][msg.sender],
-                "Operator not approved to transferMultiQuads"
+                "not authorized to transferMultiQuads"
             );
         }
         uint256 numTokensTransfered = 0;
@@ -141,7 +141,7 @@ contract LandBaseToken is ERC721BaseToken {
             require(
                 _superOperators[msg.sender] ||
                 _operatorsForAll[from][msg.sender],
-                "Operator not approved to transferQuad"
+                "not authorized to transferQuad"
             );
         }
         _transferQuad(from, to, size, x, y);
@@ -169,35 +169,16 @@ contract LandBaseToken is ERC721BaseToken {
             uint256 id1x1 = x + y * GRID_SIZE;
             address owner = _ownerOf(id1x1);
             require(owner != address(0), "token does not exist");
-            require(owner == from, "Specified owner is not the real owner");
+            require(owner == from, "not owner in _transferQuad");
             _owners[id1x1] = uint256(to);
         } else {
             _regroup(from, to, size, x, y);
         }
         for (uint16 xi = x; xi < x+size; xi++) {
             for (uint16 yi = y; yi < y+size; yi++) {
-                uint256 id1x1 = xi + yi * GRID_SIZE;
-                _operators[id1x1] = address(0);
-                emit Transfer(from, to, id1x1);
+                emit Transfer(from, to, xi + yi * GRID_SIZE);
             }
         }
-    }
-
-    /// @notice regroup Land into a quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
-    /// @param from current owner of the quad
-    /// @param size size of the quad
-    /// @param x x top coordinates of the quad
-    /// @param y y top coordinates of the quad
-    function regroup(address from, uint16 size, uint16 x, uint16 y) external {
-        require(from != address(0), "token does not exist");
-        if (msg.sender != from && !_metaTransactionContracts[msg.sender]) {
-            require(
-                _superOperators[msg.sender] ||
-                _operatorsForAll[from][msg.sender],
-                "Operator not approved to regroup"
-            );
-        }
-        _regroup(from, from, size, x, y);
     }
 
     function _checkAndClear(address from, uint256 id) internal returns(bool) {
@@ -227,7 +208,7 @@ contract LandBaseToken is ERC721BaseToken {
         }
     }
 
-    function _regroup3x3(address from, address to, uint16 x, uint16 y, bool set) internal returns (bool) {
+        function _regroup3x3(address from, address to, uint16 x, uint16 y, bool set) internal returns (bool) {
         uint256 id = x + y * GRID_SIZE;
         uint256 quadId = LAYER_3x3 + id;
         bool ownerOfAll = true;
@@ -249,7 +230,7 @@ contract LandBaseToken is ERC721BaseToken {
             _owners[quadId] = uint256(to);
             return true;
         }
-        return ownerOfAll || _owners[quadId] == uint256(from);
+        return ownerOfAll;
     }
     function _regroup6x6(address from, address to,  uint16 x, uint16 y, bool set) internal returns (bool) {
         uint256 id = x + y * GRID_SIZE;
@@ -257,8 +238,16 @@ contract LandBaseToken is ERC721BaseToken {
         bool ownerOfAll = true;
         for (uint16 xi = x; xi < x+6; xi += 3) {
             for (uint16 yi = y; yi < y+6; yi += 3) {
-                ownerOfAll = _regroup3x3(from, to, xi, yi, false) && ownerOfAll;
-                ownerOfAll = _checkAndClear(from, LAYER_3x3 + xi + yi * GRID_SIZE) && ownerOfAll;
+                bool ownAllIndividual = _regroup3x3(from, to, xi, yi, false);
+                uint256 id3x3 = LAYER_3x3 + xi + yi * GRID_SIZE;
+                uint256 owner3x3 = _owners[id3x3];
+                if (owner3x3 != 0) {
+                    if(!ownAllIndividual) {
+                        require(owner3x3 == uint256(from), "not owner of 3x3 quad");
+                    }
+                    _owners[id3x3] = 0;
+                }
+                ownerOfAll = (ownAllIndividual || owner3x3 != 0) && ownerOfAll;
             }
         }
         if(set) {
@@ -273,7 +262,7 @@ contract LandBaseToken is ERC721BaseToken {
             _owners[quadId] = uint256(to);
             return true;
         }
-        return ownerOfAll || _owners[quadId] == uint256(from);
+        return ownerOfAll;
     }
     function _regroup12x12(address from, address to,  uint16 x, uint16 y, bool set) internal returns (bool) {
         uint256 id = x + y * GRID_SIZE;
@@ -281,8 +270,16 @@ contract LandBaseToken is ERC721BaseToken {
         bool ownerOfAll = true;
         for (uint16 xi = x; xi < x+12; xi += 6) {
             for (uint16 yi = y; yi < y+12; yi += 6) {
-                ownerOfAll = _regroup6x6(from, to, xi, yi, false) && ownerOfAll;
-                ownerOfAll = _checkAndClear(from, LAYER_6x6 + xi + yi * GRID_SIZE) && ownerOfAll;
+                bool ownAllIndividual = _regroup6x6(from, to, xi, yi, false);
+                uint256 id6x6 = LAYER_6x6 + xi + yi * GRID_SIZE;
+                uint256 owner6x6 = _owners[id6x6];
+                if (owner6x6 != 0) {
+                    if(!ownAllIndividual) {
+                        require(owner6x6 == uint256(from), "not owner of 6x6 quad");
+                    }
+                    _owners[id6x6] = 0;
+                }
+                ownerOfAll = (ownAllIndividual || owner6x6 != 0) && ownerOfAll;
             }
         }
         if(set) {
@@ -296,7 +293,7 @@ contract LandBaseToken is ERC721BaseToken {
             _owners[quadId] = uint256(to);
             return true;
         }
-        return ownerOfAll || _owners[quadId] == uint256(from);
+        return ownerOfAll;
     }
     function _regroup24x24(address from, address to,  uint16 x, uint16 y, bool set) internal returns (bool) {
         uint256 id = x + y * GRID_SIZE;
@@ -304,8 +301,16 @@ contract LandBaseToken is ERC721BaseToken {
         bool ownerOfAll = true;
         for (uint16 xi = x; xi < x+24; xi += 12) {
             for (uint16 yi = y; yi < y+24; yi += 12) {
-                ownerOfAll = _regroup12x12(from, to, xi, yi, false) && ownerOfAll;
-                ownerOfAll = !_checkAndClear(from, LAYER_12x12 + xi + yi * GRID_SIZE) && ownerOfAll;
+                bool ownAllIndividual = _regroup12x12(from, to, xi, yi, false);
+                uint256 id12x12 = LAYER_12x12 + xi + yi * GRID_SIZE;
+                uint256 owner12x12 = _owners[id12x12];
+                if (owner12x12 != 0) {
+                    if(!ownAllIndividual) {
+                        require(owner12x12 == uint256(from), "not owner of 12x12 quad");
+                    }
+                    _owners[id12x12] = 0;
+                }
+                ownerOfAll = (ownAllIndividual || owner12x12 != 0) && ownerOfAll;
             }
         }
         if(set) {
@@ -432,6 +437,39 @@ contract LandBaseToken is ERC721BaseToken {
             }
         }
         return address(0); // explicit return
+    }
+
+    function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {
+        require(id & LAYER == 0, "Invalid token id");
+        uint256 x = id % GRID_SIZE;
+        uint256 y = id / GRID_SIZE;
+        uint256 owner1x1 = _owners[id];
+
+        if (owner1x1 != 0) {
+            owner = address(owner1x1);
+            operatorEnabled = (owner1x1 / 2**161) == 1;
+        } else {
+            address owner3x3 = address(_owners[LAYER_3x3 + (x/3) * 3 + ((y/3) * 3) * GRID_SIZE]);
+            if (owner3x3 != address(0)) {
+                owner = owner3x3;
+                operatorEnabled = false;
+            } else {
+                address owner6x6 = address(_owners[LAYER_6x6 + (x/6) * 6 + ((y/6) * 6) * GRID_SIZE]);
+                if (owner6x6 != address(0)) {
+                    owner = owner6x6;
+                    operatorEnabled = false;
+                } else {
+                    address owner12x12 = address(_owners[LAYER_12x12 + (x/12) * 12 + ((y/12) * 12) * GRID_SIZE]);
+                    if (owner12x12 != address(0)) {
+                        owner = owner12x12;
+                        operatorEnabled = false;
+                    } else {
+                        owner = address(_owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE]);
+                        operatorEnabled = false;
+                    }
+                }
+            }
+        }
     }
 
 }
