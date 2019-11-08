@@ -411,7 +411,9 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
                 _numNFTPerAddress[from]--;
                 _numNFTPerAddress[to]++;
                 _owners[id] = uint256(to);
-                _erc721operators[id] = address(0);
+                if (_erc721operators[id] != address(0)) { // TODO operatorEnabled flag optimization (like in ERC721BaseToken)
+                    _erc721operators[id] = address(0);
+                }
                 emit Transfer(from, to, id);
             }
         } else {
@@ -532,7 +534,9 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
                     require(_ownerOf(ids[i]) == from, "not owner");
                     numNFTs++;
                     _owners[ids[i]] = uint256(to);
-                    _erc721operators[ids[i]] = address(0);
+                    if (_erc721operators[ids[i]] != address(0)) { // TODO operatorEnabled flag optimization (like in ERC721BaseToken)
+                        _erc721operators[ids[i]] = address(0);
+                    }
                     emit Transfer(from, to, ids[i]);
                 }
             } else {
