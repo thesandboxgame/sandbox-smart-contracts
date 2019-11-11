@@ -435,18 +435,10 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                 await expectThrow(tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, creator, user1, [tokenId, tokenId2, tokenId], [1, 2, 1], emptyBytes));
             });
 
-            t.test('erc1155 batch transfer of same NFT ids emit multiple events if from == to', async () => {
+            t.test('erc1155 batch transfer of same NFT ids should fails even if from == to', async () => {
                 const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 1, creator, fixedID);
                 const tokenId2 = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 4, creator, fixedID + 1);
-                const receipt = await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, creator, creator, [tokenId, tokenId2, tokenId], [1, 2, 1], emptyBytes);
-                const eventsMatching = await getEventsFromReceipt(contracts.Asset, TransferEvent, receipt);
-                assert.equal(eventsMatching.length, 2);
-                assert.equal(eventsMatching[0].returnValues[0], creator);
-                assert.equal(eventsMatching[0].returnValues[1], creator);
-                assert.equal(eventsMatching[0].returnValues[2], tokenId);
-                assert.equal(eventsMatching[1].returnValues[0], creator);
-                assert.equal(eventsMatching[1].returnValues[1], creator);
-                assert.equal(eventsMatching[1].returnValues[2], tokenId);
+                await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, creator, creator, [tokenId, tokenId2, tokenId], [1, 2, 1], emptyBytes);
             });
 
             t.test('erc1155 batch transfer of different ids is fine', async () => {
@@ -468,6 +460,12 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                 await expectThrow(tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, creator, user1, [tokenId, tokenId2, tokenId], [2, 2, 4], emptyBytes));
             });
 
+            t.test('erc1155 batch transfer of same ids should fails if not enough owned even when from == to', async () => {
+                const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 5, creator, fixedID);
+                const tokenId2 = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 4, creator, fixedID + 1);
+                await expectThrow(tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, creator, creator, [tokenId, tokenId2, tokenId], [2, 2, 4], emptyBytes));
+            });
+
             t.test('erc1155 batch transfer of same ids is fine if enough is owned', async () => {
                 const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 5, creator, fixedID);
                 const tokenId2 = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 4, creator, fixedID + 1);
@@ -476,6 +474,45 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                 assert.equal(balance, '4');
                 const balance2 = await call(contracts.Asset, 'balanceOf', null, user1, tokenId2);
                 assert.equal(balance2, '2');
+            });
+
+            t.test('erc1155 batch transfer', async () => {
+                const numTokens = 1000;
+                const supplies = [];
+                const rarities = [];
+                const tokenIdsAmountsToTransfer = [];
+                for (let i = 0; i < numTokens; i++) {
+                    supplies.push(10);
+                    tokenIdsAmountsToTransfer.push(8);
+                    rarities.push(1);
+                }
+                let tokenIds;
+                try {
+                    tokenIds = await mintMultipleForAndReturnTokenIds({gas: 15000000}, contracts.GenesisBouncer, genesisMinter, ipfsHashString, supplies, rarities, creator, fixedID);
+                } catch (e) {
+                    console.log('could not mint tokenIds for batch', e);
+                }
+                const receipt = await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas: 10000000}, creator, user1, tokenIds, tokenIdsAmountsToTransfer, emptyBytes);
+                console.log(`gas used to transfer ${numTokens} tokens = ${receipt.gasUsed}`);
+            });
+            t.test('erc1155 batch transfer with from == to', async () => {
+                const numTokens = 1000;
+                const supplies = [];
+                const rarities = [];
+                const tokenIdsAmountsToTransfer = [];
+                for (let i = 0; i < numTokens; i++) {
+                    supplies.push(10);
+                    tokenIdsAmountsToTransfer.push(8);
+                    rarities.push(1);
+                }
+                let tokenIds;
+                try {
+                    tokenIds = await mintMultipleForAndReturnTokenIds({gas: 15000000}, contracts.GenesisBouncer, genesisMinter, ipfsHashString, supplies, rarities, creator, fixedID);
+                } catch (e) {
+                    console.log('could not mint tokenIds for from==to batch', e);
+                }
+                const receipt = await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas: 15000000}, creator, creator, tokenIds, tokenIdsAmountsToTransfer, emptyBytes);
+                console.log(`gas used to transfer ${numTokens} tokens (from==to) = ${receipt.gasUsed}`);
             });
         });
 
