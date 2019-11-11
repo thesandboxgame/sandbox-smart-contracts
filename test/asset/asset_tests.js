@@ -438,7 +438,15 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
             t.test('erc1155 batch transfer of same NFT ids should fails even if from == to', async () => {
                 const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 1, creator, fixedID);
                 const tokenId2 = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 4, creator, fixedID + 1);
-                await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, creator, creator, [tokenId, tokenId2, tokenId], [1, 2, 1], emptyBytes);
+                let reverted = false;
+                try {
+                    await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, creator, creator, [tokenId, tokenId2, tokenId], [1, 2, 1], emptyBytes);
+                } catch (e) {
+                    reverted = true;
+                    const keys = Object.keys(e.data);
+                    console.log('REVERT REASON', e.data[keys[0]].reason);
+                }
+                assert.equal(reverted, true);
             });
 
             t.test('erc1155 batch transfer of different ids is fine', async () => {
@@ -463,7 +471,15 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
             t.test('erc1155 batch transfer of same ids should fails if not enough owned even when from == to', async () => {
                 const tokenId = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 5, creator, fixedID);
                 const tokenId2 = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 4, creator, fixedID + 1);
-                await expectThrow(tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, creator, creator, [tokenId, tokenId2, tokenId], [2, 2, 4], emptyBytes));
+                let reverted = false;
+                try {
+                    await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, creator, creator, [tokenId, tokenId2, tokenId], [2, 2, 4], emptyBytes);
+                } catch (e) {
+                    reverted = true;
+                    const keys = Object.keys(e.data);
+                    console.log('REVERT REASON', e.data[keys[0]].reason);
+                }
+                assert.equal(reverted, true);
             });
 
             t.test('erc1155 batch transfer of same ids is fine if enough is owned', async () => {

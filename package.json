@@ -48,7 +48,7 @@
     "minimist": "^1.2.0",
     "prettier": "^1.18.2",
     "prettier-plugin-solidity": "^1.0.0-alpha.30",
-    "rocketh": "^0.4.12",
+    "rocketh": "^0.4.13",
     "solc": "0.5.9",
     "solhint": "^2.1.2",
     "solhint-plugin-prettier": "^0.0.3",
@@ -59,7 +59,7 @@
   "dependencies": {
     "base32.js": "^0.1.0",
     "commander": "^3.0.0",
-    "ganache-core": "^2.5.5",
+    "ganache-core": "^2.8.0",
     "js-sha256": "^0.9.0",
     "rocketh-web3": "^0.2.17"
   }
