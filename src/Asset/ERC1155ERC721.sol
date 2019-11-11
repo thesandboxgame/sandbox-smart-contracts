@@ -483,7 +483,29 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         uint256[] calldata values,
         bytes calldata data
     ) external {
-        _batchTransferFrom(from, to, ids, values);
+        require(
+            ids.length == values.length,
+            "Inconsistent array length between args"
+        );
+        require(to != address(0), "destination is zero address");
+        require(from != address(0), "from is zero address");
+        bool authorized = from == msg.sender ||
+            _superOperators[msg.sender] ||
+            _operatorsForAll[from][msg.sender] ||
+            _metaTransactionContracts[msg.sender]; // solium-disable-line max-len
+
+        if (from == to) {
+            _batchTransferToSelf(from, ids, values, authorized);
+        } else {
+            _batchTransferFrom(from, to, ids, values, authorized);
+        }
+        emit TransferBatch(
+            _metaTransactionContracts[msg.sender] ? from : msg.sender,
+            from,
+            to,
+            ids,
+            values
+        );
         require(
             _checkERC1155AndCallSafeBatchTransfer(
                 _metaTransactionContracts[msg.sender] ? from : msg.sender,
@@ -497,30 +519,75 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         );
     }
 
+    mapping(address => mapping(uint256 => uint256)) private _selfPackedTokenBalance;
+    function _batchTransferToSelf(
+        address from,
+        uint256[] memory ids,
+        uint256[] memory values,
+        bool authorized
+    ) internal {
+        uint256 numItems = ids.length;
+
+        uint256 bin;
+        uint256 index;
+        uint256 numTokensTransferedPerType;
+        uint256 lastBin;
+        for (uint256 i = 0; i < numItems; i++) {
+            bool isNFT = ids[i] & IS_NFT > 0;
+            require(authorized || (isNFT && _erc721operators[ids[i]] == msg.sender), "Operator not approved");
+            if(values[i] > 0) {
+                (bin, index) = ids[i].getTokenBinIndex();
+                if (lastBin == 0) {
+                    lastBin = bin;
+                    numTokensTransferedPerType = ObjectLib32.updateTokenBalance(
+                        _selfPackedTokenBalance[from][bin],
+                        index,
+                        values[i],
+                        ObjectLib32.Operations.ADD
+                    );
+                } else {
+                    if (bin != lastBin) {
+                        _selfPackedTokenBalance[from][lastBin] = numTokensTransferedPerType;
+                        numTokensTransferedPerType = _selfPackedTokenBalance[from][bin];
+                        lastBin = bin;
+                    }
+                    numTokensTransferedPerType = numTokensTransferedPerType.updateTokenBalance(
+                        index,
+                        values[i],
+                        ObjectLib32.Operations.ADD
+                    );
+                }
+                if (isNFT) {
+                    require(numTokensTransferedPerType.getValueInBin(index) == 1, "cannot transfer an NFT more than once");
+                    require(_ownerOf(ids[i]) == from, "not owner");
+                    if (_erc721operators[ids[i]] != address(0)) { // TODO operatorEnabled flag optimization (like in ERC721BaseToken)
+                        _erc721operators[ids[i]] = address(0);
+                    }
+                    emit Transfer(from, from, ids[i]);
+                } else {
+                    require(numTokensTransferedPerType.getValueInBin(index) <= _packedTokenBalance[from][bin].getValueInBin(index), "too many transfered");
+                }
+            }
+        }
+        for (uint256 i = 0; i < numItems; i++) {
+            (uint256 binToErase, ) = ids[i].getTokenBinIndex();
+            _selfPackedTokenBalance[from][binToErase] = 0;
+        }
+    }
+
     function _batchTransferFrom(
         address from,
         address to,
         uint256[] memory ids,
-        uint256[] memory values
+        uint256[] memory values,
+        bool authorized
     ) internal {
         uint256 numItems = ids.length;
-        require(
-            numItems == values.length,
-            "Inconsistent array length between args"
-        );
-        require(to != address(0), "destination is zero address");
-        require(from != address(0), "from is zero address");
-        bool authorized = from == msg.sender ||
-            _superOperators[msg.sender] ||
-            _operatorsForAll[from][msg.sender] ||
-            _metaTransactionContracts[msg.sender]; // solium-disable-line max-len
-
         uint256 bin;
         uint256 index;
         uint256 balFrom;
         uint256 balTo;
 
-        // Last bin updated
         uint256 lastBin;
         uint256 numNFTs = 0;
         for (uint256 i = 0; i < numItems; i++) {
@@ -543,7 +610,6 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
                 require(authorized, "Operator not approved");
                 if(values[i] > 0) {
                     (bin, index) = ids[i].getTokenBinIndex();
-                    // If first bin
                     if (lastBin == 0) {
                         lastBin = bin;
                         balFrom = ObjectLib32.updateTokenBalance(
@@ -559,22 +625,14 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
                             ObjectLib32.Operations.ADD
                         );
                     } else {
-                        // If new bin
                         if (bin != lastBin) {
-                            // ids need to be ordered appropriately to benefit for optimization
-                            // Update storage balance of previous bin
                             _packedTokenBalance[from][lastBin] = balFrom;
                             _packedTokenBalance[to][lastBin] = balTo;
-
-                            // Load current bin balance in memory
                             balFrom = _packedTokenBalance[from][bin];
                             balTo = _packedTokenBalance[to][bin];
-
-                            // Bin will be the most recent bin
                             lastBin = bin;
                         }
 
-                        // Update memory balance
                         balFrom = balFrom.updateTokenBalance(
                             index,
                             values[i],
@@ -594,19 +652,10 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
             _numNFTPerAddress[to] += numNFTs;
         }
 
-        if (bin != 0) { // if needed
-            // Update storage of the last bin visited
+        if (bin != 0) {
             _packedTokenBalance[from][bin] = balFrom;
             _packedTokenBalance[to][bin] = balTo;
         }
-
-        emit TransferBatch(
-            _metaTransactionContracts[msg.sender] ? from : msg.sender,
-            from,
-            to,
-            ids,
-            values
-        );
     }
 
     /// @notice Get the balance of `owner` for the token type `id`.
