@@ -15,6 +15,8 @@ contract LandSale is MetaTransactionReceiver {
 
     bytes32 internal _merkleRoot;
 
+    event LandQuadPurchased(address indexed buyer, address indexed to, uint256 indexed topCornerId, uint16 size, uint256 price);
+
     constructor(
         address landAddress,
         address erc20ContractAddress,
@@ -75,6 +77,7 @@ contract LandSale is MetaTransactionReceiver {
         );
 
         _land.mintQuad(to, size, x, y);
+	emit LandQuadPurchased(buyer, to, x + (y * 408), size, price); // 408 is the size of the Land
     }
 
     function _generateLandHash(
