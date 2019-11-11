@@ -78,14 +78,4 @@ contract Land is LandBaseToken {
     function supportsInterface(bytes4 id) external pure returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
     }
-
-
-    // TODO ?
-    // function burn(uint256 id) external {
-    //     revert("burning is disabled");
-    // }
-
-    // function burnFrom(address from, uint256 id) external {
-    //     revert("burning is disabled");
-    // }
 }

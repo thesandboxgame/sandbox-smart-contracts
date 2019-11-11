@@ -19,6 +19,8 @@ function ERC721Contract() {
     this.counter = 0;
     this.contract = null;
     this.minter = deployer;
+    this.supportsBatchTransfer = true;
+    this.supportsSafeBatchTransfer = true;
 }
 ERC721Contract.prototype.resetContract = async function () {
     this.contract = await deployLand();

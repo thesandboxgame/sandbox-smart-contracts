@@ -92,6 +92,40 @@ function runQuadTreeTests(title, landDeployer) {
             await expectThrow(tx(land, 'transferQuad', {from: user0, gas: 8000000}, user0, user1, size, x, y, emptyBytes));
         });
 
+        t.test('transferQuad subset of a higher quad with one approved to someone else', async (t) => {
+            const px = 312;
+            const py = 288;
+            const psize = 24;
+            await mintQuad(land, user0, psize, px, py, {
+                from: landMinter,
+                gas,
+            });
+            const x = px + 12;
+            const y = py + 18;
+            const size = 6;
+            await tx(land, 'approve', {from: user0, gas: 8000000}, user2, landId(x + 1, y + 1));
+            const receipt = await tx(land, 'transferQuad', {from: user0, gas: 8000000}, user0, user1, size, x, y, emptyBytes);
+            console.log('gasUsed for formed transferQuad 6x6 = ' + receipt.gasUsed);
+            const balance = await balanceOf(land, user1);
+            assert.equal(balance, size * size, 'user balance is wrong');
+            for (let ix = x; ix < x + size; ix++) {
+                for (let iy = y; iy < y + size; iy++) {
+                    const tokenId = landId(ix, iy);
+                    const ownerOfToken = await call(land, 'ownerOf', null, tokenId);
+                    assert.equal(ownerOfToken, user1);
+                }
+            }
+            for (let ix = px; ix < px + psize; ix++) {
+                for (let iy = py; iy < py + psize; iy++) {
+                    if ((ix < x || ix >= x + size) && (iy < y || iy >= y + size)) {
+                        const tokenId = landId(ix, iy);
+                        const ownerOfToken = await call(land, 'ownerOf', null, tokenId);
+                        assert.equal(ownerOfToken, user0);
+                    }
+                }
+            }
+        });
+
         t.test('transferQuad subset of a higher quad', async (t) => {
             const px = 312;
             const py = 288;
@@ -418,6 +452,75 @@ function runQuadTreeTests(title, landDeployer) {
             console.log('gasUsed for 12x12 batchTransferFrom from broken quad = ' + receipt.gasUsed);
         });
 
+        t.test('batchTransferFrom 12x12 from broken 12x12 with from = to', async (t) => {
+            const px = 312;
+            const py = 288;
+            const psize = 12;
+            await mintQuad(land, user0, psize, px, py, {
+                from: landMinter,
+                gas,
+            });
+            const allLands = [];
+            for (let ix = 0; ix < psize; ix++) {
+                const landIdsToTransfer = [];
+                for (let iy = 0; iy < psize; iy++) {
+                    const landIdToTransfer = landId(px + ix, py + iy);
+                    landIdsToTransfer.push(landIdToTransfer);
+                    allLands.push(landIdToTransfer);
+                }
+                await tx(land, 'batchTransferFrom', {from: user0, gas: 8000000}, user0, user1, landIdsToTransfer, emptyBytes);
+                await tx(land, 'batchTransferFrom', {from: user1, gas: 8000000}, user1, user0, landIdsToTransfer, emptyBytes);
+            }
+            const receipt = await tx(land, 'batchTransferFrom', {from: user0, gas: 8000000}, user0, user0, allLands, emptyBytes);
+            console.log('gasUsed for 12x12 batchTransferFrom (from == to) from broken quad = ' + receipt.gasUsed);
+        });
+
+        t.test('batchTransferFrom 24x24 from broken 24x24', async (t) => {
+            const px = 312;
+            const py = 288;
+            const psize = 24;
+            await mintQuad(land, user0, psize, px, py, {
+                from: landMinter,
+                gas,
+            });
+            const allLands = [];
+            for (let ix = 0; ix < psize; ix++) {
+                const landIdsToTransfer = [];
+                for (let iy = 0; iy < psize; iy++) {
+                    const landIdToTransfer = landId(px + ix, py + iy);
+                    landIdsToTransfer.push(landIdToTransfer);
+                    allLands.push(landIdToTransfer);
+                }
+                await tx(land, 'batchTransferFrom', {from: user0, gas: 8000000}, user0, user1, landIdsToTransfer, emptyBytes);
+                await tx(land, 'batchTransferFrom', {from: user1, gas: 8000000}, user1, user0, landIdsToTransfer, emptyBytes);
+            }
+            const receipt = await tx(land, 'batchTransferFrom', {from: user0, gas: 20000000}, user0, user1, allLands, emptyBytes);
+            console.log('gasUsed for 24x24 batchTransferFrom from broken quad = ' + receipt.gasUsed);
+        });
+
+        t.test('batchTransferFrom 24x24 from broken 24x24 with from = to', async (t) => {
+            const px = 312;
+            const py = 288;
+            const psize = 24;
+            await mintQuad(land, user0, psize, px, py, {
+                from: landMinter,
+                gas,
+            });
+            const allLands = [];
+            for (let ix = 0; ix < psize; ix++) {
+                const landIdsToTransfer = [];
+                for (let iy = 0; iy < psize; iy++) {
+                    const landIdToTransfer = landId(px + ix, py + iy);
+                    landIdsToTransfer.push(landIdToTransfer);
+                    allLands.push(landIdToTransfer);
+                }
+                await tx(land, 'batchTransferFrom', {from: user0, gas: 8000000}, user0, user1, landIdsToTransfer, emptyBytes);
+                await tx(land, 'batchTransferFrom', {from: user1, gas: 8000000}, user1, user0, landIdsToTransfer, emptyBytes);
+            }
+            const receipt = await tx(land, 'batchTransferFrom', {from: user0, gas: 20000000}, user0, user0, allLands, emptyBytes);
+            console.log('gasUsed for 24x24 batchTransferFrom (from == to) from broken quad = ' + receipt.gasUsed);
+        });
+
         t.test('batchTransferFrom 12x12 from unbroken quad', async (t) => {
             const px = 312;
             const py = 288;
@@ -436,6 +539,64 @@ function runQuadTreeTests(title, landDeployer) {
             const receipt = await tx(land, 'batchTransferFrom', {from: user0, gas: 8000000}, user0, user1, allLands, emptyBytes);
             console.log('gasUsed for 12x12 batchTransferFrom from unbroken quad = ' + receipt.gasUsed);
         });
+
+        t.test('batchTransferFrom 12x12 from unbroken quad (from == to)', async (t) => {
+            const px = 312;
+            const py = 288;
+            const psize = 12;
+            await mintQuad(land, user0, psize, px, py, {
+                from: landMinter,
+                gas,
+            });
+            const allLands = [];
+            for (let ix = 0; ix < psize; ix++) {
+                for (let iy = 0; iy < psize; iy++) {
+                    const landIdToTransfer = landId(px + ix, py + iy);
+                    allLands.push(landIdToTransfer);
+                }
+            }
+            const receipt = await tx(land, 'batchTransferFrom', {from: user0, gas: 8000000}, user0, user0, allLands, emptyBytes);
+            console.log('gasUsed for 12x12 batchTransferFrom from unbroken quad (from == to) = ' + receipt.gasUsed);
+        });
+
+        t.test('batchTransferFrom 24x24 from unbroken quad', async (t) => {
+            const px = 312;
+            const py = 288;
+            const psize = 24;
+            await mintQuad(land, user0, psize, px, py, {
+                from: landMinter,
+                gas,
+            });
+            const allLands = [];
+            for (let ix = 0; ix < psize; ix++) {
+                for (let iy = 0; iy < psize; iy++) {
+                    const landIdToTransfer = landId(px + ix, py + iy);
+                    allLands.push(landIdToTransfer);
+                }
+            }
+            const receipt = await tx(land, 'batchTransferFrom', {from: user0, gas: 20000000}, user0, user1, allLands, emptyBytes);
+            console.log('gasUsed for 24x24 batchTransferFrom from unbroken quad = ' + receipt.gasUsed);
+        });
+
+        t.test('batchTransferFrom 24x24 from unbroken quad (from == to)', async (t) => {
+            const px = 312;
+            const py = 288;
+            const psize = 24;
+            await mintQuad(land, user0, psize, px, py, {
+                from: landMinter,
+                gas,
+            });
+            const allLands = [];
+            for (let ix = 0; ix < psize; ix++) {
+                for (let iy = 0; iy < psize; iy++) {
+                    const landIdToTransfer = landId(px + ix, py + iy);
+                    allLands.push(landIdToTransfer);
+                }
+            }
+            const receipt = await tx(land, 'batchTransferFrom', {from: user0, gas: 20000000}, user0, user0, allLands, emptyBytes);
+            console.log('gasUsed for 24x24 batchTransferFrom from unbroken quad (from == to) = ' + receipt.gasUsed);
+        });
+
 
         t.test('batchTransferQuad 6x6+ 2* 3x3 + 1x1', async (t) => {
             const px = 312;
@@ -496,6 +657,25 @@ function runQuadTreeTests(title, landDeployer) {
             const xs = [px + 3, px + 6, px + 3, px + 3];
             const ys = [py + 6, py + 6, py + 3, py + 3];
             await expectThrow(tx(land, 'batchTransferQuad', {from: user0, gas: 8000000}, user0, user1,
+                sizes,
+                xs,
+                ys,
+                emptyBytes
+            ));
+        });
+
+        t.test('REVERT: batchTransferQuad 6x6 + 1x1 + 2* 3x3  overlap even from=to', async (t) => {
+            const px = 312;
+            const py = 288;
+            const psize = 12;
+            await mintQuad(land, user0, psize, px, py, {
+                from: landMinter,
+                gas,
+            });
+            const sizes = [3, 6, 1, 3];
+            const xs = [px + 3, px + 6, px + 3, px + 3];
+            const ys = [py + 6, py + 6, py + 3, py + 3];
+            await expectThrow(tx(land, 'batchTransferQuad', {from: user0, gas: 8000000}, user0, user0,
                 sizes,
                 xs,
                 ys,
