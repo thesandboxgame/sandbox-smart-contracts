@@ -559,6 +559,45 @@ function runQuadTreeTests(title, landDeployer) {
             console.log('gasUsed for 12x12 batchTransferFrom from unbroken quad (from == to) = ' + receipt.gasUsed);
         });
 
+        t.test('batchTransferFrom 24x24 from unbroken quad', async (t) => {
+            const px = 312;
+            const py = 288;
+            const psize = 24;
+            await mintQuad(land, user0, psize, px, py, {
+                from: landMinter,
+                gas,
+            });
+            const allLands = [];
+            for (let ix = 0; ix < psize; ix++) {
+                for (let iy = 0; iy < psize; iy++) {
+                    const landIdToTransfer = landId(px + ix, py + iy);
+                    allLands.push(landIdToTransfer);
+                }
+            }
+            const receipt = await tx(land, 'batchTransferFrom', {from: user0, gas: 20000000}, user0, user1, allLands, emptyBytes);
+            console.log('gasUsed for 24x24 batchTransferFrom from unbroken quad = ' + receipt.gasUsed);
+        });
+
+        t.test('batchTransferFrom 24x24 from unbroken quad (from == to)', async (t) => {
+            const px = 312;
+            const py = 288;
+            const psize = 24;
+            await mintQuad(land, user0, psize, px, py, {
+                from: landMinter,
+                gas,
+            });
+            const allLands = [];
+            for (let ix = 0; ix < psize; ix++) {
+                for (let iy = 0; iy < psize; iy++) {
+                    const landIdToTransfer = landId(px + ix, py + iy);
+                    allLands.push(landIdToTransfer);
+                }
+            }
+            const receipt = await tx(land, 'batchTransferFrom', {from: user0, gas: 20000000}, user0, user0, allLands, emptyBytes);
+            console.log('gasUsed for 24x24 batchTransferFrom from unbroken quad (from == to) = ' + receipt.gasUsed);
+        });
+
+
         t.test('batchTransferQuad 6x6+ 2* 3x3 + 1x1', async (t) => {
             const px = 312;
             const py = 288;
