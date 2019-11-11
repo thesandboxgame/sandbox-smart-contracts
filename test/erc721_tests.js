@@ -183,6 +183,51 @@ function runERC721tests(title, contractStore) {
                 });
             });
         }
+        if (contractStore.supportsBatchTransfer) {
+            t.test('batch transfers', async (t) => {
+                t.test('batch transfer of same NFT ids should fails', async () => {
+                    await expectThrow(tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, user1, [tokenIds[1], tokenIds[1], tokenIds[0]], emptyBytes));
+                });
+                t.test('batch transfer of same NFT ids should fails even if from == to', async () => {
+                    let reverted = false;
+                    try {
+                        await tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[1], tokenIds[1], tokenIds[0]], emptyBytes);
+                    } catch (e) {
+                        reverted = true;
+                        console.log('ERROR', e);
+                    }
+                    assert.equal(reverted, true);
+                    // await expectThrow(tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[1], tokenIds[1], tokenIds[0]], emptyBytes));
+                });
+                t.test('batch transfer of', async () => {
+                    const receipt = await tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, user1, tokenIds, emptyBytes);
+                    console.log('gas used for batch transfer = ' + receipt.gasUsed);
+                });
+            });
+        }
+
+        if (contractStore.supportsSafeBatchTransfer) {
+            t.test('safe batch transfers', async (t) => {
+                t.test('safe batch transfer of same NFT ids should fails', async () => {
+                    await expectThrow(tx(contract, 'safeBatchTransferFrom', {from: user0, gas}, user0, user1, [tokenIds[0], tokenIds[1], tokenIds[0]], emptyBytes));
+                });
+                t.test('safe batch transfer of same NFT ids should fails even if from == to', async () => {
+                    let reverted = false;
+                    try {
+                        await tx(contract, 'safeBatchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[0], tokenIds[1], tokenIds[0]], emptyBytes);
+                    } catch (e) {
+                        reverted = true;
+                        console.log('ERROR', e);
+                    }
+                    assert.equal(reverted, true);
+                    // await expectThrow(tx(contract, 'safeBatchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[0], tokenIds[1], tokenIds[0]], emptyBytes));
+                });
+                t.test('batch transfer of', async () => {
+                    const receipt = await tx(contract, 'safeBatchTransferFrom', {from: user0, gas}, user0, user1, tokenIds, emptyBytes);
+                    console.log('gas used for safe batch transfer = ' + receipt.gasUsed);
+                });
+            });
+        }
 
         t.test('transfers', async (t) => {
             t.test('transfering one NFT results in one erc721 transfer event', async () => {

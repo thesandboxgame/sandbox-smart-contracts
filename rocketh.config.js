@@ -5,7 +5,8 @@ module.exports = {
     ganacheOptions: {
         debug: true,
         vmErrorsOnRPCResponse: true,
-        gasLimit: '0x7a1200', // 8000000
+        gasLimit: '0x1312D00', // 20000000
+        // hardfork: 'istanbul',
     },
     accounts: {
         default: {
@@ -65,7 +66,7 @@ module.exports = {
     solcSettings: {
         optimizer: {
             enabled: true,
-            runs: 2000,
+            runs: 200, // TODO per contract
         }
     }
 };
