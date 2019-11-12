@@ -1,9 +1,9 @@
 const Web3 = require('web3');
 
 function generateSigs(sigs) {
-    const result = {}; 
-    for(let sig of sigs) {
-        result[sig] = Web3.utils.keccak256(sig).slice(0, 10); 
+    const result = {};
+    for (const sig of sigs) {
+        result[sig] = Web3.utils.keccak256(sig).slice(0, 10);
     }
     return result;
 }

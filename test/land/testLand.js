@@ -8,7 +8,7 @@ const {
     gas,
 } = require('../utils');
 
-const { deployer } = rocketh.namedAccounts;
+const {deployer} = rocketh.namedAccounts;
 
 async function deployLand() {
     await rocketh.runStages();

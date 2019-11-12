@@ -45,7 +45,8 @@ module.exports = async ({namedAccounts, initialRun, deployIfDifferent}) => {
         sandContract.options.address,
         landSaleAdmin,
         landSaleBeneficiary,
-        merkleRootHash
+        merkleRootHash,
+	Date.now() + 30 * 24 * 60 * 60 // 30 days
     );
     const contract = getDeployedContract('LandSale');
     if (deployResult.newlyDeployed) {

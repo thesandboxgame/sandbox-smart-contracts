@@ -23,14 +23,14 @@ const {
 
 const {
     TransferEvent
-} = require('./erc721')
+} = require('./erc721');
 
 const creator = accounts[0];
 const user1 = accounts[1];
 const operator = accounts[2];
 
 function runDualERC1155ERC721tests(title, resetContracts, mintDual) {
-    tap.test(title + " as dual erc1155/erc721", async (t)=> {
+    tap.test(title + ' as dual erc1155/erc721', async (t) => {
         // t.runOnly = true;
         let contracts;
         let assetsId;
@@ -43,8 +43,8 @@ function runDualERC1155ERC721tests(title, resetContracts, mintDual) {
             assetsId.push(await mintDual(contracts.AssetBouncer, creator, 1));
             assetsId.push(await mintDual(contracts.AssetBouncer, creator, 15));
             assetsId.push(await mintDual(contracts.AssetBouncer, creator, 1));
-        });     
-  
+        });
+
         t.test('transfers', async (t) => {
             // t.runOnly = true;
             t.test('transfering one NFT via ERC1155 transfer method results in one erc721 transfer event', async () => {
@@ -139,25 +139,25 @@ function runDualERC1155ERC721tests(title, resetContracts, mintDual) {
 
         t.test('NFT batch transfers', async (t) => {
             t.test('transfering one NFT via batch transfer results in one erc721 transfer event', async () => {
-                const receipt = await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, 
+                const receipt = await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas},
                     creator, user1, [assetsId[1], assetsId[0], assetsId[4]], [1, 5, 10], emptyBytes);
                 const eventsMatching = await getEventsFromReceipt(contracts.Asset, TransferEvent, receipt);
-                assert.equal(eventsMatching.length, 1);         
+                assert.equal(eventsMatching.length, 1);
             });
             t.test('transfering 2 NFT via batch transfer results in 2 erc721 transfer events', async () => {
-                const receipt = await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, 
+                const receipt = await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas},
                     creator, user1, [assetsId[1], assetsId[3], assetsId[4]], [1, 1, 10], emptyBytes);
                 const eventsMatching = await getEventsFromReceipt(contracts.Asset, TransferEvent, receipt);
                 assert.equal(eventsMatching.length, 2);
             });
             t.test('transfering 2 NFT via batch transfer results in erc721 balanceOf update', async () => {
-                await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas}, 
+                await tx(contracts.Asset, 'safeBatchTransferFrom', {from: creator, gas},
                     creator, user1, [assetsId[1], assetsId[3], assetsId[4]], [1, 1, 10], emptyBytes);
                 const erc721Balance = await call(contracts.Asset, 'balanceOf', null, user1);
                 assert.equal(erc721Balance, 2);
             });
         });
-        
+
         t.test('NFT approvalForAll', async (t) => {
             t.test('without approval, operator should not be able to transfer', async () => {
                 await expectThrow(tx(contracts.Asset, 'transferFrom', {from: operator, gas}, creator, user1, assetsId[1]));
@@ -179,4 +179,4 @@ function runDualERC1155ERC721tests(title, resetContracts, mintDual) {
 
 module.exports = {
     runDualERC1155ERC721tests
-}
+};

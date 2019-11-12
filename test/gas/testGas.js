@@ -34,9 +34,7 @@ async function gasUsedForCallExecution(contract, receipt) {
 }
 
 function runTests({func, epsilon, log}) {
-
-    
-    tap.test('gasTest with ' + func + (typeof epsilon != 'undefined' ? ' and epsilon = ' + epsilon : ''), async (t)=> {
+    tap.test('gasTest with ' + func + (typeof epsilon !== 'undefined' ? ' and epsilon = ' + epsilon : ''), async (t) => {
         // t.runOnly = true;
 
         let GasDrain;
@@ -49,13 +47,12 @@ function runTests({func, epsilon, log}) {
         });
 
         function exec(gasProvided, txGas, callData) {
-            if(typeof epsilon != 'undefined') {
+            if (typeof epsilon !== 'undefined') {
                 return tx(GasTest, 'test', {from: executor, gas: gasProvided}, epsilon, txGas, receiver, callData);
-            } else {
-                return tx(GasTest, func, {from: executor, gas: gasProvided}, txGas, receiver, callData);
             }
+            return tx(GasTest, func, {from: executor, gas: gasProvided}, txGas, receiver, callData);
         }
-    
+
         // t.test('drain with 3000000', async () => {
         //     const txGas = 3000000;
         //     const gasProvided = txGas*2;
@@ -71,7 +68,7 @@ function runTests({func, epsilon, log}) {
         //         console.log('gas used for exec : ' + await gasUsedForCallExecution(GasTest, receipt));
         //     }
         // });
-    
+
         // t.test('drain with 100000', async () => {
         //     const txGas = 100000;
         //     const gasProvided = txGas*2;
@@ -87,7 +84,7 @@ function runTests({func, epsilon, log}) {
         //         console.log('gas used for exec : ' + await gasUsedForCallExecution(GasTest, receipt));
         //     }
         // });
-    
+
         // t.test('drain 3000000 with 10 bytes data', async () => {
         //     const txGas = 3000000;
         //     const gasProvided = txGas*2;
@@ -121,7 +118,7 @@ function runTests({func, epsilon, log}) {
         //         console.log('gas used for exec : ' + await gasUsedForCallExecution(GasTest, receipt));
         //     }
         // });
-    
+
         // t.test('drain 3000000 with 10000 bytes data', async () => {
         //     const txGas = 3000000;
         //     const gasProvided = txGas*2;
@@ -139,16 +136,15 @@ function runTests({func, epsilon, log}) {
         //     }
         // });
 
-
         t.test('drain 3000000 via receiveSpecificERC20', async () => {
             const txGas = 3000000;
-            const gasProvided = txGas*2;
+            const gasProvided = txGas * 2;
             const callData = encodeCall(GasDrain, 'receiveSpecificERC20', receivingAddress, amount, txGas);
             const receipt = await exec(gasProvided, txGas, callData);
             // console.log(JSON.stringify(receipt, null, "  "));
             assert(await isSuccess(GasTest, receipt));
-            if(log) {
-                console.log('drain 3000000 via receiveSpecificERC20' + JSON.stringify({func, epsilon}))
+            if (log) {
+                console.log('drain 3000000 via receiveSpecificERC20' + JSON.stringify({func, epsilon}));
                 console.log('gasUsed : ' + (receipt.gasUsed));
                 console.log('gas left : ' + (gasProvided - receipt.gasUsed));
                 console.log('extra gas : ' + (receipt.gasUsed - txGas));
@@ -179,32 +175,29 @@ function runTests({func, epsilon, log}) {
             const receipt = await exec(gasProvided, txGas, callData);
             // console.log(JSON.stringify(receipt, null, "  "));
             assert(await isSuccess(GasTest, receipt));
-            if(log) {
-                console.log('drain 5000000 via receiveSpecificERC20' + JSON.stringify({func, epsilon}))
+            if (log) {
+                console.log('drain 5000000 via receiveSpecificERC20' + JSON.stringify({func, epsilon}));
                 console.log('gasUsed : ' + (receipt.gasUsed));
                 console.log('gas left : ' + (gasProvided - receipt.gasUsed));
                 console.log('extra gas : ' + (receipt.gasUsed - txGas));
                 console.log('gas used for exec : ' + await gasUsedForCallExecution(GasTest, receipt));
             }
         });
-    
     });
-    
-    
 }
 
 runTests({
-    func:'raw',
+    func: 'raw',
     // log:true,
 });
 
 runTests({
-    func:'test',
-    epsilon:1,
+    func: 'test',
+    epsilon: 1,
     // log:true,
 });
 
 runTests({
-    func:'test',
+    func: 'test',
     // log:true,
 });

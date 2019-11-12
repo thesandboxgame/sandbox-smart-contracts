@@ -7,10 +7,9 @@ const TransferBatchEvent = encodeEventSignature('TransferBatch(address,address,a
 const URIEvent = encodeEventSignature('URI(string,uint256)');
 const ApprovalForAllEvent = encodeEventSignature('ApprovalForAll(address,address,bool)');
 
-
 module.exports = {
     TransferSingleEvent,
     URIEvent,
     TransferBatchEvent,
     ApprovalForAllEvent
-}
+};

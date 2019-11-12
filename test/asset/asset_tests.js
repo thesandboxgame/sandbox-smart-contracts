@@ -61,7 +61,7 @@ const operator = others[2];
 const newFeeCollector = others[3];
 const feeCollectorOwner = others[4];
 
-const invalidIpfsHashString = '0x0000000000000000000000000000000000000000000000000000000000000000'
+const invalidIpfsHashString = '0x0000000000000000000000000000000000000000000000000000000000000000';
 const ipfsHashString = '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
 const ipfsUrl = 'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy';
 
@@ -743,7 +743,6 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                 const balance = await call(contracts.Asset, 'balanceOf', null, creator, tokenId);
                 assert.equal(balance, '0');
             });
-
         });
     });
 }
