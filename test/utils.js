@@ -72,8 +72,8 @@ module.exports = {
     soliditySha3: web3.utils.soliditySha3,
     ethSign: web3.eth.sign,
     sendTransaction: web3.eth.sendTransaction,
-    instantiateContract() {
-        return new web3.eth.Contract(...arguments);
+    instantiateContract(...args) {
+        return new web3.eth.Contract(...args);
     },
     revertToSnapshot: (id) => {
         return new Promise((resolve, reject) => {
