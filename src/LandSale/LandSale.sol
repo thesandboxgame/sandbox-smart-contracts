@@ -4,6 +4,7 @@ import "../Land.sol";
 import "../../contracts_common/src/Interfaces/ERC20.sol";
 import "../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 
+
 /**
  * @title Land Sale contract
  * @notice This contract mananges the sale of our lands
@@ -15,7 +16,13 @@ contract LandSale is MetaTransactionReceiver {
 
     bytes32 internal _merkleRoot;
 
-    event LandQuadPurchased(address indexed buyer, address indexed to, uint256 indexed topCornerId, uint16 size, uint256 price);
+    event LandQuadPurchased(
+        address indexed buyer,
+        address indexed to,
+        uint256 indexed topCornerId,
+        uint16 size,
+        uint256 price
+    );
 
     constructor(
         address landAddress,
@@ -31,10 +38,6 @@ contract LandSale is MetaTransactionReceiver {
         _admin = admin;
         _wallet = initialWalletAddress;
         _merkleRoot = merkleRoot;
-    }
-
-    function merkleRoot() external view returns(bytes32) {
-        return _merkleRoot;
     }
 
     /**
@@ -77,7 +80,11 @@ contract LandSale is MetaTransactionReceiver {
         );
 
         _land.mintQuad(to, size, x, y);
-	emit LandQuadPurchased(buyer, to, x + (y * 408), size, price); // 408 is the size of the Land
+        emit LandQuadPurchased(buyer, to, x + (y * 408), size, price); // 408 is the size of the Land
+    }
+
+    function merkleRoot() external view returns(bytes32) {
+        return _merkleRoot;
     }
 
     function _generateLandHash(
