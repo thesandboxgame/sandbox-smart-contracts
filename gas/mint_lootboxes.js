@@ -3,9 +3,9 @@ const BN = require('bn.js');
 const {getDeployedContract} = require('../lib');
 const {toChecksumAddress, web3} = require('../test/utils');
 const {executeMetaTx, signEIP712MetaTx} = require('../test/sand-utils');
-const { generateTokenId, getSingleId, getBatchIds } = require('../test/asset-utils');
-const { zeroAddress,tx, emptyBytes, encodeCall } = require('../test/utils');
-const { transfer } = require('../test/erc20');
+const {generateTokenId, getSingleId, getBatchIds} = require('../test/asset-utils');
+const {zeroAddress, tx, emptyBytes, encodeCall} = require('../test/utils');
+const {transfer} = require('../test/erc20');
 
 const rocketh = require('rocketh');
 const rockethWeb3 = require('rocketh-web3')(rocketh, require('web3'));
@@ -23,7 +23,7 @@ const assetContract = getDeployedContract('Asset');
 const gas = 8000000;
 
 const gasReport = {
-    data:{
+    data: {
 
     },
     total: 0

@@ -597,7 +597,6 @@ function runQuadTreeTests(title, landDeployer) {
             console.log('gasUsed for 24x24 batchTransferFrom from unbroken quad (from == to) = ' + receipt.gasUsed);
         });
 
-
         t.test('batchTransferQuad 6x6+ 2* 3x3 + 1x1', async (t) => {
             const px = 312;
             const py = 288;

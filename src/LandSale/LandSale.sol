@@ -13,7 +13,7 @@ contract LandSale is MetaTransactionReceiver {
     Land internal _land;
     ERC20 internal _erc20;
     address payable internal _wallet;
-
+    uint256 _expiryTime;
     bytes32 internal _merkleRoot;
 
     event LandQuadPurchased(
@@ -30,7 +30,8 @@ contract LandSale is MetaTransactionReceiver {
         address initialMetaTx,
         address admin,
         address payable initialWalletAddress,
-        bytes32 merkleRoot
+        bytes32 merkleRoot,
+	uint256 expiryTime
     ) public {
         _land = Land(landAddress);
         _erc20 = ERC20(erc20ContractAddress);
@@ -38,6 +39,11 @@ contract LandSale is MetaTransactionReceiver {
         _admin = admin;
         _wallet = initialWalletAddress;
         _merkleRoot = merkleRoot;
+	_expiryTime = expiryTime;
+    }
+
+    function getExpiryTime() external view returns(uint256) {
+	return _expiryTime;
     }
 
     /**
@@ -61,6 +67,7 @@ contract LandSale is MetaTransactionReceiver {
         uint256 price,
         bytes32[] calldata proof
     ) external {
+	require(block.timestamp < _expiryTime, "sale is over");
         require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "not authorized");
         require(reserved == address(0) || reserved == buyer, "cannot buy reserved Land");
         bytes32 leaf = _generateLandHash(x, y, size, price, reserved);

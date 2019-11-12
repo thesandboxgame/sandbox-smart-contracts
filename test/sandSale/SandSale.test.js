@@ -239,5 +239,4 @@ t.test('Normal behavior', async (t) => {
         const isPaused = await sandSale.methods.isPaused().call();
         assert.equal(isPaused, false, 'Contract state is wrong');
     });
-
 });

@@ -2,9 +2,9 @@ const assert = require('assert');
 const {getDeployedContract} = require('../lib');
 const {toChecksumAddress, web3} = require('../test/utils');
 const {executeMetaTx, signEIP712MetaTx} = require('../test/sand-utils');
-const { generateTokenId } = require('../test/asset-utils');
-const { zeroAddress,tx, emptyBytes, encodeCall } = require('../test/utils');
-const { transfer } = require('../test/erc20');
+const {generateTokenId} = require('../test/asset-utils');
+const {zeroAddress, tx, emptyBytes, encodeCall} = require('../test/utils');
+const {transfer} = require('../test/erc20');
 
 const rocketh = require('rocketh');
 const rockethWeb3 = require('rocketh-web3')(rocketh, require('web3'));
@@ -25,7 +25,7 @@ const sandContract = getDeployedContract('Sand');
 const gas = 8000000;
 
 const gasReport = {
-    data:{
+    data: {
 
     }
     // TODO commit git
@@ -47,15 +47,15 @@ const ipfsUrl = 'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2
 
 function timesHex(str, num) {
     let newStr = str;
-    for(let i =1; i < num; i++) {
-        newStr += str.slice(2);;
+    for (let i = 1; i < num; i++) {
+        newStr += str.slice(2);
     }
     return newStr;
 }
 
-function times(str, num){
+function times(str, num) {
     let newStr = str;
-    for(let i =1; i < num; i++) {
+    for (let i = 1; i < num; i++) {
         newStr += str;
     }
     return newStr;
@@ -63,7 +63,7 @@ function times(str, num){
 
 function lengths(str, num) {
     const l = [];
-    for(let i =0; i < num; i++) {
+    for (let i = 0; i < num; i++) {
         l.push(str.length);
     }
     return l;
@@ -71,7 +71,7 @@ function lengths(str, num) {
 
 function perNums(perNum, num) {
     const l = [];
-    for(let i =0; i < num; i++) {
+    for (let i = 0; i < num; i++) {
         l.push(perNum);
     }
     return l;
@@ -79,12 +79,12 @@ function perNums(perNum, num) {
 
 let counter = 0;
 function fix(fixedID, batch = 1) {
-    if(typeof fixedID == 'undefined') {
+    if (typeof fixedID === 'undefined') {
         fixedID = counter;
-        counter = (counter + batch*8) - (counter%8);
-    } else if(fixedID >= counter) {
+        counter = (counter + batch * 8) - (counter % 8);
+    } else if (fixedID >= counter) {
         counter = fixedID;
-        counter = (counter + batch*8) - (counter%8);
+        counter = (counter + batch * 8) - (counter % 8);
     }
     return fixedID;
 }
@@ -93,7 +93,7 @@ function mintGas(num, fixedID) {
 }
 
 function mintMultipleGas(num, perNum, fixedID) {
-    fixedID = fix(fixedID, Math.floor(num / 8)+1);
+    fixedID = fix(fixedID, Math.floor(num / 8) + 1);
     // console.log({fixedID})
     return gasUse('mintMultiple ' + num, () => bouncerContract.methods.mintMultiple(
         creator,
@@ -104,11 +104,11 @@ function mintMultipleGas(num, perNum, fixedID) {
         perNums(perNum, num),
         creator,
         emptyBytes
-    ).send({from: creator, gas}));   
+    ).send({from: creator, gas}));
 }
 
 function mintMultipleNFTsGas(num, fixedID) {
-    fixedID = fix(fixedID, Math.floor(num / 8)+1);
+    fixedID = fix(fixedID, Math.floor(num / 8) + 1);
     // console.log({fixedID})
     return gasUse('mintNFTs ' + num, () => bouncerContract.methods.mintMultiple(
         creator,
@@ -116,10 +116,10 @@ function mintMultipleNFTsGas(num, fixedID) {
         zeroAddress,
         fixedID,
         ipfsHashString,
-        perNums(1,num),
+        perNums(1, num),
         creator,
         emptyBytes
-    ).send({from: creator, gas}));   
+    ).send({from: creator, gas}));
 }
 
 async function metaMintGas(num, fixedID) {
@@ -127,8 +127,8 @@ async function metaMintGas(num, fixedID) {
     nonce = parseInt(nonce);
     return gasUse('metatx mint ' + num, () => executeMetaTx(signingAccount,
         sandContract,
-        {from:executor, gas, gasPrice:1},
-        {nonce:nonce+1, gasPrice:1, txGas: 2000000, gasLimit:2000000+112000, tokenGasPrice:1, relayer: zeroAddress, tokenDeposit: executor},
+        {from: executor, gas, gasPrice: 1},
+        {nonce: nonce + 1, gasPrice: 1, txGas: 2000000, gasLimit: 2000000 + 112000, tokenGasPrice: 1, relayer: zeroAddress, tokenDeposit: executor},
         bouncerContract,
         0,
         'mint', signingAccount.address, 0, zeroAddress, fix(fixedID), ipfsHashString, num, signingAccount.address, emptyBytes));
@@ -136,7 +136,6 @@ async function metaMintGas(num, fixedID) {
 
 main(accounts);
 async function main(accounts) {
-    
     // required for the signer to pay for meta-tx
     await transfer(sandContract, signingAccount.address, '1000000000000', {from: sandOwner, gas});
     // to not pay gas when receibing Sand
@@ -151,7 +150,6 @@ async function main(accounts) {
     // const ffData = timesHex("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", 120);
     // await gasUse('fallback ff * 10', () => rockethWeb3.tx({from: creator, gas, to: assetContract.options.address, data: ffData}));
     // await gasUse('test ff * 10', () => tx(assetContract, 'test', {from: creator, gas}, ffData));
-
 
     // const data = encodeCall(assetContract, 'mint', creator, 0, zeroAddress, counter, ipfsHashString, 1, creator, emptyBytes);
     // console.log(data);
@@ -212,7 +210,7 @@ async function main(accounts) {
     //     bouncerContract,
     //     0,
     //     'mintMultiple',
-    //     signingAccount.address, 
+    //     signingAccount.address,
     //     0,
     //     16,
     //     times(ipfsHashString, 4),
@@ -220,8 +218,7 @@ async function main(accounts) {
     //     [100,2,5,1000],
     //     creator,
     //     emptyBytes,
-    //     ));    
+    //     ));
 
     console.log(JSON.stringify(gasReport, null, '  '));
-    
 }
