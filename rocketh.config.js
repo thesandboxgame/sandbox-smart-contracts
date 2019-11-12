@@ -46,7 +46,7 @@ module.exports = {
         genesisBouncerAdmin: 'sandAdmin', // can set who is allowed to mint
         commonMinterAdmin: 'sandAdmin', // can change the fees
         genesisMinter: 'deployer', // the first account allowed to mint genesis Assets
-        assetAuctionTaxCollector: 'sandSaleBeneficiary',
+        assetAuctionFeeCollector: 'sandSaleBeneficiary',
         assetAuctionAdmin: 'sandAdmin',
         orbsBeneficiary: 'sandSaleBeneficiary',
         sandSaleBeneficiary: {
