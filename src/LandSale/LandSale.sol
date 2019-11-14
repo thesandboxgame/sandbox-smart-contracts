@@ -45,9 +45,10 @@ contract LandSale is MetaTransactionReceiver {
     /**
      * @notice buy Land using the merkle proof associated with it
      * @param buyer address that perform the payment
-     * @param to address that will owne the Land purchased
+     * @param to address that will own the purchased Land
+     * @param reserved the reserved address (if any)
      * @param x x coordinate of the Land
-     * @param y  coordinayte of the Land
+     * @param y y coordinate of the Land
      * @param size size of the pack of Land to purchase
      * @param price amount of Sand to purchase that Land
      * @param proof merkleProof for that particular Land
@@ -87,10 +88,18 @@ contract LandSale is MetaTransactionReceiver {
         emit LandQuadPurchased(buyer, to, x + (y * 408), size, price); // 408 is the size of the Land
     }
 
+    /**
+     * @notice Gets the expiry time for the current sale
+     * @return The expiry time, as a unix epoch
+     */
     function getExpiryTime() external view returns(uint256) {
         return _expiryTime;
     }
 
+    /**
+     * @notice Gets the Merkle root associated with the current sale
+     * @return The Merkle root, as a bytes32 hash
+     */
     function merkleRoot() external view returns(bytes32) {
         return _merkleRoot;
     }
