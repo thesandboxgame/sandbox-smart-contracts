@@ -140,7 +140,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         }
     }
 
-    function _checkTransfer(address from, address to, uint256 id) internal returns (bool isMetaTx) {
+    function _checkTransfer(address from, address to, uint256 id) internal view returns (bool isMetaTx) {
         (address owner, bool operatorEnabled, ) = _ownerAndOperatorEnabledOf(id);
         require(owner != address(0), "token does not exist");
         require(owner == from, "not owner in _checkTransfer");
