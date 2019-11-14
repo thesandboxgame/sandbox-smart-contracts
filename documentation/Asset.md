@@ -24,3 +24,5 @@ A set of moderators can then decide to give their judgement on whether an Asset 
 Note though that moderators are unlikely to need to act often as the fear of losing bets should make sure both creators and curators ensure only good content is minted on our Asset smart contract.
 
 This solution was inspired by vitalik’s post on https://ethresear.ch/t/prediction-markets-for-content-curation-daos/1312
+
+An Audit was performed by Solidified : see [./asset_audit.pdf](./asset_audit.pdf)
