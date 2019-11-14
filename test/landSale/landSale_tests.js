@@ -121,6 +121,24 @@ function runLandSaleTests(title, contactStore) {
             );
         });
 
+        t.test('cannot buy Land without enough tokens', async (t) => {
+            const proof = tree.getProof(calculateLandHash({
+                x: 120,
+                y: 144,
+                size: 12,
+                price: '2773'
+            }));
+
+            await expectThrow(tx(contracts.LandSale, 'buyLand', {from: others[2], gas},
+                others[2],
+                others[2],
+                zeroAddress,
+                120, 144, 12,
+                2773,
+                proof
+            ));
+        });
+
         t.test('cannot buy Land from a non reserved Land with reserved param', async (t) => {
             const proof = tree.getProof(calculateLandHash({
                 x: 400,
