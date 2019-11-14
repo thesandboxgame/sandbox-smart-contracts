@@ -2,15 +2,17 @@
 
 pragma solidity 0.5.9;
 
-import "./Land/erc721/LandBaseToken.sol";
+import "./Land/erc721/EstateBaseToken.sol";
 
-contract Land is LandBaseToken {
+contract Estate is EstateBaseToken {
     constructor(
         address metaTransactionContract,
-        address admin
-    ) public LandBaseToken(
+        address admin,
+        LandBaseToken land
+    ) public EstateBaseToken(
         metaTransactionContract,
-        admin
+        admin,
+        land
     ) {
     }
 
@@ -19,7 +21,7 @@ contract Land is LandBaseToken {
      * @return The name of the token contract
      */
     function name() external pure returns (string memory) {
-        return "Sandbox's LANDs";
+        return "Sandbox's ESTATEs";
     }
 
     /**
@@ -27,7 +29,7 @@ contract Land is LandBaseToken {
      * @return The symbol of the token contract
      */
     function symbol() external pure returns (string memory) {
-        return "LAND";
+        return "ESTATE";
     }
 
     // solium-disable-next-line security/no-assign-params
@@ -60,7 +62,7 @@ contract Land is LandBaseToken {
         return
             string(
                 abi.encodePacked(
-                    "https://api.sandbox.game/land/",
+                    "https://api.sandbox.game/estate/",
                     uint2str(id),
                     "/metadata.json"
                 )
@@ -77,5 +79,13 @@ contract Land is LandBaseToken {
      */
     function supportsInterface(bytes4 id) external pure returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
+    }
+
+    function burn(uint256 id) external {
+        revert("burning is disabled");
+    }
+
+    function burnFrom(address from, uint256 id) external {
+        revert("burning is disabled");
     }
 }

@@ -4,7 +4,7 @@ const {
     deployIfDifferent,
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);
-const {guard} = require('../lib');
+const {guard, multiGuards} = require('../lib');
 
 module.exports = async ({namedAccounts, initialRun}) => {
     function log(...args) {
@@ -15,6 +15,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const {
         deployer,
+        landAdmin,
     } = namedAccounts;
 
     const sandContract = getDeployedContract('Sand');
@@ -24,9 +25,10 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const deployResult = await deployIfDifferent(['data'],
         'Land',
-        {from: deployer, gas: 1000000},
+        {from: deployer, gas: 6000000},
         'Land',
-        sandContract.options.address
+        sandContract.options.address,
+        landAdmin,
     );
 
     if (deployResult.newlyDeployed) {
@@ -35,4 +37,4 @@ module.exports = async ({namedAccounts, initialRun}) => {
         log('reusing Land at ' + deployResult.contract.options.address);
     }
 };
-module.exports.skip = guard(['1', '4']); // TODO
+module.exports.skip = multiGuards([guard(['4'], 'Land'), guard(['1'])]);

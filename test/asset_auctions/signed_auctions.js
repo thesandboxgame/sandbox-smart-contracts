@@ -49,7 +49,7 @@ const {
     deployer,
     sandBeneficiary,
     assetAuctionAdmin,
-    assetAuctionTaxCollector,
+    assetAuctionFeeCollector,
     others
 } = rocketh.namedAccounts;
 
@@ -368,7 +368,7 @@ function runSignedAuctionsTests(title, resetContracts) {
         });
 
         t.test('should NOT be able to claim offer without enough SAND when tax', async () => {
-            await tx(contracts.AssetSignedAuction, 'setTax', {from: assetAuctionAdmin, gas}, assetAuctionTaxCollector, 5000);
+            await tx(contracts.AssetSignedAuction, 'setFee', {from: assetAuctionAdmin, gas}, assetAuctionFeeCollector, 5000);
             token = contracts.Sand.options.address;
             const auctionData = [offerId, startingPrice, endingPrice, startedAt, duration, packs];
 

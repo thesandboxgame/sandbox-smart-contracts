@@ -9,5 +9,6 @@ tmp_deployments/
 .bitski*
 .mythx_credentials*
 .mnemonic*
+.DS_Store
 .temporal*
 __ipfs__/

@@ -30,7 +30,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
     }
     const currentExecutionAdmin = await call(sandContract, 'getExecutionAdmin');
     if (currentExecutionAdmin.toLowerCase() !== sandExecutionAdmin.toLowerCase()) {
-        log('setting Sand Admin');
+        log('setting Sand Execution Admin');
         await txOnlyFrom(currentExecutionAdmin, {from: deployer, gas: 1000000}, sandContract, 'changeExecutionAdmin', sandExecutionAdmin);
     }
 };

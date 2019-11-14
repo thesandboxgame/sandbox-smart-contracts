@@ -10,14 +10,17 @@
     "test": "rocketh launch \"tap -T -j 1 -R spec test/**/test*\"",
     "test-sand": "rocketh launch \"yarn tap -T -j 1 -R spec test/sand/testSand.js\"",
     "test-sandSale": "rocketh launch \"yarn tap -T -j 1 -R spec test/sandSale/SandSale.test.js\"",
+    "test-landSale": "rocketh launch \"yarn tap -T -j 1 -R spec test/landSale/testLandSale.js\"",
+    "test-land": "rocketh launch \"yarn tap -T -j 1 -R spec test/land/testLand.js\"",
     "test-commonMinter": "rocketh launch \"yarn tap -T -j 1 -R spec test/asset_bouncer/testCommonMinter.js\"",
     "test-assetAuctions": "rocketh launch \"yarn tap -T -j 1 -R spec test/asset_auctions/testAssetAuctions.js\"",
     "test-bundleSandSale": "rocketh launch \"yarn tap -T -j 1 -R spec test/bundleSandSale/testBundleSandSale.js\"",
     "test-asset": "rocketh launch \"tap -T -j 1 -R spec test/asset/testAsset.js\"",
-    "ganache": "ganache-cli --seed 04624df17c837dc2113f0c65554551f2 -a 21 --gasLimit 19000000",
+    "ganache": "ganache-cli --seed 04624df17c837dc2113f0c65554551f2 -a 21 --gasLimit 19000000 -i 1572533425564",
     "export-sand": "node export-sand.js",
     "export-asset": "node export-asset.js",
     "smartcheck": "smartcheck -p .",
+    "deploy-local": "rocketh launch -n http://localhost:8545",
     "deploy-rinkeby": "rocketh launch -n https://rinkeby.infura.io/v3/ced8eecc03984939b556332468325813",
     "deploy-mainnet": "cli-confirm \"Do you really want to deploy to mainnet\" && rocketh launch -n https://mainnet.infura.io/v3/ced8eecc03984939b556332468325813 || echo ok",
     "attach-mainnet": "rocketh attach https://mainnet.infura.io/v3/ced8eecc03984939b556332468325813"
@@ -46,7 +49,7 @@
     "minimist": "^1.2.0",
     "prettier": "^1.18.2",
     "prettier-plugin-solidity": "^1.0.0-alpha.30",
-    "rocketh": "^0.4.7",
+    "rocketh": "^0.4.12",
     "solc": "0.5.9",
     "solhint": "^2.1.2",
     "solhint-plugin-prettier": "^0.0.3",
@@ -58,6 +61,7 @@
     "base32.js": "^0.1.0",
     "commander": "^3.0.0",
     "ganache-core": "^2.5.5",
+    "js-sha256": "^0.9.0",
     "rocketh-web3": "^0.2.17"
   }
 }

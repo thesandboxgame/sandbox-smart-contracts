@@ -42,26 +42,29 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
     mapping(address => mapping(uint256 => uint256)) claimed;
 
     Asset _asset;
-    uint256 _tax10000th = 0;
-    address payable _taxCollector;
+    uint256 _fee10000th = 0;
+    address payable _feeCollector;
 
-    event TaxSetup(address taxCollector, uint256 tax10000th);
+    event FeeSetup(address feeCollector, uint256 fee10000th);
 
-    constructor(Asset asset, address admin, address initialMetaTx, address payable taxCollector, uint256 tax10000th) public {
+    constructor(Asset asset, address admin, address initialMetaTx, address payable feeCollector, uint256 fee10000th) public {
         _asset = asset;
-        _taxCollector = taxCollector;
-        _tax10000th = tax10000th;
-        emit TaxSetup(taxCollector, tax10000th);
+        _feeCollector = feeCollector;
+        _fee10000th = fee10000th;
+        emit FeeSetup(feeCollector, fee10000th);
         _admin = admin;
         _setMetaTransactionProcessor(initialMetaTx, true);
         init712();
     }
 
-    function setTax(address payable taxCollector, uint256 tax10000th) external {
-        require(msg.sender == _admin, "only admin can change tax");
-        _taxCollector = taxCollector;
-        _tax10000th = tax10000th;
-        emit TaxSetup(taxCollector, tax10000th);
+    /// @notice set fee parameters
+    /// @param feeCollector address receiving the fee
+    /// @param fee10000th fee in 10,000th
+    function setFee(address payable feeCollector, uint256 fee10000th) external {
+        require(msg.sender == _admin, "only admin can change fee");
+        _feeCollector = feeCollector;
+        _fee10000th = fee10000th;
+        emit FeeSetup(feeCollector, fee10000th);
     }
 
     function _verifyParameters(
@@ -92,6 +95,15 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
 
     }
 
+    /// @notice claim offer using EIP712
+    /// @param buyer address paying for the offer
+    /// @param seller address of the seller
+    /// @param token token used for payment
+    /// @param purchase buyAmount, maxTokenAmount
+    /// @param auctionData offerId, startingPrice, endingPrice, startedAt, duration, packs
+    /// @param ids ids of the Assets being sold
+    /// @param amounts amounts of Assets per pack
+    /// @param signature signature of seller
     function claimSellerOffer(
         address buyer,
         address payable seller,
@@ -123,6 +135,15 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         );
     }
 
+    /// @notice claim offer using EIP712 and EIP1271 signature verification scheme
+    /// @param buyer address paying for the offer
+    /// @param seller address of the seller
+    /// @param token token used for payment
+    /// @param purchase buyAmount, maxTokenAmount
+    /// @param auctionData offerId, startingPrice, endingPrice, startedAt, duration, packs
+    /// @param ids ids of the Assets being sold
+    /// @param amounts amounts of Assets per pack
+    /// @param signature signature of seller
     function claimSellerOfferViaEIP1271(
         address buyer,
         address payable seller,
@@ -154,6 +175,15 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         );
     }
 
+    /// @notice claim offer using EIP712 and EIP1654 signature verification scheme
+    /// @param buyer address paying for the offer
+    /// @param seller address of the seller
+    /// @param token token used for payment
+    /// @param purchase buyAmount, maxTokenAmount
+    /// @param auctionData offerId, startingPrice, endingPrice, startedAt, duration, packs
+    /// @param ids ids of the Assets being sold
+    /// @param amounts amounts of Assets per pack
+    /// @param signature signature of seller
     function claimSellerOfferViaEIP1654(
         address buyer,
         address payable seller,
@@ -185,6 +215,15 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         );
     }
 
+    /// @notice claim offer using Basic Signature
+    /// @param buyer address paying for the offer
+    /// @param seller address of the seller
+    /// @param token token used for payment
+    /// @param purchase buyAmount, maxTokenAmount
+    /// @param auctionData offerId, startingPrice, endingPrice, startedAt, duration, packs
+    /// @param ids ids of the Assets being sold
+    /// @param amounts amounts of Assets per pack
+    /// @param signature signature of seller
     function claimSellerOfferUsingBasicSig(
         address buyer,
         address payable seller,
@@ -216,6 +255,15 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         );
     }
 
+    /// @notice claim offer using Basic Signature and EIP1271 signature verification scheme
+    /// @param buyer address paying for the offer
+    /// @param seller address of the seller
+    /// @param token token used for payment
+    /// @param purchase buyAmount, maxTokenAmount
+    /// @param auctionData offerId, startingPrice, endingPrice, startedAt, duration, packs
+    /// @param ids ids of the Assets being sold
+    /// @param amounts amounts of Assets per pack
+    /// @param signature signature of seller
     function claimSellerOfferUsingBasicSigViaEIP1271(
         address buyer,
         address payable seller,
@@ -247,6 +295,15 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         );
     }
 
+    /// @notice claim offer using Basic Signature and EIP1654 signature verification scheme
+    /// @param buyer address paying for the offer
+    /// @param seller address of the seller
+    /// @param token token used for payment
+    /// @param purchase buyAmount, maxTokenAmount
+    /// @param auctionData offerId, startingPrice, endingPrice, startedAt, duration, packs
+    /// @param ids ids of the Assets being sold
+    /// @param amounts amounts of Assets per pack
+    /// @param signature signature of seller
     function claimSellerOfferUsingBasicSigViaEIP1654(
         address buyer,
         address payable seller,
@@ -295,26 +352,26 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
             ) * purchase[0];
         claimed[seller][auctionData[AuctionData_OfferId]] += purchase[0];
 
-        uint256 tax = 0;
-        if(_tax10000th > 0) {
-            tax = PriceUtil.calculateTax(offer, _tax10000th);
+        uint256 fee = 0;
+        if(_fee10000th > 0) {
+            fee = PriceUtil.calculateFee(offer, _fee10000th);
         }
 
-        require(offer+tax <= purchase[1], "offer exceeds max amount to spend");
+        require(offer+fee <= purchase[1], "offer exceeds max amount to spend");
 
         if (token != address(0)) {
             require(ERC20(token).transferFrom(buyer, seller, offer), "failed to transfer token price");
-            if(tax > 0) {
-                require(ERC20(token).transferFrom(buyer, _taxCollector, tax), "failed to collect tax");
+            if(fee > 0) {
+                require(ERC20(token).transferFrom(buyer, _feeCollector, fee), "failed to collect fee");
             }
         } else {
-            require(msg.value >= offer + tax, "ETH < offer+tax");
-            if(msg.value > offer+tax) {
-                msg.sender.transfer(msg.value - (offer+tax));
+            require(msg.value >= offer + fee, "ETH < offer+fee");
+            if(msg.value > offer+fee) {
+                msg.sender.transfer(msg.value - (offer+fee));
             }
             seller.transfer(offer);
-            if(tax > 0) {
-                _taxCollector.transfer(tax);
+            if(fee > 0) {
+                _feeCollector.transfer(fee);
             }
         }
 
@@ -331,12 +388,12 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         );
     }
 
+    /// @notice cancel a offer previously signed, new offer need to use a id not used yet
+    /// @param offerId offer to cancel
     function cancelSellerOffer(uint256 offerId) external {
         claimed[msg.sender][offerId] = MAX_UINT256;
         emit OfferCancelled(msg.sender, offerId);
     }
-
-    // TODO support basic signature
 
     function _ensureCorrectSigner(
         address from,

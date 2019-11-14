@@ -5,7 +5,8 @@ module.exports = {
     ganacheOptions: {
         debug: true,
         vmErrorsOnRPCResponse: true,
-        gasLimit: '0x7a1200', // 8000000
+        gasLimit: '0x1312D00', // 20000000
+        // hardfork: 'istanbul',
     },
     accounts: {
         default: {
@@ -45,7 +46,7 @@ module.exports = {
         genesisBouncerAdmin: 'sandAdmin', // can set who is allowed to mint
         commonMinterAdmin: 'sandAdmin', // can change the fees
         genesisMinter: 'deployer', // the first account allowed to mint genesis Assets
-        assetAuctionTaxCollector: 'sandSaleBeneficiary',
+        assetAuctionFeeCollector: 'sandSaleBeneficiary',
         assetAuctionAdmin: 'sandAdmin',
         orbsBeneficiary: 'sandSaleBeneficiary',
         sandSaleBeneficiary: {
@@ -54,6 +55,9 @@ module.exports = {
         },
         bundleSandSaleAdmin: 'sandAdmin',
         bundleSandSaleBeneficiary: 'sandSaleBeneficiary',
+        landSaleBeneficiary: 'sandSaleBeneficiary',
+        landAdmin: 'sandAdmin',
+        landSaleAdmin: 'sandAdmin',
 
         // testing
         others: {
@@ -64,7 +68,7 @@ module.exports = {
     solcSettings: {
         optimizer: {
             enabled: true,
-            runs: 2000,
+            runs: 200, // TODO per contract
         }
     }
 };
