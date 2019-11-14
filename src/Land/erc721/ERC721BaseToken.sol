@@ -274,7 +274,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         for(uint256 i = 0; i < numTokens; i ++) {
             uint256 id = ids[i];
             (address owner, bool operatorEnabled, uint96 counter) = _ownerAndOperatorEnabledOf(id);
-            require(currentCounter == 0 || counter != currentCounter, 'already used in that transfer');
+            require(currentCounter == 0 || counter != currentCounter, "already used in that transfer");
             require(owner == from, "not owner in batchTransferFrom");
             require(authorized || (operatorEnabled && _operators[id] == msg.sender), "not authorized");
             if(currentCounter < 2**95) {
