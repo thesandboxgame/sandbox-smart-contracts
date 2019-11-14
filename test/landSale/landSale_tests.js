@@ -156,7 +156,7 @@ function runLandSaleTests(title, contactStore) {
             ));
         });
 
-        t.test('cannot buy Land from a reserved Land of a different address,', async (t) => {
+        t.test('cannot buy Land from a reserved Land of a different address', async (t) => {
             const {contract, tree} = await setupTestLandSale(contracts);
             const proof = tree.getProof(calculateLandHash({
                 x: 400,
@@ -175,7 +175,7 @@ function runLandSaleTests(title, contactStore) {
             ));
         });
 
-        t.test('can buy Land from a reserved Land if matching address,', async (t) => {
+        t.test('can buy Land from a reserved Land if matching address', async (t) => {
             const {contract, tree} = await setupTestLandSale(contracts);
             const proof = tree.getProof(calculateLandHash({
                 x: 400,
@@ -194,6 +194,27 @@ function runLandSaleTests(title, contactStore) {
             );
             const owner = await call(contracts.Land, 'ownerOf', null, 400 + (106 * 408));
             assert.equal(owner, others[1]);
+        });
+
+        t.test('can buy Land from a reserved Land and send it to another address', async (t) => {
+            const {contract, tree} = await setupTestLandSale(contracts);
+            const proof = tree.getProof(calculateLandHash({
+                x: 400,
+                y: 106,
+                size: 1,
+                price: '4047',
+                reserved: others[1]
+            }));
+            await tx(contract, 'buyLand', {from: others[1], gas},
+                others[1],
+                others[2],
+                others[1],
+                400, 106, 1,
+                4047,
+                proof
+            );
+            const owner = await call(contracts.Land, 'ownerOf', null, 400 + (106 * 408));
+            assert.equal(owner, others[2]);
         });
 
         t.test('CANNOT buy Land when minter rights revoked', async (t) => {
