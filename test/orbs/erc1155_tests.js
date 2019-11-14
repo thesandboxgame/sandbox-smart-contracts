@@ -28,15 +28,15 @@ const user1 = accounts[1];
 const operator = accounts[2];
 
 function runERC1155tests(title, contractStore) {
-    tap.test(title + ' as ERC1155', async (t)=> {
+    tap.test(title + ' as ERC1155', async (t) => {
         let contract;
         let tokens;
 
         t.beforeEach(async () => {
-          contract = await contractStore.resetContract();
-          tokens = await contractStore.getInitialTokens();
+            contract = await contractStore.resetContract();
+            tokens = await contractStore.getInitialTokens();
         });
-  
+
         t.test('transfers', async (t) => {
             t.test('transfer one instance of an item results in erc1155 transferSingle event', async () => {
                 const receipt = await tx(contract, 'safeTransferFrom', {from: creator, gas}, creator, user1, tokens[0].id, 1, emptyBytes);
@@ -81,7 +81,7 @@ function runERC1155tests(title, contractStore) {
             });
 
             t.test('should not be able to transfer more item than you own', async () => {
-                await expectThrow(tx(contract, 'safeTransferFrom', {from: creator, gas}, creator, user1, tokens[0].id, tokens[0].supply+1, emptyBytes));
+                await expectThrow(tx(contract, 'safeTransferFrom', {from: creator, gas}, creator, user1, tokens[0].id, tokens[0].supply + 1, emptyBytes));
             });
 
             t.test('should not be able to transfer an item you do not own', async () => {
@@ -115,7 +115,7 @@ function runERC1155tests(title, contractStore) {
                 const receiverAddress = receiverContract.options.address;
                 await tx(contract, 'safeTransferFrom', {from: creator, gas}, creator, receiverAddress, tokens[0].id, 3, emptyBytes);
                 const balance = await call(contract, 'balanceOf', null, receiverAddress, tokens[0].id);
-                assert.equal(balance, "3");
+                assert.equal(balance, '3');
             });
         });
 
@@ -143,14 +143,13 @@ function runERC1155tests(title, contractStore) {
                 assert.equal(eventValues[4][0], 3);
             });
 
-
             t.test('transfer multiple items with results one erc1155 transferBatch event', async () => {
-                const receipt = await tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, 
-                creator,
-                user1,
-                [tokens[0].id, tokens[2].id, tokens[1].id],
-                [3,1,4],
-                emptyBytes);
+                const receipt = await tx(contract, 'safeBatchTransferFrom', {from: creator, gas},
+                    creator,
+                    user1,
+                    [tokens[0].id, tokens[2].id, tokens[1].id],
+                    [3, 1, 4],
+                    emptyBytes);
                 const eventsMatching = await getEventsFromReceipt(contract, TransferBatchEvent, receipt);
                 assert.equal(eventsMatching.length, 1);
                 const eventValues = eventsMatching[0].returnValues;
@@ -164,7 +163,6 @@ function runERC1155tests(title, contractStore) {
                 assert.equal(eventValues[4][1], 1);
                 assert.equal(eventValues[4][2], 4);
             });
-
 
             t.test('batch transfer a item with 1 supply do NOT results in erc1155 transferSingle event', async () => {
                 const receipt = await tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, creator, user1, [tokens[0].id], [1], emptyBytes);
@@ -190,29 +188,29 @@ function runERC1155tests(title, contractStore) {
             });
 
             t.test('should not be able to transfer more items than you own', async () => {
-                await expectThrow(tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, creator, user1, [tokens[0].id], [tokens[0].supply+1], emptyBytes));
+                await expectThrow(tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, creator, user1, [tokens[0].id], [tokens[0].supply + 1], emptyBytes));
             });
 
             t.test('transfering a items to a contract that do not accept erc1155 token should fails', async () => {
                 const receiverContract = await deployContract(creator, 'TestERC1155Receiver', contract.options.address, false, true, false, true);
                 const receiverAddress = receiverContract.options.address;
-                await expectThrow(tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, creator, receiverAddress, [tokens[0].id,tokens[1].id, tokens[2].id], [2,1,3], emptyBytes));
+                await expectThrow(tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, creator, receiverAddress, [tokens[0].id, tokens[1].id, tokens[2].id], [2, 1, 3], emptyBytes));
             });
 
             t.test('transfering a assets to a contract that return incorrect magic value upon receiving erc1155 token should fails', async () => {
                 const receiverContract = await deployContract(creator, 'TestERC1155Receiver', contract.options.address, true, false, true, false);
                 const receiverAddress = receiverContract.options.address;
-                await expectThrow(tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, creator, receiverAddress, [tokens[0].id,tokens[1].id, tokens[2].id], [2,1,3], emptyBytes));
+                await expectThrow(tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, creator, receiverAddress, [tokens[0].id, tokens[1].id, tokens[2].id], [2, 1, 3], emptyBytes));
             });
 
             t.test('transfering to a contract that do accept erc1155 token should not fail', async () => {
                 const receiverContract = await deployContract(creator, 'TestERC1155Receiver', contract.options.address, false, true, true, true);
                 const receiverAddress = receiverContract.options.address;
-                await tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, creator, receiverAddress, [tokens[0].id,tokens[1].id, tokens[2].id], [3,1,3], emptyBytes);
+                await tx(contract, 'safeBatchTransferFrom', {from: creator, gas}, creator, receiverAddress, [tokens[0].id, tokens[1].id, tokens[2].id], [3, 1, 3], emptyBytes);
                 const balance = await call(contract, 'balanceOf', null, receiverAddress, tokens[0].id);
-                assert.equal(balance, "3");
+                assert.equal(balance, '3');
             });
-        
+
             t.test('should be able to transfer item with 1 or more supply at the same time', async () => {
                 const tokenIdsToTransfer = [
                     tokens[0].id,
@@ -230,14 +228,13 @@ function runERC1155tests(title, contractStore) {
                     assert.equal(balance, expectedbalance);
                 }
             });
-        
+
             t.test('should be able to get balance of batch', async () => {
-                
                 const batchBalances = await call(contract, 'balanceOfBatch', {from: creator},
                     [creator, creator, creator],
                     [tokens[0].id, tokens[1].id, tokens[2].id]
                 );
-            
+
                 for (let i = 0; i < batchBalances.length; i++) {
                     assert.equal(batchBalances[i], tokens[i].supply);
                 }
@@ -311,4 +308,4 @@ function runERC1155tests(title, contractStore) {
 
 module.exports = {
     runERC1155tests,
-}
+};

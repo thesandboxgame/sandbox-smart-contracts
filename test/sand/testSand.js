@@ -32,6 +32,6 @@ async function deployMetaTxTokenContracts() {
     };
 }
 
-runERC20Tests('SAND', erc20Token, {testBurn: true, initialOwner: sandBeneficiary, totalSupply: '3000000000000000000000000000' });
+runERC20Tests('SAND', erc20Token, {testBurn: true, initialOwner: sandBeneficiary, totalSupply: '3000000000000000000000000000'});
 runMetaTxExtensionTests('SAND', deployMetaTxTokenContracts);
 runERC20BasicApproveExtensionTests('SAND', erc20Token);

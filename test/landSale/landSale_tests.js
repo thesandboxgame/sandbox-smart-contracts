@@ -75,7 +75,8 @@ async function setupTestLandSale(contracts) {
         contracts.Sand.options.address,
         landSaleAdmin,
         landSaleBeneficiary,
-        tree.getRoot().hash
+        tree.getRoot().hash,
+	Date.now() + 30 * 24 * 60 * 60 // 30 days
     );
     await tx(contracts.Land, 'setMinter', {from: landAdmin, gas: 1000000}, contract.options.address, true);
     await tx(contracts.Sand, 'setSuperOperator', {from: sandAdmin, gas: 1000000}, contract.options.address, true);

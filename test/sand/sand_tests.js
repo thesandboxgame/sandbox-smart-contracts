@@ -11,10 +11,10 @@ const {
 const {
     sandAdmin,
     others,
-} = rocketh.namedAccounts
+} = rocketh.namedAccounts;
 
 function runSandTests(title, resetContract) {
-    tap.test(title + ' specific tests', async (t)=> {
+    tap.test(title + ' specific tests', async (t) => {
         let contract;
         t.beforeEach(async () => {
             contract = await resetContract();

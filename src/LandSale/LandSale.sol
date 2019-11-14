@@ -4,6 +4,7 @@ import "../Land.sol";
 import "../../contracts_common/src/Interfaces/ERC20.sol";
 import "../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 
+
 /**
  * @title Land Sale contract
  * @notice This contract mananges the sale of our lands
@@ -12,8 +13,16 @@ contract LandSale is MetaTransactionReceiver {
     Land internal _land;
     ERC20 internal _erc20;
     address payable internal _wallet;
-
+    uint256 internal _expiryTime;
     bytes32 internal _merkleRoot;
+
+    event LandQuadPurchased(
+        address indexed buyer,
+        address indexed to,
+        uint256 indexed topCornerId,
+        uint16 size,
+        uint256 price
+    );
 
     constructor(
         address landAddress,
@@ -21,7 +30,8 @@ contract LandSale is MetaTransactionReceiver {
         address initialMetaTx,
         address admin,
         address payable initialWalletAddress,
-        bytes32 merkleRoot
+        bytes32 merkleRoot,
+        uint256 expiryTime
     ) public {
         _land = Land(landAddress);
         _erc20 = ERC20(erc20ContractAddress);
@@ -29,10 +39,7 @@ contract LandSale is MetaTransactionReceiver {
         _admin = admin;
         _wallet = initialWalletAddress;
         _merkleRoot = merkleRoot;
-    }
-
-    function merkleRoot() external view returns(bytes32) {
-        return _merkleRoot;
+        _expiryTime = expiryTime;
     }
 
     /**
@@ -56,6 +63,8 @@ contract LandSale is MetaTransactionReceiver {
         uint256 price,
         bytes32[] calldata proof
     ) external {
+        /* solhint-disable-next-line not-rely-on-time */
+        require(block.timestamp < _expiryTime, "sale is over");
         require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "not authorized");
         require(reserved == address(0) || reserved == buyer, "cannot buy reserved Land");
         bytes32 leaf = _generateLandHash(x, y, size, price, reserved);
@@ -75,6 +84,15 @@ contract LandSale is MetaTransactionReceiver {
         );
 
         _land.mintQuad(to, size, x, y);
+        emit LandQuadPurchased(buyer, to, x + (y * 408), size, price); // 408 is the size of the Land
+    }
+
+    function getExpiryTime() external view returns(uint256) {
+        return _expiryTime;
+    }
+
+    function merkleRoot() external view returns(bytes32) {
+        return _merkleRoot;
     }
 
     function _generateLandHash(
