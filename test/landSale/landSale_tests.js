@@ -8,7 +8,8 @@ const {
     gas,
     expectThrow,
     zeroAddress,
-    deployContract
+    deployContract,
+    increaseTime,
 } = require('../utils');
 
 const {
@@ -64,6 +65,10 @@ const testLands = [
     }
 ];
 
+const saleStart = Math.floor(Date.now() / 1000);
+const saleDuration = 30 * 24 * 60 * 60;
+const saleEnd = saleStart + saleDuration;
+
 async function setupTestLandSale(contracts) {
     const landHashArray = createDataArray(testLands);
     const tree = new MerkleTree(landHashArray);
@@ -76,7 +81,7 @@ async function setupTestLandSale(contracts) {
         landSaleAdmin,
         landSaleBeneficiary,
         tree.getRoot().hash,
-	Date.now() + 30 * 24 * 60 * 60 // 30 days
+        saleEnd
     );
     await tx(contracts.Land, 'setMinter', {from: landAdmin, gas: 1000000}, contract.options.address, true);
     await tx(contracts.Sand, 'setSuperOperator', {from: sandAdmin, gas: 1000000}, contract.options.address, true);
@@ -276,7 +281,9 @@ function runLandSaleTests(title, contactStore) {
             for (let x = 288; x < 288 + 12; x++) {
                 for (let y = 144; y < 144 + 12; y++) {
                     const owner = await call(contracts.Land, 'ownerOf', null, x + (y * 408));
+                    const balance = await call(contracts.Land, 'balanceOf', null, others[0]);
                     assert.equal(owner, others[0]);
+                    assert.equal(balance, 144);
                 }
             }
         });
@@ -294,6 +301,34 @@ function runLandSaleTests(title, contactStore) {
                     proof
                 );
             }
+        });
+
+        t.test('check the expiry time of the sale', async (t) => {
+            const {contract} = await setupTestLandSale(contracts);
+
+            const expiryTime = await call(contract, 'getExpiryTime');
+            assert.equal(expiryTime, saleEnd, 'Expiry time is wrong');
+        });
+
+        t.test('Cannot buy a land after the expiry time', async (t) => {
+            await increaseTime(saleDuration);
+
+            const {contract, tree} = await setupTestLandSale(contracts);
+            const proof = tree.getProof(calculateLandHash({
+                x: 400,
+                y: 106,
+                size: 1,
+                price: '4047',
+                reserved: others[1]
+            }));
+            await expectThrow(tx(contract, 'buyLand', {from: others[0], gas},
+                others[0],
+                others[0],
+                others[0],
+                400, 106, 1,
+                4047,
+                proof
+            ));
         });
     });
 }
