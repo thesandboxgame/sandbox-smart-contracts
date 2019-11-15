@@ -54,11 +54,10 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         return address(_owners[id]);
     }
 
-    function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled, uint96 counter) {
+    function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {
         uint256 data = _owners[id];
         owner = address(data);
         operatorEnabled = (data / 2**255) == 1;
-        counter = uint96((data / 2**160) % 2**95); // used to track duplicate id in self transfers
     }
 
     /**
@@ -131,7 +130,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
      * @return The address of the operator
      */
     function getApproved(uint256 id) external view returns (address) {
-        (address owner, bool operatorEnabled, ) = _ownerAndOperatorEnabledOf(id);
+        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(owner != address(0), "token does not exist");
         if (operatorEnabled) {
             return _operators[id];
@@ -141,7 +140,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
     }
 
     function _checkTransfer(address from, address to, uint256 id) internal view returns (bool isMetaTx) {
-        (address owner, bool operatorEnabled, ) = _ownerAndOperatorEnabledOf(id);
+        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(owner != address(0), "token does not exist");
         require(owner == from, "not owner in _checkTransfer");
         require(to != address(0), "can't send to zero address");
@@ -256,30 +255,12 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         require(to != address(0), "can't send to zero address");
 
         uint256 numTokens = ids.length;
-        uint256 currentCounter = 0;
-        if (from == to) {
-            currentCounter = selfTransferCounters[from];
-            if (currentCounter < 2**95) {
-                currentCounter++;
-                selfTransferCounters[from] = currentCounter;
-            } else {  // in the unlikly case a sender reach that amount of transfer check for duplicate ids manually
-                for(uint256 i = 0; i < numTokens-1; i ++) {
-                    for(uint256 j = i+1; j < numTokens; j ++) {
-                        require(ids[i] != ids[j], "duplicate ids");
-                    }
-                }
-            }
-        }
-
         for(uint256 i = 0; i < numTokens; i ++) {
             uint256 id = ids[i];
-            (address owner, bool operatorEnabled, uint96 counter) = _ownerAndOperatorEnabledOf(id);
-            require(currentCounter == 0 || counter != currentCounter, "already used in that transfer");
+            (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
             require(owner == from, "not owner in batchTransferFrom");
             require(authorized || (operatorEnabled && _operators[id] == msg.sender), "not authorized");
-            if(currentCounter < 2**95) {
-                _owners[id] = uint256(to) + currentCounter * 2**160;
-            }
+            _owners[id] = uint256(to);
             emit Transfer(from, to, id);
         }
         if (from != to) {
