@@ -4,7 +4,7 @@ const {gas, encodeEventSignature, zeroAddress, decodeEvents} = require('./utils'
 const TransferSingleEvent = encodeEventSignature('TransferSingle(address,address,address,uint256,uint256)');
 const TransferBatchEvent = encodeEventSignature('TransferBatch(address,address,address,uint256[],uint256[])');
 const URIEvent = encodeEventSignature('URI(string,uint256)');
-const OfferClaimedEvent = encodeEventSignature('OfferClaimed(address,address,uint256,uint256)');
+const OfferClaimedEvent = encodeEventSignature('OfferClaimed(address,address,uint256,uint256,uint256,uint256)');
 const OfferCancelledEvent = encodeEventSignature('OfferCancelled(address,uint256)');
 const ExtractionEvent = encodeEventSignature('Extraction(uint256,uint256)');
 
