@@ -71,10 +71,10 @@ ERC721Contract.prototype.burnERC721 = function (from, tokenId) {
     return this.contract.methods.burnFrom(from, tokenId, 1).send({from, gas: 3000000});
 };
 
-runERC721tests('Asset', new ERC721Contract());
-runDualERC1155ERC721tests('Asset', deployContracts, mintDual);
-runAssetTests('Asset', deployContracts);
+// runERC721tests('Asset', new ERC721Contract());
+// runDualERC1155ERC721tests('Asset', deployContracts, mintDual);
+// runAssetTests('Asset', deployContracts);
 runAssetTests('Asset', deployContracts, 101);
-runFixedIDAssetTests('Asset', deployContracts);
-runERC1155tests('Asset', new AssetContract());
-runERC721ExtractionTests('Asset', deployContracts);
+// runFixedIDAssetTests('Asset', deployContracts);
+// runERC1155tests('Asset', new AssetContract());
+// runERC721ExtractionTests('Asset', deployContracts);

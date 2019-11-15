@@ -496,11 +496,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
             _superOperators[msg.sender] ||
             _operatorsForAll[from][msg.sender]; // solium-disable-line max-len
 
-        if (from == to) {
-            _batchTransferToSelf(from, ids, values, authorized);
-        } else {
-            _batchTransferFrom(from, to, ids, values, authorized);
-        }
+        _batchTransferFrom(from, to, ids, values, authorized);
         emit TransferBatch(
             metaTx ? from : msg.sender,
             from,
@@ -519,64 +515,6 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
             ),
             "erc1155 transfer rejected"
         );
-    }
-
-    mapping(address => mapping(uint256 => uint256)) private _selfPackedTokenBalance;
-    function _batchTransferToSelf(
-        address from,
-        uint256[] memory ids,
-        uint256[] memory values,
-        bool authorized
-    ) internal {
-        uint256 numItems = ids.length;
-
-        uint256 numTokensTransferedPerType;
-        uint256 lastBin;
-        for (uint256 i = 0; i < numItems; i++) {
-            bool isNFT = ids[i] & IS_NFT > 0;
-            require(authorized || (isNFT && _erc721operators[ids[i]] == msg.sender), "Operator not approved");
-            if(values[i] > 0) {
-                (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
-                if (lastBin == 0) {
-                    lastBin = bin;
-                    numTokensTransferedPerType = ObjectLib32.updateTokenBalance(
-                        _selfPackedTokenBalance[from][bin],
-                        index,
-                        values[i],
-                        ObjectLib32.Operations.ADD
-                    );
-                } else {
-                    if (bin != lastBin) {
-                        _selfPackedTokenBalance[from][lastBin] = numTokensTransferedPerType;
-                        numTokensTransferedPerType = _selfPackedTokenBalance[from][bin];
-                        lastBin = bin;
-                    }
-                    numTokensTransferedPerType = numTokensTransferedPerType.updateTokenBalance(
-                        index,
-                        values[i],
-                        ObjectLib32.Operations.ADD
-                    );
-                }
-                if (isNFT) {
-                    require(numTokensTransferedPerType.getValueInBin(index) == 1, "cannot transfer an NFT more than once");
-                    require(_ownerOf(ids[i]) == from, "not owner");
-                    if (_erc721operators[ids[i]] != address(0)) { // TODO operatorEnabled flag optimization (like in ERC721BaseToken)
-                        _erc721operators[ids[i]] = address(0);
-                    }
-                    emit Transfer(from, from, ids[i]);
-                } else {
-                    require(numTokensTransferedPerType.getValueInBin(index) <= _packedTokenBalance[from][bin].getValueInBin(index), "too many transfered");
-                }
-            }
-        }
-        lastBin = 0;
-        for (uint256 i = 0; i < numItems; i++) {
-            (uint256 binToErase, ) = ids[i].getTokenBinIndex();
-            if (binToErase != lastBin) {
-                _selfPackedTokenBalance[from][binToErase] = 0;
-                lastBin = binToErase;
-            }
-        }
     }
 
     function _batchTransferFrom(
@@ -1016,6 +954,13 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
                 ((id & PACK_INDEX) < ((id & PACK_NUM_FT_TYPES) / PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
                 _metadataHash[id & URI_ID] != 0;
         }
+    }
+
+    function isPackIdUsed(address creator, uint40 packId, uint16 numFTs) external returns(bool) {
+        uint256 uriId = uint256(creator) * CREATOR_OFFSET_MULTIPLIER + // CREATOR
+            uint256(packId) * PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // PACk_ID
+            numFTs * PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER; // number of fungible token in the pack // PACK_NUM_FT_TYPES
+        return _metadataHash[uriId] != 0;
     }
 
     /// @notice A distinct Uniform Resource Identifier (URI) for a given token.

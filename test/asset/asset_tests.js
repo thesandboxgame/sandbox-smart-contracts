@@ -81,6 +81,14 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
                 assert.equal(eventsMatching.length, 1);
             });
 
+            t.test('minting a NFT result in a packId used with numFTs = 0', async () => {
+                await tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 1, creator, emptyBytes);
+                const packIdUsed = await call(contracts.Asset, 'isPackIdUsed', null, creator, fixedID, 0);
+                assert.equal(packIdUsed, true);
+                const differentPackIdUsed = await call(contracts.Asset, 'isPackIdUsed', null, creator, fixedID, 1);
+                assert.equal(differentPackIdUsed, false);
+            });
+
             t.test('minting a NFT twice with the same id fails', async () => {
                 await tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 1, creator, emptyBytes);
                 await expectThrow(tx(contracts.AssetBouncer, 'mint', {from: creator, gas}, creator, 0, zeroAddress, fixedID, ipfsHashString, 1, creator, emptyBytes));
@@ -265,6 +273,18 @@ function runAssetTests(title, resetContracts, fixedID = 0) {
             t.test('minting a multiple FT twice with the same id fails', async () => {
                 await mintTokensWithSameURIAndSupply(contracts.AssetBouncer, 8, ipfsHashString, 10, creator, fixedID);
                 await expectThrow(mintTokensWithSameURIAndSupply(contracts.AssetBouncer, 8, ipfsHashString, 10, creator, fixedID));
+            });
+
+            t.test('minting a multiple FT result in a packId used with correct numFTs', async () => {
+                await mintTokensWithSameURIAndSupply(contracts.AssetBouncer, 8, ipfsHashString, 10, creator, fixedID);
+                const packIdUsed = await call(contracts.Asset, 'isPackIdUsed', null, creator, fixedID, 8);
+                assert.equal(packIdUsed, true);
+                const differentPackIdUsed = await call(contracts.Asset, 'isPackIdUsed', null, creator, fixedID, 7);
+                assert.equal(differentPackIdUsed, false);
+                const differentPackIdUsed2 = await call(contracts.Asset, 'isPackIdUsed', null, creator, fixedID, 9);
+                assert.equal(differentPackIdUsed2, false);
+                const differentPackIdUsed3 = await call(contracts.Asset, 'isPackIdUsed', null, creator, fixedID+1, 8);
+                assert.equal(differentPackIdUsed3, false);
             });
 
             // minting FT and NFT are on different URI_ID
