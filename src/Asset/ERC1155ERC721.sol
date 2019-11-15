@@ -956,6 +956,11 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         }
     }
 
+    /// @notice check whether a packId/numFT tupple has been used
+    /// @param creator for which creator
+    /// @param packId the packId to check
+    /// @param numFTs number of Fungible Token in that pack (can reuse packId if different)
+    /// @return whether the pack has already been used
     function isPackIdUsed(address creator, uint40 packId, uint16 numFTs) external returns(bool) {
         uint256 uriId = uint256(creator) * CREATOR_OFFSET_MULTIPLIER + // CREATOR
             uint256(packId) * PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // PACk_ID
