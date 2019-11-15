@@ -24,7 +24,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         address indexed seller,
         address indexed buyer,
         uint256 indexed offerId,
-        uint256 amount.
+        uint256 amount,
         uint256 pricePaid,
         uint256 feePaid
     );
