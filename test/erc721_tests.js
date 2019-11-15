@@ -24,7 +24,6 @@ const {
 
 const {
     namedAccounts,
-    accounts,
 } = rocketh;
 
 const {
@@ -38,6 +37,7 @@ const user3 = others[3];
 
 function runERC721tests(title, contractStore) {
     tap.test(title + ' as ERC721', async (t) => {
+        // t.runOnly = true;
         let contract;
         let tokenIds;
         let tokenId;
@@ -202,6 +202,100 @@ function runERC721tests(title, contractStore) {
                 t.test('batch transfer of', async () => {
                     const receipt = await tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, user1, tokenIds, emptyBytes);
                     console.log('gas used for batch transfer = ' + receipt.gasUsed);
+                });
+            });
+        }
+
+        if (contractStore.supportsMandatoryERC721Receiver) {
+            t.test('transfer to contracts', async (t) => {
+                if (contractStore.supportsSafeBatchTransfer) {
+                    t.test('batch transfers', async (t) => {
+                        t.test('transfering to a contract that do not implements mandatory erc721 receiver but implement classic ERC721 receiver and reject should not fails', async () => {
+                            const receiverContract = await deployContract(user0, 'TestERC721TokenReceiver', contract.options.address, false, true);
+                            const receiverAddress = receiverContract.options.address;
+                            await tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, receiverAddress, [tokenId], emptyBytes);
+                            const newOwner = await call(contract, 'ownerOf', null, tokenId);
+                            assert.equal(newOwner, receiverAddress);
+                        });
+                        t.test('transfering to a contract that implements mandatory erc721 receiver (and signal it properly via 165) should fails if it reject it', async () => {
+                            const receiverContract = await deployContract(user0, 'TestMandatoryERC721TokenReceiver', contract.options.address, false, true);
+                            const receiverAddress = receiverContract.options.address;
+                            await expectThrow(tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, receiverAddress, [tokenId], emptyBytes));
+                        });
+                        t.test('transfering to a contract that do not accept erc721 token should fail', async () => {
+                            const receiverContract = await deployContract(user0, 'TestMandatoryERC721TokenReceiver', contract.options.address, false, true);
+                            const receiverAddress = receiverContract.options.address;
+                            await expectThrow(tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, receiverAddress, [tokenId], emptyBytes));
+                        });
+
+                        t.test('transfering to a contract that do not return the correct onERC721Received bytes shoudl fail', async () => {
+                            const receiverContract = await deployContract(user0, 'TestMandatoryERC721TokenReceiver', contract.options.address, true, false);
+                            const receiverAddress = receiverContract.options.address;
+                            await expectThrow(tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, receiverAddress, [tokenId], emptyBytes));
+                        });
+
+                        t.test('transfering to a contract that do not implemented mandatory receiver should not fail', async () => {
+                            const receiverContract = await deployContract(user0, 'ERC20Fund', contract.options.address);
+                            const receiverAddress = receiverContract.options.address;
+                            await tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, receiverAddress, [tokenId], emptyBytes);
+                        });
+
+                        t.test('transfering to a contract that return the correct onERC721Received bytes shoudl succeed', async () => {
+                            const receiverContract = await deployContract(user0, 'TestMandatoryERC721TokenReceiver', contract.options.address, true, true);
+                            const receiverAddress = receiverContract.options.address;
+                            await tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, receiverAddress, [tokenId], emptyBytes);
+                            const newOwner = await call(contract, 'ownerOf', null, tokenId);
+                            assert.equal(newOwner, receiverAddress);
+                        });
+                    });
+                }
+
+                t.test('transfers', async (t) => {
+                    t.test('transfering to a contract that do not implements mandatory erc721 receiver but implement classic ERC721 receiver and reject should not fails', async () => {
+                        const receiverContract = await deployContract(user0, 'TestERC721TokenReceiver', contract.options.address, false, true);
+                        const receiverAddress = receiverContract.options.address;
+                        await tx(contract, 'transferFrom', {from: user0, gas}, user0, receiverAddress, tokenId);
+                        const newOwner = await call(contract, 'ownerOf', null, tokenId);
+                        assert.equal(newOwner, receiverAddress);
+                    });
+                    t.test('transfering to a contract that implements mandatory erc721 receiver (and signal it properly via 165) should fails if it reject it', async () => {
+                        const receiverContract = await deployContract(user0, 'TestMandatoryERC721TokenReceiver', contract.options.address, false, true);
+                        const receiverAddress = receiverContract.options.address;
+                        await expectThrow(tx(contract, 'transferFrom', {from: user0, gas}, user0, receiverAddress, tokenId));
+                    });
+                    t.test('transfering to a contract that do not accept erc721 token should fail', async () => {
+                        const receiverContract = await deployContract(user0, 'TestMandatoryERC721TokenReceiver', contract.options.address, false, true);
+                        const receiverAddress = receiverContract.options.address;
+                        await expectThrow(tx(contract, 'transferFrom', {from: user0, gas}, user0, receiverAddress, tokenId));
+                    });
+
+                    t.test('transfering to a contract that do not return the correct onERC721Received bytes shoudl fail', async () => {
+                        const receiverContract = await deployContract(user0, 'TestMandatoryERC721TokenReceiver', contract.options.address, true, false);
+                        const receiverAddress = receiverContract.options.address;
+                        await expectThrow(tx(contract, 'transferFrom', {from: user0, gas}, user0, receiverAddress, tokenId));
+                    });
+
+                    t.test('transfering to a contract that do not implemented mandatory receiver should not fail', async () => {
+                        const receiverContract = await deployContract(user0, 'ERC20Fund', contract.options.address);
+                        const receiverAddress = receiverContract.options.address;
+                        await tx(contract, 'transferFrom', {from: user0, gas}, user0, receiverAddress, tokenId);
+                    });
+
+                    t.test('transfering to a contract that return the correct onERC721Received bytes shoudl succeed', async () => {
+                        const receiverContract = await deployContract(user0, 'TestMandatoryERC721TokenReceiver', contract.options.address, true, true);
+                        const receiverAddress = receiverContract.options.address;
+                        await tx(contract, 'transferFrom', {from: user0, gas}, user0, receiverAddress, tokenId);
+                        const newOwner = await call(contract, 'ownerOf', null, tokenId);
+                        assert.equal(newOwner, receiverAddress);
+                    });
+
+                    // t.test('transfering to a contract that return the correct onERC721Received bytes shoudl succeed', async () => {
+                    //     const receiverContract = await deployContract(user0, 'TestMandatoryERC721TokenReceiver', contract.options.address, true, true);
+                    //     const receiverAddress = receiverContract.options.address;
+                    //     await ransferFrom(user0, user0, receiverAddress, tokenId);
+                    //     const newOwner = await call(contract, 'ownerOf', null, tokenId);
+                    //     assert.equal(newOwner, receiverAddress);
+                    // });
                 });
             });
         }

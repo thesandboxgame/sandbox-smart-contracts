@@ -21,6 +21,7 @@ function ERC721Contract() {
     this.minter = deployer;
     this.supportsBatchTransfer = true;
     this.supportsSafeBatchTransfer = true;
+    this.supportsMandatoryERC721Receiver = true;
 }
 ERC721Contract.prototype.resetContract = async function () {
     this.contract = await deployLand();
@@ -36,5 +37,5 @@ ERC721Contract.prototype.burnERC721 = function (from, tokenId) {
     return this.contract.methods.burnFrom(from, tokenId).send({from, gas: 3000000});
 };
 
-runQuadTreeTests('Land', new ERC721Contract());
+// runQuadTreeTests('Land', new ERC721Contract());
 runERC721tests('Land', new ERC721Contract());
