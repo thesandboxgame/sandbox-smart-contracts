@@ -31,37 +31,43 @@ const testLands = [
         y: 106,
         size: 1,
         price: '4047',
-        reserved: others[1]
+        reserved: others[1],
+        salt: '0x1111111111111111111111111111111111111111111111111111111111111111'
     },
     {
         x: 120,
         y: 144,
         size: 12,
-        price: '2773'
+        price: '2773',
+        salt: '0x1111111111111111111111111111111111111111111111111111111111111112'
     },
     {
         x: 288,
         y: 144,
         size: 12,
-        price: '1358'
+        price: '1358',
+        salt: '0x1111111111111111111111111111111111111111111111111111111111111113'
     },
     {
         x: 36,
         y: 114,
         size: 6,
-        price: '3169'
+        price: '3169',
+        salt: '0x1111111111111111111111111111111111111111111111111111111111111114'
     },
     {
         x: 308,
         y: 282,
         size: 1,
-        price: '8465'
+        price: '8465',
+        salt: '0x1111111111111111111111111111111111111111111111111111111111111115'
     },
     {
         x: 308,
         y: 281,
         size: 1,
-        price: '8465'
+        price: '8465',
+        salt: '0x1111111111111111111111111111111111111111111111111111111111111116'
     }
 ];
 
@@ -98,6 +104,7 @@ function runLandSaleTests(title, contactStore) {
             contracts = await contactStore.resetContracts();
             const deployment = rocketh.deployment('LandSale');
             lands = deployment.data;
+            // console.log({lands});
             landHashArray = createDataArray(lands);
             tree = new MerkleTree(landHashArray);
             await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[0], '1000000000000000000000');
@@ -105,29 +112,20 @@ function runLandSaleTests(title, contactStore) {
         });
 
         t.test('can buy Land', async (t) => {
-            const proof = tree.getProof(calculateLandHash({
-                x: 400,
-                y: 106,
-                size: 1,
-                price: '4047'
-            }));
+            const proof = tree.getProof(calculateLandHash(lands[0]));
             await tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
                 others[0],
                 others[0],
                 zeroAddress,
                 400, 106, 1,
                 4047,
+                lands[0].salt,
                 proof
             );
         });
 
         t.test('cannot buy Land without enough tokens', async (t) => {
-            const proof = tree.getProof(calculateLandHash({
-                x: 120,
-                y: 144,
-                size: 12,
-                price: '2773'
-            }));
+            const proof = tree.getProof(calculateLandHash(lands[1]));
 
             await expectThrow(tx(contracts.LandSale, 'buyLand', {from: others[2], gas},
                 others[2],
@@ -135,23 +133,20 @@ function runLandSaleTests(title, contactStore) {
                 zeroAddress,
                 120, 144, 12,
                 2773,
+                lands[1].salt,
                 proof
             ));
         });
 
         t.test('cannot buy Land from a non reserved Land with reserved param', async (t) => {
-            const proof = tree.getProof(calculateLandHash({
-                x: 400,
-                y: 106,
-                size: 1,
-                price: '4047'
-            }));
+            const proof = tree.getProof(calculateLandHash(lands[0]));
             await expectThrow(tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
                 others[0],
                 others[0],
                 others[0],
                 400, 106, 1,
                 4047,
+                lands[0].salt,
                 proof
             ));
         });
@@ -163,7 +158,8 @@ function runLandSaleTests(title, contactStore) {
                 y: 106,
                 size: 1,
                 price: '4047',
-                reserved: others[1]
+                reserved: others[1],
+                salt: '0x1111111111111111111111111111111111111111111111111111111111111111',
             }));
             await expectThrow(tx(contract, 'buyLand', {from: others[0], gas},
                 others[0],
@@ -171,6 +167,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 400, 106, 1,
                 4047,
+                '0x1111111111111111111111111111111111111111111111111111111111111111',
                 proof
             ));
         });
@@ -182,7 +179,8 @@ function runLandSaleTests(title, contactStore) {
                 y: 106,
                 size: 1,
                 price: '4047',
-                reserved: others[1]
+                reserved: others[1],
+                salt: '0x1111111111111111111111111111111111111111111111111111111111111111'
             }));
             await tx(contract, 'buyLand', {from: others[1], gas},
                 others[1],
@@ -190,6 +188,7 @@ function runLandSaleTests(title, contactStore) {
                 others[1],
                 400, 106, 1,
                 4047,
+                '0x1111111111111111111111111111111111111111111111111111111111111111',
                 proof
             );
             const owner = await call(contracts.Land, 'ownerOf', null, 400 + (106 * 408));
@@ -203,7 +202,8 @@ function runLandSaleTests(title, contactStore) {
                 y: 106,
                 size: 1,
                 price: '4047',
-                reserved: others[1]
+                reserved: others[1],
+                salt: '0x1111111111111111111111111111111111111111111111111111111111111111'
             }));
             await tx(contract, 'buyLand', {from: others[1], gas},
                 others[1],
@@ -211,6 +211,7 @@ function runLandSaleTests(title, contactStore) {
                 others[1],
                 400, 106, 1,
                 4047,
+                '0x1111111111111111111111111111111111111111111111111111111111111111',
                 proof
             );
             const owner = await call(contracts.Land, 'ownerOf', null, 400 + (106 * 408));
@@ -219,35 +220,27 @@ function runLandSaleTests(title, contactStore) {
 
         t.test('CANNOT buy Land when minter rights revoked', async (t) => {
             await tx(contracts.Land, 'setMinter', {from: landAdmin, gas}, contracts.LandSale.options.address, false);
-            const proof = tree.getProof(calculateLandHash({
-                x: 400,
-                y: 106,
-                size: 1,
-                price: '4047'
-            }));
+            const proof = tree.getProof(calculateLandHash(lands[0]));
             await expectThrow(tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
                 others[0],
                 others[0],
                 zeroAddress,
                 400, 106, 1,
                 4047,
+                lands[0].salt,
                 proof
             ));
         });
 
         t.test('CANNOT buy Land twice', async (t) => {
-            const proof = tree.getProof(calculateLandHash({
-                x: 400,
-                y: 106,
-                size: 1,
-                price: '4047'
-            }));
+            const proof = tree.getProof(calculateLandHash(lands[0]));
             await tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
                 others[0],
                 others[0],
                 zeroAddress,
                 400, 106, 1,
                 4047,
+                lands[0].salt,
                 proof
             );
             await expectThrow(tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
@@ -256,6 +249,7 @@ function runLandSaleTests(title, contactStore) {
                 zeroAddress,
                 400, 106, 1,
                 4047,
+                lands[0].salt,
                 proof
             ));
         });
@@ -265,7 +259,8 @@ function runLandSaleTests(title, contactStore) {
                 x: 400,
                 y: 106,
                 size: 3,
-                price: '4047'
+                price: '4047',
+                salt: lands[0].salt
             })));
         });
 
@@ -281,40 +276,33 @@ function runLandSaleTests(title, contactStore) {
                 zeroAddress,
                 400, 106, 1,
                 4047,
+                lands[0].salt,
                 proof
             ));
         });
 
         t.test('CANNOT buy Land with wrong proof', async (t) => {
-            const proof = tree.getProof(calculateLandHash({
-                x: 288,
-                y: 144,
-                size: 12,
-                price: '1358'
-            }));
+            const proof = tree.getProof(calculateLandHash(lands[2]));
             await expectThrow(tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
                 others[0],
                 others[0],
                 zeroAddress,
                 400, 106, 1,
                 4047,
+                lands[0].salt,
                 proof
             ));
         });
 
         t.test('after buying user own all Land bought', async (t) => {
-            const proof = tree.getProof(calculateLandHash({
-                x: 288,
-                y: 144,
-                size: 12,
-                price: '1358'
-            }));
+            const proof = tree.getProof(calculateLandHash(lands[2]));
             await tx(contracts.LandSale, 'buyLand', {from: others[0], gas},
                 others[0],
                 others[0],
                 zeroAddress,
                 288, 144, 12,
                 '1358',
+                lands[2].salt,
                 proof
             );
             for (let x = 288; x < 288 + 12; x++) {
@@ -337,6 +325,7 @@ function runLandSaleTests(title, contactStore) {
                     zeroAddress,
                     land.x, land.y, land.size,
                     land.price,
+                    land.salt,
                     proof
                 );
             }
@@ -358,7 +347,8 @@ function runLandSaleTests(title, contactStore) {
                 y: 106,
                 size: 1,
                 price: '4047',
-                reserved: others[1]
+                reserved: others[1],
+                salt: '0x1111111111111111111111111111111111111111111111111111111111111111'
             }));
             await expectThrow(tx(contract, 'buyLand', {from: others[0], gas},
                 others[0],
@@ -366,6 +356,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 400, 106, 1,
                 4047,
+                '0x1111111111111111111111111111111111111111111111111111111111111111',
                 proof
             ));
         });

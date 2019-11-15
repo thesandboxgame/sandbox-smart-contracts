@@ -62,13 +62,14 @@ contract LandSale is MetaTransactionReceiver {
         uint16 y,
         uint16 size,
         uint256 price,
+        bytes32 salt,
         bytes32[] calldata proof
     ) external {
         /* solhint-disable-next-line not-rely-on-time */
         require(block.timestamp < _expiryTime, "sale is over");
         require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "not authorized");
         require(reserved == address(0) || reserved == buyer, "cannot buy reserved Land");
-        bytes32 leaf = _generateLandHash(x, y, size, price, reserved);
+        bytes32 leaf = _generateLandHash(x, y, size, price, reserved, salt);
 
         require(
             _verify(proof, leaf),
@@ -109,7 +110,8 @@ contract LandSale is MetaTransactionReceiver {
         uint16 y,
         uint16 size,
         uint256 price,
-        address reserved
+        address reserved,
+        bytes32 salt
     ) internal pure returns (
         bytes32
     ) {
@@ -119,7 +121,8 @@ contract LandSale is MetaTransactionReceiver {
                 y,
                 size,
                 price,
-                reserved
+                reserved,
+                salt
             )
         );
     }
