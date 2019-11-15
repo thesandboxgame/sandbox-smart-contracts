@@ -66,7 +66,7 @@ module.exports = {
     solcSettings: {
         optimizer: {
             enabled: true,
-            runs: 200, // TODO per contract
+            runs: 2000, // TODO per contract
         }
     }
 };

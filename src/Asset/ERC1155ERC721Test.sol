@@ -11,7 +11,8 @@ import "../../contracts_common/src/Interfaces/ERC721TokenReceiver.sol";
 
 import "../../contracts_common/src/BaseWithStorage/SuperOperators.sol";
 
-contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
+// using double loop for transfer
+contract ERC1155ERC721Test is SuperOperators, ERC1155, ERC721 {
     using AddressUtils for address;
     using ObjectLib32 for ObjectLib32.Operations;
     using ObjectLib32 for uint256;
@@ -393,14 +394,13 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         address to,
         uint256 id,
         uint256 value
-    ) internal returns (bool metaTx) {
+    ) internal {
         require(to != address(0), "destination is zero address");
         require(from != address(0), "from is zero address");
-        metaTx = _metaTransactionContracts[msg.sender];
         bool authorized = from == msg.sender ||
-            metaTx ||
             _superOperators[msg.sender] ||
-            _operatorsForAll[from][msg.sender];
+            _operatorsForAll[from][msg.sender] ||
+            _metaTransactionContracts[msg.sender]; // solium-disable-line max-len
 
         if (id & IS_NFT > 0) {
             require(
@@ -430,7 +430,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         }
 
         emit TransferSingle(
-            metaTx ? from : msg.sender,
+            _metaTransactionContracts[msg.sender] ? from : msg.sender,
             from,
             to,
             id,
@@ -454,10 +454,10 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         if (id & IS_NFT > 0) {
             require(_ownerOf(id) == from, "not owner");
         }
-        bool metaTx = _transferFrom(from, to, id, value);
+        _transferFrom(from, to, id, value);
         require(
             _checkERC1155AndCallSafeTransfer(
-                metaTx ? from : msg.sender,
+                _metaTransactionContracts[msg.sender] ? from : msg.sender,
                 from,
                 to,
                 id,
@@ -490,15 +490,20 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         );
         require(to != address(0), "destination is zero address");
         require(from != address(0), "from is zero address");
-        bool metaTx = _metaTransactionContracts[msg.sender];
         bool authorized = from == msg.sender ||
-            metaTx ||
             _superOperators[msg.sender] ||
-            _operatorsForAll[from][msg.sender]; // solium-disable-line max-len
+            _operatorsForAll[from][msg.sender] ||
+            _metaTransactionContracts[msg.sender]; // solium-disable-line max-len
 
-        _batchTransferFrom(from, to, ids, values, authorized);
+        _changeBalancesFor(from, to, ids, values, ObjectLib32.Operations.SUB, authorized);
+        _changeBalancesFor(from, to, ids, values, ObjectLib32.Operations.ADD, authorized);
+        // if (from == to) {
+        //     _batchTransferToSelf(from, ids, values, authorized);
+        // } else {
+        //     _batchTransferFrom(from, to, ids, values, authorized);
+        // }
         emit TransferBatch(
-            metaTx ? from : msg.sender,
+            _metaTransactionContracts[msg.sender] ? from : msg.sender,
             from,
             to,
             ids,
@@ -506,7 +511,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         );
         require(
             _checkERC1155AndCallSafeBatchTransfer(
-                metaTx ? from : msg.sender,
+                _metaTransactionContracts[msg.sender] ? from : msg.sender,
                 from,
                 to,
                 ids,
@@ -517,36 +522,103 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         );
     }
 
-    function _batchTransferFrom(
+    // mapping(address => mapping(uint256 => uint256)) private _selfPackedTokenBalance;
+    // function _batchTransferToSelf(
+    //     address from,
+    //     uint256[] memory ids,
+    //     uint256[] memory values,
+    //     bool authorized
+    // ) internal {
+    //     uint256 numItems = ids.length;
+
+    //     uint256 bin;
+    //     uint256 index;
+    //     uint256 numTokensTransferedPerType;
+    //     uint256 lastBin;
+    //     for (uint256 i = 0; i < numItems; i++) {
+    //         bool isNFT = ids[i] & IS_NFT > 0;
+    //         require(authorized || (isNFT && _erc721operators[ids[i]] == msg.sender), "Operator not approved");
+    //         if(values[i] > 0) {
+    //             (bin, index) = ids[i].getTokenBinIndex();
+    //             if (lastBin == 0) {
+    //                 lastBin = bin;
+    //                 numTokensTransferedPerType = ObjectLib32.updateTokenBalance(
+    //                     _selfPackedTokenBalance[from][bin],
+    //                     index,
+    //                     values[i],
+    //                     ObjectLib32.Operations.ADD
+    //                 );
+    //             } else {
+    //                 if (bin != lastBin) {
+    //                     _selfPackedTokenBalance[from][lastBin] = numTokensTransferedPerType;
+    //                     numTokensTransferedPerType = _selfPackedTokenBalance[from][bin];
+    //                     lastBin = bin;
+    //                 }
+    //                 numTokensTransferedPerType = numTokensTransferedPerType.updateTokenBalance(
+    //                     index,
+    //                     values[i],
+    //                     ObjectLib32.Operations.ADD
+    //                 );
+    //             }
+    //             if (isNFT) {
+    //                 require(numTokensTransferedPerType.getValueInBin(index) == 1, "cannot transfer an NFT more than once");
+    //                 require(_ownerOf(ids[i]) == from, "not owner");
+    //                 if (_erc721operators[ids[i]] != address(0)) { // TODO operatorEnabled flag optimization (like in ERC721BaseToken)
+    //                     _erc721operators[ids[i]] = address(0);
+    //                 }
+    //                 emit Transfer(from, from, ids[i]);
+    //             } else {
+    //                 require(numTokensTransferedPerType.getValueInBin(index) <= _packedTokenBalance[from][bin].getValueInBin(index), "too many transfered");
+    //             }
+    //         }
+    //     }
+    //     for (uint256 i = 0; i < numItems; i++) {
+    //         (uint256 binToErase, ) = ids[i].getTokenBinIndex();
+    //         _selfPackedTokenBalance[from][binToErase] = 0;
+    //     }
+    // }
+
+    function _changeBalancesFor(
         address from,
         address to,
         uint256[] memory ids,
         uint256[] memory values,
+        ObjectLib32.Operations operation,
         bool authorized
     ) internal {
+        address current = operation == ObjectLib32.Operations.SUB ? from : to;
         uint256 numItems = ids.length;
         uint256 bin;
         uint256 index;
-        uint256 balFrom;
-        uint256 balTo;
-
+        uint256 bal;
         uint256 lastBin;
         uint256 numNFTs = 0;
         for (uint256 i = 0; i < numItems; i++) {
             if (ids[i] & IS_NFT > 0) {
-                require(
-                    authorized || _erc721operators[ids[i]] == msg.sender,
-                    "Operator not approved"
-                );
+                if(operation == ObjectLib32.Operations.SUB) {
+                    require(
+                        authorized || _erc721operators[ids[i]] == msg.sender,
+                        "Operator not approved"
+                    );
+                }
                 if(values[i] > 0) {
-                    require(values[i] == 1, "cannot transfer nft if amount not 1");
-                    require(_ownerOf(ids[i]) == from, "not owner");
                     numNFTs++;
-                    _owners[ids[i]] = uint256(to);
-                    if (_erc721operators[ids[i]] != address(0)) { // TODO operatorEnabled flag optimization (like in ERC721BaseToken)
-                        _erc721operators[ids[i]] = address(0);
+                    if (operation == ObjectLib32.Operations.SUB) {
+                        require(values[i] == 1, "cannot transfer nft if amount not 1");
+                        if(from == to) {
+                            require(_ownerOf(ids[i]) == from, "not owner in batch");
+                            _owners[ids[i]] = 0;
+                        }
+                        if (_erc721operators[ids[i]] != address(0)) { // TODO operatorEnabled flag optimization (like in ERC721BaseToken)
+                            _erc721operators[ids[i]] = address(0);
+                        }
+                    } else { // assume it will be only ADD
+                        if(from != to) {
+                            require(_ownerOf(ids[i]) == from, "not owner in batch");
+                        }
+                        _owners[ids[i]] = uint256(to);
+                        emit Transfer(from, to, ids[i]);
                     }
-                    emit Transfer(from, to, ids[i]);
                 }
             } else {
                 require(authorized, "Operator not approved");
@@ -554,51 +626,122 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
                     (bin, index) = ids[i].getTokenBinIndex();
                     if (lastBin == 0) {
                         lastBin = bin;
-                        balFrom = ObjectLib32.updateTokenBalance(
-                            _packedTokenBalance[from][bin],
+                        bal = ObjectLib32.updateTokenBalance(
+                            _packedTokenBalance[current][bin],
                             index,
                             values[i],
-                            ObjectLib32.Operations.SUB
-                        );
-                        balTo = ObjectLib32.updateTokenBalance(
-                            _packedTokenBalance[to][bin],
-                            index,
-                            values[i],
-                            ObjectLib32.Operations.ADD
+                            operation
                         );
                     } else {
                         if (bin != lastBin) {
-                            _packedTokenBalance[from][lastBin] = balFrom;
-                            _packedTokenBalance[to][lastBin] = balTo;
-                            balFrom = _packedTokenBalance[from][bin];
-                            balTo = _packedTokenBalance[to][bin];
+                            _packedTokenBalance[current][lastBin] = bal;
+                            bal = _packedTokenBalance[current][bin];
                             lastBin = bin;
                         }
-
-                        balFrom = balFrom.updateTokenBalance(
+                        bal = bal.updateTokenBalance(
                             index,
                             values[i],
-                            ObjectLib32.Operations.SUB
-                        );
-                        balTo = balTo.updateTokenBalance(
-                            index,
-                            values[i],
-                            ObjectLib32.Operations.ADD
+                            operation
                         );
                     }
                 }
             }
         }
         if (numNFTs > 0) {
-            _numNFTPerAddress[from] -= numNFTs;
-            _numNFTPerAddress[to] += numNFTs;
+            if (operation == ObjectLib32.Operations.SUB) {
+                _numNFTPerAddress[current] -= numNFTs;
+            } else { // assume it will be only ADD
+                _numNFTPerAddress[current] += numNFTs;
+            }
         }
 
         if (bin != 0) {
-            _packedTokenBalance[from][bin] = balFrom;
-            _packedTokenBalance[to][bin] = balTo;
+            _packedTokenBalance[current][bin] = bal;
         }
     }
+
+    // function _batchTransferFrom(
+    //     address from,
+    //     address to,
+    //     uint256[] memory ids,
+    //     uint256[] memory values,
+    //     bool authorized
+    // ) internal {
+    //     uint256 numItems = ids.length;
+    //     uint256 bin;
+    //     uint256 index;
+    //     uint256 balFrom;
+    //     uint256 balTo;
+
+    //     uint256 lastBin;
+    //     uint256 numNFTs = 0;
+    //     for (uint256 i = 0; i < numItems; i++) {
+    //         if (ids[i] & IS_NFT > 0) {
+    //             require(
+    //                 authorized || _erc721operators[ids[i]] == msg.sender,
+    //                 "Operator not approved"
+    //             );
+    //             if(values[i] > 0) {
+    //                 require(values[i] == 1, "cannot transfer nft if amount not 1");
+    //                 require(_ownerOf(ids[i]) == from, "not owner");
+    //                 numNFTs++;
+    //                 _owners[ids[i]] = uint256(to);
+    //                 if (_erc721operators[ids[i]] != address(0)) { // TODO operatorEnabled flag optimization (like in ERC721BaseToken)
+    //                     _erc721operators[ids[i]] = address(0);
+    //                 }
+    //                 emit Transfer(from, to, ids[i]);
+    //             }
+    //         } else {
+    //             require(authorized, "Operator not approved");
+    //             if(values[i] > 0) {
+    //                 (bin, index) = ids[i].getTokenBinIndex();
+    //                 if (lastBin == 0) {
+    //                     lastBin = bin;
+    //                     balFrom = ObjectLib32.updateTokenBalance(
+    //                         _packedTokenBalance[from][bin],
+    //                         index,
+    //                         values[i],
+    //                         ObjectLib32.Operations.SUB
+    //                     );
+    //                     balTo = ObjectLib32.updateTokenBalance(
+    //                         _packedTokenBalance[to][bin],
+    //                         index,
+    //                         values[i],
+    //                         ObjectLib32.Operations.ADD
+    //                     );
+    //                 } else {
+    //                     if (bin != lastBin) {
+    //                         _packedTokenBalance[from][lastBin] = balFrom;
+    //                         _packedTokenBalance[to][lastBin] = balTo;
+    //                         balFrom = _packedTokenBalance[from][bin];
+    //                         balTo = _packedTokenBalance[to][bin];
+    //                         lastBin = bin;
+    //                     }
+
+    //                     balFrom = balFrom.updateTokenBalance(
+    //                         index,
+    //                         values[i],
+    //                         ObjectLib32.Operations.SUB
+    //                     );
+    //                     balTo = balTo.updateTokenBalance(
+    //                         index,
+    //                         values[i],
+    //                         ObjectLib32.Operations.ADD
+    //                     );
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     if (numNFTs > 0) {
+    //         _numNFTPerAddress[from] -= numNFTs;
+    //         _numNFTPerAddress[to] += numNFTs;
+    //     }
+
+    //     if (bin != 0) {
+    //         _packedTokenBalance[from][bin] = balFrom;
+    //         _packedTokenBalance[to][bin] = balTo;
+    //     }
+    // }
 
     /// @notice Get the balance of `owner` for the token type `id`.
     /// @param owner The address of the token holder.
@@ -821,10 +964,10 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     /// @param id the NFT to transfer.
     function transferFrom(address from, address to, uint256 id) external {
         require(_ownerOf(id) == from, "not owner");
-        bool metaTx = _transferFrom(from, to, id, 1);
+        _transferFrom(from, to, id, 1);
         require(
             _checkERC1155AndCallSafeTransfer(
-                metaTx ? from : msg.sender,
+                _metaTransactionContracts[msg.sender] ? from : msg.sender,
                 from,
                 to,
                 id,
@@ -859,10 +1002,10 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         bytes memory data
     ) public {
         require(_ownerOf(id) == from, "not owner");
-        bool metaTx = _transferFrom(from, to, id, 1);
+        _transferFrom(from, to, id, 1);
         require(
             _checkERC1155AndCallSafeTransfer(
-                metaTx ? from : msg.sender,
+                _metaTransactionContracts[msg.sender] ? from : msg.sender,
                 from,
                 to,
                 id,
@@ -954,13 +1097,6 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
                 ((id & PACK_INDEX) < ((id & PACK_NUM_FT_TYPES) / PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
                 _metadataHash[id & URI_ID] != 0;
         }
-    }
-
-    function isPackIdUsed(address creator, uint40 packId, uint16 numFTs) external returns(bool) {
-        uint256 uriId = uint256(creator) * CREATOR_OFFSET_MULTIPLIER + // CREATOR
-            uint256(packId) * PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // PACk_ID
-            numFTs * PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER; // number of fungible token in the pack // PACK_NUM_FT_TYPES
-        return _metadataHash[uriId] != 0;
     }
 
     /// @notice A distinct Uniform Resource Identifier (URI) for a given token.
@@ -1271,15 +1407,17 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         external
         returns (uint256 newId)
     {
-        bool metaTx = _metaTransactionContracts[msg.sender];
         require(
             msg.sender == sender ||
-                metaTx ||
+                _metaTransactionContracts[msg.sender] ||
                 _superOperators[msg.sender] ||
                 _operatorsForAll[sender][msg.sender],
             "require meta approval"
         );
-        return _extractERC721From(metaTx ? sender : msg.sender, sender, id, to);
+        address operator = _metaTransactionContracts[msg.sender]
+            ? sender
+            : msg.sender;
+        return _extractERC721From(operator, sender, id, to);
     }
 
     function _extractERC721From(address operator, address sender, uint256 id, address to)
