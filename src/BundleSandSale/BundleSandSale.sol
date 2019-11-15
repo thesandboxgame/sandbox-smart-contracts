@@ -166,23 +166,22 @@ contract BundleSandSale is Admin {
             address(_asset) == msg.sender,
             "only accept asset as sender"
         );
+        require(from == operator, "only self executed transfer allowed");
         require(data.length > 0, "data need to contains the sale data");
 
         (
             uint256 numPacks,
             uint256 sandAmountPerPack,
-            address sandFrom,
             uint256 priceUSDPerPack
-        ) = abi.decode(data, (uint256, uint256, address, uint256));
+        ) = abi.decode(data, (uint256, uint256, uint256));
 
         uint256 amount = value.div(numPacks);
         require(amount.mul(numPacks) == value, "invalid amounts, not divisible by numPacks");
-        require(_sand.transferFrom(sandFrom, address(this), sandAmountPerPack.mul(numPacks)), "failed to transfer Sand");
         uint256[] memory amounts = new uint256[](1);
         amounts[0] = amount;
         uint256[] memory ids = new uint256[](1);
         ids[0] = id;
-        _setupBundle(sandFrom, sandAmountPerPack, numPacks, ids, amounts, priceUSDPerPack);
+        _setupBundle(from, sandAmountPerPack, numPacks, ids, amounts, priceUSDPerPack);
         return ERC1155_BATCH_RECEIVED;
     }
 
@@ -197,14 +196,14 @@ contract BundleSandSale is Admin {
             address(_asset) == msg.sender,
             "only accept asset as sender"
         );
+        require(from == operator, "only self executed transfer allowed");
         require(data.length > 0, "data need to contains the sale data");
 
         (
             uint256 numPacks,
             uint256 sandAmountPerPack,
-            address sandFrom,
             uint256 priceUSDPerPack
-        ) = abi.decode(data, (uint256, uint256, address, uint256));
+        ) = abi.decode(data, (uint256, uint256, uint256));
 
         uint256[] memory amounts = new uint256[](ids.length); // TODO
         for(uint256 i = 0; i < amounts.length; i ++) {
@@ -213,19 +212,19 @@ contract BundleSandSale is Admin {
             amounts[i] = amount;
         }
 
-        _setupBundle(sandFrom, sandAmountPerPack, numPacks, ids, amounts, priceUSDPerPack);
+        _setupBundle(from, sandAmountPerPack, numPacks, ids, amounts, priceUSDPerPack);
         return ERC1155_BATCH_RECEIVED;
     }
 
     function _setupBundle(
-        address sandFrom,
+        address from,
         uint256 sandAmountPerPack,
         uint256 numPacks,
         uint256[] memory ids,
         uint256[] memory amounts,
         uint256 priceUSDPerPack
     ) internal {
-        require(_sand.transferFrom(sandFrom, address(this), sandAmountPerPack.mul(numPacks)), "failed to transfer Sand");
+        require(_sand.transferFrom(from, address(this), sandAmountPerPack.mul(numPacks)), "failed to transfer Sand");
         uint256 saleIndex = sales.push(Sale({
             ids: ids,
             amounts : amounts,
