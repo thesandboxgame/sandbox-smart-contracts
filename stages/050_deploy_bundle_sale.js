@@ -55,7 +55,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const bundleSandSaleDeployResult = await deployIfDifferent(['data'],
         'BundleSandSale',
-        {from: deployer, gas: 2000000},
+        {from: deployer, gas: 3000000},
         'BundleSandSale',
         sand.options.address,
         asset.options.address,

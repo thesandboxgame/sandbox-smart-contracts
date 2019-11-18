@@ -12,12 +12,20 @@ contract BundleSandSale is Admin {
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
 
     event BundleSale(
-        uint256 index,
+        uint256 indexed index,
         uint256[] ids,
         uint256[] amounts,
         uint256 sandAmount,
         uint256 priceUSD,
         uint256 numPacks
+    );
+
+    event BundleSold(
+        uint256 indexed index,
+        address indexed buyer,
+        uint256 numPacks,
+        address token,
+        uint256 tokenAmount
     );
 
     using SafeMathWithRequire for uint256;
@@ -90,6 +98,8 @@ contract BundleSandSale is Admin {
         }
         address(_receivingWallet).transfer(ETHRequired);
         _transferPack(bundleIndex, numPacks, to);
+
+        emit BundleSold(bundleIndex, msg.sender, numPacks, address(0), ETHRequired);
     }
 
     /**
@@ -105,6 +115,8 @@ contract BundleSandSale is Admin {
         uint256 USDRequired = numPacks.mul(sales[saleIndex].priceUSD);
         require(_dai.transferFrom(msg.sender, _receivingWallet, USDRequired), "failed to transfer dai");
         _transferPack(saleIndex, numPacks, to);
+
+        emit BundleSold(saleIndex, msg.sender, numPacks, address(_dai), USDRequired);
     }
 
     function getSaleInfo(uint256 saleIndex) external view returns(uint256 priceUSD, uint256 numPacksLeft) {
@@ -167,6 +179,7 @@ contract BundleSandSale is Admin {
             "only accept asset as sender"
         );
         require(from == operator, "only self executed transfer allowed");
+        require(value > 0, "no Asset transfered");
         require(data.length > 0, "data need to contains the sale data");
 
         (
@@ -197,6 +210,7 @@ contract BundleSandSale is Admin {
             "only accept asset as sender"
         );
         require(from == operator, "only self executed transfer allowed");
+        require(ids.length > 0, "need to contains Asset");
         require(data.length > 0, "data need to contains the sale data");
 
         (
@@ -207,6 +221,7 @@ contract BundleSandSale is Admin {
 
         uint256[] memory amounts = new uint256[](ids.length); // TODO
         for(uint256 i = 0; i < amounts.length; i ++) {
+            require(values[i] > 0, "asset transfer with zero values");
             uint256 amount = values[i].div(numPacks);
             require(amount.mul(numPacks) == values[i], "invalid amounts, not divisible by numPacks");
             amounts[i] = amount;
@@ -214,7 +229,7 @@ contract BundleSandSale is Admin {
 
         _setupBundle(from, sandAmountPerPack, numPacks, ids, amounts, priceUSDPerPack);
         return ERC1155_BATCH_RECEIVED;
-    }
+    } 
 
     function _setupBundle(
         address from,
