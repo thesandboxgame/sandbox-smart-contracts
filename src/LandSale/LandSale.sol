@@ -45,6 +45,14 @@ contract LandSale is MetaTransactionReceiver {
         _expiryTime = expiryTime;
     }
 
+    /// @notice set the wallet receiving the proceeds
+    /// @param newWallet address of the new receiving wallet
+    function setReceivingWallet(address payable newWallet) external{
+        require(newWallet != address(0), "receiving wallet cannot be zero address");
+        require(msg.sender == _admin, "only admin can change the receiving wallet");
+        _wallet = newWallet;
+    }
+
     /**
      * @notice buy Land using the merkle proof associated with it
      * @param buyer address that perform the payment

@@ -64,6 +64,14 @@ contract BundleSandSale is Admin {
         _receivingWallet = receivingWallet;
     }
 
+    /// @notice set the wallet receiving the proceeds
+    /// @param newWallet address of the new receiving wallet
+    function setReceivingWallet(address payable newWallet) external{
+        require(newWallet != address(0), "receiving wallet cannot be zero address");
+        require(msg.sender == _admin, "only admin can change the receiving wallet");
+        _receivingWallet = newWallet;
+    }
+
     function _transferPack(uint256 saleIndex, uint256 numPacks, address to) internal {
         uint256 sandAmountPerPack = sales[saleIndex].sandAmount;
         require(
