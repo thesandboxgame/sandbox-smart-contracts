@@ -2,9 +2,9 @@ const assert = require('assert');
 const {getDeployedContract} = require('../lib');
 const {toChecksumAddress, web3} = require('../test/utils');
 const {executeMetaTx, signEIP712MetaTx} = require('../test/sand-utils');
-const { generateTokenId } = require('../test/asset-utils');
-const { zeroAddress, emptyBytes, encodeCall } = require('../test/utils');
-const { transfer } = require('../test/erc20');
+const {generateTokenId} = require('../test/asset-utils');
+const {zeroAddress, emptyBytes, encodeCall} = require('../test/utils');
+const {transfer} = require('../test/erc20');
 
 const rocketh = require('rocketh');
 const rockethWeb3 = require('rocketh-web3')(rocketh, require('web3'));
@@ -28,7 +28,7 @@ const sandContract = getDeployedContract('Sand');
 const gas = 8000000;
 
 const gasReport = {
-    data:{
+    data: {
 
     }
     // TODO commit git
@@ -50,7 +50,7 @@ const ipfsUrl = 'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2
 
 function perNums(perNum, num) {
     const l = [];
-    for(let i =0; i < num; i++) {
+    for (let i = 0; i < num; i++) {
         l.push(perNum);
     }
     return l;
@@ -58,12 +58,12 @@ function perNums(perNum, num) {
 
 let counter = 0;
 function fix(fixedID, batch = 1) {
-    if(typeof fixedID == 'undefined') {
+    if (typeof fixedID === 'undefined') {
         fixedID = counter;
-        counter = (counter + batch*8) - (counter%8);
-    } else if(fixedID >= counter) {
+        counter = (counter + batch * 8) - (counter % 8);
+    } else if (fixedID >= counter) {
         counter = fixedID;
-        counter = (counter + batch*8) - (counter%8);
+        counter = (counter + batch * 8) - (counter % 8);
     }
     return fixedID;
 }
@@ -74,17 +74,15 @@ function mintGas(num, fixedID) {
 function safeBatchTransferFromGas(num, fixedID, packSize) {
     const ids = [];
     const values = [];
-    for(let i = 0; i < num; i++) {
+    for (let i = 0; i < num; i++) {
         ids.push(generateTokenId(creator, 300, packSize, fixedID, i, 0));
         values.push(200);
     }
     return gasTx('safeBatchTransferFrom ' + num, {from: user1, gas}, assetContract, 'safeBatchTransferFrom', user1, creator, ids, values, emptyBytes);
 }
 
-
 main(accounts);
 async function main(accounts) {
-    
     // required for the signer to pay for meta-tx
     await transfer(sandContract, signingAccount.address, '1000000000000', {from: sandOwner, gas});
     // to not pay gas when receiving Sand
@@ -92,7 +90,6 @@ async function main(accounts) {
 
     await tx({from: creator, gas}, bouncerContract, 'mintMultiple', creator, 0, zeroAddress, 0, ipfsHashString, perNums(300, 1500), user1, emptyBytes);
     await safeBatchTransferFromGas(1000, 0, 1500);
-    
+
     console.log(JSON.stringify(gasReport, null, '  '));
-    
 }

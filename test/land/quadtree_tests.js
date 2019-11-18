@@ -191,6 +191,21 @@ function runQuadTreeTests(title, landDeployer) {
             }
         });
 
+        // TODO :
+        //t.test('transfering to a contract that check for adjency shoudl succeed', async () => {
+        //    const x = 24;
+        //    const y = 48;
+        //    const size = 24;
+        //    await mintQuad(land, user0, size, x, y, {
+        //        from: landMinter,
+        //        gas,
+        //    });
+
+        //    const receiverContract = await deployContract(user0, 'TestAdjacentLandReceiver', land.options.address);
+        //    const receiverAddress = receiverContract.options.address;
+        //    await tx(land, 'transferQuad', {from: user0, gas}, user0, receiverAddress, x, y, size, emptyBytes);
+        //});
+
         t.test('transferQuad subset whose individual owner is from but higher quad is different', async (t) => {
             const px = 24;
             const py = 48;
@@ -596,7 +611,6 @@ function runQuadTreeTests(title, landDeployer) {
             const receipt = await tx(land, 'batchTransferFrom', {from: user0, gas: 20000000}, user0, user0, allLands, emptyBytes);
             console.log('gasUsed for 24x24 batchTransferFrom from unbroken quad (from == to) = ' + receipt.gasUsed);
         });
-
 
         t.test('batchTransferQuad 6x6+ 2* 3x3 + 1x1', async (t) => {
             const px = 312;

@@ -4,7 +4,7 @@ const {gas, encodeEventSignature, zeroAddress, decodeEvents} = require('./utils'
 const TransferSingleEvent = encodeEventSignature('TransferSingle(address,address,address,uint256,uint256)');
 const TransferBatchEvent = encodeEventSignature('TransferBatch(address,address,address,uint256[],uint256[])');
 const URIEvent = encodeEventSignature('URI(string,uint256)');
-const OfferClaimedEvent = encodeEventSignature('OfferClaimed(address,address,uint256,uint256)');
+const OfferClaimedEvent = encodeEventSignature('OfferClaimed(address,address,uint256,uint256,uint256,uint256)');
 const OfferCancelledEvent = encodeEventSignature('OfferCancelled(address,uint256)');
 const ExtractionEvent = encodeEventSignature('Extraction(uint256,uint256)');
 
@@ -67,7 +67,19 @@ function mintMultiple(contract, uri, supplies, creator, fixedID = 0) {
     return contract.methods.mintMultiple(creator, 0, zeroAddress, fixedID, uri, supplies, creator, emptyBytes).send({from: creator, gas});
 }
 
-function mintMultipleFor(contract, operator, uri, supplies, rarities, creator, fixedID = 0) {
+function mintMultipleFor(options, contract, operator, uri, supplies, rarities, creator, fixedID = 0) {
+    let gasToUse = gas;
+    if (options && options.gas) {
+        gasToUse = options.gas;
+    } else {
+        fixedID = creator;
+        creator = rarities;
+        rarities = supplies;
+        supplies = uri;
+        uri = operator;
+        operator = contract;
+        contract = options;
+    }
     let rarityPack = '0x';
     for (let i = 0; i < rarities.length; i += 4) {
         let byteV = 0;
@@ -85,7 +97,7 @@ function mintMultipleFor(contract, operator, uri, supplies, rarities, creator, f
         rarityPack += s;
     }
     // console.log({rarityPack});
-    return contract.methods.mintMultipleFor(creator, fixedID, uri, supplies, rarityPack, creator).send({from: operator, gas});
+    return contract.methods.mintMultipleFor(creator, fixedID, uri, supplies, rarityPack, creator).send({from: operator, gas: gasToUse});
 }
 
 async function mintTokensIncludingNFTWithSameURI(contract, num, uri, supply, numNFTs, creator, fixedID = 0) {
@@ -119,8 +131,8 @@ async function mintMultipleAndReturnTokenIds(contract, uri, supplies, creator, f
     return getBatchIds(receipt);
 }
 
-async function mintMultipleForAndReturnTokenIds(contract, operator, uri, supplies, rarities, creator, fixedID = 0) {
-    const receipt = await mintMultipleFor(contract, operator, uri, supplies, rarities, creator, fixedID);
+async function mintMultipleForAndReturnTokenIds(options, contract, operator, uri, supplies, rarities, creator, fixedID = 0) {
+    const receipt = await mintMultipleFor(options, contract, operator, uri, supplies, rarities, creator, fixedID);
     return getBatchIds(receipt);
 }
 

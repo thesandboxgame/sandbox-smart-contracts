@@ -24,7 +24,7 @@ program
             const valueMinusGasFeeBN = balanceBN.sub(gasPriceBN.mul(gasBN));
             const valueMinusGasFee = valueMinusGasFeeBN.toString(10);
             // console.log({balance: balanceBN.toString(10), valueMinusGasFee, to: destination});
-            console.log({gas, valueMinusGasFee, to: destination});
+            console.log({sender, gas, valueMinusGasFee, to: destination});
             const receipt = await tx({from: sender, gas, value: valueMinusGasFee, to: destination});
             console.log('success', {txHash: receipt.transactionHash, gasUsed: receipt.gasUsed});
         } catch (e) {

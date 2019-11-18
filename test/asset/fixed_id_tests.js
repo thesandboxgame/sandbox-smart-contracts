@@ -44,7 +44,7 @@ const {
     sandAdmin,
     others,
     mintingFeeCollector,
-} = rocketh.namedAccounts
+} = rocketh.namedAccounts;
 
 const creator = others[0];
 const user1 = others[1];
@@ -56,15 +56,15 @@ const ipfsHashString = '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5
 const ipfsUrl = 'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy';
 
 function runFixedIDAssetTests(title, resetContracts) {
-    tap.test(title + ' specific tests', async (t)=> {
+    tap.test(title + ' specific tests', async (t) => {
         // t.runOnly = true;
         let contracts;
         t.beforeEach(async () => {
-          contracts = await resetContracts();
+            contracts = await resetContracts();
         });
 
         t.test('minting a NFT with fixed id return the id', async () => {
-            const tokenID = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString,1,creator, 4);
+            const tokenID = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 1, creator, 4);
             assert.equal(tokenID, generateTokenId(creator, 1, 0, 4, 0));
         });
 
@@ -89,7 +89,7 @@ function runFixedIDAssetTests(title, resetContracts) {
         });
 
         t.test('minting a MCFT with fixed id return the id', async () => {
-            const tokenID = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString,1033,creator, 4);
+            const tokenID = await mintAndReturnTokenId(contracts.AssetBouncer, ipfsHashString, 1033, creator, 4);
             assert.equal(tokenID, generateTokenId(creator, 1033, 1, 4, 0));
         });
 
@@ -137,7 +137,7 @@ function runFixedIDAssetTests(title, resetContracts) {
         // });
 
         t.test('minting multiple Assets with fixed id gives the correct ids', async () => {
-            let tokenIDs = await mintTokensIncludingNFTWithSameURI(contracts.AssetBouncer, 7, ipfsHashString, 1234, 7, creator, 101);
+            const tokenIDs = await mintTokensIncludingNFTWithSameURI(contracts.AssetBouncer, 7, ipfsHashString, 1234, 7, creator, 101);
             // console.log(tokenIDs.map((id) => new BN(id).toString(16)));
             // console.log(Array(7+7).fill().map(
             //         (_, i) => {
@@ -154,12 +154,11 @@ function runFixedIDAssetTests(title, resetContracts) {
                     (_, i) => {
                         if (i < 7) {
                             return generateTokenId(creator, 1234, 7, 101, i);
-                        } else {
-                            return generateTokenId(creator, 1, 7, 101, i);
                         }
+                        return generateTokenId(creator, 1, 7, 101, i);
                     }
                 )
-            )
+            );
         });
 
         t.test('minting multiple Assets then minting with existing packSize/packID fails', async () => {
@@ -204,4 +203,4 @@ function runFixedIDAssetTests(title, resetContracts) {
 
 module.exports = {
     runFixedIDAssetTests
-}
+};

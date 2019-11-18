@@ -24,7 +24,9 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         address indexed seller,
         address indexed buyer,
         uint256 indexed offerId,
-        uint256 amount
+        uint256 amount,
+        uint256 pricePaid,
+        uint256 feePaid
     );
     event OfferCancelled(address indexed seller, uint256 indexed offerId);
 
@@ -384,7 +386,9 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
             seller,
             buyer,
             auctionData[AuctionData_OfferId],
-            purchase[0]
+            purchase[0],
+            offer,
+            fee
         );
     }
 

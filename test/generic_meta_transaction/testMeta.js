@@ -53,17 +53,17 @@ function signAndExecuteMetaTransaction(signingAccount, contract, options, {
     tokenReceiver,
     signedOnBehalf
 }) {
-    if(!options) {
+    if (!options) {
         options = {};
     }
-    if(!options.gas) {
+    if (!options.gas) {
         option.gas = gas;
     }
     options.gasPrice = gasPrice;
-    if(!options.from){
+    if (!options.from) {
         options.from = relayer;
     }
-    if(!gasLimit) {
+    if (!gasLimit) {
         gasLimit = 112000 + txGas;
     }
 
@@ -79,7 +79,7 @@ function signAndExecuteMetaTransaction(signingAccount, contract, options, {
         tokenGasPrice,
         relayer
     });
-    return tx(contract, "executeERC20MetaTx", options, 
+    return tx(contract, 'executeERC20MetaTx', options,
         from,
         to,
         gasToken,
@@ -97,81 +97,78 @@ const MetaTxEvent = encodeEventSignature('MetaTx(bool,bytes)');
 
 function runTests(title, resetContracts) {
     tap.test(title + ' as Meta Transaction Processor', async (t) => {
-
         let contracts;
         let metaAddress;
         let sandAddress;
         t.beforeEach(async () => {
             contracts = await resetContracts();
-            
+
             metaAddress = contracts.MetaTx.options.address;
-            
+
             sandAddress = contracts.Sand.options.address;
-            
-            await tx(contracts.Sand, 'transfer', {from: sandOwner, gas}, signingAccount.address, "1000000000000000000000");  // 1000 Sand
-            await sendTransaction({from: sandOwner, value: "1000000000000000000", to: signingAccount.address, gas});
-            await sendSignedTransaction(encodeCall(contracts.Sand, 'approve', metaAddress, "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"), sandAddress, signingAccount.privateKey);
+
+            await tx(contracts.Sand, 'transfer', {from: sandOwner, gas}, signingAccount.address, '1000000000000000000000'); // 1000 Sand
+            await sendTransaction({from: sandOwner, value: '1000000000000000000', to: signingAccount.address, gas});
+            await sendSignedTransaction(encodeCall(contracts.Sand, 'approve', metaAddress, '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'), sandAddress, signingAccount.privateKey);
         });
 
         t.test('simple receiver', async (t) => {
-
             let receiverAddress;
             t.beforeEach(async () => {
                 contracts.Receiver = await deployContract(sandOwner, 'GenericERC20MetaTxReceiver', metaAddress, sandAddress, 150);
                 receiverAddress = contracts.Receiver.options.address;
             });
-    
+
             t.test('sendToken via meta ', async () => {
                 const receipt = await signAndExecuteMetaTransaction(signingAccount, contracts.MetaTx, {from: relayer, gas}, {
                     from: signingAccount.address,
                     to: metaAddress,
                     gasToken: sandAddress,
-                    data: encodeCall(contracts.MetaTx, "sendERC20Tokens", signingAccount.address, user1, sandAddress, "100000000000000000000", emptyBytes),
+                    data: encodeCall(contracts.MetaTx, 'sendERC20Tokens', signingAccount.address, user1, sandAddress, '100000000000000000000', emptyBytes),
                     nonce: 1,
                     gasPrice: 1,
                     txGas: 1000000,
                     tokenGasPrice: 1,
-                    relayer: relayer,
+                    relayer,
                     tokenReceiver: relayerFund,
                     signedOnBehalf: false
-                })
+                });
 
                 const metaTxEvents = await getEventsFromReceipt(contracts.MetaTx, MetaTxEvent, receipt);
                 assert.equal(metaTxEvents.length, 1);
                 assert.equal(metaTxEvents[0].returnValues[0], true);
-    
-                const user1SandBalance = await call(contracts.Sand, "balanceOf", null, user1);
-                assert.equal(user1SandBalance, "100000000000000000000", "user 1 balance checks");
+
+                const user1SandBalance = await call(contracts.Sand, 'balanceOf', null, user1);
+                assert.equal(user1SandBalance, '100000000000000000000', 'user 1 balance checks');
             });
-    
-    
+
             t.test('execute call with amount via meta tx', async () => {
                 const receipt = await signAndExecuteMetaTransaction(signingAccount, contracts.MetaTx, {from: relayer, gas: 6000000}, {
                     from: signingAccount.address,
                     to: metaAddress,
                     gasToken: sandAddress,
-                    data: encodeCall(contracts.MetaTx, "sendERC20Tokens", signingAccount.address, receiverAddress, sandAddress, "150", emptyBytes),
+                    data: encodeCall(contracts.MetaTx, 'sendERC20Tokens', signingAccount.address, receiverAddress, sandAddress, '150', emptyBytes),
                     nonce: 1,
                     gasPrice: 1,
                     txGas: 1000000,
                     tokenGasPrice: 1,
-                    relayer: relayer,
+                    relayer,
                     tokenReceiver: relayerFund,
                     signedOnBehalf: false
-                })
-    
+                });
+
                 const metaTxEvents = await getEventsFromReceipt(contracts.MetaTx, MetaTxEvent, receipt);
                 assert.equal(metaTxEvents.length, 1);
                 assert.equal(metaTxEvents[0].returnValues[0], true);
-    
+
                 const receiverEvents = await getEventsFromReceipt(contracts.Receiver, ReceivedEvent, receipt);
                 assert.equal(receiverEvents.length, 1);
                 assert.equal(receiverEvents[0].returnValues[0], signingAccount.address);
-    
-                const receiverSandBalance = await call(contracts.Sand, "balanceOf", null, receiverAddress);
+
+                const receiverSandBalance = await call(contracts.Sand, 'balanceOf', null, receiverAddress);
                 assert.equal(receiverSandBalance, 150);
             });
-    
+
             t.test('execute call without transfer via meta tx', async () => {
                 const receipt = await signAndExecuteMetaTransaction(signingAccount, contracts.MetaTx, {from: relayer, gas: 6000000}, {
                     from: signingAccount.address,
@@ -182,29 +179,27 @@ function runTests(title, resetContracts) {
                     gasPrice: 1,
                     txGas: 1000000,
                     tokenGasPrice: 1,
-                    relayer: relayer,
+                    relayer,
                     tokenReceiver: relayerFund,
                     signedOnBehalf: false
-                })
-    
+                });
+
                 const metaTxEvents = await getEventsFromReceipt(contracts.MetaTx, MetaTxEvent, receipt);
                 assert.equal(metaTxEvents.length, 1);
                 assert.equal(metaTxEvents[0].returnValues[0], true);
-    
+
                 const receiverEvents = await getEventsFromReceipt(contracts.Receiver, ReceivedEvent, receipt);
                 assert.equal(receiverEvents.length, 1);
                 assert.equal(receiverEvents[0].returnValues[0], signingAccount.address);
-    
+
                 // console.log(JSON.stringify(receipt, null, '  '));
-    
-                const receiverSandBalance = await call(contracts.Sand, "balanceOf", null, receiverAddress);
+
+                const receiverSandBalance = await call(contracts.Sand, 'balanceOf', null, receiverAddress);
                 assert.equal(receiverSandBalance, 0);
             });
-    
         });
 
         t.test('drain receiver', async (t) => {
-
             let receiverAddress;
             t.beforeEach(async () => {
                 contracts.Receiver = await deployContract(sandOwner, 'GasDrain');
@@ -212,7 +207,6 @@ function runTests(title, resetContracts) {
             });
 
             t.test('passing enough gas for the whole transaction but not enough for the call should throw', async () => {
-                
                 // const receipt = await signAndExecuteMetaTransaction(signingAccount, contracts.MetaTx, {from: relayer, gas: 6000000}, {
                 //     from: signingAccount.address,
                 //     to: receiverAddress,
@@ -232,12 +226,12 @@ function runTests(title, resetContracts) {
                     from: signingAccount.address,
                     to: receiverAddress,
                     gasToken: sandAddress,
-                    data: encodeCall(contracts.Receiver, "receiveSpecificERC20", signingAccount.address, 0, 3000000),
+                    data: encodeCall(contracts.Receiver, 'receiveSpecificERC20', signingAccount.address, 0, 3000000),
                     nonce: 1,
                     gasPrice: 1,
                     txGas: 3000000,
                     tokenGasPrice: 1,
-                    relayer: relayer,
+                    relayer,
                     tokenReceiver: relayerFund,
                     signedOnBehalf: false
                 }));
@@ -245,37 +239,35 @@ function runTests(title, resetContracts) {
 
             t.test('gas use', async () => {
                 const txGas = 3000000;
-                const receipt = await signAndExecuteMetaTransaction(signingAccount, contracts.MetaTx, {from: relayer, gas: txGas*2}, {
+                const receipt = await signAndExecuteMetaTransaction(signingAccount, contracts.MetaTx, {from: relayer, gas: txGas * 2}, {
                     from: signingAccount.address,
                     to: receiverAddress,
                     gasToken: sandAddress,
-                    data: encodeCall(contracts.Receiver, "receiveSpecificERC20", signingAccount.address, 0, txGas),
+                    data: encodeCall(contracts.Receiver, 'receiveSpecificERC20', signingAccount.address, 0, txGas),
                     nonce: 1,
                     gasPrice: 1,
-                    txGas: txGas,
+                    txGas,
                     tokenGasPrice: 1,
-                    relayer: relayer,
+                    relayer,
                     tokenReceiver: relayerFund,
                     signedOnBehalf: false
                 });
                 // console.log(receipt.gasUsed - txGas);
             });
-    
         });
 
-        t.test('mint', async(t) => {
-
+        t.test('mint', async (t) => {
             let assetAddress;
             t.beforeEach(async () => {
                 contracts.Asset = await deployContract(sandOwner, 'Asset', metaAddress);
                 assetAddress = contracts.Asset.options.address;
 
                 // to not pay gas for new sand
-                await tx(contracts.Sand, 'transfer', {from: sandOwner, gas}, relayerFund, "1000000000000000000000");  // 1000 Sand
+                await tx(contracts.Sand, 'transfer', {from: sandOwner, gas}, relayerFund, '1000000000000000000000'); // 1000 Sand
             });
 
             // t.test('minting 1', async () => {
-                
+
             //     const txGas = 3000000;
             //     const receipt = await signAndExecuteMetaTransaction(signingAccount, contracts.MetaTx, {from: relayer, gas: txGas*2}, {
             //         from: signingAccount.address,
@@ -296,15 +288,13 @@ function runTests(title, resetContracts) {
             //     assert.equal(metaTxEvents[0].returnValues[0], true);
 
             //     console.log(receipt.gasUsed);
-                
-            // })
-        })
-    });
 
+            // })
+        });
+    });
 }
 
 runTests('GenericMetaTransaction', deployGenericMetaTransaction);
-
 
 function signEIP712MetaTx(signingAccount, contractAddress, {from, to, gasToken, data, nonce, gasPrice, txGas, gasLimit, tokenGasPrice, relayer}) {
     const privateKeyAsBuffer = Buffer.from(signingAccount.privateKey.substr(2), 'hex');

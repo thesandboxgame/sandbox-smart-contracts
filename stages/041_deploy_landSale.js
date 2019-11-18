@@ -6,7 +6,7 @@ const {
 const {guard, multiGuards} = require('../lib');
 
 const MerkleTree = require('../lib/merkleTree');
-const {createDataArray} = require('../lib/merkleTreeHelper');
+const {createDataArray, saltLands} = require('../lib/merkleTreeHelper');
 const landsForSales = require('../data/land_presale_001.json');
 
 module.exports = async ({namedAccounts, initialRun, deployIfDifferent}) => {
@@ -33,19 +33,22 @@ module.exports = async ({namedAccounts, initialRun, deployIfDifferent}) => {
         throw new Error('no LAND contract deployed');
     }
 
-    const tree = new MerkleTree(createDataArray(landsForSales));
+    const secret = '0xd99c85d88ecb384d210f988028308ef7d7ffbbd33d64e7189c8e54ee2e9f6a5b';
+    const saltedLands = saltLands(landsForSales, secret);
+    const tree = new MerkleTree(createDataArray(saltedLands));
     const merkleRootHash = tree.getRoot().hash;
 
     const deployResult = await deployIfDifferent(['data'],
         'LandSale',
-        {from: deployer, gas: 1000000, associatedData: landsForSales},
+        {from: deployer, gas: 1000000, associatedData: saltedLands},
         'LandSale',
         landContract.options.address,
         sandContract.options.address,
         sandContract.options.address,
         landSaleAdmin,
         landSaleBeneficiary,
-        merkleRootHash
+        merkleRootHash,
+        Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60) // 30 days
     );
     const contract = getDeployedContract('LandSale');
     if (deployResult.newlyDeployed) {

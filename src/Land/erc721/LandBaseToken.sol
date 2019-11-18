@@ -58,6 +58,7 @@ contract LandBaseToken is ERC721BaseToken {
     /// @param id tokenId
     /// @return the x coordinates
     function x(uint256 id) external returns(uint256) {
+        require(_ownerOf(id) != address(0), "token does not exist");
         return id % GRID_SIZE;
     }
 
@@ -65,6 +66,7 @@ contract LandBaseToken is ERC721BaseToken {
     /// @param id tokenId
     /// @return the y coordinates
     function y(uint256 id) external returns(uint256) {
+        require(_ownerOf(id) != address(0), "token does not exist");
         return id / GRID_SIZE;
     }
 
@@ -76,6 +78,7 @@ contract LandBaseToken is ERC721BaseToken {
      * @param y The y coordinate of the new quad
      */
     function mintQuad(address to, uint16 size, uint16 x, uint16 y) external {
+        require(to != address(0), "to is zero address");
         require(
             isMinter(msg.sender),
             "Only a minter can mint"
@@ -177,7 +180,7 @@ contract LandBaseToken is ERC721BaseToken {
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
             uint256[] memory ids = new uint256[](size*size);
             for (uint256 i = 0; i < size*size; i++) {
-                if(i % 2 == 0) { // alow ids to follow a path
+                if((i/size) % 2 == 0) { // alow ids to follow a path
                     ids[i] = (x + (i%size)) + ((y + (i/size)) * GRID_SIZE);
                 } else {
                     ids[i] = ((x + size) - (1 + i%size)) + ((y + (i/size)) * GRID_SIZE);
@@ -207,7 +210,6 @@ contract LandBaseToken is ERC721BaseToken {
     ) external {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
-        require(from != to, "cannot use batchTransferQuad to transfer to yourself");
         require(sizes.length == xs.length && xs.length == ys.length, "invalid data");
         bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
         if (msg.sender != from && !metaTx) {
@@ -234,7 +236,7 @@ contract LandBaseToken is ERC721BaseToken {
                 uint16 x = xs[j];
                 uint16 y = ys[j];
                 for (uint256 i = 0; i < size*size; i++) {
-                    if(i % 2 == 0) { // alow ids to follow a path
+                    if((i/size) % 2 == 0) { // alow ids to follow a path
                         ids[counter] = (x + (i%size)) + ((y + (i/size)) * GRID_SIZE);
                     } else {
                         ids[counter] = ((x + size) - (1 + i%size)) + ((y + (i/size)) * GRID_SIZE);
@@ -260,7 +262,7 @@ contract LandBaseToken is ERC721BaseToken {
             _regroup(from, to, size, x, y);
         }
         for (uint256 i = 0; i < size*size; i++) {
-            if(i % 2 == 0) { // alow ids to follow a path
+            if((i/size) % 2 == 0) { // alow ids to follow a path
                 emit Transfer(from, to, (x + (i%size)) + ((y + (i/size)) * GRID_SIZE));
             } else {
                 emit Transfer(from, to, ((x + size) - (1 + i%size)) + ((y + (i/size)) * GRID_SIZE));
@@ -441,7 +443,7 @@ contract LandBaseToken is ERC721BaseToken {
         }
     }
 
-    function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled, uint96 counter) {
+    function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {
         require(id & LAYER == 0, "Invalid token id");
         uint256 x = id % GRID_SIZE;
         uint256 y = id / GRID_SIZE;
@@ -450,7 +452,6 @@ contract LandBaseToken is ERC721BaseToken {
         if (owner1x1 != 0) {
             owner = address(owner1x1);
             operatorEnabled = (owner1x1 / 2**255) == 1;
-            counter = uint96((owner1x1 / 2**160) % 2**95);
         } else {
             address owner3x3 = address(_owners[LAYER_3x3 + (x/3) * 3 + ((y/3) * 3) * GRID_SIZE]);
             if (owner3x3 != address(0)) {
