@@ -33,6 +33,30 @@ module.exports = async ({namedAccounts, initialRun, deployIfDifferent}) => {
         throw new Error('no LAND contract deployed');
     }
 
+    let daiMedianizer = getDeployedContract('DAIMedianizer');
+    if (!daiMedianizer) {
+        log('setting up a fake DAI medianizer');
+        const daiMedianizerDeployResult = await deploy(
+            'DAIMedianizer',
+            {from: deployer, gas: 6721975},
+            'FakeMedianizer',
+        );
+        daiMedianizer = daiMedianizerDeployResult.contract;
+    }
+
+    let dai = getDeployedContract('DAI');
+    if (!dai) {
+        log('setting up a fake DAI');
+        const daiDeployResult = await deploy(
+            'DAI', {
+                from: deployer,
+                gas: 6721975,
+            },
+            'FakeDai',
+        );
+        dai = daiDeployResult.contract;
+    }
+
     const secret = '0xd99c85d88ecb384d210f988028308ef7d7ffbbd33d64e7189c8e54ee2e9f6a5b';
     const saltedLands = saltLands(landsForSales, secret);
     const tree = new MerkleTree(createDataArray(saltedLands));
@@ -48,7 +72,9 @@ module.exports = async ({namedAccounts, initialRun, deployIfDifferent}) => {
         landSaleAdmin,
         landSaleBeneficiary,
         merkleRootHash,
-        Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60) // 30 days
+        Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // 30 days
+        daiMedianizer.options.address,
+        dai.options.address,
     );
     const contract = getDeployedContract('LandSale');
     if (deployResult.newlyDeployed) {
