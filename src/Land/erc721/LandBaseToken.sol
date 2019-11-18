@@ -58,6 +58,7 @@ contract LandBaseToken is ERC721BaseToken {
     /// @param id tokenId
     /// @return the x coordinates
     function x(uint256 id) external returns(uint256) {
+        require(_ownerOf(id) != address(0), "token does not exist");
         return id % GRID_SIZE;
     }
 
@@ -65,6 +66,7 @@ contract LandBaseToken is ERC721BaseToken {
     /// @param id tokenId
     /// @return the y coordinates
     function y(uint256 id) external returns(uint256) {
+        require(_ownerOf(id) != address(0), "token does not exist");
         return id / GRID_SIZE;
     }
 
@@ -76,6 +78,7 @@ contract LandBaseToken is ERC721BaseToken {
      * @param y The y coordinate of the new quad
      */
     function mintQuad(address to, uint16 size, uint16 x, uint16 y) external {
+        require(to != address(0), "to is zero address");
         require(
             isMinter(msg.sender),
             "Only a minter can mint"
@@ -177,7 +180,7 @@ contract LandBaseToken is ERC721BaseToken {
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
             uint256[] memory ids = new uint256[](size*size);
             for (uint256 i = 0; i < size*size; i++) {
-                if(i % 2 == 0) { // alow ids to follow a path
+                if((i/size) % 2 == 0) { // alow ids to follow a path
                     ids[i] = (x + (i%size)) + ((y + (i/size)) * GRID_SIZE);
                 } else {
                     ids[i] = ((x + size) - (1 + i%size)) + ((y + (i/size)) * GRID_SIZE);
@@ -233,7 +236,7 @@ contract LandBaseToken is ERC721BaseToken {
                 uint16 x = xs[j];
                 uint16 y = ys[j];
                 for (uint256 i = 0; i < size*size; i++) {
-                    if(i % 2 == 0) { // alow ids to follow a path
+                    if((i/size) % 2 == 0) { // alow ids to follow a path
                         ids[counter] = (x + (i%size)) + ((y + (i/size)) * GRID_SIZE);
                     } else {
                         ids[counter] = ((x + size) - (1 + i%size)) + ((y + (i/size)) * GRID_SIZE);

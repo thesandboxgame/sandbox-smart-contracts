@@ -42,9 +42,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
      * @param owner The address to look for
      * @return The number of Land token owned by the address
      */
-    function balanceOf(address owner) external view returns (
-        uint256 _balance
-    ) {
+    function balanceOf(address owner) external view returns (uint256) {
         require(owner != address(0), "owner is zero address");
         return _numNFTPerAddress[owner];
     }
@@ -70,6 +68,16 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         require(owner != address(0), "token does not exist");
     }
 
+    function _approveFor(address owner, address operator, uint256 id) internal {
+        if(operator == address(0)) {
+            _owners[id] = uint256(owner); // no need to resset the operator, it will be overriden next time
+        } else {
+            _owners[id] = uint256(owner) + 2**255;
+            _operators[id] = operator;
+        }
+        emit Approval(owner, operator, id);
+    }
+
     /**
      * @notice Approve an operator to spend tokens on the sender behalf
      * @param sender The address giving the approval
@@ -91,14 +99,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
             "not authorized to approve"
         );
         require(owner == sender, "owner != sender");
-
-        if(operator == address(0)) {
-            _owners[id] = uint256(owner); // no need to resset the operator, it will be overriden next time
-        } else {
-            _owners[id] = uint256(owner) + 2**255;
-            _operators[id] = operator;
-        }
-        emit Approval(sender, operator, id);
+        _approveFor(owner, operator, id);
     }
 
     /**
@@ -115,13 +116,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
             _operatorsForAll[owner][msg.sender],
             "not authorized to approve"
         );
-        if(operator == address(0)) {
-            _owners[id] = uint256(owner); // no need to resset the operator, it will be overriden next time
-        } else {
-            _owners[id] = uint256(owner) + 2**255;
-            _operators[id] = operator;
-        }
-        emit Approval(msg.sender, operator, id);
+        _approveFor(owner, operator, id);
     }
 
     /**
@@ -243,7 +238,6 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         _batchTransferFrom(from, to, ids, data, false);
     }
 
-    mapping (address => uint256) selfTransferCounters;
     function _batchTransferFrom(address from, address to, uint256[] memory ids, bytes memory data, bool safe) internal {
         bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
         bool authorized = msg.sender == from ||
