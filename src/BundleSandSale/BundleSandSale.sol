@@ -229,7 +229,7 @@ contract BundleSandSale is Admin {
 
         _setupBundle(from, sandAmountPerPack, numPacks, ids, amounts, priceUSDPerPack);
         return ERC1155_BATCH_RECEIVED;
-    } 
+    }
 
     function _setupBundle(
         address from,
