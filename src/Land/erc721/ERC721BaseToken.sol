@@ -352,8 +352,8 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         return _operatorsForAll[owner][operator] || _superOperators[operator];
     }
 
-    function _burn(address from, uint256 id) public {
-        require(from == _ownerOf(id), "not owner");
+    function _burn(address from, address owner, uint256 id) public {
+        require(from == owner, "not owner");
         _owners[id] = 2**160; // cannot mint it again
         _numNFTPerAddress[from]--;
         emit Transfer(from, address(0), id);
@@ -362,22 +362,24 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
     /// @notice Burns token `id`.
     /// @param id token which will be burnt.
     function burn(uint256 id) external {
-        _burn(msg.sender, id);
+        _burn(msg.sender, _ownerOf(id), id);
     }
 
     /// @notice Burn token`id` from `from`.
     /// @param from address whose token is to be burnt.
     /// @param id token which will be burnt.
     function burnFrom(address from, uint256 id) external {
-        require(from != address(0), "from is zero address");
+        require(from != address(0), "Invalid sender address");
+        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(
             msg.sender == from ||
             _metaTransactionContracts[msg.sender] ||
+            (operatorEnabled && _operators[id] == from) ||
             _superOperators[msg.sender] ||
             _operatorsForAll[from][msg.sender],
-            "not authorized to burn"
+            message
         );
-        _burn(from, id);
+        _burn(from, owner, id);
     }
 
     function _checkOnERC721Received(address operator, address from, address to, uint256 tokenId, bytes memory _data)

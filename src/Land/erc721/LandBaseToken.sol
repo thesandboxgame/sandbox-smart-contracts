@@ -262,7 +262,7 @@ contract LandBaseToken is ERC721BaseToken {
             _regroup(from, to, size, x, y);
         }
         for (uint256 i = 0; i < size*size; i++) {
-            if(i % 2 == 0) { // alow ids to follow a path
+            if((i/size) % 2 == 0) { // alow ids to follow a path
                 emit Transfer(from, to, (x + (i%size)) + ((y + (i/size)) * GRID_SIZE));
             } else {
                 emit Transfer(from, to, ((x + size) - (1 + i%size)) + ((y + (i/size)) * GRID_SIZE));

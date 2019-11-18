@@ -10,6 +10,9 @@ import "../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
  * @notice This contract mananges the sale of our lands
  */
 contract LandSale is MetaTransactionReceiver {
+
+    uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
+
     Land internal _land;
     ERC20 internal _erc20;
     address payable internal _wallet;
@@ -86,7 +89,7 @@ contract LandSale is MetaTransactionReceiver {
         );
 
         _land.mintQuad(to, size, x, y);
-        emit LandQuadPurchased(buyer, to, x + (y * 408), size, price); // 408 is the size of the Land
+        emit LandQuadPurchased(buyer, to, x + (y * GRID_SIZE), size, price);
     }
 
     /**
