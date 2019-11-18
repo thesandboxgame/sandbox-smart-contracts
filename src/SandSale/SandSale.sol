@@ -111,7 +111,7 @@ contract SandSale {
      * @return The amount of SAND
      */
     function getSandAmountWithDai(uint256 daiAmount) public view returns (uint256) {
-        uint256 sandAmount = daiAmount.div(sandPriceInUsd);
+        uint256 sandAmount = daiAmount.mul(1000000000000000000).div(sandPriceInUsd);
         return sandAmount;
     }
 

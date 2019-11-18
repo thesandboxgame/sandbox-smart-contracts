@@ -147,23 +147,13 @@ contract BundleSandSale is Admin {
     }
 
     /**
-     * @notice Returns the amount of USD for a specific amount of ETH
-     * @param ethAmount An amount of ETH
-     * @return The amount of USD
-     */
-    function getUSDAmountWithEther(uint256 ethAmount) public view returns (uint256) {
-        uint256 ethUsdPair = getEthUsdPair();
-        return ethAmount.mul(ethUsdPair);
-    }
-
-    /**
      * @notice Returns the amount of ETH for a specific amount of USD
      * @param usdAmount An amount of USD
      * @return The amount of ETH
      */
     function getEtherAmountWithUSD(uint256 usdAmount) public view returns (uint256) {
         uint256 ethUsdPair = getEthUsdPair();
-        return usdAmount.div(ethUsdPair);
+        return usdAmount.mul(1000000000000000000).div(ethUsdPair);
     }
 
     /**
