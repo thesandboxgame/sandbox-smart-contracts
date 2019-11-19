@@ -57,4 +57,4 @@ module.exports = async ({namedAccounts, initialRun, deployIfDifferent}) => {
         log('reusing LandSale at ' + contract.options.address);
     }
 };
-module.exports.skip = multiGuards([guard(['4'], 'LandSale'), guard(['1'])]);
+module.exports.skip = guard(['1', '4'], 'LandSale');

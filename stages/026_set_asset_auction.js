@@ -45,4 +45,3 @@ module.exports = async ({namedAccounts, initialRun}) => {
         await txOnlyFrom(currentAssetAdmin, {from: deployer, gas: 100000}, asset, 'setSuperOperator', assetAuction.options.address, true);
     }
 };
-module.exports.skip = guard(['1', '4']); // TODO
