@@ -32,7 +32,7 @@ module.exports = {
         deployer: {
             default: 1,
             1: '0x18dd4e0eb8699eA4FeE238dE41ECfb95e32272f8',
-            4: '0x18dd4e0eb8699eA4FeE238dE41ECfb95e32272f8', // TODO set it to proper address, this is just a test for it to fails
+            4: '0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20',
         }, // deploy contracts and make sure they are set up correctly
         sandAdmin: { // can add super operators and change admin
             default: 2,
