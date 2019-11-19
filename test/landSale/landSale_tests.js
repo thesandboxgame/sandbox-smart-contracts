@@ -107,8 +107,8 @@ function runLandSaleTests(title, contactStore) {
             // console.log({lands});
             landHashArray = createDataArray(lands);
             tree = new MerkleTree(landHashArray);
-            await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[0], '1000000000000000000000');
-            await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[1], '1000000000000000000000');
+            await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[0], '1000000000000000000000000');
+            await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[1], '1000000000000000000000000');
         });
 
         t.test('can buy Land', async (t) => {
@@ -118,7 +118,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 zeroAddress,
                 400, 106, 1,
-                4047,
+                '2000000000000000000000',
                 lands[0].salt,
                 proof
             );
@@ -131,8 +131,8 @@ function runLandSaleTests(title, contactStore) {
                 others[2],
                 others[2],
                 zeroAddress,
-                120, 144, 12,
-                2773,
+                99, 99, 3,
+                '17100000000000000000000',
                 lands[1].salt,
                 proof
             ));
@@ -145,7 +145,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 others[0],
                 400, 106, 1,
-                4047,
+                '2000000000000000000000',
                 lands[0].salt,
                 proof
             ));
@@ -166,7 +166,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 others[0],
                 400, 106, 1,
-                4047,
+                '4047',
                 '0x1111111111111111111111111111111111111111111111111111111111111111',
                 proof
             ));
@@ -187,7 +187,7 @@ function runLandSaleTests(title, contactStore) {
                 others[1],
                 others[1],
                 400, 106, 1,
-                4047,
+                '4047',
                 '0x1111111111111111111111111111111111111111111111111111111111111111',
                 proof
             );
@@ -210,7 +210,7 @@ function runLandSaleTests(title, contactStore) {
                 others[2],
                 others[1],
                 400, 106, 1,
-                4047,
+                '4047',
                 '0x1111111111111111111111111111111111111111111111111111111111111111',
                 proof
             );
@@ -226,7 +226,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 zeroAddress,
                 400, 106, 1,
-                4047,
+                '2000000000000000000000',
                 lands[0].salt,
                 proof
             ));
@@ -239,7 +239,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 zeroAddress,
                 400, 106, 1,
-                4047,
+                '2000000000000000000000',
                 lands[0].salt,
                 proof
             );
@@ -248,7 +248,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 zeroAddress,
                 400, 106, 1,
-                4047,
+                '2000000000000000000000',
                 lands[0].salt,
                 proof
             ));
@@ -259,7 +259,7 @@ function runLandSaleTests(title, contactStore) {
                 x: 400,
                 y: 106,
                 size: 3,
-                price: '4047',
+                price: '2000000000000000000000',
                 salt: lands[0].salt
             })));
         });
@@ -275,7 +275,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 zeroAddress,
                 400, 106, 1,
-                4047,
+                '2000000000000000000000',
                 lands[0].salt,
                 proof
             ));
@@ -288,7 +288,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 zeroAddress,
                 400, 106, 1,
-                4047,
+                '2000000000000000000000',
                 lands[0].salt,
                 proof
             ));
@@ -300,12 +300,12 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 others[0],
                 zeroAddress,
-                288, 144, 12,
-                '1358',
+                120, 144, 12,
+                '244800000000000000000000',
                 lands[2].salt,
                 proof
             );
-            for (let x = 288; x < 288 + 12; x++) {
+            for (let x = 120; x < 120 + 12; x++) {
                 for (let y = 144; y < 144 + 12; y++) {
                     const owner = await call(contracts.Land, 'ownerOf', null, x + (y * 408));
                     const balance = await call(contracts.Land, 'balanceOf', null, others[0]);
@@ -315,7 +315,7 @@ function runLandSaleTests(title, contactStore) {
             }
         });
 
-        t.test('can buy all Lands specified in json', async (t) => {
+        t.test('can buy all Lands specified in json', async (t) => { // TODO reserved 
             for (const land of lands) {
                 const landHash = calculateLandHash(land);
                 const proof = tree.getProof(landHash);
