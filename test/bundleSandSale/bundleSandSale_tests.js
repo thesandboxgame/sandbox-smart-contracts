@@ -407,6 +407,14 @@ function runBundleSandSaleTests(title, contractStore) {
         t.test('Should withdraw the sale from the contract', async () => {
 
         });
+
+        t.test('non-admin should not be able towithdraw the sale from the contract', async () => {
+
+        });
+
+        t.test('Should not be able to setup a bundle without non-multiple asset supply (need to be divisible by the number of packs)', async () => {
+
+        });
         */
     });
 }
