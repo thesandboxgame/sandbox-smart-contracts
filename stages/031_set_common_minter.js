@@ -45,4 +45,3 @@ module.exports = async ({namedAccounts, initialRun}) => {
         await txOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000}, sand, 'setSuperOperator', bouncer.options.address, true);
     }
 };
-module.exports.skip = guard(['1', '4']); // TODO

@@ -32,8 +32,8 @@ const alice = toChecksumAddress(accounts[1]);
 const bob = toChecksumAddress(accounts[2]);
 const craig = toChecksumAddress(accounts[3]);
 
-const fakeMedianizerPair = new BN('171415000000000000000');
-const sandUsdPrice = new BN('7000000000000000');
+const fakeMedianizerPair = new BN('0000000000000000000000000000000000000000000000094adc6a4ded958000', 16);
+const sandUsdPrice = new BN('14400000000000000');
 
 let beforeBalance;
 let beforeDAIBalance;
@@ -169,9 +169,12 @@ t.test('Normal behavior', async (t) => {
             from: bob,
             gas,
         });
-
         const balance = await getERC20Balance(sand, bob);
-        const expectedAmount =  new BN(daiAmount).div(new BN(sandUsdPrice));
+        const expectedAmount =  new BN(daiAmount).mul(new BN('1000000000000000000')).div(new BN(sandUsdPrice));
+        // console.log({
+        //     daiAmount: daiAmount.toString(10),
+        //     expectedAmount: expectedAmount.toString(10),
+        // });
         assert.equal(balance.toString(), expectedAmount.toString(), 'bob SAND balance is wrong');
     });
 

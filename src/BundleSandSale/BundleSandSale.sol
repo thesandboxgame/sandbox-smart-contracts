@@ -193,7 +193,7 @@ contract BundleSandSale is Admin {
         uint256[] memory ids = new uint256[](1);
         ids[0] = id;
         _setupBundle(from, sandAmountPerPack, numPacks, ids, amounts, priceUSDPerPack);
-        return ERC1155_BATCH_RECEIVED;
+        return ERC1155_RECEIVED;
     }
 
     function onERC1155BatchReceived(

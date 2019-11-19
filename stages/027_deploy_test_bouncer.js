@@ -35,5 +35,5 @@ module.exports = async ({namedAccounts, initialRun}) => {
         log('reusing TestBouncer at ' + deployResult.contract.options.address);
     }
 };
-module.exports.skip = multiGuards([guard(['4'], 'TestBouncer'), guard(['1'])]);
+module.exports.skip = guard(['4', '1']);
 
