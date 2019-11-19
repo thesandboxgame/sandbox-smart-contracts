@@ -6,16 +6,16 @@ const BN = require('bn.js');
 const {getDeployedContract} = require('../../lib');
 
 const {
-    accounts,
-} = rocketh;
-
-const {
+    deployer,
+    others,
     sandAdmin,
     sandSaleBeneficiary,
+    // sandBeneficiary,
 } = rocketh.namedAccounts;
 
+const daiHolder = deployer;
+
 const {
-    toChecksumAddress,
     toWei,
     fromWei,
     gas,
@@ -28,9 +28,9 @@ const {
     getERC20Balance,
 } = require('../erc20');
 
-const alice = toChecksumAddress(accounts[1]);
-const bob = toChecksumAddress(accounts[2]);
-const craig = toChecksumAddress(accounts[3]);
+const alice = others[1];
+const bob = others[2];
+const craig = others[3];
 
 const fakeMedianizerPair = new BN('0000000000000000000000000000000000000000000000094adc6a4ded958000', 16);
 const sandUsdPrice = new BN('14400000000000000');
@@ -144,7 +144,7 @@ t.test('Normal behavior', async (t) => {
         assert.equal(fromWei(balance.toString()), toWei('0'), 'bob DAI balance is wrong');
 
         await transfer(dai, bob, toWei('100'), {
-            from: sandAdmin,
+            from: daiHolder,
             gas,
         });
 

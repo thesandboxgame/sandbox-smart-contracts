@@ -8,7 +8,10 @@ const {
     gas,
 } = require('../utils');
 
-const {deployer} = rocketh.namedAccounts;
+const {
+    deployer,
+    landAdmin,
+} = rocketh.namedAccounts;
 
 async function deployLand() {
     await rocketh.runStages();
@@ -25,7 +28,7 @@ function ERC721Contract() {
 }
 ERC721Contract.prototype.resetContract = async function () {
     this.contract = await deployLand();
-    await tx(this.contract, 'setMinter', {from: deployer, gas}, this.minter, true);
+    await tx(this.contract, 'setMinter', {from: landAdmin, gas}, this.minter, true);
     return this.contract;
 };
 ERC721Contract.prototype.mintERC721 = async function (creator) {

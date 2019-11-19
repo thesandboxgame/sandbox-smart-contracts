@@ -147,7 +147,7 @@ function runMerkleTreeTest() {
             for (let i = 8; i < 37; i += 1) {
                 const lands = createDummyLands(i);
 
-                const data = createDataArray(lands);
+                const data = createDataArray(lands, 'secret');
                 const tree = new MerkleTree(data);
 
                 for (let i = 0; i < data.length; i += 1) {
