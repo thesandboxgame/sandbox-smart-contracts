@@ -3,7 +3,7 @@ const Web3 = require('web3');
 const {
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);
-const {guard, multiGuards} = require('../lib');
+const {guard} = require('../lib');
 
 const MerkleTree = require('../lib/merkleTree');
 const {createDataArray, saltLands} = require('../lib/merkleTreeHelper');
