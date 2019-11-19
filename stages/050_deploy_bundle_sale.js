@@ -5,7 +5,7 @@ const {
     deployIfDifferent,
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);
-const {guard, multiGuards} = require('../lib');
+const {guard} = require('../lib');
 
 module.exports = async ({namedAccounts, initialRun}) => {
     function log(...args) {
