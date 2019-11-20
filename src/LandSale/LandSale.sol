@@ -14,7 +14,7 @@ contract LandSale is MetaTransactionReceiver {
     uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
 
     Land internal _land;
-    ERC20 internal _erc20;
+    ERC20 internal _sand;
     address payable internal _wallet;
     uint256 internal _expiryTime;
     bytes32 internal _merkleRoot;
@@ -29,7 +29,7 @@ contract LandSale is MetaTransactionReceiver {
 
     constructor(
         address landAddress,
-        address erc20ContractAddress,
+        address sandContractAddress,
         address initialMetaTx,
         address admin,
         address payable initialWalletAddress,
@@ -37,7 +37,7 @@ contract LandSale is MetaTransactionReceiver {
         uint256 expiryTime
     ) public {
         _land = Land(landAddress);
-        _erc20 = ERC20(erc20ContractAddress);
+        _sand = ERC20(sandContractAddress);
         _setMetaTransactionProcessor(initialMetaTx, true);
         _admin = admin;
         _wallet = initialWalletAddress;
@@ -65,7 +65,7 @@ contract LandSale is MetaTransactionReceiver {
      * @param proof merkleProof for that particular Land
      * @return The address of the operator
      */
-    function buyLand(
+    function buyLandWithSand(
         address buyer,
         address to,
         address reserved,
@@ -88,12 +88,12 @@ contract LandSale is MetaTransactionReceiver {
         );
 
         require(
-            _erc20.transferFrom(
+            _sand.transferFrom(
                 buyer,
                 _wallet,
                 price
             ),
-            "erc20 transfer failed"
+            "sand transfer failed"
         );
 
         _land.mintQuad(to, size, x, y, "");
