@@ -59,7 +59,7 @@ contract EstateBaseToken is ERC721BaseToken {
             _superOperators[msg.sender],
             "not authorized");
         require(sender == _ownerOf(id), "only owner can destroy estate");
-        uint256 size = id / 2**32);
+        uint256 size = id / 2**32;
         uint256 coords = id % 2**32;
         uint256 x = coords % GRID_SIZE;
         uint256 y = coords / GRID_SIZE;
