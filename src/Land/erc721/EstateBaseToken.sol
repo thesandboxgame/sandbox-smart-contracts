@@ -43,7 +43,7 @@ contract EstateBaseToken is ERC721BaseToken {
         _land = land;
     }
 
-    function createFromQuad(address sender, address to, uint16 size, uint16 x, uint16 y) external {
+    function createFromQuad(address sender, address to, uint256 size, uint256 x, uint256 y) external {
         require(sender != address(0), "sender is zero address");
         _land.transferQuad(sender, address(this), size, x, y, ""); // this require approval
         uint256 id = size * 2**32 + x + y * GRID_SIZE;
@@ -59,10 +59,10 @@ contract EstateBaseToken is ERC721BaseToken {
             _superOperators[msg.sender],
             "not authorized");
         require(sender == _ownerOf(id), "only owner can destroy estate");
-        uint16 size = uint16(id / 2**32);
-        uint32 coords = uint32(id % 2**32);
-        uint16 x = uint16(coords % GRID_SIZE);
-        uint16 y = uint16(coords / GRID_SIZE);
+        uint256 size = id / 2**32;
+        uint256 coords = id % 2**32;
+        uint256 x = coords % GRID_SIZE;
+        uint256 y = coords / GRID_SIZE;
 
         _land.transferQuad(address(this), to, size, x, y, "");
         _owners[id] = 0;

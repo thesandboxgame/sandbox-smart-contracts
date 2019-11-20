@@ -5,7 +5,7 @@ const {
     getDeployedContract,
     call,
 } = require('rocketh-web3')(rocketh, Web3);
-const {guard} = require('../lib');
+// const {guard} = require('../lib');
 
 module.exports = async ({namedAccounts, initialRun}) => {
     function log(...args) {
@@ -45,4 +45,3 @@ module.exports = async ({namedAccounts, initialRun}) => {
         await txOnlyFrom(currentAssetAdmin, {from: deployer, gas: 100000}, asset, 'setSuperOperator', assetAuction.options.address, true);
     }
 };
-module.exports.skip = guard(['1', '4']); // TODO

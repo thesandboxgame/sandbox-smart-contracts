@@ -32,7 +32,7 @@ const availableSizes = [1, 3, 6, 12, 24];
 const gridSize = 408;
 
 async function mintQuad(contract, to, size, x, y, options) {
-    return contract.methods.mintQuad(to, size, x, y).send(options);
+    return contract.methods.mintQuad(to, size, x, y, emptyBytes).send(options);
 }
 
 function landId(x, y) {

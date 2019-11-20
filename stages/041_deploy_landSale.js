@@ -3,7 +3,7 @@ const Web3 = require('web3');
 const {
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);
-const {guard, multiGuards} = require('../lib');
+const {guard} = require('../lib');
 
 const MerkleTree = require('../lib/merkleTree');
 const {createDataArray, saltLands} = require('../lib/merkleTreeHelper');
@@ -57,4 +57,4 @@ module.exports = async ({namedAccounts, initialRun, deployIfDifferent}) => {
         log('reusing LandSale at ' + contract.options.address);
     }
 };
-module.exports.skip = multiGuards([guard(['4'], 'LandSale'), guard(['1'])]);
+module.exports.skip = guard(['1', '4'], 'LandSale');

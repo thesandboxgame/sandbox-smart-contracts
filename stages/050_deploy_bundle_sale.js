@@ -5,7 +5,7 @@ const {
     deployIfDifferent,
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);
-const {guard, multiGuards} = require('../lib');
+const {guard} = require('../lib');
 
 module.exports = async ({namedAccounts, initialRun}) => {
     function log(...args) {
@@ -71,4 +71,4 @@ module.exports = async ({namedAccounts, initialRun}) => {
         log('reusing BundleSandSale at ' + bundleSandSaleDeployResult.contract.options.address);
     }
 };
-module.exports.skip = multiGuards([guard(['4'], 'BundleSandSale'), guard(['1'])]);
+module.exports.skip = guard(['1', '4'], 'BundleSandSale');
