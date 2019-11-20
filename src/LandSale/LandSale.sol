@@ -23,7 +23,7 @@ contract LandSale is MetaTransactionReceiver {
         address indexed buyer,
         address indexed to,
         uint256 indexed topCornerId,
-        uint16 size,
+        uint256 size,
         uint256 price
     );
 
@@ -69,9 +69,9 @@ contract LandSale is MetaTransactionReceiver {
         address buyer,
         address to,
         address reserved,
-        uint16 x,
-        uint16 y,
-        uint16 size,
+        uint256 x,
+        uint256 y,
+        uint256 size,
         uint256 price,
         bytes32 salt,
         bytes32[] calldata proof
@@ -117,9 +117,9 @@ contract LandSale is MetaTransactionReceiver {
     }
 
     function _generateLandHash(
-        uint16 x,
-        uint16 y,
-        uint16 size,
+        uint256 x,
+        uint256 y,
+        uint256 size,
         uint256 price,
         address reserved,
         bytes32 salt
