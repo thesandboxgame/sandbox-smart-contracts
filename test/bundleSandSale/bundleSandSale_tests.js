@@ -27,8 +27,11 @@ const {
 const {
     bundleSandSaleBeneficiary,
     others,
+    deployer,
     sandBeneficiary,
 } = rocketh.namedAccounts;
+
+const daiHolder = deployer;
 
 const creator = others[1];
 const randomUser = others[2];
@@ -336,7 +339,7 @@ function runBundleSandSaleTests(title, contractStore) {
                 sandAmountPerPack,
             );
 
-            await tx(contracts.FakeDai, 'transfer', {from: sandBeneficiary, gas}, randomUser, priceUSDPerPack.toString());
+            await tx(contracts.FakeDai, 'transfer', {from: daiHolder, gas}, randomUser, priceUSDPerPack.toString());
             await tx(contracts.FakeDai, 'approve', {from: randomUser, gas}, contracts.BundleSandSale.options.address, priceUSDPerPack.toString());
 
             const previousDaiBalance = await getERC20Balance(contracts.FakeDai, bundleSandSaleBeneficiary);
@@ -365,7 +368,7 @@ function runBundleSandSaleTests(title, contractStore) {
 
             const price = new BN(priceUSDPerPack).mul(new BN(2));
 
-            await tx(contracts.FakeDai, 'transfer', {from: sandBeneficiary, gas}, randomUser, price.toString());
+            await tx(contracts.FakeDai, 'transfer', {from: daiHolder, gas}, randomUser, price.toString());
             await tx(contracts.FakeDai, 'approve', {from: randomUser, gas}, contracts.BundleSandSale.options.address, price.toString());
 
             const previousDaiBalance = await getERC20Balance(contracts.FakeDai, bundleSandSaleBeneficiary);

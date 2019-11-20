@@ -31,7 +31,7 @@ module.exports = async ({namedAccounts, initialRun, isDeploymentChainId}) => {
         {from: deployer, gas: 6000000},
         'Land',
         sandContract.options.address,
-        landAdmin,
+        deployer, // set_land_admin set it later to correct address
     );
 
     if (deployResult.newlyDeployed) {

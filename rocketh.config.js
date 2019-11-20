@@ -29,9 +29,13 @@ module.exports = {
         }
     },
     namedAccounts: {
-        deployer: 0, // deploy contracts and make sure they are set up correctly
+        deployer: {
+            default: 1,
+            1: '0x18dd4e0eb8699eA4FeE238dE41ECfb95e32272f8',
+            4: '0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20',
+        }, // deploy contracts and make sure they are set up correctly
         sandAdmin: { // can add super operators and change admin
-            default: 0,
+            default: 2,
             // 4: "0x5b4c9eae565c1ba9eb65365aa02ee9fb0a653ce5",
             1: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06', // multi sig wallet
             4: '0xcbc70EcCd52bF3910CDC1455E6D2Bd45725F573D' // test multi sig wallet
@@ -51,8 +55,9 @@ module.exports = {
         assetAuctionAdmin: 'sandAdmin',
         orbsBeneficiary: 'sandSaleBeneficiary',
         sandSaleBeneficiary: {
-            default: 0,
+            default: 3,
             1: '0x9695ed5020BB47880738Db356678fe8cBc8FF60b', // TODO use another wallet ?
+            4: '0xcbc70EcCd52bF3910CDC1455E6D2Bd45725F573D',
         },
         bundleSandSaleAdmin: 'sandAdmin',
         bundleSandSaleBeneficiary: 'sandSaleBeneficiary',
@@ -62,7 +67,7 @@ module.exports = {
 
         // testing
         others: {
-            default: 'from:3',
+            default: 'from:5',
             deployments: ''
         }
     },
