@@ -130,7 +130,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 zeroAddress,
                 400, 106, 1,
-                '2000000000000000000000',
+                lands[0].price,
                 lands[0].salt,
                 proof
             );
@@ -144,7 +144,7 @@ function runLandSaleTests(title, contactStore) {
                 others[2],
                 zeroAddress,
                 99, 99, 3,
-                '17100000000000000000000',
+                lands[1].price,
                 lands[1].salt,
                 proof
             ));
@@ -159,21 +159,21 @@ function runLandSaleTests(title, contactStore) {
                 others[2],
                 zeroAddress,
                 400, 106, 1,
-                4047,
+                lands[1].price,
                 lands[0].salt,
                 proof
             ));
         });
 
         t.test('can buy Land with just enough tokens', async (t) => {
-            await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[2], usdToSand(4047));
+            await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[2], usdToSand(lands[0].price));
             const proof = tree.getProof(calculateLandHash(lands[0]));
             await tx(contracts.LandSale, 'buyLandWithERC20', {from: others[2], gas},
                 others[2],
                 others[2],
                 zeroAddress,
                 400, 106, 1,
-                4047,
+                lands[0].price,
                 lands[0].salt,
                 proof
             );
@@ -186,7 +186,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 others[0],
                 400, 106, 1,
-                '2000000000000000000000',
+                lands[0].price,
                 lands[0].salt,
                 proof
             ));
@@ -267,7 +267,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 zeroAddress,
                 400, 106, 1,
-                '2000000000000000000000',
+                lands[0].price,
                 lands[0].salt,
                 proof
             ));
@@ -280,7 +280,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 zeroAddress,
                 400, 106, 1,
-                '2000000000000000000000',
+                lands[0].price,
                 lands[0].salt,
                 proof
             );
@@ -289,7 +289,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 zeroAddress,
                 400, 106, 1,
-                '2000000000000000000000',
+                lands[0].price,
                 lands[0].salt,
                 proof
             ));
@@ -300,7 +300,7 @@ function runLandSaleTests(title, contactStore) {
                 x: 400,
                 y: 106,
                 size: 3,
-                price: '2000000000000000000000',
+                price: lands[0].price,
                 salt: lands[0].salt
             })));
         });
@@ -316,7 +316,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 zeroAddress,
                 400, 106, 1,
-                '2000000000000000000000',
+                lands[0].price,
                 lands[0].salt,
                 proof
             ));
@@ -329,7 +329,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 zeroAddress,
                 400, 106, 1,
-                '2000000000000000000000',
+                lands[0].price,
                 lands[0].salt,
                 proof
             ));
@@ -342,7 +342,7 @@ function runLandSaleTests(title, contactStore) {
                 others[0],
                 zeroAddress,
                 120, 144, 12,
-                '244800000000000000000000',
+                lands[2].price,
                 lands[2].salt,
                 proof
             );

@@ -32,7 +32,7 @@ contract LandSale is MetaTransactionReceiver {
         address indexed buyer,
         address indexed to,
         uint256 indexed topCornerId,
-        uint16 size,
+        uint256 size,
         uint256 price,
         address token,
         uint256 amountPaid
@@ -110,9 +110,9 @@ contract LandSale is MetaTransactionReceiver {
     function _checkValidity(
         address buyer,
         address reserved,
-        uint16 x,
-        uint16 y,
-        uint16 size,
+        uint256 x,
+        uint256 y,
+        uint256 size,
         uint256 price,
         bytes32 salt,
         bytes32[] memory proof
@@ -129,7 +129,7 @@ contract LandSale is MetaTransactionReceiver {
         );
     }
 
-    function _mint(address buyer, address to, uint16 x, uint16 y, uint16 size, uint256 price, address token, uint256 tokenAmount) internal {
+    function _mint(address buyer, address to, uint256 x, uint256 y, uint256 size, uint256 price, address token, uint256 tokenAmount) internal {
          _land.mintQuad(to, size, x, y, "");
         emit LandQuadPurchased(buyer, to, x + (y * GRID_SIZE), size, price, token, tokenAmount);
     }
@@ -187,9 +187,9 @@ contract LandSale is MetaTransactionReceiver {
         address buyer,
         address to,
         address reserved,
-        uint16 x,
-        uint16 y,
-        uint16 size,
+        uint256 x,
+        uint256 y,
+        uint256 size,
         uint256 price,
         bytes32 salt,
         bytes32[] calldata proof
@@ -224,9 +224,9 @@ contract LandSale is MetaTransactionReceiver {
         address buyer,
         address to,
         address reserved,
-        uint16 x,
-        uint16 y,
-        uint16 size,
+        uint256 x,
+        uint256 y,
+        uint256 size,
         uint256 price,
         bytes32 salt,
         bytes32[] calldata proof
