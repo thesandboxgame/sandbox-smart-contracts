@@ -17,14 +17,14 @@ contract LandSale is MetaTransactionReceiver {
     uint256 internal constant tokenPriceInUsd = 14400000000000000;
 
     Land internal _land;
-    ERC20 internal _erc20;
+    ERC20 internal _sand;
     Medianizer private _medianizer;
     ERC20 private _dai;
     address payable internal _wallet;
     uint256 internal _expiryTime;
     bytes32 internal _merkleRoot;
 
-    bool _erc20Enabled = true;
+    bool _sandEnabled = true;
     bool _etherEnabled = false;
     bool _daiEnabled = false;
 
@@ -40,7 +40,7 @@ contract LandSale is MetaTransactionReceiver {
 
     constructor(
         address landAddress,
-        address erc20ContractAddress,
+        address sandContractAddress,
         address initialMetaTx,
         address admin,
         address payable initialWalletAddress,
@@ -50,7 +50,7 @@ contract LandSale is MetaTransactionReceiver {
         address daiTokenContractAddress
     ) public {
         _land = Land(landAddress);
-        _erc20 = ERC20(erc20ContractAddress);
+        _sand = ERC20(sandContractAddress);
         _setMetaTransactionProcessor(initialMetaTx, true);
         _admin = admin;
         _wallet = initialWalletAddress;
@@ -94,17 +94,17 @@ contract LandSale is MetaTransactionReceiver {
         return _etherEnabled;
     }
 
-    /// @notice enable/disable the specific ERC20 payment for Lands
+    /// @notice enable/disable the specific SAND payment for Lands
     /// @param enabled whether to enable or disable
-    function setERC20Enabled(bool enabled) external {
-        require(msg.sender == _admin, "only admin can enable/disable ERC20");
-        _erc20Enabled = enabled;
+    function setSANDEnabled(bool enabled) external {
+        require(msg.sender == _admin, "only admin can enable/disable SAND");
+        _sandEnabled = enabled;
     }
 
-    /// @notice return whether the specific ERC20 payments are enabled
-    /// @return whether the specific ERC20 payments are enabled
-    function isERC20Enabled() external returns (bool) {
-        return _erc20Enabled;
+    /// @notice return whether the specific SAND payments are enabled
+    /// @return whether the specific SAND payments are enabled
+    function isSANDEnabled() external returns (bool) {
+        return _sandEnabled;
     }
 
     function _checkValidity(
@@ -135,7 +135,7 @@ contract LandSale is MetaTransactionReceiver {
     }
 
     /**
-     * @notice buy Land with ERC20 using the merkle proof associated with it
+     * @notice buy Land with SAND using the merkle proof associated with it
      * @param buyer address that perform the payment
      * @param to address that will own the purchased Land
      * @param reserved the reserved address (if any)
@@ -146,7 +146,7 @@ contract LandSale is MetaTransactionReceiver {
      * @param proof merkleProof for that particular Land
      * @return The address of the operator
      */
-    function buyLandWithERC20(
+    function buyLandWithSand(
         address buyer,
         address to,
         address reserved,
@@ -157,18 +157,18 @@ contract LandSale is MetaTransactionReceiver {
         bytes32 salt,
         bytes32[] calldata proof
     ) external {
-        require(_erc20Enabled, "erc20 payments not enabled");
+        require(_sandEnabled, "sand payments not enabled");
         _checkValidity(buyer, reserved, x, y, size, price, salt, proof);
         uint256 tokenAmount = price.mul(1000000000000000000).div(tokenPriceInUsd);
         require(
-            _erc20.transferFrom(
+            _sand.transferFrom(
                 buyer,
                 _wallet,
                 tokenAmount
             ),
-            "erc20 token transfer failed"
+            "sand token transfer failed"
         );
-        _mint(buyer, to, x, y, size, price, address(_erc20), tokenAmount);
+        _mint(buyer, to, x, y, size, price, address(_sand), tokenAmount);
     }
 
     /**
