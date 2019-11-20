@@ -96,7 +96,7 @@ contract LandSale is MetaTransactionReceiver {
             "erc20 transfer failed"
         );
 
-        _land.mintQuad(to, size, x, y);
+        _land.mintQuad(to, size, x, y, "");
         emit LandQuadPurchased(buyer, to, x + (y * GRID_SIZE), size, price);
     }
 
