@@ -95,7 +95,7 @@ async function setupTestLandSale(contracts) {
     const tree = new MerkleTree(landHashArray);
     const contract = await deployContract(
         deployer,
-        'LandSale',
+        'LandSaleWithETHAndDAI',
         contracts.Land.options.address,
         contracts.Sand.options.address,
         contracts.Sand.options.address,

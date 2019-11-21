@@ -80,6 +80,7 @@ const testLands = [
 let saleStart;
 let saleDuration;
 let saleEnd;
+let contractName = 'LandSale';
 
 async function setupTestLandSale(contracts) {
     saleStart = getChainCurrentTime();
@@ -91,7 +92,7 @@ async function setupTestLandSale(contracts) {
     const tree = new MerkleTree(landHashArray);
     const contract = await deployContract(
         deployer,
-        'LandSale',
+        contractName,
         contracts.Land.options.address,
         contracts.Sand.options.address,
         contracts.Sand.options.address,
@@ -110,6 +111,7 @@ async function setupTestLandSale(contracts) {
 }
 
 function runLandSaleTests(title, contactStore) {
+    contractName = contactStore.contractName || 'LandSale';
     tap.test(title + ' tests', async (t) => {
         let contracts;
         let tree;
@@ -146,38 +148,40 @@ function runLandSaleTests(title, contactStore) {
                 assert.equal(balance, 1, 'Balance is wrong');
             });
 
-            t.test('cannot buy Land with SAND if not enabled', async () => {
-                await tx(contracts.LandSale, 'setSANDEnabled', {from: landSaleAdmin, gas}, false);
+            if (contractName === 'LandSaleWithETHAndDAI') {
+                t.test('cannot buy Land with SAND if not enabled', async () => {
+                    await tx(contracts.LandSale, 'setSANDEnabled', {from: landSaleAdmin, gas}, false);
 
-                const proof = tree.getProof(calculateLandHash(lands[0]));
+                    const proof = tree.getProof(calculateLandHash(lands[0]));
 
-                await expectRevert(
-                    tx(
-                        contracts.LandSale, 'buyLandWithSand', {from: others[0], gas},
-                        others[0],
-                        others[0],
-                        zeroAddress,
-                        400, 106, 1,
-                        lands[0].price,
-                        lands[0].salt,
-                        proof
-                    ),
-                    'sand payments not enabled'
-                );
-            });
+                    await expectRevert(
+                        tx(
+                            contracts.LandSale, 'buyLandWithSand', {from: others[0], gas},
+                            others[0],
+                            others[0],
+                            zeroAddress,
+                            400, 106, 1,
+                            lands[0].price,
+                            lands[0].salt,
+                            proof
+                        ),
+                        'sand payments not enabled'
+                    );
+                });
 
-            t.test('can disable SAND payment', async () => {
-                await tx(contracts.LandSale, 'setSANDEnabled', {from: landSaleAdmin, gas}, false);
-                const isSANDEnabled = await call(contracts.LandSale, 'isSANDEnabled', {from: landSaleAdmin});
-                assert.equal(isSANDEnabled, false, 'SAND should not be enabled');
-            });
+                t.test('can disable SAND payment', async () => {
+                    await tx(contracts.LandSale, 'setSANDEnabled', {from: landSaleAdmin, gas}, false);
+                    const isSANDEnabled = await call(contracts.LandSale, 'isSANDEnabled', {from: landSaleAdmin});
+                    assert.equal(isSANDEnabled, false, 'SAND should not be enabled');
+                });
 
-            t.test('cannot disable SAND payment if not admin', async () => {
-                await expectRevert(
-                    tx(contracts.LandSale, 'setSANDEnabled', {from: others[0], gas}, false),
-                    'only admin can enable/disable SAND'
-                );
-            });
+                t.test('cannot disable SAND payment if not admin', async () => {
+                    await expectRevert(
+                        tx(contracts.LandSale, 'setSANDEnabled', {from: others[0], gas}, false),
+                        'only admin can enable/disable SAND'
+                    );
+                });
+            }
 
             t.test('cannot buy Land without SAND', async () => {
                 const proof = tree.getProof(calculateLandHash(lands[1]));

@@ -15,6 +15,7 @@ const {
 } = require('./landSale_dai_tests');
 
 function ContractStore() {
+    this.contractName = 'LandSaleWithETHAndDAI';
 }
 ContractStore.prototype.resetContracts = async function () {
     await rocketh.runStages();
@@ -27,3 +28,5 @@ ContractStore.prototype.resetContracts = async function () {
 };
 
 runLandSaleTests('LandPreSale_1', new ContractStore());
+runLandSaleEthTests('LandPreSale_1', new ContractStore());
+runLandSaleDaiTests('LandPreSale_1', new ContractStore());
