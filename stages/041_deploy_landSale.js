@@ -48,7 +48,7 @@ module.exports = async ({namedAccounts, initialRun, deployIfDifferent}) => {
         landSaleAdmin,
         landSaleBeneficiary,
         merkleRootHash,
-        Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60) // 30 days
+        1576753200 // This is Thursday, 19 December 2019 11:00:00 GMT+00:00 // Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // 30 days
     );
     const contract = getDeployedContract('LandSale');
     if (deployResult.newlyDeployed) {
