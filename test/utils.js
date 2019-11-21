@@ -11,6 +11,8 @@ web3.setProvider(rocketh.ethereum);
 const gas = 4000000;
 const deployGas = 6721975; // 6000000;
 
+let timeIncrease = 0;
+
 function getEventsFromReceipt(contract, sig, receipt) {
     return contract.getPastEvents(sig, {
         fromBlock: receipt.blockNumber,
@@ -111,6 +113,10 @@ module.exports = {
         });
     },
 
+    getChainCurrentTime: () => {
+        return Math.floor(Date.now() / 1000) + timeIncrease;
+    },
+
     increaseTime: (timeInSeconds) => {
         return new Promise((resolve, reject) => {
             web3.currentProvider.sendAsync({
@@ -122,6 +128,7 @@ module.exports = {
                 if (err) {
                     reject(err);
                 } else {
+                    timeIncrease += timeInSeconds;
                     resolve();
                 }
             });
