@@ -19,9 +19,4 @@ ContractStore.prototype.resetContracts = async function () {
     };
 };
 
-async function deployBundleSandSale() {
-    await rocketh.runStages();
-    return getDeployedContract('BundleSandSale');
-}
-
 runBundleSandSaleTests('BundleSandSale', new ContractStore());

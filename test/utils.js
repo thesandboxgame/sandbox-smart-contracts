@@ -180,14 +180,13 @@ module.exports = {
 
         assert.fail('Expected revert not received');
     },
-    // Took this from https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/test/helpers/expectThrow.js
-    // Doesn't seem to work any more :(
-    // Changing to use the invalid opcode error instead works
     expectThrow: async (promise) => {
         let receipt;
         try {
             receipt = await promise;
         } catch (error) {
+            console.log(error.message);
+
             // TODO: Check jump destination to destinguish between a throw
             //       and an actual invalid jump.
             const invalidOpcode = error.message.search('invalid opcode') >= 0;
