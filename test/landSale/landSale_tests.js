@@ -90,19 +90,34 @@ async function setupTestLandSale(contracts) {
     const dai = getDeployedContract('DAI');
     const landHashArray = createDataArray(testLands);
     const tree = new MerkleTree(landHashArray);
-    const contract = await deployContract(
-        deployer,
-        contractName,
-        contracts.Land.options.address,
-        contracts.Sand.options.address,
-        contracts.Sand.options.address,
-        landSaleAdmin,
-        landSaleBeneficiary,
-        tree.getRoot().hash,
-        saleEnd,
-        daiMedianizer.options.address,
-        dai.options.address,
-    );
+    let contract;
+    if (contractName === 'LandSaleWithETHAndDAI') {
+        contract = await deployContract(
+            deployer,
+            contractName,
+            contracts.Land.options.address,
+            contracts.Sand.options.address,
+            contracts.Sand.options.address,
+            landSaleAdmin,
+            landSaleBeneficiary,
+            tree.getRoot().hash,
+            saleEnd,
+            daiMedianizer.options.address,
+            dai.options.address,
+        );
+    } else {
+        contract = await deployContract(
+            deployer,
+            contractName,
+            contracts.Land.options.address,
+            contracts.Sand.options.address,
+            contracts.Sand.options.address,
+            landSaleAdmin,
+            landSaleBeneficiary,
+            tree.getRoot().hash,
+            saleEnd
+        );
+    }
 
     await tx(contracts.Land, 'setMinter', {from: landAdmin, gas: 1000000}, contract.options.address, true);
     await tx(contracts.Sand, 'setSuperOperator', {from: sandAdmin, gas: 1000000}, contract.options.address, true);
