@@ -77,7 +77,7 @@ contract LandSale is MetaTransactionReceiver {
 
     /// @notice return whether DAI payments are enabled
     /// @return whether DAI payments are enabled
-    function isDAIEnabled() external returns (bool) {
+    function isDAIEnabled() external view returns (bool) {
         return _daiEnabled;
     }
 
@@ -90,7 +90,7 @@ contract LandSale is MetaTransactionReceiver {
 
     /// @notice return whether ETH payments are enabled
     /// @return whether ETH payments are enabled
-    function isETHEnabled() external returns (bool) {
+    function isETHEnabled() external view returns (bool) {
         return _etherEnabled;
     }
 
@@ -103,7 +103,7 @@ contract LandSale is MetaTransactionReceiver {
 
     /// @notice return whether the specific SAND payments are enabled
     /// @return whether the specific SAND payments are enabled
-    function isSANDEnabled() external returns (bool) {
+    function isSANDEnabled() external view returns (bool) {
         return _sandEnabled;
     }
 
@@ -116,7 +116,7 @@ contract LandSale is MetaTransactionReceiver {
         uint256 price,
         bytes32 salt,
         bytes32[] memory proof
-    ) internal {
+    ) internal view {
         /* solium-disable-next-line security/no-block-members */
         require(block.timestamp < _expiryTime, "sale is over");
         require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "not authorized");
@@ -130,7 +130,7 @@ contract LandSale is MetaTransactionReceiver {
     }
 
     function _mint(address buyer, address to, uint256 x, uint256 y, uint256 size, uint256 price, address token, uint256 tokenAmount) internal {
-         _land.mintQuad(to, size, x, y, "");
+        _land.mintQuad(to, size, x, y, "");
         emit LandQuadPurchased(buyer, to, x + (y * GRID_SIZE), size, price, token, tokenAmount);
     }
 
