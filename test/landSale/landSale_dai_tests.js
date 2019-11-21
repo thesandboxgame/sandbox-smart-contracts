@@ -1,7 +1,6 @@
 const tap = require('tap');
 const assert = require('assert');
 const rocketh = require('rocketh');
-const BN = require('bn.js');
 const {
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, require('web3'));
@@ -15,13 +14,13 @@ const {
     deployContract,
     increaseTime,
     expectRevert,
+    toWei,
 } = require('../utils');
 
 const {
     deployer,
     landSaleAdmin,
     landSaleBeneficiary,
-    sandBeneficiary,
     landAdmin,
     sandAdmin,
     others,
@@ -80,10 +79,6 @@ const saleStart = Math.floor(Date.now() / 1000);
 const saleDuration = 30 * 24 * 60 * 60;
 const saleEnd = saleStart + saleDuration;
 
-function usdToSand(usd) {
-    return new BN(usd).mul(new BN('1000000000000000000')).div(new BN('14400000000000000')).toString(10);
-}
-
 async function setupTestLandSale(contracts) {
     const daiMedianizer = getDeployedContract('DAIMedianizer');
     const dai = getDeployedContract('DAI');
@@ -109,7 +104,7 @@ async function setupTestLandSale(contracts) {
     return {contract, tree};
 }
 
-function runLandSaleTests(title, contactStore) {
+function runLandSaleDaiTests(title, contactStore) {
     tap.test(title + ' tests', async (t) => {
         let contracts;
         let tree;
@@ -124,15 +119,37 @@ function runLandSaleTests(title, contactStore) {
             landHashArray = createDataArray(lands);
             tree = new MerkleTree(landHashArray);
 
-            await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[0], '1000000000000000000000000');
-            await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[1], '1000000000000000000000000');
+            await tx(contracts.LandSale, 'setDAIEnabled', {from: landSaleAdmin, gas}, true);
+
+            await tx(contracts.FakeDAI, 'transfer', {from: deployer, gas}, others[0], toWei('1000000'));
+            await tx(contracts.FakeDAI, 'approve', {from: others[0], gas}, contracts.LandSale.options.address, toWei('1000000'));
         });
 
-        t.test('-> Sand payments', async (t) => {
-            t.test('can buy Land with SAND', async () => {
+        t.test('-> DAI payments', async (t) => {
+            t.test('can enable DAI payment', async () => {
+                const isDAIEnabled = await call(contracts.LandSale, 'isDAIEnabled', {from: landSaleAdmin});
+                assert.ok(isDAIEnabled, 'DAI should be enabled');
+            });
+
+            t.test('can disable DAI payment', async () => {
+                await tx(contracts.LandSale, 'setDAIEnabled', {from: landSaleAdmin, gas}, false);
+                const isDAIEnabled = await call(contracts.LandSale, 'isDAIEnabled', {from: landSaleAdmin});
+                assert.ok(!isDAIEnabled, 'DAI should not be enabled');
+            });
+
+            t.test('cannot enable DAI payment if not admin', async () => {
+                await tx(contracts.LandSale, 'setDAIEnabled', {from: landSaleAdmin, gas}, false);
+
+                await expectRevert(
+                    tx(contracts.LandSale, 'setDAIEnabled', {from: others[0], gas}, true),
+                    'only admin can enable/disable DAI'
+                );
+            });
+
+            t.test('can buy Land with DAI', async () => {
                 const proof = tree.getProof(calculateLandHash(lands[0]));
 
-                await tx(contracts.LandSale, 'buyLandWithSand', {from: others[0], gas},
+                await tx(contracts.LandSale, 'buyLandWithDAI', {from: others[0], gas},
                     others[0],
                     others[0],
                     zeroAddress,
@@ -141,19 +158,15 @@ function runLandSaleTests(title, contactStore) {
                     lands[0].salt,
                     proof
                 );
-
-                const balance = await call(contracts.Land, 'balanceOf', {from: others[0]}, others[0]);
-                assert.equal(balance, 1, 'Balance is wrong');
             });
 
-            t.test('cannot buy Land with SAND if not enabled', async () => {
-                await tx(contracts.LandSale, 'setSANDEnabled', {from: landSaleAdmin, gas}, false);
+            t.test('cannot buy Land with DAI if not enabled', async () => {
+                await tx(contracts.LandSale, 'setDAIEnabled', {from: landSaleAdmin, gas}, false);
 
                 const proof = tree.getProof(calculateLandHash(lands[0]));
 
                 await expectRevert(
-                    tx(
-                        contracts.LandSale, 'buyLandWithSand', {from: others[0], gas},
+                    tx(contracts.LandSale, 'buyLandWithDAI', {from: others[0], gas},
                         others[0],
                         others[0],
                         zeroAddress,
@@ -162,77 +175,32 @@ function runLandSaleTests(title, contactStore) {
                         lands[0].salt,
                         proof
                     ),
-                    'sand payments not enabled'
+                    'dai payments not enabled'
                 );
             });
 
-            t.test('can disable SAND payment', async () => {
-                await tx(contracts.LandSale, 'setSANDEnabled', {from: landSaleAdmin, gas}, false);
-                const isSANDEnabled = await call(contracts.LandSale, 'isSANDEnabled', {from: landSaleAdmin});
-                assert.equal(isSANDEnabled, false, 'SAND should not be enabled');
-            });
-
-            t.test('cannot disable SAND payment if not admin', async () => {
-                await expectRevert(
-                    tx(contracts.LandSale, 'setSANDEnabled', {from: others[0], gas}, false),
-                    'only admin can enable/disable SAND'
-                );
-            });
-
-            t.test('cannot buy Land without SAND', async () => {
-                const proof = tree.getProof(calculateLandHash(lands[1]));
-
-                await expectThrow(
-                    tx(contracts.LandSale, 'buyLandWithSand', {from: others[2], gas},
-                        others[2],
-                        others[2],
-                        zeroAddress,
-                        99, 99, 3,
-                        lands[1].price,
-                        lands[1].salt,
-                        proof
-                    ),
-                );
-            });
-
-            t.test('cannot buy Land without enough tokens', async () => {
-                await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[2], usdToSand(4046));
-                const proof = tree.getProof(calculateLandHash(lands[1]));
-
-                await expectThrow(
-                    tx(
-                        contracts.LandSale, 'buyLandWithSand', {from: others[2], gas},
-                        others[2],
-                        others[2],
-                        zeroAddress,
-                        400, 106, 1,
-                        lands[1].price,
-                        lands[0].salt,
-                        proof
-                    ),
-                );
-            });
-
-            t.test('can buy Land with just enough tokens', async () => {
-                await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[2], usdToSand(lands[0].price));
+            t.test('cannot buy Land without enough DAI', async () => {
                 const proof = tree.getProof(calculateLandHash(lands[0]));
 
-                await tx(contracts.LandSale, 'buyLandWithSand', {from: others[2], gas},
-                    others[2],
-                    others[2],
-                    zeroAddress,
-                    400, 106, 1,
-                    lands[0].price,
-                    lands[0].salt,
-                    proof
+                await tx(contracts.FakeDAI, 'transfer', {from: others[0], gas}, others[1], toWei('1000000'));
+
+                await expectThrow(
+                    tx(contracts.LandSale, 'buyLandWithDAI', {from: others[0], gas},
+                        others[0],
+                        others[0],
+                        zeroAddress,
+                        400, 106, 1,
+                        lands[0].price,
+                        lands[0].salt,
+                        proof
+                    )
                 );
             });
 
             t.test('cannot buy Land from a non reserved Land with reserved param', async () => {
                 const proof = tree.getProof(calculateLandHash(lands[0]));
                 await expectThrow(
-                    tx(
-                        contracts.LandSale, 'buyLandWithSand', {from: others[0], gas},
+                    tx(contracts.LandSale, 'buyLandWithDAI', {from: others[0], gas},
                         others[0],
                         others[0],
                         others[0],
@@ -246,6 +214,10 @@ function runLandSaleTests(title, contactStore) {
 
             t.test('cannot buy Land from a reserved Land of a different address', async () => {
                 const {contract, tree} = await setupTestLandSale(contracts);
+
+                await tx(contract, 'setDAIEnabled', {from: landSaleAdmin, gas}, true);
+                await tx(contracts.FakeDAI, 'approve', {from: others[0], gas}, contract.options.address, toWei('1000000'));
+
                 const proof = tree.getProof(calculateLandHash({
                     x: 400,
                     y: 106,
@@ -254,19 +226,27 @@ function runLandSaleTests(title, contactStore) {
                     reserved: others[1],
                     salt: '0x1111111111111111111111111111111111111111111111111111111111111111',
                 }));
-                await expectThrow(tx(contract, 'buyLandWithSand', {from: others[0], gas},
-                    others[0],
-                    others[0],
-                    others[0],
-                    400, 106, 1,
-                    '4047',
-                    '0x1111111111111111111111111111111111111111111111111111111111111111',
-                    proof
-                ));
+                await expectThrow(
+                    tx(
+                        contract, 'buyLandWithDAI', {from: others[0], gas},
+                        others[0],
+                        others[0],
+                        others[0],
+                        400, 106, 1,
+                        '4047',
+                        '0x1111111111111111111111111111111111111111111111111111111111111111',
+                        proof
+                    )
+                );
             });
 
             t.test('can buy Land from a reserved Land if matching address', async () => {
                 const {contract, tree} = await setupTestLandSale(contracts);
+
+                await tx(contract, 'setDAIEnabled', {from: landSaleAdmin, gas}, true);
+                await tx(contracts.FakeDAI, 'transfer', {from: others[0], gas}, others[1], toWei('1000000'));
+                await tx(contracts.FakeDAI, 'approve', {from: others[1], gas}, contract.options.address, toWei('1000000'));
+
                 const proof = tree.getProof(calculateLandHash({
                     x: 400,
                     y: 106,
@@ -275,7 +255,7 @@ function runLandSaleTests(title, contactStore) {
                     reserved: others[1],
                     salt: '0x1111111111111111111111111111111111111111111111111111111111111111'
                 }));
-                await tx(contract, 'buyLandWithSand', {from: others[1], gas},
+                await tx(contract, 'buyLandWithDAI', {from: others[1], gas},
                     others[1],
                     others[1],
                     others[1],
@@ -290,6 +270,11 @@ function runLandSaleTests(title, contactStore) {
 
             t.test('can buy Land from a reserved Land and send it to another address', async () => {
                 const {contract, tree} = await setupTestLandSale(contracts);
+
+                await tx(contract, 'setDAIEnabled', {from: landSaleAdmin, gas}, true);
+                await tx(contracts.FakeDAI, 'transfer', {from: others[0], gas}, others[1], toWei('1000000'));
+                await tx(contracts.FakeDAI, 'approve', {from: others[1], gas}, contract.options.address, toWei('1000000'));
+
                 const proof = tree.getProof(calculateLandHash({
                     x: 400,
                     y: 106,
@@ -298,7 +283,7 @@ function runLandSaleTests(title, contactStore) {
                     reserved: others[1],
                     salt: '0x1111111111111111111111111111111111111111111111111111111111111111'
                 }));
-                await tx(contract, 'buyLandWithSand', {from: others[1], gas},
+                await tx(contract, 'buyLandWithDAI', {from: others[1], gas},
                     others[1],
                     others[2],
                     others[1],
@@ -314,7 +299,7 @@ function runLandSaleTests(title, contactStore) {
             t.test('CANNOT buy Land when minter rights revoked', async () => {
                 await tx(contracts.Land, 'setMinter', {from: landAdmin, gas}, contracts.LandSale.options.address, false);
                 const proof = tree.getProof(calculateLandHash(lands[0]));
-                await expectThrow(tx(contracts.LandSale, 'buyLandWithSand', {from: others[0], gas},
+                await expectThrow(tx(contracts.LandSale, 'buyLandWithDAI', {from: others[0], gas},
                     others[0],
                     others[0],
                     zeroAddress,
@@ -327,7 +312,7 @@ function runLandSaleTests(title, contactStore) {
 
             t.test('CANNOT buy Land twice', async () => {
                 const proof = tree.getProof(calculateLandHash(lands[0]));
-                await tx(contracts.LandSale, 'buyLandWithSand', {from: others[0], gas},
+                await tx(contracts.LandSale, 'buyLandWithDAI', {from: others[0], gas},
                     others[0],
                     others[0],
                     zeroAddress,
@@ -336,7 +321,7 @@ function runLandSaleTests(title, contactStore) {
                     lands[0].salt,
                     proof
                 );
-                await expectThrow(tx(contracts.LandSale, 'buyLandWithSand', {from: others[0], gas},
+                await expectThrow(tx(contracts.LandSale, 'buyLandWithDAI', {from: others[0], gas},
                     others[0],
                     others[0],
                     zeroAddress,
@@ -364,8 +349,7 @@ function runLandSaleTests(title, contactStore) {
                     '0x0000000000000000000000000000000000000000000000000000000000000003',
                 ];
                 await expectRevert(
-                    tx(
-                        contracts.LandSale, 'buyLandWithSand', {from: others[0], gas},
+                    tx(contracts.LandSale, 'buyLandWithDAI', {from: others[0], gas},
                         others[0],
                         others[0],
                         zeroAddress,
@@ -382,7 +366,7 @@ function runLandSaleTests(title, contactStore) {
                 const proof = tree.getProof(calculateLandHash(lands[2]));
                 await expectRevert(
                     tx(
-                        contracts.LandSale, 'buyLandWithSand', {from: others[0], gas},
+                        contracts.LandSale, 'buyLandWithDAI', {from: others[0], gas},
                         others[0],
                         others[0],
                         zeroAddress,
@@ -391,13 +375,13 @@ function runLandSaleTests(title, contactStore) {
                         lands[0].salt,
                         proof
                     ),
-                    'Invalid land provided'
+                    'Invalid land provided',
                 );
             });
 
             t.test('after buying user own all Land bought', async () => {
                 const proof = tree.getProof(calculateLandHash(lands[2]));
-                await tx(contracts.LandSale, 'buyLandWithSand', {from: others[0], gas},
+                await tx(contracts.LandSale, 'buyLandWithDAI', {from: others[0], gas},
                     others[0],
                     others[0],
                     zeroAddress,
@@ -420,7 +404,7 @@ function runLandSaleTests(title, contactStore) {
                 for (const land of lands) {
                     const landHash = calculateLandHash(land);
                     const proof = tree.getProof(landHash);
-                    await tx(contracts.LandSale, 'buyLandWithSand', {from: others[0], gas},
+                    await tx(contracts.LandSale, 'buyLandWithDAI', {from: others[0], gas},
                         others[0],
                         others[0],
                         zeroAddress,
@@ -443,6 +427,10 @@ function runLandSaleTests(title, contactStore) {
                 await increaseTime(saleDuration);
 
                 const {contract, tree} = await setupTestLandSale(contracts);
+
+                await tx(contract, 'setDAIEnabled', {from: landSaleAdmin, gas}, true);
+                await tx(contracts.FakeDAI, 'approve', {from: others[0], gas}, contract.options.address, toWei('1000000'));
+
                 const proof = tree.getProof(calculateLandHash({
                     x: 400,
                     y: 106,
@@ -454,7 +442,7 @@ function runLandSaleTests(title, contactStore) {
 
                 await expectRevert(
                     tx(
-                        contract, 'buyLandWithSand', {from: others[0], gas},
+                        contract, 'buyLandWithDAI', {from: others[0], gas},
                         others[0],
                         others[0],
                         others[0],
@@ -471,5 +459,5 @@ function runLandSaleTests(title, contactStore) {
 }
 
 module.exports = {
-    runLandSaleTests
+    runLandSaleDaiTests
 };
