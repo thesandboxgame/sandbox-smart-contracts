@@ -14,7 +14,7 @@ contract LandSale is MetaTransactionReceiver {
     using SafeMathWithRequire for uint256;
 
     uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
-    uint256 internal constant tokenPriceInUsd = 14400000000000000;
+    uint256 internal constant daiPrice = 14400000000000000;
 
     Land internal _land;
     ERC20 internal _sand;
@@ -143,7 +143,7 @@ contract LandSale is MetaTransactionReceiver {
      * @param x x coordinate of the Land
      * @param y y coordinate of the Land
      * @param size size of the pack of Land to purchase
-     * @param price dollars price to purchase that Land
+     * @param priceInSand price in SAND to purchase that Land
      * @param proof merkleProof for that particular Land
      * @return The address of the operator
      */
@@ -154,22 +154,21 @@ contract LandSale is MetaTransactionReceiver {
         uint256 x,
         uint256 y,
         uint256 size,
-        uint256 price,
+        uint256 priceInSand,
         bytes32 salt,
         bytes32[] calldata proof
     ) external {
         require(_sandEnabled, "sand payments not enabled");
-        _checkValidity(buyer, reserved, x, y, size, price, salt, proof);
-        uint256 tokenAmount = price.mul(1000000000000000000).div(tokenPriceInUsd);
+        _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);
         require(
             _sand.transferFrom(
                 buyer,
                 _wallet,
-                tokenAmount
+                priceInSand
             ),
             "sand token transfer failed"
         );
-        _mint(buyer, to, x, y, size, price, address(_sand), tokenAmount);
+        _mint(buyer, to, x, y, size, priceInSand, address(_sand), priceInSand);
     }
 
     /**
@@ -180,7 +179,7 @@ contract LandSale is MetaTransactionReceiver {
      * @param x x coordinate of the Land
      * @param y y coordinate of the Land
      * @param size size of the pack of Land to purchase
-     * @param price dollars price to purchase that Land
+     * @param priceInSand price in SAND to purchase that Land
      * @param proof merkleProof for that particular Land
      * @return The address of the operator
      */
@@ -191,14 +190,14 @@ contract LandSale is MetaTransactionReceiver {
         uint256 x,
         uint256 y,
         uint256 size,
-        uint256 price,
+        uint256 priceInSand,
         bytes32 salt,
         bytes32[] calldata proof
     ) external payable {
         require(_etherEnabled, "ether payments not enabled");
-        _checkValidity(buyer, reserved, x, y, size, price, salt, proof);
+        _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);
 
-        uint256 ETHRequired = getEtherAmountWithUSD(price);
+        uint256 ETHRequired = getEtherAmountWithSAND(priceInSand);
         require(msg.value >= ETHRequired, "not enough ether sent");
         uint256 leftOver = msg.value - ETHRequired;
         if(leftOver > 0) {
@@ -206,7 +205,7 @@ contract LandSale is MetaTransactionReceiver {
         }
         address(_wallet).transfer(ETHRequired);
 
-        _mint(buyer, to, x, y, size, price, address(0), ETHRequired);
+        _mint(buyer, to, x, y, size, priceInSand, address(0), ETHRequired);
     }
 
     /**
@@ -217,7 +216,7 @@ contract LandSale is MetaTransactionReceiver {
      * @param x x coordinate of the Land
      * @param y y coordinate of the Land
      * @param size size of the pack of Land to purchase
-     * @param price dollars price to purchase that Land
+     * @param priceInSand price in SAND to purchase that Land
      * @param proof merkleProof for that particular Land
      * @return The address of the operator
      */
@@ -228,16 +227,17 @@ contract LandSale is MetaTransactionReceiver {
         uint256 x,
         uint256 y,
         uint256 size,
-        uint256 price,
+        uint256 priceInSand,
         bytes32 salt,
         bytes32[] calldata proof
     ) external {
         require(_daiEnabled, "dai payments not enabled");
-        _checkValidity(buyer, reserved, x, y, size, price, salt, proof);
+        _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);
 
-        require(_dai.transferFrom(msg.sender, _wallet, price), "failed to transfer dai");
+        uint256 DAIRequired = priceInSand.mul(daiPrice).div(1000000000000000000);
+        require(_dai.transferFrom(msg.sender, _wallet, DAIRequired), "failed to transfer dai");
 
-        _mint(buyer, to, x, y, size, price, address(_dai), price);
+        _mint(buyer, to, x, y, size, priceInSand, address(_dai), DAIRequired);
     }
 
     /**
@@ -295,13 +295,13 @@ contract LandSale is MetaTransactionReceiver {
     }
 
     /**
-     * @notice Returns the amount of ETH for a specific amount of USD
-     * @param usdAmount An amount of USD
+     * @notice Returns the amount of ETH for a specific amount of SAND
+     * @param sandAmount An amount of SAND
      * @return The amount of ETH
      */
-    function getEtherAmountWithUSD(uint256 usdAmount) public view returns (uint256) {
+    function getEtherAmountWithSAND(uint256 sandAmount) public view returns (uint256) {
         uint256 ethUsdPair = getEthUsdPair();
-        return usdAmount.mul(1000000000000000000).div(ethUsdPair);
+        return sandAmount.mul(daiPrice).div(ethUsdPair);
     }
 
     /**
