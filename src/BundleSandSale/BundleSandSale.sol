@@ -33,7 +33,7 @@ contract BundleSandSale is Admin {
     Medianizer private _medianizer;
     ERC20 private _dai;
     ERC20 private _sand;
-    ERC1155ERC721 _asset;
+    ERC1155ERC721 private _asset;
 
     address payable private _receivingWallet;
 
@@ -45,7 +45,7 @@ contract BundleSandSale is Admin {
         uint256 numPacksLeft;
     }
 
-    Sale[] sales;
+    Sale[] private sales;
 
     constructor(
         address sandTokenContractAddress,
@@ -66,7 +66,7 @@ contract BundleSandSale is Admin {
 
     /// @notice set the wallet receiving the proceeds
     /// @param newWallet address of the new receiving wallet
-    function setReceivingWallet(address payable newWallet) external{
+    function setReceivingWallet(address payable newWallet) external {
         require(newWallet != address(0), "receiving wallet cannot be zero address");
         require(msg.sender == _admin, "only admin can change the receiving wallet");
         _receivingWallet = newWallet;

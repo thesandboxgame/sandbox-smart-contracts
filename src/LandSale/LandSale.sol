@@ -20,6 +20,7 @@ contract LandSale is MetaTransactionReceiver {
     ERC20 internal _sand;
     Medianizer private _medianizer;
     ERC20 private _dai;
+
     address payable internal _wallet;
     uint256 internal _expiryTime;
     bytes32 internal _merkleRoot;

@@ -11,10 +11,10 @@ function ContractStore() {
 ContractStore.prototype.resetContracts = async function () {
     await rocketh.runStages();
     return {
-        LandSale: getDeployedContract('LandSale'),
+        LandSale: getDeployedContract('LandPreSale_1'),
         Sand: getDeployedContract('Sand'),
         Land: getDeployedContract('Land'),
     };
 };
 
-runLandSaleTests('LandSale', new ContractStore());
+runLandSaleTests('LandPreSale_1', new ContractStore());

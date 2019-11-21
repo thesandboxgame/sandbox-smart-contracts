@@ -64,24 +64,24 @@ module.exports = async ({namedAccounts, initialRun, deployIfDifferent}) => {
     const merkleRootHash = tree.getRoot().hash;
 
     const deployResult = await deployIfDifferent(['data'],
-        'LandSale',
+        'LandPreSale_1',
         {from: deployer, gas: 1000000, associatedData: saltedLands},
-        'LandSale',
+        'LandSale', // TODO rename : LandSaleWithETHAndDAI
         landContract.options.address,
         sandContract.options.address,
         sandContract.options.address,
         landSaleAdmin,
         landSaleBeneficiary,
         merkleRootHash,
-        Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // 30 days
+        1576753200, // This is Thursday, 19 December 2019 11:00:00 GMT+00:00 // Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // 30 days
         daiMedianizer.options.address,
-        dai.options.address,
+        dai.options.address
     );
-    const contract = getDeployedContract('LandSale');
+    const contract = getDeployedContract('LandPreSale_1');
     if (deployResult.newlyDeployed) {
-        log(' - LandSale deployed at : ' + contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
+        log(' - LandPreSale_1 deployed at : ' + contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
     } else {
-        log('reusing LandSale at ' + contract.options.address);
+        log('reusing LandPreSale_1 at ' + contract.options.address);
     }
 };
-module.exports.skip = guard(['1', '4'], 'LandSale');
+module.exports.skip = guard(['1', '4'], 'LandPreSale_1');

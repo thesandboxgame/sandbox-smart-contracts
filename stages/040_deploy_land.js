@@ -15,7 +15,6 @@ module.exports = async ({namedAccounts, initialRun, isDeploymentChainId}) => {
 
     const {
         deployer,
-        landAdmin,
     } = namedAccounts;
 
     const sandContract = getDeployedContract('Sand');
