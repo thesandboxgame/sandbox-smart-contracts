@@ -1,4 +1,5 @@
 const tap = require('tap');
+const BN = require('bn.js');
 const assert = require('assert');
 const rocketh = require('rocketh');
 const {
@@ -15,6 +16,7 @@ const {
     increaseTime,
     expectRevert,
     toWei,
+    getChainCurrentTime,
 } = require('../utils');
 
 const {
@@ -28,6 +30,10 @@ const {
 
 const MerkleTree = require('../../lib/merkleTree');
 const {createDataArray, calculateLandHash} = require('../../lib/merkleTreeHelper');
+
+function sandToUSD(sand) {
+    return new BN(sand).mul(new BN('14400000000000000')).div(new BN('1000000000000000000')).toString(10);
+}
 
 const testLands = [
     {
@@ -75,11 +81,14 @@ const testLands = [
     }
 ];
 
-const saleStart = Math.floor(Date.now() / 1000);
-const saleDuration = 30 * 24 * 60 * 60;
-const saleEnd = saleStart + saleDuration;
+let saleStart;
+let saleDuration;
+let saleEnd;
 
 async function setupTestLandSale(contracts) {
+    saleStart = getChainCurrentTime();
+    saleDuration = 60 * 60;
+    saleEnd = saleStart + saleDuration;
     const daiMedianizer = getDeployedContract('DAIMedianizer');
     const dai = getDeployedContract('DAI');
     const landHashArray = createDataArray(testLands);
@@ -113,7 +122,7 @@ function runLandSaleDaiTests(title, contactStore) {
 
         t.beforeEach(async () => {
             contracts = await contactStore.resetContracts();
-            const deployment = rocketh.deployment('LandSale');
+            const deployment = rocketh.deployment('LandPreSale_1');
             lands = deployment.data;
 
             landHashArray = createDataArray(lands);
@@ -122,7 +131,7 @@ function runLandSaleDaiTests(title, contactStore) {
             await tx(contracts.LandSale, 'setDAIEnabled', {from: landSaleAdmin, gas}, true);
 
             await tx(contracts.FakeDAI, 'transfer', {from: deployer, gas}, others[0], toWei('1000000'));
-            await tx(contracts.FakeDAI, 'approve', {from: others[0], gas}, contracts.LandSale.options.address, toWei('1000000'));
+            await tx(contracts.FakeDAI, 'approve', {from: others[0], gas}, contracts.LandSale.options.address, toWei('1000000')); // TODO remove and move it inot test
         });
 
         t.test('-> DAI payments', async (t) => {
@@ -179,7 +188,7 @@ function runLandSaleDaiTests(title, contactStore) {
                 );
             });
 
-            t.test('cannot buy Land without enough DAI', async () => {
+            t.test('cannot buy Land without DAI', async () => {
                 const proof = tree.getProof(calculateLandHash(lands[0]));
 
                 await tx(contracts.FakeDAI, 'transfer', {from: others[0], gas}, others[1], toWei('1000000'));
@@ -194,6 +203,42 @@ function runLandSaleDaiTests(title, contactStore) {
                         lands[0].salt,
                         proof
                     )
+                );
+            });
+
+            t.test('cannot buy Land without just enough DAI', async () => {
+                const proof = tree.getProof(calculateLandHash(lands[0]));
+
+                await tx(contracts.FakeDAI, 'transfer', {from: others[0], gas}, others[1], toWei('1000000'));
+                await tx(contracts.FakeDAI, 'transfer', {from: others[1], gas}, others[0], new BN(sandToUSD(lands[0].price)).sub(new BN(1)).toString(10));
+
+                await expectThrow(
+                    tx(contracts.LandSale, 'buyLandWithDAI', {from: others[0], gas},
+                        others[0],
+                        others[0],
+                        zeroAddress,
+                        400, 106, 1,
+                        lands[0].price,
+                        lands[0].salt,
+                        proof
+                    )
+                );
+            });
+
+            t.test('can buy Land with just enough DAI', async () => {
+                const proof = tree.getProof(calculateLandHash(lands[0]));
+
+                await tx(contracts.FakeDAI, 'transfer', {from: others[0], gas}, others[1], toWei('1000000'));
+                await tx(contracts.FakeDAI, 'transfer', {from: others[1], gas}, others[0], sandToUSD(lands[0].price));
+
+                await tx(contracts.LandSale, 'buyLandWithDAI', {from: others[0], gas},
+                    others[0],
+                    others[0],
+                    zeroAddress,
+                    400, 106, 1,
+                    lands[0].price,
+                    lands[0].salt,
+                    proof
                 );
             });
 
@@ -424,8 +469,6 @@ function runLandSaleDaiTests(title, contactStore) {
             });
 
             t.test('Cannot buy a land after the expiry time', async () => {
-                await increaseTime(saleDuration);
-
                 const {contract, tree} = await setupTestLandSale(contracts);
 
                 await tx(contract, 'setDAIEnabled', {from: landSaleAdmin, gas}, true);
@@ -440,6 +483,7 @@ function runLandSaleDaiTests(title, contactStore) {
                     salt: '0x1111111111111111111111111111111111111111111111111111111111111111'
                 }));
 
+                await increaseTime(saleDuration);
                 await expectRevert(
                     tx(
                         contract, 'buyLandWithDAI', {from: others[0], gas},
@@ -453,6 +497,7 @@ function runLandSaleDaiTests(title, contactStore) {
                     ),
                     'sale is over'
                 );
+                await increaseTime(saleDuration);
             });
         });
     });

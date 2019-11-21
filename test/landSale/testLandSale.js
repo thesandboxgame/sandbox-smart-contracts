@@ -19,13 +19,13 @@ function ContractStore() {
 ContractStore.prototype.resetContracts = async function () {
     await rocketh.runStages();
     return {
-        LandSale: getDeployedContract('LandSale'),
+        LandSale: getDeployedContract('LandPreSale_1'),
         Sand: getDeployedContract('Sand'),
         Land: getDeployedContract('Land'),
         FakeDAI: getDeployedContract('DAI'),
     };
 };
 
-runLandSaleTests('LandSale', new ContractStore());
-runLandSaleEthTests('LandSale', new ContractStore());
-runLandSaleDaiTests('LandSale', new ContractStore());
+runLandSaleTests('LandPreSale_1', new ContractStore());
+runLandSaleEthTests('LandPreSale_1', new ContractStore());
+runLandSaleDaiTests('LandPreSale_1', new ContractStore());

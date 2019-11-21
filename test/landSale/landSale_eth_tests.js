@@ -14,6 +14,7 @@ const {
     deployContract,
     increaseTime,
     expectRevert,
+    getChainCurrentTime,
 } = require('../utils');
 
 const {
@@ -74,11 +75,14 @@ const testLands = [
     }
 ];
 
-const saleStart = Math.floor(Date.now() / 1000);
-const saleDuration = 30 * 24 * 60 * 60;
-const saleEnd = saleStart + saleDuration;
+let saleStart;
+let saleDuration;
+let saleEnd;
 
 async function setupTestLandSale(contracts) {
+    saleStart = getChainCurrentTime();
+    saleDuration = 60 * 60;
+    saleEnd = saleStart + saleDuration;
     const daiMedianizer = getDeployedContract('DAIMedianizer');
     const dai = getDeployedContract('DAI');
     const landHashArray = createDataArray(testLands);
@@ -112,7 +116,7 @@ function runLandSaleEthTests(title, contactStore) {
 
         t.beforeEach(async () => {
             contracts = await contactStore.resetContracts();
-            const deployment = rocketh.deployment('LandSale');
+            const deployment = rocketh.deployment('LandPreSale_1');
             lands = deployment.data;
 
             landHashArray = createDataArray(lands);
@@ -144,7 +148,7 @@ function runLandSaleEthTests(title, contactStore) {
 
             t.test('can buy Land with ETH', async () => {
                 const sandPrice = lands[0].price;
-                const value = await call(contracts.LandSale, 'getEtherAmountWithUSD', {from: others[0], gas}, sandPrice);
+                const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
                 const proof = tree.getProof(calculateLandHash(lands[0]));
 
@@ -165,7 +169,7 @@ function runLandSaleEthTests(title, contactStore) {
                 const proof = tree.getProof(calculateLandHash(lands[0]));
 
                 const sandPrice = lands[0].price;
-                const value = await call(contracts.LandSale, 'getEtherAmountWithUSD', {from: others[0], gas}, sandPrice);
+                const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
                 await expectRevert(
                     tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value},
@@ -200,7 +204,7 @@ function runLandSaleEthTests(title, contactStore) {
 
             t.test('cannot buy Land from a non reserved Land with reserved param', async () => {
                 const sandPrice = lands[0].price;
-                const value = await call(contracts.LandSale, 'getEtherAmountWithUSD', {from: others[0], gas}, sandPrice);
+                const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
                 const proof = tree.getProof(calculateLandHash(lands[0]));
                 await expectThrow(
@@ -218,7 +222,7 @@ function runLandSaleEthTests(title, contactStore) {
 
             t.test('cannot buy Land from a reserved Land of a different address', async () => {
                 const sandPrice = '4047';
-                const value = await call(contracts.LandSale, 'getEtherAmountWithUSD', {from: others[0], gas}, sandPrice);
+                const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
                 const {contract, tree} = await setupTestLandSale(contracts);
 
@@ -248,7 +252,7 @@ function runLandSaleEthTests(title, contactStore) {
 
             t.test('can buy Land from a reserved Land if matching address', async () => {
                 const sandPrice = '4047';
-                const value = await call(contracts.LandSale, 'getEtherAmountWithUSD', {from: others[0], gas}, sandPrice);
+                const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
                 const {contract, tree} = await setupTestLandSale(contracts);
 
@@ -277,7 +281,7 @@ function runLandSaleEthTests(title, contactStore) {
 
             t.test('can buy Land from a reserved Land and send it to another address', async () => {
                 const sandPrice = '4047';
-                const value = await call(contracts.LandSale, 'getEtherAmountWithUSD', {from: others[0], gas}, sandPrice);
+                const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
                 const {contract, tree} = await setupTestLandSale(contracts);
 
@@ -306,7 +310,7 @@ function runLandSaleEthTests(title, contactStore) {
 
             t.test('CANNOT buy Land when minter rights revoked', async () => {
                 const sandPrice = lands[0].price;
-                const value = await call(contracts.LandSale, 'getEtherAmountWithUSD', {from: others[0], gas}, sandPrice);
+                const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
                 await tx(contracts.Land, 'setMinter', {from: landAdmin, gas}, contracts.LandSale.options.address, false);
                 const proof = tree.getProof(calculateLandHash(lands[0]));
@@ -323,7 +327,7 @@ function runLandSaleEthTests(title, contactStore) {
 
             t.test('CANNOT buy Land twice', async () => {
                 const sandPrice = lands[0].price;
-                const value = await call(contracts.LandSale, 'getEtherAmountWithUSD', {from: others[0], gas}, sandPrice);
+                const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
                 const proof = tree.getProof(calculateLandHash(lands[0]));
                 await tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value},
@@ -358,7 +362,7 @@ function runLandSaleEthTests(title, contactStore) {
 
             t.test('CANNOT buy Land with invalid proof', async () => {
                 const sandPrice = lands[0].price;
-                const value = await call(contracts.LandSale, 'getEtherAmountWithUSD', {from: others[0], gas}, sandPrice);
+                const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
                 const proof = [
                     '0x0000000000000000000000000000000000000000000000000000000000000001',
@@ -381,7 +385,7 @@ function runLandSaleEthTests(title, contactStore) {
 
             t.test('CANNOT buy Land with wrong proof', async () => {
                 const sandPrice = lands[0].price;
-                const value = await call(contracts.LandSale, 'getEtherAmountWithUSD', {from: others[0], gas}, sandPrice);
+                const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
                 const proof = tree.getProof(calculateLandHash(lands[2]));
                 await expectRevert(
@@ -401,7 +405,7 @@ function runLandSaleEthTests(title, contactStore) {
 
             t.test('after buying user own all Land bought', async () => {
                 const sandPrice = lands[2].price;
-                const value = await call(contracts.LandSale, 'getEtherAmountWithUSD', {from: others[0], gas}, sandPrice);
+                const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
                 const proof = tree.getProof(calculateLandHash(lands[2]));
                 await tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value},
@@ -425,7 +429,7 @@ function runLandSaleEthTests(title, contactStore) {
 
             t.test('can buy all Lands specified in json', async () => { // TODO reserved
                 for (const land of lands) {
-                    const value = await call(contracts.LandSale, 'getEtherAmountWithUSD', {from: others[0], gas}, land.price);
+                    const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, land.price);
 
                     const landHash = calculateLandHash(land);
                     const proof = tree.getProof(landHash);
@@ -450,9 +454,7 @@ function runLandSaleEthTests(title, contactStore) {
 
             t.test('Cannot buy a land after the expiry time', async () => {
                 const sandPrice = '4047';
-                const value = await call(contracts.LandSale, 'getEtherAmountWithUSD', {from: others[0], gas}, sandPrice);
-
-                await increaseTime(saleDuration);
+                const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
                 const {contract, tree} = await setupTestLandSale(contracts);
 
@@ -466,6 +468,8 @@ function runLandSaleEthTests(title, contactStore) {
                     reserved: others[1],
                     salt: '0x1111111111111111111111111111111111111111111111111111111111111111'
                 }));
+
+                await increaseTime(saleDuration);
 
                 await expectRevert(
                     tx(

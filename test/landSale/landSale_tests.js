@@ -15,6 +15,7 @@ const {
     deployContract,
     increaseTime,
     expectRevert,
+    getChainCurrentTime,
 } = require('../utils');
 
 const {
@@ -76,15 +77,14 @@ const testLands = [
     }
 ];
 
-const saleStart = Math.floor(Date.now() / 1000);
-const saleDuration = 30 * 24 * 60 * 60;
-const saleEnd = saleStart + saleDuration;
-
-function usdToSand(usd) {
-    return new BN(usd).mul(new BN('1000000000000000000')).div(new BN('14400000000000000')).toString(10);
-}
+let saleStart;
+let saleDuration;
+let saleEnd;
 
 async function setupTestLandSale(contracts) {
+    saleStart = getChainCurrentTime();
+    saleDuration = 60 * 60;
+    saleEnd = saleStart + saleDuration;
     const daiMedianizer = getDeployedContract('DAIMedianizer');
     const dai = getDeployedContract('DAI');
     const landHashArray = createDataArray(testLands);
@@ -118,7 +118,7 @@ function runLandSaleTests(title, contactStore) {
 
         t.beforeEach(async () => {
             contracts = await contactStore.resetContracts();
-            const deployment = rocketh.deployment('LandSale');
+            const deployment = rocketh.deployment('LandPreSale_1');
             lands = deployment.data;
 
             landHashArray = createDataArray(lands);
@@ -196,7 +196,25 @@ function runLandSaleTests(title, contactStore) {
             });
 
             t.test('cannot buy Land without enough tokens', async () => {
-                await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[2], usdToSand(4046));
+                await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[2], 4046);
+                const proof = tree.getProof(calculateLandHash(lands[1]));
+
+                await expectThrow(
+                    tx(
+                        contracts.LandSale, 'buyLandWithSand', {from: others[2], gas},
+                        others[2],
+                        others[2],
+                        zeroAddress,
+                        400, 106, 1,
+                        lands[1].price,
+                        lands[0].salt,
+                        proof
+                    ),
+                );
+            });
+
+            t.test('cannot buy Land without just enough tokens', async () => {
+                await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[2], new BN(lands[0].price).sub(new BN(1)).toString(10));
                 const proof = tree.getProof(calculateLandHash(lands[1]));
 
                 await expectThrow(
@@ -214,7 +232,7 @@ function runLandSaleTests(title, contactStore) {
             });
 
             t.test('can buy Land with just enough tokens', async () => {
-                await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[2], usdToSand(lands[0].price));
+                await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[2], lands[0].price);
                 const proof = tree.getProof(calculateLandHash(lands[0]));
 
                 await tx(contracts.LandSale, 'buyLandWithSand', {from: others[2], gas},
@@ -440,8 +458,6 @@ function runLandSaleTests(title, contactStore) {
             });
 
             t.test('Cannot buy a land after the expiry time', async () => {
-                await increaseTime(saleDuration);
-
                 const {contract, tree} = await setupTestLandSale(contracts);
                 const proof = tree.getProof(calculateLandHash({
                     x: 400,
@@ -451,6 +467,8 @@ function runLandSaleTests(title, contactStore) {
                     reserved: others[1],
                     salt: '0x1111111111111111111111111111111111111111111111111111111111111111'
                 }));
+
+                await increaseTime(saleDuration);
 
                 await expectRevert(
                     tx(
