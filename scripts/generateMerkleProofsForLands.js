@@ -5,7 +5,7 @@ const rocketh = require('rocketh');
 const MerkleTree = require('../lib/merkleTree');
 const {createDataArray, calculateLandHash} = require('../lib/merkleTreeHelper');
 
-const deployment = rocketh.deployment('LandSale');
+const deployment = rocketh.deployment('LandPreSale_1');
 const lands = deployment.data;
 const landHashArray = createDataArray(lands);
 const tree = new MerkleTree(landHashArray);
@@ -16,4 +16,4 @@ for (const land of lands) {
     landsWithProof.push(land);
 }
 
-fs.writeFileSync(path.join('deployments', rocketh.chainId, 'data', 'landsWithProof.json'), JSON.stringify(landsWithProof, null, '  '));
+fs.writeFileSync(path.join('deployments', rocketh.chainId, 'data', 'LandPreSale_1_withProof.json'), JSON.stringify(landsWithProof, null, '  '));
