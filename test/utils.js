@@ -163,7 +163,23 @@ module.exports = {
             });
         });
     },
+    expectRevert: async (promise, expectedMessage) => {
+        let receipt;
+        try {
+            receipt = await promise;
+        } catch (error) {
+            const isExpectedMessagePresent = error.message.search(expectedMessage) >= 0;
 
+            assert.ok(isExpectedMessagePresent, 'Revert message not present');
+            return;
+        }
+
+        if (receipt.status === '0x0') {
+            return;
+        }
+
+        assert.fail('Expected revert not received');
+    },
     // Took this from https://github.com/OpenZeppelin/zeppelin-solidity/blob/master/test/helpers/expectThrow.js
     // Doesn't seem to work any more :(
     // Changing to use the invalid opcode error instead works
