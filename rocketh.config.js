@@ -59,6 +59,7 @@ module.exports = {
             1: '0x9695ed5020BB47880738Db356678fe8cBc8FF60b', // TODO use another wallet ?
             4: '0xcbc70EcCd52bF3910CDC1455E6D2Bd45725F573D',
         },
+        bundleSandSaleManager: 'sandAdmin',
         bundleSandSaleAdmin: 'sandAdmin',
         bundleSandSaleBeneficiary: 'sandSaleBeneficiary',
         landSaleBeneficiary: 'sandSaleBeneficiary',
