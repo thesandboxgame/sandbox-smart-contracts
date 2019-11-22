@@ -11,6 +11,8 @@ function waitRequest(options) {
         request(options, (error, response, body) => {
             if (error) {
                 reject(error);
+            } else if (body && body.error) {
+                reject(body.error);
             } else {
                 resolve({response, body});
             }
@@ -97,6 +99,23 @@ program
             throw new Error('no wallet for user with id ' + creator);
         }
 
+        for (const assetId of assetIds) {
+            const assetData = await getJSON(url + '/assets/' + assetId);
+            if (assetData && assetData.asset) {
+                if (assetData.asset.blockchainId) {
+                    throw new Error('Asset already minted ' + assetId);
+                }
+                if (assetData.asset.Creator.id !== creator) {
+                    throw new Error(`Asset with id ${assetId} does not belong to specified creator `);
+                }
+
+                const assetMetadataData = await getJSON(url + '/assets/' + assetId + '/metadata');
+                console.log(JSON.stringify(assetMetadataData, null, '  '));
+            } else {
+                throw new Error('no Asset with id ' + assetId);
+            }
+        }
+
         const options = {
             method: 'PATCH',
             url: url + '/assets/mintInfo',
@@ -126,11 +145,11 @@ program
             const suppliesArr = supplies;
 
             if (testMode) {
-                console.log({genesisMinter, nonce, gas, creator, packId, hash, suppliesArr, raritiesPack, destination});
+                console.log({genesisMinter, nonce, gas, creatorWallet, packId, hash, suppliesArr, raritiesPack, destination});
             } else {
                 try {
-                    const receipt = await sendTxAndWait({from: genesisMinter, nonce, gas}, 'GenesisBouncer', 'mintMultipleFor', creator, packId, hash, suppliesArr, raritiesPack, destination);
-                    console.log('success', {txHash: receipt.transactionHash, gasUsed: receipt.gasUsed});
+                    // const receipt = await sendTxAndWait({from: genesisMinter, nonce, gas}, 'GenesisBouncer', 'mintMultipleFor', creatorWallet, packId, hash, suppliesArr, raritiesPack, destination);
+                    // console.log('success', {txHash: receipt.transactionHash, gasUsed: receipt.gasUsed});
                 } catch (e) {
                     reportErrorAndExit(e);
                 }
