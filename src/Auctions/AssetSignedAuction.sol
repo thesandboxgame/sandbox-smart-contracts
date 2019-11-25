@@ -1,19 +1,22 @@
 pragma solidity 0.5.9;
 
-import "../../../contracts_common/src/Libraries/SigUtil.sol";
-import "../../../contracts_common/src/Libraries/PriceUtil.sol";
+import "../../contracts_common/src/Libraries/SigUtil.sol";
+import "../../contracts_common/src/Libraries/PriceUtil.sol";
 import "../Sand.sol";
 import "../Asset.sol";
-import "../../../contracts_common/src/Interfaces/ERC20.sol";
+import "../../contracts_common/src/Interfaces/ERC20.sol";
 import "../TheSandbox712.sol";
-import "../../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
+import "../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 
-import "../../../contracts_common/src/Interfaces/ERC1271.sol";
-import "../../../contracts_common/src/Interfaces/ERC1271Constants.sol";
-import "../../../contracts_common/src/Interfaces/ERC1654.sol";
-import "../../../contracts_common/src/Interfaces/ERC1654Constants.sol";
+import "../../contracts_common/src/Interfaces/ERC1271.sol";
+import "../../contracts_common/src/Interfaces/ERC1271Constants.sol";
+import "../../contracts_common/src/Interfaces/ERC1654.sol";
+import "../../contracts_common/src/Interfaces/ERC1654Constants.sol";
+import "../../contracts_common/src/Libraries/SafeMathWithRequire.sol";
 
 contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712, MetaTransactionReceiver {
+    using SafeMathWithRequire for uint256;
+
     enum SignatureType { DIRECT, EIP1654, EIP1271 }
 
     bytes32 constant AUCTION_TYPEHASH = keccak256(
@@ -77,12 +80,13 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         uint256[] memory auctionData,
         uint256[] memory ids,
         uint256[] memory amounts
-    ) internal {
+    ) internal view {
+        require(ids.length == amounts.length, "ids and amounts length not matching");
         require(buyer == msg.sender || (token != address(0) && _metaTransactionContracts[msg.sender]), "not authorized");
         uint256 amountAlreadyClaimed = claimed[seller][auctionData[AuctionData_OfferId]];
         require(amountAlreadyClaimed != MAX_UINT256, "Auction cancelled");
 
-        uint256 total = amountAlreadyClaimed + buyAmount;
+        uint256 total = amountAlreadyClaimed.add(buyAmount);
         require(total >= amountAlreadyClaimed, "overflow");
         require(total <= auctionData[AuctionData_Packs], "Buy amount exceeds sell amount");
 
@@ -91,7 +95,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
             "Auction didn't start yet"
         );
         require(
-            auctionData[AuctionData_StartedAt] + auctionData[AuctionData_Duration] > block.timestamp,
+            auctionData[AuctionData_StartedAt].add(auctionData[AuctionData_Duration]) > block.timestamp,
             "Auction finished"
         );
 
@@ -350,16 +354,17 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
                 auctionData[AuctionData_StartingPrice],
                 auctionData[AuctionData_EndingPrice],
                 auctionData[AuctionData_Duration],
-                block.timestamp - auctionData[AuctionData_StartedAt]
-            ) * purchase[0];
-        claimed[seller][auctionData[AuctionData_OfferId]] += purchase[0];
+                block.timestamp.sub(auctionData[AuctionData_StartedAt])
+            ).mul(purchase[0]);
+        claimed[seller][auctionData[AuctionData_OfferId]] = claimed[seller][auctionData[AuctionData_OfferId]].add(purchase[0]);
 
         uint256 fee = 0;
         if(_fee10000th > 0) {
             fee = PriceUtil.calculateFee(offer, _fee10000th);
         }
 
-        require(offer+fee <= purchase[1], "offer exceeds max amount to spend");
+        uint256 total = offer.add(fee);
+        require(total <= purchase[1], "offer exceeds max amount to spend");
 
         if (token != address(0)) {
             require(ERC20(token).transferFrom(buyer, seller, offer), "failed to transfer token price");
@@ -367,9 +372,9 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
                 require(ERC20(token).transferFrom(buyer, _feeCollector, fee), "failed to collect fee");
             }
         } else {
-            require(msg.value >= offer + fee, "ETH < offer+fee");
-            if(msg.value > offer+fee) {
-                msg.sender.transfer(msg.value - (offer+fee));
+            require(msg.value >= total, "ETH < offer+fee");
+            if(msg.value > total) {
+                msg.sender.transfer(msg.value.sub(total));
             }
             seller.transfer(offer);
             if(fee > 0) {
@@ -379,7 +384,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
 
         uint256[] memory packAmounts = new uint256[](amounts.length);
         for (uint256 i = 0; i < packAmounts.length; i++) {
-            packAmounts[i] = amounts[i] * purchase[0];
+            packAmounts[i] = amounts[i].mul(purchase[0]);
         }
         _asset.safeBatchTransferFrom(seller, buyer, ids, packAmounts, "");
         emit OfferClaimed(

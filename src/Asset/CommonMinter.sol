@@ -85,7 +85,7 @@ contract CommonMinter is MetaTransactionReceiver {
         uint256 totalCopies = 0;
         uint256 numAssetTypes = supplies.length;
         for (uint256 i = 0; i < numAssetTypes; i++) {
-            totalCopies += supplies[i];
+            totalCopies = totalCopies.add(supplies[i]);
         }
         require(_sand.transferFrom(creator, _feeReceiver, totalCopies.mul(feePerCopy)), "failed to transfer SAND");
         return
