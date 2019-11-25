@@ -1,10 +1,7 @@
 const rocketh = require('rocketh');
 const program = require('commander');
 const request = require('request');
-// const Ajv = require('ajv');
-// const base32 = require('base32.js');
-// const fs = require('fs');
-// const path = require('path');
+const {validate} = require('../lib/metadata');
 
 function waitRequest(options) {
     return new Promise((resolve, reject) => {
@@ -110,7 +107,14 @@ program
                 }
 
                 const assetMetadataData = await getJSON(url + '/assets/' + assetId + '/metadata');
-                console.log(JSON.stringify(assetMetadataData, null, '  '));
+                if (!assetMetadataData.metadata) {
+                    reportErrorAndExit('no metadata for asset ' + assetId);
+                }
+                if (!validate(assetMetadataData.metadata)) {
+                    console.error(validate.errors);
+                    console.log(JSON.stringify(assetMetadataData.metadata, null, '  '));
+                    reportErrorAndExit('error in metadata, does not follow schema!');
+                }
             } else {
                 throw new Error('no Asset with id ' + assetId);
             }
