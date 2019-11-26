@@ -1,7 +1,7 @@
 const rocketh = require('rocketh');
 const program = require('commander');
 const request = require('request');
-const {validate} = require('../lib/metadata');
+const {getValidator} = require('../lib/metadata');
 
 function waitRequest(options) {
     return new Promise((resolve, reject) => {
@@ -78,13 +78,30 @@ program
     .command('mintIds <creator> <destination> <assetIds...>')
     .description('mint assets from ids')
     .option('-u, --url <url>', 'api url')
+    .option('-w, --webUrl <webUrl>', 'web url')
     .option('-g, --gas <gas>', 'gas limit')
     .option('-p, --packId <packId>', 'packId')
     .option('-n, --nonce <nonce>', 'nonce')
     .option('-t, --test', 'testMode')
     .action(async (creator, destination, assetIds, cmdObj) => {
+        const propertiesValues = {};
+        const propertiesMaxValue = {};
         const testMode = cmdObj.test || true; // Test only for now
-        const url = (cmdObj.url || 'http://localhost:8081');
+        let webUrl = (cmdObj.webUrl || 'http://localhost:8081');
+        let url = (cmdObj.url || 'http://localhost:8081');
+        console.log({url, webUrl});
+        if (url === 'production') {
+            url = 'https://api.sandbox.game';
+            webUrl = 'https://www.sandbox.game';
+        } else if (url === 'dev' || url === 'development') {
+            url = 'https://api-develop.sandbox.game';
+            webUrl = 'https://develop.sandbox.game';
+        } else if (url === 'staging' || url === 'development') {
+            url = 'https://api-stage.sandbox.game';
+            webUrl = 'https://stage.sandbox.game';
+        }
+        console.log({url, webUrl});
+        const validate = getValidator(webUrl);
         const userData = await getJSON(url + '/users/' + creator);
         let creatorWallet;
         if (userData && userData.user) {
@@ -96,6 +113,7 @@ program
             throw new Error('no wallet for user with id ' + creator);
         }
 
+        let i = 0;
         for (const assetId of assetIds) {
             const assetData = await getJSON(url + '/assets/' + assetId);
             if (assetData && assetData.asset) {
@@ -110,14 +128,46 @@ program
                 if (!assetMetadataData.metadata) {
                     reportErrorAndExit('no metadata for asset ' + assetId);
                 }
+
+                // TODO remove:
+                const tmp = [];
+                for (const property of assetMetadataData.metadata.properties) {
+                    if (!(property.trait_type === 'category')) {
+                        property.max_value = 100;
+                        tmp.push(property);
+                    }
+                }
+                assetMetadataData.metadata.properties = tmp;
+
                 if (!validate(assetMetadataData.metadata)) {
                     console.error(validate.errors);
                     console.log(JSON.stringify(assetMetadataData.metadata, null, '  '));
                     reportErrorAndExit('error in metadata, does not follow schema!');
                 }
+
+                // checks :
+                // creator checks :
+                if (assetMetadataData.metadata.sandbox.creator !== creatorWallet) {
+                    reportErrorAndExit(`creator wallet do not match, metadata (${assetMetadataData.metadata.sandbox.creator})  != wallet ${creatorWallet}`);
+                }
+                // checks values and rarity match
+                let total = 0;
+                let max = 0;
+                if (assetMetadataData.metadata.properties.length !== 5) {
+                    reportErrorAndExit(`wrong number fo properties for asset ${assetId}`);
+                }
+                for (const property of assetMetadataData.metadata.properties) {
+                    if (property.value > max) {
+                        max = property.value;
+                    }
+                    total += property.value;
+                }
+                propertiesMaxValue[assetId] = max;
+                propertiesValues[assetId] = total;
             } else {
                 throw new Error('no Asset with id ' + assetId);
             }
+            i++;
         }
 
         const options = {
@@ -137,13 +187,43 @@ program
         }
 
         if (assetBatchInfo) {
-            console.log(JSON.stringify(assetBatchInfo, null, '  '));
+            // console.log(JSON.stringify(assetBatchInfo, null, '  '));
             const packId = cmdObj.packId || 0;
             const nonce = cmdObj.nonce;
 
             const gas = cmdObj.gas || 2000000; // TODO estimate
 
             const {supplies, rarities, hash} = assetBatchInfo;
+
+            for (let i = 0; i < assetIds.length; i++) {
+                const assetId = assetIds[i];
+                const rarity = rarities[i];
+                const propertiesTotalValue = propertiesValues[assetId];
+                const maxValue = propertiesMaxValue[assetId];
+                let expectedValue = 0;
+                let expectedMaxValue = 0;
+                if (rarities[i] === 0) {
+                    expectedValue = 50;
+                    expectedMaxValue = 25;
+                } else if (rarities[i] === 1) {
+                    expectedValue = 100;
+                    expectedMaxValue = 50;
+                } else if (rarities[i] === 2) {
+                    expectedValue = 150;
+                    expectedMaxValue = 75;
+                } else if (rarities[i] === 3) {
+                    expectedValue = 200;
+                    expectedMaxValue = 100;
+                } else {
+                    reportErrorAndExit(`wrong rarity for asset ${assetId}`);
+                }
+                if (!(propertiesTotalValue === expectedValue)) {
+                    reportErrorAndExit(`asset ${assetId} with rarity ${rarity} got wrong total value ${propertiesTotalValue} it should be  ${expectedValue}`);
+                }
+                if (!(maxValue === expectedMaxValue)) {
+                    reportErrorAndExit(`asset ${assetId} with rarity ${rarity} got wrong max value ${maxValue} it should be  ${expectedMaxValue}`);
+                }
+            }
 
             const raritiesPack = generateRaritiesPack(rarities);
             const suppliesArr = supplies;

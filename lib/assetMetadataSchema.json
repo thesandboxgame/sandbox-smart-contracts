@@ -34,8 +34,8 @@
 				"A Speedy Helicopter"
 			],
 			"pattern": "^(.*)$",
-			"minLength": 3,
-			"maxLength": 255
+			"minLength": 0,
+			"maxLength": 500
 		},
 		"image": {
 			"$id": "#/properties/image",
@@ -65,7 +65,7 @@
 			"examples": [
 				"https://www.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/"
 			],
-			"pattern": "^https://www.sandbox.game/en/assets/(.*)$"
+			"pattern": "^https://www.sandbox.game/en/assets/(.*)/(.{36})/$"
 		},
 		"properties": {
 			"$id": "#/properties/properties",
@@ -147,7 +147,7 @@
 					"examples": [
 						"0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20"
 					],
-					"pattern": "^0x([0123456789ABCDEFabcdef]*)$"
+					"pattern": "^0x([0123456789ABCDEFabcdef]{40})$"
 				},
 				"version": {
 					"$id": "#/properties/sandbox/properties/version",
@@ -177,7 +177,11 @@
 								"Entity"
 							],
 							"pattern": "^(.*)$",
-							"enum": ["Entity", "Block", "Equipment"]
+							"enum": [
+								"Entity",
+								"Block",
+								"Equipment"
+							]
 						},
 						"theme": {
 							"$id": "#/properties/sandbox/properties/classification/properties/theme",
@@ -188,7 +192,19 @@
 								"City"
 							],
 							"pattern": "^(.*)$",
-							"enum": ["City", "Nature", "Magic", "Sci-Fi"]
+							"enum": [
+								"Medieval",
+								"Sci-Fi",
+								"Pirates",
+								"Fantasy",
+								"Horror",
+								"Realistic",
+								"Retro",
+								"Nature",
+								"City",
+								"Magic",
+								"Rural"
+							]
 						},
 						"categories": {
 							"$id": "#/properties/sandbox/properties/classification/properties/categories",
@@ -203,7 +219,20 @@
 									"Vehicle"
 								],
 								"pattern": "^(.*)$",
-								"enum": ["Vehicle", "Humanoid", "Animal", "Decoration", "Tool"]
+								"enum": [
+									"Building",
+									"Vehicle",
+									"Decoration",
+									"Weapon",
+									"Tool",
+									"Animal",
+									"Humanoid",
+									"Monster",
+									"Sports",
+									"Plant",
+									"Terrain",
+									"Hazard"
+								]
 							}
 						}
 					}
@@ -226,7 +255,7 @@
 					"examples": [
 						"https://www.sandbox.game/en/users/12344"
 					],
-					"pattern": "^https://www.sandbox.game/en/users/(.*)$"
+					"pattern": "^https://www.sandbox.game/en/users/(.*)/(.{36})/$"
 				}
 			}
 		}
