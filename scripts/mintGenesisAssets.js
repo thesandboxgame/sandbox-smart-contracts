@@ -129,16 +129,6 @@ program
                     reportErrorAndExit('no metadata for asset ' + assetId);
                 }
 
-                // TODO remove:
-                const tmp = [];
-                for (const property of assetMetadataData.metadata.properties) {
-                    if (!(property.trait_type === 'category')) {
-                        property.max_value = 100;
-                        tmp.push(property);
-                    }
-                }
-                assetMetadataData.metadata.properties = tmp;
-
                 if (!validate(assetMetadataData.metadata)) {
                     console.error(validate.errors);
                     console.log(JSON.stringify(assetMetadataData.metadata, null, '  '));
@@ -232,8 +222,8 @@ program
                 console.log({genesisMinter, nonce, gas, creatorWallet, packId, hash, suppliesArr, raritiesPack, destination});
             } else {
                 try {
-                    // const receipt = await sendTxAndWait({from: genesisMinter, nonce, gas}, 'GenesisBouncer', 'mintMultipleFor', creatorWallet, packId, hash, suppliesArr, raritiesPack, destination);
-                    // console.log('success', {txHash: receipt.transactionHash, gasUsed: receipt.gasUsed});
+                    const receipt = await sendTxAndWait({from: genesisMinter, nonce, gas}, 'GenesisBouncer', 'mintMultipleFor', creatorWallet, packId, hash, suppliesArr, raritiesPack, destination);
+                    console.log('success', {txHash: receipt.transactionHash, gasUsed: receipt.gasUsed});
                 } catch (e) {
                     reportErrorAndExit(e);
                 }

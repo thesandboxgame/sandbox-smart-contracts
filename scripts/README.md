@@ -8,3 +8,9 @@ to setup bundle :
 ```
 yarn attach-rinkeby "node scripts\setupBundleSandSale.js setup"
 ```
+
+
+generate land config from back office tool
+```
+node scripts\generateLandPreSaleJSON.js <lands.json> data\land_presale_001.json
+```

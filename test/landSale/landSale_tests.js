@@ -153,14 +153,14 @@ function runLandSaleTests(title, contactStore) {
                     others[0],
                     others[0],
                     zeroAddress,
-                    400, 106, 1,
+                    lands[0].x, lands[0].y, lands[0].size,
                     lands[0].price,
                     lands[0].salt,
                     proof
                 );
 
                 const balance = await call(contracts.Land, 'balanceOf', {from: others[0]}, others[0]);
-                assert.equal(balance, 1, 'Balance is wrong');
+                assert.equal(balance, lands[0].size, 'Balance is wrong');
             });
 
             if (contractName === 'LandSaleWithETHAndDAI') {
@@ -175,7 +175,7 @@ function runLandSaleTests(title, contactStore) {
                             others[0],
                             others[0],
                             zeroAddress,
-                            400, 106, 1,
+                            lands[0].x, lands[0].y, lands[0].size,
                             lands[0].price,
                             lands[0].salt,
                             proof
@@ -206,7 +206,7 @@ function runLandSaleTests(title, contactStore) {
                         others[2],
                         others[2],
                         zeroAddress,
-                        99, 99, 3,
+                        lands[1].x, lands[1].y, lands[1].size,
                         lands[1].price,
                         lands[1].salt,
                         proof
@@ -224,8 +224,8 @@ function runLandSaleTests(title, contactStore) {
                         others[2],
                         others[2],
                         zeroAddress,
-                        400, 106, 1,
-                        lands[1].price,
+                        lands[0].x, lands[0].y, lands[0].size,
+                        lands[0].price,
                         lands[0].salt,
                         proof
                     ),
@@ -242,8 +242,8 @@ function runLandSaleTests(title, contactStore) {
                         others[2],
                         others[2],
                         zeroAddress,
-                        400, 106, 1,
-                        lands[1].price,
+                        lands[0].x, lands[0].y, lands[0].size,
+                        lands[0].price,
                         lands[0].salt,
                         proof
                     ),
@@ -258,7 +258,7 @@ function runLandSaleTests(title, contactStore) {
                     others[2],
                     others[2],
                     zeroAddress,
-                    400, 106, 1,
+                    lands[0].x, lands[0].y, lands[0].size,
                     lands[0].price,
                     lands[0].salt,
                     proof
@@ -273,7 +273,7 @@ function runLandSaleTests(title, contactStore) {
                         others[0],
                         others[0],
                         others[0],
-                        400, 106, 1,
+                        lands[0].x, lands[0].y, lands[0].size,
                         lands[0].price,
                         lands[0].salt,
                         proof
@@ -355,7 +355,7 @@ function runLandSaleTests(title, contactStore) {
                     others[0],
                     others[0],
                     zeroAddress,
-                    400, 106, 1,
+                    lands[0].x, lands[0].y, lands[0].size,
                     lands[0].price,
                     lands[0].salt,
                     proof
@@ -368,7 +368,7 @@ function runLandSaleTests(title, contactStore) {
                     others[0],
                     others[0],
                     zeroAddress,
-                    400, 106, 1,
+                    lands[0].x, lands[0].y, lands[0].size,
                     lands[0].price,
                     lands[0].salt,
                     proof
@@ -377,7 +377,7 @@ function runLandSaleTests(title, contactStore) {
                     others[0],
                     others[0],
                     zeroAddress,
-                    400, 106, 1,
+                    lands[0].x, lands[0].y, lands[0].size,
                     lands[0].price,
                     lands[0].salt,
                     proof
@@ -386,9 +386,9 @@ function runLandSaleTests(title, contactStore) {
 
             t.test('CANNOT generate proof for Land not on sale', async () => {
                 assert.throws(() => tree.getProof(calculateLandHash({
-                    x: 400,
-                    y: 106,
-                    size: 3,
+                    x: lands[0].x,
+                    y: lands[0].y,
+                    size: lands[1].size,
                     price: lands[0].price,
                     salt: lands[0].salt
                 })));
@@ -406,7 +406,7 @@ function runLandSaleTests(title, contactStore) {
                         others[0],
                         others[0],
                         zeroAddress,
-                        400, 106, 1,
+                        lands[0].x, lands[0].y, lands[0].size,
                         lands[0].price,
                         lands[0].salt,
                         proof
@@ -423,7 +423,7 @@ function runLandSaleTests(title, contactStore) {
                         others[0],
                         others[0],
                         zeroAddress,
-                        400, 106, 1,
+                        lands[0].x, lands[0].y, lands[0].size,
                         lands[0].price,
                         lands[0].salt,
                         proof
@@ -438,7 +438,7 @@ function runLandSaleTests(title, contactStore) {
                     others[0],
                     others[0],
                     zeroAddress,
-                    120, 144, 12,
+                    lands[2].x, lands[2].y, lands[2].size,
                     lands[2].price,
                     lands[2].salt,
                     proof
