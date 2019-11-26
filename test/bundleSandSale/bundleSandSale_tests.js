@@ -286,17 +286,20 @@ function runBundleSandSaleTests(title, contractStore) {
                 ]);
 
                 await tx(contracts.Asset, 'safeTransferFrom', {from: creator, gas}, creator, contracts.BundleSandSale.options.address, ids[0], numPacks, data);
-
+                // console.log('tx success');
                 const ethPrice = await call(
                     contracts.BundleSandSale,
                     'getEtherAmountWithUSD',
                     {from: randomUser},
                     priceUSDPerPack,
                 );
+                // console.log('ethPrice call');
 
                 const oldEthBalance = await getBalance(bundleSandSaleBeneficiary);
+                // console.log('oldEthBalance call');
 
                 const receipt = await tx(contracts.BundleSandSale, 'buyBundleWithEther', {from: randomUser, gas, value: ethPrice}, 0, 1, randomUser);
+                // console.log('buyBundleWithEther call');
 
                 const events = await contracts.BundleSandSale.getPastEvents(
                     'BundleSold', {
@@ -319,8 +322,8 @@ function runBundleSandSaleTests(title, contractStore) {
                 // const assetBalance = await call(contracts.Asset, 'balanceOf', {from: randomUser}, creator, ids[0]);
                 // assert.equal(assetBalance, 1, 'User asset balance is wrong');
 
-                const owner = await call(contracts.Asset, 'ownerOf', {from: randomUser}, ids[0]);
-                assert.equal(owner, randomUser, 'Asset owner is wrong');
+                const balance = await call(contracts.Asset, 'balanceOf', {from: randomUser}, randomUser, ids[0]);
+                assert.equal(balance, 1, 'balance 1');
 
                 const saleInfo = await call(contracts.BundleSandSale, 'getSaleInfo', {}, 0);
                 assert.equal(saleInfo.numPacksLeft, numPacks - 1, 'numPacksLeft is wrong');
