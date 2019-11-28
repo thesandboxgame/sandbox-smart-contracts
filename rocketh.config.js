@@ -1,5 +1,6 @@
 
 module.exports = {
+    defaultBalance: '1000000000000000000000',
     contractSrcPath: ['src', 'contracts_common/src'],
     deploymentChainIds: ['1', '3', '4', '42', '18'],
     ganacheOptions: {

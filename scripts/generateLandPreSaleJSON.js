@@ -20,8 +20,8 @@ function exitIfError() {
 const landGroups = {};
 for (const land of rawLands) {
     let estateId = land.estate;
-    const x = land.coordinateX + 204 + 3;
-    const y = land.coordinateY + 204 + 3;
+    const x = land.coordinateX + 204;
+    const y = land.coordinateY + 204;
     if (!estateId) {
         estateId = 1000 + (y * 408) + x;
     }

@@ -160,7 +160,7 @@ function runLandSaleDaiTests(title, contactStore) {
                     others[0],
                     others[0],
                     zeroAddress,
-                    400, 106, 1,
+                    lands[0].x, lands[0].y, lands[0].size,
                     lands[0].price,
                     lands[0].salt,
                     proof
@@ -177,7 +177,7 @@ function runLandSaleDaiTests(title, contactStore) {
                         others[0],
                         others[0],
                         zeroAddress,
-                        400, 106, 1,
+                        lands[0].x, lands[0].y, lands[0].size,
                         lands[0].price,
                         lands[0].salt,
                         proof
@@ -196,7 +196,7 @@ function runLandSaleDaiTests(title, contactStore) {
                         others[0],
                         others[0],
                         zeroAddress,
-                        400, 106, 1,
+                        lands[0].x, lands[0].y, lands[0].size,
                         lands[0].price,
                         lands[0].salt,
                         proof
@@ -215,7 +215,7 @@ function runLandSaleDaiTests(title, contactStore) {
                         others[0],
                         others[0],
                         zeroAddress,
-                        400, 106, 1,
+                        lands[0].x, lands[0].y, lands[0].size,
                         lands[0].price,
                         lands[0].salt,
                         proof
@@ -233,7 +233,7 @@ function runLandSaleDaiTests(title, contactStore) {
                     others[0],
                     others[0],
                     zeroAddress,
-                    400, 106, 1,
+                    lands[0].x, lands[0].y, lands[0].size,
                     lands[0].price,
                     lands[0].salt,
                     proof
@@ -247,7 +247,7 @@ function runLandSaleDaiTests(title, contactStore) {
                         others[0],
                         others[0],
                         others[0],
-                        400, 106, 1,
+                        lands[0].x, lands[0].y, lands[0].size,
                         lands[0].price,
                         lands[0].salt,
                         proof
@@ -346,7 +346,7 @@ function runLandSaleDaiTests(title, contactStore) {
                     others[0],
                     others[0],
                     zeroAddress,
-                    400, 106, 1,
+                    lands[0].x, lands[0].y, lands[0].size,
                     lands[0].price,
                     lands[0].salt,
                     proof
@@ -359,7 +359,7 @@ function runLandSaleDaiTests(title, contactStore) {
                     others[0],
                     others[0],
                     zeroAddress,
-                    400, 106, 1,
+                    lands[0].x, lands[0].y, lands[0].size,
                     lands[0].price,
                     lands[0].salt,
                     proof
@@ -368,7 +368,7 @@ function runLandSaleDaiTests(title, contactStore) {
                     others[0],
                     others[0],
                     zeroAddress,
-                    400, 106, 1,
+                    lands[0].x, lands[0].y, lands[0].size,
                     lands[0].price,
                     lands[0].salt,
                     proof
@@ -377,9 +377,9 @@ function runLandSaleDaiTests(title, contactStore) {
 
             t.test('CANNOT generate proof for Land not on sale', async () => {
                 assert.throws(() => tree.getProof(calculateLandHash({
-                    x: 400,
-                    y: 106,
-                    size: 3,
+                    x: lands[0].x,
+                    y: lands[0].y,
+                    size: lands[0].size === 1 ? 3 : lands[0].size / 3,
                     price: lands[0].price,
                     salt: lands[0].salt
                 })));
@@ -396,7 +396,7 @@ function runLandSaleDaiTests(title, contactStore) {
                         others[0],
                         others[0],
                         zeroAddress,
-                        400, 106, 1,
+                        lands[0].x, lands[0].y, lands[0].size,
                         lands[0].price,
                         lands[0].salt,
                         proof
@@ -413,7 +413,7 @@ function runLandSaleDaiTests(title, contactStore) {
                         others[0],
                         others[0],
                         zeroAddress,
-                        400, 106, 1,
+                        lands[0].x, lands[0].y, lands[0].size,
                         lands[0].price,
                         lands[0].salt,
                         proof
@@ -428,13 +428,13 @@ function runLandSaleDaiTests(title, contactStore) {
                     others[0],
                     others[0],
                     zeroAddress,
-                    120, 144, 12,
+                    lands[2].x, lands[2].y, lands[2].size,
                     lands[2].price,
                     lands[2].salt,
                     proof
                 );
-                for (let x = 120; x < 120 + 12; x++) {
-                    for (let y = 144; y < 144 + 12; y++) {
+                for (let x = lands[2].x; x < lands[2].x + 12; x++) {
+                    for (let y = lands[2].y; y < lands[2].y + 12; y++) {
                         const owner = await call(contracts.Land, 'ownerOf', null, x + (y * 408));
                         const balance = await call(contracts.Land, 'balanceOf', null, others[0]);
                         assert.equal(owner, others[0]);
@@ -444,6 +444,7 @@ function runLandSaleDaiTests(title, contactStore) {
             });
 
             t.test('can buy all Lands specified in json', async () => { // TODO reserved
+                await tx(contracts.FakeDAI, 'transfer', {from: deployer, gas}, others[0], toWei('1000000'));
                 for (const land of lands) {
                     const landHash = calculateLandHash(land);
                     const proof = tree.getProof(landHash);
