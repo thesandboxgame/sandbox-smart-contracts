@@ -31,21 +31,21 @@ for (const land of reservedLands) {
                 break;
             case 'My Crypto Heroes': reservedAddress = '0x8b6965eb3c78f424d75649f74af86e0bcd93d203';
                 break;
-            case 'Animoca Brands': reservedAddress = '0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c'; // TODO
+            case 'Animoca Brands': reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169'; // TODO
                 break;
-            case 'Pixowl': reservedAddress = '0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c'; // TODO
+            case 'Pixowl': reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169'; // TODO
                 break;
-            case 'Shaun The Sheep': reservedAddress = '0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c'; // TODO
+            case 'Shaun The Sheep': reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169'; // TODO
                 break;
             case 'Axie Infinity': reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169';
                 break;
             case 'Cryptowars': reservedAddress = '0x57c8bcc1c4af411d996a6317971b9b44439c9b75';
                 break;
-            case 'Battle Races': reservedAddress = '0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c'; // TODO
+            case 'Battle Races': reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169'; // TODO
                 break;
-            case 'Animoca F1': reservedAddress = '0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c'; // TODO
+            case 'Animoca F1': reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169'; // TODO
                 break;
-            case 'Blocore': reservedAddress = '0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c'; // TODO
+            case 'Blocore': reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169'; // TODO
                 break;
             default:
                 reportError('partner not expected: ' + land.name);

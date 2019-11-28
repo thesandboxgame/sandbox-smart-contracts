@@ -13,3 +13,4 @@ tmp_deployments/
 .temporal*
 __ipfs__/
 .sandbox_credentials
+.land_presale*
