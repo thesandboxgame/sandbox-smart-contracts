@@ -1,9 +1,58 @@
 const fs = require('fs');
 const input = process.argv[2];
 const output = process.argv[3];
+const reservedLandFile = process.argv.length >= 4 ? process.argv[4] : undefined;
 
 const data = fs.readFileSync(input);
 const rawLands = JSON.parse(data);
+
+let reservedLands = [];
+if (reservedLandFile) {
+    const reservedLandData = fs.readFileSync(reservedLandFile);
+    reservedLands = JSON.parse(reservedLandData);
+}
+
+const reservedLandsRegistry = {};
+for (const land of reservedLands) {
+    const x = land.x + 204;
+    const y = land.y + 204;
+    let reservedAddress;
+
+    if (land.sandbox) {
+        if (land.name !== 'Sandbox Network') {
+            reportError('partner not expected as Sandbox: ' + land.name);
+        }
+        reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169';
+    } else {
+        switch (land.name) {
+            case 'Old Skull Games': reservedAddress = '0xD98a18F688DB362aCF65dcdDb6e9FE6616697cbe';
+                break;
+            case 'Korean Artists District': reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169';
+                break;
+            case 'My Crypto Heroes': reservedAddress = '0x8b6965eb3c78f424d75649f74af86e0bcd93d203';
+                break;
+            case 'Animoca Brands': reservedAddress = '0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c'; // TODO
+                break;
+            case 'Pixowl': reservedAddress = '0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c'; // TODO
+                break;
+            case 'Shaun The Sheep': reservedAddress = '0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c'; // TODO
+                break;
+            case 'Axie Infinity': reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169';
+                break;
+            case 'Cryptowars': reservedAddress = '0x57c8bcc1c4af411d996a6317971b9b44439c9b75';
+                break;
+            case 'Battle Races': reservedAddress = '0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c'; // TODO
+                break;
+            case 'Animoca F1': reservedAddress = '0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c'; // TODO
+                break;
+            case 'Blocore': reservedAddress = '0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c'; // TODO
+                break;
+            default:
+                reportError('partner not expected: ' + land.name);
+        }
+    }
+    reservedLandsRegistry[x + (408 * y)] = reservedAddress;
+}
 
 let errors = false;
 function reportError(e) {
@@ -25,19 +74,28 @@ for (const land of rawLands) {
     if (!estateId) {
         estateId = 1000 + (y * 408) + x;
     }
-    const landGroup = landGroups[estateId];
+    let landGroup = landGroups[estateId];
     if (!landGroup) {
         landGroups[estateId] = {
             x,
             y,
             numLands: 1
         };
+        landGroup = landGroups[estateId];
     } else {
         if (x < landGroup.x || y < landGroup.y) {
             landGroup.x = x;
             landGroup.y = y;
         }
         landGroup.numLands++;
+    }
+
+    const reservedAddress = reservedLandsRegistry[x + (y * 408)];
+    if (reservedAddress) {
+        if (landGroup.reserved) {
+            reportError('already reserved ' + JSON.stringify({x: landGroup.x, y: landGroup.y}));
+        }
+        landGroup.reserved = reservedAddress;
     }
 }
 const lands = [];
@@ -85,6 +143,7 @@ for (const estateId of Object.keys(landGroups)) {
         y: landGroup.y,
         size,
         price,
+        reserved: landGroup.reserved
     });
     numLands += size * size;
 }

@@ -146,18 +146,18 @@ function runLandSaleEthTests(title, contactStore) {
             });
 
             t.test('can buy Land with ETH', async () => {
-                const sandPrice = lands[0].price;
+                const sandPrice = lands[5].price;
                 const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
-                const proof = tree.getProof(calculateLandHash(lands[0]));
+                const proof = tree.getProof(calculateLandHash(lands[5]));
 
                 await tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value},
                     others[0],
                     others[0],
                     zeroAddress,
-                    lands[0].x, lands[0].y, lands[0].size,
-                    lands[0].price,
-                    lands[0].salt,
+                    lands[5].x, lands[5].y, lands[5].size,
+                    lands[5].price,
+                    lands[5].salt,
                     proof
                 );
             });
@@ -165,9 +165,9 @@ function runLandSaleEthTests(title, contactStore) {
             t.test('cannot buy Land with ETH if not enabled', async () => {
                 await tx(contracts.LandSale, 'setETHEnabled', {from: landSaleAdmin, gas}, false);
 
-                const proof = tree.getProof(calculateLandHash(lands[0]));
+                const proof = tree.getProof(calculateLandHash(lands[5]));
 
-                const sandPrice = lands[0].price;
+                const sandPrice = lands[5].price;
                 const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
                 await expectRevert(
@@ -175,9 +175,9 @@ function runLandSaleEthTests(title, contactStore) {
                         others[0],
                         others[0],
                         zeroAddress,
-                        lands[0].x, lands[0].y, lands[0].size,
-                        lands[0].price,
-                        lands[0].salt,
+                        lands[5].x, lands[5].y, lands[5].size,
+                        lands[5].price,
+                        lands[5].salt,
                         proof
                     ),
                     'ether payments not enabled'
@@ -185,16 +185,16 @@ function runLandSaleEthTests(title, contactStore) {
             });
 
             t.test('cannot buy Land without enough ETH', async () => {
-                const proof = tree.getProof(calculateLandHash(lands[0]));
+                const proof = tree.getProof(calculateLandHash(lands[5]));
 
                 await expectRevert(
                     tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value: 0},
                         others[0],
                         others[0],
                         zeroAddress,
-                        lands[0].x, lands[0].y, lands[0].size,
-                        lands[0].price,
-                        lands[0].salt,
+                        lands[5].x, lands[5].y, lands[5].size,
+                        lands[5].price,
+                        lands[5].salt,
                         proof
                     ),
                     'not enough ether sent'
@@ -202,18 +202,18 @@ function runLandSaleEthTests(title, contactStore) {
             });
 
             t.test('cannot buy Land from a non reserved Land with reserved param', async () => {
-                const sandPrice = lands[0].price;
+                const sandPrice = lands[5].price;
                 const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
-                const proof = tree.getProof(calculateLandHash(lands[0]));
+                const proof = tree.getProof(calculateLandHash(lands[5]));
                 await expectThrow(
                     tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value},
                         others[0],
                         others[0],
                         others[0],
-                        lands[0].x, lands[0].y, lands[0].size,
-                        lands[0].price,
-                        lands[0].salt,
+                        lands[5].x, lands[5].y, lands[5].size,
+                        lands[5].price,
+                        lands[5].salt,
                         proof
                     )
                 );
@@ -308,59 +308,59 @@ function runLandSaleEthTests(title, contactStore) {
             });
 
             t.test('CANNOT buy Land when minter rights revoked', async () => {
-                const sandPrice = lands[0].price;
+                const sandPrice = lands[5].price;
                 const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
                 await tx(contracts.Land, 'setMinter', {from: landAdmin, gas}, contracts.LandSale.options.address, false);
-                const proof = tree.getProof(calculateLandHash(lands[0]));
+                const proof = tree.getProof(calculateLandHash(lands[5]));
                 await expectThrow(tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value},
                     others[0],
                     others[0],
                     zeroAddress,
-                    lands[0].x, lands[0].y, lands[0].size,
-                    lands[0].price,
-                    lands[0].salt,
+                    lands[5].x, lands[5].y, lands[5].size,
+                    lands[5].price,
+                    lands[5].salt,
                     proof
                 ));
             });
 
             t.test('CANNOT buy Land twice', async () => {
-                const sandPrice = lands[0].price;
+                const sandPrice = lands[5].price;
                 const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
-                const proof = tree.getProof(calculateLandHash(lands[0]));
+                const proof = tree.getProof(calculateLandHash(lands[5]));
                 await tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value},
                     others[0],
                     others[0],
                     zeroAddress,
-                    lands[0].x, lands[0].y, lands[0].size,
-                    lands[0].price,
-                    lands[0].salt,
+                    lands[5].x, lands[5].y, lands[5].size,
+                    lands[5].price,
+                    lands[5].salt,
                     proof
                 );
                 await expectThrow(tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value},
                     others[0],
                     others[0],
                     zeroAddress,
-                    lands[0].x, lands[0].y, lands[0].size,
-                    lands[0].price,
-                    lands[0].salt,
+                    lands[5].x, lands[5].y, lands[5].size,
+                    lands[5].price,
+                    lands[5].salt,
                     proof
                 ));
             });
 
             t.test('CANNOT generate proof for Land not on sale', async () => {
                 assert.throws(() => tree.getProof(calculateLandHash({
-                    x: lands[0].x,
-                    y: lands[0].y,
-                    size: lands[0].size === 1 ? 3 : lands[0].size / 3,
-                    price: lands[0].price,
-                    salt: lands[0].salt
+                    x: lands[5].x,
+                    y: lands[5].y,
+                    size: lands[5].size === 1 ? 3 : lands[5].size / 3,
+                    price: lands[5].price,
+                    salt: lands[5].salt
                 })));
             });
 
             t.test('CANNOT buy Land with invalid proof', async () => {
-                const sandPrice = lands[0].price;
+                const sandPrice = lands[5].price;
                 const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
                 const proof = [
@@ -373,9 +373,9 @@ function runLandSaleEthTests(title, contactStore) {
                         others[0],
                         others[0],
                         zeroAddress,
-                        lands[0].x, lands[0].y, lands[0].size,
-                        lands[0].price,
-                        lands[0].salt,
+                        lands[5].x, lands[5].y, lands[5].size,
+                        lands[5].price,
+                        lands[5].salt,
                         proof
                     ),
                     'Invalid land provided'
@@ -383,7 +383,7 @@ function runLandSaleEthTests(title, contactStore) {
             });
 
             t.test('CANNOT buy Land with wrong proof', async () => {
-                const sandPrice = lands[0].price;
+                const sandPrice = lands[5].price;
                 const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
                 const proof = tree.getProof(calculateLandHash(lands[2]));
@@ -393,9 +393,9 @@ function runLandSaleEthTests(title, contactStore) {
                         others[0],
                         others[0],
                         zeroAddress,
-                        lands[0].x, lands[0].y, lands[0].size,
-                        lands[0].price,
-                        lands[0].salt,
+                        lands[5].x, lands[5].y, lands[5].size,
+                        lands[5].price,
+                        lands[5].salt,
                         proof
                     ),
                     'Invalid land provided',
@@ -426,21 +426,33 @@ function runLandSaleEthTests(title, contactStore) {
                 }
             });
 
-            t.test('can buy all Lands specified in json', async () => { // TODO reserved
+            t.test('can buy all Lands specified in json except reserved lands', async () => {
                 for (const land of lands) {
                     const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, land.price);
 
                     const landHash = calculateLandHash(land);
                     const proof = tree.getProof(landHash);
-                    await tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value},
-                        others[0],
-                        others[0],
-                        zeroAddress,
-                        land.x, land.y, land.size,
-                        land.price,
-                        land.salt,
-                        proof
-                    );
+                    if (land.reserved) {
+                        await expectThrow(tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value},
+                            others[0],
+                            others[0],
+                            land.reserved,
+                            land.x, land.y, land.size,
+                            land.price,
+                            land.salt,
+                            proof
+                        ));
+                    } else {
+                        await tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value},
+                            others[0],
+                            others[0],
+                            zeroAddress,
+                            land.x, land.y, land.size,
+                            land.price,
+                            land.salt,
+                            proof
+                        );
+                    }
                 }
             });
 
