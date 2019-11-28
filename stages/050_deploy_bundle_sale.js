@@ -71,4 +71,4 @@ module.exports = async ({namedAccounts, initialRun}) => {
         log('reusing BundleSandSale at ' + bundleSandSaleDeployResult.contract.options.address);
     }
 };
-module.exports.skip = guard(['1', '4'], 'BundleSandSale');
+module.exports.skip = guard(['1', '4']); // module.exports.skip = guard(['1', '4'], 'BundleSandSale');
