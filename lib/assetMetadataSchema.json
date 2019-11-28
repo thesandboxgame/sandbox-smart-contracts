@@ -117,7 +117,7 @@
 						"$id": "#/properties/properties/items/properties/max_value",
 						"type": "integer",
 						"title": "The max value this attribute can have",
-						"default": 0,
+						"default": 100,
 						"examples": [
 							100
 						],

@@ -12,3 +12,4 @@ tmp_deployments/
 .DS_Store
 .temporal*
 __ipfs__/
+.sandbox_credentials

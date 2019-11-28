@@ -1,7 +1,8 @@
 const rocketh = require('rocketh');
 const program = require('commander');
-const request = require('request');
+const request = require('request').defaults({jar: true}); // enable cookies
 const {getValidator} = require('../lib/metadata');
+const fs = require('fs');
 
 function waitRequest(options) {
     return new Promise((resolve, reject) => {
@@ -70,6 +71,8 @@ function generateRaritiesPack(raritiesArr) {
     return raritiesPack;
 }
 
+const credentials = JSON.parse(fs.readFileSync('.sandbox_credentials'));
+
 // const schemaS = fs.readFileSync(path.join(__dirname, 'assetMetadataSchema.json'));
 // const schema = JSON.parse(schemaS);
 // const ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}
@@ -101,6 +104,13 @@ program
             webUrl = 'https://stage.sandbox.game';
         }
         console.log({url, webUrl});
+        await waitRequest({
+            method: 'POST',
+            url: url + '/auth/login',
+            body: credentials,
+            json: true
+        });
+
         const validate = getValidator(webUrl);
         const userData = await getJSON(url + '/users/' + creator);
         let creatorWallet;
