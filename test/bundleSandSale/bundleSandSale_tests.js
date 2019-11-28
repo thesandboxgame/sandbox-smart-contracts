@@ -237,7 +237,7 @@ function runBundleSandSaleTests(title, contractStore) {
                 assert.equal(event.ids[0], tokenIds[0], 'Wrong token id');
                 assert.equal(event.amounts[0], '1', 'Wrong amounts');
 
-                const saleInfo = await call(contracts.BundleSandSale, 'getSaleInfo', {}, 0);
+                const saleInfo = await call(contracts.BundleSandSale, 'getSaleInfo', {}, 1);
                 assert.equal(saleInfo.priceUSD, priceUSDPerPack, 'USD price is wrong');
                 assert.equal(saleInfo.numPacksLeft, numPacks, 'numPacksLeft is wrong');
             });
@@ -254,7 +254,7 @@ function runBundleSandSaleTests(title, contractStore) {
                     sandAmountPerPack,
                 );
 
-                const saleInfo = await call(contracts.BundleSandSale, 'getSaleInfo', {}, 0);
+                const saleInfo = await call(contracts.BundleSandSale, 'getSaleInfo', {}, 1);
                 assert.equal(saleInfo.priceUSD, priceUSDPerPack, 'USD price is wrong');
                 assert.equal(saleInfo.numPacksLeft, numPacks, 'numPacksLeft is wrong');
             });
@@ -298,7 +298,7 @@ function runBundleSandSaleTests(title, contractStore) {
                 const oldEthBalance = await getBalance(bundleSandSaleBeneficiary);
                 // console.log('oldEthBalance call');
 
-                const receipt = await tx(contracts.BundleSandSale, 'buyBundleWithEther', {from: randomUser, gas, value: ethPrice}, 0, 1, randomUser);
+                const receipt = await tx(contracts.BundleSandSale, 'buyBundleWithEther', {from: randomUser, gas, value: ethPrice}, 1, 1, randomUser);
                 // console.log('buyBundleWithEther call');
 
                 const events = await contracts.BundleSandSale.getPastEvents(
@@ -325,7 +325,7 @@ function runBundleSandSaleTests(title, contractStore) {
                 const balance = await call(contracts.Asset, 'balanceOf', {from: randomUser}, randomUser, ids[0]);
                 assert.equal(balance, 1, 'balance 1');
 
-                const saleInfo = await call(contracts.BundleSandSale, 'getSaleInfo', {}, 0);
+                const saleInfo = await call(contracts.BundleSandSale, 'getSaleInfo', {}, 1);
                 assert.equal(saleInfo.numPacksLeft, numPacks - 1, 'numPacksLeft is wrong');
 
                 assert.equal(event.buyer, randomUser, 'Buyer address is wrong');
@@ -350,14 +350,14 @@ function runBundleSandSaleTests(title, contractStore) {
                 const ethPrice = await call(contracts.BundleSandSale, 'getEtherAmountWithUSD', {from: randomUser}, priceUSDPerPack);
                 const value = new BN(ethPrice).mul(new BN(2)).toString();
 
-                await tx(contracts.BundleSandSale, 'buyBundleWithEther', {from: randomUser, gas, value}, 0, 2, randomUser);
+                await tx(contracts.BundleSandSale, 'buyBundleWithEther', {from: randomUser, gas, value}, 1, 2, randomUser);
 
                 const sandBalance = await getERC20Balance(contracts.Sand, randomUser);
                 const expectedSandBalance = new BN(sandAmountPerPack).mul(new BN(2));
 
                 assert.equal(sandBalance.toString(), expectedSandBalance.toString(), 'Sand balance is wrong');
 
-                const saleInfo = await call(contracts.BundleSandSale, 'getSaleInfo', {}, 0);
+                const saleInfo = await call(contracts.BundleSandSale, 'getSaleInfo', {}, 1);
                 assert.equal(saleInfo.numPacksLeft, 0, 'numPacksLeft is wrong');
             });
         });
@@ -379,7 +379,7 @@ function runBundleSandSaleTests(title, contractStore) {
                 await tx(contracts.FakeDai, 'approve', {from: randomUser, gas}, contracts.BundleSandSale.options.address, priceUSDPerPack.toString());
 
                 const previousDaiBalance = await getERC20Balance(contracts.FakeDai, bundleSandSaleBeneficiary);
-                await tx(contracts.BundleSandSale, 'buyBundleWithDai', {from: randomUser, gas}, 0, 1, randomUser);
+                await tx(contracts.BundleSandSale, 'buyBundleWithDai', {from: randomUser, gas}, 1, 1, randomUser);
 
                 const sandBalance = await getERC20Balance(contracts.Sand, randomUser);
                 assert.equal(sandBalance.toString(), sandAmountPerPack.toString(), 'User Sand balance is wrong');
@@ -408,7 +408,7 @@ function runBundleSandSaleTests(title, contractStore) {
                 await tx(contracts.FakeDai, 'approve', {from: randomUser, gas}, contracts.BundleSandSale.options.address, price.toString());
 
                 const previousDaiBalance = await getERC20Balance(contracts.FakeDai, bundleSandSaleBeneficiary);
-                await tx(contracts.BundleSandSale, 'buyBundleWithDai', {from: randomUser, gas}, 0, 2, randomUser);
+                await tx(contracts.BundleSandSale, 'buyBundleWithDai', {from: randomUser, gas}, 1, 2, randomUser);
 
                 const sandBalance = await getERC20Balance(contracts.Sand, randomUser);
                 const expectedSandBalance = new BN(sandAmountPerPack).mul(new BN(2));
@@ -437,7 +437,7 @@ function runBundleSandSaleTests(title, contractStore) {
                 );
 
                 await expectRevert(
-                    tx(contracts.BundleSandSale, 'buyBundleWithEther', {from: randomUser, gas, value: '0'}, 0, 2, randomUser),
+                    tx(contracts.BundleSandSale, 'buyBundleWithEther', {from: randomUser, gas, value: '0'}, 1, 2, randomUser),
                     'not enough ether sent'
                 );
             });
@@ -457,7 +457,7 @@ function runBundleSandSaleTests(title, contractStore) {
                 const ethPrice = await call(contracts.BundleSandSale, 'getEtherAmountWithUSD', {from: randomUser}, priceUSDPerPack);
 
                 await expectRevert(
-                    tx(contracts.BundleSandSale, 'buyBundleWithEther', {from: randomUser, gas, value: ethPrice}, 0, 2, randomUser),
+                    tx(contracts.BundleSandSale, 'buyBundleWithEther', {from: randomUser, gas, value: ethPrice}, 1, 2, randomUser),
                     'not enough ether sent'
                 );
             });
@@ -478,7 +478,7 @@ function runBundleSandSaleTests(title, contractStore) {
                 );
 
                 await expectRevert(
-                    tx(contracts.BundleSandSale, 'buyBundleWithDai', {from: randomUser, gas}, 0, 1, randomUser),
+                    tx(contracts.BundleSandSale, 'buyBundleWithDai', {from: randomUser, gas}, 1, 1, randomUser),
                     'failed to transfer dai'
                 );
             });
@@ -516,10 +516,10 @@ function runBundleSandSaleTests(title, contractStore) {
                     priceUSDPerPack,
                 );
 
-                await tx(contracts.BundleSandSale, 'buyBundleWithEther', {from: randomUser, gas, value: ethPrice}, 0, 1, randomUser);
+                await tx(contracts.BundleSandSale, 'buyBundleWithEther', {from: randomUser, gas, value: ethPrice}, 1, 1, randomUser);
 
                 await expectRevert(
-                    tx(contracts.BundleSandSale, 'buyBundleWithEther', {from: randomUser, gas, value: ethPrice}, 0, 1, randomUser),
+                    tx(contracts.BundleSandSale, 'buyBundleWithEther', {from: randomUser, gas, value: ethPrice}, 1, 1, randomUser),
                     'not enough packs on sale'
                 );
             });
@@ -539,10 +539,10 @@ function runBundleSandSaleTests(title, contractStore) {
                 await tx(contracts.FakeDai, 'transfer', {from: daiHolder, gas}, randomUser, priceUSDPerPack.toString());
                 await tx(contracts.FakeDai, 'approve', {from: randomUser, gas}, contracts.BundleSandSale.options.address, priceUSDPerPack.toString());
 
-                await tx(contracts.BundleSandSale, 'buyBundleWithDai', {from: randomUser, gas}, 0, 1, randomUser);
+                await tx(contracts.BundleSandSale, 'buyBundleWithDai', {from: randomUser, gas}, 1, 1, randomUser);
 
                 await expectRevert(
-                    tx(contracts.BundleSandSale, 'buyBundleWithDai', {from: randomUser, gas}, 0, 1, randomUser),
+                    tx(contracts.BundleSandSale, 'buyBundleWithDai', {from: randomUser, gas}, 1, 1, randomUser),
                     'not enough packs on sale'
                 );
             });
@@ -561,12 +561,12 @@ function runBundleSandSaleTests(title, contractStore) {
                     sandAmountPerPack,
                 );
 
-                const saleInfo = await call(contracts.BundleSandSale, 'getSaleInfo', {}, 0);
+                const saleInfo = await call(contracts.BundleSandSale, 'getSaleInfo', {}, 1);
                 assert.equal(saleInfo.numPacksLeft, 2, 'numPacksLeft is wrong');
 
-                await tx(contracts.BundleSandSale, 'withdrawSale', {from: bundleSandSaleAdmin, gas}, 0, creator);
+                await tx(contracts.BundleSandSale, 'withdrawSale', {from: bundleSandSaleAdmin, gas}, 1, creator);
 
-                const newSaleInfo = await call(contracts.BundleSandSale, 'getSaleInfo', {}, 0);
+                const newSaleInfo = await call(contracts.BundleSandSale, 'getSaleInfo', {}, 1);
                 assert.equal(newSaleInfo.numPacksLeft, 0, 'numPacksLeft is wrong');
             });
 
@@ -582,15 +582,15 @@ function runBundleSandSaleTests(title, contractStore) {
                     sandAmountPerPack,
                 );
 
-                const saleInfo = await call(contracts.BundleSandSale, 'getSaleInfo', {}, 0);
+                const saleInfo = await call(contracts.BundleSandSale, 'getSaleInfo', {}, 1);
                 assert.equal(saleInfo.numPacksLeft, 2, 'numPacksLeft is wrong');
 
                 await expectRevert(
-                    tx(contracts.BundleSandSale, 'withdrawSale', {from: creator, gas}, 0, randomUser),
+                    tx(contracts.BundleSandSale, 'withdrawSale', {from: creator, gas}, 1, randomUser),
                     'only admin allowed'
                 );
 
-                const newSaleInfo = await call(contracts.BundleSandSale, 'getSaleInfo', {}, 0);
+                const newSaleInfo = await call(contracts.BundleSandSale, 'getSaleInfo', {}, 1);
                 assert.equal(newSaleInfo.numPacksLeft, 2, 'numPacksLeft is wrong');
             });
 

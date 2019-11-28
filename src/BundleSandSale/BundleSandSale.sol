@@ -12,7 +12,7 @@ contract BundleSandSale is Admin {
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
 
     event BundleSale(
-        uint256 indexed index,
+        uint256 indexed saleId,
         uint256[] ids,
         uint256[] amounts,
         uint256 sandAmount,
@@ -21,7 +21,7 @@ contract BundleSandSale is Admin {
     );
 
     event BundleSold(
-        uint256 indexed index,
+        uint256 indexed saleId,
         address indexed buyer,
         uint256 numPacks,
         address token,
@@ -89,15 +89,18 @@ contract BundleSandSale is Admin {
 
     /**
      * @notice Buys Sand Bundle with Ether
+     * @param saleId id of the bundle
      * @param numPacks the amount of packs to buy
      * @param to The address that will receive the SAND
      */
-    function buyBundleWithEther(uint256 bundleIndex, uint256 numPacks, address to) external payable {
-        uint256 numPacksLeft = sales[bundleIndex].numPacksLeft;
+    function buyBundleWithEther(uint256 saleId, uint256 numPacks, address to) external payable {
+        require(saleId > 0, "invalid saleId");
+        uint256 saleIndex = saleId - 1;
+        uint256 numPacksLeft = sales[saleIndex].numPacksLeft;
         require(numPacksLeft >= numPacks, "not enough packs on sale");
-        sales[bundleIndex].numPacksLeft = numPacksLeft - numPacks;
+        sales[saleIndex].numPacksLeft = numPacksLeft - numPacks;
 
-        uint256 USDRequired = numPacks.mul(sales[bundleIndex].priceUSD);
+        uint256 USDRequired = numPacks.mul(sales[saleIndex].priceUSD);
         uint256 ETHRequired = getEtherAmountWithUSD(USDRequired);
         require(msg.value >= ETHRequired, "not enough ether sent");
         uint256 leftOver = msg.value - ETHRequired;
@@ -105,17 +108,20 @@ contract BundleSandSale is Admin {
             msg.sender.transfer(leftOver); // refund extra
         }
         address(_receivingWallet).transfer(ETHRequired);
-        _transferPack(bundleIndex, numPacks, to);
+        _transferPack(saleIndex, numPacks, to);
 
-        emit BundleSold(bundleIndex, msg.sender, numPacks, address(0), ETHRequired);
+        emit BundleSold(saleId, msg.sender, numPacks, address(0), ETHRequired);
     }
 
     /**
      * @notice Buys Sand Bundle with DAI
+     * @param saleId id of the bundle
      * @param numPacks the amount of packs to buy
      * @param to The address that will receive the SAND
      */
-    function buyBundleWithDai(uint256 saleIndex, uint256 numPacks, address to) external {
+    function buyBundleWithDai(uint256 saleId, uint256 numPacks, address to) external {
+        require(saleId > 0, "invalid saleId");
+        uint256 saleIndex = saleId - 1;
         uint256 numPacksLeft = sales[saleIndex].numPacksLeft;
         require(numPacksLeft >= numPacks, "not enough packs on sale");
         sales[saleIndex].numPacksLeft = numPacksLeft - numPacks;
@@ -124,15 +130,19 @@ contract BundleSandSale is Admin {
         require(_dai.transferFrom(msg.sender, _receivingWallet, USDRequired), "failed to transfer dai");
         _transferPack(saleIndex, numPacks, to);
 
-        emit BundleSold(saleIndex, msg.sender, numPacks, address(_dai), USDRequired);
+        emit BundleSold(saleId, msg.sender, numPacks, address(_dai), USDRequired);
     }
 
-    function getSaleInfo(uint256 saleIndex) external view returns(uint256 priceUSD, uint256 numPacksLeft) {
+    function getSaleInfo(uint256 saleId) external view returns(uint256 priceUSD, uint256 numPacksLeft) {
+        require(saleId > 0, "invalid saleId");
+        uint256 saleIndex = saleId - 1;
         priceUSD = sales[saleIndex].priceUSD;
         numPacksLeft = sales[saleIndex].numPacksLeft;
     }
 
-    function withdrawSale(uint256 saleIndex, address to) external onlyAdmin() {
+    function withdrawSale(uint256 saleId, address to) external onlyAdmin() {
+        require(saleId > 0, "invalid saleId");
+        uint256 saleIndex = saleId - 1;
         uint256 numPacksLeft = sales[saleIndex].numPacksLeft;
         sales[saleIndex].numPacksLeft = 0;
 
@@ -238,13 +248,13 @@ contract BundleSandSale is Admin {
         uint256 priceUSDPerPack
     ) internal {
         require(_sand.transferFrom(from, address(this), sandAmountPerPack.mul(numPacks)), "failed to transfer Sand");
-        uint256 saleIndex = sales.push(Sale({
+        uint256 saleId = sales.push(Sale({
             ids: ids,
             amounts : amounts,
             sandAmount: sandAmountPerPack,
             priceUSD: priceUSDPerPack,
             numPacksLeft: numPacks
         }));
-        emit BundleSale(saleIndex, ids, amounts, sandAmountPerPack, priceUSDPerPack, numPacks);
+        emit BundleSale(saleId, ids, amounts, sandAmountPerPack, priceUSDPerPack, numPacks);
     }
 }
