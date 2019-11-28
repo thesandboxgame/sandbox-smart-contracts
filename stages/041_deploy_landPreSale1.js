@@ -84,4 +84,4 @@ module.exports = async ({namedAccounts, initialRun, deployIfDifferent}) => {
         log('reusing LandPreSale_1 at ' + contract.options.address);
     }
 };
-module.exports.skip = guard(['1', '4'], 'LandPreSale_1');
+module.exports.skip = () => true; // module.exports.skip = guard(['1', '4'], 'LandPreSale_1');
