@@ -118,7 +118,7 @@ async function setupTestLandSale(contracts) {
             saleEnd
         );
     }
-
+    await tx(contract, 'setSANDEnabled', {from: landSaleAdmin, gas: 100000}, true);
     await tx(contracts.Land, 'setMinter', {from: landAdmin, gas: 1000000}, contract.options.address, true);
     await tx(contracts.Sand, 'setSuperOperator', {from: sandAdmin, gas: 1000000}, contract.options.address, true);
 

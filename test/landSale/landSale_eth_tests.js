@@ -121,8 +121,6 @@ function runLandSaleEthTests(title, contactStore) {
 
             landHashArray = createDataArray(lands);
             tree = new MerkleTree(landHashArray);
-
-            await tx(contracts.LandSale, 'setETHEnabled', {from: landSaleAdmin, gas}, true);
         });
 
         t.test('-> ETH payments', async (t) => {

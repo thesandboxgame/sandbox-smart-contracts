@@ -25,8 +25,8 @@ contract LandSaleWithETHAndDAI is MetaTransactionReceiver {
     uint256 internal _expiryTime;
     bytes32 internal _merkleRoot;
 
-    bool _sandEnabled = true;
-    bool _etherEnabled = false;
+    bool _sandEnabled = false;
+    bool _etherEnabled = true;
     bool _daiEnabled = false;
 
     event LandQuadPurchased(

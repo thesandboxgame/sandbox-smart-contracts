@@ -128,8 +128,6 @@ function runLandSaleDaiTests(title, contactStore) {
             landHashArray = createDataArray(lands);
             tree = new MerkleTree(landHashArray);
 
-            await tx(contracts.LandSale, 'setDAIEnabled', {from: landSaleAdmin, gas}, true);
-
             await tx(contracts.FakeDAI, 'transfer', {from: deployer, gas}, others[0], toWei('1000000'));
             await tx(contracts.FakeDAI, 'approve', {from: others[0], gas}, contracts.LandSale.options.address, toWei('1000000')); // TODO remove and move it inot test
         });
