@@ -12,10 +12,10 @@ function generateLandsForMerkleTree() {
         let reservedAddress;
 
         if (land.sandbox) {
-            if (land.name !== 'Sandbox Network') {
+            if (land.name !== 'Sandbox') {
                 reportError('partner not expected as Sandbox: ' + land.name);
             }
-            //  TODO ? reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169';
+            reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169';
         } else {
             switch (land.name) {
                 case 'Old Skull Games': reservedAddress = '0xD98a18F688DB362aCF65dcdDb6e9FE6616697cbe';
