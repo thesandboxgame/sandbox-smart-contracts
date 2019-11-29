@@ -1,0 +1,86 @@
+[
+  {
+    "name": "Old Skull Games",
+    "img": "/img/18_Land/partners/old_skull_games.svg",
+    "sandbox": false,
+    "x": -48,
+    "y": 12
+  },
+  {
+    "name": "Korean Artists District",
+    "img": "/img/18_Land/partners/korean.svg",
+    "sandbox": false,
+    "x": -48,
+    "y": 30
+  },
+  {
+    "name": "My Crypto Heroes",
+    "img": "/img/18_Land/partners/my_crypto_heroes.svg",
+    "sandbox": false,
+    "x": -24,
+    "y": 18
+  },
+  {
+    "name": "Animoca Brands",
+    "img": "/img/18_Land/partners/animoca.svg",
+    "sandbox": false,
+    "x": -6,
+    "y": 42
+  },
+  {
+    "name": "Pixowl",
+    "img": "/img/18_Land/partners/pixowl.svg",
+    "sandbox": false,
+    "x": -42,
+    "y": 48
+  },
+  {
+    "name": "Shaun The Sheep",
+    "img": "/img/18_Land/partners/shaun.svg",
+    "sandbox": false,
+    "x": -24,
+    "y": 60
+  },
+  {
+    "name": "Axie Infinity",
+    "img": "/img/18_Land/partners/axie.svg",
+    "sandbox": false,
+    "x": -3,
+    "y": 18
+  },
+  {
+    "name": "Cryptowars",
+    "img": "/img/18_Land/partners/cryptowars.svg",
+    "sandbox": false,
+    "x": -39,
+    "y": 27
+  },
+  {
+    "name": "Battle Races",
+    "img": "/img/18_Land/partners/battle_races.svg",
+    "sandbox": false,
+    "x": -21,
+    "y": 30
+  },
+  {
+    "name": "Animoca F1",
+    "img": "/img/18_Land/partners/animoca_f1.svg",
+    "sandbox": false,
+    "x": -12,
+    "y": 48
+  },
+  {
+    "name": "Blocore",
+    "img": "/img/18_Land/partners/blocore.svg",
+    "sandbox": false,
+    "x": -42,
+    "y": 57
+  },
+  {
+    "name": "Sandbox Network",
+    "img": "/img/18_Land/partners/sandbox.svg",
+    "sandbox": true,
+    "x": -12,
+    "y": -12
+  }
+]

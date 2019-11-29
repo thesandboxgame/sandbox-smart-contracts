@@ -1,15 +1,12 @@
 const rocketh = require('rocketh');
-const fs = require('fs');
+
 const Web3 = require('web3');
 const {
     deploy,
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);
 const {guard} = require('../lib');
-
-const MerkleTree = require('../lib/merkleTree');
-const {createDataArray, saltLands} = require('../lib/merkleTreeHelper');
-const landsForSales = require('../data/land_presale_001.json');
+const {getLands} = require('../data/getLands');
 
 module.exports = async ({namedAccounts, initialRun, deployIfDifferent, isDeploymentChainId}) => {
     function log(...args) {
@@ -59,22 +56,11 @@ module.exports = async ({namedAccounts, initialRun, deployIfDifferent, isDeploym
         dai = daiDeployResult.contract;
     }
 
-    let secret;
-    let expose = false;
-    if (isDeploymentChainId) {
-        secret = fs.readFileSync('./.land_presale_1_secret');
-    } else {
-        secret = '0xd99c85d88ecb384d210f988028308ef7d7ffbbd33d64e7189c8e54ee2e9f6a5b';
-        expose = true;
-    }
-
-    const saltedLands = saltLands(landsForSales, secret);
-    const tree = new MerkleTree(createDataArray(saltedLands));
-    const merkleRootHash = tree.getRoot().hash;
+    const {lands, merkleRootHash} = getLands(isDeploymentChainId);
 
     const deployResult = await deployIfDifferent(['data'],
         'LandPreSale_1',
-        {from: deployer, gas: 1000000, associatedData: expose ? saltedLands : landsForSales},
+        {from: deployer, gas: 1000000, associatedData: lands},
         'LandSale', // TODO rename : LandSaleWithETHAndDAI
         landContract.options.address,
         sandContract.options.address,
