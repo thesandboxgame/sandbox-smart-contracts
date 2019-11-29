@@ -1,14 +1,14 @@
 [
   {
     "name": "Old Skull Games",
-    "img": "/img/18_Land/partners/old_skull_games.svg",
+    "img": "/img/18_Land/partners/old_skull.svg",
     "sandbox": false,
     "x": -48,
     "y": 12
   },
   {
     "name": "Korean Artists District",
-    "img": "/img/18_Land/partners/korean.svg",
+    "img": "/img/18_Land/partners/korean.png",
     "sandbox": false,
     "x": -48,
     "y": 30
@@ -38,46 +38,53 @@
     "name": "Shaun The Sheep",
     "img": "/img/18_Land/partners/shaun.svg",
     "sandbox": false,
-    "x": -24,
-    "y": 60
+    "x": -12,
+    "y": 24
   },
   {
     "name": "Axie Infinity",
     "img": "/img/18_Land/partners/axie.svg",
     "sandbox": false,
-    "x": -3,
-    "y": 18
+    "x": -24,
+    "y": 6
   },
   {
     "name": "Cryptowars",
-    "img": "/img/18_Land/partners/cryptowars.svg",
+    "img": "/img/18_Land/partners/cryptowars.png",
     "sandbox": false,
     "x": -39,
     "y": 27
   },
   {
     "name": "Battle Races",
-    "img": "/img/18_Land/partners/battle_races.svg",
+    "img": "/img/18_Land/partners/battle_racers.svg",
     "sandbox": false,
     "x": -21,
     "y": 30
   },
   {
-    "name": "Animoca F1",
-    "img": "/img/18_Land/partners/animoca_f1.svg",
+    "name": "Delta Time",
+    "img": "/img/18_Land/partners/delta_time.svg",
     "sandbox": false,
-    "x": -12,
-    "y": 48
+    "x": -30,
+    "y": 24
   },
   {
     "name": "Blocore",
     "img": "/img/18_Land/partners/blocore.svg",
     "sandbox": false,
-    "x": -42,
-    "y": 57
+    "x": -48,
+    "y": 51
   },
   {
-    "name": "Sandbox Network",
+    "name": "Nonfungible.com",
+    "img": "/img/18_Land/partners/korean.svg",
+    "sandbox": false,
+    "x": -48,
+    "y": 6
+  },
+  {
+    "name": "The Sandbox",
     "img": "/img/18_Land/partners/sandbox.svg",
     "sandbox": true,
     "x": -12,
