@@ -24,11 +24,11 @@ function generateLandsForMerkleTree() {
                     break;
                 case 'My Crypto Heroes': reservedAddress = '0x8b6965eb3c78f424d75649f74af86e0bcd93d203';
                     break;
-                case 'Animoca Brands': reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169';
+                case 'Animoca Brands': reservedAddress = '0x1b67dEE1d9FBf11D94f1cF3006172db830d2A913';
                     break;
-                case 'Pixowl': reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169';
+                case 'Pixowl': reservedAddress = '0x3A31455a51FD865c92a8f9563B1a5e0B3A7269ba';
                     break;
-                case 'Shaun The Sheep': reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169'; // TODO
+                case 'Shaun The Sheep': reservedAddress = '0x8D7Cd362cE140B44e025D0B7e35A9Dd843A1bA8';
                     break;
                 case 'Axie Infinity': reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169';
                     break;
@@ -39,6 +39,8 @@ function generateLandsForMerkleTree() {
                 case 'Animoca F1': reservedAddress = '0xd1A19ae358C9eD941497cEAC66478AC185E9a139';
                     break;
                 case 'Blocore': reservedAddress = '0x4B7Cb5b29Be1FcDD2a16058eA5d2a7B1EA727C35';
+                    break;
+                case 'NonFungible.com': reservedAddress = '0x841f3a12D45651C21EcfA26546C9E77F5Ff4Fe80';
                     break;
                 default:
                     reportError('partner not expected: ' + land.name);
