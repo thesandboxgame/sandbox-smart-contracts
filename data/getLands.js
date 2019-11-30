@@ -48,7 +48,12 @@ function generateLandsForMerkleTree() {
                     reportError('partner not expected: ' + land.name);
             }
         }
-        reservedLandsRegistry[x + (408 * y)] = reservedAddress;
+        reservedLandsRegistry[x + (408 * y)] = {
+            reservedAddress,
+            name: land.name,
+            originalX: land.x,
+            originalY: land.y,
+        };
     }
 
     function reportError(e) {
@@ -85,15 +90,19 @@ function generateLandsForMerkleTree() {
             }
             landGroup.numLands++;
         }
-
-        const reservedAddress = reservedLandsRegistry[x + (y * 408)];
-        if (reservedAddress) {
+        const reservedLand = reservedLandsRegistry[x + (y * 408)];
+        if (reservedLand) {
+            const {reservedAddress, name, originalX, originalY} = reservedLand;
             if (landGroup.reserved) {
                 reportError('already reserved ' + JSON.stringify({x: landGroup.x, y: landGroup.y}));
             }
             landGroup.reserved = reservedAddress;
+            landGroup.partner = {
+                x, y, originalX, originalY, name
+            };
         }
     }
+    const partnersLands = [];
     const lands = [];
     let numLands = 0;
     let num1x1Lands = 0;
@@ -141,6 +150,12 @@ function generateLandsForMerkleTree() {
             price,
             reserved: landGroup.reserved
         });
+        if (landGroup.reserved) {
+            landGroup.partner.size = size;
+            landGroup.partner.price = price;
+            landGroup.partner.reserved = landGroup.reserved;
+            partnersLands.push(landGroup.partner);
+        }
         numLands += size * size;
     }
     console.log({
@@ -154,10 +169,10 @@ function generateLandsForMerkleTree() {
         num24x24Lands,
     });
     exitIfError();
-    return lands;
+    return {lands, partnersLands};
 }
 
-const lands = generateLandsForMerkleTree();
+const {lands, partnersLands} = generateLandsForMerkleTree();
 
 module.exports = {
     getLands: (isDeploymentChainId, chainId) => {
@@ -202,5 +217,6 @@ module.exports = {
             // landsWithProof,
         };
     },
-    nonExposedLands: lands
+    nonExposedLands: lands,
+    partnersLands,
 };
