@@ -42,14 +42,30 @@ program
         }
 
         const LandPreSale = getDeployedContract('LandPreSale_1');
-        const gasPrice = cmdObj.gasPrice;
-        console.log({
-            preSale: LandPreSale.options.address,
-            sender,
-            gasPrice,
-            land: landToBuy,
-        });
-        console.log('proof ', JSON.stringify(landToBuy.proof));
+        // const gasPrice = cmdObj.gasPrice;
+        // console.log({
+        //     preSale: LandPreSale.options.address,
+        //     sender,
+        //     gasPrice,
+        //     land: landToBuy,
+        // });
+        console.log('PreSale Contract Address:');
+        console.log(LandPreSale.options.address);
+        console.log('------------------------------------------------');
+        console.log('reserved:');
+        console.log(landToBuy.reserved);
+        console.log('x:');
+        console.log(landToBuy.x);
+        console.log('y:');
+        console.log(landToBuy.y);
+        console.log('size:');
+        console.log(landToBuy.size);
+        console.log('price:');
+        console.log(landToBuy.price);
+        console.log('salt:');
+        console.log(landToBuy.salt);
+        console.log('proof:');
+        console.log(JSON.stringify(landToBuy.proof));
 
         // if (!cmdObj.test) {
         //     const receipt = await tx({from: sender, gas: 1000000, gasPrice}, LandPreSale, 'buyLandWithETH', sender, destination);

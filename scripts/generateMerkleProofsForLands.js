@@ -1,5 +1,4 @@
 const fs = require('fs');
-const path = require('path');
 const rocketh = require('rocketh');
 
 const MerkleTree = require('../lib/merkleTree');
@@ -7,7 +6,11 @@ const {createDataArray, calculateLandHash, saltLands} = require('../lib/merkleTr
 
 const deployment = rocketh.deployment('LandPreSale_1');
 const lands = deployment.data;
-const secret = fs.readFileSync('./.land_presale_1_secret');
+const secretPath = process.argv[2];
+if (!secretPath) {
+    throw new Error('no secret provided');
+}
+const secret = fs.readFileSync(secretPath);
 const saltedLands = saltLands(lands, secret);
 const landHashArray = createDataArray(saltedLands);
 const tree = new MerkleTree(landHashArray);

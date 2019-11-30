@@ -160,13 +160,28 @@ function generateLandsForMerkleTree() {
 const lands = generateLandsForMerkleTree();
 
 module.exports = {
-    getLands: (isDeploymentChainId) => {
-        let secret;
+    getLands: (isDeploymentChainId, chainId) => {
+        if (typeof chainId !== 'string') {
+            throw new Error('chainId not a string');
+        }
+
+        let secretPath = './.land_presale_1_secret';
+        if (chainId === '1') {
+            console.log('MAINNET secret');
+            secretPath = './.land_presale_1_secret.mainnet';
+        }
+
         let expose = false;
-        if (isDeploymentChainId) {
-            secret = fs.readFileSync('./.land_presale_1_secret');
-        } else {
-            secret = '0xd99c85d88ecb384d210f988028308ef7d7ffbbd33d64e7189c8e54ee2e9f6a5b';
+        let secret;
+        try {
+            secret = fs.readFileSync(secretPath);
+        } catch (e) {
+            if (isDeploymentChainId) {
+                throw e;
+            }
+        }
+
+        if (!isDeploymentChainId) {
             expose = true;
         }
 
@@ -174,9 +189,17 @@ module.exports = {
         const tree = new MerkleTree(createDataArray(saltedLands));
         const merkleRootHash = tree.getRoot().hash;
 
+        // const landsWithProof = [];
+        // for (const land of saltedLands) {
+        //     land.proof = tree.getProof(calculateLandHash(land));
+        //     landsWithProof.push(land);
+        // }
+
         return {
             lands: expose ? saltedLands : lands,
             merkleRootHash,
+            saltedLands,
+            // landsWithProof,
         };
     },
     nonExposedLands: lands

@@ -7,7 +7,7 @@ const {
 const {guard} = require('../lib');
 const {getLands} = require('../data/getLands');
 
-module.exports = async ({namedAccounts, initialRun, deployIfDifferent, isDeploymentChainId}) => {
+module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, isDeploymentChainId}) => {
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -55,7 +55,7 @@ module.exports = async ({namedAccounts, initialRun, deployIfDifferent, isDeploym
         dai = daiDeployResult.contract;
     }
 
-    const {lands, merkleRootHash} = getLands(isDeploymentChainId);
+    const {lands, merkleRootHash} = getLands(isDeploymentChainId, chainId);
 
     const deployResult = await deployIfDifferent(['data'],
         'LandPreSale_1',
