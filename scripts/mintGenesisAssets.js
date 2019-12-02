@@ -78,7 +78,7 @@ const credentials = JSON.parse(fs.readFileSync('.sandbox_credentials'));
 // const ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}
 
 program
-    .command('mintIds <creator> <destination> <assetIds...>')
+    .command('mintIds <creator> <assetIds...>')
     .description('mint assets from ids')
     .option('-u, --url <url>', 'api url')
     .option('-w, --webUrl <webUrl>', 'web url')
@@ -86,10 +86,11 @@ program
     .option('-p, --packId <packId>', 'packId')
     .option('-n, --nonce <nonce>', 'nonce')
     .option('-t, --test', 'testMode')
-    .action(async (creator, destination, assetIds, cmdObj) => {
+    .option('-d, --destination', 'destination')
+    .action(async (creator, assetIds, cmdObj) => {
         const propertiesValues = {};
         const propertiesMaxValue = {};
-        const testMode = cmdObj.test || true; // Test only for now
+        const testMode = cmdObj.test;
         let webUrl = (cmdObj.webUrl || 'http://localhost:8081');
         let url = (cmdObj.url || 'http://localhost:8081');
         console.log({url, webUrl});
@@ -122,6 +123,13 @@ program
         if (!creatorWallet) {
             throw new Error('no wallet for user with id ' + creator);
         }
+
+        let destination = creatorWallet;
+        if (cmdObj.destination) {
+            destination = cmdObj.destination;
+        }
+
+        console.log('checking assetIds...');
 
         let i = 0;
         for (const assetId of assetIds) {
@@ -170,13 +178,15 @@ program
             i++;
         }
 
+        console.log('getting mintInfo...');
+
         const options = {
             method: 'PATCH',
             url: url + '/assets/mintInfo',
             headers: {'Content-Type': 'application/json'},
             body: {
                 assetIds,
-                creator
+                creatorId: creator
             },
             json: true
         };
@@ -186,6 +196,8 @@ program
             assetBatchInfo = assetBatchInfoRes.body;
         }
 
+        console.log('checking mintInfo...');
+
         if (assetBatchInfo) {
             // console.log(JSON.stringify(assetBatchInfo, null, '  '));
             const packId = cmdObj.packId || 0;
@@ -193,7 +205,11 @@ program
 
             const gas = cmdObj.gas || 2000000; // TODO estimate
 
-            const {supplies, rarities, hash} = assetBatchInfo;
+            const {supplies, hash} = assetBatchInfo;
+            const raritiesFromBackend = assetBatchInfo.rarities;
+            const rarities = raritiesFromBackend.map((v) => v - 1);
+
+            console.log(JSON.stringify(assetBatchInfo));
 
             for (let i = 0; i < assetIds.length; i++) {
                 const assetId = assetIds[i];
@@ -212,7 +228,7 @@ program
                     expectedValue = 150;
                     expectedMaxValue = 75;
                 } else if (rarities[i] === 3) {
-                    expectedValue = 200;
+                    expectedValue = 250;
                     expectedMaxValue = 100;
                 } else {
                     reportErrorAndExit(`wrong rarity for asset ${assetId}`);
@@ -220,7 +236,7 @@ program
                 if (!(propertiesTotalValue === expectedValue)) {
                     reportErrorAndExit(`asset ${assetId} with rarity ${rarity} got wrong total value ${propertiesTotalValue} it should be  ${expectedValue}`);
                 }
-                if (!(maxValue === expectedMaxValue)) {
+                if (!(maxValue <= expectedMaxValue)) {
                     reportErrorAndExit(`asset ${assetId} with rarity ${rarity} got wrong max value ${maxValue} it should be  ${expectedMaxValue}`);
                 }
             }
