@@ -25,4 +25,4 @@ Note though that moderators are unlikely to need to act often as the fear of los
 
 This solution was inspired by vitalik’s post on https://ethresear.ch/t/prediction-markets-for-content-curation-daos/1312
 
-An Audit was performed by Solidified : see [./asset_audit.pdf](./asset_audit.pdf)
+An Audit was performed by Solidified : see [./asset_solidified_audit.pdf](./asset_solidified_audit.pdf)
