@@ -100,10 +100,14 @@ program
         } else if (url === 'dev' || url === 'development') {
             url = 'https://api-develop.sandbox.game';
             webUrl = 'https://develop.sandbox.game';
-        } else if (url === 'staging' || url === 'development') {
+        } else if (url === 'staging') {
             url = 'https://api-stage.sandbox.game';
             webUrl = 'https://stage.sandbox.game';
+        } else if (url === 'preprod') {
+            url = 'https://api-preprod.sandbox.game';
+            webUrl = 'https://preprod.sandbox.game';
         }
+        
         console.log({url, webUrl});
         await waitRequest({
             method: 'POST',
