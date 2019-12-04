@@ -374,7 +374,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         require(
             msg.sender == from ||
             _metaTransactionContracts[msg.sender] ||
-            (operatorEnabled && _operators[id] == from) ||
+            (operatorEnabled && _operators[id] == msg.sender) ||
             _superOperators[msg.sender] ||
             _operatorsForAll[from][msg.sender],
             "not authorized to burn"
