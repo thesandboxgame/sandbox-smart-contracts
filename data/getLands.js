@@ -17,14 +17,14 @@ function generateLandsForMerkleTree() {
             if (land.name !== 'The Sandbox') {
                 reportError('partner not expected as Sandbox: ' + land.name);
             }
-            reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169';
+            reservedAddress = '0x7A9fe22691c811ea339D9B73150e6911a5343DcA';
         } else {
             switch (land.name) {
-                case 'Old Skull Games': reservedAddress = '0xD98a18F688DB362aCF65dcdDb6e9FE6616697cbe';
+                case 'Old Skull Games': reservedAddress = '0x7A9fe22691c811ea339D9B73150e6911a5343DcA';
                     break;
-                case 'Korean Artists District': reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169';
+                case 'Korean Artists District': reservedAddress = '0x7A9fe22691c811ea339D9B73150e6911a5343DcA';
                     break;
-                case 'My Crypto Heroes': reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169';
+                case 'My Crypto Heroes': reservedAddress = '0x7A9fe22691c811ea339D9B73150e6911a5343DcA';
                     break;
                 case 'Animoca Brands': reservedAddress = '0x1b67dEE1d9FBf11D94f1cF3006172db830d2A913';
                     break;
@@ -32,7 +32,7 @@ function generateLandsForMerkleTree() {
                     break;
                 case 'Shaun The Sheep': reservedAddress = '0x8D7Cd362cE140B44e025D0B7e35A9Dd843A1bA82';
                     break;
-                case 'Axie Infinity': reservedAddress = '0x81B27afBF34b78670c90F1994935b6267DC9b169';
+                case 'Axie Infinity': reservedAddress = '0x7A9fe22691c811ea339D9B73150e6911a5343DcA';
                     break;
                 case 'Cryptowars': reservedAddress = '0x57c8bcc1c4af411d996a6317971b9b44439c9b75';
                     break;
