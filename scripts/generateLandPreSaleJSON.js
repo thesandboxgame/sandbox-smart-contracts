@@ -4,5 +4,10 @@ const {nonExposedLands, partnersLands} = require('../data/getLands');
 const output = process.argv[2];
 fs.writeFileSync(output, JSON.stringify(nonExposedLands, null, '    '));
 
+let totalPartnerLands = 0;
+for (const partnersLand of partnersLands) {
+    totalPartnerLands += partnersLand.size * partnersLand.size;
+}
+
 const partnerLandsOutput = process.argv[3];
-fs.writeFileSync(partnerLandsOutput, JSON.stringify(partnersLands, null, '    '));
+fs.writeFileSync(partnerLandsOutput, JSON.stringify({partnersLands, totalPartnerLands}, null, '    '));

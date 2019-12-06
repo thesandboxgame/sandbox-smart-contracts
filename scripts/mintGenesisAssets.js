@@ -105,7 +105,7 @@ program
             webUrl = 'https://stage.sandbox.game';
         } else if (url === 'preprod') {
             url = 'https://api-preprod.sandbox.game';
-            webUrl = 'https://preprod.sandbox.game';
+            webUrl = 'https://www.sandbox.game';
         }
         
         console.log({url, webUrl});
