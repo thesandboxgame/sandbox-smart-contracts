@@ -32,15 +32,16 @@ program
             fromBlock: 9048221,
             toBlock: 'latest'
         });
-        let numLandsMinted = new BN(0);
-        let numLandsFromPartner = 0;
+        let numLandsMinted = 0;
+        let numLandsMintedFromPartner = 0;
         for (const event of events) {
             const numLands = new BN(event.returnValues.size).pow(new BN(2));
-            numLandsMinted = numLandsMinted.add(numLands);
+            numLandsMinted += numLands.toNumber();
             const tokenId = new BN(event.returnValues.topCornerId).toNumber();
             // console.log(tokenId);
             if (partnerLandsMap[tokenId]) {
-                numLandsFromPartner += numLands.toNumber();
+                // console.log(partnerLandsMap[tokenId].name);
+                numLandsMintedFromPartner += numLands.toNumber();
                 partners.push(partnerLandsMap[tokenId]);
                 delete partnerLandsMap[tokenId];
             }
@@ -48,10 +49,15 @@ program
 
         const partnersLeft = [];
         for (const tokenId of Object.keys(partnerLandsMap)) {
+            // console.log(JSON.stringify(partnerLandsMap[tokenId], null, '  '));
             partnersLeft.push(partnerLandsMap[tokenId]);
         }
-
-        console.log({numLandsMinted: numLandsMinted.toNumber(), numLandsFromPartner, partners, partnersLeft});
+        console.log({
+            numLandsMintedFromPartner,
+            numLandsMinted,
+            partnerNamesLeft: partnersLeft.map((land) => land.name),
+        });
+        // console.log({numLandsMinted: numLandsMinted.toNumber(), numLandsMintedFromPartner, partners, partnersLeft});
     });
 
 program.parse(process.argv);
