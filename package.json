@@ -11,6 +11,7 @@
     "test-sand": "rocketh launch \"yarn tap -T -j 1 -R spec test/sand/testSand.js\"",
     "test-sandSale": "rocketh launch \"yarn tap -T -j 1 -R spec test/sandSale/testSandSale.js\"",
     "test-landSale": "rocketh launch \"yarn tap -T -j 1 -R spec test/landSale/testLandSale.js\"",
+    "test-referralValidator": "rocketh launch \"yarn tap -T -j 1 -R spec test/referralValidator/testReferralValidator.js\"",
     "test-landSaleWithETHAndDAI": "rocketh launch \"yarn tap -T -j 1 -R spec test/landSale/testLandSaleWithETHAndDAI.js\"",
     "test-land": "rocketh launch \"yarn tap -T -j 1 -R spec test/land/testLand.js\"",
     "test-commonMinter": "rocketh launch \"yarn tap -T -j 1 -R spec test/asset_bouncer/testCommonMinter.js\"",
