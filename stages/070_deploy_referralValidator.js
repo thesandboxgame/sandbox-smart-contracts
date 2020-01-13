@@ -21,6 +21,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
         {from: deployer, gas: 6000000},
         'ReferralValidator',
         deployer,
+        '20',
     );
 
     if (deployResult.newlyDeployed) {

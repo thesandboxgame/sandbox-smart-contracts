@@ -5,8 +5,13 @@ const Web3 = require('web3');
 
 const {
     call,
+    tx,
     deployContract,
     expectRevert,
+    gas,
+    zeroAddress,
+    increaseTime,
+    mine,
 } = require('../utils');
 
 const {
@@ -18,17 +23,50 @@ const {
     createReferral,
 } = require('../../lib/referralValidator');
 
+const maxCommissionRate = '20';
 const signer = '0x26BC52894A05EDE59B34EE7B014b57ef0a8558B3';
 const privateKey = '0x96aa38e97d1d0d19e0f1d5215ff9dad66dc5d99225b1657205d124d00d2de177';
 
+const newSigner = '0xD1Df0BB44804f4Ac75286E9b1AE66c27CBCb5c7C';
+const newPrivateKey = '0x7acc5878579a9f8e41e61d3e02c6a8d71740226c5d80706be35640790a40ff75';
+
 const referralLinkValidity = 60 * 60 * 24 * 30;
+const previousSigningDelay = 60 * 60 * 24 * 10;
 
 function runReferralValidatorTests(title) {
     tap.test(title + ' tests', async (t) => {
         let referralValidator;
 
         t.beforeEach(async () => {
-            referralValidator = await deployContract(deployer, 'ReferralValidator', signer);
+            referralValidator = await deployContract(deployer, 'ReferralValidator', signer, maxCommissionRate);
+        });
+
+        t.test('cannot update the admin if not admin', async () => {
+            await expectRevert(
+                tx(
+                    referralValidator,
+                    'updateAdmin', {
+                        from: others[0],
+                        gas,
+                    },
+                    others[0],
+                ),
+                'Sender not admin',
+            );
+        });
+
+        t.test('cannot update the admin if invalid address', async () => {
+            await expectRevert(
+                tx(
+                    referralValidator,
+                    'updateAdmin', {
+                        from: deployer,
+                        gas,
+                    },
+                    zeroAddress,
+                ),
+                'Invalid address',
+            );
         });
 
         t.test('can verify a valid referral', async () => {
@@ -85,19 +123,18 @@ function runReferralValidatorTests(title) {
                 referral.commissionRate,
             );
 
-            await expectRevert(
-                call(
-                    referralValidator, 'isReferralValid', {
-                        from: others[0],
-                    },
-                    sig.signature,
-                    referral.referrer,
-                    referral.referee,
-                    referral.expiryTime,
-                    referral.commissionRate,
-                ),
-                'Invalid rate',
+            const isValid = await call(
+                referralValidator, 'isReferralValid', {
+                    from: others[0],
+                },
+                sig.signature,
+                referral.referrer,
+                referral.referee,
+                referral.expiryTime,
+                referral.commissionRate,
             );
+
+            assert.equal(isValid, false, 'Referral should not be valid');
         });
 
         t.test('can reject an expired referral', async () => {
@@ -107,7 +144,7 @@ function runReferralValidatorTests(title) {
             const referral = {
                 referrer: others[0],
                 referee: others[1],
-                expiryTime: Math.floor(Date.now() / 1000),
+                expiryTime: Math.floor(Date.now() / 1000) - (60 * 60),
                 commissionRate: '5',
             };
 
@@ -120,19 +157,18 @@ function runReferralValidatorTests(title) {
                 referral.commissionRate,
             );
 
-            await expectRevert(
-                call(
-                    referralValidator, 'isReferralValid', {
-                        from: others[0],
-                    },
-                    sig.signature,
-                    referral.referrer,
-                    referral.referee,
-                    referral.expiryTime,
-                    referral.commissionRate,
-                ),
-                'Expired',
+            const isValid = await call(
+                referralValidator, 'isReferralValid', {
+                    from: others[0],
+                },
+                sig.signature,
+                referral.referrer,
+                referral.referee,
+                referral.expiryTime,
+                referral.commissionRate,
             );
+
+            assert.equal(isValid, false, 'Referral should not be valid');
         });
 
         t.test('can reject a self referral', async () => {
@@ -155,19 +191,18 @@ function runReferralValidatorTests(title) {
                 referral.commissionRate,
             );
 
-            await expectRevert(
-                call(
-                    referralValidator, 'isReferralValid', {
-                        from: others[0],
-                    },
-                    sig.signature,
-                    referral.referrer,
-                    referral.referee,
-                    referral.expiryTime,
-                    referral.commissionRate,
-                ),
-                'Invalid referee',
+            const isValid = await call(
+                referralValidator, 'isReferralValid', {
+                    from: others[0],
+                },
+                sig.signature,
+                referral.referrer,
+                referral.referee,
+                referral.expiryTime,
+                referral.commissionRate,
             );
+
+            assert.equal(isValid, false, 'Referral should not be valid');
         });
 
         t.test('can reject a modified referral', async () => {
@@ -223,6 +258,163 @@ function runReferralValidatorTests(title) {
                 referral.expiryTime,
                 referral.commissionRate,
             );
+
+            const isValid = await call(
+                referralValidator, 'isReferralValid', {
+                    from: others[0],
+                },
+                sig.signature,
+                referral.referrer,
+                referral.referee,
+                referral.expiryTime,
+                referral.commissionRate,
+            );
+
+            assert.equal(isValid, false, 'Referral should not be valid');
+        });
+
+        t.test('can update the signing wallet', async () => {
+            await tx(
+                referralValidator,
+                'updateSigningWallet', {
+                    from: deployer,
+                    gas,
+                },
+                newSigner,
+            );
+        });
+
+        t.test('cannot update the signing wallet if not admin', async () => {
+            await expectRevert(
+                tx(
+                    referralValidator,
+                    'updateSigningWallet', {
+                        from: others[0],
+                        gas,
+                    },
+                    newSigner,
+                ),
+                'Sender not admin',
+            );
+        });
+
+        t.test('can update the signing wallet and verify a new referral', async () => {
+            await tx(
+                referralValidator,
+                'updateSigningWallet', {
+                    from: deployer,
+                    gas,
+                },
+                newSigner,
+            );
+
+            const web3 = new Web3();
+            web3.setProvider(rocketh.ethereum);
+
+            const referral = {
+                referrer: others[0],
+                referee: others[1],
+                expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
+                commissionRate: '5',
+            };
+
+            const sig = createReferral(
+                web3,
+                newPrivateKey,
+                referral.referrer,
+                referral.referee,
+                referral.expiryTime,
+                referral.commissionRate,
+            );
+
+            const isValid = await call(
+                referralValidator, 'isReferralValid', {
+                    from: others[0],
+                },
+                sig.signature,
+                referral.referrer,
+                referral.referee,
+                referral.expiryTime,
+                referral.commissionRate,
+            );
+
+            assert.equal(isValid, true, 'Referral should be valid');
+        });
+
+        t.test('can update the signing wallet and verify an old referral', async () => {
+            const web3 = new Web3();
+            web3.setProvider(rocketh.ethereum);
+
+            const referral = {
+                referrer: others[0],
+                referee: others[1],
+                expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
+                commissionRate: '5',
+            };
+
+            const sig = createReferral(
+                web3,
+                privateKey,
+                referral.referrer,
+                referral.referee,
+                referral.expiryTime,
+                referral.commissionRate,
+            );
+
+            await tx(
+                referralValidator,
+                'updateSigningWallet', {
+                    from: deployer,
+                    gas,
+                },
+                newSigner,
+            );
+
+            const isValid = await call(
+                referralValidator, 'isReferralValid', {
+                    from: others[0],
+                },
+                sig.signature,
+                referral.referrer,
+                referral.referee,
+                referral.expiryTime,
+                referral.commissionRate,
+            );
+
+            assert.equal(isValid, true, 'Referral should be valid');
+        });
+
+        t.test('can update the signing wallet and reject an old referral', async () => {
+            const web3 = new Web3();
+            web3.setProvider(rocketh.ethereum);
+
+            const referral = {
+                referrer: others[0],
+                referee: others[1],
+                expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
+                commissionRate: '5',
+            };
+
+            const sig = createReferral(
+                web3,
+                privateKey,
+                referral.referrer,
+                referral.referee,
+                referral.expiryTime,
+                referral.commissionRate,
+            );
+
+            await tx(
+                referralValidator,
+                'updateSigningWallet', {
+                    from: deployer,
+                    gas,
+                },
+                newSigner,
+            );
+
+            await increaseTime(previousSigningDelay * 2);
+            await mine();
 
             const isValid = await call(
                 referralValidator, 'isReferralValid', {
