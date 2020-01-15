@@ -10,7 +10,7 @@ import "../ReferralValidator/ReferralValidator.sol";
 
 
 /**
- * @title Land Sale contract that supports also DAI and ETH as payment
+ * @title Land Sale contract with referral that supports also DAI and ETH as payment
  * @notice This contract mananges the sale of our lands
  */
 contract LandSaleWithReferral is MetaTransactionReceiver {
@@ -204,6 +204,7 @@ contract LandSaleWithReferral is MetaTransactionReceiver {
      * @param size size of the pack of Land to purchase
      * @param priceInSand price in SAND to purchase that Land
      * @param proof merkleProof for that particular Land
+     * @param referral the referral used by the buyer
      * @return The address of the operator
      */
     function buyLandWithETH(
