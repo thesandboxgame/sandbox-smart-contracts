@@ -13,7 +13,7 @@ import "../ReferralValidator/ReferralValidator.sol";
  * @title Land Sale contract with referral that supports also DAI and ETH as payment
  * @notice This contract mananges the sale of our lands
  */
-contract LandSaleWithReferral is MetaTransactionReceiver {
+contract LandSaleWithReferral is MetaTransactionReceiver, ReferralValidator {
     using SafeMathWithRequire for uint256;
 
     uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
@@ -23,7 +23,6 @@ contract LandSaleWithReferral is MetaTransactionReceiver {
     ERC20 internal _sand;
     Medianizer private _medianizer;
     ERC20 private _dai;
-    ReferralValidator private _referralValidator;
 
     address payable internal _wallet;
     uint256 internal _expiryTime;
@@ -60,8 +59,7 @@ contract LandSaleWithReferral is MetaTransactionReceiver {
         bytes32 merkleRoot,
         uint256 expiryTime,
         address medianizerContractAddress,
-        address daiTokenContractAddress,
-        address referralValidatorAddress
+        address daiTokenContractAddress
     ) public {
         _land = Land(landAddress);
         _sand = ERC20(sandContractAddress);
@@ -72,7 +70,6 @@ contract LandSaleWithReferral is MetaTransactionReceiver {
         _expiryTime = expiryTime;
         _medianizer = Medianizer(medianizerContractAddress);
         _dai = ERC20(daiTokenContractAddress);
-        _referralValidator = ReferralValidator(referralValidatorAddress);
     }
 
     /// @notice set the wallet receiving the proceeds
@@ -176,7 +173,7 @@ contract LandSaleWithReferral is MetaTransactionReceiver {
         require(_sandEnabled, "sand payments not enabled");
         _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);
 
-        uint256 commission = _referralValidator.recordReferral(
+        uint256 commission = recordReferral(
             priceInSand,
             referral.signature,
             referral.referrer,
@@ -247,7 +244,7 @@ contract LandSaleWithReferral is MetaTransactionReceiver {
             msg.sender.transfer(leftOver); // refund extra
         }
 
-        uint256 commission = _referralValidator.recordReferral(
+        uint256 commission = recordReferral(
             ETHRequired,
             referral.signature,
             referral.referrer,
@@ -299,7 +296,7 @@ contract LandSaleWithReferral is MetaTransactionReceiver {
 
         uint256 DAIRequired = priceInSand.mul(daiPrice).div(1000000000000000000);
 
-        uint256 commission = _referralValidator.recordReferral(
+        uint256 commission = recordReferral(
             DAIRequired,
             referral.signature,
             referral.referrer,

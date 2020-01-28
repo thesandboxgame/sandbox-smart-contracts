@@ -67,12 +67,12 @@ contract ReferralValidator {
 
     function recordReferral(
         uint256 ETHRequired,
-        bytes calldata signature,
+        bytes memory signature,
         address referrer,
         address referee,
         uint256 expiryTime,
         uint256 commissionRate
-    ) external returns (uint256) {
+    ) internal returns (uint256) {
         if (isReferralValid(signature, referrer, referee, expiryTime, commissionRate)) {
             uint256 commission = SafeMathWithRequire.div(
                 SafeMathWithRequire.mul(ETHRequired, commissionRate),
