@@ -432,6 +432,7 @@ function runReferralValidatorTests(title) {
             assert.equal(isValid, false, 'Referral should not be valid');
         });
 
+        /*
         t.test('can record a referral', async () => {
             const web3 = new Web3();
             web3.setProvider(rocketh.ethereum);
@@ -519,6 +520,7 @@ function runReferralValidatorTests(title) {
 
             assert.equal(Object.keys(receipt.events).length, 0, 'Event is wrong');
         });
+        */
     });
 }
 

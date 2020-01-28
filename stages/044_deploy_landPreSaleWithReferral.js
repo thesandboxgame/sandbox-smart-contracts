@@ -56,8 +56,6 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
         dai = daiDeployResult.contract;
     }
 
-    const referralValidator = getDeployedContract('ReferralValidator');
-
     const {lands, merkleRootHash} = getLands(isDeploymentChainId, chainId);
 
     const deployResult = await deployIfDifferent(['data'],
@@ -70,10 +68,9 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
         landSaleAdmin,
         landSaleBeneficiary,
         merkleRootHash,
-        1576753200, // This is Thursday, 19 December 2019 11:00:00 GMT+00:00 // Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // 30 days
+        1583884800, // This is March 11th 2020 at midnight
         daiMedianizer.options.address,
         dai.options.address,
-        referralValidator.options.address,
     );
     const contract = getDeployedContract('LandPreSale_2');
     if (deployResult.newlyDeployed) {
@@ -82,4 +79,4 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
         log('reusing LandPreSale_2 at ' + contract.options.address);
     }
 };
-module.exports.skip = () => true; // module.exports.skip = guard(['1', '4'], 'LandPreSale_1');
+module.exports.skip = guard(['1', '4'], 'LandPreSale_2');
