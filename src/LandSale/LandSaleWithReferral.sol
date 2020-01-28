@@ -51,15 +51,6 @@ contract LandSaleWithReferral is MetaTransactionReceiver {
         uint256 amountPaid
     );
 
-    event ReferralUsed(
-        address indexed referrer,
-        address indexed referee,
-        uint256 topCornerId,
-        uint256 size,
-        uint256 totalAmount,
-        uint256 commission
-    );
-
     constructor(
         address landAddress,
         address sandContractAddress,
@@ -179,18 +170,44 @@ contract LandSaleWithReferral is MetaTransactionReceiver {
         uint256 size,
         uint256 priceInSand,
         bytes32 salt,
-        bytes32[] calldata proof
+        bytes32[] calldata proof,
+        Referral calldata referral
     ) external {
         require(_sandEnabled, "sand payments not enabled");
         _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);
+
+        uint256 commission = _referralValidator.recordReferral(
+            priceInSand,
+            referral.signature,
+            referral.referrer,
+            referral.referee,
+            referral.expiryTime,
+            referral.commissionRate
+        );
+
+        if (commission > 0) {
+            require(
+                _sand.transferFrom(
+                    buyer,
+                    referral.referrer,
+                    commission
+                ),
+                "sand token transfer failed"
+            );
+        }
+
         require(
             _sand.transferFrom(
                 buyer,
                 _wallet,
-                priceInSand
+                SafeMathWithRequire.sub(
+                    priceInSand,
+                    commission
+                )
             ),
             "sand token transfer failed"
         );
+
         _mint(buyer, to, x, y, size, priceInSand, address(_sand), priceInSand);
     }
 
@@ -225,40 +242,32 @@ contract LandSaleWithReferral is MetaTransactionReceiver {
         uint256 ETHRequired = getEtherAmountWithSAND(priceInSand);
         require(msg.value >= ETHRequired, "not enough ether sent");
         uint256 leftOver = msg.value - ETHRequired;
-        if(leftOver > 0) {
+
+        if (leftOver > 0) {
             msg.sender.transfer(leftOver); // refund extra
         }
-        address(_wallet).transfer(ETHRequired);
+
+        uint256 commission = _referralValidator.recordReferral(
+            ETHRequired,
+            referral.signature,
+            referral.referrer,
+            referral.referee,
+            referral.expiryTime,
+            referral.commissionRate
+        );
+
+        if (commission > 0) {
+            address(uint160(referral.referrer)).transfer(commission);
+        }
+
+        address(_wallet).transfer(
+            SafeMathWithRequire.sub(
+                ETHRequired,
+                commission
+            )
+        );
 
         _mint(buyer, to, x, y, size, priceInSand, address(0), ETHRequired);
-
-        if (referral.signature.length > 0) {
-            if (
-                _referralValidator.isReferralValid(
-                    referral.signature,
-                    referral.referrer,
-                    referral.referee,
-                    referral.expiryTime,
-                    referral.commissionRate
-                )
-            ) {
-                uint256 commission = SafeMathWithRequire.div(
-                    SafeMathWithRequire.mul(ETHRequired, referral.commissionRate),
-                    10000
-                );
-
-                address(uint160(referral.referrer)).transfer(commission);
-
-                emit ReferralUsed(
-                    referral.referrer,
-                    referral.referee,
-                    x + (y * GRID_SIZE),
-                    size,
-                    ETHRequired,
-                    commission
-                );
-            }
-        }
     }
 
     /**
@@ -282,13 +291,42 @@ contract LandSaleWithReferral is MetaTransactionReceiver {
         uint256 size,
         uint256 priceInSand,
         bytes32 salt,
-        bytes32[] calldata proof
+        bytes32[] calldata proof,
+        Referral calldata referral
     ) external {
         require(_daiEnabled, "dai payments not enabled");
         _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);
 
         uint256 DAIRequired = priceInSand.mul(daiPrice).div(1000000000000000000);
-        require(_dai.transferFrom(msg.sender, _wallet, DAIRequired), "failed to transfer dai");
+
+        uint256 commission = _referralValidator.recordReferral(
+            DAIRequired,
+            referral.signature,
+            referral.referrer,
+            referral.referee,
+            referral.expiryTime,
+            referral.commissionRate
+        );
+
+        if (commission > 0) {
+            require(
+                _dai.transferFrom(
+                    msg.sender,
+                    referral.referrer,
+                    commission
+                ),
+                "failed to transfer dai"
+            );
+        }
+
+        require(
+            _dai.transferFrom(
+                msg.sender,
+                _wallet,
+                DAIRequired - commission
+            ),
+            "failed to transfer dai"
+        );
 
         _mint(buyer, to, x, y, size, priceInSand, address(_dai), DAIRequired);
     }

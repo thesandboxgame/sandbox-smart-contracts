@@ -2,6 +2,7 @@ const tap = require('tap');
 const assert = require('assert');
 const rocketh = require('rocketh');
 const Web3 = require('web3');
+const BN = require('bn.js');
 
 const {
     call,
@@ -12,6 +13,7 @@ const {
     zeroAddress,
     increaseTime,
     mine,
+    toWei,
 } = require('../utils');
 
 const {
@@ -23,7 +25,7 @@ const {
     createReferral,
 } = require('../../lib/referralValidator');
 
-const maxCommissionRate = '20';
+const maxCommissionRate = '2000';
 const signer = '0x26BC52894A05EDE59B34EE7B014b57ef0a8558B3';
 const privateKey = '0x96aa38e97d1d0d19e0f1d5215ff9dad66dc5d99225b1657205d124d00d2de177';
 
@@ -77,7 +79,7 @@ function runReferralValidatorTests(title) {
                 referrer: others[0],
                 referee: others[1],
                 expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
-                commissionRate: '5',
+                commissionRate: '500',
             };
 
             const sig = createReferral(
@@ -111,7 +113,7 @@ function runReferralValidatorTests(title) {
                 referrer: others[0],
                 referee: others[1],
                 expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
-                commissionRate: '21',
+                commissionRate: '2100',
             };
 
             const sig = createReferral(
@@ -145,7 +147,7 @@ function runReferralValidatorTests(title) {
                 referrer: others[0],
                 referee: others[1],
                 expiryTime: Math.floor(Date.now() / 1000) - (60 * 60),
-                commissionRate: '5',
+                commissionRate: '500',
             };
 
             const sig = createReferral(
@@ -179,7 +181,7 @@ function runReferralValidatorTests(title) {
                 referrer: others[0],
                 referee: others[0],
                 expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
-                commissionRate: '5',
+                commissionRate: '500',
             };
 
             const sig = createReferral(
@@ -213,7 +215,7 @@ function runReferralValidatorTests(title) {
                 referrer: others[0],
                 referee: others[1],
                 expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
-                commissionRate: '5',
+                commissionRate: '500',
             };
 
             const sig = createReferral(
@@ -233,7 +235,7 @@ function runReferralValidatorTests(title) {
                 referral.referrer,
                 others[2],
                 referral.expiryTime,
-                '10',
+                '1000',
             );
 
             assert.equal(isValid, false, 'Referral should not be valid');
@@ -247,7 +249,7 @@ function runReferralValidatorTests(title) {
                 referrer: others[0],
                 referee: others[1],
                 expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
-                commissionRate: '5',
+                commissionRate: '500',
             };
 
             const sig = createReferral(
@@ -315,7 +317,7 @@ function runReferralValidatorTests(title) {
                 referrer: others[0],
                 referee: others[1],
                 expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
-                commissionRate: '5',
+                commissionRate: '500',
             };
 
             const sig = createReferral(
@@ -349,7 +351,7 @@ function runReferralValidatorTests(title) {
                 referrer: others[0],
                 referee: others[1],
                 expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
-                commissionRate: '5',
+                commissionRate: '500',
             };
 
             const sig = createReferral(
@@ -392,7 +394,7 @@ function runReferralValidatorTests(title) {
                 referrer: others[0],
                 referee: others[1],
                 expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
-                commissionRate: '5',
+                commissionRate: '500',
             };
 
             const sig = createReferral(
@@ -428,6 +430,94 @@ function runReferralValidatorTests(title) {
             );
 
             assert.equal(isValid, false, 'Referral should not be valid');
+        });
+
+        t.test('can record a referral', async () => {
+            const web3 = new Web3();
+            web3.setProvider(rocketh.ethereum);
+
+            const referral = {
+                referrer: others[0],
+                referee: others[1],
+                expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
+                commissionRate: '500',
+            };
+
+            const sig = createReferral(
+                web3,
+                privateKey,
+                referral.referrer,
+                referral.referee,
+                referral.expiryTime,
+                referral.commissionRate,
+            );
+
+            const receipt = await tx(
+                referralValidator,
+                'recordReferral', {
+                    from: others[0],
+                    gas,
+                },
+                toWei('1'),
+                sig.signature,
+                referral.referrer,
+                referral.referee,
+                referral.expiryTime,
+                referral.commissionRate,
+            );
+
+            const event = receipt.events.ReferralUsed;
+
+            const {
+                referrer,
+                referee,
+                ETHRequired,
+                commission,
+                commissionRate,
+            } = event.returnValues;
+
+            assert.equal(referrer, referral.referrer, 'Referrer is wrong');
+            assert.equal(referee, referral.referee, 'Referee is wrong');
+            assert.equal(ETHRequired, toWei('1'), 'ETHRequired is wrong');
+            assert.equal(commission, new BN(toWei('1')).mul(new BN(commissionRate)).div(new BN(10000)), 'Commission is wrong');
+            assert.equal(commissionRate, referral.commissionRate, 'Commission rate is wrong');
+        });
+
+        t.test('can skip a referral', async () => {
+            const web3 = new Web3();
+            web3.setProvider(rocketh.ethereum);
+
+            const referral = {
+                referrer: others[0],
+                referee: others[1],
+                expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
+                commissionRate: '500',
+            };
+
+            const sig = createReferral(
+                web3,
+                privateKey,
+                referral.referrer,
+                referral.referee,
+                referral.expiryTime,
+                referral.commissionRate,
+            );
+
+            const receipt = await tx(
+                referralValidator,
+                'recordReferral', {
+                    from: others[0],
+                    gas,
+                },
+                toWei('1'),
+                sig.signature,
+                referral.referrer,
+                referral.referee,
+                referral.expiryTime,
+                '1000',
+            );
+
+            assert.equal(Object.keys(receipt.events).length, 0, 'Event is wrong');
         });
     });
 }

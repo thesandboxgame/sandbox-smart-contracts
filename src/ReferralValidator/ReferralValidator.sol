@@ -3,6 +3,7 @@
 pragma solidity 0.5.9;
 
 import "../../contracts_common/src/Libraries/SigUtil.sol";
+import "../../contracts_common/src/Libraries/SafeMathWithRequire.sol";
 
 
 /**
@@ -16,6 +17,14 @@ contract ReferralValidator {
 
     mapping (address => uint256) private _previousSigningWallets;
     uint256 private _previousSigningDelay = 60 * 60 * 24 * 10;
+
+    event ReferralUsed(
+        address indexed referrer,
+        address indexed referee,
+        uint256 ETHRequired,
+        uint256 commission,
+        uint256 commissionRate
+    );
 
     constructor(
         address initialSigningWallet,
@@ -56,6 +65,34 @@ contract ReferralValidator {
         _maxCommissionRate = newMaxCommissionRate;
     }
 
+    function recordReferral(
+        uint256 ETHRequired,
+        bytes calldata signature,
+        address referrer,
+        address referee,
+        uint256 expiryTime,
+        uint256 commissionRate
+    ) external returns (uint256) {
+        if (isReferralValid(signature, referrer, referee, expiryTime, commissionRate)) {
+            uint256 commission = SafeMathWithRequire.div(
+                SafeMathWithRequire.mul(ETHRequired, commissionRate),
+                10000
+            );
+
+            emit ReferralUsed(
+                referrer,
+                referee,
+                ETHRequired,
+                commission,
+                commissionRate
+            );
+
+            return commission;
+        }
+
+        return 0;
+    }
+
     /**
      * @notice Check if a referral is valid
      * @param signature The signature to check (signed referral)
@@ -66,12 +103,12 @@ contract ReferralValidator {
      * @return True if the referral is valid
      */
     function isReferralValid(
-        bytes calldata signature,
+        bytes memory signature,
         address referrer,
         address referee,
         uint256 expiryTime,
         uint256 commissionRate
-    ) external view returns (
+    ) public view returns (
         bool
     ) {
         if (commissionRate > _maxCommissionRate || referrer == referee || now > expiryTime) {
