@@ -13,6 +13,7 @@
     "test-landSale": "rocketh launch \"yarn tap -T -j 1 -R spec test/landSale/testLandSale.js\"",
     "test-referralValidator": "rocketh launch \"yarn tap -T -j 1 -R spec test/referralValidator/testReferralValidator.js\"",
     "test-landSaleWithETHAndDAI": "rocketh launch \"yarn tap -T -j 1 -R spec test/landSale/testLandSaleWithETHAndDAI.js\"",
+    "test-landSaleWithReferral": "rocketh launch \"yarn tap -T -j 1 -R spec test/landSaleWithReferral/testLandSaleWithReferral.js\"",
     "test-land": "rocketh launch \"yarn tap -T -j 1 -R spec test/land/testLand.js\"",
     "test-commonMinter": "rocketh launch \"yarn tap -T -j 1 -R spec test/asset_bouncer/testCommonMinter.js\"",
     "test-assetAuctions": "rocketh launch \"yarn tap -T -j 1 -R spec test/asset_auctions/testAssetAuctions.js\"",
