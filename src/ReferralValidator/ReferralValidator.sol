@@ -67,12 +67,19 @@ contract ReferralValidator {
 
     function recordReferral(
         uint256 ETHRequired,
-        bytes memory signature,
-        address referrer,
-        address referee,
-        uint256 expiryTime,
-        uint256 commissionRate
-    ) internal returns (uint256) {
+        bytes memory referral
+    ) internal returns (
+        uint256,
+        address
+    ) {
+        (
+            bytes memory signature,
+            address referrer,
+            address referee,
+            uint256 expiryTime,
+            uint256 commissionRate
+        ) = decodeReferral(referral);
+
         if (isReferralValid(signature, referrer, referee, expiryTime, commissionRate)) {
             uint256 commission = SafeMathWithRequire.div(
                 SafeMathWithRequire.mul(ETHRequired, commissionRate),
@@ -87,10 +94,10 @@ contract ReferralValidator {
                 commissionRate
             );
 
-            return commission;
+            return (commission, referrer);
         }
 
-        return 0;
+        return (0, address(0));
     }
 
     /**
@@ -136,5 +143,47 @@ contract ReferralValidator {
         }
 
         return _signingWallet == signer;
+    }
+
+    function encodeReferral(
+        bytes memory signature,
+        address referrer,
+        address referee,
+        uint256 expiryTime,
+        uint256 commissionRate
+    ) public pure returns (bytes memory) {
+        return abi.encodePacked(
+            signature,
+            referrer,
+            referee,
+            expiryTime,
+            commissionRate
+        );
+    }
+
+    function decodeReferral(
+        bytes memory referral
+    ) public pure returns (
+        bytes memory,
+        address,
+        address,
+        uint256,
+        uint256
+    ) {
+        (
+            bytes memory signature,
+            address referrer,
+            address referee,
+            uint256 expiryTime,
+            uint256 commissionRate
+        ) = abi.decode(referral, (bytes, address, address, uint256, uint256));
+
+        return (
+            signature,
+            referrer,
+            referee,
+            expiryTime,
+            commissionRate
+        );
     }
 }

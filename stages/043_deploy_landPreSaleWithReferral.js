@@ -68,9 +68,11 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
         landSaleAdmin,
         landSaleBeneficiary,
         merkleRootHash,
-        1583884800, // This is March 11th 2020 at midnight
+        15838804800, // This is March 11th 2020 at midnight
         daiMedianizer.options.address,
         dai.options.address,
+        landSaleAdmin,
+        2000,
     );
     const contract = getDeployedContract('LandPreSale_2');
     if (deployResult.newlyDeployed) {

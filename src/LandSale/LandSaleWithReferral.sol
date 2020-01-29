@@ -1,5 +1,4 @@
 pragma solidity 0.5.9;
-pragma experimental ABIEncoderV2;
 
 import "../../contracts_common/src/Libraries/SafeMathWithRequire.sol";
 import "../Land.sol";
@@ -32,14 +31,6 @@ contract LandSaleWithReferral is MetaTransactionReceiver, ReferralValidator {
     bool _etherEnabled = true;
     bool _daiEnabled = false;
 
-    struct Referral {
-        bytes signature;
-        address referrer;
-        address referee;
-        uint256 expiryTime;
-        uint256 commissionRate;
-    }
-
     event LandQuadPurchased(
         address indexed buyer,
         address indexed to,
@@ -59,8 +50,13 @@ contract LandSaleWithReferral is MetaTransactionReceiver, ReferralValidator {
         bytes32 merkleRoot,
         uint256 expiryTime,
         address medianizerContractAddress,
-        address daiTokenContractAddress
-    ) public {
+        address daiTokenContractAddress,
+        address initialSigningWallet,
+        uint256 initialMaxCommissionRate
+    ) public ReferralValidator(
+        initialSigningWallet,
+        initialMaxCommissionRate
+    ) {
         _land = Land(landAddress);
         _sand = ERC20(sandContractAddress);
         _setMetaTransactionProcessor(initialMetaTx, true);
@@ -168,25 +164,21 @@ contract LandSaleWithReferral is MetaTransactionReceiver, ReferralValidator {
         uint256 priceInSand,
         bytes32 salt,
         bytes32[] calldata proof,
-        Referral calldata referral
+        bytes calldata referral
     ) external {
         require(_sandEnabled, "sand payments not enabled");
         _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);
 
-        uint256 commission = recordReferral(
+        (uint256 commission, address referrer) = recordReferral(
             priceInSand,
-            referral.signature,
-            referral.referrer,
-            referral.referee,
-            referral.expiryTime,
-            referral.commissionRate
+            referral
         );
 
         if (commission > 0) {
             require(
                 _sand.transferFrom(
                     buyer,
-                    referral.referrer,
+                    referrer,
                     commission
                 ),
                 "sand token transfer failed"
@@ -231,30 +223,25 @@ contract LandSaleWithReferral is MetaTransactionReceiver, ReferralValidator {
         uint256 priceInSand,
         bytes32 salt,
         bytes32[] calldata proof,
-        Referral calldata referral
+        bytes calldata referral
     ) external payable {
         require(_etherEnabled, "ether payments not enabled");
         _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);
 
         uint256 ETHRequired = getEtherAmountWithSAND(priceInSand);
         require(msg.value >= ETHRequired, "not enough ether sent");
-        uint256 leftOver = msg.value - ETHRequired;
 
-        if (leftOver > 0) {
-            msg.sender.transfer(leftOver); // refund extra
+        if (msg.value - ETHRequired > 0) {
+            msg.sender.transfer(msg.value - ETHRequired); // refund extra
         }
 
-        uint256 commission = recordReferral(
+        (uint256 commission, address referrer) = recordReferral(
             ETHRequired,
-            referral.signature,
-            referral.referrer,
-            referral.referee,
-            referral.expiryTime,
-            referral.commissionRate
+            referral
         );
 
         if (commission > 0) {
-            address(uint160(referral.referrer)).transfer(commission);
+            address(uint160(referrer)).transfer(commission);
         }
 
         address(_wallet).transfer(
@@ -289,27 +276,23 @@ contract LandSaleWithReferral is MetaTransactionReceiver, ReferralValidator {
         uint256 priceInSand,
         bytes32 salt,
         bytes32[] calldata proof,
-        Referral calldata referral
+        bytes calldata referral
     ) external {
         require(_daiEnabled, "dai payments not enabled");
         _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);
 
         uint256 DAIRequired = priceInSand.mul(daiPrice).div(1000000000000000000);
 
-        uint256 commission = recordReferral(
+        (uint256 commission, address referrer) = recordReferral(
             DAIRequired,
-            referral.signature,
-            referral.referrer,
-            referral.referee,
-            referral.expiryTime,
-            referral.commissionRate
+            referral
         );
 
         if (commission > 0) {
             require(
                 _dai.transferFrom(
                     msg.sender,
-                    referral.referrer,
+                    referrer,
                     commission
                 ),
                 "failed to transfer dai"

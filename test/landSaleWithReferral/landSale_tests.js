@@ -82,13 +82,7 @@ let saleDuration;
 let saleEnd;
 let contractName = 'LandSale';
 
-const emptyReferral = {
-    signature: '',
-    referrer: '',
-    referee: '',
-    expiryTime: '0',
-    commissionRate: '0',
-};
+const emptyReferral = '0x';
 
 async function setupTestLandSale(contracts) {
     saleStart = getChainCurrentTime();
@@ -112,6 +106,8 @@ async function setupTestLandSale(contracts) {
             saleEnd,
             daiMedianizer.options.address,
             dai.options.address,
+            landSaleAdmin,
+            2000,
         );
     } else {
         contract = await deployContract(
