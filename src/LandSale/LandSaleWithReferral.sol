@@ -235,20 +235,10 @@ contract LandSaleWithReferral is MetaTransactionReceiver, ReferralValidator {
             msg.sender.transfer(msg.value - ETHRequired); // refund extra
         }
 
-        (uint256 commission, address referrer) = recordReferral(
+        handleReferralWithETH(
             ETHRequired,
-            referral
-        );
-
-        if (commission > 0) {
-            address(uint160(referrer)).transfer(commission);
-        }
-
-        address(_wallet).transfer(
-            SafeMathWithRequire.sub(
-                ETHRequired,
-                commission
-            )
+            referral,
+            _wallet
         );
 
         _mint(buyer, to, x, y, size, priceInSand, address(0), ETHRequired);

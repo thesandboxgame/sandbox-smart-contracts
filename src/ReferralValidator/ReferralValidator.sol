@@ -65,6 +65,48 @@ contract ReferralValidator {
         _maxCommissionRate = newMaxCommissionRate;
     }
 
+    function handleReferralWithETH(
+        uint256 amount,
+        bytes memory referral,
+        address payable destination
+    ) internal {
+        uint256 amountForDestination = amount;
+        if(referral.length > 0) {
+            (
+                bytes memory signature,
+                address referrer,
+                address referee,
+                uint256 expiryTime,
+                uint256 commissionRate
+            ) = decodeReferral(referral);
+
+            uint256 commission = 0;
+            if (isReferralValid(signature, referrer, referee, expiryTime, commissionRate)) {
+                commission = SafeMathWithRequire.div(
+                    SafeMathWithRequire.mul(amount, commissionRate),
+                    10000
+                );
+
+                emit ReferralUsed(
+                    referrer,
+                    referee,
+                    amount,
+                    commission,
+                    commissionRate
+                );
+                amountForDestination = SafeMathWithRequire.sub(
+                    amountForDestination,
+                    commission
+                );
+            }
+            if (commission > 0) {
+                address(uint160(referrer)).transfer(commission);
+            }
+        }
+
+        destination.transfer(amountForDestination);
+    }
+
     function recordReferral(
         uint256 ETHRequired,
         bytes memory referral

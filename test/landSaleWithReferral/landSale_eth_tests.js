@@ -163,7 +163,7 @@ function runLandSaleEthTests(title, contactStore) {
                     lands[5].price,
                     lands[5].salt,
                     proof,
-                    emptyReferral,
+                    emptyReferral
                 );
             });
 
