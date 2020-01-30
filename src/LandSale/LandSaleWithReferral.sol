@@ -56,19 +56,18 @@ contract LandSaleWithReferral is MetaTransactionReceiver, ReferralValidator {
         address initialSigningWallet,
         uint256 initialMaxCommissionRate
     ) public ReferralValidator(
-        admin,
         initialSigningWallet,
         initialMaxCommissionRate
     ) {
         _land = Land(landAddress);
         _sand = ERC20(sandContractAddress);
         _setMetaTransactionProcessor(initialMetaTx, true);
-        _admin = admin;
         _wallet = initialWalletAddress;
         _merkleRoot = merkleRoot;
         _expiryTime = expiryTime;
         _medianizer = Medianizer(medianizerContractAddress);
         _dai = ERC20(daiTokenContractAddress);
+        _admin = admin;
     }
 
     /// @notice set the wallet receiving the proceeds

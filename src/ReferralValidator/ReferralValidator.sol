@@ -5,14 +5,14 @@ pragma solidity 0.5.9;
 import "../../contracts_common/src/Libraries/SigUtil.sol";
 import "../../contracts_common/src/Libraries/SafeMathWithRequire.sol";
 import "../../contracts_common/src/Interfaces/ERC20.sol";
+import "../../contracts_common/src/BaseWithStorage/Admin.sol";
 
 
 /**
  * @title Referral Validator
  * @notice This contract verifies if a referral is valid
  */
-contract ReferralValidator {
-    address private _admin;
+contract ReferralValidator is Admin {
     address private _signingWallet;
     uint256 private _maxCommissionRate;
 
@@ -29,13 +29,11 @@ contract ReferralValidator {
     );
 
     constructor(
-        address initialAmdmin,
         address initialSigningWallet,
         uint256 initialMaxCommissionRate
     ) public {
         _signingWallet = initialSigningWallet;
         _maxCommissionRate = initialMaxCommissionRate;
-        _admin = initialAmdmin;
     }
 
     /**
