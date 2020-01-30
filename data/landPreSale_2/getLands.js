@@ -34,19 +34,19 @@ function generateLandsForMerkleTree() {
         let price = 0;
         if (size === 1) {
             num1x1Lands++;
-            price = '2000000000000000000000';
+            price = '2333000000000000000000';
         } else if (size === 3) {
             num3x3Lands++;
-            price = '17100000000000000000000';
+            price = '19950000000000000000000';
         } else if (size === 6) {
             num6x6Lands++;
-            price = '64800000000000000000000';
+            price = '75600000000000000000000';
         } else if (size === 12) {
             num12x12Lands++;
-            price = '244800000000000000000000';
+            price = '285600000000000000000000';
         } else if (size === 24) {
             num24x24Lands++;
-            price = '921600000000000000000000';
+            price = '1075200000000000000000000';
         } else {
             reportError('wrong size : ' + size);
         }
