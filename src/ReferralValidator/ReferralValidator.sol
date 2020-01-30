@@ -1,9 +1,10 @@
-/* solhint-disable not-rely-on-time */
+/* solhint-disable not-rely-on-time, func-order */
 
 pragma solidity 0.5.9;
 
 import "../../contracts_common/src/Libraries/SigUtil.sol";
 import "../../contracts_common/src/Libraries/SafeMathWithRequire.sol";
+import "../../contracts_common/src/Interfaces/ERC20.sol";
 
 
 /**
@@ -21,28 +22,20 @@ contract ReferralValidator {
     event ReferralUsed(
         address indexed referrer,
         address indexed referee,
-        uint256 ETHRequired,
+        address indexed token,
+        uint256 amount,
         uint256 commission,
         uint256 commissionRate
     );
 
     constructor(
+        address initialAmdmin,
         address initialSigningWallet,
         uint256 initialMaxCommissionRate
     ) public {
         _signingWallet = initialSigningWallet;
         _maxCommissionRate = initialMaxCommissionRate;
-        _admin = msg.sender;
-    }
-
-    /**
-     * @notice Update the admin
-     * @param newAdmin The new address of the admin
-     */
-    function updateAdmin(address newAdmin) external {
-        require(_admin == msg.sender, "Sender not admin");
-        require(newAdmin != address(0), "Invalid address");
-        _admin = newAdmin;
+        _admin = initialAmdmin;
     }
 
     /**
@@ -71,7 +64,8 @@ contract ReferralValidator {
         address payable destination
     ) internal {
         uint256 amountForDestination = amount;
-        if(referral.length > 0) {
+
+        if (referral.length > 0) {
             (
                 bytes memory signature,
                 address referrer,
@@ -81,6 +75,7 @@ contract ReferralValidator {
             ) = decodeReferral(referral);
 
             uint256 commission = 0;
+
             if (isReferralValid(signature, referrer, referee, expiryTime, commissionRate)) {
                 commission = SafeMathWithRequire.div(
                     SafeMathWithRequire.mul(amount, commissionRate),
@@ -90,6 +85,7 @@ contract ReferralValidator {
                 emit ReferralUsed(
                     referrer,
                     referee,
+                    address(0),
                     amount,
                     commission,
                     commissionRate
@@ -99,6 +95,7 @@ contract ReferralValidator {
                     commission
                 );
             }
+
             if (commission > 0) {
                 address(uint160(referrer)).transfer(commission);
             }
@@ -107,39 +104,53 @@ contract ReferralValidator {
         destination.transfer(amountForDestination);
     }
 
-    function recordReferral(
-        uint256 ETHRequired,
-        bytes memory referral
-    ) internal returns (
-        uint256,
-        address
-    ) {
-        (
-            bytes memory signature,
-            address referrer,
-            address referee,
-            uint256 expiryTime,
-            uint256 commissionRate
-        ) = decodeReferral(referral);
+    function handleReferralWithERC20(
+        address buyer,
+        uint256 amount,
+        bytes memory referral,
+        address payable destination,
+        address tokenAddress
+    ) internal {
+        ERC20 token = ERC20(tokenAddress);
+        uint256 amountForDestination = amount;
 
-        if (isReferralValid(signature, referrer, referee, expiryTime, commissionRate)) {
-            uint256 commission = SafeMathWithRequire.div(
-                SafeMathWithRequire.mul(ETHRequired, commissionRate),
-                10000
-            );
+        if (referral.length > 0) {
+            (
+                bytes memory signature,
+                address referrer,
+                address referee,
+                uint256 expiryTime,
+                uint256 commissionRate
+            ) = decodeReferral(referral);
 
-            emit ReferralUsed(
-                referrer,
-                referee,
-                ETHRequired,
-                commission,
-                commissionRate
-            );
+            uint256 commission = 0;
 
-            return (commission, referrer);
+            if (isReferralValid(signature, referrer, referee, expiryTime, commissionRate)) {
+                commission = SafeMathWithRequire.div(
+                    SafeMathWithRequire.mul(amount, commissionRate),
+                    10000
+                );
+
+                emit ReferralUsed(
+                    referrer,
+                    referee,
+                    tokenAddress,
+                    amount,
+                    commission,
+                    commissionRate
+                );
+                amountForDestination = SafeMathWithRequire.sub(
+                    amountForDestination,
+                    commission
+                );
+            }
+
+            if (commission > 0) {
+                token.transferFrom(buyer, referrer, commission);
+            }
         }
 
-        return (0, address(0));
+        token.transferFrom(buyer, destination, amountForDestination);
     }
 
     /**
@@ -185,22 +196,6 @@ contract ReferralValidator {
         }
 
         return _signingWallet == signer;
-    }
-
-    function encodeReferral(
-        bytes memory signature,
-        address referrer,
-        address referee,
-        uint256 expiryTime,
-        uint256 commissionRate
-    ) public pure returns (bytes memory) {
-        return abi.encodePacked(
-            signature,
-            referrer,
-            referee,
-            expiryTime,
-            commissionRate
-        );
     }
 
     function decodeReferral(

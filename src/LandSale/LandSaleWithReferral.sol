@@ -1,3 +1,5 @@
+/* solhint-disable not-rely-on-time, func-order */
+
 pragma solidity 0.5.9;
 
 import "../../contracts_common/src/Libraries/SafeMathWithRequire.sol";
@@ -54,6 +56,7 @@ contract LandSaleWithReferral is MetaTransactionReceiver, ReferralValidator {
         address initialSigningWallet,
         uint256 initialMaxCommissionRate
     ) public ReferralValidator(
+        admin,
         initialSigningWallet,
         initialMaxCommissionRate
     ) {
@@ -169,32 +172,12 @@ contract LandSaleWithReferral is MetaTransactionReceiver, ReferralValidator {
         require(_sandEnabled, "sand payments not enabled");
         _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);
 
-        (uint256 commission, address referrer) = recordReferral(
+        handleReferralWithERC20(
+            buyer,
             priceInSand,
-            referral
-        );
-
-        if (commission > 0) {
-            require(
-                _sand.transferFrom(
-                    buyer,
-                    referrer,
-                    commission
-                ),
-                "sand token transfer failed"
-            );
-        }
-
-        require(
-            _sand.transferFrom(
-                buyer,
-                _wallet,
-                SafeMathWithRequire.sub(
-                    priceInSand,
-                    commission
-                )
-            ),
-            "sand token transfer failed"
+            referral,
+            _wallet,
+            address(_sand)
         );
 
         _mint(buyer, to, x, y, size, priceInSand, address(_sand), priceInSand);
@@ -273,29 +256,12 @@ contract LandSaleWithReferral is MetaTransactionReceiver, ReferralValidator {
 
         uint256 DAIRequired = priceInSand.mul(daiPrice).div(1000000000000000000);
 
-        (uint256 commission, address referrer) = recordReferral(
+        handleReferralWithERC20(
+            buyer,
             DAIRequired,
-            referral
-        );
-
-        if (commission > 0) {
-            require(
-                _dai.transferFrom(
-                    msg.sender,
-                    referrer,
-                    commission
-                ),
-                "failed to transfer dai"
-            );
-        }
-
-        require(
-            _dai.transferFrom(
-                msg.sender,
-                _wallet,
-                DAIRequired - commission
-            ),
-            "failed to transfer dai"
+            referral,
+            _wallet,
+            address(_dai)
         );
 
         _mint(buyer, to, x, y, size, priceInSand, address(_dai), DAIRequired);
