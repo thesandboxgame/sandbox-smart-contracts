@@ -1,3 +1,4 @@
+const Web3 = require('web3');
 const tap = require('tap');
 const BN = require('bn.js');
 const assert = require('assert');
@@ -17,7 +18,12 @@ const {
     expectRevert,
     toWei,
     getChainCurrentTime,
+    encodeParameters,
 } = require('../utils');
+
+const {
+    createReferral,
+} = require('../../lib/referralValidator');
 
 const {
     deployer,
@@ -85,7 +91,12 @@ let saleStart;
 let saleDuration;
 let saleEnd;
 
+const maxCommissionRate = '2000';
+const signer = '0x26BC52894A05EDE59B34EE7B014b57ef0a8558B3';
+const privateKey = '0x96aa38e97d1d0d19e0f1d5215ff9dad66dc5d99225b1657205d124d00d2de177';
+
 const emptyReferral = '0x';
+const referralLinkValidity = 60 * 60 * 24 * 30;
 
 async function setupTestLandSale(contracts) {
     saleStart = getChainCurrentTime();
@@ -107,8 +118,8 @@ async function setupTestLandSale(contracts) {
         saleEnd,
         daiMedianizer.options.address,
         dai.options.address,
-        landSaleAdmin,
-        2000,
+        signer,
+        maxCommissionRate,
     );
 
     await tx(contracts.Land, 'setMinter', {from: landAdmin, gas: 1000000}, contract.options.address, true);
@@ -134,6 +145,15 @@ function runLandSaleDaiTests(title, contactStore) {
 
             await tx(contracts.FakeDAI, 'transfer', {from: deployer, gas}, others[0], toWei('1000000'));
             await tx(contracts.FakeDAI, 'approve', {from: others[0], gas}, contracts.LandSale.options.address, toWei('1000000')); // TODO remove and move it inot test
+
+            await tx(
+                contracts.LandSale,
+                'updateSigningWallet', {
+                    from: landAdmin,
+                    gas,
+                },
+                signer,
+            );
         });
 
         t.test('-> DAI payments', async (t) => {
@@ -170,6 +190,103 @@ function runLandSaleDaiTests(title, contactStore) {
                     proof,
                     emptyReferral,
                 );
+            });
+
+            t.test('can buy Land with DAI and a referral', async () => {
+                const web3 = new Web3();
+                web3.setProvider(rocketh.ethereum);
+
+                const referral = {
+                    referrer: others[0],
+                    referee: others[1],
+                    expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
+                    commissionRate: '500',
+                };
+
+                const sig = createReferral(
+                    web3,
+                    privateKey,
+                    referral.referrer,
+                    referral.referee,
+                    referral.expiryTime,
+                    referral.commissionRate,
+                );
+
+                const proof = tree.getProof(calculateLandHash(lands[5]));
+
+                const isReferralValid = await call(
+                    contracts.LandSale,
+                    'isReferralValid', {
+                        from: others[0],
+                    },
+                    sig.signature,
+                    referral.referrer,
+                    referral.referee,
+                    referral.expiryTime,
+                    referral.commissionRate,
+                );
+
+                assert.equal(isReferralValid, true, 'Referral should be valid');
+
+                const encodedReferral = encodeParameters(
+                    [
+                        'bytes',
+                        'address',
+                        'address',
+                        'uint256',
+                        'uint256'
+                    ],
+                    [
+                        sig.signature,
+                        referral.referrer,
+                        referral.referee,
+                        referral.expiryTime,
+                        referral.commissionRate,
+                    ],
+                );
+
+                const receipt = await tx(contracts.LandSale, 'buyLandWithDAI', {from: others[0], gas},
+                    others[0],
+                    others[0],
+                    zeroAddress,
+                    lands[5].x, lands[5].y, lands[5].size,
+                    lands[5].price,
+                    lands[5].salt,
+                    proof,
+                    encodedReferral,
+                );
+
+                const event = receipt.events.ReferralUsed;
+
+                assert.equal(event.event, 'ReferralUsed', 'Event name is wrong');
+
+                const {
+                    referrer,
+                    referee,
+                    token,
+                    amount,
+                    commission,
+                    commissionRate,
+                }  = event.returnValues;
+
+                assert.equal(referrer, referral.referrer, 'Referrer is wrong');
+                assert.equal(referee, referral.referee, 'Referee is wrong');
+                assert.equal(token, contracts.FakeDAI.options.address, 'Token is wrong');
+                // assert.equal(amount, lands[5].price, 'Amount is wrong');
+
+                console.log(amount);
+                console.log(lands[5].price);
+                assert.equal(commissionRate, referral.commissionRate, 'Amount is wrong');
+
+                const referrerBalance = await call(
+                    contracts.FakeDAI,
+                    'balanceOf', {
+                        from: others[0],
+                    },
+                    others[1],
+                );
+
+                assert.equal(referrerBalance, commission, 'Commission is wrong');
             });
 
             t.test('cannot buy Land with DAI if not enabled (empty referral)', async () => {

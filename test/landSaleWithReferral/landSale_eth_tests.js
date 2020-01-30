@@ -1,3 +1,4 @@
+const Web3 = require('web3');
 const tap = require('tap');
 const assert = require('assert');
 const rocketh = require('rocketh');
@@ -15,8 +16,12 @@ const {
     increaseTime,
     expectRevert,
     getChainCurrentTime,
-    sendTransaction,
+    encodeParameters,
 } = require('../utils');
+
+const {
+    createReferral,
+} = require('../../lib/referralValidator');
 
 const {
     deployer,
@@ -80,7 +85,12 @@ let saleStart;
 let saleDuration;
 let saleEnd;
 
+const maxCommissionRate = '2000';
+const signer = '0x26BC52894A05EDE59B34EE7B014b57ef0a8558B3';
+const privateKey = '0x96aa38e97d1d0d19e0f1d5215ff9dad66dc5d99225b1657205d124d00d2de177';
+
 const emptyReferral = '0x';
+const referralLinkValidity = 60 * 60 * 24 * 30;
 
 async function setupTestLandSale(contracts) {
     saleStart = getChainCurrentTime();
@@ -164,6 +174,60 @@ function runLandSaleEthTests(title, contactStore) {
                     lands[5].salt,
                     proof,
                     emptyReferral
+                );
+            });
+
+            t.test('can buy Land with ETH and a referral', async () => {
+                const web3 = new Web3();
+                web3.setProvider(rocketh.ethereum);
+
+                const referral = {
+                    referrer: others[0],
+                    referee: others[1],
+                    expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
+                    commissionRate: '500',
+                };
+
+                const sig = createReferral(
+                    web3,
+                    privateKey,
+                    referral.referrer,
+                    referral.referee,
+                    referral.expiryTime,
+                    referral.commissionRate,
+                );
+
+                const sandPrice = lands[5].price;
+                const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
+
+                const proof = tree.getProof(calculateLandHash(lands[5]));
+
+                const encodedReferral = encodeParameters(
+                    [
+                        'bytes',
+                        'address',
+                        'address',
+                        'uint256',
+                        'uint256'
+                    ],
+                    [
+                        sig.signature,
+                        referral.referrer,
+                        referral.referee,
+                        referral.expiryTime,
+                        referral.commissionRate,
+                    ],
+                );
+
+                await tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value},
+                    others[0],
+                    others[0],
+                    zeroAddress,
+                    lands[5].x, lands[5].y, lands[5].size,
+                    lands[5].price,
+                    lands[5].salt,
+                    proof,
+                    encodedReferral,
                 );
             });
 
@@ -348,7 +412,8 @@ function runLandSaleEthTests(title, contactStore) {
                     lands[5].x, lands[5].y, lands[5].size,
                     lands[5].price,
                     lands[5].salt,
-                    proof
+                    proof,
+                    emptyReferral,
                 );
                 await expectThrow(tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value},
                     others[0],

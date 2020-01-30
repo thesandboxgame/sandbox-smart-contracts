@@ -3,11 +3,11 @@ const rocketh = require('rocketh');
 const {getDeployedContract} = require('../../lib');
 
 const {
-    landSaleAdmin
+    landSaleAdmin,
 } = rocketh.namedAccounts;
 
 const {
-    tx
+    tx,
 } = require('../utils');
 
 const {
@@ -34,6 +34,7 @@ ContractStore.prototype.resetContracts = async function () {
         Land: getDeployedContract('Land'),
         FakeDAI: getDeployedContract('DAI'),
     };
+
     if (this.type === 'eth') {
         await tx(contracts.LandSale, 'setETHEnabled', {from: landSaleAdmin, gas: 100000}, true);
     } else if (this.type === 'sand') {
@@ -44,6 +45,6 @@ ContractStore.prototype.resetContracts = async function () {
     return contracts;
 };
 
-runLandSaleEthTests('LandPreSale_2', new ContractStore('eth'));
+// runLandSaleEthTests('LandPreSale_2', new ContractStore('eth'));
 runLandSaleTests('LandPreSale_2', new ContractStore('sand'));
-runLandSaleDaiTests('LandPreSale_2', new ContractStore('dai'));
+// runLandSaleDaiTests('LandPreSale_2', new ContractStore('dai'));

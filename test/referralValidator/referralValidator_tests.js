@@ -43,34 +43,6 @@ function runReferralValidatorTests(title) {
             referralValidator = await deployContract(deployer, 'ReferralValidator', signer, maxCommissionRate);
         });
 
-        t.test('cannot update the admin if not admin', async () => {
-            await expectRevert(
-                tx(
-                    referralValidator,
-                    'updateAdmin', {
-                        from: others[0],
-                        gas,
-                    },
-                    others[0],
-                ),
-                'Sender not admin',
-            );
-        });
-
-        t.test('cannot update the admin if invalid address', async () => {
-            await expectRevert(
-                tx(
-                    referralValidator,
-                    'updateAdmin', {
-                        from: deployer,
-                        gas,
-                    },
-                    zeroAddress,
-                ),
-                'Invalid address',
-            );
-        });
-
         t.test('can verify a valid referral', async () => {
             const web3 = new Web3();
             web3.setProvider(rocketh.ethereum);
