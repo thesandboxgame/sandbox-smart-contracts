@@ -291,6 +291,18 @@ function runLandSaleTests(title, contactStore) {
                 assert.equal(commission, expectedCommission.toString(), 'Commission is wrong');
 
                 assert.equal(commission, referrerBalance, 'Referrer balance is wrong');
+
+                const landSaleBeneficiaryBalance = await call(
+                    contracts.Sand,
+                    'balanceOf', {
+                        from: others[0],
+                    },
+                    landSaleBeneficiary,
+                );
+
+                const expectedLandSaleBeneficiaryBalance = new BN(amount).sub(new BN(commission));
+
+                assert.equal(landSaleBeneficiaryBalance, expectedLandSaleBeneficiaryBalance.toString(), 'Balance is wrong');
             });
 
             t.test('can buy Land with SAND and an invalid referral', async () => {
@@ -371,6 +383,16 @@ function runLandSaleTests(title, contactStore) {
                 );
 
                 assert.equal(referrerBalance, 0, 'Referrer balance is wrong');
+
+                const landSaleBeneficiaryBalance = await call(
+                    contracts.Sand,
+                    'balanceOf', {
+                        from: others[0],
+                    },
+                    landSaleBeneficiary,
+                );
+
+                assert.equal(landSaleBeneficiaryBalance, lands[5].price, 'Balance is wrong');
             });
 
             if (contractName === 'LandSaleWithETHAndDAI') {
