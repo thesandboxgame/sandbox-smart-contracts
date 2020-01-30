@@ -197,8 +197,8 @@ function runLandSaleDaiTests(title, contactStore) {
                 web3.setProvider(rocketh.ethereum);
 
                 const referral = {
-                    referrer: others[0],
-                    referee: others[1],
+                    referrer: others[2],
+                    referee: others[0],
                     expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
                     commissionRate: '500',
                 };
@@ -272,10 +272,7 @@ function runLandSaleDaiTests(title, contactStore) {
                 assert.equal(referrer, referral.referrer, 'Referrer is wrong');
                 assert.equal(referee, referral.referee, 'Referee is wrong');
                 assert.equal(token, contracts.FakeDAI.options.address, 'Token is wrong');
-                // assert.equal(amount, lands[5].price, 'Amount is wrong');
-
-                console.log(amount);
-                console.log(lands[5].price);
+                assert.equal(amount, sandToUSD(lands[5].price), 'Amount is wrong');
                 assert.equal(commissionRate, referral.commissionRate, 'Amount is wrong');
 
                 const referrerBalance = await call(
@@ -283,10 +280,13 @@ function runLandSaleDaiTests(title, contactStore) {
                     'balanceOf', {
                         from: others[0],
                     },
-                    others[1],
+                    others[2],
                 );
 
-                assert.equal(referrerBalance, commission, 'Commission is wrong');
+                const expectedCommission = new BN(amount).mul(new BN(commissionRate)).div(new BN('10000'));
+                assert.equal(commission, expectedCommission.toString(), 'Commission is wrong');
+
+                assert.equal(commission, referrerBalance, 'Referrer balance is wrong');
             });
 
             t.test('cannot buy Land with DAI if not enabled (empty referral)', async () => {
