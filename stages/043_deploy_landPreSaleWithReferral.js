@@ -1,11 +1,12 @@
 const rocketh = require('rocketh');
+
 const Web3 = require('web3');
 const {
     deploy,
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);
 const {guard} = require('../lib');
-const {getLands} = require('../data/landPreSale_2/getLands');
+const {getLands} = require('../data/landPreSale2/getLands');
 
 module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, isDeploymentChainId}) => {
     function log(...args) {
@@ -60,16 +61,18 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
     const deployResult = await deployIfDifferent(['data'],
         'LandPreSale_2',
         {from: deployer, gas: 1000000, associatedData: lands},
-        'LandSaleWithETHAndDAI',
+        'LandSaleWithReferral',
         landContract.options.address,
         sandContract.options.address,
         sandContract.options.address,
-        deployer,
+        landSaleAdmin,
         landSaleBeneficiary,
         merkleRootHash,
-        1581422400, // 1581422400 converts to Tuesday February 11, 2020 09:00:00 (am) in time zone America/Argentina/Buenos Aires (-03)
+        15838804800, // This is March 11th 2020 at midnight
         daiMedianizer.options.address,
-        dai.options.address
+        dai.options.address,
+        landSaleAdmin,
+        2000,
     );
     const contract = getDeployedContract('LandPreSale_2');
     if (deployResult.newlyDeployed) {
@@ -78,4 +81,4 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
         log('reusing LandPreSale_2 at ' + contract.options.address);
     }
 };
-module.exports.skip = guard(['1', '4', '314159'], 'LandPreSale_2');
+module.exports.skip = guard(['1', '4'], 'LandPreSale_2');
