@@ -8,7 +8,7 @@ const {
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);
 
-const {nonExposedLands, partnersLands} = require('../data/getLands');
+const {nonExposedLands, partnersLands} = require('../../data/landPreSale_2/getLands');
 
 function getTokenId(x, y) {
     return x + (y * 408);
@@ -27,7 +27,7 @@ program
     .command('count')
     .description('count presale')
     .action(async (cmdObj) => {
-        const LandPreSale = getDeployedContract('LandPreSale_1');
+        const LandPreSale = getDeployedContract('LandPreSale_2');
         const events = await LandPreSale.getPastEvents('LandQuadPurchased', {
             fromBlock: 9048221,
             toBlock: 'latest'

@@ -1,6 +1,6 @@
 const fs = require('fs');
-const MerkleTree = require('../lib/merkleTree');
-const {createDataArray, saltLands} = require('../lib/merkleTreeHelper');
+const MerkleTree = require('../../lib/merkleTree');
+const {createDataArray, saltLands} = require('../../lib/merkleTreeHelper');
 const rawLands = require('./lands.json');
 const reservedLands = require('./reserved.json');
 

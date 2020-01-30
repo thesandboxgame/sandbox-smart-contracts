@@ -1,12 +1,11 @@
 const rocketh = require('rocketh');
-
 const Web3 = require('web3');
 const {
     deploy,
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);
 const {guard} = require('../lib');
-const {getLands} = require('../data/LandPreSale_1/getLands');
+const {getLands} = require('../data/landPreSale_2/getLands');
 
 module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, isDeploymentChainId}) => {
     function log(...args) {
@@ -59,24 +58,24 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
     const {lands, merkleRootHash} = getLands(isDeploymentChainId, chainId);
 
     const deployResult = await deployIfDifferent(['data'],
-        'LandPreSale_1',
+        'LandPreSale_2',
         {from: deployer, gas: 1000000, associatedData: lands},
-        'LandSale', // TODO rename : LandSaleWithETHAndDAI
+        'LandSaleWithETHAndDAI',
         landContract.options.address,
         sandContract.options.address,
         sandContract.options.address,
-        landSaleAdmin,
+        deployer,
         landSaleBeneficiary,
         merkleRootHash,
-        1576753200, // This is Thursday, 19 December 2019 11:00:00 GMT+00:00 // Math.floor(Date.now() / 1000) + (30 * 24 * 60 * 60), // 30 days
+        15838804800, // This is March 11th 2020 at midnight
         daiMedianizer.options.address,
         dai.options.address
     );
-    const contract = getDeployedContract('LandPreSale_1');
+    const contract = getDeployedContract('LandPreSale_2');
     if (deployResult.newlyDeployed) {
-        log(' - LandPreSale_1 deployed at : ' + contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
+        log(' - LandPreSale_2 deployed at : ' + contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
     } else {
-        log('reusing LandPreSale_1 at ' + contract.options.address);
+        log('reusing LandPreSale_2 at ' + contract.options.address);
     }
 };
-module.exports.skip = () => true; // module.exports.skip = guard(['1', '4', '314159'], 'LandPreSale_1');
+module.exports.skip = guard(['1', '4', '314159'], 'LandPreSale_2');

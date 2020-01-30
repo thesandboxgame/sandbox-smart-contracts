@@ -5,7 +5,7 @@ const {
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);
 const {guard} = require('../lib');
-const {getLands} = require('../data/getLands');
+const {getLands} = require('../data/landPreSale_1/getLands');
 
 module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, isDeploymentChainId}) => {
     function log(...args) {

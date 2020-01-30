@@ -11,7 +11,7 @@ const {
 const {
     emptyBytes,
     zeroAddress,
-} = require('../test/utils')
+} = require('../../test/utils')
 
 const sender = rocketh.accounts[0];
 

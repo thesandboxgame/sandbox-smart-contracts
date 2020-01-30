@@ -1,10 +1,10 @@
 const fs = require('fs');
 const rocketh = require('rocketh');
 
-const MerkleTree = require('../lib/merkleTree');
-const {createDataArray, calculateLandHash, saltLands} = require('../lib/merkleTreeHelper');
+const MerkleTree = require('../../lib/merkleTree');
+const {createDataArray, calculateLandHash, saltLands} = require('../../lib/merkleTreeHelper');
 
-const deployment = rocketh.deployment('LandPreSale_1');
+const deployment = rocketh.deployment('LandPreSale_2');
 const lands = deployment.data;
 const secretPath = process.argv[2];
 if (!secretPath) {
@@ -21,4 +21,4 @@ for (const land of saltedLands) {
     landsWithProof.push(land);
 }
 
-fs.writeFileSync('./.land_presale_proofs.json', JSON.stringify(landsWithProof, null, '  '));
+fs.writeFileSync('./.presale_2_proofs.json', JSON.stringify(landsWithProof, null, '  '));
