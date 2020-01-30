@@ -45,6 +45,6 @@ ContractStore.prototype.resetContracts = async function () {
     return contracts;
 };
 
-// runLandSaleEthTests('LandPreSale_2', new ContractStore('eth'));
+runLandSaleEthTests('LandPreSale_2', new ContractStore('eth'));
 runLandSaleTests('LandPreSale_2', new ContractStore('sand'));
-// runLandSaleDaiTests('LandPreSale_2', new ContractStore('dai'));
+runLandSaleDaiTests('LandPreSale_2', new ContractStore('dai'));
