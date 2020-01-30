@@ -1,5 +1,6 @@
 const Web3 = require('web3');
 const tap = require('tap');
+const BN = require('bn.js');
 const assert = require('assert');
 const rocketh = require('rocketh');
 const {
@@ -17,6 +18,7 @@ const {
     expectRevert,
     getChainCurrentTime,
     encodeParameters,
+    getBalance,
 } = require('../utils');
 
 const {
@@ -112,8 +114,8 @@ async function setupTestLandSale(contracts) {
         saleEnd,
         daiMedianizer.options.address,
         dai.options.address,
-        landSaleAdmin,
-        2000,
+        signer,
+        maxCommissionRate,
     );
 
     await tx(contracts.Land, 'setMinter', {from: landAdmin, gas: 1000000}, contract.options.address, true);
@@ -136,6 +138,15 @@ function runLandSaleEthTests(title, contactStore) {
 
             landHashArray = createDataArray(lands);
             tree = new MerkleTree(landHashArray);
+
+            await tx(
+                contracts.LandSale,
+                'updateSigningWallet', {
+                    from: landAdmin,
+                    gas,
+                },
+                signer,
+            );
         });
 
         t.test('-> ETH payments', async (t) => {
@@ -182,8 +193,8 @@ function runLandSaleEthTests(title, contactStore) {
                 web3.setProvider(rocketh.ethereum);
 
                 const referral = {
-                    referrer: others[0],
-                    referee: others[1],
+                    referrer: '0x80EdC2580F0c768cb5b2bb87b96049A13508C230',
+                    referee: others[0],
                     expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
                     commissionRate: '500',
                 };
@@ -202,6 +213,20 @@ function runLandSaleEthTests(title, contactStore) {
 
                 const proof = tree.getProof(calculateLandHash(lands[5]));
 
+                const isReferralValid = await call(
+                    contracts.LandSale,
+                    'isReferralValid', {
+                        from: others[0],
+                    },
+                    sig.signature,
+                    referral.referrer,
+                    referral.referee,
+                    referral.expiryTime,
+                    referral.commissionRate,
+                );
+
+                assert.equal(isReferralValid, true, 'Referral should be valid');
+
                 const encodedReferral = encodeParameters(
                     [
                         'bytes',
@@ -219,7 +244,7 @@ function runLandSaleEthTests(title, contactStore) {
                     ],
                 );
 
-                await tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value},
+                const receipt = await tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value},
                     others[0],
                     others[0],
                     zeroAddress,
@@ -229,6 +254,32 @@ function runLandSaleEthTests(title, contactStore) {
                     proof,
                     encodedReferral,
                 );
+
+                const event = receipt.events.ReferralUsed;
+
+                assert.equal(event.event, 'ReferralUsed', 'Event name is wrong');
+
+                const {
+                    referrer,
+                    referee,
+                    token,
+                    amount,
+                    commission,
+                    commissionRate,
+                }  = event.returnValues;
+
+                assert.equal(referrer, referral.referrer, 'Referrer is wrong');
+                assert.equal(referee, referral.referee, 'Referee is wrong');
+                assert.equal(token, zeroAddress, 'Token is wrong');
+                assert.equal(amount, value, 'Amount is wrong');
+                assert.equal(commissionRate, referral.commissionRate, 'Amount is wrong');
+
+                const referrerBalance = await getBalance(referral.referrer);
+
+                const expectedCommission = new BN(amount).mul(new BN(commissionRate)).div(new BN('10000'));
+                assert.equal(commission, expectedCommission.toString(), 'Commission is wrong');
+
+                assert.equal(commission, referrerBalance, 'Referrer balance is wrong');
             });
 
             t.test('cannot buy Land with ETH if not enabled (empty referral)', async () => {
