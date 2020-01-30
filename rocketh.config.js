@@ -14,6 +14,9 @@ module.exports = {
             type: 'mnemonic',
             num: 10,
         },
+        314159: { // sandbox testnet
+            type: 'mnemonic',
+        },
         4: { // ethereum rinkeby testnet
             // type: 'bitski'
             type: 'mnemonic',
@@ -34,12 +37,14 @@ module.exports = {
             default: 1,
             1: '0x18dd4e0eb8699eA4FeE238dE41ECfb95e32272f8',
             4: '0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20',
+            314159: '0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20',
         }, // deploy contracts and make sure they are set up correctly
         sandAdmin: { // can add super operators and change admin
             default: 2,
             // 4: "0x5b4c9eae565c1ba9eb65365aa02ee9fb0a653ce5",
             1: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06', // multi sig wallet
-            4: '0xcbc70EcCd52bF3910CDC1455E6D2Bd45725F573D' // test multi sig wallet
+            4: '0xcbc70EcCd52bF3910CDC1455E6D2Bd45725F573D', // test multi sig wallet
+            314159: '0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20'
         },
         sandExecutionAdmin: 'sandAdmin',
         // metaTransactionFundOwner: 0, // TODO
@@ -59,6 +64,7 @@ module.exports = {
             default: 3,
             1: '0x9695ed5020BB47880738Db356678fe8cBc8FF60b', // TODO use another wallet ?
             4: '0xcbc70EcCd52bF3910CDC1455E6D2Bd45725F573D',
+            314159: '0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20'
         },
         bundleSandSaleManager: 'sandAdmin',
         bundleSandSaleAdmin: 'sandAdmin',

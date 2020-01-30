@@ -35,4 +35,4 @@ module.exports = async ({namedAccounts, initialRun}) => {
         log('reusing NativeMetaTransactionProcessor at ' + deployResult.contract.options.address);
     }
 };
-module.exports.skip = guard(['1', '4'], 'NativeMetaTransactionProcessor');
+module.exports.skip = guard(['1', '4', '314159'], 'NativeMetaTransactionProcessor');

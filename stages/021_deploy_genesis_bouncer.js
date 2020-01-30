@@ -39,4 +39,4 @@ module.exports = async ({namedAccounts, initialRun}) => {
         log('reusing GenesisBouncer at ' + deployResult.contract.options.address);
     }
 };
-module.exports.skip = guard(['1', '4'], 'GenesisBouncer');
+module.exports.skip = guard(['1', '4', '314159'], 'GenesisBouncer');

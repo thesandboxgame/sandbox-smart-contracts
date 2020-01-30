@@ -23,6 +23,7 @@
     "smartcheck": "smartcheck -p .",
     "deploy-local": "rocketh launch -n http://localhost:8545",
     "deploy-rinkeby": "rocketh launch -n https://rinkeby.infura.io/v3/ced8eecc03984939b556332468325813",
+    "deploy-sandbox-testnet": "rocketh launch -n https://test-rpc.sandbox.game",
     "deploy-mainnet": "rocketh launch -n https://mainnet.infura.io/v3/ced8eecc03984939b556332468325813",
     "attach-rinkeby": "rocketh attach https://rinkeby.infura.io/v3/ced8eecc03984939b556332468325813",
     "attach-mainnet": "rocketh attach https://mainnet.infura.io/v3/ced8eecc03984939b556332468325813"

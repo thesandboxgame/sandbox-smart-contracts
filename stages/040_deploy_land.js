@@ -39,4 +39,4 @@ module.exports = async ({namedAccounts, initialRun, isDeploymentChainId}) => {
         log('reusing Land at ' + deployResult.contract.options.address);
     }
 };
-module.exports.skip = guard(['1', '4'], 'Land');
+module.exports.skip = guard(['1', '4', '314159'], 'Land');

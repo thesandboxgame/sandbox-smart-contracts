@@ -34,4 +34,4 @@ module.exports = async ({namedAccounts, initialRun}) => {
         await txOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000}, asset, 'setBouncer', bouncer.options.address, true);
     }
 };
-module.exports.skip = guard(['1', '4']); // TODO
+module.exports.skip = guard(['1', '4', '314159']); // TODO
