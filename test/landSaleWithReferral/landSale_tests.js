@@ -293,6 +293,86 @@ function runLandSaleTests(title, contactStore) {
                 assert.equal(commission, referrerBalance, 'Referrer balance is wrong');
             });
 
+            t.test('can buy Land with SAND and an invalid referral', async () => {
+                const web3 = new Web3();
+                web3.setProvider(rocketh.ethereum);
+
+                const referral = {
+                    referrer: others[2],
+                    referee: others[0],
+                    expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
+                    commissionRate: '10000',
+                };
+
+                const sig = createReferral(
+                    web3,
+                    privateKey,
+                    referral.referrer,
+                    referral.referee,
+                    referral.expiryTime,
+                    referral.commissionRate,
+                );
+
+                const proof = tree.getProof(calculateLandHash(lands[5]));
+
+                const isReferralValid = await call(
+                    contracts.LandSale,
+                    'isReferralValid', {
+                        from: others[0],
+                    },
+                    sig.signature,
+                    referral.referrer,
+                    referral.referee,
+                    referral.expiryTime,
+                    referral.commissionRate,
+                );
+
+                assert.equal(isReferralValid, false, 'Referral should be invalid');
+
+                const encodedReferral = encodeParameters(
+                    [
+                        'bytes',
+                        'address',
+                        'address',
+                        'uint256',
+                        'uint256'
+                    ],
+                    [
+                        sig.signature,
+                        referral.referrer,
+                        referral.referee,
+                        referral.expiryTime,
+                        referral.commissionRate,
+                    ],
+                );
+
+                const receipt = await tx(contracts.LandSale, 'buyLandWithSand', {from: others[0], gas},
+                    others[0],
+                    others[0],
+                    zeroAddress,
+                    lands[5].x, lands[5].y, lands[5].size,
+                    lands[5].price,
+                    lands[5].salt,
+                    proof,
+                    encodedReferral,
+                );
+
+                const balance = await call(contracts.Land, 'balanceOf', {from: others[0]}, others[0]);
+                assert.equal(balance, lands[5].size * lands[5].size, 'Balance is wrong');
+
+                assert.equal(receipt.events.ReferralUsed, undefined, 'Event should be undefined');
+
+                const referrerBalance = await call(
+                    contracts.Sand,
+                    'balanceOf', {
+                        from: others[0],
+                    },
+                    others[2],
+                );
+
+                assert.equal(referrerBalance, 0, 'Referrer balance is wrong');
+            });
+
             if (contractName === 'LandSaleWithETHAndDAI') {
                 t.test('cannot buy Land with SAND if not enabled', async () => {
                     await tx(contracts.LandSale, 'setSANDEnabled', {from: landSaleAdmin, gas}, false);
