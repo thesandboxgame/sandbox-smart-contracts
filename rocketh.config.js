@@ -72,6 +72,12 @@ module.exports = {
         landSaleBeneficiary: 'sandSaleBeneficiary',
         landAdmin: 'sandAdmin',
         landSaleAdmin: 'sandAdmin',
+        backendReferralWallet: {
+            default: 0,
+            1: '', //TODO
+            4: '', // TODO
+            314159: '', // TODO
+        },
 
         // testing
         others: {
