@@ -80,7 +80,7 @@ const testLands = [
 let saleStart;
 let saleDuration;
 let saleEnd;
-let contractName = 'LandSale';
+let contractCodeName = 'LandSale';
 
 async function setupTestLandSale(contracts) {
     saleStart = getChainCurrentTime();
@@ -91,10 +91,10 @@ async function setupTestLandSale(contracts) {
     const landHashArray = createDataArray(testLands);
     const tree = new MerkleTree(landHashArray);
     let contract;
-    if (contractName === 'LandSaleWithETHAndDAI') {
+    if (contractCodeName === 'LandSaleWithETHAndDAI') {
         contract = await deployContract(
             deployer,
-            contractName,
+            contractCodeName,
             contracts.Land.options.address,
             contracts.Sand.options.address,
             contracts.Sand.options.address,
@@ -108,7 +108,7 @@ async function setupTestLandSale(contracts) {
     } else {
         contract = await deployContract(
             deployer,
-            contractName,
+            contractCodeName,
             contracts.Land.options.address,
             contracts.Sand.options.address,
             contracts.Sand.options.address,
@@ -126,7 +126,7 @@ async function setupTestLandSale(contracts) {
 }
 
 function runLandSaleTests(title, contactStore) {
-    contractName = contactStore.contractName || 'LandSale';
+    contractCodeName = contactStore.contractCodeName || 'LandSale';
     tap.test(title + ' tests', async (t) => {
         // t.runOnly = true;
         let contracts;
@@ -165,7 +165,7 @@ function runLandSaleTests(title, contactStore) {
                 assert.equal(balance, lands[5].size * lands[5].size, 'Balance is wrong');
             });
 
-            if (contractName === 'LandSaleWithETHAndDAI') {
+            if (contractCodeName === 'LandSaleWithETHAndDAI') {
                 t.test('cannot buy Land with SAND if not enabled', async () => {
                     await tx(contracts.LandSale, 'setSANDEnabled', {from: landSaleAdmin, gas}, false);
 
@@ -434,26 +434,27 @@ function runLandSaleTests(title, contactStore) {
                 );
             });
 
-            t.test('after buying user own all Land bought', async () => {
-                const proof = tree.getProof(calculateLandHash(lands[3]));
-                await tx(contracts.LandSale, 'buyLandWithSand', {from: others[0], gas},
-                    others[0],
-                    others[0],
-                    zeroAddress,
-                    lands[3].x, lands[3].y, lands[3].size,
-                    lands[3].price,
-                    lands[3].salt,
-                    proof
-                );
-                for (let x = lands[3].x; x < lands[3].x + 12; x++) {
-                    for (let y = lands[3].y; y < lands[3].y + 12; y++) {
-                        const owner = await call(contracts.Land, 'ownerOf', null, x + (y * 408));
-                        const balance = await call(contracts.Land, 'balanceOf', null, others[0]);
-                        assert.equal(owner, others[0]);
-                        assert.equal(balance, 144);
-                    }
-                }
-            });
+            // TODO enable it with specific 12x12 estate
+            // t.test('after buying user own all Land bought', async () => {
+            //     const proof = tree.getProof(calculateLandHash(lands[3]));
+            //     await tx(contracts.LandSale, 'buyLandWithSand', {from: others[0], gas},
+            //         others[0],
+            //         others[0],
+            //         zeroAddress,
+            //         lands[3].x, lands[3].y, lands[3].size,
+            //         lands[3].price,
+            //         lands[3].salt,
+            //         proof
+            //     );
+            //     for (let x = lands[3].x; x < lands[3].x + 12; x++) {
+            //         for (let y = lands[3].y; y < lands[3].y + 12; y++) {
+            //             const owner = await call(contracts.Land, 'ownerOf', null, x + (y * 408));
+            //             const balance = await call(contracts.Land, 'balanceOf', null, others[0]);
+            //             assert.equal(owner, others[0]);
+            //             assert.equal(balance, 144);
+            //         }
+            //     }
+            // });
 
             t.test('can buy all Lands specified in json except reserved lands', async () => {
                 await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[0], '1000000000000000000000000000');

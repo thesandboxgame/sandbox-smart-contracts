@@ -117,7 +117,7 @@ function runLandSaleEthTests(title, contactStore) {
 
         t.beforeEach(async () => {
             contracts = await contactStore.resetContracts();
-            const deployment = rocketh.deployment('LandPreSale_1');
+            const deployment = rocketh.deployment(contactStore.contractName);
             lands = deployment.data;
 
             landHashArray = createDataArray(lands);

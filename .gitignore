@@ -14,3 +14,5 @@ tmp_deployments/
 __ipfs__/
 .sandbox_credentials
 .land_presale*
+.presale_2*
+presale_2*

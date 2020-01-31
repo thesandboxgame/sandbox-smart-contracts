@@ -66,4 +66,4 @@ module.exports = async ({namedAccounts, initialRun}) => {
         log('reusing SandSale at ' + sandSaleDeployResult.contract.options.address);
     }
 };
-module.exports.skip = guard(['1', '4']); // module.exports.skip = multiGuards([guard(['4'], 'SandSale'), guard(['1'])]);
+module.exports.skip = guard(['1', '4', '314159']); // module.exports.skip = multiGuards([guard(['4'], 'SandSale'), guard(['1'])]);

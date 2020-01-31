@@ -13,7 +13,7 @@ Sand smart contract is the ERC-20 token that will be used for
 Sand implements the ERC-20 standard
 
 Sand was originally deployed in April 2019 and while we started to distribute the tokens to early investors. We made the decision to re-deploy a better version.
-The new version has been audited by both Solidified (see [./sand_solidified_audit.pdf](./sand_solidified_audit.pdf)) and Certik (see [./sand_certik_audit.pdf](./sand_certik_audit.pdf))
+The new version has been audited by both Solidified (see [./audits/sand_solidified_audit.pdf](./audits/sand_solidified_audit.pdf)) and Certik (see [./audits/sand_certik_audit.pdf](./audits/sand_certik_audit.pdf))
 
 The original Sand was made upgradeable as we wanted to be sure we could adapt to new standard.
 the 2 main reasons was:

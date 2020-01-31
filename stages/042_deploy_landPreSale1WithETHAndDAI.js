@@ -5,7 +5,7 @@ const {
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);
 const {guard} = require('../lib');
-const {getLands} = require('../data/getLands');
+const {getLands} = require('../data/landPreSale_1/getLands');
 
 module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, isDeploymentChainId}) => {
     function log(...args) {
@@ -78,4 +78,4 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
         log('reusing LandPreSale_1 at ' + contract.options.address);
     }
 };
-module.exports.skip = guard(['1', '4'], 'LandPreSale_1');
+module.exports.skip = guard(['1', '4', '314159'], 'LandPreSale_1');

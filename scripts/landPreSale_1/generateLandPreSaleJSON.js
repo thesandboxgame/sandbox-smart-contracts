@@ -1,5 +1,5 @@
 const fs = require('fs');
-const {nonExposedLands, partnersLands} = require('../data/getLands');
+const {nonExposedLands, partnersLands} = require('../../data/landPreSale_1/getLands');
 
 const output = process.argv[2];
 fs.writeFileSync(output, JSON.stringify(nonExposedLands, null, '    '));
