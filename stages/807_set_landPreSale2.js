@@ -48,7 +48,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const currentAdmin = await call(landSale, 'getAdmin');
     if (currentAdmin.toLowerCase() !== landSaleAdmin.toLowerCase()) {
-        log('setting Sand Admin');
+        log('setting LandPreSale_2 Admin');
         await txOnlyFrom(currentAdmin, {from: deployer, gas: 1000000}, landSale, 'changeAdmin', landSaleAdmin);
     }
 
