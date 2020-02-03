@@ -4,10 +4,11 @@ const {
     txOnlyFrom,
     getDeployedContract,
     call,
+    tx,
 } = require('rocketh-web3')(rocketh, Web3);
 // const {guard} = require('../lib');
 
-module.exports = async ({namedAccounts, initialRun}) => {
+module.exports = async ({namedAccounts, initialRun, isDeploymentChainId}) => {
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -16,6 +17,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     const {
         deployer,
+        assetAuctionFeeCollector,
     } = namedAccounts;
 
     const sand = getDeployedContract('Sand');
@@ -43,5 +45,24 @@ module.exports = async ({namedAccounts, initialRun}) => {
         log('setting AssetSignedAuction as super operator for Asset');
         const currentAssetAdmin = await call(asset, 'getAdmin');
         await txOnlyFrom(currentAssetAdmin, {from: deployer, gas: 100000}, asset, 'setSuperOperator', assetAuction.options.address, true);
+    }
+
+    const fee10000th = 30;
+    const feeEvents = await rocketh.getEvents({address: assetAuction.options.address, abi: assetAuction.options.jsonInterface}, 'FeeSetup(address,uint256)');
+    let lastFeeEvent;
+    if (feeEvents.length > 0) {
+        lastFeeEvent = feeEvents[feeEvents.length - 1];
+        // console.log(JSON.stringify(lastFeeEvent));
+    }
+    if (!lastFeeEvent || !lastFeeEvent.values[1].eq(fee10000th)) {
+        log('set AssetSignedAuction\'s fee to 3%');
+        const currentAssetAuctionAdmin = await call(assetAuction, 'getAdmin');
+        let executor = deployer;
+        if (!isDeploymentChainId) {
+            executor = currentAssetAuctionAdmin;
+        }
+        await txOnlyFrom(currentAssetAuctionAdmin, {from: executor, gas: 100000}, assetAuction, 'setFee', assetAuctionFeeCollector, fee10000th);
+    } else {
+        log('AssetSignedAuction\'s fee is already 3%');
     }
 };

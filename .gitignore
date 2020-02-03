@@ -16,3 +16,4 @@ __ipfs__/
 .land_presale*
 .presale_2*
 presale_2*
+.backend_signer_privateKey

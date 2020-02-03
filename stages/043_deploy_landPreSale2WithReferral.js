@@ -69,7 +69,7 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
         deployer,
         landSaleBeneficiary,
         merkleRootHash,
-        1581422400, // 1581422400 converts to Tuesday February 11, 2020 09:00:00 (am) in time zone America/Argentina/Buenos Aires (-03)
+        1582718400, // 1582718400 converts to Tuesday February 26, 2020 09:00:00 (am) in time zone America/Argentina/Buenos Aires (-03)
         daiMedianizer.options.address,
         dai.options.address,
         backendReferralWallet,
@@ -82,4 +82,4 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
         log('reusing LandPreSale_2 at ' + contract.options.address);
     }
 };
-module.exports.skip = guard(['1', '4'], 'LandPreSale_2');
+module.exports.skip = guard(['1', '4', '314159'], 'LandPreSale_2');

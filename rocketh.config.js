@@ -74,9 +74,9 @@ module.exports = {
         landSaleAdmin: 'sandAdmin',
         backendReferralWallet: {
             default: 0,
-            1: '', //TODO
-            4: '', // TODO
-            314159: '', // TODO
+            1: '0x94AE0495bEDb538F0a14fFE4Dc160dC280989E3a',
+            4: '0x94AE0495bEDb538F0a14fFE4Dc160dC280989E3a',
+            314159: '0x94AE0495bEDb538F0a14fFE4Dc160dC280989E3a',
         },
 
         // testing
