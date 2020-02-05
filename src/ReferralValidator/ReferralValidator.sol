@@ -144,11 +144,11 @@ contract ReferralValidator is Admin {
             }
 
             if (commission > 0) {
-                token.transferFrom(buyer, referrer, commission);
+                require(token.transferFrom(buyer, referrer, commission), "commision transfer failed");
             }
         }
 
-        token.transferFrom(buyer, destination, amountForDestination);
+        require(token.transferFrom(buyer, destination, amountForDestination), "payment transfer failed");
     }
 
     /**
