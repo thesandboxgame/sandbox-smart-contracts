@@ -14,6 +14,8 @@ tmp_deployments/
 __ipfs__/
 .sandbox_credentials
 .land_presale*
+.land_sale*
+.partners_Sale*
 .presale_2*
 presale_2*
 .backend_signer_privateKey
