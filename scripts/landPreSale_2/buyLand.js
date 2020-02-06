@@ -24,7 +24,7 @@ program
         x = parseInt(x, 10);
         y = parseInt(y, 10);
         size = parseInt(size, 10);
-        const landWithProofsData = fs.readFileSync('./.land_presale_proofs.json');
+        const landWithProofsData = fs.readFileSync('./.presale_2_proofs.json');
         const landWithProofs = JSON.parse(landWithProofsData);
         let landToBuy;
         for (const land of landWithProofs) {
