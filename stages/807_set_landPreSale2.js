@@ -60,3 +60,4 @@ module.exports = async ({namedAccounts, initialRun}) => {
     //     await txOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000}, sand, 'setSuperOperator', landSale.options.address, true);
     // }
 };
+module.exports.skip = async () => true;
