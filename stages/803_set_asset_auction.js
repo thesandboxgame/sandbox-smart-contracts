@@ -37,14 +37,14 @@ module.exports = async ({namedAccounts, initialRun, isDeploymentChainId}) => {
     if (!isSandSuperOperator) {
         log('setting AssetSignedAuction as super operator for Sand');
         const currentSandAdmin = await call(sand, 'getAdmin');
-        await txOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000}, sand, 'setSuperOperator', assetAuction.options.address, true);
+        await txOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000, skipError: true}, sand, 'setSuperOperator', assetAuction.options.address, true);
     }
 
     const isAssetSuperOperator = await call(asset, 'isSuperOperator', assetAuction.options.address);
     if (!isAssetSuperOperator) {
         log('setting AssetSignedAuction as super operator for Asset');
         const currentAssetAdmin = await call(asset, 'getAdmin');
-        await txOnlyFrom(currentAssetAdmin, {from: deployer, gas: 100000}, asset, 'setSuperOperator', assetAuction.options.address, true);
+        await txOnlyFrom(currentAssetAdmin, {from: deployer, gas: 100000, skipError: true}, asset, 'setSuperOperator', assetAuction.options.address, true);
     }
 
     const fee10000th = 30;
@@ -61,7 +61,7 @@ module.exports = async ({namedAccounts, initialRun, isDeploymentChainId}) => {
         if (!isDeploymentChainId) {
             executor = currentAssetAuctionAdmin;
         }
-        await txOnlyFrom(currentAssetAuctionAdmin, {from: executor, gas: 100000}, assetAuction, 'setFee', assetAuctionFeeCollector, fee10000th);
+        await txOnlyFrom(currentAssetAuctionAdmin, {from: executor, gas: 100000, skipError: true}, assetAuction, 'setFee', assetAuctionFeeCollector, fee10000th);
     } else {
         log('AssetSignedAuction\'s fee is already 3%');
     }

@@ -60,7 +60,7 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
     const {lands, merkleRootHash} = getLands(isDeploymentChainId, chainId);
 
     const deployResult = await deployIfDifferent(['data'],
-        'LandPreSale_2_without_referral',
+        'LandPreSale_2',
         {from: deployer, gas: 1000000, associatedData: lands},
         'LandSaleWithETHAndDAI',
         landContract.options.address,
@@ -73,11 +73,11 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
         daiMedianizer.options.address,
         dai.options.address
     );
-    const contract = getDeployedContract('LandPreSale_2_without_referral');
+    const contract = getDeployedContract('LandPreSale_2');
     if (deployResult.newlyDeployed) {
-        log(' - LandPreSale_2_without_referral deployed at : ' + contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
+        log(' - LandPreSale_2 deployed at : ' + contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
     } else {
-        log('reusing LandPreSale_2_without_referral at ' + contract.options.address);
+        log('reusing LandPreSale_2 at ' + contract.options.address);
     }
 };
-module.exports.skip = guard(['1', '4', '314159'], 'LandPreSale_2_without_referral');
+module.exports.skip = guard(['1', '4', '314159'], 'LandPreSale_2');

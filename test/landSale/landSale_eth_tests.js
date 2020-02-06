@@ -402,29 +402,29 @@ function runLandSaleEthTests(title, contactStore) {
                 );
             });
 
-            t.test('after buying user own all Land bought', async () => {
-                const sandPrice = lands[3].price;
-                const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
+            // t.test('after buying user own all Land bought', async () => {
+            //     const sandPrice = lands[3].price;
+            //     const value = await call(contracts.LandSale, 'getEtherAmountWithSAND', {from: others[0], gas}, sandPrice);
 
-                const proof = tree.getProof(calculateLandHash(lands[3]));
-                await tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value},
-                    others[0],
-                    others[0],
-                    zeroAddress,
-                    lands[3].x, lands[3].y, lands[3].size,
-                    lands[3].price,
-                    lands[3].salt,
-                    proof
-                );
-                for (let x = lands[3].x; x < lands[3].x + 12; x++) {
-                    for (let y = lands[3].y; y < lands[3].y + 12; y++) {
-                        const owner = await call(contracts.Land, 'ownerOf', null, x + (y * 408));
-                        const balance = await call(contracts.Land, 'balanceOf', null, others[0]);
-                        assert.equal(owner, others[0]);
-                        assert.equal(balance, 144);
-                    }
-                }
-            });
+            //     const proof = tree.getProof(calculateLandHash(lands[3]));
+            //     await tx(contracts.LandSale, 'buyLandWithETH', {from: others[0], gas, value},
+            //         others[0],
+            //         others[0],
+            //         zeroAddress,
+            //         lands[3].x, lands[3].y, lands[3].size,
+            //         lands[3].price,
+            //         lands[3].salt,
+            //         proof
+            //     );
+            //     for (let x = lands[3].x; x < lands[3].x + 12; x++) {
+            //         for (let y = lands[3].y; y < lands[3].y + 12; y++) {
+            //             const owner = await call(contracts.Land, 'ownerOf', null, x + (y * 408));
+            //             const balance = await call(contracts.Land, 'balanceOf', null, others[0]);
+            //             assert.equal(owner, others[0]);
+            //             assert.equal(balance, 144);
+            //         }
+            //     }
+            // });
 
             t.test('can buy all Lands specified in json except reserved lands', async () => {
                 for (const land of lands) {

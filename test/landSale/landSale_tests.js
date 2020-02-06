@@ -125,8 +125,8 @@ async function setupTestLandSale(contracts) {
     return {contract, tree};
 }
 
-function runLandSaleTests(title, contactStore) {
-    contractCodeName = contactStore.contractCodeName || 'LandSale';
+function runLandSaleTests(title, contractStore) {
+    contractCodeName = contractStore.contractCodeName || 'LandSale';
     tap.test(title + ' tests', async (t) => {
         // t.runOnly = true;
         let contracts;
@@ -135,15 +135,15 @@ function runLandSaleTests(title, contactStore) {
         let landHashArray;
 
         t.beforeEach(async () => {
-            contracts = await contactStore.resetContracts();
-            const deployment = rocketh.deployment('LandPreSale_1');
+            contracts = await contractStore.resetContracts();
+            const deployment = rocketh.deployment(contractStore.contractName);
             lands = deployment.data;
 
             landHashArray = createDataArray(lands);
             tree = new MerkleTree(landHashArray);
 
-            await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[0], '1000000000000000000000000');
-            await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[1], '1000000000000000000000000');
+            await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[0], '100000000000000000000000000');
+            await tx(contracts.Sand, 'transferFrom', {from: sandBeneficiary, gas}, sandBeneficiary, others[1], '100000000000000000000000000');
         });
 
         t.test('-> Sand payments', async (t) => {

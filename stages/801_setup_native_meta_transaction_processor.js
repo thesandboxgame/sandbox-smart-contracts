@@ -31,13 +31,13 @@ module.exports = async ({namedAccounts, initialRun}) => {
     const isSuperOperator = await call(sand, 'isSuperOperator', metaTxProcessor.options.address);
     if (!isSuperOperator) {
         log('setting NativeMetaTransactionProcessor as super operator');
-        await txOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000}, sand, 'setSuperOperator', metaTxProcessor.options.address, true);
+        await txOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000, skipError: true}, sand, 'setSuperOperator', metaTxProcessor.options.address, true);
     }
 
     const currentExecutionSandAdmin = await call(sand, 'getExecutionAdmin');
     const isExecutionOperator = await call(sand, 'isExecutionOperator', metaTxProcessor.options.address);
     if (!isExecutionOperator) {
         log('setting NativeMetaTransactionProcessor as execution operator');
-        await txOnlyFrom(currentExecutionSandAdmin, {from: deployer, gas: 100000}, sand, 'setExecutionOperator', metaTxProcessor.options.address, true);
+        await txOnlyFrom(currentExecutionSandAdmin, {from: deployer, gas: 100000, skipError: true}, sand, 'setExecutionOperator', metaTxProcessor.options.address, true);
     }
 };

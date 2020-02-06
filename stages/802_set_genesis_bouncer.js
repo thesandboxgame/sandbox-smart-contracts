@@ -30,6 +30,6 @@ module.exports = async ({namedAccounts, initialRun}) => {
     if (!isBouncer) {
         log('setting genesis bouncer as Asset bouncer');
         const currentBouncerAdmin = await call(asset, 'getBouncerAdmin');
-        await txOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000}, asset, 'setBouncer', genesisBouncer.options.address, true);
+        await txOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000, skipError: true}, asset, 'setBouncer', genesisBouncer.options.address, true);
     }
 };

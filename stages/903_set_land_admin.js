@@ -32,7 +32,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
     if (currentAdmin) {
         if (currentAdmin.toLowerCase() !== landAdmin.toLowerCase()) {
             log('setting land Admin');
-            await txOnlyFrom(currentAdmin, {from: deployer, gas: 1000000}, land, 'changeAdmin', landAdmin);
+            await txOnlyFrom(currentAdmin, {from: deployer, gas: 1000000, skipError: true}, land, 'changeAdmin', landAdmin);
         }
     } else {
         log('current land impl do not support admin');

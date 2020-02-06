@@ -13,6 +13,7 @@
     "test-landSale": "rocketh launch \"yarn tap -T -j 1 -R spec test/landSale/testLandSale.js\"",
     "test-referralValidator": "rocketh launch \"yarn tap -T -j 1 -R spec test/referralValidator/testReferralValidator.js\"",
     "test-landSaleWithETHAndDAI": "rocketh launch \"yarn tap -T -j 1 -R spec test/landSale/testLandSaleWithETHAndDAI.js\"",
+    "test-landSale2": "rocketh launch \"yarn tap -T -j 1 -R spec test/landSale/testLandSale2.js\"",
     "test-landSaleWithReferral": "rocketh launch \"yarn tap -T -j 1 -R spec test/landSaleWithReferral/testLandSaleWithReferral.js\"",
     "test-land": "rocketh launch \"yarn tap -T -j 1 -R spec test/land/testLand.js\"",
     "test-commonMinter": "rocketh launch \"yarn tap -T -j 1 -R spec test/asset_bouncer/testCommonMinter.js\"",
@@ -68,6 +69,6 @@
     "commander": "^3.0.0",
     "ganache-core": "^2.9.2",
     "js-sha256": "^0.9.0",
-    "rocketh-web3": "^0.2.17"
+    "rocketh-web3": "^0.2.18"
   }
 }

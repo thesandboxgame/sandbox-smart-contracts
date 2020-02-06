@@ -31,7 +31,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
     if (!isBouncer) {
         log('setting ORB Bouncer as bouncer');
         const currentBouncerAdmin = await call(asset, 'getBouncerAdmin');
-        await txOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000}, asset, 'setBouncer', bouncer.options.address, true);
+        await txOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000, skipError: true}, asset, 'setBouncer', bouncer.options.address, true);
     }
 };
 module.exports.skip = guard(['1', '4', '314159']); // TODO

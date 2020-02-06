@@ -35,7 +35,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
     if (!isMinter) {
         log('setting LandPreSale_1 as Land minter');
         const currentLandAdmin = await call(land, 'getAdmin');
-        await txOnlyFrom(currentLandAdmin, {from: deployer, gas: 1000000}, land, 'setMinter', landSale.options.address, true);
+        await txOnlyFrom(currentLandAdmin, {from: deployer, gas: 1000000, skipError: true}, land, 'setMinter', landSale.options.address, true);
     }
 
     // TODO if we want to enable SAND

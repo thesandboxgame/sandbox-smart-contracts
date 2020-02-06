@@ -35,14 +35,14 @@ module.exports = async ({namedAccounts, initialRun}) => {
     if (!isBouncer) {
         log('setting CommonMinter as bouncer');
         const currentBouncerAdmin = await call(asset, 'getBouncerAdmin');
-        await txOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000}, asset, 'setBouncer', bouncer.options.address, true);
+        await txOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000, skipError: true}, asset, 'setBouncer', bouncer.options.address, true);
     }
 
     const isSuperOperator = await call(sand, 'isSuperOperator', bouncer.options.address);
     if (!isSuperOperator) {
         log('setting NativeMetaTransactionProcessor as super operator');
         const currentSandAdmin = await call(sand, 'getAdmin');
-        await txOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000}, sand, 'setSuperOperator', bouncer.options.address, true);
+        await txOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000, skipError: true}, sand, 'setSuperOperator', bouncer.options.address, true);
     }
 };
 module.exports.skip = guard(['1']); // TODO to enable common minter

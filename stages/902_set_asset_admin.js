@@ -33,7 +33,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
     if (currentAdmin) {
         if (currentAdmin.toLowerCase() !== assetAdmin.toLowerCase()) {
             log('setting Asset Admin');
-            await txOnlyFrom(currentAdmin, {from: deployer, gas: 1000000}, assetContract, 'changeAdmin', assetAdmin);
+            await txOnlyFrom(currentAdmin, {from: deployer, gas: 1000000, skipError: true}, assetContract, 'changeAdmin', assetAdmin);
         }
     } else {
         log('current Asset impl do not support admin');
@@ -48,7 +48,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
     if (currentBouncerAdmin) {
         if (currentBouncerAdmin.toLowerCase() !== assetBouncerAdmin.toLowerCase()) {
             log('setting Asset Bouncer Admin');
-            await txOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000}, assetContract, 'changeBouncerAdmin', assetBouncerAdmin);
+            await txOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000, skipError: true}, assetContract, 'changeBouncerAdmin', assetBouncerAdmin);
         }
     } else {
         log('current Asset impl do not support bouncerAdmin');
