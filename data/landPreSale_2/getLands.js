@@ -25,6 +25,10 @@ function generateLandsForMerkleTree() {
     let num6x6Lands = 0;
     let num12x12Lands = 0;
     let num24x24Lands = 0;
+    let numSandboxReservedGroups = 0;
+    let numSandboxReserved = 0;
+    let numReserved = 0;
+    let numReservedGroup = 0;
 
     function addLandGroup(landGroup) {
         const size = Math.sqrt(landGroup.numLands);
@@ -63,6 +67,12 @@ function generateLandsForMerkleTree() {
         }
 
         if (landGroup.reserved) {
+            numReservedGroup++;
+            numReserved += size * size;
+            if (landGroup.reserved.toLowerCase() === '0x7A9fe22691c811ea339D9B73150e6911a5343DcA'.toLowerCase()) {
+                numSandboxReservedGroups++;
+                numSandboxReserved += size * size;
+            }
             const name = 'unknown : ' + landGroup.reserved;
             // switch (land.reserved) {
             //     case '':
@@ -113,6 +123,10 @@ function generateLandsForMerkleTree() {
         num6x6Lands,
         num12x12Lands,
         num24x24Lands,
+        numSandboxReservedGroups,
+        numSandboxReserved,
+        numReserved,
+        numReservedGroup,
     });
     exitIfError();
     return {lands, partnersLands};

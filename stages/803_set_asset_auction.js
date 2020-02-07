@@ -47,7 +47,7 @@ module.exports = async ({namedAccounts, initialRun, isDeploymentChainId}) => {
         await txOnlyFrom(currentAssetAdmin, {from: deployer, gas: 100000, skipError: true}, asset, 'setSuperOperator', assetAuction.options.address, true);
     }
 
-    const fee10000th = 30;
+    const fee10000th = 300;
     const feeEvents = await rocketh.getEvents({address: assetAuction.options.address, abi: assetAuction.options.jsonInterface}, 'FeeSetup(address,uint256)');
     let lastFeeEvent;
     if (feeEvents.length > 0) {
