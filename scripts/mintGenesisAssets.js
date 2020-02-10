@@ -1,4 +1,6 @@
 const rocketh = require('rocketh');
+const ethers = require('ethers');
+const {BigNumber} = ethers;
 const program = require('commander');
 const request = require('request').defaults({jar: true}); // enable cookies
 const {getValidator} = require('../lib/metadata');
@@ -16,6 +18,20 @@ function waitRequest(options) {
             }
         });
     });
+}
+
+const base32Alphabet = [0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79, 0x7A, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37];
+function hash2base32(hash) {
+    let _i = BigNumber.from(hash);
+    let k = 52;
+    const bstr = new Array(k);
+    bstr[--k] = base32Alphabet[_i.mod(8).mul(4).mod(256)]; // uint8 s = uint8((256 - skip) % 5);  // (_i % (2**s)) << (5-s)
+    _i = _i.div(8);
+    while (k > 0) {
+        bstr[--k] = base32Alphabet[_i.mod(32)];
+        _i = _i.div(32);
+    }
+    return bstr.map((n) => String.fromCharCode(n)).join('');
 }
 
 async function getJSON(url) {
@@ -189,6 +205,8 @@ async function mintBatch({
         assetBatchInfo = assetBatchInfoRes.body;
     }
 
+    console.log(JSON.stringify(assetBatchInfo, null, '  '));
+
     console.log('checking mintInfo...');
 
     if (assetBatchInfo) {
@@ -199,6 +217,8 @@ async function mintBatch({
         const gas = options.gas || 2000000; // TODO estimate
 
         const {supplies, hash} = assetBatchInfo;
+
+        console.log('IPFS', 'ipfs://bafybei' + hash2base32(hash));
         const raritiesFromBackend = assetBatchInfo.rarities;
         const rarities = raritiesFromBackend.map((v) => v - 1);
 
