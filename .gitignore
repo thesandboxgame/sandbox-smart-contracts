@@ -1,7 +1,7 @@
 node_modules/
 build/
 yarn-error.log
-credentials.json
+.google_credentials.json
 token.json
 tmp_deployments/
 .nyc_output/

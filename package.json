@@ -67,7 +67,9 @@
   "dependencies": {
     "base32.js": "^0.1.0",
     "commander": "^3.0.0",
+    "ethers": "5.0.0-beta.159",
     "ganache-core": "^2.9.2",
+    "googleapis": "^47.0.0",
     "js-sha256": "^0.9.0",
     "rocketh-web3": "^0.2.18"
   }

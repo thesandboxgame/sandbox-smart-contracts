@@ -1,0 +1,182 @@
+[
+  {
+    "campaign": "1st bounty campaign",
+    "name": "Alisa Alisa Khieu",
+    "email": "anqkhieu@gmail.com",
+    "address": "0xabFa5fc23a9AF64735C3B1afd5C51B9B72be9AAd",
+    "coordinates": {
+      "x": -5,
+      "y": 66
+    },
+    "sent": false,
+    "size": 1
+  },
+  {
+    "campaign": "1st bounty campaign",
+    "name": "Mahbod Mahbod Miraly",
+    "email": "coolboy1384@gmail.com",
+    "address": "0x12eeaECc0EB2E1a9f759170b706D0e9954AfF811",
+    "coordinates": {
+      "x": -3,
+      "y": 60
+    },
+    "sent": false,
+    "size": 1
+  },
+  {
+    "campaign": "1st bounty campaign",
+    "name": "Julien Julien Mourais",
+    "email": "julien05.mouraud@gmail.com",
+    "address": "0x7c36E612Ebb0907f763fFf1581ABd5E99a97D2c6",
+    "coordinates": {
+      "x": 6,
+      "y": 48
+    },
+    "sent": false,
+    "size": 1
+  },
+  {
+    "campaign": "1st bounty campaign",
+    "name": "Argel Argel Dequit",
+    "email": "argel_dequit@yahoo.com",
+    "address": "0x2Ee5512487ef3E9eA1F4D3Cc23b0337acfD92a2c",
+    "coordinates": {
+      "x": 16,
+      "y": 16
+    },
+    "sent": false,
+    "size": 1
+  },
+  {
+    "campaign": "1st bounty campaign",
+    "name": "Rico Rico tambauli",
+    "email": "graski.bontoan@gmail.com",
+    "address": "0x04e3070bed827e48af8a3fb3abeeb77e2ad93b60",
+    "coordinates": {
+      "x": 17,
+      "y": 26
+    },
+    "sent": false,
+    "size": 1
+  },
+  {
+    "campaign": "NonFungible 5 LAND giveaway",
+    "name": "chomaesi88@gmail.com",
+    "email": "chomaesi88@gmail.com",
+    "address": "0x62d8DB6fAB19be9f6E961ECdd4b7FBeBe2a25B9e",
+    "coordinates": {
+      "x": 34,
+      "y": 24
+    },
+    "sent": false,
+    "size": 1
+  },
+  {
+    "campaign": "NonFungible 5 LAND giveaway",
+    "name": "6.57S9at.S43h@gmail.com",
+    "email": "6.57S9at.S43h@gmail.com",
+    "address": "0x83C9440dc34DA00c47A0d4dC2b598d7BDB1b53F7",
+    "coordinates": {
+      "x": 33,
+      "y": 32
+    },
+    "sent": false,
+    "size": 1
+  },
+  {
+    "campaign": "NonFungible 5 LAND giveaway",
+    "name": "info@john-nousis.com",
+    "email": "info@john-nousis.com",
+    "address": "0x581b3d2CdCd3911d9Bbf503550C3f6C1f3c997b1",
+    "coordinates": {
+      "x": 33,
+      "y": 57
+    },
+    "sent": false,
+    "size": 1
+  },
+  {
+    "campaign": "NonFungible 5 LAND giveaway",
+    "name": "suhartoyo_91@yahoo.co.id",
+    "email": "suhartoyo_91@yahoo.co.id",
+    "address": "0x99a811E5c62ADD613975456292F836115AEa0164",
+    "coordinates": {
+      "x": 22,
+      "y": 46
+    },
+    "sent": false,
+    "size": 1
+  },
+  {
+    "campaign": "NonFungible 5 LAND giveaway",
+    "name": "fjpackard@gmail.com",
+    "email": "fjpackard@gmail.com",
+    "address": "0x8a9F29DCA27b1d420f64F4C28F0a0d64FcA071B4",
+    "coordinates": {
+      "x": 21,
+      "y": 69
+    },
+    "sent": false,
+    "size": 1
+  },
+  {
+    "campaign": "GEEKHASH — voxel art contest",
+    "name": "tak akkiy",
+    "email": "",
+    "address": "0x9D69A3228D510ebd7860b431576c47751431e459",
+    "coordinates": {
+      "x": 41,
+      "y": 71
+    },
+    "sent": false,
+    "size": 1
+  },
+  {
+    "campaign": "GEEKHASH — voxel art contest",
+    "name": "renen",
+    "email": "",
+    "address": "0x85a9434F6E86d50815461d76262e36D8031D02dD",
+    "coordinates": {
+      "x": 50,
+      "y": 64
+    },
+    "sent": false,
+    "size": 1
+  },
+  {
+    "campaign": "GEEKHASH — voxel art contest",
+    "name": "nukui-yukkura",
+    "email": "",
+    "address": "0xB70f7c153829fad080618E600dd2a7E131A2BdE2",
+    "coordinates": {
+      "x": 53,
+      "y": 81
+    },
+    "sent": false,
+    "size": 1
+  },
+  {
+    "campaign": "GEEKHASH — Urabe San",
+    "name": "uraberoshinante",
+    "email": "",
+    "address": "0x4a1FFd0b161A7F5d5e80af622952944D5AAf49a8",
+    "coordinates": {
+      "x": 57,
+      "y": 74
+    },
+    "sent": false,
+    "size": 1
+  },
+  {
+    "campaign": "KOREAN GIVEAWAY",
+    "name": "FOR CAMPAIGN KOREAN GIVEAWAY",
+    "email": "",
+    "address": "0x8eC3F0d91a2d1A061c8645984C5d993e920ad2A2",
+    "coordinates": {
+      "x": 87,
+      "y": 60
+    },
+    "sent": false,
+    "size": 1
+  }
+]

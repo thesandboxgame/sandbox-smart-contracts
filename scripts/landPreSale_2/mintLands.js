@@ -17,10 +17,14 @@ function mint(x, y, size, address) {
     }
     if (landToBuy.reserved) {
         if (landToBuy.reserved !== address) {
-            throw new Error('reserved address do not match', landToBuy.reserved, address);
+            if (landToBuy.reserved === '0x7a9fe22691c811ea339d9b73150e6911a5343dca') {
+                console.log('-------------------- from SANDBOX -------------------');
+            } else {
+                throw new Error('reserved address do not match', landToBuy.reserved, address);
+            }
         }
     } else {
-        console.log('--- from Sandbox ---');
+        throw new Error('cannot mint non reserved address, they are for sale',);
     }
     console.log('mintQuad(address to, uint256 size, uint256 x, uint256 y, bytes calldata data');
     console.log('to:');
@@ -51,6 +55,18 @@ const landGroups = [
         size: 6,
     },
 ];
+
+const giveaway = JSON.parse(fs.readFileSync('./giveaway.json'));
+for (const row of giveaway) {
+    landGroups.push({
+        name: row.name,
+        address: row.address,
+        x: row.coordinates.x,
+        y: row.coordinates.y,
+        size: row.size,
+    });
+}
+
 for (const landGroup of landGroups) {
     console.log('------------------- ' + landGroup.name + ' -----------------------------');
     mint(landGroup.x + 204, landGroup.y + 204, landGroup.size, landGroup.address);
