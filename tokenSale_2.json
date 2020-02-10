@@ -61,30 +61,30 @@
         "name": "Thibault Simar",
         "creatorId": "64dfd387-0c4e-429d-855d-749c9868de07",
         "address": "0xB981bC751f6401e177F415f784ea7b87632cC61e",
-        "hash": "0x68d1707cc372560a328e2710626e26ebd64128e45501bc2f0fb3e1245ab7d989",
+        "hash": "0x5e3941f91d6ec5b4445c13ea5807d16c6900c225f0e4c0184c88c368a41e3834",
         "assetIds":[
-            "49e38942-c9e5-4f4d-ac4d-f5586900f87e",
             "8e1c39a9-f07e-4b2e-a3bd-1923bbc68e5f",
-            "76e7c1f1-14b5-43f8-b3a2-fccd19b43613",
-            "52cacc43-aeea-47fb-b030-af9be8ada78f"
+            "52cacc43-aeea-47fb-b030-af9be8ada78f",
+            "49e38942-c9e5-4f4d-ac4d-f5586900f87e",
+            "76e7c1f1-14b5-43f8-b3a2-fccd19b43613"
         ],
         "supplies": [
-            2,
             12,
-            1,
-            8
+            8,
+            2,
+            1
         ],
         "rarities": [
-            4,
+            3,
             3,
             4,
-            3
+            4
         ],
         "names": [
-            "Earth Golem",
             "Large Carnivore Plant",
-            "Police Mecha",
-            "Fire Truck"
+            "Fire Truck",
+            "Earth Golem",
+            "Police Mecha"
         ]
     },
     {
