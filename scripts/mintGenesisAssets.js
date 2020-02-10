@@ -32,8 +32,30 @@ async function getJSON(url) {
     throw new Error('nothing');
 }
 
+function compareArrays(arr1, arr2) {
+    if (arr1.length !== arr2.length) {
+        return false;
+    }
+
+    for (let i = 0, l = arr1.length; i < l; i++) {
+        // Check if we have nested arrays
+        if (arr1[i] instanceof Array && arr2[i] instanceof Array) {
+            // recurse into the nested arrays
+            if (!arr1[i].equals(arr2[i])) {
+                return false;
+            }
+        } else if (arr1[i] !== arr2[i]) {
+            // Warning - two different object instances will never be equal: {x:20} != {x:20}
+            return false;
+        }
+    }
+    return true;
+}
+
 const {
     sendTxAndWait,
+    call,
+    estimateGas,
 } = rocketh;
 
 const {
@@ -73,6 +95,195 @@ function generateRaritiesPack(raritiesArr) {
 
 const credentials = JSON.parse(fs.readFileSync('.sandbox_credentials'));
 
+async function mintBatch({
+    validate,
+    url,
+    creator,
+    options,
+    assetIds,
+    checks,
+}) {
+    const propertiesValues = {};
+    const propertiesMaxValue = {};
+    const testMode = !options.sendTx;
+    const userData = await getJSON(url + '/users/' + creator);
+    let creatorWallet;
+    if (userData && userData.user) {
+        creatorWallet = userData.user.Wallets[0].address; // TODO manage multiple wallet ?
+    } else {
+        throw new Error('no user with id ' + creator);
+    }
+    if (!creatorWallet) {
+        throw new Error('no wallet for user with id ' + creator);
+    }
+
+    let destination = creatorWallet;
+    if (options.destination) {
+        destination = options.destination;
+    }
+
+    console.log('checking assetIds...');
+
+    let i = 0;
+    for (const assetId of assetIds) {
+        const assetData = await getJSON(url + '/assets/' + assetId);
+        if (assetData && assetData.asset) {
+            if (assetData.asset.blockchainId) {
+                throw new Error('Asset already minted ' + assetId);
+            }
+            if (assetData.asset.Creator.id !== creator) {
+                throw new Error(`Asset with id ${assetId} does not belong to specified creator `);
+            }
+
+            const assetMetadataData = await getJSON(url + '/assets/' + assetId + '/metadata');
+            if (!assetMetadataData.metadata) {
+                reportErrorAndExit('no metadata for asset ' + assetId);
+            }
+
+            if (!validate(assetMetadataData.metadata)) {
+                console.error(validate.errors);
+                console.log(JSON.stringify(assetMetadataData.metadata, null, '  '));
+                reportErrorAndExit('error in metadata, does not follow schema!');
+            }
+
+            // checks :
+            // creator checks :
+            if (assetMetadataData.metadata.sandbox.creator !== creatorWallet) {
+                reportErrorAndExit(`creator wallet do not match, metadata (${assetMetadataData.metadata.sandbox.creator})  != wallet ${creatorWallet}`);
+            }
+            // checks values and rarity match
+            let total = 0;
+            let max = 0;
+            if (assetMetadataData.metadata.properties.length !== 5) {
+                reportErrorAndExit(`wrong number fo properties for asset ${assetId}`);
+            }
+            for (const property of assetMetadataData.metadata.properties) {
+                if (property.value > max) {
+                    max = property.value;
+                }
+                total += property.value;
+            }
+            propertiesMaxValue[assetId] = max;
+            propertiesValues[assetId] = total;
+        } else {
+            throw new Error('no Asset with id ' + assetId);
+        }
+        i++;
+    }
+
+    console.log('getting mintInfo...');
+
+    const reqOptions = {
+        method: 'PATCH',
+        url: url + '/assets/mintInfo',
+        headers: {'Content-Type': 'application/json'},
+        body: {
+            assetIds,
+            creatorId: creator
+        },
+        json: true
+    };
+    let assetBatchInfo;
+    const assetBatchInfoRes = await waitRequest(reqOptions);
+    if (assetBatchInfoRes && assetBatchInfoRes.body) {
+        assetBatchInfo = assetBatchInfoRes.body;
+    }
+
+    console.log('checking mintInfo...');
+
+    if (assetBatchInfo) {
+        // console.log(JSON.stringify(assetBatchInfo, null, '  '));
+        const packId = options.packId || 0;
+        const nonce = options.nonce;
+
+        const gas = options.gas || 2000000; // TODO estimate
+
+        const {supplies, hash} = assetBatchInfo;
+        const raritiesFromBackend = assetBatchInfo.rarities;
+        const rarities = raritiesFromBackend.map((v) => v - 1);
+
+        console.log(JSON.stringify(assetBatchInfo));
+
+        for (let i = 0; i < assetIds.length; i++) {
+            const assetId = assetIds[i];
+            const rarity = rarities[i];
+            const propertiesTotalValue = propertiesValues[assetId];
+            const maxValue = propertiesMaxValue[assetId];
+            let expectedValue = 0;
+            let expectedMaxValue = 0;
+            if (rarities[i] === 0) {
+                expectedValue = 50;
+                expectedMaxValue = 25;
+            } else if (rarities[i] === 1) {
+                expectedValue = 100;
+                expectedMaxValue = 50;
+            } else if (rarities[i] === 2) {
+                expectedValue = 150;
+                expectedMaxValue = 75;
+            } else if (rarities[i] === 3) {
+                expectedValue = 250;
+                expectedMaxValue = 100;
+            } else {
+                reportErrorAndExit(`wrong rarity for asset ${assetId}`);
+            }
+            if (!(propertiesTotalValue === expectedValue)) {
+                reportErrorAndExit(`asset ${assetId} with rarity ${rarity} got wrong total value ${propertiesTotalValue} it should be  ${expectedValue}`);
+            }
+            if (!(maxValue <= expectedMaxValue)) {
+                reportErrorAndExit(`asset ${assetId} with rarity ${rarity} got wrong max value ${maxValue} it should be  ${expectedMaxValue}`);
+            }
+        }
+
+        const raritiesPack = generateRaritiesPack(rarities);
+        const suppliesArr = supplies;
+
+        if (checks) {
+            if (checks.creatorWallet && checks.creatorWallet.toLowerCase() !== creatorWallet.toLowerCase()) {
+                reportErrorAndExit('creatorWallet not expected (expect ' + checks.creatorWallet + ' but got ' + creatorWallet + ')');
+            }
+            if (checks.hash && checks.hash.toLowerCase() !== hash.toLowerCase()) {
+                reportErrorAndExit('hash not expected (expect ' + checks.hash + ' but got ' + hash + ')');
+            }
+            if (checks.supplies && !compareArrays(checks.supplies, supplies)) {
+                reportErrorAndExit('supplies not expected (expect ' + checks.supplies + ' but got ' + supplies + ')');
+            }
+            if (checks.rarities && !compareArrays(checks.rarities.map((v) => v - 1), rarities)) {
+                reportErrorAndExit('rarities not expected (expect ' + checks.rarities + ' but got ' + rarities + ')');
+            }
+        }
+
+        const isPackIdUsed = await call('Asset', 'isPackIdUsed', creatorWallet, packId, suppliesArr.filter((n) => n > 1).length);
+        if (isPackIdUsed) {
+            reportErrorAndExit('pack id ' + packId + ' used');
+        } else if (testMode) {
+            console.log({genesisMinter, nonce, gas, creatorWallet, packId, hash, suppliesArr, raritiesPack, destination});
+            let result;
+            try {
+                result = await estimateGas({from: genesisMinter, nonce, gas}, 'GenesisBouncer', 'mintMultipleFor', creatorWallet, packId, hash, suppliesArr, raritiesPack, destination);
+            } catch (e) {
+                reportErrorAndExit(e);
+            }
+            console.log('estimate', result.toString());
+        } else {
+            let result;
+            try {
+                result = await estimateGas({from: genesisMinter, nonce, gas}, 'GenesisBouncer', 'mintMultipleFor', creatorWallet, packId, hash, suppliesArr, raritiesPack, destination);
+            } catch (e) {
+                reportErrorAndExit(e);
+            }
+            console.log('estimate', result.toString());
+            try {
+                const receipt = await sendTxAndWait({from: genesisMinter, nonce, gas}, 'GenesisBouncer', 'mintMultipleFor', creatorWallet, packId, hash, suppliesArr, raritiesPack, destination);
+                console.log('success', {txHash: receipt.transactionHash, gasUsed: receipt.gasUsed});
+            } catch (e) {
+                reportErrorAndExit(e);
+            }
+        }
+    } else {
+        console.error('no info for ', assetIds);
+    }
+}
+
 // const schemaS = fs.readFileSync(path.join(__dirname, 'assetMetadataSchema.json'));
 // const schema = JSON.parse(schemaS);
 // const ajv = new Ajv(); // options can be passed, e.g. {allErrors: true}
@@ -85,12 +296,9 @@ program
     .option('-g, --gas <gas>', 'gas limit')
     .option('-p, --packId <packId>', 'packId')
     .option('-n, --nonce <nonce>', 'nonce')
-    .option('-t, --test', 'testMode')
+    .option('-t, --sendTx', 'send tx')
     .option('-d, --destination', 'destination')
     .action(async (creator, assetIds, cmdObj) => {
-        const propertiesValues = {};
-        const propertiesMaxValue = {};
-        const testMode = cmdObj.test;
         let webUrl = (cmdObj.webUrl || 'http://localhost:8081');
         let url = (cmdObj.url || 'http://localhost:8081');
         console.log({url, webUrl});
@@ -107,7 +315,7 @@ program
             url = 'https://api-preprod.sandbox.game';
             webUrl = 'https://www.sandbox.game';
         }
-        
+
         console.log({url, webUrl});
         await waitRequest({
             method: 'POST',
@@ -117,149 +325,77 @@ program
         });
 
         const validate = getValidator(webUrl);
-        const userData = await getJSON(url + '/users/' + creator);
-        let creatorWallet;
-        if (userData && userData.user) {
-            creatorWallet = userData.user.Wallets[0].address; // TODO manage multiple wallet ?
-        } else {
-            throw new Error('no user with id ' + creator);
-        }
-        if (!creatorWallet) {
-            throw new Error('no wallet for user with id ' + creator);
-        }
-
-        let destination = creatorWallet;
-        if (cmdObj.destination) {
-            destination = cmdObj.destination;
-        }
-
-        console.log('checking assetIds...');
-
-        let i = 0;
-        for (const assetId of assetIds) {
-            const assetData = await getJSON(url + '/assets/' + assetId);
-            if (assetData && assetData.asset) {
-                if (assetData.asset.blockchainId) {
-                    throw new Error('Asset already minted ' + assetId);
-                }
-                if (assetData.asset.Creator.id !== creator) {
-                    throw new Error(`Asset with id ${assetId} does not belong to specified creator `);
-                }
-
-                const assetMetadataData = await getJSON(url + '/assets/' + assetId + '/metadata');
-                if (!assetMetadataData.metadata) {
-                    reportErrorAndExit('no metadata for asset ' + assetId);
-                }
-
-                if (!validate(assetMetadataData.metadata)) {
-                    console.error(validate.errors);
-                    console.log(JSON.stringify(assetMetadataData.metadata, null, '  '));
-                    reportErrorAndExit('error in metadata, does not follow schema!');
-                }
-
-                // checks :
-                // creator checks :
-                if (assetMetadataData.metadata.sandbox.creator !== creatorWallet) {
-                    reportErrorAndExit(`creator wallet do not match, metadata (${assetMetadataData.metadata.sandbox.creator})  != wallet ${creatorWallet}`);
-                }
-                // checks values and rarity match
-                let total = 0;
-                let max = 0;
-                if (assetMetadataData.metadata.properties.length !== 5) {
-                    reportErrorAndExit(`wrong number fo properties for asset ${assetId}`);
-                }
-                for (const property of assetMetadataData.metadata.properties) {
-                    if (property.value > max) {
-                        max = property.value;
-                    }
-                    total += property.value;
-                }
-                propertiesMaxValue[assetId] = max;
-                propertiesValues[assetId] = total;
-            } else {
-                throw new Error('no Asset with id ' + assetId);
-            }
-            i++;
-        }
-
-        console.log('getting mintInfo...');
-
-        const options = {
-            method: 'PATCH',
-            url: url + '/assets/mintInfo',
-            headers: {'Content-Type': 'application/json'},
-            body: {
-                assetIds,
-                creatorId: creator
+        await mintBatch({
+            validate,
+            url,
+            creator,
+            options: {
+                destination: cmdObj.destination,
+                nonce: cmdObj.nonce,
+                sendTx: cmdObj.sendTx,
+                packId: cmdObj.packId,
+                gas: cmdObj.gas,
             },
-            json: true
-        };
-        let assetBatchInfo;
-        const assetBatchInfoRes = await waitRequest(options);
-        if (assetBatchInfoRes && assetBatchInfoRes.body) {
-            assetBatchInfo = assetBatchInfoRes.body;
+            assetIds,
+        });
+    });
+
+program
+    .command('mintJson <jsonPath>')
+    .description('mint assets from json')
+    .option('-u, --url <url>', 'api url')
+    .option('-w, --webUrl <webUrl>', 'web url')
+    .option('-g, --gas <gas>', 'gas limit')
+    .option('-t, --sendTx', 'send tx')
+    .action(async (jsonPath, cmdObj) => {
+        let webUrl = (cmdObj.webUrl || 'http://localhost:8081');
+        let url = (cmdObj.url || 'http://localhost:8081');
+        console.log({url, webUrl});
+        if (url === 'production') {
+            url = 'https://api.sandbox.game';
+            webUrl = 'https://www.sandbox.game';
+        } else if (url === 'dev' || url === 'development') {
+            url = 'https://api-develop.sandbox.game';
+            webUrl = 'https://develop.sandbox.game';
+        } else if (url === 'staging') {
+            url = 'https://api-stage.sandbox.game';
+            webUrl = 'https://stage.sandbox.game';
+        } else if (url === 'preprod') {
+            url = 'https://api-preprod.sandbox.game';
+            webUrl = 'https://www.sandbox.game';
         }
 
-        console.log('checking mintInfo...');
+        console.log({url, webUrl});
+        await waitRequest({
+            method: 'POST',
+            url: url + '/auth/login',
+            body: credentials,
+            json: true
+        });
 
-        if (assetBatchInfo) {
-            // console.log(JSON.stringify(assetBatchInfo, null, '  '));
-            const packId = cmdObj.packId || 0;
-            const nonce = cmdObj.nonce;
+        const validate = getValidator(webUrl);
 
-            const gas = cmdObj.gas || 2000000; // TODO estimate
-
-            const {supplies, hash} = assetBatchInfo;
-            const raritiesFromBackend = assetBatchInfo.rarities;
-            const rarities = raritiesFromBackend.map((v) => v - 1);
-
-            console.log(JSON.stringify(assetBatchInfo));
-
-            for (let i = 0; i < assetIds.length; i++) {
-                const assetId = assetIds[i];
-                const rarity = rarities[i];
-                const propertiesTotalValue = propertiesValues[assetId];
-                const maxValue = propertiesMaxValue[assetId];
-                let expectedValue = 0;
-                let expectedMaxValue = 0;
-                if (rarities[i] === 0) {
-                    expectedValue = 50;
-                    expectedMaxValue = 25;
-                } else if (rarities[i] === 1) {
-                    expectedValue = 100;
-                    expectedMaxValue = 50;
-                } else if (rarities[i] === 2) {
-                    expectedValue = 150;
-                    expectedMaxValue = 75;
-                } else if (rarities[i] === 3) {
-                    expectedValue = 250;
-                    expectedMaxValue = 100;
-                } else {
-                    reportErrorAndExit(`wrong rarity for asset ${assetId}`);
+        const batches = JSON.parse(fs.readFileSync(jsonPath));
+        for (const batch of batches) {
+            await mintBatch({
+                validate,
+                url,
+                creator: batch.creatorId,
+                options: {
+                    destination: cmdObj.destination,
+                    nonce: cmdObj.nonce,
+                    sendTx: cmdObj.sendTx,
+                    packId: batch.packId || cmdObj.packId,
+                    gas: batch.gas || cmdObj.gas,
+                },
+                assetIds: batch.assetIds,
+                checks: {
+                    creatorWallet: batch.address,
+                    hash: batch.hash,
+                    supplies: batch.supplies,
+                    rarities: batch.rarities,
                 }
-                if (!(propertiesTotalValue === expectedValue)) {
-                    reportErrorAndExit(`asset ${assetId} with rarity ${rarity} got wrong total value ${propertiesTotalValue} it should be  ${expectedValue}`);
-                }
-                if (!(maxValue <= expectedMaxValue)) {
-                    reportErrorAndExit(`asset ${assetId} with rarity ${rarity} got wrong max value ${maxValue} it should be  ${expectedMaxValue}`);
-                }
-            }
-
-            const raritiesPack = generateRaritiesPack(rarities);
-            const suppliesArr = supplies;
-
-            if (testMode) {
-                console.log({genesisMinter, nonce, gas, creatorWallet, packId, hash, suppliesArr, raritiesPack, destination});
-            } else {
-                try {
-                    const receipt = await sendTxAndWait({from: genesisMinter, nonce, gas}, 'GenesisBouncer', 'mintMultipleFor', creatorWallet, packId, hash, suppliesArr, raritiesPack, destination);
-                    console.log('success', {txHash: receipt.transactionHash, gasUsed: receipt.gasUsed});
-                } catch (e) {
-                    reportErrorAndExit(e);
-                }
-            }
-        } else {
-            console.error('no info for ', assetIds);
+            });
         }
     });
 
