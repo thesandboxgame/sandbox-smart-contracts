@@ -21,7 +21,7 @@ function waitRequest(options) {
 }
 
 const base32Alphabet = [0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x70, 0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78, 0x79, 0x7A, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37];
-function hash2base32(hash) {
+function hash2base32(hash) { // TODO fix
     let _i = BigNumber.from(hash);
     let k = 52;
     const bstr = new Array(k);
@@ -285,6 +285,7 @@ async function mintBatch({
             }
             console.log('estimate', result.toString());
         } else {
+            console.log({genesisMinter, nonce, gas, creatorWallet, packId, hash, suppliesArr, raritiesPack, destination});
             let result;
             try {
                 result = await estimateGas({from: genesisMinter, nonce, gas}, 'GenesisBouncer', 'mintMultipleFor', creatorWallet, packId, hash, suppliesArr, raritiesPack, destination);
