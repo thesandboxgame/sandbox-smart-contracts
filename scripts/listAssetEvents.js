@@ -10,8 +10,8 @@ program
     .description('list assets transfer event')
     .action(async (address, cmdObj) => {
         const Asset = getDeployedContract('Asset');
-        const events = await Asset.getPastEvents('TransferSingle', {
-            filter: {from: address},
+        const events = await Asset.getPastEvents('TransferBatch', {
+            filter: {to: address},
             fromBlock: 9048221,
             toBlock: 'latest'
         });
