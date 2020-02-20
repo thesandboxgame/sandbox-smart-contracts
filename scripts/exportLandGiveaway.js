@@ -68,12 +68,14 @@ const ethers = require('ethers');
         let size;
         if (row.length > 2) {
             const sizeSpec = row[2];
-            if (sizeSpec === '1 ESTATE (S, 3x3)') {
+            if (sizeSpec === '1 ESTATE (L, 12x12)') {
+                size = 12;
+            } else if (sizeSpec === '1 ESTATE (S, 3x3)') {
                 size = 3;
             } else if (sizeSpec === '1 LAND (Random)') {
                 size = 1;
             } else {
-                console.log('size : ', sizeSpec);
+                console.log('unsuported size spec : ', sizeSpec);
             }
         }
         let sent;

@@ -20,3 +20,4 @@ __ipfs__/
 presale_2*
 .backend_signer_privateKey
 .etherscan_*
+giveaway.json

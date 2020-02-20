@@ -8,6 +8,20 @@ const {
     getDeployedContract,
 } = require('rocketh-web3')(rocketh, Web3);
 
+const fs = require('fs');
+
+const landWithProofsData = fs.readFileSync('./.presale_2_proofs.json');
+const landWithProofs = JSON.parse(landWithProofsData);
+
+const reserved = {};
+const reservedIds = {};
+for (const land of landWithProofs) {
+    if (land.reserved) {
+        reserved[land.reserved] = (reserved[land.reserved] ? reserved[land.reserved] : 0) + 1;
+        reservedIds[land.x + (land.y * 408)] = land;
+    }
+}
+
 const landSale = {
     numGroups: 3103,
     numLandsInOutput: 8640,
@@ -71,7 +85,7 @@ program
         let numETH = BigNumber.from(0);
         for (const event of eventsToProcess) {
             numPurchases++;
-            const {size, token, amountPaid, buyer, to} = event.returnValues;
+            const {size, token, amountPaid, buyer, to, topCornerId} = event.returnValues;
             if (size === '1') {
                 numLand1x1++;
             } else if (size === '3') {
@@ -105,6 +119,12 @@ program
             if (!buyersFor1And2[buyer]) {
                 buyersFor1And2[buyer] = true;
                 newBuyers++;
+            }
+
+            if (reservedIds[parseInt(topCornerId)]) {
+                console.log('' + topCornerId + ' taken');
+                delete reservedIds[parseInt(topCornerId)];
+                reserved[buyer]--;
             }
         }
         console.log({
@@ -140,12 +160,17 @@ program
             // numLand12x12: percent(numLand12x12, landSale.num12x12Lands),
             // numLand24x24: percent(numLand24x24, landSale.num24x24Lands),
             numLands: percent(numLands, numLandsInSale),
+            numLandsLeft: numLandsInSale - numLands,
+            numPurchasesLeft: numPurchasesInSale - numPurchases,
             // numLandWithDAI: percent(numLandWithDAI, numLands),
             // numLandWithETH: percent(numLandWithETH, numLands),
             numPurchases: percent(numPurchases, numPurchasesInSale),
             // numPurchasesWithDAI: percent(numPurchasesWithDAI, numPurchases),
             // numPurchasesWithETH: percent(numPurchasesWithETH, numPurchases),
         });
+
+        // console.log(reservedIds);
+        // console.log(reserved);
     });
 
 program.parse(process.argv);

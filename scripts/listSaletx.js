@@ -5,6 +5,7 @@ const ethers = require('ethers');
 const {BigNumber} = ethers;
 const axios = require('axios');
 const fs = require('fs');
+const reveal = require('eth-reveal');
 
 const {
     getDeployedContract,
@@ -50,17 +51,28 @@ program
         const address = LandPreSale_2.options.address;
         let txs = await getTotalList(address);
         // console.log(JSON.stringify(txs[0], null, '  '));
-        // const dict = {};
-        // txs = txs.filter((tx) => {
-        //     if (!dict[tx.hash]) {
-        //         dict[tx.hash] = true;
-        //         return true;
-        //     }
-        //     return false;
-        // });
+        const dict = {};
+        txs = txs.filter((tx) => {
+            if (!dict[tx.hash]) {
+                dict[tx.hash] = true;
+                return true;
+            }
+            return false;
+        });
         const numTxs = txs.length;
         const failures = txs.filter((tx) => (tx.isError !== '0' || tx.txreceipt_status !== '1'));
-        console.log(JSON.stringify(failures, null, '  '));
+        // console.log(JSON.stringify(failures, null, '  '));
+
+        for (const failure of failures) {
+            // console.log(failure.hash);
+            // const result = await reveal({
+            //     hash: failure.hash,
+            //     // TODO network: 'mainnet', // default (supports kovan, ropsten and rinkeby)
+            //     // etherscanKey: ETHERSCAN_TOKEN,
+            // });
+            // console.log(result.revertReason);
+        }
+
         const numFailures = failures.length;
         // for (const tx of txs) {
         //     if (tx.isError !== '0' || tx.txreceipt_status !== '1') {

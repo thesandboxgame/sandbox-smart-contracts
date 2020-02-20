@@ -17,7 +17,9 @@ function mint(x, y, size, address) {
     }
     if (landToBuy.reserved) {
         if (landToBuy.reserved !== address) {
-            if (landToBuy.reserved === '0x7a9fe22691c811ea339d9b73150e6911a5343dca') {
+            if (address.toLowerCase() === '0xbc3297c20EE9f8242c91F0C844b200F91a444815'.toLowerCase() && landToBuy.reserved.toLowerCase() === '0x4546BE8aCB146bc0af81261F833277Af6f222DcF'.toLowerCase()) {
+                console.log('-------------------- FOR DAPPER -------------------');
+            } else if (landToBuy.reserved === '0x7a9fe22691c811ea339d9b73150e6911a5343dca') {
                 console.log('-------------------- from SANDBOX -------------------');
             } else {
                 throw new Error('reserved address do not match', landToBuy.reserved, address);
@@ -40,24 +42,27 @@ function mint(x, y, size, address) {
 }
 
 const landGroups = [
-    {
-        name: 'Opera',
-        address: '0x4be5f7c9912afd58bcda39b0a4ec76e7b21ba0f1',
-        x: 15,
-        y: 30,
-        size: 3,
-    },
-    {
-        name: 'PlayDapp',
-        address: '0x5c31a139ba273ebad8d1b1ae22e4617ec0f32d4c',
-        x: 66,
-        y: 60,
-        size: 6,
-    },
+    // {
+    //     name: 'Opera',
+    //     address: '0x4be5f7c9912afd58bcda39b0a4ec76e7b21ba0f1',
+    //     x: 15,
+    //     y: 30,
+    //     size: 3,
+    // },
+    // {
+    //     name: 'PlayDapp',
+    //     address: '0x5c31a139ba273ebad8d1b1ae22e4617ec0f32d4c',
+    //     x: 66,
+    //     y: 60,
+    //     size: 6,
+    // },
 ];
 
 const giveaway = JSON.parse(fs.readFileSync('./giveaway.json'));
 for (const row of giveaway) {
+    if (row.sent) {
+        continue;
+    }
     landGroups.push({
         name: row.name,
         address: row.address,
