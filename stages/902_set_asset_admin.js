@@ -1,12 +1,4 @@
-const Web3 = require('web3');
-const rocketh = require('rocketh');
-const {
-    txOnlyFrom,
-    getDeployedContract,
-    call,
-} = require('rocketh-web3')(rocketh, Web3);
-
-module.exports = async ({namedAccounts, initialRun}) => {
+module.exports = async ({namedAccounts, initialRun, call, sendTxAndWaitOnlyFrom, getDeployedContract}) => {
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -26,14 +18,14 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     let currentAdmin;
     try {
-        currentAdmin = await call(assetContract, 'getAdmin');
+        currentAdmin = await call('Asset', 'getAdmin');
     } catch (e) {
 
     }
     if (currentAdmin) {
         if (currentAdmin.toLowerCase() !== assetAdmin.toLowerCase()) {
             log('setting Asset Admin');
-            await txOnlyFrom(currentAdmin, {from: deployer, gas: 1000000, skipError: true}, assetContract, 'changeAdmin', assetAdmin);
+            await sendTxAndWaitOnlyFrom(currentAdmin, {from: deployer, gas: 1000000, skipError: true}, 'Asset', 'changeAdmin', assetAdmin);
         }
     } else {
         log('current Asset impl do not support admin');
@@ -41,14 +33,14 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     let currentBouncerAdmin;
     try {
-        currentBouncerAdmin = await call(assetContract, 'getBouncerAdmin');
+        currentBouncerAdmin = await call('Asset', 'getBouncerAdmin');
     } catch (e) {
 
     }
     if (currentBouncerAdmin) {
         if (currentBouncerAdmin.toLowerCase() !== assetBouncerAdmin.toLowerCase()) {
             log('setting Asset Bouncer Admin');
-            await txOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000, skipError: true}, assetContract, 'changeBouncerAdmin', assetBouncerAdmin);
+            await sendTxAndWaitOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000, skipError: true}, 'Asset', 'changeBouncerAdmin', assetBouncerAdmin);
         }
     } else {
         log('current Asset impl do not support bouncerAdmin');

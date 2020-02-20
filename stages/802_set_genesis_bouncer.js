@@ -1,12 +1,4 @@
-const Web3 = require('web3');
-const rocketh = require('rocketh');
-const {
-    txOnlyFrom,
-    getDeployedContract,
-    call,
-} = require('rocketh-web3')(rocketh, Web3);
-
-module.exports = async ({namedAccounts, initialRun}) => {
+module.exports = async ({namedAccounts, initialRun, getDeployedContract, call, sendTxAndWaitOnlyFrom}) => {
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -26,10 +18,10 @@ module.exports = async ({namedAccounts, initialRun}) => {
         throw new Error('no GenesisBouncer contract deployed');
     }
 
-    const isBouncer = await call(asset, 'isBouncer', genesisBouncer.options.address);
+    const isBouncer = await call('Asset', 'isBouncer', genesisBouncer.address);
     if (!isBouncer) {
         log('setting genesis bouncer as Asset bouncer');
-        const currentBouncerAdmin = await call(asset, 'getBouncerAdmin');
-        await txOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000, skipError: true}, asset, 'setBouncer', genesisBouncer.options.address, true);
+        const currentBouncerAdmin = await call('Asset', 'getBouncerAdmin');
+        await sendTxAndWaitOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000, skipError: true}, 'Asset', 'setBouncer', genesisBouncer.address, true);
     }
 };

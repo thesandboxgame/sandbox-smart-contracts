@@ -1,16 +1,9 @@
-const Web3 = require('web3');
-const rocketh = require('rocketh');
-const {
-    deployIfDifferent,
-    instantiateAndRegisterContract,
-} = require('rocketh-web3')(rocketh, Web3);
-
 const {
     decodeLogs
 } = require('../test/utils');
 const {guard} = require('../lib');
 
-module.exports = async ({namedAccounts, initialRun}) => {
+module.exports = async ({namedAccounts, initialRun, deployIfDifferent, getEvents, registerContract}) => {
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -32,44 +25,44 @@ module.exports = async ({namedAccounts, initialRun}) => {
         '1000'
     );
     if (deployResult.newlyDeployed) {
-        log(' - ORBCore deployed at : ' + deployResult.contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
+        log(' - ORBCore deployed at : ' + deployResult.contract.address + ' for gas : ' + deployResult.receipt.gasUsed);
     } else {
-        log('reusing ORBCore at ' + deployResult.contract.options.address);
+        log('reusing ORBCore at ' + deployResult.contract.address);
     }
 
     function extractContractAddress(receipt, index) {
-        return decodeLogs([{type: 'address', name: 'orb'}], receipt, index).orb;
+        return getEvents(deployResult.contract, 'ORB(address)', receipt)[index];
     }
 
     //   console.log(JSON.stringify(deployResult.receipt, null, '  '));
-    const rareORBAddress = extractContractAddress(deployResult.receipt, 1);
-    const epicORBAddress = extractContractAddress(deployResult.receipt, 3);
-    const legendaryORBAddress = extractContractAddress(deployResult.receipt, 5);
+    const rareORBAddress = extractContractAddress(deployResult.receipt, 0);
+    const epicORBAddress = extractContractAddress(deployResult.receipt, 1);
+    const legendaryORBAddress = extractContractAddress(deployResult.receipt, 2);
 
-    instantiateAndRegisterContract(
+    registerContract(
         'RareORB',
         rareORBAddress,
         deployResult.transactionHash,
         'ERC20ORB',
-        deployResult.contract.options.address,
+        deployResult.contract.address,
         0
     );
 
-    instantiateAndRegisterContract(
+    registerContract(
         'EpicORB',
         epicORBAddress,
         deployResult.transactionHash,
         'ERC20ORB',
-        deployResult.contract.options.address,
+        deployResult.contract.address,
         1
     );
 
-    instantiateAndRegisterContract(
+    registerContract(
         'LegendaryORB',
         legendaryORBAddress,
         deployResult.transactionHash,
         'ERC20ORB',
-        deployResult.contract.options.address,
+        deployResult.contract.address,
         2
     );
 };

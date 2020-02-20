@@ -1,11 +1,6 @@
-const Web3 = require('web3');
-const rocketh = require('rocketh');
-const {
-    deployIfDifferent,
-} = require('rocketh-web3')(rocketh, Web3);
 const {guard} = require('../lib');
 
-module.exports = async ({namedAccounts, initialRun}) => {
+module.exports = async ({namedAccounts, initialRun, deployIfDifferent}) => {
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -23,9 +18,9 @@ module.exports = async ({namedAccounts, initialRun}) => {
     );
 
     if (deployResult.newlyDeployed) {
-        log('GenericMetaTransaction deployed at : ' + deployResult.contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
+        log('GenericMetaTransaction deployed at : ' + deployResult.contract.address + ' for gas : ' + deployResult.receipt.gasUsed);
     } else {
-        log('reusing GenericMetaTransaction at ' + deployResult.contract.options.address);
+        log('reusing GenericMetaTransaction at ' + deployResult.contract.address);
     }
 };
 module.exports.skip = guard(['1', '4', '314159']); // TODO

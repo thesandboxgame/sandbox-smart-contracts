@@ -1,13 +1,4 @@
-const Web3 = require('web3');
-const rocketh = require('rocketh');
-const {
-    txOnlyFrom,
-    getDeployedContract,
-    call,
-} = require('rocketh-web3')(rocketh, Web3);
-// const {guard} = require('../lib');
-
-module.exports = async ({namedAccounts, initialRun}) => {
+module.exports = async ({namedAccounts, initialRun, getDeployedContract, call, sendTxAndWaitOnlyFrom}) => {
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -31,18 +22,18 @@ module.exports = async ({namedAccounts, initialRun}) => {
         throw new Error('no LandPreSale_1 contract deployed');
     }
 
-    const isMinter = await call(land, 'isMinter', landSale.options.address);
+    const isMinter = await call('Land', 'isMinter', landSale.address);
     if (!isMinter) {
         log('setting LandPreSale_1 as Land minter');
-        const currentLandAdmin = await call(land, 'getAdmin');
-        await txOnlyFrom(currentLandAdmin, {from: deployer, gas: 1000000, skipError: true}, land, 'setMinter', landSale.options.address, true);
+        const currentLandAdmin = await call('Land', 'getAdmin');
+        await sendTxAndWaitOnlyFrom(currentLandAdmin, {from: deployer, gas: 1000000, skipError: true}, 'Land', 'setMinter', landSale.address, true);
     }
 
     // TODO if we want to enable SAND
-    // const isSandSuperOperator = await call(sand, 'isSuperOperator', landSale.options.address);
+    // const isSandSuperOperator = await call(sand, 'isSuperOperator', landSale.address);
     // if (!isSandSuperOperator) {
     //     log('setting LandPreSale_1 as super operator for Sand');
     //     const currentSandAdmin = await call(sand, 'getAdmin');
-    //     await txOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000}, sand, 'setSuperOperator', landSale.options.address, true);
+    //     await txOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000}, sand, 'setSuperOperator', landSale.address, true);
     // }
 };

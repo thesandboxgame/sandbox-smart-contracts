@@ -2,11 +2,6 @@ const Web3 = require('web3');
 const fs = require('fs');
 const rocketh = require('rocketh');
 const program = require('commander');
-const {
-    tx,
-    call,
-    getDeployedContract,
-} = require('rocketh-web3')(rocketh, Web3);
 
 const {
     emptyBytes,
@@ -41,7 +36,7 @@ program
             landToBuy.reserved = zeroAddress;
         }
 
-        const LandPreSale = getDeployedContract('LandPreSale_2');
+        const LandPreSale = rocketh.getDeployedContract('LandPreSale_2');
         // const gasPrice = cmdObj.gasPrice;
         // console.log({
         //     preSale: LandPreSale.options.address,
@@ -50,7 +45,7 @@ program
         //     land: landToBuy,
         // });
         console.log('PreSale Contract Address:');
-        console.log(LandPreSale.options.address);
+        console.log(LandPreSale.address);
         console.log('------------------------------------------------');
         console.log('reserved:');
         console.log(landToBuy.reserved);

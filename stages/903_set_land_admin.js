@@ -1,12 +1,4 @@
-const Web3 = require('web3');
-const rocketh = require('rocketh');
-const {
-    txOnlyFrom,
-    getDeployedContract,
-    call,
-} = require('rocketh-web3')(rocketh, Web3);
-
-module.exports = async ({namedAccounts, initialRun}) => {
+module.exports = async ({namedAccounts, initialRun, getDeployedContract, sendTxAndWaitOnlyFrom, call}) => {
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -25,14 +17,14 @@ module.exports = async ({namedAccounts, initialRun}) => {
 
     let currentAdmin;
     try {
-        currentAdmin = await call(land, 'getAdmin');
+        currentAdmin = await call('Land', 'getAdmin');
     } catch (e) {
 
     }
     if (currentAdmin) {
         if (currentAdmin.toLowerCase() !== landAdmin.toLowerCase()) {
             log('setting land Admin');
-            await txOnlyFrom(currentAdmin, {from: deployer, gas: 1000000, skipError: true}, land, 'changeAdmin', landAdmin);
+            await sendTxAndWaitOnlyFrom(currentAdmin, {from: deployer, gas: 1000000, skipError: true}, 'Land', 'changeAdmin', landAdmin);
         }
     } else {
         log('current land impl do not support admin');

@@ -1,13 +1,6 @@
-const Web3 = require('web3');
-const rocketh = require('rocketh');
-const {
-    txOnlyFrom,
-    getDeployedContract,
-    call,
-} = require('rocketh-web3')(rocketh, Web3);
 const {guard} = require('../lib');
 
-module.exports = async ({namedAccounts, initialRun}) => {
+module.exports = async ({namedAccounts, initialRun, getDeployedContract, call, sendTxAndWaitOnlyFrom}) => {
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -27,11 +20,11 @@ module.exports = async ({namedAccounts, initialRun}) => {
         throw new Error('no TestBouncer contract deployed');
     }
 
-    const isBouncer = await call(asset, 'isBouncer', bouncer.options.address);
+    const isBouncer = await call('Asset', 'isBouncer', bouncer.address);
     if (!isBouncer) {
         log('setting TestBouncerr as bouncer');
-        const currentBouncerAdmin = await call(asset, 'getBouncerAdmin');
-        await txOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000, skipError: true}, asset, 'setBouncer', bouncer.options.address, true);
+        const currentBouncerAdmin = await call('Asset', 'getBouncerAdmin');
+        await sendTxAndWaitOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000, skipError: true}, 'Asset', 'setBouncer', bouncer.address, true);
     }
 };
 module.exports.skip = guard(['1', '4', '314159']);

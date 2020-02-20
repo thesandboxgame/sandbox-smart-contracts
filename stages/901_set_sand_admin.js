@@ -1,12 +1,4 @@
-const Web3 = require('web3');
-const rocketh = require('rocketh');
-const {
-    txOnlyFrom,
-    getDeployedContract,
-    call,
-} = require('rocketh-web3')(rocketh, Web3);
-
-module.exports = async ({namedAccounts, initialRun, chainId}) => {
+module.exports = async ({namedAccounts, initialRun, chainId, sendTxAndWaitOnlyFrom, getDeployedContract, call}) => {
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -23,18 +15,18 @@ module.exports = async ({namedAccounts, initialRun, chainId}) => {
     if (!sandContract) {
         throw new Error('no SAND contract deployed');
     }
-    const currentAdmin = await call(sandContract, 'getAdmin');
+    const currentAdmin = await call('Sand', 'getAdmin');
     if (currentAdmin.toLowerCase() !== sandAdmin.toLowerCase()) {
         log('setting Sand Admin');
-        await txOnlyFrom(currentAdmin, {from: deployer, gas: 1000000, skipError: true}, sandContract, 'changeAdmin', sandAdmin);
+        await sendTxAndWaitOnlyFrom(currentAdmin, {from: deployer, gas: 1000000, skipError: true}, 'Sand', 'changeAdmin', sandAdmin);
     }
 
     if (chainId == '4') {
         return; // TODO setup SAND on rinkeby
     }
-    const currentExecutionAdmin = await call(sandContract, 'getExecutionAdmin');
+    const currentExecutionAdmin = await call('Sand', 'getExecutionAdmin');
     if (currentExecutionAdmin.toLowerCase() !== sandExecutionAdmin.toLowerCase()) {
         log('setting Sand Execution Admin');
-        await txOnlyFrom(currentExecutionAdmin, {from: deployer, gas: 1000000, skipError: true}, sandContract, 'changeExecutionAdmin', sandExecutionAdmin);
+        await sendTxAndWaitOnlyFrom(currentExecutionAdmin, {from: deployer, gas: 1000000, skipError: true}, 'Sand', 'changeExecutionAdmin', sandExecutionAdmin);
     }
 };

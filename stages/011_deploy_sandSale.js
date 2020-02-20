@@ -1,13 +1,6 @@
-const Web3 = require('web3');
-const rocketh = require('rocketh');
-const {
-    deploy,
-    deployIfDifferent,
-    getDeployedContract,
-} = require('rocketh-web3')(rocketh, Web3);
 const {guard, multiGuards} = require('../lib');
 
-module.exports = async ({namedAccounts, initialRun}) => {
+module.exports = async ({namedAccounts, initialRun, getDeployedContract, deployIfDifferent, deploy}) => {
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -53,17 +46,17 @@ module.exports = async ({namedAccounts, initialRun}) => {
         'SandSale',
         {from: deployer, gas: 1000000},
         'SandSale',
-        daiMedianizer.options.address,
-        sandContract.options.address,
-        dai.options.address,
+        daiMedianizer.address,
+        sandContract.address,
+        dai.address,
         sandSaleAdmin,
         sandSaleBeneficiary,
     );
 
     if (sandSaleDeployResult.newlyDeployed) {
-        log(' - SandSale deployed at : ' + sandSaleDeployResult.contract.options.address + ' for gas : ' + sandSaleDeployResult.receipt.gasUsed);
+        log(' - SandSale deployed at : ' + sandSaleDeployResult.contract.address + ' for gas : ' + sandSaleDeployResult.receipt.gasUsed);
     } else {
-        log('reusing SandSale at ' + sandSaleDeployResult.contract.options.address);
+        log('reusing SandSale at ' + sandSaleDeployResult.contract.address);
     }
 };
 module.exports.skip = guard(['1', '4', '314159']); // module.exports.skip = multiGuards([guard(['4'], 'SandSale'), guard(['1'])]);

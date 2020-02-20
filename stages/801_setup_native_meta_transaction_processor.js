@@ -1,12 +1,4 @@
-const Web3 = require('web3');
-const rocketh = require('rocketh');
-const {
-    txOnlyFrom,
-    getDeployedContract,
-    call,
-} = require('rocketh-web3')(rocketh, Web3);
-
-module.exports = async ({namedAccounts, initialRun}) => {
+module.exports = async ({namedAccounts, initialRun, sendTxAndWaitOnlyFrom, getDeployedContract, call}) => {
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -26,18 +18,18 @@ module.exports = async ({namedAccounts, initialRun}) => {
         throw new Error('no NativeMetaTransactionProcessor contract deployed');
     }
 
-    const currentSandAdmin = await call(sand, 'getAdmin');
+    const currentSandAdmin = await call('Sand', 'getAdmin');
 
-    const isSuperOperator = await call(sand, 'isSuperOperator', metaTxProcessor.options.address);
+    const isSuperOperator = await call('Sand', 'isSuperOperator', metaTxProcessor.address);
     if (!isSuperOperator) {
         log('setting NativeMetaTransactionProcessor as super operator');
-        await txOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000, skipError: true}, sand, 'setSuperOperator', metaTxProcessor.options.address, true);
+        await sendTxAndWaitOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000, skipError: true}, 'Sand', 'setSuperOperator', metaTxProcessor.address, true);
     }
 
-    const currentExecutionSandAdmin = await call(sand, 'getExecutionAdmin');
-    const isExecutionOperator = await call(sand, 'isExecutionOperator', metaTxProcessor.options.address);
+    const currentExecutionSandAdmin = await call('Sand', 'getExecutionAdmin');
+    const isExecutionOperator = await call('Sand', 'isExecutionOperator', metaTxProcessor.address);
     if (!isExecutionOperator) {
         log('setting NativeMetaTransactionProcessor as execution operator');
-        await txOnlyFrom(currentExecutionSandAdmin, {from: deployer, gas: 100000, skipError: true}, sand, 'setExecutionOperator', metaTxProcessor.options.address, true);
+        await sendTxAndWaitOnlyFrom(currentExecutionSandAdmin, {from: deployer, gas: 100000, skipError: true}, 'Sand', 'setExecutionOperator', metaTxProcessor.address, true);
     }
 };

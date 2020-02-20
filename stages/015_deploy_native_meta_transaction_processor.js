@@ -1,12 +1,6 @@
-const Web3 = require('web3');
-const rocketh = require('rocketh');
-const {
-    deployIfDifferent,
-    getDeployedContract,
-} = require('rocketh-web3')(rocketh, Web3);
 const {guard} = require('../lib');
 
-module.exports = async ({namedAccounts, initialRun}) => {
+module.exports = async ({namedAccounts, initialRun, getDeployedContract, deployIfDifferent}) => {
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -26,13 +20,13 @@ module.exports = async ({namedAccounts, initialRun}) => {
         'NativeMetaTransactionProcessor',
         {from: deployer, gas: 2000000},
         'NativeMetaTransactionProcessor',
-        sand.options.address,
+        sand.address,
     );
 
     if (deployResult.newlyDeployed) {
-        log(' - NativeMetaTransactionProcessor deployed at : ' + deployResult.contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
+        log(' - NativeMetaTransactionProcessor deployed at : ' + deployResult.contract.address + ' for gas : ' + deployResult.receipt.gasUsed);
     } else {
-        log('reusing NativeMetaTransactionProcessor at ' + deployResult.contract.options.address);
+        log('reusing NativeMetaTransactionProcessor at ' + deployResult.contract.address);
     }
 };
 module.exports.skip = guard(['1', '4', '314159'], 'NativeMetaTransactionProcessor');

@@ -1,12 +1,6 @@
-const Web3 = require('web3');
-const rocketh = require('rocketh');
-const {
-    deployIfDifferent,
-    getDeployedContract
-} = require('rocketh-web3')(rocketh, Web3);
 const {guard} = require('../lib');
 
-module.exports = async ({namedAccounts, initialRun}) => {
+module.exports = async ({namedAccounts, initialRun, getDeployedContract, deployIfDifferent}) => {
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -32,17 +26,17 @@ module.exports = async ({namedAccounts, initialRun}) => {
         'CommonMinter',
         {from: deployer, gas: 2000000},
         'CommonMinter',
-        asset.options.address,
-        sand.options.address,
+        asset.address,
+        sand.address,
         '1000000000000000000',
         commonMinterAdmin,
         mintingFeeCollector,
     );
 
     if (deployResult.newlyDeployed) {
-        log(' - CommonMinter deployed at : ' + deployResult.contract.options.address + ' for gas : ' + deployResult.receipt.gasUsed);
+        log(' - CommonMinter deployed at : ' + deployResult.contract.address + ' for gas : ' + deployResult.receipt.gasUsed);
     } else {
-        log('reusing CommonMinter at ' + deployResult.contract.options.address);
+        log('reusing CommonMinter at ' + deployResult.contract.address);
     }
 };
 module.exports.skip = guard(['1', '4', '314159'], 'CommonMinter');

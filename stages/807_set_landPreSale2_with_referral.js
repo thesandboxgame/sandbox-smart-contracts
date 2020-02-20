@@ -1,13 +1,4 @@
-const Web3 = require('web3');
-const rocketh = require('rocketh');
-const {
-    txOnlyFrom,
-    getDeployedContract,
-    call,
-} = require('rocketh-web3')(rocketh, Web3);
-// const {guard} = require('../lib');
-
-module.exports = async ({namedAccounts, initialRun}) => {
+module.exports = async ({namedAccounts, initialRun, sendTxAndWaitOnlyFrom, getDeployedContract, call}) => {
     function log(...args) {
         if (initialRun) {
             console.log(...args);
@@ -19,6 +10,7 @@ module.exports = async ({namedAccounts, initialRun}) => {
         landSaleAdmin,
     } = namedAccounts;
 
+    const landSaleName = 'LandPreSale_2_with_referral';
     const sand = getDeployedContract('Sand');
     if (!sand) {
         throw new Error('no Sand contract deployed');
@@ -27,37 +19,37 @@ module.exports = async ({namedAccounts, initialRun}) => {
     if (!land) {
         throw new Error('no Land contract deployed');
     }
-    const landSale = getDeployedContract('LandPreSale_2_with_referral');
+    const landSale = getDeployedContract(landSaleName);
     if (!landSale) {
         throw new Error('no LandPreSale_2_with_referral contract deployed');
     }
 
-    const isMinter = await call(land, 'isMinter', landSale.options.address);
+    const isMinter = await call('Land', 'isMinter', landSale.address);
     if (!isMinter) {
         log('setting LandPreSale_2_with_referral as Land minter');
-        const currentLandAdmin = await call(land, 'getAdmin');
-        await txOnlyFrom(currentLandAdmin, {from: deployer, gas: 1000000, skipError: true}, land, 'setMinter', landSale.options.address, true);
+        const currentLandAdmin = await call('Land', 'getAdmin');
+        await sendTxAndWaitOnlyFrom(currentLandAdmin, {from: deployer, gas: 1000000, skipError: true}, 'Land', 'setMinter', landSale.address, true);
     }
 
-    const isDAIEnabled = await call(landSale, 'isDAIEnabled');
+    const isDAIEnabled = await call(landSaleName, 'isDAIEnabled');
     if (!isDAIEnabled) {
         log('enablingDAI for LandPreSale_2_with_referral');
-        const currentLandSaleAdmin = await call(landSale, 'getAdmin');
-        await txOnlyFrom(currentLandSaleAdmin, {from: deployer, gas: 1000000, skipError: true}, landSale, 'setDAIEnabled', true);
+        const currentLandSaleAdmin = await call(landSaleName, 'getAdmin');
+        await sendTxAndWaitOnlyFrom(currentLandSaleAdmin, {from: deployer, gas: 1000000, skipError: true}, landSaleName, 'setDAIEnabled', true);
     }
 
-    const currentAdmin = await call(landSale, 'getAdmin');
+    const currentAdmin = await call(landSaleName, 'getAdmin');
     if (currentAdmin.toLowerCase() !== landSaleAdmin.toLowerCase()) {
         log('setting LandPreSale_2_with_referral Admin');
-        await txOnlyFrom(currentAdmin, {from: deployer, gas: 1000000, skipError: true}, landSale, 'changeAdmin', landSaleAdmin);
+        await sendTxAndWaitOnlyFrom(currentAdmin, {from: deployer, gas: 1000000, skipError: true}, landSaleName, 'changeAdmin', landSaleAdmin);
     }
 
     // TODO if we want to enable SAND
-    // const isSandSuperOperator = await call(sand, 'isSuperOperator', landSale.options.address);
+    // const isSandSuperOperator = await call(sand, 'isSuperOperator', landSale.address);
     // if (!isSandSuperOperator) {
     //     log('setting LandPreSale_2_with_referral as super operator for Sand');
     //     const currentSandAdmin = await call(sand, 'getAdmin');
-    //     await txOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000, skipError: true}, sand, 'setSuperOperator', landSale.options.address, true);
+    //     await sendTxAndWaitOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000, skipError: true}, sand, 'setSuperOperator', landSale.address, true);
     // }
 };
 module.exports.skip = async () => true;
