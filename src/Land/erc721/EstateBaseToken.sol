@@ -2,6 +2,7 @@ pragma solidity 0.5.9;
 
 import "./ERC721BaseToken.sol";
 import "./LandBaseToken.sol";
+import "../../../contracts_common/src/Interfaces/ERC721MandatoryTokenReceiver.sol";
 
 // contract EstateOwner {
 //     address _owner;
@@ -32,9 +33,14 @@ import "./LandBaseToken.sol";
 
 contract EstateBaseToken is ERC721BaseToken {
 
-    uint256 internal constant GRID_SIZE = 408; // TODO share Land map size
+    uint256 internal constant GRID_SIZE = 408;
 
+    uint256 _nextId = 1;
+    mapping(uint256 => uint24[]) _quadsInEstate;
     LandBaseToken _land;
+
+    event QuadsAddedInEstate(uint256 indexed id, uint24[] list);
+
     constructor(
         address metaTransactionContract,
         address admin,
@@ -43,45 +49,97 @@ contract EstateBaseToken is ERC721BaseToken {
         _land = land;
     }
 
-    function createFromQuad(address sender, address to, uint256 size, uint256 x, uint256 y) external {
-        require(sender != address(0), "sender is zero address");
-        _land.transferQuad(sender, address(this), size, x, y, ""); // this require approval
-        uint256 id = size * 2**32 + x + y * GRID_SIZE;
-        _owners[id] = uint256(to);
-        _numNFTPerAddress[to]++;
-        emit Transfer(address(0), to, id);
+    // function createFromQuad(address sender, address to, uint256 size, uint256 x, uint256 y) external returns (uint256) {
+    //     require(sender != address(this), "from itself");
+    //     require(sender != address(0), "sender is zero address");
+    //     uint256 estateId = _nextId++;
+    //     _owners[estateId] = uint256(to);
+    //     _numNFTPerAddress[to]++;
+    //     emit Transfer(address(0), to, estateId);
+    //     _land.transferQuad(sender, address(this), size, x, y, ""); // this require approval // TODO add Estate to Land's super operators
+    //     uint24[] memory list = new uint24[](1);
+    //     list[0] = size * 2**18 + x + y * GRID_SIZE;
+    //     _quadsInEstate[estateId] = list;
+    //     emit QuadsAddedInEstate(estateId, list);
+    //     return estateId;
+    // }
+
+    // function createFromMultipleQuads(
+    //     address sender,
+    //     address to,
+    //     uint256[] calldata size,
+    //     uint256[] calldata x,
+    //     uint256[] calldata y
+    // ) external returns (uint256) {
+    //     require(sender != address(this), "from itself");
+    //     require(sender != address(0), "sender is zero address");
+    //     uint256 estateId = _nextId++;
+    //     _owners[estateId] = uint256(to);
+    //     _numNFTPerAddress[to]++;
+    //     emit Transfer(address(0), to, estateId);
+    //     _land.transferQuad(sender, address(this), size, x, y, ""); // this require approval // TODO add Estate to Land's super operators
+    //     uint24[] memory list = new uint24[](1);
+    //     list[0] = size * 2**18 + x + y * GRID_SIZE;
+    //     _quadsInEstate[estateId] = list;
+    //     emit QuadsAddedInEstate(estateId, list);
+    //     return estateId;
+    // }
+
+    // function addQuad(address sender, uint256 estateId, uint256 size, uint256 x, uint256 y) external {
+    //     require(sender != address(this), "from itself");
+    //     require(sender != address(0), "sender is zero address");
+    //     require(msg.sender == sender ||
+    //         _metaTransactionContracts[msg.sender] ||
+    //         _superOperators[msg.sender],
+    //         "not authorized");
+    //     require(sender == _ownerOf(id), "only owner or approved can add land to its own estate");
+    //     _land.transferQuad(sender, address(this), size, x, y, ""); // this require approval // TODO add Estate to Land's super operators
+    //     uint24[] memory list = new uint24[](1);
+    //     list[0] = size * 2**18 + x + y * GRID_SIZE;
+    //     _quadsInEstate[estateId].push(list[0]);
+    //     emit QuadsAddedInEstate(estateId, list);
+    // }
+
+    // function destroy(address sender, uint256 estateId) external {
+    //     require(sender != address(this), "from itself");
+    //     require(sender != address(0), "sender is zero address");
+    //     require(msg.sender == sender ||
+    //         _metaTransactionContracts[msg.sender] ||
+    //         _superOperators[msg.sender],
+    //         "not authorized");
+    //     require(sender == _ownerOf(estateId), "only owner can destroy estate");
+    //     _owners[id] = 0; // TODO keep track of it so it can transfer Land back
+    //     _numNFTPerAddress[sender]--;
+    //     emit Transfer(sender, address(0), estateId);
+    // }
+
+    // function transferFromDestroyedEstate(address sender, address to, uint256 num) external {
+    //     require(sender != address(this), "from itself");
+    //     require(sender != address(0), "sender is zero address");
+    //     require(msg.sender == sender ||
+    //         _metaTransactionContracts[msg.sender] ||
+    //         _superOperators[msg.sender],
+    //         "not authorized");
+    //     require(sender == _pastOwnerOf(estateId), "only owner can transfer land from destroyed estate");
+    //     // TODO
+    // }
+
+
+    function onERC721BatchReceived(
+        address operator,
+        address from,
+        uint256[] calldata ids,
+        bytes calldata data
+    ) external returns (bytes4) {
+        revert("please call add* or createFrom* functions");
     }
 
-    function destroy(address sender, address to, uint256 id) external {
-        require(sender != address(0), "sender is zero address");
-        require(msg.sender == sender ||
-            _metaTransactionContracts[msg.sender] ||
-            _superOperators[msg.sender],
-            "not authorized");
-        require(sender == _ownerOf(id), "only owner can destroy estate");
-        uint256 size = id / 2**32;
-        uint256 coords = id % 2**32;
-        uint256 x = coords % GRID_SIZE;
-        uint256 y = coords / GRID_SIZE;
-
-        _land.transferQuad(address(this), to, size, x, y, "");
-        _owners[id] = 0;
-        _numNFTPerAddress[sender]--;
-        emit Transfer(sender, address(0), id);
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external returns (bytes4) {
+        revert("please call add* or createFrom* functions");
     }
-
-    // function create(address from, uint256[] calldata ids) external {
-    //     require(ids.length > 0, "no ids provided");
-    // }
-
-    // function addLands(address from, uint256 estateId, uint256 joinId, uint256[] calldata ids) external {
-    //     address owner = _ownerOf(estateId);
-    //     require(owner != address(0), "estate does not exist");
-    //     require(ids.length > 0, "no ids provided");
-    // }
-
-    // function destroy() {
-    //     // token destroyed but Land up for grabs
-    // }
-
 }
