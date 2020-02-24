@@ -1,4 +1,5 @@
-const {getLands} = require('../data/LandPreSale_2/getLands');
+const {guard} = require('../lib');
+const {getLands} = require('../data/LandPreSale_3/getLands');
 
 module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, isDeploymentChainId, getDeployedContract, deploy}) => {
     function log(...args) {
@@ -52,7 +53,7 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
     const {lands, merkleRootHash} = getLands(isDeploymentChainId, chainId);
 
     const deployResult = await deployIfDifferent(['data'],
-        'LandPreSale_2_with_referral',
+        'LandPreSale_3',
         {from: deployer, gas: 1000000, associatedData: lands},
         'LandSaleWithReferral',
         landContract.address,
@@ -67,11 +68,11 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
         backendReferralWallet,
         2000,
     );
-    const contract = getDeployedContract('LandPreSale_2_with_referral');
+    const contract = getDeployedContract('LandPreSale_3');
     if (deployResult.newlyDeployed) {
-        log(' - LandPreSale_2_with_referral deployed at : ' + contract.address + ' for gas : ' + deployResult.receipt.gasUsed);
+        log(' - LandPreSale_3 deployed at : ' + contract.address + ' for gas : ' + deployResult.receipt.gasUsed);
     } else {
-        log('reusing LandPreSale_2_with_referral at ' + contract.address);
+        log('reusing LandPreSale_3 at ' + contract.address);
     }
 };
-module.exports.skip = async () => true; //  guard(['1', '4', '314159'], 'LandPreSale_2_with_referral');
+module.exports.skip = guard(['1', '4', '314159'], 'LandPreSale_3');

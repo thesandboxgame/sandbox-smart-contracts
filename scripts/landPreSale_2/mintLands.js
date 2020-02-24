@@ -17,12 +17,14 @@ function mint(x, y, size, address) {
     }
     if (landToBuy.reserved) {
         if (landToBuy.reserved !== address) {
-            if (address.toLowerCase() === '0xbc3297c20EE9f8242c91F0C844b200F91a444815'.toLowerCase() && landToBuy.reserved.toLowerCase() === '0x4546BE8aCB146bc0af81261F833277Af6f222DcF'.toLowerCase()) {
+            if (address.toLowerCase() === '0xad38dd1ae27c09e4d394d5a10cfab999da7a30c3'.toLowerCase() && landToBuy.reserved.toLowerCase() === '0xad38dd1ae27c09e4d394d5a10cfab999da7a30c3'.toLowerCase()) {
+                console.log('-------------------- FOR BGA -------------------');
+            } else if (address.toLowerCase() === '0xbc3297c20EE9f8242c91F0C844b200F91a444815'.toLowerCase() && landToBuy.reserved.toLowerCase() === '0x4546BE8aCB146bc0af81261F833277Af6f222DcF'.toLowerCase()) {
                 console.log('-------------------- FOR DAPPER -------------------');
             } else if (landToBuy.reserved === '0x7a9fe22691c811ea339d9b73150e6911a5343dca') {
                 console.log('-------------------- from SANDBOX -------------------');
             } else {
-                throw new Error('reserved address do not match', landToBuy.reserved, address);
+                throw new Error('reserved address do not match: ' + landToBuy.reserved + ' != ' + address);
             }
         }
     } else {
