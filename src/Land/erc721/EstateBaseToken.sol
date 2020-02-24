@@ -261,6 +261,7 @@ contract EstateBaseToken is ERC721BaseToken {
                 j++;
                 uint24 data;
                 if (index >= l) {
+                    require(index -l < j, "junctions need to refers to previously accepted land");
                     data = list[index - l];
                 } else {
                     data = _quadsInEstate[estateId][j];
