@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "",
   "scripts": {
+    "postinstall": "patch-package",
     "solium": "solium -d src",
     "prettier:solidity": "prettier --write src/**/*.sol",
     "solhint": "solhint -f table src/**/*.sol",
@@ -56,7 +57,7 @@
     "minimist": "^1.2.0",
     "prettier": "^1.18.2",
     "prettier-plugin-solidity": "^1.0.0-alpha.30",
-    "rocketh": "^0.4.38",
+    "rocketh": "^0.4.39",
     "rocketh-web3": "0.2.18",
     "solc": "0.5.9",
     "solhint": "^2.1.2",
@@ -71,6 +72,8 @@
     "eth-reveal": "^0.5.10",
     "ethers": "^5.0.0-beta.173",
     "googleapis": "^47.0.0",
-    "js-sha256": "^0.9.0"
+    "js-sha256": "^0.9.0",
+    "patch-package": "^6.2.0",
+    "postinstall-postinstall": "^2.0.0"
   }
 }
