@@ -44,7 +44,7 @@ module.exports = async ({namedAccounts, initialRun, isDeploymentChainId, getDepl
         lastFeeEvent = feeEvents[feeEvents.length - 1];
         // console.log(JSON.stringify(lastFeeEvent));
     }
-    if (!lastFeeEvent || !lastFeeEvent.args[1].eq(fee10000th)) {
+    if (!lastFeeEvent || !(lastFeeEvent.args || lastFeeEvent.values)[1].eq(fee10000th)) {
         log('set AssetSignedAuction\'s fee to 3%');
         const currentAssetAuctionAdmin = await call('AssetSignedAuction', 'getAdmin');
         let executor = deployer;

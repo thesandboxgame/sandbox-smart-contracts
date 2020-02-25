@@ -114,20 +114,20 @@ function generateLandsForMerkleTree() {
         addLandGroup({x, y, numLands: estate.lands.length, reserved: estate.ownerAddress, originalX: estate.coordinateX, originalY: estate.coordinateY});
     }
 
-    console.log({
-        numGroups: lands.length,
-        numLandsInOutput: numLands,
-        numLandsInInput,
-        num1x1Lands,
-        num3x3Lands,
-        num6x6Lands,
-        num12x12Lands,
-        num24x24Lands,
-        numSandboxReservedGroups,
-        numSandboxReserved,
-        numReserved,
-        numReservedGroup,
-    });
+    // console.log({
+    //     numGroups: lands.length,
+    //     numLandsInOutput: numLands,
+    //     numLandsInInput,
+    //     num1x1Lands,
+    //     num3x3Lands,
+    //     num6x6Lands,
+    //     num12x12Lands,
+    //     num24x24Lands,
+    //     numSandboxReservedGroups,
+    //     numSandboxReserved,
+    //     numReserved,
+    //     numReservedGroup,
+    // });
     exitIfError();
     return {lands, partnersLands};
 }

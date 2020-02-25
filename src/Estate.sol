@@ -2,13 +2,13 @@
 
 pragma solidity 0.5.9;
 
-import "./Land/erc721/EstateBaseToken.sol";
+import "./Estate/EstateBaseToken.sol";
 
 contract Estate is EstateBaseToken {
     constructor(
         address metaTransactionContract,
         address admin,
-        LandBaseToken land
+        LandToken land
     ) public EstateBaseToken(
         metaTransactionContract,
         admin,

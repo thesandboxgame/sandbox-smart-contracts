@@ -158,16 +158,16 @@ function generateLandsForMerkleTree() {
         }
         numLands += size * size;
     }
-    console.log({
-        numGroups: lands.length,
-        numLandsInOutput: numLands,
-        numLandsInInput: rawLands.length,
-        num1x1Lands,
-        num3x3Lands,
-        num6x6Lands,
-        num12x12Lands,
-        num24x24Lands,
-    });
+    // console.log({
+    //     numGroups: lands.length,
+    //     numLandsInOutput: numLands,
+    //     numLandsInInput: rawLands.length,
+    //     num1x1Lands,
+    //     num3x3Lands,
+    //     num6x6Lands,
+    //     num12x12Lands,
+    //     num24x24Lands,
+    // });
     exitIfError();
     return {lands, partnersLands};
 }
