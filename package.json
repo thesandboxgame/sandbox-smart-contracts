@@ -40,7 +40,6 @@
     "assert": "^1.4.1",
     "axios": "^0.18.0",
     "babel-eslint": "^8.2.5",
-    "bn.js": "^4.11.8",
     "chai": "^4.2.0",
     "cli-confirm": "^1.0.1",
     "copy": "^0.3.2",
@@ -58,13 +57,11 @@
     "prettier": "^1.18.2",
     "prettier-plugin-solidity": "^1.0.0-alpha.30",
     "rocketh": "^0.4.39",
-    "rocketh-web3": "0.2.18",
     "solc": "0.5.9",
     "solhint": "^2.1.2",
     "solhint-plugin-prettier": "^0.0.3",
     "solium": "^1.2.4",
-    "tap": "^12.1.0",
-    "web3": "1.0.0-beta.33"
+    "tap": "^12.1.0"
   },
   "dependencies": {
     "base32.js": "^0.1.0",
