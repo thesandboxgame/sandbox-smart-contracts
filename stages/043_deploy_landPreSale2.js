@@ -1,5 +1,5 @@
 const {guard} = require('../lib');
-const {getLands} = require('../data/LandPreSale_2/getLands');
+const {getLands} = require('../data/landPreSale_2/getLands');
 
 module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, isDeploymentChainId, getDeployedContract, deploy}) => {
     function log(...args) {
