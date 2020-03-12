@@ -49,7 +49,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
     }
 
 
-    function _ownerOf(uint256 id) internal view returns (address) {
+    function _ownerOf(uint256 id) virtual internal view returns (address) {
         return address(_owners[id]);
     }
 
@@ -71,9 +71,9 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
 
     function _approveFor(address owner, address operator, uint256 id) internal {
         if(operator == address(0)) {
-            _owners[id] = uint256(owner); // no need to resset the operator, it will be overriden next time
+            _owners[id] = _owners[id] & (2**255 - 1); // no need to resset the operator, it will be overriden next time
         } else {
-            _owners[id] = uint256(owner) + 2**255;
+            _owners[id] = _owners[id] | 2**255;
             _operators[id] = operator;
         }
         emit Approval(owner, operator, id);
