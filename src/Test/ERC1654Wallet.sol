@@ -1,4 +1,4 @@
-pragma solidity 0.5.9;
+pragma solidity 0.6.4;
 
 import "../../contracts_common/src/Interfaces/ERC1654.sol";
 import "../../contracts_common/src/Interfaces/ERC1654Constants.sol";
@@ -13,8 +13,9 @@ contract ERC1654Wallet is ERC1654, ERC1654Constants {
         authorizedSigners[_signer] = true;
     }
 
-    function isValidSignature(bytes32 _hash, bytes memory _signature)
-        public
+    function isValidSignature(bytes32 _hash, bytes calldata _signature)
+        override // solidity needs it even for interface
+        external
         view
         returns (bytes4 magicValue)
     {

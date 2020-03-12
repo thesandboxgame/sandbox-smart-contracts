@@ -1,6 +1,6 @@
 /* solhint-disable no-empty-blocks */
 
-pragma solidity 0.5.9;
+pragma solidity 0.6.4;
 
 import "./Estate/EstateBaseToken.sol";
 
@@ -77,15 +77,15 @@ contract Estate is EstateBaseToken {
      * @param id The id of the interface
      * @return True if the interface is supported
      */
-    function supportsInterface(bytes4 id) external pure returns (bool) {
+    function supportsInterface(bytes4 id) override external pure returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f; // TODO
     }
 
-    function burn(uint256 id) external {
+    function burn(uint256 id) external override {
         revert("burning is disabled");
     }
 
-    function burnFrom(address from, uint256 id) external {
+    function burnFrom(address from, uint256 id) override external {
         revert("burning is disabled");
     }
 }

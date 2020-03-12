@@ -1,4 +1,4 @@
-pragma solidity 0.5.9;
+pragma solidity 0.6.4;
 
 import "../../contracts_common/src/Interfaces/ERC777TokensRecipient.sol";
 import "../../contracts_common/src/Interfaces/ERC777Token.sol";
@@ -42,7 +42,10 @@ contract Sand777Receiver is ERC777TokensRecipient, ERC820Implementer {
         uint256 amount,
         bytes memory, // data,
         bytes memory // operatorData
-    ) public {
+    )
+        override // solidity needs it even for interface
+        public
+    {
         require(
             address(tokenContract) == msg.sender,
             "only accept tokenContract as sender"

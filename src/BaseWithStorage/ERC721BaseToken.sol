@@ -1,5 +1,5 @@
 /* solhint-disable func-order, code-complexity */
-pragma solidity 0.5.9;
+pragma solidity 0.6.4;
 
 import "../../contracts_common/src/Libraries/AddressUtils.sol";
 import "../../contracts_common/src/Interfaces/ERC721TokenReceiver.sol";
@@ -13,6 +13,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
     bytes4 internal constant _ERC721_BATCH_RECEIVED = 0x4b808c46;
+
 
     bytes4 internal constant ERC165ID = 0x01ffc9a7;
     bytes4 internal constant ERC721_MANDATORY_RECEIVER = 0x5e8bf644;
@@ -61,7 +62,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
     /**
      * @notice Return the owner of a Land
      * @param id The id of the Land
-     * @return The address of the owner
+     * @return owner The address of the owner
      */
     function ownerOf(uint256 id) external view returns (address owner) {
         owner = _ownerOf(id);
@@ -288,7 +289,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
      * @param id The id of the interface
      * @return True if the interface is supported
      */
-    function supportsInterface(bytes4 id) external pure returns (bool) {
+    function supportsInterface(bytes4 id) external virtual pure returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd;
     }
 
@@ -342,7 +343,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
      * @notice Check if the sender approved the operator
      * @param owner The address of the owner
      * @param operator The address of the operator
-     * @return The status of the approval
+     * @return isOperator The status of the approval
      */
     function isApprovedForAll(address owner, address operator)
         external
@@ -361,14 +362,14 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
 
     /// @notice Burns token `id`.
     /// @param id token which will be burnt.
-    function burn(uint256 id) external {
+    function burn(uint256 id) virtual external {
         _burn(msg.sender, _ownerOf(id), id);
     }
 
     /// @notice Burn token`id` from `from`.
     /// @param from address whose token is to be burnt.
     /// @param id token which will be burnt.
-    function burnFrom(address from, uint256 id) external {
+    function burnFrom(address from, uint256 id) virtual external {
         require(from != address(0), "Invalid sender address");
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(

@@ -1,4 +1,4 @@
-pragma solidity 0.5.9;
+pragma solidity 0.6.4;
 
 contract GasTest {
     uint256 constant WORST_CASE_EPSILON = 1000;

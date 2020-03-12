@@ -1,6 +1,6 @@
-pragma solidity 0.5.9;
+pragma solidity 0.6.4;
 
-contract LandToken {
+interface LandToken {
     function batchTransferQuad(
         address from,
         address to,

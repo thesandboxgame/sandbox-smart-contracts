@@ -1,4 +1,4 @@
-pragma solidity 0.5.9;
+pragma solidity 0.6.4;
 
 contract TestERC1155ERC721TokenReceiver {
     bool private allowTokensReceived;

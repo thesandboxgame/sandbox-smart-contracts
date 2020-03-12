@@ -1,4 +1,4 @@
-pragma solidity 0.5.9;
+pragma solidity 0.6.4;
 
 import "../BaseWithStorage/ERC721BaseToken.sol";
 import "../Interfaces/LandToken.sol";

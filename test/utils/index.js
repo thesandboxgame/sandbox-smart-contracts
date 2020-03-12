@@ -1,4 +1,5 @@
 const ethers = require('ethers');
+// ethers.utils.Logger.setLogLevel('off');
 const rocketh = require('rocketh');
 const {BigNumber, ContractFactory} = ethers;
 
