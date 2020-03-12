@@ -55,12 +55,12 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         address daiTokenContractAddress,
         address initialSigningWallet,
         uint256 initialMaxCommissionRate,
-        address estate,
+        address estate
     ) public ReferralValidator(
         initialSigningWallet,
         initialMaxCommissionRate
     ) {
-        _land = Land(landAddress);
+        _land = LandToken(landAddress);
         _sand = ERC20(sandContractAddress);
         _setMetaTransactionProcessor(initialMetaTx, true);
         _wallet = initialWalletAddress;
@@ -156,7 +156,6 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
      * @param size size of the pack of Land to purchase
      * @param priceInSand price in SAND to purchase that Land
      * @param proof merkleProof for that particular Land
-     * @return The address of the operator
      */
     function buyLandWithSand(
         address buyer,
@@ -195,7 +194,6 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
      * @param priceInSand price in SAND to purchase that Land
      * @param proof merkleProof for that particular Land
      * @param referral the referral used by the buyer
-     * @return The address of the operator
      */
     function buyLandWithETH(
         address buyer,
@@ -238,7 +236,6 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
      * @param size size of the pack of Land to purchase
      * @param priceInSand price in SAND to purchase that Land
      * @param proof merkleProof for that particular Land
-     * @return The address of the operator
      */
     function buyLandWithDAI(
         address buyer,
