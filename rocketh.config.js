@@ -76,7 +76,7 @@ module.exports = {
         backendReferralWallet: {
             default: 0,
             1: '0x94AE0495bEDb538F0a14fFE4Dc160dC280989E3a',
-            4: '0x94AE0495bEDb538F0a14fFE4Dc160dC280989E3a',
+            4: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
             314159: '0x94AE0495bEDb538F0a14fFE4Dc160dC280989E3a',
         },
 

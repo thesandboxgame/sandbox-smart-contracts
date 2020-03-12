@@ -140,8 +140,8 @@ contract LandSaleWithReferral is MetaTransactionReceiver, ReferralValidator {
     }
 
     function _mint(address buyer, address to, uint256 x, uint256 y, uint256 size, uint256 price, address token, uint256 tokenAmount) internal {
-        uint256[] junctions = new uint256[](0);
-        _land.mintQuad(to, size, x, y, abi.encode(to, junctions)); // TODO audit
+        uint256[] memory junctions = new uint256[](0);
+        _land.mintQuad(to, size, x, y, abi.encode(to, junctions));
         emit LandQuadPurchased(buyer, to, x + (y * GRID_SIZE), size, price, token, tokenAmount);
     }
 

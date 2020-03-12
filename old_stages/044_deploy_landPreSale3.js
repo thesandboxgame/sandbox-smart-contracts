@@ -1,5 +1,5 @@
 const {guard} = require('../lib');
-const {getLands} = require('../data/LandPreSale_3/getLands');
+const {getLands} = require('../data/landPreSale_3/getLands');
 
 module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, isDeploymentChainId, getDeployedContract, deploy}) => {
     function log(...args) {
@@ -62,7 +62,7 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
         deployer,
         landSaleBeneficiary,
         merkleRootHash,
-        1582718400, // 1582718400 converts to Tuesday February 26, 2020 09:00:00 (am) in time zone America/Argentina/Buenos Aires (-03)
+        1585395394, // Saturday, 28 March 2020 11:36:34 GMT+00:00 // TODO
         daiMedianizer.address,
         dai.address,
         backendReferralWallet,
