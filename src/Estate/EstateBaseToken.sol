@@ -32,14 +32,14 @@ contract EstateBaseToken is ERC721BaseToken {
         require(to != address(this), "do not accept estate to itself");
         _check_authorized(sender, ADD);
         uint256 estateId = _mintEstate(to);
-        _addSingleQuad(sender, estateId, size, x, y);
+        _addSingleQuad(sender, estateId, size, x, y, true, 0);
         return estateId;
     }
 
-    function addQuad(address sender, uint256 estateId, uint256 size, uint256 x, uint256 y) external {
+    function addQuad(address sender, uint256 estateId, uint256 size, uint256 x, uint256 y, uint256 junction) external {
         _check_authorized(sender, ADD);
         _check_hasOwnerRights(sender, estateId);
-        _addSingleQuad(sender, estateId, size, x, y);
+        _addSingleQuad(sender, estateId, size, x, y, false, junction);
     }
 
     function createFromMultipleLands(
@@ -51,11 +51,20 @@ contract EstateBaseToken is ERC721BaseToken {
         require(to != address(this), "do not accept estate to itself");
         _check_authorized(sender, ADD);
         uint256 estateId = _mintEstate(to);
-        _addLands(sender, estateId, ids, junctions, true);
+        _addLands(sender, estateId, ids, junctions);
         return estateId;
     }
 
-    // TODO addSingleLand
+    function addSingleLand(
+        address sender,
+        uint256 estateId,
+        uint256 id,
+        uint256 junction
+    ) external {
+        _check_authorized(sender, ADD);
+        _check_hasOwnerRights(sender, estateId);
+        _addLand(sender, estateId, id, junction);
+    }
 
     function addMultipleLands(
         address sender,
@@ -65,7 +74,7 @@ contract EstateBaseToken is ERC721BaseToken {
     ) external {
         _check_authorized(sender, ADD);
         _check_hasOwnerRights(sender, estateId);
-        _addLands(sender, estateId, ids, junctions, false);
+        _addLands(sender, estateId, ids, junctions);
     }
 
     function createFromMultipleQuads(
@@ -79,7 +88,7 @@ contract EstateBaseToken is ERC721BaseToken {
         require(to != address(this), "do not accept estate to itself");
         _check_authorized(sender, ADD);
         uint256 estateId = _mintEstate(to);
-        _addQuads(sender, estateId, sizes, xs, ys, junctions, true);
+        _addQuads(sender, estateId, sizes, xs, ys, junctions);
         return estateId;
     }
 
@@ -93,7 +102,7 @@ contract EstateBaseToken is ERC721BaseToken {
         ) external {
         _check_authorized(sender, ADD);
         _check_hasOwnerRights(sender, estateId);
-        _addQuads(sender, estateId, sizes, xs, ys, junctions, false);
+        _addQuads(sender, estateId, sizes, xs, ys, junctions);
     }
 
     function destroy(address sender, uint256 estateId) external {
@@ -214,12 +223,18 @@ contract EstateBaseToken is ERC721BaseToken {
         uint256 estateId,
         uint256 size,
         uint256 x,
-        uint256 y
+        uint256 y,
+        bool justCreated,
+        uint256 junction
     ) internal {
         _land.transferQuad(sender, address(this), size, x, y, "");
         uint24[] memory list = new uint24[](1);
         list[0] = _encode(uint16(x),uint16(y),uint8(size));
-        // TODO check adjacency
+        if (!justCreated) {
+                require(_quadsInEstate[estateId].length > junction, "invalid junction");
+            (uint16 lastX, uint16 lastY, uint8 lastSize) = _decode(_quadsInEstate[estateId][junction]);
+            require(_adjacent(uint16(x), uint16(y), uint8(size), lastX, lastY, lastSize), "not adjacent to junction provided");
+        }
         _quadsInEstate[estateId].push(list[0]);
         emit QuadsAddedInEstate(estateId, list);
     }
@@ -230,16 +245,18 @@ contract EstateBaseToken is ERC721BaseToken {
         uint256[] memory sizes,
         uint256[] memory xs,
         uint256[] memory ys,
-        uint256[] memory junctions,
-        bool justCreated
+        uint256[] memory junctions
     ) internal {
         _land.batchTransferQuad(sender, address(this), sizes, xs, ys, "");
         uint24[] memory list = new uint24[](sizes.length);
         for (uint256 i = 0; i < list.length; i++) {
             list[i] = _encode(uint16(xs[i]), uint16(ys[i]), uint8(sizes[i]));
         }
-        // TODO check adjacency
-        if (justCreated) {
+
+        uint256 l = _quadsInEstate[estateId].length;
+        _checkAdjacency(estateId, l, list, junctions);
+
+        if (l == 0) {
             _quadsInEstate[estateId] = list;
         } else {
             for (uint256 i = 0; i < list.length; i++) {
@@ -249,30 +266,77 @@ contract EstateBaseToken is ERC721BaseToken {
         emit QuadsAddedInEstate(estateId, list);
     }
 
-    function _adjacent(uint16 x1, uint16 y1, uint16 x2, uint16 y2) internal pure returns(bool) {
-        return (
-            (x1 == x2 && y1 == y2 - 1) ||
-            (x1 == x2 && y1 == y2 + 1) ||
-            (x1 == x2 - 1 && y1 == y2) ||
-            (x1 == x2 + 1 && y1 == y2)
-        );
+    function _checkAdjacency(uint256 estateId, uint256 l, uint24[] memory list, uint256[] memory junctions) internal {
+        uint16 lastX = 0;
+        uint16 lastY = 0;
+        uint8 lastSize = 0;
+        if (l > 0) {
+            (lastX, lastY, lastSize) = _decode(_quadsInEstate[estateId][l-1]);
+        }
+        uint256 j = 0;
+        for (uint256 i = 0; i < list.length; i++) {
+            (uint16 x, uint16 y, uint8 size) = _decode(list[i]);
+            if (lastSize != 0 && !_adjacent(x, y, size, lastX, lastY, lastSize)) {
+                uint256 index = junctions[j];
+                j++;
+                uint24 data;
+                if (index >= l) {
+                    require(index - l < j, "junctions need to refers to previously accepted land");
+                    data = list[index - l];
+                } else {
+                    data = _quadsInEstate[estateId][j];
+                }
+                (uint16 jx, uint16 jy, uint8 jsize) = _decode(data);
+                require(_adjacent(x, y, size, jx, jy, jsize), "need junctions to be adjacent");
+            }
+            lastX = x;
+            lastY = y;
+            lastSize = size;
+        }
     }
 
-    function _adjacent(uint16 x1, uint16 y1, uint16 x2, uint16 y2, uint8 s2) internal pure returns(bool) {
-        return (
-            (x1 >= x2 && x1 < x2 + s2 && y1 == y2 - 1) ||
-            (x1 >= x2 && x1 < x2 + s2 && y1 == y2 + s2) ||
-            (x1 == x2 - 1 && y1 >= y2 && y1 < y2 + s2) ||
-            (x1 == x2 - s2 && y1 >= y2 && y1 < y2 + s2)
-        );
+    function _adjacent(uint16 x1, uint16 y1, uint8 s1, uint16 x2, uint16 y2, uint8 s2) internal pure returns(bool) {
+        if (s1 == 1) {
+            if (s2 == 1) {
+                return (
+                    (x1 == x2 && y1 == y2 - 1) ||
+                    (x1 == x2 && y1 == y2 + 1) ||
+                    (x1 == x2 - 1 && y1 == y2) ||
+                    (x1 == x2 + 1 && y1 == y2)
+                );
+            }
+            return (
+                (x1 >= x2 && x1 < x2 + s2 && y1 == y2 - 1) ||
+                (x1 >= x2 && x1 < x2 + s2 && y1 == y2 + s2) ||
+                (x1 == x2 - 1 && y1 >= y2 && y1 < y2 + s2) ||
+                (x1 == x2 - s2 && y1 >= y2 && y1 < y2 + s2)
+            );
+        }
+        if (s2 == 1) {
+            return false;
+            // TODO:
+            // return (
+            //     (x1 >= x2 && x1 < x2 + s2 && y1 == y2 - 1) ||
+            //     (x1 >= x2 && x1 < x2 + s2 && y1 == y2 + s2) ||
+            //     (x1 == x2 - 1 && y1 >= y2 && y1 < y2 + s2) ||
+            //     (x1 == x2 - s2 && y1 >= y2 && y1 < y2 + s2)
+            // );
+        }
+        return false;
+        // TODO:
+        // return (
+        //     (x1 >= x2 && x1 < x2 + s2 && y1 == y2 - 1) ||
+        //     (x1 >= x2 && x1 < x2 + s2 && y1 == y2 + s2) ||
+        //     (x1 == x2 - 1 && y1 >= y2 && y1 < y2 + s2) ||
+        //     (x1 == x2 - s2 && y1 >= y2 && y1 < y2 + s2)
+        // );
     }
 
     function _addLands(
         address sender,
         uint256 estateId,
         uint256[] memory ids,
-        uint256[] memory junctions,
-        bool justCreated
+        uint256[] memory junctions
     ) internal {
         _land.batchTransferFrom(sender, address(this), ids, "");
         uint24[] memory list = new uint24[](ids.length);
@@ -283,44 +347,60 @@ contract EstateBaseToken is ERC721BaseToken {
         }
 
         uint256 l = _quadsInEstate[estateId].length;
-        uint16 lastX = 409;
-        uint16 lastY = 409;
-        if (!justCreated) {
-            uint24 d = _quadsInEstate[estateId][l-1];
-            lastX = uint16(d % GRID_SIZE);
-            lastY = uint16(d % GRID_SIZE);
-        }
-        uint256 j = 0;
-        for (uint256 i = 0; i < list.length; i++) {
-            uint16 x = uint16(ids[i] % GRID_SIZE);
-            uint16 y = uint16(ids[i] / GRID_SIZE);
-            if (lastX != 409 && !_adjacent(x, y, lastX, lastY)) {
-                uint256 index = junctions[j];
-                j++;
-                uint24 data;
-                if (index >= l) {
-                    require(index -l < j, "junctions need to refers to previously accepted land");
-                    data = list[index - l];
-                } else {
-                    data = _quadsInEstate[estateId][j];
-                }
-                (uint16 jx, uint16 jy, uint8 jsize) = _decode(data);
-                if (jsize == 1) {
-                    require(_adjacent(x, y, jx, jy), "need junctions to be adjacent");
-                } else {
-                    require(_adjacent(x, y, jx, jy, jsize), "need junctions to be adjacent");
-                }
-            }
-            lastX = x;
-            lastY = y;
-        }
-        if (justCreated) {
+        _checkAdjacency(estateId, l, list, junctions);
+        // uint16 lastX = 409;
+        // uint16 lastY = 409;
+        // uint8 lastSize = 0;
+        // if (l > 0) {
+        //     (lastX, lastY, lastSize) = _decode(_quadsInEstate[estateId][l-1]);
+        // }
+        // uint256 j = 0;
+        // for (uint256 i = 0; i < list.length; i++) {
+        //     uint16 x = uint16(ids[i] % GRID_SIZE);
+        //     uint16 y = uint16(ids[i] / GRID_SIZE);
+        //     if (lastX != 409 && !_adjacent(x, y, 1, lastX, lastY, lastSize)) {
+        //         uint256 index = junctions[j];
+        //         j++;
+        //         uint24 data;
+        //         if (index >= l) {
+        //             require(index -l < j, "junctions need to refers to previously accepted land");
+        //             data = list[index - l];
+        //         } else {
+        //             data = _quadsInEstate[estateId][j];
+        //         }
+        //         (uint16 jx, uint16 jy, uint8 jsize) = _decode(data);
+        //         require(_adjacent(x, y, 1, jx, jy, jsize), "need junctions to be adjacent");
+        //     }
+        //     lastX = x;
+        //     lastY = y;
+        //     lastSize = 1;
+        // }
+        if (l == 0) {
             _quadsInEstate[estateId] = list;
         } else {
             for (uint256 i = 0; i < list.length; i++) {
                 _quadsInEstate[estateId].push(list[i]);
             }
         }
+        emit QuadsAddedInEstate(estateId, list);
+    }
+
+    function _addLand(
+        address sender,
+        uint256 estateId,
+        uint256 id,
+        uint256 junction
+    ) internal {
+        _land.transferFrom(sender, address(this), id);
+        uint24[] memory list = new uint24[](1);
+        uint16 x = uint16(id % GRID_SIZE);
+        uint16 y = uint16(id / GRID_SIZE);
+        list[0] = _encode(x, y, 1);
+
+        require(_quadsInEstate[estateId].length > junction, "invalid junction");
+        (uint16 lastX, uint16 lastY, uint8 lastSize) = _decode(_quadsInEstate[estateId][junction]);
+        require(_adjacent(x, y, 1, lastX, lastY, lastSize), "not adjacent to junction provided");
+        _quadsInEstate[estateId].push(list[0]);
         emit QuadsAddedInEstate(estateId, list);
     }
 
