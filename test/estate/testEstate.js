@@ -10,11 +10,15 @@ const {
 
 const deploy_sand = require('../../stages/010_deploy_sand');
 const deploy_land = require('../../stages/040_deploy_land');
-const deploy_estate = require('../../stages/050_deploy_estate');
-const set_estate = require('../../stages/809_set_estate');
+const deploy_estate = require('../../stages/045_deploy_estate');
+const set_estate = require('../../stages/810_set_estate');
 const set_land_admin = require('../../stages/903_set_land_admin');
 
+const MerkleTree = require('../../lib/merkleTree');
+const {createDataArray, calculateLandHash} = require('../../lib/merkleTreeHelper');
+
 const {runERC721tests} = require('../batteries/erc721_tests');
+const {runMintingTestFromSale} = require('./minting_tests');
 
 const {
     deployer,
@@ -24,6 +28,34 @@ const {
 const {
     ethersProvider
 } = require('../utils');
+
+function EstateStore() {
+    // this.
+}
+EstateStore.prototype.resetContracts = async function () {
+    try {
+        await rocketh.runStages();
+    } catch (e) {
+        console.error(e);
+    }
+    const LandSale = getDeployedContract('LandPreSale_4');
+    const Estate = getDeployedContract('Estate');
+    const Land = getDeployedContract('Land');
+    const landSaleDeployment = rocketh.deployment('LandPreSale_4');
+    const lands = landSaleDeployment.data;
+    const landHashArray = createDataArray(lands);
+    const merkleTree = new MerkleTree(landHashArray);
+    return {
+        LandSale: new Contract(LandSale.address, LandSale.abi, ethersProvider),
+        Estate: new Contract(Estate.address, Estate.abi, ethersProvider),
+        Land: new Contract(Land.address, Land.abi, ethersProvider),
+        merkleTree,
+        lands,
+        getProof: (land) => merkleTree.getProof(calculateLandHash(land))
+    };
+};
+runMintingTestFromSale({contractsStore: new EstateStore()});
+
 
 function ERC721Contract() {
     this.counter = 0;
@@ -64,6 +96,4 @@ ERC721Contract.prototype.mintERC721 = async function (creator) {
 //     const tx = await this.contract.connect(ethersProvider.getSigner(from)).functions.burnFrom(from, tokenId);
 //     return tx.wait();
 // };
-
-const factory = new ERC721Contract();
-runERC721tests(factory);
+runERC721tests(new ERC721Contract());

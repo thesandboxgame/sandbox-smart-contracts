@@ -29,6 +29,7 @@ contract EstateBaseToken is ERC721BaseToken {
     }
 
     function createFromQuad(address sender, address to, uint256 size, uint256 x, uint256 y) external returns (uint256) {
+        require(to != address(this), "do not accept estate to itself");
         _check_authorized(sender, ADD);
         uint256 estateId = _mintEstate(to);
         _addSingleQuad(sender, estateId, size, x, y);
@@ -47,6 +48,7 @@ contract EstateBaseToken is ERC721BaseToken {
         uint256[] calldata ids,
         uint256[] calldata junctions
     ) external returns (uint256) {
+        require(to != address(this), "do not accept estate to itself");
         _check_authorized(sender, ADD);
         uint256 estateId = _mintEstate(to);
         _addLands(sender, estateId, ids, junctions, true);
@@ -74,6 +76,7 @@ contract EstateBaseToken is ERC721BaseToken {
         uint256[] calldata ys,
         uint256[] calldata junctions
     ) external returns (uint256) {
+        require(to != address(this), "do not accept estate to itself");
         _check_authorized(sender, ADD);
         uint256 estateId = _mintEstate(to);
         _addQuads(sender, estateId, sizes, xs, ys, junctions, true);
@@ -338,11 +341,14 @@ contract EstateBaseToken is ERC721BaseToken {
         uint256[] calldata ids,
         bytes calldata data
     ) external returns (bytes4) {
-        (address to, uint256[] memory junctions) = abi.decode(data, (address, uint256[])); // TODO get rid of junctions
+        if (operator == address(this)) {
+            return _ERC721_BATCH_RECEIVED;
+        }
+        address to = abi.decode(data, (address)); // TODO get rid of junctions
         require(from == address(0), "only Land minting allowed to mint Estate on transfer");
         uint8 size = 0;
         if (ids.length == 1) {
-            size = 1;
+            revert("do not accept 1x1 lands");
         } else if (ids.length == 9) {
             size = 3;
         } else if (ids.length == 36) {
@@ -365,6 +371,7 @@ contract EstateBaseToken is ERC721BaseToken {
         list[0] = _encode(x, y, size);
         _quadsInEstate[estateId].push(list[0]);
         emit QuadsAddedInEstate(estateId, list);
+        return _ERC721_BATCH_RECEIVED;
     }
 
     function onERC721Received(
@@ -373,6 +380,13 @@ contract EstateBaseToken is ERC721BaseToken {
         uint256 tokenId,
         bytes calldata data
     ) external returns (bytes4) {
+        if (operator == address(this)) {
+            return _ERC721_BATCH_RECEIVED;
+        }
         revert("please call add* or createFrom* functions");
+    }
+
+    function supportsInterface(bytes4 id) override virtual public pure returns (bool) {
+        return super.supportsInterface(id) || id == 0x5e8bf644;
     }
 }

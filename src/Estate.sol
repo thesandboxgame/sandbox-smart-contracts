@@ -77,8 +77,8 @@ contract Estate is EstateBaseToken {
      * @param id The id of the interface
      * @return True if the interface is supported
      */
-    function supportsInterface(bytes4 id) override external pure returns (bool) {
-        return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f; // TODO
+    function supportsInterface(bytes4 id) override public pure returns (bool) {
+        return super.supportsInterface(id) || id == 0x5b5e139f;
     }
 
     function burn(uint256 id) external override {

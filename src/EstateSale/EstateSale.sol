@@ -142,7 +142,11 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
     }
 
     function _mint(address buyer, address to, uint256 x, uint256 y, uint256 size, uint256 price, address token, uint256 tokenAmount) internal {
-        _land.mintQuad(_estate, size, x, y, abi.encode(to));
+        if (size == 1) {
+            _land.mintQuad(to, size, x, y, "");
+        } else {
+            _land.mintQuad(_estate, size, x, y, abi.encode(to));
+        }
         emit LandQuadPurchased(buyer, to, x + (y * GRID_SIZE), size, price, token, tokenAmount);
     }
 

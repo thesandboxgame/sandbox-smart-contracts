@@ -289,7 +289,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
      * @param id The id of the interface
      * @return True if the interface is supported
      */
-    function supportsInterface(bytes4 id) external virtual pure returns (bool) {
+    function supportsInterface(bytes4 id) virtual public pure returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd;
     }
 
