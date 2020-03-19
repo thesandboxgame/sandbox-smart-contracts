@@ -18,7 +18,8 @@ const MerkleTree = require('../../lib/merkleTree');
 const {createDataArray, calculateLandHash} = require('../../lib/merkleTreeHelper');
 
 const {runERC721tests} = require('../batteries/erc721_tests');
-const {runMintingTestFromSale} = require('./minting_tests');
+const {runMintingTestFromSale} = require('./sale_minting_tests');
+const {runEstateTests} = require('./estate_tests');
 
 const {
     deployer,
@@ -29,10 +30,10 @@ const {
     ethersProvider
 } = require('../utils');
 
-function EstateStore() {
+function LandSaleEstateStore() {
     // this.
 }
-EstateStore.prototype.resetContracts = async function () {
+LandSaleEstateStore.prototype.resetContracts = async function () {
     try {
         await rocketh.runStages();
     } catch (e) {
@@ -54,8 +55,32 @@ EstateStore.prototype.resetContracts = async function () {
         getProof: (land) => merkleTree.getProof(calculateLandHash(land))
     };
 };
-runMintingTestFromSale({contractsStore: new EstateStore()});
 
+function EstateStore() {
+    // this.
+}
+EstateStore.prototype.resetContracts = async function () {
+    try {
+        await rocketh.runStages();
+    } catch (e) {
+        console.error(e);
+    }
+    const EstateInfo = getDeployedContract('Estate');
+    const LandInfo = getDeployedContract('Land');
+    const Estate = new Contract(EstateInfo.address, EstateInfo.abi, ethersProvider);
+    const Land = new Contract(LandInfo.address, LandInfo.abi, ethersProvider);
+
+    const minter = rocketh.namedAccounts.others[4];
+    const landAdmin = rocketh.namedAccounts.landAdmin;
+    await Land.connect(Land.provider.getSigner(landAdmin)).functions.setMinter(minter, true).then((tx) => tx.wait());
+    const LandFromMinter = Land.connect(Land.provider.getSigner(minter));
+    return {
+        Estate,
+        Land,
+        minter,
+        LandFromMinter
+    };
+};
 
 function ERC721Contract() {
     this.counter = 0;
@@ -96,4 +121,7 @@ ERC721Contract.prototype.mintERC721 = async function (creator) {
 //     const tx = await this.contract.connect(ethersProvider.getSigner(from)).functions.burnFrom(from, tokenId);
 //     return tx.wait();
 // };
-runERC721tests(new ERC721Contract());
+
+runEstateTests({contractsStore: new EstateStore()});
+// runMintingTestFromSale({contractsStore: new LandSaleEstateStore()});
+// runERC721tests(new ERC721Contract());

@@ -31,6 +31,7 @@ contract EstateBaseToken is ERC721BaseToken {
     }
 
     function createFromQuad(address sender, address to, uint256 size, uint256 x, uint256 y) external returns (uint256) {
+        require(to != address(0), "cannot send to zero address");
         require(to != address(this), "do not accept estate to itself");
         _check_authorized(sender, CREATE, 0);
         uint256 estateId = _mintEstate(to);
@@ -49,6 +50,7 @@ contract EstateBaseToken is ERC721BaseToken {
         uint256[] calldata ids,
         uint256[] calldata junctions
     ) external returns (uint256) {
+        require(to != address(0), "cannot send to zero address");
         require(to != address(this), "do not accept estate to itself");
         _check_authorized(sender, CREATE, 0);
         uint256 estateId = _mintEstate(to);
@@ -84,6 +86,7 @@ contract EstateBaseToken is ERC721BaseToken {
         uint256[] calldata ys,
         uint256[] calldata junctions
     ) external returns (uint256) {
+        require(to != address(0), "cannot send to zero address");
         require(to != address(this), "do not accept estate to itself");
         _check_authorized(sender, CREATE, 0);
         uint256 estateId = _mintEstate(to);
@@ -110,7 +113,8 @@ contract EstateBaseToken is ERC721BaseToken {
         emit Transfer(sender, address(0), estateId);
     }
 
-    function destroyAndTransfer(address sender, address to, uint256 estateId) external {
+    function destroyAndTransfer(address sender, uint256 estateId, address to) external {
+        require(to != address(0), "cannot send to zero address");
         _check_authorized(sender, BREAK, estateId);
         _owners[estateId] = (_owners[estateId] & (2**255 - 1)) | 2**254;
         _numNFTPerAddress[sender]--;
@@ -124,17 +128,18 @@ contract EstateBaseToken is ERC721BaseToken {
         uint256 estateId,
         uint256 num
     ) public {
+        require(to != address(0), "cannot send to zero address");
         _check_authorized(sender, WITHDRAWAL, estateId);
         uint24[] memory list = _quadsInEstate[estateId];
-        uint256[] memory sizes = new uint256[](num);
-        uint256[] memory xs = new uint256[](num);
-        uint256[] memory ys = new uint256[](num);
         uint256 numLeft = list.length;
         if (num == 0) {
             num = numLeft;
         }
         require(num > 0, "no more land left");
         require(numLeft >= num, "trying to extract more than there is");
+        uint256[] memory sizes = new uint256[](num);
+        uint256[] memory xs = new uint256[](num);
+        uint256[] memory ys = new uint256[](num);
         for (uint256 i = 0; i < num; i++) {
             (uint16 x, uint16 y, uint8 size) = _decode(list[numLeft - 1 - i]);
             _quadsInEstate[estateId].pop();
@@ -223,8 +228,9 @@ contract EstateBaseToken is ERC721BaseToken {
 
     function _decode(uint24 data) internal pure returns (uint16 x, uint16 y, uint8 size) {
         size = uint8(data / (2**18));
-        y = uint16(data % (2**18) / GRID_SIZE);
-        x = uint16(data % GRID_SIZE);
+        uint24 xy = data % (2**18);
+        y = uint16(xy / GRID_SIZE);
+        x = uint16(xy % GRID_SIZE);
     }
 
     function _mintEstate(address to) internal returns (uint256) {
@@ -299,7 +305,7 @@ contract EstateBaseToken is ERC721BaseToken {
                 j++;
                 uint24 data;
                 if (index >= l) {
-                    require(index - l < j, "junctions need to refers to previously accepted land");
+                    require(index - l < i, "junctions need to refers to previously accepted land");
                     data = list[index - l];
                 } else {
                     data = _quadsInEstate[estateId][j];
@@ -342,7 +348,7 @@ contract EstateBaseToken is ERC721BaseToken {
             (x1 + s1 > x2 && x1 < x2 + s2 && y1 == y2 - s1) ||
             (x1 + s1 > x2 && x1 < x2 + s2 && y1 == y2 + s2) ||
             (x1 == x2 - s1 && y1 + s1 > y2 && y1 < y2 + s2) ||
-            (x1 == x2 - s2 && y1 + s1 > y2 && y1 < y2 + s2)
+            (x1 == x2 + s2 && y1 + s1 > y2 && y1 < y2 + s2)
         );
     }
 
@@ -412,7 +418,7 @@ contract EstateBaseToken is ERC721BaseToken {
         if (operator == address(this)) {
             return _ERC721_BATCH_RECEIVED;
         }
-        address to = abi.decode(data, (address)); // TODO get rid of junctions
+        address to = abi.decode(data, (address));
         require(from == address(0), "only Land minting allowed to mint Estate on transfer");
         uint8 size = 0;
         if (ids.length == 1) {
