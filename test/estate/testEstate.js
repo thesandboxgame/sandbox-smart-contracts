@@ -90,7 +90,7 @@ ERC721Contract.prototype.mintERC721 = async function (creator) {
     await landTx.wait();
     const tx = await this.contract.connect(ethersProvider.getSigner(creator)).functions.createFromQuad(creator, creator, 1, this.counter, this.counter);
     const receipt = await tx.wait();
-    return receipt.events.find((v) => v.event === 'QuadsAddedInEstate').args[0];
+    return receipt.events.find((v) => v.event === 'QuadsAdded').args[0];
 };
 // ERC721Contract.prototype.burnERC721 = async function (from, tokenId) {
 //     const tx = await this.contract.connect(ethersProvider.getSigner(from)).functions.burnFrom(from, tokenId);
