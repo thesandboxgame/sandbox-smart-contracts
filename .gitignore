@@ -15,8 +15,8 @@ __ipfs__/
 .sandbox_credentials
 .land_presale*
 .land_sale*
-.partners_Sale*
-.presale_2*
+.partners_Sale**
+.presale_*
 presale_2*
 .backend_signer_privateKey
 .etherscan_*
