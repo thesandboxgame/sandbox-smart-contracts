@@ -1,7 +1,7 @@
 const fs = require('fs');
 const MerkleTree = require('../../lib/merkleTree');
 const {createDataArray, saltLands} = require('../../lib/merkleTreeHelper');
-const rawSector1 = require('./sector2.json');
+const rawSector1 = require('./sector3.json');
 
 let errors = false;
 function reportError(e) {

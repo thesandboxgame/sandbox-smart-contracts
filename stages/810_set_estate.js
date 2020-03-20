@@ -1,3 +1,4 @@
+const {guard} = require('../lib');
 module.exports = async ({namedAccounts, initialRun, call, getDeployedContract, sendTxAndWaitOnlyFrom}) => {
     function log(...args) {
         if (initialRun) {
@@ -26,3 +27,5 @@ module.exports = async ({namedAccounts, initialRun, call, getDeployedContract, s
         await sendTxAndWaitOnlyFrom(currentLandAdmin, {from: deployer, gas: 100000, skipError: true}, 'Land', 'setSuperOperator', estate.address, true);
     }
 };
+
+module.exports.skip = guard(['1', '4', '314159']); // TODO remove
