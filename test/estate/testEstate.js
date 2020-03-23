@@ -123,5 +123,5 @@ ERC721Contract.prototype.mintERC721 = async function (creator) {
 // };
 
 runEstateTests({contractsStore: new EstateStore()});
-// runMintingTestFromSale({contractsStore: new LandSaleEstateStore()});
-// runERC721tests(new ERC721Contract());
+runMintingTestFromSale({contractsStore: new LandSaleEstateStore()});
+runERC721tests(new ERC721Contract());
