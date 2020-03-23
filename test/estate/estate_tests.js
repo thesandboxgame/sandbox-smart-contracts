@@ -196,6 +196,33 @@ function runEstateTests({contractsStore}) {
             const junctions = [2];
             await expectRevert(contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.createFromMultipleQuads(user0, user0, sizes, xs, ys, junctions).then((tx) => tx.wait()), 'JUNCTIONS_INVALID');
         });
+
+        t.test('creating from multiple quads with junctions and destroying get them back', async (t) => {
+            const landQuads = assignIds([
+                {x: 5, y: 7, size: 1},
+                {x: 6, y: 8, size: 1},
+                {x: 6, y: 9, size: 3},
+                {x: 6, y: 12, size: 3},
+                {x: 3, y: 9, size: 3},
+                {x: 180, y: 24, size: 12},
+                {x: 42, y: 48, size: 6},
+                {x: 9, y: 15, size: 3},
+            ]);
+            await createQuads(user0, landQuads);
+            const {xs, ys, sizes, selection} = selectQuads(landQuads, [1, 2, 3, 4]);
+            const junctions = [1];
+            await contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.createFromMultipleQuads(user0, user0, sizes, xs, ys, junctions).then((tx) => tx.wait());
+            await contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.destroyAndTransfer(user0, 1, user0).then((tx) => tx.wait());
+            for (const landQuad of selection) {
+                for (let sx = 0; sx < landQuad.size; sx++) {
+                    for (let sy = 0; sy < landQuad.size; sy++) {
+                        const id = landQuad.x + sx + ((landQuad.y + sy) * 408);
+                        const landOwner = await contracts.Land.callStatic.ownerOf(id);
+                        assert.equal(landOwner, user0);
+                    }
+                }
+            }
+        });
     });
 }
 
