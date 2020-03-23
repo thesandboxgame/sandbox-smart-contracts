@@ -32,6 +32,34 @@ function runEstateTests({contractsStore}) {
             contracts = await contractsStore.resetContracts();
         });
 
+        function selectQuads(landQuads, indices) {
+            const xs = [];
+            const ys = [];
+            const sizes = [];
+            const selection = [];
+            for (const index of indices) {
+                const landQuad = landQuads[index];
+                xs.push(landQuad.x);
+                ys.push(landQuad.y);
+                sizes.push(landQuad.size);
+                selection.push(landQuad);
+            }
+            return {xs, ys, sizes, selection};
+        }
+
+        function assignIds(landQuads) {
+            for (const landQuad of landQuads) {
+                landQuad.topCornerId = landQuad.x + (landQuad.y * 408);
+            }
+            return landQuads;
+        }
+
+        async function createQuads(to, landSpecs) {
+            for (const landSpec of landSpecs) {
+                await contracts.LandFromMinter.functions.mintQuad(to, landSpec.size, landSpec.x, landSpec.y, emptyBytes).then((tx) => tx.wait());
+            }
+        }
+
         t.test('creating from Land Quad', async (t) => {
             const size = 6;
             const x = 6;
@@ -69,6 +97,33 @@ function runEstateTests({contractsStore}) {
                     const id = x + sx + ((y + sy) * 408);
                     const landOwner = await contracts.Land.callStatic.ownerOf(id);
                     assert.equal(landOwner, contracts.Estate.address);
+                }
+            }
+            const estateOwner = await contracts.Estate.callStatic.ownerOf(1);
+            assert.equal(estateOwner, user0);
+        });
+
+        t.test('creating from multiple quads', async (t) => {
+            const landQuads = assignIds([
+                {x: 5, y: 7, size: 1},
+                {x: 6, y: 8, size: 1},
+                {x: 6, y: 9, size: 3},
+                {x: 6, y: 12, size: 3},
+                {x: 180, y: 24, size: 12},
+                {x: 42, y: 48, size: 6},
+                {x: 9, y: 15, size: 3},
+            ]);
+            await createQuads(user0, landQuads);
+            const {xs, ys, sizes, selection} = selectQuads(landQuads, [1, 2, 3]);
+            const junctions = [];
+            await contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.createFromMultipleQuads(user0, user0, sizes, xs, ys, junctions).then((tx) => tx.wait());
+            for (const landQuad of selection) {
+                for (let sx = 0; sx < landQuad.size; sx++) {
+                    for (let sy = 0; sy < landQuad.size; sy++) {
+                        const id = landQuad.x + sx + ((landQuad.y + sy) * 408);
+                        const landOwner = await contracts.Land.callStatic.ownerOf(id);
+                        assert.equal(landOwner, contracts.Estate.address);
+                    }
                 }
             }
             const estateOwner = await contracts.Estate.callStatic.ownerOf(1);
