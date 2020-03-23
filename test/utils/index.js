@@ -40,7 +40,7 @@ async function call(contract, methodName, options, ...args) {
     return method.apply(method, args);
 }
 
-async function expectRevert(expectedMessage, promise) {
+async function expectRevert(promise, expectedMessage) {
     if (typeof promise === 'undefined') {
         promise = expectedMessage;
         expectedMessage = null;
@@ -62,7 +62,13 @@ async function expectRevert(expectedMessage, promise) {
         }
         return true;
     }
-    throw new Error(`Revert expected`);
+    // throw new Error(`Revert expected`);
+}
+
+let timeDelta = 0;
+async function increaseTime(numSec) {
+    await ethersProvider.send('evm_increaseTime', [numSec]);
+    timeDelta += numSec;
 }
 
 module.exports = {
@@ -73,5 +79,8 @@ module.exports = {
     zeroAddress: '0x0000000000000000000000000000000000000000',
     emptyBytes: '0x',
     ethersProvider,
-    getBlockNumber: () => ethersProvider.getBlockNumber()
+    getBlockNumber: () => ethersProvider.getBlockNumber(),
+    getBalance: (addressOrName) => ethersProvider.getBalance(addressOrName),
+    getChainCurrentTime: () => Math.floor(Date.now() / 1000) + timeDelta,
+    increaseTime
 };
