@@ -129,6 +129,73 @@ function runEstateTests({contractsStore}) {
             const estateOwner = await contracts.Estate.callStatic.ownerOf(1);
             assert.equal(estateOwner, user0);
         });
+
+        t.test('creating from multiple quads fails if not connected', async (t) => {
+            const landQuads = assignIds([
+                {x: 5, y: 7, size: 1},
+                {x: 6, y: 8, size: 1},
+                {x: 6, y: 9, size: 3},
+                {x: 6, y: 12, size: 3},
+                {x: 180, y: 24, size: 12},
+                {x: 42, y: 48, size: 6},
+                {x: 9, y: 15, size: 3},
+            ]);
+            await createQuads(user0, landQuads);
+            const {xs, ys, sizes, selection} = selectQuads(landQuads, [1, 2, 3, 4]);
+            const junctions = [];
+            await expectRevert(contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.createFromMultipleQuads(user0, user0, sizes, xs, ys, junctions).then((tx) => tx.wait()), 'JUNCTIONS_MISSING');
+        });
+
+        t.test('creating from multiple quads with junctions', async (t) => {
+            const landQuads = assignIds([
+                {x: 5, y: 7, size: 1},
+                {x: 6, y: 8, size: 1},
+                {x: 6, y: 9, size: 3},
+                {x: 6, y: 12, size: 3},
+                {x: 3, y: 9, size: 3},
+                {x: 180, y: 24, size: 12},
+                {x: 42, y: 48, size: 6},
+                {x: 9, y: 15, size: 3},
+            ]);
+            await createQuads(user0, landQuads);
+            const {xs, ys, sizes, selection} = selectQuads(landQuads, [1, 2, 3, 4]);
+            const junctions = [1];
+            await contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.createFromMultipleQuads(user0, user0, sizes, xs, ys, junctions).then((tx) => tx.wait());
+        });
+
+        t.test('creating from multiple quads without junctions fails', async (t) => {
+            const landQuads = assignIds([
+                {x: 5, y: 7, size: 1},
+                {x: 6, y: 8, size: 1},
+                {x: 6, y: 9, size: 3},
+                {x: 6, y: 12, size: 3},
+                {x: 3, y: 9, size: 3},
+                {x: 180, y: 24, size: 12},
+                {x: 42, y: 48, size: 6},
+                {x: 9, y: 15, size: 3},
+            ]);
+            await createQuads(user0, landQuads);
+            const {xs, ys, sizes, selection} = selectQuads(landQuads, [1, 2, 3, 4]);
+            const junctions = [];
+            await expectRevert(contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.createFromMultipleQuads(user0, user0, sizes, xs, ys, junctions).then((tx) => tx.wait()), 'JUNCTIONS_MISSING');
+        });
+
+        t.test('creating from multiple quads with invalid junctions fails', async (t) => {
+            const landQuads = assignIds([
+                {x: 5, y: 7, size: 1},
+                {x: 6, y: 8, size: 1},
+                {x: 6, y: 9, size: 3},
+                {x: 6, y: 12, size: 3},
+                {x: 3, y: 9, size: 3},
+                {x: 180, y: 24, size: 12},
+                {x: 42, y: 48, size: 6},
+                {x: 9, y: 15, size: 3},
+            ]);
+            await createQuads(user0, landQuads);
+            const {xs, ys, sizes, selection} = selectQuads(landQuads, [1, 2, 3, 4]);
+            const junctions = [2];
+            await expectRevert(contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.createFromMultipleQuads(user0, user0, sizes, xs, ys, junctions).then((tx) => tx.wait()), 'JUNCTIONS_INVALID');
+        });
     });
 }
 

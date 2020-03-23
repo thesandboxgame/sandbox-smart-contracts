@@ -301,17 +301,18 @@ contract EstateBaseToken is ERC721BaseToken {
         for (uint256 i = 0; i < list.length; i++) {
             (uint16 x, uint16 y, uint8 size) = _decode(list[i]);
             if (lastSize != 0 && !_adjacent(x, y, size, lastX, lastY, lastSize)) {
+                require(j < junctions.length, "JUNCTIONS_MISSING");
                 uint256 index = junctions[j];
                 j++;
                 uint24 data;
                 if (index >= l) {
-                    require(index - l < i, "junctions need to refers to previously accepted land");
+                    require(index - l < i, "JUNCTIONS_OVERFLOW");
                     data = list[index - l];
                 } else {
                     data = _quadsInEstate[estateId][j];
                 }
                 (uint16 jx, uint16 jy, uint8 jsize) = _decode(data);
-                require(_adjacent(x, y, size, jx, jy, jsize), "need junctions to be adjacent");
+                require(_adjacent(x, y, size, jx, jy, jsize), "JUNCTIONS_INVALID");
             }
             lastX = x;
             lastY = y;

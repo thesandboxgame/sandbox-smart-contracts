@@ -51,7 +51,7 @@ async function expectRevert(promise, expectedMessage) {
     } catch (error) {
         const isExpectedMessagePresent = !expectedMessage || error.message.search(expectedMessage) >= 0;
         if (!isExpectedMessagePresent) {
-            throw new Error(`Revert message : "${expectedMessage}" not present`);
+            throw new Error(`Revert message : "${expectedMessage}" not present, instead got : "${error.message}"`);
         }
         return true;
     }
