@@ -1,0 +1,224 @@
+pragma solidity 0.6.4;
+pragma experimental ABIEncoderV2;
+
+import "../../contracts_common/src/BaseWithStorage/Admin.sol";
+import "../../contracts_common/src/Libraries/SigUtil.sol";
+import "../../contracts_common/src/Libraries/PriceUtil.sol";
+import "../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
+import "../../contracts_common/src/Interfaces/ERC721.sol";
+import "../../contracts_common/src/Interfaces/ERC20.sol";
+import "../../contracts_common/src/Interfaces/ERC1271.sol";
+import "../../contracts_common/src/Interfaces/ERC1271Constants.sol";
+import "../../contracts_common/src/Interfaces/ERC1654.sol";
+import "../../contracts_common/src/Interfaces/ERC1654Constants.sol";
+import "../../contracts_common/src/Libraries/SafeMathWithRequire.sol";
+
+import "./TheSandbox712.sol";
+
+contract P2PERC721Sale is
+    Admin,
+    ERC1654Constants,
+    ERC1271Constants,
+    TheSandbox712,
+    MetaTransactionReceiver {
+    using SafeMathWithRequire for uint256;
+
+    enum SignatureType { DIRECT, EIP1654, EIP1271 }
+
+    mapping (address => mapping (uint256 => uint256)) public claimed;
+
+    uint256 constant private MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+    ERC20 public _sand;
+    uint256 public _fee;
+    address public _feeCollector;
+
+    struct Auction {
+        uint256 id;
+        address tokenAddress;
+        uint256 tokenId;
+        address seller;
+        uint256 startingPrice;
+        uint256 endingPrice;
+        uint256 startedAt;
+        uint256 duration;
+    }
+
+    event OfferClaimed(
+        address indexed seller,
+        address indexed buyer,
+        uint256 indexed offerId,
+        address tokenAddress,
+        uint256 tokenId,
+        uint256 pricePaid,
+        uint256 feePaid
+    );
+
+    event OfferCancelled(address indexed seller, uint256 indexed offerId);
+
+    event FeeSetup(address feeCollector, uint256 fee10000th);
+
+    constructor(
+        address initialSandAddress,
+        address admin,
+        address feeCollector,
+        uint256 fee
+    ) public {
+        _sand = ERC20(initialSandAddress);
+        _admin = admin;
+        // _setMetaTransactionProcessor(initialMetaTx, true);
+
+        _fee = fee;
+        _feeCollector = feeCollector;
+        emit FeeSetup(feeCollector, fee);
+
+        init712();
+    }
+
+    function setFee(address feeCollector, uint256 fee) external {
+        require(msg.sender == _admin, "Sender not admin");
+        _feeCollector = feeCollector;
+        _fee = fee;
+        emit FeeSetup(feeCollector, fee);
+    }
+
+    function _verifyParameters(
+        address buyer,
+        uint256 buyAmount,
+        Auction memory auction
+    ) internal view {
+        require(buyer == msg.sender, "Buyer not sender");
+        require(
+            claimed[auction.seller][auction.id] != MAX_UINT256,
+            "Auction canceled"
+        );
+
+        require(
+            auction.startedAt <= now,
+            "Auction has not started yet"
+        );
+
+        require(
+            auction.startedAt.add(auction.duration) > now,
+            "Auction finished"
+        );
+    }
+
+    function claimSellerOffer(
+        address buyer,
+        uint256 buyAmount,
+        Auction calldata auction,
+        bytes calldata signature,
+        SignatureType signatureType,
+        bool isBasicSig
+    ) external {
+        _verifyParameters(buyer, buyAmount, auction);
+        _ensureCorrectSigner(auction, signature, signatureType, !isBasicSig);
+        _executeDeal(auction, buyer, buyAmount);
+    }
+
+    function _executeDeal(
+        Auction memory auction,
+        address buyer,
+        uint256 buyAmount
+    ) internal {
+        uint256 offer = PriceUtil.calculateCurrentPrice(
+            auction.startingPrice,
+            auction.endingPrice,
+            auction.duration,
+            now.sub(auction.startedAt)
+        );
+
+        claimed[auction.seller][auction.id] = buyAmount;
+
+        uint256 fee = 0;
+
+        if (_fee > 0) {
+            fee = PriceUtil.calculateFee(offer, _fee);
+        }
+
+        require(
+            _sand.transferFrom(buyer, auction.seller, offer.sub(fee)),
+            "Funds transfer failed"
+        );
+
+        ERC721 token = ERC721(auction.tokenAddress);
+
+        token.transferFrom(auction.seller, buyer, auction.tokenId);
+    }
+
+    function cancelSellerOffer(uint256 id) external {
+        claimed[msg.sender][id] = MAX_UINT256;
+        emit OfferCancelled(msg.sender, id);
+    }
+
+    function _ensureCorrectSigner(
+        Auction memory auction,
+        bytes memory signature,
+        SignatureType signatureType,
+        bool eip721
+    ) internal view returns (address) {
+        bytes memory dataToHash;
+
+        if (eip721) {
+            dataToHash = abi.encodePacked(
+                "\x19\x01",
+                domainSeparator(),
+                _hashAuction(auction)
+            );
+        } else {
+            dataToHash = _encodeBasicSignatureHash(auction);
+        }
+
+        if (signatureType == SignatureType.EIP1271) {
+            require(
+                ERC1271(auction.seller).isValidSignature(dataToHash, signature) == ERC1271_MAGICVALUE,
+                "Invalid 1271 sig"
+            );
+        } else if (signatureType == SignatureType.EIP1654) {
+            require(
+                ERC1654(auction.seller).isValidSignature(keccak256(dataToHash), signature) == ERC1654_MAGICVALUE,
+                "Invalid 1654 sig"
+            );
+        } else {
+            address signer = SigUtil.recover(keccak256(dataToHash), signature);
+            require(signer == auction.seller, "Invalid sig");
+        }
+    }
+
+    function _encodeBasicSignatureHash(
+        Auction memory auction
+    ) internal view returns (bytes memory) {
+        return SigUtil.prefixed(
+            keccak256(
+                abi.encodePacked(
+                    address(this),
+                    auction.id,
+                    auction.tokenAddress,
+                    auction.tokenId,
+                    auction.seller,
+                    auction.startingPrice,
+                    auction.endingPrice,
+                    auction.startedAt,
+                    auction.duration
+                )
+            )
+        );
+    }
+
+    function _hashAuction(
+        Auction memory auction
+    ) internal pure returns (bytes32) {
+        return keccak256(
+            abi.encode(
+                auction.id,
+                auction.tokenAddress,
+                auction.tokenId,
+                auction.seller,
+                auction.startingPrice,
+                auction.endingPrice,
+                auction.startedAt,
+                auction.duration
+            )
+        );
+    }
+}
