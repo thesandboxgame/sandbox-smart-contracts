@@ -83,10 +83,11 @@ contract P2PERC721Sale is
 
     function _verifyParameters(
         address buyer,
-        uint256 buyAmount,
         Auction memory auction
     ) internal view {
+        // We should allow people to buy for someone else
         require(buyer == msg.sender, "Buyer not sender");
+
         require(
             claimed[auction.seller][auction.id] != MAX_UINT256,
             "Auction canceled"
@@ -105,21 +106,19 @@ contract P2PERC721Sale is
 
     function claimSellerOffer(
         address buyer,
-        uint256 buyAmount,
         Auction calldata auction,
         bytes calldata signature,
         SignatureType signatureType,
         bool isBasicSig
     ) external {
-        _verifyParameters(buyer, buyAmount, auction);
+        _verifyParameters(buyer, auction);
         _ensureCorrectSigner(auction, signature, signatureType, !isBasicSig);
-        _executeDeal(auction, buyer, buyAmount);
+        _executeDeal(auction, buyer);
     }
 
     function _executeDeal(
         Auction memory auction,
-        address buyer,
-        uint256 buyAmount
+        address buyer
     ) internal {
         uint256 offer = PriceUtil.calculateCurrentPrice(
             auction.startingPrice,
@@ -128,7 +127,7 @@ contract P2PERC721Sale is
             now.sub(auction.startedAt)
         );
 
-        claimed[auction.seller][auction.id] = buyAmount;
+        claimed[auction.seller][auction.id] = offer;
 
         uint256 fee = 0;
 

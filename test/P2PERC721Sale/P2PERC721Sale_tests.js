@@ -171,6 +171,110 @@ function runP2PERC721SaleTests(title) {
             );
         });
 
+        t.test('Should NOT claim an offer that has not started yet', async () => {
+            const auction = {
+                id: 0,
+                tokenAddress: token.address,
+                tokenId: 0,
+                seller: wallet.address,
+                startingPrice: utils.parseEther('10').toString(),
+                endingPrice: utils.parseEther('10').toString(),
+                startedAt: Math.floor(Date.now() / 1000) + (60 * 60),
+                duration: 60 * 60 * 24,
+            };
+
+            const signature = await getBasicSignature(auction, wallet);
+
+            await expectRevert(
+                tx(
+                    instance,
+                    'claimSellerOffer', {
+                        from: others[0],
+                        gas,
+                    },
+                    others[0],
+                    auction,
+                    signature,
+                    0,
+                    true,
+                ),
+                'Auction has not started yet'
+            );
+        });
+
+        t.test('Should NOT claim a finished offer', async () => {
+            const auction = {
+                id: 0,
+                tokenAddress: token.address,
+                tokenId: 0,
+                seller: wallet.address,
+                startingPrice: utils.parseEther('10').toString(),
+                endingPrice: utils.parseEther('10').toString(),
+                startedAt: Math.floor(Date.now() / 1000) - (60 * 60 * 24),
+                duration: 60 * 60 * 23,
+            };
+
+            const signature = await getBasicSignature(auction, wallet);
+
+            await expectRevert(
+                tx(
+                    instance,
+                    'claimSellerOffer', {
+                        from: others[0],
+                        gas,
+                    },
+                    others[0],
+                    auction,
+                    signature,
+                    0,
+                    true,
+                ),
+                'Auction finished'
+            );
+        });
+
+        t.test('Should NOT claim a canceled offer', async () => {
+            const auction = {
+                id: 0,
+                tokenAddress: token.address,
+                tokenId: 0,
+                seller: wallet.address,
+                startingPrice: utils.parseEther('10').toString(),
+                endingPrice: utils.parseEther('10').toString(),
+                startedAt: Math.floor(Date.now() / 1000),
+                duration: 60 * 60 * 24,
+            };
+
+            const receipt = await tx(
+                instance,
+                'cancelSellerOffer', {
+                    from: wallet.address,
+                    gas,
+                },
+                auction.id,
+            );
+
+            console.log(receipt);
+
+            const signature = await getBasicSignature(auction, wallet);
+
+            await expectRevert(
+                tx(
+                    instance,
+                    'claimSellerOffer', {
+                        from: others[0],
+                        gas,
+                    },
+                    others[0],
+                    auction,
+                    signature,
+                    0,
+                    true,
+                ),
+                'Auction canceled'
+            );
+        });
+
         t.test('Should claim seller offer', async () => {
             const auction = {
                 id: 0,
@@ -192,11 +296,10 @@ function runP2PERC721SaleTests(title) {
                     gas,
                 },
                 others[0],
-                utils.parseEther('10').toString(),
                 auction,
                 signature,
                 0,
-                true,
+                false,
             );
         });
     });
