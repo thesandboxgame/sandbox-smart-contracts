@@ -174,6 +174,7 @@ module.exports = {
             lands: expose ? saltedLands : lands,
             merkleRootHash,
             saltedLands,
+            tree,
             // landsWithProof,
         };
     },
