@@ -9,14 +9,14 @@
     { "coordinateX": 158, "coordinateY": 13 },
     { "coordinateX": 158, "coordinateY": 14 },
     { "coordinateX": 157, "coordinateY": 14 },
-    { "coordinateX": 157, "coordinateY": 13, "ownerAddress": "0x32322e3e3e32c3a2e82e96630af052bb49943adb" },
+    { "coordinateX": 157, "coordinateY": 13, "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca" },
     { "coordinateX": 166, "coordinateY": 14 },
     { "coordinateX": 165, "coordinateY": 14 },
     { "coordinateX": 165, "coordinateY": 13 },
     { "coordinateX": 165, "coordinateY": 12 },
     { "coordinateX": 166, "coordinateY": 12 },
     { "coordinateX": 167, "coordinateY": 12 },
-    { "coordinateX": 167, "coordinateY": 13, "ownerAddress": "0x02fc26fc3c0feb16b67d6e164332fdce1aff09f0" },
+    { "coordinateX": 167, "coordinateY": 13, "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca" },
     { "coordinateX": 167, "coordinateY": 14 },
     { "coordinateX": 166, "coordinateY": 13 },
     { "coordinateX": 172, "coordinateY": 14 },
@@ -24,7 +24,7 @@
     { "coordinateX": 171, "coordinateY": 13 },
     { "coordinateX": 171, "coordinateY": 12 },
     { "coordinateX": 172, "coordinateY": 12 },
-    { "coordinateX": 173, "coordinateY": 12, "ownerAddress": "0xeb35b163c22acc2bc17a3266386cf443c168b9e7" },
+    { "coordinateX": 173, "coordinateY": 12, "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca" },
     { "coordinateX": 173, "coordinateY": 13 },
     { "coordinateX": 173, "coordinateY": 14 },
     { "coordinateX": 172, "coordinateY": 13 },
@@ -46,7 +46,7 @@
     { "coordinateX": 182, "coordinateY": -4 },
     { "coordinateX": 181, "coordinateY": -4 },
     { "coordinateX": 181, "coordinateY": -5, "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca" },
-    { "coordinateX": 177, "coordinateY": -13, "ownerAddress": "0xe3faa8ca364f23479122f19b01c16e4046213f68" },
+    { "coordinateX": 177, "coordinateY": -13, "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca" },
     { "coordinateX": 177, "coordinateY": -14 },
     { "coordinateX": 177, "coordinateY": -15 },
     { "coordinateX": 178, "coordinateY": -15 },
@@ -59,7 +59,7 @@
     { "coordinateX": 171, "coordinateY": -14 },
     { "coordinateX": 171, "coordinateY": -15 },
     { "coordinateX": 172, "coordinateY": -15 },
-    { "coordinateX": 173, "coordinateY": -14, "ownerAddress": "0x5bc3d5a39a50be2348b9c529f81ae79f00945897" },
+    { "coordinateX": 173, "coordinateY": -14, "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca" },
     { "coordinateX": 173, "coordinateY": -13 },
     { "coordinateX": 172, "coordinateY": -13 },
     { "coordinateX": 172, "coordinateY": -14 },
@@ -71,7 +71,7 @@
     { "coordinateX": 160, "coordinateY": -18 },
     { "coordinateX": 161, "coordinateY": -18 },
     { "coordinateX": 161, "coordinateY": -16 },
-    { "coordinateX": 160, "coordinateY": -17, "ownerAddress": "0x471c8f11ab702a13d20222eac546d90ca0abf665" },
+    { "coordinateX": 160, "coordinateY": -17, "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca" },
     { "coordinateX": 161, "coordinateY": -17 },
     { "coordinateX": 154, "coordinateY": -16 },
     { "coordinateX": 153, "coordinateY": -16 },
@@ -125,7 +125,7 @@
     { "coordinateX": 155, "coordinateY": 6 },
     { "coordinateX": 155, "coordinateY": 7 },
     { "coordinateX": 155, "coordinateY": 8 },
-    { "coordinateX": 154, "coordinateY": 8, "ownerAddress": "0x19b76e8bd63b5870fd69af8bdddb1cfc670289ee" },
+    { "coordinateX": 154, "coordinateY": 8, "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca" },
     { "coordinateX": 154, "coordinateY": 7 },
     { "coordinateX": 153, "coordinateY": 2 },
     { "coordinateX": 153, "coordinateY": 1 },
@@ -3297,7 +3297,7 @@
         { "coordinateX": 178, "coordinateY": 11 },
         { "coordinateX": 179, "coordinateY": 11 }
       ],
-      "ownerAddress": "0x32322e3e3e32c3a2e82e96630af052bb49943adb"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 60,
@@ -3881,7 +3881,7 @@
         { "coordinateX": 82, "coordinateY": -85 },
         { "coordinateX": 83, "coordinateY": -85 }
       ],
-      "ownerAddress": "0x5bc3d5a39a50be2348b9c529f81ae79f00945897"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 132,
@@ -4033,7 +4033,7 @@
         { "coordinateX": 142, "coordinateY": -1 },
         { "coordinateX": 143, "coordinateY": -1 }
       ],
-      "ownerAddress": "0x32322e3e3e32c3a2e82e96630af052bb49943adb"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 168,
@@ -4185,7 +4185,7 @@
         { "coordinateX": 178, "coordinateY": -37 },
         { "coordinateX": 179, "coordinateY": -37 }
       ],
-      "ownerAddress": "0x02fc26fc3c0feb16b67d6e164332fdce1aff09f0"
+      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
     },
     {
       "coordinateX": 108,
@@ -4337,7 +4337,7 @@
         { "coordinateX": 118, "coordinateY": -49 },
         { "coordinateX": 119, "coordinateY": -49 }
       ],
-      "ownerAddress": "0xeb35b163c22acc2bc17a3266386cf443c168b9e7"
+      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
     },
     {
       "coordinateX": 132,
@@ -4489,7 +4489,7 @@
         { "coordinateX": 142, "coordinateY": -49 },
         { "coordinateX": 143, "coordinateY": -49 }
       ],
-      "ownerAddress": "0xe3faa8ca364f23479122f19b01c16e4046213f68"
+      "ownerAddress": "0x3b27b0e4f7678055f7f28462ea15a8c06005467d"
     },
     {
       "coordinateX": 48,
@@ -4641,7 +4641,7 @@
         { "coordinateX": 58, "coordinateY": -61 },
         { "coordinateX": 59, "coordinateY": -61 }
       ],
-      "ownerAddress": "0x5bc3d5a39a50be2348b9c529f81ae79f00945897"
+      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
     },
     {
       "coordinateX": 72,
@@ -4793,7 +4793,7 @@
         { "coordinateX": 82, "coordinateY": -61 },
         { "coordinateX": 83, "coordinateY": -61 }
       ],
-      "ownerAddress": "0x471c8f11ab702a13d20222eac546d90ca0abf665"
+      "ownerAddress": "0x6986aec5bc5fa1918516db522b6689a6897842a3"
     },
     {
       "coordinateX": 156,
@@ -4945,7 +4945,7 @@
         { "coordinateX": 166, "coordinateY": -61 },
         { "coordinateX": 167, "coordinateY": -61 }
       ],
-      "ownerAddress": "0x19b76e8bd63b5870fd69af8bdddb1cfc670289ee"
+      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
     },
     {
       "coordinateX": 114,
@@ -4989,7 +4989,7 @@
         { "coordinateX": 118, "coordinateY": -7 },
         { "coordinateX": 119, "coordinateY": -7 }
       ],
-      "ownerAddress": "0x32322e3e3e32c3a2e82e96630af052bb49943adb"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 120,
@@ -5033,7 +5033,7 @@
         { "coordinateX": 124, "coordinateY": -13 },
         { "coordinateX": 125, "coordinateY": -13 }
       ],
-      "ownerAddress": "0x02fc26fc3c0feb16b67d6e164332fdce1aff09f0"
+      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
     },
     {
       "coordinateX": 138,
@@ -5077,7 +5077,7 @@
         { "coordinateX": 142, "coordinateY": -19 },
         { "coordinateX": 143, "coordinateY": -19 }
       ],
-      "ownerAddress": "0xeb35b163c22acc2bc17a3266386cf443c168b9e7"
+      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
     },
     {
       "coordinateX": 150,
@@ -5121,7 +5121,7 @@
         { "coordinateX": 154, "coordinateY": -25 },
         { "coordinateX": 155, "coordinateY": -25 }
       ],
-      "ownerAddress": "0xe3faa8ca364f23479122f19b01c16e4046213f68"
+      "ownerAddress": "0x256c1f61c8bdd2866869dc09bc3e2f0cd46d0504"
     },
     {
       "coordinateX": 162,
@@ -5165,7 +5165,7 @@
         { "coordinateX": 166, "coordinateY": -13 },
         { "coordinateX": 167, "coordinateY": -13 }
       ],
-      "ownerAddress": "0x5bc3d5a39a50be2348b9c529f81ae79f00945897"
+      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
     },
     {
       "coordinateX": 132,
@@ -5209,7 +5209,7 @@
         { "coordinateX": 136, "coordinateY": -37 },
         { "coordinateX": 137, "coordinateY": -37 }
       ],
-      "ownerAddress": "0x471c8f11ab702a13d20222eac546d90ca0abf665"
+      "ownerAddress": "0x7e28e6f93b0447f234624254a441c2f81218c842"
     },
     {
       "coordinateX": 150,
@@ -5253,7 +5253,7 @@
         { "coordinateX": 154, "coordinateY": -43 },
         { "coordinateX": 155, "coordinateY": -43 }
       ],
-      "ownerAddress": "0x19b76e8bd63b5870fd69af8bdddb1cfc670289ee"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 162,
@@ -5341,7 +5341,7 @@
         { "coordinateX": 94, "coordinateY": -55 },
         { "coordinateX": 95, "coordinateY": -55 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 66,
@@ -5402,7 +5402,7 @@
         { "coordinateX": 148, "coordinateY": -4 },
         { "coordinateX": 149, "coordinateY": -4 }
       ],
-      "ownerAddress": "0x32322e3e3e32c3a2e82e96630af052bb49943adb"
+      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
     },
     {
       "coordinateX": 153,
@@ -5419,7 +5419,7 @@
         { "coordinateX": 154, "coordinateY": -13 },
         { "coordinateX": 155, "coordinateY": -13 }
       ],
-      "ownerAddress": "0x02fc26fc3c0feb16b67d6e164332fdce1aff09f0"
+      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
     },
     {
       "coordinateX": 150,
@@ -5436,7 +5436,7 @@
         { "coordinateX": 151, "coordinateY": -19 },
         { "coordinateX": 152, "coordinateY": -19 }
       ],
-      "ownerAddress": "0xeb35b163c22acc2bc17a3266386cf443c168b9e7"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 135,
@@ -5453,7 +5453,7 @@
         { "coordinateX": 136, "coordinateY": -28 },
         { "coordinateX": 137, "coordinateY": -28 }
       ],
-      "ownerAddress": "0xe3faa8ca364f23479122f19b01c16e4046213f68"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 117,
@@ -5470,7 +5470,7 @@
         { "coordinateX": 118, "coordinateY": -22 },
         { "coordinateX": 119, "coordinateY": -22 }
       ],
-      "ownerAddress": "0x5bc3d5a39a50be2348b9c529f81ae79f00945897"
+      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
     },
     {
       "coordinateX": 117,
@@ -5487,7 +5487,7 @@
         { "coordinateX": 118, "coordinateY": -31 },
         { "coordinateX": 119, "coordinateY": -31 }
       ],
-      "ownerAddress": "0x471c8f11ab702a13d20222eac546d90ca0abf665"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 120,
@@ -5504,7 +5504,7 @@
         { "coordinateX": 121, "coordinateY": -37 },
         { "coordinateX": 122, "coordinateY": -37 }
       ],
-      "ownerAddress": "0x19b76e8bd63b5870fd69af8bdddb1cfc670289ee"
+      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
     },
     {
       "coordinateX": 150,
@@ -5521,7 +5521,7 @@
         { "coordinateX": 151, "coordinateY": -34 },
         { "coordinateX": 152, "coordinateY": -34 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x6bdaf8bb4906de6e26b8ec36776145fd219f6e09"
     },
     {
       "coordinateX": 159,
@@ -5555,7 +5555,7 @@
         { "coordinateX": 142, "coordinateY": -43 },
         { "coordinateX": 143, "coordinateY": -43 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x60206c1f2b51ac470cb0f71323474f7f9e4772e1"
     },
     {
       "coordinateX": 150,
@@ -5572,7 +5572,7 @@
         { "coordinateX": 151, "coordinateY": -55 },
         { "coordinateX": 152, "coordinateY": -55 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0xef9fe404e2058e1edd2b77b5a7c53e2a9d9c28ee"
     },
     {
       "coordinateX": 180,
@@ -8660,7 +8660,7 @@
         { "coordinateX": 127, "coordinateY": -58 },
         { "coordinateX": 128, "coordinateY": -58 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 129,
@@ -9288,7 +9288,7 @@
         { "coordinateX": 79, "coordinateY": -52 },
         { "coordinateX": 80, "coordinateY": -52 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x5425a2d66764576a9c6dcd6d64371d314c6a8a30"
     },
     {
       "coordinateX": 72,
@@ -9770,7 +9770,7 @@
         { "coordinateX": 52, "coordinateY": -55 },
         { "coordinateX": 53, "coordinateY": -55 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 48,
@@ -9916,7 +9916,7 @@
         { "coordinateX": 25, "coordinateY": -61 },
         { "coordinateX": 26, "coordinateY": -61 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0xef47f078c7186bd6e5f56a45c7a12e7632450b54"
     },
     {
       "coordinateX": 33,
@@ -9949,7 +9949,7 @@
         { "coordinateX": 37, "coordinateY": -175 },
         { "coordinateX": 38, "coordinateY": -175 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0xe0184667f02f5d9210123be7f279ed7c67c3c54a"
     },
     {
       "coordinateX": 36,
@@ -10238,7 +10238,7 @@
         { "coordinateX": 52, "coordinateY": -163 },
         { "coordinateX": 53, "coordinateY": -163 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 48,
@@ -10463,7 +10463,7 @@
         { "coordinateX": 64, "coordinateY": -148 },
         { "coordinateX": 65, "coordinateY": -148 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 60,
@@ -10770,7 +10770,7 @@
         { "coordinateX": 46, "coordinateY": -169 },
         { "coordinateX": 47, "coordinateY": -169 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 36,
@@ -11221,7 +11221,7 @@
         { "coordinateX": 43, "coordinateY": -145 },
         { "coordinateX": 44, "coordinateY": -145 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 45,
@@ -11372,7 +11372,7 @@
         { "coordinateX": 58, "coordinateY": -145 },
         { "coordinateX": 59, "coordinateY": -145 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0xfef2c33e1ca5c81e630c4c766f5860e3222848a6"
     },
     {
       "coordinateX": 66,
@@ -11640,7 +11640,7 @@
         { "coordinateX": 88, "coordinateY": -145 },
         { "coordinateX": 89, "coordinateY": -145 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x788bfe4a8685b1294a946d1f9c41112e41befba6"
     },
     {
       "coordinateX": 84,
@@ -13169,7 +13169,7 @@
         { "coordinateX": 34, "coordinateY": -139 },
         { "coordinateX": 35, "coordinateY": -139 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x24539679a156c542abdb11b26b1cd8824d77c251"
     },
     {
       "coordinateX": 36,
@@ -13502,7 +13502,7 @@
         { "coordinateX": 37, "coordinateY": -115 },
         { "coordinateX": 38, "coordinateY": -115 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x7205a1b9c5cf6494ba2ceb5adcca831c05536912"
     },
     {
       "coordinateX": 33,
@@ -14279,7 +14279,7 @@
         { "coordinateX": 136, "coordinateY": -103 },
         { "coordinateX": 137, "coordinateY": -103 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 126,
@@ -14367,7 +14367,7 @@
         { "coordinateX": 112, "coordinateY": -103 },
         { "coordinateX": 113, "coordinateY": -103 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x80316f8d7cb35919c00de0251b80c825a8b8c080"
     },
     {
       "coordinateX": 153,
@@ -14774,7 +14774,7 @@
         { "coordinateX": 142, "coordinateY": -85 },
         { "coordinateX": 143, "coordinateY": -85 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x0eabffd8ce94ab2387fc44ba32642af0c58af433"
     },
     {
       "coordinateX": 138,
@@ -15118,7 +15118,7 @@
         { "coordinateX": 142, "coordinateY": -67 },
         { "coordinateX": 143, "coordinateY": -67 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 144,
@@ -15477,7 +15477,7 @@
         { "coordinateX": 103, "coordinateY": -124 },
         { "coordinateX": 104, "coordinateY": -124 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0xea5abc1a1689984ebfdc41130886bdaeb5c24078"
     },
     {
       "coordinateX": 99,
@@ -15622,7 +15622,7 @@
         { "coordinateX": 85, "coordinateY": -130 },
         { "coordinateX": 86, "coordinateY": -130 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x00e9119ab8ded94a3d677bb7ea518f1dff69b913"
     },
     {
       "coordinateX": 102,
@@ -15752,7 +15752,7 @@
         { "coordinateX": 94, "coordinateY": -121 },
         { "coordinateX": 95, "coordinateY": -121 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 72,
@@ -15796,7 +15796,7 @@
         { "coordinateX": 76, "coordinateY": -121 },
         { "coordinateX": 77, "coordinateY": -121 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x2cb86d919332d0369c66a2d5982419266f5e490f"
     },
     {
       "coordinateX": 54,
@@ -16426,7 +16426,7 @@
         { "coordinateX": 127, "coordinateY": -70 },
         { "coordinateX": 128, "coordinateY": -70 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 132,
@@ -16975,7 +16975,7 @@
         { "coordinateX": 118, "coordinateY": -91 },
         { "coordinateX": 119, "coordinateY": -91 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 117,
@@ -17393,7 +17393,7 @@
         { "coordinateX": 109, "coordinateY": -118 },
         { "coordinateX": 110, "coordinateY": -118 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 111,
@@ -17832,7 +17832,7 @@
         { "coordinateX": 106, "coordinateY": -88 },
         { "coordinateX": 107, "coordinateY": -88 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x3fa65a1ea007019956906f7a55a11d19db872817"
     },
     {
       "coordinateX": 105,
@@ -18341,7 +18341,7 @@
         { "coordinateX": 100, "coordinateY": -70 },
         { "coordinateX": 101, "coordinateY": -70 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 102,
@@ -18839,7 +18839,7 @@
         { "coordinateX": 91, "coordinateY": -106 },
         { "coordinateX": 92, "coordinateY": -106 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 93,
@@ -19159,7 +19159,7 @@
         { "coordinateX": 46, "coordinateY": -79 },
         { "coordinateX": 47, "coordinateY": -79 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 42,
@@ -19291,7 +19291,7 @@
         { "coordinateX": 34, "coordinateY": -103 },
         { "coordinateX": 35, "coordinateY": -103 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 24,
@@ -19352,7 +19352,7 @@
         { "coordinateX": 88, "coordinateY": -64 },
         { "coordinateX": 89, "coordinateY": -64 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0xa53fe221bd861f75907d8fd496db1c70779721aa"
     },
     {
       "coordinateX": 87,
@@ -19369,7 +19369,7 @@
         { "coordinateX": 88, "coordinateY": -76 },
         { "coordinateX": 89, "coordinateY": -76 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 90,
@@ -21597,7 +21597,7 @@
         { "coordinateX": 49, "coordinateY": -109 },
         { "coordinateX": 50, "coordinateY": -109 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 33,
@@ -21665,7 +21665,7 @@
         { "coordinateX": 31, "coordinateY": -76 },
         { "coordinateX": 32, "coordinateY": -76 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x543a3db2fe608ceff8131c8171dad8aea8b466c1"
     },
     {
       "coordinateX": 45,
