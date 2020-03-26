@@ -32,8 +32,8 @@ function runP2PERC721SaleTests(title) {
         let sand;
 
         const wallet = Wallet.createRandom();
-        const httpProvider = new ethers.providers.JsonRpcProvider();
-        wallet.connect(httpProvider);
+        const provider = new ethers.providers.Web3Provider(rocketh.ethereum);
+        wallet.connect(provider);
 
         function getDomainData() {
             return {
