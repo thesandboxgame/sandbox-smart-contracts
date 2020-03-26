@@ -5,6 +5,7 @@ const ethers = require('ethers');
 const {Wallet, utils} = require('ethers');
 const {getDeployedContract} = rocketh;
 const {solidityKeccak256, arrayify} = ethers.utils;
+const ethSigUtil = require('eth-sig-util');
 
 const {
     call,
@@ -28,8 +29,11 @@ function runP2PERC721SaleTests(title) {
         const sandContract = getDeployedContract('Sand');
         let token;
         let instance;
+        let sand;
 
         const wallet = Wallet.createRandom();
+        const httpProvider = new ethers.providers.JsonRpcProvider();
+        wallet.connect(httpProvider);
 
         function getDomainData() {
             return {
@@ -39,8 +43,26 @@ function runP2PERC721SaleTests(title) {
             };
         }
 
-        function getBasicSignature(auction, wallet) {
+        const domainType = [
+            {name: 'name', type: 'string'},
+            {name: 'version', type: 'string'},
+            {name: 'verifyingContract', type: 'address'}
+        ];
+
+        const auctionType = [
+            {name: 'id', type: 'uint256'},
+            {name: 'tokenAddress', type: 'address'},
+            {name: 'tokenId', type: 'uint256'},
+            {name: 'seller', type: 'address'},
+            {name: 'startingPrice', type: 'uint256'},
+            {name: 'endingPrice', type: 'uint256'},
+            {name: 'startedAt', type: 'uint256'},
+            {name: 'duration', type: 'uint256'},
+        ];
+
+        function getBasicSignature(contractAddress, auction) {
             const hash = solidityKeccak256([
+                'address',
                 'uint256',
                 'address',
                 'uint256',
@@ -50,6 +72,7 @@ function runP2PERC721SaleTests(title) {
                 'uint256',
                 'uint256',
             ], [
+                contractAddress,
                 auction.id,
                 auction.tokenAddress,
                 auction.tokenId,
@@ -63,8 +86,24 @@ function runP2PERC721SaleTests(title) {
             return wallet.signMessage(arrayify(hash));
         }
 
+        function getSignature(auction) {
+            return ethSigUtil.signTypedData(
+                wallet.privateKey, {
+                    data: {
+                        types: {
+                            EIP712Domain: domainType,
+                            Auction: auctionType,
+                        },
+                        domain: getDomainData(),
+                        primaryType: 'Auction',
+                        message: {...auction},
+                    },
+                },
+            );
+        }
+
         t.beforeEach(async () => {
-            const sand = new ethers.Contract(sandContract.address, sandContract.abi, ethersProvider);
+            sand = new ethers.Contract(sandContract.address, sandContract.abi, ethersProvider);
 
             instance = await deployContract(
                 deployer,
@@ -75,22 +114,13 @@ function runP2PERC721SaleTests(title) {
                 initialFee,
             );
 
-            token = await deployContract(
-                deployer,
-                'TestERC721',
-                sandContract.address,
-                deployer,
-            );
+            token = await deployContract(deployer, 'TestERC721', sandContract.address, deployer);
 
-            await tx(
-                token,
-                'mint', {
-                    from: deployer,
-                    gas,
-                },
-                wallet.address,
-                0,
-            );
+            await tx(token, 'mint', {from: deployer, gas}, wallet.address, 0);
+
+            const tokenWithSigner = token.connect(wallet);
+
+            await tokenWithSigner.approve(instance.address, 0);
 
             const amount = utils.parseEther('100');
 
@@ -104,52 +134,26 @@ function runP2PERC721SaleTests(title) {
                 others[0],
                 amount.toString(),
             );
+
+            await tx(sand, 'approve', {from: others[0], gas}, instance.address, amount.toString());
         });
 
         t.test('Should get Sand contract address', async () => {
-            const sandAddress = await call(
-                instance,
-                '_sand', {
-                    from: deployer,
-                    gas,
-                },
-            );
-
+            const sandAddress = await call(instance, '_sand', {from: deployer, gas});
             assert.equal(sandAddress, sandContract.address, 'Sand address is wrong');
         });
 
         t.test('Should get the initial fee', async () => {
-            const fee = await call(
-                instance,
-                '_fee', {
-                    from: deployer,
-                    gas,
-                },
-            );
-
+            const fee = await call(instance, '_fee', {from: deployer, gas});
             assert.equal(fee, initialFee, 'Fee is wrong');
         });
 
         t.test('Should update the fee', async () => {
             const newFee = 200;
 
-            await tx(
-                instance,
-                'setFee', {
-                    from: deployer,
-                    gas,
-                },
-                deployer,
-                newFee,
-            );
+            await tx(instance, 'setFee', {from: deployer, gas}, deployer, newFee);
 
-            const fee = await call(
-                instance,
-                '_fee', {
-                    from: deployer,
-                    gas,
-                },
-            );
+            const fee = await call(instance, '_fee', {from: deployer, gas});
 
             assert.equal(fee, newFee, 'Fee is wrong');
         });
@@ -183,7 +187,7 @@ function runP2PERC721SaleTests(title) {
                 duration: 60 * 60 * 24,
             };
 
-            const signature = await getBasicSignature(auction, wallet);
+            const signature = await getBasicSignature(instance.address, auction);
 
             await expectRevert(
                 tx(
@@ -214,7 +218,7 @@ function runP2PERC721SaleTests(title) {
                 duration: 60 * 60 * 23,
             };
 
-            const signature = await getBasicSignature(auction, wallet);
+            const signature = await getBasicSignature(instance.address, auction);
 
             await expectRevert(
                 tx(
@@ -245,18 +249,16 @@ function runP2PERC721SaleTests(title) {
                 duration: 60 * 60 * 24,
             };
 
-            const receipt = await tx(
-                instance,
-                'cancelSellerOffer', {
-                    from: wallet.address,
-                    gas,
-                },
-                auction.id,
-            );
+            // Change the sender here to the signing wallet defined on top
+            const receipt = await tx(instance, 'cancelSellerOffer', {from: others[0], gas}, auction.id);
 
-            console.log(receipt);
+            const event = receipt.events[0];
 
-            const signature = await getBasicSignature(auction, wallet);
+            assert.equal(event.event, 'OfferCancelled', 'Event is wrong');
+            assert.equal(event.args[1].toString(), auction.id, 'Auction id is wrong');
+
+            /*
+            const signature = await getBasicSignature(instance.address, auction);
 
             await expectRevert(
                 tx(
@@ -273,34 +275,157 @@ function runP2PERC721SaleTests(title) {
                 ),
                 'Auction canceled'
             );
+            */
         });
 
-        t.test('Should claim seller offer', async () => {
-            const auction = {
-                id: 0,
-                tokenAddress: token.address,
-                tokenId: 0,
-                seller: wallet.address,
-                startingPrice: utils.parseEther('10').toString(),
-                endingPrice: utils.parseEther('10').toString(),
-                startedAt: Math.floor(Date.now() / 1000),
-                duration: 60 * 60 * 24,
-            };
+        t.test('-> Direct signature without EIP712', async (t) => {
+            t.test('Shoud NOT claim seller offer with a fake auction', async () => {
+                const auction = {
+                    id: 0,
+                    tokenAddress: token.address,
+                    tokenId: 0,
+                    seller: wallet.address,
+                    startingPrice: utils.parseEther('10').toString(),
+                    endingPrice: utils.parseEther('10').toString(),
+                    startedAt: Math.floor(Date.now() / 1000),
+                    duration: 60 * 60 * 24,
+                };
 
-            const signature = await getBasicSignature(auction, wallet);
+                const signature = await getBasicSignature(instance.address, auction);
 
-            await tx(
-                instance,
-                'claimSellerOffer', {
-                    from: others[0],
-                    gas,
-                },
-                others[0],
-                auction,
-                signature,
-                0,
-                false,
-            );
+                const fakeAuction = {
+                    ...auction,
+                };
+
+                fakeAuction.tokenId = 1;
+
+                await expectRevert(
+                    tx(
+                        instance,
+                        'claimSellerOffer', {
+                            from: others[0],
+                            gas,
+                        },
+                        others[0],
+                        fakeAuction,
+                        signature,
+                        0,
+                        false,
+                    ),
+                    'Invalid sig',
+                );
+            });
+
+            t.test('Should claim seller offer', async () => {
+                const auction = {
+                    id: 0,
+                    tokenAddress: token.address,
+                    tokenId: 0,
+                    seller: wallet.address,
+                    startingPrice: utils.parseEther('10').toString(),
+                    endingPrice: utils.parseEther('10').toString(),
+                    startedAt: Math.floor(Date.now() / 1000),
+                    duration: 60 * 60 * 24,
+                };
+
+                const signature = await getBasicSignature(instance.address, auction);
+
+                await tx(
+                    instance,
+                    'claimSellerOffer', {
+                        from: others[0],
+                        gas,
+                    },
+                    others[0],
+                    auction,
+                    signature,
+                    0,
+                    false,
+                );
+
+                const owner = await call(token, 'ownerOf', {from: others[0], gas}, auction.tokenId);
+
+                assert.equal(owner, others[0], 'Owner is wrong');
+
+                const balance = await call(sand, 'balanceOf', {from: others[0], gas}, wallet.address);
+
+                console.log(balance.toString());
+            });
+        });
+
+        t.test('-> Direct signature with EIP712', async (t) => {
+            t.test('Shoud NOT claim seller offer with a fake auction', async () => {
+                const auction = {
+                    id: 0,
+                    tokenAddress: token.address,
+                    tokenId: 0,
+                    seller: wallet.address,
+                    startingPrice: utils.parseEther('10').toString(),
+                    endingPrice: utils.parseEther('10').toString(),
+                    startedAt: Math.floor(Date.now() / 1000),
+                    duration: 60 * 60 * 24,
+                };
+
+                const signature = await getBasicSignature(instance.address, auction);
+
+                const fakeAuction = {
+                    ...auction,
+                };
+
+                fakeAuction.tokenId = 1;
+
+                await expectRevert(
+                    tx(
+                        instance,
+                        'claimSellerOffer', {
+                            from: others[0],
+                            gas,
+                        },
+                        others[0],
+                        fakeAuction,
+                        signature,
+                        0,
+                        true,
+                    ),
+                    'Invalid sig',
+                );
+            });
+
+            t.test('Should claim seller offer', async () => {
+                const auction = {
+                    id: 0,
+                    tokenAddress: token.address,
+                    tokenId: 0,
+                    seller: wallet.address,
+                    startingPrice: utils.parseEther('10').toString(),
+                    endingPrice: utils.parseEther('10').toString(),
+                    startedAt: Math.floor(Date.now() / 1000),
+                    duration: 60 * 60 * 24,
+                };
+
+                const signature = await getBasicSignature(instance.address, auction);
+
+                await tx(
+                    instance,
+                    'claimSellerOffer', {
+                        from: others[0],
+                        gas,
+                    },
+                    others[0],
+                    auction,
+                    signature,
+                    0,
+                    false,
+                );
+
+                const owner = await call(token, 'ownerOf', {from: others[0], gas}, auction.tokenId);
+
+                assert.equal(owner, others[0], 'Owner is wrong');
+
+                const balance = await call(sand, 'balanceOf', {from: others[0], gas}, wallet.address);
+
+                console.log(balance.toString());
+            });
         });
     });
 }

@@ -109,10 +109,10 @@ contract P2PERC721Sale is
         Auction calldata auction,
         bytes calldata signature,
         SignatureType signatureType,
-        bool isBasicSig
+        bool eip721
     ) external {
         _verifyParameters(buyer, auction);
-        _ensureCorrectSigner(auction, signature, signatureType, !isBasicSig);
+        _ensureCorrectSigner(auction, signature, signatureType, eip721);
         _executeDeal(auction, buyer);
     }
 
