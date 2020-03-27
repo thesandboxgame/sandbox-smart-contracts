@@ -13,7 +13,7 @@ import "../../contracts_common/src/Interfaces/ERC1654.sol";
 import "../../contracts_common/src/Interfaces/ERC1654Constants.sol";
 import "../../contracts_common/src/Libraries/SafeMathWithRequire.sol";
 
-import "./TheSandbox712.sol";
+import "../TheSandbox712.sol";
 
 contract P2PERC721Sale is
     Admin,
@@ -109,10 +109,10 @@ contract P2PERC721Sale is
         Auction calldata auction,
         bytes calldata signature,
         SignatureType signatureType,
-        bool eip721
+        bool eip712
     ) external {
         _verifyParameters(buyer, auction);
-        _ensureCorrectSigner(auction, signature, signatureType, eip721);
+        _ensureCorrectSigner(auction, signature, signatureType, eip712);
         _executeDeal(auction, buyer);
     }
 
@@ -154,11 +154,11 @@ contract P2PERC721Sale is
         Auction memory auction,
         bytes memory signature,
         SignatureType signatureType,
-        bool eip721
+        bool eip712
     ) internal view returns (address) {
         bytes memory dataToHash;
 
-        if (eip721) {
+        if (eip712) {
             dataToHash = abi.encodePacked(
                 "\x19\x01",
                 domainSeparator(),

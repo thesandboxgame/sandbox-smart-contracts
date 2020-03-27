@@ -2,7 +2,7 @@ const tap = require('tap');
 const assert = require('assert');
 const rocketh = require('rocketh');
 const ethers = require('ethers');
-const {Wallet, utils} = require('ethers');
+const {Wallet, utils, BigNumber} = ethers;
 const {getDeployedContract} = rocketh;
 const {solidityKeccak256, arrayify} = ethers.utils;
 const ethSigUtil = require('eth-sig-util');
@@ -26,14 +26,14 @@ const initialFee = 100;
 
 function runP2PERC721SaleTests(title) {
     tap.test(title + ' tests', async (t) => {
-        const sandContract = getDeployedContract('Sand');
         let token;
         let instance;
         let sand;
 
-        const wallet = Wallet.createRandom();
+        let wallet = Wallet.createRandom();
         const provider = new ethers.providers.Web3Provider(rocketh.ethereum);
-        wallet.connect(provider);
+        wallet = wallet.connect(provider);
+        await ethersProvider.getSigner(deployer).sendTransaction({to: wallet.address, value: BigNumber.from('1000000000000000000')});
 
         function getDomainData() {
             return {
@@ -103,6 +103,8 @@ function runP2PERC721SaleTests(title) {
         }
 
         t.beforeEach(async () => {
+            await rocketh.runStages();
+            const sandContract = getDeployedContract('Sand');
             sand = new ethers.Contract(sandContract.address, sandContract.abi, ethersProvider);
 
             instance = await deployContract(
@@ -116,11 +118,11 @@ function runP2PERC721SaleTests(title) {
 
             token = await deployContract(deployer, 'TestERC721', sandContract.address, deployer);
 
-            await tx(token, 'mint', {from: deployer, gas}, wallet.address, 0);
+            await tx(token, 'mint', {from: deployer, gas}, wallet.address, 1);
 
             const tokenWithSigner = token.connect(wallet);
 
-            await tokenWithSigner.approve(instance.address, 0);
+            await tokenWithSigner.functions.approve(instance.address, 1);
 
             const amount = utils.parseEther('100');
 
@@ -136,11 +138,6 @@ function runP2PERC721SaleTests(title) {
             );
 
             await tx(sand, 'approve', {from: others[0], gas}, instance.address, amount.toString());
-        });
-
-        t.test('Should get Sand contract address', async () => {
-            const sandAddress = await call(instance, '_sand', {from: deployer, gas});
-            assert.equal(sandAddress, sandContract.address, 'Sand address is wrong');
         });
 
         t.test('Should get the initial fee', async () => {
@@ -179,7 +176,7 @@ function runP2PERC721SaleTests(title) {
             const auction = {
                 id: 0,
                 tokenAddress: token.address,
-                tokenId: 0,
+                tokenId: 1,
                 seller: wallet.address,
                 startingPrice: utils.parseEther('10').toString(),
                 endingPrice: utils.parseEther('10').toString(),
@@ -210,7 +207,7 @@ function runP2PERC721SaleTests(title) {
             const auction = {
                 id: 0,
                 tokenAddress: token.address,
-                tokenId: 0,
+                tokenId: 1,
                 seller: wallet.address,
                 startingPrice: utils.parseEther('10').toString(),
                 endingPrice: utils.parseEther('10').toString(),
@@ -241,7 +238,7 @@ function runP2PERC721SaleTests(title) {
             const auction = {
                 id: 0,
                 tokenAddress: token.address,
-                tokenId: 0,
+                tokenId: 1,
                 seller: wallet.address,
                 startingPrice: utils.parseEther('10').toString(),
                 endingPrice: utils.parseEther('10').toString(),
@@ -283,7 +280,7 @@ function runP2PERC721SaleTests(title) {
                 const auction = {
                     id: 0,
                     tokenAddress: token.address,
-                    tokenId: 0,
+                    tokenId: 1,
                     seller: wallet.address,
                     startingPrice: utils.parseEther('10').toString(),
                     endingPrice: utils.parseEther('10').toString(),
@@ -297,7 +294,7 @@ function runP2PERC721SaleTests(title) {
                     ...auction,
                 };
 
-                fakeAuction.tokenId = 1;
+                fakeAuction.tokenId = 2;
 
                 await expectRevert(
                     tx(
@@ -320,7 +317,7 @@ function runP2PERC721SaleTests(title) {
                 const auction = {
                     id: 0,
                     tokenAddress: token.address,
-                    tokenId: 0,
+                    tokenId: 1,
                     seller: wallet.address,
                     startingPrice: utils.parseEther('10').toString(),
                     endingPrice: utils.parseEther('10').toString(),
@@ -358,7 +355,7 @@ function runP2PERC721SaleTests(title) {
                 const auction = {
                     id: 0,
                     tokenAddress: token.address,
-                    tokenId: 0,
+                    tokenId: 1,
                     seller: wallet.address,
                     startingPrice: utils.parseEther('10').toString(),
                     endingPrice: utils.parseEther('10').toString(),
@@ -372,7 +369,7 @@ function runP2PERC721SaleTests(title) {
                     ...auction,
                 };
 
-                fakeAuction.tokenId = 1;
+                fakeAuction.tokenId = 2;
 
                 await expectRevert(
                     tx(
@@ -395,7 +392,7 @@ function runP2PERC721SaleTests(title) {
                 const auction = {
                     id: 0,
                     tokenAddress: token.address,
-                    tokenId: 0,
+                    tokenId: 1,
                     seller: wallet.address,
                     startingPrice: utils.parseEther('10').toString(),
                     endingPrice: utils.parseEther('10').toString(),
