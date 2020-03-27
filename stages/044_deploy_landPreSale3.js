@@ -1,6 +1,9 @@
 const {guard} = require('../lib');
 const {getLands} = require('../data/landPreSale_3/getLands');
 
+const fs = require('fs');
+const {calculateLandHash} = require('../lib/merkleTreeHelper');
+
 module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, isDeploymentChainId, getDeployedContract, deploy}) => {
     function log(...args) {
         if (initialRun) {
@@ -50,7 +53,7 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
         dai = daiDeployResult.contract;
     }
 
-    const {lands, merkleRootHash} = getLands(isDeploymentChainId, chainId);
+    const {lands, merkleRootHash, saltedLands, tree} = getLands(isDeploymentChainId, chainId);
 
     const deployResult = await deployIfDifferent(['data'],
         'LandPreSale_3',
@@ -71,6 +74,12 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
     const contract = getDeployedContract('LandPreSale_3');
     if (deployResult.newlyDeployed) {
         log(' - LandPreSale_3 deployed at : ' + contract.address + ' for gas : ' + deployResult.receipt.gasUsed);
+        const landsWithProof = [];
+        for (const land of saltedLands) {
+            land.proof = tree.getProof(calculateLandHash(land));
+            landsWithProof.push(land);
+        }
+        fs.writeFileSync(`./.presale_3_proofs_${chainId}.json`, JSON.stringify(landsWithProof, null, '  '));
     } else {
         log('reusing LandPreSale_3 at ' + contract.address);
     }

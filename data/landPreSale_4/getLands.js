@@ -143,7 +143,7 @@ module.exports = {
         let secretPath = './.land_presale_1_secret';
         if (chainId === '1') {
             console.log('MAINNET secret');
-            secretPath = './.land_presale_2_secret.mainnet';
+            secretPath = './.land_presale_4_secret.mainnet';
         }
 
         let expose = false;

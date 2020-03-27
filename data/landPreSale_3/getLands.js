@@ -38,19 +38,19 @@ function generateLandsForMerkleTree() {
         let price = 0;
         if (size === 1) {
             num1x1Lands++;
-            price = '2333000000000000000000';
+            price = '2667000000000000000000';
         } else if (size === 3) {
             num3x3Lands++;
-            price = '19950000000000000000000';
+            price = '22800000000000000000000';
         } else if (size === 6) {
             num6x6Lands++;
-            price = '75600000000000000000000';
+            price = '86400000000000000000000';
         } else if (size === 12) {
             num12x12Lands++;
-            price = '285600000000000000000000';
+            price = '326400000000000000000000';
         } else if (size === 24) {
             num24x24Lands++;
-            price = '1075200000000000000000000';
+            price = '1228800000000000000000000';
         } else {
             reportError('wrong size : ' + size);
         }
@@ -174,6 +174,7 @@ module.exports = {
             lands: expose ? saltedLands : lands,
             merkleRootHash,
             saltedLands,
+            tree,
             // landsWithProof,
         };
     },
