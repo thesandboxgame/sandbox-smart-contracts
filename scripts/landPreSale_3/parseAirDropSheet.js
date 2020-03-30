@@ -88,5 +88,5 @@ module.exports = async () => {
             minter
         });
     }
-    return data.filter((r) => (r.size && r.coordinates && (r.to && r.to.toLowerCase() !== '0x7a9fe22691c811ea339d9b73150e6911a5343dca') && (!r.minter || r.minter.toLowerCase() === '0x7a9fe22691c811ea339d9b73150e6911a5343dca')));
+    return data.filter((r) => (r.size && r.coordinates && (r.to && r.to.toLowerCase() !== '0x7a9fe22691c811ea339d9b73150e6911a5343dca') && (r.minter && r.minter.toLowerCase() === '0x7a9fe22691c811ea339d9b73150e6911a5343dca')));
 };
