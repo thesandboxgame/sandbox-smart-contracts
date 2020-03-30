@@ -12,14 +12,14 @@ const sender = rocketh.accounts[0];
 
 program
     .command('buy <x> <y> <size>')
-    .description('buy land from presale 1')
+    .description('buy land from presale 3')
     .option('--gasPrice <gasPrice>', 'gasPrice to user')
     .option('-t, --test', 'test mode')
     .action(async (x, y, size, cmdObj) => {
         x = parseInt(x, 10);
         y = parseInt(y, 10);
         size = parseInt(size, 10);
-        const landWithProofsData = fs.readFileSync('./.presale_3_proofs.json');
+        const landWithProofsData = fs.readFileSync('./.presale_3_proofs_1.json');
         const landWithProofs = JSON.parse(landWithProofsData);
         let landToBuy;
         for (const land of landWithProofs) {

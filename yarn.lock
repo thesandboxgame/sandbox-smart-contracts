@@ -8228,10 +8228,10 @@ rlp@^2.0.0, rlp@^2.2.1, rlp@^2.2.2, rlp@^2.2.3:
   dependencies:
     bn.js "^4.11.1"
 
-rocketh@^0.4.40:
-  version "0.4.40"
-  resolved "https://registry.yarnpkg.com/rocketh/-/rocketh-0.4.40.tgz#c6d60940b76a839b0035e426e0a1aea88afe8150"
-  integrity sha512-Blh02+j+ETJvPr9jFKMAnRkSUncVGKn9f/PGh/wJGPy0yaPrpG8JbUz9Ku+1JmU7SfzygiYHNQqwJv/SBC5tYg==
+rocketh@^0.4.41:
+  version "0.4.41"
+  resolved "https://registry.yarnpkg.com/rocketh/-/rocketh-0.4.41.tgz#07af77e3ea472fce7620e7f3443f8cfff38c014f"
+  integrity sha512-tNHBUVX96SqwWBgsfy2SVdyoIzg/IpovMuiG5EpMg3D85CI7Fy9OeDQLt8/FRTtRA12PzSZ07//WSKDEuvNTDw==
   dependencies:
     "@rauschma/stringio" "^1.4.0"
     bip39 "^2.5.0"

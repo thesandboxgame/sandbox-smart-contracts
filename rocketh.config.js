@@ -75,7 +75,7 @@ module.exports = {
         estateAdmin: 'sandAdmin',
         backendReferralWallet: {
             default: 0,
-            1: 'TODO',
+            1: '0x3044719d139F866a44c988823513eCB93060bF1b',
             4: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
             314159: '0x94AE0495bEDb538F0a14fFE4Dc160dC280989E3a',
         },

@@ -1,9 +1,10 @@
 const fs = require('fs');
+const parseAirDropSheet = require('./parseAirDropSheet');
 
-const landWithProofsData = fs.readFileSync('./.presale_3_proofs.json');
+const landWithProofsData = fs.readFileSync('./.presale_3_proofs_1.json');
 const landWithProofs = JSON.parse(landWithProofsData);
 
-function mint(x, y, size, address) {
+async function mint(x, y, size, address) {
     let landToBuy;
     for (const land of landWithProofs) {
         if (land.x === x && land.y === y && land.size === size) {
@@ -17,11 +18,7 @@ function mint(x, y, size, address) {
     }
     if (landToBuy.reserved) {
         if (landToBuy.reserved !== address) {
-            if (address.toLowerCase() === '0xad38dd1ae27c09e4d394d5a10cfab999da7a30c3'.toLowerCase() && landToBuy.reserved.toLowerCase() === '0xad38dd1ae27c09e4d394d5a10cfab999da7a30c3'.toLowerCase()) {
-                console.log('-------------------- FOR BGA -------------------');
-            } else if (address.toLowerCase() === '0xbc3297c20EE9f8242c91F0C844b200F91a444815'.toLowerCase() && landToBuy.reserved.toLowerCase() === '0x4546BE8aCB146bc0af81261F833277Af6f222DcF'.toLowerCase()) {
-                console.log('-------------------- FOR DAPPER -------------------');
-            } else if (landToBuy.reserved === '0x7a9fe22691c811ea339d9b73150e6911a5343dca') {
+            if (landToBuy.reserved === '0x7a9fe22691c811ea339d9b73150e6911a5343dca') {
                 console.log('-------------------- from SANDBOX -------------------');
             } else {
                 throw new Error('reserved address do not match: ' + landToBuy.reserved + ' != ' + address);
@@ -43,40 +40,28 @@ function mint(x, y, size, address) {
     console.log('0x');
 }
 
-const landGroups = [
-    // {
-    //     name: 'Opera',
-    //     address: '0x4be5f7c9912afd58bcda39b0a4ec76e7b21ba0f1',
-    //     x: 15,
-    //     y: 30,
-    //     size: 3,
-    // },
-    // {
-    //     name: 'PlayDapp',
-    //     address: '0x5c31a139ba273ebad8d1b1ae22e4617ec0f32d4c',
-    //     x: 66,
-    //     y: 60,
-    //     size: 6,
-    // },
-];
-
-const giveaway = JSON.parse(fs.readFileSync('./giveaway.json'));
-for (const row of giveaway) {
-    if (row.sent) {
-        continue;
+(async () => {
+    const landGroups = [];
+    const giveaway = await parseAirDropSheet();
+    // console.log(JSON.stringify(giveaway, null, '  '));
+    for (const row of giveaway) {
+        // if (row.sent) {
+        //     continue;
+        // }
+        landGroups.push({
+            partner: row.partner,
+            to: row.to,
+            minter: row.minter,
+            x: row.coordinates.x,
+            y: row.coordinates.y,
+            size: row.size,
+        });
     }
-    landGroups.push({
-        name: row.name,
-        address: row.address,
-        x: row.coordinates.x,
-        y: row.coordinates.y,
-        size: row.size,
-    });
-}
 
-for (const landGroup of landGroups) {
-    console.log('------------------- ' + landGroup.name + ' -----------------------------');
-    mint(landGroup.x + 204, landGroup.y + 204, landGroup.size, landGroup.address);
-    console.log('');
-    console.log('');
-}
+    for (const landGroup of landGroups) {
+        console.log('------------------- ' + landGroup.partner + ' -----------------------------');
+        mint(landGroup.x + 204, landGroup.y + 204, landGroup.size, landGroup.to);
+        console.log('');
+        console.log('');
+    }
+})();
