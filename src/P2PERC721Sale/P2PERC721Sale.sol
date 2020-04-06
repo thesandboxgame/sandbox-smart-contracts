@@ -28,16 +28,16 @@ contract P2PERC721Sale is
     mapping (address => mapping (uint256 => uint256)) public claimed;
 
     uint256 constant private MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-    ERC20 public _sand;
-    uint256 public _fee;
-    address public _feeCollector;
+    ERC20 internal _sand;
+    uint256 internal _fee;
+    address internal _feeCollector;
 
     struct Auction {
         uint256 id;
-        address tokenAddress;
+        address tokenAddress; // TODO support bundle : tokenAddress and tokenId should be arrays
         uint256 tokenId;
         address seller;
-        uint256 startingPrice;
+        uint256 startingPrice; // TODO support any ERC20 or ethereum as payment
         uint256 endingPrice;
         uint256 startedAt;
         uint256 duration;
@@ -58,19 +58,20 @@ contract P2PERC721Sale is
     event FeeSetup(address feeCollector, uint256 fee10000th);
 
     constructor(
-        address initialSandAddress,
+        address sand,
         address admin,
         address feeCollector,
-        uint256 fee
+        uint256 fee,
+        address initialMetaTx
     ) public {
-        _sand = ERC20(initialSandAddress);
+        _sand = ERC20(sand);
         _admin = admin;
-        // _setMetaTransactionProcessor(initialMetaTx, true);
 
         _fee = fee;
         _feeCollector = feeCollector;
         emit FeeSetup(feeCollector, fee);
 
+        _setMetaTransactionProcessor(initialMetaTx, true);
         init712();
     }
 
@@ -85,8 +86,7 @@ contract P2PERC721Sale is
         address buyer,
         Auction memory auction
     ) internal view {
-        // We should allow people to buy for someone else
-        require(buyer == msg.sender, "Buyer not sender");
+        require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "not authorized"); // if support any ERC20 :(token != address(0) &&
 
         require(
             claimed[auction.seller][auction.id] != MAX_UINT256,
@@ -106,6 +106,7 @@ contract P2PERC721Sale is
 
     function claimSellerOffer(
         address buyer,
+        address to,
         Auction calldata auction,
         bytes calldata signature,
         SignatureType signatureType,
@@ -113,12 +114,13 @@ contract P2PERC721Sale is
     ) external {
         _verifyParameters(buyer, auction);
         _ensureCorrectSigner(auction, signature, signatureType, eip712);
-        _executeDeal(auction, buyer);
+        _executeDeal(auction, buyer, to);
     }
 
     function _executeDeal(
         Auction memory auction,
-        address buyer
+        address buyer,
+        address to
     ) internal {
         uint256 offer = PriceUtil.calculateCurrentPrice(
             auction.startingPrice,
@@ -142,7 +144,7 @@ contract P2PERC721Sale is
 
         ERC721 token = ERC721(auction.tokenAddress);
 
-        token.transferFrom(auction.seller, buyer, auction.tokenId);
+        token.safeTransferFrom(auction.seller, to, auction.tokenId); // TODO test safeTransferFrom fail
     }
 
     function cancelSellerOffer(uint256 id) external {
