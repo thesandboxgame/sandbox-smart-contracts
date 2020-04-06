@@ -62,7 +62,7 @@ async function mint(x, y, size, address) {
                             x: parseInt(xy[0], 10), // +204 is donw after ward
                             y: parseInt(xy[1], 10), // +204 is donw after ward
                         };
-                        if (coordinates.x && coordinates.y) {
+                        if ((typeof coordinates.x !== 'undefined') && (typeof coordinates.y !== 'undefined')) {
                             return coordinates;
                         }
                     }

@@ -1,7 +1,7 @@
 const {read} = require('../../lib/spreadsheet');
 
-async function parseSheet(doc, sheet, {startRow, lastRow, fields, filter}) {
-    const values = (await read(doc, sheet)).slice(startRow - 1, lastRow);
+async function parseSheet(doc, sheet, {startRow, endRow, fields, filter}) {
+    const values = (await read(doc, sheet)).slice(startRow - 1, endRow);
     const data = [];
     for (const row of values) {
         const object = {};
