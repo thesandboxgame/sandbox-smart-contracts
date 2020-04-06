@@ -73,6 +73,7 @@ module.exports = {
         landAdmin: 'sandAdmin',
         landSaleAdmin: 'sandAdmin',
         estateAdmin: 'sandAdmin',
+        P2PERC721SaleAdmin: 'sandAdmin',
         backendReferralWallet: {
             default: 0,
             1: '0x3044719d139F866a44c988823513eCB93060bF1b',

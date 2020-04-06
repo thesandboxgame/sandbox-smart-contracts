@@ -9,6 +9,7 @@
     "solhint": "solhint -f table src/**/*.sol",
     "test-localhost": "rocketh launch -n http://localhost:8545 \"tap -T -j 1 -R spec test/**/test*\"",
     "test": "rocketh launch -s \"tap -b -T -j 1 -R spec test/**/test*\"",
+    "test-P2PERC721Sale": "rocketh launch \"yarn tap -T -j 1 -R spec test/P2PERC721Sale/testP2PERC721Sale.js\"",
     "smartcheck": "smartcheck -p .",
     "deploy-local": "rocketh launch -n http://localhost:8545",
     "deploy-rinkeby": "rocketh launch -n https://rinkeby.infura.io/v3/ced8eecc03984939b556332468325813",
