@@ -137,14 +137,14 @@ contract EstateBaseToken is ERC721BaseToken {
         _owners[estateId] = (_owners[estateId] & (2**255 - 1)) | 2**160;
         _numNFTPerAddress[sender]--;
         emit Transfer(sender, address(0), estateId);
-        transferAllFromDestroyedEstate(sender, to, estateId);
+        transferAllFromDestroyedEstate(sender, estateId, to);
     }
 
     // Optimized version where the whole list is in memory
     function transferAllFromDestroyedEstate(
         address sender,
-        address to,
-        uint256 estateId
+        uint256 estateId,
+        address to
     ) public {
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_ESTATE_CONTRACT");
@@ -169,9 +169,9 @@ contract EstateBaseToken is ERC721BaseToken {
 
     function transferFromDestroyedEstate(
         address sender,
-        address to,
         uint256 estateId,
-        uint256 num
+        uint256 num,
+        address to
     ) public {
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_ESTATE_CONTRACT");
@@ -352,7 +352,7 @@ contract EstateBaseToken is ERC721BaseToken {
                     require(index - l < i, "JUNCTIONS_NOT_PAST");
                     data = list[index - l];
                 } else {
-                    data = _quadsInEstate[estateId][j];
+                    data = _quadsInEstate[estateId][index];
                 }
                 (uint16 jx, uint16 jy, uint8 jsize) = _decode(data);
                 require(_adjacent(x, y, size, jx, jy, jsize), "JUNCTION_NOT_ADJACENT");

@@ -29,6 +29,7 @@ const user3 = others[3];
 
 function runEstateTests({contractsStore}) {
     tap.test('Estate testing', async (t) => {
+        // t.runOnly = true;
         let contracts;
         let helper;
         t.beforeEach(async () => {
@@ -191,6 +192,247 @@ function runEstateTests({contractsStore}) {
             await contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.burnAndTransferFrom(user0, 1, user0).then((tx) => tx.wait());
             helper.checkLandOwnership(selection, user0);
         });
+
+        t.test('creating from multiple quads and adding more and destroying get them back', async (t) => {
+            const {selection} = await helper.mintQuadsAndCreateEstate({
+                quads: [
+                    {x: 5, y: 7, size: 1},
+                    {x: 6, y: 8, size: 1},
+                    {x: 6, y: 9, size: 3},
+                    {x: 6, y: 12, size: 3},
+                    {x: 3, y: 9, size: 3},
+                    {x: 180, y: 24, size: 12},
+                    {x: 42, y: 48, size: 6},
+                    {x: 9, y: 15, size: 3},
+                ],
+                junctions: [1],
+                selection: [1, 2, 3, 4]
+            }, user0);
+
+            const extraLandQuads = EstateTestHelper.assignIds([
+                {x: 3, y: 12, size: 3},
+                {x: 4, y: 15, size: 1},
+                {x: 4, y: 16, size: 1},
+                {x: 4, y: 17, size: 1},
+                {x: 3, y: 18, size: 3},
+            ]);
+            await helper.mintQuads(user0, extraLandQuads);
+            const selected = EstateTestHelper.selectQuads(extraLandQuads);
+            const {xs, ys, sizes} = selected;
+            const newSelection = selected.selection;
+            for (const sel of newSelection) {
+                selection.push(sel);
+            }
+            await contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.addMultipleQuads(user0, 1, sizes, xs, ys, []).then((tx) => tx.wait());
+            await contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.burnAndTransferFrom(user0, 1, user0).then((tx) => tx.wait());
+            helper.checkLandOwnership(selection, user0);
+        });
+
+        t.test('creating from multiple quads and adding more with gaps fails', async (t) => {
+            const {selection} = await helper.mintQuadsAndCreateEstate({
+                quads: [
+                    {x: 5, y: 7, size: 1},
+                    {x: 6, y: 8, size: 1},
+                    {x: 6, y: 9, size: 3},
+                    {x: 6, y: 12, size: 3},
+                    {x: 3, y: 9, size: 3},
+                    {x: 180, y: 24, size: 12},
+                    {x: 42, y: 48, size: 6},
+                    {x: 9, y: 15, size: 3},
+                ],
+                junctions: [1],
+                selection: [1, 2, 3, 4]
+            }, user0);
+
+            const extraLandQuads = EstateTestHelper.assignIds([
+                {x: 4, y: 15, size: 1},
+                {x: 4, y: 16, size: 1},
+                {x: 4, y: 17, size: 1},
+                {x: 3, y: 18, size: 3},
+            ]);
+            await helper.mintQuads(user0, extraLandQuads);
+            const selected = EstateTestHelper.selectQuads(extraLandQuads);
+            const {xs, ys, sizes} = selected;
+            const newSelection = selected.selection;
+            for (const sel of newSelection) {
+                selection.push(sel);
+            }
+            await expectRevert(contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.addMultipleQuads(user0, 1, sizes, xs, ys, []).then((tx) => tx.wait()));
+        });
+
+        t.test('creating from multiple quads and adding more with junctions and destroying get them back', async (t) => {
+            const {selection} = await helper.mintQuadsAndCreateEstate({
+                quads: [
+                    {x: 5, y: 7, size: 1},
+                    {x: 6, y: 8, size: 1},
+                    {x: 6, y: 9, size: 3},
+                    {x: 6, y: 12, size: 3},
+                    {x: 3, y: 9, size: 3},
+                    {x: 180, y: 24, size: 12},
+                    {x: 42, y: 48, size: 6},
+                    {x: 9, y: 15, size: 3},
+                ],
+                junctions: [1],
+                selection: [1, 2, 3, 4]
+            }, user0);
+            const extraLandQuads = EstateTestHelper.assignIds([
+                {x: 6, y: 15, size: 3},
+                {x: 7, y: 18, size: 1},
+                {x: 7, y: 19, size: 1},
+                {x: 7, y: 20, size: 1},
+                {x: 6, y: 21, size: 3},
+                {x: 3, y: 15, size: 3},
+            ]);
+            await helper.mintQuads(user0, extraLandQuads);
+            const newSelected = EstateTestHelper.selectQuads(extraLandQuads);
+            const {xs, ys, sizes} = newSelected;
+            const newSelection = newSelected.selection;
+            for (const sel of newSelection) {
+                selection.push(sel);
+            }
+            // console.log({xs, ys, sizes, selection});
+            await contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.addMultipleQuads(user0, 1, sizes, xs, ys, [2, 4]).then((tx) => tx.wait());
+            await contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.burnAndTransferFrom(user0, 1, user0).then((tx) => tx.wait());
+            helper.checkLandOwnership(selection, user0);
+        });
+
+        t.test('creating Estate with many Lands and destroying get them back', async (t) => {
+            const {selection} = await helper.mintQuadsAndCreateEstate({
+                quads: [
+                    {x: 5, y: 7, size: 1},
+                    {x: 6, y: 7, size: 1},
+                    {x: 6, y: 8, size: 1},
+                    {x: 6, y: 9, size: 3},
+                    {x: 6, y: 12, size: 3},
+                    
+                    {x: 3, y: 9, size: 3},
+                    {x: 2, y: 9, size: 1},
+                    
+                    {x: 4, y: 12, size: 1},
+                    {x: 4, y: 13, size: 1},
+                    {x: 4, y: 14, size: 1},
+                    {x: 4, y: 15, size: 1},
+                    {x: 4, y: 16, size: 1},
+                    {x: 4, y: 17, size: 1},
+                    {x: 4, y: 18, size: 1},
+                    {x: 4, y: 19, size: 1},
+                    {x: 4, y: 20, size: 1},
+                    {x: 4, y: 21, size: 1},
+                    {x: 4, y: 22, size: 1},
+                    {x: 4, y: 23, size: 1},
+                    {x: 4, y: 24, size: 1},
+                    {x: 4, y: 25, size: 1},
+                    {x: 4, y: 26, size: 1},
+                    {x: 4, y: 27, size: 1},
+                    {x: 4, y: 28, size: 1},
+                    {x: 4, y: 29, size: 1},
+                    {x: 4, y: 30, size: 1},
+                    {x: 4, y: 31, size: 1},
+                    {x: 4, y: 32, size: 1},
+                    {x: 4, y: 33, size: 1},
+                    {x: 4, y: 34, size: 1},
+                    {x: 4, y: 35, size: 1},
+                    {x: 4, y: 36, size: 1},
+                    {x: 4, y: 37, size: 1},
+                ],
+                junctions: [3, 5],
+            }, user0);
+            const receipt = await contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.burnAndTransferFrom(user0, 1, user0).then((tx) => tx.wait());
+            // console.log({gasUsed: receipt.gasUsed.toNumber()});
+            helper.checkLandOwnership(selection, user0);
+        });
+
+        t.test('creating Estate with many Lands and destroying in 2 step get them back', async (t) => {
+            const {selection} = await helper.mintQuadsAndCreateEstate({
+                quads: [
+                    {x: 5, y: 7, size: 1},
+                    {x: 6, y: 7, size: 1},
+                    {x: 6, y: 8, size: 1},
+                    {x: 6, y: 9, size: 3},
+                    {x: 6, y: 12, size: 3},
+                    
+                    {x: 3, y: 9, size: 3},
+                    {x: 2, y: 9, size: 1},
+                    
+                    {x: 4, y: 12, size: 1},
+                    {x: 4, y: 13, size: 1},
+                    {x: 4, y: 14, size: 1},
+                    {x: 4, y: 15, size: 1},
+                    {x: 4, y: 16, size: 1},
+                    {x: 4, y: 17, size: 1},
+                    {x: 4, y: 18, size: 1},
+                    {x: 4, y: 19, size: 1},
+                    {x: 4, y: 20, size: 1},
+                    {x: 4, y: 21, size: 1},
+                    {x: 4, y: 22, size: 1},
+                    {x: 4, y: 23, size: 1},
+                    {x: 4, y: 24, size: 1},
+                    {x: 4, y: 25, size: 1},
+                    {x: 4, y: 26, size: 1},
+                    {x: 4, y: 27, size: 1},
+                    {x: 4, y: 28, size: 1},
+                    {x: 4, y: 29, size: 1},
+                    {x: 4, y: 30, size: 1},
+                    {x: 4, y: 31, size: 1},
+                    {x: 4, y: 32, size: 1},
+                    {x: 4, y: 33, size: 1},
+                    {x: 4, y: 34, size: 1},
+                    {x: 4, y: 35, size: 1},
+                    {x: 4, y: 36, size: 1},
+                    {x: 4, y: 37, size: 1},
+                ],
+                junctions: [3, 5],
+            }, user0);
+            await contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.burn(1).then((tx) => tx.wait());
+            const receipt = await contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.transferFromDestroyedEstate(user0, 1, 0, user0).then((tx) => tx.wait());
+            // console.log({gasUsed: receipt.gasUsed.toNumber()});
+            helper.checkLandOwnership(selection, user0);
+        });
+
+        t.test('creating estate with gap fails', async (t) => {
+            await expectRevert(helper.mintQuadsAndCreateEstate({
+                quads: [
+                    {x: 5, y: 7, size: 1},
+                    {x: 6, y: 7, size: 1},
+                    {x: 6, y: 8, size: 1},
+                    {x: 6, y: 9, size: 3},
+                    {x: 6, y: 12, size: 3},
+                    
+                    {x: 3, y: 9, size: 3},
+                    {x: 2, y: 9, size: 1},
+                    
+                    {x: 4, y: 12, size: 1},
+                    {x: 4, y: 13, size: 1},
+                    {x: 4, y: 14, size: 1},
+                    {x: 4, y: 15, size: 1},
+                    {x: 4, y: 16, size: 1},
+                    {x: 4, y: 17, size: 1},
+                    {x: 4, y: 18, size: 1},
+                    {x: 4, y: 19, size: 1},
+                    {x: 4, y: 20, size: 1},
+                    {x: 4, y: 21, size: 1},
+                    {x: 4, y: 22, size: 1},
+                    {x: 4, y: 23, size: 1},
+                    {x: 4, y: 24, size: 1},
+                    {x: 4, y: 25, size: 1},
+
+                    {x: 4, y: 27, size: 1},
+                    {x: 4, y: 28, size: 1},
+                    {x: 4, y: 29, size: 1},
+                    {x: 4, y: 30, size: 1},
+                    {x: 4, y: 31, size: 1},
+                    {x: 4, y: 32, size: 1},
+                    {x: 4, y: 33, size: 1},
+                    {x: 4, y: 34, size: 1},
+                    {x: 4, y: 35, size: 1},
+                    {x: 4, y: 36, size: 1},
+                    {x: 4, y: 37, size: 1},
+                ],
+                junctions: [3, 5],
+            }, user0), 'JUNCTIONS_MISSING');
+        });
+
+        
     });
 }
 
