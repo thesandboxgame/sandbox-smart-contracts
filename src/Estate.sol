@@ -62,7 +62,7 @@ contract Estate is EstateBaseToken {
         return
             string(
                 abi.encodePacked(
-                    "https://api.sandbox.game/estate/",
+                    "https://api.sandbox.game/estates/",
                     uint2str(id),
                     "/metadata.json"
                 )
@@ -79,13 +79,5 @@ contract Estate is EstateBaseToken {
      */
     function supportsInterface(bytes4 id) override public pure returns (bool) {
         return super.supportsInterface(id) || id == 0x5b5e139f;
-    }
-
-    function burn(uint256 id) external override {
-        revert("burning is disabled");
-    }
-
-    function burnFrom(address from, uint256 id) override external {
-        revert("burning is disabled");
     }
 }

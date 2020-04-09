@@ -194,7 +194,7 @@ function runEstateTests({contractsStore}) {
             await createQuads(user0, landQuads);
             const {xs, ys, sizes, selection} = selectQuads(landQuads, [1, 2, 3, 4]);
             const junctions = [2];
-            await expectRevert(contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.createFromMultipleQuads(user0, user0, sizes, xs, ys, junctions).then((tx) => tx.wait()), 'JUNCTIONS_INVALID');
+            await expectRevert(contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.createFromMultipleQuads(user0, user0, sizes, xs, ys, junctions).then((tx) => tx.wait()), 'JUNCTION_NOT_ADJACENT');
         });
 
         t.test('creating from multiple quads with junctions and destroying get them back', async (t) => {
@@ -212,7 +212,7 @@ function runEstateTests({contractsStore}) {
             const {xs, ys, sizes, selection} = selectQuads(landQuads, [1, 2, 3, 4]);
             const junctions = [1];
             await contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.createFromMultipleQuads(user0, user0, sizes, xs, ys, junctions).then((tx) => tx.wait());
-            await contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.destroyAndTransfer(user0, 1, user0).then((tx) => tx.wait());
+            await contracts.Estate.connect(contracts.Estate.provider.getSigner(user0)).functions.burnAndTransferFrom(user0, 1, user0).then((tx) => tx.wait());
             for (const landQuad of selection) {
                 for (let sx = 0; sx < landQuad.size; sx++) {
                     for (let sy = 0; sy < landQuad.size; sy++) {

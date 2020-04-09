@@ -5,12 +5,6 @@ import "../Interfaces/LandToken.sol";
 import "../../contracts_common/src/Interfaces/ERC721MandatoryTokenReceiver.sol";
 
 contract EstateBaseToken is ERC721BaseToken {
-    uint8 internal constant OWNER = 0;
-    uint8 internal constant CREATE = 1;
-    uint8 internal constant ADD = 2;
-    uint8 internal constant BREAK = 3;
-    uint8 internal constant WITHDRAWAL = 4;
-
     uint16 internal constant GRID_SIZE = 408;
 
     uint256 _nextId = 1;
@@ -22,6 +16,9 @@ contract EstateBaseToken is ERC721BaseToken {
     event QuadsAdded(uint256 indexed id, uint24[] list);
     event QuadsRemoved(uint256 indexed id, uint256 numRemoved);
 
+    event Minter(address newMinter);
+    event Breaker(address newBreaker);
+
     constructor(
         address metaTransactionContract,
         address admin,
@@ -30,17 +27,36 @@ contract EstateBaseToken is ERC721BaseToken {
         _land = land;
     }
 
+    function setMinter(address minter) external {
+        require(msg.sender == _admin, "ADMIN_NOT_AUTHORIZED");
+        require(minter != _minter, "MINTER_SAME_ALREADY_SET");
+        _minter = minter;
+        emit Minter(minter);
+    }
+    function getMinter() external view returns (address) {
+        return _minter;
+    }
+    function setBreaker(address breaker) external {
+        require(msg.sender == _admin, "ADMIN_NOT_AUTHORIZED");
+        require(breaker != _breaker, "BREAKER_SAME_ALREADY_SET");
+        _breaker = breaker;
+        emit Breaker(breaker);
+    }
+    function getBreaker() external view returns (address) {
+        return _breaker;
+    }
+
     function createFromQuad(address sender, address to, uint256 size, uint256 x, uint256 y) external returns (uint256) {
-        require(to != address(0), "cannot send to zero address");
-        require(to != address(this), "do not accept estate to itself");
-        _check_authorized(sender, CREATE, 0);
+        require(to != address(0), "DESTINATION_ZERO_ADDRESS");
+        require(to != address(this), "DESTINATION_ESTATE_CONTRACT");
+        _check_create_authorized(sender);
         uint256 estateId = _mintEstate(to);
         _addSingleQuad(sender, estateId, size, x, y, true, 0);
         return estateId;
     }
 
     function addQuad(address sender, uint256 estateId, uint256 size, uint256 x, uint256 y, uint256 junction) external {
-        _check_authorized(sender, ADD, 0);
+        _check_add_authorized(sender, estateId);
         _addSingleQuad(sender, estateId, size, x, y, false, junction);
     }
 
@@ -50,9 +66,9 @@ contract EstateBaseToken is ERC721BaseToken {
         uint256[] calldata ids,
         uint256[] calldata junctions
     ) external returns (uint256) {
-        require(to != address(0), "cannot send to zero address");
-        require(to != address(this), "do not accept estate to itself");
-        _check_authorized(sender, CREATE, 0);
+        require(to != address(0), "DESTINATION_ZERO_ADDRESS");
+        require(to != address(this), "DESTINATION_ESTATE_CONTRACT");
+        _check_create_authorized(sender);
         uint256 estateId = _mintEstate(to);
         _addLands(sender, estateId, ids, junctions);
         return estateId;
@@ -64,7 +80,7 @@ contract EstateBaseToken is ERC721BaseToken {
         uint256 id,
         uint256 junction
     ) external {
-        _check_authorized(sender, ADD, 0);
+        _check_add_authorized(sender, estateId); // TODO test estateId == 0
         _addLand(sender, estateId, id, junction);
     }
 
@@ -74,7 +90,7 @@ contract EstateBaseToken is ERC721BaseToken {
         uint256[] calldata ids,
         uint256[] calldata junctions
     ) external {
-        _check_authorized(sender, ADD, 0);
+        _check_add_authorized(sender, estateId);
         _addLands(sender, estateId, ids, junctions);
     }
 
@@ -86,9 +102,9 @@ contract EstateBaseToken is ERC721BaseToken {
         uint256[] calldata ys,
         uint256[] calldata junctions
     ) external returns (uint256) {
-        require(to != address(0), "cannot send to zero address");
-        require(to != address(this), "do not accept estate to itself");
-        _check_authorized(sender, CREATE, 0);
+        require(to != address(0), "DESTINATION_ZERO_ADDRESS");
+        require(to != address(this), "DESTINATION_ESTATE_CONTRACT");
+        _check_create_authorized(sender);
         uint256 estateId = _mintEstate(to);
         _addQuads(sender, estateId, sizes, xs, ys, junctions);
         return estateId;
@@ -102,24 +118,53 @@ contract EstateBaseToken is ERC721BaseToken {
         uint256[] calldata ys,
         uint256[] calldata junctions
         ) external {
-        _check_authorized(sender, ADD, 0);
+        _check_add_authorized(sender, estateId);
         _addQuads(sender, estateId, sizes, xs, ys, junctions);
     }
 
-    function destroy(address sender, uint256 estateId) external {
-        _check_authorized(sender, BREAK, estateId);
-        _owners[estateId] = (_owners[estateId] & (2**255 - 1)) | 2**254;
-        _numNFTPerAddress[sender]--;
-        emit Transfer(sender, address(0), estateId);
+    function burn(uint256 id) override external {
+        _check_burn_authorized(msg.sender, id);
+        _burn(msg.sender, _ownerOf(id), id);
     }
 
-    function destroyAndTransfer(address sender, uint256 estateId, address to) external {
-        require(to != address(0), "cannot send to zero address");
-        _check_authorized(sender, BREAK, estateId);
-        _owners[estateId] = (_owners[estateId] & (2**255 - 1)) | 2**254;
+    function burnFrom(address from, uint256 id) override external {
+        _check_burn_authorized(from, id);
+        _burn(from, _ownerOf(id), id);
+    }
+
+    function burnAndTransferFrom(address sender, uint256 estateId, address to) external {
+        _check_burn_authorized(sender, estateId);
+        _owners[estateId] = (_owners[estateId] & (2**255 - 1)) | 2**160;
         _numNFTPerAddress[sender]--;
         emit Transfer(sender, address(0), estateId);
-        transferFromDestroyedEstate(sender, to, estateId, 0);
+        transferAllFromDestroyedEstate(sender, to, estateId);
+    }
+
+    // Optimized version where the whole list is in memory
+    function transferAllFromDestroyedEstate(
+        address sender,
+        address to,
+        uint256 estateId
+    ) public {
+        require(to != address(0), "DESTINATION_ZERO_ADDRESS");
+        require(to != address(this), "DESTINATION_ESTATE_CONTRACT");
+        _check_withdrawal_authorized(sender, estateId);
+        uint24[] memory list = _quadsInEstate[estateId];
+        uint256 num = list.length;
+        require(num > 0, "WITHDRAWAL_COMPLETE");
+        uint256[] memory sizes = new uint256[](num);
+        uint256[] memory xs = new uint256[](num);
+        uint256[] memory ys = new uint256[](num);
+        for (uint256 i = 0; i < num; i++) {
+            (uint16 x, uint16 y, uint8 size) = _decode(list[num - 1 - i]);
+            _quadsInEstate[estateId].pop();
+            sizes[i] = size;
+            xs[i] = x;
+            ys[i] = y;
+        }
+        delete _quadsInEstate[estateId];
+        _land.batchTransferQuad(address(this), to, sizes, xs, ys, "");
+        emit QuadsRemoved(estateId, num);
     }
 
     function transferFromDestroyedEstate(
@@ -128,21 +173,22 @@ contract EstateBaseToken is ERC721BaseToken {
         uint256 estateId,
         uint256 num
     ) public {
-        require(to != address(0), "cannot send to zero address");
-        _check_authorized(sender, WITHDRAWAL, estateId);
-        uint24[] memory list = _quadsInEstate[estateId];
+        require(to != address(0), "DESTINATION_ZERO_ADDRESS");
+        require(to != address(this), "DESTINATION_ESTATE_CONTRACT");
+        _check_withdrawal_authorized(sender, estateId);
+        uint24[] storage list = _quadsInEstate[estateId];
         uint256 numLeft = list.length;
         if (num == 0) {
             num = numLeft;
         }
-        require(num > 0, "no more land left");
-        require(numLeft >= num, "trying to extract more than there is");
+        require(num > 0, "WITHDRAWAL_COMPLETE");
+        require(numLeft >= num, "WITHDRAWAL_OVERFLOW");
         uint256[] memory sizes = new uint256[](num);
         uint256[] memory xs = new uint256[](num);
         uint256[] memory ys = new uint256[](num);
         for (uint256 i = 0; i < num; i++) {
             (uint16 x, uint16 y, uint8 size) = _decode(list[numLeft - 1 - i]);
-            _quadsInEstate[estateId].pop();
+            list.pop();
             sizes[i] = size;
             xs[i] = x;
             ys[i] = y;
@@ -154,70 +200,68 @@ contract EstateBaseToken is ERC721BaseToken {
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    function _ownerOf(uint256 id) override internal view returns (address) {
-        uint256 data = _owners[id];
-        if ((data & 2**254) == 2**254) {
-            return address(0);
-        }
-        return address(data);
-    }
-
     function _withdrawalOwnerOf(uint256 id) internal view returns (address) {
         uint256 data = _owners[id];
-        if ((data & 2**254) == 2**254) {
+        if ((data & 2**160) == 2**160) {
             return address(data);
         }
         return address(0);
     }
 
-    function _checkOwner(address sender, uint256 estateId) internal {
+    function _check_owner_authorized(address sender, uint256 estateId) internal view {
+        require(sender != address(0), "SENDER_ZERO_ADDRESS");
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(estateId);
-        require(owner == sender, "not owner");
+        require(owner == sender, "OWNER_NOT_EQUAL_SENDER");
         require(
             msg.sender == sender ||
             _metaTransactionContracts[msg.sender] ||
             _superOperators[msg.sender] ||
             _operatorsForAll[sender][msg.sender] ||
             (operatorEnabled && _operators[estateId] == msg.sender),
-            "not _check_authorized"
+            "NOT_AUHTORIZED"
         );
     }
 
-    function _check_authorized(address sender, uint8 action, uint256 estateId) internal {
-        require(sender != address(0), "sender is zero address");
-        if (action == CREATE) {
-            address minter = _minter;
-            if (minter == address(0)) {
-                require(msg.sender == sender || _metaTransactionContracts[msg.sender], "not _check_authorized");
-            } else {
-                require(msg.sender == minter, "only minter allowed");
-            }
-        } else if (action == ADD) {
-            address minter = _minter;
-            if (minter == address(0)) {
-                _checkOwner(sender, estateId);
-            } else {
-                require(msg.sender == minter, "only minter allowed");
-            }
-        } else if (action == BREAK) {
-            address breaker = _breaker;
-            if (breaker == address(0)) {
-                _checkOwner(sender, estateId);
-            } else {
-                require(msg.sender == breaker, "only breaker allowed");
-            }
-        } else if (action == WITHDRAWAL) {
-            require(sender == _withdrawalOwnerOf(estateId), "only past owner can transfer land from destroyed estate");
-            require(
-                msg.sender == sender ||
-                _metaTransactionContracts[msg.sender] ||
-                _superOperators[msg.sender] ||
-                _operatorsForAll[sender][msg.sender],
-                "not _check_authorized"
-            );
+    function _check_burn_authorized(address sender, uint256 estateId) internal view {
+        require(sender != address(0), "SENDER_ZERO_ADDRESS");
+        address breaker = _breaker;
+        if (breaker == address(0)) {
+            _check_owner_authorized(sender, estateId);
         } else {
-            _checkOwner(sender, estateId);
+            require(msg.sender == breaker, "BREAKER_NOT_AUTHORIZED");
         }
+    }
+
+    function _check_create_authorized(address sender) internal view {
+        require(sender != address(0), "SENDER_ZERO_ADDRESS");
+        address minter = _minter;
+        if (minter == address(0)) {
+            require(msg.sender == sender || _metaTransactionContracts[msg.sender], "CREATE_NOT_AUHTORIZED");
+        } else {
+            require(msg.sender == minter, "MINTER_NOT_AUTHORIZED");
+        }
+    }
+
+    function _check_add_authorized(address sender, uint256 estateId) internal view {
+        require(sender != address(0), "SENDER_ZERO_ADDRESS");
+        address minter = _minter;
+        if (minter == address(0)) {
+            _check_owner_authorized(sender, estateId);
+        } else {
+            require(msg.sender == minter, "MINTER_NOT_AUTHORIZED");
+        }
+    }
+
+    function _check_withdrawal_authorized(address sender, uint256 estateId) internal view {
+        require(sender != address(0), "SENDER_ZERO_ADDRESS");
+        require(sender == _withdrawalOwnerOf(estateId), "LAST_OWNER_NOT_EQUAL_SENDER");
+        require(
+            msg.sender == sender ||
+            _metaTransactionContracts[msg.sender] ||
+            _superOperators[msg.sender] ||
+            _operatorsForAll[sender][msg.sender],
+            "WITHDRAWAL_NOT_AUHTORIZED"
+        );
     }
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -234,7 +278,6 @@ contract EstateBaseToken is ERC721BaseToken {
     }
 
     function _mintEstate(address to) internal returns (uint256) {
-        require(to != address(0), "can't send to zero address");
         uint256 estateId = _nextId++;
         _owners[estateId] = uint256(to);
         _numNFTPerAddress[to]++;
@@ -255,9 +298,9 @@ contract EstateBaseToken is ERC721BaseToken {
         uint24[] memory list = new uint24[](1);
         list[0] = _encode(uint16(x),uint16(y),uint8(size));
         if (!justCreated) {
-                require(_quadsInEstate[estateId].length > junction, "invalid junction");
+            require(_quadsInEstate[estateId].length > junction, "JUNCTION_NOT_EXISTS");
             (uint16 lastX, uint16 lastY, uint8 lastSize) = _decode(_quadsInEstate[estateId][junction]);
-            require(_adjacent(uint16(x), uint16(y), uint8(size), lastX, lastY, lastSize), "not adjacent to junction provided");
+            require(_adjacent(uint16(x), uint16(y), uint8(size), lastX, lastY, lastSize), "JUNCTION_NOT_ADJACENT");
         }
         _quadsInEstate[estateId].push(list[0]);
         emit QuadsAdded(estateId, list);
@@ -306,13 +349,13 @@ contract EstateBaseToken is ERC721BaseToken {
                 j++;
                 uint24 data;
                 if (index >= l) {
-                    require(index - l < i, "JUNCTIONS_OVERFLOW");
+                    require(index - l < i, "JUNCTIONS_NOT_PAST");
                     data = list[index - l];
                 } else {
                     data = _quadsInEstate[estateId][j];
                 }
                 (uint16 jx, uint16 jy, uint8 jsize) = _decode(data);
-                require(_adjacent(x, y, size, jx, jy, jsize), "JUNCTIONS_INVALID");
+                require(_adjacent(x, y, size, jx, jy, jsize), "JUNCTION_NOT_ADJACENT");
             }
             lastX = x;
             lastY = y;
@@ -321,30 +364,6 @@ contract EstateBaseToken is ERC721BaseToken {
     }
 
     function _adjacent(uint16 x1, uint16 y1, uint8 s1, uint16 x2, uint16 y2, uint8 s2) internal pure returns(bool) {
-        // if (s1 == 1) {
-        //     if (s2 == 1) {
-        //         return (
-        //             (x1 == x2 && y1 == y2 - 1) ||
-        //             (x1 == x2 && y1 == y2 + 1) ||
-        //             (x1 == x2 - 1 && y1 == y2) ||
-        //             (x1 == x2 + 1 && y1 == y2)
-        //         );
-        //     }
-        //     return (
-        //         (x1 >= x2 && x1 < x2 + s2 && y1 == y2 - 1) ||
-        //         (x1 >= x2 && x1 < x2 + s2 && y1 == y2 + s2) ||
-        //         (x1 == x2 - 1 && y1 >= y2 && y1 < y2 + s2) ||
-        //         (x1 == x2 - s2 && y1 >= y2 && y1 < y2 + s2)
-        //     );
-        // }
-        // if (s2 == 1) {
-        //     return (
-        //         (x2 >= x1 && x2 < x1 + s1 && y2 == y1 - 1) ||
-        //         (x2 >= x1 && x2 < x1 + s1 && y2 == y1 + s1) ||
-        //         (x2 == x1 - 1 && y2 >= y1 && y2 < y1 + s1) ||
-        //         (x2 == x1 - s1 && y2 >= y1 && y2 < y1 + s1)
-        //     );
-        // }
         return (
             (x1 + s1 > x2 && x1 < x2 + s2 && y1 == y2 - s1) ||
             (x1 + s1 > x2 && x1 < x2 + s2 && y1 == y2 + s2) ||
@@ -392,9 +411,9 @@ contract EstateBaseToken is ERC721BaseToken {
         uint16 y = uint16(id / GRID_SIZE);
         list[0] = _encode(x, y, 1);
 
-        require(_quadsInEstate[estateId].length > junction, "invalid junction");
+        require(_quadsInEstate[estateId].length > junction, "JUNCTION_NOT_EXISTENT");
         (uint16 lastX, uint16 lastY, uint8 lastSize) = _decode(_quadsInEstate[estateId][junction]);
-        require(_adjacent(x, y, 1, lastX, lastY, lastSize), "not adjacent to junction provided");
+        require(_adjacent(x, y, 1, lastX, lastY, lastSize), "JUNCTION_NOT_ADJACENT");
         _quadsInEstate[estateId].push(list[0]);
         emit QuadsAdded(estateId, list);
     }
@@ -420,10 +439,12 @@ contract EstateBaseToken is ERC721BaseToken {
             return _ERC721_BATCH_RECEIVED;
         }
         address to = abi.decode(data, (address));
-        require(from == address(0), "only Land minting allowed to mint Estate on transfer");
+        require(to != address(0), "DESTINATION_ZERO_ADDRESS");
+        require(to != address(this), "DESTINATION_ESTATE_CONTRACT");
+        require(from == address(0), "ONLY_MINTING_ALLOWED_NO_TRANSFER");
         uint8 size = 0;
         if (ids.length == 1) {
-            revert("do not accept 1x1 lands");
+            revert("SIZE_1X1");
         } else if (ids.length == 9) {
             size = 3;
         } else if (ids.length == 36) {
@@ -433,13 +454,13 @@ contract EstateBaseToken is ERC721BaseToken {
         } else if (ids.length == 576) {
             size = 24;
         } else {
-            revert('invalid length, need to be a quad');
+            revert('SIZE_INVALID');
         }
         uint16 x = uint16(ids[0] % GRID_SIZE);
         uint16 y = uint16(ids[0] / GRID_SIZE);
         for (uint256 i = 1; i < ids.length; i++) {
             uint256 id = ids[i];
-            require(id == _idInPath(i, size, x, y), "invalid id orders, not a valid quad");
+            require(id == _idInPath(i, size, x, y), "ID_ORDER");
         }
         uint256 estateId = _mintEstate(to);
         uint24[] memory list = new uint24[](1);
@@ -458,7 +479,7 @@ contract EstateBaseToken is ERC721BaseToken {
         if (operator == address(this)) {
             return _ERC721_BATCH_RECEIVED;
         }
-        revert("please call add* or createFrom* functions");
+        revert("ERC721_REJECTED");
     }
 
     function supportsInterface(bytes4 id) override virtual public pure returns (bool) {

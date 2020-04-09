@@ -69,7 +69,7 @@ function runMintingTestFromSale({contractsStore}) {
             assert.equal(estateOwner, user1);
         });
 
-        t.test('purchase an estate and destroyAndTransfer', async (t) => {
+        t.test('purchase an estate and burnAndTransferFrom', async (t) => {
             const land = contracts.lands.find((l) => l.size === 6);
             const proof = contracts.getProof(land);
             const x = land.x;
@@ -91,7 +91,7 @@ function runMintingTestFromSale({contractsStore}) {
 
             const estateId = 1;
 
-            await contracts.Estate.connect(contracts.Estate.provider.getSigner(user1)).functions.destroyAndTransfer(
+            await contracts.Estate.connect(contracts.Estate.provider.getSigner(user1)).functions.burnAndTransferFrom(
                 user1,
                 estateId,
                 user2
