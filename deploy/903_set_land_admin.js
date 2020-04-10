@@ -1,13 +1,13 @@
-module.exports = async ({namedAccounts, deployments}) => {
+module.exports = async ({getNamedAccounts, deployments}) => {
     const {call, sendTxAndWait, log} = deployments;
 
     const {
         landAdmin,
-    } = namedAccounts;
+    } = await getNamedAccounts();
 
     const land = await deployments.get('Land');
     if (!land) {
-        throw new Error('no ASSET contract deployed');
+        throw new Error('no Land contract deployed');
     }
 
     let currentAdmin;
@@ -25,3 +25,5 @@ module.exports = async ({namedAccounts, deployments}) => {
         log('current land impl do not support admin');
     }
 };
+module.exports.tags = ['Land'];
+module.exports.runAtTheEnd = true;

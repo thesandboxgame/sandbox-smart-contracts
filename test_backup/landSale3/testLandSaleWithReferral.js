@@ -8,7 +8,7 @@ const {
 
 const {
     tx,
-} = require('../utils');
+} = require('../../test/utils');
 
 // TODO
 // const {

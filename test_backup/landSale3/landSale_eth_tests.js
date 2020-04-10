@@ -17,7 +17,7 @@ const {
     increaseTime,
     getChainCurrentTime,
     getBalance,
-} = require('../utils');
+} = require('../../test/utils');
 
 const {
     createReferral,

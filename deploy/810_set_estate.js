@@ -21,3 +21,4 @@ module.exports = async ({deployments}) => {
 };
 
 module.exports.skip = guard(['1', '4', '314159']); // TODO remove
+module.exports.tags = ['Estate'];

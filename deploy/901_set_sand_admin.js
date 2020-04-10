@@ -1,11 +1,11 @@
-module.exports = async ({namedAccounts, deployments}) => {
+module.exports = async ({getNamedAccounts, deployments}) => {
     const {call, sendTxAndWait, log, getChainId} = deployments;
     const chainId = await getChainId();
 
     const {
         sandAdmin,
         sandExecutionAdmin,
-    } = namedAccounts;
+    } = await getNamedAccounts();
 
     const sandContract = await deployments.get('Sand');
     if (!sandContract) {
@@ -26,3 +26,5 @@ module.exports = async ({namedAccounts, deployments}) => {
         await sendTxAndWait({from: currentExecutionAdmin, gas: 1000000, skipError: true}, 'Sand', 'changeExecutionAdmin', sandExecutionAdmin);
     }
 };
+module.exports.tags = ['Sand'];
+module.exports.runAtTheEnd = true;

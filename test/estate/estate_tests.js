@@ -2,7 +2,7 @@ const ethers = require('ethers');
 const {BigNumber} = ethers;
 const tap = require('tap');
 const assert = require('assert');
-const {deployments, namedAccounts} = require('@nomiclabs/buidler');
+const {deployments, getNamedAccounts} = require('@nomiclabs/buidler');
 
 const {
     expectRevert,
@@ -12,19 +12,19 @@ const {
     call,
 } = require('../utils');
 
-const EstateTestHelper = require('./testHelper');
-
-const {
-    others,
-} = namedAccounts;
-
-const user0 = others[0];
-const user1 = others[1];
-const user2 = others[2];
-const user3 = others[3];
+const EstateTestHelper = require('./_testHelper');
 
 function runEstateTests({contractsStore}) {
     tap.test('Estate testing', async (t) => {
+        const {
+            others,
+        } = await getNamedAccounts();
+        
+        const user0 = others[0];
+        const user1 = others[1];
+        const user2 = others[2];
+        const user3 = others[3];
+    
         // t.runOnly = true;
         let contracts;
         let helper;
@@ -426,9 +426,7 @@ function runEstateTests({contractsStore}) {
                 ],
                 junctions: [3, 5],
             }, user0), 'JUNCTIONS_MISSING');
-        });
-
-        
+        });        
     });
 }
 

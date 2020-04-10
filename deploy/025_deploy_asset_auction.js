@@ -1,13 +1,13 @@
 const {guard} = require('../lib');
 
-module.exports = async ({namedAccounts, deployments}) => {
+module.exports = async ({getNamedAccounts, deployments}) => {
     const {deployIfDifferent, log} = deployments;
 
     const {
         deployer,
         assetAuctionAdmin,
         assetAuctionFeeCollector
-    } = namedAccounts;
+    } = await getNamedAccounts();
 
     const assetAuctionFee10000th = 0; // 5000; // 5%
 

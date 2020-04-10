@@ -1,13 +1,32 @@
+require('dotenv').config();
 const fs = require('fs');
 usePlugin('buidler-deploy');
 // usePlugin('buidler-ethers-v5');
 
-console.log('buidler-deploy');
-
-let mnemonic;
-try {
-    mnemonic = fs.readFileSync('.mnemonic').toString();
-} catch (e) {}
+let mnemonic = process.env.MNEMONIC;
+if (!mnemonic || mnemonic === '') {
+    const mnemonicPath = process.env.MNEMONIC_PATH;
+    if (mnemonicPath && mnemonicPath !== '') {
+        mnemonic = fs.readFileSync(mnemonicPath).toString();
+    }
+}
+let mainnetMnemonic;
+if (mnemonic) {
+    mainnetMnemonic = mnemonic;
+} else {
+    try {
+        mnemonic = fs.readFileSync('.mnemonic').toString();
+    } catch (e) {}
+    try {
+        mainnetMnemonic = fs.readFileSync('.mnemonic_mainnet').toString();
+    } catch (e) {}
+}
+const accounts = mnemonic ? {
+    mnemonic
+} : undefined;
+const mainnetAccounts = mainnetMnemonic ? {
+    mnemonic: mainnetMnemonic
+} : undefined;
 
 module.exports = {
     namedAccounts: {
@@ -62,7 +81,7 @@ module.exports = {
         // testing
         others: {
             default: 'from:5',
-            deployments: ''
+            deployments: '' // TODO live
         }
     },
     solc: {
@@ -76,12 +95,13 @@ module.exports = {
         sources: 'src'
     },
     networks: {
-        // TODO blockTime: 6, ?
         rinkeby: {
-            url: 'https://rinkeby.infura.io/v3/bc0bdd4eaac640278cdebc3aa91fabe4',
-            accounts: mnemonic ? {
-                mnemonic
-            } : undefined
-        }
+            url: 'https://rinkeby.infura.io/v3/ced8eecc03984939b556332468325813',
+            accounts
+        },
+        mainnet: {
+            url: 'https://mainnet.infura.io/v3/ced8eecc03984939b556332468325813',
+            accounts: mainnetAccounts
+        },
     }
 };

@@ -1,12 +1,12 @@
 const {guard} = require('../lib');
 
-module.exports = async ({namedAccounts, deployments}) => {
+module.exports = async ({getNamedAccounts, deployments}) => {
     const {deployIfDifferent, log} = deployments;
 
     const {
         sandBeneficiary,
         deployer,
-    } = namedAccounts;
+    } = await getNamedAccounts();
 
     const deployResult = await deployIfDifferent(['data'],
         'Sand',
@@ -24,3 +24,4 @@ module.exports = async ({namedAccounts, deployments}) => {
     }
 };
 module.exports.skip = guard(['1', '4', '314159'], 'Sand');
+module.exports.tags = ['Sand'];

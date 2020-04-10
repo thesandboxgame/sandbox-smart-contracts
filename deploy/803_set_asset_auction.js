@@ -1,9 +1,9 @@
-module.exports = async ({namedAccounts, deployments}) => {
+module.exports = async ({getNamedAccounts, deployments}) => {
     const {call, sendTxAndWait, log} = deployments;
 
     const {
         assetAuctionFeeCollector,
-    } = namedAccounts;
+    } = await getNamedAccounts();
 
     const sand = await deployments.get('Sand');
     if (!sand) {

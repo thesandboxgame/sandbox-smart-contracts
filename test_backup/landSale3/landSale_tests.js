@@ -14,7 +14,7 @@ const {
     getChainCurrentTime,
     encodeParameters,
     toWei,
-} = require('../utils');
+} = require('../../test/utils');
 
 const {
     createReferral,

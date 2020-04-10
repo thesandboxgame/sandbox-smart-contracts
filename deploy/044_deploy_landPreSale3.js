@@ -4,7 +4,7 @@ const {getLands} = require('../data/landPreSale_3/getLands');
 const fs = require('fs');
 const {calculateLandHash} = require('../lib/merkleTreeHelper');
 
-module.exports = async ({namedAccounts, deployments, network}) => {
+module.exports = async ({getNamedAccounts, deployments, network}) => {
     const {deployIfDifferent, deploy, log, getChainId} = deployments;
     const chainId = await getChainId();
 
@@ -12,7 +12,7 @@ module.exports = async ({namedAccounts, deployments, network}) => {
         deployer,
         landSaleBeneficiary,
         backendReferralWallet,
-    } = namedAccounts;
+    } = await getNamedAccounts();
 
     const sandContract = await deployments.get('Sand');
     const landContract = await deployments.get('Land');
@@ -53,7 +53,7 @@ module.exports = async ({namedAccounts, deployments, network}) => {
 
     const deployResult = await deployIfDifferent(['data'],
         'LandPreSale_3',
-        {from: deployer, gas: 1000000, associatedData: lands},
+        {from: deployer, gas: 1000000, linkedData: lands},
         'LandSaleWithReferral',
         landContract.address,
         sandContract.address,

@@ -1,13 +1,13 @@
 const {guard} = require('../lib');
 
-module.exports = async ({namedAccounts, deployments}) => {
+module.exports = async ({getNamedAccounts, deployments}) => {
     const {deployIfDifferent, log} = deployments;
 
     const {
         deployer,
         genesisBouncerAdmin,
         genesisMinter,
-    } = namedAccounts;
+    } = await getNamedAccounts();
 
     const asset = await deployments.get('Asset');
     if (!asset) {

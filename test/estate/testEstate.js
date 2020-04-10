@@ -1,4 +1,4 @@
-const {deployments, namedAccounts} = require('@nomiclabs/buidler');
+const {deployments, getNamedAccounts} = require('@nomiclabs/buidler');
 const ethers = require('ethers');
 const {
     Contract,
@@ -10,11 +10,6 @@ const {createDataArray, calculateLandHash} = require('../../lib/merkleTreeHelper
 const {runERC721tests} = require('../batteries/erc721_tests');
 const {runMintingTestFromSale} = require('./sale_minting_tests');
 const {runEstateTests} = require('./estate_tests');
-
-const {
-    deployer,
-    landAdmin,
-} = namedAccounts;
 
 const {
     ethersProvider
@@ -33,7 +28,7 @@ LandSaleEstateStore.prototype.resetContracts = async function () {
     const Estate = await deployments.get('Estate');
     const Land = await deployments.get('Land');
     const landSaleDeployment = await deployments.get('LandPreSale_4');
-    const lands = landSaleDeployment.data;
+    const lands = landSaleDeployment.linkedData;
     const landHashArray = createDataArray(lands);
     const merkleTree = new MerkleTree(landHashArray);
     return {
@@ -60,6 +55,7 @@ EstateStore.prototype.resetContracts = async function () {
     const Estate = new Contract(EstateInfo.address, EstateInfo.abi, ethersProvider);
     const Land = new Contract(LandInfo.address, LandInfo.abi, ethersProvider);
 
+    const namedAccounts = await getNamedAccounts();
     const minter = namedAccounts.others[4];
     const landAdmin = namedAccounts.landAdmin;
     await Land.connect(Land.provider.getSigner(landAdmin)).functions.setMinter(minter, true).then((tx) => tx.wait());
@@ -76,13 +72,18 @@ function ERC721Contract() {
     this.counter = 0;
     this.contract = null;
     this.contractName = 'Estate';
-    this.minter = deployer;
     this.supportsBatchTransfer = true;
     this.supportsSafeBatchTransfer = true;
     this.supportsMandatoryERC721Receiver = true;
 }
 ERC721Contract.prototype.resetContract = async function () {
-    await deployments.run(); // TODO BUIDLER_DEPLOY TAG
+    const {
+        deployer,
+        landAdmin,
+    } = await getNamedAccounts();
+    this.minter = deployer;
+
+    await deployments.run(this.contractName);
 
     const contract = await deployments.get(this.contractName);
     this.contract = new Contract(contract.address, contract.abi, ethersProvider);
@@ -99,13 +100,13 @@ ERC721Contract.prototype.mintERC721 = async function (creator) {
     await landTx.wait();
     const tx = await this.contract.connect(ethersProvider.getSigner(creator)).functions.createFromQuad(creator, creator, 1, this.counter, this.counter);
     const receipt = await tx.wait();
-    return receipt.events.find((v) => v.event === 'QuadsAdded').args[0];
+    return {receipt, tokenId: receipt.events.find((v) => v.event === 'QuadsAdded').args[0]};
 };
 // ERC721Contract.prototype.burnERC721 = async function (from, tokenId) {
 //     const tx = await this.contract.connect(ethersProvider.getSigner(from)).functions.burnFrom(from, tokenId);
 //     return tx.wait();
 // };
 
-runEstateTests({contractsStore: new EstateStore()});
-runMintingTestFromSale({contractsStore: new LandSaleEstateStore()});
+// runEstateTests({contractsStore: new EstateStore()});
+// runMintingTestFromSale({contractsStore: new LandSaleEstateStore()});
 runERC721tests(new ERC721Contract());

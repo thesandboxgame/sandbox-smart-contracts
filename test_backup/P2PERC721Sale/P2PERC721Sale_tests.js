@@ -13,7 +13,7 @@ const {
     deployContract,
     expectRevert,
     ethersProvider,
-} = require('../utils');
+} = require('../../test/utils');
 
 const {
     deployer,

@@ -1,9 +1,9 @@
-module.exports = async ({namedAccounts, deployments}) => {
+module.exports = async ({getNamedAccounts, deployments}) => {
     const {call, sendTxAndWait, log} = deployments;
 
     const {
         landSaleAdmin,
-    } = namedAccounts;
+    } = await getNamedAccounts();
 
     const landSaleName = 'LandPreSale_2';
 

@@ -2,7 +2,7 @@ const ethers = require('ethers');
 const {BigNumber} = ethers;
 const tap = require('tap');
 const assert = require('assert');
-const {namedAccounts} = require('@nomiclabs/buidler');
+const {getNamedAccounts} = require('@nomiclabs/buidler');
 
 const {
     expectRevert,
@@ -14,29 +14,30 @@ const {
     getBlockNumber,
 } = require('../utils');
 
-const {
-    others,
-} = namedAccounts;
-
-const user0 = others[0];
-const user1 = others[1];
-const user2 = others[2];
-const user3 = others[3];
-
 const gas = 1000000;
 
 function runERC721tests(contractStore) {
     tap.test(contractStore.contractName + ' as ERC721', async (t) => {
         // t.runOnly = true;
+
+        const {
+            others,
+        } = await getNamedAccounts();
+
+        const user0 = others[0];
+        const user1 = others[1];
+        const user2 = others[2];
+        const user3 = others[3];
+
         let contract;
         let tokenIds;
         let tokenId;
         t.beforeEach(async () => {
             contract = await contractStore.resetContract();
             tokenIds = [];
-            tokenIds.push(await contractStore.mintERC721(user0));
-            tokenIds.push(await contractStore.mintERC721(user0));
-            tokenIds.push(await contractStore.mintERC721(user0));
+            tokenIds.push((await contractStore.mintERC721(user0)).tokenId);
+            tokenIds.push((await contractStore.mintERC721(user0)).tokenId);
+            tokenIds.push((await contractStore.mintERC721(user0)).tokenId);
             tokenId = tokenIds[0];
         });
 
@@ -123,18 +124,17 @@ function runERC721tests(contractStore) {
 
         t.test('minting', async (t) => {
             t.test('mint result in a transfer from 0 event', async () => {
-                const blockNumber = await getBlockNumber();
-                const newTokenId = await contractStore.mintERC721(user0);
-                const eventsMatching = await contract.queryFilter(contract.filters.Transfer(), blockNumber + 1);
+                const {receipt, tokenId} = await contractStore.mintERC721(user0);
+                const eventsMatching = await contract.queryFilter(contract.filters.Transfer(), receipt.blockNumber, receipt.blockNumber);
                 assert.equal(eventsMatching.length, 1);
                 const transferEvent = eventsMatching[0];
                 assert.equal(transferEvent.args[0], zeroAddress);
-                assert.equal(transferEvent.args[1], user0);
-                assert(transferEvent.args[2].eq(newTokenId));
+                assert.equal(transferEvent.args[1].toLowerCase(), user0.toLowerCase());
+                assert(transferEvent.args[2].eq(tokenId));
             });
 
             t.test('mint for gives correct owner', async () => {
-                const tokenId = await contractStore.mintERC721(user0);
+                const {tokenId} = await contractStore.mintERC721(user0);
                 const owner = await call(contract, 'ownerOf', null, tokenId);
                 assert.equal(owner, user0);
             });
@@ -143,19 +143,19 @@ function runERC721tests(contractStore) {
         if (contractStore.burnERC721) {
             t.test('burning', async (t) => {
                 t.test('burn result in a transfer to 0 event', async () => {
-                    const tokenId = await contractStore.mintERC721(user0);
+                    const {tokenId} = await contractStore.mintERC721(user0);
 
                     const blockNumber = await getBlockNumber();
                     await contractStore.burnERC721(user0, tokenId);
                     const eventsMatching = await contract.queryFilter(contract.filters.Transfer(), blockNumber + 1);
                     assert.equal(eventsMatching.length, 1);
                     const transferEvent = eventsMatching[0];
-                    assert.equal(transferEvent.args[0], user0);
+                    assert.equal(transferEvent.args[0].toLowerCase(), user0.toLowerCase());
                     assert.equal(transferEvent.args[1], zeroAddress);
                     assert.equal(transferEvent.args[2], tokenId);
                 });
                 t.test('burn result in ownerOf throwing', async () => {
-                    const tokenId = await contractStore.mintERC721(user1);
+                    const {tokenId} = await contractStore.mintERC721(user1);
                     await call(contract, 'ownerOf', null, tokenId);
                     await contractStore.burnERC721(user1, tokenId);
                     await expectRevert(call(contract, 'ownerOf', null, tokenId));

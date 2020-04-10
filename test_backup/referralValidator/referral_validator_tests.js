@@ -13,7 +13,7 @@ const {
     increaseTime,
     mine,
     toWei,
-} = require('../utils');
+} = require('../../test/utils');
 
 const {
     deployer,

@@ -1,11 +1,11 @@
 const {guard} = require('../lib');
 
-module.exports = async ({namedAccounts, deployments}) => {
+module.exports = async ({getNamedAccounts, deployments}) => {
     const {deployIfDifferent, log} = deployments;
 
     const {
         deployer,
-    } = namedAccounts;
+    } = await getNamedAccounts();
 
     const sandContract = await deployments.get('Sand');
     if (!sandContract) {

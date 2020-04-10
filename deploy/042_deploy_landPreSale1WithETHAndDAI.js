@@ -1,7 +1,7 @@
 const {guard} = require('../lib');
 const {getLands} = require('../data/landPreSale_1/getLands');
 
-module.exports = async ({namedAccounts, deployments, network}) => {
+module.exports = async ({getNamedAccounts, deployments, network}) => {
     const {deployIfDifferent, deploy, log, getChainId} = deployments;
     const chainId = await getChainId();
 
@@ -9,7 +9,7 @@ module.exports = async ({namedAccounts, deployments, network}) => {
         deployer,
         landSaleAdmin,
         landSaleBeneficiary,
-    } = namedAccounts;
+    } = await getNamedAccounts();
 
     const sandContract = await deployments.get('Sand');
     const landContract = await deployments.get('Land');
@@ -50,7 +50,7 @@ module.exports = async ({namedAccounts, deployments, network}) => {
 
     const deployResult = await deployIfDifferent(['data'],
         'LandPreSale_1',
-        {from: deployer, gas: 1000000, associatedData: lands},
+        {from: deployer, gas: 1000000, linkedData: lands},
         'LandSaleWithETHAndDAI',
         landContract.address,
         sandContract.address,

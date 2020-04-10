@@ -2,7 +2,7 @@ const ethers = require('ethers');
 const {BigNumber} = ethers;
 const tap = require('tap');
 const assert = require('assert');
-const {deployments, namedAccounts} = require('@nomiclabs/buidler');
+const {deployments, getNamedAccounts} = require('@nomiclabs/buidler');
 
 const {
     expectRevert,
@@ -12,17 +12,16 @@ const {
     call,
 } = require('../utils');
 
-const {
-    others,
-} = namedAccounts;
-
-const user0 = others[0];
-const user1 = others[1];
-const user2 = others[2];
-const user3 = others[3];
-
-function runMintingTestFromSale({contractsStore}) {
+function runMintingTestFromSale({contractsStore}) {        
     tap.test('Minting from Sale', async (t) => {
+        const {
+            others,
+        } = await getNamedAccounts();    
+        const user0 = others[0];
+        const user1 = others[1];
+        const user2 = others[2];
+        const user3 = others[3];
+
         let contracts;
         t.beforeEach(async () => {
             contracts = await contractsStore.resetContracts();

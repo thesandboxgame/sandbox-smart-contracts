@@ -1,10 +1,10 @@
-module.exports = async ({namedAccounts, deployments}) => {
+module.exports = async ({getNamedAccounts, deployments}) => {
     const {call, sendTxAndWait, log} = deployments;
 
     const {
         assetAdmin,
         assetBouncerAdmin,
-    } = namedAccounts;
+    } = await getNamedAccounts();
 
     const assetContract = await deployments.get('Asset');
     if (!assetContract) {
