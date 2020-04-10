@@ -1,8 +1,8 @@
 pragma solidity 0.6.4;
 
-import "../../contracts_common/src/Interfaces/ERC1654.sol";
-import "../../contracts_common/src/Interfaces/ERC1654Constants.sol";
-import "../../contracts_common/src/Libraries/SigUtil.sol";
+import "../contracts_common/src/Interfaces/ERC1654.sol";
+import "../contracts_common/src/Interfaces/ERC1654Constants.sol";
+import "../contracts_common/src/Libraries/SigUtil.sol";
 
 contract ERC1654Wallet is ERC1654, ERC1654Constants {
     address owner;

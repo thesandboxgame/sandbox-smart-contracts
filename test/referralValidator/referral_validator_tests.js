@@ -1,6 +1,6 @@
 const tap = require('tap');
 const assert = require('assert');
-const rocketh = require('rocketh');
+const {deployments, namedAccounts} = require('@nomiclabs/buidler');
 const {BigNumber} = require('ethers');
 
 const {
@@ -18,7 +18,7 @@ const {
 const {
     deployer,
     others,
-} = rocketh.namedAccounts;
+} = namedAccounts;
 
 const {
     createReferral,

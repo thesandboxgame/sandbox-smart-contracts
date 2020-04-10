@@ -1,14 +1,9 @@
 const {guard} = require('../lib');
 
-module.exports = async ({namedAccounts, initialRun, deployIfDifferent}) => {
-    function log(...args) {
-        if (initialRun) {
-            console.log(...args);
-        }
-    }
+module.exports = async ({namedAccounts, deployments}) => {
+    const {deployIfDifferent, log} = deployments;
 
     const {
-        sandAdmin,
         sandBeneficiary,
         deployer,
     } = namedAccounts;

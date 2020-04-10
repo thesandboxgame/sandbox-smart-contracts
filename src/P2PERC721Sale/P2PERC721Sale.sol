@@ -1,17 +1,17 @@
 pragma solidity 0.6.4;
 pragma experimental ABIEncoderV2;
 
-import "../../contracts_common/src/BaseWithStorage/Admin.sol";
-import "../../contracts_common/src/Libraries/SigUtil.sol";
-import "../../contracts_common/src/Libraries/PriceUtil.sol";
-import "../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
-import "../../contracts_common/src/Interfaces/ERC721.sol";
-import "../../contracts_common/src/Interfaces/ERC20.sol";
-import "../../contracts_common/src/Interfaces/ERC1271.sol";
-import "../../contracts_common/src/Interfaces/ERC1271Constants.sol";
-import "../../contracts_common/src/Interfaces/ERC1654.sol";
-import "../../contracts_common/src/Interfaces/ERC1654Constants.sol";
-import "../../contracts_common/src/Libraries/SafeMathWithRequire.sol";
+import "../contracts_common/src/BaseWithStorage/Admin.sol";
+import "../contracts_common/src/Libraries/SigUtil.sol";
+import "../contracts_common/src/Libraries/PriceUtil.sol";
+import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
+import "../contracts_common/src/Interfaces/ERC721.sol";
+import "../contracts_common/src/Interfaces/ERC20.sol";
+import "../contracts_common/src/Interfaces/ERC1271.sol";
+import "../contracts_common/src/Interfaces/ERC1271Constants.sol";
+import "../contracts_common/src/Interfaces/ERC1654.sol";
+import "../contracts_common/src/Interfaces/ERC1654Constants.sol";
+import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
 
 import "../TheSandbox712.sol";
 

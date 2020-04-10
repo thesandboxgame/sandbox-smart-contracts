@@ -1,10 +1,10 @@
 const tap = require('tap');
-const rocketh = require('rocketh');
+const {deployments, namedAccounts} = require('@nomiclabs/buidler');
 const {getDeployedContract} = require('../../lib');
 
 const {
     landSaleAdmin,
-} = rocketh.namedAccounts;
+} = namedAccounts;
 
 const {
     tx,
@@ -29,7 +29,7 @@ function ContractStore(type) {
     this.type = type;
 }
 ContractStore.prototype.resetContracts = async function () {
-    await rocketh.runStages();
+    await deployments.run(); // TODO BUIDLER_DEPLOY TAG
     const contracts = {
         LandSale: getDeployedContract('LandPreSale_3'),
         Sand: getDeployedContract('Sand'),

@@ -1,17 +1,13 @@
 const {guard} = require('../lib');
 
-module.exports = async ({namedAccounts, initialRun, getDeployedContract, deployIfDifferent}) => {
-    function log(...args) {
-        if (initialRun) {
-            console.log(...args);
-        }
-    }
+module.exports = async ({namedAccounts, deployments}) => {
+    const {deployIfDifferent, log} = deployments;
 
     const {
         deployer,
     } = namedAccounts;
 
-    const sand = getDeployedContract('Sand');
+    const sand = await deployments.get('Sand');
     if (!sand) {
         throw new Error('no SAND contract deployed');
     }

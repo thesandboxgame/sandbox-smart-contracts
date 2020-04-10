@@ -2,7 +2,7 @@ pragma solidity 0.6.4;
 
 import {
     ProxyImplementation
-} from "../../contracts_common/src/BaseWithStorage/ProxyImplementation.sol";
+} from "./contracts_common/src/BaseWithStorage/ProxyImplementation.sol";
 
 contract TheSandbox712 is ProxyImplementation {
     bytes32 constant EIP712DOMAIN_TYPEHASH = keccak256(

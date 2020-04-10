@@ -1,9 +1,9 @@
 const ethers = require('ethers');
 // ethers.utils.Logger.setLogLevel('off');
-const rocketh = require('rocketh');
+const {deployments, namedAccounts, ethereum} = require('@nomiclabs/buidler');
 const {BigNumber, ContractFactory} = ethers;
 
-const ethersProvider = new ethers.providers.Web3Provider(rocketh.ethereum);
+const ethersProvider = new ethers.providers.Web3Provider(ethereum);
 
 async function tx(contract, methodName, options, ...args) {
     if (!args) {
@@ -21,8 +21,8 @@ async function tx(contract, methodName, options, ...args) {
 }
 
 async function deployContract(from, contractName, ...args) {
-    const contractInfo = rocketh.contractInfo(contractName);
-    const contract = new ContractFactory(contractInfo.abi, contractInfo.evm.bytecode.object, ethersProvider.getSigner(from));
+    const contractInfo = await deployments.getArtifact(contractName);
+    const contract = new ContractFactory(contractInfo.abi, contractInfo.bytecode, ethersProvider.getSigner(from));
     return contract.deploy(...args);
 }
 

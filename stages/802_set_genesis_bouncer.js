@@ -1,19 +1,11 @@
-module.exports = async ({namedAccounts, initialRun, getDeployedContract, call, sendTxAndWaitOnlyFrom}) => {
-    function log(...args) {
-        if (initialRun) {
-            console.log(...args);
-        }
-    }
+module.exports = async ({deployments}) => {
+    const {call, sendTxAndWait, log} = deployments;
 
-    const {
-        deployer,
-    } = namedAccounts;
-
-    const asset = getDeployedContract('Asset');
+    const asset = await deployments.get('Asset');
     if (!asset) {
         throw new Error('no Asset contract deployed');
     }
-    const genesisBouncer = getDeployedContract('GenesisBouncer');
+    const genesisBouncer = await deployments.get('GenesisBouncer');
     if (!genesisBouncer) {
         throw new Error('no GenesisBouncer contract deployed');
     }
@@ -22,6 +14,6 @@ module.exports = async ({namedAccounts, initialRun, getDeployedContract, call, s
     if (!isBouncer) {
         log('setting genesis bouncer as Asset bouncer');
         const currentBouncerAdmin = await call('Asset', 'getBouncerAdmin');
-        await sendTxAndWaitOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000, skipError: true}, 'Asset', 'setBouncer', genesisBouncer.address, true);
+        await sendTxAndWait({from: currentBouncerAdmin, gas: 1000000, skipError: true}, 'Asset', 'setBouncer', genesisBouncer.address, true);
     }
 };

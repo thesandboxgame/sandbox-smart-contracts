@@ -1,23 +1,15 @@
-module.exports = async ({namedAccounts, initialRun, getDeployedContract, call, sendTxAndWaitOnlyFrom}) => {
-    function log(...args) {
-        if (initialRun) {
-            console.log(...args);
-        }
-    }
+module.exports = async ({deployments}) => {
+    const {call, sendTxAndWait, log} = deployments;
 
-    const {
-        deployer,
-    } = namedAccounts;
-
-    const sand = getDeployedContract('Sand');
+    const sand = await deployments.get('Sand');
     if (!sand) {
         throw new Error('no Sand contract deployed');
     }
-    const land = getDeployedContract('Land');
+    const land = await deployments.get('Land');
     if (!land) {
         throw new Error('no Land contract deployed');
     }
-    const landSale = getDeployedContract('LandPreSale_1');
+    const landSale = await deployments.get('LandPreSale_1');
     if (!landSale) {
         throw new Error('no LandPreSale_1 contract deployed');
     }
@@ -26,7 +18,7 @@ module.exports = async ({namedAccounts, initialRun, getDeployedContract, call, s
     if (!isMinter) {
         log('setting LandPreSale_1 as Land minter');
         const currentLandAdmin = await call('Land', 'getAdmin');
-        await sendTxAndWaitOnlyFrom(currentLandAdmin, {from: deployer, gas: 1000000, skipError: true}, 'Land', 'setMinter', landSale.address, true);
+        await sendTxAndWait({from: currentLandAdmin, gas: 1000000, skipError: true}, 'Land', 'setMinter', landSale.address, true);
     }
 
     // TODO if we want to enable SAND

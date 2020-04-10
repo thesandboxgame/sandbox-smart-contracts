@@ -1,10 +1,10 @@
 /* solhint-disable not-rely-on-time, func-order */
 pragma solidity 0.6.4;
 
-import "../../contracts_common/src/Libraries/SigUtil.sol";
-import "../../contracts_common/src/Libraries/SafeMathWithRequire.sol";
-import "../../contracts_common/src/Interfaces/ERC20.sol";
-import "../../contracts_common/src/BaseWithStorage/Admin.sol";
+import "../contracts_common/src/Libraries/SigUtil.sol";
+import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
+import "../contracts_common/src/Interfaces/ERC20.sol";
+import "../contracts_common/src/BaseWithStorage/Admin.sol";
 
 
 /**

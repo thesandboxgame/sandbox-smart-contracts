@@ -1,8 +1,8 @@
 pragma solidity 0.6.4;
 
-import "../../contracts_common/src/Interfaces/ERC1271.sol";
-import "../../contracts_common/src/Interfaces/ERC1271Constants.sol";
-import "../../contracts_common/src/Libraries/SigUtil.sol";
+import "../contracts_common/src/Interfaces/ERC1271.sol";
+import "../contracts_common/src/Interfaces/ERC1271Constants.sol";
+import "../contracts_common/src/Libraries/SigUtil.sol";
 
 contract ERC1271WalletWithERC1155Receiver is ERC1271, ERC1271Constants {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;

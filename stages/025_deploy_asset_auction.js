@@ -1,11 +1,7 @@
 const {guard} = require('../lib');
 
-module.exports = async ({namedAccounts, initialRun, getDeployedContract, deployIfDifferent}) => {
-    function log(...args) {
-        if (initialRun) {
-            console.log(...args);
-        }
-    }
+module.exports = async ({namedAccounts, deployments}) => {
+    const {deployIfDifferent, log} = deployments;
 
     const {
         deployer,
@@ -15,11 +11,11 @@ module.exports = async ({namedAccounts, initialRun, getDeployedContract, deployI
 
     const assetAuctionFee10000th = 0; // 5000; // 5%
 
-    const asset = getDeployedContract('Asset');
+    const asset = await deployments.get('Asset');
     if (!asset) {
         throw new Error('no Asset contract deployed');
     }
-    const sandContract = getDeployedContract('Sand');
+    const sandContract = await deployments.get('Sand');
     if (!sandContract) {
         throw new Error('no SAND contract deployed');
     }

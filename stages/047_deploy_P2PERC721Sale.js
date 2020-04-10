@@ -1,16 +1,12 @@
-module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, isDeploymentChainId, getDeployedContract, deploy}) => {
-    function log(...args) {
-        if (initialRun) {
-            console.log(...args);
-        }
-    }
+module.exports = async ({namedAccounts, deployments}) => {
+    const {deployIfDifferent, deploy} = deployments;
 
     const {
         deployer,
         P2PERC721SaleAdmin,
     } = namedAccounts;
 
-    const sandContract = getDeployedContract('Sand');
+    const sandContract = await deployments.get('Sand');
 
     if (!sandContract) {
         throw new Error('no SAND contract deployed');

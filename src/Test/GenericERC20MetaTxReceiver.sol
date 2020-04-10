@@ -1,6 +1,6 @@
 pragma solidity 0.6.4;
 
-import "../../contracts_common/src/Interfaces/ERC20.sol";
+import "../contracts_common/src/Interfaces/ERC20.sol";
 
 contract GenericERC20MetaTxReceiver {
     address metaTxContract;

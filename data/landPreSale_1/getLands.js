@@ -175,7 +175,7 @@ function generateLandsForMerkleTree() {
 const {lands, partnersLands} = generateLandsForMerkleTree();
 
 module.exports = {
-    getLands: (isDeploymentChainId, chainId) => {
+    getLands: (liveNetwork, chainId) => {
         if (typeof chainId !== 'string') {
             throw new Error('chainId not a string');
         }
@@ -191,12 +191,12 @@ module.exports = {
         try {
             secret = fs.readFileSync(secretPath);
         } catch (e) {
-            if (isDeploymentChainId) {
+            if (liveNetwork) {
                 throw e;
             }
         }
 
-        if (!isDeploymentChainId) {
+        if (!liveNetwork) {
             expose = true;
         }
 

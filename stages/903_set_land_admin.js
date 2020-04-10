@@ -1,16 +1,11 @@
-module.exports = async ({namedAccounts, initialRun, getDeployedContract, sendTxAndWaitOnlyFrom, call}) => {
-    function log(...args) {
-        if (initialRun) {
-            console.log(...args);
-        }
-    }
+module.exports = async ({namedAccounts, deployments}) => {
+    const {call, sendTxAndWait, log} = deployments;
 
     const {
-        deployer,
         landAdmin,
     } = namedAccounts;
 
-    const land = getDeployedContract('Land');
+    const land = await deployments.get('Land');
     if (!land) {
         throw new Error('no ASSET contract deployed');
     }
@@ -24,7 +19,7 @@ module.exports = async ({namedAccounts, initialRun, getDeployedContract, sendTxA
     if (currentAdmin) {
         if (currentAdmin.toLowerCase() !== landAdmin.toLowerCase()) {
             log('setting land Admin');
-            await sendTxAndWaitOnlyFrom(currentAdmin, {from: deployer, gas: 1000000, skipError: true}, 'Land', 'changeAdmin', landAdmin);
+            await sendTxAndWait({from: currentAdmin, gas: 1000000, skipError: true}, 'Land', 'changeAdmin', landAdmin);
         }
     } else {
         log('current land impl do not support admin');

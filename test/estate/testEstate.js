@@ -1,18 +1,8 @@
-const rocketh = require('rocketh');
+const {deployments, namedAccounts} = require('@nomiclabs/buidler');
 const ethers = require('ethers');
 const {
     Contract,
 } = ethers;
-const {
-    namedAccounts,
-    getDeployedContract,
-} = rocketh;
-
-const deploy_sand = require('../../stages/010_deploy_sand');
-const deploy_land = require('../../stages/040_deploy_land');
-const deploy_estate = require('../../stages/045_deploy_estate');
-const set_estate = require('../../stages/810_set_estate');
-const set_land_admin = require('../../stages/903_set_land_admin');
 
 const MerkleTree = require('../../lib/merkleTree');
 const {createDataArray, calculateLandHash} = require('../../lib/merkleTreeHelper');
@@ -35,14 +25,14 @@ function LandSaleEstateStore() {
 }
 LandSaleEstateStore.prototype.resetContracts = async function () {
     try {
-        await rocketh.runStages();
+        await deployments.run(); // TODO BUIDLER_DEPLOY TAG
     } catch (e) {
         console.error(e);
     }
-    const LandSale = getDeployedContract('LandPreSale_4');
-    const Estate = getDeployedContract('Estate');
-    const Land = getDeployedContract('Land');
-    const landSaleDeployment = rocketh.deployment('LandPreSale_4');
+    const LandSale = await deployments.get('LandPreSale_4');
+    const Estate = await deployments.get('Estate');
+    const Land = await deployments.get('Land');
+    const landSaleDeployment = await deployments.get('LandPreSale_4');
     const lands = landSaleDeployment.data;
     const landHashArray = createDataArray(lands);
     const merkleTree = new MerkleTree(landHashArray);
@@ -61,17 +51,17 @@ function EstateStore() {
 }
 EstateStore.prototype.resetContracts = async function () {
     try {
-        await rocketh.runStages();
+        await deployments.run(); // TODO BUIDLER_DEPLOY TAG
     } catch (e) {
         console.error(e);
     }
-    const EstateInfo = getDeployedContract('Estate');
-    const LandInfo = getDeployedContract('Land');
+    const EstateInfo = await deployments.get('Estate');
+    const LandInfo = await deployments.get('Land');
     const Estate = new Contract(EstateInfo.address, EstateInfo.abi, ethersProvider);
     const Land = new Contract(LandInfo.address, LandInfo.abi, ethersProvider);
 
-    const minter = rocketh.namedAccounts.others[4];
-    const landAdmin = rocketh.namedAccounts.landAdmin;
+    const minter = namedAccounts.others[4];
+    const landAdmin = namedAccounts.landAdmin;
     await Land.connect(Land.provider.getSigner(landAdmin)).functions.setMinter(minter, true).then((tx) => tx.wait());
     const LandFromMinter = Land.connect(Land.provider.getSigner(minter));
     return {
@@ -92,18 +82,12 @@ function ERC721Contract() {
     this.supportsMandatoryERC721Receiver = true;
 }
 ERC721Contract.prototype.resetContract = async function () {
-    // await rocketh.runStages();
-    rocketh.resetDeployments();
-    await deploy_sand(rocketh);
-    await deploy_land(rocketh);
-    await deploy_estate(rocketh);
-    await set_estate(rocketh);
-    await set_land_admin(rocketh);
+    await deployments.run(); // TODO BUIDLER_DEPLOY TAG
 
-    const contract = getDeployedContract(this.contractName);
+    const contract = await deployments.get(this.contractName);
     this.contract = new Contract(contract.address, contract.abi, ethersProvider);
 
-    const landContract = getDeployedContract('Land');
+    const landContract = await deployments.get('Land');
     this.landContract = new Contract(landContract.address, landContract.abi, ethersProvider);
     const tx = await this.landContract.connect(ethersProvider.getSigner(landAdmin)).functions.setMinter(this.minter, true);
     await tx.wait();

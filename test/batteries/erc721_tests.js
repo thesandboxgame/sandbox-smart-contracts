@@ -2,7 +2,7 @@ const ethers = require('ethers');
 const {BigNumber} = ethers;
 const tap = require('tap');
 const assert = require('assert');
-const rocketh = require('rocketh');
+const {namedAccounts} = require('@nomiclabs/buidler');
 
 const {
     expectRevert,
@@ -13,10 +13,6 @@ const {
     deployContract,
     getBlockNumber,
 } = require('../utils');
-
-const {
-    namedAccounts,
-} = rocketh;
 
 const {
     others,

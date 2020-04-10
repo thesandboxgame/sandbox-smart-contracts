@@ -1,17 +1,12 @@
-module.exports = async ({namedAccounts, initialRun, call, sendTxAndWaitOnlyFrom, getDeployedContract}) => {
-    function log(...args) {
-        if (initialRun) {
-            console.log(...args);
-        }
-    }
+module.exports = async ({namedAccounts, deployments}) => {
+    const {call, sendTxAndWait, log} = deployments;
 
     const {
-        deployer,
         assetAdmin,
         assetBouncerAdmin,
     } = namedAccounts;
 
-    const assetContract = getDeployedContract('Asset');
+    const assetContract = await deployments.get('Asset');
     if (!assetContract) {
         throw new Error('no ASSET contract deployed');
     }
@@ -25,7 +20,7 @@ module.exports = async ({namedAccounts, initialRun, call, sendTxAndWaitOnlyFrom,
     if (currentAdmin) {
         if (currentAdmin.toLowerCase() !== assetAdmin.toLowerCase()) {
             log('setting Asset Admin');
-            await sendTxAndWaitOnlyFrom(currentAdmin, {from: deployer, gas: 1000000, skipError: true}, 'Asset', 'changeAdmin', assetAdmin);
+            await sendTxAndWait({from: currentAdmin, gas: 1000000, skipError: true}, 'Asset', 'changeAdmin', assetAdmin);
         }
     } else {
         log('current Asset impl do not support admin');
@@ -40,7 +35,7 @@ module.exports = async ({namedAccounts, initialRun, call, sendTxAndWaitOnlyFrom,
     if (currentBouncerAdmin) {
         if (currentBouncerAdmin.toLowerCase() !== assetBouncerAdmin.toLowerCase()) {
             log('setting Asset Bouncer Admin');
-            await sendTxAndWaitOnlyFrom(currentBouncerAdmin, {from: deployer, gas: 1000000, skipError: true}, 'Asset', 'changeBouncerAdmin', assetBouncerAdmin);
+            await sendTxAndWait({from: currentBouncerAdmin, gas: 1000000, skipError: true}, 'Asset', 'changeBouncerAdmin', assetBouncerAdmin);
         }
     } else {
         log('current Asset impl do not support bouncerAdmin');

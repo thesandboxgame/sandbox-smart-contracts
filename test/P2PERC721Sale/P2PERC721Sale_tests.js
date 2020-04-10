@@ -1,9 +1,8 @@
 const tap = require('tap');
 const assert = require('assert');
-const rocketh = require('rocketh');
+const {deployments, namedAccounts, ethereum} = require('@nomiclabs/buidler');
 const ethers = require('ethers');
 const {Wallet, utils, BigNumber} = ethers;
-const {getDeployedContract} = rocketh;
 const {solidityKeccak256, arrayify} = ethers.utils;
 const ethSigUtil = require('eth-sig-util');
 
@@ -20,7 +19,7 @@ const {
     deployer,
     others,
     P2PERC721SaleAdmin,
-} = rocketh.namedAccounts;
+} = namedAccounts;
 
 const initialFee = 100;
 
@@ -31,7 +30,7 @@ function runP2PERC721SaleTests(title) {
         let sand;
 
         let wallet = Wallet.createRandom();
-        const provider = new ethers.providers.Web3Provider(rocketh.ethereum);
+        const provider = new ethers.providers.Web3Provider(ethereum); // TODO use utils
         wallet = wallet.connect(provider);
         await ethersProvider.getSigner(deployer).sendTransaction({to: wallet.address, value: BigNumber.from('1000000000000000000')});
 
@@ -103,8 +102,8 @@ function runP2PERC721SaleTests(title) {
         }
 
         t.beforeEach(async () => {
-            await rocketh.runStages();
-            const sandContract = getDeployedContract('Sand');
+            await deployments.run(); // TODO BUIDLER_DEPLOY TAG
+            const sandContract = await deployments.get('Sand');
             sand = new ethers.Contract(sandContract.address, sandContract.abi, ethersProvider);
 
             instance = await deployContract(

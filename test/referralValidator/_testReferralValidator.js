@@ -1,5 +1,5 @@
 const {
     runReferralValidatorTests,
-} = require('./referralValidator_tests');
+} = require('./referral_validator_tests');
 
 runReferralValidatorTests('ReferralValidator');

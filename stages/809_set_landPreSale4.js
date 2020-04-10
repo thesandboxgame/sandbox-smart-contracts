@@ -1,26 +1,21 @@
 const {guard} = require('../lib');
-module.exports = async ({namedAccounts, initialRun, sendTxAndWaitOnlyFrom, getDeployedContract, call}) => {
-    function log(...args) {
-        if (initialRun) {
-            console.log(...args);
-        }
-    }
+module.exports = async ({namedAccounts, deployments}) => {
+    const {call, sendTxAndWait, log} = deployments;
 
     const {
-        deployer,
         landSaleAdmin,
     } = namedAccounts;
 
     const landSaleName = 'LandPreSale_4';
-    const sand = getDeployedContract('Sand');
+    const sand = await deployments.get('Sand');
     if (!sand) {
         throw new Error('no Sand contract deployed');
     }
-    const land = getDeployedContract('Land');
+    const land = await deployments.get('Land');
     if (!land) {
         throw new Error('no Land contract deployed');
     }
-    const landSale = getDeployedContract(landSaleName);
+    const landSale = await deployments.get(landSaleName);
     if (!landSale) {
         throw new Error('no LandPreSale_4 contract deployed');
     }
@@ -29,20 +24,20 @@ module.exports = async ({namedAccounts, initialRun, sendTxAndWaitOnlyFrom, getDe
     if (!isMinter) {
         log('setting LandPreSale_4 as Land minter');
         const currentLandAdmin = await call('Land', 'getAdmin');
-        await sendTxAndWaitOnlyFrom(currentLandAdmin, {from: deployer, gas: 1000000, skipError: true}, 'Land', 'setMinter', landSale.address, true);
+        await sendTxAndWait({from: currentLandAdmin, gas: 1000000, skipError: true}, 'Land', 'setMinter', landSale.address, true);
     }
 
     const isDAIEnabled = await call(landSaleName, 'isDAIEnabled');
     if (!isDAIEnabled) {
         log('enablingDAI for LandPreSale_4');
         const currentLandSaleAdmin = await call(landSaleName, 'getAdmin');
-        await sendTxAndWaitOnlyFrom(currentLandSaleAdmin, {from: deployer, gas: 1000000, skipError: true}, landSaleName, 'setDAIEnabled', true);
+        await sendTxAndWait({from: currentLandSaleAdmin, gas: 1000000, skipError: true}, landSaleName, 'setDAIEnabled', true);
     }
 
     const currentAdmin = await call(landSaleName, 'getAdmin');
     if (currentAdmin.toLowerCase() !== landSaleAdmin.toLowerCase()) {
         log('setting LandPreSale_4 Admin');
-        await sendTxAndWaitOnlyFrom(currentAdmin, {from: deployer, gas: 1000000, skipError: true}, landSaleName, 'changeAdmin', landSaleAdmin);
+        await sendTxAndWait({from: currentAdmin, gas: 1000000, skipError: true}, landSaleName, 'changeAdmin', landSaleAdmin);
     }
 
     // TODO if we want to enable SAND
@@ -50,7 +45,7 @@ module.exports = async ({namedAccounts, initialRun, sendTxAndWaitOnlyFrom, getDe
     // if (!isSandSuperOperator) {
     //     log('setting LandPreSale_4 as super operator for Sand');
     //     const currentSandAdmin = await call(sand, 'getAdmin');
-    //     await sendTxAndWaitOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000, skipError: true}, sand, 'setSuperOperator', landSale.address, true);
+    //     await sendTxAndWait({from: currentSandAdmin, gas: 100000, skipError: true}, sand, 'setSuperOperator', landSale.address, true);
     // }
 };
 module.exports.skip = guard(['1', '4', '314159']); // TODO remove

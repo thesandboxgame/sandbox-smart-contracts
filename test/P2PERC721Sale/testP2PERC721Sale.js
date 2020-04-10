@@ -1,5 +1,3 @@
-const rocketh = require('rocketh');
-
 const {
     runP2PERC721SaleTests,
 } = require('./P2PERC721Sale_tests');

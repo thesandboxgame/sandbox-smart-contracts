@@ -4,22 +4,18 @@ const {getLands} = require('../data/landPreSale_3/getLands');
 const fs = require('fs');
 const {calculateLandHash} = require('../lib/merkleTreeHelper');
 
-module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, isDeploymentChainId, getDeployedContract, deploy}) => {
-    function log(...args) {
-        if (initialRun) {
-            console.log(...args);
-        }
-    }
+module.exports = async ({namedAccounts, deployments, network}) => {
+    const {deployIfDifferent, deploy, log, getChainId} = deployments;
+    const chainId = await getChainId();
 
     const {
         deployer,
-        landSaleAdmin,
         landSaleBeneficiary,
         backendReferralWallet,
     } = namedAccounts;
 
-    const sandContract = getDeployedContract('Sand');
-    const landContract = getDeployedContract('Land');
+    const sandContract = await deployments.get('Sand');
+    const landContract = await deployments.get('Land');
 
     if (!sandContract) {
         throw new Error('no SAND contract deployed');
@@ -29,7 +25,7 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
         throw new Error('no LAND contract deployed');
     }
 
-    let daiMedianizer = getDeployedContract('DAIMedianizer');
+    let daiMedianizer = await deployments.get('DAIMedianizer');
     if (!daiMedianizer) {
         log('setting up a fake DAI medianizer');
         const daiMedianizerDeployResult = await deploy(
@@ -40,7 +36,7 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
         daiMedianizer = daiMedianizerDeployResult.contract;
     }
 
-    let dai = getDeployedContract('DAI');
+    let dai = await deployments.get('DAI');
     if (!dai) {
         log('setting up a fake DAI');
         const daiDeployResult = await deploy(
@@ -53,7 +49,7 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
         dai = daiDeployResult.contract;
     }
 
-    const {lands, merkleRootHash, saltedLands, tree} = getLands(isDeploymentChainId, chainId);
+    const {lands, merkleRootHash, saltedLands, tree} = getLands(network.live, chainId);
 
     const deployResult = await deployIfDifferent(['data'],
         'LandPreSale_3',
@@ -71,7 +67,7 @@ module.exports = async ({chainId, namedAccounts, initialRun, deployIfDifferent, 
         backendReferralWallet,
         2000,
     );
-    const contract = getDeployedContract('LandPreSale_3');
+    const contract = await deployments.get('LandPreSale_3');
     if (deployResult.newlyDeployed) {
         log(' - LandPreSale_3 deployed at : ' + contract.address + ' for gas : ' + deployResult.receipt.gasUsed);
         const landsWithProof = [];

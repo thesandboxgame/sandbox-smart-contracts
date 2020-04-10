@@ -1,5 +1,7 @@
 node_modules/
 build/
+artifacts/
+cache/
 yarn-error.log
 .google_credentials.json
 token.json

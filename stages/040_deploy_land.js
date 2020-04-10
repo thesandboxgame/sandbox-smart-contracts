@@ -1,24 +1,15 @@
-const rocketh = require('rocketh');
 const {guard} = require('../lib');
 
-module.exports = async ({namedAccounts, initialRun, isDeploymentChainId, getDeployedContract, deployIfDifferent}) => {
-    function log(...args) {
-        if (initialRun) {
-            console.log(...args);
-        }
-    }
+module.exports = async ({namedAccounts, deployments}) => {
+    const {deployIfDifferent, log} = deployments;
 
     const {
         deployer,
     } = namedAccounts;
 
-    const sandContract = getDeployedContract('Sand');
+    const sandContract = await deployments.get('Sand');
     if (!sandContract) {
         throw new Error('no SAND contract deployed');
-    }
-    const optimizerRun = rocketh.config && rocketh.config.solcSettings && rocketh.config.solcSettings.optimizer && rocketh.config.solcSettings.optimizer.enabled && rocketh.config.solcSettings.optimizer.runs;
-    if (isDeploymentChainId && (!optimizerRun || optimizerRun < 2000)) {
-        throw new Error('Land wants to use solc optimized runs >= 2000');
     }
     const deployResult = await deployIfDifferent(['data'],
         'Land',

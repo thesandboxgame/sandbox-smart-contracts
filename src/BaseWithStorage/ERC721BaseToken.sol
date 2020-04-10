@@ -1,12 +1,12 @@
 /* solhint-disable func-order, code-complexity */
 pragma solidity 0.6.4;
 
-import "../../contracts_common/src/Libraries/AddressUtils.sol";
-import "../../contracts_common/src/Interfaces/ERC721TokenReceiver.sol";
-import "../../contracts_common/src/Interfaces/ERC721Events.sol";
-import "../../contracts_common/src/BaseWithStorage/SuperOperators.sol";
-import "../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
-import "../../contracts_common/src/Interfaces/ERC721MandatoryTokenReceiver.sol";
+import "../contracts_common/src/Libraries/AddressUtils.sol";
+import "../contracts_common/src/Interfaces/ERC721TokenReceiver.sol";
+import "../contracts_common/src/Interfaces/ERC721Events.sol";
+import "../contracts_common/src/BaseWithStorage/SuperOperators.sol";
+import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
+import "../contracts_common/src/Interfaces/ERC721MandatoryTokenReceiver.sol";
 
 contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver {
     using AddressUtils for address;

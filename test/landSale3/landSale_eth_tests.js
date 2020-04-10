@@ -1,8 +1,7 @@
 const tap = require('tap');
 const assert = require('assert');
 
-const rocketh = require('rocketh');
-const {getDeployedContract} = rocketh;
+const {deployments, namedAccounts} = require('@nomiclabs/buidler');
 
 const ethers = require('ethers');
 const {BigNumber} = ethers;
@@ -31,7 +30,7 @@ const {
     landAdmin,
     sandAdmin,
     others,
-} = rocketh.namedAccounts;
+} = namedAccounts;
 
 const MerkleTree = require('../../lib/merkleTree');
 const {createDataArray, calculateLandHash} = require('../../lib/merkleTreeHelper');
@@ -97,8 +96,8 @@ async function setupTestLandSale(contracts) {
     saleStart = getChainCurrentTime();
     saleDuration = 60 * 60;
     saleEnd = saleStart + saleDuration;
-    const daiMedianizer = getDeployedContract('DAIMedianizer');
-    const dai = getDeployedContract('DAI');
+    const daiMedianizer = await deployments.get('DAIMedianizer');
+    const dai = await deployments.get('DAI');
     const landHashArray = createDataArray(testLands);
     const tree = new MerkleTree(landHashArray);
     const contract = await deployContract(
@@ -133,8 +132,8 @@ function runLandSaleEthTests(title, contactStore) {
 
         t.beforeEach(async () => {
             contracts = await contactStore.resetContracts();
-            const deployment = rocketh.deployment('LandPreSale_3');
-            lands = deployment.data;
+            const deployment = deployments.get('LandPreSale_3');
+            lands = deployment.linkedData;
 
             landHashArray = createDataArray(lands);
             tree = new MerkleTree(landHashArray);
