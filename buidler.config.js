@@ -73,8 +73,7 @@ module.exports = {
         }
     },
     paths: {
-        sources: 'src',
-        deploy: 'stages'
+        sources: 'src'
     },
     networks: {
         // TODO blockTime: 6, ?
