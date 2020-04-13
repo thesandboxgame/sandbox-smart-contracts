@@ -1532,8 +1532,9 @@ const mandatoryReceiver = {
 
 module.exports = (init, extensions) => {
   const tests = [];
-  function it(title, test) {
-    tests.push({title, test: async () => {
+
+  function preTest(test) {
+    return async () => {
       const {ethereum, contractAddress, mint, deployer, users} = await init();
       const ethersProvider = new Web3Provider(ethereum);
       const mandatoryReceiverFactory = new ContractFactory(mandatoryReceiver.abi, mandatoryReceiver.bytecode, ethersProvider.getSigner(deployer));
@@ -1580,37 +1581,51 @@ module.exports = (init, extensions) => {
         user2,
         tokenIds
       });
-    }});
+    }
   }
 
-  it('transfering a non existing NFT fails', async function ({contractAsOwner, owner, user1}) {
-    await expectRevert(contractAsOwner.transferFrom(owner, user1, 10000000).then(tx => tx.wait()));
-  });
+  function it(title, test) {
+    tests.push({title, test: preTest(test)});
+  }
 
-  it('tx balanceOf a zero owner fails', async function ({contractAsOwner}) {
-    await expectRevert(contractAsOwner.balanceOf(zeroAddress).then(tx => tx.wait()));
-  });
+  function describe(title, func) {
+    
+    const subTests = [];
+    func((title, test) => {
+      subTests.push({title, test: preTest(test)})
+    });
+    tests.push({title, subTests});
+  }
 
-  it('call balanceOf a zero owner fails', async function ({contract}) {
-    await expectRevert(contract.callStatic.balanceOf(zeroAddress));
-  });
-
-  it('tx ownerOf a non existing NFT fails', async function ({contractAsOwner}) {
-    await expectRevert(contractAsOwner.ownerOf(1000000000).then(tx => tx.wait()));
-  });
-
-  it('call ownerOf a non existing NFT fails', async function ({contract}) {
-    await expectRevert(contract.callStatic.ownerOf(1000000000));
-  });
-
-  it('tx getApproved a non existing NFT fails', async function ({contractAsOwner}) {
-    await expectRevert(contractAsOwner.getApproved(1000000000).then(tx => tx.wait()));
-  });
-
-  it('call getApproved a non existing NFT fails', async function ({contract}) {
-    await expectRevert(contract.callStatic.getApproved(1000000000));
-  });
-
+  describe('non existing NFT', function (it) {
+    it('transfering a non existing NFT fails', async function ({contractAsOwner, owner, user1}) {
+      await expectRevert(contractAsOwner.transferFrom(owner, user1, 10000000).then(tx => tx.wait()));
+    });
+  
+    it('tx balanceOf a zero owner fails', async function ({contractAsOwner}) {
+      await expectRevert(contractAsOwner.balanceOf(zeroAddress).then(tx => tx.wait()));
+    });
+  
+    it('call balanceOf a zero owner fails', async function ({contract}) {
+      await expectRevert(contract.callStatic.balanceOf(zeroAddress));
+    });
+  
+    it('tx ownerOf a non existing NFT fails', async function ({contractAsOwner}) {
+      await expectRevert(contractAsOwner.ownerOf(1000000000).then(tx => tx.wait()));
+    });
+  
+    it('call ownerOf a non existing NFT fails', async function ({contract}) {
+      await expectRevert(contract.callStatic.ownerOf(1000000000));
+    });
+  
+    it('tx getApproved a non existing NFT fails', async function ({contractAsOwner}) {
+      await expectRevert(contractAsOwner.getApproved(1000000000).then(tx => tx.wait()));
+    });
+  
+    it('call getApproved a non existing NFT fails', async function ({contract}) {
+      await expectRevert(contract.callStatic.getApproved(1000000000));
+    });  
+  })
   // not technically required by erc721 standard //////////////////////////////////////////////
   // it('call isApprovedForAll for a zero address as owner fails', async () => {
   //     await expectRevert(call(contract, 'isApprovedForAll', {from: user0, gas}, zeroAddress, user1));
@@ -1636,266 +1651,281 @@ module.exports = (init, extensions) => {
   //     await expectRevert(tx(contract, 'isApprovedForAll', {from: user0, gas}, zeroAddress, zeroAddress));
   // });
   // ///////////////////////////////////////////////////////////////////////////////////////////////
+  
+  describe('balance', function (it) {
+    it('balance is zero for new user', async function ({contract, user0}) {
+      const balance = await contract.callStatic.balanceOf(user0);
+      assert.equal(balance.toNumber(), 0);
+    });
+  
+    it('balance return correct value', async function ({contract, contractAsOwner, contractAsUser0, owner, user0, user1, tokenIds}) {
+      const balance = await contract.callStatic.balanceOf(user0);
+      assert.equal(balance.toNumber(), 0);
+  
+      await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
+      let newBalance = await contract.callStatic.balanceOf(user0);
+      assert.equal(newBalance.toNumber(), 1);
+  
+      await contractAsOwner.transferFrom(owner, user0, tokenIds[1]).then(tx => tx.wait());
+      newBalance = await contract.callStatic.balanceOf(user0);
+      assert.equal(newBalance.toNumber(), 2);
+  
+      await contractAsUser0.transferFrom(user0, user1, tokenIds[0]).then(tx => tx.wait());
+      newBalance = await contract.callStatic.balanceOf(user0);
+      assert.equal(newBalance.toNumber(), 1);
+    });
     
-  it('balance is zero for new user', async function ({contract, user0}) {
-    const balance = await contract.callStatic.balanceOf(user0);
-    assert.equal(balance.toNumber(), 0);
-  });
-
-  it('balance return correct value', async function ({contract, contractAsOwner, contractAsUser0, owner, user0, user1, tokenIds}) {
-    const balance = await contract.callStatic.balanceOf(user0);
-    assert.equal(balance.toNumber(), 0);
-
-    await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
-    let newBalance = await contract.callStatic.balanceOf(user0);
-    assert.equal(newBalance.toNumber(), 1);
-
-    await contractAsOwner.transferFrom(owner, user0, tokenIds[1]).then(tx => tx.wait());
-    newBalance = await contract.callStatic.balanceOf(user0);
-    assert.equal(newBalance.toNumber(), 2);
-
-    await contractAsUser0.transferFrom(user0, user1, tokenIds[0]).then(tx => tx.wait());
-    newBalance = await contract.callStatic.balanceOf(user0);
-    assert.equal(newBalance.toNumber(), 1);
-  });
-    
-  it('mint result in a transfer from 0 event', async function ({contract, mint, user0}) {
-    const {receipt, tokenId}= await mint(user0);
-    const eventsMatching = await contract.queryFilter(contract.filters.Transfer(), receipt.blockNumber);
-    assert.equal(eventsMatching.length, 1);
-    const transferEvent = eventsMatching[0];
-    assert.equal(transferEvent.args[0], zeroAddress);
-    assert.equal(transferEvent.args[1], user0);
-    assert(transferEvent.args[2].eq(tokenId));
-  });
-
-  it('mint for gives correct owner', async function ({contract, mint, user0}) {
-    const {tokenId} = await mint(user0);
-    const newOwner = await contract.callStatic.ownerOf(tokenId);
-    assert.equal(newOwner, user0);
-  });
-
-  if (extensions.burn) {
-    it('burn result in a transfer to 0 event', async function ({contract, contractAsUser0, mint, user0}) {
-      const {tokenId} = await mint(user0);
-      const receipt = await contractAsUser0.burn(tokenId).then(tx => tx.wait());
+  })
+  
+  describe('mint', function (it) {
+    it('mint result in a transfer from 0 event', async function ({contract, mint, user0}) {
+      const {receipt, tokenId}= await mint(user0);
       const eventsMatching = await contract.queryFilter(contract.filters.Transfer(), receipt.blockNumber);
       assert.equal(eventsMatching.length, 1);
       const transferEvent = eventsMatching[0];
-      assert.equal(transferEvent.args[0], user0);
-      assert.equal(transferEvent.args[1], zeroAddress);
-      assert.equal(transferEvent.args[2], tokenId);
+      assert.equal(transferEvent.args[0], zeroAddress);
+      assert.equal(transferEvent.args[1], user0);
+      assert(transferEvent.args[2].eq(tokenId));
     });
-    it('burn result in ownerOf throwing', async function ({contract, contractAsUser0, mint, user0}) {
+  
+    it('mint for gives correct owner', async function ({contract, mint, user0}) {
       const {tokenId} = await mint(user0);
-      await contract.callStatic.ownerOf(tokenId);
-      await contractAsUser0.burn(tokenId).then(tx => tx.wait());
-      await expectRevert(contract.callStatic.ownerOf(tokenId));
+      const newOwner = await contract.callStatic.ownerOf(tokenId);
+      assert.equal(newOwner, user0);
+    });  
+  })
+  
+  if (extensions.burn) {
+    describe('burn', function (it) {
+      it('burn result in a transfer to 0 event', async function ({contract, contractAsUser0, mint, user0}) {
+        const {tokenId} = await mint(user0);
+        const receipt = await contractAsUser0.burn(tokenId).then(tx => tx.wait());
+        const eventsMatching = await contract.queryFilter(contract.filters.Transfer(), receipt.blockNumber);
+        assert.equal(eventsMatching.length, 1);
+        const transferEvent = eventsMatching[0];
+        assert.equal(transferEvent.args[0], user0);
+        assert.equal(transferEvent.args[1], zeroAddress);
+        assert.equal(transferEvent.args[2], tokenId);
+      });
+      it('burn result in ownerOf throwing', async function ({contract, contractAsUser0, mint, user0}) {
+        const {tokenId} = await mint(user0);
+        await contract.callStatic.ownerOf(tokenId);
+        await contractAsUser0.burn(tokenId).then(tx => tx.wait());
+        await expectRevert(contract.callStatic.ownerOf(tokenId));
+      });
     });
-    
   }
+
   if (extensions.batchTransfer) {
-    it('batch transfer of same NFT ids should fails', async function ({contractAsOwner, owner, user0, tokenIds}) {
-      await expectRevert(contractAsOwner.batchTransferFrom(owner, user0, [tokenIds[1], tokenIds[1], tokenIds[0]], emptyBytes).then(tx => tx.wait()));
-    });
-    // it('batch transfer of same NFT ids should fails even if from == to', async () => {
-    //     let reverted = false;
-    //     try {
-    //         await tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[1], tokenIds[1], tokenIds[0]], emptyBytes);
-    //     } catch (e) {
-    //         reverted = true;
-    //         console.log('ERROR', e);
-    //     }
-    //     assert.equal(reverted, true);
-    //     // await expectRevert(tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[1], tokenIds[1], tokenIds[0]], emptyBytes));
-    // });
-    it('batch transfer works', async function ({contractAsOwner, owner, user0, tokenIds}) {
-      await contractAsOwner.batchTransferFrom(owner, user0, tokenIds, emptyBytes).then(tx => tx.wait());
+    describe('batchTransfer', function (it) {
+      it('batch transfer of same NFT ids should fails', async function ({contractAsOwner, owner, user0, tokenIds}) {
+        await expectRevert(contractAsOwner.batchTransferFrom(owner, user0, [tokenIds[1], tokenIds[1], tokenIds[0]], emptyBytes).then(tx => tx.wait()));
+      });
+      // it('batch transfer of same NFT ids should fails even if from == to', async () => {
+      //     let reverted = false;
+      //     try {
+      //         await tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[1], tokenIds[1], tokenIds[0]], emptyBytes);
+      //     } catch (e) {
+      //         reverted = true;
+      //         console.log('ERROR', e);
+      //     }
+      //     assert.equal(reverted, true);
+      //     // await expectRevert(tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[1], tokenIds[1], tokenIds[0]], emptyBytes));
+      // });
+      it('batch transfer works', async function ({contractAsOwner, owner, user0, tokenIds}) {
+        await contractAsOwner.batchTransferFrom(owner, user0, tokenIds, emptyBytes).then(tx => tx.wait());
+      });
     });
   }
 
   if (extensions.mandatoryERC721Receiver) {
 
     if (extensions.batchTransfer) {
-      it('batch transfering to a contract that do not implements mandatory erc721 receiver but implement classic ERC721 receiver and reject should not fails', async function (
+      describe('mandatory batchTransfer', function (it) {
+        it('batch transfering to a contract that do not implements mandatory erc721 receiver but implement classic ERC721 receiver and reject should not fails', async function (
+          {deployERC721TokenReceiver, contract, contractAsOwner, owner, tokenIds}
+        ) {
+          const receiverContract = await deployERC721TokenReceiver(contract.address, false, true);
+          const receiverAddress = receiverContract.address;
+          await contractAsOwner.batchTransferFrom(owner, receiverAddress, [tokenIds[0]], emptyBytes).then(tx => tx.wait());
+          const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
+          assert.equal(newOwner, receiverAddress);
+        });
+        it('batch transfering to a contract that implements mandatory erc721 receiver (and signal it properly via 165) should fails if it reject it', async function (
+          {deployMandatoryERC721TokenReceiver, contract, contractAsOwner, owner, tokenIds}
+        ) {
+          const receiverContract = await deployMandatoryERC721TokenReceiver(contract.address, false, true);
+          const receiverAddress = receiverContract.address;
+          await expectRevert(contractAsOwner.batchTransferFrom(owner, receiverAddress, [tokenIds[0]], emptyBytes).then(tx => tx.wait()));
+        });
+        it('batch transfering to a contract that do not accept erc721 token should fail', async function (
+          {deployMandatoryERC721TokenReceiver, contract, contractAsOwner, owner, tokenIds}
+        ) {
+          const receiverContract = await deployMandatoryERC721TokenReceiver(contract.address, false, true);
+          const receiverAddress = receiverContract.address;
+          await expectRevert(contractAsOwner.batchTransferFrom(owner, receiverAddress, [tokenIds[0]], emptyBytes).then(tx => tx.wait()));
+        });
+  
+        it('batch transfering to a contract that do not return the correct onERC721Received bytes shoudl fail', async function (
+          {deployMandatoryERC721TokenReceiver, contract, contractAsOwner, owner, tokenIds}
+        ) {
+          const receiverContract = await deployMandatoryERC721TokenReceiver(contract.address, true, false);
+          const receiverAddress = receiverContract.address;
+          await expectRevert(contractAsOwner.batchTransferFrom(owner, receiverAddress, [tokenIds[0]], emptyBytes).then(tx => tx.wait()));
+        });
+  
+        it('batch transfering to a contract that do not implemented mandatory receiver should not fail', async function (
+          {deployNonReceivingContract, contract, contractAsOwner, owner, tokenIds}
+        ) {
+          const receiverContract = await deployNonReceivingContract(contract.address);
+          const receiverAddress = receiverContract.address;
+          await contractAsOwner.batchTransferFrom(owner, receiverAddress, [tokenIds[0]], emptyBytes).then(tx => tx.wait());
+        });
+  
+        it('batch transfering to a contract that return the correct onERC721Received bytes shoudl succeed', async function (
+          {deployMandatoryERC721TokenReceiver, contract, contractAsOwner, owner, tokenIds}
+        ) {
+          const receiverContract = await deployMandatoryERC721TokenReceiver(contract.address, true, true);
+          const receiverAddress = receiverContract.address;
+          await contractAsOwner.batchTransferFrom(owner, receiverAddress, [tokenIds[0]], emptyBytes).then(tx => tx.wait());
+          const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
+          assert.equal(newOwner, receiverAddress);
+        });
+      });
+    }
+    describe('mandatory transfer', function (it) {
+      it('transfering to a contract that do not implements mandatory erc721 receiver but implement classic ERC721 receiver and reject should not fails', async function (
         {deployERC721TokenReceiver, contract, contractAsOwner, owner, tokenIds}
       ) {
         const receiverContract = await deployERC721TokenReceiver(contract.address, false, true);
         const receiverAddress = receiverContract.address;
-        await contractAsOwner.batchTransferFrom(owner, receiverAddress, [tokenIds[0]], emptyBytes).then(tx => tx.wait());
+        await contractAsOwner.transferFrom(owner, receiverAddress, tokenIds[0]).then(tx => tx.wait());
         const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
         assert.equal(newOwner, receiverAddress);
       });
-      it('batch transfering to a contract that implements mandatory erc721 receiver (and signal it properly via 165) should fails if it reject it', async function (
+      it('transfering to a contract that implements mandatory erc721 receiver (and signal it properly via 165) should fails if it reject it', async function (
         {deployMandatoryERC721TokenReceiver, contract, contractAsOwner, owner, tokenIds}
       ) {
         const receiverContract = await deployMandatoryERC721TokenReceiver(contract.address, false, true);
         const receiverAddress = receiverContract.address;
-        await expectRevert(contractAsOwner.batchTransferFrom(owner, receiverAddress, [tokenIds[0]], emptyBytes).then(tx => tx.wait()));
+        await expectRevert(contractAsOwner.transferFrom(owner, receiverAddress, tokenIds[0]).then(tx => tx.wait()));
       });
-      it('batch transfering to a contract that do not accept erc721 token should fail', async function (
+      it('transfering to a contract that do not accept erc721 token should fail', async function (
         {deployMandatoryERC721TokenReceiver, contract, contractAsOwner, owner, tokenIds}
       ) {
         const receiverContract = await deployMandatoryERC721TokenReceiver(contract.address, false, true);
         const receiverAddress = receiverContract.address;
-        await expectRevert(contractAsOwner.batchTransferFrom(owner, receiverAddress, [tokenIds[0]], emptyBytes).then(tx => tx.wait()));
+        await expectRevert(contractAsOwner.transferFrom(owner, receiverAddress, tokenIds[0]).then(tx => tx.wait()));
       });
-
-      it('batch transfering to a contract that do not return the correct onERC721Received bytes shoudl fail', async function (
+  
+      it('transfering to a contract that do not return the correct onERC721Received bytes shoudl fail', async function (
         {deployMandatoryERC721TokenReceiver, contract, contractAsOwner, owner, tokenIds}
       ) {
         const receiverContract = await deployMandatoryERC721TokenReceiver(contract.address, true, false);
         const receiverAddress = receiverContract.address;
-        await expectRevert(contractAsOwner.batchTransferFrom(owner, receiverAddress, [tokenIds[0]], emptyBytes).then(tx => tx.wait()));
+        await expectRevert(contractAsOwner.transferFrom(owner, receiverAddress, tokenIds[0]).then(tx => tx.wait()));
       });
-
-      it('batch transfering to a contract that do not implemented mandatory receiver should not fail', async function (
+  
+      it('transfering to a contract that do not implemented mandatory receiver should not fail', async function (
         {deployNonReceivingContract, contract, contractAsOwner, owner, tokenIds}
       ) {
         const receiverContract = await deployNonReceivingContract(contract.address);
         const receiverAddress = receiverContract.address;
-        await contractAsOwner.batchTransferFrom(owner, receiverAddress, [tokenIds[0]], emptyBytes).then(tx => tx.wait());
+        await contractAsOwner.transferFrom(owner, receiverAddress, tokenIds[0]).then(tx => tx.wait());
       });
-
-      it('batch transfering to a contract that return the correct onERC721Received bytes shoudl succeed', async function (
+  
+      it('transfering to a contract that return the correct onERC721Received bytes shoudl succeed', async function (
         {deployMandatoryERC721TokenReceiver, contract, contractAsOwner, owner, tokenIds}
       ) {
         const receiverContract = await deployMandatoryERC721TokenReceiver(contract.address, true, true);
         const receiverAddress = receiverContract.address;
-        await contractAsOwner.batchTransferFrom(owner, receiverAddress, [tokenIds[0]], emptyBytes).then(tx => tx.wait());
+        await contractAsOwner.transferFrom(owner, receiverAddress, tokenIds[0]).then(tx => tx.wait());
         const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
         assert.equal(newOwner, receiverAddress);
       });
-    }
+  
+      // it('transfering to a contract that return the correct onERC721Received bytes shoudl succeed', async () => {
+      //     const receiverContract = await deployContract(user0, 'TestMandatoryERC721TokenReceiver', contract.address, true, true);
+      //     const receiverAddress = receiverContract.address;
+      //     await ransferFrom(user0, user0, receiverAddress, tokenIds[0]);
+      //     const newOwner = await call(contract, 'ownerOf', null, tokenIds[0]);
+      //     assert.equal(newOwner, receiverAddress);
+      // });
+      
+    });
+  }
 
-    it('transfering to a contract that do not implements mandatory erc721 receiver but implement classic ERC721 receiver and reject should not fails', async function (
-      {deployERC721TokenReceiver, contract, contractAsOwner, owner, tokenIds}
-    ) {
+  if (extensions.batchTransfer) {
+    describe('safe batch transfer', function (it) {
+      it('safe batch transfer of same NFT ids should fails', async function ({contractAsOwner, tokenIds, owner, user0}) {
+        await expectRevert(contractAsOwner.safeBatchTransferFrom(owner, user0, [tokenIds[0], tokenIds[1], tokenIds[0]], emptyBytes).then(tx => tx.wait()));
+      });
+      // it('safe batch transfer of same NFT ids should fails even if from == to', async () => {
+      //     let reverted = false;
+      //     try {
+      //         await tx(contract, 'safeBatchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[0], tokenIds[1], tokenIds[0]], emptyBytes);
+      //     } catch (e) {
+      //         reverted = true;
+      //         console.log('ERROR', e);
+      //     }
+      //     assert.equal(reverted, true);
+      //     // await expectRevert(tx(contract, 'safeBatchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[0], tokenIds[1], tokenIds[0]], emptyBytes));
+      // });
+      it('safe batch transfer works', async function ({contractAsOwner, tokenIds, owner, user0}) {
+        await contractAsOwner.safeBatchTransferFrom(owner, user0, tokenIds, emptyBytes).then(tx => tx.wait());
+      // console.log('gas used for safe batch transfer = ' + receipt.gasUsed);
+      });
+    });    
+  }
+
+  describe('transfer', function (it) {
+    it('transfering one NFT results in one erc721 transfer event', async function ({contractAsOwner, owner, user0, tokenIds}) {
+      const receipt = await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
+      const transferEvents = receipt.events.filter((v) => v.event === 'Transfer');
+      assert.equal(transferEvents.length, 1);
+      const transferEvent = transferEvents[0];
+      assert.equal(transferEvent.args[0], owner);
+      assert.equal(transferEvent.args[1], user0);
+      assert(transferEvent.args[2].eq(tokenIds[0]));
+    });
+    it('transfering one NFT change to correct owner', async function ({contract, contractAsOwner, owner, user0, tokenIds}) {
+      await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
+      const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
+      assert.equal(newOwner, user0);
+    });
+  
+    it('transfering one NFT increase new owner balance', async function ({contract, contractAsOwner, owner, user0, tokenIds}) {
+      const balanceBefore = await contract.callStatic.balanceOf(user0);
+      await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
+      const balanceAfter = await contract.callStatic.balanceOf(user0);
+      assert(balanceBefore.add(1).eq(balanceAfter));
+    });
+  
+    it('transfering one NFT decrease past owner balance', async function ({contract, contractAsOwner, owner, user0, tokenIds}) {
+      const balanceBefore = await contract.callStatic.balanceOf(owner);
+      await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
+      const balanceAfter = await contract.callStatic.balanceOf(owner);
+      assert(balanceBefore.sub(1).eq(balanceAfter));
+    });
+  
+    it('transfering from without approval should fails', async function ({contractAsUser0, owner, user0, tokenIds}) {
+      await expectRevert(contractAsUser0.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait()));
+    });
+  
+    it('transfering to zero address should fails', async function ({contractAsOwner, owner, tokenIds}) {
+      await expectRevert(contractAsOwner.transferFrom(owner, zeroAddress, tokenIds[0]).then(tx => tx.wait()));
+    });
+  
+    it('transfering to a contract that do not accept erc721 token should not fail', async function ({deployERC721TokenReceiver, contract, contractAsOwner, owner, tokenIds}) {
       const receiverContract = await deployERC721TokenReceiver(contract.address, false, true);
       const receiverAddress = receiverContract.address;
       await contractAsOwner.transferFrom(owner, receiverAddress, tokenIds[0]).then(tx => tx.wait());
       const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
       assert.equal(newOwner, receiverAddress);
-    });
-    it('transfering to a contract that implements mandatory erc721 receiver (and signal it properly via 165) should fails if it reject it', async function (
-      {deployMandatoryERC721TokenReceiver, contract, contractAsOwner, owner, tokenIds}
-    ) {
-      const receiverContract = await deployMandatoryERC721TokenReceiver(contract.address, false, true);
-      const receiverAddress = receiverContract.address;
-      await expectRevert(contractAsOwner.transferFrom(owner, receiverAddress, tokenIds[0]).then(tx => tx.wait()));
-    });
-    it('transfering to a contract that do not accept erc721 token should fail', async function (
-      {deployMandatoryERC721TokenReceiver, contract, contractAsOwner, owner, tokenIds}
-    ) {
-      const receiverContract = await deployMandatoryERC721TokenReceiver(contract.address, false, true);
-      const receiverAddress = receiverContract.address;
-      await expectRevert(contractAsOwner.transferFrom(owner, receiverAddress, tokenIds[0]).then(tx => tx.wait()));
-    });
-
-    it('transfering to a contract that do not return the correct onERC721Received bytes shoudl fail', async function (
-      {deployMandatoryERC721TokenReceiver, contract, contractAsOwner, owner, tokenIds}
-    ) {
-      const receiverContract = await deployMandatoryERC721TokenReceiver(contract.address, true, false);
-      const receiverAddress = receiverContract.address;
-      await expectRevert(contractAsOwner.transferFrom(owner, receiverAddress, tokenIds[0]).then(tx => tx.wait()));
-    });
-
-    it('transfering to a contract that do not implemented mandatory receiver should not fail', async function (
-      {deployNonReceivingContract, contract, contractAsOwner, owner, tokenIds}
-    ) {
-      const receiverContract = await deployNonReceivingContract(contract.address);
-      const receiverAddress = receiverContract.address;
-      await contractAsOwner.transferFrom(owner, receiverAddress, tokenIds[0]).then(tx => tx.wait());
-    });
-
-    it('transfering to a contract that return the correct onERC721Received bytes shoudl succeed', async function (
-      {deployMandatoryERC721TokenReceiver, contract, contractAsOwner, owner, tokenIds}
-    ) {
-      const receiverContract = await deployMandatoryERC721TokenReceiver(contract.address, true, true);
-      const receiverAddress = receiverContract.address;
-      await contractAsOwner.transferFrom(owner, receiverAddress, tokenIds[0]).then(tx => tx.wait());
-      const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
-      assert.equal(newOwner, receiverAddress);
-    });
-
-    // it('transfering to a contract that return the correct onERC721Received bytes shoudl succeed', async () => {
-    //     const receiverContract = await deployContract(user0, 'TestMandatoryERC721TokenReceiver', contract.address, true, true);
-    //     const receiverAddress = receiverContract.address;
-    //     await ransferFrom(user0, user0, receiverAddress, tokenIds[0]);
-    //     const newOwner = await call(contract, 'ownerOf', null, tokenIds[0]);
-    //     assert.equal(newOwner, receiverAddress);
-    // });
-    
-  }
-
-  if (extensions.batchTransfer) {
-    it('safe batch transfer of same NFT ids should fails', async function ({contractAsOwner, tokenIds, owner, user0}) {
-      await expectRevert(contractAsOwner.safeBatchTransferFrom(owner, user0, [tokenIds[0], tokenIds[1], tokenIds[0]], emptyBytes).then(tx => tx.wait()));
-    });
-    // it('safe batch transfer of same NFT ids should fails even if from == to', async () => {
-    //     let reverted = false;
-    //     try {
-    //         await tx(contract, 'safeBatchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[0], tokenIds[1], tokenIds[0]], emptyBytes);
-    //     } catch (e) {
-    //         reverted = true;
-    //         console.log('ERROR', e);
-    //     }
-    //     assert.equal(reverted, true);
-    //     // await expectRevert(tx(contract, 'safeBatchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[0], tokenIds[1], tokenIds[0]], emptyBytes));
-    // });
-    it('safe batch transfer works', async function ({contractAsOwner, tokenIds, owner, user0}) {
-      await contractAsOwner.safeBatchTransferFrom(owner, user0, tokenIds, emptyBytes).then(tx => tx.wait());
-    // console.log('gas used for safe batch transfer = ' + receipt.gasUsed);
-    });
-        
-  }
-
-  it('transfering one NFT results in one erc721 transfer event', async function ({contractAsOwner, owner, user0, tokenIds}) {
-    const receipt = await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
-    const transferEvents = receipt.events.filter((v) => v.event === 'Transfer');
-    assert.equal(transferEvents.length, 1);
-    const transferEvent = transferEvents[0];
-    assert.equal(transferEvent.args[0], owner);
-    assert.equal(transferEvent.args[1], user0);
-    assert(transferEvent.args[2].eq(tokenIds[0]));
-  });
-  it('transfering one NFT change to correct owner', async function ({contract, contractAsOwner, owner, user0, tokenIds}) {
-    await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
-    const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
-    assert.equal(newOwner, user0);
-  });
-
-  it('transfering one NFT increase new owner balance', async function ({contract, contractAsOwner, owner, user0, tokenIds}) {
-    const balanceBefore = await contract.callStatic.balanceOf(user0);
-    await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
-    const balanceAfter = await contract.callStatic.balanceOf(user0);
-    assert(balanceBefore.add(1).eq(balanceAfter));
-  });
-
-  it('transfering one NFT decrease past owner balance', async function ({contract, contractAsOwner, owner, user0, tokenIds}) {
-    const balanceBefore = await contract.callStatic.balanceOf(owner);
-    await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
-    const balanceAfter = await contract.callStatic.balanceOf(owner);
-    assert(balanceBefore.sub(1).eq(balanceAfter));
-  });
-
-  it('transfering from without approval should fails', async function ({contractAsUser0, owner, user0, tokenIds}) {
-    await expectRevert(contractAsUser0.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait()));
-  });
-
-  it('transfering to zero address should fails', async function ({contractAsOwner, owner, tokenIds}) {
-    await expectRevert(contractAsOwner.transferFrom(owner, zeroAddress, tokenIds[0]).then(tx => tx.wait()));
-  });
-
-  it('transfering to a contract that do not accept erc721 token should not fail', async function ({deployERC721TokenReceiver, contract, contractAsOwner, owner, tokenIds}) {
-    const receiverContract = await deployERC721TokenReceiver(contract.address, false, true);
-    const receiverAddress = receiverContract.address;
-    await contractAsOwner.transferFrom(owner, receiverAddress, tokenIds[0]).then(tx => tx.wait());
-    const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
-    assert.equal(newOwner, receiverAddress);
+    });  
   });
   
-  function testSafeTransfers(data) {
+  function testSafeTransfers(it, data) {
     const prefix = data ? 'data:' + data + ' : ' : '';
     let safeTransferFrom = (contract, from, to, tokenId) => {
       return contract['safeTransferFrom(address,address,uint256)'](from, to, tokenId).then(tx => tx.wait());
@@ -1966,175 +1996,192 @@ module.exports = (init, extensions) => {
     });
   }
 
-  testSafeTransfers();
-  testSafeTransfers(emptyBytes);
-  testSafeTransfers('0xff56fe3422');
-
-  it('claim to support erc165', async function ({contract}) {
-    const result = await contract.callStatic.supportsInterface('0x01ffc9a7');
-    assert.equal(result, true);
+  describe('safeTransfer', function (it) {
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    testSafeTransfers(it);
   });
-
-  it('claim to support base erc721 interface', async function ({contract}) {
-    const result = await contract.callStatic.supportsInterface('0x80ac58cd');
-    assert.equal(result, true);
+  describe('safeTransfer with empty bytes', function (it) {
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    testSafeTransfers(it, emptyBytes);
   });
-
-  it('claim to support erc721 metadata interface', async function ({contract}) {
-    const result = await contract.callStatic.supportsInterface('0x5b5e139f');
-    assert.equal(result, true);
+  describe('safeTransfer with data', function (it) {
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    testSafeTransfers(it, '0xff56fe3422');
   });
+  
 
-  it('does not claim to support random interface', async function ({contract}) {
-    const result = await contract.callStatic.supportsInterface('0x88888888');
-    assert.equal(result, false);
+  describe('ERC165', function (it) {
+    it('claim to support erc165', async function ({contract}) {
+      const result = await contract.callStatic.supportsInterface('0x01ffc9a7');
+      assert.equal(result, true);
+    });
+  
+    it('claim to support base erc721 interface', async function ({contract}) {
+      const result = await contract.callStatic.supportsInterface('0x80ac58cd');
+      assert.equal(result, true);
+    });
+  
+    it('claim to support erc721 metadata interface', async function ({contract}) {
+      const result = await contract.callStatic.supportsInterface('0x5b5e139f');
+      assert.equal(result, true);
+    });
+  
+    it('does not claim to support random interface', async function ({contract}) {
+      const result = await contract.callStatic.supportsInterface('0x88888888');
+      assert.equal(result, false);
+    });
+  
+    it('does not claim to support the invalid interface', async function ({contract}) {
+      const result = await contract.callStatic.supportsInterface('0xFFFFFFFF');
+      assert.equal(result, false);
+    });
+  })
+  
+  describe('Approval', function (it) {
+    it('approving emit Approval event', async function ({contractAsOwner, owner, user0, tokenIds}) {
+      const receipt = await contractAsOwner.approve(user0, tokenIds[0]).then(tx => tx.wait());
+      const eventsMatching = receipt.events.filter((v) => v.event === 'Approval');
+      assert.equal(eventsMatching.length, 1);
+      const eventValues = eventsMatching[0].args;
+      assert.equal(eventValues[0], owner);
+      assert.equal(eventValues[1], user0);
+      assert(eventValues[2].eq(tokenIds[0]));
+    });
+  
+    it('removing approval emit Approval event', async function ({contractAsOwner, owner, user0, tokenIds}) {
+      await contractAsOwner.approve(user0, tokenIds[0]).then(tx => tx.wait());
+      const receipt = await contractAsOwner.approve(zeroAddress, tokenIds[0]).then(tx => tx.wait());
+      const eventsMatching = receipt.events.filter((v) => v.event === 'Approval');
+      assert.equal(eventsMatching.length, 1);
+      const eventValues = eventsMatching[0].args;
+      assert.equal(eventValues[0], owner);
+      assert.equal(eventValues[1], zeroAddress);
+      assert(eventValues[2].eq(tokenIds[0]));
+    });
+  
+    it('approving update the approval status', async function ({contract, contractAsOwner, user1, tokenIds}) {
+      await contractAsOwner.approve(user1, tokenIds[0]).then(tx => tx.wait());
+      const approvedAddress = await contract.callStatic.getApproved(tokenIds[0]);
+      assert.equal(approvedAddress, user1);
+    });
+  
+    it('cant approve if not owner or operator ', async function ({contractAsOwner, owner, user0, tokenIds}) {
+      await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
+      await expectRevert(contractAsOwner.approve(user0, tokenIds[0]).then(tx => tx.wait()));
+    });
+  
+    it('approving allows transfer from the approved party', async function ({contract, contractAsOwner, contractAsUser0, owner, user0, user1, tokenIds}) {
+      await contractAsOwner.approve(user0, tokenIds[0]).then(tx => tx.wait());
+      await contractAsUser0.transferFrom(owner, user1, tokenIds[0]).then(tx => tx.wait());
+      const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
+      assert.equal(newOwner, user1);
+    });
+  
+    it('transfering the approved NFT results in aproval reset for it', async function ({contract, contractAsOwner, contractAsUser1, owner, user0, user1, tokenIds}) {
+      await contractAsOwner.approve(user1, tokenIds[0]).then(tx => tx.wait());
+      await contractAsUser1.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
+      const approvedAddress = await contract.callStatic.getApproved(tokenIds[0]);
+      assert.equal(approvedAddress, zeroAddress);
+    });
+  
+    it('transfering the approved NFT results in aproval reset for it but no approval event', async function ({contractAsOwner, contractAsUser1, owner, user0, user1, tokenIds}) {
+      await contractAsOwner.approve(user1, tokenIds[0]).then(tx => tx.wait());
+      const receipt = await contractAsUser1.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
+      const eventsMatching = receipt.events.filter((v) => v.event === 'Approval');
+      assert.equal(eventsMatching.length, 0);
+    });
+  
+    it('transfering the approved NFT again will fail', async function ({contractAsOwner, contractAsUser1, owner, user0, user1, tokenIds}) {
+      await contractAsOwner.approve(user1, tokenIds[0]).then(tx => tx.wait());
+      await contractAsUser1.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
+      await expectRevert(contractAsUser1.transferFrom(user0, owner, tokenIds[0]).then(tx => tx.wait()));
+    });
+  
+    it('approval by operator works', async function ({contract, contractAsOwner, contractAsUser0, contractAsUser1, owner, user0, user1, user2, tokenIds}) {
+      await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
+  
+      await contractAsUser0.setApprovalForAllFor(user0, user1, true).then(tx => tx.wait());
+      // await tx(contract, 'approve', {from: user0, gas}, user1, tokenId);
+      await contractAsUser1.transferFrom(user0, user2, tokenIds[0]).then(tx => tx.wait());
+      const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
+      assert.equal(newOwner, user2);
+    });
+  })
+  
+  describe('ApprovalForAll', function (it) {
+    it('approving all emit ApprovalForAll event', async function ({contractAsOwner, owner, user0}) {
+      const receipt = await contractAsOwner.setApprovalForAll(user0, true).then(tx => tx.wait());
+      const eventsMatching = receipt.events.filter((v) => v.event === 'ApprovalForAll');
+      assert.equal(eventsMatching.length, 1);
+      const eventValues = eventsMatching[0].args;
+      assert.equal(eventValues[0], owner);
+      assert.equal(eventValues[1], user0);
+      assert.equal(eventValues[2], true);
+    });
+  
+    it('approving all update the approval status', async function ({contract, contractAsOwner, owner, user0}) {
+      await contractAsOwner.setApprovalForAll(user0, true).then(tx => tx.wait());
+      const isUser0Approved = await contract.callStatic.isApprovedForAll(owner, user0);
+      assert.equal(isUser0Approved, true);
+    });
+  
+    it('unsetting approval for all should update the approval status', async function ({contract, contractAsOwner, owner, user0}) {
+      await contractAsOwner.setApprovalForAll(user0, true).then(tx => tx.wait());
+      await contractAsOwner.setApprovalForAll(user0, false).then(tx => tx.wait());
+      const isUser0Approved = await contract.callStatic.isApprovedForAll(owner, user0);
+      assert.equal(isUser0Approved, false);
+    });
+  
+    it('unsetting approval for all should emit ApprovalForAll event', async function ({contractAsOwner, owner, user0}) {
+      await contractAsOwner.setApprovalForAll(user0, true).then(tx => tx.wait());
+      const receipt = await contractAsOwner.setApprovalForAll(user0, false).then(tx => tx.wait());
+      const eventsMatching = receipt.events.filter((v) => v.event === 'ApprovalForAll');
+      assert.equal(eventsMatching.length, 1);
+      const eventValues = eventsMatching[0].args;
+      assert.equal(eventValues[0], owner);
+      assert.equal(eventValues[1], user0);
+      assert.equal(eventValues[2], false);
+    });
+  
+    it('approving for all allows transfer from the approved party', async function ({contract, contractAsOwner, contractAsUser0, owner, user0, user1, tokenIds}) {
+      await contractAsOwner.setApprovalForAll(user0, true).then(tx => tx.wait());
+      await contractAsUser0.transferFrom(owner, user1, tokenIds[0]).then(tx => tx.wait());
+      const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
+      assert.equal(newOwner, user1);
+    });
+    it('transfering one NFT do not results in aprovalForAll reset', async function ({contract, contractAsOwner, owner, user0, user1, tokenIds}) {
+      await contractAsOwner.setApprovalForAll(user1, true).then(tx => tx.wait());
+      await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
+      const isUser1Approved = await contract.callStatic.isApprovedForAll(owner, user1);
+      assert.equal(isUser1Approved, true);
+    });
+  
+    it('approval for all does not grant approval on a transfered NFT', async function ({contractAsOwner, contractAsUser1, owner, user0, user1, tokenIds}) {
+      await contractAsOwner.setApprovalForAll(user1, true).then(tx => tx.wait());
+      await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
+      await expectRevert(contractAsUser1.transferFrom(user0, user1, tokenIds[0]).then(tx => tx.wait()));
+    });
+  
+    it('approval for all set before will work on a transfered NFT', async function ({contract, contractAsOwner, contractAsUser0, contractAsUser1, owner, user0, user1, tokenIds}) {
+      await contractAsUser0.setApprovalForAll(user1, true).then(tx => tx.wait());
+      await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
+      await contractAsUser1.transferFrom(user0, user1, tokenIds[0]).then(tx => tx.wait());
+      const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
+      assert.equal(newOwner, user1);
+    });
+  
+    it('approval for all allow to set individual nft approve', async function ({contract, contractAsOwner, contractAsUser0, contractAsUser2, owner, user0, user1, user2, tokenIds}) {
+      await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
+  
+      await contractAsUser0.setApprovalForAll(user1, true).then(tx => tx.wait());
+  
+      await contractAsUser0.approve(user2, tokenIds[0]).then(tx => tx.wait());
+      await contractAsUser2.transferFrom(user0, user2, tokenIds[0]).then(tx => tx.wait());
+      const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
+      assert.equal(newOwner, user2);
+    });
+  
   });
-
-  it('does not claim to support the invalid interface', async function ({contract}) {
-    const result = await contract.callStatic.supportsInterface('0xFFFFFFFF');
-    assert.equal(result, false);
-  });
-    
-  it('approving emit Approval event', async function ({contractAsOwner, owner, user0, tokenIds}) {
-    const receipt = await contractAsOwner.approve(user0, tokenIds[0]).then(tx => tx.wait());
-    const eventsMatching = receipt.events.filter((v) => v.event === 'Approval');
-    assert.equal(eventsMatching.length, 1);
-    const eventValues = eventsMatching[0].args;
-    assert.equal(eventValues[0], owner);
-    assert.equal(eventValues[1], user0);
-    assert(eventValues[2].eq(tokenIds[0]));
-  });
-
-  it('removing approval emit Approval event', async function ({contractAsOwner, owner, user0, tokenIds}) {
-    await contractAsOwner.approve(user0, tokenIds[0]).then(tx => tx.wait());
-    const receipt = await contractAsOwner.approve(zeroAddress, tokenIds[0]).then(tx => tx.wait());
-    const eventsMatching = receipt.events.filter((v) => v.event === 'Approval');
-    assert.equal(eventsMatching.length, 1);
-    const eventValues = eventsMatching[0].args;
-    assert.equal(eventValues[0], owner);
-    assert.equal(eventValues[1], zeroAddress);
-    assert(eventValues[2].eq(tokenIds[0]));
-  });
-
-  it('approving update the approval status', async function ({contract, contractAsOwner, user1, tokenIds}) {
-    await contractAsOwner.approve(user1, tokenIds[0]).then(tx => tx.wait());
-    const approvedAddress = await contract.callStatic.getApproved(tokenIds[0]);
-    assert.equal(approvedAddress, user1);
-  });
-
-  it('cant approve if not owner or operator ', async function ({contractAsOwner, owner, user0, tokenIds}) {
-    await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
-    await expectRevert(contractAsOwner.approve(user0, tokenIds[0]).then(tx => tx.wait()));
-  });
-
-  it('approving allows transfer from the approved party', async function ({contract, contractAsOwner, contractAsUser0, owner, user0, user1, tokenIds}) {
-    await contractAsOwner.approve(user0, tokenIds[0]).then(tx => tx.wait());
-    await contractAsUser0.transferFrom(owner, user1, tokenIds[0]).then(tx => tx.wait());
-    const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
-    assert.equal(newOwner, user1);
-  });
-
-  it('transfering the approved NFT results in aproval reset for it', async function ({contract, contractAsOwner, contractAsUser1, owner, user0, user1, tokenIds}) {
-    await contractAsOwner.approve(user1, tokenIds[0]).then(tx => tx.wait());
-    await contractAsUser1.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
-    const approvedAddress = await contract.callStatic.getApproved(tokenIds[0]);
-    assert.equal(approvedAddress, zeroAddress);
-  });
-
-  it('transfering the approved NFT results in aproval reset for it but no approval event', async function ({contractAsOwner, contractAsUser1, owner, user0, user1, tokenIds}) {
-    await contractAsOwner.approve(user1, tokenIds[0]).then(tx => tx.wait());
-    const receipt = await contractAsUser1.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
-    const eventsMatching = receipt.events.filter((v) => v.event === 'Approval');
-    assert.equal(eventsMatching.length, 0);
-  });
-
-  it('transfering the approved NFT again will fail', async function ({contractAsOwner, contractAsUser1, owner, user0, user1, tokenIds}) {
-    await contractAsOwner.approve(user1, tokenIds[0]).then(tx => tx.wait());
-    await contractAsUser1.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
-    await expectRevert(contractAsUser1.transferFrom(user0, owner, tokenIds[0]).then(tx => tx.wait()));
-  });
-
-  it('approval by operator works', async function ({contract, contractAsOwner, contractAsUser0, contractAsUser1, owner, user0, user1, user2, tokenIds}) {
-    await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
-
-    await contractAsUser0.setApprovalForAllFor(user0, user1, true).then(tx => tx.wait());
-    // await tx(contract, 'approve', {from: user0, gas}, user1, tokenId);
-    await contractAsUser1.transferFrom(user0, user2, tokenIds[0]).then(tx => tx.wait());
-    const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
-    assert.equal(newOwner, user2);
-  });
-    
-  it('approving all emit ApprovalForAll event', async function ({contractAsOwner, owner, user0}) {
-    const receipt = await contractAsOwner.setApprovalForAll(user0, true).then(tx => tx.wait());
-    const eventsMatching = receipt.events.filter((v) => v.event === 'ApprovalForAll');
-    assert.equal(eventsMatching.length, 1);
-    const eventValues = eventsMatching[0].args;
-    assert.equal(eventValues[0], owner);
-    assert.equal(eventValues[1], user0);
-    assert.equal(eventValues[2], true);
-  });
-
-  it('approving all update the approval status', async function ({contract, contractAsOwner, owner, user0}) {
-    await contractAsOwner.setApprovalForAll(user0, true).then(tx => tx.wait());
-    const isUser0Approved = await contract.callStatic.isApprovedForAll(owner, user0);
-    assert.equal(isUser0Approved, true);
-  });
-
-  it('unsetting approval for all should update the approval status', async function ({contract, contractAsOwner, owner, user0}) {
-    await contractAsOwner.setApprovalForAll(user0, true).then(tx => tx.wait());
-    await contractAsOwner.setApprovalForAll(user0, false).then(tx => tx.wait());
-    const isUser0Approved = await contract.callStatic.isApprovedForAll(owner, user0);
-    assert.equal(isUser0Approved, false);
-  });
-
-  it('unsetting approval for all should emit ApprovalForAll event', async function ({contractAsOwner, owner, user0}) {
-    await contractAsOwner.setApprovalForAll(user0, true).then(tx => tx.wait());
-    const receipt = await contractAsOwner.setApprovalForAll(user0, false).then(tx => tx.wait());
-    const eventsMatching = receipt.events.filter((v) => v.event === 'ApprovalForAll');
-    assert.equal(eventsMatching.length, 1);
-    const eventValues = eventsMatching[0].args;
-    assert.equal(eventValues[0], owner);
-    assert.equal(eventValues[1], user0);
-    assert.equal(eventValues[2], false);
-  });
-
-  it('approving for all allows transfer from the approved party', async function ({contract, contractAsOwner, contractAsUser0, owner, user0, user1, tokenIds}) {
-    await contractAsOwner.setApprovalForAll(user0, true).then(tx => tx.wait());
-    await contractAsUser0.transferFrom(owner, user1, tokenIds[0]).then(tx => tx.wait());
-    const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
-    assert.equal(newOwner, user1);
-  });
-  it('transfering one NFT do not results in aprovalForAll reset', async function ({contract, contractAsOwner, owner, user0, user1, tokenIds}) {
-    await contractAsOwner.setApprovalForAll(user1, true).then(tx => tx.wait());
-    await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
-    const isUser1Approved = await contract.callStatic.isApprovedForAll(owner, user1);
-    assert.equal(isUser1Approved, true);
-  });
-
-  it('approval for all does not grant approval on a transfered NFT', async function ({contractAsOwner, contractAsUser1, owner, user0, user1, tokenIds}) {
-    await contractAsOwner.setApprovalForAll(user1, true).then(tx => tx.wait());
-    await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
-    await expectRevert(contractAsUser1.transferFrom(user0, user1, tokenIds[0]).then(tx => tx.wait()));
-  });
-
-  it('approval for all set before will work on a transfered NFT', async function ({contract, contractAsOwner, contractAsUser0, contractAsUser1, owner, user0, user1, tokenIds}) {
-    await contractAsUser0.setApprovalForAll(user1, true).then(tx => tx.wait());
-    await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
-    await contractAsUser1.transferFrom(user0, user1, tokenIds[0]).then(tx => tx.wait());
-    const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
-    assert.equal(newOwner, user1);
-  });
-
-  it('approval for all allow to set individual nft approve', async function ({contract, contractAsOwner, contractAsUser0, contractAsUser2, owner, user0, user1, user2, tokenIds}) {
-    await contractAsOwner.transferFrom(owner, user0, tokenIds[0]).then(tx => tx.wait());
-
-    await contractAsUser0.setApprovalForAll(user1, true).then(tx => tx.wait());
-
-    await contractAsUser0.approve(user2, tokenIds[0]).then(tx => tx.wait());
-    await contractAsUser2.transferFrom(user0, user2, tokenIds[0]).then(tx => tx.wait());
-    const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
-    assert.equal(newOwner, user2);
-  });
-
+  
   return tests;
 }

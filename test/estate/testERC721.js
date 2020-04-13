@@ -24,8 +24,25 @@ const erc721Tests = require('../erc721')(async () => {
   mandatoryERC721Receiver: true,
 });
 
-describe('Estate: ERC721', function() {
-  for(const test of erc721Tests) {
+function recurse(test) {
+  console.log(test);
+  if (test.subTests) {
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    describe(test.title, function() {
+      // eslint-disable-next-line mocha/no-setup-in-describe
+      for(const subTest of test.subTests) {
+        // eslint-disable-next-line mocha/no-setup-in-describe
+        recurse(subTest);
+      }
+    });
+  } else {
     it(test.title, test.test);
+  }
+}
+
+describe('Estate:ERC721', function() {
+  for(const test of erc721Tests) {
+    // eslint-disable-next-line mocha/no-setup-in-describe
+    recurse(test);
   }
 });
