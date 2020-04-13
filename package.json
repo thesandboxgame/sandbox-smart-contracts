@@ -5,7 +5,7 @@
   "scripts": {
     "postinstall": "patch-package",
     "prettier:solidity": "prettier --write src/**/*.sol",
-    "test": "mocha --bail --recursive test",
+    "test": "buidler compile && mocha --bail --recursive test",
     "smartcheck": "smartcheck -p .",
     "deploy:local": "buidler --network localhost deploy",
     "deploy:rinkeby": "buidler --network rinkeby deploy",

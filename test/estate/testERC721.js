@@ -25,7 +25,6 @@ const erc721Tests = require('../erc721')(async () => {
 });
 
 function recurse(test) {
-  console.log(test);
   if (test.subTests) {
     // eslint-disable-next-line mocha/no-setup-in-describe
     describe(test.title, function() {

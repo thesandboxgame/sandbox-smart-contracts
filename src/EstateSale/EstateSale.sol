@@ -1,5 +1,4 @@
 /* solhint-disable not-rely-on-time, func-order */
-
 pragma solidity 0.6.4;
 
 import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";

@@ -122,12 +122,12 @@ contract EstateBaseToken is ERC721BaseToken {
         _addQuads(sender, estateId, sizes, xs, ys, junctions);
     }
 
-    function burn(uint256 id) override external {
+    function burn(uint256 id) external override {
         _check_burn_authorized(msg.sender, id);
         _burn(msg.sender, _ownerOf(id), id);
     }
 
-    function burnFrom(address from, uint256 id) override external {
+    function burnFrom(address from, uint256 id) external override {
         _check_burn_authorized(from, id);
         _burn(from, _ownerOf(id), id);
     }
@@ -320,10 +320,10 @@ contract EstateBaseToken is ERC721BaseToken {
             list[i] = _encode(uint16(xs[i]), uint16(ys[i]), uint8(sizes[i]));
         }
 
-        uint256 l = _quadsInEstate[estateId].length;
-        _checkAdjacency(estateId, l, list, junctions);
+        uint256 numQuadsAlreadyIn = _quadsInEstate[estateId].length;
+        _checkAdjacency(estateId, numQuadsAlreadyIn, list, junctions);
 
-        if (l == 0) {
+        if (numQuadsAlreadyIn == 0) {
             _quadsInEstate[estateId] = list;
         } else {
             for (uint256 i = 0; i < list.length; i++) {
@@ -333,12 +333,12 @@ contract EstateBaseToken is ERC721BaseToken {
         emit QuadsAdded(estateId, list);
     }
 
-    function _checkAdjacency(uint256 estateId, uint256 l, uint24[] memory list, uint256[] memory junctions) internal {
+    function _checkAdjacency(uint256 estateId, uint256 numQuadsAlreadyIn, uint24[] memory list, uint256[] memory junctions) internal {
         uint16 lastX = 0;
         uint16 lastY = 0;
         uint8 lastSize = 0;
-        if (l > 0) {
-            (lastX, lastY, lastSize) = _decode(_quadsInEstate[estateId][l-1]);
+        if (numQuadsAlreadyIn > 0) {
+            (lastX, lastY, lastSize) = _decode(_quadsInEstate[estateId][numQuadsAlreadyIn-1]);
         }
         uint256 j = 0;
         for (uint256 i = 0; i < list.length; i++) {
@@ -348,9 +348,9 @@ contract EstateBaseToken is ERC721BaseToken {
                 uint256 index = junctions[j];
                 j++;
                 uint24 data;
-                if (index >= l) {
-                    require(index - l < i, "JUNCTIONS_NOT_PAST");
-                    data = list[index - l];
+                if (index >= numQuadsAlreadyIn) {
+                    require(index - numQuadsAlreadyIn < i, "JUNCTIONS_NOT_PAST");
+                    data = list[index - numQuadsAlreadyIn];
                 } else {
                     data = _quadsInEstate[estateId][index];
                 }
@@ -386,10 +386,10 @@ contract EstateBaseToken is ERC721BaseToken {
             list[i] = _encode(x, y, 1);
         }
 
-        uint256 l = _quadsInEstate[estateId].length;
-        _checkAdjacency(estateId, l, list, junctions);
+        uint256 numQuadsAlreadyIn = _quadsInEstate[estateId].length;
+        _checkAdjacency(estateId, numQuadsAlreadyIn, list, junctions);
 
-        if (l == 0) {
+        if (numQuadsAlreadyIn == 0) {
             _quadsInEstate[estateId] = list;
         } else {
             for (uint256 i = 0; i < list.length; i++) {
@@ -454,7 +454,7 @@ contract EstateBaseToken is ERC721BaseToken {
         } else if (ids.length == 576) {
             size = 24;
         } else {
-            revert('SIZE_INVALID');
+            revert("SIZE_INVALID");
         }
         uint16 x = uint16(ids[0] % GRID_SIZE);
         uint16 y = uint16(ids[0] / GRID_SIZE);
@@ -482,7 +482,7 @@ contract EstateBaseToken is ERC721BaseToken {
         revert("ERC721_REJECTED");
     }
 
-    function supportsInterface(bytes4 id) override virtual public pure returns (bool) {
+    function supportsInterface(bytes4 id) public override virtual pure returns (bool) {
         return super.supportsInterface(id) || id == 0x5e8bf644;
     }
 }

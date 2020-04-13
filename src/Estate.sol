@@ -1,5 +1,3 @@
-/* solhint-disable no-empty-blocks */
-
 pragma solidity 0.6.4;
 
 import "./Estate/EstateBaseToken.sol";
@@ -77,7 +75,7 @@ contract Estate is EstateBaseToken {
      * @param id The id of the interface
      * @return True if the interface is supported
      */
-    function supportsInterface(bytes4 id) override public pure returns (bool) {
+    function supportsInterface(bytes4 id) public override pure returns (bool) {
         return super.supportsInterface(id) || id == 0x5b5e139f;
     }
 }
