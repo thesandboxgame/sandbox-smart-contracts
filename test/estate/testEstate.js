@@ -20,7 +20,7 @@ function LandSaleEstateStore() {
 }
 LandSaleEstateStore.prototype.resetContracts = async function () {
     try {
-        await deployments.run(); // TODO BUIDLER_DEPLOY TAG
+        await deployments.fixture();
     } catch (e) {
         console.error(e);
     }
@@ -46,7 +46,7 @@ function EstateStore() {
 }
 EstateStore.prototype.resetContracts = async function () {
     try {
-        await deployments.run(); // TODO BUIDLER_DEPLOY TAG
+        await deployments.fixture();
     } catch (e) {
         console.error(e);
     }
@@ -83,7 +83,7 @@ ERC721Contract.prototype.resetContract = async function () {
     } = await getNamedAccounts();
     this.minter = deployer;
 
-    await deployments.run(this.contractName);
+    await deployments.fixture();
 
     const contract = await deployments.get(this.contractName);
     this.contract = new Contract(contract.address, contract.abi, ethersProvider);
