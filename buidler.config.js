@@ -1,7 +1,7 @@
 require('dotenv').config();
 const fs = require('fs');
 usePlugin('buidler-deploy');
-// usePlugin('buidler-ethers-v5');
+usePlugin('buidler-ethers-v5');
 
 let mnemonic = process.env.MNEMONIC;
 if (!mnemonic || mnemonic === '') {
