@@ -63,7 +63,12 @@ contract Sand777Receiver is ERC777TokensRecipient, ERC820Implementer {
         allowTokensReceived = false;
     }
 
-    function receiveMeta(address sender, string calldata name, uint256 value, uint256 test) external {
+    function receiveMeta(
+        address sender,
+        string calldata name,
+        uint256 value,
+        uint256 test
+    ) external {
         // for test matching erc20Receiver
     }
 }

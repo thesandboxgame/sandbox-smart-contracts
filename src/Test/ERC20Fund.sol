@@ -2,6 +2,7 @@ pragma solidity 0.6.4;
 
 import "../contracts_common/src/Interfaces/ERC20.sol";
 
+
 contract ERC20Fund {
     ERC20 token;
     address owner;

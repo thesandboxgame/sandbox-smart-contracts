@@ -15,19 +15,15 @@ import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
 
 import "../TheSandbox712.sol";
 
-contract P2PERC721Sale is
-    Admin,
-    ERC1654Constants,
-    ERC1271Constants,
-    TheSandbox712,
-    MetaTransactionReceiver {
+
+contract P2PERC721Sale is Admin, ERC1654Constants, ERC1271Constants, TheSandbox712, MetaTransactionReceiver {
     using SafeMathWithRequire for uint256;
 
-    enum SignatureType { DIRECT, EIP1654, EIP1271 }
+    enum SignatureType {DIRECT, EIP1654, EIP1271}
 
-    mapping (address => mapping (uint256 => uint256)) public claimed;
+    mapping(address => mapping(uint256 => uint256)) public claimed;
 
-    uint256 constant private MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+    uint256 private constant MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
     ERC20 internal _sand;
     uint256 internal _fee;
     address internal _feeCollector;
@@ -82,26 +78,14 @@ contract P2PERC721Sale is
         emit FeeSetup(feeCollector, fee);
     }
 
-    function _verifyParameters(
-        address buyer,
-        Auction memory auction
-    ) internal view {
+    function _verifyParameters(address buyer, Auction memory auction) internal view {
         require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "not authorized"); // if support any ERC20 :(token != address(0) &&
 
-        require(
-            claimed[auction.seller][auction.id] != MAX_UINT256,
-            "Auction canceled"
-        );
+        require(claimed[auction.seller][auction.id] != MAX_UINT256, "Auction canceled");
 
-        require(
-            auction.startedAt <= now,
-            "Auction has not started yet"
-        );
+        require(auction.startedAt <= now, "Auction has not started yet");
 
-        require(
-            auction.startedAt.add(auction.duration) > now,
-            "Auction finished"
-        );
+        require(auction.startedAt.add(auction.duration) > now, "Auction finished");
     }
 
     function claimSellerOffer(
@@ -137,10 +121,7 @@ contract P2PERC721Sale is
             fee = PriceUtil.calculateFee(offer, _fee);
         }
 
-        require(
-            _sand.transferFrom(buyer, auction.seller, offer.sub(fee)),
-            "Funds transfer failed"
-        );
+        require(_sand.transferFrom(buyer, auction.seller, offer.sub(fee)), "Funds transfer failed");
 
         ERC721 token = ERC721(auction.tokenAddress);
 
@@ -161,11 +142,7 @@ contract P2PERC721Sale is
         bytes memory dataToHash;
 
         if (eip712) {
-            dataToHash = abi.encodePacked(
-                "\x19\x01",
-                domainSeparator(),
-                _hashAuction(auction)
-            );
+            dataToHash = abi.encodePacked("\x19\x01", domainSeparator(), _hashAuction(auction));
         } else {
             dataToHash = _encodeBasicSignatureHash(auction);
         }
@@ -186,13 +163,29 @@ contract P2PERC721Sale is
         }
     }
 
-    function _encodeBasicSignatureHash(
-        Auction memory auction
-    ) internal view returns (bytes memory) {
-        return SigUtil.prefixed(
+    function _encodeBasicSignatureHash(Auction memory auction) internal view returns (bytes memory) {
+        return
+            SigUtil.prefixed(
+                keccak256(
+                    abi.encodePacked(
+                        address(this),
+                        auction.id,
+                        auction.tokenAddress,
+                        auction.tokenId,
+                        auction.seller,
+                        auction.startingPrice,
+                        auction.endingPrice,
+                        auction.startedAt,
+                        auction.duration
+                    )
+                )
+            );
+    }
+
+    function _hashAuction(Auction memory auction) internal pure returns (bytes32) {
+        return
             keccak256(
-                abi.encodePacked(
-                    address(this),
+                abi.encode(
                     auction.id,
                     auction.tokenAddress,
                     auction.tokenId,
@@ -202,24 +195,6 @@ contract P2PERC721Sale is
                     auction.startedAt,
                     auction.duration
                 )
-            )
-        );
-    }
-
-    function _hashAuction(
-        Auction memory auction
-    ) internal pure returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                auction.id,
-                auction.tokenAddress,
-                auction.tokenId,
-                auction.seller,
-                auction.startingPrice,
-                auction.endingPrice,
-                auction.startedAt,
-                auction.duration
-            )
-        );
+            );
     }
 }

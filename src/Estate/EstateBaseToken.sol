@@ -20,10 +20,11 @@ contract EstateBaseToken is ERC721BaseToken {
     event Minter(address newMinter);
     event Breaker(address newBreaker);
 
-    constructor(address metaTransactionContract, address admin, LandToken land)
-        public
-        ERC721BaseToken(metaTransactionContract, admin)
-    {
+    constructor(
+        address metaTransactionContract,
+        address admin,
+        LandToken land
+    ) public ERC721BaseToken(metaTransactionContract, admin) {
         _land = land;
     }
 
@@ -49,7 +50,13 @@ contract EstateBaseToken is ERC721BaseToken {
         return _breaker;
     }
 
-    function createFromQuad(address sender, address to, uint256 size, uint256 x, uint256 y) external returns (uint256) {
+    function createFromQuad(
+        address sender,
+        address to,
+        uint256 size,
+        uint256 x,
+        uint256 y
+    ) external returns (uint256) {
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_ESTATE_CONTRACT");
         _check_create_authorized(sender);
@@ -58,15 +65,24 @@ contract EstateBaseToken is ERC721BaseToken {
         return estateId;
     }
 
-    function addQuad(address sender, uint256 estateId, uint256 size, uint256 x, uint256 y, uint256 junction) external {
+    function addQuad(
+        address sender,
+        uint256 estateId,
+        uint256 size,
+        uint256 x,
+        uint256 y,
+        uint256 junction
+    ) external {
         _check_add_authorized(sender, estateId);
         _addSingleQuad(sender, estateId, size, x, y, false, junction);
     }
 
-    function createFromMultipleLands(address sender, address to, uint256[] calldata ids, uint256[] calldata junctions)
-        external
-        returns (uint256)
-    {
+    function createFromMultipleLands(
+        address sender,
+        address to,
+        uint256[] calldata ids,
+        uint256[] calldata junctions
+    ) external returns (uint256) {
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_ESTATE_CONTRACT");
         _check_create_authorized(sender);
@@ -75,14 +91,22 @@ contract EstateBaseToken is ERC721BaseToken {
         return estateId;
     }
 
-    function addSingleLand(address sender, uint256 estateId, uint256 id, uint256 junction) external {
+    function addSingleLand(
+        address sender,
+        uint256 estateId,
+        uint256 id,
+        uint256 junction
+    ) external {
         _check_add_authorized(sender, estateId); // TODO test estateId == 0
         _addLand(sender, estateId, id, junction);
     }
 
-    function addMultipleLands(address sender, uint256 estateId, uint256[] calldata ids, uint256[] calldata junctions)
-        external
-    {
+    function addMultipleLands(
+        address sender,
+        uint256 estateId,
+        uint256[] calldata ids,
+        uint256[] calldata junctions
+    ) external {
         _check_add_authorized(sender, estateId);
         _addLands(sender, estateId, ids, junctions);
     }
@@ -129,7 +153,11 @@ contract EstateBaseToken is ERC721BaseToken {
         _burn(from, _ownerOf(id), id);
     }
 
-    function burnAndTransferFrom(address sender, uint256 estateId, address to) external {
+    function burnAndTransferFrom(
+        address sender,
+        uint256 estateId,
+        address to
+    ) external {
         _check_burn_authorized(sender, estateId);
         _owners[estateId] = (_owners[estateId] & (2**255 - 1)) | (2**160);
         _numNFTPerAddress[sender]--;
@@ -138,7 +166,11 @@ contract EstateBaseToken is ERC721BaseToken {
     }
 
     // Optimized version where the whole list is in memory
-    function transferAllFromDestroyedEstate(address sender, uint256 estateId, address to) public {
+    function transferAllFromDestroyedEstate(
+        address sender,
+        uint256 estateId,
+        address to
+    ) public {
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_ESTATE_CONTRACT");
         _check_withdrawal_authorized(sender, estateId);
@@ -160,7 +192,12 @@ contract EstateBaseToken is ERC721BaseToken {
         emit QuadsRemoved(estateId, num);
     }
 
-    function transferFromDestroyedEstate(address sender, uint256 estateId, uint256 num, address to) public {
+    function transferFromDestroyedEstate(
+        address sender,
+        uint256 estateId,
+        uint256 num,
+        address to
+    ) public {
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_ESTATE_CONTRACT");
         _check_withdrawal_authorized(sender, estateId);
@@ -253,11 +290,23 @@ contract EstateBaseToken is ERC721BaseToken {
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    function _encode(uint16 x, uint16 y, uint8 size) internal pure returns (uint24) {
+    function _encode(
+        uint16 x,
+        uint16 y,
+        uint8 size
+    ) internal pure returns (uint24) {
         return uint24(size) * uint24(2**18) + (uint24(x) + uint24(y) * GRID_SIZE);
     }
 
-    function _decode(uint24 data) internal pure returns (uint16 x, uint16 y, uint8 size) {
+    function _decode(uint24 data)
+        internal
+        pure
+        returns (
+            uint16 x,
+            uint16 y,
+            uint8 size
+        )
+    {
         size = uint8(data / (2**18));
         uint24 xy = data % (2**18);
         y = uint16(xy / GRID_SIZE);
@@ -355,14 +404,26 @@ contract EstateBaseToken is ERC721BaseToken {
         }
     }
 
-    function _adjacent(uint16 x1, uint16 y1, uint8 s1, uint16 x2, uint16 y2, uint8 s2) internal pure returns (bool) {
+    function _adjacent(
+        uint16 x1,
+        uint16 y1,
+        uint8 s1,
+        uint16 x2,
+        uint16 y2,
+        uint8 s2
+    ) internal pure returns (bool) {
         return ((x1 + s1 > x2 && x1 < x2 + s2 && y1 == y2 - s1) ||
             (x1 + s1 > x2 && x1 < x2 + s2 && y1 == y2 + s2) ||
             (x1 == x2 - s1 && y1 + s1 > y2 && y1 < y2 + s2) ||
             (x1 == x2 + s2 && y1 + s1 > y2 && y1 < y2 + s2));
     }
 
-    function _addLands(address sender, uint256 estateId, uint256[] memory ids, uint256[] memory junctions) internal {
+    function _addLands(
+        address sender,
+        uint256 estateId,
+        uint256[] memory ids,
+        uint256[] memory junctions
+    ) internal {
         _land.batchTransferFrom(sender, address(this), ids, "");
         uint24[] memory list = new uint24[](ids.length);
         for (uint256 i = 0; i < list.length; i++) {
@@ -384,7 +445,12 @@ contract EstateBaseToken is ERC721BaseToken {
         emit QuadsAdded(estateId, list);
     }
 
-    function _addLand(address sender, uint256 estateId, uint256 id, uint256 junction) internal {
+    function _addLand(
+        address sender,
+        uint256 estateId,
+        uint256 id,
+        uint256 junction
+    ) internal {
         _land.transferFrom(sender, address(this), id);
         uint24[] memory list = new uint24[](1);
         uint16 x = uint16(id % GRID_SIZE);
@@ -400,7 +466,12 @@ contract EstateBaseToken is ERC721BaseToken {
 
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    function _idInPath(uint256 i, uint256 size, uint256 x, uint256 y) internal pure returns (uint256) {
+    function _idInPath(
+        uint256 i,
+        uint256 size,
+        uint256 x,
+        uint256 y
+    ) internal pure returns (uint256) {
         uint256 row = i / size;
         if (row % 2 == 0) {
             // alow ids to follow a path in a quad
@@ -410,10 +481,12 @@ contract EstateBaseToken is ERC721BaseToken {
         }
     }
 
-    function onERC721BatchReceived(address operator, address from, uint256[] calldata ids, bytes calldata data)
-        external
-        returns (bytes4)
-    {
+    function onERC721BatchReceived(
+        address operator,
+        address from,
+        uint256[] calldata ids,
+        bytes calldata data
+    ) external returns (bytes4) {
         if (operator == address(this)) {
             return _ERC721_BATCH_RECEIVED;
         }
@@ -449,10 +522,12 @@ contract EstateBaseToken is ERC721BaseToken {
         return _ERC721_BATCH_RECEIVED;
     }
 
-    function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data)
-        external
-        returns (bytes4)
-    {
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external returns (bytes4) {
         if (operator == address(this)) {
             return _ERC721_BATCH_RECEIVED;
         }

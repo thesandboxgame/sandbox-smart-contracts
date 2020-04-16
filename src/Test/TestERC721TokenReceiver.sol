@@ -1,5 +1,6 @@
 pragma solidity 0.6.4;
 
+
 contract TestERC721TokenReceiver {
     bool private allowTokensReceived;
     bool private returnCorrectBytes;
@@ -34,10 +35,7 @@ contract TestERC721TokenReceiver {
         uint256 _tokenId,
         bytes memory // data
     ) public returns (bytes4) {
-        require(
-            address(tokenContract) == msg.sender,
-            "only accept tokenContract as sender"
-        );
+        require(address(tokenContract) == msg.sender, "only accept tokenContract as sender");
         require(allowTokensReceived, "Receive not allowed");
         if (returnCorrectBytes) {
             return _ERC721_RECEIVED;
@@ -49,6 +47,7 @@ contract TestERC721TokenReceiver {
     function acceptTokens() public onlyOwner {
         allowTokensReceived = true;
     }
+
     function rejectTokens() public onlyOwner {
         allowTokensReceived = false;
     }

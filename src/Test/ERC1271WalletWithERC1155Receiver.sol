@@ -34,10 +34,13 @@ contract ERC1271WalletWithERC1155Receiver is ERC1271, ERC1271Constants {
         }
     }
 
-    function onERC1155Received(address _operator, address _from, uint256 _id, uint256 _value, bytes calldata _data)
-        external
-        returns (bytes4)
-    {
+    function onERC1155Received(
+        address _operator,
+        address _from,
+        uint256 _id,
+        uint256 _value,
+        bytes calldata _data
+    ) external returns (bytes4) {
         return ERC1155_RECEIVED;
     }
 

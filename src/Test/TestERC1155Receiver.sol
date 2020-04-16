@@ -1,5 +1,6 @@
 pragma solidity 0.6.4;
 
+
 contract TestERC1155Receiver {
     bool private allowTokensReceived;
     bool private returnCorrectBytes;
@@ -42,10 +43,7 @@ contract TestERC1155Receiver {
         uint256 _value,
         bytes calldata _data
     ) external returns (bytes4) {
-        require(
-            address(tokenContract) == msg.sender,
-            "only accept tokenContract as sender"
-        );
+        require(address(tokenContract) == msg.sender, "only accept tokenContract as sender");
         require(allowTokensReceived, "Receive not allowed");
         if (returnCorrectBytes) {
             return ERC1155_RECEIVED;
@@ -61,10 +59,7 @@ contract TestERC1155Receiver {
         uint256[] calldata _values,
         bytes calldata _data
     ) external returns (bytes4) {
-        require(
-            address(tokenContract) == msg.sender,
-            "only accept tokenContract as sender"
-        );
+        require(address(tokenContract) == msg.sender, "only accept tokenContract as sender");
         require(allowBatchTokensReceived, "Receive not allowed");
         if (returnCorrectBytesOnBatch) {
             return ERC1155_BATCH_RECEIVED;
@@ -76,6 +71,7 @@ contract TestERC1155Receiver {
     function acceptTokens() public onlyOwner {
         allowTokensReceived = true;
     }
+
     function rejectTokens() public onlyOwner {
         allowTokensReceived = false;
     }
@@ -83,6 +79,7 @@ contract TestERC1155Receiver {
     function acceptBatchTokens() public onlyOwner {
         allowBatchTokensReceived = true;
     }
+
     function rejectBatchTokens() public onlyOwner {
         allowBatchTokensReceived = false;
     }

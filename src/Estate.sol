@@ -4,10 +4,11 @@ import "./Estate/EstateBaseToken.sol";
 
 
 contract Estate is EstateBaseToken {
-    constructor(address metaTransactionContract, address admin, LandToken land)
-        public
-        EstateBaseToken(metaTransactionContract, admin, land)
-    {}
+    constructor(
+        address metaTransactionContract,
+        address admin,
+        LandToken land
+    ) public EstateBaseToken(metaTransactionContract, admin, land) {}
 
     /**
      * @notice Return the name of the token contract

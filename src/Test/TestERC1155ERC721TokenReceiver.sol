@@ -1,5 +1,6 @@
 pragma solidity 0.6.4;
 
+
 contract TestERC1155ERC721TokenReceiver {
     bool private allowTokensReceived;
     bool private returnCorrectBytes;
@@ -45,10 +46,7 @@ contract TestERC1155ERC721TokenReceiver {
         uint256 _value,
         bytes calldata _data
     ) external returns (bytes4) {
-        require(
-            address(tokenContract) == msg.sender,
-            "only accept tokenContract as sender"
-        );
+        require(address(tokenContract) == msg.sender, "only accept tokenContract as sender");
         require(doNotThrow, "throw requested");
         if (!allowTokensReceived) {
             return 0x150b7a03;
@@ -71,11 +69,7 @@ contract TestERC1155ERC721TokenReceiver {
         }
     }
 
-    function supportsInterface(bytes4 _interfaceId)
-        external
-        pure
-        returns (bool)
-    {
+    function supportsInterface(bytes4 _interfaceId) external pure returns (bool) {
         return _interfaceId == 0x01ffc9a7 || _interfaceId == 0x4e2312e0;
     }
 
@@ -86,10 +80,7 @@ contract TestERC1155ERC721TokenReceiver {
         uint256[] calldata _values,
         bytes calldata _data
     ) external returns (bytes4) {
-        require(
-            address(tokenContract) == msg.sender,
-            "only accept tokenContract as sender"
-        );
+        require(address(tokenContract) == msg.sender, "only accept tokenContract as sender");
         require(allowBatchTokensReceived, "Receive not allowed");
         if (returnCorrectBytesOnBatch) {
             return ERC1155_BATCH_RECEIVED;
@@ -104,10 +95,7 @@ contract TestERC1155ERC721TokenReceiver {
         uint256 _tokenId,
         bytes memory // data
     ) public returns (bytes4) {
-        require(
-            address(tokenContract) == msg.sender,
-            "only accept tokenContract as sender"
-        );
+        require(address(tokenContract) == msg.sender, "only accept tokenContract as sender");
         require(allowTokensReceived, "Receive not allowed");
         if (returnCorrectBytes) {
             return _ERC721_RECEIVED;
@@ -119,6 +107,7 @@ contract TestERC1155ERC721TokenReceiver {
     function acceptTokens() public onlyOwner {
         allowTokensReceived = true;
     }
+
     function rejectTokens() public onlyOwner {
         allowTokensReceived = false;
     }
@@ -126,6 +115,7 @@ contract TestERC1155ERC721TokenReceiver {
     function acceptBatchTokens() public onlyOwner {
         allowBatchTokensReceived = true;
     }
+
     function rejectBatchTokens() public onlyOwner {
         allowBatchTokensReceived = false;
     }

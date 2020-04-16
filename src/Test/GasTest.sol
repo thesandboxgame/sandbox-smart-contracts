@@ -1,5 +1,6 @@
 pragma solidity 0.6.4;
 
+
 contract GasTest {
     uint256 constant WORST_CASE_EPSILON = 1000;
 
@@ -17,20 +18,22 @@ contract GasTest {
         emit Tx(success, returnData, gasAvailable - gasleft());
     }
 
-    function test(uint256 txGas, address _to, bytes calldata _data)
-        external
-        returns (bool success, bytes memory returnData)
-    {
+    function test(
+        uint256 txGas,
+        address _to,
+        bytes calldata _data
+    ) external returns (bool success, bytes memory returnData) {
         uint256 gasAvailable = gasleft() - WORST_CASE_EPSILON;
         require(gasAvailable - gasAvailable / 64 > txGas, "not enough gas");
         (success, returnData) = _to.call.gas(txGas)(_data);
         emit Tx(success, returnData, gasAvailable - gasleft());
     }
 
-    function raw(uint256 txGas, address _to, bytes calldata _data)
-        external
-        returns (bool success, bytes memory returnData)
-    {
+    function raw(
+        uint256 txGas,
+        address _to,
+        bytes calldata _data
+    ) external returns (bool success, bytes memory returnData) {
         uint256 gasAvailable = gasleft();
         (success, returnData) = _to.call.gas(txGas)(_data);
         emit Tx(success, returnData, gasAvailable - gasleft());

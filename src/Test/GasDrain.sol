@@ -1,5 +1,6 @@
 pragma solidity 0.6.4;
 
+
 contract GasDrain {
     mapping(uint256 => uint256) store;
 
@@ -17,9 +18,11 @@ contract GasDrain {
         }
     }
 
-    function receiveSpecificERC20(address, uint256, uint256 amoutOfGas)
-        external
-    {
+    function receiveSpecificERC20(
+        address,
+        uint256,
+        uint256 amoutOfGas
+    ) external {
         uint256 start = gasleft() + 303; // 301 for amoutOfGas == 3000000 // 321 for amountOfGas == 2000000 // 303 for amountOfGas == 5000000
         while (start - gasleft() < amoutOfGas) {}
     }

@@ -272,11 +272,14 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         return _merkleRoot;
     }
 
-    function _generateLandHash(uint256 x, uint256 y, uint256 size, uint256 price, address reserved, bytes32 salt)
-        internal
-        pure
-        returns (bytes32)
-    {
+    function _generateLandHash(
+        uint256 x,
+        uint256 y,
+        uint256 size,
+        uint256 price,
+        address reserved,
+        bytes32 salt
+    ) internal pure returns (bytes32) {
         return keccak256(abi.encodePacked(x, y, size, price, reserved, salt));
     }
 

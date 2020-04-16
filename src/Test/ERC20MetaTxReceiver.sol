@@ -2,6 +2,7 @@ pragma solidity 0.6.4;
 
 import "../contracts_common/src/Interfaces/ERC20.sol";
 
+
 contract ERC20MetaTxReceiver {
     ERC20 token;
     address owner;
@@ -22,10 +23,7 @@ contract ERC20MetaTxReceiver {
         string calldata name,
         uint256 test
     ) external {
-        require(
-            msg.sender == sender || msg.sender == address(token),
-            "sender != msg.sender || token"
-        );
+        require(msg.sender == sender || msg.sender == address(token), "sender != msg.sender || token");
         require(value == price, "not enough value");
         token.transferFrom(sender, address(this), value);
 
