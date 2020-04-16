@@ -3,6 +3,7 @@ const fs = require("fs");
 usePlugin("buidler-deploy");
 usePlugin("buidler-ethers-v5");
 usePlugin("@nomiclabs/buidler-solhint");
+usePlugin("buidler-gas-reporter");
 
 let mnemonic = process.env.MNEMONIC;
 if (!mnemonic || mnemonic === "") {
@@ -34,6 +35,10 @@ const mainnetAccounts = mainnetMnemonic
   : undefined;
 
 module.exports = {
+  gasReporter: {
+    enabled: process.env.REPORT_GAS ? true : false,
+    src: "src",
+  },
   namedAccounts: {
     deployer: {
       default: 1,
