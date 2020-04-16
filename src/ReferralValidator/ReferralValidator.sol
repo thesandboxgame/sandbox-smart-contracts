@@ -42,7 +42,22 @@ contract ReferralValidator is Admin {
         _signingWallet = newSigningWallet;
     }
 
-    // TODO: Check if this function is really useful
+    /**
+     * @notice signing wallet authorized for referral
+     * @return the address of the signing wallet
+     */
+    function getSigningWallet() external view returns (address) {
+        return _signingWallet;
+    }
+
+    /**
+     * @notice the max commision rate
+     * @return the maximum commision rate that a referral can give
+     */
+    function getMaxCommisionRate() external view returns (uint256) {
+        return _maxCommissionRate;
+    }
+
     /**
      * @notice Update the maximum commission rate
      * @param newMaxCommissionRate The new maximum commission rate
