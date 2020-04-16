@@ -6,7 +6,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     assetBouncerAdmin,
   } = await getNamedAccounts();
 
-  const assetContract = await deployments.get('Asset');
+  const assetContract = await deployments.getOrNull('Asset');
   if (!assetContract) {
     throw new Error('no ASSET contract deployed');
   }

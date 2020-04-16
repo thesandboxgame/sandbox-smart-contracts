@@ -5,7 +5,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     landAdmin,
   } = await getNamedAccounts();
 
-  const land = await deployments.get('Land');
+  const land = await deployments.getOrNull('Land');
   if (!land) {
     throw new Error('no Land contract deployed');
   }

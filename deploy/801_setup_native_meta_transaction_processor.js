@@ -1,11 +1,11 @@
 module.exports = async ({deployments}) => {
   const {call, sendTxAndWait, log} = deployments;
 
-  const sand = await deployments.get('Sand');
+  const sand = await deployments.getOrNull('Sand');
   if (!sand) {
     throw new Error('no Sand contract deployed');
   }
-  const metaTxProcessor = await deployments.get('NativeMetaTransactionProcessor');
+  const metaTxProcessor = await deployments.getOrNull('NativeMetaTransactionProcessor');
   if (!metaTxProcessor) {
     throw new Error('no NativeMetaTransactionProcessor contract deployed');
   }

@@ -11,11 +11,11 @@ module.exports = async ({getNamedAccounts, deployments}) => {
 
   const assetAuctionFee10000th = 0; // 5000; // 5%
 
-  const asset = await deployments.get('Asset');
+  const asset = await deployments.getOrNull('Asset');
   if (!asset) {
     throw new Error('no Asset contract deployed');
   }
-  const sandContract = await deployments.get('Sand');
+  const sandContract = await deployments.getOrNull('Sand');
   if (!sandContract) {
     throw new Error('no SAND contract deployed');
   }

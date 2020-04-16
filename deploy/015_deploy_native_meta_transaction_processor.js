@@ -7,7 +7,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     deployer,
   } = await getNamedAccounts();
 
-  const sand = await deployments.get('Sand');
+  const sand = await deployments.getOrNull('Sand');
   if (!sand) {
     throw new Error('no SAND contract deployed');
   }

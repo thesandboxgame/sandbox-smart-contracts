@@ -7,15 +7,15 @@ module.exports = async ({getNamedAccounts, deployments}) => {
 
   const landSaleName = 'LandPreSale_2';
 
-  const sand = await deployments.get('Sand');
+  const sand = await deployments.getOrNull('Sand');
   if (!sand) {
     throw new Error('no Sand contract deployed');
   }
-  const land = await deployments.get('Land');
+  const land = await deployments.getOrNull('Land');
   if (!land) {
     throw new Error('no Land contract deployed');
   }
-  const landSale = await deployments.get(landSaleName);
+  const landSale = await deployments.getOrNull(landSaleName);
   if (!landSale) {
     throw new Error('no LandPreSale_2 contract deployed');
   }

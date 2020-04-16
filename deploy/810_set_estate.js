@@ -2,12 +2,12 @@ const {guard} = require('../lib');
 module.exports = async ({deployments}) => {
   const {call, sendTxAndWait, log} = deployments;
 
-  const land = await deployments.get('Land');
+  const land = await deployments.getOrNull('Land');
   if (!land) {
     throw new Error('no Land contract deployed');
   }
 
-  const estate = await deployments.get('Estate');
+  const estate = await deployments.getOrNull('Estate');
   if (!estate) {
     throw new Error('no Estate contract deployed');
   }

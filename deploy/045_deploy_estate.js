@@ -8,8 +8,8 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     estateAdmin,
   } = await getNamedAccounts();
 
-  const sandContract = await deployments.get('Sand');
-  const landContract = await deployments.get('Land');
+  const sandContract = await deployments.getOrNull('Sand');
+  const landContract = await deployments.getOrNull('Land');
 
   if (!sandContract) {
     throw new Error('no SAND contract deployed');

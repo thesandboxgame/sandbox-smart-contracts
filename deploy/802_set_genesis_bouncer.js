@@ -1,11 +1,11 @@
 module.exports = async ({deployments}) => {
   const {call, sendTxAndWait, log} = deployments;
 
-  const asset = await deployments.get('Asset');
+  const asset = await deployments.getOrNull('Asset');
   if (!asset) {
     throw new Error('no Asset contract deployed');
   }
-  const genesisBouncer = await deployments.get('GenesisBouncer');
+  const genesisBouncer = await deployments.getOrNull('GenesisBouncer');
   if (!genesisBouncer) {
     throw new Error('no GenesisBouncer contract deployed');
   }

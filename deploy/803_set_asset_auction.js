@@ -5,15 +5,15 @@ module.exports = async ({/*getNamedAccounts, */deployments}) => {
   //   assetAuctionFeeCollector,
   // } = await getNamedAccounts();
 
-  const sand = await deployments.get('Sand');
+  const sand = await deployments.getOrNull('Sand');
   if (!sand) {
     throw new Error('no Sand contract deployed');
   }
-  const asset = await deployments.get('Asset');
+  const asset = await deployments.getOrNull('Asset');
   if (!asset) {
     throw new Error('no Asset contract deployed');
   }
-  const assetAuction = await deployments.get('AssetSignedAuction');
+  const assetAuction = await deployments.getOrNull('AssetSignedAuction');
   if (!assetAuction) {
     throw new Error('no AssetSignedAuction contract deployed');
   }

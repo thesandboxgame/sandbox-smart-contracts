@@ -11,9 +11,9 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     backendReferralWallet,
   } = await getNamedAccounts();
 
-  const sandContract = await deployments.get('Sand');
-  const landContract = await deployments.get('Land');
-  const estateContract = await deployments.get('Estate');
+  const sandContract = await deployments.getOrNull('Sand');
+  const landContract = await deployments.getOrNull('Land');
+  const estateContract = await deployments.getOrNull('Estate');
 
   if (!sandContract) {
     throw new Error('no SAND contract deployed');
@@ -27,7 +27,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     throw new Error('no ESTATE contract deployed');
   }
 
-  let daiMedianizer = await deployments.get('DAIMedianizer');
+  let daiMedianizer = await deployments.getOrNull('DAIMedianizer');
   if (!daiMedianizer) {
     log('setting up a fake DAI medianizer');
     const daiMedianizerDeployResult = await deploy(
@@ -38,7 +38,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     daiMedianizer = daiMedianizerDeployResult.contract;
   }
 
-  let dai = await deployments.get('DAI');
+  let dai = await deployments.getOrNull('DAI');
   if (!dai) {
     log('setting up a fake DAI');
     const daiDeployResult = await deploy(

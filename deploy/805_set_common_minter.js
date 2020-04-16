@@ -3,15 +3,15 @@ const {guard} = require('../lib');
 module.exports = async ({deployments}) => {
   const {call, sendTxAndWait, log} = deployments;
 
-  const sand = await deployments.get('Sand');
+  const sand = await deployments.getOrNull('Sand');
   if (!sand) {
     throw new Error('no Sand contract deployed');
   }
-  const asset = await deployments.get('Asset');
+  const asset = await deployments.getOrNull('Asset');
   if (!asset) {
     throw new Error('no Asset contract deployed');
   }
-  const bouncer = await deployments.get('CommonMinter');
+  const bouncer = await deployments.getOrNull('CommonMinter');
   if (!bouncer) {
     throw new Error('no CommonMinter contract deployed');
   }

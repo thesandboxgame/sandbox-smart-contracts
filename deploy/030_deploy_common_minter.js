@@ -9,11 +9,11 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     mintingFeeCollector,
   } = await getNamedAccounts();
 
-  const asset = await deployments.get('Asset');
+  const asset = await deployments.getOrNull('Asset');
   if (!asset) {
     throw new Error('no Asset contract deployed');
   }
-  const sand = await deployments.get('Sand');
+  const sand = await deployments.getOrNull('Sand');
   if (!sand) {
     throw new Error('no Sand contract deployed');
   }
