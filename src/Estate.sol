@@ -2,17 +2,12 @@ pragma solidity 0.6.4;
 
 import "./Estate/EstateBaseToken.sol";
 
+
 contract Estate is EstateBaseToken {
-    constructor(
-        address metaTransactionContract,
-        address admin,
-        LandToken land
-    ) public EstateBaseToken(
-        metaTransactionContract,
-        admin,
-        land
-    ) {
-    }
+    constructor(address metaTransactionContract, address admin, LandToken land)
+        public
+        EstateBaseToken(metaTransactionContract, admin, land)
+    {}
 
     /**
      * @notice Return the name of the token contract
@@ -31,20 +26,20 @@ contract Estate is EstateBaseToken {
     }
 
     // solium-disable-next-line security/no-assign-params
-    function uint2str(uint _i) internal pure returns (string memory) {
+    function uint2str(uint256 _i) internal pure returns (string memory) {
         if (_i == 0) {
             return "0";
         }
-        uint j = _i;
-        uint len;
+        uint256 j = _i;
+        uint256 len;
         while (j != 0) {
             len++;
             j /= 10;
         }
         bytes memory bstr = new bytes(len);
-        uint k = len - 1;
+        uint256 k = len - 1;
         while (_i != 0) {
-            bstr[k--] = byte(uint8(48 + _i % 10));
+            bstr[k--] = bytes1(uint8(48 + (_i % 10)));
             _i /= 10;
         }
         return string(bstr);
@@ -57,14 +52,7 @@ contract Estate is EstateBaseToken {
      */
     function tokenURI(uint256 id) public view returns (string memory) {
         require(_ownerOf(id) != address(0), "Id does not exist");
-        return
-            string(
-                abi.encodePacked(
-                    "https://api.sandbox.game/estates/",
-                    uint2str(id),
-                    "/metadata.json"
-                )
-            );
+        return string(abi.encodePacked("https://api.sandbox.game/estates/", uint2str(id), "/metadata.json"));
     }
 
     /**
@@ -75,6 +63,8 @@ contract Estate is EstateBaseToken {
      * @param id The id of the interface
      * @return True if the interface is supported
      */
+    // override is not supported by prettier-plugin-solidity
+    // prettier-ignore
     function supportsInterface(bytes4 id) public override pure returns (bool) {
         return super.supportsInterface(id) || id == 0x5b5e139f;
     }

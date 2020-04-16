@@ -4,6 +4,7 @@ import "../contracts_common/src/Interfaces/ERC1271.sol";
 import "../contracts_common/src/Interfaces/ERC1271Constants.sol";
 import "../contracts_common/src/Libraries/SigUtil.sol";
 
+
 contract ERC1271Wallet is ERC1271, ERC1271Constants {
     address owner;
     mapping(address => bool) authorizedSigners;
@@ -13,6 +14,8 @@ contract ERC1271Wallet is ERC1271, ERC1271Constants {
         authorizedSigners[_signer] = true;
     }
 
+    // override is not supported by prettier-plugin-solidity
+    // prettier-ignore
     function isValidSignature(bytes calldata _data, bytes calldata _signature)
         override // solidity needs it even for interface
         external

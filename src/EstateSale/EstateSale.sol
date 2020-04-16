@@ -8,6 +8,7 @@ import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../contracts_common/src/Interfaces/Medianizer.sol";
 import "../ReferralValidator/ReferralValidator.sol";
 
+
 /**
  * @title Estate Sale contract with referral that supports also DAI and ETH as payment
  * @notice This contract mananges the sale of our lands as Estates
@@ -55,10 +56,7 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         address initialSigningWallet,
         uint256 initialMaxCommissionRate,
         address estate
-    ) public ReferralValidator(
-        initialSigningWallet,
-        initialMaxCommissionRate
-    ) {
+    ) public ReferralValidator(initialSigningWallet, initialMaxCommissionRate) {
         _land = LandToken(landAddress);
         _sand = ERC20(sandContractAddress);
         _setMetaTransactionProcessor(initialMetaTx, true);
@@ -73,7 +71,7 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
 
     /// @notice set the wallet receiving the proceeds
     /// @param newWallet address of the new receiving wallet
-    function setReceivingWallet(address payable newWallet) external{
+    function setReceivingWallet(address payable newWallet) external {
         require(newWallet != address(0), "receiving wallet cannot be zero address");
         require(msg.sender == _admin, "only admin can change the receiving wallet");
         _wallet = newWallet;
@@ -134,13 +132,19 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         require(reserved == address(0) || reserved == buyer, "cannot buy reserved Land");
         bytes32 leaf = _generateLandHash(x, y, size, price, reserved, salt);
 
-        require(
-            _verify(proof, leaf),
-            "Invalid land provided"
-        );
+        require(_verify(proof, leaf), "Invalid land provided");
     }
 
-    function _mint(address buyer, address to, uint256 x, uint256 y, uint256 size, uint256 price, address token, uint256 tokenAmount) internal {
+    function _mint(
+        address buyer,
+        address to,
+        uint256 x,
+        uint256 y,
+        uint256 size,
+        uint256 price,
+        address token,
+        uint256 tokenAmount
+    ) internal {
         if (size == 1) {
             _land.mintQuad(to, size, x, y, "");
         } else {
@@ -175,13 +179,7 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         require(_sandEnabled, "sand payments not enabled");
         _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);
 
-        handleReferralWithERC20(
-            buyer,
-            priceInSand,
-            referral,
-            _wallet,
-            address(_sand)
-        );
+        handleReferralWithERC20(buyer, priceInSand, referral, _wallet, address(_sand));
 
         _mint(buyer, to, x, y, size, priceInSand, address(_sand), priceInSand);
     }
@@ -220,11 +218,7 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
             msg.sender.transfer(msg.value - ETHRequired); // refund extra
         }
 
-        handleReferralWithETH(
-            ETHRequired,
-            referral,
-            _wallet
-        );
+        handleReferralWithETH(ETHRequired, referral, _wallet);
 
         _mint(buyer, to, x, y, size, priceInSand, address(0), ETHRequired);
     }
@@ -257,13 +251,7 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
 
         uint256 DAIRequired = priceInSand.mul(daiPrice).div(1000000000000000000);
 
-        handleReferralWithERC20(
-            buyer,
-            DAIRequired,
-            referral,
-            _wallet,
-            address(_dai)
-        );
+        handleReferralWithERC20(buyer, DAIRequired, referral, _wallet, address(_dai));
 
         _mint(buyer, to, x, y, size, priceInSand, address(_dai), DAIRequired);
     }
@@ -272,7 +260,7 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
      * @notice Gets the expiry time for the current sale
      * @return The expiry time, as a unix epoch
      */
-    function getExpiryTime() external view returns(uint256) {
+    function getExpiryTime() external view returns (uint256) {
         return _expiryTime;
     }
 
@@ -280,30 +268,16 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
      * @notice Gets the Merkle root associated with the current sale
      * @return The Merkle root, as a bytes32 hash
      */
-    function merkleRoot() external view returns(bytes32) {
+    function merkleRoot() external view returns (bytes32) {
         return _merkleRoot;
     }
 
-    function _generateLandHash(
-        uint256 x,
-        uint256 y,
-        uint256 size,
-        uint256 price,
-        address reserved,
-        bytes32 salt
-    ) internal pure returns (
-        bytes32
-    ) {
-        return keccak256(
-            abi.encodePacked(
-                x,
-                y,
-                size,
-                price,
-                reserved,
-                salt
-            )
-        );
+    function _generateLandHash(uint256 x, uint256 y, uint256 size, uint256 price, address reserved, bytes32 salt)
+        internal
+        pure
+        returns (bytes32)
+    {
+        return keccak256(abi.encodePacked(x, y, size, price, reserved, salt));
     }
 
     function _verify(bytes32[] memory proof, bytes32 leaf) internal view returns (bool) {

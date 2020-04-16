@@ -3,9 +3,8 @@ pragma solidity 0.6.4;
 import "../contracts_common/src/Interfaces/ERC777TokensRecipient.sol";
 import "../contracts_common/src/Interfaces/ERC777Token.sol";
 import "../contracts_common/src/Interfaces/ERC20.sol";
-import {
-    ERC820Implementer
-} from "../contracts_common/src/Base/ERC820Implementer.sol";
+import {ERC820Implementer} from "../contracts_common/src/Base/ERC820Implementer.sol";
+
 
 contract Sand777Sender is ERC777TokensRecipient, ERC820Implementer {
     bool private allowTokensSent;
@@ -36,6 +35,8 @@ contract Sand777Sender is ERC777TokensRecipient, ERC820Implementer {
         ERC20(address(tokenContract)).transfer(_to, _amount);
     }
 
+    // override is not supported by prettier-plugin-solidity
+    // prettier-ignore
     function tokensReceived(
         address, // operator,
         address, // from,
@@ -62,10 +63,7 @@ contract Sand777Sender is ERC777TokensRecipient, ERC820Implementer {
         bytes memory, // data,
         bytes memory // operatorData
     ) public {
-        require(
-            address(tokenContract) == msg.sender,
-            "only accept tokenContract as sender"
-        );
+        require(address(tokenContract) == msg.sender, "only accept tokenContract as sender");
         require(allowTokensSent, "Sending not allowed");
         tokenBalance -= amount;
     }
@@ -73,8 +71,8 @@ contract Sand777Sender is ERC777TokensRecipient, ERC820Implementer {
     function acceptTokens() public onlyOwner {
         allowTokensSent = true;
     }
+
     function rejectTokens() public onlyOwner {
         allowTokensSent = false;
     }
-
 }

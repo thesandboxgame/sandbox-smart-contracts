@@ -3,9 +3,8 @@ pragma solidity 0.6.4;
 import "../contracts_common/src/Interfaces/ERC777TokensRecipient.sol";
 import "../contracts_common/src/Interfaces/ERC777Token.sol";
 import "../contracts_common/src/Interfaces/ERC20.sol";
-import {
-    ERC820Implementer
-} from "../contracts_common/src/Base/ERC820Implementer.sol";
+import {ERC820Implementer} from "../contracts_common/src/Base/ERC820Implementer.sol";
+
 
 contract Sand777Receiver is ERC777TokensRecipient, ERC820Implementer {
     bool private allowTokensReceived;
@@ -35,6 +34,8 @@ contract Sand777Receiver is ERC777TokensRecipient, ERC820Implementer {
         ERC20(address(tokenContract)).transfer(_to, _amount);
     }
 
+    // override is not supported by prettier-plugin-solidity
+    // prettier-ignore
     function tokensReceived(
         address, // operator,
         address, // from,
@@ -57,16 +58,12 @@ contract Sand777Receiver is ERC777TokensRecipient, ERC820Implementer {
     function acceptTokens() public onlyOwner {
         allowTokensReceived = true;
     }
+
     function rejectTokens() public onlyOwner {
         allowTokensReceived = false;
     }
 
-    function receiveMeta(
-        address sender,
-        string calldata name,
-        uint256 value,
-        uint256 test
-    ) external {
+    function receiveMeta(address sender, string calldata name, uint256 value, uint256 test) external {
         // for test matching erc20Receiver
     }
 }
