@@ -139,14 +139,14 @@ contract EstateBaseToken is ERC721BaseToken {
         _addQuads(sender, estateId, sizes, xs, ys, junctions);
     }
 
-    // override is not supported by prettier-plugin-solidity
+    // override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
     // prettier-ignore
     function burn(uint256 id) external override {
         _check_burn_authorized(msg.sender, id);
         _burn(msg.sender, _ownerOf(id), id);
     }
 
-    // override is not supported by prettier-plugin-solidity
+    // override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
     // prettier-ignore
     function burnFrom(address from, uint256 id) external override {
         _check_burn_authorized(from, id);
@@ -374,7 +374,7 @@ contract EstateBaseToken is ERC721BaseToken {
         uint256 numQuadsAlreadyIn,
         uint24[] memory list,
         uint256[] memory junctions
-    ) internal {
+    ) internal view {
         uint16 lastX = 0;
         uint16 lastY = 0;
         uint8 lastSize = 0;
@@ -524,17 +524,17 @@ contract EstateBaseToken is ERC721BaseToken {
 
     function onERC721Received(
         address operator,
-        address from,
-        uint256 tokenId,
-        bytes calldata data
-    ) external returns (bytes4) {
+        address, /*from*/
+        uint256, /*tokenId*/
+        bytes calldata /*data*/
+    ) external view returns (bytes4) {
         if (operator == address(this)) {
             return _ERC721_BATCH_RECEIVED;
         }
         revert("ERC721_REJECTED");
     }
 
-    // override is not supported by prettier-plugin-solidity
+    // override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
     // prettier-ignore
     function supportsInterface(bytes4 id) public override virtual pure returns (bool) {
         return super.supportsInterface(id) || id == 0x5e8bf644;

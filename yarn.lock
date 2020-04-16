@@ -118,26 +118,10 @@
   dependencies:
     "@ethersproject/bignumber" ">=5.0.0-beta.130"
 
-"@ethersproject/contracts@>=5.0.0-beta.137":
-  version "5.0.0-beta.143"
-  resolved "https://registry.yarnpkg.com/@ethersproject/contracts/-/contracts-5.0.0-beta.143.tgz#5fc2ed962f3364534b80048cb742a231354a4b80"
-  integrity sha512-xjWNlnbhfAkWxBW1ICi6l/O9iplf6GW8IlN57DddERCuzJnj3t2g3PinVTacH27ySqApnWF2FbFQIf0BRYp5hQ==
-  dependencies:
-    "@ethersproject/abi" ">=5.0.0-beta.137"
-    "@ethersproject/abstract-provider" ">=5.0.0-beta.131"
-    "@ethersproject/abstract-signer" ">=5.0.0-beta.132"
-    "@ethersproject/address" ">=5.0.0-beta.128"
-    "@ethersproject/bignumber" ">=5.0.0-beta.130"
-    "@ethersproject/bytes" ">=5.0.0-beta.129"
-    "@ethersproject/constants" ">=5.0.0-beta.128"
-    "@ethersproject/logger" ">=5.0.0-beta.129"
-    "@ethersproject/properties" ">=5.0.0-beta.131"
-    "@ethersproject/transactions" ">=5.0.0-beta.128"
-
-"@ethersproject/contracts@^5.0.0-beta.145":
-  version "5.0.0-beta.145"
-  resolved "https://registry.yarnpkg.com/@ethersproject/contracts/-/contracts-5.0.0-beta.145.tgz#e568ed2dd4edc003c0f44cedea833c5d7a279a05"
-  integrity sha512-N+kvW1Aq4EcSqLUXv9QLVX6gSeOHfs8HMnL4oITuKqXY+TU6Y16Z+0MwQsKYCh2wbUksvg9RduEFAKatLGrk2w==
+"@ethersproject/contracts@5.0.0-beta.147", "@ethersproject/contracts@>=5.0.0-beta.137", "@ethersproject/contracts@^5.0.0-beta.145":
+  version "5.0.0-beta.147"
+  resolved "https://registry.yarnpkg.com/@ethersproject/contracts/-/contracts-5.0.0-beta.147.tgz#56385e102c8491b67bd21dd484acafa4ed1e102d"
+  integrity sha512-3jhSG53FR5z8o9069ac4w8bKBu44P4qMGFTfAIpDN+68jTCJKwd9N1xCZPjKKxk4vRyo0gS8LTrnn8VXWy9h2g==
   dependencies:
     "@ethersproject/abi" ">=5.0.0-beta.137"
     "@ethersproject/abstract-provider" ">=5.0.0-beta.131"

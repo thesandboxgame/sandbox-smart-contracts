@@ -4,11 +4,10 @@ import "./Estate/EstateBaseToken.sol";
 
 
 contract Estate is EstateBaseToken {
-    constructor(
-        address metaTransactionContract,
-        address admin,
-        LandToken land
-    ) public EstateBaseToken(metaTransactionContract, admin, land) {}
+    constructor(address metaTransactionContract, address admin, LandToken land)
+        public
+        EstateBaseToken(metaTransactionContract, admin, land)
+    {}
 
     /**
      * @notice Return the name of the token contract
@@ -64,7 +63,7 @@ contract Estate is EstateBaseToken {
      * @param id The id of the interface
      * @return True if the interface is supported
      */
-    // override is not supported by prettier-plugin-solidity
+    // override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
     // prettier-ignore
     function supportsInterface(bytes4 id) public override pure returns (bool) {
         return super.supportsInterface(id) || id == 0x5b5e139f;
