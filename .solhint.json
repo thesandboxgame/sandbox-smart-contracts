@@ -2,6 +2,7 @@
   "extends": "solhint:default",
   "plugins": ["prettier"],
   "rules": {
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "max-line-length": 150
   }
 }

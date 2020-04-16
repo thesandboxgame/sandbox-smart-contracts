@@ -381,6 +381,13 @@
     "@ethersproject/properties" ">=5.0.0-beta.131"
     "@ethersproject/strings" ">=5.0.0-beta.130"
 
+"@nomiclabs/buidler-solhint@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@nomiclabs/buidler-solhint/-/buidler-solhint-1.2.0.tgz#02be42acb313f1655de88dba1b8c621e7bb54aa7"
+  integrity sha512-PLVki6PcjPuHc6if94gnqHD7gZbchVZrtLRuEuRaXv75E9UDX4CcIj2ufMmjDsHFxvwo5M5jTGEK0onAFMXq5Q==
+  dependencies:
+    solhint "^2.0.0"
+
 "@nomiclabs/buidler@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@nomiclabs/buidler/-/buidler-1.2.0.tgz#79a0a6f1c6ab4985ab5dca888fb9edf304279693"
@@ -4055,7 +4062,7 @@ solhint-plugin-prettier@^0.0.4:
   dependencies:
     prettier-linter-helpers "^1.0.0"
 
-solhint@^2.3.1:
+solhint@^2.0.0, solhint@^2.3.1:
   version "2.3.1"
   resolved "https://registry.yarnpkg.com/solhint/-/solhint-2.3.1.tgz#6fee8fc2635112bf5812f7cba8359c14e9d9a491"
   integrity sha512-wP/G+Dqj8LNWlCI9Mt6XiQRWQfZwv1rkZe/V+HKtip5SAZJVvp144PdH28KE45ZvR99Hhrp/Mujt74fSmXsFiw==

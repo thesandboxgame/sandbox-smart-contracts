@@ -1,26 +1,19 @@
 {
-  "extends": [
-    "plugin:mocha/recommended"
-  ],
+  "extends": ["plugin:mocha/recommended", "plugin:prettier/recommended", "prettier"],
   "env": {
-      "node": true,
-      "mocha": true
+    "node": true,
+    "mocha": true
   },
-  "plugins": [
-      "mocha"
-  ],
+  "plugins": ["mocha", "prettier"],
   "parserOptions": {
-      "ecmaVersion": 9
+    "ecmaVersion": 9
   },
   "rules": {
-    "indent": ["error", 2, {
-      "SwitchCase": 1
-    }],
-    "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-    "no-multi-spaces": ["error", { "exceptions": { "VariableDeclarator": true } }],
+    "prettier/prettier": "error",
+    "no-unused-vars": ["error", {"argsIgnorePattern": "^_"}],
+    "no-multi-spaces": ["error", {"exceptions": {"VariableDeclarator": true}}],
     "no-else-return": ["error", {"allowElseIf": true}],
-    "max-params": ["error", 5],
+    "max-params": ["error", 4],
     "no-await-in-loop": "off"
   }
 }
-

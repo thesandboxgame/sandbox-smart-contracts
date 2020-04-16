@@ -106,12 +106,7 @@ contract P2PERC721Sale is Admin, ERC1654Constants, ERC1271Constants, TheSandbox7
         address buyer,
         address to
     ) internal {
-        uint256 offer = PriceUtil.calculateCurrentPrice(
-            auction.startingPrice,
-            auction.endingPrice,
-            auction.duration,
-            now.sub(auction.startedAt)
-        );
+        uint256 offer = PriceUtil.calculateCurrentPrice(auction.startingPrice, auction.endingPrice, auction.duration, now.sub(auction.startedAt));
 
         claimed[auction.seller][auction.id] = offer;
 
@@ -148,15 +143,9 @@ contract P2PERC721Sale is Admin, ERC1654Constants, ERC1271Constants, TheSandbox7
         }
 
         if (signatureType == SignatureType.EIP1271) {
-            require(
-                ERC1271(auction.seller).isValidSignature(dataToHash, signature) == ERC1271_MAGICVALUE,
-                "Invalid 1271 sig"
-            );
+            require(ERC1271(auction.seller).isValidSignature(dataToHash, signature) == ERC1271_MAGICVALUE, "Invalid 1271 sig");
         } else if (signatureType == SignatureType.EIP1654) {
-            require(
-                ERC1654(auction.seller).isValidSignature(keccak256(dataToHash), signature) == ERC1654_MAGICVALUE,
-                "Invalid 1654 sig"
-            );
+            require(ERC1654(auction.seller).isValidSignature(keccak256(dataToHash), signature) == ERC1654_MAGICVALUE, "Invalid 1654 sig");
         } else {
             address signer = SigUtil.recover(keccak256(dataToHash), signature);
             require(signer == auction.seller, "Invalid sig");

@@ -75,13 +75,7 @@ contract ReferralValidator is Admin {
         uint256 amountForDestination = amount;
 
         if (referral.length > 0) {
-            (
-                bytes memory signature,
-                address referrer,
-                address referee,
-                uint256 expiryTime,
-                uint256 commissionRate
-            ) = decodeReferral(referral);
+            (bytes memory signature, address referrer, address referee, uint256 expiryTime, uint256 commissionRate) = decodeReferral(referral);
 
             uint256 commission = 0;
 
@@ -111,13 +105,7 @@ contract ReferralValidator is Admin {
         uint256 amountForDestination = amount;
 
         if (referral.length > 0) {
-            (
-                bytes memory signature,
-                address referrer,
-                address referee,
-                uint256 expiryTime,
-                uint256 commissionRate
-            ) = decodeReferral(referral);
+            (bytes memory signature, address referrer, address referee, uint256 expiryTime, uint256 commissionRate) = decodeReferral(referral);
 
             uint256 commission = 0;
 
@@ -158,10 +146,7 @@ contract ReferralValidator is Admin {
 
         bytes32 hashedData = keccak256(abi.encodePacked(referrer, referee, expiryTime, commissionRate));
 
-        address signer = SigUtil.recover(
-            keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)),
-            signature
-        );
+        address signer = SigUtil.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
 
         if (_previousSigningWallets[signer] >= now) {
             return true;
@@ -181,8 +166,10 @@ contract ReferralValidator is Admin {
             uint256
         )
     {
-        (bytes memory signature, address referrer, address referee, uint256 expiryTime, uint256 commissionRate) = abi
-            .decode(referral, (bytes, address, address, uint256, uint256));
+        (bytes memory signature, address referrer, address referee, uint256 expiryTime, uint256 commissionRate) = abi.decode(
+            referral,
+            (bytes, address, address, uint256, uint256)
+        );
 
         return (signature, referrer, referee, expiryTime, commissionRate);
     }

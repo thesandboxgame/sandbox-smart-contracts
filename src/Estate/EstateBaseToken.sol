@@ -280,10 +280,7 @@ contract EstateBaseToken is ERC721BaseToken {
         require(sender != address(0), "SENDER_ZERO_ADDRESS");
         require(sender == _withdrawalOwnerOf(estateId), "LAST_OWNER_NOT_EQUAL_SENDER");
         require(
-            msg.sender == sender ||
-                _metaTransactionContracts[msg.sender] ||
-                _superOperators[msg.sender] ||
-                _operatorsForAll[sender][msg.sender],
+            msg.sender == sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender] || _operatorsForAll[sender][msg.sender],
             "WITHDRAWAL_NOT_AUHTORIZED"
         );
     }

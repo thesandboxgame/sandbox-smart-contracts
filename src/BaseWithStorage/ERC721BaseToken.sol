@@ -101,10 +101,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         address owner = _ownerOf(id);
         require(sender != address(0), "sender is zero address");
         require(
-            msg.sender == sender ||
-                _metaTransactionContracts[msg.sender] ||
-                _superOperators[msg.sender] ||
-                _operatorsForAll[sender][msg.sender],
+            msg.sender == sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender] || _operatorsForAll[sender][msg.sender],
             "not authorized to approve"
         );
         require(owner == sender, "owner != sender");
@@ -119,10 +116,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
     function approve(address operator, uint256 id) external {
         address owner = _ownerOf(id);
         require(owner != address(0), "token does not exist");
-        require(
-            owner == msg.sender || _superOperators[msg.sender] || _operatorsForAll[owner][msg.sender],
-            "not authorized to approve"
-        );
+        require(owner == msg.sender || _superOperators[msg.sender] || _operatorsForAll[owner][msg.sender], "not authorized to approve");
         _approveFor(owner, operator, id);
     }
 
@@ -153,9 +147,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         isMetaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
         if (msg.sender != from && !isMetaTx) {
             require(
-                _superOperators[msg.sender] ||
-                    _operatorsForAll[from][msg.sender] ||
-                    (operatorEnabled && _operators[id] == msg.sender),
+                _superOperators[msg.sender] || _operatorsForAll[from][msg.sender] || (operatorEnabled && _operators[id] == msg.sender),
                 "not approved to transfer"
             );
         }
@@ -193,10 +185,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         bool metaTx = _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-            require(
-                _checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, ""),
-                "erc721 transfer rejected by to"
-            );
+            require(_checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, ""), "erc721 transfer rejected by to");
         }
     }
 
@@ -216,10 +205,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         bool metaTx = _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract()) {
-            require(
-                _checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, data),
-                "ERC721: transfer rejected by to"
-            );
+            require(_checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, data), "ERC721: transfer rejected by to");
         }
     }
 
@@ -261,10 +247,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         bool safe
     ) internal {
         bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
-        bool authorized = msg.sender == from ||
-            metaTx ||
-            _superOperators[msg.sender] ||
-            _operatorsForAll[from][msg.sender];
+        bool authorized = msg.sender == from || metaTx || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender];
 
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
@@ -284,10 +267,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         }
 
         if (to.isContract() && (safe || _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER))) {
-            require(
-                _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, data),
-                "erc721 batch transfer rejected by to"
-            );
+            require(_checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, data), "erc721 batch transfer rejected by to");
         }
     }
 
@@ -330,10 +310,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         bool approved
     ) external {
         require(sender != address(0), "Invalid sender address");
-        require(
-            msg.sender == sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender],
-            "not authorized to approve for all"
-        );
+        require(msg.sender == sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender], "not authorized to approve for all");
 
         _setApprovalForAll(sender, operator, approved);
     }

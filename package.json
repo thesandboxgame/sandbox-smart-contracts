@@ -16,6 +16,7 @@
   "private": true,
   "devDependencies": {
     "@nomiclabs/buidler": "^1.2.0",
+    "@nomiclabs/buidler-solhint": "^1.2.0",
     "@smartdec/smartcheck": "^2.0.1",
     "axios": "^0.18.0",
     "base32.js": "^0.1.0",
