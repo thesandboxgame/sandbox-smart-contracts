@@ -1584,9 +1584,9 @@ module.exports = (init, extensions) => {
     }
   }
 
-  function it(title, test) {
-    tests.push({title, test: preTest(test)});
-  }
+  // function it(title, test) {
+  //   tests.push({title, test: preTest(test)});
+  // }
 
   function describe(title, func) {
     
