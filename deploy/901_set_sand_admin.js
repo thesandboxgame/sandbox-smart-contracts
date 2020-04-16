@@ -1,5 +1,5 @@
-module.exports = async ({getNamedAccounts, deployments}) => {
-    const {call, sendTxAndWait, log, getChainId} = deployments;
+module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
+    const {call, sendTxAndWait, log} = deployments;
     const chainId = await getChainId();
 
     const {
