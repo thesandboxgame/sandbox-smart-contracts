@@ -1,0 +1,23 @@
+{
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "read",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function",
+      "signature": "0x57de26a4"
+    }
+  ],
+  "address": "0x729D19f657BD0614b4985Cf1D82531c67569197B",
+  "bytecode": "0x6080604052348015600f57600080fd5b5060878061001e6000396000f3fe6080604052348015600f57600080fd5b506004361060285760003560e01c806357de26a414602d575b600080fd5b60336045565b60408051918252519081900360200190f35b68094adc6a4ded9580009056fea265627a7a723058206a3371d1670edd2caf9230a18ffdd6845a430ab990f72aa8c479e880e0b264be64736f6c63430005090032",
+  "deployedBytecode": "0x6080604052348015600f57600080fd5b506004361060285760003560e01c806357de26a414602d575b600080fd5b60336045565b60408051918252519081900360200190f35b68094adc6a4ded9580009056fea265627a7a723058206a3371d1670edd2caf9230a18ffdd6845a430ab990f72aa8c479e880e0b264be64736f6c63430005090032",
+  "solidityMetadata": "{\"compiler\":{\"version\":\"0.5.9+commit.e560f70d\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[],\"name\":\"read\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"details\":\"From MakerDAO (https://etherscan.io/address/0x729D19f657BD0614b4985Cf1D82531c67569197B#code)\",\"methods\":{},\"title\":\"Fake Medianizer contract\"},\"userdoc\":{\"methods\":{}}},\"settings\":{\"compilationTarget\":{\"src/Test/FakeMedianizer.sol\":\"FakeMedianizer\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"metadata\":{\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":2000},\"remappings\":[]},\"sources\":{\"src/Test/FakeMedianizer.sol\":{\"content\":\"pragma solidity ^0.5.2;\\n\\n\\n/**\\n * @title Fake Medianizer contract\\n * @dev From MakerDAO (https://etherscan.io/address/0x729D19f657BD0614b4985Cf1D82531c67569197B#code)\\n */\\ncontract FakeMedianizer {\\n    function read() external view returns (bytes32) {\\n        return 0x0000000000000000000000000000000000000000000000094adc6a4ded958000;\\n    }\\n}\\n\",\"keccak256\":\"0x5fcc60be37c153c19df25516c02b3aac192a88d6ee8786d9255761d04c33e202\"}},\"version\":1}"
+}
