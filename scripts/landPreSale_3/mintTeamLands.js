@@ -1,5 +1,5 @@
 const fs = require("fs");
-const parseSheet = require("../lib/parseSheet");
+const parseSheet = require("../../lib/parseSheet");
 
 const landWithProofsData = fs.readFileSync("./.presale_3_proofs_1.json");
 const landWithProofs = JSON.parse(landWithProofsData);
