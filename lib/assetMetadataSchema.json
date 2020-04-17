@@ -1,263 +1,204 @@
 {
-	"definitions": {},
-	"$id": "https://www.sandbox.game/metadataSchemaV1.json",
-	"type": "object",
-	"title": "The Schema for Asset's Metadata",
-	"required": [
-		"name",
-		"description",
-		"image",
-		"animation_url",
-		"external_url",
-		"properties",
-		"sandbox"
-	],
-	"properties": {
-		"name": {
-			"$id": "#/properties/name",
-			"type": "string",
-			"title": "The name of the Asset",
-			"default": "",
-			"examples": [
-				"Helicopter"
-			],
-			"pattern": "^(.*)$",
-			"minLength": 3,
-			"maxLength": 255
-		},
-		"description": {
-			"$id": "#/properties/description",
-			"type": "string",
-			"title": "The Description of the Asset",
-			"default": "",
-			"examples": [
-				"A Speedy Helicopter"
-			],
-			"pattern": "^(.*)$",
-			"minLength": 0,
-			"maxLength": 500
-		},
-		"image": {
-			"$id": "#/properties/image",
-			"type": "string",
-			"title": "The Image Schema",
-			"default": "",
-			"examples": [
-				"ipfs://QmRKiVGdNG8wgamGfzRCh9LPzWjwpDJsKSAmw3u6TrDYQe/Helicopter.png"
-			],
-			"pattern": "^ipfs://(.*).png$"
-		},
-		"animation_url": {
-			"$id": "#/properties/animation_url",
-			"type": "string",
-			"title": "URI to gltf file representing the Asset",
-			"default": "",
-			"examples": [
-				"ipfs://QmRKiVGdNG8wgamGfzRCh9LPzWjwpDJsKSAmw3u6TrDYQe/Helicopter.gltf"
-			],
-			"pattern": "^ipfs://(.*).gltf$"
-		},
-		"external_url": {
-			"$id": "#/properties/external_url",
-			"type": "string",
-			"title": "The External_url Schema",
-			"default": "",
-			"examples": [
-				"https://www.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/"
-			],
-			"pattern": "^https://www.sandbox.game/en/assets/(.*)/(.{36})/$"
-		},
-		"properties": {
-			"$id": "#/properties/properties",
-			"type": "array",
-			"title": "The Atributes for the Asset",
-			"items": {
-				"$id": "#/properties/properties/items",
-				"type": "object",
-				"title": "Property value",
-				"required": [
-					"trait_type",
-					"display_type",
-					"value",
-					"max_value"
-				],
-				"properties": {
-					"trait_type": {
-						"$id": "#/properties/properties/items/properties/trait_type",
-						"type": "string",
-						"title": "Type of attribute",
-						"default": "",
-						"examples": [
-							"power"
-						],
-						"pattern": "^(.*)$"
-					},
-					"display_type": {
-						"$id": "#/properties/properties/items/properties/display_type",
-						"type": "string",
-						"title": "Type of display for the attribute",
-						"default": "",
-						"examples": [
-							"ranking"
-						],
-						"pattern": "^(.*)$"
-					},
-					"value": {
-						"$id": "#/properties/properties/items/properties/value",
-						"type": "integer",
-						"title": "The value of the attribute",
-						"default": 0,
-						"examples": [
-							30
-						],
-						"minimum": 0,
-						"maximum": 100
-					},
-					"max_value": {
-						"$id": "#/properties/properties/items/properties/max_value",
-						"type": "integer",
-						"title": "The max value this attribute can have",
-						"default": 100,
-						"examples": [
-							100
-						],
-						"minimum": 100,
-						"maximum": 100
-					}
-				}
-			}
-		},
-		"sandbox": {
-			"$id": "#/properties/sandbox",
-			"type": "object",
-			"title": "The Sandbox Schema",
-			"required": [
-				"creator",
-				"version",
-				"classification",
-				"voxel_model",
-				"creator_profile_url"
-			],
-			"properties": {
-				"creator": {
-					"$id": "#/properties/sandbox/properties/creator",
-					"type": "string",
-					"title": "The Creator's ethereum address",
-					"default": "",
-					"examples": [
-						"0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20"
-					],
-					"pattern": "^0x([0123456789ABCDEFabcdef]{40})$"
-				},
-				"version": {
-					"$id": "#/properties/sandbox/properties/version",
-					"type": "integer",
-					"title": "The Version of the Sandbox metadata",
-					"default": 0,
-					"examples": [
-						1
-					]
-				},
-				"classification": {
-					"$id": "#/properties/sandbox/properties/classification",
-					"type": "object",
-					"title": "Classification of the Asset",
-					"required": [
-						"type",
-						"theme",
-						"categories"
-					],
-					"properties": {
-						"type": {
-							"$id": "#/properties/sandbox/properties/classification/properties/type",
-							"type": "string",
-							"title": "Type of Asset",
-							"default": "",
-							"examples": [
-								"Entity"
-							],
-							"pattern": "^(.*)$",
-							"enum": [
-								"Entity",
-								"Block",
-								"Equipment"
-							]
-						},
-						"theme": {
-							"$id": "#/properties/sandbox/properties/classification/properties/theme",
-							"type": "string",
-							"title": "The Theme of the Asset",
-							"default": "",
-							"examples": [
-								"City"
-							],
-							"pattern": "^(.*)$",
-							"enum": [
-								"Medieval",
-								"Sci-Fi",
-								"Pirates",
-								"Fantasy",
-								"Horror",
-								"Realistic",
-								"Retro",
-								"Nature",
-								"City",
-								"Magic",
-								"Rural"
-							]
-						},
-						"categories": {
-							"$id": "#/properties/sandbox/properties/classification/properties/categories",
-							"type": "array",
-							"title": "The Categories",
-							"items": {
-								"$id": "#/properties/sandbox/properties/classification/properties/categories/items",
-								"type": "string",
-								"title": "Category",
-								"default": "",
-								"examples": [
-									"Vehicle"
-								],
-								"pattern": "^(.*)$",
-								"enum": [
-									"Building",
-									"Vehicle",
-									"Decoration",
-									"Weapon",
-									"Tool",
-									"Animal",
-									"Humanoid",
-									"Monster",
-									"Sports",
-									"Plant",
-									"Terrain",
-									"Hazard"
-								]
-							}
-						}
-					}
-				},
-				"voxel_model": {
-					"$id": "#/properties/sandbox/properties/voxel_model",
-					"type": "string",
-					"title": "The Voxel_model Schema",
-					"default": "",
-					"examples": [
-						"ipfs://QmRKiVGdNG8wgamGfzRCh9LPzWjwpDJsKSAmw3u6TrDYQe/Helicopter.vxc"
-					],
-					"pattern": "^ipfs://(.*).vxc$"
-				},
-				"creator_profile_url": {
-					"$id": "#/properties/sandbox/properties/creator_profile_url",
-					"type": "string",
-					"title": "The Creator_profile_url Schema",
-					"default": "",
-					"examples": [
-						"https://www.sandbox.game/en/users/12344"
-					],
-					"pattern": "^https://www.sandbox.game/en/users/(.*)/(.{36})/$"
-				}
-			}
-		}
-	}
+  "definitions": {},
+  "$id": "https://www.sandbox.game/metadataSchemaV1.json",
+  "type": "object",
+  "title": "The Schema for Asset's Metadata",
+  "required": ["name", "description", "image", "animation_url", "external_url", "properties", "sandbox"],
+  "properties": {
+    "name": {
+      "$id": "#/properties/name",
+      "type": "string",
+      "title": "The name of the Asset",
+      "default": "",
+      "examples": ["Helicopter"],
+      "pattern": "^(.*)$",
+      "minLength": 3,
+      "maxLength": 255
+    },
+    "description": {
+      "$id": "#/properties/description",
+      "type": "string",
+      "title": "The Description of the Asset",
+      "default": "",
+      "examples": ["A Speedy Helicopter"],
+      "pattern": "^(.*)$",
+      "minLength": 0,
+      "maxLength": 500
+    },
+    "image": {
+      "$id": "#/properties/image",
+      "type": "string",
+      "title": "The Image Schema",
+      "default": "",
+      "examples": ["ipfs://QmRKiVGdNG8wgamGfzRCh9LPzWjwpDJsKSAmw3u6TrDYQe/Helicopter.png"],
+      "pattern": "^ipfs://(.*).png$"
+    },
+    "animation_url": {
+      "$id": "#/properties/animation_url",
+      "type": "string",
+      "title": "URI to gltf file representing the Asset",
+      "default": "",
+      "examples": ["ipfs://QmRKiVGdNG8wgamGfzRCh9LPzWjwpDJsKSAmw3u6TrDYQe/Helicopter.gltf"],
+      "pattern": "^ipfs://(.*).gltf$"
+    },
+    "external_url": {
+      "$id": "#/properties/external_url",
+      "type": "string",
+      "title": "The External_url Schema",
+      "default": "",
+      "examples": ["https://www.sandbox.game/en/assets/Earth-golem/20802d69-72e3-4e6a-b870-bca94b8134e2/"],
+      "pattern": "^https://www.sandbox.game/en/assets/(.*)/(.{36})/$"
+    },
+    "properties": {
+      "$id": "#/properties/properties",
+      "type": "array",
+      "title": "The Atributes for the Asset",
+      "items": {
+        "$id": "#/properties/properties/items",
+        "type": "object",
+        "title": "Property value",
+        "required": ["trait_type", "display_type", "value", "max_value"],
+        "properties": {
+          "trait_type": {
+            "$id": "#/properties/properties/items/properties/trait_type",
+            "type": "string",
+            "title": "Type of attribute",
+            "default": "",
+            "examples": ["power"],
+            "pattern": "^(.*)$"
+          },
+          "display_type": {
+            "$id": "#/properties/properties/items/properties/display_type",
+            "type": "string",
+            "title": "Type of display for the attribute",
+            "default": "",
+            "examples": ["ranking"],
+            "pattern": "^(.*)$"
+          },
+          "value": {
+            "$id": "#/properties/properties/items/properties/value",
+            "type": "integer",
+            "title": "The value of the attribute",
+            "default": 0,
+            "examples": [30],
+            "minimum": 0,
+            "maximum": 100
+          },
+          "max_value": {
+            "$id": "#/properties/properties/items/properties/max_value",
+            "type": "integer",
+            "title": "The max value this attribute can have",
+            "default": 100,
+            "examples": [100],
+            "minimum": 100,
+            "maximum": 100
+          }
+        }
+      }
+    },
+    "sandbox": {
+      "$id": "#/properties/sandbox",
+      "type": "object",
+      "title": "The Sandbox Schema",
+      "required": ["creator", "version", "classification", "voxel_model", "creator_profile_url"],
+      "properties": {
+        "creator": {
+          "$id": "#/properties/sandbox/properties/creator",
+          "type": "string",
+          "title": "The Creator's ethereum address",
+          "default": "",
+          "examples": ["0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20"],
+          "pattern": "^0x([0123456789ABCDEFabcdef]{40})$"
+        },
+        "version": {
+          "$id": "#/properties/sandbox/properties/version",
+          "type": "integer",
+          "title": "The Version of the Sandbox metadata",
+          "default": 0,
+          "examples": [1]
+        },
+        "classification": {
+          "$id": "#/properties/sandbox/properties/classification",
+          "type": "object",
+          "title": "Classification of the Asset",
+          "required": ["type", "theme", "categories"],
+          "properties": {
+            "type": {
+              "$id": "#/properties/sandbox/properties/classification/properties/type",
+              "type": "string",
+              "title": "Type of Asset",
+              "default": "",
+              "examples": ["Entity"],
+              "pattern": "^(.*)$",
+              "enum": ["Entity", "Block", "Equipment"]
+            },
+            "theme": {
+              "$id": "#/properties/sandbox/properties/classification/properties/theme",
+              "type": "string",
+              "title": "The Theme of the Asset",
+              "default": "",
+              "examples": ["City"],
+              "pattern": "^(.*)$",
+              "enum": [
+                "Medieval",
+                "Sci-Fi",
+                "Pirates",
+                "Fantasy",
+                "Horror",
+                "Realistic",
+                "Retro",
+                "Nature",
+                "City",
+                "Magic",
+                "Rural"
+              ]
+            },
+            "categories": {
+              "$id": "#/properties/sandbox/properties/classification/properties/categories",
+              "type": "array",
+              "title": "The Categories",
+              "items": {
+                "$id": "#/properties/sandbox/properties/classification/properties/categories/items",
+                "type": "string",
+                "title": "Category",
+                "default": "",
+                "examples": ["Vehicle"],
+                "pattern": "^(.*)$",
+                "enum": [
+                  "Building",
+                  "Vehicle",
+                  "Decoration",
+                  "Weapon",
+                  "Tool",
+                  "Animal",
+                  "Humanoid",
+                  "Monster",
+                  "Sports",
+                  "Plant",
+                  "Terrain",
+                  "Hazard"
+                ]
+              }
+            }
+          }
+        },
+        "voxel_model": {
+          "$id": "#/properties/sandbox/properties/voxel_model",
+          "type": "string",
+          "title": "The Voxel_model Schema",
+          "default": "",
+          "examples": ["ipfs://QmRKiVGdNG8wgamGfzRCh9LPzWjwpDJsKSAmw3u6TrDYQe/Helicopter.vxc"],
+          "pattern": "^ipfs://(.*).vxc$"
+        },
+        "creator_profile_url": {
+          "$id": "#/properties/sandbox/properties/creator_profile_url",
+          "type": "string",
+          "title": "The Creator_profile_url Schema",
+          "default": "",
+          "examples": ["https://www.sandbox.game/en/users/12344"],
+          "pattern": "^https://www.sandbox.game/en/users/(.*)/(.{36})/$"
+        }
+      }
+    }
+  }
 }
