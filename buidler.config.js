@@ -1,5 +1,6 @@
 require("dotenv").config();
 const fs = require("fs");
+usePlugin("solidity-coverage");
 usePlugin("buidler-deploy");
 usePlugin("buidler-ethers-v5");
 usePlugin("@nomiclabs/buidler-solhint");
@@ -114,5 +115,18 @@ module.exports = {
       url: "https://mainnet.infura.io/v3/ced8eecc03984939b556332468325813",
       accounts: mainnetAccounts,
     },
+    coverage: {
+      url: "http://localhost:5458",
+      accounts: accounts,
+    },
+    // wati for : https://github.com/nomiclabs/buidler/pull/522
+    // buidlerevm: {
+    //   solc: {
+    //     version: "0.6.4",
+    //     optimizer: {
+    //       enabled: false,
+    //     },
+    //   },
+    // },
   },
 };
