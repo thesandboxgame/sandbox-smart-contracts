@@ -18,17 +18,17 @@ function exitIfError() {
 function generateLandsForMerkleTree() {
   const partnersLands = [];
   const lands = [];
-  let numLands = 0;
-  let numLandsInInput = 0;
-  let num1x1Lands = 0;
-  let num3x3Lands = 0;
-  let num6x6Lands = 0;
-  let num12x12Lands = 0;
-  let num24x24Lands = 0;
-  let numSandboxReservedGroups = 0;
-  let numSandboxReserved = 0;
-  let numReserved = 0;
-  let numReservedGroup = 0;
+  // let numLands = 0;
+  // let numLandsInInput = 0;
+  // let num1x1Lands = 0;
+  // let num3x3Lands = 0;
+  // let num6x6Lands = 0;
+  // let num12x12Lands = 0;
+  // let num24x24Lands = 0;
+  // let numSandboxReservedGroups = 0;
+  // let numSandboxReserved = 0;
+  // let numReserved = 0;
+  // let numReservedGroup = 0;
 
   function addLandGroup(landGroup) {
     const size = Math.sqrt(landGroup.numLands);

@@ -120,12 +120,12 @@ function generateLandsForMerkleTree() {
   }
   const partnersLands = [];
   const lands = [];
-  let numLands = 0;
-  let num1x1Lands = 0;
-  let num3x3Lands = 0;
-  let num6x6Lands = 0;
-  let num12x12Lands = 0;
-  let num24x24Lands = 0;
+  // let numLands = 0;
+  // let num1x1Lands = 0;
+  // let num3x3Lands = 0;
+  // let num6x6Lands = 0;
+  // let num12x12Lands = 0;
+  // let num24x24Lands = 0;
   for (const estateId of Object.keys(landGroups)) {
     const landGroup = landGroups[estateId];
     const size = Math.sqrt(landGroup.numLands);
