@@ -1,35 +1,47 @@
-module.exports = async ({/*getNamedAccounts, */deployments}) => {
+module.exports = async ({/*getNamedAccounts, */ deployments}) => {
   const {call, sendTxAndWait, log} = deployments;
 
   // const {
   //   assetAuctionFeeCollector,
   // } = await getNamedAccounts();
 
-  const sand = await deployments.getOrNull('Sand');
+  const sand = await deployments.getOrNull("Sand");
   if (!sand) {
-    throw new Error('no Sand contract deployed');
+    throw new Error("no Sand contract deployed");
   }
-  const asset = await deployments.getOrNull('Asset');
+  const asset = await deployments.getOrNull("Asset");
   if (!asset) {
-    throw new Error('no Asset contract deployed');
+    throw new Error("no Asset contract deployed");
   }
-  const assetAuction = await deployments.getOrNull('AssetSignedAuction');
+  const assetAuction = await deployments.getOrNull("AssetSignedAuction");
   if (!assetAuction) {
-    throw new Error('no AssetSignedAuction contract deployed');
+    throw new Error("no AssetSignedAuction contract deployed");
   }
 
-  const isSandSuperOperator = await call('Sand', 'isSuperOperator', assetAuction.address);
+  const isSandSuperOperator = await call("Sand", "isSuperOperator", assetAuction.address);
   if (!isSandSuperOperator) {
-    log('setting AssetSignedAuction as super operator for Sand');
-    const currentSandAdmin = await call('Sand', 'getAdmin');
-    await sendTxAndWait({from: currentSandAdmin, gas: 100000, skipError: true}, 'Sand', 'setSuperOperator', assetAuction.address, true);
+    log("setting AssetSignedAuction as super operator for Sand");
+    const currentSandAdmin = await call("Sand", "getAdmin");
+    await sendTxAndWait(
+      {from: currentSandAdmin, gas: 100000, skipError: true},
+      "Sand",
+      "setSuperOperator",
+      assetAuction.address,
+      true
+    );
   }
 
-  const isAssetSuperOperator = await call('Asset', 'isSuperOperator', assetAuction.address);
+  const isAssetSuperOperator = await call("Asset", "isSuperOperator", assetAuction.address);
   if (!isAssetSuperOperator) {
-    log('setting AssetSignedAuction as super operator for Asset');
-    const currentAssetAdmin = await call('Asset', 'getAdmin');
-    await sendTxAndWait({from: currentAssetAdmin, gas: 100000, skipError: true}, 'Asset', 'setSuperOperator', assetAuction.address, true);
+    log("setting AssetSignedAuction as super operator for Asset");
+    const currentAssetAdmin = await call("Asset", "getAdmin");
+    await sendTxAndWait(
+      {from: currentAssetAdmin, gas: 100000, skipError: true},
+      "Asset",
+      "setSuperOperator",
+      assetAuction.address,
+      true
+    );
   }
 
   // TODO

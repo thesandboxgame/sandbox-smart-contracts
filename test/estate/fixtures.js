@@ -1,8 +1,7 @@
-
-const {ethers, deployments, getNamedAccounts} = require('@nomiclabs/buidler');
-const EstateTestHelper = require('./_testHelper');
-const MerkleTree = require('../../lib/merkleTree');
-const {createDataArray, calculateLandHash} = require('../../lib/merkleTreeHelper');
+const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
+const EstateTestHelper = require("./_testHelper");
+const MerkleTree = require("../../lib/merkleTree");
+const {createDataArray, calculateLandHash} = require("../../lib/merkleTreeHelper");
 
 module.exports.setupEstate = deployments.createFixture(async () => {
   const namedAccounts = await getNamedAccounts();
@@ -12,9 +11,12 @@ module.exports.setupEstate = deployments.createFixture(async () => {
   const landAdmin = namedAccounts.landAdmin;
 
   await deployments.fixture();
-  const estateContract = await ethers.getContract('Estate');
-  const landContract = await ethers.getContract('Land', minter);
-  await landContract.connect(landContract.provider.getSigner(landAdmin)).functions.setMinter(minter, true).then((tx) => tx.wait());
+  const estateContract = await ethers.getContract("Estate");
+  const landContract = await ethers.getContract("Land", minter);
+  await landContract
+    .connect(landContract.provider.getSigner(landAdmin))
+    .functions.setMinter(minter, true)
+    .then((tx) => tx.wait());
   return {
     estateContract,
     landContract,
@@ -24,8 +26,8 @@ module.exports.setupEstate = deployments.createFixture(async () => {
     helper: new EstateTestHelper({
       Estate: estateContract,
       LandFromMinter: landContract,
-      Land: landContract
-    })
+      Land: landContract,
+    }),
   };
 });
 
@@ -35,14 +37,14 @@ module.exports.setupEstateSale = deployments.createFixture(async () => {
   const user0 = namedAccounts.others[0];
   const user1 = namedAccounts.others[1];
   const user2 = namedAccounts.others[2];
-  
+
   await deployments.fixture();
 
-  const estateContract = await ethers.getContract('Estate');
-  const landContract = await ethers.getContract('Land');
+  const estateContract = await ethers.getContract("Estate");
+  const landContract = await ethers.getContract("Land");
 
-  const saleContract = await ethers.getContract('LandPreSale_4');
-  const landSaleDeployment = await deployments.get('LandPreSale_4');
+  const saleContract = await ethers.getContract("LandPreSale_4");
+  const landSaleDeployment = await deployments.get("LandPreSale_4");
   const lands = landSaleDeployment.linkedData;
   const landHashArray = createDataArray(lands);
   const merkleTree = new MerkleTree(landHashArray);
@@ -57,6 +59,6 @@ module.exports.setupEstateSale = deployments.createFixture(async () => {
     user2,
     merkleTree,
     lands,
-    getProof: (land) => merkleTree.getProof(calculateLandHash(land))
+    getProof: (land) => merkleTree.getProof(calculateLandHash(land)),
   };
 });

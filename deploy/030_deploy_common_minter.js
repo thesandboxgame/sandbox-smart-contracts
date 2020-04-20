@@ -1,39 +1,37 @@
-const {guard} = require('../lib');
+const {guard} = require("../lib");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deployIfDifferent, log} = deployments;
 
-  const {
-    deployer,
-    commonMinterAdmin,
-    mintingFeeCollector,
-  } = await getNamedAccounts();
+  const {deployer, commonMinterAdmin, mintingFeeCollector} = await getNamedAccounts();
 
-  const asset = await deployments.getOrNull('Asset');
+  const asset = await deployments.getOrNull("Asset");
   if (!asset) {
-    throw new Error('no Asset contract deployed');
+    throw new Error("no Asset contract deployed");
   }
-  const sand = await deployments.getOrNull('Sand');
+  const sand = await deployments.getOrNull("Sand");
   if (!sand) {
-    throw new Error('no Sand contract deployed');
+    throw new Error("no Sand contract deployed");
   }
 
-  const deployResult = await deployIfDifferent(['data'],
-    'CommonMinter',
+  const deployResult = await deployIfDifferent(
+    ["data"],
+    "CommonMinter",
     {from: deployer, gas: 2000000},
-    'CommonMinter',
+    "CommonMinter",
     asset.address,
     sand.address,
-    '1000000000000000000',
+    "1000000000000000000",
     commonMinterAdmin,
-    mintingFeeCollector,
+    mintingFeeCollector
   );
 
   if (deployResult.newlyDeployed) {
-    log(' - CommonMinter deployed at : ' + deployResult.contract.address + ' for gas : ' + deployResult.receipt.gasUsed);
+    log(
+      " - CommonMinter deployed at : " + deployResult.contract.address + " for gas : " + deployResult.receipt.gasUsed
+    );
   } else {
-    log('reusing CommonMinter at ' + deployResult.contract.address);
+    log("reusing CommonMinter at " + deployResult.contract.address);
   }
 };
-module.exports.skip = guard(['1', '4', '314159'], 'CommonMinter');
-
+module.exports.skip = guard(["1", "4", "314159"], "CommonMinter");

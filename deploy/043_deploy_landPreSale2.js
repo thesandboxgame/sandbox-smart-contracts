@@ -1,56 +1,51 @@
-const {guard} = require('../lib');
-const {getLands} = require('../data/landPreSale_2/getLands');
+const {guard} = require("../lib");
+const {getLands} = require("../data/landPreSale_2/getLands");
 
 module.exports = async ({getChainId, getNamedAccounts, deployments, network}) => {
   const {deployIfDifferent, deploy, log} = deployments;
   const chainId = await getChainId();
 
-  const {
-    deployer,
-    landSaleBeneficiary,
-  } = await getNamedAccounts();
+  const {deployer, landSaleBeneficiary} = await getNamedAccounts();
 
-  const sandContract = await deployments.getOrNull('Sand');
-  const landContract = await deployments.getOrNull('Land');
+  const sandContract = await deployments.getOrNull("Sand");
+  const landContract = await deployments.getOrNull("Land");
 
   if (!sandContract) {
-    throw new Error('no SAND contract deployed');
+    throw new Error("no SAND contract deployed");
   }
 
   if (!landContract) {
-    throw new Error('no LAND contract deployed');
+    throw new Error("no LAND contract deployed");
   }
 
-  let daiMedianizer = await deployments.getOrNull('DAIMedianizer');
+  let daiMedianizer = await deployments.getOrNull("DAIMedianizer");
   if (!daiMedianizer) {
-    log('setting up a fake DAI medianizer');
-    const daiMedianizerDeployResult = await deploy(
-      'DAIMedianizer',
-      {from: deployer, gas: 6721975},
-      'FakeMedianizer',
-    );
+    log("setting up a fake DAI medianizer");
+    const daiMedianizerDeployResult = await deploy("DAIMedianizer", {from: deployer, gas: 6721975}, "FakeMedianizer");
     daiMedianizer = daiMedianizerDeployResult.contract;
   }
 
-  let dai = await deployments.getOrNull('DAI');
+  let dai = await deployments.getOrNull("DAI");
   if (!dai) {
-    log('setting up a fake DAI');
+    log("setting up a fake DAI");
     const daiDeployResult = await deploy(
-      'DAI', {
+      "DAI",
+      {
         from: deployer,
         gas: 6721975,
       },
-      'FakeDai',
+      "FakeDai"
     );
     dai = daiDeployResult.contract;
   }
 
   const {lands, merkleRootHash} = getLands(network.live, chainId);
 
-  const deployResult = await deployIfDifferent(['data'],
-    'LandPreSale_2',
+  const deployResult = await deployIfDifferent(
+    ["data"],
+    "LandPreSale_2",
     {from: deployer, gas: 1000000, linkedData: lands},
-    'LandSaleWithETHAndDAI',
+    "LandSaleWithETHAndDAI",
     landContract.address,
     sandContract.address,
     sandContract.address,
@@ -61,11 +56,11 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     daiMedianizer.address,
     dai.address
   );
-  const contract = await deployments.get('LandPreSale_2');
+  const contract = await deployments.get("LandPreSale_2");
   if (deployResult.newlyDeployed) {
-    log(' - LandPreSale_2 deployed at : ' + contract.address + ' for gas : ' + deployResult.receipt.gasUsed);
+    log(" - LandPreSale_2 deployed at : " + contract.address + " for gas : " + deployResult.receipt.gasUsed);
   } else {
-    log('reusing LandPreSale_2 at ' + contract.address);
+    log("reusing LandPreSale_2 at " + contract.address);
   }
 };
-module.exports.skip = guard(['1', '4', '314159'], 'LandPreSale_2');
+module.exports.skip = guard(["1", "4", "314159"], "LandPreSale_2");

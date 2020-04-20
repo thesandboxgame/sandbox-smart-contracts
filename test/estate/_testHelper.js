@@ -1,5 +1,5 @@
-const assert = require('assert');
-const {emptyBytes} = require('testUtils');
+const assert = require("assert");
+const {emptyBytes} = require("testUtils");
 function EstateTestHelper(contracts) {
   this.contracts = contracts;
 }
@@ -26,7 +26,7 @@ EstateTestHelper.selectQuads = function (landQuads, indices) {
 
 EstateTestHelper.assignIds = function (landQuads) {
   for (const landQuad of landQuads) {
-    landQuad.topCornerId = landQuad.x + (landQuad.y * 408);
+    landQuad.topCornerId = landQuad.x + landQuad.y * 408;
   }
   return landQuads;
 };
@@ -34,7 +34,9 @@ EstateTestHelper.assignIds = function (landQuads) {
 EstateTestHelper.prototype.mintQuads = async function (to, landSpecs) {
   const contracts = this.contracts;
   for (const landSpec of landSpecs) {
-    await contracts.LandFromMinter.functions.mintQuad(to, landSpec.size, landSpec.x, landSpec.y, emptyBytes).then((tx) => tx.wait());
+    await contracts.LandFromMinter.functions
+      .mintQuad(to, landSpec.size, landSpec.x, landSpec.y, emptyBytes)
+      .then((tx) => tx.wait());
   }
 };
 
@@ -43,7 +45,9 @@ EstateTestHelper.prototype.mintQuadsAndCreateEstate = async function (map, to) {
   const landQuads = EstateTestHelper.assignIds(map.quads, map.selection);
   await this.mintQuads(to, landQuads);
   const {xs, ys, sizes, selection} = EstateTestHelper.selectQuads(landQuads, map.selection);
-  await contracts.Estate.connect(contracts.Estate.provider.getSigner(to)).functions.createFromMultipleQuads(to, to, sizes, xs, ys, map.junctions).then((tx) => tx.wait());
+  await contracts.Estate.connect(contracts.Estate.provider.getSigner(to))
+    .functions.createFromMultipleQuads(to, to, sizes, xs, ys, map.junctions)
+    .then((tx) => tx.wait());
   return {selection};
 };
 
@@ -51,7 +55,7 @@ EstateTestHelper.prototype.checkLandOwnership = async function (selection, expec
   for (const landQuad of selection) {
     for (let sx = 0; sx < landQuad.size; sx++) {
       for (let sy = 0; sy < landQuad.size; sy++) {
-        const id = landQuad.x + sx + ((landQuad.y + sy) * 408);
+        const id = landQuad.x + sx + (landQuad.y + sy) * 408;
         const landOwner = await this.contracts.Land.callStatic.ownerOf(id);
         assert.equal(landOwner, expectedOwner);
       }

@@ -1,29 +1,26 @@
-const {guard} = require('../lib');
+const {guard} = require("../lib");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deployIfDifferent, log} = deployments;
 
-  const {
-    deployer,
-    assetAuctionAdmin,
-    assetAuctionFeeCollector
-  } = await getNamedAccounts();
+  const {deployer, assetAuctionAdmin, assetAuctionFeeCollector} = await getNamedAccounts();
 
   const assetAuctionFee10000th = 0; // 5000; // 5%
 
-  const asset = await deployments.getOrNull('Asset');
+  const asset = await deployments.getOrNull("Asset");
   if (!asset) {
-    throw new Error('no Asset contract deployed');
+    throw new Error("no Asset contract deployed");
   }
-  const sandContract = await deployments.getOrNull('Sand');
+  const sandContract = await deployments.getOrNull("Sand");
   if (!sandContract) {
-    throw new Error('no SAND contract deployed');
+    throw new Error("no SAND contract deployed");
   }
 
-  const deployResult = await deployIfDifferent(['data'],
-    'AssetSignedAuction',
+  const deployResult = await deployIfDifferent(
+    ["data"],
+    "AssetSignedAuction",
     {from: deployer, gas: 4000000},
-    'AssetSignedAuction',
+    "AssetSignedAuction",
     asset.address,
     assetAuctionAdmin,
     sandContract.address,
@@ -31,9 +28,14 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     assetAuctionFee10000th
   );
   if (deployResult.newlyDeployed) {
-    log(' - AssetSignedAuction deployed at : ' + deployResult.contract.address + ' for gas : ' + deployResult.receipt.gasUsed);
+    log(
+      " - AssetSignedAuction deployed at : " +
+        deployResult.contract.address +
+        " for gas : " +
+        deployResult.receipt.gasUsed
+    );
   } else {
-    log('reusing AssetSignedAuction at ' + deployResult.contract.address);
+    log("reusing AssetSignedAuction at " + deployResult.contract.address);
   }
 };
-module.exports.skip = guard(['1', '4', '314159'], 'AssetSignedAuction');
+module.exports.skip = guard(["1", "4", "314159"], "AssetSignedAuction");

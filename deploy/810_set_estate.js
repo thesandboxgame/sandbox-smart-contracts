@@ -1,24 +1,30 @@
-const {guard} = require('../lib');
+const {guard} = require("../lib");
 module.exports = async ({deployments}) => {
   const {call, sendTxAndWait, log} = deployments;
 
-  const land = await deployments.getOrNull('Land');
+  const land = await deployments.getOrNull("Land");
   if (!land) {
-    throw new Error('no Land contract deployed');
+    throw new Error("no Land contract deployed");
   }
 
-  const estate = await deployments.getOrNull('Estate');
+  const estate = await deployments.getOrNull("Estate");
   if (!estate) {
-    throw new Error('no Estate contract deployed');
+    throw new Error("no Estate contract deployed");
   }
 
-  const isSuperOperator = await call('Land', 'isSuperOperator', estate.address);
+  const isSuperOperator = await call("Land", "isSuperOperator", estate.address);
   if (!isSuperOperator) {
-    log('setting NativeMetaTransactionProcessor as super operator');
-    const currentLandAdmin = await call('Land', 'getAdmin');
-    await sendTxAndWait({from: currentLandAdmin, gas: 100000, skipError: true}, 'Land', 'setSuperOperator', estate.address, true);
+    log("setting NativeMetaTransactionProcessor as super operator");
+    const currentLandAdmin = await call("Land", "getAdmin");
+    await sendTxAndWait(
+      {from: currentLandAdmin, gas: 100000, skipError: true},
+      "Land",
+      "setSuperOperator",
+      estate.address,
+      true
+    );
   }
 };
 
-module.exports.skip = guard(['1', '4', '314159']); // TODO remove
-module.exports.tags = ['Estate'];
+module.exports.skip = guard(["1", "4", "314159"]); // TODO remove
+module.exports.tags = ["Estate"];
