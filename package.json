@@ -2,19 +2,6 @@
   "name": "tsb-contracts",
   "version": "0.0.1",
   "description": "",
-  "scripts": {
-    "prettier:solidity": "prettier --write src/**/*.sol",
-    "test": "buidler compile && mocha --bail --recursive test",
-    "gas-report": "wait-on tcp:8545 && cross-env REPORT_GAS=true buidler --network localhost test",
-    "coverage": "buidler --network coverage coverage",
-    "ganache": "ganache-cli",
-    "smartcheck": "smartcheck -p .",
-    "deploy:local": "buidler --network localhost deploy",
-    "deploy:rinkeby": "buidler --network rinkeby deploy",
-    "deploy:mainnet": "buidler --network mainnet deploy",
-    "run:rinkeby": "cross-env BUIDLER_NETWORK=rinkeby node",
-    "run:mainnet": "cross-env BUIDLER_NETWORK=mainnet node"
-  },
   "license": "UNLICENSED",
   "private": true,
   "devDependencies": {
@@ -55,5 +42,20 @@
   "resolutions": {
     "@ethersproject/logger": "5.0.0-beta.136",
     "@ethersproject/contracts": "5.0.0-beta.147"
+  },
+  "scripts": {
+    "prettier:solidity": "prettier --write src/**/*.sol",
+    "prettier:js": "prettier --write lib deploy test scripts",
+    "prettier": "run-s prettier:js prettier:solidity",
+    "test": "buidler compile && mocha --bail --recursive test",
+    "gas-report": "wait-on tcp:8545 && cross-env REPORT_GAS=true buidler --network localhost test",
+    "coverage": "buidler --network coverage coverage",
+    "ganache": "ganache-cli",
+    "smartcheck": "smartcheck -p .",
+    "deploy:local": "buidler --network localhost deploy",
+    "deploy:rinkeby": "buidler --network rinkeby deploy",
+    "deploy:mainnet": "buidler --network mainnet deploy",
+    "run:rinkeby": "cross-env BUIDLER_NETWORK=rinkeby node",
+    "run:mainnet": "cross-env BUIDLER_NETWORK=mainnet node"
   }
 }
