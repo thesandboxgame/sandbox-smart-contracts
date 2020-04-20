@@ -4,8 +4,10 @@ build/
 artifacts/
 cache/
 yarn-error.log
+
 coverage/
 coverage.json
+.coverage_*
 
 .vscode/*
 !.vscode/settings.json.default
@@ -27,3 +29,4 @@ presale_2*
 .backend_signer_privateKey
 .etherscan_*
 giveaway.json
+

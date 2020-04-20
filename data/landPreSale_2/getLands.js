@@ -18,17 +18,17 @@ function exitIfError() {
 function generateLandsForMerkleTree() {
   const partnersLands = [];
   const lands = [];
-  // let numLands = 0;
-  // let numLandsInInput = 0;
-  // let num1x1Lands = 0;
-  // let num3x3Lands = 0;
-  // let num6x6Lands = 0;
-  // let num12x12Lands = 0;
-  // let num24x24Lands = 0;
-  // let numSandboxReservedGroups = 0;
-  // let numSandboxReserved = 0;
-  // let numReserved = 0;
-  // let numReservedGroup = 0;
+  let numLands = 0;
+  let numLandsInInput = 0;
+  let num1x1Lands = 0;
+  let num3x3Lands = 0;
+  let num6x6Lands = 0;
+  let num12x12Lands = 0;
+  let num24x24Lands = 0;
+  let numSandboxReservedGroups = 0;
+  let numSandboxReserved = 0;
+  let numReserved = 0;
+  let numReservedGroup = 0;
 
   function addLandGroup(landGroup) {
     const size = Math.sqrt(landGroup.numLands);
@@ -128,20 +128,23 @@ function generateLandsForMerkleTree() {
     });
   }
 
-  // console.log({
-  //     numGroups: lands.length,
-  //     numLandsInOutput: numLands,
-  //     numLandsInInput,
-  //     num1x1Lands,
-  //     num3x3Lands,
-  //     num6x6Lands,
-  //     num12x12Lands,
-  //     num24x24Lands,
-  //     numSandboxReservedGroups,
-  //     numSandboxReserved,
-  //     numReserved,
-  //     numReservedGroup,
-  // });
+  // TODO debug option
+  if (false) {
+    console.log({
+      numGroups: lands.length,
+      numLandsInOutput: numLands,
+      numLandsInInput,
+      num1x1Lands,
+      num3x3Lands,
+      num6x6Lands,
+      num12x12Lands,
+      num24x24Lands,
+      numSandboxReservedGroups,
+      numSandboxReserved,
+      numReserved,
+      numReservedGroup,
+    });
+  }
   exitIfError();
   return {lands, partnersLands};
 }

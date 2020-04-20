@@ -120,12 +120,12 @@ function generateLandsForMerkleTree() {
   }
   const partnersLands = [];
   const lands = [];
-  // let numLands = 0;
-  // let num1x1Lands = 0;
-  // let num3x3Lands = 0;
-  // let num6x6Lands = 0;
-  // let num12x12Lands = 0;
-  // let num24x24Lands = 0;
+  let numLands = 0;
+  let num1x1Lands = 0;
+  let num3x3Lands = 0;
+  let num6x6Lands = 0;
+  let num12x12Lands = 0;
+  let num24x24Lands = 0;
   for (const estateId of Object.keys(landGroups)) {
     const landGroup = landGroups[estateId];
     const size = Math.sqrt(landGroup.numLands);
@@ -174,16 +174,19 @@ function generateLandsForMerkleTree() {
     }
     numLands += size * size;
   }
-  // console.log({
-  //     numGroups: lands.length,
-  //     numLandsInOutput: numLands,
-  //     numLandsInInput: rawLands.length,
-  //     num1x1Lands,
-  //     num3x3Lands,
-  //     num6x6Lands,
-  //     num12x12Lands,
-  //     num24x24Lands,
-  // });
+  // TODO debug option
+  if (false) {
+    console.log({
+      numGroups: lands.length,
+      numLandsInOutput: numLands,
+      numLandsInInput: rawLands.length,
+      num1x1Lands,
+      num3x3Lands,
+      num6x6Lands,
+      num12x12Lands,
+      num24x24Lands,
+    });
+  }
   exitIfError();
   return {lands, partnersLands};
 }
