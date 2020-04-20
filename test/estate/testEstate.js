@@ -288,6 +288,85 @@ describe("Estate:CreationAndDestruction", function () {
     helper.checkLandOwnership(selection, user0);
   });
 
+  it("creating from multiple quads and adding one land and destroying get them back", async function () {
+    const {estateContract, user0, helper} = await setupEstate();
+    const {selection} = await helper.mintQuadsAndCreateEstate(
+      {
+        quads: [
+          {x: 5, y: 7, size: 1},
+          {x: 6, y: 8, size: 1},
+          {x: 6, y: 9, size: 3},
+          {x: 6, y: 12, size: 3},
+          {x: 3, y: 9, size: 3},
+          {x: 180, y: 24, size: 12},
+          {x: 42, y: 48, size: 6},
+          {x: 9, y: 15, size: 3},
+        ],
+        junctions: [1],
+        selection: [1, 2, 3, 4],
+      },
+      user0
+    );
+
+    const extraLandQuads = EstateTestHelper.assignIds([{x: 3, y: 12, size: 3}]);
+    const x = 4;
+    const y = 12;
+    selection.push({x, y, size: 1});
+    await helper.mintQuads(user0, extraLandQuads);
+    await estateContract
+      .connect(estateContract.provider.getSigner(user0))
+      .functions.addSingleLand(user0, 1, x + y * 408, 3)
+      .then((tx) => tx.wait());
+    await estateContract
+      .connect(estateContract.provider.getSigner(user0))
+      .functions.burnAndTransferFrom(user0, 1, user0)
+      .then((tx) => tx.wait());
+    helper.checkLandOwnership(selection, user0);
+  });
+
+  it("creating from multiple quads and adding multiple lands and destroying get them back", async function () {
+    const {estateContract, user0, helper} = await setupEstate();
+    const {selection} = await helper.mintQuadsAndCreateEstate(
+      {
+        quads: [
+          {x: 5, y: 7, size: 1},
+          {x: 6, y: 8, size: 1},
+          {x: 6, y: 9, size: 3},
+          {x: 6, y: 12, size: 3},
+          {x: 3, y: 9, size: 3},
+          {x: 180, y: 24, size: 12},
+          {x: 42, y: 48, size: 6},
+          {x: 9, y: 15, size: 3},
+        ],
+        junctions: [1],
+        selection: [1, 2, 3, 4],
+      },
+      user0
+    );
+
+    const extraLandQuads = EstateTestHelper.assignIds([{x: 3, y: 12, size: 3}]);
+    const xs = [4, 4, 4, 3];
+    const ys = [12, 13, 14, 14];
+    const ids = [];
+    for (let i = 0; i < xs.length; i++) {
+      const x = xs[i];
+      const y = ys[i];
+      const size = 1;
+      ids.push(x + y * 408);
+      selection.push({x, y, size});
+    }
+    await helper.mintQuads(user0, extraLandQuads);
+    await estateContract
+      .connect(estateContract.provider.getSigner(user0))
+      .functions.addMultipleLands(user0, 1, ids, [])
+      .then((tx) => tx.wait());
+    await estateContract
+      .connect(estateContract.provider.getSigner(user0))
+      .functions.burnAndTransferFrom(user0, 1, user0)
+      .then((tx) => tx.wait());
+    helper.checkLandOwnership(selection, user0);
+  });
+
   it("creating from multiple quads and adding more with gaps fails", async function () {
     const {estateContract, user0, helper} = await setupEstate();
     const {selection} = await helper.mintQuadsAndCreateEstate(

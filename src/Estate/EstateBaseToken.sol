@@ -526,7 +526,7 @@ contract EstateBaseToken is ERC721BaseToken {
         bytes calldata /*data*/
     ) external view returns (bytes4) {
         if (operator == address(this)) {
-            return _ERC721_BATCH_RECEIVED;
+            return _ERC721_RECEIVED;
         }
         revert("ERC721_REJECTED");
     }
