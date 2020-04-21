@@ -1,0 +1,20 @@
+{
+  "name": "dev environment",
+  "dockerFile": "Dockerfile",
+  "appPort": [3000],
+  "extensions": [
+    "esbenp.prettier-vscode",
+    "dbaeumer.vscode-eslint",
+    "editorconfig.editorconfig",
+    "prisma.vscode-graphql",
+    "tberman.json-schema-validator",
+    "hbenl.vscode-mocha-test-adapter",
+    "jebbs.plantuml",
+    "juanblanco.solidity"
+  ],
+  "settings": {
+    "terminal.integrated.shell.linux": "/bin/bash"
+  },
+  "postCreateCommand": "yarn install",
+  "runArgs": ["-u", "node"] // run as node user, comment out for running as root
+}
