@@ -6,10 +6,7 @@
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
     "editorconfig.editorconfig",
-    "prisma.vscode-graphql",
-    "tberman.json-schema-validator",
     "hbenl.vscode-mocha-test-adapter",
-    "jebbs.plantuml",
     "juanblanco.solidity"
   ],
   "settings": {

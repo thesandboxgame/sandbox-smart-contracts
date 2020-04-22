@@ -11,6 +11,7 @@ coverage.json
 
 .vscode/*
 !.vscode/settings.json.default
+!.vscode/extensions.json
 
 
 .google_credentials.json
