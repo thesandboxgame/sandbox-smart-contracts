@@ -28,14 +28,9 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     assetAuctionFee10000th
   );
   if (deployResult.newlyDeployed) {
-    log(
-      " - AssetSignedAuction deployed at : " +
-        deployResult.contract.address +
-        " for gas : " +
-        deployResult.receipt.gasUsed
-    );
+    log(" - AssetSignedAuction deployed at : " + deployResult.address + " for gas : " + deployResult.receipt.gasUsed);
   } else {
-    log("reusing AssetSignedAuction at " + deployResult.contract.address);
+    log("reusing AssetSignedAuction at " + deployResult.address);
   }
 };
 module.exports.skip = guard(["1", "4", "314159"], "AssetSignedAuction");

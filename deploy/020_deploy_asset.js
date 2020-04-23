@@ -20,9 +20,9 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     deployer // is set to assetBouncerAdmin in a later stage
   );
   if (deployResult.newlyDeployed) {
-    log(" - Asset deployed at : " + deployResult.contract.address + " for gas : " + deployResult.receipt.gasUsed);
+    log(" - Asset deployed at : " + deployResult.address + " for gas : " + deployResult.receipt.gasUsed);
   } else {
-    log("reusing Asset at " + deployResult.contract.address);
+    log("reusing Asset at " + deployResult.address);
   }
 };
 module.exports.skip = guard(["1", "4", "314159"], "Asset");

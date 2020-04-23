@@ -25,11 +25,10 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     estateAdmin,
     landContract.address
   );
-  const contract = await deployments.get("Estate");
   if (deployResult.newlyDeployed) {
-    log(" - Estate deployed at : " + contract.address + " for gas : " + deployResult.receipt.gasUsed);
+    log(" - Estate deployed at : " + deployResult.address + " for gas : " + deployResult.receipt.gasUsed);
   } else {
-    log("reusing Estate at " + contract.address);
+    log("reusing Estate at " + deployResult.address);
   }
 };
 module.exports.skip = guard(["1", "4", "314159"]); // TODO , 'Estate');

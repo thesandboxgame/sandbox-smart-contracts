@@ -16,9 +16,9 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   );
 
   if (deployResult.newlyDeployed) {
-    log(" - Sand deployed at : " + deployResult.contract.address + " for gas : " + deployResult.receipt.gasUsed);
+    log(" - Sand deployed at : " + deployResult.address + " for gas : " + deployResult.receipt.gasUsed);
   } else {
-    log("reusing Sand at " + deployResult.contract.address);
+    log("reusing Sand at " + deployResult.address);
   }
 };
 module.exports.skip = guard(["1", "4", "314159"], "Sand");

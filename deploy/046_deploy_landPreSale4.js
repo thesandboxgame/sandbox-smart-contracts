@@ -26,14 +26,13 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
   let daiMedianizer = await deployments.getOrNull("DAIMedianizer");
   if (!daiMedianizer) {
     log("setting up a fake DAI medianizer");
-    const daiMedianizerDeployResult = await deploy("DAIMedianizer", {from: deployer, gas: 6721975}, "FakeMedianizer");
-    daiMedianizer = daiMedianizerDeployResult.contract;
+    daiMedianizer = await deploy("DAIMedianizer", {from: deployer, gas: 6721975}, "FakeMedianizer");
   }
 
   let dai = await deployments.getOrNull("DAI");
   if (!dai) {
     log("setting up a fake DAI");
-    const daiDeployResult = await deploy(
+    dai = await deploy(
       "DAI",
       {
         from: deployer,
@@ -41,7 +40,6 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
       },
       "FakeDai"
     );
-    dai = daiDeployResult.contract;
   }
 
   const {lands, merkleRootHash} = getLands(network.live, chainId);
@@ -64,11 +62,10 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     2000,
     estateContract.address
   );
-  const contract = await deployments.get("LandPreSale_4");
   if (deployResult.newlyDeployed) {
-    log(" - LandPreSale_4 deployed at : " + contract.address + " for gas : " + deployResult.receipt.gasUsed);
+    log(" - LandPreSale_4 deployed at : " + deployResult.address + " for gas : " + deployResult.receipt.gasUsed);
   } else {
-    log("reusing LandPreSale_4 at " + contract.address);
+    log("reusing LandPreSale_4 at " + deployResult.address);
   }
 };
 module.exports.skip = guard(["1", "4", "314159"]); // TODO , 'LandPreSale_4');

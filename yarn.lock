@@ -464,7 +464,7 @@
   dependencies:
     solhint "^2.0.0"
 
-"@nomiclabs/buidler@^1.2.0":
+"@nomiclabs/buidler@1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@nomiclabs/buidler/-/buidler-1.2.0.tgz#79a0a6f1c6ab4985ab5dca888fb9edf304279693"
   integrity sha512-4jnJgvcG15tG5HHDuxR0l8eCqx0Fdt3KnYjamtp63Ht3vAoEoU2zNOFtDghElMkApZxvqzDzjfhOdPi70yCnKw==
@@ -1254,10 +1254,10 @@ buffer@^5.2.1:
     base64-js "^1.0.2"
     ieee754 "^1.1.4"
 
-buidler-deploy@^0.2.1:
-  version "0.2.1"
-  resolved "https://registry.yarnpkg.com/buidler-deploy/-/buidler-deploy-0.2.1.tgz#f579f4ae4cdaea2fa1bd06d011dde522769cc7f9"
-  integrity sha512-ezJB9nQAcQUpA4PoIiJhTa4JYqHJukfi+cRHWfIvWJ0wqOt0i2qDQso0Vc+//EZUwMiJ8dU3jhEBKWlxC1Rb9g==
+buidler-deploy@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/buidler-deploy/-/buidler-deploy-0.3.0.tgz#a940b6b82cb0043b06193e3270f2461cda12afb1"
+  integrity sha512-RHEQlwJ6TCNVSPfNkO2DwI460dIT2a1OlX+XbQ/smmP4abNN25e5373ckDFx6XyFBr6GhrI1JCMbgdGW0S1d4Q==
   dependencies:
     "@ethersproject/bignumber" "^5.0.0-beta.136"
     "@ethersproject/contracts" "^5.0.0-beta.145"

@@ -27,11 +27,9 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   );
 
   if (deployResult.newlyDeployed) {
-    log(
-      " - CommonMinter deployed at : " + deployResult.contract.address + " for gas : " + deployResult.receipt.gasUsed
-    );
+    log(" - CommonMinter deployed at : " + deployResult.address + " for gas : " + deployResult.receipt.gasUsed);
   } else {
-    log("reusing CommonMinter at " + deployResult.contract.address);
+    log("reusing CommonMinter at " + deployResult.address);
   }
 };
 module.exports.skip = guard(["1", "4", "314159"], "CommonMinter");

@@ -21,12 +21,12 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   if (deployResult.newlyDeployed) {
     log(
       " - NativeMetaTransactionProcessor deployed at : " +
-        deployResult.contract.address +
+        deployResult.address +
         " for gas : " +
         deployResult.receipt.gasUsed
     );
   } else {
-    log("reusing NativeMetaTransactionProcessor at " + deployResult.contract.address);
+    log("reusing NativeMetaTransactionProcessor at " + deployResult.address);
   }
 };
 module.exports.skip = guard(["1", "4", "314159"], "NativeMetaTransactionProcessor");

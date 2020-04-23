@@ -21,11 +21,9 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   );
 
   if (deployResult.newlyDeployed) {
-    log(
-      " - GenesisBouncer deployed at : " + deployResult.contract.address + " for gas : " + deployResult.receipt.gasUsed
-    );
+    log(" - GenesisBouncer deployed at : " + deployResult.address + " for gas : " + deployResult.receipt.gasUsed);
   } else {
-    log("reusing GenesisBouncer at " + deployResult.contract.address);
+    log("reusing GenesisBouncer at " + deployResult.address);
   }
 };
 module.exports.skip = guard(["1", "4", "314159"], "GenesisBouncer");
