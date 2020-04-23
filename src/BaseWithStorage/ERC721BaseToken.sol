@@ -1,5 +1,5 @@
 /* solhint-disable func-order, code-complexity */
-pragma solidity 0.6.4;
+pragma solidity 0.6.5;
 
 import "../contracts_common/src/Libraries/AddressUtils.sol";
 import "../contracts_common/src/Interfaces/ERC721TokenReceiver.sol";

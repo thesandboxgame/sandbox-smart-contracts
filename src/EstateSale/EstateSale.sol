@@ -1,5 +1,5 @@
 /* solhint-disable not-rely-on-time, func-order */
-pragma solidity 0.6.4;
+pragma solidity 0.6.5;
 
 import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
 import "./LandToken.sol";
