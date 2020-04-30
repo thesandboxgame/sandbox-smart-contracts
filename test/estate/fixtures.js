@@ -9,6 +9,7 @@ module.exports.setupEstate = deployments.createFixture(async () => {
   const user0 = namedAccounts.others[0];
   const user1 = namedAccounts.others[2];
   const landAdmin = namedAccounts.landAdmin;
+  const estateAdmin = namedAccounts.estateAdmin;
 
   await deployments.fixture();
   const estateContract = await ethers.getContract("Estate");
@@ -23,6 +24,7 @@ module.exports.setupEstate = deployments.createFixture(async () => {
     minter,
     user0,
     user1,
+    estateAdmin,
     helper: new EstateTestHelper({
       Estate: estateContract,
       LandFromMinter: landContract,

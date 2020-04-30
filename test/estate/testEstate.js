@@ -611,4 +611,55 @@ describe("Estate:CreationAndDestruction", function () {
       "JUNCTIONS_MISSING"
     );
   });
+
+  describe("breaker and minter", function () {
+    it("cannot break if not breaker", async function () {
+      const {estateContract, user0, helper, estateAdmin} = await setupEstate();
+      await estateContract
+        .connect(estateContract.provider.getSigner(estateAdmin))
+        .functions.setBreaker(estateAdmin)
+        .then((tx) => tx.wait());
+      await helper.mintQuadsAndCreateEstate(
+        {
+          quads: [
+            {x: 5, y: 7, size: 1},
+            {x: 6, y: 8, size: 1},
+            {x: 6, y: 9, size: 3},
+            {x: 6, y: 12, size: 3},
+            {x: 3, y: 9, size: 3},
+            {x: 180, y: 24, size: 12},
+            {x: 42, y: 48, size: 6},
+            {x: 9, y: 15, size: 3},
+          ],
+          junctions: [1],
+          selection: [1, 2, 3, 4],
+        },
+        user0
+      );
+      await expectRevert(
+        estateContract
+          .connect(estateContract.provider.getSigner(user0))
+          .functions.burnAndTransferFrom(user0, 1, user0)
+          .then((tx) => tx.wait())
+      );
+    });
+
+    it("cannot create if not minter", async function () {
+      const {estateContract, landContract, user0, estateAdmin} = await setupEstate();
+      await estateContract
+        .connect(estateContract.provider.getSigner(estateAdmin))
+        .functions.setMinter(estateAdmin)
+        .then((tx) => tx.wait());
+      const size = 6;
+      const x = 6;
+      const y = 12;
+      await landContract.functions.mintQuad(user0, size, x, y, emptyBytes).then((tx) => tx.wait());
+      await expectRevert(
+        estateContract
+          .connect(estateContract.provider.getSigner(user0))
+          .functions.createFromQuad(user0, user0, size, x, y)
+          .then((tx) => tx.wait())
+      );
+    });
+  });
 });
