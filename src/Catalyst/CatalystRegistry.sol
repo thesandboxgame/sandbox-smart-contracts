@@ -2,13 +2,14 @@ pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
 import "./AssetToken.sol";
+import "./CatalystToken.sol";
 import "../contracts_common/src/BaseWithStorage/Admin.sol";
 
 contract CatalystRegistry is Admin {
 
     struct Gem {
         uint64 blockNumber;
-        uint32 gemId;
+        uint32 id;
     }
 
     struct Catalyst {
@@ -16,15 +17,15 @@ contract CatalystRegistry is Admin {
         Gem[] gems;
     }
 
+    struct Attribute {
+        uint32 gemId;
+        uint32 value;
+    }
+
     function setCatalyst(uint256 assetId, uint32 catalystId, uint32[] calldata gemIds) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
 
         _catalysts[assetId].id = catalystId;
-        _addGems(_catalysts[assetId], gemIds);
-    }
-
-    function addGems(uint256 assetId, uint32[] calldata gemIds) external {
-        require(msg.sender == _admin, "NOT_AUTHORIZED");
         _addGems(_catalysts[assetId], gemIds);
     }
 
@@ -39,13 +40,32 @@ contract CatalystRegistry is Admin {
         return catalyst;
     }
 
+    function getAttributes(uint256 assetId) external view returns(Attribute[] memory) {
+        Catalyst memory catalyst = _catalysts[assetId];
+        if (catalyst.id == 0) {
+            uint256 collectionId = _getCollectionId(assetId);
+            if (collectionId != 0) {
+                catalyst = _catalysts[assetId];
+            }
+        }
+        Attribute[] memory attributes = new Attribute[](catalyst.gems.length);
+        for (uint256 i = 0; i < attributes.length; i++) {
+            Gem memory gem = catalyst.gems[i];
+            attributes[i] = Attribute({
+                gemId: gem.id,
+                value: _catalystToken.getValue(catalyst.id, gem.id, gem.blockNumber)
+            });
+        }
+        return attributes;
+    }
+
     // ///////// INTERNAL ////////////
 
     function _addGems(Catalyst storage catalyst, uint32[] memory gemIds) internal {
         for(uint256 i = 0; i < gemIds.length; i++) {
             catalyst.gems.push(Gem({
                 blockNumber: uint64(block.number),
-                gemId: gemIds[i]
+                id: gemIds[i]
             }));
         }
     }
@@ -58,12 +78,14 @@ contract CatalystRegistry is Admin {
     }
 
     // CONSTRUCTOR ////
-    constructor(AssetToken asset, address admin) public {
+    constructor(AssetToken asset, CatalystToken catalystToken, address admin) public {
         _asset = asset;
+        _catalystToken = catalystToken;
         _admin = admin;
     }
 
     /// DATA ////////
     mapping(uint256 => Catalyst) _catalysts;
     AssetToken internal immutable _asset;
+    CatalystToken internal immutable _catalystToken;
 }
