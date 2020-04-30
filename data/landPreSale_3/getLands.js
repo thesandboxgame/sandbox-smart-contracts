@@ -171,6 +171,7 @@ module.exports = {
       if (isDeploymentChainId) {
         throw e;
       }
+      secret = "0x4467363716526536535425451427798982881775318563547751090997863683";
     }
 
     if (!isDeploymentChainId) {
