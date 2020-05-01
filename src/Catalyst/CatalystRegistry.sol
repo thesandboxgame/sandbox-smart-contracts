@@ -53,7 +53,7 @@ contract CatalystRegistry is Admin {
             Gem memory gem = catalyst.gems[i];
             attributes[i] = Attribute({
                 gemId: gem.id,
-                value: _catalystToken.getValue(catalyst.id, gem.id, gem.blockNumber)
+                value: _catalystToken.getValue(catalyst.id, gem.id, i, gem.blockNumber)
             });
         }
         return attributes;
