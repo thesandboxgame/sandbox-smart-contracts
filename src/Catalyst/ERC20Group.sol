@@ -1,4 +1,5 @@
 pragma solidity 0.6.5;
+pragma experimental ABIEncoderV2;
 
 import "./ERC20SubToken.sol";
 import "../contracts_common/src/Libraries/SafeMath.sol";
@@ -140,15 +141,21 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
 
     // ////////////// CONSTRUCTOR ////////////////////////////
 
+    struct SubTokenData {
+        uint256 supply;
+        string name;
+        string symbol;
+    }
+
     constructor(
         address to,
-        uint256[] memory supplies,
+        SubTokenData[] memory tokens,
         address admin
     ) public {
         _admin = admin;
-        for (uint256 i = 0; i < supplies.length; i++) {
-            ERC20SubToken subToken = new ERC20SubToken();
-            _addSubToken(subToken, to, supplies[i]);
+        for (uint256 i = 0; i < tokens.length; i++) {
+            ERC20SubToken subToken = new ERC20SubToken(tokens[i].name, tokens[i].symbol, admin);
+            _addSubToken(subToken, to, tokens[i].supply);
         }
     }
 }

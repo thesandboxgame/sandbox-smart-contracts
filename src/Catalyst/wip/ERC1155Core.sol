@@ -1,15 +1,15 @@
 pragma solidity 0.6.5;
 
-import "./ERC20SubToken.sol";
-import "../contracts_common/src/Libraries/SafeMath.sol";
-import "../contracts_common/src/Libraries/AddressUtils.sol";
-import "../contracts_common/src/Libraries/ObjectLib64.sol";
-import "../contracts_common/src/Libraries/BytesUtil.sol";
+import "../ERC20SubToken.sol";
+import "../../contracts_common/src/Libraries/SafeMath.sol";
+import "../../contracts_common/src/Libraries/AddressUtils.sol";
+import "../../contracts_common/src/Libraries/ObjectLib64.sol";
+import "../../contracts_common/src/Libraries/BytesUtil.sol";
 
-import "../contracts_common/src/Interfaces/ERC1155.sol";
-import "../contracts_common/src/Interfaces/ERC1155TokenReceiver.sol";
+import "../../contracts_common/src/Interfaces/ERC1155.sol";
+import "../../contracts_common/src/Interfaces/ERC1155TokenReceiver.sol";
 
-import "../contracts_common/src/BaseWithStorage/SuperOperators.sol";
+import "../../contracts_common/src/BaseWithStorage/SuperOperators.sol";
 
 
 contract ERC1155Core is

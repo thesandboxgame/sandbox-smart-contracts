@@ -10,11 +10,23 @@ import "./ERC20Group.sol";
 
 contract ERC20SubToken is
     ERC20Events,
-    SuperOperators /*, ERC20 */
+    SuperOperators /*, ERC20 */ // TODO MetaTransactionReceiver
 {
     struct Origin {
         ERC20Group group;
         uint96 index;
+    }
+
+    /// @notice A descriptive name for the tokens
+    /// @return name of the tokens
+    function name() public view returns (string memory) {
+        return string(abi.encodePacked(_name));
+    }
+
+    /// @notice An abbreviated name for the tokens
+    /// @return symbol of the tokens
+    function symbol() public view returns (string memory) {
+        return string(abi.encodePacked(_symbol));
     }
 
     function totalSupply() external view returns (uint256) {
@@ -105,10 +117,35 @@ contract ERC20SubToken is
         _origin.group.singleTransferFrom(from, to, _origin.index, amount);
     }
 
+    function _firstBytes32(bytes memory src) public pure returns (bytes32 output) {
+        assembly {
+            output := mload(add(src, 32))
+        }
+    }
+
     // ///////////////////// UTILITIES ///////////////////////
     using SafeMath for uint256;
+
+    // //////////////////// CONSTRUCTOR /////////////////////
+    constructor(
+        string memory tokenName,
+        string memory tokenSymbol,
+        address admin
+    ) public {
+        require(bytes(tokenName).length > 0, "need a name");
+        require(bytes(tokenName).length <= 32, "name too long");
+        _name = _firstBytes32(bytes(tokenName));
+        require(bytes(tokenSymbol).length > 0, "need a symbol");
+        require(bytes(tokenSymbol).length <= 32, "symbol too long");
+        _symbol = _firstBytes32(bytes(tokenSymbol));
+
+        _admin = admin;
+    }
 
     // ////////////////////// DATA ///////////////////////////
     Origin _origin;
     mapping(address => mapping(address => uint256)) internal _mAllowed;
+    bytes32 internal immutable _name; // work only for string that can fit into 32 bytes
+    bytes32 internal immutable _symbol; // work only for string that can fit into 32 bytes
+
 }
