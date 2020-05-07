@@ -4,13 +4,15 @@ import {ERC20} from "../contracts_common/src/Interfaces/ERC20.sol";
 import {ERC20Events} from "../contracts_common/src/Interfaces/ERC20Events.sol";
 import "../contracts_common/src/Libraries/SafeMath.sol";
 import "../contracts_common/src/BaseWithStorage/SuperOperators.sol";
+import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 
 import "./ERC20Group.sol";
 
 
 contract ERC20SubToken is
     ERC20Events,
-    SuperOperators /*, ERC20 */ // TODO MetaTransactionReceiver
+    SuperOperators,
+    MetaTransactionReceiver /*, ERC20 */
 {
     struct Origin {
         ERC20Group group;
@@ -38,7 +40,7 @@ contract ERC20SubToken is
     }
 
     function decimals() external pure returns (uint8) {
-        return uint8(18); // TODO
+        return uint8(0);
     }
 
     function transfer(address to, uint256 amount) external returns (bool success) {

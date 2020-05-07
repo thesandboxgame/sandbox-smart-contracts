@@ -1,7 +1,7 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-import "./AssetToken.sol";
+import "../Interfaces/AssetToken.sol";
 import "./CatalystToken.sol";
 import "../contracts_common/src/BaseWithStorage/Admin.sol";
 
@@ -13,7 +13,7 @@ contract CatalystRegistry is Admin {
     }
 
     struct Catalyst {
-        uint32 id;
+        CatalystToken token;
         Gem[] gems;
     }
 
@@ -22,16 +22,16 @@ contract CatalystRegistry is Admin {
         uint32 value;
     }
 
-    function setCatalyst(uint256 assetId, uint32 catalystId, uint32[] calldata gemIds) external {
+    function setCatalyst(uint256 assetId, CatalystToken catalystToken, uint256[] calldata gemIds) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
 
-        _catalysts[assetId].id = catalystId;
+        _catalysts[assetId].token = catalystToken;
         _addGems(_catalysts[assetId], gemIds);
     }
 
     function getCatalyst(uint256 assetId) external view returns(Catalyst memory) {
         Catalyst memory catalyst = _catalysts[assetId];
-        if (catalyst.id == 0) {
+        if (address(catalyst.token) == address(0)) {
             uint256 collectionId = _getCollectionId(assetId);
             if (collectionId != 0) {
                 catalyst = _catalysts[assetId];
@@ -42,7 +42,7 @@ contract CatalystRegistry is Admin {
 
     function getAttributes(uint256 assetId) external view returns(Attribute[] memory) {
         Catalyst memory catalyst = _catalysts[assetId];
-        if (catalyst.id == 0) {
+        if (address(catalyst.token) == address(0)) {
             uint256 collectionId = _getCollectionId(assetId);
             if (collectionId != 0) {
                 catalyst = _catalysts[assetId];
@@ -52,8 +52,8 @@ contract CatalystRegistry is Admin {
         for (uint256 i = 0; i < attributes.length; i++) {
             Gem memory gem = catalyst.gems[i];
             attributes[i] = Attribute({
-                gemId: gem.id,
-                value: _catalystToken.getValue(catalyst.id, gem.id, i, gem.blockNumber)
+                gemId: uint32(gem.id), // TODO require value not overflow
+                value: _catalystToken.getValue(gem.id, i, gem.blockNumber)
             });
         }
         return attributes;
@@ -61,11 +61,11 @@ contract CatalystRegistry is Admin {
 
     // ///////// INTERNAL ////////////
 
-    function _addGems(Catalyst storage catalyst, uint32[] memory gemIds) internal {
+    function _addGems(Catalyst storage catalyst, uint256[] memory gemIds) internal {
         for(uint256 i = 0; i < gemIds.length; i++) {
             catalyst.gems.push(Gem({
                 blockNumber: uint64(block.number),
-                id: gemIds[i]
+                id: uint32(gemIds[i])
             }));
         }
     }

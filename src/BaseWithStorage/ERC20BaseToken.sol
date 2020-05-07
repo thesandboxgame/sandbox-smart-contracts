@@ -1,10 +1,10 @@
 pragma solidity 0.6.5;
 
-import "../contracts_common/src/Interfaces/ERC20Events.sol";
+import "../Interfaces/ERC20Extended.sol";
 import "../contracts_common/src/BaseWithStorage/SuperOperators.sol";
 
 
-contract ERC20BaseToken is SuperOperators, ERC20Events {
+contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
     bytes32 internal immutable _name; // work only for string that can fit into 32 bytes
     bytes32 internal immutable _symbol; // work only for string that can fit into 32 bytes
 
@@ -32,26 +32,26 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
 
     /// @notice A descriptive name for the tokens
     /// @return name of the tokens
-    function name() public view returns (string memory) {
+    function name() external view returns (string memory) {
         return string(abi.encodePacked(_name));
     }
 
     /// @notice An abbreviated name for the tokens
     /// @return symbol of the tokens
-    function symbol() public view returns (string memory) {
+    function symbol() external view returns (string memory) {
         return string(abi.encodePacked(_symbol));
     }
 
     /// @notice Gets the total number of tokens in existence.
     /// @return the total number of tokens in existence.
-    function totalSupply() public view returns (uint256) {
+    function totalSupply() external override view returns (uint256) {
         return _totalSupply;
     }
 
     /// @notice Gets the balance of `owner`.
     /// @param owner The address to query the balance of.
     /// @return The amount owned by `owner`.
-    function balanceOf(address owner) public view returns (uint256) {
+    function balanceOf(address owner) external override view returns (uint256) {
         return _balances[owner];
     }
 
@@ -59,13 +59,13 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
     /// @param owner address whose token is allowed.
     /// @param spender address allowed to transfer.
     /// @return remaining the amount of token `spender` is allowed to transfer on behalf of `owner`.
-    function allowance(address owner, address spender) public view returns (uint256 remaining) {
+    function allowance(address owner, address spender) external override view returns (uint256 remaining) {
         return _allowances[owner][spender];
     }
 
     /// @notice returns the number of decimals for that token.
     /// @return the number of decimals.
-    function decimals() public view returns (uint8) {
+    function decimals() external virtual pure returns (uint8) {
         return uint8(18);
     }
 
@@ -73,7 +73,7 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
     /// @param to the recipient address of the tokens transfered.
     /// @param amount the number of tokens transfered.
     /// @return success true if success.
-    function transfer(address to, uint256 amount) public returns (bool success) {
+    function transfer(address to, uint256 amount) external override returns (bool success) {
         _transfer(msg.sender, to, amount);
         return true;
     }
@@ -87,7 +87,7 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
         address from,
         address to,
         uint256 amount
-    ) public returns (bool success) {
+    ) external override returns (bool success) {
         if (msg.sender != from && !_superOperators[msg.sender]) {
             uint256 currentAllowance = _allowances[from][msg.sender];
             if (currentAllowance != (2**256) - 1) {
@@ -103,7 +103,7 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
     /// @notice burn `amount` tokens.
     /// @param amount the number of tokens to burn.
     /// @return true if success.
-    function burn(uint256 amount) external returns (bool) {
+    function burn(uint256 amount) external override returns (bool) {
         _burn(msg.sender, amount);
         return true;
     }
@@ -112,7 +112,7 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
     /// @param owner address whose token is to burn.
     /// @param amount the number of token to burn.
     /// @return true if success.
-    function burnFor(address owner, uint256 amount) external returns (bool) {
+    function burnFor(address owner, uint256 amount) external override returns (bool) {
         _burn(owner, amount);
         return true;
     }
@@ -121,7 +121,7 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
     /// @param spender address to be given rights to transfer.
     /// @param amount the number of tokens allowed.
     /// @return success true if success.
-    function approve(address spender, uint256 amount) public returns (bool success) {
+    function approve(address spender, uint256 amount) external override returns (bool success) {
         _approveFor(msg.sender, spender, amount);
         return true;
     }
