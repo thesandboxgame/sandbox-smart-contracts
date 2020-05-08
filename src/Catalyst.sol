@@ -1,4 +1,5 @@
 pragma solidity 0.6.5;
+pragma experimental ABIEncoderV2;
 
 import "./BaseWithStorage/ERC20BaseToken.sol";
 import "./Catalyst/CatalystToken.sol";
@@ -27,14 +28,39 @@ contract Catalyst is ERC20BaseToken, CatalystToken {
 
     // override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
     // prettier-ignore
-    function getValue(
-        uint256 gemId,
-        uint256 slotIndex,
-        uint64 blockNumber
-    ) external override view returns (uint32) {
-        return 0;
-        // TODO return BlockHashRegister.
+    function getAttributes(Gem[] calldata gems) external override view returns(Attribute[] memory) {
+        Attribute[] memory attributes = new Attribute[](gems.length);
+        for (uint256 i = 0; i < attributes.length; i++) {
+            Gem memory gem = gems[i];
+            attributes[i] = Attribute({
+                gemId: gem.id,
+                value: _getValue(gem.id, i, gem.blockNumber)
+            });
+        }
+        return attributes;
     }
+
+    /* Support global access to gems so multiple same gem could have a different values that just the sum
+    / override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
+    // prettier-ignore
+    function getAttributes(Gem[] calldata gems) external override view returns(Attribute[] memory) {
+        uint32 maxGemId = 0;
+        for (uint256 i = 0; i < gems.length; i++) {
+            if (maxGemId < gems[i].id) {
+                maxGemId = gems[i].id;
+            }
+        }
+        Attribute[] memory attributes = new Attribute[](maxGemId);
+        for (uint256 i = 0; i < attributes.length; i++) {
+            Gem memory gem = gems[i];
+            attributes[i] = Attribute({
+                gemId: uint32(gem.id), // TODO require value not overflow
+                value: _catalystToken.getValue(gem.id, i, gem.blockNumber)
+            });
+        }
+        return attributes;
+    }
+    */
 
     // override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
     // prettier-ignore
@@ -48,5 +74,11 @@ contract Catalyst is ERC20BaseToken, CatalystToken {
     /// @return the number of decimals.
     function decimals() external override pure returns (uint8) {
         return uint8(0);
+    }
+
+    // /////////////////////// INTERNALS /////////////////////////////////////////
+    function _getValue(uint32 gemId, uint256 slotIndex, uint64 blockNumber) internal view returns(uint32) {
+        // TODO
+        return 25;
     }
 }

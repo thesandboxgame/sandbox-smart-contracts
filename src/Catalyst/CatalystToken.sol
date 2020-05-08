@@ -1,14 +1,21 @@
 pragma solidity 0.6.5;
+pragma experimental ABIEncoderV2;
 
 import "../Interfaces/ERC20Extended.sol";
 
 
 interface CatalystToken is ERC20Extended {
-    function getValue(
-        uint256 gemId,
-        uint256 slotIndex,
-        uint64 blockNumber
-    ) external view returns (uint32);
+    struct Gem {
+        uint64 blockNumber;
+        uint32 id;
+    }
+
+    struct Attribute {
+        uint32 gemId;
+        uint32 value;
+    }
+
+    function getAttributes(Gem[] calldata) external view returns (Attribute[] memory);
 
     function getMintData()
         external
