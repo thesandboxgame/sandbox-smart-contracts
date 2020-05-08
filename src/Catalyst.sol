@@ -40,28 +40,6 @@ contract Catalyst is ERC20BaseToken, CatalystToken {
         return attributes;
     }
 
-    /* Support global access to gems so multiple same gem could have a different values that just the sum
-    / override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
-    // prettier-ignore
-    function getAttributes(Gem[] calldata gems) external override view returns(Attribute[] memory) {
-        uint32 maxGemId = 0;
-        for (uint256 i = 0; i < gems.length; i++) {
-            if (maxGemId < gems[i].id) {
-                maxGemId = gems[i].id;
-            }
-        }
-        Attribute[] memory attributes = new Attribute[](maxGemId);
-        for (uint256 i = 0; i < attributes.length; i++) {
-            Gem memory gem = gems[i];
-            attributes[i] = Attribute({
-                gemId: uint32(gem.id), // TODO require value not overflow
-                value: _catalystToken.getValue(gem.id, i, gem.blockNumber)
-            });
-        }
-        return attributes;
-    }
-    */
-
     // override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
     // prettier-ignore
     function getMintData() external override view returns (uint8 rarity, uint16 maxGems, uint64 quantity) {
