@@ -15,21 +15,42 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     event SubToken(ERC20SubToken subToken);
     event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
 
-    function addSubToken(
-        ERC20SubToken subToken,
+    event Minter(address newMinter);
+
+    function getMinter() external view returns (address) {
+        return _minter;
+    }
+
+    function setMinter(address newMinter) external {
+        require(msg.sender == _admin, "only admin allowed");
+        _minter = newMinter;
+        emit Minter(newMinter);
+    }
+
+    function mint(
         address to,
-        uint256 supply
+        uint256 id,
+        uint256 amount
     ) external {
-        require(msg.sender == _admin, "NOT_AUTHORIZED");
-        _addSubToken(subToken, to, supply);
+        require(msg.sender == _minter, "only minter allowed to mint");
+        (uint256 bin, uint256 index) = id.getTokenBinIndex();
+        _packedTokenBalance[to][bin] = _packedTokenBalance[to][bin].updateTokenBalance(index, amount, ObjectLib64.Operations.ADD);
+        _totalSupplies[id] += amount;
+        _erc20s[id].emitTransferEvent(address(0), to, amount);
+    }
+
+    function addSubToken(ERC20SubToken subToken) external {
+        require(msg.sender == _minter, "NOT_AUTHORIZED_ONLY_MINTER");
+        _addSubToken(subToken);
     }
 
     function supplyOf(uint256 id) external view returns (uint256) {
         return _totalSupplies[id];
     }
 
-    function balanceOf(address owner, uint256 tokenId) public view returns (uint256) {
-        return _packedTokenBalance[owner].getValueInBin(tokenId);
+    function balanceOf(address owner, uint256 id) public view returns (uint256) {
+        (uint256 bin, uint256 index) = id.getTokenBinIndex();
+        return _packedTokenBalance[owner][bin].getValueInBin(index);
     }
 
     function balanceOfBatch(address[] calldata owners, uint256[] calldata tokenIds) external view returns (uint256[] memory) {
@@ -48,13 +69,19 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         uint256 value
     ) external {
         require(to != address(0), "INVALID_TO");
+        ERC20SubToken erc20 = _erc20s[id];
         require(
-            from == msg.sender || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender] || _metaTransactionContracts[msg.sender],
+            from == msg.sender ||
+                msg.sender == address(erc20) ||
+                _superOperators[msg.sender] ||
+                _operatorsForAll[from][msg.sender] ||
+                _metaTransactionContracts[msg.sender],
             "NOT_AUTHORIZED"
         );
-        ERC20SubToken erc20 = _erc20s[id];
-        _packedTokenBalance[from] = ObjectLib64.updateTokenBalance(_packedTokenBalance[from], id, value, ObjectLib64.Operations.SUB);
-        _packedTokenBalance[to] = ObjectLib64.updateTokenBalance(_packedTokenBalance[to], id, value, ObjectLib64.Operations.ADD);
+
+        (uint256 bin, uint256 index) = id.getTokenBinIndex();
+        _packedTokenBalance[from][bin] = _packedTokenBalance[from][bin].updateTokenBalance(index, value, ObjectLib64.Operations.SUB);
+        _packedTokenBalance[to][bin] = _packedTokenBalance[to][bin].updateTokenBalance(index, value, ObjectLib64.Operations.ADD);
         erc20.emitTransferEvent(from, to, value);
     }
 
@@ -71,16 +98,35 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
             "NOT_AUTHORIZED"
         );
 
-        uint256 balFrom = _packedTokenBalance[from];
-        uint256 balTo = _packedTokenBalance[to];
+        uint256 bin = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
+        uint256 index;
+        uint256 lastBin;
+        uint256 balFrom;
+        uint256 balTo;
         for (uint256 i = 0; i < ids.length; i++) {
+            (bin, index) = ids[i].getTokenBinIndex();
+            if (lastBin == 0) {
+                lastBin = bin;
+                balFrom = ObjectLib64.updateTokenBalance(_packedTokenBalance[from][bin], index, values[i], ObjectLib64.Operations.SUB);
+                balTo = ObjectLib64.updateTokenBalance(_packedTokenBalance[to][bin], index, values[i], ObjectLib64.Operations.ADD);
+            } else {
+                if (bin != lastBin) {
+                    _packedTokenBalance[from][lastBin] = balFrom;
+                    _packedTokenBalance[to][lastBin] = balTo;
+                    balFrom = _packedTokenBalance[from][bin];
+                    balTo = _packedTokenBalance[to][bin];
+                    lastBin = bin;
+                }
+                balFrom = balFrom.updateTokenBalance(index, values[i], ObjectLib64.Operations.SUB);
+                balTo = balTo.updateTokenBalance(index, values[i], ObjectLib64.Operations.ADD);
+            }
             ERC20SubToken erc20 = _erc20s[ids[i]];
-            balFrom = ObjectLib64.updateTokenBalance(balFrom, ids[i], values[i], ObjectLib64.Operations.SUB);
-            balTo = ObjectLib64.updateTokenBalance(balTo, ids[i], values[i], ObjectLib64.Operations.ADD);
             erc20.emitTransferEvent(from, to, values[i]);
         }
-        _packedTokenBalance[from] = balFrom;
-        _packedTokenBalance[to] = balTo;
+        if (bin != 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF) {
+            _packedTokenBalance[from][bin] = balFrom;
+            _packedTokenBalance[to][bin] = balTo;
+        }
     }
 
     function setApprovalForAllFor(
@@ -110,7 +156,8 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
             "NOT_AUTHORIZED"
         );
         ERC20SubToken erc20 = _erc20s[id];
-        _packedTokenBalance[from] = ObjectLib64.updateTokenBalance(_packedTokenBalance[from], id, value, ObjectLib64.Operations.SUB);
+        (uint256 bin, uint256 index) = id.getTokenBinIndex();
+        _packedTokenBalance[from][bin] = ObjectLib64.updateTokenBalance(_packedTokenBalance[from][bin], id, value, ObjectLib64.Operations.SUB);
         erc20.emitTransferEvent(from, address(0), value);
         return true;
     }
@@ -127,26 +174,19 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         for (uint256 i = 0; i < ids.length; i++) {
             uint256 id = ids[i];
             ERC20SubToken erc20 = _erc20s[id];
-            _packedTokenBalance[from] = ObjectLib64.updateTokenBalance(_packedTokenBalance[from], id, value, ObjectLib64.Operations.SUB);
+            (uint256 bin, uint256 index) = id.getTokenBinIndex();
+            _packedTokenBalance[from][bin] = ObjectLib64.updateTokenBalance(_packedTokenBalance[from][bin], id, value, ObjectLib64.Operations.SUB);
             erc20.emitTransferEvent(from, address(0), value);
         }
         return true;
     }
 
     // ///////////////// INTERNAL //////////////////////////
-    function _addSubToken(
-        ERC20SubToken subToken,
-        address to,
-        uint256 supply
-    ) internal {
+    function _addSubToken(ERC20SubToken subToken) internal {
         uint256 index = _erc20s.length;
         _erc20s.push(subToken);
+        _totalSupplies.push(0); // TODO use mapping instead
         subToken.setSubTokenIndex(this, index);
-
-        _packedTokenBalance[to] = _packedTokenBalance[to].updateTokenBalance(index, supply, ObjectLib64.Operations.REPLACE);
-        _totalSupplies[index] = supply;
-
-        subToken.emitTransferEvent(address(0), to, supply);
         emit SubToken(subToken);
     }
 
@@ -167,28 +207,21 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     using SafeMath for uint256;
 
     // ////////////////// DATA ///////////////////////////////
-    mapping(address => uint256) _packedTokenBalance;
+    mapping(address => mapping(uint256 => uint256)) private _packedTokenBalance;
     mapping(address => mapping(address => bool)) _operatorsForAll;
     uint256[] _totalSupplies;
     ERC20SubToken[] _erc20s;
+    address _minter;
 
     // ////////////// CONSTRUCTOR ////////////////////////////
 
     struct SubTokenData {
-        uint256 supply;
         string name;
         string symbol;
     }
 
-    constructor(
-        address to,
-        SubTokenData[] memory tokens,
-        address admin
-    ) public {
+    constructor(address admin, address minter) public {
         _admin = admin;
-        for (uint256 i = 0; i < tokens.length; i++) {
-            ERC20SubToken subToken = new ERC20SubToken(tokens[i].name, tokens[i].symbol, admin);
-            _addSubToken(subToken, to, tokens[i].supply);
-        }
+        _minter = minter;
     }
 }

@@ -29,6 +29,9 @@ contract Catalyst is ERC20BaseToken, CatalystToken {
         _minter = minter;
     }
     
+    function getMinter() external view returns (address) {
+        return _minter;
+    }
     function setMinter(address newMinter) external {
         require(msg.sender == _admin, "only admin allowed");
         _minter = newMinter;

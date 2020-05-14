@@ -439,7 +439,7 @@ module.exports = (init, extensions, {initialOwner, initialSupply} = {}) => {
   }
 
   if (initialSupply) {
-    it("deploy should emit Transfer event", async function ({owner}) {
+    it("deploy should emit Transfer event", async function ({users}) {
       // TODO
       // const events = await getPastEvents(owner.contract, TransferEvent);
       // assert.equal(events[0].returnValues[0], "0x0000000000000000000000000000000000000000");
