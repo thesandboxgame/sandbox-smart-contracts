@@ -15,9 +15,7 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
     constructor(
         string memory tokenName,
         string memory tokenSymbol,
-        address admin,
-        address beneficiary,
-        uint256 amount
+        address admin
     ) internal {
         require(bytes(tokenName).length > 0, "need a name");
         require(bytes(tokenName).length <= 32, "name too long");
@@ -27,7 +25,6 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
         _symbol = _firstBytes32(bytes(tokenSymbol));
 
         _admin = admin;
-        _mint(beneficiary, amount);
     }
 
     /// @notice A descriptive name for the tokens

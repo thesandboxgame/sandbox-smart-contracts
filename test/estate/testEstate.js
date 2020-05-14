@@ -1,6 +1,6 @@
-const {assert} = require("chai-local");
+const {assert} = require("local-chai");
 const {setupEstate} = require("./fixtures");
-const {expectRevert, emptyBytes} = require("testUtils");
+const {expectRevert, emptyBytes} = require("local-utils");
 const EstateTestHelper = require("./_testHelper");
 
 describe("Estate:CreationAndDestruction", function () {

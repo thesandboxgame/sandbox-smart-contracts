@@ -1,5 +1,5 @@
 const assert = require("assert");
-const {emptyBytes} = require("testUtils");
+const {emptyBytes} = require("local-utils");
 function EstateTestHelper(contracts) {
   this.contracts = contracts;
 }

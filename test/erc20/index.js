@@ -1,7 +1,7 @@
-const {assert} = require("chai-local");
+const {assert, expect} = require("local-chai");
 const ethers = require("ethers");
-const {expectRevert, zeroAddress, emptyBytes} = require("testUtils");
-const {Contract} = ethers;
+const {expectRevert, zeroAddress, waitFor} = require("local-utils");
+const {Contract, BigNumber} = ethers;
 const {Web3Provider} = ethers.providers;
 const erc20ABI = [
   {
@@ -395,30 +395,32 @@ const erc20ABI = [
   },
 ];
 
-module.exports = (init, extensions) => {
+module.exports = (init, extensions, {initialOwner, initialSupply} = {}) => {
   const tests = [];
 
   function preTest(test) {
     return async function () {
-      const {ethereum, contractAddress, users} = await init();
+      const {ethereum, contractAddress, users, mint} = await init();
       const ethersProvider = new Web3Provider(ethereum);
 
       const contract = new Contract(contractAddress, erc20ABI, ethersProvider);
 
       const usersWithContracts = [];
-      for (const user of users.slice(1)) {
+      for (const user of users) {
         usersWithContracts.push({
           address: user,
           contract: contract.connect(ethersProvider.getSigner(user)),
+          initialBalance: BigNumber.from(0),
         });
       }
-      const owner = {
-        address: users[0],
-        contract: contract.connect(ethersProvider.getSigner(users[0])),
-      };
+
+      const initialBalance = BigNumber.from("1000000");
+      await mint(usersWithContracts[0].address, initialBalance);
+      usersWithContracts[0].initialBalance = initialBalance;
 
       return test({
-        owner,
+        contract,
+        mint,
         users: usersWithContracts,
       });
     };
@@ -432,125 +434,176 @@ module.exports = (init, extensions) => {
     tests.push({title, subTests});
   }
 
-  it("deploy should emit Transfer event", async function ({owner}) {
-    const events = await getPastEvents(owner.contract, TransferEvent);
-    assert.equal(events[0].returnValues[0], "0x0000000000000000000000000000000000000000");
-    assert.equal(events[0].returnValues[1], initialOwner);
-    assert.equal(events[0].returnValues[2], totalSupply);
-  });
+  function it(title, test) {
+    tests.push({title, test: preTest(test)});
+  }
 
-  it("transfering from users[0] to users[1] should adjust their balance accordingly", async function ({users}) {
-    await transfer(contract, users[1], "1000", {from: users[0], gas});
-    const user0Balance = await getERC20Balance(contract, users[0]);
-    const user1Balance = await getERC20Balance(contract, users[1]);
-    assert.equal(user1Balance.toString(10), "1000");
-    assert.equal(user0Balance.toString(10), new BN(initialBalance).sub(new BN("1000")).toString(10));
+  if (initialSupply) {
+    it("deploy should emit Transfer event", async function ({owner}) {
+      // TODO
+      // const events = await getPastEvents(owner.contract, TransferEvent);
+      // assert.equal(events[0].returnValues[0], "0x0000000000000000000000000000000000000000");
+      // assert.equal(events[0].returnValues[1], initialOwner);
+      // assert.equal(events[0].returnValues[2], initialSupply);
+    });
+  }
+
+  // TODO mint
+
+  it("transfering from users[0] to users[1] should adjust their balance accordingly", async function ({
+    users,
+    contract,
+  }) {
+    const amount = BigNumber.from("1000");
+    await waitFor(users[0].contract.transfer(users[1].address, amount));
+    const user0Balance = await contract.callStatic.balanceOf(users[0].address);
+    const user1Balance = await contract.callStatic.balanceOf(users[1].address);
+    expect(user1Balance).to.equal(users[1].initialBalance.add(amount));
+    expect(user0Balance).to.equal(users[0].initialBalance.sub(amount));
   });
 
   it("transfering from users[0] more token that it owns should fails", async function ({users}) {
-    await expectRevert(
-      transfer(contract, users[1], new BN(initialBalance).add(new BN("1000")).toString(10), {from: users[0], gas})
-    );
+    await expectRevert(users[0].contract.transfer(users[1].address, users[0].initialBalance.add("1000")));
   });
 
   it("transfering to address zero should fails", async function ({users}) {
-    await expectRevert(transfer(contract, zeroAddress, "1000", {from: users[0], gas}));
+    await expectRevert(users[0].contract.transfer(zeroAddress, "1000"));
   });
 
   it("transfering from users[0] to users[1] by users[0] should adjust their balance accordingly", async function ({
     users,
+    contract,
   }) {
-    await transferFrom(contract, users[0], users[1], "1000", {from: users[0], gas});
-    const user0Balance = await getERC20Balance(contract, users[0]);
-    const user1Balance = await getERC20Balance(contract, users[1]);
-    assert.equal(user1Balance.toString(10), "1000");
-    assert.equal(user0Balance.toString(10), new BN(initialBalance).sub(new BN("1000")).toString(10));
+    const amount = BigNumber.from("1000");
+    await waitFor(users[0].contract.transferFrom(users[0].address, users[1].address, amount));
+    const user0Balance = await contract.callStatic.balanceOf(users[0].address);
+    const user1Balance = await contract.callStatic.balanceOf(users[1].address);
+    expect(user1Balance).to.equal(users[1].initialBalance.add(amount));
+    expect(user0Balance).to.equal(users[0].initialBalance.sub(amount));
   });
 
   it("transfering from users[0] by users[1] should fails", async function ({users}) {
-    await expectRevert(transferFrom(contract, users[0], users[1], "1000", {from: users[1], gas}));
+    await expectRevert(users[1].contract.transferFrom(users[0].address, users[1].address, users[0].initialBalance));
   });
 
   it("transfering from users[0] to users[1] should trigger a transfer event", async function ({users}) {
-    const receipt = await transfer(contract, users[1], "1000", {from: users[0], gas});
-    const events = await getEventsFromReceipt(contract, TransferEvent, receipt);
-    assert.equal(events[0].returnValues[0], users[0]);
-    assert.equal(events[0].returnValues[1], users[1]);
-    assert.equal(events[0].returnValues[2], "1000");
+    const amount = BigNumber.from("1000");
+    const receipt = await waitFor(users[0].contract.transfer(users[1].address, amount));
+    const event = receipt.events.find((e) => e.event == "Transfer");
+    assert.equal(event.args[0].toString(), users[0].address.toString());
+    assert.equal(event.args[1].toString(), users[1].address.toString());
+    assert.equal(event.args[2].toString(), amount.toString());
   });
 
   it("transfering from users[0] to users[1] by operator after approval, should adjust their balance accordingly", async function ({
     users,
+    contract,
   }) {
-    await approve(contract, operator, "1000", {from: users[0], gas});
-    await transferFrom(contract, users[0], users[1], "1000", {from: operator, gas});
-    const user0Balance = await getERC20Balance(contract, users[0]);
-    const user1Balance = await getERC20Balance(contract, users[1]);
-    assert.equal(user1Balance.toString(10), "1000");
-    assert.equal(user0Balance.toString(10), new BN(initialBalance).sub(new BN("1000")).toString(10));
+    const amount = BigNumber.from("1000");
+    const operator = users[2];
+    await waitFor(users[0].contract.approve(operator.address, amount));
+    await waitFor(operator.contract.transferFrom(users[0].address, users[1].address, amount));
+    const user0Balance = await contract.callStatic.balanceOf(users[0].address);
+    const user1Balance = await contract.callStatic.balanceOf(users[1].address);
+    expect(user1Balance).to.equal(users[1].initialBalance.add(amount));
+    expect(user0Balance).to.equal(users[0].initialBalance.sub(amount));
   });
+
   it("transfering from users[0] to users[1] by operator after approval and approval reset, should fail", async function ({
     users,
   }) {
-    await approve(contract, operator, "1000", {from: users[0], gas});
-    await approve(contract, operator, "0", {from: users[0], gas});
-    await expectRevert(transferFrom(contract, users[0], users[1], "1000", {from: operator, gas}));
+    const amount = BigNumber.from("1000");
+    const operator = users[2];
+    await waitFor(users[0].contract.approve(operator.address, amount));
+    await waitFor(users[0].contract.approve(operator.address, 0));
+    await expectRevert(operator.contract.transferFrom(users[0].address, users[1].address, amount));
   });
   it("transfering from users[0] to users[1] by operator after approval, should adjust the operator alowance accordingly", async function ({
     users,
+    contract,
   }) {
-    await approve(contract, operator, "1010", {from: users[0], gas});
-    await transferFrom(contract, users[0], users[1], "1000", {from: operator, gas});
-    const allowance = await getERC20Allowance(contract, users[0], operator);
-    assert.equal(allowance.toString(10), "10");
+    const amountApproved = BigNumber.from("1010");
+    const amount = BigNumber.from("1000");
+    const operator = users[2];
+    await waitFor(users[0].contract.approve(operator.address, amountApproved));
+    await waitFor(operator.contract.transferFrom(users[0].address, users[1].address, amount));
+    const allowance = await contract.callStatic.allowance(users[0].address, operator.address);
+    assert.equal(allowance.toString(), amountApproved.sub(amount).toString());
   });
-  it("transfering from users[0] to users[1] by operator after max approval (2**256-1), should NOT adjust the operator allowance", async function ({
-    users,
-  }) {
-    await approve(contract, operator, "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", {
-      from: users[0],
-      gas,
+
+  if (extensions.EIP717) {
+    it("transfering from users[0] to users[1] by operator after max approval (2**256-1), should NOT adjust the operator allowance", async function ({
+      users,
+      contract,
+    }) {
+      const amountApproved = BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+      const amount = BigNumber.from("1000");
+      const operator = users[2];
+      await waitFor(users[0].contract.approve(operator.address, amountApproved));
+      await waitFor(operator.contract.transferFrom(users[0].address, users[1].address, amount));
+      const allowance = await contract.callStatic.allowance(users[0].address, operator.address);
+      assert.equal(allowance.toHexString(), "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
     });
-    await transferFrom(contract, users[0], users[1], "1000", {from: operator, gas});
-    const allowance = await getERC20Allowance(contract, users[0], operator);
-    assert.equal(allowance.toString("hex"), "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
-  });
+  } else {
+    it("transfering from users[0] to users[1] by operator after max approval (2**256-1), should still adjust the operator allowance", async function ({
+      users,
+      contract,
+    }) {
+      const amountApproved = BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
+      const amount = BigNumber.from("1000");
+      const operator = users[2];
+      await waitFor(users[0].contract.approve(operator.address, amountApproved));
+      await waitFor(operator.contract.transferFrom(users[0].address, users[1].address, amount));
+      const allowance = await contract.callStatic.allowance(users[0].address, operator.address);
+      assert.equal(allowance.toHexString(), amountApproved.sub(amount).toHexString());
+    });
+  }
+
   it("transfering from users[0] to users[1] by operator after approval, but without enough allowance, should fails", async function ({
     users,
   }) {
-    await approve(contract, operator, "1010", {from: users[0], gas});
-    await expectRevert(transferFrom(contract, users[0], users[1], "2000000", {from: operator, gas}));
+    const amountApproved = BigNumber.from("1010");
+    const amount = amountApproved.add(1);
+    const operator = users[2];
+    await waitFor(users[0].contract.approve(operator.address, amountApproved));
+    await expectRevert(operator.contract.transferFrom(users[0].address, users[1].address, amount));
   });
+
   it("transfering from users[0] by operators without pre-approval should fails", async function ({users}) {
-    await expectRevert(transferFrom(contract, users[0], users[1], "1000", {from: operator, gas}));
+    const operator = users[2];
+    await expectRevert(operator.contract.transferFrom(users[0].address, users[1].address, users[0].initialBalance));
   });
+
   it("approving operator should trigger a Approval event", async function ({users}) {
-    const receipt = await approve(contract, operator, "1000", {from: users[0], gas});
-    const events = await getEventsFromReceipt(contract, ApproveEvent, receipt);
-    assert.equal(events[0].returnValues[2], "1000");
+    const operator = users[2];
+    const receipt = await waitFor(users[0].contract.approve(operator.address, "1000"));
+    const event = receipt.events.find((e) => e.event == "Approval");
+    assert.equal(event.args[2].toString(), "1000");
   });
   it("disapproving operator (allowance to zero) should trigger a Approval event", async function ({users}) {
-    const receipt = await approve(contract, operator, "0", {from: users[0], gas});
-    const events = await getEventsFromReceipt(contract, ApproveEvent, receipt);
-    assert.equal(events[0].returnValues[2], "0");
+    const operator = users[2];
+    await waitFor(users[0].contract.approve(operator.address, "1000"));
+    const receipt = await waitFor(users[0].contract.approve(operator.address, "0"));
+    const event = receipt.events.find((e) => e.event == "Approval");
+    assert.equal(event.args[2].toString(), "0");
   });
 
   it("approve to address zero should fails", async function ({users}) {
-    await expectRevert(approve(contract, zeroAddress, "1000", {from: users[0], gas}));
+    await expectRevert(users[0].contract.approve(zeroAddress, "1000"));
   });
 
-  if (testBurn) {
-    desccribe("burn", async function () {
+  if (extensions.burn) {
+    describe("burn", function (it) {
       it("burn should emit erc20 transfer event to zero address", async function ({users}) {
-        const receipt = await burn(contract, "1000", {from: users[0], gas});
-        const events = await getEventsFromReceipt(contract, TransferEvent, receipt);
-        assert.equal(events[0].returnValues[0], users[0]);
-        assert.equal(events[0].returnValues[1], "0x0000000000000000000000000000000000000000");
-        assert.equal(events[0].returnValues[2], "1000");
+        const receipt = await waitFor(users[0].contract.burn("1000"));
+        const event = receipt.events.find((e) => e.event == "Transfer");
+        assert.equal(event.args[0], users[0].address);
+        assert.equal(event.args[1], "0x0000000000000000000000000000000000000000");
+        assert.equal(event.args[2].toString(), "1000");
       });
 
       it("burning more token that a user owns should fails", async function ({users}) {
-        await expectRevert(burn(contract, "2000000", {from: users[0], gas}));
+        await expectRevert(users[0].contract.burn(users[0].initialBalance.add(1)));
       });
     });
   }

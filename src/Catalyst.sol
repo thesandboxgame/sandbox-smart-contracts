@@ -10,20 +10,34 @@ contract Catalyst is ERC20BaseToken, CatalystToken {
     uint64 immutable _quantity;
     uint8 immutable _rarity;
     uint16 immutable _maxGems;
+    address _minter;
+
+    event Minter(address newMinter);
 
     constructor(
         string memory name,
         string memory symbol,
         address admin,
-        address beneficiary,
-        uint256 amount,
+        address minter,
         uint8 rarity,
         uint16 maxGems,
         uint16 quantity
-    ) public ERC20BaseToken(name, symbol, admin, beneficiary, amount) {
+    ) public ERC20BaseToken(name, symbol, admin) {
         _quantity = quantity;
         _maxGems = maxGems;
         _rarity = rarity;
+        _minter = minter;
+    }
+    
+    function setMinter(address newMinter) external {
+        require(msg.sender == _admin, "only admin allowed");
+        _minter = newMinter;
+        emit Minter(newMinter);
+    }
+
+    function mint(address to, uint256 amount) external {
+        require(msg.sender == _minter, "only minter allowed to mint");
+        _mint(to, amount);
     }
 
     // override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
