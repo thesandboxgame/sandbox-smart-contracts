@@ -43,12 +43,13 @@ contract CatalystMinter is MetaTransactionReceiver {
         uint256[] memory gemIds,
         uint256 quantity
     ) internal returns(
-        uint8 rarity
+        uint8
     ) {
         (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity) = catalystToken.getMintData();
         require(minQuantity <= quantity && quantity <= maxQuantity, "invalid quantity");
         _checkAndBurnGems(from, maxGems, gemIds);
         _sand.burnFor(from, quantity * _sandFee);
+        return rarity;
     }
  
     function extractAndChangeCatalyst(
@@ -141,16 +142,18 @@ contract CatalystMinter is MetaTransactionReceiver {
     ) internal returns(uint256 totalQuantity, uint256[] memory supplies, bytes memory rarities) {
         totalQuantity = 0;
         
-        rarities = new bytes(assets.length / 4); // TODO
+        rarities = new bytes(assets.length / 4);
+        supplies = new uint256[](assets.length);
         
         for(uint256 i = 0; i < assets.length; i++) {
             _checkAndBurnCatalyst(from, assets[i].catalystToken);
             (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity) = assets[i].catalystToken.getMintData();
             require(minQuantity <= assets[i].supply && assets[i].supply <= maxQuantity, "invalid quantity");
+            supplies[i] = assets[i].supply;
             totalQuantity += assets[i].supply;
             require(assets[i].gemIds.length <= maxGems, "too many gems for catalyst");
             _gems.burnEachFor(from, assets[i].gemIds, 1);
-            // TODO rarities
+            rarities[i/4] = rarities[i/4] | bytes1(uint8(rarity * 2**((3-(i%4))*2)));
         }
     }
 
