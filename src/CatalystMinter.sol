@@ -25,23 +25,32 @@ contract CatalystMinter is MetaTransactionReceiver {
         bytes32 metadataHash,
         CatalystToken catalystToken,
         uint256[] calldata gemIds,
+        uint256 quantity,
         address to,
         bytes calldata data
     ) external returns (uint256) {
         _checkAuthorization(from, to);
         _checkAndBurnCatalyst(from, catalystToken);
-        (uint8 rarity, uint16 maxGems, uint64 quantity) = catalystToken.getMintData();
-        _checkAndBurnGems(from, maxGems, gemIds);
-
-        _sand.burnFor(from, quantity * _sandFee);
-        
+        uint8 rarity = _checkQuantityAndBurnSandAndGems(from, catalystToken, gemIds, quantity);
         uint256 id = _asset.mint(from, packId, metadataHash, quantity, rarity, to, data);
-        
         _catalystRegistry.setCatalyst(id, catalystToken, gemIds);
-        
         return id;
     }
 
+    function _checkQuantityAndBurnSandAndGems(
+        address from,
+        CatalystToken catalystToken,
+        uint256[] memory gemIds,
+        uint256 quantity
+    ) internal returns(
+        uint8 rarity
+    ) {
+        (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity) = catalystToken.getMintData();
+        require(minQuantity <= quantity && quantity <= maxQuantity, "invalid quantity");
+        _checkAndBurnGems(from, maxGems, gemIds);
+        _sand.burnFor(from, quantity * _sandFee);
+    }
+ 
     function extractAndChangeCatalyst(
         address from,
         uint256 assetId,
@@ -134,9 +143,9 @@ contract CatalystMinter is MetaTransactionReceiver {
         for(uint256 i = 0; i < catalystTokens.length; i++) {
             CatalystToken catalystToken = catalystTokens[i];
             _checkAndBurnCatalyst(from, catalystToken);
-            (uint8 rarity, uint16 maxGems, uint64 quantity) = catalystToken.getMintData();
-            totalQuantity += uint256(quantity);
-            supplies[i] = quantity;
+            (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity) = catalystToken.getMintData();
+            totalQuantity += uint256(minQuantity);
+            supplies[i] = minQuantity; // TODOO
             require(numGems[i] <= maxGems, "too many gems for catalyst");
             // TODO rarities    
         }
@@ -179,7 +188,7 @@ contract CatalystMinter is MetaTransactionReceiver {
     ) internal {
         require(assetId & IS_NFT > 0, "NEED TO BE AN NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will reyrn false
         _checkAndBurnCatalyst(from, catalystToken);
-        (uint8 rarity, uint16 maxGems, uint64 quantity) = catalystToken.getMintData();
+        (uint8 rarity, uint16 maxGems,,) = catalystToken.getMintData();
         _checkAndBurnGems(from, maxGems, gemIds);
 
         _catalystRegistry.setCatalyst(assetId, catalystToken, gemIds);
@@ -195,7 +204,7 @@ contract CatalystMinter is MetaTransactionReceiver {
     ) internal {
         require(assetId & IS_NFT > 0, "NEED TO BE AN NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will reyrn false
         CatalystRegistry.Catalyst memory catalyst = _catalystRegistry.getCatalyst(assetId);
-        (uint8 rarity, uint16 maxGems, uint64 quantity) = catalyst.token.getMintData();
+        (,uint16 maxGems,,) = catalyst.token.getMintData();
         require(gemIds.length + catalyst.gems.length <= maxGems, "too many gems");
         
         _catalystRegistry.addGems(assetId, gemIds);

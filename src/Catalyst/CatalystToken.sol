@@ -6,7 +6,7 @@ import "../Interfaces/ERC20Extended.sol";
 
 interface CatalystToken is ERC20Extended {
     struct Gem {
-        uint64 blockNumber;
+        uint224 seed;
         uint32 id;
     }
 
@@ -23,6 +23,7 @@ interface CatalystToken is ERC20Extended {
         returns (
             uint8 rarity,
             uint16 maxGems,
-            uint64 quantity
+            uint16 minQuantity,
+            uint16 maxQuantity
         );
 }

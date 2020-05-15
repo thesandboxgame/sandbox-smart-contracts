@@ -16,8 +16,8 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       catalystMinter,
       rarity,
       maxGems,
-      quantityRange[0] // TODO
-      // attributeRange[1] // TODO
+      quantityRange,
+      attributeRange
     );
     if (catalystToken.newlyDeployed) {
       log(` - ${name} deployed at :  ${catalystToken.address} for gas: ${catalystToken.receipt.gasUsed}`);

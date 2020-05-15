@@ -7,7 +7,10 @@ import "./Catalyst/CatalystToken.sol";
 
 contract Catalyst is ERC20BaseToken, CatalystToken {
     
-    uint64 immutable _quantity;
+    uint16 immutable _minQuantity;
+    uint16 immutable _maxQuantity;
+    uint16 immutable _minValue;
+    uint16 immutable _maxValue;
     uint8 immutable _rarity;
     uint16 immutable _maxGems;
     address _minter;
@@ -21,9 +24,15 @@ contract Catalyst is ERC20BaseToken, CatalystToken {
         address minter,
         uint8 rarity,
         uint16 maxGems,
-        uint16 quantity
+        uint16[] memory quantityRange,
+        uint16[] memory valueRange
     ) public ERC20BaseToken(name, symbol, admin) {
-        _quantity = quantity;
+        require(quantityRange[1] >= quantityRange[0], "invalid quantity range");
+        require(valueRange[1] >= valueRange[0], "invalid value range");
+        _minQuantity = quantityRange[0];
+        _maxQuantity = quantityRange[1];
+        _minValue = valueRange[0];
+        _maxValue = valueRange[1];
         _maxGems = maxGems;
         _rarity = rarity;
         _minter = minter;
@@ -51,7 +60,7 @@ contract Catalyst is ERC20BaseToken, CatalystToken {
             Gem memory gem = gems[i];
             attributes[i] = Attribute({
                 gemId: gem.id,
-                value: _getValue(gem.id, i, gem.blockNumber)
+                value: _getValue(gem.id, i, gem.seed)
             });
         }
         return attributes;
@@ -59,10 +68,11 @@ contract Catalyst is ERC20BaseToken, CatalystToken {
 
     // override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
     // prettier-ignore
-    function getMintData() external override view returns (uint8 rarity, uint16 maxGems, uint64 quantity) {
+    function getMintData() external override view returns (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity) {
         rarity = _rarity;
         maxGems = _maxGems;
-        quantity = _quantity;
+        minQuantity = _minQuantity;
+        maxQuantity = _maxQuantity;
     }
 
     /// @notice returns the number of decimals for that token.
@@ -72,8 +82,8 @@ contract Catalyst is ERC20BaseToken, CatalystToken {
     }
 
     // /////////////////////// INTERNALS /////////////////////////////////////////
-    function _getValue(uint32 gemId, uint256 slotIndex, uint64 blockNumber) internal view returns(uint32) {
-        // TODO
-        return 25;
+    function _getValue(uint32 gemId, uint256 slotIndex, uint224 seed) internal view returns(uint32) {
+        uint16 range = _maxValue - _minValue;
+        return _minValue +  uint16(uint256(keccak256(abi.encodePacked(seed, gemId, slotIndex))) % range);
     }
 }

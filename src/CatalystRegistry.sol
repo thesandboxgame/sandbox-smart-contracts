@@ -63,7 +63,7 @@ contract CatalystRegistry is Admin {
     function _addGems(Catalyst storage catalyst, uint256[] memory gemIds) internal {
         for(uint256 i = 0; i < gemIds.length; i++) {
             catalyst.gems.push(CatalystToken.Gem({
-                blockNumber: uint64(block.number),
+                seed: uint224(uint256(blockhash(block.number-1))), // TODO consider using a larger window for block number to make it more fair
                 id: uint32(gemIds[i])
             }));
         }
