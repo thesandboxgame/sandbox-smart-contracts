@@ -14,7 +14,7 @@ const erc20Tests = require("../erc20")(
   },
   {
     EIP717: true,
-    burn: true,
+    burn: false,
   }
 );
 

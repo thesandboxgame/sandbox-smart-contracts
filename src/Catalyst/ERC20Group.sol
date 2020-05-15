@@ -150,38 +150,46 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         address from,
         uint256 id,
         uint256 value
-    ) external returns (bool) {
+    ) external {
         require(
             from == msg.sender || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender] || _metaTransactionContracts[msg.sender],
             "NOT_AUTHORIZED"
         );
-        ERC20SubToken erc20 = _erc20s[id];
-        (uint256 bin, uint256 index) = id.getTokenBinIndex();
-        _packedTokenBalance[from][bin] = ObjectLib64.updateTokenBalance(_packedTokenBalance[from][bin], id, value, ObjectLib64.Operations.SUB);
-        erc20.emitTransferEvent(from, address(0), value);
-        return true;
+        _burn(from, id, value);
+    }
+
+    function burn(uint256 id, uint256 value) external {
+        _burn(msg.sender, id, value);
     }
 
     function burnEachFor(
         address from,
         uint256[] calldata ids,
         uint256 value
-    ) external returns (bool) {
+    ) external {
         require(
             from == msg.sender || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender] || _metaTransactionContracts[msg.sender],
             "NOT_AUTHORIZED"
         );
         for (uint256 i = 0; i < ids.length; i++) {
             uint256 id = ids[i];
-            ERC20SubToken erc20 = _erc20s[id];
-            (uint256 bin, uint256 index) = id.getTokenBinIndex();
-            _packedTokenBalance[from][bin] = ObjectLib64.updateTokenBalance(_packedTokenBalance[from][bin], id, value, ObjectLib64.Operations.SUB);
-            erc20.emitTransferEvent(from, address(0), value);
+            _burn(from, id, value);
         }
-        return true;
     }
 
     // ///////////////// INTERNAL //////////////////////////
+
+    function _burn(
+        address from,
+        uint256 id,
+        uint256 value
+    ) internal {
+        ERC20SubToken erc20 = _erc20s[id];
+        (uint256 bin, uint256 index) = id.getTokenBinIndex();
+        _packedTokenBalance[from][bin] = ObjectLib64.updateTokenBalance(_packedTokenBalance[from][bin], id, value, ObjectLib64.Operations.SUB);
+        erc20.emitTransferEvent(from, address(0), value);
+    }
+
     function _addSubToken(ERC20SubToken subToken) internal {
         uint256 index = _erc20s.length;
         _erc20s.push(subToken);

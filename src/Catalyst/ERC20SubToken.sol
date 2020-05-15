@@ -53,7 +53,7 @@ contract ERC20SubToken is
         address to,
         uint256 amount
     ) external returns (bool success) {
-        if (msg.sender != from && !_superOperators[msg.sender] && !_origin.group.isApprovedForAll(from, msg.sender)) {
+        if (msg.sender != from && !_metaTransactionContracts[msg.sender] && !_superOperators[msg.sender] && !_origin.group.isApprovedForAll(from, msg.sender)) {
             uint256 allowance = _mAllowed[from][msg.sender];
             if (allowance != (2**256) - 1) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
@@ -75,7 +75,7 @@ contract ERC20SubToken is
         address spender,
         uint256 amount
     ) external returns (bool success) {
-        require(msg.sender == from || _superOperators[msg.sender], "msg.sender != from || superOperator"); // TODO metatx
+        require(msg.sender == from || _metaTransactionContracts[msg.sender] ||  _superOperators[msg.sender], "msg.sender != from || superOperator"); // TODO metatx
         _approveFor(from, spender, amount);
         return true;
     }

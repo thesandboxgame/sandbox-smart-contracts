@@ -99,19 +99,22 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
 
     /// @notice burn `amount` tokens.
     /// @param amount the number of tokens to burn.
-    /// @return true if success.
-    function burn(uint256 amount) external override returns (bool) {
+    function burn(uint256 amount) external override {
         _burn(msg.sender, amount);
-        return true;
     }
 
     /// @notice burn `amount` tokens from `owner`.
-    /// @param owner address whose token is to burn.
+    /// @param from address whose token is to burn.
     /// @param amount the number of token to burn.
-    /// @return true if success.
-    function burnFor(address owner, uint256 amount) external override returns (bool) {
-        _burn(owner, amount);
-        return true;
+    function burnFor(address from, uint256 amount) external override {
+        if (msg.sender != from && !_superOperators[msg.sender]) {
+            uint256 currentAllowance = _allowances[from][msg.sender];
+            if (currentAllowance != (2**256) - 1) {
+                require(currentAllowance >= amount, "Not enough funds allowed");
+                _allowances[from][msg.sender] = currentAllowance - amount;
+            }
+        }
+        _burn(from, amount);
     }
 
     /// @notice approve `spender` to transfer `amount` tokens.

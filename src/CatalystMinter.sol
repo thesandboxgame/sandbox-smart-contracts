@@ -33,7 +33,7 @@ contract CatalystMinter is MetaTransactionReceiver {
         (uint8 rarity, uint16 maxGems, uint64 quantity) = catalystToken.getMintData();
         _checkAndBurnGems(from, maxGems, gemIds);
 
-        require(_sand.burnFor(from, quantity * _sandFee), "cannot burn Sand");
+        _sand.burnFor(from, quantity * _sandFee);
         
         uint256 id = _asset.mint(from, packId, metadataHash, quantity, rarity, to, data);
         
@@ -116,7 +116,7 @@ contract CatalystMinter is MetaTransactionReceiver {
     ) internal {
         (uint256 totalQuantity, uint256[] memory supplies, bytes memory rarities) = _handleMultipleCatalysts(from, catalystTokens, numGems);
 
-        require(_sand.burnFor(from, totalQuantity * _sandFee), "cannot burn Sand");
+        _sand.burnFor(from, totalQuantity * _sandFee);
 
         _mintAssets(from, packId, metadataHash, catalystTokens, numGems, gemIds, supplies, rarities, to, data);
     }
@@ -154,7 +154,7 @@ contract CatalystMinter is MetaTransactionReceiver {
         address to,
         bytes memory data
     ) internal {
-        require(_gems.burnEachFor(from, gemIds, 1), "cannot burn gems");
+        _gems.burnEachFor(from, gemIds, 1);
         
         uint256[] memory tokenIds = _asset.mintMultiple(from, packId, metadataHash, supplies, rarities, to, data);
         
@@ -219,12 +219,12 @@ contract CatalystMinter is MetaTransactionReceiver {
 
     function _checkAndBurnGems(address from, uint256 maxGems, uint256[] memory gemIds) internal {
         require(gemIds.length <= maxGems, "too many gems");
-        require(_gems.burnEachFor(from, gemIds, 1), "cannot burn gems");
+        _gems.burnEachFor(from, gemIds, 1);
     }
 
     function _checkAndBurnCatalyst(address from, CatalystToken catalystToken) internal {
         require(_validCatalysts[catalystToken], "invalid catalyst");
-        require(catalystToken.burnFor(from, 1), "cannot burn catalyst");
+        catalystToken.burnFor(from, 1);
     }
 
 
