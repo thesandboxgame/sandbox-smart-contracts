@@ -40,7 +40,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     );
   }
 
-  for (const sector = 4; sector < 10; sector++) {
+  for (let sector = 4; sector < 10; sector++) {
     const {lands, merkleRootHash, saltedLands, tree} = getLands(sector, network.live, chainId);
     const landSaleName = "LandPreSale_3_" + sector;
     const existingLandSale = await deployments.getOrNull(landSaleName);

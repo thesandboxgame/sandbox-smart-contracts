@@ -66,13 +66,16 @@ function generateLandsForMerkleTree(sectorData) {
             size,
           })
       );
+      return;
     }
 
     if (landGroup.x < 0 || landGroup.x >= 408) {
       reportError("wrong x : " + landGroup.x);
+      return;
     }
     if (landGroup.y < 0 || landGroup.y >= 408) {
       reportError("wrong y : " + landGroup.y);
+      return;
     }
 
     if (landGroup.reserved) {
@@ -203,6 +206,8 @@ module.exports = {
       lands: expose ? saltedLands : lands,
       merkleRootHash,
       saltedLands,
+      tree,
+      merkleRootHash,
       // landsWithProof,
     };
   },
