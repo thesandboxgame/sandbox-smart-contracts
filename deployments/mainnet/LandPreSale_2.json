@@ -469,7 +469,9 @@
     }
   ],
   "address": "0xb2fb1D91325d0211B1Eb39e4CF2C9F3Cf14508b0",
-  "transactionHash": "0x1efbe4f0b9a4cdeb1e631b81194f1b0b00984c5fd5e388ad2fdea2762e2d82bc",
+  "receipt": {
+    "transactionHash": "0x1efbe4f0b9a4cdeb1e631b81194f1b0b00984c5fd5e388ad2fdea2762e2d82bc"
+  },
   "args": [
     "0x50f5474724e0Ee42D9a4e711ccFB275809Fd6d4a",
     "0x3845badAde8e6dFF049820680d1F14bD3903a5d0",
