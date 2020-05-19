@@ -1,4 +1,5 @@
 const {guard} = require("../lib");
+const {BigNumber} = require("ethers");
 const {getLands} = require("../data/landPreSale_3_multiple/getLands");
 
 const fs = require("fs");
@@ -6,7 +7,7 @@ const {calculateLandHash} = require("../lib/merkleTreeHelper");
 
 module.exports = async ({getChainId, getNamedAccounts, deployments, network}) => {
   const {deployIfDifferent, deploy, log} = deployments;
-  const chainId = await getChainId();
+  const chainId = BigNumber.from(await getChainId()).toString();
 
   const {deployer, landSaleBeneficiary, backendReferralWallet} = await getNamedAccounts();
 
