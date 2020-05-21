@@ -1,9 +1,8 @@
-Asset, a dual ERC1155 / ERC721 token for user generated content
-===============================================================
+# Asset, a dual ERC1155 / ERC721 token for user generated content
 
 ASSET is a smart contract token implementation of both [EIP-1155](https://eips.ethereum.org/EIPS/eip-1155) (for limited editions tokens) and [EIP-721](https://eips.ethereum.org/EIPS/eip-721) (for non fungible, unique tokens)
 
-See [src/Asset.sol](../src/Asset.sol)
+See [Asset.sol](../old_src/Asset.sol)
 
 Each token represents the creations of our players. It is a permission-less implementation of EIP-1155 and EIP-721 where every user can mint their own token represented via metadata.
 
@@ -19,7 +18,7 @@ Every time a creator submit a minting transaction on our Asset smart contract, i
 
 The Asset is then published on our website and curators can bet whether the Asset will be rejected by our policies. Our website can filter bad assets based on this information.
 
-A set of moderators can then decide to give their judgement on whether an Asset should be filtered out or not. When doing so curators are rewarded or punished based on their bet. 
+A set of moderators can then decide to give their judgement on whether an Asset should be filtered out or not. When doing so curators are rewarded or punished based on their bet.
 
 Note though that moderators are unlikely to need to act often as the fear of losing bets should make sure both creators and curators ensure only good content is minted on our Asset smart contract.
 

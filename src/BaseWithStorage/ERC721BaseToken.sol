@@ -59,7 +59,11 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
 
     function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {
         uint256 data = _owners[id];
-        owner = address(data);
+        if ((data & (2**160)) == 2**160) {
+            owner = address(0);
+        } else {
+            owner = address(data);
+        }
         operatorEnabled = (data / 2**255) == 1;
     }
 
@@ -349,7 +353,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         address from,
         address owner,
         uint256 id
-    ) public {
+    ) internal {
         require(from == owner, "not owner");
         _owners[id] = (_owners[id] & (2**255 - 1)) | (2**160); // record as non owner but keep track of last owner
         _numNFTPerAddress[from]--;
