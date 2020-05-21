@@ -6,7 +6,6 @@ import "./Catalyst/CatalystToken.sol";
 
 
 contract Catalyst is ERC20BaseToken, CatalystToken {
-    
     uint16 immutable _minQuantity;
     uint16 immutable _maxQuantity;
     uint16 immutable _minValue;
@@ -37,10 +36,11 @@ contract Catalyst is ERC20BaseToken, CatalystToken {
         _rarity = rarity;
         _minter = minter;
     }
-    
+
     function getMinter() external view returns (address) {
         return _minter;
     }
+
     function setMinter(address newMinter) external {
         require(msg.sender == _admin, "only admin allowed");
         _minter = newMinter;
@@ -60,10 +60,23 @@ contract Catalyst is ERC20BaseToken, CatalystToken {
             Gem memory gem = gems[i];
             attributes[i] = Attribute({
                 gemId: gem.id,
-                value: _getValue(gem.id, i, gem.seed)
+                blockNumber: gem.blockNumber,
+                slotIndex: uint32(i),
+                minValue: _minValue,
+                maxValue: _maxValue
             });
         }
         return attributes;
+    }
+
+    /// @notice compute value given a blockHash, the blockHash need to correspon to the blockNumber associated with the gem
+    function getValue(
+        uint32 gemId,
+        uint256 slotIndex,
+        bytes32 blockHash
+    ) external view returns (uint32) {
+        uint16 range = _maxValue - _minValue;
+        return _minValue + uint16(uint256(keccak256(abi.encode(blockHash, gemId, slotIndex))) % range);
     }
 
     // override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
@@ -79,11 +92,5 @@ contract Catalyst is ERC20BaseToken, CatalystToken {
     /// @return the number of decimals.
     function decimals() external override pure returns (uint8) {
         return uint8(0);
-    }
-
-    // /////////////////////// INTERNALS /////////////////////////////////////////
-    function _getValue(uint32 gemId, uint256 slotIndex, uint224 seed) internal view returns(uint32) {
-        uint16 range = _maxValue - _minValue;
-        return _minValue +  uint16(uint256(keccak256(abi.encodePacked(seed, gemId, slotIndex))) % range);
     }
 }

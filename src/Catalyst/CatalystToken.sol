@@ -6,13 +6,16 @@ import "../Interfaces/ERC20Extended.sol";
 
 interface CatalystToken is ERC20Extended {
     struct Gem {
-        uint224 seed;
+        uint64 blockNumber;
         uint32 id;
     }
 
     struct Attribute {
         uint32 gemId;
-        uint32 value;
+        uint64 blockNumber;
+        uint32 slotIndex;
+        uint16 minValue;
+        uint16 maxValue;
     }
 
     function getAttributes(Gem[] calldata) external view returns (Attribute[] memory);
