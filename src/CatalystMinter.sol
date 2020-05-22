@@ -10,6 +10,7 @@ import "./Catalyst/ERC20Group.sol";
 import "./Catalyst/CatalystToken.sol";
 import "./CatalystRegistry.sol";
 
+
 contract CatalystMinter is MetaTransactionReceiver {
     /// @notice mint common Asset token by paying the Sand fee
     /// @param from address creating the Asset, need to be the tx sender or meta tx signer
@@ -42,16 +43,14 @@ contract CatalystMinter is MetaTransactionReceiver {
         CatalystToken catalystToken,
         uint256[] memory gemIds,
         uint256 quantity
-    ) internal returns(
-        uint8
-    ) {
+    ) internal returns (uint8) {
         (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity) = catalystToken.getMintData();
         require(minQuantity <= quantity && quantity <= maxQuantity, "invalid quantity");
         _checkAndBurnGems(from, maxGems, gemIds);
         _sand.burnFor(from, quantity * _sandFee);
         return rarity;
     }
- 
+
     function extractAndChangeCatalyst(
         address from,
         uint256 assetId,
@@ -61,7 +60,7 @@ contract CatalystMinter is MetaTransactionReceiver {
     ) external {
         _checkAuthorization(from, to);
         uint256 id = _asset.extractERC721From(from, assetId, from);
-        _changeCatalyst(from, id, catalystToken, gemIds, to); 
+        _changeCatalyst(from, id, catalystToken, gemIds, to);
     }
 
     function changeCatalyst(
@@ -75,7 +74,6 @@ contract CatalystMinter is MetaTransactionReceiver {
         _changeCatalyst(from, assetId, catalystToken, gemIds, to);
     }
 
-
     function extractAndAddGems(
         address from,
         uint256 assetId,
@@ -84,7 +82,7 @@ contract CatalystMinter is MetaTransactionReceiver {
     ) external {
         _checkAuthorization(from, to);
         uint256 id = _asset.extractERC721From(from, assetId, from);
-        _addGems(from, id, gemIds, to); 
+        _addGems(from, id, gemIds, to);
     }
 
     function addGems(
@@ -136,16 +134,20 @@ contract CatalystMinter is MetaTransactionReceiver {
         return _mintAssets(from, packId, metadataHash, assets, supplies, rarities, to, data);
     }
 
-    function _handleMultipleCatalysts(
-        address from,
-        AssetData[] memory assets
-    ) internal returns(uint256 totalQuantity, uint256[] memory supplies, bytes memory rarities) {
+    function _handleMultipleCatalysts(address from, AssetData[] memory assets)
+        internal
+        returns (
+            uint256 totalQuantity,
+            uint256[] memory supplies,
+            bytes memory rarities
+        )
+    {
         totalQuantity = 0;
-        
+
         rarities = new bytes(assets.length / 4);
         supplies = new uint256[](assets.length);
-        
-        for(uint256 i = 0; i < assets.length; i++) {
+
+        for (uint256 i = 0; i < assets.length; i++) {
             _checkAndBurnCatalyst(from, assets[i].catalystToken);
             (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity) = assets[i].catalystToken.getMintData();
             require(minQuantity <= assets[i].supply && assets[i].supply <= maxQuantity, "invalid quantity");
@@ -153,7 +155,7 @@ contract CatalystMinter is MetaTransactionReceiver {
             totalQuantity += assets[i].supply;
             require(assets[i].gemIds.length <= maxGems, "too many gems for catalyst");
             _gems.burnEachFor(from, assets[i].gemIds, 1);
-            rarities[i/4] = rarities[i/4] | bytes1(uint8(rarity * 2**((3-(i%4))*2)));
+            rarities[i / 4] = rarities[i / 4] | bytes1(uint8(rarity * 2**((3 - (i % 4)) * 2)));
         }
     }
 
@@ -166,9 +168,9 @@ contract CatalystMinter is MetaTransactionReceiver {
         bytes memory rarities,
         address to,
         bytes memory data
-    ) internal returns(uint256[] memory tokenIds) {
+    ) internal returns (uint256[] memory tokenIds) {
         tokenIds = _asset.mintMultiple(from, packId, metadataHash, supplies, rarities, to, data);
-        for(uint256 i = 0; i < tokenIds.length; i++) {
+        for (uint256 i = 0; i < tokenIds.length; i++) {
             AssetData memory asset = assets[i];
             _catalystRegistry.setCatalyst(tokenIds[i], asset.catalystToken, asset.gemIds);
         }
@@ -183,7 +185,7 @@ contract CatalystMinter is MetaTransactionReceiver {
     ) internal {
         require(assetId & IS_NFT > 0, "NEED TO BE AN NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will reyrn false
         _checkAndBurnCatalyst(from, catalystToken);
-        (uint8 rarity, uint16 maxGems,,) = catalystToken.getMintData();
+        (uint8 rarity, uint16 maxGems, , ) = catalystToken.getMintData();
         _checkAndBurnGems(from, maxGems, gemIds);
 
         _catalystRegistry.setCatalyst(assetId, catalystToken, gemIds);
@@ -199,29 +201,34 @@ contract CatalystMinter is MetaTransactionReceiver {
     ) internal {
         require(assetId & IS_NFT > 0, "NEED TO BE AN NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will reyrn false
         CatalystRegistry.Catalyst memory catalyst = _catalystRegistry.getCatalyst(assetId);
-        (,uint16 maxGems,,) = catalyst.token.getMintData();
+        (, uint16 maxGems, , ) = catalyst.token.getMintData();
         require(gemIds.length + catalyst.gems.length <= maxGems, "too many gems");
-        
+
         _catalystRegistry.addGems(assetId, gemIds);
 
         _transfer(from, to, assetId);
     }
 
-    function _transfer(address from, address to, uint256 assetId) internal {
+    function _transfer(
+        address from,
+        address to,
+        uint256 assetId
+    ) internal {
         if (from != to) {
-            _asset.safeTransferFrom(from, to, assetId);   
+            _asset.safeTransferFrom(from, to, assetId);
         }
     }
 
-    function _checkAuthorization(
-        address from,
-        address to
-    ) internal {
+    function _checkAuthorization(address from, address to) internal {
         require(to != address(0), "INVALID ADDRESS ZERO");
         require(from == msg.sender || _metaTransactionContracts[msg.sender], "not authorized");
     }
 
-    function _checkAndBurnGems(address from, uint256 maxGems, uint256[] memory gemIds) internal {
+    function _checkAndBurnGems(
+        address from,
+        uint256 maxGems,
+        uint256[] memory gemIds
+    ) internal {
         require(gemIds.length <= maxGems, "too many gems");
         _gems.burnEachFor(from, gemIds, 1);
     }
@@ -230,53 +237,6 @@ contract CatalystMinter is MetaTransactionReceiver {
         require(_validCatalysts[catalystToken], "invalid catalyst");
         catalystToken.burnFor(from, 1);
     }
-
-
-    // ////////////////// FROM ERC1155ERC721.sol ////////////
-
-    // function generateTokenId(
-    //     address creator,
-    //     uint256 supply,
-    //     uint40 packId,
-    //     uint16 numFTs,
-    //     uint16 packIndex
-    // ) internal pure returns (uint256) {
-    //     require(supply > 0 && supply <= MAX_SUPPLY, "invalid supply");
-
-    //     return
-    //         uint256(creator) *
-    //         CREATOR_OFFSET_MULTIPLIER + // CREATOR
-    //         (supply == 1 ? uint256(1) * IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT (1) or FT (0) // IS_NFT
-    //         uint256(packId) *
-    //         PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // PACk_ID
-    //         numFTs *
-    //         PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack // PACK_NUM_FT_TYPES
-    //         packIndex; // packIndex (position in the pack) // PACK_INDEX
-    // }
-
-    // function generateTokenIds(
-    //     address creator,
-    //     uint256[] memory supplies,
-    //     uint40 packId
-    // ) internal pure returns (uint256[] memory, uint16) {
-    //     uint16 numTokenTypes = uint16(supplies.length);
-    //     uint256[] memory ids = new uint256[](numTokenTypes);
-    //     uint16 numNFTs = 0;
-    //     for (uint16 i = 0; i < numTokenTypes; i++) {
-    //         if (numNFTs == 0) {
-    //             if (supplies[i] == 1) {
-    //                 numNFTs = uint16(numTokenTypes - i);
-    //             }
-    //         } else {
-    //             require(supplies[i] == 1, "NFTs need to be put at the end");
-    //         }
-    //     }
-    //     uint16 numFTs = numTokenTypes - numNFTs;
-    //     for (uint16 i = 0; i < numTokenTypes; i++) {
-    //         ids[i] = generateTokenId(creator, supplies[i], packId, numFTs, i);
-    //     }
-    //     return (ids, numNFTs);
-    // }
 
     // /////////////////// UTILITIES /////////////////////
     using SafeMathWithRequire for uint256;
