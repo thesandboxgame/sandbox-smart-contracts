@@ -3,30 +3,29 @@
 {{~/inline~}}
 
 {{#*inline "function"}}
-### {{name}}({{> typed-variable-array args}})
+#### {{name}}({{> typed-variable-array args}})
 {{natspec.userdoc}}
 {{!-- {{#each args}}
 {{#if name}} {{name}}{{/if}}: {{typeName}} // {{natspec}}
 {{/each}} --}}
 {{#if natspec.param}}
-#### Parameters
+##### Parameters
 {{#each natspec.params}}{{param}}: {{description}}{{/each}}
 {{/if}}
 {{#if natspec.returns}}
-#### Returns
+##### Returns
 {{#each natspec.returns}}{{param}}: {{description}}{{/each}}
 {{/if}}
-------------------------------------------
 
 {{/inline}}
 
 
 
-# {{name}}
+## {{name}}
 {{natspec.userdoc}}
 
 {{#if functions}}
-## Functions
+### Functions
 {{#each inheritedItems}}
 {{#if functions}}
 {{#each functions}}
@@ -57,7 +56,7 @@
 
 
 {{#if events}}
-# Events
+### Events
 {{#each inheritedItems}}
 {{#each events}}
 {{name}}({{args.names}})

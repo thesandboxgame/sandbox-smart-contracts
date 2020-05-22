@@ -44,7 +44,7 @@
   },
   "scripts": {
     "npm-test": "echo $npm_package_config_path",
-    "doc:solidity": "solidity-docgen -t docs-template -i src -o contract-doc --solc-module solc-0.6.5",
+    "doc:solidity": "solidity-docgen -t docs-template -s single -x html.md -i src -o slate-docs --solc-module solc-0.6.5",
     "doc:slate:setup": "node documentation/setup-slate.js",
     "doc:slate:generate": "node documentation/generate-slate.js",
     "prettier:solidity": "prettier --write src/**/*.sol",
