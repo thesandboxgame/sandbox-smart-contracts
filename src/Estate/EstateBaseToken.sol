@@ -28,6 +28,8 @@ contract EstateBaseToken is ERC721BaseToken {
         _land = land;
     }
 
+    /// @notice Set the Minter that will be the only address able to create Estate
+    /// @param minter address of the minter
     function setMinter(address minter) external {
         require(msg.sender == _admin, "ADMIN_NOT_AUTHORIZED");
         require(minter != _minter, "MINTER_SAME_ALREADY_SET");
@@ -35,10 +37,13 @@ contract EstateBaseToken is ERC721BaseToken {
         emit Minter(minter);
     }
 
+    /// @notice return the current minter
     function getMinter() external view returns (address) {
         return _minter;
     }
 
+    /// @notice Set the Breaker that will be the only address able to break Estate apart
+    /// @param breaker address of the breaker
     function setBreaker(address breaker) external {
         require(msg.sender == _admin, "ADMIN_NOT_AUTHORIZED");
         require(breaker != _breaker, "BREAKER_SAME_ALREADY_SET");
@@ -46,10 +51,17 @@ contract EstateBaseToken is ERC721BaseToken {
         emit Breaker(breaker);
     }
 
+    /// @notice return the current breaker
     function getBreaker() external view returns (address) {
         return _breaker;
     }
 
+    /// @notice create an Estate from a quad (a group of land forming a square on a specific grid in the Land contract)
+    /// @param sender address perforing the operation that will create an Estate from its land token
+    /// @param to the estate will belong to that address
+    /// @param size edge size of the quad, 3, 6, 12 or 24
+    /// @param x top left corner position of the quad
+    /// @param y top left corner position of the quad
     function createFromQuad(
         address sender,
         address to,
@@ -65,6 +77,13 @@ contract EstateBaseToken is ERC721BaseToken {
         return estateId;
     }
 
+    /// @notice add a single quad to an existing estate
+    /// @param sender address perforing the operation that will add the quad to its Estate
+    /// @param estateId the estate that is going to be modified
+    /// @param size edge size of the quad, 3, 6, 12 or 24
+    /// @param x top left corner position of the quad
+    /// @param y top left corner position of the quad
+    /// @param junction this need to be the index (in the estate) of a quad part of the estate that is adjacent to the newly added quad
     function addQuad(
         address sender,
         uint256 estateId,
@@ -77,6 +96,11 @@ contract EstateBaseToken is ERC721BaseToken {
         _addSingleQuad(sender, estateId, size, x, y, false, junction);
     }
 
+    /// @notice create an Estate from a set of Lands, these need to be adjacent so they form a connected whole
+    /// @param sender address perforing the operation that will create an Estate from its land token
+    /// @param to the estate will belong to that address
+    /// @param ids set of Land to add to the estate
+    /// @param junctions list of indexes (the index at which the land/quad was indeed in the estate) that will connect added land to the current estate (only if the previously added land is not adjacent to the one added)
     function createFromMultipleLands(
         address sender,
         address to,
@@ -91,6 +115,11 @@ contract EstateBaseToken is ERC721BaseToken {
         return estateId;
     }
 
+    /// @notice add a single land to an existing estate
+    /// @param sender address perforing the operation that will add the quad to its Estate
+    /// @param estateId the estate that is going to be modified
+    /// @param id land id to be added to the estate
+    /// @param junction this need to be the index (in the estate) of a quad/land part of the estate that is adjacent to the newly added quad
     function addSingleLand(
         address sender,
         uint256 estateId,
@@ -101,6 +130,11 @@ contract EstateBaseToken is ERC721BaseToken {
         _addLand(sender, estateId, id, junction);
     }
 
+    /// @notice add a multiple lands to an existing estate
+    /// @param sender address perforing the operation that will add the quad to its Estate
+    /// @param estateId the estate that is going to be modified
+    /// @param ids array of land ids to be added (these need to be adjacent to each other or to the lands alreayd part of the estate)
+    /// @param junctions list of indexes (the index at which the land/quad was indeed in the estate) that will connect added land to the current estate (only if the previously added land is not adjacent to the one added)
     function addMultipleLands(
         address sender,
         uint256 estateId,
@@ -111,6 +145,13 @@ contract EstateBaseToken is ERC721BaseToken {
         _addLands(sender, estateId, ids, junctions);
     }
 
+    /// @notice create an Estate from a set of Quads, these need to be adjacent so they form a connected whole
+    /// @param sender address perforing the operation that will create an Estate from its land token
+    /// @param to the estate will belong to that address
+    /// @param sizes the array of sizes for each quad
+    /// @param xs the array of top left corner x coordinates for each quad
+    /// @param ys the array of top left corner y coordinates for each quad
+    /// @param junctions list of indexes (the index at which the land/quad was indeed in the estate) that will connect added land to the current estate (only if the previously added land is not adjacent to the one added)
     function createFromMultipleQuads(
         address sender,
         address to,
@@ -127,6 +168,13 @@ contract EstateBaseToken is ERC721BaseToken {
         return estateId;
     }
 
+    /// @notice add a multiple lands to an existing estate
+    /// @param sender address perforing the operation that will add the quad to its Estate
+    /// @param estateId the estate that is going to be modified
+    /// @param sizes the array of sizes for each quad
+    /// @param xs the array of top left corner x coordinates for each quad
+    /// @param ys the array of top left corner y coordinates for each quad
+    /// @param junctions list of indexes (the index at which the land/quad was indeed in the estate) that will connect added land to the current estate (only if the previously added land is not adjacent to the one added)
     function addMultipleQuads(
         address sender,
         uint256 estateId,
@@ -141,6 +189,8 @@ contract EstateBaseToken is ERC721BaseToken {
 
     // override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
     // prettier-ignore
+    /// @notice burn an Estate
+    /// @param id estate id to be burnt
     function burn(uint256 id) external override {
         _check_burn_authorized(msg.sender, id);
         _burn(msg.sender, _ownerOf(id), id);
@@ -148,11 +198,18 @@ contract EstateBaseToken is ERC721BaseToken {
 
     // override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
     // prettier-ignore
+    /// @notice burn an Estate on behalf
+    /// @param from owner of the estate to be burnt
+    /// @param id estate id to be burnt
     function burnFrom(address from, uint256 id) external override {
         _check_burn_authorized(from, id);
         _burn(from, _ownerOf(id), id);
     }
 
+    /// @notice burn an Estate on behalf and transfer land
+    /// @param sender owner of the estate to be burnt
+    /// @param estateId estate id to be burnt
+    /// @param to address that will receive the lands
     function burnAndTransferFrom(
         address sender,
         uint256 estateId,
@@ -166,6 +223,10 @@ contract EstateBaseToken is ERC721BaseToken {
     }
 
     // Optimized version where the whole list is in memory
+    /// @notice transfer all lands from a burnt estate
+    /// @param sender previous owner of the burnt estate
+    /// @param estateId estate id
+    /// @param to address that will receive the lands
     function transferAllFromDestroyedEstate(
         address sender,
         uint256 estateId,
@@ -192,6 +253,11 @@ contract EstateBaseToken is ERC721BaseToken {
         emit QuadsRemoved(estateId, num);
     }
 
+    /// @notice transfer a certain number of lands from a burnt estate
+    /// @param sender previous owner of the burnt estate
+    /// @param estateId estate id
+    /// @param num number of land to transfer
+    /// @param to address that will receive the lands
     function transferFromDestroyedEstate(
         address sender,
         uint256 estateId,
