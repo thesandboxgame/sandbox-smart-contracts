@@ -234,18 +234,15 @@
             <a href="#graphql-queries" class="toc-h1 toc-link" data-title="GraphQL queries">GraphQL queries</a>
           </li>
           <li>
-            <a href="#land" class="toc-h1 toc-link" data-title="Land">Land</a>
-              <ul class="toc-list-h2">
-                  <li>
-                    <a href="#get-lands" class="toc-h2 toc-link" data-title="Get Lands">Get Lands</a>
-                  </li>
-                  <li>
-                    <a href="#get-a-specific-land-via-x-and-y" class="toc-h2 toc-link" data-title="Get a Specific Land via x and y">Get a Specific Land via x and y</a>
-                  </li>
-              </ul>
+            <a href="#land-graphql" class="toc-h1 toc-link" data-title="Land GraphQL">Land GraphQL</a>
           </li>
           <li>
             <a href="#errors" class="toc-h1 toc-link" data-title="Errors">Errors</a>
+              <ul class="toc-list-h2">
+                  <li>
+                    <a href="#search-true" class="toc-h2 toc-link" data-title="search: true">search: true</a>
+                  </li>
+              </ul>
           </li>
       </ul>
         <ul class="toc-footer">
@@ -258,30 +255,31 @@
         <h1 id='introduction'>Introduction</h1>
 <p>Welcome to the Sandbox Smart contract documentation!</p>
 <h1 id='setting-up'>Setting Up</h1>
-<p>You can clone the repo at https://github.com/thesandboxgame/sandbox-smart-contracts (or make a fork) and set it up on your mahcine</p>
+<blockquote>
+<p>You can clone and setup the repo via the following:</p>
+</blockquote>
 <div class="highlight"><pre class="highlight plaintext"><code>git clone https://github.com/thesandboxgame/sandbox-smart-contracts
 cd sandbox-smart-contracts
 yarn
-</code></pre></div><h1 id='executing-scripts'>Executing scripts</h1>
-<p>you can then execute scripts by executing</p>
-<div class="highlight"><pre class="highlight plaintext"><code>yarn run:mainnet &lt;script file&gt;
 </code></pre></div>
+<p>The example shown here can be executed from a clone of this repo : https://github.com/thesandboxgame/sandbox-smart-contracts</p>
+<h1 id='executing-scripts'>Executing scripts</h1>
 <blockquote>
 <p>this will execute the script against mainnet.</p>
 </blockquote>
-<h1 id='examples'>Examples</h1>
-<p>The example shown in the right side will show you example of scripts</p>
-
-<p>For example :</p>
-<div class="highlight"><pre class="highlight javascript tab-javascript"><code><span class="kd">const</span> <span class="p">{</span><span class="nx">ethers</span><span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">"</span><span class="s2">@nomiclabs/buidler</span><span class="dl">"</span><span class="p">);</span>
+<div class="highlight"><pre class="highlight plaintext"><code>yarn run:mainnet &lt;script file&gt;
+</code></pre></div>
+<p>The repo contains all address and abi information to all our deployed contract.
+Our scripts uses buidler and buidler-deploy to fetch that info automatically.</p>
+<h1 id='examples'>Examples</h1><div class="highlight"><pre class="highlight javascript tab-javascript"><code><span class="kd">const</span> <span class="p">{</span><span class="nx">ethers</span><span class="p">}</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="dl">"</span><span class="s2">@nomiclabs/buidler</span><span class="dl">"</span><span class="p">);</span>
 <span class="p">(</span><span class="k">async</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">{</span>
   <span class="kd">const</span> <span class="nx">Land</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">ethers</span><span class="p">.</span><span class="nx">getContract</span><span class="p">(</span><span class="dl">"</span><span class="s2">Land</span><span class="dl">"</span><span class="p">);</span>
   <span class="kd">const</span> <span class="nx">contractName</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">Land</span><span class="p">.</span><span class="nx">callStatic</span><span class="p">.</span><span class="nx">name</span><span class="p">();</span>
   <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">({</span><span class="nx">contractName</span><span class="p">});</span>
 <span class="p">})();</span>
-</code></pre></div><h1 id='graphql-queries'>GraphQL queries</h1>
-<p>We also have examples for graphql queries against our subgraph : https://thegraph.com/explorer/subgraph/pixowl/the-sandbox</p>
-<div class="highlight"><pre class="highlight graphql tab-graphql"><code><span class="p">{</span><span class="w">
+</code></pre></div>
+<p>Scripts can fetch info like shown here, but they can also write data assuming you have put your mnemonic in the <code>.mnemonic</code> file.</p>
+<h1 id='graphql-queries'>GraphQL queries</h1><div class="highlight"><pre class="highlight graphql tab-graphql"><code><span class="p">{</span><span class="w">
   </span><span class="n">alls</span><span class="p">(</span><span class="n">first</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
     </span><span class="n">id</span><span class="w">
     </span><span class="n">numLands</span><span class="w">
@@ -295,8 +293,12 @@ yarn
     </span><span class="n">y</span><span class="w">
   </span><span class="p">}</span><span class="w">
 </span><span class="p">}</span><span class="w">
-</span></code></pre></div><h1 id='land'>Land</h1><h2 id='get-lands'>Get Lands</h2>
+</span></code></pre></div>
+<p>We also have examples for graphql queries against our subgraph : https://thegraph.com/explorer/subgraph/pixowl/the-sandbox</p>
+<h1 id='land-graphql'>Land GraphQL</h1>
+<blockquote>
 <p>Get the first 5 lands</p>
+</blockquote>
 <div class="highlight"><pre class="highlight graphql tab-graphql"><code><span class="p">{</span><span class="w">
   </span><span class="n">landTokens</span><span class="p">(</span><span class="n">first</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
     </span><span class="n">id</span><span class="w">
@@ -345,8 +347,12 @@ yarn
     </span><span class="p">]</span><span class="w">
   </span><span class="p">}</span><span class="w">
 </span><span class="p">}</span><span class="w">
-</span></code></pre></div><h2 id='get-a-specific-land-via-x-and-y'>Get a Specific Land via x and y</h2><div class="highlight"><pre class="highlight graphql tab-graphql"><code><span class="p">{</span><span class="w">
-  </span><span class="n">landTokens</span><span class="p">(</span><span class="n">where</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="n">x</span><span class="p">:</span><span class="mi">142</span><span class="w"> </span><span class="n">y</span><span class="p">:</span><span class="mi">245</span><span class="p">}</span><span class="w"> </span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w">
+</span></code></pre></div>
+<blockquote>
+<p>Get a Specific Land via x and y</p>
+</blockquote>
+<div class="highlight"><pre class="highlight graphql tab-graphql"><code><span class="p">{</span><span class="w">
+  </span><span class="n">landTokens</span><span class="p">(</span><span class="n">where</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="mi">142</span><span class="p">,</span><span class="w"> </span><span class="n">y</span><span class="p">:</span><span class="w"> </span><span class="mi">245</span><span class="p">})</span><span class="w"> </span><span class="p">{</span><span class="w">
     </span><span class="n">id</span><span class="w">
     </span><span class="n">owner</span><span class="w">
     </span><span class="n">x</span><span class="w">
@@ -369,7 +375,9 @@ yarn
     </span><span class="p">]</span><span class="w">
   </span><span class="p">}</span><span class="w">
 </span><span class="p">}</span><span class="w">
-</span></code></pre></div><h1 id='errors'>Errors</h1>
+</span></code></pre></div>
+<p>Our GraphQL API is hosted on thegrah.com</p>
+<h1 id='errors'>Errors</h1>
 <aside class="notice">
 This error section is stored in a separate file in <code>includes/_errors.md</code>. Slate allows you to optionally separate out your docs into many files...just save them to the <code>includes</code> folder and add them to the top of your <code>index.md</code>'s frontmatter. Files are included in the order listed.
 </aside>
@@ -383,7 +391,16 @@ This error section is stored in a separate file in <code>includes/_errors.md</co
 </tr>
 </thead><tbody>
 </tbody></table>
+<hr>
 
+<p>title: Contracts</p>
+
+<p>language_tabs: # must be one of https://git.io/vQNgJ
+  - javascript</p>
+
+<p>includes:
+  - test</p>
+<h2 id='search-true'>search: true</h2>
       </div>
       <div class="dark-box">
           <div class="lang-selector">

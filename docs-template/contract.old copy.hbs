@@ -1,18 +1,16 @@
 {{~#*inline "typed-variable-array"~}}
-{{#each .}}++[.var-type]#++{{typeName}}++#++{{#if name}} ++[.var-name]#++{{name}}++#++{{/if}}{{#unless @last}},
-{{/unless}}{{/each}}
+{{#each .}}++[.var-type]#++{{typeName}}++#++{{#if name}} ++[.var-name]#++{{name}}++#++{{/if}}{{#unless @last}}, {{/unless}}{{/each}}
 {{~/inline~}}
 
 {{#each linkable}}
 :{{name}}: pass:normal[xref:#{{anchor}}[`++{{name}}++`]]
 {{/each}}
 
-
 [.contract]
 [[{{anchor}}]]
 === `++{{name}}++`
 
-{{natspec.userdoc}}
+{{natspec.devdoc}}
 
 {{#if modifiers}}
 [.contract-index]
@@ -70,17 +68,16 @@
 [[{{anchor}}]]
 ==== `++{{name}}({{> typed-variable-array args}})++` [.item-kind]#modifier#
 
-{{natspec.userdoc}}
+{{natspec.devdoc}}
 
 {{/each}}
 
 {{#each ownFunctions}}
 [.contract-item]
 [[{{anchor}}]]
-==== `++{{name}}({{> typed-variable-array args}}){{#if outputs}} → {{> typed-variable-array outputs}}{{/if}}++`
-[.item-kind]#{{visibility}}#
+==== `++{{name}}({{> typed-variable-array args}}){{#if outputs}} → {{> typed-variable-array outputs}}{{/if}}++` [.item-kind]#{{visibility}}#
 
-{{natspec.userdoc}}
+{{natspec.devdoc}}
 
 {{/each}}
 
@@ -89,6 +86,6 @@
 [[{{anchor}}]]
 ==== `++{{name}}({{> typed-variable-array args}})++` [.item-kind]#event#
 
-{{natspec.userdoc}}
+{{natspec.devdoc}}
 
 {{/each}}

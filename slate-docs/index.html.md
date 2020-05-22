@@ -19,7 +19,7 @@ Welcome to the Sandbox Smart contract documentation!
 
 # Setting Up
 
-You can clone the repo at https://github.com/thesandboxgame/sandbox-smart-contracts (or make a fork) and set it up on your mahcine
+> You can clone and setup the repo via the following:
 
 ```
 git clone https://github.com/thesandboxgame/sandbox-smart-contracts
@@ -27,20 +27,20 @@ cd sandbox-smart-contracts
 yarn
 ```
 
+The example shown here can be executed from a clone of this repo : https://github.com/thesandboxgame/sandbox-smart-contracts
+
 # Executing scripts
-you can then execute scripts by executing
+
+> this will execute the script against mainnet.
 
 ```
 yarn run:mainnet <script file>
 ```
 
-> this will execute the script against mainnet.
+The repo contains all address and abi information to all our deployed contract.
+Our scripts uses buidler and buidler-deploy to fetch that info automatically.
 
 # Examples
-
-The example shown in the right side will show you example of scripts
-
-For example :
 
 ```javascript
 const {ethers} = require("@nomiclabs/buidler");
@@ -51,9 +51,9 @@ const {ethers} = require("@nomiclabs/buidler");
 })();
 ```
 
-# GraphQL queries
+Scripts can fetch info like shown here, but they can also write data assuming you have put your mnemonic in the `.mnemonic` file.
 
-We also have examples for graphql queries against our subgraph : https://thegraph.com/explorer/subgraph/pixowl/the-sandbox
+# GraphQL queries
 
 ```graphql
 {
@@ -72,11 +72,11 @@ We also have examples for graphql queries against our subgraph : https://thegrap
 }
 ```
 
-# Land
+We also have examples for graphql queries against our subgraph : https://thegraph.com/explorer/subgraph/pixowl/the-sandbox
 
-## Get Lands
+# Land GraphQL
 
-Get the first 5 lands
+> Get the first 5 lands
 
 ```graphql
 {
@@ -130,11 +130,11 @@ Get the first 5 lands
 }
 ```
 
-## Get a Specific Land via x and y
+> Get a Specific Land via x and y
 
 ```graphql
 {
-  landTokens(where: {x:142 y:245} ) {
+  landTokens(where: {x: 142, y: 245}) {
     id
     owner
     x
@@ -142,7 +142,6 @@ Get the first 5 lands
   }
 }
 ```
-
 
 > The above command returns JSON structured like this:
 
@@ -160,3 +159,5 @@ Get the first 5 lands
   }
 }
 ```
+
+Our GraphQL API is hosted on thegrah.com
