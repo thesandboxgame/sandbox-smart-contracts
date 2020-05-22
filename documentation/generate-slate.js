@@ -4,7 +4,7 @@ const {spawn} = require("child_process");
 
 const dir = path.resolve(__dirname, "..");
 const source = `${dir}/slate-docs`;
-const output = `${dir}/documentation/api`;
+const output = `${dir}/docs`;
 fs.emptyDirSync(output);
 command = `docker run -p 4567:4567 -v ${source}:/srv/slate/source -v ${output}:/srv/slate/build slate:latest bundle exec middleman build --clean`;
 

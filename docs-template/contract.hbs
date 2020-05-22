@@ -1,94 +1,73 @@
 {{~#*inline "typed-variable-array"~}}
-{{#each .}}++[.var-type]#++{{typeName}}++#++{{#if name}} ++[.var-name]#++{{name}}++#++{{/if}}{{#unless @last}},
-{{/unless}}{{/each}}
+{{#each .}}{{typeName}}{{#if name}} {{name}}{{/if}}{{#unless @last}}, {{/unless}}{{/each}}
 {{~/inline~}}
 
-{{#each linkable}}
-:{{name}}: pass:normal[xref:#{{anchor}}[`++{{name}}++`]]
-{{/each}}
-
-
-[.contract]
-[[{{anchor}}]]
-=== `++{{name}}++`
-
+{{#*inline "function"}}
+### {{name}}({{> typed-variable-array args}})
 {{natspec.userdoc}}
-
-{{#if modifiers}}
-[.contract-index]
-.Modifiers
---
-{{#each inheritedItems}}
-{{#unless @first}}
-[.contract-subindex-inherited]
-.{{contract.name}}
-{{/unless}}
-{{#each modifiers}}
-* {xref-{{slug fullName~}} }[`++{{name}}({{args.names}})++`]
-{{/each}}
-
-{{/each}}
---
+{{!-- {{#each args}}
+{{#if name}} {{name}}{{/if}}: {{typeName}} // {{natspec}}
+{{/each}} --}}
+{{#if natspec.param}}
+#### Parameters
+{{#each natspec.params}}{{param}}: {{description}}{{/each}}
 {{/if}}
+{{#if natspec.returns}}
+#### Returns
+{{#each natspec.returns}}{{param}}: {{description}}{{/each}}
+{{/if}}
+------------------------------------------
+
+{{/inline}}
+
+
+
+# {{name}}
+{{natspec.userdoc}}
 
 {{#if functions}}
-[.contract-index]
-.Functions
---
+## Functions
 {{#each inheritedItems}}
-{{#unless @first}}
-[.contract-subindex-inherited]
-.{{contract.name}}
-{{/unless}}
+{{#if functions}}
 {{#each functions}}
-* {xref-{{slug fullName~}} }[`++{{name}}({{args.names}})++`]
-{{/each}}
+{{#eq visibility "public"}}
+{{> function .}}
 
+{{/eq}}
+{{#eq visibility "external"}}
+{{> function .}}
+
+{{/eq}}
 {{/each}}
---
 {{/if}}
+{{/each}}
+{{/if}}
+
+{{!-- 
+{{#each ownFunctions}}
+{{#eq visibility "public"}}
+{{name}}({{args.names}})
+{{natspec.userdoc}}
+{{/eq}}
+{{#eq visibility "external"}}
+{{name}}({{args.names}})
+{{natspec.userdoc}}
+{{/eq}}
+{{/each}} --}}
+
 
 {{#if events}}
-[.contract-index]
-.Events
---
+# Events
 {{#each inheritedItems}}
-{{#unless @first}}
-[.contract-subindex-inherited]
-.{{contract.name}}
-{{/unless}}
 {{#each events}}
-* {xref-{{slug fullName~}} }[`++{{name}}({{args.names}})++`]
+{{name}}({{args.names}})
+{{natspec.userdoc}}
 {{/each}}
-
 {{/each}}
---
 {{/if}}
 
-{{#each ownModifiers}}
-[.contract-item]
-[[{{anchor}}]]
-==== `++{{name}}({{> typed-variable-array args}})++` [.item-kind]#modifier#
 
+{{!-- {{#each ownEvents}}
+{{name}}({{args.names}})
 {{natspec.userdoc}}
-
-{{/each}}
-
-{{#each ownFunctions}}
-[.contract-item]
-[[{{anchor}}]]
-==== `++{{name}}({{> typed-variable-array args}}){{#if outputs}} → {{> typed-variable-array outputs}}{{/if}}++`
-[.item-kind]#{{visibility}}#
-
-{{natspec.userdoc}}
-
-{{/each}}
-
-{{#each ownEvents}}
-[.contract-item]
-[[{{anchor}}]]
-==== `++{{name}}({{> typed-variable-array args}})++` [.item-kind]#event#
-
-{{natspec.userdoc}}
-
-{{/each}}
+{{/each}} --}}

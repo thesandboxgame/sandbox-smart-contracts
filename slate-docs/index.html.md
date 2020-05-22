@@ -7,8 +7,8 @@ language_tabs: # must be one of https://git.io/vQNgJ
 toc_footers:
   - <a href='https://github.com/thesandboxgame/sandbox-smart-contracts'>Smart Contract repository</a>
 
-includes:
-  - errors
+# includes:
+#   - errors
 
 search: true
 ---
