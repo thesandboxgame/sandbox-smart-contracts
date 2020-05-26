@@ -2,7 +2,7 @@ const {guard} = require("../lib");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deployIfDifferent, log} = deployments;
-  const {deployer, gemCoreAdmin, gemCoreMinter} = await getNamedAccounts(); // TODO gemCoreAdmin
+  const {deployer, gemCoreMinter} = await getNamedAccounts();
 
   const gemCore = await deployIfDifferent(
     ["data"],
@@ -32,7 +32,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       "Gem",
       tokenName,
       tokenSymbol,
-      gemCoreAdmin // TODO different admin ?
+      deployer // gemCoreAdmin is set later
     );
     if (gemToken.newlyDeployed) {
       log(` - ${name} deployed at :  ${gemToken.address} for gas: ${gemToken.receipt.gasUsed}`);
@@ -57,9 +57,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
 
   if (currentMinter.toLowerCase() != gemCoreMinter.toLowerCase()) {
     await gemCoreContractAsAdmin.setMinter(gemCoreMinter).then((tx) => tx.wait());
-  }
-  if (currentAdmin.toLowerCase() != gemCoreAdmin.toLowerCase()) {
-    await gemCoreContractAsAdmin.changeAdmin(gemCoreAdmin).then((tx) => tx.wait());
   }
 };
 module.exports.skip = guard(["1", "4", "314159"]); // TODO

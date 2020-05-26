@@ -2,7 +2,7 @@ const {guard} = require("../lib");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deployIfDifferent, log} = deployments;
-  const {deployer, catalystAdmin, catalystMinter} = await getNamedAccounts();
+  const {deployer, catalystMinter} = await getNamedAccounts();
 
   async function deployCatalyst(name, {tokenName, tokenSymbol, rarity, maxGems, quantityRange, attributeRange}) {
     const catalystToken = await deployIfDifferent(
@@ -12,8 +12,8 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       "Catalyst",
       tokenName,
       tokenSymbol,
-      catalystAdmin,
-      catalystMinter,
+      deployer,
+      catalystMinter, // set to catalystMinter later
       rarity,
       maxGems,
       quantityRange,
