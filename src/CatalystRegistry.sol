@@ -104,21 +104,13 @@ contract CatalystRegistry is Admin {
     }
 
     // CONSTRUCTOR ////
-    constructor(
-        AssetToken asset,
-        CatalystToken catalystToken,
-        address admin,
-        address minter // se CatalystMinter
-    ) public {
+    constructor(AssetToken asset, address admin) public {
         _asset = asset;
-        _catalystToken = catalystToken;
         _admin = admin;
-        _minter = minter;
     }
 
     /// DATA ////////
     address _minter;
     mapping(uint256 => Catalyst) _catalysts;
     AssetToken internal immutable _asset;
-    CatalystToken internal immutable _catalystToken;
 }

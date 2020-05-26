@@ -188,7 +188,6 @@ module.exports = {
       expose = true;
     }
 
-    console.log("SECTOR ", sector);
     const sectorData = require(`./sector${sector}.json`);
     const {lands} = generateLandsForMerkleTree(sectorData);
 

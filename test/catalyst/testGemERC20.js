@@ -1,41 +1,36 @@
 const {ethers, getNamedAccounts, ethereum} = require("@nomiclabs/buidler");
-const {waitFor} = require("local-utils");
-const erc20Tests = require("../erc20")(
-  async () => {
-    const {others, gemCoreMinter} = await getNamedAccounts();
-    await deployments.fixture();
+const {waitFor, recurseTests} = require("local-utils");
+const generateERC20Tests = require("../erc20");
 
-    const coreContract = await ethers.getContract("GemCore", gemCoreMinter);
-    async function mint(to, amount) {
-      await waitFor(coreContract.mint(to, 0, amount));
-    }
-    const contract = await ethers.getContract("Luck");
-    return {ethereum, contractAddress: contract.address, users: others, mint};
-  },
-  {
-    EIP717: true,
-    burn: false,
-  }
-);
+function testGem(gemName) {
+  const erc20Tests = generateERC20Tests(
+    async () => {
+      const {others, gemCoreMinter} = await getNamedAccounts();
+      await deployments.fixture();
 
-function recurse(test) {
-  if (test.subTests) {
-    // eslint-disable-next-line mocha/no-setup-in-describe
-    describe(test.title, function () {
-      // eslint-disable-next-line mocha/no-setup-in-describe
-      for (const subTest of test.subTests) {
-        // eslint-disable-next-line mocha/no-setup-in-describe
-        recurse(subTest);
+      const contract = await ethers.getContract(gemName);
+      const tokenId = await contract.originTokenId();
+
+      const coreContract = await ethers.getContract("GemCore", gemCoreMinter);
+      async function mint(to, amount) {
+        await waitFor(coreContract.mint(to, tokenId, amount));
       }
-    });
-  } else {
-    it(test.title, test.test);
-  }
+
+      return {ethereum, contractAddress: contract.address, users: others, mint};
+    },
+    {
+      EIP717: true,
+      burn: false,
+    }
+  );
+
+  describe("Gem:ERC20", function () {
+    for (const test of erc20Tests) {
+      // eslint-disable-next-line mocha/no-setup-in-describe
+      recurseTests(test);
+    }
+  });
 }
 
-describe("Gem:ERC20", function () {
-  for (const test of erc20Tests) {
-    // eslint-disable-next-line mocha/no-setup-in-describe
-    recurse(test);
-  }
-});
+testGem("Luck");
+testGem("Power");

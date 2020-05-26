@@ -31,6 +31,12 @@ contract ERC20SubToken is
         return string(abi.encodePacked(_symbol));
     }
 
+    /// @notice the tokenId in GemCore
+    /// @return the tokenId in GemCore
+    function originTokenId() external view returns (uint256) {
+        return _origin.index;
+    }
+
     function totalSupply() external view returns (uint256) {
         return _origin.group.supplyOf(_origin.index);
     }
@@ -53,7 +59,12 @@ contract ERC20SubToken is
         address to,
         uint256 amount
     ) external returns (bool success) {
-        if (msg.sender != from && !_metaTransactionContracts[msg.sender] && !_superOperators[msg.sender] && !_origin.group.isApprovedForAll(from, msg.sender)) {
+        if (
+            msg.sender != from &&
+            !_metaTransactionContracts[msg.sender] &&
+            !_superOperators[msg.sender] &&
+            !_origin.group.isApprovedForAll(from, msg.sender)
+        ) {
             uint256 allowance = _mAllowed[from][msg.sender];
             if (allowance != (2**256) - 1) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
@@ -75,7 +86,7 @@ contract ERC20SubToken is
         address spender,
         uint256 amount
     ) external returns (bool success) {
-        require(msg.sender == from || _metaTransactionContracts[msg.sender] ||  _superOperators[msg.sender], "msg.sender != from || superOperator"); // TODO metatx
+        require(msg.sender == from || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender], "msg.sender != from || superOperator"); // TODO metatx
         _approveFor(from, spender, amount);
         return true;
     }
@@ -149,5 +160,4 @@ contract ERC20SubToken is
     mapping(address => mapping(address => uint256)) internal _mAllowed;
     bytes32 internal immutable _name; // work only for string that can fit into 32 bytes
     bytes32 internal immutable _symbol; // work only for string that can fit into 32 bytes
-
 }

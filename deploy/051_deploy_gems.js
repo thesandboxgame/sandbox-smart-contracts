@@ -47,16 +47,18 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     await gemCoreContractAsMinter.addSubToken(gem.address).then((tx) => tx.wait());
   }
 
-  await deployAndAddGem("Luck", {
-    tokenName: "Sandbox's Luck GEM",
-    tokenSymbol: "LUCK",
-  });
-  // TODO more
+  const gems = ["Power", "Defense", "Speed", "Magic", "Luck"];
+  for (const gem of gems) {
+    await deployAndAddGem(gem, {
+      tokenName: `Sandbox's ${gem} GEM`,
+      tokenSymbol: gem.toUpperCase(),
+    });
+  }
 
-  if (currentMinter != gemCoreMinter) {
+  if (currentMinter.toLowerCase() != gemCoreMinter.toLowerCase()) {
     await gemCoreContractAsAdmin.setMinter(gemCoreMinter).then((tx) => tx.wait());
   }
-  if (currentAdmin != gemCoreAdmin) {
+  if (currentAdmin.toLowerCase() != gemCoreAdmin.toLowerCase()) {
     await gemCoreContractAsAdmin.changeAdmin(gemCoreAdmin).then((tx) => tx.wait());
   }
 };
