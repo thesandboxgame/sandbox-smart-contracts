@@ -32,5 +32,5 @@ function testGem(gemName) {
   });
 }
 
-testGem("Luck");
-testGem("Power");
+testGem("LuckGem");
+testGem("PowerGem");

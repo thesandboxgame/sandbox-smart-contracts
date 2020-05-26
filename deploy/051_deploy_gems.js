@@ -43,7 +43,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   }
 
   async function deployAndAddGem(name, {tokenName, tokenSymbol}) {
-    const gem = await deployGem(name, {tokenName, tokenSymbol});
+    const gem = await deployGem(`${name}Gem`, {tokenName, tokenSymbol});
     await gemCoreContractAsMinter.addSubToken(gem.address).then((tx) => tx.wait());
   }
 

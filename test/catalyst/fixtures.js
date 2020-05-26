@@ -23,19 +23,24 @@ module.exports.setupCatalystSystem = deployments.createFixture(async () => {
   for (const name of ["Common", "Rare", "Epic", "Legendary"]) {
     catalysts[name] = await ethers.getContract(`${name}Catalyst`, catalystMinter);
   }
+  const gems = {};
+  for (const name of ["Power", "Defense", "Speed", "Magic", "Luck"]) {
+    gems[name] = await ethers.getContract(`${name}Gem`);
+  }
   const sand = await ethers.getContract("Sand", sandBeneficiary);
   const asset = await ethers.getContract("Asset");
   return {
     users,
     gemCore,
     catalysts,
+    gems,
     sand,
     asset,
   };
 });
 
 module.exports.setupCatalystUsers = deployments.createFixture(async () => {
-  const {users, gemCore, catalysts, sand, asset} = await this.setupCatalystSystem();
+  const {users, gemCore, catalysts, sand, asset, gems} = await this.setupCatalystSystem();
   async function setupUser(creator, {hasSand, hasGems, hasCatalysts}) {
     if (hasSand) {
       await sand.transfer(creator.address, toSandWei(1000));
@@ -66,5 +71,6 @@ module.exports.setupCatalystUsers = deployments.createFixture(async () => {
     sand,
     gemCore,
     catalysts,
+    gems,
   };
 });
