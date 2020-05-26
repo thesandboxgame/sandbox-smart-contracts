@@ -3,7 +3,7 @@ const {setupLandSale} = require("./fixtures");
 
 describe("testLandSaleWithReferral", function () {
   it("intro", async function () {
-    // const contracts = await setupLandSale();
-    // console.log(contracts);
+    const contracts = await setupLandSale();
+    console.log(contracts);
   });
 });
