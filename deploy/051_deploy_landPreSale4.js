@@ -26,13 +26,19 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
   let daiMedianizer = await deployments.getOrNull("DAIMedianizer");
   if (!daiMedianizer) {
     log("setting up a fake DAI medianizer");
-    daiMedianizer = await deploy("DAIMedianizer", {from: deployer, gas: 6721975}, "FakeMedianizer");
+    daiMedianizer = await deployIfDifferent(
+      ["data"],
+      "DAIMedianizer",
+      {from: deployer, gas: 6721975},
+      "FakeMedianizer"
+    );
   }
 
   let dai = await deployments.getOrNull("DAI");
   if (!dai) {
     log("setting up a fake DAI");
-    dai = await deploy(
+    dai = await deployIfDifferent(
+      ["data"],
       "DAI",
       {
         from: deployer,
