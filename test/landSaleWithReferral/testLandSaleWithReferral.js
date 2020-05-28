@@ -1,12 +1,12 @@
 const {assert} = require("chai-local");
+const {expectRevert} = require("testUtils");
 const {setupLandSaleWithReferral} = require("./fixtures");
 
 describe("testLandSaleWithReferral", function () {
   let initialSetUp;
-  describe("--> Eth tests", function () {
+  describe("--> ETH tests", function () {
     beforeEach(async function () {
       initialSetUp = await setupLandSaleWithReferral();
-      return initialSetUp;
     });
 
     // const {
@@ -26,8 +26,8 @@ describe("testLandSaleWithReferral", function () {
     it("ETH is enabled", async function () {
       const {landSaleWithReferralContract, others} = initialSetUp;
 
-      // Ether is set to true as default in LandSaleWithReferral.sol
-      // others[1] account is
+      // isETHEnabled is set to TRUE as default in LandSaleWithReferral.sol
+      // others[1] account is not admin
       const isETHEnabled = await landSaleWithReferralContract
         .connect(landSaleWithReferralContract.provider.getSigner(others[1]))
         .functions.isETHEnabled();
@@ -47,6 +47,44 @@ describe("testLandSaleWithReferral", function () {
 
       assert.ok(!isETHEnabled, "ETH should not be enabled");
     });
+
+    it("ETH cannot be enabled if not admin", async function () {
+      const {landSaleWithReferralContract, others} = initialSetUp;
+      await expectRevert(
+        landSaleWithReferralContract
+          .connect(landSaleWithReferralContract.provider.getSigner(others[1]))
+          .functions.setETHEnabled(true),
+        "only admin can enable/disable ETH"
+      );
+    });
+
+    it("can buy LAND with ETH (empty referral)", async function () {});
+
+    it("can buy LAND with ETH and referral", async function () {});
+
+    it("cannot buy LAND with ETH if not enabled (empty referral)", async function () {});
+
+    it("cannot buy LAND without enough ETH (empty referral)", async function () {});
+
+    it("can buy LAND from a reserved Land if matching address (empty referral)", async function () {});
+
+    it("can buy LAND from a reserved Land and send it to another address (empty referral)", async function () {});
+
+    it("CANNOT buy LAND when minter rights revoked (empty referral)", async function () {});
+
+    it("CANNOT buy LAND twice (empty referral)", async function () {});
+
+    it("CANNOT generate proof for Land not on sale", async function () {});
+
+    it("CANNOT buy LAND with invalid proof (empty referral)", async function () {});
+
+    it("CANNOT buy LAND with wrong proof (empty referral)", async function () {});
+
+    it("after buying user own all LAND bought (empty referral)", async function () {});
+
+    it("can buy all LANDs specified in json except reserved lands (empty referral)", async function () {});
+
+    it("check the expiry time of the sale", async function () {});
   });
 
   describe("--> SAND tests", function () {});
