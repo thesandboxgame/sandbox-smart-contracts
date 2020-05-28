@@ -51,6 +51,7 @@
     "smartcheck": "smartcheck -p .",
     "deploy:local": "buidler --network localhost deploy",
     "deploy:rinkeby": "buidler --network rinkeby deploy",
+    "deploy:kovan": "buidler --network kovan deploy",
     "deploy:mainnet": "buidler --network mainnet deploy",
     "run:rinkeby": "cross-env BUIDLER_NETWORK=rinkeby node",
     "run:mainnet": "cross-env BUIDLER_NETWORK=mainnet node"
