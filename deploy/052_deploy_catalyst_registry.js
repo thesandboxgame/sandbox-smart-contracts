@@ -8,7 +8,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   const catalystRegistry = await deployIfDifferent(
     ["data"],
     "CatalystRegistry",
-    {from: deployer, gas: 300000},
+    {from: deployer, gas: 3000000},
     "CatalystRegistry",
     asset.address,
     deployer // is to to catalystRegistryAdmin later

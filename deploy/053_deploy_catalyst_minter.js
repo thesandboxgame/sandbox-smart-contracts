@@ -17,7 +17,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   const catalystMinter = await deployIfDifferent(
     ["data"],
     "CatalystMinter",
-    {from: deployer, gas: 300000},
+    {from: deployer, gas: 3000000},
     "CatalystMinter",
     registry.address,
     sand.address,

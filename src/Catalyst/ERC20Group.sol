@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 import "./ERC20SubToken.sol";
 import "../contracts_common/src/Libraries/SafeMath.sol";
 import "../contracts_common/src/Libraries/AddressUtils.sol";
-import "../contracts_common/src/Libraries/ObjectLib64.sol";
+import "../contracts_common/src/Libraries/ObjectLib32.sol";
 import "../contracts_common/src/Libraries/BytesUtil.sol";
 
 import "../contracts_common/src/BaseWithStorage/SuperOperators.sol";
@@ -34,7 +34,7 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     ) external {
         require(msg.sender == _minter, "only minter allowed to mint");
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
-        _packedTokenBalance[to][bin] = _packedTokenBalance[to][bin].updateTokenBalance(index, amount, ObjectLib64.Operations.ADD);
+        _packedTokenBalance[to][bin] = _packedTokenBalance[to][bin].updateTokenBalance(index, amount, ObjectLib32.Operations.ADD);
         _totalSupplies[id] += amount;
         _erc20s[id].emitTransferEvent(address(0), to, amount);
     }
@@ -80,8 +80,8 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         );
 
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
-        _packedTokenBalance[from][bin] = _packedTokenBalance[from][bin].updateTokenBalance(index, value, ObjectLib64.Operations.SUB);
-        _packedTokenBalance[to][bin] = _packedTokenBalance[to][bin].updateTokenBalance(index, value, ObjectLib64.Operations.ADD);
+        _packedTokenBalance[from][bin] = _packedTokenBalance[from][bin].updateTokenBalance(index, value, ObjectLib32.Operations.SUB);
+        _packedTokenBalance[to][bin] = _packedTokenBalance[to][bin].updateTokenBalance(index, value, ObjectLib32.Operations.ADD);
         erc20.emitTransferEvent(from, to, value);
     }
 
@@ -107,8 +107,8 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
             (bin, index) = ids[i].getTokenBinIndex();
             if (lastBin == 0) {
                 lastBin = bin;
-                balFrom = ObjectLib64.updateTokenBalance(_packedTokenBalance[from][bin], index, values[i], ObjectLib64.Operations.SUB);
-                balTo = ObjectLib64.updateTokenBalance(_packedTokenBalance[to][bin], index, values[i], ObjectLib64.Operations.ADD);
+                balFrom = ObjectLib32.updateTokenBalance(_packedTokenBalance[from][bin], index, values[i], ObjectLib32.Operations.SUB);
+                balTo = ObjectLib32.updateTokenBalance(_packedTokenBalance[to][bin], index, values[i], ObjectLib32.Operations.ADD);
             } else {
                 if (bin != lastBin) {
                     _packedTokenBalance[from][lastBin] = balFrom;
@@ -117,8 +117,8 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
                     balTo = _packedTokenBalance[to][bin];
                     lastBin = bin;
                 }
-                balFrom = balFrom.updateTokenBalance(index, values[i], ObjectLib64.Operations.SUB);
-                balTo = balTo.updateTokenBalance(index, values[i], ObjectLib64.Operations.ADD);
+                balFrom = balFrom.updateTokenBalance(index, values[i], ObjectLib32.Operations.SUB);
+                balTo = balTo.updateTokenBalance(index, values[i], ObjectLib32.Operations.ADD);
             }
             ERC20SubToken erc20 = _erc20s[ids[i]];
             erc20.emitTransferEvent(from, to, values[i]);
@@ -186,7 +186,7 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     ) internal {
         ERC20SubToken erc20 = _erc20s[id];
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
-        _packedTokenBalance[from][bin] = ObjectLib64.updateTokenBalance(_packedTokenBalance[from][bin], id, value, ObjectLib64.Operations.SUB);
+        _packedTokenBalance[from][bin] = ObjectLib32.updateTokenBalance(_packedTokenBalance[from][bin], index, value, ObjectLib32.Operations.SUB);
         erc20.emitTransferEvent(from, address(0), value);
     }
 
@@ -210,8 +210,8 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
 
     // ///////////////// UTILITIES /////////////////////////
     using AddressUtils for address;
-    using ObjectLib64 for ObjectLib64.Operations;
-    using ObjectLib64 for uint256;
+    using ObjectLib32 for ObjectLib32.Operations;
+    using ObjectLib32 for uint256;
     using SafeMath for uint256;
 
     // ////////////////// DATA ///////////////////////////////

@@ -6,6 +6,7 @@ import "./Catalyst/CatalystToken.sol";
 
 
 contract Catalyst is ERC20BaseToken, CatalystToken {
+    uint256 immutable _sandFee;
     uint16 immutable _minQuantity;
     uint16 immutable _maxQuantity;
     uint16 immutable _minValue;
@@ -21,6 +22,7 @@ contract Catalyst is ERC20BaseToken, CatalystToken {
         string memory symbol,
         address admin,
         address minter,
+        uint256 sandFee,
         uint8 rarity,
         uint16 maxGems,
         uint16[] memory quantityRange,
@@ -28,6 +30,7 @@ contract Catalyst is ERC20BaseToken, CatalystToken {
     ) public ERC20BaseToken(name, symbol, admin) {
         require(quantityRange[1] >= quantityRange[0], "invalid quantity range");
         require(valueRange[1] >= valueRange[0], "invalid value range");
+        _sandFee = sandFee;
         _minQuantity = quantityRange[0];
         _maxQuantity = quantityRange[1];
         _minValue = valueRange[0];
@@ -81,11 +84,12 @@ contract Catalyst is ERC20BaseToken, CatalystToken {
 
     // override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
     // prettier-ignore
-    function getMintData() external override view returns (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity) {
+    function getMintData() external override view returns (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) {
         rarity = _rarity;
         maxGems = _maxGems;
         minQuantity = _minQuantity;
         maxQuantity = _maxQuantity;
+        sandFee = _sandFee;
     }
 
     /// @notice returns the number of decimals for that token.

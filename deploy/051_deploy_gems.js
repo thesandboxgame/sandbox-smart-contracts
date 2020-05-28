@@ -7,7 +7,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   const gemCore = await deployIfDifferent(
     ["data"],
     "GemCore",
-    {from: deployer, gas: 300000},
+    {from: deployer, gas: 3000000},
     "GemCore",
     deployer,
     deployer
@@ -28,7 +28,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     const gemToken = await deployIfDifferent(
       ["data"],
       name,
-      {from: deployer, gas: 300000},
+      {from: deployer, gas: 2000000},
       "Gem",
       tokenName,
       tokenSymbol,

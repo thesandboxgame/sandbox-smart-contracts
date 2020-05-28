@@ -44,10 +44,10 @@ contract CatalystMinter is MetaTransactionReceiver {
         uint256[] memory gemIds,
         uint256 quantity
     ) internal returns (uint8) {
-        (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity) = catalystToken.getMintData();
+        (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = catalystToken.getMintData();
         require(minQuantity <= quantity && quantity <= maxQuantity, "invalid quantity");
         _checkAndBurnGems(from, maxGems, gemIds);
-        _sand.burnFor(from, quantity * _sandFee);
+        _sand.burnFor(from, quantity * sandFee);
         return rarity;
     }
 
@@ -127,9 +127,9 @@ contract CatalystMinter is MetaTransactionReceiver {
         address to,
         bytes memory data
     ) internal returns (uint256[] memory ids) {
-        (uint256 totalQuantity, uint256[] memory supplies, bytes memory rarities) = _handleMultipleCatalysts(from, assets);
+        (uint256 totalSandFee, uint256[] memory supplies, bytes memory rarities) = _handleMultipleCatalysts(from, assets);
 
-        _sand.burnFor(from, totalQuantity * _sandFee);
+        _sand.burnFor(from, totalSandFee);
 
         return _mintAssets(from, packId, metadataHash, assets, supplies, rarities, to, data);
     }
@@ -137,22 +137,22 @@ contract CatalystMinter is MetaTransactionReceiver {
     function _handleMultipleCatalysts(address from, AssetData[] memory assets)
         internal
         returns (
-            uint256 totalQuantity,
+            uint256 totalSandFee,
             uint256[] memory supplies,
             bytes memory rarities
         )
     {
-        totalQuantity = 0;
+        totalSandFee = 0;
 
         rarities = new bytes(assets.length / 4);
         supplies = new uint256[](assets.length);
 
         for (uint256 i = 0; i < assets.length; i++) {
             _checkAndBurnCatalyst(from, assets[i].catalystToken);
-            (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity) = assets[i].catalystToken.getMintData();
+            (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = assets[i].catalystToken.getMintData();
             require(minQuantity <= assets[i].supply && assets[i].supply <= maxQuantity, "invalid quantity");
             supplies[i] = assets[i].supply;
-            totalQuantity += assets[i].supply;
+            totalSandFee += sandFee * assets[i].supply;
             require(assets[i].gemIds.length <= maxGems, "too many gems for catalyst");
             _gems.burnEachFor(from, assets[i].gemIds, 1);
             rarities[i / 4] = rarities[i / 4] | bytes1(uint8(rarity * 2**((3 - (i % 4)) * 2)));
@@ -185,7 +185,7 @@ contract CatalystMinter is MetaTransactionReceiver {
     ) internal {
         require(assetId & IS_NFT > 0, "NEED TO BE AN NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will reyrn false
         _checkAndBurnCatalyst(from, catalystToken);
-        (uint8 rarity, uint16 maxGems, , ) = catalystToken.getMintData();
+        (, uint16 maxGems, , , ) = catalystToken.getMintData();
         _checkAndBurnGems(from, maxGems, gemIds);
 
         _catalystRegistry.setCatalyst(assetId, catalystToken, gemIds);
@@ -201,7 +201,7 @@ contract CatalystMinter is MetaTransactionReceiver {
     ) internal {
         require(assetId & IS_NFT > 0, "NEED TO BE AN NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will reyrn false
         CatalystRegistry.Catalyst memory catalyst = _catalystRegistry.getCatalyst(assetId);
-        (, uint16 maxGems, , ) = catalyst.token.getMintData();
+        (, uint16 maxGems, , , ) = catalyst.token.getMintData();
         require(gemIds.length + catalyst.gems.length <= maxGems, "too many gems");
 
         _catalystRegistry.addGems(assetId, gemIds);
@@ -219,7 +219,7 @@ contract CatalystMinter is MetaTransactionReceiver {
         }
     }
 
-    function _checkAuthorization(address from, address to) internal {
+    function _checkAuthorization(address from, address to) internal view {
         require(to != address(0), "INVALID ADDRESS ZERO");
         require(from == msg.sender || _metaTransactionContracts[msg.sender], "not authorized");
     }
@@ -249,8 +249,6 @@ contract CatalystMinter is MetaTransactionReceiver {
     ERC20Group _gems;
     mapping(CatalystToken => bool) _validCatalysts;
     CatalystRegistry _catalystRegistry;
-
-    uint256 constant _sandFee = 1000000000000000000; // TODO fee and feeReceiver
 
     // /////////////////// CONSTRUCTOR ////////////////////
     constructor(

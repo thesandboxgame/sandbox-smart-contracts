@@ -27,6 +27,7 @@ interface CatalystToken is ERC20Extended {
             uint8 rarity,
             uint16 maxGems,
             uint16 minQuantity,
-            uint16 maxQuantity
+            uint16 maxQuantity,
+            uint256 sandFee
         );
 }
