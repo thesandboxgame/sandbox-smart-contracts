@@ -52,7 +52,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     const deployResult = await deployIfDifferent(
       ["data"],
       landSaleName,
-      {from: deployer, gas: 3000000, linkedData: lands},
+      {from: deployer, gas: 6000000, linkedData: lands},
       "LandSaleWithReferral",
       landContract.address,
       sandContract.address,
@@ -60,7 +60,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
       deployer,
       landSaleBeneficiary,
       merkleRootHash,
-      1586869200, // Tuesday, 14 April 2020 13:00:00 GMT+00:00
+      1594299600, // Thursday, 9 July 2020 13:00:00 GMT+00:00
       daiMedianizer.address,
       dai.address,
       backendReferralWallet,
