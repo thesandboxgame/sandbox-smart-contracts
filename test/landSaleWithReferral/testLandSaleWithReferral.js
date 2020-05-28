@@ -64,11 +64,11 @@ describe("testLandSaleWithReferral", function () {
 
       const sandPrice = lands[5].price;
 
-      const value = await landSaleWithReferralContract
+      const value = await landSaleWithReferralContract // should it be the "presale contract" ?
         .connect(landSaleWithReferralContract.provider.getSigner(others[0]))
         .functions.getEtherAmountWithSAND(sandPrice);
 
-      const proof = tree.getProof(calculateLandHash(lands[5]));
+      const proof = tree.getProof(calculateLandHash(lands[5])); // need to deploy landSaleWithReferral with correct merkleRoot
 
       // address buyer,
       // address to,
