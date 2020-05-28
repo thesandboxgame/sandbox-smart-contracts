@@ -9,9 +9,6 @@ let saleDuration;
 let saleEnd;
 const maxCommissionRate = "2000";
 const signer = "0x26BC52894A05EDE59B34EE7B014b57ef0a8558B3";
-// const privateKey = "0x96aa38e97d1d0d19e0f1d5215ff9dad66dc5d99225b1657205d124d00d2de177";
-// const emptyReferral = "0x";
-// const referralLinkValidity = 60 * 60 * 24 * 30;
 
 module.exports.setupLandSaleWithReferral = deployments.createFixture(async () => {
   const {landSaleAdmin, landSaleBeneficiary, landAdmin, sandAdmin, others} = await getNamedAccounts();
