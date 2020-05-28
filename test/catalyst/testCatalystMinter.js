@@ -1,6 +1,6 @@
 const {assert} = require("local-chai");
 const {setupCatalystUsers} = require("./fixtures");
-const {expectRevert, emptyBytes, waitFor, findEvents, checERC20Balances} = require("local-utils");
+const {expectRevert, emptyBytes, waitFor, findEvents, checERC20Balances, toWei} = require("local-utils");
 
 const dummyHash = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 
@@ -86,10 +86,11 @@ describe("Catalyst:Minting", function () {
     const packId = 0;
     const gemIds = [0, 0, 0];
     const quantity = 11;
+    const totalExpectedFee = toWei(11 * 10);
 
     const receipt = await checERC20Balances(
       creator.address,
-      {Sand: [sand, "-11000000000000000000"], PowerGem: [gems.Power, -3], EpicCatalyst: [catalysts.Epic, -1]}, // TOOO SAND fee
+      {Sand: [sand, "-" + totalExpectedFee], PowerGem: [gems.Power, -3], EpicCatalyst: [catalysts.Epic, -1]}, // TOOO SAND fee
       () =>
         waitFor(
           creator.CatalystMinter.mint(

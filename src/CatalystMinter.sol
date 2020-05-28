@@ -47,7 +47,7 @@ contract CatalystMinter is MetaTransactionReceiver {
         (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = catalystToken.getMintData();
         require(minQuantity <= quantity && quantity <= maxQuantity, "invalid quantity");
         _checkAndBurnGems(from, maxGems, gemIds);
-        _sand.burnFor(from, quantity * sandFee);
+        _sand.burnFor(from, quantity * sandFee); // TODO Safe math
         return rarity;
     }
 

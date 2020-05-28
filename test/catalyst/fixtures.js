@@ -1,9 +1,6 @@
+const {toWei} = require("local-utils");
 const {BigNumber} = require("ethers");
 const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
-
-function toSandWei(number) {
-  return BigNumber.from(number).mul("100000000000000000");
-}
 
 module.exports.setupCatalystSystem = deployments.createFixture(async () => {
   const {gemCoreMinter, catalystMinter, others, sandBeneficiary} = await getNamedAccounts();
@@ -14,7 +11,7 @@ module.exports.setupCatalystSystem = deployments.createFixture(async () => {
       address: other,
       CatalystMinter: await ethers.getContract("CatalystMinter", other),
       GemCore: await ethers.getContract("GemCore", other),
-      // TODO catalysts
+      // TODO catalysts and gems
       Asset: await ethers.getContract("Asset", other),
     });
   }
@@ -43,7 +40,7 @@ module.exports.setupCatalystUsers = deployments.createFixture(async () => {
   const {users, gemCore, catalysts, sand, asset, gems} = await this.setupCatalystSystem();
   async function setupUser(creator, {hasSand, hasGems, hasCatalysts}) {
     if (hasSand) {
-      await sand.transfer(creator.address, toSandWei(1000));
+      await sand.transfer(creator.address, toWei(1000));
     }
     if (hasGems) {
       for (let i = 0; i < 5; i++) {
