@@ -42,7 +42,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
   const deployResult = await deployIfDifferent(
     ["data"],
     "LandPreSale_1",
-    {from: deployer, gas: 1000000, linkedData: lands},
+    {from: deployer, gas: 3000000, linkedData: lands},
     "LandSaleWithETHAndDAI",
     landContract.address,
     sandContract.address,
