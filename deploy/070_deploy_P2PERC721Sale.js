@@ -9,7 +9,8 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     throw new Error("no SAND contract deployed");
   }
 
-  await deploy(
+  await deployIfDifferent(
+    ["data"],
     "TestERC721",
     {
       from: deployer,
