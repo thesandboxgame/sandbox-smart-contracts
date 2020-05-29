@@ -11,6 +11,7 @@ import "./Catalyst/CatalystToken.sol";
 import "./CatalystRegistry.sol";
 
 
+/// @notice Gateway to mint Asset with Catalyst, Gems and Sand
 contract CatalystMinter is MetaTransactionReceiver {
     /// @notice mint common Asset token by paying the Sand fee
     /// @param from address creating the Asset, need to be the tx sender or meta tx signer
