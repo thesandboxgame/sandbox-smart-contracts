@@ -1,9 +1,7 @@
-const {deployments} = require("@nomiclabs/buidler");
 const {assert} = require("chai-local");
 const {expectRevert, zeroAddress} = require("testUtils");
 const {setupLandSaleWithReferral} = require("./fixtures");
-const MerkleTree = require("../../lib/merkleTree");
-const {createDataArray, calculateLandHash} = require("../../lib/merkleTreeHelper");
+const {calculateLandHash} = require("../../lib/merkleTreeHelper");
 
 describe("testLandSaleWithReferral", function () {
   let initialSetUp;
@@ -17,14 +15,8 @@ describe("testLandSaleWithReferral", function () {
     });
 
     it("ETH is enabled", async function () {
-      const {landSaleWithReferralContract, others} = initialSetUp;
-
-      // isETHEnabled is set to TRUE as default in LandSaleWithReferral.sol
-      // others[1] account is not admin
-      const isETHEnabled = await landSaleWithReferralContract
-        .connect(landSaleWithReferralContract.provider.getSigner(others[1]))
-        .functions.isETHEnabled();
-
+      const {landSaleWithReferralContract} = initialSetUp;
+      const isETHEnabled = await landSaleWithReferralContract.isETHEnabled(); // isETHEnabled is set to TRUE as default in LandSaleWithReferral.sol
       assert.ok(isETHEnabled, "ETH should be enabled");
     });
 
@@ -51,37 +43,14 @@ describe("testLandSaleWithReferral", function () {
       );
     });
 
-    // TODO review LandSaleWithReferral relationship to a given presale
     it("can buy LAND with ETH (empty referral)", async function () {
-      const {landSaleWithReferralContract, others} = initialSetUp;
-      let tree; // new tree
-
-      // get lands from deployed preSale contract linkedData
-      const deployment = await deployments.get("LandPreSale_2");
-      lands = deployment.linkedData;
-      const landHashArray = createDataArray(lands);
-      tree = new MerkleTree(landHashArray);
-
+      const {landSaleWithReferralContract, tree, others} = initialSetUp;
       const sandPrice = lands[5].price;
-
-      const value = await landSaleWithReferralContract // should it be the "presale contract" ?
+      const value = await landSaleWithReferralContract
         .connect(landSaleWithReferralContract.provider.getSigner(others[0]))
         .functions.getEtherAmountWithSAND(sandPrice);
+      const proof = tree.getProof(calculateLandHash(lands[5]));
 
-      const proof = tree.getProof(calculateLandHash(lands[5])); // need to deploy landSaleWithReferral with correct merkleRoot
-
-      // address buyer,
-      // address to,
-      // address reserved,
-      // uint256 x,
-      // uint256 y,
-      // uint256 size,
-      // uint256 priceInSand,
-      // bytes32 salt,
-      // bytes32[] calldata proof,
-      // bytes calldata referral
-
-      // TODO send correct args - "Error: VM Exception while processing transaction: revert Invalid land provided"
       await landSaleWithReferralContract
         .connect(landSaleWithReferralContract.provider.getSigner(others[0]))
         .functions.buyLandWithETH(

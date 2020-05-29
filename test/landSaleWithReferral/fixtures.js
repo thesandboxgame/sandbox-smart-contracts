@@ -2,7 +2,7 @@ const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
 const MerkleTree = require("../../lib/merkleTree");
 const {getChainCurrentTime} = require("testUtils");
 const {createDataArray} = require("../../lib/merkleTreeHelper");
-const {testLands} = require("./_testHelper");
+// const {testLands} = require("./_testHelper"); // currently not used
 
 let saleStart;
 let saleDuration;
@@ -11,14 +11,15 @@ const maxCommissionRate = "2000";
 const signer = "0x26BC52894A05EDE59B34EE7B014b57ef0a8558B3";
 
 module.exports.setupLandSaleWithReferral = deployments.createFixture(async () => {
+  const landSaleName = "LandPreSale_4";
   const {landSaleAdmin, landSaleBeneficiary, landAdmin, sandAdmin, others} = await getNamedAccounts();
 
   // testLands have been moved to _testHelper file, so here we set the reserved account in first testLand
-  testLands[0].reserved = others[1];
+  // testLands[0].reserved = others[1]; // currently not used
 
   await deployments.fixture();
 
-  const landSaleContract = await ethers.getContract("LandPreSale_2");
+  const landSaleContract = await ethers.getContract(landSaleName);
   const landContract = await ethers.getContract("Land");
   const sandContract = await ethers.getContract("Sand");
   const fakeDAIContract = await ethers.getContract("DAI");
@@ -28,8 +29,12 @@ module.exports.setupLandSaleWithReferral = deployments.createFixture(async () =>
   saleEnd = saleStart + saleDuration;
   const daiMedianizer = await ethers.getContract("DAIMedianizer");
   const dai = await ethers.getContract("DAI");
-  const landHashArray = createDataArray(testLands);
+
+  const deployment = await deployments.get(landSaleName);
+  lands = deployment.linkedData; 
+  const landHashArray = createDataArray(lands);
   const tree = new MerkleTree(landHashArray);
+
   let landSaleWithReferralContract;
   let ethersFactory;
 
