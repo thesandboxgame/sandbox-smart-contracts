@@ -13,6 +13,15 @@ import "./CatalystRegistry.sol";
 
 /// @notice Gateway to mint Asset with Catalyst, Gems and Sand
 contract CatalystMinter is MetaTransactionReceiver {
+    /// @dev emitted when fee collector (that receive the sand fee) get changed
+    /// @param newCollector address of the new collector, address(0) means the fee will be burned
+    event FeeCollector(address newCollector);
+
+    function setFeeCollector(address newCollector) external {
+        require(msg.sender == _admin, "NOT_AUTHORIZED_ADMIN");
+        _setFeeCollector(newCollector);
+    }
+
     /// @notice mint common Asset token by paying the Sand fee
     /// @param from address creating the Asset, need to be the tx sender or meta tx signer
     /// @param packId unused packId that will let you predict the resulting tokenId
@@ -48,7 +57,11 @@ contract CatalystMinter is MetaTransactionReceiver {
         (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = catalystToken.getMintData();
         require(minQuantity <= quantity && quantity <= maxQuantity, "invalid quantity");
         _checkAndBurnGems(from, maxGems, gemIds);
-        _sand.burnFor(from, quantity * sandFee); // TODO Safe math
+        if (_feeCollector == address(0)) {
+            _sand.burnFor(from, quantity * sandFee); // TODO Safe math
+        } else {
+            _sand.transferFrom(from, _feeCollector, quantity * sandFee); // TODO Safe math
+        }
         return rarity;
     }
 
@@ -239,6 +252,11 @@ contract CatalystMinter is MetaTransactionReceiver {
         catalystToken.burnFor(from, 1);
     }
 
+    function _setFeeCollector(address newCollector) internal {
+        _feeCollector = newCollector;
+        emit FeeCollector(newCollector);
+    }
+
     // /////////////////// UTILITIES /////////////////////
     using SafeMathWithRequire for uint256;
 
@@ -250,6 +268,7 @@ contract CatalystMinter is MetaTransactionReceiver {
     ERC20Group _gems;
     mapping(CatalystToken => bool) _validCatalysts;
     CatalystRegistry _catalystRegistry;
+    address _feeCollector;
 
     // /////////////////// CONSTRUCTOR ////////////////////
     constructor(
@@ -259,6 +278,7 @@ contract CatalystMinter is MetaTransactionReceiver {
         ERC20Group gems,
         address metaTx,
         address admin,
+        address feeCollector,
         CatalystToken[] memory catalysts
     ) public {
         _catalystRegistry = catalystRegistry;
@@ -266,6 +286,7 @@ contract CatalystMinter is MetaTransactionReceiver {
         _asset = asset;
         _gems = gems;
         _admin = admin;
+        _setFeeCollector(feeCollector);
         _setMetaTransactionProcessor(metaTx, true);
         for (uint256 i = 0; i < catalysts.length; i++) {
             _validCatalysts[catalysts[i]] = true;

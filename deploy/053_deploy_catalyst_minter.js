@@ -2,7 +2,7 @@ const {guard} = require("../lib");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deployIfDifferent, log, call, sendTxAndWait} = deployments;
-  const {deployer, catalystMinterAdmin} = await getNamedAccounts();
+  const {deployer, catalystMinterAdmin, mintingFeeCollector} = await getNamedAccounts();
 
   const registry = await deployments.get("CatalystRegistry");
   const sand = await deployments.get("Sand");
@@ -25,6 +25,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     gemCore.address,
     sand.address,
     catalystMinterAdmin,
+    mintingFeeCollector,
     catalysts
   );
   if (catalystMinter.newlyDeployed) {
