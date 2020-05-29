@@ -1,0 +1,12 @@
+sequenceDiagram
+  autonumber
+  Creator->>+CatalystMinter: mint(...)
+  CatalystMinter->>Catalyst: burn(catalystId)
+  CatalystMinter->>+Catalyst: getMintData()
+  Catalyst-->>-CatalystMinter: fee,value range,...
+  CatalystMinter->>GemCore: burn(gemIds)
+  CatalystMinter->>Sand: burn(fee)
+  CatalystMinter->>+Asset: mint(...)
+  Asset-->>-CatalystMinter: tokenId
+  CatalystMinter->>CatalystRegistry: setCatalyst(tokenId,...)
+  CatalystMinter-->>-Creator: tokenId
