@@ -1,7 +1,5 @@
 pragma solidity 0.6.5;
 
-import {ERC20} from "../contracts_common/src/Interfaces/ERC20.sol";
-import {ERC20Events} from "../contracts_common/src/Interfaces/ERC20Events.sol";
 import "../contracts_common/src/Libraries/SafeMath.sol";
 import "../contracts_common/src/BaseWithStorage/SuperOperators.sol";
 import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
@@ -9,11 +7,11 @@ import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 import "./ERC20Group.sol";
 
 
-contract ERC20SubToken is
-    ERC20Events,
-    SuperOperators,
-    MetaTransactionReceiver /*, ERC20 */
-{
+contract ERC20SubToken is SuperOperators, MetaTransactionReceiver {
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+
     struct Origin {
         ERC20Group group;
         uint96 index;
