@@ -1,17 +1,20 @@
-const {assert} = require("chai-local");
+const {assert, expect} = require("chai-local");
+const {ethers} = require("@nomiclabs/buidler");
+const {utils, BigNumber} = require("ethers");
 const {expectRevert, zeroAddress} = require("testUtils");
-const {setupLandSaleWithReferral} = require("./fixtures");
+const {setupLandSaleWithReferralUsers} = require("./fixtures");
 const {calculateLandHash} = require("../../lib/merkleTreeHelper");
+const {createReferral} = require("../../lib/referralValidator");
 
 describe("testLandSaleWithReferral", function () {
   let initialSetUp;
   const emptyReferral = "0x";
-  // const privateKey = "0x96aa38e97d1d0d19e0f1d5215ff9dad66dc5d99225b1657205d124d00d2de177";
-  // const referralLinkValidity = 60 * 60 * 24 * 30;
+  const privateKey = "0x96aa38e97d1d0d19e0f1d5215ff9dad66dc5d99225b1657205d124d00d2de177";
+  const referralLinkValidity = 60 * 60 * 24 * 30;
 
   describe("--> ETH tests", function () {
     beforeEach(async function () {
-      initialSetUp = await setupLandSaleWithReferral();
+      initialSetUp = await setupLandSaleWithReferralUsers();
     });
 
     it("ETH is enabled", async function () {
@@ -21,41 +24,129 @@ describe("testLandSaleWithReferral", function () {
     });
 
     it("ETH can be disabled", async function () {
-      const {landSaleWithReferralContract, landSaleAdmin, others} = initialSetUp;
-      await landSaleWithReferralContract
-        .connect(landSaleWithReferralContract.provider.getSigner(landSaleAdmin))
-        .functions.setETHEnabled(false);
-
-      const isETHEnabled = await landSaleWithReferralContract
-        .connect(landSaleWithReferralContract.provider.getSigner(others[1]))
-        .functions.isETHEnabled();
-
+      const {LandSaleAdmin} = initialSetUp;
+      await LandSaleAdmin.LandSaleWithReferral.functions.setETHEnabled(false);
+      const isETHEnabled = await LandSaleAdmin.LandSaleWithReferral.functions.isETHEnabled();
       assert.ok(!isETHEnabled, "ETH should not be enabled");
     });
 
     it("ETH cannot be enabled if not admin", async function () {
-      const {landSaleWithReferralContract, others} = initialSetUp;
+      const {users} = initialSetUp;
       await expectRevert(
-        landSaleWithReferralContract
-          .connect(landSaleWithReferralContract.provider.getSigner(others[1]))
-          .functions.setETHEnabled(true),
+        users[1].LandSaleWithReferral.functions.setETHEnabled(true),
         "only admin can enable/disable ETH"
       );
     });
 
     it("can buy LAND with ETH (empty referral)", async function () {
-      const {landSaleWithReferralContract, tree, others} = initialSetUp;
+      const {tree, users} = initialSetUp;
       const sandPrice = lands[5].price;
-      const value = await landSaleWithReferralContract
-        .connect(landSaleWithReferralContract.provider.getSigner(others[0]))
-        .functions.getEtherAmountWithSAND(sandPrice);
+      const value = await users[0].LandSaleWithReferral.functions.getEtherAmountWithSAND(sandPrice);
       const proof = tree.getProof(calculateLandHash(lands[5]));
 
-      await landSaleWithReferralContract
-        .connect(landSaleWithReferralContract.provider.getSigner(others[0]))
-        .functions.buyLandWithETH(
-          others[0],
-          others[0],
+      await users[0].LandSaleWithReferral.functions.buyLandWithETH(
+        users[0].address,
+        users[0].address,
+        zeroAddress,
+        lands[5].x,
+        lands[5].y,
+        lands[5].size,
+        lands[5].price,
+        lands[5].salt,
+        proof,
+        emptyReferral,
+        {value: value}
+      );
+    });
+
+    it("can buy LAND with ETH and referral", async function () {
+      const {tree, users} = initialSetUp;
+      const sandPrice = lands[5].price;
+      const value = await users[0].LandSaleWithReferral.functions.getEtherAmountWithSAND(sandPrice);
+      const proof = tree.getProof(calculateLandHash(lands[5]));
+
+      const referral = {
+        referrer: "0x80EdC2580F0c768cb5b2bb87b96049A13508C230",
+        referee: users[0].address,
+        expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
+        commissionRate: "500",
+      };
+
+      const sig = await createReferral(
+        privateKey,
+        referral.referrer,
+        referral.referee,
+        referral.expiryTime,
+        referral.commissionRate
+      );
+
+      const isReferralValid = await users[0].LandSaleWithReferral.functions.isReferralValid(
+        sig,
+        referral.referrer,
+        referral.referee,
+        referral.expiryTime,
+        referral.commissionRate
+      );
+
+      assert.equal(isReferralValid, true, "Referral should be valid");
+
+      const encodedReferral = utils.defaultAbiCoder.encode(
+        ["bytes", "address", "address", "uint256", "uint256"],
+        [sig, referral.referrer, referral.referee, referral.expiryTime, referral.commissionRate]
+      );
+
+      const tx = await users[0].LandSaleWithReferral.functions.buyLandWithETH(
+        users[0].address,
+        users[0].address,
+        zeroAddress,
+        lands[5].x,
+        lands[5].y,
+        lands[5].size,
+        lands[5].price,
+        lands[5].salt,
+        proof,
+        encodedReferral,
+        {value: value}
+      );
+
+      const receipt = await tx.wait();
+      const event = receipt.events[0];
+      assert.equal(event.event, "ReferralUsed", "Event name is wrong");
+
+      const referrer = event.args[0];
+      const referree = event.args[1];
+      const token = event.args[2];
+      const amount = event.args[3];
+      const commission = event.args[4];
+      const commissionRate = event.args[5];
+
+      assert.equal(referrer, referral.referrer, "Referrer is wrong");
+      assert.equal(referree, referral.referee, "Referee is wrong");
+      assert.equal(token, zeroAddress, "Token is wrong");
+      assert.isOk(amount.eq(value), "Amount is wrong");
+      assert.equal(commissionRate, referral.commissionRate, "Amount is wrong");
+
+      const referrerBalance = await ethers.provider.getBalance(referral.referrer);
+
+      const expectedCommission = BigNumber.from(amount)
+        .mul(BigNumber.from(commissionRate))
+        .div(BigNumber.from("10000"));
+
+      assert.equal(commission, expectedCommission.toString(), "Commission is wrong");
+      assert.isOk(commission.eq(referrerBalance), "Referrer balance is wrong");
+    });
+
+    it("cannot buy LAND with ETH if not enabled (empty referral)", async function () {
+      const {LandSaleAdmin, tree, users} = initialSetUp;
+      await LandSaleAdmin.LandSaleWithReferral.functions.setETHEnabled(false);
+      const sandPrice = lands[5].price;
+      const value = await users[0].LandSaleWithReferral.functions.getEtherAmountWithSAND(sandPrice);
+      const proof = tree.getProof(calculateLandHash(lands[5]));
+
+      await expectRevert(
+        users[0].LandSaleWithReferral.functions.buyLandWithETH(
+          users[0].address,
+          users[0].address,
           zeroAddress,
           lands[5].x,
           lands[5].y,
@@ -64,15 +155,87 @@ describe("testLandSaleWithReferral", function () {
           lands[5].salt,
           proof,
           emptyReferral,
-          {value: value} // TODO check value is in wei (value is given in ETH)
-        );
+          {value: value}
+        )
+      ),
+        "Ether payments are not enabled";
     });
 
-    it("can buy LAND with ETH and referral", async function () {});
+    it("cannot buy LAND without enough ETH (empty referral)", async function () {
+      const {tree, users} = initialSetUp;
+      const proof = tree.getProof(calculateLandHash(lands[5]));
 
-    it("cannot buy LAND with ETH if not enabled (empty referral)", async function () {});
+      await expectRevert(
+        users[0].LandSaleWithReferral.functions.buyLandWithETH(
+          users[0].address,
+          users[0].address,
+          zeroAddress,
+          lands[5].x,
+          lands[5].y,
+          lands[5].size,
+          lands[5].price,
+          lands[5].salt,
+          proof,
+          emptyReferral,
+          {value: 0}
+        )
+      ),
+        "Not enough Ether sent";
+    });
 
-    it("cannot buy LAND without enough ETH (empty referral)", async function () {});
+    it("cannot buy Land from a non reserved Land with reserved param (empty referral)", async function () {
+      const {tree, users} = initialSetUp;
+      const proof = tree.getProof(calculateLandHash(lands[5]));
+
+      await expectRevert(
+        users[0].LandSaleWithReferral.functions.buyLandWithETH(
+          users[0].address,
+          users[0].address,
+          users[0].address,
+          lands[5].x,
+          lands[5].y,
+          lands[5].size,
+          lands[5].price,
+          lands[5].salt,
+          proof,
+          emptyReferral
+        )
+      ),
+        "Land has reserved param";
+    });
+
+    it("cannot buy Land from a reserved Land of a different address (empty referral)", async function () {
+      // TODO - fix merkle tree
+      // const {tree, users} = initialSetUp;
+      // const sandPrice = "4047";
+      // const value = await users[0].LandSaleWithReferral.functions.getEtherAmountWithSAND(sandPrice);
+      // const proof = tree.getProof(
+      //   calculateLandHash({
+      //     x: 400,
+      //     y: 106,
+      //     size: 1,
+      //     price: "4047",
+      //     reserved: users[1].address,
+      //     salt: "0x1111111111111111111111111111111111111111111111111111111111111111",
+      //   })
+      // );
+      // await expectRevert(
+      //   users[0].LandSaleWithReferral.functions.buyLandWithETH(
+      //     users[0].address,
+      //     users[0].address,
+      //     users[0].address,
+      //     400,
+      //     106,
+      //     1,
+      //     "4047",
+      //     "0x1111111111111111111111111111111111111111111111111111111111111111",
+      //     proof,
+      //     emptyReferral,
+      //     {value: value}
+      //   )
+      // ),
+      //   "Land is reserved";
+    });
 
     it("can buy LAND from a reserved Land if matching address (empty referral)", async function () {});
 
