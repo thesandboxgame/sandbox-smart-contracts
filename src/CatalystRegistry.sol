@@ -11,9 +11,19 @@ contract CatalystRegistry is Admin {
     event CatalystApplied(uint256 assetId, address catalyst);
     event GemsSocketed(uint256 assetId, address catalyst, uint256[] gemIds);
 
+    struct Gem {
+        uint64 blockNumber;
+        uint32 id;
+    }
+
+    struct Attribute {
+        uint32 gemId;
+        uint32 value;
+    }
+
     struct Catalyst {
         CatalystToken token;
-        CatalystToken.Gem[] gems;
+        Gem[] gems;
     }
 
     function setCatalyst(
@@ -54,16 +64,26 @@ contract CatalystRegistry is Admin {
     /// @notice return the attributes for a particular asset.
     /// @param assetId tokenId of the Asset.
     /// @return attributes the attributes associatted with that token.
-    function getAttributes(uint256 assetId) external view returns (CatalystToken.Attribute[] memory attributes) {
-        Catalyst memory catalyst = _catalysts[assetId];
-        if (address(catalyst.token) == address(0)) {
-            uint256 collectionId = _getCollectionId(assetId);
-            if (collectionId != 0) {
-                catalyst = _catalysts[assetId];
-            }
+    function getAttributes(uint256 assetId, bytes32[] calldata blockHashes) external view returns (Attribute[] memory attributes) {
+        Catalyst storage catalyst = _getCatalyst(assetId);
+        Gem[] memory gems = catalyst.gems;
+        require(gems.length == blockHashes.length, "invalid number of blockHash");
+        attributes = new Attribute[](gems.length);
+        for (uint256 i = 0; i < gems.length; i++) {
+            uint32 gemId = gems[i].id;
+            attributes[i] = Attribute({gemId: gemId, value: catalyst.token.getValue(gemId, i, blockHashes[i])});
         }
+    }
 
-        return catalyst.token.getAttributes(catalyst.gems);
+    /// @notice return the list of blockNumbers for each socket.
+    /// @param assetId tokenId of the Asset.
+    /// @return blockNumbers list of blockNumber for each gems.
+    function getAttributesBlockNumbers(uint256 assetId) external view returns (uint64[] memory blockNumbers) {
+        Catalyst storage catalyst = _getCatalyst(assetId);
+        blockNumbers = new uint64[](catalyst.gems.length);
+        for (uint256 i = 0; i < blockNumbers.length; i++) {
+            blockNumbers[i] = catalyst.gems[i].blockNumber;
+        }
     }
 
     /// @notice Set the Minter that will be the only address able to create Estate
@@ -95,7 +115,7 @@ contract CatalystRegistry is Admin {
 
     function _addGems(Catalyst storage catalyst, uint256[] memory gemIds) internal {
         for (uint256 i = 0; i < gemIds.length; i++) {
-            catalyst.gems.push(CatalystToken.Gem({blockNumber: uint64(block.number + 1), id: uint32(gemIds[i])}));
+            catalyst.gems.push(Gem({blockNumber: uint64(block.number + 1), id: uint32(gemIds[i])}));
         }
     }
 

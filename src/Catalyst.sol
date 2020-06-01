@@ -55,29 +55,11 @@ contract Catalyst is ERC20BaseToken, CatalystToken {
         _mint(to, amount);
     }
 
-    // override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
-    // prettier-ignore
-    function getAttributes(Gem[] calldata gems) external override view returns(Attribute[] memory) {
-        Attribute[] memory attributes = new Attribute[](gems.length);
-        for (uint256 i = 0; i < attributes.length; i++) {
-            Gem memory gem = gems[i];
-            attributes[i] = Attribute({
-                gemId: gem.id,
-                blockNumber: gem.blockNumber,
-                slotIndex: uint32(i),
-                minValue: _minValue,
-                maxValue: _maxValue
-            });
-        }
-        return attributes;
-    }
-
-    /// @notice compute value given a blockHash, the blockHash need to correspon to the blockNumber associated with the gem
     function getValue(
         uint32 gemId,
         uint256 slotIndex,
         bytes32 blockHash
-    ) external view returns (uint32) {
+    ) external override view returns (uint32) {
         uint16 range = _maxValue - _minValue;
         return _minValue + uint16(uint256(keccak256(abi.encode(blockHash, gemId, slotIndex))) % range);
     }
