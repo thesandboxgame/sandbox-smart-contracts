@@ -1,7 +1,7 @@
 pragma solidity 0.6.5;
 
+
 contract MetaTxWrapper {
-    
     address internal immutable _forwardTo;
     address internal immutable _forwarder;
 
