@@ -8,8 +8,10 @@ import "./ERC20Group.sol";
 
 
 contract ERC20SubToken is SuperOperators, MetaTransactionReceiver {
+    // TODO add natspec, currently block by solidity compiler issue
     event Transfer(address indexed from, address indexed to, uint256 value);
 
+    // TODO add natspec, currently block by solidity compiler issue
     event Approval(address indexed owner, address indexed spender, uint256 value);
 
     struct Origin {
