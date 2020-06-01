@@ -51,7 +51,10 @@ contract CatalystRegistry is Admin {
         return _getCatalyst(assetId);
     }
 
-    function getAttributes(uint256 assetId) external view returns (CatalystToken.Attribute[] memory) {
+    /// @notice return the attributes for a particular asset.
+    /// @param assetId tokenId of the Asset.
+    /// @return attributes the attributes associatted with that token.
+    function getAttributes(uint256 assetId) external view returns (CatalystToken.Attribute[] memory attributes) {
         Catalyst memory catalyst = _catalysts[assetId];
         if (address(catalyst.token) == address(0)) {
             uint256 collectionId = _getCollectionId(assetId);

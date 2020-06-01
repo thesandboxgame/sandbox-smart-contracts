@@ -22,14 +22,14 @@ contract CatalystMinter is MetaTransactionReceiver {
         _setFeeCollector(newCollector);
     }
 
-    /// @notice mint common Asset token by paying the Sand fee
-    /// @param from address creating the Asset, need to be the tx sender or meta tx signer
-    /// @param packId unused packId that will let you predict the resulting tokenId
-    /// @param metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata
-    /// @param catalystToken address of the Catalyst ERC20 token to burn
-    /// @param gemIds list of gem ids to burn in the catalyst
-    /// @param to address receiving the minted tokens
-    /// @param data extra data
+    /// @notice mint one Asset token.
+    /// @param from address creating the Asset, need to be the tx sender or meta tx signer.
+    /// @param packId unused packId that will let you predict the resulting tokenId.
+    /// @param metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata.
+    /// @param catalystToken address of the Catalyst ERC20 token to burn.
+    /// @param gemIds list of gem ids to burn in the catalyst.
+    /// @param to destination address receiving the minted tokens.
+    /// @param data extra data.
     function mint(
         address from,
         uint40 packId,
@@ -65,6 +65,12 @@ contract CatalystMinter is MetaTransactionReceiver {
         return rarity;
     }
 
+    /// @notice associate a catalyst to a fungible Asset token by extracting it as ERC721 first.
+    /// @param from address from which the Asset token belongs to.
+    /// @param assetId tokenId of the Asset being extracted.
+    /// @param catalystToken address of the catalyst token to use and burn.
+    /// @param gemIds list of gems to socket into the catalyst (burned).
+    /// @param to destination address receiving the extracted and upgraded ERC721 Asset token.
     function extractAndChangeCatalyst(
         address from,
         uint256 assetId,
@@ -77,6 +83,12 @@ contract CatalystMinter is MetaTransactionReceiver {
         _changeCatalyst(from, id, catalystToken, gemIds, to);
     }
 
+    /// @notice associate a new catalyst to a non-fungible Asset token.
+    /// @param from address from which the Asset token belongs to.
+    /// @param assetId tokenId of the Asset being updated.
+    /// @param catalystToken address of the catalyst token to use and burn.
+    /// @param gemIds list of gems to socket into the catalyst (burned).
+    /// @param to destination address receiving the Asset token.
     function changeCatalyst(
         address from,
         uint256 assetId,
@@ -88,6 +100,11 @@ contract CatalystMinter is MetaTransactionReceiver {
         _changeCatalyst(from, assetId, catalystToken, gemIds, to);
     }
 
+    /// @notice add gems to a fungible Asset token by extracting it as ERC721 first.
+    /// @param from address from which the Asset token belongs to.
+    /// @param assetId tokenId of the Asset being extracted.
+    /// @param gemIds list of gems to socket into the existing catalyst (burned).
+    /// @param to destination address receiving the extracted and upgraded ERC721 Asset token.
     function extractAndAddGems(
         address from,
         uint256 assetId,
@@ -99,6 +116,11 @@ contract CatalystMinter is MetaTransactionReceiver {
         _addGems(from, id, gemIds, to);
     }
 
+    /// @notice add gems to a non-fungible Asset token.
+    /// @param from address from which the Asset token belongs to.
+    /// @param assetId tokenId of the Asset to which the gems will be added to.
+    /// @param gemIds list of gems to socket into the existing catalyst (burned).
+    /// @param to destination address receiving the extracted and upgraded ERC721 Asset token.
     function addGems(
         address from,
         uint256 assetId,
@@ -115,10 +137,13 @@ contract CatalystMinter is MetaTransactionReceiver {
         CatalystToken catalystToken;
     }
 
-    // struct AssetMintData {
-
-    // }
-
+    /// @notice mint multiple Asset tokens.
+    /// @param from address creating the Asset, need to be the tx sender or meta tx signer.
+    /// @param packId unused packId that will let you predict the resulting tokenId.
+    /// @param metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata.
+    /// @param assets contains the data to associate catalyst and gems to the assets.
+    /// @param to destination address receiving the minted tokens.
+    /// @param data extra data.
     function mintMultiple(
         address from,
         uint40 packId,
