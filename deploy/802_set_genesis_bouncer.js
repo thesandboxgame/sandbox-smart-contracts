@@ -15,7 +15,7 @@ module.exports = async ({deployments}) => {
     log("setting genesis bouncer as Asset bouncer");
     const currentBouncerAdmin = await call("Asset", "getBouncerAdmin");
     await sendTxAndWait(
-      {from: currentBouncerAdmin, gas: 1000000, skipError: true},
+      {from: currentBouncerAdmin, gas: 1000000, skipUnknownSigner: true},
       "Asset",
       "setBouncer",
       genesisBouncer.address,

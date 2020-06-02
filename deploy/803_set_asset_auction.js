@@ -23,7 +23,7 @@ module.exports = async ({/*getNamedAccounts, */ deployments}) => {
     log("setting AssetSignedAuction as super operator for Sand");
     const currentSandAdmin = await call("Sand", "getAdmin");
     await sendTxAndWait(
-      {from: currentSandAdmin, gas: 100000, skipError: true},
+      {from: currentSandAdmin, gas: 100000, skipUnknownSigner: true},
       "Sand",
       "setSuperOperator",
       assetAuction.address,
@@ -36,7 +36,7 @@ module.exports = async ({/*getNamedAccounts, */ deployments}) => {
     log("setting AssetSignedAuction as super operator for Asset");
     const currentAssetAdmin = await call("Asset", "getAdmin");
     await sendTxAndWait(
-      {from: currentAssetAdmin, gas: 100000, skipError: true},
+      {from: currentAssetAdmin, gas: 100000, skipUnknownSigner: true},
       "Asset",
       "setSuperOperator",
       assetAuction.address,
@@ -55,7 +55,7 @@ module.exports = async ({/*getNamedAccounts, */ deployments}) => {
   // if (!lastFeeEvent || !(lastFeeEvent.args || lastFeeEvent.values)[1].eq(fee10000th)) {
   //     log('set AssetSignedAuction\'s fee to 3%');
   //     const currentAssetAuctionAdmin = await call('AssetSignedAuction', 'getAdmin');
-  //     await sendTxAndWait({from: currentAssetAuctionAdmin, gas: 100000, skipError: true}, 'AssetSignedAuction', 'setFee', assetAuctionFeeCollector, fee10000th);
+  //     await sendTxAndWait({from: currentAssetAuctionAdmin, gas: 100000, skipUnknownSigner: true}, 'AssetSignedAuction', 'setFee', assetAuctionFeeCollector, fee10000th);
   // } else {
   //     log('AssetSignedAuction\'s fee is already 3%');
   // }

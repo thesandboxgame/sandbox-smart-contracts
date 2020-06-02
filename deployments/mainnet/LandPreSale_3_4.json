@@ -1,0 +1,3504 @@
+{
+  "abi": [
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getExpiryTime",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "merkleRoot",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "enabled",
+          "type": "bool"
+        }
+      ],
+      "name": "setDAIEnabled",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "buyer",
+          "type": "address"
+        },
+        {
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "name": "reserved",
+          "type": "address"
+        },
+        {
+          "name": "x",
+          "type": "uint256"
+        },
+        {
+          "name": "y",
+          "type": "uint256"
+        },
+        {
+          "name": "size",
+          "type": "uint256"
+        },
+        {
+          "name": "priceInSand",
+          "type": "uint256"
+        },
+        {
+          "name": "salt",
+          "type": "bytes32"
+        },
+        {
+          "name": "proof",
+          "type": "bytes32[]"
+        },
+        {
+          "name": "referral",
+          "type": "bytes"
+        }
+      ],
+      "name": "buyLandWithDAI",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "isDAIEnabled",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "isETHEnabled",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "newSigningWallet",
+          "type": "address"
+        }
+      ],
+      "name": "updateSigningWallet",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "sandAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "getEtherAmountWithSAND",
+      "outputs": [
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "referral",
+          "type": "bytes"
+        }
+      ],
+      "name": "decodeReferral",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bytes"
+        },
+        {
+          "name": "",
+          "type": "address"
+        },
+        {
+          "name": "",
+          "type": "address"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "getAdmin",
+      "outputs": [
+        {
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "enabled",
+          "type": "bool"
+        }
+      ],
+      "name": "setSANDEnabled",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "metaTransactionProcessor",
+          "type": "address"
+        },
+        {
+          "name": "enabled",
+          "type": "bool"
+        }
+      ],
+      "name": "setMetaTransactionProcessor",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "newAdmin",
+          "type": "address"
+        }
+      ],
+      "name": "changeAdmin",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [],
+      "name": "isSANDEnabled",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "newWallet",
+          "type": "address"
+        }
+      ],
+      "name": "setReceivingWallet",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "signature",
+          "type": "bytes"
+        },
+        {
+          "name": "referrer",
+          "type": "address"
+        },
+        {
+          "name": "referee",
+          "type": "address"
+        },
+        {
+          "name": "expiryTime",
+          "type": "uint256"
+        },
+        {
+          "name": "commissionRate",
+          "type": "uint256"
+        }
+      ],
+      "name": "isReferralValid",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "buyer",
+          "type": "address"
+        },
+        {
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "name": "reserved",
+          "type": "address"
+        },
+        {
+          "name": "x",
+          "type": "uint256"
+        },
+        {
+          "name": "y",
+          "type": "uint256"
+        },
+        {
+          "name": "size",
+          "type": "uint256"
+        },
+        {
+          "name": "priceInSand",
+          "type": "uint256"
+        },
+        {
+          "name": "salt",
+          "type": "bytes32"
+        },
+        {
+          "name": "proof",
+          "type": "bytes32[]"
+        },
+        {
+          "name": "referral",
+          "type": "bytes"
+        }
+      ],
+      "name": "buyLandWithETH",
+      "outputs": [],
+      "payable": true,
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "constant": true,
+      "inputs": [
+        {
+          "name": "who",
+          "type": "address"
+        }
+      ],
+      "name": "isMetaTransactionProcessor",
+      "outputs": [
+        {
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "buyer",
+          "type": "address"
+        },
+        {
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "name": "reserved",
+          "type": "address"
+        },
+        {
+          "name": "x",
+          "type": "uint256"
+        },
+        {
+          "name": "y",
+          "type": "uint256"
+        },
+        {
+          "name": "size",
+          "type": "uint256"
+        },
+        {
+          "name": "priceInSand",
+          "type": "uint256"
+        },
+        {
+          "name": "salt",
+          "type": "bytes32"
+        },
+        {
+          "name": "proof",
+          "type": "bytes32[]"
+        },
+        {
+          "name": "referral",
+          "type": "bytes"
+        }
+      ],
+      "name": "buyLandWithSand",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "newMaxCommissionRate",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateMaxCommissionRate",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "constant": false,
+      "inputs": [
+        {
+          "name": "enabled",
+          "type": "bool"
+        }
+      ],
+      "name": "setETHEnabled",
+      "outputs": [],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "name": "landAddress",
+          "type": "address"
+        },
+        {
+          "name": "sandContractAddress",
+          "type": "address"
+        },
+        {
+          "name": "initialMetaTx",
+          "type": "address"
+        },
+        {
+          "name": "admin",
+          "type": "address"
+        },
+        {
+          "name": "initialWalletAddress",
+          "type": "address"
+        },
+        {
+          "name": "merkleRoot",
+          "type": "bytes32"
+        },
+        {
+          "name": "expiryTime",
+          "type": "uint256"
+        },
+        {
+          "name": "medianizerContractAddress",
+          "type": "address"
+        },
+        {
+          "name": "daiTokenContractAddress",
+          "type": "address"
+        },
+        {
+          "name": "initialSigningWallet",
+          "type": "address"
+        },
+        {
+          "name": "initialMaxCommissionRate",
+          "type": "uint256"
+        }
+      ],
+      "payable": false,
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "buyer",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "topCornerId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "size",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "price",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "amountPaid",
+          "type": "uint256"
+        }
+      ],
+      "name": "LandQuadPurchased",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "name": "referrer",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "referee",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "commission",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "name": "commissionRate",
+          "type": "uint256"
+        }
+      ],
+      "name": "ReferralUsed",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "metaTransactionProcessor",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "enabled",
+          "type": "bool"
+        }
+      ],
+      "name": "MetaTransactionProcessor",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "name": "oldAdmin",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "name": "newAdmin",
+          "type": "address"
+        }
+      ],
+      "name": "AdminChanged",
+      "type": "event"
+    }
+  ],
+  "receipt": {
+    "to": null,
+    "from": "0x18dd4e0eb8699ea4fee238de41ecfb95e32272f8",
+    "contractAddress": "0x1cc7657c4d8d300544acc7f519cec11fd484dbee",
+    "transactionIndex": "0x59",
+    "gasUsed": "0x208193",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000030000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000008000000000000000000000000000000080000000000000000000000000000000000000000",
+    "blockHash": "0xc069b106a2d4470ae1244e608062b689c83663992d2a393b67e9b842b30b4b37",
+    "transactionHash": "0x316f14e87de116232fbb3ff80406384dc4abd7bad4e037f3fcbc0e9ba15701c6",
+    "logs": [
+      {
+        "address": "0x1cc7657c4d8d300544acc7f519cec11fd484dbee",
+        "blockHash": "0xc069b106a2d4470ae1244e608062b689c83663992d2a393b67e9b842b30b4b37",
+        "blockNumber": "0x9b7054",
+        "data": "0x0000000000000000000000003845badade8e6dff049820680d1f14bd3903a5d00000000000000000000000000000000000000000000000000000000000000001",
+        "logIndex": "0x45",
+        "removed": false,
+        "topics": [
+          "0xb21eb88b4e33b3f1281830a7178d74d8aa73220416215726b68ae23d539515cb"
+        ],
+        "transactionHash": "0x316f14e87de116232fbb3ff80406384dc4abd7bad4e037f3fcbc0e9ba15701c6",
+        "transactionIndex": "0x59"
+      }
+    ],
+    "blockNumber": "0x9b7054",
+    "cumulativeGasUsed": "0x62a3ba",
+    "status": "0x1"
+  },
+  "address": "0x1cc7657c4d8d300544acc7f519cec11fd484dbee",
+  "args": [
+    "0x50f5474724e0Ee42D9a4e711ccFB275809Fd6d4a",
+    "0x3845badAde8e6dFF049820680d1F14bD3903a5d0",
+    "0x3845badAde8e6dFF049820680d1F14bD3903a5d0",
+    "0x18dd4e0eb8699eA4FeE238dE41ECfb95e32272f8",
+    "0x9695ed5020BB47880738Db356678fe8cBc8FF60b",
+    "0x3674473bf8068ac60819e6ccb61388f274227cd3d9e1fd2a988cf64b6c79a2ce",
+    1594321140,
+    "0x729D19f657BD0614b4985Cf1D82531c67569197B",
+    "0x6b175474e89094c44da98b954eedeac495271d0f",
+    "0x3044719d139F866a44c988823513eCB93060bF1b",
+    2000
+  ],
+  "linkedData": [
+    {
+      "x": 219,
+      "y": 134,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 220,
+      "y": 134,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 221,
+      "y": 134,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 219,
+      "y": 133,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 220,
+      "y": 133,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 221,
+      "y": 133,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 221,
+      "y": 132,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 219,
+      "y": 132,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 220,
+      "y": 132,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 216,
+      "y": 137,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 217,
+      "y": 137,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 218,
+      "y": 137,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 218,
+      "y": 136,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 218,
+      "y": 135,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 217,
+      "y": 135,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 216,
+      "y": 135,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 216,
+      "y": 136,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 217,
+      "y": 136,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 225,
+      "y": 140,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 225,
+      "y": 139,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 225,
+      "y": 138,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 226,
+      "y": 138,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 227,
+      "y": 138,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 227,
+      "y": 139,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 227,
+      "y": 140,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 226,
+      "y": 140,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 226,
+      "y": 139,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 222,
+      "y": 143,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 222,
+      "y": 142,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 222,
+      "y": 141,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 223,
+      "y": 141,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 223,
+      "y": 142,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 224,
+      "y": 142,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 223,
+      "y": 143,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 224,
+      "y": 141,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 224,
+      "y": 143,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 220,
+      "y": 146,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 219,
+      "y": 146,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 221,
+      "y": 146,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 221,
+      "y": 145,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 221,
+      "y": 144,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 220,
+      "y": 144,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 219,
+      "y": 144,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 219,
+      "y": 145,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 220,
+      "y": 145,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 222,
+      "y": 152,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 222,
+      "y": 151,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 222,
+      "y": 150,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 223,
+      "y": 150,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 223,
+      "y": 151,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 224,
+      "y": 151,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 224,
+      "y": 152,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 223,
+      "y": 152,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 224,
+      "y": 150,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 231,
+      "y": 152,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 231,
+      "y": 151,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 231,
+      "y": 150,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 232,
+      "y": 150,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 233,
+      "y": 151,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 233,
+      "y": 152,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 232,
+      "y": 152,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 232,
+      "y": 151,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 233,
+      "y": 150,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 227,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 226,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 226,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 225,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 225,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 226,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 225,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 227,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 227,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 234,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 234,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 234,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 235,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 236,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 236,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 236,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 235,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 235,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 240,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 240,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 240,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 241,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 242,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 242,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 242,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 241,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 241,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 243,
+      "y": 164,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 243,
+      "y": 163,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 243,
+      "y": 162,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 244,
+      "y": 162,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 245,
+      "y": 162,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 245,
+      "y": 163,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 245,
+      "y": 164,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 244,
+      "y": 164,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 244,
+      "y": 163,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 232,
+      "y": 167,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 231,
+      "y": 167,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 231,
+      "y": 166,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 232,
+      "y": 166,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 233,
+      "y": 166,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 233,
+      "y": 167,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 232,
+      "y": 165,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 233,
+      "y": 165,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 231,
+      "y": 165,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 237,
+      "y": 167,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 237,
+      "y": 166,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 237,
+      "y": 165,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 238,
+      "y": 165,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 239,
+      "y": 165,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 239,
+      "y": 166,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 239,
+      "y": 167,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 238,
+      "y": 167,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 238,
+      "y": 166,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 246,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 246,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 246,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 247,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 248,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 248,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 248,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 247,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 247,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 246,
+      "y": 170,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 246,
+      "y": 169,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 246,
+      "y": 168,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 247,
+      "y": 168,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 248,
+      "y": 168,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 248,
+      "y": 169,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 248,
+      "y": 170,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 247,
+      "y": 170,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 247,
+      "y": 169,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 252,
+      "y": 170,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 252,
+      "y": 169,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 252,
+      "y": 168,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 253,
+      "y": 168,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 254,
+      "y": 168,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 254,
+      "y": 169,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 254,
+      "y": 170,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 253,
+      "y": 170,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 253,
+      "y": 169,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 256,
+      "y": 164,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 255,
+      "y": 164,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 255,
+      "y": 163,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 255,
+      "y": 162,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 256,
+      "y": 162,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 257,
+      "y": 162,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 257,
+      "y": 163,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 257,
+      "y": 164,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 256,
+      "y": 163,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 255,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 255,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 255,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 256,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 257,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 257,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 257,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 256,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 256,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 261,
+      "y": 155,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 261,
+      "y": 154,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 262,
+      "y": 154,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 263,
+      "y": 154,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 263,
+      "y": 155,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 262,
+      "y": 155,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 262,
+      "y": 153,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 261,
+      "y": 153,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 263,
+      "y": 153,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 267,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 267,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 267,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 268,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 269,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 269,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 268,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 268,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 269,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 262,
+      "y": 167,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 262,
+      "y": 166,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 261,
+      "y": 166,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 261,
+      "y": 165,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 262,
+      "y": 165,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 263,
+      "y": 165,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 263,
+      "y": 166,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 263,
+      "y": 167,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 261,
+      "y": 167,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 271,
+      "y": 167,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 271,
+      "y": 166,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 270,
+      "y": 166,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 270,
+      "y": 165,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 271,
+      "y": 165,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 272,
+      "y": 165,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 272,
+      "y": 166,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 272,
+      "y": 167,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 270,
+      "y": 167,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 276,
+      "y": 164,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 276,
+      "y": 163,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 276,
+      "y": 162,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 277,
+      "y": 162,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 278,
+      "y": 162,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 278,
+      "y": 163,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 278,
+      "y": 164,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 277,
+      "y": 164,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 277,
+      "y": 163,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 276,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 276,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 276,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 277,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 278,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 278,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 278,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 277,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 277,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 283,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 282,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 282,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 282,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 283,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 284,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 284,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 283,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 284,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 288,
+      "y": 164,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 288,
+      "y": 163,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 288,
+      "y": 162,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 289,
+      "y": 162,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 290,
+      "y": 162,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 290,
+      "y": 163,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 290,
+      "y": 164,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 289,
+      "y": 164,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 289,
+      "y": 163,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 225,
+      "y": 170,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 225,
+      "y": 169,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 225,
+      "y": 168,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 226,
+      "y": 168,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 227,
+      "y": 168,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 227,
+      "y": 169,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 227,
+      "y": 170,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 226,
+      "y": 170,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 226,
+      "y": 169,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 219,
+      "y": 167,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 219,
+      "y": 166,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 219,
+      "y": 165,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 220,
+      "y": 165,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 221,
+      "y": 165,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 221,
+      "y": 166,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 220,
+      "y": 166,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 220,
+      "y": 167,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 221,
+      "y": 167,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 219,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 219,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 219,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 220,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 221,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 220,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 220,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 221,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 221,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 213,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 213,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 213,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 214,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 215,
+      "y": 159,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 215,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 215,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 214,
+      "y": 161,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 214,
+      "y": 160,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 217,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 216,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 216,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 216,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 217,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 218,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 218,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 218,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 217,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 212,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 211,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 210,
+      "y": 158,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 210,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 210,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 211,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 212,
+      "y": 156,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 212,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 211,
+      "y": 157,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 201,
+      "y": 155,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 201,
+      "y": 154,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 201,
+      "y": 153,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 202,
+      "y": 153,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 203,
+      "y": 153,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 203,
+      "y": 154,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 203,
+      "y": 155,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 202,
+      "y": 155,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 202,
+      "y": 154,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 201,
+      "y": 149,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 201,
+      "y": 148,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 201,
+      "y": 147,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 202,
+      "y": 147,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 203,
+      "y": 147,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 203,
+      "y": 148,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 203,
+      "y": 149,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 202,
+      "y": 149,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 202,
+      "y": 148,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 217,
+      "y": 152,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 216,
+      "y": 152,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 216,
+      "y": 151,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 216,
+      "y": 150,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 217,
+      "y": 150,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 218,
+      "y": 150,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 218,
+      "y": 151,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 218,
+      "y": 152,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 217,
+      "y": 151,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 210,
+      "y": 143,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 210,
+      "y": 142,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 210,
+      "y": 141,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 211,
+      "y": 141,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 212,
+      "y": 141,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 212,
+      "y": 142,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 212,
+      "y": 143,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 211,
+      "y": 143,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 211,
+      "y": 142,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 213,
+      "y": 140,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 213,
+      "y": 139,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 214,
+      "y": 139,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 214,
+      "y": 138,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 215,
+      "y": 139,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 215,
+      "y": 140,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 214,
+      "y": 140,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 213,
+      "y": 138,
+      "size": 1,
+      "price": "2333000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 215,
+      "y": 138,
+      "size": 1,
+      "price": "2333000000000000000000"
+    },
+    {
+      "x": 282,
+      "y": 159,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 285,
+      "y": 159,
+      "size": 3,
+      "price": "19950000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 285,
+      "y": 156,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 279,
+      "y": 156,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 279,
+      "y": 159,
+      "size": 3,
+      "price": "19950000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 279,
+      "y": 162,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 276,
+      "y": 159,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 288,
+      "y": 159,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 288,
+      "y": 156,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 291,
+      "y": 162,
+      "size": 3,
+      "price": "19950000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 291,
+      "y": 165,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 288,
+      "y": 165,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 294,
+      "y": 162,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 279,
+      "y": 165,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 276,
+      "y": 165,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 273,
+      "y": 165,
+      "size": 3,
+      "price": "19950000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 273,
+      "y": 162,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 270,
+      "y": 162,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 267,
+      "y": 162,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 264,
+      "y": 162,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 261,
+      "y": 162,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 258,
+      "y": 162,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 252,
+      "y": 162,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 252,
+      "y": 165,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 255,
+      "y": 165,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 258,
+      "y": 165,
+      "size": 3,
+      "price": "19950000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 264,
+      "y": 165,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 267,
+      "y": 165,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 264,
+      "y": 168,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 267,
+      "y": 168,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 267,
+      "y": 156,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 267,
+      "y": 153,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 264,
+      "y": 156,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 264,
+      "y": 159,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 258,
+      "y": 153,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 261,
+      "y": 150,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 252,
+      "y": 156,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 252,
+      "y": 159,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 255,
+      "y": 159,
+      "size": 3,
+      "price": "19950000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 246,
+      "y": 171,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 249,
+      "y": 171,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 252,
+      "y": 171,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 255,
+      "y": 171,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 255,
+      "y": 168,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 249,
+      "y": 168,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 240,
+      "y": 168,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 243,
+      "y": 168,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 243,
+      "y": 165,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 240,
+      "y": 165,
+      "size": 3,
+      "price": "19950000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 234,
+      "y": 165,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 228,
+      "y": 162,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 231,
+      "y": 162,
+      "size": 3,
+      "price": "19950000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 234,
+      "y": 162,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 237,
+      "y": 162,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 240,
+      "y": 162,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 243,
+      "y": 159,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 249,
+      "y": 159,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 222,
+      "y": 159,
+      "size": 3,
+      "price": "19950000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 225,
+      "y": 159,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 228,
+      "y": 159,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 231,
+      "y": 159,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 237,
+      "y": 159,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 222,
+      "y": 156,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 228,
+      "y": 156,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 231,
+      "y": 156,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 234,
+      "y": 156,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 237,
+      "y": 156,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 240,
+      "y": 156,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 219,
+      "y": 153,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 222,
+      "y": 153,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 225,
+      "y": 153,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 228,
+      "y": 153,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 231,
+      "y": 153,
+      "size": 3,
+      "price": "19950000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 234,
+      "y": 153,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 237,
+      "y": 153,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 219,
+      "y": 150,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 225,
+      "y": 150,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 228,
+      "y": 150,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 234,
+      "y": 150,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 231,
+      "y": 147,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 234,
+      "y": 147,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 219,
+      "y": 147,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 216,
+      "y": 144,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 216,
+      "y": 141,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 219,
+      "y": 141,
+      "size": 3,
+      "price": "19950000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 219,
+      "y": 138,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 216,
+      "y": 138,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 222,
+      "y": 138,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 222,
+      "y": 135,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 222,
+      "y": 132,
+      "size": 3,
+      "price": "19950000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 219,
+      "y": 135,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 225,
+      "y": 141,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 216,
+      "y": 132,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 210,
+      "y": 132,
+      "size": 6,
+      "price": "75600000000000000000000"
+    },
+    {
+      "x": 222,
+      "y": 144,
+      "size": 6,
+      "price": "75600000000000000000000"
+    },
+    {
+      "x": 222,
+      "y": 162,
+      "size": 6,
+      "price": "75600000000000000000000"
+    },
+    {
+      "x": 246,
+      "y": 162,
+      "size": 6,
+      "price": "75600000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 258,
+      "y": 156,
+      "size": 6,
+      "price": "75600000000000000000000"
+    },
+    {
+      "x": 258,
+      "y": 168,
+      "size": 6,
+      "price": "75600000000000000000000"
+    },
+    {
+      "x": 270,
+      "y": 168,
+      "size": 6,
+      "price": "75600000000000000000000"
+    },
+    {
+      "x": 270,
+      "y": 156,
+      "size": 6,
+      "price": "75600000000000000000000"
+    },
+    {
+      "x": 282,
+      "y": 162,
+      "size": 6,
+      "price": "75600000000000000000000"
+    },
+    {
+      "x": 228,
+      "y": 165,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 252,
+      "y": 174,
+      "size": 6,
+      "price": "75600000000000000000000"
+    },
+    {
+      "x": 201,
+      "y": 150,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 201,
+      "y": 144,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 207,
+      "y": 156,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 213,
+      "y": 156,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 216,
+      "y": 153,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 219,
+      "y": 156,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 216,
+      "y": 147,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 216,
+      "y": 159,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 219,
+      "y": 162,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 207,
+      "y": 141,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 210,
+      "y": 138,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 213,
+      "y": 141,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 204,
+      "y": 144,
+      "size": 12,
+      "price": "285600000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+    },
+    {
+      "x": 219,
+      "y": 126,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 219,
+      "y": 129,
+      "size": 3,
+      "price": "19950000000000000000000"
+    },
+    {
+      "x": 222,
+      "y": 126,
+      "size": 6,
+      "price": "75600000000000000000000"
+    }
+  ],
+  "solidityMetadata": "{\"compiler\":{\"version\":\"0.5.9+commit.e560f70d\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"constant\":true,\"inputs\":[],\"name\":\"getExpiryTime\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"merkleRoot\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes32\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"enabled\",\"type\":\"bool\"}],\"name\":\"setDAIEnabled\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"buyer\",\"type\":\"address\"},{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"reserved\",\"type\":\"address\"},{\"name\":\"x\",\"type\":\"uint256\"},{\"name\":\"y\",\"type\":\"uint256\"},{\"name\":\"size\",\"type\":\"uint256\"},{\"name\":\"priceInSand\",\"type\":\"uint256\"},{\"name\":\"salt\",\"type\":\"bytes32\"},{\"name\":\"proof\",\"type\":\"bytes32[]\"},{\"name\":\"referral\",\"type\":\"bytes\"}],\"name\":\"buyLandWithDAI\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"isDAIEnabled\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"isETHEnabled\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newSigningWallet\",\"type\":\"address\"}],\"name\":\"updateSigningWallet\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"sandAmount\",\"type\":\"uint256\"}],\"name\":\"getEtherAmountWithSAND\",\"outputs\":[{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"referral\",\"type\":\"bytes\"}],\"name\":\"decodeReferral\",\"outputs\":[{\"name\":\"\",\"type\":\"bytes\"},{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"address\"},{\"name\":\"\",\"type\":\"uint256\"},{\"name\":\"\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"pure\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"getAdmin\",\"outputs\":[{\"name\":\"\",\"type\":\"address\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"enabled\",\"type\":\"bool\"}],\"name\":\"setSANDEnabled\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"metaTransactionProcessor\",\"type\":\"address\"},{\"name\":\"enabled\",\"type\":\"bool\"}],\"name\":\"setMetaTransactionProcessor\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"changeAdmin\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[],\"name\":\"isSANDEnabled\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newWallet\",\"type\":\"address\"}],\"name\":\"setReceivingWallet\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"signature\",\"type\":\"bytes\"},{\"name\":\"referrer\",\"type\":\"address\"},{\"name\":\"referee\",\"type\":\"address\"},{\"name\":\"expiryTime\",\"type\":\"uint256\"},{\"name\":\"commissionRate\",\"type\":\"uint256\"}],\"name\":\"isReferralValid\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"buyer\",\"type\":\"address\"},{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"reserved\",\"type\":\"address\"},{\"name\":\"x\",\"type\":\"uint256\"},{\"name\":\"y\",\"type\":\"uint256\"},{\"name\":\"size\",\"type\":\"uint256\"},{\"name\":\"priceInSand\",\"type\":\"uint256\"},{\"name\":\"salt\",\"type\":\"bytes32\"},{\"name\":\"proof\",\"type\":\"bytes32[]\"},{\"name\":\"referral\",\"type\":\"bytes\"}],\"name\":\"buyLandWithETH\",\"outputs\":[],\"payable\":true,\"stateMutability\":\"payable\",\"type\":\"function\"},{\"constant\":true,\"inputs\":[{\"name\":\"who\",\"type\":\"address\"}],\"name\":\"isMetaTransactionProcessor\",\"outputs\":[{\"name\":\"\",\"type\":\"bool\"}],\"payable\":false,\"stateMutability\":\"view\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"buyer\",\"type\":\"address\"},{\"name\":\"to\",\"type\":\"address\"},{\"name\":\"reserved\",\"type\":\"address\"},{\"name\":\"x\",\"type\":\"uint256\"},{\"name\":\"y\",\"type\":\"uint256\"},{\"name\":\"size\",\"type\":\"uint256\"},{\"name\":\"priceInSand\",\"type\":\"uint256\"},{\"name\":\"salt\",\"type\":\"bytes32\"},{\"name\":\"proof\",\"type\":\"bytes32[]\"},{\"name\":\"referral\",\"type\":\"bytes\"}],\"name\":\"buyLandWithSand\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"newMaxCommissionRate\",\"type\":\"uint256\"}],\"name\":\"updateMaxCommissionRate\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"constant\":false,\"inputs\":[{\"name\":\"enabled\",\"type\":\"bool\"}],\"name\":\"setETHEnabled\",\"outputs\":[],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"name\":\"landAddress\",\"type\":\"address\"},{\"name\":\"sandContractAddress\",\"type\":\"address\"},{\"name\":\"initialMetaTx\",\"type\":\"address\"},{\"name\":\"admin\",\"type\":\"address\"},{\"name\":\"initialWalletAddress\",\"type\":\"address\"},{\"name\":\"merkleRoot\",\"type\":\"bytes32\"},{\"name\":\"expiryTime\",\"type\":\"uint256\"},{\"name\":\"medianizerContractAddress\",\"type\":\"address\"},{\"name\":\"daiTokenContractAddress\",\"type\":\"address\"},{\"name\":\"initialSigningWallet\",\"type\":\"address\"},{\"name\":\"initialMaxCommissionRate\",\"type\":\"uint256\"}],\"payable\":false,\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"buyer\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"to\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"topCornerId\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"size\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"price\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amountPaid\",\"type\":\"uint256\"}],\"name\":\"LandQuadPurchased\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"name\":\"referrer\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"referee\",\"type\":\"address\"},{\"indexed\":true,\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"commission\",\"type\":\"uint256\"},{\"indexed\":false,\"name\":\"commissionRate\",\"type\":\"uint256\"}],\"name\":\"ReferralUsed\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"metaTransactionProcessor\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"enabled\",\"type\":\"bool\"}],\"name\":\"MetaTransactionProcessor\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"name\":\"oldAdmin\",\"type\":\"address\"},{\"indexed\":false,\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"AdminChanged\",\"type\":\"event\"}],\"devdoc\":{\"methods\":{\"buyLandWithDAI(address,address,address,uint256,uint256,uint256,uint256,bytes32,bytes32[],bytes)\":{\"params\":{\"buyer\":\"address that perform the payment\",\"priceInSand\":\"price in SAND to purchase that Land\",\"proof\":\"merkleProof for that particular Land\",\"reserved\":\"the reserved address (if any)\",\"size\":\"size of the pack of Land to purchase\",\"to\":\"address that will own the purchased Land\",\"x\":\"x coordinate of the Land\",\"y\":\"y coordinate of the Land\"},\"return\":\"The address of the operator\"},\"buyLandWithETH(address,address,address,uint256,uint256,uint256,uint256,bytes32,bytes32[],bytes)\":{\"params\":{\"buyer\":\"address that perform the payment\",\"priceInSand\":\"price in SAND to purchase that Land\",\"proof\":\"merkleProof for that particular Land\",\"referral\":\"the referral used by the buyer\",\"reserved\":\"the reserved address (if any)\",\"size\":\"size of the pack of Land to purchase\",\"to\":\"address that will own the purchased Land\",\"x\":\"x coordinate of the Land\",\"y\":\"y coordinate of the Land\"},\"return\":\"The address of the operator\"},\"buyLandWithSand(address,address,address,uint256,uint256,uint256,uint256,bytes32,bytes32[],bytes)\":{\"params\":{\"buyer\":\"address that perform the payment\",\"priceInSand\":\"price in SAND to purchase that Land\",\"proof\":\"merkleProof for that particular Land\",\"reserved\":\"the reserved address (if any)\",\"size\":\"size of the pack of Land to purchase\",\"to\":\"address that will own the purchased Land\",\"x\":\"x coordinate of the Land\",\"y\":\"y coordinate of the Land\"},\"return\":\"The address of the operator\"},\"changeAdmin(address)\":{\"params\":{\"newAdmin\":\"address of the new administrator.\"}},\"getAdmin()\":{\"return\":\"the current administrator of this contract.\"},\"getEtherAmountWithSAND(uint256)\":{\"params\":{\"sandAmount\":\"An amount of SAND\"},\"return\":\"The amount of ETH\"},\"getExpiryTime()\":{\"return\":\"The expiry time, as a unix epoch\"},\"isDAIEnabled()\":{\"return\":\"whether DAI payments are enabled\"},\"isETHEnabled()\":{\"return\":\"whether ETH payments are enabled\"},\"isMetaTransactionProcessor(address)\":{\"params\":{\"who\":\"The address to query.\"},\"return\":\"whether the address has meta-transaction execution rights.\"},\"isReferralValid(bytes,address,address,uint256,uint256)\":{\"params\":{\"commissionRate\":\"The commissionRate of the referral\",\"expiryTime\":\"The expiry time of the referral\",\"referee\":\"The address of the referee\",\"referrer\":\"The address of the referrer\",\"signature\":\"The signature to check (signed referral)\"},\"return\":\"True if the referral is valid\"},\"isSANDEnabled()\":{\"return\":\"whether the specific SAND payments are enabled\"},\"merkleRoot()\":{\"return\":\"The Merkle root, as a bytes32 hash\"},\"setDAIEnabled(bool)\":{\"params\":{\"enabled\":\"whether to enable or disable\"}},\"setETHEnabled(bool)\":{\"params\":{\"enabled\":\"whether to enable or disable\"}},\"setMetaTransactionProcessor(address,bool)\":{\"params\":{\"enabled\":\"set whether the metaTransactionProcessor is enabled or disabled.\",\"metaTransactionProcessor\":\"address that will be given/removed metaTransactionProcessor rights.\"}},\"setReceivingWallet(address)\":{\"params\":{\"newWallet\":\"address of the new receiving wallet\"}},\"setSANDEnabled(bool)\":{\"params\":{\"enabled\":\"whether to enable or disable\"}},\"updateMaxCommissionRate(uint256)\":{\"params\":{\"newMaxCommissionRate\":\"The new maximum commission rate\"}},\"updateSigningWallet(address)\":{\"params\":{\"newSigningWallet\":\"The new address of the signing wallet\"}}},\"title\":\"Land Sale contract with referral that supports also DAI and ETH as payment\"},\"userdoc\":{\"methods\":{\"buyLandWithDAI(address,address,address,uint256,uint256,uint256,uint256,bytes32,bytes32[],bytes)\":{\"notice\":\"buy Land with DAI using the merkle proof associated with it\"},\"buyLandWithETH(address,address,address,uint256,uint256,uint256,uint256,bytes32,bytes32[],bytes)\":{\"notice\":\"buy Land with ETH using the merkle proof associated with it\"},\"buyLandWithSand(address,address,address,uint256,uint256,uint256,uint256,bytes32,bytes32[],bytes)\":{\"notice\":\"buy Land with SAND using the merkle proof associated with it\"},\"changeAdmin(address)\":{\"notice\":\"change the administrator to be `newAdmin`.\"},\"getAdmin()\":{\"notice\":\"gives the current administrator of this contract.\"},\"getEtherAmountWithSAND(uint256)\":{\"notice\":\"Returns the amount of ETH for a specific amount of SAND\"},\"getExpiryTime()\":{\"notice\":\"Gets the expiry time for the current sale\"},\"isDAIEnabled()\":{\"notice\":\"return whether DAI payments are enabled\"},\"isETHEnabled()\":{\"notice\":\"return whether ETH payments are enabled\"},\"isMetaTransactionProcessor(address)\":{\"notice\":\"check whether address `who` is given meta-transaction execution rights.\"},\"isReferralValid(bytes,address,address,uint256,uint256)\":{\"notice\":\"Check if a referral is valid\"},\"isSANDEnabled()\":{\"notice\":\"return whether the specific SAND payments are enabled\"},\"merkleRoot()\":{\"notice\":\"Gets the Merkle root associated with the current sale\"},\"setDAIEnabled(bool)\":{\"notice\":\"enable/disable DAI payment for Lands\"},\"setETHEnabled(bool)\":{\"notice\":\"enable/disable ETH payment for Lands\"},\"setMetaTransactionProcessor(address,bool)\":{\"notice\":\"Enable or disable the ability of `metaTransactionProcessor` to perform meta-tx (metaTransactionProcessor rights).\"},\"setReceivingWallet(address)\":{\"notice\":\"set the wallet receiving the proceeds\"},\"setSANDEnabled(bool)\":{\"notice\":\"enable/disable the specific SAND payment for Lands\"},\"updateMaxCommissionRate(uint256)\":{\"notice\":\"Update the maximum commission rate\"},\"updateSigningWallet(address)\":{\"notice\":\"Update the signing wallet\"}},\"notice\":\"This contract mananges the sale of our lands\"}},\"settings\":{\"compilationTarget\":{\"src/LandSale/LandSaleWithReferral.sol\":\"LandSaleWithReferral\"},\"evmVersion\":\"petersburg\",\"libraries\":{},\"metadata\":{\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":2000},\"remappings\":[]},\"sources\":{\"contracts_common/src/BaseWithStorage/Admin.sol\":{\"content\":\"pragma solidity ^0.5.2;\\n\\ncontract Admin {\\n\\n    address internal _admin;\\n\\n    event AdminChanged(address oldAdmin, address newAdmin);\\n\\n    /// @notice gives the current administrator of this contract.\\n    /// @return the current administrator of this contract.\\n    function getAdmin() external view returns (address) {\\n        return _admin;\\n    }\\n\\n    /// @notice change the administrator to be `newAdmin`.\\n    /// @param newAdmin address of the new administrator.\\n    function changeAdmin(address newAdmin) external {\\n        require(msg.sender == _admin, \\\"only admin can change admin\\\");\\n        emit AdminChanged(_admin, newAdmin);\\n        _admin = newAdmin;\\n    }\\n\\n    modifier onlyAdmin() {\\n        require (msg.sender == _admin, \\\"only admin allowed\\\");\\n        _;\\n    }\\n\\n}\\n\",\"keccak256\":\"0xf3763fa108235379b48cf8fe9a708692fcb077250d9974351fd636ff0baf84bf\"},\"contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol\":{\"content\":\"pragma solidity ^0.5.2;\\n\\nimport \\\"./Admin.sol\\\";\\n\\ncontract MetaTransactionReceiver is Admin{\\n\\n    mapping(address => bool) internal _metaTransactionContracts;\\n    event MetaTransactionProcessor(address metaTransactionProcessor, bool enabled);\\n\\n    /// @notice Enable or disable the ability of `metaTransactionProcessor` to perform meta-tx (metaTransactionProcessor rights).\\n    /// @param metaTransactionProcessor address that will be given/removed metaTransactionProcessor rights.\\n    /// @param enabled set whether the metaTransactionProcessor is enabled or disabled.\\n    function setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) public {\\n        require(\\n            msg.sender == _admin,\\n            \\\"only admin can setup metaTransactionProcessors\\\"\\n        );\\n        _setMetaTransactionProcessor(metaTransactionProcessor, enabled);\\n    }\\n\\n    function _setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) internal {\\n        _metaTransactionContracts[metaTransactionProcessor] = enabled;\\n        emit MetaTransactionProcessor(metaTransactionProcessor, enabled);\\n    }\\n\\n    /// @notice check whether address `who` is given meta-transaction execution rights.\\n    /// @param who The address to query.\\n    /// @return whether the address has meta-transaction execution rights.\\n    function isMetaTransactionProcessor(address who) external view returns(bool) {\\n        return _metaTransactionContracts[who];\\n    }\\n}\",\"keccak256\":\"0xbd938dbadc0ed2142b6dc20b0613dc3236a9a6ec370639476b672c2536e9a186\"},\"contracts_common/src/BaseWithStorage/SuperOperators.sol\":{\"content\":\"pragma solidity ^0.5.2;\\n\\nimport \\\"./Admin.sol\\\";\\n\\ncontract SuperOperators is Admin {\\n\\n    mapping(address => bool) internal _superOperators;\\n\\n    event SuperOperator(address superOperator, bool enabled);\\n\\n    /// @notice Enable or disable the ability of `superOperator` to transfer tokens of all (superOperator rights).\\n    /// @param superOperator address that will be given/removed superOperator right.\\n    /// @param enabled set whether the superOperator is enabled or disabled.\\n    function setSuperOperator(address superOperator, bool enabled) external {\\n        require(\\n            msg.sender == _admin,\\n            \\\"only admin is allowed to add super operators\\\"\\n        );\\n        _superOperators[superOperator] = enabled;\\n        emit SuperOperator(superOperator, enabled);\\n    }\\n\\n    /// @notice check whether address `who` is given superOperator rights.\\n    /// @param who The address to query.\\n    /// @return whether the address has superOperator rights.\\n    function isSuperOperator(address who) public view returns (bool) {\\n        return _superOperators[who];\\n    }\\n}\\n\",\"keccak256\":\"0x22354cf60ccf77a6de61c13bdaf4e3094d115b960ae563b0527622c846a12abb\"},\"contracts_common/src/Interfaces/ERC20.sol\":{\"content\":\"pragma solidity ^0.5.2;\\n\\nimport \\\"./ERC20Basic.sol\\\";\\n\\n/**\\n * @title ERC20 interface\\n * @dev see https://eips.ethereum.org/EIPS/eip-20\\n */\\n/* interface */\\ncontract ERC20 is ERC20Basic {\\n    function transferFrom(address from, address to, uint256 value)\\n        public\\n        returns (bool);\\n    function approve(address spender, uint256 value) public returns (bool);\\n    function allowance(address owner, address spender)\\n        public\\n        view\\n        returns (uint256);\\n    event Approval(\\n        address indexed owner,\\n        address indexed spender,\\n        uint256 value\\n    );\\n}\\n\",\"keccak256\":\"0xa8cb63790e43bb77235530d0add180a84e9eb20c95173059e7d783c599c199b0\"},\"contracts_common/src/Interfaces/ERC20Basic.sol\":{\"content\":\"pragma solidity ^0.5.2;\\n\\n/**\\n * @title ERC20Basic DRAFT\\n * @dev Simpler version of ERC20 interface\\n * See https://github.com/ethereum/EIPs/issues/179\\n */\\n/* interface */\\ncontract ERC20Basic {\\n    function totalSupply() public view returns (uint256);\\n    function balanceOf(address who) public view returns (uint256);\\n    function transfer(address to, uint256 value) public returns (bool);\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n}\\n\",\"keccak256\":\"0x7d333b4cd97e3fa0a67f3f20d79e6a46d5c81a8f7d506aa24c624ec6e4e913b9\"},\"contracts_common/src/Interfaces/ERC721Events.sol\":{\"content\":\"pragma solidity ^0.5.2;\\n\\n/**\\n * @title ERC721 Non-Fungible Token Standard basic interface\\n * @dev see https://eips.ethereum.org/EIPS/eip-721\\n */\\ninterface ERC721Events {\\n    event Transfer(\\n        address indexed _from,\\n        address indexed _to,\\n        uint256 indexed _tokenId\\n    );\\n    event Approval(\\n        address indexed _owner,\\n        address indexed _approved,\\n        uint256 indexed _tokenId\\n    );\\n    event ApprovalForAll(\\n        address indexed _owner,\\n        address indexed _operator,\\n        bool _approved\\n    );\\n}\\n\",\"keccak256\":\"0xdf0051d52413d5e853a9801d5745337e4040949b31568cc17ca50f8853e10567\"},\"contracts_common/src/Interfaces/ERC721MandatoryTokenReceiver.sol\":{\"content\":\"pragma solidity ^0.5.2;\\n\\n/**\\n    Note: The ERC-165 identifier for this interface is 0x5e8bf644.\\n*/\\ninterface ERC721MandatoryTokenReceiver {\\n    function onERC721BatchReceived(\\n        address operator,\\n        address from,\\n        uint256[] calldata ids,\\n        bytes calldata data\\n    ) external returns (bytes4); // needs to return 0x4b808c46\\n\\n    function onERC721Received(\\n        address operator,\\n        address from,\\n        uint256 tokenId,\\n        bytes calldata data\\n    ) external returns (bytes4); // needs to return 0x150b7a02\\n\\n    // needs to implements EIP-165\\n    // function supportsInterface(bytes4 interfaceId)\\n    //     external\\n    //     view\\n    //     returns (bool);\\n}\\n\",\"keccak256\":\"0xe68dbcb5d43dd61dd8606271fe75e149bb401e9fdfb9e89e2a5b3962638fea91\"},\"contracts_common/src/Interfaces/ERC721TokenReceiver.sol\":{\"content\":\"/* This Source Code Form is subject to the terms of the Mozilla Public\\n * License, v. 2.0. If a copy of the MPL was not distributed with this\\n * file, You can obtain one at http://mozilla.org/MPL/2.0/.\\n *\\n * This code has not been reviewed.\\n * Do not use or deploy this code before reviewing it personally first.\\n */\\n// solhint-disable-next-line compiler-fixed\\npragma solidity ^0.5.2;\\n\\ninterface ERC721TokenReceiver {\\n    function onERC721Received(\\n        address operator,\\n        address from,\\n        uint256 tokenId,\\n        bytes calldata data\\n    ) external returns (bytes4);\\n}\\n\",\"keccak256\":\"0x94e7441c07cb2f97b9b5be8ca5a5f76623615963852aa5e20208b8cbcb33c1ce\"},\"contracts_common/src/Interfaces/Medianizer.sol\":{\"content\":\"pragma solidity ^0.5.2;\\n\\n\\n/**\\n * @title Medianizer contract\\n * @dev From MakerDAO (https://etherscan.io/address/0x729D19f657BD0614b4985Cf1D82531c67569197B#code)\\n */\\ninterface Medianizer {\\n    function read() external view returns (bytes32);\\n}\\n\",\"keccak256\":\"0x77a6277882bc0f9482175a23dcd2cf4ec08cc7268f9e8caf71ad49c39b07c262\"},\"contracts_common/src/Libraries/AddressUtils.sol\":{\"content\":\"pragma solidity ^0.5.2;\\n\\nlibrary AddressUtils {\\n\\n    function toPayable(address _address) internal pure returns (address payable _payable) {\\n        return address(uint160(_address));\\n    }\\n\\n    function isContract(address addr) internal view returns (bool) {\\n        // for accounts without code, i.e. `keccak256('')`:\\n        bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;\\n\\n        bytes32 codehash;\\n        // solium-disable-next-line security/no-inline-assembly\\n        assembly {\\n            codehash := extcodehash(addr)\\n        }\\n        return (codehash != 0x0 && codehash != accountHash);\\n    }\\n}\\n\",\"keccak256\":\"0x2ad037f43ea9a899526bd911737727d027ce8a2bc1cf615bdf5a1706d400afd6\"},\"contracts_common/src/Libraries/SafeMathWithRequire.sol\":{\"content\":\"pragma solidity ^0.5.2;\\n\\n/**\\n * @title SafeMath\\n * @dev Math operations with safety checks that revert\\n */\\nlibrary SafeMathWithRequire {\\n    /**\\n    * @dev Multiplies two numbers, throws on overflow.\\n    */\\n    function mul(uint256 a, uint256 b) internal pure returns (uint256 c) {\\n        // Gas optimization: this is cheaper than asserting 'a' not being zero, but the\\n        // benefit is lost if 'b' is also tested.\\n        // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522\\n        if (a == 0) {\\n            return 0;\\n        }\\n\\n        c = a * b;\\n        require(c / a == b, \\\"overflow\\\");\\n        return c;\\n    }\\n\\n    /**\\n    * @dev Integer division of two numbers, truncating the quotient.\\n    */\\n    function div(uint256 a, uint256 b) internal pure returns (uint256) {\\n        // assert(b > 0); // Solidity automatically throws when dividing by 0\\n        // uint256 c = a / b;\\n        // assert(a == b * c + a % b); // There is no case in which this doesn't hold\\n        return a / b;\\n    }\\n\\n    /**\\n    * @dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).\\n    */\\n    function sub(uint256 a, uint256 b) internal pure returns (uint256) {\\n        require(b <= a, \\\"undeflow\\\");\\n        return a - b;\\n    }\\n\\n    /**\\n    * @dev Adds two numbers, throws on overflow.\\n    */\\n    function add(uint256 a, uint256 b) internal pure returns (uint256 c) {\\n        c = a + b;\\n        require(c >= a, \\\"overflow\\\");\\n        return c;\\n    }\\n}\\n\",\"keccak256\":\"0x362e750dc8b68acf6b56e0e78c6e8801b5d08031cfc77576e3222e5f42d99313\"},\"contracts_common/src/Libraries/SigUtil.sol\":{\"content\":\"pragma solidity ^0.5.2;\\n\\nlibrary SigUtil {\\n    function recover(bytes32 hash, bytes memory sig)\\n        internal\\n        pure\\n        returns (address recovered)\\n    {\\n        require(sig.length == 65);\\n\\n        bytes32 r;\\n        bytes32 s;\\n        uint8 v;\\n        assembly {\\n            r := mload(add(sig, 32))\\n            s := mload(add(sig, 64))\\n            v := byte(0, mload(add(sig, 96)))\\n        }\\n\\n        // Version of signature should be 27 or 28, but 0 and 1 are also possible versions\\n        if (v < 27) {\\n            v += 27;\\n        }\\n        require(v == 27 || v == 28);\\n\\n        recovered = ecrecover(hash, v, r, s);\\n        require(recovered != address(0));\\n    }\\n\\n    function recoverWithZeroOnFailure(bytes32 hash, bytes memory sig)\\n        internal\\n        pure\\n        returns (address)\\n    {\\n        if (sig.length != 65) {\\n            return (address(0));\\n        }\\n\\n        bytes32 r;\\n        bytes32 s;\\n        uint8 v;\\n        assembly {\\n            r := mload(add(sig, 32))\\n            s := mload(add(sig, 64))\\n            v := byte(0, mload(add(sig, 96)))\\n        }\\n\\n        // Version of signature should be 27 or 28, but 0 and 1 are also possible versions\\n        if (v < 27) {\\n            v += 27;\\n        }\\n\\n        if (v != 27 && v != 28) {\\n            return (address(0));\\n        } else {\\n            return ecrecover(hash, v, r, s);\\n        }\\n    }\\n\\n    // Builds a prefixed hash to mimic the behavior of eth_sign.\\n    function prefixed(bytes32 hash) internal pure returns (bytes memory) {\\n        return abi.encodePacked(\\\"\\\\x19Ethereum Signed Message:\\\\n32\\\", hash);\\n    }\\n}\\n\",\"keccak256\":\"0xda7729e5b24c3780242ed1923b2a709ab284c18ee533669d6d0fa394ffb0491b\"},\"src/Land.sol\":{\"content\":\"/* solhint-disable no-empty-blocks */\\n\\npragma solidity 0.5.9;\\n\\nimport \\\"./Land/erc721/LandBaseToken.sol\\\";\\n\\ncontract Land is LandBaseToken {\\n    constructor(\\n        address metaTransactionContract,\\n        address admin\\n    ) public LandBaseToken(\\n        metaTransactionContract,\\n        admin\\n    ) {\\n    }\\n\\n    /**\\n     * @notice Return the name of the token contract\\n     * @return The name of the token contract\\n     */\\n    function name() external pure returns (string memory) {\\n        return \\\"Sandbox's LANDs\\\";\\n    }\\n\\n    /**\\n     * @notice Return the symbol of the token contract\\n     * @return The symbol of the token contract\\n     */\\n    function symbol() external pure returns (string memory) {\\n        return \\\"LAND\\\";\\n    }\\n\\n    // solium-disable-next-line security/no-assign-params\\n    function uint2str(uint _i) internal pure returns (string memory) {\\n        if (_i == 0) {\\n            return \\\"0\\\";\\n        }\\n        uint j = _i;\\n        uint len;\\n        while (j != 0) {\\n            len++;\\n            j /= 10;\\n        }\\n        bytes memory bstr = new bytes(len);\\n        uint k = len - 1;\\n        while (_i != 0) {\\n            bstr[k--] = byte(uint8(48 + _i % 10));\\n            _i /= 10;\\n        }\\n        return string(bstr);\\n    }\\n\\n    /**\\n     * @notice Return the URI of a specific token\\n     * @param id The id of the token\\n     * @return The URI of the token\\n     */\\n    function tokenURI(uint256 id) public view returns (string memory) {\\n        require(_ownerOf(id) != address(0), \\\"Id does not exist\\\");\\n        return\\n            string(\\n                abi.encodePacked(\\n                    \\\"https://api.sandbox.game/lands/\\\",\\n                    uint2str(id),\\n                    \\\"/metadata.json\\\"\\n                )\\n            );\\n    }\\n\\n    /**\\n     * @notice Check if the contract supports an interface\\n     * 0x01ffc9a7 is ERC-165\\n     * 0x80ac58cd is ERC-721\\n     * 0x5b5e139f is ERC-721 metadata\\n     * @param id The id of the interface\\n     * @return True if the interface is supported\\n     */\\n    function supportsInterface(bytes4 id) external pure returns (bool) {\\n        return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;\\n    }\\n}\\n\",\"keccak256\":\"0x50a19e798e0ecee177cf2e7a21bdfe0a0e98bf67251a510fe25c3ae982e17c00\"},\"src/Land/erc721/ERC721BaseToken.sol\":{\"content\":\"/* solhint-disable func-order, code-complexity */\\npragma solidity 0.5.9;\\n\\nimport \\\"../../../contracts_common/src/Libraries/AddressUtils.sol\\\";\\nimport \\\"../../../contracts_common/src/Interfaces/ERC721TokenReceiver.sol\\\";\\nimport \\\"../../../contracts_common/src/Interfaces/ERC721Events.sol\\\";\\nimport \\\"../../../contracts_common/src/BaseWithStorage/SuperOperators.sol\\\";\\nimport \\\"../../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol\\\";\\nimport \\\"../../../contracts_common/src/Interfaces/ERC721MandatoryTokenReceiver.sol\\\";\\n\\ncontract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver {\\n    using AddressUtils for address;\\n\\n    bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;\\n    bytes4 internal constant _ERC721_BATCH_RECEIVED = 0x4b808c46;\\n\\n    bytes4 internal constant ERC165ID = 0x01ffc9a7;\\n    bytes4 internal constant ERC721_MANDATORY_RECEIVER = 0x5e8bf644;\\n\\n    mapping (address => uint256) public _numNFTPerAddress;\\n    mapping (uint256 => uint256) public _owners;\\n    mapping (address => mapping(address => bool)) public _operatorsForAll;\\n    mapping (uint256 => address) public _operators;\\n\\n    constructor(\\n        address metaTransactionContract,\\n        address admin\\n    ) internal {\\n        _admin = admin;\\n        _setMetaTransactionProcessor(metaTransactionContract, true);\\n    }\\n\\n    function _transferFrom(address from, address to, uint256 id) internal {\\n        _numNFTPerAddress[from]--;\\n        _numNFTPerAddress[to]++;\\n        _owners[id] = uint256(to);\\n        emit Transfer(from, to, id);\\n    }\\n\\n    /**\\n     * @notice Return the number of Land owned by an address\\n     * @param owner The address to look for\\n     * @return The number of Land token owned by the address\\n     */\\n    function balanceOf(address owner) external view returns (uint256) {\\n        require(owner != address(0), \\\"owner is zero address\\\");\\n        return _numNFTPerAddress[owner];\\n    }\\n\\n\\n    function _ownerOf(uint256 id) internal view returns (address) {\\n        return address(_owners[id]);\\n    }\\n\\n    function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {\\n        uint256 data = _owners[id];\\n        owner = address(data);\\n        operatorEnabled = (data / 2**255) == 1;\\n    }\\n\\n    /**\\n     * @notice Return the owner of a Land\\n     * @param id The id of the Land\\n     * @return The address of the owner\\n     */\\n    function ownerOf(uint256 id) external view returns (address owner) {\\n        owner = _ownerOf(id);\\n        require(owner != address(0), \\\"token does not exist\\\");\\n    }\\n\\n    function _approveFor(address owner, address operator, uint256 id) internal {\\n        if(operator == address(0)) {\\n            _owners[id] = uint256(owner); // no need to resset the operator, it will be overriden next time\\n        } else {\\n            _owners[id] = uint256(owner) + 2**255;\\n            _operators[id] = operator;\\n        }\\n        emit Approval(owner, operator, id);\\n    }\\n\\n    /**\\n     * @notice Approve an operator to spend tokens on the sender behalf\\n     * @param sender The address giving the approval\\n     * @param operator The address receiving the approval\\n     * @param id The id of the token\\n     */\\n    function approveFor(\\n        address sender,\\n        address operator,\\n        uint256 id\\n    ) external {\\n        address owner = _ownerOf(id);\\n        require(sender != address(0), \\\"sender is zero address\\\");\\n        require(\\n            msg.sender == sender ||\\n            _metaTransactionContracts[msg.sender] ||\\n            _superOperators[msg.sender] ||\\n            _operatorsForAll[sender][msg.sender],\\n            \\\"not authorized to approve\\\"\\n        );\\n        require(owner == sender, \\\"owner != sender\\\");\\n        _approveFor(owner, operator, id);\\n    }\\n\\n    /**\\n     * @notice Approve an operator to spend tokens on the sender behalf\\n     * @param operator The address receiving the approval\\n     * @param id The id of the token\\n     */\\n    function approve(address operator, uint256 id) external {\\n        address owner = _ownerOf(id);\\n        require(owner != address(0), \\\"token does not exist\\\");\\n        require(\\n            owner == msg.sender ||\\n            _superOperators[msg.sender] ||\\n            _operatorsForAll[owner][msg.sender],\\n            \\\"not authorized to approve\\\"\\n        );\\n        _approveFor(owner, operator, id);\\n    }\\n\\n    /**\\n     * @notice Get the approved operator for a specific token\\n     * @param id The id of the token\\n     * @return The address of the operator\\n     */\\n    function getApproved(uint256 id) external view returns (address) {\\n        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);\\n        require(owner != address(0), \\\"token does not exist\\\");\\n        if (operatorEnabled) {\\n            return _operators[id];\\n        } else {\\n            return address(0);\\n        }\\n    }\\n\\n    function _checkTransfer(address from, address to, uint256 id) internal view returns (bool isMetaTx) {\\n        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);\\n        require(owner != address(0), \\\"token does not exist\\\");\\n        require(owner == from, \\\"not owner in _checkTransfer\\\");\\n        require(to != address(0), \\\"can't send to zero address\\\");\\n        isMetaTx = msg.sender != from && _metaTransactionContracts[msg.sender];\\n        if (msg.sender != from && !isMetaTx) {\\n            require(\\n                _superOperators[msg.sender] ||\\n                _operatorsForAll[from][msg.sender] ||\\n                (operatorEnabled && _operators[id] == msg.sender),\\n                \\\"not approved to transfer\\\"\\n            );\\n        }\\n    }\\n\\n    function _checkInterfaceWith10000Gas(address _contract, bytes4 interfaceId)\\n        internal\\n        view\\n        returns (bool)\\n    {\\n        bool success;\\n        bool result;\\n        bytes memory call_data = abi.encodeWithSelector(\\n            ERC165ID,\\n            interfaceId\\n        );\\n        // solium-disable-next-line security/no-inline-assembly\\n        assembly {\\n            let call_ptr := add(0x20, call_data)\\n            let call_size := mload(call_data)\\n            let output := mload(0x40) // Find empty storage location using \\\"free memory pointer\\\"\\n            mstore(output, 0x0)\\n            success := staticcall(\\n                10000,\\n                _contract,\\n                call_ptr,\\n                call_size,\\n                output,\\n                0x20\\n            ) // 32 bytes\\n            result := mload(output)\\n        }\\n        // (10000 / 63) \\\"not enough for supportsInterface(...)\\\" // consume all gas, so caller can potentially know that there was not enough gas\\n        assert(gasleft() > 158);\\n        return success && result;\\n    }\\n\\n    /**\\n     * @notice Transfer a token between 2 addresses\\n     * @param from The sender of the token\\n     * @param to The recipient of the token\\n     * @param id The id of the token\\n    */\\n    function transferFrom(address from, address to, uint256 id) external {\\n        bool metaTx = _checkTransfer(from, to, id);\\n        _transferFrom(from, to, id);\\n        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {\\n            require(\\n                _checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, \\\"\\\"),\\n                \\\"erc721 transfer rejected by to\\\"\\n            );\\n        }\\n    }\\n\\n    /**\\n     * @notice Transfer a token between 2 addresses letting the receiver knows of the transfer\\n     * @param from The sender of the token\\n     * @param to The recipient of the token\\n     * @param id The id of the token\\n     * @param data Additional data\\n     */\\n    function safeTransferFrom(address from, address to, uint256 id, bytes memory data) public {\\n        bool metaTx = _checkTransfer(from, to, id);\\n        _transferFrom(from, to, id);\\n        if (to.isContract()) {\\n            require(\\n                _checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, data),\\n                \\\"ERC721: transfer rejected by to\\\"\\n            );\\n        }\\n    }\\n\\n    /**\\n     * @notice Transfer a token between 2 addresses letting the receiver knows of the transfer\\n     * @param from The send of the token\\n     * @param to The recipient of the token\\n     * @param id The id of the token\\n     */\\n    function safeTransferFrom(address from, address to, uint256 id) external {\\n        safeTransferFrom(from, to, id, \\\"\\\");\\n    }\\n\\n    /**\\n     * @notice Transfer many tokens between 2 addresses\\n     * @param from The sender of the token\\n     * @param to The recipient of the token\\n     * @param ids The ids of the tokens\\n     * @param data additional data\\n    */\\n    function batchTransferFrom(address from, address to, uint256[] calldata ids, bytes calldata data) external {\\n        _batchTransferFrom(from, to, ids, data, false);\\n    }\\n\\n    function _batchTransferFrom(address from, address to, uint256[] memory ids, bytes memory data, bool safe) internal {\\n        bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];\\n        bool authorized = msg.sender == from ||\\n            metaTx ||\\n            _superOperators[msg.sender] ||\\n            _operatorsForAll[from][msg.sender];\\n\\n        require(from != address(0), \\\"from is zero address\\\");\\n        require(to != address(0), \\\"can't send to zero address\\\");\\n\\n        uint256 numTokens = ids.length;\\n        for(uint256 i = 0; i < numTokens; i ++) {\\n            uint256 id = ids[i];\\n            (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);\\n            require(owner == from, \\\"not owner in batchTransferFrom\\\");\\n            require(authorized || (operatorEnabled && _operators[id] == msg.sender), \\\"not authorized\\\");\\n            _owners[id] = uint256(to);\\n            emit Transfer(from, to, id);\\n        }\\n        if (from != to) {\\n            _numNFTPerAddress[from] -= numTokens;\\n            _numNFTPerAddress[to] += numTokens;\\n        }\\n\\n        if (to.isContract() && (safe || _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER))) {\\n            require(\\n                _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, data),\\n                \\\"erc721 batch transfer rejected by to\\\"\\n            );\\n        }\\n    }\\n\\n    /**\\n     * @notice Transfer many tokens between 2 addresses ensuring the receiving contract has a receiver method\\n     * @param from The sender of the token\\n     * @param to The recipient of the token\\n     * @param ids The ids of the tokens\\n     * @param data additional data\\n    */\\n    function safeBatchTransferFrom(address from, address to, uint256[] calldata ids, bytes calldata data) external {\\n        _batchTransferFrom(from, to, ids, data, true);\\n    }\\n\\n    /**\\n     * @notice Check if the contract supports an interface\\n     * 0x01ffc9a7 is ERC-165\\n     * 0x80ac58cd is ERC-721\\n     * @param id The id of the interface\\n     * @return True if the interface is supported\\n     */\\n    function supportsInterface(bytes4 id) external pure returns (bool) {\\n        return id == 0x01ffc9a7 || id == 0x80ac58cd;\\n    }\\n\\n    /**\\n     * @notice Set the approval for an operator to manage all the tokens of the sender\\n     * @param sender The address giving the approval\\n     * @param operator The address receiving the approval\\n     * @param approved The determination of the approval\\n     */\\n    function setApprovalForAllFor(\\n        address sender,\\n        address operator,\\n        bool approved\\n    ) external {\\n        require(sender != address(0), \\\"Invalid sender address\\\");\\n        require(\\n            msg.sender == sender ||\\n            _metaTransactionContracts[msg.sender] ||\\n            _superOperators[msg.sender],\\n            \\\"not authorized to approve for all\\\"\\n        );\\n\\n        _setApprovalForAll(sender, operator, approved);\\n    }\\n\\n    /**\\n     * @notice Set the approval for an operator to manage all the tokens of the sender\\n     * @param operator The address receiving the approval\\n     * @param approved The determination of the approval\\n     */\\n    function setApprovalForAll(address operator, bool approved) external {\\n        _setApprovalForAll(msg.sender, operator, approved);\\n    }\\n\\n\\n    function _setApprovalForAll(\\n        address sender,\\n        address operator,\\n        bool approved\\n    ) internal {\\n        require(\\n            !_superOperators[operator],\\n            \\\"super operator can't have their approvalForAll changed\\\"\\n        );\\n        _operatorsForAll[sender][operator] = approved;\\n\\n        emit ApprovalForAll(sender, operator, approved);\\n    }\\n\\n    /**\\n     * @notice Check if the sender approved the operator\\n     * @param owner The address of the owner\\n     * @param operator The address of the operator\\n     * @return The status of the approval\\n     */\\n    function isApprovedForAll(address owner, address operator)\\n        external\\n        view\\n        returns (bool isOperator)\\n    {\\n        return _operatorsForAll[owner][operator] || _superOperators[operator];\\n    }\\n\\n    function _burn(address from, address owner, uint256 id) public {\\n        require(from == owner, \\\"not owner\\\");\\n        _owners[id] = 2**160; // cannot mint it again\\n        _numNFTPerAddress[from]--;\\n        emit Transfer(from, address(0), id);\\n    }\\n\\n    /// @notice Burns token `id`.\\n    /// @param id token which will be burnt.\\n    function burn(uint256 id) external {\\n        _burn(msg.sender, _ownerOf(id), id);\\n    }\\n\\n    /// @notice Burn token`id` from `from`.\\n    /// @param from address whose token is to be burnt.\\n    /// @param id token which will be burnt.\\n    function burnFrom(address from, uint256 id) external {\\n        require(from != address(0), \\\"Invalid sender address\\\");\\n        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);\\n        require(\\n            msg.sender == from ||\\n            _metaTransactionContracts[msg.sender] ||\\n            (operatorEnabled && _operators[id] == msg.sender) ||\\n            _superOperators[msg.sender] ||\\n            _operatorsForAll[from][msg.sender],\\n            \\\"not authorized to burn\\\"\\n        );\\n        _burn(from, owner, id);\\n    }\\n\\n    function _checkOnERC721Received(address operator, address from, address to, uint256 tokenId, bytes memory _data)\\n        internal returns (bool)\\n    {\\n        bytes4 retval = ERC721TokenReceiver(to).onERC721Received(operator, from, tokenId, _data);\\n        return (retval == _ERC721_RECEIVED);\\n    }\\n\\n    function _checkOnERC721BatchReceived(address operator, address from, address to, uint256[] memory ids, bytes memory _data)\\n        internal returns (bool)\\n    {\\n        bytes4 retval = ERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);\\n        return (retval == _ERC721_BATCH_RECEIVED);\\n    }\\n}\\n\",\"keccak256\":\"0x9c1d22fffbcf67aaaff189b13be447afb40138c947c48b767e35494cdd2d009c\"},\"src/Land/erc721/LandBaseToken.sol\":{\"content\":\"/* solhint-disable func-order, code-complexity */\\npragma solidity 0.5.9;\\n\\nimport \\\"./ERC721BaseToken.sol\\\";\\n\\ncontract LandBaseToken is ERC721BaseToken {\\n    // Our grid is 408 x 408 lands\\n    uint256 internal constant GRID_SIZE = 408;\\n\\n    uint256 internal constant LAYER =          0xFF00000000000000000000000000000000000000000000000000000000000000;\\n    uint256 internal constant LAYER_1x1 =      0x0000000000000000000000000000000000000000000000000000000000000000;\\n    uint256 internal constant LAYER_3x3 =      0x0100000000000000000000000000000000000000000000000000000000000000;\\n    uint256 internal constant LAYER_6x6 =      0x0200000000000000000000000000000000000000000000000000000000000000;\\n    uint256 internal constant LAYER_12x12 =    0x0300000000000000000000000000000000000000000000000000000000000000;\\n    uint256 internal constant LAYER_24x24 =    0x0400000000000000000000000000000000000000000000000000000000000000;\\n\\n    mapping(address => bool) internal _minters;\\n    event Minter(address superOperator, bool enabled);\\n\\n    /// @notice Enable or disable the ability of `minter` to mint tokens\\n    /// @param minter address that will be given/removed minter right.\\n    /// @param enabled set whether the minter is enabled or disabled.\\n    function setMinter(address minter, bool enabled) external {\\n        require(\\n            msg.sender == _admin,\\n            \\\"only admin is allowed to add minters\\\"\\n        );\\n        _minters[minter] = enabled;\\n        emit Minter(minter, enabled);\\n    }\\n\\n    /// @notice check whether address `who` is given minter rights.\\n    /// @param who The address to query.\\n    /// @return whether the address has minter rights.\\n    function isMinter(address who) public view returns (bool) {\\n        return _minters[who];\\n    }\\n\\n    constructor(\\n        address metaTransactionContract,\\n        address admin\\n    ) public ERC721BaseToken(metaTransactionContract, admin) {\\n    }\\n\\n    /// @notice total width of the map\\n    /// @return width\\n    function width() external returns(uint256) {\\n        return GRID_SIZE;\\n    }\\n\\n    /// @notice total height of the map\\n    /// @return height\\n    function height() external returns(uint256) {\\n        return GRID_SIZE;\\n    }\\n\\n    /// @notice x coordinate of Land token\\n    /// @param id tokenId\\n    /// @return the x coordinates\\n    function x(uint256 id) external returns(uint256) {\\n        require(_ownerOf(id) != address(0), \\\"token does not exist\\\");\\n        return id % GRID_SIZE;\\n    }\\n\\n    /// @notice y coordinate of Land token\\n    /// @param id tokenId\\n    /// @return the y coordinates\\n    function y(uint256 id) external returns(uint256) {\\n        require(_ownerOf(id) != address(0), \\\"token does not exist\\\");\\n        return id / GRID_SIZE;\\n    }\\n\\n    /**\\n     * @notice Mint a new quad (aligned to a quad tree with size 3, 6, 12 or 24 only)\\n     * @param to The recipient of the new quad\\n     * @param size The size of the new quad\\n     * @param x The top left x coordinate of the new quad\\n     * @param y The top left y coordinate of the new quad\\n     * @param data extra data to pass to the transfer\\n     */\\n    function mintQuad(address to, uint256 size, uint256 x, uint256 y, bytes calldata data) external {\\n        require(to != address(0), \\\"to is zero address\\\");\\n        require(\\n            isMinter(msg.sender),\\n            \\\"Only a minter can mint\\\"\\n        );\\n        require(x % size == 0 && y % size == 0, \\\"Invalid coordinates\\\");\\n        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, \\\"Out of bounds\\\");\\n\\n        uint256 quadId;\\n        uint256 id = x + y * GRID_SIZE;\\n\\n        if (size == 1) {\\n            quadId = id;\\n        } else if (size == 3) {\\n            quadId = LAYER_3x3 + id;\\n        } else if (size == 6) {\\n            quadId = LAYER_6x6 + id;\\n        } else if (size == 12) {\\n            quadId = LAYER_12x12 + id;\\n        } else if (size == 24) {\\n            quadId = LAYER_24x24 + id;\\n        } else {\\n            require(false, \\\"Invalid size\\\");\\n        }\\n\\n        require(_owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE] == 0, \\\"Already minted as 24x24\\\");\\n\\n        uint256 toX = x+size;\\n        uint256 toY = y+size;\\n        if (size <= 12) {\\n            require(\\n                _owners[LAYER_12x12 + (x/12) * 12 + ((y/12) * 12) * GRID_SIZE] == 0,\\n                \\\"Already minted as 12x12\\\"\\n            );\\n        } else {\\n            for (uint256 x12i = x; x12i < toX; x12i += 12) {\\n                for (uint256 y12i = y; y12i < toY; y12i += 12) {\\n                    uint256 id12x12 = LAYER_12x12 + x12i + y12i * GRID_SIZE;\\n                    require(_owners[id12x12] == 0, \\\"Already minted as 12x12\\\");\\n                }\\n            }\\n        }\\n\\n        if (size <= 6) {\\n            require(_owners[LAYER_6x6 + (x/6) * 6 + ((y/6) * 6) * GRID_SIZE] == 0, \\\"Already minted as 6x6\\\");\\n        } else {\\n            for (uint256 x6i = x; x6i < toX; x6i += 6) {\\n                for (uint256 y6i = y; y6i < toY; y6i += 6) {\\n                    uint256 id6x6 = LAYER_6x6 + x6i + y6i * GRID_SIZE;\\n                    require(_owners[id6x6] == 0, \\\"Already minted as 6x6\\\");\\n                }\\n            }\\n        }\\n\\n        if (size <= 3) {\\n            require(_owners[LAYER_3x3 + (x/3) * 3 + ((y/3) * 3) * GRID_SIZE] == 0, \\\"Already minted as 3x3\\\");\\n        } else {\\n            for (uint256 x3i = x; x3i < toX; x3i += 3) {\\n                for (uint256 y3i = y; y3i < toY; y3i += 3) {\\n                    uint256 id3x3 = LAYER_3x3 + x3i + y3i * GRID_SIZE;\\n                    require(_owners[id3x3] == 0, \\\"Already minted as 3x3\\\");\\n                }\\n            }\\n        }\\n\\n        for (uint256 i = 0; i < size*size; i++) {\\n            uint256 id = _idInPath(i, size, x, y);\\n            require(_owners[id] == 0, \\\"Already minted\\\");\\n            emit Transfer(address(0), to, id);\\n        }\\n\\n        _owners[quadId] = uint256(to);\\n        _numNFTPerAddress[to] += size * size;\\n\\n        _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);\\n    }\\n\\n    function _idInPath(uint256 i, uint256 size, uint256 x, uint256 y) internal pure returns(uint256) {\\n        uint256 row = i / size;\\n        if(row % 2 == 0) { // alow ids to follow a path in a quad\\n            return (x + (i%size)) + ((y + row) * GRID_SIZE);\\n        } else {\\n            return ((x + size) - (1 + i%size)) + ((y + row) * GRID_SIZE);\\n        }\\n    }\\n\\n    /// @notice transfer one quad (aligned to a quad tree with size 3, 6, 12 or 24 only)\\n    /// @param from current owner of the quad\\n    /// @param to destination\\n    /// @param size size of the quad\\n    /// @param x The top left x coordinate of the quad\\n    /// @param y The top left y coordinate of the quad\\n    /// @param data additional data\\n    function transferQuad(address from, address to, uint256 size, uint256 x, uint256 y, bytes calldata data) external {\\n        require(from != address(0), \\\"from is zero address\\\");\\n        require(to != address(0), \\\"can't send to zero address\\\");\\n        bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];\\n        if (msg.sender != from && !metaTx) {\\n            require(\\n                _superOperators[msg.sender] ||\\n                _operatorsForAll[from][msg.sender],\\n                \\\"not authorized to transferQuad\\\"\\n            );\\n        }\\n        _transferQuad(from, to, size, x, y);\\n        _numNFTPerAddress[from] -= size * size;\\n        _numNFTPerAddress[to] += size * size;\\n\\n        _checkBatchReceiverAcceptQuad(metaTx ? from : msg.sender, from, to, size, x, y, data);\\n    }\\n\\n    function _checkBatchReceiverAcceptQuad(\\n        address operator,\\n        address from,\\n        address to,\\n        uint256 size,\\n        uint256 x,\\n        uint256 y,\\n        bytes memory data\\n    ) internal {\\n        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {\\n            uint256[] memory ids = new uint256[](size*size);\\n            for (uint256 i = 0; i < size*size; i++) {\\n                ids[i] = _idInPath(i, size, x, y);\\n            }\\n            require(\\n                _checkOnERC721BatchReceived(operator, from, to, ids, data),\\n                \\\"erc721 batch transfer rejected by to\\\"\\n            );\\n        }\\n    }\\n\\n    /// @notice transfer multiple quad (aligned to a quad tree with size 3, 6, 12 or 24 only)\\n    /// @param from current owner of the quad\\n    /// @param to destination\\n    /// @param sizes list of sizes for each quad\\n    /// @param xs list of top left x coordinates for each quad\\n    /// @param ys list of top left y coordinates for each quad\\n    /// @param data additional data\\n    function batchTransferQuad(\\n        address from,\\n        address to,\\n        uint256[] calldata sizes,\\n        uint256[] calldata xs,\\n        uint256[] calldata ys,\\n        bytes calldata data\\n    ) external {\\n        require(from != address(0), \\\"from is zero address\\\");\\n        require(to != address(0), \\\"can't send to zero address\\\");\\n        require(sizes.length == xs.length && xs.length == ys.length, \\\"invalid data\\\");\\n        bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];\\n        if (msg.sender != from && !metaTx) {\\n            require(\\n                _superOperators[msg.sender] ||\\n                _operatorsForAll[from][msg.sender],\\n                \\\"not authorized to transferMultiQuads\\\"\\n            );\\n        }\\n        uint256 numTokensTransfered = 0;\\n        for (uint256 i = 0; i < sizes.length; i++) {\\n            uint256 size = sizes[i];\\n            _transferQuad(from, to, size, xs[i], ys[i]);\\n            numTokensTransfered += size * size;\\n        }\\n        _numNFTPerAddress[from] -= numTokensTransfered;\\n        _numNFTPerAddress[to] += numTokensTransfered;\\n\\n        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {\\n            uint256[] memory ids = new uint256[](numTokensTransfered);\\n            uint256 counter = 0;\\n            for (uint256 j = 0; j < sizes.length; j++) {\\n                uint256 size = sizes[j];\\n                for (uint256 i = 0; i < size*size; i++) {\\n                    ids[counter] = _idInPath(i, size, xs[j], ys[j]);\\n                    counter++;\\n                }\\n            }\\n            require(\\n                _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, data),\\n                \\\"erc721 batch transfer rejected by to\\\"\\n            );\\n        }\\n    }\\n\\n    function _transferQuad(address from, address to, uint256 size, uint256 x, uint256 y) internal {\\n        if (size == 1) {\\n            uint256 id1x1 = x + y * GRID_SIZE;\\n            address owner = _ownerOf(id1x1);\\n            require(owner != address(0), \\\"token does not exist\\\");\\n            require(owner == from, \\\"not owner in _transferQuad\\\");\\n            _owners[id1x1] = uint256(to);\\n        } else {\\n            _regroup(from, to, size, x, y);\\n        }\\n        for (uint256 i = 0; i < size*size; i++) {\\n            emit Transfer(from, to, _idInPath(i, size, x, y));\\n        }\\n    }\\n\\n    function _checkAndClear(address from, uint256 id) internal returns(bool) {\\n        uint256 owner = _owners[id];\\n        if (owner != 0) {\\n            require(address(owner) == from, \\\"not owner\\\");\\n            _owners[id] = 0;\\n            return true;\\n        }\\n        return false;\\n    }\\n\\n    function _regroup(address from, address to, uint256 size, uint256 x, uint256 y) internal {\\n        require(x % size == 0 && y % size == 0, \\\"Invalid coordinates\\\");\\n        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, \\\"Out of bounds\\\");\\n\\n        if (size == 3) {\\n            _regroup3x3(from, to, x, y, true);\\n        } else if (size == 6) {\\n            _regroup6x6(from, to, x, y, true);\\n        } else if (size == 12) {\\n            _regroup12x12(from, to, x, y, true);\\n        } else if (size == 24) {\\n            _regroup24x24(from, to, x, y, true);\\n        } else {\\n            require(false, \\\"Invalid size\\\");\\n        }\\n    }\\n\\n    function _regroup3x3(address from, address to, uint256 x, uint256 y, bool set) internal returns (bool) {\\n        uint256 id = x + y * GRID_SIZE;\\n        uint256 quadId = LAYER_3x3 + id;\\n        bool ownerOfAll = true;\\n        for (uint256 xi = x; xi < x+3; xi++) {\\n            for (uint256 yi = y; yi < y+3; yi++) {\\n                ownerOfAll = _checkAndClear(from, xi + yi * GRID_SIZE) && ownerOfAll;\\n            }\\n        }\\n        if(set) {\\n            if(!ownerOfAll) {\\n                require(\\n                    _owners[quadId] == uint256(from) ||\\n                    _owners[LAYER_6x6 + (x/6) * 6 + ((y/6) * 6) * GRID_SIZE] == uint256(from) ||\\n                    _owners[LAYER_12x12 + (x/12) * 12 + ((y/12) * 12) * GRID_SIZE] == uint256(from) ||\\n                    _owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE] == uint256(from),\\n                    \\\"not owner of all sub quads nor parent quads\\\"\\n                );\\n            }\\n            _owners[quadId] = uint256(to);\\n            return true;\\n        }\\n        return ownerOfAll;\\n    }\\n    function _regroup6x6(address from, address to, uint256 x, uint256 y, bool set) internal returns (bool) {\\n        uint256 id = x + y * GRID_SIZE;\\n        uint256 quadId = LAYER_6x6 + id;\\n        bool ownerOfAll = true;\\n        for (uint256 xi = x; xi < x+6; xi += 3) {\\n            for (uint256 yi = y; yi < y+6; yi += 3) {\\n                bool ownAllIndividual = _regroup3x3(from, to, xi, yi, false);\\n                uint256 id3x3 = LAYER_3x3 + xi + yi * GRID_SIZE;\\n                uint256 owner3x3 = _owners[id3x3];\\n                if (owner3x3 != 0) {\\n                    if(!ownAllIndividual) {\\n                        require(owner3x3 == uint256(from), \\\"not owner of 3x3 quad\\\");\\n                    }\\n                    _owners[id3x3] = 0;\\n                }\\n                ownerOfAll = (ownAllIndividual || owner3x3 != 0) && ownerOfAll;\\n            }\\n        }\\n        if(set) {\\n            if(!ownerOfAll) {\\n                require(\\n                    _owners[quadId] == uint256(from) ||\\n                    _owners[LAYER_12x12 + (x/12) * 12 + ((y/12) * 12) * GRID_SIZE] == uint256(from) ||\\n                    _owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE] == uint256(from),\\n                    \\\"not owner of all sub quads nor parent quads\\\"\\n                );\\n            }\\n            _owners[quadId] = uint256(to);\\n            return true;\\n        }\\n        return ownerOfAll;\\n    }\\n    function _regroup12x12(address from, address to, uint256 x, uint256 y, bool set) internal returns (bool) {\\n        uint256 id = x + y * GRID_SIZE;\\n        uint256 quadId = LAYER_12x12 + id;\\n        bool ownerOfAll = true;\\n        for (uint256 xi = x; xi < x+12; xi += 6) {\\n            for (uint256 yi = y; yi < y+12; yi += 6) {\\n                bool ownAllIndividual = _regroup6x6(from, to, xi, yi, false);\\n                uint256 id6x6 = LAYER_6x6 + xi + yi * GRID_SIZE;\\n                uint256 owner6x6 = _owners[id6x6];\\n                if (owner6x6 != 0) {\\n                    if(!ownAllIndividual) {\\n                        require(owner6x6 == uint256(from), \\\"not owner of 6x6 quad\\\");\\n                    }\\n                    _owners[id6x6] = 0;\\n                }\\n                ownerOfAll = (ownAllIndividual || owner6x6 != 0) && ownerOfAll;\\n            }\\n        }\\n        if(set) {\\n            if(!ownerOfAll) {\\n                require(\\n                    _owners[quadId] == uint256(from) ||\\n                    _owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE] == uint256(from),\\n                    \\\"not owner of all sub quads nor parent quads\\\"\\n                );\\n            }\\n            _owners[quadId] = uint256(to);\\n            return true;\\n        }\\n        return ownerOfAll;\\n    }\\n    function _regroup24x24(address from, address to, uint256 x, uint256 y, bool set) internal returns (bool) {\\n        uint256 id = x + y * GRID_SIZE;\\n        uint256 quadId = LAYER_24x24 + id;\\n        bool ownerOfAll = true;\\n        for (uint256 xi = x; xi < x+24; xi += 12) {\\n            for (uint256 yi = y; yi < y+24; yi += 12) {\\n                bool ownAllIndividual = _regroup12x12(from, to, xi, yi, false);\\n                uint256 id12x12 = LAYER_12x12 + xi + yi * GRID_SIZE;\\n                uint256 owner12x12 = _owners[id12x12];\\n                if (owner12x12 != 0) {\\n                    if(!ownAllIndividual) {\\n                        require(owner12x12 == uint256(from), \\\"not owner of 12x12 quad\\\");\\n                    }\\n                    _owners[id12x12] = 0;\\n                }\\n                ownerOfAll = (ownAllIndividual || owner12x12 != 0) && ownerOfAll;\\n            }\\n        }\\n        if(set) {\\n            if(!ownerOfAll) {\\n                require(\\n                    _owners[quadId] == uint256(from),\\n                    \\\"not owner of all sub quads not parent quad\\\"\\n                );\\n            }\\n            _owners[quadId] = uint256(to);\\n            return true;\\n        }\\n        return ownerOfAll || _owners[quadId] == uint256(from);\\n    }\\n\\n    function _ownerOf(uint256 id) internal view returns (address) {\\n        require(id & LAYER == 0, \\\"Invalid token id\\\");\\n        uint256 x = id % GRID_SIZE;\\n        uint256 y = id / GRID_SIZE;\\n        uint256 owner1x1 = _owners[id];\\n\\n        if (owner1x1 != 0) {\\n            return address(owner1x1); // cast to zero\\n        } else {\\n            address owner3x3 = address(_owners[LAYER_3x3 + (x/3) * 3 + ((y/3) * 3) * GRID_SIZE]);\\n            if (owner3x3 != address(0)) {\\n                return owner3x3;\\n            } else {\\n                address owner6x6 = address(_owners[LAYER_6x6 + (x/6) * 6 + ((y/6) * 6) * GRID_SIZE]);\\n                if (owner6x6 != address(0)) {\\n                    return owner6x6;\\n                } else {\\n                    address owner12x12 = address(_owners[LAYER_12x12 + (x/12) * 12 + ((y/12) * 12) * GRID_SIZE]);\\n                    if (owner12x12 != address(0)) {\\n                        return owner12x12;\\n                    } else {\\n                        return address(_owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE]);\\n                    }\\n                }\\n            }\\n        }\\n    }\\n\\n    function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {\\n        require(id & LAYER == 0, \\\"Invalid token id\\\");\\n        uint256 x = id % GRID_SIZE;\\n        uint256 y = id / GRID_SIZE;\\n        uint256 owner1x1 = _owners[id];\\n\\n        if (owner1x1 != 0) {\\n            owner = address(owner1x1);\\n            operatorEnabled = (owner1x1 / 2**255) == 1;\\n        } else {\\n            address owner3x3 = address(_owners[LAYER_3x3 + (x/3) * 3 + ((y/3) * 3) * GRID_SIZE]);\\n            if (owner3x3 != address(0)) {\\n                owner = owner3x3;\\n                operatorEnabled = false;\\n            } else {\\n                address owner6x6 = address(_owners[LAYER_6x6 + (x/6) * 6 + ((y/6) * 6) * GRID_SIZE]);\\n                if (owner6x6 != address(0)) {\\n                    owner = owner6x6;\\n                    operatorEnabled = false;\\n                } else {\\n                    address owner12x12 = address(_owners[LAYER_12x12 + (x/12) * 12 + ((y/12) * 12) * GRID_SIZE]);\\n                    if (owner12x12 != address(0)) {\\n                        owner = owner12x12;\\n                        operatorEnabled = false;\\n                    } else {\\n                        owner = address(_owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE]);\\n                        operatorEnabled = false;\\n                    }\\n                }\\n            }\\n        }\\n    }\\n\\n}\\n\",\"keccak256\":\"0xa6aed274b1cbb8ad60bfe17506b73da798ff64aa08ef30137a4021a0ef0996dd\"},\"src/LandSale/LandSaleWithReferral.sol\":{\"content\":\"/* solhint-disable not-rely-on-time, func-order */\\n\\npragma solidity 0.5.9;\\n\\nimport \\\"../../contracts_common/src/Libraries/SafeMathWithRequire.sol\\\";\\nimport \\\"../Land.sol\\\";\\nimport \\\"../../contracts_common/src/Interfaces/ERC20.sol\\\";\\nimport \\\"../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol\\\";\\nimport \\\"../../contracts_common/src/Interfaces/Medianizer.sol\\\";\\nimport \\\"../ReferralValidator/ReferralValidator.sol\\\";\\n\\n\\n/**\\n * @title Land Sale contract with referral that supports also DAI and ETH as payment\\n * @notice This contract mananges the sale of our lands\\n */\\ncontract LandSaleWithReferral is MetaTransactionReceiver, ReferralValidator {\\n    using SafeMathWithRequire for uint256;\\n\\n    uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land\\n    uint256 internal constant daiPrice = 14400000000000000;\\n\\n    Land internal _land;\\n    ERC20 internal _sand;\\n    Medianizer private _medianizer;\\n    ERC20 private _dai;\\n\\n    address payable internal _wallet;\\n    uint256 internal _expiryTime;\\n    bytes32 internal _merkleRoot;\\n\\n    bool _sandEnabled = false;\\n    bool _etherEnabled = true;\\n    bool _daiEnabled = false;\\n\\n    event LandQuadPurchased(\\n        address indexed buyer,\\n        address indexed to,\\n        uint256 indexed topCornerId,\\n        uint256 size,\\n        uint256 price,\\n        address token,\\n        uint256 amountPaid\\n    );\\n\\n    constructor(\\n        address landAddress,\\n        address sandContractAddress,\\n        address initialMetaTx,\\n        address admin,\\n        address payable initialWalletAddress,\\n        bytes32 merkleRoot,\\n        uint256 expiryTime,\\n        address medianizerContractAddress,\\n        address daiTokenContractAddress,\\n        address initialSigningWallet,\\n        uint256 initialMaxCommissionRate\\n    ) public ReferralValidator(\\n        initialSigningWallet,\\n        initialMaxCommissionRate\\n    ) {\\n        _land = Land(landAddress);\\n        _sand = ERC20(sandContractAddress);\\n        _setMetaTransactionProcessor(initialMetaTx, true);\\n        _wallet = initialWalletAddress;\\n        _merkleRoot = merkleRoot;\\n        _expiryTime = expiryTime;\\n        _medianizer = Medianizer(medianizerContractAddress);\\n        _dai = ERC20(daiTokenContractAddress);\\n        _admin = admin;\\n    }\\n\\n    /// @notice set the wallet receiving the proceeds\\n    /// @param newWallet address of the new receiving wallet\\n    function setReceivingWallet(address payable newWallet) external{\\n        require(newWallet != address(0), \\\"receiving wallet cannot be zero address\\\");\\n        require(msg.sender == _admin, \\\"only admin can change the receiving wallet\\\");\\n        _wallet = newWallet;\\n    }\\n\\n    /// @notice enable/disable DAI payment for Lands\\n    /// @param enabled whether to enable or disable\\n    function setDAIEnabled(bool enabled) external {\\n        require(msg.sender == _admin, \\\"only admin can enable/disable DAI\\\");\\n        _daiEnabled = enabled;\\n    }\\n\\n    /// @notice return whether DAI payments are enabled\\n    /// @return whether DAI payments are enabled\\n    function isDAIEnabled() external view returns (bool) {\\n        return _daiEnabled;\\n    }\\n\\n    /// @notice enable/disable ETH payment for Lands\\n    /// @param enabled whether to enable or disable\\n    function setETHEnabled(bool enabled) external {\\n        require(msg.sender == _admin, \\\"only admin can enable/disable ETH\\\");\\n        _etherEnabled = enabled;\\n    }\\n\\n    /// @notice return whether ETH payments are enabled\\n    /// @return whether ETH payments are enabled\\n    function isETHEnabled() external view returns (bool) {\\n        return _etherEnabled;\\n    }\\n\\n    /// @notice enable/disable the specific SAND payment for Lands\\n    /// @param enabled whether to enable or disable\\n    function setSANDEnabled(bool enabled) external {\\n        require(msg.sender == _admin, \\\"only admin can enable/disable SAND\\\");\\n        _sandEnabled = enabled;\\n    }\\n\\n    /// @notice return whether the specific SAND payments are enabled\\n    /// @return whether the specific SAND payments are enabled\\n    function isSANDEnabled() external view returns (bool) {\\n        return _sandEnabled;\\n    }\\n\\n    function _checkValidity(\\n        address buyer,\\n        address reserved,\\n        uint256 x,\\n        uint256 y,\\n        uint256 size,\\n        uint256 price,\\n        bytes32 salt,\\n        bytes32[] memory proof\\n    ) internal view {\\n        /* solium-disable-next-line security/no-block-members */\\n        require(block.timestamp < _expiryTime, \\\"sale is over\\\");\\n        require(buyer == msg.sender || _metaTransactionContracts[msg.sender], \\\"not authorized\\\");\\n        require(reserved == address(0) || reserved == buyer, \\\"cannot buy reserved Land\\\");\\n        bytes32 leaf = _generateLandHash(x, y, size, price, reserved, salt);\\n\\n        require(\\n            _verify(proof, leaf),\\n            \\\"Invalid land provided\\\"\\n        );\\n    }\\n\\n    function _mint(address buyer, address to, uint256 x, uint256 y, uint256 size, uint256 price, address token, uint256 tokenAmount) internal {\\n        uint256[] memory junctions = new uint256[](0);\\n        _land.mintQuad(to, size, x, y, abi.encode(to, junctions));\\n        emit LandQuadPurchased(buyer, to, x + (y * GRID_SIZE), size, price, token, tokenAmount);\\n    }\\n\\n    /**\\n     * @notice buy Land with SAND using the merkle proof associated with it\\n     * @param buyer address that perform the payment\\n     * @param to address that will own the purchased Land\\n     * @param reserved the reserved address (if any)\\n     * @param x x coordinate of the Land\\n     * @param y y coordinate of the Land\\n     * @param size size of the pack of Land to purchase\\n     * @param priceInSand price in SAND to purchase that Land\\n     * @param proof merkleProof for that particular Land\\n     * @return The address of the operator\\n     */\\n    function buyLandWithSand(\\n        address buyer,\\n        address to,\\n        address reserved,\\n        uint256 x,\\n        uint256 y,\\n        uint256 size,\\n        uint256 priceInSand,\\n        bytes32 salt,\\n        bytes32[] calldata proof,\\n        bytes calldata referral\\n    ) external {\\n        require(_sandEnabled, \\\"sand payments not enabled\\\");\\n        _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);\\n\\n        handleReferralWithERC20(\\n            buyer,\\n            priceInSand,\\n            referral,\\n            _wallet,\\n            address(_sand)\\n        );\\n\\n        _mint(buyer, to, x, y, size, priceInSand, address(_sand), priceInSand);\\n    }\\n\\n    /**\\n     * @notice buy Land with ETH using the merkle proof associated with it\\n     * @param buyer address that perform the payment\\n     * @param to address that will own the purchased Land\\n     * @param reserved the reserved address (if any)\\n     * @param x x coordinate of the Land\\n     * @param y y coordinate of the Land\\n     * @param size size of the pack of Land to purchase\\n     * @param priceInSand price in SAND to purchase that Land\\n     * @param proof merkleProof for that particular Land\\n     * @param referral the referral used by the buyer\\n     * @return The address of the operator\\n     */\\n    function buyLandWithETH(\\n        address buyer,\\n        address to,\\n        address reserved,\\n        uint256 x,\\n        uint256 y,\\n        uint256 size,\\n        uint256 priceInSand,\\n        bytes32 salt,\\n        bytes32[] calldata proof,\\n        bytes calldata referral\\n    ) external payable {\\n        require(_etherEnabled, \\\"ether payments not enabled\\\");\\n        _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);\\n\\n        uint256 ETHRequired = getEtherAmountWithSAND(priceInSand);\\n        require(msg.value >= ETHRequired, \\\"not enough ether sent\\\");\\n\\n        if (msg.value - ETHRequired > 0) {\\n            msg.sender.transfer(msg.value - ETHRequired); // refund extra\\n        }\\n\\n        handleReferralWithETH(\\n            ETHRequired,\\n            referral,\\n            _wallet\\n        );\\n\\n        _mint(buyer, to, x, y, size, priceInSand, address(0), ETHRequired);\\n    }\\n\\n    /**\\n     * @notice buy Land with DAI using the merkle proof associated with it\\n     * @param buyer address that perform the payment\\n     * @param to address that will own the purchased Land\\n     * @param reserved the reserved address (if any)\\n     * @param x x coordinate of the Land\\n     * @param y y coordinate of the Land\\n     * @param size size of the pack of Land to purchase\\n     * @param priceInSand price in SAND to purchase that Land\\n     * @param proof merkleProof for that particular Land\\n     * @return The address of the operator\\n     */\\n    function buyLandWithDAI(\\n        address buyer,\\n        address to,\\n        address reserved,\\n        uint256 x,\\n        uint256 y,\\n        uint256 size,\\n        uint256 priceInSand,\\n        bytes32 salt,\\n        bytes32[] calldata proof,\\n        bytes calldata referral\\n    ) external {\\n        require(_daiEnabled, \\\"dai payments not enabled\\\");\\n        _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);\\n\\n        uint256 DAIRequired = priceInSand.mul(daiPrice).div(1000000000000000000);\\n\\n        handleReferralWithERC20(\\n            buyer,\\n            DAIRequired,\\n            referral,\\n            _wallet,\\n            address(_dai)\\n        );\\n\\n        _mint(buyer, to, x, y, size, priceInSand, address(_dai), DAIRequired);\\n    }\\n\\n    /**\\n     * @notice Gets the expiry time for the current sale\\n     * @return The expiry time, as a unix epoch\\n     */\\n    function getExpiryTime() external view returns(uint256) {\\n        return _expiryTime;\\n    }\\n\\n    /**\\n     * @notice Gets the Merkle root associated with the current sale\\n     * @return The Merkle root, as a bytes32 hash\\n     */\\n    function merkleRoot() external view returns(bytes32) {\\n        return _merkleRoot;\\n    }\\n\\n    function _generateLandHash(\\n        uint256 x,\\n        uint256 y,\\n        uint256 size,\\n        uint256 price,\\n        address reserved,\\n        bytes32 salt\\n    ) internal pure returns (\\n        bytes32\\n    ) {\\n        return keccak256(\\n            abi.encodePacked(\\n                x,\\n                y,\\n                size,\\n                price,\\n                reserved,\\n                salt\\n            )\\n        );\\n    }\\n\\n    function _verify(bytes32[] memory proof, bytes32 leaf) internal view returns (bool) {\\n        bytes32 computedHash = leaf;\\n\\n        for (uint256 i = 0; i < proof.length; i++) {\\n            bytes32 proofElement = proof[i];\\n\\n            if (computedHash < proofElement) {\\n                computedHash = keccak256(abi.encodePacked(computedHash, proofElement));\\n            } else {\\n                computedHash = keccak256(abi.encodePacked(proofElement, computedHash));\\n            }\\n        }\\n\\n        return computedHash == _merkleRoot;\\n    }\\n\\n    /**\\n     * @notice Returns the amount of ETH for a specific amount of SAND\\n     * @param sandAmount An amount of SAND\\n     * @return The amount of ETH\\n     */\\n    function getEtherAmountWithSAND(uint256 sandAmount) public view returns (uint256) {\\n        uint256 ethUsdPair = getEthUsdPair();\\n        return sandAmount.mul(daiPrice).div(ethUsdPair);\\n    }\\n\\n    /**\\n     * @notice Gets the ETHUSD pair from the Medianizer contract\\n     * @return The pair as an uint256\\n     */\\n    function getEthUsdPair() internal view returns (uint256) {\\n        bytes32 pair = _medianizer.read();\\n        return uint256(pair);\\n    }\\n}\\n\",\"keccak256\":\"0x4f7672c3f8ffa1f8f418910f2fb966bee95f4083be02a552c5285196e064925b\"},\"src/ReferralValidator/ReferralValidator.sol\":{\"content\":\"/* solhint-disable not-rely-on-time, func-order */\\n\\npragma solidity 0.5.9;\\n\\nimport \\\"../../contracts_common/src/Libraries/SigUtil.sol\\\";\\nimport \\\"../../contracts_common/src/Libraries/SafeMathWithRequire.sol\\\";\\nimport \\\"../../contracts_common/src/Interfaces/ERC20.sol\\\";\\nimport \\\"../../contracts_common/src/BaseWithStorage/Admin.sol\\\";\\n\\n\\n/**\\n * @title Referral Validator\\n * @notice This contract verifies if a referral is valid\\n */\\ncontract ReferralValidator is Admin {\\n    address private _signingWallet;\\n    uint256 private _maxCommissionRate;\\n\\n    mapping (address => uint256) private _previousSigningWallets;\\n    uint256 private _previousSigningDelay = 60 * 60 * 24 * 10;\\n\\n    event ReferralUsed(\\n        address indexed referrer,\\n        address indexed referee,\\n        address indexed token,\\n        uint256 amount,\\n        uint256 commission,\\n        uint256 commissionRate\\n    );\\n\\n    constructor(\\n        address initialSigningWallet,\\n        uint256 initialMaxCommissionRate\\n    ) public {\\n        _signingWallet = initialSigningWallet;\\n        _maxCommissionRate = initialMaxCommissionRate;\\n    }\\n\\n    /**\\n     * @notice Update the signing wallet\\n     * @param newSigningWallet The new address of the signing wallet\\n     */\\n    function updateSigningWallet(address newSigningWallet) external {\\n        require(_admin == msg.sender, \\\"Sender not admin\\\");\\n        _previousSigningWallets[_signingWallet] = now + _previousSigningDelay;\\n        _signingWallet = newSigningWallet;\\n    }\\n\\n    // TODO: Check if this function is really useful\\n    /**\\n     * @notice Update the maximum commission rate\\n     * @param newMaxCommissionRate The new maximum commission rate\\n     */\\n    function updateMaxCommissionRate(uint256 newMaxCommissionRate) external {\\n        require(_admin == msg.sender, \\\"Sender not admin\\\");\\n        _maxCommissionRate = newMaxCommissionRate;\\n    }\\n\\n    function handleReferralWithETH(\\n        uint256 amount,\\n        bytes memory referral,\\n        address payable destination\\n    ) internal {\\n        uint256 amountForDestination = amount;\\n\\n        if (referral.length > 0) {\\n            (\\n                bytes memory signature,\\n                address referrer,\\n                address referee,\\n                uint256 expiryTime,\\n                uint256 commissionRate\\n            ) = decodeReferral(referral);\\n\\n            uint256 commission = 0;\\n\\n            if (isReferralValid(signature, referrer, referee, expiryTime, commissionRate)) {\\n                commission = SafeMathWithRequire.div(\\n                    SafeMathWithRequire.mul(amount, commissionRate),\\n                    10000\\n                );\\n\\n                emit ReferralUsed(\\n                    referrer,\\n                    referee,\\n                    address(0),\\n                    amount,\\n                    commission,\\n                    commissionRate\\n                );\\n                amountForDestination = SafeMathWithRequire.sub(\\n                    amountForDestination,\\n                    commission\\n                );\\n            }\\n\\n            if (commission > 0) {\\n                address(uint160(referrer)).transfer(commission);\\n            }\\n        }\\n\\n        destination.transfer(amountForDestination);\\n    }\\n\\n    function handleReferralWithERC20(\\n        address buyer,\\n        uint256 amount,\\n        bytes memory referral,\\n        address payable destination,\\n        address tokenAddress\\n    ) internal {\\n        ERC20 token = ERC20(tokenAddress);\\n        uint256 amountForDestination = amount;\\n\\n        if (referral.length > 0) {\\n            (\\n                bytes memory signature,\\n                address referrer,\\n                address referee,\\n                uint256 expiryTime,\\n                uint256 commissionRate\\n            ) = decodeReferral(referral);\\n\\n            uint256 commission = 0;\\n\\n            if (isReferralValid(signature, referrer, referee, expiryTime, commissionRate)) {\\n                commission = SafeMathWithRequire.div(\\n                    SafeMathWithRequire.mul(amount, commissionRate),\\n                    10000\\n                );\\n\\n                emit ReferralUsed(\\n                    referrer,\\n                    referee,\\n                    tokenAddress,\\n                    amount,\\n                    commission,\\n                    commissionRate\\n                );\\n                amountForDestination = SafeMathWithRequire.sub(\\n                    amountForDestination,\\n                    commission\\n                );\\n            }\\n\\n            if (commission > 0) {\\n                require(token.transferFrom(buyer, referrer, commission), \\\"commision transfer failed\\\");\\n            }\\n        }\\n\\n        require(token.transferFrom(buyer, destination, amountForDestination), \\\"payment transfer failed\\\");\\n    }\\n\\n    /**\\n     * @notice Check if a referral is valid\\n     * @param signature The signature to check (signed referral)\\n     * @param referrer The address of the referrer\\n     * @param referee The address of the referee\\n     * @param expiryTime The expiry time of the referral\\n     * @param commissionRate The commissionRate of the referral\\n     * @return True if the referral is valid\\n     */\\n    function isReferralValid(\\n        bytes memory signature,\\n        address referrer,\\n        address referee,\\n        uint256 expiryTime,\\n        uint256 commissionRate\\n    ) public view returns (\\n        bool\\n    ) {\\n        if (commissionRate > _maxCommissionRate || referrer == referee || now > expiryTime) {\\n            return false;\\n        }\\n\\n        bytes32 hashedData = keccak256(\\n            abi.encodePacked(\\n                referrer,\\n                referee,\\n                expiryTime,\\n                commissionRate\\n            )\\n        );\\n\\n        address signer = SigUtil.recover(\\n            keccak256(\\n                abi.encodePacked(\\\"\\\\x19Ethereum Signed Message:\\\\n32\\\", hashedData)\\n            ),\\n            signature\\n        );\\n\\n        if (_previousSigningWallets[signer] >= now) {\\n            return true;\\n        }\\n\\n        return _signingWallet == signer;\\n    }\\n\\n    function decodeReferral(\\n        bytes memory referral\\n    ) public pure returns (\\n        bytes memory,\\n        address,\\n        address,\\n        uint256,\\n        uint256\\n    ) {\\n        (\\n            bytes memory signature,\\n            address referrer,\\n            address referee,\\n            uint256 expiryTime,\\n            uint256 commissionRate\\n        ) = abi.decode(referral, (bytes, address, address, uint256, uint256));\\n\\n        return (\\n            signature,\\n            referrer,\\n            referee,\\n            expiryTime,\\n            commissionRate\\n        );\\n    }\\n}\\n\",\"keccak256\":\"0x3530ad19bf86c6e50e965ef3528ec75e362f9b24f80a5d0b4f7465b5353a8858\"}},\"version\":1}",
+  "bytecode": "0x6080604052620d2f00600555600d805462ff00001961ffff199091166101001716905534801561002e57600080fd5b50604051612260380380612260833981810160405261016081101561005257600080fd5b508051602082015160408301516060840151608085015160a086015160c087015160e08801516101008901516101208a0151610140909a0151600280546001600160a01b03808e166001600160a01b031992831617909255600383905560068054838e1690831617905560078054928c1692909116919091179055989997989697959694959394929391929091906100f48960016001600160e01b0361015916565b5050600a80546001600160a01b03199081166001600160a01b0397881617909155600c94909455600b929092556008805484169185169190911790556009805483169184169190911790556000805490911692909116919091179055506101bd915050565b6001600160a01b038216600081815260016020908152604091829020805460ff191685151590811790915582519384529083015280517fb21eb88b4e33b3f1281830a7178d74d8aa73220416215726b68ae23d539515cb9281900390910190a15050565b612094806101cc6000396000f3fe60806040526004361061016a5760003560e01c80637c53ec4c116100cb578063c10a42081161007f578063e0a1f1c711610059578063e0a1f1c71461080c578063e56f8a9e1461091e578063e97eb0a2146109485761016a565b8063c10a420814610604578063c2bddf26146106d4578063dc5074af146107d95761016a565b80638f283970116100b05780638f28397014610589578063a7e30684146105bc578063b522ecff146105d15761016a565b80637c53ec4c146105225780638a04af6a1461054e5761016a565b80634a253778116101225780635d8e3021116101075780635d8e30211461035c57806365194ce7146103865780636e9960c3146104f15761016a565b80634a2537781461031457806358bc2944146103295761016a565b80633b7c4c15116101535780633b7c4c15146101ab5780633be3b0e2146101d9578063427b8d34146102eb5761016a565b806325cb5bc01461016f5780632eb4a7ab14610196575b600080fd5b34801561017b57600080fd5b50610184610974565b60408051918252519081900360200190f35b3480156101a257600080fd5b5061018461097a565b3480156101b757600080fd5b506101d7600480360360208110156101ce57600080fd5b50351515610980565b005b3480156101e557600080fd5b506101d760048036036101408110156101fd57600080fd5b6001600160a01b038235811692602081013582169260408201359092169160608201359160808101359160a08201359160c08101359160e08201359190810190610120810161010082013564010000000081111561025a57600080fd5b82018360208201111561026c57600080fd5b8035906020019184602083028401116401000000008311171561028e57600080fd5b9193909290916020810190356401000000008111156102ac57600080fd5b8201836020820111156102be57600080fd5b803590602001918460018302840111640100000000831117156102e057600080fd5b509092509050610a01565b3480156102f757600080fd5b50610300610b5c565b604080519115158252519081900360200190f35b34801561032057600080fd5b50610300610b6b565b34801561033557600080fd5b506101d76004803603602081101561034c57600080fd5b50356001600160a01b0316610b79565b34801561036857600080fd5b506101846004803603602081101561037f57600080fd5b5035610c24565b34801561039257600080fd5b50610439600480360360208110156103a957600080fd5b8101906020810181356401000000008111156103c457600080fd5b8201836020820111156103d657600080fd5b803590602001918460018302840111640100000000831117156103f857600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600092019190915250929550610c53945050505050565b6040518080602001866001600160a01b03166001600160a01b03168152602001856001600160a01b03166001600160a01b03168152602001848152602001838152602001828103825287818151815260200191508051906020019080838360005b838110156104b257818101518382015260200161049a565b50505050905090810190601f1680156104df5780820380516001836020036101000a031916815260200191505b50965050505050505060405180910390f35b3480156104fd57600080fd5b50610506610cf1565b604080516001600160a01b039092168252519081900360200190f35b34801561052e57600080fd5b506101d76004803603602081101561054557600080fd5b50351515610d00565b34801561055a57600080fd5b506101d76004803603604081101561057157600080fd5b506001600160a01b0381351690602001351515610d5c565b34801561059557600080fd5b506101d7600480360360208110156105ac57600080fd5b50356001600160a01b0316610db3565b3480156105c857600080fd5b50610300610e89565b3480156105dd57600080fd5b506101d7600480360360208110156105f457600080fd5b50356001600160a01b0316610e92565b34801561061057600080fd5b50610300600480360360a081101561062757600080fd5b81019060208101813564010000000081111561064257600080fd5b82018360208201111561065457600080fd5b8035906020019184600183028401116401000000008311171561067657600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600092019190915250929550506001600160a01b038335811694506020840135169260408101359250606001359050610f4f565b6101d760048036036101408110156106eb57600080fd5b6001600160a01b038235811692602081013582169260408201359092169160608201359160808101359160a08201359160c08101359160e08201359190810190610120810161010082013564010000000081111561074857600080fd5b82018360208201111561075a57600080fd5b8035906020019184602083028401116401000000008311171561077c57600080fd5b91939092909160208101903564010000000081111561079a57600080fd5b8201836020820111156107ac57600080fd5b803590602001918460018302840111640100000000831117156107ce57600080fd5b509092509050611078565b3480156107e557600080fd5b50610300600480360360208110156107fc57600080fd5b50356001600160a01b0316611211565b34801561081857600080fd5b506101d7600480360361014081101561083057600080fd5b6001600160a01b038235811692602081013582169260408201359092169160608201359160808101359160a08201359160c08101359160e08201359190810190610120810161010082013564010000000081111561088d57600080fd5b82018360208201111561089f57600080fd5b803590602001918460208302840111640100000000831117156108c157600080fd5b9193909290916020810190356401000000008111156108df57600080fd5b8201836020820111156108f157600080fd5b8035906020019184600183028401116401000000008311171561091357600080fd5b50909250905061122f565b34801561092a57600080fd5b506101d76004803603602081101561094157600080fd5b5035611350565b34801561095457600080fd5b506101d76004803603602081101561096b57600080fd5b503515156113b4565b600b5490565b600c5490565b6000546001600160a01b031633146109c95760405162461bcd60e51b815260040180806020018281038252602181526020018061203f6021913960400191505060405180910390fd5b600d805491151562010000027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00ffff909216919091179055565b600d5462010000900460ff16610a5e576040805162461bcd60e51b815260206004820152601860248201527f646169207061796d656e7473206e6f7420656e61626c65640000000000000000604482015290519081900360640190fd5b610aa18c8b8b8b8b8b8b8b8b8080602002602001604051908101604052809392919081815260200183836020028082843760009201919091525061143492505050565b6000610ad2670de0b6b3a7640000610ac689663328b944c4000063ffffffff6115f116565b9063ffffffff61166716565b9050610b288d8285858080601f01602080910402602001604051908101604052809392919081815260200183838082843760009201919091525050600a546009546001600160a01b03918216935016905061167a565b610b4d8d8d8c8c8c8c600960009054906101000a90046001600160a01b031688611937565b50505050505050505050505050565b600d5462010000900460ff1690565b600d54610100900460ff1690565b6000546001600160a01b03163314610bd8576040805162461bcd60e51b815260206004820152601060248201527f53656e646572206e6f742061646d696e00000000000000000000000000000000604482015290519081900360640190fd5b600554600280546001600160a01b03908116600090815260046020526040902042909301909255805473ffffffffffffffffffffffffffffffffffffffff191692909116919091179055565b600080610c2f611b36565b9050610c4c81610ac685663328b944c4000063ffffffff6115f116565b9392505050565b606060008060008060606000806000808a80602001905160a0811015610c7857600080fd5b810190808051640100000000811115610c9057600080fd5b82016020810184811115610ca357600080fd5b8151640100000000811182820187101715610cbd57600080fd5b5050602082015160408301516060840151608090940151929f50909d509b5090995097505050505050505091939590929450565b6000546001600160a01b031690565b6000546001600160a01b03163314610d495760405162461bcd60e51b8152600401808060200182810382526022815260200180611fef6022913960400191505060405180910390fd5b600d805460ff1916911515919091179055565b6000546001600160a01b03163314610da55760405162461bcd60e51b815260040180806020018281038252602e815260200180612011602e913960400191505060405180910390fd5b610daf8282611bb9565b5050565b6000546001600160a01b03163314610e12576040805162461bcd60e51b815260206004820152601b60248201527f6f6e6c792061646d696e2063616e206368616e67652061646d696e0000000000604482015290519081900360640190fd5b600054604080516001600160a01b039283168152918316602083015280517f7e644d79422f17c01e4894b5f4f588d331ebfa28653d42ae832dc59e38c9798f9281900390910190a16000805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b600d5460ff1690565b6001600160a01b038116610ed75760405162461bcd60e51b8152600401808060200182810382526027815260200180611f9e6027913960400191505060405180910390fd5b6000546001600160a01b03163314610f205760405162461bcd60e51b815260040180806020018281038252602a815260200180611fc5602a913960400191505060405180910390fd5b600a805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b6000600354821180610f725750836001600160a01b0316856001600160a01b0316145b80610f7c57508242115b15610f895750600061106f565b60408051606087811b6bffffffffffffffffffffffff199081166020808501919091529188901b166034830152604882018690526068808301869052835180840390910181526088830184528051908201207f19457468657265756d205369676e6564204d6573736167653a0a33320000000060a884015260c48084018290528451808503909101815260e4909301909352815191012060009061102d9089611c1d565b6001600160a01b038116600090815260046020526040902054909150421161105a5760019250505061106f565b6002546001600160a01b039081169116149150505b95945050505050565b600d54610100900460ff166110d4576040805162461bcd60e51b815260206004820152601a60248201527f6574686572207061796d656e7473206e6f7420656e61626c6564000000000000604482015290519081900360640190fd5b6111178c8b8b8b8b8b8b8b8b8080602002602001604051908101604052809392919081815260200183836020028082843760009201919091525061143492505050565b600061112287610c24565b905080341015611179576040805162461bcd60e51b815260206004820152601560248201527f6e6f7420656e6f7567682065746865722073656e740000000000000000000000604482015290519081900360640190fd5b34819003156111b35760405133903483900380156108fc02916000818181858888f193505050501580156111b1573d6000803e3d6000fd5b505b6112008184848080601f01602080910402602001604051908101604052809392919081815260200183838082843760009201919091525050600a546001600160a01b03169150611cea9050565b610b4d8d8d8c8c8c8c600088611937565b6001600160a01b031660009081526001602052604090205460ff1690565b600d5460ff16611286576040805162461bcd60e51b815260206004820152601960248201527f73616e64207061796d656e7473206e6f7420656e61626c656400000000000000604482015290519081900360640190fd5b6112c98c8b8b8b8b8b8b8b8b8080602002602001604051908101604052809392919081815260200183836020028082843760009201919091525061143492505050565b61131d8c8784848080601f01602080910402602001604051908101604052809392919081815260200183838082843760009201919091525050600a546007546001600160a01b03918216935016905061167a565b6113428c8c8b8b8b8b600760009054906101000a90046001600160a01b03168d611937565b505050505050505050505050565b6000546001600160a01b031633146113af576040805162461bcd60e51b815260206004820152601060248201527f53656e646572206e6f742061646d696e00000000000000000000000000000000604482015290519081900360640190fd5b600355565b6000546001600160a01b031633146113fd5760405162461bcd60e51b8152600401808060200182810382526021815260200180611f7d6021913960400191505060405180910390fd5b600d8054911515610100027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00ff909216919091179055565b600b54421061148a576040805162461bcd60e51b815260206004820152600c60248201527f73616c65206973206f7665720000000000000000000000000000000000000000604482015290519081900360640190fd5b6001600160a01b0388163314806114b057503360009081526001602052604090205460ff165b611501576040805162461bcd60e51b815260206004820152600e60248201527f6e6f7420617574686f72697a6564000000000000000000000000000000000000604482015290519081900360640190fd5b6001600160a01b03871615806115285750876001600160a01b0316876001600160a01b0316145b611579576040805162461bcd60e51b815260206004820152601860248201527f63616e6e6f7420627579207265736572766564204c616e640000000000000000604482015290519081900360640190fd5b6000611589878787878c88611e16565b90506115958282611e74565b6115e6576040805162461bcd60e51b815260206004820152601560248201527f496e76616c6964206c616e642070726f76696465640000000000000000000000604482015290519081900360640190fd5b505050505050505050565b60008261160057506000611661565b508181028183828161160e57fe5b0414611661576040805162461bcd60e51b815260206004820152600860248201527f6f766572666c6f77000000000000000000000000000000000000000000000000604482015290519081900360640190fd5b92915050565b600081838161167257fe5b049392505050565b8251819085901561183d5760606000806000806116968a610c53565b93985091965094509250905060006116b18686868686610f4f565b1561173f576116cb6116c38d846115f1565b612710611667565b9050886001600160a01b0316846001600160a01b0316866001600160a01b03167fac7a699eb95c3c6d390ec4626de17ef9a67b35891efdb197beba7c7fdd45fac48f858760405180848152602001838152602001828152602001935050505060405180910390a461173c8782611f1f565b96505b801561183657604080517f23b872dd0000000000000000000000000000000000000000000000000000000081526001600160a01b038f811660048301528781166024830152604482018490529151918a16916323b872dd916064808201926020929091908290030181600087803b1580156117b957600080fd5b505af11580156117cd573d6000803e3d6000fd5b505050506040513d60208110156117e357600080fd5b5051611836576040805162461bcd60e51b815260206004820152601960248201527f636f6d6d6973696f6e207472616e73666572206661696c656400000000000000604482015290519081900360640190fd5b5050505050505b604080517f23b872dd0000000000000000000000000000000000000000000000000000000081526001600160a01b0389811660048301528681166024830152604482018490529151918416916323b872dd916064808201926020929091908290030181600087803b1580156118b157600080fd5b505af11580156118c5573d6000803e3d6000fd5b505050506040513d60208110156118db57600080fd5b505161192e576040805162461bcd60e51b815260206004820152601760248201527f7061796d656e74207472616e73666572206661696c6564000000000000000000604482015290519081900360640190fd5b50505050505050565b60408051600080825260208201909252606091509050600660009054906101000a90046001600160a01b03166001600160a01b0316636e1e3bbf89878a8a8d8760405160200180836001600160a01b03166001600160a01b0316815260200180602001828103825283818151815260200191508051906020019060200280838360005b838110156119d25781810151838201526020016119ba565b5050505090500193505050506040516020818303038152906040526040518663ffffffff1660e01b815260040180866001600160a01b03166001600160a01b0316815260200185815260200184815260200183815260200180602001828103825283818151815260200191508051906020019080838360005b83811015611a63578181015183820152602001611a4b565b50505050905090810190601f168015611a905780820380516001836020036101000a031916815260200191505b509650505050505050600060405180830381600087803b158015611ab357600080fd5b505af1158015611ac7573d6000803e3d6000fd5b505060408051888152602081018890526001600160a01b03878116828401526060820187905291516101988b028c019450828d169350918d16917fe4dfa6ac11314892f3029b34a25b1a887da3b1cab2bbf8506d87128ba6e3ac029181900360800190a4505050505050505050565b600080600860009054906101000a90046001600160a01b03166001600160a01b03166357de26a46040518163ffffffff1660e01b815260040160206040518083038186803b158015611b8757600080fd5b505afa158015611b9b573d6000803e3d6000fd5b505050506040513d6020811015611bb157600080fd5b505191505090565b6001600160a01b038216600081815260016020908152604091829020805460ff191685151590811790915582519384529083015280517fb21eb88b4e33b3f1281830a7178d74d8aa73220416215726b68ae23d539515cb9281900390910190a15050565b60008151604114611c2d57600080fd5b60208201516040830151606084015160001a601b811015611c4c57601b015b8060ff16601b1480611c6157508060ff16601c145b611c6a57600080fd5b6040805160008152602080820180845289905260ff8416828401526060820186905260808201859052915160019260a0808401939192601f1981019281900390910190855afa158015611cc1573d6000803e3d6000fd5b5050604051601f1901519450506001600160a01b038416611ce157600080fd5b50505092915050565b8151839015611dd9576060600080600080611d0488610c53565b9398509196509450925090506000611d1f8686868686610f4f565b15611d9457611d316116c38b846115f1565b604080518c81526020810183905280820185905290519192506000916001600160a01b0387811692908916917fac7a699eb95c3c6d390ec4626de17ef9a67b35891efdb197beba7c7fdd45fac49181900360600190a4611d918782611f1f565b96505b8015611dd2576040516001600160a01b0386169082156108fc029083906000818181858888f19350505050158015611dd0573d6000803e3d6000fd5b505b5050505050505b6040516001600160a01b0383169082156108fc029083906000818181858888f19350505050158015611e0f573d6000803e3d6000fd5b5050505050565b60408051602080820198909852808201969096526060808701959095526080860193909352921b6bffffffffffffffffffffffff191660a084015260b4808401929092528051808403909201825260d4909201909152805191012090565b600081815b8451811015611f13576000858281518110611e9057fe5b6020026020010151905080831015611ed85782816040516020018083815260200182815260200192505050604051602081830303815290604052805190602001209250611f0a565b808360405160200180838152602001828152602001925050506040516020818303038152906040528051906020012092505b50600101611e79565b50600c54149392505050565b600082821115611f76576040805162461bcd60e51b815260206004820152600860248201527f756e6465666c6f77000000000000000000000000000000000000000000000000604482015290519081900360640190fd5b5090039056fe6f6e6c792061646d696e2063616e20656e61626c652f64697361626c6520455448726563656976696e672077616c6c65742063616e6e6f74206265207a65726f20616464726573736f6e6c792061646d696e2063616e206368616e67652074686520726563656976696e672077616c6c65746f6e6c792061646d696e2063616e20656e61626c652f64697361626c652053414e446f6e6c792061646d696e2063616e207365747570206d6574615472616e73616374696f6e50726f636573736f72736f6e6c792061646d696e2063616e20656e61626c652f64697361626c6520444149a265627a7a723058209987ebdf08909dce1f2ea5d2b1691f50310c456133e0dbe2241f28115fb7633964736f6c63430005090032",
+  "deployedBytecode": "0x60806040526004361061016a5760003560e01c80637c53ec4c116100cb578063c10a42081161007f578063e0a1f1c711610059578063e0a1f1c71461080c578063e56f8a9e1461091e578063e97eb0a2146109485761016a565b8063c10a420814610604578063c2bddf26146106d4578063dc5074af146107d95761016a565b80638f283970116100b05780638f28397014610589578063a7e30684146105bc578063b522ecff146105d15761016a565b80637c53ec4c146105225780638a04af6a1461054e5761016a565b80634a253778116101225780635d8e3021116101075780635d8e30211461035c57806365194ce7146103865780636e9960c3146104f15761016a565b80634a2537781461031457806358bc2944146103295761016a565b80633b7c4c15116101535780633b7c4c15146101ab5780633be3b0e2146101d9578063427b8d34146102eb5761016a565b806325cb5bc01461016f5780632eb4a7ab14610196575b600080fd5b34801561017b57600080fd5b50610184610974565b60408051918252519081900360200190f35b3480156101a257600080fd5b5061018461097a565b3480156101b757600080fd5b506101d7600480360360208110156101ce57600080fd5b50351515610980565b005b3480156101e557600080fd5b506101d760048036036101408110156101fd57600080fd5b6001600160a01b038235811692602081013582169260408201359092169160608201359160808101359160a08201359160c08101359160e08201359190810190610120810161010082013564010000000081111561025a57600080fd5b82018360208201111561026c57600080fd5b8035906020019184602083028401116401000000008311171561028e57600080fd5b9193909290916020810190356401000000008111156102ac57600080fd5b8201836020820111156102be57600080fd5b803590602001918460018302840111640100000000831117156102e057600080fd5b509092509050610a01565b3480156102f757600080fd5b50610300610b5c565b604080519115158252519081900360200190f35b34801561032057600080fd5b50610300610b6b565b34801561033557600080fd5b506101d76004803603602081101561034c57600080fd5b50356001600160a01b0316610b79565b34801561036857600080fd5b506101846004803603602081101561037f57600080fd5b5035610c24565b34801561039257600080fd5b50610439600480360360208110156103a957600080fd5b8101906020810181356401000000008111156103c457600080fd5b8201836020820111156103d657600080fd5b803590602001918460018302840111640100000000831117156103f857600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600092019190915250929550610c53945050505050565b6040518080602001866001600160a01b03166001600160a01b03168152602001856001600160a01b03166001600160a01b03168152602001848152602001838152602001828103825287818151815260200191508051906020019080838360005b838110156104b257818101518382015260200161049a565b50505050905090810190601f1680156104df5780820380516001836020036101000a031916815260200191505b50965050505050505060405180910390f35b3480156104fd57600080fd5b50610506610cf1565b604080516001600160a01b039092168252519081900360200190f35b34801561052e57600080fd5b506101d76004803603602081101561054557600080fd5b50351515610d00565b34801561055a57600080fd5b506101d76004803603604081101561057157600080fd5b506001600160a01b0381351690602001351515610d5c565b34801561059557600080fd5b506101d7600480360360208110156105ac57600080fd5b50356001600160a01b0316610db3565b3480156105c857600080fd5b50610300610e89565b3480156105dd57600080fd5b506101d7600480360360208110156105f457600080fd5b50356001600160a01b0316610e92565b34801561061057600080fd5b50610300600480360360a081101561062757600080fd5b81019060208101813564010000000081111561064257600080fd5b82018360208201111561065457600080fd5b8035906020019184600183028401116401000000008311171561067657600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600092019190915250929550506001600160a01b038335811694506020840135169260408101359250606001359050610f4f565b6101d760048036036101408110156106eb57600080fd5b6001600160a01b038235811692602081013582169260408201359092169160608201359160808101359160a08201359160c08101359160e08201359190810190610120810161010082013564010000000081111561074857600080fd5b82018360208201111561075a57600080fd5b8035906020019184602083028401116401000000008311171561077c57600080fd5b91939092909160208101903564010000000081111561079a57600080fd5b8201836020820111156107ac57600080fd5b803590602001918460018302840111640100000000831117156107ce57600080fd5b509092509050611078565b3480156107e557600080fd5b50610300600480360360208110156107fc57600080fd5b50356001600160a01b0316611211565b34801561081857600080fd5b506101d7600480360361014081101561083057600080fd5b6001600160a01b038235811692602081013582169260408201359092169160608201359160808101359160a08201359160c08101359160e08201359190810190610120810161010082013564010000000081111561088d57600080fd5b82018360208201111561089f57600080fd5b803590602001918460208302840111640100000000831117156108c157600080fd5b9193909290916020810190356401000000008111156108df57600080fd5b8201836020820111156108f157600080fd5b8035906020019184600183028401116401000000008311171561091357600080fd5b50909250905061122f565b34801561092a57600080fd5b506101d76004803603602081101561094157600080fd5b5035611350565b34801561095457600080fd5b506101d76004803603602081101561096b57600080fd5b503515156113b4565b600b5490565b600c5490565b6000546001600160a01b031633146109c95760405162461bcd60e51b815260040180806020018281038252602181526020018061203f6021913960400191505060405180910390fd5b600d805491151562010000027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00ffff909216919091179055565b600d5462010000900460ff16610a5e576040805162461bcd60e51b815260206004820152601860248201527f646169207061796d656e7473206e6f7420656e61626c65640000000000000000604482015290519081900360640190fd5b610aa18c8b8b8b8b8b8b8b8b8080602002602001604051908101604052809392919081815260200183836020028082843760009201919091525061143492505050565b6000610ad2670de0b6b3a7640000610ac689663328b944c4000063ffffffff6115f116565b9063ffffffff61166716565b9050610b288d8285858080601f01602080910402602001604051908101604052809392919081815260200183838082843760009201919091525050600a546009546001600160a01b03918216935016905061167a565b610b4d8d8d8c8c8c8c600960009054906101000a90046001600160a01b031688611937565b50505050505050505050505050565b600d5462010000900460ff1690565b600d54610100900460ff1690565b6000546001600160a01b03163314610bd8576040805162461bcd60e51b815260206004820152601060248201527f53656e646572206e6f742061646d696e00000000000000000000000000000000604482015290519081900360640190fd5b600554600280546001600160a01b03908116600090815260046020526040902042909301909255805473ffffffffffffffffffffffffffffffffffffffff191692909116919091179055565b600080610c2f611b36565b9050610c4c81610ac685663328b944c4000063ffffffff6115f116565b9392505050565b606060008060008060606000806000808a80602001905160a0811015610c7857600080fd5b810190808051640100000000811115610c9057600080fd5b82016020810184811115610ca357600080fd5b8151640100000000811182820187101715610cbd57600080fd5b5050602082015160408301516060840151608090940151929f50909d509b5090995097505050505050505091939590929450565b6000546001600160a01b031690565b6000546001600160a01b03163314610d495760405162461bcd60e51b8152600401808060200182810382526022815260200180611fef6022913960400191505060405180910390fd5b600d805460ff1916911515919091179055565b6000546001600160a01b03163314610da55760405162461bcd60e51b815260040180806020018281038252602e815260200180612011602e913960400191505060405180910390fd5b610daf8282611bb9565b5050565b6000546001600160a01b03163314610e12576040805162461bcd60e51b815260206004820152601b60248201527f6f6e6c792061646d696e2063616e206368616e67652061646d696e0000000000604482015290519081900360640190fd5b600054604080516001600160a01b039283168152918316602083015280517f7e644d79422f17c01e4894b5f4f588d331ebfa28653d42ae832dc59e38c9798f9281900390910190a16000805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b600d5460ff1690565b6001600160a01b038116610ed75760405162461bcd60e51b8152600401808060200182810382526027815260200180611f9e6027913960400191505060405180910390fd5b6000546001600160a01b03163314610f205760405162461bcd60e51b815260040180806020018281038252602a815260200180611fc5602a913960400191505060405180910390fd5b600a805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b6000600354821180610f725750836001600160a01b0316856001600160a01b0316145b80610f7c57508242115b15610f895750600061106f565b60408051606087811b6bffffffffffffffffffffffff199081166020808501919091529188901b166034830152604882018690526068808301869052835180840390910181526088830184528051908201207f19457468657265756d205369676e6564204d6573736167653a0a33320000000060a884015260c48084018290528451808503909101815260e4909301909352815191012060009061102d9089611c1d565b6001600160a01b038116600090815260046020526040902054909150421161105a5760019250505061106f565b6002546001600160a01b039081169116149150505b95945050505050565b600d54610100900460ff166110d4576040805162461bcd60e51b815260206004820152601a60248201527f6574686572207061796d656e7473206e6f7420656e61626c6564000000000000604482015290519081900360640190fd5b6111178c8b8b8b8b8b8b8b8b8080602002602001604051908101604052809392919081815260200183836020028082843760009201919091525061143492505050565b600061112287610c24565b905080341015611179576040805162461bcd60e51b815260206004820152601560248201527f6e6f7420656e6f7567682065746865722073656e740000000000000000000000604482015290519081900360640190fd5b34819003156111b35760405133903483900380156108fc02916000818181858888f193505050501580156111b1573d6000803e3d6000fd5b505b6112008184848080601f01602080910402602001604051908101604052809392919081815260200183838082843760009201919091525050600a546001600160a01b03169150611cea9050565b610b4d8d8d8c8c8c8c600088611937565b6001600160a01b031660009081526001602052604090205460ff1690565b600d5460ff16611286576040805162461bcd60e51b815260206004820152601960248201527f73616e64207061796d656e7473206e6f7420656e61626c656400000000000000604482015290519081900360640190fd5b6112c98c8b8b8b8b8b8b8b8b8080602002602001604051908101604052809392919081815260200183836020028082843760009201919091525061143492505050565b61131d8c8784848080601f01602080910402602001604051908101604052809392919081815260200183838082843760009201919091525050600a546007546001600160a01b03918216935016905061167a565b6113428c8c8b8b8b8b600760009054906101000a90046001600160a01b03168d611937565b505050505050505050505050565b6000546001600160a01b031633146113af576040805162461bcd60e51b815260206004820152601060248201527f53656e646572206e6f742061646d696e00000000000000000000000000000000604482015290519081900360640190fd5b600355565b6000546001600160a01b031633146113fd5760405162461bcd60e51b8152600401808060200182810382526021815260200180611f7d6021913960400191505060405180910390fd5b600d8054911515610100027fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff00ff909216919091179055565b600b54421061148a576040805162461bcd60e51b815260206004820152600c60248201527f73616c65206973206f7665720000000000000000000000000000000000000000604482015290519081900360640190fd5b6001600160a01b0388163314806114b057503360009081526001602052604090205460ff165b611501576040805162461bcd60e51b815260206004820152600e60248201527f6e6f7420617574686f72697a6564000000000000000000000000000000000000604482015290519081900360640190fd5b6001600160a01b03871615806115285750876001600160a01b0316876001600160a01b0316145b611579576040805162461bcd60e51b815260206004820152601860248201527f63616e6e6f7420627579207265736572766564204c616e640000000000000000604482015290519081900360640190fd5b6000611589878787878c88611e16565b90506115958282611e74565b6115e6576040805162461bcd60e51b815260206004820152601560248201527f496e76616c6964206c616e642070726f76696465640000000000000000000000604482015290519081900360640190fd5b505050505050505050565b60008261160057506000611661565b508181028183828161160e57fe5b0414611661576040805162461bcd60e51b815260206004820152600860248201527f6f766572666c6f77000000000000000000000000000000000000000000000000604482015290519081900360640190fd5b92915050565b600081838161167257fe5b049392505050565b8251819085901561183d5760606000806000806116968a610c53565b93985091965094509250905060006116b18686868686610f4f565b1561173f576116cb6116c38d846115f1565b612710611667565b9050886001600160a01b0316846001600160a01b0316866001600160a01b03167fac7a699eb95c3c6d390ec4626de17ef9a67b35891efdb197beba7c7fdd45fac48f858760405180848152602001838152602001828152602001935050505060405180910390a461173c8782611f1f565b96505b801561183657604080517f23b872dd0000000000000000000000000000000000000000000000000000000081526001600160a01b038f811660048301528781166024830152604482018490529151918a16916323b872dd916064808201926020929091908290030181600087803b1580156117b957600080fd5b505af11580156117cd573d6000803e3d6000fd5b505050506040513d60208110156117e357600080fd5b5051611836576040805162461bcd60e51b815260206004820152601960248201527f636f6d6d6973696f6e207472616e73666572206661696c656400000000000000604482015290519081900360640190fd5b5050505050505b604080517f23b872dd0000000000000000000000000000000000000000000000000000000081526001600160a01b0389811660048301528681166024830152604482018490529151918416916323b872dd916064808201926020929091908290030181600087803b1580156118b157600080fd5b505af11580156118c5573d6000803e3d6000fd5b505050506040513d60208110156118db57600080fd5b505161192e576040805162461bcd60e51b815260206004820152601760248201527f7061796d656e74207472616e73666572206661696c6564000000000000000000604482015290519081900360640190fd5b50505050505050565b60408051600080825260208201909252606091509050600660009054906101000a90046001600160a01b03166001600160a01b0316636e1e3bbf89878a8a8d8760405160200180836001600160a01b03166001600160a01b0316815260200180602001828103825283818151815260200191508051906020019060200280838360005b838110156119d25781810151838201526020016119ba565b5050505090500193505050506040516020818303038152906040526040518663ffffffff1660e01b815260040180866001600160a01b03166001600160a01b0316815260200185815260200184815260200183815260200180602001828103825283818151815260200191508051906020019080838360005b83811015611a63578181015183820152602001611a4b565b50505050905090810190601f168015611a905780820380516001836020036101000a031916815260200191505b509650505050505050600060405180830381600087803b158015611ab357600080fd5b505af1158015611ac7573d6000803e3d6000fd5b505060408051888152602081018890526001600160a01b03878116828401526060820187905291516101988b028c019450828d169350918d16917fe4dfa6ac11314892f3029b34a25b1a887da3b1cab2bbf8506d87128ba6e3ac029181900360800190a4505050505050505050565b600080600860009054906101000a90046001600160a01b03166001600160a01b03166357de26a46040518163ffffffff1660e01b815260040160206040518083038186803b158015611b8757600080fd5b505afa158015611b9b573d6000803e3d6000fd5b505050506040513d6020811015611bb157600080fd5b505191505090565b6001600160a01b038216600081815260016020908152604091829020805460ff191685151590811790915582519384529083015280517fb21eb88b4e33b3f1281830a7178d74d8aa73220416215726b68ae23d539515cb9281900390910190a15050565b60008151604114611c2d57600080fd5b60208201516040830151606084015160001a601b811015611c4c57601b015b8060ff16601b1480611c6157508060ff16601c145b611c6a57600080fd5b6040805160008152602080820180845289905260ff8416828401526060820186905260808201859052915160019260a0808401939192601f1981019281900390910190855afa158015611cc1573d6000803e3d6000fd5b5050604051601f1901519450506001600160a01b038416611ce157600080fd5b50505092915050565b8151839015611dd9576060600080600080611d0488610c53565b9398509196509450925090506000611d1f8686868686610f4f565b15611d9457611d316116c38b846115f1565b604080518c81526020810183905280820185905290519192506000916001600160a01b0387811692908916917fac7a699eb95c3c6d390ec4626de17ef9a67b35891efdb197beba7c7fdd45fac49181900360600190a4611d918782611f1f565b96505b8015611dd2576040516001600160a01b0386169082156108fc029083906000818181858888f19350505050158015611dd0573d6000803e3d6000fd5b505b5050505050505b6040516001600160a01b0383169082156108fc029083906000818181858888f19350505050158015611e0f573d6000803e3d6000fd5b5050505050565b60408051602080820198909852808201969096526060808701959095526080860193909352921b6bffffffffffffffffffffffff191660a084015260b4808401929092528051808403909201825260d4909201909152805191012090565b600081815b8451811015611f13576000858281518110611e9057fe5b6020026020010151905080831015611ed85782816040516020018083815260200182815260200192505050604051602081830303815290604052805190602001209250611f0a565b808360405160200180838152602001828152602001925050506040516020818303038152906040528051906020012092505b50600101611e79565b50600c54149392505050565b600082821115611f76576040805162461bcd60e51b815260206004820152600860248201527f756e6465666c6f77000000000000000000000000000000000000000000000000604482015290519081900360640190fd5b5090039056fe6f6e6c792061646d696e2063616e20656e61626c652f64697361626c6520455448726563656976696e672077616c6c65742063616e6e6f74206265207a65726f20616464726573736f6e6c792061646d696e2063616e206368616e67652074686520726563656976696e672077616c6c65746f6e6c792061646d696e2063616e20656e61626c652f64697361626c652053414e446f6e6c792061646d696e2063616e207365747570206d6574615472616e73616374696f6e50726f636573736f72736f6e6c792061646d696e2063616e20656e61626c652f64697361626c6520444149a265627a7a723058209987ebdf08909dce1f2ea5d2b1691f50310c456133e0dbe2241f28115fb7633964736f6c63430005090032"
+}

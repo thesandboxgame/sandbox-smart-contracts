@@ -67,14 +67,14 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
   );
   if (deployResult.newlyDeployed) {
     log(" - LandPreSale_3 deployed at : " + deployResult.address + " for gas : " + deployResult.receipt.gasUsed);
-    const landsWithProof = [];
-    for (const land of saltedLands) {
-      land.proof = tree.getProof(calculateLandHash(land));
-      landsWithProof.push(land);
-    }
-    fs.writeFileSync(`./.presale_3_proofs_${chainId}.json`, JSON.stringify(landsWithProof, null, "  "));
   } else {
     log("reusing LandPreSale_3 at " + deployResult.address);
   }
+  const landsWithProof = [];
+  for (const land of saltedLands) {
+    land.proof = tree.getProof(calculateLandHash(land));
+    landsWithProof.push(land);
+  }
+  fs.writeFileSync(`./.presale_3_proofs_${chainId}.json`, JSON.stringify(landsWithProof, null, "  "));
 };
 module.exports.skip = guard(["1", "4", "314159"], "LandPreSale_3");

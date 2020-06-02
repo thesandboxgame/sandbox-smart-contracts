@@ -19,7 +19,7 @@ module.exports = async ({deployments}) => {
     log("setting LandPreSale_1 as Land minter");
     const currentLandAdmin = await call("Land", "getAdmin");
     await sendTxAndWait(
-      {from: currentLandAdmin, gas: 1000000, skipError: true},
+      {from: currentLandAdmin, gas: 1000000, skipUnknownSigner: true},
       "Land",
       "setMinter",
       landSale.address,
