@@ -57,7 +57,10 @@ contract CatalystRegistry is Admin {
         emit GemsSocketed(assetId, catalystToken, gemIds);
     }
 
-    function getCatalyst(uint256 assetId) external view returns (Catalyst memory) {
+    /// @notice return the Catalyst associated with an Asset
+    /// @param assetId token id of the Asset
+    /// @return catalyst with gem Ids and blockNumber
+    function getCatalyst(uint256 assetId) external view returns (Catalyst memory catalyst) {
         return _getCatalyst(assetId);
     }
 
