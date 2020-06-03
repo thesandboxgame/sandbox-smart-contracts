@@ -1,3 +1,6 @@
+// const {utils} = require("ethers");
+// const {toWei} = require("testUtils");
+
 module.exports.testLands = [
   {
     x: 400,
@@ -43,3 +46,74 @@ module.exports.testLands = [
     salt: "0x1111111111111111111111111111111111111111111111111111111111111116",
   },
 ];
+
+module.exports.generateUserPermissions = async function (roles, contracts) {
+  const {landSaleAdmin, landSaleBeneficiary, landAdmin, sandAdmin, others} = roles;
+  const {landSaleWithReferral, land, estate, landSale, sand, fakeDAI} = contracts;
+  const LandSaleAdmin = {
+    address: landSaleAdmin,
+    LandSaleWithReferral: landSaleWithReferral.connect(landSaleWithReferral.provider.getSigner(landSaleAdmin)),
+    Land: land.connect(landSaleWithReferral.provider.getSigner(landSaleAdmin)),
+    Estate: estate.connect(estate.provider.getSigner(landSaleAdmin)),
+    LandSale: landSale.connect(landSale.provider.getSigner(landSaleAdmin)),
+    Sand: sand.connect(sand.provider.getSigner(landSaleAdmin)),
+    FakeDAI: fakeDAI.connect(fakeDAI.provider.getSigner(landSaleAdmin)),
+  };
+
+  const LandSaleBeneficiary = {
+    address: landSaleBeneficiary,
+    LandSaleWithReferral: landSaleWithReferral.connect(landSaleWithReferral.provider.getSigner(landSaleBeneficiary)),
+    Land: land.connect(land.provider.getSigner(landSaleBeneficiary)),
+    Estate: estate.connect(estate.provider.getSigner(landSaleBeneficiary)),
+    LandSale: landSale.connect(landSale.provider.getSigner(landSaleBeneficiary)),
+    Sand: sand.connect(sand.provider.getSigner(landSaleBeneficiary)),
+    FakeDAI: fakeDAI.connect(fakeDAI.provider.getSigner(landSaleBeneficiary)),
+  };
+
+  const LandAdmin = {
+    address: landAdmin,
+    LandSaleWithReferral: landSaleWithReferral.connect(landSaleWithReferral.provider.getSigner(landAdmin)),
+    Land: land.connect(landSaleWithReferral.provider.getSigner(landAdmin)),
+    Estate: estate.connect(estate.provider.getSigner(landAdmin)),
+    LandSale: landSale.connect(landSale.provider.getSigner(landAdmin)),
+    Sand: sand.connect(sand.provider.getSigner(landAdmin)),
+    FakeDAI: fakeDAI.connect(fakeDAI.provider.getSigner(landAdmin)),
+  };
+
+  const SandAdmin = {
+    address: sandAdmin,
+    LandSaleWithReferral: landSaleWithReferral.connect(landSaleWithReferral.provider.getSigner(sandAdmin)),
+    Land: land.connect(landSaleWithReferral.provider.getSigner(sandAdmin)),
+    Estate: estate.connect(estate.provider.getSigner(sandAdmin)),
+    LandSale: landSale.connect(landSale.provider.getSigner(sandAdmin)),
+    Sand: sand.connect(sand.provider.getSigner(sandAdmin)),
+    FakeDAI: fakeDAI.connect(fakeDAI.provider.getSigner(sandAdmin)),
+  };
+
+  const users = [];
+  for (const other of others) {
+    users.push({
+      address: other,
+      LandSaleWithReferral: landSaleWithReferral.connect(landSaleWithReferral.provider.getSigner(other)),
+      Land: land.connect(landSaleWithReferral.provider.getSigner(other)),
+      Estate: estate.connect(estate.provider.getSigner(other)),
+      LandSale: landSale.connect(landSale.provider.getSigner(other)),
+      Sand: sand.connect(sand.provider.getSigner(other)),
+      FakeDAI: fakeDAI.connect(fakeDAI.provider.getSigner(other)),
+    });
+  }
+  return {LandSaleAdmin, LandSaleBeneficiary, LandAdmin, SandAdmin, users};
+};
+
+module.exports.setupUser = async function (contracts, userType, {hasSand, hasETH, hasDAI}) {
+  if (hasDAI) {
+    // TODO
+  }
+  if (hasSand) {
+    // TODO
+    // const balance = await sandContract.provider.getBalance(userType.address);
+    // console.log(utils.formatEther(balance)); // 10000.0
+    // await sandContract.transfer(userType.address, toWei(1000)); // revert not enough fund
+  }
+  return userType;
+};
