@@ -17,7 +17,7 @@ describe("testLandSaleWithReferral", function () {
       initialSetUp = await setupLandSaleWithReferral("lands");
     });
 
-    it("check the expiry time of the sale", async function () {
+    it("the expiry time of the sale is correct", async function () {
       const {contracts, saleEnd} = initialSetUp;
       const expiryTime = await contracts.landSaleWithReferral.getExpiryTime();
       assert.equal(expiryTime, saleEnd, "Expiry time is wrong");
@@ -40,7 +40,7 @@ describe("testLandSaleWithReferral", function () {
       const {users} = initialSetUp;
       await expectRevert(
         users[1].LandSaleWithReferral.functions.setETHEnabled(true),
-        "only admin can enable/disable ETH" // check
+        "only admin can enable/disable ETH"
       );
     });
 
@@ -296,7 +296,7 @@ describe("testLandSaleWithReferral", function () {
               salt: lands[5].salt,
             })
           ),
-        "Cannot read property 'parent' of undefined" // TODO Check
+        "Cannot read property 'parent' of undefined" // TODO check this is the correct error message
       );
     });
 
