@@ -1,5 +1,6 @@
 // const {utils} = require("ethers");
 // const {toWei} = require("testUtils");
+const {BigNumber} = require("ethers");
 
 module.exports.testLands = [
   {
@@ -105,15 +106,12 @@ module.exports.generateUserPermissions = async function (roles, contracts) {
   return {LandSaleAdmin, LandSaleBeneficiary, LandAdmin, SandAdmin, users};
 };
 
-module.exports.setupUser = async function (contracts, userType, {hasSand, hasETH, hasDAI}) {
+module.exports.setupUser = async function (SandAdmin, contracts, user, {hasSand, hasDAI}) {
   if (hasDAI) {
-    // TODO
+    // TODO: give the user some DAI
   }
   if (hasSand) {
-    // TODO
-    // const balance = await sandContract.provider.getBalance(userType.address);
-    // console.log(utils.formatEther(balance)); // 10000.0
-    // await sandContract.transfer(userType.address, toWei(1000)); // revert not enough fund
+    await SandAdmin.Sand.transfer(user.address, BigNumber.from("500000000000000000000000"));
   }
-  return userType;
+  return user;
 };

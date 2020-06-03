@@ -13,9 +13,10 @@ const contractName = "LandSaleWithReferral";
 
 module.exports.setupLandSaleWithReferral = async (landType) => {
   const {
-    landPurchaserWithETH,
     landPurchaserWithSAND,
+    secondLandPurchaserWithSAND,
     landPurchaserWithDAI,
+    secondLandPurchaserWithDAI,
     LandSaleAdmin,
     LandSaleBeneficiary,
     LandAdmin,
@@ -43,6 +44,8 @@ module.exports.setupLandSaleWithReferral = async (landType) => {
 
     let tree;
     let lands;
+
+    // Supply a tree made from real lands or testLands
     if (landType === "lands") {
       const deployment = await deployments.get(landSaleName);
       lands = deployment.linkedData;
@@ -80,14 +83,17 @@ module.exports.setupLandSaleWithReferral = async (landType) => {
       .setSuperOperator(contracts.landSaleWithReferral.address, true)
       .then((tx) => tx.wait());
 
-    const landPurchaserWithETH = await setupUser(contracts, users[0], {hasSand: false, hasETH: true, hasDAI: false});
-    const landPurchaserWithSAND = await setupUser(contracts, users[0], {hasSand: true, hasETH: false, hasDAI: false});
-    const landPurchaserWithDAI = await setupUser(contracts, users[0], {hasSand: false, hasETH: false, hasDAI: true});
+    const landPurchaserWithSAND = await setupUser(SandAdmin, contracts, users[0], {hasSand: true, hasDAI: false});
+    const secondLandPurchaserWithSAND = await setupUser(SandAdmin, contracts, users[1], {hasSand: true, hasDAI: false});
+
+    const landPurchaserWithDAI = await setupUser(SandAdmin, contracts, users[0], {hasSand: false, hasDAI: true});
+    const secondLandPurchaserWithDAI = await setupUser(SandAdmin, contracts, users[1], {hasSand: false, hasDAI: true});
 
     return {
-      landPurchaserWithETH,
       landPurchaserWithSAND,
+      secondLandPurchaserWithSAND,
       landPurchaserWithDAI,
+      secondLandPurchaserWithDAI,
       LandSaleAdmin,
       LandSaleBeneficiary,
       LandAdmin,
@@ -102,9 +108,10 @@ module.exports.setupLandSaleWithReferral = async (landType) => {
 
   return {
     // User types
-    landPurchaserWithETH,
     landPurchaserWithSAND,
+    secondLandPurchaserWithSAND,
     landPurchaserWithDAI,
+    secondLandPurchaserWithDAI,
     LandSaleAdmin,
     LandSaleBeneficiary,
     LandAdmin,

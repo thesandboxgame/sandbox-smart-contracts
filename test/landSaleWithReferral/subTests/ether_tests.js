@@ -50,7 +50,7 @@ function runEtherTests() {
       it("can buy LAND with ETH (empty referral)", async function () {
         const {tree, users, lands, contracts} = initialSetUp;
         const land = lands[5];
-        const proof = tree.getProof(calculateLandHash(lands[5]));
+        const proof = tree.getProof(calculateLandHash(land));
         const value = await contracts.landSaleWithReferral.getEtherAmountWithSAND(land.price);
 
         await users[0].LandSaleWithReferral.functions.buyLandWithETH(
@@ -252,7 +252,7 @@ function runEtherTests() {
         const {tree, users, lands} = initialSetUp;
         const land = lands[5];
         const value = await users[0].LandSaleWithReferral.functions.getEtherAmountWithSAND(land.price);
-        const proof = tree.getProof(calculateLandHash(lands[5]));
+        const proof = tree.getProof(calculateLandHash(land));
 
         await users[0].LandSaleWithReferral.functions.buyLandWithETH(
           users[0].address,
@@ -443,7 +443,7 @@ function runEtherTests() {
         const {lands, users, tree, contracts} = initialSetUp;
         const land = lands[0];
         const value = await contracts.landSaleWithReferral.getEtherAmountWithSAND(land.price);
-        const proof = tree.getProof(calculateLandHash(lands[0]));
+        const proof = tree.getProof(calculateLandHash(land));
         await users[1].LandSaleWithReferral.functions.buyLandWithETH(
           users[1].address,
           users[1].address,
