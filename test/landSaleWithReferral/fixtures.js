@@ -24,6 +24,7 @@ module.exports.setupLandSaleWithReferral = async (landType) => {
     contracts,
     lands,
     tree,
+    saleEnd,
   } = await deployments.createFixture(async () => {
     await deployments.fixture();
 
@@ -95,6 +96,7 @@ module.exports.setupLandSaleWithReferral = async (landType) => {
       contracts,
       lands,
       tree,
+      saleEnd,
     };
   })();
 
@@ -111,6 +113,9 @@ module.exports.setupLandSaleWithReferral = async (landType) => {
 
     // Contracts
     contracts,
+
+    // Timing
+    saleEnd,
 
     // Lands, tree
     lands,
