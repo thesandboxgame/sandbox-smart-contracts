@@ -1,3 +1,3 @@
-const {runMerkleTreeTest} = require("./merkleTree_tests");
+const {runMerkleTreeTest} = require("./subTests/merkleTree_tests");
 
 runMerkleTreeTest();

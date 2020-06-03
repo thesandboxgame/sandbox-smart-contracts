@@ -1,6 +1,6 @@
 const {assert} = require("chai-local");
-const MerkleTree = require("../../lib/merkleTree");
-const {createDataArray} = require("../../lib/merkleTreeHelper");
+const MerkleTree = require("../../../lib/merkleTree");
+const {createDataArray} = require("../../../lib/merkleTreeHelper");
 
 function createDummyLands(amount) {
   function getRandomBetween(min, max) {
