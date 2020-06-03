@@ -14,7 +14,7 @@ describe("testLandSaleWithReferral", function () {
 
   describe("--> Tests with real LANDs", function () {
     beforeEach(async function () {
-      initialSetUp = await setupLandSaleWithReferral();
+      initialSetUp = await setupLandSaleWithReferral("lands");
     });
 
     it("ETH is enabled", async function () {
@@ -277,13 +277,13 @@ describe("testLandSaleWithReferral", function () {
 
   describe("--> Tests with test LANDs", function () {
     beforeEach(async function () {
-      initialSetUp = await setupTestLandSaleWithReferral();
+      initialSetUp = await setupLandSaleWithReferral("testLands");
     });
 
     it("cannot buy Land from a reserved Land of a different address (empty referral)", async function () {
-      const {testLands, users, testTree, contracts} = initialSetUp;
+      const {lands, users, tree, contracts} = initialSetUp;
 
-      const proof = testTree.getProof(calculateLandHash(testLands[0]));
+      const proof = tree.getProof(calculateLandHash(lands[0]));
       const sandPrice = "4047";
       const value = await contracts.landSaleWithReferral.getEtherAmountWithSAND(sandPrice);
 
@@ -308,10 +308,10 @@ describe("testLandSaleWithReferral", function () {
     });
 
     it("can buy LAND from a reserved Land if matching address (empty referral)", async function () {
-      const {testLands, users, testTree, contracts} = initialSetUp;
+      const {lands, users, tree, contracts} = initialSetUp;
       const sandPrice = "4047";
       const value = await contracts.landSaleWithReferral.getEtherAmountWithSAND(sandPrice);
-      const proof = testTree.getProof(calculateLandHash(testLands[0]));
+      const proof = tree.getProof(calculateLandHash(lands[0]));
       await users[1].LandSaleWithReferral.functions.buyLandWithETH(
         users[1].address,
         users[1].address,
@@ -330,8 +330,8 @@ describe("testLandSaleWithReferral", function () {
     });
 
     it("can buy LAND from a reserved Land and send it to another address (empty referral)", async function () {
-      const {testLands, users, testTree, contracts} = initialSetUp;
-      const proof = testTree.getProof(calculateLandHash(testLands[0]));
+      const {lands, users, tree, contracts} = initialSetUp;
+      const proof = tree.getProof(calculateLandHash(lands[0]));
       const sandPrice = "4047";
       const value = await contracts.landSaleWithReferral.getEtherAmountWithSAND(sandPrice);
       await users[1].LandSaleWithReferral.functions.buyLandWithETH(
