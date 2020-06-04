@@ -13,10 +13,12 @@ const contractName = "LandSaleWithReferral";
 
 module.exports.setupLandSaleWithReferral = async (landType) => {
   const {
-    landPurchaserWithSAND,
-    secondLandPurchaserWithSAND,
-    landPurchaserWithDAI,
-    secondLandPurchaserWithDAI,
+    userWithSAND,
+    secondUserWithSAND,
+    userWithoutSAND,
+    userWithDAI,
+    secondUserWithDAI,
+    userWithoutDAI,
     LandSaleAdmin,
     LandSaleBeneficiary,
     LandAdmin,
@@ -83,17 +85,21 @@ module.exports.setupLandSaleWithReferral = async (landType) => {
       .setSuperOperator(contracts.landSaleWithReferral.address, true)
       .then((tx) => tx.wait());
 
-    const landPurchaserWithSAND = await setupUser(SandAdmin, contracts, users[0], {hasSand: true, hasDAI: false});
-    const secondLandPurchaserWithSAND = await setupUser(SandAdmin, contracts, users[1], {hasSand: true, hasDAI: false});
+    const userWithSAND = await setupUser(SandAdmin, contracts, users[0], {hasSand: true, hasDAI: false});
+    const secondUserWithSAND = await setupUser(SandAdmin, contracts, users[1], {hasSand: true, hasDAI: false});
+    const userWithoutSAND = users[2];
 
-    const landPurchaserWithDAI = await setupUser(SandAdmin, contracts, users[0], {hasSand: false, hasDAI: true});
-    const secondLandPurchaserWithDAI = await setupUser(SandAdmin, contracts, users[1], {hasSand: false, hasDAI: true});
+    const userWithDAI = await setupUser(SandAdmin, contracts, users[0], {hasSand: false, hasDAI: true});
+    const secondUserWithDAI = await setupUser(SandAdmin, contracts, users[1], {hasSand: false, hasDAI: true});
+    const userWithoutDAI = users[2];
 
     return {
-      landPurchaserWithSAND,
-      secondLandPurchaserWithSAND,
-      landPurchaserWithDAI,
-      secondLandPurchaserWithDAI,
+      userWithSAND,
+      secondUserWithSAND,
+      userWithoutSAND,
+      userWithDAI,
+      secondUserWithDAI,
+      userWithoutDAI,
       LandSaleAdmin,
       LandSaleBeneficiary,
       LandAdmin,
@@ -108,10 +114,12 @@ module.exports.setupLandSaleWithReferral = async (landType) => {
 
   return {
     // User types
-    landPurchaserWithSAND,
-    secondLandPurchaserWithSAND,
-    landPurchaserWithDAI,
-    secondLandPurchaserWithDAI,
+    userWithSAND,
+    secondUserWithSAND,
+    userWithoutSAND,
+    userWithDAI,
+    secondUserWithDAI,
+    userWithoutDAI,
     LandSaleAdmin,
     LandSaleBeneficiary,
     LandAdmin,

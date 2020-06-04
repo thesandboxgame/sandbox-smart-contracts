@@ -111,7 +111,7 @@ module.exports.setupUser = async function (SandAdmin, contracts, user, {hasSand,
     // TODO: give the user some DAI
   }
   if (hasSand) {
-    await SandAdmin.Sand.transfer(user.address, BigNumber.from("500000000000000000000000"));
+    await SandAdmin.Sand.transfer(user.address, BigNumber.from('1000000000000000000000000'));
   }
   return user;
 };
