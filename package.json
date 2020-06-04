@@ -10,7 +10,7 @@
     "@smartdec/smartcheck": "^2.0.1",
     "axios": "^0.18.0",
     "base32.js": "^0.1.0",
-    "buidler-deploy": "^0.3.5",
+    "buidler-deploy": "^0.4.1",
     "buidler-ethers-v5": "^0.2.0",
     "buidler-gas-reporter": "^0.1.3",
     "chai": "^4.2.0",
