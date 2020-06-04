@@ -105,6 +105,7 @@ contract CatalystMinter is MetaTransactionReceiver {
         // tokenId =
         _checkAuthorization(from, to);
         _changeCatalyst(from, assetId, catalystToken, gemIds, to);
+        return assetId;
     }
 
     /// @notice add gems to a fungible Asset token by extracting it as ERC721 first.
