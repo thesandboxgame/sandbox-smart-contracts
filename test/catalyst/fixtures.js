@@ -1,18 +1,27 @@
-const {toWei} = require("local-utils");
-const {BigNumber} = require("ethers");
+const {toWei, findEvents, waitFor} = require("local-utils");
 const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
+
+const dummyHash = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 
 module.exports.setupCatalystSystem = deployments.createFixture(async () => {
   const {gemCoreMinter, catalystMinter, others, sandBeneficiary} = await getNamedAccounts();
   await deployments.fixture();
   const users = [];
   for (const other of others) {
+    const CatalystMinter = await ethers.getContract("CatalystMinter", other);
     users.push({
       address: other,
-      CatalystMinter: await ethers.getContract("CatalystMinter", other),
+      CatalystMinter,
       GemCore: await ethers.getContract("GemCore", other),
       // TODO catalysts and gems
       Asset: await ethers.getContract("Asset", other),
+      mintAsset: async ({catalyst, packId, ipfsHash, gemIds, quantity, to}) => {
+        const receipt = await waitFor(
+          CatalystMinter.mint(other, packId || 0, ipfsHash || dummyHash, catalyst, gemIds, quantity, to || other, "0x")
+        );
+        const events = await findEvents(asset, "TransferSingle", receipt.blockHash);
+        return events[0].args.id;
+      },
     });
   }
   const gemCore = await ethers.getContract("GemCore", gemCoreMinter);
@@ -33,18 +42,20 @@ module.exports.setupCatalystSystem = deployments.createFixture(async () => {
     gems,
     sand,
     asset,
+    catalystRegistry: await ethers.getContract("CatalystRegistry"),
   };
 });
 
 module.exports.setupCatalystUsers = deployments.createFixture(async () => {
-  const {users, gemCore, catalysts, sand, asset, gems} = await this.setupCatalystSystem();
+  const setup = await this.setupCatalystSystem();
+  const {users, gemCore, catalysts, sand} = setup;
   async function setupUser(creator, {hasSand, hasGems, hasCatalysts}) {
     if (hasSand) {
       await sand.transfer(creator.address, toWei(1000));
     }
     if (hasGems) {
       for (let i = 0; i < 5; i++) {
-        await gemCore.mint(creator.address, 0, 10);
+        await gemCore.mint(creator.address, i, 10);
       }
     }
     if (hasCatalysts) {
@@ -59,15 +70,10 @@ module.exports.setupCatalystUsers = deployments.createFixture(async () => {
   const creatorWithoutCatalyst = await setupUser(users[1], {hasSand: true, hasGems: true, hasCatalysts: false});
   const creatorWithoutSand = await setupUser(users[1], {hasSand: false, hasGems: true, hasCatalysts: true});
   return {
+    ...setup,
     creator,
     creatorWithoutGems,
     creatorWithoutCatalyst,
     creatorWithoutSand,
-    users: users.slice(4),
-    asset,
-    sand,
-    gemCore,
-    catalysts,
-    gems,
   };
 });

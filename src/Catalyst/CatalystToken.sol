@@ -6,6 +6,7 @@ import "../Interfaces/ERC20Extended.sol";
 
 interface CatalystToken is ERC20Extended {
     function getValue(
+        uint256 assetTokenId,
         uint32 gemId,
         uint256 slotIndex,
         bytes32 blockHash
