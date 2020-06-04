@@ -118,10 +118,10 @@ contract CatalystMinter is MetaTransactionReceiver {
         uint256 assetId,
         uint256[] calldata gemIds,
         address to
-    ) external {
+    ) external returns (uint256 tokenId) {
         _checkAuthorization(from, to);
-        uint256 id = _asset.extractERC721From(from, assetId, from);
-        _addGems(from, id, gemIds, to);
+        tokenId = _asset.extractERC721From(from, assetId, from);
+        _addGems(from, tokenId, gemIds, to);
     }
 
     /// @notice add gems to a non-fungible Asset token.

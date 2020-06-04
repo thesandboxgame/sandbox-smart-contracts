@@ -178,5 +178,5 @@ describe("Catalyst:Minting", function () {
   });
 
   // TODO upgrade catalyst
-  // add gems
+  // add gems and test values from previous asset are still same in extracted one // + test post extraction too
 });
