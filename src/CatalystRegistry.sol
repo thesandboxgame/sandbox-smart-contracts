@@ -29,7 +29,7 @@ contract CatalystRegistry is Admin {
     struct Catalyst {
         CatalystToken token;
         Gem[] gems;
-        uint256 assetTokenId;
+        uint256 baseTokenId;
     }
 
     function setCatalyst(
@@ -67,8 +67,8 @@ contract CatalystRegistry is Admin {
     /// @param assetId token id of the Asset
     /// @return catalyst with gem Ids and blockNumber
     function getCatalyst(uint256 assetId) external view returns (Catalyst memory catalyst) {
-        (CatalystStored storage catalystStored, uint256 assetTokenId) = _getCatalyst(assetId);
-        return Catalyst({token: catalystStored.token, gems: catalystStored.gems, assetTokenId: assetTokenId});
+        (CatalystStored storage catalystStored, uint256 baseTokenId) = _getCatalyst(assetId);
+        return Catalyst({token: catalystStored.token, gems: catalystStored.gems, baseTokenId: baseTokenId});
     }
 
     /// @notice return the attributes for a particular asset.
@@ -76,13 +76,13 @@ contract CatalystRegistry is Admin {
     /// @param gemBlockHashes list of block hashes, one for each gem. These must coorespon to the block hashes of the block Number returned by `getGemBlockNumbers`.
     /// @return attributes the attributes associatted with that token.
     function getAttributes(uint256 assetId, bytes32[] calldata gemBlockHashes) external view returns (Attribute[] memory attributes) {
-        (CatalystStored storage catalyst, uint256 assetTokenId) = _getCatalyst(assetId);
+        (CatalystStored storage catalyst, uint256 baseTokenId) = _getCatalyst(assetId);
         Gem[] memory gems = catalyst.gems;
         require(gems.length == gemBlockHashes.length, "invalid number of blockHash");
         attributes = new Attribute[](gems.length);
         for (uint256 i = 0; i < gems.length; i++) {
             uint32 gemId = gems[i].id;
-            attributes[i] = Attribute({gemId: gemId, value: catalyst.token.getValue(assetTokenId, gemId, i, gemBlockHashes[i])});
+            attributes[i] = Attribute({gemId: gemId, value: catalyst.token.getValue(baseTokenId, gemId, i, gemBlockHashes[i])});
         }
     }
 
@@ -113,14 +113,14 @@ contract CatalystRegistry is Admin {
 
     // ///////// INTERNAL ////////////
 
-    function _getCatalyst(uint256 assetId) internal view returns (CatalystStored storage catalyst, uint256 assetTokenId) {
+    function _getCatalyst(uint256 assetId) internal view returns (CatalystStored storage catalyst, uint256 baseTokenId) {
         catalyst = _catalysts[assetId];
-        assetTokenId = assetId;
+        baseTokenId = assetId;
         if (address(catalyst.token) == address(0)) {
             uint256 collectionId = _getCollectionId(assetId);
             if (collectionId != 0) {
                 catalyst = _catalysts[collectionId];
-                assetTokenId = collectionId;
+                baseTokenId = collectionId;
             }
         }
     }
