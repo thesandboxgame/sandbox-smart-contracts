@@ -16,7 +16,7 @@ module.exports = async ({deployments}) => {
   if (!isSuperOperator) {
     log("setting NativeMetaTransactionProcessor as super operator");
     await sendTxAndWait(
-      {from: currentSandAdmin, gas: 100000, skipError: true},
+      {from: currentSandAdmin, gas: 100000, skipUnknownSigner: true},
       "Sand",
       "setSuperOperator",
       metaTxProcessor.address,
@@ -29,7 +29,7 @@ module.exports = async ({deployments}) => {
   if (!isExecutionOperator) {
     log("setting NativeMetaTransactionProcessor as execution operator");
     await sendTxAndWait(
-      {from: currentExecutionSandAdmin, gas: 100000, skipError: true},
+      {from: currentExecutionSandAdmin, gas: 100000, skipUnknownSigner: true},
       "Sand",
       "setExecutionOperator",
       metaTxProcessor.address,

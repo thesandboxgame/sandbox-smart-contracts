@@ -22,7 +22,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     log("setting LandPreSale_3 as Land minter");
     const currentLandAdmin = await call("Land", "getAdmin");
     await sendTxAndWait(
-      {from: currentLandAdmin, gas: 1000000, skipError: true},
+      {from: currentLandAdmin, gas: 1000000, skipUnknownSigner: true},
       "Land",
       "setMinter",
       landSale.address,
@@ -35,7 +35,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     log("enablingDAI for LandPreSale_3");
     const currentLandSaleAdmin = await call(landSaleName, "getAdmin");
     await sendTxAndWait(
-      {from: currentLandSaleAdmin, gas: 1000000, skipError: true},
+      {from: currentLandSaleAdmin, gas: 1000000, skipUnknownSigner: true},
       landSaleName,
       "setDAIEnabled",
       true
@@ -46,7 +46,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   if (currentAdmin.toLowerCase() !== landSaleAdmin.toLowerCase()) {
     log("setting LandPreSale_3 Admin");
     await sendTxAndWait(
-      {from: currentAdmin, gas: 1000000, skipError: true},
+      {from: currentAdmin, gas: 1000000, skipUnknownSigner: true},
       landSaleName,
       "changeAdmin",
       landSaleAdmin
@@ -58,6 +58,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   // if (!isSandSuperOperator) {
   //     log('setting LandPreSale_3 as super operator for Sand');
   //     const currentSandAdmin = await call(sand, 'getAdmin');
-  //     await sendTxAndWait({from: currentSandAdmin, gas: 100000, skipError: true}, sand, 'setSuperOperator', landSale.address, true);
+  //     await sendTxAndWait({from: currentSandAdmin, gas: 100000, skipUnknownSigner: true}, sand, 'setSuperOperator', landSale.address, true);
   // }
 };

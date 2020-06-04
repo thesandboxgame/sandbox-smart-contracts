@@ -126,6 +126,10 @@ module.exports = {
       url: "https://rinkeby.infura.io/v3/ced8eecc03984939b556332468325813",
       accounts,
     },
+    test_rinkeby: {
+      url: "https://rinkeby.infura.io/v3/ced8eecc03984939b556332468325813",
+      accounts,
+    },
     mainnet: {
       url: "https://mainnet.infura.io/v3/ced8eecc03984939b556332468325813",
       accounts: mainnetAccounts,

@@ -15,7 +15,12 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   if (currentAdmin) {
     if (currentAdmin.toLowerCase() !== landAdmin.toLowerCase()) {
       log("setting land Admin");
-      await sendTxAndWait({from: currentAdmin, gas: 1000000, skipError: true}, "Land", "changeAdmin", landAdmin);
+      await sendTxAndWait(
+        {from: currentAdmin, gas: 1000000, skipUnknownSigner: true},
+        "Land",
+        "changeAdmin",
+        landAdmin
+      );
     }
   } else {
     log("current land impl do not support admin");

@@ -17,7 +17,7 @@ module.exports = async ({deployments}) => {
     log("setting NativeMetaTransactionProcessor as super operator");
     const currentLandAdmin = await call("Land", "getAdmin");
     await sendTxAndWait(
-      {from: currentLandAdmin, gas: 100000, skipError: true},
+      {from: currentLandAdmin, gas: 100000, skipUnknownSigner: true},
       "Land",
       "setSuperOperator",
       estate.address,

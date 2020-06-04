@@ -15,7 +15,12 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   if (currentAdmin) {
     if (currentAdmin.toLowerCase() !== assetAdmin.toLowerCase()) {
       log("setting Asset Admin");
-      await sendTxAndWait({from: currentAdmin, gas: 1000000, skipError: true}, "Asset", "changeAdmin", assetAdmin);
+      await sendTxAndWait(
+        {from: currentAdmin, gas: 1000000, skipUnknownSigner: true},
+        "Asset",
+        "changeAdmin",
+        assetAdmin
+      );
     }
   } else {
     log("current Asset impl do not support admin");
@@ -29,7 +34,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     if (currentBouncerAdmin.toLowerCase() !== assetBouncerAdmin.toLowerCase()) {
       log("setting Asset Bouncer Admin");
       await sendTxAndWait(
-        {from: currentBouncerAdmin, gas: 1000000, skipError: true},
+        {from: currentBouncerAdmin, gas: 1000000, skipUnknownSigner: true},
         "Asset",
         "changeBouncerAdmin",
         assetBouncerAdmin

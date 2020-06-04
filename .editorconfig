@@ -14,3 +14,6 @@ indent_size = 4
 
 [.mnemonic*]
 insert_final_newline = false
+
+[.land_presale*]
+insert_final_newline = false

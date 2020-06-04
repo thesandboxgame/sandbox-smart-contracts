@@ -11,7 +11,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
   const currentAdmin = await call("Sand", "getAdmin");
   if (currentAdmin.toLowerCase() !== sandAdmin.toLowerCase()) {
     log("setting Sand Admin");
-    await sendTxAndWait({from: currentAdmin, gas: 1000000, skipError: true}, "Sand", "changeAdmin", sandAdmin);
+    await sendTxAndWait({from: currentAdmin, gas: 1000000, skipUnknownSigner: true}, "Sand", "changeAdmin", sandAdmin);
   }
 
   if (chainId === "4") {
@@ -21,7 +21,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
   if (currentExecutionAdmin.toLowerCase() !== sandExecutionAdmin.toLowerCase()) {
     log("setting Sand Execution Admin");
     await sendTxAndWait(
-      {from: currentExecutionAdmin, gas: 1000000, skipError: true},
+      {from: currentExecutionAdmin, gas: 1000000, skipUnknownSigner: true},
       "Sand",
       "changeExecutionAdmin",
       sandExecutionAdmin
