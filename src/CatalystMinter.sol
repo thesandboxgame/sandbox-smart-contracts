@@ -74,13 +74,16 @@ contract CatalystMinter is MetaTransactionReceiver {
     function extractAndChangeCatalyst(
         address from,
         uint256 assetId,
+        // uint40 packId,
         CatalystToken catalystToken,
         uint256[] calldata gemIds,
         address to
     ) external returns (uint256 tokenId) {
         _checkAuthorization(from, to);
         tokenId = _asset.extractERC721From(from, assetId, from);
-        // TODO : updateERC721
+        // TODO? if we want rarity to follow catalyst because without updateERC721 rarity cannot be changed
+        // uint256 extractedTokenId = _asset.extractERC721From(from, assetId, from);
+        // tokenId = _asset.updateERC721(from, extractedTokenId, packId,
         _changeCatalyst(from, tokenId, catalystToken, gemIds, to);
     }
 
@@ -97,7 +100,8 @@ contract CatalystMinter is MetaTransactionReceiver {
         uint256[] calldata gemIds,
         address to
     ) external returns (uint256 tokenId) {
-        // TODO : updateERC721
+        // TODO? if we want rarity to follow catalyst because without updateERC721 rarity cannot be changed
+        // : updateERC721
         // tokenId =
         _checkAuthorization(from, to);
         _changeCatalyst(from, assetId, catalystToken, gemIds, to);
