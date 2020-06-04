@@ -23,13 +23,8 @@ contract CatalystRegistry is Admin {
 
     struct CatalystStored {
         CatalystToken token;
+        uint96 seed;
         Gem[] gems;
-    }
-
-    struct Catalyst {
-        CatalystToken token;
-        Gem[] gems;
-        uint256 baseTokenId;
     }
 
     function setCatalyst(
@@ -40,6 +35,7 @@ contract CatalystRegistry is Admin {
         require(msg.sender == _minter, "NOT_MINTER");
 
         _catalysts[assetId].token = catalystToken;
+        _catalysts[assetId].seed = uint96(uint256(keccak256(abi.encodePacked(assetId)))); // ensure 2 gems minted in same block are different
         delete _catalysts[assetId].gems;
         emit CatalystApplied(assetId, address(catalystToken));
         if (gemIds.length > 0) {
@@ -55,8 +51,9 @@ contract CatalystRegistry is Admin {
         address catalystToken = address(catalyst.token);
         if (catalystToken == address(0)) {
             // copy if not set
-            (CatalystStored storage parentCatalyst, ) = _getCatalyst(assetId);
+            CatalystStored storage parentCatalyst = _getCatalyst(assetId);
             catalyst.token = parentCatalyst.token;
+            catalyst.seed = parentCatalyst.seed;
             catalyst.gems = parentCatalyst.gems;
         }
         _addGems(catalyst, gemIds);
@@ -66,9 +63,8 @@ contract CatalystRegistry is Admin {
     /// @notice return the Catalyst associated with an Asset
     /// @param assetId token id of the Asset
     /// @return catalyst with gem Ids and blockNumber
-    function getCatalyst(uint256 assetId) external view returns (Catalyst memory catalyst) {
-        (CatalystStored storage catalystStored, uint256 baseTokenId) = _getCatalyst(assetId);
-        return Catalyst({token: catalystStored.token, gems: catalystStored.gems, baseTokenId: baseTokenId});
+    function getCatalyst(uint256 assetId) external view returns (CatalystStored memory catalyst) {
+        return _getCatalyst(assetId);
     }
 
     /// @notice return the attributes for a particular asset.
@@ -76,13 +72,13 @@ contract CatalystRegistry is Admin {
     /// @param gemBlockHashes list of block hashes, one for each gem. These must coorespon to the block hashes of the block Number returned by `getGemBlockNumbers`.
     /// @return attributes the attributes associatted with that token.
     function getAttributes(uint256 assetId, bytes32[] calldata gemBlockHashes) external view returns (Attribute[] memory attributes) {
-        (CatalystStored storage catalyst, uint256 baseTokenId) = _getCatalyst(assetId);
+        CatalystStored storage catalyst = _getCatalyst(assetId);
         Gem[] memory gems = catalyst.gems;
         require(gems.length == gemBlockHashes.length, "invalid number of blockHash");
         attributes = new Attribute[](gems.length);
         for (uint256 i = 0; i < gems.length; i++) {
             uint32 gemId = gems[i].id;
-            attributes[i] = Attribute({gemId: gemId, value: catalyst.token.getValue(baseTokenId, gemId, i, gemBlockHashes[i])});
+            attributes[i] = Attribute({gemId: gemId, value: catalyst.token.getValue(gemId, catalyst.seed, gemBlockHashes[i], i)});
         }
     }
 
@@ -90,7 +86,7 @@ contract CatalystRegistry is Admin {
     /// @param assetId tokenId of the Asset.
     /// @return blockNumbers list of blockNumber for each gems.
     function getGemBlockNumbers(uint256 assetId) external view returns (uint64[] memory blockNumbers) {
-        (CatalystStored storage catalyst, ) = _getCatalyst(assetId);
+        CatalystStored storage catalyst = _getCatalyst(assetId);
         blockNumbers = new uint64[](catalyst.gems.length);
         for (uint256 i = 0; i < blockNumbers.length; i++) {
             blockNumbers[i] = catalyst.gems[i].blockNumber;
@@ -113,14 +109,12 @@ contract CatalystRegistry is Admin {
 
     // ///////// INTERNAL ////////////
 
-    function _getCatalyst(uint256 assetId) internal view returns (CatalystStored storage catalyst, uint256 baseTokenId) {
+    function _getCatalyst(uint256 assetId) internal view returns (CatalystStored storage catalyst) {
         catalyst = _catalysts[assetId];
-        baseTokenId = assetId;
         if (address(catalyst.token) == address(0)) {
             uint256 collectionId = _getCollectionId(assetId);
             if (collectionId != 0) {
                 catalyst = _catalysts[collectionId];
-                baseTokenId = collectionId;
             }
         }
     }
@@ -146,6 +140,7 @@ contract CatalystRegistry is Admin {
 
     /// DATA ////////
     address _minter;
-    mapping(uint256 => CatalystStored) _catalysts;
     AssetToken internal immutable _asset;
+    uint64 _counter;
+    mapping(uint256 => CatalystStored) _catalysts;
 }

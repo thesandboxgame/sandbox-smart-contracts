@@ -22,6 +22,13 @@ module.exports.setupCatalystSystem = deployments.createFixture(async () => {
         const events = await findEvents(asset, "TransferSingle", receipt.blockHash);
         return events[0].args.id;
       },
+      updateAsset: async (tokenId, {catalyst, gemIds, to}) => {
+        const receipt = await waitFor(
+          CatalystMinter.extractAndChangeCatalyst(other, tokenId, catalyst, gemIds, to || other)
+        );
+        const events = await findEvents(asset, "Transfer", receipt.blockHash);
+        return events[0].args[2];
+      },
     });
   }
   const gemCore = await ethers.getContract("GemCore", gemCoreMinter);

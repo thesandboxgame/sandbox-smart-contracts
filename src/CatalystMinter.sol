@@ -77,10 +77,11 @@ contract CatalystMinter is MetaTransactionReceiver {
         CatalystToken catalystToken,
         uint256[] calldata gemIds,
         address to
-    ) external {
+    ) external returns (uint256 tokenId) {
         _checkAuthorization(from, to);
-        uint256 id = _asset.extractERC721From(from, assetId, from);
-        _changeCatalyst(from, id, catalystToken, gemIds, to);
+        tokenId = _asset.extractERC721From(from, assetId, from);
+        // TODO : updateERC721
+        _changeCatalyst(from, tokenId, catalystToken, gemIds, to);
     }
 
     /// @notice associate a new catalyst to a non-fungible Asset token.
@@ -95,7 +96,9 @@ contract CatalystMinter is MetaTransactionReceiver {
         CatalystToken catalystToken,
         uint256[] calldata gemIds,
         address to
-    ) external {
+    ) external returns (uint256 tokenId) {
+        // TODO : updateERC721
+        // tokenId =
         _checkAuthorization(from, to);
         _changeCatalyst(from, assetId, catalystToken, gemIds, to);
     }
@@ -239,7 +242,7 @@ contract CatalystMinter is MetaTransactionReceiver {
         address to
     ) internal {
         require(assetId & IS_NFT > 0, "NEED TO BE AN NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will reyrn false
-        CatalystRegistry.Catalyst memory catalyst = _catalystRegistry.getCatalyst(assetId);
+        CatalystRegistry.CatalystStored memory catalyst = _catalystRegistry.getCatalyst(assetId);
         (, uint16 maxGems, , , ) = catalyst.token.getMintData();
         require(gemIds.length + catalyst.gems.length <= maxGems, "too many gems");
 

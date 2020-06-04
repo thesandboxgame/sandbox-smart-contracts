@@ -76,6 +76,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
 
   await setSuperOperatorFor("Sand", catalystMinter.address);
   await setSuperOperatorFor("GemCore", catalystMinter.address);
+  await setSuperOperatorFor("Asset", catalystMinter.address);
   for (const name of ["Common", "Rare", "Epic", "Legendary"]) {
     await setSuperOperatorFor(`${name}Catalyst`, catalystMinter.address);
   }

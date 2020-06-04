@@ -147,6 +147,36 @@ describe("Catalyst:Minting", function () {
     assert.equal(rarity, 3);
   });
 
+  it("creator mint Rare Asset And Upgrade to Legendary", async function () {
+    const {creator, catalysts, asset, catalystRegistry} = await setupCatalystUsers();
+    const originalGemIds = [0, 1];
+    const quantity = 60;
+    const originalTokenId = await creator.mintAsset({
+      catalyst: catalysts.Rare.address,
+      gemIds: originalGemIds,
+      quantity,
+    });
+
+    const gemIds = [1, 2, 3];
+    const tokenId = await creator.updateAsset(originalTokenId, {
+      catalyst: catalysts.Legendary.address,
+      gemIds,
+      quantity,
+    });
+
+    const originalBalance = await asset["balanceOf(address,uint256)"](creator.address, originalTokenId);
+
+    const balance = await asset["balanceOf(address,uint256)"](creator.address, tokenId);
+    const rarity = await asset.rarity(tokenId);
+    await mine(); // future block need to be mined to get the value
+    await assertValidAttributes({catalystRegistry, tokenId, tokenId, gemIds, range: [76, 100]});
+
+    assert.equal(originalBalance, quantity - 1);
+    assert.equal(balance, 1);
+    console.log({rarity, rarityBN: rarity.toNumber()});
+    assert.equal(rarity, 3);
+  });
+
   // TODO upgrade catalyst
   // add gems
 });
