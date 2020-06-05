@@ -6,8 +6,6 @@ const {setupLandSaleWithReferral} = require("./fixtures");
 const {calculateLandHash} = require("../../../lib/merkleTreeHelper");
 const {createReferral} = require("../../../lib/referralValidator");
 
-// TODO move non-Ether tests to common_tests.js
-
 function runEtherTests() {
   describe("LandSaleWithReferral:ETH", function () {
     let initialSetUp;
@@ -18,12 +16,6 @@ function runEtherTests() {
     describe("--> Tests with real LANDs", function () {
       beforeEach(async function () {
         initialSetUp = await setupLandSaleWithReferral("lands");
-      });
-
-      it("the expiry time of the sale is correct", async function () {
-        const {contracts, saleEnd} = initialSetUp;
-        const expiryTime = await contracts.landSaleWithReferral.getExpiryTime();
-        assert.equal(expiryTime, saleEnd, "Expiry time is wrong");
       });
 
       it("ETH is enabled", async function () {

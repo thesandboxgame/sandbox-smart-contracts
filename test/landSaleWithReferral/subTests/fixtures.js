@@ -23,6 +23,7 @@ module.exports.setupLandSaleWithReferral = async (landType) => {
     LandSaleBeneficiary,
     LandAdmin,
     SandAdmin,
+    DaiAdmin,
     users,
     contracts,
     lands,
@@ -37,7 +38,7 @@ module.exports.setupLandSaleWithReferral = async (landType) => {
       estate: await ethers.getContract("Estate"),
       sand: await ethers.getContract("Sand"),
       daiMedianizer: await ethers.getContract("DAIMedianizer"),
-      fakeDAI: await ethers.getContract("DAI"),
+      dai: await ethers.getContract("DAI"),
     };
     const saleStart = getChainCurrentTime();
     const saleDuration = 60 * 60;
@@ -71,12 +72,12 @@ module.exports.setupLandSaleWithReferral = async (landType) => {
       tree.getRoot().hash,
       saleEnd,
       contracts.daiMedianizer.address,
-      contracts.fakeDAI.address,
+      contracts.dai.address,
       signer,
       maxCommissionRate
     );
 
-    const {LandSaleAdmin, LandSaleBeneficiary, LandAdmin, SandAdmin, users} = await generateUserPermissions(
+    const {LandSaleAdmin, LandSaleBeneficiary, LandAdmin, SandAdmin, DaiAdmin, users} = await generateUserPermissions(
       roles,
       contracts
     );
@@ -84,13 +85,17 @@ module.exports.setupLandSaleWithReferral = async (landType) => {
     await SandAdmin.Sand.functions
       .setSuperOperator(contracts.landSaleWithReferral.address, true)
       .then((tx) => tx.wait());
+    // await DaiAdmin.Dai.functions.setSuperOperator(contracts.landSaleWithReferral.address, true).then((tx) => tx.wait());
 
-    const userWithSAND = await setupUser(SandAdmin, contracts, users[0], {hasSand: true, hasDAI: false});
-    const secondUserWithSAND = await setupUser(SandAdmin, contracts, users[1], {hasSand: true, hasDAI: false});
+    const userWithSAND = await setupUser(contracts, SandAdmin, DaiAdmin, users[0], {hasSand: true, hasDAI: false});
+    const secondUserWithSAND = await setupUser(contracts, SandAdmin, DaiAdmin, users[1], {
+      hasSand: true,
+      hasDAI: false,
+    });
     const userWithoutSAND = users[2];
 
-    const userWithDAI = await setupUser(SandAdmin, contracts, users[0], {hasSand: false, hasDAI: true});
-    const secondUserWithDAI = await setupUser(SandAdmin, contracts, users[1], {hasSand: false, hasDAI: true});
+    const userWithDAI = await setupUser(contracts, SandAdmin, DaiAdmin, users[0], {hasSand: false, hasDAI: true});
+    const secondUserWithDAI = await setupUser(contracts, SandAdmin, DaiAdmin, users[1], {hasSand: false, hasDAI: true});
     const userWithoutDAI = users[2];
 
     return {
@@ -104,6 +109,7 @@ module.exports.setupLandSaleWithReferral = async (landType) => {
       LandSaleBeneficiary,
       LandAdmin,
       SandAdmin,
+      DaiAdmin,
       users,
       contracts,
       lands,
@@ -124,6 +130,7 @@ module.exports.setupLandSaleWithReferral = async (landType) => {
     LandSaleBeneficiary,
     LandAdmin,
     SandAdmin,
+    DaiAdmin,
     users,
 
     // Contracts
