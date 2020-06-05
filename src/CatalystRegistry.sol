@@ -8,8 +8,8 @@ import "./contracts_common/src/BaseWithStorage/Admin.sol";
 
 contract CatalystRegistry is Admin {
     event Minter(address newMinter);
-    event CatalystApplied(uint256 assetId, address catalyst);
-    event GemsSocketed(uint256 assetId, address catalyst, uint256[] gemIds);
+    event CatalystApplied(uint256 assetId, address catalyst, uint96 seed);
+    event GemsSocketed(uint256 assetId, address catalyst, uint256[] gemIds, uint64 blockNumber);
 
     struct Gem {
         uint64 blockNumber;
@@ -35,12 +35,13 @@ contract CatalystRegistry is Admin {
         require(msg.sender == _minter, "NOT_MINTER");
 
         _catalysts[assetId].token = catalystToken;
-        _catalysts[assetId].seed = uint96(uint256(keccak256(abi.encodePacked(assetId)))); // ensure 2 gems minted in same block are different
+        uint96 seed = uint96(uint256(keccak256(abi.encodePacked(assetId)))); // ensure 2 gems minted in same block are different
+        _catalysts[assetId].seed = seed;
         delete _catalysts[assetId].gems;
-        emit CatalystApplied(assetId, address(catalystToken));
+        emit CatalystApplied(assetId, address(catalystToken), seed);
         if (gemIds.length > 0) {
-            _addGems(_catalysts[assetId], gemIds);
-            emit GemsSocketed(assetId, address(catalystToken), gemIds);
+            uint64 blockNumber = _addGems(_catalysts[assetId], gemIds);
+            emit GemsSocketed(assetId, address(catalystToken), gemIds, blockNumber);
         }
     }
 
@@ -56,8 +57,8 @@ contract CatalystRegistry is Admin {
             catalyst.seed = parentCatalyst.seed;
             catalyst.gems = parentCatalyst.gems;
         }
-        _addGems(catalyst, gemIds);
-        emit GemsSocketed(assetId, catalystToken, gemIds);
+        uint64 blockNumber = _addGems(catalyst, gemIds);
+        emit GemsSocketed(assetId, catalystToken, gemIds, blockNumber);
     }
 
     /// @notice return the Catalyst associated with an Asset
@@ -119,9 +120,10 @@ contract CatalystRegistry is Admin {
         }
     }
 
-    function _addGems(CatalystStored storage catalyst, uint256[] memory gemIds) internal {
+    function _addGems(CatalystStored storage catalyst, uint256[] memory gemIds) internal returns (uint64 blockNumber) {
+        blockNumber = uint64(block.number + 1);
         for (uint256 i = 0; i < gemIds.length; i++) {
-            catalyst.gems.push(Gem({blockNumber: uint64(block.number + 1), id: uint32(gemIds[i])}));
+            catalyst.gems.push(Gem({blockNumber: blockNumber, id: uint32(gemIds[i])}));
         }
     }
 
@@ -141,6 +143,5 @@ contract CatalystRegistry is Admin {
     /// DATA ////////
     address _minter;
     AssetToken internal immutable _asset;
-    uint64 _counter;
     mapping(uint256 => CatalystStored) _catalysts;
 }
