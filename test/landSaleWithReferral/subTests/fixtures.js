@@ -1,4 +1,3 @@
-// const {utils} = require("ethers");
 const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
 const MerkleTree = require("../../../lib/merkleTree");
 const {getChainCurrentTime} = require("testUtils");
@@ -85,7 +84,6 @@ module.exports.setupLandSaleWithReferral = async (landType) => {
     await SandAdmin.Sand.functions
       .setSuperOperator(contracts.landSaleWithReferral.address, true)
       .then((tx) => tx.wait());
-    // await DaiAdmin.Dai.functions.setSuperOperator(contracts.landSaleWithReferral.address, true).then((tx) => tx.wait());
 
     const userWithSAND = await setupUser(contracts, SandAdmin, DaiAdmin, users[0], {hasSand: true, hasDAI: false});
     const secondUserWithSAND = await setupUser(contracts, SandAdmin, DaiAdmin, users[1], {
@@ -96,7 +94,7 @@ module.exports.setupLandSaleWithReferral = async (landType) => {
 
     const userWithDAI = await setupUser(contracts, SandAdmin, DaiAdmin, users[0], {hasSand: false, hasDAI: true});
     const secondUserWithDAI = await setupUser(contracts, SandAdmin, DaiAdmin, users[1], {hasSand: false, hasDAI: true});
-    const userWithoutDAI = users[2];
+    const userWithoutDAI = await setupUser(contracts, SandAdmin, DaiAdmin, users[2], {hasSand: false, hasDAI: false});
 
     return {
       userWithSAND,

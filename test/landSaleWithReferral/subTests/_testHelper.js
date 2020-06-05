@@ -1,5 +1,5 @@
-// const {utils} = require("ethers");
 const {BigNumber} = require("ethers");
+const {toWei} = require("testUtils");
 
 module.exports.testLands = [
   {
@@ -118,14 +118,14 @@ module.exports.generateUserPermissions = async function (roles, contracts) {
 
 module.exports.setupUser = async function (contracts, SandAdmin, DaiAdmin, user, {hasSand, hasDAI}) {
   if (hasDAI) {
-    await DaiAdmin.Dai.transfer(user.address, BigNumber.from("1000000").mul("1000000000000000000")); // Review
-    await user.Dai.approve(
-      contracts.landSaleWithReferral.address,
-      BigNumber.from("1000000").mul("1000000000000000000")
-    );
+    await DaiAdmin.Dai.transfer(user.address, toWei("1000000"));
+    await user.Dai.approve(contracts.landSaleWithReferral.address, toWei("1000000"));
   }
   if (hasSand) {
     await SandAdmin.Sand.transfer(user.address, BigNumber.from("1000000000000000000000000"));
+  }
+  if (!hasDAI && !hasSand) {
+    await user.Dai.approve(contracts.landSaleWithReferral.address, toWei("1000000"));
   }
   return user;
 };

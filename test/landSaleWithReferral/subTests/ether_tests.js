@@ -133,7 +133,7 @@ function runEtherTests() {
           .mul(BigNumber.from(commissionRate))
           .div(BigNumber.from("10000"));
 
-        assert.equal(commission, expectedCommission.toString(), "Commission is wrong");
+        assert.isOk(commission.eq(expectedCommission), "Commission is wrong");
         assert.isOk(commission.eq(referrerBalance), "Referrer balance is wrong");
       });
 

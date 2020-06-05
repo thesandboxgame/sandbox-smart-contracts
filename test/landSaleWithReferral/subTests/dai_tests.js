@@ -60,9 +60,9 @@ function runDaiTests() {
           land.salt,
           proof,
           emptyReferral,
-          {gasLimit: 100000}
+          {gasLimit: 1000000}
         );
-      }); // revert Not enough funds allowed
+      });
 
       it("can buy LAND with DAI and referral", async function () {
         const {tree, userWithDAI, userWithoutDAI, LandSaleBeneficiary, lands, contracts} = initialSetUp;
@@ -125,22 +125,22 @@ function runDaiTests() {
 
         assert.equal(referrer, referral.referrer, "Referrer is wrong");
         assert.equal(referree, referral.referee, "Referee is wrong");
-        assert.equal(token, contracts.sand.address, "Token is wrong");
-        assert.equal(amount, sandToUSD(land.price), "Amount is wrong");
+        assert.equal(token, contracts.dai.address, "Token is wrong");
+        assert.isOk(amount.eq(sandToUSD(land.price)), "Amount is wrong");
         assert.equal(commissionRate, referral.commissionRate, "Amount is wrong");
 
-        const referrerBalance = await contracts.sand.balanceOf(userWithoutDAI.address);
+        const referrerBalance = await contracts.dai.balanceOf(userWithoutDAI.address);
 
         const expectedCommission = BigNumber.from(amount)
           .mul(BigNumber.from(commissionRate))
           .div(BigNumber.from("10000"));
 
-        assert.equal(commission, expectedCommission.toString(), "Commission is wrong");
+        assert.isOk(commission.eq(expectedCommission), "Commission is wrong");
         assert.isOk(commission.eq(referrerBalance), "Referrer balance is wrong");
 
-        const landSaleBeneficiaryBalance = await contracts.sand.balanceOf(LandSaleBeneficiary.address);
+        const landSaleBeneficiaryBalance = await contracts.dai.balanceOf(LandSaleBeneficiary.address);
         const expectedLandSaleBeneficiaryBalance = BigNumber.from(amount).sub(BigNumber.from(commission));
-        assert.equal(landSaleBeneficiaryBalance, expectedLandSaleBeneficiaryBalance.toString(), "Balance is wrong");
+        assert.isOk(landSaleBeneficiaryBalance.eq(expectedLandSaleBeneficiaryBalance), "Balance is wrong");
       });
 
       it("CANNOT buy LAND with DAI if not enabled (empty referral)", async function () {
@@ -164,7 +164,7 @@ function runDaiTests() {
             proof,
             emptyReferral
           ),
-          "sand payments not enabled"
+          "dai payments not enabled"
         );
       });
 
@@ -220,12 +220,12 @@ function runDaiTests() {
         const event = receipt.events[0];
         assert.equal(event.event, undefined, "Event should be undefined");
 
-        const referrerBalance = await contracts.sand.balanceOf(userWithoutDAI.address);
+        const referrerBalance = await contracts.dai.balanceOf(userWithoutDAI.address);
 
         assert.equal(referrerBalance, 0, "Referrer balance is wrong");
 
-        const landSaleBeneficiaryBalance = await contracts.sand.balanceOf(LandSaleBeneficiary.address);
-        assert.equal(landSaleBeneficiaryBalance, land.price, "Balance is wrong");
+        const landSaleBeneficiaryBalance = await contracts.dai.balanceOf(LandSaleBeneficiary.address);
+        assert.isOk(landSaleBeneficiaryBalance.eq(sandToUSD(land.price)), "Balance is wrong");
       });
 
       it("CANNOT buy Land without DAI", async function () {
@@ -244,35 +244,12 @@ function runDaiTests() {
             land.price,
             land.salt,
             proof,
-            emptyReferral
+            emptyReferral,
+            {gasLimit: 1000000}
           ),
           "not enough fund"
         );
       });
-
-      // it("CANNOT buy Land without enough tokens", async function () {
-      //   const {userWithoutDAI, tree, lands, DaiAdmin} = initialSetUp;
-      //   const land = lands[1];
-      //   const proof = tree.getProof(calculateLandHash(land));
-
-      //   await DaiAdmin.Dai.transfer(userWithoutDAI.address, "4046");
-
-      //   await expectRevert(
-      //     userWithoutDAI.LandSaleWithReferral.functions.buyLandWithDAI(
-      //       userWithoutDAI.address,
-      //       userWithoutDAI.address,
-      //       zeroAddress,
-      //       land.x,
-      //       land.y,
-      //       land.size,
-      //       land.price,
-      //       land.salt,
-      //       proof,
-      //       emptyReferral
-      //     ),
-      //     "not enough fund"
-      //   );
-      // });
 
       it("CANNOT buy Land without just enough tokens", async function () {
         const {userWithoutDAI, tree, lands, DaiAdmin} = initialSetUp;
@@ -295,7 +272,8 @@ function runDaiTests() {
             land.price,
             land.salt,
             proof,
-            emptyReferral
+            emptyReferral,
+            {gasLimit: 1000000}
           ),
           "not enough fund"
         );
@@ -340,9 +318,7 @@ function runDaiTests() {
             proof,
             emptyReferral
           ),
-          "Invalid land provided" // lands[5] has no reserved param
-          // require(reserved == address(0) || reserved == buyer, "cannot buy reserved Land");
-          // note: requirement passes because buyLandWithETH reserved param == buyer in this case
+          "Invalid land provided"
         );
       });
 
@@ -506,8 +482,8 @@ function runDaiTests() {
     describe("--> Tests with test LANDs for reserved addresses", function () {
       beforeEach(async function () {
         initialSetUp = await setupLandSaleWithReferral("testLands");
-        const {DaiAdmin} = initialSetUp;
-        await DaiAdmin.LandSaleWithReferral.setDAIEnabled(true);
+        const {LandSaleAdmin} = initialSetUp;
+        await LandSaleAdmin.LandSaleWithReferral.setDAIEnabled(true);
       });
 
       it("CANNOT buy Land from a reserved Land of a different address (empty referral)", async function () {
@@ -529,8 +505,6 @@ function runDaiTests() {
             emptyReferral
           ),
           "Invalid land provided"
-          // require(reserved == address(0) || reserved == buyer, "cannot buy reserved Land");
-          // note: requirement passes because buyLandWithETH reserved param == buyer in this case
         );
       });
 

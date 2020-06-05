@@ -129,12 +129,12 @@ function runSandTests() {
           .mul(BigNumber.from(commissionRate))
           .div(BigNumber.from("10000"));
 
-        assert.equal(commission, expectedCommission.toString(), "Commission is wrong");
+        assert.isOk(commission.eq(expectedCommission), "Commission is wrong");
         assert.isOk(commission.eq(referrerBalance), "Referrer balance is wrong");
 
         const landSaleBeneficiaryBalance = await contracts.sand.balanceOf(LandSaleBeneficiary.address);
         const expectedLandSaleBeneficiaryBalance = BigNumber.from(amount).sub(BigNumber.from(commission));
-        assert.equal(landSaleBeneficiaryBalance, expectedLandSaleBeneficiaryBalance.toString(), "Balance is wrong");
+        assert.isOk(landSaleBeneficiaryBalance.eq(expectedLandSaleBeneficiaryBalance), "Balance is wrong");
       });
 
       it("CANNOT buy LAND with SAND if not enabled (empty referral)", async function () {
@@ -331,9 +331,7 @@ function runSandTests() {
             proof,
             emptyReferral
           ),
-          "Invalid land provided" // lands[5] has no reserved param
-          // require(reserved == address(0) || reserved == buyer, "cannot buy reserved Land");
-          // note: requirement passes because buyLandWithETH reserved param == buyer in this case
+          "Invalid land provided"
         );
       });
 
@@ -520,8 +518,6 @@ function runSandTests() {
             emptyReferral
           ),
           "Invalid land provided"
-          // require(reserved == address(0) || reserved == buyer, "cannot buy reserved Land");
-          // note: requirement passes because buyLandWithETH reserved param == buyer in this case
         );
       });
 
