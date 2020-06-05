@@ -291,7 +291,7 @@ function runEtherTests() {
                 salt: lands[5].salt,
               })
             ),
-          "Cannot read property 'parent' of undefined" // TODO check this is the correct error message
+          "Leaf not found"
         );
       });
 
@@ -385,7 +385,7 @@ function runEtherTests() {
           users[0].LandSaleWithReferral.functions.buyLandWithETH(
             users[0].address,
             users[0].address,
-            users[0].address,
+            zeroAddress,
             land.x,
             land.y,
             land.size,
