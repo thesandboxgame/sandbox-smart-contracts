@@ -57,12 +57,13 @@
     "coverage": "buidler --network coverage coverage",
     "ganache": "ganache-cli",
     "smartcheck": "smartcheck -p .",
-    "deploy:local": "buidler --network localhost deploy",
-    "deploy:rinkeby": "buidler --network rinkeby deploy",
-    "deploy:test": "buidler --network test_rinkeby deploy",
-    "deploy:kovan": "buidler --network kovan deploy",
-    "deploy:mainnet": "buidler --network mainnet deploy",
-    "run:rinkeby": "cross-env BUIDLER_NETWORK=rinkeby node",
-    "run:mainnet": "cross-env BUIDLER_NETWORK=mainnet node"
+    "local:deploy": "buidler --network localhost deploy",
+    "rinkeby:deploy": "buidler --network rinkeby deploy",
+    "test:deploy": "buidler --network test_rinkeby deploy",
+    "kovan:deploy": "buidler --network kovan deploy",
+    "mainnet:deploy": "buidler --network mainnet deploy",
+    "local:run": "cross-env BUIDLER_NETWORK=localhost node",
+    "rinkeby:run": "cross-env BUIDLER_NETWORK=rinkeby node",
+    "mainnet:run": "cross-env BUIDLER_NETWORK=mainnet node"
   }
 }

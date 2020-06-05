@@ -34,3 +34,4 @@ giveaway.json
 .proofs*
 
 deployments/buidlerevm*
+deployments/localhost*
