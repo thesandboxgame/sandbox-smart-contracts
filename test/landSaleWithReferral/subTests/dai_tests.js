@@ -465,7 +465,7 @@ function runDaiTests() {
           userWithDAI.LandSaleWithReferral.functions.buyLandWithDAI(
             userWithDAI.address,
             userWithDAI.address,
-            userWithDAI.address,
+            zeroAddress,
             land.x,
             land.y,
             land.size,

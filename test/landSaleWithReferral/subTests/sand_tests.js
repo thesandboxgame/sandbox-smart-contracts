@@ -478,7 +478,7 @@ function runSandTests() {
           userWithSAND.LandSaleWithReferral.functions.buyLandWithSand(
             userWithSAND.address,
             userWithSAND.address,
-            userWithSAND.address,
+            zeroAddress,
             land.x,
             land.y,
             land.size,
