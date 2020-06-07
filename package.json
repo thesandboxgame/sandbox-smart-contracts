@@ -56,6 +56,7 @@
     "mainnet:deploy": "buidler --network mainnet deploy",
     "local:run": "cross-env BUIDLER_NETWORK=localhost node",
     "rinkeby:run": "cross-env BUIDLER_NETWORK=rinkeby node",
+    "kovan:run": "cross-env BUIDLER_NETWORK=kovan node",
     "mainnet:run": "cross-env BUIDLER_NETWORK=mainnet node"
   }
 }
