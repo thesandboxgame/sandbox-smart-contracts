@@ -11,7 +11,7 @@ function runCommonTests() {
     });
 
     it("CANNOT generate proof for Land not on sale", async function () {
-      const {lands, tree} = initialSetUp;
+      const {lands, tree} = await setupLandSaleWithReferral("lands");
       assert.throws(
         () =>
           tree.getProof(

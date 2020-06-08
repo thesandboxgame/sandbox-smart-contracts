@@ -68,7 +68,7 @@ function runEtherTests() {
       });
 
       it("can buy estate with ETH and referral", async function () {
-        const {tree, users, lands, contracts, LandSaleBeneficiary} = initialSetUp;
+        const {tree, users, lands, contracts} = initialSetUp;
         const land = lands.find((l) => l.size === 6);
         const proof = tree.getProof(calculateLandHash(land));
         const value = await users[0].EstateSale.functions.getEtherAmountWithSAND(land.price);
