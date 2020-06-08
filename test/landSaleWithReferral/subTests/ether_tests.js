@@ -278,23 +278,6 @@ function runEtherTests() {
         );
       });
 
-      it("CANNOT generate proof for Land not on sale", async function () {
-        const {lands, tree} = initialSetUp;
-        assert.throws(
-          () =>
-            tree.getProof(
-              calculateLandHash({
-                x: lands[5].x,
-                y: lands[5].y,
-                size: lands[5].size === 1 ? 3 : lands[5].size / 3,
-                price: lands[5].price,
-                salt: lands[5].salt,
-              })
-            ),
-          "Leaf not found"
-        );
-      });
-
       it("CANNOT buy LAND with invalid proof (empty referral)", async function () {
         const {users, lands, contracts} = initialSetUp;
         const proof = [

@@ -55,6 +55,7 @@ module.exports.setupEstateSale = async (landType) => {
       tree = new MerkleTree(landHashArray);
     } else if (landType === "testLands") {
       testLands[0].reserved = roles.others[1];
+      testLands[3].reserved = roles.others[1];
       lands = testLands;
       const testLandHashArray = createDataArray(lands);
       tree = new MerkleTree(testLandHashArray);
