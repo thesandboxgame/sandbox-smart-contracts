@@ -9,12 +9,13 @@ module.exports.setupCatalystSystem = deployments.createFixture(async () => {
   const users = [];
   for (const other of others) {
     const CatalystMinter = await ethers.getContract("CatalystMinter", other);
+    const Asset = await ethers.getContract("Asset", other);
+    const GemCore = await ethers.getContract("GemCore", other);
     users.push({
       address: other,
       CatalystMinter,
-      GemCore: await ethers.getContract("GemCore", other),
-      // TODO catalysts and gems
-      Asset: await ethers.getContract("Asset", other),
+      GemCore,
+      Asset,
       mintAsset: async ({catalyst, packId, ipfsHash, gemIds, quantity, to}) => {
         const receipt = await waitFor(
           CatalystMinter.mint(other, packId || 0, ipfsHash || dummyHash, catalyst, gemIds, quantity, to || other, "0x")
@@ -26,6 +27,11 @@ module.exports.setupCatalystSystem = deployments.createFixture(async () => {
         const receipt = await waitFor(
           CatalystMinter.extractAndChangeCatalyst(other, tokenId, catalyst, gemIds, to || other)
         );
+        const events = await findEvents(asset, "Transfer", receipt.blockHash);
+        return events[0].args[2];
+      },
+      extractAsset: async (tokenId, to) => {
+        const receipt = await waitFor(Asset.extractERC721(tokenId, to || other));
         const events = await findEvents(asset, "Transfer", receipt.blockHash);
         return events[0].args[2];
       },

@@ -169,14 +169,65 @@ describe("Catalyst:Minting", function () {
     const balance = await asset["balanceOf(address,uint256)"](creator.address, tokenId);
     const rarity = await asset.rarity(tokenId);
     await mine(); // future block need to be mined to get the value
-    await assertValidAttributes({catalystRegistry, tokenId, tokenId, gemIds, range: [76, 100]});
+    await assertValidAttributes({catalystRegistry, tokenId, gemIds, range: [76, 100]});
 
     assert.equal(originalBalance, quantity - 1);
     assert.equal(balance, 1);
-    console.log({rarity, rarityBN: rarity.toNumber()});
-    assert.equal(rarity, 3);
+    assert.equal(rarity, 1); // rarity does not change
   });
 
-  // TODO upgrade catalyst
+  it("creator mint Epic Asset And Downgrade to Rare", async function () {
+    const {creator, catalysts, asset, catalystRegistry} = await setupCatalystUsers();
+    const originalGemIds = [0, 1, 1];
+    const quantity = 30;
+    const originalTokenId = await creator.mintAsset({
+      catalyst: catalysts.Epic.address,
+      gemIds: originalGemIds,
+      quantity,
+    });
+
+    const gemIds = [4, 4];
+    const tokenId = await creator.updateAsset(originalTokenId, {
+      catalyst: catalysts.Rare.address,
+      gemIds,
+      quantity,
+    });
+
+    const originalBalance = await asset["balanceOf(address,uint256)"](creator.address, originalTokenId);
+
+    const balance = await asset["balanceOf(address,uint256)"](creator.address, tokenId);
+    const rarity = await asset.rarity(tokenId);
+    await mine(); // future block need to be mined to get the value
+    await assertValidAttributes({catalystRegistry, tokenId, gemIds, range: [26, 50]});
+
+    assert.equal(originalBalance, quantity - 1);
+    assert.equal(balance, 1);
+    assert.equal(rarity, 2); // rarity does not change
+  });
+
+  it("extracted asset share same catalyst", async function () {
+    const {creator, catalysts, asset, catalystRegistry} = await setupCatalystUsers();
+    const originalGemIds = [3, 2, 3];
+    const quantity = 30;
+    const originalTokenId = await creator.mintAsset({
+      catalyst: catalysts.Epic.address,
+      gemIds: originalGemIds,
+      quantity,
+    });
+
+    const tokenId = await creator.extractAsset(originalTokenId);
+    const originalBalance = await asset["balanceOf(address,uint256)"](creator.address, originalTokenId);
+
+    const balance = await asset["balanceOf(address,uint256)"](creator.address, tokenId);
+    const rarity = await asset.rarity(tokenId);
+    await assertValidAttributes({catalystRegistry, tokenId, originalTokenId, gemIds: originalGemIds, range: [51, 75]});
+
+    assert.equal(originalBalance, quantity - 1);
+    assert.equal(balance, 1);
+    assert.equal(rarity, 2); // rarity does not change
+  });
+
+  // it("adding gems");
+
   // add gems and test values from previous asset are still same in extracted one // + test post extraction too
 });
