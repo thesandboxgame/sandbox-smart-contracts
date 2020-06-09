@@ -52,8 +52,56 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         require(msg.sender == _minter, "only minter allowed to mint");
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         _packedTokenBalance[to][bin] = _packedTokenBalance[to][bin].updateTokenBalance(index, amount, ObjectLib32.Operations.ADD);
-        _totalSupplies[id] += amount;
+        _packedSupplies[bin] = _packedSupplies[bin].updateTokenBalance(index, amount, ObjectLib32.Operations.ADD);
         _erc20s[id].emitTransferEvent(address(0), to, amount);
+    }
+
+    // TODO test
+    /// @dev mint more tokens of a several subToken .
+    /// @param to address receiving the tokens.
+    /// @param ids subToken ids (also the index at which it was added).
+    /// @param amounts for each token minted.
+    function mintMultiple(
+        address to,
+        uint256[] calldata ids,
+        uint256[] calldata amounts
+    ) external {
+        require(msg.sender == _minter, "only minter allowed to mint");
+        require(ids.length == amounts.length, "inconsisten length");
+        _mintMultiple(to, ids, amounts);
+    }
+
+    function _mintMultiple(
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts
+    ) internal {
+        uint256 lastBin = 2**256 - 1;
+        uint256 bal = 0;
+        uint256 supply = 0;
+        for (uint256 i = 0; i < ids.length; i++) {
+            (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
+            if (lastBin == 2**256 - 1) {
+                lastBin = bin;
+                bal = _packedTokenBalance[to][bin].updateTokenBalance(index, amounts[i], ObjectLib32.Operations.ADD);
+                supply = _packedSupplies[bin].updateTokenBalance(index, amounts[i], ObjectLib32.Operations.ADD);
+            } else {
+                if (bin != lastBin) {
+                    _packedTokenBalance[to][lastBin] = bal;
+                    bal = _packedTokenBalance[to][bin];
+                    _packedSupplies[lastBin] = supply;
+                    supply = _packedSupplies[bin];
+                    lastBin = bin;
+                }
+                bal = bal.updateTokenBalance(index, amounts[i], ObjectLib32.Operations.ADD);
+                supply = supply.updateTokenBalance(index, amounts[i], ObjectLib32.Operations.ADD);
+            }
+            _erc20s[ids[i]].emitTransferEvent(address(0), to, amounts[i]);
+        }
+        if (lastBin != 2**256 - 1) {
+            _packedTokenBalance[to][lastBin] = bal;
+            _packedSupplies[lastBin] = supply;
+        }
     }
 
     /// @dev add new subToken to the group
@@ -67,7 +115,8 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     /// @param id subToken id.
     /// @return supply current total number of tokens.
     function supplyOf(uint256 id) external view returns (uint256 supply) {
-        return _totalSupplies[id];
+        (uint256 bin, uint256 index) = id.getTokenBinIndex();
+        return _packedSupplies[bin].getValueInBin(index);
     }
 
     /// @notice return the balance of a particular owner for a particular subToken.
@@ -255,7 +304,6 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     function _addSubToken(ERC20SubToken subToken) internal {
         uint256 index = _erc20s.length;
         _erc20s.push(subToken);
-        _totalSupplies.push(0); // TODO use mapping instead
         subToken.setSubTokenIndex(this, index);
         emit SubToken(subToken);
     }
@@ -277,9 +325,9 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     using SafeMath for uint256;
 
     // ////////////////// DATA ///////////////////////////////
+    mapping(uint256 => uint256) private _packedSupplies;
     mapping(address => mapping(uint256 => uint256)) private _packedTokenBalance;
     mapping(address => mapping(address => bool)) _operatorsForAll;
-    uint256[] _totalSupplies;
     ERC20SubToken[] _erc20s;
     address _minter;
 

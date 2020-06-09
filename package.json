@@ -62,6 +62,7 @@
     "test:deploy": "buidler --network test_rinkeby deploy",
     "kovan:deploy": "buidler --network kovan deploy",
     "mainnet:deploy": "buidler --network mainnet deploy",
+    "void:run": "cross-env BUIDLER_NETWORK=buidlerevm node",
     "local:run": "cross-env BUIDLER_NETWORK=localhost node",
     "rinkeby:run": "cross-env BUIDLER_NETWORK=rinkeby node",
     "kovan:run": "cross-env BUIDLER_NETWORK=kovan node",

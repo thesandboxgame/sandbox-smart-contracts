@@ -1,6 +1,6 @@
 const {guard} = require("../lib");
 
-module.exports = async ({getNamedAccounts, deployments}) => {
+module.exports = async ({getNamedAccounts, deployments, ethers}) => {
   const {deployIfDifferent, log} = deployments;
   const {deployer, gemCoreMinter} = await getNamedAccounts();
 

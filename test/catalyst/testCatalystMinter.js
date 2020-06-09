@@ -282,6 +282,36 @@ describe("Catalyst:Minting", function () {
     );
   });
 
+  it("creator mint many Asset", async function () {
+    const {creator, catalysts} = await setupCatalystUsers();
+    const packId = 0;
+    const assets = [];
+    for (let i = 0; i < 16; i++) {
+      assets.push({
+        gemIds: [i % 5],
+        quantity: 200 + i,
+        catalystToken: catalysts.Common.address,
+      });
+    }
+    for (let i = 0; i < 11; i++) {
+      assets.push({
+        gemIds: [(i + 1) % 5, (i + 3) % 5],
+        quantity: 60 + i,
+        catalystToken: catalysts.Rare.address,
+      });
+    }
+    for (let i = 0; i < 5; i++) {
+      assets.push({
+        gemIds: [(i + 1) % 5, (i + 3) % 5, (i + 2) % 5],
+        quantity: 10 + i,
+        catalystToken: catalysts.Epic.address,
+      });
+    }
+    await waitFor(
+      creator.CatalystMinter.mintMultiple(creator.address, packId, dummyHash, assets, creator.address, emptyBytes)
+    );
+  });
+
   // TODO quantity = 1
   // TODO addGems post extraction
   // TODO set new catalyst post extraction

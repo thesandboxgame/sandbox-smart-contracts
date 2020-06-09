@@ -69,16 +69,16 @@ module.exports.setupCatalystUsers = deployments.createFixture(async () => {
   const {users, gemCore, catalysts, sand} = setup;
   async function setupUser(creator, {hasSand, hasGems, hasCatalysts}) {
     if (hasSand) {
-      await sand.transfer(creator.address, toWei(1000));
+      await sand.transfer(creator.address, toWei(10000));
     }
     if (hasGems) {
       for (let i = 0; i < 5; i++) {
-        await gemCore.mint(creator.address, i, 10);
+        await gemCore.mint(creator.address, i, 50);
       }
     }
     if (hasCatalysts) {
       for (const name of ["Common", "Rare", "Epic", "Legendary"]) {
-        await catalysts[name].mint(creator.address, 10);
+        await catalysts[name].mint(creator.address, 20);
       }
     }
     return creator;
