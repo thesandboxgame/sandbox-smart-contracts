@@ -710,7 +710,7 @@ describe("Estate:CreationAndDestruction", function () {
       const estateBreaker = await estateContract.getBreaker();
       assert.equal(estateBreaker, zeroAddress);
 
-      estateContract
+      await estateContract
         .connect(estateContract.provider.getSigner(user0))
         .functions.burnAndTransferFrom(user0, 1, user0)
         .then((tx) => tx.wait());
@@ -724,8 +724,7 @@ describe("Estate:CreationAndDestruction", function () {
           }
         }
       }
-      const estateOwnerAfterBurn = await estateContract.ownerOf(1); // others[0] 0x9FC9C2DfBA3b6cF204C37a5F690619772b926e39
-      assert.equal(estateOwnerAfterBurn, zeroAddress);
+      await expectRevert(estateContract.ownerOf(1), "token does not exist");
     });
   });
 });
