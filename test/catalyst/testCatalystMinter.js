@@ -158,10 +158,9 @@ describe("Catalyst:Minting", function () {
     });
 
     const gemIds = [1, 2, 3];
-    const tokenId = await creator.updateAsset(originalTokenId, {
+    const tokenId = await creator.extractAndChangeCatalyst(originalTokenId, {
       catalyst: catalysts.Legendary.address,
       gemIds,
-      quantity,
     });
 
     const originalBalance = await asset["balanceOf(address,uint256)"](creator.address, originalTokenId);
@@ -187,10 +186,9 @@ describe("Catalyst:Minting", function () {
     });
 
     const gemIds = [4, 4];
-    const tokenId = await creator.updateAsset(originalTokenId, {
+    const tokenId = await creator.extractAndChangeCatalyst(originalTokenId, {
       catalyst: catalysts.Rare.address,
       gemIds,
-      quantity,
     });
 
     const originalBalance = await asset["balanceOf(address,uint256)"](creator.address, originalTokenId);
@@ -227,7 +225,64 @@ describe("Catalyst:Minting", function () {
     assert.equal(rarity, 2); // rarity does not change
   });
 
-  // it("adding gems");
+  it("creator mint Epic Asset And new onwer add gems", async function () {
+    const {creator, user, catalysts, asset, catalystRegistry} = await setupCatalystUsers();
+    const originalGemIds = [0, 2];
+    const quantity = 30;
+    const originalTokenId = await creator.mintAsset({
+      catalyst: catalysts.Epic.address,
+      gemIds: originalGemIds,
+      quantity,
+      to: user.address,
+    });
 
-  // add gems and test values from previous asset are still same in extracted one // + test post extraction too
+    const newGemIds = [4];
+    const tokenId = await user.extractAndAddGems(originalTokenId, {newGemIds});
+    const originalBalance = await asset["balanceOf(address,uint256)"](user.address, originalTokenId);
+    const balance = await asset["balanceOf(address,uint256)"](user.address, tokenId);
+
+    const gemIds = originalGemIds.concat(newGemIds);
+    const rarity = await asset.rarity(tokenId);
+    await mine(); // future block need to be mined to get the value
+
+    await assertValidAttributes({catalystRegistry, tokenId, originalTokenId, gemIds, range: [51, 75]});
+    assert.equal(originalBalance, quantity - 1);
+    assert.equal(balance, 1);
+    assert.equal(rarity, 2); // rarity does not change
+  });
+
+  it("creator mint multiple Asset", async function () {
+    const {creator, catalysts} = await setupCatalystUsers();
+    const packId = 0;
+    await waitFor(
+      creator.CatalystMinter.mintMultiple(
+        creator.address,
+        packId,
+        dummyHash,
+        [
+          {
+            gemIds: [1, 2, 3],
+            quantity: 11,
+            catalystToken: catalysts.Epic.address,
+          },
+          {
+            gemIds: [4, 3],
+            quantity: 50,
+            catalystToken: catalysts.Rare.address,
+          },
+          {
+            gemIds: [4, 3, 1, 1],
+            quantity: 1,
+            catalystToken: catalysts.Legendary.address,
+          },
+        ],
+        creator.address,
+        emptyBytes
+      )
+    );
+  });
+
+  // TODO quantity = 1
+  // TODO addGems post extraction
+  // TODO set new catalyst post extraction
 });

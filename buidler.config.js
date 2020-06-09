@@ -40,6 +40,9 @@ module.exports = {
     enabled: process.env.REPORT_GAS ? true : false,
     src: "src",
   },
+  mocha: {
+    timeout: 0, // for gas-reporter // TODO create a test plugin that allow to pass mocha args in the command line
+  },
   namedAccounts: {
     deployer: {
       default: 1,

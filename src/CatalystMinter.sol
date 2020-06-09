@@ -141,7 +141,7 @@ contract CatalystMinter is MetaTransactionReceiver {
 
     struct AssetData {
         uint256[] gemIds;
-        uint256 supply;
+        uint256 quantity;
         CatalystToken catalystToken;
     }
 
@@ -160,6 +160,7 @@ contract CatalystMinter is MetaTransactionReceiver {
         address to,
         bytes memory data
     ) public returns (uint256[] memory ids) {
+        require(assets.length > 0, "0 assets passed in");
         _checkAuthorization(from, to);
         return _mintMultiple(from, packId, metadataHash, assets, to, data);
     }
@@ -191,15 +192,15 @@ contract CatalystMinter is MetaTransactionReceiver {
     {
         totalSandFee = 0;
 
-        rarities = new bytes(assets.length / 4);
+        rarities = new bytes(((assets.length - 1) / 4) + 1);
         supplies = new uint256[](assets.length);
 
         for (uint256 i = 0; i < assets.length; i++) {
             _checkAndBurnCatalyst(from, assets[i].catalystToken);
             (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = assets[i].catalystToken.getMintData();
-            require(minQuantity <= assets[i].supply && assets[i].supply <= maxQuantity, "invalid quantity");
-            supplies[i] = assets[i].supply;
-            totalSandFee += sandFee * assets[i].supply;
+            require(minQuantity <= assets[i].quantity && assets[i].quantity <= maxQuantity, "invalid quantity");
+            supplies[i] = assets[i].quantity;
+            totalSandFee += sandFee * assets[i].quantity;
             require(assets[i].gemIds.length <= maxGems, "too many gems for catalyst");
             _gems.burnEachFor(from, assets[i].gemIds, 1);
             rarities[i / 4] = rarities[i / 4] | bytes1(uint8(rarity * 2**((3 - (i % 4)) * 2)));
