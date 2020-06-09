@@ -10,6 +10,9 @@ import "../contracts_common/src/Libraries/BytesUtil.sol";
 import "../contracts_common/src/BaseWithStorage/SuperOperators.sol";
 import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 
+// TODO remove:
+import "@nomiclabs/buidler/console.sol";
+
 
 contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     /// @notice emitted when a new Token is added to the group.
@@ -81,6 +84,7 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         uint256 supply = 0;
         for (uint256 i = 0; i < ids.length; i++) {
             (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
+            console.log("bin: '%s' index '%s'", bin, index);
             if (lastBin == 2**256 - 1) {
                 lastBin = bin;
                 bal = _packedTokenBalance[to][bin].updateTokenBalance(index, amounts[i], ObjectLib32.Operations.ADD);

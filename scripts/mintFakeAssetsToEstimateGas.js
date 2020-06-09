@@ -1,6 +1,7 @@
 const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
 const {rawTx, execute} = deployments;
 const {Wallet} = require("@ethersproject/wallet");
+const {BigNumber} = require("@ethersproject/bignumber");
 
 const parseSheet = require("../lib/parseSheet");
 
@@ -37,30 +38,37 @@ mintMultiple(
         bytes memory data
         */
 async function mintMultiple({creatorWallet, assets, gems, catalysts, sand}) {
-  const {deployer, sandBeneficiary, gemCoreMinter} = await getNamedAccounts();
+  const {deployer, sandBeneficiary, gemCoreMinter, catalystMinter} = await getNamedAccounts();
   console.log(
     "mintMultiple(address from, uint40 packId, bytes32 metadataHash, AssetData[] assets, address to, bytes calldata data)"
   );
-  console.log("from:");
-  console.log(creatorWallet.address);
-  console.log("packId:");
-  console.log(0);
-  console.log("metadataHash:");
-  console.log(dummyHash);
-  console.log("assets:");
-  console.log("assets"); // assets);
-  console.log("to:");
-  console.log(creatorWallet.address);
-  console.log("data:");
-  console.log("0x");
+  const packId = 0;
+  // console.log("from:");
+  // console.log(creatorWallet.address);
+  // console.log("packId:");
+  // console.log(packId);
+  // console.log("metadataHash:");
+  // console.log(dummyHash);
+  // console.log("assets:");
+  // console.log(assets); // assets);
+  // console.log("to:");
+  // console.log(creatorWallet.address);
+  // console.log("data:");
+  // console.log("0x");
 
-  console.log("giving ETH...");
-  const receipt = await rawTx({from: deployer, to: creatorWallet.address, value: "500000000000000000"}); // TODO exact amount
+  // console.log("giving ETH...");
+  const {gasUsed: eth_gasUsed} = await rawTx({from: deployer, to: creatorWallet.address, value: "500000000000000000"}); // TODO exact amount
   // TODO  record("ETH", receipt);
-  console.log("giving Sand...");
-  await execute("Sand", {from: sandBeneficiary}, "transfer", creatorWallet.address, "10000000000000000000000"); // TODO exact amount
-  await console.log("giving Gems...");
-  await execute(
+  // console.log("giving Sand...");
+  const {gasUsed: sand_gasUsed} = await execute(
+    "Sand",
+    {from: sandBeneficiary},
+    "transfer",
+    creatorWallet.address,
+    "10000000000000000000000"
+  ); // TODO exact amount
+  // await console.log("giving Gems...");
+  const {gasUsed: gems_gasUsed} = await execute(
     "GemCore",
     {from: gemCoreMinter},
     "mintMultiple",
@@ -68,10 +76,36 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand}) {
     gems.map((v) => v.id),
     gems.map((v) => v.quantity)
   ); // TODO exact amount
-  console.log("giving Catalysts");
-  // TODO for each
+  // console.log("giving Catalysts");
+  let catalysts_gasUsed = BigNumber.from(0);
+  for (const catalystName of Object.keys(catalysts)) {
+    const quantity = catalysts[catalystName];
+    if (quantity > 0) {
+      const receipt = await execute(catalystName, {from: catalystMinter}, "mint", creatorWallet.address, quantity);
+      catalysts_gasUsed = catalysts_gasUsed.add(receipt.gasUsed);
+    }
+  }
 
-  const CatalystMinter = await ethers.getContract("CatalystMinter", creatorWallet);
+  // console.log(`minting ${assets.length} assets...`);
+  const CatalystMinter = await ethers.getContract("CatalystMinter", creatorWallet.connect(ethers.provider));
+  const {gasUsed: mint_gasUsed} = await CatalystMinter.mintMultiple(
+    creatorWallet.address,
+    packId,
+    dummyHash,
+    assets,
+    creatorWallet.address,
+    "0x",
+    {
+      gasLimit: 8000000,
+    }
+  ).then((tx) => tx.wait());
+  console.log({
+    eth_gasUsed: eth_gasUsed.toNumber(),
+    sand_gasUsed: sand_gasUsed.toNumber(),
+    gems_gasUsed: gems_gasUsed.toNumber(),
+    catalysts_gasUsed: catalysts_gasUsed.toNumber(),
+    mint_gasUsed: mint_gasUsed.toNumber(),
+  });
 }
 
 function catalyst(type) {
@@ -112,13 +146,13 @@ function getNumberOfGems(catalystName) {
 function getQuantity(catalystName) {
   switch (catalystName) {
     case "CommonCatalyst":
-      return 1;
-    case "RareCatalyst":
-      return 10;
-    case "EpicCatalyst":
-      return 50;
-    case "LegendaryCatalyst":
       return 200;
+    case "RareCatalyst":
+      return 50;
+    case "EpicCatalyst":
+      return 10;
+    case "LegendaryCatalyst":
+      return 1;
   }
   return -1;
 }
@@ -162,10 +196,12 @@ async function handleRow(row) {
     LegendaryCatalyst: row.LegendaryCatalyst.quantity,
   };
   const gems = [];
-  for (const gemName of ["Power", "Defense", "Speed", "Magic", "Luck"]) {
+  const gemTypes = ["Power", "Defense", "Speed", "Magic", "Luck"];
+  for (let i = 0; i < gemTypes.length; i++) {
+    const gemName = gemTypes[i];
     const gem = row[`${gemName}Gem`];
     if (gem.quantity > 0) {
-      gems.push({id: 0, quantity: gem.quantity});
+      gems.push({id: i, quantity: gem.quantity});
     }
   }
 
