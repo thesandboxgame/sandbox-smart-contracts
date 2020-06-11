@@ -36,7 +36,14 @@ const mainnetAccounts = mainnetMnemonic
   : undefined;
 
 function eth_node(networkName) {
-  let uri = process.env.ETH_NODE_URI;
+  let uri;
+  if (networkName === "mainnet") {
+    uri = process.env.ETH_NODE_URI_MAINNET;
+    if (uri && uri !== "") {
+      return uri;
+    }
+  }
+  uri = process.env.ETH_NODE_URI;
   if (uri) {
     uri = uri.replace("{{networkName}}", networkName);
   }
