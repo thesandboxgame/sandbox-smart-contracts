@@ -10,7 +10,6 @@ import "./Catalyst/ERC20Group.sol";
 import "./Catalyst/CatalystToken.sol";
 import "./CatalystRegistry.sol";
 
-
 /// @notice Gateway to mint Asset with Catalyst, Gems and Sand
 contract CatalystMinter is MetaTransactionReceiver {
     /// @dev emitted when fee collector (that receive the sand fee) get changed
@@ -177,7 +176,9 @@ contract CatalystMinter is MetaTransactionReceiver {
     ) internal returns (uint256[] memory ids) {
         (uint256 totalSandFee, uint256[] memory supplies, bytes memory rarities) = _handleMultipleCatalysts(from, assets);
 
-        _sand.burnFor(from, totalSandFee);
+        if (totalSandFee > 0) {
+            _sand.burnFor(from, totalSandFee);
+        }
 
         return _mintAssets(from, packId, metadataHash, assets, supplies, rarities, to, data);
     }

@@ -38,7 +38,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   await deployCatalyst("CommonCatalyst", {
     tokenName: "Sandbox's Common CATALYST",
     tokenSymbol: "COMMON",
-    sandFee: sandWei(1),
+    sandFee: 0, // TODO ?sandWei(1),
     rarity: 0,
     maxGems: 1,
     quantityRange: [200, 1000],
@@ -47,7 +47,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   await deployCatalyst("RareCatalyst", {
     tokenName: "Sandbox's Rare CATALYST",
     tokenSymbol: "RARE",
-    sandFee: sandWei(4),
+    sandFee: 0, // TODO ?sandWei(4),
     rarity: 1,
     maxGems: 2,
     quantityRange: [50, 200],
@@ -56,7 +56,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   await deployCatalyst("EpicCatalyst", {
     tokenName: "Sandbox's Epic CATALYST",
     tokenSymbol: "EPIC",
-    sandFee: sandWei(10),
+    sandFee: 0, // TODO ?sandWei(10),
     rarity: 2,
     maxGems: 3,
     quantityRange: [10, 50],
@@ -65,7 +65,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   await deployCatalyst("LegendaryCatalyst", {
     tokenName: "Sandbox's Legendary CATALYST",
     tokenSymbol: "LEGENDARY",
-    sandFee: sandWei(200),
+    sandFee: 0, // TODO ?sandWei(200),
     rarity: 3,
     maxGems: 4,
     quantityRange: [1, 10],

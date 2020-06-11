@@ -28,16 +28,21 @@ async function mint({creator, catalystToken, gemIds, quantity}) {
   console.log("0x");
 }
 
-/*
-mintMultiple(
-        address from,
-        uint40 packId,
-        bytes32 metadataHash,
-        AssetData[] memory assets,
-        address to,
-        bytes memory data
-        */
+const total = {
+  eth_gasUsed: BigNumber.from(0),
+  sand_gasUsed: BigNumber.from(0),
+  gems_gasUsed: BigNumber.from(0),
+  catalysts_gasUsed: BigNumber.from(0),
+  mint_gasUsed: BigNumber.from(0),
+  airdrop_gasUsed: BigNumber.from(0),
+  total_gasUsed: BigNumber.from(0),
+};
+
 async function mintMultiple({creatorWallet, assets, gems, catalysts, sand}) {
+  if (assets.length === 0) {
+    return;
+  }
+  console.log(`minting ${assets.length} assets... with ${gems.reduce((prev, curr) => prev + curr.quantity, 0)} gems`);
   const {deployer, sandBeneficiary, gemCoreMinter, catalystMinter} = await getNamedAccounts();
   console.log(
     "mintMultiple(address from, uint40 packId, bytes32 metadataHash, AssetData[] assets, address to, bytes calldata data)"
@@ -60,13 +65,15 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand}) {
   const {gasUsed: eth_gasUsed} = await rawTx({from: deployer, to: creatorWallet.address, value: "500000000000000000"}); // TODO exact amount
   // TODO  record("ETH", receipt);
   // console.log("giving Sand...");
-  const {gasUsed: sand_gasUsed} = await execute(
-    "Sand",
-    {from: sandBeneficiary},
-    "transfer",
-    creatorWallet.address,
-    "10000000000000000000000"
-  ); // TODO exact amount
+  let sand_gasUsed;
+
+  if (BigNumber.from(sand).gt(0)) {
+    const sandReceipt = await execute("Sand", {from: sandBeneficiary}, "transfer", creatorWallet.address, sand); // TODO exact amount
+    sand_gasUsed = sandReceipt.gasUsed;
+  } else {
+    sand_gasUsed = BigNumber.from(0);
+  }
+
   // await console.log("giving Gems...");
   const {gasUsed: gems_gasUsed} = await execute(
     "GemCore",
@@ -99,12 +106,25 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand}) {
       gasLimit: 8000000,
     }
   ).then((tx) => tx.wait());
+
+  const airdrop_gasUsed = eth_gasUsed.add(sand_gasUsed).add(gems_gasUsed).add(catalysts_gasUsed);
+  const total_gasUsed = mint_gasUsed.add(airdrop_gasUsed);
+
+  total.eth_gasUsed = total.eth_gasUsed.add(eth_gasUsed);
+  total.sand_gasUsed = total.sand_gasUsed.add(sand_gasUsed);
+  total.gems_gasUsed = total.gems_gasUsed.add(gems_gasUsed);
+  total.catalysts_gasUsed = total.catalysts_gasUsed.add(catalysts_gasUsed);
+  total.mint_gasUsed = total.mint_gasUsed.add(mint_gasUsed);
+  total.airdrop_gasUsed = total.airdrop_gasUsed.add(airdrop_gasUsed);
+  total.total_gasUsed = total.total_gasUsed.add(total_gasUsed);
   console.log({
     eth_gasUsed: eth_gasUsed.toNumber(),
     sand_gasUsed: sand_gasUsed.toNumber(),
     gems_gasUsed: gems_gasUsed.toNumber(),
     catalysts_gasUsed: catalysts_gasUsed.toNumber(),
     mint_gasUsed: mint_gasUsed.toNumber(),
+    airdrop_gasUsed: airdrop_gasUsed.toNumber(),
+    total_gasUsed: total_gasUsed.toNumber(),
   });
 }
 
@@ -188,7 +208,7 @@ const creators = {};
 async function handleRow(row) {
   const {creator} = row;
 
-  const sand = "10000000000000000000000"; // TODO
+  const sand = 0; // "100000000000000000000000"; // TODO
   const catalysts = {
     CommonCatalyst: row.CommonCatalyst.quantity,
     RareCatalyst: row.RareCatalyst.quantity,
@@ -258,4 +278,14 @@ async function handleRow(row) {
     console.log("");
     console.log("");
   }
+  console.log("TOTAL");
+  console.log({
+    eth_gasUsed: total.eth_gasUsed.toNumber(),
+    sand_gasUsed: total.sand_gasUsed.toNumber(),
+    gems_gasUsed: total.gems_gasUsed.toNumber(),
+    catalysts_gasUsed: total.catalysts_gasUsed.toNumber(),
+    mint_gasUsed: total.mint_gasUsed.toNumber(),
+    airdrop_gasUsed: total.airdrop_gasUsed.toNumber(),
+    total_gasUsed: total.total_gasUsed.toNumber(),
+  });
 })();
