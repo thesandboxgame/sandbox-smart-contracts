@@ -10,7 +10,6 @@ import "../contracts_common/src/Libraries/BytesUtil.sol";
 import "../contracts_common/src/BaseWithStorage/SuperOperators.sol";
 import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 
-
 contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     /// @notice emitted when a new Token is added to the group.
     /// @param subToken the token added, its id will be its index in the array.
@@ -302,9 +301,9 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     }
 
     function _addSubToken(ERC20SubToken subToken) internal {
-        uint256 index = _erc20s.length;
+        require(subToken.groupAddress() == address(this), "subToken fro different group");
+        require(subToken.groupTokenId() == _erc20s.length, "id already taken");
         _erc20s.push(subToken);
-        subToken.setSubTokenIndex(this, index);
         emit SubToken(subToken);
     }
 

@@ -24,12 +24,14 @@ module.exports = async ({getNamedAccounts, deployments, ethers}) => {
   const gemCoreContractAsMinter = gemCoreContract.connect(gemCoreContract.provider.getSigner(currentMinter));
   const gemCoreContractAsAdmin = gemCoreContract.connect(gemCoreContract.provider.getSigner(currentAdmin));
 
-  async function deployGem(name, {tokenName, tokenSymbol}) {
+  async function deployGem(name, {tokenName, tokenSymbol, index, group}) {
     const gemToken = await deployIfDifferent(
       ["data"],
       name,
       {from: deployer, gas: 2000000},
       "Gem",
+      group,
+      index,
       tokenName,
       tokenSymbol,
       deployer // gemCoreAdmin is set later
@@ -42,16 +44,18 @@ module.exports = async ({getNamedAccounts, deployments, ethers}) => {
     return gemToken;
   }
 
-  async function deployAndAddGem(name, {tokenName, tokenSymbol}) {
-    const gem = await deployGem(`${name}Gem`, {tokenName, tokenSymbol});
+  async function deployAndAddGem(name, {tokenName, tokenSymbol, index}) {
+    const gem = await deployGem(`${name}Gem`, {tokenName, tokenSymbol, group: gemCoreContract.address, index});
     await gemCoreContractAsMinter.addSubToken(gem.address).then((tx) => tx.wait());
   }
 
   const gems = ["Power", "Defense", "Speed", "Magic", "Luck"];
-  for (const gem of gems) {
+  for (let i = 0; i < gems.length; i++) {
+    const gem = gems[i];
     await deployAndAddGem(gem, {
       tokenName: `Sandbox's ${gem} GEM`,
       tokenSymbol: gem.toUpperCase(),
+      index: i,
     });
   }
 

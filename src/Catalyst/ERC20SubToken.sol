@@ -6,18 +6,12 @@ import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 
 import "./ERC20Group.sol";
 
-
 contract ERC20SubToken is SuperOperators, MetaTransactionReceiver {
     // TODO add natspec, currently block by solidity compiler issue
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     // TODO add natspec, currently block by solidity compiler issue
     event Approval(address indexed owner, address indexed spender, uint256 value);
-
-    struct Origin {
-        ERC20Group group;
-        uint96 index;
-    }
 
     /// @notice A descriptive name for the tokens
     /// @return name of the tokens
@@ -33,16 +27,22 @@ contract ERC20SubToken is SuperOperators, MetaTransactionReceiver {
 
     /// @notice the tokenId in GemCore
     /// @return the tokenId in GemCore
-    function originTokenId() external view returns (uint256) {
-        return _origin.index;
+    function groupTokenId() external view returns (uint256) {
+        return _index;
+    }
+
+    /// @notice the GemCore address
+    /// @return the address of the group
+    function groupAddress() external view returns (address) {
+        return address(_group);
     }
 
     function totalSupply() external view returns (uint256) {
-        return _origin.group.supplyOf(_origin.index);
+        return _group.supplyOf(_index);
     }
 
     function balanceOf(address who) external view returns (uint256) {
-        return _origin.group.balanceOf(who, _origin.index);
+        return _group.balanceOf(who, _index);
     }
 
     function decimals() external pure returns (uint8) {
@@ -60,10 +60,7 @@ contract ERC20SubToken is SuperOperators, MetaTransactionReceiver {
         uint256 amount
     ) external returns (bool success) {
         if (
-            msg.sender != from &&
-            !_metaTransactionContracts[msg.sender] &&
-            !_superOperators[msg.sender] &&
-            !_origin.group.isApprovedForAll(from, msg.sender)
+            msg.sender != from && !_metaTransactionContracts[msg.sender] && !_superOperators[msg.sender] && !_group.isApprovedForAll(from, msg.sender)
         ) {
             uint256 allowance = _mAllowed[from][msg.sender];
             if (allowance != (2**256) - 1) {
@@ -91,18 +88,12 @@ contract ERC20SubToken is SuperOperators, MetaTransactionReceiver {
         return true;
     }
 
-    function setSubTokenIndex(ERC20Group group, uint256 index) external {
-        require(address(_origin.group) == address(0), "already part of a group");
-        require(index < 2**96, "out of bound");
-        _origin = Origin(group, uint96(index));
-    }
-
     function emitTransferEvent(
         address from,
         address to,
         uint256 amount
     ) external {
-        require(msg.sender == address(_origin.group), "only core");
+        require(msg.sender == address(_group), "only core");
         emit Transfer(from, to, amount);
     }
 
@@ -127,7 +118,7 @@ contract ERC20SubToken is SuperOperators, MetaTransactionReceiver {
         address to,
         uint256 amount
     ) internal {
-        _origin.group.singleTransferFrom(from, to, _origin.index, amount);
+        _group.singleTransferFrom(from, to, _index, amount);
     }
 
     function _firstBytes32(bytes memory src) public pure returns (bytes32 output) {
@@ -141,10 +132,14 @@ contract ERC20SubToken is SuperOperators, MetaTransactionReceiver {
 
     // //////////////////// CONSTRUCTOR /////////////////////
     constructor(
+        ERC20Group group,
+        uint256 index,
         string memory tokenName,
         string memory tokenSymbol,
         address admin
     ) public {
+        _group = group;
+        _index = index;
         require(bytes(tokenName).length > 0, "need a name");
         require(bytes(tokenName).length <= 32, "name too long");
         _name = _firstBytes32(bytes(tokenName));
@@ -156,7 +151,8 @@ contract ERC20SubToken is SuperOperators, MetaTransactionReceiver {
     }
 
     // ////////////////////// DATA ///////////////////////////
-    Origin _origin;
+    ERC20Group immutable _group;
+    uint256 immutable _index;
     mapping(address => mapping(address => uint256)) internal _mAllowed;
     bytes32 internal immutable _name; // work only for string that can fit into 32 bytes
     bytes32 internal immutable _symbol; // work only for string that can fit into 32 bytes

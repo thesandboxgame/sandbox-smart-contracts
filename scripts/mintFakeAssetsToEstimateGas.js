@@ -36,6 +36,8 @@ const total = {
   mint_gasUsed: BigNumber.from(0),
   airdrop_gasUsed: BigNumber.from(0),
   total_gasUsed: BigNumber.from(0),
+
+  commonMint_gasUsed: BigNumber.from(0),
 };
 
 async function mintMultiple({creatorWallet, assets, gems, catalysts, sand}) {
@@ -107,6 +109,26 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand}) {
     }
   ).then((tx) => tx.wait());
 
+  // function mintMultipleFor(
+  //   address creator,
+  //   uint40 packId,
+  //   bytes32 hash,
+  //   uint256[] calldata supplies,
+  //   address owner,
+  //   bytes calldata data,
+  //   uint256 feePerCopy
+  const CommonMinter = await ethers.getContract("CommonMinter", creatorWallet.connect(ethers.provider));
+  const {gasUsed: commonMint_gasUsed} = await CommonMinter.mintMultipleFor(
+    creatorWallet.address,
+    packId + 1,
+    dummyHash,
+    assets.map((v) => v.quantity),
+    creatorWallet.address,
+    "0x",
+    0,
+    {gasLimit: 8000000}
+  ).then((tx) => tx.wait());
+
   const airdrop_gasUsed = eth_gasUsed.add(sand_gasUsed).add(gems_gasUsed).add(catalysts_gasUsed);
   const total_gasUsed = mint_gasUsed.add(airdrop_gasUsed);
 
@@ -117,6 +139,8 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand}) {
   total.mint_gasUsed = total.mint_gasUsed.add(mint_gasUsed);
   total.airdrop_gasUsed = total.airdrop_gasUsed.add(airdrop_gasUsed);
   total.total_gasUsed = total.total_gasUsed.add(total_gasUsed);
+
+  total.commonMint_gasUsed = total.commonMint_gasUsed.add(commonMint_gasUsed);
   console.log({
     eth_gasUsed: eth_gasUsed.toNumber(),
     sand_gasUsed: sand_gasUsed.toNumber(),
@@ -125,6 +149,8 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand}) {
     mint_gasUsed: mint_gasUsed.toNumber(),
     airdrop_gasUsed: airdrop_gasUsed.toNumber(),
     total_gasUsed: total_gasUsed.toNumber(),
+
+    commonMint_gasUsed: commonMint_gasUsed.toNumber(),
   });
 }
 
@@ -287,5 +313,7 @@ async function handleRow(row) {
     mint_gasUsed: total.mint_gasUsed.toNumber(),
     airdrop_gasUsed: total.airdrop_gasUsed.toNumber(),
     total_gasUsed: total.total_gasUsed.toNumber(),
+
+    commonMint_gasUsed: total.commonMint_gasUsed.toNumber(),
   });
 })();

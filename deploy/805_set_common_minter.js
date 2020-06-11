@@ -1,7 +1,8 @@
 const {guard} = require("../lib");
 
-module.exports = async ({deployments}) => {
+module.exports = async ({deployments, getChainId}) => {
   const {call, sendTxAndWait, log} = deployments;
+  const chainId = await getChainId();
 
   const sand = await deployments.getOrNull("Sand");
   if (!sand) {
@@ -17,16 +18,30 @@ module.exports = async ({deployments}) => {
   }
 
   const isBouncer = await call("Asset", "isBouncer", bouncer.address);
-  if (!isBouncer) {
-    log("setting CommonMinter as bouncer");
-    const currentBouncerAdmin = await call("Asset", "getBouncerAdmin");
-    await sendTxAndWait(
-      {from: currentBouncerAdmin, gas: 1000000, skipUnknownSigner: true},
-      "Asset",
-      "setBouncer",
-      bouncer.address,
-      true
-    );
+  if (chainId == "1") {
+    if (isBouncer) {
+      log("unsetting CommonMinter as bouncer");
+      const currentBouncerAdmin = await call("Asset", "getBouncerAdmin");
+      await sendTxAndWait(
+        {from: currentBouncerAdmin, gas: 1000000, skipUnknownSigner: true},
+        "Asset",
+        "setBouncer",
+        bouncer.address,
+        false
+      );
+    }
+  } else {
+    if (!isBouncer) {
+      log("setting CommonMinter as bouncer");
+      const currentBouncerAdmin = await call("Asset", "getBouncerAdmin");
+      await sendTxAndWait(
+        {from: currentBouncerAdmin, gas: 1000000, skipUnknownSigner: true},
+        "Asset",
+        "setBouncer",
+        bouncer.address,
+        true
+      );
+    }
   }
 
   const isSuperOperator = await call("Sand", "isSuperOperator", bouncer.address);
