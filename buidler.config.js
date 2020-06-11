@@ -35,6 +35,20 @@ const mainnetAccounts = mainnetMnemonic
     }
   : undefined;
 
+function eth_node(networkName) {
+  let uri = process.env.ETH_NODE_URI;
+  if (uri) {
+    uri = uri.replace("{{networkName}}", networkName);
+  }
+  if (!uri || uri === "") {
+    throw new Error(`environment variable "ETH_NODE_URI" not configured `);
+  }
+  if (uri.indexOf("{{") >= 0) {
+    throw new Error(`invalid uri or network not supported by nod eprovider : ${uri}`);
+  }
+  return uri;
+}
+
 module.exports = {
   gasReporter: {
     enabled: process.env.REPORT_GAS ? true : false,
@@ -118,19 +132,19 @@ module.exports = {
   },
   networks: {
     rinkeby: {
-      url: "https://rinkeby.infura.io/v3/ced8eecc03984939b556332468325813",
+      url: eth_node("rinkeby"),
       accounts,
     },
     test_rinkeby: {
-      url: "https://rinkeby.infura.io/v3/ced8eecc03984939b556332468325813",
+      url: eth_node("rinkeby"),
       accounts,
     },
     mainnet: {
-      url: "https://mainnet.infura.io/v3/ced8eecc03984939b556332468325813",
+      url: eth_node("mainnet"),
       accounts: mainnetAccounts,
     },
     kovan: {
-      url: "https://kovan.infura.io/v3/ced8eecc03984939b556332468325813",
+      url: eth_node("kovan"),
       accounts,
     },
     coverage: {
