@@ -40,16 +40,20 @@ const total = {
   commonMint_gasUsed: BigNumber.from(0),
 };
 
-async function mintMultiple({creatorWallet, assets, gems, catalysts, sand}) {
+const packIds = {};
+
+async function mintMultiple({creatorWallet, assets, gems, catalysts, sand, useSingle}) {
   if (assets.length === 0) {
     return;
   }
+  const waddr = creatorWallet.address.toLowerCase();
+  let packId = packIds[waddr] || 0;
+
   console.log(`minting ${assets.length} assets... with ${gems.reduce((prev, curr) => prev + curr.quantity, 0)} gems`);
   const {deployer, sandBeneficiary, gemCoreMinter, catalystMinter} = await getNamedAccounts();
   console.log(
     "mintMultiple(address from, uint40 packId, bytes32 metadataHash, AssetData[] assets, address to, bytes calldata data)"
   );
-  const packId = 0;
   // console.log("from:");
   // console.log(creatorWallet.address);
   // console.log("packId:");
@@ -97,30 +101,49 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand}) {
 
   // console.log(`minting ${assets.length} assets...`);
   const CatalystMinter = await ethers.getContract("CatalystMinter", creatorWallet.connect(ethers.provider));
-  const {gasUsed: mint_gasUsed} = await CatalystMinter.mintMultiple(
-    creatorWallet.address,
-    packId,
-    dummyHash,
-    assets,
-    creatorWallet.address,
-    "0x",
-    {
-      gasLimit: 8000000,
-    }
-  ).then((tx) => tx.wait());
 
-  // function mintMultipleFor(
-  //   address creator,
-  //   uint40 packId,
-  //   bytes32 hash,
-  //   uint256[] calldata supplies,
-  //   address owner,
-  //   bytes calldata data,
-  //   uint256 feePerCopy
+  let mint_gasUsed = BigNumber.from(0);
+  if (useSingle) {
+    for (let i = 0; i < assets.length; i++) {
+      const asset = assets[i];
+      // mint(address from, uint40 packId, bytes32 metadataHash, CatalystToken catalystToken, uint256[] calldata gemIds, uint256 quantity, address to, bytes calldata data
+      const {gasUsed} = await CatalystMinter.mint(
+        creatorWallet.address,
+        packId,
+        dummyHash,
+        asset.catalystToken,
+        asset.gemIds,
+        asset.quantity,
+        creatorWallet.address,
+        "0x",
+        {
+          gasLimit: 8000000,
+        }
+      ).then((tx) => tx.wait());
+      mint_gasUsed = mint_gasUsed.add(gasUsed);
+      packId++;
+    }
+  } else {
+    const {gasUsed} = await CatalystMinter.mintMultiple(
+      creatorWallet.address,
+      packId,
+      dummyHash,
+      assets,
+      creatorWallet.address,
+      "0x",
+      {
+        gasLimit: 8000000,
+      }
+    ).then((tx) => tx.wait());
+    mint_gasUsed = gasUsed;
+    packId++;
+  }
+
+  // Use old method (no catalyst no gems, no Sand) for comparison
   const CommonMinter = await ethers.getContract("CommonMinter", creatorWallet.connect(ethers.provider));
   const {gasUsed: commonMint_gasUsed} = await CommonMinter.mintMultipleFor(
     creatorWallet.address,
-    packId + 1,
+    packId,
     dummyHash,
     assets.map((v) => v.quantity),
     creatorWallet.address,
@@ -128,6 +151,9 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand}) {
     0,
     {gasLimit: 8000000}
   ).then((tx) => tx.wait());
+  packId++;
+
+  packIds[waddr] = packId;
 
   const airdrop_gasUsed = eth_gasUsed.add(sand_gasUsed).add(gems_gasUsed).add(catalysts_gasUsed);
   const total_gasUsed = mint_gasUsed.add(airdrop_gasUsed);
@@ -254,6 +280,8 @@ async function handleRow(row) {
   let creatorWallet = creators[creator];
   if (!creatorWallet) {
     creatorWallet = creators[creator] = Wallet.createRandom();
+  } else {
+    console.log(`Reusing creator ${creator}`);
   }
   const assets = [];
   await addAssets(creatorWallet, assets, row, "CommonCatalyst");
@@ -270,7 +298,7 @@ async function handleRow(row) {
   //     quantity: asset.quantity,
   //   });
   // }
-  await mintMultiple({creatorWallet, assets, gems, catalysts, sand});
+  await mintMultiple({creatorWallet, assets, gems, catalysts, sand, useSingle: process.argv[2] === "single"});
 }
 
 (async () => {
