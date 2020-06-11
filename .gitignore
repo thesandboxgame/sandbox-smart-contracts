@@ -35,3 +35,4 @@ giveaway.json
 
 deployments/buidlerevm*
 deployments/localhost*
+.env
