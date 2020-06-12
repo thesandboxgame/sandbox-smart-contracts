@@ -9,7 +9,7 @@ describe("GAS:Catalyst:Minting", function () {
     gasReport[name] = gasUsed.toNumber(); // TODO average...
   }
   after(function () {
-    console.log(JSON.stringify(gasReport, null, "  "));
+    // TODO ? console.log(JSON.stringify(gasReport, null, "  "));
   });
 
   it.skip("creator mint Asset", async function () {
