@@ -1,13 +1,29 @@
 pragma solidity 0.6.5;
+pragma experimental ABIEncoderV2;
 
-import "./Catalyst/ERC20SubToken.sol";
+import "./BaseWithStorage/MintableERC1155Token.sol";
 
-contract Gem is ERC20SubToken {
+
+contract Gem is MintableERC1155Token {
+    function addGem(string[] calldata names) external {
+        require(msg.sender == _admin, "only admin");
+        uint256 count = _count;
+        for (uint256 i = 0; i < names.length; i++) {
+            _names[count + i] = names[i];
+        }
+        _count = count + names.length;
+    }
+
+    // TODO metadata + EIP-165
+
+    // /////////////////////
+    uint256 _count;
+    mapping(uint256 => string) _names;
+
+    // ////////////////////////
     constructor(
-        ERC20Group group,
-        uint256 index,
-        string memory name,
-        string memory symbol,
-        address admin
-    ) public ERC20SubToken(group, index, name, symbol, admin) {}
+        address metaTransactionContract,
+        address admin,
+        address initialMinter
+    ) public MintableERC1155Token(metaTransactionContract, admin, initialMinter) {}
 }

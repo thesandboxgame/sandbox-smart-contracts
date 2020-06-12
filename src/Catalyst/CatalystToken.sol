@@ -1,18 +1,19 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-import "../Interfaces/ERC20Extended.sol";
+import "../contracts_common/src/Interfaces/ERC1155.sol";
 
 
-interface CatalystToken is ERC20Extended {
+interface CatalystToken is ERC1155 {
     function getValue(
+        uint256 catalystId,
         uint32 gemId,
         uint96 seed,
         bytes32 blockHash,
         uint256 slotIndex
     ) external view returns (uint32);
 
-    function getMintData()
+    function getMintData(uint256 catalystId)
         external
         view
         returns (

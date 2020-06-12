@@ -311,20 +311,20 @@ contract ERC1155BaseToken is MetaTransactionReceiver, SuperOperators, ERC1155 {
     using ObjectLib32 for ObjectLib32.Operations;
     using ObjectLib32 for uint256;
 
-    bytes4 constant ERC165ID = 0x01ffc9a7;
-    bytes4 private constant ERC1155_IS_RECEIVER = 0x4e2312e0;
-    bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
-    bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
+    bytes4 internal constant ERC165ID = 0x01ffc9a7;
+    bytes4 internal constant ERC1155_IS_RECEIVER = 0x4e2312e0;
+    bytes4 internal constant ERC1155_RECEIVED = 0xf23a6e61;
+    bytes4 internal constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
 
-    uint256 private constant MAX_SUPPLY = uint256(2)**32 - 1;
+    uint256 internal constant MAX_SUPPLY = uint256(2)**32 - 1;
 
     // /////////////////////////////////////////// DATA ///////////////////////////////
 
-    mapping(address => mapping(uint256 => uint256)) private _packedTokenBalance;
-    mapping(address => mapping(address => bool)) private _operatorsForAll;
+    mapping(address => mapping(uint256 => uint256)) internal _packedTokenBalance;
+    mapping(address => mapping(address => bool)) internal _operatorsForAll;
 
     // //////////////////////////////////// CONSTRUCTOR ////////////////////////////////
-    constructor(address metaTransactionContract, address admin) public {
+    constructor(address metaTransactionContract, address admin) internal {
         _setMetaTransactionProcessor(metaTransactionContract, true);
         _admin = admin;
     }

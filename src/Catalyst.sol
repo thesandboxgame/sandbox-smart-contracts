@@ -1,83 +1,78 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-import "./BaseWithStorage/ERC20BaseToken.sol";
 import "./Catalyst/CatalystToken.sol";
+import "./BaseWithStorage/MintableERC1155Token.sol";
 
 
-contract Catalyst is ERC20BaseToken, CatalystToken {
-    uint256 immutable _sandFee;
-    uint16 immutable _minQuantity;
-    uint16 immutable _maxQuantity;
-    uint16 immutable _minValue;
-    uint16 immutable _maxValue;
-    uint8 immutable _rarity;
-    uint16 immutable _maxGems;
-    address _minter;
-
-    event Minter(address newMinter);
-
-    constructor(
-        string memory name,
-        string memory symbol,
-        address admin,
-        address minter,
-        uint256 sandFee,
-        uint8 rarity,
-        uint16 maxGems,
-        uint16[] memory quantityRange,
-        uint16[] memory valueRange
-    ) public ERC20BaseToken(name, symbol, admin) {
-        require(quantityRange[1] >= quantityRange[0], "invalid quantity range");
-        require(valueRange[1] >= valueRange[0], "invalid value range");
-        _sandFee = sandFee;
-        _minQuantity = quantityRange[0];
-        _maxQuantity = quantityRange[1];
-        _minValue = valueRange[0];
-        _maxValue = valueRange[1];
-        _maxGems = maxGems;
-        _rarity = rarity;
-        _minter = minter;
-    }
-
-    function getMinter() external view returns (address) {
-        return _minter;
-    }
-
-    function setMinter(address newMinter) external {
-        require(msg.sender == _admin, "only admin allowed");
-        _minter = newMinter;
-        emit Minter(newMinter);
-    }
-
-    function mint(address to, uint256 amount) external {
-        require(msg.sender == _minter, "only minter allowed to mint");
-        _mint(to, amount);
-    }
-
+contract Catalyst is MintableERC1155Token, CatalystToken {
     function getValue(
+        uint256 catalystId,
         uint32 gemId,
         uint96 seed,
         bytes32 blockHash,
         uint256 slotIndex
     ) external override view returns (uint32) {
-        uint16 range = _maxValue - _minValue;
-        return _minValue + uint16(uint256(keccak256(abi.encodePacked(gemId, seed, blockHash, slotIndex))) % range);
+        uint16 minValue = _data[catalystId].minValue;
+        uint16 maxValue = _data[catalystId].maxValue;
+        uint16 range = maxValue - minValue;
+        return minValue + uint16(uint256(keccak256(abi.encodePacked(gemId, seed, blockHash, slotIndex))) % range);
     }
 
     // override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
     // prettier-ignore
-    function getMintData() external override view returns (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) {
-        rarity = _rarity;
-        maxGems = _maxGems;
-        minQuantity = _minQuantity;
-        maxQuantity = _maxQuantity;
-        sandFee = _sandFee;
+    function getMintData(uint256 catalystId) external override view returns (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) {
+        rarity = _data[catalystId].rarity;
+        maxGems = _data[catalystId].maxGems;
+        minQuantity = _data[catalystId].minQuantity;
+        maxQuantity = _data[catalystId].maxQuantity;
+        sandFee = _data[catalystId].sandFee;
     }
 
-    /// @notice returns the number of decimals for that token.
-    /// @return the number of decimals.
-    function decimals() external override pure returns (uint8) {
-        return uint8(0);
+    // TODO metadata + EIP-165
+
+    // //////////////////////////// ADMIN ///////////////////////////////////////////
+
+    struct CatalystData {
+        uint168 sandFee;
+        uint16 minQuantity;
+        uint16 maxQuantity;
+        uint16 minValue;
+        uint16 maxValue;
+        uint8 rarity;
+        uint16 maxGems;
     }
+
+    function addCatalysts(string[] memory names, CatalystData[] memory data) public {
+        require(msg.sender == _admin, "only admin");
+        require(names.length == data.length, "inconsistent length");
+        uint256 count = _count;
+        for (uint256 i = 0; i < data.length; i++) {
+            _names[count + i] = names[i];
+            _data[count + i] = data[i];
+        }
+        _count = count + data.length;
+    }
+
+    function addCatalyst(string memory name, CatalystData memory data) public {
+        require(msg.sender == _admin, "only admin");
+        uint256 count = _count;
+        _names[count] = name;
+        _data[count] = data;
+        _count++;
+
+        // TODO event ?
+    }
+
+    // /////////////////////
+    uint256 _count;
+    mapping(uint256 => CatalystData) _data;
+    mapping(uint256 => string) _names;
+
+    // ////////////////////////
+    constructor(
+        address metaTransactionContract,
+        address admin,
+        address initialMinter
+    ) public MintableERC1155Token(metaTransactionContract, admin, initialMinter) {}
 }
