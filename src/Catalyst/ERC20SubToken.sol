@@ -6,6 +6,7 @@ import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 
 import "./ERC20Group.sol";
 
+
 contract ERC20SubToken is SuperOperators, MetaTransactionReceiver {
     // TODO add natspec, currently block by solidity compiler issue
     event Transfer(address indexed from, address indexed to, uint256 value);
@@ -25,13 +26,13 @@ contract ERC20SubToken is SuperOperators, MetaTransactionReceiver {
         return string(abi.encodePacked(_symbol));
     }
 
-    /// @notice the tokenId in GemCore
-    /// @return the tokenId in GemCore
+    /// @notice the tokenId in ERC20Group
+    /// @return the tokenId in ERC20Group
     function groupTokenId() external view returns (uint256) {
         return _index;
     }
 
-    /// @notice the GemCore address
+    /// @notice the ERC20Group address
     /// @return the address of the group
     function groupAddress() external view returns (address) {
         return address(_group);

@@ -4,17 +4,17 @@ const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
 const dummyHash = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 
 module.exports.setupCatalystSystem = deployments.createFixture(async () => {
-  const {gemCoreMinter, catalystMinter, others, sandBeneficiary} = await getNamedAccounts();
+  const {gemMinter, catalystMinter, others, sandBeneficiary} = await getNamedAccounts();
   await deployments.fixture();
   const users = [];
   for (const other of others) {
     const CatalystMinter = await ethers.getContract("CatalystMinter", other);
     const Asset = await ethers.getContract("Asset", other);
-    const GemCore = await ethers.getContract("GemCore", other);
+    const Gem = await ethers.getContract("Gem", other);
     users.push({
       address: other,
       CatalystMinter,
-      GemCore,
+      Gem,
       Asset,
       mintAsset: async ({catalyst, packId, ipfsHash, gemIds, quantity, to}) => {
         const receipt = await waitFor(
@@ -42,22 +42,14 @@ module.exports.setupCatalystSystem = deployments.createFixture(async () => {
       },
     });
   }
-  const gemCore = await ethers.getContract("GemCore", gemCoreMinter);
-  const catalysts = {};
-  for (const name of ["Common", "Rare", "Epic", "Legendary"]) {
-    catalysts[name] = await ethers.getContract(`${name}Catalyst`, catalystMinter);
-  }
-  const gems = {};
-  for (const name of ["Power", "Defense", "Speed", "Magic", "Luck"]) {
-    gems[name] = await ethers.getContract(`${name}Gem`);
-  }
+  const gem = await ethers.getContract("Gem", gemMinter);
+  const catalyst = await ethers.getContract(`Catalyst`, catalystMinter);
   const sand = await ethers.getContract("Sand", sandBeneficiary);
   const asset = await ethers.getContract("Asset");
   return {
     users,
-    gemCore,
-    catalysts,
-    gems,
+    gem,
+    catalyst,
     sand,
     asset,
     catalystRegistry: await ethers.getContract("CatalystRegistry"),
@@ -66,19 +58,19 @@ module.exports.setupCatalystSystem = deployments.createFixture(async () => {
 
 module.exports.setupCatalystUsers = deployments.createFixture(async () => {
   const setup = await this.setupCatalystSystem();
-  const {users, gemCore, catalysts, sand} = setup;
+  const {users, gem, catalyst, sand} = setup;
   async function setupUser(creator, {hasSand, hasGems, hasCatalysts}) {
     if (hasSand) {
       await sand.transfer(creator.address, toWei(10000));
     }
     if (hasGems) {
       for (let i = 0; i < 5; i++) {
-        await gemCore.mint(creator.address, i, 50);
+        await gem.mint(creator.address, i, 50);
       }
     }
     if (hasCatalysts) {
-      for (const name of ["Common", "Rare", "Epic", "Legendary"]) {
-        await catalysts[name].mint(creator.address, 20);
+      for (let i = 0; i < 4; i++) {
+        await catalyst.mint(creator.address, i, 20);
       }
     }
     return creator;

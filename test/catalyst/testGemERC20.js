@@ -5,13 +5,13 @@ const generateERC20Tests = require("../erc20");
 function testGem(gemName) {
   const erc20Tests = generateERC20Tests(
     async () => {
-      const {others, gemCoreMinter} = await getNamedAccounts();
+      const {others, gemMinter} = await getNamedAccounts();
       await deployments.fixture();
 
       const contract = await ethers.getContract(gemName);
       const tokenId = await contract.originTokenId();
 
-      const coreContract = await ethers.getContract("GemCore", gemCoreMinter);
+      const coreContract = await ethers.getContract("Gem", gemMinter);
       async function mint(to, amount) {
         await waitFor(coreContract.mint(to, tokenId, amount));
       }

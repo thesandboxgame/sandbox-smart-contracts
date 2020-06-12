@@ -5,9 +5,20 @@ const {assertValidAttributes} = require("./_testHelper.js");
 
 const dummyHash = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 
+const CommonCatalyst = 0;
+const RareCatalyst = 1;
+const EpicCatalyst = 2;
+const LegendaryCatalyst = 3;
+
+const PowerGem = 0;
+const DefenseGem = 1;
+const SpeedGem = 2;
+const MagicGem = 3;
+const LuckGem = 4;
+
 describe("Catalyst:Minting", function () {
   it("creator mint Asset", async function () {
-    const {creator, catalysts} = await setupCatalystUsers();
+    const {creator} = await setupCatalystUsers();
     const packId = 0;
     const gemIds = [0, 0, 0];
     const quantity = 11;
@@ -16,7 +27,7 @@ describe("Catalyst:Minting", function () {
         creator.address,
         packId,
         dummyHash,
-        catalysts.Epic.address,
+        EpicCatalyst,
         gemIds,
         quantity,
         creator.address,

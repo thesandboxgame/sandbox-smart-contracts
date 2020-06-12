@@ -23,8 +23,8 @@ contract MintableERC1155Token is ERC1155BaseToken {
     }
 
     function mint(
-        uint256 id,
         address to,
+        uint256 id,
         uint256 amount
     ) external {
         require(_minters[msg.sender], "only minter allowed to mint");

@@ -50,7 +50,7 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand, useSi
   let packId = packIds[waddr] || 0;
 
   // console.log(`minting ${assets.length} assets... with ${gems.reduce((prev, curr) => prev + curr.quantity, 0)} gems`);
-  const {deployer, sandBeneficiary, gemCoreMinter, catalystMinter} = await getNamedAccounts();
+  const {deployer, sandBeneficiary, gemMinter, catalystMinter} = await getNamedAccounts();
   // console.log(
   //   "mintMultiple(address from, uint40 packId, bytes32 metadataHash, AssetData[] assets, address to, bytes calldata data)"
   // );
@@ -82,9 +82,9 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand, useSi
 
   // await console.log("giving Gems...");
   const {gasUsed: gems_gasUsed} = await execute(
-    "GemCore",
-    {from: gemCoreMinter},
-    "mintMultiple",
+    "Gem",
+    {from: gemMinter},
+    "batchMint",
     creatorWallet.address,
     gems.map((v) => v.id),
     gems.map((v) => v.quantity)
