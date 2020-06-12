@@ -90,7 +90,7 @@ describe("Catalyst:Minting", function () {
 
     const tokenId = await checERC20Balances(
       creator.address,
-      {Sand: [sand, "-" + totalExpectedFee], PowerGem: [gems.Power, -3], EpicCatalyst: [catalysts.Epic, -1]}, // TOOO SAND fee
+      {/*Sand: [sand, "-" + totalExpectedFee],*/ PowerGem: [gems.Power, -3], EpicCatalyst: [catalysts.Epic, -1]}, // TOOO SAND fee
       () => creator.mintAsset({catalyst: catalysts.Epic.address, gemIds, quantity})
     );
     const balance = await asset["balanceOf(address,uint256)"](creator.address, tokenId);
@@ -111,7 +111,7 @@ describe("Catalyst:Minting", function () {
     const tokenId = await checERC20Balances(
       creator.address,
       {
-        Sand: [sand, "-" + totalExpectedFee],
+        /*Sand: [sand, "-" + totalExpectedFee],*/
         PowerGem: [gems.Power, -1],
         DefenseGem: [gems.Defense, -1],
         LuckGem: [gems.Luck, -1],

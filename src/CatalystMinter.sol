@@ -47,23 +47,6 @@ contract CatalystMinter is MetaTransactionReceiver {
         return id;
     }
 
-    function _checkQuantityAndBurnSandAndGems(
-        address from,
-        CatalystToken catalystToken,
-        uint256[] memory gemIds,
-        uint256 quantity
-    ) internal returns (uint8) {
-        (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = catalystToken.getMintData();
-        require(minQuantity <= quantity && quantity <= maxQuantity, "invalid quantity");
-        _checkAndBurnGems(from, maxGems, gemIds);
-        if (_feeCollector == address(0)) {
-            _sand.burnFor(from, quantity * sandFee); // TODO Safe math
-        } else {
-            _sand.transferFrom(from, _feeCollector, quantity * sandFee); // TODO Safe math
-        }
-        return rarity;
-    }
-
     /// @notice associate a catalyst to a fungible Asset token by extracting it as ERC721 first.
     /// @param from address from which the Asset token belongs to.
     /// @param assetId tokenId of the Asset being extracted.
@@ -166,6 +149,25 @@ contract CatalystMinter is MetaTransactionReceiver {
 
     // //////////////////// INTERNALS ////////////////////
 
+    function _checkQuantityAndBurnSandAndGems(
+        address from,
+        CatalystToken catalystToken,
+        uint256[] memory gemIds,
+        uint256 quantity
+    ) internal returns (uint8) {
+        (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = catalystToken.getMintData();
+        require(minQuantity <= quantity && quantity <= maxQuantity, "invalid quantity");
+        _checkAndBurnGems(from, maxGems, gemIds);
+        if (sandFee > 0) {
+            if (_feeCollector == address(0)) {
+                _sand.burnFor(from, quantity * sandFee); // TODO Safe math
+            } else {
+                _sand.transferFrom(from, _feeCollector, quantity * sandFee); // TODO Safe math
+            }
+        }
+        return rarity;
+    }
+
     function _mintMultiple(
         address from,
         uint40 packId,
@@ -196,6 +198,12 @@ contract CatalystMinter is MetaTransactionReceiver {
         rarities = new bytes(((assets.length - 1) / 4) + 1);
         supplies = new uint256[](assets.length);
 
+        uint256 numGems = 0;
+        for (uint256 i = 0; i < assets.length; i++) {
+            numGems += assets[i].gemIds.length;
+        }
+        uint256[] memory totalGemIds = new uint256[](numGems);
+        uint256 c = 0;
         for (uint256 i = 0; i < assets.length; i++) {
             _checkAndBurnCatalyst(from, assets[i].catalystToken);
             (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = assets[i].catalystToken.getMintData();
@@ -203,9 +211,13 @@ contract CatalystMinter is MetaTransactionReceiver {
             supplies[i] = assets[i].quantity;
             totalSandFee += sandFee * assets[i].quantity;
             require(assets[i].gemIds.length <= maxGems, "too many gems for catalyst");
-            _gems.burnEachFor(from, assets[i].gemIds, 1);
             rarities[i / 4] = rarities[i / 4] | bytes1(uint8(rarity * 2**((3 - (i % 4)) * 2)));
+            for (uint256 j = 0; j < assets[i].gemIds.length; j++) {
+                totalGemIds[c] = assets[i].gemIds[j];
+                c++;
+            }
         }
+        _gems.burnEachFor(from, totalGemIds, 1);
     }
 
     function _mintAssets(

@@ -281,13 +281,43 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
             from == msg.sender || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender] || _metaTransactionContracts[msg.sender],
             "NOT_AUTHORIZED"
         );
-        for (uint256 i = 0; i < ids.length; i++) {
-            uint256 id = ids[i];
-            _burn(from, id, value);
-        }
+        _burnEach(from, ids, value);
     }
 
     // ///////////////// INTERNAL //////////////////////////
+
+    function _burnEach(
+        address from,
+        uint256[] memory ids,
+        uint256 value
+    ) internal {
+        uint256 lastBin = 2**256 - 1;
+        uint256 bal = 0;
+        uint256 supply = 0;
+        for (uint256 i = 0; i < ids.length; i++) {
+            (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
+            if (lastBin == 2**256 - 1) {
+                lastBin = bin;
+                bal = _packedTokenBalance[from][bin].updateTokenBalance(index, value, ObjectLib32.Operations.SUB);
+                supply = _packedSupplies[bin].updateTokenBalance(index, value, ObjectLib32.Operations.SUB);
+            } else {
+                if (bin != lastBin) {
+                    _packedTokenBalance[from][lastBin] = bal;
+                    bal = _packedTokenBalance[from][bin];
+                    _packedSupplies[lastBin] = supply;
+                    supply = _packedSupplies[bin];
+                    lastBin = bin;
+                }
+                bal = bal.updateTokenBalance(index, value, ObjectLib32.Operations.SUB);
+                supply = supply.updateTokenBalance(index, value, ObjectLib32.Operations.SUB);
+            }
+            _erc20s[ids[i]].emitTransferEvent(from, address(0), value);
+        }
+        if (lastBin != 2**256 - 1) {
+            _packedTokenBalance[from][lastBin] = bal;
+            _packedSupplies[lastBin] = supply;
+        }
+    }
 
     function _burn(
         address from,
@@ -297,6 +327,7 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         ERC20SubToken erc20 = _erc20s[id];
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         _packedTokenBalance[from][bin] = ObjectLib32.updateTokenBalance(_packedTokenBalance[from][bin], index, value, ObjectLib32.Operations.SUB);
+        _packedSupplies[bin] = ObjectLib32.updateTokenBalance(_packedSupplies[bin], index, value, ObjectLib32.Operations.SUB);
         erc20.emitTransferEvent(from, address(0), value);
     }
 

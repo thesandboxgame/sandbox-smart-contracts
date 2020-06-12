@@ -49,11 +49,11 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand, useSi
   const waddr = creatorWallet.address.toLowerCase();
   let packId = packIds[waddr] || 0;
 
-  console.log(`minting ${assets.length} assets... with ${gems.reduce((prev, curr) => prev + curr.quantity, 0)} gems`);
+  // console.log(`minting ${assets.length} assets... with ${gems.reduce((prev, curr) => prev + curr.quantity, 0)} gems`);
   const {deployer, sandBeneficiary, gemCoreMinter, catalystMinter} = await getNamedAccounts();
-  console.log(
-    "mintMultiple(address from, uint40 packId, bytes32 metadataHash, AssetData[] assets, address to, bytes calldata data)"
-  );
+  // console.log(
+  //   "mintMultiple(address from, uint40 packId, bytes32 metadataHash, AssetData[] assets, address to, bytes calldata data)"
+  // );
   // console.log("from:");
   // console.log(creatorWallet.address);
   // console.log("packId:");
@@ -167,17 +167,17 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand, useSi
   total.total_gasUsed = total.total_gasUsed.add(total_gasUsed);
 
   total.commonMint_gasUsed = total.commonMint_gasUsed.add(commonMint_gasUsed);
-  console.log({
-    eth_gasUsed: eth_gasUsed.toNumber(),
-    sand_gasUsed: sand_gasUsed.toNumber(),
-    gems_gasUsed: gems_gasUsed.toNumber(),
-    catalysts_gasUsed: catalysts_gasUsed.toNumber(),
-    mint_gasUsed: mint_gasUsed.toNumber(),
-    airdrop_gasUsed: airdrop_gasUsed.toNumber(),
-    total_gasUsed: total_gasUsed.toNumber(),
+  // console.log({
+  //   eth_gasUsed: eth_gasUsed.toNumber(),
+  //   sand_gasUsed: sand_gasUsed.toNumber(),
+  //   gems_gasUsed: gems_gasUsed.toNumber(),
+  //   catalysts_gasUsed: catalysts_gasUsed.toNumber(),
+  //   mint_gasUsed: mint_gasUsed.toNumber(),
+  //   airdrop_gasUsed: airdrop_gasUsed.toNumber(),
+  //   total_gasUsed: total_gasUsed.toNumber(),
 
-    commonMint_gasUsed: commonMint_gasUsed.toNumber(),
-  });
+  //   commonMint_gasUsed: commonMint_gasUsed.toNumber(),
+  // });
 }
 
 function catalyst(type) {
@@ -281,7 +281,7 @@ async function handleRow(row) {
   if (!creatorWallet) {
     creatorWallet = creators[creator] = Wallet.createRandom();
   } else {
-    console.log(`Reusing creator ${creator}`);
+    // console.log(`Reusing creator ${creator}`);
   }
   const assets = [];
   await addAssets(creatorWallet, assets, row, "CommonCatalyst");
@@ -327,10 +327,10 @@ async function handleRow(row) {
   });
 
   for (const row of sheet) {
-    console.log("------------------------------------------------------------------");
+    // console.log("------------------------------------------------------------------");
     await handleRow(row);
-    console.log("");
-    console.log("");
+    // console.log("");
+    // console.log("");
   }
   console.log("TOTAL");
   console.log({

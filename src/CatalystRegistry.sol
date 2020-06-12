@@ -5,7 +5,6 @@ import "./Interfaces/AssetToken.sol";
 import "./Catalyst/CatalystToken.sol";
 import "./contracts_common/src/BaseWithStorage/Admin.sol";
 
-
 contract CatalystRegistry is Admin {
     event Minter(address newMinter);
     event CatalystApplied(uint256 assetId, address catalyst, uint96 seed);
@@ -34,10 +33,12 @@ contract CatalystRegistry is Admin {
     ) external {
         require(msg.sender == _minter, "NOT_MINTER");
 
-        _catalysts[assetId].token = catalystToken;
         uint96 seed = uint96(uint256(keccak256(abi.encodePacked(assetId)))); // ensure 2 gems minted in same block are different
+        _catalysts[assetId].token = catalystToken;
         _catalysts[assetId].seed = seed;
-        delete _catalysts[assetId].gems;
+        if (_catalysts[assetId].gems.length > 0) {
+            delete _catalysts[assetId].gems;
+        }
         emit CatalystApplied(assetId, address(catalystToken), seed);
         if (gemIds.length > 0) {
             uint64 blockNumber = _addGems(_catalysts[assetId], gemIds);

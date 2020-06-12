@@ -46,9 +46,9 @@ contract ERC1155BaseToken is MetaTransactionReceiver, SuperOperators, ERC1155 {
         require(to != address(0), "destination is zero address");
         require(from != address(0), "from is zero address");
         bool metaTx = _metaTransactionContracts[msg.sender];
-        bool authorized = from == msg.sender || metaTx || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender]; // solium-disable-line max-len
+        require(from == msg.sender || metaTx || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender], "not authorized");
 
-        _batchTransferFrom(from, to, ids, values, authorized);
+        _batchTransferFrom(from, to, ids, values);
         emit TransferBatch(metaTx ? from : msg.sender, from, to, ids, values);
         require(_checkERC1155AndCallSafeBatchTransfer(metaTx ? from : msg.sender, from, to, ids, values, data), "erc1155 transfer rejected");
     }
@@ -116,11 +116,46 @@ contract ERC1155BaseToken is MetaTransactionReceiver, SuperOperators, ERC1155 {
             id == 0xd9b67a26; // ERC1155
     }
 
+    function batchBurnFrom(
+        address from,
+        uint256[] calldata ids,
+        uint256[] calldata amounts
+    ) external {
+        require(from != address(0), "from is zero address");
+        bool metaTx = _metaTransactionContracts[msg.sender];
+        require(from == msg.sender || metaTx || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender], "not authorized");
+
+        uint256 balFrom;
+
+        uint256 lastBin = 2**256 - 1;
+        for (uint256 i = 0; i < ids.length; i++) {
+            if (amounts[i] > 0) {
+                (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
+                if (lastBin == 2**256 - 1) {
+                    lastBin = bin;
+                    balFrom = ObjectLib32.updateTokenBalance(_packedTokenBalance[from][bin], index, amounts[i], ObjectLib32.Operations.SUB);
+                } else {
+                    if (bin != lastBin) {
+                        _packedTokenBalance[from][lastBin] = balFrom;
+                        balFrom = _packedTokenBalance[from][bin];
+                        lastBin = bin;
+                    }
+
+                    balFrom = balFrom.updateTokenBalance(index, amounts[i], ObjectLib32.Operations.SUB);
+                }
+            }
+        }
+        if (lastBin != 2**256 - 1) {
+            _packedTokenBalance[from][lastBin] = balFrom;
+        }
+        emit TransferBatch(metaTx ? from : msg.sender, from, address(0), ids, amounts);
+    }
+
     /// @notice Burns `amount` tokens of type `id`.
     /// @param id token type which will be burnt.
     /// @param amount amount of token to burn.
     function burn(uint256 id, uint256 amount) external {
-        _burn(msg.sender, id, amount);
+        _burn(msg.sender, msg.sender, id, amount);
     }
 
     /// @notice Burns `amount` tokens of type `id` from `from`.
@@ -133,11 +168,9 @@ contract ERC1155BaseToken is MetaTransactionReceiver, SuperOperators, ERC1155 {
         uint256 amount
     ) external {
         require(from != address(0), "from is zero address");
-        require(
-            msg.sender == from || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender],
-            "require meta approval"
-        );
-        _burn(from, id, amount);
+        bool metaTx = _metaTransactionContracts[msg.sender];
+        require(from == msg.sender || metaTx || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender], "not authorized");
+        _burn(metaTx ? from : msg.sender, from, id, amount);
     }
 
     // /////////////////////////////// INTERNAL ////////////////////////////
@@ -165,8 +198,7 @@ contract ERC1155BaseToken is MetaTransactionReceiver, SuperOperators, ERC1155 {
         address from,
         address to,
         uint256[] memory ids,
-        uint256[] memory values,
-        bool authorized
+        uint256[] memory values
     ) internal {
         uint256 numItems = ids.length;
         uint256 bin;
@@ -174,12 +206,11 @@ contract ERC1155BaseToken is MetaTransactionReceiver, SuperOperators, ERC1155 {
         uint256 balFrom;
         uint256 balTo;
 
-        uint256 lastBin;
+        uint256 lastBin = 2**256 - 1;
         for (uint256 i = 0; i < numItems; i++) {
-            require(authorized, "Operator not approved"); // TODO check in caller now
             if (values[i] > 0) {
                 (bin, index) = ids[i].getTokenBinIndex();
-                if (lastBin == 0) {
+                if (lastBin == 2**256 - 1) {
                     lastBin = bin;
                     balFrom = ObjectLib32.updateTokenBalance(_packedTokenBalance[from][bin], index, values[i], ObjectLib32.Operations.SUB);
                     balTo = ObjectLib32.updateTokenBalance(_packedTokenBalance[to][bin], index, values[i], ObjectLib32.Operations.ADD);
@@ -197,9 +228,9 @@ contract ERC1155BaseToken is MetaTransactionReceiver, SuperOperators, ERC1155 {
                 }
             }
         }
-        if (bin != 0) {
-            _packedTokenBalance[from][bin] = balFrom;
-            _packedTokenBalance[to][bin] = balTo;
+        if (lastBin != 2**256 - 1) {
+            _packedTokenBalance[from][lastBin] = balFrom;
+            _packedTokenBalance[to][lastBin] = balTo;
         }
     }
 
@@ -216,24 +247,16 @@ contract ERC1155BaseToken is MetaTransactionReceiver, SuperOperators, ERC1155 {
         emit ApprovalForAll(sender, operator, approved);
     }
 
-    function _burnERC1155(
-        address operator,
-        address from,
-        uint256 id,
-        uint32 amount
-    ) internal {
-        (uint256 bin, uint256 index) = (id).getTokenBinIndex();
-        _packedTokenBalance[from][bin] = _packedTokenBalance[from][bin].updateTokenBalance(index, amount, ObjectLib32.Operations.SUB);
-        emit TransferSingle(operator, from, address(0), id, amount);
-    }
-
     function _burn(
+        address operator,
         address from,
         uint256 id,
         uint256 amount
     ) internal {
         require(amount > 0 && amount <= MAX_SUPPLY, "invalid amount");
-        _burnERC1155(_metaTransactionContracts[msg.sender] ? from : msg.sender, from, id, uint32(amount));
+        (uint256 bin, uint256 index) = (id).getTokenBinIndex();
+        _packedTokenBalance[from][bin] = _packedTokenBalance[from][bin].updateTokenBalance(index, amount, ObjectLib32.Operations.SUB);
+        emit TransferSingle(operator, from, address(0), id, amount);
     }
 
     function checkIsERC1155Receiver(address _contract) internal view returns (bool) {
