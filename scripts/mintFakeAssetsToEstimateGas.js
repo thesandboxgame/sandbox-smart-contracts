@@ -6,9 +6,9 @@ const {BigNumber} = require("@ethersproject/bignumber");
 const parseSheet = require("../lib/parseSheet");
 
 const dummyHash = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-async function mint({creator, catalystToken, gemIds, quantity}) {
+async function mint({creator, catalystId, gemIds, quantity}) {
   console.log(
-    "mint(address from, uint40 packId, bytes32 metadataHash, CatalystToken catalystToken, uint256[] calldata gemIds, uint256 quantity, address to, bytes calldata data)"
+    "mint(address from, uint40 packId, bytes32 metadataHash, uint256 catalystId, uint256[] calldata gemIds, uint256 quantity, address to, bytes calldata data)"
   );
   console.log("from:");
   console.log(creator);
@@ -16,8 +16,8 @@ async function mint({creator, catalystToken, gemIds, quantity}) {
   console.log(0);
   console.log("metadataHash:");
   console.log(dummyHash);
-  console.log("catalystToken:");
-  console.log(catalystToken);
+  console.log("catalystId:");
+  console.log(catalystId);
   console.log("gemIds:");
   console.log(gemIds);
   console.log("quantity:");
@@ -94,7 +94,14 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand, useSi
   for (const catalystName of Object.keys(catalysts)) {
     const quantity = catalysts[catalystName];
     if (quantity > 0) {
-      const receipt = await execute(catalystName, {from: catalystMinter}, "mint", creatorWallet.address, quantity);
+      const receipt = await execute(
+        "Catalyst",
+        {from: catalystMinter},
+        "mint",
+        creatorWallet.address,
+        getCatalystIdFronName(catalystName),
+        quantity
+      );
       catalysts_gasUsed = catalysts_gasUsed.add(receipt.gasUsed);
     }
   }
@@ -106,12 +113,12 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand, useSi
   if (useSingle) {
     for (let i = 0; i < assets.length; i++) {
       const asset = assets[i];
-      // mint(address from, uint40 packId, bytes32 metadataHash, CatalystToken catalystToken, uint256[] calldata gemIds, uint256 quantity, address to, bytes calldata data
+      // mint(address from, uint40 packId, bytes32 metadataHash, uint256 catalystId, uint256[] calldata gemIds, uint256 quantity, address to, bytes calldata data
       const {gasUsed} = await CatalystMinter.mint(
         creatorWallet.address,
         packId,
         dummyHash,
-        asset.catalystToken,
+        asset.catalystId,
         asset.gemIds,
         asset.quantity,
         creatorWallet.address,
@@ -124,10 +131,20 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand, useSi
       packId++;
     }
   } else {
+    const gemsQuantities = [0, 0, 0, 0, 0];
+    const catalystsQuantities = [0, 0, 0, 0];
+    for (const asset of assets) {
+      for (const gemId of asset.gemIds) {
+        gemsQuantities[gemId]++;
+      }
+      catalystsQuantities[asset.catalystId]++;
+    }
     const {gasUsed} = await CatalystMinter.mintMultiple(
       creatorWallet.address,
       packId,
       dummyHash,
+      gemsQuantities,
+      catalystsQuantities,
       assets,
       creatorWallet.address,
       "0x",
@@ -195,10 +212,18 @@ function gem(type) {
     name: `${type}Gem`,
     parse: (value) => ({
       name: `${type}Gem`,
-      id: ["Power", "Defense", "Speed", "Magic", "Luck"].indexOf(type),
+      id: getGemId(type),
       quantity: value === "" ? 0 : parseInt(value, 10),
     }),
   };
+}
+
+function getGemId(type) {
+  return ["Power", "Defense", "Speed", "Magic", "Luck"].indexOf(type);
+}
+
+function getCatalystIdFronName(catalystName) {
+  return ["CommonCatalyst", "RareCatalyst", "EpicCatalyst", "LegendaryCatalyst"].indexOf(catalystName);
 }
 
 function getNumberOfGems(catalystName) {
@@ -246,12 +271,12 @@ function handleGemIds(num, row) {
 }
 
 async function addAssets(wallet, assets, row, catalystName) {
-  const catalystToken = await ethers.getContract(catalystName, wallet);
+  const catalystId = getCatalystIdFronName(catalystName);
   for (let i = 0; i < row[catalystName].quantity; i++) {
     assets.push({
       gemIds: handleGemIds(getNumberOfGems(catalystName), row),
       quantity: getQuantity(catalystName) + i,
-      catalystToken: catalystToken.address,
+      catalystId,
     });
   }
 }

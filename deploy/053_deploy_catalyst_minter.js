@@ -21,7 +21,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       gem.address,
       sand.address,
       catalystMinterAdmin,
-      mintingFeeCollector,
+      "0x0000000000000000000000000000000000000000", // TODO // mintingFeeCollector,
       catalyst.address,
     ],
   });
