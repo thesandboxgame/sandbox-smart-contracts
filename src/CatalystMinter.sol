@@ -198,7 +198,7 @@ contract CatalystMinter is MetaTransactionReceiver {
         address to,
         bytes memory data
     ) internal returns (uint256[] memory ids) {
-        (uint256 totalSandFee, uint256[] memory supplies, bytes memory rarities, uint16[] memory maxGemsList) = _handleMultipleCatalysts(
+        (uint256 totalSandFee, uint256[] memory supplies, uint16[] memory maxGemsList) = _handleMultipleCatalysts(
             from,
             gemsQuantities,
             catalystsQuantities,
@@ -207,7 +207,7 @@ contract CatalystMinter is MetaTransactionReceiver {
 
         _chargeSand(from, totalSandFee);
 
-        return _mintAssets(from, packId, metadataHash, assets, supplies, rarities, maxGemsList, to, data);
+        return _mintAssets(from, packId, metadataHash, assets, supplies, maxGemsList, to, data);
     }
 
     function _chargeSand(address from, uint256 sandFee) internal {
@@ -232,7 +232,6 @@ contract CatalystMinter is MetaTransactionReceiver {
         returns (
             uint256 totalSandFee,
             uint256[] memory supplies,
-            bytes memory rarities,
             uint16[] memory maxGemsList
         )
     {
@@ -240,7 +239,6 @@ contract CatalystMinter is MetaTransactionReceiver {
         _burnGems(from, gemsQuantities);
 
         totalSandFee = 0;
-        rarities = new bytes(((assets.length - 1) / 4) + 1);
         supplies = new uint256[](assets.length);
         maxGemsList = new uint16[](assets.length);
 
@@ -254,7 +252,6 @@ contract CatalystMinter is MetaTransactionReceiver {
             supplies[i] = assets[i].quantity;
             totalSandFee += sandFee * assets[i].quantity;
             require(assets[i].gemIds.length <= maxGems, "too many gems for catalyst");
-            rarities[i / 4] = rarities[i / 4] | bytes1(uint8(rarity * 2**((3 - (i % 4)) * 2)));
         }
     }
 
@@ -288,12 +285,11 @@ contract CatalystMinter is MetaTransactionReceiver {
         bytes32 metadataHash,
         AssetData[] memory assets,
         uint256[] memory supplies,
-        bytes memory rarities,
         uint16[] memory maxGemsList,
         address to,
         bytes memory data
     ) internal returns (uint256[] memory tokenIds) {
-        tokenIds = _asset.mintMultiple(from, packId, metadataHash, supplies, rarities, to, data);
+        tokenIds = _asset.mintMultiple(from, packId, metadataHash, supplies, "", to, data);
         for (uint256 i = 0; i < tokenIds.length; i++) {
             AssetData memory asset = assets[i];
             _catalystRegistry.setCatalyst(tokenIds[i], asset.catalystId, maxGemsList[i], asset.gemIds);

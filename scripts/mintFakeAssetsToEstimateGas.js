@@ -80,33 +80,58 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand, useSi
     sand_gasUsed = BigNumber.from(0);
   }
 
+  const gemsQuantities = [0, 0, 0, 0, 0];
+  const catalystsQuantities = [0, 0, 0, 0];
+  for (const asset of assets) {
+    for (const gemId of asset.gemIds) {
+      gemsQuantities[gemId]++;
+    }
+    catalystsQuantities[asset.catalystId]++;
+  }
+
   // await console.log("giving Gems...");
   const {gasUsed: gems_gasUsed} = await execute(
     "Gem",
     {from: gemMinter},
     "batchMint",
     creatorWallet.address,
-    gems.map((v) => v.id),
-    gems.map((v) => v.quantity)
-  ); // TODO exact amount
-  // console.log("giving Catalysts");
-  let catalysts_gasUsed = BigNumber.from(0);
-  for (const catalystName of Object.keys(catalysts)) {
-    const quantity = catalysts[catalystName];
-    if (quantity > 0) {
-      const receipt = await execute(
-        "Catalyst",
-        {from: catalystMinter},
-        "mint",
-        creatorWallet.address,
-        getCatalystIdFronName(catalystName),
-        quantity
-      );
-      catalysts_gasUsed = catalysts_gasUsed.add(receipt.gasUsed);
-    }
-  }
+    gemsQuantities.reduce((p, c, i) => {
+      if (c > 0) {
+        p.push(i);
+      }
+      return p;
+    }, []),
+    gemsQuantities.reduce((p, c) => {
+      if (c > 0) {
+        p.push(c);
+      }
+      return p;
+    }, [])
+  );
 
-  // console.log(`minting ${assets.length} assets...`);
+  const {gasUsed: catalysts_gasUsed} = await execute(
+    "Catalyst",
+    {from: catalystMinter},
+    "batchMint",
+    creatorWallet.address,
+    catalystsQuantities.reduce((p, c, i) => {
+      if (c > 0) {
+        p.push(i);
+      }
+      return p;
+    }, []),
+    catalystsQuantities.reduce((p, c) => {
+      if (c > 0) {
+        p.push(c);
+      }
+      return p;
+    }, [])
+  );
+
+  console.log(`minting ${assets.length} assets...`);
+  if (assets.length == 1) {
+    console.log(`with gemIds : ${assets[0].gemIds}`);
+  }
   const CatalystMinter = await ethers.getContract("CatalystMinter", creatorWallet.connect(ethers.provider));
 
   let mint_gasUsed = BigNumber.from(0);
@@ -131,14 +156,6 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand, useSi
       packId++;
     }
   } else {
-    const gemsQuantities = [0, 0, 0, 0, 0];
-    const catalystsQuantities = [0, 0, 0, 0];
-    for (const asset of assets) {
-      for (const gemId of asset.gemIds) {
-        gemsQuantities[gemId]++;
-      }
-      catalystsQuantities[asset.catalystId]++;
-    }
     const {gasUsed} = await CatalystMinter.mintMultiple(
       creatorWallet.address,
       packId,
@@ -184,17 +201,17 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand, useSi
   total.total_gasUsed = total.total_gasUsed.add(total_gasUsed);
 
   total.commonMint_gasUsed = total.commonMint_gasUsed.add(commonMint_gasUsed);
-  // console.log({
-  //   eth_gasUsed: eth_gasUsed.toNumber(),
-  //   sand_gasUsed: sand_gasUsed.toNumber(),
-  //   gems_gasUsed: gems_gasUsed.toNumber(),
-  //   catalysts_gasUsed: catalysts_gasUsed.toNumber(),
-  //   mint_gasUsed: mint_gasUsed.toNumber(),
-  //   airdrop_gasUsed: airdrop_gasUsed.toNumber(),
-  //   total_gasUsed: total_gasUsed.toNumber(),
+  console.log({
+    eth_gasUsed: eth_gasUsed.toNumber(),
+    sand_gasUsed: sand_gasUsed.toNumber(),
+    gems_gasUsed: gems_gasUsed.toNumber(),
+    catalysts_gasUsed: catalysts_gasUsed.toNumber(),
+    mint_gasUsed: mint_gasUsed.toNumber(),
+    airdrop_gasUsed: airdrop_gasUsed.toNumber(),
+    total_gasUsed: total_gasUsed.toNumber(),
 
-  //   commonMint_gasUsed: commonMint_gasUsed.toNumber(),
-  // });
+    commonMint_gasUsed: commonMint_gasUsed.toNumber(),
+  });
 }
 
 function catalyst(type) {
