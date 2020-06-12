@@ -125,8 +125,8 @@ module.exports = {
     },
     catalystMinter: "sandAdmin", // TODO ?
     catalystAdmin: "sandAdmin",
-    gemCoreAdmin: "sandAdmin",
-    gemCoreMinter: "sandAdmin", // TODO ?
+    gemAdmin: "sandAdmin",
+    gemMinter: "sandAdmin", // TODO ?
     catalystRegistryAdmin: "sandAdmin",
     catalystMinterAdmin: "sandAdmin",
     // testing

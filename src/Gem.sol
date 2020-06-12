@@ -5,7 +5,7 @@ import "./BaseWithStorage/MintableERC1155Token.sol";
 
 
 contract Gem is MintableERC1155Token {
-    function addGem(string[] calldata names) external {
+    function addGems(string[] calldata names) external {
         require(msg.sender == _admin, "only admin");
         uint256 count = _count;
         for (uint256 i = 0; i < names.length; i++) {

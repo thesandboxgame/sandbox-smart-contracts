@@ -110,7 +110,7 @@ contract ERC1155BaseToken is MetaTransactionReceiver, SuperOperators, ERC1155 {
     /// @notice Query if a contract implements interface `id`.
     /// @param id the interface identifier, as specified in ERC-165.
     /// @return `true` if the contract implements `id`.
-    function supportsInterface(bytes4 id) external view returns (bool) {
+    function supportsInterface(bytes4 id) external pure returns (bool) {
         return
             id == ERC165ID || //ERC165
             id == 0xd9b67a26; // ERC1155

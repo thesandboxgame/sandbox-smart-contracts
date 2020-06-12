@@ -6,70 +6,71 @@ function sandWei(amount) {
 }
 
 module.exports = async ({getNamedAccounts, deployments}) => {
-  const {deployIfDifferent, log} = deployments;
+  const {execute, deploy} = deployments;
   const {deployer, catalystMinter} = await getNamedAccounts();
 
-  async function deployCatalyst(
-    name,
-    {tokenName, tokenSymbol, rarity, maxGems, quantityRange, attributeRange, sandFee}
-  ) {
-    const catalystToken = await deployIfDifferent(
-      ["data"],
-      name,
-      {from: deployer, gas: 3000000},
-      "Catalyst",
-      tokenName,
-      tokenSymbol,
-      deployer,
-      catalystMinter, // set to catalystMinter later
-      sandFee,
-      rarity,
-      maxGems,
-      quantityRange,
-      attributeRange
-    );
-    if (catalystToken.newlyDeployed) {
-      log(` - ${name} deployed at :  ${catalystToken.address} for gas: ${catalystToken.receipt.gasUsed}`);
-    } else {
-      log(`reusing ${name} at ${catalystToken.address}`);
-    }
-  }
+  const sand = await deployments.get("Sand");
 
-  await deployCatalyst("CommonCatalyst", {
-    tokenName: "Sandbox's Common CATALYST",
-    tokenSymbol: "COMMON",
-    sandFee: 0, // TODO ?sandWei(1),
-    rarity: 0,
-    maxGems: 1,
-    quantityRange: [200, 1000],
-    attributeRange: [1, 25],
+  await deploy("Catalyst", {
+    from: deployer,
+    gas: 3000000,
+    log: true,
+    args: [
+      sand.address, // metatx
+      deployer,
+      catalystMinter,
+    ],
   });
-  await deployCatalyst("RareCatalyst", {
-    tokenName: "Sandbox's Rare CATALYST",
-    tokenSymbol: "RARE",
-    sandFee: 0, // TODO ?sandWei(4),
-    rarity: 1,
-    maxGems: 2,
-    quantityRange: [50, 200],
-    attributeRange: [26, 50],
-  });
-  await deployCatalyst("EpicCatalyst", {
-    tokenName: "Sandbox's Epic CATALYST",
-    tokenSymbol: "EPIC",
-    sandFee: 0, // TODO ?sandWei(10),
-    rarity: 2,
-    maxGems: 3,
-    quantityRange: [10, 50],
-    attributeRange: [51, 75],
-  });
-  await deployCatalyst("LegendaryCatalyst", {
-    tokenName: "Sandbox's Legendary CATALYST",
-    tokenSymbol: "LEGENDARY",
-    sandFee: 0, // TODO ?sandWei(200),
-    rarity: 3,
-    maxGems: 4,
-    quantityRange: [1, 10],
-    attributeRange: [76, 100],
-  });
+  function addCatalysts(catalystData) {
+    const names = [];
+    const data = [];
+    for (const catalyst of catalystData) {
+      names.push(catalyst.name);
+      data.push({
+        sandFee: catalyst.sandFee,
+        minQuantity: catalyst.quantityRange[0],
+        maxQuantity: catalyst.quantityRange[1],
+        minValue: catalyst.attributeRange[0],
+        maxValue: catalyst.attributeRange[1],
+        rarity: catalyst.rarity,
+        maxGems: catalyst.maxGems,
+      });
+    }
+    return execute("Catalyst", {from: deployer}, "addCatalysts", names, data);
+  }
+  await addCatalysts([
+    {
+      name: "Common",
+      sandFee: sandWei(1),
+      rarity: 0,
+      maxGems: 1,
+      quantityRange: [200, 1000],
+      attributeRange: [1, 25],
+    },
+    {
+      name: "Rare",
+      sandFee: sandWei(4),
+      rarity: 1,
+      maxGems: 2,
+      quantityRange: [50, 200],
+      attributeRange: [26, 50],
+    },
+    {
+      name: "Epic",
+      sandFee: sandWei(10),
+      rarity: 2,
+      maxGems: 3,
+      quantityRange: [10, 50],
+      attributeRange: [51, 75],
+    },
+    {
+      name: "Legendary",
+      sandFee: sandWei(200),
+      rarity: 3,
+      maxGems: 4,
+      quantityRange: [1, 10],
+      attributeRange: [76, 100],
+    },
+  ]);
 };
 module.exports.skip = guard(["1", "4", "314159"]); // TODO

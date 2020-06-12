@@ -79,7 +79,7 @@ contract CatalystRegistry is Admin {
         return _emptySockets[collectionId];
     }
 
-    function _getBlockNumber() internal returns (uint64 blockNumber) {
+    function _getBlockNumber() internal view returns (uint64 blockNumber) {
         blockNumber = uint64(block.number + 1);
     }
 
