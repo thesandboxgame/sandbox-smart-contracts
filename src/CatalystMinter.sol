@@ -183,8 +183,10 @@ contract CatalystMinter is MetaTransactionReceiver {
     }
 
     function _chargeSand(address from, uint256 sandFee) internal {
-        if (address(_sand) != address(0) && sandFee > 0) {
-            if (_feeCollector == address(0)) {
+        address feeCollector = _feeCollector;
+        if (feeCollector != address(0) && sandFee > 0) {
+            if (feeCollector == address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF)) {
+                // special address for burn
                 _sand.burnFor(from, sandFee);
             } else {
                 _sand.transferFrom(from, _feeCollector, sandFee); // TODO Safe math
