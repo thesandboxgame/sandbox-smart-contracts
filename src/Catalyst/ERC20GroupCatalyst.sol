@@ -1,41 +1,40 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-import "../BaseWithStorage/MintableERC1155Token.sol";
+import "../BaseWithStorage/ERC20Group.sol";
 import "./CatalystDataBase.sol";
+import "../BaseWithStorage/ERC20SubToken.sol";
 
 
-contract ERC1155Catalyst is CatalystDataBase, MintableERC1155Token {
-    function addCatalysts(string[] memory names, CatalystData[] memory data) public {
+contract ERC20GroupCatalyst is CatalystDataBase, ERC20Group {
+    function addCatalysts(ERC20SubToken[] memory catalysts, CatalystData[] memory data) public {
         require(msg.sender == _admin, "only admin");
-        require(names.length == data.length, "inconsistent length");
+        require(catalysts.length == data.length, "inconsistent length");
         uint256 count = _count;
         for (uint256 i = 0; i < data.length; i++) {
-            _names[count + i] = names[i];
             _data[count + i] = data[i];
+            _addSubToken(catalysts[i]);
         }
         _count = count + data.length;
         // TODO event ?
     }
 
-    function addCatalyst(string memory name, CatalystData memory data) public {
+    function addCatalyst(ERC20SubToken catalyst, CatalystData memory data) public {
         require(msg.sender == _admin, "only admin");
         uint256 count = _count;
-        _names[count] = name;
         _data[count] = data;
         _count++;
-
+        _addSubToken(catalyst);
         // TODO event ?
     }
 
     // /////////////////////
     uint256 _count;
-    mapping(uint256 => string) _names;
 
     // ////////////////////////
     constructor(
         address metaTransactionContract,
         address admin,
         address initialMinter
-    ) public MintableERC1155Token(metaTransactionContract, admin, initialMinter) {}
+    ) public ERC20Group(metaTransactionContract, admin, initialMinter) {}
 }

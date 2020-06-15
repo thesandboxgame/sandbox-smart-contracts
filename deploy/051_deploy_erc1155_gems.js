@@ -13,4 +13,4 @@ module.exports = async ({getNamedAccounts, deployments, ethers}) => {
     args: [sand.address, gemAdmin, gemMinter, ["Power", "Defense", "Speed", "Magic", "Luck"]],
   });
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO
+module.exports.skip = () => true; // guard(["1", "4", "314159"]); // TODO

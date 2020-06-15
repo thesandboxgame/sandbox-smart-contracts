@@ -10,6 +10,7 @@ import "../contracts_common/src/Libraries/BytesUtil.sol";
 import "../contracts_common/src/BaseWithStorage/SuperOperators.sol";
 import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 
+
 contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     /// @notice emitted when a new Token is added to the group.
     /// @param subToken the token added, its id will be its index in the array.
@@ -21,22 +22,21 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     /// @param approved whether the operator is granted transfer right or not.
     event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
 
-    /// @dev emitted when the address responsible to mint new token or add new sub token is changed.
-    /// @param newMinter address that is allowed to mint new tokens or add new sub tokens.
-    event Minter(address newMinter);
+    event Minter(address minter, bool enabled);
 
-    /// @dev return the current minter.
-    /// @return minter address allowed to mint.
-    function getMinter() external view returns (address minter) {
-        return _minter;
+    /// @notice Enable or disable the ability of `minter` to mint tokens
+    /// @param minter address that will be given/removed minter right.
+    /// @param enabled set whether the minter is enabled or disabled.
+    function setMinter(address minter, bool enabled) external {
+        require(msg.sender == _admin, "only admin is allowed to add minters");
+        _setMinter(minter, enabled);
     }
 
-    /// @dev change the current minter.
-    /// @param newMinter address of the new minter.
-    function setMinter(address newMinter) external {
-        require(msg.sender == _admin, "only admin allowed");
-        _minter = newMinter;
-        emit Minter(newMinter);
+    /// @notice check whether address `who` is given minter rights.
+    /// @param who The address to query.
+    /// @return whether the address has minter rights.
+    function isMinter(address who) public view returns (bool) {
+        return _minters[who];
     }
 
     /// @dev mint more tokens of a specific subToken .
@@ -48,7 +48,7 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         uint256 id,
         uint256 amount
     ) external {
-        require(msg.sender == _minter, "only minter allowed to mint");
+        require(_minters[msg.sender], "only minter allowed to mint");
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         _packedTokenBalance[to][bin] = _packedTokenBalance[to][bin].updateTokenBalance(index, amount, ObjectLib32.Operations.ADD);
         _packedSupplies[bin] = _packedSupplies[bin].updateTokenBalance(index, amount, ObjectLib32.Operations.ADD);
@@ -60,17 +60,17 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     /// @param to address receiving the tokens.
     /// @param ids subToken ids (also the index at which it was added).
     /// @param amounts for each token minted.
-    function mintMultiple(
+    function batchMint(
         address to,
         uint256[] calldata ids,
         uint256[] calldata amounts
     ) external {
-        require(msg.sender == _minter, "only minter allowed to mint");
+        require(_minters[msg.sender], "only minter allowed to mint");
         require(ids.length == amounts.length, "inconsisten length");
-        _mintMultiple(to, ids, amounts);
+        _batchMint(to, ids, amounts);
     }
 
-    function _mintMultiple(
+    function _batchMint(
         address to,
         uint256[] memory ids,
         uint256[] memory amounts
@@ -101,13 +101,6 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
             _packedTokenBalance[to][lastBin] = bal;
             _packedSupplies[lastBin] = supply;
         }
-    }
-
-    /// @dev add new subToken to the group
-    /// @param subToken the address of the new ERC20 token added
-    function addSubToken(ERC20SubToken subToken) external {
-        require(msg.sender == _minter, "NOT_AUTHORIZED_ONLY_MINTER");
-        _addSubToken(subToken);
     }
 
     /// @notice return the current total supply of a specific subToken.
@@ -156,9 +149,9 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         require(
             from == msg.sender ||
                 msg.sender == address(erc20) ||
+                _metaTransactionContracts[msg.sender] ||
                 _superOperators[msg.sender] ||
-                _operatorsForAll[from][msg.sender] ||
-                _metaTransactionContracts[msg.sender],
+                _operatorsForAll[from][msg.sender],
             "NOT_AUTHORIZED"
         );
 
@@ -245,11 +238,33 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         return _operatorsForAll[owner][operator] || _superOperators[operator];
     }
 
+    function isAuthorizedToTransfer(address owner, address sender) external view returns (bool) {
+        return _metaTransactionContracts[sender] || _superOperators[sender] || _operatorsForAll[owner][sender];
+    }
+
+    function isAuthorizedToApprove(address sender) external view returns (bool) {
+        return _metaTransactionContracts[sender] || _superOperators[sender];
+    }
+
+    function batchBurnFrom(
+        address from,
+        uint256[] calldata ids,
+        uint256[] calldata amounts
+    ) external {
+        require(from != address(0), "from is zero address");
+        require(
+            from == msg.sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender],
+            "not authorized"
+        );
+
+        _batchBurnFrom(from, ids, amounts);
+    }
+
     /// @notice burn token for a specific owner and subToken.
     /// @param from fron which address the token are burned from.
     /// @param id subToken id.
     /// @param value amount of tokens to burn.
-    function burnFor(
+    function burnFrom(
         address from,
         uint256 id,
         uint256 value
@@ -268,53 +283,40 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         _burn(msg.sender, id, value);
     }
 
-    /// @notice burn several subToken at once ro a specific owner.
-    /// @param from fron which address the token are burned from.
-    /// @param ids list of subToken id.
-    /// @param value amount of tokens to burn for each
-    function burnEachFor(
-        address from,
-        uint256[] calldata ids,
-        uint256 value
-    ) external {
-        require(
-            from == msg.sender || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender] || _metaTransactionContracts[msg.sender],
-            "NOT_AUTHORIZED"
-        );
-        _burnEach(from, ids, value);
-    }
-
     // ///////////////// INTERNAL //////////////////////////
 
-    function _burnEach(
+    function _batchBurnFrom(
         address from,
         uint256[] memory ids,
-        uint256 value
+        uint256[] memory amounts
     ) internal {
-        uint256 lastBin = 2**256 - 1;
-        uint256 bal = 0;
+        uint256 balFrom = 0;
         uint256 supply = 0;
+        uint256 lastBin = 2**256 - 1;
         for (uint256 i = 0; i < ids.length; i++) {
-            (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
-            if (lastBin == 2**256 - 1) {
-                lastBin = bin;
-                bal = _packedTokenBalance[from][bin].updateTokenBalance(index, value, ObjectLib32.Operations.SUB);
-                supply = _packedSupplies[bin].updateTokenBalance(index, value, ObjectLib32.Operations.SUB);
-            } else {
-                if (bin != lastBin) {
-                    _packedTokenBalance[from][lastBin] = bal;
-                    bal = _packedTokenBalance[from][bin];
-                    _packedSupplies[lastBin] = supply;
-                    supply = _packedSupplies[bin];
+            if (amounts[i] > 0) {
+                (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
+                if (lastBin == 2**256 - 1) {
                     lastBin = bin;
+                    balFrom = _packedTokenBalance[from][bin].updateTokenBalance(index, amounts[i], ObjectLib32.Operations.SUB);
+                    supply = _packedSupplies[bin].updateTokenBalance(index, amounts[i], ObjectLib32.Operations.SUB);
+                } else {
+                    if (bin != lastBin) {
+                        _packedTokenBalance[from][lastBin] = balFrom;
+                        balFrom = _packedTokenBalance[from][bin];
+                        _packedSupplies[lastBin] = supply;
+                        supply = _packedSupplies[bin];
+                        lastBin = bin;
+                    }
+
+                    balFrom = balFrom.updateTokenBalance(index, amounts[i], ObjectLib32.Operations.SUB);
+                    supply = supply.updateTokenBalance(index, amounts[i], ObjectLib32.Operations.SUB);
                 }
-                bal = bal.updateTokenBalance(index, value, ObjectLib32.Operations.SUB);
-                supply = supply.updateTokenBalance(index, value, ObjectLib32.Operations.SUB);
             }
-            _erc20s[ids[i]].emitTransferEvent(from, address(0), value);
+            _erc20s[ids[i]].emitTransferEvent(from, address(0), amounts[i]);
         }
         if (lastBin != 2**256 - 1) {
-            _packedTokenBalance[from][lastBin] = bal;
+            _packedTokenBalance[from][lastBin] = balFrom;
             _packedSupplies[lastBin] = supply;
         }
     }
@@ -348,6 +350,11 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         emit ApprovalForAll(sender, operator, approved);
     }
 
+    function _setMinter(address minter, bool enabled) internal {
+        _minters[minter] = enabled;
+        emit Minter(minter, enabled);
+    }
+
     // ///////////////// UTILITIES /////////////////////////
     using AddressUtils for address;
     using ObjectLib32 for ObjectLib32.Operations;
@@ -359,7 +366,7 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     mapping(address => mapping(uint256 => uint256)) private _packedTokenBalance;
     mapping(address => mapping(address => bool)) _operatorsForAll;
     ERC20SubToken[] _erc20s;
-    address _minter;
+    mapping(address => bool) internal _minters;
 
     // ////////////// CONSTRUCTOR ////////////////////////////
 
@@ -368,8 +375,13 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         string symbol;
     }
 
-    constructor(address admin, address minter) public {
+    constructor(
+        address metaTransactionContract,
+        address admin,
+        address initialMinter
+    ) internal {
         _admin = admin;
-        _minter = minter;
+        _setMetaTransactionProcessor(metaTransactionContract, true);
+        _setMinter(initialMinter, true);
     }
 }

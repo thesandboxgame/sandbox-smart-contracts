@@ -1,40 +1,36 @@
 const {ethers, getNamedAccounts, ethereum} = require("@nomiclabs/buidler");
-const {waitFor} = require("local-utils");
-const erc20Tests = require("../erc20")(
-  async () => {
-    const {others, catalystMinter} = await getNamedAccounts();
-    await deployments.fixture();
+const {waitFor, recurseTests} = require("local-utils");
+const generateERC20Tests = require("../erc20");
 
-    const contract = await ethers.getContract("CommonCatalyst", catalystMinter);
-    async function mint(to, amount) {
-      await waitFor(contract.mint(to, amount));
-    }
-    return {ethereum, contractAddress: contract.address, users: others, mint};
-  },
-  {
-    EIP717: true,
-    burn: true,
-  }
-);
+function testCatalyst(catalystName) {
+  const erc20Tests = generateERC20Tests(
+    async () => {
+      const {others, catalystMinter} = await getNamedAccounts();
+      await deployments.fixture();
 
-function recurse(test) {
-  if (test.subTests) {
-    // eslint-disable-next-line mocha/no-setup-in-describe
-    describe(test.title, function () {
-      // eslint-disable-next-line mocha/no-setup-in-describe
-      for (const subTest of test.subTests) {
-        // eslint-disable-next-line mocha/no-setup-in-describe
-        recurse(subTest);
+      const contract = await ethers.getContract(catalystName);
+      const tokenId = await contract.groupTokenId();
+
+      const coreContract = await ethers.getContract("Catalyst", catalystMinter);
+      async function mint(to, amount) {
+        await waitFor(coreContract.mint(to, tokenId, amount));
       }
-    });
-  } else {
-    it(test.title, test.test);
-  }
+
+      return {ethereum, contractAddress: contract.address, users: others, mint};
+    },
+    {
+      EIP717: true,
+      burn: false,
+    }
+  );
+
+  describe("Catalyst:ERC20", function () {
+    for (const test of erc20Tests) {
+      // eslint-disable-next-line mocha/no-setup-in-describe
+      recurseTests(test);
+    }
+  });
 }
 
-describe("Catalyst:ERC20", function () {
-  for (const test of erc20Tests) {
-    // eslint-disable-next-line mocha/no-setup-in-describe
-    recurse(test);
-  }
-});
+testCatalyst("EpicCatalyst");
+testCatalyst("CommonCatalyst");

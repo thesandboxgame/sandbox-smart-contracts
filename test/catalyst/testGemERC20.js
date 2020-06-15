@@ -9,7 +9,7 @@ function testGem(gemName) {
       await deployments.fixture();
 
       const contract = await ethers.getContract(gemName);
-      const tokenId = await contract.originTokenId();
+      const tokenId = await contract.groupTokenId();
 
       const coreContract = await ethers.getContract("Gem", gemMinter);
       async function mint(to, amount) {
