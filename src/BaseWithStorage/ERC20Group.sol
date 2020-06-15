@@ -238,11 +238,25 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         return _operatorsForAll[owner][operator] || _superOperators[operator];
     }
 
+    function batchBurnFrom(
+        address from,
+        uint256[] calldata ids,
+        uint256[] calldata amounts
+    ) external {
+        require(from != address(0), "from is zero address");
+        require(
+            from == msg.sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender],
+            "not authorized"
+        );
+
+        _batchBurnFrom(from, ids, amounts);
+    }
+
     /// @notice burn token for a specific owner and subToken.
     /// @param from fron which address the token are burned from.
     /// @param id subToken id.
     /// @param value amount of tokens to burn.
-    function burnFor(
+    function burnFrom(
         address from,
         uint256 id,
         uint256 value
@@ -261,53 +275,40 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         _burn(msg.sender, id, value);
     }
 
-    /// @notice burn several subToken at once ro a specific owner.
-    /// @param from fron which address the token are burned from.
-    /// @param ids list of subToken id.
-    /// @param value amount of tokens to burn for each
-    function burnEachFor(
-        address from,
-        uint256[] calldata ids,
-        uint256 value
-    ) external {
-        require(
-            from == msg.sender || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender] || _metaTransactionContracts[msg.sender],
-            "NOT_AUTHORIZED"
-        );
-        _burnEach(from, ids, value);
-    }
-
     // ///////////////// INTERNAL //////////////////////////
 
-    function _burnEach(
+    function _batchBurnFrom(
         address from,
         uint256[] memory ids,
-        uint256 value
+        uint256[] memory amounts
     ) internal {
-        uint256 lastBin = 2**256 - 1;
-        uint256 bal = 0;
+        uint256 balFrom = 0;
         uint256 supply = 0;
+        uint256 lastBin = 2**256 - 1;
         for (uint256 i = 0; i < ids.length; i++) {
-            (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
-            if (lastBin == 2**256 - 1) {
-                lastBin = bin;
-                bal = _packedTokenBalance[from][bin].updateTokenBalance(index, value, ObjectLib32.Operations.SUB);
-                supply = _packedSupplies[bin].updateTokenBalance(index, value, ObjectLib32.Operations.SUB);
-            } else {
-                if (bin != lastBin) {
-                    _packedTokenBalance[from][lastBin] = bal;
-                    bal = _packedTokenBalance[from][bin];
-                    _packedSupplies[lastBin] = supply;
-                    supply = _packedSupplies[bin];
+            if (amounts[i] > 0) {
+                (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
+                if (lastBin == 2**256 - 1) {
                     lastBin = bin;
+                    balFrom = _packedTokenBalance[from][bin].updateTokenBalance(index, amounts[i], ObjectLib32.Operations.SUB);
+                    supply = _packedSupplies[bin].updateTokenBalance(index, amounts[i], ObjectLib32.Operations.SUB);
+                } else {
+                    if (bin != lastBin) {
+                        _packedTokenBalance[from][lastBin] = balFrom;
+                        balFrom = _packedTokenBalance[from][bin];
+                        _packedSupplies[lastBin] = supply;
+                        supply = _packedSupplies[bin];
+                        lastBin = bin;
+                    }
+
+                    balFrom = balFrom.updateTokenBalance(index, amounts[i], ObjectLib32.Operations.SUB);
+                    supply = supply.updateTokenBalance(index, amounts[i], ObjectLib32.Operations.SUB);
                 }
-                bal = bal.updateTokenBalance(index, value, ObjectLib32.Operations.SUB);
-                supply = supply.updateTokenBalance(index, value, ObjectLib32.Operations.SUB);
             }
-            _erc20s[ids[i]].emitTransferEvent(from, address(0), value);
+            _erc20s[ids[i]].emitTransferEvent(from, address(0), amounts[i]);
         }
         if (lastBin != 2**256 - 1) {
-            _packedTokenBalance[from][lastBin] = bal;
+            _packedTokenBalance[from][lastBin] = balFrom;
             _packedSupplies[lastBin] = supply;
         }
     }
