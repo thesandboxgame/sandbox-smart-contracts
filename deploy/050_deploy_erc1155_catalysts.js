@@ -74,4 +74,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     },
   ]);
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO
+module.exports.skip = () => true; //guard(["1", "4", "314159"]); // TODO

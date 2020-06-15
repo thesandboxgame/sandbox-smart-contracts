@@ -7,7 +7,7 @@ import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 import "./ERC20Group.sol";
 
 
-contract ERC20SubToken is SuperOperators, MetaTransactionReceiver {
+contract ERC20SubToken {
     // TODO add natspec, currently block by solidity compiler issue
     event Transfer(address indexed from, address indexed to, uint256 value);
 
@@ -60,9 +60,7 @@ contract ERC20SubToken is SuperOperators, MetaTransactionReceiver {
         address to,
         uint256 amount
     ) external returns (bool success) {
-        if (
-            msg.sender != from && !_metaTransactionContracts[msg.sender] && !_superOperators[msg.sender] && !_group.isApprovedForAll(from, msg.sender)
-        ) {
+        if (msg.sender != from && !_group.isAuthorizedToTransfer(from, msg.sender)) {
             uint256 allowance = _mAllowed[from][msg.sender];
             if (allowance != (2**256) - 1) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
@@ -84,7 +82,7 @@ contract ERC20SubToken is SuperOperators, MetaTransactionReceiver {
         address spender,
         uint256 amount
     ) external returns (bool success) {
-        require(msg.sender == from || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender], "msg.sender != from || superOperator"); // TODO metatx
+        require(msg.sender == from || _group.isAuthorizedToApprove(msg.sender), "NOT_AUTHORIZED");
         _approveFor(from, spender, amount);
         return true;
     }
@@ -94,7 +92,7 @@ contract ERC20SubToken is SuperOperators, MetaTransactionReceiver {
         address to,
         uint256 amount
     ) external {
-        require(msg.sender == address(_group), "only core");
+        require(msg.sender == address(_group), "only group allowed");
         emit Transfer(from, to, amount);
     }
 
@@ -136,8 +134,7 @@ contract ERC20SubToken is SuperOperators, MetaTransactionReceiver {
         ERC20Group group,
         uint256 index,
         string memory tokenName,
-        string memory tokenSymbol,
-        address admin
+        string memory tokenSymbol
     ) public {
         _group = group;
         _index = index;
@@ -147,8 +144,6 @@ contract ERC20SubToken is SuperOperators, MetaTransactionReceiver {
         require(bytes(tokenSymbol).length > 0, "need a symbol");
         require(bytes(tokenSymbol).length <= 32, "symbol too long");
         _symbol = _firstBytes32(bytes(tokenSymbol));
-
-        _admin = admin;
     }
 
     // ////////////////////// DATA ///////////////////////////

@@ -60,17 +60,17 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     /// @param to address receiving the tokens.
     /// @param ids subToken ids (also the index at which it was added).
     /// @param amounts for each token minted.
-    function mintMultiple(
+    function batchMint(
         address to,
         uint256[] calldata ids,
         uint256[] calldata amounts
     ) external {
         require(_minters[msg.sender], "only minter allowed to mint");
         require(ids.length == amounts.length, "inconsisten length");
-        _mintMultiple(to, ids, amounts);
+        _batchMint(to, ids, amounts);
     }
 
-    function _mintMultiple(
+    function _batchMint(
         address to,
         uint256[] memory ids,
         uint256[] memory amounts
@@ -149,9 +149,9 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         require(
             from == msg.sender ||
                 msg.sender == address(erc20) ||
+                _metaTransactionContracts[msg.sender] ||
                 _superOperators[msg.sender] ||
-                _operatorsForAll[from][msg.sender] ||
-                _metaTransactionContracts[msg.sender],
+                _operatorsForAll[from][msg.sender],
             "NOT_AUTHORIZED"
         );
 
@@ -236,6 +236,14 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     /// @return isOperator whether the operator has approval rigths or not.
     function isApprovedForAll(address owner, address operator) external view returns (bool isOperator) {
         return _operatorsForAll[owner][operator] || _superOperators[operator];
+    }
+
+    function isAuthorizedToTransfer(address owner, address sender) external view returns (bool) {
+        return _metaTransactionContracts[sender] || _superOperators[sender] || _operatorsForAll[owner][sender];
+    }
+
+    function isAuthorizedToApprove(address sender) external view returns (bool) {
+        return _metaTransactionContracts[sender] || _superOperators[sender];
     }
 
     function batchBurnFrom(
