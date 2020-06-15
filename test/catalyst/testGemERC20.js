@@ -32,5 +32,6 @@ function testGem(gemName) {
   });
 }
 
-testGem("LuckGem");
-testGem("PowerGem");
+// TODO renable if using ERC20
+// testGem("LuckGem");
+// testGem("PowerGem");

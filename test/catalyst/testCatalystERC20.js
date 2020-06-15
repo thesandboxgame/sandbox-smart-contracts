@@ -32,9 +32,10 @@ function recurse(test) {
   }
 }
 
-describe("Catalyst:ERC20", function () {
-  for (const test of erc20Tests) {
-    // eslint-disable-next-line mocha/no-setup-in-describe
-    recurse(test);
-  }
-});
+// TODO renable if using ERC20
+// describe("Catalyst:ERC20", function () {
+//   for (const test of erc20Tests) {
+//     // eslint-disable-next-line mocha/no-setup-in-describe
+//     recurse(test);
+//   }
+// });
