@@ -15,7 +15,6 @@ interface CatalystToken {
         external
         view
         returns (
-            uint8 rarity,
             uint16 maxGems,
             uint16 minQuantity,
             uint16 maxQuantity,

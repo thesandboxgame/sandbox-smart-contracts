@@ -119,7 +119,7 @@ describe("Catalyst:Minting", function () {
     // TODO await assertValidEvents({catalystRegistry, tokenId, gemIds, range: [51, 75]});
 
     assert.equal(balance, 11);
-    assert.equal(rarity, 2);
+    assert.equal(rarity, 0); // rarity is no more in use
   });
 
   it("creator mint Legendary Asset", async function () {
@@ -145,7 +145,7 @@ describe("Catalyst:Minting", function () {
     // TODO await assertValidAttributes({catalystRegistry, tokenId, gemIds, range: [76, 100]});
 
     assert.equal(balance, quantity);
-    assert.equal(rarity, 3);
+    assert.equal(rarity, 0); // rarity is no more in use
   });
 
   it("creator mint Legendary Asset And extract", async function () {
@@ -164,7 +164,7 @@ describe("Catalyst:Minting", function () {
     // TODO await assertValidAttributes({catalystRegistry, tokenId, originalTokenId, gemIds, range: [76, 100]});
 
     assert.equal(balance, 1);
-    assert.equal(rarity, 3);
+    assert.equal(rarity, 0); // rarity is no more in use
   });
 
   it("creator mint Rare Asset And Upgrade to Legendary", async function () {
@@ -192,7 +192,7 @@ describe("Catalyst:Minting", function () {
 
     assert.equal(originalBalance, quantity - 1);
     assert.equal(balance, 1);
-    assert.equal(rarity, 1); // rarity does not change
+    assert.equal(rarity, 0); // rarity is no more in use
   });
 
   it("creator mint Epic Asset And Downgrade to Rare", async function () {
@@ -220,7 +220,7 @@ describe("Catalyst:Minting", function () {
 
     assert.equal(originalBalance, quantity - 1);
     assert.equal(balance, 1);
-    assert.equal(rarity, 2); // rarity does not change
+    assert.equal(rarity, 0); // rarity is no more in use
   });
 
   it("extracted asset share same catalyst", async function () {
@@ -242,7 +242,7 @@ describe("Catalyst:Minting", function () {
 
     assert.equal(originalBalance, quantity - 1);
     assert.equal(balance, 1);
-    assert.equal(rarity, 2); // rarity does not change
+    assert.equal(rarity, 0); // rarity is no more in use
   });
 
   it("creator mint Epic Asset And new onwer add gems", async function () {
@@ -268,7 +268,7 @@ describe("Catalyst:Minting", function () {
     // TODO await assertValidAttributes({catalystRegistry, tokenId, originalTokenId, gemIds, range: [51, 75]});
     assert.equal(originalBalance, quantity - 1);
     assert.equal(balance, 1);
-    assert.equal(rarity, 2); // rarity does not change
+    assert.equal(rarity, 0); // rarity is no more in use
   });
 
   it("creator mint multiple Asset", async function () {

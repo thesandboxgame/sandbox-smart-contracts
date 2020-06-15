@@ -18,8 +18,7 @@ contract CatalystDataBase {
 
     // override is not supported by prettier-plugin-solidity : https://github.com/prettier-solidity/prettier-plugin-solidity/issues/221
     // prettier-ignore
-    function getMintData(uint256 catalystId) external view returns (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) {
-        rarity = _data[catalystId].rarity;
+    function getMintData(uint256 catalystId) external view returns (uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) {
         maxGems = _data[catalystId].maxGems;
         minQuantity = _data[catalystId].minQuantity;
         maxQuantity = _data[catalystId].maxQuantity;
@@ -32,7 +31,6 @@ contract CatalystDataBase {
         uint16 maxQuantity;
         uint16 minValue;
         uint16 maxValue;
-        uint8 rarity;
         uint16 maxGems;
     }
 

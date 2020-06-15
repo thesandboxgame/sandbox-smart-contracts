@@ -42,8 +42,8 @@ contract CatalystMinter is MetaTransactionReceiver {
     ) external returns (uint256) {
         _checkAuthorization(from, to);
         _burnCatalyst(from, catalystId);
-        (uint8 rarity, uint16 maxGems) = _checkQuantityAndBurnSandAndGems(from, catalystId, gemIds, quantity);
-        uint256 id = _asset.mint(from, packId, metadataHash, quantity, rarity, to, data);
+        uint16 maxGems = _checkQuantityAndBurnSandAndGems(from, catalystId, gemIds, quantity);
+        uint256 id = _asset.mint(from, packId, metadataHash, quantity, 0, to, data);
         _catalystRegistry.setCatalyst(id, catalystId, maxGems, gemIds);
         return id;
     }
@@ -57,16 +57,12 @@ contract CatalystMinter is MetaTransactionReceiver {
     function extractAndChangeCatalyst(
         address from,
         uint256 assetId,
-        // uint40 packId,
         uint256 catalystId,
         uint256[] calldata gemIds,
         address to
     ) external returns (uint256 tokenId) {
         _checkAuthorization(from, to);
         tokenId = _asset.extractERC721From(from, assetId, from);
-        // TODO? if we want rarity to follow catalyst because without updateERC721 rarity cannot be changed
-        // uint256 extractedTokenId = _asset.extractERC721From(from, assetId, from);
-        // tokenId = _asset.updateERC721(from, extractedTokenId, packId,
         _changeCatalyst(from, tokenId, catalystId, gemIds, to);
     }
 
@@ -83,9 +79,6 @@ contract CatalystMinter is MetaTransactionReceiver {
         uint256[] calldata gemIds,
         address to
     ) external returns (uint256 tokenId) {
-        // TODO? if we want rarity to follow catalyst because without updateERC721 rarity cannot be changed
-        // : updateERC721
-        // tokenId =
         _checkAuthorization(from, to);
         _changeCatalyst(from, assetId, catalystId, gemIds, to);
         return assetId;
@@ -179,13 +172,13 @@ contract CatalystMinter is MetaTransactionReceiver {
         uint256 catalystId,
         uint256[] memory gemIds,
         uint256 quantity
-    ) internal returns (uint8, uint16) {
-        (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = _catalysts.getMintData(catalystId);
+    ) internal returns (uint16) {
+        (uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = _catalysts.getMintData(catalystId);
         require(minQuantity <= quantity && quantity <= maxQuantity, "invalid quantity");
         require(gemIds.length <= maxGems, "too many gems");
         _burnSingleGems(from, gemIds);
         _chargeSand(from, quantity * sandFee); // TODO safe math
-        return (rarity, maxGems);
+        return maxGems;
     }
 
     function _mintMultiple(
@@ -246,7 +239,7 @@ contract CatalystMinter is MetaTransactionReceiver {
             require(catalystsQuantities[assets[i].catalystId] > 0, "invalid catalys quantities");
             catalystsQuantities[assets[i].catalystId]--;
             gemsQuantities = _checkGemsQuantities(gemsQuantities, assets[i].gemIds);
-            (uint8 rarity, uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = _catalysts.getMintData(assets[i].catalystId); // TODO hardcode
+            (uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = _catalysts.getMintData(assets[i].catalystId); // TODO hardcode
             maxGemsList[i] = maxGems;
             require(minQuantity <= assets[i].quantity && assets[i].quantity <= maxQuantity, "invalid quantity");
             supplies[i] = assets[i].quantity;
@@ -305,7 +298,7 @@ contract CatalystMinter is MetaTransactionReceiver {
     ) internal {
         require(assetId & IS_NFT > 0, "NEED TO BE AN NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will reyrn false
         _burnCatalyst(from, catalystId);
-        (, uint16 maxGems, , , ) = _catalysts.getMintData(catalystId);
+        (uint16 maxGems, , , ) = _catalysts.getMintData(catalystId);
         require(gemIds.length <= maxGems, "too many gems");
         _burnGems(from, gemIds);
 

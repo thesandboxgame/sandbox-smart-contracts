@@ -333,9 +333,10 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         erc20.emitTransferEvent(from, address(0), value);
     }
 
-    function _addSubToken(ERC20SubToken subToken) internal {
-        require(subToken.groupAddress() == address(this), "subToken fro different group");
-        require(subToken.groupTokenId() == _erc20s.length, "id already taken");
+    function _addSubToken(ERC20SubToken subToken) internal returns (uint256 id) {
+        id = _erc20s.length;
+        require(subToken.groupAddress() == address(this), "subToken for different group");
+        require(subToken.groupTokenId() == id, "id not mathcing");
         _erc20s.push(subToken);
         emit SubToken(subToken);
     }
