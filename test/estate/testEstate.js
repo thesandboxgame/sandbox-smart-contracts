@@ -1,6 +1,7 @@
 const {assert} = require("local-chai");
 const {setupEstate} = require("./fixtures");
-const {expectRevert, emptyBytes} = require("local-utils");
+const {expectRevert, emptyBytes, zeroAddress} = require("local-utils");
+
 const EstateTestHelper = require("./_testHelper");
 
 describe("Estate:CreationAndDestruction", function () {
@@ -612,7 +613,7 @@ describe("Estate:CreationAndDestruction", function () {
     );
   });
 
-  describe("breaker and minter", function () {
+  describe("Estate:BreakerAndMinter", function () {
     it("cannot break if not breaker", async function () {
       const {estateContract, user0, helper, estateAdmin} = await setupEstate();
       await estateContract
@@ -640,7 +641,8 @@ describe("Estate:CreationAndDestruction", function () {
         estateContract
           .connect(estateContract.provider.getSigner(user0))
           .functions.burnAndTransferFrom(user0, 1, user0)
-          .then((tx) => tx.wait())
+          .then((tx) => tx.wait()),
+        "BREAKER_NOT_AUTHORIZED"
       );
     });
 
@@ -658,8 +660,72 @@ describe("Estate:CreationAndDestruction", function () {
         estateContract
           .connect(estateContract.provider.getSigner(user0))
           .functions.createFromQuad(user0, user0, size, x, y)
-          .then((tx) => tx.wait())
+          .then((tx) => tx.wait()),
+        "MINTER_NOT_AUTHORIZED"
       );
+    });
+
+    it("can create if minter", async function () {
+      const {estateContract, landContract, user0} = await setupEstate();
+      const size = 6;
+      const x = 6;
+      const y = 12;
+      await landContract.functions.mintQuad(user0, size, x, y, emptyBytes).then((tx) => tx.wait());
+      await estateContract
+        .connect(estateContract.provider.getSigner(user0))
+        .functions.createFromQuad(user0, user0, size, x, y)
+        .then((tx) => tx.wait());
+
+      for (let sx = 0; sx < size; sx++) {
+        for (let sy = 0; sy < size; sy++) {
+          const id = x + sx + (y + sy) * 408;
+          const landOwner = await landContract.ownerOf(id);
+          assert.equal(landOwner, estateContract.address);
+        }
+      }
+      const estateOwner = await estateContract.ownerOf(1);
+      assert.equal(estateOwner, user0);
+    });
+
+    it("can break if breaker", async function () {
+      const {estateContract, user0, helper} = await setupEstate();
+      const testEstate = {
+        quads: [
+          {x: 5, y: 7, size: 1},
+          {x: 6, y: 8, size: 1},
+          {x: 6, y: 9, size: 3},
+          {x: 6, y: 12, size: 3},
+          {x: 3, y: 9, size: 3},
+          {x: 180, y: 24, size: 12},
+          {x: 42, y: 48, size: 6},
+          {x: 9, y: 15, size: 3},
+        ],
+        junctions: [1],
+        selection: [1, 2, 3, 4],
+      };
+      await helper.mintQuadsAndCreateEstate(testEstate, user0);
+
+      const estateOwner = await estateContract.ownerOf(1);
+      assert.equal(estateOwner, user0);
+
+      const estateBreaker = await estateContract.getBreaker();
+      assert.equal(estateBreaker, zeroAddress);
+
+      await estateContract
+        .connect(estateContract.provider.getSigner(user0))
+        .functions.burnAndTransferFrom(user0, 1, user0)
+        .then((tx) => tx.wait());
+
+      for (const quad in testEstate.quads) {
+        for (let sx = 0; sx < quad.size; sx++) {
+          for (let sy = 0; sy < quad.size; sy++) {
+            const id = quad.x + sx + (quad.y + sy) * 408;
+            const landOwner = await landContract.ownerOf(id);
+            assert.equal(landOwner, user0);
+          }
+        }
+      }
+      await expectRevert(estateContract.ownerOf(1), "token does not exist");
     });
   });
 });
