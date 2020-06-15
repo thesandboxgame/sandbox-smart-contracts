@@ -6,9 +6,9 @@ import "./contracts_common/src/BaseWithStorage/Admin.sol";
 
 
 contract CatalystRegistry is Admin {
-    event Minter(address newMinter);
-    event CatalystApplied(uint256 assetId, uint256 catalystId, uint96 seed, uint256[] gemIds, uint64 blockNumber);
-    event GemsAdded(uint256 assetId, uint256[] gemIds, uint64 blockNumber);
+    event Minter(address indexed newMinter);
+    event CatalystApplied(uint256 indexed assetId, uint256 catalystId, uint256[] gemIds, uint64 blockNumber);
+    event GemsAdded(uint256 indexed assetId, uint256 catalystAssetId, uint256[] gemIds, uint64 blockNumber);
 
     function setCatalyst(
         uint256 assetId,
@@ -18,7 +18,6 @@ contract CatalystRegistry is Admin {
     ) external {
         require(msg.sender == _minter, "NOT_MINTER");
         require(gemIds.length <= maxGems, "too many gems");
-        uint96 seed = uint96(uint256(keccak256(abi.encodePacked(assetId)))); // ensure 2 gems minted in same block are different
         uint256 emptySockets = maxGems - gemIds.length;
         if (emptySockets == 0 && assetId & IS_NFT > 0) {
             // IF NFT We record as set to be zero via magic value 256**2-1
@@ -26,13 +25,13 @@ contract CatalystRegistry is Admin {
         }
         _emptySockets[assetId] = emptySockets;
         uint64 blockNumber = _getBlockNumber();
-        emit CatalystApplied(assetId, catalystId, seed, gemIds, blockNumber);
+        emit CatalystApplied(assetId, catalystId, gemIds, blockNumber);
     }
 
     function addGems(uint256 assetId, uint256[] calldata gemIds) external {
         require(gemIds.length > 0, "NO_GEMS_GIVEN");
         require(msg.sender == _minter, "NOT_MINTER");
-        uint256 emptySockets = _getEmptySockets(assetId);
+        (uint256 emptySockets, uint256 catalystAssetId) = _getSocketData(assetId);
         require(emptySockets >= gemIds.length, "too many gems");
         emptySockets -= gemIds.length;
         if (emptySockets == 0 && assetId & IS_NFT > 0) {
@@ -41,7 +40,7 @@ contract CatalystRegistry is Admin {
         }
         _emptySockets[assetId] = emptySockets;
         uint64 blockNumber = _getBlockNumber();
-        emit GemsAdded(assetId, gemIds, blockNumber);
+        emit GemsAdded(assetId, catalystAssetId, gemIds, blockNumber);
     }
 
     /// @notice Set the Minter that will be the only address able to create Estate
@@ -62,21 +61,19 @@ contract CatalystRegistry is Admin {
 
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
 
-    function _getEmptySockets(uint256 assetId) internal view returns (uint256) {
-        bool isNFT = assetId & IS_NFT > 0;
-        if (!isNFT) {
-            return _emptySockets[assetId];
-        }
-        uint256 emptySockets = _emptySockets[assetId];
-        if (emptySockets != 0) {
-            if (emptySockets == 256**2 - 1) {
-                return 0;
+    function _getSocketData(uint256 assetId) internal view returns (uint256 emptySockets, uint256 fromAssetId) {
+        fromAssetId = assetId;
+        emptySockets = _emptySockets[assetId];
+        if (assetId & IS_NFT > 0) {
+            if (emptySockets != 0) {
+                if (emptySockets == 256**2 - 1) {
+                    emptySockets = 0;
+                }
+            } else {
+                fromAssetId = _getCollectionId(assetId);
+                emptySockets = _emptySockets[fromAssetId];
             }
-            return emptySockets;
         }
-
-        uint256 collectionId = _getCollectionId(assetId);
-        return _emptySockets[collectionId];
     }
 
     function _getBlockNumber() internal view returns (uint64 blockNumber) {

@@ -11,6 +11,13 @@ interface CatalystToken {
         uint256 slotIndex
     ) external view returns (uint32);
 
+    function getValues(
+        uint256 catalystId,
+        uint96 seed,
+        uint32[] calldata gemIds,
+        bytes32[] calldata blockHashes
+    ) external view returns (uint32[] memory);
+
     function getMintData(uint256 catalystId)
         external
         view

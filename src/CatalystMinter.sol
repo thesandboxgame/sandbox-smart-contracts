@@ -28,6 +28,7 @@ contract CatalystMinter is MetaTransactionReceiver {
     /// @param metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata.
     /// @param catalystId address of the Catalyst ERC20 token to burn.
     /// @param gemIds list of gem ids to burn in the catalyst.
+    /// @param quantity asset supply to mint
     /// @param to destination address receiving the minted tokens.
     /// @param data extra data.
     function mint(
@@ -121,26 +122,6 @@ contract CatalystMinter is MetaTransactionReceiver {
         uint256 catalystId;
     }
 
-    // /// @notice mint multiple Asset tokens.
-    // /// @param from address creating the Asset, need to be the tx sender or meta tx signer.
-    // /// @param packId unused packId that will let you predict the resulting tokenId.
-    // /// @param metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata.
-    // /// @param assets contains the data to associate catalyst and gems to the assets.
-    // /// @param to destination address receiving the minted tokens.
-    // /// @param data extra data.
-    // function mintMultipleWithoutQuantities(
-    //     address from,
-    //     uint40 packId,
-    //     bytes32 metadataHash,
-    //     AssetData[] memory assets,
-    //     address to,
-    //     bytes memory data
-    // ) public returns (uint256[] memory ids) {
-    //     require(assets.length > 0, "0 assets passed in");
-    //     _checkAuthorization(from, to);
-    //     return _mintMultipleWithoutQuantities(from, packId, metadataHash, gemsQuantities, catalystsQuantities, assets, to, data);
-    // }
-
     /// @notice mint multiple Asset tokens.
     /// @param from address creating the Asset, need to be the tx sender or meta tx signer.
     /// @param packId unused packId that will let you predict the resulting tokenId.
@@ -233,6 +214,7 @@ contract CatalystMinter is MetaTransactionReceiver {
 
     function _getMintData(uint256 catalystId)
         internal
+        view
         returns (
             uint16 maxGems,
             uint16 minQuantity,
