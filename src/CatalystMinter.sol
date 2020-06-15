@@ -6,8 +6,8 @@ import "./contracts_common/src/Interfaces/ERC20.sol";
 import "./Interfaces/ERC20Extended.sol";
 import "./contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 import "./contracts_common/src/Libraries/SafeMathWithRequire.sol";
-import "./Gem.sol";
-import "./Catalyst.sol";
+import "./Catalyst/GemToken.sol";
+import "./Catalyst/CatalystToken.sol";
 import "./CatalystRegistry.sol";
 
 
@@ -366,8 +366,8 @@ contract CatalystMinter is MetaTransactionReceiver {
 
     ERC20Extended immutable _sand;
     AssetToken immutable _asset;
-    Gem immutable _gems;
-    Catalyst immutable _catalysts;
+    GemToken immutable _gems;
+    CatalystToken immutable _catalysts;
     CatalystRegistry immutable _catalystRegistry;
     address _feeCollector;
 
@@ -376,11 +376,11 @@ contract CatalystMinter is MetaTransactionReceiver {
         CatalystRegistry catalystRegistry,
         ERC20Extended sand,
         AssetToken asset,
-        Gem gems,
+        GemToken gems,
         address metaTx,
         address admin,
         address feeCollector,
-        Catalyst catalysts
+        CatalystToken catalysts
     ) public {
         _catalystRegistry = catalystRegistry;
         _sand = sand;

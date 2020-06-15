@@ -1,10 +1,10 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-import "./BaseWithStorage/MintableERC1155Token.sol";
+import "../BaseWithStorage/MintableERC1155Token.sol";
 
 
-contract Gem is MintableERC1155Token {
+contract ERC1155Gem is MintableERC1155Token {
     function addGems(string[] memory names) public {
         require(msg.sender == _admin, "only admin");
         _addGems(names);

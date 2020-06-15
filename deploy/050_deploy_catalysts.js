@@ -12,6 +12,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   const sand = await deployments.get("Sand");
 
   await deploy("Catalyst", {
+    contractName: "ERC1155Catalyst",
     from: deployer,
     gas: 3000000,
     log: true,

@@ -1,10 +1,8 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-import "../contracts_common/src/Interfaces/ERC1155.sol";
 
-
-interface CatalystToken is ERC1155 {
+interface CatalystToken {
     function getValue(
         uint256 catalystId,
         uint32 gemId,
@@ -23,4 +21,16 @@ interface CatalystToken is ERC1155 {
             uint16 maxQuantity,
             uint256 sandFee
         );
+
+    function batchBurnFrom(
+        address from,
+        uint256[] calldata ids,
+        uint256[] calldata amounts
+    ) external;
+
+    function burnFrom(
+        address from,
+        uint256 id,
+        uint256 amount
+    ) external;
 }
