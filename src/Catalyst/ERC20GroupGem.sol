@@ -5,34 +5,17 @@ import "../BaseWithStorage/ERC20Group.sol";
 
 
 contract ERC20GroupGem is ERC20Group {
-    function addGems(string[] memory names) public {
+    function addGems(ERC20SubToken[] calldata catalysts) external {
         require(msg.sender == _admin, "only admin");
-        _addGems(names);
-    }
-
-    // TODO metadata + EIP-165
-
-    // ///////////////////
-    function _addGems(string[] memory names) internal {
-        uint256 count = _count;
-        for (uint256 i = 0; i < names.length; i++) {
-            _names[count + i] = names[i];
+        for (uint256 i = 0; i < catalysts.length; i++) {
+            _addSubToken(catalysts[i]);
         }
-        _count = count + names.length;
-        // TODO event ?
     }
-
-    // /////////////////////
-    uint256 _count;
-    mapping(uint256 => string) _names;
 
     // ////////////////////////
     constructor(
         address metaTransactionContract,
         address admin,
-        address initialMinter,
-        string[] memory initialGems
-    ) public ERC20Group(metaTransactionContract, admin, initialMinter) {
-        _addGems(initialGems);
-    }
+        address initialMinter
+    ) public ERC20Group(metaTransactionContract, admin, initialMinter) {}
 }

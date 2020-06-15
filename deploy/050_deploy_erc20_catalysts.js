@@ -27,9 +27,9 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     const data = [];
     for (let i = 0; i < catalystData.length; i++) {
       const catalyst = catalystData[i];
-      const tokenName = `${catalyst.name}Catalyst`;
+      const contractName = `${catalyst.name}Catalyst`;
       const tokenSymbol = catalyst.symbol;
-      const result = await deploy(tokenName, {
+      const result = await deploy(contractName, {
         contractName: "ERC20SubToken",
         from: deployer,
         gas: 3000000,
