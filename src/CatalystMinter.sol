@@ -173,7 +173,7 @@ contract CatalystMinter is MetaTransactionReceiver {
         uint256[] memory gemIds,
         uint256 quantity
     ) internal returns (uint16) {
-        (uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = _catalysts.getMintData(catalystId);
+        (uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = _getMintData(catalystId);
         require(minQuantity <= quantity && quantity <= maxQuantity, "invalid quantity");
         require(gemIds.length <= maxGems, "too many gems");
         _burnSingleGems(from, gemIds);
@@ -215,6 +215,43 @@ contract CatalystMinter is MetaTransactionReceiver {
         }
     }
 
+    function _extractMintData(uint256 data)
+        internal
+        pure
+        returns (
+            uint16 maxGems,
+            uint16 minQuantity,
+            uint16 maxQuantity,
+            uint256 sandFee
+        )
+    {
+        maxGems = uint16(data >> 240);
+        minQuantity = uint16((data >> 224) % 2**16);
+        maxQuantity = uint16((data >> 208) % 2**16);
+        sandFee = uint256(data % 2**192);
+    }
+
+    function _getMintData(uint256 catalystId)
+        internal
+        returns (
+            uint16 maxGems,
+            uint16 minQuantity,
+            uint16 maxQuantity,
+            uint256 sandFee
+        )
+    {
+        if (catalystId == 0) {
+            return _extractMintData(_common_mint_data);
+        } else if (catalystId == 1) {
+            return _extractMintData(_rare_mint_data);
+        } else if (catalystId == 2) {
+            return _extractMintData(_epic_mint_data);
+        } else if (catalystId == 3) {
+            return _extractMintData(_legendary_mint_data);
+        }
+        return _catalysts.getMintData(catalystId); // TODO hardcode
+    }
+
     function _handleMultipleCatalysts(
         address from,
         uint256[] memory gemsQuantities,
@@ -239,7 +276,7 @@ contract CatalystMinter is MetaTransactionReceiver {
             require(catalystsQuantities[assets[i].catalystId] > 0, "invalid catalys quantities");
             catalystsQuantities[assets[i].catalystId]--;
             gemsQuantities = _checkGemsQuantities(gemsQuantities, assets[i].gemIds);
-            (uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = _catalysts.getMintData(assets[i].catalystId); // TODO hardcode
+            (uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = _getMintData(assets[i].catalystId);
             maxGemsList[i] = maxGems;
             require(minQuantity <= assets[i].quantity && assets[i].quantity <= maxQuantity, "invalid quantity");
             supplies[i] = assets[i].quantity;
@@ -298,7 +335,7 @@ contract CatalystMinter is MetaTransactionReceiver {
     ) internal {
         require(assetId & IS_NFT > 0, "NEED TO BE AN NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will reyrn false
         _burnCatalyst(from, catalystId);
-        (uint16 maxGems, , , ) = _catalysts.getMintData(catalystId);
+        (uint16 maxGems, , , ) = _getMintData(catalystId);
         require(gemIds.length <= maxGems, "too many gems");
         _burnGems(from, gemIds);
 
@@ -364,6 +401,11 @@ contract CatalystMinter is MetaTransactionReceiver {
     CatalystRegistry immutable _catalystRegistry;
     address _feeCollector;
 
+    uint256 immutable _common_mint_data;
+    uint256 immutable _rare_mint_data;
+    uint256 immutable _epic_mint_data;
+    uint256 immutable _legendary_mint_data;
+
     // /////////////////// CONSTRUCTOR ////////////////////
     constructor(
         CatalystRegistry catalystRegistry,
@@ -373,7 +415,8 @@ contract CatalystMinter is MetaTransactionReceiver {
         address metaTx,
         address admin,
         address feeCollector,
-        CatalystToken catalysts
+        CatalystToken catalysts,
+        uint256[4] memory bakedInMintdata
     ) public {
         _catalystRegistry = catalystRegistry;
         _sand = sand;
@@ -383,5 +426,9 @@ contract CatalystMinter is MetaTransactionReceiver {
         _admin = admin;
         _setFeeCollector(feeCollector);
         _setMetaTransactionProcessor(metaTx, true);
+        _common_mint_data = bakedInMintdata[0];
+        _rare_mint_data = bakedInMintdata[1];
+        _epic_mint_data = bakedInMintdata[2];
+        _legendary_mint_data = bakedInMintdata[3];
     }
 }
