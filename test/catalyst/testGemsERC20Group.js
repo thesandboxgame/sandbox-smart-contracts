@@ -1,19 +1,19 @@
 const {ethers, getNamedAccounts, ethereum} = require("@nomiclabs/buidler");
-const {waitFor} = require("local-utils");
-const erc20Tests = require("../erc20")(
+const erc20GroupTests = require("../erc20Group")(
   async () => {
-    const {others, catalystMinter} = await getNamedAccounts();
+    const {others, gemMinter} = await getNamedAccounts();
     await deployments.fixture();
 
-    const contract = await ethers.getContract("CommonCatalyst", catalystMinter);
+    const contract = await ethers.getContract("Gem", gemMinter);
     async function mint(to, amount) {
-      await waitFor(contract.mint(to, amount));
+      const tx = await contract.mint(to, 1, amount);
+      const receipt = await tx.wait();
+      return {receipt, tokenId: receipt.events.find((v) => v.event === "TransferSingle").args[3].toString()};
     }
     return {ethereum, contractAddress: contract.address, users: others, mint};
   },
   {
-    EIP717: true,
-    burn: true,
+    // TODO
   }
 );
 
@@ -32,8 +32,8 @@ function recurse(test) {
   }
 }
 
-describe("Catalyst:ERC20", function () {
-  for (const test of erc20Tests) {
+describe("Gems:ERC20Group", function () {
+  for (const test of erc20GroupTests) {
     // eslint-disable-next-line mocha/no-setup-in-describe
     recurse(test);
   }
