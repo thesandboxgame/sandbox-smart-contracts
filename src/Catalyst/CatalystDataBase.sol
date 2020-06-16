@@ -5,19 +5,19 @@ pragma experimental ABIEncoderV2;
 contract CatalystDataBase {
     function getValue(
         uint256 catalystId,
+        uint256 seed,
         uint32 gemId,
-        uint256 catalystAssetId,
         bytes32 blockHash,
         uint256 slotIndex
     ) external view returns (uint32) {
         uint16 minValue = _data[catalystId].minValue;
         uint16 maxValue = _data[catalystId].maxValue;
 
-        return _computeValue(catalystAssetId, gemId, minValue, maxValue, blockHash, slotIndex);
+        return _computeValue(seed, gemId, minValue, maxValue, blockHash, slotIndex);
     }
 
     function _computeValue(
-        uint256 catalystAssetId,
+        uint256 seed,
         uint32 gemId,
         uint16 minValue,
         uint16 maxValue,
@@ -25,12 +25,13 @@ contract CatalystDataBase {
         uint256 slotIndex
     ) internal pure returns (uint32) {
         uint16 range = maxValue - minValue;
-        return minValue + uint16(uint256(keccak256(abi.encodePacked(gemId, catalystAssetId, blockHash, slotIndex))) % range);
+        return minValue + uint16(uint256(keccak256(abi.encodePacked(gemId, seed, blockHash, slotIndex))) % range);
     }
 
     function getValues(
         uint256 catalystId,
-        uint256 catalystAssetId,
+        uint256 seed,
+        uint256 startIndex,
         uint32[] calldata gemIds,
         bytes32[] calldata blockHashes
     ) external view returns (uint32[] memory values) {
@@ -39,7 +40,7 @@ contract CatalystDataBase {
         uint16 maxValue = _data[catalystId].maxValue;
         values = new uint32[](gemIds.length);
         for (uint256 i = 0; i < gemIds.length; i++) {
-            values[i] = _computeValue(catalystAssetId, gemIds[i], minValue, maxValue, blockHashes[i], i);
+            values[i] = _computeValue(seed, gemIds[i], minValue, maxValue, blockHashes[i], startIndex + i);
         }
     }
 
