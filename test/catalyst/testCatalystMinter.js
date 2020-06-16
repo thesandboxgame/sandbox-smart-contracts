@@ -45,8 +45,7 @@ describe("Catalyst:Minting", function () {
     );
   });
 
-  it.only("number of gemIds is <= maxGems", async function () {
-    // const {catalyst} = await setupCatalystSystem();
+  it("number of gems is <= maxGems", async function () {
     const {creator, catalyst, catalystRegistry} = await setupCatalystUsers();
     const packId = 0;
     const gemIds = [0, 0, 0];
@@ -64,13 +63,11 @@ describe("Catalyst:Minting", function () {
       )
     );
     const catalystAppliedEvent = await findEvents(catalystRegistry, "CatalystApplied", receipt.blockHash);
-    // const gemsAddedEvent = await findEvents(catalystRegistry, "GemsAdded", receipt.blockhash);
-    console.log(`events: ${catalystAppliedEvent[0].args[1]}`);
-    let catId = catalystAppliedEvent[0].args[1];
+    const catId = catalystAppliedEvent[0].args[1];
+    const eventGemIds = catalystAppliedEvent[0].args[3];
     const mintData = await catalyst.getMintData(catId);
     const maxGemsConfigured = mintData[0];
-    console.log(`maxGems: ${maxGemsConfigured}`);
-    // const gemIds =
+    assert.isAtMost(eventGemIds.length, maxGemsConfigured, "more gems than allowed!");
   });
 
   it("creator without gems cannot mint Asset", async function () {
