@@ -63,9 +63,9 @@ describe("Catalyst:Minting", function () {
       )
     );
     const catalystAppliedEvent = await findEvents(catalystRegistry, "CatalystApplied", receipt.blockHash);
-    const catId = catalystAppliedEvent[0].args[1];
+    const catalystId = catalystAppliedEvent[0].args[1];
     const eventGemIds = catalystAppliedEvent[0].args[3];
-    const mintData = await catalyst.getMintData(catId);
+    const mintData = await catalyst.getMintData(catalystId);
     const maxGemsConfigured = mintData[0];
     assert.isAtMost(eventGemIds.length, maxGemsConfigured, "more gems than allowed!");
   });
