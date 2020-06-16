@@ -21,24 +21,24 @@ module.exports.setupCatalystSystem = deployments.createFixture(async () => {
           CatalystMinter.mint(other, packId || 0, ipfsHash || dummyHash, catalyst, gemIds, quantity, to || other, "0x")
         );
         const events = await findEvents(asset, "TransferSingle", receipt.blockHash);
-        return events[0].args.id;
+        return {tokenId: events[0].args.id, receipt};
       },
       extractAndChangeCatalyst: async (tokenId, {catalyst, gemIds, to}) => {
         const receipt = await waitFor(
           CatalystMinter.extractAndChangeCatalyst(other, tokenId, catalyst, gemIds, to || other)
         );
         const events = await findEvents(asset, "Transfer", receipt.blockHash);
-        return events[0].args[2];
+        return {tokenId: events[0].args[2], receipt};
       },
       extractAndAddGems: async (tokenId, {newGemIds, to}) => {
         const receipt = await waitFor(CatalystMinter.extractAndAddGems(other, tokenId, newGemIds, to || other));
         const events = await findEvents(asset, "Transfer", receipt.blockHash);
-        return events[0].args[2];
+        return {tokenId: events[0].args[2], receipt};
       },
       extractAsset: async (tokenId, to) => {
         const receipt = await waitFor(Asset.extractERC721(tokenId, to || other));
         const events = await findEvents(asset, "Transfer", receipt.blockHash);
-        return events[0].args[2];
+        return {tokenId: events[0].args[2], receipt};
       },
     });
   }
