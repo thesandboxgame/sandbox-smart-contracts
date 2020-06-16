@@ -1,13 +1,13 @@
 pragma solidity 0.6.5;
 
-import "../contracts_common/src/Interfaces/ERC1155.sol";
-import "../contracts_common/src/Interfaces/ERC1155TokenReceiver.sol";
+import "../../contracts_common/src/Interfaces/ERC1155.sol";
+import "../../contracts_common/src/Interfaces/ERC1155TokenReceiver.sol";
 
-import "../contracts_common/src/Libraries/AddressUtils.sol";
-import "../contracts_common/src/Libraries/ObjectLib32.sol";
+import "../../contracts_common/src/Libraries/AddressUtils.sol";
+import "../../contracts_common/src/Libraries/ObjectLib32.sol";
 
-import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
-import "../contracts_common/src/BaseWithStorage/SuperOperators.sol";
+import "../../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
+import "../../contracts_common/src/BaseWithStorage/SuperOperators.sol";
 
 
 contract ERC1155BaseToken is MetaTransactionReceiver, SuperOperators, ERC1155 {

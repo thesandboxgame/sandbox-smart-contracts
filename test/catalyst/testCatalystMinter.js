@@ -1,4 +1,4 @@
-const {assert} = require("local-chai");
+const {assert, expect} = require("local-chai");
 const {setupCatalystUsers} = require("./fixtures");
 const {
   expectRevert,
@@ -109,7 +109,7 @@ describe("Catalyst:Minting", function () {
     const totalExpectedFee = toWei(11 * 10);
 
     // TODO check Sand fee
-    const tokenId = await checERC1155Balances(
+    const {tokenId} = await checERC1155Balances(
       creator.address,
       {PowerGem: [gem, PowerGem, -3], EpicCatalyst: [catalyst, EpicCatalyst, -1]},
       () => creator.mintAsset({catalyst: EpicCatalyst, gemIds, quantity})
@@ -129,7 +129,7 @@ describe("Catalyst:Minting", function () {
     const totalExpectedFee = toWei(3 * 200);
 
     // TODO check Sand fee
-    const tokenId = await checERC1155Balances(
+    const {tokenId} = await checERC1155Balances(
       creator.address,
       {
         PowerGem: [gem, PowerGem, -1],
@@ -153,7 +153,7 @@ describe("Catalyst:Minting", function () {
     const gemIds = [PowerGem, DefenseGem, LuckGem];
     const quantity = 3;
 
-    const originalTokenId = await creator.mintAsset({catalyst: LegendaryCatalyst, gemIds, quantity});
+    const {tokenId: originalTokenId} = await creator.mintAsset({catalyst: LegendaryCatalyst, gemIds, quantity});
     const receipt = await waitFor(creator.Asset.extractERC721(originalTokenId, creator.address));
     const events = await findEvents(asset, "Transfer", receipt.blockHash);
     const tokenId = events[0].args[2];
@@ -171,14 +171,14 @@ describe("Catalyst:Minting", function () {
     const {creator, asset, catalystRegistry} = await setupCatalystUsers();
     const originalGemIds = [PowerGem, DefenseGem];
     const quantity = 60;
-    const originalTokenId = await creator.mintAsset({
+    const {tokenId: originalTokenId} = await creator.mintAsset({
       catalyst: RareCatalyst,
       gemIds: originalGemIds,
       quantity,
     });
 
     const gemIds = [DefenseGem, SpeedGem, MagicGem];
-    const tokenId = await creator.extractAndChangeCatalyst(originalTokenId, {
+    const {tokenId} = await creator.extractAndChangeCatalyst(originalTokenId, {
       catalyst: LegendaryCatalyst,
       gemIds,
     });
@@ -199,14 +199,14 @@ describe("Catalyst:Minting", function () {
     const {creator, asset, catalystRegistry} = await setupCatalystUsers();
     const originalGemIds = [PowerGem, DefenseGem, DefenseGem];
     const quantity = 30;
-    const originalTokenId = await creator.mintAsset({
+    const {tokenId: originalTokenId} = await creator.mintAsset({
       catalyst: EpicCatalyst,
       gemIds: originalGemIds,
       quantity,
     });
 
     const gemIds = [LuckGem, LuckGem];
-    const tokenId = await creator.extractAndChangeCatalyst(originalTokenId, {
+    const {tokenId} = await creator.extractAndChangeCatalyst(originalTokenId, {
       catalyst: RareCatalyst,
       gemIds,
     });
@@ -227,13 +227,13 @@ describe("Catalyst:Minting", function () {
     const {creator, catalysts, asset, catalystRegistry} = await setupCatalystUsers();
     const originalGemIds = [MagicGem, SpeedGem, MagicGem];
     const quantity = 30;
-    const originalTokenId = await creator.mintAsset({
+    const {tokenId: originalTokenId} = await creator.mintAsset({
       catalyst: EpicCatalyst,
       gemIds: originalGemIds,
       quantity,
     });
 
-    const tokenId = await creator.extractAsset(originalTokenId);
+    const {tokenId} = await creator.extractAsset(originalTokenId);
     const originalBalance = await asset["balanceOf(address,uint256)"](creator.address, originalTokenId);
 
     const balance = await asset["balanceOf(address,uint256)"](creator.address, tokenId);
@@ -246,29 +246,34 @@ describe("Catalyst:Minting", function () {
   });
 
   it("creator mint Epic Asset And new onwer add gems", async function () {
-    const {creator, user, catalyst, gem, asset, catalystRegistry} = await setupCatalystUsers();
+    const {creator, user, asset, catalystRegistry} = await setupCatalystUsers();
     const originalGemIds = [PowerGem, SpeedGem];
     const quantity = 30;
-    const originalTokenId = await creator.mintAsset({
+    const {tokenId: originalTokenId, receipt: originalReceipt} = await creator.mintAsset({
       catalyst: EpicCatalyst,
       gemIds: originalGemIds,
       quantity,
       to: user.address,
     });
+    const catalystAppliedEvent = (await findEvents(catalystRegistry, "CatalystApplied", originalReceipt.blockHash))[0];
+    const seed = catalystAppliedEvent.args.seed;
 
     const newGemIds = [4];
-    const tokenId = await user.extractAndAddGems(originalTokenId, {newGemIds});
+    const {tokenId, receipt} = await user.extractAndAddGems(originalTokenId, {newGemIds});
     const originalBalance = await asset["balanceOf(address,uint256)"](user.address, originalTokenId);
     const balance = await asset["balanceOf(address,uint256)"](user.address, tokenId);
-
-    const gemIds = originalGemIds.concat(newGemIds);
     const rarity = await asset.rarity(tokenId);
-    await mine(); // future block need to be mined to get the value
 
-    // TODO await assertValidAttributes({catalystRegistry, tokenId, originalTokenId, gemIds, range: [51, 75]});
-    assert.equal(originalBalance, quantity - 1);
-    assert.equal(balance, 1);
-    assert.equal(rarity, 0); // rarity is no more in use
+    const gemsAddedEvent = (await findEvents(catalystRegistry, "GemsAdded", receipt.blockHash))[0];
+
+    expect(gemsAddedEvent.args.gemIds[0]).to.equal(newGemIds[0]);
+    expect(gemsAddedEvent.args.assetId).to.equal(tokenId);
+    expect(gemsAddedEvent.args.startIndex).to.equal(2);
+    expect(gemsAddedEvent.args.seed).to.equal(seed);
+    expect(gemsAddedEvent.args.blockNumber).to.equal(receipt.blockNumber + 1);
+    expect(originalBalance).to.equal(quantity - 1);
+    expect(balance).to.equal(1);
+    expect(rarity).to.equal(0); // rarity is no more in use
   });
 
   it("creator mint multiple Asset", async function () {

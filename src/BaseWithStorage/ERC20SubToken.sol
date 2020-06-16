@@ -8,10 +8,10 @@ import "./ERC20Group.sol";
 
 
 contract ERC20SubToken {
-    // TODO add natspec, currently block by solidity compiler issue
+    // TODO add natspec, currently blocked by solidity compiler issue
     event Transfer(address indexed from, address indexed to, uint256 value);
 
-    // TODO add natspec, currently block by solidity compiler issue
+    // TODO add natspec, currently blocked by solidity compiler issue
     event Approval(address indexed owner, address indexed spender, uint256 value);
 
     /// @notice A descriptive name for the tokens
@@ -64,7 +64,7 @@ contract ERC20SubToken {
             uint256 allowance = _mAllowed[from][msg.sender];
             if (allowance != (2**256) - 1) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
-                require(allowance >= amount, "Not enough funds allowed");
+                require(allowance >= amount, "NOT_AUTHOIZED_ALLOWANCE");
                 _mAllowed[from][msg.sender] = allowance.sub(amount);
             }
         }
@@ -92,7 +92,7 @@ contract ERC20SubToken {
         address to,
         uint256 amount
     ) external {
-        require(msg.sender == address(_group), "only group allowed");
+        require(msg.sender == address(_group), "NOT_AUTHORIZED_GROUP_ONLY");
         emit Transfer(from, to, amount);
     }
 
@@ -103,7 +103,7 @@ contract ERC20SubToken {
         address spender,
         uint256 amount
     ) internal {
-        require(owner != address(0) && spender != address(0), "Cannot approve with 0x0");
+        require(owner != address(0) && spender != address(0), "INVALID_FROM_OR_SPENDER");
         _mAllowed[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }
@@ -138,11 +138,11 @@ contract ERC20SubToken {
     ) public {
         _group = group;
         _index = index;
-        require(bytes(tokenName).length > 0, "need a name");
-        require(bytes(tokenName).length <= 32, "name too long");
+        require(bytes(tokenName).length > 0, "INVALID_NAME_REQUIRED");
+        require(bytes(tokenName).length <= 32, "INVALID_NAME_TOO_LONG");
         _name = _firstBytes32(bytes(tokenName));
-        require(bytes(tokenSymbol).length > 0, "need a symbol");
-        require(bytes(tokenSymbol).length <= 32, "symbol too long");
+        require(bytes(tokenSymbol).length > 0, "INVALID_SYMBOL_REQUIRED");
+        require(bytes(tokenSymbol).length <= 32, "INVALID_SYMBOL_TOO_LONG");
         _symbol = _firstBytes32(bytes(tokenSymbol));
     }
 

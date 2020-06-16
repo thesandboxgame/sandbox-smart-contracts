@@ -3,13 +3,24 @@ pragma experimental ABIEncoderV2;
 
 
 interface CatalystToken {
+    event CatalystApplied(uint256 indexed assetId, uint256 indexed catalystId, uint256 seed, uint256[] gemIds, uint64 blockNumber);
+    event GemsAdded(uint256 indexed assetId, uint256 seed, uint256 startIndex, uint256[] gemIds, uint64 blockNumber);
+
     function getValue(
         uint256 catalystId,
+        uint256 seed,
         uint32 gemId,
-        uint96 seed,
         bytes32 blockHash,
         uint256 slotIndex
     ) external view returns (uint32);
+
+    function getValues(
+        uint256 catalystId,
+        uint256 seed,
+        uint32[] calldata gemIds,
+        bytes32[] calldata blockHashes,
+        uint256 startIndex
+    ) external view returns (uint32[] memory);
 
     function getMintData(uint256 catalystId)
         external

@@ -1,7 +1,7 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-import "../BaseWithStorage/ERC1155BaseToken.sol";
+import "./ERC1155BaseToken.sol";
 
 
 contract MintableERC1155Token is ERC1155BaseToken {
