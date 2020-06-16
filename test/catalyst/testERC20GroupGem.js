@@ -5,15 +5,21 @@ const erc20GroupTests = require("../erc20Group")(
     await deployments.fixture();
 
     const contract = await ethers.getContract("Gem", gemMinter);
+
     async function mint(to, amount) {
       const tx = await contract.mint(to, 1, amount);
       const receipt = await tx.wait();
-      return {receipt, tokenId: receipt.events.find((v) => v.event === "TransferSingle").args[3].toString()};
+      return {receipt};
     }
-    return {ethereum, contractAddress: contract.address, users: others, mint};
+    async function batchMint(to, amount) {
+      const tx = await contract.batchMint(to, [1, 2, 3], amount);
+      const receipt = await tx.wait();
+      return {receipt};
+    }
+    return {ethereum, contractAddress: contract.address, users: others, mint, batchMint};
   },
   {
-    // TODO
+    // TODO extensions
   }
 );
 

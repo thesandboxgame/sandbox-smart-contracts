@@ -9,12 +9,17 @@ const erc20GroupABI = [
     inputs: [
       {
         internalType: "address",
+        name: "metaTransactionContract",
+        type: "address",
+      },
+      {
+        internalType: "address",
         name: "admin",
         type: "address",
       },
       {
         internalType: "address",
-        name: "minter",
+        name: "initialMinter",
         type: "address",
       },
     ],
@@ -90,8 +95,14 @@ const erc20GroupABI = [
       {
         indexed: false,
         internalType: "address",
-        name: "newMinter",
+        name: "minter",
         type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "bool",
+        name: "enabled",
+        type: "bool",
       },
     ],
     name: "Minter",
@@ -128,19 +139,6 @@ const erc20GroupABI = [
     ],
     name: "SuperOperator",
     type: "event",
-  },
-  {
-    inputs: [
-      {
-        internalType: "contract ERC20SubToken",
-        name: "subToken",
-        type: "address",
-      },
-    ],
-    name: "addSubToken",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
   },
   {
     inputs: [
@@ -198,6 +196,52 @@ const erc20GroupABI = [
         type: "address",
       },
       {
+        internalType: "uint256[]",
+        name: "ids",
+        type: "uint256[]",
+      },
+      {
+        internalType: "uint256[]",
+        name: "amounts",
+        type: "uint256[]",
+      },
+    ],
+    name: "batchBurnFrom",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "to",
+        type: "address",
+      },
+      {
+        internalType: "uint256[]",
+        name: "ids",
+        type: "uint256[]",
+      },
+      {
+        internalType: "uint256[]",
+        name: "amounts",
+        type: "uint256[]",
+      },
+    ],
+    name: "batchMint",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "from",
+        type: "address",
+      },
+      {
         internalType: "address",
         name: "to",
         type: "address",
@@ -244,29 +288,6 @@ const erc20GroupABI = [
         type: "address",
       },
       {
-        internalType: "uint256[]",
-        name: "ids",
-        type: "uint256[]",
-      },
-      {
-        internalType: "uint256",
-        name: "value",
-        type: "uint256",
-      },
-    ],
-    name: "burnEachFor",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "from",
-        type: "address",
-      },
-      {
         internalType: "uint256",
         name: "id",
         type: "uint256",
@@ -277,7 +298,7 @@ const erc20GroupABI = [
         type: "uint256",
       },
     ],
-    name: "burnFor",
+    name: "burnFrom",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -302,19 +323,6 @@ const erc20GroupABI = [
       {
         internalType: "address",
         name: "",
-        type: "address",
-      },
-    ],
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    inputs: [],
-    name: "getMinter",
-    outputs: [
-      {
-        internalType: "address",
-        name: "minter",
         type: "address",
       },
     ],
@@ -349,11 +357,73 @@ const erc20GroupABI = [
     inputs: [
       {
         internalType: "address",
+        name: "sender",
+        type: "address",
+      },
+    ],
+    name: "isAuthorizedToApprove",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "owner",
+        type: "address",
+      },
+      {
+        internalType: "address",
+        name: "sender",
+        type: "address",
+      },
+    ],
+    name: "isAuthorizedToTransfer",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
         name: "who",
         type: "address",
       },
     ],
     name: "isMetaTransactionProcessor",
+    outputs: [
+      {
+        internalType: "bool",
+        name: "",
+        type: "bool",
+      },
+    ],
+    stateMutability: "view",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "who",
+        type: "address",
+      },
+    ],
+    name: "isMinter",
     outputs: [
       {
         internalType: "bool",
@@ -402,29 +472,6 @@ const erc20GroupABI = [
       },
     ],
     name: "mint",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    inputs: [
-      {
-        internalType: "address",
-        name: "to",
-        type: "address",
-      },
-      {
-        internalType: "uint256[]",
-        name: "ids",
-        type: "uint256[]",
-      },
-      {
-        internalType: "uint256[]",
-        name: "amounts",
-        type: "uint256[]",
-      },
-    ],
-    name: "mintMultiple",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -492,8 +539,13 @@ const erc20GroupABI = [
     inputs: [
       {
         internalType: "address",
-        name: "newMinter",
+        name: "minter",
         type: "address",
+      },
+      {
+        internalType: "bool",
+        name: "enabled",
+        type: "bool",
       },
     ],
     name: "setMinter",
@@ -573,7 +625,7 @@ module.exports = (init, extensions) => {
 
   function preTest(test) {
     return async function () {
-      const {ethereum, contractAddress, users, mint} = await init();
+      const {ethereum, contractAddress, users, mint, batchMint} = await init();
       const ethersProvider = new Web3Provider(ethereum);
 
       const contract = new Contract(contractAddress, erc20GroupABI, ethersProvider);
@@ -594,7 +646,9 @@ module.exports = (init, extensions) => {
       return test({
         contract,
         mint,
+        batchMint,
         users: usersWithContracts,
+        ethersProvider,
       });
     };
   }
@@ -612,30 +666,154 @@ module.exports = (init, extensions) => {
   }
 
   describe("mint", function (it) {
-    it("minting one token results in a TransferSingle event", async function ({contract, mint, users}) {
-      const {receipt, tokenId} = await mint(users[1].address, 1);
-      const eventsMatching = receipt.events.filter((v) => v.event === "TransferSingle");
-      assert.equal(eventsMatching.length, 1);
-      const transferEvent = eventsMatching[0];
-      assert.equal(transferEvent.args[1], zeroAddress);
-      assert.equal(transferEvent.args[2], users[1].address);
-      assert.ok(transferEvent.args[3].eq(BigNumber.from(tokenId)));
+    it("minting one token results in correct balance update", async function ({contract, mint, users}) {
+      const initialBalance = await contract.balanceOf(users[1].address, 1);
+      assert.equal(initialBalance, 0);
+      await mint(users[1].address, 1);
+      const newBalance = await contract.balanceOf(users[1].address, 1);
+      assert.ok(newBalance, BigNumber.from(1));
     });
 
-    it("minting several tokens results in a TransferSingle event", async function ({contract, mint, users}) {
-      const {receipt, tokenId} = await mint(users[1].address, 5);
-      const eventsMatching = receipt.events.filter((v) => v.event === "TransferSingle");
-      assert.equal(eventsMatching.length, 1);
-      const transferEvent = eventsMatching[0];
-      assert.equal(transferEvent.args[1], zeroAddress);
-      assert.equal(transferEvent.args[2], users[1].address);
-      assert.ok(transferEvent.args[3].eq(BigNumber.from(tokenId)));
+    // it("minting one token results in TransferEvent", async function ({contract, mint, users}) {
+    // });
+
+    it("minting several tokens results in correct balance update", async function ({contract, mint, users}) {
+      const initialBalance = await contract.balanceOf(users[1].address, 1);
+      assert.equal(initialBalance, 0);
+      await mint(users[1].address, 5);
+      const newBalance = await contract.balanceOf(users[1].address, 1);
+      assert.ok(newBalance, BigNumber.from(5));
+    });
+
+    // it("minting several tokens results in several TransferEvents", async function ({contract, mint, users}) {
+    // });
+  });
+
+  describe("batchMint", function (it) {
+    it("minting multiple token types results in correct balance updates", async function ({
+      contract,
+      batchMint,
+      users,
+    }) {
+      const initialBalances = [];
+      initialBalances.push(await contract.balanceOf(users[1].address, 1));
+      initialBalances.push(await contract.balanceOf(users[1].address, 2));
+      initialBalances.push(await contract.balanceOf(users[1].address, 3));
+      assert.equal(initialBalances[0], 0);
+      assert.equal(initialBalances[1], 0);
+      assert.equal(initialBalances[2], 0);
+      await batchMint(users[1].address, [5, 6, 7]);
+      const newBalances = [];
+      newBalances.push(await contract.balanceOf(users[1].address, 1));
+      newBalances.push(await contract.balanceOf(users[1].address, 2));
+      newBalances.push(await contract.balanceOf(users[1].address, 3));
+      assert.ok(newBalances[0], BigNumber.from(5));
+      assert.ok(newBalances[1], BigNumber.from(6));
+      assert.ok(newBalances[2], BigNumber.from(7));
+    });
+
+    // it("batchMint results in multiple TransferEvents", async function ({contract, mint, users}) {
+    // });
+
+    it("balanceOfBatch returns the correct balances", async function ({contract, batchMint, users}) {
+      const initialBalances = [];
+      initialBalances.push(await contract.balanceOf(users[1].address, 1));
+      initialBalances.push(await contract.balanceOf(users[1].address, 2));
+      initialBalances.push(await contract.balanceOf(users[1].address, 3));
+      assert.equal(initialBalances[0], 0);
+      assert.equal(initialBalances[1], 0);
+      assert.equal(initialBalances[2], 0);
+      await batchMint(users[1].address, [5, 6, 7]);
+      const newBalances = await contract.balanceOfBatch(
+        [users[1].address, users[1].address, users[1].address],
+        [1, 2, 3]
+      );
+      assert.ok(newBalances[0], BigNumber.from(5));
+      assert.ok(newBalances[1], BigNumber.from(6));
+      assert.ok(newBalances[2], BigNumber.from(7));
     });
   });
 
-  describe("mintMultiple", function (it) {
-    it("minting x token types with mintMultiple results in x TransferSingle events", async function ({contract, mint, users}) {});
+  describe("transfer events", function (it) {
+    it("transferring one instance of an item using singleTransferFrom results in a transfer event", async function ({contract, mint, users, ethersProvider}) {
+      const initialBalanceUser0 = await contract.balanceOf(users[0].address, 1);
+      assert.ok(initialBalanceUser0, BigNumber.from("1000000"));
+      const initialBalanceUser1 = await contract.balanceOf(users[1].address, 1);
+      assert.equal(initialBalanceUser1, 0);
+      const receipt = await contract
+        .connect(ethersProvider.getSigner(users[0].address))
+        .functions.singleTransferFrom(users[0].address, users[1].address, 1, 1)
+        .then((tx) => tx.wait());
+      const newBalanceUser0 = await contract.balanceOf(users[0].address, 1);
+      const newBalanceUser1 = await contract.balanceOf(users[1].address, 1);
+      assert.ok(newBalanceUser0, BigNumber.from("999999"));
+      assert.ok(newBalanceUser1, BigNumber.from("1"));
+      // TODO Transfer event
+      // const event = receipt.events[0];
+    });
+
+    it("transferring several instances of an item using singleTransferFrom results in a transfer event", async function ({contract, mint, users, ethersProvider}) {
+    });
+
+    it("transferring 0 instances of an item using singleTransferFrom results in a transfer event", async function ({contract, mint, users, ethersProvider}) {
+    });
+
+    it("transferring one instance of several items using batchTransferFrom results in several transfer events", async function ({contract, mint, users, ethersProvider}) {
+      // const initialBalanceUser0 = await contract.balanceOf(users[0].address, 1);
+      // assert.ok(initialBalanceUser0, BigNumber.from("1000000"));
+      // const initialBalanceUser1 = await contract.balanceOf(users[1].address, 1);
+      // assert.equal(initialBalanceUser1, 0);
+      // const receipt = await contract
+      //   .connect(ethersProvider.getSigner(users[0].address))
+      //   .functions.singleTransferFrom(users[0].address, users[1].address, 1, 1)
+      //   .then((tx) => tx.wait());
+      // const newBalanceUser0 = await contract.balanceOf(users[0].address, 1);
+      // const newBalanceUser1 = await contract.balanceOf(users[1].address, 1);
+      // assert.ok(newBalanceUser0, BigNumber.from("999999"));
+      // assert.ok(newBalanceUser1, BigNumber.from("1"));
+      // TODO Transfer event
+      // const event = receipt.events[0];
+    });
+
+    it("transferring 0 instances of an items using batchTransferFrom results in several transfer events", async function ({contract, mint, users, ethersProvider}) {
+    });
+
+    it("transferring one instance of several items using batchTransferFrom results in several transfer events", async function ({contract, mint, users, ethersProvider}) {
+    });
+
+    it("transferring 0 instances of several items using batchTransferFrom results in several transfer events", async function ({contract, mint, users, ethersProvider}) {
+    });
+
+    it("transferring to a contract with singleTransferFrom that does not accept ERC20 token should fail", async function ({contract, mint, users, ethersProvider}) {
+    });
+
+    it("transferring to a contract with batchTransferFrom that does not accept ERC20 token should fail", async function ({contract, mint, users, ethersProvider}) {
+    });
+
+    it("transferring to a contract with singleTransferFrom that does accept ERC20 token should not fail", async function ({contract, mint, users, ethersProvider}) {
+    });
+
+    it("transferring to a contract with batchTransferFrom that does accept ERC20 token should not fail", async function ({contract, mint, users, ethersProvider}) {
+    });
+
+
+
   });
+
+  describe("burn", function (it) {
+    it("burnFrom", async function ({contract, mint, users}) {});
+    it("batchBurnFrom", async function ({contract, mint, users}) {});
+  });
+
+  describe("approvals", function (it) {
+    it("setApprovalForAllFor", async function ({contract, mint, users}) {});
+    it("setApprovalForAll", async function ({contract, mint, users}) {});
+    it("isApprovedForAll", async function ({contract, mint, users}) {});
+    it("isAuthorizedToTransfer", async function ({contract, mint, users}) {});
+    it("isAuthorizedToApprove", async function ({contract, mint, users}) {});
+  });
+
+  describe("interface", function (it) {});
 
   return tests;
 };
