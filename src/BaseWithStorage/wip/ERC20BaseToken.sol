@@ -1,7 +1,7 @@
 pragma solidity 0.6.5;
 
-import "../Interfaces/ERC20Extended.sol";
-import "../contracts_common/src/BaseWithStorage/SuperOperators.sol";
+import "../../Interfaces/ERC20Extended.sol";
+import "../../contracts_common/src/BaseWithStorage/SuperOperators.sol";
 
 
 contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
@@ -17,11 +17,11 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
         string memory tokenSymbol,
         address admin
     ) internal {
-        require(bytes(tokenName).length > 0, "need a name");
-        require(bytes(tokenName).length <= 32, "name too long");
+        require(bytes(tokenName).length > 0, "INVALID_NAME_REQUIRED");
+        require(bytes(tokenName).length <= 32, "INVALID_NAME_TOO_LONG");
         _name = _firstBytes32(bytes(tokenName));
-        require(bytes(tokenSymbol).length > 0, "need a symbol");
-        require(bytes(tokenSymbol).length <= 32, "symbol too long");
+        require(bytes(tokenSymbol).length > 0, "INVALID_SYMBOL_REQUIRED");
+        require(bytes(tokenSymbol).length <= 32, "INVALID_SYMBOL_TOO_LONG");
         _symbol = _firstBytes32(bytes(tokenSymbol));
 
         _admin = admin;
@@ -89,7 +89,7 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
             uint256 currentAllowance = _allowances[from][msg.sender];
             if (currentAllowance != (2**256) - 1) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
-                require(currentAllowance >= amount, "Not enough funds allowed");
+                require(currentAllowance >= amount, "NOT_AUTHOIZED_ALLOWANCE");
                 _allowances[from][msg.sender] = currentAllowance - amount;
             }
         }
@@ -110,7 +110,7 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
         if (msg.sender != from && !_superOperators[msg.sender]) {
             uint256 currentAllowance = _allowances[from][msg.sender];
             if (currentAllowance != (2**256) - 1) {
-                require(currentAllowance >= amount, "Not enough funds allowed");
+                require(currentAllowance >= amount, "NOT_AUTHOIZED_ALLOWANCE");
                 _allowances[from][msg.sender] = currentAllowance - amount;
             }
         }
@@ -136,7 +136,7 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
         address spender,
         uint256 amount
     ) public returns (bool success) {
-        require(msg.sender == owner || _superOperators[msg.sender], "msg.sender != owner && !superOperator");
+        require(msg.sender == owner || _superOperators[msg.sender], "NOT_AUTHORIZED"); // TODO metatx
         _approveFor(owner, spender, amount);
         return true;
     }

@@ -16,8 +16,8 @@ contract CatalystRegistry is Admin {
         uint256 maxGems,
         uint256[] calldata gemIds
     ) external {
-        require(msg.sender == _minter, "NOT_MINTER");
-        require(gemIds.length <= maxGems, "too many gems");
+        require(msg.sender == _minter, "NOT_AUTHORIZED_MINTER");
+        require(gemIds.length <= maxGems, "INVALID_GEMS_TOO_MANY");
         uint256 emptySockets = maxGems - gemIds.length;
         uint256 index = gemIds.length;
         if (emptySockets == 0) {
@@ -34,12 +34,12 @@ contract CatalystRegistry is Admin {
     }
 
     function addGems(uint256 assetId, uint256[] calldata gemIds) external {
-        require(assetId & IS_NFT > 0, "cannot add gems to a collection");
-        require(gemIds.length > 0, "NO_GEMS_GIVEN");
-        require(msg.sender == _minter, "NOT_MINTER");
+        require(msg.sender == _minter, "NOT_AUTHORIZED_MINTER");
+        require(assetId & IS_NFT > 0, "INVALID_NOT_NFT");
+        require(gemIds.length > 0, "INVALID_GEMS_0");
         (uint256 emptySockets, uint256 index, uint256 seed) = _getSocketData(assetId);
         uint256 startIndex = index;
-        require(emptySockets >= gemIds.length, "too many gems");
+        require(emptySockets >= gemIds.length, "INVALID_GEMS_TOO_MANY");
         emptySockets -= gemIds.length;
         index += gemIds.length;
         if (emptySockets == 0) {
@@ -55,8 +55,8 @@ contract CatalystRegistry is Admin {
     /// @notice Set the Minter that will be the only address able to create Estate
     /// @param minter address of the minter
     function setMinter(address minter) external {
-        require(msg.sender == _admin, "ADMIN_NOT_AUTHORIZED");
-        require(minter != _minter, "MINTER_SAME_ALREADY_SET");
+        require(msg.sender == _admin, "NOT_AUTHORIZED_ADMIN");
+        require(minter != _minter, "INVALID_MINTER_SAME_ALREADY_SET");
         _minter = minter;
         emit Minter(minter);
     }

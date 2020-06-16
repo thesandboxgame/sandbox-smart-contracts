@@ -8,8 +8,8 @@ import "../BaseWithStorage/ERC20SubToken.sol";
 
 contract ERC20GroupCatalyst is CatalystDataBase, ERC20Group {
     function addCatalysts(ERC20SubToken[] memory catalysts, CatalystData[] memory data) public {
-        require(msg.sender == _admin, "only admin");
-        require(catalysts.length == data.length, "inconsistent length");
+        require(msg.sender == _admin, "NOT_AUTHORIZED_ADMIN");
+        require(catalysts.length == data.length, "INVALID_INCONSISTENT_LENGTH");
         for (uint256 i = 0; i < data.length; i++) {
             uint256 id = _addSubToken(catalysts[i]);
             _data[id] = data[i];
@@ -17,12 +17,11 @@ contract ERC20GroupCatalyst is CatalystDataBase, ERC20Group {
     }
 
     function addCatalyst(ERC20SubToken catalyst, CatalystData memory data) public {
-        require(msg.sender == _admin, "only admin");
+        require(msg.sender == _admin, "NOT_AUTHORIZED_ADMIN");
         uint256 id = _addSubToken(catalyst);
         _data[id] = data;
     }
 
-    // ////////////////////////
     constructor(
         address metaTransactionContract,
         address admin,

@@ -28,7 +28,7 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     /// @param minter address that will be given/removed minter right.
     /// @param enabled set whether the minter is enabled or disabled.
     function setMinter(address minter, bool enabled) external {
-        require(msg.sender == _admin, "only admin is allowed to add minters");
+        require(msg.sender == _admin, "NOT_AUTHORIZED_ADMIN");
         _setMinter(minter, enabled);
     }
 
@@ -48,7 +48,7 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         uint256 id,
         uint256 amount
     ) external {
-        require(_minters[msg.sender], "only minter allowed to mint");
+        require(_minters[msg.sender], "NOT_AUTHORIZED_ADMIN");
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         _packedTokenBalance[to][bin] = _packedTokenBalance[to][bin].updateTokenBalance(index, amount, ObjectLib32.Operations.ADD);
         _packedSupplies[bin] = _packedSupplies[bin].updateTokenBalance(index, amount, ObjectLib32.Operations.ADD);
@@ -65,8 +65,8 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         uint256[] calldata ids,
         uint256[] calldata amounts
     ) external {
-        require(_minters[msg.sender], "only minter allowed to mint");
-        require(ids.length == amounts.length, "inconsisten length");
+        require(_minters[msg.sender], "NOT_AUTHORIZED_ADMIN");
+        require(ids.length == amounts.length, "INVALID_INCONSISTENT_LENGTH");
         _batchMint(to, ids, amounts);
     }
 
@@ -125,7 +125,7 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     /// @param ids list of subTokens's addresses.
     /// @return balances list of balances for each request.
     function balanceOfBatch(address[] calldata owners, uint256[] calldata ids) external view returns (uint256[] memory balances) {
-        require(owners.length == ids.length, "Inconsistent array length between args");
+        require(owners.length == ids.length, "INVALID_INCONSISTENT_LENGTH");
         balances = new uint256[](ids.length);
         for (uint256 i = 0; i < ids.length; i++) {
             balances[i] = balanceOf(owners[i], ids[i]);
@@ -144,7 +144,7 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         uint256 id,
         uint256 value
     ) external {
-        require(to != address(0), "INVALID_TO");
+        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         ERC20SubToken erc20 = _erc20s[id];
         require(
             from == msg.sender ||
@@ -172,8 +172,8 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         uint256[] calldata ids,
         uint256[] calldata values
     ) external {
-        require(ids.length == values.length, "INVALID_ARGS_IDS_VALUES_LENGTH");
-        require(to != address(0), "INVALID_TO");
+        require(ids.length == values.length, "INVALID_INCONSISTENT_LENGTH");
+        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         require(
             from == msg.sender || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender] || _metaTransactionContracts[msg.sender],
             "NOT_AUTHORIZED"
@@ -251,10 +251,10 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         uint256[] calldata ids,
         uint256[] calldata amounts
     ) external {
-        require(from != address(0), "from is zero address");
+        require(from != address(0), "INVALID_FROM_ZERO_ADDRESS");
         require(
             from == msg.sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender],
-            "not authorized"
+            "NOT_AUTHORIZED"
         );
 
         _batchBurnFrom(from, ids, amounts);
@@ -335,8 +335,8 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
 
     function _addSubToken(ERC20SubToken subToken) internal returns (uint256 id) {
         id = _erc20s.length;
-        require(subToken.groupAddress() == address(this), "subToken for different group");
-        require(subToken.groupTokenId() == id, "id not mathcing");
+        require(subToken.groupAddress() == address(this), "INVALID_GROUP");
+        require(subToken.groupTokenId() == id, "INVALID_ID");
         _erc20s.push(subToken);
         emit SubToken(subToken);
     }
@@ -346,7 +346,7 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         address operator,
         bool approved
     ) internal {
-        require(!_superOperators[operator], "super operator can't have their approvalForAll changed");
+        require(!_superOperators[operator], "INVALID_SUPER_OPERATOR");
         _operatorsForAll[sender][operator] = approved;
         emit ApprovalForAll(sender, operator, approved);
     }
