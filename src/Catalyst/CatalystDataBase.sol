@@ -31,9 +31,9 @@ contract CatalystDataBase {
     function getValues(
         uint256 catalystId,
         uint256 seed,
-        uint256 startIndex,
         uint32[] calldata gemIds,
-        bytes32[] calldata blockHashes
+        bytes32[] calldata blockHashes,
+        uint256 startIndex
     ) external view returns (uint32[] memory values) {
         require(gemIds.length == blockHashes.length, "inconsisten length");
         uint16 minValue = _data[catalystId].minValue;
