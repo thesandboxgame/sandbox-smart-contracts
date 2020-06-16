@@ -45,6 +45,34 @@ describe("Catalyst:Minting", function () {
     );
   });
 
+  it.only("number of gemIds is <= maxGems", async function () {
+    // const {catalyst} = await setupCatalystSystem();
+    const {creator, catalyst, catalystRegistry} = await setupCatalystUsers();
+    const packId = 0;
+    const gemIds = [0, 0, 0];
+    const quantity = 11;
+    const receipt = await waitFor(
+      creator.CatalystMinter.mint(
+        creator.address,
+        packId,
+        dummyHash,
+        EpicCatalyst,
+        gemIds,
+        quantity,
+        creator.address,
+        emptyBytes
+      )
+    );
+    const catalystAppliedEvent = await findEvents(catalystRegistry, "CatalystApplied", receipt.blockHash);
+    // const gemsAddedEvent = await findEvents(catalystRegistry, "GemsAdded", receipt.blockhash);
+    console.log(`events: ${catalystAppliedEvent[0].args[1]}`);
+    let catId = catalystAppliedEvent[0].args[1];
+    const mintData = await catalyst.getMintData(catId);
+    const maxGemsConfigured = mintData[0];
+    console.log(`maxGems: ${maxGemsConfigured}`);
+    // const gemIds =
+  });
+
   it("creator without gems cannot mint Asset", async function () {
     const {creatorWithoutGems: creator} = await setupCatalystUsers();
     const packId = 0;
