@@ -917,7 +917,6 @@ module.exports = (init, extensions) => {
       mint,
       contract,
       users,
-      ethersProvider,
       ERC20SubToken,
     }) {
       await mint(users[0].address, 100);
@@ -925,9 +924,8 @@ module.exports = (init, extensions) => {
       assert.ok(initialBalanceUser0, BigNumber.from(100));
       const initialBalanceUser1 = await contract.balanceOf(users[1].address, 1);
       assert.equal(initialBalanceUser1, 0);
-      const receipt = await contract
-        .connect(ethersProvider.getSigner(users[0].address))
-        .functions.singleTransferFrom(users[0].address, users[1].address, 1, 1)
+      const receipt = await users[0].contract
+        .singleTransferFrom(users[0].address, users[1].address, 1, 1)
         .then((tx) => tx.wait());
       const newBalanceUser0 = await contract.balanceOf(users[0].address, 1);
       const newBalanceUser1 = await contract.balanceOf(users[1].address, 1);
@@ -944,7 +942,6 @@ module.exports = (init, extensions) => {
       contract,
       mint,
       users,
-      ethersProvider,
       ERC20SubToken,
     }) {
       await mint(users[0].address, 8);
@@ -952,9 +949,8 @@ module.exports = (init, extensions) => {
       assert.ok(initialBalanceUser0, BigNumber.from(8));
       const initialBalanceUser1 = await contract.balanceOf(users[1].address, 1);
       assert.equal(initialBalanceUser1, 0);
-      const receipt = await contract
-        .connect(ethersProvider.getSigner(users[0].address))
-        .functions.singleTransferFrom(users[0].address, users[1].address, 1, 8)
+      const receipt = await users[0].contract
+        .singleTransferFrom(users[0].address, users[1].address, 1, 8)
         .then((tx) => tx.wait());
       const newBalanceUser0 = await contract.balanceOf(users[0].address, 1);
       const newBalanceUser1 = await contract.balanceOf(users[1].address, 1);
@@ -971,7 +967,6 @@ module.exports = (init, extensions) => {
       contract,
       mint,
       users,
-      ethersProvider,
       ERC20SubToken,
     }) {
       await mint(users[0].address, 8);
@@ -979,9 +974,8 @@ module.exports = (init, extensions) => {
       assert.ok(initialBalanceUser0, BigNumber.from(8));
       const initialBalanceUser1 = await contract.balanceOf(users[1].address, 1);
       assert.equal(initialBalanceUser1, 0);
-      const receipt = await contract
-        .connect(ethersProvider.getSigner(users[0].address))
-        .functions.singleTransferFrom(users[0].address, users[1].address, 1, 0)
+      const receipt = await users[0].contract
+        .singleTransferFrom(users[0].address, users[1].address, 1, 0)
         .then((tx) => tx.wait());
       const newBalanceUser0 = await contract.balanceOf(users[0].address, 1);
       const newBalanceUser1 = await contract.balanceOf(users[1].address, 1);
@@ -995,32 +989,68 @@ module.exports = (init, extensions) => {
     });
 
     it("transferring one instance of several items using batchTransferFrom results in several transfer events", async function ({
-      contract,
-      mint,
+      batchMint,
       users,
-      ethersProvider,
-    }) {});
+      ERC20SubToken,
+      secondERC20SubToken,
+      thirdERC20SubToken,
+    }) {
+      await batchMint(users[1].address, [5, 6, 7]);
+      const receipt = await users[1].contract
+        .batchTransferFrom(users[1].address, users[2].address, [1, 2, 3], [5, 6, 7])
+        .then((tx) => tx.wait());
 
-    it("transferring 0 instances of an items using batchTransferFrom results in several transfer events", async function ({
-      contract,
-      mint,
-      users,
-      ethersProvider,
-    }) {});
-
-    it("transferring one instance of several items using batchTransferFrom results in several transfer events", async function ({
-      contract,
-      mint,
-      users,
-      ethersProvider,
-    }) {});
+      const eventsMatchingFirstSubToken = await findEvents(ERC20SubToken, "Transfer", receipt.blockHash);
+      assert.equal(eventsMatchingFirstSubToken.length, 1);
+      const firstEvent = eventsMatchingFirstSubToken[0];
+      assert.equal(firstEvent.args[0], users[1].address);
+      assert.equal(firstEvent.args[1], users[2].address);
+      assert.ok(firstEvent.args[2], BigNumber.from(5));
+      const eventsMatchingSecondSubToken = await findEvents(secondERC20SubToken, "Transfer", receipt.blockHash);
+      assert.equal(eventsMatchingSecondSubToken.length, 1);
+      const secondEvent = eventsMatchingSecondSubToken[0];
+      assert.equal(secondEvent.args[0], users[1].address);
+      assert.equal(secondEvent.args[1], users[2].address);
+      assert.ok(secondEvent.args[2], BigNumber.from(6));
+      const eventsMatchingThirdSubToken = await findEvents(thirdERC20SubToken, "Transfer", receipt.blockHash);
+      assert.equal(eventsMatchingThirdSubToken.length, 1);
+      const thirdEvent = eventsMatchingThirdSubToken[0];
+      assert.equal(thirdEvent.args[0], users[1].address);
+      assert.equal(thirdEvent.args[1], users[2].address);
+      assert.ok(thirdEvent.args[2], BigNumber.from(7));
+    });
 
     it("transferring 0 instances of several items using batchTransferFrom results in several transfer events", async function ({
-      contract,
-      mint,
+      batchMint,
       users,
-      ethersProvider,
-    }) {});
+      ERC20SubToken,
+      secondERC20SubToken,
+      thirdERC20SubToken,
+    }) {
+      await batchMint(users[1].address, [5, 6, 7]);
+      const receipt = await users[1].contract
+        .batchTransferFrom(users[1].address, users[2].address, [1, 2, 3], [0, 0, 0])
+        .then((tx) => tx.wait());
+
+      const eventsMatchingFirstSubToken = await findEvents(ERC20SubToken, "Transfer", receipt.blockHash);
+      assert.equal(eventsMatchingFirstSubToken.length, 1);
+      const firstEvent = eventsMatchingFirstSubToken[0];
+      assert.equal(firstEvent.args[0], users[1].address);
+      assert.equal(firstEvent.args[1], users[2].address);
+      assert.ok(firstEvent.args[2], BigNumber.from(0));
+      const eventsMatchingSecondSubToken = await findEvents(secondERC20SubToken, "Transfer", receipt.blockHash);
+      assert.equal(eventsMatchingSecondSubToken.length, 1);
+      const secondEvent = eventsMatchingSecondSubToken[0];
+      assert.equal(secondEvent.args[0], users[1].address);
+      assert.equal(secondEvent.args[1], users[2].address);
+      assert.ok(secondEvent.args[2], BigNumber.from(0));
+      const eventsMatchingThirdSubToken = await findEvents(thirdERC20SubToken, "Transfer", receipt.blockHash);
+      assert.equal(eventsMatchingThirdSubToken.length, 1);
+      const thirdEvent = eventsMatchingThirdSubToken[0];
+      assert.equal(thirdEvent.args[0], users[1].address);
+      assert.equal(thirdEvent.args[1], users[2].address);
+      assert.ok(thirdEvent.args[2], BigNumber.from(0));
+    });
 
     it("transferring to a contract with singleTransferFrom that does not accept ERC20 token should fail", async function ({
       contract,
