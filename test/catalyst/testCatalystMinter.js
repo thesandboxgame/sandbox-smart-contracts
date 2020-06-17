@@ -25,6 +25,18 @@ const SpeedGem = 2;
 const MagicGem = 3;
 const LuckGem = 4;
 
+const getGems = async function (_receipt, _catalyst, _catalystRegistry) {
+  const catalystAppliedEvent = await findEvents(_catalystRegistry, "CatalystApplied", _receipt.blockHash);
+  const catalystId = catalystAppliedEvent[0].args[1];
+  const gems = catalystAppliedEvent[0].args[3].length;
+  const mintData = await _catalyst.getMintData(catalystId);
+  const maxGemsConfigured = mintData[0];
+  return {
+    gems,
+    maxGemsConfigured,
+  };
+};
+
 describe("Catalyst:Minting", function () {
   it("creator mint Asset", async function () {
     const {creator} = await setupCatalystUsers();
@@ -50,6 +62,7 @@ describe("Catalyst:Minting", function () {
     const packId = 0;
     const gemIds = [0, 0, 0];
     const quantity = 11;
+
     const receipt = await waitFor(
       creator.CatalystMinter.mint(
         creator.address,
@@ -62,12 +75,8 @@ describe("Catalyst:Minting", function () {
         emptyBytes
       )
     );
-    const catalystAppliedEvent = await findEvents(catalystRegistry, "CatalystApplied", receipt.blockHash);
-    const catalystId = catalystAppliedEvent[0].args[1];
-    const eventGemIds = catalystAppliedEvent[0].args[3];
-    const mintData = await catalyst.getMintData(catalystId);
-    const maxGemsConfigured = mintData[0];
-    assert.isAtMost(eventGemIds.length, maxGemsConfigured, "more gems than allowed!");
+    const {gems, maxGemsConfigured} = await getGems(receipt, catalyst, catalystRegistry);
+    assert.isAtMost(gems, maxGemsConfigured, "more gems than allowed!");
   });
 
   it("creator without gems cannot mint Asset", async function () {
