@@ -1,10 +1,17 @@
 const {ethers, getNamedAccounts, ethereum} = require("@nomiclabs/buidler");
 const erc20GroupTests = require("../erc20Group")(
   async () => {
-    const {others, gemMinter} = await getNamedAccounts();
+    const {others, gemMinter, deployer} = await getNamedAccounts();
     await deployments.fixture();
 
     const contract = await ethers.getContract("Gem", gemMinter);
+
+    // Gem ERC20SubToken contracts: "Power", "Defense", "Speed", "Magic", "Luck"
+    const ERC20SubTokenPower = await ethers.getContract("PowerGem");
+    const ERC20SubTokenDefense = await ethers.getContract("DefenseGem");
+    const ERC20SubTokenSpeed = await ethers.getContract("SpeedGem");
+    const ERC20SubTokenMagic = await ethers.getContract("MagicGem");
+    const ERC20SubTokenLuck = await ethers.getContract("LuckGem");
 
     async function mint(to, amount) {
       const tx = await contract.mint(to, 1, amount);
@@ -16,10 +23,20 @@ const erc20GroupTests = require("../erc20Group")(
       const receipt = await tx.wait();
       return {receipt};
     }
-    return {ethereum, contractAddress: contract.address, users: others, mint, batchMint};
+    return {
+      ethereum,
+      contractAddress: contract.address,
+      users: others,
+      mint,
+      batchMint,
+      deployer,
+      ERC20SubToken: ERC20SubTokenDefense, // index 1
+      secondERC20SubToken: ERC20SubTokenSpeed, // index 2
+      thirdERC20SubToken: ERC20SubTokenMagic, // index 3
+    };
   },
   {
-    // TODO extensions
+    burn: true,
   }
 );
 
