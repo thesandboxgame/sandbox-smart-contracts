@@ -659,81 +659,7 @@ const receiver = {
   deployedLinkReferences: {},
 };
 
-const nonReceiving = {
-  abi: [
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "_tokenContract",
-          type: "address",
-        },
-        {
-          internalType: "bool",
-          name: "_allowTokensReceived",
-          type: "bool",
-        },
-        {
-          internalType: "bool",
-          name: "_returnCorrectBytes",
-          type: "bool",
-        },
-      ],
-      stateMutability: "nonpayable",
-      type: "constructor",
-    },
-    {
-      inputs: [],
-      name: "acceptTokens",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [
-        {
-          internalType: "address",
-          name: "",
-          type: "address",
-        },
-        {
-          internalType: "address",
-          name: "",
-          type: "address",
-        },
-        {
-          internalType: "uint256",
-          name: "_tokenId",
-          type: "uint256",
-        },
-        {
-          internalType: "bytes",
-          name: "",
-          type: "bytes",
-        },
-      ],
-      name: "onERC721Received",
-      outputs: [
-        {
-          internalType: "bytes4",
-          name: "",
-          type: "bytes4",
-        },
-      ],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-    {
-      inputs: [],
-      name: "rejectTokens",
-      outputs: [],
-      stateMutability: "nonpayable",
-      type: "function",
-    },
-  ],
-  bytecode:
-    "0x608060405234801561001057600080fd5b5060405161046f38038061046f8339818101604052606081101561003357600080fd5b5080516020820151604090920151600180546001600160a01b0319166001600160a01b03909316929092179091556000805460ff19169215159290921761ff001916610100911515919091021762010000600160b01b0319163362010000021781556103ca9081906100a590396000f3fe608060405234801561001057600080fd5b50600436106100415760003560e01c8063150b7a021461004657806399a46be31461014e578063f5c89c6f14610158575b600080fd5b6101196004803603608081101561005c57600080fd5b73ffffffffffffffffffffffffffffffffffffffff8235811692602081013590911691604082013591908101906080810160608201356401000000008111156100a457600080fd5b8201836020820111156100b657600080fd5b803590602001918460018302840111640100000000831117156100d857600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600092019190915250929550610160945050505050565b604080517fffffffff000000000000000000000000000000000000000000000000000000009092168252519081900360200190f35b610156610272565b005b6101566102f0565b60015460009073ffffffffffffffffffffffffffffffffffffffff1633146101b95760405162461bcd60e51b81526004018080602001828103825260238152602001806103726023913960400191505060405180910390fd5b60005460ff16610210576040805162461bcd60e51b815260206004820152601360248201527f52656365697665206e6f7420616c6c6f77656400000000000000000000000000604482015290519081900360640190fd5b600054610100900460ff161561024757507f150b7a020000000000000000000000000000000000000000000000000000000061026a565b507f150b7a03000000000000000000000000000000000000000000000000000000005b949350505050565b60005462010000900473ffffffffffffffffffffffffffffffffffffffff1633146102e4576040805162461bcd60e51b815260206004820152601260248201527f6f6e6c79206f776e657220616c6c6f7765640000000000000000000000000000604482015290519081900360640190fd5b6000805460ff19169055565b60005462010000900473ffffffffffffffffffffffffffffffffffffffff163314610362576040805162461bcd60e51b815260206004820152601260248201527f6f6e6c79206f776e657220616c6c6f7765640000000000000000000000000000604482015290519081900360640190fd5b6000805460ff1916600117905556fe6f6e6c792061636365707420746f6b656e436f6e74726163742061732073656e646572a264697066735822122034df058e019e9277fd6a4cde930af75ca3d17a0612cf35c722aaeac519f8ff5964736f6c63430006040033",
-};
+// const nonReceiving = {}; TODO
 
 module.exports = (init, extensions) => {
   const tests = [];
@@ -754,15 +680,17 @@ module.exports = (init, extensions) => {
       const ethersProvider = new Web3Provider(ethereum);
 
       const receiverFactory = new ContractFactory(receiver.abi, receiver.bytecode, ethersProvider.getSigner(deployer));
-      const nonReceivingFactory = new ContractFactory(
-        nonReceiving.abi,
-        nonReceiving.bytecode,
-        ethersProvider.getSigner(deployer)
-      );
 
-      function deployNonReceivingContract(...args) {
-        return nonReceivingFactory.deploy(...args);
-      }
+      // const nonReceivingFactory = new ContractFactory(
+      //   nonReceiving.abi,
+      //   nonReceiving.bytecode,
+      //   ethersProvider.getSigner(deployer)
+      // );
+
+      // function deployNonReceivingContract(...args) {
+      //   return nonReceivingFactory.deploy(...args);
+      // }
+
       function deployERC20TokenReceiver(...args) {
         return receiverFactory.deploy(...args);
       }
@@ -784,7 +712,7 @@ module.exports = (init, extensions) => {
         batchMint,
         users: usersWithContracts,
         ethersProvider,
-        deployNonReceivingContract,
+        // deployNonReceivingContract,
         deployERC20TokenReceiver,
         ERC20SubToken,
         secondERC20SubToken,
@@ -1052,33 +980,15 @@ module.exports = (init, extensions) => {
       assert.ok(thirdEvent.args[2], BigNumber.from(0));
     });
 
-    it("transferring to a contract with singleTransferFrom that does not accept ERC20 token should fail", async function ({
-      contract,
-      mint,
-      users,
-      ethersProvider,
-    }) {});
+    // TODO deploy args
 
-    it("transferring to a contract with batchTransferFrom that does not accept ERC20 token should fail", async function ({
-      contract,
-      mint,
-      users,
-      ethersProvider,
-    }) {});
+    // it("transferring to a contract with singleTransferFrom that does accept ERC20 token should not fail", async function ({}) {});
 
-    it("transferring to a contract with singleTransferFrom that does accept ERC20 token should not fail", async function ({
-      contract,
-      mint,
-      users,
-      ethersProvider,
-    }) {});
+    // it("transferring to a contract with batchTransferFrom that does accept ERC20 token should not fail", async function ({}) {});
 
-    it("transferring to a contract with batchTransferFrom that does accept ERC20 token should not fail", async function ({
-      contract,
-      mint,
-      users,
-      ethersProvider,
-    }) {});
+    // it("transferring to a contract with singleTransferFrom that does not accept ERC20 token should fail", async function ({}) {});
+
+    // it("transferring to a contract with batchTransferFrom that does not accept ERC20 token should fail", async function ({}) {});
   });
 
   describe("burn", function (it) {
