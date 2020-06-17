@@ -59,28 +59,6 @@ describe("Catalyst:Minting", function () {
     assert.isAtMost(gems, maxGemsConfigured, "more gems than allowed!");
   });
 
-  it("number of gems is <= maxGems", async function () {
-    const {creator, catalyst, catalystRegistry} = await setupCatalystUsers();
-    const packId = 0;
-    const gemIds = [0, 0, 0];
-    const quantity = 11;
-
-    const receipt = await waitFor(
-      creator.CatalystMinter.mint(
-        creator.address,
-        packId,
-        dummyHash,
-        EpicCatalyst,
-        gemIds,
-        quantity,
-        creator.address,
-        emptyBytes
-      )
-    );
-    const {gems, maxGemsConfigured} = await getMintEventGems(receipt, catalyst, catalystRegistry);
-    assert.isAtMost(gems, maxGemsConfigured, "more gems than allowed!");
-  });
-
   it("creator without gems cannot mint Asset", async function () {
     const {creatorWithoutGems: creator} = await setupCatalystUsers();
     const packId = 0;
