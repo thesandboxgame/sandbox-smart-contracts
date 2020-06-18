@@ -415,10 +415,7 @@ async function handleRow(row) {
   });
 
   for (const row of sheet) {
-    // console.log("------------------------------------------------------------------");
     await handleRow(row);
-    // console.log("");
-    // console.log("");
   }
 
   write(sheetId, {values: gasValues, range: "M1:O" + (gasValues.length + 1)});
@@ -433,5 +430,19 @@ async function handleRow(row) {
     total_gasUsed: total.total_gasUsed.toNumber(),
 
     commonMint_gasUsed: total.commonMint_gasUsed.toNumber(),
+  });
+
+  handleRow({
+    cell: "Cell X",
+    creator: "Test",
+    CommonCatalyst: {name: "CommonCatalyst", quantity: 0},
+    RareCatalyst: {name: "RareCatalyst", quantity: 1},
+    EpicCatalyst: {name: "EpicCatalyst", quantity: 0},
+    LegendaryCatalyst: {name: "LegendaryCatalyst", quantity: 0},
+    PowerGem: {name: "PowerGem", id: 0, quantity: 1},
+    DefenseGem: {name: "DefenseGem", id: 1, quantity: 0},
+    SpeedGem: {name: "SpeedGem", id: 2, quantity: 0},
+    MagicGem: {name: "MagicGem", id: 3, quantity: 1},
+    LuckGem: {name: "LuckGem", id: 4, quantity: 0},
   });
 })();
