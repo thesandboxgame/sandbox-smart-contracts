@@ -4,11 +4,22 @@ pragma experimental ABIEncoderV2;
 import "./Interfaces/AssetToken.sol";
 import "./contracts_common/src/BaseWithStorage/Admin.sol";
 
-
 contract CatalystRegistry is Admin {
     event Minter(address indexed newMinter);
     event CatalystApplied(uint256 indexed assetId, uint256 indexed catalystId, uint256 seed, uint256[] gemIds, uint64 blockNumber);
     event GemsAdded(uint256 indexed assetId, uint256 seed, uint256 startIndex, uint256[] gemIds, uint64 blockNumber);
+
+    function getCatalyst(uint256 assetId) external view returns (bool exists, uint256 catalystId) {
+        CatalystStored memory catalyst = _catalysts[assetId];
+        if (catalyst.set != 0) {
+            return (true, catalyst.catalystId);
+        }
+        if (assetId & IS_NFT > 0) {
+            catalyst = _catalysts[_getCollectionId(assetId)];
+            return (catalyst.set != 0, catalyst.catalystId);
+        }
+        return (false, 0);
+    }
 
     function setCatalyst(
         uint256 assetId,
@@ -20,15 +31,10 @@ contract CatalystRegistry is Admin {
         require(gemIds.length <= maxGems, "INVALID_GEMS_TOO_MANY");
         uint256 emptySockets = maxGems - gemIds.length;
         uint256 index = gemIds.length;
-        if (emptySockets == 0) {
-            if (assetId & IS_NFT > 0) {
-                // IF NFT We record as set to be zero via magic value 2**128-1
-                emptySockets = 2**128 - 1;
-            }
-            index = 0; // do not bother storing the index as the sockets are full
-        }
-        _sockets[assetId].emptySockets = uint128(emptySockets);
-        _sockets[assetId].index = uint128(index);
+        _catalysts[assetId].emptySockets = uint64(emptySockets);
+        _catalysts[assetId].index = uint64(index);
+        _catalysts[assetId].catalystId = uint64(catalystId);
+        _catalysts[assetId].set = 1;
         uint64 blockNumber = _getBlockNumber();
         emit CatalystApplied(assetId, catalystId, _getSeed(assetId), gemIds, blockNumber);
     }
@@ -42,17 +48,13 @@ contract CatalystRegistry is Admin {
         require(emptySockets >= gemIds.length, "INVALID_GEMS_TOO_MANY");
         emptySockets -= gemIds.length;
         index += gemIds.length;
-        if (emptySockets == 0) {
-            // IF NFT We record as set to be zero via magic value 2**128-1
-            emptySockets = 2**128 - 1;
-        }
-        _sockets[assetId].emptySockets = uint128(emptySockets);
-        _sockets[assetId].index = uint128(index);
+        _catalysts[assetId].emptySockets = uint64(emptySockets);
+        _catalysts[assetId].index = uint64(index);
         uint64 blockNumber = _getBlockNumber();
         emit GemsAdded(assetId, seed, startIndex, gemIds, blockNumber);
     }
 
-    /// @notice Set the Minter that will be the only address able to create Estate
+    /// @dev Set the Minter that will be the only address able to create Estate
     /// @param minter address of the minter
     function setMinter(address minter) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED_ADMIN");
@@ -61,7 +63,7 @@ contract CatalystRegistry is Admin {
         emit Minter(minter);
     }
 
-    /// @notice return the current minter
+    /// @dev return the current minter
     function getMinter() external view returns (address) {
         return _minter;
     }
@@ -89,19 +91,16 @@ contract CatalystRegistry is Admin {
         )
     {
         seed = assetId;
-        emptySockets = _sockets[assetId].emptySockets;
-        index = _sockets[assetId].index;
-        if (assetId & IS_NFT > 0) {
-            seed = _getCollectionId(assetId); // for nft the seed is always the collection assetId to ensure the gems added and gems already present are generated with same seed
-            if (emptySockets != 0) {
-                if (emptySockets == 2**128 - 1) {
-                    emptySockets = 0;
-                }
-            } else {
-                emptySockets = _sockets[seed].emptySockets;
-                index = _sockets[seed].index;
-            }
+        CatalystStored memory catalyst = _catalysts[assetId];
+        if (catalyst.set != 0) {
+            return (catalyst.emptySockets, catalyst.index, seed);
         }
+        if (assetId & IS_NFT > 0) {
+            seed = _getCollectionId(assetId);
+            catalyst = _catalysts[seed];
+            return (catalyst.emptySockets, catalyst.index, seed);
+        }
+        return (0, 0, seed); // Should not reach here
     }
 
     function _getBlockNumber() internal view returns (uint64 blockNumber) {
@@ -120,11 +119,13 @@ contract CatalystRegistry is Admin {
 
     /// DATA ////////
 
-    struct Sockets {
-        uint128 emptySockets;
-        uint128 index;
+    struct CatalystStored {
+        uint64 emptySockets;
+        uint64 index;
+        uint64 catalystId;
+        uint64 set;
     }
     address _minter;
     AssetToken internal immutable _asset;
-    mapping(uint256 => Sockets) _sockets;
+    mapping(uint256 => CatalystStored) _catalysts;
 }

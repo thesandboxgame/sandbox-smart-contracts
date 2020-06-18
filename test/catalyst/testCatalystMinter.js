@@ -114,6 +114,11 @@ describe("Catalyst:Minting", function () {
       {PowerGem: [gem, PowerGem, -3], EpicCatalyst: [catalyst, EpicCatalyst, -1]},
       () => creator.mintAsset({catalyst: EpicCatalyst, gemIds, quantity})
     );
+
+    const catalystData = await catalystRegistry.getCatalyst(tokenId);
+    expect(catalystData[0]).to.equal(true);
+    expect(catalystData[1]).to.equal(EpicCatalyst);
+
     const balance = await asset["balanceOf(address,uint256)"](creator.address, tokenId);
     const rarity = await asset.rarity(tokenId);
     // TODO await assertValidEvents({catalystRegistry, tokenId, gemIds, range: [51, 75]});
@@ -139,6 +144,11 @@ describe("Catalyst:Minting", function () {
       },
       () => creator.mintAsset({catalyst: LegendaryCatalyst, gemIds, quantity})
     );
+
+    const catalystData = await catalystRegistry.getCatalyst(tokenId);
+    expect(catalystData[0]).to.equal(true);
+    expect(catalystData[1]).to.equal(LegendaryCatalyst);
+
     const balance = await asset["balanceOf(address,uint256)"](creator.address, tokenId);
     const rarity = await asset.rarity(tokenId);
     await mine(); // future block need to be mined to get the value
@@ -157,6 +167,10 @@ describe("Catalyst:Minting", function () {
     const receipt = await waitFor(creator.Asset.extractERC721(originalTokenId, creator.address));
     const events = await findEvents(asset, "Transfer", receipt.blockHash);
     const tokenId = events[0].args[2];
+
+    const catalystData = await catalystRegistry.getCatalyst(tokenId);
+    expect(catalystData[0]).to.equal(true);
+    expect(catalystData[1]).to.equal(LegendaryCatalyst);
 
     const balance = await asset["balanceOf(address,uint256)"](creator.address, tokenId);
     const rarity = await asset.rarity(tokenId);
@@ -182,6 +196,14 @@ describe("Catalyst:Minting", function () {
       catalyst: LegendaryCatalyst,
       gemIds,
     });
+
+    const originalCatalystData = await catalystRegistry.getCatalyst(originalTokenId);
+    expect(originalCatalystData[0]).to.equal(true);
+    expect(originalCatalystData[1]).to.equal(RareCatalyst);
+
+    const catalystData = await catalystRegistry.getCatalyst(tokenId);
+    expect(catalystData[0]).to.equal(true);
+    expect(catalystData[1]).to.equal(LegendaryCatalyst);
 
     const originalBalance = await asset["balanceOf(address,uint256)"](creator.address, originalTokenId);
 
@@ -211,6 +233,10 @@ describe("Catalyst:Minting", function () {
       gemIds,
     });
 
+    const catalystData = await catalystRegistry.getCatalyst(tokenId);
+    expect(catalystData[0]).to.equal(true);
+    expect(catalystData[1]).to.equal(RareCatalyst);
+
     const originalBalance = await asset["balanceOf(address,uint256)"](creator.address, originalTokenId);
 
     const balance = await asset["balanceOf(address,uint256)"](creator.address, tokenId);
@@ -234,11 +260,15 @@ describe("Catalyst:Minting", function () {
     });
 
     const {tokenId} = await creator.extractAsset(originalTokenId);
+
+    const catalystData = await catalystRegistry.getCatalyst(tokenId);
+    expect(catalystData[0]).to.equal(true);
+    expect(catalystData[1]).to.equal(EpicCatalyst);
+
     const originalBalance = await asset["balanceOf(address,uint256)"](creator.address, originalTokenId);
 
     const balance = await asset["balanceOf(address,uint256)"](creator.address, tokenId);
     const rarity = await asset.rarity(tokenId);
-    // TODO await assertValidAttributes({catalystRegistry, tokenId, originalTokenId, gemIds: originalGemIds, range: [51, 75]});
 
     assert.equal(originalBalance, quantity - 1);
     assert.equal(balance, 1);
@@ -260,19 +290,25 @@ describe("Catalyst:Minting", function () {
 
     const newGemIds = [4];
     const {tokenId, receipt} = await user.extractAndAddGems(originalTokenId, {newGemIds});
-    const originalBalance = await asset["balanceOf(address,uint256)"](user.address, originalTokenId);
-    const balance = await asset["balanceOf(address,uint256)"](user.address, tokenId);
-    const rarity = await asset.rarity(tokenId);
+
+    const catalystData = await catalystRegistry.getCatalyst(tokenId);
+    expect(catalystData[0]).to.equal(true);
+    expect(catalystData[1]).to.equal(EpicCatalyst);
 
     const gemsAddedEvent = (await findEvents(catalystRegistry, "GemsAdded", receipt.blockHash))[0];
-
     expect(gemsAddedEvent.args.gemIds[0]).to.equal(newGemIds[0]);
     expect(gemsAddedEvent.args.assetId).to.equal(tokenId);
     expect(gemsAddedEvent.args.startIndex).to.equal(2);
     expect(gemsAddedEvent.args.seed).to.equal(seed);
     expect(gemsAddedEvent.args.blockNumber).to.equal(receipt.blockNumber + 1);
+
+    const originalBalance = await asset["balanceOf(address,uint256)"](user.address, originalTokenId);
     expect(originalBalance).to.equal(quantity - 1);
+
+    const balance = await asset["balanceOf(address,uint256)"](user.address, tokenId);
     expect(balance).to.equal(1);
+
+    const rarity = await asset.rarity(tokenId);
     expect(rarity).to.equal(0); // rarity is no more in use
   });
 
