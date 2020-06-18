@@ -991,17 +991,39 @@ module.exports = (init, extensions) => {
     // it("transferring to a contract with batchTransferFrom that does not accept ERC20 token should fail", async function ({}) {});
   });
 
-  describe("burn", function (it) {
-    it("burnFrom", async function ({contract, mint, users}) {});
-    it("batchBurnFrom", async function ({contract, mint, users}) {});
+  describe("approvals", function (it) {
+    it("setApprovalForAllFor should grant the ability for an address to transfer token on behalf of another address", async function ({contract, mint, users}) {});
+    it("setApprovalForAllFor should revoke the ability for an address to transfer token on behalf of another address", async function ({contract, mint, users}) {});
+    it("user should not be able to transfer token on behalf of another address if not approved", async function ({contract, mint, users}) {});
+    it("user should be able to transfer token on behalf of another address if approved", async function ({contract, mint, users}) {});
+    it("setApprovalForAll should grant the ability for an address to transfer token on your behalf", async function ({contract, mint, users}) {});
+    it("setApprovalForAll should revoke the ability for an address to transfer token on your behalf", async function ({contract, mint, users}) {});
+    it("user should not be able to transfer token on your behalf if not approved", async function ({contract, mint, users}) {});
+    it("user should be able to transfer token on your behalf if approved", async function ({contract, mint, users}) {});
+    it("isApprovedForAll returns true when an operator has the ability to transfer on behalf of another address or is a superOperator", async function ({contract, mint, users}) {});
+    it("isApprovedForAll returns false when an operator does not have the ability to transfer on behalf of another address and is not a superOperator", async function ({contract, mint, users}) {});
+    it("isAuthorizedToTransfer returns true when the sender is a whitelisted metatransactioncontract operator, superOperator or has been authorized to transfer on behalf of another address", async function ({contract, mint, users}) {});
+    it("isAuthorizedToTransfer returns false when the sender is not a whitelisted metatransactioncontract operator, superOperator and has not been authorized to transfer on behalf of another address", async function ({contract, mint, users}) {});
+    it("isAuthorizedToApprove returns true when the sender is a whitelisted metatransactioncontract operator or superOperator", async function ({contract, mint, users}) {});
+    it("isAuthorizedToApprove returns false when the sender is not a whitelisted metatransactioncontract operator or a superOperator", async function ({contract, mint, users}) {});
   });
 
-  describe("approvals", function (it) {
-    it("setApprovalForAllFor", async function ({contract, mint, users}) {});
-    it("setApprovalForAll", async function ({contract, mint, users}) {});
-    it("isApprovedForAll", async function ({contract, mint, users}) {});
-    it("isAuthorizedToTransfer", async function ({contract, mint, users}) {});
-    it("isAuthorizedToApprove", async function ({contract, mint, users}) {});
+  // TODO add burn extension
+
+  describe("burn", function (it) {
+    it("burnFrom is invalid from zeroAddress", async function ({contract, mint, users}) {});
+    it("burnFrom emits a Transfer event", async function ({contract, mint, users}) {});
+    it("burnFrom is reverted if the sender is not authorized", async function ({contract, mint, users}) {});
+    it("burnFrom is successful when sent by the owner of the tokens with balance being correctly updated", async function ({contract, mint, users}) {});
+    it("burnFrom is successful when sent by an operator that has been granted the ability to transfer on behalf of another address", async function ({contract, mint, users}) {});
+    it("burnFrom is successful when sent by a superOperator ", async function ({contract, mint, users}) {});
+    it("batchBurnFrom is invalid from zeroAddress", async function ({contract, mint, users}) {});
+    it("batchBurnFrom emits multiple Transfer events", async function ({contract, mint, users}) {});
+    it("batchBurnFrom is reverted if the sender is not authorized", async function ({contract, mint, users}) {});
+    it("batchBurnFrom is successful when sent by the owner of the tokens with balances being correctly updated", async function ({contract, mint, users}) {});
+    it("batchBurnFrom is successful when sent by an operator that has been granted the ability to transfer on behalf of another address", async function ({contract, mint, users}) {});
+    it("batchBurnFrom is successful when sent by a superOperator ", async function ({contract, mint, users}) {});
+
   });
 
   describe("interface", function (it) {});
