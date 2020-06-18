@@ -1,9 +1,5 @@
-const {BigNumber} = require("@ethersproject/bignumber");
 const {guard} = require("../lib");
-
-function sandWei(amount) {
-  return BigNumber.from(amount).mul("1000000000000000000").toString();
-}
+const catalysts = require("../data/catalysts");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {execute, deploy} = deployments;
@@ -49,43 +45,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     }
     return execute("Catalyst", {from: deployer}, "addCatalysts", erc20s, data);
   }
-  await addCatalysts([
-    {
-      name: "Common",
-      symbol: "COMMON",
-      sandFee: sandWei(1),
-      rarity: 0,
-      maxGems: 1,
-      quantityRange: [200, 1000],
-      attributeRange: [1, 25],
-    },
-    {
-      name: "Rare",
-      symbol: "RARE",
-      sandFee: sandWei(4),
-      rarity: 1,
-      maxGems: 2,
-      quantityRange: [50, 200],
-      attributeRange: [26, 50],
-    },
-    {
-      name: "Epic",
-      symbol: "EPIC",
-      sandFee: sandWei(10),
-      rarity: 2,
-      maxGems: 3,
-      quantityRange: [10, 50],
-      attributeRange: [51, 75],
-    },
-    {
-      name: "Legendary",
-      symbol: "LEGENDARY",
-      sandFee: sandWei(200),
-      rarity: 3,
-      maxGems: 4,
-      quantityRange: [1, 10],
-      attributeRange: [76, 100],
-    },
-  ]);
+  await addCatalysts(catalysts);
 };
 module.exports.skip = guard(["1", "4", "314159"]); // TODO
