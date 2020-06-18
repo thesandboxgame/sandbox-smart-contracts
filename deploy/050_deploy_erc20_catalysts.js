@@ -34,7 +34,8 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       });
       erc20s.push(result.address);
       data.push({
-        sandFee: catalyst.sandFee,
+        sandMintingFee: catalyst.sandMintingFee,
+        sandUpdateFee: catalyst.sandUpdateFee,
         minQuantity: catalyst.quantityRange[0],
         maxQuantity: catalyst.quantityRange[1],
         minValue: catalyst.attributeRange[0],

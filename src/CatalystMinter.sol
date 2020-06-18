@@ -10,7 +10,6 @@ import "./Catalyst/GemToken.sol";
 import "./Catalyst/CatalystToken.sol";
 import "./CatalystRegistry.sol";
 
-
 /// @notice Gateway to mint Asset with Catalyst, Gems and Sand
 contract CatalystMinter is MetaTransactionReceiver {
     /// @dev emitted when fee collector (that receive the sand fee) get changed
@@ -20,6 +19,13 @@ contract CatalystMinter is MetaTransactionReceiver {
     function setFeeCollector(address newCollector) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED_ADMIN");
         _setFeeCollector(newCollector);
+    }
+
+    event GemAdditionFee(uint256 newFee);
+
+    function setGemAdditionFee(uint256 newFee) external {
+        require(msg.sender == _admin, "NOT_AUTHORIZED_ADMIN");
+        _setGemAdditionFee(newFee);
     }
 
     /// @notice mint one Asset token.
@@ -154,11 +160,11 @@ contract CatalystMinter is MetaTransactionReceiver {
         uint256[] memory gemIds,
         uint256 quantity
     ) internal returns (uint16) {
-        (uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = _getMintData(catalystId);
+        (uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandMintingFee, ) = _getMintData(catalystId);
         require(minQuantity <= quantity && quantity <= maxQuantity, "INVALID_QUANTITY");
         require(gemIds.length <= maxGems, "INVALID_GEMS_TOO_MANY");
         _burnSingleGems(from, gemIds);
-        _chargeSand(from, quantity.mul(sandFee));
+        _chargeSand(from, quantity.mul(sandMintingFee));
         return maxGems;
     }
 
@@ -203,13 +209,15 @@ contract CatalystMinter is MetaTransactionReceiver {
             uint16 maxGems,
             uint16 minQuantity,
             uint16 maxQuantity,
-            uint256 sandFee
+            uint256 sandMintingFee,
+            uint256 sandUpdateFee
         )
     {
         maxGems = uint16(data >> 240);
         minQuantity = uint16((data >> 224) % 2**16);
         maxQuantity = uint16((data >> 208) % 2**16);
-        sandFee = uint256(data % 2**192);
+        sandMintingFee = uint256((data >> 120) % 2**88);
+        sandUpdateFee = uint256(data % 2**88);
     }
 
     function _getMintData(uint256 catalystId)
@@ -219,7 +227,8 @@ contract CatalystMinter is MetaTransactionReceiver {
             uint16 maxGems,
             uint16 minQuantity,
             uint16 maxQuantity,
-            uint256 sandFee
+            uint256 sandMintingFee,
+            uint256 sandUpdateFee
         )
     {
         if (catalystId == 0) {
@@ -258,11 +267,11 @@ contract CatalystMinter is MetaTransactionReceiver {
             require(catalystsQuantities[assets[i].catalystId] > 0, "INVALID_CATALYST_NOT_ENOUGH");
             catalystsQuantities[assets[i].catalystId]--;
             gemsQuantities = _checkGemsQuantities(gemsQuantities, assets[i].gemIds);
-            (uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee) = _getMintData(assets[i].catalystId);
+            (uint16 maxGems, uint16 minQuantity, uint16 maxQuantity, uint256 sandMintingFee, ) = _getMintData(assets[i].catalystId);
             maxGemsList[i] = maxGems;
             require(minQuantity <= assets[i].quantity && assets[i].quantity <= maxQuantity, "INVALID_QUANTITY");
             supplies[i] = assets[i].quantity;
-            totalSandFee += sandFee.mul(assets[i].quantity);
+            totalSandFee += sandMintingFee.mul(assets[i].quantity);
             require(assets[i].gemIds.length <= maxGems, "INVALID_GEMS_TOO_MANY");
         }
     }
@@ -317,9 +326,10 @@ contract CatalystMinter is MetaTransactionReceiver {
     ) internal {
         require(assetId & IS_NFT > 0, "INVALID_NOT_NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will reyrn false
         _burnCatalyst(from, catalystId);
-        (uint16 maxGems, , , ) = _getMintData(catalystId);
+        (uint16 maxGems, , , , uint256 sandUpdateFee) = _getMintData(catalystId);
         require(gemIds.length <= maxGems, "INVALID_GEMS_TOO_MANY");
         _burnGems(from, gemIds);
+        _chargeSand(from, sandUpdateFee);
 
         _catalystRegistry.setCatalyst(assetId, catalystId, maxGems, gemIds);
 
@@ -334,6 +344,7 @@ contract CatalystMinter is MetaTransactionReceiver {
     ) internal {
         require(assetId & IS_NFT > 0, "INVALID_NOT_NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will reyrn false
         _catalystRegistry.addGems(assetId, gemIds);
+        _chargeSand(from, gemIds.length.mul(_gemAdditionFee));
         _transfer(from, to, assetId);
     }
 
@@ -369,6 +380,11 @@ contract CatalystMinter is MetaTransactionReceiver {
         emit FeeCollector(newCollector);
     }
 
+    function _setGemAdditionFee(uint256 newFee) internal {
+        _gemAdditionFee = newFee;
+        emit GemAdditionFee(newFee);
+    }
+
     // /////////////////// UTILITIES /////////////////////
     using SafeMathWithRequire for uint256;
 
@@ -387,6 +403,8 @@ contract CatalystMinter is MetaTransactionReceiver {
     uint256 immutable _epic_mint_data;
     uint256 immutable _legendary_mint_data;
 
+    uint256 _gemAdditionFee;
+
     // /////////////////// CONSTRUCTOR ////////////////////
     constructor(
         CatalystRegistry catalystRegistry,
@@ -396,6 +414,7 @@ contract CatalystMinter is MetaTransactionReceiver {
         address metaTx,
         address admin,
         address feeCollector,
+        uint256 gemAdditionFee,
         CatalystToken catalysts,
         uint256[4] memory bakedInMintdata
     ) public {
@@ -405,6 +424,7 @@ contract CatalystMinter is MetaTransactionReceiver {
         _gems = gems;
         _catalysts = catalysts;
         _admin = admin;
+        _setGemAdditionFee(gemAdditionFee);
         _setFeeCollector(feeCollector);
         _setMetaTransactionProcessor(metaTx, true);
         _common_mint_data = bakedInMintdata[0];

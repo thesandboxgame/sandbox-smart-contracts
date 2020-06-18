@@ -1,6 +1,8 @@
 const {guard} = require("../lib");
-const {read} = require("fs-extra");
-const {BigNumber} = require("ethers");
+const {BigNumber} = require("@ethersproject/bignumber");
+function sandWei(amount) {
+  return BigNumber.from(amount).mul("1000000000000000000").toString();
+}
 
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deploy, call, sendTxAndWait, log, read} = deployments;
@@ -18,8 +20,9 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     const maxGems = BigNumber.from(mintData.maxGems).mul(BigNumber.from(2).pow(240));
     const minQuantity = BigNumber.from(mintData.minQuantity).mul(BigNumber.from(2).pow(224));
     const maxQuantity = BigNumber.from(mintData.maxQuantity).mul(BigNumber.from(2).pow(208));
-    const sandFee = BigNumber.from(mintData.sandFee);
-    const bakedData = sandFee.add(maxGems).add(minQuantity).add(maxQuantity);
+    const sandMintingFee = BigNumber.from(mintData.sandMintingFee).mul(BigNumber.from(2).pow(120));
+    const sandUpdateFee = BigNumber.from(mintData.sandUpdateFee);
+    const bakedData = sandUpdateFee.add(sandMintingFee).add(maxGems).add(minQuantity).add(maxQuantity);
     log({bakedData: bakedData.toHexString()});
     bakedMintData.push(bakedData);
   }
@@ -36,6 +39,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       sand.address,
       catalystMinterAdmin,
       "0x0000000000000000000000000000000000000000", // TODO // mintingFeeCollector,
+      sandWei(1), // TODO configure ?
       catalyst.address,
       bakedMintData,
     ],

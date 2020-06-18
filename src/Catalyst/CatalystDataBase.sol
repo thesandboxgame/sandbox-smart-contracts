@@ -2,32 +2,35 @@ pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
 contract CatalystDataBase {
-    event CatalystConfiguration(uint256 indexed id, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee);
+    event CatalystConfiguration(uint256 indexed id, uint16 minQuantity, uint16 maxQuantity, uint256 sandMintingFee, uint256 sandUpdateFee);
 
     function _setData(uint256 id, CatalystData memory data) internal {
         _data[id] = data;
-        _emitConfiguration(id, data.minQuantity, data.maxQuantity, data.sandFee);
+        _emitConfiguration(id, data.minQuantity, data.maxQuantity, data.sandMintingFee, data.sandUpdateFee);
     }
 
     function _setConfiguration(
         uint256 id,
         uint16 minQuantity,
         uint16 maxQuantity,
-        uint256 sandFee
+        uint256 sandMintingFee,
+        uint256 sandUpdateFee
     ) internal {
         _data[id].minQuantity = minQuantity;
         _data[id].maxQuantity = maxQuantity;
-        _data[id].sandFee = uint168(sandFee);
-        _emitConfiguration(id, minQuantity, maxQuantity, sandFee);
+        _data[id].sandMintingFee = uint88(sandMintingFee);
+        _data[id].sandUpdateFee = uint88(sandUpdateFee);
+        _emitConfiguration(id, minQuantity, maxQuantity, sandMintingFee, sandUpdateFee);
     }
 
     function _emitConfiguration(
         uint256 id,
         uint16 minQuantity,
         uint16 maxQuantity,
-        uint256 sandFee
+        uint256 sandMintingFee,
+        uint256 sandUpdateFee
     ) internal {
-        emit CatalystConfiguration(id, minQuantity, maxQuantity, sandFee);
+        emit CatalystConfiguration(id, minQuantity, maxQuantity, sandMintingFee, sandUpdateFee);
     }
 
     function getValue(
@@ -78,17 +81,20 @@ contract CatalystDataBase {
             uint16 maxGems,
             uint16 minQuantity,
             uint16 maxQuantity,
-            uint256 sandFee
+            uint256 sandMintingFee,
+            uint256 sandUpdateFee
         )
     {
         maxGems = _data[catalystId].maxGems;
         minQuantity = _data[catalystId].minQuantity;
         maxQuantity = _data[catalystId].maxQuantity;
-        sandFee = _data[catalystId].sandFee;
+        sandMintingFee = _data[catalystId].sandMintingFee;
+        sandUpdateFee = _data[catalystId].sandUpdateFee;
     }
 
     struct CatalystData {
-        uint168 sandFee;
+        uint88 sandMintingFee;
+        uint88 sandUpdateFee;
         uint16 minQuantity;
         uint16 maxQuantity;
         uint16 minValue;
