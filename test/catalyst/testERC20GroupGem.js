@@ -13,6 +13,8 @@ const erc20GroupTests = require("../erc20Group")(
     const ERC20SubTokenMagic = await ethers.getContract("MagicGem");
     const ERC20SubTokenLuck = await ethers.getContract("LuckGem");
 
+    const sandContract = await ethers.getContract("Sand");
+
     async function mint(to, amount) {
       const tx = await contract.mint(to, 1, amount);
       const receipt = await tx.wait();
@@ -26,10 +28,12 @@ const erc20GroupTests = require("../erc20Group")(
     return {
       ethereum,
       contractAddress: contract.address,
+      deployer,
+      minter: gemMinter,
       users: others,
+      admin: sandContract.address,
       mint,
       batchMint,
-      deployer,
       ERC20SubToken: ERC20SubTokenDefense, // index 1
       secondERC20SubToken: ERC20SubTokenSpeed, // index 2
       thirdERC20SubToken: ERC20SubTokenMagic, // index 3

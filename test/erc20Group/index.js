@@ -673,6 +673,8 @@ module.exports = (init, extensions) => {
         mint,
         batchMint,
         deployer,
+        minter,
+        admin,
         ERC20SubToken,
         secondERC20SubToken,
         thirdERC20SubToken,
@@ -697,6 +699,10 @@ module.exports = (init, extensions) => {
 
       const contract = new Contract(contractAddress, erc20GroupABI, ethersProvider);
 
+      const contractAsMinter = contract.connect(ethersProvider.getSigner(minter));
+
+      // const contractAsAdmin = contract.connect(ethersProvider.getSigner(admin));
+
       const usersWithContracts = [];
       for (const user of users) {
         usersWithContracts.push({
@@ -710,9 +716,10 @@ module.exports = (init, extensions) => {
         contract,
         mint,
         batchMint,
+        contractAsMinter,
+        admin,
         users: usersWithContracts,
         ethersProvider,
-        // deployNonReceivingContract,
         deployERC20TokenReceiver,
         ERC20SubToken,
         secondERC20SubToken,
@@ -736,10 +743,10 @@ module.exports = (init, extensions) => {
   describe("mint", function (it) {
     it("minting one token results in correct balance update", async function ({contract, mint, users}) {
       const initialBalance = await contract.balanceOf(users[1].address, 1);
-      assert.ok(initialBalance, BigNumber.from(0));
+      assert.ok(initialBalance.eq(BigNumber.from(0)));
       await mint(users[1].address, 1);
       const newBalance = await contract.balanceOf(users[1].address, 1);
-      assert.ok(newBalance, BigNumber.from(1));
+      assert.ok(newBalance.eq(BigNumber.from(1)));
     });
 
     it("minting one token results in a Transfer event", async function ({mint, users, ERC20SubToken}) {
@@ -748,15 +755,15 @@ module.exports = (init, extensions) => {
       const transferEvent = eventsMatching[0];
       assert.equal(transferEvent.args[0], zeroAddress);
       assert.equal(transferEvent.args[1], users[1].address);
-      assert.ok(transferEvent.args[2], BigNumber.from(1));
+      assert.ok(transferEvent.args[2].eq(BigNumber.from(1)));
     });
 
     it("minting several tokens results in correct balance update", async function ({contract, mint, users}) {
       const initialBalance = await contract.balanceOf(users[1].address, 1);
-      assert.ok(initialBalance, BigNumber.from(0));
+      assert.ok(initialBalance.eq(BigNumber.from(0)));
       await mint(users[1].address, 5);
       const newBalance = await contract.balanceOf(users[1].address, 1);
-      assert.ok(newBalance, BigNumber.from(5));
+      assert.ok(newBalance.eq(BigNumber.from(5)));
     });
 
     it("minting several tokens results in a Transfer event", async function ({mint, users, ERC20SubToken}) {
@@ -766,7 +773,7 @@ module.exports = (init, extensions) => {
       const transferEvent = eventsMatching[0];
       assert.equal(transferEvent.args[0], zeroAddress);
       assert.equal(transferEvent.args[1], users[1].address);
-      assert.ok(transferEvent.args[2], BigNumber.from(5));
+      assert.ok(transferEvent.args[2].eq(BigNumber.from(5)));
     });
   });
 
@@ -788,9 +795,9 @@ module.exports = (init, extensions) => {
       newBalances.push(await contract.balanceOf(users[1].address, 1));
       newBalances.push(await contract.balanceOf(users[1].address, 2));
       newBalances.push(await contract.balanceOf(users[1].address, 3));
-      assert.ok(newBalances[0], BigNumber.from(5));
-      assert.ok(newBalances[1], BigNumber.from(6));
-      assert.ok(newBalances[2], BigNumber.from(7));
+      assert.ok(newBalances[0].eq(BigNumber.from(5)));
+      assert.ok(newBalances[1].eq(BigNumber.from(6)));
+      assert.ok(newBalances[2].eq(BigNumber.from(7)));
     });
 
     it("batchMint results in a Transfer event for each sub-token", async function ({
@@ -806,19 +813,19 @@ module.exports = (init, extensions) => {
       const firstEvent = eventsMatchingFirstSubToken[0];
       assert.equal(firstEvent.args[0], zeroAddress);
       assert.equal(firstEvent.args[1], users[1].address);
-      assert.ok(firstEvent.args[2], BigNumber.from(5));
+      assert.ok(firstEvent.args[2].eq(BigNumber.from(5)));
       const eventsMatchingSecondSubToken = await findEvents(secondERC20SubToken, "Transfer", receipt.blockHash);
       assert.equal(eventsMatchingSecondSubToken.length, 1);
       const secondEvent = eventsMatchingSecondSubToken[0];
       assert.equal(secondEvent.args[0], zeroAddress);
       assert.equal(secondEvent.args[1], users[1].address);
-      assert.ok(secondEvent.args[2], BigNumber.from(6));
+      assert.ok(secondEvent.args[2].eq(BigNumber.from(6)));
       const eventsMatchingThirdSubToken = await findEvents(thirdERC20SubToken, "Transfer", receipt.blockHash);
       assert.equal(eventsMatchingThirdSubToken.length, 1);
       const thirdEvent = eventsMatchingThirdSubToken[0];
       assert.equal(thirdEvent.args[0], zeroAddress);
       assert.equal(thirdEvent.args[1], users[1].address);
-      assert.ok(thirdEvent.args[2], BigNumber.from(7));
+      assert.ok(thirdEvent.args[2].eq(BigNumber.from(7)));
     });
 
     it("balanceOfBatch returns the correct balances", async function ({contract, batchMint, users}) {
@@ -826,17 +833,17 @@ module.exports = (init, extensions) => {
       initialBalances.push(await contract.balanceOf(users[1].address, 1));
       initialBalances.push(await contract.balanceOf(users[1].address, 2));
       initialBalances.push(await contract.balanceOf(users[1].address, 3));
-      assert.equal(initialBalances[0], 0);
-      assert.equal(initialBalances[1], 0);
-      assert.equal(initialBalances[2], 0);
+      assert.ok(initialBalances[0].eq(BigNumber.from(0)));
+      assert.ok(initialBalances[1].eq(BigNumber.from(0)));
+      assert.ok(initialBalances[2].eq(BigNumber.from(0)));
       await batchMint(users[1].address, [5, 6, 7]);
       const newBalances = await contract.balanceOfBatch(
         [users[1].address, users[1].address, users[1].address],
         [1, 2, 3]
       );
-      assert.ok(newBalances[0], BigNumber.from(5));
-      assert.ok(newBalances[1], BigNumber.from(6));
-      assert.ok(newBalances[2], BigNumber.from(7));
+      assert.ok(newBalances[0].eq(BigNumber.from(5)));
+      assert.ok(newBalances[1].eq(BigNumber.from(6)));
+      assert.ok(newBalances[2].eq(BigNumber.from(7)));
     });
   });
 
@@ -849,7 +856,7 @@ module.exports = (init, extensions) => {
     }) {
       await mint(users[0].address, 100);
       const initialBalanceUser0 = await contract.balanceOf(users[0].address, 1);
-      assert.ok(initialBalanceUser0, BigNumber.from(100));
+      assert.ok(initialBalanceUser0.eq(BigNumber.from(100)));
       const initialBalanceUser1 = await contract.balanceOf(users[1].address, 1);
       assert.equal(initialBalanceUser1, 0);
       const receipt = await users[0].contract
@@ -857,13 +864,13 @@ module.exports = (init, extensions) => {
         .then((tx) => tx.wait());
       const newBalanceUser0 = await contract.balanceOf(users[0].address, 1);
       const newBalanceUser1 = await contract.balanceOf(users[1].address, 1);
-      assert.ok(newBalanceUser0, BigNumber.from(99));
-      assert.ok(newBalanceUser1, BigNumber.from(1));
+      assert.ok(newBalanceUser0.eq(BigNumber.from(99)));
+      assert.ok(newBalanceUser1.eq(BigNumber.from(1)));
       const eventsMatching = await findEvents(ERC20SubToken, "Transfer", receipt.blockHash);
       const transferEvent = eventsMatching[0];
       assert.equal(transferEvent.args[0], users[0].address);
       assert.equal(transferEvent.args[1], users[1].address);
-      assert.ok(transferEvent.args[2], BigNumber.from(1));
+      assert.ok(transferEvent.args[2].eq(BigNumber.from(1)));
     });
 
     it("transferring several instances of an item using singleTransferFrom results in a transfer event", async function ({
@@ -874,7 +881,7 @@ module.exports = (init, extensions) => {
     }) {
       await mint(users[0].address, 8);
       const initialBalanceUser0 = await contract.balanceOf(users[0].address, 1);
-      assert.ok(initialBalanceUser0, BigNumber.from(8));
+      assert.ok(initialBalanceUser0.eq(BigNumber.from(8)));
       const initialBalanceUser1 = await contract.balanceOf(users[1].address, 1);
       assert.equal(initialBalanceUser1, 0);
       const receipt = await users[0].contract
@@ -882,13 +889,13 @@ module.exports = (init, extensions) => {
         .then((tx) => tx.wait());
       const newBalanceUser0 = await contract.balanceOf(users[0].address, 1);
       const newBalanceUser1 = await contract.balanceOf(users[1].address, 1);
-      assert.ok(newBalanceUser0, BigNumber.from(0));
-      assert.ok(newBalanceUser1, BigNumber.from(8));
+      assert.ok(newBalanceUser0.eq(BigNumber.from(0)));
+      assert.ok(newBalanceUser1.eq(BigNumber.from(8)));
       const eventsMatching = await findEvents(ERC20SubToken, "Transfer", receipt.blockHash);
       const transferEvent = eventsMatching[0];
       assert.equal(transferEvent.args[0], users[0].address);
       assert.equal(transferEvent.args[1], users[1].address);
-      assert.ok(transferEvent.args[2], BigNumber.from(8));
+      assert.ok(transferEvent.args[2].eq(BigNumber.from(8)));
     });
 
     it("transferring 0 instances of an item using singleTransferFrom results in a transfer event", async function ({
@@ -899,7 +906,7 @@ module.exports = (init, extensions) => {
     }) {
       await mint(users[0].address, 8);
       const initialBalanceUser0 = await contract.balanceOf(users[0].address, 1);
-      assert.ok(initialBalanceUser0, BigNumber.from(8));
+      assert.ok(initialBalanceUser0.eq(BigNumber.from(8)));
       const initialBalanceUser1 = await contract.balanceOf(users[1].address, 1);
       assert.equal(initialBalanceUser1, 0);
       const receipt = await users[0].contract
@@ -907,13 +914,23 @@ module.exports = (init, extensions) => {
         .then((tx) => tx.wait());
       const newBalanceUser0 = await contract.balanceOf(users[0].address, 1);
       const newBalanceUser1 = await contract.balanceOf(users[1].address, 1);
-      assert.ok(newBalanceUser0, BigNumber.from(0));
-      assert.ok(newBalanceUser1, BigNumber.from(8));
+      assert.ok(newBalanceUser0.eq(BigNumber.from(8)));
+      assert.ok(newBalanceUser1.eq(BigNumber.from(0)));
       const eventsMatching = await findEvents(ERC20SubToken, "Transfer", receipt.blockHash);
       const transferEvent = eventsMatching[0];
       assert.equal(transferEvent.args[0], users[0].address);
       assert.equal(transferEvent.args[1], users[1].address);
-      assert.ok(transferEvent.args[2], BigNumber.from(0));
+      assert.ok(transferEvent.args[2].eq(BigNumber.from(0)));
+    });
+
+    it("cannot transfer more than the supply using singleTransferFrom", async function ({contract, users}) {
+      const initialBalanceUser0 = await contract.balanceOf(users[3].address, 1);
+      assert.ok(initialBalanceUser0.eq(BigNumber.from(0)));
+
+      await expectRevert(
+        users[3].contract.singleTransferFrom(users[3].address, users[1].address, 1, 5),
+        "can't substract more than there is"
+      );
     });
 
     it("transferring one instance of several items using batchTransferFrom results in several transfer events", async function ({
@@ -933,19 +950,19 @@ module.exports = (init, extensions) => {
       const firstEvent = eventsMatchingFirstSubToken[0];
       assert.equal(firstEvent.args[0], users[1].address);
       assert.equal(firstEvent.args[1], users[2].address);
-      assert.ok(firstEvent.args[2], BigNumber.from(5));
+      assert.ok(firstEvent.args[2].eq(BigNumber.from(5)));
       const eventsMatchingSecondSubToken = await findEvents(secondERC20SubToken, "Transfer", receipt.blockHash);
       assert.equal(eventsMatchingSecondSubToken.length, 1);
       const secondEvent = eventsMatchingSecondSubToken[0];
       assert.equal(secondEvent.args[0], users[1].address);
       assert.equal(secondEvent.args[1], users[2].address);
-      assert.ok(secondEvent.args[2], BigNumber.from(6));
+      assert.ok(secondEvent.args[2].eq(BigNumber.from(6)));
       const eventsMatchingThirdSubToken = await findEvents(thirdERC20SubToken, "Transfer", receipt.blockHash);
       assert.equal(eventsMatchingThirdSubToken.length, 1);
       const thirdEvent = eventsMatchingThirdSubToken[0];
       assert.equal(thirdEvent.args[0], users[1].address);
       assert.equal(thirdEvent.args[1], users[2].address);
-      assert.ok(thirdEvent.args[2], BigNumber.from(7));
+      assert.ok(thirdEvent.args[2].eq(BigNumber.from(7)));
     });
 
     it("transferring 0 instances of several items using batchTransferFrom results in several transfer events", async function ({
@@ -965,47 +982,171 @@ module.exports = (init, extensions) => {
       const firstEvent = eventsMatchingFirstSubToken[0];
       assert.equal(firstEvent.args[0], users[1].address);
       assert.equal(firstEvent.args[1], users[2].address);
-      assert.ok(firstEvent.args[2], BigNumber.from(0));
+      assert.ok(firstEvent.args[2].eq(BigNumber.from(0)));
       const eventsMatchingSecondSubToken = await findEvents(secondERC20SubToken, "Transfer", receipt.blockHash);
       assert.equal(eventsMatchingSecondSubToken.length, 1);
       const secondEvent = eventsMatchingSecondSubToken[0];
       assert.equal(secondEvent.args[0], users[1].address);
       assert.equal(secondEvent.args[1], users[2].address);
-      assert.ok(secondEvent.args[2], BigNumber.from(0));
+      assert.ok(secondEvent.args[2].eq(BigNumber.from(0)));
       const eventsMatchingThirdSubToken = await findEvents(thirdERC20SubToken, "Transfer", receipt.blockHash);
       assert.equal(eventsMatchingThirdSubToken.length, 1);
       const thirdEvent = eventsMatchingThirdSubToken[0];
       assert.equal(thirdEvent.args[0], users[1].address);
       assert.equal(thirdEvent.args[1], users[2].address);
-      assert.ok(thirdEvent.args[2], BigNumber.from(0));
+      assert.ok(thirdEvent.args[2].eq(BigNumber.from(0)));
     });
 
-    // TODO deploy args
+    it("cannot transfer more than the supply using batchTransferFrom", async function ({users}) {
+      await expectRevert(
+        users[3].contract.batchTransferFrom(users[3].address, users[1].address, [1, 2, 3], [5, 6, 7]),
+        "can't substract more than there is"
+      );
+    });
 
-    // it("transferring to a contract with singleTransferFrom that does accept ERC20 token should not fail", async function ({}) {});
-
-    // it("transferring to a contract with batchTransferFrom that does accept ERC20 token should not fail", async function ({}) {});
-
-    // it("transferring to a contract with singleTransferFrom that does not accept ERC20 token should fail", async function ({}) {});
-
-    // it("transferring to a contract with batchTransferFrom that does not accept ERC20 token should fail", async function ({}) {});
-  });
+    it("cannot transfer more than the supply for one token using batchTransferFrom", async function ({users}) {
+      await expectRevert(
+        users[3].contract.batchTransferFrom(users[3].address, users[1].address, [1, 2, 3], [0, 5, 0]),
+        "can't substract more than there is"
+      );
+    });
+ });
 
   describe("approvals", function (it) {
-    it("setApprovalForAllFor should grant the ability for an address to transfer token on behalf of another address", async function ({contract, mint, users}) {});
-    it("setApprovalForAllFor should revoke the ability for an address to transfer token on behalf of another address", async function ({contract, mint, users}) {});
-    it("user should not be able to transfer token on behalf of another address if not approved", async function ({contract, mint, users}) {});
-    it("user should be able to transfer token on behalf of another address if approved", async function ({contract, mint, users}) {});
-    it("setApprovalForAll should grant the ability for an address to transfer token on your behalf", async function ({contract, mint, users}) {});
-    it("setApprovalForAll should revoke the ability for an address to transfer token on your behalf", async function ({contract, mint, users}) {});
-    it("user should not be able to transfer token on your behalf if not approved", async function ({contract, mint, users}) {});
-    it("user should be able to transfer token on your behalf if approved", async function ({contract, mint, users}) {});
-    it("isApprovedForAll returns true when an operator has the ability to transfer on behalf of another address or is a superOperator", async function ({contract, mint, users}) {});
-    it("isApprovedForAll returns false when an operator does not have the ability to transfer on behalf of another address and is not a superOperator", async function ({contract, mint, users}) {});
-    it("isAuthorizedToTransfer returns true when the sender is a whitelisted metatransactioncontract operator, superOperator or has been authorized to transfer on behalf of another address", async function ({contract, mint, users}) {});
-    it("isAuthorizedToTransfer returns false when the sender is not a whitelisted metatransactioncontract operator, superOperator and has not been authorized to transfer on behalf of another address", async function ({contract, mint, users}) {});
-    it("isAuthorizedToApprove returns true when the sender is a whitelisted metatransactioncontract operator or superOperator", async function ({contract, mint, users}) {});
-    it("isAuthorizedToApprove returns false when the sender is not a whitelisted metatransactioncontract operator or a superOperator", async function ({contract, mint, users}) {});
+    it("setApprovalForAllFor should grant the ability for an address to transfer token on behalf of another address", async function ({
+      users,
+      contract,
+      mint,
+    }) {
+      const result = await contract.isApprovedForAll(users[0].address, users[4].address);
+      assert.equal(result, false);
+      const receipt = await users[0].contract.setApprovalForAllFor(users[0].address, users[4].address, true).then(tx => tx.wait());
+      assert.equal(receipt.events[0].event, "ApprovalForAll");
+      assert.equal(receipt.events[0].args[0], users[0].address);
+      assert.equal(receipt.events[0].args[1], users[4].address);
+      assert.equal(receipt.events[0].args[2], true);
+      const newResult = await contract.isApprovedForAll(users[0].address, users[4].address);
+      assert.equal(newResult, true);
+      await mint(users[0].address, 8);
+      await users[4].contract.singleTransferFrom(users[0].address, users[1].address, 1, 8);
+      const user1Balance = await contract.balanceOf(users[1].address, 1);
+      assert.ok(user1Balance.eq(BigNumber.from(8)));
+    });
+
+    it("setApprovalForAllFor should revoke the ability for an address to transfer token on behalf of another address", async function ({
+      contract,
+      mint,
+      users,
+    }) {
+      const result = await contract.isApprovedForAll(users[0].address, users[4].address);
+      assert.equal(result, false);
+      const receipt = await users[0].contract.setApprovalForAllFor(users[0].address, users[4].address, true).then(tx => tx.wait());
+      assert.equal(receipt.events[0].event, "ApprovalForAll");
+      assert.equal(receipt.events[0].args[0], users[0].address);
+      assert.equal(receipt.events[0].args[1], users[4].address);
+      assert.equal(receipt.events[0].args[2], true);
+      const newResult = await contract.isApprovedForAll(users[0].address, users[4].address);
+      assert.equal(newResult, true);
+      const newReceipt = await users[0].contract.setApprovalForAllFor(users[0].address, users[4].address, false).then(tx => tx.wait());
+      assert.equal(newReceipt.events[0].event, "ApprovalForAll");
+      assert.equal(newReceipt.events[0].args[0], users[0].address);
+      assert.equal(newReceipt.events[0].args[1], users[4].address);
+      assert.equal(newReceipt.events[0].args[2], false);
+      await mint(users[0].address, 8);
+      await expectRevert(users[4].contract.singleTransferFrom(users[0].address, users[1].address, 1, 8), "NOT_AUTHORIZED");
+      const user0Balance = await contract.balanceOf(users[0].address, 1);
+      assert.ok(user0Balance.eq(BigNumber.from(8)));
+      const user1Balance = await contract.balanceOf(users[1].address, 1);
+      assert.ok(user1Balance.eq(BigNumber.from(0)));
+    });
+    it("setApprovalForAll should grant the ability for an address to transfer token on your behalf", async function ({
+      contract,
+      mint,
+      users,
+    }) {
+      const result = await contract.isApprovedForAll(users[0].address, users[4].address);
+      assert.equal(result, false);
+      const receipt = await users[0].contract.setApprovalForAll(users[4].address, true).then(tx => tx.wait());
+      assert.equal(receipt.events[0].event, "ApprovalForAll");
+      assert.equal(receipt.events[0].args[0], users[0].address);
+      assert.equal(receipt.events[0].args[1], users[4].address);
+      assert.equal(receipt.events[0].args[2], true);
+      const newResult = await contract.isApprovedForAll(users[0].address, users[4].address);
+      assert.equal(newResult, true);
+      await mint(users[0].address, 8);
+      await users[4].contract.singleTransferFrom(users[0].address, users[1].address, 1, 8);
+      const user1Balance = await contract.balanceOf(users[1].address, 1);
+      assert.ok(user1Balance.eq(BigNumber.from(8)));
+    });
+    it("setApprovalForAll should revoke the ability for an address to transfer token on your behalf", async function ({
+      contract,
+      mint,
+      users,
+    }) {
+      const result = await contract.isApprovedForAll(users[0].address, users[4].address);
+      assert.equal(result, false);
+      const receipt = await users[0].contract.setApprovalForAll(users[4].address, true).then(tx => tx.wait());
+      assert.equal(receipt.events[0].event, "ApprovalForAll");
+      assert.equal(receipt.events[0].args[0], users[0].address);
+      assert.equal(receipt.events[0].args[1], users[4].address);
+      assert.equal(receipt.events[0].args[2], true);
+      const newResult = await contract.isApprovedForAll(users[0].address, users[4].address);
+      assert.equal(newResult, true);
+      const newReceipt = await users[0].contract.setApprovalForAll(users[4].address, false).then(tx => tx.wait());
+      assert.equal(newReceipt.events[0].event, "ApprovalForAll");
+      assert.equal(newReceipt.events[0].args[0], users[0].address);
+      assert.equal(newReceipt.events[0].args[1], users[4].address);
+      assert.equal(newReceipt.events[0].args[2], false);
+      await mint(users[0].address, 8);
+      await expectRevert(users[4].contract.singleTransferFrom(users[0].address, users[1].address, 1, 8), "NOT_AUTHORIZED");
+      const user0Balance = await contract.balanceOf(users[0].address, 1);
+      assert.ok(user0Balance.eq(BigNumber.from(8)));
+      const user1Balance = await contract.balanceOf(users[1].address, 1);
+      assert.ok(user1Balance.eq(BigNumber.from(0)));
+    });
+    it("isApprovedForAll returns true when an operator has the ability to transfer on behalf of another address or is a superOperator", async function ({
+      contract,
+      users,
+    }) {
+      await users[0].contract.setApprovalForAll(users[4].address, true).then(tx => tx.wait());
+      const result = await contract.isApprovedForAll(users[0].address, users[4].address);
+      assert.equal(result, true);
+    });
+    it("isApprovedForAll returns false when an operator does not have the ability to transfer on behalf of another address and is not a superOperator", async function ({
+      contract,
+      users,
+    }) {
+      const result = await contract.isApprovedForAll(users[0].address, users[4].address);
+      assert.equal(result, false);
+    });
+    it("isAuthorizedToTransfer returns true when the sender is a whitelisted metatransactioncontract operator, superOperator or has been authorized to transfer on behalf of another address", async function ({
+      contract,
+      users,
+    }) {
+      await users[0].contract.setApprovalForAll(users[4].address, true).then(tx => tx.wait());
+      const result = await contract.isAuthorizedToTransfer(users[0].address, users[4].address);
+      assert.equal(result, true);
+    });
+    it("isAuthorizedToTransfer returns false when the sender is not a whitelisted metatransactioncontract operator, superOperator and has not been authorized to transfer on behalf of another address", async function ({
+      contract,
+      users,
+    }) {
+      const result = await contract.isAuthorizedToTransfer(users[0].address, users[4].address);
+      assert.equal(result, false);
+    });
+    it("isAuthorizedToApprove returns true when the sender is a whitelisted metatransactioncontract operator or superOperator", async function ({
+      admin,
+      users,
+    }) {
+      const result = await users[0].contract.isAuthorizedToTransfer(users[0].address, admin);
+      assert.equal(result, true);
+    });
+    it("isAuthorizedToApprove returns false when the sender is not a whitelisted metatransactioncontract operator or a superOperator", async function ({
+      users,
+    }) {
+      const result = await users[1].contract.isAuthorizedToTransfer(users[0].address, users[1].address);
+      assert.equal(result, false);
+    });
   });
 
   // TODO add burn extension
@@ -1014,19 +1155,36 @@ module.exports = (init, extensions) => {
     it("burnFrom is invalid from zeroAddress", async function ({contract, mint, users}) {});
     it("burnFrom emits a Transfer event", async function ({contract, mint, users}) {});
     it("burnFrom is reverted if the sender is not authorized", async function ({contract, mint, users}) {});
-    it("burnFrom is successful when sent by the owner of the tokens with balance being correctly updated", async function ({contract, mint, users}) {});
-    it("burnFrom is successful when sent by an operator that has been granted the ability to transfer on behalf of another address", async function ({contract, mint, users}) {});
+    it("burnFrom is successful when sent by the owner of the tokens with balance being correctly updated", async function ({
+      contract,
+      mint,
+      users,
+    }) {});
+    it("burnFrom is successful when sent by an operator that has been granted the ability to transfer on behalf of another address", async function ({
+      contract,
+      mint,
+      users,
+    }) {});
     it("burnFrom is successful when sent by a superOperator ", async function ({contract, mint, users}) {});
     it("batchBurnFrom is invalid from zeroAddress", async function ({contract, mint, users}) {});
     it("batchBurnFrom emits multiple Transfer events", async function ({contract, mint, users}) {});
     it("batchBurnFrom is reverted if the sender is not authorized", async function ({contract, mint, users}) {});
-    it("batchBurnFrom is successful when sent by the owner of the tokens with balances being correctly updated", async function ({contract, mint, users}) {});
-    it("batchBurnFrom is successful when sent by an operator that has been granted the ability to transfer on behalf of another address", async function ({contract, mint, users}) {});
+    it("batchBurnFrom is successful when sent by the owner of the tokens with balances being correctly updated", async function ({
+      contract,
+      mint,
+      users,
+    }) {});
+    it("batchBurnFrom is successful when sent by an operator that has been granted the ability to transfer on behalf of another address", async function ({
+      contract,
+      mint,
+      users,
+    }) {});
     it("batchBurnFrom is successful when sent by a superOperator ", async function ({contract, mint, users}) {});
-
   });
 
-  describe("interface", function (it) {});
+  describe("interface", function (it) {
+    it("does not claim to support the invalid interface", async function ({contract, mint, users}) {});
+  });
 
   return tests;
 };
