@@ -1,8 +1,35 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-
 contract CatalystDataBase {
+    event CatalystConfiguration(uint256 indexed id, uint16 minQuantity, uint16 maxQuantity, uint256 sandFee);
+
+    function _setData(uint256 id, CatalystData memory data) internal {
+        _data[id] = data;
+        _emitConfiguration(id, data.minQuantity, data.maxQuantity, data.sandFee);
+    }
+
+    function _setConfiguration(
+        uint256 id,
+        uint16 minQuantity,
+        uint16 maxQuantity,
+        uint256 sandFee
+    ) internal {
+        _data[id].minQuantity = minQuantity;
+        _data[id].maxQuantity = maxQuantity;
+        _data[id].sandFee = uint168(sandFee);
+        _emitConfiguration(id, minQuantity, maxQuantity, sandFee);
+    }
+
+    function _emitConfiguration(
+        uint256 id,
+        uint16 minQuantity,
+        uint16 maxQuantity,
+        uint256 sandFee
+    ) internal {
+        emit CatalystConfiguration(id, minQuantity, maxQuantity, sandFee);
+    }
+
     function getValue(
         uint256 catalystId,
         uint256 seed,

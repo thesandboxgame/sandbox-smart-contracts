@@ -4,7 +4,6 @@ pragma experimental ABIEncoderV2;
 import "./Interfaces/AssetToken.sol";
 import "./contracts_common/src/BaseWithStorage/Admin.sol";
 
-
 contract CatalystRegistry is Admin {
     event Minter(address indexed newMinter);
     event CatalystApplied(uint256 indexed assetId, uint256 indexed catalystId, uint256 seed, uint256[] gemIds, uint64 blockNumber);
@@ -52,7 +51,7 @@ contract CatalystRegistry is Admin {
         emit GemsAdded(assetId, seed, startIndex, gemIds, blockNumber);
     }
 
-    /// @notice Set the Minter that will be the only address able to create Estate
+    /// @dev Set the Minter that will be the only address able to create Estate
     /// @param minter address of the minter
     function setMinter(address minter) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED_ADMIN");
@@ -61,7 +60,7 @@ contract CatalystRegistry is Admin {
         emit Minter(minter);
     }
 
-    /// @notice return the current minter
+    /// @dev return the current minter
     function getMinter() external view returns (address) {
         return _minter;
     }
