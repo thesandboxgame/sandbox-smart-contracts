@@ -1,7 +1,7 @@
 const {ethers, getNamedAccounts, ethereum} = require("@nomiclabs/buidler");
 const erc20GroupTests = require("../erc20Group")(
   async () => {
-    const {others, gemMinter, deployer} = await getNamedAccounts();
+    const {others, gemMinter} = await getNamedAccounts();
     await deployments.fixture();
 
     const contract = await ethers.getContract("Gem", gemMinter);
@@ -28,7 +28,6 @@ const erc20GroupTests = require("../erc20Group")(
     return {
       ethereum,
       contractAddress: contract.address,
-      deployer,
       minter: gemMinter,
       users: others,
       admin: sandContract.address,
