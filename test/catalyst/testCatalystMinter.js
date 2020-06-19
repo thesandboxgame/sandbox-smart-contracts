@@ -9,10 +9,13 @@ const {
   checERC1155Balances,
   toWei,
   mine,
+  zeroAddress,
 } = require("local-utils");
+const {BigNumber} = require("ethers");
 const {assertValidAttributes} = require("./_testHelper.js");
 
 const dummyHash = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+const specialBurnAddressForSandFee = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 
 const CommonCatalyst = 0;
 const RareCatalyst = 1;
@@ -396,7 +399,7 @@ describe("Catalyst:Minting", function () {
         emptyBytes
       )
     );
-    console.log(receipt.gasUsed.toNumber());
+    console.log("Gas used: ", receipt.gasUsed.toNumber());
   });
 
   // TODO quantity = 1
@@ -412,66 +415,98 @@ describe("Catalyst:Minting", function () {
       assert.equal(event.args[0], users[0].address);
     });
 
-    // TODO
-
-    // it("fee collection results in a SAND Transfer event to zero address if fee collector is set to special burn address", async function ({
-    //   minterContract,
-    //   users,
-    //   sandContract,
-    //   mint,
-    // }) {
-    //   const newFeeCollectorReceipt = await minterContract
-    //     .setFeeCollector("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
-    //     .then((tx) => tx.wait());
-    //   assert.equal(newFeeCollectorReceipt.events[0].event, "FeeCollector");
-    //   assert.equal(newFeeCollectorReceipt.events[0].args[0], "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF");
-    //   const receipt = await mint(users[0].address, 8);
-    //   const eventsMatching = await findEvents(sandContract, "Transfer", receipt.blockHash);
-    //   const event = eventsMatching[0];
-    //   const from = event.args[0];
-    //   const to = event.args[1];
-    //   const value = event.args[2];
-
-    //   // TODO
-    //   // assert.equal(from, users[0].address); // currently '0x0000000000000000000000000000000000000000'
-    //   // assert.equal(to, zeroAddress); // currently admin address '0xE5904695748fe4A84b40b3fc79De2277660BD1D3',
-    // });
-
-    // it("fee collection results in a SAND Transfer event to fee collector address", async function ({
-    //   minterContract,
-    //   users,
-    //   sandContract,
-    //   mint,
-    // }) {
-    //   const balance = await sandContract.balanceOf(users[1].address);
-    //   assert.ok(balance, BigNumber.from(0));
-    //   const newFeeCollectorReceipt = await minterContract.setFeeCollector(users[1].address).then((tx) => tx.wait());
-    //   assert.equal(newFeeCollectorReceipt.events[0].event, "FeeCollector");
-    //   assert.equal(newFeeCollectorReceipt.events[0].args[0], users[1].address);
-    //   const receipt = await mint(users[0].address, 8);
-    //   const eventsMatching = await findEvents(sandContract, "Transfer", receipt.blockHash);
-    //   const event = eventsMatching[0];
-    //   const from = event.args[0];
-    //   const to = event.args[1];
-    //   const value = event.args[2];
-
-    //   // TODO
-    //   // assert.equal(from, users[0].address); // currently '0x0000000000000000000000000000000000000000'
-    //   // assert.equal(to, users[1].address); // currently admin address '0xE5904695748fe4A84b40b3fc79De2277660BD1D3',
-    //   const newBalance = await sandContract.balanceOf(users[1].address);
-    //   // assert.ok(newBalance.eq(BigNumber.from(value)));
-    // });
-
-    it("transaction reverts if fee collector is set to special burn address and 0 SAND are transferred", async function ({}) {
-      //TODO
+    it("fee collection results in a SAND Transfer event to zero address if fee collector is set to special burn address", async function () {
+      const {sand, user, catalystMinterContract, creator} = await setupCatalystUsers();
+      const newFeeCollectorReceipt = await waitFor(
+        catalystMinterContract.setFeeCollector(specialBurnAddressForSandFee)
+      );
+      assert.equal(newFeeCollectorReceipt.events[0].event, "FeeCollector");
+      assert.equal(newFeeCollectorReceipt.events[0].args[0], "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF");
+      const originalGemIds = [PowerGem, SpeedGem];
+      const quantity = 30;
+      const {receipt} = await creator.mintAsset({
+        catalyst: EpicCatalyst,
+        gemIds: originalGemIds,
+        quantity,
+        to: user.address,
+      });
+      const eventsMatching = await findEvents(sand, "Transfer", receipt.blockHash);
+      const event = eventsMatching[0];
+      const from = event.args[0];
+      const to = event.args[1];
+      assert.equal(from, creator.address);
+      assert.equal(to, zeroAddress);
     });
 
-    it("transaction reverts if fee collector is set to special burn address and user does not have enough funds", async function ({}) {
-      //TODO
+    it("fee collection results in a SAND Transfer event to fee collector address", async function () {
+      const {sand, user, catalystMinterContract, creator, creatorWithoutSand} = await setupCatalystUsers();
+      const newFeeCollectorReceipt = await waitFor(catalystMinterContract.setFeeCollector(creatorWithoutSand.address));
+      assert.equal(newFeeCollectorReceipt.events[0].event, "FeeCollector");
+      assert.equal(newFeeCollectorReceipt.events[0].args[0], creatorWithoutSand.address);
+      const originalGemIds = [PowerGem, SpeedGem];
+      const quantity = 30;
+      const {receipt} = await creator.mintAsset({
+        catalyst: EpicCatalyst,
+        gemIds: originalGemIds,
+        quantity,
+        to: user.address,
+      });
+      const eventsMatching = await findEvents(sand, "Transfer", receipt.blockHash);
+      const event = eventsMatching[0];
+      const from = event.args[0];
+      const to = event.args[1];
+      const value = event.args[2];
+      assert.equal(from, creator.address);
+      assert.equal(to, creatorWithoutSand.address);
+      const newBalance = await sand.balanceOf(creatorWithoutSand.address);
+      assert.ok(newBalance.eq(BigNumber.from(value)));
     });
 
-    it("transaction reverts if fee collection is enabled but user does not have enough SAND", async function ({}) {
-      // TODO
+    it("transaction reverts if fee collector is set to special burn address and user does not have enough SAND", async function () {
+      const {user, catalystMinterContract, creatorWithoutSand} = await setupCatalystUsers();
+      await catalystMinterContract.setFeeCollector(specialBurnAddressForSandFee);
+      const originalGemIds = [PowerGem, SpeedGem];
+      const quantity = 30;
+      await expectRevert(
+        creatorWithoutSand.mintAssetNoReceipt({
+          catalyst: EpicCatalyst,
+          gemIds: originalGemIds,
+          quantity,
+          to: user.address,
+        }),
+        "Not enough funds"
+      );
+    });
+
+    it("transaction reverts if fee collection is enabled but user does not have enough SAND", async function () {
+      const {user, catalystMinterContract, creatorWithoutSand, creator} = await setupCatalystUsers();
+      await catalystMinterContract.setFeeCollector(creator.address);
+      const originalGemIds = [PowerGem, SpeedGem];
+      const quantity = 30;
+      await expectRevert(
+        creatorWithoutSand.mintAssetNoReceipt({
+          catalyst: EpicCatalyst,
+          gemIds: originalGemIds,
+          quantity,
+          to: user.address,
+        }),
+        "not enough fund"
+      );
+    });
+
+    it("transaction is successful and asset is minted if fee collection is enabled but fee collector is set to zeroAddress", async function () {
+      const {user, catalystMinterContract, creator} = await setupCatalystUsers();
+      await catalystMinterContract.setFeeCollector(zeroAddress);
+      const originalGemIds = [PowerGem, SpeedGem];
+      const quantity = 30;
+
+      // if feeCollector is set to zeroAddress, then the applicable sandFee is not collected but the asset is still minted
+      await creator.mintAsset({
+        catalyst: EpicCatalyst,
+        gemIds: originalGemIds,
+        quantity,
+        to: user.address,
+      });
     });
   });
 });
