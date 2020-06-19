@@ -25,11 +25,12 @@ contract ERC20GroupCatalyst is CatalystDataBase, ERC20Group {
         uint256 id,
         uint16 minQuantity,
         uint16 maxQuantity,
-        uint256 sandFee
+        uint256 sandMintingFee,
+        uint256 sandUpdateFee
     ) external {
         // CatalystMinter hardcode the value for efficiency purpose, so a change here would require a new deployment of CatalystMinter
         require(msg.sender == _admin, "NOT_AUTHORIZED_ADMIN");
-        _setConfiguration(id, minQuantity, maxQuantity, sandFee);
+        _setConfiguration(id, minQuantity, maxQuantity, sandMintingFee, sandUpdateFee);
     }
 
     constructor(

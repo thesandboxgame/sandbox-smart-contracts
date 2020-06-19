@@ -1,11 +1,7 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-
 interface CatalystToken {
-    event CatalystApplied(uint256 indexed assetId, uint256 indexed catalystId, uint256 seed, uint256[] gemIds, uint64 blockNumber);
-    event GemsAdded(uint256 indexed assetId, uint256 seed, uint256 startIndex, uint256[] gemIds, uint64 blockNumber);
-
     function getValue(
         uint256 catalystId,
         uint256 seed,
@@ -29,7 +25,8 @@ interface CatalystToken {
             uint16 maxGems,
             uint16 minQuantity,
             uint16 maxQuantity,
-            uint256 sandFee
+            uint256 sandMintingFee,
+            uint256 sandUpdateFee
         );
 
     function batchBurnFrom(

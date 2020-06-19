@@ -7,7 +7,8 @@ module.exports = [
   {
     name: "Common",
     symbol: "COMMON",
-    sandFee: sandWei(1),
+    sandMintingFee: sandWei(1),
+    sandUpdateFee: sandWei(1),
     maxGems: 1,
     quantityRange: [200, 1000],
     attributeRange: [1, 25],
@@ -15,7 +16,8 @@ module.exports = [
   {
     name: "Rare",
     symbol: "RARE",
-    sandFee: sandWei(4),
+    sandMintingFee: sandWei(4),
+    sandUpdateFee: sandWei(4),
     maxGems: 2,
     quantityRange: [50, 200],
     attributeRange: [26, 50],
@@ -23,7 +25,8 @@ module.exports = [
   {
     name: "Epic",
     symbol: "EPIC",
-    sandFee: sandWei(10),
+    sandMintingFee: sandWei(10),
+    sandUpdateFee: sandWei(10),
     maxGems: 3,
     quantityRange: [10, 50],
     attributeRange: [51, 75],
@@ -31,7 +34,8 @@ module.exports = [
   {
     name: "Legendary",
     symbol: "LEGENDARY",
-    sandFee: sandWei(200),
+    sandMintingFee: sandWei(200),
+    sandUpdateFee: sandWei(200),
     maxGems: 4,
     quantityRange: [1, 10],
     attributeRange: [76, 100],
