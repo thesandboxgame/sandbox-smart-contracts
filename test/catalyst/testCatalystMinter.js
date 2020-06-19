@@ -581,7 +581,7 @@ describe("Catalyst:Minting", function () {
       assert.equal(newFeeCollectorReceipt.events[0].event, "FeeCollector");
       assert.equal(newFeeCollectorReceipt.events[0].args[0], creatorWithoutSand.address);
 
-      // creator mint asset and give to themselves
+      // creator mint asset and give to user
       const originalGemIds = [PowerGem, SpeedGem];
       const quantity = 30;
       const totalExpectedFee = toWei(quantity * 10);
@@ -607,7 +607,7 @@ describe("Catalyst:Minting", function () {
       assert.ok(newBalance.eq(BigNumber.from(value)));
       assert.ok(value.eq(BigNumber.from(totalExpectedFee)));
 
-      // update the catalyst in the asset
+      // user updates the catalyst in the asset
       const catalystChangeSandFee = 0; // TODO
       const catalystChangeReceipt = await waitFor(
         user.CatalystMinter.extractAndChangeCatalyst(user.address, tokenId, LegendaryCatalyst, [], user.address) // empty gem array
