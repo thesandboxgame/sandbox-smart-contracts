@@ -402,10 +402,6 @@ describe("Catalyst:Minting", function () {
     console.log("Gas used: ", receipt.gasUsed.toNumber());
   });
 
-  // TODO quantity = 1
-  // TODO addGems post extraction
-  // TODO set new catalyst post extraction
-
   describe("fees", function () {
     it("setting the fee collector emits a FeeCollector event", async function () {
       const {users, catalystMinterContract} = await setupCatalystUsers();
@@ -424,6 +420,7 @@ describe("Catalyst:Minting", function () {
       assert.equal(newFeeCollectorReceipt.events[0].args[0], "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF");
       const originalGemIds = [PowerGem, SpeedGem];
       const quantity = 30;
+      const totalExpectedFee = toWei(quantity * 10);
       const {receipt} = await creator.mintAsset({
         catalyst: EpicCatalyst,
         gemIds: originalGemIds,
@@ -434,8 +431,10 @@ describe("Catalyst:Minting", function () {
       const event = eventsMatching[0];
       const from = event.args[0];
       const to = event.args[1];
+      const value = event.args[2];
       assert.equal(from, creator.address);
       assert.equal(to, zeroAddress);
+      assert.ok(value.eq(BigNumber.from(totalExpectedFee)));
     });
 
     it("fee collection results in a SAND Transfer event to fee collector address", async function () {
@@ -445,6 +444,8 @@ describe("Catalyst:Minting", function () {
       assert.equal(newFeeCollectorReceipt.events[0].args[0], creatorWithoutSand.address);
       const originalGemIds = [PowerGem, SpeedGem];
       const quantity = 30;
+      const totalExpectedFee = toWei(quantity * 10);
+
       const {receipt} = await creator.mintAsset({
         catalyst: EpicCatalyst,
         gemIds: originalGemIds,
@@ -460,6 +461,7 @@ describe("Catalyst:Minting", function () {
       assert.equal(to, creatorWithoutSand.address);
       const newBalance = await sand.balanceOf(creatorWithoutSand.address);
       assert.ok(newBalance.eq(BigNumber.from(value)));
+      assert.ok(value.eq(BigNumber.from(totalExpectedFee)));
     });
 
     it("transaction reverts if fee collector is set to special burn address and user does not have enough SAND", async function () {
@@ -508,5 +510,129 @@ describe("Catalyst:Minting", function () {
         to: user.address,
       });
     });
+
+    it("fee is not collected and catalyst is not changed if not extracted first", async function () {
+      const {user, catalystMinterContract, creator, creatorWithoutSand} = await setupCatalystUsers();
+      const newFeeCollectorReceipt = await waitFor(catalystMinterContract.setFeeCollector(creatorWithoutSand.address));
+      assert.equal(newFeeCollectorReceipt.events[0].event, "FeeCollector");
+      assert.equal(newFeeCollectorReceipt.events[0].args[0], creatorWithoutSand.address);
+      const originalGemIds = [PowerGem, SpeedGem];
+      const quantity = 30;
+
+      const {tokenId} = await creator.mintAsset({
+        catalyst: EpicCatalyst,
+        gemIds: originalGemIds,
+        quantity,
+        to: user.address,
+      });
+      await expectRevert(
+        waitFor(user.CatalystMinter.changeCatalyst(user.address, tokenId, LegendaryCatalyst, [], user.address)),
+        "INVALID_NOT_NFT"
+      );
+    });
+
+    it("fee is not taken and catalyst is not changed if from != sender", async function () {
+      const {user, catalystMinterContract, creator, creatorWithoutSand} = await setupCatalystUsers();
+      const newFeeCollectorReceipt = await waitFor(catalystMinterContract.setFeeCollector(creatorWithoutSand.address));
+      assert.equal(newFeeCollectorReceipt.events[0].event, "FeeCollector");
+      assert.equal(newFeeCollectorReceipt.events[0].args[0], creatorWithoutSand.address);
+      const originalGemIds = [PowerGem, SpeedGem];
+      const quantity = 30;
+
+      const {tokenId} = await creator.mintAsset({
+        catalyst: EpicCatalyst,
+        gemIds: originalGemIds,
+        quantity,
+        to: user.address,
+      });
+      await expectRevert(
+        waitFor(user.CatalystMinter.changeCatalyst(creator.address, tokenId, LegendaryCatalyst, [], creator.address)),
+        "NOT_SENDER"
+      );
+    });
+
+    it("fee is not taken and catalyst is not extracted and changed if from != sender", async function () {
+      const {user, catalystMinterContract, creator, creatorWithoutSand} = await setupCatalystUsers();
+      const newFeeCollectorReceipt = await waitFor(catalystMinterContract.setFeeCollector(creatorWithoutSand.address));
+      assert.equal(newFeeCollectorReceipt.events[0].event, "FeeCollector");
+      assert.equal(newFeeCollectorReceipt.events[0].args[0], creatorWithoutSand.address);
+      const originalGemIds = [PowerGem, SpeedGem];
+      const quantity = 30;
+
+      const {tokenId} = await creator.mintAsset({
+        catalyst: EpicCatalyst,
+        gemIds: originalGemIds,
+        quantity,
+        to: user.address,
+      });
+      await expectRevert(
+        waitFor(
+          user.CatalystMinter.extractAndChangeCatalyst(creator.address, tokenId, LegendaryCatalyst, [], creator.address)
+        ),
+        "NOT_SENDER"
+      );
+    });
+
+    it("the correct sandFee is collected when a catalyst is extracted and changed", async function () {
+      const {sand, user, catalystMinterContract, creator, creatorWithoutSand} = await setupCatalystUsers();
+
+      // set fee collector as creatorWithoutSand
+      const newFeeCollectorReceipt = await waitFor(catalystMinterContract.setFeeCollector(creatorWithoutSand.address));
+      assert.equal(newFeeCollectorReceipt.events[0].event, "FeeCollector");
+      assert.equal(newFeeCollectorReceipt.events[0].args[0], creatorWithoutSand.address);
+
+      // creator mint asset and give to themselves
+      const originalGemIds = [PowerGem, SpeedGem];
+      const quantity = 30;
+      const totalExpectedFee = toWei(quantity * 10);
+
+      const {receipt, tokenId} = await creator.mintAsset({
+        catalyst: EpicCatalyst,
+        gemIds: originalGemIds,
+        quantity,
+        to: user.address,
+      });
+
+      // ensure the SAND transfer event occurred
+      const eventsMatching = await findEvents(sand, "Transfer", receipt.blockHash);
+      const event = eventsMatching[0];
+      const from = event.args[0];
+      const to = event.args[1];
+      const value = event.args[2];
+      assert.equal(from, creator.address);
+      assert.equal(to, creatorWithoutSand.address);
+
+      // check fee collector has received the correct fee for the mint
+      const newBalance = await sand.balanceOf(creatorWithoutSand.address);
+      assert.ok(newBalance.eq(BigNumber.from(value)));
+      assert.ok(value.eq(BigNumber.from(totalExpectedFee)));
+
+      // update the catalyst in the asset
+      const catalystChangeSandFee = 0; // TODO
+      const catalystChangeReceipt = await waitFor(
+        user.CatalystMinter.extractAndChangeCatalyst(user.address, tokenId, LegendaryCatalyst, [], user.address) // empty gem array
+      );
+
+      // check the fee collector has received the correctfee for the catalyst update
+      const changeEventsMatching = await findEvents(sand, "Transfer", catalystChangeReceipt.blockHash);
+      const changeEvent = changeEventsMatching[0];
+      assert.equal(changeEvent.args[0], user.address);
+      assert.equal(changeEvent.args[1], creatorWithoutSand.address);
+      console.log(changeEvent.args[2]);
+      // TODO assert.equal(changeEvent.args[2], catalystChangeSandFee);
+    });
+
+    it("the correct sandFee is collected when gems are added", async function () {
+      // addGems(
+      //   address from,
+      //   uint256 assetId,
+      //   uint256[] calldata gemIds,
+      //   address to
+      // )
+    });
+
+    // TODO quantity = 1
+    // TODO addGems post extraction
+    // TODO set new catalyst post extraction
   });
 });
