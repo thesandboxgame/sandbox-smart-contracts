@@ -402,4 +402,76 @@ describe("Catalyst:Minting", function () {
   // TODO quantity = 1
   // TODO addGems post extraction
   // TODO set new catalyst post extraction
+
+  describe("fees", function () {
+    it("setting the fee collector emits a FeeCollector event", async function () {
+      const {users, catalystMinterContract} = await setupCatalystUsers();
+      const receipt = await waitFor(catalystMinterContract.setFeeCollector(users[0].address));
+      const event = receipt.events[0];
+      assert.equal(event.event, "FeeCollector");
+      assert.equal(event.args[0], users[0].address);
+    });
+
+    // TODO
+
+    // it("fee collection results in a SAND Transfer event to zero address if fee collector is set to special burn address", async function ({
+    //   minterContract,
+    //   users,
+    //   sandContract,
+    //   mint,
+    // }) {
+    //   const newFeeCollectorReceipt = await minterContract
+    //     .setFeeCollector("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
+    //     .then((tx) => tx.wait());
+    //   assert.equal(newFeeCollectorReceipt.events[0].event, "FeeCollector");
+    //   assert.equal(newFeeCollectorReceipt.events[0].args[0], "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF");
+    //   const receipt = await mint(users[0].address, 8);
+    //   const eventsMatching = await findEvents(sandContract, "Transfer", receipt.blockHash);
+    //   const event = eventsMatching[0];
+    //   const from = event.args[0];
+    //   const to = event.args[1];
+    //   const value = event.args[2];
+
+    //   // TODO
+    //   // assert.equal(from, users[0].address); // currently '0x0000000000000000000000000000000000000000'
+    //   // assert.equal(to, zeroAddress); // currently admin address '0xE5904695748fe4A84b40b3fc79De2277660BD1D3',
+    // });
+
+    // it("fee collection results in a SAND Transfer event to fee collector address", async function ({
+    //   minterContract,
+    //   users,
+    //   sandContract,
+    //   mint,
+    // }) {
+    //   const balance = await sandContract.balanceOf(users[1].address);
+    //   assert.ok(balance, BigNumber.from(0));
+    //   const newFeeCollectorReceipt = await minterContract.setFeeCollector(users[1].address).then((tx) => tx.wait());
+    //   assert.equal(newFeeCollectorReceipt.events[0].event, "FeeCollector");
+    //   assert.equal(newFeeCollectorReceipt.events[0].args[0], users[1].address);
+    //   const receipt = await mint(users[0].address, 8);
+    //   const eventsMatching = await findEvents(sandContract, "Transfer", receipt.blockHash);
+    //   const event = eventsMatching[0];
+    //   const from = event.args[0];
+    //   const to = event.args[1];
+    //   const value = event.args[2];
+
+    //   // TODO
+    //   // assert.equal(from, users[0].address); // currently '0x0000000000000000000000000000000000000000'
+    //   // assert.equal(to, users[1].address); // currently admin address '0xE5904695748fe4A84b40b3fc79De2277660BD1D3',
+    //   const newBalance = await sandContract.balanceOf(users[1].address);
+    //   // assert.ok(newBalance.eq(BigNumber.from(value)));
+    // });
+
+    it("transaction reverts if fee collector is set to special burn address and 0 SAND are transferred", async function ({}) {
+      //TODO
+    });
+
+    it("transaction reverts if fee collector is set to special burn address and user does not have enough funds", async function ({}) {
+      //TODO
+    });
+
+    it("transaction reverts if fee collection is enabled but user does not have enough SAND", async function ({}) {
+      // TODO
+    });
+  });
 });
