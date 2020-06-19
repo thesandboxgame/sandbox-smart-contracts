@@ -4,7 +4,7 @@ const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
 const dummyHash = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 
 module.exports.setupCatalystSystem = deployments.createFixture(async () => {
-  const {gemMinter, catalystMinter, others, sandBeneficiary} = await getNamedAccounts();
+  const {gemMinter, catalystMinter, others, sandBeneficiary, catalystMinterAdmin} = await getNamedAccounts();
   await deployments.fixture();
   const users = [];
   for (const other of others) {
@@ -44,6 +44,7 @@ module.exports.setupCatalystSystem = deployments.createFixture(async () => {
   }
   const gem = await ethers.getContract("Gem", gemMinter);
   const catalyst = await ethers.getContract(`Catalyst`, catalystMinter);
+  const catalystMinterContract = await ethers.getContract(`CatalystMinter`, catalystMinterAdmin);
   const sand = await ethers.getContract("Sand", sandBeneficiary);
   const asset = await ethers.getContract("Asset");
   return {
@@ -52,6 +53,7 @@ module.exports.setupCatalystSystem = deployments.createFixture(async () => {
     catalyst,
     sand,
     asset,
+    catalystMinterContract,
     catalystRegistry: await ethers.getContract("CatalystRegistry"),
   };
 });
