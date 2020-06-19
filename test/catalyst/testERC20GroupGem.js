@@ -1,7 +1,7 @@
 const {ethers, getNamedAccounts, ethereum} = require("@nomiclabs/buidler");
 const erc20GroupTests = require("../erc20Group")(
   async () => {
-    const {others, gemMinter} = await getNamedAccounts();
+    const {others, gemMinter, catalystMinter} = await getNamedAccounts();
     await deployments.fixture();
 
     const contract = await ethers.getContract("Gem", gemMinter);
@@ -14,6 +14,8 @@ const erc20GroupTests = require("../erc20Group")(
     const ERC20SubTokenLuck = await ethers.getContract("LuckGem");
 
     const sandContract = await ethers.getContract("Sand");
+
+    const catalystMinterContract = await ethers.getContract("CatalystMinter", catalystMinter);
 
     async function mint(to, amount) {
       const tx = await contract.mint(to, 1, amount);
@@ -29,8 +31,10 @@ const erc20GroupTests = require("../erc20Group")(
       ethereum,
       contractAddress: contract.address,
       minter: gemMinter,
+      minterContract: catalystMinterContract,
       users: others,
-      admin: sandContract.address,
+      meta: sandContract.address,
+      sandContract,
       mint,
       batchMint,
       ERC20SubToken: ERC20SubTokenDefense, // index 1
@@ -40,6 +44,7 @@ const erc20GroupTests = require("../erc20Group")(
   },
   {
     burn: true,
+    fee: true,
   }
 );
 

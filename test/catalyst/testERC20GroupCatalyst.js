@@ -15,6 +15,8 @@ const erc20GroupTests = require("../erc20Group")(
 
     const sandContract = await ethers.getContract("Sand");
 
+    const catalystMinterContract = await ethers.getContract("CatalystMinter", catalystMinter);
+
     async function mint(to, amount) {
       const tx = await contract.mint(to, 1, amount);
       const receipt = await tx.wait();
@@ -29,8 +31,10 @@ const erc20GroupTests = require("../erc20Group")(
       ethereum,
       contractAddress: contract.address,
       minter: catalystMinter,
+      minterContract: catalystMinterContract,
       users: others,
-      admin: sandContract.address,
+      meta: sandContract.address,
+      sandContract,
       mint,
       batchMint,
       ERC20SubToken: ERC20SubTokenRare, // index 1
@@ -40,6 +44,7 @@ const erc20GroupTests = require("../erc20Group")(
   },
   {
     burn: true,
+    fee: true,
   }
 );
 

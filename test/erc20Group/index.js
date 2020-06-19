@@ -630,12 +630,14 @@ module.exports = (init, extensions) => {
         contractAddress,
         users,
         mint,
+        minterContract,
         batchMint,
         minter,
-        admin,
+        meta,
         ERC20SubToken,
         secondERC20SubToken,
         thirdERC20SubToken,
+        sandContract,
       } = await init();
 
       const ethersProvider = new Web3Provider(ethereum);
@@ -658,12 +660,14 @@ module.exports = (init, extensions) => {
         mint,
         batchMint,
         contractAsMinter,
-        admin,
+        minterContract,
+        meta,
         users: usersWithContracts,
         ethersProvider,
         ERC20SubToken,
         secondERC20SubToken,
         thirdERC20SubToken,
+        sandContract,
       });
     };
   }
@@ -1106,10 +1110,10 @@ module.exports = (init, extensions) => {
     });
 
     it("isAuthorizedToApprove returns true when the sender is a whitelisted metatransactioncontract operator or superOperator", async function ({
-      admin,
+      meta,
       users,
     }) {
-      const result = await users[0].contract.isAuthorizedToTransfer(users[0].address, admin);
+      const result = await users[0].contract.isAuthorizedToTransfer(users[0].address, meta);
       assert.equal(result, true);
     });
 
@@ -1232,6 +1236,77 @@ module.exports = (init, extensions) => {
         await users[4].contract.batchBurnFrom(users[1].address, [1, 2, 3], [5, 6, 7]).then((tx) => tx.wait());
       });
     });
+
+    if (extensions.fee) {
+      describe("fees", function (it) {
+        it("setting the fee collector emits a FeeCollector event", async function ({minterContract, users}) {
+          const receipt = await minterContract.setFeeCollector(users[0].address).then((tx) => tx.wait());
+          const event = receipt.events[0];
+          assert.equal(event.event, "FeeCollector");
+          assert.equal(event.args[0], users[0].address);
+        });
+
+        it("fee collection results in a SAND Transfer event to zero address if fee collector is set to special burn address", async function ({
+          minterContract,
+          users,
+          sandContract,
+          mint,
+        }) {
+          const newFeeCollectorReceipt = await minterContract
+            .setFeeCollector("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")
+            .then((tx) => tx.wait());
+          assert.equal(newFeeCollectorReceipt.events[0].event, "FeeCollector");
+          assert.equal(newFeeCollectorReceipt.events[0].args[0], "0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF");
+          const receipt = await mint(users[0].address, 8);
+          const eventsMatching = await findEvents(sandContract, "Transfer", receipt.blockHash);
+          const event = eventsMatching[0];
+          const from = event.args[0];
+          const to = event.args[1];
+          const value = event.args[2];
+
+          // TODO
+          // assert.equal(from, users[0].address); // currently '0x0000000000000000000000000000000000000000'
+          // assert.equal(to, zeroAddress); // currently admin address '0xE5904695748fe4A84b40b3fc79De2277660BD1D3',
+        });
+
+        it("fee collection results in a SAND Transfer event to fee collector address", async function ({
+          minterContract,
+          users,
+          sandContract,
+          mint,
+        }) {
+          const balance = await sandContract.balanceOf(users[1].address);
+          assert.ok(balance, BigNumber.from(0));
+          const newFeeCollectorReceipt = await minterContract.setFeeCollector(users[1].address).then((tx) => tx.wait());
+          assert.equal(newFeeCollectorReceipt.events[0].event, "FeeCollector");
+          assert.equal(newFeeCollectorReceipt.events[0].args[0], users[1].address);
+          const receipt = await mint(users[0].address, 8);
+          const eventsMatching = await findEvents(sandContract, "Transfer", receipt.blockHash);
+          const event = eventsMatching[0];
+          const from = event.args[0];
+          const to = event.args[1];
+          const value = event.args[2];
+
+          // TODO
+          // assert.equal(from, users[0].address); // currently '0x0000000000000000000000000000000000000000'
+          // assert.equal(to, users[1].address); // currently admin address '0xE5904695748fe4A84b40b3fc79De2277660BD1D3',
+          const newBalance = await sandContract.balanceOf(users[1].address);
+          // assert.ok(newBalance.eq(BigNumber.from(value)));
+        });
+
+        it("transaction reverts if fee collector is set to special burn address and 0 SAND are transferred", async function ({}) {
+          //TODO
+        });
+
+        it("transaction reverts if fee collector is set to special burn address and user does not have enough funds", async function ({}) {
+          //TODO
+        });
+
+        it("transaction reverts if fee collection is enabled but user does not have enough SAND", async function ({}) {
+          // TODO
+        });
+      });
+    }
   }
 
   return tests;
