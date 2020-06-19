@@ -16,18 +16,6 @@ module.exports.setupCatalystSystem = deployments.createFixture(async () => {
       CatalystMinter,
       Gem,
       Asset,
-      mintAssetNoReceipt: async ({catalyst, packId, ipfsHash, gemIds, quantity, to}) => {
-        await CatalystMinter.mint(
-          other,
-          packId || 0,
-          ipfsHash || dummyHash,
-          catalyst,
-          gemIds,
-          quantity,
-          to || other,
-          "0x"
-        );
-      },
       mintAsset: async ({catalyst, packId, ipfsHash, gemIds, quantity, to}) => {
         const receipt = await waitFor(
           CatalystMinter.mint(other, packId || 0, ipfsHash || dummyHash, catalyst, gemIds, quantity, to || other, "0x")

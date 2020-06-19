@@ -468,7 +468,7 @@ describe("Catalyst:Minting", function () {
       const originalGemIds = [PowerGem, SpeedGem];
       const quantity = 30;
       await expectRevert(
-        creatorWithoutSand.mintAssetNoReceipt({
+        creatorWithoutSand.mintAsset({
           catalyst: EpicCatalyst,
           gemIds: originalGemIds,
           quantity,
@@ -484,7 +484,7 @@ describe("Catalyst:Minting", function () {
       const originalGemIds = [PowerGem, SpeedGem];
       const quantity = 30;
       await expectRevert(
-        creatorWithoutSand.mintAssetNoReceipt({
+        creatorWithoutSand.mintAsset({
           catalyst: EpicCatalyst,
           gemIds: originalGemIds,
           quantity,
