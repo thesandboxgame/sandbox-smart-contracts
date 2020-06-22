@@ -322,8 +322,6 @@ describe("Catalyst:Minting", function () {
     assert.equal(rarity, 0); // rarity is no more in use
   });
 
-  it("extracted asset share same gems", async function () {});
-
   it("creator mint Epic Asset And new owner add gems", async function () {
     const {creator, user, asset, catalystRegistry} = await setupCatalystUsers();
     const originalGemIds = [PowerGem, SpeedGem];
