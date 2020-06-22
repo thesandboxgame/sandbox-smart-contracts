@@ -270,6 +270,16 @@ describe("Catalyst:Minting", function () {
       gemIds,
     });
 
+    const {totalGems: newTotalGems, maxGemsConfigured: newMaxGems} = await getGems(
+      postExtractionReceipt,
+      catalyst,
+      catalystRegistry
+    );
+
+    expect(newTotalGems).to.equal(2);
+    expect(newMaxGems).to.equal(2);
+    assert.isAtMost(newTotalGems, newMaxGems);
+
     const catalystData = await catalystRegistry.getCatalyst(tokenId);
     expect(catalystData[0]).to.equal(true);
     expect(catalystData[1]).to.equal(RareCatalyst);
