@@ -1,10 +1,11 @@
 const {assert, expect} = require("local-chai");
 const {setupCatalystUsers} = require("./fixtures");
+const {getGems} = require("../../lib/getGems.js");
+const {findEvents} = require("../../lib/findEvents.js");
 const {
   expectRevert,
   emptyBytes,
   waitFor,
-  findEvents,
   checERC20Balances,
   checERC1155Balances,
   toWei,
