@@ -574,7 +574,13 @@ describe("Catalyst:Minting", function () {
     });
 
     it("the correct sandFee is collected when a catalyst is extracted and changed", async function () {
-      const {sand, user, catalystMinterContract, creator, creatorWithoutSand} = await setupCatalystUsers();
+      const {sand, user, catalystMinterContract, creator, creatorWithoutSand} = await setupCatalystUsers({
+        catalystConfig: [
+          undefined,
+          undefined,
+          {minQuantity: 10, maxQuantity: 50, sandMintingFee: toWei(11), sandUpdateFee: toWei(12)},
+        ],
+      });
 
       // set fee collector as creatorWithoutSand
       const newFeeCollectorReceipt = await waitFor(catalystMinterContract.setFeeCollector(creatorWithoutSand.address));
@@ -584,7 +590,7 @@ describe("Catalyst:Minting", function () {
       // creator mint asset and give to user
       const originalGemIds = [PowerGem, SpeedGem];
       const quantity = 30;
-      const totalExpectedFee = toWei(quantity * 10);
+      const totalExpectedFee = toWei(quantity * 11);
 
       const {receipt, tokenId} = await creator.mintAsset({
         catalyst: EpicCatalyst,
