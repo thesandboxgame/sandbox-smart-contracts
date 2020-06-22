@@ -200,20 +200,31 @@ describe("Catalyst:Minting", function () {
   });
 
   it("creator mint Rare Asset And Upgrade to Legendary", async function () {
-    const {creator, asset, catalystRegistry} = await setupCatalystUsers();
+    const {creator, asset, catalyst, catalystRegistry} = await setupCatalystUsers();
     const originalGemIds = [PowerGem, DefenseGem];
     const quantity = 60;
-    const {tokenId: originalTokenId} = await creator.mintAsset({
+    const {tokenId: originalTokenId, receipt: mintReceipt} = await creator.mintAsset({
       catalyst: RareCatalyst,
       gemIds: originalGemIds,
       quantity,
     });
 
     const gemIds = [DefenseGem, SpeedGem, MagicGem];
-    const {tokenId} = await creator.extractAndChangeCatalyst(originalTokenId, {
+    const {tokenId, receipt: postExtractionReceipt} = await creator.extractAndChangeCatalyst(originalTokenId, {
       catalyst: LegendaryCatalyst,
       gemIds,
     });
+    const {gems: originalGems, maxGemsConfigured: originalMaxGems} = await getMintEventGems(
+      mintReceipt,
+      catalyst,
+      catalystRegistry
+    );
+    const catalystAppliedEvent = await findEvents(catalystRegistry, "CatalystApplied", postExtractionReceipt.blockHash);
+    const catalystId = catalystAppliedEvent[0].args[1];
+    const eventGemIds = catalystAppliedEvent[0].args[3];
+    // const assetId = catalystAppliedEvent[0].args[0];
+    const mintData = await catalyst.getMintData(catalystId);
+    const newMaxGemsConfigured = mintData[0];
 
     const originalCatalystData = await catalystRegistry.getCatalyst(originalTokenId);
     expect(originalCatalystData[0]).to.equal(true);
@@ -233,6 +244,12 @@ describe("Catalyst:Minting", function () {
     assert.equal(originalBalance, quantity - 1);
     assert.equal(balance, 1);
     assert.equal(rarity, 0); // rarity is no more in use
+    assert.equal(originalMaxGems, 2);
+    assert.isAtMost(originalGems, originalMaxGems, "more gems than allowed!");
+    assert.equal(newMaxGemsConfigured, 4);
+    // TODO: get full list of gems.
+    // assert.isAtMost(newGemsTotal, newMaxGemsConfigured, "more gems than allowed!");
+    assert.equal(gemIds.length, eventGemIds.length);
   });
 
   it("creator mint Epic Asset And Downgrade to Rare", async function () {
