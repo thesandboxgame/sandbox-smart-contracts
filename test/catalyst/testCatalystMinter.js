@@ -322,7 +322,9 @@ describe("Catalyst:Minting", function () {
     assert.equal(rarity, 0); // rarity is no more in use
   });
 
-  it("creator mint Epic Asset And new onwer add gems", async function () {
+  it("extracted asset share same gems", async function () {});
+
+  it("creator mint Epic Asset And new owner add gems", async function () {
     const {creator, user, asset, catalystRegistry} = await setupCatalystUsers();
     const originalGemIds = [PowerGem, SpeedGem];
     const quantity = 30;
@@ -343,6 +345,12 @@ describe("Catalyst:Minting", function () {
     expect(catalystData[1]).to.equal(EpicCatalyst);
 
     const gemsAddedEvent = (await findEvents(catalystRegistry, "GemsAdded", receipt.blockHash))[0];
+
+    const mintedGems = catalystAppliedEvent.args.gemIds.length;
+    const addedGems = gemsAddedEvent.args.gemIds.length;
+    const totalGems = mintedGems + addedGems;
+
+    expect(totalGems).to.equal(3);
     expect(gemsAddedEvent.args.gemIds[0]).to.equal(newGemIds[0]);
     expect(gemsAddedEvent.args.assetId).to.equal(tokenId);
     expect(gemsAddedEvent.args.startIndex).to.equal(2);
