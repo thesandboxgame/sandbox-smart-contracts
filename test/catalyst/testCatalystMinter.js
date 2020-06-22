@@ -51,7 +51,7 @@ describe("Catalyst:Minting", function () {
         emptyBytes
       )
     );
-    const {totalGems, maxGemsConfigured} = await getMintEventGems(receipt, catalyst, catalystRegistry);
+    const {totalGems, maxGemsConfigured} = await getGems(receipt, catalyst, catalystRegistry);
     assert.isAtMost(totalGems, maxGemsConfigured, "more gems than allowed!");
   });
 
@@ -128,7 +128,7 @@ describe("Catalyst:Minting", function () {
     const catalystData = await catalystRegistry.getCatalyst(tokenId);
     expect(catalystData[0]).to.equal(true);
     expect(catalystData[1]).to.equal(EpicCatalyst);
-    const {totalGems, maxGemsConfigured} = await getMintEventGems(receipt, catalyst, catalystRegistry);
+    const {totalGems, maxGemsConfigured} = await getGems(receipt, catalyst, catalystRegistry);
 
     const balance = await asset["balanceOf(address,uint256)"](creator.address, tokenId);
     const rarity = await asset.rarity(tokenId);
@@ -159,7 +159,7 @@ describe("Catalyst:Minting", function () {
     expect(catalystData[0]).to.equal(true);
     expect(catalystData[1]).to.equal(LegendaryCatalyst);
 
-    const {totalGems, maxGemsConfigured} = await getMintEventGems(receipt, catalyst, catalystRegistry);
+    const {totalGems, maxGemsConfigured} = await getGems(receipt, catalyst, catalystRegistry);
     const balance = await asset["balanceOf(address,uint256)"](creator.address, tokenId);
     const rarity = await asset.rarity(tokenId);
     await mine(); // future block need to be mined to get the value
@@ -181,7 +181,7 @@ describe("Catalyst:Minting", function () {
       quantity,
     });
     const receipt = await waitFor(creator.Asset.extractERC721(originalTokenId, creator.address));
-    const {totalGems, maxGemsConfigured} = await getMintEventGems(mintReceipt, catalyst, catalystRegistry);
+    const {totalGems, maxGemsConfigured} = await getGems(mintReceipt, catalyst, catalystRegistry);
     const transferEvents = await findEvents(asset, "Transfer", receipt.blockHash);
     const tokenId = transferEvents[0].args[2];
 
@@ -214,12 +214,12 @@ describe("Catalyst:Minting", function () {
       catalyst: LegendaryCatalyst,
       gemIds,
     });
-    const {totalGems: originalTotalGems, maxGemsConfigured: originalMaxGems} = await getMintEventGems(
+    const {totalGems: originalTotalGems, maxGemsConfigured: originalMaxGems} = await getGems(
       mintReceipt,
       catalyst,
       catalystRegistry
     );
-    const {totalGems: newTotalGems, maxGemsConfigured: newMaxGems} = await getMintEventGems(
+    const {totalGems: newTotalGems, maxGemsConfigured: newMaxGems} = await getGems(
       postExtractionReceipt,
       catalyst,
       catalystRegistry
