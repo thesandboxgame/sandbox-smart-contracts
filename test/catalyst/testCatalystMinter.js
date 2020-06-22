@@ -28,6 +28,10 @@ const SpeedGem = 2;
 const MagicGem = 3;
 const LuckGem = 4;
 
+function sandWei(amount) {
+  return BigNumber.from(amount).mul("1000000000000000000");
+}
+
 describe("Catalyst:Minting", function () {
   it("creator mint Asset", async function () {
     const {creator} = await setupCatalystUsers();
@@ -609,36 +613,175 @@ describe("Catalyst:Minting", function () {
       assert.equal(to, creatorWithoutSand.address);
 
       // check fee collector has received the correct fee for the mint
-      const newBalance = await sand.balanceOf(creatorWithoutSand.address);
-      assert.ok(newBalance.eq(BigNumber.from(value)));
+      const newBalanceAfterMint = await sand.balanceOf(creatorWithoutSand.address);
+      assert.ok(newBalanceAfterMint.eq(BigNumber.from(value)));
       assert.ok(value.eq(BigNumber.from(totalExpectedFee)));
 
       // user updates the catalyst in the asset
-      const catalystChangeSandFee = 0; // TODO
+      const sandUpdateFee = sandWei(200); // in bakedMintData
       const catalystChangeReceipt = await waitFor(
         user.CatalystMinter.extractAndChangeCatalyst(user.address, tokenId, LegendaryCatalyst, [], user.address) // empty gem array
       );
 
-      // check the fee collector has received the correctfee for the catalyst update
+      // check the fee collector has received the correct fee for the catalyst update
       const changeEventsMatching = await findEvents(sand, "Transfer", catalystChangeReceipt.blockHash);
       const changeEvent = changeEventsMatching[0];
       assert.equal(changeEvent.args[0], user.address);
       assert.equal(changeEvent.args[1], creatorWithoutSand.address);
-      console.log(changeEvent.args[2]);
-      // TODO assert.equal(changeEvent.args[2], catalystChangeSandFee);
+      assert.ok(changeEvent.args[2].eq(sandUpdateFee));
+
+      // check fee collector's new balance has been increased by the catalystChangeSandFee
+      const newBalanceAfterCatalystChange = await sand.balanceOf(creatorWithoutSand.address);
+      assert.ok(newBalanceAfterCatalystChange.eq(newBalanceAfterMint.add(sandUpdateFee)));
     });
 
     it("the correct sandFee is collected when gems are added", async function () {
-      // addGems(
-      //   address from,
-      //   uint256 assetId,
-      //   uint256[] calldata gemIds,
-      //   address to
-      // )
+      const {sand, user, catalystMinterContract, creator, creatorWithoutSand} = await setupCatalystUsers();
+
+      // set fee collector as creatorWithoutSand
+      const newFeeCollectorReceipt = await waitFor(catalystMinterContract.setFeeCollector(creatorWithoutSand.address));
+      assert.equal(newFeeCollectorReceipt.events[0].event, "FeeCollector");
+      assert.equal(newFeeCollectorReceipt.events[0].args[0], creatorWithoutSand.address);
+
+      // creator mint asset and give to user
+      const originalGemIds = []; // can add up to 3 gems for Epic Catalyst
+      const quantity = 30;
+      const totalExpectedFee = toWei(quantity * 10);
+
+      const {receipt, tokenId} = await creator.mintAsset({
+        catalyst: EpicCatalyst,
+        gemIds: originalGemIds,
+        quantity,
+        to: user.address,
+      });
+
+      // ensure the SAND transfer event occurred
+      const eventsMatching = await findEvents(sand, "Transfer", receipt.blockHash);
+      const event = eventsMatching[0];
+      const from = event.args[0];
+      const to = event.args[1];
+      const value = event.args[2];
+      assert.equal(from, creator.address);
+      assert.equal(to, creatorWithoutSand.address);
+
+      // check fee collector has received the correct fee for the mint
+      const newBalanceAfterMint = await sand.balanceOf(creatorWithoutSand.address);
+      assert.ok(newBalanceAfterMint.eq(BigNumber.from(value)));
+      assert.ok(value.eq(BigNumber.from(totalExpectedFee)));
+
+      // user adds gems to the asset
+      const gemAdditionFee = sandWei(1); // initially set up via CatalystMinter constructor (uint256 gemAdditionFee)
+      const gemsToBeAdded = [LuckGem, MagicGem, SpeedGem];
+      const gemsAdditionReceipt = await waitFor(
+        user.CatalystMinter.extractAndAddGems(user.address, tokenId, gemsToBeAdded, user.address)
+      );
+
+      // check the fee collector has received the correct fee for adding the gems
+      const changeEventsMatching = await findEvents(sand, "Transfer", gemsAdditionReceipt.blockHash);
+      const changeEvent = changeEventsMatching[0];
+      assert.equal(changeEvent.args[0], user.address);
+      assert.equal(changeEvent.args[1], creatorWithoutSand.address);
+      assert.ok(changeEvent.args[2].eq(gemAdditionFee.mul(gemsToBeAdded.length)));
+
+      // check fee collector's new balance has been increased by the catalystChangeSandFee
+      const newBalanceAfterCatalystChange = await sand.balanceOf(creatorWithoutSand.address);
+      const totalGemFee = gemAdditionFee.mul(gemsToBeAdded.length);
+      assert.ok(newBalanceAfterCatalystChange.eq(newBalanceAfterMint.add(totalGemFee)));
     });
 
-    // TODO quantity = 1
-    // TODO addGems post extraction
-    // TODO set new catalyst post extraction
+    // TODOs below (for review)
+
+    it("cannot change gemAdditionFee if not authorized", async function () {});
+
+    it("can change gemAdditionFee if authorized", async function () {});
+
+    it("correct fee is taken after the gemAdditionFee is set", async function () {});
+
+    it("can mint catalyst with 1 gem - COMMON", async function () {});
+
+    it("can mint catalyst with 1 gem - RARE", async function () {});
+
+    it("can mint catalyst with 1 gem - EPIC", async function () {});
+
+    it("can mint catalyst with 1 gem - LEGENDARY", async function () {});
+
+    it("can mint catalyst with MAX gem - RARE - 2", async function () {});
+
+    it("can mint catalyst with MAX gem - EPIC - 3", async function () {});
+
+    it("can mint catalyst with MAX gem - LEGENDARY - 4", async function () {});
+
+    it("cannot add more gems than there are sockets and fee is not taken - COMMON - 0 gems already socketed", async function () {});
+
+    it("cannot add more gems than there are sockets and fee is not taken - RARE - 0 gems already socketed", async function () {});
+
+    it("cannot add more gems than there are sockets and fee is not taken - EPIC - 0 gems already socketed", async function () {});
+
+    it("cannot add more gems than there are sockets and fee is not taken - LEGENDARY - 0 gems already socketed", async function () {});
+
+    it("cannot add more gems than there are sockets and fee is not taken - COMMON - 1 gem already socketed", async function () {});
+
+    it("cannot add more gems than there are sockets and fee is not taken - RARE - 1 gem already socketed", async function () {});
+
+    it("cannot add more gems than there are sockets and fee is not taken - RARE - 2 gems already socketed", async function () {});
+
+    it("cannot add more gems than there are sockets and fee is not taken - EPIC - 1 gem already socketed", async function () {});
+
+    it("cannot add more gems than there are sockets and fee is not taken - EPIC - 2 gems already socketed", async function () {});
+
+    it("cannot add more gems than there are sockets and fee is not taken - EPIC - 3 gems already socketed", async function () {});
+
+    it("cannot add more gems than there are sockets and fee is not taken - LEGENDARY - 1 gem already socketed", async function () {});
+
+    it("cannot add more gems than there are sockets and fee is not taken - LEGENDARY - 2 gems already socketed", async function () {});
+
+    it("cannot add more gems than there are sockets and fee is not taken - LEGENDARY - 3 gems already socketed", async function () {});
+
+    it("cannot add more gems than there are sockets and fee is not taken - LEGENDARY - 4 gems already socketed", async function () {});
+
+    it("fee is not collected and gems are not added if not extracted first", async function () {});
+
+    it("fee is not taken and gens are not added if from != sender", async function () {});
+
+    it("transaction reverts if fee collection is enabled but user does not have enough SAND for changing catalyst", async function () {});
+
+    it("transaction reverts if fee collection is enabled but user does not have enough SAND for adding gems", async function () {});
   });
 });
+
+// {
+//   name: "Common",
+//   symbol: "COMMON",
+//   sandMintingFee: sandWei(1),
+//   sandUpdateFee: sandWei(1),
+//   maxGems: 1,
+//   quantityRange: [200, 1000],
+//   attributeRange: [1, 25],
+// },
+// {
+//   name: "Rare",
+//   symbol: "RARE",
+//   sandMintingFee: sandWei(4),
+//   sandUpdateFee: sandWei(4),
+//   maxGems: 2,
+//   quantityRange: [50, 200],
+//   attributeRange: [26, 50],
+// },
+// {
+//   name: "Epic",
+//   symbol: "EPIC",
+//   sandMintingFee: sandWei(10),
+//   sandUpdateFee: sandWei(10),
+//   maxGems: 3,
+//   quantityRange: [10, 50],
+//   attributeRange: [51, 75],
+// },
+// {
+//   name: "Legendary",
+//   symbol: "LEGENDARY",
+//   sandMintingFee: sandWei(200),
+//   sandUpdateFee: sandWei(200),
+//   maxGems: 4,
+//   quantityRange: [1, 10],
+//   attributeRange: [76, 100],
+// },
