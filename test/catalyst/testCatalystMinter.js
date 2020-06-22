@@ -35,11 +35,11 @@ function sandWei(amount) {
 
 describe("Catalyst:Minting", function () {
   it("creator mint Asset", async function () {
-    const {creator} = await setupCatalystUsers();
+    const {creator, catalyst, catalystRegistry} = await setupCatalystUsers();
     const packId = 0;
     const gemIds = [0, 0, 0];
     const quantity = 11;
-    await waitFor(
+    const receipt = await waitFor(
       creator.CatalystMinter.mint(
         creator.address,
         packId,
@@ -51,6 +51,8 @@ describe("Catalyst:Minting", function () {
         emptyBytes
       )
     );
+    const {gems, maxGemsConfigured} = await getMintEventGems(receipt, catalyst, catalystRegistry);
+    assert.isAtMost(gems, maxGemsConfigured, "more gems than allowed!");
   });
 
   it("creator without gems cannot mint Asset", async function () {
@@ -117,7 +119,7 @@ describe("Catalyst:Minting", function () {
     const totalExpectedFee = toWei(11 * 10);
 
     // TODO check Sand fee
-    const {tokenId} = await checERC1155Balances(
+    const {tokenId, receipt} = await checERC1155Balances(
       creator.address,
       {PowerGem: [gem, PowerGem, -3], EpicCatalyst: [catalyst, EpicCatalyst, -1]},
       () => creator.mintAsset({catalyst: EpicCatalyst, gemIds, quantity})
@@ -126,11 +128,12 @@ describe("Catalyst:Minting", function () {
     const catalystData = await catalystRegistry.getCatalyst(tokenId);
     expect(catalystData[0]).to.equal(true);
     expect(catalystData[1]).to.equal(EpicCatalyst);
+    const {gems, maxGemsConfigured} = await getMintEventGems(receipt, catalyst, catalystRegistry);
 
     const balance = await asset["balanceOf(address,uint256)"](creator.address, tokenId);
     const rarity = await asset.rarity(tokenId);
     // TODO await assertValidEvents({catalystRegistry, tokenId, gemIds, range: [51, 75]});
-
+    assert.isAtMost(gems, maxGemsConfigured, "more gems than allowed!");
     assert.equal(balance, 11);
     assert.equal(rarity, 0); // rarity is no more in use
   });
