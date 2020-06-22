@@ -10,7 +10,6 @@ import "../contracts_common/src/Libraries/BytesUtil.sol";
 import "../contracts_common/src/BaseWithStorage/SuperOperators.sol";
 import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 
-
 contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     /// @notice emitted when a new Token is added to the group.
     /// @param subToken the token added, its id will be its index in the array.
@@ -55,7 +54,6 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         _erc20s[id].emitTransferEvent(address(0), to, amount);
     }
 
-    // TODO test
     /// @dev mint more tokens of a several subToken .
     /// @param to address receiving the tokens.
     /// @param ids subToken ids (also the index at which it was added).
