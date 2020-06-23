@@ -7,7 +7,7 @@ import "./contracts_common/src/BaseWithStorage/Admin.sol";
 
 contract StarterPack is IStarterPack, Admin {
     // /////////////////////////// Data ///////////////////////////
-    mapping(address => uint256) creatorNonce;
+    mapping(address => mapping(uint256 => bool)) public nonceByCreator;
 
     // //////////////////////////Functions ////////////////////////
     function purchase(
@@ -18,8 +18,9 @@ contract StarterPack is IStarterPack, Admin {
         uint256 nonce,
         bytes calldata signature
     ) external override payable {
-        // Sanity check:
-        creatorNonce[to]++;
+        require(!nonceByCreator[to][nonce], "invalid nonce!");
+        nonceByCreator[to][nonce] = true;
+
         emit Purchase(from, to, catalystQuantities, gemQuantities);
     }
 
