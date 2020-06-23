@@ -2,9 +2,10 @@ pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
 import "./interfaces/IStarterPack.sol";
+import "./contracts_common/src/BaseWithStorage/Admin.sol";
 
 
-contract StarterPack is IStarterPack {
+contract StarterPack is IStarterPack, Admin {
     // /////////////////////////// Data ///////////////////////////
     mapping(address => uint256) creatorNonce;
 
@@ -21,7 +22,7 @@ contract StarterPack is IStarterPack {
         creatorNonce[to]++;
     }
 
-    function withdrawAll(address to) external override {}
+    function withdrawAll(address to) external override adminOnly {}
 
-    function setPrices(uint256[4] calldata prices) external override {}
+    function setPrices(uint256[4] calldata prices) external override adminOnly {}
 }
