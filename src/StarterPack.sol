@@ -5,6 +5,10 @@ import "./interfaces/IStarterPack.sol";
 
 
 contract StarterPack is IStarterPack {
+    // /////////////////////////// Data ///////////////////////////
+    mapping(address => uint256) creatorNonce;
+
+    // //////////////////////////Functions ////////////////////////
     function purchase(
         address from,
         address to,
@@ -12,7 +16,10 @@ contract StarterPack is IStarterPack {
         uint256[5] calldata gemQuantities,
         uint256 nonce,
         bytes calldata signature
-    ) external override payable {}
+    ) external override payable {
+        // Sanity check:
+        creatorNonce[to]++;
+    }
 
     function withdrawAll(address to) external override {}
 
