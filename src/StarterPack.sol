@@ -20,9 +20,14 @@ contract StarterPack is IStarterPack, Admin {
     ) external override payable {
         // Sanity check:
         creatorNonce[to]++;
+        emit Purchase(from, to, catalystQuantities, gemQuantities);
     }
 
-    function withdrawAll(address to) external override onlyAdmin {}
+    function withdrawAll(address to) external override onlyAdmin {
+        emit Withdraw(to, 42);
+    }
 
-    function setPrices(uint256[4] calldata prices) external override onlyAdmin {}
+    function setPrices(uint256[4] calldata prices) external override onlyAdmin {
+        emit SetPrices(prices);
+    }
 }
