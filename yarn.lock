@@ -1332,10 +1332,10 @@ buffer@^5.0.5, buffer@^5.2.1:
     base64-js "^1.0.2"
     ieee754 "^1.1.4"
 
-buidler-deploy@^0.4.2:
-  version "0.4.2"
-  resolved "https://registry.yarnpkg.com/buidler-deploy/-/buidler-deploy-0.4.2.tgz#55a9805463cdb5e3d88fcfceef6d4f5d60728959"
-  integrity sha512-ge1G6XQa/kjhlsw0728kad5zZwtYz+IuzYIzXlqU8f9VCYuKoy8fGFCck8Be/9fAmdKg1bZ9Ooeqm41nXWZkQg==
+buidler-deploy@^0.4.3:
+  version "0.4.3"
+  resolved "https://registry.yarnpkg.com/buidler-deploy/-/buidler-deploy-0.4.3.tgz#d9637b6ab9059edb33b238303c80e5f8bf470b65"
+  integrity sha512-0rEZCjV+8BQeqA0G12+Zca3NPuGLdrygjvrc5cC8epU6dLQoyDme4dTh5vYzF8e6LxrA+/TOax7xFMPvoWSjZw==
   dependencies:
     "@ethersproject/abstract-signer" "^5.0.0-beta.144"
     "@ethersproject/address" "^5.0.0-beta.135"
