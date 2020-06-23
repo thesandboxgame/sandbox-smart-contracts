@@ -22,7 +22,7 @@ contract StarterPack is IStarterPack, Admin {
         creatorNonce[to]++;
     }
 
-    function withdrawAll(address to) external override adminOnly {}
+    function withdrawAll(address to) external override onlyAdmin {}
 
-    function setPrices(uint256[4] calldata prices) external override adminOnly {}
+    function setPrices(uint256[4] calldata prices) external override onlyAdmin {}
 }
