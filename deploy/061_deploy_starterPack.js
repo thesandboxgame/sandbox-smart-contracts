@@ -5,14 +5,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
 
   const {deployer} = await getNamedAccounts();
 
-  const deployResult = await deployIfDifferent(
-    ["data"],
-    "StarterPack",
-    {from: deployer, gas: 3000000},
-    "StarterPack",
-    deployer,
-    deployer
-  );
+  const deployResult = await deployIfDifferent(["data"], "StarterPack", {from: deployer, gas: 3000000}, deployer);
 
   if (deployResult.newlyDeployed) {
     log(" - StarterPack deployed at : " + deployResult.address + " for gas : " + deployResult.receipt.gasUsed);
