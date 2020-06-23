@@ -8,14 +8,12 @@ import "./contracts_common/src/BaseWithStorage/Admin.sol";
 contract StarterPack is IStarterPack, Admin {
     // /////////////////////////// Data ///////////////////////////
 
-    address _beneficiary;
     mapping(address => mapping(uint256 => bool)) public nonceByCreator;
 
     // //////////////////////////Functions ////////////////////////
 
-    constructor(address starterPackAdmin, address beneficiary) public {
+    constructor(address starterPackAdmin) public {
         _admin = starterPackAdmin;
-        _beneficiary = beneficiary;
     }
 
     function purchase(
