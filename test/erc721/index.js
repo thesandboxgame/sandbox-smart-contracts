@@ -1,6 +1,6 @@
-const {assert} = require("chai-local");
+const {assert} = require("local-chai");
 const ethers = require("ethers");
-const {expectRevert, zeroAddress, emptyBytes} = require("testUtils");
+const {expectRevert, zeroAddress, emptyBytes} = require("local-utils");
 const {Contract, ContractFactory} = ethers;
 const {Web3Provider} = ethers.providers;
 const erc721ABI = [

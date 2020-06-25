@@ -13,7 +13,7 @@ import "../contracts_common/src/Interfaces/ERC1654.sol";
 import "../contracts_common/src/Interfaces/ERC1654Constants.sol";
 import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
 
-import "../TheSandbox712.sol";
+import "../Base/TheSandbox712.sol";
 
 
 contract P2PERC721Sale is Admin, ERC1654Constants, ERC1271Constants, TheSandbox712, MetaTransactionReceiver {

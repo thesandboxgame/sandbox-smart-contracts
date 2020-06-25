@@ -69,7 +69,7 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         _estate = estate;
     }
 
-    /// @notice set the wallet receiving the proceeds
+    /// @dev set the wallet receiving the proceeds
     /// @param newWallet address of the new receiving wallet
     function setReceivingWallet(address payable newWallet) external {
         require(newWallet != address(0), "receiving wallet cannot be zero address");
@@ -77,7 +77,7 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         _wallet = newWallet;
     }
 
-    /// @notice enable/disable DAI payment for Lands
+    /// @dev enable/disable DAI payment for Lands
     /// @param enabled whether to enable or disable
     function setDAIEnabled(bool enabled) external {
         require(msg.sender == _admin, "only admin can enable/disable DAI");
@@ -103,7 +103,7 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         return _etherEnabled;
     }
 
-    /// @notice enable/disable the specific SAND payment for Lands
+    /// @dev enable/disable the specific SAND payment for Lands
     /// @param enabled whether to enable or disable
     function setSANDEnabled(bool enabled) external {
         require(msg.sender == _admin, "only admin can enable/disable SAND");

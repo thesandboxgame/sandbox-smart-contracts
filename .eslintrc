@@ -13,7 +13,7 @@
     "no-unused-vars": ["error", {"argsIgnorePattern": "^_"}],
     "no-multi-spaces": ["error", {"exceptions": {"VariableDeclarator": true}}],
     "no-else-return": ["error", {"allowElseIf": true}],
-    "max-params": ["error", 5],
+    "max-params": ["error", 6],
     "no-await-in-loop": "off"
   }
 }

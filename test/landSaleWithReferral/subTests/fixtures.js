@@ -1,6 +1,6 @@
 const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
 const MerkleTree = require("../../../lib/merkleTree");
-const {getChainCurrentTime} = require("testUtils");
+const {getChainCurrentTime} = require("local-utils");
 const {createDataArray} = require("../../../lib/merkleTreeHelper");
 const {testLands, generateUserPermissions, setupUser} = require("./_testHelper");
 

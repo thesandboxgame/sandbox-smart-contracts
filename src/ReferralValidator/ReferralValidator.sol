@@ -7,10 +7,7 @@ import "../contracts_common/src/Interfaces/ERC20.sol";
 import "../contracts_common/src/BaseWithStorage/Admin.sol";
 
 
-/**
- * @title Referral Validator
- * @notice This contract verifies if a referral is valid
- */
+/// @dev This contract verifies if a referral is valid
 contract ReferralValidator is Admin {
     address private _signingWallet;
     uint256 private _maxCommissionRate;
@@ -33,7 +30,7 @@ contract ReferralValidator is Admin {
     }
 
     /**
-     * @notice Update the signing wallet
+     * @dev Update the signing wallet
      * @param newSigningWallet The new address of the signing wallet
      */
     function updateSigningWallet(address newSigningWallet) external {
@@ -43,7 +40,7 @@ contract ReferralValidator is Admin {
     }
 
     /**
-     * @notice signing wallet authorized for referral
+     * @dev signing wallet authorized for referral
      * @return the address of the signing wallet
      */
     function getSigningWallet() external view returns (address) {
@@ -59,7 +56,7 @@ contract ReferralValidator is Admin {
     }
 
     /**
-     * @notice Update the maximum commission rate
+     * @dev Update the maximum commission rate
      * @param newMaxCommissionRate The new maximum commission rate
      */
     function updateMaxCommissionRate(uint256 newMaxCommissionRate) external {

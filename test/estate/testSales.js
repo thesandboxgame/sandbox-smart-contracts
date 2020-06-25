@@ -1,7 +1,7 @@
 const {BigNumber} = require("ethers");
-const {assert} = require("chai-local");
+const {assert} = require("local-chai");
 const {setupEstateSale} = require("./fixtures");
-const {emptyBytes, zeroAddress} = require("testUtils");
+const {emptyBytes, zeroAddress} = require("local-utils");
 
 describe("Estate:Sales", function () {
   it("purchase an estate and burnAndTransferFrom", async function () {

@@ -1,4 +1,4 @@
-const {assert} = require("chai-local");
+const {assert} = require("local-chai");
 const MerkleTree = require("../../../lib/merkleTree");
 const {createDataArray} = require("../../../lib/merkleTreeHelper");
 

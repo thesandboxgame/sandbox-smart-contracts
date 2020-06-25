@@ -48,7 +48,8 @@ function eth_node(networkName) {
     uri = uri.replace("{{networkName}}", networkName);
   }
   if (!uri || uri === "") {
-    throw new Error(`environment variable "ETH_NODE_URI" not configured `);
+    // throw new Error(`environment variable "ETH_NODE_URI" not configured `);
+    return "";
   }
   if (uri.indexOf("{{") >= 0) {
     throw new Error(`invalid uri or network not supported by nod eprovider : ${uri}`);
@@ -60,6 +61,9 @@ module.exports = {
   gasReporter: {
     enabled: process.env.REPORT_GAS ? true : false,
     src: "src",
+  },
+  mocha: {
+    timeout: 0, // for gas-reporter // TODO create a test plugin that allow to pass mocha args in the command line
   },
   namedAccounts: {
     deployer: {
@@ -120,7 +124,12 @@ module.exports = {
       42: "0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e",
       314159: "0x94AE0495bEDb538F0a14fFE4Dc160dC280989E3a",
     },
-
+    catalystMinter: "sandAdmin", // TODO ?
+    catalystAdmin: "sandAdmin",
+    gemAdmin: "sandAdmin",
+    gemMinter: "sandAdmin", // TODO ?
+    catalystRegistryAdmin: "sandAdmin",
+    catalystMinterAdmin: "sandAdmin",
     // testing
     others: {
       default: "from:5",

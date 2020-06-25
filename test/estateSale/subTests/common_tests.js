@@ -1,4 +1,4 @@
-const {assert} = require("chai-local");
+const {assert} = require("local-chai");
 const {setupEstateSale} = require("./fixtures");
 const {calculateLandHash} = require("../../../lib/merkleTreeHelper");
 

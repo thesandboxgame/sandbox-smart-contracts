@@ -1,5 +1,5 @@
 const {BigNumber} = require("ethers");
-const {toWei} = require("testUtils");
+const {toWei} = require("local-utils");
 
 module.exports.testLands = [
   {

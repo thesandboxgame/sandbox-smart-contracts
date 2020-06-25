@@ -23,7 +23,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     if (!isMinter) {
       log(`setting ${landSaleName} as Land minter`);
       const currentLandAdmin = await call("Land", "getAdmin");
-      console.log(`current land admin ${currentLandAdmin}`);
       await sendTxAndWait(
         {from: currentLandAdmin, gas: 1000000, skipUnknownSigner: true},
         "Land",
@@ -31,7 +30,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
         landSale.address,
         true
       );
-      console.log(`DONE`);
     }
 
     const isDAIEnabled = await call(landSaleName, "isDAIEnabled");

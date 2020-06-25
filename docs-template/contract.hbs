@@ -1,0 +1,69 @@
+{{~#*inline "typed-variable-array"~}}
+{{#each .}}{{typeName}}{{#if name}} {{name}}{{/if}}{{#unless @last}}, {{/unless}}{{/each}}
+{{~/inline~}}
+
+{{#*inline "function"}}
+{{#if natspec.userdoc}}
+### {{name}}({{> typed-variable-array args}})
+{{natspec.userdoc}}
+{{#if natspec.params}}
+#### Parameters
+{{#each natspec.params}}
+**{{param}}:** {{description}}
+{{/each}}
+{{/if}}
+{{#if natspec.returns}}
+#### Returns
+{{#each natspec.returns}}
+**{{param}}:** {{description}}
+{{/each}}
+{{/if}}
+{{/if}}
+{{/inline}}
+
+{{#*inline "contract"}}
+{{#if natspec.userdoc}}
+## {{name}}
+{{natspec.userdoc}}
+{{#if functions}}
+### Functions
+{{#each inheritedItems}}
+{{#if functions}}
+{{#each functions}}
+{{#ne name "constructor"}}
+{{#eq visibility "public"}}
+{{> function .}}
+{{/eq}}
+{{#eq visibility "external"}}
+{{> function .}}
+{{/eq}}
+{{/ne}}
+{{/each}}
+{{/if}}
+{{/each}}
+{{/if}}
+
+
+{{#if events}}
+### Events
+{{#each inheritedItems}}
+{{#each events}}
+{{#if natspec.userdoc}}
+### {{name}}({{> typed-variable-array args}})
+{{natspec.userdoc}}
+{{#if natspec.params}}
+#### Parameters
+{{#each natspec.params}}
+**{{param}}:** {{description}}
+{{/each}}
+{{/if}}
+{{/if}}
+{{/each}}
+{{/each}}
+{{/if}}
+{{/if}}
+{{/inline}}
+
+{{!-- {{#eq name "CatalystMinter"}} --}}
+{{> contract .}}
+{{!-- {{/eq}} --}}

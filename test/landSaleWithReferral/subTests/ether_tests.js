@@ -1,7 +1,7 @@
-const {assert} = require("chai-local");
+const {assert} = require("local-chai");
 const {ethers} = require("@nomiclabs/buidler");
 const {utils, BigNumber} = require("ethers");
-const {expectRevert, zeroAddress, increaseTime} = require("testUtils");
+const {expectRevert, zeroAddress, increaseTime} = require("local-utils");
 const {setupLandSaleWithReferral} = require("./fixtures");
 const {calculateLandHash} = require("../../../lib/merkleTreeHelper");
 const {createReferral} = require("../../../lib/referralValidator");

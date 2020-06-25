@@ -21,7 +21,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     "CommonMinter",
     asset.address,
     sand.address,
-    "1000000000000000000",
+    "0", // TODO "1000000000000000000",
     commonMinterAdmin,
     mintingFeeCollector
   );
