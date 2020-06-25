@@ -1,4 +1,5 @@
-const {toWei, findEvents, waitFor} = require("local-utils");
+const {toWei, waitFor} = require("local-utils");
+const {findEvents} = require("../../lib/findEvents.js");
 const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
 const {BigNumber} = require("@ethersproject/bignumber");
 

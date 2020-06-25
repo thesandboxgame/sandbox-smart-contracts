@@ -1,6 +1,7 @@
 const {assert} = require("local-chai");
 const ethers = require("ethers");
-const {expectRevert, zeroAddress, findEvents} = require("local-utils");
+const {expectRevert, zeroAddress} = require("local-utils");
+const {findEvents} = require("../../lib/findEvents.js");
 const {Contract, BigNumber} = ethers;
 const {Web3Provider} = ethers.providers;
 
