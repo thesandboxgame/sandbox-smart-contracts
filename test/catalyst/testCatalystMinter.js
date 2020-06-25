@@ -728,8 +728,8 @@ describe("Catalyst:Minting", function () {
       assert.equal(to, creatorWithoutSand.address);
       // check fee collector has received the correct fee for the mint
       const newBalanceAfterMint = await sand.balanceOf(creatorWithoutSand.address);
-      assert.ok(newBalanceAfterMint.eq(BigNumber.from(value)));
-      assert.ok(value.eq(BigNumber.from(totalExpectedFee)));
+      expect(newBalanceAfterMint).to.equal(BigNumber.from(value));
+      expect(value).to.equal(BigNumber.from(totalExpectedFee));
       // user updates the catalyst in the asset
       const sandUpdateFee = toWei(1000); // in catalystConfig
       const catalystChangeReceipt = await waitFor(
@@ -740,10 +740,10 @@ describe("Catalyst:Minting", function () {
       const changeEvent = changeEventsMatching[0];
       assert.equal(changeEvent.args[0], user.address);
       assert.equal(changeEvent.args[1], creatorWithoutSand.address);
-      assert.ok(changeEvent.args[2].eq(sandUpdateFee));
+      expect(changeEvent.args[2]).to.equal(sandUpdateFee);
       // check fee collector's new balance has been increased by the catalystChangeSandFee
       const newBalanceAfterCatalystChange = await sand.balanceOf(creatorWithoutSand.address);
-      assert.ok(newBalanceAfterCatalystChange.eq(newBalanceAfterMint.add(sandUpdateFee)));
+      expect(newBalanceAfterCatalystChange).to.equal(newBalanceAfterMint.add(sandUpdateFee));
     });
 
     it("the transaction reverts if the user does not have enough SAND to pay the catalystChangeFee (catalyst change fee set via fixture)", async function () {
@@ -771,7 +771,7 @@ describe("Catalyst:Minting", function () {
       });
 
       const newBalanceAfterMint = await sand.balanceOf(creatorWithoutSand.address);
-      assert.ok(newBalanceAfterMint.eq(BigNumber.from(0)));
+      expect(newBalanceAfterMint).to.equal(BigNumber.from(0));
 
       await expectRevert(
         waitFor(
@@ -815,8 +815,8 @@ describe("Catalyst:Minting", function () {
       assert.equal(to, creatorWithoutSand.address);
       // check fee collector has received the correct fee for the mint
       const newBalanceAfterMint = await sand.balanceOf(creatorWithoutSand.address);
-      assert.ok(newBalanceAfterMint.eq(BigNumber.from(value)));
-      assert.ok(value.eq(BigNumber.from(totalExpectedFee)));
+      expect(newBalanceAfterMint).to.equal(BigNumber.from(value));
+      expect(value).to.equal(BigNumber.from(totalExpectedFee));
       // user updates the gems in the asset
       const expectedGemAdditionFee = toWei(2);
       const gemsAddedReceipt = await waitFor(
@@ -827,10 +827,10 @@ describe("Catalyst:Minting", function () {
       const changeEvent = changeEventsMatching[0];
       assert.equal(changeEvent.args[0], user.address);
       assert.equal(changeEvent.args[1], creatorWithoutSand.address);
-      assert.ok(changeEvent.args[2].eq(expectedGemAdditionFee));
+      expect(changeEvent.args[2]).to.equal(expectedGemAdditionFee);
       // check fee collector's new balance has been increased by the gemAdditionFee
       const newBalanceAfterCatalystChange = await sand.balanceOf(creatorWithoutSand.address);
-      assert.ok(newBalanceAfterCatalystChange.eq(newBalanceAfterMint.add(expectedGemAdditionFee)));
+      expect(newBalanceAfterCatalystChange).to.equal(newBalanceAfterMint.add(expectedGemAdditionFee));
     });
 
     it("the correct sandFee is collected when MAX gems are added (via gemAdditionFee option in fixture)", async function () {
@@ -861,8 +861,8 @@ describe("Catalyst:Minting", function () {
       assert.equal(to, creatorWithoutSand.address);
       // check fee collector has received the correct fee for the mint
       const newBalanceAfterMint = await sand.balanceOf(creatorWithoutSand.address);
-      assert.ok(newBalanceAfterMint.eq(BigNumber.from(value)));
-      assert.ok(value.eq(BigNumber.from(totalExpectedFee)));
+      expect(newBalanceAfterMint).to.equal(BigNumber.from(value));
+      expect(value).to.equal(BigNumber.from(totalExpectedFee));
       // user updates the gems in the asset
       const expectedGemAdditionFee = toWei(2).mul(3);
       const gemsAddedReceipt = await waitFor(
@@ -873,10 +873,10 @@ describe("Catalyst:Minting", function () {
       const changeEvent = changeEventsMatching[0];
       assert.equal(changeEvent.args[0], user.address);
       assert.equal(changeEvent.args[1], creatorWithoutSand.address);
-      assert.ok(changeEvent.args[2].eq(expectedGemAdditionFee));
+      expect(changeEvent.args[2]).to.equal(expectedGemAdditionFee);
       // check fee collector's new balance has been increased by the gemAdditionFee
       const newBalanceAfterCatalystChange = await sand.balanceOf(creatorWithoutSand.address);
-      assert.ok(newBalanceAfterCatalystChange.eq(newBalanceAfterMint.add(expectedGemAdditionFee)));
+      expect(newBalanceAfterCatalystChange).to.equal(newBalanceAfterMint.add(expectedGemAdditionFee));
     });
 
     it("the correct sandFee is collected when 1 gem is added to an empty asset (via gemAdditionFee option in fixture)", async function () {
@@ -907,8 +907,8 @@ describe("Catalyst:Minting", function () {
       assert.equal(to, creatorWithoutSand.address);
       // check fee collector has received the correct fee for the mint
       const newBalanceAfterMint = await sand.balanceOf(creatorWithoutSand.address);
-      assert.ok(newBalanceAfterMint.eq(BigNumber.from(value)));
-      assert.ok(value.eq(BigNumber.from(totalExpectedFee)));
+      expect(newBalanceAfterMint).to.equal(BigNumber.from(value));
+      expect(value).to.equal(BigNumber.from(totalExpectedFee));
       // user updates the gems in the asset
       const expectedGemAdditionFee = toWei(2);
       const gemsAddedReceipt = await waitFor(
@@ -919,10 +919,10 @@ describe("Catalyst:Minting", function () {
       const changeEvent = changeEventsMatching[0];
       assert.equal(changeEvent.args[0], user.address);
       assert.equal(changeEvent.args[1], creatorWithoutSand.address);
-      assert.ok(changeEvent.args[2].eq(expectedGemAdditionFee));
+      expect(changeEvent.args[2]).to.equal(expectedGemAdditionFee);
       // check fee collector's new balance has been increased by the gemAdditionFee
       const newBalanceAfterCatalystChange = await sand.balanceOf(creatorWithoutSand.address);
-      assert.ok(newBalanceAfterCatalystChange.eq(newBalanceAfterMint.add(expectedGemAdditionFee)));
+      expect(newBalanceAfterCatalystChange).to.equal(newBalanceAfterMint.add(expectedGemAdditionFee));
     });
 
     it("the transaction reverts if user attempts to add several more gems than available sockets - SOCKETS FULL - (via gemAdditionFee option in fixture)", async function () {
