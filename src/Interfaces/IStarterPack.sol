@@ -10,14 +10,46 @@ interface IStarterPack {
 
     event Withdraw(address indexed to, uint256 amount);
 
-    /// @notice A function for purchasing starter-packs.
+    /// @notice A function for purchasing starter-packs with SAND.
     /// @param from Must be the tx sender or meta tx signer.
     /// @param to The address to send catalysts & gems to.
     /// @param catalystQuantities The amounts of each type of catalyst to send.
     /// @param gemQuantities The amounts of each type of gem to send.
     /// @param nonce A per-creator nonce, incremented to avoid reuse of signatures.
     /// @param signature A signed message specifying tx details.
-    function purchase(
+    function purchaseWithSand(
+        address from,
+        address to,
+        uint256[4] calldata catalystQuantities,
+        uint256[5] calldata gemQuantities,
+        uint256 nonce,
+        bytes calldata signature
+    ) external payable;
+
+    /// @notice A function for purchasing starter-packs with Ether.
+    /// @param from Must be the tx sender or meta tx signer.
+    /// @param to The address to send catalysts & gems to.
+    /// @param catalystQuantities The amounts of each type of catalyst to send.
+    /// @param gemQuantities The amounts of each type of gem to send.
+    /// @param nonce A per-creator nonce, incremented to avoid reuse of signatures.
+    /// @param signature A signed message specifying tx details.
+    function purchaseWithEth(
+        address from,
+        address to,
+        uint256[4] calldata catalystQuantities,
+        uint256[5] calldata gemQuantities,
+        uint256 nonce,
+        bytes calldata signature
+    ) external payable;
+
+    /// @notice A function for purchasing starter-packs with DAI.
+    /// @param from Must be the tx sender or meta tx signer.
+    /// @param to The address to send catalysts & gems to.
+    /// @param catalystQuantities The amounts of each type of catalyst to send.
+    /// @param gemQuantities The amounts of each type of gem to send.
+    /// @param nonce A per-creator nonce, incremented to avoid reuse of signatures.
+    /// @param signature A signed message specifying tx details.
+    function purchaseWithDai(
         address from,
         address to,
         uint256[4] calldata catalystQuantities,
