@@ -1,6 +1,7 @@
 const {setupStarterPack} = require("./fixtures");
 const {assert} = require("chai");
 const {ethers, getNamedAccounts} = require("@nomiclabs/buidler");
+
 const starterPackJSON = require("../../artifacts/StarterPack.json");
 const starterPackABI = starterPackJSON.abi;
 const starterPackbytecode = starterPackJSON.bytecode;
