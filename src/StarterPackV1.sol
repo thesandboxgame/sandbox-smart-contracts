@@ -1,18 +1,20 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
+import "./interfaces/StarterPack.sol";
 import "./contracts_common/src/Libraries/SafeMathWithRequire.sol";
-import "./interfaces/IStarterPack.sol";
 import "./contracts_common/src/Interfaces/ERC20.sol";
 import "./contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 import "./contracts_common/src/Interfaces/Medianizer.sol";
 import "./contracts_common/src/BaseWithStorage/Admin.sol";
+import "./Catalyst/ERC20GroupCatalyst.sol";
+import "./Catalyst/ERC20GroupGem.sol";
 
 /**
  * @title StarterPack contract that supports SAND, DAI and ETH as payment
  * @notice This contract manages the distribution of StarterPacks for Catalysts and Gems
  */
-contract StarterPack is IStarterPack, Admin, MetaTransactionReceiver {
+contract StarterPackV1 is StarterPack, Admin, MetaTransactionReceiver {
     using SafeMathWithRequire for uint256;
 
     uint256 internal constant daiPrice = 14400000000000000;
@@ -21,6 +23,9 @@ contract StarterPack is IStarterPack, Admin, MetaTransactionReceiver {
     Medianizer private _medianizer;
     ERC20 private _dai;
 
+    ERC20Group internal _erc20GroupCatalyst;
+    ERC20Group internal _erc20GroupGem;
+
     bool _sandEnabled = false;
     bool _etherEnabled = true;
     bool _daiEnabled = false;
@@ -28,7 +33,7 @@ contract StarterPack is IStarterPack, Admin, MetaTransactionReceiver {
     address payable internal _wallet;
     bool _purchasesEnabled = false;
 
-    mapping(address => mapping(uint256 => bool)) public nonceByCreator;
+    mapping(address => mapping(uint256 => uint256)) public nonceByCreator;
 
     // ////////////////////////// Functions ////////////////////////
 
@@ -38,7 +43,9 @@ contract StarterPack is IStarterPack, Admin, MetaTransactionReceiver {
         address initialMetaTx,
         address payable initialWalletAddress,
         address medianizerContractAddress,
-        address daiTokenContractAddress
+        address daiTokenContractAddress,
+        address erc20GroupCatalystAddress,
+        address erc20GroupGemAddress
     ) public {
         _admin = starterPackAdmin;
         _sand = ERC20(sandContractAddress);
@@ -46,9 +53,9 @@ contract StarterPack is IStarterPack, Admin, MetaTransactionReceiver {
         _wallet = initialWalletAddress;
         _medianizer = Medianizer(medianizerContractAddress);
         _dai = ERC20(daiTokenContractAddress);
+        _erc20GroupCatalyst = ERC20Group(erc20GroupCatalystAddress);
+        _erc20GroupGem = ERC20Group(erc20GroupGemAddress);
     }
-
-    // TODO: as catalysts and gems are going to be sent to this contract we need to set up storage
 
     /// @dev set the wallet receiving the proceeds
     /// @param newWallet address of the new receiving wallet
@@ -121,9 +128,12 @@ contract StarterPack is IStarterPack, Admin, MetaTransactionReceiver {
         require(_purchasesEnabled, "sale not started");
         require(_sandEnabled, "sand payments not enabled");
 
-         _isAuthorized(from, to, nonce, signature);
+        require(to != address(0), "DESTINATION_ZERO_ADDRESS");
+        require(to != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
 
-        _isValidNonce(to, nonce);
+        require(_isAuthorized(from, to, nonce, signature), "NOT_AUTHORIZED");
+        require(_isValidNonce(to, nonce), "INVALID_NONCE");
+        require(_hasAllocation(to, catalystQuantities, gemQuantities));
 
         uint256 priceInSand = _calculatePriceInSand();
 
@@ -133,7 +143,7 @@ contract StarterPack is IStarterPack, Admin, MetaTransactionReceiver {
 
         _issueGems();
 
-        emit Purchase(from, to, catalystQuantities, gemQuantities);
+        emit Purchase(from, to, catalystQuantities, gemQuantities, priceInSand);
     }
 
     function purchaseWithEth(
@@ -146,8 +156,9 @@ contract StarterPack is IStarterPack, Admin, MetaTransactionReceiver {
     ) external override payable {
         
         // TODO:
+        uint256 priceInSand = 0;
 
-        emit Purchase(from, to, catalystQuantities, gemQuantities);
+        emit Purchase(from, to, catalystQuantities, gemQuantities, priceInSand);
     }
 
     function purchaseWithDai(
@@ -160,21 +171,60 @@ contract StarterPack is IStarterPack, Admin, MetaTransactionReceiver {
     ) external override payable {
 
         // TODO:
+        uint256 priceInSand = 0;
 
-        emit Purchase(from, to, catalystQuantities, gemQuantities);
+        emit Purchase(from, to, catalystQuantities, gemQuantities, priceInSand);
     }
 
-    // TBD: after admin sets purchasesEnabled as false (or sale has expired, could do this instead), admin can withdrawAll
     function withdrawAll(address to) external override {
         require(!_purchasesEnabled, "sale is still in progress");
         require(msg.sender == _admin, "only admin can withdraw remaining tokens");
-        emit Withdraw(to, 42); // TODO: what Catalyst & Gem information do we want to see?
+        // TODO: withdrawal
     }
 
-    // TBD: timing for setPrices. Enable admin to update prices at any time, or ensure that purchasing is disabled first?
+    // Prices can be changed anytime by admin. Envisage the need to set a delay where old prices are allowed
     function setPrices(uint256[4] calldata prices) external override {
         require(msg.sender == _admin, "only admin can change StarterPack prices");
+        // TODO: prices
         emit SetPrices(prices);
+    }
+
+    function viewNonceByCreator(address to,  uint256 nonce) external view returns (uint256) {
+        return nonceByCreator[to][nonce];
+    }
+
+    function checkCatalystBalance(uint256 tokenId) external view returns (uint256) {
+        return _erc20GroupCatalyst.balanceOf(address(this), tokenId);
+    }
+
+    function checkGemBalance(uint256 tokenId) external view returns (uint256) {
+        return _erc20GroupGem.balanceOf(address(this), tokenId);
+    }
+
+    function checkCatalystBatchBalances(uint256[] calldata tokenIds) external view returns (uint256[] memory balances) {
+        address[] memory owners;
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            owners[i] = address(this);
+        }
+        return _erc20GroupCatalyst.balanceOfBatch(owners, tokenIds);
+    }
+
+    function checkGemBatchBalances(uint256[] calldata tokenIds) external view returns (uint256[] memory balances) {
+        address[] memory owners;
+        for (uint256 i = 0; i < tokenIds.length; i++) {
+            owners[i] = address(this);
+        }
+        return _erc20GroupGem.balanceOfBatch(owners, tokenIds);
+    }
+
+    function checkPurchaserAllocationCatalyst(address to, uint256 tokenId) external view returns (uint256) {
+        uint256 tokensAllocated; // TODO::
+        return tokensAllocated;
+    }
+
+    function checkPurchaserAllocationGem(address to, uint256 tokenId) external view returns (uint256) {
+        uint256 tokensAllocated; // TODO::
+        return tokensAllocated;
     }
 
     // ////////////////////////// Internal ////////////////////////
@@ -205,8 +255,14 @@ contract StarterPack is IStarterPack, Admin, MetaTransactionReceiver {
     }
 
     function _isValidNonce(address to, uint256 nonce) internal returns (bool) {
-        require(!nonceByCreator[to][nonce], "invalid nonce!");
-        nonceByCreator[to][nonce] = true;
+        require(nonceByCreator[to][nonce] + 1 == nonce, "nonce out of order"); // TODO:
+        nonceByCreator[to][nonce] = nonce;
+        return true;
+    }
+
+    function _hasAllocation(address to, uint256[4] memory catalystQuantities, uint256[5] memory gemQuantities) internal returns (bool) {
+        // TODO: ensure that requested amounts of catalyst tokens and gem tokens are less than or equal to amounts allocated to purchaser - TBD
+        // TODO: ensure that requested amounts of catalyst tokens and gem tokens are less than or equal to amounts owned by this contract - or can do this in _issue functions below
         return true;
     }
     
@@ -223,12 +279,13 @@ contract StarterPack is IStarterPack, Admin, MetaTransactionReceiver {
 
     function _issueCatalysts() internal returns (bool) {
         // TODO: transfer relevant Catalysts
+        // call ERC20 single/batch transfer
         return true;
     }
     
     function _issueGems() internal returns (bool) {
         // TODO: transfer relevant Gems
+         // call ERC20 single/batch transfer
         return true;
     }
-
 }

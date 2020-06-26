@@ -3,12 +3,10 @@ pragma solidity 0.6.5;
 
 /// @title Interface for StarterPack contract
 
-interface IStarterPack {
-    event Purchase(address indexed from, address indexed to, uint256[4] catQuantities, uint256[5] gemQuantities);
+interface StarterPack {
+    event Purchase(address indexed from, address indexed to, uint256[4] catQuantities, uint256[5] gemQuantities, uint256 priceInSand);
 
     event SetPrices(uint256[4] prices);
-
-    event Withdraw(address indexed to, uint256 amount);
 
     /// @notice A function for purchasing starter-packs with SAND.
     /// @param from Must be the tx sender or meta tx signer.
