@@ -9,7 +9,6 @@ import "./contracts_common/src/BaseWithStorage/Admin.sol";
 import "./Catalyst/ERC20GroupCatalyst.sol";
 import "./Catalyst/ERC20GroupGem.sol";
 
-
 /**
  * @title StarterPack contract that supports SAND, DAI and ETH as payment
  * @notice This contract manages the distribution of StarterPacks for Catalysts and Gems
