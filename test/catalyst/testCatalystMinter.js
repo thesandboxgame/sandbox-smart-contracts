@@ -91,7 +91,8 @@ describe("Catalyst:Minting", function () {
   });
 
   it("creator without sand cannot mint Asset", async function () {
-    const {creatorWithoutSand: creator} = await setupCatalystUsers();
+    const {creatorWithoutSand: creator, user, catalystMinterContract} = await setupCatalystUsers();
+    await waitFor(catalystMinterContract.setFeeCollector(user.address));
     const packId = 0;
     const gemIds = [0, 0, 0];
     const quantity = 11;
