@@ -3,14 +3,14 @@ const {guard} = require("../lib");
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deployIfDifferent, log} = deployments;
 
-  const {deployer, catalystAdmin} = await getNamedAccounts();
+  const {deployer, starterPackAdmin} = await getNamedAccounts();
 
   const deployResult = await deployIfDifferent(
     ["data"],
     "StarterPack",
     {from: deployer, gas: 3000000},
     "StarterPack",
-    catalystAdmin
+    starterPackAdmin
   );
 
   if (deployResult.newlyDeployed) {
