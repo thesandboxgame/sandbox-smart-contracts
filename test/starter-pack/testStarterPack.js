@@ -1,4 +1,4 @@
-// const {setupStarterPack} = require("./fixtures");
+const {setupStarterPack} = require("./fixtures");
 const {assert} = require("chai");
 const {ethers} = require("@nomiclabs/buidler");
 const starterPackJSON = require("../../artifacts/StarterPack.json");
@@ -17,10 +17,12 @@ async function deployStarterPack() {
 }
 
 describe("StarterPack: Setup", function () {
-  it("Returns a starterPack contract", async function () {
-    const {starterPack} = await deployStarterPack();
+  it.only("Returns a starterPack contract", async function () {
+    const starterPack = await setupStarterPack();
+    console.log(`starterPack: ${starterPack}`);
+    // const {starterPack} = await deployStarterPack();
     console.log(`starterPack deployed at: ${starterPack.address}`);
-    assert.isOk(starterPack.address != undefined);
+    assert.notEqual(starterPack.address, undefined);
   }); // Passing
 
   it("should set the admin address correctly", async function () {
