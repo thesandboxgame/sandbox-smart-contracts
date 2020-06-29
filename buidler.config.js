@@ -137,6 +137,8 @@ module.exports = {
     gemMinter: "sandAdmin", // TODO later : Staking Reward mechanism
     catalystRegistryAdmin: "sandAdmin",
     catalystMinterAdmin: "sandAdmin",
+    starterPackAdmin: "sandAdmin",
+    starterPackSaleBeneficiary: "sandSaleBeneficiary",
     // testing
     others: {
       default: "from:5",
