@@ -4,7 +4,7 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
   const {deployer} = await getNamedAccounts();
   await deployments.fixture();
 
-  const starterPackContract = await ethers.getContract("StarterPack", deployer);
+  const starterPackContract = await ethers.getContract("StarterPackV1", deployer);
 
   return {
     starterPackContract,
