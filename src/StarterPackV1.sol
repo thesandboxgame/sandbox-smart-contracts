@@ -254,7 +254,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver {
         nonceByCreator[to][nonce] = nonce;
         return true;
     }
-
     function _calculateTotalPriceInSand() internal returns (uint256) {
         // TODO:
         return 10;
@@ -276,7 +275,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver {
     //     // call ERC20 single/batch transfer
     //     return true;
     // }
-
     // function _issueGems() internal returns (bool) {
     //     // TODO: transfer relevant Gems
     //      // call ERC20 single/batch transfer
