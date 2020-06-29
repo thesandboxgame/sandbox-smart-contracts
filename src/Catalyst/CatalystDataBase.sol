@@ -49,8 +49,6 @@ contract CatalystDataBase {
     function _computeValue(
         uint256 seed,
         uint32 gemId,
-        uint16 minValue,
-        uint16 maxValue,
         bytes32 blockHash,
         uint256 slotIndex
     ) internal pure returns (uint32) {
@@ -66,11 +64,23 @@ contract CatalystDataBase {
         uint256 startIndex
     ) external view returns (uint32[] memory values) {
         require(gemIds.length == blockHashes.length, "inconsisten length");
-        uint16 minValue = _data[catalystId].minValue;
-        uint16 maxValue = _data[catalystId].maxValue;
         values = new uint32[](gemIds.length);
-        for (uint256 i = 0; i < gemIds.length; i++) {
-            values[i] = _computeValue(seed, gemIds[i], minValue, maxValue, blockHashes[i], startIndex + i);
+        uint256 maxGemIds = 0;
+        for (uint256 i = gemIds.length - 1; i >= 0; i--) {
+            if (gemIds[i] > maxGemIds) {
+                maxGemIds = gemIds[i];
+            }
+        }
+        uint32[] memory valuesPerGemIds = new uint32[](maxGemIds + 1);
+        for (uint256 i = gemIds.length - 1; i >= 0; i--) {
+            uint32 gemId = gemIds[i];
+            if (valuesPerGemIds[gemId] == 0) {
+                uint32 randomValue = _computeValue(seed, gemId, 1, 25, blockHashes[i], startIndex + i);
+                valuesPerGemIds[gemId] = randomValue;
+                values[i] = randomValue;
+            } else {
+                values[i] = 25;
+            }
         }
     }
 
