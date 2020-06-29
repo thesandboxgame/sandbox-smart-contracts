@@ -133,15 +133,14 @@ contract StarterPackV1 is StarterPack, Admin, MetaTransactionReceiver {
 
         require(_isAuthorized(from, to, nonce, signature), "NOT_AUTHORIZED");
         require(_isValidNonce(to, nonce), "INVALID_NONCE");
-        require(_hasAllocation(to, catalystQuantities, gemQuantities));
 
-        uint256 priceInSand = _calculatePriceInSand();
+        uint256 priceInSand = _calculateTotalPriceInSand();
 
         _handlePurchaseWithERC20(from, priceInSand, _wallet, address(_sand));
 
-        _issueCatalysts();
+        // _issueCatalysts(); 
 
-        _issueGems();
+        // _issueGems();
 
         emit Purchase(from, to, catalystQuantities, gemQuantities, priceInSand);
     }
@@ -217,16 +216,6 @@ contract StarterPackV1 is StarterPack, Admin, MetaTransactionReceiver {
         return _erc20GroupGem.balanceOfBatch(owners, tokenIds);
     }
 
-    function checkPurchaserAllocationCatalyst(address to, uint256 tokenId) external view returns (uint256) {
-        uint256 tokensAllocated; // TODO::
-        return tokensAllocated;
-    }
-
-    function checkPurchaserAllocationGem(address to, uint256 tokenId) external view returns (uint256) {
-        uint256 tokensAllocated; // TODO::
-        return tokensAllocated;
-    }
-
     // ////////////////////////// Internal ////////////////////////
 
     /**
@@ -259,14 +248,8 @@ contract StarterPackV1 is StarterPack, Admin, MetaTransactionReceiver {
         nonceByCreator[to][nonce] = nonce;
         return true;
     }
-
-    function _hasAllocation(address to, uint256[4] memory catalystQuantities, uint256[5] memory gemQuantities) internal returns (bool) {
-        // TODO: ensure that requested amounts of catalyst tokens and gem tokens are less than or equal to amounts allocated to purchaser - TBD
-        // TODO: ensure that requested amounts of catalyst tokens and gem tokens are less than or equal to amounts owned by this contract - or can do this in _issue functions below
-        return true;
-    }
     
-    function _calculatePriceInSand() internal returns (uint256) {
+    function _calculateTotalPriceInSand() internal returns (uint256) {
         // TODO:
         return 10;
     }
@@ -277,15 +260,15 @@ contract StarterPackV1 is StarterPack, Admin, MetaTransactionReceiver {
         require(token.transferFrom(buyer, paymentRecipient, amountForPaymentRecipient), "payment transfer failed");
     }
 
-    function _issueCatalysts() internal returns (bool) {
-        // TODO: transfer relevant Catalysts
-        // call ERC20 single/batch transfer
-        return true;
-    }
+    // function _issueCatalysts() internal returns (bool) {
+    //     // TODO: transfer relevant Catalysts
+    //     // call ERC20 single/batch transfer
+    //     return true;
+    // }
     
-    function _issueGems() internal returns (bool) {
-        // TODO: transfer relevant Gems
-         // call ERC20 single/batch transfer
-        return true;
-    }
+    // function _issueGems() internal returns (bool) {
+    //     // TODO: transfer relevant Gems
+    //      // call ERC20 single/batch transfer
+    //     return true;
+    // }
 }
