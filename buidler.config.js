@@ -130,6 +130,8 @@ module.exports = {
     gemMinter: "sandAdmin", // TODO ?
     catalystRegistryAdmin: "sandAdmin",
     catalystMinterAdmin: "sandAdmin",
+    starterPackAdmin: "sandAdmin",
+    starterPackSaleBeneficiary: "sandSaleBeneficiary",
     // testing
     others: {
       default: "from:5",
