@@ -165,7 +165,6 @@ module.exports = {
     },
     coverage: {
       url: "http://localhost:5458",
-      accounts: accounts,
     },
     // wati for : https://github.com/nomiclabs/buidler/pull/522
     // buidlerevm: {
