@@ -8,13 +8,14 @@ import "./contracts_common/src/Interfaces/Medianizer.sol";
 import "./contracts_common/src/BaseWithStorage/Admin.sol";
 import "./Catalyst/ERC20GroupCatalyst.sol";
 import "./Catalyst/ERC20GroupGem.sol";
+import "./ReferralValidator/ReferralValidator.sol";
 
 
 /**
  * @title StarterPack contract that supports SAND, DAI and ETH as payment
  * @notice This contract manages the distribution of StarterPacks for Catalysts and Gems
  */
-contract StarterPackV1 is Admin, MetaTransactionReceiver {
+contract StarterPackV1 is Admin, MetaTransactionReceiver, ReferralValidator {
     using SafeMathWithRequire for uint256;
 
     uint256 internal constant daiPrice = 14400000000000000;
@@ -49,8 +50,10 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver {
         address medianizerContractAddress,
         address daiTokenContractAddress,
         address erc20GroupCatalystAddress,
-        address erc20GroupGemAddress
-    ) public {
+        address erc20GroupGemAddress,
+        address initialSigningWallet,
+        uint256 initialMaxCommissionRate
+    ) public ReferralValidator(initialSigningWallet, initialMaxCommissionRate) {
         _admin = starterPackAdmin;
         _sand = ERC20(sandContractAddress);
         _setMetaTransactionProcessor(initialMetaTx, true);
