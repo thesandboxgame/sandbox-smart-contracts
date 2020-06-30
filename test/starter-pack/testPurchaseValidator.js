@@ -2,6 +2,8 @@ const {setupStarterPack} = require("./fixtures");
 const {assert} = require("chai");
 const {getNamedAccounts} = require("@nomiclabs/buidler");
 const {createPurchase} = require("../../lib/purchaseValidator");
+const ethers = require("ethers");
+const {computeAddress} = ethers.utils;
 
 const privateKey = "0x96aa38e97d1d0d19e0f1d5215ff9dad66dc5d99225b1657205d124d00d2de177";
 
@@ -31,7 +33,7 @@ describe("Validating Purchase Messages", function () {
     };
 
     const sig = await createPurchase(
-      privateKey,
+      backendReferralWallet,
       purchase.from,
       purchase.to,
       purchase.catalystIds,
@@ -44,11 +46,13 @@ describe("Validating Purchase Messages", function () {
   });
 
   it.only("Purchase validator function exists", async function () {
-    const {starterPackContract: starterPack} = await setupStarterPack();
+    const {starterPackContract: starterPack, metaTxContract} = await setupStarterPack();
     const {backendReferralWallet, others} = await getNamedAccounts();
 
+    const addrFromPrivateKey = computeAddress("0x96aa38e97d1d0d19e0f1d5215ff9dad66dc5d99225b1657205d124d00d2de177");
+
     const purchase = {
-      from: backendReferralWallet,
+      from: metaTxContract.address,
       to: others[0],
       catalystIds: catIds,
       catalystQuantities: catAmounts,
@@ -59,6 +63,7 @@ describe("Validating Purchase Messages", function () {
     };
 
     const sig = await createPurchase(
+      // backendReferralWallet,
       privateKey,
       purchase.from,
       purchase.to,
@@ -70,6 +75,23 @@ describe("Validating Purchase Messages", function () {
       purchase.expiryTime,
       backendReferralWallet
     );
+
+    // const results = await starterPack.isPurchaseValid(
+    //   sig,
+    //   purchase.from,
+    //   purchase.to,
+    //   purchase.catalystIds,
+    //   purchase.catalystQuantities,
+    //   purchase.gemIds,
+    //   purchase.gemQuantities,
+    //   purchase.nonce,
+    //   purchase.expiryTime
+    // );
+    // console.log(`Signer: ${results[0]}`);
+    // console.log(`initialSigner: ${results[1]}`);
+    // console.log(`backend referral wallet: ${backendReferralWallet}`);
+
+    // console.log(`addrFromPrivateKey: ${addrFromPrivateKey}`);
 
     assert.ok(
       await starterPack.isPurchaseValid(
