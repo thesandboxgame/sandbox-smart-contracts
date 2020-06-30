@@ -1,11 +1,11 @@
 sequenceDiagram
   autonumber
-  Admin->>CatalystMinter: mint(...)
-  CatalystMinter->>StarterPack: batchTransferFrom(...)
-  Admin-->>StarterPack: setPrices(...)
-  Admin-->>StarterPack: Whitelist(creator Addr)
-  Creator->>Frontend: Choose pack
-  Frontend->>Backend: Check Whitelist
-  Backend-->>Frontend: return signed message
-  Frontend->>StarterPack: purchaseWithSand(...)
-  StarterPack->>Creator: batchTransferFrom(...)
+  admin->>Gem: batchMint(StarterPack.address,...)
+  admin->>Catalyst: batchMint(StarterPack.address,...)
+  admin-->>StarterPack: setPrices(...)
+  creator->>frontend: Choose pack
+  frontend->>+backend: getList
+  backend-->>-frontend: list + signature
+  frontend->>StarterPack: purchaseWithSand(...)
+  StarterPack->>Catalyst: batchTransferFrom(...,creator,...)
+  StarterPack->>Gem: batchTransferFrom(...,creator,)
