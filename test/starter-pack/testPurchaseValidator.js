@@ -3,6 +3,13 @@ const {assert} = require("chai");
 const {getNamedAccounts} = require("@nomiclabs/buidler");
 const {createPurchase} = require("../../lib/purchaseValidator");
 
+const privateKey = "0x96aa38e97d1d0d19e0f1d5215ff9dad66dc5d99225b1657205d124d00d2de177";
+
+const catIds = [0, 1, 2, 3];
+const catAmounts = [0, 0, 0, 1];
+const gemIds = [0, 1, 2, 3, 4];
+const gemAmounts = [0, 0, 0, 0, 4];
+
 describe("Validating Purchase Messages", function () {
   it.skip("should fail if the nonce is reused", async function () {
     const {backendReferralWallet, others} = await getNamedAccounts();
@@ -39,12 +46,6 @@ describe("Validating Purchase Messages", function () {
   it.only("Purchase validator function exists", async function () {
     const {starterPackContract: starterPack} = await setupStarterPack();
     const {backendReferralWallet, others} = await getNamedAccounts();
-    const privateKey = "0x96aa38e97d1d0d19e0f1d5215ff9dad66dc5d99225b1657205d124d00d2de177";
-
-    const catIds = [0, 1, 2, 3];
-    const catAmounts = [0, 0, 0, 1];
-    const gemIds = [0, 1, 2, 3, 4];
-    const gemAmounts = [0, 0, 0, 0, 4];
 
     const purchase = {
       from: backendReferralWallet,
