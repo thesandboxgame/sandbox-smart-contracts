@@ -43,11 +43,11 @@ contract MintableERC1155Token is ERC1155BaseToken {
 
         uint256 balTo;
 
-        uint256 lastBin = 2**256 - 1;
+        uint256 lastBin = ~uint256(0);
         for (uint256 i = 0; i < ids.length; i++) {
             if (amounts[i] > 0) {
                 (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
-                if (lastBin == 2**256 - 1) {
+                if (lastBin == ~uint256(0)) {
                     lastBin = bin;
                     balTo = ObjectLib32.updateTokenBalance(_packedTokenBalance[to][bin], index, amounts[i], ObjectLib32.Operations.ADD);
                 } else {
@@ -61,7 +61,7 @@ contract MintableERC1155Token is ERC1155BaseToken {
                 }
             }
         }
-        if (lastBin != 2**256 - 1) {
+        if (lastBin != ~uint256(0)) {
             _packedTokenBalance[to][lastBin] = balTo;
         }
         emit TransferBatch(msg.sender, address(0), to, ids, amounts);
