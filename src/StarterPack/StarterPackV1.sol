@@ -238,6 +238,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         address erc20GroupGemAddress,
         address initialSigningWallet
     ) public PurchaseValidator(initialSigningWallet) {
+        _admin = starterPackAdmin;
+        _sand = ERC20(sandContractAddress);
         _setMetaTransactionProcessor(initialMetaTx, true);
         _wallet = initialWalletAddress;
         _admin = starterPackAdmin;
