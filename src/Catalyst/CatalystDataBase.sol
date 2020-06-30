@@ -1,12 +1,18 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-contract CatalystDataBase {
+import "./CatalystValue.sol";
+
+contract CatalystDataBase is CatalystValue {
     event CatalystConfiguration(uint256 indexed id, uint16 minQuantity, uint16 maxQuantity, uint256 sandMintingFee, uint256 sandUpdateFee);
 
-    function _setData(uint256 id, CatalystData memory data) internal {
+    function _setMindData(uint256 id, MintData memory data) internal {
         _data[id] = data;
         _emitConfiguration(id, data.minQuantity, data.maxQuantity, data.sandMintingFee, data.sandUpdateFee);
+    }
+
+    function _setValueOverride(uint256 id, CatalystValue valueOverride) internal {
+        _valueOverrides[id] = valueOverride;
     }
 
     function _setConfiguration(
@@ -33,37 +39,26 @@ contract CatalystDataBase {
         emit CatalystConfiguration(id, minQuantity, maxQuantity, sandMintingFee, sandUpdateFee);
     }
 
-    function getValue(
-        uint256 catalystId,
-        uint256 seed,
-        uint32 gemId,
-        bytes32 blockHash,
-        uint256 slotIndex
-    ) external view returns (uint32) {
-        uint16 minValue = _data[catalystId].minValue;
-        uint16 maxValue = _data[catalystId].maxValue;
-
-        return _computeValue(seed, gemId, minValue, maxValue, blockHash, slotIndex);
-    }
-
     function _computeValue(
         uint256 seed,
         uint32 gemId,
         bytes32 blockHash,
         uint256 slotIndex
     ) internal pure returns (uint32) {
-        uint16 range = maxValue - minValue;
-        return minValue + uint16(uint256(keccak256(abi.encodePacked(gemId, seed, blockHash, slotIndex))) % range);
+        return 1 + uint16(uint256(keccak256(abi.encodePacked(gemId, seed, blockHash, slotIndex))) % 25);
     }
 
     function getValues(
         uint256 catalystId,
         uint256 seed,
         uint32[] calldata gemIds,
-        bytes32[] calldata blockHashes,
-        uint256 startIndex
-    ) external view returns (uint32[] memory values) {
+        bytes32[] calldata blockHashes
+    ) external override view returns (uint32[] memory values) {
         require(gemIds.length == blockHashes.length, "inconsisten length");
+        CatalystValue valueOverride = _valueOverrides[catalystId];
+        if (address(valueOverride) != address(0)) {
+            return valueOverride.getValues(catalystId, seed, gemIds, blockHashes);
+        }
         values = new uint32[](gemIds.length);
         uint256 maxGemIds = 0;
         for (uint256 i = gemIds.length - 1; i >= 0; i--) {
@@ -75,7 +70,7 @@ contract CatalystDataBase {
         for (uint256 i = gemIds.length - 1; i >= 0; i--) {
             uint32 gemId = gemIds[i];
             if (valuesPerGemIds[gemId] == 0) {
-                uint32 randomValue = _computeValue(seed, gemId, 1, 25, blockHashes[i], startIndex + i);
+                uint32 randomValue = _computeValue(seed, gemId, blockHashes[i], i);
                 valuesPerGemIds[gemId] = randomValue;
                 values[i] = randomValue;
             } else {
@@ -102,15 +97,14 @@ contract CatalystDataBase {
         sandUpdateFee = _data[catalystId].sandUpdateFee;
     }
 
-    struct CatalystData {
+    struct MintData {
         uint88 sandMintingFee;
         uint88 sandUpdateFee;
         uint16 minQuantity;
         uint16 maxQuantity;
-        uint16 minValue;
-        uint16 maxValue;
         uint16 maxGems;
     }
 
-    mapping(uint256 => CatalystData) _data;
+    mapping(uint256 => MintData) _data;
+    mapping(uint256 => CatalystValue) _valueOverrides;
 }
