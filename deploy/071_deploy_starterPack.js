@@ -3,7 +3,7 @@ const {guard} = require("../lib");
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deployIfDifferent, log} = deployments;
 
-  const {deployer, starterPackAdmin, backendReferralWallet} = await getNamedAccounts();
+  const {deployer, starterPackAdmin, starterPackSaleBeneficiary} = await getNamedAccounts();
 
   const sandContract = await deployments.getOrNull("Sand");
   if (!sandContract) {
@@ -43,7 +43,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     starterPackAdmin,
     sandContract.address,
     metaTxContract.address,
-    backendReferralWallet,
+    starterPackSaleBeneficiary,
     daiMedianizer.address,
     daiContract.address,
     catalystGroup.address,
