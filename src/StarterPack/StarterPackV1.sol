@@ -1,21 +1,21 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-import "./contracts_common/src/Libraries/SafeMathWithRequire.sol";
-import "./contracts_common/src/Interfaces/ERC20.sol";
-import "./contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
-import "./contracts_common/src/Interfaces/Medianizer.sol";
-import "./contracts_common/src/BaseWithStorage/Admin.sol";
-import "./Catalyst/ERC20GroupCatalyst.sol";
-import "./Catalyst/ERC20GroupGem.sol";
-import "./ReferralValidator/ReferralValidator.sol";
+import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
+import "../contracts_common/src/Interfaces/ERC20.sol";
+import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
+import "../contracts_common/src/Interfaces/Medianizer.sol";
+import "../contracts_common/src/BaseWithStorage/Admin.sol";
+import "../Catalyst/ERC20GroupCatalyst.sol";
+import "../Catalyst/ERC20GroupGem.sol";
+import "./PurchaseValidator.sol";
 
 
 /**
  * @title StarterPack contract that supports SAND, DAI and ETH as payment
  * @notice This contract manages the distribution of StarterPacks for Catalysts and Gems
  */
-contract StarterPackV1 is Admin, MetaTransactionReceiver, ReferralValidator {
+contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     using SafeMathWithRequire for uint256;
 
     uint256 internal constant daiPrice = 14400000000000000;
@@ -51,9 +51,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, ReferralValidator {
         address daiTokenContractAddress,
         address erc20GroupCatalystAddress,
         address erc20GroupGemAddress,
-        address initialSigningWallet,
-        uint256 initialMaxCommissionRate
-    ) public ReferralValidator(initialSigningWallet, initialMaxCommissionRate) {
+        address initialSigningWallet
+    ) public PurchaseValidator(initialSigningWallet) {
         _admin = starterPackAdmin;
         _sand = ERC20(sandContractAddress);
         _setMetaTransactionProcessor(initialMetaTx, true);
