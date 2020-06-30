@@ -3,6 +3,7 @@ pragma experimental ABIEncoderV2;
 
 import "./CatalystValue.sol";
 
+
 contract CatalystDataBase is CatalystValue {
     event CatalystConfiguration(uint256 indexed id, uint16 minQuantity, uint16 maxQuantity, uint256 sandMintingFee, uint256 sandUpdateFee);
 
@@ -60,21 +61,25 @@ contract CatalystDataBase is CatalystValue {
             return valueOverride.getValues(catalystId, seed, gemIds, blockHashes);
         }
         values = new uint32[](gemIds.length);
-        uint256 maxGemIds = 0;
-        for (uint256 i = gemIds.length - 1; i >= 0; i--) {
-            if (gemIds[i] > maxGemIds) {
-                maxGemIds = gemIds[i];
+        if (gemIds.length == 0) {
+            return values;
+        }
+
+        uint32 maxGemIds = 0;
+        for (uint256 i = gemIds.length; i > 0; i--) {
+            if (gemIds[i - 1] > maxGemIds) {
+                maxGemIds = gemIds[i - 1];
             }
         }
         uint32[] memory valuesPerGemIds = new uint32[](maxGemIds + 1);
-        for (uint256 i = gemIds.length - 1; i >= 0; i--) {
-            uint32 gemId = gemIds[i];
+        for (uint256 i = gemIds.length; i > 0; i--) {
+            uint32 gemId = gemIds[i - 1];
             if (valuesPerGemIds[gemId] == 0) {
-                uint32 randomValue = _computeValue(seed, gemId, blockHashes[i], i);
+                uint32 randomValue = _computeValue(seed, gemId, blockHashes[i - 1], i);
                 valuesPerGemIds[gemId] = randomValue;
-                values[i] = randomValue;
+                values[i - 1] = randomValue;
             } else {
-                values[i] = 25;
+                values[i - 1] = 25;
             }
         }
     }

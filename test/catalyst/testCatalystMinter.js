@@ -1,6 +1,6 @@
 const {assert, expect} = require("local-chai");
 const {setupCatalystUsers} = require("./fixtures");
-const {getGems} = require("../../lib/getGems.js");
+const {getGems, getValues} = require("../../lib/getGems.js");
 const {findEvents} = require("../../lib/findEvents.js");
 const {
   expectRevert,
@@ -451,6 +451,82 @@ describe("Catalyst:Minting", function () {
       )
     );
     console.log("Gas used: ", receipt.gasUsed.toNumber());
+  });
+
+  it.only("creator mint Legendary Asset with 3 gems and get correct values", async function () {
+    const {creator, asset, sand, gem, catalyst, catalystRegistry} = await setupCatalystUsers();
+    const gemIds = [PowerGem, DefenseGem, LuckGem];
+    const quantity = 3;
+    const {tokenId, receipt} = await creator.mintAsset({catalyst: LegendaryCatalyst, gemIds, quantity});
+    await mine(); // future block need to be mined to get the value
+    const values = await getValues({assetId: tokenId, fromBlockHash: receipt.blockHash, catalystRegistry});
+    expect(values).to.have.lengthOf(3);
+    expect(values[0]).to.be.within(1, 25);
+    expect(values[1]).to.be.within(1, 25);
+    expect(values[2]).to.be.within(1, 25);
+  });
+
+  it.only("creator mint Legendary Asset with 2 identitcal gems + other and get correct values", async function () {
+    const {creator, catalystRegistry} = await setupCatalystUsers();
+    const gemIds = [SpeedGem, LuckGem, SpeedGem];
+    const quantity = 3;
+    const {tokenId, receipt} = await creator.mintAsset({catalyst: LegendaryCatalyst, gemIds, quantity});
+    await mine(); // future block need to be mined to get the value
+    const values = await getValues({assetId: tokenId, fromBlockHash: receipt.blockHash, catalystRegistry});
+    expect(values).to.have.lengthOf(3);
+    expect(values[0]).to.equal(25);
+    expect(values[1]).to.be.within(1, 25);
+    expect(values[2]).to.be.within(1, 25);
+  });
+
+  it.only("creator mint Epic Asset And Downgrade to Rare: get correct values", async function () {
+    const {creator, catalystRegistry} = await setupCatalystUsers();
+    const originalGemIds = [PowerGem, DefenseGem, DefenseGem];
+    const quantity = 30;
+    const {tokenId: originalTokenId} = await creator.mintAsset({
+      catalyst: EpicCatalyst,
+      gemIds: originalGemIds,
+      quantity,
+    });
+
+    const gemIds = [LuckGem, LuckGem];
+    const {tokenId, receipt: postExtractionReceipt} = await creator.extractAndChangeCatalyst(originalTokenId, {
+      catalyst: RareCatalyst,
+      gemIds,
+    });
+    await mine(); // future block need to be mined to get the value
+    const values = await getValues({
+      assetId: tokenId,
+      fromBlockHash: postExtractionReceipt.blockHash,
+      catalystRegistry,
+    });
+    expect(values).to.have.lengthOf(2);
+    expect(values[0]).to.equal(25);
+    expect(values[1]).to.be.within(1, 25);
+  });
+  it.only("creator mint Epic Asset And new owner add gems: get correct values", async function () {
+    const {creator, user, catalystRegistry} = await setupCatalystUsers();
+    const originalGemIds = [PowerGem, SpeedGem];
+    const quantity = 30;
+    const {tokenId: originalTokenId, receipt: originalReceipt} = await creator.mintAsset({
+      catalyst: EpicCatalyst,
+      gemIds: originalGemIds,
+      quantity,
+      to: user.address,
+    });
+    const newGemIds = [SpeedGem];
+    const {tokenId, receipt} = await user.extractAndAddGems(originalTokenId, {newGemIds});
+    await mine(); // future block need to be mined to get the value
+    const values = await getValues({
+      assetId: tokenId,
+      originalTokenId,
+      fromBlockHash: originalReceipt.blockHash,
+      catalystRegistry,
+    });
+    expect(values).to.have.lengthOf(3);
+    expect(values[0]).to.be.within(1, 25);
+    expect(values[1]).to.equal(25);
+    expect(values[2]).to.be.within(1, 25);
   });
 
   describe("fees", function () {
