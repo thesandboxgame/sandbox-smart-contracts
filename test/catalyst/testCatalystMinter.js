@@ -453,7 +453,7 @@ describe("Catalyst:Minting", function () {
     console.log("Gas used: ", receipt.gasUsed.toNumber());
   });
 
-  it.only("creator mint Legendary Asset with 3 gems and get correct values", async function () {
+  it("creator mint Legendary Asset with 3 gems and get correct values", async function () {
     const {creator, asset, sand, gem, catalyst, catalystRegistry} = await setupCatalystUsers();
     const gemIds = [PowerGem, DefenseGem, LuckGem];
     const quantity = 3;
@@ -466,7 +466,7 @@ describe("Catalyst:Minting", function () {
     expect(values[2]).to.be.within(1, 25);
   });
 
-  it.only("creator mint Legendary Asset with 2 identitcal gems + other and get correct values", async function () {
+  it("creator mint Legendary Asset with 2 identitcal gems + other and get correct values", async function () {
     const {creator, catalystRegistry} = await setupCatalystUsers();
     const gemIds = [SpeedGem, LuckGem, SpeedGem];
     const quantity = 3;
@@ -479,7 +479,7 @@ describe("Catalyst:Minting", function () {
     expect(values[2]).to.be.within(1, 25);
   });
 
-  it.only("creator mint Epic Asset And Downgrade to Rare: get correct values", async function () {
+  it("creator mint Epic Asset And Downgrade to Rare: get correct values", async function () {
     const {creator, catalystRegistry} = await setupCatalystUsers();
     const originalGemIds = [PowerGem, DefenseGem, DefenseGem];
     const quantity = 30;
@@ -504,7 +504,7 @@ describe("Catalyst:Minting", function () {
     expect(values[0]).to.equal(25);
     expect(values[1]).to.be.within(1, 25);
   });
-  it.only("creator mint Epic Asset And new owner add gems: get correct values", async function () {
+  it("creator mint Epic Asset And new owner add gems: get correct values", async function () {
     const {creator, user, catalystRegistry} = await setupCatalystUsers();
     const originalGemIds = [PowerGem, SpeedGem];
     const quantity = 30;
