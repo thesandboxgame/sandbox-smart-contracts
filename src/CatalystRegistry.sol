@@ -3,8 +3,10 @@ pragma experimental ABIEncoderV2;
 
 import "./Interfaces/AssetToken.sol";
 import "./contracts_common/src/BaseWithStorage/Admin.sol";
+import "./Catalyst/CatalystValue.sol";
 
-contract CatalystRegistry is Admin {
+
+contract CatalystRegistry is Admin, CatalystValue {
     event Minter(address indexed newMinter);
     event CatalystApplied(uint256 indexed assetId, uint256 indexed catalystId, uint256 seed, uint256[] gemIds, uint64 blockNumber);
     event GemsAdded(uint256 indexed assetId, uint256 seed, uint256 startIndex, uint256[] gemIds, uint64 blockNumber);
@@ -68,6 +70,15 @@ contract CatalystRegistry is Admin {
         return _minter;
     }
 
+    function getValues(
+        uint256 catalystId,
+        uint256 seed,
+        uint32[] calldata gemIds,
+        bytes32[] calldata blockHashes
+    ) external override view returns (uint32[] memory values) {
+        return _catalystValue.getValues(catalystId, seed, gemIds, blockHashes);
+    }
+
     // ///////// INTERNAL ////////////
 
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
@@ -112,9 +123,14 @@ contract CatalystRegistry is Admin {
     }
 
     // CONSTRUCTOR ////
-    constructor(AssetToken asset, address admin) public {
+    constructor(
+        AssetToken asset,
+        CatalystValue catalystValue,
+        address admin
+    ) public {
         _asset = asset;
         _admin = admin;
+        _catalystValue = catalystValue;
     }
 
     /// DATA ////////
@@ -127,5 +143,6 @@ contract CatalystRegistry is Admin {
     }
     address _minter;
     AssetToken internal immutable _asset;
+    CatalystValue internal immutable _catalystValue;
     mapping(uint256 => CatalystStored) _catalysts;
 }

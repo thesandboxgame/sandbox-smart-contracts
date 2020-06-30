@@ -44,7 +44,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
         maxGems: catalyst.maxGems,
       });
     }
-    return execute("Catalyst", {from: deployer}, "addCatalysts", erc20s, data);
+    return execute("Catalyst", {from: deployer}, "addCatalysts", erc20s, data, []);
   }
   await addCatalysts(catalysts);
 };

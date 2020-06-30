@@ -5,12 +5,15 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   const {deployer} = await getNamedAccounts();
 
   const asset = await deployments.get("Asset");
+  const catalyst = await deployments.get("Catalyst");
+
   const catalystRegistry = await deployIfDifferent(
     ["data"],
     "CatalystRegistry",
     {from: deployer, gas: 3000000},
     "CatalystRegistry",
     asset.address,
+    catalyst.address,
     deployer // is to to catalystRegistryAdmin later
   );
   if (catalystRegistry.newlyDeployed) {

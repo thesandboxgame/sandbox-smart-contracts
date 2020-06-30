@@ -58,8 +58,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
 };
 
 module.exports.skip = guard(["1", "4", "314159"], "StarterPack");
-<<<<<<< HEAD
-=======
 module.exports.dependencies = [
   "Sand",
   "NativeMetaTransactionProcessor",
@@ -68,4 +66,3 @@ module.exports.dependencies = [
   "ERC20GroupCatalyst",
   "Gem",
 ];
->>>>>>> ec271c8c1d13ec191a2a5008ad5ec4d34cd165be

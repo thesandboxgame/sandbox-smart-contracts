@@ -4,9 +4,8 @@ pragma experimental ABIEncoderV2;
 import "../../BaseWithStorage/wip/MintableERC1155Token.sol";
 import "../CatalystDataBase.sol";
 
-
 contract ERC1155Catalyst is CatalystDataBase, MintableERC1155Token {
-    function addCatalysts(string[] memory names, CatalystData[] memory data) public {
+    function addCatalysts(string[] memory names, MintData[] memory data) public {
         require(msg.sender == _admin, "NOT_AUTHORIZED_ADMIN");
         require(names.length == data.length, "INVALID_INCONSISTENT_LENGTH");
         uint256 count = _count;
@@ -18,7 +17,7 @@ contract ERC1155Catalyst is CatalystDataBase, MintableERC1155Token {
         // TODO event
     }
 
-    function addCatalyst(string memory name, CatalystData memory data) public {
+    function addCatalyst(string memory name, MintData memory data) public {
         require(msg.sender == _admin, "NOT_AUTHORIZED_ADMIN");
         uint256 count = _count;
         _names[count] = name;
