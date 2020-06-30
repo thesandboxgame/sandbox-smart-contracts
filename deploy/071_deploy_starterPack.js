@@ -48,8 +48,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     daiContract.address,
     catalystGroup.address,
     gemGroup.address,
-    backendReferralWallet,
-    2000
+    backendReferralWallet
   );
 
   if (deployResult.newlyDeployed) {
