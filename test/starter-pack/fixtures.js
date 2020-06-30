@@ -8,6 +8,7 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
   const medianizerContract = await ethers.getContract("DAIMedianizer");
   const daiContract = await ethers.getContract("DAI");
   const starterPackContract = await ethers.getContract("StarterPackV1");
+  const metaTxContract = await ethers.getContract("NativeMetaTransactionProcessor");
 
   const starterPackContractAsDeployer = await ethers.getContract("StarterPackV1", deployer);
   const starterPackContractAsAdmin = await ethers.getContract("StarterPackV1", starterPackAdmin);
@@ -31,6 +32,7 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
     sandContract,
     medianizerContract,
     daiContract,
+    metaTxContract,
     users,
   };
 });
