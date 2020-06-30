@@ -261,7 +261,6 @@ contract CatalystMinter is MetaTransactionReceiver {
         _burnCatalysts(from, catalystsQuantities);
         _burnGems(from, gemsQuantities);
 
-        totalSandFee = 0;
         supplies = new uint256[](assets.length);
         maxGemsList = new uint16[](assets.length);
 
