@@ -1,4 +1,6 @@
 const {guard} = require("../lib");
+const ethers = require("ethers");
+const {computeAddress} = ethers.utils;
 
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deployIfDifferent, log} = deployments;
@@ -35,6 +37,8 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     throw new Error("no GEM contract deployed");
   }
 
+  const addrFromPrivateKey = computeAddress("0x96aa38e97d1d0d19e0f1d5215ff9dad66dc5d99225b1657205d124d00d2de177");
+
   const deployResult = await deployIfDifferent(
     ["data"],
     "StarterPackV1",
@@ -48,7 +52,8 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     daiContract.address,
     catalystGroup.address,
     gemGroup.address,
-    backendReferralWallet
+    addrFromPrivateKey
+    // backendReferralWallet
   );
 
   if (deployResult.newlyDeployed) {
@@ -66,4 +71,5 @@ module.exports.dependencies = [
   "DAI",
   "ERC20GroupCatalyst",
   "Gem",
+  "NativeMetaTransactionProcessor",
 ];
