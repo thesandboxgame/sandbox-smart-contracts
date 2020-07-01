@@ -139,7 +139,7 @@ module.exports = {
     catalystMinterAdmin: "sandAdmin",
     starterPackAdmin: "sandAdmin",
     starterPackSaleBeneficiary: "sandSaleBeneficiary",
-    backendMessageSigner: backendReferralWallet,
+    backendMessageSigner: "backendReferralWallet",
     // testing
     others: {
       default: "from:5",
