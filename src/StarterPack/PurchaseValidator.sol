@@ -10,7 +10,6 @@ contract PurchaseValidator is Admin {
 
     /**
      * @notice Check if a purchase message is valid
-     * @param signature A signed message specifying tx details
      * @param from The tx sender or meta tx signer
      * @param to The address of the creator
      * @param catalystIds The types of catalysts to send
@@ -18,25 +17,20 @@ contract PurchaseValidator is Admin {
      * @param gemIds The types of gems to send
      * @param gemQuantities The amounts of each type of gem to send
      * @param nonce A per-creator nonce, incremented to avoid reuse of signatures
-     * @param expiryTime The expiry time of the referral
+     * @param signature A signed message specifying tx details
      * @return True if the referral is valid
      */
     function isPurchaseValid(
-        bytes memory signature,
         address from,
         address to,
-        uint256[4] memory catalystIds,
-        uint256[4] memory catalystQuantities,
-        uint256[5] memory gemIds,
-        uint256[5] memory gemQuantities,
+        uint256[] memory catalystIds,
+        uint256[] memory catalystQuantities,
+        uint256[] memory gemIds,
+        uint256[] memory gemQuantities,
         uint256 nonce,
-        uint256 expiryTime
+        bytes memory signature
     ) public view returns (bool) {
-        if (now > expiryTime) {
-            return false;
-        }
-
-        bytes32 hashedData = keccak256(abi.encodePacked(from, to, catalystIds, catalystQuantities, gemIds, gemQuantities, nonce, expiryTime));
+        bytes32 hashedData = keccak256(abi.encodePacked(from, to, catalystIds, catalystQuantities, gemIds, gemQuantities, nonce));
 
         address signer = SigUtil.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
 
