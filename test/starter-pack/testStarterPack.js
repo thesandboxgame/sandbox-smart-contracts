@@ -74,10 +74,10 @@ describe("StarterPack:PurchaseWithSand", function () {
     await expectRevert(userWithoutSAND.StarterPack.setSANDEnabled(true), "only admin can enable/disable SAND");
   });
 
-  it("if StarterpackV1.sol owns Catalysts & Gems then listed purchasers should be able to purchase with SAND", async function () {
-    // Mint Catalysts & Gems and send to StarterPackV1
-    // Check Purchase event
-  });
+  // it("if StarterpackV1.sol owns Catalysts & Gems then listed purchasers should be able to purchase with SAND", async function () {
+  //   // Mint Catalysts & Gems and send to StarterPackV1
+  //   // Check Purchase event
+  // });
 
   // it("should invalidate the nonce after 1 use", async function () {});
   // it("should fail if the nonce is reused", async function () {});
