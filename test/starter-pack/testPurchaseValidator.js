@@ -1,4 +1,5 @@
 const {setupStarterPack} = require("./fixtures");
+const {expectRevert} = require("local-utils");
 const {assert} = require("chai");
 const {getNamedAccounts} = require("@nomiclabs/buidler");
 const {signPurchaseMessage} = require("../../lib/purchaseMessageSigner");
@@ -29,7 +30,7 @@ describe("Validating Purchase Messages", function () {
     assert.ok(await starterPack.isPurchaseValid(starterPackBuyer, purchaseMessage, sig));
   });
 
-  it.only("should fail if the from address does not match", async function () {
+  it("should fail if the from address does not match", async function () {
     const {starterPackContract: starterPack} = await setupStarterPack();
     const {others} = await getNamedAccounts();
     const starterPackBuyer = others[0];
@@ -43,6 +44,24 @@ describe("Validating Purchase Messages", function () {
       nonce: 1,
     };
     const sig = await signPurchaseMessage(privateKey, purchaseMessage);
-    assert.notOk(await starterPack.isPurchaseValid(wrongFromAddress, purchaseMessage, sig));
+    await expectRevert(starterPack.isPurchaseValid(wrongFromAddress, purchaseMessage, sig), "INVALID_SENDER");
+  });
+
+  it("should fail if the nonce is re-used", async function () {
+    const {starterPackContract: starterPack} = await setupStarterPack();
+    const {others} = await getNamedAccounts();
+    const starterPackBuyer = others[0];
+    const purchaseMessage = {
+      catalystIds: catIds,
+      catalystQuantities: catAmounts,
+      gemIds: gemIds,
+      gemQuantities: gemAmounts,
+      buyer: starterPackBuyer,
+      nonce: 1,
+    };
+    const sig = await signPurchaseMessage(privateKey, purchaseMessage);
+    assert.ok(await starterPack.isPurchaseValid(starterPackBuyer, purchaseMessage, sig));
+
+    await expectRevert(starterPack.isPurchaseValid(starterPackBuyer, purchaseMessage, sig), "INVALID_NONCE");
   });
 });
