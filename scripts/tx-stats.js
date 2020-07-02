@@ -34,6 +34,12 @@ const records = parse(csvData, {
     a.createdAt - b.createdAt;
   });
 
+const accountFound = {};
+
+for (const record of records) {
+  accountFound[record.address.toLowerCase()] = true;
+}
+
 let counter = 0;
 let numNotFound = 0;
 let numFound = 0;
@@ -110,6 +116,10 @@ let numReplaced = 0;
           }
         } else {
           replacements[id] = replacement;
+        }
+
+        if (!accountFound[landPurchase.buyer.toLowerCase()]) {
+          console.log("front running : ", landPurchase.buyer);
         }
       }
     }
