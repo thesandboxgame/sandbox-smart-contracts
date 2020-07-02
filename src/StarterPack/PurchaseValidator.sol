@@ -10,7 +10,7 @@ contract PurchaseValidator is Admin {
 
     /**
      * @notice Check if a purchase message is valid
-     * @param from The tx sender or meta tx signer
+     * @param from The tx sender
      * @param to The address of the creator
      * @param catalystIds The types of catalysts to send
      * @param catalystQuantities The amounts of each type of catalyst to send
