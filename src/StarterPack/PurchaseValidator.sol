@@ -30,6 +30,7 @@ contract PurchaseValidator is Admin {
         Message memory message,
         bytes memory signature
     ) public view returns (bool) {
+        require(from == message.buyer, "INVALID_SENDER");
         bytes32 hashedData = keccak256(
             abi.encodePacked(message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce)
         );
