@@ -43,10 +43,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     mapping(address => mapping(uint256 => uint256)) public nonceByCreator;
 
-    // mapping(address => mapping(uint256 => CatalystPurchase)) private catalystPurchaseByCreator;
-    // mapping(address => mapping(uint256 => GemPurchase)) private gemPurchaseByCreator;
-
-
     // event Purchase(address indexed from, address indexed to, uint256[] catIds, uint256[] catQuantities, uint256[] gemIds, uint256[] gemQuantities, uint256 priceInSand);
 
     // event SetPrices(uint256[4] prices);
@@ -131,6 +127,30 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _erc20GroupGem.batchTransferFrom(address(this), message.buyer, message.gemIds, message.gemQuantities);
         emit Purchase(from, message, amountInSand);
     }
+
+    // function _purchaseWithSand(
+    //     address from,
+    //     address to,
+    //     uint256[] memory catalystIds,
+    //     uint256[] memory catalystQuantities,
+    //     uint256[] memory gemIds,
+    //     uint256[] memory gemQuantities,
+    //     uint256 nonce
+    // ) internal {
+    //     require(_sandEnabled, "sand payments not enabled");
+
+    //     require(to != address(0), "DESTINATION_ZERO_ADDRESS");
+    //     require(to != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
+
+    //     // require(_isAuthorized(from, to, nonce, signature), "NOT_AUTHORIZED");
+    //     // require(_isValidNonce(to, nonce), "INVALID_NONCE");
+
+    //     uint256 amount = _calculateTotalPriceInSand();
+       
+    //     _handlePurchaseWithERC20(to, _wallet, address(_sand));
+    //     _erc20GroupCatalyst.batchTransferFrom(address(this), to, catalystIds, catalystQuantities);
+    //     _erc20GroupGem.batchTransferFrom(address(this), to, gemIds, gemQuantities);
+    // }
 
     // function purchaseWithEth(
     //     address from,
@@ -220,23 +240,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         bytes32 pair = _medianizer.read();
         return uint256(pair);
     }
-
-    // function _isAuthorized(
-    //     address from,
-    //     address to,
-    //     uint256 nonce,
-    //     bytes memory signature
-    // ) internal returns (bool) {
-    //     // TODO: require(from == _admin || from == _meta || from == _creator, "not authorized"); // TBD
-    //     // TODO: signature checks
-    //     return true;
-    // }
-
-    // function _isValidNonce(address to, uint256 nonce) internal returns (bool) {
-    //     require(nonceByCreator[to][nonce] + 1 == nonce, "nonce out of order");
-    //     nonceByCreator[to][nonce] = nonce;
-    //     return true;
-    // }
 
     function _calculateTotalPriceInSand() internal returns (uint256) {
         // TODO:
