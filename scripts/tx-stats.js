@@ -16,81 +16,130 @@ const csvData = fs.readFileSync(args[0]).toString();
 const records = parse(csvData, {
   columns: true,
   skip_empty_lines: true,
-});
+})
+  // .slice(0, 2) // TODO remove
+  .map((record) => {
+    const topLeftX = parseInt(record.X, 10) + 204;
+    const topLeftY = parseInt(record.Y, 10) + 204;
+    const landQuadId = topLeftX + topLeftY * 408;
+    return {
+      ...record,
+      createdAt: new Date(record.createdAt + "  GMT+00:00").getTime() / 1000,
+      topLeftX,
+      topLeftY,
+      landQuadId,
+    };
+  })
+  .sort((a, b) => {
+    a.createdAt - b.createdAt;
+  });
 
 let counter = 0;
+let numNotFound = 0;
 let numFound = 0;
 let numReplaced = 0;
 (async () => {
+  const replacements = {};
+  const failedAttempts = {};
   for (const record of records) {
-    // console.log(record.transactionHash);
-    const txReceipt = await provider.getTransaction(record.transactionHash);
-    if (txReceipt) {
-      // TODO check success ?
-      numFound++;
-      record.txReceipt = txReceipt;
-      // console.log(txReceipt);
-    } else {
-      const topLeftX = parseInt(record.X, 10) + 204;
-      const topLeftY = parseInt(record.Y, 10) + 204;
-      const id = topLeftX + topLeftY * 408;
-      // console.log(`checking purchase of (${topLeftX}, ${topLeftY}) (id: ${id}) (size : ${record.size})`);
-      // or with toPromise, which also limits this to one result
-      const result = await client
-        .query(
-          `
-        {
+    const id = record.landQuadId;
 
-          landPurchases(where: {id: ${id}}) {
-            buyer
-            timestamp
-            to
-          }
-        }        
-        `,
-          {
-            /* vars */
-          }
-        )
-        .toPromise();
-      const landPurchases = result.data.landPurchases;
-      const landPurchase = landPurchases[0];
-      if (landPurchases.length == 0) {
-        console.log(`no purchase of (${topLeftX}, ${topLeftY}) (id: ${id}) (size : ${record.size})`);
-      } else if (landPurchases.length > 1) {
-        console.log("multiple purchase ?", {landPurchases});
+    const landString = `${record.topLeftX}, ${record.topLeftY}) (id: ${record.landQuadId}) (size : ${record.size}`;
+    const txReceipt = await provider.getTransactionReceipt(record.transactionHash);
+    if (!txReceipt) {
+      numNotFound++;
+      record.txNotFound = true;
+    }
+    record.txSuccess = txReceipt && txReceipt.status == 1;
+    record.txReceipt = txReceipt;
+    const result = await client
+      .query(
+        `
+      {
+
+        landPurchases(where: {id: ${id}}) {
+          buyer
+          timestamp
+          to
+        }
+      }        
+      `,
+        {
+          /* vars */
+        }
+      )
+      .toPromise();
+    const landPurchases = result.data.landPurchases;
+    const landPurchase = landPurchases[0];
+
+    if (landPurchases.length == 0) {
+      console.log(`no purchase of (${landString})`);
+      if (record.txSuccess) {
+        console.error("tx went through ?");
       }
-      if (landPurchase) {
-        if (
-          landPurchase.buyer.toLowerCase() === record.address.toLowerCase() ||
-          landPurchase.to.toLowerCase() === record.address.toLowerCase() // accept to
-        ) {
+    } else if (landPurchases.length > 1) {
+      console.error("multiple purchase ?", {landPurchases});
+    }
+    if (landPurchase) {
+      if (
+        landPurchase.buyer.toLowerCase() === record.address.toLowerCase() ||
+        landPurchase.to.toLowerCase() === record.address.toLowerCase() // accept to
+      ) {
+        if (!record.txSuccess) {
           record.replaced = true;
-          record.txReceipt = "replaced"; // TODO
-          numFound++;
           numReplaced++;
+        }
+        numFound++;
+      } else {
+        if (record.txSuccess) {
+          console.error("tx should have failed");
+        }
+        const date = new Date();
+        date.setTime(landPurchase.timestamp * 1000);
+        const timeDiff = parseInt(landPurchase.timestamp, 10) - record.createdAt;
+        console.log(
+          `${record.address} VS ${landPurchase.buyer} timeDiff : ${Math.floor((timeDiff / 60) * 100) / 100} min`
+        );
+        const replacement = {
+          success: landPurchase.buyer.toLowerCase(),
+          failure: record.address.toLowerCase(),
+        };
+        if (replacements[id]) {
+          if (replacements[id].success !== replacement.success || replacements[id].failure !== replacement.failure) {
+            console.error({replacement, replacementPresent: replacements[id]});
+          }
         } else {
-          console.log(
-            `diff purchase of (${topLeftX}, ${topLeftY}) (id: ${id}) (size : ${record.size}) ${record.transactionHash}`
-          );
-          console.log({landPurchase});
-          const date = new Date();
-          date.setTime(landPurchase.timestamp * 1000);
-          console.log({date});
-          const timeDiff =
-            parseInt(landPurchase.timestamp, 10) - new Date(record.createdAt + "  GMT+00:00").getTime() / 1000;
-          console.log(
-            `diferent buyer ${record.address} VS ${landPurchase.buyer} timeDiff : ${timeDiff} s (${
-              Math.floor((timeDiff / 60) * 100) / 100
-            } min)`
-          );
+          replacements[id] = replacement;
         }
       }
     }
+
+    if (record.txSuccess) {
+      const failedAttempt = failedAttempts[id];
+      if (failedAttempt) {
+        console.log(`failed attempted ${failedAttempt.address} VS ${record.address}`);
+        const replacement = {
+          success: record.address.toLowerCase(),
+          failure: failedAttempt.address.toLowerCase(),
+        };
+        if (replacements[id]) {
+          if (replacements[id].success !== replacement.success || replacements[id].failure !== replacement.failure) {
+            console.error({replacement, replacementPresent: replacements[id]});
+          }
+        } else {
+          replacements[id] = replacement;
+        }
+      }
+    } else {
+      failedAttempts[id] = record;
+    }
+
     counter++;
     print(`${numFound} / ${counter} (${numReplaced})`);
   }
 
+  console.log("");
+  console.log({numNotFound});
   console.log("num tx : ", records.length);
   console.log("num tx with receipt : ", records.filter((v) => v.txReceipt).length);
 })();
