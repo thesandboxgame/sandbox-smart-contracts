@@ -29,12 +29,21 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     bool _etherEnabled;
     bool _daiEnabled;
 
+    struct CatalystPurchase {
+        uint256[] _catalystIds;
+        uint256[] _catalystQuantities;
+    }
+
+    struct GemPurchase {
+        uint256[] _gemIds;
+        uint256[] _gemQuantities;
+    }
+
     address payable internal _wallet;
-    bool _purchasesEnabled = false;
 
     event Purchase(address indexed from, Message, uint256 price, address token, uint256 amountPaid);
 
-    event SetPrices(uint256[4] prices);
+    // event SetPrices(uint256[4] prices);
 
     struct Message {
         uint256[] catalystIds;
@@ -62,11 +71,11 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _daiEnabled = enabled;
     }
 
-    /// @notice return whether DAI payments are enabled
-    /// @return whether DAI payments are enabled
-    function isDAIEnabled() external view returns (bool) {
-        return _daiEnabled;
-    }
+    // /// @notice return whether DAI payments are enabled
+    // /// @return whether DAI payments are enabled
+    // function isDAIEnabled() external view returns (bool) {
+    //     return _daiEnabled;
+    // }
 
     /// @notice enable/disable ETH payment for StarterPacks
     /// @param enabled whether to enable or disable
@@ -75,11 +84,11 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _etherEnabled = enabled;
     }
 
-    /// @notice return whether ETH payments are enabled
-    /// @return whether ETH payments are enabled
-    function isETHEnabled() external view returns (bool) {
-        return _etherEnabled;
-    }
+    // /// @notice return whether ETH payments are enabled
+    // /// @return whether ETH payments are enabled
+    // function isETHEnabled() external view returns (bool) {
+    //     _etherEnabled;
+    // }
 
     /// @dev enable/disable the specific SAND payment for StarterPacks
     /// @param enabled whether to enable or disable
@@ -95,6 +104,12 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     function purchaseWithSand(
+        uint256[] memory catalystIds,
+        uint256[] memory catalystQuantities,
+        uint256[] memory gemIds,
+        uint256[] memory gemQuantities,
+        uint256 nonce,
+        bytes memory signature,
         address from,
         Message calldata message,
         bytes calldata signature
@@ -177,17 +192,17 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         emit Purchase(from, message, amountInSand, address(_dai), DAIRequired);
     }
 
-    function withdrawAll(address to) external {
-        require(msg.sender == _admin, "only admin can withdraw remaining tokens");
-        // TODO: withdrawal
-    }
+    // function withdrawAll(address to) external {
+    //     require(msg.sender == _admin, "only admin can withdraw remaining tokens");
+    //     // TODO: withdrawal
+    // }
 
-    // Prices can be changed anytime by admin. Envisage the need to set a delay where old prices are allowed
-    function setPrices(uint256[4] calldata prices) external {
-        require(msg.sender == _admin, "only admin can change StarterPack prices");
-        // TODO: prices
-        emit SetPrices(prices);
-    }
+    // // Prices can be changed anytime by admin. Envisage the need to set a delay where old prices are allowed
+    // function setPrices(uint256[4] calldata prices) external {
+    //     require(msg.sender == _admin, "only admin can change StarterPack prices");
+    //     // TODO: prices
+    //     // emit SetPrices(prices);
+    // }
 
     function checkCatalystBalance(uint256 tokenId) external view returns (uint256) {
         return _erc20GroupCatalyst.balanceOf(address(this), tokenId);
@@ -234,6 +249,23 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         return uint256(pair);
     }
 
+    // function _isAuthorized(
+    //     address from,
+    //     address to,
+    //     uint256 nonce,
+    //     bytes memory signature
+    // ) internal returns (bool) {
+    //     // TODO: require(from == _admin || from == _meta || from == _creator, "not authorized"); // TBD
+    //     // TODO: signature checks
+    //     return true;
+    // }
+
+    // function _isValidNonce(address to, uint256 nonce) internal returns (bool) {
+    //     require(nonceByCreator[to][nonce] + 1 == nonce, "nonce out of order");
+    //     nonceByCreator[to][nonce] = nonce;
+    //     return true;
+    // }
+
     function _calculateTotalPriceInSand() internal returns (uint256) {
         // TODO:
         return 1000000;
@@ -242,9 +274,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     function _handlePurchaseWithERC20(
         address buyer,
         address payable paymentRecipient,
-        address tokenAddress,
-        uint256 amount
-    ) internal {
+        address tokenAddress
+    ) internal returns (uint256 amount) {
         ERC20 token = ERC20(tokenAddress);
         uint256 amountForDestination = amount;
         require(token.transferFrom(buyer, paymentRecipient, amountForDestination), "PAYMENT_TRANSFER_FAILED");
