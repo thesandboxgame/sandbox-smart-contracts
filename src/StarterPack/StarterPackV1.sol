@@ -19,11 +19,11 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     using SafeMathWithRequire for uint256;
     uint256 internal constant daiPrice = 14400000000000000;
 
-    ERC20 _sand;
-    Medianizer _medianizer;
-    ERC20 _dai;
-    ERC20Group _erc20GroupCatalyst;
-    ERC20Group _erc20GroupGem;
+    ERC20 internal _sand;
+    Medianizer private _medianizer;
+    ERC20 private _dai;
+    ERC20Group internal _erc20GroupCatalyst;
+    ERC20Group internal _erc20GroupGem;
 
     bool _sandEnabled;
     bool _etherEnabled;
@@ -101,7 +101,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @notice return whether ETH payments are enabled
     /// @return whether ETH payments are enabled
     function isETHEnabled() external view returns (bool) {
-        _etherEnabled;
+        return _etherEnabled;
     }
 
     /// @dev enable/disable the specific SAND payment for StarterPacks
