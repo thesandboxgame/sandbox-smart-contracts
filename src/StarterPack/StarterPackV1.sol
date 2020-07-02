@@ -43,10 +43,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     mapping(address => mapping(uint256 => uint256)) public nonceByCreator;
 
-    // mapping(address => mapping(uint256 => CatalystPurchase)) private catalystPurchaseByCreator;
-    // mapping(address => mapping(uint256 => GemPurchase)) private gemPurchaseByCreator;
-
-
     // event Purchase(address indexed from, address indexed to, uint256[] catIds, uint256[] catQuantities, uint256[] gemIds, uint256[] gemQuantities, uint256 priceInSand);
 
     // event SetPrices(uint256[4] prices);
@@ -133,16 +129,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         address from,
         address to
     ) public {
-        _purchaseWithSand(from, to, CatalystPurchase(catalystIds, catalystQuantities), GemPurchase(gemIds, gemQuantities), nonce);
-    }
-
-    function _purchaseWithSand(
-        address from,
-        address to,
-        CatalystPurchase memory catalystPurchase,
-        GemPurchase memory gemPurchase,
-        uint256 nonce
-    ) internal {
         require(_sandEnabled, "sand payments not enabled");
 
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
@@ -154,11 +140,34 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         uint256 priceInSand = _calculateTotalPriceInSand();
 
         uint256 amount = _calculateTotalPriceInSand();
-       
         _handlePurchaseWithERC20(to, _wallet, address(_sand));
-        _erc20GroupCatalyst.batchTransferFrom(address(this), to, catalystPurchase._catalystIds, catalystPurchase._catalystQuantities);
-        _erc20GroupGem.batchTransferFrom(address(this), to, gemPurchase._gemIds, gemPurchase._gemQuantities);
+        _erc20GroupCatalyst.batchTransferFrom(address(this), to, catalystIds, catalystQuantities);
+        _erc20GroupGem.batchTransferFrom(address(this), to, gemIds, gemQuantities);
     }
+
+    // function _purchaseWithSand(
+    //     address from,
+    //     address to,
+    //     uint256[] memory catalystIds,
+    //     uint256[] memory catalystQuantities,
+    //     uint256[] memory gemIds,
+    //     uint256[] memory gemQuantities,
+    //     uint256 nonce
+    // ) internal {
+    //     require(_sandEnabled, "sand payments not enabled");
+
+    //     require(to != address(0), "DESTINATION_ZERO_ADDRESS");
+    //     require(to != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
+
+    //     // require(_isAuthorized(from, to, nonce, signature), "NOT_AUTHORIZED");
+    //     // require(_isValidNonce(to, nonce), "INVALID_NONCE");
+
+    //     uint256 amount = _calculateTotalPriceInSand();
+       
+    //     _handlePurchaseWithERC20(to, _wallet, address(_sand));
+    //     _erc20GroupCatalyst.batchTransferFrom(address(this), to, catalystIds, catalystQuantities);
+    //     _erc20GroupGem.batchTransferFrom(address(this), to, gemIds, gemQuantities);
+    // }
 
     // function purchaseWithEth(
     //     address from,
