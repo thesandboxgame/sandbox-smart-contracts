@@ -28,24 +28,23 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     bool _sandEnabled;
     bool _etherEnabled;
     bool _daiEnabled;
-   
-    struct CatalystPurchase {
-        uint[] _catalystIds;
-        uint[] _catalystQuantities;
-    }
 
-    struct GemPurchase {
-        uint[] _gemIds;
-        uint[] _gemQuantities;
+    struct SignedMessage {
+        uint256[] catalystIds;
+        uint256[] catalystQuantities;
+        uint256[] gemIds;
+        uint256[] gemQuantities;
+        address buyer;
+        uint256 nonce;
     }
 
     address payable internal _wallet;
 
     mapping(address => mapping(uint256 => uint256)) public nonceByCreator;
 
-    // event Purchase(address indexed from, address indexed to, uint256[] catIds, uint256[] catQuantities, uint256[] gemIds, uint256[] gemQuantities, uint256 priceInSand);
+    event Purchase(address indexed from, SignedMessage, uint256 priceInSand);
 
-    // event SetPrices(uint256[4] prices);
+    event SetPrices(uint256[4] prices);
 
     struct Message {
         uint256[] catalystIds;
@@ -73,11 +72,11 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _daiEnabled = enabled;
     }
 
-    // /// @notice return whether DAI payments are enabled
-    // /// @return whether DAI payments are enabled
-    // function isDAIEnabled() external view returns (bool) {
-    //     return _daiEnabled;
-    // }
+    /// @notice return whether DAI payments are enabled
+    /// @return whether DAI payments are enabled
+    function isDAIEnabled() external view returns (bool) {
+        return _daiEnabled;
+    }
 
     /// @notice enable/disable ETH payment for StarterPacks
     /// @param enabled whether to enable or disable
@@ -86,11 +85,11 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _etherEnabled = enabled;
     }
 
-    // /// @notice return whether ETH payments are enabled
-    // /// @return whether ETH payments are enabled
-    // function isETHEnabled() external view returns (bool) {
-    //     _etherEnabled;
-    // }
+    /// @notice return whether ETH payments are enabled
+    /// @return whether ETH payments are enabled
+    function isETHEnabled() external view returns (bool) {
+        _etherEnabled;
+    }
 
     /// @dev enable/disable the specific SAND payment for StarterPacks
     /// @param enabled whether to enable or disable
@@ -106,12 +105,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     function purchaseWithSand(
-        uint256[] memory catalystIds,
-        uint256[] memory catalystQuantities,
-        uint256[] memory gemIds,
-        uint256[] memory gemQuantities,
-        uint256 nonce,
-        bytes memory signature,
         address from,
         Message calldata message,
         bytes calldata signature
@@ -127,30 +120,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _erc20GroupGem.batchTransferFrom(address(this), message.buyer, message.gemIds, message.gemQuantities);
         emit Purchase(from, message, amountInSand);
     }
-
-    // function _purchaseWithSand(
-    //     address from,
-    //     address to,
-    //     uint256[] memory catalystIds,
-    //     uint256[] memory catalystQuantities,
-    //     uint256[] memory gemIds,
-    //     uint256[] memory gemQuantities,
-    //     uint256 nonce
-    // ) internal {
-    //     require(_sandEnabled, "sand payments not enabled");
-
-    //     require(to != address(0), "DESTINATION_ZERO_ADDRESS");
-    //     require(to != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
-
-    //     // require(_isAuthorized(from, to, nonce, signature), "NOT_AUTHORIZED");
-    //     // require(_isValidNonce(to, nonce), "INVALID_NONCE");
-
-    //     uint256 amount = _calculateTotalPriceInSand();
-       
-    //     _handlePurchaseWithERC20(to, _wallet, address(_sand));
-    //     _erc20GroupCatalyst.batchTransferFrom(address(this), to, catalystIds, catalystQuantities);
-    //     _erc20GroupGem.batchTransferFrom(address(this), to, gemIds, gemQuantities);
-    // }
 
     // function purchaseWithEth(
     //     address from,
@@ -184,17 +153,17 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     //     emit Purchase(from, to, catalystIds, catalystQuantities, gemIds, gemQuantities, priceInSand);
     // }
 
-    // function withdrawAll(address to) external {
-    //     require(msg.sender == _admin, "only admin can withdraw remaining tokens");
-    //     // TODO: withdrawal
-    // }
+    function withdrawAll(address to) external {
+        require(msg.sender == _admin, "only admin can withdraw remaining tokens");
+        // TODO: withdrawal
+    }
 
-    // // Prices can be changed anytime by admin. Envisage the need to set a delay where old prices are allowed
-    // function setPrices(uint256[4] calldata prices) external {
-    //     require(msg.sender == _admin, "only admin can change StarterPack prices");
-    //     // TODO: prices
-    //     // emit SetPrices(prices);
-    // }
+    // Prices can be changed anytime by admin. Envisage the need to set a delay where old prices are allowed
+    function setPrices(uint256[4] calldata prices) external {
+        require(msg.sender == _admin, "only admin can change StarterPack prices");
+        // TODO: prices
+        // emit SetPrices(prices);
+    }
 
     function checkCatalystBalance(uint256 tokenId) external view returns (uint256) {
         return _erc20GroupCatalyst.balanceOf(address(this), tokenId);
@@ -249,8 +218,9 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     function _handlePurchaseWithERC20(
         address buyer,
         address payable paymentRecipient,
-        address tokenAddress
-    ) internal returns (uint256 amount) {
+        address tokenAddress,
+        uint256 amount
+    ) internal {
         ERC20 token = ERC20(tokenAddress);
         uint256 amountForDestination = amount;
         require(token.transferFrom(buyer, paymentRecipient, amountForDestination), "PAYMENT_TRANSFER_FAILED");
