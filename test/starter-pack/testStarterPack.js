@@ -2,6 +2,8 @@ const {setupStarterPack} = require("./fixtures");
 const {assert} = require("chai");
 const {getNamedAccounts} = require("@nomiclabs/buidler");
 const {waitFor, expectRevert} = require("local-utils");
+const ethers = require("ethers");
+const {BigNumber} = ethers;
 
 const emptySignature = "0x";
 
@@ -21,67 +23,63 @@ describe("StarterPack:Setup", function () {
 
 describe("StarterPack:PurchaseWithSand", function () {
   let setUp;
+  const SignedMessage = {
+    catalystIds: [0, 1, 2, 3],
+    catalystQuantities: [1, 1, 1, 1],
+    gemIds: [0, 1, 2, 3, 4],
+    gemQuantities: [2, 2, 2, 2, 2],
+    buyer: "",
+    nonce: 1,
+  };
+
   beforeEach(async function () {
     setUp = await setupStarterPack();
-    await setUp.starterPackContractAsAdmin.setSANDEnabled(true);
+    const {starterPackContractAsAdmin} = setUp;
+    await starterPackContractAsAdmin.setSANDEnabled(true);
   });
 
   it("should revert if the user does not have enough SAND", async function () {
-    const {users} = setUp;
-    expectRevert(
-      await users[0].StarterPack.purchaseWithSand(
-        users[0].address,
-        users[0].address,
-        [0, 1, 2, 3],
-        [1, 1, 1, 1],
-        [0, 1, 2, 3, 4],
-        [1, 1, 1, 1, 1],
-        1,
-        emptySignature
-      ),
-      "Not enough funds allowed"
+    const {userWithoutSAND, sandContract} = setUp;
+    SignedMessage.buyer = userWithoutSAND.address;
+    const balance = await sandContract.balanceOf(userWithoutSAND.address);
+    assert.ok(balance.eq(BigNumber.from(0)));
+    await expectRevert(
+      userWithoutSAND.StarterPack.purchaseWithSand(userWithoutSAND.address, SignedMessage, emptySignature),
+      "not enough fund"
     );
   });
 
-  it("should throw if purchases are not enabled", async function () {
-    const {users, starterPackContractAsAdmin} = setUp;
+  it("purchase should revert if StarterpackV1.sol does not own any Catalysts & Gems", async function () {
+    const {userWithSAND} = setUp;
+    SignedMessage.buyer = userWithSAND.address;
+    await expectRevert(
+      userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, SignedMessage, emptySignature),
+      "can't substract more than there is"
+    );
+  });
+
+  it("should throw if SAND is not enabled", async function () {
+    const {userWithSAND, starterPackContractAsAdmin} = setUp;
+    SignedMessage.buyer = userWithSAND.address;
     await starterPackContractAsAdmin.setSANDEnabled(false);
-    expectRevert(
-      await users[0].StarterPack.purchaseWithSand(
-        users[0].address,
-        users[0].address,
-        [0, 1, 2, 3],
-        [1, 1, 1, 1],
-        [0, 1, 2, 3, 4],
-        [1, 1, 1, 1, 1],
-        1,
-        emptySignature
-      ),
+    await expectRevert(
+      userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, SignedMessage, emptySignature),
       "sand payments not enabled"
     );
   });
 
-  it("should enable purchases for user with SAND", async function () {
-    const {users} = setUp;
-    const receipt = waitFor(
-      await users[0].StarterPack.purchaseWithSand(
-        users[0].address,
-        users[0].address,
-        [0, 1, 2, 3],
-        [1, 1, 1, 1],
-        [0, 1, 2, 3, 4],
-        [1, 1, 1, 1, 1],
-        1,
-        emptySignature
-      )
-    );
-    console.log(receipt);
+  it("cannot enable/disable SAND if not admin", async function () {
+    const {userWithoutSAND, starterPackContractAsAdmin} = setUp;
+    await starterPackContractAsAdmin.setSANDEnabled(false);
+    await expectRevert(userWithoutSAND.StarterPack.setSANDEnabled(true), "only admin can enable/disable SAND");
   });
 
-  // it("should throw if SAND is not enabled", async function () {});
-  // it("cannot enable/disable SAND if not admin", async function () {});
+  it("if StarterpackV1.sol owns Catalysts & Gems then listed purchasers should be able to purchase with SAND", async function () {
+    // Mint Catalysts & Gems and send to StarterPackV1
+    // Check Purchase event
+  });
+
   // it("should invalidate the nonce after 1 use", async function () {});
-  // it("should emit the Purchase event", async function () {});
   // it("should fail if the nonce is reused", async function () {});
 });
 
