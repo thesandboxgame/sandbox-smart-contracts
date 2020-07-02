@@ -17,30 +17,44 @@ import "./PurchaseValidator.sol";
  */
 contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     using SafeMathWithRequire for uint256;
-
     uint256 internal constant daiPrice = 14400000000000000;
 
-    ERC20 internal _sand;
-    Medianizer private _medianizer;
-    ERC20 private _dai;
+    ERC20 _sand;
+    Medianizer _medianizer;
+    ERC20 _dai;
+    ERC20Group _erc20GroupCatalyst;
+    ERC20Group _erc20GroupGem;
 
-    ERC20Group internal _erc20GroupCatalyst;
-    ERC20Group internal _erc20GroupGem;
+    bool _sandEnabled;
+    bool _etherEnabled;
+    bool _daiEnabled;
+   
+    struct CatalystPurchase {
+        uint[] _catalystIds;
+        uint[] _catalystQuantities;
+    }
 
-    bool _sandEnabled = false;
-    bool _etherEnabled = true;
-    bool _daiEnabled = false;
+    struct GemPurchase {
+        uint[] _gemIds;
+        uint[] _gemQuantities;
+    }
 
     address payable internal _wallet;
-    bool _purchasesEnabled = false;
 
-    event Purchase(address indexed from, address indexed to, uint256[4] catQuantities, uint256[5] gemQuantities, uint256 priceInSand);
+    mapping(address => mapping(uint256 => uint256)) public nonceByCreator;
 
-    event SetPrices(uint256[4] prices);
+    // mapping(address => mapping(uint256 => CatalystPurchase)) private catalystPurchaseByCreator;
+    // mapping(address => mapping(uint256 => GemPurchase)) private gemPurchaseByCreator;
+
+
+    // event Purchase(address indexed from, address indexed to, uint256[] catIds, uint256[] catQuantities, uint256[] gemIds, uint256[] gemQuantities, uint256 priceInSand);
+
+    // event SetPrices(uint256[4] prices);
 
     // ////////////////////////// Functions ////////////////////////
 
     constructor(
+        
         address starterPackAdmin,
         address sandContractAddress,
         address initialMetaTx,
@@ -51,10 +65,11 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         address erc20GroupGemAddress,
         address initialSigningWallet
     ) public PurchaseValidator(initialSigningWallet) {
-        _admin = starterPackAdmin;
-        _sand = ERC20(sandContractAddress);
         _setMetaTransactionProcessor(initialMetaTx, true);
         _wallet = initialWalletAddress;
+        _admin = starterPackAdmin;
+        _sandEnabled = false;
+        _sand = ERC20(sandContractAddress);
         _medianizer = Medianizer(medianizerContractAddress);
         _dai = ERC20(daiTokenContractAddress);
         _erc20GroupCatalyst = ERC20Group(erc20GroupCatalystAddress);
@@ -69,44 +84,31 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _wallet = newWallet;
     }
 
-    /// @notice enable/disable the sale of StarterPacks
-    /// @param enabled whether to enable or disable
-    function setPurchasesEnabled(bool enabled) external {
-        require(msg.sender == _admin, "only admin can start or stop the sale");
-        _purchasesEnabled = enabled;
-    }
+    // /// @dev enable/disable DAI payment for StarterPacks
+    // /// @param enabled whether to enable or disable
+    // function setDAIEnabled(bool enabled) external {
+    //     require(msg.sender == _admin, "only admin can enable/disable DAI");
+    //     _daiEnabled = enabled;
+    // }
 
-    /// @notice start/stop the sale of StarterPacks
-    /// @return whether purchase of StarterPacks is enabled or disabled
-    function isPurchasingEnabled() external view returns (bool) {
-        return _purchasesEnabled;
-    }
+    // /// @notice return whether DAI payments are enabled
+    // /// @return whether DAI payments are enabled
+    // function isDAIEnabled() external view returns (bool) {
+    //     return _daiEnabled;
+    // }
 
-    /// @dev enable/disable DAI payment for StarterPacks
-    /// @param enabled whether to enable or disable
-    function setDAIEnabled(bool enabled) external {
-        require(msg.sender == _admin, "only admin can enable/disable DAI");
-        _daiEnabled = enabled;
-    }
+    // /// @notice enable/disable ETH payment for StarterPacks
+    // /// @param enabled whether to enable or disable
+    // function setETHEnabled(bool enabled) external {
+    //     require(msg.sender == _admin, "only admin can enable/disable ETH");
+    //     _etherEnabled = enabled;
+    // }
 
-    /// @notice return whether DAI payments are enabled
-    /// @return whether DAI payments are enabled
-    function isDAIEnabled() external view returns (bool) {
-        return _daiEnabled;
-    }
-
-    /// @notice enable/disable ETH payment for StarterPacks
-    /// @param enabled whether to enable or disable
-    function setETHEnabled(bool enabled) external {
-        require(msg.sender == _admin, "only admin can enable/disable ETH");
-        _etherEnabled = enabled;
-    }
-
-    /// @notice return whether ETH payments are enabled
-    /// @return whether ETH payments are enabled
-    function isETHEnabled() external view returns (bool) {
-        return _etherEnabled;
-    }
+    // /// @notice return whether ETH payments are enabled
+    // /// @return whether ETH payments are enabled
+    // function isETHEnabled() external view returns (bool) {
+    //     _etherEnabled;
+    // }
 
     /// @dev enable/disable the specific SAND payment for StarterPacks
     /// @param enabled whether to enable or disable
@@ -122,14 +124,25 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     function purchaseWithSand(
+        uint256[] memory catalystIds,
+        uint256[] memory catalystQuantities,
+        uint256[] memory gemIds,
+        uint256[] memory gemQuantities,
+        uint256 nonce,
+        bytes memory signature,
+        address from,
+        address to
+    ) public {
+        _purchaseWithSand(from, to, CatalystPurchase(catalystIds, catalystQuantities), GemPurchase(gemIds, gemQuantities), nonce);
+    }
+
+    function _purchaseWithSand(
         address from,
         address to,
-        uint256[4] calldata catalystQuantities,
-        uint256[5] calldata gemQuantities,
-        uint256 nonce,
-        bytes calldata signature
-    ) external payable {
-        require(_purchasesEnabled, "sale not started");
+        CatalystPurchase memory catalystPurchase,
+        GemPurchase memory gemPurchase,
+        uint256 nonce
+    ) internal {
         require(_sandEnabled, "sand payments not enabled");
 
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
@@ -140,55 +153,56 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
         uint256 priceInSand = _calculateTotalPriceInSand();
 
-        _handlePurchaseWithERC20(from, priceInSand, _wallet, address(_sand));
-
-        // _issueCatalysts();
-
-        // _issueGems();
-
-        emit Purchase(from, to, catalystQuantities, gemQuantities, priceInSand);
+        uint256 amount = _calculateTotalPriceInSand();
+       
+        _handlePurchaseWithERC20(to, _wallet, address(_sand));
+        _erc20GroupCatalyst.batchTransferFrom(address(this), to, catalystPurchase._catalystIds, catalystPurchase._catalystQuantities);
+        _erc20GroupGem.batchTransferFrom(address(this), to, gemPurchase._gemIds, gemPurchase._gemQuantities);
     }
 
-    function purchaseWithEth(
-        address from,
-        address to,
-        uint256[4] calldata catalystQuantities,
-        uint256[5] calldata gemQuantities,
-        uint256 nonce,
-        bytes calldata signature
-    ) external payable {
-        // TODO:
-        uint256 priceInSand = 0;
+    // function purchaseWithEth(
+    //     address from,
+    //     address to,
+    //     uint256[] calldata catalystIds,
+    //     uint256[] calldata catalystQuantities,
+    //     uint256[] calldata gemIds,
+    //     uint256[] calldata gemQuantities,
+    //     uint256 nonce,
+    //     bytes calldata signature
+    // ) external payable {
+    //     // TODO:
+    //     uint256 priceInSand = 0;
 
-        emit Purchase(from, to, catalystQuantities, gemQuantities, priceInSand);
-    }
+    //     emit Purchase(from, to, catalystIds, catalystQuantities, gemIds, gemQuantities, priceInSand);
+    // }
 
-    function purchaseWithDai(
-        address from,
-        address to,
-        uint256[4] calldata catalystQuantities,
-        uint256[5] calldata gemQuantities,
-        uint256 nonce,
-        bytes calldata signature
-    ) external payable {
-        // TODO:
-        uint256 priceInSand = 0;
+    // function purchaseWithDai(
+    //     address from,
+    //     address to,
+    //     uint256[] calldata catalystIds,
+    //     uint256[] calldata catalystQuantities,
+    //     uint256[] calldata gemIds,
+    //     uint256[] calldata gemQuantities,
+    //     uint256 nonce,
+    //     bytes calldata signature
+    // ) external payable {
+    //     // TODO:
+    //     uint256 priceInSand = 0;
 
-        emit Purchase(from, to, catalystQuantities, gemQuantities, priceInSand);
-    }
+    //     emit Purchase(from, to, catalystIds, catalystQuantities, gemIds, gemQuantities, priceInSand);
+    // }
 
-    function withdrawAll(address to) external {
-        require(!_purchasesEnabled, "sale is still in progress");
-        require(msg.sender == _admin, "only admin can withdraw remaining tokens");
-        // TODO: withdrawal
-    }
+    // function withdrawAll(address to) external {
+    //     require(msg.sender == _admin, "only admin can withdraw remaining tokens");
+    //     // TODO: withdrawal
+    // }
 
-    // Prices can be changed anytime by admin. Envisage the need to set a delay where old prices are allowed
-    function setPrices(uint256[4] calldata prices) external {
-        require(msg.sender == _admin, "only admin can change StarterPack prices");
-        // TODO: prices
-        emit SetPrices(prices);
-    }
+    // // Prices can be changed anytime by admin. Envisage the need to set a delay where old prices are allowed
+    // function setPrices(uint256[4] calldata prices) external {
+    //     require(msg.sender == _admin, "only admin can change StarterPack prices");
+    //     // TODO: prices
+    //     // emit SetPrices(prices);
+    // }
 
     function checkCatalystBalance(uint256 tokenId) external view returns (uint256) {
         return _erc20GroupCatalyst.balanceOf(address(this), tokenId);
@@ -235,6 +249,23 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         return uint256(pair);
     }
 
+    // function _isAuthorized(
+    //     address from,
+    //     address to,
+    //     uint256 nonce,
+    //     bytes memory signature
+    // ) internal returns (bool) {
+    //     // TODO: require(from == _admin || from == _meta || from == _creator, "not authorized"); // TBD
+    //     // TODO: signature checks
+    //     return true;
+    // }
+
+    // function _isValidNonce(address to, uint256 nonce) internal returns (bool) {
+    //     require(nonceByCreator[to][nonce] + 1 == nonce, "nonce out of order");
+    //     nonceByCreator[to][nonce] = nonce;
+    //     return true;
+    // }
+
     function _calculateTotalPriceInSand() internal returns (uint256) {
         // TODO:
         return 10;
@@ -242,23 +273,22 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     function _handlePurchaseWithERC20(
         address buyer,
-        uint256 amount,
         address payable paymentRecipient,
         address tokenAddress
-    ) internal {
+    ) internal returns (uint256 amount) {
         ERC20 token = ERC20(tokenAddress);
         uint256 amountForPaymentRecipient = amount;
         require(token.transferFrom(buyer, paymentRecipient, amountForPaymentRecipient), "payment transfer failed");
     }
 
-    // function _issueCatalysts() internal returns (bool) {
-    //     // TODO: transfer relevant Catalysts
-    //     // call ERC20 single/batch transfer
-    //     return true;
+    // function _transferCatalysts(address buyer, uint256[] memory catalystIds, uint256[] memory catalystQuantities) internal {
+    //     _erc20GroupCatalyst.batchTransferFrom(address(this), buyer, catalystIds, catalystQuantities);
+
     // }
     // function _issueGems() internal returns (bool) {
     //     // TODO: transfer relevant Gems
     //      // call ERC20 single/batch transfer
     //     return true;
     // }
+
 }
