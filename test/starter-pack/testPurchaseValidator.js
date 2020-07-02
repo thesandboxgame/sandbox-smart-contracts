@@ -11,11 +11,12 @@ const gemAmounts = [0, 0, 0, 0, 4];
 
 describe("Validating Purchase Messages", function () {
   it("Purchase validator function exists", async function () {
-    const {starterPackContract: starterPack, metaTxContract} = await setupStarterPack();
+    const {starterPackContract: starterPack} = await setupStarterPack();
     const {others} = await getNamedAccounts();
+    const starterPackBuyer = others[0];
     const purchase = {
-      from: metaTxContract.address,
-      to: others[0],
+      from: starterPackBuyer,
+      to: starterPackBuyer,
       catalystIds: catIds,
       catalystQuantities: catAmounts,
       gemIds: gemIds,
