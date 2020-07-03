@@ -34,8 +34,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     address payable internal _wallet;
     bool _purchasesEnabled = false;
 
-    mapping(address => mapping(uint256 => uint256)) public nonceByCreator;
-
     event Purchase(address indexed from, address indexed to, uint256[4] catQuantities, uint256[5] gemQuantities, uint256 priceInSand);
 
     event SetPrices(uint256[4] prices);
@@ -137,8 +135,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
 
-        require(_isAuthorized(from, to, nonce, signature), "NOT_AUTHORIZED");
-        require(_isValidNonce(to, nonce), "INVALID_NONCE");
+        // Add args !
+        // require(isPurchaseValid(...), "INVALID_PURCHASE");
 
         uint256 priceInSand = _calculateTotalPriceInSand();
 
@@ -190,10 +188,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         require(msg.sender == _admin, "only admin can change StarterPack prices");
         // TODO: prices
         emit SetPrices(prices);
-    }
-
-    function viewNonceByCreator(address to, uint256 nonce) external view returns (uint256) {
-        return nonceByCreator[to][nonce];
     }
 
     function checkCatalystBalance(uint256 tokenId) external view returns (uint256) {
