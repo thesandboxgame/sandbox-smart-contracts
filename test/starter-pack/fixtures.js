@@ -87,7 +87,7 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
 
   // Give StarterPackV1 contract the option to have Catalysts & Gems
   async function setupSupply() {
-    await catalystAsAdmin.batchMint(starterPackContract.address, [0, 1, 2, 3], [4, 3, 2, 1]);
+    await catalystAsAdmin.batchMint(starterPackContract.address, [0, 1, 2, 3], [8, 6, 4, 2]);
     await gemAsAdmin.batchMint(starterPackContract.address, [0, 1, 2, 3, 4], [100, 100, 100, 100, 100]);
   }
 
