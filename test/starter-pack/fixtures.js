@@ -20,6 +20,9 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
   const starterPackContract = await ethers.getContract("StarterPackV1");
   const metaTxContract = await ethers.getContract("NativeMetaTransactionProcessor");
 
+  const gemContract = await ethers.getContract("Gem");
+  const catalystContract = await ethers.getContract("Catalyst");
+  
   const gemAsAdmin = await ethers.getContract("Gem", gemAdmin);
   const catalystAsAdmin = await ethers.getContract("Catalyst", catalystAdmin);
   const sandAsAdmin = await ethers.getContract("Sand", sandAdmin);
@@ -52,6 +55,7 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
     });
   }
 
+  // Give users funds
   async function setupUser(StarterPack, SandAdmin, DaiAdmin, user, {hasSand, hasDAI}) {
     if (hasDAI) {
       await DaiAdmin.Dai.transfer(user.address, toWei("1000000"));
@@ -81,6 +85,55 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
     hasDAI: false,
   });
 
+  // Give StarterPackV1 contract the option to have Catalysts & Gems
+  async function setupSupply() {
+    await catalystAsAdmin.batchMint(starterPackContract.address, [0, 1, 2, 3], [4, 3, 2, 1]);
+    await gemAsAdmin.batchMint(starterPackContract.address, [0, 1, 2, 3, 4], [100, 100, 100, 100, 100]);
+  }
+
+  return {
+    starterPackContract,
+    starterPackContractAsDeployer,
+    starterPackContractAsAdmin,
+    starterPackContractAsBeneficiary,
+    sandContract,
+    medianizerContract,
+    daiContract,
+    users,
+    SandAdmin,
+    DaiAdmin,
+    userWithSAND,
+    userWithoutSAND,
+    userWithDAI,
+    userWithoutDAI,
+    catalystContract,
+    gemContract,
+    setupSupply,
+  };
+});
+
+module.exports.supplyStarterPack = deployments.createFixture(async () => {
+  const setup = await this.setupStarterPack();
+  const {
+    starterPackContract,
+    starterPackContractAsDeployer,
+    starterPackContractAsAdmin,
+    starterPackContractAsBeneficiary,
+    sandContract,
+    medianizerContract,
+    daiContract,
+    users,
+    SandAdmin,
+    DaiAdmin,
+    userWithSAND,
+    userWithoutSAND,
+    userWithDAI,
+    userWithoutDAI,
+    catalystContract,
+    gemContract,
+    setupSupply,
+  } = setup;
+  await setupSupply();
   return {
     starterPackContract,
     starterPackContractAsDeployer,
@@ -97,5 +150,7 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
     userWithoutSAND,
     userWithDAI,
     userWithoutDAI,
+    catalystContract,
+    gemContract,
   };
 });
