@@ -30,6 +30,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     bool _daiEnabled;
 
     address payable internal _wallet;
+    bool _purchasesEnabled = false;
 
     event Purchase(address indexed from, Message, uint256 price, address token, uint256 amountPaid);
 
@@ -101,7 +102,19 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         require(_sandEnabled, "SAND_IS_NOT_ENABLED");
         require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
         require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
-        require(isPurchaseValid(from, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce, signature), "INVALID_PURCHASE");
+        require(
+            isPurchaseValid(
+                from,
+                message.catalystIds,
+                message.catalystQuantities,
+                message.gemIds,
+                message.gemQuantities,
+                message.buyer,
+                message.nonce,
+                signature
+            ),
+            "INVALID_PURCHASE"
+        );
 
         uint256 amountInSand = _calculateTotalPriceInSand();
         _handlePurchaseWithERC20(message.buyer, _wallet, address(_sand), amountInSand);
@@ -118,7 +131,19 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         require(_etherEnabled, "ETHER_IS_NOT_ENABLED");
         require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
         require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
-        require(isPurchaseValid(from, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce, signature), "INVALID_PURCHASE");
+        require(
+            isPurchaseValid(
+                from,
+                message.catalystIds,
+                message.catalystQuantities,
+                message.gemIds,
+                message.gemQuantities,
+                message.buyer,
+                message.nonce,
+                signature
+            ),
+            "INVALID_PURCHASE"
+        );
 
         uint256 amountInSand = _calculateTotalPriceInSand();
         uint256 ETHRequired = getEtherAmountWithSAND(amountInSand);
@@ -161,7 +186,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     function setPrices(uint256[4] calldata prices) external {
         require(msg.sender == _admin, "only admin can change StarterPack prices");
         // TODO: prices
-        // emit SetPrices(prices);
+        emit SetPrices(prices);
     }
 
     function checkCatalystBalance(uint256 tokenId) external view returns (uint256) {
