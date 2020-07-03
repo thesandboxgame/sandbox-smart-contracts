@@ -1,4 +1,4 @@
-const {setupStarterPack} = require("./fixtures");
+const {setupStarterPack, supplyStarterPack} = require("./fixtures");
 const {assert} = require("chai");
 const {getNamedAccounts} = require("@nomiclabs/buidler");
 const {waitFor, expectRevert} = require("local-utils");
@@ -74,8 +74,37 @@ describe("StarterPack:PurchaseWithSand", function () {
     await expectRevert(userWithoutSAND.StarterPack.setSANDEnabled(true), "only admin can enable/disable SAND");
   });
 
+  it("StarterPackV1 can receive Catalysts and Gems", async function () { // TODO: change to use proper assertion (see prev comment from Ronan)
+    // Mint Catalysts & Gems in fixture
+    const {starterPackContract, catalystContract, gemContract} = await supplyStarterPack();
+
+    // Catalyst ERC20SubToken contracts: "Common", "Rare", "Epic", "Legendary"
+    const balanceCommonCatalyst = await catalystContract.balanceOf(starterPackContract.address, 0);
+    const balanceRareCatalyst = await catalystContract.balanceOf(starterPackContract.address, 1);
+    const balanceEpicCatalyst = await catalystContract.balanceOf(starterPackContract.address, 2);
+    const balanceLegendaryCatalyst = await catalystContract.balanceOf(starterPackContract.address, 3);
+    assert.ok(balanceCommonCatalyst.eq(BigNumber.from(4)));
+    assert.ok(balanceRareCatalyst.eq(BigNumber.from(3)));
+    assert.ok(balanceEpicCatalyst.eq(BigNumber.from(2)));
+    assert.ok(balanceLegendaryCatalyst.eq(BigNumber.from(1)));
+
+    // Gem ERC20SubToken contracts: "Power", "Defense", "Speed", "Magic", "Luck"
+    const balancePowerGem = await gemContract.balanceOf(starterPackContract.address, 0);
+    const balanceDefenseGem = await gemContract.balanceOf(starterPackContract.address, 1);
+    const balanceSpeedGem = await gemContract.balanceOf(starterPackContract.address, 2);
+    const balanceMagicGem = await gemContract.balanceOf(starterPackContract.address, 3);
+    const balanceLuckGem = await gemContract.balanceOf(starterPackContract.address, 4);
+    assert.ok(balancePowerGem.eq(BigNumber.from(100)));
+    assert.ok(balanceDefenseGem.eq(BigNumber.from(100)));
+    assert.ok(balanceSpeedGem.eq(BigNumber.from(100)));
+    assert.ok(balanceMagicGem.eq(BigNumber.from(100)));
+    assert.ok(balanceLuckGem.eq(BigNumber.from(100)));
+  });
+
   // it("if StarterpackV1.sol owns Catalysts & Gems then listed purchasers should be able to purchase with SAND", async function () {
-  //   // Mint Catalysts & Gems and send to StarterPackV1
+  //   // Mint Catalysts & Gems in fixture
+  //   const {starterPackContract} = await supplyStarterPack();
+  //   // Check balance of StarterPack
   //   // Check Purchase event
   // });
 
