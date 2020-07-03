@@ -34,8 +34,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     address payable internal _wallet;
     bool _purchasesEnabled = false;
 
-    mapping(address => mapping(uint256 => uint256)) public nonceByCreator;
-
     event Purchase(address indexed from, address indexed to, uint256[4] catQuantities, uint256[5] gemQuantities, uint256 priceInSand);
 
     event SetPrices(uint256[4] prices);
@@ -137,8 +135,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
 
-        require(_isAuthorized(from, to, nonce, signature), "NOT_AUTHORIZED");
-        require(_isValidNonce(to, nonce), "INVALID_NONCE");
+        // Add args !
+        // require(isPurchaseValid(...), "INVALID_PURCHASE");
 
         uint256 priceInSand = _calculateTotalPriceInSand();
 
@@ -192,10 +190,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         emit SetPrices(prices);
     }
 
-    function viewNonceByCreator(address to, uint256 nonce) external view returns (uint256) {
-        return nonceByCreator[to][nonce];
-    }
-
     function checkCatalystBalance(uint256 tokenId) external view returns (uint256) {
         return _erc20GroupCatalyst.balanceOf(address(this), tokenId);
     }
@@ -239,23 +233,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     function _getEthUsdPair() internal view returns (uint256) {
         bytes32 pair = _medianizer.read();
         return uint256(pair);
-    }
-
-    function _isAuthorized(
-        address from,
-        address to,
-        uint256 nonce,
-        bytes memory signature
-    ) internal returns (bool) {
-        // TODO: require(from == _admin || from == _meta || from == _creator, "not authorized"); // TBD
-        // TODO: signature checks
-        return true;
-    }
-
-    function _isValidNonce(address to, uint256 nonce) internal returns (bool) {
-        require(nonceByCreator[to][nonce] + 1 == nonce, "nonce out of order"); // TODO:
-        nonceByCreator[to][nonce] = nonce;
-        return true;
     }
 
     function _calculateTotalPriceInSand() internal returns (uint256) {
