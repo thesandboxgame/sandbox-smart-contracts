@@ -30,8 +30,9 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     bool _daiEnabled;
 
     address payable internal _wallet;
+    bool _purchasesEnabled = false;
 
-    event Purchase(address indexed from, Message, uint256 priceInSand);
+    event Purchase(address indexed from, address indexed to, uint256[4] catQuantities, uint256[5] gemQuantities, uint256 priceInSand);
 
     event SetPrices(uint256[4] prices);
 
@@ -151,7 +152,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     function setPrices(uint256[4] calldata prices) external {
         require(msg.sender == _admin, "only admin can change StarterPack prices");
         // TODO: prices
-        // emit SetPrices(prices);
+        emit SetPrices(prices);
     }
 
     function checkCatalystBalance(uint256 tokenId) external view returns (uint256) {
