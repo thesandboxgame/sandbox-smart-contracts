@@ -235,17 +235,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         return uint256(pair);
     }
 
-    function _isAuthorized(
-        address from,
-        address to,
-        uint256 nonce,
-        bytes memory signature
-    ) internal returns (bool) {
-        // TODO: require(from == _admin || from == _meta || from == _creator, "not authorized"); // TBD
-        // TODO: signature checks
-        return true;
-    }
-
     function _calculateTotalPriceInSand() internal returns (uint256) {
         // TODO:
         return 10;
