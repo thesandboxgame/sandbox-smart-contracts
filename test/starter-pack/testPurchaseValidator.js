@@ -6,6 +6,10 @@ const {expectRevert, zeroAddress} = require("local-utils");
 const {signPurchaseMessage} = require("../../lib/purchaseMessageSigner");
 const privateKey = "0x4242424242424242424242424242424242424242424242424242424242424242";
 
+// Example queueIds and nonces:
+// const queueId1_nonce1 = BigNumber.from("0x0000000000000000000000000000000100000000000000000000000000000001");
+// const queueId42_nonce11 = BigNumber.from("0x0000000000000000000000000000002A0000000000000000000000000000000B");
+
 const catIds = [0, 1, 2, 3];
 const catAmounts = [0, 0, 0, 1];
 const gemIds = [0, 1, 2, 3, 4];
