@@ -20,9 +20,8 @@ contract PurchaseValidator is Admin {
         uint256 nonce;
     }
 
-    function getNonceByBuyer(address _buyer, uint256 _packedValue) external view returns (uint128) {
-        uint128 queueId = uint128(_packedValue / 2**128);
-        return queuedNonces[_buyer][queueId];
+    function getNonceByBuyer(address _buyer, uint128 _queueId) external view returns (uint128) {
+        return queuedNonces[_buyer][_queueId];
     }
 
     /**
