@@ -1,7 +1,8 @@
+const {assert} = require("chai");
+const {BigNumber} = require("ethers");
+const {getNamedAccounts} = require("@nomiclabs/buidler");
 const {setupStarterPack} = require("./fixtures");
 const {expectRevert, zeroAddress} = require("local-utils");
-const {assert} = require("chai");
-const {getNamedAccounts} = require("@nomiclabs/buidler");
 const {signPurchaseMessage} = require("../../lib/purchaseMessageSigner");
 const privateKey = "0x4242424242424242424242424242424242424242424242424242424242424242";
 
@@ -15,7 +16,6 @@ let purchaseMessage = {
   catalystQuantities: catAmounts,
   gemIds: gemIds,
   gemQuantities: gemAmounts,
-  // buyer: 0x0,
   buyer: zeroAddress,
   nonce: 0, // queuId:0, nonce:0
 };
