@@ -41,7 +41,6 @@ describe("Validating Purchase Messages", function () {
       gemIds: gemIds,
       gemQuantities: gemAmounts,
       buyer: starterPackBuyer,
-      // nonce: "0x0000000000000000000000000000000000000000000000000000000000000001",
       nonce: 0,
     };
     const sig = await signPurchaseMessage(privateKey, purchaseMessage);
