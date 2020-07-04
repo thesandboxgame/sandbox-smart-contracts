@@ -22,7 +22,7 @@ describe("Validating Purchase Messages", function () {
       gemIds: gemIds,
       gemQuantities: gemAmounts,
       buyer: starterPackBuyer,
-      nonce: 1,
+      nonce: 0,
     };
 
     const sig = await signPurchaseMessage(privateKey, purchaseMessage);
@@ -41,7 +41,8 @@ describe("Validating Purchase Messages", function () {
       gemIds: gemIds,
       gemQuantities: gemAmounts,
       buyer: starterPackBuyer,
-      nonce: 1,
+      // nonce: "0x0000000000000000000000000000000000000000000000000000000000000001",
+      nonce: 0,
     };
     const sig = await signPurchaseMessage(privateKey, purchaseMessage);
     await expectRevert(starterPack.isPurchaseValid(wrongFromAddress, purchaseMessage, sig), "INVALID_SENDER");
@@ -57,7 +58,7 @@ describe("Validating Purchase Messages", function () {
       gemIds: gemIds,
       gemQuantities: gemAmounts,
       buyer: starterPackBuyer,
-      nonce: 1,
+      nonce: 0,
     };
     const sig = await signPurchaseMessage(privateKey, purchaseMessage);
     assert.ok(await starterPack.isPurchaseValid(starterPackBuyer, purchaseMessage, sig));
