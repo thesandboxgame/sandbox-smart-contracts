@@ -29,20 +29,11 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     bool _etherEnabled;
     bool _daiEnabled;
 
-    struct SignedMessage {
-        uint256[] catalystIds;
-        uint256[] catalystQuantities;
-        uint256[] gemIds;
-        uint256[] gemQuantities;
-        address buyer;
-        uint256 nonce;
-    }
-
     address payable internal _wallet;
 
     mapping(address => mapping(uint256 => uint256)) public nonceByCreator;
 
-    event Purchase(address indexed from, SignedMessage, uint256 priceInSand);
+    event Purchase(address indexed from, Message, uint256 priceInSand);
 
     event SetPrices(uint256[4] prices);
 
@@ -119,7 +110,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     function purchaseWithSand(
         address from,
-        SignedMessage calldata message,
+        Message calldata message,
         bytes calldata signature
     ) external {
         require(_sandEnabled, "sand payments not enabled");
@@ -129,8 +120,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
         // Add args !
         // require(isPurchaseValid(...), "INVALID_PURCHASE");
-
-        uint256 priceInSand = _calculateTotalPriceInSand();
 
         uint256 amountInSand = _calculateTotalPriceInSand();
         _handlePurchaseWithERC20(message.buyer, _wallet, address(_sand), amountInSand);
