@@ -45,6 +45,13 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
   await gemAsAdmin.setSuperOperator(starterPackContract.address, true);
   await catalystAsAdmin.setSuperOperator(starterPackContract.address, true);
 
+  // await catalystRegistry.setMinter(catalystMinterDeployment.address);
+  // await asset.setBouncer(catalystMinterDeployment.address, true);
+  // await sandAsAdmin.setSuperOperator(catalystMinterDeployment.address, true);
+  // await gemAsAdmin.setSuperOperator(catalystMinterDeployment.address, true);
+  // await asset.setSuperOperator(catalystMinterDeployment.address, true);
+  // await catalystAsAdmin.setSuperOperator(catalystMinterDeployment.address, true);
+
   const users = [];
   for (const other of others) {
     users.push({
@@ -86,6 +93,16 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
   });
 
   // Give StarterPackV1 contract the option to have Catalysts & Gems
+  const ERC20SubTokenCommon = await ethers.getContract("CommonCatalyst");
+  const ERC20SubTokenRare = await ethers.getContract("RareCatalyst");
+  const ERC20SubTokenEpic = await ethers.getContract("EpicCatalyst");
+  const ERC20SubTokenLegendary = await ethers.getContract("LegendaryCatalyst");
+  const ERC20SubTokenPower = await ethers.getContract("PowerGem");
+  const ERC20SubTokenDefense = await ethers.getContract("DefenseGem");
+  const ERC20SubTokenSpeed = await ethers.getContract("SpeedGem");
+  const ERC20SubTokenMagic = await ethers.getContract("MagicGem");
+  const ERC20SubTokenLuck = await ethers.getContract("LuckGem");
+
   async function setupSupply() {
     await catalystAsAdmin.batchMint(starterPackContract.address, [0, 1, 2, 3], [8, 6, 4, 2]);
     await gemAsAdmin.batchMint(starterPackContract.address, [0, 1, 2, 3, 4], [100, 100, 100, 100, 100]);
@@ -99,6 +116,7 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
     sandContract,
     medianizerContract,
     daiContract,
+    metaTxContract,
     users,
     SandAdmin,
     DaiAdmin,
@@ -109,6 +127,8 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
     catalystContract,
     gemContract,
     setupSupply,
+    ERC20SubTokenCommon,
+    ERC20SubTokenPower,
   };
 });
 
@@ -122,6 +142,7 @@ module.exports.supplyStarterPack = deployments.createFixture(async () => {
     sandContract,
     medianizerContract,
     daiContract,
+    metaTxContract,
     users,
     SandAdmin,
     DaiAdmin,
@@ -132,6 +153,8 @@ module.exports.supplyStarterPack = deployments.createFixture(async () => {
     catalystContract,
     gemContract,
     setupSupply,
+    ERC20SubTokenCommon,
+    ERC20SubTokenPower,
   } = setup;
   await setupSupply();
   return {
@@ -152,5 +175,7 @@ module.exports.supplyStarterPack = deployments.createFixture(async () => {
     userWithoutDAI,
     catalystContract,
     gemContract,
+    ERC20SubTokenCommon,
+    ERC20SubTokenPower,
   };
 });

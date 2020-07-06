@@ -24,7 +24,7 @@ describe("StarterPack:Setup", function () {
 
 describe("StarterPack:PurchaseWithSandEmptyStarterPack", function () {
   let setUp;
-  const SignedMessage = {
+  const Message = {
     catalystIds: [0, 1, 2, 3],
     catalystQuantities: [1, 1, 1, 1],
     gemIds: [0, 1, 2, 3, 4],
@@ -41,30 +41,30 @@ describe("StarterPack:PurchaseWithSandEmptyStarterPack", function () {
 
   it("should revert if the user does not have enough SAND", async function () {
     const {userWithoutSAND, sandContract} = setUp;
-    SignedMessage.buyer = userWithoutSAND.address;
+    Message.buyer = userWithoutSAND.address;
     const balance = await sandContract.balanceOf(userWithoutSAND.address);
     assert.ok(balance.eq(BigNumber.from(0)));
     await expectRevert(
-      userWithoutSAND.StarterPack.purchaseWithSand(userWithoutSAND.address, SignedMessage, emptySignature),
+      userWithoutSAND.StarterPack.purchaseWithSand(userWithoutSAND.address, Message, emptySignature),
       "not enough fund"
     );
   });
 
   it("purchase should revert if StarterpackV1.sol does not own any Catalysts & Gems", async function () {
     const {userWithSAND} = setUp;
-    SignedMessage.buyer = userWithSAND.address;
+    Message.buyer = userWithSAND.address;
     await expectRevert(
-      userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, SignedMessage, emptySignature),
+      userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, emptySignature),
       "can't substract more than there is"
     );
   });
 
   it("should throw if SAND is not enabled", async function () {
     const {userWithSAND, starterPackContractAsAdmin} = setUp;
-    SignedMessage.buyer = userWithSAND.address;
+    Message.buyer = userWithSAND.address;
     await starterPackContractAsAdmin.setSANDEnabled(false);
     await expectRevert(
-      userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, SignedMessage, emptySignature),
+      userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, emptySignature),
       "sand payments not enabled"
     );
   });
@@ -78,7 +78,7 @@ describe("StarterPack:PurchaseWithSandEmptyStarterPack", function () {
 
 describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
   let setUp;
-  const SignedMessage = {
+  const Message = {
     catalystIds: [0, 1, 2, 3],
     catalystQuantities: [1, 1, 1, 1],
     gemIds: [0, 1, 2, 3, 4],
@@ -123,10 +123,10 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
   });
 
   it("if StarterpackV1.sol owns Catalysts & Gems then listed purchasers should be able to purchase with SAND with 1 Purchase event", async function () {
-    const {userWithSAND, catalystContract, gemContract} = await setUp;
-    SignedMessage.buyer = userWithSAND.address;
+    const {userWithSAND, catalystContract, gemContract, ERC20SubTokenCommon, ERC20SubTokenPower, starterPackContract} = await setUp;
+    Message.buyer = userWithSAND.address;
     const receipt = await waitFor(
-      userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, SignedMessage, emptySignature)
+      userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, emptySignature)
     );
     const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
     assert.equal(eventsMatching.length, 1);
@@ -167,28 +167,47 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
     assert.ok(eventsMatching[0].args[1][5].eq(BigNumber.from(1)));
 
     // transfer events
-    const transferEventsMatching = await findEvents(catalystContract, "Transfer", receipt.blockHash);
-    console.log(transferEventsMatching)
 
-    // user balances TODO: fix transfer
-    const balanceCommonCatalyst = await catalystContract.balanceOf(userWithSAND.address, 0);
-    const balanceRareCatalyst = await catalystContract.balanceOf(userWithSAND.address, 1);
-    const balanceEpicCatalyst = await catalystContract.balanceOf(userWithSAND.address, 2);
-    const balanceLegendaryCatalyst = await catalystContract.balanceOf(userWithSAND.address, 3);
+    // one of the catalyst Transfer events
+    const transferEventsMatching = await findEvents(ERC20SubTokenCommon, "Transfer", receipt.blockHash); // one Transfer event per subtoken
+    const transferEventCommonCatalyst = transferEventsMatching[0];
+    assert.equal(transferEventCommonCatalyst.args[0], starterPackContract.address, starterPackContract.address);
+    assert.equal(transferEventCommonCatalyst.args[1], userWithSAND.address);
+    assert.ok(transferEventCommonCatalyst.args[2].eq(BigNumber.from(1)));
+    // one of the gem Transfer events
+    const secondTransferEventsMatching = await findEvents(ERC20SubTokenPower, "Transfer", receipt.blockHash); // one Transfer event per subtoken
+    const transferEventPowerGem = secondTransferEventsMatching[0];
+    assert.equal(transferEventPowerGem.args[0], starterPackContract.address, starterPackContract.address);
+    assert.equal(transferEventPowerGem.args[1], userWithSAND.address);
+    assert.ok(transferEventPowerGem.args[2].eq(BigNumber.from(2)));
+
+    // user balances TODO: fix user balances
+    const balanceCommonCatalystRemaining = await ERC20SubTokenCommon.balanceOf(starterPackContract.address);
+    console.log(balanceCommonCatalystRemaining);
+    assert.ok(balanceCommonCatalystRemaining.eq(BigNumber.from(7)));
+    const balanceCommonCatalyst = await ERC20SubTokenCommon.balanceOf(userWithSAND.address);
+    console.log(balanceCommonCatalystRemaining);
     assert.ok(balanceCommonCatalyst.eq(BigNumber.from(1)));
-    assert.ok(balanceRareCatalyst.eq(BigNumber.from(1)));
-    assert.ok(balanceEpicCatalyst.eq(BigNumber.from(1)));
-    assert.ok(balanceLegendaryCatalyst.eq(BigNumber.from(1)));
-    const balancePowerGem = await gemContract.balanceOf(userWithSAND.address, 0);
-    const balanceDefenseGem = await gemContract.balanceOf(userWithSAND.address, 1);
-    const balanceSpeedGem = await gemContract.balanceOf(userWithSAND.address, 2);
-    const balanceMagicGem = await gemContract.balanceOf(userWithSAND.address, 3);
-    const balanceLuckGem = await gemContract.balanceOf(userWithSAND.address, 4);
+
+    const balancePowerGemRemaining = await ERC20SubTokenPower.balanceOf(starterPackContract.address);
+    assert.ok(balancePowerGemRemaining.eq(BigNumber.from(98)));
+    const balancePowerGem = await ERC20SubTokenCommon.balanceOf(userWithSAND.address);
     assert.ok(balancePowerGem.eq(BigNumber.from(2)));
-    assert.ok(balanceDefenseGem.eq(BigNumber.from(2)));
-    assert.ok(balanceSpeedGem.eq(BigNumber.from(2)));
-    assert.ok(balanceMagicGem.eq(BigNumber.from(2)));
-    assert.ok(balanceLuckGem.eq(BigNumber.from(2)));
+
+    // const balanceRareCatalyst = await catalystContract.balanceOf(userWithSAND.address, 1);
+    // const balanceEpicCatalyst = await catalystContract.balanceOf(userWithSAND.address, 2);
+    // const balanceLegendaryCatalyst = await catalystContract.balanceOf(userWithSAND.address, 3);
+    // assert.ok(balanceRareCatalyst.eq(BigNumber.from(1)));
+    // assert.ok(balanceEpicCatalyst.eq(BigNumber.from(1)));
+    // assert.ok(balanceLegendaryCatalyst.eq(BigNumber.from(1)));
+    // const balanceDefenseGem = await gemContract.balanceOf(userWithSAND.address, 1);
+    // const balanceSpeedGem = await gemContract.balanceOf(userWithSAND.address, 2);
+    // const balanceMagicGem = await gemContract.balanceOf(userWithSAND.address, 3);
+    // const balanceLuckGem = await gemContract.balanceOf(userWithSAND.address, 4);
+    // assert.ok(balanceDefenseGem.eq(BigNumber.from(2)));
+    // assert.ok(balanceSpeedGem.eq(BigNumber.from(2)));
+    // assert.ok(balanceMagicGem.eq(BigNumber.from(2)));
+    // assert.ok(balanceLuckGem.eq(BigNumber.from(2)));
   });
 
   // it("should invalidate the nonce after 1 use", async function () {});
