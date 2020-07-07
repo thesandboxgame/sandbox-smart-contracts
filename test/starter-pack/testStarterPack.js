@@ -363,8 +363,42 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
   });
 });
 
-// describe("SetPrices"...
-// it("should fail if called by other than the admin address", async function () {});
+describe("StarterPack:SetPricesEmptyStarterPack", function () {
+  let setUp;
+
+  beforeEach(async function () {
+    setUp = await setupStarterPack();
+  });
+
+  it("cannot set prices if not admin", async function () {
+    const {userWithoutSAND} = setUp;
+    await expectRevert(
+      userWithoutSAND.StarterPack.setPrices([50, 60, 70, 80]),
+      "only admin can change StarterPack prices"
+    );
+  });
+
+  it("can set prices if admin", async function () {
+    const {starterPackContractAsAdmin, starterPackContract} = setUp;
+    const receipt = await waitFor(starterPackContractAsAdmin.setPrices([50, 60, 70, 80]));
+
+    const eventsMatching = receipt.events.filter((event) => event.event === "SetPrices");
+    expect(eventsMatching).to.have.lengthOf(1);
+    const priceEvent = eventsMatching[0];
+    expect(priceEvent.args[0][0]).to.equal(50);
+    expect(priceEvent.args[0][1]).to.equal(60);
+    expect(priceEvent.args[0][2]).to.equal(70);
+    expect(priceEvent.args[0][3]).to.equal(80);
+
+    const latestPrices = await starterPackContract.getStarterPackPrices();
+    expect(latestPrices[0]).to.equal(50);
+    expect(latestPrices[1]).to.equal(60);
+    expect(latestPrices[2]).to.equal(70);
+    expect(latestPrices[3]).to.equal(80);
+  });
+
+  // it("price change should be implemented after a delay", async function () {});
+});
 
 // describe("WithdrawAll"...
 // it("should fail if called by other than the admin address", async function () {});
