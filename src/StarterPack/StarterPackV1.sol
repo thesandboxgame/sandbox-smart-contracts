@@ -29,11 +29,13 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     bool _etherEnabled;
     bool _daiEnabled;
 
+    uint256[] private _starterPackPrices;
+
     address payable internal _wallet;
 
     event Purchase(address indexed from, Message, uint256 price, address token, uint256 amountPaid);
 
-    event SetPrices(uint256[4] prices);
+    event SetPrices(uint256[] prices);
 
     struct Message {
         uint256[] catalystIds;
@@ -181,11 +183,16 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         // TODO: withdrawal
     }
 
-    // Prices can be changed anytime by admin. Envisage the need to set a delay where old prices are allowed
-    function setPrices(uint256[4] calldata prices) external {
+    // TODO: initial  prices at deploy time
+    // TODO: implement delay
+    function setPrices(uint256[] calldata prices) external {
         require(msg.sender == _admin, "only admin can change StarterPack prices");
-        // TODO: prices
-        // emit SetPrices(prices);
+        _starterPackPrices = prices;
+        emit SetPrices(prices);
+    }
+
+    function getStarterPackPrices() external view returns (uint256[] memory prices) {
+        return _starterPackPrices;
     }
 
     function checkCatalystBalance(uint256 tokenId) external view returns (uint256) {
