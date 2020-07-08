@@ -165,9 +165,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         emit SetPrices(prices);
     }
 
-    
-
-     function getStarterPackPrices() external view returns (uint256[] memory prices) {
+    function getStarterPackPrices() external view returns (uint256[] memory prices) {
         return _starterPackPrices;
     }
 
@@ -221,20 +219,13 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         for (uint256 i = 0; i < catalystIds.length; i++) {
             uint256 id = catalystIds[i];
             uint256 quantity = catalystQuantities[i];
-            totalPrice += (_starterPackPrices[id] * quantity);
+            totalPrice += _starterPackPrices[id].mul(quantity);
         }
         return totalPrice;
     }
 
     function _isPricingValid(uint256[] memory catalystIds) internal returns (bool) {
-        for (uint256 i = 0; i < catalystIds.length; i++) {
-            uint256 id = catalystIds[i];
-            uint256 price = _starterPackPrices[id];
-            if (_previousPrices[id][price] < now) {
-                return false;
-            }
-        }
-        return true;
+        return true; // TODO: 
     }
 
     function _handlePurchaseWithERC20(

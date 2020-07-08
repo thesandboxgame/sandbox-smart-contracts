@@ -361,6 +361,18 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
 
     await userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature);
   });
+
+  it("total price is correctly calculated", async function () {
+    const {userWithSAND} = await setUp;
+    Message.buyer = userWithSAND.address;
+    const receipt = await waitFor(
+      userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, emptySignature)
+    );
+    const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
+    assert.equal(eventsMatching.length, 1);
+    const totalExpectedPrice = 1600;
+    expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
+  });
 });
 
 describe("StarterPack:SetPricesEmptyStarterPack", function () {
