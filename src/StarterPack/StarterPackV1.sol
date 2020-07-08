@@ -31,8 +31,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     address payable internal _wallet;
 
-    mapping(address => mapping(uint256 => uint256)) public nonceByCreator;
-
     event Purchase(address indexed from, Message, uint256 priceInSand);
 
     event SetPrices(uint256[4] prices);
