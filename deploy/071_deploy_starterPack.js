@@ -1,4 +1,5 @@
 const {guard} = require("../lib");
+const {starterPackPrices} = require("../data/starterPack");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deployIfDifferent, log} = deployments;
@@ -48,7 +49,8 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     daiContract.address,
     catalystGroup.address,
     gemGroup.address,
-    backendMessageSigner
+    backendMessageSigner,
+    starterPackPrices,
   );
 
   if (deployResult.newlyDeployed) {
