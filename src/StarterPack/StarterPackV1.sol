@@ -35,7 +35,10 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     mapping(address => mapping(uint256 => uint256)) public nonceByCreator;
 
-    event Purchase(address indexed from, SignedMessage, uint256 priceInSand);
+    mapping (uint256 => mapping(uint256 => uint256)) private _previousPrices;
+    uint256 private _previousTransactionDelay = 60; // TODO: define suitable delay
+
+    event Purchase(address indexed from, Message, uint256 priceInSand);
 
     event SetPrices(uint256[] prices);
 
@@ -106,8 +109,9 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
         require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
         require(isPurchaseValid(from, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce, signature), "INVALID_PURCHASE");
+        require(_isPricingValid(message.catalystIds), "INVALID_PRICING");
 
-        uint256 amountInSand = _calculateTotalPriceInSand();
+        uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities);
         _handlePurchaseWithERC20(message.buyer, _wallet, address(_sand), amountInSand);
         _erc20GroupCatalyst.batchTransferFrom(address(this), message.buyer, message.catalystIds, message.catalystQuantities);
         _erc20GroupGem.batchTransferFrom(address(this), message.buyer, message.gemIds, message.gemQuantities);
@@ -151,13 +155,17 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         // TODO: withdrawal
     }
 
-    // TODO: initial  prices at deploy time
-    // TODO: implement delay
-    function setPrices(uint256[] calldata prices) external {
+    function setPrices(uint256[] calldata prices) external { // TODO: review
         require(msg.sender == _admin, "only admin can change StarterPack prices");
+        for (uint256 i = 0; i < prices.length; i++) {
+            uint256 price = prices[i];
+            _previousPrices[i][price] = now + _previousTransactionDelay;
+        }
         _starterPackPrices = prices;
         emit SetPrices(prices);
     }
+
+    
 
      function getStarterPackPrices() external view returns (uint256[] memory prices) {
         return _starterPackPrices;
@@ -208,9 +216,25 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         return uint256(pair);
     }
 
-    function _calculateTotalPriceInSand() internal returns (uint256) {
-        // TODO:
-        return 1;
+    function _calculateTotalPriceInSand(uint256[] memory catalystIds, uint256[] memory catalystQuantities) internal returns (uint256) {
+        uint256 totalPrice;
+        for (uint256 i = 0; i < catalystIds.length; i++) {
+            uint256 id = catalystIds[i];
+            uint256 quantity = catalystQuantities[i];
+            totalPrice += (_starterPackPrices[id] * quantity);
+        }
+        return totalPrice;
+    }
+
+    function _isPricingValid(uint256[] memory catalystIds) internal returns (bool) {
+        for (uint256 i = 0; i < catalystIds.length; i++) {
+            uint256 id = catalystIds[i];
+            uint256 price = _starterPackPrices[id];
+            if (_previousPrices[id][price] < now) {
+                return false;
+            }
+        }
+        return true;
     }
 
     function _handlePurchaseWithERC20(
