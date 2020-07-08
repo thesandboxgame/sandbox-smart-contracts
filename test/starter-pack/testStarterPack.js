@@ -1,5 +1,5 @@
 const {setupStarterPack, supplyStarterPack} = require("./fixtures");
-const {assert} = require("chai");
+const {assert, expect} = require("local-chai");
 const {getNamedAccounts} = require("@nomiclabs/buidler");
 const {waitFor, expectRevert, emptyBytes, mine} = require("local-utils");
 const ethers = require("ethers");
@@ -94,8 +94,6 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
   });
 
   it("StarterPackV1 can receive Catalysts and Gems", async function () {
-    // TODO: change to use assertion with better error message for BigNumber comparisons
-
     // Mint Catalysts & Gems in fixture
     const {starterPackContract, catalystContract, gemContract} = setUp;
 
@@ -104,10 +102,10 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
     const balanceRareCatalyst = await catalystContract.balanceOf(starterPackContract.address, 1);
     const balanceEpicCatalyst = await catalystContract.balanceOf(starterPackContract.address, 2);
     const balanceLegendaryCatalyst = await catalystContract.balanceOf(starterPackContract.address, 3);
-    assert.ok(balanceCommonCatalyst.eq(BigNumber.from(8)));
-    assert.ok(balanceRareCatalyst.eq(BigNumber.from(6)));
-    assert.ok(balanceEpicCatalyst.eq(BigNumber.from(4)));
-    assert.ok(balanceLegendaryCatalyst.eq(BigNumber.from(2)));
+    expect(balanceCommonCatalyst).to.equal(8);
+    expect(balanceRareCatalyst).to.equal(6);
+    expect(balanceEpicCatalyst).to.equal(4);
+    expect(balanceLegendaryCatalyst).to.equal(2);
 
     // Gem ERC20SubToken contracts: "Power", "Defense", "Speed", "Magic", "Luck"
     const balancePowerGem = await gemContract.balanceOf(starterPackContract.address, 0);
@@ -115,11 +113,11 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
     const balanceSpeedGem = await gemContract.balanceOf(starterPackContract.address, 2);
     const balanceMagicGem = await gemContract.balanceOf(starterPackContract.address, 3);
     const balanceLuckGem = await gemContract.balanceOf(starterPackContract.address, 4);
-    assert.ok(balancePowerGem.eq(BigNumber.from(100)));
-    assert.ok(balanceDefenseGem.eq(BigNumber.from(100)));
-    assert.ok(balanceSpeedGem.eq(BigNumber.from(100)));
-    assert.ok(balanceMagicGem.eq(BigNumber.from(100)));
-    assert.ok(balanceLuckGem.eq(BigNumber.from(100)));
+    expect(balancePowerGem).to.equal(100);
+    expect(balanceDefenseGem).to.equal(100);
+    expect(balanceSpeedGem).to.equal(100);
+    expect(balanceMagicGem).to.equal(100);
+    expect(balanceLuckGem).to.equal(100);
   });
 
   it("if StarterpackV1.sol owns Catalysts & Gems then listed purchasers should be able to purchase with SAND with 1 Purchase event", async function () {
@@ -139,80 +137,80 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
     assert.equal(eventsMatching.length, 1);
 
     // from
-    assert.equal(eventsMatching[0].args[0], userWithSAND.address);
+    expect(eventsMatching[0].args[0]).to.equal(userWithSAND.address);
 
     // catalystIds
-    assert.ok(eventsMatching[0].args[1][0][0].eq(BigNumber.from(0)));
-    assert.ok(eventsMatching[0].args[1][0][1].eq(BigNumber.from(1)));
-    assert.ok(eventsMatching[0].args[1][0][2].eq(BigNumber.from(2)));
-    assert.ok(eventsMatching[0].args[1][0][3].eq(BigNumber.from(3)));
+    expect(eventsMatching[0].args[1][0][0]).to.equal(0);
+    expect(eventsMatching[0].args[1][0][1]).to.equal(1);
+    expect(eventsMatching[0].args[1][0][2]).to.equal(2);
+    expect(eventsMatching[0].args[1][0][3]).to.equal(3);
 
     // catalystQuantities
-    assert.ok(eventsMatching[0].args[1][1][0].eq(BigNumber.from(1)));
-    assert.ok(eventsMatching[0].args[1][1][1].eq(BigNumber.from(1)));
-    assert.ok(eventsMatching[0].args[1][1][2].eq(BigNumber.from(1)));
-    assert.ok(eventsMatching[0].args[1][1][3].eq(BigNumber.from(1)));
+    expect(eventsMatching[0].args[1][1][0]).to.equal(1);
+    expect(eventsMatching[0].args[1][1][1]).to.equal(1);
+    expect(eventsMatching[0].args[1][1][2]).to.equal(1);
+    expect(eventsMatching[0].args[1][1][3]).to.equal(1);
 
     // gemIds
-    assert.ok(eventsMatching[0].args[1][2][0].eq(BigNumber.from(0)));
-    assert.ok(eventsMatching[0].args[1][2][1].eq(BigNumber.from(1)));
-    assert.ok(eventsMatching[0].args[1][2][2].eq(BigNumber.from(2)));
-    assert.ok(eventsMatching[0].args[1][2][3].eq(BigNumber.from(3)));
-    assert.ok(eventsMatching[0].args[1][2][4].eq(BigNumber.from(4)));
+    expect(eventsMatching[0].args[1][2][0]).to.equal(0);
+    expect(eventsMatching[0].args[1][2][1]).to.equal(1);
+    expect(eventsMatching[0].args[1][2][2]).to.equal(2);
+    expect(eventsMatching[0].args[1][2][3]).to.equal(3);
+    expect(eventsMatching[0].args[1][2][4]).to.equal(4);
 
     // gemQuantities
-    assert.ok(eventsMatching[0].args[1][3][0].eq(BigNumber.from(2)));
-    assert.ok(eventsMatching[0].args[1][3][1].eq(BigNumber.from(2)));
-    assert.ok(eventsMatching[0].args[1][3][2].eq(BigNumber.from(2)));
-    assert.ok(eventsMatching[0].args[1][3][3].eq(BigNumber.from(2)));
-    assert.ok(eventsMatching[0].args[1][3][4].eq(BigNumber.from(2)));
+    expect(eventsMatching[0].args[1][3][0]).to.equal(2);
+    expect(eventsMatching[0].args[1][3][1]).to.equal(2);
+    expect(eventsMatching[0].args[1][3][2]).to.equal(2);
+    expect(eventsMatching[0].args[1][3][3]).to.equal(2);
+    expect(eventsMatching[0].args[1][3][4]).to.equal(2);
 
     // buyer
-    assert.equal(eventsMatching[0].args[1][4], userWithSAND.address);
+    expect(eventsMatching[0].args[1][4]).to.equal(userWithSAND.address);
 
     // nonce
-    assert.ok(eventsMatching[0].args[1][5].eq(BigNumber.from(1)));
+    expect(eventsMatching[0].args[1][5]).to.equal(1);
 
     // transfer events
 
     // one of the catalyst Transfer events
     const transferEventsMatching = await findEvents(ERC20SubTokenCommon, "Transfer", receipt.blockHash); // one Transfer event per subtoken
     const transferEventCommonCatalyst = transferEventsMatching[0];
-    assert.equal(transferEventCommonCatalyst.args[0], starterPackContract.address, starterPackContract.address);
-    assert.equal(transferEventCommonCatalyst.args[1], userWithSAND.address);
-    assert.ok(transferEventCommonCatalyst.args[2].eq(BigNumber.from(1)));
+    expect(transferEventCommonCatalyst.args[0]).to.equal(starterPackContract.address);
+    expect(transferEventCommonCatalyst.args[1]).to.equal(userWithSAND.address);
+    expect(transferEventCommonCatalyst.args[2]).to.equal(1);
     // one of the gem Transfer events
     const secondTransferEventsMatching = await findEvents(ERC20SubTokenPower, "Transfer", receipt.blockHash); // one Transfer event per subtoken
     const transferEventPowerGem = secondTransferEventsMatching[0];
-    assert.equal(transferEventPowerGem.args[0], starterPackContract.address, starterPackContract.address);
-    assert.equal(transferEventPowerGem.args[1], userWithSAND.address);
-    assert.ok(transferEventPowerGem.args[2].eq(BigNumber.from(2)));
+    expect(transferEventPowerGem.args[0]).to.equal(starterPackContract.address);
+    expect(transferEventPowerGem.args[1]).to.equal(userWithSAND.address);
+    expect(transferEventPowerGem.args[2]).to.equal(2);
 
     // user balances TODO: fix user balances
-
     // const balanceCommonCatalystRemaining = await catalystContract.balanceOf(starterPackContract.address, 0);
-    // assert.ok(balanceCommonCatalystRemaining.eq(BigNumber.from(7)));
+    // expect(balanceCommonCatalystRemaining).to.equal(7);
 
     // const balancePowerGemRemaining = await gemContract.balanceOf(starterPackContract.address, 0);
-    // assert.ok(balancePowerGemRemaining.eq(BigNumber.from(98)));
+    // expect(balancePowerGemRemaining).to.equal(98);
 
+    // const balanceCommonCatalyst = await catalystContract.balanceOf(userWithSAND.address, 0);
     // const balanceRareCatalyst = await catalystContract.balanceOf(userWithSAND.address, 1);
     // const balanceEpicCatalyst = await catalystContract.balanceOf(userWithSAND.address, 2);
     // const balanceLegendaryCatalyst = await catalystContract.balanceOf(userWithSAND.address, 3);
-    // assert.ok(balanceCommonCatalyst.eq(BigNumber.from(1)));
-    // assert.ok(balanceRareCatalyst.eq(BigNumber.from(1)));
-    // assert.ok(balanceEpicCatalyst.eq(BigNumber.from(1)));
-    // assert.ok(balanceLegendaryCatalyst.eq(BigNumber.from(1)));
+    // expect(balanceCommonCatalyst).to.equal(1);
+    // expect(balanceRareCatalyst).to.equal(1);
+    // expect(balanceEpicCatalyst).to.equal(1);
+    // expect(balanceLegendaryCatalyst).to.equal(1);
     // const balancePowerGem = await gemContract.balanceOf(userWithSAND.address, 0);
     // const balanceDefenseGem = await gemContract.balanceOf(userWithSAND.address, 1);
     // const balanceSpeedGem = await gemContract.balanceOf(userWithSAND.address, 2);
     // const balanceMagicGem = await gemContract.balanceOf(userWithSAND.address, 3);
     // const balanceLuckGem = await gemContract.balanceOf(userWithSAND.address, 4);
-    // assert.ok(balancePowerGem.eq(BigNumber.from(2)));
-    // assert.ok(balanceDefenseGem.eq(BigNumber.from(2)));
-    // assert.ok(balanceSpeedGem.eq(BigNumber.from(2)));
-    // assert.ok(balanceMagicGem.eq(BigNumber.from(2)));
-    // assert.ok(balanceLuckGem.eq(BigNumber.from(2)));
+    // expect(balancePowerGem).to.equal(2);
+    // expect(balanceDefenseGem).to.equal(2);
+    // expect(balanceSpeedGem).to.equal(2);
+    // expect(balanceMagicGem).to.equal(2);
+    // expect(balanceLuckGem).to.equal(2);
   });
 
   // it("should invalidate the nonce after 1 use", async function () {});
