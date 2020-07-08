@@ -248,7 +248,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         for (uint256 i = 0; i < catalystIds.length; i++) {
             uint256 id = catalystIds[i];
             uint256 quantity = catalystQuantities[i];
-            totalPrice += (_starterPackPrices[id] * quantity);
+            totalPrice += _starterPackPrices[id].mul(quantity);
         }
         return totalPrice;
     }
