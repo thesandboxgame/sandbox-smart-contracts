@@ -22,7 +22,7 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
 
   const gemContract = await ethers.getContract("Gem");
   const catalystContract = await ethers.getContract("Catalyst");
-  
+
   const gemAsAdmin = await ethers.getContract("Gem", gemAdmin);
   const catalystAsAdmin = await ethers.getContract("Catalyst", catalystAdmin);
   const sandAsAdmin = await ethers.getContract("Sand", sandAdmin);
@@ -44,13 +44,6 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
   await sandAsAdmin.setSuperOperator(starterPackContract.address, true);
   await gemAsAdmin.setSuperOperator(starterPackContract.address, true);
   await catalystAsAdmin.setSuperOperator(starterPackContract.address, true);
-
-  // await catalystRegistry.setMinter(catalystMinterDeployment.address);
-  // await asset.setBouncer(catalystMinterDeployment.address, true);
-  // await sandAsAdmin.setSuperOperator(catalystMinterDeployment.address, true);
-  // await gemAsAdmin.setSuperOperator(catalystMinterDeployment.address, true);
-  // await asset.setSuperOperator(catalystMinterDeployment.address, true);
-  // await catalystAsAdmin.setSuperOperator(catalystMinterDeployment.address, true);
 
   const users = [];
   for (const other of others) {
