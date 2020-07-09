@@ -934,7 +934,6 @@ module.exports = (init, extensions) => {
         .batchTransferFrom(users[1].address, users[2].address, [0, 2, 3], [5, 6, 7])
         .then((tx) => tx.wait());
 
-      // TODO
       const eventsMatchingFirstSubToken = await findEvents(tokenByIds[0], "Transfer", receipt.blockHash);
       assert.equal(eventsMatchingFirstSubToken.length, 1);
       const firstEvent = eventsMatchingFirstSubToken[0];
