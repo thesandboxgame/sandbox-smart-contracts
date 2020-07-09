@@ -1,5 +1,5 @@
 const {guard} = require("../lib");
-const {getLands} = require("../data/LandPreSale_4/getLands");
+const {getLands} = require("../data/LandPreSale_5/getLands");
 
 module.exports = async ({getChainId, getNamedAccounts, deployments, network}) => {
   const {deployIfDifferent, deploy, log} = deployments;
@@ -52,7 +52,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
 
   const deployResult = await deployIfDifferent(
     ["data"],
-    "LandPreSale_4",
+    "LandPreSale_5",
     {from: deployer, gas: 3000000, linkedData: lands},
     "EstateSale",
     landContract.address,
@@ -66,12 +66,12 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     dai.address,
     backendReferralWallet,
     2000,
-    "0x0000000000000000000000000000000000000000" // estateContract.address
+    estateContract.address
   );
   if (deployResult.newlyDeployed) {
-    log(" - LandPreSale_4 deployed at : " + deployResult.address + " for gas : " + deployResult.receipt.gasUsed);
+    log(" - LandPreSale_5 deployed at : " + deployResult.address + " for gas : " + deployResult.receipt.gasUsed);
   } else {
-    log("reusing LandPreSale_4 at " + deployResult.address);
+    log("reusing LandPreSale_5 at " + deployResult.address);
   }
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO , 'LandPreSale_4');
+module.exports.skip = guard(["1", "4", "314159"]); // TODO , 'LandPreSale_5');

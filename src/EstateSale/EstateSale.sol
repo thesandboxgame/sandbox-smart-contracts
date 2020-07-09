@@ -145,7 +145,7 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         address token,
         uint256 tokenAmount
     ) internal {
-        if (size == 1) {
+        if (size == 1 || _estate == address(0)) {
             _land.mintQuad(to, size, x, y, "");
         } else {
             _land.mintQuad(_estate, size, x, y, abi.encode(to));
