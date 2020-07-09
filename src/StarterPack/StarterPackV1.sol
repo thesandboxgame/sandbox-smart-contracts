@@ -35,6 +35,15 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     event SetPrices(uint256[4] prices);
 
+    struct Message {
+        uint256[] catalystIds;
+        uint256[] catalystQuantities;
+        uint256[] gemIds;
+        uint256[] gemQuantities;
+        address buyer;
+        uint256 nonce;
+    }
+
     // ////////////////////////// Functions ////////////////////////
 
     constructor(
@@ -115,9 +124,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
         require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
         require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
-
-        // Add args !
-        // require(isPurchaseValid(...), "INVALID_PURCHASE");
+        require(isPurchaseValid(from, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce, signature), "INVALID_PURCHASE");
 
         uint256 amountInSand = _calculateTotalPriceInSand();
         _handlePurchaseWithERC20(message.buyer, _wallet, address(_sand), amountInSand);
@@ -247,15 +254,4 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         uint256 amountForDestination = amount;
         require(token.transferFrom(buyer, paymentRecipient, amountForDestination), "payment transfer failed");
     }
-
-    // function _transferCatalysts(address buyer, uint256[] memory catalystIds, uint256[] memory catalystQuantities) internal {
-    //     _erc20GroupCatalyst.batchTransferFrom(address(this), buyer, catalystIds, catalystQuantities);
-
-    // }
-    // function _issueGems() internal returns (bool) {
-    //     // TODO: transfer relevant Gems
-    //      // call ERC20 single/batch transfer
-    //     return true;
-    // }
-
 }

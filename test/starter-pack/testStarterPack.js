@@ -1,7 +1,7 @@
 const {setupStarterPack, supplyStarterPack} = require("./fixtures");
 const {assert, expect} = require("local-chai");
 const {getNamedAccounts} = require("@nomiclabs/buidler");
-const {waitFor, expectRevert, emptyBytes, mine} = require("local-utils");
+const {waitFor, expectRevert, emptyBytes} = require("local-utils");
 const ethers = require("ethers");
 const {BigNumber} = ethers;
 const {findEvents} = require("../../lib/findEvents.js");
@@ -30,7 +30,7 @@ describe("StarterPack:PurchaseWithSandEmptyStarterPack", function () {
     gemIds: [0, 1, 2, 3, 4],
     gemQuantities: [2, 2, 2, 2, 2],
     buyer: "",
-    nonce: 1,
+    nonce: 0,
   };
 
   beforeEach(async function () {
@@ -186,35 +186,33 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
     expect(transferEventPowerGem.args[1]).to.equal(userWithSAND.address);
     expect(transferEventPowerGem.args[2]).to.equal(2);
 
-    // user balances TODO: fix user balances
-    // const balanceCommonCatalystRemaining = await catalystContract.balanceOf(starterPackContract.address, 0);
-    // expect(balanceCommonCatalystRemaining).to.equal(7);
+    // TODO: all Transfer events for all subtokens
+    // TODO: all remaining balances
+    const balanceCommonCatalystRemaining = await catalystContract.balanceOf(starterPackContract.address, 0);
+    expect(balanceCommonCatalystRemaining).to.equal(7);
 
-    // const balancePowerGemRemaining = await gemContract.balanceOf(starterPackContract.address, 0);
-    // expect(balancePowerGemRemaining).to.equal(98);
+    const balancePowerGemRemaining = await gemContract.balanceOf(starterPackContract.address, 0);
+    expect(balancePowerGemRemaining).to.equal(98);
 
-    // const balanceCommonCatalyst = await catalystContract.balanceOf(userWithSAND.address, 0);
-    // const balanceRareCatalyst = await catalystContract.balanceOf(userWithSAND.address, 1);
-    // const balanceEpicCatalyst = await catalystContract.balanceOf(userWithSAND.address, 2);
-    // const balanceLegendaryCatalyst = await catalystContract.balanceOf(userWithSAND.address, 3);
-    // expect(balanceCommonCatalyst).to.equal(1);
-    // expect(balanceRareCatalyst).to.equal(1);
-    // expect(balanceEpicCatalyst).to.equal(1);
-    // expect(balanceLegendaryCatalyst).to.equal(1);
-    // const balancePowerGem = await gemContract.balanceOf(userWithSAND.address, 0);
-    // const balanceDefenseGem = await gemContract.balanceOf(userWithSAND.address, 1);
-    // const balanceSpeedGem = await gemContract.balanceOf(userWithSAND.address, 2);
-    // const balanceMagicGem = await gemContract.balanceOf(userWithSAND.address, 3);
-    // const balanceLuckGem = await gemContract.balanceOf(userWithSAND.address, 4);
-    // expect(balancePowerGem).to.equal(2);
-    // expect(balanceDefenseGem).to.equal(2);
-    // expect(balanceSpeedGem).to.equal(2);
-    // expect(balanceMagicGem).to.equal(2);
-    // expect(balanceLuckGem).to.equal(2);
+    const balanceCommonCatalyst = await catalystContract.balanceOf(userWithSAND.address, 0);
+    const balanceRareCatalyst = await catalystContract.balanceOf(userWithSAND.address, 1);
+    const balanceEpicCatalyst = await catalystContract.balanceOf(userWithSAND.address, 2);
+    const balanceLegendaryCatalyst = await catalystContract.balanceOf(userWithSAND.address, 3);
+    expect(balanceCommonCatalyst).to.equal(1);
+    expect(balanceRareCatalyst).to.equal(1);
+    expect(balanceEpicCatalyst).to.equal(1);
+    expect(balanceLegendaryCatalyst).to.equal(1);
+    const balancePowerGem = await gemContract.balanceOf(userWithSAND.address, 0);
+    const balanceDefenseGem = await gemContract.balanceOf(userWithSAND.address, 1);
+    const balanceSpeedGem = await gemContract.balanceOf(userWithSAND.address, 2);
+    const balanceMagicGem = await gemContract.balanceOf(userWithSAND.address, 3);
+    const balanceLuckGem = await gemContract.balanceOf(userWithSAND.address, 4);
+    expect(balancePowerGem).to.equal(2);
+    expect(balanceDefenseGem).to.equal(2);
+    expect(balanceSpeedGem).to.equal(2);
+    expect(balanceMagicGem).to.equal(2);
+    expect(balanceLuckGem).to.equal(2);
   });
-
-  // it("should invalidate the nonce after 1 use", async function () {});
-  // it("should fail if the nonce is reused", async function () {});
 });
 
 // describe("SetPrices"...
