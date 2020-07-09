@@ -13,6 +13,8 @@ const erc20GroupTests = require("../erc20Group")(
     const ERC20SubTokenEpic = await ethers.getContract("EpicCatalyst");
     const ERC20SubTokenLegendary = await ethers.getContract("LegendaryCatalyst");
 
+    const tokenByIds = [ERC20SubTokenCommon, ERC20SubTokenRare, ERC20SubTokenEpic, ERC20SubTokenLegendary];
+
     const sandContract = await ethers.getContract("Sand");
 
     const catalystMinterContract = await ethers.getContract("CatalystMinter", catalystMinter);
@@ -22,8 +24,8 @@ const erc20GroupTests = require("../erc20Group")(
       const receipt = await tx.wait();
       return {receipt};
     }
-    async function batchMint(to, amount) {
-      const tx = await contract.batchMint(to, [1, 2, 3], amount);
+    async function batchMint(to, amount, ids) {
+      const tx = await contract.batchMint(to, ids || [1, 2, 3], amount);
       const receipt = await tx.wait();
       return {receipt};
     }
@@ -37,6 +39,7 @@ const erc20GroupTests = require("../erc20Group")(
       sandContract,
       mint,
       batchMint,
+      tokenByIds,
       ERC20SubToken: ERC20SubTokenRare, // index 1
       secondERC20SubToken: ERC20SubTokenEpic, // index 2
       thirdERC20SubToken: ERC20SubTokenLegendary, // index 3
