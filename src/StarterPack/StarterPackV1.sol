@@ -246,11 +246,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         return true;
     }
 
-    function _isValidNonce(address to, uint256 nonce) internal returns (bool) {
-        require(nonceByCreator[to][nonce] + 1 == nonce, "nonce out of order"); // TODO:
-        nonceByCreator[to][nonce] = nonce;
-        return true;
-    }
     function _calculateTotalPriceInSand() internal returns (uint256) {
         // TODO:
         return 10;
@@ -272,7 +267,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     //     // call ERC20 single/batch transfer
     //     return true;
     // }
-    
     // function _issueGems() internal returns (bool) {
     //     // TODO: transfer relevant Gems
     //      // call ERC20 single/batch transfer
