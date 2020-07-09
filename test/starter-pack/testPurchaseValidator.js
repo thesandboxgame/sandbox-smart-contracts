@@ -29,10 +29,21 @@ describe("Validating Purchase Messages", function () {
     const {starterPackContract: starterPack} = await setupStarterPack();
     const {others} = await getNamedAccounts();
     const starterPackBuyer = others[0];
-    const goodMsg = Object.assign({}, purchaseMessage, {buyer: starterPackBuyer});
-    const sig = await signPurchaseMessage(privateKey, goodMsg);
+    purchaseMessage.buyer = starterPackBuyer;
+    const sig = await signPurchaseMessage(privateKey, purchaseMessage);
 
-    assert.ok(await starterPack.isPurchaseValid(starterPackBuyer, goodMsg, sig));
+    assert.ok(
+      await starterPack.isPurchaseValid(
+        starterPackBuyer,
+        purchaseMessage.catalystIds,
+        purchaseMessage.catalystQuantities,
+        purchaseMessage.gemIds,
+        purchaseMessage.gemQuantities,
+        starterPackBuyer,
+        purchaseMessage.nonce,
+        sig
+      )
+    );
   });
 
   it("should fail if the from address does not match", async function () {
@@ -40,20 +51,55 @@ describe("Validating Purchase Messages", function () {
     const {others} = await getNamedAccounts();
     const starterPackBuyer = others[0];
     const wrongFromAddress = others[1];
-    const goodMsg = Object.assign({}, purchaseMessage, {buyer: starterPackBuyer});
-    const sig = await signPurchaseMessage(privateKey, goodMsg);
+    purchaseMessage.buyer = starterPackBuyer;
+    const sig = await signPurchaseMessage(privateKey, purchaseMessage);
 
-    await expectRevert(starterPack.isPurchaseValid(wrongFromAddress, goodMsg, sig), "INVALID_SENDER");
+    await expectRevert(
+      starterPack.isPurchaseValid(
+        wrongFromAddress,
+        purchaseMessage.catalystIds,
+        purchaseMessage.catalystQuantities,
+        purchaseMessage.gemIds,
+        purchaseMessage.gemQuantities,
+        starterPackBuyer,
+        purchaseMessage.nonce,
+        sig
+      ),
+      "INVALID_SENDER"
+    );
   });
 
   it("should fail if the nonce is re-used", async function () {
     const {starterPackContract: starterPack} = await setupStarterPack();
     const {others} = await getNamedAccounts();
     const starterPackBuyer = others[0];
-    const goodMsg = Object.assign({}, purchaseMessage, {buyer: starterPackBuyer});
-    const sig = await signPurchaseMessage(privateKey, goodMsg);
-    assert.ok(await starterPack.isPurchaseValid(starterPackBuyer, goodMsg, sig));
+    purchaseMessage.buyer = starterPackBuyer;
+    const sig = await signPurchaseMessage(privateKey, purchaseMessage);
+    assert.ok(
+      await starterPack.isPurchaseValid(
+        starterPackBuyer,
+        purchaseMessage.catalystIds,
+        purchaseMessage.catalystQuantities,
+        purchaseMessage.gemIds,
+        purchaseMessage.gemQuantities,
+        starterPackBuyer,
+        purchaseMessage.nonce,
+        sig
+      )
+    );
 
-    await expectRevert(starterPack.isPurchaseValid(starterPackBuyer, goodMsg, sig), "INVALID_NONCE");
+    await expectRevert(
+      starterPack.isPurchaseValid(
+        starterPackBuyer,
+        purchaseMessage.catalystIds,
+        purchaseMessage.catalystQuantities,
+        purchaseMessage.gemIds,
+        purchaseMessage.gemQuantities,
+        starterPackBuyer,
+        purchaseMessage.nonce,
+        sig
+      ),
+      "INVALID_NONCE"
+    );
   });
 });

@@ -11,15 +11,6 @@ contract PurchaseValidator is Admin {
     // A parallel-queue mapping to nonces.
     mapping(address => mapping(uint128 => uint128)) public queuedNonces;
 
-    struct Message {
-        uint256[] catalystIds;
-        uint256[] catalystQuantities;
-        uint256[] gemIds;
-        uint256[] gemQuantities;
-        address buyer;
-        uint256 nonce;
-    }
-
     function getNonceByBuyer(address _buyer, uint128 _queueId) external view returns (uint128) {
         return queuedNonces[_buyer][_queueId];
     }
@@ -27,27 +18,36 @@ contract PurchaseValidator is Admin {
     /**
      * @notice Check if a purchase message is valid
      * @param from The tx sender
-     * @param message The specific parameters signed
-     * by the backend, of type "Message"
+     * @param catalystIds The catalyst IDs to be purchased
+     * @param catalystQuantities The quantities of the catalysts to be purchased
+     * @param gemIds The gem IDs to be purchased
+     * @param gemQuantities The quantities of the gems to be purchased
+     * @param buyer The intended recipient of the purchased items
+     * @param nonce The nonce to be incremented
      * @param signature A signed message specifying tx details
      * @return True if the purchase is valid
      */
     function isPurchaseValid(
         address from,
-        Message memory message,
+        uint256[] memory catalystIds,
+        uint256[] memory catalystQuantities,
+        uint256[] memory gemIds,
+        uint256[] memory gemQuantities,
+        address buyer,
+        uint256 nonce,
         bytes memory signature
     ) public returns (bool) {
-        require(from == message.buyer, "INVALID_SENDER");
-        require(checkAndUpdateNonce(message.buyer, message.nonce), "INVALID_NONCE");
+        require(from == buyer, "INVALID_SENDER");
+        require(_checkAndUpdateNonce(buyer, nonce), "INVALID_NONCE");
         bytes32 hashedData = keccak256(
-            abi.encodePacked(message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce)
+            abi.encodePacked(catalystIds, catalystQuantities, gemIds, gemQuantities, buyer, nonce)
         );
 
         address signer = SigUtil.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
         return signer == _signingWallet;
     }
 
-    function checkAndUpdateNonce(address _buyer, uint256 _packedValue) private returns (bool) {
+    function _checkAndUpdateNonce(address _buyer, uint256 _packedValue) private returns (bool) {
         uint128 queueId = uint128(_packedValue / 2**128);
         uint128 nonce = uint128(_packedValue % 2**128);
         uint128 currentNonce = queuedNonces[_buyer][queueId];
