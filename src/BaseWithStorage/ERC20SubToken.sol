@@ -17,13 +17,13 @@ contract ERC20SubToken {
     /// @notice A descriptive name for the tokens
     /// @return name of the tokens
     function name() public view returns (string memory) {
-        return string(abi.encodePacked(_name));
+        return _name;
     }
 
     /// @notice An abbreviated name for the tokens
     /// @return symbol of the tokens
     function symbol() public view returns (string memory) {
-        return string(abi.encodePacked(_symbol));
+        return _symbol;
     }
 
     /// @notice the tokenId in ERC20Group
@@ -138,18 +138,14 @@ contract ERC20SubToken {
     ) public {
         _group = group;
         _index = index;
-        require(bytes(tokenName).length != 0, "INVALID_NAME_REQUIRED");
-        require(bytes(tokenName).length <= 32, "INVALID_NAME_TOO_LONG");
-        _name = _firstBytes32(bytes(tokenName));
-        require(bytes(tokenSymbol).length != 0, "INVALID_SYMBOL_REQUIRED");
-        require(bytes(tokenSymbol).length <= 32, "INVALID_SYMBOL_TOO_LONG");
-        _symbol = _firstBytes32(bytes(tokenSymbol));
+        _name = tokenName;
+        _symbol = tokenSymbol;
     }
 
     // ////////////////////// DATA ///////////////////////////
     ERC20Group immutable _group;
     uint256 immutable _index;
     mapping(address => mapping(address => uint256)) internal _mAllowed;
-    bytes32 internal immutable _name; // work only for string that can fit into 32 bytes
-    bytes32 internal immutable _symbol; // work only for string that can fit into 32 bytes
+    string internal _name;
+    string internal _symbol;
 }
