@@ -30,8 +30,8 @@ const erc20GroupTests = require("../erc20Group")(
       const receipt = await tx.wait();
       return {receipt};
     }
-    async function batchMint(to, amount) {
-      const tx = await contract.batchMint(to, [1, 2, 3], amount);
+    async function batchMint(to, amount, ids) {
+      const tx = await contract.batchMint(to, ids || [1, 2, 3], amount);
       const receipt = await tx.wait();
       return {receipt};
     }
