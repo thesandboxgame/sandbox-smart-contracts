@@ -64,7 +64,7 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         uint256[] calldata ids,
         uint256[] calldata amounts
     ) external {
-        require(_minters[msg.sender], "NOT_AUTHORIZED_ADMIN");
+        require(_minters[msg.sender], "NOT_AUTHORIZED_MINTER");
         require(ids.length == amounts.length, "INVALID_INCONSISTENT_LENGTH");
         _batchMint(to, ids, amounts);
     }
