@@ -1,6 +1,6 @@
 pragma solidity 0.6.5;
 
-import "../contracts_common/src/Libraries/SafeMath.sol";
+import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
 import "../contracts_common/src/BaseWithStorage/SuperOperators.sol";
 import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 
@@ -62,7 +62,7 @@ contract ERC20SubToken {
     ) external returns (bool success) {
         if (msg.sender != from && !_group.isAuthorizedToTransfer(from, msg.sender)) {
             uint256 allowance = _mAllowed[from][msg.sender];
-            if (allowance != (2**256) - 1) {
+            if (allowance != ~uint256(0)) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
                 require(allowance >= amount, "NOT_AUTHOIZED_ALLOWANCE");
                 _mAllowed[from][msg.sender] = allowance.sub(amount);
@@ -127,7 +127,7 @@ contract ERC20SubToken {
     }
 
     // ///////////////////// UTILITIES ///////////////////////
-    using SafeMath for uint256;
+    using SafeMathWithRequire for uint256;
 
     // //////////////////// CONSTRUCTOR /////////////////////
     constructor(
@@ -138,10 +138,10 @@ contract ERC20SubToken {
     ) public {
         _group = group;
         _index = index;
-        require(bytes(tokenName).length > 0, "INVALID_NAME_REQUIRED");
+        require(bytes(tokenName).length != 0, "INVALID_NAME_REQUIRED");
         require(bytes(tokenName).length <= 32, "INVALID_NAME_TOO_LONG");
         _name = _firstBytes32(bytes(tokenName));
-        require(bytes(tokenSymbol).length > 0, "INVALID_SYMBOL_REQUIRED");
+        require(bytes(tokenSymbol).length != 0, "INVALID_SYMBOL_REQUIRED");
         require(bytes(tokenSymbol).length <= 32, "INVALID_SYMBOL_TOO_LONG");
         _symbol = _firstBytes32(bytes(tokenSymbol));
     }

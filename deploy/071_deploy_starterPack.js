@@ -3,7 +3,7 @@ const {guard} = require("../lib");
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deployIfDifferent, log} = deployments;
 
-  const {deployer, starterPackAdmin, starterPackSaleBeneficiary} = await getNamedAccounts();
+  const {deployer, starterPackAdmin, starterPackSaleBeneficiary, backendMessageSigner} = await getNamedAccounts();
 
   const sandContract = await deployments.getOrNull("Sand");
   if (!sandContract) {
@@ -47,7 +47,8 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     daiMedianizer.address,
     daiContract.address,
     catalystGroup.address,
-    gemGroup.address
+    gemGroup.address,
+    backendMessageSigner
   );
 
   if (deployResult.newlyDeployed) {
@@ -65,4 +66,5 @@ module.exports.dependencies = [
   "DAI",
   "ERC20GroupCatalyst",
   "Gem",
+  "NativeMetaTransactionProcessor",
 ];

@@ -1,4 +1,4 @@
-const {assert} = require("local-chai");
+const {assert, expect} = require("local-chai");
 const ethers = require("ethers");
 const {expectRevert, zeroAddress} = require("local-utils");
 const {findEvents} = require("../../lib/findEvents.js");
@@ -635,6 +635,7 @@ module.exports = (init, extensions) => {
         batchMint,
         minter,
         meta,
+        tokenByIds,
         ERC20SubToken,
         secondERC20SubToken,
         thirdERC20SubToken,
@@ -668,6 +669,7 @@ module.exports = (init, extensions) => {
         ERC20SubToken,
         secondERC20SubToken,
         thirdERC20SubToken,
+        tokenByIds,
         sandContract,
       });
     };
@@ -920,6 +922,53 @@ module.exports = (init, extensions) => {
       assert.equal(thirdEvent.args[0], users[1].address);
       assert.equal(thirdEvent.args[1], users[2].address);
       assert.ok(thirdEvent.args[2].eq(BigNumber.from(7)));
+    });
+
+    it("transferring one instance of several items using batchTransferFrom including 0-id results in several transfer events", async function ({
+      batchMint,
+      users,
+      tokenByIds,
+    }) {
+      await batchMint(users[1].address, [5, 6, 7], [0, 2, 3]);
+      const receipt = await users[1].contract
+        .batchTransferFrom(users[1].address, users[2].address, [0, 2, 3], [5, 6, 7])
+        .then((tx) => tx.wait());
+
+      const eventsMatchingFirstSubToken = await findEvents(tokenByIds[0], "Transfer", receipt.blockHash);
+      assert.equal(eventsMatchingFirstSubToken.length, 1);
+      const firstEvent = eventsMatchingFirstSubToken[0];
+      assert.equal(firstEvent.args[0], users[1].address);
+      assert.equal(firstEvent.args[1], users[2].address);
+      assert.ok(firstEvent.args[2].eq(BigNumber.from(5)));
+      const eventsMatchingSecondSubToken = await findEvents(tokenByIds[2], "Transfer", receipt.blockHash);
+      assert.equal(eventsMatchingSecondSubToken.length, 1);
+      const secondEvent = eventsMatchingSecondSubToken[0];
+      assert.equal(secondEvent.args[0], users[1].address);
+      assert.equal(secondEvent.args[1], users[2].address);
+      assert.ok(secondEvent.args[2].eq(BigNumber.from(6)));
+      const eventsMatchingThirdSubToken = await findEvents(tokenByIds[3], "Transfer", receipt.blockHash);
+      assert.equal(eventsMatchingThirdSubToken.length, 1);
+      const thirdEvent = eventsMatchingThirdSubToken[0];
+      assert.equal(thirdEvent.args[0], users[1].address);
+      assert.equal(thirdEvent.args[1], users[2].address);
+      assert.ok(thirdEvent.args[2].eq(BigNumber.from(7)));
+    });
+
+    it("transferring one instance of several items using batchTransferFrom including 0-id results in several correct balance update", async function ({
+      batchMint,
+      users,
+      tokenByIds,
+    }) {
+      await batchMint(users[1].address, [5, 6, 7], [0, 2, 3]);
+      const receipt = await users[1].contract
+        .batchTransferFrom(users[1].address, users[2].address, [0, 2, 3], [5, 6, 7])
+        .then((tx) => tx.wait());
+      const balanceFor0 = await users[1].contract.balanceOf(users[2].address, 0);
+      expect(balanceFor0).to.equal(5);
+      const balanceFor1 = await users[1].contract.balanceOf(users[2].address, 2);
+      expect(balanceFor1).to.equal(6);
+      const balanceFor2 = await users[1].contract.balanceOf(users[2].address, 3);
+      expect(balanceFor2).to.equal(7);
     });
 
     it("transferring 0 instances of several items using batchTransferFrom results in several transfer events", async function ({

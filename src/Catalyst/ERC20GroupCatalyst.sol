@@ -6,6 +6,7 @@ import "./CatalystDataBase.sol";
 import "../BaseWithStorage/ERC20SubToken.sol";
 import "./CatalystValue.sol";
 
+
 contract ERC20GroupCatalyst is CatalystDataBase, ERC20Group {
     function addCatalysts(
         ERC20SubToken[] memory catalysts,

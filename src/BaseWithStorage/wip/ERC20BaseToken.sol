@@ -87,7 +87,7 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
     ) external override returns (bool success) {
         if (msg.sender != from && !_superOperators[msg.sender]) {
             uint256 currentAllowance = _allowances[from][msg.sender];
-            if (currentAllowance != (2**256) - 1) {
+            if (currentAllowance != ~uint256(0)) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
                 require(currentAllowance >= amount, "NOT_AUTHOIZED_ALLOWANCE");
                 _allowances[from][msg.sender] = currentAllowance - amount;
@@ -109,7 +109,7 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
     function burnFor(address from, uint256 amount) external override {
         if (msg.sender != from && !_superOperators[msg.sender]) {
             uint256 currentAllowance = _allowances[from][msg.sender];
-            if (currentAllowance != (2**256) - 1) {
+            if (currentAllowance != ~uint256(0)) {
                 require(currentAllowance >= amount, "NOT_AUTHOIZED_ALLOWANCE");
                 _allowances[from][msg.sender] = currentAllowance - amount;
             }
@@ -203,7 +203,7 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
         if (msg.sender != from && !_superOperators[msg.sender]) {
             uint256 currentAllowance = _allowances[from][msg.sender];
             require(currentAllowance >= amount, "Not enough funds allowed");
-            if (currentAllowance != (2**256) - 1) {
+            if (currentAllowance != ~uint256(0)) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
                 _allowances[from][msg.sender] = currentAllowance - amount;
             }

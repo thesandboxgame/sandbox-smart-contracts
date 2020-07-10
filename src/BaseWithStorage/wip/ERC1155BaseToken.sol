@@ -127,11 +127,11 @@ contract ERC1155BaseToken is MetaTransactionReceiver, SuperOperators, ERC1155 {
 
         uint256 balFrom;
 
-        uint256 lastBin = 2**256 - 1;
+        uint256 lastBin = ~uint256(0);
         for (uint256 i = 0; i < ids.length; i++) {
             if (amounts[i] > 0) {
                 (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
-                if (lastBin == 2**256 - 1) {
+                if (lastBin == ~uint256(0)) {
                     lastBin = bin;
                     balFrom = ObjectLib32.updateTokenBalance(_packedTokenBalance[from][bin], index, amounts[i], ObjectLib32.Operations.SUB);
                 } else {
@@ -145,7 +145,7 @@ contract ERC1155BaseToken is MetaTransactionReceiver, SuperOperators, ERC1155 {
                 }
             }
         }
-        if (lastBin != 2**256 - 1) {
+        if (lastBin != ~uint256(0)) {
             _packedTokenBalance[from][lastBin] = balFrom;
         }
         emit TransferBatch(metaTx ? from : msg.sender, from, address(0), ids, amounts);
@@ -206,11 +206,11 @@ contract ERC1155BaseToken is MetaTransactionReceiver, SuperOperators, ERC1155 {
         uint256 balFrom;
         uint256 balTo;
 
-        uint256 lastBin = 2**256 - 1;
+        uint256 lastBin = ~uint256(0);
         for (uint256 i = 0; i < numItems; i++) {
             if (values[i] > 0) {
                 (bin, index) = ids[i].getTokenBinIndex();
-                if (lastBin == 2**256 - 1) {
+                if (lastBin == ~uint256(0)) {
                     lastBin = bin;
                     balFrom = ObjectLib32.updateTokenBalance(_packedTokenBalance[from][bin], index, values[i], ObjectLib32.Operations.SUB);
                     balTo = ObjectLib32.updateTokenBalance(_packedTokenBalance[to][bin], index, values[i], ObjectLib32.Operations.ADD);
@@ -228,7 +228,7 @@ contract ERC1155BaseToken is MetaTransactionReceiver, SuperOperators, ERC1155 {
                 }
             }
         }
-        if (lastBin != 2**256 - 1) {
+        if (lastBin != ~uint256(0)) {
             _packedTokenBalance[from][lastBin] = balFrom;
             _packedTokenBalance[to][lastBin] = balTo;
         }
