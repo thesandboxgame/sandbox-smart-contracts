@@ -79,7 +79,7 @@ contract CatalystDataBase is CatalystValue {
                 valuesPerGemIds[gemId] = randomValue;
                 values[i - 1] = randomValue;
             } else {
-                values[i - 1] = 25; // 25 ensure multiple of the same gem will give add. so 2 Power gem will at least have a value of 26 (always more than a single gem which could be between 1 and 25)
+                values[i - 1] = 25; // 25 ensure multiple of the same gem will add up. so 2 Power gem will at least have a value of 26 (always more than a single gem which can only be between 1 and 25 by itself)
             }
         }
     }

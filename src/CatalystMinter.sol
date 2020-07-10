@@ -324,7 +324,7 @@ contract CatalystMinter is MetaTransactionReceiver {
         uint256[] memory gemIds,
         address to
     ) internal {
-        require(assetId & IS_NFT != 0, "INVALID_NOT_NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will reyrn false
+        require(assetId & IS_NFT != 0, "INVALID_NOT_NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will return false
         _burnCatalyst(from, catalystId);
         (uint16 maxGems, , , , uint256 sandUpdateFee) = _getMintData(catalystId);
         require(gemIds.length <= maxGems, "INVALID_GEMS_TOO_MANY");
@@ -342,7 +342,7 @@ contract CatalystMinter is MetaTransactionReceiver {
         uint256[] memory gemIds,
         address to
     ) internal {
-        require(assetId & IS_NFT != 0, "INVALID_NOT_NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will reyrn false
+        require(assetId & IS_NFT != 0, "INVALID_NOT_NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will return false
         _catalystRegistry.addGems(assetId, gemIds);
         _chargeSand(from, gemIds.length.mul(_gemAdditionFee));
         _transfer(from, to, assetId);
