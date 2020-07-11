@@ -213,6 +213,9 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
     expect(balanceMagicGem).to.equal(2);
     expect(balanceLuckGem).to.equal(2);
   });
+
+  // it("purchase should invalidate the nonce after 1 use", async function () {});
+  // it("purchase should fail if the nonce is reused", async function () {});
 });
 
 // describe("SetPrices"...
