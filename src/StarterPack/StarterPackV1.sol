@@ -60,7 +60,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _setMetaTransactionProcessor(initialMetaTx, true);
         _wallet = initialWalletAddress;
         _admin = starterPackAdmin;
-        _sandEnabled = false;
         _sand = ERC20(sandContractAddress);
         _medianizer = Medianizer(medianizerContractAddress);
         _dai = ERC20(daiTokenContractAddress);
