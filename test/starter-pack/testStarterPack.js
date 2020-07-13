@@ -23,6 +23,7 @@ describe("StarterPack:Setup", function () {
 
 describe("StarterPack:PurchaseWithSandEmptyStarterPack", function () {
   let setUp;
+
   const Message = {
     catalystIds: [0, 1, 2, 3],
     catalystQuantities: [1, 1, 1, 1],
@@ -41,10 +42,18 @@ describe("StarterPack:PurchaseWithSandEmptyStarterPack", function () {
   it("should revert if the user does not have enough SAND", async function () {
     const {userWithoutSAND, sandContract} = setUp;
     Message.buyer = userWithoutSAND.address;
+    const dummySignature = getSignature(
+      Message.catalystIds,
+      Message.catalystQuantities,
+      Message.gemIds,
+      Message.gemQuantities,
+      Message.buyer,
+      Message.nonce
+    );
     const balance = await sandContract.balanceOf(userWithoutSAND.address);
     assert.ok(balance.eq(BigNumber.from(0)));
     await expectRevert(
-      userWithoutSAND.StarterPack.purchaseWithSand(userWithoutSAND.address, Message, emptySignature),
+      userWithoutSAND.StarterPack.purchaseWithSand(userWithoutSAND.address, Message, dummySignature),
       "not enough fund"
     );
   });
@@ -52,8 +61,16 @@ describe("StarterPack:PurchaseWithSandEmptyStarterPack", function () {
   it("purchase should revert if StarterpackV1.sol does not own any Catalysts & Gems", async function () {
     const {userWithSAND} = setUp;
     Message.buyer = userWithSAND.address;
+    const dummySignature = getSignature(
+      Message.catalystIds,
+      Message.catalystQuantities,
+      Message.gemIds,
+      Message.gemQuantities,
+      Message.buyer,
+      Message.nonce
+    );
     await expectRevert(
-      userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, emptySignature),
+      userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature),
       "can't substract more than there is"
     );
   });
@@ -61,22 +78,31 @@ describe("StarterPack:PurchaseWithSandEmptyStarterPack", function () {
   it("should throw if SAND is not enabled", async function () {
     const {userWithSAND, starterPackContractAsAdmin} = setUp;
     Message.buyer = userWithSAND.address;
+    const dummySignature = getSignature(
+      Message.catalystIds,
+      Message.catalystQuantities,
+      Message.gemIds,
+      Message.gemQuantities,
+      Message.buyer,
+      Message.nonce
+    );
     await starterPackContractAsAdmin.setSANDEnabled(false);
     await expectRevert(
-      userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, emptySignature),
-      "sand payments not enabled"
+      userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature),
+      "SAND_IS_NOT_ENABLED"
     );
   });
 
   it("cannot enable/disable SAND if not admin", async function () {
     const {userWithoutSAND, starterPackContractAsAdmin} = setUp;
     await starterPackContractAsAdmin.setSANDEnabled(false);
-    await expectRevert(userWithoutSAND.StarterPack.setSANDEnabled(true), "only admin can enable/disable SAND");
+    await expectRevert(userWithoutSAND.StarterPack.setSANDEnabled(true), "ONLY_ADMIN_CAN_SET_SAND_ENABLED_OR_DISABLED");
   });
 });
 
 describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
   let setUp;
+
   const Message = {
     catalystIds: [0, 1, 2, 3],
     catalystQuantities: [1, 1, 1, 1],
