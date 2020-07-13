@@ -82,20 +82,20 @@ describe("StarterPack:PurchaseWithSandEmptyStarterPack", function () {
 
 describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
   let setUp;
-
-  const Message = {
-    catalystIds: [0, 1, 2, 3],
-    catalystQuantities: [1, 1, 1, 1],
-    gemIds: [0, 1, 2, 3, 4],
-    gemQuantities: [2, 2, 2, 2, 2],
-    buyer: "",
-    nonce: 0,
-  };
+  let Message;
 
   beforeEach(async function () {
     setUp = await supplyStarterPack();
     const {starterPackContractAsAdmin} = setUp;
     await starterPackContractAsAdmin.setSANDEnabled(true);
+    Message = {
+      catalystIds: [0, 1, 2, 3],
+      catalystQuantities: [1, 1, 1, 1],
+      gemIds: [0, 1, 2, 3, 4],
+      gemQuantities: [2, 2, 2, 2, 2],
+      buyer: "",
+      nonce: 0,
+    };
   });
 
   it("StarterPackV1 can receive Catalysts and Gems", async function () {
@@ -365,8 +365,18 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
   it("total price is correctly calculated", async function () {
     const {userWithSAND} = await setUp;
     Message.buyer = userWithSAND.address;
+
+    const dummySignature = getSignature(
+      Message.catalystIds,
+      Message.catalystQuantities,
+      Message.gemIds,
+      Message.gemQuantities,
+      Message.buyer,
+      Message.nonce
+    );
+
     const receipt = await waitFor(
-      userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, emptySignature)
+      userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature)
     );
     const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
     assert.equal(eventsMatching.length, 1);
