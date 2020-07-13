@@ -17,13 +17,13 @@ import "./PurchaseValidator.sol";
  */
 contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     using SafeMathWithRequire for uint256;
-    uint256 internal constant daiPrice = 14400000000000000;
+    uint256 internal constant DAI_PRICE = 14400000000000000;
 
-    ERC20 internal _sand;
-    Medianizer private _medianizer;
-    ERC20 private _dai;
-    ERC20Group internal _erc20GroupCatalyst;
-    ERC20Group internal _erc20GroupGem;
+    ERC20 internal immutable _sand;
+    Medianizer private immutable _medianizer;
+    ERC20 private immutable _dai;
+    ERC20Group internal immutable _erc20GroupCatalyst;
+    ERC20Group internal immutable _erc20GroupGem;
 
     bool _sandEnabled;
     bool _etherEnabled;
@@ -123,7 +123,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
         require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
         require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
-        // require(isPurchaseValid(from, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce, signature), "INVALID_PURCHASE");
+        require(isPurchaseValid(from, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce, signature), "INVALID_PURCHASE");
 
         uint256 amountInSand = _calculateTotalPriceInSand();
         _handlePurchaseWithERC20(message.buyer, _wallet, address(_sand), amountInSand);
@@ -209,7 +209,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
      */
     function _getEtherAmountWithSAND(uint256 sandAmount) internal view returns (uint256) {
         uint256 ethUsdPair = _getEthUsdPair();
-        return sandAmount.mul(daiPrice).div(ethUsdPair);
+        return sandAmount.mul(DAI_PRICE).div(ethUsdPair);
     }
 
     /**
