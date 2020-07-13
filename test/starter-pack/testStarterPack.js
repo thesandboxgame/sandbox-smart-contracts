@@ -1,7 +1,7 @@
 const {setupStarterPack, supplyStarterPack} = require("./fixtures");
 const {assert, expect} = require("local-chai");
 const {getNamedAccounts} = require("@nomiclabs/buidler");
-const {waitFor, expectRevert, emptyBytes} = require("local-utils");
+const {waitFor, expectRevert} = require("local-utils");
 const ethers = require("ethers");
 const {BigNumber} = ethers;
 const {findEvents} = require("../../lib/findEvents.js");
