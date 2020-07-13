@@ -35,6 +35,7 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
       land: await ethers.getContract("Land"),
       estate: await ethers.getContract("Estate"),
       sand: await ethers.getContract("Sand"),
+      asset: await ethers.getContract("Asset"),
       daiMedianizer: await ethers.getContract("DAIMedianizer"),
       dai: await ethers.getContract("DAI"),
     };
@@ -74,7 +75,8 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
       contracts.dai.address,
       signer,
       maxCommissionRate,
-      contracts.estate.address
+      contracts.estate.address,
+      contracts.asset.address
     );
 
     const {LandSaleAdmin, LandSaleBeneficiary, LandAdmin, SandAdmin, DaiAdmin, users} = await generateUserPermissions(

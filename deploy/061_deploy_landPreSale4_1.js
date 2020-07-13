@@ -7,21 +7,10 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
 
   const {deployer, landSaleBeneficiary, backendReferralWallet} = await getNamedAccounts();
 
-  const sandContract = await deployments.getOrNull("Sand");
-  const landContract = await deployments.getOrNull("Land");
-  const estateContract = await deployments.getOrNull("Estate");
-
-  if (!sandContract) {
-    throw new Error("no SAND contract deployed");
-  }
-
-  if (!landContract) {
-    throw new Error("no LAND contract deployed");
-  }
-
-  if (!estateContract) {
-    throw new Error("no ESTATE contract deployed");
-  }
+  const sandContract = await deployments.get("Sand");
+  const landContract = await deployments.get("Land");
+  const estateContract = await deployments.get("Estate");
+  const assetContract = await deployments.get("Asset");
 
   let daiMedianizer = await deployments.getOrNull("DAIMedianizer");
   if (!daiMedianizer) {
@@ -66,7 +55,8 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     dai.address,
     backendReferralWallet,
     2000,
-    "0x0000000000000000000000000000000000000000" // estateContract.address
+    "0x0000000000000000000000000000000000000000", // estateContract.address
+    assetContract.address
   );
   if (deployResult.newlyDeployed) {
     log(" - LandPreSale_4_1 deployed at : " + deployResult.address + " for gas : " + deployResult.receipt.gasUsed);
