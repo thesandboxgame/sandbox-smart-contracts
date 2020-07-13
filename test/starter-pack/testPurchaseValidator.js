@@ -76,4 +76,16 @@ describe("ValidatingPurchaseMessages", function () {
       "INVALID_NONCE"
     );
   });
+
+  it("should fail if too many gems are requested", async function () {
+    const {starterPackContract: starterPack} = await setupStarterPack();
+    const {others} = await getNamedAccounts();
+    const starterPackBuyer = others[0];
+    purchaseMessage.catalystQuantities = [1, 1, 1, 1];
+    // total gems allowed is max 10
+    purchaseMessage.gemQuantities = [3, 2, 4, 2, 3];
+    purchaseMessage.buyer = starterPackBuyer;
+    const sig = await signPurchaseMessage(privateKey, purchaseMessage);
+    await expectRevert(starterPack.isPurchaseValid(starterPackBuyer, purchaseMessage, sig), "INVALID_GEMS");
+  });
 });
