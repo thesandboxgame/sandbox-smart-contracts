@@ -7,7 +7,7 @@ import "./CatalystValue.sol";
 contract CatalystDataBase is CatalystValue {
     event CatalystConfiguration(uint256 indexed id, uint16 minQuantity, uint16 maxQuantity, uint256 sandMintingFee, uint256 sandUpdateFee);
 
-    function _setMindData(uint256 id, MintData memory data) internal {
+    function _setMintData(uint256 id, MintData memory data) internal {
         _data[id] = data;
         _emitConfiguration(id, data.minQuantity, data.maxQuantity, data.sandMintingFee, data.sandUpdateFee);
     }
@@ -79,7 +79,7 @@ contract CatalystDataBase is CatalystValue {
                 valuesPerGemIds[gemId] = randomValue;
                 values[i - 1] = randomValue;
             } else {
-                values[i - 1] = 25;
+                values[i - 1] = 25; // 25 ensure multiple of the same gem will add up. so 2 Power gem will at least have a value of 26 (always more than a single gem which can only be between 1 and 25 by itself)
             }
         }
     }

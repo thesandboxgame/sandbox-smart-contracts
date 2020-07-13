@@ -415,7 +415,13 @@ async function handleRow(row) {
   });
 
   for (const row of sheet) {
-    await handleRow(row);
+    try {
+      await handleRow(row);
+    } catch (e) {
+      console.error(e);
+      console.log(JSON.stringify(row, null, "  "));
+      throw e;
+    }
   }
 
   write(sheetId, {values: gasValues, range: "M1:O" + (gasValues.length + 1)});

@@ -64,7 +64,7 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         uint256[] calldata ids,
         uint256[] calldata amounts
     ) external {
-        require(_minters[msg.sender], "NOT_AUTHORIZED_ADMIN");
+        require(_minters[msg.sender], "NOT_AUTHORIZED_MINTER");
         require(ids.length == amounts.length, "INVALID_INCONSISTENT_LENGTH");
         _batchMint(to, ids, amounts);
     }
@@ -178,14 +178,12 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
             "NOT_AUTHORIZED"
         );
 
-        uint256 bin = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
-        uint256 index;
-        uint256 lastBin;
+        uint256 lastBin = ~uint256(0);
         uint256 balFrom;
         uint256 balTo;
         for (uint256 i = 0; i < ids.length; i++) {
-            (bin, index) = ids[i].getTokenBinIndex();
-            if (lastBin == 0) {
+            (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
+            if (lastBin == ~uint256(0)) {
                 lastBin = bin;
                 balFrom = ObjectLib32.updateTokenBalance(_packedTokenBalance[from][bin], index, values[i], ObjectLib32.Operations.SUB);
                 balTo = ObjectLib32.updateTokenBalance(_packedTokenBalance[to][bin], index, values[i], ObjectLib32.Operations.ADD);
@@ -203,9 +201,9 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
             ERC20SubToken erc20 = _erc20s[ids[i]];
             erc20.emitTransferEvent(from, to, values[i]);
         }
-        if (bin != 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF) {
-            _packedTokenBalance[from][bin] = balFrom;
-            _packedTokenBalance[to][bin] = balTo;
+        if (lastBin != ~uint256(0)) {
+            _packedTokenBalance[from][lastBin] = balFrom;
+            _packedTokenBalance[to][lastBin] = balTo;
         }
     }
 
