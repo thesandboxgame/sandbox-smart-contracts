@@ -4,6 +4,7 @@ const {getNamedAccounts} = require("@nomiclabs/buidler");
 const {setupStarterPack} = require("./fixtures");
 const {expectRevert, zeroAddress} = require("local-utils");
 const {signPurchaseMessage} = require("../../lib/purchaseMessageSigner");
+const {getMsgAndSignature} = require('./_testHelper')
 const privateKey = "0x4242424242424242424242424242424242424242424242424242424242424242";
 
 // Example queueIds and nonces:
