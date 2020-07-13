@@ -24,6 +24,7 @@ describe("Estate:Sales", function () {
         size,
         sandPrice,
         salt,
+        [],
         proof,
         emptyBytes, // referral
         {value: BigNumber.from("30000000000000000000")}

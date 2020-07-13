@@ -54,6 +54,7 @@ function runDaiTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral,
           {gasLimit: 1000000}
@@ -114,6 +115,7 @@ function runDaiTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           encodedReferral
         );
@@ -177,6 +179,7 @@ function runDaiTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -202,6 +205,7 @@ function runDaiTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -253,6 +257,7 @@ function runDaiTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           encodedReferral
         );
@@ -294,6 +299,7 @@ function runDaiTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral,
             {gasLimit: 1000000}
@@ -322,6 +328,7 @@ function runDaiTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral,
             {gasLimit: 1000000}
@@ -346,6 +353,7 @@ function runDaiTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral
         );
@@ -366,6 +374,7 @@ function runDaiTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -391,6 +400,7 @@ function runDaiTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -412,6 +422,7 @@ function runDaiTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral
         );
@@ -426,6 +437,7 @@ function runDaiTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -452,6 +464,7 @@ function runDaiTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -474,6 +487,7 @@ function runDaiTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -494,6 +508,7 @@ function runDaiTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral
         );
@@ -525,6 +540,7 @@ function runDaiTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -555,6 +571,7 @@ function runDaiTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -575,6 +592,7 @@ function runDaiTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral
         );
@@ -595,6 +613,7 @@ function runDaiTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral
         );
@@ -622,6 +641,7 @@ function runDaiTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral
         );
@@ -642,6 +662,7 @@ function runDaiTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral
         );
@@ -671,6 +692,7 @@ function runDaiTests(landSaleName) {
                 land.size,
                 land.price,
                 land.salt,
+                [],
                 proof,
                 emptyReferral
               ),
@@ -687,6 +709,7 @@ function runDaiTests(landSaleName) {
                 land.size,
                 land.price,
                 land.salt,
+                [],
                 proof,
                 emptyReferral
               );

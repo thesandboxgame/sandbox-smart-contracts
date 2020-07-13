@@ -123,13 +123,14 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         uint256 size,
         uint256 price,
         bytes32 salt,
+        uint256[] memory assetIds,
         bytes32[] memory proof
     ) internal view {
         /* solium-disable-next-line security/no-block-members */
         require(block.timestamp < _expiryTime, "sale is over");
         require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "not authorized");
         require(reserved == address(0) || reserved == buyer, "cannot buy reserved Land");
-        bytes32 leaf = _generateLandHash(x, y, size, price, reserved, salt);
+        bytes32 leaf = _generateLandHash(x, y, size, price, reserved, salt, assetIds);
 
         require(_verify(proof, leaf), "Invalid land provided");
     }
@@ -172,11 +173,12 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         uint256 size,
         uint256 priceInSand,
         bytes32 salt,
+        uint256[] calldata assetIds,
         bytes32[] calldata proof,
         bytes calldata referral
     ) external {
         require(_sandEnabled, "sand payments not enabled");
-        _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);
+        _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, assetIds, proof);
 
         handleReferralWithERC20(buyer, priceInSand, referral, _wallet, address(_sand));
 
@@ -204,11 +206,12 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         uint256 size,
         uint256 priceInSand,
         bytes32 salt,
+        uint256[] calldata assetIds,
         bytes32[] calldata proof,
         bytes calldata referral
     ) external payable {
         require(_etherEnabled, "ether payments not enabled");
-        _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);
+        _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, assetIds, proof);
 
         uint256 ETHRequired = getEtherAmountWithSAND(priceInSand);
         require(msg.value >= ETHRequired, "not enough ether sent");
@@ -242,11 +245,12 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         uint256 size,
         uint256 priceInSand,
         bytes32 salt,
+        uint256[] calldata assetIds,
         bytes32[] calldata proof,
         bytes calldata referral
     ) external {
         require(_daiEnabled, "dai payments not enabled");
-        _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);
+        _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, assetIds, proof);
 
         uint256 DAIRequired = priceInSand.mul(daiPrice).div(1000000000000000000);
 
@@ -277,9 +281,10 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         uint256 size,
         uint256 price,
         address reserved,
-        bytes32 salt
+        bytes32 salt,
+        uint256[] memory assetIds
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(x, y, size, price, reserved, salt));
+        return keccak256(abi.encodePacked(x, y, size, price, reserved, salt, assetIds));
     }
 
     function _verify(bytes32[] memory proof, bytes32 leaf) internal view returns (bool) {

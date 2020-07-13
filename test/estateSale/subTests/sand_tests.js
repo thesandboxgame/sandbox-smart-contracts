@@ -54,6 +54,7 @@ function runSandTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral
         );
@@ -113,6 +114,7 @@ function runSandTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           encodedReferral
         );
@@ -176,6 +178,7 @@ function runSandTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -201,6 +204,7 @@ function runSandTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -252,6 +256,7 @@ function runSandTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           encodedReferral
         );
@@ -293,6 +298,7 @@ function runSandTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -317,6 +323,7 @@ function runSandTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -341,6 +348,7 @@ function runSandTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -364,6 +372,7 @@ function runSandTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral
         );
@@ -384,6 +393,7 @@ function runSandTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -409,6 +419,7 @@ function runSandTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -430,6 +441,7 @@ function runSandTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral
         );
@@ -444,6 +456,7 @@ function runSandTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -470,6 +483,7 @@ function runSandTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -492,6 +506,7 @@ function runSandTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -512,6 +527,7 @@ function runSandTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral
         );
@@ -543,6 +559,7 @@ function runSandTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -573,6 +590,7 @@ function runSandTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral
           ),
@@ -593,6 +611,7 @@ function runSandTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral
         );
@@ -613,6 +632,7 @@ function runSandTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral
         );
@@ -640,6 +660,7 @@ function runSandTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral
         );
@@ -660,6 +681,7 @@ function runSandTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral
         );
@@ -689,6 +711,7 @@ function runSandTests(landSaleName) {
                 land.size,
                 land.price,
                 land.salt,
+                [],
                 proof,
                 emptyReferral
               ),
@@ -705,6 +728,7 @@ function runSandTests(landSaleName) {
                 land.size,
                 land.price,
                 land.salt,
+                [],
                 proof,
                 emptyReferral
               );

@@ -51,6 +51,7 @@ function runEtherTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral,
           {value: value}
@@ -112,6 +113,7 @@ function runEtherTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           encodedReferral,
           {value: value}
@@ -173,6 +175,7 @@ function runEtherTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral,
             {value: value}
@@ -200,6 +203,7 @@ function runEtherTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral,
             {value: value}
@@ -253,6 +257,7 @@ function runEtherTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           encodedReferral,
           {value: value}
@@ -292,6 +297,7 @@ function runEtherTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral,
             {value: 0}
@@ -316,6 +322,7 @@ function runEtherTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral,
             {value: value}
@@ -343,6 +350,7 @@ function runEtherTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral,
             {value: value}
@@ -366,6 +374,7 @@ function runEtherTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral,
           {value: value}
@@ -381,6 +390,7 @@ function runEtherTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral,
             {value: value}
@@ -409,6 +419,7 @@ function runEtherTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral,
             {value: value}
@@ -433,6 +444,7 @@ function runEtherTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral,
             {value: value}
@@ -455,6 +467,7 @@ function runEtherTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral,
           {value: value}
@@ -487,6 +500,7 @@ function runEtherTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral,
             {value: value}
@@ -517,6 +531,7 @@ function runEtherTests(landSaleName) {
             land.size,
             land.price,
             land.salt,
+            [],
             proof,
             emptyReferral,
             {value: value}
@@ -539,6 +554,7 @@ function runEtherTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral,
           {value: value}
@@ -561,6 +577,7 @@ function runEtherTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral,
           {value: value}
@@ -590,6 +607,7 @@ function runEtherTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral,
           {value: value}
@@ -612,6 +630,7 @@ function runEtherTests(landSaleName) {
           land.size,
           land.price,
           land.salt,
+          [],
           proof,
           emptyReferral,
           {value: value}
@@ -643,6 +662,7 @@ function runEtherTests(landSaleName) {
                 land.size,
                 land.price,
                 land.salt,
+                [],
                 proof,
                 emptyReferral,
                 {value: value}
@@ -660,6 +680,7 @@ function runEtherTests(landSaleName) {
                 land.size,
                 land.price,
                 land.salt,
+                [],
                 proof,
                 emptyReferral,
                 {value: value}
