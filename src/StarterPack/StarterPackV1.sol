@@ -70,15 +70,15 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @dev set the wallet receiving the proceeds
     /// @param newWallet address of the new receiving wallet
     function setReceivingWallet(address payable newWallet) external {
-        require(newWallet != address(0), "receiving wallet cannot be zero address");
-        require(msg.sender == _admin, "only admin can change the receiving wallet");
+        require(newWallet != address(0), "WALLET_ZERO_ADDRESS");
+        require(msg.sender == _admin, "ONLY_ADMIN_CAN_CHANGE_WALLET");
         _wallet = newWallet;
     }
 
     /// @dev enable/disable DAI payment for StarterPacks
     /// @param enabled whether to enable or disable
     function setDAIEnabled(bool enabled) external {
-        require(msg.sender == _admin, "only admin can enable/disable DAI");
+        require(msg.sender == _admin, "ONLY_ADMIN_CAN_SET_DAI_ENABLED_OR_DISABLED");
         _daiEnabled = enabled;
     }
 
@@ -91,7 +91,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @notice enable/disable ETH payment for StarterPacks
     /// @param enabled whether to enable or disable
     function setETHEnabled(bool enabled) external {
-        require(msg.sender == _admin, "only admin can enable/disable ETH");
+        require(msg.sender == _admin, "ONLY_ADMIN_CAN_SET_ETH_ENABLED_OR_DISABLED");
         _etherEnabled = enabled;
     }
 
@@ -104,7 +104,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @dev enable/disable the specific SAND payment for StarterPacks
     /// @param enabled whether to enable or disable
     function setSANDEnabled(bool enabled) external {
-        require(msg.sender == _admin, "only admin can enable/disable SAND");
+        require(msg.sender == _admin, "ONLY_ADMIN_CAN_SET_SAND_ENABLED_OR_DISABLED");
         _sandEnabled = enabled;
     }
 
@@ -119,8 +119,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         Message calldata message,
         bytes calldata signature
     ) external {
-        require(_sandEnabled, "sand payments not enabled");
-
+        require(_sandEnabled, "SAND_IS_NOT_ENABLED");
         require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
         require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
         require(isPurchaseValid(from, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce, signature), "INVALID_PURCHASE");
