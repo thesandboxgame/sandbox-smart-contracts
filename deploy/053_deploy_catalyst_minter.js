@@ -90,4 +90,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   await setSuperOperatorFor("Asset", catalystMinter.address);
   await setSuperOperatorFor(`Catalyst`, catalystMinter.address);
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO
+module.exports.skip = guard(["1", "314159"]); // TODO

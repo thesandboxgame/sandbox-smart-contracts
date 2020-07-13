@@ -22,4 +22,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     log(`reusing CatalystRegistry at ${catalystRegistry.address}`);
   }
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO
+module.exports.skip = guard(["1", "314159"]); // TODO
