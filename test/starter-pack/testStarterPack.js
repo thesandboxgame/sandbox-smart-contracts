@@ -214,6 +214,36 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
     expect(balanceLuckGem).to.equal(2);
   });
 
+  it("user can check the balance of a catalyst ID owned by StarterPackV1", async function () {
+    const {userWithSAND} = await setUp;
+    const balance = await userWithSAND.StarterPack.checkCatalystBalance(0);
+    expect(balance).to.equal(8);
+  });
+
+  it("user can check the balance of a gem ID owned by StarterPackV1", async function () {
+    const {userWithSAND} = await setUp;
+    const balance = await userWithSAND.StarterPack.checkGemBalance(1);
+    expect(balance).to.equal(100);
+  });
+
+  it("user can check batch balances of catalyst IDs owned by StarterPackV1", async function () {
+    const {userWithSAND} = await setUp;
+    const balances = await userWithSAND.StarterPack.checkCatalystBatchBalances([0, 1, 2, 3]);
+    expect(balances[0]).to.equal(BigNumber.from(8));
+    expect(balances[1]).to.equal(BigNumber.from(6));
+    expect(balances[2]).to.equal(BigNumber.from(4));
+    expect(balances[3]).to.equal(BigNumber.from(2));
+  });
+
+  it("user can check batch balances of gem IDs owned by StarterPackV1", async function () {
+    const {userWithSAND} = await setUp;
+    const balances = await userWithSAND.StarterPack.checkGemBatchBalances([0, 1, 2, 3]);
+    expect(balances[0]).to.equal(BigNumber.from(100));
+    expect(balances[1]).to.equal(BigNumber.from(100));
+    expect(balances[2]).to.equal(BigNumber.from(100));
+    expect(balances[3]).to.equal(BigNumber.from(100));
+  });
+
   // it("purchase should invalidate the nonce after 1 use", async function () {});
   // it("purchase should fail if the nonce is reused", async function () {});
 });
