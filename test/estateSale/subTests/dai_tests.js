@@ -9,8 +9,8 @@ function sandToUSD(sand) {
   return BigNumber.from(sand).mul(BigNumber.from("14400000000000000")).div(BigNumber.from("1000000000000000000"));
 }
 
-function runDaiTests() {
-  describe("EstateSale:DAI", function () {
+function runDaiTests(landSaleName) {
+  describe(landSaleName + ":DAI", function () {
     let initialSetUp;
     const emptyReferral = "0x";
     const privateKey = "0x96aa38e97d1d0d19e0f1d5215ff9dad66dc5d99225b1657205d124d00d2de177";
@@ -18,7 +18,7 @@ function runDaiTests() {
 
     describe("--> Tests with real LANDs", function () {
       beforeEach(async function () {
-        initialSetUp = await setupEstateSale("lands");
+        initialSetUp = await setupEstateSale(landSaleName, "lands");
         const {LandSaleAdmin} = initialSetUp;
         await LandSaleAdmin.EstateSale.setDAIEnabled(true);
       });
@@ -535,7 +535,7 @@ function runDaiTests() {
 
     describe("--> Tests with test LANDs for reserved addresses", function () {
       beforeEach(async function () {
-        initialSetUp = await setupEstateSale("testLands");
+        initialSetUp = await setupEstateSale(landSaleName, "testLands");
         const {LandSaleAdmin} = initialSetUp;
         await LandSaleAdmin.EstateSale.setDAIEnabled(true);
       });

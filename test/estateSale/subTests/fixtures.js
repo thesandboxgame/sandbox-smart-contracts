@@ -5,12 +5,11 @@ const {createDataArray} = require("../../../lib/merkleTreeHelper");
 const {testLands, generateUserPermissions, setupUser} = require("./_testHelper");
 
 // Inputs
-const landSaleName = "LandPreSale_5";
 const maxCommissionRate = "2000";
 const signer = "0x26BC52894A05EDE59B34EE7B014b57ef0a8558B3";
 const contractName = "EstateSale";
 
-module.exports.setupEstateSale = async (landType) => {
+module.exports.setupEstateSale = async (landSaleName, landType) => {
   const {
     userWithSAND,
     secondUserWithSAND,

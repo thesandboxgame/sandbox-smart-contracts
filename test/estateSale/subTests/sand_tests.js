@@ -5,8 +5,8 @@ const {setupEstateSale} = require("./fixtures");
 const {calculateLandHash} = require("../../../lib/merkleTreeHelper");
 const {createReferral} = require("../../../lib/referralValidator");
 
-function runSandTests() {
-  describe("EstateSale:SAND", function () {
+function runSandTests(landSaleName) {
+  describe(landSaleName + ":SAND", function () {
     let initialSetUp;
     const emptyReferral = "0x";
     const privateKey = "0x96aa38e97d1d0d19e0f1d5215ff9dad66dc5d99225b1657205d124d00d2de177";
@@ -14,7 +14,7 @@ function runSandTests() {
 
     describe("--> Tests with real LANDs", function () {
       beforeEach(async function () {
-        initialSetUp = await setupEstateSale("lands");
+        initialSetUp = await setupEstateSale(landSaleName, "lands");
         const {LandSaleAdmin} = initialSetUp;
         await LandSaleAdmin.EstateSale.setSANDEnabled(true);
       });
@@ -553,7 +553,7 @@ function runSandTests() {
 
     describe("--> Tests with test LANDs for reserved addresses", function () {
       beforeEach(async function () {
-        initialSetUp = await setupEstateSale("testLands");
+        initialSetUp = await setupEstateSale(landSaleName, "testLands");
         const {SandAdmin} = initialSetUp;
         await SandAdmin.EstateSale.setSANDEnabled(true);
       });

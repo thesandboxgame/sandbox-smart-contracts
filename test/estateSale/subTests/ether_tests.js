@@ -6,8 +6,8 @@ const {setupEstateSale} = require("./fixtures");
 const {calculateLandHash} = require("../../../lib/merkleTreeHelper");
 const {createReferral} = require("../../../lib/referralValidator");
 
-function runEtherTests() {
-  describe("EstateSale:ETH", function () {
+function runEtherTests(landSaleName) {
+  describe(landSaleName + ":ETH", function () {
     let initialSetUp;
     const emptyReferral = "0x";
     const privateKey = "0x96aa38e97d1d0d19e0f1d5215ff9dad66dc5d99225b1657205d124d00d2de177";
@@ -15,7 +15,7 @@ function runEtherTests() {
 
     describe("--> Tests with real LANDs", function () {
       beforeEach(async function () {
-        initialSetUp = await setupEstateSale("lands");
+        initialSetUp = await setupEstateSale(landSaleName, "lands");
       });
 
       it("ETH is enabled", async function () {
@@ -498,7 +498,7 @@ function runEtherTests() {
 
     describe("--> Tests with test LANDs for reserved addresses", function () {
       beforeEach(async function () {
-        initialSetUp = await setupEstateSale("testLands");
+        initialSetUp = await setupEstateSale(landSaleName, "testLands");
       });
 
       it("CANNOT buy Land from a reserved Land of a different address (empty referral)", async function () {

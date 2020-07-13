@@ -8,7 +8,6 @@ import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../contracts_common/src/Interfaces/Medianizer.sol";
 import "../ReferralValidator/ReferralValidator.sol";
 
-
 /**
  * @title Estate Sale contract with referral that supports also DAI and ETH as payment
  * @notice This contract mananges the sale of our lands as Estates

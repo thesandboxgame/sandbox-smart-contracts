@@ -88,6 +88,7 @@ function generateLandsForMerkleTree() {
         size,
         price,
         reserved: landGroup.reserved,
+        assetIds: landGroup.assetIds,
       });
     }
     lands.push({
@@ -96,6 +97,7 @@ function generateLandsForMerkleTree() {
       size,
       price,
       reserved: landGroup.reserved,
+      assetIds: landGroup.assetIds,
     });
     numLands += size * size;
   }
@@ -111,6 +113,7 @@ function generateLandsForMerkleTree() {
       reserved: land.ownerAddress,
       originalX: land.coordinateX,
       originalY: land.coordinateY,
+      // assetIds: land.assetIds || [], // TODO
     });
   }
 
@@ -125,6 +128,7 @@ function generateLandsForMerkleTree() {
       reserved: estate.ownerAddress,
       originalX: estate.coordinateX,
       originalY: estate.coordinateY,
+      // assetIds: estate.assetIds || [], // TODO
     });
   }
 
@@ -160,7 +164,7 @@ module.exports = {
     let secretPath = "./.land_presale_1_secret";
     if (chainId === "1") {
       console.log("MAINNET secret");
-      secretPath = "./.land_presale_4_secret.mainnet";
+      secretPath = "./.land_presale_4_1_secret.mainnet";
     }
 
     let expose = false;
