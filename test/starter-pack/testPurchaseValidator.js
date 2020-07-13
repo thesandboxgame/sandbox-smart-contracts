@@ -63,6 +63,11 @@ describe("PurchaseValidator", function () {
         )
       );
     });
+
+    it("Should be possible to get the nonce for a buyer", async function () {
+      const nonce = await starterPack.getNonceByBuyer(message.buyer, 0);
+      assert.equal(nonce, 0);
+    });
   });
 
   describe("Failures", function () {
