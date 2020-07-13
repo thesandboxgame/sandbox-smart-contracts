@@ -1,0 +1,11 @@
+sequenceDiagram
+  autonumber
+  admin->>Gem: batchMint(StarterPack.address,...)
+  admin->>Catalyst: batchMint(StarterPack.address,...)
+  admin-->>StarterPack: setPrices(...)
+  creator->>frontend: Choose pack
+  frontend->>+backend: getList
+  backend-->>-frontend: list + signature
+  frontend->>StarterPack: purchaseWithSand(...)
+  StarterPack->>Catalyst: batchTransferFrom(...,creator,...)
+  StarterPack->>Gem: batchTransferFrom(...,creator,)
