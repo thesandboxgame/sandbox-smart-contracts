@@ -46,6 +46,23 @@ contract PurchaseValidator is Admin {
         return signer == _signingWallet;
     }
 
+    /**
+     * @dev signing wallet authorized for purchases
+     * @return the address of the signing wallet
+     */
+    function getSigningWallet() external view returns (address) {
+        return _signingWallet;
+    }
+
+    /**
+     * @dev Update the signing wallet
+     * @param newSigningWallet The new address of the signing wallet
+     */
+    function updateSigningWallet(address newSigningWallet) external {
+        require(_admin == msg.sender, "SENDER_NOT_ADMIN");
+        _signingWallet = newSigningWallet;
+    }
+
     function _checkAndUpdateNonce(address _buyer, uint256 _packedValue) private returns (bool) {
         uint128 queueId = uint128(_packedValue / 2**128);
         uint128 nonce = uint128(_packedValue % 2**128);
