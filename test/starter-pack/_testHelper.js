@@ -1,5 +1,4 @@
 const {signPurchaseMessage} = require("../../lib/purchaseMessageSigner");
-const {setupStarterPack} = require("./fixtures");
 const privateKey = "0x4242424242424242424242424242424242424242424242424242424242424242";
 
 // Example queueIds and nonces:
