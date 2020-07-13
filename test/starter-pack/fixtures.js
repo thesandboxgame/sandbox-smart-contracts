@@ -121,7 +121,14 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
     gemContract,
     setupSupply,
     ERC20SubTokenCommon,
+    ERC20SubTokenRare,
+    ERC20SubTokenEpic,
+    ERC20SubTokenLegendary,
     ERC20SubTokenPower,
+    ERC20SubTokenDefense,
+    ERC20SubTokenSpeed,
+    ERC20SubTokenMagic,
+    ERC20SubTokenLuck,
   };
 });
 
@@ -147,7 +154,14 @@ module.exports.supplyStarterPack = deployments.createFixture(async () => {
     gemContract,
     setupSupply,
     ERC20SubTokenCommon,
+    ERC20SubTokenRare,
+    ERC20SubTokenEpic,
+    ERC20SubTokenLegendary,
     ERC20SubTokenPower,
+    ERC20SubTokenDefense,
+    ERC20SubTokenSpeed,
+    ERC20SubTokenMagic,
+    ERC20SubTokenLuck,
   } = setup;
   await setupSupply();
   return {
@@ -169,6 +183,13 @@ module.exports.supplyStarterPack = deployments.createFixture(async () => {
     catalystContract,
     gemContract,
     ERC20SubTokenCommon,
+    ERC20SubTokenRare,
+    ERC20SubTokenEpic,
+    ERC20SubTokenLegendary,
     ERC20SubTokenPower,
+    ERC20SubTokenDefense,
+    ERC20SubTokenSpeed,
+    ERC20SubTokenMagic,
+    ERC20SubTokenLuck,
   };
 });
