@@ -24,13 +24,13 @@ let purchaseMessage = {
   nonce: 0, // queuId:0, nonce:0
 };
 
-describe("Validating Purchase Messages", function () {
+describe("ValidatingPurchaseMessages", function () {
   it("Purchase validator function exists", async function () {
     const {starterPackContract: starterPack} = await setupStarterPack();
     const {others} = await getNamedAccounts();
     const starterPackBuyer = others[0];
-    purchaseMessage.buyer = starterPackBuyer;
-    const sig = await signPurchaseMessage(privateKey, purchaseMessage);
+    const goodMsg = Object.assign({}, purchaseMessage, {buyer: starterPackBuyer});
+    const sig = await signPurchaseMessage(privateKey, goodMsg);
 
     assert.ok(
       await starterPack.isPurchaseValid(
@@ -51,8 +51,8 @@ describe("Validating Purchase Messages", function () {
     const {others} = await getNamedAccounts();
     const starterPackBuyer = others[0];
     const wrongFromAddress = others[1];
-    purchaseMessage.buyer = starterPackBuyer;
-    const sig = await signPurchaseMessage(privateKey, purchaseMessage);
+    const goodMsg = Object.assign({}, purchaseMessage, {buyer: starterPackBuyer});
+    const sig = await signPurchaseMessage(privateKey, goodMsg);
 
     await expectRevert(
       starterPack.isPurchaseValid(
@@ -73,8 +73,8 @@ describe("Validating Purchase Messages", function () {
     const {starterPackContract: starterPack} = await setupStarterPack();
     const {others} = await getNamedAccounts();
     const starterPackBuyer = others[0];
-    purchaseMessage.buyer = starterPackBuyer;
-    const sig = await signPurchaseMessage(privateKey, purchaseMessage);
+    const goodMsg = Object.assign({}, purchaseMessage, {buyer: starterPackBuyer});
+    const sig = await signPurchaseMessage(privateKey, goodMsg);
     assert.ok(
       await starterPack.isPurchaseValid(
         starterPackBuyer,
