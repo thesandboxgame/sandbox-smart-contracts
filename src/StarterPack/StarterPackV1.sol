@@ -46,27 +46,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     // ////////////////////////// Functions ////////////////////////
 
-    constructor(
-        address starterPackAdmin,
-        address sandContractAddress,
-        address initialMetaTx,
-        address payable initialWalletAddress,
-        address medianizerContractAddress,
-        address daiTokenContractAddress,
-        address erc20GroupCatalystAddress,
-        address erc20GroupGemAddress,
-        address initialSigningWallet
-    ) public PurchaseValidator(initialSigningWallet) {
-        _setMetaTransactionProcessor(initialMetaTx, true);
-        _wallet = initialWalletAddress;
-        _admin = starterPackAdmin;
-        _sand = ERC20(sandContractAddress);
-        _medianizer = Medianizer(medianizerContractAddress);
-        _dai = ERC20(daiTokenContractAddress);
-        _erc20GroupCatalyst = ERC20Group(erc20GroupCatalystAddress);
-        _erc20GroupGem = ERC20Group(erc20GroupGemAddress);
-    }
-
     /// @dev set the wallet receiving the proceeds
     /// @param newWallet address of the new receiving wallet
     function setReceivingWallet(address payable newWallet) external {
@@ -234,5 +213,28 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         ERC20 token = ERC20(tokenAddress);
         uint256 amountForDestination = amount;
         require(token.transferFrom(buyer, paymentRecipient, amountForDestination), "PAYMENT_TRANSFER_FAILED");
+    }
+
+    // /////////////////// CONSTRUCTOR ////////////////////
+
+    constructor(
+        address starterPackAdmin,
+        address sandContractAddress,
+        address initialMetaTx,
+        address payable initialWalletAddress,
+        address medianizerContractAddress,
+        address daiTokenContractAddress,
+        address erc20GroupCatalystAddress,
+        address erc20GroupGemAddress,
+        address initialSigningWallet
+    ) public PurchaseValidator(initialSigningWallet) {
+        _setMetaTransactionProcessor(initialMetaTx, true);
+        _wallet = initialWalletAddress;
+        _admin = starterPackAdmin;
+        _sand = ERC20(sandContractAddress);
+        _medianizer = Medianizer(medianizerContractAddress);
+        _dai = ERC20(daiTokenContractAddress);
+        _erc20GroupCatalyst = ERC20Group(erc20GroupCatalystAddress);
+        _erc20GroupGem = ERC20Group(erc20GroupGemAddress);
     }
 }
