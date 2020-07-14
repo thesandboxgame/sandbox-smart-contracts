@@ -275,10 +275,9 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         address daiTokenContractAddress,
         address erc20GroupCatalystAddress,
         address erc20GroupGemAddress,
-        address initialSigningWallet
+        address initialSigningWallet,
+        uint256[] memory initialStarterPackPrices
     ) public PurchaseValidator(initialSigningWallet) {
-        _admin = starterPackAdmin;
-        _sand = ERC20(sandContractAddress);
         _setMetaTransactionProcessor(initialMetaTx, true);
         _wallet = initialWalletAddress;
         _admin = starterPackAdmin;
@@ -287,5 +286,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _dai = ERC20(daiTokenContractAddress);
         _erc20GroupCatalyst = ERC20Group(erc20GroupCatalystAddress);
         _erc20GroupGem = ERC20Group(erc20GroupGemAddress);
+        _starterPackPrices = initialStarterPackPrices;
     }
 }
