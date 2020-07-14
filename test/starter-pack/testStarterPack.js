@@ -1,7 +1,7 @@
 const {setupStarterPack, supplyStarterPack} = require("./fixtures");
 const {assert, expect} = require("local-chai");
 const {getNamedAccounts} = require("@nomiclabs/buidler");
-const {waitFor, expectRevert} = require("local-utils");
+const {waitFor, expectRevert, increaseTime} = require("local-utils");
 const ethers = require("ethers");
 const {BigNumber} = ethers;
 const {findEvents} = require("../../lib/findEvents.js");
@@ -380,9 +380,17 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
 
 describe("StarterPack:SetPricesEmptyStarterPack", function () {
   let setUp;
-
+  // @review
   beforeEach(async function () {
-    setUp = await setupStarterPack();
+    setUp = await supplyStarterPack();
+    Message = {
+      catalystIds: [0, 1, 2, 3],
+      catalystQuantities: [1, 1, 1, 1],
+      gemIds: [0, 1, 2, 3, 4],
+      gemQuantities: [2, 2, 2, 2, 2],
+      buyer: "",
+      nonce: 0,
+    };
   });
 
   it("cannot set prices if not admin", async function () {
@@ -412,7 +420,62 @@ describe("StarterPack:SetPricesEmptyStarterPack", function () {
     expect(latestPrices[3]).to.equal(80);
   });
 
-  // it("price change should be implemented after a delay", async function () {});
+  it("should track both current and previous prices", async function () {
+    const {starterPackContractAsAdmin, starterPackContract} = setUp;
+    await starterPackContractAsAdmin.setPrices([3, 5, 8, 13]);
+    const currentPrices = await starterPackContract.getStarterPackPrices();
+    const previousPrices = await starterPackContract.getPreviousPrices();
+    for (i = 0; i < currentPrices.length; i++) {
+      expect(currentPrices[i]).to.not.equal(previousPrices[i]);
+    }
+  });
+
+  it("price change should be implemented after a delay", async function () {
+    let priceChangeActive;
+    assert.notOk(priceChangeActive);
+
+    const {starterPackContractAsAdmin, starterPackContract, userWithSAND} = setUp;
+    Message.buyer = userWithSAND.address;
+    const dummySignature = signPurchaseMessage(privateKey, Message);
+    await starterPackContractAsAdmin.setSANDEnabled(true);
+    priceChangeActive = await starterPackContract._priceChangeActive();
+
+    const oldPrices = await starterPackContract.getPreviousPrices();
+    const pricesToSet = [3, 5, 8, 13];
+    await starterPackContractAsAdmin.setPrices(pricesToSet);
+
+    const newPrices = await starterPackContract.getStarterPackPrices();
+    priceChangeActive = await starterPackContract._priceChangeActive();
+    // buyer should still pay the old price
+    const receipt = await waitFor(
+      userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature)
+    );
+    const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
+    const totalExpectedPrice = 1600;
+    assert.ok(priceChangeActive);
+    expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
+    const initPrices = [100, 200, 300, 1000];
+    for (i = 0; i < oldPrices.length; i++) {
+      expect(oldPrices[i]).to.equal(initPrices[i]);
+    }
+    for (i = 0; i < newPrices.length; i++) {
+      expect(newPrices[i]).to.equal(pricesToSet[i]);
+    }
+
+    Message.nonce++;
+    const dummySignature2 = signPurchaseMessage(privateKey, Message);
+
+    // fast-forward 1 hour. now buyer should pay the new price
+    await increaseTime(60 * 60);
+    const receipt2 = await waitFor(
+      userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature2)
+    );
+    const eventsMatching2 = receipt2.events.filter((event) => event.event === "Purchase");
+    const newTotalExpectedPrice = 29;
+    expect(eventsMatching2[0].args[2]).to.equal(newTotalExpectedPrice);
+    priceChangeActive = await starterPackContract._priceChangeActive();
+    assert.notOk(priceChangeActive);
+  });
 });
 
 // describe("WithdrawAll"...
