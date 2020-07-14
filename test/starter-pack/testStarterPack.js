@@ -24,20 +24,20 @@ describe("StarterPack:Setup", function () {
 
 describe("StarterPack:PurchaseWithSandEmptyStarterPack", function () {
   let setUp;
-
-  const Message = {
-    catalystIds: [0, 1, 2, 3],
-    catalystQuantities: [1, 1, 1, 1],
-    gemIds: [0, 1, 2, 3, 4],
-    gemQuantities: [2, 2, 2, 2, 2],
-    buyer: "",
-    nonce: 0,
-  };
+  let Message;
 
   beforeEach(async function () {
     setUp = await setupStarterPack();
     const {starterPackContractAsAdmin} = setUp;
     await starterPackContractAsAdmin.setSANDEnabled(true);
+    Message = {
+      catalystIds: [0, 1, 2, 3],
+      catalystQuantities: [1, 1, 1, 1],
+      gemIds: [0, 1, 2, 3, 4],
+      gemQuantities: [2, 2, 2, 2, 2],
+      buyer: "",
+      nonce: 0,
+    };
   });
 
   it("should revert if the user does not have enough SAND", async function () {
@@ -366,14 +366,7 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
     const {userWithSAND} = await setUp;
     Message.buyer = userWithSAND.address;
 
-    const dummySignature = getSignature(
-      Message.catalystIds,
-      Message.catalystQuantities,
-      Message.gemIds,
-      Message.gemQuantities,
-      Message.buyer,
-      Message.nonce
-    );
+    const dummySignature = signPurchaseMessage(privateKey, Message);
 
     const receipt = await waitFor(
       userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature)
