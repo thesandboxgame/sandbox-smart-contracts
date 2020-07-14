@@ -33,10 +33,7 @@ contract CatalystRegistry is Admin, CatalystValue {
         require(gemIds.length <= maxGems, "INVALID_GEMS_TOO_MANY");
         uint256 emptySockets = maxGems - gemIds.length;
         uint256 index = gemIds.length;
-        _catalysts[assetId].emptySockets = uint64(emptySockets);
-        _catalysts[assetId].index = uint64(index);
-        _catalysts[assetId].catalystId = uint64(catalystId);
-        _catalysts[assetId].set = 1;
+        _catalysts[assetId] = CatalystStored(uint64(emptySockets), uint64(index), uint64(catalystId), 1);
         uint64 blockNumber = _getBlockNumber();
         emit CatalystApplied(assetId, catalystId, _getSeed(assetId), gemIds, blockNumber);
     }

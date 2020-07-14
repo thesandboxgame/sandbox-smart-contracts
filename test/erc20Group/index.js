@@ -971,7 +971,7 @@ module.exports = (init, extensions) => {
       expect(balanceFor2).to.equal(7);
     });
 
-    it("transferring 0 instances of several items using batchTransferFrom results in several transfer events", async function ({
+    it("transferring 0 instances of several items using batchTransferFrom results in zero transfer events", async function ({
       batchMint,
       users,
       ERC20SubToken,
@@ -984,23 +984,11 @@ module.exports = (init, extensions) => {
         .then((tx) => tx.wait());
 
       const eventsMatchingFirstSubToken = await findEvents(ERC20SubToken, "Transfer", receipt.blockHash);
-      assert.equal(eventsMatchingFirstSubToken.length, 1);
-      const firstEvent = eventsMatchingFirstSubToken[0];
-      assert.equal(firstEvent.args[0], users[1].address);
-      assert.equal(firstEvent.args[1], users[2].address);
-      assert.ok(firstEvent.args[2].eq(BigNumber.from(0)));
+      assert.equal(eventsMatchingFirstSubToken.length, 0);
       const eventsMatchingSecondSubToken = await findEvents(secondERC20SubToken, "Transfer", receipt.blockHash);
-      assert.equal(eventsMatchingSecondSubToken.length, 1);
-      const secondEvent = eventsMatchingSecondSubToken[0];
-      assert.equal(secondEvent.args[0], users[1].address);
-      assert.equal(secondEvent.args[1], users[2].address);
-      assert.ok(secondEvent.args[2].eq(BigNumber.from(0)));
+      assert.equal(eventsMatchingSecondSubToken.length, 0);
       const eventsMatchingThirdSubToken = await findEvents(thirdERC20SubToken, "Transfer", receipt.blockHash);
-      assert.equal(eventsMatchingThirdSubToken.length, 1);
-      const thirdEvent = eventsMatchingThirdSubToken[0];
-      assert.equal(thirdEvent.args[0], users[1].address);
-      assert.equal(thirdEvent.args[1], users[2].address);
-      assert.ok(thirdEvent.args[2].eq(BigNumber.from(0)));
+      assert.equal(eventsMatchingThirdSubToken.length, 0);
     });
 
     it("cannot transfer more than the supply using batchTransferFrom", async function ({users}) {
