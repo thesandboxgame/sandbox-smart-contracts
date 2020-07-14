@@ -378,9 +378,8 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
   });
 });
 
-describe("StarterPack:SetPricesEmptyStarterPack", function () {
+describe(":SetPricesEmptyStarterPack", function () {
   let setUp;
-  // @review
   beforeEach(async function () {
     setUp = await supplyStarterPack();
     Message = {
