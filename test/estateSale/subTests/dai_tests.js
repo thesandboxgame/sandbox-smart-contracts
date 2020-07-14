@@ -692,7 +692,7 @@ function runDaiTests(landSaleName) {
                 land.size,
                 land.price,
                 land.salt,
-                [],
+                land.assetIds,
                 proof,
                 emptyReferral
               ),
@@ -709,7 +709,7 @@ function runDaiTests(landSaleName) {
                 land.size,
                 land.price,
                 land.salt,
-                [],
+                land.assetIds,
                 proof,
                 emptyReferral
               );

@@ -3,6 +3,7 @@ const MerkleTree = require("../../../lib/merkleTree");
 const {getChainCurrentTime} = require("local-utils");
 const {createDataArray} = require("../../../lib/merkleTreeHelper");
 const {testLands, generateUserPermissions, setupUser} = require("./_testHelper");
+const {findEvents} = require("../../../lib/findEvents.js");
 
 // Inputs
 const maxCommissionRate = "2000";
@@ -30,22 +31,44 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
   } = await deployments.createFixture(async () => {
     await deployments.fixture();
 
+    const roles = await getNamedAccounts();
+    const {assetBouncerAdmin} = roles;
+    const creator = roles.others[3];
+
+    const asset = await ethers.getContract("Asset", assetBouncerAdmin);
+    await asset.setBouncer(assetBouncerAdmin, true);
+
     const contracts = {
       landSale: await ethers.getContract(landSaleName),
       land: await ethers.getContract("Land"),
       estate: await ethers.getContract("Estate"),
       sand: await ethers.getContract("Sand"),
-      asset: await ethers.getContract("Asset"),
+      asset,
       daiMedianizer: await ethers.getContract("DAIMedianizer"),
       dai: await ethers.getContract("DAI"),
     };
     const saleStart = getChainCurrentTime();
     const saleDuration = 60 * 60;
     const saleEnd = saleStart + saleDuration;
-    const roles = await getNamedAccounts();
 
     let tree;
     let lands;
+
+    const assetAsCreator = await ethers.getContract("Asset", creator);
+    const ipfsHash = "0x0000000000000000000000000000000000000000000000000000000000000001";
+    const assetIds = [];
+    const assetAmounts = [];
+    async function mintAsset() {
+      const mintReceipt = await contracts.asset.mint(creator, 0, ipfsHash, 200, 0, creator, "0x");
+      const events = await findEvents(asset, "TransferSingle", mintReceipt.blockHash);
+      const tokenId = events[0].args.id;
+      const value = events[0].args.value;
+      const to = events[0].args.to;
+      assetIds.push(tokenId);
+      assetAmounts.push(value);
+      // console.log({tokenId, value, to});
+      return tokenId;
+    }
 
     // Supply a tree made from real lands or testLands
     if (landType === "lands") {
@@ -54,7 +77,12 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
       const landHashArray = createDataArray(lands);
       tree = new MerkleTree(landHashArray);
     } else if (landType === "testLands") {
+      testLands.forEach((testLand) => {
+        testLand.assetIds = [];
+      });
       testLands[0].reserved = roles.others[1];
+      const tokenId = await mintAsset();
+      testLands[5].assetIds = [tokenId];
       testLands[3].reserved = roles.others[1];
       lands = testLands;
       const testLandHashArray = createDataArray(lands);
@@ -78,6 +106,10 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
       contracts.estate.address,
       contracts.asset.address
     );
+
+    if (landType === "testLands") {
+      await assetAsCreator.safeBatchTransferFrom(creator, contracts.estateSale.address, assetIds, assetAmounts, "0x");
+    }
 
     const {LandSaleAdmin, LandSaleBeneficiary, LandAdmin, SandAdmin, DaiAdmin, users} = await generateUserPermissions(
       roles,

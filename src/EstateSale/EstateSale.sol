@@ -9,6 +9,7 @@ import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../contracts_common/src/Interfaces/Medianizer.sol";
 import "../ReferralValidator/ReferralValidator.sol";
 
+
 /**
  * @title Estate Sale contract with referral that supports also DAI and ETH as payment
  * @notice This contract mananges the sale of our lands as Estates
@@ -187,6 +188,7 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         handleReferralWithERC20(buyer, priceInSand, referral, _wallet, address(_sand));
 
         _mint(buyer, to, x, y, size, priceInSand, address(_sand), priceInSand);
+        _sendAssets(to, assetIds);
     }
 
     /**
@@ -227,6 +229,7 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         handleReferralWithETH(ETHRequired, referral, _wallet);
 
         _mint(buyer, to, x, y, size, priceInSand, address(0), ETHRequired);
+        _sendAssets(to, assetIds);
     }
 
     /**
@@ -333,5 +336,25 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
     function getEthUsdPair() internal view returns (uint256) {
         bytes32 pair = _medianizer.read();
         return uint256(pair);
+    }
+
+    function onERC1155Received(
+        address, /*operator*/
+        address, /*from*/
+        uint256, /*id*/
+        uint256, /*value*/
+        bytes calldata /*data*/
+    ) external pure returns (bytes4) {
+        return 0xf23a6e61;
+    }
+
+    function onERC1155BatchReceived(
+        address, /*operator*/
+        address, /*from*/
+        uint256[] calldata, /*ids*/
+        uint256[] calldata, /*values*/
+        bytes calldata /*data*/
+    ) external pure returns (bytes4) {
+        return 0xbc197c81;
     }
 }

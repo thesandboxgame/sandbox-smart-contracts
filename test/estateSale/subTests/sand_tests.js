@@ -711,7 +711,7 @@ function runSandTests(landSaleName) {
                 land.size,
                 land.price,
                 land.salt,
-                [],
+                land.assetIds,
                 proof,
                 emptyReferral
               ),
@@ -728,7 +728,7 @@ function runSandTests(landSaleName) {
                 land.size,
                 land.price,
                 land.salt,
-                [],
+                land.assetIds,
                 proof,
                 emptyReferral
               );
@@ -739,6 +739,59 @@ function runSandTests(landSaleName) {
             }
           }
         }
+      });
+    });
+
+    describe("--> Tests with test LANDs for assets bundle", function () {
+      beforeEach(async function () {
+        initialSetUp = await setupEstateSale(landSaleName, "testLands");
+        const {SandAdmin} = initialSetUp;
+        await SandAdmin.EstateSale.setSANDEnabled(true);
+      });
+
+      it("can buy Land with assets", async function () {
+        const {lands, userWithSAND, tree} = initialSetUp;
+        const land = lands[5];
+        const proof = tree.getProof(calculateLandHash(land));
+
+        await userWithSAND.EstateSale.functions.buyLandWithSand(
+          userWithSAND.address,
+          userWithSAND.address,
+          zeroAddress,
+          land.x,
+          land.y,
+          land.size,
+          land.price,
+          land.salt,
+          land.assetIds,
+          proof,
+          emptyReferral
+        );
+
+        // TODO check balance
+      });
+
+      it("CANNOT buy Land with assets using zero asset", async function () {
+        const {lands, userWithSAND, tree} = initialSetUp;
+        const land = lands[5];
+        const proof = tree.getProof(calculateLandHash(land));
+
+        await expectRevert(
+          userWithSAND.EstateSale.functions.buyLandWithSand(
+            userWithSAND.address,
+            userWithSAND.address,
+            zeroAddress,
+            land.x,
+            land.y,
+            land.size,
+            land.price,
+            land.salt,
+            [],
+            proof,
+            emptyReferral
+          ),
+          "Invalid land provided"
+        );
       });
     });
   });

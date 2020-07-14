@@ -662,7 +662,7 @@ function runEtherTests(landSaleName) {
                 land.size,
                 land.price,
                 land.salt,
-                [],
+                land.assetIds,
                 proof,
                 emptyReferral,
                 {value: value}
@@ -680,7 +680,7 @@ function runEtherTests(landSaleName) {
                 land.size,
                 land.price,
                 land.salt,
-                [],
+                land.assetIds,
                 proof,
                 emptyReferral,
                 {value: value}
