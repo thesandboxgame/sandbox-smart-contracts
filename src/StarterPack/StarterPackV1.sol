@@ -29,9 +29,20 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     bool _etherEnabled;
     bool _daiEnabled;
 
+    // indicates whether a price change is in effect
+    bool public _priceChangeActive;
     uint256[] private _starterPackPrices;
+    uint256[] private _previousStarterPackPrices;
+
+    // the timestamp of the last pricechange
+    uint256 private _priceChangeTimestamp;
 
     address payable internal _wallet;
+
+    // The delay between calling setPrices() and when
+    // the new prices come into effect.
+    // Minimizes the effect of price changes on pending TXs
+    uint256 private _priceChangeDelay = 1 hours;
 
     event Purchase(address indexed from, Message, uint256 price, address token, uint256 amountPaid);
 
@@ -116,7 +127,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
             ),
             "INVALID_PURCHASE"
         );
-
         uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities);
         _handlePurchaseWithERC20(message.buyer, _wallet, address(_sand), amountInSand);
         _erc20GroupCatalyst.batchTransferFrom(address(this), message.buyer, message.catalystIds, message.catalystQuantities);
@@ -184,18 +194,20 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     function setPrices(uint256[] calldata prices) external {
-        // TODO: implement delay; review use of previousPrices mapping
         require(msg.sender == _admin, "only admin can change StarterPack prices");
-        for (uint256 i = 0; i < prices.length; i++) {
-            uint256 price = prices[i];
-            _previousPrices[i][price] = now + _previousTransactionDelay;
-        }
+        _previousStarterPackPrices = _starterPackPrices;
         _starterPackPrices = prices;
+        _priceChangeActive = true;
+        _priceChangeTimestamp = now;
         emit SetPrices(prices);
     }
 
     function getStarterPackPrices() external view returns (uint256[] memory prices) {
         return _starterPackPrices;
+    }
+
+    function getPreviousPrices() external view returns (uint256[] memory prices) {
+        return _previousStarterPackPrices;
     }
 
     function checkCatalystBalance(uint256 tokenId) external view returns (uint256) {
@@ -244,13 +256,34 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     function _calculateTotalPriceInSand(uint256[] memory catalystIds, uint256[] memory catalystQuantities) internal returns (uint256) {
+        uint256[] memory prices = _priceSelector();
         uint256 totalPrice;
         for (uint256 i = 0; i < catalystIds.length; i++) {
             uint256 id = catalystIds[i];
             uint256 quantity = catalystQuantities[i];
-            totalPrice += _starterPackPrices[id].mul(quantity);
+            totalPrice += prices[id].mul(quantity);
         }
         return totalPrice;
+    }
+
+    // @dev function to determine whether to use old or
+    // new prices during the 1 hr delay after a price change
+    function _priceSelector() internal returns (uint256[] memory) {
+        uint256[] memory prices;
+        // No price change active:
+        if (!_priceChangeActive) {
+            prices = _starterPackPrices;
+        } else {
+            // No price change active, but bool not toggled off yet:
+            if (now > _priceChangeTimestamp + 1 hours) {
+                _priceChangeActive = false;
+                prices = _starterPackPrices;
+            } else {
+                // Price change is active:
+                prices = _previousStarterPackPrices;
+            }
+        }
+        return prices;
     }
 
     function _handlePurchaseWithERC20(
@@ -287,5 +320,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _erc20GroupCatalyst = ERC20Group(erc20GroupCatalystAddress);
         _erc20GroupGem = ERC20Group(erc20GroupGemAddress);
         _starterPackPrices = initialStarterPackPrices;
+        _previousStarterPackPrices = initialStarterPackPrices;
     }
 }
