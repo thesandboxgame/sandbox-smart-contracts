@@ -90,12 +90,14 @@ describe("PurchaseValidator", function () {
     let message;
     let signature;
     let roles;
+
     beforeEach(async function () {
       ({message, signature} = await getMsgAndSignature());
       roles = await getNamedAccounts();
     });
+
     it("should fail if the from address does not match", async function () {
-      {starterPackContract: starterPack} = await setupStarterPack();
+      ({starterPackContract: starterPack} = await setupStarterPack());
       const wrongFromAddress = roles.others[1];
       await expectRevert(
         starterPack.isPurchaseValid(
