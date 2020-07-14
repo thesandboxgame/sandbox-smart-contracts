@@ -79,7 +79,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @notice return whether ETH payments are enabled
     /// @return whether ETH payments are enabled
     function isETHEnabled() external view returns (bool) {
-        _etherEnabled;
+        return _etherEnabled;
     }
 
     /// @dev enable/disable the specific SAND payment for StarterPacks
@@ -184,7 +184,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     function setPrices(uint256[] calldata prices) external {
-        // TODO: review
+        // TODO: implement delay; review use of previousPrices mapping
         require(msg.sender == _admin, "only admin can change StarterPack prices");
         for (uint256 i = 0; i < prices.length; i++) {
             uint256 price = prices[i];
