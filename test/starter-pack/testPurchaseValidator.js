@@ -1,7 +1,7 @@
 const {assert} = require("local-chai");
-const {setupStarterPack} = require("./fixtures");
+const {setupStarterPack} = require("./subTests/fixtures");
 const {expectRevert} = require("local-utils");
-const {getMsgAndSignature} = require("./_testHelper");
+const {getMsgAndSignature} = require("./subTests/_testHelper");
 const {getNamedAccounts} = require("@nomiclabs/buidler");
 
 describe("PurchaseValidator", function () {
