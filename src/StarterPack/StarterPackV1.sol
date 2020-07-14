@@ -33,8 +33,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     address payable internal _wallet;
 
-    mapping(address => mapping(uint256 => uint256)) public nonceByCreator;
-
     mapping (uint256 => mapping(uint256 => uint256)) private _previousPrices;
     uint256 private _previousTransactionDelay = 60; // TODO: define suitable delay
 
@@ -84,7 +82,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @notice return whether ETH payments are enabled
     /// @return whether ETH payments are enabled
     function isETHEnabled() external view returns (bool) {
-        _etherEnabled;
+        return _etherEnabled;
     }
 
     /// @dev enable/disable the specific SAND payment for StarterPacks
@@ -155,7 +153,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         // TODO: withdrawal
     }
 
-    function setPrices(uint256[] calldata prices) external { // TODO: review
+    function setPrices(uint256[] calldata prices) external { // TODO: implement delay; review use of previousPrices mapping
         require(msg.sender == _admin, "only admin can change StarterPack prices");
         for (uint256 i = 0; i < prices.length; i++) {
             uint256 price = prices[i];
