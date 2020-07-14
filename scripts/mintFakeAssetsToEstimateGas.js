@@ -185,7 +185,7 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand, useSi
       packId++;
     }
   } else {
-    const {gasUsed} = await CatalystMinter.mintMultiple(
+    const receipt = await CatalystMinter.mintMultiple(
       creatorWallet.address,
       packId,
       dummyHash,
@@ -198,6 +198,8 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand, useSi
         gasLimit: 8000000,
       }
     ).then((tx) => tx.wait());
+    const {gasUsed} = receipt;
+    // console.log(JSON.stringify(receipt, null, "  "));
     mint_gasUsed = gasUsed;
     packId++;
   }
@@ -388,10 +390,11 @@ async function handleRow(row) {
   const CatalystMinter = await ethers.getContractOrNull("CatalystMinter");
   if (!CatalystMinter) {
     console.log("deploying...");
-    await deployments.run(undefined, {
-      resetMemory: false,
-      writeDeploymentsToFiles: true,
-    });
+    await deployments.run();
+    // await deployments.run(undefined, {
+    //   resetMemory: false,
+    //   writeDeploymentsToFiles: true,
+    // });
   }
   const sheetId = {
     document: "1HIJYoveEvaaOzYngL7V8OygkDuEcqOweBPJw5Uk7XAI",
