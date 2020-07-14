@@ -7,7 +7,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   if (currentAdmin.toLowerCase() !== catalystRegistryAdmin.toLowerCase()) {
     log("setting CatalystRegistry Admin");
     await sendTxAndWait(
-      {from: currentAdmin, gas: 1000000, skipError: true},
+      {from: currentAdmin, gas: 1000000, skipUnknownSigner: true},
       "CatalystRegistry",
       "changeAdmin",
       catalystRegistryAdmin
