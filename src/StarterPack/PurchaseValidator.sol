@@ -39,9 +39,8 @@ contract PurchaseValidator is Admin {
     ) public returns (bool) {
         require(from == buyer, "INVALID_SENDER");
         require(_checkAndUpdateNonce(buyer, nonce), "INVALID_NONCE");
-        bytes32 hashedData = keccak256(
-            abi.encodePacked(catalystIds, catalystQuantities, gemIds, gemQuantities, buyer, nonce)
-        );
+        require(_validateGemAmounts(catalystIds, catalystQuantities, gemQuantities), "INVALID_GEMS");
+        bytes32 hashedData = keccak256(abi.encodePacked(catalystIds, catalystQuantities, gemIds, gemQuantities, buyer, nonce));
 
         address signer = SigUtil.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
         return signer == _signingWallet;
@@ -56,6 +55,23 @@ contract PurchaseValidator is Admin {
             return true;
         }
         return false;
+    }
+
+    function _validateGemAmounts(
+        uint256[] memory catalystIds,
+        uint256[] memory catalystQuantities,
+        uint256[] memory gemQuantities
+    ) private returns (bool) {
+        uint256 maxGemsAllowed;
+        uint256 requestedGems;
+        for (uint256 i = 0; i < catalystQuantities.length; i++) {
+            require(catalystIds[i] < 4, "ID_OUT_OF_BOUNDS");
+            maxGemsAllowed += catalystQuantities[i] * (catalystIds[i] + 1);
+        }
+        for (uint256 i = 0; i < gemQuantities.length; i++) {
+            requestedGems += gemQuantities[i];
+        }
+        return (requestedGems <= maxGemsAllowed);
     }
 
     constructor(address initialSigningWallet) public {
