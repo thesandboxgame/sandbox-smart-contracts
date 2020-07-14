@@ -388,7 +388,10 @@ async function handleRow(row) {
   const CatalystMinter = await ethers.getContractOrNull("CatalystMinter");
   if (!CatalystMinter) {
     console.log("deploying...");
-    await deployments.run();
+    await deployments.run(undefined, {
+      resetMemory: false,
+      writeDeploymentsToFiles: true,
+    });
   }
   const sheetId = {
     document: "1HIJYoveEvaaOzYngL7V8OygkDuEcqOweBPJw5Uk7XAI",
@@ -438,6 +441,7 @@ async function handleRow(row) {
     commonMint_gasUsed: total.commonMint_gasUsed.toNumber(),
   });
 
+  creators["Test"] = new Wallet("0x2dfc067a0e855b8916aee81237972550d8b69675ecfe163dca6081ed4a4602b8");
   handleRow({
     cell: "Cell X",
     creator: "Test",
