@@ -3,6 +3,7 @@ pragma solidity 0.6.5;
 
 import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
 import "./LandToken.sol";
+import "../contracts_common/src/Interfaces/ERC1155.sol";
 import "../contracts_common/src/Interfaces/ERC20.sol";
 import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../contracts_common/src/Interfaces/Medianizer.sol";
@@ -18,15 +19,16 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
     uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
     uint256 internal constant daiPrice = 14400000000000000;
 
-    LandToken internal _land;
-    ERC20 internal _sand;
-    Medianizer private _medianizer;
-    ERC20 private _dai;
-    address internal _estate;
+    ERC1155 internal immutable _asset;
+    LandToken internal immutable _land;
+    ERC20 internal immutable _sand;
+    Medianizer private immutable _medianizer;
+    ERC20 private immutable _dai;
+    address internal immutable _estate;
 
     address payable internal _wallet;
-    uint256 internal _expiryTime;
-    bytes32 internal _merkleRoot;
+    uint256 internal immutable _expiryTime;
+    bytes32 internal immutable _merkleRoot;
 
     bool _sandEnabled = false;
     bool _etherEnabled = true;
@@ -54,7 +56,8 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         address daiTokenContractAddress,
         address initialSigningWallet,
         uint256 initialMaxCommissionRate,
-        address estate
+        address estate,
+        address asset
     ) public ReferralValidator(initialSigningWallet, initialMaxCommissionRate) {
         _land = LandToken(landAddress);
         _sand = ERC20(sandContractAddress);
@@ -66,6 +69,7 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         _dai = ERC20(daiTokenContractAddress);
         _admin = admin;
         _estate = estate;
+        _asset = ERC1155(asset);
     }
 
     /// @dev set the wallet receiving the proceeds
@@ -257,6 +261,7 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
         handleReferralWithERC20(buyer, DAIRequired, referral, _wallet, address(_dai));
 
         _mint(buyer, to, x, y, size, priceInSand, address(_dai), DAIRequired);
+        _sendAssets(to, assetIds);
     }
 
     /**
@@ -273,6 +278,14 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
      */
     function merkleRoot() external view returns (bytes32) {
         return _merkleRoot;
+    }
+
+    function _sendAssets(address to, uint256[] memory assetIds) internal {
+        uint256[] memory values = new uint256[](assetIds.length);
+        for (uint256 i = 0; i < assetIds.length; i++) {
+            values[i] = 1;
+        }
+        _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
     }
 
     function _generateLandHash(
