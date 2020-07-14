@@ -24,20 +24,7 @@ async function getMsgAndSignature() {
   return {message, signature};
 }
 
-async function getSignature(catIds, catAmounts, gemIds, gemAmounts, starterPackBuyer, nonce) {
-  const message = {
-    catalystIds: catIds,
-    catalystQuantities: catAmounts,
-    gemIds: gemIds,
-    gemQuantities: gemAmounts,
-    buyer: starterPackBuyer,
-    nonce: nonce,
-  };
-  const signature = await signPurchaseMessage(privateKey, message);
-  return signature;
-}
-
 module.exports = {
   getMsgAndSignature,
-  getSignature,
+  privateKey,
 };

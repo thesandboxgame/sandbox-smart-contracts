@@ -5,7 +5,8 @@ const {waitFor, expectRevert} = require("local-utils");
 const ethers = require("ethers");
 const {BigNumber} = ethers;
 const {findEvents} = require("../../lib/findEvents.js");
-const {getSignature} = require("./_testHelper");
+const {signPurchaseMessage} = require("../../lib/purchaseMessageSigner");
+const {privateKey} = require("./_testHelper");
 
 describe("StarterPack:Setup", function () {
   it("Returns a starterPack contract", async function () {
@@ -42,14 +43,7 @@ describe("StarterPack:PurchaseWithSandEmptyStarterPack", function () {
   it("should revert if the user does not have enough SAND", async function () {
     const {userWithoutSAND, sandContract} = setUp;
     Message.buyer = userWithoutSAND.address;
-    const dummySignature = getSignature(
-      Message.catalystIds,
-      Message.catalystQuantities,
-      Message.gemIds,
-      Message.gemQuantities,
-      Message.buyer,
-      Message.nonce
-    );
+    const dummySignature = signPurchaseMessage(privateKey, Message);
     const balance = await sandContract.balanceOf(userWithoutSAND.address);
     assert.ok(balance.eq(BigNumber.from(0)));
     await expectRevert(
@@ -61,14 +55,7 @@ describe("StarterPack:PurchaseWithSandEmptyStarterPack", function () {
   it("purchase should revert if StarterpackV1.sol does not own any Catalysts & Gems", async function () {
     const {userWithSAND} = setUp;
     Message.buyer = userWithSAND.address;
-    const dummySignature = getSignature(
-      Message.catalystIds,
-      Message.catalystQuantities,
-      Message.gemIds,
-      Message.gemQuantities,
-      Message.buyer,
-      Message.nonce
-    );
+    const dummySignature = signPurchaseMessage(privateKey, Message);
     await expectRevert(
       userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature),
       "can't substract more than there is"
@@ -78,14 +65,7 @@ describe("StarterPack:PurchaseWithSandEmptyStarterPack", function () {
   it("should throw if SAND is not enabled", async function () {
     const {userWithSAND, starterPackContractAsAdmin} = setUp;
     Message.buyer = userWithSAND.address;
-    const dummySignature = getSignature(
-      Message.catalystIds,
-      Message.catalystQuantities,
-      Message.gemIds,
-      Message.gemQuantities,
-      Message.buyer,
-      Message.nonce
-    );
+    const dummySignature = signPurchaseMessage(privateKey, Message);
     await starterPackContractAsAdmin.setSANDEnabled(false);
     await expectRevert(
       userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature),
@@ -163,14 +143,7 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
     } = await setUp;
     Message.buyer = userWithSAND.address;
 
-    const dummySignature = getSignature(
-      Message.catalystIds,
-      Message.catalystQuantities,
-      Message.gemIds,
-      Message.gemQuantities,
-      Message.buyer,
-      Message.nonce
-    );
+    const dummySignature = signPurchaseMessage(privateKey, Message);
 
     const receipt = await waitFor(
       userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature)
@@ -353,14 +326,7 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
     const {userWithSAND, starterPackContract} = await setUp;
     Message.buyer = userWithSAND.address;
 
-    const dummySignature = getSignature(
-      Message.catalystIds,
-      Message.catalystQuantities,
-      Message.gemIds,
-      Message.gemQuantities,
-      Message.buyer,
-      Message.nonce
-    );
+    const dummySignature = signPurchaseMessage(privateKey, Message);
     const nonceBeforePurchase = await starterPackContract.getNonceByBuyer(userWithSAND.address, 0);
     expect(nonceBeforePurchase).to.equal(0);
     await userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature);
@@ -372,14 +338,7 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
     const {userWithSAND} = await setUp;
     Message.buyer = userWithSAND.address;
 
-    const dummySignature = getSignature(
-      Message.catalystIds,
-      Message.catalystQuantities,
-      Message.gemIds,
-      Message.gemQuantities,
-      Message.buyer,
-      Message.nonce
-    );
+    const dummySignature = signPurchaseMessage(privateKey, Message);
 
     await userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature);
     await expectRevert(
@@ -392,27 +351,13 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
     const {userWithSAND} = await setUp;
     Message.buyer = userWithSAND.address;
 
-    let dummySignature = getSignature(
-      Message.catalystIds,
-      Message.catalystQuantities,
-      Message.gemIds,
-      Message.gemQuantities,
-      Message.buyer,
-      Message.nonce
-    );
+    let dummySignature = signPurchaseMessage(privateKey, Message);
 
     await userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature);
 
     Message.nonce++;
 
-    dummySignature = getSignature(
-      Message.catalystIds,
-      Message.catalystQuantities,
-      Message.gemIds,
-      Message.gemQuantities,
-      Message.buyer,
-      Message.nonce
-    );
+    dummySignature = signPurchaseMessage(privateKey, Message);
 
     await userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature);
   });
