@@ -30,6 +30,23 @@ describe("PurchaseValidator", function () {
         )
       );
     });
+
+    it("the order of catalystIds should't matter", async function () {
+      message.catalystIds = [2, 3, 0, 1];
+      message.gemQuantities = [0, 0, 1, 1, 0];
+      assert.ok(
+        await starterPack.isPurchaseValid(
+          message.buyer,
+          message.catalystIds,
+          message.catalystQuantities,
+          message.gemIds,
+          message.gemQuantities,
+          message.buyer,
+          message.nonce,
+          signature
+        )
+      );
+    });
   });
 
   describe("Failures", function () {
