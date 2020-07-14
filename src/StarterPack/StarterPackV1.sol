@@ -110,21 +110,29 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         emit Purchase(from, message, amountInSand);
     }
 
-    // function purchaseWithEth(
-    //     address from,
-    //     address to,
-    //     uint256[] calldata catalystIds,
-    //     uint256[] calldata catalystQuantities,
-    //     uint256[] calldata gemIds,
-    //     uint256[] calldata gemQuantities,
-    //     uint256 nonce,
-    //     bytes calldata signature
-    // ) external payable {
-    //     // TODO:
-    //     uint256 priceInSand = 0;
+    function purchaseWithETH(
+        address from,
+        Message calldata message,
+        bytes calldata signature
+    ) external payable {
+        require(_etherEnabled, "ETHER_IS_NOT_ENABLED");
+        require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
+        require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
+        require(isPurchaseValid(from, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce, signature), "INVALID_PURCHASE");
 
-    //     emit Purchase(from, to, catalystIds, catalystQuantities, gemIds, gemQuantities, priceInSand);
-    // }
+        uint256 amountInSand = _calculateTotalPriceInSand();
+        uint256 ETHRequired = _getEtherAmountWithSAND(amountInSand);
+        require(msg.value >= ETHRequired, "NOT_ENOUGH_ETHER_SENT");
+
+        if (msg.value - ETHRequired > 0) {
+            msg.sender.transfer(msg.value - ETHRequired); // refund extra
+        }
+
+        _wallet.transfer(ETHRequired);
+        _erc20GroupCatalyst.batchTransferFrom(address(this), message.buyer, message.catalystIds, message.catalystQuantities);
+        _erc20GroupGem.batchTransferFrom(address(this), message.buyer, message.gemIds, message.gemQuantities);
+        emit Purchase(from, message, amountInSand);
+    }
 
     // function purchaseWithDai(
     //     address from,
