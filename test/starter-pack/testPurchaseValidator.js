@@ -5,17 +5,17 @@ const {getMsgAndSignature} = require("./_testHelper");
 const {getNamedAccounts} = require("@nomiclabs/buidler");
 
 describe("PurchaseValidator", function () {
-  describe("Validation", function () {
-    let starterPack;
-    let message;
-    let signature;
-    let roles;
-    beforeEach(async function () {
-      ({starterPackContract: starterPack} = await setupStarterPack());
-      ({message, signature} = await getMsgAndSignature());
-      roles = await getNamedAccounts();
-    });
+  let starterPack;
+  let message;
+  let signature;
+  let roles;
 
+  beforeEach(async function () {
+    ({starterPackContract: starterPack} = await setupStarterPack());
+    ({message, signature} = await getMsgAndSignature());
+    roles = await getNamedAccounts();
+  });
+  describe("Validation", function () {
     it("Purchase validator function exists", async function () {
       assert.ok(
         await starterPack.isPurchaseValid(
@@ -79,23 +79,13 @@ describe("PurchaseValidator", function () {
     it("Should be possible for Admin to update the signing wallet", async function () {
       const {starterPackContractAsAdmin: starterPackAsAdmin} = await setupStarterPack();
       const newSigner = roles.others[1];
-      await starterPack.updateSigningWallet(newSigner);
+      await starterPackAsAdmin.updateSigningWallet(newSigner);
       const wallet = await starterPackAsAdmin.getSigningWallet();
       assert.equal(wallet, newSigner);
     });
   });
 
   describe("Failures", function () {
-    let starterPack;
-    let message;
-    let signature;
-    let roles;
-
-    beforeEach(async function () {
-      ({message, signature} = await getMsgAndSignature());
-      roles = await getNamedAccounts();
-    });
-
     it("should fail if the from address does not match", async function () {
       ({starterPackContract: starterPack} = await setupStarterPack());
       const wrongFromAddress = roles.others[1];
