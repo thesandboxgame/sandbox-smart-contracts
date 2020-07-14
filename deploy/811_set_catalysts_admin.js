@@ -8,4 +8,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     await sendTxAndWait({from: currentAdmin, gas: 1000000, skipError: true}, `Catalyst`, "changeAdmin", catalystAdmin);
   }
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO remove
+module.exports.skip = guard(["1", "314159"]); // TODO remove

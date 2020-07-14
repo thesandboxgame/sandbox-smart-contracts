@@ -38,8 +38,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
         sandUpdateFee: catalyst.sandUpdateFee,
         minQuantity: catalyst.quantityRange[0],
         maxQuantity: catalyst.quantityRange[1],
-        minValue: catalyst.attributeRange[0],
-        maxValue: catalyst.attributeRange[1],
         rarity: catalyst.rarity,
         maxGems: catalyst.maxGems,
       });
@@ -48,4 +46,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   }
   await addCatalysts(catalysts);
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO
+module.exports.skip = guard(["1", "4", "314159", "Catalyst"]); // TODO

@@ -42,4 +42,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   }
   await addGems(gemNames);
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO
+module.exports.skip = guard(["1", "4", "314159"], "Gem"); // TODO

@@ -78,23 +78,25 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         uint256 bal = 0;
         uint256 supply = 0;
         for (uint256 i = 0; i < ids.length; i++) {
-            (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
-            if (lastBin == ~uint256(0)) {
-                lastBin = bin;
-                bal = _packedTokenBalance[to][bin].updateTokenBalance(index, amounts[i], ObjectLib32.Operations.ADD);
-                supply = _packedSupplies[bin].updateTokenBalance(index, amounts[i], ObjectLib32.Operations.ADD);
-            } else {
-                if (bin != lastBin) {
-                    _packedTokenBalance[to][lastBin] = bal;
-                    bal = _packedTokenBalance[to][bin];
-                    _packedSupplies[lastBin] = supply;
-                    supply = _packedSupplies[bin];
+            if (amounts[i] != 0) {
+                (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
+                if (lastBin == ~uint256(0)) {
                     lastBin = bin;
+                    bal = _packedTokenBalance[to][bin].updateTokenBalance(index, amounts[i], ObjectLib32.Operations.ADD);
+                    supply = _packedSupplies[bin].updateTokenBalance(index, amounts[i], ObjectLib32.Operations.ADD);
+                } else {
+                    if (bin != lastBin) {
+                        _packedTokenBalance[to][lastBin] = bal;
+                        bal = _packedTokenBalance[to][bin];
+                        _packedSupplies[lastBin] = supply;
+                        supply = _packedSupplies[bin];
+                        lastBin = bin;
+                    }
+                    bal = bal.updateTokenBalance(index, amounts[i], ObjectLib32.Operations.ADD);
+                    supply = supply.updateTokenBalance(index, amounts[i], ObjectLib32.Operations.ADD);
                 }
-                bal = bal.updateTokenBalance(index, amounts[i], ObjectLib32.Operations.ADD);
-                supply = supply.updateTokenBalance(index, amounts[i], ObjectLib32.Operations.ADD);
+                _erc20s[ids[i]].emitTransferEvent(address(0), to, amounts[i]);
             }
-            _erc20s[ids[i]].emitTransferEvent(address(0), to, amounts[i]);
         }
         if (lastBin != ~uint256(0)) {
             _packedTokenBalance[to][lastBin] = bal;
@@ -182,24 +184,26 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         uint256 balFrom;
         uint256 balTo;
         for (uint256 i = 0; i < ids.length; i++) {
-            (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
-            if (lastBin == ~uint256(0)) {
-                lastBin = bin;
-                balFrom = ObjectLib32.updateTokenBalance(_packedTokenBalance[from][bin], index, values[i], ObjectLib32.Operations.SUB);
-                balTo = ObjectLib32.updateTokenBalance(_packedTokenBalance[to][bin], index, values[i], ObjectLib32.Operations.ADD);
-            } else {
-                if (bin != lastBin) {
-                    _packedTokenBalance[from][lastBin] = balFrom;
-                    _packedTokenBalance[to][lastBin] = balTo;
-                    balFrom = _packedTokenBalance[from][bin];
-                    balTo = _packedTokenBalance[to][bin];
+            if (values[i] != 0) {
+                (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
+                if (lastBin == ~uint256(0)) {
                     lastBin = bin;
+                    balFrom = ObjectLib32.updateTokenBalance(_packedTokenBalance[from][bin], index, values[i], ObjectLib32.Operations.SUB);
+                    balTo = ObjectLib32.updateTokenBalance(_packedTokenBalance[to][bin], index, values[i], ObjectLib32.Operations.ADD);
+                } else {
+                    if (bin != lastBin) {
+                        _packedTokenBalance[from][lastBin] = balFrom;
+                        _packedTokenBalance[to][lastBin] = balTo;
+                        balFrom = _packedTokenBalance[from][bin];
+                        balTo = _packedTokenBalance[to][bin];
+                        lastBin = bin;
+                    }
+                    balFrom = balFrom.updateTokenBalance(index, values[i], ObjectLib32.Operations.SUB);
+                    balTo = balTo.updateTokenBalance(index, values[i], ObjectLib32.Operations.ADD);
                 }
-                balFrom = balFrom.updateTokenBalance(index, values[i], ObjectLib32.Operations.SUB);
-                balTo = balTo.updateTokenBalance(index, values[i], ObjectLib32.Operations.ADD);
+                ERC20SubToken erc20 = _erc20s[ids[i]];
+                erc20.emitTransferEvent(from, to, values[i]);
             }
-            ERC20SubToken erc20 = _erc20s[ids[i]];
-            erc20.emitTransferEvent(from, to, values[i]);
         }
         if (lastBin != ~uint256(0)) {
             _packedTokenBalance[from][lastBin] = balFrom;
@@ -309,8 +313,8 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
                     balFrom = balFrom.updateTokenBalance(index, amounts[i], ObjectLib32.Operations.SUB);
                     supply = supply.updateTokenBalance(index, amounts[i], ObjectLib32.Operations.SUB);
                 }
+                _erc20s[ids[i]].emitTransferEvent(from, address(0), amounts[i]);
             }
-            _erc20s[ids[i]].emitTransferEvent(from, address(0), amounts[i]);
         }
         if (lastBin != ~uint256(0)) {
             _packedTokenBalance[from][lastBin] = balFrom;
