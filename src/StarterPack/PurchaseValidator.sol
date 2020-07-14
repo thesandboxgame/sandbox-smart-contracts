@@ -39,12 +39,10 @@ contract PurchaseValidator is Admin {
     ) public returns (bool) {
         require(from == buyer, "INVALID_SENDER");
         require(_checkAndUpdateNonce(buyer, nonce), "INVALID_NONCE");
-        require(from == message.buyer, "INVALID_SENDER");
-        require(checkAndUpdateNonce(message.buyer, message.nonce), "INVALID_NONCE");
-        require(_validateGemAmounts(message.catalystIds, message.catalystQuantities, message.gemQuantities), "INVALID_GEMS");
-        bytes32 hashedData = keccak256(
-            abi.encodePacked(message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce)
-        );
+        require(from == buyer, "INVALID_SENDER");
+        require(checkAndUpdateNonce(buyer, nonce), "INVALID_NONCE");
+        require(_validateGemAmounts(catalystIds, catalystQuantities, gemQuantities), "INVALID_GEMS");
+        bytes32 hashedData = keccak256(abi.encodePacked(catalystIds, catalystQuantities, gemIds, gemQuantities, buyer, nonce));
 
         address signer = SigUtil.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
         return signer == _signingWallet;
