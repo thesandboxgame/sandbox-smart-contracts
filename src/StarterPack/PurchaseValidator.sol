@@ -41,8 +41,10 @@ contract PurchaseValidator is Admin {
         require(_checkAndUpdateNonce(buyer, nonce), "INVALID_NONCE");
         require(from == message.buyer, "INVALID_SENDER");
         require(checkAndUpdateNonce(message.buyer, message.nonce), "INVALID_NONCE");
-        require(_validateGemAmounts(message.catalystQuantities, message.gemQuantities), "INVALID_GEMS");
-        bytes32 hashedData = keccak256(abi.encodePacked(catalystIds, catalystQuantities, gemIds, gemQuantities, buyer, nonce));
+        require(_validateGemAmounts(message.catalystIds, message.catalystQuantities, message.gemQuantities), "INVALID_GEMS");
+        bytes32 hashedData = keccak256(
+            abi.encodePacked(message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce)
+        );
 
         address signer = SigUtil.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
         return signer == _signingWallet;
@@ -59,14 +61,19 @@ contract PurchaseValidator is Admin {
         return false;
     }
 
-    function _validateGemAmounts(uint256[] memory _catalystQuantities, uint256[] memory _gemQuantities) private returns (bool) {
-        uint256 requestedGems;
+    function _validateGemAmounts(
+        uint256[] memory catalystIds,
+        uint256[] memory catalystQuantities,
+        uint256[] memory gemQuantities
+    ) private returns (bool) {
         uint256 maxGemsAllowed;
-        for (uint256 i = 0; i < _gemQuantities.length; i++) {
-            requestedGems += _gemQuantities[i];
+        uint256 requestedGems;
+        for (uint256 i = 0; i < catalystQuantities.length; i++) {
+            require(catalystIds[i] < 4, "ID_OUT_OF_BOUNDS");
+            maxGemsAllowed += catalystQuantities[i] * (catalystIds[i] + 1);
         }
-        for (uint256 i = 0; i < _catalystQuantities.length; i++) {
-            maxGemsAllowed += _catalystQuantities[i] * (i + 1);
+        for (uint256 i = 0; i < gemQuantities.length; i++) {
+            requestedGems += gemQuantities[i];
         }
         return (requestedGems <= maxGemsAllowed);
     }
