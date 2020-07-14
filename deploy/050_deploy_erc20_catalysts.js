@@ -46,4 +46,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   }
   await addCatalysts(catalysts);
 };
-module.exports.skip = guard(["1", "4", "314159", "Catalyst"]); // TODO
+module.exports.skip = guard(["1", "4", "314159"], "Catalyst");
