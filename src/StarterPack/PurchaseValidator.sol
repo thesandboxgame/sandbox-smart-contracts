@@ -39,8 +39,6 @@ contract PurchaseValidator is Admin {
     ) public returns (bool) {
         require(from == buyer, "INVALID_SENDER");
         require(_checkAndUpdateNonce(buyer, nonce), "INVALID_NONCE");
-        require(from == buyer, "INVALID_SENDER");
-        require(checkAndUpdateNonce(buyer, nonce), "INVALID_NONCE");
         require(_validateGemAmounts(catalystIds, catalystQuantities, gemQuantities), "INVALID_GEMS");
         bytes32 hashedData = keccak256(abi.encodePacked(catalystIds, catalystQuantities, gemIds, gemQuantities, buyer, nonce));
 
