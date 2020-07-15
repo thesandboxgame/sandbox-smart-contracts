@@ -102,6 +102,7 @@ function runSandTests() {
         ERC20SubTokenMagic,
         ERC20SubTokenLuck,
         starterPackContract,
+        sandContract,
       } = await setUp;
       Message.buyer = userWithSAND.address;
 
@@ -147,6 +148,9 @@ function runSandTests() {
 
       // nonce
       expect(eventsMatching[0].args[1][5]).to.equal(0);
+
+      // token
+      expect(eventsMatching[0].args[3]).to.equal(sandContract.address);
 
       // catalyst Transfer events
       const transferEventsMatchingCommon = await findEvents(ERC20SubTokenCommon, "Transfer", receipt.blockHash); // one Transfer event per subtoken

@@ -31,7 +31,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     address payable internal _wallet;
 
-    event Purchase(address indexed from, Message, uint256 priceInSand);
+    event Purchase(address indexed from, Message, uint256 price, address token, uint256 amountPaid);
 
     event SetPrices(uint256[4] prices);
 
@@ -107,7 +107,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _handlePurchaseWithERC20(message.buyer, _wallet, address(_sand), amountInSand);
         _erc20GroupCatalyst.batchTransferFrom(address(this), message.buyer, message.catalystIds, message.catalystQuantities);
         _erc20GroupGem.batchTransferFrom(address(this), message.buyer, message.gemIds, message.gemQuantities);
-        emit Purchase(from, message, amountInSand);
+        emit Purchase(from, message, amountInSand, address(_sand), amountInSand);
     }
 
     function purchaseWithETH(
@@ -131,7 +131,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _wallet.transfer(ETHRequired);
         _erc20GroupCatalyst.batchTransferFrom(address(this), message.buyer, message.catalystIds, message.catalystQuantities);
         _erc20GroupGem.batchTransferFrom(address(this), message.buyer, message.gemIds, message.gemQuantities);
-        emit Purchase(from, message, amountInSand);
+        emit Purchase(from, message, amountInSand, address(0), ETHRequired);
     }
 
     // function purchaseWithDai(
