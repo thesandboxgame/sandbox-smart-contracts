@@ -124,14 +124,14 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         uint256 ETHRequired = _getEtherAmountWithSAND(amountInSand);
         require(msg.value >= ETHRequired, "NOT_ENOUGH_ETHER_SENT");
 
-        if (msg.value - ETHRequired > 0) {
-            msg.sender.transfer(msg.value - ETHRequired); // refund extra
-        }
-
         _wallet.transfer(ETHRequired);
         _erc20GroupCatalyst.batchTransferFrom(address(this), message.buyer, message.catalystIds, message.catalystQuantities);
         _erc20GroupGem.batchTransferFrom(address(this), message.buyer, message.gemIds, message.gemQuantities);
         emit Purchase(from, message, amountInSand, address(0), ETHRequired);
+
+        if (msg.value - ETHRequired > 0) {
+            msg.sender.transfer(msg.value - ETHRequired); // refund extra
+        }
     }
 
     // function purchaseWithDai(
