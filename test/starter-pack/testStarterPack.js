@@ -419,16 +419,6 @@ describe(":SetPricesEmptyStarterPack", function () {
     expect(latestPrices[3]).to.equal(80);
   });
 
-  it("should track both current and previous prices", async function () {
-    const {starterPackContractAsAdmin, starterPackContract} = setUp;
-    await starterPackContractAsAdmin.setPrices([3, 5, 8, 13]);
-    const currentPrices = await starterPackContract.getStarterPackPrices();
-    const previousPrices = await starterPackContract.getPreviousPrices();
-    for (i = 0; i < currentPrices.length; i++) {
-      expect(currentPrices[i]).to.not.equal(previousPrices[i]);
-    }
-  });
-
   it("price change should be implemented after a delay", async function () {
     let priceChangeActive;
     assert.notOk(priceChangeActive);
