@@ -121,7 +121,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         require(isPurchaseValid(from, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce, signature), "INVALID_PURCHASE");
 
         uint256 amountInSand = _calculateTotalPriceInSand();
-        uint256 ETHRequired = _getEtherAmountWithSAND(amountInSand);
+        uint256 ETHRequired = getEtherAmountWithSAND(amountInSand);
         require(msg.value >= ETHRequired, "NOT_ENOUGH_ETHER_SENT");
 
         _wallet.transfer(ETHRequired);
@@ -186,17 +186,17 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         return _erc20GroupGem.balanceOfBatch(owners, tokenIds);
     }
 
-    // ////////////////////////// Internal ////////////////////////
-
     /**
      * @notice Returns the amount of ETH for a specific amount of SAND
      * @param sandAmount An amount of SAND
      * @return The amount of ETH
      */
-    function _getEtherAmountWithSAND(uint256 sandAmount) internal view returns (uint256) {
+    function getEtherAmountWithSAND(uint256 sandAmount) public view returns (uint256) {
         uint256 ethUsdPair = _getEthUsdPair();
         return sandAmount.mul(DAI_PRICE).div(ethUsdPair);
     }
+
+    // ////////////////////////// Internal ////////////////////////
 
     /**
      * @notice Gets the ETHUSD pair from the Medianizer contract
