@@ -30,7 +30,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     bool _daiEnabled;
 
     // indicates whether a price change is in effect
-    bool public _priceChangeActive;
+    bool private _priceChangeActive;
     uint256[] private _starterPackPrices;
     uint256[] private _previousStarterPackPrices;
 
@@ -204,10 +204,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     function getStarterPackPrices() external view returns (uint256[] memory prices) {
         return _starterPackPrices;
-    }
-
-    function getPreviousPrices() external view returns (uint256[] memory prices) {
-        return _previousStarterPackPrices;
     }
 
     function checkCatalystBalance(uint256 tokenId) external view returns (uint256) {
