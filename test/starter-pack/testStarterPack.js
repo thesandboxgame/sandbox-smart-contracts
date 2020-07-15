@@ -378,7 +378,7 @@ describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
   });
 });
 
-describe("StarterPack:SetPricesEmptyStarterPack", function () {
+describe(":SetPricesEmptyStarterPack", function () {
   let setUp;
   beforeEach(async function () {
     setUp = await supplyStarterPack();
@@ -420,31 +420,50 @@ describe("StarterPack:SetPricesEmptyStarterPack", function () {
   });
 
   it("price change should be implemented after a delay", async function () {
+    let priceChangeActive;
+    assert.notOk(priceChangeActive);
+
     const {starterPackContractAsAdmin, starterPackContract, userWithSAND} = setUp;
     Message.buyer = userWithSAND.address;
     const dummySignature = signPurchaseMessage(privateKey, Message);
     await starterPackContractAsAdmin.setSANDEnabled(true);
-    const newPrices = [3, 5, 8, 13];
-    await starterPackContractAsAdmin.setPrices(newPrices);
+    priceChangeActive = await starterPackContract._priceChangeActive();
 
-    // buyer should still pay the old price for 1 hour
+    const oldPrices = await starterPackContract.getPreviousPrices();
+    const pricesToSet = [3, 5, 8, 13];
+    await starterPackContractAsAdmin.setPrices(pricesToSet);
+
+    const newPrices = await starterPackContract.getStarterPackPrices();
+    priceChangeActive = await starterPackContract._priceChangeActive();
+    // buyer should still pay the old price
     const receipt = await waitFor(
       userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature)
     );
     const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
     const totalExpectedPrice = 1600;
+    assert.ok(priceChangeActive);
     expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
+    const initPrices = [100, 200, 300, 1000];
+    for (i = 0; i < oldPrices.length; i++) {
+      expect(oldPrices[i]).to.equal(initPrices[i]);
+    }
+    for (i = 0; i < newPrices.length; i++) {
+      expect(newPrices[i]).to.equal(pricesToSet[i]);
+    }
+
+    Message.nonce++;
+    const dummySignature2 = signPurchaseMessage(privateKey, Message);
 
     // fast-forward 1 hour. now buyer should pay the new price
     await increaseTime(60 * 60);
-    Message.nonce++;
-    const dummySignature2 = signPurchaseMessage(privateKey, Message);
     const receipt2 = await waitFor(
       userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature2)
     );
     const eventsMatching2 = receipt2.events.filter((event) => event.event === "Purchase");
     const newTotalExpectedPrice = 29;
     expect(eventsMatching2[0].args[2]).to.equal(newTotalExpectedPrice);
+    priceChangeActive = await starterPackContract._priceChangeActive();
+    assert.notOk(priceChangeActive);
   });
 });
 
