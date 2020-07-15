@@ -209,7 +209,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     function _calculateTotalPriceInSand() internal returns (uint256) {
         // TODO:
-        return 1;
+        return 1000000;
     }
 
     function _handlePurchaseWithERC20(
