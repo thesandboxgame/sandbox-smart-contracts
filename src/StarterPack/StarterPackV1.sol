@@ -29,8 +29,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     bool _etherEnabled;
     bool _daiEnabled;
 
-    // indicates whether a price change is in effect
-    bool public _priceChangeActive;
     uint256[] private _starterPackPrices;
     uint256[] private _previousStarterPackPrices;
 
@@ -197,7 +195,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         require(msg.sender == _admin, "only admin can change StarterPack prices");
         _previousStarterPackPrices = _starterPackPrices;
         _starterPackPrices = prices;
-        _priceChangeActive = true;
         _priceChangeTimestamp = now;
         emit SetPrices(prices);
     }
@@ -267,19 +264,19 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     // @dev function to determine whether to use old or
-    // new prices based on state of _priceChangeActive
+    // new prices
     function _priceSelector() internal returns (uint256[] memory) {
         uint256[] memory prices;
-        // No price change active:
-        if (!_priceChangeActive) {
+        // No price change:
+        if (_priceChangeTimestamp == 0) {
             prices = _starterPackPrices;
         } else {
-            // No price change active, but bool not toggled off yet:
+            // Price change delay has expired.
             if (now > _priceChangeTimestamp + 1 hours) {
-                _priceChangeActive = false;
+                _priceChangeTimestamp = 0;
                 prices = _starterPackPrices;
             } else {
-                // Price change is active:
+                // Price change has occured:
                 prices = _previousStarterPackPrices;
             }
         }
