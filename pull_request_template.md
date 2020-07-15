@@ -6,9 +6,10 @@ Provide a summary of the changes made, and include some context, such as why the
 
 # Checklist:
 
-- [ ] My Pull Request applies to a single purpose
-- [ ] I have added comments to my code where needed
-- [ ] I have updated any relavent docs
-- [ ] I have added tests (and stories for frontend components) that prove my fix is effective or that my feature works
-- [ ] I have performed a self-review of my own code
-- [ ] If my code involves visual changes, I am adding applicable screenshots to this thread
+- [ ] Pull Request applies to a single purpose
+- [ ] I've added comments to my code where needed
+- [ ] I've updated any relevant docs
+- [ ] I've added tests to show that my changes achieve the desired results
+- [ ] I've reviewed my code
+- [ ] I've followed established naming conventions and formatting
+- [ ] All tests are passing locally
