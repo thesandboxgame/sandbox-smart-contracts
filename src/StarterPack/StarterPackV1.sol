@@ -154,7 +154,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
             "INVALID_PURCHASE"
         );
 
-        uint256 amountInSand = _calculateTotalPriceInSand();
+        uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities);
         uint256 ETHRequired = getEtherAmountWithSAND(amountInSand);
         require(msg.value >= ETHRequired, "NOT_ENOUGH_ETHER_SENT");
 
