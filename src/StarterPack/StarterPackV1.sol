@@ -134,21 +134,23 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         }
     }
 
-    // function purchaseWithDai(
-    //     address from,
-    //     address to,
-    //     uint256[] calldata catalystIds,
-    //     uint256[] calldata catalystQuantities,
-    //     uint256[] calldata gemIds,
-    //     uint256[] calldata gemQuantities,
-    //     uint256 nonce,
-    //     bytes calldata signature
-    // ) external payable {n
-    //     // TODO:
-    //     uint256 priceInSand = 0;
+    function purchaseWithDAI(
+        address from,
+        Message calldata message,
+        bytes calldata signature
+    ) external {
+        require(_daiEnabled, "DAI_IS_NOT_ENABLED");
+        require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
+        require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
+        require(isPurchaseValid(from, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce, signature), "INVALID_PURCHASE");
 
-    //     emit Purchase(from, to, catalystIds, catalystQuantities, gemIds, gemQuantities, priceInSand);
-    // }
+        uint256 amountInSand = _calculateTotalPriceInSand();
+        uint256 DAIRequired = amountInSand.mul(DAI_PRICE).div(1000000000000000000);
+        _handlePurchaseWithERC20(message.buyer, _wallet, address(_dai), DAIRequired);
+        _erc20GroupCatalyst.batchTransferFrom(address(this), message.buyer, message.catalystIds, message.catalystQuantities);
+        _erc20GroupGem.batchTransferFrom(address(this), message.buyer, message.gemIds, message.gemQuantities);
+        emit Purchase(from, message, amountInSand, address(_dai), DAIRequired);
+    }
 
     function withdrawAll(address to) external {
         require(msg.sender == _admin, "only admin can withdraw remaining tokens");
