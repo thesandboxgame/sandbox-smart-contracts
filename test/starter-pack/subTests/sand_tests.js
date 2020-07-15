@@ -1,6 +1,6 @@
 const {setupStarterPack, supplyStarterPack} = require("./fixtures");
 const {assert, expect} = require("local-chai");
-const {waitFor, expectRevert} = require("local-utils");
+const {waitFor, expectRevert, increaseTime} = require("local-utils");
 const ethers = require("ethers");
 const {BigNumber} = ethers;
 const {findEvents} = require("../../../lib/findEvents.js");
@@ -296,6 +296,34 @@ function runSandTests() {
       dummySignature = signPurchaseMessage(privateKey, Message);
 
       await userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature);
+    });
+
+    it("price change should be implemented after a delay", async function () {
+      const {starterPackContractAsAdmin, userWithSAND} = setUp;
+      Message.buyer = userWithSAND.address;
+      const dummySignature = signPurchaseMessage(privateKey, Message);
+      await starterPackContractAsAdmin.setSANDEnabled(true);
+      const newPrices = [3, 5, 8, 13];
+      await starterPackContractAsAdmin.setPrices(newPrices);
+
+      // buyer should still pay the old price for 1 hour
+      const receipt = await waitFor(
+        userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature)
+      );
+      const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
+      const totalExpectedPrice = 1600;
+      expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
+
+      // fast-forward 1 hour. now buyer should pay the new price
+      await increaseTime(60 * 60);
+      Message.nonce++;
+      const dummySignature2 = signPurchaseMessage(privateKey, Message);
+      const receipt2 = await waitFor(
+        userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature2)
+      );
+      const eventsMatching2 = receipt2.events.filter((event) => event.event === "Purchase");
+      const newTotalExpectedPrice = 29;
+      expect(eventsMatching2[0].args[2]).to.equal(newTotalExpectedPrice);
     });
   });
 }
