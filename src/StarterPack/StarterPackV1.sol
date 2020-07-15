@@ -267,7 +267,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     // @dev function to determine whether to use old or
-    // new prices during the 1 hr delay after a price change
+    // new prices based on state of _priceChangeActive
     function _priceSelector() internal returns (uint256[] memory) {
         uint256[] memory prices;
         // No price change active:
