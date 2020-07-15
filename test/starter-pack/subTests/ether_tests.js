@@ -1,6 +1,6 @@
 const {setupStarterPack, supplyStarterPack} = require("./fixtures");
 const {assert, expect} = require("local-chai");
-const {waitFor, expectRevert} = require("local-utils");
+const {waitFor, expectRevert, zeroAddress} = require("local-utils");
 const {findEvents} = require("../../../lib/findEvents.js");
 const {signPurchaseMessage} = require("../../../lib/purchaseMessageSigner");
 const {privateKey} = require("./_testHelper");
@@ -140,6 +140,9 @@ function runEtherTests() {
 
       // nonce
       expect(eventsMatching[0].args[1][5]).to.equal(0);
+
+      // token
+      expect(eventsMatching[0].args[3]).to.equal(zeroAddress);
 
       // catalyst Transfer events
       const transferEventsMatchingCommon = await findEvents(ERC20SubTokenCommon, "Transfer", receipt.blockHash); // one Transfer event per subtoken
