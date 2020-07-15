@@ -9,6 +9,7 @@ const {signPurchaseMessage} = require("../../lib/purchaseMessageSigner");
 const {privateKey} = require("./_testHelper");
 
 describe("StarterPack:Setup", function () {
+  console.log("testing");
   it("Returns a starterPack contract", async function () {
     const {starterPackContract: starterPack} = await setupStarterPack();
     assert.notEqual(starterPack.address, undefined);
