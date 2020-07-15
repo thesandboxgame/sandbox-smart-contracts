@@ -31,7 +31,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     address payable internal _wallet;
 
-    event Purchase(address indexed from, Message, uint256 priceInSand);
+    event Purchase(address indexed from, Message, uint256 price, address token, uint256 amountPaid);
 
     event SetPrices(uint256[4] prices);
 
@@ -107,24 +107,32 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _handlePurchaseWithERC20(message.buyer, _wallet, address(_sand), amountInSand);
         _erc20GroupCatalyst.batchTransferFrom(address(this), message.buyer, message.catalystIds, message.catalystQuantities);
         _erc20GroupGem.batchTransferFrom(address(this), message.buyer, message.gemIds, message.gemQuantities);
-        emit Purchase(from, message, amountInSand);
+        emit Purchase(from, message, amountInSand, address(_sand), amountInSand);
     }
 
-    // function purchaseWithEth(
-    //     address from,
-    //     address to,
-    //     uint256[] calldata catalystIds,
-    //     uint256[] calldata catalystQuantities,
-    //     uint256[] calldata gemIds,
-    //     uint256[] calldata gemQuantities,
-    //     uint256 nonce,
-    //     bytes calldata signature
-    // ) external payable {
-    //     // TODO:
-    //     uint256 priceInSand = 0;
+    function purchaseWithETH(
+        address from,
+        Message calldata message,
+        bytes calldata signature
+    ) external payable {
+        require(_etherEnabled, "ETHER_IS_NOT_ENABLED");
+        require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
+        require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
+        require(isPurchaseValid(from, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce, signature), "INVALID_PURCHASE");
 
-    //     emit Purchase(from, to, catalystIds, catalystQuantities, gemIds, gemQuantities, priceInSand);
-    // }
+        uint256 amountInSand = _calculateTotalPriceInSand();
+        uint256 ETHRequired = getEtherAmountWithSAND(amountInSand);
+        require(msg.value >= ETHRequired, "NOT_ENOUGH_ETHER_SENT");
+
+        _wallet.transfer(ETHRequired);
+        _erc20GroupCatalyst.batchTransferFrom(address(this), message.buyer, message.catalystIds, message.catalystQuantities);
+        _erc20GroupGem.batchTransferFrom(address(this), message.buyer, message.gemIds, message.gemQuantities);
+        emit Purchase(from, message, amountInSand, address(0), ETHRequired);
+
+        if (msg.value - ETHRequired > 0) {
+            msg.sender.transfer(msg.value - ETHRequired); // refund extra
+        }
+    }
 
     // function purchaseWithDai(
     //     address from,
@@ -178,17 +186,17 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         return _erc20GroupGem.balanceOfBatch(owners, tokenIds);
     }
 
-    // ////////////////////////// Internal ////////////////////////
-
     /**
      * @notice Returns the amount of ETH for a specific amount of SAND
      * @param sandAmount An amount of SAND
      * @return The amount of ETH
      */
-    function _getEtherAmountWithSAND(uint256 sandAmount) internal view returns (uint256) {
+    function getEtherAmountWithSAND(uint256 sandAmount) public view returns (uint256) {
         uint256 ethUsdPair = _getEthUsdPair();
         return sandAmount.mul(DAI_PRICE).div(ethUsdPair);
     }
+
+    // ////////////////////////// Internal ////////////////////////
 
     /**
      * @notice Gets the ETHUSD pair from the Medianizer contract
@@ -201,7 +209,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     function _calculateTotalPriceInSand() internal returns (uint256) {
         // TODO:
-        return 1;
+        return 1000000;
     }
 
     function _handlePurchaseWithERC20(
