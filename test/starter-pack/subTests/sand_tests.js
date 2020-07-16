@@ -301,11 +301,11 @@ function runSandTests() {
     it("price change should be implemented after a delay", async function () {
       const {starterPackContractAsAdmin, userWithSAND} = setUp;
       Message.buyer = userWithSAND.address;
+      Message.nonce = 0;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await starterPackContractAsAdmin.setSANDEnabled(true);
       const newPrices = [3, 5, 8, 13];
       await starterPackContractAsAdmin.setPrices(newPrices);
-
       // buyer should still pay the old price for 1 hour
       const receipt = await waitFor(
         userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature)
