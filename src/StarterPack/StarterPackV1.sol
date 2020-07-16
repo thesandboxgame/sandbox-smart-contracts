@@ -178,7 +178,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
         require(isPurchaseValid(from, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce, signature), "INVALID_PURCHASE");
 
-        uint256 amountInSand = _calculateTotalPriceInSand();
+        uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities);
         uint256 DAIRequired = amountInSand.mul(DAI_PRICE).div(1000000000000000000);
         _handlePurchaseWithERC20(message.buyer, _wallet, address(_dai), DAIRequired);
         _erc20GroupCatalyst.batchTransferFrom(address(this), message.buyer, message.catalystIds, message.catalystQuantities);
@@ -192,7 +192,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     function setPrices(uint256[] calldata prices) external {
-        require(msg.sender == _admin, "only admin can change StarterPack prices");
+        require(msg.sender == _admin, "ONLY_ADMIN_CAN_CHANGE_STARTERPACK_PRICES");
         _previousStarterPackPrices = _starterPackPrices;
         _starterPackPrices = prices;
         _priceChangeTimestamp = now;
