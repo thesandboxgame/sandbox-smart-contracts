@@ -39,7 +39,7 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
     await asset.setBouncer(assetBouncerAdmin, true);
 
     const contracts = {
-      landSale: await ethers.getContract(landSaleName),
+      landSale: await ethers.getContract(landSaleName, roles.landSaleAdmin),
       land: await ethers.getContract("Land"),
       estate: await ethers.getContract("Estate"),
       sand: await ethers.getContract("Sand"),
@@ -47,7 +47,8 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
       daiMedianizer: await ethers.getContract("DAIMedianizer"),
       dai: await ethers.getContract("DAI"),
     };
-    const saleStart = getChainCurrentTime();
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const saleStart = latestBlock.timestamp; // Math.floor(Date.now() / 1000); // TODO ? getChainCurrentTime();
     const saleDuration = 60 * 60;
     const saleEnd = saleStart + saleDuration;
 
@@ -91,7 +92,7 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
 
     const ethersFactory = await ethers.getContractFactory(contractName);
 
-    contracts.estateSale = await ethersFactory.deploy(
+    const estateSaleContract = await ethersFactory.deploy(
       contracts.land.address,
       contracts.sand.address,
       contracts.sand.address,
@@ -106,6 +107,8 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
       contracts.estate.address,
       contracts.asset.address
     );
+
+    contracts.estateSale = estateSaleContract.connect(estateSaleContract.provider.getSigner(roles.landSaleAdmin));
 
     if (landType === "testLands") {
       await assetAsCreator.safeBatchTransferFrom(creator, contracts.estateSale.address, assetIds, assetAmounts, "0x");

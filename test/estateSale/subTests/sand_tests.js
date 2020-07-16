@@ -1,4 +1,4 @@
-const {assert} = require("local-chai");
+const {assert, expect} = require("local-chai");
 const {utils, BigNumber} = require("ethers");
 const {expectRevert, zeroAddress, increaseTime} = require("local-utils");
 const {setupEstateSale} = require("./fixtures");
@@ -750,7 +750,7 @@ function runSandTests(landSaleName) {
       });
 
       it("can buy Land with assets", async function () {
-        const {lands, userWithSAND, tree} = initialSetUp;
+        const {lands, userWithSAND, tree, contracts} = initialSetUp;
         const land = lands[5];
         const proof = tree.getProof(calculateLandHash(land));
 
@@ -768,7 +768,12 @@ function runSandTests(landSaleName) {
           emptyReferral
         );
 
-        // TODO check balance
+        const {asset} = contracts;
+        const balances = await asset.callStatic.balanceOfBatch(
+          land.assetIds.map(() => userWithSAND.address),
+          land.assetIds
+        );
+        expect(balances[0]).to.equal(1);
       });
 
       it("CANNOT buy Land with assets using zero asset", async function () {
@@ -791,6 +796,38 @@ function runSandTests(landSaleName) {
             emptyReferral
           ),
           "Invalid land provided"
+        );
+      });
+
+      it("can withdraw asset token post sale from admin", async function () {
+        const {lands, userWithSAND, contracts} = initialSetUp;
+        const {asset, estateSale} = contracts;
+        const land = lands[5];
+        await increaseTime(60 * 60 + 1);
+        await estateSale.functions.withdrawAssets(
+          userWithSAND.address,
+          land.assetIds,
+          land.assetIds.map(() => 1)
+        );
+
+        const balances = await asset.callStatic.balanceOfBatch(
+          land.assetIds.map(() => userWithSAND.address),
+          land.assetIds
+        );
+        expect(balances[0]).to.equal(1);
+      });
+
+      it("CANNOT withdraw asset token post sale if not admin", async function () {
+        const {lands, userWithSAND} = initialSetUp;
+        const land = lands[5];
+        await increaseTime(60 * 60 + 1);
+        await expectRevert(
+          userWithSAND.EstateSale.functions.withdrawAssets(
+            userWithSAND.address,
+            land.assetIds,
+            land.assetIds.map(() => 1)
+          ),
+          "NOT_AUTHORIZED"
         );
       });
     });
