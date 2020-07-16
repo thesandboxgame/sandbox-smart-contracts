@@ -29,11 +29,22 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     bool _etherEnabled;
     bool _daiEnabled;
 
+    uint256[] private _starterPackPrices;
+    uint256[] private _previousStarterPackPrices;
+
+    // the timestamp of the last pricechange
+    uint256 private _priceChangeTimestamp;
+
     address payable internal _wallet;
+
+    // The delay between calling setPrices() and when
+    // the new prices come into effect.
+    // Minimizes the effect of price changes on pending TXs
+    uint256 private _priceChangeDelay = 1 hours;
 
     event Purchase(address indexed from, Message, uint256 price, address token, uint256 amountPaid);
 
-    event SetPrices(uint256[4] prices);
+    event SetPrices(uint256[] prices);
 
     struct Message {
         uint256[] catalystIds;
@@ -101,9 +112,20 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         require(_sandEnabled, "SAND_IS_NOT_ENABLED");
         require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
         require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
-        require(isPurchaseValid(from, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce, signature), "INVALID_PURCHASE");
-
-        uint256 amountInSand = _calculateTotalPriceInSand();
+        require(
+            isPurchaseValid(
+                from,
+                message.catalystIds,
+                message.catalystQuantities,
+                message.gemIds,
+                message.gemQuantities,
+                message.buyer,
+                message.nonce,
+                signature
+            ),
+            "INVALID_PURCHASE"
+        );
+        uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities);
         _handlePurchaseWithERC20(message.buyer, _wallet, address(_sand), amountInSand);
         _erc20GroupCatalyst.batchTransferFrom(address(this), message.buyer, message.catalystIds, message.catalystQuantities);
         _erc20GroupGem.batchTransferFrom(address(this), message.buyer, message.gemIds, message.gemQuantities);
@@ -118,9 +140,21 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         require(_etherEnabled, "ETHER_IS_NOT_ENABLED");
         require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
         require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
-        require(isPurchaseValid(from, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce, signature), "INVALID_PURCHASE");
+        require(
+            isPurchaseValid(
+                from,
+                message.catalystIds,
+                message.catalystQuantities,
+                message.gemIds,
+                message.gemQuantities,
+                message.buyer,
+                message.nonce,
+                signature
+            ),
+            "INVALID_PURCHASE"
+        );
 
-        uint256 amountInSand = _calculateTotalPriceInSand();
+        uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities);
         uint256 ETHRequired = getEtherAmountWithSAND(amountInSand);
         require(msg.value >= ETHRequired, "NOT_ENOUGH_ETHER_SENT");
 
@@ -157,11 +191,20 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         // TODO: withdrawal
     }
 
-    // Prices can be changed anytime by admin. Envisage the need to set a delay where old prices are allowed
-    function setPrices(uint256[4] calldata prices) external {
+    function setPrices(uint256[] calldata prices) external {
         require(msg.sender == _admin, "only admin can change StarterPack prices");
-        // TODO: prices
-        // emit SetPrices(prices);
+        _previousStarterPackPrices = _starterPackPrices;
+        _starterPackPrices = prices;
+        _priceChangeTimestamp = now;
+        emit SetPrices(prices);
+    }
+
+    function getStarterPackPrices() external view returns (uint256[] memory prices) {
+        return _starterPackPrices;
+    }
+
+    function getPreviousPrices() external view returns (uint256[] memory prices) {
+        return _previousStarterPackPrices;
     }
 
     function checkCatalystBalance(uint256 tokenId) external view returns (uint256) {
@@ -209,9 +252,35 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         return uint256(pair);
     }
 
-    function _calculateTotalPriceInSand() internal returns (uint256) {
-        // TODO:
-        return 1000000;
+    function _calculateTotalPriceInSand(uint256[] memory catalystIds, uint256[] memory catalystQuantities) internal returns (uint256) {
+        uint256[] memory prices = _priceSelector();
+        uint256 totalPrice;
+        for (uint256 i = 0; i < catalystIds.length; i++) {
+            uint256 id = catalystIds[i];
+            uint256 quantity = catalystQuantities[i];
+            totalPrice += prices[id].mul(quantity);
+        }
+        return totalPrice;
+    }
+
+    // @dev function to determine whether to use old or
+    // new prices
+    function _priceSelector() internal returns (uint256[] memory) {
+        uint256[] memory prices;
+        // No price change:
+        if (_priceChangeTimestamp == 0) {
+            prices = _starterPackPrices;
+        } else {
+            // Price change delay has expired.
+            if (now > _priceChangeTimestamp + 1 hours) {
+                _priceChangeTimestamp = 0;
+                prices = _starterPackPrices;
+            } else {
+                // Price change has occured:
+                prices = _previousStarterPackPrices;
+            }
+        }
+        return prices;
     }
 
     function _handlePurchaseWithERC20(
@@ -236,7 +305,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         address daiTokenContractAddress,
         address erc20GroupCatalystAddress,
         address erc20GroupGemAddress,
-        address initialSigningWallet
+        address initialSigningWallet,
+        uint256[] memory initialStarterPackPrices
     ) public PurchaseValidator(initialSigningWallet) {
         _setMetaTransactionProcessor(initialMetaTx, true);
         _wallet = initialWalletAddress;
@@ -246,5 +316,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _dai = ERC20(daiTokenContractAddress);
         _erc20GroupCatalyst = ERC20Group(erc20GroupCatalystAddress);
         _erc20GroupGem = ERC20Group(erc20GroupGemAddress);
+        _starterPackPrices = initialStarterPackPrices;
+        _previousStarterPackPrices = initialStarterPackPrices;
     }
 }
