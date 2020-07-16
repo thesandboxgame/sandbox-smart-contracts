@@ -50,7 +50,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     log("setting CatalystMinter as CatalystRegistry minter");
     const currentRegistryAdmin = await call("CatalystRegistry", "getAdmin");
     await sendTxAndWait(
-      {from: currentRegistryAdmin, gas: 1000000, skipError: true},
+      {from: currentRegistryAdmin, gas: 1000000, skipUnknownSigner: true},
       "CatalystRegistry",
       "setMinter",
       catalystMinter.address
@@ -62,7 +62,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     log("setting CatalystMinter as Asset bouncer");
     const currentBouncerAdmin = await call("Asset", "getBouncerAdmin");
     await sendTxAndWait(
-      {from: currentBouncerAdmin, gas: 1000000, skipError: true},
+      {from: currentBouncerAdmin, gas: 1000000, skipUnknownSigner: true},
       "Asset",
       "setBouncer",
       catalystMinter.address,
@@ -76,7 +76,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       log("setting CatalystMinter as super operator for " + contractName);
       const currentSandAdmin = await call(contractName, "getAdmin");
       await sendTxAndWait(
-        {from: currentSandAdmin, gas: 100000, skipError: true},
+        {from: currentSandAdmin, gas: 100000, skipUnknownSigner: true},
         contractName,
         "setSuperOperator",
         address,
@@ -90,4 +90,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   await setSuperOperatorFor("Asset", catalystMinter.address);
   await setSuperOperatorFor(`Catalyst`, catalystMinter.address);
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO
+module.exports.skip = guard(["1", "314159"]); // TODO

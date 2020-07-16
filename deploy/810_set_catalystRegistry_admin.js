@@ -7,11 +7,11 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   if (currentAdmin.toLowerCase() !== catalystRegistryAdmin.toLowerCase()) {
     log("setting CatalystRegistry Admin");
     await sendTxAndWait(
-      {from: currentAdmin, gas: 1000000, skipError: true},
+      {from: currentAdmin, gas: 1000000, skipUnknownSigner: true},
       "CatalystRegistry",
       "changeAdmin",
       catalystRegistryAdmin
     );
   }
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO remove
+module.exports.skip = guard(["1", "314159"]); // TODO remove

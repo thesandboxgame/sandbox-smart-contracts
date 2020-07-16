@@ -6,7 +6,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   const currentAdmin = await call("Gem", "getAdmin");
   if (currentAdmin.toLowerCase() !== gemAdmin.toLowerCase()) {
     log("setting Gem Admin");
-    await sendTxAndWait({from: currentAdmin, gas: 1000000, skipError: true}, "Gem", "changeAdmin", gemAdmin);
+    await sendTxAndWait({from: currentAdmin, gas: 1000000, skipUnknownSigner: true}, "Gem", "changeAdmin", gemAdmin);
   }
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO remove
+module.exports.skip = guard(["1", "314159"]); // TODO remove
