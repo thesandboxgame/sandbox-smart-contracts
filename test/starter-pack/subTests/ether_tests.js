@@ -305,7 +305,7 @@ function runEtherTests() {
         users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {value: 1000000})
       );
       const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
-      const totalExpectedPrice = BigNumber.from(1600);
+      const totalExpectedPrice = 1600;
       expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
 
       // fast-forward 1 hour. now buyer should pay the new price
