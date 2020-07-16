@@ -3,6 +3,7 @@ const {assert, expect} = require("local-chai");
 const {getNamedAccounts} = require("@nomiclabs/buidler");
 const ethers = require("ethers");
 const {BigNumber} = ethers;
+const {waitFor, expectRevert} = require("local-utils");
 
 function runCommonTests() {
   describe("StarterPack:Setup", function () {
@@ -75,12 +76,36 @@ function runCommonTests() {
     });
 
     it("user can check batch balances of gem IDs owned by StarterPackV1", async function () {
-      const {userWithSAND} = await setUp;
-      const balances = await userWithSAND.StarterPack.checkGemBatchBalances([0, 1, 2, 3]);
+      const {users} = await setUp;
+      const balances = await users[0].StarterPack.checkGemBatchBalances([0, 1, 2, 3]);
       expect(balances[0]).to.equal(BigNumber.from(100));
       expect(balances[1]).to.equal(BigNumber.from(100));
       expect(balances[2]).to.equal(BigNumber.from(100));
       expect(balances[3]).to.equal(BigNumber.from(100));
+    });
+
+    it("cannot set prices if not admin", async function () {
+      const {users} = setUp;
+      await expectRevert(users[0].StarterPack.setPrices([50, 60, 70, 80]), "ONLY_ADMIN_CAN_CHANGE_STARTERPACK_PRICES");
+    });
+
+    it("can set prices if admin", async function () {
+      const {starterPackContractAsAdmin, starterPackContract} = setUp;
+      const receipt = await waitFor(starterPackContractAsAdmin.setPrices([50, 60, 70, 80]));
+
+      const eventsMatching = receipt.events.filter((event) => event.event === "SetPrices");
+      expect(eventsMatching).to.have.lengthOf(1);
+      const priceEvent = eventsMatching[0];
+      expect(priceEvent.args[0][0]).to.equal(50);
+      expect(priceEvent.args[0][1]).to.equal(60);
+      expect(priceEvent.args[0][2]).to.equal(70);
+      expect(priceEvent.args[0][3]).to.equal(80);
+
+      const latestPrices = await starterPackContract.getStarterPackPrices();
+      expect(latestPrices[0]).to.equal(50);
+      expect(latestPrices[1]).to.equal(60);
+      expect(latestPrices[2]).to.equal(70);
+      expect(latestPrices[3]).to.equal(80);
     });
   });
 }
