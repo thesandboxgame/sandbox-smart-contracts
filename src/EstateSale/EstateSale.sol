@@ -357,4 +357,14 @@ contract EstateSale is MetaTransactionReceiver, ReferralValidator {
     ) external pure returns (bytes4) {
         return 0xbc197c81;
     }
+
+    function withdrawAssets(
+        address to,
+        uint256[] calldata assetIds,
+        uint256[] calldata values
+    ) external {
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
+        require(block.timestamp > _expiryTime, "SALE_NOT_OVER");
+        _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
+    }
 }
