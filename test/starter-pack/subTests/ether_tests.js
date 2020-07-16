@@ -11,9 +11,9 @@ function runEtherTests() {
 
     const Message = {
       catalystIds: [0, 1, 2, 3],
-      catalystQuantities: [1, 1, 1, 1],
+      catalystQuantities: [10, 10, 10, 10],
       gemIds: [0, 1, 2, 3, 4],
-      gemQuantities: [2, 2, 2, 2, 2],
+      gemQuantities: [20, 20, 20, 20, 20],
       buyer: "",
       nonce: 0,
     };
