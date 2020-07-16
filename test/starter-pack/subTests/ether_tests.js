@@ -41,7 +41,9 @@ function runEtherTests() {
       Message.buyer = users[0].address;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await expectRevert(
-        users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {value: 1000000}),
+        users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
+          value: BigNumber.from(2).mul("1000000000000000000"),
+        }),
         "can't substract more than there is"
       );
     });
@@ -103,7 +105,9 @@ function runEtherTests() {
       const dummySignature = signPurchaseMessage(privateKey, Message);
 
       const receipt = await waitFor(
-        users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {value: 1000000})
+        users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
+          value: BigNumber.from(2).mul("1000000000000000000"),
+        })
       );
       const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
       assert.equal(eventsMatching.length, 1);
@@ -259,7 +263,9 @@ function runEtherTests() {
       const dummySignature = signPurchaseMessage(privateKey, Message);
       const nonceBeforePurchase = await starterPackContract.getNonceByBuyer(users[0].address, 0);
       expect(nonceBeforePurchase).to.equal(0);
-      await users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {value: 1000000});
+      await users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
+        value: BigNumber.from(2).mul("1000000000000000000"),
+      });
       const nonceAfterPurchase = await starterPackContract.getNonceByBuyer(users[0].address, 0);
       expect(nonceAfterPurchase).to.equal(1);
     });
@@ -270,9 +276,13 @@ function runEtherTests() {
 
       const dummySignature = signPurchaseMessage(privateKey, Message);
 
-      await users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {value: 1000000});
+      await users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
+        value: BigNumber.from(2).mul("1000000000000000000"),
+      });
       await expectRevert(
-        users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {value: 1000000}),
+        users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
+          value: BigNumber.from(2).mul("1000000000000000000"),
+        }),
         "INVALID_NONCE"
       );
     });
@@ -283,13 +293,17 @@ function runEtherTests() {
 
       let dummySignature = signPurchaseMessage(privateKey, Message);
 
-      await users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {value: 1000000});
+      await users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
+        value: BigNumber.from(2).mul("1000000000000000000"),
+      });
 
       Message.nonce++;
 
       dummySignature = signPurchaseMessage(privateKey, Message);
 
-      await users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {value: 1000000});
+      await users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
+        value: BigNumber.from(2).mul("1000000000000000000"),
+      });
     });
 
     it("price change should be implemented after a delay", async function () {
@@ -298,14 +312,21 @@ function runEtherTests() {
       Message.nonce = 0;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await starterPackContractAsAdmin.setETHEnabled(true);
-      const newPrices = [BigNumber.from(300), BigNumber.from(500), BigNumber.from(800), BigNumber.from(1300)];
+      const newPrices = [
+        BigNumber.from(300).mul("1000000000000000000"),
+        BigNumber.from(500).mul("1000000000000000000"),
+        BigNumber.from(800).mul("1000000000000000000"),
+        BigNumber.from(1300).mul("1000000000000000000"),
+      ];
       await starterPackContractAsAdmin.setPrices(newPrices);
       // buyer should still pay the old price for 1 hour
       const receipt = await waitFor(
-        users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {value: 1000000})
+        users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
+          value: BigNumber.from(2).mul("1000000000000000000"),
+        })
       );
       const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
-      const totalExpectedPrice = 1600;
+      const totalExpectedPrice = BigNumber.from(1600).mul("1000000000000000000");
       expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
 
       // fast-forward 1 hour. now buyer should pay the new price
@@ -313,10 +334,12 @@ function runEtherTests() {
       Message.nonce++;
       const dummySignature2 = signPurchaseMessage(privateKey, Message);
       const receipt2 = await waitFor(
-        users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature2, {value: 1000000})
+        users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature2, {
+          value: BigNumber.from(2).mul("1000000000000000000"),
+        })
       );
       const eventsMatching2 = receipt2.events.filter((event) => event.event === "Purchase");
-      const newTotalExpectedPrice = 2900;
+      const newTotalExpectedPrice = BigNumber.from(2900).mul("1000000000000000000");
       expect(eventsMatching2[0].args[2]).to.equal(newTotalExpectedPrice);
     });
   });

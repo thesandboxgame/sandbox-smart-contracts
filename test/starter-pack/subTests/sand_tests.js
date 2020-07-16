@@ -304,14 +304,19 @@ function runSandTests() {
       Message.nonce = 0;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await starterPackContractAsAdmin.setSANDEnabled(true);
-      const newPrices = [BigNumber.from(300), BigNumber.from(500), BigNumber.from(800), BigNumber.from(1300)];
+      const newPrices = [
+        BigNumber.from(300).mul("1000000000000000000"),
+        BigNumber.from(500).mul("1000000000000000000"),
+        BigNumber.from(800).mul("1000000000000000000"),
+        BigNumber.from(1300).mul("1000000000000000000"),
+      ];
       await starterPackContractAsAdmin.setPrices(newPrices);
       // buyer should still pay the old price for 1 hour
       const receipt = await waitFor(
         userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature)
       );
       const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
-      const totalExpectedPrice = 1600;
+      const totalExpectedPrice = BigNumber.from(1600).mul("1000000000000000000");
       expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
 
       // fast-forward 1 hour. now buyer should pay the new price
@@ -322,7 +327,7 @@ function runSandTests() {
         userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature2)
       );
       const eventsMatching2 = receipt2.events.filter((event) => event.event === "Purchase");
-      const newTotalExpectedPrice = 2900;
+      const newTotalExpectedPrice = BigNumber.from(2900).mul("1000000000000000000");
       expect(eventsMatching2[0].args[2]).to.equal(newTotalExpectedPrice);
     });
   });
