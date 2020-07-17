@@ -10,8 +10,9 @@ const {privateKey} = require("./_testHelper");
 function runEtherTests() {
   describe("StarterPack:PurchaseWithETHEmptyStarterPack", function () {
     let setUp;
+    let Message;
 
-    const Message = {
+    const TestMessage = {
       catalystIds: [0, 1, 2, 3],
       catalystQuantities: [10, 10, 10, 10],
       gemIds: [0, 1, 2, 3, 4],
@@ -24,6 +25,7 @@ function runEtherTests() {
       setUp = await setupStarterPack();
       const {starterPackContractAsAdmin} = setUp;
       await starterPackContractAsAdmin.setETHEnabled(true);
+      Message = {...TestMessage};
     });
 
     it("should revert if the user does not have enough ETH", async function () {
@@ -68,8 +70,9 @@ function runEtherTests() {
 
   describe("StarterPack:PurchaseWithETHSuppliedStarterPack", function () {
     let setUp;
+    let Message;
 
-    const Message = {
+    const TestMessage = {
       catalystIds: [0, 1, 2, 3],
       catalystQuantities: [1, 1, 1, 1],
       gemIds: [0, 1, 2, 3, 4],
@@ -82,6 +85,7 @@ function runEtherTests() {
       setUp = await supplyStarterPack();
       const {starterPackContractAsAdmin} = setUp;
       await starterPackContractAsAdmin.setETHEnabled(true);
+      Message = {...TestMessage};
     });
 
     it("if StarterpackV1.sol owns Catalysts & Gems then listed purchasers should be able to purchase with ETH with 1 Purchase event", async function () {
@@ -309,7 +313,6 @@ function runEtherTests() {
     it("price change should be implemented after a delay", async function () {
       const {starterPackContractAsAdmin, users} = setUp;
       Message.buyer = users[0].address;
-      Message.nonce = 0;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await starterPackContractAsAdmin.setETHEnabled(true);
       const newPrices = [
