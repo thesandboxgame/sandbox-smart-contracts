@@ -187,8 +187,9 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     function withdrawAll(address to) external {
-        require(msg.sender == _admin, "only admin can withdraw remaining tokens");
+        require(msg.sender == _admin, "ONLY_ADMIN_CAN_WITHDRAW_REMAINING_TOKENS");
         // TODO: withdrawal
+        // If curren token owner is address(this) then [batch]transfer ownership to new address
     }
 
     function setPrices(uint256[] calldata prices) external {
@@ -205,30 +206,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     function getPreviousPrices() external view returns (uint256[] memory prices) {
         return _previousStarterPackPrices;
-    }
-
-    function checkCatalystBalance(uint256 tokenId) external view returns (uint256) {
-        return _erc20GroupCatalyst.balanceOf(address(this), tokenId);
-    }
-
-    function checkGemBalance(uint256 tokenId) external view returns (uint256) {
-        return _erc20GroupGem.balanceOf(address(this), tokenId);
-    }
-
-    function checkCatalystBatchBalances(uint256[] calldata tokenIds) external view returns (uint256[] memory balances) {
-        address[] memory owners = new address[](tokenIds.length);
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            owners[i] = address(this);
-        }
-        return _erc20GroupCatalyst.balanceOfBatch(owners, tokenIds);
-    }
-
-    function checkGemBatchBalances(uint256[] calldata tokenIds) external view returns (uint256[] memory balances) {
-        address[] memory owners = new address[](tokenIds.length);
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            owners[i] = address(this);
-        }
-        return _erc20GroupGem.balanceOfBatch(owners, tokenIds);
     }
 
     /**
