@@ -10,8 +10,9 @@ const {privateKey} = require("./_testHelper");
 function runSandTests() {
   describe("StarterPack:PurchaseWithSandEmptyStarterPack", function () {
     let setUp;
+    let Message;
 
-    const Message = {
+    const TestMessage = {
       catalystIds: [0, 1, 2, 3],
       catalystQuantities: [1, 1, 1, 1],
       gemIds: [0, 1, 2, 3, 4],
@@ -24,6 +25,7 @@ function runSandTests() {
       setUp = await setupStarterPack();
       const {starterPackContractAsAdmin} = setUp;
       await starterPackContractAsAdmin.setSANDEnabled(true);
+      Message = {...TestMessage};
     });
 
     it("should revert if the user does not have enough SAND", async function () {
@@ -68,8 +70,9 @@ function runSandTests() {
 
   describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
     let setUp;
+    let Message;
 
-    const Message = {
+    const TestMessage = {
       catalystIds: [0, 1, 2, 3],
       catalystQuantities: [1, 1, 1, 1],
       gemIds: [0, 1, 2, 3, 4],
@@ -82,6 +85,7 @@ function runSandTests() {
       setUp = await supplyStarterPack();
       const {starterPackContractAsAdmin} = setUp;
       await starterPackContractAsAdmin.setSANDEnabled(true);
+      Message = {...TestMessage};
     });
 
     it("if StarterpackV1.sol owns Catalysts & Gems then listed purchasers should be able to purchase with SAND with 1 Purchase event", async function () {
@@ -298,7 +302,6 @@ function runSandTests() {
     it("price change should be implemented after a delay", async function () {
       const {starterPackContractAsAdmin, userWithSAND} = setUp;
       Message.buyer = userWithSAND.address;
-      Message.nonce = 0;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await starterPackContractAsAdmin.setSANDEnabled(true);
       const newPrices = [
