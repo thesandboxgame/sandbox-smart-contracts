@@ -204,10 +204,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         return _starterPackPrices;
     }
 
-    function getPreviousPrices() external view returns (uint256[] memory prices) {
-        return _previousStarterPackPrices;
-    }
-
     /**
      * @notice Returns the amount of ETH for a specific amount of SAND
      * @param sandAmount An amount of SAND
