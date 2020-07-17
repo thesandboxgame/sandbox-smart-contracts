@@ -61,14 +61,14 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @param newWallet address of the new receiving wallet
     function setReceivingWallet(address payable newWallet) external {
         require(newWallet != address(0), "WALLET_ZERO_ADDRESS");
-        require(msg.sender == _admin, "ONLY_ADMIN_CAN_CHANGE_WALLET");
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
         _wallet = newWallet;
     }
 
     /// @dev enable/disable DAI payment for StarterPacks
     /// @param enabled whether to enable or disable
     function setDAIEnabled(bool enabled) external {
-        require(msg.sender == _admin, "ONLY_ADMIN_CAN_SET_DAI_ENABLED_OR_DISABLED");
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
         _daiEnabled = enabled;
     }
 
@@ -81,7 +81,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @notice enable/disable ETH payment for StarterPacks
     /// @param enabled whether to enable or disable
     function setETHEnabled(bool enabled) external {
-        require(msg.sender == _admin, "ONLY_ADMIN_CAN_SET_ETH_ENABLED_OR_DISABLED");
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
         _etherEnabled = enabled;
     }
 
@@ -94,7 +94,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @dev enable/disable the specific SAND payment for StarterPacks
     /// @param enabled whether to enable or disable
     function setSANDEnabled(bool enabled) external {
-        require(msg.sender == _admin, "ONLY_ADMIN_CAN_SET_SAND_ENABLED_OR_DISABLED");
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
         _sandEnabled = enabled;
     }
 
@@ -187,13 +187,13 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     function withdrawAll(address to) external {
-        require(msg.sender == _admin, "ONLY_ADMIN_CAN_WITHDRAW_REMAINING_TOKENS");
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
         // TODO: withdrawal
         // If curren token owner is address(this) then [batch]transfer ownership to new address
     }
 
     function setPrices(uint256[] calldata prices) external {
-        require(msg.sender == _admin, "ONLY_ADMIN_CAN_CHANGE_STARTERPACK_PRICES");
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
         _previousStarterPackPrices = _starterPackPrices;
         _starterPackPrices = prices;
         _priceChangeTimestamp = now;
