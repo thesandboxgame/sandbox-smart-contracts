@@ -1,6 +1,6 @@
 const {setupStarterPack, supplyStarterPack} = require("./fixtures");
 const {assert, expect} = require("local-chai");
-const {waitFor, expectRevert} = require("local-utils");
+const {waitFor, expectRevert, increaseTime} = require("local-utils");
 const ethers = require("ethers");
 const {BigNumber} = ethers;
 const {findEvents} = require("../../../lib/findEvents.js");
@@ -10,8 +10,9 @@ const {privateKey} = require("./_testHelper");
 function runDaiTests() {
   describe("StarterPack:PurchaseWithDAIEmptyStarterPack", function () {
     let setUp;
+    let Message;
 
-    const Message = {
+    const TestMessage = {
       catalystIds: [0, 1, 2, 3],
       catalystQuantities: [1, 1, 1, 1],
       gemIds: [0, 1, 2, 3, 4],
@@ -24,6 +25,7 @@ function runDaiTests() {
       setUp = await setupStarterPack();
       const {starterPackContractAsAdmin} = setUp;
       await starterPackContractAsAdmin.setDAIEnabled(true);
+      Message = {...TestMessage};
     });
 
     it("should revert if the user does not have enough DAI", async function () {
@@ -62,14 +64,15 @@ function runDaiTests() {
     it("cannot enable/disable DAI if not admin", async function () {
       const {userWithoutDAI, starterPackContractAsAdmin} = setUp;
       await starterPackContractAsAdmin.setDAIEnabled(false);
-      await expectRevert(userWithoutDAI.StarterPack.setDAIEnabled(true), "ONLY_ADMIN_CAN_SET_DAI_ENABLED_OR_DISABLED");
+      await expectRevert(userWithoutDAI.StarterPack.setDAIEnabled(true), "NOT_AUTHORIZED");
     });
   });
 
   describe("StarterPack:PurchaseWithDAISuppliedStarterPack", function () {
     let setUp;
+    let Message;
 
-    const Message = {
+    const TestMessage = {
       catalystIds: [0, 1, 2, 3],
       catalystQuantities: [1, 1, 1, 1],
       gemIds: [0, 1, 2, 3, 4],
@@ -82,6 +85,7 @@ function runDaiTests() {
       setUp = await supplyStarterPack();
       const {starterPackContractAsAdmin} = setUp;
       await starterPackContractAsAdmin.setDAIEnabled(true);
+      Message = {...TestMessage};
     });
 
     it("if StarterpackV1.sol owns Catalysts & Gems then listed purchasers should be able to purchase with DAI with 1 Purchase event", async function () {
@@ -293,6 +297,38 @@ function runDaiTests() {
       dummySignature = signPurchaseMessage(privateKey, Message);
 
       await userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature);
+    });
+
+    it("price change should be implemented after a delay", async function () {
+      const {starterPackContractAsAdmin, userWithDAI} = setUp;
+      Message.buyer = userWithDAI.address;
+      const dummySignature = signPurchaseMessage(privateKey, Message);
+      await starterPackContractAsAdmin.setDAIEnabled(true);
+      const newPrices = [
+        BigNumber.from(300).mul("1000000000000000000"),
+        BigNumber.from(500).mul("1000000000000000000"),
+        BigNumber.from(800).mul("1000000000000000000"),
+        BigNumber.from(1300).mul("1000000000000000000"),
+      ];
+      await starterPackContractAsAdmin.setPrices(newPrices);
+      // buyer should still pay the old price for 1 hour
+      const receipt = await waitFor(
+        userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature)
+      );
+      const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
+      const totalExpectedPrice = BigNumber.from(1600).mul("1000000000000000000");
+      expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
+
+      // fast-forward 1 hour. now buyer should pay the new price
+      await increaseTime(60 * 60);
+      Message.nonce++;
+      const dummySignature2 = signPurchaseMessage(privateKey, Message);
+      const receipt2 = await waitFor(
+        userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature2)
+      );
+      const eventsMatching2 = receipt2.events.filter((event) => event.event === "Purchase");
+      const newTotalExpectedPrice = BigNumber.from(2900).mul("1000000000000000000");
+      expect(eventsMatching2[0].args[2]).to.equal(newTotalExpectedPrice);
     });
   });
 }

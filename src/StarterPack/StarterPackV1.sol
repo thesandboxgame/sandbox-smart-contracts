@@ -61,14 +61,14 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @param newWallet address of the new receiving wallet
     function setReceivingWallet(address payable newWallet) external {
         require(newWallet != address(0), "WALLET_ZERO_ADDRESS");
-        require(msg.sender == _admin, "ONLY_ADMIN_CAN_CHANGE_WALLET");
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
         _wallet = newWallet;
     }
 
     /// @dev enable/disable DAI payment for StarterPacks
     /// @param enabled whether to enable or disable
     function setDAIEnabled(bool enabled) external {
-        require(msg.sender == _admin, "ONLY_ADMIN_CAN_SET_DAI_ENABLED_OR_DISABLED");
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
         _daiEnabled = enabled;
     }
 
@@ -81,7 +81,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @notice enable/disable ETH payment for StarterPacks
     /// @param enabled whether to enable or disable
     function setETHEnabled(bool enabled) external {
-        require(msg.sender == _admin, "ONLY_ADMIN_CAN_SET_ETH_ENABLED_OR_DISABLED");
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
         _etherEnabled = enabled;
     }
 
@@ -94,7 +94,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @dev enable/disable the specific SAND payment for StarterPacks
     /// @param enabled whether to enable or disable
     function setSANDEnabled(bool enabled) external {
-        require(msg.sender == _admin, "ONLY_ADMIN_CAN_SET_SAND_ENABLED_OR_DISABLED");
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
         _sandEnabled = enabled;
     }
 
@@ -178,7 +178,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
         require(isPurchaseValid(from, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce, signature), "INVALID_PURCHASE");
 
-        uint256 amountInSand = _calculateTotalPriceInSand();
+        uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities);
         uint256 DAIRequired = amountInSand.mul(DAI_PRICE).div(1000000000000000000);
         _handlePurchaseWithERC20(message.buyer, _wallet, address(_dai), DAIRequired);
         _erc20GroupCatalyst.batchTransferFrom(address(this), message.buyer, message.catalystIds, message.catalystQuantities);
@@ -187,12 +187,13 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     function withdrawAll(address to) external {
-        require(msg.sender == _admin, "only admin can withdraw remaining tokens");
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
         // TODO: withdrawal
+        // If curren token owner is address(this) then [batch]transfer ownership to new address
     }
 
     function setPrices(uint256[] calldata prices) external {
-        require(msg.sender == _admin, "only admin can change StarterPack prices");
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
         _previousStarterPackPrices = _starterPackPrices;
         _starterPackPrices = prices;
         _priceChangeTimestamp = now;
@@ -201,34 +202,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     function getStarterPackPrices() external view returns (uint256[] memory prices) {
         return _starterPackPrices;
-    }
-
-    function getPreviousPrices() external view returns (uint256[] memory prices) {
-        return _previousStarterPackPrices;
-    }
-
-    function checkCatalystBalance(uint256 tokenId) external view returns (uint256) {
-        return _erc20GroupCatalyst.balanceOf(address(this), tokenId);
-    }
-
-    function checkGemBalance(uint256 tokenId) external view returns (uint256) {
-        return _erc20GroupGem.balanceOf(address(this), tokenId);
-    }
-
-    function checkCatalystBatchBalances(uint256[] calldata tokenIds) external view returns (uint256[] memory balances) {
-        address[] memory owners = new address[](tokenIds.length);
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            owners[i] = address(this);
-        }
-        return _erc20GroupCatalyst.balanceOfBatch(owners, tokenIds);
-    }
-
-    function checkGemBatchBalances(uint256[] calldata tokenIds) external view returns (uint256[] memory balances) {
-        address[] memory owners = new address[](tokenIds.length);
-        for (uint256 i = 0; i < tokenIds.length; i++) {
-            owners[i] = address(this);
-        }
-        return _erc20GroupGem.balanceOfBatch(owners, tokenIds);
     }
 
     /**

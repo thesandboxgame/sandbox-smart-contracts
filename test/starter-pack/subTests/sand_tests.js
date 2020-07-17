@@ -10,8 +10,9 @@ const {privateKey} = require("./_testHelper");
 function runSandTests() {
   describe("StarterPack:PurchaseWithSandEmptyStarterPack", function () {
     let setUp;
+    let Message;
 
-    const Message = {
+    const TestMessage = {
       catalystIds: [0, 1, 2, 3],
       catalystQuantities: [1, 1, 1, 1],
       gemIds: [0, 1, 2, 3, 4],
@@ -24,6 +25,7 @@ function runSandTests() {
       setUp = await setupStarterPack();
       const {starterPackContractAsAdmin} = setUp;
       await starterPackContractAsAdmin.setSANDEnabled(true);
+      Message = {...TestMessage};
     });
 
     it("should revert if the user does not have enough SAND", async function () {
@@ -62,17 +64,15 @@ function runSandTests() {
     it("cannot enable/disable SAND if not admin", async function () {
       const {userWithoutSAND, starterPackContractAsAdmin} = setUp;
       await starterPackContractAsAdmin.setSANDEnabled(false);
-      await expectRevert(
-        userWithoutSAND.StarterPack.setSANDEnabled(true),
-        "ONLY_ADMIN_CAN_SET_SAND_ENABLED_OR_DISABLED"
-      );
+      await expectRevert(userWithoutSAND.StarterPack.setSANDEnabled(true), "NOT_AUTHORIZED");
     });
   });
 
   describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
     let setUp;
+    let Message;
 
-    const Message = {
+    const TestMessage = {
       catalystIds: [0, 1, 2, 3],
       catalystQuantities: [1, 1, 1, 1],
       gemIds: [0, 1, 2, 3, 4],
@@ -85,6 +85,7 @@ function runSandTests() {
       setUp = await supplyStarterPack();
       const {starterPackContractAsAdmin} = setUp;
       await starterPackContractAsAdmin.setSANDEnabled(true);
+      Message = {...TestMessage};
     });
 
     it("if StarterpackV1.sol owns Catalysts & Gems then listed purchasers should be able to purchase with SAND with 1 Purchase event", async function () {
@@ -301,17 +302,21 @@ function runSandTests() {
     it("price change should be implemented after a delay", async function () {
       const {starterPackContractAsAdmin, userWithSAND} = setUp;
       Message.buyer = userWithSAND.address;
-      Message.nonce = 0;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await starterPackContractAsAdmin.setSANDEnabled(true);
-      const newPrices = [3, 5, 8, 13];
+      const newPrices = [
+        BigNumber.from(300).mul("1000000000000000000"),
+        BigNumber.from(500).mul("1000000000000000000"),
+        BigNumber.from(800).mul("1000000000000000000"),
+        BigNumber.from(1300).mul("1000000000000000000"),
+      ];
       await starterPackContractAsAdmin.setPrices(newPrices);
       // buyer should still pay the old price for 1 hour
       const receipt = await waitFor(
         userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature)
       );
       const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
-      const totalExpectedPrice = 1600;
+      const totalExpectedPrice = BigNumber.from(1600).mul("1000000000000000000");
       expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
 
       // fast-forward 1 hour. now buyer should pay the new price
@@ -322,7 +327,7 @@ function runSandTests() {
         userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature2)
       );
       const eventsMatching2 = receipt2.events.filter((event) => event.event === "Purchase");
-      const newTotalExpectedPrice = 29;
+      const newTotalExpectedPrice = BigNumber.from(2900).mul("1000000000000000000");
       expect(eventsMatching2[0].args[2]).to.equal(newTotalExpectedPrice);
     });
   });
