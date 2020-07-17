@@ -10,8 +10,9 @@ const {privateKey} = require("./_testHelper");
 function runDaiTests() {
   describe("StarterPack:PurchaseWithDAIEmptyStarterPack", function () {
     let setUp;
+    let Message;
 
-    const Message = {
+    const TestMessage = {
       catalystIds: [0, 1, 2, 3],
       catalystQuantities: [1, 1, 1, 1],
       gemIds: [0, 1, 2, 3, 4],
@@ -24,6 +25,7 @@ function runDaiTests() {
       setUp = await setupStarterPack();
       const {starterPackContractAsAdmin} = setUp;
       await starterPackContractAsAdmin.setDAIEnabled(true);
+      Message = {...TestMessage};
     });
 
     it("should revert if the user does not have enough DAI", async function () {
@@ -68,8 +70,9 @@ function runDaiTests() {
 
   describe("StarterPack:PurchaseWithDAISuppliedStarterPack", function () {
     let setUp;
+    let Message;
 
-    const Message = {
+    const TestMessage = {
       catalystIds: [0, 1, 2, 3],
       catalystQuantities: [1, 1, 1, 1],
       gemIds: [0, 1, 2, 3, 4],
@@ -82,6 +85,7 @@ function runDaiTests() {
       setUp = await supplyStarterPack();
       const {starterPackContractAsAdmin} = setUp;
       await starterPackContractAsAdmin.setDAIEnabled(true);
+      Message = {...TestMessage};
     });
 
     it("if StarterpackV1.sol owns Catalysts & Gems then listed purchasers should be able to purchase with DAI with 1 Purchase event", async function () {
@@ -298,7 +302,6 @@ function runDaiTests() {
     it("price change should be implemented after a delay", async function () {
       const {starterPackContractAsAdmin, userWithDAI} = setUp;
       Message.buyer = userWithDAI.address;
-      Message.nonce = 0;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await starterPackContractAsAdmin.setDAIEnabled(true);
       const newPrices = [
