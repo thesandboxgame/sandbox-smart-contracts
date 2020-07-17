@@ -1,4 +1,4 @@
-const {assert} = require("local-chai");
+const {assert, expect} = require("local-chai");
 const {utils, BigNumber} = require("ethers");
 const {expectRevert, zeroAddress, increaseTime} = require("local-utils");
 const {setupEstateSale} = require("./fixtures");
@@ -720,6 +720,96 @@ function runDaiTests(landSaleName) {
             }
           }
         }
+      });
+    });
+
+    describe("--> Tests with test LANDs for assets bundle", function () {
+      beforeEach(async function () {
+        initialSetUp = await setupEstateSale(landSaleName, "testLands");
+        const {LandSaleAdmin} = initialSetUp;
+        await LandSaleAdmin.EstateSale.setDAIEnabled(true);
+      });
+
+      it("can buy Land with assets", async function () {
+        const {lands, userWithDAI, tree, contracts} = initialSetUp;
+        const land = lands[5];
+        const proof = tree.getProof(calculateLandHash(land));
+
+        await userWithDAI.EstateSale.functions.buyLandWithDAI(
+          userWithDAI.address,
+          userWithDAI.address,
+          zeroAddress,
+          land.x,
+          land.y,
+          land.size,
+          land.price,
+          land.salt,
+          land.assetIds,
+          proof,
+          emptyReferral
+        );
+
+        const {asset} = contracts;
+        const balances = await asset.callStatic.balanceOfBatch(
+          land.assetIds.map(() => userWithDAI.address),
+          land.assetIds
+        );
+        expect(balances[0]).to.equal(1);
+      });
+
+      it("CANNOT buy Land with assets using zero asset", async function () {
+        const {lands, userWithDAI, tree} = initialSetUp;
+        const land = lands[5];
+        const proof = tree.getProof(calculateLandHash(land));
+
+        await expectRevert(
+          userWithDAI.EstateSale.functions.buyLandWithDAI(
+            userWithDAI.address,
+            userWithDAI.address,
+            zeroAddress,
+            land.x,
+            land.y,
+            land.size,
+            land.price,
+            land.salt,
+            [],
+            proof,
+            emptyReferral
+          ),
+          "Invalid land provided"
+        );
+      });
+
+      it("can withdraw asset token post sale from admin", async function () {
+        const {lands, userWithDAI, contracts} = initialSetUp;
+        const {asset, estateSale} = contracts;
+        const land = lands[5];
+        await increaseTime(60 * 60 + 1);
+        await estateSale.functions.withdrawAssets(
+          userWithDAI.address,
+          land.assetIds,
+          land.assetIds.map(() => 1)
+        );
+
+        const balances = await asset.callStatic.balanceOfBatch(
+          land.assetIds.map(() => userWithDAI.address),
+          land.assetIds
+        );
+        expect(balances[0]).to.equal(1);
+      });
+
+      it("CANNOT withdraw asset token post sale if not admin", async function () {
+        const {lands, userWithDAI} = initialSetUp;
+        const land = lands[5];
+        await increaseTime(60 * 60 + 1);
+        await expectRevert(
+          userWithDAI.EstateSale.functions.withdrawAssets(
+            userWithDAI.address,
+            land.assetIds,
+            land.assetIds.map(() => 1)
+          ),
+          "NOT_AUTHORIZED"
+        );
       });
     });
   });
