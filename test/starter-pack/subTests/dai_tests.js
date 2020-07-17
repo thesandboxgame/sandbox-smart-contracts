@@ -62,7 +62,7 @@ function runDaiTests() {
     it("cannot enable/disable DAI if not admin", async function () {
       const {userWithoutDAI, starterPackContractAsAdmin} = setUp;
       await starterPackContractAsAdmin.setDAIEnabled(false);
-      await expectRevert(userWithoutDAI.StarterPack.setDAIEnabled(true), "ONLY_ADMIN_CAN_SET_DAI_ENABLED_OR_DISABLED");
+      await expectRevert(userWithoutDAI.StarterPack.setDAIEnabled(true), "NOT_AUTHORIZED");
     });
   });
 

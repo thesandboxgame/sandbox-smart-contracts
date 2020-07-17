@@ -62,7 +62,7 @@ function runEtherTests() {
     it("cannot enable/disable ETH if not admin", async function () {
       const {users, starterPackContractAsAdmin} = setUp;
       await starterPackContractAsAdmin.setETHEnabled(false);
-      await expectRevert(users[0].StarterPack.setETHEnabled(true), "ONLY_ADMIN_CAN_SET_ETH_ENABLED_OR_DISABLED");
+      await expectRevert(users[0].StarterPack.setETHEnabled(true), "NOT_AUTHORIZED");
     });
   });
 
