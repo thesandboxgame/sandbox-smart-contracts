@@ -104,7 +104,7 @@ function runCommonTests() {
 
     it("cannot set prices if not admin", async function () {
       const {users} = setUp;
-      await expectRevert(users[0].StarterPack.setPrices([50, 60, 70, 80]), "ONLY_ADMIN_CAN_CHANGE_STARTERPACK_PRICES");
+      await expectRevert(users[0].StarterPack.setPrices([50, 60, 70, 80]), "NOT_AUTHORIZED");
     });
 
     it("can set prices if admin", async function () {
