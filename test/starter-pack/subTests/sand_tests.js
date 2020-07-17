@@ -62,10 +62,7 @@ function runSandTests() {
     it("cannot enable/disable SAND if not admin", async function () {
       const {userWithoutSAND, starterPackContractAsAdmin} = setUp;
       await starterPackContractAsAdmin.setSANDEnabled(false);
-      await expectRevert(
-        userWithoutSAND.StarterPack.setSANDEnabled(true),
-        "ONLY_ADMIN_CAN_SET_SAND_ENABLED_OR_DISABLED"
-      );
+      await expectRevert(userWithoutSAND.StarterPack.setSANDEnabled(true), "NOT_AUTHORIZED");
     });
   });
 
