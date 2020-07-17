@@ -55,20 +55,28 @@ function runCommonTests() {
     });
 
     it("user can check the balance of a catalyst ID owned by StarterPackV1", async function () {
-      const {userWithSAND} = await setUp;
-      const balance = await userWithSAND.StarterPack.checkCatalystBalance(0);
+      const {catalystContract, starterPackContract} = await setUp;
+      const balance = await catalystContract.balanceOf(starterPackContract.address, 0);
       expect(balance).to.equal(8);
     });
 
     it("user can check the balance of a gem ID owned by StarterPackV1", async function () {
-      const {userWithSAND} = await setUp;
-      const balance = await userWithSAND.StarterPack.checkGemBalance(1);
+      const {gemContract, starterPackContract} = await setUp;
+      const balance = await gemContract.balanceOf(starterPackContract.address, 1);
       expect(balance).to.equal(100);
     });
 
     it("user can check batch balances of catalyst IDs owned by StarterPackV1", async function () {
-      const {userWithSAND} = await setUp;
-      const balances = await userWithSAND.StarterPack.checkCatalystBatchBalances([0, 1, 2, 3]);
+      const {catalystContract, starterPackContract} = await setUp;
+      const balances = await catalystContract.balanceOfBatch(
+        [
+          starterPackContract.address,
+          starterPackContract.address,
+          starterPackContract.address,
+          starterPackContract.address,
+        ],
+        [0, 1, 2, 3]
+      );
       expect(balances[0]).to.equal(BigNumber.from(8));
       expect(balances[1]).to.equal(BigNumber.from(6));
       expect(balances[2]).to.equal(BigNumber.from(4));
@@ -76,12 +84,22 @@ function runCommonTests() {
     });
 
     it("user can check batch balances of gem IDs owned by StarterPackV1", async function () {
-      const {users} = await setUp;
-      const balances = await users[0].StarterPack.checkGemBatchBalances([0, 1, 2, 3]);
+      const {gemContract, starterPackContract} = await setUp;
+      const balances = await gemContract.balanceOfBatch(
+        [
+          starterPackContract.address,
+          starterPackContract.address,
+          starterPackContract.address,
+          starterPackContract.address,
+          starterPackContract.address,
+        ],
+        [0, 1, 2, 3, 4]
+      );
       expect(balances[0]).to.equal(BigNumber.from(100));
       expect(balances[1]).to.equal(BigNumber.from(100));
       expect(balances[2]).to.equal(BigNumber.from(100));
       expect(balances[3]).to.equal(BigNumber.from(100));
+      expect(balances[4]).to.equal(BigNumber.from(100));
     });
 
     it("cannot set prices if not admin", async function () {
