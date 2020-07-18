@@ -18,8 +18,6 @@ contract FeeDistributor {
     }
     mapping(address => AssetState) public assetsState;
 
-    // how many decimal points for precentage ?
-    // should we trust input (length)?
     constructor(address payable[] memory _recepients, uint256[] memory _precentages) public {
         require(_recepients.length == _precentages.length);
         for (uint256 i = 0; i < _recepients.length; i++) {

@@ -116,8 +116,6 @@ describe("FeeDistributor:ERC20", function () {
     let percentages = [10, 15, 25, 50];
     let feeDistContract = await initContract(recepients, percentages);
     let erc20Contract = await initERC20Contract();
-    // await fundContractWithTokenFees(feeDistContract.address, erc20Contract, amount);
-    // await testERC20FeeWithdrawal(recepients[0], percentages[0], amount, feeDistContract, erc20Contract);
     await expectRevert(
       feeDistContract.connect(ethers.provider.getSigner(recepients[0])).withdraw(erc20Contract.address),
       "Withdrawal of zero amount"
