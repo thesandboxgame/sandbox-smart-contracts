@@ -66,6 +66,16 @@ function runSandTests() {
       await starterPackContractAsAdmin.setSANDEnabled(false);
       await expectRevert(userWithoutSAND.StarterPack.setSANDEnabled(true), "NOT_AUTHORIZED");
     });
+
+    it("should revert if msg sender is not from or metaTX contract: SAND", async function () {
+      const {userWithSAND, userWithoutSAND} = setUp;
+      Message.buyer = userWithSAND.address;
+      const dummySignature = signPurchaseMessage(privateKey, Message);
+      await expectRevert(
+        userWithoutSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature),
+        "INVALID_SENDER"
+      );
+    });
   });
 
   describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
