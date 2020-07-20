@@ -316,7 +316,7 @@ function runSandTests() {
         userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature)
       );
       const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
-      const totalExpectedPrice = BigNumber.from(1600).mul("1000000000000000000");
+      const totalExpectedPrice = BigNumber.from(3749).mul("1000000000000000000");
       expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
 
       // fast-forward 1 hour. now buyer should pay the new price
