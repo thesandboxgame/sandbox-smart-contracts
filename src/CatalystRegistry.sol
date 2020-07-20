@@ -120,12 +120,7 @@ contract CatalystRegistry is Admin, CatalystValue {
     }
 
     // CONSTRUCTOR ////
-    constructor(
-        AssetToken asset,
-        CatalystValue catalystValue,
-        address admin
-    ) public {
-        _asset = asset;
+    constructor(CatalystValue catalystValue, address admin) public {
         _admin = admin;
         _catalystValue = catalystValue;
     }
@@ -139,7 +134,6 @@ contract CatalystRegistry is Admin, CatalystValue {
         uint64 set;
     }
     address internal _minter;
-    AssetToken internal immutable _asset;
     CatalystValue internal immutable _catalystValue;
     mapping(uint256 => CatalystStored) internal _catalysts;
 }
