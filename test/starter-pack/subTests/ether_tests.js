@@ -345,6 +345,86 @@ function runEtherTests() {
       const newTotalExpectedPrice = BigNumber.from(2900).mul("1000000000000000000");
       expect(eventsMatching2[0].args[2]).to.equal(newTotalExpectedPrice);
     });
+
+    it("withdrawAll withdraws all remaining tokens after purchases have occurred", async function () {
+      const {
+        users,
+        starterPackContractAsAdmin,
+        starterPackAdmin,
+        catalystContract,
+        gemContract,
+        starterPackContract,
+      } = setUp;
+
+      Message.buyer = users[0].address;
+
+      const dummySignature = signPurchaseMessage(privateKey, Message);
+
+      await users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
+        value: BigNumber.from(2).mul("1000000000000000000"),
+      });
+
+      await starterPackContractAsAdmin.withdrawAll(starterPackAdmin, [0, 1, 2, 3], [0, 1, 2, 3, 4]);
+
+      // catalyst remaining balances
+      const balanceCommonCatalystRemaining = await catalystContract.balanceOf(starterPackContract.address, 0);
+      expect(balanceCommonCatalystRemaining).to.equal(0);
+      const balanceRareCatalystRemaining = await catalystContract.balanceOf(starterPackContract.address, 1);
+      expect(balanceRareCatalystRemaining).to.equal(0);
+      const balanceRareEpicRemaining = await catalystContract.balanceOf(starterPackContract.address, 2);
+      expect(balanceRareEpicRemaining).to.equal(0);
+      const balanceLegendaryCatalystRemaining = await catalystContract.balanceOf(starterPackContract.address, 3);
+      expect(balanceLegendaryCatalystRemaining).to.equal(0);
+
+      // gem remaining balances
+      const balancePowerGemRemaining = await gemContract.balanceOf(starterPackContract.address, 0);
+      expect(balancePowerGemRemaining).to.equal(0);
+      const balanceDefenseGemRemaining = await gemContract.balanceOf(starterPackContract.address, 1);
+      expect(balanceDefenseGemRemaining).to.equal(0);
+      const balanceSpeedGemRemaining = await gemContract.balanceOf(starterPackContract.address, 2);
+      expect(balanceSpeedGemRemaining).to.equal(0);
+      const balanceMagicGemRemaining = await gemContract.balanceOf(starterPackContract.address, 3);
+      expect(balanceMagicGemRemaining).to.equal(0);
+      const balanceLuckGemRemaining = await gemContract.balanceOf(starterPackContract.address, 4);
+      expect(balanceLuckGemRemaining).to.equal(0);
+
+      // admin balances
+      const balanceCommonCatalyst = await catalystContract.balanceOf(starterPackAdmin, 0);
+      const balanceRareCatalyst = await catalystContract.balanceOf(starterPackAdmin, 1);
+      const balanceEpicCatalyst = await catalystContract.balanceOf(starterPackAdmin, 2);
+      const balanceLegendaryCatalyst = await catalystContract.balanceOf(starterPackAdmin, 3);
+      expect(balanceCommonCatalyst).to.equal(7);
+      expect(balanceRareCatalyst).to.equal(5);
+      expect(balanceEpicCatalyst).to.equal(3);
+      expect(balanceLegendaryCatalyst).to.equal(1);
+      const balancePowerGem = await gemContract.balanceOf(starterPackAdmin, 0);
+      const balanceDefenseGem = await gemContract.balanceOf(starterPackAdmin, 1);
+      const balanceSpeedGem = await gemContract.balanceOf(starterPackAdmin, 2);
+      const balanceMagicGem = await gemContract.balanceOf(starterPackAdmin, 3);
+      const balanceLuckGem = await gemContract.balanceOf(starterPackAdmin, 4);
+      expect(balancePowerGem).to.equal(98);
+      expect(balanceDefenseGem).to.equal(98);
+      expect(balanceSpeedGem).to.equal(98);
+      expect(balanceMagicGem).to.equal(98);
+      expect(balanceLuckGem).to.equal(98);
+    });
+
+    it("cannot withdrawAll after purchase if not admin", async function () {
+      const {users} = setUp;
+
+      Message.buyer = users[0].address;
+
+      const dummySignature = signPurchaseMessage(privateKey, Message);
+
+      await users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
+        value: BigNumber.from(2).mul("1000000000000000000"),
+      });
+
+      await expectRevert(
+        users[1].StarterPack.withdrawAll(users[1].address, [0, 1, 2, 3], [0, 1, 2, 3, 4]),
+        "NOT_AUTHORIZED"
+      );
+    });
   });
 }
 
