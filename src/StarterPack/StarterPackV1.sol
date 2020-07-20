@@ -109,6 +109,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         Message calldata message,
         bytes calldata signature
     ) external {
+        require(msg.sender == from || _metaTransactionContracts[msg.sender]);
         require(_sandEnabled, "SAND_IS_NOT_ENABLED");
         require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
         require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
@@ -137,6 +138,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         Message calldata message,
         bytes calldata signature
     ) external payable {
+        require(msg.sender == from || _metaTransactionContracts[msg.sender]);
         require(_etherEnabled, "ETHER_IS_NOT_ENABLED");
         require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
         require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
@@ -173,6 +175,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         Message calldata message,
         bytes calldata signature
     ) external {
+        require(msg.sender == from || _metaTransactionContracts[msg.sender]);
         require(_daiEnabled, "DAI_IS_NOT_ENABLED");
         require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
         require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
