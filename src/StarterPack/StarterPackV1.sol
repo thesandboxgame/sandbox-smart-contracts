@@ -138,7 +138,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         Message calldata message,
         bytes calldata signature
     ) external payable {
-        require(msg.sender == from || _metaTransactionContracts[msg.sender]);
+        require(msg.sender == from || _metaTransactionContracts[msg.sender], "INVALID_SENDER");
         require(_etherEnabled, "ETHER_IS_NOT_ENABLED");
         require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
         require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
@@ -175,7 +175,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         Message calldata message,
         bytes calldata signature
     ) external {
-        require(msg.sender == from || _metaTransactionContracts[msg.sender]);
+        require(msg.sender == from || _metaTransactionContracts[msg.sender], "INVALID_SENDER");
         require(_daiEnabled, "DAI_IS_NOT_ENABLED");
         require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
         require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
@@ -201,7 +201,11 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         emit Purchase(from, message, amountInSand, address(_dai), DAIRequired);
     }
 
-    function withdrawAll(address to, uint256[] calldata catalystIds, uint256[] calldata gemIds) external {
+    function withdrawAll(
+        address to,
+        uint256[] calldata catalystIds,
+        uint256[] calldata gemIds
+    ) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
 
         address[] memory catalystAddresses = new address[](catalystIds.length);
@@ -217,7 +221,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
         _erc20GroupCatalyst.batchTransferFrom(address(this), to, catalystIds, unsoldCatalystQuantities);
         _erc20GroupGem.batchTransferFrom(address(this), to, gemIds, unsoldGemQuantities);
-
     }
 
     function setPrices(uint256[] calldata prices) external {
