@@ -64,7 +64,11 @@ describe("PurchaseValidator", function () {
     });
 
     it("Should be possible to get the nonce for a buyer", async function () {
-      const nonce = await starterPack.getNonceByBuyer(buyer, 0);
+      // default queueId (0)
+      let nonce = await starterPack.getNonceByBuyer(buyer, 0);
+      assert.equal(nonce, 0);
+      // queueId (7)
+      nonce = await starterPack.getNonceByBuyer(buyer, 7);
       assert.equal(nonce, 0);
     });
 
