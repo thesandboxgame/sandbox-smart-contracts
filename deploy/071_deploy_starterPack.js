@@ -12,7 +12,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   }
 
   const metaTxContract = await deployments.getOrNull("NativeMetaTransactionProcessor");
-  if (!sandContract) {
+  if (!metaTxContract) {
     throw new Error("no META-TX contract deployed");
   }
 
@@ -50,7 +50,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     catalystGroup.address,
     gemGroup.address,
     backendMessageSigner,
-    starterPackPrices,
+    starterPackPrices
   );
 
   if (deployResult.newlyDeployed) {
