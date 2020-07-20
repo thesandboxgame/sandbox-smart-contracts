@@ -109,7 +109,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         Message calldata message,
         bytes calldata signature
     ) external {
-        require(msg.sender == from || _metaTransactionContracts[msg.sender]);
+        require(msg.sender == from || _metaTransactionContracts[msg.sender], "INVALID_SENDER");
         require(_sandEnabled, "SAND_IS_NOT_ENABLED");
         require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
         require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
@@ -179,7 +179,19 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         require(_daiEnabled, "DAI_IS_NOT_ENABLED");
         require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
         require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
-        require(isPurchaseValid(from, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.buyer, message.nonce, signature), "INVALID_PURCHASE");
+        require(
+            isPurchaseValid(
+                from,
+                message.catalystIds,
+                message.catalystQuantities,
+                message.gemIds,
+                message.gemQuantities,
+                message.buyer,
+                message.nonce,
+                signature
+            ),
+            "INVALID_PURCHASE"
+        );
 
         uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities);
         uint256 DAIRequired = amountInSand.mul(DAI_PRICE).div(1000000000000000000);
