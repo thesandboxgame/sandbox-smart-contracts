@@ -17,7 +17,6 @@ function runDaiTests() {
       catalystQuantities: [1, 1, 1, 1],
       gemIds: [0, 1, 2, 3, 4],
       gemQuantities: [2, 2, 2, 2, 2],
-      buyer: "",
       nonce: 0,
     };
 
@@ -30,9 +29,8 @@ function runDaiTests() {
 
     it("should revert if the user does not have enough DAI", async function () {
       const {userWithoutDAI, daiContract} = setUp;
-      Message.buyer = userWithoutDAI.address;
-      const dummySignature = signPurchaseMessage(privateKey, Message);
       const balance = await daiContract.balanceOf(userWithoutDAI.address);
+      const dummySignature = signPurchaseMessage(privateKey, Message);
       assert.ok(balance.eq(BigNumber.from(0)));
       await expectRevert(
         userWithoutDAI.StarterPack.purchaseWithDAI(userWithoutDAI.address, Message, dummySignature),
@@ -42,7 +40,6 @@ function runDaiTests() {
 
     it("purchase should revert if StarterpackV1.sol does not own any Catalysts & Gems", async function () {
       const {userWithDAI} = setUp;
-      Message.buyer = userWithDAI.address;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await expectRevert(
         userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature),
@@ -52,7 +49,6 @@ function runDaiTests() {
 
     it("should throw if DAI is not enabled", async function () {
       const {userWithDAI, starterPackContractAsAdmin} = setUp;
-      Message.buyer = userWithDAI.address;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await starterPackContractAsAdmin.setDAIEnabled(false);
       await expectRevert(
@@ -69,7 +65,6 @@ function runDaiTests() {
 
     it("should revert if msg sender is not from or metaTX contract: DAI", async function () {
       const {userWithDAI, userWithoutDAI} = setUp;
-      Message.buyer = userWithDAI.address;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await expectRevert(
         userWithoutDAI.StarterPack.purchaseWithSand(userWithDAI.address, Message, dummySignature),
@@ -87,7 +82,6 @@ function runDaiTests() {
       catalystQuantities: [1, 1, 1, 1],
       gemIds: [0, 1, 2, 3, 4],
       gemQuantities: [2, 2, 2, 2, 2],
-      buyer: "",
       nonce: 0,
     };
 
@@ -115,7 +109,6 @@ function runDaiTests() {
         starterPackContract,
         daiContract,
       } = await setUp;
-      Message.buyer = userWithDAI.address;
 
       const dummySignature = signPurchaseMessage(privateKey, Message);
 
@@ -125,7 +118,7 @@ function runDaiTests() {
       const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
       assert.equal(eventsMatching.length, 1);
 
-      // from
+      // buyer
       expect(eventsMatching[0].args[0]).to.equal(userWithDAI.address);
 
       // catalystIds
@@ -154,11 +147,8 @@ function runDaiTests() {
       expect(eventsMatching[0].args[1][3][3]).to.equal(2);
       expect(eventsMatching[0].args[1][3][4]).to.equal(2);
 
-      // buyer
-      expect(eventsMatching[0].args[1][4]).to.equal(userWithDAI.address);
-
       // nonce
-      expect(eventsMatching[0].args[1][5]).to.equal(0);
+      expect(eventsMatching[0].args[1][4]).to.equal(0);
 
       // token
       expect(eventsMatching[0].args[3]).to.equal(daiContract.address);
@@ -271,7 +261,6 @@ function runDaiTests() {
 
     it("purchase should invalidate the nonce after 1 use", async function () {
       const {userWithDAI, starterPackContract} = await setUp;
-      Message.buyer = userWithDAI.address;
 
       const dummySignature = signPurchaseMessage(privateKey, Message);
       const nonceBeforePurchase = await starterPackContract.getNonceByBuyer(userWithDAI.address, 0);
@@ -283,7 +272,6 @@ function runDaiTests() {
 
     it("purchase should fail if the nonce is reused", async function () {
       const {userWithDAI} = await setUp;
-      Message.buyer = userWithDAI.address;
 
       const dummySignature = signPurchaseMessage(privateKey, Message);
 
@@ -296,7 +284,6 @@ function runDaiTests() {
 
     it("sequential purchases should succeed with new nonce (as long as there are enough catalysts and gems)", async function () {
       const {userWithDAI} = await setUp;
-      Message.buyer = userWithDAI.address;
 
       let dummySignature = signPurchaseMessage(privateKey, Message);
 
@@ -311,7 +298,6 @@ function runDaiTests() {
 
     it("price change should be implemented after a delay", async function () {
       const {starterPackContractAsAdmin, userWithDAI} = setUp;
-      Message.buyer = userWithDAI.address;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await starterPackContractAsAdmin.setDAIEnabled(true);
       const newPrices = [
@@ -350,8 +336,6 @@ function runDaiTests() {
         gemContract,
         starterPackContract,
       } = setUp;
-
-      Message.buyer = userWithDAI.address;
 
       const dummySignature = signPurchaseMessage(privateKey, Message);
 
@@ -404,8 +388,6 @@ function runDaiTests() {
 
     it("cannot withdrawAll after purchase if not admin", async function () {
       const {users, userWithDAI} = setUp;
-
-      Message.buyer = userWithDAI.address;
 
       const dummySignature = signPurchaseMessage(privateKey, Message);
 
