@@ -66,6 +66,16 @@ function runDaiTests() {
       await starterPackContractAsAdmin.setDAIEnabled(false);
       await expectRevert(userWithoutDAI.StarterPack.setDAIEnabled(true), "NOT_AUTHORIZED");
     });
+
+    it("should revert if msg sender is not from or metaTX contract: DAI", async function () {
+      const {userWithDAI, userWithoutDAI} = setUp;
+      Message.buyer = userWithDAI.address;
+      const dummySignature = signPurchaseMessage(privateKey, Message);
+      await expectRevert(
+        userWithoutDAI.StarterPack.purchaseWithSand(userWithDAI.address, Message, dummySignature),
+        "INVALID_SENDER"
+      );
+    });
   });
 
   describe("StarterPack:PurchaseWithDAISuppliedStarterPack", function () {
