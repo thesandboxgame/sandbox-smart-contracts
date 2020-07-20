@@ -67,6 +67,16 @@ function runEtherTests() {
       await starterPackContractAsAdmin.setETHEnabled(false);
       await expectRevert(users[0].StarterPack.setETHEnabled(true), "NOT_AUTHORIZED");
     });
+
+    it("should revert if msg sender is not from or metaTX contract: ETH", async function () {
+      const {users} = setUp;
+      Message.buyer = users[0].address;
+      const dummySignature = signPurchaseMessage(privateKey, Message);
+      await expectRevert(
+        users[1].StarterPack.purchaseWithSand(users[0].address, Message, dummySignature),
+        "INVALID_SENDER"
+      );
+    });
   });
 
   describe("StarterPack:PurchaseWithETHSuppliedStarterPack", function () {
