@@ -186,10 +186,23 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         emit Purchase(from, message, amountInSand, address(_dai), DAIRequired);
     }
 
-    function withdrawAll(address to) external {
+    function withdrawAll(address to, uint256[] calldata catalystIds, uint256[] calldata gemIds) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
-        // TODO: withdrawal
-        // If curren token owner is address(this) then [batch]transfer ownership to new address
+
+        address[] memory catalystAddresses = new address[](catalystIds.length);
+        for (uint256 i = 0; i < catalystIds.length; i++) {
+            catalystAddresses[i] = address(this);
+        }
+        address[] memory gemAddresses = new address[](gemIds.length);
+        for (uint256 i = 0; i < gemIds.length; i++) {
+            gemAddresses[i] = address(this);
+        }
+        uint256[] memory unsoldCatalystQuantities = _erc20GroupCatalyst.balanceOfBatch(catalystAddresses, catalystIds);
+        uint256[] memory unsoldGemQuantities = _erc20GroupGem.balanceOfBatch(gemAddresses, gemIds);
+
+        _erc20GroupCatalyst.batchTransferFrom(address(this), to, catalystIds, unsoldCatalystQuantities);
+        _erc20GroupGem.batchTransferFrom(address(this), to, gemIds, unsoldGemQuantities);
+
     }
 
     function setPrices(uint256[] calldata prices) external {
