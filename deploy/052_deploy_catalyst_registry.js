@@ -10,7 +10,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     from: deployer,
     args: [
       catalyst.address,
-      deployer, // is to to catalystRegistryAdmin later
+      deployer, // is set to catalystRegistryAdmin later (see 810_set_catalystRegistry_admin.js)
     ],
     log: true,
   });
