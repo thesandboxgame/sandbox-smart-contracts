@@ -7,7 +7,7 @@ import "./CatalystValue.sol";
 contract CatalystDataBase is CatalystValue {
     event CatalystConfiguration(uint256 indexed id, uint16 minQuantity, uint16 maxQuantity, uint256 sandMintingFee, uint256 sandUpdateFee);
 
-    function _setMindData(uint256 id, MintData memory data) internal {
+    function _setMintData(uint256 id, MintData memory data) internal {
         _data[id] = data;
         _emitConfiguration(id, data.minQuantity, data.maxQuantity, data.sandMintingFee, data.sandUpdateFee);
     }
