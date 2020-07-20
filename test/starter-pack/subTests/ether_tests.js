@@ -16,7 +16,6 @@ function runEtherTests() {
       catalystQuantities: [10, 10, 10, 10],
       gemIds: [0, 1, 2, 3, 4],
       gemQuantities: [20, 20, 20, 20, 20],
-      buyer: "",
       nonce: 0,
     };
 
@@ -29,7 +28,6 @@ function runEtherTests() {
 
     it("should revert if the user does not have enough ETH", async function () {
       const {users} = setUp;
-      Message.buyer = users[0].address;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await expectRevert(
         users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {value: 0}),
@@ -39,7 +37,6 @@ function runEtherTests() {
 
     it("purchase should revert if StarterpackV1.sol does not own any Catalysts & Gems", async function () {
       const {users} = setUp;
-      Message.buyer = users[0].address;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await expectRevert(
         users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
@@ -51,7 +48,6 @@ function runEtherTests() {
 
     it("should throw if ETH is not enabled", async function () {
       const {users, starterPackContractAsAdmin} = setUp;
-      Message.buyer = users[0].address;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await starterPackContractAsAdmin.setETHEnabled(false);
       await expectRevert(
@@ -70,7 +66,6 @@ function runEtherTests() {
 
     it("should revert if msg sender is not from or metaTX contract: ETH", async function () {
       const {users} = setUp;
-      Message.buyer = users[0].address;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await expectRevert(
         users[1].StarterPack.purchaseWithSand(users[0].address, Message, dummySignature),
@@ -88,7 +83,6 @@ function runEtherTests() {
       catalystQuantities: [1, 1, 1, 1],
       gemIds: [0, 1, 2, 3, 4],
       gemQuantities: [2, 2, 2, 2, 2],
-      buyer: "",
       nonce: 0,
     };
 
@@ -115,7 +109,6 @@ function runEtherTests() {
         ERC20SubTokenLuck,
         starterPackContract,
       } = await setUp;
-      Message.buyer = users[0].address;
 
       const dummySignature = signPurchaseMessage(privateKey, Message);
 
@@ -127,7 +120,7 @@ function runEtherTests() {
       const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
       assert.equal(eventsMatching.length, 1);
 
-      // from
+      // buyer
       expect(eventsMatching[0].args[0]).to.equal(users[0].address);
 
       // catalystIds
@@ -156,11 +149,8 @@ function runEtherTests() {
       expect(eventsMatching[0].args[1][3][3]).to.equal(2);
       expect(eventsMatching[0].args[1][3][4]).to.equal(2);
 
-      // buyer
-      expect(eventsMatching[0].args[1][4]).to.equal(users[0].address);
-
       // nonce
-      expect(eventsMatching[0].args[1][5]).to.equal(0);
+      expect(eventsMatching[0].args[1][4]).to.equal(0);
 
       // token
       expect(eventsMatching[0].args[3]).to.equal(zeroAddress);
@@ -273,7 +263,6 @@ function runEtherTests() {
 
     it("purchase should invalidate the nonce after 1 use", async function () {
       const {users, starterPackContract} = await setUp;
-      Message.buyer = users[0].address;
 
       const dummySignature = signPurchaseMessage(privateKey, Message);
       const nonceBeforePurchase = await starterPackContract.getNonceByBuyer(users[0].address, 0);
@@ -287,7 +276,6 @@ function runEtherTests() {
 
     it("purchase should fail if the nonce is reused", async function () {
       const {users} = await setUp;
-      Message.buyer = users[0].address;
 
       const dummySignature = signPurchaseMessage(privateKey, Message);
 
@@ -304,7 +292,6 @@ function runEtherTests() {
 
     it("sequential purchases should succeed with new nonce (as long as there are enough catalysts and gems)", async function () {
       const {users} = await setUp;
-      Message.buyer = users[0].address;
 
       let dummySignature = signPurchaseMessage(privateKey, Message);
 
@@ -323,7 +310,6 @@ function runEtherTests() {
 
     it("price change should be implemented after a delay", async function () {
       const {starterPackContractAsAdmin, users} = setUp;
-      Message.buyer = users[0].address;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await starterPackContractAsAdmin.setETHEnabled(true);
       const newPrices = [
@@ -366,8 +352,6 @@ function runEtherTests() {
         gemContract,
         starterPackContract,
       } = setUp;
-
-      Message.buyer = users[0].address;
 
       const dummySignature = signPurchaseMessage(privateKey, Message);
 
@@ -422,8 +406,6 @@ function runEtherTests() {
 
     it("cannot withdrawAll after purchase if not admin", async function () {
       const {users} = setUp;
-
-      Message.buyer = users[0].address;
 
       const dummySignature = signPurchaseMessage(privateKey, Message);
 
