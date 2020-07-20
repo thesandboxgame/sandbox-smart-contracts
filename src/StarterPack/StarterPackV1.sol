@@ -42,7 +42,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     // Minimizes the effect of price changes on pending TXs
     uint256 private _priceChangeDelay = 1 hours;
 
-    event Purchase(address indexed from, Message, uint256 price, address token, uint256 amountPaid);
+    event Purchase(address indexed buyer, Message, uint256 price, address token, uint256 amountPaid);
 
     event SetPrices(uint256[] prices);
 
@@ -51,7 +51,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         uint256[] catalystQuantities;
         uint256[] gemIds;
         uint256[] gemQuantities;
-        address buyer;
         uint256 nonce;
     }
 
@@ -105,54 +104,36 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     function purchaseWithSand(
-        address from,
+        address buyer,
         Message calldata message,
         bytes calldata signature
     ) external {
-        require(msg.sender == from || _metaTransactionContracts[msg.sender], "INVALID_SENDER");
+        require(msg.sender == buyer || _metaTransactionContracts[msg.sender], "INVALID_SENDER");
         require(_sandEnabled, "SAND_IS_NOT_ENABLED");
-        require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
-        require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
+        require(buyer != address(0), "DESTINATION_ZERO_ADDRESS");
+        require(buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
         require(
-            isPurchaseValid(
-                from,
-                message.catalystIds,
-                message.catalystQuantities,
-                message.gemIds,
-                message.gemQuantities,
-                message.buyer,
-                message.nonce,
-                signature
-            ),
+            isPurchaseValid(buyer, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.nonce, signature),
             "INVALID_PURCHASE"
         );
         uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities);
-        _handlePurchaseWithERC20(message.buyer, _wallet, address(_sand), amountInSand);
-        _erc20GroupCatalyst.batchTransferFrom(address(this), message.buyer, message.catalystIds, message.catalystQuantities);
-        _erc20GroupGem.batchTransferFrom(address(this), message.buyer, message.gemIds, message.gemQuantities);
-        emit Purchase(from, message, amountInSand, address(_sand), amountInSand);
+        _handlePurchaseWithERC20(buyer, _wallet, address(_sand), amountInSand);
+        _erc20GroupCatalyst.batchTransferFrom(address(this), buyer, message.catalystIds, message.catalystQuantities);
+        _erc20GroupGem.batchTransferFrom(address(this), buyer, message.gemIds, message.gemQuantities);
+        emit Purchase(buyer, message, amountInSand, address(_sand), amountInSand);
     }
 
     function purchaseWithETH(
-        address from,
+        address buyer,
         Message calldata message,
         bytes calldata signature
     ) external payable {
-        require(msg.sender == from || _metaTransactionContracts[msg.sender], "INVALID_SENDER");
+        require(msg.sender == buyer || _metaTransactionContracts[msg.sender], "INVALID_SENDER");
         require(_etherEnabled, "ETHER_IS_NOT_ENABLED");
-        require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
-        require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
+        require(buyer != address(0), "DESTINATION_ZERO_ADDRESS");
+        require(buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
         require(
-            isPurchaseValid(
-                from,
-                message.catalystIds,
-                message.catalystQuantities,
-                message.gemIds,
-                message.gemQuantities,
-                message.buyer,
-                message.nonce,
-                signature
-            ),
+            isPurchaseValid(buyer, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.nonce, signature),
             "INVALID_PURCHASE"
         );
 
@@ -161,9 +142,9 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         require(msg.value >= ETHRequired, "NOT_ENOUGH_ETHER_SENT");
 
         _wallet.transfer(ETHRequired);
-        _erc20GroupCatalyst.batchTransferFrom(address(this), message.buyer, message.catalystIds, message.catalystQuantities);
-        _erc20GroupGem.batchTransferFrom(address(this), message.buyer, message.gemIds, message.gemQuantities);
-        emit Purchase(from, message, amountInSand, address(0), ETHRequired);
+        _erc20GroupCatalyst.batchTransferFrom(address(this), buyer, message.catalystIds, message.catalystQuantities);
+        _erc20GroupGem.batchTransferFrom(address(this), buyer, message.gemIds, message.gemQuantities);
+        emit Purchase(buyer, message, amountInSand, address(0), ETHRequired);
 
         if (msg.value - ETHRequired > 0) {
             msg.sender.transfer(msg.value - ETHRequired); // refund extra
@@ -171,34 +152,25 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     function purchaseWithDAI(
-        address from,
+        address buyer,
         Message calldata message,
         bytes calldata signature
     ) external {
-        require(msg.sender == from || _metaTransactionContracts[msg.sender], "INVALID_SENDER");
+        require(msg.sender == buyer || _metaTransactionContracts[msg.sender], "INVALID_SENDER");
         require(_daiEnabled, "DAI_IS_NOT_ENABLED");
-        require(message.buyer != address(0), "DESTINATION_ZERO_ADDRESS");
-        require(message.buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
+        require(buyer != address(0), "DESTINATION_ZERO_ADDRESS");
+        require(buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
         require(
-            isPurchaseValid(
-                from,
-                message.catalystIds,
-                message.catalystQuantities,
-                message.gemIds,
-                message.gemQuantities,
-                message.buyer,
-                message.nonce,
-                signature
-            ),
+            isPurchaseValid(buyer, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.nonce, signature),
             "INVALID_PURCHASE"
         );
 
         uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities);
         uint256 DAIRequired = amountInSand.mul(DAI_PRICE).div(1000000000000000000);
-        _handlePurchaseWithERC20(message.buyer, _wallet, address(_dai), DAIRequired);
-        _erc20GroupCatalyst.batchTransferFrom(address(this), message.buyer, message.catalystIds, message.catalystQuantities);
-        _erc20GroupGem.batchTransferFrom(address(this), message.buyer, message.gemIds, message.gemQuantities);
-        emit Purchase(from, message, amountInSand, address(_dai), DAIRequired);
+        _handlePurchaseWithERC20(buyer, _wallet, address(_dai), DAIRequired);
+        _erc20GroupCatalyst.batchTransferFrom(address(this), buyer, message.catalystIds, message.catalystQuantities);
+        _erc20GroupGem.batchTransferFrom(address(this), buyer, message.gemIds, message.gemQuantities);
+        emit Purchase(buyer, message, amountInSand, address(_dai), DAIRequired);
     }
 
     function withdrawAll(
