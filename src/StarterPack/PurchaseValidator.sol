@@ -17,30 +17,27 @@ contract PurchaseValidator is Admin {
 
     /**
      * @notice Check if a purchase message is valid
-     * @param from The tx sender
+     * @param buyer The end user making the purchase
      * @param catalystIds The catalyst IDs to be purchased
      * @param catalystQuantities The quantities of the catalysts to be purchased
      * @param gemIds The gem IDs to be purchased
      * @param gemQuantities The quantities of the gems to be purchased
-     * @param buyer The intended recipient of the purchased items
      * @param nonce The nonce to be incremented
      * @param signature A signed message specifying tx details
      * @return True if the purchase is valid
      */
     function isPurchaseValid(
-        address from,
+        address buyer,
         uint256[] memory catalystIds,
         uint256[] memory catalystQuantities,
         uint256[] memory gemIds,
         uint256[] memory gemQuantities,
-        address buyer,
         uint256 nonce,
         bytes memory signature
     ) public returns (bool) {
-        require(from == buyer, "INVALID_SENDER");
         require(_checkAndUpdateNonce(buyer, nonce), "INVALID_NONCE");
         require(_validateGemAmounts(catalystIds, catalystQuantities, gemQuantities), "INVALID_GEMS");
-        bytes32 hashedData = keccak256(abi.encodePacked(catalystIds, catalystQuantities, gemIds, gemQuantities, buyer, nonce));
+        bytes32 hashedData = keccak256(abi.encodePacked(catalystIds, catalystQuantities, gemIds, gemQuantities, nonce));
 
         address signer = SigUtil.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
         return signer == _signingWallet;
