@@ -34,7 +34,7 @@ function runSandTests() {
       assert.ok(balance.eq(BigNumber.from(0)));
       await expectRevert(
         userWithoutSAND.StarterPack.purchaseWithSand(userWithoutSAND.address, Message, dummySignature),
-        "not enough fund"
+        "not enough funds"
       );
     });
 
