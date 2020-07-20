@@ -129,6 +129,7 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
     ERC20SubTokenSpeed,
     ERC20SubTokenMagic,
     ERC20SubTokenLuck,
+    starterPackAdmin,
   };
 });
 
@@ -162,6 +163,7 @@ module.exports.supplyStarterPack = deployments.createFixture(async () => {
     ERC20SubTokenSpeed,
     ERC20SubTokenMagic,
     ERC20SubTokenLuck,
+    starterPackAdmin,
   } = setup;
   await setupSupply();
   return {
@@ -191,5 +193,6 @@ module.exports.supplyStarterPack = deployments.createFixture(async () => {
     ERC20SubTokenSpeed,
     ERC20SubTokenMagic,
     ERC20SubTokenLuck,
+    starterPackAdmin,
   };
 });
