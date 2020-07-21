@@ -9,63 +9,68 @@ describe("PurchaseValidator", function () {
   let message;
   let signature;
   let roles;
+  let buyer;
+  let Message;
 
   beforeEach(async function () {
     ({starterPackContract: starterPack} = await setupStarterPack());
     ({message, signature} = await getMsgAndSignature());
     roles = await getNamedAccounts();
+    buyer = roles.others[0];
+    Message = {...message};
   });
   describe("Validation", function () {
     it("Purchase validator function exists", async function () {
       assert.ok(
         await starterPack.isPurchaseValid(
-          message.buyer,
-          message.catalystIds,
-          message.catalystQuantities,
-          message.gemIds,
-          message.gemQuantities,
-          message.buyer,
-          message.nonce,
+          buyer,
+          Message.catalystIds,
+          Message.catalystQuantities,
+          Message.gemIds,
+          Message.gemQuantities,
+          Message.nonce,
           signature
         )
       );
     });
 
     it("the order of catalystIds should't matter", async function () {
-      message.catalystIds = [2, 3, 0, 1];
-      message.gemQuantities = [0, 0, 1, 1, 0];
+      Message.catalystIds = [2, 3, 0, 1];
+      Message.gemQuantities = [0, 0, 1, 1, 0];
       assert.ok(
         await starterPack.isPurchaseValid(
-          message.buyer,
-          message.catalystIds,
-          message.catalystQuantities,
-          message.gemIds,
-          message.gemQuantities,
-          message.buyer,
-          message.nonce,
+          buyer,
+          Message.catalystIds,
+          Message.catalystQuantities,
+          Message.gemIds,
+          Message.gemQuantities,
+          Message.nonce,
           signature
         )
       );
 
-      message.catalystIds = [3, 2, 1, 0];
-      message.catalystQuantities = [2, 1, 0, 3];
-      message.gemQuantities = [5, 2, 3, 1, 3];
+      Message.catalystIds = [3, 2, 1, 0];
+      Message.catalystQuantities = [2, 1, 0, 3];
+      Message.gemQuantities = [5, 2, 3, 1, 3];
       assert.ok(
         await starterPack.isPurchaseValid(
-          message.buyer,
-          message.catalystIds,
-          message.catalystQuantities,
-          message.gemIds,
-          message.gemQuantities,
-          message.buyer,
-          message.nonce + 1,
+          buyer,
+          Message.catalystIds,
+          Message.catalystQuantities,
+          Message.gemIds,
+          Message.gemQuantities,
+          Message.nonce + 1,
           signature
         )
       );
     });
 
     it("Should be possible to get the nonce for a buyer", async function () {
-      const nonce = await starterPack.getNonceByBuyer(message.buyer, 0);
+      // default queueId (0)
+      let nonce = await starterPack.getNonceByBuyer(buyer, 0);
+      assert.equal(nonce, 0);
+      // queueId (7)
+      nonce = await starterPack.getNonceByBuyer(buyer, 7);
       assert.equal(nonce, 0);
     });
 
@@ -86,76 +91,56 @@ describe("PurchaseValidator", function () {
   });
 
   describe("Failures", function () {
-    it("should fail if the from address does not match", async function () {
+    it("should fail if the nonce is re-used", async function () {
       ({starterPackContract: starterPack} = await setupStarterPack());
-      const wrongFromAddress = roles.others[1];
+      assert.ok(
+        await starterPack.isPurchaseValid(
+          buyer,
+          Message.catalystIds,
+          Message.catalystQuantities,
+          Message.gemIds,
+          Message.gemQuantities,
+          Message.nonce,
+          signature
+        )
+      );
+
       await expectRevert(
         starterPack.isPurchaseValid(
-          wrongFromAddress,
-          message.catalystIds,
-          message.catalystQuantities,
-          message.gemIds,
-          message.gemQuantities,
-          message.buyer,
-          message.nonce,
+          buyer,
+          Message.catalystIds,
+          Message.catalystQuantities,
+          Message.gemIds,
+          Message.gemQuantities,
+          Message.nonce,
           signature
         ),
-        "INVALID_SENDER"
+        "INVALID_NONCE"
       );
     });
-  });
-  it("should fail if the nonce is re-used", async function () {
-    ({starterPackContract: starterPack} = await setupStarterPack());
-    assert.ok(
-      await starterPack.isPurchaseValid(
-        message.buyer,
-        message.catalystIds,
-        message.catalystQuantities,
-        message.gemIds,
-        message.gemQuantities,
-        message.buyer,
-        message.nonce,
-        signature
-      )
-    );
 
-    await expectRevert(
-      starterPack.isPurchaseValid(
-        message.buyer,
-        message.catalystIds,
-        message.catalystQuantities,
-        message.gemIds,
-        message.gemQuantities,
-        message.buyer,
-        message.nonce,
-        signature
-      ),
-      "INVALID_NONCE"
-    );
-  });
-
-  it("should fail if too many gems are requested", async function () {
-    ({starterPackContract: starterPack} = await setupStarterPack());
-    message.catalystQuantities = [1, 1, 1, 1];
-    // total gems allowed is max 10
-    message.gemQuantities = [3, 2, 4, 2, 3];
-    await expectRevert(
-      starterPack.isPurchaseValid(
-        message.buyer,
-        message.catalystIds,
-        message.catalystQuantities,
-        message.gemIds,
-        message.gemQuantities,
-        message.buyer,
-        message.nonce,
-        signature
-      ),
-      "INVALID_GEMS"
-    );
-  });
-  it("Should fail if anyone but Admin tries to update signing wallet", async function () {
-    const {starterPackContract: starterPack} = await setupStarterPack();
-    const newSigner = roles.others[0];
-    await expectRevert(starterPack.updateSigningWallet(newSigner), "SENDER_NOT_ADMIN");
+    it("should fail if too many gems are requested", async function () {
+      ({starterPackContract: starterPack} = await setupStarterPack());
+      Message.catalystQuantities = [1, 1, 1, 1];
+      // total gems allowed is max 10
+      Message.gemQuantities = [3, 2, 4, 2, 3];
+      await expectRevert(
+        starterPack.isPurchaseValid(
+          buyer,
+          Message.catalystIds,
+          Message.catalystQuantities,
+          Message.gemIds,
+          Message.gemQuantities,
+          Message.nonce,
+          signature
+        ),
+        "INVALID_GEMS"
+      );
+    });
+    it("Should fail if anyone but Admin tries to update signing wallet", async function () {
+      const {starterPackContract: starterPack} = await setupStarterPack();
+      const newSigner = roles.others[0];
+      await expectRevert(starterPack.updateSigningWallet(newSigner), "SENDER_NOT_ADMIN");
+    });
   });
 });

@@ -17,7 +17,6 @@ function runSandTests() {
       catalystQuantities: [1, 1, 1, 1],
       gemIds: [0, 1, 2, 3, 4],
       gemQuantities: [2, 2, 2, 2, 2],
-      buyer: "",
       nonce: 0,
     };
 
@@ -30,7 +29,6 @@ function runSandTests() {
 
     it("should revert if the user does not have enough SAND", async function () {
       const {userWithoutSAND, sandContract} = setUp;
-      Message.buyer = userWithoutSAND.address;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       const balance = await sandContract.balanceOf(userWithoutSAND.address);
       assert.ok(balance.eq(BigNumber.from(0)));
@@ -42,7 +40,6 @@ function runSandTests() {
 
     it("purchase should revert if StarterpackV1.sol does not own any Catalysts & Gems", async function () {
       const {userWithSAND} = setUp;
-      Message.buyer = userWithSAND.address;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await expectRevert(
         userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature),
@@ -52,7 +49,6 @@ function runSandTests() {
 
     it("should throw if SAND is not enabled", async function () {
       const {userWithSAND, starterPackContractAsAdmin} = setUp;
-      Message.buyer = userWithSAND.address;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await starterPackContractAsAdmin.setSANDEnabled(false);
       await expectRevert(
@@ -66,6 +62,15 @@ function runSandTests() {
       await starterPackContractAsAdmin.setSANDEnabled(false);
       await expectRevert(userWithoutSAND.StarterPack.setSANDEnabled(true), "NOT_AUTHORIZED");
     });
+
+    it("should revert if msg sender is not from or metaTX contract: SAND", async function () {
+      const {userWithSAND, userWithoutSAND} = setUp;
+      const dummySignature = signPurchaseMessage(privateKey, Message);
+      await expectRevert(
+        userWithoutSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature),
+        "INVALID_SENDER"
+      );
+    });
   });
 
   describe("StarterPack:PurchaseWithSandSuppliedStarterPack", function () {
@@ -77,7 +82,6 @@ function runSandTests() {
       catalystQuantities: [1, 1, 1, 1],
       gemIds: [0, 1, 2, 3, 4],
       gemQuantities: [2, 2, 2, 2, 2],
-      buyer: "",
       nonce: 0,
     };
 
@@ -105,7 +109,6 @@ function runSandTests() {
         starterPackContract,
         sandContract,
       } = await setUp;
-      Message.buyer = userWithSAND.address;
 
       const dummySignature = signPurchaseMessage(privateKey, Message);
 
@@ -115,7 +118,7 @@ function runSandTests() {
       const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
       assert.equal(eventsMatching.length, 1);
 
-      // from
+      // buyer
       expect(eventsMatching[0].args[0]).to.equal(userWithSAND.address);
 
       // catalystIds
@@ -144,11 +147,8 @@ function runSandTests() {
       expect(eventsMatching[0].args[1][3][3]).to.equal(2);
       expect(eventsMatching[0].args[1][3][4]).to.equal(2);
 
-      // buyer
-      expect(eventsMatching[0].args[1][4]).to.equal(userWithSAND.address);
-
       // nonce
-      expect(eventsMatching[0].args[1][5]).to.equal(0);
+      expect(eventsMatching[0].args[1][4]).to.equal(0);
 
       // token
       expect(eventsMatching[0].args[3]).to.equal(sandContract.address);
@@ -261,7 +261,6 @@ function runSandTests() {
 
     it("purchase should invalidate the nonce after 1 use", async function () {
       const {userWithSAND, starterPackContract} = await setUp;
-      Message.buyer = userWithSAND.address;
 
       const dummySignature = signPurchaseMessage(privateKey, Message);
       const nonceBeforePurchase = await starterPackContract.getNonceByBuyer(userWithSAND.address, 0);
@@ -273,7 +272,6 @@ function runSandTests() {
 
     it("purchase should fail if the nonce is reused", async function () {
       const {userWithSAND} = await setUp;
-      Message.buyer = userWithSAND.address;
 
       const dummySignature = signPurchaseMessage(privateKey, Message);
 
@@ -286,7 +284,6 @@ function runSandTests() {
 
     it("sequential purchases should succeed with new nonce (as long as there are enough catalysts and gems)", async function () {
       const {userWithSAND} = await setUp;
-      Message.buyer = userWithSAND.address;
 
       let dummySignature = signPurchaseMessage(privateKey, Message);
 
@@ -301,7 +298,6 @@ function runSandTests() {
 
     it("price change should be implemented after a delay", async function () {
       const {starterPackContractAsAdmin, userWithSAND} = setUp;
-      Message.buyer = userWithSAND.address;
       const dummySignature = signPurchaseMessage(privateKey, Message);
       await starterPackContractAsAdmin.setSANDEnabled(true);
       const newPrices = [
@@ -340,8 +336,6 @@ function runSandTests() {
         gemContract,
         starterPackContract,
       } = setUp;
-
-      Message.buyer = userWithSAND.address;
 
       const dummySignature = signPurchaseMessage(privateKey, Message);
 
@@ -394,8 +388,6 @@ function runSandTests() {
 
     it("cannot withdrawAll after purchase if not admin", async function () {
       const {users, userWithSAND} = setUp;
-
-      Message.buyer = userWithSAND.address;
 
       const dummySignature = signPurchaseMessage(privateKey, Message);
 
