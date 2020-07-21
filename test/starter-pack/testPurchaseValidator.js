@@ -127,7 +127,7 @@ describe("PurchaseValidator", function () {
     });
 
     it("should fail if too many gems are requested", async function () {
-      ({starterPackContract: starterPack} = await setupStarterPack());
+      const {starterPackContract: starterPack} = await setupStarterPack();
       Message.catalystQuantities = [1, 1, 1, 1];
       // total gems allowed is max 10
       Message.gemQuantities = [3, 2, 4, 2, 3];
@@ -143,6 +143,24 @@ describe("PurchaseValidator", function () {
           dummySignature
         ),
         "INVALID_GEMS"
+      );
+    });
+
+    it("should fail if catalystIds are out of range", async function () {
+      const {starterPackContract: starterPack} = await setupStarterPack();
+      Message.catalystIds = [5, 6, 7, 8];
+      const dummySignature = signPurchaseMessage(privateKey, Message);
+      await expectRevert(
+        starterPack.isPurchaseValid(
+          buyer,
+          Message.catalystIds,
+          Message.catalystQuantities,
+          Message.gemIds,
+          Message.gemQuantities,
+          Message.nonce,
+          dummySignature
+        ),
+        "ID_OUT_OF_BOUNDS"
       );
     });
 
