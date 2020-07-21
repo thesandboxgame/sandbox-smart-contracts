@@ -10,54 +10,56 @@ describe("PurchaseValidator", function () {
   let signature;
   let roles;
   let buyer;
+  let Message;
 
   beforeEach(async function () {
     ({starterPackContract: starterPack} = await setupStarterPack());
     ({message, signature} = await getMsgAndSignature());
     roles = await getNamedAccounts();
     buyer = roles.others[0];
+    Message = {...message};
   });
   describe("Validation", function () {
     it("Purchase validator function exists", async function () {
       assert.ok(
         await starterPack.isPurchaseValid(
           buyer,
-          message.catalystIds,
-          message.catalystQuantities,
-          message.gemIds,
-          message.gemQuantities,
-          message.nonce,
+          Message.catalystIds,
+          Message.catalystQuantities,
+          Message.gemIds,
+          Message.gemQuantities,
+          Message.nonce,
           signature
         )
       );
     });
 
     it("the order of catalystIds should't matter", async function () {
-      message.catalystIds = [2, 3, 0, 1];
-      message.gemQuantities = [0, 0, 1, 1, 0];
+      Message.catalystIds = [2, 3, 0, 1];
+      Message.gemQuantities = [0, 0, 1, 1, 0];
       assert.ok(
         await starterPack.isPurchaseValid(
           buyer,
-          message.catalystIds,
-          message.catalystQuantities,
-          message.gemIds,
-          message.gemQuantities,
-          message.nonce,
+          Message.catalystIds,
+          Message.catalystQuantities,
+          Message.gemIds,
+          Message.gemQuantities,
+          Message.nonce,
           signature
         )
       );
 
-      message.catalystIds = [3, 2, 1, 0];
-      message.catalystQuantities = [2, 1, 0, 3];
-      message.gemQuantities = [5, 2, 3, 1, 3];
+      Message.catalystIds = [3, 2, 1, 0];
+      Message.catalystQuantities = [2, 1, 0, 3];
+      Message.gemQuantities = [5, 2, 3, 1, 3];
       assert.ok(
         await starterPack.isPurchaseValid(
           buyer,
-          message.catalystIds,
-          message.catalystQuantities,
-          message.gemIds,
-          message.gemQuantities,
-          message.nonce + 1,
+          Message.catalystIds,
+          Message.catalystQuantities,
+          Message.gemIds,
+          Message.gemQuantities,
+          Message.nonce + 1,
           signature
         )
       );
@@ -94,11 +96,11 @@ describe("PurchaseValidator", function () {
       assert.ok(
         await starterPack.isPurchaseValid(
           buyer,
-          message.catalystIds,
-          message.catalystQuantities,
-          message.gemIds,
-          message.gemQuantities,
-          message.nonce,
+          Message.catalystIds,
+          Message.catalystQuantities,
+          Message.gemIds,
+          Message.gemQuantities,
+          Message.nonce,
           signature
         )
       );
@@ -106,11 +108,11 @@ describe("PurchaseValidator", function () {
       await expectRevert(
         starterPack.isPurchaseValid(
           buyer,
-          message.catalystIds,
-          message.catalystQuantities,
-          message.gemIds,
-          message.gemQuantities,
-          message.nonce,
+          Message.catalystIds,
+          Message.catalystQuantities,
+          Message.gemIds,
+          Message.gemQuantities,
+          Message.nonce,
           signature
         ),
         "INVALID_NONCE"
@@ -119,17 +121,17 @@ describe("PurchaseValidator", function () {
 
     it("should fail if too many gems are requested", async function () {
       ({starterPackContract: starterPack} = await setupStarterPack());
-      message.catalystQuantities = [1, 1, 1, 1];
+      Message.catalystQuantities = [1, 1, 1, 1];
       // total gems allowed is max 10
-      message.gemQuantities = [3, 2, 4, 2, 3];
+      Message.gemQuantities = [3, 2, 4, 2, 3];
       await expectRevert(
         starterPack.isPurchaseValid(
           buyer,
-          message.catalystIds,
-          message.catalystQuantities,
-          message.gemIds,
-          message.gemQuantities,
-          message.nonce,
+          Message.catalystIds,
+          Message.catalystQuantities,
+          Message.gemIds,
+          Message.gemQuantities,
+          Message.nonce,
           signature
         ),
         "INVALID_GEMS"
