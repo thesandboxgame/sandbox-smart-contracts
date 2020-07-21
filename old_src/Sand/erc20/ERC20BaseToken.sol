@@ -148,7 +148,7 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
     ) internal {
         require(to != address(0), "Cannot send to 0x0");
         uint256 currentBalance = _balances[from];
-        require(currentBalance >= amount, "not enough funds");
+        require(currentBalance >= amount, "not enough fund");
         _balances[from] = currentBalance - amount;
         _balances[to] += amount;
         emit Transfer(from, to, amount);
