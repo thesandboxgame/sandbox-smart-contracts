@@ -259,7 +259,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     /// @dev function to determine whether to use old or new prices
-    /// @return array of new prices
+    /// @return array of prices
     function _priceSelector() internal returns (uint256[] memory) {
         uint256[] memory prices;
         // No price change:
