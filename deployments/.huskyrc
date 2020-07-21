@@ -1,5 +1,5 @@
 {
   "hooks": {
-    "pre-push": "yarn prettier"
+    "pre-push": "npm prettier"
   }
 }
