@@ -11,7 +11,6 @@ import "../Catalyst/ERC20GroupGem.sol";
 import "./PurchaseValidator.sol";
 
 
-
 /// @title StarterPack contract that supports SAND, DAI and ETH as payment
 /// @notice This contract manages the purchase and distribution of StarterPacks (bundles of Catalysts and Gems)
 contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
@@ -235,7 +234,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     // ////////////////////////// Internal ////////////////////////
-
 
     /// @dev Gets the ETHUSD pair from the Medianizer contract
     /// @return The pair as an uint256
