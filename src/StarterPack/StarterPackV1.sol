@@ -11,10 +11,9 @@ import "../Catalyst/ERC20GroupGem.sol";
 import "./PurchaseValidator.sol";
 
 
-/**
- * @title StarterPack contract that supports SAND, DAI and ETH as payment
- * @notice This contract manages the distribution of StarterPacks for Catalysts and Gems
- */
+
+/// @title StarterPack contract that supports SAND, DAI and ETH as payment
+/// @notice This contract manages the purchase and distribution of StarterPacks (bundles of Catalysts and Gems)
 contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     using SafeMathWithRequire for uint256;
     uint256 internal constant DAI_PRICE = 14400000000000000;
@@ -103,6 +102,10 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         return _sandEnabled;
     }
 
+    /// @dev purchase StarterPacks with SAND
+    /// @param buyer the destination address for the purchased Catalysts and Gems
+    /// @param message a message containing information about the Catalysts and Gems to be purchased
+    /// @param signature a signed message specifying tx details
     function purchaseWithSand(
         address buyer,
         Message calldata message,
@@ -122,6 +125,10 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         emit Purchase(buyer, message, amountInSand, address(_sand), amountInSand);
     }
 
+    /// @dev purchase StarterPacks with Ether
+    /// @param buyer the destination address for the purchased Catalysts and Gems
+    /// @param message a message containing information about the Catalysts and Gems to be purchased
+    /// @param signature a signed message specifying tx details
     function purchaseWithETH(
         address buyer,
         Message calldata message,
@@ -150,6 +157,10 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         }
     }
 
+    /// @dev purchase StarterPacks with DAI
+    /// @param buyer the destination address for the purchased Catalysts and Gems
+    /// @param message a message containing information about the Catalysts and Gems to be purchased
+    /// @param signature a signed message specifying tx details
     function purchaseWithDAI(
         address buyer,
         Message calldata message,
@@ -172,6 +183,10 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         emit Purchase(buyer, message, amountInSand, address(_dai), DAIRequired);
     }
 
+    /// @dev enables admin to withdraw all remaining tokens
+    /// @param to the destination address for the purchased Catalysts and Gems
+    /// @param catalystIds the IDs of the catalysts to be transferred
+    /// @param gemIds the IDs of the gems to be transferred
     function withdrawAll(
         address to,
         uint256[] calldata catalystIds,
@@ -194,6 +209,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _erc20GroupGem.batchTransferFrom(address(this), to, gemIds, unsoldGemQuantities);
     }
 
+    /// @dev enables admin to change the prices of the StarterPack bundles
+    /// @param prices array of new prices that wil take effect after a delay period
     function setPrices(uint256[] calldata prices) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
         _previousStarterPackPrices = _starterPackPrices;
@@ -202,15 +219,16 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         emit SetPrices(prices);
     }
 
+    /// @dev get current StarterPack prices
+    /// @return prices array of prices
     function getStarterPackPrices() external view returns (uint256[] memory prices) {
         return _starterPackPrices;
     }
 
-    /**
-     * @notice Returns the amount of ETH for a specific amount of SAND
-     * @param sandAmount An amount of SAND
-     * @return The amount of ETH
-     */
+  
+    /// @notice Returns the amount of ETH for a specific amount of SAND
+    /// @param sandAmount An amount of SAND
+    /// @return The amount of ETH
     function getEtherAmountWithSAND(uint256 sandAmount) public view returns (uint256) {
         uint256 ethUsdPair = _getEthUsdPair();
         return sandAmount.mul(DAI_PRICE).div(ethUsdPair);
@@ -218,15 +236,17 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     // ////////////////////////// Internal ////////////////////////
 
-    /**
-     * @notice Gets the ETHUSD pair from the Medianizer contract
-     * @return The pair as an uint256
-     */
+
+    /// @dev Gets the ETHUSD pair from the Medianizer contract
+    /// @return The pair as an uint256
     function _getEthUsdPair() internal view returns (uint256) {
         bytes32 pair = _medianizer.read();
         return uint256(pair);
     }
 
+    /// @dev function to calculate the total price in SAND of the StarterPacks to be purchased 
+    /// @dev the price of each StarterPack relates to the catalystId
+    /// @return total price in SAND
     function _calculateTotalPriceInSand(uint256[] memory catalystIds, uint256[] memory catalystQuantities) internal returns (uint256) {
         uint256[] memory prices = _priceSelector();
         uint256 totalPrice;
@@ -238,8 +258,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         return totalPrice;
     }
 
-    // @dev function to determine whether to use old or
-    // new prices
+    /// @dev function to determine whether to use old or new prices
+    /// @return array of new prices
     function _priceSelector() internal returns (uint256[] memory) {
         uint256[] memory prices;
         // No price change:
@@ -258,6 +278,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         return prices;
     }
 
+    /// @dev function to handle purchase with SAND or DAI
     function _handlePurchaseWithERC20(
         address buyer,
         address payable paymentRecipient,
