@@ -1,6 +1,7 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
+
 interface CatalystToken {
     function getValues(
         uint256 catalystId,
