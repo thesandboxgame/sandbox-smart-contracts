@@ -33,6 +33,7 @@
     "ganache-cli": "^6.9.1",
     "googleapis": "^47.0.0",
     "graphql": "^15.1.0",
+    "husky": "^4.2.5",
     "js-sha256": "^0.9.0",
     "minimist": "^1.2.0",
     "mocha": "^7.1.1",
