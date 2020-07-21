@@ -11,13 +11,11 @@ describe("PurchaseValidator", function () {
   let buyer;
   let Message;
 
-  const TestMessage = {
+  const message = {
     catalystIds: [0, 1, 2, 3],
     catalystQuantities: [1, 1, 1, 1],
     gemIds: [0, 1, 2, 3, 4],
     gemQuantities: [2, 2, 2, 2, 2],
-    // @review !
-    buyer: "",
     nonce: 0,
   };
 
@@ -39,7 +37,7 @@ describe("PurchaseValidator", function () {
           Message.gemIds,
           Message.gemQuantities,
           Message.nonce,
-          signature
+          dummySignature
         )
       );
     });
@@ -47,6 +45,7 @@ describe("PurchaseValidator", function () {
     it("the order of catalystIds should't matter", async function () {
       Message.catalystIds = [2, 3, 0, 1];
       Message.gemQuantities = [0, 0, 1, 1, 0];
+      const dummySignature = signPurchaseMessage(privateKey, Message);
       assert.ok(
         await starterPack.isPurchaseValid(
           buyer,
@@ -55,7 +54,7 @@ describe("PurchaseValidator", function () {
           Message.gemIds,
           Message.gemQuantities,
           Message.nonce,
-          signature
+          dummySignature
         )
       );
 
@@ -70,7 +69,7 @@ describe("PurchaseValidator", function () {
           Message.gemIds,
           Message.gemQuantities,
           Message.nonce + 1,
-          signature
+          dummySignature
         )
       );
     });
@@ -100,6 +99,7 @@ describe("PurchaseValidator", function () {
   describe("Failures", function () {
     it("should fail if the nonce is re-used", async function () {
       ({starterPackContract: starterPack} = await setupStarterPack());
+      const dummySignature = signPurchaseMessage(privateKey, Message);
       assert.ok(
         await starterPack.isPurchaseValid(
           buyer,
@@ -108,7 +108,7 @@ describe("PurchaseValidator", function () {
           Message.gemIds,
           Message.gemQuantities,
           Message.nonce,
-          signature
+          dummySignature
         )
       );
 
@@ -120,7 +120,7 @@ describe("PurchaseValidator", function () {
           Message.gemIds,
           Message.gemQuantities,
           Message.nonce,
-          signature
+          dummySignature
         ),
         "INVALID_NONCE"
       );
@@ -131,6 +131,7 @@ describe("PurchaseValidator", function () {
       Message.catalystQuantities = [1, 1, 1, 1];
       // total gems allowed is max 10
       Message.gemQuantities = [3, 2, 4, 2, 3];
+      const dummySignature = signPurchaseMessage(privateKey, Message);
       await expectRevert(
         starterPack.isPurchaseValid(
           buyer,
@@ -139,74 +140,16 @@ describe("PurchaseValidator", function () {
           Message.gemIds,
           Message.gemQuantities,
           Message.nonce,
-          signature
+          dummySignature
         ),
         "INVALID_GEMS"
       );
     });
+
     it("Should fail if anyone but Admin tries to update signing wallet", async function () {
       const {starterPackContract: starterPack} = await setupStarterPack();
       const newSigner = roles.others[0];
       await expectRevert(starterPack.updateSigningWallet(newSigner), "SENDER_NOT_ADMIN");
     });
-  });
-
-  it("should fail if the nonce is re-used", async function () {
-    ({starterPackContract: starterPack} = await setupStarterPack());
-    Message.buyer = roles.others[1];
-    const dummySignature = signPurchaseMessage(privateKey, Message);
-    assert.ok(
-      await starterPack.isPurchaseValid(
-        Message.buyer,
-        Message.catalystIds,
-        Message.catalystQuantities,
-        Message.gemIds,
-        Message.gemQuantities,
-        Message.buyer,
-        Message.nonce,
-        dummySignature
-      )
-    );
-
-    await expectRevert(
-      starterPack.isPurchaseValid(
-        Message.buyer,
-        Message.catalystIds,
-        Message.catalystQuantities,
-        Message.gemIds,
-        Message.gemQuantities,
-        Message.buyer,
-        Message.nonce,
-        dummySignature
-      ),
-      "INVALID_NONCE"
-    );
-  });
-
-  it("should fail if too many gems are requested", async function () {
-    ({starterPackContract: starterPack} = await setupStarterPack());
-    Message.catalystQuantities = [1, 1, 1, 1];
-    // total gems allowed is max 10
-    Message.gemQuantities = [3, 2, 4, 2, 3];
-    Message.buyer = roles.others[1];
-    const dummySignature = signPurchaseMessage(privateKey, Message);
-    await expectRevert(
-      starterPack.isPurchaseValid(
-        Message.buyer,
-        Message.catalystIds,
-        Message.catalystQuantities,
-        Message.gemIds,
-        Message.gemQuantities,
-        Message.buyer,
-        Message.nonce,
-        dummySignature
-      ),
-      "INVALID_GEMS"
-    );
-  });
-  it("Should fail if anyone but Admin tries to update signing wallet", async function () {
-    const {starterPackContract: starterPack} = await setupStarterPack();
-    const newSigner = roles.others[0];
-    await expectRevert(starterPack.updateSigningWallet(newSigner), "SENDER_NOT_ADMIN");
   });
 });
