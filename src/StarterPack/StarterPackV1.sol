@@ -111,7 +111,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         require(msg.sender == buyer || _metaTransactionContracts[msg.sender], "INVALID_SENDER");
         require(_sandEnabled, "SAND_IS_NOT_ENABLED");
         require(buyer != address(0), "DESTINATION_ZERO_ADDRESS");
-        require(buyer != address(this), "DESTINATION_STARTERPACKV1_CONTRACT");
         require(
             isPurchaseValid(buyer, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.nonce, signature),
             "INVALID_PURCHASE"
