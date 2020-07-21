@@ -15,4 +15,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     log: true,
   });
 };
-module.exports.skip = guard(["1", "314159"]); // TODO enable for mainnet
+module.exports.skip = guard(["1", "314159", "4"], "CatalystRegistry");

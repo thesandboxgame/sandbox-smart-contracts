@@ -48,6 +48,11 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
 
   const {lands, merkleRootHash, saltedLands, tree} = getLands(network.live, chainId);
 
+  let expiry = 1586869200; // Tuesday, 14 April 2020 13:00:00 GMT+00:00
+  if (chainId == "4") {
+    expiry = 1626795341; // Tuesday, 20 July 2021 15:35:41 GMT+00:00
+  }
+
   const deployResult = await deployIfDifferent(
     ["data"],
     "LandPreSale_3",
@@ -59,7 +64,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     deployer,
     landSaleBeneficiary,
     merkleRootHash,
-    1586869200, // Tuesday, 14 April 2020 13:00:00 GMT+00:00
+    expiry,
     daiMedianizer.address,
     dai.address,
     backendReferralWallet,
