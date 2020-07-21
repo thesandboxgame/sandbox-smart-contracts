@@ -2,62 +2,68 @@ pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
 import "../contracts_common/src/interfaces/ERC20.sol";
-import "../contracts_common/src/Libraries/SafeMath.sol";
+import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
 
 
 contract FeeDistributor {
-    using SafeMath for uint256;
+    using SafeMathWithRequire for uint256;
 
-    event Deposit(address asset, address from, uint256 amount);
-    event Withdrawl(address asset, address to, uint256 amount);
+    event Deposit(address token, address from, uint256 amount);
+    event Withdrawl(ERC20 token, address to, uint256 amount);
     mapping(address => uint256) public recepientsShares;
-    struct AssetState {
+    struct TokenState {
         uint256 totalReceived;
         mapping(address => uint256) amountAlreadyGiven;
         uint256 lastBalance;
     }
-    mapping(address => AssetState) public assetsState;
+    mapping(address => TokenState) private _tokensState;
 
-    constructor(address payable[] memory _recepients, uint256[] memory _precentages) public {
-        require(_recepients.length == _precentages.length);
-        for (uint256 i = 0; i < _recepients.length; i++) {
-            recepientsShares[_recepients[i]] = _precentages[i];
+    constructor(address payable[] memory recepients, uint256[] memory precentages) public {
+        require(recepients.length == precentages.length);
+        for (uint256 i = 0; i < recepients.length; i++) {
+            recepientsShares[recepients[i]] = precentages[i];
         }
     }
 
-    function withdraw(address _asset) external {
-        uint256 amount;
-        if (_asset == address(0)) {
+    function withdraw(ERC20 token) external returns (uint256 amount) {
+        if (address(token) == address(0)) {
             amount = etherWithdrawal();
         } else {
-            amount = tokenWithdrawal(_asset);
+            amount = tokenWithdrawal(token);
         }
-        emit Withdrawl(_asset, msg.sender, amount);
+        emit Withdrawl(token, msg.sender, amount);
     }
 
     function etherWithdrawal() private returns (uint256) {
         uint256 amount = calculateWithdrawalAmount(address(this).balance, address(0));
-        msg.sender.transfer(amount);
+        if (amount > 0) {
+            msg.sender.transfer(amount);
+        }
         return amount;
     }
 
-    function tokenWithdrawal(address _token) private returns (uint256) {
-        uint256 amount = calculateWithdrawalAmount(ERC20(_token).balanceOf(address(this)), _token);
-        require(ERC20(_token).transfer(msg.sender, amount));
+    function tokenWithdrawal(ERC20 token) private returns (uint256) {
+        uint256 amount = calculateWithdrawalAmount(ERC20(token).balanceOf(address(this)), address(token));
+        if (amount > 0) {
+            require(ERC20(token).transfer(msg.sender, amount));
+        }
         return amount;
     }
 
-    function calculateWithdrawalAmount(uint256 _currentBalance, address _asset) private returns (uint256) {
-        uint256 totalReceived = assetsState[_asset].totalReceived;
-        uint256 lastBalance = assetsState[_asset].lastBalance;
-        uint256 amountAlreadyGiven = assetsState[_asset].amountAlreadyGiven[msg.sender];
+    function calculateWithdrawalAmount(uint256 currentBalance, address token) private returns (uint256) {
+        uint256 totalReceived = _tokensState[token].totalReceived;
+        uint256 lastBalance = _tokensState[token].lastBalance;
+        uint256 amountAlreadyGiven = _tokensState[token].amountAlreadyGiven[msg.sender];
+        uint256 _currentBalance = currentBalance;
         totalReceived = totalReceived.add(_currentBalance.sub(lastBalance));
-        assetsState[_asset].totalReceived = totalReceived;
-        uint256 amountDue = ((totalReceived.mul(recepientsShares[msg.sender])).div(100)).sub(amountAlreadyGiven);
-        require(amountDue > 0, "Withdrawal of zero amount");
+        _tokensState[token].totalReceived = totalReceived;
+        uint256 amountDue = ((totalReceived.mul(recepientsShares[msg.sender])).div(10000)).sub(amountAlreadyGiven);
+        if (amountDue == 0) {
+            return amountDue;
+        }
         amountAlreadyGiven = amountAlreadyGiven.add(amountDue);
-        assetsState[_asset].amountAlreadyGiven[msg.sender] = amountAlreadyGiven;
-        assetsState[_asset].lastBalance = _currentBalance.sub(amountDue);
+        _tokensState[token].amountAlreadyGiven[msg.sender] = amountAlreadyGiven;
+        _tokensState[token].lastBalance = _currentBalance.sub(amountDue);
         return amountDue;
     }
 
