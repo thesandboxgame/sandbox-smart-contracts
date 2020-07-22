@@ -223,7 +223,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         return _starterPackPrices;
     }
 
-  
     /// @notice Returns the amount of ETH for a specific amount of SAND
     /// @param sandAmount An amount of SAND
     /// @return The amount of ETH
@@ -241,7 +240,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         return uint256(pair);
     }
 
-    /// @dev Function to calculate the total price in SAND of the StarterPacks to be purchased 
+    /// @dev Function to calculate the total price in SAND of the StarterPacks to be purchased
     /// @dev The price of each StarterPack relates to the catalystId
     /// @param catalystIds Array of catalystIds to be purchase
     /// @param catalystQuantities Array of quantities of those catalystIds to be purchased
