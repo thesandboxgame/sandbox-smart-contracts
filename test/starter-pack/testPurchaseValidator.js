@@ -28,7 +28,7 @@ describe("PurchaseValidator", function () {
   describe("Validation", function () {
     it("Purchase validator function exists", async function () {
       Message.buyer = roles.others[1];
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, buyer);
       assert.ok(
         await starterPack.isPurchaseValid(
           buyer,
@@ -45,7 +45,7 @@ describe("PurchaseValidator", function () {
     it("the order of catalystIds should't matter", async function () {
       Message.catalystIds = [2, 3, 0, 1];
       Message.gemQuantities = [0, 0, 1, 1, 0];
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, buyer);
       assert.ok(
         await starterPack.isPurchaseValid(
           buyer,
@@ -99,7 +99,7 @@ describe("PurchaseValidator", function () {
   describe("Failures", function () {
     it("should fail if the nonce is re-used", async function () {
       ({starterPackContract: starterPack} = await setupStarterPack());
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, buyer);
       assert.ok(
         await starterPack.isPurchaseValid(
           buyer,
@@ -131,7 +131,7 @@ describe("PurchaseValidator", function () {
       Message.catalystQuantities = [1, 1, 1, 1];
       // total gems allowed is max 10
       Message.gemQuantities = [3, 2, 4, 2, 3];
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, buyer);
       await expectRevert(
         starterPack.isPurchaseValid(
           buyer,

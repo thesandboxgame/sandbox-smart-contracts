@@ -29,7 +29,7 @@ function runSandTests() {
 
     it("should revert if the user does not have enough SAND", async function () {
       const {userWithoutSAND, sandContract} = setUp;
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithoutSAND.address);
       const balance = await sandContract.balanceOf(userWithoutSAND.address);
       assert.ok(balance.eq(BigNumber.from(0)));
       await expectRevert(
@@ -40,7 +40,7 @@ function runSandTests() {
 
     it("purchase should revert if StarterpackV1.sol does not own any Catalysts & Gems", async function () {
       const {userWithSAND} = setUp;
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithSAND.address);
       await expectRevert(
         userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature),
         "can't substract more than there is"
@@ -49,7 +49,7 @@ function runSandTests() {
 
     it("should throw if SAND is not enabled", async function () {
       const {userWithSAND, starterPackContractAsAdmin} = setUp;
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithSAND.address);
       await starterPackContractAsAdmin.setSANDEnabled(false);
       await expectRevert(
         userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature),
@@ -65,7 +65,7 @@ function runSandTests() {
 
     it("should revert if msg sender is not from or metaTX contract: SAND", async function () {
       const {userWithSAND, userWithoutSAND} = setUp;
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithoutSAND.address);
       await expectRevert(
         userWithoutSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature),
         "INVALID_SENDER"
@@ -110,7 +110,7 @@ function runSandTests() {
         sandContract,
       } = await setUp;
 
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithSAND.address);
 
       const receipt = await waitFor(
         userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature)
@@ -262,7 +262,7 @@ function runSandTests() {
     it("purchase should invalidate the nonce after 1 use", async function () {
       const {userWithSAND, starterPackContract} = await setUp;
 
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithSAND.address);
       const nonceBeforePurchase = await starterPackContract.getNonceByBuyer(userWithSAND.address, 0);
       expect(nonceBeforePurchase).to.equal(0);
       await userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature);
@@ -273,7 +273,7 @@ function runSandTests() {
     it("purchase should fail if the nonce is reused", async function () {
       const {userWithSAND} = await setUp;
 
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithSAND.address);
 
       await userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature);
       await expectRevert(
@@ -285,20 +285,20 @@ function runSandTests() {
     it("sequential purchases should succeed with new nonce (as long as there are enough catalysts and gems)", async function () {
       const {userWithSAND} = await setUp;
 
-      let dummySignature = signPurchaseMessage(privateKey, Message);
+      let dummySignature = signPurchaseMessage(privateKey, Message, userWithSAND.address);
 
       await userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature);
 
       Message.nonce++;
 
-      dummySignature = signPurchaseMessage(privateKey, Message);
+      dummySignature = signPurchaseMessage(privateKey, Message, userWithSAND.address);
 
       await userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature);
     });
 
     it("price change should be implemented after a delay", async function () {
       const {starterPackContractAsAdmin, userWithSAND} = setUp;
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithSAND.address);
       await starterPackContractAsAdmin.setSANDEnabled(true);
       const newPrices = [
         BigNumber.from(300).mul("1000000000000000000"),
@@ -318,7 +318,7 @@ function runSandTests() {
       // fast-forward 1 hour. now buyer should pay the new price
       await increaseTime(60 * 60);
       Message.nonce++;
-      const dummySignature2 = signPurchaseMessage(privateKey, Message);
+      const dummySignature2 = signPurchaseMessage(privateKey, Message, userWithSAND.address);
       const receipt2 = await waitFor(
         userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature2)
       );
@@ -337,7 +337,7 @@ function runSandTests() {
         starterPackContract,
       } = setUp;
 
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithSAND.address);
 
       await userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature);
 
@@ -389,7 +389,7 @@ function runSandTests() {
     it("cannot withdrawAll after purchase if not admin", async function () {
       const {users, userWithSAND} = setUp;
 
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithSAND.address);
 
       await userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature);
 
