@@ -28,7 +28,7 @@ function runEtherTests() {
 
     it("should revert if the user does not have enough ETH", async function () {
       const {users} = setUp;
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, users[0].address);
       await expectRevert(
         users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {value: 0}),
         "NOT_ENOUGH_ETHER_SENT"
@@ -37,7 +37,7 @@ function runEtherTests() {
 
     it("purchase should revert if StarterpackV1.sol does not own any Catalysts & Gems", async function () {
       const {users} = setUp;
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, users[0].address);
       await expectRevert(
         users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
           value: BigNumber.from(4).mul("1000000000000000000"),
@@ -48,7 +48,7 @@ function runEtherTests() {
 
     it("should throw if ETH is not enabled", async function () {
       const {users, starterPackContractAsAdmin} = setUp;
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, users[0].address);
       await starterPackContractAsAdmin.setETHEnabled(false);
       await expectRevert(
         users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
@@ -66,7 +66,7 @@ function runEtherTests() {
 
     it("should revert if msg sender is not from or metaTX contract: ETH", async function () {
       const {users} = setUp;
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, users[0].address);
       await expectRevert(
         users[1].StarterPack.purchaseWithSand(users[0].address, Message, dummySignature),
         "INVALID_SENDER"
@@ -110,7 +110,7 @@ function runEtherTests() {
         starterPackContract,
       } = await setUp;
 
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, users[0].address);
 
       const receipt = await waitFor(
         users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
@@ -264,7 +264,7 @@ function runEtherTests() {
     it("purchase should invalidate the nonce after 1 use", async function () {
       const {users, starterPackContract} = await setUp;
 
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, users[0].address);
       const nonceBeforePurchase = await starterPackContract.getNonceByBuyer(users[0].address, 0);
       expect(nonceBeforePurchase).to.equal(0);
       await users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
@@ -277,7 +277,7 @@ function runEtherTests() {
     it("purchase should fail if the nonce is reused", async function () {
       const {users} = await setUp;
 
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, users[0].address);
 
       await users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
         value: BigNumber.from(4).mul("1000000000000000000"),
@@ -293,7 +293,7 @@ function runEtherTests() {
     it("sequential purchases should succeed with new nonce (as long as there are enough catalysts and gems)", async function () {
       const {users} = await setUp;
 
-      let dummySignature = signPurchaseMessage(privateKey, Message);
+      let dummySignature = signPurchaseMessage(privateKey, Message, users[0].address);
 
       await users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
         value: BigNumber.from(4).mul("1000000000000000000"),
@@ -301,7 +301,7 @@ function runEtherTests() {
 
       Message.nonce++;
 
-      dummySignature = signPurchaseMessage(privateKey, Message);
+      dummySignature = signPurchaseMessage(privateKey, Message, users[0].address);
 
       await users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
         value: BigNumber.from(4).mul("1000000000000000000"),
@@ -310,7 +310,7 @@ function runEtherTests() {
 
     it("price change should be implemented after a delay", async function () {
       const {starterPackContractAsAdmin, users} = setUp;
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, users[0].address);
       await starterPackContractAsAdmin.setETHEnabled(true);
       const newPrices = [
         BigNumber.from(300).mul("1000000000000000000"),
@@ -332,7 +332,7 @@ function runEtherTests() {
       // fast-forward 1 hour. now buyer should pay the new price
       await increaseTime(60 * 60);
       Message.nonce++;
-      const dummySignature2 = signPurchaseMessage(privateKey, Message);
+      const dummySignature2 = signPurchaseMessage(privateKey, Message, users[0].address);
       const receipt2 = await waitFor(
         users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature2, {
           value: BigNumber.from(4).mul("1000000000000000000"),
@@ -353,7 +353,7 @@ function runEtherTests() {
         starterPackContract,
       } = setUp;
 
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, users[0].address);
 
       await users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
         value: BigNumber.from(4).mul("1000000000000000000"),
@@ -407,7 +407,7 @@ function runEtherTests() {
     it("cannot withdrawAll after purchase if not admin", async function () {
       const {users} = setUp;
 
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, users[0].address);
 
       await users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
         value: BigNumber.from(4).mul("1000000000000000000"),
