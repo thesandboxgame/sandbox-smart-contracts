@@ -103,12 +103,9 @@ contract CatalystRegistry is Admin, CatalystValue {
         if (catalyst.set != 0) {
             return (catalyst.emptySockets, catalyst.index, seed);
         }
-        if (assetId & IS_NFT != 0) {
-            seed = _getCollectionId(assetId);
-            catalyst = _catalysts[seed];
-            return (catalyst.emptySockets, catalyst.index, seed);
-        }
-        return (0, 0, seed); // Should not reach here
+        seed = _getCollectionId(assetId);
+        catalyst = _catalysts[seed];
+        return (catalyst.emptySockets, catalyst.index, seed);
     }
 
     function _getBlockNumber() internal view returns (uint64 blockNumber) {
