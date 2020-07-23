@@ -571,6 +571,80 @@ describe("Catalyst:Minting", function () {
     expect(values[2]).to.be.within(1, 25);
   });
 
+  it("creator mint Legendart NFT Asset And new owner set Legendary catalyst with new gems: get correct values", async function () {
+    const {creator, user, catalystRegistry} = await setupCatalystUsers();
+    const originalGemIds = [PowerGem, SpeedGem, SpeedGem, LuckGem];
+    const quantity = 1;
+    const {tokenId, receipt: originalReceipt} = await creator.mintAsset({
+      catalyst: LegendaryCatalyst,
+      gemIds: originalGemIds,
+      quantity,
+      to: user.address,
+    });
+
+    const originalCatalystAppliedEvent = (
+      await findEvents(catalystRegistry, "CatalystApplied", originalReceipt.blockHash)
+    )[0];
+    expect(originalCatalystAppliedEvent.args.seed).to.equal(tokenId);
+
+    const {receipt} = await user.changeCatalyst(tokenId, {
+      catalyst: LegendaryCatalyst,
+      gemIds: [PowerGem, MagicGem, LuckGem, LuckGem],
+    });
+
+    const catalystAppliedEvent = (await findEvents(catalystRegistry, "CatalystApplied", receipt.blockHash))[0];
+    expect(catalystAppliedEvent.args.seed).to.equal(tokenId);
+
+    await mine(); // future block need to be mined to get the value
+    const values = await getValues({
+      assetId: tokenId,
+      tokenId,
+      fromBlockHash: receipt.blockHash,
+      catalystRegistry,
+    });
+    expect(values).to.have.lengthOf(4);
+    expect(values[0]).to.be.within(1, 25);
+    expect(values[1]).to.be.within(1, 25);
+    expect(values[2]).to.equal(25);
+    expect(values[3]).to.be.within(1, 25);
+  });
+
+  it("creator mint Legendart NFT Asset and new owner add new gems: get correct values", async function () {
+    const {creator, user, catalystRegistry} = await setupCatalystUsers();
+    const originalGemIds = [PowerGem, SpeedGem];
+    const quantity = 1;
+    const {tokenId, receipt: originalReceipt} = await creator.mintAsset({
+      catalyst: LegendaryCatalyst,
+      gemIds: originalGemIds,
+      quantity,
+      to: user.address,
+    });
+
+    const originalCatalystAppliedEvent = (
+      await findEvents(catalystRegistry, "CatalystApplied", originalReceipt.blockHash)
+    )[0];
+    expect(originalCatalystAppliedEvent.args.seed).to.equal(tokenId);
+
+    const newGemIds = [SpeedGem];
+    const {receipt} = await user.addGems(tokenId, {newGemIds});
+
+    const catalystAppliedEvent = (await findEvents(catalystRegistry, "CatalystApplied", originalReceipt.blockHash))[0];
+    const gemsAddedEvent = (await findEvents(catalystRegistry, "GemsAdded", receipt.blockHash))[0];
+    expect(gemsAddedEvent.args.seed).to.equal(catalystAppliedEvent.args.seed);
+
+    await mine(); // future block need to be mined to get the value
+    const values = await getValues({
+      assetId: tokenId,
+      tokenId,
+      fromBlockHash: originalReceipt.blockHash,
+      catalystRegistry,
+    });
+    expect(values).to.have.lengthOf(3);
+    expect(values[0]).to.be.within(1, 25);
+    expect(values[1]).to.equal(25);
+    expect(values[2]).to.be.within(1, 25);
+  });
+
   it("creator mint Epic Asset And new owner set Legendary catalyst and add gems: get correct values", async function () {
     const {creator, user, catalystRegistry} = await setupCatalystUsers();
     const originalGemIds = [PowerGem, SpeedGem];
