@@ -8,7 +8,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   const sand = await deployments.get("Sand");
 
   const catalystGroup = await deploy("Catalyst", {
-    contractName: "ERC20GroupCatalyst",
+    contract: "ERC20GroupCatalyst",
     from: deployer,
     gas: 3000000,
     log: true,
@@ -26,7 +26,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       const contractName = `${catalyst.name}Catalyst`;
       const tokenSymbol = catalyst.symbol;
       const result = await deploy(contractName, {
-        contractName: "ERC20SubToken",
+        contract: "ERC20SubToken",
         from: deployer,
         gas: 3000000,
         log: true,
