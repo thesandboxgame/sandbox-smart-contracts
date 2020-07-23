@@ -12,6 +12,8 @@ import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
 
 
 contract ERC20Group is SuperOperators, MetaTransactionReceiver {
+    uint256 internal constant MAX_UINT256 = ~uint256(0);
+
     /// @notice emitted when a new Token is added to the group.
     /// @param subToken the token added, its id will be its index in the array.
     event SubToken(ERC20SubToken subToken);
@@ -50,7 +52,8 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     ) external {
         require(_minters[msg.sender], "NOT_AUTHORIZED_MINTER");
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
-        _packedTokenBalance[to][bin] = _packedTokenBalance[to][bin].updateTokenBalance(index, amount, ObjectLib32.Operations.ADD);
+        mapping(uint256 => uint256) storage toPack = _packedTokenBalance[to];
+        toPack[bin] = toPack[bin].updateTokenBalance(index, amount, ObjectLib32.Operations.ADD);
         _packedSupplies[bin] = _packedSupplies[bin].updateTokenBalance(index, amount, ObjectLib32.Operations.ADD);
         _erc20s[id].emitTransferEvent(address(0), to, amount);
     }
@@ -74,20 +77,21 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         uint256[] memory ids,
         uint256[] memory amounts
     ) internal {
-        uint256 lastBin = ~uint256(0);
+        uint256 lastBin = MAX_UINT256;
         uint256 bal = 0;
         uint256 supply = 0;
+        mapping(uint256 => uint256) storage toPack = _packedTokenBalance[to];
         for (uint256 i = 0; i < ids.length; i++) {
             if (amounts[i] != 0) {
                 (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
-                if (lastBin == ~uint256(0)) {
+                if (lastBin == MAX_UINT256) {
                     lastBin = bin;
-                    bal = _packedTokenBalance[to][bin].updateTokenBalance(index, amounts[i], ObjectLib32.Operations.ADD);
+                    bal = toPack[bin].updateTokenBalance(index, amounts[i], ObjectLib32.Operations.ADD);
                     supply = _packedSupplies[bin].updateTokenBalance(index, amounts[i], ObjectLib32.Operations.ADD);
                 } else {
                     if (bin != lastBin) {
-                        _packedTokenBalance[to][lastBin] = bal;
-                        bal = _packedTokenBalance[to][bin];
+                        toPack[lastBin] = bal;
+                        bal = toPack[bin];
                         _packedSupplies[lastBin] = supply;
                         supply = _packedSupplies[bin];
                         lastBin = bin;
@@ -98,8 +102,8 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
                 _erc20s[ids[i]].emitTransferEvent(address(0), to, amounts[i]);
             }
         }
-        if (lastBin != ~uint256(0)) {
-            _packedTokenBalance[to][lastBin] = bal;
+        if (lastBin != MAX_UINT256) {
+            toPack[lastBin] = bal;
             _packedSupplies[lastBin] = supply;
         }
     }
@@ -131,7 +135,6 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         for (uint256 i = 0; i < ids.length; i++) {
             balances[i] = balanceOf(owners[i], ids[i]);
         }
-        return balances;
     }
 
     /// @notice transfer a number of subToken from one address to another.
@@ -157,8 +160,10 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
         );
 
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
-        _packedTokenBalance[from][bin] = _packedTokenBalance[from][bin].updateTokenBalance(index, value, ObjectLib32.Operations.SUB);
-        _packedTokenBalance[to][bin] = _packedTokenBalance[to][bin].updateTokenBalance(index, value, ObjectLib32.Operations.ADD);
+        mapping(uint256 => uint256) storage fromPack = _packedTokenBalance[from];
+        mapping(uint256 => uint256) storage toPack = _packedTokenBalance[to];
+        fromPack[bin] = fromPack[bin].updateTokenBalance(index, value, ObjectLib32.Operations.SUB);
+        toPack[bin] = toPack[bin].updateTokenBalance(index, value, ObjectLib32.Operations.ADD);
         erc20.emitTransferEvent(from, to, value);
     }
 
@@ -179,23 +184,33 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
             from == msg.sender || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender] || _metaTransactionContracts[msg.sender],
             "NOT_AUTHORIZED"
         );
+        _batchTransferFrom(from, to, ids, values);
+    }
 
-        uint256 lastBin = ~uint256(0);
+    function _batchTransferFrom(
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory values
+    ) internal {
+        uint256 lastBin = MAX_UINT256;
         uint256 balFrom;
         uint256 balTo;
+        mapping(uint256 => uint256) storage fromPack = _packedTokenBalance[from];
+        mapping(uint256 => uint256) storage toPack = _packedTokenBalance[to];
         for (uint256 i = 0; i < ids.length; i++) {
             if (values[i] != 0) {
                 (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
-                if (lastBin == ~uint256(0)) {
+                if (lastBin == MAX_UINT256) {
                     lastBin = bin;
-                    balFrom = ObjectLib32.updateTokenBalance(_packedTokenBalance[from][bin], index, values[i], ObjectLib32.Operations.SUB);
-                    balTo = ObjectLib32.updateTokenBalance(_packedTokenBalance[to][bin], index, values[i], ObjectLib32.Operations.ADD);
+                    balFrom = ObjectLib32.updateTokenBalance(fromPack[bin], index, values[i], ObjectLib32.Operations.SUB);
+                    balTo = ObjectLib32.updateTokenBalance(toPack[bin], index, values[i], ObjectLib32.Operations.ADD);
                 } else {
                     if (bin != lastBin) {
-                        _packedTokenBalance[from][lastBin] = balFrom;
-                        _packedTokenBalance[to][lastBin] = balTo;
-                        balFrom = _packedTokenBalance[from][bin];
-                        balTo = _packedTokenBalance[to][bin];
+                        fromPack[lastBin] = balFrom;
+                        toPack[lastBin] = balTo;
+                        balFrom = fromPack[bin];
+                        balTo = toPack[bin];
                         lastBin = bin;
                     }
                     balFrom = balFrom.updateTokenBalance(index, values[i], ObjectLib32.Operations.SUB);
@@ -205,9 +220,9 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
                 erc20.emitTransferEvent(from, to, values[i]);
             }
         }
-        if (lastBin != ~uint256(0)) {
-            _packedTokenBalance[from][lastBin] = balFrom;
-            _packedTokenBalance[to][lastBin] = balTo;
+        if (lastBin != MAX_UINT256) {
+            fromPack[lastBin] = balFrom;
+            toPack[lastBin] = balTo;
         }
     }
 
@@ -293,18 +308,19 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     ) internal {
         uint256 balFrom = 0;
         uint256 supply = 0;
-        uint256 lastBin = ~uint256(0);
+        uint256 lastBin = MAX_UINT256;
+        mapping(uint256 => uint256) storage fromPack = _packedTokenBalance[from];
         for (uint256 i = 0; i < ids.length; i++) {
             if (amounts[i] != 0) {
                 (uint256 bin, uint256 index) = ids[i].getTokenBinIndex();
-                if (lastBin == ~uint256(0)) {
+                if (lastBin == MAX_UINT256) {
                     lastBin = bin;
-                    balFrom = _packedTokenBalance[from][bin].updateTokenBalance(index, amounts[i], ObjectLib32.Operations.SUB);
+                    balFrom = fromPack[bin].updateTokenBalance(index, amounts[i], ObjectLib32.Operations.SUB);
                     supply = _packedSupplies[bin].updateTokenBalance(index, amounts[i], ObjectLib32.Operations.SUB);
                 } else {
                     if (bin != lastBin) {
-                        _packedTokenBalance[from][lastBin] = balFrom;
-                        balFrom = _packedTokenBalance[from][bin];
+                        fromPack[lastBin] = balFrom;
+                        balFrom = fromPack[bin];
                         _packedSupplies[lastBin] = supply;
                         supply = _packedSupplies[bin];
                         lastBin = bin;
@@ -316,8 +332,8 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
                 _erc20s[ids[i]].emitTransferEvent(from, address(0), amounts[i]);
             }
         }
-        if (lastBin != ~uint256(0)) {
-            _packedTokenBalance[from][lastBin] = balFrom;
+        if (lastBin != MAX_UINT256) {
+            fromPack[lastBin] = balFrom;
             _packedSupplies[lastBin] = supply;
         }
     }
@@ -329,7 +345,8 @@ contract ERC20Group is SuperOperators, MetaTransactionReceiver {
     ) internal {
         ERC20SubToken erc20 = _erc20s[id];
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
-        _packedTokenBalance[from][bin] = ObjectLib32.updateTokenBalance(_packedTokenBalance[from][bin], index, value, ObjectLib32.Operations.SUB);
+        mapping(uint256 => uint256) storage fromPack = _packedTokenBalance[from];
+        fromPack[bin] = ObjectLib32.updateTokenBalance(fromPack[bin], index, value, ObjectLib32.Operations.SUB);
         _packedSupplies[bin] = ObjectLib32.updateTokenBalance(_packedSupplies[bin], index, value, ObjectLib32.Operations.SUB);
         erc20.emitTransferEvent(from, address(0), value);
     }

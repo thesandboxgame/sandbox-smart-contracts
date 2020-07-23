@@ -55,7 +55,7 @@ contract CatalystDataBase is CatalystValue {
         uint32[] calldata gemIds,
         bytes32[] calldata blockHashes
     ) external override view returns (uint32[] memory values) {
-        require(gemIds.length == blockHashes.length, "inconsisten length");
+        require(gemIds.length == blockHashes.length, "INCONSISTENT_LENGTHS");
         CatalystValue valueOverride = _valueOverrides[catalystId];
         if (address(valueOverride) != address(0)) {
             return valueOverride.getValues(catalystId, seed, gemIds, blockHashes);
@@ -110,6 +110,6 @@ contract CatalystDataBase is CatalystValue {
         uint16 maxGems;
     }
 
-    mapping(uint256 => MintData) _data;
-    mapping(uint256 => CatalystValue) _valueOverrides;
+    mapping(uint256 => MintData) internal _data;
+    mapping(uint256 => CatalystValue) internal _valueOverrides;
 }
