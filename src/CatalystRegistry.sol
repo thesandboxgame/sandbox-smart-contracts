@@ -35,7 +35,7 @@ contract CatalystRegistry is Admin, CatalystValue {
         uint256 index = gemIds.length;
         _catalysts[assetId] = CatalystStored(uint64(emptySockets), uint64(index), uint64(catalystId), 1);
         uint64 blockNumber = _getBlockNumber();
-        emit CatalystApplied(assetId, catalystId, _getSeed(assetId), gemIds, blockNumber);
+        emit CatalystApplied(assetId, catalystId, assetId, gemIds, blockNumber);
     }
 
     function addGems(uint256 assetId, uint256[] calldata gemIds) external {
@@ -82,13 +82,6 @@ contract CatalystRegistry is Admin, CatalystValue {
     uint256 private constant NOT_IS_NFT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFFFFFFFF;
     uint256 private constant NOT_NFT_INDEX = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF800000007FFFFFFFFFFFFFFF;
 
-    function _getSeed(uint256 assetId) internal pure returns (uint256) {
-        if (assetId & IS_NFT != 0) {
-            return _getCollectionId(assetId);
-        }
-        return assetId;
-    }
-
     function _getSocketData(uint256 assetId)
         internal
         view
@@ -101,8 +94,11 @@ contract CatalystRegistry is Admin, CatalystValue {
         seed = assetId;
         CatalystStored memory catalyst = _catalysts[assetId];
         if (catalyst.set != 0) {
+            // the gems are added to an asset who already get a specific catalyst.
+            // the seed is its id
             return (catalyst.emptySockets, catalyst.index, seed);
         }
+        // else the asset is only adding gems while keeping the sane seed (that of the original assetId)
         seed = _getCollectionId(assetId);
         catalyst = _catalysts[seed];
         return (catalyst.emptySockets, catalyst.index, seed);
