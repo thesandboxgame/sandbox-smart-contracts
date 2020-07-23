@@ -420,29 +420,29 @@ async function handleRow(row) {
     recordRowNumber: true,
   });
 
-  // for (const row of sheet) {
-  //   try {
-  //     await handleRow(row);
-  //   } catch (e) {
-  //     console.error(e);
-  //     console.log(JSON.stringify(row, null, "  "));
-  //     throw e;
-  //   }
-  // }
+  for (const row of sheet) {
+    try {
+      await handleRow(row);
+    } catch (e) {
+      console.error(e);
+      console.log(JSON.stringify(row, null, "  "));
+      throw e;
+    }
+  }
 
-  // write(sheetId, {values: gasValues, range: "O1:Q" + (gasValues.length + 1)});
-  // console.log("TOTAL");
-  // console.log({
-  //   eth_gasUsed: total.eth_gasUsed.toNumber(),
-  //   sand_gasUsed: total.sand_gasUsed.toNumber(),
-  //   gems_gasUsed: total.gems_gasUsed.toNumber(),
-  //   catalysts_gasUsed: total.catalysts_gasUsed.toNumber(),
-  //   mint_gasUsed: total.mint_gasUsed.toNumber(),
-  //   airdrop_gasUsed: total.airdrop_gasUsed.toNumber(),
-  //   total_gasUsed: total.total_gasUsed.toNumber(),
+  write(sheetId, {values: gasValues, range: "O1:Q" + (gasValues.length + 1)});
+  console.log("TOTAL");
+  console.log({
+    eth_gasUsed: total.eth_gasUsed.toNumber(),
+    sand_gasUsed: total.sand_gasUsed.toNumber(),
+    gems_gasUsed: total.gems_gasUsed.toNumber(),
+    catalysts_gasUsed: total.catalysts_gasUsed.toNumber(),
+    mint_gasUsed: total.mint_gasUsed.toNumber(),
+    airdrop_gasUsed: total.airdrop_gasUsed.toNumber(),
+    total_gasUsed: total.total_gasUsed.toNumber(),
 
-  //   commonMint_gasUsed: total.commonMint_gasUsed.toNumber(),
-  // });
+    commonMint_gasUsed: total.commonMint_gasUsed.toNumber(),
+  });
 
   creators["Test"] = new Wallet("0x2dfc067a0e855b8916aee81237972550d8b69675ecfe163dca6081ed4a4602b8");
   handleRow({
