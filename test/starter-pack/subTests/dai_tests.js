@@ -30,7 +30,7 @@ function runDaiTests() {
     it("should revert if the user does not have enough DAI", async function () {
       const {userWithoutDAI, daiContract} = setUp;
       const balance = await daiContract.balanceOf(userWithoutDAI.address);
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithoutDAI.address);
       assert.ok(balance.eq(BigNumber.from(0)));
       await expectRevert(
         userWithoutDAI.StarterPack.purchaseWithDAI(userWithoutDAI.address, Message, dummySignature),
@@ -40,7 +40,7 @@ function runDaiTests() {
 
     it("purchase should revert if StarterpackV1.sol does not own any Catalysts & Gems", async function () {
       const {userWithDAI} = setUp;
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithDAI.address);
       await expectRevert(
         userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature),
         "can't substract more than there is"
@@ -49,7 +49,7 @@ function runDaiTests() {
 
     it("should throw if DAI is not enabled", async function () {
       const {userWithDAI, starterPackContractAsAdmin} = setUp;
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithDAI.address);
       await starterPackContractAsAdmin.setDAIEnabled(false);
       await expectRevert(
         userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature),
@@ -65,7 +65,7 @@ function runDaiTests() {
 
     it("should revert if msg sender is not from or metaTX contract: DAI", async function () {
       const {userWithDAI, userWithoutDAI} = setUp;
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithDAI.address);
       await expectRevert(
         userWithoutDAI.StarterPack.purchaseWithSand(userWithDAI.address, Message, dummySignature),
         "INVALID_SENDER"
@@ -110,7 +110,7 @@ function runDaiTests() {
         daiContract,
       } = await setUp;
 
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithDAI.address);
 
       const receipt = await waitFor(
         userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature)
@@ -262,7 +262,7 @@ function runDaiTests() {
     it("purchase should invalidate the nonce after 1 use", async function () {
       const {userWithDAI, starterPackContract} = await setUp;
 
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithDAI.address);
       const nonceBeforePurchase = await starterPackContract.getNonceByBuyer(userWithDAI.address, 0);
       expect(nonceBeforePurchase).to.equal(0);
       await userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature);
@@ -273,7 +273,7 @@ function runDaiTests() {
     it("purchase should fail if the nonce is reused", async function () {
       const {userWithDAI} = await setUp;
 
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithDAI.address);
 
       await userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature);
       await expectRevert(
@@ -285,20 +285,20 @@ function runDaiTests() {
     it("sequential purchases should succeed with new nonce (as long as there are enough catalysts and gems)", async function () {
       const {userWithDAI} = await setUp;
 
-      let dummySignature = signPurchaseMessage(privateKey, Message);
+      let dummySignature = signPurchaseMessage(privateKey, Message, userWithDAI.address);
 
       await userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature);
 
       Message.nonce++;
 
-      dummySignature = signPurchaseMessage(privateKey, Message);
+      dummySignature = signPurchaseMessage(privateKey, Message, userWithDAI.address);
 
       await userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature);
     });
 
     it("price change should be implemented after a delay", async function () {
       const {starterPackContractAsAdmin, userWithDAI} = setUp;
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithDAI.address);
       await starterPackContractAsAdmin.setDAIEnabled(true);
       const newPrices = [
         BigNumber.from(300).mul("1000000000000000000"),
@@ -318,7 +318,7 @@ function runDaiTests() {
       // fast-forward 1 hour. now buyer should pay the new price
       await increaseTime(60 * 60);
       Message.nonce++;
-      const dummySignature2 = signPurchaseMessage(privateKey, Message);
+      const dummySignature2 = signPurchaseMessage(privateKey, Message, userWithDAI.address);
       const receipt2 = await waitFor(
         userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature2)
       );
@@ -337,7 +337,7 @@ function runDaiTests() {
         starterPackContract,
       } = setUp;
 
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithDAI.address);
 
       await userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature);
 
@@ -389,7 +389,7 @@ function runDaiTests() {
     it("cannot withdrawAll after purchase if not admin", async function () {
       const {users, userWithDAI} = setUp;
 
-      const dummySignature = signPurchaseMessage(privateKey, Message);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithDAI.address);
 
       await userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature);
 
