@@ -430,7 +430,7 @@ async function handleRow(row) {
     }
   }
 
-  write(sheetId, {values: gasValues, range: "M1:O" + (gasValues.length + 1)});
+  write(sheetId, {values: gasValues, range: "O1:Q" + (gasValues.length + 1)});
   console.log("TOTAL");
   console.log({
     eth_gasUsed: total.eth_gasUsed.toNumber(),

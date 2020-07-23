@@ -99,12 +99,9 @@ contract CatalystRegistry is Admin, CatalystValue {
             return (catalyst.emptySockets, catalyst.index, seed);
         }
         // else the asset is only adding gems while keeping the sane seed (that of the original assetId)
-        if (assetId & IS_NFT != 0) {
-            seed = _getCollectionId(assetId);
-            catalyst = _catalysts[seed];
-            return (catalyst.emptySockets, catalyst.index, seed);
-        }
-        return (0, 0, seed); // Should not reach here
+        seed = _getCollectionId(assetId);
+        catalyst = _catalysts[seed];
+        return (catalyst.emptySockets, catalyst.index, seed);
     }
 
     function _getBlockNumber() internal view returns (uint64 blockNumber) {
