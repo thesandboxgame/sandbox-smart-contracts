@@ -54,3 +54,17 @@ You can explore here the documentation of our tokens and blockchain featurs:
 
 - our Marketplaces features: [Escrowless Auctions](documentation/escrow_less_auctions.md)
 - our User-Generated Content Moderation Policies using [Prediction Market](documentation/curation.md)
+
+# Your First Pull Request
+
+We are using feature branches to host the code of an upcoming feature. All feature branches start with "feat/"
+prefix, each feature branch is intended for a single purpose.
+The following branches will reject direct pushes:
+
+- master branch
+- "feat/" prefixed branches
+- "n44o/" prefixed branches
+
+So, in order to commit your changes to master you will have to
+
+- checkout master
