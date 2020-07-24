@@ -13,7 +13,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   const sand = await deployments.get("Sand");
 
   const gemGroup = await deploy("Gem", {
-    contractName: "ERC20GroupGem",
+    contract: "ERC20GroupGem",
     from: deployer,
     gas: 3000000,
     log: true,
@@ -30,7 +30,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       const contractName = `${name}Gem`;
       const tokenSymbol = name.toUpperCase();
       const result = await deploy(contractName, {
-        contractName: "ERC20SubToken",
+        contract: "ERC20SubToken",
         from: deployer,
         gas: 3000000,
         log: true,
