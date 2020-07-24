@@ -67,4 +67,11 @@ The following branches will reject direct pushes:
 
 So, in order to commit your changes to master you will have to
 
-- checkout master
+- git checkout master
+- git checkout -b feat/exampleFeature
+- git push --set-upstream origin feat/exampleFeature
+- git checkout -b exampleFeature
+- git push --set-upstream origin exampleFeature
+
+Now you can write your code and push your changes to the exampleFeature branch, once your'e done you need to open
+a pull request from exampleFeature to feat/exampleFeature.
