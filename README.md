@@ -74,4 +74,4 @@ So, in order to commit your changes to master you will have to
 - git push --set-upstream origin exampleFeature
 
 Now you can write your code and push your changes to the exampleFeature branch, once your'e done you need to open
-a pull request from exampleFeature to feat/exampleFeature.
+a pull request from exampleFeature to feat/exampleFeature, and then another pull request from feat/exampleFeature to master.
