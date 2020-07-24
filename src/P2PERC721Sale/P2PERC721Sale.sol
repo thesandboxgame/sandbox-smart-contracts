@@ -116,7 +116,7 @@ contract P2PERC721Sale is Admin, ERC1654Constants, ERC1271Constants, TheSandbox7
             fee = PriceUtil.calculateFee(offer, _fee);
         }
 
-        require(_sand.transferFrom(buyer, auction.seller, offer.sub(fee)), "Funds transfer failed");
+        require(_sand.transferFrom(buyer, auction.seller, offer.sub(fee)), "Funds transfer failed"); // TODO feeCollector
 
         ERC721 token = ERC721(auction.tokenAddress);
 
