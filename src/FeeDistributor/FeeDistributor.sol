@@ -11,7 +11,7 @@ contract FeeDistributor {
     using SafeMathWithRequire for uint256;
 
     event Deposit(address token, address from, uint256 amount);
-    event Withdrawl(ERC20 token, address to, uint256 amount);
+    event Withdrawal(ERC20 token, address to, uint256 amount);
     mapping(address => uint256) public recipientsShares;
     struct TokenState {
         uint256 totalReceived;
@@ -19,6 +19,7 @@ contract FeeDistributor {
         uint256 lastBalance;
     }
     mapping(address => TokenState) private _tokensState;
+    uint256 constant decimals = 4;
 
     /// @notice Assign each recipient with its corresponding percentage.
     /// @notice Percentages are 4 decimal points, e.g. 1 % = 100
@@ -26,9 +27,13 @@ contract FeeDistributor {
     /// @param percentages the corresponding percentage (from total fees held by the contract) for a recipient
     constructor(address payable[] memory recipients, uint256[] memory percentages) public {
         require(recipients.length == percentages.length, "ARRAYS LENGTHS SHOULD BE EQUAL");
+        uint256 totalPercentage = 0;
         for (uint256 i = 0; i < recipients.length; i++) {
-            recipientsShares[recipients[i]] = percentages[i];
+            uint256 percentage = percentages[i];
+            recipientsShares[recipients[i]] = percentage;
+            totalPercentage = totalPercentage.add(percentage);
         }
+        require(totalPercentage == 10**decimals, "PERCENTAGES ARRAY SHOULD SUM TO 100%");
     }
 
     /// @notice Enables fee holder to withdraw its share
@@ -40,7 +45,9 @@ contract FeeDistributor {
         } else {
             amount = tokenWithdrawal(token);
         }
-        emit Withdrawl(token, msg.sender, amount);
+        if (amount != 0) {
+            emit Withdrawal(token, msg.sender, amount);
+        }
     }
 
     function etherWithdrawal() private returns (uint256) {
@@ -66,7 +73,7 @@ contract FeeDistributor {
         uint256 _currentBalance = currentBalance;
         totalReceived = totalReceived.add(_currentBalance.sub(lastBalance));
         _tokensState[token].totalReceived = totalReceived;
-        uint256 amountDue = ((totalReceived.mul(recipientsShares[msg.sender])).div(10000)).sub(amountAlreadyGiven);
+        uint256 amountDue = ((totalReceived.mul(recipientsShares[msg.sender])).div(10**decimals)).sub(amountAlreadyGiven);
         if (amountDue == 0) {
             return amountDue;
         }
