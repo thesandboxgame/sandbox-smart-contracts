@@ -5,6 +5,8 @@ import "../contracts_common/src/interfaces/ERC20.sol";
 import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
 
 
+/// @title Fee distributor
+/// @notice Distributes all fees collected from platform activities to stakeholders
 contract FeeDistributor {
     using SafeMathWithRequire for uint256;
 
@@ -18,13 +20,20 @@ contract FeeDistributor {
     }
     mapping(address => TokenState) private _tokensState;
 
-    constructor(address payable[] memory recepients, uint256[] memory precentages) public {
-        require(recepients.length == precentages.length);
+    /// @notice Assign each recepient with its corresponding percentage
+    /// @dev percentages are 4 decimal points, e.g. 1 % = 100
+    /// @param recepients fee recepients
+    /// @param percentages the corresponding percentage (from total fees held by the contract) for a recepient
+    constructor(address payable[] memory recepients, uint256[] memory percentages) public {
+        require(recepients.length == percentages.length, "ARRAYS LENGTHS SHOULD BE EQUAL");
         for (uint256 i = 0; i < recepients.length; i++) {
-            recepientsShares[recepients[i]] = precentages[i];
+            recepientsShares[recepients[i]] = percentages[i];
         }
     }
 
+    /// @notice enable fee holder to withdraw its share
+    /// @dev zero address reserved for ether withdrawal
+    /// @param token the token that fee should be distributed in
     function withdraw(ERC20 token) external returns (uint256 amount) {
         if (address(token) == address(0)) {
             amount = etherWithdrawal();
