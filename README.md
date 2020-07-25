@@ -63,7 +63,6 @@ The following branches will reject direct pushes:
 
 - master branch
 - "feat/" prefixed branches
-- "n44o/" prefixed branches
 
 So, in order to commit your changes to master you will have to
 
