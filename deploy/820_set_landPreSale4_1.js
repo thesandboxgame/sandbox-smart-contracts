@@ -61,3 +61,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   //     await sendTxAndWait({from: currentSandAdmin, gas: 100000, skipUnknownSigner: true}, sand, 'setSuperOperator', landSale.address, true);
   // }
 };
+module.exports.skip = async () => true; // TODO
