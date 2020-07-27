@@ -335,7 +335,7 @@ function runSandTests() {
       assert.ok(starterPackContract.isMetaTransactionProcessor(dummyMetaTxContract));
       assert.notEqual(dummyMetaTxContract, userWithSAND.address);
       Message.buyer = userWithSAND.address;
-      let dummySignature = signPurchaseMessage(privateKey, Message, userWithSAND.address);
+      const dummySignature = signPurchaseMessage(privateKey, Message, userWithSAND.address);
       const starterPackContractAsMetaTx = await starterPackContract.connect(
         starterPackContract.provider.getSigner(dummyMetaTxContract)
       );
