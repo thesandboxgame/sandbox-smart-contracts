@@ -1626,10 +1626,10 @@ buffer@^5.0.5, buffer@^5.2.1:
     base64-js "^1.0.2"
     ieee754 "^1.1.4"
 
-buidler-deploy@^0.5.2:
-  version "0.5.2"
-  resolved "https://registry.yarnpkg.com/buidler-deploy/-/buidler-deploy-0.5.2.tgz#29a9b7916db70f917a2077ed900bbfb8429ae015"
-  integrity sha512-h10e/Qenq7tCuoN2/L7sxpoOvx+oH5O3MeO5aA9T/yX8YMOeo1UAQwvg7wDZEX5ACEs4AlvO43M1BkptZkMICQ==
+buidler-deploy@^0.5.4:
+  version "0.5.4"
+  resolved "https://registry.yarnpkg.com/buidler-deploy/-/buidler-deploy-0.5.4.tgz#cf568f2c20980e4159184d59d662fd2e523a1c71"
+  integrity sha512-227suMYzQwbIoKCUFu2Pd6VmyMRftybvgwCOilAxnJ75SLZPW72jj4J97W77PZx4BFQEJckATQAlJ98OnPCdwQ==
   dependencies:
     "@ethersproject/abi" "^5.0.2"
     "@ethersproject/abstract-signer" "^5.0.2"
@@ -1640,7 +1640,6 @@ buidler-deploy@^0.5.2:
     "@ethersproject/solidity" "^5.0.2"
     "@ethersproject/transactions" "^5.0.2"
     "@ethersproject/wallet" "^5.0.2"
-
     chalk "^4.0.0"
     chokidar "^3.4.0"
     debug "^4.1.1"
