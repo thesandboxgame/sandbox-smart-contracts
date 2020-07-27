@@ -53,12 +53,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       landSaleAdmin
     );
   }
-
-  // TODO if we want to enable SAND
-  // const isSandSuperOperator = await call(sand, 'isSuperOperator', landSale.address);
-  // if (!isSandSuperOperator) {
-  //     log('setting LandPreSale_2 as super operator for Sand');
-  //     const currentSandAdmin = await call(sand, 'getAdmin');
-  //     await txOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000, skipUnknownSigner: true}, sand, 'setSuperOperator', landSale.address, true);
-  // }
 };

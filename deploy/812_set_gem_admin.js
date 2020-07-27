@@ -9,4 +9,3 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     await sendTxAndWait({from: currentAdmin, gas: 1000000, skipUnknownSigner: true}, "Gem", "changeAdmin", gemAdmin);
   }
 };
-module.exports.skip = guard(["1", "314159"]); // TODO remove
