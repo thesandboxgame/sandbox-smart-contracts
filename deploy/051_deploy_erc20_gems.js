@@ -1,10 +1,5 @@
-const {BigNumber} = require("@ethersproject/bignumber");
 const {guard} = require("../lib");
 const gemNames = require("../data/gems");
-
-function sandWei(amount) {
-  return BigNumber.from(amount).mul("1000000000000000000").toString();
-}
 
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {execute, deploy} = deployments;

@@ -6,7 +6,7 @@ const fs = require("fs");
 const {calculateLandHash} = require("../lib/merkleTreeHelper");
 
 module.exports = async ({getChainId, getNamedAccounts, deployments, network}) => {
-  const {deployIfDifferent, deploy, log} = deployments;
+  const {deployIfDifferent, log} = deployments;
   const chainId = BigNumber.from(await getChainId()).toString();
 
   const {deployer, landSaleBeneficiary, backendReferralWallet} = await getNamedAccounts();
@@ -55,11 +55,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     }
     const {lands, merkleRootHash, saltedLands, tree} = getLands(sector, network.live, chainId);
     const landSaleName = "LandPreSale_3_" + sector;
-    const existingLandSale = await deployments.getOrNull(landSaleName);
-    // if (existingLandSale) {
-    //   log(`${landSaleName} already deployed at ${existingLandSale.address}`);
-    //   continue;
-    // }
+    await deployments.getOrNull(landSaleName);
     const deployResult = await deployIfDifferent(
       ["data"],
       landSaleName,
@@ -90,3 +86,4 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     fs.writeFileSync(`./.presale_3_${sector}_proofs_${chainId}.json`, JSON.stringify(landsWithProof, null, "  "));
   }
 };
+module.exports.skip = guard(["1", "4", "314159"], "LandPreSale_3_9");

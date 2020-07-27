@@ -1,4 +1,3 @@
-const {guard} = require("../lib");
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {call, sendTxAndWait, log} = deployments;
 
