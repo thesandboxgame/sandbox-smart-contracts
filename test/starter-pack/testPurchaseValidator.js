@@ -116,7 +116,7 @@ describe("PurchaseValidator", function () {
       assert.equal(nonceForqueueId454, 0);
       // for the default queueId=0, we can just pass the nonce
       Message.nonce = nonceForqueueId0;
-      let dummySignature = signPurchaseMessage(privateKey, Message);
+      let dummySignature = signPurchaseMessage(privateKey, Message, buyer);
       assert.ok(
         await starterPack.isPurchaseValid(
           buyer,
@@ -133,7 +133,7 @@ describe("PurchaseValidator", function () {
       let queueId = 454;
       // for any other queueId, we need to pack the values
       Message.nonce = getPackedNonce(nonce, queueId);
-      dummySignature = signPurchaseMessage(privateKey, Message);
+      dummySignature = signPurchaseMessage(privateKey, Message, buyer);
       assert.ok(
         await starterPack.isPurchaseValid(
           buyer,
@@ -148,7 +148,7 @@ describe("PurchaseValidator", function () {
       // Now we can simply increment the nonce in the new queue
       nonce++;
       Message.nonce = getPackedNonce(nonce, queueId); // 0x000000000000000000000000000001c600000000000000000000000000000001
-      dummySignature = signPurchaseMessage(privateKey, Message);
+      dummySignature = signPurchaseMessage(privateKey, Message, buyer);
       assert.ok(
         await starterPack.isPurchaseValid(
           buyer,
