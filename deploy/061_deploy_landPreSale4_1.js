@@ -33,10 +33,10 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
       dai.address,
       backendReferralWallet,
       2000,
-      "0x0000000000000000000000000000000000000000", // estateContract.address
+      "0x0000000000000000000000000000000000000000",
       assetContract.address,
     ],
     log: true,
   });
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO , 'LandPreSale_4_1');
+module.exports.skip = guard(["1", "4", "314159"], "LandPreSale_4_1");

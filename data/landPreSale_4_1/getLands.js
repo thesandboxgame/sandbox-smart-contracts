@@ -41,26 +41,36 @@ function generateLandsForMerkleTree() {
     if (size * size !== landGroup.numLands) {
       reportError("wrong number of land ", landGroup.numLands);
     }
-    let price = 0;
+
+    let assetIds = [];
+    if (landGroup.bundleId) {
+      assetIds = bundles[landGroup.bundleId];
+      numBundles++;
+    }
+    if (!assetIds) {
+      throw new Error("assetIds cannot be undefined");
+    }
+
+    const premium = assetIds.length > 0;
     if (size === 1) {
       num1x1Lands++;
-      price = prices["1x1"];
+      priceId = (premium ? "premium_" : "") + "1x1";
     } else if (size === 3) {
       num3x3Lands++;
-      price = prices["3x3"];
+      priceId = (premium ? "premium_" : "") + "3x3";
     } else if (size === 6) {
       num6x6Lands++;
-      price = prices["6x6"];
+      priceId = (premium ? "premium_" : "") + "6x6";
     } else if (size === 12) {
       num12x12Lands++;
-      price = prices["12x12"];
+      priceId = (premium ? "premium_" : "") + "12x12";
     } else if (size === 24) {
       num24x24Lands++;
-      price = prices["24x24"];
+      priceId = (premium ? "premium_" : "") + "24x24";
     } else {
       reportError("wrong size : " + size);
     }
-
+    const price = prices[priceId];
     if (!price) {
       reportError("no price for size = " + size);
     }
@@ -74,15 +84,6 @@ function generateLandsForMerkleTree() {
     }
     if (landGroup.y < 0 || landGroup.y >= 408) {
       reportError("wrong y : " + landGroup.y);
-    }
-
-    let assetIds = [];
-    if (landGroup.bundleId) {
-      assetIds = bundles[landGroup.bundleId];
-      numBundles++;
-    }
-    if (!assetIds) {
-      throw new Error("assetIds cannot be undefined");
     }
 
     if (landGroup.reserved) {
