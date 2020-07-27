@@ -2,7 +2,7 @@ const fs = require("fs");
 const MerkleTree = require("../../lib/merkleTree");
 const {createDataArray, saltLands} = require("../../lib/merkleTreeHelper");
 const rawSector = require("./sector10.json");
-const prices = require("./prices.json");
+const prices = require("./prices");
 const addresses = require("../addresses.json");
 const bundles = require("./sector10.bundles.json");
 
@@ -217,6 +217,7 @@ module.exports = {
       lands: expose ? saltedLands : lands,
       merkleRootHash,
       saltedLands,
+      tree,
       // landsWithProof,
     };
   },
