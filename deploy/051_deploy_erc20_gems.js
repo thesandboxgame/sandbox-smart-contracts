@@ -3,7 +3,7 @@ const gemNames = require("../data/gems");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {execute, deploy} = deployments;
-  const {deployer, gemMinter} = await getNamedAccounts();
+  const {deployer} = await getNamedAccounts();
 
   const sand = await deployments.get("Sand");
 
@@ -15,7 +15,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     args: [
       sand.address, // metatx
       deployer,
-      gemMinter,
+      deployer,
     ],
   });
   async function addGems(names) {

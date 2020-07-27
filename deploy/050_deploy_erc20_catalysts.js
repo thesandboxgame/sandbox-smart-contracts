@@ -3,7 +3,7 @@ const catalysts = require("../data/catalysts");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {execute, deploy} = deployments;
-  const {deployer, catalystMinter} = await getNamedAccounts();
+  const {deployer} = await getNamedAccounts();
 
   const sand = await deployments.get("Sand");
 
@@ -15,7 +15,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     args: [
       sand.address, // metatx
       deployer,
-      catalystMinter,
+      deployer,
     ],
   });
   async function addCatalysts(catalystData) {

@@ -126,7 +126,7 @@ module.exports = {
     },
     sandboxAccount: {
       default: 4,
-      1: "TODO", // TODO
+      1: "0x7A9fe22691c811ea339D9B73150e6911a5343DcA",
       4: "0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c",
       42: "0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c",
       314159: "0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c",
