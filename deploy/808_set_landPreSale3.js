@@ -1,5 +1,7 @@
-module.exports = async ({getNamedAccounts, deployments}) => {
+module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
   const {call, sendTxAndWait, log} = deployments;
+
+  const chainId = await getChainId();
 
   const {landSaleAdmin} = await getNamedAccounts();
 
@@ -40,6 +42,10 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       "setDAIEnabled",
       true
     );
+  }
+
+  if (chainId == 4) {
+    return; // skip on chainId 4 as we changed the admin and do not care for old presales
   }
 
   const currentAdmin = await call(landSaleName, "getAdmin");

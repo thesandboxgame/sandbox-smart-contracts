@@ -1,5 +1,7 @@
-module.exports = async ({getNamedAccounts, deployments}) => {
+module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
   const {call, sendTxAndWait, log} = deployments;
+
+  const chainId = await getChainId();
 
   const {landSaleAdmin} = await getNamedAccounts();
 
@@ -44,6 +46,9 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       );
     }
 
+    if (chainId == 4) {
+      continue; // skip on chainId 4 as we changed the admin and do not care for old presales
+    }
     const currentAdmin = await call(landSaleName, "getAdmin");
     if (currentAdmin.toLowerCase() !== landSaleAdmin.toLowerCase()) {
       log(`setting ${landSaleName} Admin`);
