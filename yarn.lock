@@ -1640,6 +1640,7 @@ buidler-deploy@^0.5.2:
     "@ethersproject/solidity" "^5.0.2"
     "@ethersproject/transactions" "^5.0.2"
     "@ethersproject/wallet" "^5.0.2"
+
     chalk "^4.0.0"
     chokidar "^3.4.0"
     debug "^4.1.1"

@@ -76,10 +76,13 @@ function generateLandsForMerkleTree() {
       reportError("wrong y : " + landGroup.y);
     }
 
-    let assetIds;
+    let assetIds = [];
     if (landGroup.bundleId) {
       assetIds = bundles[landGroup.bundleId];
       numBundles++;
+    }
+    if (!assetIds) {
+      throw new Error("assetIds cannot be undefined");
     }
 
     if (landGroup.reserved) {

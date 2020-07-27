@@ -1,5 +1,5 @@
 const {guard} = require("../lib");
-const {getLands} = require("../data/LandPreSale_4_1/getLands"); // TODO
+const {getLands} = require("../data/LandPreSale_4_1/getLands");
 
 module.exports = async ({getChainId, getNamedAccounts, deployments, network}) => {
   const {deployIfDifferent, deploy, log} = deployments;
@@ -7,9 +7,10 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
 
   const {deployer, landSaleBeneficiary, backendReferralWallet} = await getNamedAccounts();
 
-  const sandContract = await deployments.getOrNull("Sand");
-  const landContract = await deployments.getOrNull("Land");
-  const estateContract = await deployments.getOrNull("Estate");
+  const sandContract = await deployments.get("Sand");
+  const landContract = await deployments.get("Land");
+  const estateContract = await deployments.get("Estate");
+  const assetContract = await deployments.get("Asset");
 
   if (!sandContract) {
     throw new Error("no SAND contract deployed");
@@ -66,7 +67,8 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     dai.address,
     backendReferralWallet,
     2000,
-    estateContract.address
+    estateContract.address,
+    assetContract.address
   );
   if (deployResult.newlyDeployed) {
     log(" - LandPreSale_5 deployed at : " + deployResult.address + " for gas : " + deployResult.receipt.gasUsed);
