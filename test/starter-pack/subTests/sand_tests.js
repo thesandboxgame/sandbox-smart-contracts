@@ -327,6 +327,26 @@ function runSandTests() {
       expect(eventsMatching2[0].args[2]).to.equal(newTotalExpectedPrice);
     });
 
+    it("Any user should be able to purchase when msg.sender == metaTx contract", async function () {
+      const {starterPackContract, starterPackContractAsAdmin, userWithSAND, sandContract} = await setUp;
+      const roles = await getNamedAccounts();
+      const dummyMetaTxContract = roles.others[1];
+      await starterPackContractAsAdmin.setMetaTransactionProcessor(dummyMetaTxContract, true);
+      assert.ok(starterPackContract.isMetaTransactionProcessor(dummyMetaTxContract));
+      assert.notEqual(dummyMetaTxContract, userWithSAND.address);
+      Message.buyer = userWithSAND.address;
+      let dummySignature = signPurchaseMessage(privateKey, Message, userWithSAND.address);
+      const starterPackContractAsMetaTx = await starterPackContract.connect(
+        starterPackContract.provider.getSigner(dummyMetaTxContract)
+      );
+
+      const userBalanceBefore = await sandContract.balanceOf(userWithSAND.address);
+      await starterPackContractAsMetaTx.purchaseWithSand(userWithSAND.address, Message, dummySignature);
+      const userBalanceAfter = await sandContract.balanceOf(userWithSAND.address);
+
+      assert(userBalanceAfter.lt(userBalanceBefore));
+    });
+
     it("withdrawAll withdraws all remaining tokens after purchases have occurred", async function () {
       const {
         userWithSAND,
