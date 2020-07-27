@@ -1,7 +1,12 @@
 const fs = require("fs");
 const MerkleTree = require("../../lib/merkleTree");
 const {createDataArray, saltLands} = require("../../lib/merkleTreeHelper");
-const rawSector1 = require("./sector2.json");
+const rawSector = require("./sector10.json");
+const prices = require("./prices.json");
+const addresses = require("../addresses.json");
+const bundles = require("./sector10.bundles.json");
+
+const sandboxWallet = addresses["sandbox"];
 
 let errors = false;
 function reportError(e) {
@@ -29,6 +34,7 @@ function generateLandsForMerkleTree() {
   let numSandboxReserved = 0;
   let numReserved = 0;
   let numReservedGroup = 0;
+  let numBundles = 0;
 
   function addLandGroup(landGroup) {
     const size = Math.sqrt(landGroup.numLands);
@@ -38,21 +44,25 @@ function generateLandsForMerkleTree() {
     let price = 0;
     if (size === 1) {
       num1x1Lands++;
-      price = "2333000000000000000000";
+      price = prices["1x1"];
     } else if (size === 3) {
       num3x3Lands++;
-      price = "19950000000000000000000";
+      price = prices["3x3"];
     } else if (size === 6) {
       num6x6Lands++;
-      price = "75600000000000000000000";
+      price = prices["6x6"];
     } else if (size === 12) {
       num12x12Lands++;
-      price = "285600000000000000000000";
+      price = prices["12x12"];
     } else if (size === 24) {
       num24x24Lands++;
-      price = "1075200000000000000000000";
+      price = prices["24x24"];
     } else {
       reportError("wrong size : " + size);
+    }
+
+    if (!price) {
+      reportError("no price for size = " + size);
     }
 
     if (!(landGroup.x % size === 0 && landGroup.y % size === 0)) {
@@ -66,10 +76,16 @@ function generateLandsForMerkleTree() {
       reportError("wrong y : " + landGroup.y);
     }
 
+    let assetIds;
+    if (landGroup.bundleId) {
+      assetIds = bundles[landGroup.bundleId];
+      numBundles++;
+    }
+
     if (landGroup.reserved) {
       numReservedGroup++;
       numReserved += size * size;
-      if (landGroup.reserved.toLowerCase() === "0x7A9fe22691c811ea339D9B73150e6911a5343DcA".toLowerCase()) {
+      if (landGroup.reserved.toLowerCase() === sandboxWallet.toLowerCase()) {
         numSandboxReservedGroups++;
         numSandboxReserved += size * size;
       }
@@ -88,6 +104,7 @@ function generateLandsForMerkleTree() {
         size,
         price,
         reserved: landGroup.reserved,
+        assetIds,
       });
     }
     lands.push({
@@ -96,11 +113,12 @@ function generateLandsForMerkleTree() {
       size,
       price,
       reserved: landGroup.reserved,
+      assetIds,
     });
     numLands += size * size;
   }
 
-  for (const land of rawSector1.lands) {
+  for (const land of rawSector.lands) {
     const x = land.coordinateX + 204;
     const y = land.coordinateY + 204;
     numLandsInInput++;
@@ -111,10 +129,11 @@ function generateLandsForMerkleTree() {
       reserved: land.ownerAddress,
       originalX: land.coordinateX,
       originalY: land.coordinateY,
+      bundleId: land.bundleId,
     });
   }
 
-  for (const estate of rawSector1.estates) {
+  for (const estate of rawSector.estates) {
     const x = estate.coordinateX + 204;
     const y = estate.coordinateY + 204;
     numLandsInInput += estate.lands.length;
@@ -125,11 +144,12 @@ function generateLandsForMerkleTree() {
       reserved: estate.ownerAddress,
       originalX: estate.coordinateX,
       originalY: estate.coordinateY,
+      bundleId: estate.bundleId,
     });
   }
 
   // TODO debug option
-  if (false) {
+  if (true) {
     console.log({
       numGroups: lands.length,
       numLandsInOutput: numLands,
@@ -143,6 +163,7 @@ function generateLandsForMerkleTree() {
       numSandboxReserved,
       numReserved,
       numReservedGroup,
+      numBundles,
     });
   }
   exitIfError();
@@ -157,7 +178,7 @@ module.exports = {
       throw new Error("chainId not a string");
     }
 
-    let secretPath = "./.land_presale_1_secret";
+    let secretPath = "./.land_presale_4_secret";
     if (chainId === "1") {
       console.log("MAINNET secret");
       secretPath = "./.land_presale_4_secret.mainnet";
