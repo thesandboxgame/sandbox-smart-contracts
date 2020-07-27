@@ -149,7 +149,7 @@ function generateLandsForMerkleTree() {
   }
 
   // TODO debug option
-  if (true) {
+  if (false) {
     console.log({
       numGroups: lands.length,
       numLandsInOutput: numLands,
@@ -178,10 +178,10 @@ module.exports = {
       throw new Error("chainId not a string");
     }
 
-    let secretPath = "./.land_presale_4_secret";
+    let secretPath = "./.land_presale_4_1_secret";
     if (chainId === "1") {
       console.log("MAINNET secret");
-      secretPath = "./.land_presale_4_secret.mainnet";
+      secretPath = "./.land_presale_4_1_secret.mainnet";
     }
 
     let expose = false;

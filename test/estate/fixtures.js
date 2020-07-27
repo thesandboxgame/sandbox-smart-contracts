@@ -45,8 +45,8 @@ module.exports.setupEstateSale = deployments.createFixture(async () => {
   const estateContract = await ethers.getContract("Estate");
   const landContract = await ethers.getContract("Land");
 
-  const saleContract = await ethers.getContract("LandPreSale_4");
-  const landSaleDeployment = await deployments.get("LandPreSale_4");
+  const saleContract = await ethers.getContract("LandPreSale_5");
+  const landSaleDeployment = await deployments.get("LandPreSale_5");
   const lands = landSaleDeployment.linkedData;
   const landHashArray = createDataArray(lands);
   const merkleTree = new MerkleTree(landHashArray);
