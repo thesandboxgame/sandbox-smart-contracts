@@ -1,5 +1,6 @@
 pragma solidity ^0.6.5;
 import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
+import "../contracts_common/src/interfaces/ERC20.sol";
 
 
 contract Ownable {
@@ -24,74 +25,7 @@ contract Ownable {
 }
 
 
-contract Pausable is Ownable {
-    event Pause();
-    event Unpause();
-
-    bool public paused = false;
-
-    /**
-     * @dev Modifier to make a function callable only when the contract is not paused.
-     */
-    modifier whenNotPaused() {
-        require(!paused);
-        _;
-    }
-
-    /**
-     * @dev Modifier to make a function callable only when the contract is paused.
-     */
-    modifier whenPaused() {
-        require(paused);
-        _;
-    }
-
-    /**
-     * @dev called by the owner to pause, triggers stopped state
-     */
-    function pause() public onlyOwner whenNotPaused {
-        paused = true;
-        emit Pause();
-    }
-
-    /**
-     * @dev called by the owner to unpause, returns to normal state
-     */
-    function unpause() public onlyOwner whenPaused {
-        paused = false;
-        emit Unpause();
-    }
-}
-
-
-interface IERC20 {
-    function totalSupply() external view returns (uint256);
-
-    function balanceOf(address account) external view returns (uint256);
-
-    function transfer(address recipient, uint256 amount) external returns (bool);
-
-    function allowance(address owner, address spender) external view returns (uint256);
-
-    function approve(address spender, uint256 amount) external returns (bool);
-
-    function transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
-    ) external returns (bool);
-
-    function increaseAllowance(address _spender, uint256 _addedValue) external returns (bool);
-
-    function decreaseAllowance(address spender, uint256 subtractedValue) external returns (bool);
-
-    event Transfer(address indexed from, address indexed to, uint256 value);
-
-    event Approval(address indexed owner, address indexed spender, uint256 value);
-}
-
-
-contract ERC20 is IERC20 {
+contract ERC20Impl is ERC20 {
     using SafeMathWithRequire for uint256;
 
     mapping(address => uint256) public _balances;
@@ -132,16 +66,6 @@ contract ERC20 is IERC20 {
         return true;
     }
 
-    function increaseAllowance(address spender, uint256 addedValue) public override returns (bool) {
-        _approve(msg.sender, spender, _allowances[msg.sender][spender].add(addedValue));
-        return true;
-    }
-
-    function decreaseAllowance(address spender, uint256 subtractedValue) public override returns (bool) {
-        _approve(msg.sender, spender, _allowances[msg.sender][spender].sub(subtractedValue));
-        return true;
-    }
-
     function _transfer(
         address sender,
         address recipient,
@@ -169,7 +93,7 @@ contract ERC20 is IERC20 {
 }
 
 
-contract MintableToken is ERC20, Ownable {
+contract MintableToken is ERC20Impl, Ownable {
     function mint(address account, uint256 amount) public onlyOwner {
         require(account != address(0), "ERC20: mint to the zero address");
         _totalSupply = _totalSupply.add(amount);
