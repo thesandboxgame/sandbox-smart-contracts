@@ -26,14 +26,14 @@ contract FeeDistributor {
     /// @param recipients fee recipients
     /// @param percentages the corresponding percentage (from total fees held by the contract) for a recipient
     constructor(address payable[] memory recipients, uint256[] memory percentages) public {
-        require(recipients.length == percentages.length, "ARRAYS LENGTHS SHOULD BE EQUAL");
+        require(recipients.length == percentages.length, "ARRAYS_LENGTHS_SHOULD_BE_EQUAL");
         uint256 totalPercentage = 0;
         for (uint256 i = 0; i < recipients.length; i++) {
             uint256 percentage = percentages[i];
             recipientsShares[recipients[i]] = percentage;
             totalPercentage = totalPercentage.add(percentage);
         }
-        require(totalPercentage == 10**DECIMALS, "PERCENTAGES ARRAY SHOULD SUM TO 100%");
+        require(totalPercentage == 10**DECIMALS, "PERCENTAGES_ARRAY_SHOULD_SUM_TO_100%");
     }
 
     /// @notice Enables fee holder to withdraw its share
@@ -62,7 +62,7 @@ contract FeeDistributor {
     function _tokenWithdrawal(ERC20 token) private returns (uint256) {
         uint256 amount = _calculateWithdrawalAmount(ERC20(token).balanceOf(address(this)), address(token));
         if (amount > 0) {
-            require(ERC20(token).transfer(msg.sender, amount), "FEE WITHDRAWAL FAILED");
+            require(ERC20(token).transfer(msg.sender, amount), "FEE_WITHDRAWAL_FAILED");
         }
         return amount;
     }
