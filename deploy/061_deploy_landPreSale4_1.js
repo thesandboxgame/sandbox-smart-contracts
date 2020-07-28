@@ -1,67 +1,51 @@
 const {guard} = require("../lib");
+const fs = require("fs");
+const {calculateLandHash} = require("../lib/merkleTreeHelper");
 const {getLands} = require("../data/LandPreSale_4_1/getLands");
 
 module.exports = async ({getChainId, getNamedAccounts, deployments, network}) => {
-  const {deployIfDifferent, deploy, log} = deployments;
+  const {deploy} = deployments;
   const chainId = await getChainId();
 
   const {deployer, landSaleBeneficiary, backendReferralWallet} = await getNamedAccounts();
 
   const sandContract = await deployments.get("Sand");
   const landContract = await deployments.get("Land");
-  const estateContract = await deployments.get("Estate");
   const assetContract = await deployments.get("Asset");
 
-  let daiMedianizer = await deployments.getOrNull("DAIMedianizer");
-  if (!daiMedianizer) {
-    log("setting up a fake DAI medianizer");
-    daiMedianizer = await deployIfDifferent(
-      ["data"],
-      "DAIMedianizer",
-      {from: deployer, gas: 6721975},
-      "FakeMedianizer"
-    );
-  }
+  const daiMedianizer = await deployments.get("DAIMedianizer");
+  const dai = await deployments.get("DAI");
 
-  let dai = await deployments.getOrNull("DAI");
-  if (!dai) {
-    log("setting up a fake DAI");
-    dai = await deployIfDifferent(
-      ["data"],
-      "DAI",
-      {
-        from: deployer,
-        gas: 6721975,
-      },
-      "FakeDai"
-    );
-  }
+  const {lands, merkleRootHash, saltedLands, tree} = getLands(network.live, chainId);
 
-  const {lands, merkleRootHash} = getLands(network.live, chainId);
+  await deploy("LandPreSale_4_1", {
+    from: deployer,
+    gas: 3000000,
+    linkedData: lands,
+    contract: "EstateSale",
+    args: [
+      landContract.address,
+      sandContract.address,
+      sandContract.address,
+      deployer,
+      landSaleBeneficiary,
+      merkleRootHash,
+      1597755600, // Tuesday, 18 August 2020 13:00:00 GMT+00:00
+      daiMedianizer.address,
+      dai.address,
+      backendReferralWallet,
+      2000,
+      "0x0000000000000000000000000000000000000000",
+      assetContract.address,
+    ],
+    log: true,
+  });
 
-  const deployResult = await deployIfDifferent(
-    ["data"],
-    "LandPreSale_4_1",
-    {from: deployer, gas: 3000000, linkedData: lands},
-    "EstateSale",
-    landContract.address,
-    sandContract.address,
-    sandContract.address,
-    deployer,
-    landSaleBeneficiary,
-    merkleRootHash,
-    2591016400, // TODO
-    daiMedianizer.address,
-    dai.address,
-    backendReferralWallet,
-    2000,
-    "0x0000000000000000000000000000000000000000", // estateContract.address
-    assetContract.address
-  );
-  if (deployResult.newlyDeployed) {
-    log(" - LandPreSale_4_1 deployed at : " + deployResult.address + " for gas : " + deployResult.receipt.gasUsed);
-  } else {
-    log("reusing LandPreSale_4_1 at " + deployResult.address);
+  const landsWithProof = [];
+  for (const land of saltedLands) {
+    land.proof = tree.getProof(calculateLandHash(land));
+    landsWithProof.push(land);
   }
+  fs.writeFileSync(`./.presale_4_1_proofs_${chainId}.json`, JSON.stringify(landsWithProof, null, "  "));
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO , 'LandPreSale_4_1');
+module.exports.skip = guard(["1", "4", "314159"]); //, "LandPreSale_4_1"); // TODO once catalyst system is deployed

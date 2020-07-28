@@ -5,7 +5,7 @@ const fs = require("fs");
 const {calculateLandHash} = require("../lib/merkleTreeHelper");
 
 module.exports = async ({getChainId, getNamedAccounts, deployments, network}) => {
-  const {deployIfDifferent, deploy, log} = deployments;
+  const {deployIfDifferent, log} = deployments;
   const chainId = await getChainId();
 
   const {deployer, landSaleBeneficiary, backendReferralWallet} = await getNamedAccounts();

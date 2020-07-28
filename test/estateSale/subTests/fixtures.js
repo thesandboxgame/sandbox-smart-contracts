@@ -1,6 +1,5 @@
 const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
 const MerkleTree = require("../../../lib/merkleTree");
-const {getChainCurrentTime} = require("local-utils");
 const {createDataArray} = require("../../../lib/merkleTreeHelper");
 const {testLands, generateUserPermissions, setupUser} = require("./_testHelper");
 const {findEvents} = require("../../../lib/findEvents.js");
@@ -64,7 +63,7 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
       const events = await findEvents(asset, "TransferSingle", mintReceipt.blockHash);
       const tokenId = events[0].args.id;
       const value = events[0].args.value;
-      const to = events[0].args.to;
+      // const to = events[0].args.to;
       assetIds.push(tokenId);
       assetAmounts.push(value);
       // console.log({tokenId, value, to});

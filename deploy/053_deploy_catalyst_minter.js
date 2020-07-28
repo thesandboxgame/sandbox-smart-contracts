@@ -6,7 +6,7 @@ function sandWei(amount) {
 
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deploy, call, sendTxAndWait, log, read} = deployments;
-  const {deployer, catalystMinterAdmin, mintingFeeCollector} = await getNamedAccounts();
+  const {deployer, catalystMinterAdmin} = await getNamedAccounts();
 
   const registry = await deployments.get("CatalystRegistry");
   const sand = await deployments.get("Sand");
@@ -38,8 +38,8 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       gem.address,
       sand.address,
       catalystMinterAdmin,
-      "0x0000000000000000000000000000000000000000", // TODO // mintingFeeCollector,
-      sandWei(1), // TODO configure ?
+      "0x0000000000000000000000000000000000000000", // TODO SAND : mintingFeeCollector
+      sandWei(1), //TODO SAND : confirm
       catalyst.address,
       bakedMintData,
     ],

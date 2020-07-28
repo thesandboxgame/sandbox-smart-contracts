@@ -727,6 +727,26 @@ function runEtherTests(landSaleName) {
         expect(balances[0]).to.equal(1);
       });
 
+      it("can buy Land with zero assets", async function () {
+        const {lands, users, tree} = initialSetUp;
+        const land = lands[4];
+        const proof = tree.getProof(calculateLandHash(land));
+
+        await users[0].EstateSale.functions.buyLandWithETH(
+          users[0].address,
+          users[0].address,
+          zeroAddress,
+          land.x,
+          land.y,
+          land.size,
+          land.price,
+          land.salt,
+          land.assetIds,
+          proof,
+          emptyReferral
+        );
+      });
+
       it("CANNOT buy Land with assets using zero asset", async function () {
         const {lands, users, tree} = initialSetUp;
         const land = lands[5];

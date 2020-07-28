@@ -62,4 +62,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   //     await sendTxAndWait({from: currentSandAdmin, gas: 100000, skipUnknownSigner: true}, sand, 'setSuperOperator', landSale.address, true);
   // }
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO remove
+module.exports.skip = guard(["1", "4", "314159"]); // TODO once catalyst system is deployed

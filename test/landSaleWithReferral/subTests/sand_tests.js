@@ -445,7 +445,7 @@ function runSandTests() {
 
       it("after buying user owns all LAND bought (empty referral)", async function () {
         const {tree, userWithSAND, lands, contracts} = initialSetUp;
-        const land = lands[3];
+        const land = lands[4];
         const proof = tree.getProof(calculateLandHash(land));
         await userWithSAND.LandSaleWithReferral.functions.buyLandWithSand(
           userWithSAND.address,

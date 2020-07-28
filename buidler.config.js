@@ -78,7 +78,7 @@ module.exports = {
       default: 2,
       // 4: "0x5b4c9eae565c1ba9eb65365aa02ee9fb0a653ce5",
       1: "0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06", // multi sig wallet
-      4: "0xcbc70EcCd52bF3910CDC1455E6D2Bd45725F573D", // test multi sig wallet
+      4: "0xE53cd71271AcAdbeb0f64d9c8C62bBdDc8cA9e66",
       42: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
       314159: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
     },
@@ -110,7 +110,7 @@ module.exports = {
     landAdmin: {
       default: 2,
       1: "0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06",
-      4: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
+      4: "0xE53cd71271AcAdbeb0f64d9c8C62bBdDc8cA9e66",
       42: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
       314159: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
     },
@@ -124,16 +124,23 @@ module.exports = {
       42: "0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e",
       314159: "0x94AE0495bEDb538F0a14fFE4Dc160dC280989E3a",
     },
-    catalystMinter: "sandAdmin", // TODO ?
+    sandboxAccount: {
+      default: 4,
+      1: "0x7A9fe22691c811ea339D9B73150e6911a5343DcA",
+      4: "0x3B4Ce74FB0793250AE211334a5Df00214D5aB807", // Leon asset minter
+      42: "0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c",
+      314159: "0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c",
+    },
+    catalystMinter: "sandAdmin", // TODO later : Staking Reward mechanism
     catalystAdmin: "sandAdmin",
     gemAdmin: "sandAdmin",
-    gemMinter: "sandAdmin", // TODO ?
+    gemMinter: "sandAdmin", // TODO later : Staking Reward mechanism
     catalystRegistryAdmin: "sandAdmin",
     catalystMinterAdmin: "sandAdmin",
     // testing
     others: {
       default: "from:5",
-      deployments: "", // TODO live
+      deployments: "", // TODO builder-deploy support live
     },
   },
   solc: {

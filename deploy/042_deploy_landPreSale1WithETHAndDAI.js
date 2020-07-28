@@ -2,7 +2,7 @@ const {guard} = require("../lib");
 const {getLands} = require("../data/landPreSale_1/getLands");
 
 module.exports = async ({getChainId, getNamedAccounts, deployments, network}) => {
-  const {deployIfDifferent, deploy, log} = deployments;
+  const {deployIfDifferent, log} = deployments;
   const chainId = await getChainId();
 
   const {deployer, landSaleAdmin, landSaleBeneficiary} = await getNamedAccounts();

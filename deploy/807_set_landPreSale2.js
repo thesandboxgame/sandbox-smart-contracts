@@ -1,5 +1,7 @@
-module.exports = async ({getNamedAccounts, deployments}) => {
+module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
   const {call, sendTxAndWait, log} = deployments;
+
+  const chainId = await getChainId();
 
   const {landSaleAdmin} = await getNamedAccounts();
 
@@ -43,6 +45,10 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     );
   }
 
+  if (chainId == 4) {
+    return; // skip on chainId 4 as we changed the admin and do not care for old presales
+  }
+
   const currentAdmin = await call(landSaleName, "getAdmin");
   if (currentAdmin.toLowerCase() !== landSaleAdmin.toLowerCase()) {
     log("setting LandPreSale_2 Admin");
@@ -53,12 +59,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       landSaleAdmin
     );
   }
-
-  // TODO if we want to enable SAND
-  // const isSandSuperOperator = await call(sand, 'isSuperOperator', landSale.address);
-  // if (!isSandSuperOperator) {
-  //     log('setting LandPreSale_2 as super operator for Sand');
-  //     const currentSandAdmin = await call(sand, 'getAdmin');
-  //     await txOnlyFrom(currentSandAdmin, {from: deployer, gas: 100000, skipUnknownSigner: true}, sand, 'setSuperOperator', landSale.address, true);
-  // }
 };

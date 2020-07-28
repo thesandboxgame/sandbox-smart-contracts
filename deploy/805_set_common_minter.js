@@ -57,4 +57,4 @@ module.exports = async ({deployments, getChainId}) => {
     );
   }
 };
-module.exports.skip = guard(["1"]); // TODO to enable common minter
+module.exports.skip = guard(["1"]); // TODO to enable common minter // TODO set a fee, not zero
