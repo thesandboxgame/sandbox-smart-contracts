@@ -54,3 +54,23 @@ You can explore here the documentation of our tokens and blockchain featurs:
 
 - our Marketplaces features: [Escrowless Auctions](documentation/escrow_less_auctions.md)
 - our User-Generated Content Moderation Policies using [Prediction Market](documentation/curation.md)
+
+# Your First Pull Request
+
+We are using feature branches to host the code of an upcoming feature. All feature branches start with "feat/"
+prefix, each feature branch is intended for a single purpose.
+The following branches will reject direct pushes:
+
+- master branch
+- "feat/" prefixed branches
+
+So, in order to commit your changes to master you will have to
+
+- git checkout master
+- git checkout -b feat/exampleFeature
+- git push --set-upstream origin feat/exampleFeature
+- git checkout -b exampleFeature
+- git push --set-upstream origin exampleFeature
+
+Now you can write your code and push your changes to the exampleFeature branch, once your'e done you need to open
+a pull request from exampleFeature to feat/exampleFeature, and then another pull request from feat/exampleFeature to master.
