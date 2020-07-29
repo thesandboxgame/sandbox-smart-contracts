@@ -9,3 +9,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     args: [[deployer], [10000]],
   });
 };
+module.exports.tags = ["FeeDistributor"];
