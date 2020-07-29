@@ -94,6 +94,11 @@ describe("FeeDistributor:ERC20", function () {
     await tx.wait();
   }
 
+  async function fundContractWithSand(feeDistContractAdd, sandContract, beneficiary, amount) {
+    let tx = await sandContract.connect(ethers.provider.getSigner(beneficiary)).transfer(feeDistContractAdd, amount);
+    await tx.wait();
+  }
+
   async function testERC20FeeWithdrawal(account, percentage, amount, contract, erc20Contract) {
     let balanceBefore = await erc20Contract.balanceOf(account);
     let tx = await contract.connect(ethers.provider.getSigner(account)).withdraw(erc20Contract.address);
@@ -196,5 +201,18 @@ describe("FeeDistributor:ERC20", function () {
     await testERC20FeeWithdrawal(recipients[0], percentages[0], value3, feeDistContract, token2);
     await testERC20FeeWithdrawal(recipients[1], percentages[1], value3, feeDistContract, token2);
     await testERC20FeeWithdrawal(recipients[2], percentages[2], value3, feeDistContract, token2);
+  });
+
+  it("Sand fees withdrawal", async function () {
+    const {sandBeneficiary} = await getNamedAccounts();
+    const ethersFactory = await ethers.getContractFactory("Sand", sandBeneficiary);
+    let sandContract = await ethersFactory.deploy(sandBeneficiary, sandBeneficiary, sandBeneficiary);
+    let accounts = await getNamedAccounts();
+    let percentages = [5000, 5000];
+    let recipients = accounts.others.slice(0, 2);
+    let amount = BigNumber.from("800000000000000000");
+    let feeDistContract = await initContract(recipients, percentages);
+    await fundContractWithSand(feeDistContract.address, sandContract, sandBeneficiary, amount);
+    await testERC20FeeWithdrawal(recipients[0], percentages[0], amount, feeDistContract, sandContract);
   });
 });
