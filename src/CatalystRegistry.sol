@@ -70,10 +70,10 @@ contract CatalystRegistry is Admin, CatalystValue {
     function getValues(
         uint256 catalystId,
         uint256 seed,
-        uint32[] calldata gemIds,
-        bytes32[] calldata blockHashes
+        GemEvent[] calldata events,
+        uint32 totalNumberOfGemTypes
     ) external override view returns (uint32[] memory values) {
-        return _catalystValue.getValues(catalystId, seed, gemIds, blockHashes);
+        return _catalystValue.getValues(catalystId, seed, events, totalNumberOfGemTypes);
     }
 
     // ///////// INTERNAL ////////////
