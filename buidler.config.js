@@ -131,6 +131,11 @@ module.exports = {
       42: "0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c",
       314159: "0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c",
     },
+    extraCatalystAndGemMinter: {
+      default: null,
+      1: null,
+      4: "0x5BC3D5A39a50BE2348b9C529f81aE79f00945897", // Leon asset minter
+    },
     catalystMinter: "sandAdmin", // TODO later : Staking Reward mechanism
     catalystAdmin: "sandAdmin",
     gemAdmin: "sandAdmin",

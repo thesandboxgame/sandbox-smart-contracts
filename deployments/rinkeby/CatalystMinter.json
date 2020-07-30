@@ -478,66 +478,66 @@
   "receipt": {
     "to": null,
     "from": "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
-    "contractAddress": "0x65039f6497e61Bae9Ffad054a019e163A0Faa0e5",
-    "transactionIndex": 12,
+    "contractAddress": "0x8851c972b134a60982011995F0C858628cbD7b8f",
+    "transactionIndex": 7,
     "gasUsed": "2245951",
-    "logsBloom": "0x00000000000000000000000000000000000002000800000000040000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000004000000000000000000001000000000000000000000008000000000008000000000000000000000000000000000000000000000000000000000000",
-    "blockHash": "0x3de4ebcdaac302539d2f2b4e65f1fae2abe95ff0cac1c92a4d2314c1c026d169",
-    "transactionHash": "0x7adcdc77efd92537bafc5a736fc2942ecfb4b6959a2c85cce0edc7669fe73f06",
+    "logsBloom": "0x00000000000000000000000000000000000002000000000000040000000000000000000000000000040000000000000000000040000000000000000000000000000000000000000000000000004000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000002000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000014000000000000000000000000000000000000000000000000000000000008000000000008000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x07d636137f6c20d7d3160c360f982ffa71e0c3d394563fce69b6bc038de601e5",
+    "transactionHash": "0x0eb52eee2b9d6400eed8487e94b7f850fe0c06ae764e38c95e92bf623d1e55a7",
     "logs": [
       {
-        "transactionIndex": 12,
-        "blockNumber": 6930972,
-        "transactionHash": "0x7adcdc77efd92537bafc5a736fc2942ecfb4b6959a2c85cce0edc7669fe73f06",
-        "address": "0x65039f6497e61Bae9Ffad054a019e163A0Faa0e5",
+        "transactionIndex": 7,
+        "blockNumber": 6931208,
+        "transactionHash": "0x0eb52eee2b9d6400eed8487e94b7f850fe0c06ae764e38c95e92bf623d1e55a7",
+        "address": "0x8851c972b134a60982011995F0C858628cbD7b8f",
         "topics": [
           "0xd1f666866bc45129492a51e011fa6b5a25db558c3bbdffbaf0dbbdbc57347403"
         ],
         "data": "0x0000000000000000000000000000000000000000000000000de0b6b3a7640000",
-        "logIndex": 18,
-        "blockHash": "0x3de4ebcdaac302539d2f2b4e65f1fae2abe95ff0cac1c92a4d2314c1c026d169"
+        "logIndex": 16,
+        "blockHash": "0x07d636137f6c20d7d3160c360f982ffa71e0c3d394563fce69b6bc038de601e5"
       },
       {
-        "transactionIndex": 12,
-        "blockNumber": 6930972,
-        "transactionHash": "0x7adcdc77efd92537bafc5a736fc2942ecfb4b6959a2c85cce0edc7669fe73f06",
-        "address": "0x65039f6497e61Bae9Ffad054a019e163A0Faa0e5",
+        "transactionIndex": 7,
+        "blockNumber": 6931208,
+        "transactionHash": "0x0eb52eee2b9d6400eed8487e94b7f850fe0c06ae764e38c95e92bf623d1e55a7",
+        "address": "0x8851c972b134a60982011995F0C858628cbD7b8f",
         "topics": [
           "0xfa62ad95255db03db5eaabed7a43b93f377948b56cea8e12a747b6565582ed5e"
         ],
         "data": "0x0000000000000000000000000000000000000000000000000000000000000000",
-        "logIndex": 19,
-        "blockHash": "0x3de4ebcdaac302539d2f2b4e65f1fae2abe95ff0cac1c92a4d2314c1c026d169"
+        "logIndex": 17,
+        "blockHash": "0x07d636137f6c20d7d3160c360f982ffa71e0c3d394563fce69b6bc038de601e5"
       },
       {
-        "transactionIndex": 12,
-        "blockNumber": 6930972,
-        "transactionHash": "0x7adcdc77efd92537bafc5a736fc2942ecfb4b6959a2c85cce0edc7669fe73f06",
-        "address": "0x65039f6497e61Bae9Ffad054a019e163A0Faa0e5",
+        "transactionIndex": 7,
+        "blockNumber": 6931208,
+        "transactionHash": "0x0eb52eee2b9d6400eed8487e94b7f850fe0c06ae764e38c95e92bf623d1e55a7",
+        "address": "0x8851c972b134a60982011995F0C858628cbD7b8f",
         "topics": [
           "0xb21eb88b4e33b3f1281830a7178d74d8aa73220416215726b68ae23d539515cb"
         ],
         "data": "0x000000000000000000000000cc933a862fc15379e441f2a16cb943d385a4695f0000000000000000000000000000000000000000000000000000000000000001",
-        "logIndex": 20,
-        "blockHash": "0x3de4ebcdaac302539d2f2b4e65f1fae2abe95ff0cac1c92a4d2314c1c026d169"
+        "logIndex": 18,
+        "blockHash": "0x07d636137f6c20d7d3160c360f982ffa71e0c3d394563fce69b6bc038de601e5"
       }
     ],
-    "blockNumber": 6930972,
-    "cumulativeGasUsed": "5385741",
+    "blockNumber": 6931208,
+    "cumulativeGasUsed": "3708268",
     "status": 1,
     "byzantium": true
   },
-  "address": "0x65039f6497e61Bae9Ffad054a019e163A0Faa0e5",
+  "address": "0x8851c972b134a60982011995F0C858628cbD7b8f",
   "args": [
-    "0x24A2d489bCd44b406803954A902D7Fb1b13f676F",
+    "0x87A44e4d7ceA60e0eb84CFC18Eb2f0c00130A790",
     "0xCc933a862fc15379E441F2A16Cb943D385a4695f",
     "0x42D39493e3A59026Ab92f13F340F56038114f329",
-    "0x23Ec7674F97562c0B77Dfdf5d8BF4A63Bfc71670",
+    "0xe64B1a36a1d2fA9E8CCf52F8e328E1da76999119",
     "0xCc933a862fc15379E441F2A16Cb943D385a4695f",
     "0xE53cd71271AcAdbeb0f64d9c8C62bBdDc8cA9e66",
     "0x0000000000000000000000000000000000000000",
     "1000000000000000000",
-    "0x3305753E85d412f22D6d542811546b285Ec6e8eD",
+    "0xe9258A05f2c2Dce108230785072bCBFEC5330B76",
     [
       "1874695078969773496121404331721825698178364448525453992945337385334603776",
       "3574135695062051945381549662225212526631156734242292716544731166568087552",
@@ -719,6 +719,49 @@
         "label": "uint256",
         "numberOfBytes": "32"
       }
+    }
+  },
+  "contractFilepath": "src/CatalystMinter.sol",
+  "contractName": "CatalystMinter",
+  "gasEstimates": {
+    "creation": {
+      "codeDepositCost": "1960800",
+      "executionCost": "infinite",
+      "totalCost": "infinite"
+    },
+    "external": {
+      "addGems(address,uint256,uint256[],address)": "infinite",
+      "changeAdmin(address)": "24245",
+      "changeCatalyst(address,uint256,uint256,uint256[],address)": "infinite",
+      "extractAndAddGems(address,uint256,uint256[],address)": "infinite",
+      "extractAndChangeCatalyst(address,uint256,uint256,uint256[],address)": "infinite",
+      "getAdmin()": "1094",
+      "isMetaTransactionProcessor(address)": "1354",
+      "mint(address,uint40,bytes32,uint256,uint256[],uint256,address,bytes)": "infinite",
+      "mintMultiple(address,uint40,bytes32,uint256[],uint256[],(uint256[],uint256,uint256)[],address,bytes)": "infinite",
+      "setFeeCollector(address)": "23201",
+      "setGemAdditionFee(uint256)": "22260",
+      "setMetaTransactionProcessor(address,bool)": "23659"
+    },
+    "internal": {
+      "_addGems(address,uint256,uint256[] memory,address)": "infinite",
+      "_burnCatalyst(address,uint256)": "infinite",
+      "_burnCatalysts(address,uint256[] memory)": "infinite",
+      "_burnGems(address,uint256[] memory)": "infinite",
+      "_burnSingleGems(address,uint256[] memory)": "infinite",
+      "_changeCatalyst(address,uint256,uint256,uint256[] memory,address)": "infinite",
+      "_chargeSand(address,uint256)": "infinite",
+      "_checkAuthorization(address,address)": "infinite",
+      "_checkGemsQuantities(uint256[] memory,uint256[] memory)": "infinite",
+      "_checkQuantityAndBurnSandAndGems(address,uint256,uint256[] memory,uint256)": "infinite",
+      "_extractMintData(uint256)": "102",
+      "_getMintData(uint256)": "infinite",
+      "_handleMultipleCatalysts(address,uint256[] memory,uint256[] memory,struct CatalystMinter.AssetData memory[] memory)": "infinite",
+      "_mintAssets(address,uint40,bytes32,struct CatalystMinter.AssetData memory[] memory,uint256[] memory,uint16[] memory,address,bytes memory)": "infinite",
+      "_mintMultiple(address,uint40,bytes32,uint256[] memory,uint256[] memory,struct CatalystMinter.AssetData memory[] memory,address,bytes memory)": "infinite",
+      "_setFeeCollector(address)": "infinite",
+      "_setGemAdditionFee(uint256)": "infinite",
+      "_transfer(address,address,uint256)": "infinite"
     }
   }
 }

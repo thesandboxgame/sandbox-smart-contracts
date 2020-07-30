@@ -330,21 +330,21 @@
   "receipt": {
     "to": null,
     "from": "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
-    "contractAddress": "0xB42E8c4756425D1d6937080A109041C243251D1E",
-    "transactionIndex": 4,
+    "contractAddress": "0x93c93cB5085c5c1f2cBdb1A6A7391939DA12A0FA",
+    "transactionIndex": 21,
     "gasUsed": "746983",
     "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-    "blockHash": "0xae69198d6aa94ecd09c081c8cfc312bbc4a2078143e0eeb6236a676158278ec3",
-    "transactionHash": "0xf25c7551d2fdf4382de4c33a059d990d4653b6b9f2bb6867b17ba8e421f4b22a",
+    "blockHash": "0x80533b47e259bb0ad78d1e012d02cdeb460ca44aec1799ee15e483964adbb16b",
+    "transactionHash": "0xf5decbbccd9aae1d0551e6b7f4e564e24e0e1fb16425689528726669d2e0edc5",
     "logs": [],
-    "blockNumber": 6930969,
-    "cumulativeGasUsed": "986938",
+    "blockNumber": 6931205,
+    "cumulativeGasUsed": "3442846",
     "status": 1,
     "byzantium": true
   },
-  "address": "0xB42E8c4756425D1d6937080A109041C243251D1E",
+  "address": "0x93c93cB5085c5c1f2cBdb1A6A7391939DA12A0FA",
   "args": [
-    "0x23Ec7674F97562c0B77Dfdf5d8BF4A63Bfc71670",
+    "0xe64B1a36a1d2fA9E8CCf52F8e328E1da76999119",
     4,
     "Luck",
     "LUCK"
@@ -428,6 +428,34 @@
         "label": "uint256",
         "numberOfBytes": "32"
       }
+    }
+  },
+  "contractFilepath": "src/BaseWithStorage/ERC20SubToken.sol",
+  "contractName": "ERC20SubToken",
+  "gasEstimates": {
+    "creation": {
+      "codeDepositCost": "596400",
+      "executionCost": "infinite",
+      "totalCost": "infinite"
+    },
+    "external": {
+      "allowance(address,address)": "1335",
+      "approve(address,uint256)": "22452",
+      "approveFor(address,address,uint256)": "infinite",
+      "balanceOf(address)": "infinite",
+      "decimals()": "274",
+      "emitTransferEvent(address,address,uint256)": "infinite",
+      "groupAddress()": "infinite",
+      "groupTokenId()": "infinite",
+      "name()": "infinite",
+      "symbol()": "infinite",
+      "totalSupply()": "infinite",
+      "transfer(address,uint256)": "infinite",
+      "transferFrom(address,address,uint256)": "infinite"
+    },
+    "internal": {
+      "_approveFor(address,address,uint256)": "infinite",
+      "_transfer(address,address,uint256)": "infinite"
     }
   }
 }
