@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 interface CatalystValue {
     struct GemEvent {
-        uint32[] gemIds;
+        uint256[] gemIds;
         bytes32 blockHash;
     }
 

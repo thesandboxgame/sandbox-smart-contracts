@@ -1,0 +1,281 @@
+const {expect} = require("local-chai");
+const {setupCatalystUsers} = require("./fixtures");
+const {randomBytes, hexlify} = require("ethers/lib/utils");
+
+const LegendaryCatalyst = 3;
+
+const PowerGem = 0;
+const DefenseGem = 1;
+const SpeedGem = 2;
+const MagicGem = 3;
+const LuckGem = 4;
+
+/*
+MINTING / CATALYST Burning
+
+Minting Asset with 1 Speed Gem:
+Speed: roll 1-25 = 25
+
+Minting Asset with 1 Speed Gem + 1 Magic Gem
+Speed: roll 6-25  = 2 => 6
+Magic: roll 6-25  = 20
+
+Minting Asset with 2 Power gems  + 1 Luck Gem
+Power : roll 26-50 => 40
+Luck: roll 11-25 => 20
+
+Minting Asset with 1 Power Gem
+Power : roll 1-25 = 3
+
+
+Adding Gems (later transaction done by the owner, not the creator)
+
+A + 1 Speed Gem
+Speed: roll 26-50 => 26
+
+A + 1 Magic Gem
+Speed: 25
+Magic: roll 6-25 =>  15
+
+A + 1 Power Gem +  1 Magic Gem
+Speed: 25
+Power roll: 11-25 = 15
+Magic: roll 11-25 = 10
+
+B + 2 Speed Gem
+Speed: roll 51-75 = 70
+Magic: 20
+
+D + 1 Magic Gem
+Power: 3 => 6
+Magic: roll 6-25 = 15
+
+*/
+
+function expectGemValues(values, expectedValues, options) {
+  options = options || {};
+  for (let i = 0; i < values.length; i++) {
+    const v = values[i];
+    if (expectedValues[i]) {
+      if (Array.isArray(expectedValues[i])) {
+        expect(v).to.be.within(expectedValues[i][0], expectedValues[i][1]);
+      } else {
+        expect(v).to.equal(expectedValues[i]);
+      }
+    } else {
+      if (v !== 0) {
+        console.log({values, expectedValues});
+      }
+      expect(v, `gemId ${i} not expected`).to.equal(0);
+    }
+  }
+  if (!options.ignoreMissing) {
+    for (const key of Object.keys(expectedValues)) {
+      if (parseInt(key) >= values.length) {
+        throw new Error(`no value for gemId ${key}`);
+      }
+    }
+  }
+}
+
+describe("Catalyst:Values", function () {
+  let catalystRegistry;
+
+  async function testValues(catalystId, seed, events, totalNumberOfGemTypes, expectedValues) {
+    const numEvents = events.length;
+    let pastValues;
+    if (Array.isArray(expectedValues)) {
+      for (let i = 0; i < numEvents; i++) {
+        const subEvents = events.slice(0, i + 1);
+        const numGems = subEvents.reduce((prev, curr) => prev + curr.gemIds.length, 0);
+        const minValue = (numGems - 1) * 5 + 1;
+        const values = await catalystRegistry.getValues(catalystId, seed, subEvents, totalNumberOfGemTypes);
+        const expectedValuesConsideringPastOnes = {};
+        for (const key of Object.keys(expectedValues[i])) {
+          let expectedValue = expectedValues[i][key];
+          if (pastValues && pastValues[key]) {
+            let minExpectedValue = expectedValue;
+            if (Array.isArray(expectedValue)) {
+              minExpectedValue = expectedValue[0];
+            }
+            if (Math.floor((minExpectedValue - 1) / 25) > Math.floor((pastValues[key] - 1) / 25)) {
+            } else {
+              expectedValue = pastValues[key];
+              if (expectedValue < minValue) {
+                expectedValue = minValue;
+              }
+            }
+          }
+          expectedValuesConsideringPastOnes[key] = expectedValue;
+        }
+        expectGemValues(values, expectedValuesConsideringPastOnes);
+        pastValues = values;
+      }
+    } else {
+      const values = await catalystRegistry.getValues(catalystId, seed, events, totalNumberOfGemTypes);
+      expectGemValues(values, expectedValues);
+    }
+  }
+  async function fuzzValues(catalystId, seed, events, totalNumberOfGemTypes, expectedValues, numTimes) {
+    numTimes = numTimes || 100;
+    const transformedEvents = [];
+    for (const event of events) {
+      const transformedEvent = {...event};
+      transformedEvents.push(transformedEvent);
+    }
+    for (let i = 0; i < numTimes; i++) {
+      for (const event of transformedEvents) {
+        event.blockHash = hexlify(randomBytes(32));
+      }
+      await testValues(catalystId, seed, transformedEvents, totalNumberOfGemTypes, expectedValues);
+    }
+  }
+
+  beforeEach(async function () {
+    const result = await setupCatalystUsers();
+    catalystRegistry = result.catalystRegistry;
+  });
+  it("Minting Asset with 1 Speed Gem", async function () {
+    await fuzzValues(
+      LegendaryCatalyst,
+      LegendaryCatalyst,
+      [
+        {
+          gemIds: [SpeedGem],
+        },
+      ],
+      5,
+      {[SpeedGem]: [1, 25]}
+    );
+  });
+
+  it("Minting Asset with 1 Speed Gem + 1 Magic Gem", async function () {
+    await fuzzValues(
+      LegendaryCatalyst,
+      LegendaryCatalyst,
+      [
+        {
+          gemIds: [SpeedGem, MagicGem],
+        },
+      ],
+      5,
+      {[SpeedGem]: [6, 25], [MagicGem]: [6, 25]}
+    );
+  });
+
+  it("Minting Asset with 2 Power gems  + 1 Luck Gem", async function () {
+    await fuzzValues(
+      LegendaryCatalyst,
+      LegendaryCatalyst,
+      [
+        {
+          gemIds: [PowerGem, PowerGem, MagicGem],
+        },
+      ],
+      5,
+      {[PowerGem]: [26, 50], [MagicGem]: [11, 25]}
+    );
+  });
+
+  it("Minting Asset with 2 Power gems  + 1 Luck Gem in non-order", async function () {
+    await fuzzValues(
+      LegendaryCatalyst,
+      LegendaryCatalyst,
+      [
+        {
+          gemIds: [PowerGem, MagicGem, PowerGem],
+        },
+      ],
+      5,
+      {[PowerGem]: [26, 50], [MagicGem]: [11, 25]}
+    );
+  });
+
+  it("Minting Asset with 1 Speed gem, then adding 1 Speed Gem", async function () {
+    await fuzzValues(
+      LegendaryCatalyst,
+      LegendaryCatalyst,
+      [
+        {
+          gemIds: [SpeedGem],
+        },
+        {
+          gemIds: [SpeedGem],
+        },
+      ],
+      5,
+      [{[SpeedGem]: [1, 25]}, {[SpeedGem]: [26, 50]}]
+    );
+  });
+
+  it("Minting Asset with 1 Speed gem, then adding 1 Magic Gem", async function () {
+    await fuzzValues(
+      LegendaryCatalyst,
+      LegendaryCatalyst,
+      [
+        {
+          gemIds: [SpeedGem],
+        },
+        {
+          gemIds: [MagicGem],
+        },
+      ],
+      5,
+      [{[SpeedGem]: [1, 25]}, {[SpeedGem]: [6, 25], [MagicGem]: [6, 25]}]
+    );
+  });
+
+  it("Minting Asset with 1 Speed gem, then adding 1 Power Gem + Magic Gem", async function () {
+    await fuzzValues(
+      LegendaryCatalyst,
+      LegendaryCatalyst,
+      [
+        {
+          gemIds: [SpeedGem],
+        },
+        {
+          gemIds: [PowerGem, MagicGem],
+        },
+      ],
+      5,
+      [{[SpeedGem]: [1, 25]}, {[SpeedGem]: [11, 25], [MagicGem]: [11, 25], [PowerGem]: [11, 25]}]
+    );
+  });
+
+  it("Minting Asset with 1 Speed Gem + 1 Magic Gem, then adding 2 Speed Gem", async function () {
+    await fuzzValues(
+      LegendaryCatalyst,
+      LegendaryCatalyst,
+      [
+        {
+          gemIds: [SpeedGem, MagicGem],
+        },
+        {
+          gemIds: [SpeedGem, SpeedGem],
+        },
+      ],
+      5,
+      [
+        {[SpeedGem]: [6, 25], [MagicGem]: [6, 25]},
+        {[SpeedGem]: [51, 75], [MagicGem]: [16, 25]},
+      ]
+    );
+  });
+
+  it("Minting Asset with 1 Power gem, then adding 1 Magic Gem", async function () {
+    await fuzzValues(
+      LegendaryCatalyst,
+      LegendaryCatalyst,
+      [
+        {
+          gemIds: [PowerGem],
+        },
+        {
+          gemIds: [MagicGem],
+        },
+      ],
+      5,
+      [{[PowerGem]: [1, 25]}, {[PowerGem]: [6, 25], [MagicGem]: [6, 25]}]
+    );
+  });
+});

@@ -44,20 +44,12 @@ contract CatalystDataBase is CatalystValue {
     //. example: 1-25, 6-25, 11-25, 16-25
     function _computeValue(
         uint256 seed,
-        uint32 gemId,
+        uint256 gemId,
         bytes32 blockHash,
         uint256 slotIndex,
         uint32 min
     ) internal pure returns (uint32) {
         return min + uint16(uint256(keccak256(abi.encodePacked(gemId, seed, blockHash, slotIndex))) % (26 - min));
-    }
-
-    function _ensureMinimum(uint32[] memory values, uint32 numGems) internal pure {
-        for (uint256 i = 0; i < values.length; i++) {
-            if (values[i] < 1 + (numGems - 1) * 5) {
-                values[i] = 1 + (numGems - 1) * 5;
-            }
-        }
     }
 
     function getValues(
@@ -73,69 +65,33 @@ contract CatalystDataBase is CatalystValue {
         values = new uint32[](totalNumberOfGemTypes);
 
         uint32 numGems;
-        for (uint256 i = events.length; i > 0; i--) {
-            numGems += uint32(events[i - 1].gemIds.length);
+        for (uint256 i = 0; i < events.length; i++) {
+            numGems += uint32(events[i].gemIds.length);
         }
+        require(numGems <= MAX_UINT32, "TOO_MANY_GEMS");
+        uint32 minValue = (numGems - 1) * 5 + 1;
 
-        uint32 slotIndex = numGems;
-        for (uint256 i = events.length; i > 0; i--) {
-            for (uint256 j = events[i - 1].gemIds.length; j > 0; j--) {
-                slotIndex--;
-                if (values[events[i - 1].gemIds[j - 1]] == 0) {
-                    values[events[i - 1].gemIds[j - 1]] = _computeValue(seed, events[i - 1].gemIds[j - 1], events[i - 1].blockHash, slotIndex, 1);
+        uint256 numGemsSoFar = 0;
+        for (uint256 i = 0; i < events.length; i++) {
+            numGemsSoFar += events[i].gemIds.length;
+            for (uint256 j = 0; j < events[i].gemIds.length; j++) {
+                uint256 gemId = events[i].gemIds[j];
+                uint256 slotIndex = numGemsSoFar - events[i].gemIds.length + j;
+                if (values[gemId] == 0) {
+                    // first gem : value = roll between ((numGemsSoFar-1)*5+1) and 25
+                    values[gemId] = _computeValue(seed, gemId, events[i].blockHash, slotIndex, (uint32(numGemsSoFar) - 1) * 5 + 1);
+                    // bump previous values:
+                    if (values[gemId] < minValue) {
+                        values[gemId] = minValue;
+                    }
                 } else {
-                    values[events[i - 1].gemIds[j - 1]] += 25;
+                    // further gem, previous roll are overriden with 25 and new roll between 1 and 25
+                    uint32 newRoll = _computeValue(seed, gemId, events[i].blockHash, slotIndex, 1);
+                    values[gemId] = (((values[gemId] - 1) / 25) + 1) * 25 + newRoll;
                 }
             }
         }
-
-        _ensureMinimum(values, numGems);
     }
-
-    // function getValues(
-    //     uint256 catalystId,
-    //     uint256 seed,
-    //     uint32[] calldata gemIds,
-    //     bytes32[] calldata blockHashes
-    // ) external override view returns (uint32[] memory values) {
-    //     require(gemIds.length == blockHashes.length, "INCONSISTENT_LENGTHS");
-    //     CatalystValue valueOverride = _valueOverrides[catalystId];
-    //     if (address(valueOverride) != address(0)) {
-    //         return valueOverride.getValues(catalystId, seed, gemIds, blockHashes);
-    //     }
-    //     values = new uint32[](gemIds.length);
-    //     if (gemIds.length == 0) {
-    //         return values;
-    //     }
-
-    //     uint32 maxGemIds = 0;
-    //     for (uint256 i = gemIds.length; i > 0; i--) {
-    //         if (gemIds[i - 1] > maxGemIds) {
-    //             maxGemIds = gemIds[i - 1];
-    //         }
-    //     }
-    //     uint32[] memory numGemsPerGemIds = new uint32[](maxGemIds + 1);
-    //     for (uint256 i = gemIds.length; i > 0; i--) {
-    //         numGemsPerGemIds[gemIds[i]]++;
-    //     }
-    //     for (uint256 i = gemIds.length; i > 0; i--) {
-    //         uint32 gemId = gemIds[i - 1];
-    //         if (numGemsPerGemIds[gemId] == 1) {
-    //             // unique gems:
-    //             // the more gems a catalyst have, the higher the floor start, 1 gem: 1, 2 gems: 6, 3 gems: 11, 4 gems: 16
-    //             values[i - 1] = _computeValue(seed, gemId, blockHashes[i - 1], i, 1 + ((uint32(gemIds.length) - 1) * 5));
-    //         } else {
-    //             // multiple of the same gems
-    //             if (numGemsPerGemIds[gemId] == 0) {
-    //                 // last one is already counted, so 25 for others
-    //                 values[i - 1] = 25; // 25 ensure multiple of the same gem will add up. so 2 Power gem will at least have a value of 26 (always more than a single gem which can only be between 1 and 25 by itself)
-    //             } else {
-    //                 numGemsPerGemIds[gemId] = 0; // record last gem
-    //                 values[i - 1] = _computeValue(seed, gemId, blockHashes[i - 1], i, 1);
-    //             }
-    //         }
-    //     }
-    // }
 
     function getMintData(uint256 catalystId)
         external
@@ -162,6 +118,8 @@ contract CatalystDataBase is CatalystValue {
         uint16 maxQuantity;
         uint16 maxGems;
     }
+
+    uint32 internal constant MAX_UINT32 = 2**32 - 1;
 
     mapping(uint256 => MintData) internal _data;
     mapping(uint256 => CatalystValue) internal _valueOverrides;
