@@ -86,7 +86,7 @@ contract CatalystRegistry is Admin, CatalystValue {
             // the seed is its id
             return (catalyst.emptySockets, seed);
         }
-        // else the asset is only adding gems while keeping the sane seed (that of the original assetId)
+        // else the asset is only adding gems while keeping the same seed (that of the original assetId)
         seed = _getCollectionId(assetId);
         catalyst = _catalysts[seed];
         return (catalyst.emptySockets, seed);
