@@ -1,6 +1,7 @@
 const {expect} = require("local-chai");
 const {setupCatalystUsers} = require("./fixtures");
 const {randomBytes, hexlify} = require("ethers/lib/utils");
+const {expectGemValues} = require("./_testHelper");
 
 const LegendaryCatalyst = 3;
 
@@ -9,32 +10,6 @@ const DefenseGem = 1;
 const SpeedGem = 2;
 const MagicGem = 3;
 const LuckGem = 4;
-
-function expectGemValues(values, expectedValues, options) {
-  options = options || {};
-  for (let i = 0; i < values.length; i++) {
-    const v = values[i];
-    if (expectedValues[i]) {
-      if (Array.isArray(expectedValues[i])) {
-        expect(v).to.be.within(expectedValues[i][0], expectedValues[i][1]);
-      } else {
-        expect(v).to.equal(expectedValues[i]);
-      }
-    } else {
-      if (v !== 0) {
-        console.log({values, expectedValues});
-      }
-      expect(v, `gemId ${i} not expected`).to.equal(0);
-    }
-  }
-  if (!options.ignoreMissing) {
-    for (const key of Object.keys(expectedValues)) {
-      if (parseInt(key) >= values.length) {
-        throw new Error(`no value for gemId ${key}`);
-      }
-    }
-  }
-}
 
 describe("Catalyst:Values", function () {
   let catalystRegistry;

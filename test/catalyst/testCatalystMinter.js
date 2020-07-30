@@ -2,18 +2,9 @@ const {assert, expect} = require("local-chai");
 const {setupCatalystUsers} = require("./fixtures");
 const {getGems, getValues} = require("../../lib/getGems.js");
 const {findEvents} = require("../../lib/findEvents.js");
-const {
-  expectRevert,
-  emptyBytes,
-  waitFor,
-  checERC20Balances,
-  checERC1155Balances,
-  toWei,
-  mine,
-  zeroAddress,
-} = require("local-utils");
+const {expectRevert, emptyBytes, waitFor, checERC1155Balances, toWei, mine, zeroAddress} = require("local-utils");
 const {BigNumber} = require("ethers");
-const {assertValidAttributes} = require("./_testHelper.js");
+const {expectGemValues} = require("./_testHelper.js");
 
 const nftConfig = {
   catalystConfig: [
@@ -357,7 +348,6 @@ describe("Catalyst:Minting", function () {
     expect(totalGems).to.equal(3);
     expect(gemsAddedEvent.args.gemIds[0]).to.equal(newGemIds[0]);
     expect(gemsAddedEvent.args.assetId).to.equal(tokenId);
-    expect(gemsAddedEvent.args.startIndex).to.equal(2);
     expect(gemsAddedEvent.args.seed).to.equal(seed);
     expect(gemsAddedEvent.args.blockNumber).to.equal(receipt.blockNumber + 1);
 
@@ -459,16 +449,17 @@ describe("Catalyst:Minting", function () {
   });
 
   it("creator mint Legendary Asset with 3 gems and get correct values", async function () {
-    const {creator, asset, sand, gem, catalyst, catalystRegistry} = await setupCatalystUsers();
+    const {creator, catalystRegistry} = await setupCatalystUsers();
     const gemIds = [PowerGem, DefenseGem, LuckGem];
     const quantity = 3;
     const {tokenId, receipt} = await creator.mintAsset({catalyst: LegendaryCatalyst, gemIds, quantity});
     await mine(); // future block need to be mined to get the value
-    const values = await getValues({assetId: tokenId, fromBlockHash: receipt.blockHash, catalystRegistry});
-    expect(values).to.have.lengthOf(3);
-    expect(values[0]).to.be.within(1, 25);
-    expect(values[1]).to.be.within(1, 25);
-    expect(values[2]).to.be.within(1, 25);
+    const values = await getValues({assetId: tokenId, fromBlock: receipt.blockNumber, catalystRegistry});
+    expectGemValues(values, {
+      [PowerGem]: [11, 25],
+      [DefenseGem]: [11, 25],
+      [LuckGem]: [11, 25],
+    });
   });
 
   it("creator mint Legendary Asset with 2 identitcal gems + other and get correct values", async function () {
@@ -477,11 +468,11 @@ describe("Catalyst:Minting", function () {
     const quantity = 3;
     const {tokenId, receipt} = await creator.mintAsset({catalyst: LegendaryCatalyst, gemIds, quantity});
     await mine(); // future block need to be mined to get the value
-    const values = await getValues({assetId: tokenId, fromBlockHash: receipt.blockHash, catalystRegistry});
-    expect(values).to.have.lengthOf(3);
-    expect(values[0]).to.equal(25);
-    expect(values[1]).to.be.within(1, 25);
-    expect(values[2]).to.be.within(1, 25);
+    const values = await getValues({assetId: tokenId, fromBlock: receipt.blockNumber, catalystRegistry});
+    expectGemValues(values, {
+      [SpeedGem]: [26, 50],
+      [LuckGem]: [6, 25],
+    });
   });
 
   it("creator mint Epic Asset And Downgrade to Rare: get correct values", async function () {
@@ -502,12 +493,12 @@ describe("Catalyst:Minting", function () {
     await mine(); // future block need to be mined to get the value
     const values = await getValues({
       assetId: tokenId,
-      fromBlockHash: postExtractionReceipt.blockHash,
+      fromBlock: postExtractionReceipt.blockNumber,
       catalystRegistry,
     });
-    expect(values).to.have.lengthOf(2);
-    expect(values[0]).to.equal(25);
-    expect(values[1]).to.be.within(1, 25);
+    expectGemValues(values, {
+      [LuckGem]: [26, 50],
+    });
   });
   it("creator mint Epic Asset And new owner add gems: get correct values", async function () {
     const {creator, user, catalystRegistry} = await setupCatalystUsers();
@@ -530,13 +521,13 @@ describe("Catalyst:Minting", function () {
     const values = await getValues({
       assetId: tokenId,
       originalTokenId,
-      fromBlockHash: originalReceipt.blockHash,
+      fromBlock: originalReceipt.blockNumber,
       catalystRegistry,
     });
-    expect(values).to.have.lengthOf(3);
-    expect(values[0]).to.be.within(1, 25);
-    expect(values[1]).to.equal(25);
-    expect(values[2]).to.be.within(1, 25);
+    expectGemValues(values, {
+      [PowerGem]: [11, 25],
+      [SpeedGem]: [26, 50],
+    });
   });
 
   it("creator mint Epic Asset And new owner set Legendary catalyst with gems: get correct values", async function () {
@@ -567,13 +558,13 @@ describe("Catalyst:Minting", function () {
     const values = await getValues({
       assetId: tokenId,
       originalTokenId,
-      fromBlockHash: receipt.blockHash,
+      fromBlock: receipt.blockNumber,
       catalystRegistry,
     });
-    expect(values).to.have.lengthOf(3);
-    expect(values[0]).to.be.within(1, 25);
-    expect(values[1]).to.equal(25);
-    expect(values[2]).to.be.within(1, 25);
+    expectGemValues(values, {
+      [PowerGem]: [11, 25],
+      [LuckGem]: [26, 50],
+    });
   });
 
   it("creator mint Legendart NFT Asset And new owner set Legendary catalyst with new gems: get correct values", async function () {
@@ -604,14 +595,14 @@ describe("Catalyst:Minting", function () {
     const values = await getValues({
       assetId: tokenId,
       tokenId,
-      fromBlockHash: receipt.blockHash,
+      fromBlock: receipt.blockNumber,
       catalystRegistry,
     });
-    expect(values).to.have.lengthOf(4);
-    expect(values[0]).to.be.within(1, 25);
-    expect(values[1]).to.be.within(1, 25);
-    expect(values[2]).to.equal(25);
-    expect(values[3]).to.be.within(1, 25);
+    expectGemValues(values, {
+      [PowerGem]: [16, 25],
+      [MagicGem]: [16, 25],
+      [LuckGem]: [26, 50],
+    });
   });
 
   it("creator mint Legendart NFT Asset and new owner add new gems: get correct values", async function () {
@@ -641,13 +632,13 @@ describe("Catalyst:Minting", function () {
     const values = await getValues({
       assetId: tokenId,
       tokenId,
-      fromBlockHash: originalReceipt.blockHash,
+      fromBlock: originalReceipt.blockNumber,
       catalystRegistry,
     });
-    expect(values).to.have.lengthOf(3);
-    expect(values[0]).to.be.within(1, 25);
-    expect(values[1]).to.equal(25);
-    expect(values[2]).to.be.within(1, 25);
+    expectGemValues(values, {
+      [PowerGem]: [11, 25],
+      [SpeedGem]: [26, 50],
+    });
   });
 
   it("creator mint Epic Asset And new owner set Legendary catalyst and add gems: get correct values", async function () {
@@ -677,13 +668,14 @@ describe("Catalyst:Minting", function () {
     const values = await getValues({
       assetId: tokenId,
       originalTokenId,
-      fromBlockHash: originalReceipt.blockHash,
+      fromBlock: originalReceipt.blockNumber,
       catalystRegistry,
     });
-    expect(values).to.have.lengthOf(3);
-    expect(values[0]).to.be.within(1, 25);
-    expect(values[1]).to.equal(25);
-    expect(values[2]).to.be.within(1, 25);
+    expectGemValues(values, {
+      [PowerGem]: [16, 25],
+      [SpeedGem]: [26, 50],
+      [LuckGem]: [16, 25],
+    });
   });
 
   it("creator mint Epic Asset And new owner set Common then Legendary catalyst and add gems: get correct values", async function () {
@@ -718,13 +710,14 @@ describe("Catalyst:Minting", function () {
     const values = await getValues({
       assetId: tokenId,
       originalTokenId,
-      fromBlockHash: originalReceipt.blockHash,
+      fromBlock: originalReceipt.blockNumber,
       catalystRegistry,
     });
-    expect(values).to.have.lengthOf(3);
-    expect(values[0]).to.be.within(1, 25);
-    expect(values[1]).to.equal(25);
-    expect(values[2]).to.be.within(1, 25);
+    expectGemValues(values, {
+      [PowerGem]: [16, 25],
+      [SpeedGem]: [26, 50],
+      [LuckGem]: [16, 25],
+    });
   });
 
   describe("fees", function () {
