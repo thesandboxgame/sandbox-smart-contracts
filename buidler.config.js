@@ -130,6 +130,7 @@ module.exports = {
     gemMinter: "sandAdmin", // TODO ?
     catalystRegistryAdmin: "sandAdmin",
     catalystMinterAdmin: "sandAdmin",
+    feeDistributionRecipients: ["0x0994C5fe4C175CC03Ec206C50Ed141101E92B6E2"],
     // testing
     others: {
       default: "from:5",
