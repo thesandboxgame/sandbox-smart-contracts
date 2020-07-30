@@ -10,48 +10,6 @@ const SpeedGem = 2;
 const MagicGem = 3;
 const LuckGem = 4;
 
-/*
-MINTING / CATALYST Burning
-
-Minting Asset with 1 Speed Gem:
-Speed: roll 1-25 = 25
-
-Minting Asset with 1 Speed Gem + 1 Magic Gem
-Speed: roll 6-25  = 2 => 6
-Magic: roll 6-25  = 20
-
-Minting Asset with 2 Power gems  + 1 Luck Gem
-Power : roll 26-50 => 40
-Luck: roll 11-25 => 20
-
-Minting Asset with 1 Power Gem
-Power : roll 1-25 = 3
-
-
-Adding Gems (later transaction done by the owner, not the creator)
-
-A + 1 Speed Gem
-Speed: roll 26-50 => 26
-
-A + 1 Magic Gem
-Speed: 25
-Magic: roll 6-25 =>  15
-
-A + 1 Power Gem +  1 Magic Gem
-Speed: 25
-Power roll: 11-25 = 15
-Magic: roll 11-25 = 10
-
-B + 2 Speed Gem
-Speed: roll 51-75 = 70
-Magic: 20
-
-D + 1 Magic Gem
-Power: 3 => 6
-Magic: roll 6-25 = 15
-
-*/
-
 function expectGemValues(values, expectedValues, options) {
   options = options || {};
   for (let i = 0; i < values.length; i++) {
@@ -276,6 +234,34 @@ describe("Catalyst:Values", function () {
       ],
       5,
       [{[PowerGem]: [1, 25]}, {[PowerGem]: [6, 25], [MagicGem]: [6, 25]}]
+    );
+  });
+
+  it("Minting Asset with 4 Gem one by one get 16-25 for all", async function () {
+    await fuzzValues(
+      LegendaryCatalyst,
+      LegendaryCatalyst,
+      [
+        {
+          gemIds: [DefenseGem],
+        },
+        {
+          gemIds: [LuckGem],
+        },
+        {
+          gemIds: [SpeedGem],
+        },
+        {
+          gemIds: [MagicGem],
+        },
+      ],
+      5,
+      [
+        {[DefenseGem]: [1, 25]},
+        {[DefenseGem]: [6, 25], [LuckGem]: [6, 25]},
+        {[DefenseGem]: [11, 25], [LuckGem]: [11, 25], [SpeedGem]: [11, 25]},
+        {[DefenseGem]: [16, 25], [LuckGem]: [16, 25], [SpeedGem]: [16, 25], [MagicGem]: [16, 25]},
+      ]
     );
   });
 });
