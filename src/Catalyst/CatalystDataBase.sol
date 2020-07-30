@@ -77,19 +77,19 @@ contract CatalystDataBase is CatalystValue {
             numGems += uint32(events[i - 1].gemIds.length);
         }
 
-        uint32 currentNumGems = numGems;
+        uint32 slotIndex = numGems;
         for (uint256 i = events.length; i > 0; i--) {
             for (uint256 j = events[i - 1].gemIds.length; j > 0; j--) {
-                uint256 slotIndex = currentNumGems - events[i - 1].gemIds.length + j - 1;
+                slotIndex--;
                 if (values[events[i - 1].gemIds[j - 1]] == 0) {
                     values[events[i - 1].gemIds[j - 1]] = _computeValue(seed, events[i - 1].gemIds[j - 1], events[i - 1].blockHash, slotIndex, 1);
                 } else {
                     values[events[i - 1].gemIds[j - 1]] += 25;
                 }
             }
-            _ensureMinimum(values, currentNumGems);
-            currentNumGems -= uint32(events[i - 1].gemIds.length);
         }
+
+        _ensureMinimum(values, numGems);
     }
 
     // function getValues(
