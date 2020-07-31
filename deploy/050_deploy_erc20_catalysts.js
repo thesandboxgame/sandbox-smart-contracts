@@ -30,7 +30,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
         from: deployer,
         gas: 3000000,
         log: true,
-        args: [catalystGroup.address, i, catalyst.name, tokenSymbol],
+        args: [catalystGroup.address, i, `Sandbox's ${tokenSymbol} Catalysts`, tokenSymbol],
       });
       erc20s.push(result.address);
       data.push({
