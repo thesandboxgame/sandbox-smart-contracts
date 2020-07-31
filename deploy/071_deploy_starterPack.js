@@ -60,7 +60,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   }
 };
 
-module.exports.skip = guard(["1", "4", "314159"], "StarterPack");
+module.exports.skip = guard(["1", "4", "314159"]); // TODO, "StarterPack");
 module.exports.dependencies = [
   "Sand",
   "NativeMetaTransactionProcessor",
