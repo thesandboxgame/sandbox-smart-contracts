@@ -34,6 +34,6 @@ module.exports = [
     sandMintingFee: sandWei(200),
     sandUpdateFee: sandWei(200),
     maxGems: 4,
-    quantityRange: [2, 200],
+    quantityRange: [1, 200],
   },
 ];

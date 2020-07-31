@@ -29,7 +29,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
         from: deployer,
         gas: 3000000,
         log: true,
-        args: [gemGroup.address, i, name, tokenSymbol],
+        args: [gemGroup.address, i, `Sandbox's ${tokenSymbol} Gems`, tokenSymbol],
       });
       gems.push(result.address);
     }
