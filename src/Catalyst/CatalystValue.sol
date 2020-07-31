@@ -3,10 +3,15 @@ pragma experimental ABIEncoderV2;
 
 
 interface CatalystValue {
+    struct GemEvent {
+        uint256[] gemIds;
+        bytes32 blockHash;
+    }
+
     function getValues(
         uint256 catalystId,
         uint256 seed,
-        uint32[] calldata gemIds,
-        bytes32[] calldata blockHashes
-    ) external view returns (uint32[] memory);
+        GemEvent[] calldata events,
+        uint32 totalNumberOfGemTypes
+    ) external view returns (uint32[] memory values);
 }

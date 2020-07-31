@@ -40,46 +40,55 @@ contract CatalystDataBase is CatalystValue {
         emit CatalystConfiguration(id, minQuantity, maxQuantity, sandMintingFee, sandUpdateFee);
     }
 
+    ///@dev compute a random value between min to 25.
+    //. example: 1-25, 6-25, 11-25, 16-25
     function _computeValue(
         uint256 seed,
-        uint32 gemId,
+        uint256 gemId,
         bytes32 blockHash,
-        uint256 slotIndex
+        uint256 slotIndex,
+        uint32 min
     ) internal pure returns (uint32) {
-        return 1 + uint16(uint256(keccak256(abi.encodePacked(gemId, seed, blockHash, slotIndex))) % 25);
+        return min + uint16(uint256(keccak256(abi.encodePacked(gemId, seed, blockHash, slotIndex))) % (26 - min));
     }
 
     function getValues(
         uint256 catalystId,
         uint256 seed,
-        uint32[] calldata gemIds,
-        bytes32[] calldata blockHashes
+        GemEvent[] calldata events,
+        uint32 totalNumberOfGemTypes
     ) external override view returns (uint32[] memory values) {
-        require(gemIds.length == blockHashes.length, "INCONSISTENT_LENGTHS");
         CatalystValue valueOverride = _valueOverrides[catalystId];
         if (address(valueOverride) != address(0)) {
-            return valueOverride.getValues(catalystId, seed, gemIds, blockHashes);
+            return valueOverride.getValues(catalystId, seed, events, totalNumberOfGemTypes);
         }
-        values = new uint32[](gemIds.length);
-        if (gemIds.length == 0) {
-            return values;
-        }
+        values = new uint32[](totalNumberOfGemTypes);
 
-        uint32 maxGemIds = 0;
-        for (uint256 i = gemIds.length; i > 0; i--) {
-            if (gemIds[i - 1] > maxGemIds) {
-                maxGemIds = gemIds[i - 1];
-            }
+        uint32 numGems;
+        for (uint256 i = 0; i < events.length; i++) {
+            numGems += uint32(events[i].gemIds.length);
         }
-        uint32[] memory valuesPerGemIds = new uint32[](maxGemIds + 1);
-        for (uint256 i = gemIds.length; i > 0; i--) {
-            uint32 gemId = gemIds[i - 1];
-            if (valuesPerGemIds[gemId] == 0) {
-                uint32 randomValue = _computeValue(seed, gemId, blockHashes[i - 1], i);
-                valuesPerGemIds[gemId] = randomValue;
-                values[i - 1] = randomValue;
-            } else {
-                values[i - 1] = 25; // 25 ensure multiple of the same gem will add up. so 2 Power gem will at least have a value of 26 (always more than a single gem which can only be between 1 and 25 by itself)
+        require(numGems <= MAX_UINT32, "TOO_MANY_GEMS");
+        uint32 minValue = (numGems - 1) * 5 + 1;
+
+        uint256 numGemsSoFar = 0;
+        for (uint256 i = 0; i < events.length; i++) {
+            numGemsSoFar += events[i].gemIds.length;
+            for (uint256 j = 0; j < events[i].gemIds.length; j++) {
+                uint256 gemId = events[i].gemIds[j];
+                uint256 slotIndex = numGemsSoFar - events[i].gemIds.length + j;
+                if (values[gemId] == 0) {
+                    // first gem : value = roll between ((numGemsSoFar-1)*5+1) and 25
+                    values[gemId] = _computeValue(seed, gemId, events[i].blockHash, slotIndex, (uint32(numGemsSoFar) - 1) * 5 + 1);
+                    // bump previous values:
+                    if (values[gemId] < minValue) {
+                        values[gemId] = minValue;
+                    }
+                } else {
+                    // further gem, previous roll are overriden with 25 and new roll between 1 and 25
+                    uint32 newRoll = _computeValue(seed, gemId, events[i].blockHash, slotIndex, 1);
+                    values[gemId] = (((values[gemId] - 1) / 25) + 1) * 25 + newRoll;
+                }
             }
         }
     }
@@ -109,6 +118,8 @@ contract CatalystDataBase is CatalystValue {
         uint16 maxQuantity;
         uint16 maxGems;
     }
+
+    uint32 internal constant MAX_UINT32 = 2**32 - 1;
 
     mapping(uint256 => MintData) internal _data;
     mapping(uint256 => CatalystValue) internal _valueOverrides;
