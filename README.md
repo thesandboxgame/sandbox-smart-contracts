@@ -41,6 +41,10 @@ RUN TESTS :
 yarn test
 ```
 
+ENVIRONMENT VARIABLES :
+
+The root of this repo contains a `example.env` file. You can copy this to your own `.env` file and populate the FIELDS with your own values. We use the MNEMONIC field to hold your seed-phrase. Alternately, if you want to use an HD-Wallet, the buidler-docs have a section on configuration here: https://buidler.dev/config/#hd-wallet-config
+
 # Technical Documentation
 
 You can explore here the documentation of our tokens and blockchain featurs:

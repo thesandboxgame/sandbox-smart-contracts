@@ -118,7 +118,9 @@ module.exports = {
     estateAdmin: "sandAdmin",
     P2PERC721SaleAdmin: "sandAdmin",
     backendReferralWallet: {
-      default: 0,
+      // default is computed from private key:
+      // "0x4242424242424242424242424242424242424242424242424242424242424242"
+      default: "0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025",
       1: "0x3044719d139F866a44c988823513eCB93060bF1b",
       4: "0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e",
       42: "0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e",
@@ -142,6 +144,9 @@ module.exports = {
     gemMinter: "sandAdmin", // TODO later : Staking Reward mechanism
     catalystRegistryAdmin: "sandAdmin",
     catalystMinterAdmin: "sandAdmin",
+    starterPackAdmin: "sandAdmin",
+    starterPackSaleBeneficiary: "sandSaleBeneficiary",
+    backendMessageSigner: "backendReferralWallet",
     // testing
     others: {
       default: "from:5",
