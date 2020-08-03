@@ -63,8 +63,8 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     landSaleBeneficiary,
     merkleRootHash,
     2591016400, // TODO
-    daiMedianizer.address,
-    dai.address,
+    // daiMedianizer.address,
+    // dai.address,
     backendReferralWallet,
     2000,
     estateContract.address,

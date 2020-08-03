@@ -31,17 +31,19 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     );
   }
 
-  const isDAIEnabled = await call(landSaleName, "isDAIEnabled");
-  if (!isDAIEnabled) {
-    log("enablingDAI for LandPreSale_4");
-    const currentLandSaleAdmin = await call(landSaleName, "getAdmin");
-    await sendTxAndWait(
-      {from: currentLandSaleAdmin, gas: 1000000, skipUnknownSigner: true},
-      landSaleName,
-      "setDAIEnabled",
-      true
-    );
-  }
+  // Remove for EstateSaleWithFee
+
+  // const isDAIEnabled = await call(landSaleName, "isDAIEnabled");
+  // if (!isDAIEnabled) {
+  //   log("enablingDAI for LandPreSale_4");
+  //   const currentLandSaleAdmin = await call(landSaleName, "getAdmin");
+  //   await sendTxAndWait(
+  //     {from: currentLandSaleAdmin, gas: 1000000, skipUnknownSigner: true},
+  //     landSaleName,
+  //     "setDAIEnabled",
+  //     true
+  //   );
+  // }
 
   const currentAdmin = await call(landSaleName, "getAdmin");
   if (currentAdmin.toLowerCase() !== landSaleAdmin.toLowerCase()) {
