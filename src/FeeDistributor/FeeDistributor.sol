@@ -1,7 +1,7 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-import "../contracts_common/src/interfaces/ERC20.sol";
+import {ERC20 as erc20tokenInterface} from "../contracts_common/src/interfaces/ERC20.sol";
 import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
 
 
@@ -11,7 +11,7 @@ contract FeeDistributor {
     using SafeMathWithRequire for uint256;
 
     event Deposit(address token, address from, uint256 amount);
-    event Withdrawal(ERC20 token, address to, uint256 amount);
+    event Withdrawal(erc20tokenInterface token, address to, uint256 amount);
     mapping(address => uint256) public recipientsShares;
     struct TokenState {
         uint256 totalReceived;
@@ -40,7 +40,7 @@ contract FeeDistributor {
     /// @notice Zero address reserved for ether withdrawal
     /// @param token the token that fee should be distributed in
     /// @return amount had withdrawn
-    function withdraw(ERC20 token) external returns (uint256 amount) {
+    function withdraw(erc20tokenInterface token) external returns (uint256 amount) {
         if (address(token) == address(0)) {
             amount = _etherWithdrawal();
         } else {
@@ -59,10 +59,10 @@ contract FeeDistributor {
         return amount;
     }
 
-    function _tokenWithdrawal(ERC20 token) private returns (uint256) {
-        uint256 amount = _calculateWithdrawalAmount(ERC20(token).balanceOf(address(this)), address(token));
+    function _tokenWithdrawal(erc20tokenInterface token) private returns (uint256) {
+        uint256 amount = _calculateWithdrawalAmount(erc20tokenInterface(token).balanceOf(address(this)), address(token));
         if (amount > 0) {
-            require(ERC20(token).transfer(msg.sender, amount), "FEE_WITHDRAWAL_FAILED");
+            require(erc20tokenInterface(token).transfer(msg.sender, amount), "FEE_WITHDRAWAL_FAILED");
         }
         return amount;
     }
