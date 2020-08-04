@@ -69,7 +69,7 @@ module.exports = {
     deployer: {
       default: 1,
       1: "0x18dd4e0eb8699eA4FeE238dE41ECfb95e32272f8",
-      4: "0x0994C5fe4C175CC03Ec206C50Ed141101E92B6E2",
+      4: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
       42: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
       314159: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
     }, // deploy contracts and make sure they are set up correctly
@@ -78,7 +78,7 @@ module.exports = {
       default: 2,
       // 4: "0x5b4c9eae565c1ba9eb65365aa02ee9fb0a653ce5",
       1: "0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06", // multi sig wallet
-      4: "0x0994C5fe4C175CC03Ec206C50Ed141101E92B6E2", // test multi sig wallet
+      4: "0xcbc70EcCd52bF3910CDC1455E6D2Bd45725F573D", // test multi sig wallet
       42: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
       314159: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
     },
@@ -110,7 +110,7 @@ module.exports = {
     landAdmin: {
       default: 2,
       1: "0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06",
-      4: "0x0994C5fe4C175CC03Ec206C50Ed141101E92B6E2",
+      4: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
       42: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
       314159: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
     },
@@ -118,7 +118,7 @@ module.exports = {
     estateAdmin: "sandAdmin",
     P2PERC721SaleAdmin: "sandAdmin",
     backendReferralWallet: {
-      default: "0x0994C5fe4C175CC03Ec206C50Ed141101E92B6E2",
+      default: 0,
       1: "0x3044719d139F866a44c988823513eCB93060bF1b",
       4: "0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e",
       42: "0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e",
