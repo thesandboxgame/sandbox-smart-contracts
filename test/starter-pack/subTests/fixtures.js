@@ -11,6 +11,8 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
     others,
     gemAdmin,
     catalystAdmin,
+    catalystMinter,
+    gemMinter,
   } = await getNamedAccounts();
   await deployments.fixture();
 
@@ -20,8 +22,8 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
   const starterPackContract = await ethers.getContract("StarterPackV1");
   const metaTxContract = await ethers.getContract("NativeMetaTransactionProcessor");
 
-  const gemContract = await ethers.getContract("Gem");
-  const catalystContract = await ethers.getContract("Catalyst");
+  const gemContract = await ethers.getContract("Gem", gemMinter);
+  const catalystContract = await ethers.getContract("Catalyst", catalystMinter);
 
   const gemAsAdmin = await ethers.getContract("Gem", gemAdmin);
   const catalystAsAdmin = await ethers.getContract("Catalyst", catalystAdmin);
@@ -30,6 +32,13 @@ module.exports.setupStarterPack = deployments.createFixture(async () => {
   const starterPackContractAsDeployer = await ethers.getContract("StarterPackV1", deployer);
   const starterPackContractAsAdmin = await ethers.getContract("StarterPackV1", starterPackAdmin);
   const starterPackContractAsBeneficiary = await ethers.getContract("StarterPackV1", starterPackSaleBeneficiary);
+
+  // reset to ensure existing test succeed
+  await starterPackContractAsAdmin.withdrawAll(
+    "0x0000000000000000000000000000000000000001",
+    [0, 1, 2, 3],
+    [0, 1, 2, 3, 4]
+  );
 
   const SandAdmin = {
     address: sandAdmin,
