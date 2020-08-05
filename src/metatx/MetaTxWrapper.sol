@@ -44,8 +44,8 @@ contract MetaTxWrapper {
     }
 
     /// @dev function to get the actual sender by fetching the last 20bytes
-    /// @return address of signer
-    function _msgSender() internal view returns (address payable signer) {
+    /// @return signer address of signer
+    function _msgSender() internal returns (address payable signer) {
         signer = msg.sender;
         if (isTrustedForwarder(signer)) {
             bytes memory data = msg.data;
