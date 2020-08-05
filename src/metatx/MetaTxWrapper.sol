@@ -3,15 +3,16 @@ pragma solidity 0.6.5;
 
 contract MetaTxWrapper {
     address internal immutable _forwardTo;
-    address internal immutable _forwarder;
+    address internal immutable _trustedForwarder;
 
-    constructor(address forwarder, address forwardTo) public {
-        _forwardTo = forwardTo;
-        _forwarder = forwarder;
+    /// @notice function to check if forwarder is trusted.
+    /// @return bool
+    function isTrustedForwarder(address forwarder) public returns (bool) {
+        return forwarder == _trustedForwarder;
     }
 
     fallback() external {
-        require(msg.sender == _forwarder, "can only be called by a forwarder");
+        require(isTrustedForwarder(msg.sender), "UNTRUSTED_FORWARDER");
         bytes memory data = msg.data;
         uint256 length = msg.data.length;
 
@@ -40,5 +41,23 @@ contract MetaTxWrapper {
                 }
         }
         */
+    }
+
+    /// @dev function to get the actual sender by fetching the last 20bytes
+    /// @return address of signer
+    function _msgSender() internal view returns (address payable signer) {
+        signer = msg.sender;
+        if (isTrustedForwarder(signer)) {
+            bytes memory data = msg.data;
+            uint256 length = msg.data.length;
+            assembly {
+                signer := mload(add(data, length))
+            }
+        }
+    }
+
+    constructor(address trustedForwarder, address forwardTo) public {
+        _forwardTo = forwardTo;
+        _trustedForwarder = trustedForwarder;
     }
 }
