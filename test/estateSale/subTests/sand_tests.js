@@ -120,7 +120,7 @@ function runSandTests(landSaleName) {
         );
 
         const receipt = await tx.wait();
-        const event = receipt.events[0];
+        const event = receipt.events[1];
         assert.equal(event.event, "ReferralUsed", "Event name is wrong");
 
         const referrer = event.args[0];
@@ -133,7 +133,7 @@ function runSandTests(landSaleName) {
         assert.equal(referrer, referral.referrer, "Referrer is wrong");
         assert.equal(referree, referral.referee, "Referee is wrong");
         assert.equal(token, contracts.sand.address, "Token is wrong");
-        assert.equal(amount, land.price, "Amount is wrong");
+        expect(amount).to.equal(BigNumber.from(land.price).mul(95).div(100)); // Referral calculated on 95% of the land sale price (after 5% fee has been deducted)
         assert.equal(commissionRate, referral.commissionRate, "Amount is wrong");
 
         const referrerBalance = await contracts.sand.balanceOf(userWithoutSAND.address);
@@ -262,7 +262,7 @@ function runSandTests(landSaleName) {
         );
 
         const receipt = await tx.wait();
-        const event = receipt.events[0];
+        const event = receipt.events[1];
         assert.equal(event.event, undefined, "Event should be undefined");
 
         const referrerBalance = await contracts.sand.balanceOf(userWithoutSAND.address);
@@ -270,7 +270,7 @@ function runSandTests(landSaleName) {
         assert.equal(referrerBalance, 0, "Referrer balance is wrong");
 
         const landSaleBeneficiaryBalance = await contracts.sand.balanceOf(LandSaleBeneficiary.address);
-        assert.equal(landSaleBeneficiaryBalance, land.price, "Balance is wrong");
+        expect(landSaleBeneficiaryBalance).to.equal(BigNumber.from(land.price).mul(95).div(100)); // land sale beneficiary receives 95% of the land sale price
 
         for (let sx = 0; sx < land.size; sx++) {
           for (let sy = 0; sy < land.size; sy++) {
