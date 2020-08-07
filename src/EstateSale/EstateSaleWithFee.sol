@@ -209,7 +209,7 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
     }
 
     function _handleSandFee(address buyer, uint256 priceInSand) internal returns (uint256) {
-        uint256 feeAmountInSand = priceInSand.div(100).mul(5);
+        uint256 feeAmountInSand = priceInSand.mul(5).div(100);
         require(_sand.transferFrom(buyer, address(_feeDistributor), feeAmountInSand), "FEE_TRANSFER_FAILED");
         return priceInSand.sub(feeAmountInSand);
     }
@@ -251,5 +251,4 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         _asset = ERC1155(asset);
         _feeDistributor = feeDistributor;
     }
-
 }
