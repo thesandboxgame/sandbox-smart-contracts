@@ -14,8 +14,6 @@ import "../ReferralValidator/ReferralValidator.sol";
 contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
     using SafeMathWithRequire for uint256;
 
-    bool _sandEnabled = false;
-
     event LandQuadPurchased(
         address indexed buyer,
         address indexed to,
@@ -32,19 +30,6 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         require(newWallet != address(0), "receiving wallet cannot be zero address");
         require(msg.sender == _admin, "only admin can change the receiving wallet");
         _wallet = newWallet;
-    }
-
-    /// @notice enable/disable the specific SAND payment for Lands
-    /// @param enabled whether to enable or disable
-    function setSANDEnabled(bool enabled) external {
-        require(msg.sender == _admin, "only admin can enable/disable SAND");
-        _sandEnabled = enabled;
-    }
-
-    /// @notice return whether the specific SAND payments are enabled
-    /// @return whether the specific SAND payments are enabled
-    function isSANDEnabled() external view returns (bool) {
-        return _sandEnabled;
     }
 
     /// @notice buy Land with SAND using the merkle proof associated with it
@@ -69,7 +54,6 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         bytes32[] calldata proof,
         bytes calldata referral
     ) external {
-        require(_sandEnabled, "sand payments not enabled");
         _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, assetIds, proof);
         _handleFeeAndReferral(buyer, priceInSand, referral);
         _mint(buyer, to, x, y, size, priceInSand, address(_sand), priceInSand);
@@ -209,7 +193,7 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
     }
 
     function _handleSandFee(address buyer, uint256 priceInSand) internal returns (uint256) {
-        uint256 feeAmountInSand = priceInSand.mul(5).div(100);
+        uint256 feeAmountInSand = priceInSand.mul(FEE).div(100);
         require(_sand.transferFrom(buyer, address(_feeDistributor), feeAmountInSand), "FEE_TRANSFER_FAILED");
         return priceInSand.sub(feeAmountInSand);
     }
@@ -225,6 +209,8 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
     address payable internal _wallet;
     uint256 internal immutable _expiryTime;
     bytes32 internal immutable _merkleRoot;
+
+    uint256 private constant FEE = 5; // percentage of land sale price to be diverted to a specially configured instance of FeeDistributor, shown as an integer
 
     constructor(
         address landAddress,

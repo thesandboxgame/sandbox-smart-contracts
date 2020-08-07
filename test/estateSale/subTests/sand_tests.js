@@ -15,29 +15,6 @@ function runSandTests(landSaleName) {
     describe("--> Tests with real LANDs", function () {
       beforeEach(async function () {
         initialSetUp = await setupEstateSale(landSaleName, "lands");
-        const {LandSaleAdmin} = initialSetUp;
-        await LandSaleAdmin.EstateSale.setSANDEnabled(true);
-      });
-
-      it("SAND is enabled", async function () {
-        const {contracts} = initialSetUp;
-        const isSANDEnabled = await contracts.estateSale.isSANDEnabled();
-        assert.ok(isSANDEnabled, "SAND should be enabled");
-      });
-
-      it("SAND can be disabled", async function () {
-        const {LandSaleAdmin} = initialSetUp;
-        await LandSaleAdmin.EstateSale.functions.setSANDEnabled(false);
-        const isSANDEnabled = await LandSaleAdmin.EstateSale.functions.isSANDEnabled();
-        assert.ok(!isSANDEnabled, "SAND should not be enabled");
-      });
-
-      it("SAND cannot be enabled if not admin", async function () {
-        const {userWithSAND} = initialSetUp;
-        await expectRevert(
-          userWithSAND.EstateSale.functions.setSANDEnabled(true),
-          "only admin can enable/disable SAND"
-        );
       });
 
       it("can buy estate with SAND (empty referral)", async function () {
@@ -211,58 +188,6 @@ function runSandTests(landSaleName) {
 
         const feeBeneficiaryBalance = await contracts.sand.balanceOf(users[5].address);
         expect(feeBeneficiaryBalance).to.equal(BigNumber.from(land.price).mul(5).div(100)); // 5% fee
-      });
-
-      it("CANNOT buy LAND (size === 1) with SAND if not enabled (empty referral)", async function () {
-        const {LandSaleAdmin, tree, userWithSAND, lands} = initialSetUp;
-
-        await LandSaleAdmin.EstateSale.functions.setSANDEnabled(false);
-
-        const land = lands[0];
-        const proof = tree.getProof(calculateLandHash(land));
-
-        await expectRevert(
-          userWithSAND.EstateSale.functions.buyLandWithSand(
-            userWithSAND.address,
-            userWithSAND.address,
-            zeroAddress,
-            land.x,
-            land.y,
-            land.size,
-            land.price,
-            land.salt,
-            [],
-            proof,
-            emptyReferral
-          ),
-          "sand payments not enabled"
-        );
-      });
-
-      it("CANNOT buy LAND (size > 1) with SAND if not enabled (empty referral)", async function () {
-        const {LandSaleAdmin, tree, userWithSAND, lands} = initialSetUp;
-
-        await LandSaleAdmin.EstateSale.functions.setSANDEnabled(false);
-
-        const land = lands.find((l) => l.size === 6);
-        const proof = tree.getProof(calculateLandHash(land));
-
-        await expectRevert(
-          userWithSAND.EstateSale.functions.buyLandWithSand(
-            userWithSAND.address,
-            userWithSAND.address,
-            zeroAddress,
-            land.x,
-            land.y,
-            land.size,
-            land.price,
-            land.salt,
-            [],
-            proof,
-            emptyReferral
-          ),
-          "sand payments not enabled"
-        );
       });
 
       it("can buy Land with SAND and an invalid referral", async function () {
@@ -677,8 +602,6 @@ function runSandTests(landSaleName) {
     describe("--> Tests with test LANDs for reserved addresses", function () {
       beforeEach(async function () {
         initialSetUp = await setupEstateSale(landSaleName, "testLands");
-        const {SandAdmin} = initialSetUp;
-        await SandAdmin.EstateSale.setSANDEnabled(true);
       });
 
       it("CANNOT buy Land from a reserved Land of a different address (empty referral)", async function () {
@@ -851,8 +774,6 @@ function runSandTests(landSaleName) {
     describe("--> Tests with test LANDs for assets bundle", function () {
       beforeEach(async function () {
         initialSetUp = await setupEstateSale(landSaleName, "testLands");
-        const {SandAdmin} = initialSetUp;
-        await SandAdmin.EstateSale.setSANDEnabled(true);
       });
 
       it("can buy Land with assets", async function () {
