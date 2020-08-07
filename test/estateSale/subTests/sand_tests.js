@@ -781,7 +781,7 @@ function runSandTests(landSaleName) {
         const land = lands[4];
         const proof = tree.getProof(calculateLandHash(land));
 
-        await userWithSAND.EstateSale.functions.buyLandWithETH(
+        await userWithSAND.EstateSale.functions.buyLandWithSand(
           userWithSAND.address,
           userWithSAND.address,
           zeroAddress,

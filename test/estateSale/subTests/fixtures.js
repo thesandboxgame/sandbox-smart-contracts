@@ -99,8 +99,6 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
       roles.landSaleBeneficiary,
       tree.getRoot().hash,
       saleEnd,
-      contracts.daiMedianizer.address,
-      contracts.dai.address,
       signer,
       maxCommissionRate,
       contracts.estate.address,

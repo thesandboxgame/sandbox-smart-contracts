@@ -6,7 +6,6 @@ import "./LandToken.sol";
 import "../contracts_common/src/Interfaces/ERC1155.sol";
 import "../contracts_common/src/Interfaces/ERC20.sol";
 import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
-import "../contracts_common/src/Interfaces/Medianizer.sol";
 import "../ReferralValidator/ReferralValidator.sol";
 
 
@@ -18,13 +17,10 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
     using SafeMathWithRequire for uint256;
 
     uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
-    uint256 internal constant daiPrice = 14400000000000000;
 
     ERC1155 internal immutable _asset;
     LandToken internal immutable _land;
     ERC20 internal immutable _sand;
-    Medianizer private immutable _medianizer;
-    ERC20 private immutable _dai;
     address internal immutable _estate;
     address internal immutable _feeDistributor;
 
@@ -33,8 +29,6 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
     bytes32 internal immutable _merkleRoot;
 
     bool _sandEnabled = false;
-    bool _etherEnabled = true;
-    bool _daiEnabled = false;
 
     event LandQuadPurchased(
         address indexed buyer,
@@ -54,8 +48,6 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         address payable initialWalletAddress,
         bytes32 merkleRoot,
         uint256 expiryTime,
-        address medianizerContractAddress,
-        address daiTokenContractAddress,
         address initialSigningWallet,
         uint256 initialMaxCommissionRate,
         address estate,
@@ -68,8 +60,6 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         _wallet = initialWalletAddress;
         _merkleRoot = merkleRoot;
         _expiryTime = expiryTime;
-        _medianizer = Medianizer(medianizerContractAddress);
-        _dai = ERC20(daiTokenContractAddress);
         _admin = admin;
         _estate = estate;
         _asset = ERC1155(asset);
@@ -82,32 +72,6 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         require(newWallet != address(0), "receiving wallet cannot be zero address");
         require(msg.sender == _admin, "only admin can change the receiving wallet");
         _wallet = newWallet;
-    }
-
-    /// @dev enable/disable DAI payment for Lands
-    /// @param enabled whether to enable or disable
-    function setDAIEnabled(bool enabled) external {
-        require(msg.sender == _admin, "only admin can enable/disable DAI");
-        _daiEnabled = enabled;
-    }
-
-    /// @notice return whether DAI payments are enabled
-    /// @return whether DAI payments are enabled
-    function isDAIEnabled() external view returns (bool) {
-        return _daiEnabled;
-    }
-
-    /// @notice enable/disable ETH payment for Lands
-    /// @param enabled whether to enable or disable
-    function setETHEnabled(bool enabled) external {
-        require(msg.sender == _admin, "only admin can enable/disable ETH");
-        _etherEnabled = enabled;
-    }
-
-    /// @notice return whether ETH payments are enabled
-    /// @return whether ETH payments are enabled
-    function isETHEnabled() external view returns (bool) {
-        return _etherEnabled;
     }
 
     /// @dev enable/disable the specific SAND payment for Lands
@@ -195,82 +159,6 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
     }
 
     /**
-     * @notice buy Land with ETH using the merkle proof associated with it
-     * @param buyer address that perform the payment
-     * @param to address that will own the purchased Land
-     * @param reserved the reserved address (if any)
-     * @param x x coordinate of the Land
-     * @param y y coordinate of the Land
-     * @param size size of the pack of Land to purchase
-     * @param priceInSand price in SAND to purchase that Land
-     * @param proof merkleProof for that particular Land
-     * @param referral the referral used by the buyer
-     */
-    function buyLandWithETH(
-        address buyer,
-        address to,
-        address reserved,
-        uint256 x,
-        uint256 y,
-        uint256 size,
-        uint256 priceInSand,
-        bytes32 salt,
-        uint256[] calldata assetIds,
-        bytes32[] calldata proof,
-        bytes calldata referral
-    ) external payable {
-        require(_etherEnabled, "ether payments not enabled");
-        _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, assetIds, proof);
-
-        uint256 ETHRequired = getEtherAmountWithSAND(priceInSand);
-        require(msg.value >= ETHRequired, "not enough ether sent");
-
-        if (msg.value - ETHRequired > 0) {
-            msg.sender.transfer(msg.value - ETHRequired); // refund extra
-        }
-
-        handleReferralWithETH(ETHRequired, referral, _wallet);
-
-        _mint(buyer, to, x, y, size, priceInSand, address(0), ETHRequired);
-        _sendAssets(to, assetIds);
-    }
-
-    /**
-     * @notice buy Land with DAI using the merkle proof associated with it
-     * @param buyer address that perform the payment
-     * @param to address that will own the purchased Land
-     * @param reserved the reserved address (if any)
-     * @param x x coordinate of the Land
-     * @param y y coordinate of the Land
-     * @param size size of the pack of Land to purchase
-     * @param priceInSand price in SAND to purchase that Land
-     * @param proof merkleProof for that particular Land
-     */
-    function buyLandWithDAI(
-        address buyer,
-        address to,
-        address reserved,
-        uint256 x,
-        uint256 y,
-        uint256 size,
-        uint256 priceInSand,
-        bytes32 salt,
-        uint256[] calldata assetIds,
-        bytes32[] calldata proof,
-        bytes calldata referral
-    ) external {
-        require(_daiEnabled, "dai payments not enabled");
-        _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, assetIds, proof);
-
-        uint256 DAIRequired = priceInSand.mul(daiPrice).div(1000000000000000000);
-
-        handleReferralWithERC20(buyer, DAIRequired, referral, _wallet, address(_dai));
-
-        _mint(buyer, to, x, y, size, priceInSand, address(_dai), DAIRequired);
-        _sendAssets(to, assetIds);
-    }
-
-    /**
      * @notice Gets the expiry time for the current sale
      * @return The expiry time, as a unix epoch
      */
@@ -341,25 +229,6 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         uint256 feeAmountInSand = priceInSand.div(100).mul(5);
         require(_sand.transferFrom(buyer, address(_feeDistributor), feeAmountInSand), "FEE_TRANSFER_FAILED");
         return priceInSand.sub(feeAmountInSand);
-    }
-
-    /**
-     * @notice Returns the amount of ETH for a specific amount of SAND
-     * @param sandAmount An amount of SAND
-     * @return The amount of ETH
-     */
-    function getEtherAmountWithSAND(uint256 sandAmount) public view returns (uint256) {
-        uint256 ethUsdPair = getEthUsdPair();
-        return sandAmount.mul(daiPrice).div(ethUsdPair);
-    }
-
-    /**
-     * @notice Gets the ETHUSD pair from the Medianizer contract
-     * @return The pair as an uint256
-     */
-    function getEthUsdPair() internal view returns (uint256) {
-        bytes32 pair = _medianizer.read();
-        return uint256(pair);
     }
 
     function onERC1155Received(

@@ -12,9 +12,6 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
   const estateContract = await deployments.get("Estate");
   const assetContract = await deployments.get("Asset");
 
-  const daiMedianizer = await deployments.get("DAIMedianizer");
-  const dai = await deployments.get("DAI");
-
   const {lands, merkleRootHash} = getLands(network.live, chainId);
 
   await deploy("LandPreSale_5", {
@@ -30,8 +27,6 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
       landSaleBeneficiary,
       merkleRootHash,
       2591016400, // TODO
-      daiMedianizer.address,
-      dai.address,
       backendReferralWallet,
       2000,
       estateContract.address,
