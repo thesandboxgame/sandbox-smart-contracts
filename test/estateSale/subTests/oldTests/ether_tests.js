@@ -2,9 +2,9 @@ const {assert, expect} = require("local-chai");
 const {ethers} = require("@nomiclabs/buidler");
 const {utils, BigNumber} = require("ethers");
 const {expectRevert, zeroAddress, increaseTime} = require("local-utils");
-const {setupEstateSale} = require("./fixtures");
-const {calculateLandHash} = require("../../../lib/merkleTreeHelper");
-const {createReferral} = require("../../../lib/referralValidator");
+const {setupEstateSale} = require("../fixtures");
+const {calculateLandHash} = require("../../../../lib/merkleTreeHelper");
+const {createReferral} = require("../../../../lib/referralValidator");
 
 function runEtherTests(landSaleName) {
   describe(landSaleName + ":ETH", function () {
