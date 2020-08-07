@@ -104,7 +104,8 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
       signer,
       maxCommissionRate,
       contracts.estate.address,
-      contracts.asset.address
+      contracts.asset.address,
+      roles.others[5] // TODO FeeDistributor for 5% fee
     );
 
     contracts.estateSale = estateSaleContract.connect(estateSaleContract.provider.getSigner(roles.landSaleAdmin));

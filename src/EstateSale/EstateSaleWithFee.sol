@@ -26,6 +26,7 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
     Medianizer private immutable _medianizer;
     ERC20 private immutable _dai;
     address internal immutable _estate;
+    address internal immutable _feeDistributor;
 
     address payable internal _wallet;
     uint256 internal immutable _expiryTime;
@@ -58,7 +59,8 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         address initialSigningWallet,
         uint256 initialMaxCommissionRate,
         address estate,
-        address asset
+        address asset,
+        address feeDistributor
     ) public ReferralValidator(initialSigningWallet, initialMaxCommissionRate) {
         _land = LandToken(landAddress);
         _sand = ERC20(sandContractAddress);
@@ -71,6 +73,7 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         _admin = admin;
         _estate = estate;
         _asset = ERC1155(asset);
+        _feeDistributor = feeDistributor;
     }
 
     /// @dev set the wallet receiving the proceeds
