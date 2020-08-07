@@ -1719,10 +1719,10 @@ buffer@^5.0.5, buffer@^5.2.1:
     base64-js "^1.0.2"
     ieee754 "^1.1.4"
 
-buidler-deploy@^0.5.8:
-  version "0.5.8"
-  resolved "https://registry.yarnpkg.com/buidler-deploy/-/buidler-deploy-0.5.8.tgz#850830890bc4c97835ec88848065df3e6f8b2f69"
-  integrity sha512-M9A1VTV6iRfqcB4Qsc6vF83KFMM6e6sa2QvgaDFQw2zIxx3R3kT4bthyRUMYsbJPCo8sbhdBSgviDTjjJY5eCQ==
+buidler-deploy@^0.5.11:
+  version "0.5.11"
+  resolved "https://registry.yarnpkg.com/buidler-deploy/-/buidler-deploy-0.5.11.tgz#a04c7a2f3848a0b26d7ef978472e6485b9af5d26"
+  integrity sha512-Rm12zw0u6yvyl+rxTOa5OYpSPACT0lAmxlrOZ/HjgT+qfa8esIaWP7kwfXZB5sTWnW42TbpsfJiLxa4dmA5Pmw==
   dependencies:
     "@ethersproject/abi" "^5.0.2"
     "@ethersproject/abstract-signer" "^5.0.2"
