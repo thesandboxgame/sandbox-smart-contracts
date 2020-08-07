@@ -188,7 +188,7 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         require(_sandEnabled, "sand payments not enabled");
         _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, assetIds, proof);
 
-        handleReferralWithERC20(buyer, priceInSand, referral, _wallet, address(_sand));
+        _handleFeeAndReferral(buyer, priceInSand, referral);
 
         _mint(buyer, to, x, y, size, priceInSand, address(_sand), priceInSand);
         _sendAssets(to, assetIds);
@@ -320,6 +320,27 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         }
 
         return computedHash == _merkleRoot;
+    }
+
+    function _handleFeeAndReferral(
+        address buyer,
+        uint256 priceInSand,
+        bytes memory referral
+    ) internal {
+         // send 5% fee to a specially configured instance of FeeDistributor.sol
+        uint256 remainingAmountInSand = _handleSandFee(buyer, priceInSand);
+
+        // calculate referral based on 95% of original priceInSand
+        handleReferralWithERC20(buyer, remainingAmountInSand, referral, _wallet, address(_sand));
+    }
+
+    function _handleSandFee(
+        address buyer,
+        uint256 priceInSand
+    ) internal returns (uint256) {
+        uint256 feeAmountInSand = priceInSand.div(100).mul(5);
+        require(_sand.transferFrom(buyer, address(_feeDistributor), feeAmountInSand), "FEE_TRANSFER_FAILED");
+        return priceInSand.sub(feeAmountInSand);
     }
 
     /**
