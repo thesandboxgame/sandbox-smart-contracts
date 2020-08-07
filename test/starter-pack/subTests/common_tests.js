@@ -3,7 +3,7 @@ const {assert, expect} = require("local-chai");
 const {getNamedAccounts} = require("@nomiclabs/buidler");
 const ethers = require("ethers");
 const {BigNumber} = ethers;
-const {waitFor, expectRevert} = require("local-utils");
+const {waitFor, expectRevert, checERC20Balances} = require("local-utils");
 
 function runCommonTests() {
   describe("StarterPack:Setup", function () {
@@ -29,29 +29,39 @@ function runCommonTests() {
 
     it("StarterPackV1 can receive Catalysts and Gems", async function () {
       // Mint Catalysts & Gems in fixture
-      const {starterPackContract, catalystContract, gemContract} = setUp;
+      const {
+        starterPackContract,
+        catalystContract,
+        gemContract,
+        ERC20SubTokenCommon,
+        ERC20SubTokenRare,
+        ERC20SubTokenEpic,
+        ERC20SubTokenLegendary,
+        ERC20SubTokenPower,
+        ERC20SubTokenDefense,
+        ERC20SubTokenSpeed,
+        ERC20SubTokenMagic,
+        ERC20SubTokenLuck,
+      } = setUp;
 
-      // Catalyst ERC20SubToken contracts: "Common", "Rare", "Epic", "Legendary"
-      const balanceCommonCatalyst = await catalystContract.balanceOf(starterPackContract.address, 0);
-      const balanceRareCatalyst = await catalystContract.balanceOf(starterPackContract.address, 1);
-      const balanceEpicCatalyst = await catalystContract.balanceOf(starterPackContract.address, 2);
-      const balanceLegendaryCatalyst = await catalystContract.balanceOf(starterPackContract.address, 3);
-      expect(balanceCommonCatalyst).to.equal(8);
-      expect(balanceRareCatalyst).to.equal(6);
-      expect(balanceEpicCatalyst).to.equal(4);
-      expect(balanceLegendaryCatalyst).to.equal(2);
-
-      // Gem ERC20SubToken contracts: "Power", "Defense", "Speed", "Magic", "Luck"
-      const balancePowerGem = await gemContract.balanceOf(starterPackContract.address, 0);
-      const balanceDefenseGem = await gemContract.balanceOf(starterPackContract.address, 1);
-      const balanceSpeedGem = await gemContract.balanceOf(starterPackContract.address, 2);
-      const balanceMagicGem = await gemContract.balanceOf(starterPackContract.address, 3);
-      const balanceLuckGem = await gemContract.balanceOf(starterPackContract.address, 4);
-      expect(balancePowerGem).to.equal(100);
-      expect(balanceDefenseGem).to.equal(100);
-      expect(balanceSpeedGem).to.equal(100);
-      expect(balanceMagicGem).to.equal(100);
-      expect(balanceLuckGem).to.equal(100);
+      await checERC20Balances(
+        starterPackContract.address,
+        {
+          ERC20SubTokenCommon: [ERC20SubTokenCommon, 2],
+          ERC20SubTokenRare: [ERC20SubTokenRare, 2],
+          ERC20SubTokenEpic: [ERC20SubTokenEpic, 2],
+          ERC20SubTokenLegendary: [ERC20SubTokenLegendary, 2],
+          ERC20SubTokenPower: [ERC20SubTokenPower, 2],
+          ERC20SubTokenDefense: [ERC20SubTokenDefense, 2],
+          ERC20SubTokenSpeed: [ERC20SubTokenSpeed, 2],
+          ERC20SubTokenMagic: [ERC20SubTokenMagic, 2],
+          ERC20SubTokenLuck: [ERC20SubTokenLuck, 2],
+        },
+        async () => {
+          await gemContract.batchMint(starterPackContract.address, [0, 1, 2, 3, 4], [2, 2, 2, 2, 2]);
+          await catalystContract.batchMint(starterPackContract.address, [0, 1, 2, 3], [2, 2, 2, 2]);
+        }
+      );
     });
 
     it("user can check the balance of a catalyst ID owned by StarterPackV1", async function () {
