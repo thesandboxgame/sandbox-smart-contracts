@@ -10,7 +10,7 @@ import "../ReferralValidator/ReferralValidator.sol";
 
 
 /// @title Estate Sale contract with referral
-/// @notice This contract mananges the sale of our lands as Estates
+/// @notice This contract manages the sale of our lands as Estates
 contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
     using SafeMathWithRequire for uint256;
 
