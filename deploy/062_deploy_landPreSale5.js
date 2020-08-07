@@ -21,7 +21,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     from: deployer,
     gas: 3000000,
     linkedData: lands,
-    contract: "EstateSale",
+    contract: "EstateSaleWithFee",
     args: [
       landContract.address,
       sandContract.address,

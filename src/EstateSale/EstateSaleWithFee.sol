@@ -14,7 +14,7 @@ import "../ReferralValidator/ReferralValidator.sol";
  * @title Estate Sale contract with referral that supports also DAI and ETH as payment
  * @notice This contract mananges the sale of our lands as Estates
  */
-contract EstateSale is MetaTransactionReceiver, ReferralValidator {
+contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
     using SafeMathWithRequire for uint256;
 
     uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
