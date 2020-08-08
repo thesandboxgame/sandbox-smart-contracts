@@ -11,3 +11,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   });
 };
 module.exports.tags = ["FeeDistributor"];
+module.exports.skip = guard(["1"], "FeeDistributor");
