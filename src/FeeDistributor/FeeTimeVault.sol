@@ -17,7 +17,6 @@ contract FeeTimeVault is Ownable {
     uint256 private _lastDaySaved;
     uint256 private _withdrawnAmount;
     uint256 private _startTime;
-    event Sync(uint256 amount);
 
     constructor(uint256 lockPeriod, ERC20 token) public {
         _lockPeriod = lockPeriod;
@@ -30,7 +29,6 @@ contract FeeTimeVault is Ownable {
         uint256 amount = _feeDistributor.withdraw(_token);
         _accumulatedAmountPerDay[day] = _accumulatedAmountPerDay[_lastDaySaved].add(amount);
         _lastDaySaved = day;
-        emit Sync(amount);
     }
 
     function withdraw() external onlyOwner {
@@ -38,8 +36,10 @@ contract FeeTimeVault is Ownable {
         uint256 amount = _accumulatedAmountPerDay[day.sub(_lockPeriod)];
         uint256 withdrawnAmount = _withdrawnAmount;
         amount = amount.sub(withdrawnAmount);
-        _withdrawnAmount = withdrawnAmount.add(amount);
-        require(ERC20(_token).transfer(msg.sender, amount), "FEE_WITHDRAWAL_FAILED");
+        if (amount > 0) {
+            _withdrawnAmount = withdrawnAmount.add(amount);
+            require(ERC20(_token).transfer(msg.sender, amount), "FEE_WITHDRAWAL_FAILED");
+        }
     }
 
     function setFeeDistributor(FeeDistributor feeDistributor) external onlyOwner {
