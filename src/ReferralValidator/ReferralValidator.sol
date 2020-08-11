@@ -1,10 +1,10 @@
 /* solhint-disable not-rely-on-time, func-order */
 pragma solidity 0.6.5;
 
-import "../contracts_common/src/Libraries/SigUtil.sol";
-import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
-import "../contracts_common/src/Interfaces/ERC20.sol";
-import "../contracts_common/src/BaseWithStorage/Admin.sol";
+import "../common/Libraries/SigUtil.sol";
+import "../common/Libraries/SafeMathWithRequire.sol";
+import "../common/Interfaces/ERC20.sol";
+import "../common/BaseWithStorage/Admin.sol";
 
 
 /// @dev This contract verifies if a referral is valid

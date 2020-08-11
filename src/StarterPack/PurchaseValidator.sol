@@ -1,8 +1,8 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-import "../contracts_common/src/Libraries/SigUtil.sol";
-import "../contracts_common/src/BaseWithStorage/Admin.sol";
+import "../common/Libraries/SigUtil.sol";
+import "../common/BaseWithStorage/Admin.sol";
 
 
 contract PurchaseValidator is Admin {
@@ -84,7 +84,7 @@ contract PurchaseValidator is Admin {
         uint256[] memory catalystIds,
         uint256[] memory catalystQuantities,
         uint256[] memory gemQuantities
-    ) private returns (bool) {
+    ) private pure returns (bool) {
         uint256 maxGemsAllowed;
         uint256 requestedGems;
         for (uint256 i = 0; i < catalystQuantities.length; i++) {

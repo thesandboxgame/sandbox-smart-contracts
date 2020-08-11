@@ -2,13 +2,13 @@ pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
 import "./ERC20SubToken.sol";
-import "../contracts_common/src/Libraries/SafeMath.sol";
-import "../contracts_common/src/Libraries/AddressUtils.sol";
-import "../contracts_common/src/Libraries/ObjectLib32.sol";
-import "../contracts_common/src/Libraries/BytesUtil.sol";
+import "../common/Libraries/SafeMath.sol";
+import "../common/Libraries/AddressUtils.sol";
+import "../common/Libraries/ObjectLib32.sol";
+import "../common/Libraries/BytesUtil.sol";
 
-import "../contracts_common/src/BaseWithStorage/SuperOperators.sol";
-import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
+import "../common/BaseWithStorage/SuperOperators.sol";
+import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 
 
 contract ERC20Group is SuperOperators, MetaTransactionReceiver {
