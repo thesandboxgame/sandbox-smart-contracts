@@ -6,13 +6,13 @@ import "./BaseRelayRecipient.sol";
 contract MetaTxWrapper is BaseRelayRecipient {
     address internal immutable _forwardTo;
 
-    constructor(address forwarder, address forwardTo) public {
+    constructor(address trusted_Forwarder, address forwardTo) public {
         _forwardTo = forwardTo;
-        _forwarder = forwarder;
+        trustedForwarder = trusted_Forwarder;
     }
 
     fallback() external {
-        require(msg.sender == _forwarder, "can only be called by a forwarder");
+        require(msg.sender == trustedForwarder, "can only be called by a forwarder");
         bytes memory data = msg.data;
         uint256 length = msg.data.length;
 
