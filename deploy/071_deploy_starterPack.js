@@ -14,7 +14,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
 
   await deploy("StarterPackV1", {
     from: deployer,
-    gas: 3000000,
     args: [
       starterPackAdmin,
       sandContract.address,
