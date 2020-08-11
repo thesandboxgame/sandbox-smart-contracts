@@ -1,4 +1,5 @@
 const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
+const {BigNumber} = require("ethers");
 const EstateTestHelper = require("./_testHelper");
 const MerkleTree = require("../../lib/merkleTree");
 const {createDataArray, calculateLandHash} = require("../../lib/merkleTreeHelper");
@@ -55,6 +56,11 @@ module.exports.setupEstateSale = deployments.createFixture(async () => {
   const lands = landSaleDeployment.linkedData;
   const landHashArray = createDataArray(lands);
   const merkleTree = new MerkleTree(landHashArray);
+
+  await sandContract.connect(sandContract.provider.getSigner(sandAdmin)).setSuperOperator(saleContract.address, true);
+  await sandContract
+    .connect(sandContract.provider.getSigner(sandAdmin))
+    .transfer(user0, BigNumber.from("1000000000000000000000000"));
 
   return {
     estateContract,
