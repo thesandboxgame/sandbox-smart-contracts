@@ -1,7 +1,9 @@
 pragma solidity 0.6.5;
 
+import "./BaseRelayRecipient.sol";
 
-contract MetaTxWrapper {
+
+contract MetaTxWrapper is BaseRelayRecipient {
     address internal immutable _forwardTo;
     address internal immutable _forwarder;
 
