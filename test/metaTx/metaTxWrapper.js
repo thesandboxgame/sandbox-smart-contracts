@@ -1,13 +1,17 @@
-// const {ethers} = require("ethers");
-const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
+const {deployments, getNamedAccounts} = require("@nomiclabs/buidler");
+// const ethers = require("ethers");
+// const {Wallet} = ethers;
 const {assert, expect} = require("local-chai");
 // const {expectRevert} = require("local-utils");
 
-let setUp;
+// const privateKey = "0x7777777777777777777777777777777777777777777777777777777777777777";
 
-const setupTest = deployments.createFixture(async () => {
+let setUp;
+let accounts;
+
+const setupTest = deployments.createFixture(async (bre) => {
   await deployments.fixture();
-  const MetaTxWrapperContract = await ethers.getContract("MetaTxWrapper");
+  const MetaTxWrapperContract = await bre.ethers.getContract("MetaTxWrapper");
   return {
     MetaTxWrapperContract,
   };
@@ -16,13 +20,19 @@ const setupTest = deployments.createFixture(async () => {
 describe("MetaTxWrapper", function () {
   beforeEach(async function () {
     setUp = await setupTest();
+    accounts = await getNamedAccounts();
   });
 
-  it("can set & check trusted forwarder", async function () {
+  it("can check trusted forwarder", async function () {
     const {MetaTxWrapperContract} = setUp;
-    const {metaTxTrustedForwarder} = await getNamedAccounts();
     const trustedForwarder = await MetaTxWrapperContract.trustedForwarder();
-    expect(trustedForwarder).to.equal(metaTxTrustedForwarder);
-    assert.ok(await MetaTxWrapperContract.isTrustedForwarder(metaTxTrustedForwarder));
+    expect(trustedForwarder).to.equal(accounts.metaTxTrustedForwarder);
+    assert.ok(await MetaTxWrapperContract.isTrustedForwarder(accounts.metaTxTrustedForwarder));
+  });
+
+  it("can return the message sender when called with no extra data", async function () {
+    const {MetaTxWrapperContract} = setUp;
+    const sender = await MetaTxWrapperContract._msgSender();
+    expect(sender).to.equal("0xc783df8a850f42e7F7e57013759C285caa701eB6");
   });
 });
