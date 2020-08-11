@@ -2,7 +2,7 @@ pragma solidity 0.6.5;
 
 import "../BaseWithStorage/ERC721BaseToken.sol";
 import "../Interfaces/LandToken.sol";
-import "../common/Interfaces/ERC721MandatoryTokenReceiver.sol";
+import "../contracts_common/src/Interfaces/ERC721MandatoryTokenReceiver.sol";
 
 
 contract EstateBaseToken is ERC721BaseToken {
