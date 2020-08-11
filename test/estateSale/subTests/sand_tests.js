@@ -15,29 +15,6 @@ function runSandTests(landSaleName) {
     describe("--> Tests with real LANDs", function () {
       beforeEach(async function () {
         initialSetUp = await setupEstateSale(landSaleName, "lands");
-        const {LandSaleAdmin} = initialSetUp;
-        await LandSaleAdmin.EstateSale.setSANDEnabled(true);
-      });
-
-      it("SAND is enabled", async function () {
-        const {contracts} = initialSetUp;
-        const isSANDEnabled = await contracts.estateSale.isSANDEnabled();
-        assert.ok(isSANDEnabled, "SAND should be enabled");
-      });
-
-      it("SAND can be disabled", async function () {
-        const {LandSaleAdmin} = initialSetUp;
-        await LandSaleAdmin.EstateSale.functions.setSANDEnabled(false);
-        const isSANDEnabled = await LandSaleAdmin.EstateSale.functions.isSANDEnabled();
-        assert.ok(!isSANDEnabled, "SAND should not be enabled");
-      });
-
-      it("SAND cannot be enabled if not admin", async function () {
-        const {userWithSAND} = initialSetUp;
-        await expectRevert(
-          userWithSAND.EstateSale.functions.setSANDEnabled(true),
-          "only admin can enable/disable SAND"
-        );
       });
 
       it("can buy estate with SAND (empty referral)", async function () {
@@ -120,7 +97,7 @@ function runSandTests(landSaleName) {
         );
 
         const receipt = await tx.wait();
-        const event = receipt.events[0];
+        const event = receipt.events[1];
         assert.equal(event.event, "ReferralUsed", "Event name is wrong");
 
         const referrer = event.args[0];
@@ -133,7 +110,7 @@ function runSandTests(landSaleName) {
         assert.equal(referrer, referral.referrer, "Referrer is wrong");
         assert.equal(referree, referral.referee, "Referee is wrong");
         assert.equal(token, contracts.sand.address, "Token is wrong");
-        assert.equal(amount, land.price, "Amount is wrong");
+        expect(amount).to.equal(BigNumber.from(land.price).mul(95).div(100)); // Referral calculated on 95% of the land sale price (after 5% fee has been deducted)
         assert.equal(commissionRate, referral.commissionRate, "Amount is wrong");
 
         const referrerBalance = await contracts.sand.balanceOf(userWithoutSAND.address);
@@ -160,56 +137,57 @@ function runSandTests(landSaleName) {
         assert.equal(estateOwner, userWithSAND.address);
       });
 
-      it("CANNOT buy LAND (size === 1) with SAND if not enabled (empty referral)", async function () {
-        const {LandSaleAdmin, tree, userWithSAND, lands} = initialSetUp;
-
-        await LandSaleAdmin.EstateSale.functions.setSANDEnabled(false);
-
-        const land = lands[0];
-        const proof = tree.getProof(calculateLandHash(land));
-
-        await expectRevert(
-          userWithSAND.EstateSale.functions.buyLandWithSand(
-            userWithSAND.address,
-            userWithSAND.address,
-            zeroAddress,
-            land.x,
-            land.y,
-            land.size,
-            land.price,
-            land.salt,
-            [],
-            proof,
-            emptyReferral
-          ),
-          "sand payments not enabled"
-        );
-      });
-
-      it("CANNOT buy LAND (size > 1) with SAND if not enabled (empty referral)", async function () {
-        const {LandSaleAdmin, tree, userWithSAND, lands} = initialSetUp;
-
-        await LandSaleAdmin.EstateSale.functions.setSANDEnabled(false);
-
+      it("correct fee is taken when estate is purchased with SAND and referral", async function () {
+        const {tree, userWithSAND, userWithoutSAND, lands, contracts, users} = initialSetUp;
         const land = lands.find((l) => l.size === 6);
         const proof = tree.getProof(calculateLandHash(land));
 
-        await expectRevert(
-          userWithSAND.EstateSale.functions.buyLandWithSand(
-            userWithSAND.address,
-            userWithSAND.address,
-            zeroAddress,
-            land.x,
-            land.y,
-            land.size,
-            land.price,
-            land.salt,
-            [],
-            proof,
-            emptyReferral
-          ),
-          "sand payments not enabled"
+        const referral = {
+          referrer: userWithoutSAND.address,
+          referee: userWithSAND.address,
+          expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
+          commissionRate: "500",
+        };
+
+        const sig = await createReferral(
+          privateKey,
+          referral.referrer,
+          referral.referee,
+          referral.expiryTime,
+          referral.commissionRate
         );
+
+        const isReferralValid = await contracts.estateSale.isReferralValid(
+          sig,
+          referral.referrer,
+          referral.referee,
+          referral.expiryTime,
+          referral.commissionRate
+        );
+
+        assert.equal(isReferralValid, true, "Referral should be valid");
+
+        const encodedReferral = utils.defaultAbiCoder.encode(
+          ["bytes", "address", "address", "uint256", "uint256"],
+          [sig, referral.referrer, referral.referee, referral.expiryTime, referral.commissionRate]
+        );
+
+        await userWithSAND.EstateSale.functions.buyLandWithSand(
+          userWithSAND.address,
+          userWithSAND.address,
+          zeroAddress,
+          land.x,
+          land.y,
+          land.size,
+          land.price,
+          land.salt,
+          [],
+          proof,
+          encodedReferral
+        );
+
+        const feeBeneficiaryBalance = await contracts.sand.balanceOf(users[5].address);
+        expect(feeBeneficiaryBalance).to.equal(BigNumber.from(land.price).mul(5).div(100)); // 5% fee
       });
 
       it("can buy Land with SAND and an invalid referral", async function () {
@@ -262,7 +240,7 @@ function runSandTests(landSaleName) {
         );
 
         const receipt = await tx.wait();
-        const event = receipt.events[0];
+        const event = receipt.events[1];
         assert.equal(event.event, undefined, "Event should be undefined");
 
         const referrerBalance = await contracts.sand.balanceOf(userWithoutSAND.address);
@@ -270,7 +248,7 @@ function runSandTests(landSaleName) {
         assert.equal(referrerBalance, 0, "Referrer balance is wrong");
 
         const landSaleBeneficiaryBalance = await contracts.sand.balanceOf(LandSaleBeneficiary.address);
-        assert.equal(landSaleBeneficiaryBalance, land.price, "Balance is wrong");
+        expect(landSaleBeneficiaryBalance).to.equal(BigNumber.from(land.price).mul(95).div(100)); // land sale beneficiary receives 95% of the land sale price
 
         for (let sx = 0; sx < land.size; sx++) {
           for (let sy = 0; sy < land.size; sy++) {
@@ -281,6 +259,59 @@ function runSandTests(landSaleName) {
         }
         const estateOwner = await contracts.estate.ownerOf(1);
         assert.equal(estateOwner, userWithSAND.address);
+      });
+
+      it("correct fee is taken when estate is purchased with SAND and invalid referral", async function () {
+        const {tree, userWithSAND, userWithoutSAND, lands, contracts, users} = initialSetUp;
+        const land = lands.find((l) => l.size === 6);
+        const proof = tree.getProof(calculateLandHash(land));
+
+        const referral = {
+          referrer: userWithoutSAND.address,
+          referee: userWithSAND.address,
+          expiryTime: Math.floor(Date.now() / 1000) + referralLinkValidity,
+          commissionRate: "10000",
+        };
+
+        const sig = await createReferral(
+          privateKey,
+          referral.referrer,
+          referral.referee,
+          referral.expiryTime,
+          referral.commissionRate
+        );
+
+        const isReferralValid = await contracts.estateSale.isReferralValid(
+          sig,
+          referral.referrer,
+          referral.referee,
+          referral.expiryTime,
+          referral.commissionRate
+        );
+
+        assert.equal(isReferralValid, false, "Referral should be invalid");
+
+        const encodedReferral = utils.defaultAbiCoder.encode(
+          ["bytes", "address", "address", "uint256", "uint256"],
+          [sig, referral.referrer, referral.referee, referral.expiryTime, referral.commissionRate]
+        );
+
+        await userWithSAND.EstateSale.functions.buyLandWithSand(
+          userWithSAND.address,
+          userWithSAND.address,
+          zeroAddress,
+          land.x,
+          land.y,
+          land.size,
+          land.price,
+          land.salt,
+          [],
+          proof,
+          encodedReferral
+        );
+
+        const feeBeneficiaryBalance = await contracts.sand.balanceOf(users[5].address);
+        expect(feeBeneficiaryBalance).to.equal(BigNumber.from(land.price).mul(5).div(100)); // 5% fee
       });
 
       it("CANNOT buy Land without SAND", async function () {
@@ -571,8 +602,6 @@ function runSandTests(landSaleName) {
     describe("--> Tests with test LANDs for reserved addresses", function () {
       beforeEach(async function () {
         initialSetUp = await setupEstateSale(landSaleName, "testLands");
-        const {SandAdmin} = initialSetUp;
-        await SandAdmin.EstateSale.setSANDEnabled(true);
       });
 
       it("CANNOT buy Land from a reserved Land of a different address (empty referral)", async function () {
@@ -745,8 +774,6 @@ function runSandTests(landSaleName) {
     describe("--> Tests with test LANDs for assets bundle", function () {
       beforeEach(async function () {
         initialSetUp = await setupEstateSale(landSaleName, "testLands");
-        const {SandAdmin} = initialSetUp;
-        await SandAdmin.EstateSale.setSANDEnabled(true);
       });
 
       it("can buy Land with assets", async function () {
@@ -781,7 +808,7 @@ function runSandTests(landSaleName) {
         const land = lands[4];
         const proof = tree.getProof(calculateLandHash(land));
 
-        await userWithSAND.EstateSale.functions.buyLandWithETH(
+        await userWithSAND.EstateSale.functions.buyLandWithSand(
           userWithSAND.address,
           userWithSAND.address,
           zeroAddress,
