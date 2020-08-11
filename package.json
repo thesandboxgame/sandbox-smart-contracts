@@ -65,13 +65,12 @@
     "smartcheck": "smartcheck -p .",
     "local:deploy": "buidler --network localhost deploy",
     "rinkeby:deploy": "buidler --network rinkeby deploy",
-    "test:deploy": "buidler --network test_rinkeby deploy",
-    "kovan:deploy": "buidler --network kovan deploy",
+    "rinkeby:test:deploy": "buidler --network rinkeby_test deploy",
     "mainnet:deploy": "buidler --network mainnet deploy",
     "void:run": "cross-env BUIDLER_NETWORK=buidlerevm node",
     "local:run": "cross-env BUIDLER_NETWORK=localhost node",
     "rinkeby:run": "cross-env BUIDLER_NETWORK=rinkeby node",
-    "kovan:run": "cross-env BUIDLER_NETWORK=kovan node",
+    "rinkeby:test:run": "cross-env BUIDLER_NETWORK=rinkeby_test node",
     "mainnet:run": "cross-env BUIDLER_NETWORK=mainnet node"
   }
 }

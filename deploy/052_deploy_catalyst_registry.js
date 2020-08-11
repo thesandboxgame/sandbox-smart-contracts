@@ -16,3 +16,5 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   });
 };
 module.exports.skip = guard(["1", "314159", "4"], "CatalystRegistry");
+module.exports.tags = ["CatalystRegistry"];
+module.exports.dependencies = ["Catalyst"];

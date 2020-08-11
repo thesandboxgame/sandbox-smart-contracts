@@ -1,43 +1,32 @@
 module.exports = async ({/*getNamedAccounts, */ deployments}) => {
-  const {call, sendTxAndWait, log} = deployments;
+  const {read, execute, log} = deployments;
 
   // const {
   //   assetAuctionFeeCollector,
   // } = await getNamedAccounts();
 
-  const sand = await deployments.getOrNull("Sand");
-  if (!sand) {
-    throw new Error("no Sand contract deployed");
-  }
-  const asset = await deployments.getOrNull("Asset");
-  if (!asset) {
-    throw new Error("no Asset contract deployed");
-  }
-  const assetAuction = await deployments.getOrNull("AssetSignedAuction");
-  if (!assetAuction) {
-    throw new Error("no AssetSignedAuction contract deployed");
-  }
+  const assetAuction = await deployments.get("AssetSignedAuction");
 
-  const isSandSuperOperator = await call("Sand", "isSuperOperator", assetAuction.address);
+  const isSandSuperOperator = await read("Sand", "isSuperOperator", assetAuction.address);
   if (!isSandSuperOperator) {
     log("setting AssetSignedAuction as super operator for Sand");
-    const currentSandAdmin = await call("Sand", "getAdmin");
-    await sendTxAndWait(
-      {from: currentSandAdmin, gas: 100000, skipUnknownSigner: true},
+    const currentSandAdmin = await read("Sand", "getAdmin");
+    await execute(
       "Sand",
+      {from: currentSandAdmin, skipUnknownSigner: true},
       "setSuperOperator",
       assetAuction.address,
       true
     );
   }
 
-  const isAssetSuperOperator = await call("Asset", "isSuperOperator", assetAuction.address);
+  const isAssetSuperOperator = await read("Asset", "isSuperOperator", assetAuction.address);
   if (!isAssetSuperOperator) {
     log("setting AssetSignedAuction as super operator for Asset");
-    const currentAssetAdmin = await call("Asset", "getAdmin");
-    await sendTxAndWait(
-      {from: currentAssetAdmin, gas: 100000, skipUnknownSigner: true},
+    const currentAssetAdmin = await read("Asset", "getAdmin");
+    await execute(
       "Asset",
+      {from: currentAssetAdmin, skipUnknownSigner: true},
       "setSuperOperator",
       assetAuction.address,
       true
@@ -54,9 +43,10 @@ module.exports = async ({/*getNamedAccounts, */ deployments}) => {
   // }
   // if (!lastFeeEvent || !(lastFeeEvent.args || lastFeeEvent.values)[1].eq(fee10000th)) {
   //     log('set AssetSignedAuction\'s fee to 3%');
-  //     const currentAssetAuctionAdmin = await call('AssetSignedAuction', 'getAdmin');
-  //     await sendTxAndWait({from: currentAssetAuctionAdmin, gas: 100000, skipUnknownSigner: true}, 'AssetSignedAuction', 'setFee', assetAuctionFeeCollector, fee10000th);
+  //     const currentAssetAuctionAdmin = await read('AssetSignedAuction', 'getAdmin');
+  //     await execute('AssetSignedAuction', {from: currentAssetAuctionAdmin, skipUnknownSigner: true}, 'setFee', assetAuctionFeeCollector, fee10000th);
   // } else {
   //     log('AssetSignedAuction\'s fee is already 3%');
   // }
 };
+module.exports.dependencies = ["Sand", "AssetSignedAuction", "Asset"];

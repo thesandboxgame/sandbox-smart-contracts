@@ -1,5 +1,5 @@
 module.exports = async ({getNamedAccounts, deployments}) => {
-  const {call, sendTxAndWait, log} = deployments;
+  const {read, execute, log} = deployments;
 
   const {landAdmin} = await getNamedAccounts();
 
@@ -10,21 +10,16 @@ module.exports = async ({getNamedAccounts, deployments}) => {
 
   let currentAdmin;
   try {
-    currentAdmin = await call("Land", "getAdmin");
+    currentAdmin = await read("Land", "getAdmin");
   } catch (e) {}
   if (currentAdmin) {
     if (currentAdmin.toLowerCase() !== landAdmin.toLowerCase()) {
       log("setting land Admin");
-      await sendTxAndWait(
-        {from: currentAdmin, gas: 1000000, skipUnknownSigner: true},
-        "Land",
-        "changeAdmin",
-        landAdmin
-      );
+      await execute("Land", {from: currentAdmin, skipUnknownSigner: true}, "changeAdmin", landAdmin);
     }
   } else {
     log("current land impl do not support admin");
   }
 };
-module.exports.tags = ["Land"];
 module.exports.runAtTheEnd = true;
+module.exports.dependencies = ["Land"];

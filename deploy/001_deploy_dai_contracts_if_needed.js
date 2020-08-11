@@ -15,3 +15,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     dai = await deploy("DAI", {from: deployer, gas: 6721975, contract: "FakeDai"});
   }
 };
+module.exports.tags = ["DAI"];

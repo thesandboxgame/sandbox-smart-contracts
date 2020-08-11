@@ -38,3 +38,5 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   await addGems(gemNames);
 };
 module.exports.skip = guard(["1", "4", "314159"], "Gem");
+module.exports.tags = ["Gem"];
+module.exports.dependencies = ["Sand"];

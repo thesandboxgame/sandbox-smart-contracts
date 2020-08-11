@@ -41,3 +41,5 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
   });
 };
 module.exports.skip = guard(["1", "4", "314159"]); // TODO , 'LandPreSale_5');
+module.exports.tags = ["LandPreSale_5"];
+module.exports.dependencies = ["Sand", "Land", "DAI", "Asset", "Estate"];
