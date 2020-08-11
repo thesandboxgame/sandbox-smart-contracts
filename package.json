@@ -1,9 +1,12 @@
 {
   "name": "tsb-contracts",
   "version": "0.0.1",
-  "description": "",
+  "description": "smart contracts for the sandbox",
   "license": "UNLICENSED",
-  "private": true,
+  "files": [
+    "deployments/mainnet",
+    "deployments/rinkeby"
+  ],
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^8.5.1-2",
     "@nomiclabs/buidler": "^1.4.3",
