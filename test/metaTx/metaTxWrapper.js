@@ -1,9 +1,11 @@
-const {ethers} = require("ethers");
-const {deployments, getNamedAccounts} = require("@nomiclabs/buidler");
+// const {ethers} = require("ethers");
+const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
 const {assert, expect} = require("local-chai");
 // const {expectRevert} = require("local-utils");
 
-const setupTest = deployments.createFixture(async ({deployments, ethers}) => {
+let setUp;
+
+const setupTest = deployments.createFixture(async () => {
   await deployments.fixture();
   const MetaTxWrapperContract = await ethers.getContract("MetaTxWrapper");
   return {
@@ -12,9 +14,13 @@ const setupTest = deployments.createFixture(async ({deployments, ethers}) => {
 });
 
 describe("MetaTxWrapper", function () {
+  beforeEach(async function () {
+    setUp = await setupTest();
+  });
+
   it("can set & check trusted forwarder", async function () {
+    const {MetaTxWrapperContract} = setUp;
     const {metaTxTrustedForwarder} = await getNamedAccounts();
-    const {MetaTxWrapperContract} = await setupTest();
     const trustedForwarder = await MetaTxWrapperContract.trustedForwarder();
     expect(trustedForwarder).to.equal(metaTxTrustedForwarder);
     assert.ok(await MetaTxWrapperContract.isTrustedForwarder(metaTxTrustedForwarder));
