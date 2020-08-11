@@ -5,15 +5,12 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
   const {deploy} = deployments;
   const chainId = await getChainId();
 
-  const {deployer, landSaleBeneficiary, backendReferralWallet} = await getNamedAccounts();
+  const {deployer, landSaleBeneficiary, backendReferralWallet, others} = await getNamedAccounts();
 
   const sandContract = await deployments.get("Sand");
   const landContract = await deployments.get("Land");
   const estateContract = await deployments.get("Estate");
   const assetContract = await deployments.get("Asset");
-
-  const daiMedianizer = await deployments.get("DAIMedianizer");
-  const dai = await deployments.get("DAI");
 
   const {lands, merkleRootHash} = getLands(network.live, chainId);
 
@@ -21,7 +18,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     from: deployer,
     gas: 3000000,
     linkedData: lands,
-    contract: "EstateSale",
+    contract: "EstateSaleWithFee",
     args: [
       landContract.address,
       sandContract.address,
@@ -30,12 +27,11 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
       landSaleBeneficiary,
       merkleRootHash,
       2591016400, // TODO
-      daiMedianizer.address,
-      dai.address,
       backendReferralWallet,
       2000,
       estateContract.address,
       assetContract.address,
+      others[5], // TODO FeeDistributor for 5% fee
     ],
     log: true,
   });

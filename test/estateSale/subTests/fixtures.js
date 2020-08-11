@@ -7,7 +7,7 @@ const {findEvents} = require("../../../lib/findEvents.js");
 // Inputs
 const maxCommissionRate = "2000";
 const signer = "0x26BC52894A05EDE59B34EE7B014b57ef0a8558B3";
-const contractName = "EstateSale";
+const contractName = "EstateSaleWithFee";
 
 module.exports.setupEstateSale = async (landSaleName, landType) => {
   const {
@@ -99,12 +99,11 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
       roles.landSaleBeneficiary,
       tree.getRoot().hash,
       saleEnd,
-      contracts.daiMedianizer.address,
-      contracts.dai.address,
       signer,
       maxCommissionRate,
       contracts.estate.address,
-      contracts.asset.address
+      contracts.asset.address,
+      roles.others[5] // TODO FeeDistributor for 5% fee
     );
 
     contracts.estateSale = estateSaleContract.connect(estateSaleContract.provider.getSigner(roles.landSaleAdmin));
