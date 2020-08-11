@@ -312,5 +312,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _erc20GroupGem = ERC20Group(erc20GroupGemAddress);
         _starterPackPrices = initialStarterPackPrices;
         _previousStarterPackPrices = initialStarterPackPrices;
+        _sandEnabled = true; // Sand is enabled by default
     }
 }
