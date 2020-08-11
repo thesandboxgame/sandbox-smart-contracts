@@ -30,6 +30,7 @@ function runSandTests(landSaleName) {
           land.y,
           land.size,
           land.price,
+          land.price,
           land.salt,
           [],
           proof,
@@ -89,6 +90,7 @@ function runSandTests(landSaleName) {
           land.x,
           land.y,
           land.size,
+          land.price,
           land.price,
           land.salt,
           [],
@@ -180,6 +182,7 @@ function runSandTests(landSaleName) {
           land.y,
           land.size,
           land.price,
+          land.price,
           land.salt,
           [],
           proof,
@@ -232,6 +235,7 @@ function runSandTests(landSaleName) {
           land.x,
           land.y,
           land.size,
+          land.price,
           land.price,
           land.salt,
           [],
@@ -304,6 +308,7 @@ function runSandTests(landSaleName) {
           land.y,
           land.size,
           land.price,
+          land.price,
           land.salt,
           [],
           proof,
@@ -327,6 +332,7 @@ function runSandTests(landSaleName) {
             land.x,
             land.y,
             land.size,
+            land.price,
             land.price,
             land.salt,
             [],
@@ -353,6 +359,7 @@ function runSandTests(landSaleName) {
             land.y,
             land.size,
             land.price,
+            land.price,
             land.salt,
             [],
             proof,
@@ -378,6 +385,7 @@ function runSandTests(landSaleName) {
             land.y,
             land.size,
             land.price,
+            land.price,
             land.salt,
             [],
             proof,
@@ -402,6 +410,7 @@ function runSandTests(landSaleName) {
           land.y,
           land.size,
           land.price,
+          land.price,
           land.salt,
           [],
           proof,
@@ -423,12 +432,13 @@ function runSandTests(landSaleName) {
             land.y,
             land.size,
             land.price,
+            land.price,
             land.salt,
             [],
             proof,
             emptyReferral
           ),
-          "Invalid land provided"
+          "INVALID_LAND"
         );
       });
 
@@ -448,6 +458,7 @@ function runSandTests(landSaleName) {
             land.x,
             land.y,
             land.size,
+            land.price,
             land.price,
             land.salt,
             [],
@@ -471,6 +482,7 @@ function runSandTests(landSaleName) {
           land.y,
           land.size,
           land.price,
+          land.price,
           land.salt,
           [],
           proof,
@@ -485,6 +497,7 @@ function runSandTests(landSaleName) {
             land.x,
             land.y,
             land.size,
+            land.price,
             land.price,
             land.salt,
             [],
@@ -513,12 +526,13 @@ function runSandTests(landSaleName) {
             land.y,
             land.size,
             land.price,
+            land.price,
             land.salt,
             [],
             proof,
             emptyReferral
           ),
-          "Invalid land provided"
+          "INVALID_LAND"
         );
       });
 
@@ -536,12 +550,13 @@ function runSandTests(landSaleName) {
             land.y,
             land.size,
             land.price,
+            land.price,
             land.salt,
             [],
             proof,
             emptyReferral
           ),
-          "Invalid land provided"
+          "INVALID_LAND"
         );
       });
 
@@ -556,6 +571,7 @@ function runSandTests(landSaleName) {
           land.x,
           land.y,
           land.size,
+          land.price,
           land.price,
           land.salt,
           [],
@@ -589,6 +605,7 @@ function runSandTests(landSaleName) {
             land.y,
             land.size,
             land.price,
+            land.price,
             land.salt,
             [],
             proof,
@@ -618,12 +635,13 @@ function runSandTests(landSaleName) {
             land.y,
             land.size,
             land.price,
+            land.price,
             land.salt,
             [],
             proof,
             emptyReferral
           ),
-          "Invalid land provided"
+          "INVALID_LAND"
         );
       });
 
@@ -638,6 +656,7 @@ function runSandTests(landSaleName) {
           land.x,
           land.y,
           land.size,
+          land.price,
           land.price,
           land.salt,
           [],
@@ -659,6 +678,7 @@ function runSandTests(landSaleName) {
           land.x,
           land.y,
           land.size,
+          land.price,
           land.price,
           land.salt,
           [],
@@ -688,6 +708,7 @@ function runSandTests(landSaleName) {
           land.y,
           land.size,
           land.price,
+          land.price,
           land.salt,
           [],
           proof,
@@ -708,6 +729,7 @@ function runSandTests(landSaleName) {
           land.x,
           land.y,
           land.size,
+          land.price,
           land.price,
           land.salt,
           [],
@@ -739,12 +761,13 @@ function runSandTests(landSaleName) {
                 land.y,
                 land.size,
                 land.price,
+                land.price,
                 land.salt,
                 land.assetIds,
                 proof,
                 emptyReferral
               ),
-              "cannot buy reserved Land"
+              "RESERVED_LAND"
             );
           } else {
             try {
@@ -755,6 +778,7 @@ function runSandTests(landSaleName) {
                 land.x,
                 land.y,
                 land.size,
+                land.price,
                 land.price,
                 land.salt,
                 land.assetIds,
@@ -789,6 +813,7 @@ function runSandTests(landSaleName) {
           land.y,
           land.size,
           land.price,
+          land.price,
           land.salt,
           land.assetIds,
           proof,
@@ -816,6 +841,7 @@ function runSandTests(landSaleName) {
           land.y,
           land.size,
           land.price,
+          land.price,
           land.salt,
           land.assetIds,
           proof,
@@ -837,12 +863,13 @@ function runSandTests(landSaleName) {
             land.y,
             land.size,
             land.price,
+            land.price,
             land.salt,
             [],
             proof,
             emptyReferral
           ),
-          "Invalid land provided"
+          "INVALID_LAND"
         );
       });
 
