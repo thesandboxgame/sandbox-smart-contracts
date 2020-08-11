@@ -5,7 +5,6 @@ import "./BaseRelayRecipient.sol";
 
 contract MetaTxWrapper is BaseRelayRecipient {
     address internal immutable _forwardTo;
-    address internal immutable _forwarder;
 
     constructor(address forwarder, address forwardTo) public {
         _forwardTo = forwardTo;
