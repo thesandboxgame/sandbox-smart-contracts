@@ -1,8 +1,8 @@
 const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
-const {BigNumber} = require("ethers");
 const EstateTestHelper = require("./_testHelper");
 const MerkleTree = require("../../lib/merkleTree");
 const {createDataArray, calculateLandHash} = require("../../lib/merkleTreeHelper");
+const {BigNumber} = require("ethers");
 
 module.exports.setupEstate = deployments.createFixture(async () => {
   const namedAccounts = await getNamedAccounts();
