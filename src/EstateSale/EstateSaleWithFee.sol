@@ -64,6 +64,7 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         bytes32[] calldata proof,
         bytes calldata referral
     ) external {
+        _checkPrices(priceInSand, adjustedPriceInSand);
         _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, assetIds, proof);
         _handleFeeAndReferral(buyer, adjustedPriceInSand, referral);
         _mint(buyer, to, x, y, size, adjustedPriceInSand, address(_sand), adjustedPriceInSand);
@@ -122,6 +123,13 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
             values[i] = 1;
         }
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
+    }
+
+    function _checkPrices(
+        uint256 priceInSand,
+        uint256 adjustedPriceInSand
+    ) internal {
+        require(adjustedPriceInSand == priceInSand.mul(_multiplier).div(MULTIPLIER_DECIMALS), "INVALID_PRICE");
     }
 
     function _checkValidity(
@@ -223,6 +231,7 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
     uint256 private constant FEE = 5; // percentage of land sale price to be diverted to a specially configured instance of FeeDistributor, shown as an integer
 
     uint256 private _multiplier = 1000; // multiplier used for rebalancing SAND values, 3 decimal places
+    uint256 private constant MULTIPLIER_DECIMALS = 1000;
 
     constructor(
         address landAddress,
