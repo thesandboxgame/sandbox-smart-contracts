@@ -1,11 +1,11 @@
 /* solhint-disable not-rely-on-time, func-order */
 pragma solidity 0.6.5;
 
-import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
+import "../common/Libraries/SafeMathWithRequire.sol";
 import "./LandToken.sol";
-import "../contracts_common/src/Interfaces/ERC1155.sol";
-import "../contracts_common/src/Interfaces/ERC20.sol";
-import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
+import "../common/Interfaces/ERC1155.sol";
+import "../common/Interfaces/ERC20.sol";
+import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../ReferralValidator/ReferralValidator.sol";
 
 

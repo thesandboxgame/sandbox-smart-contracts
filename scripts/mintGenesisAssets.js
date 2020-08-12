@@ -1,5 +1,5 @@
 const {/*ethers, */ deployments, getNamedAccounts} = require("@nomiclabs/buidler");
-const {sendTxAndWait, call, estimateGas} = deployments;
+const {execute, read} = deployments;
 
 const program = require("commander");
 const {BigNumber} = require("ethers");
@@ -304,7 +304,7 @@ async function mintBatch({validate, url, creator, options, assetIds, checks}) {
       }
     }
 
-    const isPackIdUsed = await call(
+    const isPackIdUsed = await read(
       "Asset",
       "isPackIdUsed",
       creatorWallet,
@@ -315,46 +315,46 @@ async function mintBatch({validate, url, creator, options, assetIds, checks}) {
       reportErrorAndExit("pack id " + packId + " used");
     } else if (testMode) {
       console.log({genesisMinter, nonce, gas, creatorWallet, packId, hash, suppliesArr, raritiesPack, destination});
-      let result;
-      try {
-        result = await estimateGas(
-          {from: genesisMinter, nonce, gas},
-          "GenesisBouncer",
-          "mintMultipleFor",
-          creatorWallet,
-          packId,
-          hash,
-          suppliesArr,
-          raritiesPack,
-          destination
-        );
-      } catch (e) {
-        reportErrorAndExit(e);
-      }
-      console.log("estimate", result.toString());
+      // let result;
+      // try {
+      //   result = await estimateGas(
+      //     {from: genesisMinter, nonce, gas},
+      //     "GenesisBouncer",
+      //     "mintMultipleFor",
+      //     creatorWallet,
+      //     packId,
+      //     hash,
+      //     suppliesArr,
+      //     raritiesPack,
+      //     destination
+      //   );
+      // } catch (e) {
+      //   reportErrorAndExit(e);
+      // }
+      // console.log("estimate", result.toString());
     } else {
       console.log({genesisMinter, nonce, gas, creatorWallet, packId, hash, suppliesArr, raritiesPack, destination});
-      let result;
+      // let result;
+      // try {
+      //   result = await estimateGas(
+      //     {from: genesisMinter, nonce, gas},
+      //     "GenesisBouncer",
+      //     "mintMultipleFor",
+      //     creatorWallet,
+      //     packId,
+      //     hash,
+      //     suppliesArr,
+      //     raritiesPack,
+      //     destination
+      //   );
+      // } catch (e) {
+      //   reportErrorAndExit(e);
+      // }
+      // console.log("estimate", result.toString());
       try {
-        result = await estimateGas(
-          {from: genesisMinter, nonce, gas},
+        const receipt = await execute(
           "GenesisBouncer",
-          "mintMultipleFor",
-          creatorWallet,
-          packId,
-          hash,
-          suppliesArr,
-          raritiesPack,
-          destination
-        );
-      } catch (e) {
-        reportErrorAndExit(e);
-      }
-      console.log("estimate", result.toString());
-      try {
-        const receipt = await sendTxAndWait(
           {from: genesisMinter, nonce, gas},
-          "GenesisBouncer",
           "mintMultipleFor",
           creatorWallet,
           packId,

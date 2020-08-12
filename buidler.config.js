@@ -1,37 +1,27 @@
 require("dotenv").config();
-const fs = require("fs");
 usePlugin("solidity-coverage");
 usePlugin("buidler-deploy");
 usePlugin("buidler-ethers-v5");
 usePlugin("@nomiclabs/buidler-solhint");
 usePlugin("buidler-gas-reporter");
 
-let mnemonic = process.env.MNEMONIC;
-if (!mnemonic || mnemonic === "") {
-  const mnemonicPath = process.env.MNEMONIC_PATH;
-  if (mnemonicPath && mnemonicPath !== "") {
-    mnemonic = fs.readFileSync(mnemonicPath).toString();
-  }
-}
-let mainnetMnemonic;
-if (mnemonic) {
-  mainnetMnemonic = mnemonic;
-} else {
-  try {
-    mnemonic = fs.readFileSync(".mnemonic").toString();
-  } catch (e) {}
-  try {
-    mainnetMnemonic = fs.readFileSync(".mnemonic_mainnet").toString();
-  } catch (e) {}
-}
+const mnemonic = process.env.MNEMONIC;
+const mnemonic_mainnet = process.env.MNEMONIC_MAINNET;
+const mnemonic_rinkeby = process.env.MNEMONIC_RINKEBY;
 const accounts = mnemonic
   ? {
       mnemonic,
     }
   : undefined;
-const mainnetAccounts = mainnetMnemonic
+const accounts_mainnet = mnemonic_mainnet
   ? {
-      mnemonic: mainnetMnemonic,
+      mnemonic: mnemonic_mainnet,
+    }
+  : undefined;
+
+const accounts_rinkeby = mnemonic_rinkeby
+  ? {
+      mnemonic: mnemonic_rinkeby,
     }
   : undefined;
 
@@ -69,22 +59,16 @@ module.exports = {
     deployer: {
       default: 1,
       1: "0x18dd4e0eb8699eA4FeE238dE41ECfb95e32272f8",
-      4: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
-      42: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
-      314159: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
+      rinkeby: "0x8A0e83DE499d7543CF486974a6196a35B5F573E7",
     }, // deploy contracts and make sure they are set up correctly
+
     sandAdmin: {
-      // can add super operators and change admin
       default: 2,
-      // 4: "0x5b4c9eae565c1ba9eb65365aa02ee9fb0a653ce5",
-      1: "0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06", // multi sig wallet
-      4: "0xE53cd71271AcAdbeb0f64d9c8C62bBdDc8cA9e66",
-      42: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
-      314159: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
-    },
-    sandExecutionAdmin: "sandAdmin",
-    // metaTransactionFundOwner: 0, // TODO
-    // metaTransactionExecutor: 0, // TODO
+      1: "0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06",
+      rinkeby: "0xa4519D601F43D0b8f167842a367465681F652252",
+    }, // can add super operators and change admin
+
+    sandExecutionAdmin: "sandAdmin", // can add execution extension to SAND (used for Native metatx support)
     mintingFeeCollector: "sandAdmin", // will receiver the fee from Asset minting
     sandBeneficiary: "sandAdmin", // will be the owner of all initial SAND
     assetAdmin: "sandAdmin", // can add super operator and change admin to Asset
@@ -93,60 +77,52 @@ module.exports = {
     genesisBouncerAdmin: "sandAdmin", // can set who is allowed to mint
     commonMinterAdmin: "sandAdmin", // can change the fees
     genesisMinter: "deployer", // the first account allowed to mint genesis Assets
-    assetAuctionFeeCollector: "sandSaleBeneficiary",
-    assetAuctionAdmin: "sandAdmin",
-    orbsBeneficiary: "sandSaleBeneficiary",
+    assetAuctionFeeCollector: "sandSaleBeneficiary", // collect fees from asset auctions
+    assetAuctionAdmin: "sandAdmin", // can change fee collector
+
     sandSaleBeneficiary: {
       default: 3,
       1: "0x9695ed5020BB47880738Db356678fe8cBc8FF60b", // TODO use another wallet ?
-      4: "0xcbc70EcCd52bF3910CDC1455E6D2Bd45725F573D",
-      42: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
-      314159: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
+      rinkeby: "0x60927eB036621b801491B6c5e9A60A8d2dEeD75A",
     },
-    bundleSandSaleManager: "sandAdmin",
-    bundleSandSaleAdmin: "sandAdmin",
-    bundleSandSaleBeneficiary: "sandSaleBeneficiary",
-    landSaleBeneficiary: "sandSaleBeneficiary",
+
+    landSaleBeneficiary: "sandSaleBeneficiary", // collect funds from land sales
+
     landAdmin: {
       default: 2,
       1: "0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06",
-      4: "0xE53cd71271AcAdbeb0f64d9c8C62bBdDc8cA9e66",
-      42: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
-      314159: "0x61c461EcC993aaDEB7e4b47E96d1B8cC37314B20",
-    },
-    landSaleAdmin: "sandAdmin",
-    estateAdmin: "sandAdmin",
-    P2PERC721SaleAdmin: "sandAdmin",
+      rinkeby: "0xa4519D601F43D0b8f167842a367465681F652252",
+    }, // can add super operators and change admin
+
+    landSaleAdmin: "sandAdmin", // can enable currencies
+    estateAdmin: "sandAdmin", // can add super operators and change admin
+    P2PERC721SaleAdmin: "sandAdmin", // can set fees
     backendReferralWallet: {
       // default is computed from private key:
       // "0x4242424242424242424242424242424242424242424242424242424242424242"
       default: "0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025",
       1: "0x3044719d139F866a44c988823513eCB93060bF1b",
-      4: "0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e",
-      42: "0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e",
-      314159: "0x94AE0495bEDb538F0a14fFE4Dc160dC280989E3a",
+      rinkeby: "0xa4519D601F43D0b8f167842a367465681F652252",
     },
     sandboxAccount: {
       default: 4,
       1: "0x7A9fe22691c811ea339D9B73150e6911a5343DcA",
-      4: "0x5BC3D5A39a50BE2348b9C529f81aE79f00945897", // Leon asset minter
-      42: "0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c",
-      314159: "0x9a3b0D0B08fb71F1a5E0F248Ad3a42C341f7837c",
+      rinkeby: "0x5BC3D5A39a50BE2348b9C529f81aE79f00945897", // Leon account on demo.sandbox
     },
     extraCatalystAndGemMinter: {
       default: null,
       1: null,
-      4: "0x5BC3D5A39a50BE2348b9C529f81aE79f00945897", // Leon asset minter
+      rinkeby: "0x5BC3D5A39a50BE2348b9C529f81aE79f00945897", // Leon account on demo.sandbox
     },
-    catalystMinter: "sandAdmin", // TODO later : Staking Reward mechanism
-    catalystAdmin: "sandAdmin",
-    gemAdmin: "sandAdmin",
-    gemMinter: "sandAdmin", // TODO later : Staking Reward mechanism
-    catalystRegistryAdmin: "sandAdmin",
-    catalystMinterAdmin: "sandAdmin",
-    starterPackAdmin: "sandAdmin",
-    starterPackSaleBeneficiary: "sandSaleBeneficiary",
-    backendMessageSigner: "backendReferralWallet",
+    catalystMinter: "sandAdmin", // account that can mint catalysts
+    catalystAdmin: "sandAdmin", // can set minter and admin for catatalyt, as well as super operators
+    gemAdmin: "sandAdmin", // can set minter and admin for gems, as well as super operators
+    gemMinter: "sandAdmin", // account that can mint gems
+    catalystRegistryAdmin: "sandAdmin", // can change the minter
+    catalystMinterAdmin: "sandAdmin", // control the fees and which catalyst are allowed
+    starterPackAdmin: "sandAdmin", // can change price
+    starterPackSaleBeneficiary: "sandSaleBeneficiary", // collect funds from starter pack sales
+    backendMessageSigner: "backendReferralWallet", // account that sign message for the starter pack
     // testing
     others: {
       default: "from:5",
@@ -166,31 +142,18 @@ module.exports = {
   networks: {
     rinkeby: {
       url: eth_node("rinkeby"),
-      accounts,
+      accounts: accounts_rinkeby,
     },
-    test_rinkeby: {
+    rinkeby_test: {
       url: eth_node("rinkeby"),
       accounts,
     },
     mainnet: {
       url: eth_node("mainnet"),
-      accounts: mainnetAccounts,
-    },
-    kovan: {
-      url: eth_node("kovan"),
-      accounts,
+      accounts: accounts_mainnet,
     },
     coverage: {
       url: "http://localhost:5458",
     },
-    // wati for : https://github.com/nomiclabs/buidler/pull/522
-    // buidlerevm: {
-    //   solc: {
-    //     version: "0.6.4",
-    //     optimizer: {
-    //       enabled: false,
-    //     },
-    //   },
-    // },
   },
 };

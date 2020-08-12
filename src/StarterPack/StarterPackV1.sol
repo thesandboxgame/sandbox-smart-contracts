@@ -1,11 +1,11 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
-import "../contracts_common/src/Interfaces/ERC20.sol";
-import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
-import "../contracts_common/src/Interfaces/Medianizer.sol";
-import "../contracts_common/src/BaseWithStorage/Admin.sol";
+import "../common/Libraries/SafeMathWithRequire.sol";
+import "../common/Interfaces/ERC20.sol";
+import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
+import "../common/Interfaces/Medianizer.sol";
+import "../common/BaseWithStorage/Admin.sol";
 import "../Catalyst/ERC20GroupCatalyst.sol";
 import "../Catalyst/ERC20GroupGem.sol";
 import "./PurchaseValidator.sol";
@@ -312,5 +312,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _erc20GroupGem = ERC20Group(erc20GroupGemAddress);
         _starterPackPrices = initialStarterPackPrices;
         _previousStarterPackPrices = initialStarterPackPrices;
+        _sandEnabled = true; // Sand is enabled by default
     }
 }

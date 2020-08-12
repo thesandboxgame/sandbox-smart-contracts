@@ -2,7 +2,7 @@ pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
 import "./Interfaces/AssetToken.sol";
-import "./contracts_common/src/BaseWithStorage/Admin.sol";
+import "./common/BaseWithStorage/Admin.sol";
 import "./Catalyst/CatalystValue.sol";
 
 

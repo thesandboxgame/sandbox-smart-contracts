@@ -1,26 +1,16 @@
 module.exports = async ({getNamedAccounts, deployments}) => {
-  const {call, sendTxAndWait, log} = deployments;
+  const {read, execute, log} = deployments;
 
   const {assetAdmin, assetBouncerAdmin} = await getNamedAccounts();
 
-  const assetContract = await deployments.getOrNull("Asset");
-  if (!assetContract) {
-    throw new Error("no ASSET contract deployed");
-  }
-
   let currentAdmin;
   try {
-    currentAdmin = await call("Asset", "getAdmin");
+    currentAdmin = await read("Asset", "getAdmin");
   } catch (e) {}
   if (currentAdmin) {
     if (currentAdmin.toLowerCase() !== assetAdmin.toLowerCase()) {
       log("setting Asset Admin");
-      await sendTxAndWait(
-        {from: currentAdmin, gas: 1000000, skipUnknownSigner: true},
-        "Asset",
-        "changeAdmin",
-        assetAdmin
-      );
+      await execute("Asset", {from: currentAdmin, skipUnknownSigner: true}, "changeAdmin", assetAdmin);
     }
   } else {
     log("current Asset impl do not support admin");
@@ -28,14 +18,14 @@ module.exports = async ({getNamedAccounts, deployments}) => {
 
   let currentBouncerAdmin;
   try {
-    currentBouncerAdmin = await call("Asset", "getBouncerAdmin");
+    currentBouncerAdmin = await read("Asset", "getBouncerAdmin");
   } catch (e) {}
   if (currentBouncerAdmin) {
     if (currentBouncerAdmin.toLowerCase() !== assetBouncerAdmin.toLowerCase()) {
       log("setting Asset Bouncer Admin");
-      await sendTxAndWait(
-        {from: currentBouncerAdmin, gas: 1000000, skipUnknownSigner: true},
+      await execute(
         "Asset",
+        {from: currentBouncerAdmin, skipUnknownSigner: true},
         "changeBouncerAdmin",
         assetBouncerAdmin
       );
@@ -44,3 +34,5 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     log("current Asset impl do not support bouncerAdmin");
   }
 };
+module.exports.runAtTheEnd = true;
+module.exports.dependencies = ["Asset"];

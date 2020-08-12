@@ -4,3 +4,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   await execute("Catalyst", {from: deployer}, "batchMint", sandboxAccount, [0, 1, 2, 3], [1, 1, 1, 6]);
   return true;
 };
+module.exports.dependencies = ["Catalyst"];

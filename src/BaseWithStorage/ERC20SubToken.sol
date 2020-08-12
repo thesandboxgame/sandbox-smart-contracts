@@ -1,8 +1,8 @@
 pragma solidity 0.6.5;
 
-import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
-import "../contracts_common/src/BaseWithStorage/SuperOperators.sol";
-import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
+import "../common/Libraries/SafeMathWithRequire.sol";
+import "../common/BaseWithStorage/SuperOperators.sol";
+import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 
 import "./ERC20Group.sol";
 

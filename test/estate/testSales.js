@@ -1,11 +1,19 @@
-const {BigNumber} = require("ethers");
 const {assert} = require("local-chai");
 const {setupEstateSale} = require("./fixtures");
 const {emptyBytes, zeroAddress} = require("local-utils");
 
 describe("Estate:Sales", function () {
   it("purchase an estate and burnAndTransferFrom", async function () {
-    const {estateContract, landContract, saleContract, lands, getProof, user0, user1, user2} = await setupEstateSale();
+    const {
+      estateContract,
+      landContract,
+      saleContract,
+      lands,
+      getProof,
+      userWithSand,
+      user1,
+      user2,
+    } = await setupEstateSale();
     const land = lands.find((l) => l.size === 6);
     const proof = getProof(land);
     const x = land.x;
@@ -14,9 +22,9 @@ describe("Estate:Sales", function () {
     const sandPrice = land.price;
     const salt = land.salt;
     await saleContract
-      .connect(saleContract.provider.getSigner(user0))
-      .functions.buyLandWithETH(
-        user0,
+      .connect(saleContract.provider.getSigner(userWithSand))
+      .functions.buyLandWithSand(
+        userWithSand,
         user1,
         zeroAddress,
         x,
@@ -26,8 +34,7 @@ describe("Estate:Sales", function () {
         salt,
         [],
         proof,
-        emptyBytes, // referral
-        {value: BigNumber.from("30000000000000000000")}
+        emptyBytes // referral
       )
       .then((tx) => tx.wait());
 

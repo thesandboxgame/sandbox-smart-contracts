@@ -5,7 +5,7 @@ function sandWei(amount) {
 }
 
 module.exports = async ({getNamedAccounts, deployments}) => {
-  const {deploy, call, sendTxAndWait, log, read} = deployments;
+  const {deploy, read, execute, log} = deployments;
   const {deployer, catalystMinterAdmin} = await getNamedAccounts();
 
   const registry = await deployments.get("CatalystRegistry");
@@ -23,7 +23,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     const sandMintingFee = BigNumber.from(mintData.sandMintingFee).mul(BigNumber.from(2).pow(120));
     const sandUpdateFee = BigNumber.from(mintData.sandUpdateFee);
     const bakedData = sandUpdateFee.add(sandMintingFee).add(maxGems).add(minQuantity).add(maxQuantity);
-    log({bakedData: bakedData.toHexString()});
     bakedMintData.push(bakedData);
   }
 
@@ -45,25 +44,25 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     ],
   });
 
-  const currentMinter = await call("CatalystRegistry", "getMinter");
+  const currentMinter = await read("CatalystRegistry", "getMinter");
   if (currentMinter.toLowerCase() != catalystMinter.address.toLowerCase()) {
     log("setting CatalystMinter as CatalystRegistry minter");
-    const currentRegistryAdmin = await call("CatalystRegistry", "getAdmin");
-    await sendTxAndWait(
-      {from: currentRegistryAdmin, gas: 1000000, skipUnknownSigner: true},
+    const currentRegistryAdmin = await read("CatalystRegistry", "getAdmin");
+    await execute(
       "CatalystRegistry",
+      {from: currentRegistryAdmin, skipUnknownSigner: true},
       "setMinter",
       catalystMinter.address
     );
   }
 
-  const isBouncer = await call("Asset", "isBouncer", catalystMinter.address);
+  const isBouncer = await read("Asset", "isBouncer", catalystMinter.address);
   if (!isBouncer) {
     log("setting CatalystMinter as Asset bouncer");
-    const currentBouncerAdmin = await call("Asset", "getBouncerAdmin");
-    await sendTxAndWait(
-      {from: currentBouncerAdmin, gas: 1000000, skipUnknownSigner: true},
+    const currentBouncerAdmin = await read("Asset", "getBouncerAdmin");
+    await execute(
       "Asset",
+      {from: currentBouncerAdmin, skipUnknownSigner: true},
       "setBouncer",
       catalystMinter.address,
       true
@@ -71,17 +70,11 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   }
 
   async function setSuperOperatorFor(contractName, address) {
-    const isSuperOperator = await call(contractName, "isSuperOperator", address);
+    const isSuperOperator = await read(contractName, "isSuperOperator", address);
     if (!isSuperOperator) {
       log("setting CatalystMinter as super operator for " + contractName);
-      const currentSandAdmin = await call(contractName, "getAdmin");
-      await sendTxAndWait(
-        {from: currentSandAdmin, gas: 100000, skipUnknownSigner: true},
-        contractName,
-        "setSuperOperator",
-        address,
-        true
-      );
+      const currentSandAdmin = await read(contractName, "getAdmin");
+      await execute(contractName, {from: currentSandAdmin, skipUnknownSigner: true}, "setSuperOperator", address, true);
     }
   }
 
@@ -91,3 +84,5 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   await setSuperOperatorFor(`Catalyst`, catalystMinter.address);
 };
 module.exports.skip = guard(["1", "314159", "4"], "CatalystMinter");
+module.exports.tags = ["CatalystMinter"];
+module.exports.dependencies = ["Catalyst", "Sand", "Gem", "Asset", "CatalystRegistry"];

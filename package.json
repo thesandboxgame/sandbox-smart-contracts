@@ -1,18 +1,21 @@
 {
   "name": "tsb-contracts",
   "version": "0.0.1",
-  "description": "",
+  "description": "smart contracts for the sandbox",
   "license": "UNLICENSED",
-  "private": true,
+  "files": [
+    "deployments/mainnet",
+    "deployments/rinkeby"
+  ],
   "devDependencies": {
     "@mermaid-js/mermaid-cli": "^8.5.1-2",
-    "@nomiclabs/buidler": "^1.3.5",
+    "@nomiclabs/buidler": "^1.4.3",
     "@nomiclabs/buidler-solhint": "1.2.0",
     "@smartdec/smartcheck": "^2.0.1",
     "@urql/core": "^1.12.1",
     "axios": "^0.18.0",
     "base32.js": "^0.1.0",
-    "buidler-deploy": "^0.5.8",
+    "buidler-deploy": "^0.5.11",
     "buidler-ethers-v5": "^0.2.2",
     "buidler-gas-reporter": "^0.1.3",
     "chai": "^4.2.0",
@@ -65,13 +68,12 @@
     "smartcheck": "smartcheck -p .",
     "local:deploy": "buidler --network localhost deploy",
     "rinkeby:deploy": "buidler --network rinkeby deploy",
-    "test:deploy": "buidler --network test_rinkeby deploy",
-    "kovan:deploy": "buidler --network kovan deploy",
+    "rinkeby:test:deploy": "buidler --network rinkeby_test deploy",
     "mainnet:deploy": "buidler --network mainnet deploy",
     "void:run": "cross-env BUIDLER_NETWORK=buidlerevm node",
     "local:run": "cross-env BUIDLER_NETWORK=localhost node",
     "rinkeby:run": "cross-env BUIDLER_NETWORK=rinkeby node",
-    "kovan:run": "cross-env BUIDLER_NETWORK=kovan node",
+    "rinkeby:test:run": "cross-env BUIDLER_NETWORK=rinkeby_test node",
     "mainnet:run": "cross-env BUIDLER_NETWORK=mainnet node"
   }
 }

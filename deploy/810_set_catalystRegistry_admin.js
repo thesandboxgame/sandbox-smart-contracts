@@ -1,16 +1,16 @@
-const {guard} = require("../lib");
 module.exports = async ({getNamedAccounts, deployments}) => {
-  const {call, sendTxAndWait, log} = deployments;
+  const {read, execute, log} = deployments;
 
   const {catalystRegistryAdmin} = await getNamedAccounts();
-  const currentAdmin = await call("CatalystRegistry", "getAdmin");
+  const currentAdmin = await read("CatalystRegistry", "getAdmin");
   if (currentAdmin.toLowerCase() !== catalystRegistryAdmin.toLowerCase()) {
     log("setting CatalystRegistry Admin");
-    await sendTxAndWait(
-      {from: currentAdmin, gas: 1000000, skipUnknownSigner: true},
+    await execute(
       "CatalystRegistry",
+      {from: currentAdmin, skipUnknownSigner: true},
       "changeAdmin",
       catalystRegistryAdmin
     );
   }
 };
+module.exports.dependencies = ["CatalystRegistry"];

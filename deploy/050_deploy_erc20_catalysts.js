@@ -47,3 +47,5 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   await addCatalysts(catalysts);
 };
 module.exports.skip = guard(["1", "4", "314159"], "Catalyst");
+module.exports.tags = ["Catalyst"];
+module.exports.dependencies = ["Sand"];

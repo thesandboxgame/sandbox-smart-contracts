@@ -1,4 +1,3 @@
-const {guard} = require("../lib");
 const {starterPackGems} = require("../data/starterPackv1");
 module.exports = async ({deployments, getNamedAccounts}) => {
   const {execute} = deployments;
@@ -16,5 +15,3 @@ module.exports = async ({deployments, getNamedAccounts}) => {
   );
   return true;
 };
-
-module.exports.skip = guard(["1", "4", "314159"]); // TODO remove

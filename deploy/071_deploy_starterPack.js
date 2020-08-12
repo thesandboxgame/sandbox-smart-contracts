@@ -5,6 +5,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   const {deploy} = deployments;
 
   const {deployer, starterPackAdmin, starterPackSaleBeneficiary, backendMessageSigner} = await getNamedAccounts();
+
   const sandContract = await deployments.get("Sand");
   const daiContract = await deployments.get("DAI");
   const daiMedianizer = await deployments.get("DAIMedianizer");
@@ -29,13 +30,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   });
 };
 
-module.exports.skip = guard(["1", "4", "314159"]); // TODO, "StarterPack");
-module.exports.dependencies = [
-  "Sand",
-  "NativeMetaTransactionProcessor",
-  "DAIMedianizer",
-  "DAI",
-  "ERC20GroupCatalyst",
-  "Gem",
-  "NativeMetaTransactionProcessor",
-];
+module.exports.skip = guard(["1", "4", "314159"], "StarterPackV1");
+module.exports.tags = ["StarterPackV1"];
+module.exports.dependencies = ["Sand", "DAI", "Catalyst", "Gem"];
