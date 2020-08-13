@@ -27,9 +27,18 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
     /// @notice set the wallet receiving the proceeds
     /// @param newWallet address of the new receiving wallet
     function setReceivingWallet(address payable newWallet) external {
-        require(newWallet != address(0), "receiving wallet cannot be zero address");
-        require(msg.sender == _admin, "only admin can change the receiving wallet");
+        require(newWallet != address(0), "ZERO_ADDRESS");
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
         _wallet = newWallet;
+    }
+
+    function rebalanceSand(uint256 newMultiplier) external {
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
+        _multiplier = newMultiplier;
+    }
+
+    function getSandMultiplier() external view returns (uint256) {
+        return _multiplier;
     }
 
     /// @notice buy Land with SAND using the merkle proof associated with it
@@ -49,14 +58,16 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         uint256 y,
         uint256 size,
         uint256 priceInSand,
+        uint256 adjustedPriceInSand,
         bytes32 salt,
         uint256[] calldata assetIds,
         bytes32[] calldata proof,
         bytes calldata referral
     ) external {
+        _checkPrices(priceInSand, adjustedPriceInSand);
         _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, assetIds, proof);
-        _handleFeeAndReferral(buyer, priceInSand, referral);
-        _mint(buyer, to, x, y, size, priceInSand, address(_sand), priceInSand);
+        _handleFeeAndReferral(buyer, adjustedPriceInSand, referral);
+        _mint(buyer, to, x, y, size, adjustedPriceInSand, address(_sand), adjustedPriceInSand);
         _sendAssets(to, assetIds);
     }
 
@@ -114,6 +125,10 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
     }
 
+    function _checkPrices(uint256 priceInSand, uint256 adjustedPriceInSand) internal {
+        require(adjustedPriceInSand == priceInSand.mul(_multiplier).div(MULTIPLIER_DECIMALS), "INVALID_PRICE");
+    }
+
     function _checkValidity(
         address buyer,
         address reserved,
@@ -126,12 +141,12 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         bytes32[] memory proof
     ) internal view {
         /* solium-disable-next-line security/no-block-members */
-        require(block.timestamp < _expiryTime, "sale is over");
-        require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "not authorized");
-        require(reserved == address(0) || reserved == buyer, "cannot buy reserved Land");
+        require(block.timestamp < _expiryTime, "SALE_IS_OVER");
+        require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "NOT_AUTHORIZED");
+        require(reserved == address(0) || reserved == buyer, "RESERVED_LAND");
         bytes32 leaf = _generateLandHash(x, y, size, price, reserved, salt, assetIds);
 
-        require(_verify(proof, leaf), "Invalid land provided");
+        require(_verify(proof, leaf), "INVALID_LAND");
     }
 
     function _mint(
@@ -211,6 +226,9 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
     bytes32 internal immutable _merkleRoot;
 
     uint256 private constant FEE = 5; // percentage of land sale price to be diverted to a specially configured instance of FeeDistributor, shown as an integer
+
+    uint256 private _multiplier = 1000; // multiplier used for rebalancing SAND values, 3 decimal places
+    uint256 private constant MULTIPLIER_DECIMALS = 1000;
 
     constructor(
         address landAddress,
