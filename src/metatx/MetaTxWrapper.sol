@@ -1,6 +1,7 @@
 pragma solidity 0.6.5;
 
 import "./BaseRelayRecipient.sol";
+import "@nomiclabs/buidler/console.sol";
 
 
 contract MetaTxWrapper is BaseRelayRecipient {
@@ -11,22 +12,21 @@ contract MetaTxWrapper is BaseRelayRecipient {
         trustedForwarder = trusted_Forwarder;
     }
 
-    fallback() external {
-        require(msg.sender == trustedForwarder, "can only be called by a forwarder");
+    fallback() external trustedForwarderOnly() {
         bytes memory data = msg.data;
         uint256 length = msg.data.length;
-
-        address signer;
-        assembly {
-            signer := and(mload(sub(add(data, length), 0x00)), 0xffffffffffffffffffffffffffffffffffffffff)
-        }
+        // retrieve the msg sender as per EIP-2771
+        address signer = _msgSender();
 
         uint256 firstParam;
         assembly {
             firstParam := and(mload(data), 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)
         }
-        require(uint256(signer) == firstParam, "firstParam is not signer");
-
+        console.logBytes(data);
+        console.log("signer: ", signer);
+        console.log("firstParam: ", firstParam);
+        require(uint256(signer) == firstParam, "INVALID_SIGNER");
+        // @review implement call forwarding
         /*
         assembly {
             calldatacopy(0, 0, calldatasize())
