@@ -14,9 +14,7 @@ let userWithEth;
 
 describe("MetaTxWrapper", function () {
   beforeEach(async function () {
-    console.log(`Now 1: ${Date.now()}`);
     setUp = await setupTest();
-    // accounts = await getNamedAccounts();
     const signers = await ethers.getSigners();
     dummyTrustedforwarder = signers[11]; // 0x532792b73c0c6e7565912e7039c59986f7e1dd1f
     userWithEth = await signers[1].getAddress();
