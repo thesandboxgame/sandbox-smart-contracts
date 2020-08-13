@@ -1,30 +1,30 @@
-const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
+const {ethers} = require("@nomiclabs/buidler");
 const {utils} = require("ethers");
 const {assert, expect} = require("local-chai");
 const {expectRevert} = require("local-utils");
+const {signPurchaseMessage} = require("../../lib/purchaseMessageSigner");
+const {setupTest} = require("./fixtures");
+
+const privateKey = "0x4242424242424242424242424242424242424242424242424242424242424242";
 
 let setUp;
-let accounts;
-
-const setupTest = deployments.createFixture(async (bre) => {
-  await deployments.fixture();
-  const MetaTxWrapperContract = await bre.ethers.getContract("MetaTxWrapper");
-  return {
-    MetaTxWrapperContract,
-  };
-});
+// let accounts;
+let dummyTrustedforwarder;
+let userWithEth;
 
 describe("MetaTxWrapper", function () {
   beforeEach(async function () {
+    console.log(`Now 1: ${Date.now()}`);
     setUp = await setupTest();
-    accounts = await getNamedAccounts();
+    // accounts = await getNamedAccounts();
+    const signers = await ethers.getSigners();
+    dummyTrustedforwarder = signers[11]; // 0x532792b73c0c6e7565912e7039c59986f7e1dd1f
+    userWithEth = await signers[1].getAddress();
   });
 
   it("can check trusted forwarder", async function () {
     const {MetaTxWrapperContract} = setUp;
     const trustedForwarder = await MetaTxWrapperContract.trustedForwarder();
-    const signers = await ethers.getSigners();
-    const dummyTrustedforwarder = signers[11];
 
     expect(trustedForwarder).to.equal(await dummyTrustedforwarder.getAddress());
     assert.ok(await MetaTxWrapperContract.isTrustedForwarder(dummyTrustedforwarder.getAddress()));
@@ -53,9 +53,40 @@ describe("MetaTxWrapper", function () {
       value: utils.parseEther("0.0"),
       data: senderAddress,
     };
-
-    const signers = await ethers.getSigners();
-    const dummyTrustedforwarder = signers[11]; // 0x532792b73c0c6e7565912e7039c59986f7e1dd1f
     await expectRevert(dummyTrustedforwarder.sendTransaction(tx), "INVALID_SIGNER");
   });
+
+  it("can forward a call", async function () {
+    const {MetaTxWrapperContract} = setUp;
+    // const {others} = await getNamedAccounts();
+
+    const TestMessage = {
+      catalystIds: [0, 1, 2, 3],
+      catalystQuantities: [10, 10, 10, 10],
+      gemIds: [0, 1, 2, 3, 4],
+      gemQuantities: [20, 20, 20, 20, 20],
+      nonce: 0,
+    };
+    const dummySignature = signPurchaseMessage(privateKey, TestMessage, userWithEth);
+
+    let ABI = ["function purchaseWithETH(address buyer, Message message, bytes signature)"];
+    let iface = new utils.Interface(ABI);
+    const encodedCallData = iface.encodeFunctionData("purchaseWithETH", [userWithEth, TestMessage, dummySignature]);
+
+    // const senderAddress = "0x532792b73c0c6e7565912e7039c59986f7e1dd1f";
+
+    const tx = {
+      to: MetaTxWrapperContract.address,
+      value: utils.parseEther("0.0"),
+      data: encodedCallData,
+    };
+    // @review need to set the forwardTo address in wrapper constructor
+    await dummyTrustedforwarder.sendTransaction(tx);
+  });
+  /**
+
+> let iface = new ethers.utils.Interface(ABI);
+> iface.encodeFunctionData("transfer", [ "0x1234567890123456789012345678901234567890", parseEther("1.0") ])
+'0xa9059cbb00000000000000000000000012345678901234567890123456789012345678900000000000000000000000000000000000000000000000000de0b6b3a7640000'
+   */
 });
