@@ -1,10 +1,7 @@
-const {deployments, getNamedAccounts} = require("@nomiclabs/buidler");
-// const ethers = require("ethers");
-// const {Wallet} = ethers;
+const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
+const {utils} = require("ethers");
 const {assert, expect} = require("local-chai");
-// const {expectRevert} = require("local-utils");
-
-// const privateKey = "0x7777777777777777777777777777777777777777777777777777777777777777";
+const {expectRevert} = require("local-utils");
 
 let setUp;
 let accounts;
@@ -26,13 +23,39 @@ describe("MetaTxWrapper", function () {
   it("can check trusted forwarder", async function () {
     const {MetaTxWrapperContract} = setUp;
     const trustedForwarder = await MetaTxWrapperContract.trustedForwarder();
-    expect(trustedForwarder).to.equal(accounts.metaTxTrustedForwarder);
-    assert.ok(await MetaTxWrapperContract.isTrustedForwarder(accounts.metaTxTrustedForwarder));
+    const signers = await ethers.getSigners();
+    const dummyTrustedforwarder = signers[11];
+
+    expect(trustedForwarder).to.equal(await dummyTrustedforwarder.getAddress());
+    assert.ok(await MetaTxWrapperContract.isTrustedForwarder(dummyTrustedforwarder.getAddress()));
   });
 
-  it("can return the message sender when called with no extra data", async function () {
+  it("should revert if forwarded by Untrusted address", async function () {
     const {MetaTxWrapperContract} = setUp;
-    const sender = await MetaTxWrapperContract._msgSender();
-    expect(sender).to.equal("0xc783df8a850f42e7F7e57013759C285caa701eB6");
+    const tx = {
+      to: MetaTxWrapperContract.address,
+      value: utils.parseEther("0.0"),
+    };
+    const signers = await ethers.getSigners();
+    const untrustedforwarder = signers[13];
+    await expectRevert(
+      untrustedforwarder.sendTransaction(tx),
+      "Function can only be called through the trusted Forwarder"
+    );
+  });
+
+  it("should revert with incorrect or missing first param", async function () {
+    const {MetaTxWrapperContract} = setUp;
+    const senderAddress = "0x532792b73c0c6e7565912e7039c59986f7e1dd1f";
+
+    const tx = {
+      to: MetaTxWrapperContract.address,
+      value: utils.parseEther("0.0"),
+      data: senderAddress,
+    };
+
+    const signers = await ethers.getSigners();
+    const dummyTrustedforwarder = signers[11]; // 0x532792b73c0c6e7565912e7039c59986f7e1dd1f
+    await expectRevert(dummyTrustedforwarder.sendTransaction(tx), "INVALID_SIGNER");
   });
 });

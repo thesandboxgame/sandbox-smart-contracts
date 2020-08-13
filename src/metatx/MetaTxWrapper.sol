@@ -22,6 +22,7 @@ contract MetaTxWrapper is BaseRelayRecipient {
         assembly {
             firstParam := and(mload(data), 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)
         }
+        // @review delete all console logs
         console.logBytes(data);
         console.log("signer: ", signer);
         console.log("firstParam: ", firstParam);

@@ -3,13 +3,15 @@ const {guard} = require("../lib");
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deploy} = deployments;
 
-  const {deployer, metaTxTrustedForwarder, others} = await getNamedAccounts();
+  const {deployer, others} = await getNamedAccounts();
   const roles = others;
   const forwardTo = roles[4];
+  const signers = await ethers.getSigners();
+  const fakeTrustedForwarder = await signers[11].getAddress();
 
   await deploy("MetaTxWrapper", {
     from: deployer,
-    args: [metaTxTrustedForwarder, forwardTo],
+    args: [fakeTrustedForwarder, forwardTo],
     log: true,
   });
 };
