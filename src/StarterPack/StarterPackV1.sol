@@ -10,6 +10,7 @@ import "../Catalyst/ERC20GroupCatalyst.sol";
 import "../Catalyst/ERC20GroupGem.sol";
 import "./PurchaseValidator.sol";
 
+
 /// @title StarterPack contract that supports SAND, DAI and ETH as payment
 /// @notice This contract manages the purchase and distribution of StarterPacks (bundles of Catalysts and Gems)
 contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
