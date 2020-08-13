@@ -5,4 +5,4 @@ function sandWei(amount) {
 }
 
 // sand price is in Sand unit (Sand has 18 decimals)
-module.exports.starterPackPrices = [sandWei(69), sandWei(208), sandWei(694), sandWei(2778)];
+module.exports.starterPackPrices = [sandWei(120), sandWei(361), sandWei(1205), sandWei(4819)];

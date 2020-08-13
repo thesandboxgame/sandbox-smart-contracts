@@ -10,12 +10,11 @@ import "../Catalyst/ERC20GroupCatalyst.sol";
 import "../Catalyst/ERC20GroupGem.sol";
 import "./PurchaseValidator.sol";
 
-
 /// @title StarterPack contract that supports SAND, DAI and ETH as payment
 /// @notice This contract manages the purchase and distribution of StarterPacks (bundles of Catalysts and Gems)
 contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     using SafeMathWithRequire for uint256;
-    uint256 internal constant DAI_PRICE = 14400000000000000;
+    uint256 internal constant DAI_PRICE = 8300000000000000;
 
     ERC20 internal immutable _sand;
     Medianizer private immutable _medianizer;
@@ -313,5 +312,6 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _starterPackPrices = initialStarterPackPrices;
         _previousStarterPackPrices = initialStarterPackPrices;
         _sandEnabled = true; // Sand is enabled by default
+        _etherEnabled = true; // Ether is enabled by default
     }
 }

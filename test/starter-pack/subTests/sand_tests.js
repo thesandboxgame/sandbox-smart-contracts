@@ -6,6 +6,7 @@ const {BigNumber} = ethers;
 const {findEvents} = require("../../../lib/findEvents.js");
 const {signPurchaseMessage} = require("../../../lib/purchaseMessageSigner");
 const {privateKey} = require("./_testHelper");
+const {starterPackPrices} = require("../../../data/starterPack");
 
 function runSandTests() {
   describe("StarterPack:PurchaseWithSandEmptyStarterPack", function () {
@@ -312,7 +313,7 @@ function runSandTests() {
         userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature)
       );
       const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
-      const totalExpectedPrice = BigNumber.from(3749).mul("1000000000000000000");
+      const totalExpectedPrice = starterPackPrices.reduce((p, v) => p.add(v), BigNumber.from(0));
       expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
 
       // fast-forward 1 hour. now buyer should pay the new price
