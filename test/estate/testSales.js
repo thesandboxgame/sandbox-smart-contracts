@@ -31,6 +31,7 @@ describe("Estate:Sales", function () {
         y,
         size,
         sandPrice,
+        sandPrice,
         salt,
         [],
         proof,
