@@ -5,6 +5,7 @@ const {BigNumber} = require("ethers");
 const {findEvents} = require("../../../lib/findEvents.js");
 const {signPurchaseMessage} = require("../../../lib/purchaseMessageSigner");
 const {privateKey} = require("./_testHelper");
+const {starterPackPrices} = require("../../../data/starterPack");
 
 function runEtherTests() {
   describe("StarterPack:PurchaseWithETHEmptyStarterPack", function () {
@@ -326,7 +327,7 @@ function runEtherTests() {
         })
       );
       const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
-      const totalExpectedPrice = BigNumber.from(3749).mul("1000000000000000000");
+      const totalExpectedPrice = starterPackPrices.reduce((p, v) => p.add(v), BigNumber.from(0));
       expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
 
       // fast-forward 1 hour. now buyer should pay the new price
