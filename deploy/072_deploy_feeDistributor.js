@@ -1,3 +1,5 @@
+const {guard} = require("../lib");
+
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deployer, feeDistributionRecipients} = await getNamedAccounts();
   const {deploy} = deployments;
