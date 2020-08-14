@@ -1,6 +1,6 @@
 pragma solidity 0.6.5;
 
-import {ProxyImplementation} from "../contracts_common/src/BaseWithStorage/ProxyImplementation.sol";
+import {ProxyImplementation} from "../common/BaseWithStorage/ProxyImplementation.sol";
 
 
 contract TheSandbox712 is ProxyImplementation {

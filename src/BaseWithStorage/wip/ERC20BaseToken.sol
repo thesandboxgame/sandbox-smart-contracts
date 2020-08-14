@@ -1,7 +1,7 @@
 pragma solidity 0.6.5;
 
 import "../../Interfaces/ERC20Extended.sol";
-import "../../contracts_common/src/BaseWithStorage/SuperOperators.sol";
+import "../../common/BaseWithStorage/SuperOperators.sol";
 
 
 contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {

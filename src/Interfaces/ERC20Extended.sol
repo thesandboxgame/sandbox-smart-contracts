@@ -1,6 +1,6 @@
 pragma solidity 0.6.5;
 
-import "../contracts_common/src/Interfaces/ERC20.sol";
+import "../common/Interfaces/ERC20.sol";
 
 
 interface ERC20Extended is ERC20 {

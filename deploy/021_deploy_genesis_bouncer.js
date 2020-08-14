@@ -1,29 +1,18 @@
 const {guard} = require("../lib");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
-  const {deployIfDifferent, log} = deployments;
+  const {deploy} = deployments;
 
   const {deployer, genesisBouncerAdmin, genesisMinter} = await getNamedAccounts();
 
-  const asset = await deployments.getOrNull("Asset");
-  if (!asset) {
-    throw new Error("no Asset contract deployed");
-  }
+  const asset = await deployments.get("Asset");
 
-  const deployResult = await deployIfDifferent(
-    ["data"],
-    "GenesisBouncer",
-    {from: deployer, gas: 2000000},
-    "GenesisBouncer",
-    asset.address,
-    genesisBouncerAdmin,
-    genesisMinter
-  );
-
-  if (deployResult.newlyDeployed) {
-    log(" - GenesisBouncer deployed at : " + deployResult.address + " for gas : " + deployResult.receipt.gasUsed);
-  } else {
-    log("reusing GenesisBouncer at " + deployResult.address);
-  }
+  await deploy("GenesisBouncer", {
+    from: deployer,
+    args: [asset.address, genesisBouncerAdmin, genesisMinter],
+    log: true,
+  });
 };
 module.exports.skip = guard(["1", "4", "314159"], "GenesisBouncer");
+module.exports.tags = ["GenesisBouncer"];
+module.exports.dependencies = ["Asset"];

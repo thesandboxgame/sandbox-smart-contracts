@@ -3,8 +3,8 @@ pragma solidity 0.5.9;
 import "../../../contracts_common/src/Interfaces/ERC20Events.sol";
 import "../../../contracts_common/src/BaseWithStorage/SuperOperators.sol";
 
-contract ERC20BaseToken is SuperOperators, ERC20Events {
 
+contract ERC20BaseToken is SuperOperators, ERC20Events {
     uint256 internal _totalSupply;
     mapping(address => uint256) internal _balances;
     mapping(address => mapping(address => uint256)) internal _allowances;
@@ -26,11 +26,7 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
     /// @param owner address whose token is allowed.
     /// @param spender address allowed to transfer.
     /// @return the amount of token `spender` is allowed to transfer on behalf of `owner`.
-    function allowance(address owner, address spender)
-        public
-        view
-        returns (uint256 remaining)
-    {
+    function allowance(address owner, address spender) public view returns (uint256 remaining) {
         return _allowances[owner][spender];
     }
 
@@ -44,10 +40,7 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
     /// @param to the recipient address of the tokens transfered.
     /// @param amount the number of tokens transfered.
     /// @return true if success.
-    function transfer(address to, uint256 amount)
-        public
-        returns (bool success)
-    {
+    function transfer(address to, uint256 amount) public returns (bool success) {
         _transfer(msg.sender, to, amount);
         return true;
     }
@@ -57,10 +50,11 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
     /// @param to the recipient address of the tokens transfered.
     /// @param amount the number of tokens transfered.
     /// @return true if success.
-    function transferFrom(address from, address to, uint256 amount)
-        public
-        returns (bool success)
-    {
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) public returns (bool success) {
         if (msg.sender != from && !_superOperators[msg.sender]) {
             uint256 currentAllowance = _allowances[from][msg.sender];
             if (currentAllowance != (2**256) - 1) {
@@ -94,10 +88,7 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
     /// @param spender address to be given rights to transfer.
     /// @param amount the number of tokens allowed.
     /// @return true if success.
-    function approve(address spender, uint256 amount)
-        public
-        returns (bool success)
-    {
+    function approve(address spender, uint256 amount) public returns (bool success) {
         _approveFor(msg.sender, spender, amount);
         return true;
     }
@@ -107,53 +98,54 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
     /// @param spender  address to be given rights to transfer.
     /// @param amount the number of tokens allowed.
     /// @return true if success.
-    function approveFor(address owner, address spender, uint256 amount)
-        public
-        returns (bool success)
-    {
-        require(
-            msg.sender == owner || _superOperators[msg.sender],
-            "msg.sender != owner && !superOperator"
-        );
+    function approveFor(
+        address owner,
+        address spender,
+        uint256 amount
+    ) public returns (bool success) {
+        require(msg.sender == owner || _superOperators[msg.sender], "msg.sender != owner && !superOperator");
         _approveFor(owner, spender, amount);
         return true;
     }
 
-    function addAllowanceIfNeeded(address owner, address spender, uint256 amountNeeded)
-        public
-        returns (bool success)
-    {
-        require(
-            msg.sender == owner || _superOperators[msg.sender],
-            "msg.sender != owner && !superOperator"
-        );
+    function addAllowanceIfNeeded(
+        address owner,
+        address spender,
+        uint256 amountNeeded
+    ) public returns (bool success) {
+        require(msg.sender == owner || _superOperators[msg.sender], "msg.sender != owner && !superOperator");
         _addAllowanceIfNeeded(owner, spender, amountNeeded);
         return true;
     }
 
-    function _addAllowanceIfNeeded(address owner, address spender, uint256 amountNeeded)
-        internal
-    {
-        if(amountNeeded > 0 && !isSuperOperator(spender)) {
+    function _addAllowanceIfNeeded(
+        address owner,
+        address spender,
+        uint256 amountNeeded
+    ) internal {
+        if (amountNeeded > 0 && !isSuperOperator(spender)) {
             uint256 currentAllowance = _allowances[owner][spender];
-            if(currentAllowance < amountNeeded) {
+            if (currentAllowance < amountNeeded) {
                 _approveFor(owner, spender, amountNeeded);
             }
         }
     }
 
-    function _approveFor(address owner, address spender, uint256 amount)
-        internal
-    {
-        require(
-            owner != address(0) && spender != address(0),
-            "Cannot approve with 0x0"
-        );
+    function _approveFor(
+        address owner,
+        address spender,
+        uint256 amount
+    ) internal {
+        require(owner != address(0) && spender != address(0), "Cannot approve with 0x0");
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }
 
-    function _transfer(address from, address to, uint256 amount) internal {
+    function _transfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal {
         require(to != address(0), "Cannot send to 0x0");
         uint256 currentBalance = _balances[from];
         require(currentBalance >= amount, "not enough fund");
@@ -177,10 +169,7 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
         require(amount > 0, "cannot burn 0 tokens");
         if (msg.sender != from && !_superOperators[msg.sender]) {
             uint256 currentAllowance = _allowances[from][msg.sender];
-            require(
-                currentAllowance >= amount,
-                "Not enough funds allowed"
-            );
+            require(currentAllowance >= amount, "Not enough funds allowed");
             if (currentAllowance != (2**256) - 1) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
                 _allowances[from][msg.sender] = currentAllowance - amount;

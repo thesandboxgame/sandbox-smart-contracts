@@ -697,7 +697,7 @@ module.exports = (init, extensions) => {
     });
 
     it("minting one token results in a Transfer event", async function ({mint, users, ERC20SubToken}) {
-      const receipt = await mint(users[1].address, 1);
+      const {receipt} = await mint(users[1].address, 1);
       const eventsMatching = await findEvents(ERC20SubToken, "Transfer", receipt.blockHash);
       const transferEvent = eventsMatching[0];
       assert.equal(transferEvent.args[0], zeroAddress);
@@ -714,7 +714,7 @@ module.exports = (init, extensions) => {
     });
 
     it("minting several tokens results in a Transfer event", async function ({mint, users, ERC20SubToken}) {
-      const receipt = await mint(users[1].address, 5);
+      const {receipt} = await mint(users[1].address, 5);
       const eventsMatching = await findEvents(ERC20SubToken, "Transfer", receipt.blockHash);
       assert.equal(eventsMatching.length, 1);
       const transferEvent = eventsMatching[0];
@@ -754,7 +754,7 @@ module.exports = (init, extensions) => {
       secondERC20SubToken,
       thirdERC20SubToken,
     }) {
-      const receipt = await batchMint(users[1].address, [5, 6, 7]);
+      const {receipt} = await batchMint(users[1].address, [5, 6, 7]);
       const eventsMatchingFirstSubToken = await findEvents(ERC20SubToken, "Transfer", receipt.blockHash);
       assert.equal(eventsMatchingFirstSubToken.length, 1);
       const firstEvent = eventsMatchingFirstSubToken[0];

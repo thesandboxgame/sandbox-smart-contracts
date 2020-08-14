@@ -1,32 +1,14 @@
 const {guard} = require("../lib");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
-  const {deployIfDifferent, log} = deployments;
+  const {deploy} = deployments;
 
   const {deployer} = await getNamedAccounts();
 
-  const sand = await deployments.getOrNull("Sand");
-  if (!sand) {
-    throw new Error("no SAND contract deployed");
-  }
+  const sand = await deployments.get("Sand");
 
-  const deployResult = await deployIfDifferent(
-    ["data"],
-    "NativeMetaTransactionProcessor",
-    {from: deployer, gas: 2000000},
-    "NativeMetaTransactionProcessor",
-    sand.address
-  );
-
-  if (deployResult.newlyDeployed) {
-    log(
-      " - NativeMetaTransactionProcessor deployed at : " +
-        deployResult.address +
-        " for gas : " +
-        deployResult.receipt.gasUsed
-    );
-  } else {
-    log("reusing NativeMetaTransactionProcessor at " + deployResult.address);
-  }
+  await deploy("NativeMetaTransactionProcessor", {from: deployer, args: [sand.address], log: true});
 };
 module.exports.skip = guard(["1", "4", "314159"], "NativeMetaTransactionProcessor");
+module.exports.tags = ["NativeMetaTransactionProcessor"];
+module.exports.dependencies = ["Sand"];
