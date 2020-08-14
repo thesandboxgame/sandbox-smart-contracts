@@ -6,37 +6,30 @@ import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
 import "../contracts_common/src/BaseWithStorage/Ownable.sol";
 
 
+/// @title Fee Time Vault
+/// @notice Holds tokens collected from fees in a locked state for a certain period of time
 contract FeeTimeVault is Ownable {
-    using SafeMathWithRequire for uint256;
+    event Sync(address token, uint256 amount, uint256 timestamp);
+    mapping(uint256 => uint256) public accumulatedAmountPerDay;
 
-    FeeDistributor private _feeDistributor;
-    uint256 private _lockPeriod;
-    ERC20 private _token;
-    // key = day number, value = accumulated fees til this day
-    mapping(uint256 => uint256) private _accumulatedAmountPerDay;
-    uint256 private _lastDaySaved;
-    uint256 private _withdrawnAmount;
-    uint256 private _startTime;
-
-    constructor(uint256 lockPeriod, ERC20 token) public {
-        _lockPeriod = lockPeriod;
-        _token = token;
-        _startTime = now;
-    }
-
+    /// @notice Updates the total amount of fees collected alongside with the due date
     function sync() external {
-        uint256 day = ((now - _startTime) / 1 days);
+        uint256 timestamp = now;
+        uint256 day = ((timestamp - _startTime) / 1 days);
         uint256 amount = _feeDistributor.withdraw(_token);
-        _accumulatedAmountPerDay[day] = _accumulatedAmountPerDay[_lastDaySaved].add(amount);
+        accumulatedAmountPerDay[day] = accumulatedAmountPerDay[_lastDaySaved].add(amount);
         _lastDaySaved = day;
+        emit Sync(address(_token), amount, timestamp);
     }
 
+    /// @notice Enables fee holder to withdraw its share after lock period expired
     function withdraw() external onlyOwner {
         uint256 day = ((now - _startTime) / 1 days);
-        uint256 amount = _accumulatedAmountPerDay[day.sub(_lockPeriod)];
-        uint256 withdrawnAmount = _withdrawnAmount;
-        amount = amount.sub(withdrawnAmount);
-        if (amount > 0) {
+        uint256 amount = _lockPeriod > day ? 0 : accumulatedAmountPerDay[day - _lockPeriod];
+
+        if (amount != 0) {
+            uint256 withdrawnAmount = _withdrawnAmount;
+            amount = amount.sub(withdrawnAmount);
             _withdrawnAmount = withdrawnAmount.add(amount);
             require(ERC20(_token).transfer(msg.sender, amount), "FEE_WITHDRAWAL_FAILED");
         }
@@ -44,5 +37,26 @@ contract FeeTimeVault is Ownable {
 
     function setFeeDistributor(FeeDistributor feeDistributor) external onlyOwner {
         _feeDistributor = feeDistributor;
+    }
+
+    // /////////////////// UTILITIES /////////////////////
+    using SafeMathWithRequire for uint256;
+    // //////////////////////// DATA /////////////////////
+
+    FeeDistributor private _feeDistributor;
+    uint256 private _lockPeriod;
+    ERC20 private _token;
+    uint256 private _lastDaySaved;
+    uint256 private _withdrawnAmount;
+    uint256 private _startTime;
+
+    // /////////////////// CONSTRUCTOR ////////////////////
+    /// @notice lockPeriod measured in days, e.g. lockPeriod = 10 => 10 days
+    /// @param lockPeriod fee recipients
+    /// @param token the token that fees are collected in
+    constructor(uint256 lockPeriod, ERC20 token) public {
+        _lockPeriod = lockPeriod;
+        _token = token;
+        _startTime = now;
     }
 }
