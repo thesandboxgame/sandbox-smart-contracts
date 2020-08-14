@@ -36,6 +36,7 @@ contract FeeTimeVault is Ownable {
     }
 
     function setFeeDistributor(FeeDistributor feeDistributor) external onlyOwner {
+        require(address(_feeDistributor) == address(0), "FEE_DISTRIBUTOR_ALREADY_SET");
         _feeDistributor = feeDistributor;
     }
 
