@@ -8,6 +8,9 @@ import "./CatalystValue.sol";
 
 
 contract ERC20GroupCatalyst is CatalystDataBase, ERC20Group {
+    /// @dev add Catalyst, if one of the catalyst to be added in the batch need to have a value override, all catalyst added in that batch need to have override
+    /// if this is not desired, they can be added in a separated batch
+    /// if no override are needed, the valueOverrides can be left emopty
     function addCatalysts(
         ERC20SubToken[] memory catalysts,
         MintData[] memory mintData,

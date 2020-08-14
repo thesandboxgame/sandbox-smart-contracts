@@ -12,8 +12,8 @@ function testCatalyst(catalystName) {
       const tokenId = await contract.groupTokenId();
 
       const coreContract = await ethers.getContract("Catalyst", catalystMinter);
-      async function mint(to, amount) {
-        await waitFor(coreContract.mint(to, tokenId, amount));
+      function mint(to, amount) {
+        return waitFor(coreContract.mint(to, tokenId, amount));
       }
 
       return {ethereum, contractAddress: contract.address, users: others, mint};

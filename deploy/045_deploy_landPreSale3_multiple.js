@@ -6,82 +6,40 @@ const fs = require("fs");
 const {calculateLandHash} = require("../lib/merkleTreeHelper");
 
 module.exports = async ({getChainId, getNamedAccounts, deployments, network}) => {
-  const {deployIfDifferent, deploy, log} = deployments;
+  const {deploy} = deployments;
   const chainId = BigNumber.from(await getChainId()).toString();
 
   const {deployer, landSaleBeneficiary, backendReferralWallet} = await getNamedAccounts();
 
-  const sandContract = await deployments.getOrNull("Sand");
-  const landContract = await deployments.getOrNull("Land");
+  const sandContract = await deployments.get("Sand");
+  const landContract = await deployments.get("Land");
 
-  if (!sandContract) {
-    throw new Error("no SAND contract deployed");
-  }
-
-  if (!landContract) {
-    throw new Error("no LAND contract deployed");
-  }
-
-  let daiMedianizer = await deployments.getOrNull("DAIMedianizer");
-  if (!daiMedianizer) {
-    log("setting up a fake DAI medianizer");
-    daiMedianizer = await deployIfDifferent(
-      ["data"],
-      "DAIMedianizer",
-      {from: deployer, gas: 6721975},
-      "FakeMedianizer"
-    );
-  }
-
-  let dai = await deployments.getOrNull("DAI");
-  if (!dai) {
-    log("setting up a fake DAI");
-    dai = await deployIfDifferent(
-      ["data"],
-      "DAI",
-      {
-        from: deployer,
-        gas: 6721975,
-      },
-      "FakeDai"
-    );
-  }
+  const daiMedianizer = await deployments.get("DAIMedianizer");
+  const dai = await deployments.get("DAI");
 
   for (let sector = 4; sector < 10; sector++) {
-    if (chainId == "1" || chainId == "4") {
-      if (sector == 4) {
-        continue;
-      }
-    }
     const {lands, merkleRootHash, saltedLands, tree} = getLands(sector, network.live, chainId);
     const landSaleName = "LandPreSale_3_" + sector;
-    const existingLandSale = await deployments.getOrNull(landSaleName);
-    // if (existingLandSale) {
-    //   log(`${landSaleName} already deployed at ${existingLandSale.address}`);
-    //   continue;
-    // }
-    const deployResult = await deployIfDifferent(
-      ["data"],
-      landSaleName,
-      {from: deployer, gas: 6000000, linkedData: lands},
-      "LandSaleWithReferral",
-      landContract.address,
-      sandContract.address,
-      sandContract.address,
-      deployer,
-      landSaleBeneficiary,
-      merkleRootHash,
-      1594321140, // Thursday, 9 July 2020 18:59:00 GMT+00:00
-      daiMedianizer.address,
-      dai.address,
-      backendReferralWallet,
-      2000
-    );
-    if (deployResult.newlyDeployed) {
-      log(` - ${landSaleName} deployed at : ${deployResult.address} for gas :  ${deployResult.receipt.gasUsed}`);
-    } else {
-      log(`reusing ${landSaleName} at ${deployResult.address}`);
-    }
+    await deploy(landSaleName, {
+      from: deployer,
+      linkedData: lands,
+      contract: "LandSaleWithReferral",
+      args: [
+        landContract.address,
+        sandContract.address,
+        sandContract.address,
+        deployer,
+        landSaleBeneficiary,
+        merkleRootHash,
+        1594321140, // Thursday, 9 July 2020 18:59:00 GMT+00:00
+        daiMedianizer.address,
+        dai.address,
+        backendReferralWallet,
+        2000,
+      ],
+      log: true,
+    });
+
     const landsWithProof = [];
     for (const land of saltedLands) {
       land.proof = tree.getProof(calculateLandHash(land));
@@ -90,3 +48,6 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     fs.writeFileSync(`./.presale_3_${sector}_proofs_${chainId}.json`, JSON.stringify(landsWithProof, null, "  "));
   }
 };
+module.exports.skip = guard(["1", "4", "314159"], "LandPreSale_3_9");
+module.exports.tags = ["LandPreSale_3_multiple"];
+module.exports.dependencies = ["Sand", "Land", "DAI"];

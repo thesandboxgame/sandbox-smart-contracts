@@ -6,6 +6,7 @@ Provide a summary of the changes made, and include some context, such as why the
 
 # Checklist:
 
+- [ ] Pull Request references Jira issue
 - [ ] Pull Request applies to a single purpose
 - [ ] I've added comments to my code where needed
 - [ ] I've updated any relevant docs

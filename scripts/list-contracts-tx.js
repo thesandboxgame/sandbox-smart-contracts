@@ -1,10 +1,11 @@
 require("dotenv");
 const fs = require("fs");
 const axios = require("axios");
-const contractAddress = "0x1a802826F12D5b0128AA2E21689fcA84E8F57132";
-const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
 
-const fromBlockNumber = 10381489;
+const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY;
+const args = process.argv.slice(2);
+const contractAddress = args[0];
+const fromBlockNumber = args[1];
 const offset = 1000;
 (async () => {
   const txs = [];

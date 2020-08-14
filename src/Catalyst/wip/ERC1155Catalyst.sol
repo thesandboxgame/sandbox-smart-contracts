@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 import "../../BaseWithStorage/wip/MintableERC1155Token.sol";
 import "../CatalystDataBase.sol";
 
+
 contract ERC1155Catalyst is CatalystDataBase, MintableERC1155Token {
     function addCatalysts(string[] memory names, MintData[] memory data) public {
         require(msg.sender == _admin, "NOT_AUTHORIZED_ADMIN");

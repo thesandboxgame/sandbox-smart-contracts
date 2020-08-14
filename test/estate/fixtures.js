@@ -2,6 +2,7 @@ const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
 const EstateTestHelper = require("./_testHelper");
 const MerkleTree = require("../../lib/merkleTree");
 const {createDataArray, calculateLandHash} = require("../../lib/merkleTreeHelper");
+const {BigNumber} = require("ethers");
 
 module.exports.setupEstate = deployments.createFixture(async () => {
   const namedAccounts = await getNamedAccounts();
@@ -39,14 +40,18 @@ module.exports.setupEstateSale = deployments.createFixture(async () => {
   const user0 = namedAccounts.others[0];
   const user1 = namedAccounts.others[1];
   const user2 = namedAccounts.others[2];
+  const userWithSand = namedAccounts.others[3];
+  const sandBeneficiary = namedAccounts.sandBeneficiary;
 
   await deployments.fixture();
 
   const estateContract = await ethers.getContract("Estate");
   const landContract = await ethers.getContract("Land");
+  const sandContract = await ethers.getContract("Sand", sandBeneficiary);
+  await sandContract.transfer(userWithSand, BigNumber.from("1000000000000000000000000"));
 
-  const saleContract = await ethers.getContract("LandPreSale_4");
-  const landSaleDeployment = await deployments.get("LandPreSale_4");
+  const saleContract = await ethers.getContract("LandPreSale_5");
+  const landSaleDeployment = await deployments.get("LandPreSale_5");
   const lands = landSaleDeployment.linkedData;
   const landHashArray = createDataArray(lands);
   const merkleTree = new MerkleTree(landHashArray);
@@ -59,6 +64,7 @@ module.exports.setupEstateSale = deployments.createFixture(async () => {
     user0,
     user1,
     user2,
+    userWithSand,
     merkleTree,
     lands,
     getProof: (land) => merkleTree.getProof(calculateLandHash(land)),

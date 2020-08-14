@@ -206,7 +206,6 @@ module.exports = {
       merkleRootHash,
       saltedLands,
       tree,
-      merkleRootHash,
       // landsWithProof,
     };
   },
