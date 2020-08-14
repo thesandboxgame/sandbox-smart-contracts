@@ -1,6 +1,6 @@
 pragma solidity ^0.6.5;
-import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
-import "../contracts_common/src/interfaces/ERC20.sol";
+import "../common/Libraries/SafeMathWithRequire.sol";
+import "../common/interfaces/ERC20.sol";
 
 
 contract Ownable {
