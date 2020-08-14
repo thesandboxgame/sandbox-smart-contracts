@@ -8,33 +8,9 @@ import "../common/Libraries/SafeMathWithRequire.sol";
 /// @title Fee distributor
 /// @notice Distributes all fees collected from platform activities to stakeholders
 contract FeeDistributor {
-    using SafeMathWithRequire for uint256;
-
     event Deposit(address token, address from, uint256 amount);
     event Withdrawal(ERC20 token, address to, uint256 amount);
     mapping(address => uint256) public recipientsShares;
-    struct TokenState {
-        uint256 totalReceived;
-        mapping(address => uint256) amountAlreadyGiven;
-        uint256 lastBalance;
-    }
-    mapping(address => TokenState) private _tokensState;
-    uint256 private constant DECIMALS = 4;
-
-    /// @notice Assign each recipient with its corresponding percentage.
-    /// @notice Percentages are 4 decimal points, e.g. 1 % = 100
-    /// @param recipients fee recipients
-    /// @param percentages the corresponding percentage (from total fees held by the contract) for a recipient
-    constructor(address payable[] memory recipients, uint256[] memory percentages) public {
-        require(recipients.length == percentages.length, "ARRAYS_LENGTHS_SHOULD_BE_EQUAL");
-        uint256 totalPercentage = 0;
-        for (uint256 i = 0; i < recipients.length; i++) {
-            uint256 percentage = percentages[i];
-            recipientsShares[recipients[i]] = percentage;
-            totalPercentage = totalPercentage.add(percentage);
-        }
-        require(totalPercentage == 10**DECIMALS, "PERCENTAGES_ARRAY_SHOULD_SUM_TO_100%");
-    }
 
     /// @notice Enables fee holder to withdraw its share
     /// @notice Zero address reserved for ether withdrawal
@@ -51,6 +27,11 @@ contract FeeDistributor {
         }
     }
 
+    receive() external payable {
+        emit Deposit(address(0), msg.sender, msg.value);
+    }
+
+    // //////////////////// INTERNALS ////////////////////
     function _etherWithdrawal() private returns (uint256) {
         uint256 amount = _calculateWithdrawalAmount(address(this).balance, address(0));
         if (amount > 0) {
@@ -84,7 +65,31 @@ contract FeeDistributor {
         return amountDue;
     }
 
-    receive() external payable {
-        emit Deposit(address(0), msg.sender, msg.value);
+    // /////////////////// UTILITIES /////////////////////
+    using SafeMathWithRequire for uint256;
+
+    // //////////////////////// DATA /////////////////////
+    struct TokenState {
+        uint256 totalReceived;
+        mapping(address => uint256) amountAlreadyGiven;
+        uint256 lastBalance;
+    }
+    mapping(address => TokenState) private _tokensState;
+    uint256 private constant DECIMALS = 4;
+
+    // /////////////////// CONSTRUCTOR ////////////////////
+    /// @notice Assign each recipient with its corresponding percentage.
+    /// @notice Percentages are 4 decimal points, e.g. 1 % = 100
+    /// @param recipients fee recipients
+    /// @param percentages the corresponding percentage (from total fees held by the contract) for a recipient
+    constructor(address payable[] memory recipients, uint256[] memory percentages) public {
+        require(recipients.length == percentages.length, "ARRAYS_LENGTHS_SHOULD_BE_EQUAL");
+        uint256 totalPercentage = 0;
+        for (uint256 i = 0; i < recipients.length; i++) {
+            uint256 percentage = percentages[i];
+            recipientsShares[recipients[i]] = percentage;
+            totalPercentage = totalPercentage.add(percentage);
+        }
+        require(totalPercentage == 10**DECIMALS, "PERCENTAGES_ARRAY_SHOULD_SUM_TO_100%");
     }
 }
