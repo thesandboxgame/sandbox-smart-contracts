@@ -1,8 +1,8 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-import "../contracts_common/src/interfaces/ERC20.sol";
-import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
+import "../common/interfaces/ERC20.sol";
+import "../common/Libraries/SafeMathWithRequire.sol";
 
 
 /// @title Fee distributor

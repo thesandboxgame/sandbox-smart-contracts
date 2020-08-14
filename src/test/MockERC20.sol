@@ -1,28 +1,28 @@
 pragma solidity ^0.6.5;
-import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
+import "../common/Libraries/SafeMathWithRequire.sol";
+import "../common/BaseWithStorage/Ownable.sol";
 
 
-contract Ownable {
-    address public owner;
+// contract Ownable {
+//     address public owner;
 
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
+//     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
-    constructor() public {
-        owner = msg.sender;
-    }
+//     constructor() public {
+//         owner = msg.sender;
+//     }
 
-    modifier onlyOwner() {
-        require(msg.sender == owner);
-        _;
-    }
+//     modifier onlyOwner() {
+//         require(msg.sender == owner);
+//         _;
+//     }
 
-    function transferOwnership(address newOwner) public onlyOwner {
-        require(newOwner != address(0));
-        emit OwnershipTransferred(owner, newOwner);
-        owner = newOwner;
-    }
-}
-
+//     function transferOwnership(address newOwner) public onlyOwner {
+//         require(newOwner != address(0));
+//         emit OwnershipTransferred(owner, newOwner);
+//         owner = newOwner;
+//     }
+// }
 
 contract Pausable is Ownable {
     event Pause();
