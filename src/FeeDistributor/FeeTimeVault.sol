@@ -26,7 +26,6 @@ contract FeeTimeVault is Ownable {
     function withdraw() external onlyOwner {
         uint256 day = ((now - _startTime) / 1 days);
         uint256 amount = _lockPeriod > day ? 0 : accumulatedAmountPerDay[day - _lockPeriod];
-
         if (amount != 0) {
             uint256 withdrawnAmount = _withdrawnAmount;
             amount = amount.sub(withdrawnAmount);

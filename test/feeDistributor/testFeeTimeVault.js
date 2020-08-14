@@ -48,7 +48,7 @@ describe("FeeTimeVault", function () {
     let balanceAfter = await sandToken.balanceOf(deployer);
     expect(balanceAfter).to.equal(amount.mul(BigNumber.from(percentages[2])).div(BigNumber.from(10000)));
   });
-  it("Single deposit with withdraw before lock period should fail", async function () {
+  it("Single deposit with withdraw before lock period should not change token balance", async function () {
     let lockPeriod = 10;
     let percentages = [2000, 2000, 6000];
     let {deployer, sandBeneficiary} = await getNamedAccounts();
@@ -60,7 +60,11 @@ describe("FeeTimeVault", function () {
     let {timestamp} = await ethers.provider.getBlock("latest");
     let nineDaysInSecs = 60 * 60 * 24 * (lockPeriod - 1);
     await ethers.provider.send("evm_setNextBlockTimestamp", [timestamp + nineDaysInSecs]);
-    await expectRevert(feeTimeVault.connect(ethers.provider.getSigner(deployer)).withdraw());
+    let sandBalanceBefore = await sandToken.balanceOf(deployer);
+    tx = await feeTimeVault.connect(ethers.provider.getSigner(deployer)).withdraw();
+    await tx.wait();
+    let sandBalanceAfter = await sandToken.balanceOf(deployer);
+    expect(sandBalanceBefore).to.equal(sandBalanceAfter);
   });
   it("Deposit that hasn't synced in the same day should be delayed", async function () {
     let lockPeriod = 10;
@@ -73,19 +77,28 @@ describe("FeeTimeVault", function () {
     let {timestamp} = await ethers.provider.getBlock("latest");
     await ethers.provider.send("evm_setNextBlockTimestamp", [timestamp + dayInSecs]);
     let secondAmount = BigNumber.from("100000000000000000");
+    let amount = firstAmount.add(secondAmount);
     await fundContractWithSand(feeDist.address, sandToken, sandBeneficiary, secondAmount);
     let tx = await feeTimeVault.connect(ethers.provider.getSigner(deployer)).sync();
     await tx.wait();
+    let accAmount = await feeTimeVault.accumulatedAmountPerDay(1);
+    expect(accAmount).to.equal(amount.mul(BigNumber.from(percentages[2])).div(BigNumber.from(10000)));
     timestamp = (await ethers.provider.getBlock("latest")).timestamp;
+    console.log(timestamp);
     await ethers.provider.send("evm_setNextBlockTimestamp", [timestamp + (lockPeriod - 2) * dayInSecs]);
-    await expectRevert(feeTimeVault.connect(ethers.provider.getSigner(deployer)).withdraw());
+    let sandBalanceBefore = await sandToken.balanceOf(deployer);
+    tx = await feeTimeVault.connect(ethers.provider.getSigner(deployer)).withdraw();
+    await tx.wait();
+    let sandBalanceAfter = await sandToken.balanceOf(deployer);
+    expect(sandBalanceBefore).to.equal(sandBalanceAfter);
     timestamp = (await ethers.provider.getBlock("latest")).timestamp;
-    await ethers.provider.send("evm_setNextBlockTimestamp", [timestamp + lockPeriod * dayInSecs]);
+    console.log(timestamp);
+    await ethers.provider.send("evm_setNextBlockTimestamp", [timestamp + 2 * dayInSecs]);
     tx = await feeTimeVault.connect(ethers.provider.getSigner(deployer)).withdraw();
     await tx.wait();
     timestamp = (await ethers.provider.getBlock("latest")).timestamp;
+    console.log(timestamp);
     let balanceAfter = await sandToken.balanceOf(deployer);
-    let amount = firstAmount.add(secondAmount);
     expect(balanceAfter).to.equal(amount.mul(BigNumber.from(percentages[2])).div(BigNumber.from(10000)));
   });
   it("First deposit syncs before the lock period, second after the lock period", async function () {
@@ -130,7 +143,7 @@ describe("FeeTimeVault", function () {
     tx = await feeTimeVault.connect(ethers.provider.getSigner(deployer)).withdraw();
     await tx.wait();
     let balanceAfter2 = await sandToken.balanceOf(deployer);
-    expect(balanceAfter2.to.equal(balanceAfter1));
+    expect(balanceAfter2).to.equal(balanceAfter1);
   });
   it("Funds should be synced only once", async function () {
     let lockPeriod = 4;
