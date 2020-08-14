@@ -22,7 +22,7 @@ contract Permit is TheSandbox712 {
 
     ERC20Extended internal immutable _sand;
 
-    mapping(address => uint) public nonces;
+    mapping(address => uint256) public nonces;
 
     bytes32 constant PERMIT_TYPEHASH = keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
