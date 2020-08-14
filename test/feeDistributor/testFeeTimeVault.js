@@ -1,7 +1,6 @@
 const {ethers, getNamedAccounts} = require("@nomiclabs/buidler");
 const {BigNumber} = require("@ethersproject/bignumber");
 const {expect} = require("local-chai");
-const {expectRevert} = require("local-utils");
 
 describe("FeeTimeVault", function () {
   async function initContracts(lockPeriod, percentages) {
@@ -12,7 +11,6 @@ describe("FeeTimeVault", function () {
       accounts.sandBeneficiary,
     ]);
     let feeTimeVault = await initContract("FeeTimeVault", accounts.deployer, [lockPeriod, sandToken.address]);
-    let {timestamp} = await ethers.provider.getBlock("latest");
     let feeDist = await initContract("FeeDistributor", accounts.deployer, [
       [accounts.others[0], accounts.others[1], feeTimeVault.address],
       percentages,
