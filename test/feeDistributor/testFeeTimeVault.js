@@ -10,7 +10,11 @@ describe("FeeTimeVault", function () {
       accounts.sandBeneficiary,
       accounts.sandBeneficiary,
     ]);
-    let feeTimeVault = await initContract("FeeTimeVault", accounts.deployer, [lockPeriod, sandToken.address]);
+    let feeTimeVault = await initContract("FeeTimeVault", accounts.deployer, [
+      lockPeriod,
+      sandToken.address,
+      accounts.deployer,
+    ]);
     let feeDist = await initContract("FeeDistributor", accounts.deployer, [
       [accounts.others[0], accounts.others[1], feeTimeVault.address],
       percentages,

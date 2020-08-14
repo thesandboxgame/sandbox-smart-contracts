@@ -54,7 +54,11 @@ contract FeeTimeVault is Ownable {
     /// @notice lockPeriod measured in days, e.g. lockPeriod = 10 => 10 days
     /// @param lockPeriod fee recipients
     /// @param token the token that fees are collected in
-    constructor(uint256 lockPeriod, ERC20 token) public {
+    constructor(
+        uint256 lockPeriod,
+        ERC20 token,
+        address payable owner
+    ) public Ownable(owner) {
         _lockPeriod = lockPeriod;
         _token = token;
         _startTime = now;

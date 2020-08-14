@@ -44,4 +44,6 @@ contract Pausable is Ownable {
         paused = false;
         emit Unpause();
     }
+
+    constructor() public Ownable(msg.sender) {}
 }

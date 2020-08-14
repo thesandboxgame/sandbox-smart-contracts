@@ -13,7 +13,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     from: deployer,
     gas: 3000000,
     log: true,
-    args: [lockPeriod, sandContract.address],
+    args: [lockPeriod, sandContract.address, deployer],
   });
 };
 module.exports.tags = ["FeeTimeVault"];
