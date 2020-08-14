@@ -2,11 +2,16 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   const {deployer} = await getNamedAccounts();
   const {deploy} = deployments;
   const {lockPeriod} = require("../data/feeTimeVault/deploymentData.js");
+
+  const sandContract = await deployments.getOrNull("Sand");
+  if (!sandContract) {
+    throw new Error("no SAND contract deployed");
+  }
   await deploy("FeeTimeVault", {
     from: deployer,
     gas: 3000000,
     log: true,
-    args: [lockPeriod], //TODO: add sand address,
+    args: [lockPeriod, sandContract.address],
   });
 };
 module.exports.tags = ["FeeTimeVault"];
