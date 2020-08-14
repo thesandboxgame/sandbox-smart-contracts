@@ -1,28 +1,8 @@
 pragma solidity ^0.6.5;
 import "../common/Libraries/SafeMathWithRequire.sol";
 import "../common/BaseWithStorage/Ownable.sol";
+import "../common/interfaces/ERC20.sol";
 
-
-// contract Ownable {
-//     address public owner;
-
-//     event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
-//     constructor() public {
-//         owner = msg.sender;
-//     }
-
-//     modifier onlyOwner() {
-//         require(msg.sender == owner);
-//         _;
-//     }
-
-//     function transferOwnership(address newOwner) public onlyOwner {
-//         require(newOwner != address(0));
-//         emit OwnershipTransferred(owner, newOwner);
-//         owner = newOwner;
-//     }
-// }
 
 contract ERC20Impl is ERC20 {
     using SafeMathWithRequire for uint256;
