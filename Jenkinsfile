@@ -1,6 +1,6 @@
 #!/usr/bin/env groovy
 //=====================
-// DEFINE ALL VARIABLES
+// DEFINE ALL VARIABLES!
 //=====================
 
 
