@@ -11,12 +11,13 @@ import "../common/BaseWithStorage/Ownable.sol";
 contract FeeTimeVault is Ownable {
     event Sync(address token, uint256 amount, uint256 timestamp);
     mapping(uint256 => uint256) public accumulatedAmountPerDay;
+    FeeDistributor public feeDistributor;
 
     /// @notice Updates the total amount of fees collected alongside with the due date
     function sync() external {
         uint256 timestamp = now;
         uint256 day = ((timestamp - _startTime) / 1 days);
-        uint256 amount = _feeDistributor.withdraw(_token);
+        uint256 amount = feeDistributor.withdraw(_token);
         accumulatedAmountPerDay[day] = accumulatedAmountPerDay[_lastDaySaved].add(amount);
         _lastDaySaved = day;
         emit Sync(address(_token), amount, timestamp);
@@ -34,16 +35,15 @@ contract FeeTimeVault is Ownable {
         }
     }
 
-    function setFeeDistributor(FeeDistributor feeDistributor) external onlyOwner {
-        require(address(_feeDistributor) == address(0), "FEE_DISTRIBUTOR_ALREADY_SET");
-        _feeDistributor = feeDistributor;
+    function setFeeDistributor(FeeDistributor _feeDistributor) external onlyOwner {
+        require(address(feeDistributor) == address(0), "FEE_DISTRIBUTOR_ALREADY_SET");
+        feeDistributor = _feeDistributor;
     }
 
     // /////////////////// UTILITIES /////////////////////
     using SafeMathWithRequire for uint256;
     // //////////////////////// DATA /////////////////////
 
-    FeeDistributor private _feeDistributor;
     uint256 private _lockPeriod;
     ERC20 private _token;
     uint256 private _lastDaySaved;

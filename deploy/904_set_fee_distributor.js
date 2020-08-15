@@ -1,18 +1,13 @@
 module.exports = async ({deployments}) => {
-  const {call, sendTxAndWait, log} = deployments;
-  const feeTimeVault = await deployments.getOrNull("FeeTimeVault");
-  if (!feeTimeVault) {
-    throw new Error("no FeeTimeVault contract deployed");
-  }
-  const feeDistributor = await deployments.getOrNull("FeeDistributor");
-  if (!feeDistributor) {
-    throw new Error("no FeeDistributor contract deployed");
-  }
+  const {read, execute, log} = deployments;
+
+  const feeDistributor = await deployments.get("FeeDistributor");
+
   log("setting fee distributor in fee time vault contract");
-  const feeTimeVaultOwner = await call("FeeTimeVault", "owner");
-  await sendTxAndWait(
-    {from: feeTimeVaultOwner, gas: 1000000, skipUnknownSigner: true},
+  const feeTimeVaultOwner = await read("FeeTimeVault", "owner");
+  await execute(
     "FeeTimeVault",
+    {from: feeTimeVaultOwner, skipUnknownSigner: true},
     "setFeeDistributor",
     feeDistributor.address
   );
