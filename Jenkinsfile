@@ -10,9 +10,7 @@ pipeline {
     options {
         timestamps()
     }
-    environment {
-
-    }
+    
     stages {
 
         stage ('Checkout') {
