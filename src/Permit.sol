@@ -29,6 +29,7 @@ contract Permit is TheSandbox712 {
     constructor(
         ERC20Extended sandContractAddress
     ) public {
+        init712();
         _sand = sandContractAddress;
     }
 
