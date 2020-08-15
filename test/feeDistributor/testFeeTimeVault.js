@@ -161,4 +161,29 @@ describe("FeeTimeVault", function () {
     let b2 = await feeTimeVault.accumulatedAmountPerDay(1);
     expect(b1).to.equal(b2);
   });
+
+  it("No sync all over a lock time period", async function () {
+    let lockPeriod = 4;
+    let oneDayInSecs = 60 * 60 * 24 * 1;
+    let percentages = [2000, 2000, 6000];
+    let {deployer, sandBeneficiary} = await getNamedAccounts();
+    let {feeTimeVault, feeDist, sandToken} = await initContracts(lockPeriod, percentages);
+    let amount1 = BigNumber.from("1000000000000000000");
+    await fundContractWithSand(feeDist.address, sandToken, sandBeneficiary, amount1);
+    let {timestamp} = await ethers.provider.getBlock("latest");
+    await ethers.provider.send("evm_setNextBlockTimestamp", [timestamp + (lockPeriod + 1) * oneDayInSecs]);
+    let tx = await feeTimeVault.connect(ethers.provider.getSigner(deployer)).sync();
+    await tx.wait();
+    let balanceBefore = await sandToken.balanceOf(deployer);
+    tx = await feeTimeVault.connect(ethers.provider.getSigner(deployer)).withdraw();
+    await tx.wait();
+    let balanceAfter = await sandToken.balanceOf(deployer);
+    expect(balanceBefore).to.equal(balanceAfter);
+    timestamp = (await ethers.provider.getBlock("latest")).timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [timestamp + lockPeriod * oneDayInSecs]);
+    tx = await feeTimeVault.connect(ethers.provider.getSigner(deployer)).withdraw();
+    await tx.wait();
+    balanceAfter = await sandToken.balanceOf(deployer);
+    expect(balanceAfter).to.equal(amount1.mul(BigNumber.from(percentages[2])).div(BigNumber.from(10000)));
+  });
 });
