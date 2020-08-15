@@ -10,7 +10,7 @@ pipeline {
     options {
         timestamps()
     }
-    
+
     stages {
 
         stage ('Checkout') {
@@ -20,19 +20,13 @@ pipeline {
             }
         }
 
-        stage ('Install packages') {
+        stage ('Test') {
             steps {
-                sh "yarn" 
+                sh "docker build -t test-private-contracts ." 
                 
             }
         }      
-
-        stage ('Test') {
-            steps {
-                sh "yarn test" 
-                
-            }
-        }                
+             
         
                    
     }
