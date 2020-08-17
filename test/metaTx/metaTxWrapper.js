@@ -62,23 +62,39 @@ describe("MetaTxWrapper", function () {
   it("can forward a call to Sand contract", async function () {
     const {sandWrapper, sandContract} = setUp;
     const {sandAdmin} = await getNamedAccounts();
+    const amount = BigNumber.from("50000000000000000000000");
+    const forwarderAddress = await dummyTrustedforwarder.getAddress();
+    const sandWrapperAsTrustedForwarder = await sandWrapper.connect(dummyTrustedforwarder);
+    const sandAsUserWithSand = await sandContract.connect(sandContract.provider.getSigner(userWithSand));
+
     const SandAdmin = {
       address: sandAdmin,
       Sand: sandContract.connect(sandContract.provider.getSigner(sandAdmin)),
     };
 
+    // confirm superOperator status:
+    await SandAdmin.Sand.setSuperOperator(sandWrapper.address, true);
+    console.log(`sandWrapper: ${sandWrapper.address}`);
+    console.log(`trustedForwarder: ${forwarderAddress}`);
+    assert.ok(await SandAdmin.Sand.isSuperOperator(sandWrapper.address));
+
+    // Supply user with sand:
     await SandAdmin.Sand.transfer(userWithSand, BigNumber.from("1000000000000000000000000"));
+    const currentBalance = await sandContract.balanceOf(userWithSand);
+    assert(currentBalance.gte(amount));
 
-    const sandWrapperAsTrustedForwarder = await sandWrapper.connect(dummyTrustedforwarder);
+    // approve forwarder
+    await sandAsUserWithSand.approve(forwarderAddress, amount);
+    const allowance = await sandContract.allowance(userWithSand, forwarderAddress);
+    expect(allowance).to.be.equal(amount);
 
-    const sandAsUserWithSand = await sandContract.connect(sandContract.provider.getSigner(userWithSand));
-    await sandAsUserWithSand.approve(userWithoutSand, BigNumber.from("50000000000000000000000"));
-    const senderAddress = "0x532792b73c0c6e7565912e7039c59986f7e1dd1f";
-    await sandWrapperAsTrustedForwarder.transferFrom(
+    let {to, data} = await sandWrapperAsTrustedForwarder.populateTransaction.transferFrom(
       userWithSand,
       userWithoutSand,
-      BigNumber.from("50000000000000000000000"),
-      {data: senderAddress}
+      amount
     );
+    data += userWithSand.replace("0x", "");
+
+    await dummyTrustedforwarder.sendTransaction({to, data});
   });
 });
