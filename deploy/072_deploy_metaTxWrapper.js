@@ -8,13 +8,15 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   const signers = await ethers.getSigners();
   const fakeTrustedForwarder = await signers[11].getAddress();
 
-  await deploy("MetaTxWrapper", {
+  const metaTx = await deploy("MetaTxWrapper", {
     from: deployer,
     args: [fakeTrustedForwarder, sandContract.address],
     log: true,
   });
 
-  await deployments.save("MetaTxWrapper", sandContract);
+  const sandWrapper = {...metaTx, abi: sandContract.abi};
+
+  await deployments.save("SandWrapper", sandWrapper);
 };
 
 module.exports.skip = guard(["1", "4", "314159"]);

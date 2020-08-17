@@ -5,6 +5,7 @@ import "@nomiclabs/buidler/console.sol";
 
 
 contract MetaTxWrapper is BaseRelayRecipient {
+    // @review removed immutable, TypeError: Assembly access to immutable variables is not supported
     address internal immutable _forwardTo;
 
     constructor(address trusted_Forwarder, address forwardTo) public {
@@ -28,10 +29,10 @@ contract MetaTxWrapper is BaseRelayRecipient {
         console.log("firstParam: ", firstParam);
         require(uint256(signer) == firstParam, "INVALID_SIGNER");
         // @review implement call forwarding
-        /*
+        address target = _forwardTo;
         assembly {
             calldatacopy(0, 0, calldatasize())
-            let result := call(gas(), _forwardTo, 0, calldatasize(), 0, 0)
+            let result := call(gas(), target, 0, calldatasize(), 0, 0, 0)
             returndatacopy(0, 0, returndatasize())
             switch result
                 case 0 {
@@ -41,6 +42,5 @@ contract MetaTxWrapper is BaseRelayRecipient {
                     return(0, returndatasize())
                 }
         }
-        */
     }
 }

@@ -4,9 +4,9 @@ const {ethers, deployments} = require("@nomiclabs/buidler");
 module.exports.setupTest = deployments.createFixture(async () => {
   await deployments.fixture("MetaTxWrapper");
   const sandContract = await ethers.getContract("Sand");
-  const metaWrapper = await ethers.getContract("MetaTxWrapper");
+  const sandWrapper = await ethers.getContract("SandWrapper");
   return {
-    metaWrapper,
+    sandWrapper,
     sandContract,
   };
 });
