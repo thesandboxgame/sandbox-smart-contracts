@@ -13,6 +13,8 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     args: [fakeTrustedForwarder, sandContract.address],
     log: true,
   });
+
+  await deployments.save("MetaTxWrapper", sandContract);
 };
 
 module.exports.skip = guard(["1", "4", "314159"]);
