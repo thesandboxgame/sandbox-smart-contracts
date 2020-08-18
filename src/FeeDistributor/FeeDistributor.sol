@@ -1,8 +1,8 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-import "../contracts_common/src/interfaces/ERC20.sol";
-import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
+import "../common/interfaces/ERC20.sol";
+import "../common/Libraries/SafeMathWithRequire.sol";
 
 
 /// @title Fee distributor
@@ -34,7 +34,7 @@ contract FeeDistributor {
     // //////////////////// INTERNALS ////////////////////
     function _etherWithdrawal() private returns (uint256) {
         uint256 amount = _calculateWithdrawalAmount(address(this).balance, address(0));
-        if (amount > 0) {
+        if (amount != 0) {
             msg.sender.transfer(amount);
         }
         return amount;
@@ -42,7 +42,7 @@ contract FeeDistributor {
 
     function _tokenWithdrawal(ERC20 token) private returns (uint256) {
         uint256 amount = _calculateWithdrawalAmount(ERC20(token).balanceOf(address(this)), address(token));
-        if (amount > 0) {
+        if (amount != 0) {
             require(ERC20(token).transfer(msg.sender, amount), "FEE_WITHDRAWAL_FAILED");
         }
         return amount;
