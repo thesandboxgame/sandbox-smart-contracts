@@ -111,9 +111,7 @@ describe("MetaTxWrapper", function () {
     data += userWithSand.replace("0x", "");
 
     const balanceBefore = await sandContract.balanceOf(sandRecipient);
-
     await waitFor(dummyTrustedforwarder.sendTransaction({to, data}));
-
     const balanceAfter = await sandContract.balanceOf(sandRecipient);
     expect(balanceAfter).to.be.equal(balanceBefore.add(amount));
   });
