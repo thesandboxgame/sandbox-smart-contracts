@@ -4,18 +4,23 @@ const {assert, expect} = require("local-chai");
 const {expectRevert, waitFor} = require("local-utils");
 const {setupTest} = require("./fixtures");
 
+const amount = BigNumber.from("50000000000000000000000");
+
 let setUp;
 let dummyTrustedforwarder;
 let userWithSand;
 let sandRecipient;
+let sandWrapperAsTrustedForwarder;
 
 describe("MetaTxWrapper", function () {
   beforeEach(async function () {
     setUp = await setupTest();
+    const {sandWrapper} = setUp;
     const signers = await ethers.getSigners();
-    dummyTrustedforwarder = signers[11]; // 0x532792b73c0c6e7565912e7039c59986f7e1dd1f
+    dummyTrustedforwarder = signers[11];
     userWithSand = await signers[1].getAddress();
     sandRecipient = await signers[2].getAddress();
+    sandWrapperAsTrustedForwarder = await sandWrapper.connect(dummyTrustedforwarder);
   });
 
   it("should revert if forwarded by Untrusted address", async function () {
@@ -34,36 +39,27 @@ describe("MetaTxWrapper", function () {
   });
 
   it("should revert with incorrect or missing first param", async function () {
-    const {sandWrapper} = setUp;
-    const senderAddress = "0x532792b73c0c6e7565912e7039c59986f7e1dd1f";
+    let {to, data} = await sandWrapperAsTrustedForwarder.populateTransaction.transferFrom(
+      sandRecipient, // passing the wrong address
+      sandRecipient,
+      amount
+    );
+    data += userWithSand.replace("0x", "");
 
-    const tx = {
-      to: sandWrapper.address,
-      value: utils.parseEther("0.0"),
-      data: senderAddress,
-    };
-    await expectRevert(dummyTrustedforwarder.sendTransaction(tx), "INVALID_SIGNER");
+    await expectRevert(waitFor(dummyTrustedforwarder.sendTransaction({to, data})), "INVALID_METATX_DATA");
   });
 
-  it("should fail if params don't match", async function () {
-    const {sandWrapper} = setUp;
-    const sandWrapperAsTrustedForwarder = await sandWrapper.connect(dummyTrustedforwarder);
-
-    await expectRevert(
-      sandWrapperAsTrustedForwarder.transferFrom(
-        userWithSand,
-        sandRecipient,
-        BigNumber.from("50000000000000000000000")
-      ),
-      "INVALID_SIGNER"
+  it("should fail if missing appended data", async function () {
+    let {to, data} = await sandWrapperAsTrustedForwarder.populateTransaction.transferFrom(
+      sandRecipient, // passing the wrong address
+      sandRecipient,
+      amount
     );
+
+    await expectRevert(waitFor(dummyTrustedforwarder.sendTransaction({to, data})), "INVALID_METATX_DATA");
   });
 
   it("should handle a failure in the Sand contract", async function () {
-    const {sandWrapper} = setUp;
-    const amount = BigNumber.from("50000000000000000000000");
-    const sandWrapperAsTrustedForwarder = await sandWrapper.connect(dummyTrustedforwarder);
-
     let {to, data} = await sandWrapperAsTrustedForwarder.populateTransaction.transferFrom(
       userWithSand,
       sandRecipient,
@@ -74,12 +70,10 @@ describe("MetaTxWrapper", function () {
     await expectRevert(waitFor(dummyTrustedforwarder.sendTransaction({to, data})), "FORWARDED_CALL_FAILED");
   });
 
-  it("can forward a call to Sand contract", async function () {
+  it("can forward a transferFrom call to Sand contract", async function () {
     const {sandWrapper, sandContract} = setUp;
     const {sandAdmin} = await getNamedAccounts();
-    const amount = BigNumber.from("50000000000000000000000");
     const forwarderAddress = await dummyTrustedforwarder.getAddress();
-    const sandWrapperAsTrustedForwarder = await sandWrapper.connect(dummyTrustedforwarder);
     const sandAsUserWithSand = await sandContract.connect(sandContract.provider.getSigner(userWithSand));
 
     const SandAdmin = {
@@ -87,21 +81,9 @@ describe("MetaTxWrapper", function () {
       Sand: sandContract.connect(sandContract.provider.getSigner(sandAdmin)),
     };
 
-    // confirm superOperator status:
     await waitFor(SandAdmin.Sand.setSuperOperator(sandWrapper.address, true));
-    console.log(`sandWrapper: ${sandWrapper.address}`);
-    console.log(`trustedForwarder: ${forwarderAddress}`);
-    assert.ok(await SandAdmin.Sand.isSuperOperator(sandWrapper.address));
-
-    // Supply user with sand:
     await waitFor(SandAdmin.Sand.transfer(userWithSand, BigNumber.from("1000000000000000000000000")));
-    const currentBalance = await sandContract.balanceOf(userWithSand);
-    assert(currentBalance.gte(amount));
-
-    // approve forwarder
     await waitFor(sandAsUserWithSand.approve(forwarderAddress, amount));
-    const allowance = await sandContract.allowance(userWithSand, forwarderAddress);
-    expect(allowance).to.be.equal(amount);
 
     let {to, data} = await sandWrapperAsTrustedForwarder.populateTransaction.transferFrom(
       userWithSand,
