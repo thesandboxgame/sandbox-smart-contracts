@@ -1,7 +1,7 @@
 const {ethers, getNamedAccounts} = require("@nomiclabs/buidler");
 const {utils, BigNumber} = require("ethers");
 const {assert, expect} = require("local-chai");
-const {expectRevert} = require("local-utils");
+const {expectRevert, waitFor} = require("local-utils");
 const {setupTest} = require("./fixtures");
 
 let setUp;
@@ -73,18 +73,18 @@ describe("MetaTxWrapper", function () {
     };
 
     // confirm superOperator status:
-    await SandAdmin.Sand.setSuperOperator(sandWrapper.address, true);
+    await waitFor(SandAdmin.Sand.setSuperOperator(sandWrapper.address, true));
     console.log(`sandWrapper: ${sandWrapper.address}`);
     console.log(`trustedForwarder: ${forwarderAddress}`);
     assert.ok(await SandAdmin.Sand.isSuperOperator(sandWrapper.address));
 
     // Supply user with sand:
-    await SandAdmin.Sand.transfer(userWithSand, BigNumber.from("1000000000000000000000000"));
+    await waitFor(SandAdmin.Sand.transfer(userWithSand, BigNumber.from("1000000000000000000000000")));
     const currentBalance = await sandContract.balanceOf(userWithSand);
     assert(currentBalance.gte(amount));
 
     // approve forwarder
-    await sandAsUserWithSand.approve(forwarderAddress, amount);
+    await waitFor(sandAsUserWithSand.approve(forwarderAddress, amount));
     const allowance = await sandContract.allowance(userWithSand, forwarderAddress);
     expect(allowance).to.be.equal(amount);
 
@@ -95,6 +95,6 @@ describe("MetaTxWrapper", function () {
     );
     data += userWithSand.replace("0x", "");
 
-    await dummyTrustedforwarder.sendTransaction({to, data});
+    await waitFor(dummyTrustedforwarder.sendTransaction({to, data}));
   });
 });
