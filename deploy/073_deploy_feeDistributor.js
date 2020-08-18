@@ -2,7 +2,7 @@ const {guard} = require("../lib");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deployer} = await getNamedAccounts();
-  const {deploy, log} = deployments;
+  const {deploy} = deployments;
   const deploymentData = require("../data/feeDistribution/deploymentData.js");
 
   for (key of Object.keys(deploymentData)) {
@@ -11,9 +11,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     for (contractName of recipients) {
       let recipient = await deployments.getOrNull(contractName);
       if (!recipient) {
-        log(`setting up a fake ${contractName}`);
-        let contract = await deploy(contractName, {from: deployer, gas: 6721975, contract: contractName});
-        feeDistributionRecipients.push(contract.address);
+        throw new Error(`${contractName} was not deployed`);
       } else {
         feeDistributionRecipients.push(recipient.address);
       }
