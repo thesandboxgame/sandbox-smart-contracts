@@ -1,39 +1,33 @@
 module.exports = async ({deployments}) => {
-  const {call, sendTxAndWait, log} = deployments;
+  const {execute, read, log} = deployments;
 
-  const sand = await deployments.getOrNull("Sand");
-  if (!sand) {
-    throw new Error("no Sand contract deployed");
-  }
-  const metaTxProcessor = await deployments.getOrNull("NativeMetaTransactionProcessor");
-  if (!metaTxProcessor) {
-    throw new Error("no NativeMetaTransactionProcessor contract deployed");
-  }
+  const metaTxProcessor = await deployments.get("NativeMetaTransactionProcessor");
 
-  const currentSandAdmin = await call("Sand", "getAdmin");
+  const currentSandAdmin = await read("Sand", "getAdmin");
 
-  const isSuperOperator = await call("Sand", "isSuperOperator", metaTxProcessor.address);
+  const isSuperOperator = await read("Sand", "isSuperOperator", metaTxProcessor.address);
   if (!isSuperOperator) {
     log("setting NativeMetaTransactionProcessor as super operator");
-    await sendTxAndWait(
-      {from: currentSandAdmin, gas: 100000, skipUnknownSigner: true},
+    await execute(
       "Sand",
+      {from: currentSandAdmin, skipUnknownSigner: true},
       "setSuperOperator",
       metaTxProcessor.address,
       true
     );
   }
 
-  const currentExecutionSandAdmin = await call("Sand", "getExecutionAdmin");
-  const isExecutionOperator = await call("Sand", "isExecutionOperator", metaTxProcessor.address);
+  const currentExecutionSandAdmin = await read("Sand", "getExecutionAdmin");
+  const isExecutionOperator = await read("Sand", "isExecutionOperator", metaTxProcessor.address);
   if (!isExecutionOperator) {
     log("setting NativeMetaTransactionProcessor as execution operator");
-    await sendTxAndWait(
-      {from: currentExecutionSandAdmin, gas: 100000, skipUnknownSigner: true},
+    await execute(
       "Sand",
+      {from: currentExecutionSandAdmin, skipUnknownSigner: true},
       "setExecutionOperator",
       metaTxProcessor.address,
       true
     );
   }
 };
+module.exports.dependencies = ["Sand", "NativeMetaTransactionProcessor"];

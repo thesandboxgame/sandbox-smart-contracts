@@ -1,8 +1,8 @@
 pragma solidity 0.6.5;
 
-import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
-import "../contracts_common/src/BaseWithStorage/SuperOperators.sol";
-import "../contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
+import "../common/Libraries/SafeMathWithRequire.sol";
+import "../common/BaseWithStorage/SuperOperators.sol";
+import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 
 import "./ERC20Group.sol";
 
@@ -65,7 +65,7 @@ contract ERC20SubToken {
             if (allowance != ~uint256(0)) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
                 require(allowance >= amount, "NOT_AUTHOIZED_ALLOWANCE");
-                _mAllowed[from][msg.sender] = allowance.sub(amount);
+                _mAllowed[from][msg.sender] = allowance - amount;
             }
         }
         _transfer(from, to, amount);
@@ -120,12 +120,6 @@ contract ERC20SubToken {
         _group.singleTransferFrom(from, to, _index, amount);
     }
 
-    function _firstBytes32(bytes memory src) public pure returns (bytes32 output) {
-        assembly {
-            output := mload(add(src, 32))
-        }
-    }
-
     // ///////////////////// UTILITIES ///////////////////////
     using SafeMathWithRequire for uint256;
 
@@ -143,8 +137,8 @@ contract ERC20SubToken {
     }
 
     // ////////////////////// DATA ///////////////////////////
-    ERC20Group immutable _group;
-    uint256 immutable _index;
+    ERC20Group internal immutable _group;
+    uint256 internal immutable _index;
     mapping(address => mapping(address => uint256)) internal _mAllowed;
     string internal _name;
     string internal _symbol;

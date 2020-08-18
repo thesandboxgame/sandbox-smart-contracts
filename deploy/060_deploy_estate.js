@@ -1,35 +1,14 @@
 const {guard} = require("../lib");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
-  const {deployIfDifferent, log} = deployments;
+  const {deploy} = deployments;
 
   const {deployer, estateAdmin} = await getNamedAccounts();
 
-  const sandContract = await deployments.getOrNull("Sand");
-  const landContract = await deployments.getOrNull("Land");
+  const sandContract = await deployments.get("Sand");
+  const landContract = await deployments.get("Land");
 
-  if (!sandContract) {
-    throw new Error("no SAND contract deployed");
-  }
-
-  if (!landContract) {
-    throw new Error("no LAND contract deployed");
-  }
-
-  const deployResult = await deployIfDifferent(
-    ["data"],
-    "Estate",
-    {from: deployer, gas: 6000000},
-    "Estate",
-    sandContract.address,
-    estateAdmin,
-    landContract.address
-  );
-  if (deployResult.newlyDeployed) {
-    log(" - Estate deployed at : " + deployResult.address + " for gas : " + deployResult.receipt.gasUsed);
-  } else {
-    log("reusing Estate at " + deployResult.address);
-  }
+  await deploy("Estate", {from: deployer, args: [sandContract.address, estateAdmin, landContract.address], log: true});
 };
 module.exports.skip = guard(["1", "4", "314159"]); // TODO , 'Estate');
 module.exports.tags = ["Estate"];

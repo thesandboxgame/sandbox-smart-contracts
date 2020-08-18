@@ -1,6 +1,3 @@
-[submodule "contracts_common"]
-	path = src/contracts_common
-	url = git@github.com:thesandboxgame/contracts_common.git
 [submodule "sandbox-subgraph"]
 	path = sandbox-subgraph
 	url = git@github.com:thesandboxgame/sandbox-subgraph.git
