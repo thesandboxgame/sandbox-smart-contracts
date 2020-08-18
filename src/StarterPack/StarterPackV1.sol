@@ -27,11 +27,11 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     bool _etherEnabled;
     bool _daiEnabled;
 
-    uint256[] public starterPackPrices;
-    uint256[] public previousStarterPackPrices;
+    uint256[] private _starterPackPrices;
+    uint256[] private _previousStarterPackPrices;
 
     // The timestamp of the last pricechange
-    uint256 public priceChangeTimestamp;
+    uint256 private _priceChangeTimestamp;
 
     address payable internal _wallet;
 
@@ -211,28 +211,28 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @param prices Array of new prices that wil take effect after a delay period
     function setPrices(uint256[] calldata prices) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
-        previousStarterPackPrices = starterPackPrices;
-        starterPackPrices = prices;
-        priceChangeTimestamp = now;
+        _previousStarterPackPrices = _starterPackPrices;
+        _starterPackPrices = prices;
+        _priceChangeTimestamp = now;
         emit SetPrices(prices);
     }
 
     /// @notice Get current StarterPack prices
     /// @return prices Array of prices
     function getStarterPackPrices() external view returns (uint256[] memory prices) {
-        return starterPackPrices;
+        return _starterPackPrices;
     }
 
     /// @notice Get previous StarterPack prices
     /// @return prices Array of prices
     function getPreviousStarterPackPrices() external view returns (uint256[] memory prices) {
-        return previousStarterPackPrices;
+        return _previousStarterPackPrices;
     }
 
     /// @notice Get price change timestamp
     /// @return timestamp The timestamp of the last StarterPack price change
     function getTimestamp() external view returns (uint256 timestamp) {
-        return priceChangeTimestamp;
+        return _priceChangeTimestamp;
     }
 
     /// @notice Returns the amount of ETH for a specific amount of SAND
@@ -273,16 +273,16 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     function _priceSelector() internal returns (uint256[] memory) {
         uint256[] memory prices;
         // No price change:
-        if (priceChangeTimestamp == 0) {
-            prices = starterPackPrices;
+        if (_priceChangeTimestamp == 0) {
+            prices = _starterPackPrices;
         } else {
             // Price change delay has expired.
-            if (now > priceChangeTimestamp + 1 hours) {
-                priceChangeTimestamp = 0;
-                prices = starterPackPrices;
+            if (now > _priceChangeTimestamp + 1 hours) {
+                _priceChangeTimestamp = 0;
+                prices = _starterPackPrices;
             } else {
                 // Price change has occured:
-                prices = previousStarterPackPrices;
+                prices = _previousStarterPackPrices;
             }
         }
         return prices;
@@ -322,8 +322,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _dai = ERC20(daiTokenContractAddress);
         _erc20GroupCatalyst = ERC20Group(erc20GroupCatalystAddress);
         _erc20GroupGem = ERC20Group(erc20GroupGemAddress);
-        starterPackPrices = initialStarterPackPrices;
-        previousStarterPackPrices = initialStarterPackPrices;
+        _starterPackPrices = initialStarterPackPrices;
+        _previousStarterPackPrices = initialStarterPackPrices;
         _sandEnabled = true; // Sand is enabled by default
         _etherEnabled = true; // Ether is enabled by default
     }
