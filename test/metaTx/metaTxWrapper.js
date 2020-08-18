@@ -7,7 +7,7 @@ const {setupTest} = require("./fixtures");
 let setUp;
 let dummyTrustedforwarder;
 let userWithSand;
-let userWithoutSand;
+let sandRecipient;
 
 describe("MetaTxWrapper", function () {
   beforeEach(async function () {
@@ -15,7 +15,7 @@ describe("MetaTxWrapper", function () {
     const signers = await ethers.getSigners();
     dummyTrustedforwarder = signers[11]; // 0x532792b73c0c6e7565912e7039c59986f7e1dd1f
     userWithSand = await signers[1].getAddress();
-    userWithoutSand = await signers[2].getAddress();
+    sandRecipient = await signers[2].getAddress();
   });
 
   it("should revert if forwarded by Untrusted address", async function () {
@@ -52,7 +52,7 @@ describe("MetaTxWrapper", function () {
     await expectRevert(
       sandWrapperAsTrustedForwarder.transferFrom(
         userWithSand,
-        userWithoutSand,
+        sandRecipient,
         BigNumber.from("50000000000000000000000")
       ),
       "INVALID_SIGNER"
@@ -66,7 +66,7 @@ describe("MetaTxWrapper", function () {
 
     let {to, data} = await sandWrapperAsTrustedForwarder.populateTransaction.transferFrom(
       userWithSand,
-      userWithoutSand,
+      sandRecipient,
       amount
     );
     data += userWithSand.replace("0x", "");
@@ -105,11 +105,16 @@ describe("MetaTxWrapper", function () {
 
     let {to, data} = await sandWrapperAsTrustedForwarder.populateTransaction.transferFrom(
       userWithSand,
-      userWithoutSand,
+      sandRecipient,
       amount
     );
     data += userWithSand.replace("0x", "");
 
+    const balanceBefore = await sandContract.balanceOf(sandRecipient);
+
     await waitFor(dummyTrustedforwarder.sendTransaction({to, data}));
+
+    const balanceAfter = await sandContract.balanceOf(sandRecipient);
+    expect(balanceAfter).to.be.equal(balanceBefore.add(amount));
   });
 });
