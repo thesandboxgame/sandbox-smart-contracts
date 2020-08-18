@@ -10,7 +10,6 @@ import "../Catalyst/ERC20GroupCatalyst.sol";
 import "../Catalyst/ERC20GroupGem.sol";
 import "./PurchaseValidator.sol";
 
-
 /// @title StarterPack contract that supports SAND, DAI and ETH as payment
 /// @notice This contract manages the purchase and distribution of StarterPacks (bundles of Catalysts and Gems)
 contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
@@ -39,7 +38,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     // Minimizes the effect of price changes on pending TXs
     uint256 private _priceChangeDelay = 1 hours;
 
-    event Purchase(address indexed buyer, Message, uint256 price, address token, uint256 amountPaid);
+    event Purchase(address indexed buyer, Message message, uint256 price, address token, uint256 amountPaid);
 
     event SetPrices(uint256[] prices);
 
