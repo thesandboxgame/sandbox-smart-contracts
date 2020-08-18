@@ -67,7 +67,7 @@ describe("MetaTxWrapper", function () {
     );
     data += userWithSand.replace("0x", "");
 
-    await expectRevert(waitFor(dummyTrustedforwarder.sendTransaction({to, data})), "FORWARDED_CALL_FAILED");
+    await expectRevert(waitFor(dummyTrustedforwarder.sendTransaction({to, data})), "Not enough funds allowed");
   });
 
   it("can forward a transferFrom call to Sand contract", async function () {
