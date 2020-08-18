@@ -31,5 +31,5 @@ module.exports = async ({getNamedAccounts, deployments}) => {
 };
 
 module.exports.skip = guard(["1", "4", "314159"]);
-module.exports.dependencies = ["Sand", "CatalystMinter"];
+module.exports.dependencies = ["Sand", "CatalystMinter", "Forwarder"];
 module.exports.tags = ["MetaTxWrapper"];
