@@ -8,6 +8,7 @@ import "../common/Interfaces/ERC20.sol";
 import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../ReferralValidator/ReferralValidator.sol";
 
+
 /// @title Estate Sale contract with referral
 /// @notice This contract manages the sale of our lands as Estates
 contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
