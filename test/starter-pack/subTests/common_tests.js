@@ -4,6 +4,7 @@ const {getNamedAccounts} = require("@nomiclabs/buidler");
 const ethers = require("ethers");
 const {BigNumber} = ethers;
 const {waitFor, expectRevert, checERC20Balances} = require("local-utils");
+const {starterPackPrices} = require("../../../data/starterPack");
 
 function runCommonTests() {
   describe("StarterPack:Setup", function () {
@@ -214,6 +215,32 @@ function runCommonTests() {
       expect(balanceMagicGemRemaining).to.equal(0);
       const balanceLuckGemRemaining = await gemContract.balanceOf(starterPackContract.address, 4);
       expect(balanceLuckGemRemaining).to.equal(0);
+    });
+
+    it("user can get the current starterpack prices", async function () {
+      const {users} = await setUp;
+      const prices = await users[0].StarterPack.getStarterPackPrices();
+      const expectedPrices = starterPackPrices;
+      expect(prices[0]).to.equal(expectedPrices[0]);
+      expect(prices[1]).to.equal(expectedPrices[1]);
+      expect(prices[2]).to.equal(expectedPrices[2]);
+      expect(prices[3]).to.equal(expectedPrices[3]);
+    });
+
+    it("user can get the previous starterpack prices", async function () {
+      const {users} = await setUp;
+      const prices = await users[0].StarterPack.getPreviousStarterPackPrices();
+      const expectedPrices = starterPackPrices;
+      expect(prices[0]).to.equal(expectedPrices[0]);
+      expect(prices[1]).to.equal(expectedPrices[1]);
+      expect(prices[2]).to.equal(expectedPrices[2]);
+      expect(prices[3]).to.equal(expectedPrices[3]);
+    });
+
+    it("user can get the latest price change timestamp", async function () {
+      const {users} = await setUp;
+      const timestamp = await users[0].StarterPack.getTimestamp();
+      expect(timestamp).to.equal(0);
     });
   });
 }
