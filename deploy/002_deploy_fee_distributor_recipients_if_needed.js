@@ -36,4 +36,4 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   }
 };
 module.exports.tags = ["FakeRecipients"];
-module.exports.skip = guard(["1", "4"], "FakeRecipients");
+module.exports.skip = guard(["1", "4"]);

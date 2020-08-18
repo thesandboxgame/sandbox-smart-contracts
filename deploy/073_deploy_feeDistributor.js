@@ -9,12 +9,8 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     let {percentages, recipients} = deploymentData[key];
     let feeDistributionRecipients = [];
     for (contractName of recipients) {
-      let recipient = await deployments.getOrNull(contractName);
-      if (!recipient) {
-        throw new Error(`${contractName} was not deployed`);
-      } else {
-        feeDistributionRecipients.push(recipient.address);
-      }
+      let recipient = await deployments.get(contractName);
+      feeDistributionRecipients.push(recipient.address);
     }
     await deploy("FeeDistributor", {
       from: deployer,
