@@ -4,6 +4,7 @@ const {getNamedAccounts} = require("@nomiclabs/buidler");
 const ethers = require("ethers");
 const {BigNumber} = ethers;
 const {waitFor, expectRevert, checERC20Balances} = require("local-utils");
+const {starterPackPrices} = require("../../../data/starterPack");
 
 function runCommonTests() {
   describe("StarterPack:Setup", function () {
@@ -129,11 +130,11 @@ function runCommonTests() {
       expect(priceEvent.args[0][2]).to.equal(70);
       expect(priceEvent.args[0][3]).to.equal(80);
 
-      const latestPrices = await starterPackContract.getStarterPackPrices();
-      expect(latestPrices[0]).to.equal(50);
-      expect(latestPrices[1]).to.equal(60);
-      expect(latestPrices[2]).to.equal(70);
-      expect(latestPrices[3]).to.equal(80);
+      const latestPrices = await starterPackContract.getPrices();
+      expect(latestPrices[1][0]).to.equal(50);
+      expect(latestPrices[1][1]).to.equal(60);
+      expect(latestPrices[1][2]).to.equal(70);
+      expect(latestPrices[1][3]).to.equal(80);
     });
 
     it("cannot withdrawAll if not admin", async function () {
@@ -214,6 +215,21 @@ function runCommonTests() {
       expect(balanceMagicGemRemaining).to.equal(0);
       const balanceLuckGemRemaining = await gemContract.balanceOf(starterPackContract.address, 4);
       expect(balanceLuckGemRemaining).to.equal(0);
+    });
+
+    it("user can get the starterpack prices", async function () {
+      const {users} = await setUp;
+      const prices = await users[0].StarterPack.getPrices();
+      const expectedPrices = starterPackPrices;
+      expect(prices[0][0]).to.equal(expectedPrices[0]);
+      expect(prices[0][1]).to.equal(expectedPrices[1]);
+      expect(prices[0][2]).to.equal(expectedPrices[2]);
+      expect(prices[0][3]).to.equal(expectedPrices[3]);
+      expect(prices[1][0]).to.equal(expectedPrices[0]);
+      expect(prices[1][1]).to.equal(expectedPrices[1]);
+      expect(prices[1][2]).to.equal(expectedPrices[2]);
+      expect(prices[1][3]).to.equal(expectedPrices[3]);
+      expect(prices[2]).to.equal(0);
     });
   });
 }

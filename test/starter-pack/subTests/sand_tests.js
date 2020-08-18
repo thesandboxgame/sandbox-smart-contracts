@@ -298,7 +298,7 @@ function runSandTests() {
     });
 
     it("price change should be implemented after a delay", async function () {
-      const {starterPackContractAsAdmin, userWithSAND} = setUp;
+      const {starterPackContractAsAdmin, userWithSAND, users} = setUp;
       const dummySignature = signPurchaseMessage(privateKey, Message, userWithSAND.address);
       await starterPackContractAsAdmin.setSANDEnabled(true);
       const newPrices = [
@@ -315,6 +315,22 @@ function runSandTests() {
       const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
       const totalExpectedPrice = starterPackPrices.reduce((p, v) => p.add(v), BigNumber.from(0));
       expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
+
+      // prices are set but the new prices do not take effect for purchases yet
+      const prices = await users[0].StarterPack.getPrices();
+      const expectedPrices = newPrices;
+      expect(prices[1][0]).to.equal(expectedPrices[0]);
+      expect(prices[1][1]).to.equal(expectedPrices[1]);
+      expect(prices[1][2]).to.equal(expectedPrices[2]);
+      expect(prices[1][3]).to.equal(expectedPrices[3]);
+
+      const expectedPreviousPrices = starterPackPrices;
+      expect(prices[0][0]).to.equal(expectedPreviousPrices[0]);
+      expect(prices[0][1]).to.equal(expectedPreviousPrices[1]);
+      expect(prices[0][2]).to.equal(expectedPreviousPrices[2]);
+      expect(prices[0][3]).to.equal(expectedPreviousPrices[3]);
+
+      expect(prices[2]).not.to.equal(0);
 
       // fast-forward 1 hour. now buyer should pay the new price
       await increaseTime(60 * 60);
