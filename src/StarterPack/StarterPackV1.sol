@@ -220,9 +220,21 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @notice Get current StarterPack prices
     /// @return pricesBeforeSwitch Array of prices before price change
     /// @return pricesAfterSwitch Array of prices after price change
-    /// @return switchTime Latest price change timestamp
-    function getPrices() external view returns (uint256[] memory pricesBeforeSwitch, uint256[] memory pricesAfterSwitch, uint256 switchTime) {
-        return (_previousStarterPackPrices, _starterPackPrices, _priceChangeTimestamp);
+    /// @return switchTime The time the latest price change will take effect, being the time of the price change plus the price change delay
+    function getPrices()
+        external
+        view
+        returns (
+            uint256[] memory pricesBeforeSwitch,
+            uint256[] memory pricesAfterSwitch,
+            uint256 switchTime
+        )
+    {
+        uint switchTime = 0;
+        if (_priceChangeTimestamp != 0) {
+            switchTime = _priceChangeTimestamp + _priceChangeDelay;
+        }
+        return (_previousStarterPackPrices, _starterPackPrices, switchTime);
     }
 
     /// @notice Returns the amount of ETH for a specific amount of SAND
