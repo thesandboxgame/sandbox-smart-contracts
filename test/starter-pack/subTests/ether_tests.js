@@ -331,19 +331,20 @@ function runEtherTests() {
       expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
 
       // prices are set but the new prices do not take effect for purchases yet
-      const prices = await users[0].StarterPack.getStarterPackPrices();
+      const prices = await users[0].StarterPack.getPrices();
       const expectedPrices = newPrices;
-      expect(prices[0]).to.equal(expectedPrices[0]);
-      expect(prices[1]).to.equal(expectedPrices[1]);
-      expect(prices[2]).to.equal(expectedPrices[2]);
-      expect(prices[3]).to.equal(expectedPrices[3]);
+      expect(prices[1][0]).to.equal(expectedPrices[0]);
+      expect(prices[1][1]).to.equal(expectedPrices[1]);
+      expect(prices[1][2]).to.equal(expectedPrices[2]);
+      expect(prices[1][3]).to.equal(expectedPrices[3]);
 
-      const previousPrices = await users[0].StarterPack.getPreviousStarterPackPrices();
       const expectedPreviousPrices = starterPackPrices;
-      expect(previousPrices[0]).to.equal(expectedPreviousPrices[0]);
-      expect(previousPrices[1]).to.equal(expectedPreviousPrices[1]);
-      expect(previousPrices[2]).to.equal(expectedPreviousPrices[2]);
-      expect(previousPrices[3]).to.equal(expectedPreviousPrices[3]);
+      expect(prices[0][0]).to.equal(expectedPreviousPrices[0]);
+      expect(prices[0][1]).to.equal(expectedPreviousPrices[1]);
+      expect(prices[0][2]).to.equal(expectedPreviousPrices[2]);
+      expect(prices[0][3]).to.equal(expectedPreviousPrices[3]);
+
+      expect(prices[2]).not.to.equal(0);
 
       // fast-forward 1 hour. now buyer should pay the new price
       await increaseTime(60 * 60);
@@ -357,21 +358,6 @@ function runEtherTests() {
       const eventsMatching2 = receipt2.events.filter((event) => event.event === "Purchase");
       const newTotalExpectedPrice = BigNumber.from(2900).mul("1000000000000000000");
       expect(eventsMatching2[0].args[2]).to.equal(newTotalExpectedPrice);
-
-      // the set prices remain the same after the delay has occurred
-      const pricesAfterDelay = await users[0].StarterPack.getStarterPackPrices();
-      const expectedPricesAfterDelay = newPrices;
-      expect(pricesAfterDelay[0]).to.equal(expectedPricesAfterDelay[0]);
-      expect(pricesAfterDelay[1]).to.equal(expectedPricesAfterDelay[1]);
-      expect(pricesAfterDelay[2]).to.equal(expectedPricesAfterDelay[2]);
-      expect(pricesAfterDelay[3]).to.equal(expectedPricesAfterDelay[3]);
-
-      const previousPricesAfterDelay = await users[0].StarterPack.getPreviousStarterPackPrices();
-      const expectedPreviousPricesAfterDelay = starterPackPrices;
-      expect(previousPricesAfterDelay[0]).to.equal(expectedPreviousPricesAfterDelay[0]);
-      expect(previousPricesAfterDelay[1]).to.equal(expectedPreviousPricesAfterDelay[1]);
-      expect(previousPricesAfterDelay[2]).to.equal(expectedPreviousPricesAfterDelay[2]);
-      expect(previousPricesAfterDelay[3]).to.equal(expectedPreviousPricesAfterDelay[3]);
     });
 
     it("withdrawAll withdraws all remaining tokens after purchases have occurred", async function () {

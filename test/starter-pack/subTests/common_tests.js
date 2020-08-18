@@ -130,11 +130,11 @@ function runCommonTests() {
       expect(priceEvent.args[0][2]).to.equal(70);
       expect(priceEvent.args[0][3]).to.equal(80);
 
-      const latestPrices = await starterPackContract.getStarterPackPrices();
-      expect(latestPrices[0]).to.equal(50);
-      expect(latestPrices[1]).to.equal(60);
-      expect(latestPrices[2]).to.equal(70);
-      expect(latestPrices[3]).to.equal(80);
+      const latestPrices = await starterPackContract.getPrices();
+      expect(latestPrices[1][0]).to.equal(50);
+      expect(latestPrices[1][1]).to.equal(60);
+      expect(latestPrices[1][2]).to.equal(70);
+      expect(latestPrices[1][3]).to.equal(80);
     });
 
     it("cannot withdrawAll if not admin", async function () {
@@ -217,30 +217,19 @@ function runCommonTests() {
       expect(balanceLuckGemRemaining).to.equal(0);
     });
 
-    it("user can get the current starterpack prices", async function () {
+    it("user can get the starterpack prices", async function () {
       const {users} = await setUp;
-      const prices = await users[0].StarterPack.getStarterPackPrices();
+      const prices = await users[0].StarterPack.getPrices();
       const expectedPrices = starterPackPrices;
-      expect(prices[0]).to.equal(expectedPrices[0]);
-      expect(prices[1]).to.equal(expectedPrices[1]);
-      expect(prices[2]).to.equal(expectedPrices[2]);
-      expect(prices[3]).to.equal(expectedPrices[3]);
-    });
-
-    it("user can get the previous starterpack prices", async function () {
-      const {users} = await setUp;
-      const prices = await users[0].StarterPack.getPreviousStarterPackPrices();
-      const expectedPrices = starterPackPrices;
-      expect(prices[0]).to.equal(expectedPrices[0]);
-      expect(prices[1]).to.equal(expectedPrices[1]);
-      expect(prices[2]).to.equal(expectedPrices[2]);
-      expect(prices[3]).to.equal(expectedPrices[3]);
-    });
-
-    it("user can get the latest price change timestamp", async function () {
-      const {users} = await setUp;
-      const timestamp = await users[0].StarterPack.getTimestamp();
-      expect(timestamp).to.equal(0);
+      expect(prices[0][0]).to.equal(expectedPrices[0]);
+      expect(prices[0][1]).to.equal(expectedPrices[1]);
+      expect(prices[0][2]).to.equal(expectedPrices[2]);
+      expect(prices[0][3]).to.equal(expectedPrices[3]);
+      expect(prices[1][0]).to.equal(expectedPrices[0]);
+      expect(prices[1][1]).to.equal(expectedPrices[1]);
+      expect(prices[1][2]).to.equal(expectedPrices[2]);
+      expect(prices[1][3]).to.equal(expectedPrices[3]);
+      expect(prices[2]).to.equal(0);
     });
   });
 }
