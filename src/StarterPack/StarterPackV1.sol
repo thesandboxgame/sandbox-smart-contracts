@@ -230,7 +230,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
             uint256 switchTime
         )
     {
-        uint256 switchTime = 0;
+        switchTime = 0;
         if (_priceChangeTimestamp != 0) {
             switchTime = _priceChangeTimestamp + _priceChangeDelay;
         }

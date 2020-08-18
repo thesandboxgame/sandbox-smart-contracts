@@ -8,7 +8,6 @@ import "../common/Interfaces/ERC20.sol";
 import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../ReferralValidator/ReferralValidator.sol";
 
-
 /// @title Estate Sale contract with referral
 /// @notice This contract manages the sale of our lands as Estates
 contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
@@ -125,7 +124,7 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
     }
 
-    function _checkPrices(uint256 priceInSand, uint256 adjustedPriceInSand) internal {
+    function _checkPrices(uint256 priceInSand, uint256 adjustedPriceInSand) internal view {
         require(adjustedPriceInSand == priceInSand.mul(_multiplier).div(MULTIPLIER_DECIMALS), "INVALID_PRICE");
     }
 
