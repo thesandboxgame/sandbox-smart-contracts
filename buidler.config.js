@@ -104,14 +104,10 @@ module.exports = {
       1: "0x3044719d139F866a44c988823513eCB93060bF1b",
       rinkeby: "0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e",
     },
-    metaTxTrustedForwarder: {
-      // default computed from private key:
-      // "0x7777777777777777777777777777777777777777777777777777777777777777"
-      default: "0xAe72A48c1a36bd18Af168541c53037965d26e4A8",
-      1: "", // TODO
-      4: "", // TODO
-      42: "", // TODO
-      314159: "", // TODO
+    trustedForwarder: {
+      default: "0x6da02F43c3BdEb30c21b57a24825417F671a8490",
+      1: null,
+      rinkeby: null,
     },
     sandboxAccount: {
       default: 4,
