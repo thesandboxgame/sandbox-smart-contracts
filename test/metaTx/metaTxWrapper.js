@@ -59,6 +59,21 @@ describe("MetaTxWrapper", function () {
     );
   });
 
+  it("should handle a failure in the Sand contract", async function () {
+    const {sandWrapper} = setUp;
+    const amount = BigNumber.from("50000000000000000000000");
+    const sandWrapperAsTrustedForwarder = await sandWrapper.connect(dummyTrustedforwarder);
+
+    let {to, data} = await sandWrapperAsTrustedForwarder.populateTransaction.transferFrom(
+      userWithSand,
+      userWithoutSand,
+      amount
+    );
+    data += userWithSand.replace("0x", "");
+
+    await expectRevert(waitFor(dummyTrustedforwarder.sendTransaction({to, data})), "FORWARDED_CALL_FAILED");
+  });
+
   it("can forward a call to Sand contract", async function () {
     const {sandWrapper, sandContract} = setUp;
     const {sandAdmin} = await getNamedAccounts();

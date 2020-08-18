@@ -25,6 +25,6 @@ contract MetaTxWrapper is BaseRelayRecipient {
         require(signer == firstParam, "INVALID_SIGNER");
         address target = _forwardTo;
         (bool success, ) = target.call{value: msg.value}(msg.data);
-        require(success, "FORWARDER_CALL_FAILURE");
+        require(success, "FORWARDED_CALL_FAILED");
     }
 }
