@@ -12,16 +12,10 @@ contract MetaTxWrapper is BaseRelayRecipient {
         trustedForwarder = trusted_Forwarder;
     }
 
-    fallback() external trustedForwarderOnly() {
-        // bytes memory data = msg.data;
+    fallback() external payable trustedForwarderOnly() {
         uint256 length = msg.data.length;
         // retrieve the msg sender as per EIP-2771
         address signer = _msgSender();
-
-        // uint256 firstParam;
-        // assembly {
-        //     firstParam := and(mload(data), 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)
-        // }
         // @review delete all console logs
         console.logBytes(msg.data);
         address firstParam = abi.decode(msg.data[4:], (address));
@@ -30,17 +24,7 @@ contract MetaTxWrapper is BaseRelayRecipient {
         console.log("firstParam: ", firstParam);
         require(signer == firstParam, "INVALID_SIGNER");
         address target = _forwardTo;
-        assembly {
-            calldatacopy(0, 0, calldatasize())
-            let result := call(gas(), target, 0, calldatasize(), 0x0, 0, 0x0)
-            returndatacopy(0, 0, returndatasize())
-            switch result
-                case 0 {
-                    revert(0, returndatasize())
-                }
-                default {
-                    return(0, returndatasize())
-                }
-        }
+        (bool success, ) = target.call{value: msg.value}(msg.data);
+        require(success, "FORWARDER_CALL_FAILURE");
     }
 }
