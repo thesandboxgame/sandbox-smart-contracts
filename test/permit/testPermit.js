@@ -7,15 +7,14 @@ const {getApprovalDigest} = require("./_testHelper");
 const {waitFor} = require("local-utils");
 
 const TEST_AMOUNT = BigNumber.from(10).mul("1000000000000000000");
+const deadline = BigNumber.from(2582718400);
 const nonce = BigNumber.from(0);
-const deadline = BigNumber.from("0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff");
 
 describe("Permit", function () {
   it("Permit contract emits an Approval event when msg.sender == owner", async function () {
     const {permitContract, others} = await setupPermit();
-    console.log(others[0]); // 0x9FC9C2DfBA3b6cF204C37a5F690619772b926e39
 
-    const digest = await getApprovalDigest(
+    const digest = getApprovalDigest(
       permitContract.address,
       {owner: others[0], spender: others[1], value: TEST_AMOUNT},
       nonce,
