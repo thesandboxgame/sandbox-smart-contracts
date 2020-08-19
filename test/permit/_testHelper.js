@@ -3,12 +3,11 @@ const {utils} = require("ethers");
 function getDomainSeparator(tokenAddress) {
   return utils.keccak256(
     utils.defaultAbiCoder.encode(
-      ["bytes32", "bytes32", "bytes32", "uint256", "address"],
+      ["bytes32", "bytes32", "bytes32", "address"],
       [
         utils.keccak256(utils.toUtf8Bytes("EIP712Domain(string name,string version,address verifyingContract)")),
         utils.keccak256(utils.toUtf8Bytes("The Sandbox 3D")),
         utils.keccak256(utils.toUtf8Bytes("1")),
-        1,
         tokenAddress,
       ]
     )
