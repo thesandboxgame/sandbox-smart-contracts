@@ -19,6 +19,7 @@ contract Permit is TheSandbox712 {
         );
         address recoveredAddress = ecrecover(digest, v, r, s);
         console.log('rec', recoveredAddress);
+        console.log('owner', owner);
         require(recoveredAddress != address(0) && recoveredAddress == owner, 'INVALID_SIGNATURE');
         _sand.approveFor(owner, spender, value);
     }
