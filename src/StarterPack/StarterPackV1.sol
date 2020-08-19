@@ -39,7 +39,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     // Minimizes the effect of price changes on pending TXs
     uint256 private _priceChangeDelay = 1 hours;
 
-    event Purchase(address indexed buyer, Message, uint256 price, address token, uint256 amountPaid);
+    event Purchase(address indexed buyer, Message message, uint256 price, address token, uint256 amountPaid);
 
     event SetPrices(uint256[] prices);
 
@@ -230,7 +230,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
             uint256 switchTime
         )
     {
-        uint256 switchTime = 0;
+        switchTime = 0;
         if (_priceChangeTimestamp != 0) {
             switchTime = _priceChangeTimestamp + _priceChangeDelay;
         }
