@@ -25,7 +25,7 @@ describe("Permit", function () {
     const ethersProvider = new Web3Provider(ethereum);
     const flatSig = await ethersProvider.getSigner(others[0]).signMessage(digest);
     const sig = splitSignature(flatSig);
-    console.log('sig', sig);
+    console.log("sig", sig);
 
     const permitContractAsUser = await permitContract.connect(ethersProvider.getSigner(others[0]));
 

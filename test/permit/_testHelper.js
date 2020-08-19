@@ -18,7 +18,9 @@ function getDomainSeparator(tokenAddress) {
 module.exports.getApprovalDigest = async function (tokenAddress, approve, nonce, deadline) {
   const DOMAIN_SEPARATOR = getDomainSeparator(tokenAddress);
   // eslint-disable-next-line prettier/prettier
-  const PERMIT_TYPEHASH = utils.keccak256(utils.toUtf8Bytes("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"));
+  const PERMIT_TYPEHASH = utils.keccak256(
+    utils.toUtf8Bytes("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)")
+  );
   return utils.keccak256(
     utils.solidityPack(
       ["bytes1", "bytes1", "bytes32", "bytes32"],
