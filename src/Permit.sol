@@ -14,14 +14,29 @@ contract Permit is TheSandbox712 {
             abi.encodePacked(
                 '\x19\x01',
                 domainSeparator(),
-                keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+                keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner], deadline))
             )
         );
+        nonces[owner] = nonces[owner] + 1;
         address recoveredAddress = ecrecover(digest, v, r, s);
         console.log('rec', recoveredAddress);
         console.log('owner', owner);
         require(recoveredAddress != address(0) && recoveredAddress == owner, 'INVALID_SIGNATURE');
         _sand.approveFor(owner, spender, value);
+    }
+
+    function digestMe(address owner, address spender, uint256 value, uint256 deadline) public view returns(bytes32) {
+        return keccak256(
+            abi.encodePacked(
+                '\x19\x01',
+                domainSeparator(),
+                keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner], deadline))
+            )
+        );
+    }
+
+    function sig(bytes32 r) public view returns(bytes32) {
+        return r;
     }
 
     ERC20Extended internal immutable _sand;
