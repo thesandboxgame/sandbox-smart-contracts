@@ -104,6 +104,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @param buyer The destination address for the purchased Catalysts and Gems and the address that will pay for the purchase; if not metaTx then buyer must be equal to msg.sender
     /// @param message A message containing information about the Catalysts and Gems to be purchased
     /// @param signature A signed message specifying tx details
+    // @review
     function purchaseWithSand(
         address buyer,
         Message calldata message,
@@ -208,7 +209,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     /// @notice Enables admin to change the prices of the StarterPack bundles
-    /// @param prices Array of new prices that wil take effect after a delay period
+    /// @param prices Array of new prices that will take effect after a delay period
+    // @review
     function setPrices(uint256[] calldata prices) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
         _previousStarterPackPrices = _starterPackPrices;
@@ -221,6 +223,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @return pricesBeforeSwitch Array of prices before price change
     /// @return pricesAfterSwitch Array of prices after price change
     /// @return switchTime The time the latest price change will take effect, being the time of the price change plus the price change delay
+    // @review
     function getPrices()
         external
         view
@@ -259,6 +262,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @param catalystIds Array of catalystIds to be purchase
     /// @param catalystQuantities Array of quantities of those catalystIds to be purchased
     /// @return Total price in SAND
+    // @review
     function _calculateTotalPriceInSand(uint256[] memory catalystIds, uint256[] memory catalystQuantities) internal returns (uint256) {
         uint256[] memory prices = _priceSelector();
         uint256 totalPrice;
@@ -272,6 +276,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     /// @dev Function to determine whether to use old or new prices
     /// @return Array of prices
+    // @review
     function _priceSelector() internal returns (uint256[] memory) {
         uint256[] memory prices;
         // No price change:
@@ -303,7 +308,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     // /////////////////// CONSTRUCTOR ////////////////////
-
+    // @review
     constructor(
         address starterPackAdmin,
         address sandContractAddress,
