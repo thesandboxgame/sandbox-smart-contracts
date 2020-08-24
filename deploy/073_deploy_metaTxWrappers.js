@@ -18,18 +18,18 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     log: true,
   });
 
-  // const metaTxCatalyst = await deploy("MetaTxWrapper", {
-  //   contractName: "CatalystWrapper",
-  //   from: deployer,
-  //   args: [fakeTrustedForwarder, catalystMinterContract.address],
-  //   log: true,
-  // });
+  const metaTxCatalyst = await deploy("MetaTxWrapper", {
+    contractName: "CatalystWrapper",
+    from: deployer,
+    args: [fakeTrustedForwarder, catalystMinterContract.address],
+    log: true,
+  });
 
   const sandWrapper = {...metaTxSand, abi: sandContract.abi};
-  // const catalystWrapper = {...metaTxCatalyst, abi: catalystMinterContract.abi};
+  const catalystWrapper = {...metaTxCatalyst, abi: catalystMinterContract.abi};
 
   await deployments.save("SandWrapper", sandWrapper);
-  // await deployments.save("CatalystWrapper", catalystWrapper);
+  await deployments.save("CatalystWrapper", catalystWrapper);
 };
 
 module.exports.skip = guard(["1", "4", "314159"]);
