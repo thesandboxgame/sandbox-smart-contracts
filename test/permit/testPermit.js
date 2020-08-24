@@ -1,10 +1,9 @@
 const {setupPermit} = require("./fixtures");
 const ethers = require("ethers");
 const {BigNumber} = ethers;
-const {Web3Provider} = ethers.providers;
-const {splitSignature, arrayify} = require("ethers/lib/utils");
-const {getApprovalDigest} = require("./_testHelper");
+const {splitSignature} = require("ethers/lib/utils");
 const {waitFor} = require("local-utils");
+const sigUtil = require("eth-sig-util");
 
 const TEST_AMOUNT = BigNumber.from(10).mul("1000000000000000000");
 const deadline = BigNumber.from(2582718400);
@@ -14,41 +13,71 @@ describe("Permit", function () {
   it("Permit contract emits an Approval event when msg.sender == owner", async function () {
     const {permitContract, others} = await setupPermit();
 
-    const digest = getApprovalDigest(
-      permitContract.address,
-      {owner: others[0], spender: others[1], value: TEST_AMOUNT},
-      nonce,
-      deadline
-    );
-    
-    console.log('others[0]', others[0]);
-    console.log('others[1]', others[1]);
+    const wallet = ethers.Wallet.createRandom();
+    const privateKey = wallet.privateKey;
 
-    console.log('digestTest', digest); 
-    // digest bytes32
-    // 0x14 94 b8 a8 72 93 c1 c6 87 91 02 50 a8 f0 22 fc 23 1d ea e2 98 ab 5f 9f 76 fc 52 12 19 3c b8 0e
+    const approve = {owner: wallet.address, spender: others[1], value: TEST_AMOUNT};
 
-    const ethersProvider = new Web3Provider(ethereum);
+    const data712 = {
+      types: {
+        EIP712Domain: [
+          {
+            name: "name",
+            type: "string",
+          },
+          {
+            name: "version",
+            type: "string",
+          },
+          {
+            name: "verifyingContract",
+            type: "address",
+          },
+        ],
+        Permit: [
+          {
+            name: "owner",
+            type: "address",
+          },
+          {
+            name: "spender",
+            type: "address",
+          },
+          {
+            name: "value",
+            type: "uint256",
+          },
+          {
+            name: "nonce",
+            type: "uint256",
+          },
+          {
+            name: "deadline",
+            type: "uint256",
+          },
+        ],
+      },
+      primaryType: "Permit",
+      domain: {
+        name: "The Sandbox 3D",
+        version: "1",
+        verifyingContract: permitContract.address,
+      },
+      message: {
+        owner: approve.owner,
+        spender: approve.spender,
+        value: approve.value._hex,
+        nonce: nonce._hex,
+        deadline: deadline._hex,
+      },
+    };
 
-    const user = await ethersProvider.getSigner(others[0]);
-
-    // TODO: fix sig
-    const flatSig = await user.signMessage(arrayify(digest));
+    const privateKeyAsBuffer = Buffer.from(privateKey.substr(2), "hex");
+    const flatSig = sigUtil.signTypedData_v4(privateKeyAsBuffer, {data: data712});
     const sig = splitSignature(flatSig);
-    console.log('sig', sig);
-
-    const permitContractAsUser = await permitContract.connect(user);
-
-    const digestActual = await permitContract.digestMe(others[0], others[1], TEST_AMOUNT, deadline);
-    console.log('digestActual', digestActual);
-
-    const rContract = await permitContract.sig(sig.r);
-    const sContract = await permitContract.sig(sig.s);
-
-    console.log('contract sig r&s', rContract, sContract);
 
     const receipt = await waitFor(
-      permitContractAsUser.permit(others[0], others[1], TEST_AMOUNT, deadline, sig.v, sig.r, sig.s)
+      permitContract.permit(wallet.address, others[1], TEST_AMOUNT, deadline, sig.v, sig.r, sig.s)
     );
 
     console.log(receipt);
