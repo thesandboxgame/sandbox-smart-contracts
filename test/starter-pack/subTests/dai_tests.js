@@ -6,7 +6,7 @@ const {BigNumber} = ethers;
 const {findEvents} = require("../../../lib/findEvents.js");
 const {signPurchaseMessage} = require("../../../lib/purchaseMessageSigner");
 const {privateKey} = require("./_testHelper");
-const {starterPackPrices, gemPrices} = require("../../../data/starterPack");
+const {starterPackPrices, gemPrice} = require("../../../data/starterPack");
 
 function runDaiTests() {
   describe("StarterPack:PurchaseWithDAIEmptyStarterPack", function () {
@@ -307,7 +307,8 @@ function runDaiTests() {
         BigNumber.from(800).mul("1000000000000000000"),
         BigNumber.from(1300).mul("1000000000000000000"),
       ];
-      await starterPackContractAsAdmin.setPrices(newPrices);
+      const newGemPrice = 11;
+      await starterPackContractAsAdmin.setPrices(newPrices, newGemPrice);
       // buyer should still pay the old price for 1 hour
       const receipt = await waitFor(
         userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature)
@@ -323,14 +324,17 @@ function runDaiTests() {
       expect(prices[1][1]).to.equal(expectedPrices[1]);
       expect(prices[1][2]).to.equal(expectedPrices[2]);
       expect(prices[1][3]).to.equal(expectedPrices[3]);
+      expect(prices[3]).to.equal(newGemPrice);
 
       const expectedPreviousPrices = starterPackPrices;
+      const expectedPreviousGemPrice = gemPrice;
       expect(prices[0][0]).to.equal(expectedPreviousPrices[0]);
       expect(prices[0][1]).to.equal(expectedPreviousPrices[1]);
       expect(prices[0][2]).to.equal(expectedPreviousPrices[2]);
       expect(prices[0][3]).to.equal(expectedPreviousPrices[3]);
+      expect(prices[2]).to.equal(expectedPreviousGemPrice);
 
-      expect(prices[2]).not.to.equal(0);
+      expect(prices[4]).not.to.equal(0);
 
       // fast-forward 1 hour. now buyer should pay the new price
       await increaseTime(60 * 60);
