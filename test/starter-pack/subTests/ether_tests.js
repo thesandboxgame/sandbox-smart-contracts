@@ -5,7 +5,7 @@ const {BigNumber} = require("ethers");
 const {findEvents} = require("../../../lib/findEvents.js");
 const {signPurchaseMessage} = require("../../../lib/purchaseMessageSigner");
 const {privateKey} = require("./_testHelper");
-const {starterPackPrices} = require("../../../data/starterPack");
+const {starterPackPrices, gemPrices} = require("../../../data/starterPack");
 
 function runEtherTests() {
   describe("StarterPack:PurchaseWithETHEmptyStarterPack", function () {
