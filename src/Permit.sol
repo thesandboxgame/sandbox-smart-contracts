@@ -2,7 +2,6 @@ pragma solidity 0.6.5;
 
 import "./Interfaces/ERC20Extended.sol";
 import "./base/TheSandbox712.sol";
-import "@nomiclabs/buidler/console.sol";
 
 /// @title Permit contract
 /// @notice This contract manages approvals of SAND via signature
