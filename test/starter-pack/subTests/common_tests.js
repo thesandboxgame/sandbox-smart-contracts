@@ -115,12 +115,12 @@ function runCommonTests() {
 
     it("cannot set prices if not admin", async function () {
       const {users} = setUp;
-      await expectRevert(users[0].StarterPack.setPrices([50, 60, 70, 80]), "NOT_AUTHORIZED");
+      await expectRevert(users[0].StarterPack.setPrices([50, 60, 70, 80], 42), "NOT_AUTHORIZED");
     });
 
     it("can set prices if admin", async function () {
       const {starterPackContractAsAdmin, starterPackContract} = setUp;
-      const receipt = await waitFor(starterPackContractAsAdmin.setPrices([50, 60, 70, 80]));
+      const receipt = await waitFor(starterPackContractAsAdmin.setPrices([50, 60, 70, 80], 42));
 
       const eventsMatching = receipt.events.filter((event) => event.event === "SetPrices");
       expect(eventsMatching).to.have.lengthOf(1);
@@ -129,12 +129,14 @@ function runCommonTests() {
       expect(priceEvent.args[0][1]).to.equal(60);
       expect(priceEvent.args[0][2]).to.equal(70);
       expect(priceEvent.args[0][3]).to.equal(80);
+      expect(priceEvent.args[1]).to.equal(42);
 
       const latestPrices = await starterPackContract.getPrices();
       expect(latestPrices[1][0]).to.equal(50);
       expect(latestPrices[1][1]).to.equal(60);
       expect(latestPrices[1][2]).to.equal(70);
       expect(latestPrices[1][3]).to.equal(80);
+      expect(latestPrices[3]).to.equal(42);
     });
 
     it("cannot withdrawAll if not admin", async function () {
@@ -217,7 +219,7 @@ function runCommonTests() {
       expect(balanceLuckGemRemaining).to.equal(0);
     });
 
-    it("user can get the starterpack prices", async function () {
+    it("user can get the starterpack and Gem prices", async function () {
       const {users} = await setUp;
       const prices = await users[0].StarterPack.getPrices();
       const expectedPrices = starterPackPrices;
@@ -229,7 +231,7 @@ function runCommonTests() {
       expect(prices[1][1]).to.equal(expectedPrices[1]);
       expect(prices[1][2]).to.equal(expectedPrices[2]);
       expect(prices[1][3]).to.equal(expectedPrices[3]);
-      expect(prices[2]).to.equal(0);
+      expect(prices[2]).to.equal(BigNumber.from("42000000000000000000"));
     });
   });
 }
