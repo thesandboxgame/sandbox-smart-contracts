@@ -5,7 +5,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
 
   const {deployer} = await getNamedAccounts();
   const sandContract = await deployments.get("Sand");
-  // const catalystMinterContract = await deployments.get("CatalystMinter");
+  const catalystMinterContract = await deployments.get("CatalystMinter");
   const signers = await ethers.getSigners();
   const fakeTrustedForwarder = await signers[11].getAddress();
   // @todo: deploy wrappers using actual forwarder contract.
