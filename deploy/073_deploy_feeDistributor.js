@@ -12,13 +12,15 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       let recipient = await deployments.get(contractName);
       feeDistributionRecipients.push(recipient.address);
     }
-    await deploy("FeeDistributor", {
+    await deploy("FeeDistributor_" + key, {
+      contract: "FeeDistributor",
       from: deployer,
       gas: 3000000,
       log: true,
       args: [feeDistributionRecipients, percentages],
     });
   }
+  return true;
 };
 module.exports.tags = ["FeeDistributor"];
-module.exports.skip = guard(["1"], "FeeDistributor");
+module.exports.skip = guard(["1", "4"]); // TODO
