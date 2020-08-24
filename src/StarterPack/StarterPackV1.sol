@@ -29,6 +29,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     uint256[] private _starterPackPrices;
     uint256[] private _previousStarterPackPrices;
+    uint256 private _gemPrice;
+    uint256 private _previousGemPrice;
 
     // The timestamp of the last pricechange
     uint256 private _priceChangeTimestamp;
@@ -41,7 +43,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     event Purchase(address indexed buyer, Message message, uint256 price, address token, uint256 amountPaid);
 
-    event SetPrices(uint256[] prices);
+    event SetPrices(uint256[] prices, uint256 gemPrice);
 
     struct Message {
         uint256[] catalystIds;
@@ -210,18 +212,23 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     /// @notice Enables admin to change the prices of the StarterPack bundles
     /// @param prices Array of new prices that will take effect after a delay period
+    /// @param gemPrice New price for gems that will take effect after a delay period
     // @review
-    function setPrices(uint256[] calldata prices) external {
+    function setPrices(uint256[] calldata prices, uint256 gemPrice) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
         _previousStarterPackPrices = _starterPackPrices;
         _starterPackPrices = prices;
+        _previousGemPrice = _gemPrice;
+        _gemPrice = gemPrice;
         _priceChangeTimestamp = now;
-        emit SetPrices(prices);
+        emit SetPrices(prices, gemPrice);
     }
 
     /// @notice Get current StarterPack prices
     /// @return pricesBeforeSwitch Array of prices before price change
     /// @return pricesAfterSwitch Array of prices after price change
+    /// @return gemPriceBeforeSwitch Gem price before price change
+    /// @return gemPriceAfterSwitch Gem price after price change
     /// @return switchTime The time the latest price change will take effect, being the time of the price change plus the price change delay
     // @review
     function getPrices()
@@ -230,6 +237,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         returns (
             uint256[] memory pricesBeforeSwitch,
             uint256[] memory pricesAfterSwitch,
+            uint256 gemPriceBeforeSwitch,
+            uint256 gemPriceAfterSwitch,
             uint256 switchTime
         )
     {
@@ -237,7 +246,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         if (_priceChangeTimestamp != 0) {
             switchTime = _priceChangeTimestamp + _priceChangeDelay;
         }
-        return (_previousStarterPackPrices, _starterPackPrices, switchTime);
+        return (_previousStarterPackPrices, _starterPackPrices, _previousGemPrice, _gemPrice, switchTime);
     }
 
     /// @notice Returns the amount of ETH for a specific amount of SAND
@@ -319,7 +328,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         address erc20GroupCatalystAddress,
         address erc20GroupGemAddress,
         address initialSigningWallet,
-        uint256[] memory initialStarterPackPrices
+        uint256[] memory initialStarterPackPrices,
+        uint256 initialGemPrice
     ) public PurchaseValidator(initialSigningWallet) {
         _setMetaTransactionProcessor(initialMetaTx, true);
         _wallet = initialWalletAddress;
@@ -331,6 +341,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _erc20GroupGem = ERC20Group(erc20GroupGemAddress);
         _starterPackPrices = initialStarterPackPrices;
         _previousStarterPackPrices = initialStarterPackPrices;
+        _gemPrice = initialGemPrice;
+        _previousGemPrice = initialGemPrice;
         _sandEnabled = true; // Sand is enabled by default
         _etherEnabled = true; // Ether is enabled by default
     }
