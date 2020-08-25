@@ -367,6 +367,57 @@ function runSandTests() {
       );
       expect(eventsMatching2[0].args[2]).to.equal(newTotalExpectedPrice);
     });
+    // @review
+    it("should allow users to purchase gems directly", async function () {
+      const {userWithSAND, catalystContract, gemContract} = await setUp;
+
+      const gemsOnlyMessage = {
+        catalystIds: [0, 1, 2, 3],
+        catalystQuantities: [0, 0, 0, 0],
+        gemIds: [0, 1, 2, 3, 4],
+        gemQuantities: [1, 1, 1, 1, 1],
+        nonce: 0,
+      };
+
+      const balancePowerGemBefore = await gemContract.balanceOf(userWithSAND.address, 0);
+      const balanceDefenseGemBefore = await gemContract.balanceOf(userWithSAND.address, 1);
+      const balanceSpeedGemBefore = await gemContract.balanceOf(userWithSAND.address, 2);
+      const balanceMagicGemBefore = await gemContract.balanceOf(userWithSAND.address, 3);
+      const balanceLuckGemBefore = await gemContract.balanceOf(userWithSAND.address, 4);
+      expect(balancePowerGemBefore).to.equal(0);
+      expect(balanceDefenseGemBefore).to.equal(0);
+      expect(balanceSpeedGemBefore).to.equal(0);
+      expect(balanceMagicGemBefore).to.equal(0);
+      expect(balanceLuckGemBefore).to.equal(0);
+
+      const dummySignature = signPurchaseMessage(privateKey, gemsOnlyMessage, userWithSAND.address);
+
+      // purchase gems from starterPack
+      const receipt = await waitFor(
+        userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, gemsOnlyMessage, dummySignature)
+      );
+      const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
+
+      const totalExpectedPrice = priceCalculator(
+        starterPackPrices,
+        gemsOnlyMessage.catalystQuantities,
+        gemPrice,
+        gemsOnlyMessage.gemQuantities
+      );
+
+      const balancePowerGemAfter = await gemContract.balanceOf(userWithSAND.address, 0);
+      const balanceDefenseGemAfter = await gemContract.balanceOf(userWithSAND.address, 1);
+      const balanceSpeedGemAfter = await gemContract.balanceOf(userWithSAND.address, 2);
+      const balanceMagicGemAfter = await gemContract.balanceOf(userWithSAND.address, 3);
+      const balanceLuckGemAfter = await gemContract.balanceOf(userWithSAND.address, 4);
+
+      expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
+      expect(balancePowerGemAfter).to.equal(1);
+      expect(balanceDefenseGemAfter).to.equal(1);
+      expect(balanceSpeedGemAfter).to.equal(1);
+      expect(balanceMagicGemAfter).to.equal(1);
+      expect(balanceLuckGemAfter).to.equal(1);
+    });
 
     it("Any user should be able to purchase when msg.sender == metaTx contract", async function () {
       const {starterPackContract, starterPackContractAsAdmin, userWithSAND, sandContract} = await setUp;
