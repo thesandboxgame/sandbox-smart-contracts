@@ -1,5 +1,5 @@
 const {guard} = require("../lib");
-const {starterPackPrices} = require("../data/starterPack");
+const {starterPackPrices, gemPrice} = require("../data/starterPack");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deploy} = deployments;
@@ -25,6 +25,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       gemGroup.address,
       backendMessageSigner,
       starterPackPrices,
+      gemPrice,
     ],
     log: true,
   });

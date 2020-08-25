@@ -15,7 +15,7 @@ import "./PurchaseValidator.sol";
 /// @notice This contract manages the purchase and distribution of StarterPacks (bundles of Catalysts and Gems)
 contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     using SafeMathWithRequire for uint256;
-    uint256 internal constant DAI_PRICE = 8300000000000000;
+    uint256 internal constant DAI_PRICE = 55000000000000000;
 
     ERC20 internal immutable _sand;
     Medianizer private immutable _medianizer;
@@ -29,6 +29,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     uint256[] private _starterPackPrices;
     uint256[] private _previousStarterPackPrices;
+    uint256 private _gemPrice;
+    uint256 private _previousGemPrice;
 
     // The timestamp of the last pricechange
     uint256 private _priceChangeTimestamp;
@@ -41,7 +43,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     event Purchase(address indexed buyer, Message message, uint256 price, address token, uint256 amountPaid);
 
-    event SetPrices(uint256[] prices);
+    event SetPrices(uint256[] prices, uint256 gemPrice);
 
     struct Message {
         uint256[] catalystIds;
@@ -104,6 +106,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @param buyer The destination address for the purchased Catalysts and Gems and the address that will pay for the purchase; if not metaTx then buyer must be equal to msg.sender
     /// @param message A message containing information about the Catalysts and Gems to be purchased
     /// @param signature A signed message specifying tx details
+
     function purchaseWithSand(
         address buyer,
         Message calldata message,
@@ -116,7 +119,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
             isPurchaseValid(buyer, message.catalystIds, message.catalystQuantities, message.gemIds, message.gemQuantities, message.nonce, signature),
             "INVALID_PURCHASE"
         );
-        uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities);
+
+        uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities, message.gemQuantities);
         _handlePurchaseWithERC20(buyer, _wallet, address(_sand), amountInSand);
         _erc20GroupCatalyst.batchTransferFrom(address(this), buyer, message.catalystIds, message.catalystQuantities);
         _erc20GroupGem.batchTransferFrom(address(this), buyer, message.gemIds, message.gemQuantities);
@@ -141,7 +145,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
             "INVALID_PURCHASE"
         );
 
-        uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities);
+        uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities, message.gemQuantities);
         uint256 ETHRequired = getEtherAmountWithSAND(amountInSand);
         require(msg.value >= ETHRequired, "NOT_ENOUGH_ETHER_SENT");
 
@@ -173,7 +177,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
             "INVALID_PURCHASE"
         );
 
-        uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities);
+        uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities, message.gemQuantities);
         uint256 DAIRequired = amountInSand.mul(DAI_PRICE).div(1000000000000000000);
         _handlePurchaseWithERC20(buyer, _wallet, address(_dai), DAIRequired);
         _erc20GroupCatalyst.batchTransferFrom(address(this), buyer, message.catalystIds, message.catalystQuantities);
@@ -208,25 +212,34 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     }
 
     /// @notice Enables admin to change the prices of the StarterPack bundles
-    /// @param prices Array of new prices that wil take effect after a delay period
-    function setPrices(uint256[] calldata prices) external {
+    /// @param prices Array of new prices that will take effect after a delay period
+    /// @param gemPrice New price for gems that will take effect after a delay period
+
+    function setPrices(uint256[] calldata prices, uint256 gemPrice) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
         _previousStarterPackPrices = _starterPackPrices;
         _starterPackPrices = prices;
+        _previousGemPrice = _gemPrice;
+        _gemPrice = gemPrice;
         _priceChangeTimestamp = now;
-        emit SetPrices(prices);
+        emit SetPrices(prices, gemPrice);
     }
 
     /// @notice Get current StarterPack prices
     /// @return pricesBeforeSwitch Array of prices before price change
     /// @return pricesAfterSwitch Array of prices after price change
+    /// @return gemPriceBeforeSwitch Gem price before price change
+    /// @return gemPriceAfterSwitch Gem price after price change
     /// @return switchTime The time the latest price change will take effect, being the time of the price change plus the price change delay
+
     function getPrices()
         external
         view
         returns (
             uint256[] memory pricesBeforeSwitch,
             uint256[] memory pricesAfterSwitch,
+            uint256 gemPriceBeforeSwitch,
+            uint256 gemPriceAfterSwitch,
             uint256 switchTime
         )
     {
@@ -234,7 +247,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         if (_priceChangeTimestamp != 0) {
             switchTime = _priceChangeTimestamp + _priceChangeDelay;
         }
-        return (_previousStarterPackPrices, _starterPackPrices, switchTime);
+        return (_previousStarterPackPrices, _starterPackPrices, _previousGemPrice, _gemPrice, switchTime);
     }
 
     /// @notice Returns the amount of ETH for a specific amount of SAND
@@ -259,35 +272,49 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @param catalystIds Array of catalystIds to be purchase
     /// @param catalystQuantities Array of quantities of those catalystIds to be purchased
     /// @return Total price in SAND
-    function _calculateTotalPriceInSand(uint256[] memory catalystIds, uint256[] memory catalystQuantities) internal returns (uint256) {
-        uint256[] memory prices = _priceSelector();
+
+    function _calculateTotalPriceInSand(
+        uint256[] memory catalystIds,
+        uint256[] memory catalystQuantities,
+        uint256[] memory gemQuantities
+    ) internal returns (uint256) {
+        (uint256[] memory prices, uint256 gemPrice) = _priceSelector();
         uint256 totalPrice;
         for (uint256 i = 0; i < catalystIds.length; i++) {
             uint256 id = catalystIds[i];
             uint256 quantity = catalystQuantities[i];
             totalPrice += prices[id].mul(quantity);
         }
+        for (uint256 i = 0; i < gemQuantities.length; i++) {
+            uint256 quantity = gemQuantities[i];
+            totalPrice += gemPrice.mul(quantity);
+        }
         return totalPrice;
     }
 
     /// @dev Function to determine whether to use old or new prices
     /// @return Array of prices
-    function _priceSelector() internal returns (uint256[] memory) {
+
+    function _priceSelector() internal returns (uint256[] memory, uint256) {
         uint256[] memory prices;
+        uint256 gemPrice;
         // No price change:
         if (_priceChangeTimestamp == 0) {
             prices = _starterPackPrices;
+            gemPrice = _gemPrice;
         } else {
             // Price change delay has expired.
             if (now > _priceChangeTimestamp + 1 hours) {
                 _priceChangeTimestamp = 0;
                 prices = _starterPackPrices;
+                gemPrice = _gemPrice;
             } else {
                 // Price change has occured:
                 prices = _previousStarterPackPrices;
+                gemPrice = _previousGemPrice;
             }
         }
-        return prices;
+        return (prices, gemPrice);
     }
 
     /// @dev Function to handle purchase with SAND or DAI
@@ -314,7 +341,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         address erc20GroupCatalystAddress,
         address erc20GroupGemAddress,
         address initialSigningWallet,
-        uint256[] memory initialStarterPackPrices
+        uint256[] memory initialStarterPackPrices,
+        uint256 initialGemPrice
     ) public PurchaseValidator(initialSigningWallet) {
         _setMetaTransactionProcessor(initialMetaTx, true);
         _wallet = initialWalletAddress;
@@ -326,6 +354,8 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         _erc20GroupGem = ERC20Group(erc20GroupGemAddress);
         _starterPackPrices = initialStarterPackPrices;
         _previousStarterPackPrices = initialStarterPackPrices;
+        _gemPrice = initialGemPrice;
+        _previousGemPrice = initialGemPrice;
         _sandEnabled = true; // Sand is enabled by default
         _etherEnabled = true; // Ether is enabled by default
     }
