@@ -15,7 +15,7 @@ import "./PurchaseValidator.sol";
 /// @notice This contract manages the purchase and distribution of StarterPacks (bundles of Catalysts and Gems)
 contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     using SafeMathWithRequire for uint256;
-    uint256 internal constant DAI_PRICE = 8300000000000000;
+    uint256 internal constant DAI_PRICE = 55000000000000000;
 
     ERC20 internal immutable _sand;
     Medianizer private immutable _medianizer;
