@@ -5,7 +5,7 @@ const ethers = require("ethers");
 const {BigNumber} = ethers;
 const {findEvents} = require("../../../lib/findEvents.js");
 const {signPurchaseMessage} = require("../../../lib/purchaseMessageSigner");
-const {privateKey} = require("./_testHelper");
+const {privateKey, priceCalculator} = require("./_testHelper");
 const {starterPackPrices, gemPrice} = require("../../../data/starterPack");
 
 function runDaiTests() {
@@ -314,7 +314,12 @@ function runDaiTests() {
         userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature)
       );
       const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
-      const totalExpectedPrice = starterPackPrices.reduce((p, v) => p.add(v), BigNumber.from(0));
+      const totalExpectedPrice = priceCalculator(
+        starterPackPrices,
+        Message.catalystQuantities,
+        gemPrice,
+        Message.gemQuantities
+      );
       expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
 
       // prices are set but the new prices do not take effect for purchases yet
@@ -344,7 +349,12 @@ function runDaiTests() {
         userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature2)
       );
       const eventsMatching2 = receipt2.events.filter((event) => event.event === "Purchase");
-      const newTotalExpectedPrice = BigNumber.from(2900).mul("1000000000000000000");
+      const newTotalExpectedPrice = priceCalculator(
+        newPrices,
+        Message.catalystQuantities,
+        newGemPrice,
+        Message.gemQuantities
+      );
       expect(eventsMatching2[0].args[2]).to.equal(newTotalExpectedPrice);
     });
 
