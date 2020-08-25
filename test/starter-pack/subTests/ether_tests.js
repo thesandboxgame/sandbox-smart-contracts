@@ -383,9 +383,6 @@ function runEtherTests() {
         Message.gemQuantities
       );
       const eventsMatching2 = receipt2.events.filter((event) => event.event === "Purchase");
-
-      console.log(`event price: ${eventsMatching2[0].args[2]}`);
-      console.log(`newTotalExpectedPrice: ${newTotalExpectedPrice}`);
       expect(eventsMatching2[0].args[2]).to.equal(newTotalExpectedPrice);
     });
 
