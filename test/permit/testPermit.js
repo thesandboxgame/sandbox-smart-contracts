@@ -103,7 +103,7 @@ describe("Permit", function () {
     );
   });
 
-  it("Permit function reverts if owner == address(0)", async function () {
+  it("Permit function reverts if owner is zeroAddress", async function () {
     const {permitContract, others} = setUp;
 
     const approve = {
