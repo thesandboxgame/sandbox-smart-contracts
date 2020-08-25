@@ -21,6 +21,10 @@ contract Permit is TheSandbox712 {
         _sand.approveFor(owner, spender, value);
     }
 
+    function getNonce(address owner) external view returns (uint256) {
+        return nonces[owner];
+    }
+
     ERC20Extended internal immutable _sand;
 
     mapping(address => uint256) public nonces;
