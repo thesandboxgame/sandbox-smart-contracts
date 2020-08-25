@@ -4,7 +4,7 @@ const {waitFor, expectRevert, zeroAddress, increaseTime} = require("local-utils"
 const {BigNumber} = require("ethers");
 const {findEvents} = require("../../../lib/findEvents.js");
 const {signPurchaseMessage} = require("../../../lib/purchaseMessageSigner");
-const {privateKey} = require("./_testHelper");
+const {privateKey, priceCalculator} = require("./_testHelper");
 const {starterPackPrices, gemPrice} = require("../../../data/starterPack");
 
 function runEtherTests() {
@@ -319,7 +319,7 @@ function runEtherTests() {
         BigNumber.from(800).mul("1000000000000000000"),
         BigNumber.from(1300).mul("1000000000000000000"),
       ];
-      const newGemPrice = 11;
+      const newGemPrice = BigNumber.from(300).mul("1000000000000000000");
       await starterPackContractAsAdmin.setPrices(newPrices, newGemPrice);
       // buyer should still pay the old price for 1 hour
       const receipt = await waitFor(
@@ -328,8 +328,14 @@ function runEtherTests() {
         })
       );
       const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
-      const totalExpectedPrice = starterPackPrices.reduce((p, v) => p.add(v), BigNumber.from(0));
-      expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
+
+      const totalExpectedPrice = priceCalculator(
+        starterPackPrices,
+        Message.catalystQuantities,
+        gemPrice,
+        Message.gemQuantities
+      );
+      expect(eventsMatching[0].args[2]).to.equal(BigNumber.from(totalExpectedPrice));
 
       // prices are set but the new prices do not take effect for purchases yet
       const prices = await users[0].StarterPack.getPrices();
@@ -359,8 +365,17 @@ function runEtherTests() {
           value: BigNumber.from(4).mul("1000000000000000000"),
         })
       );
+
+      const newTotalExpectedPrice = priceCalculator(
+        newPrices,
+        Message.catalystQuantities,
+        newGemPrice,
+        Message.gemQuantities
+      );
       const eventsMatching2 = receipt2.events.filter((event) => event.event === "Purchase");
-      const newTotalExpectedPrice = BigNumber.from(2900).mul("1000000000000000000");
+
+      console.log(`event price: ${eventsMatching2[0].args[2]}`);
+      console.log(`newTotalExpectedPrice: ${newTotalExpectedPrice}`);
       expect(eventsMatching2[0].args[2]).to.equal(newTotalExpectedPrice);
     });
 
