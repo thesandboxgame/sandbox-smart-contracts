@@ -263,6 +263,8 @@ describe("MetaTxWrapper: CATALYST_MINTER", function () {
       Catalyst: catalystContract.connect(catalystContract.provider.getSigner(catalystAdmin)),
     };
 
+    const admin = await catalystContract.getAdmin();
+    console.log(`admin: ${admin}`);
     await waitFor(CatalystAdmin.Catalyst.setMetaTransactionProcessor(catalystWrapper.address, true));
     let {to, data} = await catalystWrapperAsTrustedForwarder.populateTransaction.mint(
       userWithSand,
@@ -280,29 +282,23 @@ describe("MetaTxWrapper: CATALYST_MINTER", function () {
       "can't substract more than there is"
     );
   });
-  // currently fails with : Error: VM Exception while processing transaction: revert NOT_SENDER
-  it.skip("should forward call to the CatalystMinter contract", async function () {
-    const {gem, catalyst} = await setupCatalystUsers();
+
+  it("should forward call to the CatalystMinter contract", async function () {
+    const {catalyst} = await setupCatalystUsers();
     const gemIds = [0, 1, 4];
     const quantity = 3;
 
     const {catalystWrapper} = setUp;
-    const {catalystAdmin, gemAdmin} = await getNamedAccounts();
+    const {catalystAdmin} = await getNamedAccounts();
     const CatalystAdmin = {
       address: catalystAdmin,
       Catalyst: catalyst.connect(catalyst.provider.getSigner(catalystAdmin)),
     };
-    const GemAdmin = {
-      address: gemAdmin,
-      Gem: gem.connect(gem.provider.getSigner(gemAdmin)),
-    };
 
-    await CatalystAdmin.Catalyst.batchMint(userWithSand, [0, 1, 2, 3], [10, 10, 10, 10]);
-    await GemAdmin.Gem.batchMint(userWithSand, [0, 1, 2, 3, 4], [10, 10, 10, 10, 10]);
-
-    // when call is forwarded to CatalystMinter, the msg.sender is the metaTXWrapper contract
+    // the msg.sender seen by CatalystMinter is the metaTXWrapper contract
     await waitFor(CatalystAdmin.Catalyst.setMetaTransactionProcessor(catalystWrapper.address, true));
-    assert.ok(await catalyst.isMetaTransactionProcessor(catalystWrapper.address));
+    const isMetaTxProcessor = await catalyst.isMetaTransactionProcessor(catalystWrapper.address);
+    assert.ok(isMetaTxProcessor);
 
     let {to, data} = await catalystWrapperAsTrustedForwarder.populateTransaction.mint(
       userWithSand,
@@ -315,6 +311,7 @@ describe("MetaTxWrapper: CATALYST_MINTER", function () {
       "0x"
     );
     data += userWithSand.replace("0x", "");
+
     assert.ok(await waitFor(dummyTrustedforwarder.sendTransaction({to, data})));
   });
 });
