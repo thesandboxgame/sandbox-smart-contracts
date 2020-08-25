@@ -4,7 +4,8 @@ const {getNamedAccounts} = require("@nomiclabs/buidler");
 const ethers = require("ethers");
 const {BigNumber} = ethers;
 const {waitFor, expectRevert, checERC20Balances} = require("local-utils");
-const {starterPackPrices} = require("../../../data/starterPack");
+const {priceCalculator} = require("./_testHelper");
+const {starterPackPrices, gemPrice} = require("../../../data/starterPack");
 
 function runCommonTests() {
   describe("StarterPack:Setup", function () {
@@ -231,7 +232,16 @@ function runCommonTests() {
       expect(prices[1][1]).to.equal(expectedPrices[1]);
       expect(prices[1][2]).to.equal(expectedPrices[2]);
       expect(prices[1][3]).to.equal(expectedPrices[3]);
-      expect(prices[2]).to.equal(BigNumber.from("42000000000000000000"));
+      expect(prices[2]).to.equal(gemPrice);
+    });
+
+    it("prices can be calculated locally", async function () {
+      // starterPackPrices = [sandWei(18), sandWei(55), sandWei(182), sandWei(727)];
+      // gemPrice = sandWei(18);
+      const catalystQuantities = [1, 2, 3, 4];
+      const gemQuantities = [7, 11, 2, 6];
+      const totalCalculatedPrice = priceCalculator(starterPackPrices, catalystQuantities, gemPrice, gemQuantities);
+      expect(totalCalculatedPrice).to.be.equal(BigNumber.from(4050).mul("1000000000000000000"));
     });
   });
 }
