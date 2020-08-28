@@ -289,7 +289,7 @@ function runDaiTests() {
       let dummySignature = signPurchaseMessage(privateKey, Message, userWithDAI.address);
       await expectRevert(
         userWithDAI.StarterPack.purchaseWithDAI(userWithDAI.address, Message, dummySignature),
-        "Transaction reverted without a reason"
+        "VM Exception while processing transaction: invalid opcode" // TODO: review error message
       );
     });
 

@@ -297,7 +297,7 @@ function runEtherTests() {
       let dummySignature = signPurchaseMessage(privateKey, Message, users[0].address);
       await expectRevert(
         users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature),
-        "Transaction reverted without a reason"
+        "VM Exception while processing transaction: invalid opcode" // TODO: review error message
       );
     });
 

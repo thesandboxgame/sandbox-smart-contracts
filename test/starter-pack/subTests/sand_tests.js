@@ -289,7 +289,7 @@ function runSandTests() {
       let dummySignature = signPurchaseMessage(privateKey, Message, userWithSAND.address);
       await expectRevert(
         userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature),
-        "Transaction reverted without a reason"
+        "VM Exception while processing transaction: invalid opcode" // TODO: review error message
       );
     });
 
