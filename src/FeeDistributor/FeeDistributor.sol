@@ -1,7 +1,7 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-import "../common/interfaces/ERC20.sol";
+import "../common/Interfaces/ERC20.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 
 
