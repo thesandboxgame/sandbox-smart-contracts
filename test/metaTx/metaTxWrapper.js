@@ -164,7 +164,9 @@ describe("MetaTxWrapper: SAND", function () {
       const {sandWrapper, sandContract} = setUp;
       const {sandAdmin} = await getNamedAccounts();
       const {trustedForwarder} = await getNamedAccounts();
-      const sandAsUserWithSand = await sandContract.connect(sandContract.provider.getSigner(userWithSand));
+
+      let {toAddress, approveData} = await sandContract.populateTransaction.approve(trustedForwarder, amount);
+      await waitFor(wallet.sendTransaction({toAddress, approveData}));
 
       const SandAdmin = {
         address: sandAdmin,
@@ -172,14 +174,9 @@ describe("MetaTxWrapper: SAND", function () {
       };
 
       await waitFor(SandAdmin.Sand.setSuperOperator(sandWrapper.address, true));
-      await waitFor(SandAdmin.Sand.transfer(userWithSand, BigNumber.from("1000000000000000000000000")));
-      await waitFor(sandAsUserWithSand.approve(trustedForwarder, amount));
+      await waitFor(SandAdmin.Sand.transfer(wallet.address, BigNumber.from("1000000000000000000000000")));
 
-      let {to, data} = await sandWrapperAsTrustedForwarder.populateTransaction.transferFrom(
-        wallet.address,
-        sandRecipient,
-        amount
-      );
+      let {to, data} = await sandWrapper.populateTransaction.transferFrom(wallet.address, sandRecipient, amount);
       data += wallet.address.replace("0x", "");
       console.log(`txData: ${data}`);
 
@@ -200,7 +197,9 @@ describe("MetaTxWrapper: SAND", function () {
       const domainSeparator = TypedDataUtils.hashStruct("EIP712Domain", typeData.domain, typeData.types);
 
       const balanceBefore = await sandContract.balanceOf(sandRecipient);
-      await waitFor(forwarder.execute(req1, bufferToHex(domainSeparator), typeHash, "0x", sig));
+      const receipt = await waitFor(forwarder.execute(req1, bufferToHex(domainSeparator), typeHash, "0x", sig));
+      const events = await findEvents(sandContract, "Transfer", receipt.blockHash);
+      console.log(`Events: ${events.length}`);
       const balanceAfter = await sandContract.balanceOf(sandRecipient);
 
       expect(balanceAfter).to.be.equal(balanceBefore.add(amount));
@@ -215,7 +214,6 @@ describe("MetaTxWrapper: CATALYST_MINTER", function () {
     const signers = await ethers.getSigners();
     dummyTrustedforwarder = signers[11];
     userWithSand = await signers[1].getAddress();
-    // sandRecipient = await signers[3].getAddress();
     catalystWrapperAsTrustedForwarder = await catalystWrapper.connect(dummyTrustedforwarder);
   });
 
