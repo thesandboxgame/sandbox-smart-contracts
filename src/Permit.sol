@@ -7,7 +7,7 @@ import "./base/TheSandbox712.sol";
 /// @notice This contract manages approvals of SAND via signature
 contract Permit is TheSandbox712 {
 
-    /// @notice Function to get the nonce for a given address
+    /// @notice Function to permit the expenditure of SAND by a nominated spender
     /// @param owner the owner of the ERC20 tokens
     /// @param spender the nominated spender of the ERC20 tokens
     /// @param value the value (allowance) of the ERC20 tokens that the nominated spender will be allowed to spend
