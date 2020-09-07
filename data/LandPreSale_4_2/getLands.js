@@ -2,8 +2,11 @@ const fs = require("fs");
 const MerkleTree = require("../../lib/merkleTree");
 const {createDataArray, saltLands} = require("../../lib/merkleTreeHelper");
 const {BigNumber} = require("ethers");
+const addresses = require("../addresses.json");
 const prices = require("./prices");
 const bundles = require("./bundles.rinkeby.json"); // TODO Mainnet land bundles
+
+const sandboxWallet = addresses["sandbox"];
 
 let errors = false;
 function reportError(e) {
@@ -96,7 +99,7 @@ function generateLandsForMerkleTree(sectorData) {
     if (landGroup.reserved) {
       numReservedGroup++;
       numReserved += size * size;
-      if (landGroup.reserved.toLowerCase() === "0x7A9fe22691c811ea339D9B73150e6911a5343DcA".toLowerCase()) {
+      if (landGroup.reserved.toLowerCase() === sandboxWallet.toLowerCase()) {
         numSandboxReservedGroups++;
         numSandboxReserved += size * size;
       }

@@ -8,7 +8,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
   const {deploy} = deployments;
   const chainId = await getChainId();
 
-  const {deployer, landSaleBeneficiary, backendReferralWallet, others} = await getNamedAccounts();
+  const {deployer, landSaleBeneficiary, backendReferralWallet, landSaleFeeRecipient} = await getNamedAccounts();
 
   const sandContract = await deployments.get("Sand");
   const landContract = await deployments.get("Land");
@@ -36,7 +36,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
         2000,
         estateContract.address,
         assetContract.address,
-        others[5], // TODO FeeDistributor for 5% fee
+        landSaleFeeRecipient, // TODO FeeDistributor for 5% fee
       ],
       log: true,
     });
@@ -49,6 +49,6 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     fs.writeFileSync(`./.presale_4_2_${sector}_proofs_${chainId}.json`, JSON.stringify(landsWithProof, null, "  "));
   }
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO , 'LandPreSale_4_2_1');
+module.exports.skip = guard(["1", "4", "314159"], "LandPreSale_4_2");
 module.exports.tags = ["LandPreSale_4_2_multiple"];
 module.exports.dependencies = ["Sand", "Land", "DAI", "Asset", "Estate"];
