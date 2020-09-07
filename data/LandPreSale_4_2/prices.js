@@ -4,7 +4,7 @@ function sandWei(v) {
   return BigNumber.from(v).mul("1000000000000000000").toString();
 }
 
-// TODO
+// TODO Mainnet prices
 module.exports = {
   "1x1": sandWei(1182),
   "3x3": sandWei(10147),

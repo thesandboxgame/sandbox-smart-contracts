@@ -125,7 +125,9 @@ function runSandTests(landSaleName) {
         assert.isOk(commission.eq(referrerBalance), "Referrer balance is wrong");
 
         const landSaleBeneficiaryBalance = await contracts.sand.balanceOf(LandSaleBeneficiary.address);
-        const expectedLandSaleBeneficiaryBalance = BigNumber.from(amount).sub(BigNumber.from(commission)).add(BigNumber.from(land.price).mul(5).div(100)); // Note: LandSaleBeneficiary currently the same as 5% fee recipient
+        const expectedLandSaleBeneficiaryBalance = BigNumber.from(amount)
+          .sub(BigNumber.from(commission))
+          .add(BigNumber.from(land.price).mul(5).div(100)); // Note: LandSaleBeneficiary currently the same as 5% fee recipient
         assert.isOk(landSaleBeneficiaryBalance.eq(expectedLandSaleBeneficiaryBalance), "Balance is wrong");
 
         for (let sx = 0; sx < land.size; sx++) {
@@ -220,7 +222,9 @@ function runSandTests(landSaleName) {
         assert.isOk(commission.eq(referrerBalance), "Referrer balance is wrong");
 
         const landSaleBeneficiaryBalance = await contracts.sand.balanceOf(LandSaleBeneficiary.address);
-        const expectedLandSaleBeneficiaryBalance = BigNumber.from(amount).sub(BigNumber.from(commission)).add(BigNumber.from(adjustedLandPrice).mul(5).div(100)); // Note: LandSaleBeneficiary currently the same as 5% fee recipient
+        const expectedLandSaleBeneficiaryBalance = BigNumber.from(amount)
+          .sub(BigNumber.from(commission))
+          .add(BigNumber.from(adjustedLandPrice).mul(5).div(100)); // Note: LandSaleBeneficiary currently the same as 5% fee recipient
         assert.isOk(landSaleBeneficiaryBalance.eq(expectedLandSaleBeneficiaryBalance), "Balance is wrong");
 
         for (let sx = 0; sx < land.size; sx++) {
