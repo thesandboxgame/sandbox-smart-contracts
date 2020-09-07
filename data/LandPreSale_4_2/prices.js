@@ -6,10 +6,10 @@ function sandWei(v) {
 
 // TODO
 module.exports = {
-  "1x1": sandWei(3000),
-  "3x3": sandWei(25650),
-  "6x6": sandWei(97200),
-  "12x12": sandWei(367200),
-  "24x24": sandWei(1382400),
-  premium_1x1: sandWei(6950),
+  "1x1": sandWei(1182),
+  "3x3": sandWei(10147),
+  "6x6": sandWei(38496),
+  "12x12": sandWei(145407),
+  "24x24": sandWei(547392),
+  premium_1x1: sandWei(2750),
 };
