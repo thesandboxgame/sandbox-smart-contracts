@@ -10,6 +10,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
 
   await deploy("Estate", {from: deployer, args: [sandContract.address, estateAdmin, landContract.address], log: true});
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO , 'Estate');
+module.exports.skip = guard(["1", "4", "314159"], "Estate");
 module.exports.tags = ["Estate"];
 module.exports.dependencies = ["Sand", "Land"];
