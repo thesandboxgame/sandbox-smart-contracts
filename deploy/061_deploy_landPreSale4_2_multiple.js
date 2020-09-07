@@ -14,7 +14,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
   const landContract = await deployments.get("Land");
   const assetContract = await deployments.get("Asset");
 
-  for (let sector = 1; sector < 10; sector++) {
+  for (let sector = 11; sector <= 14; sector++) {
     const {lands, merkleRootHash, saltedLands, tree} = getLands(sector, network.live, chainId);
     const landSaleName = "LandPreSale_4_2_" + sector;
 

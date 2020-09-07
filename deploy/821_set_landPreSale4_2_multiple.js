@@ -3,7 +3,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
 
   const {landSaleAdmin} = await getNamedAccounts();
 
-  for (let sector = 1; sector < 10; sector++) {
+  for (let sector = 11; sector <= 14; sector++) {
     const landSaleName = "LandPreSale_4_2_" + sector;
     const landSale = await deployments.get(landSaleName);
 
