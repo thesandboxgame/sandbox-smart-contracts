@@ -4,7 +4,6 @@ const {createDataArray, saltLands} = require("../../lib/merkleTreeHelper");
 const {BigNumber} = require("ethers");
 const prices = require("./prices");
 const bundles = require("./bundles.rinkeby.json"); // TODO Mainnet land bundles
-const rawSectors = require("./sectors11-14.rinkeby.json"); // TODO Mainnet land data
 
 let errors = false;
 function reportError(e) {
