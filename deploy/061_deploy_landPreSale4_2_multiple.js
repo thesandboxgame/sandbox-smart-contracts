@@ -13,7 +13,6 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
   const sandContract = await deployments.get("Sand");
   const landContract = await deployments.get("Land");
   const assetContract = await deployments.get("Asset");
-  const estateContract = await deployments.get("Estate");
 
   for (let sector = 11; sector <= 14; sector++) {
     const {lands, merkleRootHash, saltedLands, tree} = getLands(sector, network.live, chainId);
@@ -34,7 +33,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
         2591016400, // TODO
         backendReferralWallet,
         2000,
-        estateContract.address,
+        "0x0000000000000000000000000000000000000000",
         assetContract.address,
         landSaleFeeRecipient, // TODO FeeDistributor for 5% fee
       ],
