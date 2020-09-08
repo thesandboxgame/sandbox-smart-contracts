@@ -50,4 +50,4 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
 };
 module.exports.skip = guard(["1", "4", "314159"], "LandPreSale_4_2");
 module.exports.tags = ["LandPreSale_4_2_multiple"];
-module.exports.dependencies = ["Sand", "Land", "DAI", "Asset", "Estate"];
+module.exports.dependencies = ["Sand", "Land", "DAI", "Asset"];
