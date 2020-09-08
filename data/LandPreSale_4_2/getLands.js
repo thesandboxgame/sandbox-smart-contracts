@@ -118,6 +118,7 @@ function generateLandsForMerkleTree(sectorData) {
         size,
         price,
         reserved: landGroup.reserved,
+        assetIds,
       });
     }
     lands.push({
@@ -126,6 +127,7 @@ function generateLandsForMerkleTree(sectorData) {
       size,
       price,
       reserved: landGroup.reserved,
+      assetIds,
     });
     numLands += size * size;
   }
