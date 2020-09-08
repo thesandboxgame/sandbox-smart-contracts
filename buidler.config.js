@@ -88,7 +88,7 @@ module.exports = {
 
     landSaleBeneficiary: "sandSaleBeneficiary", // collect funds from land sales
 
-    landSaleFeeRecipient: {default: 3, rinkeby: "sandSaleBeneficiary"}, // collect 5% fee from land sales (prior to implementation of FeeDistributor)
+    landSaleFeeRecipient: {default: 3, rinkeby: accounts_rinkeby[5], 1: ""}, // collect 5% fee from land sales (prior to implementation of FeeDistributor)
 
     landAdmin: {
       default: 2,
