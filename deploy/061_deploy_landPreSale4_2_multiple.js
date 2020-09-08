@@ -14,9 +14,28 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
   const landContract = await deployments.get("Land");
   const assetContract = await deployments.get("Asset");
 
+  let deadline;
+
   for (let sector = 11; sector <= 14; sector++) {
     const {lands, merkleRootHash, saltedLands, tree} = getLands(sector, network.live, chainId);
     const landSaleName = "LandPreSale_4_2_" + sector;
+
+    switch (landSaleName) {
+      case "LandPreSale_4_2_11":
+        deadline = 1600772400000; // Tuesday, 22 September 2020 11:00:00 GMT+00:00
+        break;
+      case "LandPreSale_4_2_12":
+        deadline = 1600866000000; // Wednesday, 23 September 2020 13:00:00 GMT+00:00
+        break;
+      case "LandPreSale_4_2_13":
+        deadline = 1600959600000; // Thursday, 24 September 2020 15:00:00 GMT+00:00
+        break;
+      case "LandPreSale_4_2_14":
+        deadline = 1601053200000; // Friday, 25 September 2020 17:00:00 GMT+00:00
+        break;
+      default:
+        deadline = 1601053200000; // Friday, 25 September 2020 17:00:00 GMT+00:00
+    }
 
     await deploy(landSaleName, {
       from: deployer,
@@ -30,7 +49,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
         deployer,
         landSaleBeneficiary,
         merkleRootHash,
-        2591016400, // TODO
+        deadline,
         backendReferralWallet,
         2000,
         "0x0000000000000000000000000000000000000000",
