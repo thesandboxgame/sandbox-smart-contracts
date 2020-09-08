@@ -163,10 +163,12 @@ describe("MetaTxWrapper: SAND", function () {
     it("should work with an actual forwarder contract", async function () {
       const {sandWrapper, sandContract} = setUp;
       const {sandAdmin} = await getNamedAccounts();
-      const {trustedForwarder} = await getNamedAccounts();
+      // const {trustedForwarder} = await getNamedAccounts();
 
-      let {toAddress, approveData} = await sandContract.populateTransaction.approve(trustedForwarder, amount);
-      await waitFor(wallet.sendTransaction({toAddress, approveData}));
+      // let {toAddress, approveData} = await sandContract.populateTransaction.approve(trustedForwarder, amount);
+      const sandContractAsWallet = await sandContract.connect(wallet);
+      await sandContractAsWallet.approve(forwarder.address, amount);
+      // await waitFor(wallet.sendTransaction({toAddress, approveData}));
 
       const SandAdmin = {
         address: sandAdmin,
@@ -197,9 +199,15 @@ describe("MetaTxWrapper: SAND", function () {
       const domainSeparator = TypedDataUtils.hashStruct("EIP712Domain", typeData.domain, typeData.types);
 
       const balanceBefore = await sandContract.balanceOf(sandRecipient);
+      const walletBalance = await sandContract.balanceOf(wallet.address);
       const receipt = await waitFor(forwarder.execute(req1, bufferToHex(domainSeparator), typeHash, "0x", sig));
       const events = await findEvents(sandContract, "Transfer", receipt.blockHash);
       console.log(`Events: ${events.length}`);
+      console.log(`wallet Balance: ${walletBalance}`);
+
+      const allowance = await sandContract.allowance(wallet.address, forwarder.address);
+      console.log(`allowance: ${allowance}`);
+
       const balanceAfter = await sandContract.balanceOf(sandRecipient);
 
       expect(balanceAfter).to.be.equal(balanceBefore.add(amount));
