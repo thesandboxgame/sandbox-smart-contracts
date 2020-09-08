@@ -19,6 +19,19 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       log(`setting ${landSaleName} Admin`);
       await execute(landSaleName, {from: currentAdmin, skipUnknownSigner: true}, "changeAdmin", landSaleAdmin);
     }
+
+    const isSandSuperOperator = await read("Sand", "isSuperOperator", landSale.address);
+    if (!isSandSuperOperator) {
+      log(`setting ${landSaleName} as super operator for Sand`);
+      const currentSandAdmin = await read("Sand", "getAdmin");
+      await execute(
+        "Sand",
+        {from: currentSandAdmin, skipUnknownSigner: true},
+        "setSuperOperator",
+        landSale.address,
+        true
+      );
+    }
   }
 };
 module.exports.dependencies = ["LandPreSale_4_2_multiple", "Land"];
