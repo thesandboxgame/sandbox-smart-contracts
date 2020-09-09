@@ -34,6 +34,7 @@ function generateLandsForMerkleTree(sectorData) {
   let numSandboxReserved = 0;
   let numReserved = 0;
   let numReservedGroup = 0;
+  let numBundles = 0;
 
   function addLandGroup(landGroup) {
     const size = Math.sqrt(landGroup.numLands);
@@ -143,6 +144,7 @@ function generateLandsForMerkleTree(sectorData) {
       reserved: land.ownerAddress,
       originalX: land.coordinateX,
       originalY: land.coordinateY,
+      bundleId: land.bundleId,
     });
   }
 
@@ -157,6 +159,7 @@ function generateLandsForMerkleTree(sectorData) {
       reserved: estate.ownerAddress,
       originalX: estate.coordinateX,
       originalY: estate.coordinateY,
+      bundleId: estate.bundleId,
     });
   }
 
@@ -175,6 +178,7 @@ function generateLandsForMerkleTree(sectorData) {
       numSandboxReserved,
       numReserved,
       numReservedGroup,
+      numBundles,
     });
   }
   exitIfError();
