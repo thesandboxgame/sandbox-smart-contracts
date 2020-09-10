@@ -86,9 +86,13 @@ module.exports = {
       rinkeby: "0x60927eB036621b801491B6c5e9A60A8d2dEeD75A",
     },
 
-    landSaleBeneficiary: "0x4489590a116618B506F0EfE885432F6A8ED998E9", // updated to company treasury wallet 9th September - collect funds from land sales
+    landSaleBeneficiary: {
+      default: "sandSaleBeneficiary",
+      rinkeby: "sandSaleBeneficiary",
+      1: "0x4489590a116618B506F0EfE885432F6A8ED998E9",
+    }, // updated to company treasury wallet 9th September - collect funds from land sales
 
-    landSaleFeeRecipient: {default: 3, rinkeby: accounts_rinkeby[5], 1: "0x0EB04462D69B1D267d269377E34f60b9De1c8510"}, // updated to 5% transaction fees wallet 9th September - collect 5% fee from land sales (prior to implementation of FeeDistributor)
+    landSaleFeeRecipient: {default: 3, rinkeby: accounts_rinkeby[5], 1: "0x0EB04462D69B1D267d269377E34f60b9De1c8510"}, // collect 5% fee from land sales (prior to implementation of FeeDistributor)
 
     landAdmin: {
       default: 2,
