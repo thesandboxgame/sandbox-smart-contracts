@@ -82,13 +82,13 @@ module.exports = {
 
     sandSaleBeneficiary: {
       default: 3,
-      1: "0x9695ed5020BB47880738Db356678fe8cBc8FF60b", // TODO use another wallet ?
+      1: "0x4489590a116618B506F0EfE885432F6A8ED998E9", // updated as per email from Seb on 9 September 2020
       rinkeby: "0x60927eB036621b801491B6c5e9A60A8d2dEeD75A",
     },
 
     landSaleBeneficiary: "sandSaleBeneficiary", // collect funds from land sales
 
-    landSaleFeeRecipient: {default: 3, rinkeby: accounts_rinkeby[5], 1: ""}, // collect 5% fee from land sales (prior to implementation of FeeDistributor)
+    landSaleFeeRecipient: {default: 3, rinkeby: accounts_rinkeby[5], 1: "0x0EB04462D69B1D267d269377E34f60b9De1c8510"}, // updated as per email from Seb on 9 September 2020 (prior to implementation of FeeDistributor)
 
     landAdmin: {
       default: 2,
