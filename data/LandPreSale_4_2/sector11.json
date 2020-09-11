@@ -905,7 +905,7 @@
         { "coordinateX": -146, "coordinateY": 71 },
         { "coordinateX": -145, "coordinateY": 71 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x1d7d54c4b2cab08d0807fb8963db8ee278291deb"
     },
     {
       "coordinateX": -144,
@@ -1209,7 +1209,7 @@
         { "coordinateX": -110, "coordinateY": 35 },
         { "coordinateX": -109, "coordinateY": 35 }
       ],
-      "ownerAddress": "0x1d7d54c4b2cab08d0807fb8963db8ee278291deb"
+      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
     },
     {
       "coordinateX": -144,
@@ -1762,7 +1762,7 @@
         { "coordinateX": -161, "coordinateY": 56 },
         { "coordinateX": -160, "coordinateY": 56 }
       ],
-      "ownerAddress": "0x7a9fe22691c811ea339d9b73150e6911a5343dca"
+      "ownerAddress": "0x44bC1E612e11d0Acd2c43218Ea55717aC28e3a40"
     },
     {
       "coordinateX": -174,

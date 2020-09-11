@@ -4,7 +4,7 @@ const {createDataArray, saltLands} = require("../../lib/merkleTreeHelper");
 const {BigNumber} = require("ethers");
 const addresses = require("../addresses.json");
 const prices = require("./prices");
-const bundles = require("./bundles.rinkeby.json"); // TODO Mainnet land bundles
+const bundles = require("./bundles.mainnet.json");
 
 const sandboxWallet = addresses["sandbox"];
 
