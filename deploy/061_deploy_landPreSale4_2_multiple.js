@@ -22,13 +22,13 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
 
     switch (landSaleName) {
       case "LandPreSale_4_2_11":
-        deadline = 1600772400000; // Tuesday, 22 September 2020 11:00:00 GMT+00:00
+        deadline = 1601053200000; // Tuesday, 22 September 2020 11:00:00 GMT+00:00
         break;
       case "LandPreSale_4_2_12":
-        deadline = 1600866000000; // Wednesday, 23 September 2020 13:00:00 GMT+00:00
+        deadline = 1601053200000; // Wednesday, 23 September 2020 13:00:00 GMT+00:00
         break;
       case "LandPreSale_4_2_13":
-        deadline = 1600959600000; // Thursday, 24 September 2020 15:00:00 GMT+00:00
+        deadline = 1601053200000; // Thursday, 24 September 2020 15:00:00 GMT+00:00
         break;
       case "LandPreSale_4_2_14":
         deadline = 1601053200000; // Friday, 25 September 2020 17:00:00 GMT+00:00
