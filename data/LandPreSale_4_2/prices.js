@@ -4,7 +4,7 @@ function sandWei(v) {
   return BigNumber.from(v).mul("1000000000000000000").toString();
 }
 
-// TODO Mainnet prices based on 0.036367$ per SAND
+// These are Mainnet prices based on 0.036367$ per SAND
 module.exports = {
   "1x1": sandWei(1182),
   "3x3": sandWei(10147),

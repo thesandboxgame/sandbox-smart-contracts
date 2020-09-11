@@ -67,6 +67,6 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
     fs.writeFileSync(`./.presale_4_2_${sector}_proofs_${chainId}.json`, JSON.stringify(landsWithProof, null, "  "));
   }
 };
-module.exports.skip = guard(["1", "4", "314159"], "LandPreSale_4_2");
+module.exports.skip = guard(["1", "4", "314159"], "LandPreSale_4_2_14");
 module.exports.tags = ["LandPreSale_4_2_multiple"];
 module.exports.dependencies = ["Sand", "Land", "DAI", "Asset"];
