@@ -1,13 +1,11 @@
 const {guard} = require("../lib");
-const ethers = require("ethers");
-const {ethereum} = require("@nomiclabs/buidler");
-const {Web3Provider} = ethers.providers;
+const {Contract} = require("ethers");
+const {ethers} = require("@nomiclabs/buidler");
 const IUniswapV2Factory = require("@uniswap/v2-core/build/IUniswapV2Factory.json");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
-  const {deploy} = deployments;
+  const {deploy, log} = deployments;
   const {deployer} = await getNamedAccounts();
-  const ethersProvider = new Web3Provider(ethereum);
 
   // createPair to generate Rinkeby Uniswap SAND-ETH pair
   // UniswapV2Factory is deployed at 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f on Mainnet and Rinkeby
@@ -16,19 +14,21 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   const chainId = await getChainId();
 
   if (chainId === "4") {
-    const uniswapV2Factory = new ethers.Contract(
+    const uniswapV2Factory = new Contract(
       uniswapV2FactoryAddress,
       IUniswapV2Factory.abi,
-      ethersProvider.getSigner(deployer)
+      ethers.provider.getSigner(deployer)
     );
 
-    const pairCreatorAsDeployer = uniswapV2Factory.connect(ethersProvider.getSigner(deployer));
+    const pairCreatorAsDeployer = uniswapV2Factory.connect(ethers.provider.getSigner(deployer));
     let pairAddress;
     try {
-      pairAddress = await pairCreatorAsDeployer.functions.createPair(
-        "0xCc933a862fc15379E441F2A16Cb943D385a4695f",
-        "0xc778417E063141139Fce010982780140Aa0cD5Ab"
-      );
+      pairAddress = await pairCreatorAsDeployer.functions
+        .createPair("0xCc933a862fc15379E441F2A16Cb943D385a4695f", "0xc778417E063141139Fce010982780140Aa0cD5Ab", {
+          gasLimit: 10000000,
+        })
+        .then((tx) => tx.wait());
+
       // Rinkeby SAND token address, Rinkeby WETH token address
     } catch (e) {
       throw e;
