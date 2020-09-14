@@ -4,13 +4,13 @@ import "@openzeppelin/contracts/math/Math.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import "./IRewardDistributionRecipient.sol";
+import "../IRewardDistributionRecipient.sol";
 
 contract LPTokenWrapper {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    IERC20 public uni = IERC20(0x3dd49f67E9d5Bc4C5E6634b3F70BfD9dc1b6BD74); // lpToken contract address, currently set to the SAND-ETH pool contract address
+    IERC20 public _uniTest; // deploy a Rinkeby Uniswap SAND-ETH pair
 
     uint256 private _totalSupply;
     mapping(address => uint256) private _balances;
@@ -26,18 +26,23 @@ contract LPTokenWrapper {
     function stake(uint256 amount) public virtual {
         _totalSupply = _totalSupply.add(amount);
         _balances[msg.sender] = _balances[msg.sender].add(amount);
-        uni.safeTransferFrom(msg.sender, address(this), amount);
+        _uniTest.safeTransferFrom(msg.sender, address(this), amount);
     }
 
     function withdraw(uint256 amount) public virtual {
         _totalSupply = _totalSupply.sub(amount);
         _balances[msg.sender] = _balances[msg.sender].sub(amount);
-        uni.safeTransfer(msg.sender, amount);
+        _uniTest.safeTransfer(msg.sender, amount);
     }
 }
 
 contract SANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
-    IERC20 public sand = IERC20(0x3845badAde8e6dFF049820680d1F14bD3903a5d0); // Reward token: SAND
+
+    constructor(address uniTest) public {
+        _uniTest = IERC20(uniTest); // constructor for Rinkeby UniswapPair address
+    }
+
+    IERC20 public sand = IERC20(0xCc933a862fc15379E441F2A16Cb943D385a4695f); // Reward token: Rinkeby SAND
     uint256 public constant DURATION = 7 days; // Reward period
 
     uint256 public periodFinish = 0;
