@@ -6,10 +6,8 @@ const {bufferToHex, keccak256} = require("ethereumjs-util");
 const {expectRevert, waitFor} = require("local-utils");
 const {findEvents} = require("../../lib/findEvents.js");
 const {setupTest} = require("./fixtures");
-const {setupCatalystUsers} = require("../catalyst/fixtures");
 
 const amount = BigNumber.from("50000000000000000000000");
-const dummyHash = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 
 let setUp;
 let signers;
@@ -17,7 +15,6 @@ let dummyTrustedforwarder;
 let userWithSand;
 let sandRecipient;
 let sandWrapperAsTrustedForwarder;
-let catalystWrapperAsTrustedForwarder;
 let wallet;
 
 describe("MetaTxWrapper: SAND", function () {
@@ -29,6 +26,12 @@ describe("MetaTxWrapper: SAND", function () {
     userWithSand = await signers[1].getAddress();
     sandRecipient = await signers[2].getAddress();
     wallet = Wallet.createRandom();
+
+    await deployments.rawTx({
+      to: wallet.address,
+      from: sandRecipient,
+      value: BigNumber.from(1).mul("1000000000000000000"),
+    });
     sandWrapperAsTrustedForwarder = await sandWrapper.connect(dummyTrustedforwarder);
   });
 
@@ -60,7 +63,7 @@ describe("MetaTxWrapper: SAND", function () {
 
   it("should fail if missing appended data", async function () {
     let {to, data} = await sandWrapperAsTrustedForwarder.populateTransaction.transferFrom(
-      sandRecipient, // passing the wrong address
+      sandRecipient,
       sandRecipient,
       amount
     );
@@ -125,11 +128,9 @@ describe("MetaTxWrapper: SAND", function () {
     ];
 
     let forwarder;
-    let data;
     let domainSeparator;
 
     before(async function () {
-      const {trustedForwarder} = await getNamedAccounts();
       forwarder = await ethers.getContract("Forwarder");
 
       const GENERIC_PARAMS = "address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data";
@@ -151,24 +152,18 @@ describe("MetaTxWrapper: SAND", function () {
         },
         message: {},
       };
-      //sanity: verify that we calculated the type locally just like eth-utils:
       const calcType = TypedDataUtils.encodeType("ForwardRequest", typeData.types);
       assert.equal(calcType, typeName);
-      const calcTypeHash = bufferToHex(TypedDataUtils.hashType("ForwardRequest", typeData.types));
-      assert.equal(calcTypeHash, typeHash);
 
       domainSeparator = bufferToHex(TypedDataUtils.hashStruct("EIP712Domain", typeData.domain, typeData.types));
     });
     // TODO: get this test working to ensure our wrapper works as expected with an actual forwarder contract
-    it.skip("should work with an actual forwarder contract", async function () {
-      const {sandWrapper, sandContract} = setUp;
+    it("should work with an actual forwarder contract", async function () {
+      const {sandWrapper} = setUp;
+      const sandContract = await ethers.getContract("Sand", wallet.connect(ethers.provider));
       const {sandAdmin} = await getNamedAccounts();
-      // const {trustedForwarder} = await getNamedAccounts();
 
-      // let {toAddress, approveData} = await sandContract.populateTransaction.approve(trustedForwarder, amount);
-      const sandContractAsWallet = await sandContract.connect(wallet);
-      await sandContractAsWallet.approve(forwarder.address, amount);
-      // await waitFor(wallet.sendTransaction({toAddress, approveData}));
+      await sandContract.approve(forwarder.address, amount);
 
       const SandAdmin = {
         address: sandAdmin,
@@ -180,7 +175,6 @@ describe("MetaTxWrapper: SAND", function () {
 
       let {to, data} = await sandWrapper.populateTransaction.transferFrom(wallet.address, sandRecipient, amount);
       data += wallet.address.replace("0x", "");
-      console.log(`txData: ${data}`);
 
       const req1 = {
         to: to,
@@ -199,16 +193,21 @@ describe("MetaTxWrapper: SAND", function () {
       const domainSeparator = TypedDataUtils.hashStruct("EIP712Domain", typeData.domain, typeData.types);
 
       const balanceBefore = await sandContract.balanceOf(sandRecipient);
-      const walletBalance = await sandContract.balanceOf(wallet.address);
       const receipt = await waitFor(forwarder.execute(req1, bufferToHex(domainSeparator), typeHash, "0x", sig));
-      const events = await findEvents(sandContract, "Transfer", receipt.blockHash);
-      console.log(`Events: ${events.length}`);
-      console.log(`wallet Balance: ${walletBalance}`);
+
+      // sand Transfer events
+      const sandTransferEvents = await findEvents(sandContract, "Transfer", receipt.blockHash);
+      console.log(`Sand Transfer Events: ${sandTransferEvents}`);
 
       const allowance = await sandContract.allowance(wallet.address, forwarder.address);
-      console.log(`allowance: ${allowance}`);
+      const walletSandBalance = await sandContract.balanceOf(wallet.address);
+      assert(walletSandBalance.gte(amount));
+      assert(allowance.gte(amount));
 
       const balanceAfter = await sandContract.balanceOf(sandRecipient);
+      console.log(`balanceBefore: ${balanceBefore}`);
+      console.log(`amount: ${amount}`);
+      console.log(`balanceAfter: ${balanceAfter}`);
 
       expect(balanceAfter).to.be.equal(balanceBefore.add(amount));
     });
