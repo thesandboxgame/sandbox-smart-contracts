@@ -22,23 +22,26 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       ethersProvider.getSigner(deployer)
     );
 
-    const receipt = await uniswapV2Factory
-      .connect(ethersProvider.getSigner(deployer))
-      .functions.createPair("0xCc933a862fc15379E441F2A16Cb943D385a4695f", "0xc778417e063141139fce010982780140aa0cd5ab") // Rinkeby SAND token address, Rinkeby WETH token address
-      .then((tx) => tx.wait());
+    const pairCreatorAsDeployer = uniswapV2Factory.connect(ethersProvider.getSigner(deployer));
+    let pairAddress;
+    try {
+      pairAddress = await pairCreatorAsDeployer.functions.createPair(
+        "0xCc933a862fc15379E441F2A16Cb943D385a4695f",
+        "0xc778417E063141139Fce010982780140Aa0cD5Ab"
+      );
+      // Rinkeby SAND token address, Rinkeby WETH token address
+    } catch (e) {
+      throw e;
+    }
 
-    // event PairCreated(address indexed token0, address indexed token1, address pair, uint);
-    const pairCreatedEvent = receipt.events.find((event) => event.event === "PairCreated");
-
-    if (pairCreatedEvent) {
-      const pairContractAddress = pairCreatedEvent.args[2];
+    if (pairAddress) {
       log("Rinkeby SAND address: 0xCc933a862fc15379E441F2A16Cb943D385a4695f");
-      log("Rinkeby WETH address: 0xc778417e063141139fce010982780140aa0cd5ab");
-      log(`Rinkeby UniswapV2 SAND-ETH Pair Contract Address: ${pairContractAddress}`);
+      log("Rinkeby WETH address: 0xc778417E063141139Fce010982780140Aa0cD5Ab");
+      log(`Rinkeby UniswapV2 SAND-ETH Pair Contract Address: ${pairAddress}`);
 
       await deploy("TestSANDRewardPool", {
         from: deployer,
-        args: [pairContractAddress],
+        args: [pairAddress],
         log: true,
       });
     }
