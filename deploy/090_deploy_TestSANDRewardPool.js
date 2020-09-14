@@ -16,7 +16,11 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   const chainId = await getChainId();
 
   if (chainId === "4") {
-    const uniswapV2Factory = new ethers.Contract(uniswapV2FactoryAddress, IUniswapV2Factory.abi, ethersProvider.getSigner(deployer));
+    const uniswapV2Factory = new ethers.Contract(
+      uniswapV2FactoryAddress,
+      IUniswapV2Factory.abi,
+      ethersProvider.getSigner(deployer)
+    );
 
     const receipt = await uniswapV2Factory
       .connect(ethersProvider.getSigner(deployer))
