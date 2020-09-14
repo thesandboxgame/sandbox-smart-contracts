@@ -6,7 +6,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
 
   await deploy("SANDRewardPool", {
     from: deployer,
-    args: [],
+    // args: [],
     log: true,
   });
 };

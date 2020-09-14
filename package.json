@@ -61,7 +61,7 @@
     "prettier:js": "prettier --write lib deploy test scripts",
     "prettier": "run-s prettier:js prettier:solidity",
     "compile": "buidler compile",
-    "test": "buidler compile && mocha --bail --recursive test",
+    "test": "buidler compile && mocha --bail --recursive test --grep SANDRewardPool",
     "gas-report": "wait-on tcp:8545 && cross-env REPORT_GAS=true buidler --network localhost test",
     "coverage": "buidler --network coverage coverage",
     "ganache": "ganache-cli",

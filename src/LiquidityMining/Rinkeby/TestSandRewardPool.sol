@@ -36,7 +36,7 @@ contract LPTokenWrapper {
     }
 }
 
-contract SANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
+contract TestSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
 
     constructor(address uniTest) public {
         _uniTest = IERC20(uniTest); // constructor for Rinkeby UniswapPair address
