@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "../IRewardDistributionRecipient.sol";
 
+
 contract LPTokenWrapper {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -36,8 +37,8 @@ contract LPTokenWrapper {
     }
 }
 
-contract TestSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
 
+contract TestSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
     constructor(address uniTest) public {
         _uniTest = IERC20(uniTest); // constructor for Rinkeby UniswapPair address
     }
@@ -75,22 +76,11 @@ contract TestSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
         if (totalSupply() == 0) {
             return rewardPerTokenStored;
         }
-        return
-            rewardPerTokenStored.add(
-                lastTimeRewardApplicable()
-                    .sub(lastUpdateTime)
-                    .mul(rewardRate)
-                    .mul(1e18)
-                    .div(totalSupply())
-            );
+        return rewardPerTokenStored.add(lastTimeRewardApplicable().sub(lastUpdateTime).mul(rewardRate).mul(1e18).div(totalSupply()));
     }
 
     function earned(address account) public view returns (uint256) {
-        return
-            balanceOf(account)
-                .mul(rewardPerToken().sub(userRewardPerTokenPaid[account]))
-                .div(1e18)
-                .add(rewards[account]);
+        return balanceOf(account).mul(rewardPerToken().sub(userRewardPerTokenPaid[account])).div(1e18).add(rewards[account]);
     }
 
     // stake visibility is public as overriding LPTokenWrapper's stake() function
@@ -120,11 +110,7 @@ contract TestSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
         }
     }
 
-    function notifyRewardAmount(uint256 reward)
-        external override
-        onlyRewardDistribution
-        updateReward(address(0))
-    {
+    function notifyRewardAmount(uint256 reward) external override onlyRewardDistribution updateReward(address(0)) {
         if (block.timestamp >= periodFinish) {
             rewardRate = reward.div(DURATION);
         } else {
