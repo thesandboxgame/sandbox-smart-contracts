@@ -11,7 +11,7 @@ contract LPTokenWrapper {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    IERC20 public _uniTest; // deploy a Rinkeby Uniswap SAND-ETH pair
+    IERC20 public _uniTest; // deploy a Goerli Uniswap SAND-ETH pair
 
     uint256 private _totalSupply;
     mapping(address => uint256) private _balances;
@@ -38,12 +38,12 @@ contract LPTokenWrapper {
 }
 
 
-contract TestSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
+contract GoerliSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
     constructor(address uniTest) public {
-        _uniTest = IERC20(uniTest); // constructor for Rinkeby UniswapPair address
+        _uniTest = IERC20(uniTest); // constructor for Goerli UniswapPair address
     }
 
-    IERC20 public sand = IERC20(0xCc933a862fc15379E441F2A16Cb943D385a4695f); // Reward token: Rinkeby SAND
+    IERC20 public sand = IERC20(0x200814fe1B8F947084D810C099176685496e5d14); // Reward token: Goerli SAND
     uint256 public constant DURATION = 7 days; // Reward period
 
     uint256 public periodFinish = 0;
