@@ -6,7 +6,7 @@ module.exports = async ({deployments, getNamedAccounts}) => {
   const oldSANDPrice = 0.036367;
   const newSANDPrice = 0.047455;
 
-  const newMultiplier = Math.floor((newSANDPrice / oldSANDPrice) * 1000);
+  const newMultiplier = Math.floor((oldSANDPrice / newSANDPrice) * 1000);
 
   const currentMultiplier = await read(landSaleName, "getSandMultiplier");
   if (currentMultiplier != newMultiplier) {
