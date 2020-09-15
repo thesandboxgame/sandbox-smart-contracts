@@ -4,7 +4,7 @@ module.exports = async ({deployments, getNamedAccounts}) => {
 
   const landSaleName = "LandPreSale_4_2_11";
   const oldSANDPrice = 0.036367;
-  const newSANDPrice = 0.036367;
+  const newSANDPrice = 0.047455;
 
   const newMultiplier = Math.floor((newSANDPrice / oldSANDPrice) * 1000);
 
