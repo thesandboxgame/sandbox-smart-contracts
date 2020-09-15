@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity 0.6.5;
 
 import "./AdminUpgradeabilityProxy.sol";
 import "../BaseWithStorage/Ownable.sol";

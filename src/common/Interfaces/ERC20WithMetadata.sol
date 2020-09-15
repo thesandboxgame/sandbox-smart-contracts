@@ -6,7 +6,7 @@
  * Do not use or deploy this code before reviewing it personally first.
  */
 // solhint-disable-next-line compiler-fixed
-pragma solidity ^0.6.0;
+pragma solidity 0.6.5;
 
 import "./ERC20.sol";
 
