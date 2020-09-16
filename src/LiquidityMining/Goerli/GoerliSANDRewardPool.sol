@@ -44,7 +44,7 @@ contract GoerliSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
     }
 
     IERC20 public sand = IERC20(0x200814fe1B8F947084D810C099176685496e5d14); // Reward token: Goerli SAND
-    uint256 public constant DURATION = 7 days; // Reward period
+    uint256 public constant DURATION = 1 hours; // Reward period
 
     uint256 public periodFinish = 0;
     uint256 public rewardRate = 0;
