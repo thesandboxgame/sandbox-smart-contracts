@@ -137,7 +137,7 @@ describe("MetaTxWrapper: SAND", function () {
 
       typeName = `ForwardRequest(${GENERIC_PARAMS})`;
       typeHash = bufferToHex(keccak256(typeName));
-      await forwarder.registerRequestType("TestCall", "");
+      await forwarder.registerRequestType("TestCall", "0x");
       typeData = {
         domain: {
           name: "Test Domain",
@@ -163,7 +163,7 @@ describe("MetaTxWrapper: SAND", function () {
       const sandContract = await ethers.getContract("Sand", wallet.connect(ethers.provider));
       const {sandAdmin} = await getNamedAccounts();
 
-      await sandContract.approve(forwarder.address, amount);
+      // await waitFor(sandAsUserWithSand.approve(forwarderAddress, amount));
 
       const SandAdmin = {
         address: sandAdmin,
@@ -172,6 +172,7 @@ describe("MetaTxWrapper: SAND", function () {
 
       await waitFor(SandAdmin.Sand.setSuperOperator(sandWrapper.address, true));
       await waitFor(SandAdmin.Sand.transfer(wallet.address, BigNumber.from("1000000000000000000000000")));
+      await waitFor(sandContract.approve(forwarder.address, amount));
 
       let {to, data} = await sandWrapper.populateTransaction.transferFrom(wallet.address, sandRecipient, amount);
       data += wallet.address.replace("0x", "");
