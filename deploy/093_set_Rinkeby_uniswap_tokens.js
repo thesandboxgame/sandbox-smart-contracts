@@ -1,211 +1,76 @@
 const {guard} = require("../lib");
-const {Contract} = require("ethers");
-const {ethers} = require("@nomiclabs/buidler");
-const IUniswapV2Pair = require("@uniswap/v2-core/build/IUniswapV2Pair.json");
-const wethABI = [
-  {
-    constant: true,
-    inputs: [],
-    name: "name",
-    outputs: [{name: "", type: "string"}],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [
-      {name: "guy", type: "address"},
-      {name: "wad", type: "uint256"},
-    ],
-    name: "approve",
-    outputs: [{name: "", type: "bool"}],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "totalSupply",
-    outputs: [{name: "", type: "uint256"}],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [
-      {name: "src", type: "address"},
-      {name: "dst", type: "address"},
-      {name: "wad", type: "uint256"},
-    ],
-    name: "transferFrom",
-    outputs: [{name: "", type: "bool"}],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [{name: "wad", type: "uint256"}],
-    name: "withdraw",
-    outputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "decimals",
-    outputs: [{name: "", type: "uint8"}],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [{name: "", type: "address"}],
-    name: "balanceOf",
-    outputs: [{name: "", type: "uint256"}],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "symbol",
-    outputs: [{name: "", type: "string"}],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [
-      {name: "dst", type: "address"},
-      {name: "wad", type: "uint256"},
-    ],
-    name: "transfer",
-    outputs: [{name: "", type: "bool"}],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function",
-  },
-  {
-    constant: false,
-    inputs: [],
-    name: "deposit",
-    outputs: [],
-    payable: true,
-    stateMutability: "payable",
-    type: "function",
-  },
-  {
-    constant: true,
-    inputs: [
-      {name: "", type: "address"},
-      {name: "", type: "address"},
-    ],
-    name: "allowance",
-    outputs: [{name: "", type: "uint256"}],
-    payable: false,
-    stateMutability: "view",
-    type: "function",
-  },
-  {payable: true, stateMutability: "payable", type: "fallback"},
-  {
-    anonymous: false,
-    inputs: [
-      {indexed: true, name: "src", type: "address"},
-      {indexed: true, name: "guy", type: "address"},
-      {indexed: false, name: "wad", type: "uint256"},
-    ],
-    name: "Approval",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {indexed: true, name: "src", type: "address"},
-      {indexed: true, name: "dst", type: "address"},
-      {indexed: false, name: "wad", type: "uint256"},
-    ],
-    name: "Transfer",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {indexed: true, name: "dst", type: "address"},
-      {indexed: false, name: "wad", type: "uint256"},
-    ],
-    name: "Deposit",
-    type: "event",
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {indexed: true, name: "src", type: "address"},
-      {indexed: false, name: "wad", type: "uint256"},
-    ],
-    name: "Withdrawal",
-    type: "event",
-  },
-];
 
 module.exports = async ({getNamedAccounts, deployments}) => {
-  const {execute, log} = deployments;
-  const {deployer} = await getNamedAccounts();
+  const {read, execute, log} = deployments;
+  const {deployer, sandBeneficiary} = await getNamedAccounts();
+
+  await deployments.get("Sand");
+  await deployments.get("WrappedEther");
+  const sandEthUniswapV2Pair = await deployments.get("SandEthIUniswapV2Pair");
 
   // Transfer some SAND tokens from deployer to the pair contract to be able to mint UniV2 tokens
+
   log("Transferring SAND to pair contract");
   await execute(
     "Sand",
-    {from: deployer, skipUnknownSigner: true},
+    {from: sandBeneficiary, skipUnknownSigner: true, gasLimit: 6000000},
     "transfer",
-    "0x57459003f480188204085A0F744ffEbcD53bcc5E",
-    "100000000000000000000"
+    sandEthUniswapV2Pair.address,
+    "300000000000000000000"
   );
 
-  // WETH
-  const wethContract = new Contract(
-    "0xc778417E063141139Fce010982780140Aa0cD5Ab",
-    wethABI,
-    ethers.provider.getSigner(deployer)
+  const balanceSandInPair = await read("Sand", "balanceOf", sandEthUniswapV2Pair.address);
+  log(`SAND balance in pair: ${balanceSandInPair}`);
+
+  log("Depositing ETH in WETH contract");
+  await execute(
+    "WrappedEther",
+    {from: deployer, skipUnknownSigner: true, value: "2000000000000000000", gasLimit: 6000000},
+    "deposit"
   );
 
-  const balance = await wethContract.functions.balanceOf(deployer);
-  log(`Initial balance: ${balance}`);
-
-  // log("Depositing ETH in WETH contract");
-  // await wethContract.functions.deposit({value: "2000000000000000000", gasLimit: 1000000}).then((tx) => tx.wait());
+  const balanceWeth = await read("WrappedEther", "balanceOf", deployer);
+  log(`WETH balance: ${balanceWeth}`);
 
   log("Transferring deployer's WETH to pair contract");
-  await wethContract.functions
-    .transferFrom(
-      "0xc778417E063141139Fce010982780140Aa0cD5Ab",
-      "0x57459003f480188204085A0F744ffEbcD53bcc5E",
-      "2000000000000000000",
-      {
-        gasLimit: 10000000,
-      }
-    )
-    .then((tx) => tx.wait());
-
-  const pairContract = new Contract(
-    "0x57459003f480188204085A0F744ffEbcD53bcc5E",
-    IUniswapV2Pair.abi,
-    ethers.provider.getSigner(deployer)
+  await execute(
+    "WrappedEther",
+    {from: deployer, skipUnknownSigner: true, gasLimit: 6000000},
+    "transferFrom", // sender recipient amount
+    deployer,
+    sandEthUniswapV2Pair.address,
+    balanceWeth
   );
+
+  const balanceWethInPair = await read("WrappedEther", "balanceOf", sandEthUniswapV2Pair.address);
+  log(`WETH in pair contract: ${balanceWethInPair}`);
 
   // Mint UniV2 tokens and give to deployer
   log("Minting UniswapV2 tokens and sending to deployer");
-  await pairContract.mint(deployer, {gasLimit: 30000000});
+  await execute(
+    "SandEthIUniswapV2Pair",
+    {from: deployer, skipUnknownSigner: true, gasLimit: 6000000},
+    "mint",
+    deployer
+  );
 
-  log("Minting completed; use wallet to transfer UniV2 tokens to reward pool contract address");
+  const balanceUniV2Tokens = await read("SandEthIUniswapV2Pair", "balanceOf", deployer);
+  log(`Deployer's UniV2 balance: ${balanceUniV2Tokens}`);
+
+  // log("Transferring UniV2 tokens to reward pool contract address");
+  // const rewardPool = await deployments.get("RinkebySANDRewardPool");
+
+  // await execute(
+  //   "SandEthIUniswapV2Pair",
+  //   {from: deployer, skipUnknownSigner: true, gasLimit: 6000000},
+  //   "transferFrom",
+  //   deployer,
+  //   rewardPool.address,
+  //   balanceUniV2Tokens
+  // );
+
+  // const balanceUniV2TokensInPool = await read("SandEthIUniswapV2Pair", "balanceOf", rewardPool.address);
+  // log(`Staked UniV2 balance: ${balanceUniV2TokensInPool}`);
 };
-module.exports.dependencies = ["RinkebySANDRewardPool", "Sand"];
-// module.exports.skip = guard(["1", "314159", "4"]);
+module.exports.dependencies = ["RinkebySANDRewardPool", "Sand", "WrappedEther", "SandEthIUniswapV2Pair"];
+module.exports.skip = guard(["1", "314159", "4"]);
