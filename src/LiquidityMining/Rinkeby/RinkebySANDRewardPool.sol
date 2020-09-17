@@ -44,7 +44,7 @@ contract RinkebySANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
     }
 
     IERC20 public sand = IERC20(0xCc933a862fc15379E441F2A16Cb943D385a4695f); // Reward token: Rinkeby SAND
-    uint256 public constant DURATION = 7 days; // Reward period
+    uint256 public constant DURATION = 1 days; // Reward period
 
     uint256 public periodFinish = 0;
     uint256 public rewardRate = 0;
