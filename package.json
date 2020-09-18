@@ -69,6 +69,7 @@
     "local:deploy": "buidler --network localhost deploy",
     "rinkeby:deploy": "buidler --network rinkeby deploy",
     "rinkeby:test:deploy": "buidler --network rinkeby_test deploy",
+    "goerli:test:deploy": "buidler --network goerli_test deploy",
     "mainnet:deploy": "buidler --network mainnet deploy",
     "void:run": "cross-env BUIDLER_NETWORK=buidlerevm node",
     "local:run": "cross-env BUIDLER_NETWORK=localhost node",

@@ -16,7 +16,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     {from: sandBeneficiary, skipUnknownSigner: true, gasLimit: 6000000},
     "transfer",
     sandEthUniswapV2Pair.address,
-    "300000000000000000000"
+    "30000000000000000000000"
   );
 
   const balanceSandInPair = await read("Sand", "balanceOf", sandEthUniswapV2Pair.address);
@@ -25,7 +25,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   log("Depositing ETH in WETH contract");
   await execute(
     "WrappedEther",
-    {from: deployer, skipUnknownSigner: true, value: "2000000000000000000", gasLimit: 6000000},
+    {from: deployer, skipUnknownSigner: true, value: "4000000000000000000", gasLimit: 6000000},
     "deposit"
   );
 
