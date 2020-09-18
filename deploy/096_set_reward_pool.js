@@ -5,7 +5,8 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   const {execute, log} = deployments;
   const {deployer, sandAdmin, sandBeneficiary} = await getNamedAccounts();
 
-  const REWARD_AMOUNT = BigNumber.from(3000000).mul("1000000000000000000");
+  // Monthly reward 1,500,000 SAND
+  const REWARD_AMOUNT = BigNumber.from(1500000).mul("1000000000000000000");
   const REWARD_NAME = "RinkebySANDRewardPool";
 
   const rewardPool = await deployments.get(REWARD_NAME);
