@@ -1,7 +1,5 @@
-const fs = require("fs");
-const path = require("path");
-const configPath = path.join(__dirname, "../data/kyberReserve/liquidity_settings.json");
 const {BigNumber} = require("ethers");
+const configParams = require("../data/kyberReserve/liquidity_settings");
 
 let tokenAddress;
 
@@ -30,11 +28,10 @@ module.exports = async ({getChainId, deployments}) => {
   if (chainId === "31337") {
     return;
   }
-  const configParams = JSON.parse(fs.readFileSync(configPath, "utf8"));
   const {execute, read} = deployments;
   const reserveAddress = (await deployments.get("KyberReserve")).address;
   await instantiateContracts();
-  parseInput(configParams);
+  parseInput(configParams[chainId]);
   await fetchParams();
   calculateParams();
   await setLiquidityParams();
@@ -103,4 +100,4 @@ module.exports = async ({getChainId, deployments}) => {
     );
   }
 };
-module.exports.tags = ["SetLiquidity"];
+module.exports.dependencies = ["KyberReserve"];

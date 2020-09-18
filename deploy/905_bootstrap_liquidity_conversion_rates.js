@@ -7,25 +7,27 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
   }
   let pricingOperator;
 
-  const {deploy, execute, log} = deployments;
+  const {execute} = deployments;
   const {deployer} = await getNamedAccounts();
-  const networkAddress = configParams[chainId].kyberNetworkAddress;
+  const kyberReserve = await deployments.get("KyberReserve");
+
   parseInput(configParams[chainId]);
   deployerAddress = deployer;
-  const sandContract = await deployments.get("Sand");
-  log("deploying LiquidityConversionRates...");
+  // set reserve addressF
+  await execute(
+    "LiquidityConversionRates",
+    {from: deployer, skipUnknownSigner: true},
+    "setReserveAddress",
+    kyberReserve.address
+  );
 
-  let lcr = await deploy("LiquidityConversionRates", {
-    from: deployer,
-    args: [deployerAddress, sandContract.address],
-    log: true,
-  });
-  log("deploying KyberReserve...");
-  await deploy("KyberReserve", {
-    from: deployer,
-    args: [networkAddress, lcr.address, deployerAddress],
-    log: true,
-  });
+  // transfer admin rights to pricing operator
+  await execute(
+    "LiquidityConversionRates",
+    {from: deployer, skipUnknownSigner: true},
+    "transferAdminQuickly",
+    pricingOperator
+  );
 
   function parseInput(jsonInput) {
     whitelistedAddresses = jsonInput["whitelistedAddresses"];
@@ -36,5 +38,4 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
     sandDepositAmount = jsonInput["sandDepositAmount"];
   }
 };
-
-module.exports.tags = ["KyberReserve"];
+module.exports.dependencies = ["KyberReserve"];
