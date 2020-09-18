@@ -8,7 +8,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   await deployments.get("WrappedEther");
   const sandEthUniswapV2Pair = await deployments.get("SandEthIUniswapV2Pair");
 
-  // Transfer some SAND tokens from deployer to the pair contract to be able to mint UniV2 tokens
+  // Transfer some SAND tokens and WETH to the pair contract to be able to mint Rinkeby UniV2 tokens
 
   log("Transferring SAND to pair contract");
   await execute(
@@ -36,7 +36,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   await execute(
     "WrappedEther",
     {from: deployer, skipUnknownSigner: true, gasLimit: 6000000},
-    "transferFrom", // sender recipient amount
+    "transferFrom",
     deployer,
     sandEthUniswapV2Pair.address,
     balanceWeth
@@ -45,7 +45,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   const balanceWethInPair = await read("WrappedEther", "balanceOf", sandEthUniswapV2Pair.address);
   log(`WETH in pair contract: ${balanceWethInPair}`);
 
-  // Mint UniV2 tokens and give to deployer
   log("Minting UniswapV2 tokens and sending to deployer");
   await execute(
     "SandEthIUniswapV2Pair",
