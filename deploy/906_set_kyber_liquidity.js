@@ -61,11 +61,9 @@ module.exports = async ({getChainId, deployments}) => {
     liqRate = Math.log(1 / minAllowablePrice) / ethBalance;
     try {
       const tokenWallet = await read("KyberReserve", "tokenWallet", tokenAddress);
-      // tokenBalance = await token.balanceOf(tokenWallet) / 10 ** tokenDecimals;
       tokenBalance = (await read("Sand", "balanceOf", tokenWallet)) / 10 ** tokenDecimals;
     } catch (e) {
       tokenBalance = (await read("Sand", "balanceOf", reserveAddress)) / 10 ** tokenDecimals;
-      // tokenBalance = await token.balanceOf(reserveAddress) / 10 ** tokenDecimals;
     }
   }
 

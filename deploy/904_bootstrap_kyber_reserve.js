@@ -1,5 +1,6 @@
 const configParams = require("../data/kyberReserve/apr_input");
 const {BigNumber} = require("ethers");
+const {solidityKeccak256} = ethers.utils;
 
 module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
   const chainId = await getChainId();
@@ -15,7 +16,6 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
   const {execute, read, log} = deployments;
   const {deployer} = await getNamedAccounts();
   parseInput(configParams[chainId]);
-  deployerAddress = deployer;
   const sandContract = await deployments.get("Sand");
   const kyberReserve = await deployments.get("KyberReserve");
   // whitelist addresses
@@ -29,22 +29,25 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
   function parseInput(jsonInput) {
     whitelistedAddresses = jsonInput["whitelistedAddresses"];
     reserveAdmin = jsonInput["reserveAdmin"];
-    pricingOperator = jsonInput["pricingOperator"];
-    reserveOperators = jsonInput["reserveOperators"];
     weiDepositAmount = jsonInput["weiDepositAmount"];
     sandDepositAmount = jsonInput["sandDepositAmount"];
   }
 
   async function whitelistAddressesInReserve() {
     for (let whitelistAddress of whitelistedAddresses) {
-      await execute(
-        "KyberReserve",
-        {from: deployer, skipUnknownSigner: true},
-        "approveWithdrawAddress",
-        sandContract.address,
-        whitelistAddress,
-        true
-      );
+      let key = solidityKeccak256(["address", "address"], [sandContract.address, whitelistAddress]);
+      let approved = await read("KyberReserve", "approvedWithdrawAddresses", key);
+      if (!approved) {
+        log(`approveWithdrawAddress, token = ${sandContract.address}, address = ${whitelistAddress}`);
+        await execute(
+          "KyberReserve",
+          {from: deployer, skipUnknownSigner: true},
+          "approveWithdrawAddress",
+          sandContract.address,
+          whitelistAddress,
+          true
+        );
+      }
     }
   }
 
@@ -56,12 +59,16 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
     }
 
     await addAlerter(reserveAdmin);
-
-    await execute("KyberReserve", {from: deployer, skipUnknownSigner: true}, "transferAdminQuickly", reserveAdmin);
+    const admin = await read("KyberReserve", "admin");
+    if (admin.toLowerCase() !== reserveAdmin.toLowerCase()) {
+      log(`transferAdminQuickly, admin = ${reserveAdmin}`);
+      await execute("KyberReserve", {from: deployer, skipUnknownSigner: true}, "transferAdminQuickly", reserveAdmin);
+    }
   }
   async function addOperator(operator) {
     const operators = await read("KyberReserve", "getOperators");
-    if (operators.indexOf(operator) !== -1) {
+    operators = operators.map((op) => op.toLowerCase());
+    if (operators.indexOf(operator.toLowerCase()) !== -1) {
       log(`${operator} was already set as an operator, skipping`);
     } else {
       await execute("KyberReserve", {from: deployer, skipUnknownSigner: true}, "addOperator", operator);
@@ -70,7 +77,8 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
 
   async function addAlerter(alerter) {
     const alerters = await read("KyberReserve", "getAlerters");
-    if (alerters.indexOf(alerter) !== -1) {
+    alerters = alerters.map((al) => al.toLowerCase());
+    if (alerters.indexOf(alerter.toLowerCase()) !== -1) {
       log(`${alerter} was already set as an alerter, skipping`);
     } else {
       await execute("KyberReserve", {from: deployer, skipUnknownSigner: true}, "addAlerter", alerter);
