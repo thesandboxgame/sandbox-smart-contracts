@@ -1,5 +1,6 @@
 const configParams = require("../data/kyberReserve/apr_input");
-const {BigNumber} = require("ethers");
+const ethers = require("ethers");
+const {BigNumber} = ethers;
 const {solidityKeccak256} = ethers.utils;
 
 module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
@@ -31,6 +32,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
     reserveAdmin = jsonInput["reserveAdmin"];
     weiDepositAmount = jsonInput["weiDepositAmount"];
     sandDepositAmount = jsonInput["sandDepositAmount"];
+    reserveOperators = jsonInput["reserveOperators"];
   }
 
   async function whitelistAddressesInReserve() {
@@ -66,7 +68,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
     }
   }
   async function addOperator(operator) {
-    const operators = await read("KyberReserve", "getOperators");
+    let operators = await read("KyberReserve", "getOperators");
     operators = operators.map((op) => op.toLowerCase());
     if (operators.indexOf(operator.toLowerCase()) !== -1) {
       log(`${operator} was already set as an operator, skipping`);
@@ -76,7 +78,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
   }
 
   async function addAlerter(alerter) {
-    const alerters = await read("KyberReserve", "getAlerters");
+    let alerters = await read("KyberReserve", "getAlerters");
     alerters = alerters.map((al) => al.toLowerCase());
     if (alerters.indexOf(alerter.toLowerCase()) !== -1) {
       log(`${alerter} was already set as an alerter, skipping`);

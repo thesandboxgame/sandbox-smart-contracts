@@ -59,7 +59,7 @@ module.exports = {
     deployer: {
       default: 1,
       1: "0x18dd4e0eb8699eA4FeE238dE41ECfb95e32272f8",
-      rinkeby: "0x8A0e83DE499d7543CF486974a6196a35B5F573E7",
+      rinkeby: "0x0994C5fe4C175CC03Ec206C50Ed141101E92B6E2",
     }, // deploy contracts and make sure they are set up correctly
 
     sandAdmin: {
