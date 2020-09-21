@@ -1,4 +1,3 @@
-const {guard} = require("../lib");
 // const IUniswapV2Factory = require("@uniswap/v2-core/build/IUniswapV2Factory.json");
 // const {Contract} = require("ethers");
 // const {ethers} = require("@nomiclabs/buidler");
@@ -67,6 +66,3 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     }
   }
 };
-
-module.exports.skip = guard(["1", "314159", "4"], "RinkebySANDRewardPool");
-module.exports.tags = ["RinkebySANDRewardPool"];

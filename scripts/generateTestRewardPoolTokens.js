@@ -1,5 +1,3 @@
-const {guard} = require("../lib");
-
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {read, execute, log} = deployments;
   const {deployer, sandBeneficiary} = await getNamedAccounts();
@@ -71,5 +69,3 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   // const balanceUniV2TokensInPool = await read("SandEthIUniswapV2Pair", "balanceOf", rewardPool.address);
   // log(`Staked UniV2 balance: ${balanceUniV2TokensInPool}`);
 };
-module.exports.dependencies = ["RinkebySANDRewardPool", "Sand", "WrappedEther", "SandEthIUniswapV2Pair"];
-module.exports.skip = guard(["1", "314159", "4"]);
