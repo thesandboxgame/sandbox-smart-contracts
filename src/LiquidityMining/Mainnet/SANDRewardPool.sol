@@ -6,6 +6,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "../IRewardDistributionRecipient.sol";
 
+
 contract LPTokenWrapper {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -35,6 +36,7 @@ contract LPTokenWrapper {
         uni.safeTransfer(msg.sender, amount);
     }
 }
+
 
 contract SANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
     IERC20 public sand = IERC20(0x3845badAde8e6dFF049820680d1F14bD3903a5d0); // Reward token: SAND
