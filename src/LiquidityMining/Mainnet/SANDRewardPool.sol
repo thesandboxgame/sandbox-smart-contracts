@@ -40,7 +40,7 @@ contract LPTokenWrapper {
 
 contract SANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
     IERC20 public sand = IERC20(0x3845badAde8e6dFF049820680d1F14bD3903a5d0); // Reward token: SAND
-    uint256 public constant DURATION = 7 days; // Reward period
+    uint256 public constant DURATION = 30 days; // Reward period
 
     uint256 public periodFinish = 0;
     uint256 public rewardRate = 0;
