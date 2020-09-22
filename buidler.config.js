@@ -68,6 +68,9 @@ module.exports = {
       rinkeby: "0xa4519D601F43D0b8f167842a367465681F652252",
     }, // can add super operators and change admin
 
+    liquidityRewardProvider: "sandBeneficiary",
+    liquidityRewardAdmin: "sandAdmin",
+
     sandExecutionAdmin: "sandAdmin", // can add execution extension to SAND (used for Native metatx support)
     mintingFeeCollector: "sandAdmin", // will receiver the fee from Asset minting
     sandBeneficiary: "sandAdmin", // will be the owner of all initial SAND
