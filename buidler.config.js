@@ -69,7 +69,7 @@ module.exports = {
     }, // can add super operators and change admin
 
     liquidityRewardProvider: {
-      defaukt: 3,
+      default: "sandBeneficiary",
       1: "0x8FFA64FB50559c3Ff09a1022b84B2c5233ed8068",
     },
     liquidityRewardAdmin: "sandAdmin",

@@ -8,7 +8,6 @@ describe("SANDRewardPool", function () {
 
   it("Contract should exist", async function () {
     await createFixture();
-    const sandRewardPoolContract = await ethers.getContract("SANDRewardPool");
-    console.log(sandRewardPoolContract);
+    await ethers.getContract("SANDRewardPool");
   });
 });
