@@ -135,6 +135,8 @@ module.exports = {
     starterPackAdmin: "sandAdmin", // can change price
     starterPackSaleBeneficiary: "sandSaleBeneficiary", // collect funds from starter pack sales
     backendMessageSigner: "backendReferralWallet", // account that sign message for the starter pack
+    kyberLiquidityProvider: "sandBeneficiary", //TODO check what should be the value
+
     // testing
     others: {
       default: "from:5",

@@ -11,15 +11,40 @@ const offset = 1000;
   const txs = [];
   let page = 1;
   let more = true;
+  let startBlock = fromBlockNumber;
+  let lastTransaction;
+  let fromTransactionIndex = 0;
   while (more) {
     const response = await axios.get(
-      `https://api.etherscan.io/api?module=account&action=txlist&address=${contractAddress}&startblock=${fromBlockNumber}&endblock=99999999&page=${page}&offset=${offset}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
+      `https://api.etherscan.io/api?module=account&action=txlist&address=${contractAddress}&startblock=${startBlock}&endblock=99999999&page=${page}&offset=${offset}&sort=asc&apikey=${ETHERSCAN_API_KEY}`
     );
-    for (const tx of response.data.result) {
-      txs.push(tx);
+    const transactions = response.data.result;
+    if (transactions) {
+      for (const tx of transactions) {
+        if (fromTransactionIndex > 0) {
+          if (tx.transactionIndex < fromTransactionIndex) {
+            continue;
+          }
+        }
+        txs.push(tx);
+      }
+      const numTransactions = transactions.length;
+      more = numTransactions > 0; // TODO max
+      page++;
+      lastTransaction = transactions[numTransactions - 1];
+      fromTransactionIndex = 0;
+    } else {
+      if (
+        response.status === "0" &&
+        response.message === "Result window is too large, PageNo x Offset size must be less than or equal to 10000"
+      ) {
+        startBlock = lastTransaction.blockNumber;
+        fromTransactionIndex = lastTransaction.transactionIndex + 1;
+      } else {
+        console.log(response.data);
+        more = false;
+      }
     }
-    more = response.data.result.length > 0;
-    page++;
   }
   fs.writeFileSync(`.transactions_${contractAddress}.json`, JSON.stringify(txs, null, "  "));
 })();
