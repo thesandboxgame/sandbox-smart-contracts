@@ -8,5 +8,5 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     log: true,
   });
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO , 'SANDRewardPool');
+module.exports.skip = guard(["1", "4", "314159"], "SANDRewardPool");
 module.exports.tags = ["SANDRewardPool"];
