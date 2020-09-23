@@ -20,7 +20,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       args: [feeDistributionRecipients, percentages],
     });
   }
-  return true;
 };
 module.exports.tags = ["FeeDistributor"];
 module.exports.skip = guard(["1", "4"]); // TODO

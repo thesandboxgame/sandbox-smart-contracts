@@ -1,3 +1,4 @@
+const {guard} = require("../lib");
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();
@@ -6,6 +7,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     from: deployer,
     log: true,
   });
-  return true; // do not execute again;
 };
+module.exports.skip = guard(["1", "4", "314159"]); // TODO , 'SANDRewardPool');
 module.exports.tags = ["SANDRewardPool"];
