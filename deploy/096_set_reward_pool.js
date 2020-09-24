@@ -1,3 +1,4 @@
+const {guard} = require("../lib");
 const {BigNumber} = require("ethers");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
@@ -32,7 +33,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     "notifyRewardAmount",
     REWARD_AMOUNT
   );
-
-  return true; // do not execute again;
 };
+module.exports.skip = guard(["1", "4", "314159"]); // skip as already executed
 module.exports.dependencies = ["SANDRewardPool", "Sand"];

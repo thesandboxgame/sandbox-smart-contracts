@@ -1,3 +1,4 @@
+const {guard} = require("../lib");
 const configParams = require("../data/kyberReserve/apr_input");
 const ethers = require("ethers");
 const {BigNumber} = ethers;
@@ -43,7 +44,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
         log(`approveWithdrawAddress, token = ${sandContract.address}, address = ${whitelistAddress}`);
         await execute(
           "KyberReserve",
-          {from: deployer, skipUnknownSigner: true},
+          {from: deployer},
           "approveWithdrawAddress",
           sandContract.address,
           whitelistAddress,
@@ -64,7 +65,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
     const admin = await read("KyberReserve", "admin");
     if (admin.toLowerCase() !== reserveAdmin.toLowerCase()) {
       log(`transferAdminQuickly, admin = ${reserveAdmin}`);
-      await execute("KyberReserve", {from: deployer, skipUnknownSigner: true}, "transferAdminQuickly", reserveAdmin);
+      await execute("KyberReserve", {from: deployer}, "transferAdminQuickly", reserveAdmin);
     }
   }
   async function addOperator(operator) {
@@ -73,7 +74,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
     if (operators.indexOf(operator.toLowerCase()) !== -1) {
       log(`${operator} was already set as an operator, skipping`);
     } else {
-      await execute("KyberReserve", {from: deployer, skipUnknownSigner: true}, "addOperator", operator);
+      await execute("KyberReserve", {from: deployer}, "addOperator", operator);
     }
   }
 
@@ -83,20 +84,31 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
     if (alerters.indexOf(alerter.toLowerCase()) !== -1) {
       log(`${alerter} was already set as an alerter, skipping`);
     } else {
-      await execute("KyberReserve", {from: deployer, skipUnknownSigner: true}, "addAlerter", alerter);
+      await execute("KyberReserve", {from: deployer}, "addAlerter", alerter);
     }
   }
 
   async function depositETH(value) {
     await deployments.rawTx({
       to: kyberReserve.address,
-      from: deployer,
+      from: deployer, // TODO
+      skipUnknownSigner: true,
       value,
     });
   }
 
   async function depositSand(value) {
-    await execute("Sand", {from: deployer, skipUnknownSigner: true}, "transfer", kyberReserve.address, value);
+    await execute(
+      "Sand",
+      {
+        from: deployer, // TODO
+        skipUnknownSigner: true,
+      },
+      "transfer",
+      kyberReserve.address,
+      value
+    );
   }
 };
+module.exports.skip = guard(["1", "4", "314159"]);
 module.exports.dependencies = ["KyberReserve"];

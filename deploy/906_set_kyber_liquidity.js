@@ -1,3 +1,4 @@
+const {guard} = require("../lib");
 const {BigNumber} = require("ethers");
 const configParams = require("../data/kyberReserve/liquidity_settings");
 
@@ -98,4 +99,5 @@ module.exports = async ({getChainId, deployments}) => {
     );
   }
 };
+module.exports.skip = guard(["1", "4", "314159"]);
 module.exports.dependencies = ["KyberReserve"];

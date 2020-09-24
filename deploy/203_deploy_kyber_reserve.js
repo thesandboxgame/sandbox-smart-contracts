@@ -1,3 +1,4 @@
+const {guard} = require("../lib");
 const configParams = require("../data/kyberReserve/apr_input");
 
 module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
@@ -24,5 +25,5 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
     log: true,
   });
 };
-
+module.exports.skip = guard(["1", "4", "314159"]); // TODO , 'KyberReserve');
 module.exports.tags = ["KyberReserve"];
