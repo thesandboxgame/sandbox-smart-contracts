@@ -30,5 +30,5 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
     pricingOperator = jsonInput["pricingOperator"];
   }
 };
-module.exports.skip = guard(["1", "4", "314159"]);
+// module.exports.skip = guard(["1", "4", "314159"]);
 module.exports.dependencies = ["KyberReserve"];

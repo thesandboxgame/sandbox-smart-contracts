@@ -13,10 +13,10 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
   let whitelistedAddresses;
   let reserveOperators;
   let weiDepositAmount;
-  let sandDepositAmount;
+  let tokenPriceInEth;
 
   const {execute, read, log} = deployments;
-  const {deployer} = await getNamedAccounts();
+  const {deployer, kyberDepositor} = await getNamedAccounts();
   parseInput(configParams[chainId]);
   const sandContract = await deployments.get("Sand");
   const kyberReserve = await deployments.get("KyberReserve");
@@ -26,9 +26,10 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
   // transfer reserve permissions
   await setReservePermissions();
   await depositETH(weiDepositAmount);
-  await depositSand(BigNumber.from(sandDepositAmount));
+  await depositSand(BigNumber.from(weiDepositAmount).div(tokenPriceInEth.mul("1000000000000000000")));
 
   function parseInput(jsonInput) {
+    tokenPriceInEth = jsonInput["tokenPriceInEth"];
     whitelistedAddresses = jsonInput["whitelistedAddresses"];
     reserveAdmin = jsonInput["reserveAdmin"];
     weiDepositAmount = jsonInput["weiDepositAmount"];
@@ -91,7 +92,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
   async function depositETH(value) {
     await deployments.rawTx({
       to: kyberReserve.address,
-      from: deployer, // TODO
+      from: kyberDepositor,
       skipUnknownSigner: true,
       value,
     });
@@ -101,7 +102,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
     await execute(
       "Sand",
       {
-        from: deployer, // TODO
+        from: kyberDepositor,
         skipUnknownSigner: true,
       },
       "transfer",
@@ -110,5 +111,5 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
     );
   }
 };
-module.exports.skip = guard(["1", "4", "314159"]);
+// module.exports.skip = guard(["1", "4", "314159"]);
 module.exports.dependencies = ["KyberReserve"];

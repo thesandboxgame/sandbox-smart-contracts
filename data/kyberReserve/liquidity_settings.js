@@ -8,6 +8,11 @@ module.exports = {
     feePercent: 0.1,
   },
   1: {
-    //TODO: define parameters
+    tokenPriceInEth: 0.00011759776,
+    minAllowablePrice: 0.5,
+    maxAllowablePrice: 2,
+    maxTxBuyAmtEth: 5,
+    maxTxSellAmtEth: 5,
+    feePercent: 0.1,
   },
 };
