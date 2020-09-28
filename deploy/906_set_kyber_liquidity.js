@@ -2,12 +2,9 @@ const {guard} = require("../lib");
 const {BigNumber} = require("ethers");
 const configParams = require("../data/kyberReserve/liquidity_settings");
 
-let tokenAddress;
-
 let pricingAdmin;
 
-let tokenPriceInEth;
-let ethBalance;
+let tokenPriceInWei;
 let liqRate;
 let minAllowablePrice;
 let maxAllowablePrice;
@@ -39,11 +36,10 @@ module.exports = async ({getChainId, deployments}) => {
   async function instantiateContracts() {
     pricingAddress = await read("KyberReserve", "conversionRatesContract");
     pricingAdmin = await read("LiquidityConversionRates", "admin");
-    tokenAddress = await read("LiquidityConversionRates", "token");
   }
 
   function parseInput(jsonInput) {
-    tokenPriceInEth = tokenPriceInEth ? tokenPriceInEth : jsonInput["tokenPriceInEth"];
+    tokenPriceInWei = tokenPriceInWei ? tokenPriceInWei : jsonInput["tokenPriceInWei"];
 
     minAllowablePrice = jsonInput["minAllowablePrice"] ? jsonInput["minAllowablePrice"] : 0.5;
 
@@ -56,48 +52,55 @@ module.exports = async ({getChainId, deployments}) => {
     feePercent = jsonInput["feePercent"] ? jsonInput["feePercent"] : 0.05;
   }
 
+  const weiInETH = BigNumber.from("1000000000000000000");
+
   async function fetchParams() {
-    let tokenDecimals = await read("Sand", "decimals");
-    ethBalance = (await ethers.provider.getBalance(reserveAddress)) / 10 ** 18;
-    liqRate = Math.log(1 / minAllowablePrice) / ethBalance;
-    try {
-      const tokenWallet = await read("KyberReserve", "tokenWallet", tokenAddress);
-      tokenBalance = (await read("Sand", "balanceOf", tokenWallet)) / 10 ** tokenDecimals;
-    } catch (e) {
-      tokenBalance = (await read("Sand", "balanceOf", reserveAddress)) / 10 ** tokenDecimals;
-    }
+    const weiBalance = await ethers.provider.getBalance(reserveAddress);
+    const ethBalance = weiBalance.div(weiInETH);
+    liqRate = BigNumber.from(Math.log(1 / minAllowablePrice)).div(ethBalance);
   }
 
   function calculateParams() {
-    const maxSupportPrice = maxAllowablePrice * tokenPriceInEth;
-    const minSupportPrice = minAllowablePrice * tokenPriceInEth;
-    _rInFp = liqRate * 2 ** formulaPrecision;
-    _rInFp = Math.floor(_rInFp);
-    _pMinInFp = minSupportPrice * 2 ** formulaPrecision;
-    _pMinInFp = Math.floor(_pMinInFp);
-    _numFpBits = formulaPrecision;
-    _maxCapBuyInWei = maxTxBuyAmtEth * 10 ** 18;
-    _maxCapSellInWei = maxTxSellAmtEth * 10 ** 18;
+    const maxSupportPrice = BigNumber.from(tokenPriceInWei).mul(maxAllowablePrice);
+    const minSupportPrice = BigNumber.from(tokenPriceInWei)
+      .mul(Math.floor(minAllowablePrice * 100))
+      .div(100);
+    _rInFp = liqRate.mul(BigNumber.from(2).pow(formulaPrecision));
+    _pMinInFp = minSupportPrice.mul(BigNumber.from(2).pow(formulaPrecision));
+    _numFpBits = BigNumber.from(formulaPrecision);
+    _maxCapBuyInWei = BigNumber.from(maxTxBuyAmtEth).mul(weiInETH);
+    _maxCapSellInWei = BigNumber.from(maxTxSellAmtEth).mul(weiInETH);
     _feeInBps = feePercent * 100;
-    _maxTokenToEthRateInPrecision = maxSupportPrice * 10 ** 18;
-    _minTokenToEthRateInPrecision = minSupportPrice * 10 ** 18;
+    _maxTokenToEthRateInPrecision = maxSupportPrice.mul(weiInETH);
+    _minTokenToEthRateInPrecision = minSupportPrice.mul(weiInETH);
   }
 
-  async function setLiquidityParams() {
-    await execute(
-      "LiquidityConversionRates",
-      {from: pricingAdmin, skipUnknownSigner: true},
-      "setLiquidityParams",
-      BigNumber.from(_rInFp.toString()),
-      BigNumber.from(_pMinInFp.toString()),
-      BigNumber.from(_numFpBits.toString()),
-      BigNumber.from(_maxCapBuyInWei.toString()),
-      BigNumber.from(_maxCapSellInWei.toString()),
-      BigNumber.from(_feeInBps.toString()),
-      BigNumber.from(_maxTokenToEthRateInPrecision.toString()),
-      BigNumber.from(_minTokenToEthRateInPrecision.toString())
-    );
-  }
+  console.log(
+    _rInFp.toString(),
+    _pMinInFp.toString(),
+    _numFpBits.toString(),
+    _maxCapBuyInWei.toString(),
+    _maxCapSellInWei.toString(),
+    _feeInBps.toString(),
+    _maxTokenToEthRateInPrecision.toString(),
+    _minTokenToEthRateInPrecision.toString()
+  );
+
+  // async function setLiquidityParams() {
+  //   await execute(
+  //     "LiquidityConversionRates",
+  //     {from: pricingAdmin, skipUnknownSigner: true},
+  //     "setLiquidityParams",
+  //     _rInFp,
+  //     _pMinInFp,
+  //     _numFpBits,
+  //     _maxCapBuyInWei,
+  //     _maxCapSellInWei,
+  //     _feeInBps,
+  //     _maxTokenToEthRateInPrecision,
+  //     _minTokenToEthRateInPrecision
+  //   );
+  // }
 };
-// module.exports.skip = guard(["1", "4", "314159"]);
+module.exports.skip = guard(["1", "4", "314159"]);
 module.exports.dependencies = ["KyberReserve"];
