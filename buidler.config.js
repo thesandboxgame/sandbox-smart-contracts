@@ -74,6 +74,11 @@ module.exports = {
     },
     liquidityRewardAdmin: "sandAdmin",
 
+    kyberDepositor: {
+      default: "sandBeneficiary",
+      1: "0x8FFA64FB50559c3Ff09a1022b84B2c5233ed8068",
+    },
+
     sandExecutionAdmin: "sandAdmin", // can add execution extension to SAND (used for Native metatx support)
     mintingFeeCollector: "sandAdmin", // will receiver the fee from Asset minting
     sandBeneficiary: "sandAdmin", // will be the owner of all initial SAND
