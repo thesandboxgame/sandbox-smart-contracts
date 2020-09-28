@@ -104,11 +104,6 @@ module.exports = {
       1: "0x3044719d139F866a44c988823513eCB93060bF1b",
       rinkeby: "0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e",
     },
-    trustedForwarder: {
-      default: "0x6da02F43c3BdEb30c21b57a24825417F671a8490",
-      1: null,
-      rinkeby: null,
-    },
     sandboxAccount: {
       default: 4,
       1: "0x7A9fe22691c811ea339D9B73150e6911a5343DcA",
