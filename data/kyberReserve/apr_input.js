@@ -13,6 +13,6 @@ module.exports = {
     reserveOperators: ["0x7A9fe22691c811ea339D9B73150e6911a5343DcA"],
     pricingOperator: "0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06",
     kyberNetworkAddress: "0x9CB7bB6D4795A281860b9Bfb7B1441361Cc9A794",
-    weiDepositAmount: "100000000000000000",
+    weiDepositAmount: "70000000000000000000",
   },
 };
