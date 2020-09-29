@@ -7,6 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./IRewardDistributionRecipient.sol";
 import "../common/Interfaces/ERC721.sol";
 
+
 contract LPTokenWrapper {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -42,6 +43,7 @@ contract LPTokenWrapper {
         _stakeToken.safeTransfer(msg.sender, amount);
     }
 }
+
 
 contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
     uint256 public constant DURATION = 30 days; // Reward period
