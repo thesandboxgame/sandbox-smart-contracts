@@ -10,7 +10,7 @@ abstract contract BaseRelayRecipient {
     /*
      * Forwarder singleton we accept calls from
      */
-    address public trustedForwarder;
+    address immutable trustedForwarder;
 
     /*
      * require a function to be called through GSN only
@@ -41,5 +41,9 @@ abstract contract BaseRelayRecipient {
         } else {
             return msg.sender;
         }
+    }
+
+    constructor(address trusted_Forwarder) public {
+        trustedForwarder = trusted_Forwarder;
     }
 }
