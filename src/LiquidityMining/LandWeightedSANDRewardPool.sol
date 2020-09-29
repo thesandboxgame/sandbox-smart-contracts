@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "./IRewardDistributionRecipient.sol";
 import "../common/Interfaces/ERC721.sol";
 
-
 contract LPTokenWrapper {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
@@ -43,7 +42,6 @@ contract LPTokenWrapper {
         _stakeToken.safeTransfer(msg.sender, amount);
     }
 }
-
 
 contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
     uint256 public constant DURATION = 30 days; // Reward period
@@ -125,6 +123,10 @@ contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipi
     function withdraw(uint256 amount) public override updateReward(msg.sender) {
         require(amount > 0, "Cannot withdraw 0");
         super.withdraw(amount);
+        uint256 ratio = amount.mul(DECIMAL_18).div(balanceOf(msg.sender));
+        uint256 currentContribution = contributionOf(msg.sender);
+        uint256 contributionReduction = currentContribution.mul(ratio).div(DECIMAL_18);
+        _contributions[msg.sender] = currentContribution.sub(contributionReduction);
         emit Withdrawn(msg.sender, amount);
     }
 
