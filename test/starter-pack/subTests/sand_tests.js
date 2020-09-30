@@ -367,9 +367,9 @@ function runSandTests() {
       );
       expect(eventsMatching2[0].args[2]).to.equal(newTotalExpectedPrice);
     });
-    // @review
+
     it("should allow users to purchase gems directly", async function () {
-      const {userWithSAND, catalystContract, gemContract} = await setUp;
+      const {userWithSAND, gemContract} = await setUp;
 
       const gemsOnlyMessage = {
         catalystIds: [0, 1, 2, 3],
