@@ -16,6 +16,7 @@ import "./PurchaseValidator.sol";
 contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     using SafeMathWithRequire for uint256;
     uint256 internal constant DAI_PRICE = 55000000000000000;
+    uint256 private constant DECIMAL_PLACES = 1 ether;
 
     ERC20 internal immutable _sand;
     Medianizer private immutable _medianizer;
@@ -155,7 +156,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         emit Purchase(buyer, message, amountInSand, address(0), ETHRequired);
 
         if (msg.value - ETHRequired > 0) {
-            msg.sender.transfer(msg.value - ETHRequired); // refund extra
+            msg.sender.call{gas: 50000, value: msg.value - ETHRequired}(""); // refund extra
         }
     }
 
@@ -178,7 +179,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         );
 
         uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities, message.gemQuantities);
-        uint256 DAIRequired = amountInSand.mul(DAI_PRICE).div(1000000000000000000);
+        uint256 DAIRequired = amountInSand.mul(DAI_PRICE).div(DECIMAL_PLACES);
         _handlePurchaseWithERC20(buyer, _wallet, address(_dai), DAIRequired);
         _erc20GroupCatalyst.batchTransferFrom(address(this), buyer, message.catalystIds, message.catalystQuantities);
         _erc20GroupGem.batchTransferFrom(address(this), buyer, message.gemIds, message.gemQuantities);
@@ -272,22 +273,22 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @param catalystIds Array of catalystIds to be purchase
     /// @param catalystQuantities Array of quantities of those catalystIds to be purchased
     /// @return Total price in SAND
-
     function _calculateTotalPriceInSand(
         uint256[] memory catalystIds,
         uint256[] memory catalystQuantities,
         uint256[] memory gemQuantities
     ) internal returns (uint256) {
+        require(catalystIds.length == catalystQuantities.length, "INVALID_INPUT");
         (uint256[] memory prices, uint256 gemPrice) = _priceSelector();
         uint256 totalPrice;
         for (uint256 i = 0; i < catalystIds.length; i++) {
             uint256 id = catalystIds[i];
             uint256 quantity = catalystQuantities[i];
-            totalPrice += prices[id].mul(quantity);
+            totalPrice = totalPrice.add(prices[id].mul(quantity));
         }
         for (uint256 i = 0; i < gemQuantities.length; i++) {
             uint256 quantity = gemQuantities[i];
-            totalPrice += gemPrice.mul(quantity);
+            totalPrice = totalPrice.add(gemPrice.mul(quantity));
         }
         return totalPrice;
     }
@@ -304,7 +305,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
             gemPrice = _gemPrice;
         } else {
             // Price change delay has expired.
-            if (now > _priceChangeTimestamp + 1 hours) {
+            if (now > _priceChangeTimestamp + _priceChangeDelay) {
                 _priceChangeTimestamp = 0;
                 prices = _starterPackPrices;
                 gemPrice = _gemPrice;
