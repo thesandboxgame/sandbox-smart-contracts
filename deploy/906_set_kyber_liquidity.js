@@ -27,7 +27,7 @@ module.exports = async ({getChainId, deployments}) => {
   if (chainId === "31337") {
     return;
   }
-  const {execute, read, log} = deployments;
+  const {execute, read} = deployments;
   const weiInETH = BigNumber.from("1000000000000000000");
   const reserveAddress = (await deployments.get("KyberReserve")).address;
   await instantiateContracts();
@@ -68,13 +68,13 @@ module.exports = async ({getChainId, deployments}) => {
     _rInFp = BigNumber.from(liqRate * 100000000000000000)
       .mul(BigNumber.from(2).pow(formulaPrecision))
       .div("100000000000000000");
-    _pMinInFp = minSupportPrice.mul(BigNumber.from(2).pow(formulaPrecision));
+    _pMinInFp = minSupportPrice.mul(BigNumber.from(2).pow(formulaPrecision)).div(weiInETH);
     _numFpBits = formulaPrecision;
     _maxCapBuyInWei = BigNumber.from(maxTxBuyAmtEth).mul(weiInETH);
     _maxCapSellInWei = BigNumber.from(maxTxSellAmtEth).mul(weiInETH);
     _feeInBps = feePercent * 100;
-    _maxTokenToEthRateInPrecision = maxSupportPrice.mul(weiInETH);
-    _minTokenToEthRateInPrecision = minSupportPrice.mul(weiInETH);
+    _maxTokenToEthRateInPrecision = maxSupportPrice;
+    _minTokenToEthRateInPrecision = minSupportPrice;
   }
 
   async function setLiquidityParams() {
@@ -83,13 +83,13 @@ module.exports = async ({getChainId, deployments}) => {
       {from: pricingAdmin, skipUnknownSigner: true},
       "setLiquidityParams",
       _rInFp,
-      _pMinInFp,
+      _pMinInFp, // TODO
       _numFpBits,
       _maxCapBuyInWei,
       _maxCapSellInWei,
       _feeInBps,
-      _maxTokenToEthRateInPrecision,
-      _minTokenToEthRateInPrecision
+      _maxTokenToEthRateInPrecision, // TODO
+      _minTokenToEthRateInPrecision // TODO
     );
   }
 };
