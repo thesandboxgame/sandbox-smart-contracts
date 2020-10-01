@@ -40,7 +40,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     // The delay between calling setPrices() and when the new prices come into effect.
     // Minimizes the effect of price changes on pending TXs
-    uint256 private _priceChangeDelay = 1 hours;
+    uint256 private constant PRICE_CHANGE_DELAY = 1 hours;
 
     event Purchase(address indexed buyer, Message message, uint256 price, address token, uint256 amountPaid);
 
@@ -156,7 +156,9 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         emit Purchase(buyer, message, amountInSand, address(0), ETHRequired);
 
         if (msg.value - ETHRequired > 0) {
-            msg.sender.call{gas: 50000, value: msg.value - ETHRequired}(""); // refund extra
+            // refund extra
+            (bool success, ) = msg.sender.call{value: msg.value - ETHRequired}("");
+            require(success, "REFUND_FAILED");
         }
     }
 
@@ -246,7 +248,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     {
         switchTime = 0;
         if (_priceChangeTimestamp != 0) {
-            switchTime = _priceChangeTimestamp + _priceChangeDelay;
+            switchTime = _priceChangeTimestamp + PRICE_CHANGE_DELAY;
         }
         return (_previousStarterPackPrices, _starterPackPrices, _previousGemPrice, _gemPrice, switchTime);
     }
@@ -305,7 +307,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
             gemPrice = _gemPrice;
         } else {
             // Price change delay has expired.
-            if (now > _priceChangeTimestamp + _priceChangeDelay) {
+            if (now > _priceChangeTimestamp + PRICE_CHANGE_DELAY) {
                 _priceChangeTimestamp = 0;
                 prices = _starterPackPrices;
                 gemPrice = _gemPrice;
