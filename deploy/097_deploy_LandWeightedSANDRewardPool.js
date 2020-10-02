@@ -10,7 +10,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   await deploy("LandWeightedSANDRewardPool", {
     from: deployer,
     log: true,
-    args: [stakeToken.address, sand.address, land.address, "1000000000000000000"],
+    args: [stakeToken.address, sand.address, land.address, "100000", "9000000"],
   });
 };
 module.exports.skip = guard(["1", "4", "314159"], "LandWeightedSANDRewardPool");
