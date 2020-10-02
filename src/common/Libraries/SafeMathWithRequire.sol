@@ -6,6 +6,11 @@ pragma solidity 0.6.5;
  * @dev Math operations with safety checks that revert
  */
 library SafeMathWithRequire {
+    using SafeMathWithRequire for uint256;
+
+    uint256 constant DECIMALS_18 = 1000000000000000000;
+    uint256 constant DECIMALS_12 = 1000000000000;
+
     /**
      * @dev Multiplies two numbers, throws on overflow.
      */
@@ -47,5 +52,29 @@ library SafeMathWithRequire {
         c = a + b;
         require(c >= a, "overflow");
         return c;
+    }
+
+    function sqrt6(uint256 a) internal pure returns (uint256 c) {
+        a = a.mul(DECIMALS_12);
+        uint256 tmp = a.add(1) / 2;
+        c = a;
+        // tmp cannot be zero unless a = 0 which skip the loop
+        while (tmp < c) {
+            c = tmp;
+            tmp = ((a / tmp) + tmp) / 2;
+        }
+    }
+
+    function cbrt6(uint256 a) internal pure returns (uint256 c) {
+        a = a.mul(DECIMALS_18);
+        uint256 tmp = a.add(2) / 3;
+        c = a;
+        // tmp cannot be zero unless a = 0 which skip the loop
+        while (tmp < c) {
+            c = tmp;
+            uint256 tmpSquare = tmp**2;
+            require(tmpSquare > tmp, "overflow");
+            tmp = ((a / tmpSquare) + (tmp * 2)) / 3;
+        }
     }
 }
