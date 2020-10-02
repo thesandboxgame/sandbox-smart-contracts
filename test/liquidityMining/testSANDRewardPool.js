@@ -9,7 +9,9 @@ const REWARD_TOKEN = "Sand";
 const MULTIPLIER_NFToken = "Land";
 const POOL = "LandWeightedSANDRewardPool";
 const REWARD_DURATION = 2592000; // 30 days in seconds
-const REWARD_AMOUNT = BigNumber.from(1500000).mul("1000000000000000000").div(REWARD_DURATION).mul(REWARD_DURATION);
+const REWARD_AMOUNT = BigNumber.from(1500000).mul("1000000000000000000");
+const ACTUAL_REWARD_AMOUNT = REWARD_AMOUNT.div(REWARD_DURATION).mul(REWARD_DURATION);
+
 const NEW_REWARD_AMOUNT = BigNumber.from(2000000).mul("1000000000000000000");
 const STAKE_AMOUNT = BigNumber.from(10000).mul("1000000000000000000");
 
@@ -96,7 +98,7 @@ describe("SANDRewardPool", function () {
     await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
     await mine();
     const earned = await rewardPoolAsUser.earned(others[0]);
-    expect(earned).to.equal(REWARD_AMOUNT); // AssertionError: Expected "1499958912037037035210000" to be equal "1500000000000000000000000"
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT); // AssertionError: Expected "1499958912037037035210000" to be equal "1500000000000000000000000"
   });
 
   it("admin can notifyRewardAmount and start a new reward process (without sending more reward tokens)", async function () {
