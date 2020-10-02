@@ -24,7 +24,7 @@ contract FeeTimeVault is Ownable {
     }
 
     /// @notice Enables fee holder to withdraw its share after lock period expired
-    function withdraw() external onlyOwner {
+    function withdraw() external onlyOwner returns (uint256) {
         uint256 day = ((now - _startTime) / 1 days);
         uint256 amount = _lockPeriod > day ? 0 : accumulatedAmountPerDay[day - _lockPeriod];
         if (amount != 0) {
@@ -33,10 +33,12 @@ contract FeeTimeVault is Ownable {
             _withdrawnAmount = withdrawnAmount.add(amount);
             require(ERC20(_token).transfer(msg.sender, amount), "FEE_WITHDRAWAL_FAILED");
         }
+        return amount;
     }
 
     function setFeeDistributor(FeeDistributor _feeDistributor) external onlyOwner {
         require(address(feeDistributor) == address(0), "FEE_DISTRIBUTOR_ALREADY_SET");
+        require(address(_feeDistributor) != address(0), "FEE_DISTRIBUTOR_ZERO_ADDRESS");
         feeDistributor = _feeDistributor;
     }
 
@@ -51,9 +53,9 @@ contract FeeTimeVault is Ownable {
     uint256 private _startTime;
 
     // /////////////////// CONSTRUCTOR ////////////////////
-    /// @notice lockPeriod measured in days, e.g. lockPeriod = 10 => 10 days
-    /// @param lockPeriod fee recipients
+    /// @param lockPeriod lockPeriod measured in days, e.g. lockPeriod = 10 => 10 days
     /// @param token the token that fees are collected in
+    /// @param owner the account that can make a withdrawal
     constructor(
         uint256 lockPeriod,
         ERC20 token,

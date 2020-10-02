@@ -161,7 +161,6 @@ describe("FeeTimeVault", function () {
     let b2 = await feeTimeVault.accumulatedAmountPerDay(1);
     expect(b1).to.equal(b2);
   });
-
   it("No sync all over a lock time period", async function () {
     let lockPeriod = 4;
     let oneDayInSecs = 60 * 60 * 24 * 1;
