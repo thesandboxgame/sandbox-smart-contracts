@@ -96,12 +96,7 @@ contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipi
     modifier updateReward(address account) {
         rewardPerTokenStored = rewardPerToken();
 
-        if (block.timestamp >= periodFinish) {
-            // if there are no stakers during the period
-            // ensure that a late staker cannot earn rewards
-            lastUpdateTime = periodFinish;
-        }
-        if (_totalContributions != 0) {
+        if (block.timestamp >= periodFinish || _totalContributions != 0) {
             // ensure reward past the first staker do not get lost
             lastUpdateTime = lastTimeRewardApplicable();
         }
