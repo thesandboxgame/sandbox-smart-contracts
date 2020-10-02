@@ -109,7 +109,7 @@ describe("SANDRewardPool", function () {
     await rewardPoolAsUser.stake(STAKE_AMOUNT);
     await mine();
     const rewardPerToken = await rewardPool.rewardPerToken();
-    expect(rewardPerToken).to.equal(0); // 0 + (periodFinish - notifyRewardAmount_timestamp * rewardRate * 1e30 / 0)
+    expect(rewardPerToken).to.equal(0);
     const earned = await rewardPoolAsUser.earned(others[0]);
     expect(earned).to.equal(0);
   });
