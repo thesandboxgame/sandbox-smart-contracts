@@ -95,7 +95,16 @@ contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipi
 
     modifier updateReward(address account) {
         rewardPerTokenStored = rewardPerToken();
-        lastUpdateTime = lastTimeRewardApplicable();
+
+        if (block.timestamp >= periodFinish) {
+            // if there are no stakers during the period
+            // ensure that a late staker cannot earn rewards
+            lastUpdateTime = periodFinish;
+        }
+        if (_totalContributions != 0) {
+            // ensure reward past the first staker do not get lost
+            lastUpdateTime = lastTimeRewardApplicable();
+        }
         if (account != address(0)) {
             rewards[account] = earned(account);
             userRewardPerTokenPaid[account] = rewardPerTokenStored;
@@ -111,11 +120,11 @@ contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipi
         if (totalContributions() == 0) {
             return rewardPerTokenStored;
         }
-        return rewardPerTokenStored.add(lastTimeRewardApplicable().sub(lastUpdateTime).mul(rewardRate).mul(1e18).div(totalContributions()));
+        return rewardPerTokenStored.add(lastTimeRewardApplicable().sub(lastUpdateTime).mul(rewardRate).mul(1e30).div(totalContributions()));
     }
 
     function earned(address account) public view returns (uint256) {
-        return contributionOf(account).mul(rewardPerToken().sub(userRewardPerTokenPaid[account])).div(1e18).add(rewards[account]);
+        return contributionOf(account).mul(rewardPerToken().sub(userRewardPerTokenPaid[account])).div(1e30).add(rewards[account]);
     }
 
     function computeContribution(uint256 amountStaked, uint256 numLands) internal view returns (uint256) {
