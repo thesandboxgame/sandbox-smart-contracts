@@ -1,5 +1,6 @@
 const {guard} = require("../lib");
 const configParams = require("../data/kyberReserve/apr_input");
+const liquidity_settings = require("../data/kyberReserve/liquidity_settings");
 const ethers = require("ethers");
 const {BigNumber} = ethers;
 const {solidityKeccak256} = ethers.utils;
@@ -13,7 +14,12 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
   let whitelistedAddresses;
   let reserveOperators;
   let weiDepositAmount;
-  let tokenPriceInEth;
+
+  const liquiditySettingsForChain = liquidity_settings[chainId];
+  if (!liquiditySettingsForChain) {
+    throw new Error(`no liquidity settings for chain with id ${chainId}`);
+  }
+  let tokenPriceInWei = liquiditySettingsForChain.tokenPriceInWei;
 
   const {execute, read, log} = deployments;
   const {deployer, kyberDepositor} = await getNamedAccounts();
@@ -26,10 +32,9 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
   // transfer reserve permissions
   await setReservePermissions();
   await depositETH(weiDepositAmount);
-  await depositSand(BigNumber.from(weiDepositAmount).div(tokenPriceInEth.mul("1000000000000000000")));
+  await depositSand(BigNumber.from(weiDepositAmount).mul("1000000000000000000").div(tokenPriceInWei));
 
   function parseInput(jsonInput) {
-    tokenPriceInEth = jsonInput["tokenPriceInEth"];
     whitelistedAddresses = jsonInput["whitelistedAddresses"];
     reserveAdmin = jsonInput["reserveAdmin"];
     weiDepositAmount = jsonInput["weiDepositAmount"];
@@ -111,5 +116,5 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
     );
   }
 };
-// module.exports.skip = guard(["1", "4", "314159"]);
+module.exports.skip = guard(["1", "4", "314159"]);
 module.exports.dependencies = ["KyberReserve"];

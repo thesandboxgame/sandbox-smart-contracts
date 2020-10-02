@@ -8,7 +8,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
   }
   let pricingOperator;
 
-  const {execute, read} = deployments;
+  const {execute, read, log} = deployments;
   const {deployer} = await getNamedAccounts();
   const kyberReserve = await deployments.get("KyberReserve");
 
@@ -30,5 +30,5 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
     pricingOperator = jsonInput["pricingOperator"];
   }
 };
-// module.exports.skip = guard(["1", "4", "314159"]);
+module.exports.skip = guard(["1", "4", "314159"]);
 module.exports.dependencies = ["KyberReserve"];
