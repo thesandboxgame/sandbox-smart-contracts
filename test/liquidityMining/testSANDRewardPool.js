@@ -9,7 +9,7 @@ const REWARD_TOKEN = "Sand";
 const MULTIPLIER_NFToken = "Land";
 const POOL = "LandWeightedSANDRewardPool";
 const REWARD_AMOUNT = BigNumber.from(1500000).mul("1000000000000000000");
-const REWARD_DURATION = 2592000000; // 30 days in milliseconds
+const REWARD_DURATION = 2592000; // 30 days in seconds
 const NEW_REWARD_AMOUNT = BigNumber.from(2000000).mul("1000000000000000000");
 const STAKE_AMOUNT = BigNumber.from(10000).mul("1000000000000000000");
 
