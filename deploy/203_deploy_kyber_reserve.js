@@ -25,5 +25,5 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
     log: true,
   });
 };
-module.exports.skip = guard(["1", "4", "314159"], "KyberReserve");
+module.exports.skip = guard(["1", "4", "314159"]);
 module.exports.tags = ["KyberReserve"];
