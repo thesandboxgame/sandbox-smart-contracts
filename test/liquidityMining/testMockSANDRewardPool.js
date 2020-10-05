@@ -69,18 +69,16 @@ describe("MockSANDRewardPool", function () {
     await rewardTokenAsAdmin.transfer(rewardPool.address, REWARD_AMOUNT);
     await rewardPoolAsAdmin.notifyRewardAmount(REWARD_AMOUNT);
 
+    // Set up user with NFTs (mockLands)
+    await multiplierNFTokenAsAdmin.mint(others[0], 0);
+    await multiplierNFTokenAsAdmin.mint(others[0], 1);
+    await multiplierNFTokenAsAdmin.mint(others[0], 2);
+    const balance = await multiplierNFToken.balanceOf(others[0]);
+    expect(balance).to.equal(3);
+
     // Give user some stakeTokens
     await stakeTokenAsAdmin.transfer(others[0], STAKE_AMOUNT);
     await stakeTokenAsUser.approve(rewardPool.address, STAKE_AMOUNT);
-
-    // Set up user with NFTs (mockLands)
-    await multiplierNFTokenAsAdmin.transferFrom(multiplierNFToken.address, others[0], 0);
-    await multiplierNFTokenAsAdmin.transferFrom(multiplierNFToken.address, others[0], 1);
-    await multiplierNFTokenAsAdmin.transferFrom(multiplierNFToken.address, others[0], 2);
-
-    // TODO: check user's NFT balance
-    const balance = await multiplierNFToken.functions.balanceOf(others[0]);
-    console.log(balance);
   }
 
   it("Pool contains reward tokens", async function () {
