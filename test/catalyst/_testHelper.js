@@ -1,4 +1,4 @@
-const {assert} = require("local-chai");
+const {assert, expect} = require("local-chai");
 const {BigNumber} = require("@ethersproject/bignumber");
 const {keccak256} = require("@ethersproject/solidity");
 const {ethers} = require("@nomiclabs/buidler");
@@ -35,6 +35,33 @@ async function assertValidAttributes({catalystRegistry, tokenId, originalTokenId
   }
 }
 
+function expectGemValues(values, expectedValues, options) {
+  options = options || {};
+  for (let i = 0; i < values.length; i++) {
+    const v = values[i];
+    if (expectedValues[i]) {
+      if (Array.isArray(expectedValues[i])) {
+        expect(v).to.be.within(expectedValues[i][0], expectedValues[i][1]);
+      } else {
+        expect(v).to.equal(expectedValues[i]);
+      }
+    } else {
+      if (v !== 0) {
+        console.log({values, expectedValues});
+      }
+      expect(v, `gemId ${i} not expected`).to.equal(0);
+    }
+  }
+  if (!options.ignoreMissing) {
+    for (const key of Object.keys(expectedValues)) {
+      if (parseInt(key) >= values.length) {
+        throw new Error(`no value for gemId ${key}`);
+      }
+    }
+  }
+}
+
 module.exports = {
+  expectGemValues,
   assertValidAttributes,
 };

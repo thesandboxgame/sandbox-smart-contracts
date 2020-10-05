@@ -1,28 +1,21 @@
 const {guard} = require("../lib");
 
 module.exports = async ({getNamedAccounts, deployments}) => {
-  const {deployIfDifferent, log} = deployments;
+  const {deploy} = deployments;
 
   const {deployer} = await getNamedAccounts();
 
-  const sandContract = await deployments.getOrNull("Sand");
-  if (!sandContract) {
-    throw new Error("no SAND contract deployed");
-  }
-  const deployResult = await deployIfDifferent(
-    ["data"],
-    "Land",
-    {from: deployer, gas: 6000000},
-    "Land",
-    sandContract.address,
-    deployer // set_land_admin set it later to correct address
-  );
+  const sandContract = await deployments.get("Sand");
 
-  if (deployResult.newlyDeployed) {
-    log(" - Land deployed at : " + deployResult.address + " for gas : " + deployResult.receipt.gasUsed);
-  } else {
-    log("reusing Land at " + deployResult.address);
-  }
+  await deploy("Land", {
+    from: deployer,
+    gas: 6000000,
+    args: [
+      sandContract.address,
+      deployer, // set_land_admin set it later to correct address
+    ],
+    log: true,
+  });
 };
 module.exports.skip = guard(["1", "4", "314159"], "Land");
 module.exports.tags = ["Land"];

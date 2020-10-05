@@ -2,10 +2,10 @@ pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
 import "./Interfaces/AssetToken.sol";
-import "./contracts_common/src/Interfaces/ERC20.sol";
+import "./common/Interfaces/ERC20.sol";
 import "./Interfaces/ERC20Extended.sol";
-import "./contracts_common/src/BaseWithStorage/MetaTransactionReceiver.sol";
-import "./contracts_common/src/Libraries/SafeMathWithRequire.sol";
+import "./common/BaseWithStorage/MetaTransactionReceiver.sol";
+import "./common/Libraries/SafeMathWithRequire.sol";
 import "./Catalyst/GemToken.sol";
 import "./Catalyst/CatalystToken.sol";
 import "./CatalystRegistry.sol";

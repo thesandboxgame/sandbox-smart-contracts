@@ -1,14 +1,8 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-interface CatalystToken {
-    function getValues(
-        uint256 catalystId,
-        uint256 seed,
-        uint32[] calldata gemIds,
-        bytes32[] calldata blockHashes
-    ) external view returns (uint32[] memory);
 
+interface CatalystToken {
     function getMintData(uint256 catalystId)
         external
         view

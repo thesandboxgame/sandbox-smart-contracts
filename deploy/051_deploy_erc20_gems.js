@@ -1,26 +1,21 @@
-const {BigNumber} = require("@ethersproject/bignumber");
 const {guard} = require("../lib");
 const gemNames = require("../data/gems");
 
-function sandWei(amount) {
-  return BigNumber.from(amount).mul("1000000000000000000").toString();
-}
-
 module.exports = async ({getNamedAccounts, deployments}) => {
   const {execute, deploy} = deployments;
-  const {deployer, gemMinter} = await getNamedAccounts();
+  const {deployer} = await getNamedAccounts();
 
   const sand = await deployments.get("Sand");
 
   const gemGroup = await deploy("Gem", {
-    contractName: "ERC20GroupGem",
+    contract: "ERC20GroupGem",
     from: deployer,
     gas: 3000000,
     log: true,
     args: [
       sand.address, // metatx
       deployer,
-      gemMinter,
+      deployer,
     ],
   });
   async function addGems(names) {
@@ -30,11 +25,11 @@ module.exports = async ({getNamedAccounts, deployments}) => {
       const contractName = `${name}Gem`;
       const tokenSymbol = name.toUpperCase();
       const result = await deploy(contractName, {
-        contractName: "ERC20SubToken",
+        contract: "ERC20SubToken",
         from: deployer,
         gas: 3000000,
         log: true,
-        args: [gemGroup.address, i, name, tokenSymbol],
+        args: [gemGroup.address, i, `Sandbox's ${tokenSymbol} Gems`, tokenSymbol],
       });
       gems.push(result.address);
     }
@@ -42,4 +37,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   }
   await addGems(gemNames);
 };
-module.exports.skip = guard(["1", "4", "314159"], "Gem"); // TODO
+module.exports.skip = guard(["1", "4", "314159"], "Gem");
+module.exports.tags = ["Gem"];
+module.exports.dependencies = ["Sand"];

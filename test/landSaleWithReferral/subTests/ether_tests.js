@@ -332,7 +332,7 @@ function runEtherTests() {
 
       it("after buying user owns all LAND bought (empty referral)", async function () {
         const {tree, users, lands, contracts} = initialSetUp;
-        const land = lands[3];
+        const land = lands[4];
         const proof = tree.getProof(calculateLandHash(land));
         const value = await contracts.landSaleWithReferral.getEtherAmountWithSAND(land.price);
         await users[0].LandSaleWithReferral.functions.buyLandWithETH(

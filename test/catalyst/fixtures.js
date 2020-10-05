@@ -111,10 +111,18 @@ module.exports.setupCatalystSystem = deployments.createFixture(async (bre, optio
         const events = await findEvents(asset, "Transfer", receipt.blockHash);
         return {tokenId: events[0].args[2], receipt};
       },
+      changeCatalyst: async (tokenId, {catalyst, gemIds, to}) => {
+        const receipt = await waitFor(CatalystMinter.changeCatalyst(other, tokenId, catalyst, gemIds, to || other));
+        return {receipt};
+      },
       extractAndAddGems: async (tokenId, {newGemIds, to}) => {
         const receipt = await waitFor(CatalystMinter.extractAndAddGems(other, tokenId, newGemIds, to || other));
         const events = await findEvents(asset, "Transfer", receipt.blockHash);
         return {tokenId: events[0].args[2], receipt};
+      },
+      addGems: async (tokenId, {newGemIds, to}) => {
+        const receipt = await waitFor(CatalystMinter.addGems(other, tokenId, newGemIds, to || other));
+        return {receipt};
       },
       extractAsset: async (tokenId, to) => {
         const receipt = await waitFor(Asset.extractERC721(tokenId, to || other));

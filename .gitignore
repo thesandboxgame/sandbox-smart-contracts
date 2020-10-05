@@ -35,4 +35,5 @@ giveaway.json
 
 deployments/buidlerevm*
 deployments/localhost*
+deployments/rinkeby_test_4
 .env

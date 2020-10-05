@@ -10,7 +10,7 @@ module.exports = [
     sandMintingFee: sandWei(1),
     sandUpdateFee: sandWei(1),
     maxGems: 1,
-    quantityRange: [200, 40000],
+    quantityRange: [4000, 20000],
   },
   {
     name: "Rare",
@@ -18,7 +18,7 @@ module.exports = [
     sandMintingFee: sandWei(4),
     sandUpdateFee: sandWei(4),
     maxGems: 2,
-    quantityRange: [50, 10000],
+    quantityRange: [1500, 4000],
   },
   {
     name: "Epic",
@@ -26,7 +26,7 @@ module.exports = [
     sandMintingFee: sandWei(10),
     sandUpdateFee: sandWei(10),
     maxGems: 3,
-    quantityRange: [10, 2000],
+    quantityRange: [200, 1500],
   },
   {
     name: "Legendary",

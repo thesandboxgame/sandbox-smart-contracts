@@ -41,6 +41,10 @@ RUN TESTS :
 yarn test
 ```
 
+ENVIRONMENT VARIABLES :
+
+The root of this repo contains a `example.env` file. You can copy this to your own `.env` file and populate the FIELDS with your own values. We use the MNEMONIC field to hold your seed-phrase. Alternately, if you want to use an HD-Wallet, the buidler-docs have a section on configuration here: https://buidler.dev/config/#hd-wallet-config
+
 # Technical Documentation
 
 You can explore here the documentation of our tokens and blockchain featurs:
@@ -54,3 +58,23 @@ You can explore here the documentation of our tokens and blockchain featurs:
 
 - our Marketplaces features: [Escrowless Auctions](documentation/escrow_less_auctions.md)
 - our User-Generated Content Moderation Policies using [Prediction Market](documentation/curation.md)
+
+# Your First Pull Request
+
+We are using feature branches to host the code of an upcoming feature. All feature branches start with "feat/"
+prefix, each feature branch is intended for a single purpose.
+The following branches will reject direct pushes:
+
+- master branch
+- "feat/" prefixed branches
+
+So, in order to commit your changes to master you will have to
+
+- git checkout master
+- git checkout -b feat/exampleFeature
+- git push --set-upstream origin feat/exampleFeature
+- git checkout -b exampleFeature
+- git push --set-upstream origin exampleFeature
+
+Now you can write your code and push your changes to the exampleFeature branch, once your'e done you need to open
+a pull request from exampleFeature to feat/exampleFeature, and then another pull request from feat/exampleFeature to master.

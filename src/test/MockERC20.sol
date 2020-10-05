@@ -1,28 +1,7 @@
 pragma solidity ^0.6.5;
-import "../contracts_common/src/Libraries/SafeMathWithRequire.sol";
-import "../contracts_common/src/interfaces/ERC20.sol";
-
-
-contract Ownable {
-    address public owner;
-
-    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
-
-    constructor() public {
-        owner = msg.sender;
-    }
-
-    modifier onlyOwner() {
-        require(msg.sender == owner);
-        _;
-    }
-
-    function transferOwnership(address newOwner) public onlyOwner {
-        require(newOwner != address(0));
-        emit OwnershipTransferred(owner, newOwner);
-        owner = newOwner;
-    }
-}
+import "../common/Libraries/SafeMathWithRequire.sol";
+import "../common/BaseWithStorage/Ownable.sol";
+import "../common/interfaces/ERC20.sol";
 
 
 contract ERC20Impl is ERC20 {
@@ -100,6 +79,8 @@ contract MintableToken is ERC20Impl, Ownable {
         _balances[account] = _balances[account].add(amount);
         emit Transfer(address(0), account, amount);
     }
+
+    constructor() public Ownable(msg.sender) {}
 }
 
 

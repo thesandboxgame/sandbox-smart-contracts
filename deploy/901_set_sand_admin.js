@@ -1,32 +1,28 @@
 module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
-  const {call, sendTxAndWait, log} = deployments;
+  const {read, execute, log} = deployments;
   const chainId = await getChainId();
 
   const {sandAdmin, sandExecutionAdmin} = await getNamedAccounts();
 
-  const sandContract = await deployments.getOrNull("Sand");
-  if (!sandContract) {
-    throw new Error("no SAND contract deployed");
-  }
-  const currentAdmin = await call("Sand", "getAdmin");
+  const currentAdmin = await read("Sand", "getAdmin");
   if (currentAdmin.toLowerCase() !== sandAdmin.toLowerCase()) {
     log("setting Sand Admin");
-    await sendTxAndWait({from: currentAdmin, gas: 1000000, skipUnknownSigner: true}, "Sand", "changeAdmin", sandAdmin);
+    await execute("Sand", {from: currentAdmin, skipUnknownSigner: true}, "changeAdmin", sandAdmin);
   }
 
   if (chainId === "4") {
     return; // TODO setup SAND on rinkeby
   }
-  const currentExecutionAdmin = await call("Sand", "getExecutionAdmin");
+  const currentExecutionAdmin = await read("Sand", "getExecutionAdmin");
   if (currentExecutionAdmin.toLowerCase() !== sandExecutionAdmin.toLowerCase()) {
     log("setting Sand Execution Admin");
-    await sendTxAndWait(
-      {from: currentExecutionAdmin, gas: 1000000, skipUnknownSigner: true},
+    await execute(
       "Sand",
+      {from: currentExecutionAdmin, skipUnknownSigner: true},
       "changeExecutionAdmin",
       sandExecutionAdmin
     );
   }
 };
-module.exports.tags = ["Sand"];
 module.exports.runAtTheEnd = true;
+module.exports.dependencies = ["Sand"];
