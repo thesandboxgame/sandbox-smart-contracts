@@ -320,8 +320,7 @@ contract MockERC721 is ERC721, SuperOperators, MetaTransactionReceiver {
 
 
 contract MockLand is MockERC721 {
-    constructor(address metaTransactionContract, address admin) MockERC721(metaTransactionContract, admin) public {
-    }
+    constructor(address metaTransactionContract, address admin) public MockERC721(metaTransactionContract, admin) {}
 
     function name() external pure returns (string memory) {
         return "Mock LANDs";
