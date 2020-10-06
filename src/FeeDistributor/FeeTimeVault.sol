@@ -17,21 +17,37 @@ contract FeeTimeVault is Ownable {
     function sync() external {
         uint256 timestamp = now;
         uint256 day = ((timestamp - _startTime) / 1 days);
-        uint256 amount = feeDistributor.withdraw(_token);
+        uint256 amount = feeDistributor.withdraw(_sandToken);
         accumulatedAmountPerDay[day] = accumulatedAmountPerDay[_lastDaySaved].add(amount);
         _lastDaySaved = day;
-        emit Sync(address(_token), amount, timestamp);
+        emit Sync(address(_sandToken), amount, timestamp);
     }
 
     /// @notice Enables fee holder to withdraw its share after lock period expired
     function withdraw() external onlyOwner returns (uint256) {
         uint256 day = ((now - _startTime) / 1 days);
-        uint256 amount = _lockPeriod > day ? 0 : accumulatedAmountPerDay[day - _lockPeriod];
+        uint256 lockPeriod = _lockPeriod;
+        uint256 amount = lockPeriod > day ? 0 : accumulatedAmountPerDay[day - lockPeriod];
         if (amount != 0) {
             uint256 withdrawnAmount = _withdrawnAmount;
             amount = amount.sub(withdrawnAmount);
             _withdrawnAmount = withdrawnAmount.add(amount);
-            require(ERC20(_token).transfer(msg.sender, amount), "FEE_WITHDRAWAL_FAILED");
+            require(ERC20(_sandToken).transfer(msg.sender, amount), "FEE_WITHDRAWAL_FAILED");
+        }
+        return amount;
+    }
+
+    /// @notice Enables fee holder to withdraw token fees with no time-lock for tokens other than SAND
+    /// @param token the token that fees are collected in
+    function withdrawNoTimeLock(ERC20 token) external onlyOwner returns (uint256) {
+        require(token != _sandToken, "SAND_TOKEN_WITHDRWAL_NOT_ALLOWED");
+        uint256 amount = feeDistributor.withdraw(token);
+        if (amount != 0) {
+            if (address(token) == address(0)) {
+                msg.sender.transfer(amount);
+            } else {
+                require(ERC20(token).transfer(msg.sender, amount), "FEE_WITHDRAWAL_FAILED");
+            }
         }
         return amount;
     }
@@ -42,19 +58,21 @@ contract FeeTimeVault is Ownable {
         feeDistributor = _feeDistributor;
     }
 
+    receive() external payable {}
+
     // /////////////////// UTILITIES /////////////////////
     using SafeMathWithRequire for uint256;
     // //////////////////////// DATA /////////////////////
 
     uint256 private _lockPeriod;
-    ERC20 private _token;
+    ERC20 private _sandToken;
     uint256 private _lastDaySaved;
     uint256 private _withdrawnAmount;
     uint256 private _startTime;
 
     // /////////////////// CONSTRUCTOR ////////////////////
     /// @param lockPeriod lockPeriod measured in days, e.g. lockPeriod = 10 => 10 days
-    /// @param token the token that fees are collected in
+    /// @param token sand token contract address
     /// @param owner the account that can make a withdrawal
     constructor(
         uint256 lockPeriod,
@@ -62,7 +80,7 @@ contract FeeTimeVault is Ownable {
         address payable owner
     ) public Ownable(owner) {
         _lockPeriod = lockPeriod;
-        _token = token;
+        _sandToken = token;
         _startTime = now;
     }
 }
