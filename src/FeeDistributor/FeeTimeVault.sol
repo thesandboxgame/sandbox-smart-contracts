@@ -1,14 +1,15 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 import "./FeeDistributor.sol";
-import "../common/interfaces/ERC20.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 import "../common/BaseWithStorage/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 
 /// @title Fee Time Vault
 /// @notice Holds tokens collected from fees in a locked state for a certain period of time
 contract FeeTimeVault is Ownable {
+    using SafeERC20 for IERC20;
     event Sync(address token, uint256 amount, uint256 timestamp);
     mapping(uint256 => uint256) public accumulatedAmountPerDay;
     FeeDistributor public feeDistributor;
@@ -32,21 +33,21 @@ contract FeeTimeVault is Ownable {
             uint256 withdrawnAmount = _withdrawnAmount;
             amount = amount.sub(withdrawnAmount);
             _withdrawnAmount = withdrawnAmount.add(amount);
-            require(ERC20(_sandToken).transfer(msg.sender, amount), "FEE_WITHDRAWAL_FAILED");
+            _sandToken.safeTransfer(msg.sender, amount);
         }
         return amount;
     }
 
     /// @notice Enables fee holder to withdraw token fees with no time-lock for tokens other than SAND
     /// @param token the token that fees are collected in
-    function withdrawNoTimeLock(ERC20 token) external onlyOwner returns (uint256) {
+    function withdrawNoTimeLock(IERC20 token) external onlyOwner returns (uint256) {
         require(token != _sandToken, "SAND_TOKEN_WITHDRWAL_NOT_ALLOWED");
         uint256 amount = feeDistributor.withdraw(token);
         if (amount != 0) {
             if (address(token) == address(0)) {
                 msg.sender.transfer(amount);
             } else {
-                require(ERC20(token).transfer(msg.sender, amount), "FEE_WITHDRAWAL_FAILED");
+                token.safeTransfer(msg.sender, amount);
             }
         }
         return amount;
@@ -65,7 +66,7 @@ contract FeeTimeVault is Ownable {
     // //////////////////////// DATA /////////////////////
 
     uint256 private _lockPeriod;
-    ERC20 private _sandToken;
+    IERC20 private _sandToken;
     uint256 private _lastDaySaved;
     uint256 private _withdrawnAmount;
     uint256 private _startTime;
@@ -76,7 +77,7 @@ contract FeeTimeVault is Ownable {
     /// @param owner the account that can make a withdrawal
     constructor(
         uint256 lockPeriod,
-        ERC20 token,
+        IERC20 token,
         address payable owner
     ) public Ownable(owner) {
         _lockPeriod = lockPeriod;
