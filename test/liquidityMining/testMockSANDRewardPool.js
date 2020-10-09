@@ -15,6 +15,7 @@ const CALCULATED_REWARD_AMOUNT = REWARD_AMOUNT.div(REWARD_DURATION).mul(REWARD_D
 
 const NEW_REWARD_AMOUNT = BigNumber.from(2000000).mul("1000000000000000000");
 const STAKE_AMOUNT = BigNumber.from(10000).mul("1000000000000000000");
+const SMALL_STAKE_AMOUNT = BigNumber.from(10).mul("1000000000000000000");
 
 describe("MockSANDRewardPool", function () {
   let deployer;
@@ -89,9 +90,9 @@ describe("MockSANDRewardPool", function () {
     }
   }
 
-  async function setUpUserWithNfts(user, max) {
+  async function setUpUserWithNfts(user, min, max) {
     // Set up users with NFTs (mockLands)
-    for (let i = 0; i < max; i++) {
+    for (let i = min; i < max; i++) {
       await multiplierNFTokenAsAdmin.mint(user, i);
     }
   }
@@ -132,12 +133,27 @@ describe("MockSANDRewardPool", function () {
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
   });
 
+  // it("User earnings for 0 NFTs match expected reward with multiple stakes", async function () {
+  //   await createFixture();
+  //   for (let i = 0; i < 10; i++) {
+  //     await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
+  //   }
+  //   const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
+  //   expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(10));
+  //   const latestBlock = await ethers.provider.getBlock("latest");
+  //   const currentTimestamp = latestBlock.timestamp;
+  //   await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+  //   await mine();
+  //   const earned = await rewardPoolAsUser[0].earned(others[0]);
+  //   expect(earned).to.equal(ACTUAL_REWARD_AMOUNT); // AssertionError: Expected "1499999999999999998175996" to be equal "1499999999999999998176000"
+  // });
+
   // Single staker with LANDs receive rewards
   // Total rewards add up to 100% of reward available
 
   it("User earnings for 1 NFTs match expected reward", async function () {
     await createFixture();
-    await setUpUserWithNfts(others[0], 1);
+    await setUpUserWithNfts(others[0], 0, 1);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
@@ -151,7 +167,7 @@ describe("MockSANDRewardPool", function () {
 
   it("User earnings for 2 NFTs match expected reward", async function () {
     await createFixture();
-    await setUpUserWithNfts(others[0], 2);
+    await setUpUserWithNfts(others[0], 0, 2);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
@@ -165,7 +181,7 @@ describe("MockSANDRewardPool", function () {
 
   it("User earnings for 3 NFTs match expected reward", async function () {
     await createFixture();
-    await setUpUserWithNfts(others[0], 3);
+    await setUpUserWithNfts(others[0], 0, 3);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
@@ -177,9 +193,25 @@ describe("MockSANDRewardPool", function () {
     expect(earned).to.equal(CALCULATED_REWARD_AMOUNT);
   });
 
+  // it("User earnings for 3 NFTs match expected reward with multiple stakes", async function () {
+  //   await createFixture();
+  //   await setUpUserWithNfts(others[0], 0, 3);
+  //   for (let i = 0; i < 10; i++) {
+  //     await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
+  //   }
+  //   const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
+  //   expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(10));
+  //   const latestBlock = await ethers.provider.getBlock("latest");
+  //   const currentTimestamp = latestBlock.timestamp;
+  //   await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+  //   await mine();
+  //   const earned = await rewardPoolAsUser[0].earned(others[0]);
+  //   expect(earned).to.equal(ACTUAL_REWARD_AMOUNT); // AssertionError: Expected "1499999999999999998175990" to be equal "1499999999999999998176000"
+  // });
+
   it("User earnings for 89 NFTs match expected reward", async function () {
     await createFixture();
-    await setUpUserWithNfts(others[0], 89);
+    await setUpUserWithNfts(others[0], 0, 89);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
@@ -193,7 +225,7 @@ describe("MockSANDRewardPool", function () {
 
   // it("User earnings for 500 NFTs match expected reward", async function () {
   //   await createFixture();
-  //   await setUpUserWithNfts(others[0], 500);
+  //   await setUpUserWithNfts(others[0], 0, 500);
   //   await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
   //   const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
   //   expect(stakedBalance).to.equal(STAKE_AMOUNT);
@@ -207,7 +239,7 @@ describe("MockSANDRewardPool", function () {
 
   // it("User earnings for 10000 NFTs match expected reward", async function () {
   //   await createFixture();
-  //   await setUpUserWithNfts(others[0], 10000);
+  //   await setUpUserWithNfts(others[0], 0, 10000);
   //   await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
   //   const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
   //   expect(stakedBalance).to.equal(STAKE_AMOUNT);
@@ -276,9 +308,42 @@ describe("MockSANDRewardPool", function () {
     expect(earned0.add(earned1).add(earned2)).to.equal(CALCULATED_REWARD_AMOUNT);
   });
 
-  // WHAT HAPPENS TO ACTUAL REWARD AMOUNT AS NUMBER OF USERS INCREASES?
-  // OR AS NUMBER OF TIMES STAKED INCREASES?
-
-  // TODO: Multiple stakers with LANDs receive rewards
+  // Multiple stakers with LANDs receive rewards
   // Total contributions add up to 100% of reward available
+
+  it("Multiple user earnings for 1 NFTs match expected reward", async function () {
+    await createFixture();
+    await setUpUserWithNfts(others[0], 0, 1);
+    await setUpUserWithNfts(others[1], 1, 2);
+    await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
+    const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
+    expect(stakedBalance).to.equal(STAKE_AMOUNT.mul(2));
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+    await mine();
+    const earned0 = await rewardPoolAsUser[0].earned(others[0]);
+    const earned1 = await rewardPoolAsUser[1].earned(others[1]);
+    const earned = earned0.add(earned1);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+  });
+
+  // it("Multiple user earnings for 3 NFTs match expected reward", async function () {
+  //   await createFixture();
+  //   await setUpUserWithNfts(others[0], 0, 3);
+  //   await setUpUserWithNfts(others[1], 3, 6);
+  //   await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+  //   await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
+  //   const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
+  //   expect(stakedBalance).to.equal(STAKE_AMOUNT.mul(2));
+  //   const latestBlock = await ethers.provider.getBlock("latest");
+  //   const currentTimestamp = latestBlock.timestamp;
+  //   await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+  //   await mine();
+  //   const earned0 = await rewardPoolAsUser[0].earned(others[0]);
+  //   const earned1 = await rewardPoolAsUser[1].earned(others[1]);
+  //   const earned = earned0.add(earned1);
+  //   expect(earned).to.equal(ACTUAL_REWARD_AMOUNT); // AssertionError: Expected "1499999999999999998175998" to be equal "1499999999999999998176000"
+  // });
 });

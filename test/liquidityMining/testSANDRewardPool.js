@@ -14,17 +14,22 @@ const ACTUAL_REWARD_AMOUNT = REWARD_AMOUNT.div(REWARD_DURATION).mul(REWARD_DURAT
 const NEW_REWARD_AMOUNT = BigNumber.from(2000000).mul("1000000000000000000");
 const STAKE_AMOUNT = BigNumber.from(10000).mul("1000000000000000000");
 
-describe("SANDRewardPool", function () {
+const ONE_DAY = 86400;
+
+describe("ActualSANDRewardPool", function () {
   let deployer;
   let others;
   let sandAdmin;
   let landAdmin;
   let rewardPool;
   let rewardPoolAsUser;
+  let rewardPoolAsAdmin;
   let stakeToken;
+  let stakeTokenAsUser;
   let stakeTokenAsAdmin;
   let rewardToken;
   let multiplierNFToken;
+  let multiplierNFTokenAsAdmin;
 
   async function createFixture() {
     await deployments.fixture();
@@ -53,14 +58,24 @@ describe("SANDRewardPool", function () {
     rewardPoolAsUser = rewardPool.connect(ethers.provider.getSigner(others[0]));
     stakeTokenAsAdmin = stakeToken.connect(ethers.provider.getSigner(stakeTokenAdmin));
     stakeTokenAsUser = stakeToken.connect(ethers.provider.getSigner(others[0]));
-    rewardTokenAsAdmin = rewardToken.connect(ethers.provider.getSigner(rewardTokenAdmin));
-    rewardTokenAsUser = rewardToken.connect(ethers.provider.getSigner(others[0]));
     multiplierNFTokenAsAdmin = multiplierNFToken.connect(ethers.provider.getSigner(multiplierNFTokenAdmin));
-    multiplierNFTokenAsUser = multiplierNFToken.connect(ethers.provider.getSigner(others[0]));
+    const rewardTokenAsAdmin = rewardToken.connect(ethers.provider.getSigner(rewardTokenAdmin));
+    const rewardTokenAsUser = rewardToken.connect(ethers.provider.getSigner(others[0]));
+    const multiplierNFTokenAsUser = multiplierNFToken.connect(ethers.provider.getSigner(others[0]));
 
     // Give user some stakeTokens
     await stakeTokenAsAdmin.transfer(others[0], STAKE_AMOUNT);
     await stakeTokenAsUser.approve(rewardPool.address, STAKE_AMOUNT);
+
+    // Enable minting of LANDs
+    await multiplierNFTokenAsAdmin.setMinter(landAdmin, true).then((tx) => tx.wait());
+  }
+
+  // To set up LANDs
+  let counter = 0;
+  async function mintLandQuad(to) {
+    await multiplierNFTokenAsAdmin.mintQuad(to, 1, counter, counter, "0x");
+    counter++;
   }
 
   it("Contract should exist", async function () {
@@ -123,6 +138,86 @@ describe("SANDRewardPool", function () {
     expect(earned).to.equal(0);
   });
 
+  it("User earns full reward amount if they are the only staker after 1 day", async function () {
+    await createFixture();
+    await ethers.provider.send("evm_increaseTime", [ONE_DAY]);
+    await mine();
+    await rewardPoolAsUser.stake(STAKE_AMOUNT);
+    const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
+    expect(stakedBalance).to.equal(STAKE_AMOUNT);
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION - ONE_DAY]);
+    await mine();
+    const earned = await rewardPoolAsUser.earned(others[0]);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+  });
+
+  it("User earns full reward amount if they are the only staker after 29 days", async function () {
+    await createFixture();
+    await ethers.provider.send("evm_increaseTime", [ONE_DAY * 29]);
+    await mine();
+    await rewardPoolAsUser.stake(STAKE_AMOUNT);
+    const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
+    expect(stakedBalance).to.equal(STAKE_AMOUNT);
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION - ONE_DAY * 29]);
+    await mine();
+    const earned = await rewardPoolAsUser.earned(others[0]);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+  });
+
+  // Using LAND contract
+
+  it("User with 1 LAND earns correct reward amount", async function () {
+    await createFixture();
+    await mintLandQuad(others[0]);
+    const landCount = await multiplierNFToken.balanceOf(others[0]);
+    expect(landCount).to.equal(1);
+    await rewardPoolAsUser.stake(STAKE_AMOUNT);
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+    await mine();
+    const earned = await rewardPoolAsUser.earned(others[0]);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+  });
+
+  it("User with 3 LANDs earns correct reward amount", async function () {
+    await createFixture();
+    for (let i = 0; i < 3; i++) {
+      await mintLandQuad(others[0]);
+    }
+    const landCount = await multiplierNFToken.balanceOf(others[0]);
+    expect(landCount).to.equal(3);
+    await rewardPoolAsUser.stake(STAKE_AMOUNT);
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+    await mine();
+    const earned = await rewardPoolAsUser.earned(others[0]);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT); // AssertionError: Expected "1499999999999999998175999" to be equal "1499999999999999998176000"
+  });
+
+  it("User with 10 LANDs earns correct reward amount", async function () {
+    await createFixture();
+    for (let i = 0; i < 10; i++) {
+      await mintLandQuad(others[0]);
+    }
+    const landCount = await multiplierNFToken.balanceOf(others[0]);
+    expect(landCount).to.equal(10);
+    await rewardPoolAsUser.stake(STAKE_AMOUNT);
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+    await mine();
+    const earned = await rewardPoolAsUser.earned(others[0]);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT); // AssertionError: Expected "1499999999999999998175999" to be equal "1499999999999999998176000"
+  });
+
+  // TODO:
+  // Multiple users
   // Test what happens if rewardToken in pool is less than amount notified
   // Test what happens if pool is notified before end of current reward period
 });
