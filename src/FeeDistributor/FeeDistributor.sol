@@ -17,11 +17,11 @@ contract FeeDistributor {
     /// @notice Zero address reserved for ether withdrawal
     /// @param token the token that fee should be distributed in
     /// @return amount had withdrawn
-    function withdraw(IERC20 token) external returns (uint256 amount) {
+    function withdraw(IERC20 token, address payable beneficiary) external returns (uint256 amount) {
         if (address(token) == address(0)) {
-            amount = _etherWithdrawal();
+            amount = _etherWithdrawal(beneficiary);
         } else {
-            amount = _tokenWithdrawal(token);
+            amount = _tokenWithdrawal(token, beneficiary);
         }
         if (amount != 0) {
             emit Withdrawal(token, msg.sender, amount);
@@ -33,18 +33,18 @@ contract FeeDistributor {
     }
 
     // //////////////////// INTERNALS ////////////////////
-    function _etherWithdrawal() private returns (uint256) {
+    function _etherWithdrawal(address payable beneficiary) private returns (uint256) {
         uint256 amount = _calculateWithdrawalAmount(address(this).balance, address(0));
         if (amount > 0) {
-            msg.sender.transfer(amount);
+            beneficiary.transfer(amount);
         }
         return amount;
     }
 
-    function _tokenWithdrawal(IERC20 token) private returns (uint256) {
+    function _tokenWithdrawal(IERC20 token, address payable beneficiary) private returns (uint256) {
         uint256 amount = _calculateWithdrawalAmount(token.balanceOf(address(this)), address(token));
         if (amount > 0) {
-            token.safeTransfer(msg.sender, amount);
+            token.safeTransfer(beneficiary, amount);
         }
         return amount;
     }

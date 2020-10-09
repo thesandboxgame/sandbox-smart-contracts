@@ -18,7 +18,7 @@ contract FeeTimeVault is Ownable {
     function sync() external {
         uint256 timestamp = now;
         uint256 day = ((timestamp - _startTime) / 1 days);
-        uint256 amount = feeDistributor.withdraw(_sandToken);
+        uint256 amount = feeDistributor.withdraw(_sandToken, address(this));
         accumulatedAmountPerDay[day] = accumulatedAmountPerDay[_lastDaySaved].add(amount);
         _lastDaySaved = day;
         emit Sync(address(_sandToken), amount, timestamp);
@@ -42,14 +42,7 @@ contract FeeTimeVault is Ownable {
     /// @param token the token that fees are collected in
     function withdrawNoTimeLock(IERC20 token) external onlyOwner returns (uint256) {
         require(token != _sandToken, "SAND_TOKEN_WITHDRWAL_NOT_ALLOWED");
-        uint256 amount = feeDistributor.withdraw(token);
-        if (amount != 0) {
-            if (address(token) == address(0)) {
-                msg.sender.transfer(amount);
-            } else {
-                token.safeTransfer(msg.sender, amount);
-            }
-        }
+        uint256 amount = feeDistributor.withdraw(token, msg.sender);
         return amount;
     }
 
