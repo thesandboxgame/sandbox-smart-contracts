@@ -4,6 +4,39 @@ import "../BaseWithStorage/ERC721BaseToken.sol";
 
 
 contract GameToken is ERC721BaseToken {
+    uint256 public _nextId;
+    // mapping(uint256 => uint24[]) _assetsInGame;
+
+
+
+    /**
+     * @notice Function to create a new GAME token
+     * @param from The address of the one creating the game (may be different from msg.sender if metaTx)
+     * @param to The address who will be assigned ownerdhip of this game
+     * @param assetIds The ids of the assets to add to this game
+     * @param gameEditors The addresses to allow to edit (Can also be set later)
+     *  */
+    function createGame(
+        address from,
+        address to,
+        uint256[] assetIds,
+        address[] editors
+    ) public {
+        // anyone can "create" a GAME token by transfering assets to the Game contract.
+        // @review Any restrictions?
+        require(to != address(0), "DESTINATION_ZERO_ADDRESS");
+        require(to != address(this), "DESTINATION_GAME_CONTRACT");
+        require(assetIds.length != 0, "INSUFFICIENT_ASSETS_SPECIFIED");
+        // require msg.sender/"from" address owns or is approved for all assets
+        uint256 gameId = _mintGame(to);
+        if (editors.length != 0) {
+            // add each address to mapping
+            for (uint256 i = 0; i < editors.length; i++) {
+                _gameEditors[gameId][editors[i]] = true
+            }
+        }
+    }
+
     /**
      * @notice Function to allow token owner to set game editors
      * @param gameId The id of the GAME token owned by owner
@@ -81,7 +114,6 @@ contract GameToken is ERC721BaseToken {
 
     mapping(uint256 => string) private _metaData;
     mapping(uint256 => mapping(address => bool)) private _gameEditors;
-    uint256 internal _nextId;
 
     constructor(address metaTransactionContract, address admin) public ERC721BaseToken(metaTransactionContract, admin) {
         _nextId = 1;
