@@ -16,7 +16,7 @@ contract FeeDistributor {
     /// @notice Enables fee holder to withdraw its share
     /// @notice Zero address reserved for ether withdrawal
     /// @param token the token that fee should be distributed in
-    /// @param beneficiary the address that receives fees
+    /// @param beneficiary the address that will receive fees
     /// @return amount had withdrawn
     function withdraw(IERC20 token, address payable beneficiary) external returns (uint256 amount) {
         if (address(token) == address(0)) {
