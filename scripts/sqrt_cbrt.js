@@ -47,8 +47,19 @@ function cbrt(a) {
   return c / 100;
 }
 
+function rt6(a) {
+  a = a * 1000000;
+  let tmp = Math.floor((a + 5) / 6);
+  let c = a;
+  while (tmp < c) {
+    c = tmp;
+    tmp = Math.floor((Math.floor(a / Math.pow(tmp, 5)) + 5 * tmp) / 6);
+  }
+  return c / 10;
+}
+
 // for (const num of [2, 3, 9, 10, 122, 10000]) {
-//   console.log(cbrt(num));
+//   console.log(rt6(num));
 // }
 
 const m = 0.1;
