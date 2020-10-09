@@ -97,10 +97,16 @@ module.exports = {
       rinkeby: "0x60927eB036621b801491B6c5e9A60A8d2dEeD75A",
     },
 
-    landSaleBeneficiary: {
+    treasury: {
       default: "sandSaleBeneficiary",
       rinkeby: "sandSaleBeneficiary",
       1: "0x4489590a116618B506F0EfE885432F6A8ED998E9",
+    },
+
+    landSaleBeneficiary: {
+      default: "sandSaleBeneficiary",
+      rinkeby: "sandSaleBeneficiary",
+      1: "treasury",
     }, // updated to company treasury wallet 9th September - collect funds from land sales
 
     landSaleFeeRecipient: {default: 3, rinkeby: accounts_rinkeby[5], 1: "0x0EB04462D69B1D267d269377E34f60b9De1c8510"}, // collect 5% fee from land sales (prior to implementation of FeeDistributor)
@@ -138,7 +144,7 @@ module.exports = {
     catalystRegistryAdmin: "sandAdmin", // can change the minter
     catalystMinterAdmin: "sandAdmin", // control the fees and which catalyst are allowed
     starterPackAdmin: "sandAdmin", // can change price
-    starterPackSaleBeneficiary: "sandSaleBeneficiary", // collect funds from starter pack sales
+    starterPackSaleBeneficiary: "treasury", // collect funds from starter pack sales
     backendMessageSigner: "backendReferralWallet", // account that sign message for the starter pack
     kyberLiquidityProvider: "sandBeneficiary", //TODO check what should be the value
 
