@@ -75,5 +75,8 @@
     "rinkeby:run": "cross-env BUIDLER_NETWORK=rinkeby node",
     "rinkeby:test:run": "cross-env BUIDLER_NETWORK=rinkeby_test node",
     "mainnet:run": "cross-env BUIDLER_NETWORK=mainnet node"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^3.2.0"
   }
 }
