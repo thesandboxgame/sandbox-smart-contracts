@@ -57,12 +57,12 @@ function setGasValue(column, row, value) {
     }
   }
   let valuesRow = gasValues[row - 1];
-  if (!valuesRow) {
+  if (typeof valuesRow === "undefined") {
     valuesRow = [];
     gasValues[row - 1] = valuesRow;
   }
-  if (col > valuesRow.length) {
-    for (let i = 0; i < col - valuesRow.length; i++) {
+  if (col + 1 > valuesRow.length) {
+    for (let i = 0; i < col + 1 - valuesRow.length; i++) {
       valuesRow.push([]);
     }
   }
@@ -158,6 +158,7 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand, useSi
   );
 
   console.log(`minting ${assets.length} assets...`);
+  // console.log("ASSETS", JSON.stringify(assets, null, "  "));
   if (assets.length == 1) {
     console.log(`with gemIds : ${assets[0].gemIds}`);
   }
@@ -247,6 +248,8 @@ async function mintMultiple({creatorWallet, assets, gems, catalysts, sand, useSi
   setGasValue("mint", rowNumber, mint_gasUsed.toNumber());
   setGasValue("airdrop", rowNumber, airdrop_gasUsed.toNumber());
   setGasValue("total", rowNumber, total_gasUsed.toNumber());
+
+  return [mint_gasUsed.toNumber(), airdrop_gasUsed.toNumber(), total_gasUsed.toNumber()];
 }
 
 function catalyst(type) {
@@ -295,11 +298,11 @@ function getNumberOfGems(catalystName) {
 function getQuantity(catalystName) {
   switch (catalystName) {
     case "CommonCatalyst":
-      return 200;
+      return 4000;
     case "RareCatalyst":
-      return 50;
+      return 1500;
     case "EpicCatalyst":
-      return 10;
+      return 200;
     case "LegendaryCatalyst":
       return 1;
   }
@@ -366,6 +369,8 @@ async function handleRow(row) {
   await addAssets(creatorWallet, assets, row, "EpicCatalyst");
   await addAssets(creatorWallet, assets, row, "LegendaryCatalyst");
 
+  // console.log("ROW", JSON.stringify(row, null, "  "));
+
   // console.log(JSON.stringify(assets, null, "  "));
   // for (const asset of assets) {
   //   await mint({
@@ -375,7 +380,7 @@ async function handleRow(row) {
   //     quantity: asset.quantity,
   //   });
   // }
-  await mintMultiple({
+  return await mintMultiple({
     creatorWallet,
     assets,
     gems,
@@ -401,8 +406,8 @@ async function handleRow(row) {
     sheet: "Cata/Gem Count",
   };
   const sheet = await parseSheet(sheetId, {
-    startRow: 3,
-    endRow: 57,
+    startRow: 8,
+    endRow: 83,
     fields: {
       1: "cell",
       2: "creator",
@@ -416,13 +421,24 @@ async function handleRow(row) {
       10: gem("Magic"),
       11: gem("Luck"),
     },
-    filter: (object) => object.cell !== "",
+    // filter: (object) => object.cell !== "",
     recordRowNumber: true,
   });
 
+  const pureGasValues = [];
   for (const row of sheet) {
     try {
-      await handleRow(row);
+      let gasValuesForRow;
+      if (row.cell !== "") {
+        gasValuesForRow = await handleRow(row);
+      } else {
+        gasValuesForRow = [];
+      }
+      if (!gasValuesForRow) {
+        gasValuesForRow = [];
+      }
+      // console.log({gasValuesForRow});
+      pureGasValues.push(gasValuesForRow);
     } catch (e) {
       console.error(e);
       console.log(JSON.stringify(row, null, "  "));
@@ -430,7 +446,8 @@ async function handleRow(row) {
     }
   }
 
-  write(sheetId, {values: gasValues, range: "O1:Q" + (gasValues.length + 1)});
+  // console.log("GAS_VALUES", JSON.stringify(pureGasValues, null, "  "));
+  write(sheetId, {values: pureGasValues, range: "O8:Q" + (pureGasValues.length + 8)});
   console.log("TOTAL");
   console.log({
     eth_gasUsed: total.eth_gasUsed.toNumber(),

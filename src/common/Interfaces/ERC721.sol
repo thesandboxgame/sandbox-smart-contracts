@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity 0.6.5;
 
 import "./ERC165.sol";
 import "./ERC721Events.sol";

@@ -215,4 +215,10 @@ describe("FeeDistributor:ERC20", function () {
     await fundContractWithSand(feeDistContract.address, sandContract, sandBeneficiary, amount);
     await testERC20FeeWithdrawal(recipients[0], percentages[0], amount, feeDistContract, sandContract);
   });
+  it("Duplicate recipient should fail", async function () {
+    let accounts = await getNamedAccounts();
+    let recipients = [accounts.others[0], accounts.others[1], accounts.others[0]];
+    let percentages = [1000, 1500, 7500];
+    await expectRevert(initContract(recipients, percentages));
+  });
 });
