@@ -9,10 +9,10 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   for (const key of Object.keys(deploymentData)) {
     let {percentages, recipients, name} = deploymentData[key];
     let feeDistributionRecipients = [];
-    for (const name of recipients) {
-      const recipient = namedAccounts[name];
+    for (const rName of recipients) {
+      const recipient = namedAccounts[rName];
       if (!recipient) {
-        const deployedContract = await deployments.get(name);
+        const deployedContract = await deployments.get(rName);
         feeDistributionRecipients.push(deployedContract.address);
       } else {
         feeDistributionRecipients.push(recipient);

@@ -10,18 +10,17 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 /// @notice Holds tokens collected from fees in a locked state for a certain period of time
 contract FeeTimeVault is Ownable {
     using SafeERC20 for IERC20;
-    event Sync(address token, uint256 amount, uint256 timestamp);
     mapping(uint256 => uint256) public accumulatedAmountPerDay;
     FeeDistributor public feeDistributor;
 
     /// @notice Updates the total amount of fees collected alongside with the due date
-    function sync() external {
+    function sync() external returns (uint256) {
         uint256 timestamp = now;
         uint256 day = ((timestamp - _startTime) / 1 days);
         uint256 amount = feeDistributor.withdraw(_sandToken, address(this));
         accumulatedAmountPerDay[day] = accumulatedAmountPerDay[_lastDaySaved].add(amount);
         _lastDaySaved = day;
-        emit Sync(address(_sandToken), amount, timestamp);
+        return amount;
     }
 
     /// @notice Enables fee holder to withdraw its share after lock period expired
