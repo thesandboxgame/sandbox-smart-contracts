@@ -1,17 +1,52 @@
 const {ethers, getNamedAccounts, deployments} = require("@nomiclabs/buidler");
-const {utils, BigNumber, Wallet} = require("ethers");
+// const {utils, BigNumber, Wallet} = require("ethers");
 const {assert, expect} = require("local-chai");
-const {expectRevert, waitFor} = require("local-utils");
+const {expectRevert, waitFor, emptyBytes} = require("local-utils");
 const {findEvents} = require("../../lib/findEvents.js");
 const {setupTest} = require("./fixtures");
+const {execute} = deployments;
 
-let signers;
-let userWithSand;
+// let signers;
+let assetAdmin;
+let assetBouncerAdmin;
 let others;
+let receipt;
+
+const dummyHash = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+const packId = 0;
+const supply = 11;
+const rarity = 3;
+
+async function supplyAssets(creator) {
+  await execute("Asset", {from: assetBouncerAdmin, skipUnknownSigner: true}, "setBouncer", assetAdmin, true);
+  // mint some assets to a user who can then create a GAME token
+  receipt = await waitFor(
+    execute(
+      "Asset",
+      {from: assetAdmin, skipUnknownSigner: true},
+      "mint",
+      creator.address,
+      packId,
+      dummyHash,
+      supply,
+      rarity,
+      creator.address,
+      emptyBytes
+    )
+  );
+  console.log(`Blockhash: ${receipt.blockHash}`);
+}
 
 describe("GameToken", function () {
   before(async function () {
-    ({others} = await getNamedAccounts());
+    ({assetAdmin, assetBouncerAdmin, others} = await getNamedAccounts());
+    const {userWithSAND} = await setupTest();
+    await supplyAssets(userWithSAND);
+    const asset = await ethers.getContract("Asset", assetAdmin);
+    const transferEvents = await findEvents(asset, "Transfer", receipt.blockHash);
+    console.log(`transferEvents: ${transferEvents.length}`);
+    const tokenId = transferEvents[0].args[2];
+    console.log(`Token ID: ${tokenId}`);
   });
   describe("GameToken: MetaData", function () {
     it("can get the ERC721 token contract name", async function () {
@@ -75,7 +110,7 @@ describe("GameToken", function () {
   });
 
   it("should revert if non-owner trys to set Game Editors", async function () {
-    const {gameToken, users} = await setupTest();
+    const {gameToken} = await setupTest();
     const editor = others[3];
     await expectRevert(gameToken.setGameEditor(42, editor, false), "EDITOR_ACCESS_DENIED");
   });
