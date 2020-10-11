@@ -29,8 +29,10 @@ contract GameToken is ERC721BaseToken {
         require(assetIds.length != 0, "INSUFFICIENT_ASSETS_SPECIFIED");
         // require msg.sender/"from" address owns or is approved for all assets
         uint256 gameId = _mintGame(to);
-        if (editors.length != 0) {
-            // add each address to mapping
+        // If no editors passed in, set Game owner as editor
+        if (editors.length == 0) {
+            _gameEditors[gameId][from] = true;
+        } else {
             for (uint256 i = 0; i < editors.length; i++) {
                 _gameEditors[gameId][editors[i]] = true;
             }
