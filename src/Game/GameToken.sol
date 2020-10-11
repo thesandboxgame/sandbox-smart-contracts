@@ -5,22 +5,22 @@ import "../BaseWithStorage/ERC721BaseToken.sol";
 
 contract GameToken is ERC721BaseToken {
     uint256 public _nextId;
+
     // mapping(uint256 => uint24[]) _assetsInGame;
-
-
+    // @review Admin functions needed?
 
     /**
      * @notice Function to create a new GAME token
      * @param from The address of the one creating the game (may be different from msg.sender if metaTx)
      * @param to The address who will be assigned ownerdhip of this game
      * @param assetIds The ids of the assets to add to this game
-     * @param gameEditors The addresses to allow to edit (Can also be set later)
+     * @param editors The addresses to allow to edit (Can also be set later)
      *  */
     function createGame(
         address from,
         address to,
-        uint256[] assetIds,
-        address[] editors
+        uint256[] memory assetIds,
+        address[] memory editors
     ) public {
         // anyone can "create" a GAME token by transfering assets to the Game contract.
         // @review Any restrictions?
@@ -32,7 +32,7 @@ contract GameToken is ERC721BaseToken {
         if (editors.length != 0) {
             // add each address to mapping
             for (uint256 i = 0; i < editors.length; i++) {
-                _gameEditors[gameId][editors[i]] = true
+                _gameEditors[gameId][editors[i]] = true;
             }
         }
     }
