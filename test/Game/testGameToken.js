@@ -74,9 +74,21 @@ describe("GameToken", function () {
     assert.notOk(isEditor2);
   });
 
-  it("should fail if non-owner trys to set Game Editors", async function () {
+  it("should revert if non-owner trys to set Game Editors", async function () {
     const {gameToken, users} = await setupTest();
     const editor = others[3];
     await expectRevert(gameToken.setGameEditor(42, editor, false), "EDITOR_ACCESS_DENIED");
+  });
+
+  describe("GameToken: Minting GAMEs", function () {
+    it("creator without Assets cannot mint Game", async function () {});
+    it("if _minter is address(0) anyone can mint Game", async function () {});
+    it("if _minter is set only _minter can mint Game", async function () {});
+  });
+  describe("GameToken: Modifying GAMEs", function () {
+    it("Owner can add single Asset", async function () {});
+    it("Editor can add single Asset", async function () {});
+    it("Owner can add multiple Assets", async function () {});
+    it("Editor can add multiple Assets", async function () {});
   });
 });
