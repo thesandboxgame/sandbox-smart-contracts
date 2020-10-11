@@ -1,16 +1,13 @@
 const {ethers, getNamedAccounts, deployments} = require("@nomiclabs/buidler");
-// const {utils, BigNumber, Wallet} = require("ethers");
 const {assert, expect} = require("local-chai");
 const {expectRevert, waitFor, emptyBytes} = require("local-utils");
 const {findEvents} = require("../../lib/findEvents.js");
 const {setupTest} = require("./fixtures");
 const {execute} = deployments;
 
-// let signers;
 let assetAdmin;
 let assetBouncerAdmin;
 let others;
-let receipt;
 
 const dummyHash = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 const packId = 0;
@@ -20,7 +17,7 @@ const rarity = 3;
 async function supplyAssets(creator) {
   await execute("Asset", {from: assetBouncerAdmin, skipUnknownSigner: true}, "setBouncer", assetAdmin, true);
   // mint some assets to a user who can then create a GAME token
-  receipt = await waitFor(
+  const receipt = await waitFor(
     execute(
       "Asset",
       {from: assetAdmin, skipUnknownSigner: true},
@@ -35,13 +32,14 @@ async function supplyAssets(creator) {
     )
   );
   console.log(`Blockhash: ${receipt.blockHash}`);
+  return receipt;
 }
 
 describe("GameToken", function () {
   before(async function () {
     ({assetAdmin, assetBouncerAdmin, others} = await getNamedAccounts());
     const {userWithSAND} = await setupTest();
-    await supplyAssets(userWithSAND);
+    const {receipt} = await supplyAssets(userWithSAND);
     const asset = await ethers.getContract("Asset", assetAdmin);
     const transferEvents = await findEvents(asset, "Transfer", receipt.blockHash);
     console.log(`transferEvents: ${transferEvents.length}`);
