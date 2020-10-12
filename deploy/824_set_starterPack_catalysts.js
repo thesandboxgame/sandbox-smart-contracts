@@ -7,12 +7,11 @@ module.exports = async ({deployments, getNamedAccounts}) => {
 
   await execute(
     "Catalyst",
-    {from: catalystMinter},
+    {from: catalystMinter, skipUnknownSigner: true},
     "batchMint",
     starterPack.address,
     starterPackCatalysts.ids,
     starterPackCatalysts.quantities
   );
 };
-// TODO reenable
-// module.exports.skip = () => true;
+module.exports.skip = () => true;

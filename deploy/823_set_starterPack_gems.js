@@ -7,12 +7,11 @@ module.exports = async ({deployments, getNamedAccounts}) => {
 
   await execute(
     "Gem",
-    {from: gemMinter},
+    {from: gemMinter, skipUnknownSigner: true},
     "batchMint",
     starterPack.address,
     starterPackGems.ids,
     starterPackGems.quantities
   );
 };
-// TODO reenable
-// module.exports.skip = () => true;
+module.exports.skip = () => true;
