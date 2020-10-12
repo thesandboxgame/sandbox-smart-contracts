@@ -2,6 +2,7 @@ pragma solidity 0.6.5;
 
 import "../LiquidityMining/LandWeightedSANDRewardPool.sol";
 
+
 contract LandWeightedSANDRewardPoolNFTTest is LandWeightedSANDRewardPool {
     constructor(
         address stakeTokenContract,

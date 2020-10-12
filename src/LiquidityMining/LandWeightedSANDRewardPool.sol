@@ -7,6 +7,7 @@ import "./IRewardDistributionRecipient.sol";
 import "../common/Interfaces/ERC721.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 
+
 contract LPTokenWrapper {
     using SafeMathWithRequire for uint256;
     using SafeERC20 for IERC20;
@@ -42,6 +43,7 @@ contract LPTokenWrapper {
         _stakeToken.safeTransfer(msg.sender, amount);
     }
 }
+
 
 contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
     using SafeMathWithRequire for uint256;
