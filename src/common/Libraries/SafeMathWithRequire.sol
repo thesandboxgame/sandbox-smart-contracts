@@ -1,6 +1,5 @@
 pragma solidity 0.6.5;
 
-
 /**
  * @title SafeMath
  * @dev Math operations with safety checks that revert
@@ -76,6 +75,7 @@ library SafeMathWithRequire {
             require(tmpSquare > tmp, "overflow");
             tmp = ((a / tmpSquare) + (tmp * 2)) / 3;
         }
+        return c;
     }
 
     // TODO test
