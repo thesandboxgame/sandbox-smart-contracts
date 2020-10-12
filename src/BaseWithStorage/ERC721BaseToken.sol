@@ -8,7 +8,6 @@ import "../common/BaseWithStorage/SuperOperators.sol";
 import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../common/Interfaces/ERC721MandatoryTokenReceiver.sol";
 
-
 contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver {
     using AddressUtils for address;
 
@@ -18,10 +17,10 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
     bytes4 internal constant ERC165ID = 0x01ffc9a7;
     bytes4 internal constant ERC721_MANDATORY_RECEIVER = 0x5e8bf644;
 
-    mapping(address => uint256) public _numNFTPerAddress;
-    mapping(uint256 => uint256) public _owners;
-    mapping(address => mapping(address => bool)) public _operatorsForAll;
-    mapping(uint256 => address) public _operators;
+    mapping(address => uint256) internal _numNFTPerAddress;
+    mapping(uint256 => uint256) internal _owners;
+    mapping(address => mapping(address => bool)) internal _operatorsForAll;
+    mapping(uint256 => address) internal _operators;
 
     constructor(address metaTransactionContract, address admin) internal {
         _admin = admin;
