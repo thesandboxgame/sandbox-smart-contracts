@@ -8,6 +8,7 @@ import "../common/BaseWithStorage/SuperOperators.sol";
 import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../common/Interfaces/ERC721MandatoryTokenReceiver.sol";
 
+
 contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceiver {
     using AddressUtils for address;
 
