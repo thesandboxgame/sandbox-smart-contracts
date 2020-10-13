@@ -7,6 +7,7 @@ contract LandWeightedSANDRewardPoolNFTTest is LandWeightedSANDRewardPool {
     constructor(
         address stakeTokenContract,
         address rewardTokenContract,
-        address nftContract
-    ) public LandWeightedSANDRewardPool(IERC20(stakeTokenContract), IERC20(rewardTokenContract), ERC721(nftContract)) {}
+        address nftContract,
+        uint256 rewardDuration
+    ) public LandWeightedSANDRewardPool(IERC20(stakeTokenContract), IERC20(rewardTokenContract), ERC721(nftContract), rewardDuration) {}
 }

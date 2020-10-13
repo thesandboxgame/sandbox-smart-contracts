@@ -65,7 +65,7 @@ const MIDPOINT_9 = BigNumber.from("500000000");
 const NFT_FACTOR_6 = BigNumber.from("10000");
 const NFT_CONSTANT_3 = BigNumber.from("9000");
 const ROOT3_FACTOR = BigNumber.from(697);
-const DECIMAL_9 = BigNumber.from("1000000000");
+const DECIMALS_9 = BigNumber.from("1000000000");
 
 function contribution(amountStaked, numLands) {
   amountStaked = BigNumber.from(amountStaked);
@@ -77,7 +77,7 @@ function contribution(amountStaked, numLands) {
   if (nftContrib.gt(MIDPOINT_9)) {
     nftContrib = MIDPOINT_9.add(nftContrib.sub(MIDPOINT_9).div(10));
   }
-  return amountStaked.add(amountStaked.mul(nftContrib).div(DECIMAL_9));
+  return amountStaked.add(amountStaked.mul(nftContrib).div(DECIMALS_9));
 }
 
 const valuesToTests = [
