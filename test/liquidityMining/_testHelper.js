@@ -1,21 +1,20 @@
 const {BigNumber} = require("ethers");
-const {cubeRoot6} = require("local-utils");
-const NFT_FACTOR_6 = BigNumber.from(1).mul("100000");
-const NFT_CONSTANT_6 = BigNumber.from(9).mul("1000000");
-const DECIMAL_12 = BigNumber.from(1).mul("1000000000000");
 const SOL_PRECISION = BigNumber.from(1).mul("1000000000000000000000000000000");
 
 // LandWeightedSANDRewardPool.sol helper functions
 
-// To calculate user's contribution when staking
-module.exports.replicateContribution = (stakeAmount, numLands) => {
-  if (numLands === 0) {
-    return stakeAmount;
-  }
-  const landFactor = cubeRoot6(BigNumber.from(numLands)).add(NFT_CONSTANT_6).mul(NFT_FACTOR_6);
-  const additionalContributionForLands = stakeAmount.mul(landFactor).div(DECIMAL_12);
-  return stakeAmount.add(additionalContributionForLands);
-};
+// STEPS
+// 1 -  Admin initiate by calling notifyRewardAmount:
+// a) updateReward is called: rewardPerTokenStored is 0. lastUpdateTime is not set.
+// b) rewardRate is set.
+// c) lastUpdateTime is set to start time.
+// 2 - User stakes:
+// a) updateReward is called: rewardPerTokenStored is still 0 because contributions are stll 0
+// b) lastUpdateTime is NOT updated because contributions are stll 0
+// c) User rewards are updated (but they are 0)
+// d) amount is staked and contribution is calculated
+// 3 - User earns: contribution x 0.add(time since start.mul(rewardRate).mul(1e30).div(contribution)).div(1e30)
+
 
 // To calculate latest reward per token stored
 // uint256 remainingTime = periodFinish.sub(block.timestamp); // initially 0

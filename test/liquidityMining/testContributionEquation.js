@@ -188,3 +188,5 @@ describe("LandWeightedSANDRewardPool computation", function () {
     }
   });
 });
+
+module.exports.contribution = contribution;
