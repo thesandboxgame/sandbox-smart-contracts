@@ -181,7 +181,6 @@ describe("ActualSANDRewardPool", function () {
     const receipt = await rewardPoolAsUser.stake(STAKE_AMOUNT).then((tx) => tx.wait());
     const stakeBlock = await ethers.provider.getBlock(receipt.blockNumber);
     const stakeTimestamp = stakeBlock.timestamp;
-    console.log(stakeTimestamp);
 
     // user earnings immediately after staking
     const earnedAfterStake = await rewardPoolAsUser.earned(others[0]);
@@ -215,8 +214,7 @@ describe("ActualSANDRewardPool", function () {
     );
     const expectedReward = replicateEarned(contribution(STAKE_AMOUNT, numNfts), expectedRewardPerToken);
     expect(ACTUAL_REWARD_AMOUNT).to.equal(expectedReward);
-    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(expectedReward);
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(precisionLost));
+    expect(earned).to.equal(expectedReward);
   });
 
   it("User with 1 LAND earns correct reward amount", async function () {
@@ -229,7 +227,6 @@ describe("ActualSANDRewardPool", function () {
     const receipt = await rewardPoolAsUser.stake(STAKE_AMOUNT).then((tx) => tx.wait());
     const stakeBlock = await ethers.provider.getBlock(receipt.blockNumber);
     const stakeTimestamp = stakeBlock.timestamp;
-    console.log(stakeTimestamp);
 
     // user earnings immediately after staking
     const earnedAfterStake = await rewardPoolAsUser.earned(others[0]);
@@ -264,6 +261,9 @@ describe("ActualSANDRewardPool", function () {
     const expectedReward = replicateEarned(contribution(STAKE_AMOUNT, numNfts), expectedRewardPerToken);
     const precisionLost = ACTUAL_REWARD_AMOUNT.sub(expectedReward);
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(precisionLost));
+    expect(ACTUAL_REWARD_AMOUNT).not.to.equal(expectedReward);
+    expect(earned).to.equal(expectedReward);
+    expect(precisionLost.toString()).to.equal("1");
   });
 
   it("User with 3 LANDs earns correct reward amount", async function () {
@@ -278,7 +278,6 @@ describe("ActualSANDRewardPool", function () {
     const receipt = await rewardPoolAsUser.stake(STAKE_AMOUNT).then((tx) => tx.wait());
     const stakeBlock = await ethers.provider.getBlock(receipt.blockNumber);
     const stakeTimestamp = stakeBlock.timestamp;
-    console.log(stakeTimestamp);
 
     // user earnings immediately after staking
     const earnedAfterStake = await rewardPoolAsUser.earned(others[0]);
@@ -312,7 +311,9 @@ describe("ActualSANDRewardPool", function () {
     );
     const expectedReward = replicateEarned(contribution(STAKE_AMOUNT, numNfts), expectedRewardPerToken);
     const precisionLost = ACTUAL_REWARD_AMOUNT.sub(expectedReward);
+    expect(ACTUAL_REWARD_AMOUNT).not.to.equal(expectedReward);
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(precisionLost));
+    expect(precisionLost.toString()).to.equal("1");
   });
 
   it("User with 10 LANDs earns correct reward amount", async function () {
@@ -327,7 +328,6 @@ describe("ActualSANDRewardPool", function () {
     const receipt = await rewardPoolAsUser.stake(STAKE_AMOUNT).then((tx) => tx.wait());
     const stakeBlock = await ethers.provider.getBlock(receipt.blockNumber);
     const stakeTimestamp = stakeBlock.timestamp;
-    console.log(stakeTimestamp);
 
     // user earnings immediately after staking
     const earnedAfterStake = await rewardPoolAsUser.earned(others[0]);
@@ -361,7 +361,9 @@ describe("ActualSANDRewardPool", function () {
     );
     const expectedReward = replicateEarned(contribution(STAKE_AMOUNT, numNfts), expectedRewardPerToken);
     const precisionLost = ACTUAL_REWARD_AMOUNT.sub(expectedReward);
+    expect(ACTUAL_REWARD_AMOUNT).not.to.equal(expectedReward);
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(precisionLost));
+    expect(precisionLost.toString()).to.equal("1");
   });
 
   // TODO:
