@@ -50,7 +50,7 @@ contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipi
 
     uint256 public constant DURATION = 30 days; // Reward period
     uint256 constant DECIMAL_18 = 1000000000000000000;
-    uint256 constant DECIMAL_12 = 1000000000000;
+    uint256 constant DECIMAL_9 = 1000000000;
 
     uint256 public periodFinish = 0;
     uint256 public rewardRate = 0;
@@ -62,9 +62,9 @@ contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipi
     uint256 internal _totalContributions;
     mapping(address => uint256) internal _contributions;
 
-    uint256 internal constant MIDPOINT_12 = 500000000000;
+    uint256 internal constant MIDPOINT_9 = 500000000;
     uint256 internal constant NFT_FACTOR_6 = 10000;
-    uint256 internal constant NFT_CONSTANT_6 = 9000000;
+    uint256 internal constant NFT_CONSTANT_3 = 9000;
     uint256 internal constant ROOT3_FACTOR = 697;
     IERC20 internal immutable _rewardToken;
     ERC721 internal immutable _multiplierNFToken;
@@ -124,11 +124,11 @@ contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipi
         if (numLands == 0) {
             return amountStaked;
         }
-        uint256 nftContrib = NFT_FACTOR_6.mul(NFT_CONSTANT_6.add(numLands.sub(1).mul(ROOT3_FACTOR).add(1).cbrt6()));
-        if (nftContrib > MIDPOINT_12) {
-            nftContrib = MIDPOINT_12.add(nftContrib.sub(MIDPOINT_12).div(10));
+        uint256 nftContrib = NFT_FACTOR_6.mul(NFT_CONSTANT_3.add(numLands.sub(1).mul(ROOT3_FACTOR).add(1).cbrt3()));
+        if (nftContrib > MIDPOINT_9) {
+            nftContrib = MIDPOINT_9.add(nftContrib.sub(MIDPOINT_9).div(10));
         }
-        return amountStaked.add(amountStaked.mul(nftContrib).div(DECIMAL_12));
+        return amountStaked.add(amountStaked.mul(nftContrib).div(DECIMAL_9));
     }
 
     function stake(uint256 amount) public override updateReward(msg.sender) {
