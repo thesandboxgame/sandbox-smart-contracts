@@ -151,6 +151,17 @@ contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipi
             );
     }
 
+    function computeContribution4(uint256 amountStaked, uint256 numLands) public view returns (uint256) {
+        if (numLands == 0) {
+            return amountStaked;
+        }
+        if (numLands > 100) {
+            return computeContribution2(amountStaked, 100).add((numLands - 100).mul(amountStaked).mul(1000).div(10000));
+        } else {
+            return computeContribution2(amountStaked, numLands);
+        }
+    }
+
     function stake(uint256 amount) public override updateReward(msg.sender) {
         require(amount > 0, "Cannot stake 0");
         super.stake(amount);

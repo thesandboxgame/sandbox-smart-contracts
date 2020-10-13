@@ -2,7 +2,10 @@ const {expect} = require("chai");
 const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
 const {BigNumber} = require("ethers");
 
+let loopCounter = 0;
+
 function cbrt6(a) {
+  loopCounter = 0;
   a = BigNumber.from(a);
   a = a.mul("1000000000000000000");
   let tmp = a.add(2).div(3);
@@ -11,11 +14,13 @@ function cbrt6(a) {
     c = BigNumber.from(tmp);
     const tmpSquare = tmp.pow(2);
     tmp = a.div(tmpSquare).add(tmp.mul(2)).div(3);
+    loopCounter++;
   }
   return c;
 }
 
 function rt6_3(a) {
+  loopCounter = 0;
   a = BigNumber.from(a);
   a = a.mul("1000000000000000000");
   let tmp = a.add(5).div(6);
@@ -24,6 +29,7 @@ function rt6_3(a) {
     c = BigNumber.from(tmp);
     const tmpFive = tmp.pow(5);
     tmp = a.div(tmpFive).add(tmp.mul(5)).div(6);
+    loopCounter++;
   }
   return c;
 }
@@ -114,6 +120,10 @@ const valuesToTests = [
     amountStaked: 1000,
     numLands: 10000,
   },
+  {
+    amountStaked: "1000000000000000000000000",
+    numLands: 10000,
+  },
 ];
 
 describe("SafeMathWithRequire", function () {
@@ -128,6 +138,9 @@ describe("SafeMathWithRequire", function () {
     expect(cbrt6(50)).to.equal(3684031);
     expect(cbrt6(100)).to.equal(4641588);
     expect(cbrt6(1000)).to.equal(10000000);
+
+    expect(cbrt6("1000000000000000000000000000")).to.equal("1000000000000000");
+    console.log({loopCounter});
   });
 
   it("rt6_3", async function () {
@@ -141,6 +154,9 @@ describe("SafeMathWithRequire", function () {
     expect(rt6_3(50)).to.equal(1919);
     expect(rt6_3(100)).to.equal(2154);
     expect(rt6_3(1000)).to.equal(3162);
+
+    expect(rt6_3("1000000000000000000000000000")).to.equal(31622776);
+    console.log({loopCounter});
   });
 });
 
