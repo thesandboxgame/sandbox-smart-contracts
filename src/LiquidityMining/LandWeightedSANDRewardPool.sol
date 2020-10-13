@@ -50,7 +50,7 @@ contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipi
 
     uint256 public constant DURATION = 30 days; // Reward period
     uint256 constant DECIMAL_18 = 1000000000000000000;
-    uint256 constant DECIMAL_12 = 1000000000000;
+    uint256 constant DECIMAL_9 = 1000000000;
 
     uint256 public periodFinish = 0;
     uint256 public rewardRate = 0;
@@ -62,9 +62,9 @@ contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipi
     uint256 internal _totalContributions;
     mapping(address => uint256) internal _contributions;
 
-    uint256 internal immutable NFT_FACTOR_6;
-    uint256 internal immutable NFT_CONSTANT_6;
-    uint256 internal constant ROOT6_FACTOR = 48000000;
+    uint256 internal constant MIDPOINT_9 = 500000000;
+    uint256 internal constant NFT_FACTOR_6 = 10000;
+    uint256 internal constant NFT_CONSTANT_3 = 9000;
     uint256 internal constant ROOT3_FACTOR = 697;
     IERC20 internal immutable _rewardToken;
     ERC721 internal immutable _multiplierNFToken;
@@ -77,14 +77,10 @@ contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipi
     constructor(
         IERC20 stakeToken,
         IERC20 rewardToken,
-        ERC721 multiplierNFToken,
-        uint256 nftFactor6,
-        uint256 nftConstant6
+        ERC721 multiplierNFToken
     ) public LPTokenWrapper(stakeToken) {
         _rewardToken = rewardToken;
         _multiplierNFToken = multiplierNFToken;
-        NFT_FACTOR_6 = nftFactor6;
-        NFT_CONSTANT_6 = nftConstant6;
     }
 
     function totalContributions() public view returns (uint256) {
@@ -124,37 +120,21 @@ contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipi
         return contributionOf(account).mul(rewardPerToken().sub(userRewardPerTokenPaid[account])).div(1e30).add(rewards[account]);
     }
 
-    function computeContribution1(uint256 amountStaked, uint256 numLands) public view returns (uint256) {
+    function computeContribution(uint256 amountStaked, uint256 numLands) public pure returns (uint256) {
         if (numLands == 0) {
             return amountStaked;
         }
-        return amountStaked.add(amountStaked.mul(NFT_FACTOR_6).mul(NFT_CONSTANT_6.add(numLands.cbrt6())).div(DECIMAL_12));
-    }
-
-    function computeContribution2(uint256 amountStaked, uint256 numLands) public view returns (uint256) {
-        if (numLands == 0) {
-            return amountStaked;
+        uint256 nftContrib = NFT_FACTOR_6.mul(NFT_CONSTANT_3.add(numLands.sub(1).mul(ROOT3_FACTOR).add(1).cbrt3()));
+        if (nftContrib > MIDPOINT_9) {
+            nftContrib = MIDPOINT_9.add(nftContrib.sub(MIDPOINT_9).div(10));
         }
-        return
-            amountStaked.add(
-                amountStaked.mul(NFT_FACTOR_6).mul(NFT_CONSTANT_6.add(numLands.sub(1).mul(ROOT3_FACTOR).add(1).cbrt6())).div(DECIMAL_12)
-            );
-    }
-
-    function computeContribution3(uint256 amountStaked, uint256 numLands) public view returns (uint256) {
-        if (numLands == 0) {
-            return amountStaked;
-        }
-        return
-            amountStaked.add(
-                amountStaked.mul(NFT_FACTOR_6).mul(NFT_CONSTANT_6.add(numLands.sub(1).mul(ROOT6_FACTOR).add(1).rt6_3().mul(1000))).div(DECIMAL_12)
-            );
+        return amountStaked.add(amountStaked.mul(nftContrib).div(DECIMAL_9));
     }
 
     function stake(uint256 amount) public override updateReward(msg.sender) {
         require(amount > 0, "Cannot stake 0");
         super.stake(amount);
-        uint256 contribution = computeContribution3(amount, _multiplierNFToken.balanceOf(msg.sender));
+        uint256 contribution = computeContribution(amount, _multiplierNFToken.balanceOf(msg.sender));
         _totalContributions = _totalContributions.add(contribution);
         _contributions[msg.sender] = _contributions[msg.sender].add(contribution);
         emit Staked(msg.sender, amount);
