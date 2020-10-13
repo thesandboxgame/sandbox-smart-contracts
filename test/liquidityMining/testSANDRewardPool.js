@@ -2,6 +2,8 @@ const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
 const {BigNumber} = require("@ethersproject/bignumber");
 const {expect} = require("local-chai");
 const {mine} = require("local-utils");
+const {replicateContribution, replicateEarned, replicateRewardPerToken} = require("./_testHelper");
+// const {startBlock} = require("../../deploy/098_set_land_weighted_reward_pool");
 
 const STAKE_TOKEN = "UNI_SAND_ETH";
 const REWARD_TOKEN = "Sand";
@@ -108,12 +110,14 @@ describe("ActualSANDRewardPool", function () {
     await rewardPoolAsUser.stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
+    const userContribution = await rewardPool.contributionOf(others[0]);
     const latestBlock = await ethers.provider.getBlock("latest");
     const currentTimestamp = latestBlock.timestamp;
     await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
     await mine();
     const earned = await rewardPoolAsUser.earned(others[0]);
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+    expect(userContribution).to.equal(replicateContribution(STAKE_AMOUNT, 0));
   });
 
   it("admin can notifyRewardAmount and start a new reward process (without sending more reward tokens)", async function () {
@@ -176,27 +180,64 @@ describe("ActualSANDRewardPool", function () {
     const landCount = await multiplierNFToken.balanceOf(others[0]);
     expect(landCount).to.equal(1);
     await rewardPoolAsUser.stake(STAKE_AMOUNT);
+    const userContribution = await rewardPool.contributionOf(others[0]);
     const latestBlock = await ethers.provider.getBlock("latest");
     const currentTimestamp = latestBlock.timestamp;
     await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
     await mine();
     const earned = await rewardPoolAsUser.earned(others[0]);
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+    expect(userContribution).to.equal(replicateContribution(STAKE_AMOUNT, 1));
   });
 
   it("User with 3 LANDs earns correct reward amount", async function () {
     await createFixture();
+    console.log('time', startBlock);
+    const startTimestamp = startBlock;
+    // const finishTimestamp = startTimestamp + REWARD_DURATION;
     for (let i = 0; i < 3; i++) {
       await mintLandQuad(others[0]);
     }
     const landCount = await multiplierNFToken.balanceOf(others[0]);
     expect(landCount).to.equal(3);
-    await rewardPoolAsUser.stake(STAKE_AMOUNT);
-    const latestBlock = await ethers.provider.getBlock("latest");
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+    const receipt = await rewardPoolAsUser.stake(STAKE_AMOUNT).then(tx => tx.wait());
+    const stakeBlock = await ethers.provider.getBlock(receipt.blockNumber);
+    const stakeTimestamp = stakeBlock.timestamp;
+    const earnedAfterStake = await rewardPoolAsUser.earned(others[0]);
+    const userContribution = await rewardPool.contributionOf(others[0]);
+    // const latestBlock = await ethers.provider.getBlock("latest");
+    // const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [stakeTimestamp + REWARD_DURATION]);
     await mine();
     const earned = await rewardPoolAsUser.earned(others[0]);
+    expect(userContribution).to.equal(replicateContribution(STAKE_AMOUNT, 3));
+    const rewardRate = REWARD_AMOUNT.div(REWARD_DURATION);
+
+    // STEPS
+    // 1 -  Admin initiate by calling notifyRewardAmount:
+    // a) updateReward is called: rewardPerTokenStored is 0. lastUpdateTime is not set.
+    // b) rewardRate is set.
+    // c) lastUpdateTime is set to start time.
+    // 2 - User stakes:
+    // a) updateReward is called: rewardPerTokenStored is still 0 because contributions are stll 0
+    // b) lastUpdateTime is NOT updated because contributions are stll 0
+    // c) User rewards are updated (but they are 0)
+    // d) amount is staked and contribution is calculated
+    // 3 - User earns: contribution x 0.add(time since start.mul(rewardRate).mul(1e30).div(contribution)).div(1e30)
+
+    const expectedRewardPerToken = replicateRewardPerToken(
+      // TODO: review steps and rewardRate
+      BigNumber.from(0),
+      BigNumber.from(stakeTimestamp),
+      BigNumber.from(startTimestamp),
+      rewardRate,
+      replicateContribution(STAKE_AMOUNT, 3)
+    );
+    const expectedReward = replicateEarned(replicateContribution(STAKE_AMOUNT, 3), expectedRewardPerToken);
+    expect(expectedReward).to.equal(earnedAfterStake);
+    // TODO: fix calc to understand impact on precision
+    // 2314814814814814811 last output
+    // 43402777777777777724 expected
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT); // AssertionError: Expected "1499999999999999998175999" to be equal "1499999999999999998176000"
   });
 
