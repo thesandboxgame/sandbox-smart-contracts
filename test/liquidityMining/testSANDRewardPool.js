@@ -228,6 +228,7 @@ describe("ActualSANDRewardPool", function () {
     );
     const expectedReward = replicateEarned(replicateContribution(STAKE_AMOUNT, 3), expectedRewardPerToken);
     expect(expectedReward).to.equal(earnedAfterStake);
+    // TODO: tests with ranges
     // 43981481481481481427 last output
     // 43402777777777777724 expected
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT); // AssertionError: Expected "1499999999999999998175999" to be equal "1499999999999999998176000"
