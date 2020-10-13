@@ -76,6 +76,7 @@ library SafeMathWithRequire {
             require(tmpSquare > tmp, "overflow");
             tmp = ((a / tmpSquare) + (tmp * 2)) / 3;
         }
+        return c;
     }
 
     // TODO test

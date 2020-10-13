@@ -11,8 +11,4 @@ contract LandWeightedSANDRewardPoolNFTTest is LandWeightedSANDRewardPool {
         uint256 nftFactor6,
         uint256 nftConstant6
     ) public LandWeightedSANDRewardPool(IERC20(stakeTokenContract), IERC20(rewardTokenContract), ERC721(nftContract), nftFactor6, nftConstant6) {}
-
-    function testComputeContribution(uint256 amountStaked, uint256 numLands) external view returns (uint256) {
-        return computeContribution(amountStaked, numLands);
-    }
 }
