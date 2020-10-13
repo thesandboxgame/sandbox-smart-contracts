@@ -196,7 +196,7 @@ describe("ActualSANDRewardPool", function () {
     }
     const landCount = await multiplierNFToken.balanceOf(others[0]);
     expect(landCount).to.equal(3);
-    const receipt = await rewardPoolAsUser.stake(STAKE_AMOUNT).then(tx => tx.wait());
+    const receipt = await rewardPoolAsUser.stake(STAKE_AMOUNT).then((tx) => tx.wait());
     const stakeBlock = await ethers.provider.getBlock(receipt.blockNumber);
     const stakeTimestamp = stakeBlock.timestamp;
     const earnedAfterStake = await rewardPoolAsUser.earned(others[0]);
