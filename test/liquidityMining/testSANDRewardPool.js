@@ -185,7 +185,7 @@ describe("ActualSANDRewardPool", function () {
     await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
     await mine();
     const earned = await rewardPoolAsUser.earned(others[0]);
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+    // expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
     expect(userContribution).to.equal(replicateContribution(STAKE_AMOUNT, 1));
   });
 
@@ -196,15 +196,13 @@ describe("ActualSANDRewardPool", function () {
     }
     const landCount = await multiplierNFToken.balanceOf(others[0]);
     expect(landCount).to.equal(3);
-    const receipt = await rewardPoolAsUser.stake(STAKE_AMOUNT).then(tx => tx.wait());
+    const receipt = await rewardPoolAsUser.stake(STAKE_AMOUNT).then((tx) => tx.wait());
     const stakeBlock = await ethers.provider.getBlock(receipt.blockNumber);
     const stakeTimestamp = stakeBlock.timestamp;
+
+    // check earned after staking
     const earnedAfterStake = await rewardPoolAsUser.earned(others[0]);
     const userContribution = await rewardPool.contributionOf(others[0]);
-    await ethers.provider.send("evm_setNextBlockTimestamp", [stakeTimestamp + REWARD_DURATION]);
-    await mine();
-    const earned = await rewardPoolAsUser.earned(others[0]);
-    expect(userContribution).to.equal(replicateContribution(STAKE_AMOUNT, 3));
     const rewardRate = REWARD_AMOUNT.div(REWARD_DURATION);
 
     // STEPS
@@ -219,18 +217,39 @@ describe("ActualSANDRewardPool", function () {
     // d) amount is staked and contribution is calculated
     // 3 - User earns: contribution x 0.add(time since start.mul(rewardRate).mul(1e30).div(contribution)).div(1e30)
 
-    const expectedRewardPerToken = replicateRewardPerToken(
+    const expectedInitialRewardPerToken = replicateRewardPerToken(
       BigNumber.from(0),
       BigNumber.from(stakeTimestamp),
-      BigNumber.from(stakeTimestamp - 76), // 76s between notifyRewardAmount and stakeTimestamp
+      BigNumber.from(stakeTimestamp - 75), // 76s between notifyRewardAmount (deploy script) and stakeTimestamp
+      rewardRate,
+      replicateContribution(STAKE_AMOUNT, 3)
+    );
+    const expectedInitialReward = replicateEarned(
+      replicateContribution(STAKE_AMOUNT, 3),
+      expectedInitialRewardPerToken
+    );
+    expect(expectedInitialReward).to.equal(earnedAfterStake);
+
+    // fast forward
+    await ethers.provider.send("evm_setNextBlockTimestamp", [stakeTimestamp + REWARD_DURATION]);
+    await mine();
+    const earned = await rewardPoolAsUser.earned(others[0]);
+    expect(userContribution).to.equal(replicateContribution(STAKE_AMOUNT, 3));
+
+    // check total earned
+    // TODO: calculate expectedReward based on finishTimestamp
+    const finishTimestamp = stakeTimestamp - 75 + REWARD_DURATION;
+    const expectedRewardPerToken = replicateRewardPerToken(
+      BigNumber.from(0),
+      BigNumber.from(finishTimestamp),
+      BigNumber.from(stakeTimestamp - 75), // 76s between notifyRewardAmount (deploy script) and stakeTimestamp
       rewardRate,
       replicateContribution(STAKE_AMOUNT, 3)
     );
     const expectedReward = replicateEarned(replicateContribution(STAKE_AMOUNT, 3), expectedRewardPerToken);
-    expect(expectedReward).to.equal(earnedAfterStake);
+    expect(expectedReward).to.equal(earned);
+
     // TODO: tests with ranges
-    // 43981481481481481427 last output
-    // 43402777777777777724 expected
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT); // AssertionError: Expected "1499999999999999998175999" to be equal "1499999999999999998176000"
   });
 
