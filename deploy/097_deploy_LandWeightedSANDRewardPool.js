@@ -7,10 +7,11 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   const land = await deployments.get("Land");
   const sand = await deployments.get("Sand");
 
+  const durationInSeconds = 30 * 24 * 60 * 60;
   await deploy("LandWeightedSANDRewardPool", {
     from: deployer,
     log: true,
-    args: [stakeToken.address, sand.address, land.address],
+    args: [stakeToken.address, sand.address, land.address, durationInSeconds],
   });
 };
 module.exports.skip = guard(["1", "4", "314159"], "LandWeightedSANDRewardPool");

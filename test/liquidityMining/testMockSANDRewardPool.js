@@ -50,7 +50,7 @@ describe("MockSANDRewardPool", function () {
     stakeToken = await ethers.getContract(STAKE_TOKEN);
     await deployments.deploy(POOL, {
       from: deployer,
-      args: [stakeToken.address, rewardToken.address, multiplierNFToken.address],
+      args: [stakeToken.address, rewardToken.address, multiplierNFToken.address, 2592000],
     });
     rewardPool = await ethers.getContract(POOL);
 
