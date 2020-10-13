@@ -3,7 +3,6 @@ const {BigNumber} = require("@ethersproject/bignumber");
 const {expect} = require("local-chai");
 const {mine} = require("local-utils");
 const {replicateContribution, replicateEarned, replicateRewardPerToken} = require("./_testHelper");
-// const {startBlock} = require("../../deploy/098_set_land_weighted_reward_pool");
 
 const STAKE_TOKEN = "UNI_SAND_ETH";
 const REWARD_TOKEN = "Sand";
@@ -192,9 +191,6 @@ describe("ActualSANDRewardPool", function () {
 
   it("User with 3 LANDs earns correct reward amount", async function () {
     await createFixture();
-    console.log('time', startBlock);
-    const startTimestamp = startBlock;
-    // const finishTimestamp = startTimestamp + REWARD_DURATION;
     for (let i = 0; i < 3; i++) {
       await mintLandQuad(others[0]);
     }
@@ -205,8 +201,6 @@ describe("ActualSANDRewardPool", function () {
     const stakeTimestamp = stakeBlock.timestamp;
     const earnedAfterStake = await rewardPoolAsUser.earned(others[0]);
     const userContribution = await rewardPool.contributionOf(others[0]);
-    // const latestBlock = await ethers.provider.getBlock("latest");
-    // const currentTimestamp = latestBlock.timestamp;
     await ethers.provider.send("evm_setNextBlockTimestamp", [stakeTimestamp + REWARD_DURATION]);
     await mine();
     const earned = await rewardPoolAsUser.earned(others[0]);
@@ -226,17 +220,15 @@ describe("ActualSANDRewardPool", function () {
     // 3 - User earns: contribution x 0.add(time since start.mul(rewardRate).mul(1e30).div(contribution)).div(1e30)
 
     const expectedRewardPerToken = replicateRewardPerToken(
-      // TODO: review steps and rewardRate
       BigNumber.from(0),
       BigNumber.from(stakeTimestamp),
-      BigNumber.from(startTimestamp),
+      BigNumber.from(stakeTimestamp - 76), // 76s between notifyRewardAmount and stakeTimestamp
       rewardRate,
       replicateContribution(STAKE_AMOUNT, 3)
     );
     const expectedReward = replicateEarned(replicateContribution(STAKE_AMOUNT, 3), expectedRewardPerToken);
     expect(expectedReward).to.equal(earnedAfterStake);
-    // TODO: fix calc to understand impact on precision
-    // 2314814814814814811 last output
+    // 43981481481481481427 last output
     // 43402777777777777724 expected
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT); // AssertionError: Expected "1499999999999999998175999" to be equal "1499999999999999998176000"
   });
