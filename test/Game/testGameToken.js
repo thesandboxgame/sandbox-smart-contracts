@@ -1,6 +1,6 @@
 const {ethers, getNamedAccounts, deployments} = require("@nomiclabs/buidler");
 const {assert, expect} = require("local-chai");
-const {expectRevert, waitFor, emptyBytes} = require("local-utils");
+const {expectRevert, waitFor, emptyBytes, zeroAddress} = require("local-utils");
 const {findEvents} = require("../../lib/findEvents.js");
 const {setupTest} = require("./fixtures");
 const {execute} = deployments;
@@ -17,22 +17,20 @@ const rarity = 3;
 async function supplyAssets(creator) {
   await execute("Asset", {from: assetBouncerAdmin, skipUnknownSigner: true}, "setBouncer", assetAdmin, true);
   // mint some assets to a user who can then create a GAME token
-  const receipt = await waitFor(
-    execute(
-      "Asset",
-      {from: assetAdmin, skipUnknownSigner: true},
-      "mint",
-      creator.address,
-      packId,
-      dummyHash,
-      supply,
-      rarity,
-      creator.address,
-      emptyBytes
-    )
+  const receipt = await execute(
+    "Asset",
+    {from: assetAdmin, skipUnknownSigner: true},
+    "mint",
+    creator.address,
+    packId,
+    dummyHash,
+    supply,
+    rarity,
+    creator.address,
+    emptyBytes
   );
   console.log(`Blockhash: ${receipt.blockHash}`);
-  return receipt;
+  return {receipt};
 }
 
 describe("GameToken", function () {
@@ -43,8 +41,8 @@ describe("GameToken", function () {
     const asset = await ethers.getContract("Asset", assetAdmin);
     const transferEvents = await findEvents(asset, "Transfer", receipt.blockHash);
     console.log(`transferEvents: ${transferEvents.length}`);
-    const tokenId = transferEvents[0].args[2];
-    console.log(`Token ID: ${tokenId}`);
+    // const tokenId = transferEvents[0].args[2];
+    // console.log(`Token ID: ${tokenId}`);
   });
   describe("GameToken: MetaData", function () {
     it("can get the ERC721 token contract name", async function () {
@@ -114,14 +112,32 @@ describe("GameToken", function () {
   });
 
   describe("GameToken: Minting GAMEs", function () {
+    // @review !
     it("creator without Assets cannot mint Game", async function () {});
-    it("if _minter is address(0) anyone can mint Game", async function () {});
-    it("if _minter is set only _minter can mint Game", async function () {});
+
+    // @review finish test.
+    it.skip("by default anyone can mint Games", async function () {
+      const {gameToken} = await setupTest();
+      const minterAddress = await gameToken.getMinter();
+      assert.equal(minterAddress, zeroAddress);
+    });
+
+    it("reverts if non-minter trys to mint Game when _minter set", async function () {
+      const {gameTokenAsAdmin, gameToken} = await setupTest();
+      await gameTokenAsAdmin.setMinter(others[7]);
+      const minterAddress = await gameToken.getMinter();
+      assert.equal(minterAddress, others[7]);
+      await expectRevert(gameToken.createGame(others[2], others[2], [], []), "INVALID_MINTER");
+    });
   });
   describe("GameToken: Modifying GAMEs", function () {
     it("Owner can add single Asset", async function () {});
     it("Editor can add single Asset", async function () {});
     it("Owner can add multiple Assets", async function () {});
     it("Editor can add multiple Assets", async function () {});
+    it("Owner can remove single Asset", async function () {});
+    it("Editor can remove single Asset", async function () {});
+    it("Owner can remove multiple Assets", async function () {});
+    it("Editor can remove multiple Assets", async function () {});
   });
 });
