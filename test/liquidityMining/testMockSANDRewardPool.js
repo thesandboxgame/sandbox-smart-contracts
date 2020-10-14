@@ -2,6 +2,7 @@ const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
 const {BigNumber} = require("@ethersproject/bignumber");
 const {expect} = require("local-chai");
 const {mine} = require("local-utils");
+const {contribution} = require("./testContributionEquation");
 
 const STAKE_TOKEN = "UNI_SAND_ETH";
 const REWARD_TOKEN = "Sand";
@@ -15,6 +16,8 @@ const ACTUAL_REWARD_AMOUNT = REWARD_AMOUNT.div(REWARD_DURATION).mul(REWARD_DURAT
 const NEW_REWARD_AMOUNT = BigNumber.from(2000000).mul("1000000000000000000");
 const STAKE_AMOUNT = BigNumber.from(10000).mul("1000000000000000000");
 const SMALL_STAKE_AMOUNT = BigNumber.from(10).mul("1000000000000000000");
+
+let startTimestamp;
 
 describe("MockSANDRewardPool", function () {
   let deployer;
@@ -51,6 +54,8 @@ describe("MockSANDRewardPool", function () {
       from: deployer,
       args: [stakeToken.address, rewardToken.address, multiplierNFToken.address, 2592000],
     });
+    const latestBlock = await ethers.provider.getBlock("latest");
+    startTimestamp = latestBlock.timestamp;
     rewardPool = await ethers.getContract(POOL);
 
     // Define token admins
@@ -84,8 +89,8 @@ describe("MockSANDRewardPool", function () {
 
     // Give users some stakeTokens
     for (let i = 0; i < 3; i++) {
-      await stakeTokenAsAdmin.transfer(others[i], STAKE_AMOUNT);
-      await stakeTokenAsUser[i].approve(rewardPool.address, STAKE_AMOUNT);
+      await stakeTokenAsAdmin.transfer(others[i], STAKE_AMOUNT.mul(10));
+      await stakeTokenAsUser[i].approve(rewardPool.address, STAKE_AMOUNT.mul(10));
     }
   }
 
@@ -106,14 +111,14 @@ describe("MockSANDRewardPool", function () {
   it("User with stakeTokens can stake", async function () {
     await createFixture();
     let balance = await stakeToken.balanceOf(others[0]);
-    expect(balance).to.equal(STAKE_AMOUNT);
+    expect(balance).to.equal(STAKE_AMOUNT.mul(10));
     const receipt = await rewardPoolAsUser[0].stake(STAKE_AMOUNT).then((tx) => tx.wait());
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     const eventsMatching = receipt.events.filter((event) => event.event === "Staked");
     expect(eventsMatching.length).to.equal(1);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
     balance = await stakeToken.balanceOf(others[0]);
-    expect(balance).to.equal(0);
+    expect(balance).to.equal(STAKE_AMOUNT.mul(10).sub(STAKE_AMOUNT));
   });
 
   // Single staker with no LANDs receive rewards
@@ -378,7 +383,6 @@ describe("MockSANDRewardPool", function () {
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(PRECISION_INCREMENT.mul(10)));
   });
 
-
   it("Multiple Users' earnings for 0 NFTs match expected reward: 3 users, 1 stake each", async function () {
     await createFixture();
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
@@ -471,5 +475,112 @@ describe("MockSANDRewardPool", function () {
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     const earned = earned0.add(earned1);
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(PRECISION_INCREMENT.mul(2)));
+  });
+
+  it("Staking with STAKE_AMOUNT plus an extra amount equivalent to 2 NFTs", async function () {
+    await createFixture();
+    const numNfts = 2;
+    const contributionNoNfts = contribution(STAKE_AMOUNT, 0);
+    const contributionWithNfts = contribution(STAKE_AMOUNT, numNfts);
+    const stakeAmount = STAKE_AMOUNT.add(contributionWithNfts.sub(contributionNoNfts));
+    await rewardPoolAsUser[0].stake(stakeAmount);
+    const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
+    expect(stakedBalance).to.equal(stakeAmount);
+
+    const userContribution = await rewardPool.contributionOf(others[0]);
+    expect(userContribution).to.equal(contribution(stakeAmount, 0));
+
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+    await mine();
+    const earned = await rewardPoolAsUser[0].earned(others[0]);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(PRECISION_INCREMENT)); // same precision loss as for 2 NFTs
+  });
+
+  it("Earlier staker gets more rewards with same NFT amount - small NFT number", async function () {
+    await createFixture();
+    await setUpUserWithNfts(others[0], 0, 1);
+    await setUpUserWithNfts(others[1], 1, 2);
+    await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+    await mine();
+    const earned0 = await rewardPoolAsUser[0].earned(others[0]);
+    const earned1 = await rewardPoolAsUser[1].earned(others[1]);
+    expect(earned0).to.be.gte(earned1);
+    const earned = earned0.add(earned1);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(PRECISION_INCREMENT.mul(2)));
+  });
+
+  it("Earlier staker gets more rewards with same NFT amount - large NFT number", async function () {
+    await createFixture();
+    await setUpUserWithNfts(others[0], 0, 100);
+    await setUpUserWithNfts(others[1], 100, 200);
+    await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+    await mine();
+    const earned0 = await rewardPoolAsUser[0].earned(others[0]);
+    const earned1 = await rewardPoolAsUser[1].earned(others[1]);
+    expect(earned0).to.be.gte(earned1);
+    const earned = earned0.add(earned1);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(PRECISION_INCREMENT.mul(2)));
+  });
+
+  it("More lands give more rewards than earlier staker when NFT amounts are smaller", async function () {
+    await createFixture();
+    await setUpUserWithNfts(others[0], 0, 1);
+    await setUpUserWithNfts(others[1], 1, 3); // has extra NFT
+    await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+    await mine();
+    const earned0 = await rewardPoolAsUser[0].earned(others[0]);
+    const earned1 = await rewardPoolAsUser[1].earned(others[1]);
+    expect(earned1).to.be.gte(earned0);
+    const earned = earned0.add(earned1);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(PRECISION_INCREMENT));
+  });
+
+  it("More lands do not give more rewards than earlier staker with large NFT amounts", async function () {
+    await createFixture();
+    await setUpUserWithNfts(others[0], 0, 100);
+    await setUpUserWithNfts(others[1], 100, 201); // has extra NFT
+    await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+    await mine();
+    const earned0 = await rewardPoolAsUser[0].earned(others[0]);
+    const earned1 = await rewardPoolAsUser[1].earned(others[1]);
+    expect(earned0).to.be.gte(earned1);
+    const earned = earned0.add(earned1);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(PRECISION_INCREMENT));
+  });
+
+  it("Multiple Users' earnings for 0 NFTs match expected reward: 2 users, 100 stakes each", async function () {
+    await createFixture();
+    for (let i = 0; i < 100; i++) {
+      await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
+      await rewardPoolAsUser[1].stake(SMALL_STAKE_AMOUNT);
+    }
+    const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
+    expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(200));
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+    await mine();
+    const earned0 = await rewardPoolAsUser[0].earned(others[0]);
+    const earned1 = await rewardPoolAsUser[1].earned(others[1]);
+    const earned = earned0.add(earned1);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(PRECISION_INCREMENT.mul(99)));
   });
 });
