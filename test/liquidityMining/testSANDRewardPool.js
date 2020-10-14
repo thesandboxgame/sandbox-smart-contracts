@@ -15,6 +15,7 @@ const ACTUAL_REWARD_AMOUNT = REWARD_AMOUNT.div(REWARD_DURATION).mul(REWARD_DURAT
 
 const NEW_REWARD_AMOUNT = BigNumber.from(2000000).mul("1000000000000000000");
 const STAKE_AMOUNT = BigNumber.from(10000).mul("1000000000000000000");
+const LESS_PRECISE_STAKE_AMOUNT = BigNumber.from(7).mul("1000000000000000000");
 
 const ONE_DAY = 86400;
 
@@ -217,6 +218,55 @@ describe("ActualSANDRewardPool", function () {
     expect(earned).to.equal(expectedReward);
   });
 
+  it("User with 0 LAND earns correct reward amount - smaller stake", async function () {
+    const timeDiff = 72; // 72s between notifyRewardAmount (deploy script) and stakeTimestamp
+    const numNfts = 0;
+    await createFixture();
+    const receipt = await rewardPoolAsUser.stake(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
+    const stakeBlock = await ethers.provider.getBlock(receipt.blockNumber);
+    const stakeTimestamp = stakeBlock.timestamp;
+
+    // user earnings immediately after staking
+    const earnedAfterStake = await rewardPoolAsUser.earned(others[0]);
+    const userContribution = await rewardPool.contributionOf(others[0]);
+    expect(userContribution).to.equal(contribution(LESS_PRECISE_STAKE_AMOUNT, numNfts));
+    const rewardRate = REWARD_AMOUNT.div(REWARD_DURATION);
+
+    const expectedInitialRewardPerToken = replicateRewardPerToken(
+      BigNumber.from(0),
+      BigNumber.from(stakeTimestamp),
+      BigNumber.from(stakeTimestamp - timeDiff),
+      rewardRate,
+      contribution(LESS_PRECISE_STAKE_AMOUNT, numNfts)
+    );
+    const expectedInitialReward = replicateEarned(
+      contribution(LESS_PRECISE_STAKE_AMOUNT, numNfts),
+      expectedInitialRewardPerToken
+    );
+    expect(expectedInitialReward).to.equal(earnedAfterStake);
+
+    // fast forward to end of reward period
+    await ethers.provider.send("evm_setNextBlockTimestamp", [stakeTimestamp + REWARD_DURATION]);
+    await mine();
+    const earned = await rewardPoolAsUser.earned(others[0]);
+
+    // total earned over entire reward period
+    const finishTimestamp = stakeTimestamp - timeDiff + REWARD_DURATION;
+    const expectedRewardPerToken = replicateRewardPerToken(
+      BigNumber.from(0),
+      BigNumber.from(finishTimestamp),
+      BigNumber.from(stakeTimestamp - timeDiff),
+      rewardRate,
+      contribution(LESS_PRECISE_STAKE_AMOUNT, numNfts)
+    );
+    const expectedReward = replicateEarned(contribution(LESS_PRECISE_STAKE_AMOUNT, numNfts), expectedRewardPerToken);
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(expectedReward);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(precisionLost));
+    expect(ACTUAL_REWARD_AMOUNT).not.to.equal(expectedReward);
+    expect(earned).to.equal(expectedReward);
+    expect(precisionLost.toString()).to.equal("1");
+  });
+
   it("User with 1 LAND earns correct reward amount", async function () {
     const timeDiff = 73; // 73s between notifyRewardAmount (deploy script) and stakeTimestamp
     const numNfts = 1;
@@ -367,11 +417,11 @@ describe("ActualSANDRewardPool", function () {
   });
 
   // TODO:
-  // Multiple users staking
   // Test what happens if rewardToken in pool is less than amount notified
   // Test what happens if pool is notified before end of current reward period
-  // withdraw
-  // getReward
+  // withdraw - check withdrawn equals one amount staked
+  // withdraw - check withdrawn equals multiple amounts staked
+  // getReward - check equals expectedReward
   // Multiple withdrawal
   // exit
 });
