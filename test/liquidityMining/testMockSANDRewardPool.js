@@ -583,4 +583,44 @@ describe("MockSANDRewardPool", function () {
     const earned = earned0.add(earned1);
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(PRECISION_INCREMENT.mul(99)));
   });
+
+  it("Multiple Users' earnings for 100 NFTs match expected reward: 2 users, 100 stakes each", async function () {
+    await createFixture();
+    await setUpUserWithNfts(others[0], 0, 100);
+    await setUpUserWithNfts(others[1], 100, 200);
+    for (let i = 0; i < 100; i++) {
+      await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
+      await rewardPoolAsUser[1].stake(SMALL_STAKE_AMOUNT);
+    }
+    const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
+    expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(200));
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+    await mine();
+    const earned0 = await rewardPoolAsUser[0].earned(others[0]);
+    const earned1 = await rewardPoolAsUser[1].earned(others[1]);
+    const earned = earned0.add(earned1);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(PRECISION_INCREMENT.mul(100)));
+  });
+
+  it("Multiple Users' earnings for 100 NFTs match expected reward: 2 users, 1000 stakes each", async function () {
+    await createFixture();
+    await setUpUserWithNfts(others[0], 0, 100);
+    await setUpUserWithNfts(others[1], 100, 200);
+    for (let i = 0; i < 1000; i++) {
+      await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
+      await rewardPoolAsUser[1].stake(SMALL_STAKE_AMOUNT);
+    }
+    const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
+    expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(2000));
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+    await mine();
+    const earned0 = await rewardPoolAsUser[0].earned(others[0]);
+    const earned1 = await rewardPoolAsUser[1].earned(others[1]);
+    const earned = earned0.add(earned1);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(PRECISION_INCREMENT.mul(1015)));
+  });
 });
