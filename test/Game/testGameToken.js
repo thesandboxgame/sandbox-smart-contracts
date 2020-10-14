@@ -112,8 +112,10 @@ describe("GameToken", function () {
   });
 
   describe("GameToken: Minting GAMEs", function () {
-    // @review !
-    it("creator without Assets cannot mint Game", async function () {});
+    it("creator without Assets cannot mint Game", async function () {
+      const {gameToken} = await setupTest();
+      await expectRevert(gameToken.createGame(others[2], others[2], [], []), "INSUFFICIENT_ASSETS_SPECIFIED");
+    });
 
     // @review finish test.
     it.skip("by default anyone can mint Games", async function () {
