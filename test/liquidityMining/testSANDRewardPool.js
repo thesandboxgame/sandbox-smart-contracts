@@ -444,8 +444,8 @@ describe("ActualSANDRewardPool", function () {
 
   // TODO: withdraw - check withdrawn equals multiple amounts staked
   // TODO: balanceOf rewardTokens left in pool after withdrawals
-  // getReward - check equals expectedReward
-  // exit
+  // TODO: getReward - check equals expectedReward
+  // TODO: exit
 
   // Test what happens if rewardToken in pool is less than amount notified
   // Test what happens if pool is notified before end of current reward period
