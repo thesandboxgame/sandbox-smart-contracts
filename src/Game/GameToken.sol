@@ -9,6 +9,7 @@ contract GameToken is ERC721BaseToken {
     uint256 public _nextId;
 
     event Minter(address newMinter);
+    event NewGame(uint256 indexed id, address indexed gameOwner, uint256[] assets);
     event AssetsAdded(uint256 indexed id, uint256[] assets);
     event AssetsRemoved(uint256 indexed id, uint256[] assets);
 
@@ -45,18 +46,18 @@ contract GameToken is ERC721BaseToken {
         require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
-        require(assetIds.length != 0, "INSUFFICIENT_ASSETS_SPECIFIED");
         uint256 gameId = _mintGame(to);
         if (editors.length != 0) {
             for (uint256 i = 0; i < editors.length; i++) {
                 _gameEditors[gameId][editors[i]] = true;
             }
         }
+        // @review add if statement for assetIds.length == 0
         for (uint256 i = 0; i < assetIds.length; i++) {
             _assetsInGame[gameId].push(assetIds[i]);
             _asset.safeTransferFrom(from, address(this), assetIds[i]);
         }
-        emit AssetsAdded(gameId, assetIds);
+        emit NewGame(gameId, to, assetIds);
         return gameId;
     }
 
@@ -128,9 +129,13 @@ contract GameToken is ERC721BaseToken {
      * @return id The newly created gameId
      */
     function _mintGame(address to) internal returns (uint256 id) {
-        uint256 gameId = _nextId++;
+        uint256 gameId = _nextId;
+        _nextId = _nextId + 1;
         _owners[gameId] = uint256(to);
-        // _numNFTPerAddress[to]++;
+        uint256 testOwner = _owners[gameId];
+        console.log("to: ", uint256(to));
+        console.log("test owner: ", testOwner);
+        _numNFTPerAddress[to]++;
         emit Transfer(address(0), to, gameId);
         return gameId;
     }
@@ -148,5 +153,6 @@ contract GameToken is ERC721BaseToken {
         AssetToken asset
     ) public ERC721BaseToken(metaTransactionContract, admin) {
         _asset = asset;
+        _nextId = 1;
     }
 }
