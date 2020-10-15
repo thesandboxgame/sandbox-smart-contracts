@@ -12,16 +12,6 @@ module.exports.setupTest = deployments.createFixture(async () => {
   const gameToken = await ethers.getContract("GameToken");
   const gameTokenAsAdmin = await ethers.getContract("GameToken", gameTokenAdmin);
 
-  const SandAdmin = {
-    address: sandAdmin,
-    Sand: sandContract.connect(sandContract.provider.getSigner(sandAdmin)),
-  };
-
-  const DaiAdmin = {
-    address: deployer,
-    Dai: daiContract.connect(daiContract.provider.getSigner(deployer)),
-  };
-
   // Give users funds
   async function setupUser(GameToken, SandAdmin, DaiAdmin, user, {hasSand, hasDAI}) {
     if (hasDAI) {
@@ -47,17 +37,42 @@ module.exports.setupTest = deployments.createFixture(async () => {
     });
   }
 
+  const SandAdmin = {
+    address: sandAdmin,
+    Sand: sandContract.connect(sandContract.provider.getSigner(sandAdmin)),
+  };
+
+  const DaiAdmin = {
+    address: deployer,
+    Dai: daiContract.connect(daiContract.provider.getSigner(deployer)),
+  };
+
   const userWithSAND = await setupUser(gameToken, SandAdmin, DaiAdmin, users[0], {
     hasSand: true,
     hasDAI: false,
   });
 
-  const userWithoutSAND = users[2];
+  const GameOwner = {
+    address: userWithSAND.address,
+    Game: gameToken.connect(gameToken.provider.getSigner(userWithSAND.address)),
+  };
+
+  const GameEditor1 = {
+    address: users[5],
+    Game: gameToken.connect(gameToken.provider.getSigner(users[5])),
+  };
+
+  const GameEditor2 = {
+    address: users[6],
+    Game: gameToken.connect(gameToken.provider.getSigner(users[5])),
+  };
 
   return {
     gameToken,
     gameTokenAsAdmin,
     userWithSAND,
-    userWithoutSAND,
+    GameOwner,
+    GameEditor1,
+    GameEditor2,
   };
 });
