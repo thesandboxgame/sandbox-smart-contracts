@@ -2,10 +2,13 @@ pragma solidity 0.6.5;
 
 import "../BaseWithStorage/ERC721BaseToken.sol";
 import "../interfaces/AssetToken.sol";
+import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "@nomiclabs/buidler/console.sol";
 
 
 contract GameToken is ERC721BaseToken {
+    using EnumerableSet for EnumerableSet.UintSet;
+
     uint256 public _nextId;
 
     event Minter(address newMinter);
@@ -47,16 +50,23 @@ contract GameToken is ERC721BaseToken {
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
         uint256 gameId = _mintGame(to);
+
         if (editors.length != 0) {
             for (uint256 i = 0; i < editors.length; i++) {
                 _gameEditors[gameId][editors[i]] = true;
             }
         }
-        // @review add if statement for assetIds.length == 0
-        for (uint256 i = 0; i < assetIds.length; i++) {
-            _assetsInGame[gameId].push(assetIds[i]);
-            _asset.safeTransferFrom(from, address(this), assetIds[i]);
+
+        if (assetIds.length != 0) {
+            EnumerableSet.UintSet storage gameAssets = _assetsInGame[gameId];
+            for (uint256 i = 0; i < assetIds.length; i++) {
+                // @review using openzeppelin's enumerable set lib:
+                // https://docs.openzeppelin.com/contracts/3.x/api/utils#EnumerableSet-add-struct-EnumerableSet-AddressSet-address-
+                gameAssets.add(assetIds[i]);
+                _asset.safeTransferFrom(from, address(this), assetIds[i]);
+            }
         }
+
         emit NewGame(gameId, to, assetIds);
         return gameId;
     }
@@ -143,9 +153,10 @@ contract GameToken is ERC721BaseToken {
     address internal _minter;
     AssetToken _asset;
 
+    // EnumerableSet.UintSet private _assetsSet;
     mapping(uint256 => string) private _metaData;
     mapping(uint256 => mapping(address => bool)) private _gameEditors;
-    mapping(uint256 => uint256[]) _assetsInGame;
+    mapping(uint256 => EnumerableSet.UintSet) private _assetsInGame;
 
     constructor(
         address metaTransactionContract,
