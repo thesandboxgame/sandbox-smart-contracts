@@ -9,7 +9,6 @@ module.exports.setupTest = deployments.createFixture(async () => {
 
   const sandContract = await ethers.getContract("Sand");
   const daiContract = await ethers.getContract("DAI");
-  // const assetContract = await ethers.getContract("Asset");
   const gameToken = await ethers.getContract("GameToken");
   const gameTokenAsAdmin = await ethers.getContract("GameToken", gameTokenAdmin);
 
@@ -52,6 +51,7 @@ module.exports.setupTest = deployments.createFixture(async () => {
     hasSand: true,
     hasDAI: false,
   });
+
   const userWithoutSAND = users[2];
 
   return {
