@@ -1,6 +1,7 @@
 pragma solidity 0.6.5;
 
 import "../BaseWithStorage/ERC721BaseToken.sol";
+import "../interfaces/AssetToken.sol";
 import "@nomiclabs/buidler/console.sol";
 
 
@@ -8,6 +9,8 @@ contract GameToken is ERC721BaseToken {
     uint256 public _nextId;
 
     event Minter(address newMinter);
+    event AssetsAdded(uint256 indexed id, uint256[] assets);
+    event AssetsRemoved(uint256 indexed id, uint256[] assets);
 
     // @review Admin functions needed?
 
@@ -37,7 +40,7 @@ contract GameToken is ERC721BaseToken {
         address to,
         uint256[] memory assetIds,
         address[] memory editors
-    ) public {
+    ) public returns (uint256 id) {
         // @review consider metaTransactions here! should we require "from", "to" or msg.sender to be the minter?
         require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
@@ -49,6 +52,12 @@ contract GameToken is ERC721BaseToken {
                 _gameEditors[gameId][editors[i]] = true;
             }
         }
+        for (uint256 i = 0; i < assetIds.length; i++) {
+            _assetsInGame[gameId].push(assetIds[i]);
+            _asset.safeTransferFrom(from, address(this), assetIds[i]);
+        }
+        emit AssetsAdded(gameId, assetIds);
+        return gameId;
     }
 
     /**
@@ -127,11 +136,17 @@ contract GameToken is ERC721BaseToken {
     }
 
     address internal _minter;
+    AssetToken _asset;
 
     mapping(uint256 => string) private _metaData;
     mapping(uint256 => mapping(address => bool)) private _gameEditors;
+    mapping(uint256 => uint256[]) _assetsInGame;
 
-    constructor(address metaTransactionContract, address admin) public ERC721BaseToken(metaTransactionContract, admin) {
-        // _nextId = 1;
+    constructor(
+        address metaTransactionContract,
+        address admin,
+        AssetToken asset
+    ) public ERC721BaseToken(metaTransactionContract, admin) {
+        _asset = asset;
     }
 }
