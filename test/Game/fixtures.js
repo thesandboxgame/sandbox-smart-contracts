@@ -58,13 +58,13 @@ module.exports.setupTest = deployments.createFixture(async () => {
   };
 
   const GameEditor1 = {
-    address: users[5],
-    Game: gameToken.connect(gameToken.provider.getSigner(users[5])),
+    address: users[1].address,
+    Game: gameToken.connect(gameToken.provider.getSigner(users[1].address)),
   };
 
   const GameEditor2 = {
-    address: users[6],
-    Game: gameToken.connect(gameToken.provider.getSigner(users[5])),
+    address: users[1].address,
+    Game: gameToken.connect(gameToken.provider.getSigner(users[2].address)),
   };
 
   return {
@@ -74,5 +74,6 @@ module.exports.setupTest = deployments.createFixture(async () => {
     GameOwner,
     GameEditor1,
     GameEditor2,
+    users,
   };
 });
