@@ -1,6 +1,6 @@
 const {ethers, getNamedAccounts, deployments} = require("@nomiclabs/buidler");
 const {assert, expect} = require("local-chai");
-const {expectRevert, waitFor, emptyBytes, zeroAddress} = require("local-utils");
+const {expectRevert, emptyBytes, checERC1155Balances} = require("local-utils");
 const {findEvents} = require("../../lib/findEvents.js");
 const {setupTest} = require("./fixtures");
 const {execute} = deployments;
@@ -8,10 +8,12 @@ const {execute} = deployments;
 let assetAdmin;
 let assetBouncerAdmin;
 let others;
+let userWithAssets;
+let id;
 
 const dummyHash = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 const packId = 0;
-const supply = 11;
+const supply = 4;
 const rarity = 3;
 
 async function supplyAssets(creator) {
@@ -38,13 +40,39 @@ describe("GameToken", function () {
     ({assetAdmin, assetBouncerAdmin, others} = await getNamedAccounts());
     const {userWithSAND} = await setupTest();
     const {receipt} = await supplyAssets(userWithSAND);
-    const asset = await ethers.getContract("Asset", assetAdmin);
-    const transferEvents = await findEvents(asset, "Transfer", receipt.blockHash);
+    userWithAssets = userWithSAND;
+    const assetContract = await ethers.getContract("Asset");
+    const transferEvents = await findEvents(assetContract, "TransferSingle", receipt.blockHash);
     console.log(`transferEvents: ${transferEvents.length}`);
-    // const tokenId = transferEvents[0].args[2];
-    // console.log(`Token ID: ${tokenId}`);
+    id = transferEvents[0].args[3];
+
+    console.log(`Token ID: ${id}`);
+    const isCollection = await assetContract.isCollection(id);
+    console.log(`Collection? : ${isCollection}`);
+    assert.ok(isCollection);
+
+    const balanceOf = await assetContract.balanceOf(userWithAssets.address, id);
+    console.log(`balance? : ${balanceOf}`);
+
+    expect(ownerOf).to.be.equal(userWithAssets.address);
   });
   describe("GameToken: MetaData", function () {
+    let gameTokenAsOwner;
+    let gameTokenAsAdmin;
+    let editor;
+    let editor1;
+    let editor2;
+    let gameId;
+
+    before(async function () {
+      const {gameToken, users} = await setupTest();
+      // gameId =
+      editor = users[5];
+      editor1 = users[6];
+      editor2 = users[6];
+      gameTokenAsOwner = gameToken.connect(gameToken.provider.getSigner(userWithAssets.address));
+      gameTokenAsEditor = gameToken.connect(gameToken.provider.getSigner(editor.address));
+    });
     it("can get the ERC721 token contract name", async function () {
       const {gameToken} = await setupTest();
       const name = await gameToken.name();
@@ -67,40 +95,36 @@ describe("GameToken", function () {
       await expectRevert(gameToken.setTokenURI(11, "New URI"), "URI_ACCESS_DENIED");
     });
 
-    it.skip("can get the tokenURI", async function () {
+    it("GAME owner can set the tokenURI", async function () {
       const {gameToken} = await setupTest();
-      const URI = await gameToken.tokenURI(1);
+      await gameTokenAsOwner.setTokenURI("Hello World");
+      const URI = await gameToken.tokenURI(gameId);
       expect(URI).to.be.equal("Hello World");
     });
 
-    it.skip("GAME owner can set the tokenURI", async function () {
+    it("GAME editors can set the tokenURI", async function () {
       const {gameToken} = await setupTest();
-      const URI = await gameToken.tokenURI(1);
-      expect(URI).to.be.equal("Hello World");
-    });
-
-    it.skip("GAME editors can set the tokenURI", async function () {
-      const {gameToken} = await setupTest();
-      const URI = await gameToken.tokenURI(1);
-      expect(URI).to.be.equal("Hello World");
+      await gameTokenAsEditor.setTokenURI("Hello Sandbox");
+      const URI = await gameToken.tokenURI(gameId);
+      expect(URI).to.be.equal("Hello Sandbox");
     });
   });
 
-  it.skip("should allow the owner to add game editors", async function () {
+  it("should allow the owner to add game editors", async function () {
     const {gameToken} = await setupTest();
-    await gameToken.setGameEditor(id, editor1, true);
-    await gameToken.setGameEditor(id, editor2, true);
-    const isEditor1 = await gameToken.isGameEditor(id, editor1);
-    const isEditor2 = await gameToken.isGameEditor(id, editor2);
+    await gameTokenAsOwner.setGameEditor(gameId, editor1, true);
+    await gameTokenAsOwner.setGameEditor(gameId, editor2, true);
+    const isEditor1 = await gameToken.isGameEditor(gameId, editor1);
+    const isEditor2 = await gameToken.isGameEditor(gameId, editor2);
     assert.ok(isEditor1);
     assert.ok(isEditor2);
   });
-  it.skip("should allow the owner to remove game editors", async function () {
+  it("should allow the owner to remove game editors", async function () {
     const {gameToken} = await setupTest();
-    await gameToken.setGameEditor();
-    await gameToken.setGameEditor();
-    const isEditor1 = await gameToken.isGameEditor();
-    const isEditor2 = await gameToken.isGameEditor();
+    await gameTokenAsOwner.setGameEditor(gameId, editor1, false);
+    await gameTokenAsOwner.setGameEditor(gameId, editor2, false);
+    const isEditor1 = await gameToken.isGameEditor(editor1);
+    const isEditor2 = await gameToken.isGameEditor(editor2);
     assert.notOk(isEditor1);
     assert.notOk(isEditor2);
   });
@@ -118,10 +142,10 @@ describe("GameToken", function () {
     });
 
     // @review finish test.
-    it.skip("by default anyone can mint Games", async function () {
+    it("by default anyone can mint Games", async function () {
       const {gameToken} = await setupTest();
-      const minterAddress = await gameToken.getMinter();
-      assert.equal(minterAddress, zeroAddress);
+      const gameAsAssetOwner = gameToken.connect(gameToken.provider.getSigner(userWithAssets.address));
+      await gameAsAssetOwner.createGame(others[2], others[2], [id], []);
     });
 
     it("reverts if non-minter trys to mint Game when _minter set", async function () {
