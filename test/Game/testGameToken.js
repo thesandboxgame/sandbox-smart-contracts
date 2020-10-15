@@ -57,21 +57,12 @@ describe("GameToken", function () {
     expect(ownerOf).to.be.equal(userWithAssets.address);
   });
   describe("GameToken: MetaData", function () {
-    let gameTokenAsOwner;
     let gameTokenAsAdmin;
-    let editor;
-    let editor1;
-    let editor2;
     let gameId;
 
     before(async function () {
-      const {gameToken, users} = await setupTest();
+      const {gameToken} = await setupTest();
       // gameId =
-      editor = users[5];
-      editor1 = users[6];
-      editor2 = users[6];
-      gameTokenAsOwner = gameToken.connect(gameToken.provider.getSigner(userWithAssets.address));
-      gameTokenAsEditor = gameToken.connect(gameToken.provider.getSigner(editor.address));
     });
     it("can get the ERC721 token contract name", async function () {
       const {gameToken} = await setupTest();
@@ -96,35 +87,35 @@ describe("GameToken", function () {
     });
 
     it("GAME owner can set the tokenURI", async function () {
-      const {gameToken} = await setupTest();
-      await gameTokenAsOwner.setTokenURI("Hello World");
+      const {gameToken, GameOwner} = await setupTest();
+      await GameOwner.Game.setTokenURI("Hello World");
       const URI = await gameToken.tokenURI(gameId);
       expect(URI).to.be.equal("Hello World");
     });
 
     it("GAME editors can set the tokenURI", async function () {
-      const {gameToken} = await setupTest();
-      await gameTokenAsEditor.setTokenURI("Hello Sandbox");
+      const {gameToken, GameEditor1} = await setupTest();
+      await GameEditor1.Game.setTokenURI("Hello Sandbox");
       const URI = await gameToken.tokenURI(gameId);
       expect(URI).to.be.equal("Hello Sandbox");
     });
   });
 
   it("should allow the owner to add game editors", async function () {
-    const {gameToken} = await setupTest();
-    await gameTokenAsOwner.setGameEditor(gameId, editor1, true);
-    await gameTokenAsOwner.setGameEditor(gameId, editor2, true);
-    const isEditor1 = await gameToken.isGameEditor(gameId, editor1);
-    const isEditor2 = await gameToken.isGameEditor(gameId, editor2);
+    const {gameToken, GameOwner, GameEditor1, GameEditor2} = await setupTest();
+    await GameOwner.Game.setGameEditor(gameId, GameEditor1.address, true);
+    await GameOwner.Game.setGameEditor(gameId, GameEditor2.address, true);
+    const isEditor1 = await gameToken.isGameEditor(gameId, GameEditor1.address);
+    const isEditor2 = await gameToken.isGameEditor(gameId, GameEditor2.address);
     assert.ok(isEditor1);
     assert.ok(isEditor2);
   });
   it("should allow the owner to remove game editors", async function () {
-    const {gameToken} = await setupTest();
-    await gameTokenAsOwner.setGameEditor(gameId, editor1, false);
-    await gameTokenAsOwner.setGameEditor(gameId, editor2, false);
-    const isEditor1 = await gameToken.isGameEditor(editor1);
-    const isEditor2 = await gameToken.isGameEditor(editor2);
+    const {gameToken, GameOwner, GameEditor1, GameEditor2} = await setupTest();
+    await GameOwner.Game.setGameEditor(gameId, GameEditor1.address, false);
+    await GameOwner.Game.setGameEditor(gameId, GameEditor2.address, false);
+    const isEditor1 = await gameToken.isGameEditor(GameEditor1.address);
+    const isEditor2 = await gameToken.isGameEditor(GameEditor2.address);
     assert.notOk(isEditor1);
     assert.notOk(isEditor2);
   });
@@ -141,12 +132,14 @@ describe("GameToken", function () {
       await expectRevert(gameToken.createGame(others[2], others[2], [], []), "INSUFFICIENT_ASSETS_SPECIFIED");
     });
 
-    // @review finish test.
+    // @review finish test. Add testing for proper transfer of asset ownership, linking of game token and asset id's, all event args, etc...
     it("by default anyone can mint Games", async function () {
       const {gameToken} = await setupTest();
       const gameAsAssetOwner = gameToken.connect(gameToken.provider.getSigner(userWithAssets.address));
       await gameAsAssetOwner.createGame(others[2], others[2], [id], []);
     });
+
+    it("minter can create GAMEs when _minter is set", async function () {});
 
     it("reverts if non-minter trys to mint Game when _minter set", async function () {
       const {gameTokenAsAdmin, gameToken} = await setupTest();
@@ -157,13 +150,44 @@ describe("GameToken", function () {
     });
   });
   describe("GameToken: Modifying GAMEs", function () {
-    it("Owner can add single Asset", async function () {});
-    it("Editor can add single Asset", async function () {});
-    it("Owner can add multiple Assets", async function () {});
-    it("Editor can add multiple Assets", async function () {});
-    it("Owner can remove single Asset", async function () {});
-    it("Editor can remove single Asset", async function () {});
-    it("Owner can remove multiple Assets", async function () {});
-    it("Editor can remove multiple Assets", async function () {});
+    it("Owner can add single Asset", async function () {
+      const {GameOwner} = await setupTest();
+      await GameOwner.Game.addSingleAsset();
+    });
+
+    it("Owner can add multiple Assets", async function () {
+      const {GameOwner} = await setupTest();
+      await GameOwner.Game.addMultipleAssets();
+    });
+
+    it("Owner can remove single Asset", async function () {
+      const {GameOwner} = await setupTest();
+      await GameOwner.Game.removeSingleAsset();
+    });
+
+    it("Owner can remove multiple Assets", async function () {
+      const {GameOwner} = await setupTest();
+      await GameOwner.Game.removeMultipleAssets();
+    });
+
+    it("Editor can add single Asset", async function () {
+      const {GameEditor1} = await setupTest();
+      await GameEditor1.Game.addSingleAsset();
+    });
+
+    it("Editor can add multiple Assets", async function () {
+      const {GameEditor1} = await setupTest();
+      await GameEditor1.Game.addMultipleAssets();
+    });
+
+    it("Editor can remove single Asset", async function () {
+      const {GameEditor1} = await setupTest();
+      await GameEditor1.Game.removeSingleAsset();
+    });
+
+    it("Editor can remove multiple Assets", async function () {
+      const {GameEditor1} = await setupTest();
+      await GameEditor1.Game.removeSingleAsset();
+    });
   });
 });
