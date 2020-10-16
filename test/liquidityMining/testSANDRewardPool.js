@@ -260,11 +260,12 @@ describe("ActualSANDRewardPool", function () {
       contribution(LESS_PRECISE_STAKE_AMOUNT, numNfts)
     );
     const expectedReward = replicateEarned(contribution(LESS_PRECISE_STAKE_AMOUNT, numNfts), expectedRewardPerToken);
-    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(expectedReward);
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(precisionLost));
-    expect(ACTUAL_REWARD_AMOUNT).not.to.equal(expectedReward);
     expect(earned).to.equal(expectedReward);
-    expect(precisionLost.toString()).to.equal("1");
+
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(expectedReward);
+    expect(ACTUAL_REWARD_AMOUNT).not.to.equal(expectedReward);
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(1);
   });
 
   it("User with 1 LAND earns correct reward amount", async function () {
@@ -309,11 +310,12 @@ describe("ActualSANDRewardPool", function () {
       contribution(STAKE_AMOUNT, numNfts)
     );
     const expectedReward = replicateEarned(contribution(STAKE_AMOUNT, numNfts), expectedRewardPerToken);
-    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(expectedReward);
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(precisionLost));
-    expect(ACTUAL_REWARD_AMOUNT).not.to.equal(expectedReward);
     expect(earned).to.equal(expectedReward);
-    expect(precisionLost.toString()).to.equal("1");
+
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(expectedReward);
+    expect(ACTUAL_REWARD_AMOUNT).not.to.equal(expectedReward);
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(1);
   });
 
   it("User with 3 LANDs earns correct reward amount", async function () {
@@ -360,10 +362,12 @@ describe("ActualSANDRewardPool", function () {
       contribution(STAKE_AMOUNT, numNfts)
     );
     const expectedReward = replicateEarned(contribution(STAKE_AMOUNT, numNfts), expectedRewardPerToken);
+    expect(earned).to.equal(expectedReward);
+
     const precisionLost = ACTUAL_REWARD_AMOUNT.sub(expectedReward);
     expect(ACTUAL_REWARD_AMOUNT).not.to.equal(expectedReward);
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(precisionLost));
-    expect(precisionLost.toString()).to.equal("1");
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(1);
   });
 
   it("User with 10 LANDs earns correct reward amount", async function () {
@@ -410,10 +414,12 @@ describe("ActualSANDRewardPool", function () {
       contribution(STAKE_AMOUNT, numNfts)
     );
     const expectedReward = replicateEarned(contribution(STAKE_AMOUNT, numNfts), expectedRewardPerToken);
+    expect(earned).to.equal(expectedReward);
+
     const precisionLost = ACTUAL_REWARD_AMOUNT.sub(expectedReward);
     expect(ACTUAL_REWARD_AMOUNT).not.to.equal(expectedReward);
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT.sub(precisionLost));
-    expect(precisionLost.toString()).to.equal("1");
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(1);
   });
 
   it("User can withdraw some stakeTokens after several amounts have been staked", async function () {
