@@ -1,6 +1,6 @@
 const {ethers, getNamedAccounts, deployments} = require("@nomiclabs/buidler");
 const {assert, expect} = require("local-chai");
-const {expectRevert, emptyBytes} = require("local-utils");
+const {expectRevert, emptyBytes, waitFor} = require("local-utils");
 const {findEvents} = require("../../lib/findEvents.js");
 const {setupTest} = require("./fixtures");
 const {execute} = deployments;
@@ -18,7 +18,7 @@ const rarity = 3;
 
 async function supplyAssets(creator) {
   await execute("Asset", {from: assetBouncerAdmin, skipUnknownSigner: true}, "setBouncer", assetAdmin, true);
-  // mint some assets to a user who can then create a GAME token
+  // mint some assets to a user who can then create a GAME token with assets:
   const receipt = await execute(
     "Asset",
     {from: assetAdmin, skipUnknownSigner: true},
@@ -53,11 +53,15 @@ describe("GameToken", function () {
     // @review finish test. Add testing for proper transfer of asset ownership, linking of game token and asset id's, all event args, etc...
     it("by default anyone can mint Games", async function () {
       const {gameToken, GameOwner} = await setupTest();
-      const receipt = await GameOwner.Game.createGame(GameOwner.address, GameOwner.address, [], []);
+      console.log(`gameOwner address: ${GameOwner.address}`);
+      const receipt = await waitFor(GameOwner.Game.createGame(GameOwner.address, GameOwner.address, [], []));
       newGameEvents = await findEvents(gameToken, "NewGame", receipt.blockHash);
       console.log(`newGameEvents: ${newGameEvents.length}`);
       gameId = newGameEvents[0].args[0];
       console.log(`event gameId: ${gameId}`);
+
+      const owner = await gameToken.ownerOf(gameId);
+      console.log(`owner: ${owner}`);
     });
 
     it("minter can create GAMEs when _minter is set", async function () {
@@ -79,8 +83,21 @@ describe("GameToken", function () {
     });
   });
   describe("GameToken: Modifying GAMEs", function () {
+    let gameToken;
+    let GameOwner;
+    let GameEditor1;
+    let GameEditor2;
+    let users;
+
+    before(async function () {
+      ({gameToken, GameOwner, GameEditor1, GameEditor2, users} = await setupTest());
+    });
+
     it("should allow the owner to add game editors", async function () {
-      const {gameToken, GameOwner, GameEditor1, GameEditor2} = await setupTest();
+      // const {gameToken, GameOwner, GameEditor1, GameEditor2} = await setupTest();
+      const receipt = await waitFor(GameOwner.Game.createGame(GameOwner.address, GameOwner.address, [], []));
+      newGameEvents = await findEvents(gameToken, "NewGame", receipt.blockHash);
+      gameId = newGameEvents[0].args[0];
       const owner = await gameToken.ownerOf(gameId);
       console.log(`owner: ${owner}`);
       expect(owner).to.be.equal(GameOwner.address);
@@ -92,17 +109,17 @@ describe("GameToken", function () {
       assert.ok(isEditor2);
     });
     it("should allow the owner to remove game editors", async function () {
-      const {gameToken, GameOwner, GameEditor1, GameEditor2} = await setupTest();
+      // const {gameToken, GameOwner, GameEditor1, GameEditor2} = await setupTest();
       await GameOwner.Game.setGameEditor(gameId, GameEditor1.address, false);
       await GameOwner.Game.setGameEditor(gameId, GameEditor2.address, false);
-      const isEditor1 = await gameToken.isGameEditor(GameEditor1.address);
-      const isEditor2 = await gameToken.isGameEditor(GameEditor2.address);
+      const isEditor1 = await gameToken.isGameEditor(gameId, GameEditor1.address);
+      const isEditor2 = await gameToken.isGameEditor(gameId, GameEditor2.address);
       assert.notOk(isEditor1);
       assert.notOk(isEditor2);
     });
 
     it("should revert if non-owner trys to set Game Editors", async function () {
-      const {gameToken} = await setupTest();
+      // const {gameToken} = await setupTest();
       const editor = users[1];
       await expectRevert(gameToken.setGameEditor(42, editor.address, false), "EDITOR_ACCESS_DENIED");
     });
