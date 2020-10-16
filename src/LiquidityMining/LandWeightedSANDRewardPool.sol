@@ -146,8 +146,9 @@ contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipi
 
     function withdraw(uint256 amount) public override updateReward(msg.sender) {
         require(amount > 0, "Cannot withdraw 0");
+        uint256 balance = balanceOf(msg.sender);
         super.withdraw(amount);
-        uint256 ratio = amount.mul(DECIMALS_18).div(balanceOf(msg.sender));
+        uint256 ratio = amount.mul(DECIMALS_18).div(balance);
         uint256 currentContribution = contributionOf(msg.sender);
         uint256 contributionReduction = currentContribution.mul(ratio).div(DECIMALS_18);
         _contributions[msg.sender] = currentContribution.sub(contributionReduction);
