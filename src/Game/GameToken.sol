@@ -61,18 +61,18 @@ contract GameToken is ERC721BaseToken {
                 _gameEditors[gameId][editors[i]] = true;
             }
         }
-
+        // @review if only 1 asset use safeTransferFrom. If many, use safeBatchTransferFrom
         if (assetIds.length != 0) {
             EnumerableSet.UintSet storage gameAssets = _assetsInGame[gameId];
-            for (uint256 i = 0; i < assetIds.length; i++) {
-                // @review using openzeppelin's enumerable set lib:
-                // https://docs.openzeppelin.com/contracts/3.x/api/utils#EnumerableSet-add-struct-EnumerableSet-AddressSet-address-
-                gameAssets.add(assetIds[i]);
-                // @review should I be using batchTransfers here?
-                _asset.safeTransferFrom(from, address(this), assetIds[i]);
+            if (assetIds.length > 1) {
+                for (uint256 i = 0; i < assetIds.length; i++) {
+                    gameAssets.add(assetIds[i]);
+                }
+                _asset.safeBatchTransferFrom(from, address(this), assetIds, "");
+            } else {
+                _asset.safeTransferFrom(from, address(this), assetIds[0]);
             }
         }
-
         emit NewGame(gameId, to, assetIds);
         return gameId;
     }
@@ -126,7 +126,19 @@ contract GameToken is ERC721BaseToken {
         emit AssetsRemoved(gameId, assetIds, to);
     }
 
-    function getGameAssets(uint256 gameId) external returns (uint256 numberOfAssets, uint256[] memory assetIds) {}
+    function getGameAssets(uint256 gameId) external view returns (uint256 numberOfAssets, uint256[] memory assetIds) {
+        uint256[] memory assets;
+        uint256 lengthOfSet = _assetsInGame[gameId].length();
+        if (lengthOfSet != 0) {
+            for (uint256 i = 0; i < lengthOfSet; i++) {
+                assets[i] = _assetsInGame[gameId].at(i);
+                console.log("assets[i] - contract", _assetsInGame[gameId].at(i));
+            }
+            return (lengthOfSet, assets);
+        } else {
+            return (0, assets);
+        }
+    }
 
     /**
      * @notice Function to allow token owner to set game editors
