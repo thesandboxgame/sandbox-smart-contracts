@@ -438,21 +438,156 @@ describe("ActualSANDRewardPool", function () {
     await rewardPoolAsUser.stake(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
     const stakedTokens = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedTokens).to.equal(LESS_PRECISE_STAKE_AMOUNT);
-
-    // TODO: Error: VM Exception while processing transaction: revert divbyzero
     const receipt = await rewardPoolAsUser.withdraw(stakedTokens).then((tx) => tx.wait());
-    // console.log(receipt);
-    // const balance = await stakeToken.balanceOf(others[0]);
-    // expect(balance).to.equal(STAKE_AMOUNT);
-    // const eventsMatching = receipt.events.filter((event) => event.event === "Withdrawn");
-    // expect(eventsMatching.length).to.equal(1);
+    const balance = await stakeToken.balanceOf(others[0]);
+    expect(balance).to.equal(STAKE_AMOUNT);
+    const eventsMatching = receipt.events.filter((event) => event.event === "Withdrawn");
+    expect(eventsMatching.length).to.equal(1);
+    const balancePool = await stakeToken.balanceOf(rewardPool.address);
+    expect(balancePool).to.equal(0);
   });
 
-  // TODO: withdraw - check withdrawn equals multiple amounts staked
-  // TODO: balanceOf rewardTokens left in pool after withdrawals
-  // TODO: getReward - check equals expectedReward
-  // TODO: exit
+  it("User can withdraw all stakeTokens after several amounts have been staked", async function () {
+    await createFixture();
+    await rewardPoolAsUser.stake(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
+    await rewardPoolAsUser.stake(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
+    const receipt = await rewardPoolAsUser.withdraw(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
+    const balance = await stakeToken.balanceOf(others[0]);
+    expect(balance).to.equal(STAKE_AMOUNT.sub(LESS_PRECISE_STAKE_AMOUNT));
+    const eventsMatching = receipt.events.filter((event) => event.event === "Withdrawn");
+    expect(eventsMatching.length).to.equal(1);
 
-  // Test what happens if rewardToken in pool is less than amount notified
-  // Test what happens if pool is notified before end of current reward period
+    const receiptTwo = await rewardPoolAsUser.withdraw(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
+    const balanceTwo = await stakeToken.balanceOf(others[0]);
+    expect(balanceTwo).to.equal(STAKE_AMOUNT);
+    const eventsMatchingTwo = receiptTwo.events.filter((event) => event.event === "Withdrawn");
+    expect(eventsMatchingTwo.length).to.equal(1);
+  });
+
+  it("First user can claim their reward - no NFTs", async function () {
+    await createFixture();
+    await rewardPoolAsUser.stake(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+    await mine();
+
+    const expectedReward = await rewardPoolAsUser.earned(others[0]);
+    const rewardReceipt = await rewardPoolAsUser.getReward().then((tx) => tx.wait());
+    const balance = await rewardToken.balanceOf(others[0]);
+    expect(balance).to.equal(expectedReward);
+    const eventsMatching = rewardReceipt.events.filter((event) => event.event === "RewardPaid");
+    expect(eventsMatching.length).to.equal(1);
+    const balanceRewardPool = await rewardToken.balanceOf(rewardPool.address);
+    expect(balanceRewardPool).to.equal(REWARD_AMOUNT.sub(expectedReward));
+  });
+
+  it("First user can claim their reward - has NFTs", async function () {
+    await createFixture();
+    for (let i = 0; i < 10; i++) {
+      await mintLandQuad(others[0]);
+    }
+    await rewardPoolAsUser.stake(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+    await mine();
+    const expectedReward = await rewardPoolAsUser.earned(others[0]);
+    const rewardReceipt = await rewardPoolAsUser.getReward().then((tx) => tx.wait());
+    const balance = await rewardToken.balanceOf(others[0]);
+    expect(balance).to.equal(expectedReward);
+    const eventsMatching = rewardReceipt.events.filter((event) => event.event === "RewardPaid");
+    expect(eventsMatching.length).to.equal(1);
+    const balanceRewardPool = await rewardToken.balanceOf(rewardPool.address);
+    expect(balanceRewardPool).to.equal(REWARD_AMOUNT.sub(expectedReward));
+  });
+
+  it("A user can claim their reward after multiple stakes", async function () {
+    await createFixture();
+    for (let i = 0; i < 10; i++) {
+      await mintLandQuad(others[0]);
+    }
+    await rewardPoolAsUser.stake(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
+    await rewardPoolAsUser.stake(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
+    await rewardPoolAsUser.stake(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
+    const latestBlock = await ethers.provider.getBlock("latest");
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send("evm_setNextBlockTimestamp", [currentTimestamp + REWARD_DURATION]);
+    await mine();
+    const expectedReward = await rewardPoolAsUser.earned(others[0]);
+    const rewardReceipt = await rewardPoolAsUser.getReward().then((tx) => tx.wait());
+    const balance = await rewardToken.balanceOf(others[0]);
+    expect(balance).to.equal(expectedReward);
+    const eventsMatching = rewardReceipt.events.filter((event) => event.event === "RewardPaid");
+    expect(eventsMatching.length).to.equal(1);
+    const balanceRewardPool = await rewardToken.balanceOf(rewardPool.address);
+    expect(balanceRewardPool).to.equal(REWARD_AMOUNT.sub(expectedReward));
+  });
+
+  it("First user can exit the pool", async function () {
+    await createFixture();
+    await rewardPoolAsUser.stake(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
+    const receipt = await rewardPoolAsUser.exit().then((tx) => tx.wait());
+
+    // No user stakeTokens remaining in pool
+    const balanceUser = await stakeToken.balanceOf(others[0]);
+    expect(balanceUser).to.equal(STAKE_AMOUNT);
+    const balancePool = await stakeToken.balanceOf(rewardPool.address);
+    expect(balancePool).to.equal(0);
+
+    // Withdraw Event
+    const eventsMatchingWithdraw = receipt.events.filter((event) => event.event === "Withdrawn");
+    expect(eventsMatchingWithdraw.length).to.equal(1);
+
+    // RewardPaidEvent
+    const eventsMatchingRewardPaid = receipt.events.filter((event) => event.event === "RewardPaid");
+    expect(eventsMatchingRewardPaid.length).to.equal(1);
+  });
+
+  it("A user can exit the pool after multiple stakes", async function () {
+    await createFixture();
+    await rewardPoolAsUser.stake(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
+    await rewardPoolAsUser.stake(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
+    await rewardPoolAsUser.stake(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
+    const receipt = await rewardPoolAsUser.exit().then((tx) => tx.wait());
+
+    // No user stakeTokens remaining in pool
+    const balanceUser = await stakeToken.balanceOf(others[0]);
+    expect(balanceUser).to.equal(STAKE_AMOUNT);
+    const balancePool = await stakeToken.balanceOf(rewardPool.address);
+    expect(balancePool).to.equal(0);
+
+    // Withdraw Event
+    const eventsMatchingWithdraw = receipt.events.filter((event) => event.event === "Withdrawn");
+    expect(eventsMatchingWithdraw.length).to.equal(1);
+
+    // RewardPaidEvent
+    const eventsMatchingRewardPaid = receipt.events.filter((event) => event.event === "RewardPaid");
+    expect(eventsMatchingRewardPaid.length).to.equal(1);
+  });
+
+  it("A user with NFTs can exit the pool after multiple stakes", async function () {
+    await createFixture();
+    for (let i = 0; i < 10; i++) {
+      await mintLandQuad(others[0]);
+    }
+    await rewardPoolAsUser.stake(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
+    await rewardPoolAsUser.stake(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
+    await rewardPoolAsUser.stake(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
+    const receipt = await rewardPoolAsUser.exit().then((tx) => tx.wait());
+
+    // No user stakeTokens remaining in pool
+    const balanceUser = await stakeToken.balanceOf(others[0]);
+    expect(balanceUser).to.equal(STAKE_AMOUNT);
+    const balancePool = await stakeToken.balanceOf(rewardPool.address);
+    expect(balancePool).to.equal(0);
+
+    // Withdraw Event
+    const eventsMatchingWithdraw = receipt.events.filter((event) => event.event === "Withdrawn");
+    expect(eventsMatchingWithdraw.length).to.equal(1);
+
+    // RewardPaidEvent
+    const eventsMatchingRewardPaid = receipt.events.filter((event) => event.event === "RewardPaid");
+    expect(eventsMatchingRewardPaid.length).to.equal(1);
+  });
 });
