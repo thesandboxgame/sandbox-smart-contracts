@@ -14,7 +14,7 @@ contract GameToken is ERC721BaseToken {
     event Minter(address newMinter);
     event NewGame(uint256 indexed id, address indexed gameOwner, uint256[] assets);
     event AssetsAdded(uint256 indexed id, uint256[] assets);
-    event AssetsRemoved(uint256 indexed id, uint256[] assets);
+    event AssetsRemoved(uint256 indexed id, uint256[] assets, address to);
 
     // @review Admin functions needed?
 
@@ -32,6 +32,11 @@ contract GameToken is ERC721BaseToken {
         emit Minter(minter);
     }
 
+    function _ownerOf(uint256 id) internal override view returns (address) {
+        uint256 data = _owners[id];
+        return address(data);
+    }
+
     /**
      * @notice Function to create a new GAME token
      * @param from The address of the one creating the game (may be different from msg.sender if metaTx)
@@ -45,7 +50,7 @@ contract GameToken is ERC721BaseToken {
         uint256[] memory assetIds,
         address[] memory editors
     ) public returns (uint256 id) {
-        // @review consider metaTransactions here! should we require "from", "to" or msg.sender to be the minter?
+        // @review consider metaTransactions here. should we require "from", "to" or msg.sender to be the minter?
         require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
@@ -63,6 +68,7 @@ contract GameToken is ERC721BaseToken {
                 // @review using openzeppelin's enumerable set lib:
                 // https://docs.openzeppelin.com/contracts/3.x/api/utils#EnumerableSet-add-struct-EnumerableSet-AddressSet-address-
                 gameAssets.add(assetIds[i]);
+                // @review should I be using batchTransfers here?
                 _asset.safeTransferFrom(from, address(this), assetIds[i]);
             }
         }
@@ -70,6 +76,57 @@ contract GameToken is ERC721BaseToken {
         emit NewGame(gameId, to, assetIds);
         return gameId;
     }
+
+    function addSingleAsset(uint256 gameId, uint256 assetId) external {
+        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
+        _assetsInGame[gameId].add(assetId);
+        _asset.safeTransferFrom(msg.sender, address(this), assetId);
+        uint256[] memory assets;
+        assets[0] = assetId;
+        emit AssetsAdded(gameId, assets);
+    }
+
+    function removeSingleAsset(
+        uint256 gameId,
+        uint256 assetId,
+        address to
+    ) external {
+        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
+        require(to != address(0), "INVALID_TO_ADDRESS");
+        _assetsInGame[gameId].remove(assetId);
+        // @review does this work?
+        _asset.safeTransferFrom(address(this), to, assetId);
+        uint256[] memory assets;
+        assets[0] = assetId;
+        emit AssetsRemoved(gameId, assets, to);
+    }
+
+    function addMultipleAssets(uint256 gameId, uint256[] calldata assetIds) external {
+        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
+        EnumerableSet.UintSet storage gameAssets = _assetsInGame[gameId];
+        for (uint256 i = 0; i < assetIds.length; i++) {
+            gameAssets.add(assetIds[i]);
+            _asset.safeTransferFrom(msg.sender, address(this), assetIds[i]);
+        }
+        emit AssetsAdded(gameId, assetIds);
+    }
+
+    function removeMultipleAssets(
+        uint256 gameId,
+        uint256[] calldata assetIds,
+        address to
+    ) external {
+        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
+        require(to != address(0), "INVALID_TO_ADDRESS");
+        EnumerableSet.UintSet storage gameAssets = _assetsInGame[gameId];
+        for (uint256 i = 0; i < assetIds.length; i++) {
+            gameAssets.remove(assetIds[i]);
+            _asset.safeTransferFrom(address(this), to, assetIds[i]);
+        }
+        emit AssetsRemoved(gameId, assetIds, to);
+    }
+
+    function getGameAssets(uint256 gameId) external returns (uint256 numberOfAssets, uint256[] memory assetIds) {}
 
     /**
      * @notice Function to allow token owner to set game editors
@@ -92,7 +149,7 @@ contract GameToken is ERC721BaseToken {
      * @param editor the address of the editor to set
      * @return isEditor editor status of editor for given tokenId
      */
-    function isGameEditor(uint256 gameId, address editor) external returns (bool isEditor) {
+    function isGameEditor(uint256 gameId, address editor) external view returns (bool isEditor) {
         return _gameEditors[gameId][editor];
     }
 
@@ -142,9 +199,6 @@ contract GameToken is ERC721BaseToken {
         uint256 gameId = _nextId;
         _nextId = _nextId + 1;
         _owners[gameId] = uint256(to);
-        uint256 testOwner = _owners[gameId];
-        console.log("to: ", uint256(to));
-        console.log("test owner: ", testOwner);
         _numNFTPerAddress[to]++;
         emit Transfer(address(0), to, gameId);
         return gameId;
