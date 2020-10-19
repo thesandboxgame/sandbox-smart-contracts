@@ -50,6 +50,7 @@ contract GameToken is ERC721BaseToken {
         address from,
         address to,
         uint256[] memory assetIds,
+        uint256[] memory values,
         address[] memory editors
     ) public returns (uint256 id) {
         // @review consider metaTransactions here. should we require "from", "to" or msg.sender to be the minter?
@@ -70,9 +71,9 @@ contract GameToken is ERC721BaseToken {
                 for (uint256 i = 0; i < assetIds.length; i++) {
                     gameAssets.add(assetIds[i]);
                 }
-                _asset.safeBatchTransferFrom(from, address(this), assetIds, "");
+                _asset.safeBatchTransferFrom(from, address(this), assetIds, values, "");
             } else {
-                _asset.safeTransferFrom(from, address(this), assetIds[0], 1, "");
+                _asset.safeTransferFrom(from, address(this), assetIds[0], values[0], "");
             }
         }
         emit NewGame(gameId, to, assetIds);
