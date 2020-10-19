@@ -4,7 +4,7 @@ import "../BaseWithStorage/ERC721BaseToken.sol";
 import "../interfaces/AssetToken.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 
-// @review remove console.logs !
+// @review remove all console.logs !
 import "@nomiclabs/buidler/console.sol";
 
 
@@ -14,11 +14,8 @@ contract GameToken is ERC721BaseToken {
     uint256 public _nextId;
 
     event Minter(address newMinter);
-    event NewGame(uint256 indexed id, address indexed gameOwner, uint256[] assets);
-    event AssetsAdded(uint256 indexed id, uint256[] assets);
-    event AssetsRemoved(uint256 indexed id, uint256[] assets, address to);
-
-    // @review Admin functions needed?
+    event AssetsAdded(uint256 indexed id, uint256[] assets, uint256[] values);
+    event AssetsRemoved(uint256 indexed id, uint256[] assets, uint256[] values, address to);
 
     /// @notice return the current minter
     function getMinter() external view returns (address) {
@@ -81,22 +78,34 @@ contract GameToken is ERC721BaseToken {
                 _asset.safeTransferFrom(from, address(this), assetIds[0], values[0], "");
             }
         }
-        emit NewGame(gameId, to, assetIds);
+        emit AssetsAdded(gameId, assetIds, values);
         return gameId;
     }
 
-    function addSingleAsset(uint256 gameId, uint256 assetId) external {
+    // @review Add burnGame function. see comments here: https://github.com/thesandboxgame/sandbox-private-contracts/pull/138#discussion_r507714939
+
+    // @review Could be made into a wrapper which calls addMultipleAssets with correct params...
+    function addSingleAsset(
+        uint256 gameId,
+        uint256 assetId,
+        uint256 value
+    ) external {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         _assetsInGame[gameId].add(assetId);
         _asset.safeTransferFrom(msg.sender, address(this), assetId);
         uint256[] memory assets;
+        uint256[] memory values;
         assets[0] = assetId;
-        emit AssetsAdded(gameId, assets);
+        values[0] = value;
+
+        emit AssetsAdded(gameId, assets, values);
     }
 
+    // @review Could be made into a wrapper which calls removeMultipleAssets with correct params...
     function removeSingleAsset(
         uint256 gameId,
         uint256 assetId,
+        uint256 value,
         address to
     ) external {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
@@ -105,23 +114,30 @@ contract GameToken is ERC721BaseToken {
         // @review does this work?
         _asset.safeTransferFrom(address(this), to, assetId);
         uint256[] memory assets;
+        uint256[] memory values;
         assets[0] = assetId;
-        emit AssetsRemoved(gameId, assets, to);
+        values[0] = value;
+        emit AssetsRemoved(gameId, assets, values, to);
     }
 
-    function addMultipleAssets(uint256 gameId, uint256[] calldata assetIds) external {
+    function addMultipleAssets(
+        uint256 gameId,
+        uint256[] calldata assetIds,
+        uint256[] calldata values
+    ) external {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         EnumerableSet.UintSet storage gameAssets = _assetsInGame[gameId];
         for (uint256 i = 0; i < assetIds.length; i++) {
             gameAssets.add(assetIds[i]);
             _asset.safeTransferFrom(msg.sender, address(this), assetIds[i]);
         }
-        emit AssetsAdded(gameId, assetIds);
+        emit AssetsAdded(gameId, assetIds, values);
     }
 
     function removeMultipleAssets(
         uint256 gameId,
         uint256[] calldata assetIds,
+        uint256[] calldata values,
         address to
     ) external {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
@@ -131,7 +147,7 @@ contract GameToken is ERC721BaseToken {
             gameAssets.remove(assetIds[i]);
             _asset.safeTransferFrom(address(this), to, assetIds[i]);
         }
-        emit AssetsRemoved(gameId, assetIds, to);
+        emit AssetsRemoved(gameId, assetIds, values, to);
     }
 
     function getGameAssets(uint256 gameId) external view returns (uint256[] memory assetIds, uint256[] memory quantities) {
