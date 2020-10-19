@@ -3,6 +3,8 @@ pragma solidity 0.6.5;
 import "../BaseWithStorage/ERC721BaseToken.sol";
 import "../interfaces/AssetToken.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
+
+// @review remove console.logs !
 import "@nomiclabs/buidler/console.sol";
 
 
@@ -61,7 +63,7 @@ contract GameToken is ERC721BaseToken {
                 _gameEditors[gameId][editors[i]] = true;
             }
         }
-        // @review if only 1 asset use safeTransferFrom. If many, use safeBatchTransferFrom
+
         if (assetIds.length != 0) {
             EnumerableSet.UintSet storage gameAssets = _assetsInGame[gameId];
             if (assetIds.length > 1) {
@@ -70,7 +72,7 @@ contract GameToken is ERC721BaseToken {
                 }
                 _asset.safeBatchTransferFrom(from, address(this), assetIds, "");
             } else {
-                _asset.safeTransferFrom(from, address(this), assetIds[0]);
+                _asset.safeTransferFrom(from, address(this), assetIds[0], 1, "");
             }
         }
         emit NewGame(gameId, to, assetIds);
@@ -231,6 +233,8 @@ contract GameToken is ERC721BaseToken {
         uint256 gameId = _nextId;
         _nextId = _nextId + 1;
         _owners[gameId] = uint256(to);
+        console.log("owner: ", _owners[gameId]);
+        console.log("to: ", to);
         _numNFTPerAddress[to]++;
         emit Transfer(address(0), to, gameId);
         return gameId;
