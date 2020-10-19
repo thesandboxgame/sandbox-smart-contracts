@@ -46,6 +46,8 @@ contract GameToken is ERC721BaseToken {
      * @param assetIds The ids of the assets to add to this game
      * @param editors The addresses to allow to edit (Can also be set later)
      *  */
+
+    // @review make sure assetIds.length == quantities.length
     function createGame(
         address from,
         address to,
@@ -57,6 +59,7 @@ contract GameToken is ERC721BaseToken {
         require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
+        require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
         uint256 gameId = _mintGame(to);
 
         if (editors.length != 0) {
@@ -67,9 +70,11 @@ contract GameToken is ERC721BaseToken {
 
         if (assetIds.length != 0) {
             EnumerableSet.UintSet storage gameAssets = _assetsInGame[gameId];
+            EnumerableSet.UintSet storage assetQuantities = _assetQuantities[gameId];
             if (assetIds.length > 1) {
                 for (uint256 i = 0; i < assetIds.length; i++) {
                     gameAssets.add(assetIds[i]);
+                    assetQuantities.add(values[i]);
                 }
                 _asset.safeBatchTransferFrom(from, address(this), assetIds, values, "");
             } else {
@@ -129,18 +134,14 @@ contract GameToken is ERC721BaseToken {
         emit AssetsRemoved(gameId, assetIds, to);
     }
 
-    function getGameAssets(uint256 gameId) external view returns (uint256 numberOfAssets, uint256[] memory assetIds) {
-        uint256[] memory assets;
-        uint256 lengthOfSet = _assetsInGame[gameId].length();
-        if (lengthOfSet != 0) {
-            for (uint256 i = 0; i < lengthOfSet; i++) {
-                assets[i] = _assetsInGame[gameId].at(i);
-                console.log("assets[i] - contract", _assetsInGame[gameId].at(i));
-            }
-            return (lengthOfSet, assets);
-        } else {
-            return (0, assets);
+    function getGameAssets(uint256 gameId) external view returns (uint256[] memory assetIds, uint256[] memory quantities) {
+        // uint256[] memory assets;
+        // uint256[] memory quantities;
+        for (uint256 i = 0; i < _assetsInGame[gameId].length(); i++) {
+            assetIds[i] = _assetsInGame[gameId].at(i);
+            quantities[i] = _assetQuantities[gameId].at(i);
         }
+        return (assetIds, quantities);
     }
 
     /**
@@ -244,10 +245,10 @@ contract GameToken is ERC721BaseToken {
     address internal _minter;
     AssetToken _asset;
 
-    // EnumerableSet.UintSet private _assetsSet;
     mapping(uint256 => string) private _metaData;
     mapping(uint256 => mapping(address => bool)) private _gameEditors;
     mapping(uint256 => EnumerableSet.UintSet) private _assetsInGame;
+    mapping(uint256 => EnumerableSet.UintSet) private _assetQuantities;
 
     constructor(
         address metaTransactionContract,
