@@ -1,4 +1,4 @@
-pragma solidity ^0.6.5;
+pragma solidity 0.6.5;
 import "../common/Libraries/SafeMathWithRequire.sol";
 import "../common/BaseWithStorage/Ownable.sol";
 import "../common/interfaces/ERC20.sol";

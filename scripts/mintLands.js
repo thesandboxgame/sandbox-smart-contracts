@@ -14,6 +14,8 @@ async function mint(x, y, size, address) {
   console.log(y);
   console.log("data:");
   console.log("0x");
+
+  console.log(`to: <address> , size: ${size} , x: ${x} , y: ${y} , data: 0x`);
 }
 
 (async () => {

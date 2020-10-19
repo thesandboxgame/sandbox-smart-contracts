@@ -80,17 +80,18 @@ contract FeeDistributor {
     uint256 private constant DECIMALS = 4;
 
     // /////////////////// CONSTRUCTOR ////////////////////
-    /// @notice Assign each recipient with its corresponding percentage.
+    /// @notice Assign each recipient with its corresponding share.
     /// @notice Percentages are 4 decimal points, e.g. 1 % = 100
     /// @param recipients fee recipients
-    /// @param percentages the corresponding percentage (from total fees held by the contract) for a recipient
-    constructor(address payable[] memory recipients, uint256[] memory percentages) public {
-        require(recipients.length == percentages.length, "ARRAYS_LENGTHS_SHOULD_BE_EQUAL");
+    /// @param shares the corresponding share (from total fees held by the contract) for a recipient
+    constructor(address payable[] memory recipients, uint256[] memory shares) public {
+        require(recipients.length == shares.length, "ARRAYS_LENGTHS_SHOULD_BE_EQUAL");
         uint256 totalPercentage = 0;
         for (uint256 i = 0; i < recipients.length; i++) {
-            uint256 percentage = percentages[i];
-            recipientsShares[recipients[i]] = percentage;
-            totalPercentage = totalPercentage.add(percentage);
+            require(recipientsShares[recipients[i]] == 0, "NO DUPLICATE ADDRESSES");
+            uint256 share = shares[i];
+            recipientsShares[recipients[i]] = share;
+            totalPercentage = totalPercentage.add(share);
         }
         require(totalPercentage == 10**DECIMALS, "PERCENTAGES_ARRAY_SHOULD_SUM_TO_100%");
     }
