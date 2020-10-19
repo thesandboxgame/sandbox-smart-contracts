@@ -181,6 +181,26 @@ contract GameToken is ERC721BaseToken {
         return "GAME";
     }
 
+    function onERC1155Received(
+        address, /*operator*/
+        address, /*from*/
+        uint256, /*id*/
+        uint256, /*value*/
+        bytes calldata /*data*/
+    ) external pure returns (bytes4) {
+        return 0xf23a6e61;
+    }
+
+    function onERC1155BatchReceived(
+        address, /*operator*/
+        address, /*from*/
+        uint256[] calldata, /*ids*/
+        uint256[] calldata, /*values*/
+        bytes calldata /*data*/
+    ) external pure returns (bytes4) {
+        return 0xbc197c81;
+    }
+
     /**
      * @notice Return the URI of a specific token
      * @param gameId The id of the token
