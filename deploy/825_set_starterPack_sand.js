@@ -1,4 +1,3 @@
-const {guard} = require("../lib");
 module.exports = async ({deployments}) => {
   const {read, execute, log} = deployments;
   const starterPack = await deployments.get("StarterPackV1");
@@ -16,4 +15,3 @@ module.exports = async ({deployments}) => {
     );
   }
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO remove

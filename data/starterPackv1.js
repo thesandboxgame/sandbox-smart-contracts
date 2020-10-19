@@ -1,10 +1,10 @@
 module.exports = {
   starterPackGems: {
     ids: [0, 1, 2, 3, 4],
-    quantities: [202, 200, 226, 103, 150], // TODO final data for mainnet
+    quantities: [569, 437, 468, 245, 366],
   },
   starterPackCatalysts: {
     ids: [0, 1, 2, 3],
-    quantities: [707, 354, 72, 1], // TODO final data for mainnet
+    quantities: [876, 709, 279, 2],
   },
 };
