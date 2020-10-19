@@ -16,7 +16,7 @@ let id3;
 const dummyHash = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 const packId = 0;
 const rarity = 3;
-const raritiesPack = "0x";
+// const raritiesPack = "0x";
 
 async function supplyAssets(creator, owner, supply) {
   await execute("Asset", {from: assetBouncerAdmin, skipUnknownSigner: true}, "setBouncer", assetAdmin, true);
@@ -45,16 +45,13 @@ describe("GameToken", function () {
     const assetContract = await ethers.getContract("Asset");
     const transferEvents = await findEvents(assetContract, "Transfer", receipt.blockHash);
     id = transferEvents[0].args[2];
-    // const extractionReceipt = await assetContract.extractERC721(id, userWithSAND.address);
-    // const extractionEvents = await findEvents(assetContract, "Extraction", extractionReceipt.blockHash);
-    // const erc721Id = extractionEvents[0].args[1];
-    // console.log(`erc-721 Id: ${erc721Id}`);
+    const owner = transferEvents[0].args[1];
+    console.log(`owner: ${owner}`);
+    // await assetContract.extractERC721(id, owner);
     console.log(`id: ${id}`);
   });
 
   describe("GameToken: Minting GAMEs - Without Assets", function () {
-    // let gameId;
-
     describe("GameToken: With Minter", function () {
       let gameToken;
       let gameTokenAsAdmin;
@@ -65,13 +62,23 @@ describe("GameToken", function () {
         ({gameToken, gameTokenAsAdmin, users} = await setupTest());
       });
 
-      // @review finish test !
+      // @review finish writing test
       it("minter can create GAMEs when _minter is set", async function () {
         await gameTokenAsAdmin.setMinter(users[3].address);
         const Minter = users[3];
         const minterReceipt = Minter.Game.createGame(users[3].address, users[4].address, [], []);
         newGameEvents = await findEvents(gameToken, "NewGame", minterReceipt.blockHash);
         minterGameId = newGameEvents[0].args[0];
+        console.log(`minter game id: ${minterGameId}`);
+      });
+
+      it("can transfer ownership of a GAME", async function () {
+        const {users} = await setupTest();
+        const originalOwner = gameToken.ownerOf(minterGameId);
+        const recipient = users[7].address;
+        await waitFor(gameToken.safeTransferFrom(originalOwner, recipient, minterGameId));
+        const newOwner = await gameToken.ownerOf(id);
+        expect(newOwner).to.be.equal(recipient);
       });
 
       it("reverts if non-minter trys to mint Game when _minter set", async function () {
@@ -131,7 +138,9 @@ describe("GameToken", function () {
       console.log(`balance: ${balance}`);
       const balanceBefore = await assetContract["balanceOf(address,uint256)"](gameToken.address, id);
       const assetAsAssetOwner = await assetContract.connect(assetContract.provider.getSigner(GameOwner.address));
+      // @review using erc721 or erc1155 ?
       await waitFor(assetAsAssetOwner.approveFor(GameOwner.address, gameToken.address, id));
+      console.log(`intendedOwner: ${GameOwner.address}`);
       const receipt = await waitFor(GameOwner.Game.createGame(GameOwner.address, GameOwner.address, id, []));
       const balanceAfter = await assetContract["balanceOf(address,uint256)"](gameToken.address, id);
       expect(balanceAfter).to.be.equal(balanceBefore + 1);
