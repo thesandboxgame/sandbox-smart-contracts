@@ -102,12 +102,10 @@ describe("GameToken", function () {
       });
 
       it("can get GAME data when no assets", async function () {
-        // let assets = [];
-        // let numberOfAssets;
         const {assets, quantities} = await gameToken.getGameAssets(gameId);
         const ownerOf = await gameToken.ownerOf(gameId);
 
-        expect(quantities).to.be.eql([]);
+        expect(quantities).to.be.equal(undefined);
         expect(assets).to.be.equal(undefined);
         expect(ownerOf).to.be.equal(GameOwner.address);
       });
