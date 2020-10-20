@@ -36,6 +36,12 @@ interface AssetToken {
         address to
     ) external returns (uint256 newId);
 
+    function transferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) external;
+
     function safeTransferFrom(
         address from,
         address to,

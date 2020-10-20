@@ -1,5 +1,4 @@
 const {ethers, deployments, getNamedAccounts} = require("@nomiclabs/buidler");
-// const {execute} = deployments;
 const {BigNumber} = require("ethers");
 const {toWei} = require("local-utils");
 
