@@ -208,7 +208,7 @@ contract GameToken is ERC721BaseToken {
         uint256, /*value*/
         bytes calldata /*data*/
     ) external pure returns (bytes4) {
-        return 0xf23a6e61;
+        revert("NOT_ERC1155_RECEIVER");
     }
 
     function onERC1155BatchReceived(
@@ -218,7 +218,7 @@ contract GameToken is ERC721BaseToken {
         uint256[] calldata, /*values*/
         bytes calldata /*data*/
     ) external pure returns (bytes4) {
-        return 0xbc197c81;
+        revert("NOT_ERC1155_RECEIVER");
     }
 
     /**
