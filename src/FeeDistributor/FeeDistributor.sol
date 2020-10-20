@@ -88,7 +88,7 @@ contract FeeDistributor {
         require(recipients.length == shares.length, "ARRAYS_LENGTHS_SHOULD_BE_EQUAL");
         uint256 totalPercentage = 0;
         for (uint256 i = 0; i < recipients.length; i++) {
-            require(recipientsShares[recipients[i]] == 0, "NO DUPLICATE ADDRESSES");
+            require(recipientsShares[recipients[i]] == 0, "NO_DUPLICATE_ADDRESSES");
             uint256 share = shares[i];
             recipientsShares[recipients[i]] = share;
             totalPercentage = totalPercentage.add(share);

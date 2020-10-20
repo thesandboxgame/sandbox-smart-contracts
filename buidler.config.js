@@ -103,7 +103,7 @@ module.exports = {
     },
 
     StakingPool: {
-      default: 5,
+      default: 6,
       1: "", // TODO
     },
 

@@ -236,12 +236,14 @@ function runCommonTests() {
     });
 
     it("prices can be calculated locally", async function () {
-      // starterPackPrices = [sandWei(18), sandWei(55), sandWei(182), sandWei(727)];
-      // gemPrice = sandWei(18);
+      // module.exports.starterPackPrices = [sandWei(20), sandWei(60), sandWei(200), sandWei(800)];
+      // module.exports.gemPrice = sandWei(20);
       const catalystQuantities = [1, 2, 3, 4];
       const gemQuantities = [7, 11, 2, 6];
       const totalCalculatedPrice = priceCalculator(starterPackPrices, catalystQuantities, gemPrice, gemQuantities);
-      expect(totalCalculatedPrice).to.be.equal(BigNumber.from(4050).mul("1000000000000000000"));
+      expect(totalCalculatedPrice).to.be.equal(
+        BigNumber.from(20 + 60 * 2 + 200 * 3 + 800 * 4 + (7 + 11 + 2 + 6) * 20).mul("1000000000000000000")
+      );
     });
   });
 }
