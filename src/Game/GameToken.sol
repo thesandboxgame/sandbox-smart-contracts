@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 import "../BaseWithStorage/ERC721BaseToken.sol";
 import "../interfaces/AssetToken.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
+import "../common/Libraries/SafeMathWithRequire.sol";
 
 // @review remove all console.logs !
 import "@nomiclabs/buidler/console.sol";
@@ -11,6 +12,7 @@ import "@nomiclabs/buidler/console.sol";
 
 contract GameToken is ERC721BaseToken {
     using EnumerableSet for EnumerableSet.UintSet;
+    using SafeMathWithRequire for uint256;
 
     uint256 public _nextId;
 
@@ -19,6 +21,7 @@ contract GameToken is ERC721BaseToken {
     event AssetsRemoved(uint256 indexed id, uint256[] assets, uint256[] values, address to);
 
     /// @notice return the current minter
+    /// @return address of minter
     function getMinter() external view returns (address) {
         return _minter;
     }
@@ -32,20 +35,13 @@ contract GameToken is ERC721BaseToken {
         emit Minter(minter);
     }
 
-    function _ownerOf(uint256 id) internal override view returns (address) {
-        uint256 data = _owners[id];
-        return address(data);
-    }
-
-    /**
-     * @notice Function to create a new GAME token
-     * @param from The address of the one creating the game (may be different from msg.sender if metaTx)
-     * @param to The address who will be assigned ownership of this game
-     * @param assetIds The ids of the assets to add to this game
-     * @param editors The addresses to allow to edit (Can also be set later)
-     *  */
-
-    // @review make sure assetIds.length == quantities.length
+    /// @notice Function to create a new GAME token
+    /// @param from The address of the one creating the game (may be different from msg.sender if metaTx)
+    /// @param to The address who will be assigned ownership of this game
+    /// @param assetIds The ids of the assets to add to this game
+    /// @param values the amount of each token id to add to game
+    /// @param editors The addresses to allow to edit (Can also be set later)
+    /// @return id The id of the new GAME token (erc721)
     function createGame(
         address from,
         address to,
@@ -65,42 +61,70 @@ contract GameToken is ERC721BaseToken {
                 _gameEditors[gameId][editors[i]] = true;
             }
         }
+        // @review what about when only one id and value > 1 ?
+        // a single asset is defined as 1 tokenID, and a value of 1 for that id. For anything else, use addMultipleAssets
 
         if (assetIds.length != 0) {
-            EnumerableSet.UintSet storage gameAssets = _assetsInGame[gameId];
-            EnumerableSet.UintSet storage assetQuantities = _assetQuantities[gameId];
-            if (assetIds.length > 1) {
-                for (uint256 i = 0; i < assetIds.length; i++) {
-                    gameAssets.add(assetIds[i]);
-                    assetQuantities.add(values[i]);
-                }
-                _asset.safeBatchTransferFrom(from, address(this), assetIds, values, "");
+            if (assetIds.length == 1 && values[0] == 1) {
+                // Case: a single asset id with a value of 1
+                addSingleAsset(from, gameId, assetIds[0]);
             } else {
-                _asset.transferFrom(from, address(this), assetIds[0]);
+                // Case: Either multiple assetIds, or single assetId with value > 1
+                addMultipleAssets(from, gameId, assetIds, values);
             }
         }
         emit AssetsAdded(gameId, assetIds, values);
         return gameId;
     }
 
-    // @review Add burnGame function. see comments here: https://github.com/thesandboxgame/sandbox-private-contracts/pull/138#discussion_r507714939
-
-    // @review Could be made into a wrapper which calls addMultipleAssets with correct params...
+    /// @notice Function to add a single asset to an existing GAME
+    /// @param from The address of the one creating the game (may be different from msg.sender if metaTx)
+    /// @param gameId The id of the GAME to add asset to
+    /// @param assetId The id of the asset to add to GAME. Value is 1. If vaule needs to be > 1, use `addMultipleAssets(...)` instead.
     function addSingleAsset(
+        address from,
         uint256 gameId,
-        uint256 assetId,
-        uint256 value
-    ) external {
+        uint256 assetId
+    ) public {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
-        _assetsInGame[gameId].add(assetId);
-        _asset.safeTransferFrom(msg.sender, address(this), assetId);
-        uint256[] memory assets;
-        uint256[] memory values;
+        // here "add" is from EnumerableSet.sol
+        _gameData[gameId]._assets.add(assetId);
+        uint256 assetValues = _gameData[gameId]._values[assetId];
+        // here "add" is from SafeMathWithRequire.sol
+        _gameData[gameId]._values[assetId] = assetValues.add(1);
+        _asset.transferFrom(from, address(this), assetId);
+        uint256[] memory assets = new uint256[](1);
+        uint256[] memory values = new uint256[](1);
         assets[0] = assetId;
-        values[0] = value;
+        values[0] = uint256(1);
 
         emit AssetsAdded(gameId, assets, values);
     }
+
+    /// @notice Function to add multiple assets to an existing GAME
+    /// @param from The address of the one creating the game (may be different from msg.sender if metaTx)
+    /// @param gameId The id of the GAME to add asset to
+    /// @param assetIds The id of the asset to add to GAME
+    /// @param values The amount of each asset to add to GAME
+    function addMultipleAssets(
+        address from,
+        uint256 gameId,
+        uint256[] memory assetIds,
+        uint256[] memory values
+    ) public {
+        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
+        require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
+        for (uint256 i = 0; i < assetIds.length; i++) {
+            _gameData[gameId]._assets.add(assetIds[i]);
+            uint256 assetValues = _gameData[gameId]._values[assetIds[i]];
+            _gameData[gameId]._values[assetIds[i]] = assetValues.add(values[i]);
+            // @review Re-enable this ! not sure why it fails atm...
+            _asset.safeBatchTransferFrom(from, address(this), assetIds, values, "");
+        }
+        emit AssetsAdded(gameId, assetIds, values);
+    }
+
+    // @review Add burnGame function. see comments here: https://github.com/thesandboxgame/sandbox-private-contracts/pull/138#discussion_r507714939
 
     // @review Could be made into a wrapper which calls removeMultipleAssets with correct params...
     function removeSingleAsset(
@@ -111,28 +135,17 @@ contract GameToken is ERC721BaseToken {
     ) external {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(to != address(0), "INVALID_TO_ADDRESS");
-        _assetsInGame[gameId].remove(assetId);
-        // @review does this work?
+        // "remove" is from EnumerableSet.sol
+        _gameData[gameId]._assets.remove(assetId);
+        uint256 assetValues = _gameData[gameId]._values[assetId];
+        // "sub" is from SafeMathWithRequire.sol
+        _gameData[gameId]._values[assetId] = assetValues.sub(value);
         _asset.safeTransferFrom(address(this), to, assetId);
         uint256[] memory assets;
         uint256[] memory values;
         assets[0] = assetId;
         values[0] = value;
         emit AssetsRemoved(gameId, assets, values, to);
-    }
-
-    function addMultipleAssets(
-        uint256 gameId,
-        uint256[] calldata assetIds,
-        uint256[] calldata values
-    ) external {
-        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
-        EnumerableSet.UintSet storage gameAssets = _assetsInGame[gameId];
-        for (uint256 i = 0; i < assetIds.length; i++) {
-            gameAssets.add(assetIds[i]);
-            _asset.safeTransferFrom(msg.sender, address(this), assetIds[i]);
-        }
-        emit AssetsAdded(gameId, assetIds, values);
     }
 
     function removeMultipleAssets(
@@ -143,16 +156,24 @@ contract GameToken is ERC721BaseToken {
     ) external {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(to != address(0), "INVALID_TO_ADDRESS");
-        EnumerableSet.UintSet storage gameAssets = _assetsInGame[gameId];
+        require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
         for (uint256 i = 0; i < assetIds.length; i++) {
-            gameAssets.remove(assetIds[i]);
+            // "remove" is from EnumerableSet.sol
+            _gameData[gameId]._assets.remove(assetIds[i]);
+            uint256 assetValues = _gameData[gameId]._values[assetIds[i]];
+            // "sub" is from SafeMathWithRequire.sol
+            _gameData[gameId]._values[assetIds[i]] = assetValues.sub(values[i]);
             _asset.safeTransferFrom(address(this), to, assetIds[i]);
         }
         emit AssetsRemoved(gameId, assetIds, values, to);
     }
 
+    /// @notice Function to get all assets and quantities for a GAME
+    /// @param gameId The id of the GAME to get assets for
+    /// @return arrays: "assets" & "quantities"
+    // @review currently returning undefined. Should we return a 2 dimensional array here? ie: uint256[][2] memory
     function getGameAssets(uint256 gameId) external view returns (uint256[] memory, uint256[] memory) {
-        uint256 length = _assetsInGame[gameId].length();
+        uint256 length = _gameData[gameId]._assets.length();
         console.log("length: ", length);
         uint256[] memory assets;
         uint256[] memory quantities;
@@ -160,9 +181,10 @@ contract GameToken is ERC721BaseToken {
         if (length != 0) {
             assets = new uint256[](length);
             quantities = new uint256[](length);
-            for (uint256 i = 0; i < _assetsInGame[gameId].length(); i++) {
-                assets[i] = _assetsInGame[gameId].at(i);
-                quantities[i] = _assetQuantities[gameId].at(i);
+            for (uint256 i = 0; i < length; i++) {
+                assets[i] = _gameData[gameId]._assets.at(i);
+                quantities[i] = _gameData[gameId]._values[i];
+                console.log("assets[i]: ", assets[i]);
                 console.log("quantities[i]: ", quantities[i]);
             }
         } else {
@@ -171,16 +193,13 @@ contract GameToken is ERC721BaseToken {
             assets[0] = uint256(0);
             quantities[0] = uint256(0);
         }
-
         return (assets, quantities);
     }
 
-    /**
-     * @notice Function to allow token owner to set game editors
-     * @param gameId The id of the GAME token owned by owner
-     * @param editor The address of the editor to set
-     * @param isEditor Add or remove the ability to edit
-     */
+    /// @notice Function to allow token owner to set game editors
+    /// @param gameId The id of the GAME token owned by owner
+    /// @param editor The address of the editor to set
+    /// @param isEditor Add or remove the ability to edit
     function setGameEditor(
         uint256 gameId,
         address editor,
@@ -190,30 +209,44 @@ contract GameToken is ERC721BaseToken {
         _gameEditors[gameId][editor] = isEditor;
     }
 
-    /**
-     * @notice Function to get game editor status
-     * @param gameId the id of the GAME token owned by owner
-     * @param editor the address of the editor to set
-     * @return isEditor editor status of editor for given tokenId
-     */
+    /// @notice Function to get game editor status
+    /// @param gameId The id of the GAME token owned by owner
+    /// @param editor The address of the editor to set
+    /// @return isEditor Editor status of editor for given tokenId
     function isGameEditor(uint256 gameId, address editor) external view returns (bool isEditor) {
         return _gameEditors[gameId][editor];
     }
 
-    /**
-     * @notice Return the name of the token contract
-     * @return The name of the token contract
-     */
+    /// @notice Return the name of the token contract
+    /// @return The name of the token contract
+    // @review What should the actual name be?
+    // @review Do we want to be able to update metadata?
     function name() external pure returns (string memory) {
         return "Sandbox's GAMEs";
     }
 
-    /**
-     * @notice Return the symbol of the token contract
-     * @return The symbol of the token contract
-     */
+    /// @notice Function to get the symbol of the token contract
+    /// @return The symbol of the token contract
+    // @review What should the actual symbol be?
     function symbol() external pure returns (string memory) {
         return "GAME";
+    }
+
+    /// @notice Return the URI of a specific token
+    /// @param gameId The id of the token
+    /// @return tokenURI The URI of the token
+    function tokenURI(uint256 gameId) public view returns (string memory tokenURI) {
+        require(_ownerOf(gameId) != address(0), "Id does not exist");
+        string memory URI = _metaData[gameId];
+        return URI;
+    }
+
+    /// @notice Set the URI of a specific game token
+    /// @param gameId The id of the game token
+    /// @param URI The URI string for the token's metadata
+    function setTokenURI(uint256 gameId, string memory URI) public {
+        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "URI_ACCESS_DENIED");
+        _metaData[gameId] = URI;
     }
 
     function onERC1155Received(
@@ -240,32 +273,9 @@ contract GameToken is ERC721BaseToken {
         }
     }
 
-    /**
-     * @notice Return the URI of a specific token
-     * @param gameId The id of the token
-     * @return tokenURI The URI of the token
-     */
-    function tokenURI(uint256 gameId) public view returns (string memory tokenURI) {
-        require(_ownerOf(gameId) != address(0), "Id does not exist");
-        string memory URI = _metaData[gameId];
-        return URI;
-    }
-
-    /**
-     * @notice Set the URI of a specific game token
-     * @param gameId The id of the game token
-     * @param URI The URI string for the token's metadata
-     */
-    function setTokenURI(uint256 gameId, string memory URI) public {
-        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "URI_ACCESS_DENIED");
-        _metaData[gameId] = URI;
-    }
-
-    /**
-     * @dev Function to create a new gameId and associate it with an owner
-     * @param to The address of the Game owner
-     * @return id The newly created gameId
-     */
+    /// @dev Function to create a new gameId and associate it with an owner
+    /// @param to The address of the Game owner
+    /// @return id The newly created gameId
     function _mintGame(address to) internal returns (uint256 id) {
         uint256 gameId = _nextId;
         _nextId = _nextId + 1;
@@ -278,10 +288,18 @@ contract GameToken is ERC721BaseToken {
     address internal _minter;
     AssetToken _asset;
 
+    struct Data {
+        EnumerableSet.UintSet _assets;
+        mapping(uint256 => uint256) _values;
+    }
+
+    mapping(uint256 => Data) private _gameData;
+
     mapping(uint256 => string) private _metaData;
     mapping(uint256 => mapping(address => bool)) private _gameEditors;
-    mapping(uint256 => EnumerableSet.UintSet) private _assetsInGame;
-    mapping(uint256 => EnumerableSet.UintSet) private _assetQuantities;
+
+    // mapping(uint256 => EnumerableSet.UintSet) private _assetsInGame;
+    // mapping(uint256 => EnumerableSet.UintSet) private _assetQuantities;
 
     constructor(
         address metaTransactionContract,
