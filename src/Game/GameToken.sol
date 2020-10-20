@@ -118,9 +118,8 @@ contract GameToken is ERC721BaseToken {
             _gameData[gameId]._assets.add(assetIds[i]);
             uint256 assetValues = _gameData[gameId]._values[assetIds[i]];
             _gameData[gameId]._values[assetIds[i]] = assetValues.add(values[i]);
-            // @review Re-enable this ! not sure why it fails atm...
-            _asset.safeBatchTransferFrom(from, address(this), assetIds, values, "");
         }
+        _asset.safeBatchTransferFrom(from, address(this), assetIds, values, "");
         emit AssetsAdded(gameId, assetIds, values);
     }
 
