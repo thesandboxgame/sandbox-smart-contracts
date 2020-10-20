@@ -158,7 +158,7 @@ describe("GameToken", function () {
         expect(ownerOf).to.be.equal(GameOwner.address);
       });
 
-      // @review finish !
+      // @review fix !
       it("anyone can mint Games with many Assets", async function () {
         ({gameToken, GameOwner, userWithSAND} = await setupTest());
         const assetContract = await ethers.getContract("Asset");
@@ -182,10 +182,6 @@ describe("GameToken", function () {
 
         const quantity = assetTransferEvents[0].args[4];
         const quantity2 = assetTransferEvents2[0].args[4];
-        console.log(`asset id: ${assetId}`);
-        console.log(`asset id2: ${assetId2}`);
-        console.log(`quantity: ${quantity}`);
-        console.log(`quantity2: ${quantity2}`);
 
         const balanceBefore = await assetContract["balanceOf(address,uint256)"](gameToken.address, assetId);
         const balanceBefore2 = await assetContract["balanceOf(address,uint256)"](gameToken.address, assetId2);
@@ -213,10 +209,6 @@ describe("GameToken", function () {
         assets = assetsAddedEvents[0].args[1];
         values = assetsAddedEvents[0].args[2];
 
-        console.log(`id: ${id}`);
-        console.log(`assets: ${assets}`);
-        console.log(`values: ${values}`);
-
         const balanceOf = await gameToken.balanceOf(GameOwner.address);
         const ownerOf = await gameToken.ownerOf(gameId);
 
@@ -229,21 +221,29 @@ describe("GameToken", function () {
         expect(values).to.be.eql([BigNumber.from(3), BigNumber.from(2)]);
       });
 
-      // @review fix !
+      // @review fix ! assets, quantities are undefined...
       it.skip("can get GAME data with assets", async function () {
         let assets = [0];
         let quantities = [0];
         ({assets, quantities} = await gameToken.getGameAssets(gameId));
-        // console.log(`num of assets: ${quantities}`);
-        // console.log(`assets: ${assets}`);
-        // console.log(`length: ${assets.length}`);
-        // console.log(`quan length: ${quantities.length}`);
-        // expect(assets.length).to.be.equal(1);
-        // expect(quantities.length).to.be.equal(assets.length);
+        console.log(`num of assets: ${quantities}`);
+        console.log(`assets: ${assets}`);
+        console.log(`length: ${assets.length}`);
+        console.log(`quan length: ${quantities.length}`);
+        expect(assets.length).to.be.equal(1);
+        expect(quantities.length).to.be.equal(assets.length);
       });
 
-      it.skip("should fail if length of assetIds and values dont match", async function () {
-        // await expectRevert(, "INVALID_INPUT_LENGTHS")
+      it("should fail if length of assetIds and values dont match", async function () {
+        const assetContract = await ethers.getContract("Asset");
+        const {assetReceipt} = await supplyAssets(userWithSAND.address, 7, userWithSAND.address, 3, dummyHash);
+        const assetTransferEvents = await findEvents(assetContract, "TransferSingle", assetReceipt.blockHash);
+
+        const assetId = assetTransferEvents[0].args[3];
+        await expectRevert(
+          waitFor(GameOwner.Game.createGame(GameOwner.address, GameOwner.address, [assetId], [11, 42], [])),
+          "INVALID_INPUT_LENGTHS"
+        );
       });
     });
   });
@@ -295,7 +295,15 @@ describe("GameToken", function () {
     });
 
     it("Owner can add single Asset", async function () {
-      const {receipt} = await GameOwner.Game.addSingleAsset(gameId, assetId, 1);
+      const ownerOfGame = await gameToken.ownerOf(gameId);
+      assert(ownerOfGame == GameOwner.address, "Owner Mismatch");
+
+      const assetContract = await ethers.getContract("Asset");
+      const {assetReceipt} = await supplyAssets(userWithSAND.address, 11, userWithSAND.address, 1, dummyHash);
+      const assetTransferEvents = await findEvents(assetContract, "Transfer", assetReceipt.blockHash);
+      assetId = assetTransferEvents[0].args[2];
+
+      const {receipt} = await waitFor(GameOwner.Game.addSingleAsset(GameOwner.address, gameId, assetId));
       const assetsAddedEvents = await findEvents(gameToken, "AssetsAdded", receipt.blockHash);
       const id = assetsAddedEvents[0].args[0];
       const assets = assetsAddedEvents[0].args[1];
