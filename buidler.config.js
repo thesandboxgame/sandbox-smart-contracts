@@ -97,6 +97,16 @@ module.exports = {
       rinkeby: "0x60927eB036621b801491B6c5e9A60A8d2dEeD75A",
     },
 
+    Foundation: {
+      default: 5,
+      1: "", // TODO
+    },
+
+    StakingPool: {
+      default: 6,
+      1: "", // TODO
+    },
+
     treasury: {
       default: "sandSaleBeneficiary",
       rinkeby: "sandSaleBeneficiary",
