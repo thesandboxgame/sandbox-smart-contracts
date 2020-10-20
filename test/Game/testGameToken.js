@@ -101,6 +101,7 @@ describe("GameToken", function () {
         expect(contractGameOwner).to.be.equal(eventGameOwner);
       });
 
+      // @review should probably be [] or [0], not undefined
       it("can get GAME data when no assets", async function () {
         const {assets, quantities} = await gameToken.getGameAssets(gameId);
         const ownerOf = await gameToken.ownerOf(gameId);
@@ -225,19 +226,22 @@ describe("GameToken", function () {
         expect(values).to.be.eql([BigNumber.from(3), BigNumber.from(2)]);
       });
 
-      // @review finish !
+      // @review fix !
       it("can get GAME data with assets", async function () {
-        let assetIds;
-        let quantities;
-        ({assetIds, quantities} = await gameToken.getGameAssets(gameId));
-        console.log(`num of assets: ${quantities[0]}`);
-        console.log(`assets: ${assetIds[0]}`);
-        console.log(`lenght: ${assetIds.length}`);
-        expect(assetIds.length).to.be.equal(1);
-        expect(quantities.length).to.be.equal(assetIds.length);
+        let assets = [0];
+        let quantities = [0];
+        ({assets, quantities} = await gameToken.getGameAssets(gameId));
+        console.log(`num of assets: ${quantities}`);
+        console.log(`assets: ${assets}`);
+        console.log(`length: ${assets.length}`);
+        console.log(`quan length: ${quantities.length}`);
+        expect(assets.length).to.be.equal(1);
+        expect(quantities.length).to.be.equal(assets.length);
       });
 
-      it("should fail if length of assetIds and values dont match", async function () {});
+      it.skip("should fail if length of assetIds and values dont match", async function () {
+        // await expectRevert(, "INVALID_INPUT_LENGTHS")
+      });
     });
   });
 
