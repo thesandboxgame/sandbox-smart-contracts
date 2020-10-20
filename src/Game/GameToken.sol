@@ -1,4 +1,5 @@
 pragma solidity 0.6.5;
+pragma experimental ABIEncoderV2;
 
 import "../BaseWithStorage/ERC721BaseToken.sol";
 import "../interfaces/AssetToken.sol";
@@ -152,6 +153,7 @@ contract GameToken is ERC721BaseToken {
 
     function getGameAssets(uint256 gameId) external view returns (uint256[] memory, uint256[] memory) {
         uint256 length = _assetsInGame[gameId].length();
+        console.log("length: ", length);
         uint256[] memory assets;
         uint256[] memory quantities;
 
@@ -161,6 +163,7 @@ contract GameToken is ERC721BaseToken {
             for (uint256 i = 0; i < _assetsInGame[gameId].length(); i++) {
                 assets[i] = _assetsInGame[gameId].at(i);
                 quantities[i] = _assetQuantities[gameId].at(i);
+                console.log("quantities[i]: ", quantities[i]);
             }
         } else {
             assets = new uint256[](1);
@@ -168,6 +171,7 @@ contract GameToken is ERC721BaseToken {
             assets[0] = uint256(0);
             quantities[0] = uint256(0);
         }
+
         return (assets, quantities);
     }
 
@@ -229,8 +233,6 @@ contract GameToken is ERC721BaseToken {
         uint256[] calldata, /*values*/
         bytes calldata /*data*/
     ) external view returns (bytes4) {
-        // @review if this reverts we have no way to use batch transfers from our asset contract when adding assets to a game ! Maybe we have to add logic here to return the correct bytes4 if the caller is trusted asset contract...
-
         if (msg.sender == address(_asset)) {
             return 0xbc197c81;
         } else {
