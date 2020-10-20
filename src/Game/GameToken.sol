@@ -150,14 +150,25 @@ contract GameToken is ERC721BaseToken {
         emit AssetsRemoved(gameId, assetIds, values, to);
     }
 
-    function getGameAssets(uint256 gameId) external view returns (uint256[] memory assetIds, uint256[] memory quantities) {
-        // uint256[] memory assets;
-        // uint256[] memory quantities;
-        for (uint256 i = 0; i < _assetsInGame[gameId].length(); i++) {
-            assetIds[i] = _assetsInGame[gameId].at(i);
-            quantities[i] = _assetQuantities[gameId].at(i);
+    function getGameAssets(uint256 gameId) external view returns (uint256[] memory, uint256[] memory) {
+        uint256 length = _assetsInGame[gameId].length();
+        uint256[] memory assets;
+        uint256[] memory quantities;
+
+        if (length != 0) {
+            assets = new uint256[](length);
+            quantities = new uint256[](length);
+            for (uint256 i = 0; i < _assetsInGame[gameId].length(); i++) {
+                assets[i] = _assetsInGame[gameId].at(i);
+                quantities[i] = _assetQuantities[gameId].at(i);
+            }
+        } else {
+            assets = new uint256[](1);
+            quantities = new uint256[](1);
+            assets[0] = uint256(0);
+            quantities[0] = uint256(0);
         }
-        return (assetIds, quantities);
+        return (assets, quantities);
     }
 
     /**
