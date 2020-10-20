@@ -120,7 +120,7 @@ module.exports = {
     }, // updated to company treasury wallet 9th September - collect funds from land sales
 
     landSaleFeeRecipient: {default: 3, rinkeby: accounts_rinkeby[5], 1: "0x0EB04462D69B1D267d269377E34f60b9De1c8510"}, // collect 5% fee from land sales (prior to implementation of FeeDistributor)
-
+ 
     landAdmin: {
       default: 2,
       1: "0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06",
