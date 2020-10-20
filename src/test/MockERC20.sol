@@ -79,6 +79,8 @@ contract MintableToken is ERC20Impl, Ownable {
         _balances[account] = _balances[account].add(amount);
         emit Transfer(address(0), account, amount);
     }
+
+    constructor() public Ownable(msg.sender) {}
 }
 
 
