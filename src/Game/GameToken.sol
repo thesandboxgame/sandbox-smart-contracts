@@ -75,7 +75,7 @@ contract GameToken is ERC721BaseToken {
                 }
                 _asset.safeBatchTransferFrom(from, address(this), assetIds, values, "");
             } else {
-                _asset.safeTransferFrom(from, address(this), assetIds[0], values[0], "");
+                _asset.transferFrom(from, address(this), assetIds[0]);
             }
         }
         emit AssetsAdded(gameId, assetIds, values);
@@ -217,8 +217,14 @@ contract GameToken is ERC721BaseToken {
         uint256[] calldata, /*ids*/
         uint256[] calldata, /*values*/
         bytes calldata /*data*/
-    ) external pure returns (bytes4) {
-        revert("NOT_ERC1155_RECEIVER");
+    ) external view returns (bytes4) {
+        // @review if this reverts we have no way to use batch transfers from our asset contract when adding assets to a game ! Maybe we have to add logic here to return the correct bytes4 if the caller is trusted asset contract...
+
+        if (msg.sender == address(_asset)) {
+            return 0xbc197c81;
+        } else {
+            revert("NOT_ERC1155_RECEIVER");
+        }
     }
 
     /**
@@ -251,8 +257,6 @@ contract GameToken is ERC721BaseToken {
         uint256 gameId = _nextId;
         _nextId = _nextId + 1;
         _owners[gameId] = uint256(to);
-        console.log("owner: ", _owners[gameId]);
-        console.log("to: ", to);
         _numNFTPerAddress[to]++;
         emit Transfer(address(0), to, gameId);
         return gameId;
