@@ -25,6 +25,8 @@ interface AssetToken {
     // fails on non-NFT or nft who do not have collection (was a mistake)
     function collectionOf(uint256 id) external view returns (uint256);
 
+    function balanceOf(address owner, uint256 id) external view returns (uint256);
+
     // return true for Non-NFT ERC1155 tokens which exists
     function isCollection(uint256 id) external view returns (bool);
 
