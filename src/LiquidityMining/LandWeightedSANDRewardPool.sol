@@ -137,21 +137,22 @@ contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipi
 
     function stake(uint256 amount) public override updateReward(msg.sender) {
         require(amount > 0, "Cannot stake 0");
-        super.stake(amount);
         uint256 contribution = computeContribution(amount, _multiplierNFToken.balanceOf(msg.sender));
         _totalContributions = _totalContributions.add(contribution);
         _contributions[msg.sender] = _contributions[msg.sender].add(contribution);
+        super.stake(amount);
         emit Staked(msg.sender, amount);
     }
 
     function withdraw(uint256 amount) public override updateReward(msg.sender) {
         require(amount > 0, "Cannot withdraw 0");
         uint256 balance = balanceOf(msg.sender);
-        super.withdraw(amount);
         uint256 ratio = amount.mul(DECIMALS_18).div(balance);
         uint256 currentContribution = contributionOf(msg.sender);
         uint256 contributionReduction = currentContribution.mul(ratio).div(DECIMALS_18);
         _contributions[msg.sender] = currentContribution.sub(contributionReduction);
+        _totalContributions = _totalContributions.sub(contributionReduction);
+        super.withdraw(amount);
         emit Withdrawn(msg.sender, amount);
     }
 
@@ -161,7 +162,7 @@ contract LandWeightedSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipi
     }
 
     function getReward() public updateReward(msg.sender) {
-        uint256 reward = earned(msg.sender);
+        uint256 reward = rewards[msg.sender];
         if (reward > 0) {
             rewards[msg.sender] = 0;
             _rewardToken.safeTransfer(msg.sender, reward);
