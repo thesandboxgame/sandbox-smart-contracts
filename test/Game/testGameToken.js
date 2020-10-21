@@ -258,7 +258,7 @@ describe("GameToken", function () {
     let assetId;
 
     before(async function () {
-      ({gameToken, GameOwner, GameEditor1, GameEditor2, users} = await setupTest());
+      ({gameToken, GameOwner, GameEditor1, GameEditor2, userWithSAND, users} = await setupTest());
       const assetContract = await ethers.getContract("Asset");
       const {assetReceipt} = await supplyAssets(userWithSAND.address, packId, userWithSAND.address, 1, dummyHash);
       const assetTransferEvents = await findEvents(assetContract, "Transfer", assetReceipt.blockHash);
@@ -303,44 +303,27 @@ describe("GameToken", function () {
       const assetTransferEvents = await findEvents(assetContract, "Transfer", assetReceipt.blockHash);
       assetId = assetTransferEvents[0].args[2];
 
-      const {receipt} = await waitFor(GameOwner.Game.addSingleAsset(GameOwner.address, gameId, assetId));
+      const receipt = await waitFor(GameOwner.Game.addSingleAsset(GameOwner.address, gameId, assetId));
       const assetsAddedEvents = await findEvents(gameToken, "AssetsAdded", receipt.blockHash);
       const id = assetsAddedEvents[0].args[0];
       const assets = assetsAddedEvents[0].args[1];
       const values = assetsAddedEvents[0].args[2];
 
       expect(id).to.be.equal(gameId);
-      expect(assets).to.have.same.members([assetId]);
-      expect(values).to.have.same.members([1]);
+      expect(assets[0]).to.be.equal(assetId);
+      expect(values[0]).to.be.equal(1);
+      // @review once getGameAssets is working add a check here to prove game data is updated correctly.
     });
 
     it.skip("Owner can add multiple Assets", async function () {
       await GameOwner.Game.addMultipleAssets();
     });
 
-    it.skip("Owner can remove single Asset", async function () {
-      await GameOwner.Game.removeSingleAsset();
-    });
+    it.skip("Owner can remove single Asset", async function () {});
 
-    it.skip("Owner can remove multiple Assets", async function () {
-      await GameOwner.Game.removeMultipleAssets();
-    });
+    it.skip("Owner can remove multiple Assets", async function () {});
 
-    it.skip("Editor can add single Asset", async function () {
-      await GameEditor1.Game.addSingleAsset();
-    });
-
-    it.skip("Editor can add multiple Assets", async function () {
-      await GameEditor1.Game.addMultipleAssets();
-    });
-
-    it.skip("Editor can remove single Asset", async function () {
-      await GameEditor1.Game.removeSingleAsset();
-    });
-
-    it.skip("Editor can remove multiple Assets", async function () {
-      await GameEditor1.Game.removeSingleAsset();
-    });
+    it.skip("Editor can add & remove Assets", async function () {});
   });
 
   describe("GameToken: Transferring GAMEs", function () {
@@ -357,17 +340,17 @@ describe("GameToken", function () {
       const {assetReceipt} = await supplyAssets(userWithSAND.address, packId, userWithSAND.address, 1, dummyHash);
       userWithAssets = userWithSAND;
       assetContract = await ethers.getContract("Asset");
-      const transferEvents = await findEvents(assetContract, "Transfer", assetReceipt.blockHash);
-      assetId = transferEvents[0].args[2];
+      const assetTransferEvents = await findEvents(assetContract, "Transfer", assetReceipt.blockHash);
+      assetId = assetTransferEvents[0].args[2];
       const assetAsAssetOwner = await assetContract.connect(assetContract.provider.getSigner(GameOwner.address));
       await waitFor(assetAsAssetOwner.setApprovalForAllFor(GameOwner.address, gameToken.address, true));
       const receipt = await waitFor(
         GameOwner.Game.createGame(GameOwner.address, GameOwner.address, [assetId], [1], [])
       );
-      const newGameEvents = await findEvents(gameToken, "NewGame", receipt.blockHash);
-      gameId = newGameEvents[0].args[0];
+      const transferEvents = await findEvents(gameToken, "Transfer", receipt.blockHash);
+      gameId = transferEvents[0].args[2];
       console.log(`gameId: ${gameId}`);
-      const owner = newGameEvents[0].args[1];
+      const owner = transferEvents[0].args[1];
       console.log(`owner here: ${owner}`);
     });
 
@@ -404,8 +387,8 @@ describe("GameToken", function () {
     before(async function () {
       ({gameToken, GameOwner, GameEditor1} = await setupTest());
       const receipt = await waitFor(GameOwner.Game.createGame(GameOwner.address, GameOwner.address, [], [], []));
-      newGameEvents = await findEvents(gameToken, "NewGame", receipt.blockHash);
-      gameId = newGameEvents[0].args[0];
+      transferEvents = await findEvents(gameToken, "Transfer", receipt.blockHash);
+      gameId = transferEvents[0].args[2];
       await GameOwner.Game.setGameEditor(gameId, GameEditor1.address, true);
     });
 
