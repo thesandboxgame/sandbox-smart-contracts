@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "../common/BaseWithStorage/Admin.sol";
 
-
 contract ERC20FixedExchangeForwarder is Admin {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
@@ -52,5 +51,12 @@ contract ERC20FixedExchangeForwarder is Admin {
 
     function updateRate(uint256 newRate_18) external onlyAdmin {
         _sentReceivedRate_18 = newRate_18;
+    }
+
+    function withdrawToken(IERC20 token, address to) external onlyAdmin returns (uint256 amount) {
+        amount = token.balanceOf(address(this));
+        if (amount > 0) {
+            token.safeTransfer(to, amount);
+        }
     }
 }
