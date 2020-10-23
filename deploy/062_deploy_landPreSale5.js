@@ -1,5 +1,5 @@
 const {guard} = require("../lib");
-const {getLands} = require("../data/LandPreSale_4_1/getLands");
+const {getLands} = require("../data/landPreSale_4_1/getLands");
 
 module.exports = async ({getChainId, getNamedAccounts, deployments, network}) => {
   const {deploy} = deployments;
