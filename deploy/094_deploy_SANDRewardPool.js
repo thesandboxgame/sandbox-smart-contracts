@@ -8,5 +8,5 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     log: true,
   });
 };
-module.exports.skip = guard(["1", "4", "314159"], "SANDRewardPool");
+module.exports.skip = guard(["1", "4", "314159"]); // skip as deployed for phase 0 Liquidity Mining
 module.exports.tags = ["SANDRewardPool"];
