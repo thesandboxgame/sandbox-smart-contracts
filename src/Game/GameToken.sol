@@ -61,9 +61,7 @@ contract GameToken is ERC721BaseToken {
                 _gameEditors[gameId][editors[i]] = true;
             }
         }
-        // @review what about when only one id and value > 1 ?
         // a single asset is defined as 1 tokenID, and a value of 1 for that id. For anything else, use addMultipleAssets
-
         if (assetIds.length != 0) {
             if (assetIds.length == 1 && values[0] == 1) {
                 // Case: a single asset id with a value of 1
@@ -118,6 +116,8 @@ contract GameToken is ERC721BaseToken {
             _gameData[gameId]._assets.add(assetIds[i]);
             uint256 assetValues = _gameData[gameId]._values[assetIds[i]];
             _gameData[gameId]._values[assetIds[i]] = assetValues.add(values[i]);
+            console.log("Asset ID in addMultiple()", assetIds[i]);
+            console.log("Value in addMultiple()", values[i]);
         }
         _asset.safeBatchTransferFrom(from, address(this), assetIds, values, "");
         emit AssetsAdded(gameId, assetIds, values);
@@ -170,19 +170,18 @@ contract GameToken is ERC721BaseToken {
     /// @notice Function to get all assets and quantities for a GAME
     /// @param gameId The id of the GAME to get assets for
     /// @return arrays: "assets" & "quantities"
-    // @review currently returning undefined. Should we return a 2 dimensional array here? ie: uint256[][2] memory
+    // @review currently returning undefined...
     function getGameAssets(uint256 gameId) external view returns (uint256[] memory, uint256[] memory) {
         uint256 length = _gameData[gameId]._assets.length();
-        console.log("length: ", length);
         uint256[] memory assets;
         uint256[] memory quantities;
+        assets = new uint256[](length);
+        quantities = new uint256[](length);
 
         if (length != 0) {
-            assets = new uint256[](length);
-            quantities = new uint256[](length);
             for (uint256 i = 0; i < length; i++) {
                 assets[i] = _gameData[gameId]._assets.at(i);
-                quantities[i] = _gameData[gameId]._values[i];
+                quantities[i] = _gameData[gameId]._values[assets[i]];
                 console.log("assets[i]: ", assets[i]);
                 console.log("quantities[i]: ", quantities[i]);
             }
@@ -296,9 +295,6 @@ contract GameToken is ERC721BaseToken {
 
     mapping(uint256 => string) private _metaData;
     mapping(uint256 => mapping(address => bool)) private _gameEditors;
-
-    // mapping(uint256 => EnumerableSet.UintSet) private _assetsInGame;
-    // mapping(uint256 => EnumerableSet.UintSet) private _assetQuantities;
 
     constructor(
         address metaTransactionContract,
