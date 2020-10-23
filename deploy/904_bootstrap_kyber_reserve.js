@@ -111,5 +111,5 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
     );
   }
 };
-// module.exports.skip = guard(["1", "4", "314159"]);
+module.exports.skip = guard(["1", "4", "314159"]);
 module.exports.dependencies = ["KyberReserve"];
