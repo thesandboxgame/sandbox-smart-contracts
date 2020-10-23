@@ -49,7 +49,7 @@ module.exports.testLands = [
 ];
 
 module.exports.generateUserPermissions = async function (roles, contracts) {
-  const {landSaleAdmin, landSaleBeneficiary, landAdmin, sandAdmin, deployer, others} = roles;
+  const {landSaleAdmin, landSaleBeneficiary, landSaleFeeRecipient, landAdmin, sandAdmin, deployer, others} = roles;
   const {estateSale, land, estate, landSale, sand, dai} = contracts;
 
   const LandSaleAdmin = {
@@ -70,6 +70,16 @@ module.exports.generateUserPermissions = async function (roles, contracts) {
     LandSale: landSale.connect(landSale.provider.getSigner(landSaleBeneficiary)),
     Sand: sand.connect(sand.provider.getSigner(landSaleBeneficiary)),
     Dai: dai.connect(dai.provider.getSigner(landSaleBeneficiary)),
+  };
+
+  const LandSaleFeeRecipient = {
+    address: landSaleFeeRecipient,
+    EstateSale: estateSale.connect(estateSale.provider.getSigner(landSaleFeeRecipient)),
+    Land: land.connect(land.provider.getSigner(landSaleFeeRecipient)),
+    Estate: estate.connect(estate.provider.getSigner(landSaleFeeRecipient)),
+    LandSale: landSale.connect(landSale.provider.getSigner(landSaleFeeRecipient)),
+    Sand: sand.connect(sand.provider.getSigner(landSaleFeeRecipient)),
+    Dai: dai.connect(dai.provider.getSigner(landSaleFeeRecipient)),
   };
 
   const LandAdmin = {
@@ -114,7 +124,7 @@ module.exports.generateUserPermissions = async function (roles, contracts) {
       Dai: dai.connect(dai.provider.getSigner(other)),
     });
   }
-  return {LandSaleAdmin, LandSaleBeneficiary, LandAdmin, SandAdmin, DaiAdmin, users};
+  return {LandSaleAdmin, LandSaleBeneficiary, LandSaleFeeRecipient, LandAdmin, SandAdmin, DaiAdmin, users};
 };
 
 module.exports.setupUser = async function (contracts, SandAdmin, DaiAdmin, user, {hasSand, hasDAI}) {

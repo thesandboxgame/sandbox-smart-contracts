@@ -1,26 +1,29 @@
 pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-import "../common/Interfaces/ERC20.sol";
+
 import "../common/Libraries/SafeMathWithRequire.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 
 /// @title Fee distributor
 /// @notice Distributes all fees collected from platform activities to stakeholders
 contract FeeDistributor {
+    using SafeERC20 for IERC20;
     event Deposit(address token, address from, uint256 amount);
-    event Withdrawal(ERC20 token, address to, uint256 amount);
+    event Withdrawal(IERC20 token, address to, uint256 amount);
     mapping(address => uint256) public recipientsShares;
 
     /// @notice Enables fee holder to withdraw its share
     /// @notice Zero address reserved for ether withdrawal
     /// @param token the token that fee should be distributed in
+    /// @param beneficiary the address that will receive fees
     /// @return amount had withdrawn
-    function withdraw(ERC20 token) external returns (uint256 amount) {
+    function withdraw(IERC20 token, address payable beneficiary) external returns (uint256 amount) {
         if (address(token) == address(0)) {
-            amount = _etherWithdrawal();
+            amount = _etherWithdrawal(beneficiary);
         } else {
-            amount = _tokenWithdrawal(token);
+            amount = _tokenWithdrawal(token, beneficiary);
         }
         if (amount != 0) {
             emit Withdrawal(token, msg.sender, amount);
@@ -32,18 +35,18 @@ contract FeeDistributor {
     }
 
     // //////////////////// INTERNALS ////////////////////
-    function _etherWithdrawal() private returns (uint256) {
+    function _etherWithdrawal(address payable beneficiary) private returns (uint256) {
         uint256 amount = _calculateWithdrawalAmount(address(this).balance, address(0));
-        if (amount != 0) {
-            msg.sender.transfer(amount);
+        if (amount > 0) {
+            beneficiary.transfer(amount);
         }
         return amount;
     }
 
-    function _tokenWithdrawal(ERC20 token) private returns (uint256) {
-        uint256 amount = _calculateWithdrawalAmount(ERC20(token).balanceOf(address(this)), address(token));
-        if (amount != 0) {
-            require(ERC20(token).transfer(msg.sender, amount), "FEE_WITHDRAWAL_FAILED");
+    function _tokenWithdrawal(IERC20 token, address payable beneficiary) private returns (uint256) {
+        uint256 amount = _calculateWithdrawalAmount(token.balanceOf(address(this)), address(token));
+        if (amount > 0) {
+            token.safeTransfer(beneficiary, amount);
         }
         return amount;
     }
@@ -78,17 +81,18 @@ contract FeeDistributor {
     uint256 private constant DECIMALS = 4;
 
     // /////////////////// CONSTRUCTOR ////////////////////
-    /// @notice Assign each recipient with its corresponding percentage.
+    /// @notice Assign each recipient with its corresponding share.
     /// @notice Percentages are 4 decimal points, e.g. 1 % = 100
     /// @param recipients fee recipients
-    /// @param percentages the corresponding percentage (from total fees held by the contract) for a recipient
-    constructor(address payable[] memory recipients, uint256[] memory percentages) public {
-        require(recipients.length == percentages.length, "ARRAYS_LENGTHS_SHOULD_BE_EQUAL");
+    /// @param shares the corresponding share (from total fees held by the contract) for a recipient
+    constructor(address payable[] memory recipients, uint256[] memory shares) public {
+        require(recipients.length == shares.length, "ARRAYS_LENGTHS_SHOULD_BE_EQUAL");
         uint256 totalPercentage = 0;
         for (uint256 i = 0; i < recipients.length; i++) {
-            uint256 percentage = percentages[i];
-            recipientsShares[recipients[i]] = percentage;
-            totalPercentage = totalPercentage.add(percentage);
+            require(recipientsShares[recipients[i]] == 0, "NO_DUPLICATE_ADDRESSES");
+            uint256 share = shares[i];
+            recipientsShares[recipients[i]] = share;
+            totalPercentage = totalPercentage.add(share);
         }
         require(totalPercentage == 10**DECIMALS, "PERCENTAGES_ARRAY_SHOULD_SUM_TO_100%");
     }

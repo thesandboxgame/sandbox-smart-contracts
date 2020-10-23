@@ -19,7 +19,7 @@ function runSandTests(landSaleName) {
 
       it("can buy estate with SAND (empty referral)", async function () {
         const {tree, userWithSAND, lands, contracts} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
 
         await userWithSAND.EstateSale.functions.buyLandWithSand(
@@ -50,7 +50,7 @@ function runSandTests(landSaleName) {
 
       it("can buy estate with SAND and referral", async function () {
         const {tree, userWithSAND, userWithoutSAND, LandSaleBeneficiary, lands, contracts} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
 
         const referral = {
@@ -125,7 +125,9 @@ function runSandTests(landSaleName) {
         assert.isOk(commission.eq(referrerBalance), "Referrer balance is wrong");
 
         const landSaleBeneficiaryBalance = await contracts.sand.balanceOf(LandSaleBeneficiary.address);
-        const expectedLandSaleBeneficiaryBalance = BigNumber.from(amount).sub(BigNumber.from(commission));
+        const expectedLandSaleBeneficiaryBalance = BigNumber.from(amount)
+          .sub(BigNumber.from(commission))
+          .add(BigNumber.from(land.price).mul(5).div(100)); // Note: LandSaleBeneficiary currently the same as 5% fee recipient
         assert.isOk(landSaleBeneficiaryBalance.eq(expectedLandSaleBeneficiaryBalance), "Balance is wrong");
 
         for (let sx = 0; sx < land.size; sx++) {
@@ -141,7 +143,7 @@ function runSandTests(landSaleName) {
 
       it("can buy estate with adjusted SAND price and referral", async function () {
         const {tree, userWithSAND, userWithoutSAND, LandSaleBeneficiary, lands, contracts, SandAdmin} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
 
         const adjustedLandPrice = BigNumber.from(land.price).mul(12).div(10);
@@ -220,7 +222,9 @@ function runSandTests(landSaleName) {
         assert.isOk(commission.eq(referrerBalance), "Referrer balance is wrong");
 
         const landSaleBeneficiaryBalance = await contracts.sand.balanceOf(LandSaleBeneficiary.address);
-        const expectedLandSaleBeneficiaryBalance = BigNumber.from(amount).sub(BigNumber.from(commission));
+        const expectedLandSaleBeneficiaryBalance = BigNumber.from(amount)
+          .sub(BigNumber.from(commission))
+          .add(BigNumber.from(adjustedLandPrice).mul(5).div(100)); // Note: LandSaleBeneficiary currently the same as 5% fee recipient
         assert.isOk(landSaleBeneficiaryBalance.eq(expectedLandSaleBeneficiaryBalance), "Balance is wrong");
 
         for (let sx = 0; sx < land.size; sx++) {
@@ -235,8 +239,8 @@ function runSandTests(landSaleName) {
       });
 
       it("correct fee is taken when estate is purchased with SAND and referral", async function () {
-        const {tree, userWithSAND, userWithoutSAND, lands, contracts, users} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const {tree, userWithSAND, userWithoutSAND, lands, contracts, LandSaleFeeRecipient} = initialSetUp;
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
 
         const referral = {
@@ -284,13 +288,17 @@ function runSandTests(landSaleName) {
           encodedReferral
         );
 
-        const feeBeneficiaryBalance = await contracts.sand.balanceOf(users[5].address);
-        expect(feeBeneficiaryBalance).to.equal(BigNumber.from(land.price).mul(5).div(100)); // 5% fee
+        const feeAmount = BigNumber.from(land.price).mul(5).div(100);
+        const salePrice = BigNumber.from(land.price).mul(95).div(100);
+        const commission = salePrice.mul(5).div(100);
+
+        const feeBeneficiaryBalance = await contracts.sand.balanceOf(LandSaleFeeRecipient.address);
+        expect(feeBeneficiaryBalance).to.equal(feeAmount.add(salePrice).sub(commission)); // 5% fee + land sale price net of commission, as LandSaleBeneficiary currently the same as 5% fee recipient
       });
 
       it("correct fee is taken when estate is purchased with adjusted SAND price and referral", async function () {
-        const {tree, userWithSAND, userWithoutSAND, lands, contracts, users, SandAdmin} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const {tree, userWithSAND, userWithoutSAND, lands, contracts, LandSaleFeeRecipient, SandAdmin} = initialSetUp;
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
 
         await SandAdmin.EstateSale.rebalanceSand("1200");
@@ -342,13 +350,17 @@ function runSandTests(landSaleName) {
           encodedReferral
         );
 
-        const feeBeneficiaryBalance = await contracts.sand.balanceOf(users[5].address);
-        expect(feeBeneficiaryBalance).to.equal(BigNumber.from(adjustedLandPrice).mul(5).div(100)); // 5% fee
+        const feeAmount = BigNumber.from(adjustedLandPrice).mul(5).div(100);
+        const salePrice = BigNumber.from(adjustedLandPrice).mul(95).div(100);
+        const commission = salePrice.mul(5).div(100);
+
+        const feeBeneficiaryBalance = await contracts.sand.balanceOf(LandSaleFeeRecipient.address);
+        expect(feeBeneficiaryBalance).to.equal(feeAmount.add(salePrice).sub(commission)); // 5% fee + land sale price net of commission, as LandSaleBeneficiary currently the same as 5% fee recipient
       });
 
       it("can buy Land with SAND and an invalid referral", async function () {
         const {tree, userWithSAND, userWithoutSAND, LandSaleBeneficiary, lands, contracts} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
 
         const referral = {
@@ -405,7 +417,7 @@ function runSandTests(landSaleName) {
         assert.equal(referrerBalance, 0, "Referrer balance is wrong");
 
         const landSaleBeneficiaryBalance = await contracts.sand.balanceOf(LandSaleBeneficiary.address);
-        expect(landSaleBeneficiaryBalance).to.equal(BigNumber.from(land.price).mul(95).div(100)); // land sale beneficiary receives 95% of the land sale price
+        expect(landSaleBeneficiaryBalance).to.equal(BigNumber.from(land.price)); // land sale beneficiary receives 95% of the land sale price; LandSaleBeneficiary currently the same as 5% fee recipient
 
         for (let sx = 0; sx < land.size; sx++) {
           for (let sy = 0; sy < land.size; sy++) {
@@ -419,8 +431,8 @@ function runSandTests(landSaleName) {
       });
 
       it("correct fee is taken when estate is purchased with SAND and invalid referral", async function () {
-        const {tree, userWithSAND, userWithoutSAND, lands, contracts, users} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const {tree, userWithSAND, userWithoutSAND, lands, contracts, LandSaleFeeRecipient} = initialSetUp;
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
 
         const referral = {
@@ -468,13 +480,13 @@ function runSandTests(landSaleName) {
           encodedReferral
         );
 
-        const feeBeneficiaryBalance = await contracts.sand.balanceOf(users[5].address);
-        expect(feeBeneficiaryBalance).to.equal(BigNumber.from(land.price).mul(5).div(100)); // 5% fee
+        const feeBeneficiaryBalance = await contracts.sand.balanceOf(LandSaleFeeRecipient.address);
+        expect(feeBeneficiaryBalance).to.equal(BigNumber.from(land.price)); // 5% fee; LandSaleBeneficiary currently the same as 5% fee recipient
       });
 
       it("correct fee is taken when estate is purchased with adjusted SAND price and invalid referral", async function () {
-        const {tree, userWithSAND, userWithoutSAND, lands, contracts, users, SandAdmin} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const {tree, userWithSAND, userWithoutSAND, lands, contracts, LandSaleFeeRecipient, SandAdmin} = initialSetUp;
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
 
         await SandAdmin.EstateSale.rebalanceSand("1200");
@@ -526,13 +538,13 @@ function runSandTests(landSaleName) {
           encodedReferral
         );
 
-        const feeBeneficiaryBalance = await contracts.sand.balanceOf(users[5].address);
-        expect(feeBeneficiaryBalance).to.equal(BigNumber.from(adjustedLandPrice).mul(5).div(100)); // 5% fee
+        const feeBeneficiaryBalance = await contracts.sand.balanceOf(LandSaleFeeRecipient.address);
+        expect(feeBeneficiaryBalance).to.equal(BigNumber.from(adjustedLandPrice)); // 5% fee; LandSaleBeneficiary currently the same as 5% fee recipient
       });
 
       it("CANNOT buy Land without SAND", async function () {
         const {tree, userWithoutSAND, lands} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
 
         await expectRevert(
@@ -556,7 +568,7 @@ function runSandTests(landSaleName) {
 
       it("CANNOT buy Land without enough tokens", async function () {
         const {userWithoutSAND, tree, lands, SandAdmin} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
 
         await SandAdmin.Sand.transfer(userWithoutSAND.address, "4046");
@@ -582,7 +594,7 @@ function runSandTests(landSaleName) {
 
       it("CANNOT buy Land without enough tokens for adjusted SAND price", async function () {
         const {userWithoutSAND, tree, lands, SandAdmin} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
         const adjustedLandPrice = BigNumber.from(land.price).mul(12).div(10);
 
@@ -610,7 +622,7 @@ function runSandTests(landSaleName) {
 
       it("CANNOT buy Land with an adjusted price in SAND that does not match with the multiplier set", async function () {
         const {userWithoutSAND, tree, lands, SandAdmin} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
         const adjustedLandPrice = BigNumber.from(land.price).mul(11).div(10);
 
@@ -638,7 +650,7 @@ function runSandTests(landSaleName) {
 
       it("CANNOT buy lands without just enough tokens", async function () {
         const {userWithoutSAND, tree, lands, SandAdmin} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
 
         await SandAdmin.Sand.transfer(userWithoutSAND.address, BigNumber.from(land.price).sub(BigNumber.from(1)));
@@ -664,7 +676,7 @@ function runSandTests(landSaleName) {
 
       it("can buy Land with just enough tokens", async function () {
         const {userWithoutSAND, tree, lands, SandAdmin} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
 
         await SandAdmin.Sand.transfer(userWithoutSAND.address, BigNumber.from(land.price));
@@ -687,7 +699,7 @@ function runSandTests(landSaleName) {
 
       it("can buy Land with just enough tokens for adjusted land price", async function () {
         const {userWithoutSAND, tree, lands, SandAdmin} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
         const adjustedLandPrice = BigNumber.from(land.price).mul(12).div(10);
 
@@ -739,7 +751,7 @@ function runSandTests(landSaleName) {
 
         await LandAdmin.Land.functions.setMinter(contracts.estateSale.address, false).then((tx) => tx.wait());
 
-        const land = lands.find((l) => l.size === 6);
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
 
         await expectRevert(
@@ -763,7 +775,7 @@ function runSandTests(landSaleName) {
 
       it("CANNOT buy LAND twice (empty referral)", async function () {
         const {tree, userWithSAND, lands} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
 
         await userWithSAND.EstateSale.functions.buyLandWithSand(
@@ -807,8 +819,7 @@ function runSandTests(landSaleName) {
           "0x0000000000000000000000000000000000000000000000000000000000000002",
           "0x0000000000000000000000000000000000000000000000000000000000000003",
         ];
-        const land = lands.find((l) => l.size === 6);
-
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         await expectRevert(
           userWithSAND.EstateSale.functions.buyLandWithSand(
             userWithSAND.address,
@@ -830,7 +841,7 @@ function runSandTests(landSaleName) {
 
       it("CANNOT buy LAND with wrong proof (empty referral)", async function () {
         const {tree, userWithSAND, lands} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(lands[2]));
 
         await expectRevert(
@@ -854,7 +865,7 @@ function runSandTests(landSaleName) {
 
       it("after buying user owns an Estate token and the Estate contract owns all LANDs (empty referral)", async function () {
         const {tree, userWithSAND, lands, contracts} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
         await userWithSAND.EstateSale.functions.buyLandWithSand(
           userWithSAND.address,
@@ -885,7 +896,7 @@ function runSandTests(landSaleName) {
       // TODO investigate
       it.skip("CANNOT buy a land after the expiry time (empty referral)", async function () {
         const {lands, userWithSAND, tree} = initialSetUp;
-        const land = lands.find((l) => l.size === 6);
+        const land = lands.filter((l) => l.size === 6).find((l) => !l.reserved);
         const proof = tree.getProof(calculateLandHash(land));
         await increaseTime(60 * 60);
         await expectRevert(

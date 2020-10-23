@@ -6,7 +6,7 @@ const {expectRevert, zeroAddress} = require("local-utils");
 describe("FeeDistributor:ETH", function () {
   async function testEthFeeWithdrawal(account, percentage, amount, contract) {
     let balanceBefore = await ethers.provider.getBalance(account);
-    let tx = await contract.connect(ethers.provider.getSigner(account)).withdraw(zeroAddress);
+    let tx = await contract.connect(ethers.provider.getSigner(account)).withdraw(zeroAddress, account);
     let receipt = await tx.wait();
     let balanceAfter = await ethers.provider.getBalance(account);
     let txFee = tx.gasPrice.mul(receipt.gasUsed);
@@ -101,7 +101,7 @@ describe("FeeDistributor:ERC20", function () {
 
   async function testERC20FeeWithdrawal(account, percentage, amount, contract, erc20Contract) {
     let balanceBefore = await erc20Contract.balanceOf(account);
-    let tx = await contract.connect(ethers.provider.getSigner(account)).withdraw(erc20Contract.address);
+    let tx = await contract.connect(ethers.provider.getSigner(account)).withdraw(erc20Contract.address, account);
     await tx.wait();
     let balanceAfter = await erc20Contract.balanceOf(account);
     let distributionFee = balanceAfter.sub(balanceBefore);
@@ -214,5 +214,11 @@ describe("FeeDistributor:ERC20", function () {
     let feeDistContract = await initContract(recipients, percentages);
     await fundContractWithSand(feeDistContract.address, sandContract, sandBeneficiary, amount);
     await testERC20FeeWithdrawal(recipients[0], percentages[0], amount, feeDistContract, sandContract);
+  });
+  it("Duplicate recipient should fail", async function () {
+    let accounts = await getNamedAccounts();
+    let recipients = [accounts.others[0], accounts.others[1], accounts.others[0]];
+    let percentages = [1000, 1500, 7500];
+    await expectRevert(initContract(recipients, percentages));
   });
 });

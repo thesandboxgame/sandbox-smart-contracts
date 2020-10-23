@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity 0.6.5;
 
 import "./Ownable.sol";
 import "../Interfaces/ERC20.sol";
@@ -12,4 +12,6 @@ contract Withdrawable is Ownable {
     function withdrawToken(ERC20 _token, address _destination) external onlyOwner {
         require(_token.transfer(_destination, _token.balanceOf(address(this))), "Transfer failed");
     }
+
+    constructor() public Ownable(msg.sender) {}
 }

@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity 0.6.5;
 
 import "./Ownable.sol";
 
@@ -44,4 +44,6 @@ contract Pausable is Ownable {
         paused = false;
         emit Unpause();
     }
+
+    constructor() public Ownable(msg.sender) {}
 }

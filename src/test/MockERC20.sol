@@ -1,4 +1,4 @@
-pragma solidity ^0.6.5;
+pragma solidity 0.6.5;
 import "../common/Libraries/SafeMathWithRequire.sol";
 import "../common/BaseWithStorage/Ownable.sol";
 import "../common/Interfaces/ERC20.sol";
@@ -79,6 +79,8 @@ contract MintableToken is ERC20Impl, Ownable {
         _balances[account] = _balances[account].add(amount);
         emit Transfer(address(0), account, amount);
     }
+
+    constructor() public Ownable(msg.sender) {}
 }
 
 
