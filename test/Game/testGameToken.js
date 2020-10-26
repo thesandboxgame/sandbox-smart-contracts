@@ -187,9 +187,6 @@ describe("GameToken", function () {
         const assetAsAssetOwner = await assetContract.connect(assetContract.provider.getSigner(GameOwner.address));
         await waitFor(assetAsAssetOwner.setApprovalForAllFor(GameOwner.address, gameToken.address, true));
 
-        console.log(`asset id: ${assetId}`);
-        console.log(`asset id2: ${assetId2}`);
-
         const receipt = await waitFor(
           GameOwner.Game.createGame(
             GameOwner.address,
@@ -206,7 +203,6 @@ describe("GameToken", function () {
         const transferEvents = await findEvents(gameToken, "Transfer", receipt.blockHash);
         const assetsAddedEvents = await findEvents(gameToken, "AssetsAdded", receipt.blockHash);
         gameId = transferEvents[0].args[2];
-        console.log(`gameID when settingB: ${gameId}`);
         id = assetsAddedEvents[0].args[0];
         assets = assetsAddedEvents[0].args[1];
         values = assetsAddedEvents[0].args[2];
@@ -230,8 +226,6 @@ describe("GameToken", function () {
 
       it("can get an asset id and its value from a GAME", async function () {
         const {asset, value} = await gameToken.getGameAsset(gameId, 0);
-        console.log(`asset: ${asset}`);
-        console.log(`value: ${value}`);
         expect(asset).to.be.equal(assetId);
         expect(value).to.be.equal(3);
       });
@@ -245,8 +239,7 @@ describe("GameToken", function () {
           assets.push(asset);
           values.push(value);
         }
-        console.log(`assets: ${assets}`);
-        console.log(`values: ${values}`);
+
         expect(assets).to.be.eql([assetId, assetId2]);
         expect(values[0]).to.be.equal(3);
         expect(values[1]).to.be.equal(2);
@@ -320,17 +313,24 @@ describe("GameToken", function () {
       const {assetReceipt} = await supplyAssets(userWithSAND.address, 11, userWithSAND.address, 1, dummyHash);
       const assetTransferEvents = await findEvents(assetContract, "Transfer", assetReceipt.blockHash);
       assetId = assetTransferEvents[0].args[2];
+      const numberBefore = await gameToken.getNumberOfAssets(gameId);
+      assert.equal(numberBefore, 0);
 
       const receipt = await waitFor(GameOwner.Game.addSingleAsset(GameOwner.address, gameId, assetId));
+      const numberAfter = await gameToken.getNumberOfAssets(gameId);
+      assert.equal(numberAfter, 1);
       const assetsAddedEvents = await findEvents(gameToken, "AssetsAdded", receipt.blockHash);
       const id = assetsAddedEvents[0].args[0];
       const assets = assetsAddedEvents[0].args[1];
       const values = assetsAddedEvents[0].args[2];
-
+      const gameDataAssetId = await gameToken.getGameAsset(gameId, 0);
+      console.log(`gameDataAssetId: ${gameDataAssetId}`);
+      console.log(`assetId: ${assetId}`);
+      expect(gameDataAssetId[0]).to.be.equal(assetId);
+      expect(gameDataAssetId[1]).to.be.equal(values[0]);
       expect(id).to.be.equal(gameId);
       expect(assets[0]).to.be.equal(assetId);
       expect(values[0]).to.be.equal(1);
-      // @review once getGameAssets is working add a check here to prove game data is updated correctly.
     });
 
     it.skip("Owner can add multiple Assets", async function () {
@@ -367,17 +367,10 @@ describe("GameToken", function () {
       );
       const transferEvents = await findEvents(gameToken, "Transfer", receipt.blockHash);
       gameId = transferEvents[0].args[2];
-      console.log(`gameId: ${gameId}`);
-      const owner = transferEvents[0].args[1];
-      console.log(`owner here: ${owner}`);
     });
 
     it("current owner can transfer ownership of a GAME", async function () {
-      console.log(`game id here: ${gameId}`);
-      const balance = await gameToken.balanceOf(GameOwner.address);
-      console.log(`balance here: ${balance}`);
       const originalOwner = await gameToken.ownerOf(gameId);
-      console.log(`original Owner: ${originalOwner}`);
       const recipient = users[7].address;
       const gameTokenAsGameOwner = await gameToken.connect(gameToken.provider.getSigner(userWithSAND.address));
       await waitFor(
