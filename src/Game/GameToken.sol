@@ -167,31 +167,24 @@ contract GameToken is ERC721BaseToken {
         emit AssetsRemoved(gameId, assetIds, values, to);
     }
 
-    /// @notice Function to get all assets and quantities for a GAME
-    /// @param gameId The id of the GAME to get assets for
-    /// @return arrays: "assets" & "quantities"
-    // @review currently returning undefined...
-    function getGameAssets(uint256 gameId) external view returns (uint256[] memory, uint256[] memory) {
-        uint256 length = _gameData[gameId]._assets.length();
-        uint256[] memory assets;
-        uint256[] memory quantities;
-        assets = new uint256[](length);
-        quantities = new uint256[](length);
+    function getNumberOfAssets(uint256 gameId) external view returns (uint256) {
+        return _gameData[gameId]._assets.length();
+    }
 
-        if (length != 0) {
-            for (uint256 i = 0; i < length; i++) {
-                assets[i] = _gameData[gameId]._assets.at(i);
-                quantities[i] = _gameData[gameId]._values[assets[i]];
-                console.log("assets[i]: ", assets[i]);
-                console.log("quantities[i]: ", quantities[i]);
-            }
-        } else {
-            assets = new uint256[](1);
-            quantities = new uint256[](1);
-            assets[0] = uint256(0);
-            quantities[0] = uint256(0);
-        }
-        return (assets, quantities);
+    /// @notice Function to get an asset and its value for a GAME
+    /// @param gameId The id of the GAME to get assets for
+    /// @param index The index of the asset in the set of assets for the GAME
+    /// @return asset The assetId
+    /// @return value The number of the given asset
+
+    // @review currently returning undefined...
+    // consider returning a fixed length array here, maybe the asset at index i along with its corresponding value...
+    function getGameAsset(uint256 gameId, uint256 index) external view returns (uint256 asset, uint256 value) {
+        uint256 asset;
+        uint256 value;
+        asset = _gameData[gameId]._assets.at(index);
+        value = _gameData[gameId]._values[asset];
+        return (asset, value);
     }
 
     /// @notice Function to allow token owner to set game editors
