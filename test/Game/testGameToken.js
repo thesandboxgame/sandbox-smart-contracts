@@ -101,14 +101,10 @@ describe("GameToken", function () {
         expect(contractGameOwner).to.be.equal(eventGameOwner);
       });
 
-      // @review should probably be [] or [0], not undefined
-      it("can get GAME data when no assets", async function () {
-        const {assets, quantities} = await gameToken.getGameAssets(gameId);
-        const ownerOf = await gameToken.ownerOf(gameId);
-
-        expect(quantities).to.be.equal(undefined);
-        expect(assets).to.be.equal(undefined);
-        expect(ownerOf).to.be.equal(GameOwner.address);
+      // @review should be [] or [0], not undefined
+      it("fails to get GAME data when no assets", async function () {
+        const index = 0;
+        await expectRevert(gameToken.getGameAsset(gameId, index), "EnumerableSet: index out of bounds");
       });
 
       it("anyone can mint Games with Editors", async function () {
@@ -133,6 +129,7 @@ describe("GameToken", function () {
     });
 
     describe("GameToken: Mint With Assets", function () {
+      let assetId;
       it("anyone can mint Games with single Asset", async function () {
         ({gameToken, GameOwner, userWithSAND} = await setupTest());
         const {assetReceipt} = await supplyAssets(userWithSAND.address, packId, userWithSAND.address, 1, dummyHash);
@@ -172,7 +169,7 @@ describe("GameToken", function () {
         const assetTransferEvents = await findEvents(assetContract, "TransferSingle", assetReceipt1.blockHash);
         const assetTransferEvents2 = await findEvents(assetContract, "TransferSingle", assetReceipt2.blockHash);
 
-        const assetId = assetTransferEvents[0].args[3];
+        assetId = assetTransferEvents[0].args[3];
         const assetId2 = assetTransferEvents2[0].args[3];
 
         const userBalanceOf1 = await assetContract["balanceOf(address,uint256)"](userWithSAND.address, assetId);
@@ -188,6 +185,9 @@ describe("GameToken", function () {
 
         const assetAsAssetOwner = await assetContract.connect(assetContract.provider.getSigner(GameOwner.address));
         await waitFor(assetAsAssetOwner.setApprovalForAllFor(GameOwner.address, gameToken.address, true));
+
+        console.log(`asset id: ${assetId}`);
+        console.log(`asset id2: ${assetId2}`);
 
         const receipt = await waitFor(
           GameOwner.Game.createGame(
@@ -205,6 +205,7 @@ describe("GameToken", function () {
         const transferEvents = await findEvents(gameToken, "Transfer", receipt.blockHash);
         const assetsAddedEvents = await findEvents(gameToken, "AssetsAdded", receipt.blockHash);
         gameId = transferEvents[0].args[2];
+        console.log(`gameID when settingB: ${gameId}`);
         id = assetsAddedEvents[0].args[0];
         assets = assetsAddedEvents[0].args[1];
         values = assetsAddedEvents[0].args[2];
@@ -221,17 +222,17 @@ describe("GameToken", function () {
         expect(values).to.be.eql([BigNumber.from(3), BigNumber.from(2)]);
       });
 
-      // @review fix ! assets, quantities are undefined...
-      it.skip("can get GAME data with assets", async function () {
-        let assets = [0];
-        let quantities = [0];
-        ({assets, quantities} = await gameToken.getGameAssets(gameId));
-        console.log(`num of assets: ${quantities}`);
-        console.log(`assets: ${assets}`);
-        console.log(`length: ${assets.length}`);
-        console.log(`quan length: ${quantities.length}`);
-        expect(assets.length).to.be.equal(1);
-        expect(quantities.length).to.be.equal(assets.length);
+      it("can get the number of assets", async function () {
+        const number = await gameToken.getNumberOfAssets(gameId);
+        expect(number).to.be.equal(2);
+      });
+
+      it("can get an asset id and its value from a GAME", async function () {
+        const {asset, value} = await gameToken.getGameAsset(gameId, 0);
+        console.log(`asset: ${asset}`);
+        console.log(`value: ${value}`);
+        expect(asset).to.be.equal(assetId);
+        expect(value).to.be.equal(3);
       });
 
       it("should fail if length of assetIds and values dont match", async function () {
