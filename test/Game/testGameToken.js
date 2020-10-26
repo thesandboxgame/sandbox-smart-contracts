@@ -130,6 +130,7 @@ describe("GameToken", function () {
 
     describe("GameToken: Mint With Assets", function () {
       let assetId;
+      let assetId2;
       it("anyone can mint Games with single Asset", async function () {
         ({gameToken, GameOwner, userWithSAND} = await setupTest());
         const {assetReceipt} = await supplyAssets(userWithSAND.address, packId, userWithSAND.address, 1, dummyHash);
@@ -170,7 +171,7 @@ describe("GameToken", function () {
         const assetTransferEvents2 = await findEvents(assetContract, "TransferSingle", assetReceipt2.blockHash);
 
         assetId = assetTransferEvents[0].args[3];
-        const assetId2 = assetTransferEvents2[0].args[3];
+        assetId2 = assetTransferEvents2[0].args[3];
 
         const userBalanceOf1 = await assetContract["balanceOf(address,uint256)"](userWithSAND.address, assetId);
         const userBalanceOf2 = await assetContract["balanceOf(address,uint256)"](userWithSAND.address, assetId2);
@@ -233,6 +234,22 @@ describe("GameToken", function () {
         console.log(`value: ${value}`);
         expect(asset).to.be.equal(assetId);
         expect(value).to.be.equal(3);
+      });
+
+      it("can get many assets & values from a GAME", async function () {
+        const number = await gameToken.getNumberOfAssets(gameId);
+        let assets = [];
+        let values = [];
+        for (i = 0; i < number; i++) {
+          const {asset, value} = await gameToken.getGameAsset(gameId, i);
+          assets.push(asset);
+          values.push(value);
+        }
+        console.log(`assets: ${assets}`);
+        console.log(`values: ${values}`);
+        expect(assets).to.be.eql([assetId, assetId2]);
+        expect(values[0]).to.be.equal(3);
+        expect(values[1]).to.be.equal(2);
       });
 
       it("should fail if length of assetIds and values dont match", async function () {
