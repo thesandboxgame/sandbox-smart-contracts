@@ -11,8 +11,8 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   await deploy("LandWeightedSANDRewardPool", {
     from: deployer,
     log: true,
-    args: [stakeToken.address, sand.address, land.address, durationInSeconds], // TODO: update for mainnet address
+    args: [stakeToken.address, sand.address, land.address, durationInSeconds],
   });
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO: update for mainnet
+module.exports.skip = guard(["1", "4", "314159"], "LandWeightedSANDRewardPool");
 module.exports.tags = ["LandWeightedSANDRewardPool"];

@@ -34,5 +34,5 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     REWARD_AMOUNT
   );
 };
-module.exports.skip = guard(["1", "4", "314159"], "LandWeightedSANDRewardPool");
+module.exports.skip = guard(["1", "4", "314159"]);
 module.exports.dependencies = ["LandWeightedSANDRewardPool", "Sand"];

@@ -1,3 +1,4 @@
+const {guard} = require("../lib");
 module.exports = async ({deployments}) => {
   const {read, execute} = deployments;
 
@@ -11,3 +12,4 @@ module.exports = async ({deployments}) => {
     salesDistribution.address
   );
 };
+module.exports.skip = guard(["1", "4", "314159"]);
