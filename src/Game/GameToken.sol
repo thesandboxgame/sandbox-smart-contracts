@@ -129,7 +129,6 @@ contract GameToken is ERC721BaseToken {
     function removeSingleAsset(
         uint256 gameId,
         uint256 assetId,
-        uint256 value,
         address to
     ) external {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
@@ -138,12 +137,12 @@ contract GameToken is ERC721BaseToken {
         _gameData[gameId]._assets.remove(assetId);
         uint256 assetValues = _gameData[gameId]._values[assetId];
         // "sub" is from SafeMathWithRequire.sol
-        _gameData[gameId]._values[assetId] = assetValues.sub(value);
+        _gameData[gameId]._values[assetId] = assetValues.sub(1);
         _asset.safeTransferFrom(address(this), to, assetId);
-        uint256[] memory assets;
-        uint256[] memory values;
+        uint256[] memory assets = new uint256[](1);
+        uint256[] memory values = new uint256[](1);
         assets[0] = assetId;
-        values[0] = value;
+        values[0] = uint256(1);
         emit AssetsRemoved(gameId, assets, values, to);
     }
 
