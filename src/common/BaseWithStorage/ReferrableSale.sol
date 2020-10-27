@@ -30,4 +30,6 @@ contract ReferrableSale is Ownable {
         customReferralPercentages[_referrer] = _customReferralPercentage;
         emit CustomReferralSet(_referrer, _customReferralPercentage);
     }
+
+    constructor() public Ownable(msg.sender) {}
 }

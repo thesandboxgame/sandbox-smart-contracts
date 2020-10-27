@@ -1,4 +1,3 @@
-const {guard} = require("../lib");
 const {starterPackCatalysts} = require("../data/starterPackv1");
 module.exports = async ({deployments, getNamedAccounts}) => {
   const {execute} = deployments;
@@ -8,12 +7,11 @@ module.exports = async ({deployments, getNamedAccounts}) => {
 
   await execute(
     "Catalyst",
-    {from: catalystMinter},
+    {from: catalystMinter, skipUnknownSigner: true},
     "batchMint",
     starterPack.address,
     starterPackCatalysts.ids,
     starterPackCatalysts.quantities
   );
-  return true;
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO remove
+module.exports.skip = () => true;

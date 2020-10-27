@@ -8,7 +8,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments}) => {
   }
   let pricingOperator;
 
-  const {execute, read} = deployments;
+  const {execute, read, log} = deployments;
   const {deployer} = await getNamedAccounts();
   const kyberReserve = await deployments.get("KyberReserve");
 

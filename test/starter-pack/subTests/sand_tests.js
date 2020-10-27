@@ -293,6 +293,16 @@ function runSandTests() {
       );
     });
 
+    it("purchase will fail if wrong number of catalystIds or catalystQuantities", async function () {
+      const {userWithSAND} = await setUp;
+      Message.catalystIds = [0, 1, 2]; // currently any IDs > 3 are invalid
+      let dummySignature = signPurchaseMessage(privateKey, Message, userWithSAND.address);
+      await expectRevert(
+        userWithSAND.StarterPack.purchaseWithSand(userWithSAND.address, Message, dummySignature),
+        "INVALID_INPUT"
+      );
+    });
+
     it("sequential purchases should succeed with new nonce (as long as there are enough catalysts and gems)", async function () {
       const {userWithSAND} = await setUp;
 
@@ -367,9 +377,9 @@ function runSandTests() {
       );
       expect(eventsMatching2[0].args[2]).to.equal(newTotalExpectedPrice);
     });
-    // @review
+
     it("should allow users to purchase gems directly", async function () {
-      const {userWithSAND, catalystContract, gemContract} = await setUp;
+      const {userWithSAND, gemContract} = await setUp;
 
       const gemsOnlyMessage = {
         catalystIds: [0, 1, 2, 3],

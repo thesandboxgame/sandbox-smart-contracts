@@ -1,0 +1,9 @@
+sequenceDiagram
+autonumber
+
+    Note over User, CatalystRegistry: get Attributes
+
+    User->>+CatalystRegistry:getValues(catalystId,seed,events,totalNumberOfGemTypes)
+    CatalystRegistry->>CatalystValues:getValues(catalystId,seed,events,totalNumberOfGemTypes)
+    CatalystValues->>CatalystRegistry:values(catalystId,seed,events,totalNumberOfGemTypes)
+

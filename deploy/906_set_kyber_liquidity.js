@@ -1,13 +1,11 @@
 const {guard} = require("../lib");
-const {BigNumber} = require("ethers");
+const {BigNumber, utils} = require("ethers");
+const {formatEther} = utils;
 const configParams = require("../data/kyberReserve/liquidity_settings");
-
-let tokenAddress;
 
 let pricingAdmin;
 
-let tokenPriceInEth;
-let ethBalance;
+let tokenPriceInWei;
 let liqRate;
 let minAllowablePrice;
 let maxAllowablePrice;
@@ -30,6 +28,7 @@ module.exports = async ({getChainId, deployments}) => {
     return;
   }
   const {execute, read} = deployments;
+  const weiInETH = BigNumber.from("1000000000000000000");
   const reserveAddress = (await deployments.get("KyberReserve")).address;
   await instantiateContracts();
   parseInput(configParams[chainId]);
@@ -39,11 +38,10 @@ module.exports = async ({getChainId, deployments}) => {
   async function instantiateContracts() {
     pricingAddress = await read("KyberReserve", "conversionRatesContract");
     pricingAdmin = await read("LiquidityConversionRates", "admin");
-    tokenAddress = await read("LiquidityConversionRates", "token");
   }
 
   function parseInput(jsonInput) {
-    tokenPriceInEth = tokenPriceInEth ? tokenPriceInEth : jsonInput["tokenPriceInEth"];
+    tokenPriceInWei = tokenPriceInWei ? tokenPriceInWei : jsonInput["tokenPriceInWei"];
 
     minAllowablePrice = jsonInput["minAllowablePrice"] ? jsonInput["minAllowablePrice"] : 0.5;
 
@@ -57,30 +55,26 @@ module.exports = async ({getChainId, deployments}) => {
   }
 
   async function fetchParams() {
-    let tokenDecimals = await read("Sand", "decimals");
-    ethBalance = (await ethers.provider.getBalance(reserveAddress)) / 10 ** 18;
+    const weiBalance = await ethers.provider.getBalance(reserveAddress);
+    const ethBalance = parseFloat(formatEther(weiBalance));
     liqRate = Math.log(1 / minAllowablePrice) / ethBalance;
-    try {
-      const tokenWallet = await read("KyberReserve", "tokenWallet", tokenAddress);
-      tokenBalance = (await read("Sand", "balanceOf", tokenWallet)) / 10 ** tokenDecimals;
-    } catch (e) {
-      tokenBalance = (await read("Sand", "balanceOf", reserveAddress)) / 10 ** tokenDecimals;
-    }
   }
 
   function calculateParams() {
-    const maxSupportPrice = maxAllowablePrice * tokenPriceInEth;
-    const minSupportPrice = minAllowablePrice * tokenPriceInEth;
-    _rInFp = liqRate * 2 ** formulaPrecision;
-    _rInFp = Math.floor(_rInFp);
-    _pMinInFp = minSupportPrice * 2 ** formulaPrecision;
-    _pMinInFp = Math.floor(_pMinInFp);
+    const maxSupportPrice = BigNumber.from(tokenPriceInWei).mul(maxAllowablePrice);
+    const minSupportPrice = BigNumber.from(tokenPriceInWei)
+      .mul(Math.floor(minAllowablePrice * 100))
+      .div(100);
+    _rInFp = BigNumber.from(liqRate * 100000000000000000)
+      .mul(BigNumber.from(2).pow(formulaPrecision))
+      .div("100000000000000000");
+    _pMinInFp = minSupportPrice.mul(BigNumber.from(2).pow(formulaPrecision)).div(weiInETH);
     _numFpBits = formulaPrecision;
-    _maxCapBuyInWei = maxTxBuyAmtEth * 10 ** 18;
-    _maxCapSellInWei = maxTxSellAmtEth * 10 ** 18;
+    _maxCapBuyInWei = BigNumber.from(maxTxBuyAmtEth).mul(weiInETH);
+    _maxCapSellInWei = BigNumber.from(maxTxSellAmtEth).mul(weiInETH);
     _feeInBps = feePercent * 100;
-    _maxTokenToEthRateInPrecision = maxSupportPrice * 10 ** 18;
-    _minTokenToEthRateInPrecision = minSupportPrice * 10 ** 18;
+    _maxTokenToEthRateInPrecision = maxSupportPrice;
+    _minTokenToEthRateInPrecision = minSupportPrice;
   }
 
   async function setLiquidityParams() {
@@ -88,14 +82,14 @@ module.exports = async ({getChainId, deployments}) => {
       "LiquidityConversionRates",
       {from: pricingAdmin, skipUnknownSigner: true},
       "setLiquidityParams",
-      BigNumber.from(_rInFp.toString()),
-      BigNumber.from(_pMinInFp.toString()),
-      BigNumber.from(_numFpBits.toString()),
-      BigNumber.from(_maxCapBuyInWei.toString()),
-      BigNumber.from(_maxCapSellInWei.toString()),
-      BigNumber.from(_feeInBps.toString()),
-      BigNumber.from(_maxTokenToEthRateInPrecision.toString()),
-      BigNumber.from(_minTokenToEthRateInPrecision.toString())
+      _rInFp,
+      _pMinInFp, // TODO
+      _numFpBits,
+      _maxCapBuyInWei,
+      _maxCapSellInWei,
+      _feeInBps,
+      _maxTokenToEthRateInPrecision, // TODO
+      _minTokenToEthRateInPrecision // TODO
     );
   }
 };

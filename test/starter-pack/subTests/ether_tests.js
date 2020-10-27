@@ -301,6 +301,16 @@ function runEtherTests() {
       );
     });
 
+    it("purchase will fail if wrong number of catalystIds or catalystQuantities", async function () {
+      const {users} = await setUp;
+      Message.catalystIds = [0, 1, 2]; // currently any IDs > 3 are invalid
+      let dummySignature = signPurchaseMessage(privateKey, Message, users[0].address);
+      await expectRevert(
+        users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature),
+        "INVALID_INPUT"
+      );
+    });
+
     it("sequential purchases should succeed with new nonce (as long as there are enough catalysts and gems)", async function () {
       const {users} = await setUp;
 

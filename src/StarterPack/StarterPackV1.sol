@@ -15,7 +15,8 @@ import "./PurchaseValidator.sol";
 /// @notice This contract manages the purchase and distribution of StarterPacks (bundles of Catalysts and Gems)
 contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     using SafeMathWithRequire for uint256;
-    uint256 internal constant DAI_PRICE = 55000000000000000;
+    uint256 internal constant DAI_PRICE = 44000000000000000;
+    uint256 private constant DECIMAL_PLACES = 1 ether;
 
     ERC20 internal immutable _sand;
     Medianizer private immutable _medianizer;
@@ -39,7 +40,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
 
     // The delay between calling setPrices() and when the new prices come into effect.
     // Minimizes the effect of price changes on pending TXs
-    uint256 private _priceChangeDelay = 1 hours;
+    uint256 private constant PRICE_CHANGE_DELAY = 1 hours;
 
     event Purchase(address indexed buyer, Message message, uint256 price, address token, uint256 amountPaid);
 
@@ -155,7 +156,9 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         emit Purchase(buyer, message, amountInSand, address(0), ETHRequired);
 
         if (msg.value - ETHRequired > 0) {
-            msg.sender.transfer(msg.value - ETHRequired); // refund extra
+            // refund extra
+            (bool success, ) = msg.sender.call{value: msg.value - ETHRequired}("");
+            require(success, "REFUND_FAILED");
         }
     }
 
@@ -178,7 +181,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
         );
 
         uint256 amountInSand = _calculateTotalPriceInSand(message.catalystIds, message.catalystQuantities, message.gemQuantities);
-        uint256 DAIRequired = amountInSand.mul(DAI_PRICE).div(1000000000000000000);
+        uint256 DAIRequired = amountInSand.mul(DAI_PRICE).div(DECIMAL_PLACES);
         _handlePurchaseWithERC20(buyer, _wallet, address(_dai), DAIRequired);
         _erc20GroupCatalyst.batchTransferFrom(address(this), buyer, message.catalystIds, message.catalystQuantities);
         _erc20GroupGem.batchTransferFrom(address(this), buyer, message.gemIds, message.gemQuantities);
@@ -245,7 +248,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     {
         switchTime = 0;
         if (_priceChangeTimestamp != 0) {
-            switchTime = _priceChangeTimestamp + _priceChangeDelay;
+            switchTime = _priceChangeTimestamp + PRICE_CHANGE_DELAY;
         }
         return (_previousStarterPackPrices, _starterPackPrices, _previousGemPrice, _gemPrice, switchTime);
     }
@@ -272,22 +275,22 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
     /// @param catalystIds Array of catalystIds to be purchase
     /// @param catalystQuantities Array of quantities of those catalystIds to be purchased
     /// @return Total price in SAND
-
     function _calculateTotalPriceInSand(
         uint256[] memory catalystIds,
         uint256[] memory catalystQuantities,
         uint256[] memory gemQuantities
     ) internal returns (uint256) {
+        require(catalystIds.length == catalystQuantities.length, "INVALID_INPUT");
         (uint256[] memory prices, uint256 gemPrice) = _priceSelector();
         uint256 totalPrice;
         for (uint256 i = 0; i < catalystIds.length; i++) {
             uint256 id = catalystIds[i];
             uint256 quantity = catalystQuantities[i];
-            totalPrice += prices[id].mul(quantity);
+            totalPrice = totalPrice.add(prices[id].mul(quantity));
         }
         for (uint256 i = 0; i < gemQuantities.length; i++) {
             uint256 quantity = gemQuantities[i];
-            totalPrice += gemPrice.mul(quantity);
+            totalPrice = totalPrice.add(gemPrice.mul(quantity));
         }
         return totalPrice;
     }
@@ -304,7 +307,7 @@ contract StarterPackV1 is Admin, MetaTransactionReceiver, PurchaseValidator {
             gemPrice = _gemPrice;
         } else {
             // Price change delay has expired.
-            if (now > _priceChangeTimestamp + 1 hours) {
+            if (now > _priceChangeTimestamp + PRICE_CHANGE_DELAY) {
                 _priceChangeTimestamp = 0;
                 prices = _starterPackPrices;
                 gemPrice = _gemPrice;

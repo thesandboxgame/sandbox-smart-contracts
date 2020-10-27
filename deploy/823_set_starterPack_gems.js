@@ -1,4 +1,3 @@
-const {guard} = require("../lib");
 const {starterPackGems} = require("../data/starterPackv1");
 module.exports = async ({deployments, getNamedAccounts}) => {
   const {execute} = deployments;
@@ -8,12 +7,11 @@ module.exports = async ({deployments, getNamedAccounts}) => {
 
   await execute(
     "Gem",
-    {from: gemMinter},
+    {from: gemMinter, skipUnknownSigner: true},
     "batchMint",
     starterPack.address,
     starterPackGems.ids,
     starterPackGems.quantities
   );
-  return true;
 };
-module.exports.skip = guard(["1", "4", "314159"]); // TODO remove
+module.exports.skip = () => true;
