@@ -21,6 +21,6 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     log: true,
   });
 };
-module.exports.skip = guard(["1", "4", "314159"], "ATARI_SAND_Exchange");
+module.exports.skip = guard(["1", "4", "314159"]); // TODO, "ATARI_SAND_Exchange");
 module.exports.tags = ["ATARI_SAND_Exchange"];
 module.exports.dependencies = ["Sand", "ATARI"];
