@@ -4,7 +4,7 @@ const {createDataArray, saltLands} = require("../../lib/merkleTreeHelper");
 const {BigNumber} = require("ethers");
 const addresses = require("../addresses.json");
 const prices = require("./prices");
-const bundles = require("./bundles.mainnet.json");
+const bundles = require("./bundles.json");
 
 const sandboxWallet = addresses["sandbox"];
 
@@ -191,10 +191,10 @@ module.exports = {
       throw new Error("chainId not a string");
     }
 
-    let secretPath = "./.land_presale_4_2_multiple_secret";
+    let secretPath = "./.land_presale_4_3_secret";
     if (BigNumber.from(chainId).toString() === "1") {
       console.log("MAINNET secret");
-      secretPath = "./.land_presale_4_2_multiple_secret.mainnet";
+      secretPath = "./.land_presale_4_3_secret.mainnet";
     }
 
     let expose = false;
@@ -212,7 +212,7 @@ module.exports = {
       expose = true;
     }
 
-    const sectorData = require(`./sector${sector}.json`);
+    const sectorData = require(`./sector${sector}.json`)[0];
     const {lands} = generateLandsForMerkleTree(sectorData);
 
     const saltedLands = saltLands(lands, secret);

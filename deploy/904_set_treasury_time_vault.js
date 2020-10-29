@@ -11,3 +11,6 @@ module.exports = async ({deployments}) => {
     salesDistribution.address
   );
 };
+
+const {guard} = require("../lib");
+module.exports.skip = guard(["1", "4"]); // TODO

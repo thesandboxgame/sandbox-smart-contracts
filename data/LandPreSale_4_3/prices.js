@@ -6,10 +6,10 @@ function sandWei(v) {
 
 // These are Mainnet prices based on 0.036367$ per SAND
 module.exports = {
-  "1x1": sandWei(1182),
-  "3x3": sandWei(10147),
-  "6x6": sandWei(38496),
-  "12x12": sandWei(145407),
-  "24x24": sandWei(547392),
-  premium_1x1: sandWei(2750),
+  "1x1": sandWei(905), // 905.412
+  "3x3": sandWei(7772), // 7772.602
+  "6x6": sandWei(29487), // 29487.936
+  "12x12": sandWei(111381), // 111381.762
+  "24x24": sandWei(419302), // 419302.272
+  premium_1x1: sandWei(2106), // 2106.5
 };

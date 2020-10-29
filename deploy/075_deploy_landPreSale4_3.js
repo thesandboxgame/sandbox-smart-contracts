@@ -14,7 +14,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
   const landContract = await deployments.get("Land");
   const assetContract = await deployments.get("Asset");
 
-  const deadline = 1609459200; // TODO
+  const deadline = 1606395600; // Thursday, 26 November 2020 13:00:00 GMT+00:00
 
   const {lands, merkleRootHash, saltedLands, tree} = getLands(15, network.live, chainId);
 
