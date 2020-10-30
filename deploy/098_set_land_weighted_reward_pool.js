@@ -35,7 +35,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   );
 
   // Pass the timestamp of notifyRewardAmount to linkedData for accurate testing
-  const latestBlock = await ethers.provider.getBlock(receipt.timestamp);
+  const latestBlock = await ethers.provider.getBlock(receipt.blockNumber);
   rewardPool.linkedData = JSON.stringify(latestBlock.timestamp);
   await deployments.save("REWARD_NAME", rewardPool);
 };
