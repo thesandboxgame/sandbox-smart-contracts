@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity 0.6.5;
 
 import "./Ownable.sol";
 
@@ -30,4 +30,6 @@ contract ReferrableSale is Ownable {
         customReferralPercentages[_referrer] = _customReferralPercentage;
         emit CustomReferralSet(_referrer, _customReferralPercentage);
     }
+
+    constructor() public Ownable(msg.sender) {}
 }

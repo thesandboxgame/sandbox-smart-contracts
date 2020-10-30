@@ -19,6 +19,7 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
     userWithoutDAI,
     LandSaleAdmin,
     LandSaleBeneficiary,
+    LandSaleFeeRecipient,
     LandAdmin,
     SandAdmin,
     DaiAdmin,
@@ -103,7 +104,7 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
       maxCommissionRate,
       contracts.estate.address,
       contracts.asset.address,
-      roles.others[5] // TODO FeeDistributor for 5% fee
+      roles.landSaleFeeRecipient
     );
 
     contracts.estateSale = estateSaleContract.connect(estateSaleContract.provider.getSigner(roles.landSaleAdmin));
@@ -112,10 +113,15 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
       await assetAsCreator.safeBatchTransferFrom(creator, contracts.estateSale.address, assetIds, assetAmounts, "0x");
     }
 
-    const {LandSaleAdmin, LandSaleBeneficiary, LandAdmin, SandAdmin, DaiAdmin, users} = await generateUserPermissions(
-      roles,
-      contracts
-    );
+    const {
+      LandSaleAdmin,
+      LandSaleBeneficiary,
+      LandAdmin,
+      SandAdmin,
+      DaiAdmin,
+      LandSaleFeeRecipient,
+      users,
+    } = await generateUserPermissions(roles, contracts);
     await LandAdmin.Land.functions.setMinter(contracts.estateSale.address, true).then((tx) => tx.wait());
     await SandAdmin.Sand.functions.setSuperOperator(contracts.estateSale.address, true).then((tx) => tx.wait());
 
@@ -147,6 +153,7 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
       lands,
       tree,
       saleEnd,
+      LandSaleFeeRecipient,
     };
   })();
 
@@ -164,6 +171,7 @@ module.exports.setupEstateSale = async (landSaleName, landType) => {
     SandAdmin,
     DaiAdmin,
     users,
+    LandSaleFeeRecipient,
 
     // Contracts
     contracts,

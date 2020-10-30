@@ -4,8 +4,8 @@ const {waitFor, expectRevert, zeroAddress, increaseTime} = require("local-utils"
 const {BigNumber} = require("ethers");
 const {findEvents} = require("../../../lib/findEvents.js");
 const {signPurchaseMessage} = require("../../../lib/purchaseMessageSigner");
-const {privateKey} = require("./_testHelper");
-const {starterPackPrices} = require("../../../data/starterPack");
+const {privateKey, priceCalculator} = require("./_testHelper");
+const {starterPackPrices, gemPrice} = require("../../../data/starterPack");
 
 function runEtherTests() {
   describe("StarterPack:PurchaseWithETHEmptyStarterPack", function () {
@@ -291,6 +291,26 @@ function runEtherTests() {
       );
     });
 
+    it("purchase will fail if catalystIds are invalid", async function () {
+      const {users} = await setUp;
+      Message.catalystIds = [5, 6, 7, 8]; // currently any IDs > 3 are invalid
+      let dummySignature = signPurchaseMessage(privateKey, Message, users[0].address);
+      await expectRevert(
+        users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature),
+        "VM Exception while processing transaction: invalid opcode" // TODO: review error message
+      );
+    });
+
+    it("purchase will fail if wrong number of catalystIds or catalystQuantities", async function () {
+      const {users} = await setUp;
+      Message.catalystIds = [0, 1, 2]; // currently any IDs > 3 are invalid
+      let dummySignature = signPurchaseMessage(privateKey, Message, users[0].address);
+      await expectRevert(
+        users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature),
+        "INVALID_INPUT"
+      );
+    });
+
     it("sequential purchases should succeed with new nonce (as long as there are enough catalysts and gems)", async function () {
       const {users} = await setUp;
 
@@ -319,7 +339,8 @@ function runEtherTests() {
         BigNumber.from(800).mul("1000000000000000000"),
         BigNumber.from(1300).mul("1000000000000000000"),
       ];
-      await starterPackContractAsAdmin.setPrices(newPrices);
+      const newGemPrice = BigNumber.from(300).mul("1000000000000000000");
+      await starterPackContractAsAdmin.setPrices(newPrices, newGemPrice);
       // buyer should still pay the old price for 1 hour
       const receipt = await waitFor(
         users[0].StarterPack.purchaseWithETH(users[0].address, Message, dummySignature, {
@@ -327,8 +348,33 @@ function runEtherTests() {
         })
       );
       const eventsMatching = receipt.events.filter((event) => event.event === "Purchase");
-      const totalExpectedPrice = starterPackPrices.reduce((p, v) => p.add(v), BigNumber.from(0));
-      expect(eventsMatching[0].args[2]).to.equal(totalExpectedPrice);
+
+      const totalExpectedPrice = priceCalculator(
+        starterPackPrices,
+        Message.catalystQuantities,
+        gemPrice,
+        Message.gemQuantities
+      );
+      expect(eventsMatching[0].args[2]).to.equal(BigNumber.from(totalExpectedPrice));
+
+      // prices are set but the new prices do not take effect for purchases yet
+      const prices = await users[0].StarterPack.getPrices();
+      const expectedPrices = newPrices;
+      expect(prices[1][0]).to.equal(expectedPrices[0]);
+      expect(prices[1][1]).to.equal(expectedPrices[1]);
+      expect(prices[1][2]).to.equal(expectedPrices[2]);
+      expect(prices[1][3]).to.equal(expectedPrices[3]);
+      expect(prices[3]).to.equal(newGemPrice);
+
+      const expectedPreviousPrices = starterPackPrices;
+      const expectedPreviousGemPrice = gemPrice;
+      expect(prices[0][0]).to.equal(expectedPreviousPrices[0]);
+      expect(prices[0][1]).to.equal(expectedPreviousPrices[1]);
+      expect(prices[0][2]).to.equal(expectedPreviousPrices[2]);
+      expect(prices[0][3]).to.equal(expectedPreviousPrices[3]);
+      expect(prices[2]).to.equal(expectedPreviousGemPrice);
+
+      expect(prices[4]).not.to.equal(0);
 
       // fast-forward 1 hour. now buyer should pay the new price
       await increaseTime(60 * 60);
@@ -339,8 +385,14 @@ function runEtherTests() {
           value: BigNumber.from(4).mul("1000000000000000000"),
         })
       );
+
+      const newTotalExpectedPrice = priceCalculator(
+        newPrices,
+        Message.catalystQuantities,
+        newGemPrice,
+        Message.gemQuantities
+      );
       const eventsMatching2 = receipt2.events.filter((event) => event.event === "Purchase");
-      const newTotalExpectedPrice = BigNumber.from(2900).mul("1000000000000000000");
       expect(eventsMatching2[0].args[2]).to.equal(newTotalExpectedPrice);
     });
 

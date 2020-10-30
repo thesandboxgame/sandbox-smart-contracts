@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity 0.6.5;
 
 import "./AdminUpgradeabilityProxy.sol";
 import "../BaseWithStorage/Ownable.sol";
@@ -7,9 +7,8 @@ import "../BaseWithStorage/Ownable.sol";
 contract ProxyAdmin is Ownable {
     AdminUpgradeabilityProxy proxy;
 
-    constructor(AdminUpgradeabilityProxy _proxy, address payable _owner) public {
+    constructor(AdminUpgradeabilityProxy _proxy, address payable _owner) public Ownable(_owner) {
         proxy = _proxy;
-        owner = _owner;
     }
 
     function proxyAddress() public view returns (address) {

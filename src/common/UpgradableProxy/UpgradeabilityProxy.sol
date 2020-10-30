@@ -1,5 +1,5 @@
 // from https://github.com/zeppelinos/zos/blob/1cea266a672a1efc31915420af5eb5185173837c/packages/lib/contracts/upgradeability/UpgradeabilityProxy.sol
-pragma solidity ^0.6.0;
+pragma solidity 0.6.5;
 
 import "./ProxyBase.sol";
 import "../Libraries/AddressUtils.sol";
