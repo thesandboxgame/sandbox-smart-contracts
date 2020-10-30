@@ -358,7 +358,7 @@ describe("MockSANDRewardPool", function () {
     expect(precisionLost).to.be.at.most(10);
   });
 
-  it("User earnings for 500 NFTs match expected reward", async function () {
+  it.skip("User earnings for 500 NFTs match expected reward", async function () {
     await createFixture(true, true);
     await setUpUserWithNfts(others[0], 0, 500);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
@@ -376,7 +376,7 @@ describe("MockSANDRewardPool", function () {
     expect(precisionLost).to.be.at.most(1);
   });
 
-  it("User earnings for 10000 NFTs match expected reward", async function () {
+  it.skip("User earnings for 10000 NFTs match expected reward", async function () {
     await createFixture(true, true);
     await setUpUserWithNfts(others[0], 0, 10000);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
