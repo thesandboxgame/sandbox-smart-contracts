@@ -1,7 +1,7 @@
 const {guard} = require("../lib");
 const fs = require("fs");
 const {calculateLandHash} = require("../lib/merkleTreeHelper");
-const {getLands} = require("../data/LandPreSale_4_1/getLands");
+const {getLands} = require("../data/landPreSale_4_1/getLands");
 
 module.exports = async ({getChainId, getNamedAccounts, deployments, network}) => {
   const {deploy} = deployments;

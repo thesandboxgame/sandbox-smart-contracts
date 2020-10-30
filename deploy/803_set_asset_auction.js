@@ -1,11 +1,9 @@
-module.exports = async ({/*getNamedAccounts, */ deployments}) => {
+module.exports = async ({getNamedAccounts, deployments, ethers}) => {
   const {read, execute, log} = deployments;
 
-  // const {
-  //   assetAuctionFeeCollector,
-  // } = await getNamedAccounts();
+  const {assetAuctionFeeCollector} = await getNamedAccounts();
 
-  const assetAuction = await deployments.get("AssetSignedAuction");
+  const assetAuction = await ethers.getContract("AssetSignedAuction");
 
   const isSandSuperOperator = await read("Sand", "isSuperOperator", assetAuction.address);
   if (!isSandSuperOperator) {
@@ -33,20 +31,23 @@ module.exports = async ({/*getNamedAccounts, */ deployments}) => {
     );
   }
 
-  // TODO
-  // const fee10000th = 300;
-  // const feeEvents = await getEvents(assetAuction, 'FeeSetup(address,uint256)');
-  // let lastFeeEvent;
-  // if (feeEvents.length > 0) {
-  //     lastFeeEvent = feeEvents[feeEvents.length - 1];
-  //     // console.log(JSON.stringify(lastFeeEvent));
-  // }
-  // if (!lastFeeEvent || !(lastFeeEvent.args || lastFeeEvent.values)[1].eq(fee10000th)) {
-  //     log('set AssetSignedAuction\'s fee to 3%');
-  //     const currentAssetAuctionAdmin = await read('AssetSignedAuction', 'getAdmin');
-  //     await execute('AssetSignedAuction', {from: currentAssetAuctionAdmin, skipUnknownSigner: true}, 'setFee', assetAuctionFeeCollector, fee10000th);
-  // } else {
-  //     log('AssetSignedAuction\'s fee is already 3%');
-  // }
+  const fee10000th = 500;
+  const feeEvents = await assetAuction.queryFilter("FeeSetup");
+  let lastFeeEvent;
+  if (feeEvents.length > 0) {
+    lastFeeEvent = feeEvents[feeEvents.length - 1];
+    // console.log(JSON.stringify(lastFeeEvent));
+  }
+  if (!lastFeeEvent || !(lastFeeEvent.args || lastFeeEvent.values)[1].eq(fee10000th)) {
+    log("set AssetSignedAuction's fee to 5%");
+    const currentAssetAuctionAdmin = await read("AssetSignedAuction", "getAdmin");
+    await execute(
+      "AssetSignedAuction",
+      {from: currentAssetAuctionAdmin, skipUnknownSigner: true},
+      "setFee",
+      assetAuctionFeeCollector,
+      fee10000th
+    );
+  }
 };
 module.exports.dependencies = ["Sand", "AssetSignedAuction", "Asset"];

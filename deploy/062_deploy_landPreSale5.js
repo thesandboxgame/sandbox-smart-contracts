@@ -1,11 +1,11 @@
 const {guard} = require("../lib");
-const {getLands} = require("../data/LandPreSale_4_1/getLands");
+const {getLands} = require("../data/landPreSale_4_1/getLands");
 
 module.exports = async ({getChainId, getNamedAccounts, deployments, network}) => {
   const {deploy} = deployments;
   const chainId = await getChainId();
 
-  const {deployer, landSaleBeneficiary, backendReferralWallet, others} = await getNamedAccounts();
+  const {deployer, landSaleBeneficiary, backendReferralWallet, landSaleFeeRecipient} = await getNamedAccounts();
 
   const sandContract = await deployments.get("Sand");
   const landContract = await deployments.get("Land");
@@ -31,7 +31,7 @@ module.exports = async ({getChainId, getNamedAccounts, deployments, network}) =>
       2000,
       estateContract.address,
       assetContract.address,
-      others[5], // TODO FeeDistributor for 5% fee
+      landSaleFeeRecipient, // TODO FeeDistributor for 5% fee
     ],
     log: true,
   });

@@ -207,42 +207,6 @@ describe("PurchaseValidator", function () {
       );
     });
 
-    it("should fail if too many gems are requested", async function () {
-      Message.catalystQuantities = [1, 1, 1, 1];
-      // total gems allowed is max 10
-      Message.gemQuantities = [3, 2, 4, 2, 3];
-      const dummySignature = signPurchaseMessage(privateKey, Message, buyer);
-      await expectRevert(
-        starterPack.isPurchaseValid(
-          buyer,
-          Message.catalystIds,
-          Message.catalystQuantities,
-          Message.gemIds,
-          Message.gemQuantities,
-          Message.nonce,
-          dummySignature
-        ),
-        "INVALID_GEMS"
-      );
-    });
-
-    it("should fail if catalystIds are out of range", async function () {
-      Message.catalystIds = [5, 6, 7, 8];
-      const dummySignature = signPurchaseMessage(privateKey, Message, buyer);
-      await expectRevert(
-        starterPack.isPurchaseValid(
-          buyer,
-          Message.catalystIds,
-          Message.catalystQuantities,
-          Message.gemIds,
-          Message.gemQuantities,
-          Message.nonce,
-          dummySignature
-        ),
-        "ID_OUT_OF_BOUNDS"
-      );
-    });
-
     it("Should fail if anyone but Admin tries to update signing wallet", async function () {
       const newSigner = roles.others[0];
       await expectRevert(starterPack.updateSigningWallet(newSigner), "SENDER_NOT_ADMIN");

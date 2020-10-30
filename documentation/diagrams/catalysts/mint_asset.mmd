@@ -1,0 +1,7 @@
+sequenceDiagram
+autonumber
+    Note over Artist, AssetMinter: Minting Assets (no catalyst)
+    
+    Artist->>+AssetMinter:mint(hash,supply)
+    AssetMinter->>SAND:transferFrom(artist,feeRecipient,fee*supply)
+    AssetMinter->>-Asset:mint(hash,supply)

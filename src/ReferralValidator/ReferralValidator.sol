@@ -84,7 +84,7 @@ contract ReferralValidator is Admin {
             }
 
             if (commission > 0) {
-                address(uint160(referrer)).transfer(commission);
+                payable(referrer).transfer(commission);
             }
         }
 

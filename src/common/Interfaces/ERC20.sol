@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity 0.6.5;
 
 
 /// @dev see https://eips.ethereum.org/EIPS/eip-20

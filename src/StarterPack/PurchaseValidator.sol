@@ -40,7 +40,6 @@ contract PurchaseValidator is Admin {
         bytes memory signature
     ) public returns (bool) {
         require(_checkAndUpdateNonce(buyer, nonce), "INVALID_NONCE");
-        require(_validateGemAmounts(catalystIds, catalystQuantities, gemQuantities), "INVALID_GEMS");
         bytes32 hashedData = keccak256(abi.encodePacked(catalystIds, catalystQuantities, gemIds, gemQuantities, buyer, nonce));
 
         address signer = SigUtil.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
@@ -73,28 +72,6 @@ contract PurchaseValidator is Admin {
             return true;
         }
         return false;
-    }
-
-    /// @dev Function to ensure the gem amounts requested are valid.
-    /// @param catalystIds An array of Ids. Order cannot be assumed to be consistent.
-    /// @param catalystQuantities The quantitiy of each catalyst Id
-    /// @param gemQuantities The quantitiy of each type of gem.
-    /// @return bool - whether or not gem amounts are valid
-    function _validateGemAmounts(
-        uint256[] memory catalystIds,
-        uint256[] memory catalystQuantities,
-        uint256[] memory gemQuantities
-    ) private pure returns (bool) {
-        uint256 maxGemsAllowed;
-        uint256 requestedGems;
-        for (uint256 i = 0; i < catalystQuantities.length; i++) {
-            require(catalystIds[i] < 4, "ID_OUT_OF_BOUNDS");
-            maxGemsAllowed += catalystQuantities[i] * (catalystIds[i] + 1);
-        }
-        for (uint256 i = 0; i < gemQuantities.length; i++) {
-            requestedGems += gemQuantities[i];
-        }
-        return (requestedGems <= maxGemsAllowed);
     }
 
     constructor(address initialSigningWallet) public {

@@ -1,44 +1,29 @@
 pragma solidity 0.6.5;
 
+import "./BaseRelayRecipient.sol";
 
-contract MetaTxWrapper {
+
+contract MetaTxWrapper is BaseRelayRecipient {
     address internal immutable _forwardTo;
-    address internal immutable _forwarder;
 
-    constructor(address forwarder, address forwardTo) public {
+    constructor(address trusted_Forwarder, address forwardTo) public BaseRelayRecipient(trusted_Forwarder) {
         _forwardTo = forwardTo;
-        _forwarder = forwarder;
     }
 
-    fallback() external {
-        require(msg.sender == _forwarder, "can only be called by a forwarder");
-        bytes memory data = msg.data;
+    fallback() external payable trustedForwarderOnly() {
         uint256 length = msg.data.length;
-
-        address signer;
-        assembly {
-            signer := and(mload(sub(add(data, length), 0x00)), 0xffffffffffffffffffffffffffffffffffffffff)
+        // retrieve the msg sender as per EIP-2771
+        address signer = _msgSender();
+        address firstParam = abi.decode(msg.data[4:], (address));
+        require(signer == firstParam, "INVALID_METATX_DATA");
+        address target = _forwardTo;
+        (bool success, ) = target.call{value: msg.value}(msg.data);
+        if (!success) {
+            assembly {
+                let returnDataSize := returndatasize()
+                returndatacopy(0, 0, returnDataSize)
+                revert(0, returnDataSize)
+            }
         }
-
-        uint256 firstParam;
-        assembly {
-            firstParam := and(mload(data), 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff)
-        }
-        require(uint256(signer) == firstParam, "firstParam is not signer");
-
-        /*
-        assembly {
-            calldatacopy(0, 0, calldatasize())
-            let result := call(gas(), _forwardTo, 0, calldatasize(), 0, 0)
-            returndatacopy(0, 0, returndatasize())
-            switch result
-                case 0 {
-                    revert(0, returndatasize())
-                }
-                default {
-                    return(0, returndatasize())
-                }
-        }
-        */
     }
 }
