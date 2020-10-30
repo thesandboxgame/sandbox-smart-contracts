@@ -27,7 +27,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   );
 
   log("notifying the Reward Amount");
-  await execute(
+  const receipt = await execute(
     REWARD_NAME,
     {from: liquidityRewardAdmin, skipUnknownSigner: true, gasLimit: 1000000},
     "notifyRewardAmount",
@@ -35,7 +35,7 @@ module.exports = async ({getNamedAccounts, deployments}) => {
   );
 
   // Pass the timestamp of notifyRewardAmount to linkedData for accurate testing
-  const latestBlock = await ethers.provider.getBlock("latest");
+  const latestBlock = await ethers.provider.getBlock(receipt.timestamp);
   rewardPool.linkedData = JSON.stringify(latestBlock.timestamp);
   await deployments.save("REWARD_NAME", rewardPool);
 };
