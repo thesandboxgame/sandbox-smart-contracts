@@ -33,6 +33,11 @@ module.exports = async ({getNamedAccounts, deployments}) => {
     "notifyRewardAmount",
     REWARD_AMOUNT
   );
+
+  // Pass the timestamp of notifyRewardAmount to linkedData for accurate testing
+  const latestBlock = await ethers.provider.getBlock("latest");
+  rewardPool.linkedData = JSON.stringify(latestBlock.timestamp);
+  await deployments.save("REWARD_NAME", rewardPool);
 };
 module.exports.skip = guard(["1", "4", "314159"]);
 module.exports.dependencies = ["LandWeightedSANDRewardPool", "Sand"];

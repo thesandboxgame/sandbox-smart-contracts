@@ -19,6 +19,8 @@ const LESS_PRECISE_STAKE_AMOUNT = BigNumber.from(7).mul("1000000000000000000");
 
 const ONE_DAY = 86400;
 
+let notifyRewardTimestamp;
+
 describe("ActualSANDRewardPool", function () {
   let deployer;
   let others;
@@ -72,6 +74,11 @@ describe("ActualSANDRewardPool", function () {
 
     // Enable minting of LANDs
     await multiplierNFTokenAsAdmin.setMinter(landAdmin, true).then((tx) => tx.wait());
+
+    // Get notifyRewardAmount timestamp from deployment linkedData
+    const deployedRewardPool = await deployments.get(POOL);
+    const linkedData = deployedRewardPool.linkedData;
+    notifyRewardTimestamp = parseInt(linkedData);
   }
 
   // Provide users with LANDs
@@ -176,12 +183,12 @@ describe("ActualSANDRewardPool", function () {
   // Using LAND contract
 
   it("User with 0 LAND earns correct reward amount", async function () {
-    const timeDiff = 72; // 72s between notifyRewardAmount (deploy script) and stakeTimestamp
     const numNfts = 0;
     await createFixture();
     const receipt = await rewardPoolAsUser.stake(STAKE_AMOUNT).then((tx) => tx.wait());
     const stakeBlock = await ethers.provider.getBlock(receipt.blockNumber);
     const stakeTimestamp = stakeBlock.timestamp;
+    const timeDiff = stakeTimestamp - notifyRewardTimestamp;
 
     // user earnings immediately after staking
     const earnedAfterStake = await rewardPoolAsUser.earned(others[0]);
@@ -197,7 +204,7 @@ describe("ActualSANDRewardPool", function () {
       contribution(STAKE_AMOUNT, numNfts)
     );
     const expectedInitialReward = replicateEarned(contribution(STAKE_AMOUNT, numNfts), expectedInitialRewardPerToken);
-    // TODO FAILS: expect(expectedInitialReward).to.equal(earnedAfterStake);
+    expect(expectedInitialReward).to.equal(earnedAfterStake);
 
     // fast forward to end of reward period
     await ethers.provider.send("evm_setNextBlockTimestamp", [stakeTimestamp + REWARD_DURATION]);
@@ -219,12 +226,12 @@ describe("ActualSANDRewardPool", function () {
   });
 
   it("User with 0 LAND earns correct reward amount - smaller stake", async function () {
-    const timeDiff = 72; // 72s between notifyRewardAmount (deploy script) and stakeTimestamp
     const numNfts = 0;
     await createFixture();
     const receipt = await rewardPoolAsUser.stake(LESS_PRECISE_STAKE_AMOUNT).then((tx) => tx.wait());
     const stakeBlock = await ethers.provider.getBlock(receipt.blockNumber);
     const stakeTimestamp = stakeBlock.timestamp;
+    const timeDiff = stakeTimestamp - notifyRewardTimestamp;
 
     // user earnings immediately after staking
     const earnedAfterStake = await rewardPoolAsUser.earned(others[0]);
@@ -243,7 +250,7 @@ describe("ActualSANDRewardPool", function () {
       contribution(LESS_PRECISE_STAKE_AMOUNT, numNfts),
       expectedInitialRewardPerToken
     );
-    // TODO FAILS: expect(expectedInitialReward).to.equal(earnedAfterStake);
+    expect(expectedInitialReward).to.equal(earnedAfterStake);
 
     // fast forward to end of reward period
     await ethers.provider.send("evm_setNextBlockTimestamp", [stakeTimestamp + REWARD_DURATION]);
@@ -269,7 +276,6 @@ describe("ActualSANDRewardPool", function () {
   });
 
   it("User with 1 LAND earns correct reward amount", async function () {
-    const timeDiff = 73; // 73s between notifyRewardAmount (deploy script) and stakeTimestamp
     const numNfts = 1;
     await createFixture();
     await mintLandQuad(others[0]);
@@ -278,6 +284,7 @@ describe("ActualSANDRewardPool", function () {
     const receipt = await rewardPoolAsUser.stake(STAKE_AMOUNT).then((tx) => tx.wait());
     const stakeBlock = await ethers.provider.getBlock(receipt.blockNumber);
     const stakeTimestamp = stakeBlock.timestamp;
+    const timeDiff = stakeTimestamp - notifyRewardTimestamp;
 
     // user earnings immediately after staking
     const earnedAfterStake = await rewardPoolAsUser.earned(others[0]);
@@ -293,7 +300,7 @@ describe("ActualSANDRewardPool", function () {
       contribution(STAKE_AMOUNT, numNfts)
     );
     const expectedInitialReward = replicateEarned(contribution(STAKE_AMOUNT, numNfts), expectedInitialRewardPerToken);
-    // TODO FAILS: expect(expectedInitialReward).to.equal(earnedAfterStake);
+    expect(expectedInitialReward).to.equal(earnedAfterStake);
 
     // fast forward to end of reward period
     await ethers.provider.send("evm_setNextBlockTimestamp", [stakeTimestamp + REWARD_DURATION]);
@@ -319,7 +326,6 @@ describe("ActualSANDRewardPool", function () {
   });
 
   it("User with 3 LANDs earns correct reward amount", async function () {
-    const timeDiff = 75; // 75s between notifyRewardAmount (deploy script) and stakeTimestamp
     const numNfts = 3;
     await createFixture();
     for (let i = 0; i < 3; i++) {
@@ -330,6 +336,7 @@ describe("ActualSANDRewardPool", function () {
     const receipt = await rewardPoolAsUser.stake(STAKE_AMOUNT).then((tx) => tx.wait());
     const stakeBlock = await ethers.provider.getBlock(receipt.blockNumber);
     const stakeTimestamp = stakeBlock.timestamp;
+    const timeDiff = stakeTimestamp - notifyRewardTimestamp;
 
     // user earnings immediately after staking
     const earnedAfterStake = await rewardPoolAsUser.earned(others[0]);
@@ -345,7 +352,7 @@ describe("ActualSANDRewardPool", function () {
       contribution(STAKE_AMOUNT, numNfts)
     );
     const expectedInitialReward = replicateEarned(contribution(STAKE_AMOUNT, numNfts), expectedInitialRewardPerToken);
-    // TODO FAILS: expect(expectedInitialReward).to.equal(earnedAfterStake);
+    expect(expectedInitialReward).to.equal(earnedAfterStake);
 
     // fast forward to end of reward period
     await ethers.provider.send("evm_setNextBlockTimestamp", [stakeTimestamp + REWARD_DURATION]);
@@ -371,7 +378,6 @@ describe("ActualSANDRewardPool", function () {
   });
 
   it("User with 10 LANDs earns correct reward amount", async function () {
-    const timeDiff = 82; // 82s between notifyRewardAmount (deploy script) and stakeTimestamp
     const numNfts = 10;
     await createFixture();
     for (let i = 0; i < 10; i++) {
@@ -382,6 +388,7 @@ describe("ActualSANDRewardPool", function () {
     const receipt = await rewardPoolAsUser.stake(STAKE_AMOUNT).then((tx) => tx.wait());
     const stakeBlock = await ethers.provider.getBlock(receipt.blockNumber);
     const stakeTimestamp = stakeBlock.timestamp;
+    const timeDiff = stakeTimestamp - notifyRewardTimestamp;
 
     // user earnings immediately after staking
     const earnedAfterStake = await rewardPoolAsUser.earned(others[0]);
@@ -397,7 +404,7 @@ describe("ActualSANDRewardPool", function () {
       contribution(STAKE_AMOUNT, numNfts)
     );
     const expectedInitialReward = replicateEarned(contribution(STAKE_AMOUNT, numNfts), expectedInitialRewardPerToken);
-    // TODO FAILS: expect(expectedInitialReward).to.equal(earnedAfterStake);
+    expect(expectedInitialReward).to.equal(earnedAfterStake);
 
     // fast forward to end of reward period
     await ethers.provider.send("evm_setNextBlockTimestamp", [stakeTimestamp + REWARD_DURATION]);
