@@ -116,8 +116,6 @@ contract GameToken is ERC721BaseToken {
             _gameData[gameId]._assets.add(assetIds[i]);
             uint256 assetValues = _gameData[gameId]._values[assetIds[i]];
             _gameData[gameId]._values[assetIds[i]] = assetValues.add(values[i]);
-            console.log("Asset ID in addMultiple()", assetIds[i]);
-            console.log("Value in addMultiple()", values[i]);
         }
         _asset.safeBatchTransferFrom(from, address(this), assetIds, values, "");
         emit AssetsAdded(gameId, assetIds, values);
