@@ -32,6 +32,14 @@ interface GameTokenInterface {
         bool isEditor
     ) external;
 
+    function creatorOf(uint256 id) external view returns (address);
+
+    function transferCreatorship(
+        address sender,
+        address original,
+        address to
+    ) external;
+
     function isGameEditor(uint256 gameId, address editor) external returns (bool isEditor);
 
     function name() external pure returns (string memory);
