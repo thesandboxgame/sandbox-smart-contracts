@@ -54,7 +54,7 @@ contract GameToken is ERC721BaseToken {
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
         require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
-        uint256 gameId = _mintGame(to);
+        uint256 gameId = _mintGame(from, to);
 
         if (editors.length != 0) {
             for (uint256 i = 0; i < editors.length; i++) {
@@ -275,8 +275,8 @@ contract GameToken is ERC721BaseToken {
     /// @dev Function to create a new gameId and associate it with an owner
     /// @param to The address of the Game owner
     /// @return id The newly created gameId
-    function _mintGame(address to) internal returns (uint256 id) {
-        uint256 gameId = _nextId;
+    function _mintGame(address from, address to) internal returns (uint256 id) {
+        uint256 gameId = generateGameId(from);
         _nextId = _nextId + 1;
         _owners[gameId] = uint256(to);
         _numNFTPerAddress[to]++;
@@ -284,8 +284,14 @@ contract GameToken is ERC721BaseToken {
         return gameId;
     }
 
+    function generateGameId(address creator) internal view returns (uint256) {
+        return uint256(creator) * CREATOR_OFFSET_MULTIPLIER + uint96(_nextId);
+    }
+
     address internal _minter;
     AssetToken _asset;
+
+    uint256 private constant CREATOR_OFFSET_MULTIPLIER = uint256(10)**16;
 
     struct Data {
         EnumerableSet.UintSet _assets;
