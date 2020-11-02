@@ -29,6 +29,10 @@ contract Permit is TheSandbox712 {
         _sand.approveFor(owner, spender, value);
     }
 
+    function DOMAIN_SEPARATOR() external view returns (bytes32) {
+        return domainSeparator();
+    }
+
     ERC20Extended internal immutable _sand;
 
     mapping(address => uint256) public nonces;
