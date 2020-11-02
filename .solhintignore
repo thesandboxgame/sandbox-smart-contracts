@@ -1,8 +1,7 @@
-imports/
+export/
 deployments/
 artifacts/
 cache/
 coverage/
 node_modules/
-package.json
-src/
+src/solc_0.6
