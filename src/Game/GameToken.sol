@@ -166,24 +166,33 @@ contract GameToken is ERC721BaseToken {
         emit AssetsRemoved(gameId, assetIds, values, to);
     }
 
+    // @review consider removing this
     function getNumberOfAssets(uint256 gameId) external view returns (uint256) {
         return _gameData[gameId]._assets.length();
     }
 
-    /// @notice Function to get an asset and its value for a GAME
+    /// @notice Function to get all assets and their quantities for a GAME
     /// @param gameId The id of the GAME to get assets for
-    /// @param index The index of the asset in the set of assets for the GAME
-    /// @return asset The assetId
-    /// @return value The number of the given asset
 
-    // @review currently returning undefined...
-    // consider returning a fixed length array here, maybe the asset at index i along with its corresponding value...
-    function getGameAsset(uint256 gameId, uint256 index) external view returns (uint256 asset, uint256 value) {
-        uint256 asset;
-        uint256 value;
-        asset = _gameData[gameId]._assets.at(index);
-        value = _gameData[gameId]._values[asset];
-        return (asset, value);
+    function getGameAssets(uint256 gameId) external view returns (uint256[] memory, uint256[] memory) {
+        uint256 assetLength = _gameData[gameId]._assets.length();
+        uint256[] memory gameAssets;
+        uint256[] memory quantities;
+
+        if (assetLength != 0) {
+            gameAssets = new uint256[](assetLength);
+            quantities = new uint256[](assetLength);
+            for (uint256 i = 0; i < assetLength; i++) {
+                gameAssets[i] = _gameData[gameId]._assets.at(i);
+                quantities[i] = _gameData[gameId]._values[gameAssets[i]];
+            }
+        } else {
+            gameAssets = new uint256[](1);
+            quantities = new uint256[](1);
+            gameAssets[0] = uint256(0);
+            quantities[0] = uint256(0);
+        }
+        return (gameAssets, quantities);
     }
 
     /// @notice Function to allow token owner to set game editors
