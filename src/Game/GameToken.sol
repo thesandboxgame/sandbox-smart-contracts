@@ -170,6 +170,40 @@ contract GameToken is ERC721BaseToken {
         return _gameData[gameId]._assets.length();
     }
 
+    /// @notice Function to get all assets and quantities for a GAME
+    /// @param gameId The id of the GAME to get assets for
+    /// @return arrays: "assets" & "quantities"
+    // @review currently returning undefined...
+    // consider returning a fixed length array here, maybe the asset at index i along with its corresponding value...
+    function getGameAssets(uint256 gameId) external view returns (uint256[] memory) {
+        uint256 assetLength = _gameData[gameId]._assets.length();
+
+        console.log("New length: ", assetLength);
+
+        // uint256[] memory assets;
+        uint256[] memory gameAssets;
+        // uint256[] memory quantities;
+
+        if (assetLength != 0) {
+            gameAssets = new uint256[](assetLength);
+            // uint256[] memory quantities = new uint256[](length);
+            for (uint256 i = 0; i < assetLength; i++) {
+                gameAssets[i] = _gameData[gameId]._assets.at(i);
+                // quantities[i] = _gameData[gameId]._values[assets[i]];
+                // console.log("assets[i]: ", assets[i]);
+                // console.log("quantities[i]: ", quantities[i]);
+            }
+        } else {
+            gameAssets = new uint256[](1);
+            // uint256[] memory quantities = new uint256[](1);
+            gameAssets[0] = uint256(0);
+            // quantities[0] = uint256(0);
+        }
+        return (gameAssets);
+    }
+
+    // assets = _gameData[gameId]._assets._inner._values
+
     /// @notice Function to get an asset and its value for a GAME
     /// @param gameId The id of the GAME to get assets for
     /// @param index The index of the asset in the set of assets for the GAME
