@@ -12,13 +12,9 @@ let id;
 
 const dummyHash = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 const dummyHash2 = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE";
-const dummyHash3 = "0xEEFFFFFFFFFFFFFFFFFFFFFFFFFFFFEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEFF";
 const packId = 0;
 const packId2 = 1;
-const packId3 = 3;
-
 const rarity = 3;
-// const raritiesPack = "0x";
 
 async function supplyAssets(creator, packId, owner, supply, hash) {
   await execute("Asset", {from: assetBouncerAdmin, skipUnknownSigner: true}, "setBouncer", assetAdmin, true);
@@ -156,7 +152,6 @@ describe("GameToken", function () {
         expect(ownerOf).to.be.equal(GameOwner.address);
       });
 
-      // @review fix !
       it("anyone can mint Games with many Assets", async function () {
         ({gameToken, GameOwner, userWithSAND} = await setupTest());
         const assetContract = await ethers.getContract("Asset");
@@ -243,6 +238,12 @@ describe("GameToken", function () {
         expect(assets).to.be.eql([assetId, assetId2]);
         expect(values[0]).to.be.equal(3);
         expect(values[1]).to.be.equal(2);
+      });
+
+      it("can get all assets at once from a game", async function () {
+        const assets = await gameToken.getGameAssets(gameId);
+        console.log(`assets: ${assets}`);
+        assert.notEqual(assets, undefined, "assets is still undefined");
       });
 
       it("should fail if length of assetIds and values dont match", async function () {
