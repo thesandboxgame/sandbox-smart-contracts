@@ -69,12 +69,12 @@ describe("Permit", function () {
     const flatSig = sigUtil.signTypedData_v4(privateKeyAsBuffer, {data: permitData712});
     const sig = splitSignature(flatSig);
 
-    const checkNonce = await permitContract.getNonce(wallet.address);
+    const checkNonce = await permitContract.nonces(wallet.address);
     expect(checkNonce).to.equal(0);
 
     await permitContract.permit(wallet.address, others[1], TEST_AMOUNT, deadline, sig.v, sig.r, sig.s);
 
-    const nonceAfterApproval = await permitContract.getNonce(wallet.address);
+    const nonceAfterApproval = await permitContract.nonces(wallet.address);
     expect(nonceAfterApproval).to.equal(1);
   });
 

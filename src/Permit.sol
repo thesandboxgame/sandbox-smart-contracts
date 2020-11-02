@@ -28,13 +28,6 @@ contract Permit is TheSandbox712 {
         require(recoveredAddress != address(0) && recoveredAddress == owner, 'INVALID_SIGNATURE');
         _sand.approveFor(owner, spender, value);
     }
-    
-    /// @notice Function to get the nonce for a given address
-    /// @param owner the owner of the ERC20 tokens
-    /// @return uint256 representing the current nonce
-    function getNonce(address owner) external view returns (uint256) {
-        return nonces[owner];
-    }
 
     ERC20Extended internal immutable _sand;
 
