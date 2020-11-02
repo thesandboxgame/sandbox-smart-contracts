@@ -40,7 +40,7 @@ module.exports.data712 = function (verifyingContract, message) {
     },
     primaryType: "Permit",
     domain: {
-      name: "The Sandbox 3D",
+      name: "The Sandbox",
       version: "1",
       verifyingContract: verifyingContract.address,
     },
