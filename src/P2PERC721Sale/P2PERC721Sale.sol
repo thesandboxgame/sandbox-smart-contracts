@@ -68,7 +68,6 @@ contract P2PERC721Sale is Admin, ERC1654Constants, ERC1271Constants, TheSandbox7
         emit FeeSetup(feeCollector, fee);
 
         _setMetaTransactionProcessor(initialMetaTx, true);
-        init712();
     }
 
     function setFee(address feeCollector, uint256 fee) external {
@@ -137,7 +136,7 @@ contract P2PERC721Sale is Admin, ERC1654Constants, ERC1271Constants, TheSandbox7
         bytes memory dataToHash;
 
         if (eip712) {
-            dataToHash = abi.encodePacked("\x19\x01", domainSeparator(), _hashAuction(auction));
+            dataToHash = abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, _hashAuction(auction));
         } else {
             dataToHash = _encodeBasicSignatureHash(auction);
         }

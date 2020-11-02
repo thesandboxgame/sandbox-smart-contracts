@@ -20,17 +20,13 @@ contract Permit is TheSandbox712 {
         bytes32 digest = keccak256(
             abi.encodePacked(
                 '\x19\x01',
-                domainSeparator(),
+                DOMAIN_SEPARATOR,
                 keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
             )
         );
         address recoveredAddress = ecrecover(digest, v, r, s);
         require(recoveredAddress != address(0) && recoveredAddress == owner, 'INVALID_SIGNATURE');
         _sand.approveFor(owner, spender, value);
-    }
-
-    function DOMAIN_SEPARATOR() external view returns (bytes32) {
-        return domainSeparator();
     }
 
     ERC20Extended internal immutable _sand;
@@ -42,7 +38,6 @@ contract Permit is TheSandbox712 {
     constructor(
         ERC20Extended sandContractAddress
     ) public {
-        init712();
         _sand = sandContractAddress;
     }
 
