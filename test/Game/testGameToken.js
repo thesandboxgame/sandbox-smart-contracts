@@ -99,8 +99,9 @@ describe("GameToken", function () {
 
       // @review should be [] or [0], not undefined
       it("fails to get GAME data when no assets", async function () {
-        const index = 0;
-        await expectRevert(gameToken.getGameAsset(gameId, index), "EnumerableSet: index out of bounds");
+        const [gameAssets, quantities] = await gameToken.getGameAssets(gameId);
+        expect(gameAssets[0]).to.be.equal("0x00");
+        expect(quantities[0]).to.be.equal("0x00");
       });
 
       it("anyone can mint Games with Editors", async function () {
@@ -219,31 +220,19 @@ describe("GameToken", function () {
         expect(number).to.be.equal(2);
       });
 
-      it("can get an asset id and its value from a GAME", async function () {
+      // @review redundent...
+      it.skip("can get an asset id and its value from a GAME", async function () {
         const {asset, value} = await gameToken.getGameAsset(gameId, 0);
         expect(asset).to.be.equal(assetId);
         expect(value).to.be.equal(3);
       });
 
-      it("can get many assets & values from a GAME", async function () {
-        const number = await gameToken.getNumberOfAssets(gameId);
-        let assets = [];
-        let values = [];
-        for (i = 0; i < number; i++) {
-          const {asset, value} = await gameToken.getGameAsset(gameId, i);
-          assets.push(asset);
-          values.push(value);
-        }
-
-        expect(assets).to.be.eql([assetId, assetId2]);
-        expect(values[0]).to.be.equal(3);
-        expect(values[1]).to.be.equal(2);
-      });
-
       it("can get all assets at once from a game", async function () {
-        const assets = await gameToken.getGameAssets(gameId);
-        console.log(`assets: ${assets}`);
-        assert.notEqual(assets, undefined, "assets is still undefined");
+        const [gameAssets, quantities] = await gameToken.getGameAssets(gameId);
+        expect(gameAssets[0]).to.be.equal(assetId);
+        expect(gameAssets[1]).to.be.equal(assetId2);
+        expect(quantities[0]).to.be.equal(3);
+        expect(quantities[1]).to.be.equal(2);
       });
 
       it("should fail if length of assetIds and values dont match", async function () {
@@ -325,9 +314,9 @@ describe("GameToken", function () {
       const id = assetsAddedEvents[0].args[0];
       const assets = assetsAddedEvents[0].args[1];
       const values = assetsAddedEvents[0].args[2];
-      const gameDataAssetId = await gameToken.getGameAsset(gameId, 0);
-      expect(gameDataAssetId[0]).to.be.equal(assetId);
-      expect(gameDataAssetId[1]).to.be.equal(values[0]);
+      const [gameAssets, quantities] = await gameToken.getGameAssets(gameId);
+      expect(gameAssets[0]).to.be.equal(assetId);
+      expect(quantities[0]).to.be.equal(values[0]);
       expect(id).to.be.equal(gameId);
       expect(assets[0]).to.be.equal(assetId);
       expect(values[0]).to.be.equal(1);
@@ -340,8 +329,8 @@ describe("GameToken", function () {
       expect(numberBefore).to.be.equal(1);
       expect(assetBalanceBefore).to.be.equal(1);
 
-      const assetInGame = await gameToken.getGameAsset(gameId, 0);
-      const assetRemovalReceipt = await GameOwner.Game.removeSingleAsset(gameId, assetInGame[0], GameOwner.address);
+      const [gameAssets, quantities] = await gameToken.getGameAssets(gameId);
+      const assetRemovalReceipt = await GameOwner.Game.removeSingleAsset(gameId, gameAssets[0], GameOwner.address);
       const assetsRemovedEvents = await findEvents(gameToken, "AssetsRemoved", assetRemovalReceipt.blockHash);
       const id = assetsRemovedEvents[0].args[0];
       const assets = assetsRemovedEvents[0].args[1];
@@ -353,8 +342,9 @@ describe("GameToken", function () {
       expect(assetBalanceAfter).to.be.equal(assetBalanceBefore - 1);
       expect(numberAfter).to.be.equal(0);
       expect(id).to.be.equal(gameId);
-      expect(assets[0]).to.be.equal(assetInGame[0]);
+      expect(assets[0]).to.be.equal(gameAssets[0]);
       expect(values[0]).to.be.equal(1);
+      expect(quantities[0]).to.be.equal(1);
       expect(to).to.be.equal(GameOwner.address);
     });
 
