@@ -18,7 +18,6 @@ const rarity = 3;
 
 async function supplyAssets(creator, packId, owner, supply, hash) {
   await execute("Asset", {from: assetBouncerAdmin, skipUnknownSigner: true}, "setBouncer", assetAdmin, true);
-  // mint some assets to a user who can then create a GAME token with assets:
   const assetReceipt = await execute(
     "Asset",
     {from: assetAdmin, skipUnknownSigner: true},
@@ -37,9 +36,8 @@ async function supplyAssets(creator, packId, owner, supply, hash) {
 describe("GameToken", function () {
   before(async function () {
     ({assetAdmin, assetBouncerAdmin, others} = await getNamedAccounts());
-    const {userWithSAND} = await setupTest();
-    const {assetReceipt} = await supplyAssets(userWithSAND.address, packId, userWithSAND.address, 1, dummyHash);
-    userWithAssets = userWithSAND;
+    const {GameOwner} = await setupTest();
+    const {assetReceipt} = await supplyAssets(GameOwner.address, packId, GameOwner.address, 1, dummyHash);
     const assetContract = await ethers.getContract("Asset");
     const transferEvents = await findEvents(assetContract, "Transfer", assetReceipt.blockHash);
     id = transferEvents[0].args[2];
@@ -51,7 +49,6 @@ describe("GameToken", function () {
         let gameToken;
         let gameTokenAsAdmin;
         let users;
-        let minterGameId;
 
         before(async function () {
           ({gameToken, gameTokenAsAdmin, users} = await setupTest());
@@ -78,7 +75,6 @@ describe("GameToken", function () {
       let gameId;
       let GameEditor1;
       let GameEditor2;
-      let userWithSAND;
 
       // @review finish test. Add testing for proper transfer of asset ownership, linking of game token and asset id's, all event args, etc...
       it("anyone can mint Games with no Assets", async function () {
@@ -123,18 +119,25 @@ describe("GameToken", function () {
         assert.ok(isEditor1);
         assert.ok(isEditor2);
       });
+
+      it("gameId contains creator address", async function () {
+        console.log(`id: ${gameId}`);
+        const slicedId = gameId.toString().slice(0, 48);
+        const secondSlice = gameId.toString().slice(63);
+        expect(slicedId).to.be.equal(BigNumber.from(GameOwner.address));
+        expect(secondSlice).to.be.equal(String(1));
+      });
     });
 
     describe("GameToken: Mint With Assets", function () {
       let assetId;
       let assetId2;
       it("anyone can mint Games with single Asset", async function () {
-        ({gameToken, GameOwner, userWithSAND} = await setupTest());
-        const {assetReceipt} = await supplyAssets(userWithSAND.address, packId, userWithSAND.address, 1, dummyHash);
+        ({gameToken, GameOwner} = await setupTest());
+        const {assetReceipt} = await supplyAssets(GameOwner.address, packId, GameOwner.address, 1, dummyHash);
         const assetContract = await ethers.getContract("Asset");
         const assetTransferEvents = await findEvents(assetContract, "Transfer", assetReceipt.blockHash);
         const assetId = assetTransferEvents[0].args[2];
-        expect(GameOwner.address).to.be.equal(userWithSAND.address);
         const balanceBefore = await assetContract["balanceOf(address,uint256)"](gameToken.address, id);
         const assetAsAssetOwner = await assetContract.connect(assetContract.provider.getSigner(GameOwner.address));
         await waitFor(assetAsAssetOwner.setApprovalForAllFor(GameOwner.address, gameToken.address, true));
@@ -154,12 +157,12 @@ describe("GameToken", function () {
       });
 
       it("anyone can mint Games with many Assets", async function () {
-        ({gameToken, GameOwner, userWithSAND} = await setupTest());
+        ({gameToken, GameOwner} = await setupTest());
         const assetContract = await ethers.getContract("Asset");
         let assetReceipt;
-        ({assetReceipt} = await supplyAssets(userWithSAND.address, packId, userWithSAND.address, 3, dummyHash));
+        ({assetReceipt} = await supplyAssets(GameOwner.address, packId, GameOwner.address, 3, dummyHash));
         const assetReceipt1 = assetReceipt;
-        ({assetReceipt} = await supplyAssets(userWithSAND.address, packId2, userWithSAND.address, 2, dummyHash2));
+        ({assetReceipt} = await supplyAssets(GameOwner.address, packId2, GameOwner.address, 2, dummyHash2));
         const assetReceipt2 = assetReceipt;
         9;
 
@@ -169,8 +172,8 @@ describe("GameToken", function () {
         assetId = assetTransferEvents[0].args[3];
         assetId2 = assetTransferEvents2[0].args[3];
 
-        const userBalanceOf1 = await assetContract["balanceOf(address,uint256)"](userWithSAND.address, assetId);
-        const userBalanceOf2 = await assetContract["balanceOf(address,uint256)"](userWithSAND.address, assetId2);
+        const userBalanceOf1 = await assetContract["balanceOf(address,uint256)"](GameOwner.address, assetId);
+        const userBalanceOf2 = await assetContract["balanceOf(address,uint256)"](GameOwner.address, assetId2);
         assert(userBalanceOf1 == 3, "Not 3");
         assert(userBalanceOf2 == 2, "Not 2");
 
@@ -237,7 +240,7 @@ describe("GameToken", function () {
 
       it("should fail if length of assetIds and values dont match", async function () {
         const assetContract = await ethers.getContract("Asset");
-        const {assetReceipt} = await supplyAssets(userWithSAND.address, 7, userWithSAND.address, 3, dummyHash);
+        const {assetReceipt} = await supplyAssets(GameOwner.address, 7, GameOwner.address, 3, dummyHash);
         const assetTransferEvents = await findEvents(assetContract, "TransferSingle", assetReceipt.blockHash);
 
         const assetId = assetTransferEvents[0].args[3];
@@ -260,9 +263,9 @@ describe("GameToken", function () {
     let assetContract;
 
     before(async function () {
-      ({gameToken, GameOwner, GameEditor1, GameEditor2, userWithSAND, users} = await setupTest());
+      ({gameToken, GameOwner, GameEditor1, GameEditor2, users} = await setupTest());
       assetContract = await ethers.getContract("Asset");
-      const {assetReceipt} = await supplyAssets(userWithSAND.address, packId, userWithSAND.address, 1, dummyHash);
+      const {assetReceipt} = await supplyAssets(GameOwner.address, packId, GameOwner.address, 1, dummyHash);
       const assetTransferEvents = await findEvents(assetContract, "Transfer", assetReceipt.blockHash);
 
       assetId = assetTransferEvents[0].args[2];
@@ -301,7 +304,7 @@ describe("GameToken", function () {
       assert(ownerOfGame == GameOwner.address, "Owner Mismatch");
 
       const assetContract = await ethers.getContract("Asset");
-      const {assetReceipt} = await supplyAssets(userWithSAND.address, 11, userWithSAND.address, 1, dummyHash);
+      const {assetReceipt} = await supplyAssets(GameOwner.address, 11, GameOwner.address, 1, dummyHash);
       const assetTransferEvents = await findEvents(assetContract, "Transfer", assetReceipt.blockHash);
       assetId = assetTransferEvents[0].args[2];
       const numberBefore = await gameToken.getNumberOfAssets(gameId);
@@ -364,12 +367,10 @@ describe("GameToken", function () {
     let gameToken;
     let users;
     let GameOwner;
-    let userWithSAND;
 
     before(async function () {
-      ({gameToken, userWithSAND, users, GameOwner} = await setupTest());
-      const {assetReceipt} = await supplyAssets(userWithSAND.address, packId, userWithSAND.address, 1, dummyHash);
-      userWithAssets = userWithSAND;
+      ({gameToken, users, GameOwner} = await setupTest());
+      const {assetReceipt} = await supplyAssets(GameOwner.address, packId, GameOwner.address, 1, dummyHash);
       assetContract = await ethers.getContract("Asset");
       const assetTransferEvents = await findEvents(assetContract, "Transfer", assetReceipt.blockHash);
       assetId = assetTransferEvents[0].args[2];
@@ -385,7 +386,7 @@ describe("GameToken", function () {
     it("current owner can transfer ownership of a GAME", async function () {
       const originalOwner = await gameToken.ownerOf(gameId);
       const recipient = users[7].address;
-      const gameTokenAsGameOwner = await gameToken.connect(gameToken.provider.getSigner(userWithSAND.address));
+      const gameTokenAsGameOwner = await gameToken.connect(gameToken.provider.getSigner(GameOwner.address));
       await waitFor(
         gameTokenAsGameOwner["safeTransferFrom(address,address,uint256)"](originalOwner, recipient, gameId)
       );
@@ -449,3 +450,4 @@ describe("GameToken", function () {
     });
   });
 });
+s;
