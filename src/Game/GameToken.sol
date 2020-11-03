@@ -152,15 +152,17 @@ contract GameToken is ERC721BaseToken {
     ) external {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(to != address(0), "INVALID_TO_ADDRESS");
-        require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
+        require(assetIds.length == values.length && assetIds.length <= _gameData[gameId]._assets.length(), "INVALID_INPUT_LENGTHS");
         for (uint256 i = 0; i < assetIds.length; i++) {
             // "remove" is from EnumerableSet.sol
-            _gameData[gameId]._assets.remove(assetIds[i]);
             uint256 assetValues = _gameData[gameId]._values[assetIds[i]];
+            if (values[i] >= _gameData[gameId]._values[assetIds[i]]) {
+                _gameData[gameId]._assets.remove(assetIds[i]);
+            }
             // "sub" is from SafeMathWithRequire.sol
             _gameData[gameId]._values[assetIds[i]] = assetValues.sub(values[i]);
-            _asset.safeTransferFrom(address(this), to, assetIds[i]);
         }
+        _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
         emit AssetsRemoved(gameId, assetIds, values, to);
     }
 
