@@ -284,10 +284,14 @@ describe("GameToken", function () {
       const {assetReceipt} = await supplyAssets(GameOwner.address, 11, GameOwner.address, 1, dummyHash);
       const assetTransferEvents = await findEvents(assetContract, "Transfer", assetReceipt.blockHash);
       singleAssetId = assetTransferEvents[0].args[2];
+      const contractBalanceBefore = await assetContract["balanceOf(address,uint256)"](gameToken.address, singleAssetId);
+      const ownerBalanceBefore = await assetContract["balanceOf(address,uint256)"](GameOwner.address, singleAssetId);
       const numberBefore = await gameToken.getNumberOfAssets(gameId);
       assert.equal(numberBefore, 0);
 
       const receipt = await waitFor(GameOwner.Game.addSingleAsset(GameOwner.address, gameId, singleAssetId));
+      const contractBalanceAfter = await assetContract["balanceOf(address,uint256)"](gameToken.address, singleAssetId);
+      const ownerBalanceAfter = await assetContract["balanceOf(address,uint256)"](GameOwner.address, singleAssetId);
       const numberAfter = await gameToken.getNumberOfAssets(gameId);
       assert.equal(numberAfter, 1);
       const assetsAddedEvents = await findEvents(gameToken, "AssetsAdded", receipt.blockHash);
@@ -295,6 +299,11 @@ describe("GameToken", function () {
       const assets = assetsAddedEvents[0].args[1];
       const values = assetsAddedEvents[0].args[2];
       const [gameAssets, quantities] = await gameToken.getGameAssets(gameId);
+      const totalAssets = await GameOwner.Game.getNumberOfAssets(gameId);
+
+      expect(totalAssets).to.be.equal(1);
+      expect(contractBalanceAfter).to.be.equal(contractBalanceBefore + 1);
+      expect(ownerBalanceAfter).to.be.equal(ownerBalanceBefore - 1);
       expect(gameAssets[0]).to.be.equal(singleAssetId);
       expect(quantities[0]).to.be.equal(values[0]);
       expect(id).to.be.equal(gameId);
@@ -343,8 +352,6 @@ describe("GameToken", function () {
 
       const [gameAssets, quantities] = await GameOwner.Game.getGameAssets(gameId);
       const totalAssets = await GameOwner.Game.getNumberOfAssets(gameId);
-      console.log(`game Assets: ${gameAssets}`);
-      console.log(`Asset Quantitites: ${quantities}`);
 
       expect(totalAssets).to.be.equal(3);
       expect(contractBalanceAfter).to.be.equal(contractBalanceBefore + 7);
