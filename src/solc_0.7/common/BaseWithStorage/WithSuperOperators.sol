@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.7.1;
 
-import "./Admin.sol";
+import "./WithAdmin.sol";
 
-contract SuperOperators is Admin {
+contract WithSuperOperators is WithAdmin {
     mapping(address => bool) internal _superOperators;
 
     event SuperOperator(address superOperator, bool enabled);

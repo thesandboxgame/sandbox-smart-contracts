@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.7.1;
 
-contract Admin {
+contract WithAdmin {
     address internal _admin;
 
     /// @dev emitted when the contract administrator is changed.
