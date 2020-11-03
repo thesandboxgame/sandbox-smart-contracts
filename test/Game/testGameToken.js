@@ -1,37 +1,16 @@
-const {ethers, getNamedAccounts, deployments} = require("@nomiclabs/buidler");
+const {ethers, getNamedAccounts} = require("@nomiclabs/buidler");
 const {assert, expect} = require("local-chai");
 const {BigNumber} = require("ethers");
-const {expectRevert, emptyBytes, waitFor} = require("local-utils");
+const {expectRevert, waitFor} = require("local-utils");
 const {findEvents} = require("../../lib/findEvents.js");
-const {setupTest} = require("./fixtures");
-const {execute} = deployments;
+const {setupTest, supplyAssets} = require("./fixtures");
 
-let assetAdmin;
-let assetBouncerAdmin;
 let id;
 
 const dummyHash = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 const dummyHash2 = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE";
 const packId = 0;
 const packId2 = 1;
-const rarity = 3;
-
-async function supplyAssets(creator, packId, owner, supply, hash) {
-  await execute("Asset", {from: assetBouncerAdmin, skipUnknownSigner: true}, "setBouncer", assetAdmin, true);
-  const assetReceipt = await execute(
-    "Asset",
-    {from: assetAdmin, skipUnknownSigner: true},
-    "mint",
-    creator,
-    packId,
-    hash,
-    supply,
-    rarity,
-    creator,
-    emptyBytes
-  );
-  return {assetReceipt};
-}
 
 describe("GameToken", function () {
   before(async function () {
@@ -450,4 +429,3 @@ describe("GameToken", function () {
     });
   });
 });
-s;
