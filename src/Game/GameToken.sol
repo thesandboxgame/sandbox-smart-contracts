@@ -123,7 +123,6 @@ contract GameToken is ERC721BaseToken {
 
     // @review Add burnGame function. see comments here: https://github.com/thesandboxgame/sandbox-private-contracts/pull/138#discussion_r507714939
 
-    // @review modify so that asset is only removed when remaining value = 0 !
     function removeSingleAsset(
         uint256 gameId,
         uint256 assetId,
@@ -156,7 +155,6 @@ contract GameToken is ERC721BaseToken {
     ) external {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(to != address(0), "INVALID_TO_ADDRESS");
-        console.log("num of assets: ", getNumberOfAssets(gameId));
         require(assetIds.length == values.length && assetIds.length <= getNumberOfAssets(gameId), "INVALID_INPUT_LENGTHS");
         for (uint256 i = 0; i < assetIds.length; i++) {
             // "remove" is from EnumerableSet.sol
