@@ -123,7 +123,6 @@ contract GameToken is ERC721BaseToken {
 
     // @review Add burnGame function. see comments here: https://github.com/thesandboxgame/sandbox-private-contracts/pull/138#discussion_r507714939
 
-    // @review Could be made into a wrapper which calls removeMultipleAssets with correct params...
     function removeSingleAsset(
         uint256 gameId,
         uint256 assetId,
@@ -131,11 +130,15 @@ contract GameToken is ERC721BaseToken {
     ) external {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(to != address(0), "INVALID_TO_ADDRESS");
-        // "remove" is from EnumerableSet.sol
-        _gameData[gameId]._assets.remove(assetId);
-        uint256 assetValues = _gameData[gameId]._values[assetId];
         // "sub" is from SafeMathWithRequire.sol
-        _gameData[gameId]._values[assetId] = assetValues.sub(1);
+        _gameData[gameId]._values[assetId] = _gameData[gameId]._values[assetId].sub(1);
+        uint256 remainingAssets = _gameData[gameId]._values[assetId];
+
+        if (remainingAssets == 0) {
+            // "remove" is from EnumerableSet.sol
+            require(_gameData[gameId]._assets.remove(assetId), "ASSET_NOT_IN_GAME");
+        }
+
         _asset.safeTransferFrom(address(this), to, assetId);
         uint256[] memory assets = new uint256[](1);
         uint256[] memory values = new uint256[](1);
@@ -152,7 +155,7 @@ contract GameToken is ERC721BaseToken {
     ) external {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(to != address(0), "INVALID_TO_ADDRESS");
-        require(assetIds.length == values.length && assetIds.length <= _gameData[gameId]._assets.length(), "INVALID_INPUT_LENGTHS");
+        require(assetIds.length == values.length && assetIds.length <= getNumberOfAssets(gameId), "INVALID_INPUT_LENGTHS");
         for (uint256 i = 0; i < assetIds.length; i++) {
             // "remove" is from EnumerableSet.sol
             uint256 assetValues = _gameData[gameId]._values[assetIds[i]];
@@ -167,7 +170,7 @@ contract GameToken is ERC721BaseToken {
     }
 
     // @review consider removing this
-    function getNumberOfAssets(uint256 gameId) external view returns (uint256) {
+    function getNumberOfAssets(uint256 gameId) public view returns (uint256) {
         return _gameData[gameId]._assets.length();
     }
 
