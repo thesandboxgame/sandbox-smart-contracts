@@ -240,6 +240,7 @@ describe("GameToken", function () {
     let gameId;
     let singleAssetId;
     let assetId;
+    let assetId2;
     let assetContract;
 
     before(async function () {
@@ -396,6 +397,13 @@ describe("GameToken", function () {
       expect(assets[0]).to.be.equal(singleAssetId);
       expect(values[0]).to.be.equal(1);
       expect(to).to.be.equal(GameOwner.address);
+    });
+
+    it("fails when removing more assets than the game contains", async function () {
+      await expectRevert(
+        GameOwner.Game.removeMultipleAssets(gameId, [assetId, assetId2, assetId2], [7, 31, 2], GameOwner.address),
+        "INVALID_INPUT_LENGTHS"
+      );
     });
 
     it("Owner can remove multiple Assets", async function () {
