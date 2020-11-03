@@ -9,8 +9,10 @@ let id;
 
 const dummyHash = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
 const dummyHash2 = "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE";
+const dummyHash3 = "0xAAAAAAAFFFFFFFFFFFFFFFFFFFFFFFEEEEEEEEEEEEEEEEEEEEEEEEEEEAAAAAAA";
 const packId = 0;
 const packId2 = 1;
+const packId3 = 2;
 
 describe("GameToken", function () {
   before(async function () {
@@ -33,13 +35,16 @@ describe("GameToken", function () {
           ({gameToken, gameTokenAsAdmin, users} = await setupTest());
         });
 
-        // @review finish writing test
         it("minter can create GAMEs when _minter is set", async function () {
           await gameTokenAsAdmin.setMinter(users[3].address);
           const Minter = users[3];
           const minterReceipt = Minter.Game.createGame(users[3].address, users[4].address, [], [], []);
           transferEvents = await findEvents(gameToken, "Transfer", minterReceipt.blockHash);
-          minterGameId = transferEvents[0].args[2];
+          const minterGameId = transferEvents[0].args[2];
+          const gameOwner = transferEvents[0].args[1];
+
+          expect(await gameToken.ownerOf(minterGameId)).to.be.equal(users[4].address);
+          expect(gameOwner).to.be.equal(users[4].address);
         });
 
         it("reverts if non-minter trys to mint Game when _minter set", async function () {
@@ -55,17 +60,19 @@ describe("GameToken", function () {
       let GameEditor1;
       let GameEditor2;
 
-      // @review finish test. Add testing for proper transfer of asset ownership, linking of game token and asset id's, all event args, etc...
       it("anyone can mint Games with no Assets", async function () {
         ({gameToken, GameOwner, GameEditor1, GameEditor2} = await setupTest());
         const receipt = await waitFor(GameOwner.Game.createGame(GameOwner.address, GameOwner.address, [], [], []));
-        transferEvents = await findEvents(gameToken, "Transfer", receipt.blockHash);
+        const transferEvents = await findEvents(gameToken, "Transfer", receipt.blockHash);
         assetsAddedEvents = await findEvents(gameToken, "AssetsAdded", receipt.blockHash);
         gameId = transferEvents[0].args[2];
         const eventGameOwner = transferEvents[0].args[1];
         const assets = assetsAddedEvents[0].args[1];
         const contractGameOwner = await gameToken.ownerOf(gameId);
+        const [gameAssets, quantities] = await gameToken.getGameAssets(gameId);
 
+        expect(gameAssets[0]).to.be.equal(["0x00"]);
+        expect(quantities[0]).to.be.equal(["0x00"]);
         expect(assets).to.eql([]);
         expect(eventGameOwner).to.be.equal(GameOwner.address);
         expect(contractGameOwner).to.be.equal(GameOwner.address);
@@ -75,6 +82,8 @@ describe("GameToken", function () {
       // @review should be [] or [0], not undefined
       it("fails to get GAME data when no assets", async function () {
         const [gameAssets, quantities] = await gameToken.getGameAssets(gameId);
+        console.log(`gameAssets: ${gameAssets}`);
+        console.log(`quantities: ${quantities}`);
         expect(gameAssets[0]).to.be.equal("0x00");
         expect(quantities[0]).to.be.equal("0x00");
       });
@@ -200,13 +209,6 @@ describe("GameToken", function () {
       it("can get the number of assets", async function () {
         const number = await gameToken.getNumberOfAssets(gameId);
         expect(number).to.be.equal(2);
-      });
-
-      // @review redundent...
-      it.skip("can get an asset id and its value from a GAME", async function () {
-        const {asset, value} = await gameToken.getGameAsset(gameId, 0);
-        expect(asset).to.be.equal(assetId);
-        expect(value).to.be.equal(3);
       });
 
       it("can get all assets at once from a game", async function () {
@@ -448,7 +450,30 @@ describe("GameToken", function () {
       expect(to).to.be.equal(GameOwner.address);
     });
 
-    it.skip("Editor can add & remove Assets", async function () {});
+    it("Editor can add & remove Assets", async function () {
+      await waitFor(GameOwner.Game.setGameEditor(gameId, GameEditor1.address, true));
+      const numberBefore = await gameToken.getNumberOfAssets(gameId);
+      const assetContract = await ethers.getContract("Asset");
+      const {assetReceipt} = await supplyAssets(GameEditor1.address, packId3, GameEditor1.address, 1, dummyHash3);
+      const assetAsAssetOwner = await assetContract.connect(assetContract.provider.getSigner(GameEditor1.address));
+      await waitFor(assetAsAssetOwner.setApprovalForAllFor(GameEditor1.address, gameToken.address, true));
+      const assetTransferEvents = await findEvents(assetContract, "TransferSingle", assetReceipt.blockHash);
+      const editorAssetId = assetTransferEvents[0].args[3];
+      const balance = await assetContract["balanceOf(address,uint256)"](GameEditor1.address, editorAssetId);
+
+      await waitFor(GameEditor1.Game.addSingleAsset(GameEditor1.address, gameId, editorAssetId));
+
+      const numberAfter = await gameToken.getNumberOfAssets(gameId);
+
+      await waitFor(GameEditor1.Game.removeSingleAsset(gameId, editorAssetId, GameEditor1.address));
+
+      const finalNumber = await gameToken.getNumberOfAssets(gameId);
+
+      expect(balance).to.be.equal(1);
+      expect(numberBefore).to.be.equal(1);
+      expect(numberAfter).to.be.equal(2);
+      expect(finalNumber).to.be.equal(1);
+    });
   });
 
   describe("GameToken: Transferring GAMEs", function () {
