@@ -294,7 +294,7 @@ contract GameToken is ERC721BaseToken {
     address internal _minter;
     AssetToken _asset;
 
-    uint256 private constant CREATOR_OFFSET_MULTIPLIER = uint256(10)**16;
+    uint256 private constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
 
     struct Data {
         EnumerableSet.UintSet _assets;
