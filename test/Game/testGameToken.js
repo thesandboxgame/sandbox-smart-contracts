@@ -1,6 +1,6 @@
 const {ethers, getNamedAccounts} = require("@nomiclabs/buidler");
 const {assert, expect} = require("local-chai");
-const {BigNumber} = require("ethers");
+const {BigNumber, utils} = require("ethers");
 const {expectRevert, waitFor} = require("local-utils");
 const {findEvents} = require("../../lib/findEvents.js");
 const {setupTest, supplyAssets} = require("./fixtures");
@@ -79,7 +79,6 @@ describe("GameToken", function () {
         expect(contractGameOwner).to.be.equal(eventGameOwner);
       });
 
-      // @review should be [] or [0], not undefined
       it("fails to get GAME data when no assets", async function () {
         const [gameAssets, quantities] = await gameToken.getGameAssets(gameId);
         console.log(`gameAssets: ${gameAssets}`);
@@ -109,10 +108,10 @@ describe("GameToken", function () {
       });
 
       it("gameId contains creator address", async function () {
-        console.log(`id: ${gameId}`);
-        const slicedId = gameId.toString().slice(0, 48);
-        const secondSlice = gameId.toString().slice(63);
-        expect(slicedId).to.be.equal(BigNumber.from(GameOwner.address));
+        const idAsHex = utils.hexValue(gameId);
+        const slicedId = idAsHex.slice(0, 42);
+        const secondSlice = idAsHex.slice(65);
+        expect(utils.getAddress(slicedId)).to.be.equal(GameOwner.address);
         expect(secondSlice).to.be.equal(String(1));
       });
     });
