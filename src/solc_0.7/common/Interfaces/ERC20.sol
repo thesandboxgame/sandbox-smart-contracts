@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: UNLICENSED
+//SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
 /// @dev see https://eips.ethereum.org/EIPS/eip-20

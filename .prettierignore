@@ -5,3 +5,7 @@ cache/
 coverage/
 node_modules/
 package.json
+documentation/
+sandbox-subgraph/
+old_src/
+src/solc_0.6
