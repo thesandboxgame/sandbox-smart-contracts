@@ -1,19 +1,22 @@
-.DS_Store
-node_modules/*
-!src/node_modules
-build/
-artifacts/
 cache/
-yarn-error.log
+artifacts/
 
-coverage/
-coverage.json
-.coverage_*
+yarn.error.log
+
+coverage*
 
 .vscode/*
 !.vscode/settings.json.default
-!.vscode/extensions.json
+!.vscode/launch.json.default
+!.vscode/extensions.json.default
 
+node_modules/
+.env
+
+contractsInfo.json
+deployments/hardhat
+deployments/localhost
+deployments/rinkeby_test
 
 .google_credentials.json
 token.json
@@ -33,8 +36,4 @@ presale_2*
 giveaway.json
 .proofs*
 
-deployments/buidlerevm*
-deployments/localhost*
-deployments/rinkeby_test_4
-deployments/goerli_test_5
-.env
+
