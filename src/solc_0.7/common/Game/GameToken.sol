@@ -1,4 +1,4 @@
-pragma solidity 0.6.5;
+pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
 import "../BaseWithStorage/ERC721BaseToken.sol";
@@ -8,7 +8,6 @@ import "../common/Libraries/SafeMathWithRequire.sol";
 
 // @review remove all console.logs !
 import "@nomiclabs/buidler/console.sol";
-
 
 contract GameToken is ERC721BaseToken {
     using EnumerableSet for EnumerableSet.UintSet;
@@ -155,7 +154,10 @@ contract GameToken is ERC721BaseToken {
     ) external {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(to != address(0), "INVALID_TO_ADDRESS");
-        require(assetIds.length == values.length && assetIds.length <= getNumberOfAssets(gameId), "INVALID_INPUT_LENGTHS");
+        require(
+            assetIds.length == values.length && assetIds.length <= getNumberOfAssets(gameId),
+            "INVALID_INPUT_LENGTHS"
+        );
         for (uint256 i = 0; i < assetIds.length; i++) {
             // "remove" is from EnumerableSet.sol
             uint256 assetValues = _gameData[gameId]._values[assetIds[i]];
