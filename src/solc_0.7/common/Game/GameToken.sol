@@ -1,15 +1,15 @@
-pragma solidity 0.6.5;
+pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
-import "../../../solc_0.6/BaseWithStorage/ERC721BaseToken.sol";
-import "../../../solc_0.6/Interfaces/AssetToken.sol";
+import "../BaseWithStorage/WithERC721BaseToken.sol";
+import "../Interfaces/AssetToken.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
-import "../../../solc_0.6/common/Libraries/SafeMathWithRequire.sol";
+import "../Libraries/SafeMathWithRequire.sol";
 
 // @review remove all console.logs !
-import "@nomiclabs/buidler/console.sol";
+// import "@hardhat/console.sol";
 
-contract GameToken is ERC721BaseToken {
+contract GameToken is WithERC721BaseToken {
     using EnumerableSet for EnumerableSet.UintSet;
     using SafeMathWithRequire for uint256;
 
@@ -312,7 +312,7 @@ contract GameToken is ERC721BaseToken {
         address metaTransactionContract,
         address admin,
         AssetToken asset
-    ) public ERC721BaseToken(metaTransactionContract, admin) {
+    ) public WithERC721BaseToken(metaTransactionContract, admin) {
         _asset = asset;
         _nextId = 1;
     }
