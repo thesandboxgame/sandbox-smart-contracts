@@ -5,7 +5,7 @@ const {splitSignature} = require("ethers/lib/utils");
 const {findEvents} = require("../utils");
 const sigUtil = require("eth-sig-util");
 const {expect} = require('../chai-setup');
-const {data712} = require("./data712.js");
+const {data712} = require("./data712.ts");
 const {bufferToHex} = require("ethereumjs-util");
 
 const zeroAddress = ethers.constants.AddressZero;

@@ -1,4 +1,37 @@
-module.exports.data712 = function (verifyingContract, message) {
+import { BigNumber } from "ethers";
+
+type Message = {
+  owner: string,
+  spender: string,
+  value: BigNumber,
+  nonce: BigNumber,
+  deadline: BigNumber,
+};
+
+type Contract = {
+  address: string,
+};
+
+type Type = {
+  name: string,
+  type: string
+};
+
+type Data712 = {
+  types: {
+    EIP712Domain: Array<Type>,
+    Permit: Array<Type>,
+  },
+  primaryType: string,
+    domain: {
+      name: string,
+      version: string,
+      verifyingContract: string,
+    },
+    message: Message,
+};
+
+export const data712 = function (verifyingContract: Contract, message: Message): Data712 {
   return {
     types: {
       EIP712Domain: [
