@@ -1,5 +1,4 @@
-pragma solidity 0.6.5;
-
+pragma solidity 0.7.1;
 
 /// @title Interface for the Game token
 
