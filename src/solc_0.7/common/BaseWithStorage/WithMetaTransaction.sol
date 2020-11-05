@@ -1,7 +1,8 @@
-//SPDX-License-Identifier: UNLICENSED
+//SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
 import "./WithAdmin.sol";
+
 
 contract WithMetaTransaction is WithAdmin {
     uint8 internal constant METATX_SANDBOX = 1;
@@ -47,7 +48,7 @@ contract WithMetaTransaction is WithAdmin {
      * otherwise, return `msg.sender`.
      * should be used in the contract anywhere instead of msg.sender
      */
-    function _msgSender() internal view virtual returns (address payable ret) {
+    function _msgSender() internal virtual view returns (address payable ret) {
         if (isTrustedForwarder(msg.sender)) {
             return _forceMsgSender();
         } else {
@@ -55,7 +56,7 @@ contract WithMetaTransaction is WithAdmin {
         }
     }
 
-    function _forceMsgSender() internal view virtual returns (address payable ret) {
+    function _forceMsgSender() internal virtual view returns (address payable ret) {
         // solhint-disable-next-line no-inline-assembly
         assembly {
             ret := shr(96, calldataload(sub(calldatasize(), 20)))

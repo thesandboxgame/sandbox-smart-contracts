@@ -1,5 +1,6 @@
-//SPDX-License-Identifier: UNLICENSED
+//SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
+
 
 /// @dev Note: The ERC-165 identifier for this interface is 0x5e8bf644.
 interface ERC721MandatoryTokenReceiver {

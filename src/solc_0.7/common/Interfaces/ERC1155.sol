@@ -1,5 +1,6 @@
-//SPDX-License-Identifier: UNLICENSED
+//SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
+
 
 /**
     @title ERC-1155 Multi Token Standard
