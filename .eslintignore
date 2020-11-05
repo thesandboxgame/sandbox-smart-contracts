@@ -6,3 +6,7 @@ coverage/
 node_modules/
 package.json
 src/
+documentation/
+sandbox-subgraph/
+old_src/
+src/solc_0.6
