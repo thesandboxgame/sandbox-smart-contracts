@@ -1,7 +1,7 @@
 /* solhint-disable func-order, code-complexity */
 pragma solidity 0.7.1;
 
-import "../Libraries/AddressUtils.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "../Interfaces/ERC721TokenReceiver.sol";
 import "../Interfaces/ERC721Events.sol";
 import "../BaseWithStorage/WithSuperOperators.sol";
