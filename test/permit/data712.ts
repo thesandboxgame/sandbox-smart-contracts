@@ -1,31 +1,58 @@
-import { BigNumber } from "ethers";
-
 type Message = {
   owner: string,
   spender: string,
-  value: BigNumber,
-  nonce: BigNumber,
-  deadline: BigNumber,
+  value: string,
+  nonce: string,
+  deadline: string,
 };
 
 type Contract = {
   address: string,
 };
 
-type Type = {
-  name: string,
-  type: string
-};
-
 type Data712 = {
   types: {
-    EIP712Domain: Array<Type>,
-    Permit: Array<Type>,
+    EIP712Domain: [
+      {
+        name: "name",
+        type: "string",
+      },
+      {
+        name: "version",
+        type: "string",
+      },
+      {
+        name: "verifyingContract",
+        type: "address",
+      },
+    ],
+    Permit: [
+      {
+        name: "owner",
+        type: "address",
+      },
+      {
+        name: "spender",
+        type: "address",
+      },
+      {
+        name: "value",
+        type: "uint256",
+      },
+      {
+        name: "nonce",
+        type: "uint256",
+      },
+      {
+        name: "deadline",
+        type: "uint256",
+      },
+    ]
   },
-  primaryType: string,
+  primaryType: "Permit",
     domain: {
-      name: string,
-      version: string,
+      name: "The Sandbox",
+      version: "1",
       verifyingContract: string,
     },
     message: Message,
