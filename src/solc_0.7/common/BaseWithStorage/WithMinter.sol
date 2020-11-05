@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
-
 contract WithMinter {
     address internal _minter;
     event MinterChanged(address oldMinter, address newMinter);

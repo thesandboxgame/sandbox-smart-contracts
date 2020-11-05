@@ -9,7 +9,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
-
 interface ERC721TokenReceiver {
     function onERC721Received(
         address operator,

@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
-
 /// @dev see https://eips.ethereum.org/EIPS/eip-20
 interface ERC20 {
     /// @notice emitted when tokens are transfered from one address to another.

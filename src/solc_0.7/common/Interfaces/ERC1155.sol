@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
-
 /**
     @title ERC-1155 Multi Token Standard
     @dev See https://eips.ethereum.org/EIPS/eip-1155

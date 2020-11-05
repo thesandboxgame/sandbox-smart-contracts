@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
-
 /**
  * @title ERC721 Non-Fungible Token Standard basic interface
  * @dev see https://eips.ethereum.org/EIPS/eip-721

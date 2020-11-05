@@ -3,7 +3,6 @@ pragma solidity 0.7.1;
 
 import "./WithAdmin.sol";
 
-
 contract WithSuperOperators is WithAdmin {
     mapping(address => bool) internal _superOperators;
 

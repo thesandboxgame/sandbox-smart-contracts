@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
-
 interface ERC20Receiver {
     function receiveApproval(
         address _from,

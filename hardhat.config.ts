@@ -39,7 +39,7 @@ const config: HardhatUserConfig = {
     maxMethodDiff: 10,
   },
   mocha: {
-    timeout: 0
+    timeout: 0,
   },
   solidity: {
     compilers: [

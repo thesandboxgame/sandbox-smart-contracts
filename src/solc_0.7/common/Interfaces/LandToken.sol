@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
-
 interface LandToken {
     function batchTransferQuad(
         address from,

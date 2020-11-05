@@ -11,7 +11,6 @@ pragma solidity 0.7.1;
 
 import "./ERC20.sol";
 
-
 interface ERC20WithMetadata is ERC20 {
     function name() external view returns (string memory);
 
