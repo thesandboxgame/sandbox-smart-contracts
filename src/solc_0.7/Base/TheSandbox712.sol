@@ -7,7 +7,7 @@ contract TheSandbox712 {
     );
     bytes32 public immutable DOMAIN_SEPARATOR;
 
-    constructor() public {
+    constructor() {
         DOMAIN_SEPARATOR = keccak256(
             abi.encode(EIP712DOMAIN_TYPEHASH, keccak256("The Sandbox"), keccak256("1"), address(this))
         );

@@ -45,7 +45,7 @@ contract Permit is TheSandbox712 {
         "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
     );
 
-    constructor(ERC20Extended sandContractAddress) public {
+    constructor(ERC20Extended sandContractAddress) {
         _sand = sandContractAddress;
     }
 }
