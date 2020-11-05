@@ -1,7 +1,7 @@
 /* solhint-disable func-order, code-complexity */
 pragma solidity 0.7.1;
 
-import "../Libraries/AddressUtils.sol";
+import "@openzeppelin/contracts/utils/Address.sol";
 import "../Interfaces/ERC721TokenReceiver.sol";
 import "../Interfaces/ERC721Events.sol";
 import "../BaseWithStorage/WithSuperOperators.sol";
@@ -9,7 +9,7 @@ import "../BaseWithStorage/WithMetaTransactionReceiver.sol";
 import "../Interfaces/ERC721MandatoryTokenReceiver.sol";
 
 contract WithERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactionReceiver {
-    using AddressUtils for address;
+    using Address for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
     bytes4 internal constant _ERC721_BATCH_RECEIVED = 0x4b808c46;
