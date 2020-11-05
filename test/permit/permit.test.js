@@ -1,4 +1,4 @@
-const {setupPermit} = require("./fixtures");
+const {setupPermit} = require("./fixtures.ts");
 const ethers = require("ethers");
 const {BigNumber} = ethers;
 const {splitSignature} = require("ethers/lib/utils");
