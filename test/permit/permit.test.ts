@@ -7,6 +7,7 @@ import {signTypedData_v4, TypedDataUtils} from "eth-sig-util";
 import {expect} from "../chai-setup";
 import {bufferToHex} from "ethereumjs-util";
 import {data712} from "./data712";
+import {Tx} from "./types"
 
 const zeroAddress = constants.AddressZero;
 const TEST_AMOUNT = BigNumber.from(10).mul("1000000000000000000");
@@ -32,7 +33,7 @@ describe("Permit", function () {
     const flatSig = signTypedData_v4(privateKeyAsBuffer, {data: permitData712});
     const sig = splitSignature(flatSig);
 
-    const receipt = await permitContract.permit(wallet.address, others[3], TEST_AMOUNT, deadline, sig.v, sig.r, sig.s).then((tx: any) => tx.wait());;
+    const receipt = await permitContract.permit(wallet.address, others[3], TEST_AMOUNT, deadline, sig.v, sig.r, sig.s).then((tx: Tx) => tx.wait());;
 
     const transferEvents = await findEvents(sandContract, "Approval", receipt.blockHash);
 
@@ -212,7 +213,7 @@ describe("Permit", function () {
     await expect(sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT)).to.be.revertedWith(
       "Not enough funds allowed"
     );
-    await permitContract.permit(wallet.address, others[3], TEST_AMOUNT, deadline, sig.v, sig.r, sig.s).then((tx: any) => tx.wait());;
+    await permitContract.permit(wallet.address, others[3], TEST_AMOUNT, deadline, sig.v, sig.r, sig.s).then((tx: Tx) => tx.wait());;
     const receipt = await sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT);
     const receiverNewBalance = await sandContract.balanceOf(others[4]);
     const transferEventsMatching = await findEvents(sandContract, "Transfer", receipt.blockHash);
@@ -247,7 +248,7 @@ describe("Permit", function () {
     await sandContractAsAdmin.transferFrom(sandBeneficiary, wallet.address, TEST_AMOUNT.mul(2));
 
     const sandContractAsSpender = await sandContract.connect(ethers.provider.getSigner(others[3]));
-    await permitContract.permit(wallet.address, others[3], TEST_AMOUNT, deadline, sig.v, sig.r, sig.s).then((tx: any) => tx.wait());;
+    await permitContract.permit(wallet.address, others[3], TEST_AMOUNT, deadline, sig.v, sig.r, sig.s).then((tx: Tx) => tx.wait());;
     await expect(sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT.mul(2))).to.be.revertedWith(
       "Not enough funds allowed"
     );
@@ -277,7 +278,7 @@ describe("Permit", function () {
     await sandContractAsAdmin.transferFrom(sandBeneficiary, wallet.address, TEST_AMOUNT.div(2));
 
     const sandContractAsSpender = await sandContract.connect(ethers.provider.getSigner(others[3]));
-    await permitContract.permit(wallet.address, others[3], TEST_AMOUNT, deadline, sig.v, sig.r, sig.s).then((tx: any) => tx.wait());;
+    await permitContract.permit(wallet.address, others[3], TEST_AMOUNT, deadline, sig.v, sig.r, sig.s).then((tx: Tx) => tx.wait());;
     await expect(sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT)).to.be.revertedWith("not enough fund");
   });
 });
