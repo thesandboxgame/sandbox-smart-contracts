@@ -1,10 +1,9 @@
-pragma solidity 0.6.5;
+pragma solidity 0.7.1;
 
 import "../../Interfaces/ERC20Extended.sol";
-import "../../common/BaseWithStorage/SuperOperators.sol";
+import "../SuperOperators.sol";
 
-
-contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
+abstract contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
     bytes32 internal immutable _name; // work only for string that can fit into 32 bytes
     bytes32 internal immutable _symbol; // work only for string that can fit into 32 bytes
 
@@ -41,14 +40,14 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
 
     /// @notice Gets the total number of tokens in existence.
     /// @return the total number of tokens in existence.
-    function totalSupply() external override view returns (uint256) {
+    function totalSupply() external view override returns (uint256) {
         return _totalSupply;
     }
 
     /// @notice Gets the balance of `owner`.
     /// @param owner The address to query the balance of.
     /// @return The amount owned by `owner`.
-    function balanceOf(address owner) external override view returns (uint256) {
+    function balanceOf(address owner) external view override returns (uint256) {
         return _balances[owner];
     }
 
@@ -56,13 +55,13 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
     /// @param owner address whose token is allowed.
     /// @param spender address allowed to transfer.
     /// @return remaining the amount of token `spender` is allowed to transfer on behalf of `owner`.
-    function allowance(address owner, address spender) external override view returns (uint256 remaining) {
+    function allowance(address owner, address spender) external view override returns (uint256 remaining) {
         return _allowances[owner][spender];
     }
 
     /// @notice returns the number of decimals for that token.
     /// @return the number of decimals.
-    function decimals() external virtual pure returns (uint8) {
+    function decimals() external pure virtual returns (uint8) {
         return uint8(18);
     }
 
@@ -155,7 +154,7 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
         address owner,
         address spender,
         uint256 amountNeeded
-    ) internal virtual{
+    ) internal virtual {
         if (amountNeeded > 0 && !isSuperOperator(spender)) {
             uint256 currentAllowance = _allowances[owner][spender];
             if (currentAllowance < amountNeeded) {
@@ -168,7 +167,7 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
         address owner,
         address spender,
         uint256 amount
-    ) internal virtual{
+    ) internal virtual {
         require(owner != address(0) && spender != address(0), "Cannot approve with 0x0");
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
