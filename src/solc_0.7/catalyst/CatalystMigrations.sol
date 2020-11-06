@@ -6,7 +6,6 @@ import "./AssetAttributesRegistry.sol";
 import "../common/Interfaces/AssetToken.sol";
 
 contract CatalystMigrations {
-
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
 
     OldCatalystRegistry internal immutable _oldRegistry;
@@ -15,14 +14,25 @@ contract CatalystMigrations {
     bytes32 immutable _merkleRoot;
     mapping(uint256 => bool) _migratedNFT;
 
-    constructor(AssetToken asset, AssetAttributesRegistry registry, OldCatalystRegistry oldRegistry, bytes32 merkleRoot) {
+    constructor(
+        AssetToken asset,
+        AssetAttributesRegistry registry,
+        OldCatalystRegistry oldRegistry,
+        bytes32 merkleRoot
+    ) {
         _oldRegistry = oldRegistry;
         _asset = asset;
         _registry = registry;
         _merkleRoot = merkleRoot;
     }
 
-    function migrate(address from, address to, uint256 assetId, uint256 amount, uint16[] calldata gems) external {
+    function migrate(
+        address from,
+        address to,
+        uint256 assetId,
+        uint256 amount,
+        uint16[] calldata gems
+    ) external {
         // TODO metatx
         require(msg.sender == from, "NOT_AUTHORIZED");
         uint256 balance = _asset.balanceOf(from, assetId);
@@ -47,5 +57,4 @@ contract CatalystMigrations {
             }
         }
     }
-
 }

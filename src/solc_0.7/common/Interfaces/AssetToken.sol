@@ -38,7 +38,6 @@ interface AssetToken is ERC1155 {
         address to
     ) external returns (uint256 newId);
 
-
     // ERC721 (minus ERC1155 duplicates)
     function balanceOf(address owner) external view returns (uint256 balance);
 
