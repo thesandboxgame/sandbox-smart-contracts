@@ -1,13 +1,12 @@
 import {ethers} from 'hardhat';
 import {setupPermit} from './fixtures';
-import {BigNumber, constants} from 'ethers';
+import {BigNumber, constants, ContractTransaction} from 'ethers';
 import {splitSignature} from 'ethers/lib/utils';
 import {findEvents} from '../utils';
 import {signTypedData_v4, TypedDataUtils} from 'eth-sig-util';
 import {expect} from '../chai-setup';
 import {bufferToHex} from 'ethereumjs-util';
 import {data712} from './data712';
-import {Tx} from './types';
 
 const zeroAddress = constants.AddressZero;
 const TEST_AMOUNT = BigNumber.from(10).mul('1000000000000000000');
@@ -50,7 +49,7 @@ describe('Permit', function () {
         sig.r,
         sig.s
       )
-      .then((tx: Tx) => tx.wait());
+      .then((tx: ContractTransaction) => tx.wait());
 
     const transferEvents = await findEvents(
       sandContract,
@@ -310,7 +309,7 @@ describe('Permit', function () {
         sig.r,
         sig.s
       )
-      .then((tx: Tx) => tx.wait());
+      .then((tx: ContractTransaction) => tx.wait());
     const receipt = await sandContractAsSpender.transferFrom(
       wallet.address,
       others[4],
@@ -382,7 +381,7 @@ describe('Permit', function () {
         sig.r,
         sig.s
       )
-      .then((tx: Tx) => tx.wait());
+      .then((tx: ContractTransaction) => tx.wait());
     await expect(
       sandContractAsSpender.transferFrom(
         wallet.address,
@@ -443,7 +442,7 @@ describe('Permit', function () {
         sig.r,
         sig.s
       )
-      .then((tx: Tx) => tx.wait());
+      .then((tx: ContractTransaction) => tx.wait());
     await expect(
       sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT)
     ).to.be.revertedWith('not enough fund');
