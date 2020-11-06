@@ -67,7 +67,7 @@ export async function findEvents(
 
 export type EventWithArgs = Event & {args: Result};
 
-export async function expectReceipEventWithArgs(
+export async function expectReceiptEventWithArgs(
   receipt: ContractReceipt,
   name: string
 ): Promise<EventWithArgs> {

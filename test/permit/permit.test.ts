@@ -4,10 +4,10 @@ import {BigNumber, constants} from 'ethers';
 import {splitSignature} from 'ethers/lib/utils';
 import {
   expectEventWithArgs,
-  expectReceipEventWithArgs,
+  expectReceiptEventWithArgs,
   waitFor,
 } from '../utils';
-import {signTypedData_v4, TypedDataUtils} from 'eth-sig-util';
+import {TypedDataUtils} from 'eth-sig-util';
 import {expect} from '../chai-setup';
 import {bufferToHex} from 'ethereumjs-util';
 import {data712} from './data712';
@@ -18,19 +18,18 @@ const TEST_AMOUNT = BigNumber.from(10).mul('1000000000000000000');
 describe('Permit', function () {
   // Note: on test network, others[1] is sandAdmin, others[2] is sandBeneficiary
 
-  it('ERC20 Approval event is emitted when msg.sender == owner', async function () {
+  it('ERC20 Approval event is emitted when msg signer == owner', async function () {
     const setUp = await setupPermit();
     const {
       permitContract,
       sandContract,
       others,
-      wallet,
       nonce,
       deadline,
     } = setUp;
 
     const approve = {
-      owner: wallet.address,
+      owner: others[5],
       spender: others[3],
       value: TEST_AMOUNT._hex,
       nonce: nonce._hex,
@@ -38,14 +37,12 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const privateKey = wallet.privateKey;
-    const privateKeyAsBuffer = Buffer.from(privateKey.substr(2), 'hex');
-    const flatSig = signTypedData_v4(privateKeyAsBuffer, {data: permitData712});
+    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
     const sig = splitSignature(flatSig);
 
     const receipt = await waitFor(
       permitContract.permit(
-        wallet.address,
+        others[5],
         others[3],
         TEST_AMOUNT,
         deadline,
@@ -60,7 +57,7 @@ describe('Permit', function () {
       receipt,
       'Approval'
     );
-    expect(approvalEvent.args[0]).to.equal(wallet.address); // owner
+    expect(approvalEvent.args[0]).to.equal(others[5]); // owner
     expect(approvalEvent.args[1]).to.equal(others[3]); // spender
     expect(approvalEvent.args[2]).to.equal(TEST_AMOUNT); // amount
   });
@@ -68,10 +65,10 @@ describe('Permit', function () {
   it('Nonce is incremented for each Approval', async function () {
     const setUp = await setupPermit();
 
-    const {permitContract, others, wallet, nonce, deadline} = setUp;
+    const {permitContract, others, nonce, deadline} = setUp;
 
     const approve = {
-      owner: wallet.address,
+      owner: others[5],
       spender: others[3],
       value: TEST_AMOUNT._hex,
       nonce: nonce._hex,
@@ -79,17 +76,15 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const privateKey = wallet.privateKey;
-    const privateKeyAsBuffer = Buffer.from(privateKey.substr(2), 'hex');
-    const flatSig = signTypedData_v4(privateKeyAsBuffer, {data: permitData712});
+    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
     const sig = splitSignature(flatSig);
 
-    const checkNonce = await permitContract.nonces(wallet.address);
+    const checkNonce = await permitContract.nonces(others[5]);
     expect(checkNonce).to.equal(0);
 
     await waitFor(
       permitContract.permit(
-        wallet.address,
+        others[5],
         others[3],
         TEST_AMOUNT,
         deadline,
@@ -99,7 +94,7 @@ describe('Permit', function () {
       )
     );
 
-    const nonceAfterApproval = await permitContract.nonces(wallet.address);
+    const nonceAfterApproval = await permitContract.nonces(others[5]);
     expect(nonceAfterApproval).to.equal(1);
   });
 
@@ -107,10 +102,10 @@ describe('Permit', function () {
     const setUp = await setupPermit();
     const deadline = BigNumber.from(1382718400);
 
-    const {permitContract, others, wallet, nonce} = setUp;
+    const {permitContract, others, nonce} = setUp;
 
     const approve = {
-      owner: wallet.address,
+      owner: others[5],
       spender: others[3],
       value: TEST_AMOUNT._hex,
       nonce: nonce._hex,
@@ -118,14 +113,12 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const privateKey = wallet.privateKey;
-    const privateKeyAsBuffer = Buffer.from(privateKey.substr(2), 'hex');
-    const flatSig = signTypedData_v4(privateKeyAsBuffer, {data: permitData712});
+    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
     const sig = splitSignature(flatSig);
 
     await expect(
       permitContract.permit(
-        wallet.address,
+        others[5],
         others[3],
         TEST_AMOUNT,
         deadline,
@@ -139,10 +132,10 @@ describe('Permit', function () {
   it('Permit function reverts if owner is zeroAddress', async function () {
     const setUp = await setupPermit();
 
-    const {permitContract, others, wallet, nonce, deadline} = setUp;
+    const {permitContract, others, nonce, deadline} = setUp;
 
     const approve = {
-      owner: wallet.address,
+      owner: others[5],
       spender: others[3],
       value: TEST_AMOUNT._hex,
       nonce: nonce._hex,
@@ -150,9 +143,7 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const privateKey = wallet.privateKey;
-    const privateKeyAsBuffer = Buffer.from(privateKey.substr(2), 'hex');
-    const flatSig = signTypedData_v4(privateKeyAsBuffer, {data: permitData712});
+    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
     const sig = splitSignature(flatSig);
 
     await expect(
@@ -168,13 +159,13 @@ describe('Permit', function () {
     ).to.be.revertedWith('INVALID_SIGNATURE');
   });
 
-  it('Permit function reverts if owner != msg.sender', async function () {
+  it('Permit function reverts if owner != msg signer', async function () {
     const setUp = await setupPermit();
 
-    const {permitContract, others, wallet, nonce, deadline} = setUp;
+    const {permitContract, others, nonce, deadline} = setUp;
 
     const approve = {
-      owner: wallet.address,
+      owner: others[5],
       spender: others[3],
       value: TEST_AMOUNT._hex,
       nonce: nonce._hex,
@@ -182,9 +173,7 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const privateKey = wallet.privateKey;
-    const privateKeyAsBuffer = Buffer.from(privateKey.substr(2), 'hex');
-    const flatSig = signTypedData_v4(privateKeyAsBuffer, {data: permitData712});
+    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
     const sig = splitSignature(flatSig);
 
     await expect(
@@ -203,10 +192,10 @@ describe('Permit', function () {
   it('Permit function reverts if spender is not the approved spender', async function () {
     const setUp = await setupPermit();
 
-    const {permitContract, others, wallet, nonce, deadline} = setUp;
+    const {permitContract, others, nonce, deadline} = setUp;
 
     const approve = {
-      owner: wallet.address,
+      owner: others[5],
       spender: others[3],
       value: TEST_AMOUNT._hex,
       nonce: nonce._hex,
@@ -214,14 +203,12 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const privateKey = wallet.privateKey;
-    const privateKeyAsBuffer = Buffer.from(privateKey.substr(2), 'hex');
-    const flatSig = signTypedData_v4(privateKeyAsBuffer, {data: permitData712});
+    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
     const sig = splitSignature(flatSig);
 
     await expect(
       permitContract.permit(
-        wallet.address,
+        others[5],
         others[4],
         TEST_AMOUNT,
         deadline,
@@ -235,11 +222,11 @@ describe('Permit', function () {
   it('Domain separator is public', async function () {
     const setUp = await setupPermit();
 
-    const {permitContract, others, wallet, nonce, deadline} = setUp;
+    const {permitContract, others, nonce, deadline} = setUp;
     const domainSeparator = await permitContract.DOMAIN_SEPARATOR();
 
     const approve = {
-      owner: wallet.address,
+      owner: others[5],
       spender: others[3],
       value: TEST_AMOUNT._hex,
       nonce: nonce._hex,
@@ -266,7 +253,6 @@ describe('Permit', function () {
       sandAdmin,
       sandBeneficiary,
       others,
-      wallet,
       nonce,
       deadline,
     } = setUp;
@@ -274,7 +260,7 @@ describe('Permit', function () {
     expect(receiverOriginalBalance).to.equal(0);
 
     const approve = {
-      owner: wallet.address,
+      owner: others[5],
       spender: others[3],
       value: TEST_AMOUNT._hex,
       nonce: nonce._hex,
@@ -282,9 +268,7 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const privateKey = wallet.privateKey;
-    const privateKeyAsBuffer = Buffer.from(privateKey.substr(2), 'hex');
-    const flatSig = signTypedData_v4(privateKeyAsBuffer, {data: permitData712});
+    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
     const sig = splitSignature(flatSig);
 
     // Give wallet some SAND
@@ -294,7 +278,7 @@ describe('Permit', function () {
     await waitFor(
       sandContractAsAdmin.transferFrom(
         sandBeneficiary,
-        wallet.address,
+        others[5],
         TEST_AMOUNT
       )
     );
@@ -303,11 +287,11 @@ describe('Permit', function () {
       ethers.provider.getSigner(others[3])
     );
     await expect(
-      sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT)
+      sandContractAsSpender.transferFrom(others[5], others[4], TEST_AMOUNT)
     ).to.be.revertedWith('Not enough funds allowed');
     await waitFor(
       permitContract.permit(
-        wallet.address,
+        others[5],
         others[3],
         TEST_AMOUNT,
         deadline,
@@ -317,14 +301,14 @@ describe('Permit', function () {
       )
     );
     const receipt = await waitFor(
-      sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT)
+      sandContractAsSpender.transferFrom(others[5], others[4], TEST_AMOUNT)
     );
     const receiverNewBalance = await sandContract.balanceOf(others[4]);
-    const firstTransferEvent = await expectReceipEventWithArgs(
+    const firstTransferEvent = await expectReceiptEventWithArgs(
       receipt,
       'Transfer'
     );
-    expect(firstTransferEvent.args[0]).to.equal(wallet.address);
+    expect(firstTransferEvent.args[0]).to.equal(others[5]);
     expect(firstTransferEvent.args[1]).to.equal(others[4]);
     expect(firstTransferEvent.args[2]).to.equal(TEST_AMOUNT);
     expect(receiverNewBalance).to.equal(
@@ -341,13 +325,12 @@ describe('Permit', function () {
       sandAdmin,
       sandBeneficiary,
       others,
-      wallet,
       nonce,
       deadline,
     } = setUp;
 
     const approve = {
-      owner: wallet.address,
+      owner: others[5],
       spender: others[3],
       value: TEST_AMOUNT._hex,
       nonce: nonce._hex,
@@ -355,9 +338,7 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const privateKey = wallet.privateKey;
-    const privateKeyAsBuffer = Buffer.from(privateKey.substr(2), 'hex');
-    const flatSig = signTypedData_v4(privateKeyAsBuffer, {data: permitData712});
+    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
     const sig = splitSignature(flatSig);
 
     // Give wallet lots of SAND
@@ -367,7 +348,7 @@ describe('Permit', function () {
     await waitFor(
       sandContractAsAdmin.transferFrom(
         sandBeneficiary,
-        wallet.address,
+        others[5],
         TEST_AMOUNT.mul(2)
       )
     );
@@ -377,7 +358,7 @@ describe('Permit', function () {
     );
     await waitFor(
       permitContract.permit(
-        wallet.address,
+        others[5],
         others[3],
         TEST_AMOUNT,
         deadline,
@@ -388,7 +369,7 @@ describe('Permit', function () {
     );
     await expect(
       sandContractAsSpender.transferFrom(
-        wallet.address,
+        others[5],
         others[4],
         TEST_AMOUNT.mul(2)
       )
@@ -404,13 +385,12 @@ describe('Permit', function () {
       sandAdmin,
       sandBeneficiary,
       others,
-      wallet,
       nonce,
       deadline,
     } = setUp;
 
     const approve = {
-      owner: wallet.address,
+      owner: others[5],
       spender: others[3],
       value: TEST_AMOUNT._hex,
       nonce: nonce._hex,
@@ -418,9 +398,7 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const privateKey = wallet.privateKey;
-    const privateKeyAsBuffer = Buffer.from(privateKey.substr(2), 'hex');
-    const flatSig = signTypedData_v4(privateKeyAsBuffer, {data: permitData712});
+    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
     const sig = splitSignature(flatSig);
 
     // Give wallet small amount of SAND
@@ -430,7 +408,7 @@ describe('Permit', function () {
     await waitFor(
       sandContractAsAdmin.transferFrom(
         sandBeneficiary,
-        wallet.address,
+        others[5],
         TEST_AMOUNT.div(2)
       )
     );
@@ -440,7 +418,7 @@ describe('Permit', function () {
     );
     await waitFor(
       permitContract.permit(
-        wallet.address,
+        others[5],
         others[3],
         TEST_AMOUNT,
         deadline,
@@ -450,7 +428,7 @@ describe('Permit', function () {
       )
     );
     await expect(
-      sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT)
+      sandContractAsSpender.transferFrom(others[5], others[4], TEST_AMOUNT)
     ).to.be.revertedWith('not enough fund');
   });
 });

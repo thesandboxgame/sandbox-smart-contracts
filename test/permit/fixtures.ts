@@ -4,7 +4,7 @@ import {
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
-import {BigNumber, Wallet} from 'ethers';
+import {BigNumber} from 'ethers';
 
 export const setupPermit = deployments.createFixture(async function () {
   const {sandAdmin, sandBeneficiary} = await getNamedAccounts();
@@ -14,7 +14,6 @@ export const setupPermit = deployments.createFixture(async function () {
   const sandContract = await ethers.getContract('Sand');
   const permitContract = await ethers.getContract('Permit');
 
-  const wallet = Wallet.createRandom();
   const nonce = BigNumber.from(0);
   const deadline = BigNumber.from(2582718400);
 
@@ -24,7 +23,6 @@ export const setupPermit = deployments.createFixture(async function () {
     sandAdmin,
     sandBeneficiary,
     others,
-    wallet,
     nonce,
     deadline,
   };
