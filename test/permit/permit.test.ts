@@ -1,3 +1,4 @@
+import {ethers} from "hardhat";
 import {setupPermit} from "./fixtures";
 import {BigNumber, Wallet, constants} from "ethers";
 import {splitSignature} from "ethers/lib/utils";
@@ -227,24 +228,22 @@ describe("Permit", function () {
     const sig = splitSignature(flatSig);
 
     // Give wallet some SAND
+    const sandContractAsAdmin = await sandContract.connect(ethers.provider.getSigner(sandAdmin));
+    await sandContractAsAdmin.transferFrom(sandBeneficiary, wallet.address, TEST_AMOUNT);
 
-    // TODO: fix signer error
-    const sandContractAsAdmin = await sandContract.connect(sandContract.provider.getSigner(sandAdmin));
-    // await sandContractAsAdmin.transferFrom(sandBeneficiary, wallet.address, TEST_AMOUNT);
-
-    // const sandContractAsSpender = await sandContract.connect(sandContract.provider.getSigner(others[3]));
-    // await expect(sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT)).to.be.revertedWith(
-    //   "Not enough funds allowed"
-    // );
-    // await permitContract.permit(wallet.address, others[3], TEST_AMOUNT, deadline, sig.v, sig.r, sig.s).then((tx: any) => tx.wait());;
-    // const receipt = await sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT);
-    // const receiverNewBalance = await sandContract.balanceOf(others[4]);
-    // const transferEventsMatching = await findEvents(sandContract, "Transfer", receipt.blockHash);
-    // expect(transferEventsMatching.length).to.equal(1);
-    // expect(transferEventsMatching[0].args[0]).to.equal(wallet.address);
-    // expect(transferEventsMatching[0].args[1]).to.equal(others[4]);
-    // expect(transferEventsMatching[0].args[2]).to.equal(TEST_AMOUNT);
-    // expect(receiverNewBalance).to.equal(TEST_AMOUNT.add(receiverOriginalBalance));
+    const sandContractAsSpender = await sandContract.connect(ethers.provider.getSigner(others[3]));
+    await expect(sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT)).to.be.revertedWith(
+      "Not enough funds allowed"
+    );
+    await permitContract.permit(wallet.address, others[3], TEST_AMOUNT, deadline, sig.v, sig.r, sig.s).then((tx: any) => tx.wait());;
+    const receipt = await sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT);
+    const receiverNewBalance = await sandContract.balanceOf(others[4]);
+    const transferEventsMatching = await findEvents(sandContract, "Transfer", receipt.blockHash);
+    expect(transferEventsMatching.length).to.equal(1);
+    expect(transferEventsMatching[0].args[0]).to.equal(wallet.address);
+    expect(transferEventsMatching[0].args[1]).to.equal(others[4]);
+    expect(transferEventsMatching[0].args[2]).to.equal(TEST_AMOUNT);
+    expect(receiverNewBalance).to.equal(TEST_AMOUNT.add(receiverOriginalBalance));
   });
 
   it("Approved operators cannot transfer more ERC20 than their allowance", async function () {
@@ -270,16 +269,14 @@ describe("Permit", function () {
     const sig = splitSignature(flatSig);
 
     // Give wallet lots of SAND
+    const sandContractAsAdmin = await sandContract.connect(ethers.provider.getSigner(sandAdmin));
+    await sandContractAsAdmin.transferFrom(sandBeneficiary, wallet.address, TEST_AMOUNT.mul(2));
 
-    // TODO: fix signer error
-    // const sandContractAsAdmin = await sandContract.connect(sandContract.provider.getSigner(sandAdmin));
-    // await sandContractAsAdmin.transferFrom(sandBeneficiary, wallet.address, TEST_AMOUNT.mul(2));
-
-    // const sandContractAsSpender = await sandContract.connect(sandContract.provider.getSigner(others[3]));
-    // await permitContract.permit(wallet.address, others[3], TEST_AMOUNT, deadline, sig.v, sig.r, sig.s).then((tx: any) => tx.wait());;
-    // await expect(sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT.mul(2))).to.be.revertedWith(
-    //   "Not enough funds allowed"
-    // );
+    const sandContractAsSpender = await sandContract.connect(ethers.provider.getSigner(others[3]));
+    await permitContract.permit(wallet.address, others[3], TEST_AMOUNT, deadline, sig.v, sig.r, sig.s).then((tx: any) => tx.wait());;
+    await expect(sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT.mul(2))).to.be.revertedWith(
+      "Not enough funds allowed"
+    );
   });
 
   it("Approved operators cannot transfer more ERC20 than there is", async function () {
@@ -305,13 +302,11 @@ describe("Permit", function () {
     const sig = splitSignature(flatSig);
 
     // Give wallet small amount of SAND
+    const sandContractAsAdmin = await sandContract.connect(ethers.provider.getSigner(sandAdmin));
+    await sandContractAsAdmin.transferFrom(sandBeneficiary, wallet.address, TEST_AMOUNT.div(2));
 
-    // TODO: fix signer error
-    // const sandContractAsAdmin = await sandContract.connect(sandContract.provider.getSigner(sandAdmin));
-    // await sandContractAsAdmin.transferFrom(sandBeneficiary, wallet.address, TEST_AMOUNT.div(2));
-
-    // const sandContractAsSpender = await sandContract.connect(sandContract.provider.getSigner(others[3]));
-    // await permitContract.permit(wallet.address, others[3], TEST_AMOUNT, deadline, sig.v, sig.r, sig.s).then((tx: any) => tx.wait());;
-    // await expect(sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT)).to.be.revertedWith("not enough fund");
+    const sandContractAsSpender = await sandContract.connect(ethers.provider.getSigner(others[3]));
+    await permitContract.permit(wallet.address, others[3], TEST_AMOUNT, deadline, sig.v, sig.r, sig.s).then((tx: any) => tx.wait());;
+    await expect(sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT)).to.be.revertedWith("not enough fund");
   });
 });
