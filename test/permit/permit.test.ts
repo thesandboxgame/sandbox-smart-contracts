@@ -1,6 +1,6 @@
 import {ethers} from "hardhat";
 import {setupPermit} from "./fixtures";
-import {BigNumber, Wallet, constants} from "ethers";
+import {BigNumber, constants} from "ethers";
 import {splitSignature} from "ethers/lib/utils";
 import {findEvents} from "../utils";
 import {signTypedData_v4, TypedDataUtils} from "eth-sig-util";
@@ -16,10 +16,7 @@ describe("Permit", function () {
 
   it("ERC20 Approval event is emitted when msg.sender == owner", async function () {
     const setUp = await setupPermit();
-    const wallet = Wallet.createRandom();
-    const nonce = BigNumber.from(0);
-    const deadline = BigNumber.from(2582718400);
-    const {permitContract, sandContract, others} = setUp;
+    const {permitContract, sandContract, others, wallet, nonce, deadline} = setUp;
 
     const approve = {
       owner: wallet.address,
@@ -47,11 +44,8 @@ describe("Permit", function () {
 
   it("Nonce is incremented for each Approval", async function () {
     const setUp = await setupPermit();
-    const wallet = Wallet.createRandom();
-    const nonce = BigNumber.from(0);
-    const deadline = BigNumber.from(2582718400);
 
-    const {permitContract, others} = setUp;
+    const {permitContract, others, wallet, nonce, deadline} = setUp;
 
     const approve = {
       owner: wallet.address,
@@ -78,11 +72,9 @@ describe("Permit", function () {
 
   it("Permit function reverts if deadline has passed", async function () {
     const setUp = await setupPermit();
-    const wallet = Wallet.createRandom();
-    const nonce = BigNumber.from(0);
     const deadline = BigNumber.from(1382718400);
 
-    const {permitContract, others} = setUp;
+    const {permitContract, others, wallet, nonce} = setUp;
 
     const approve = {
       owner: wallet.address,
@@ -103,11 +95,8 @@ describe("Permit", function () {
 
   it("Permit function reverts if owner is zeroAddress", async function () {
     const setUp = await setupPermit();
-    const wallet = Wallet.createRandom();
-    const nonce = BigNumber.from(0);
-    const deadline = BigNumber.from(2582718400);
 
-    const {permitContract, others} = setUp;
+    const {permitContract, others, wallet, nonce, deadline} = setUp;
 
     const approve = {
       owner: wallet.address,
@@ -129,11 +118,8 @@ describe("Permit", function () {
 
   it("Permit function reverts if owner != msg.sender", async function () {
     const setUp = await setupPermit();
-    const wallet = Wallet.createRandom();
-    const nonce = BigNumber.from(0);
-    const deadline = BigNumber.from(2582718400);
 
-    const {permitContract, others} = setUp;
+    const {permitContract, others, wallet, nonce, deadline} = setUp;
 
     const approve = {
       owner: wallet.address,
@@ -155,11 +141,8 @@ describe("Permit", function () {
 
   it("Permit function reverts if spender is not the approved spender", async function () {
     const setUp = await setupPermit();
-    const wallet = Wallet.createRandom();
-    const nonce = BigNumber.from(0);
-    const deadline = BigNumber.from(2582718400);
 
-    const {permitContract, others} = setUp;
+    const {permitContract, others, wallet, nonce, deadline} = setUp;
 
     const approve = {
       owner: wallet.address,
@@ -181,11 +164,8 @@ describe("Permit", function () {
 
   it("Domain separator is public", async function () {
     const setUp = await setupPermit();
-    const wallet = Wallet.createRandom();
-    const nonce = BigNumber.from(0);
-    const deadline = BigNumber.from(2582718400);
 
-    const {permitContract, others} = setUp;
+    const {permitContract, others, wallet, nonce, deadline} = setUp;
     const domainSeparator = await permitContract.DOMAIN_SEPARATOR();
 
     const approve = {
@@ -205,11 +185,8 @@ describe("Permit", function () {
 
   it("Non-approved operators cannot transfer ERC20 until approved", async function () {
     const setUp = await setupPermit();
-    const wallet = Wallet.createRandom();
-    const nonce = BigNumber.from(0);
-    const deadline = BigNumber.from(2582718400);
 
-    const {permitContract, sandContract, sandAdmin, sandBeneficiary, others} = setUp;
+    const {permitContract, sandContract, sandAdmin, sandBeneficiary, others, wallet, nonce, deadline} = setUp;
     const receiverOriginalBalance = await sandContract.balanceOf(others[4]);
     expect(receiverOriginalBalance).to.equal(0);
 
@@ -248,11 +225,8 @@ describe("Permit", function () {
 
   it("Approved operators cannot transfer more ERC20 than their allowance", async function () {
     const setUp = await setupPermit();
-    const wallet = Wallet.createRandom();
-    const nonce = BigNumber.from(0);
-    const deadline = BigNumber.from(2582718400);
 
-    const {permitContract, sandContract, sandAdmin, sandBeneficiary, others} = setUp;
+    const {permitContract, sandContract, sandAdmin, sandBeneficiary, others, wallet, nonce, deadline} = setUp;
 
     const approve = {
       owner: wallet.address,
@@ -281,11 +255,8 @@ describe("Permit", function () {
 
   it("Approved operators cannot transfer more ERC20 than there is", async function () {
     const setUp = await setupPermit();
-    const wallet = Wallet.createRandom();
-    const nonce = BigNumber.from(0);
-    const deadline = BigNumber.from(2582718400);
 
-    const {permitContract, sandContract, sandAdmin, sandBeneficiary, others} = setUp;
+    const {permitContract, sandContract, sandAdmin, sandBeneficiary, others, wallet, nonce, deadline} = setUp;
 
     const approve = {
       owner: wallet.address,
