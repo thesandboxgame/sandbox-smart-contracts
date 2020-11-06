@@ -1,15 +1,13 @@
 import {ethers} from 'hardhat';
 import {setupPermit} from './fixtures';
 import {BigNumber, constants} from 'ethers';
-import {splitSignature} from 'ethers/lib/utils';
+import {splitSignature, _TypedDataEncoder} from 'ethers/lib/utils';
 import {
   expectEventWithArgs,
   expectReceiptEventWithArgs,
   waitFor,
 } from '../utils';
-import {TypedDataUtils} from 'eth-sig-util';
 import {expect} from '../chai-setup';
-import {bufferToHex} from 'ethereumjs-util';
 import {data712} from './data712';
 
 const zeroAddress = constants.AddressZero;
@@ -234,13 +232,7 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const expectedDomainSeparator = bufferToHex(
-      TypedDataUtils.hashStruct(
-        'EIP712Domain',
-        permitData712.domain,
-        permitData712.types
-      )
-    );
+    const expectedDomainSeparator = _TypedDataEncoder.hashDomain(permitData712.domain);
     expect(domainSeparator).to.equal(expectedDomainSeparator);
   });
 
