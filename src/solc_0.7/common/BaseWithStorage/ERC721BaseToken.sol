@@ -8,7 +8,7 @@ import "../BaseWithStorage/WithSuperOperators.sol";
 import "../BaseWithStorage/WithMetaTransactionReceiver.sol";
 import "../Interfaces/ERC721MandatoryTokenReceiver.sol";
 
-contract WithERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactionReceiver {
+contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactionReceiver {
     using Address for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
