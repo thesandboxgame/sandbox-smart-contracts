@@ -91,6 +91,8 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         emit Approval(owner, operator, id);
     }
 
+    /// @dev Function to test if a tx is a valid Sandbox or EIP-2771 metaTransaction
+    /// @param from The address passed as either "from" or "sender" to the external func which called this one
     function _isValidMetaTx(address from) internal view returns (bool) {
         uint256 processorType = _metaTransactionContracts[msg.sender];
         require(processorType != 0, "INVALID SENDER");
