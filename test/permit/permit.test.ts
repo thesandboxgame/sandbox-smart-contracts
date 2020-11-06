@@ -1,8 +1,12 @@
 import {ethers} from 'hardhat';
 import {setupPermit} from './fixtures';
-import {BigNumber, constants, ContractTransaction} from 'ethers';
+import {BigNumber, constants} from 'ethers';
 import {splitSignature} from 'ethers/lib/utils';
-import {findEvents} from '../utils';
+import {
+  expectEventWithArgs,
+  expectReceipEventWithArgs,
+  waitFor,
+} from '../utils';
 import {signTypedData_v4, TypedDataUtils} from 'eth-sig-util';
 import {expect} from '../chai-setup';
 import {bufferToHex} from 'ethereumjs-util';
@@ -39,8 +43,8 @@ describe('Permit', function () {
     const flatSig = signTypedData_v4(privateKeyAsBuffer, {data: permitData712});
     const sig = splitSignature(flatSig);
 
-    const receipt = await permitContract
-      .permit(
+    const receipt = await waitFor(
+      permitContract.permit(
         wallet.address,
         others[3],
         TEST_AMOUNT,
@@ -49,15 +53,13 @@ describe('Permit', function () {
         sig.r,
         sig.s
       )
-      .then((tx: ContractTransaction) => tx.wait());
-
-    const transferEvents = await findEvents(
-      sandContract,
-      'Approval',
-      receipt.blockHash
     );
 
-    const approvalEvent = transferEvents[0];
+    const approvalEvent = await expectEventWithArgs(
+      sandContract,
+      receipt,
+      'Approval'
+    );
     expect(approvalEvent.args[0]).to.equal(wallet.address); // owner
     expect(approvalEvent.args[1]).to.equal(others[3]); // spender
     expect(approvalEvent.args[2]).to.equal(TEST_AMOUNT); // amount
@@ -85,14 +87,16 @@ describe('Permit', function () {
     const checkNonce = await permitContract.nonces(wallet.address);
     expect(checkNonce).to.equal(0);
 
-    await permitContract.permit(
-      wallet.address,
-      others[3],
-      TEST_AMOUNT,
-      deadline,
-      sig.v,
-      sig.r,
-      sig.s
+    await waitFor(
+      permitContract.permit(
+        wallet.address,
+        others[3],
+        TEST_AMOUNT,
+        deadline,
+        sig.v,
+        sig.r,
+        sig.s
+      )
     );
 
     const nonceAfterApproval = await permitContract.nonces(wallet.address);
@@ -287,10 +291,12 @@ describe('Permit', function () {
     const sandContractAsAdmin = await sandContract.connect(
       ethers.provider.getSigner(sandAdmin)
     );
-    await sandContractAsAdmin.transferFrom(
-      sandBeneficiary,
-      wallet.address,
-      TEST_AMOUNT
+    await waitFor(
+      sandContractAsAdmin.transferFrom(
+        sandBeneficiary,
+        wallet.address,
+        TEST_AMOUNT
+      )
     );
 
     const sandContractAsSpender = await sandContract.connect(
@@ -299,8 +305,8 @@ describe('Permit', function () {
     await expect(
       sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT)
     ).to.be.revertedWith('Not enough funds allowed');
-    await permitContract
-      .permit(
+    await waitFor(
+      permitContract.permit(
         wallet.address,
         others[3],
         TEST_AMOUNT,
@@ -309,22 +315,18 @@ describe('Permit', function () {
         sig.r,
         sig.s
       )
-      .then((tx: ContractTransaction) => tx.wait());
-    const receipt = await sandContractAsSpender.transferFrom(
-      wallet.address,
-      others[4],
-      TEST_AMOUNT
+    );
+    const receipt = await waitFor(
+      sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT)
     );
     const receiverNewBalance = await sandContract.balanceOf(others[4]);
-    const transferEventsMatching = await findEvents(
-      sandContract,
-      'Transfer',
-      receipt.blockHash
+    const firstTransferEvent = await expectReceipEventWithArgs(
+      receipt,
+      'Transfer'
     );
-    expect(transferEventsMatching.length).to.equal(1);
-    expect(transferEventsMatching[0].args[0]).to.equal(wallet.address);
-    expect(transferEventsMatching[0].args[1]).to.equal(others[4]);
-    expect(transferEventsMatching[0].args[2]).to.equal(TEST_AMOUNT);
+    expect(firstTransferEvent.args[0]).to.equal(wallet.address);
+    expect(firstTransferEvent.args[1]).to.equal(others[4]);
+    expect(firstTransferEvent.args[2]).to.equal(TEST_AMOUNT);
     expect(receiverNewBalance).to.equal(
       TEST_AMOUNT.add(receiverOriginalBalance)
     );
@@ -362,17 +364,19 @@ describe('Permit', function () {
     const sandContractAsAdmin = await sandContract.connect(
       ethers.provider.getSigner(sandAdmin)
     );
-    await sandContractAsAdmin.transferFrom(
-      sandBeneficiary,
-      wallet.address,
-      TEST_AMOUNT.mul(2)
+    await waitFor(
+      sandContractAsAdmin.transferFrom(
+        sandBeneficiary,
+        wallet.address,
+        TEST_AMOUNT.mul(2)
+      )
     );
 
     const sandContractAsSpender = await sandContract.connect(
       ethers.provider.getSigner(others[3])
     );
-    await permitContract
-      .permit(
+    await waitFor(
+      permitContract.permit(
         wallet.address,
         others[3],
         TEST_AMOUNT,
@@ -381,7 +385,7 @@ describe('Permit', function () {
         sig.r,
         sig.s
       )
-      .then((tx: ContractTransaction) => tx.wait());
+    );
     await expect(
       sandContractAsSpender.transferFrom(
         wallet.address,
@@ -423,17 +427,19 @@ describe('Permit', function () {
     const sandContractAsAdmin = await sandContract.connect(
       ethers.provider.getSigner(sandAdmin)
     );
-    await sandContractAsAdmin.transferFrom(
-      sandBeneficiary,
-      wallet.address,
-      TEST_AMOUNT.div(2)
+    await waitFor(
+      sandContractAsAdmin.transferFrom(
+        sandBeneficiary,
+        wallet.address,
+        TEST_AMOUNT.div(2)
+      )
     );
 
     const sandContractAsSpender = await sandContract.connect(
       ethers.provider.getSigner(others[3])
     );
-    await permitContract
-      .permit(
+    await waitFor(
+      permitContract.permit(
         wallet.address,
         others[3],
         TEST_AMOUNT,
@@ -442,7 +448,7 @@ describe('Permit', function () {
         sig.r,
         sig.s
       )
-      .then((tx: ContractTransaction) => tx.wait());
+    );
     await expect(
       sandContractAsSpender.transferFrom(wallet.address, others[4], TEST_AMOUNT)
     ).to.be.revertedWith('not enough fund');
