@@ -24,7 +24,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
 
     constructor(address metaTransactionContract, address admin) {
         _admin = admin;
-        _setMetaTransactionProcessor(metaTransactionContract, true);
+        _setMetaTransactionProcessor(metaTransactionContract, METATX_SANDBOX);
     }
 
     function _transferFrom(
@@ -90,6 +90,19 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         emit Approval(owner, operator, id);
     }
 
+    function _isValidMetaTx(address from) internal view returns (bool) {
+        uint256 processorType = _metaTransactionContracts[msg.sender];
+        require(processorType != 0, "INVALID SENDER");
+        if (processorType == METATX_2771) {
+            require(from == _forceMsgSender(), "INVALID_SENDER");
+            return true;
+        } else if (processorType == METATX_SANDBOX) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     /**
      * @notice Approve an operator to spend tokens on the sender behalf
      * @param sender The address giving the approval
@@ -105,7 +118,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         require(sender != address(0), "sender is zero address");
         require(
             msg.sender == sender ||
-                _metaTransactionContracts[msg.sender] ||
+                _isValidMetaTx(sender) ||
                 _superOperators[msg.sender] ||
                 _operatorsForAll[sender][msg.sender],
             "not authorized to approve"
@@ -153,7 +166,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         require(owner != address(0), "token does not exist");
         require(owner == from, "not owner in _checkTransfer");
         require(to != address(0), "can't send to zero address");
-        isMetaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
+        isMetaTx = msg.sender != from && _isValidMetaTx(from);
         if (msg.sender != from && !isMetaTx) {
             require(
                 _superOperators[msg.sender] ||
@@ -263,7 +276,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         bytes memory data,
         bool safe
     ) internal {
-        bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
+        bool metaTx = msg.sender != from && _isValidMetaTx(from);
         bool authorized = msg.sender == from ||
             metaTx ||
             _superOperators[msg.sender] ||
@@ -334,7 +347,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
     ) external {
         require(sender != address(0), "Invalid sender address");
         require(
-            msg.sender == sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender],
+            msg.sender == sender || _isValidMetaTx(sender) || _superOperators[msg.sender],
             "not authorized to approve for all"
         );
 
@@ -396,7 +409,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(
             msg.sender == from ||
-                _metaTransactionContracts[msg.sender] ||
+                _isValidMetaTx(from) ||
                 (operatorEnabled && _operators[id] == msg.sender) ||
                 _superOperators[msg.sender] ||
                 _operatorsForAll[from][msg.sender],
