@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: UNLICENSED
+//SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
@@ -58,6 +58,7 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         uint16 catalystId,
         uint16[] calldata gemIds
     ) external {
+        // TODO allow unsetting catalysts
         require(msg.sender == _minter, "NOT_AUTHORIZED_MINTER");
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT");
         require(gemIds.length <= MAX_NUM_GEMS, "GEMS_MAX_REACHED");

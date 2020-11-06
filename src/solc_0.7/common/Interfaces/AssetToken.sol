@@ -1,7 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
-interface AssetToken {
+import "./ERC1155.sol";
+
+interface AssetToken is ERC1155 {
     function mint(
         address creator,
         uint40 packId,
@@ -36,9 +38,32 @@ interface AssetToken {
         address to
     ) external returns (uint256 newId);
 
+
+    // ERC721 (minus ERC1155 duplicates)
+    function balanceOf(address owner) external view returns (uint256 balance);
+
+    function ownerOf(uint256 tokenId) external view returns (address owner);
+
+    function approve(address to, uint256 tokenId) external;
+
+    function getApproved(uint256 tokenId) external view returns (address operator);
+
+    function transferFrom(
+        address from,
+        address to,
+        uint256 tokenId
+    ) external;
+
     function safeTransferFrom(
         address from,
         address to,
-        uint256 id
+        uint256 tokenId
+    ) external;
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 tokenId,
+        bytes calldata data
     ) external;
 }

@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: UNLICENSED
+//SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
