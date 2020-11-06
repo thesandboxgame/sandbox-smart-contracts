@@ -91,21 +91,6 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         emit Approval(owner, operator, id);
     }
 
-    /// @dev Function to test if a tx is a valid Sandbox or EIP-2771 metaTransaction
-    /// @param from The address passed as either "from" or "sender" to the external func which called this one
-    function _isValidMetaTx(address from) internal view returns (bool) {
-        uint256 processorType = _metaTransactionContracts[msg.sender];
-        require(processorType != 0, "INVALID SENDER");
-        if (processorType == METATX_2771) {
-            require(from == _forceMsgSender(), "INVALID_SENDER");
-            return true;
-        } else if (processorType == METATX_SANDBOX) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
     /**
      * @notice Approve an operator to spend tokens on the sender behalf
      * @param sender The address giving the approval
@@ -169,7 +154,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         require(owner != address(0), "token does not exist");
         require(owner == from, "not owner in _checkTransfer");
         require(to != address(0), "can't send to zero address");
-        isMetaTx = msg.sender != from && _isValidMetaTx(from);
+        isMetaTx = _isValidMetaTx(from);
         if (msg.sender != from && !isMetaTx) {
             require(
                 _superOperators[msg.sender] ||
@@ -279,9 +264,8 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         bytes memory data,
         bool safe
     ) internal {
-        bool metaTx = msg.sender != from && _isValidMetaTx(from);
         bool authorized = msg.sender == from ||
-            metaTx ||
+            _isValidMetaTx(from) ||
             _superOperators[msg.sender] ||
             _operatorsForAll[from][msg.sender];
 
@@ -441,5 +425,21 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
     ) internal returns (bool) {
         bytes4 retval = ERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);
         return (retval == _ERC721_BATCH_RECEIVED);
+    }
+
+    /// @dev Function to test if a tx is a valid Sandbox or EIP-2771 metaTransaction
+    /// @param from The address passed as either "from" or "sender" to the external func which called this one
+    function _isValidMetaTx(address from) internal view returns (bool) {
+        uint256 processorType = _metaTransactionContracts[msg.sender];
+        require(processorType != 0, "INVALID SENDER");
+        require(msg.sender != from, "INVALID_META_TX");
+        if (processorType == METATX_2771) {
+            require(from == _forceMsgSender(), "INVALID_SENDER");
+            return true;
+        } else if (processorType == METATX_SANDBOX) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
