@@ -56,14 +56,18 @@ export function cubeRoot6(bigNum: BigNumber): BigNumber {
 // TODO: correct types
 type Contract = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  queryFilter: any,
+  queryFilter: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  filters: any,
-}
+  filters: any;
+};
 
 // TODO: correct types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function findEvents(contract: Contract, event: string, blockHash: string): Promise<any[]> {
+export async function findEvents(
+  contract: Contract,
+  event: string,
+  blockHash: string
+): Promise<any[]> {
   const filter = contract.filters[event]();
   const events = await contract.queryFilter(filter, blockHash);
   return events;

@@ -4,7 +4,6 @@ pragma solidity 0.7.1;
 import "../common/Interfaces/ERC20Extended.sol";
 import "../Base/TheSandbox712.sol";
 
-
 /// @title Permit contract
 /// @notice This contract manages approvals of SAND via signature
 contract Permit is TheSandbox712 {

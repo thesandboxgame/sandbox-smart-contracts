@@ -1,6 +1,5 @@
 pragma solidity 0.7.1;
 
-
 contract TheSandbox712 {
     bytes32 constant EIP712DOMAIN_TYPEHASH = keccak256(
         "EIP712Domain(string name,string version,address verifyingContract)"
