@@ -264,8 +264,9 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         bytes memory data,
         bool safe
     ) internal {
+        bool metaTx = _isValidMetaTx(from);
         bool authorized = msg.sender == from ||
-            _isValidMetaTx(from) ||
+            metaTx ||
             _superOperators[msg.sender] ||
             _operatorsForAll[from][msg.sender];
 
