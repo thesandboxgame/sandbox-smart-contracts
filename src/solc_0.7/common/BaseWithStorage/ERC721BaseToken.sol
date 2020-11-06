@@ -5,10 +5,10 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "../Interfaces/ERC721TokenReceiver.sol";
 import "../Interfaces/ERC721Events.sol";
 import "../BaseWithStorage/WithSuperOperators.sol";
-import "../BaseWithStorage/WithMetaTransactionReceiver.sol";
+import "../BaseWithStorage/WithMetaTransaction.sol";
 import "../Interfaces/ERC721MandatoryTokenReceiver.sol";
 
-contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactionReceiver {
+contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransaction {
     using Address for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
