@@ -18,13 +18,7 @@ describe('Permit', function () {
 
   it('ERC20 Approval event is emitted when msg signer == owner', async function () {
     const setUp = await setupPermit();
-    const {
-      permitContract,
-      sandContract,
-      others,
-      nonce,
-      deadline,
-    } = setUp;
+    const {permitContract, sandContract, others, nonce, deadline} = setUp;
 
     const approve = {
       owner: others[5],
@@ -35,7 +29,10 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
+    const flatSig = await ethers.provider.send('eth_signTypedData', [
+      others[5],
+      permitData712,
+    ]);
     const sig = splitSignature(flatSig);
 
     const receipt = await waitFor(
@@ -74,7 +71,10 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
+    const flatSig = await ethers.provider.send('eth_signTypedData', [
+      others[5],
+      permitData712,
+    ]);
     const sig = splitSignature(flatSig);
 
     const checkNonce = await permitContract.nonces(others[5]);
@@ -111,7 +111,10 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
+    const flatSig = await ethers.provider.send('eth_signTypedData', [
+      others[5],
+      permitData712,
+    ]);
     const sig = splitSignature(flatSig);
 
     await expect(
@@ -141,7 +144,10 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
+    const flatSig = await ethers.provider.send('eth_signTypedData', [
+      others[5],
+      permitData712,
+    ]);
     const sig = splitSignature(flatSig);
 
     await expect(
@@ -171,7 +177,10 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
+    const flatSig = await ethers.provider.send('eth_signTypedData', [
+      others[5],
+      permitData712,
+    ]);
     const sig = splitSignature(flatSig);
 
     await expect(
@@ -201,7 +210,10 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
+    const flatSig = await ethers.provider.send('eth_signTypedData', [
+      others[5],
+      permitData712,
+    ]);
     const sig = splitSignature(flatSig);
 
     await expect(
@@ -232,7 +244,9 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const expectedDomainSeparator = _TypedDataEncoder.hashDomain(permitData712.domain);
+    const expectedDomainSeparator = _TypedDataEncoder.hashDomain(
+      permitData712.domain
+    );
     expect(domainSeparator).to.equal(expectedDomainSeparator);
   });
 
@@ -260,7 +274,10 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
+    const flatSig = await ethers.provider.send('eth_signTypedData', [
+      others[5],
+      permitData712,
+    ]);
     const sig = splitSignature(flatSig);
 
     // Give wallet some SAND
@@ -268,11 +285,7 @@ describe('Permit', function () {
       ethers.provider.getSigner(sandAdmin)
     );
     await waitFor(
-      sandContractAsAdmin.transferFrom(
-        sandBeneficiary,
-        others[5],
-        TEST_AMOUNT
-      )
+      sandContractAsAdmin.transferFrom(sandBeneficiary, others[5], TEST_AMOUNT)
     );
 
     const sandContractAsSpender = await sandContract.connect(
@@ -330,7 +343,10 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
+    const flatSig = await ethers.provider.send('eth_signTypedData', [
+      others[5],
+      permitData712,
+    ]);
     const sig = splitSignature(flatSig);
 
     // Give wallet lots of SAND
@@ -390,7 +406,10 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send("eth_signTypedData", [others[5], permitData712])
+    const flatSig = await ethers.provider.send('eth_signTypedData', [
+      others[5],
+      permitData712,
+    ]);
     const sig = splitSignature(flatSig);
 
     // Give wallet small amount of SAND
