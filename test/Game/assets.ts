@@ -1,4 +1,5 @@
 import {Address, Receipt} from 'hardhat-deploy/types';
+import {ContractReceipt} from 'ethers';
 import {deployments, getNamedAccounts} from 'hardhat';
 
 const emptyBytes = '0x';
