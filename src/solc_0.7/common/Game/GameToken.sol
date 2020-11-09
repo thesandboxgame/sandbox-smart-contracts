@@ -1,10 +1,10 @@
-pragma solidity 0.7.1;
+pragma solidity 0.6.5;
 pragma experimental ABIEncoderV2;
 
-import "../BaseWithStorage/ERC721BaseToken.sol";
-import "../interfaces/AssetToken.sol";
+import "../../../solc_0.6/BaseWithStorage/ERC721BaseToken.sol";
+import "../../../solc_0.6/Interfaces/AssetToken.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
-import "../common/Libraries/SafeMathWithRequire.sol";
+import "../../../solc_0.6/common/Libraries/SafeMathWithRequire.sol";
 
 // @review remove all console.logs !
 import "@nomiclabs/buidler/console.sol";
