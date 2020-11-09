@@ -18,7 +18,6 @@ export const setupTest = deployments.createFixture(async () => {
   const others = await getUnnamedAccounts();
   await deployments.fixture('GameToken');
 
-  const sandContract = await ethers.getContract('Sand');
   const gameToken = await ethers.getContract('GameToken');
   const gameTokenAsAdmin = await ethers.getContract(
     'GameToken',
