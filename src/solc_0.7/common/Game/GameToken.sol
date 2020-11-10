@@ -1,7 +1,7 @@
 pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
-import "../BaseWithStorage/WithERC721BaseToken.sol";
+import "../BaseWithStorage/ERC721BaseToken.sol";
 import "../Interfaces/AssetToken.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "../Libraries/SafeMathWithRequire.sol";
@@ -9,7 +9,7 @@ import "../Libraries/SafeMathWithRequire.sol";
 // @review remove all console.logs !
 // import "@hardhat/console.sol";
 
-contract GameToken is WithERC721BaseToken {
+contract GameToken is ERC721BaseToken {
     using EnumerableSet for EnumerableSet.UintSet;
     using SafeMathWithRequire for uint256;
 
@@ -312,7 +312,7 @@ contract GameToken is WithERC721BaseToken {
         address metaTransactionContract,
         address admin,
         AssetToken asset
-    ) public WithERC721BaseToken(metaTransactionContract, admin) {
+    ) public ERC721BaseToken(metaTransactionContract, admin) {
         _asset = asset;
         _nextId = 1;
     }
