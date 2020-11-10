@@ -35,11 +35,14 @@ describe("ERC677Token", function () {
     const toBalanceAfter = await token.balanceOf(tokenReceiver.address);
     const tokenReceiverEvents = await tokenReceiver.queryFilter(tokenReceiver.filters.onTokenTransferEvent());
     const event = tokenReceiverEvents.filter((e) => e.event === "onTokenTransferEvent")[0];
-    expect(event.args![0].toLowerCase()).to.equal(accounts.deployer.toLowerCase());
-    expect(event.args![1]).to.equal(amount);
-    expect(event.args![2]).to.equal("0x64617461");
-    expect(fromBalanceBefore).to.equal(fromBalanceAfter.add(amount));
-    expect(toBalanceAfter).to.equal(toBalanceBefore.add(amount));
+    expect(event.args).not.to.equal(null || undefined);
+    if (event.args) {
+      expect(event.args[0].toLowerCase()).to.equal(accounts.deployer.toLowerCase());
+      expect(event.args[1]).to.equal(amount);
+      expect(event.args[2]).to.equal("0x64617461");
+      expect(fromBalanceBefore).to.equal(fromBalanceAfter.add(amount));
+      expect(toBalanceAfter).to.equal(toBalanceBefore.add(amount));
+    }
   });
   it("Transfering tokens to EOA", async function () {
     const { token } = await initContracts("MOCK", "MOCK");
