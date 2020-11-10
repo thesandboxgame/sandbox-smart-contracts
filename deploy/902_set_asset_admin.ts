@@ -22,7 +22,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await execute(
       'Asset',
       {from: currentBouncerAdmin, log: true},
-      'changeExecutionAdmin',
+      'changeBouncerAdmin',
       assetBouncerAdmin
     );
   }
