@@ -7,6 +7,10 @@ import "./interfaces/CatalystToken.sol";
 import "./AssetAttributesRegistry.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
 
+/// @notice Contract managing the Gems and Catalysts
+/// Each Gems and Catalys must be registered here.
+/// Each new Gem get assigned a new id (starting at 1)
+/// Each new Catalyst get assigned a new id (starting at 1)
 contract GemsAndCatalysts is WithAdmin {
     GemToken[] internal _gems;
     CatalystToken[] internal _catalysts;

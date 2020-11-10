@@ -15,6 +15,9 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
     GemsAndCatalysts immutable _gemsAndCatalysts;
     mapping(uint256 => Record) internal _records;
 
+    // used to allow migration to specify blockNumber when setting catalyst/gems
+    address internal _migrationContract;
+
     struct GemEvent {
         uint16[] gemIds;
         bytes32 blockHash;
@@ -58,20 +61,17 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         uint16 catalystId,
         uint16[] calldata gemIds
     ) external {
-        // TODO allow unsetting catalysts
-        require(msg.sender == _minter, "NOT_AUTHORIZED_MINTER");
-        require(assetId & IS_NFT != 0, "INVALID_NOT_NFT");
-        require(gemIds.length <= MAX_NUM_GEMS, "GEMS_MAX_REACHED");
-        uint8 maxGems = _gemsAndCatalysts.getMaxGems(_records[assetId].catalystId);
-        require(gemIds.length <= maxGems, "GEMS_TOO_MANY");
+        _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber());
+    }
 
-        uint16[MAX_NUM_GEMS] memory gemIdsToStore;
-        for (uint8 i = 0; i < MAX_NUM_GEMS; i++) {
-            gemIdsToStore[i] = gemIds[i];
-        }
-        _records[assetId] = Record(catalystId, gemIdsToStore);
-        uint64 blockNumber = _getBlockNumber();
-        emit CatalystApplied(assetId, catalystId, gemIds, blockNumber);
+    function setCatalystWithBlockNumber(
+        uint256 assetId,
+        uint16 catalystId,
+        uint16[] calldata gemIds,
+        uint64 blockNumber
+    ) external {
+        require(msg.sender == _migrationContract, "ONLY_FOR_MIGRATION");
+        _setCatalyst(assetId, catalystId, gemIds, blockNumber);
     }
 
     function addGems(uint256 assetId, uint16[] calldata gemIds) external {
@@ -101,6 +101,37 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
 
     function getAttributes(uint256 assetId, GemEvent[] calldata events) external view returns (uint32[] memory values) {
         return _gemsAndCatalysts.getAttributes(_records[assetId].catalystId, assetId, events);
+    }
+
+    function setMigrationContract(address migrationContract) external {
+        address currentMigrationContract = _migrationContract;
+        if (currentMigrationContract == address(0)) {
+            require(msg.sender == _admin, "NOT_AUTHORIZED");
+            _migrationContract = migrationContract;
+        } else {
+            require(msg.sender == currentMigrationContract, "NOT_AUTHORIZED_MIGRATION");
+            _migrationContract = migrationContract;
+        }
+    }
+
+    function _setCatalyst(
+        uint256 assetId,
+        uint16 catalystId,
+        uint16[] memory gemIds,
+        uint64 blockNumber
+    ) internal {
+        require(msg.sender == _minter, "NOT_AUTHORIZED_MINTER");
+        require(assetId & IS_NFT != 0, "INVALID_NOT_NFT");
+        require(gemIds.length <= MAX_NUM_GEMS, "GEMS_MAX_REACHED");
+        uint8 maxGems = _gemsAndCatalysts.getMaxGems(_records[assetId].catalystId);
+        require(gemIds.length <= maxGems, "GEMS_TOO_MANY");
+
+        uint16[MAX_NUM_GEMS] memory gemIdsToStore;
+        for (uint8 i = 0; i < MAX_NUM_GEMS; i++) {
+            gemIdsToStore[i] = gemIds[i];
+        }
+        _records[assetId] = Record(catalystId, gemIdsToStore);
+        emit CatalystApplied(assetId, catalystId, gemIds, blockNumber);
     }
 
     function _getBlockNumber() internal view returns (uint64 blockNumber) {

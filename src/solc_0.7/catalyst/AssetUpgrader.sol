@@ -8,7 +8,7 @@ import "../common/Interfaces/ERC20Extended.sol";
 import "../common/Interfaces/AssetToken.sol";
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 
-/// @notice Gateway to upgrade Asset with Catalyst, Gems and Sand
+/// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetUpgrader is WithMetaTransaction {
     using SafeMath for uint256;
 
@@ -19,25 +19,33 @@ contract AssetUpgrader is WithMetaTransaction {
     AssetAttributesRegistry internal immutable _registry;
     AssetToken internal immutable _asset;
     GemsAndCatalysts internal immutable _gemsAndCatalysts;
-    uint256 internal immutable _flatFee;
-    uint256 internal immutable _perCopyFee;
+    uint256 internal immutable _upgradeFee;
+    uint256 internal immutable _gemAdditionFee;
     address internal immutable _feeRecipient;
 
+    /// @notice AssetUpgrader depends on
+    /// @param registry: AssetAttributesRegistry for recording catalyst and gems used
+    /// @param sand: ERC20 for fee payment
+    /// @param asset: Asset Token Contract (dual ERC1155/ERC721)
+    /// @param gemsAndCatalysts: that track the canonical catalyst and gems and provide batch burning facility
+    /// @param upgradeFee: the fee in Sand paid for an upgrade (setting or replacing a catalyst)
+    /// @param gemAdditionFee: the fee in Sand paid for adding gems
+    /// @param feeRecipient: address receiving the Sand fee
     constructor(
         AssetAttributesRegistry registry,
         ERC20Extended sand,
         AssetToken asset,
         GemsAndCatalysts gemsAndCatalysts,
-        uint256 flatFee,
-        uint256 perCopyFee,
+        uint256 upgradeFee,
+        uint256 gemAdditionFee,
         address feeRecipient
-    ) public {
+    ) {
         _registry = registry;
         _sand = sand;
         _asset = asset;
         _gemsAndCatalysts = gemsAndCatalysts;
-        _flatFee = flatFee;
-        _perCopyFee = perCopyFee;
+        _upgradeFee = upgradeFee;
+        _gemAdditionFee = gemAdditionFee;
         _feeRecipient = feeRecipient;
     }
 
@@ -114,7 +122,7 @@ contract AssetUpgrader is WithMetaTransaction {
 
         _burnCatalyst(from, catalystId);
         _burnGems(from, gemIds);
-        // TODO _chargeSand(from, sandUpdateFee);
+        _chargeSand(from, _upgradeFee);
 
         _registry.setCatalyst(assetId, catalystId, gemIds);
 
@@ -130,7 +138,7 @@ contract AssetUpgrader is WithMetaTransaction {
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will return false
 
         _burnGems(from, gemIds);
-        // TODO _chargeSand(from, gemIds.length.mul(_gemAdditionFee));
+        _chargeSand(from, _gemAdditionFee); // TODO per gems or flat fee ?
 
         _registry.addGems(assetId, gemIds);
 
