@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: MIT
 /* solhint-disable func-order, code-complexity */
 pragma solidity 0.7.1;
 
@@ -5,10 +6,10 @@ import "@openzeppelin/contracts/utils/Address.sol";
 import "../Interfaces/ERC721TokenReceiver.sol";
 import "../Interfaces/ERC721Events.sol";
 import "../BaseWithStorage/WithSuperOperators.sol";
-import "../BaseWithStorage/WithMetaTransactionReceiver.sol";
+import "../BaseWithStorage/WithMetaTransaction.sol";
 import "../Interfaces/ERC721MandatoryTokenReceiver.sol";
 
-contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactionReceiver {
+contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransaction {
     using Address for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
@@ -24,7 +25,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
 
     constructor(address metaTransactionContract, address admin) {
         _admin = admin;
-        _setMetaTransactionProcessor(metaTransactionContract, true);
+        _setMetaTransactionProcessor(metaTransactionContract, METATX_SANDBOX);
     }
 
     function _transferFrom(
@@ -105,7 +106,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         require(sender != address(0), "sender is zero address");
         require(
             msg.sender == sender ||
-                _metaTransactionContracts[msg.sender] ||
+                _isValidMetaTx(sender) ||
                 _superOperators[msg.sender] ||
                 _operatorsForAll[sender][msg.sender],
             "not authorized to approve"
@@ -153,7 +154,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         require(owner != address(0), "token does not exist");
         require(owner == from, "not owner in _checkTransfer");
         require(to != address(0), "can't send to zero address");
-        isMetaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
+        isMetaTx = _isValidMetaTx(from);
         if (msg.sender != from && !isMetaTx) {
             require(
                 _superOperators[msg.sender] ||
@@ -263,7 +264,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         bytes memory data,
         bool safe
     ) internal {
-        bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
+        bool metaTx = _isValidMetaTx(from);
         bool authorized = msg.sender == from ||
             metaTx ||
             _superOperators[msg.sender] ||
@@ -334,7 +335,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
     ) external {
         require(sender != address(0), "Invalid sender address");
         require(
-            msg.sender == sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender],
+            msg.sender == sender || _isValidMetaTx(sender) || _superOperators[msg.sender],
             "not authorized to approve for all"
         );
 
@@ -396,7 +397,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(
             msg.sender == from ||
-                _metaTransactionContracts[msg.sender] ||
+                _isValidMetaTx(from) ||
                 (operatorEnabled && _operators[id] == msg.sender) ||
                 _superOperators[msg.sender] ||
                 _operatorsForAll[from][msg.sender],
@@ -425,5 +426,21 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
     ) internal returns (bool) {
         bytes4 retval = ERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);
         return (retval == _ERC721_BATCH_RECEIVED);
+    }
+
+    /// @dev Function to test if a tx is a valid Sandbox or EIP-2771 metaTransaction
+    /// @param from The address passed as either "from" or "sender" to the external func which called this one
+    function _isValidMetaTx(address from) internal view returns (bool) {
+        uint256 processorType = _metaTransactionContracts[msg.sender];
+        require(processorType != 0, "INVALID SENDER");
+        require(msg.sender != from, "INVALID_META_TX");
+        if (processorType == METATX_2771) {
+            require(from == _forceMsgSender(), "INVALID_SENDER");
+            return true;
+        } else if (processorType == METATX_SANDBOX) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
