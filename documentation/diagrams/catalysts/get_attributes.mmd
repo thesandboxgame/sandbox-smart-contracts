@@ -1,9 +1,12 @@
 sequenceDiagram
 autonumber
 
-    Note over User, CatalystRegistry: get Attributes
+    Note over user, CatalystRegistry: get Attributes
 
-    User->>+CatalystRegistry:getValues(catalystId,seed,events,totalNumberOfGemTypes)
-    CatalystRegistry->>CatalystValues:getValues(catalystId,seed,events,totalNumberOfGemTypes)
-    CatalystValues->>CatalystRegistry:values(catalystId,seed,events,totalNumberOfGemTypes)
+    user->>+AssetAttributesRegistry:getAttributes(catalystId,assetId,events)
+    AssetAttributesRegistry->>+GemsAndCatalysts:getAttributes(catalystId,assetId,events)
+    GemsAndCatalysts->>+Catalyst:getAttributes(assetId,events)
+    Catalyst-->>-GemsAndCatalysts:attributes
+    GemsAndCatalysts-->>-AssetAttributesRegistry:attributes
+    AssetAttributesRegistry-->>-user:attributes
 
