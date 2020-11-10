@@ -51,7 +51,7 @@ abstract contract ERC20ExecuteExtension {
         bytes calldata data
     ) external returns (bool success, bytes memory returnData) {
         require(_executionOperators[msg.sender], "only execution operators allowed to execute on SAND behalf");
-        (success, returnData) = to.call.gas(gasLimit)(data);
+        (success, returnData) = to.call{gas: gasLimit}(data);
         assert(gasleft() > gasLimit / 63); // not enough gas provided, assert to throw all gas // TODO use EIP-1930
     }
 
@@ -159,7 +159,7 @@ abstract contract ERC20ExecuteExtension {
         if (amount > 0) {
             _addAllowanceIfNeeded(from, to, amount);
         }
-        (success, returnData) = to.call.gas(gasLimit)(data);
+        (success, returnData) = to.call{gas: gasLimit}(data);
         assert(gasleft() > gasLimit / 63); // not enough gas provided, assert to throw all gas // TODO use EIP-1930
     }
 
