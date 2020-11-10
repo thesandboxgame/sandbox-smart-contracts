@@ -22,5 +22,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['GameToken'];
+func.tags = ['GameToken', 'GameToken_deploy'];
 func.dependencies = ['NativeMetaTransactionProcessor', 'Asset'];
