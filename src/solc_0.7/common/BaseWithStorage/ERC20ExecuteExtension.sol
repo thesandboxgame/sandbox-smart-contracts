@@ -1,4 +1,4 @@
-pragma solidity 0.6.5;
+pragma solidity 0.7.1;
 
 abstract contract ERC20ExecuteExtension {
     /// @dev _executionAdmin != _admin so that this super power can be disabled independently

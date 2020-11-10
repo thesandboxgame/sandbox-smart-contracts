@@ -3,10 +3,11 @@ pragma solidity 0.7.1;
 import {ProxyImplementation} from "../common/BaseWithStorage/ProxyImplementation.sol";
 
 contract TheSandbox712 is ProxyImplementation {
-    bytes32 constant EIP712DOMAIN_TYPEHASH = keccak256(
+    bytes32 internal constant EIP712DOMAIN_TYPEHASH = keccak256(
         "EIP712Domain(string name,string version,address verifyingContract)"
     );
-    bytes32 DOMAIN_SEPARATOR;
+
+    bytes32 internal DOMAIN_SEPARATOR;
 
     function init712() public phase("712") {
         DOMAIN_SEPARATOR = keccak256(
