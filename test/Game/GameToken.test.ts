@@ -939,4 +939,6 @@ describe('GameToken', function () {
       );
     });
   });
+
+  describe('GameToken: MetaTransactions', function () {});
 });
