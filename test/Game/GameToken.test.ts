@@ -1,4 +1,4 @@
-import {ethers, getNamedAccounts} from 'hardhat';
+import {ethers} from 'hardhat';
 import {expect} from '../chai-setup';
 import {BigNumber, utils, Contract} from 'ethers';
 import {Receipt} from 'hardhat-deploy/types';
@@ -24,7 +24,6 @@ const packId3 = 2;
 
 describe('GameToken', function () {
   before(async function () {
-    const {assetAdmin, assetBouncerAdmin, others} = await getNamedAccounts();
     const {GameOwner, gameToken} = await setupTest();
     const assetReceipt = await supplyAssets(
       GameOwner.address,
@@ -649,7 +648,7 @@ describe('GameToken', function () {
           GameOwner.address
         );
 
-        const [gameAssets, quantities] = await gameToken.getGameAssets(gameId);
+        const [gameAssets] = await gameToken.getGameAssets(gameId);
         const assetsRemovedEvent = await expectEventWithArgs(
           gameToken,
           assetRemovalReceipt,
