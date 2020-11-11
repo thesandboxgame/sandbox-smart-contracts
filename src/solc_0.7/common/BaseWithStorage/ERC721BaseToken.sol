@@ -432,11 +432,15 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
     /// @param from The address passed as either "from" or "sender" to the external func which called this one
     function _isValidMetaTx(address from) internal view returns (bool) {
         uint256 processorType = _metaTransactionContracts[msg.sender];
-        require(processorType != 0, "INVALID SENDER");
-        require(msg.sender != from, "INVALID_META_TX");
+        if (msg.sender == from || processorType == 0) {
+            return false;
+        }
         if (processorType == METATX_2771) {
-            require(from == _forceMsgSender(), "INVALID_SENDER");
-            return true;
+            if (from != _forceMsgSender()) {
+                return false;
+            } else {
+                return true;
+            }
         } else if (processorType == METATX_SANDBOX) {
             return true;
         } else {
