@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "../Libraries/SafeMathWithRequire.sol";
 
 // @review remove all console.logs !
-// import "@hardhat/console.sol";
+// import "hardhat/console.sol";
 
 contract GameToken is ERC721BaseToken {
     using EnumerableSet for EnumerableSet.UintSet;
