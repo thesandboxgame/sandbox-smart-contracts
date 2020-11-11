@@ -168,11 +168,11 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
     function _checkInterfaceWith10000Gas(address _contract, bytes4 interfaceId) internal view returns (bool) {
         bool success;
         bool result;
-        bytes memory call_data = abi.encodeWithSelector(ERC165ID, interfaceId);
-        // solium-disable-next-line security/no-inline-assembly
+        bytes memory callData = abi.encodeWithSelector(ERC165ID, interfaceId);
+        // solhint-disable-next-line no-inline-assembly
         assembly {
-            let call_ptr := add(0x20, call_data)
-            let call_size := mload(call_data)
+            let call_ptr := add(0x20, callData)
+            let call_size := mload(callData)
             let output := mload(0x40) // Find empty storage location using "free memory pointer"
             mstore(output, 0x0)
             success := staticcall(10000, _contract, call_ptr, call_size, output, 0x20) // 32 bytes
