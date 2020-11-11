@@ -239,8 +239,8 @@ contract GameToken is ERC721BaseToken {
 
     /// @notice Return the URI of a specific token
     /// @param gameId The id of the token
-    /// @return tokenURI The URI of the token
-    function tokenURI(uint256 gameId) public view returns (string memory tokenURI) {
+    /// @return uri The URI of the token
+    function tokenURI(uint256 gameId) public view returns (string memory uri) {
         require(_ownerOf(gameId) != address(0), "Id does not exist");
         string memory URI = _metaData[gameId];
         return URI;
@@ -313,7 +313,7 @@ contract GameToken is ERC721BaseToken {
         address metaTransactionContract,
         address admin,
         AssetToken asset
-    ) public ERC721BaseToken(metaTransactionContract, admin) {
+    ) ERC721BaseToken(metaTransactionContract, admin) {
         _asset = asset;
         _nextId = 1;
     }
