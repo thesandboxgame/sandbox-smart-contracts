@@ -25,7 +25,7 @@ const packId3 = 2;
 describe('GameToken', function () {
   before(async function () {
     const {assetAdmin, assetBouncerAdmin, others} = await getNamedAccounts();
-    const {GameOwner} = await setupTest();
+    const {GameOwner, gameToken} = await setupTest();
     const assetReceipt = await supplyAssets(
       GameOwner.address,
       packId,
@@ -41,6 +41,10 @@ describe('GameToken', function () {
       'Transfer'
     );
     id = transferEvent.args[2];
+    const isSuperOperator = await assetContract.isSuperOperator(
+      gameToken.address
+    );
+    expect(isSuperOperator).to.be.true;
   });
 
   describe('GameToken: Minting GAMEs', function () {
@@ -210,16 +214,7 @@ describe('GameToken', function () {
           gameToken.address,
           id
         );
-        const assetAsAssetOwner = await assetContract.connect(
-          ethers.provider.getSigner(GameOwner.address)
-        );
-        await waitFor(
-          assetAsAssetOwner.setApprovalForAllFor(
-            GameOwner.address,
-            gameToken.address,
-            true
-          )
-        );
+
         const receipt = await waitFor(
           GameOwner.Game.createGame(
             GameOwner.address,
@@ -304,17 +299,6 @@ describe('GameToken', function () {
         const balanceBefore2 = await assetContract[
           'balanceOf(address,uint256)'
         ](gameToken.address, assetId2);
-
-        const assetAsAssetOwner = await assetContract.connect(
-          ethers.provider.getSigner(GameOwner.address)
-        );
-        await waitFor(
-          assetAsAssetOwner.setApprovalForAllFor(
-            GameOwner.address,
-            gameToken.address,
-            true
-          )
-        );
 
         const receipt = await waitFor(
           GameOwner.Game.createGame(
@@ -440,16 +424,7 @@ describe('GameToken', function () {
         );
 
         assetId = assetTransferEvent.args[2];
-        const assetAsAssetOwner = await assetContract.connect(
-          ethers.provider.getSigner(GameOwner.address)
-        );
-        await waitFor(
-          assetAsAssetOwner.setApprovalForAllFor(
-            GameOwner.address,
-            gameToken.address,
-            true
-          )
-        );
+
         const receipt = await waitFor(
           GameOwner.Game.createGame(
             GameOwner.address,
@@ -790,16 +765,7 @@ describe('GameToken', function () {
           1,
           dummyHash3
         );
-        const assetAsAssetOwner = await assetContract.connect(
-          ethers.provider.getSigner(GameEditor1.address)
-        );
-        await waitFor(
-          assetAsAssetOwner.setApprovalForAllFor(
-            GameEditor1.address,
-            gameToken.address,
-            true
-          )
-        );
+
         const assetTransferEvent = await expectEventWithArgsFromReceipt(
           assetContract,
           assetReceipt,
@@ -862,16 +828,7 @@ describe('GameToken', function () {
         'Transfer'
       );
       assetId = assetTransferEvent.args[2];
-      const assetAsAssetOwner = await assetContract.connect(
-        ethers.provider.getSigner(GameOwner.address)
-      );
-      await waitFor(
-        assetAsAssetOwner.setApprovalForAllFor(
-          GameOwner.address,
-          gameToken.address,
-          true
-        )
-      );
+
       const receipt = await waitFor(
         GameOwner.Game.createGame(
           GameOwner.address,
