@@ -72,4 +72,6 @@ interface IAssetToken {
         uint256[] calldata values,
         bytes calldata data
     ) external;
+
+    function isSuperOperator(address who) external view returns (bool);
 }
