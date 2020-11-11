@@ -940,5 +940,28 @@ describe('GameToken', function () {
     });
   });
 
-  describe('GameToken: MetaTransactions', function () {});
+  describe('GameToken: MetaTransactions', function () {
+    // @review
+    // try to set up a situation where we can add a single test case to any new contract which will run the metaTx test suite for that specific contract
+    it('can set the MetaTransactionProcessor type', async function () {});
+    it('can get the MetaTransactionProcessor type', async function () {});
+    it('should emit the "MetaTransactionProcessor" event ', async function () {});
+    it('can check if contract is a Trusted Forwarder', async function () {});
+    // should succeed:
+    // if processorType == METATX_SANDBOX
+    // if processorType == METATX_2771 && from == _forceMsgSender()
+
+    describe('GameToken: Invalid metaTransactions', function () {
+      it('should fail if ...', async function () {
+        // force metaTx conditions:
+        // msg.sender != from/sender, &&
+        // msg.sender is not any type of operator(operator, superOperator, operatorForAll)
+        // then:
+        // if processorType == METATX_2771:
+        // should fail if from != _forceMsgSender()
+        // else if processorType == METATX_SANDBOX:
+        // should fail if msg.sender == from || processorType == 0
+      });
+    });
+  });
 });
