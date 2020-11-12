@@ -1,10 +1,11 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
+import "./extensions/ERC20Internal.sol";
 import "../../Interfaces/ERC20Extended.sol";
 import "../SuperOperators.sol";
 
-abstract contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
+abstract contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended, ERC20Internal {
     bytes32 internal immutable _name; // work only for string that can fit into 32 bytes
     bytes32 internal immutable _symbol; // work only for string that can fit into 32 bytes
 
@@ -155,7 +156,7 @@ abstract contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
         address owner,
         address spender,
         uint256 amountNeeded
-    ) internal virtual {
+    ) internal override {
         if (amountNeeded > 0 && !isSuperOperator(spender)) {
             uint256 currentAllowance = _allowances[owner][spender];
             if (currentAllowance < amountNeeded) {
@@ -168,7 +169,7 @@ abstract contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
         address owner,
         address spender,
         uint256 amount
-    ) internal virtual {
+    ) internal override {
         require(owner != address(0) && spender != address(0), "Cannot approve with 0x0");
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
@@ -178,7 +179,7 @@ abstract contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
         address from,
         address to,
         uint256 amount
-    ) internal {
+    ) internal override {
         require(to != address(0), "Cannot send to 0x0");
         uint256 currentBalance = _balances[from];
         require(currentBalance >= amount, "not enough fund");

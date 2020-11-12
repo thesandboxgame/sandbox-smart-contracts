@@ -1,9 +1,10 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
-import "../Libraries/BytesUtil.sol";
+import "./ERC20Internal.sol";
+import "../../../Libraries/BytesUtil.sol";
 
-abstract contract ERC20BasicApproveExtension {
+abstract contract ERC20BasicApproveExtension is ERC20Internal {
     /// @notice approve `target` to spend `amount` and call it with data.
     /// @param target address to be given rights to transfer and destination of the call.
     /// @param amount the number of tokens allowed.
@@ -46,16 +47,4 @@ abstract contract ERC20BasicApproveExtension {
 
         return returnData;
     }
-
-    function _approveFor(
-        address owner,
-        address target,
-        uint256 amount
-    ) internal virtual;
-
-    function _addAllowanceIfNeeded(
-        address owner,
-        address spender,
-        uint256 amountNeeded
-    ) internal virtual;
 }

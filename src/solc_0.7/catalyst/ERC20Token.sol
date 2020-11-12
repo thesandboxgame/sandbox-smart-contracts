@@ -1,13 +1,13 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
-import "../common/BaseWithStorage/wip/ERC20BaseToken.sol";
-import "../common/BaseWithStorage/ERC20BasicApproveExtension.sol";
+import "../common/BaseWithStorage/erc20/ERC20BaseToken.sol";
+import "../common/BaseWithStorage/erc20/extensions/ERC20BasicApproveExtension.sol";
 import "../Base/TheSandbox712.sol";
-import "../catalyst/ERC677Token.sol";
+import "../common/BaseWithStorage/erc20/extensions/ERC677Extension.sol";
 import "../common/Interfaces/ERC677Receiver.sol";
 
-contract ERC20Token is ERC20BasicApproveExtension, TheSandbox712, ERC677Token {
+contract ERC20Token is ERC20BasicApproveExtension, ERC677Extension, TheSandbox712, ERC20BaseToken {
     mapping(address => uint256) public nonces;
 
     /// @notice Function to permit the expenditure of SAND by a nominated spender
@@ -50,24 +50,6 @@ contract ERC20Token is ERC20BasicApproveExtension, TheSandbox712, ERC677Token {
         uint256[] calldata amounts // solhint-disable-next-line no-empty-blocks
     ) external {}
 
-    // //////////////////// INTERNALS ////////////////////
-
-    function _addAllowanceIfNeeded(
-        address owner,
-        address spender,
-        uint256 amountNeeded
-    ) internal override(ERC20BasicApproveExtension, ERC20BaseToken) {
-        ERC20BaseToken._addAllowanceIfNeeded(owner, spender, amountNeeded);
-    }
-
-    function _approveFor(
-        address owner,
-        address spender,
-        uint256 amount
-    ) internal override(ERC20BasicApproveExtension, ERC20BaseToken) {
-        ERC20BaseToken._approveFor(owner, spender, amount);
-    }
-
     // //////////////////////// DATA /////////////////////
     bytes32 internal constant PERMIT_TYPEHASH = keccak256(
         "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
@@ -79,6 +61,6 @@ contract ERC20Token is ERC20BasicApproveExtension, TheSandbox712, ERC677Token {
         string memory symbol,
         address admin
     )
-        ERC677Token(name, symbol, admin) // solhint-disable-next-line no-empty-blocks
+        ERC20BaseToken(name, symbol, admin) // solhint-disable-next-line no-empty-blocks
     {}
 }
