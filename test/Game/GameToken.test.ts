@@ -1,7 +1,7 @@
 import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
 import {expect} from '../chai-setup';
 import {BigNumber, utils, Contract} from 'ethers';
-import {Receipt} from 'hardhat-deploy/types';
+import {Receipt, Address} from 'hardhat-deploy/types';
 import {
   waitFor,
   expectEventWithArgs,
@@ -989,7 +989,7 @@ describe('GameToken', function () {
     // if processorType == METATX_2771 && from == _forceMsgSender()
 
     /**
-     * @note ==========================
+     * @note ==========================`
      * -Extracting the metaTx tests-
      * params to pass to the metaTx suite:
      * - contract to test (GameToken)
@@ -999,16 +999,69 @@ describe('GameToken', function () {
      * @note ==========================
      */
 
+    /**
+     * @note
+     * MetaTx control:
+     * if msg.sender == from || processorType == 0:
+     * => ! isValidMetaTx
+     * if msg.sender != from && processorType != 0:
+     * => if processorType == 2:
+     *    => if from != _forceMsgSender():
+     *       => ! isValidMetaTx
+     *       else, isValidMetaTx
+     * => if processorType == 1:
+     *    => isValidMetaTx
+     * @note
+     */
+
     describe('GameToken: Invalid metaTransactions', function () {
-      it('should fail if ...', async function () {
-        // force metaTx conditions:
-        // msg.sender != from/sender, &&
-        // msg.sender is not any type of operator(operator, superOperator, operatorForAll)
-        // then:
-        // if processorType == METATX_2771:
-        // should fail if from != _forceMsgSender()
-        // else if processorType == METATX_SANDBOX:
-        // should fail if msg.sender == from || processorType == 0
+      let gameAsUser7: Contract;
+      let user2: Address;
+      let others: Address[];
+      let gameId: BigNumber;
+      let gameToken: Contract;
+      let GameOwner: User;
+      let gameTokenAsAdmin: Contract;
+
+      before(async function () {
+        ({gameToken, GameOwner, gameTokenAsAdmin} = await setupTest());
+        others = await getUnnamedAccounts();
+        const receipt = await waitFor(
+          GameOwner.Game.createGame(
+            GameOwner.address,
+            GameOwner.address,
+            [],
+            [],
+            []
+          )
+        );
+        const transferEvent = await expectEventWithArgs(
+          gameToken,
+          receipt,
+          'Transfer'
+        );
+        gameId = transferEvent.args[2];
+        gameAsUser7 = gameToken.connect(ethers.provider.getSigner(others[7]));
+        const approvedAddress = await gameToken.getApproved(gameId);
+        const isApprovedForAll = await gameToken.isApprovedForAll(
+          GameOwner.address,
+          others[7]
+        );
+        // Force metaTx conditions: (msg.sender != from && msg.sender != any type of operator(operator, superOperator, operatorForAll)
+        expect(approvedAddress).to.not.equal(others[7]);
+        expect(isApprovedForAll).to.be.false;
+      });
+
+      it('should fail if processorType == METATX_2771 && from != _forceMsgSender()', async function () {
+        await gameTokenAsAdmin.setMetaTransactionProcessor(
+          others[7],
+          METATX_2771
+        );
+        const type = await gameToken.getMetaTransactionProcessorType(others[7]);
+        expect(type).to.be.equal(METATX_2771);
+        await expect(
+          gameAsUser7.transferFrom(GameOwner.address, others[7], gameId)
+        ).to.be.revertedWith('not approved to transfer!');
       });
     });
   });
