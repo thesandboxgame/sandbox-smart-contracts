@@ -3,9 +3,9 @@ pragma solidity 0.7.1;
 
 import "./extensions/ERC20Internal.sol";
 import "../../Interfaces/ERC20Extended.sol";
-import "../SuperOperators.sol";
+import "../WithSuperOperators.sol";
 
-abstract contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended, ERC20Internal {
+abstract contract ERC20BaseToken is WithSuperOperators, ERC20, ERC20Extended, ERC20Internal {
     bytes32 internal immutable _name; // work only for string that can fit into 32 bytes
     bytes32 internal immutable _symbol; // work only for string that can fit into 32 bytes
 

@@ -44,12 +44,6 @@ contract ERC20Token is ERC20BasicApproveExtension, ERC677Extension, TheSandbox71
         _mint(to, amount);
     }
 
-    function batchBurnFrom(
-        address from,
-        uint256[] calldata ids,
-        uint256[] calldata amounts // solhint-disable-next-line no-empty-blocks
-    ) external {}
-
     // //////////////////////// DATA /////////////////////
     bytes32 internal constant PERMIT_TYPEHASH = keccak256(
         "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
