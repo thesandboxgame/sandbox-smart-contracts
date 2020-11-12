@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
 interface ERC677 {
@@ -6,6 +7,6 @@ interface ERC677 {
         uint256 value,
         bytes calldata data
     ) external returns (bool success);
-
-    event Transfer(address indexed from, address indexed to, uint256 value, bytes data);
+    //TODO: decide whether we use that event, as it collides with ERC20 Transfer event
+    //event Transfer(address indexed from, address indexed to, uint256 value, bytes data);
 }

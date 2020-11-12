@@ -1,7 +1,7 @@
-import {ethers, getNamedAccounts} from 'hardhat';
-import {BigNumber} from '@ethersproject/bignumber';
-import {expect} from '../chai-setup';
-import {ContractFactory, Contract} from 'ethers';
+import { ethers, getNamedAccounts } from 'hardhat';
+import { BigNumber } from '@ethersproject/bignumber';
+import { expect } from '../chai-setup';
+import { ContractFactory, Contract } from 'ethers';
 
 describe('ERC677Token', function () {
   async function initContracts(name: string, symbol: string) {
@@ -20,7 +20,7 @@ describe('ERC677Token', function () {
       .connect(ethers.provider.getSigner(accounts.deployer))
       .mint(accounts.deployer, BigNumber.from('800000000000000000'));
     await tx.wait();
-    return {token, tokenReceiver};
+    return { token, tokenReceiver };
   }
 
   async function initContract(
@@ -36,8 +36,8 @@ describe('ERC677Token', function () {
     return contractRef;
   }
 
-  it('Transfering tokens to ERC677Receiver contract should emit an onTokenTransferEvent', async function () {
-    const {token, tokenReceiver} = await initContracts('MOCK', 'MOCK');
+  it('Transfering tokens to ERC677Receiver contract should emit an OnTokenTransferEvent', async function () {
+    const { token, tokenReceiver } = await initContracts('MOCK', 'MOCK');
     const accounts = await getNamedAccounts();
     const fromBalanceBefore = await token.balanceOf(accounts.deployer);
     const toBalanceBefore = await token.balanceOf(tokenReceiver.address);
@@ -49,10 +49,10 @@ describe('ERC677Token', function () {
     const fromBalanceAfter = await token.balanceOf(accounts.deployer);
     const toBalanceAfter = await token.balanceOf(tokenReceiver.address);
     const tokenReceiverEvents = await tokenReceiver.queryFilter(
-      tokenReceiver.filters.onTokenTransferEvent()
+      tokenReceiver.filters.OnTokenTransferEvent()
     );
     const event = tokenReceiverEvents.filter(
-      (e) => e.event === 'onTokenTransferEvent'
+      (e) => e.event === 'OnTokenTransferEvent'
     )[0];
     expect(event.args).not.to.equal(null || undefined);
     if (event.args) {
@@ -66,7 +66,7 @@ describe('ERC677Token', function () {
     }
   });
   it('Transfering tokens to EOA', async function () {
-    const {token} = await initContracts('MOCK', 'MOCK');
+    const { token } = await initContracts('MOCK', 'MOCK');
     const accounts = await getNamedAccounts();
     const fromBalanceBefore = await token.balanceOf(accounts.deployer);
     const toBalanceBefore = await token.balanceOf(accounts.sandAdmin);
@@ -82,7 +82,7 @@ describe('ERC677Token', function () {
   });
   it('Transfering tokens to a non receiver contract should fail', async function () {
     const accounts = await getNamedAccounts();
-    const {token} = await initContracts('MOCK', 'MOCK');
+    const { token } = await initContracts('MOCK', 'MOCK');
     const emptyContract = await initContract(
       'EmptyContract',
       accounts.deployer,
@@ -101,7 +101,7 @@ describe('ERC677Token', function () {
   });
   it('Transfering tokens to a contract with fallback function should succeed', async function () {
     const accounts = await getNamedAccounts();
-    const {token} = await initContracts('MOCK', 'MOCK');
+    const { token } = await initContracts('MOCK', 'MOCK');
     const fallbackContract = await initContract(
       'FallBackContract',
       accounts.deployer,

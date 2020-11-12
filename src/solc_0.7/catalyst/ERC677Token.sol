@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
 import "../common/BaseWithStorage/wip/ERC20BaseToken.sol";
@@ -42,7 +43,6 @@ contract ERC677Token is ERC20BaseToken, ERC677 {
         string memory symbol,
         address admin
     )
-        public
         ERC20BaseToken(name, symbol, admin) // solhint-disable-next-line no-empty-blocks
     {}
 }

@@ -1,3 +1,4 @@
+//SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
 import "../common/BaseWithStorage/wip/ERC20BaseToken.sol";
