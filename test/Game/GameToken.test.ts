@@ -941,6 +941,8 @@ describe('GameToken', function () {
   });
 
   describe('GameToken: MetaTransactions', function () {
+    const METATX_SANDBOX = 1;
+    const METATX_2771 = 2;
     // @review
     // try to set up a situation where we can add a single test case to any new contract which will run the metaTx test suite for that specific contract
     it('can set the MetaTransactionProcessor type', async function () {
@@ -955,18 +957,47 @@ describe('GameToken', function () {
         )
       )
         .to.emit(gameTokenAsAdmin, 'MetaTransactionProcessor')
-        .withArgs(NativeMetaTransactionProcessor.address, 1);
+        .withArgs(NativeMetaTransactionProcessor.address, METATX_SANDBOX);
 
       const type = await gameToken.getMetaTransactionProcessorType(
         NativeMetaTransactionProcessor.address
       );
-      expect(type).to.be.equal(1);
+      expect(type).to.be.equal(METATX_SANDBOX);
     });
 
-    it('can check if contract is a Trusted Forwarder', async function () {});
+    it('can check if contract is a Trusted Forwarder', async function () {
+      const {gameToken, gameTokenAsAdmin} = await setupTest();
+      const others = await getUnnamedAccounts();
+
+      let isTrustedForwarder = await gameToken.isTrustedForwarder(others[0]);
+      expect(isTrustedForwarder).to.be.false;
+
+      await expect(
+        gameTokenAsAdmin.setMetaTransactionProcessor(others[0], METATX_2771)
+      )
+        .to.emit(gameTokenAsAdmin, 'MetaTransactionProcessor')
+        .withArgs(others[0], METATX_2771);
+
+      isTrustedForwarder = await gameToken.isTrustedForwarder(others[0]);
+      expect(isTrustedForwarder).to.be.true;
+    });
     // should succeed:
     // if processorType == METATX_SANDBOX
+    // Set up a test where:
+    // - processorType == METATX_SANDBOX
+    // - metaTxPRocessor successfully mints a game
     // if processorType == METATX_2771 && from == _forceMsgSender()
+
+    /**
+     * @note ==========================
+     * -Extracting the metaTx tests-
+     * params to pass to the metaTx suite:
+     * - contract to test (GameToken)
+     * - function to test (createGame)
+     * - native metaTx processor address ?
+     * - trustedForwarder address ?
+     * @note ==========================
+     */
 
     describe('GameToken: Invalid metaTransactions', function () {
       it('should fail if ...', async function () {
