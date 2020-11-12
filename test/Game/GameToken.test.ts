@@ -1,4 +1,4 @@
-import {ethers} from 'hardhat';
+import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
 import {expect} from '../chai-setup';
 import {BigNumber, utils, Contract} from 'ethers';
 import {Receipt} from 'hardhat-deploy/types';
@@ -943,9 +943,26 @@ describe('GameToken', function () {
   describe('GameToken: MetaTransactions', function () {
     // @review
     // try to set up a situation where we can add a single test case to any new contract which will run the metaTx test suite for that specific contract
-    it('can set the MetaTransactionProcessor type', async function () {});
-    it('can get the MetaTransactionProcessor type', async function () {});
-    it('should emit the "MetaTransactionProcessor" event ', async function () {});
+    it('can set the MetaTransactionProcessor type', async function () {
+      const {gameToken, gameTokenAsAdmin} = await setupTest();
+      const NativeMetaTransactionProcessor = await ethers.getContract(
+        'NativeMetaTransactionProcessor'
+      );
+      await expect(
+        gameTokenAsAdmin.setMetaTransactionProcessor(
+          NativeMetaTransactionProcessor.address,
+          1
+        )
+      )
+        .to.emit(gameTokenAsAdmin, 'MetaTransactionProcessor')
+        .withArgs(NativeMetaTransactionProcessor.address, 1);
+
+      const type = await gameToken.getMetaTransactionProcessorType(
+        NativeMetaTransactionProcessor.address
+      );
+      expect(type).to.be.equal(1);
+    });
+
     it('can check if contract is a Trusted Forwarder', async function () {});
     // should succeed:
     // if processorType == METATX_SANDBOX
