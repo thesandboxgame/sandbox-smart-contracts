@@ -135,7 +135,7 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
         address owner,
         address spender,
         uint256 amount
-    ) public returns (bool success) {
+    ) public override returns (bool success) {
         require(msg.sender == owner || _superOperators[msg.sender], "NOT_AUTHORIZED"); // TODO metatx
         _approveFor(owner, spender, amount);
         return true;

@@ -1,22 +1,15 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
-import {ProxyImplementation} from "../common/BaseWithStorage/ProxyImplementation.sol";
-
-contract TheSandbox712 is ProxyImplementation {
-    bytes32 internal constant EIP712DOMAIN_TYPEHASH = keccak256(
+contract TheSandbox712 {
+    bytes32 constant EIP712DOMAIN_TYPEHASH = keccak256(
         "EIP712Domain(string name,string version,address verifyingContract)"
     );
-    // solhint-disable-next-line
-    bytes32 internal DOMAIN_SEPARATOR;
+    bytes32 public immutable DOMAIN_SEPARATOR;
 
-    function init712() public phase("712") {
+    constructor() {
         DOMAIN_SEPARATOR = keccak256(
-            abi.encode(EIP712DOMAIN_TYPEHASH, keccak256("The Sandbox 3D"), keccak256("1"), address(this))
+            abi.encode(EIP712DOMAIN_TYPEHASH, keccak256("The Sandbox"), keccak256("1"), address(this))
         );
-    }
-
-    function domainSeparator() internal view returns (bytes32) {
-        return DOMAIN_SEPARATOR;
     }
 }
