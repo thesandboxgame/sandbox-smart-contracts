@@ -51,6 +51,7 @@ abstract contract ERC20ExecuteExtension {
         bytes calldata data
     ) external returns (bool success, bytes memory returnData) {
         require(_executionOperators[msg.sender], "only execution operators allowed to execute on SAND behalf");
+        // solhint-disable-next-line avoid-low-level-calls
         (success, returnData) = to.call{gas: gasLimit}(data);
         assert(gasleft() > gasLimit / 63); // not enough gas provided, assert to throw all gas // TODO use EIP-1930
     }
@@ -159,6 +160,7 @@ abstract contract ERC20ExecuteExtension {
         if (amount > 0) {
             _addAllowanceIfNeeded(from, to, amount);
         }
+        // solhint-disable-next-line avoid-low-level-calls
         (success, returnData) = to.call{gas: gasLimit}(data);
         assert(gasleft() > gasLimit / 63); // not enough gas provided, assert to throw all gas // TODO use EIP-1930
     }

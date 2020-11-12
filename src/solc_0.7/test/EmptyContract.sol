@@ -1,3 +1,6 @@
 pragma solidity 0.7.1;
 
-contract EmptyContract {}
+// solhint-disable-next-line no-empty-blocks
+contract EmptyContract {
+
+}

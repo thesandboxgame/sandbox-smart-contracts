@@ -8,6 +8,7 @@ library BytesUtil {
     ) internal pure {
         // Copy word-length chunks while possible
         for (; len >= 32; len -= 32) {
+            // solhint-disable-next-line no-inline-assembly
             assembly {
                 mstore(dest, mload(src))
             }
@@ -17,6 +18,7 @@ library BytesUtil {
 
         // Copy remaining bytes
         uint256 mask = 256**(32 - len) - 1;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             let srcpart := and(mload(src), not(mask))
             let destpart := and(mload(dest), mask)
@@ -27,6 +29,7 @@ library BytesUtil {
     function pointerToBytes(uint256 src, uint256 len) internal pure returns (bytes memory) {
         bytes memory ret = new bytes(len);
         uint256 retptr;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             retptr := add(ret, 32)
         }
@@ -36,6 +39,7 @@ library BytesUtil {
     }
 
     function addressToBytes(address a) internal pure returns (bytes memory b) {
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             let m := mload(0x40)
             mstore(add(m, 20), xor(0x140000000000000000000000000000000000000000, a))
@@ -45,6 +49,7 @@ library BytesUtil {
     }
 
     function uint256ToBytes(uint256 a) internal pure returns (bytes memory b) {
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             let m := mload(0x40)
             mstore(add(m, 32), a)
@@ -58,6 +63,7 @@ library BytesUtil {
             return false;
         }
         uint256 value;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             value := mload(add(data, 36))
         }
@@ -74,6 +80,7 @@ library BytesUtil {
         }
         uint256 offset = 36 + i * 32;
         uint256 valuePresent;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             valuePresent := mload(add(data, offset))
         }
@@ -82,12 +89,14 @@ library BytesUtil {
 
     function overrideFirst32BytesWithAddress(bytes memory data, address _address) internal pure returns (bytes memory) {
         uint256 dest;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             dest := add(data, 48)
         } // 48 = 32 (offset) + 4 (func sig) + 12 (address is only 20 bytes)
 
         bytes memory addressBytes = addressToBytes(_address);
         uint256 src;
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             src := add(addressBytes, 32)
         }
@@ -103,20 +112,22 @@ library BytesUtil {
     ) internal pure returns (bytes memory) {
         uint256 dest;
         uint256 src;
-
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             dest := add(data, 48)
         } // 48 = 32 (offset) + 4 (func sig) + 12 (address is only 20 bytes)
         bytes memory bbytes = addressToBytes(_address);
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             src := add(bbytes, 32)
         }
         memcpy(dest, src, 20);
-
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             dest := add(data, 68)
         } // 48 = 32 (offset) + 4 (func sig) + 32 (next slot)
         bbytes = uint256ToBytes(_value);
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             src := add(bbytes, 32)
         }

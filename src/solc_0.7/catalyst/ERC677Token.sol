@@ -36,9 +36,13 @@ contract ERC677Token is ERC20BaseToken, ERC677 {
     }
 
     // /////////////////// CONSTRUCTOR ////////////////////
+    // solhint-disable-next-line
     constructor(
         string memory name,
         string memory symbol,
         address admin
-    ) public ERC20BaseToken(name, symbol, admin) {}
+    )
+        public
+        ERC20BaseToken(name, symbol, admin) // solhint-disable-next-line no-empty-blocks
+    {}
 }

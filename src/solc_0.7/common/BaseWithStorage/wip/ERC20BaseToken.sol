@@ -15,7 +15,7 @@ abstract contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
         string memory tokenName,
         string memory tokenSymbol,
         address admin
-    ) internal {
+    ) {
         require(bytes(tokenName).length > 0, "INVALID_NAME_REQUIRED");
         require(bytes(tokenName).length <= 32, "INVALID_NAME_TOO_LONG");
         _name = _firstBytes32(bytes(tokenName));
@@ -216,6 +216,7 @@ abstract contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
     }
 
     function _firstBytes32(bytes memory src) public pure returns (bytes32 output) {
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             output := mload(add(src, 32))
         }

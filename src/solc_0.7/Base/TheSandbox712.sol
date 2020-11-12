@@ -6,7 +6,7 @@ contract TheSandbox712 is ProxyImplementation {
     bytes32 internal constant EIP712DOMAIN_TYPEHASH = keccak256(
         "EIP712Domain(string name,string version,address verifyingContract)"
     );
-
+    // solhint-disable-next-line
     bytes32 internal DOMAIN_SEPARATOR;
 
     function init712() public phase("712") {

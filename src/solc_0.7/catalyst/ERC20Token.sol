@@ -46,7 +46,7 @@ contract ERC20Token is ERC20BasicApproveExtension, TheSandbox712, ERC677Token {
     function batchBurnFrom(
         address from,
         uint256[] calldata ids,
-        uint256[] calldata amounts
+        uint256[] calldata amounts // solhint-disable-next-line no-empty-blocks
     ) external {}
 
     // //////////////////// INTERNALS ////////////////////
@@ -68,7 +68,7 @@ contract ERC20Token is ERC20BasicApproveExtension, TheSandbox712, ERC677Token {
     }
 
     // //////////////////////// DATA /////////////////////
-    bytes32 constant PERMIT_TYPEHASH = keccak256(
+    bytes32 internal constant PERMIT_TYPEHASH = keccak256(
         "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
     );
 
@@ -77,5 +77,7 @@ contract ERC20Token is ERC20BasicApproveExtension, TheSandbox712, ERC677Token {
         string memory name,
         string memory symbol,
         address admin
-    ) public ERC677Token(name, symbol, admin) {}
+    )
+        ERC677Token(name, symbol, admin) // solhint-disable-next-line no-empty-blocks
+    {}
 }
