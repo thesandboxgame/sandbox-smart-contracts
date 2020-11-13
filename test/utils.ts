@@ -1,8 +1,8 @@
 /* eslint-disable mocha/no-exports */
-import {BigNumber} from '@ethersproject/bignumber';
-import {ContractReceipt, Event, Contract, ContractTransaction} from 'ethers';
-import {Result} from 'ethers/lib/utils';
-import {ethers} from 'hardhat';
+import { BigNumber } from '@ethersproject/bignumber';
+import { ContractReceipt, Event, Contract, ContractTransaction } from 'ethers';
+import { Result } from 'ethers/lib/utils';
+import { ethers } from 'hardhat';
 
 export async function increaseTime(numSec: number): Promise<void> {
   await ethers.provider.send('evm_increaseTime', [numSec]);
@@ -65,7 +65,7 @@ export async function findEvents(
   return events;
 }
 
-export type EventWithArgs = Event & {args: Result};
+export type EventWithArgs = Event & { args: Result };
 
 export async function expectReceiptEventWithArgs(
   receipt: ContractReceipt,
@@ -105,3 +105,5 @@ export function waitFor(
 ): Promise<ContractReceipt> {
   return p.then((tx) => tx.wait());
 }
+
+export declare const zeroAddress = "0x0000000000000000000000000000000000000000";
