@@ -396,7 +396,7 @@ const erc20ABI = [
   },
 ];
 
-module.exports = (init, extensions, {initialOwner, initialSupply} = {}) => {
+module.exports = (init, extensions, {initialSupply} = {}) => {
   const tests = [];
 
   function preTest(test) {
@@ -439,7 +439,7 @@ module.exports = (init, extensions, {initialOwner, initialSupply} = {}) => {
   }
 
   if (initialSupply) {
-    it('deploy should emit Transfer event', async function ({users}) {
+    it('deploy should emit Transfer event', async function () {
       // TODO
       // const events = await getPastEvents(owner.contract, TransferEvent);
       // assert.equal(events[0].returnValues[0], "0x0000000000000000000000000000000000000000");
