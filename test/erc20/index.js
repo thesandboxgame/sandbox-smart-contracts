@@ -2,7 +2,6 @@ const {assert, expect} = require('../chai-setup');
 const {ethers} = require('hardhat');
 const {zeroAddress, waitFor} = require('../utils');
 const {Contract, BigNumber} = ethers;
-const {Web3Provider} = ethers.providers;
 const erc20ABI = [
   {
     constant: true,
@@ -402,8 +401,7 @@ module.exports = (init, extensions, {initialOwner, initialSupply} = {}) => {
 
   function preTest(test) {
     return async function () {
-      const {ethereum, contractAddress, users, mint} = await init();
-      const ethersProvider = ethereum;
+      const {ethersProvider, contractAddress, users, mint} = await init();
 
       const contract = new Contract(contractAddress, erc20ABI, ethersProvider);
 

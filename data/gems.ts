@@ -1,1 +1,1 @@
-export =['Power', 'Defense', 'Speed', 'Magic', 'Luck'];
+export = ['Power', 'Defense', 'Speed', 'Magic', 'Luck'];

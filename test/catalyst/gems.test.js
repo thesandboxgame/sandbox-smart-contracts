@@ -22,7 +22,7 @@ function testGem(gemName) {
       }
 
       return {
-        ethereum: ethers.provider,
+        ethersProvider: ethers.provider,
         contractAddress: contract.address,
         users: others,
         mint,
@@ -43,7 +43,7 @@ function testGem(gemName) {
 }
 
 testGem('Gem_Power');
-testGem('Gem_Defense');
-testGem('Gem_Speed');
-testGem('Gem_Magic');
-testGem('Gem_Luck');
+// testGem('Gem_Defense');
+// testGem('Gem_Speed');
+// testGem('Gem_Magic');
+// testGem('Gem_Luck');
