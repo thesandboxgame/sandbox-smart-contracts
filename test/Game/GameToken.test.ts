@@ -1,7 +1,10 @@
 import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
-import {expect} from '../chai-setup';
-import {BigNumber, utils, Contract} from 'ethers';
+import {BigNumber, utils, Contract, Wallet} from 'ethers';
+import {signTypedData_v4, TypedDataUtils} from 'eth-sig-util';
+import {} from '@types/eth-sig-util';
+import {bufferToHex, keccak256} from 'ethereumjs-util';
 import {Receipt, Address} from 'hardhat-deploy/types';
+import {expect} from '../chai-setup';
 import {
   waitFor,
   expectEventWithArgs,
@@ -941,10 +944,69 @@ describe('GameToken', function () {
   });
 
   describe('GameToken: MetaTransactions', function () {
+    /////////////////////// GSN Forwarder ///////////////////////////
+    let trustedForwarder: Contract;
+    let typeHash: string;
+    let typeData: Object;
+
+    const EIP712DomainType = [
+      {name: 'name', type: 'string'},
+      {name: 'version', type: 'string'},
+      {name: 'chainId', type: 'uint256'},
+      {name: 'verifyingContract', type: 'address'},
+    ];
+
+    const ForwardRequestType = [
+      {name: 'from', type: 'address'},
+      {name: 'to', type: 'address'},
+      {name: 'value', type: 'uint256'},
+      {name: 'gas', type: 'uint256'},
+      {name: 'nonce', type: 'uint256'},
+      {name: 'data', type: 'bytes'},
+    ];
+    before(async function () {
+      trustedForwarder = await ethers.getContract('Forwarder');
+
+      const GENERIC_PARAMS =
+        'address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data';
+
+      const typeName = `ForwardRequest(${GENERIC_PARAMS})`;
+      typeHash = bufferToHex(keccak256(typeName));
+      await trustedForwarder.registerRequestType('TestCall', '0x');
+      typeData = {
+        domain: {
+          name: 'Test Domain',
+          version: '1',
+          chainId: 1234,
+          verifyingContract: forwarder.address,
+        },
+        primaryType: 'ForwardRequest',
+        types: {
+          EIP712Domain: EIP712DomainType,
+          ForwardRequest: ForwardRequestType,
+        },
+        message: {},
+      };
+      const calcType = TypedDataUtils.encodeType(
+        'ForwardRequest',
+        typeData.types
+      );
+      expect(calcType).to.be.equal(typeName);
+
+      const domainSeparator = bufferToHex(
+        TypedDataUtils.hashStruct(
+          'EIP712Domain',
+          typeData.domain,
+          typeData.types
+        )
+      );
+    });
+
+    /////////////////////// GSN Forwarder ///////////////////////////
+
     const METATX_SANDBOX = 1;
     const METATX_2771 = 2;
-    // @review
-    // try to set up a situation where we can add a single test case to any new contract which will run the metaTx test suite for that specific contract
+
     it('can set the MetaTransactionProcessor type', async function () {
       const {gameToken, gameTokenAsAdmin} = await setupTest();
       const NativeMetaTransactionProcessor = await ethers.getContract(
@@ -983,10 +1045,71 @@ describe('GameToken', function () {
     });
     // should succeed:
     // if processorType == METATX_SANDBOX
-    // Set up a test where:
-    // - processorType == METATX_SANDBOX
-    // - metaTxPRocessor successfully mints a game
-    // if processorType == METATX_2771 && from == _forceMsgSender()
+    it.skip('can process metaTransactions if processorType == METATX_SANDBOX', async function () {});
+    it('can process metaTransactions if processorType == METATX_2771', async function () {
+      const {gameToken, gameTokenAsAdmin, GameOwner} = await setupTest();
+      const others = await getUnnamedAccounts();
+      const amount = 1;
+      await waitFor(gameTokenAsAdmin.approve(trustedForwarder.address, amount));
+      const wallet = Wallet.createRandom();
+
+      const receipt = await waitFor(
+        GameOwner.Game.createGame(
+          GameOwner.address,
+          GameOwner.address,
+          [],
+          [],
+          []
+        )
+      );
+      const transferEvent = await expectEventWithArgs(
+        gameToken,
+        receipt,
+        'Transfer'
+      );
+      const gameId = transferEvent.args[2];
+
+      await GameOwner.Game.transferFrom(
+        GameOwner.address,
+        wallet.address,
+        gameId
+      );
+      let {to, data} = await gameToken.populateTransaction.transferFrom(
+        wallet.address,
+        others[3],
+        amount
+      );
+      data += wallet.address.replace('0x', '');
+
+      const req1 = {
+        to: to,
+        data: data,
+        value: '0',
+        from: wallet.address,
+        nonce: 0,
+        gas: 1e6,
+      };
+
+      const privateKey = wallet.privateKey;
+      const privateKeyAsBuffer = Buffer.from(privateKey.substr(2), 'hex');
+      const sig = signTypedData_v4(privateKeyAsBuffer, {
+        data: {...typeData, message: req1},
+      });
+      const domainSeparator = TypedDataUtils.hashStruct(
+        'EIP712Domain',
+        typeData.domain,
+        typeData.types
+      );
+      const executionReceipt = await waitFor(
+        trustedForwarder.execute(
+          req1,
+          bufferToHex(domainSeparator),
+          typeHash,
+          '0x',
+          sig
+        )
+      );
+    });
 
     /**
      * @note ==========================`
