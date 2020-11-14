@@ -1,11 +1,9 @@
-import { deployments, ethers, getNamedAccounts } from 'hardhat';
-import { BigNumber } from '@ethersproject/bignumber';
-import { expect } from '../chai-setup';
-import { Contract } from 'ethers';
+import {deployments, ethers, getNamedAccounts} from 'hardhat';
+import {BigNumber} from '@ethersproject/bignumber';
+import {expect} from '../chai-setup';
+import {Contract} from 'ethers';
 
 describe('ERC677Token', function () {
-
-
   let tokenReceiver: Contract;
   let gemToken: Contract;
   let emptyContract: Contract;
