@@ -1051,7 +1051,6 @@ describe('GameToken', function () {
       const {gameToken, gameTokenAsAdmin, GameOwner} = await setupTest();
       const others = await getUnnamedAccounts();
       const amount = 1;
-      await waitFor(gameTokenAsAdmin.approve(trustedForwarder.address, amount));
       const wallet = Wallet.createRandom();
 
       const receipt = await waitFor(
@@ -1069,6 +1068,13 @@ describe('GameToken', function () {
         'Transfer'
       );
       const gameId = transferEvent.args[2];
+      await waitFor(
+        GameOwner.Game.approveFor(
+          GameOwner.address,
+          trustedForwarder.address,
+          gameId
+        )
+      );
 
       await GameOwner.Game.transferFrom(
         GameOwner.address,
@@ -1179,7 +1185,7 @@ describe('GameToken', function () {
         expect(type).to.be.equal(METATX_2771);
         await expect(
           gameAsUser7.transferFrom(GameOwner.address, others[7], gameId)
-        ).to.be.revertedWith('not approved to transfer!');
+        ).to.be.revertedWith('not approved to transfer');
       });
     });
   });
