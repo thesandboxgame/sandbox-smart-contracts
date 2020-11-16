@@ -1075,13 +1075,11 @@ describe('GameToken', function () {
         wallet.address,
         gameId
       );
-      let to;
-      let data;
-      ({to, data} = await gameToken.populateTransaction.transferFrom(
+      let {to, data} = await gameToken.populateTransaction.transferFrom(
         wallet.address,
         others[3],
         amount
-      ));
+      );
       data += wallet.address.replace('0x', '');
 
       const req1 = {
