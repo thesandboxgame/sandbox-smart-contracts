@@ -6,11 +6,12 @@ import "../BaseWithStorage/ERC721BaseToken.sol";
 import "../Interfaces/AssetToken.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "../Libraries/SafeMathWithRequire.sol";
+import "../Interfaces/GameToken.sol";
 
 // @review remove all console.logs !
 // import "hardhat/console.sol";
 
-contract GameToken is ERC721BaseToken {
+contract GameToken is ERC721BaseToken, GameTokenInterface {
     using EnumerableSet for EnumerableSet.UintSet;
     using SafeMathWithRequire for uint256;
 
@@ -22,13 +23,13 @@ contract GameToken is ERC721BaseToken {
 
     /// @notice return the current minter
     /// @return address of minter
-    function getMinter() external view returns (address) {
+    function getMinter() external view override returns (address) {
         return _minter;
     }
 
     /// @notice Set the Minter that will be the only address able to create Estate
     /// @param minter address of the minter
-    function setMinter(address minter) external {
+    function setMinter(address minter) external override {
         require(msg.sender == _admin, "ADMIN_NOT_AUTHORIZED");
         require(minter != _minter, "MINTER_SAME_ALREADY_SET");
         _minter = minter;
@@ -48,7 +49,7 @@ contract GameToken is ERC721BaseToken {
         uint256[] memory assetIds,
         uint256[] memory values,
         address[] memory editors
-    ) public returns (uint256 id) {
+    ) public override returns (uint256 id) {
         // @review consider metaTransactions here. should we require "from", "to" or msg.sender to be the minter?
         require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
@@ -83,7 +84,7 @@ contract GameToken is ERC721BaseToken {
         address from,
         uint256 gameId,
         uint256 assetId
-    ) public {
+    ) public override {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         // here "add" is from EnumerableSet.sol
         _gameData[gameId]._assets.add(assetId);
@@ -109,7 +110,7 @@ contract GameToken is ERC721BaseToken {
         uint256 gameId,
         uint256[] memory assetIds,
         uint256[] memory values
-    ) public {
+    ) public override {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
         for (uint256 i = 0; i < assetIds.length; i++) {
@@ -127,7 +128,7 @@ contract GameToken is ERC721BaseToken {
         uint256 gameId,
         uint256 assetId,
         address to
-    ) external {
+    ) external override {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(to != address(0), "INVALID_TO_ADDRESS");
         // "sub" is from SafeMathWithRequire.sol
@@ -152,7 +153,7 @@ contract GameToken is ERC721BaseToken {
         uint256[] calldata assetIds,
         uint256[] calldata values,
         address to
-    ) external {
+    ) external override {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(to != address(0), "INVALID_TO_ADDRESS");
         require(
@@ -173,14 +174,14 @@ contract GameToken is ERC721BaseToken {
     }
 
     // @review consider removing this
-    function getNumberOfAssets(uint256 gameId) public view returns (uint256) {
+    function getNumberOfAssets(uint256 gameId) public view override returns (uint256) {
         return _gameData[gameId]._assets.length();
     }
 
     /// @notice Function to get all assets and their quantities for a GAME
     /// @param gameId The id of the GAME to get assets for
 
-    function getGameAssets(uint256 gameId) external view returns (uint256[] memory, uint256[] memory) {
+    function getGameAssets(uint256 gameId) external view override returns (uint256[] memory, uint256[] memory) {
         uint256 assetLength = _gameData[gameId]._assets.length();
         uint256[] memory gameAssets;
         uint256[] memory quantities;
@@ -209,7 +210,7 @@ contract GameToken is ERC721BaseToken {
         uint256 gameId,
         address editor,
         bool isEditor
-    ) external {
+    ) external override {
         require(msg.sender == _ownerOf(gameId), "EDITOR_ACCESS_DENIED");
         _gameEditors[gameId][editor] = isEditor;
     }
@@ -218,7 +219,7 @@ contract GameToken is ERC721BaseToken {
     /// @param gameId The id of the GAME token owned by owner
     /// @param editor The address of the editor to set
     /// @return isEditor Editor status of editor for given tokenId
-    function isGameEditor(uint256 gameId, address editor) external view returns (bool isEditor) {
+    function isGameEditor(uint256 gameId, address editor) external view override returns (bool isEditor) {
         return _gameEditors[gameId][editor];
     }
 
@@ -226,21 +227,21 @@ contract GameToken is ERC721BaseToken {
     /// @return The name of the token contract
     // @review What should the actual name be?
     // @review Do we want to be able to update metadata?
-    function name() external pure returns (string memory) {
+    function name() external pure override returns (string memory) {
         return "Sandbox's GAMEs";
     }
 
     /// @notice Function to get the symbol of the token contract
     /// @return The symbol of the token contract
     // @review What should the actual symbol be?
-    function symbol() external pure returns (string memory) {
+    function symbol() external pure override returns (string memory) {
         return "GAME";
     }
 
     /// @notice Return the URI of a specific token
     /// @param gameId The id of the token
     /// @return uri The URI of the token
-    function tokenURI(uint256 gameId) public view returns (string memory uri) {
+    function tokenURI(uint256 gameId) public view override returns (string memory uri) {
         require(_ownerOf(gameId) != address(0), "Id does not exist");
         string memory URI = _metaData[gameId];
         return URI;
@@ -249,7 +250,7 @@ contract GameToken is ERC721BaseToken {
     /// @notice Set the URI of a specific game token
     /// @param gameId The id of the game token
     /// @param URI The URI string for the token's metadata
-    function setTokenURI(uint256 gameId, string memory URI) public {
+    function setTokenURI(uint256 gameId, string memory URI) public override {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "URI_ACCESS_DENIED");
         _metaData[gameId] = URI;
     }
@@ -260,7 +261,7 @@ contract GameToken is ERC721BaseToken {
         uint256, /*id*/
         uint256, /*value*/
         bytes calldata /*data*/
-    ) external pure returns (bytes4) {
+    ) external pure override returns (bytes4) {
         revert("NOT_ERC1155_RECEIVER");
     }
 
@@ -270,7 +271,7 @@ contract GameToken is ERC721BaseToken {
         uint256[] calldata, /*ids*/
         uint256[] calldata, /*values*/
         bytes calldata /*data*/
-    ) external view returns (bytes4) {
+    ) external view override returns (bytes4) {
         if (msg.sender == address(_asset)) {
             return 0xbc197c81;
         } else {
