@@ -244,6 +244,11 @@ describe('GameToken', function () {
         expect(ownerOf).to.be.equal(GameOwner.address);
       });
 
+      it('should be able to retrieve the creator address from the gameId', async function () {
+        const creator = await gameToken.creatorOf(gameId);
+        expect(creator).to.be.equal(GameOwner.address);
+      });
+
       it('anyone can mint Games with many Assets', async function () {
         const {gameToken, GameOwner} = await setupTest();
         const assetContract = await ethers.getContract('Asset');
@@ -320,12 +325,12 @@ describe('GameToken', function () {
           assetId2
         );
 
-        const transferEvent = await expectEventWithArgs(
+        const transferEvent = await expectEventWithArgsFromReceipt(
           gameToken,
           receipt,
           'Transfer'
         );
-        const assetsAddedEvent = await expectEventWithArgs(
+        const assetsAddedEvent = await expectEventWithArgsFromReceipt(
           gameToken,
           receipt,
           'AssetsAdded'
@@ -941,6 +946,14 @@ describe('GameToken', function () {
       );
     });
   });
+
+  // ███╗   ███╗███████╗████████╗ █████╗ ████████╗██╗  ██╗
+  // ████╗ ████║██╔════╝╚══██╔══╝██╔══██╗╚══██╔══╝╚██╗██╔╝
+  // ██╔████╔██║█████╗     ██║   ███████║   ██║    ╚███╔╝
+  // ██║╚██╔╝██║██╔══╝     ██║   ██╔══██║   ██║    ██╔██╗
+  // ██║ ╚═╝ ██║███████╗   ██║   ██║  ██║   ██║   ██╔╝ ██╗
+  // ╚═╝     ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
+  //
 
   describe('GameToken: MetaTransactions', function () {
     /////////////////////// GSN Forwarder ///////////////////////////
