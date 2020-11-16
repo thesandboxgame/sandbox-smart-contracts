@@ -21,11 +21,168 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     event AssetsAdded(uint256 indexed id, uint256[] assets, uint256[] values);
     event AssetsRemoved(uint256 indexed id, uint256[] assets, uint256[] values, address to);
 
+    constructor(
+        address metaTransactionContract,
+        address admin,
+        AssetToken asset
+    ) ERC721BaseToken(metaTransactionContract, admin) {
+        _asset = asset;
+        _nextId = 1;
+    }
+
+    /// @notice Return the name of the token contract
+    /// @return The name of the token contract
+    // @review What should the actual name be?
+    // @review Do we want to be able to update metadata?
+    function name() external pure override returns (string memory) {
+        return "Sandbox's GAMEs";
+    }
+
+    /// @notice Function to get the symbol of the token contract
+    /// @return The symbol of the token contract
+    // @review What should the actual symbol be?
+    function symbol() external pure override returns (string memory) {
+        return "GAME";
+    }
+
     /// @notice return the current minter
     /// @return address of minter
     function getMinter() external view override returns (address) {
         return _minter;
     }
+
+    function removeSingleAsset(
+        uint256 gameId,
+        uint256 assetId,
+        address to
+    ) external override {
+        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
+        require(to != address(0), "INVALID_TO_ADDRESS");
+        // "sub" is from SafeMathWithRequire.sol
+        _gameData[gameId]._values[assetId] = _gameData[gameId]._values[assetId].sub(1);
+        uint256 remainingAssets = _gameData[gameId]._values[assetId];
+
+        if (remainingAssets == 0) {
+            // "remove" is from EnumerableSet.sol
+            require(_gameData[gameId]._assets.remove(assetId), "ASSET_NOT_IN_GAME");
+        }
+
+        _asset.safeTransferFrom(address(this), to, assetId);
+        uint256[] memory assets = new uint256[](1);
+        uint256[] memory values = new uint256[](1);
+        assets[0] = assetId;
+        values[0] = uint256(1);
+        emit AssetsRemoved(gameId, assets, values, to);
+    }
+
+    // @review add docs
+    function removeMultipleAssets(
+        uint256 gameId,
+        uint256[] calldata assetIds,
+        uint256[] calldata values,
+        address to
+    ) external override {
+        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
+        require(to != address(0), "INVALID_TO_ADDRESS");
+        require(
+            assetIds.length == values.length && assetIds.length <= getNumberOfAssets(gameId),
+            "INVALID_INPUT_LENGTHS"
+        );
+        for (uint256 i = 0; i < assetIds.length; i++) {
+            // "remove" is from EnumerableSet.sol
+            uint256 assetValues = _gameData[gameId]._values[assetIds[i]];
+            if (values[i] >= _gameData[gameId]._values[assetIds[i]]) {
+                _gameData[gameId]._assets.remove(assetIds[i]);
+            }
+            // "sub" is from SafeMathWithRequire.sol
+            _gameData[gameId]._values[assetIds[i]] = assetValues.sub(values[i]);
+        }
+        _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
+        emit AssetsRemoved(gameId, assetIds, values, to);
+    }
+
+    /// @notice Function to get all assets and their quantities for a GAME
+    /// @param gameId The id of the GAME to get assets for
+    function getGameAssets(uint256 gameId) external view override returns (uint256[] memory, uint256[] memory) {
+        uint256 assetLength = _gameData[gameId]._assets.length();
+        uint256[] memory gameAssets;
+        uint256[] memory quantities;
+
+        if (assetLength != 0) {
+            gameAssets = new uint256[](assetLength);
+            quantities = new uint256[](assetLength);
+            for (uint256 i = 0; i < assetLength; i++) {
+                gameAssets[i] = _gameData[gameId]._assets.at(i);
+                quantities[i] = _gameData[gameId]._values[gameAssets[i]];
+            }
+        } else {
+            gameAssets = new uint256[](1);
+            quantities = new uint256[](1);
+            gameAssets[0] = uint256(0);
+            quantities[0] = uint256(0);
+        }
+        return (gameAssets, quantities);
+    }
+
+    /// @notice Function to allow token owner to set game editors
+    /// @param gameId The id of the GAME token owned by owner
+    /// @param editor The address of the editor to set
+    /// @param isEditor Add or remove the ability to edit
+    function setGameEditor(
+        uint256 gameId,
+        address editor,
+        bool isEditor
+    ) external override {
+        require(msg.sender == _ownerOf(gameId), "EDITOR_ACCESS_DENIED");
+        _gameEditors[gameId][editor] = isEditor;
+    }
+
+    /// @notice Function to get game editor status
+    /// @param gameId The id of the GAME token owned by owner
+    /// @param editor The address of the editor to set
+    /// @return isEditor Editor status of editor for given tokenId
+    function isGameEditor(uint256 gameId, address editor) external view override returns (bool isEditor) {
+        return _gameEditors[gameId][editor];
+    }
+
+    /// @notice Get the creator of the token type `id`.
+    /// @param id the id of the token to get the creator of.
+    /// @return the creator of the token type `id`.
+    function creatorOf(uint256 id) external view override returns (address) {
+        // require(wasEverMinted(id), "token was never minted");
+        address originalCreator = address(id / CREATOR_OFFSET_MULTIPLIER);
+        address newCreator = _creatorship[originalCreator];
+        if (newCreator != address(0)) {
+            return newCreator;
+        }
+        return originalCreator;
+    }
+
+    /// @notice Transfers creatorship of `original` from `sender` to `to`.
+    /// @param sender address of current registered creator.
+    /// @param original address of the original creator whose creation are saved in the ids themselves.
+    /// @param to address which will be given creatorship for all tokens originally minted by `original`.
+    // function transferCreatorship(
+    //     address sender,
+    //     address original,
+    //     address to
+    // ) external {
+    //     require(msg.sender == sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender], "require meta approval");
+    //     require(sender != address(0), "sender is zero address");
+    //     require(to != address(0), "destination is zero address");
+    //     address current = _creatorship[original];
+    //     if (current == address(0)) {
+    //         current = original;
+    //     }
+    //     require(current != to, "current == to");
+    //     require(current == sender, "current != sender");
+    //     if (to == original) {
+    //         _creatorship[original] = address(0);
+    //     } else {
+    //         _creatorship[original] = to;
+    //     }
+    //     emit CreatorshipTransfer(original, current, to);
+    // }
 
     /// @notice Set the Minter that will be the only address able to create Estate
     /// @param minter address of the minter
@@ -34,6 +191,30 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         require(minter != _minter, "MINTER_SAME_ALREADY_SET");
         _minter = minter;
         emit Minter(minter);
+    }
+
+    function onERC1155Received(
+        address, /*operator*/
+        address, /*from*/
+        uint256, /*id*/
+        uint256, /*value*/
+        bytes calldata /*data*/
+    ) external pure override returns (bytes4) {
+        revert("NOT_ERC1155_RECEIVER");
+    }
+
+    function onERC1155BatchReceived(
+        address, /*operator*/
+        address, /*from*/
+        uint256[] calldata, /*ids*/
+        uint256[] calldata, /*values*/
+        bytes calldata /*data*/
+    ) external view override returns (bytes4) {
+        if (msg.sender == address(_asset)) {
+            return 0xbc197c81;
+        } else {
+            revert("NOT_ERC1155_RECEIVER");
+        }
     }
 
     /// @notice Function to create a new GAME token
@@ -124,119 +305,21 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
 
     // @review Add burnGame function. see comments here: https://github.com/thesandboxgame/sandbox-private-contracts/pull/138#discussion_r507714939
 
-    function removeSingleAsset(
-        uint256 gameId,
-        uint256 assetId,
-        address to
-    ) external override {
-        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
-        require(to != address(0), "INVALID_TO_ADDRESS");
-        // "sub" is from SafeMathWithRequire.sol
-        _gameData[gameId]._values[assetId] = _gameData[gameId]._values[assetId].sub(1);
-        uint256 remainingAssets = _gameData[gameId]._values[assetId];
-
-        if (remainingAssets == 0) {
-            // "remove" is from EnumerableSet.sol
-            require(_gameData[gameId]._assets.remove(assetId), "ASSET_NOT_IN_GAME");
-        }
-
-        _asset.safeTransferFrom(address(this), to, assetId);
-        uint256[] memory assets = new uint256[](1);
-        uint256[] memory values = new uint256[](1);
-        assets[0] = assetId;
-        values[0] = uint256(1);
-        emit AssetsRemoved(gameId, assets, values, to);
-    }
-
-    function removeMultipleAssets(
-        uint256 gameId,
-        uint256[] calldata assetIds,
-        uint256[] calldata values,
-        address to
-    ) external override {
-        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
-        require(to != address(0), "INVALID_TO_ADDRESS");
-        require(
-            assetIds.length == values.length && assetIds.length <= getNumberOfAssets(gameId),
-            "INVALID_INPUT_LENGTHS"
-        );
-        for (uint256 i = 0; i < assetIds.length; i++) {
-            // "remove" is from EnumerableSet.sol
-            uint256 assetValues = _gameData[gameId]._values[assetIds[i]];
-            if (values[i] >= _gameData[gameId]._values[assetIds[i]]) {
-                _gameData[gameId]._assets.remove(assetIds[i]);
-            }
-            // "sub" is from SafeMathWithRequire.sol
-            _gameData[gameId]._values[assetIds[i]] = assetValues.sub(values[i]);
-        }
-        _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
-        emit AssetsRemoved(gameId, assetIds, values, to);
-    }
-
     // @review consider removing this
     function getNumberOfAssets(uint256 gameId) public view override returns (uint256) {
         return _gameData[gameId]._assets.length();
     }
 
-    /// @notice Function to get all assets and their quantities for a GAME
-    /// @param gameId The id of the GAME to get assets for
-
-    function getGameAssets(uint256 gameId) external view override returns (uint256[] memory, uint256[] memory) {
-        uint256 assetLength = _gameData[gameId]._assets.length();
-        uint256[] memory gameAssets;
-        uint256[] memory quantities;
-
-        if (assetLength != 0) {
-            gameAssets = new uint256[](assetLength);
-            quantities = new uint256[](assetLength);
-            for (uint256 i = 0; i < assetLength; i++) {
-                gameAssets[i] = _gameData[gameId]._assets.at(i);
-                quantities[i] = _gameData[gameId]._values[gameAssets[i]];
-            }
-        } else {
-            gameAssets = new uint256[](1);
-            quantities = new uint256[](1);
-            gameAssets[0] = uint256(0);
-            quantities[0] = uint256(0);
-        }
-        return (gameAssets, quantities);
-    }
-
-    /// @notice Function to allow token owner to set game editors
-    /// @param gameId The id of the GAME token owned by owner
-    /// @param editor The address of the editor to set
-    /// @param isEditor Add or remove the ability to edit
-    function setGameEditor(
-        uint256 gameId,
-        address editor,
-        bool isEditor
-    ) external override {
-        require(msg.sender == _ownerOf(gameId), "EDITOR_ACCESS_DENIED");
-        _gameEditors[gameId][editor] = isEditor;
-    }
-
-    /// @notice Function to get game editor status
-    /// @param gameId The id of the GAME token owned by owner
-    /// @param editor The address of the editor to set
-    /// @return isEditor Editor status of editor for given tokenId
-    function isGameEditor(uint256 gameId, address editor) external view override returns (bool isEditor) {
-        return _gameEditors[gameId][editor];
-    }
-
-    /// @notice Return the name of the token contract
-    /// @return The name of the token contract
-    // @review What should the actual name be?
-    // @review Do we want to be able to update metadata?
-    function name() external pure override returns (string memory) {
-        return "Sandbox's GAMEs";
-    }
-
-    /// @notice Function to get the symbol of the token contract
-    /// @return The symbol of the token contract
-    // @review What should the actual symbol be?
-    function symbol() external pure override returns (string memory) {
-        return "GAME";
-    }
+    // @review WTF !!!
+    // function wasEverMinted(uint256 id) public view override returns (bool) {
+    //     if ((id & IS_NFT) > 0) {
+    //         return _owners[id] != 0;
+    //     } else {
+    //         return
+    //             ((id & PACK_INDEX) < ((id & PACK_NUM_FT_TYPES) / PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
+    //             _metadataHash[id & URI_ID] != 0;
+    //     }
+    // }
 
     /// @notice Return the URI of a specific token
     /// @param gameId The id of the token
@@ -253,30 +336,6 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     function setTokenURI(uint256 gameId, string memory URI) public override {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "URI_ACCESS_DENIED");
         _metaData[gameId] = URI;
-    }
-
-    function onERC1155Received(
-        address, /*operator*/
-        address, /*from*/
-        uint256, /*id*/
-        uint256, /*value*/
-        bytes calldata /*data*/
-    ) external pure override returns (bytes4) {
-        revert("NOT_ERC1155_RECEIVER");
-    }
-
-    function onERC1155BatchReceived(
-        address, /*operator*/
-        address, /*from*/
-        uint256[] calldata, /*ids*/
-        uint256[] calldata, /*values*/
-        bytes calldata /*data*/
-    ) external view override returns (bytes4) {
-        if (msg.sender == address(_asset)) {
-            return 0xbc197c81;
-        } else {
-            revert("NOT_ERC1155_RECEIVER");
-        }
     }
 
     /// @dev Function to create a new gameId and associate it with an owner
@@ -306,16 +365,8 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     }
 
     mapping(uint256 => Data) private _gameData;
+    mapping(address => address) private _creatorship; // creatorship transfer
 
     mapping(uint256 => string) private _metaData;
     mapping(uint256 => mapping(address => bool)) private _gameEditors;
-
-    constructor(
-        address metaTransactionContract,
-        address admin,
-        AssetToken asset
-    ) ERC721BaseToken(metaTransactionContract, admin) {
-        _asset = asset;
-        _nextId = 1;
-    }
 }
