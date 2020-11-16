@@ -4,9 +4,6 @@ pragma solidity 0.7.1;
 /// @title Interface for the Game token
 
 interface GameTokenInterface {
-    event AssetsAdded(uint256 indexed id, uint24[] list);
-    event AssetsRemoved(uint256 indexed id, uint256 numRemoved);
-
     function getMinter() external view returns (address);
 
     function setMinter(address minter) external;
@@ -57,8 +54,9 @@ interface GameTokenInterface {
 
     function isGameEditor(uint256 gameId, address editor) external view returns (bool isEditor);
 
-    // @review re-enable this !!!
-    // function creatorOf(uint256 id) external view returns (address);
+    // function wasEverMinted(uint256 id) external view returns (bool);
+
+    function creatorOf(uint256 id) external view returns (address);
 
     // @review re-enable this !!!
     // function transferCreatorship(
