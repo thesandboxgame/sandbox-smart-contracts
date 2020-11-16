@@ -1,8 +1,6 @@
-import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
+import {ethers, getUnnamedAccounts} from 'hardhat';
 import {BigNumber, utils, Contract, Wallet} from 'ethers';
 import {signTypedData_v4, TypedDataUtils} from 'eth-sig-util';
-import {} from '@types/eth-sig-util';
-import {bufferToHex, keccak256} from 'ethereumjs-util';
 import {Receipt, Address} from 'hardhat-deploy/types';
 import {expect} from '../chai-setup';
 import {
@@ -947,7 +945,7 @@ describe('GameToken', function () {
     /////////////////////// GSN Forwarder ///////////////////////////
     let trustedForwarder: Contract;
     let typeHash: string;
-    let typeData: Object;
+    let typeData: any;
 
     const EIP712DomainType = [
       {name: 'name', type: 'string'},
@@ -965,20 +963,25 @@ describe('GameToken', function () {
       {name: 'data', type: 'bytes'},
     ];
     before(async function () {
-      trustedForwarder = await ethers.getContract('Forwarder');
+      trustedForwarder = await ethers.getContractAt(
+        'Forwarder',
+        '0x956868751Cc565507B3B58E53a6f9f41B56bed74'
+      );
+      // deployed rinkey address for forwarder:
+      // 0x956868751Cc565507B3B58E53a6f9f41B56bed74
 
       const GENERIC_PARAMS =
         'address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data';
 
       const typeName = `ForwardRequest(${GENERIC_PARAMS})`;
-      typeHash = bufferToHex(keccak256(typeName));
+      typeHash = utils.keccak256(utils.toUtf8Bytes(typeName));
       await trustedForwarder.registerRequestType('TestCall', '0x');
       typeData = {
         domain: {
           name: 'Test Domain',
           version: '1',
           chainId: 1234,
-          verifyingContract: forwarder.address,
+          verifyingContract: trustedForwarder.address,
         },
         primaryType: 'ForwardRequest',
         types: {
@@ -993,12 +996,10 @@ describe('GameToken', function () {
       );
       expect(calcType).to.be.equal(typeName);
 
-      const domainSeparator = bufferToHex(
-        TypedDataUtils.hashStruct(
-          'EIP712Domain',
-          typeData.domain,
-          typeData.types
-        )
+      const domainSeparator = TypedDataUtils.hashStruct(
+        'EIP712Domain',
+        typeData.domain,
+        typeData.types
       );
     });
 
@@ -1074,11 +1075,13 @@ describe('GameToken', function () {
         wallet.address,
         gameId
       );
-      let {to, data} = await gameToken.populateTransaction.transferFrom(
+      let to;
+      let data;
+      ({to, data} = await gameToken.populateTransaction.transferFrom(
         wallet.address,
         others[3],
         amount
-      );
+      ));
       data += wallet.address.replace('0x', '');
 
       const req1 = {
@@ -1101,13 +1104,7 @@ describe('GameToken', function () {
         typeData.types
       );
       const executionReceipt = await waitFor(
-        trustedForwarder.execute(
-          req1,
-          bufferToHex(domainSeparator),
-          typeHash,
-          '0x',
-          sig
-        )
+        trustedForwarder.execute(req1, domainSeparator, typeHash, '0x', sig)
       );
     });
 
