@@ -181,6 +181,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, ERC20, ERC20Extended, ER
         uint256 amount
     ) internal override {
         require(to != address(0), "Cannot send to 0x0");
+        require(to != address(this), "Cannot send to address(this)");
         uint256 currentBalance = _balances[from];
         require(currentBalance >= amount, "not enough fund");
         _balances[from] = currentBalance - amount;
