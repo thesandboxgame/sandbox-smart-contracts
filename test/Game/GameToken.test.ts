@@ -1,5 +1,6 @@
 import {ethers, getUnnamedAccounts} from 'hardhat';
 import {BigNumber, utils, Contract, Wallet} from 'ethers';
+import {splitSignature, _TypedDataEncoder} from 'ethers/lib/utils';
 import {signTypedData_v4, TypedDataUtils} from 'eth-sig-util';
 import {Receipt, Address} from 'hardhat-deploy/types';
 import {expect} from '../chai-setup';
@@ -946,6 +947,7 @@ describe('GameToken', function () {
     let trustedForwarder: Contract;
     let typeHash: string;
     let typeData: any;
+    let wallet: Wallet;
 
     const EIP712DomainType = [
       {name: 'name', type: 'string'},
@@ -1048,10 +1050,10 @@ describe('GameToken', function () {
     // if processorType == METATX_SANDBOX
     it.skip('can process metaTransactions if processorType == METATX_SANDBOX', async function () {});
     it('can process metaTransactions if processorType == METATX_2771', async function () {
-      const {gameToken, gameTokenAsAdmin, GameOwner} = await setupTest();
+      const {gameToken, GameOwner} = await setupTest();
       const others = await getUnnamedAccounts();
       const amount = 1;
-      const wallet = Wallet.createRandom();
+      wallet = Wallet.createRandom();
 
       const receipt = await waitFor(
         GameOwner.Game.createGame(
@@ -1068,20 +1070,23 @@ describe('GameToken', function () {
         'Transfer'
       );
       const gameId = transferEvent.args[2];
+      const gameAsWallet = await gameToken.connect(
+        ethers.provider.getSigner(wallet.address)
+      );
       await waitFor(
-        GameOwner.Game.approveFor(
-          GameOwner.address,
+        gameAsWallet.approveFor(
+          wallet.address,
           trustedForwarder.address,
           gameId
         )
       );
 
-      await GameOwner.Game.transferFrom(
+      await GameOwner.Game.safeTransferFrom(
         GameOwner.address,
         wallet.address,
         gameId
       );
-      let {to, data} = await gameToken.populateTransaction.transferFrom(
+      let {to, data} = await gameToken.populateTransaction.safeTransferFrom(
         wallet.address,
         others[3],
         amount
@@ -1107,9 +1112,12 @@ describe('GameToken', function () {
         typeData.domain,
         typeData.types
       );
-      const executionReceipt = await waitFor(
+
+      await expect(
         trustedForwarder.execute(req1, domainSeparator, typeHash, '0x', sig)
-      );
+      )
+        .to.emit(gameToken, 'Transfer')
+        .withArgs(to, wallet.address, gameId);
     });
 
     /**
@@ -1123,24 +1131,8 @@ describe('GameToken', function () {
      * @note ==========================
      */
 
-    /**
-     * @note
-     * MetaTx control:
-     * if msg.sender == from || processorType == 0:
-     * => ! isValidMetaTx
-     * if msg.sender != from && processorType != 0:
-     * => if processorType == 2:
-     *    => if from != _forceMsgSender():
-     *       => ! isValidMetaTx
-     *       else, isValidMetaTx
-     * => if processorType == 1:
-     *    => isValidMetaTx
-     * @note
-     */
-
     describe('GameToken: Invalid metaTransactions', function () {
       let gameAsUser7: Contract;
-      let user2: Address;
       let others: Address[];
       let gameId: BigNumber;
       let gameToken: Contract;
