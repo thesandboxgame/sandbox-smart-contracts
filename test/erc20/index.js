@@ -477,7 +477,10 @@ module.exports = (init, extensions, {initialSupply} = {}) => {
     await expect(users[0].contract.transfer(zeroAddress, '1000')).to.be
       .reverted;
   });
-  it('transfering to address(this) should fail', async function ({users, contract}) {
+  it('transfering to address(this) should fail', async function ({
+    users,
+    contract,
+  }) {
     await expect(users[0].contract.transfer(contract.address, '1000')).to.be
       .reverted;
   });
