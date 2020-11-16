@@ -244,11 +244,6 @@ describe('GameToken', function () {
         expect(ownerOf).to.be.equal(GameOwner.address);
       });
 
-      it('should be able to retrieve the creator address from the gameId', async function () {
-        const creator = await gameToken.creatorOf(gameId);
-        expect(creator).to.be.equal(GameOwner.address);
-      });
-
       it('anyone can mint Games with many Assets', async function () {
         const {gameToken, GameOwner} = await setupTest();
         const assetContract = await ethers.getContract('Asset');
@@ -872,6 +867,21 @@ describe('GameToken', function () {
       expect(newOwner).to.be.equal(recipient);
     });
 
+    // @review is creatorship meant to remain independent of ownership?
+    it('can transfer creatorship of a GAME', async function () {
+      const others = await getUnnamedAccounts();
+      const creatorBefore = await gameToken.creatorOf(gameId);
+
+      await GameOwner.Game.transferCreatorship(
+        GameOwner.address,
+        GameOwner.address,
+        others[3]
+      );
+
+      const creatorAfter = await gameToken.creatorOf(gameId);
+      expect(creatorAfter).to.not.equal(creatorBefore);
+    });
+
     it('should fail if non-owner trys to transfer a GAME', async function () {
       const originalOwner = await gameToken.ownerOf(gameId);
       await expect(
@@ -945,15 +955,12 @@ describe('GameToken', function () {
         'URI_ACCESS_DENIED'
       );
     });
-  });
 
-  // ███╗   ███╗███████╗████████╗ █████╗ ████████╗██╗  ██╗
-  // ████╗ ████║██╔════╝╚══██╔══╝██╔══██╗╚══██╔══╝╚██╗██╔╝
-  // ██╔████╔██║█████╗     ██║   ███████║   ██║    ╚███╔╝
-  // ██║╚██╔╝██║██╔══╝     ██║   ██╔══██║   ██║    ██╔██╗
-  // ██║ ╚═╝ ██║███████╗   ██║   ██║  ██║   ██║   ██╔╝ ██╗
-  // ╚═╝     ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝
-  //
+    it('should be able to retrieve the creator address from the gameId', async function () {
+      const creator = await gameToken.creatorOf(gameId);
+      expect(creator).to.be.equal(GameOwner.address);
+    });
+  });
 
   describe('GameToken: MetaTransactions', function () {
     /////////////////////// GSN Forwarder ///////////////////////////
