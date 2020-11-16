@@ -58,12 +58,11 @@ interface GameTokenInterface {
 
     function creatorOf(uint256 id) external view returns (address);
 
-    // @review re-enable this !!!
-    // function transferCreatorship(
-    //     address sender,
-    //     address original,
-    //     address to
-    // ) external;
+    function transferCreatorship(
+        address sender,
+        address original,
+        address to
+    ) external;
 
     function name() external pure returns (string memory);
 
