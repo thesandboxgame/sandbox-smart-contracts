@@ -42,6 +42,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     event Minter(address newMinter);
     event AssetsAdded(uint256 indexed id, uint256[] assets, uint256[] values);
     event AssetsRemoved(uint256 indexed id, uint256[] assets, uint256[] values, address to);
+    event CreatorshipTransfer(address indexed original, address indexed from, address indexed to);
 
     constructor(
         address metaTransactionContract,
@@ -121,27 +122,27 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     /// @param sender address of current registered creator.
     /// @param original address of the original creator whose creation are saved in the ids themselves.
     /// @param to address which will be given creatorship for all tokens originally minted by `original`.
-    // function transferCreatorship(
-    //     address sender,
-    //     address original,
-    //     address to
-    // ) external {
-    //     require(msg.sender == sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender], "require meta approval");
-    //     require(sender != address(0), "sender is zero address");
-    //     require(to != address(0), "destination is zero address");
-    //     address current = _creatorship[original];
-    //     if (current == address(0)) {
-    //         current = original;
-    //     }
-    //     require(current != to, "current == to");
-    //     require(current == sender, "current != sender");
-    //     if (to == original) {
-    //         _creatorship[original] = address(0);
-    //     } else {
-    //         _creatorship[original] = to;
-    //     }
-    //     emit CreatorshipTransfer(original, current, to);
-    // }
+    function transferCreatorship(
+        address sender,
+        address original,
+        address to
+    ) external override {
+        require(msg.sender == sender || _isValidMetaTx(sender) || _superOperators[msg.sender], "require meta approval");
+        require(sender != address(0), "sender is zero address");
+        require(to != address(0), "destination is zero address");
+        address current = _creatorship[original];
+        if (current == address(0)) {
+            current = original;
+        }
+        require(current != to, "current == to");
+        require(current == sender, "current != sender");
+        if (to == original) {
+            _creatorship[original] = address(0);
+        } else {
+            _creatorship[original] = to;
+        }
+        emit CreatorshipTransfer(original, current, to);
+    }
 
     /// @notice Set the Minter that will be the only address able to create Estate
     /// @param minter address of the minter
