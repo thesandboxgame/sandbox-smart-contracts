@@ -1,41 +1,10 @@
-import {deployments, ethers, getNamedAccounts} from 'hardhat';
+import {ethers, getNamedAccounts} from 'hardhat';
 import {BigNumber} from '@ethersproject/bignumber';
 import {expect} from '../chai-setup';
-import {Contract} from 'ethers';
-
+import {setupERC677} from './fixtures';
 describe('ERC677Token', function () {
-  let tokenReceiver: Contract;
-  let gemToken: Contract;
-  let emptyContract: Contract;
-  let fallbackContract: Contract;
-
-  async function createFixture() {
-    await deployments.fixture();
-    const accounts = await getNamedAccounts();
-    gemToken = await ethers.getContract('Gem_Power');
-    await deployments.deploy('MockERC677Receiver', {
-      from: accounts.deployer,
-      args: [],
-    });
-    tokenReceiver = await ethers.getContract('MockERC677Receiver');
-    await deployments.deploy('EmptyContract', {
-      from: accounts.deployer,
-      args: [],
-    });
-    emptyContract = await ethers.getContract('EmptyContract');
-    await deployments.deploy('FallBackContract', {
-      from: accounts.deployer,
-      args: [],
-    });
-    fallbackContract = await ethers.getContract('FallBackContract');
-    const tx = await gemToken
-      .connect(ethers.provider.getSigner(accounts.deployer))
-      .mint(accounts.deployer, BigNumber.from('800000000000000000'));
-    await tx.wait();
-  }
-
   it('Transfering tokens to ERC677Receiver contract should emit an OnTokenTransferEvent event', async function () {
-    await createFixture();
+    const {gemToken, tokenReceiver} = await setupERC677();
     const accounts = await getNamedAccounts();
     const fromBalanceBefore = await gemToken.balanceOf(accounts.deployer);
     const toBalanceBefore = await gemToken.balanceOf(tokenReceiver.address);
@@ -64,7 +33,7 @@ describe('ERC677Token', function () {
     }
   });
   it('Transfering tokens to EOA', async function () {
-    await createFixture();
+    const {gemToken} = await setupERC677();
     const accounts = await getNamedAccounts();
     const fromBalanceBefore = await gemToken.balanceOf(accounts.deployer);
     const toBalanceBefore = await gemToken.balanceOf(accounts.sandAdmin);
@@ -79,7 +48,7 @@ describe('ERC677Token', function () {
     expect(toBalanceAfter).to.equal(toBalanceBefore.add(amount));
   });
   it('Transfering tokens to a non receiver contract should fail', async function () {
-    await createFixture();
+    const {gemToken, emptyContract} = await setupERC677();
     const accounts = await getNamedAccounts();
     const toBalanceBefore = await gemToken.balanceOf(emptyContract.address);
 
@@ -93,7 +62,7 @@ describe('ERC677Token', function () {
     expect(toBalanceAfter).to.equal(toBalanceBefore);
   });
   it('Transfering tokens to a contract with fallback function should succeed', async function () {
-    await createFixture();
+    const {gemToken, fallbackContract} = await setupERC677();
     const accounts = await getNamedAccounts();
     const toBalanceBefore = await gemToken.balanceOf(fallbackContract.address);
     const fromBalanceBefore = await gemToken.balanceOf(accounts.deployer);

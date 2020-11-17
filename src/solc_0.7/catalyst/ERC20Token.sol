@@ -10,7 +10,7 @@ import "../common/Interfaces/ERC677Receiver.sol";
 contract ERC20Token is ERC20BasicApproveExtension, ERC677Extension, TheSandbox712, ERC20BaseToken {
     mapping(address => uint256) public nonces;
 
-    /// @notice Function to permit the expenditure of SAND by a nominated spender
+    /// @notice Function to permit the expenditure of ERC20 token by a nominated spender
     /// @param owner the owner of the ERC20 tokens
     /// @param spender the nominated spender of the ERC20 tokens
     /// @param value the value (allowance) of the ERC20 tokens that the nominated spender will be allowed to spend

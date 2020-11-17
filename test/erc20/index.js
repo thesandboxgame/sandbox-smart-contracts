@@ -1,7 +1,11 @@
 const {assert, expect} = require('../chai-setup');
 const {ethers} = require('hardhat');
-const {zeroAddress, waitFor} = require('../utils');
-const {Contract, BigNumber} = ethers;
+const {waitFor} = require('../utils');
+const {BigNumber, constants} = require('ethers');
+
+const zeroAddress = constants.AddressZero;
+
+const {Contract} = ethers;
 const erc20ABI = [
   {
     constant: true,

@@ -105,5 +105,3 @@ export function waitFor(
 ): Promise<ContractReceipt> {
   return p.then((tx) => tx.wait());
 }
-
-export declare const zeroAddress = '0x0000000000000000000000000000000000000000';
