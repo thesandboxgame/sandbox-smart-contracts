@@ -427,24 +427,4 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         bytes4 retval = ERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);
         return (retval == _ERC721_BATCH_RECEIVED);
     }
-
-    /// @dev Function to test if a tx is a valid Sandbox or EIP-2771 metaTransaction
-    /// @param from The address passed as either "from" or "sender" to the external func which called this one
-    function _isValidMetaTx(address from) internal view returns (bool) {
-        uint256 processorType = _metaTransactionContracts[msg.sender];
-        if (msg.sender == from || processorType == 0) {
-            return false;
-        }
-        if (processorType == METATX_2771) {
-            if (from != _forceMsgSender()) {
-                return false;
-            } else {
-                return true;
-            }
-        } else if (processorType == METATX_SANDBOX) {
-            return true;
-        } else {
-            return false;
-        }
-    }
 }
