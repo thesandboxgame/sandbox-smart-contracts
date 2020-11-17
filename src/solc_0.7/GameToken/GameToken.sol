@@ -2,10 +2,10 @@
 pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
-import "../BaseWithStorage/ERC721BaseToken.sol";
+import "../common/BaseWithStorage/ERC721BaseToken.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
-import "../Interfaces/AssetToken.sol";
-import "../Interfaces/GameToken.sol";
+import "../common/Interfaces/AssetToken.sol";
+import "../common/Interfaces/GameToken.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
 // @review remove all console.logs !
