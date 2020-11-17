@@ -67,7 +67,8 @@ describe('GameToken', function () {
             users[4].address,
             [],
             [],
-            []
+            [],
+            ''
           );
           const transferEvent = await expectEventWithArgs(
             gameToken,
@@ -85,7 +86,14 @@ describe('GameToken', function () {
 
         it('reverts if non-minter trys to mint Game when _minter set', async function () {
           await expect(
-            gameToken.createGame(users[2].address, users[2].address, [], [], [])
+            gameToken.createGame(
+              users[2].address,
+              users[2].address,
+              [],
+              [],
+              [],
+              ''
+            )
           ).to.be.revertedWith('INVALID_MINTER');
         });
       });
@@ -110,7 +118,8 @@ describe('GameToken', function () {
               GameOwner.address,
               [],
               [],
-              []
+              [],
+              ''
             )
           );
           const transferEvent = await expectEventWithArgs(
@@ -155,7 +164,8 @@ describe('GameToken', function () {
               GameOwner.address,
               [],
               [],
-              [GameEditor1.address, GameEditor2.address]
+              [GameEditor1.address, GameEditor2.address],
+              ''
             )
           );
           const transferEvent = await expectEventWithArgs(
@@ -222,7 +232,8 @@ describe('GameToken', function () {
             GameOwner.address,
             [assetId],
             [1],
-            []
+            [],
+            ''
           )
         );
         const balanceAfter = await assetContract['balanceOf(address,uint256)'](
@@ -307,7 +318,8 @@ describe('GameToken', function () {
             GameOwner.address,
             [assetId, assetId2],
             [quantity, quantity2],
-            []
+            [],
+            ''
           )
         );
 
@@ -383,7 +395,8 @@ describe('GameToken', function () {
               GameOwner.address,
               [assetId],
               [11, 42],
-              []
+              [],
+              ''
             )
           )
         ).to.be.revertedWith('INVALID_INPUT_LENGTHS');
@@ -432,7 +445,8 @@ describe('GameToken', function () {
             GameOwner.address,
             [],
             [],
-            []
+            [],
+            'Uri is this'
           )
         );
         const transferEvent = await expectEventWithArgs(
@@ -505,13 +519,21 @@ describe('GameToken', function () {
         const numberBefore = await gameToken.getNumberOfAssets(gameId);
         expect(numberBefore).to.be.equal(0);
 
+        const uriBefore = await gameToken.tokenURI(gameId);
+        expect(uriBefore).to.be.equal('Uri is this');
+
         const receipt = await waitFor(
           GameOwner.Game.addSingleAsset(
             GameOwner.address,
             gameId,
-            singleAssetId
+            singleAssetId,
+            'Uri is different now'
           )
         );
+
+        const uriAfter = await gameToken.tokenURI(gameId);
+        expect(uriAfter).to.be.equal('Uri is different now');
+
         const contractBalanceAfter = await assetContract[
           'balanceOf(address,uint256)'
         ](gameToken.address, singleAssetId);
@@ -589,7 +611,8 @@ describe('GameToken', function () {
           GameOwner.address,
           gameId,
           [assetId, assetId2],
-          [7, 42]
+          [7, 42],
+          ''
         );
 
         const contractBalanceAfter = await assetContract[
@@ -647,7 +670,8 @@ describe('GameToken', function () {
         const assetRemovalReceipt = await GameOwner.Game.removeSingleAsset(
           gameId,
           singleAssetId,
-          GameOwner.address
+          GameOwner.address,
+          ''
         );
 
         const [gameAssets] = await gameToken.getGameAssets(gameId);
@@ -686,7 +710,8 @@ describe('GameToken', function () {
             gameId,
             [assetId, assetId2, assetId2],
             [7, 31, 2],
-            GameOwner.address
+            GameOwner.address,
+            ''
           )
         ).to.be.revertedWith('INVALID_INPUT_LENGTHS');
       });
@@ -710,7 +735,8 @@ describe('GameToken', function () {
           gameId,
           [assetId, assetId2],
           [7, 31],
-          GameOwner.address
+          GameOwner.address,
+          ''
         );
 
         const [gameAssets, quantities] = await gameToken.getGameAssets(gameId);
@@ -782,7 +808,8 @@ describe('GameToken', function () {
           GameEditor1.Game.addSingleAsset(
             GameEditor1.address,
             gameId,
-            editorAssetId
+            editorAssetId,
+            ''
           )
         );
 
@@ -792,7 +819,8 @@ describe('GameToken', function () {
           GameEditor1.Game.removeSingleAsset(
             gameId,
             editorAssetId,
-            GameEditor1.address
+            GameEditor1.address,
+            ''
           )
         );
 
@@ -836,7 +864,8 @@ describe('GameToken', function () {
           GameOwner.address,
           [assetId],
           [1],
-          []
+          [],
+          ''
         )
       );
       const transferEvent = await expectEventWithArgs(
@@ -908,7 +937,8 @@ describe('GameToken', function () {
           GameOwner.address,
           [],
           [],
-          []
+          [],
+          'Hello Sandbox'
         )
       );
       const transferEvent = await expectEventWithArgs(
@@ -931,9 +961,9 @@ describe('GameToken', function () {
     });
 
     it('GAME owner can set the tokenURI', async function () {
-      await GameOwner.Game.setTokenURI(gameId, 'Hello World');
+      // await GameOwner.Game.setTokenURI(gameId, 'Hello Sandbox');
       const URI = await gameToken.tokenURI(gameId);
-      expect(URI).to.be.equal('Hello World');
+      expect(URI).to.be.equal('Hello Sandbox');
     });
 
     it('GAME editors can set the tokenURI', async function () {
@@ -1083,7 +1113,8 @@ describe('GameToken', function () {
           GameOwner.address,
           [],
           [],
-          []
+          [],
+          ''
         )
       );
       const transferEvent = await expectEventWithArgs(
@@ -1173,7 +1204,8 @@ describe('GameToken', function () {
             GameOwner.address,
             [],
             [],
-            []
+            [],
+            ''
           )
         );
         const transferEvent = await expectEventWithArgs(
