@@ -5,22 +5,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
   const {deployer, gameTokenAdmin} = await getNamedAccounts();
-  const metaTransactionContract = await deployments.get(
-    'NativeMetaTransactionProcessor'
-  );
+  const sandContract = await deployments.get('Sand');
   const assetContract = await deployments.get('Asset');
 
   await deploy('GameToken', {
     from: deployer,
     log: true,
-    args: [
-      metaTransactionContract.address,
-      gameTokenAdmin,
-      assetContract.address,
-    ],
+    args: [sandContract.address, gameTokenAdmin, assetContract.address],
   });
 };
 
 export default func;
 func.tags = ['GameToken', 'GameToken_deploy'];
-func.dependencies = ['NativeMetaTransactionProcessor', 'Asset'];
+func.dependencies = ['Sand', 'Asset'];
