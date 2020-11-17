@@ -9,10 +9,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer} = await getNamedAccounts();
   for (const catalyst of catalysts) {
     await deploy(`Catalyst_${catalyst.name}`, {
-      contract: 'ERC20Token',
+      contract: 'PrimaryCatalyst',
       from: deployer,
       log: true,
-      args: [catalyst.name, catalyst.symbol, deployer],
+      args: [catalyst.name, catalyst.symbol, deployer, catalyst.maxGems],
     });
   }
 };

@@ -4,15 +4,20 @@ pragma experimental ABIEncoderV2;
 
 import "./interfaces/CatalystToken.sol";
 import "./AssetAttributesRegistry.sol";
+import "./ERC20Token.sol";
 
-// TODO ERC20
-contract PrimaryCatalyst is CatalystToken {
+contract PrimaryCatalyst is CatalystToken, ERC20Token {
     uint256 internal constant MAX_NUM_GEMS = 15;
     uint256 internal constant MAX_NUM_GEM_TYPES = 256;
 
     uint8 internal immutable _maxGems;
 
-    constructor(uint8 maxGems) {
+    constructor(
+        string memory name,
+        string memory symbol,
+        address admin,
+        uint8 maxGems
+    ) ERC20Token(name, symbol, admin) {
         _maxGems = maxGems;
     }
 
