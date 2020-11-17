@@ -29,6 +29,8 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     address internal _minter;
     AssetToken _asset;
 
+    bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
+    bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     uint256 private constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
 
     mapping(uint256 => Data) private _gameData;
@@ -159,7 +161,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     /// @param assetIds The ids of the assets to add to this game
     /// @param values the amount of each token id to add to game
     /// @param editors The addresses to allow to edit (Can also be set later)
-    /// @return id The id of the new GAME token (erc721)
+    /// @return id The id of the new GAME token (er1c721)
     function createGame(
         address from,
         address to,
@@ -171,7 +173,6 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
-        require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
         uint256 gameId = _mintGame(from, to);
 
         if (editors.length != 0) {
@@ -205,7 +206,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     /// @param id the id of the token to get the creator of.
     /// @return the creator of the token type `id`.
     function creatorOf(uint256 id) external view override returns (address) {
-        // require(wasEverMinted(id), "token was never minted");
+        require(id != uint256(0), "NEVER_MINTED");
         address originalCreator = address(id / CREATOR_OFFSET_MULTIPLIER);
         address newCreator = _creatorship[originalCreator];
         if (newCreator != address(0)) {
@@ -244,27 +245,36 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     }
 
     function onERC1155BatchReceived(
-        address, /*operator*/
-        address, /*from*/
-        uint256[] calldata, /*ids*/
-        uint256[] calldata, /*values*/
-        bytes calldata /*data*/
+        address operator,
+        address from,
+        uint256[] calldata ids,
+        uint256[] calldata values,
+        bytes calldata data
     ) external view override returns (bytes4) {
-        if (msg.sender == address(_asset)) {
-            return 0xbc197c81;
-        } else {
-            revert("NOT_ERC1155_RECEIVER");
-        }
+        require(msg.sender == address(_asset), "UNAUTHORIZED_SENDER");
+        // @review
+        // require(from == operator, "SELF_EXECUTED_TRANSFER_ONLY");
+        require(ids.length > 0, "EMPTY_TRANSFER_DISALLOWED");
+        require(ids.length == values.length, "need to contains Asset");
+        // @review
+        // require(data.length > 0, "EMPTY_DATA_DISALLOWED");
+        return ERC1155_BATCH_RECEIVED;
     }
 
     function onERC1155Received(
-        address, /*operator*/
-        address, /*from*/
-        uint256, /*id*/
-        uint256, /*value*/
-        bytes calldata /*data*/
-    ) external pure override returns (bytes4) {
-        revert("NOT_ERC1155_RECEIVER");
+        address operator,
+        address from,
+        uint256 id,
+        uint256 value,
+        bytes calldata data
+    ) external view override returns (bytes4) {
+        require(msg.sender == address(_asset), "UNAUTHORIZED_SENDER");
+        // @review below.
+        // require(from == operator, "SELF_EXECUTED_TRANSFER_ONLY");
+        require(id != uint256(0) && value > 0, "EMPTY_TRANSFER_DISALLOWED");
+        // @review
+        // require(data.length > 0, "EMPTY_DATA_DISALLOWED");
+        return ERC1155_RECEIVED;
     }
 
     /// @notice Return the name of the token contract
@@ -297,8 +307,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256 assetValues = _gameData[gameId]._values[assetId];
         // here "add" is from SafeMathWithRequire.sol
         _gameData[gameId]._values[assetId] = assetValues.add(1);
-        // @review switch to safeTransferFrom? requires that we handle erc1155 transfers to this.
-        _asset.transferFrom(from, address(this), assetId);
+        _asset.safeTransferFrom(from, address(this), assetId, 1, "");
         uint256[] memory assets = new uint256[](1);
         uint256[] memory values = new uint256[](1);
         assets[0] = assetId;
@@ -343,17 +352,6 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     function getNumberOfAssets(uint256 gameId) public view override returns (uint256) {
         return _gameData[gameId]._assets.length();
     }
-
-    // @review WTF !!!
-    // function wasEverMinted(uint256 id) public view override returns (bool) {
-    //     if ((id & IS_NFT) > 0) {
-    //         return _owners[id] != 0;
-    //     } else {
-    //         return
-    //             ((id & PACK_INDEX) < ((id & PACK_NUM_FT_TYPES) / PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
-    //             _metadataHash[id & URI_ID] != 0;
-    //     }
-    // }
 
     /// @notice Return the URI of a specific token
     /// @param gameId The id of the token
