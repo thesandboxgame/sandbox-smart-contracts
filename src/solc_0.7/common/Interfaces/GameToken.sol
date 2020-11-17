@@ -20,27 +20,31 @@ interface GameTokenInterface {
     function addSingleAsset(
         address from,
         uint256 gameId,
-        uint256 assetId
+        uint256 assetId,
+        string calldata uri
     ) external;
 
     function addMultipleAssets(
         address from,
         uint256 gameId,
         uint256[] memory assetIds,
-        uint256[] memory values
+        uint256[] memory values,
+        string calldata uri
     ) external;
 
     function removeSingleAsset(
         uint256 gameId,
         uint256 assetId,
-        address to
+        address to,
+        string calldata uri
     ) external;
 
     function removeMultipleAssets(
         uint256 gameId,
         uint256[] calldata assetIds,
         uint256[] calldata values,
-        address to
+        address to,
+        string calldata uri
     ) external;
 
     function getNumberOfAssets(uint256 gameId) external view returns (uint256);
