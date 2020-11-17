@@ -1,5 +1,7 @@
 /* eslint-disable mocha/no-exports */
 import {BigNumber} from '@ethersproject/bignumber';
+import {ContractReceipt, Event, Contract, ContractTransaction} from 'ethers';
+import {Result} from 'ethers/lib/utils';
 import {ethers} from 'hardhat';
 
 export async function increaseTime(numSec: number): Promise<void> {
@@ -51,4 +53,55 @@ export function cubeRoot6(bigNum: BigNumber): BigNumber {
     tmp = numerator.div(root);
   }
   return c;
+}
+
+export async function findEvents(
+  contract: Contract,
+  event: string,
+  blockHash: string
+): Promise<Event[]> {
+  const filter = contract.filters[event]();
+  const events = await contract.queryFilter(filter, blockHash);
+  return events;
+}
+
+export type EventWithArgs = Event & {args: Result};
+
+export async function expectReceiptEventWithArgs(
+  receipt: ContractReceipt,
+  name: string
+): Promise<EventWithArgs> {
+  if (!receipt.events) {
+    throw new Error('no events');
+  }
+  for (const event of receipt.events) {
+    if (event.event === name) {
+      if (!event.args) {
+        throw new Error('event has no args');
+      }
+      return event as EventWithArgs;
+    }
+  }
+  throw new Error('no matching events');
+}
+
+export async function expectEventWithArgs(
+  contract: Contract,
+  receipt: ContractReceipt,
+  event: string
+): Promise<EventWithArgs> {
+  const events = await findEvents(contract, event, receipt.blockHash);
+  if (events.length == 0) {
+    throw new Error('no events');
+  }
+  if (!events[0].args) {
+    throw new Error('event has no args');
+  }
+  return events[0] as EventWithArgs;
+}
+
+export function waitFor(
+  p: Promise<ContractTransaction>
+): Promise<ContractReceipt> {
+  return p.then((tx) => tx.wait());
 }
