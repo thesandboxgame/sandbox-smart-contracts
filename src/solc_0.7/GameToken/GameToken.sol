@@ -62,6 +62,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256 assetId,
         address to
     ) external override {
+        require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(to != address(0), "INVALID_TO_ADDRESS");
         // "sub" is from SafeMath.sol
@@ -88,6 +89,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256[] calldata values,
         address to
     ) external override {
+        require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(to != address(0), "INVALID_TO_ADDRESS");
         require(
@@ -301,6 +303,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256 gameId,
         uint256 assetId
     ) public override {
+        require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         // here "add" is from EnumerableSet.sol
         _gameData[gameId]._assets.add(assetId);
@@ -327,6 +330,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256[] memory assetIds,
         uint256[] memory values
     ) public override {
+        require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
         for (uint256 i = 0; i < assetIds.length; i++) {
