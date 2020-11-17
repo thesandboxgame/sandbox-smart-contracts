@@ -1108,11 +1108,14 @@ describe('GameToken', function () {
         wallet.address,
         gameId
       );
-      let {to, data} = await gameToken.populateTransaction.safeTransferFrom(
+      const txObj = await gameToken.populateTransaction.safeTransferFrom(
         wallet.address,
         others[3],
         amount
       );
+      const to = txObj.to;
+      let data = txObj.data;
+
       data += wallet.address.replace('0x', '');
 
       const req1 = {
