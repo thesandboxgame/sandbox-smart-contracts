@@ -17,6 +17,12 @@ interface GameTokenInterface {
         string calldata uri
     ) external returns (uint256 id);
 
+    function destroyGame(
+        address from,
+        address to,
+        uint256 gameId
+    ) external;
+
     function addSingleAsset(
         address from,
         uint256 gameId,
