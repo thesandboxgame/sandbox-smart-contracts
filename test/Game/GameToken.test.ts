@@ -1069,7 +1069,7 @@ describe('GameToken', function () {
     // should succeed:
     // if processorType == METATX_SANDBOX
     it.skip('can process metaTransactions if processorType == METATX_SANDBOX', async function () {});
-    it('can process metaTransactions if processorType == METATX_2771', async function () {
+    it.skip('can process metaTransactions if processorType == METATX_2771', async function () {
       const {gameToken, GameOwner} = await setupTest();
       const others = await getUnnamedAccounts();
       const amount = 1;
