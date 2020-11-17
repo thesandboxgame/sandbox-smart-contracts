@@ -13,7 +13,8 @@ interface GameTokenInterface {
         address to,
         uint256[] calldata assetIds,
         uint256[] calldata values,
-        address[] calldata editors
+        address[] calldata editors,
+        string calldata uri
     ) external returns (uint256 id);
 
     function addSingleAsset(
