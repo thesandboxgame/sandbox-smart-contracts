@@ -6,7 +6,7 @@ import "../BaseWithStorage/ERC721BaseToken.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "../Interfaces/AssetToken.sol";
 import "../Interfaces/GameToken.sol";
-import "../Libraries/SafeMathWithRequire.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 // @review remove all console.logs !
 // import "hardhat/console.sol";
@@ -15,7 +15,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     ///////////////////////////////  Libs //////////////////////////////
 
     using EnumerableSet for EnumerableSet.UintSet;
-    using SafeMathWithRequire for uint256;
+    using SafeMath for uint256;
 
     ///////////////////////////////  Data //////////////////////////////
 
@@ -64,7 +64,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     ) external override {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(to != address(0), "INVALID_TO_ADDRESS");
-        // "sub" is from SafeMathWithRequire.sol
+        // "sub" is from SafeMath.sol
         _gameData[gameId]._values[assetId] = _gameData[gameId]._values[assetId].sub(1);
         uint256 remainingAssets = _gameData[gameId]._values[assetId];
 
@@ -100,7 +100,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
             if (values[i] >= _gameData[gameId]._values[assetIds[i]]) {
                 _gameData[gameId]._assets.remove(assetIds[i]);
             }
-            // "sub" is from SafeMathWithRequire.sol
+            // "sub" is from SafeMath.sol
             _gameData[gameId]._values[assetIds[i]] = assetValues.sub(values[i]);
         }
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
@@ -305,7 +305,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         // here "add" is from EnumerableSet.sol
         _gameData[gameId]._assets.add(assetId);
         uint256 assetValues = _gameData[gameId]._values[assetId];
-        // here "add" is from SafeMathWithRequire.sol
+        // here "add" is from SafeMath.sol
         _gameData[gameId]._values[assetId] = assetValues.add(1);
         _asset.safeTransferFrom(from, address(this), assetId, 1, "");
         uint256[] memory assets = new uint256[](1);
