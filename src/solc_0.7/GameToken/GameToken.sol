@@ -57,6 +57,11 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
 
     ///////////////////////////////  Functions //////////////////////////////
 
+    /// @notice Function to remove multiple assets from a GAME
+    /// @param gameId The GAME to remove assets from
+    /// @param assetId The asset Id to remove
+    /// @param to The address to send the removed asset to
+    /// @param uri The URI string to update the GAME token's URI
     function removeSingleAsset(
         uint256 gameId,
         uint256 assetId,
@@ -85,14 +90,19 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         emit AssetsRemoved(gameId, assets, values, to);
     }
 
-    // @review add docs
+    /// @notice Function to remove multiple assets from a GAME
+    /// @param gameId The GAME to remove assets from
+    /// @param assetIds An array of asset Ids to remove
+    /// @param values An array of the number of each asset id to remove
+    /// @param to The address to send removed assets to
+    /// @param uri The URI string to update the GAME token's URI
     function removeMultipleAssets(
         uint256 gameId,
-        uint256[] calldata assetIds,
-        uint256[] calldata values,
+        uint256[] memory assetIds,
+        uint256[] memory values,
         address to,
         string memory uri
-    ) external override {
+    ) public override {
         require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(to != address(0), "INVALID_TO_ADDRESS");
@@ -204,6 +214,34 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         return gameId;
     }
 
+    /// @notice Function to burn a GAME token
+    /// @param from The address of the one destroying the game
+    /// @param to The address to send all game assets to
+    /// @param gameId The id of the game to destroy
+    function destroyGame(
+        address from,
+        address to,
+        uint256 gameId
+    ) external override {
+        require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
+        // @review Add metaTx support
+        require(from == _ownerOf(gameId), "ACCESS_DENIED");
+        require(to != address(0), "DESTINATION_ZERO_ADDRESS");
+        require(to != address(this), "DESTINATION_GAME_CONTRACT");
+
+        // @note ensure all assets are removed first
+        // uint256[] calldata assets;
+        // uint256[] calldata values;
+        (uint256[] memory assets, uint256[] memory values) = getGameAssets(gameId);
+        removeMultipleAssets(gameId, assets, values, to, "");
+        assert(_gameData[gameId]._assets.length() == 0);
+        _burnGame(gameId);
+    }
+
+    function _burnGame(uint256 gameId) private {
+        emit Transfer(_ownerOf(gameId), address(0), gameId);
+    }
+
     /// @notice Function to get game editor status
     /// @param gameId The id of the GAME token owned by owner
     /// @param editor The address of the editor to set
@@ -227,7 +265,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
 
     /// @notice Function to get all assets and their quantities for a GAME
     /// @param gameId The id of the GAME to get assets for
-    function getGameAssets(uint256 gameId) external view override returns (uint256[] memory, uint256[] memory) {
+    function getGameAssets(uint256 gameId) public view override returns (uint256[] memory, uint256[] memory) {
         uint256 assetLength = _gameData[gameId]._assets.length();
         uint256[] memory gameAssets;
         uint256[] memory quantities;
