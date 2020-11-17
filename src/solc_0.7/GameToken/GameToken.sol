@@ -60,7 +60,8 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     function removeSingleAsset(
         uint256 gameId,
         uint256 assetId,
-        address to
+        address to,
+        string memory uri
     ) external override {
         require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
@@ -79,6 +80,8 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256[] memory values = new uint256[](1);
         assets[0] = assetId;
         values[0] = uint256(1);
+
+        setTokenURI(gameId, uri);
         emit AssetsRemoved(gameId, assets, values, to);
     }
 
@@ -87,7 +90,8 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256 gameId,
         uint256[] calldata assetIds,
         uint256[] calldata values,
-        address to
+        address to,
+        string memory uri
     ) external override {
         require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
@@ -106,6 +110,8 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
             _gameData[gameId]._values[assetIds[i]] = assetValues.sub(values[i]);
         }
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
+
+        setTokenURI(gameId, uri);
         emit AssetsRemoved(gameId, assetIds, values, to);
     }
 
@@ -169,7 +175,8 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         address to,
         uint256[] memory assetIds,
         uint256[] memory values,
-        address[] memory editors
+        address[] memory editors,
+        string memory uri
     ) external override returns (uint256 id) {
         // @review consider metaTransactions here. should we require "from", "to" or msg.sender to be the minter?
         require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
@@ -186,12 +193,13 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         if (assetIds.length != 0) {
             if (assetIds.length == 1 && values[0] == 1) {
                 // Case: a single asset id with a value of 1
-                addSingleAsset(from, gameId, assetIds[0]);
+                addSingleAsset(from, gameId, assetIds[0], uri);
             } else {
                 // Case: Either multiple assetIds, or single assetId with value > 1
-                addMultipleAssets(from, gameId, assetIds, values);
+                addMultipleAssets(from, gameId, assetIds, values, uri);
             }
         }
+        setTokenURI(gameId, uri);
         emit AssetsAdded(gameId, assetIds, values);
         return gameId;
     }
@@ -301,7 +309,8 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     function addSingleAsset(
         address from,
         uint256 gameId,
-        uint256 assetId
+        uint256 assetId,
+        string memory uri
     ) public override {
         require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
@@ -316,6 +325,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         assets[0] = assetId;
         values[0] = uint256(1);
 
+        setTokenURI(gameId, uri);
         emit AssetsAdded(gameId, assets, values);
     }
 
@@ -328,7 +338,8 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         address from,
         uint256 gameId,
         uint256[] memory assetIds,
-        uint256[] memory values
+        uint256[] memory values,
+        string memory uri
     ) public override {
         require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
@@ -339,6 +350,8 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
             _gameData[gameId]._values[assetIds[i]] = assetValues.add(values[i]);
         }
         _asset.safeBatchTransferFrom(from, address(this), assetIds, values, "");
+
+        setTokenURI(gameId, uri);
         emit AssetsAdded(gameId, assetIds, values);
     }
 
@@ -346,13 +359,15 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     /// @param gameId The id of the game token
     /// @param URI The URI string for the token's metadata
     function setTokenURI(uint256 gameId, string memory URI) public override {
-        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "URI_ACCESS_DENIED");
+        require(
+            msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender] || msg.sender == _minter,
+            "URI_ACCESS_DENIED"
+        );
         _metaData[gameId] = URI;
     }
 
     // @review Add burnGame function. see comments here: https://github.com/thesandboxgame/sandbox-private-contracts/pull/138#discussion_r507714939
 
-    // @review consider removing this
     function getNumberOfAssets(uint256 gameId) public view override returns (uint256) {
         return _gameData[gameId]._assets.length();
     }
