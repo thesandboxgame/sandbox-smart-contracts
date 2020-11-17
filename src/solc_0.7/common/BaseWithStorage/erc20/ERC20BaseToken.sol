@@ -1,10 +1,11 @@
-pragma solidity 0.6.5;
+//SPDX-License-Identifier: MIT
+pragma solidity 0.7.1;
 
+import "./extensions/ERC20Internal.sol";
 import "../../Interfaces/ERC20Extended.sol";
-import "../../common/BaseWithStorage/SuperOperators.sol";
+import "../WithSuperOperators.sol";
 
-
-contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
+abstract contract ERC20BaseToken is WithSuperOperators, ERC20, ERC20Extended, ERC20Internal {
     bytes32 internal immutable _name; // work only for string that can fit into 32 bytes
     bytes32 internal immutable _symbol; // work only for string that can fit into 32 bytes
 
@@ -16,7 +17,7 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
         string memory tokenName,
         string memory tokenSymbol,
         address admin
-    ) internal {
+    ) {
         require(bytes(tokenName).length > 0, "INVALID_NAME_REQUIRED");
         require(bytes(tokenName).length <= 32, "INVALID_NAME_TOO_LONG");
         _name = _firstBytes32(bytes(tokenName));
@@ -41,14 +42,14 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
 
     /// @notice Gets the total number of tokens in existence.
     /// @return the total number of tokens in existence.
-    function totalSupply() external override view returns (uint256) {
+    function totalSupply() external view override returns (uint256) {
         return _totalSupply;
     }
 
     /// @notice Gets the balance of `owner`.
     /// @param owner The address to query the balance of.
     /// @return The amount owned by `owner`.
-    function balanceOf(address owner) external override view returns (uint256) {
+    function balanceOf(address owner) external view override returns (uint256) {
         return _balances[owner];
     }
 
@@ -56,13 +57,13 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
     /// @param owner address whose token is allowed.
     /// @param spender address allowed to transfer.
     /// @return remaining the amount of token `spender` is allowed to transfer on behalf of `owner`.
-    function allowance(address owner, address spender) external override view returns (uint256 remaining) {
+    function allowance(address owner, address spender) external view override returns (uint256 remaining) {
         return _allowances[owner][spender];
     }
 
     /// @notice returns the number of decimals for that token.
     /// @return the number of decimals.
-    function decimals() external virtual pure returns (uint8) {
+    function decimals() external pure virtual returns (uint8) {
         return uint8(18);
     }
 
@@ -155,7 +156,7 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
         address owner,
         address spender,
         uint256 amountNeeded
-    ) internal virtual{
+    ) internal override {
         if (amountNeeded > 0 && !isSuperOperator(spender)) {
             uint256 currentAllowance = _allowances[owner][spender];
             if (currentAllowance < amountNeeded) {
@@ -168,7 +169,7 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
         address owner,
         address spender,
         uint256 amount
-    ) internal virtual{
+    ) internal override {
         require(owner != address(0) && spender != address(0), "Cannot approve with 0x0");
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
@@ -178,8 +179,9 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
         address from,
         address to,
         uint256 amount
-    ) internal {
+    ) internal override {
         require(to != address(0), "Cannot send to 0x0");
+        require(to != address(this), "Cannot send to address(this)");
         uint256 currentBalance = _balances[from];
         require(currentBalance >= amount, "not enough fund");
         _balances[from] = currentBalance - amount;
@@ -217,6 +219,7 @@ contract ERC20BaseToken is SuperOperators, ERC20, ERC20Extended {
     }
 
     function _firstBytes32(bytes memory src) public pure returns (bytes32 output) {
+        // solhint-disable-next-line no-inline-assembly
         assembly {
             output := mload(add(src, 32))
         }
