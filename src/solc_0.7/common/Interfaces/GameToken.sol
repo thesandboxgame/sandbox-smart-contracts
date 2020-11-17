@@ -54,8 +54,6 @@ interface GameTokenInterface {
 
     function isGameEditor(uint256 gameId, address editor) external view returns (bool isEditor);
 
-    // function wasEverMinted(uint256 id) external view returns (bool);
-
     function creatorOf(uint256 id) external view returns (address);
 
     function transferCreatorship(
@@ -78,7 +76,7 @@ interface GameTokenInterface {
         uint256 id,
         uint256 value,
         bytes calldata data
-    ) external pure returns (bytes4);
+    ) external view returns (bytes4);
 
     function onERC1155BatchReceived(
         address operator,
