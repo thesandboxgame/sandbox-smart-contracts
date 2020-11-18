@@ -992,6 +992,109 @@ describe('GameToken', function () {
     });
   });
 
+  describe('GameToken: Destroying Games', function () {
+    let gameToken: Contract;
+    let gameTokenAsAdmin: Contract;
+    let GameOwner: User;
+    let others: Address[];
+
+    let assetId: BigNumber;
+    let assetId2: BigNumber;
+    let gameId: BigNumber;
+
+    const quantity = 7;
+    const quantity2 = 11;
+
+    before(async function () {
+      ({gameToken, gameTokenAsAdmin, GameOwner} = await setupTest());
+      others = await getUnnamedAccounts();
+
+      const assetContract = await ethers.getContract('Asset');
+      let assetReceipt: Receipt;
+      assetReceipt = await supplyAssets(
+        GameOwner.address,
+        packId,
+        GameOwner.address,
+        quantity,
+        dummyHash
+      );
+      const assetReceipt1 = assetReceipt;
+      assetReceipt = await supplyAssets(
+        GameOwner.address,
+        packId2,
+        GameOwner.address,
+        quantity2,
+        dummyHash2
+      );
+      const assetReceipt2 = assetReceipt;
+      9;
+
+      const assetTransferEvent = await expectEventWithArgsFromReceipt(
+        assetContract,
+        assetReceipt1,
+        'TransferSingle'
+      );
+      const assetTransferEvent2 = await expectEventWithArgsFromReceipt(
+        assetContract,
+        assetReceipt2,
+        'TransferSingle'
+      );
+
+      assetId = assetTransferEvent.args[3];
+      assetId2 = assetTransferEvent2.args[3];
+
+      const receipt = await waitFor(
+        GameOwner.Game.createGame(
+          GameOwner.address,
+          GameOwner.address,
+          [assetId, assetId2],
+          [quantity, quantity2],
+          [],
+          ''
+        )
+      );
+
+      const transferEvent = await expectEventWithArgsFromReceipt(
+        gameToken,
+        receipt,
+        'Transfer'
+      );
+      const assetsAddedEvent = await expectEventWithArgsFromReceipt(
+        gameToken,
+        receipt,
+        'AssetsAdded'
+      );
+      gameId = transferEvent.args[2];
+    });
+
+    it('fails if "to" == address(0)', async function () {
+      await expect(
+        GameOwner.Game.destroyGame(
+          GameOwner.address,
+          ethers.constants.AddressZero,
+          gameId
+        )
+      ).to.be.revertedWith('DESTINATION_ZERO_ADDRESS');
+    });
+
+    it('fails if "to" == Game Token contract', async function () {
+      await expect(
+        gameToken.destroyGame(GameOwner.address, gameToken.address, gameId)
+      ).to.be.revertedWith('DESTINATION_GAME_CONTRACT');
+    });
+    it('fails if "from" != game owner', async function () {
+      await expect(
+        GameOwner.Game.destroyGame(others[2], others[1], gameId)
+      ).to.be.revertedWith('DESTROY_ACCESS_DENIED');
+    });
+    it('fails if called by non-minter when minter is set', async function () {
+      await gameTokenAsAdmin.setMinter(others[9]);
+      await expect(
+        gameToken.destroyGame(others[0], others[0], gameId)
+      ).to.be.revertedWith('INVALID_MINTER');
+    });
+  });
+
   describe('GameToken: MetaTransactions', function () {
     /////////////////////// GSN Forwarder ///////////////////////////
     let trustedForwarder: Contract;
