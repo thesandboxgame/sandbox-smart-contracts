@@ -55,6 +55,13 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         _nextId = 1;
     }
 
+    ///////////////////////////////  Modifiers //////////////////////////////
+
+    modifier minterGuard() {
+        require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
+        _;
+    }
+
     ///////////////////////////////  Functions //////////////////////////////
 
     /// @notice Function to remove multiple assets from a GAME
@@ -67,8 +74,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256 assetId,
         address to,
         string memory uri
-    ) external override {
-        require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
+    ) external override minterGuard() {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(to != address(0), "INVALID_TO_ADDRESS");
         // "sub" is from SafeMath.sol
@@ -102,8 +108,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256[] memory values,
         address to,
         string memory uri
-    ) public override {
-        require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
+    ) public override minterGuard() {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(to != address(0), "INVALID_TO_ADDRESS");
         require(
@@ -187,9 +192,8 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256[] memory values,
         address[] memory editors,
         string memory uri
-    ) external override returns (uint256 id) {
+    ) external override minterGuard() returns (uint256 id) {
         // @review consider metaTransactions here. should we require "from", "to" or msg.sender to be the minter?
-        require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
         uint256 gameId = _mintGame(from, to);
@@ -222,8 +226,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         address from,
         address to,
         uint256 gameId
-    ) external override {
-        require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
+    ) external override minterGuard() {
         // @review Add metaTx support
         require(from == _ownerOf(gameId), "ACCESS_DENIED");
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
@@ -294,35 +297,28 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
 
     function onERC1155BatchReceived(
         address operator,
-        address from,
-        uint256[] calldata ids,
-        uint256[] calldata values,
-        bytes calldata data
+        address, /*from*/
+        uint256[] calldata, /*ids*/
+        uint256[] calldata, /*values*/
+        bytes calldata /*data*/
     ) external view override returns (bytes4) {
-        require(msg.sender == address(_asset), "UNAUTHORIZED_SENDER");
-        // @review
-        // require(from == operator, "SELF_EXECUTED_TRANSFER_ONLY");
-        require(ids.length > 0, "EMPTY_TRANSFER_DISALLOWED");
-        require(ids.length == values.length, "need to contains Asset");
-        // @review
-        // require(data.length > 0, "EMPTY_DATA_DISALLOWED");
-        return ERC1155_BATCH_RECEIVED;
+        if (operator == address(this)) {
+            return ERC1155_BATCH_RECEIVED;
+        }
+        revert("ERC1155_BATCH_REJECTED");
     }
 
     function onERC1155Received(
         address operator,
-        address from,
-        uint256 id,
-        uint256 value,
-        bytes calldata data
+        address, /*from*/
+        uint256, /*id*/
+        uint256, /*value*/
+        bytes calldata /*data*/
     ) external view override returns (bytes4) {
-        require(msg.sender == address(_asset), "UNAUTHORIZED_SENDER");
-        // @review below.
-        // require(from == operator, "SELF_EXECUTED_TRANSFER_ONLY");
-        require(id != uint256(0) && value > 0, "EMPTY_TRANSFER_DISALLOWED");
-        // @review
-        // require(data.length > 0, "EMPTY_DATA_DISALLOWED");
-        return ERC1155_RECEIVED;
+        if (operator == address(this)) {
+            return ERC1155_RECEIVED;
+        }
+        revert("ERC1155_REJECTED");
     }
 
     /// @notice Return the name of the token contract
@@ -349,8 +345,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256 gameId,
         uint256 assetId,
         string memory uri
-    ) public override {
-        require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
+    ) public override minterGuard() {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         // here "add" is from EnumerableSet.sol
         _gameData[gameId]._assets.add(assetId);
@@ -378,8 +373,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256[] memory assetIds,
         uint256[] memory values,
         string memory uri
-    ) public override {
-        require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
+    ) public override minterGuard() {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
         require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
         for (uint256 i = 0; i < assetIds.length; i++) {
