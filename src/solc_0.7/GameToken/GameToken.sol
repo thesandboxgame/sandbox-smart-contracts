@@ -60,7 +60,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     }
 
     modifier onlyOwnerOrEditor(uint256 id) {
-        require(msg.sender == _ownerOf(id) || _gameEditors[id][msg.sender], "ACCESS_DENIED");
+        require(msg.sender == _ownerOf(id) || _gameEditors[id][msg.sender], "OWNER_EDITOR_ACCESS_DENIED");
         _;
     }
 
@@ -153,14 +153,17 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         address original,
         address to
     ) external override notToZero(to) {
-        require(msg.sender == sender || _isValidMetaTx(sender) || _superOperators[msg.sender], "require meta approval");
-        require(sender != address(0), "sender is zero address");
+        require(
+            msg.sender == sender || _isValidMetaTx(sender) || _superOperators[msg.sender],
+            "TRANSFER_ACCESS_DENIED"
+        );
+        require(sender != address(0), "ZERO_SENDER_FORBIDDEN");
         address current = _creatorship[original];
         if (current == address(0)) {
             current = original;
         }
-        require(current != to, "current == to");
-        require(current == sender, "current != sender");
+        require(current != to, "CURRENT_=_TO");
+        require(current == sender, "CURRENT_!=_SENDER");
         if (to == original) {
             _creatorship[original] = address(0);
         } else {
@@ -204,6 +207,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         }
 
         if (assetIds.length != 0) {
+            // @review cases (erc721/1155)
             if (assetIds.length == 1 && values[0] == 1) {
                 // Case: a single asset id with a value of 1
                 addSingleAsset(from, gameId, assetIds[0], uri);
@@ -227,7 +231,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256 gameId
     ) external override minterGuard() notToZero(to) {
         // @review Add metaTx support
-        require(from == _ownerOf(gameId), "ACCESS_DENIED");
+        require(from == _ownerOf(gameId), "DESTROY_ACCESS_DENIED");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
 
         // @note ensure all assets are removed first
@@ -255,7 +259,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     /// @param id the id of the token to get the creator of.
     /// @return the creator of the token type `id`.
     function creatorOf(uint256 id) external view override returns (address) {
-        require(id != uint256(0), "NEVER_MINTED");
+        require(id != uint256(0), "GAME_NEVER_MINTED");
         address originalCreator = address(id / CREATOR_OFFSET_MULTIPLIER);
         address newCreator = _creatorship[originalCreator];
         if (newCreator != address(0)) {
