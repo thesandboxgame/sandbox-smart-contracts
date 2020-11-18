@@ -975,7 +975,7 @@ describe('GameToken', function () {
     it('should revert if ownerOf == address(0)', async function () {
       const {gameToken} = await setupTest();
       await expect(gameToken.tokenURI(11)).to.be.revertedWith(
-        'Id does not exist'
+        'GAME_NEVER_MINTED'
       );
     });
 
