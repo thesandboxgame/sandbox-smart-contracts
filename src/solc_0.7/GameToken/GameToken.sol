@@ -172,7 +172,8 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         emit CreatorshipTransfer(original, current, to);
     }
 
-    /// @notice Set the Minter that will be the only address able to create Estate
+    /// @notice Set the Minter that will be the only address able to create Estate.
+    /// If set at deployment, resetting to address(0) will allow anyone to mint games
     /// @param minter address of the minter
     function setMinter(address minter) external override {
         require(msg.sender == _admin, "ADMIN_NOT_AUTHORIZED");
@@ -230,13 +231,10 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         address to,
         uint256 gameId
     ) external override minterGuard() notToZero(to) {
-        // @review Add metaTx support
+        // @review enforce fromm == msg.sender & add metaTx support
         require(from == _ownerOf(gameId), "DESTROY_ACCESS_DENIED");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
-
-        // @note ensure all assets are removed first
-        // uint256[] calldata assets;
-        // uint256[] calldata values;
+        // @review ensure all assets are removed first
         (uint256[] memory assets, uint256[] memory values) = getGameAssets(gameId);
         removeMultipleAssets(gameId, assets, values, to, "");
         assert(_gameData[gameId]._assets.length() == 0);
