@@ -8,9 +8,6 @@ import "../common/Interfaces/AssetToken.sol";
 import "../common/Interfaces/GameToken.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-// @review remove all console.logs !
-// import "hardhat/console.sol";
-
 contract GameToken is ERC721BaseToken, GameTokenInterface {
     ///////////////////////////////  Libs //////////////////////////////
 
@@ -62,6 +59,11 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         _;
     }
 
+    modifier onlyOwnerOrEditor(uint256 id) {
+        require(msg.sender == _ownerOf(id) || _gameEditors[id][msg.sender], "ACCESS_DENIED");
+        _;
+    }
+
     ///////////////////////////////  Functions //////////////////////////////
 
     /// @notice Function to remove multiple assets from a GAME
@@ -74,10 +76,8 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256 assetId,
         address to,
         string memory uri
-    ) external override minterGuard() {
-        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
+    ) external override minterGuard() onlyOwnerOrEditor(gameId) {
         require(to != address(0), "INVALID_TO_ADDRESS");
-        // "sub" is from SafeMath.sol
         _gameData[gameId]._values[assetId] = _gameData[gameId]._values[assetId].sub(1);
         uint256 remainingAssets = _gameData[gameId]._values[assetId];
 
@@ -108,8 +108,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256[] memory values,
         address to,
         string memory uri
-    ) public override minterGuard() {
-        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
+    ) public override minterGuard() onlyOwnerOrEditor(gameId) {
         require(to != address(0), "INVALID_TO_ADDRESS");
         require(
             assetIds.length == values.length && assetIds.length <= getNumberOfAssets(gameId),
@@ -121,7 +120,6 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
             if (values[i] >= _gameData[gameId]._values[assetIds[i]]) {
                 _gameData[gameId]._assets.remove(assetIds[i]);
             }
-            // "sub" is from SafeMath.sol
             _gameData[gameId]._values[assetIds[i]] = assetValues.sub(values[i]);
         }
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
@@ -193,7 +191,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         address[] memory editors,
         string memory uri
     ) external override minterGuard() returns (uint256 id) {
-        // @review consider metaTransactions here. should we require "from", "to" or msg.sender to be the minter?
+        // @review metaTransactions !
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
         uint256 gameId = _mintGame(from, to);
@@ -203,7 +201,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
                 _gameEditors[gameId][editors[i]] = true;
             }
         }
-        // a single asset is defined as 1 tokenID, and a value of 1 for that id. For anything else, use addMultipleAssets
+
         if (assetIds.length != 0) {
             if (assetIds.length == 1 && values[0] == 1) {
                 // Case: a single asset id with a value of 1
@@ -339,14 +337,14 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     /// @notice Function to add a single asset to an existing GAME
     /// @param from The address of the one creating the game (may be different from msg.sender if metaTx)
     /// @param gameId The id of the GAME to add asset to
-    /// @param assetId The id of the asset to add to GAME. Value is 1. If vaule needs to be > 1, use `addMultipleAssets(...)` instead.
+    /// @param assetId The id of the asset to add to GAME. Single asset defined as 1 tokenID && value = 1. Otherwise use addMultipleAssets
+
     function addSingleAsset(
         address from,
         uint256 gameId,
         uint256 assetId,
         string memory uri
-    ) public override minterGuard() {
-        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
+    ) public override minterGuard() onlyOwnerOrEditor(gameId) {
         // here "add" is from EnumerableSet.sol
         _gameData[gameId]._assets.add(assetId);
         uint256 assetValues = _gameData[gameId]._values[assetId];
@@ -373,8 +371,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256[] memory assetIds,
         uint256[] memory values,
         string memory uri
-    ) public override minterGuard() {
-        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "ACCESS_DENIED");
+    ) public override minterGuard() onlyOwnerOrEditor(gameId) {
         require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
         for (uint256 i = 0; i < assetIds.length; i++) {
             _gameData[gameId]._assets.add(assetIds[i]);
@@ -392,13 +389,12 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     /// @param URI The URI string for the token's metadata
     function setTokenURI(uint256 gameId, string memory URI) public override {
         require(
+            // @review !
             msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender] || msg.sender == _minter,
             "URI_ACCESS_DENIED"
         );
         _metaData[gameId] = URI;
     }
-
-    // @review Add burnGame function. see comments here: https://github.com/thesandboxgame/sandbox-private-contracts/pull/138#discussion_r507714939
 
     function getNumberOfAssets(uint256 gameId) public view override returns (uint256) {
         return _gameData[gameId]._assets.length();
@@ -408,7 +404,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     /// @param gameId The id of the token
     /// @return uri The URI of the token
     function tokenURI(uint256 gameId) public view override returns (string memory uri) {
-        require(_ownerOf(gameId) != address(0), "Id does not exist");
+        require(_ownerOf(gameId) != address(0), "GAME_NEVER_MINTED");
         string memory URI = _metaData[gameId];
         return URI;
     }
