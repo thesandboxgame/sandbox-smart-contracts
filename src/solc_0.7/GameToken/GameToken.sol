@@ -64,6 +64,11 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         _;
     }
 
+    modifier notToZero(address to) {
+        require(to != address(0), "DESTINATION_ZERO_ADDRESS");
+        _;
+    }
+
     ///////////////////////////////  Functions //////////////////////////////
 
     /// @notice Function to remove multiple assets from a GAME
@@ -76,8 +81,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256 assetId,
         address to,
         string memory uri
-    ) external override minterGuard() onlyOwnerOrEditor(gameId) {
-        require(to != address(0), "INVALID_TO_ADDRESS");
+    ) external override minterGuard() onlyOwnerOrEditor(gameId) notToZero(to) {
         _gameData[gameId]._values[assetId] = _gameData[gameId]._values[assetId].sub(1);
         uint256 remainingAssets = _gameData[gameId]._values[assetId];
 
@@ -108,8 +112,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256[] memory values,
         address to,
         string memory uri
-    ) public override minterGuard() onlyOwnerOrEditor(gameId) {
-        require(to != address(0), "INVALID_TO_ADDRESS");
+    ) public override minterGuard() onlyOwnerOrEditor(gameId) notToZero(to) {
         require(
             assetIds.length == values.length && assetIds.length <= getNumberOfAssets(gameId),
             "INVALID_INPUT_LENGTHS"
@@ -149,10 +152,9 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         address sender,
         address original,
         address to
-    ) external override {
+    ) external override notToZero(to) {
         require(msg.sender == sender || _isValidMetaTx(sender) || _superOperators[msg.sender], "require meta approval");
         require(sender != address(0), "sender is zero address");
-        require(to != address(0), "destination is zero address");
         address current = _creatorship[original];
         if (current == address(0)) {
             current = original;
@@ -190,9 +192,8 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         uint256[] memory values,
         address[] memory editors,
         string memory uri
-    ) external override minterGuard() returns (uint256 id) {
+    ) external override minterGuard() notToZero(to) returns (uint256 id) {
         // @review metaTransactions !
-        require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
         uint256 gameId = _mintGame(from, to);
 
@@ -224,10 +225,9 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         address from,
         address to,
         uint256 gameId
-    ) external override minterGuard() {
+    ) external override minterGuard() notToZero(to) {
         // @review Add metaTx support
         require(from == _ownerOf(gameId), "ACCESS_DENIED");
-        require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
 
         // @note ensure all assets are removed first
