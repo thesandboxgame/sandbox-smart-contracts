@@ -730,7 +730,6 @@ describe('GameToken', function () {
 
       it('fails when removing more assets than the game contains', async function () {
         const assets = await gameToken.getGameAssets(gameId);
-        console.log(`assets: ${assets}`);
         await expect(
           GameOwner.Game.removeMultipleAssets(
             gameId,
@@ -1134,24 +1133,57 @@ describe('GameToken', function () {
 
     describe('GameToken: After Burning...', function () {
       before(async function () {
-        await await gameTokenAsAdmin.setMinter(ethers.constants.AddressZero);
+        await gameTokenAsAdmin.setMinter(ethers.constants.AddressZero);
         const [
           assetTypes,
           totalAssets,
         ] = await gameTokenAsAdmin.getNumberOfAssets(gameId);
         expect(assetTypes).to.be.equal(2);
         expect(totalAssets).to.be.equal(18);
+
+        const assetContract = await ethers.getContract('Asset');
+
+        const ownerBalanceBefore = await assetContract[
+          'balanceOf(address,uint256)'
+        ](GameOwner.address, assetId);
+        const ownerBalanceBefore2 = await assetContract[
+          'balanceOf(address,uint256)'
+        ](GameOwner.address, assetId2);
+        const contractBalanceBefore = await assetContract[
+          'balanceOf(address,uint256)'
+        ](gameToken.address, assetId);
+        const contractBalanceBefore2 = await assetContract[
+          'balanceOf(address,uint256)'
+        ](gameToken.address, assetId2);
+
+        expect(ownerBalanceBefore).to.be.equal(0);
+        expect(ownerBalanceBefore2).to.be.equal(0);
+        expect(contractBalanceBefore).to.be.equal(7);
+        expect(contractBalanceBefore2).to.be.equal(11);
+
         await GameOwner.Game.destroyGame(
           GameOwner.address,
           GameOwner.address,
           gameId
         );
-      });
 
-      it('game should no longer exist', async function () {
-        await expect(gameToken.ownerOf(gameId)).to.be.revertedWith(
-          'token does not exist'
-        );
+        const ownerBalanceAfter = await assetContract[
+          'balanceOf(address,uint256)'
+        ](GameOwner.address, assetId);
+        const ownerBalanceAfter2 = await assetContract[
+          'balanceOf(address,uint256)'
+        ](GameOwner.address, assetId2);
+        const contractBalanceAfter = await assetContract[
+          'balanceOf(address,uint256)'
+        ](gameToken.address, assetId);
+        const contractBalanceAfter2 = await assetContract[
+          'balanceOf(address,uint256)'
+        ](gameToken.address, assetId2);
+
+        expect(ownerBalanceAfter).to.be.equal(7);
+        expect(ownerBalanceAfter2).to.be.equal(11);
+        expect(contractBalanceAfter).to.be.equal(0);
+        expect(contractBalanceAfter2).to.be.equal(0);
       });
 
       it('getNumberOfAssets() should now return 0', async function () {
@@ -1161,9 +1193,16 @@ describe('GameToken', function () {
         expect(assetTypes).to.be.equal(0);
         expect(totalAssets).to.be.equal(0);
       });
+
       it('creatorOf() should should still return original creator', async function () {
         const gameCreator = await gameToken.creatorOf(gameId);
         expect(gameCreator).to.be.equal(GameOwner.address);
+      });
+
+      it('game should no longer exist', async function () {
+        await expect(gameToken.ownerOf(gameId)).to.be.revertedWith(
+          'token does not exist'
+        );
       });
     });
   });
