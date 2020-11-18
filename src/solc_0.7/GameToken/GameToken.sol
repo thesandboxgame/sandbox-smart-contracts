@@ -113,10 +113,8 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         address to,
         string memory uri
     ) public override minterGuard() onlyOwnerOrEditor(gameId) notToZero(to) {
-        require(
-            assetIds.length == values.length && assetIds.length <= getNumberOfAssets(gameId),
-            "INVALID_INPUT_LENGTHS"
-        );
+        (uint256 assetTypes, ) = getNumberOfAssets(gameId);
+        require(assetIds.length == values.length && assetIds.length <= assetTypes, "INVALID_INPUT_LENGTHS");
         for (uint256 i = 0; i < assetIds.length; i++) {
             // "remove" is from EnumerableSet.sol
             uint256 assetValues = _gameData[gameId]._values[assetIds[i]];
@@ -230,7 +228,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         address from,
         address to,
         uint256 gameId
-    ) external override minterGuard() notToZero(to) {
+    ) external override minterGuard() {
         // @review enforce fromm == msg.sender & add metaTx support
         require(from == _ownerOf(gameId), "DESTROY_ACCESS_DENIED");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
@@ -238,11 +236,12 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         (uint256[] memory assets, uint256[] memory values) = getGameAssets(gameId);
         removeMultipleAssets(gameId, assets, values, to, "");
         assert(_gameData[gameId]._assets.length() == 0);
-        _burnGame(gameId);
+        _burnGame(from, gameId);
     }
 
-    function _burnGame(uint256 gameId) private {
-        emit Transfer(_ownerOf(gameId), address(0), gameId);
+    function _burnGame(address from, uint256 gameId) private {
+        _transferFrom(from, address(0), gameId);
+        emit Transfer(from, address(0), gameId);
     }
 
     /// @notice Function to get game editor status
@@ -398,15 +397,23 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         _metaData[gameId] = URI;
     }
 
-    function getNumberOfAssets(uint256 gameId) public view override returns (uint256) {
-        return _gameData[gameId]._assets.length();
+    // @review add docs
+    // make it return both number of assetIds(asset-types) & total number of assets
+    function getNumberOfAssets(uint256 gameId) public view override returns (uint256 assetTypes, uint256 totalAssets) {
+        uint256 assets = _gameData[gameId]._assets.length();
+        uint256 total;
+        for (uint256 i = 0; i < assets; i++) {
+            total += _gameData[gameId]._values[_gameData[gameId]._assets.at(i)];
+        }
+        // get each value and add together
+        return (assets, total);
     }
 
     /// @notice Return the URI of a specific token
     /// @param gameId The id of the token
     /// @return uri The URI of the token
     function tokenURI(uint256 gameId) public view override returns (string memory uri) {
-        require(_ownerOf(gameId) != address(0), "GAME_NEVER_MINTED");
+        require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
         string memory URI = _metaData[gameId];
         return URI;
     }
