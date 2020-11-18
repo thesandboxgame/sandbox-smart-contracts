@@ -53,7 +53,7 @@ interface GameTokenInterface {
         string calldata uri
     ) external;
 
-    function getNumberOfAssets(uint256 gameId) external view returns (uint256);
+    function getNumberOfAssets(uint256 gameId) external view returns (uint256 assetTypes, uint256 totalAssets);
 
     function getGameAssets(uint256 gameId) external view returns (uint256[] memory, uint256[] memory);
 
