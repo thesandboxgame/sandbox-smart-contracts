@@ -360,8 +360,11 @@ describe('GameToken', function () {
       });
 
       it('can get the number of assets', async function () {
-        const number = await gameToken.getNumberOfAssets(gameId);
-        expect(number).to.be.equal(2);
+        const [assetTypes, totalAssets] = await gameToken.getNumberOfAssets(
+          gameId
+        );
+        expect(assetTypes).to.be.equal(2);
+        expect(totalAssets).to.be.equal(5);
       });
 
       it('can get all assets at once from a game', async function () {
@@ -414,6 +417,8 @@ describe('GameToken', function () {
       let assetId: BigNumber;
       let assetId2: BigNumber;
       let assetContract: Contract;
+      // let assetTypes: number;
+      // let totalAssets: number;
 
       before(async function () {
         ({
@@ -516,8 +521,13 @@ describe('GameToken', function () {
         const ownerBalanceBefore = await assetContract[
           'balanceOf(address,uint256)'
         ](GameOwner.address, singleAssetId);
-        const numberBefore = await gameToken.getNumberOfAssets(gameId);
-        expect(numberBefore).to.be.equal(0);
+        let [assetTypes, totalAssets] = await gameToken.getNumberOfAssets(
+          gameId
+        );
+        // const assetTypes = assetData[0];
+        // const totalAssets = assetData[1];
+        expect(assetTypes).to.be.equal(0);
+        expect(totalAssets).to.be.equal(0);
 
         const uriBefore = await gameToken.tokenURI(gameId);
         expect(uriBefore).to.be.equal('Uri is this');
@@ -540,8 +550,9 @@ describe('GameToken', function () {
         const ownerBalanceAfter = await assetContract[
           'balanceOf(address,uint256)'
         ](GameOwner.address, singleAssetId);
-        const numberAfter = await gameToken.getNumberOfAssets(gameId);
-        expect(numberAfter).to.be.equal(1);
+        [assetTypes, totalAssets] = await gameToken.getNumberOfAssets(gameId);
+        expect(assetTypes).to.be.equal(1);
+        expect(totalAssets).to.be.equal(1);
         const assetsAddedEvent = await expectEventWithArgs(
           gameToken,
           receipt,
@@ -551,8 +562,11 @@ describe('GameToken', function () {
         const assets = assetsAddedEvent.args[1];
         const values = assetsAddedEvent.args[2];
         const [gameAssets, quantities] = await gameToken.getGameAssets(gameId);
-        const totalAssets = await GameOwner.Game.getNumberOfAssets(gameId);
+        [assetTypes, totalAssets] = await GameOwner.Game.getNumberOfAssets(
+          gameId
+        );
 
+        expect(assetTypes).to.be.equal(1);
         expect(totalAssets).to.be.equal(1);
         expect(contractBalanceAfter).to.be.equal(contractBalanceBefore + 1);
         expect(ownerBalanceAfter).to.be.equal(ownerBalanceBefore - 1);
@@ -640,9 +654,13 @@ describe('GameToken', function () {
         const [gameAssets, quantities] = await GameOwner.Game.getGameAssets(
           gameId
         );
-        const totalAssets = await GameOwner.Game.getNumberOfAssets(gameId);
+        const [
+          assetTypes,
+          totalAssets,
+        ] = await GameOwner.Game.getNumberOfAssets(gameId);
 
-        expect(totalAssets).to.be.equal(3);
+        expect(assetTypes).to.be.equal(3);
+        expect(totalAssets).to.be.equal(50);
         expect(contractBalanceAfter).to.be.equal(contractBalanceBefore + 7);
         expect(ownerBalanceAfter).to.be.equal(ownerBalanceBefore - 7);
         expect(ownerBalanceAfter2).to.be.equal(ownerBalanceBefore2 - 42);
@@ -659,7 +677,9 @@ describe('GameToken', function () {
       });
 
       it('Owner can remove single Asset', async function () {
-        const numberBefore = await gameToken.getNumberOfAssets(gameId);
+        const [typesBefore, assetsBefore] = await gameToken.getNumberOfAssets(
+          gameId
+        );
         const contractBalanceBefore = await assetContract[
           'balanceOf(address,uint256)'
         ](gameToken.address, singleAssetId);
@@ -684,7 +704,9 @@ describe('GameToken', function () {
         const assets = assetsRemovedEvent.args[1];
         const values = assetsRemovedEvent.args[2];
         const to = assetsRemovedEvent.args[3];
-        const numberAfter = await gameToken.getNumberOfAssets(gameId);
+        const [typesAfter, assetsAfter] = await gameToken.getNumberOfAssets(
+          gameId
+        );
         const contractBalanceAfter = await assetContract[
           'balanceOf(address,uint256)'
         ](gameToken.address, singleAssetId);
@@ -692,8 +714,10 @@ describe('GameToken', function () {
           'balanceOf(address,uint256)'
         ](GameOwner.address, singleAssetId);
 
-        expect(numberBefore).to.be.equal(3);
-        expect(numberAfter).to.be.equal(2);
+        expect(typesBefore).to.be.equal(3);
+        expect(assetsBefore).to.be.equal(50);
+        expect(typesAfter).to.be.equal(2);
+        expect(assetsAfter).to.be.equal(49);
         expect(contractBalanceAfter).to.be.equal(contractBalanceBefore - 1);
         expect(ownerBalanceAfter).to.be.equal(ownerBalanceBefore + 1);
         expect(gameAssets.length).to.be.equal(2);
@@ -705,6 +729,8 @@ describe('GameToken', function () {
       });
 
       it('fails when removing more assets than the game contains', async function () {
+        const assets = await gameToken.getGameAssets(gameId);
+        console.log(`assets: ${assets}`);
         await expect(
           GameOwner.Game.removeMultipleAssets(
             gameId,
@@ -717,7 +743,9 @@ describe('GameToken', function () {
       });
 
       it('Owner can remove multiple Assets', async function () {
-        const numberBefore = await gameToken.getNumberOfAssets(gameId);
+        const [typesBefore, assetsBefore] = await gameToken.getNumberOfAssets(
+          gameId
+        );
         const contractBalanceBefore = await assetContract[
           'balanceOf(address,uint256)'
         ](gameToken.address, assetId);
@@ -749,7 +777,9 @@ describe('GameToken', function () {
         const assets = assetsRemovedEvent.args[1];
         const values = assetsRemovedEvent.args[2];
         const to = assetsRemovedEvent.args[3];
-        const numberAfter = await gameToken.getNumberOfAssets(gameId);
+        const [typesAfter, assetsAfter] = await gameToken.getNumberOfAssets(
+          gameId
+        );
         const contractBalanceAfter = await assetContract[
           'balanceOf(address,uint256)'
         ](gameToken.address, assetId);
@@ -763,8 +793,10 @@ describe('GameToken', function () {
           'balanceOf(address,uint256)'
         ](GameOwner.address, assetId2);
 
-        expect(numberBefore).to.be.equal(2);
-        expect(numberAfter).to.be.equal(1);
+        expect(typesBefore).to.be.equal(2);
+        expect(assetsBefore).to.be.equal(49);
+        expect(typesAfter).to.be.equal(1);
+        expect(assetsAfter).to.be.equal(11);
         expect(contractBalanceAfter).to.be.equal(contractBalanceBefore - 7);
         expect(contractBalance2After).to.be.equal(contractBalance2Before - 31);
         expect(ownerBalanceAfter).to.be.equal(ownerBalanceBefore + 7);
@@ -783,7 +815,9 @@ describe('GameToken', function () {
         await waitFor(
           GameOwner.Game.setGameEditor(gameId, GameEditor1.address, true)
         );
-        const numberBefore = await gameToken.getNumberOfAssets(gameId);
+        const [typesBefore, assetsBefore] = await gameToken.getNumberOfAssets(
+          gameId
+        );
         const assetContract = await ethers.getContract('Asset');
         const assetReceipt = await supplyAssets(
           GameEditor1.address,
@@ -813,7 +847,9 @@ describe('GameToken', function () {
           )
         );
 
-        const numberAfter = await gameToken.getNumberOfAssets(gameId);
+        const [typesAfter, assetsAfter] = await gameToken.getNumberOfAssets(
+          gameId
+        );
 
         await waitFor(
           GameEditor1.Game.removeSingleAsset(
@@ -824,12 +860,17 @@ describe('GameToken', function () {
           )
         );
 
-        const finalNumber = await gameToken.getNumberOfAssets(gameId);
+        const [finalTypes, finalTotal] = await gameToken.getNumberOfAssets(
+          gameId
+        );
 
         expect(balance).to.be.equal(1);
-        expect(numberBefore).to.be.equal(1);
-        expect(numberAfter).to.be.equal(2);
-        expect(finalNumber).to.be.equal(1);
+        expect(typesBefore).to.be.equal(1);
+        expect(assetsBefore).to.be.equal(11);
+        expect(typesAfter).to.be.equal(2);
+        expect(assetsAfter).to.be.equal(12);
+        expect(finalTypes).to.be.equal(1);
+        expect(finalTotal).to.be.equal(11);
       });
     });
   });
@@ -877,11 +918,8 @@ describe('GameToken', function () {
     });
 
     it('current owner can transfer ownership of a GAME', async function () {
-      console.log(`Game Token: ${gameToken.address}`);
-      console.log(`Game Owner: ${GameOwner.address}`);
       const originalOwner = await gameToken.ownerOf(gameId);
       const recipient = users[7].address;
-      console.log(`recipient: ${recipient}`);
       const gameTokenAsGameOwner = await gameToken.connect(
         ethers.provider.getSigner(GameOwner.address)
       );
@@ -975,7 +1013,7 @@ describe('GameToken', function () {
     it('should revert if ownerOf == address(0)', async function () {
       const {gameToken} = await setupTest();
       await expect(gameToken.tokenURI(11)).to.be.revertedWith(
-        'GAME_NEVER_MINTED'
+        'BURNED_OR_NEVER_MINTED'
       );
     });
 
@@ -1092,6 +1130,41 @@ describe('GameToken', function () {
       await expect(
         gameToken.destroyGame(others[0], others[0], gameId)
       ).to.be.revertedWith('INVALID_MINTER');
+    });
+
+    describe('GameToken: After Burning...', function () {
+      before(async function () {
+        await await gameTokenAsAdmin.setMinter(ethers.constants.AddressZero);
+        const [
+          assetTypes,
+          totalAssets,
+        ] = await gameTokenAsAdmin.getNumberOfAssets(gameId);
+        expect(assetTypes).to.be.equal(2);
+        expect(totalAssets).to.be.equal(18);
+        await GameOwner.Game.destroyGame(
+          GameOwner.address,
+          GameOwner.address,
+          gameId
+        );
+      });
+
+      it('game should no longer exist', async function () {
+        await expect(gameToken.ownerOf(gameId)).to.be.revertedWith(
+          'token does not exist'
+        );
+      });
+
+      it('getNumberOfAssets() should now return 0', async function () {
+        const [assetTypes, totalAssets] = await gameToken.getNumberOfAssets(
+          gameId
+        );
+        expect(assetTypes).to.be.equal(0);
+        expect(totalAssets).to.be.equal(0);
+      });
+      it('creatorOf() should should still return original creator', async function () {
+        const gameCreator = await gameToken.creatorOf(gameId);
+        expect(gameCreator).to.be.equal(GameOwner.address);
+      });
     });
   });
 
