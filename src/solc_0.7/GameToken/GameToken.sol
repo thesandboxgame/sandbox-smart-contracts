@@ -240,6 +240,10 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     }
 
     function _burnGame(address from, uint256 gameId) private {
+        delete _gameData[gameId];
+        delete _metaData[gameId];
+        _creatorship[creatorOf(gameId)] = address(0);
+        // @review best practices re: transfer to zero address
         _transferFrom(from, address(0), gameId);
         emit Transfer(from, address(0), gameId);
     }
@@ -255,7 +259,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     /// @notice Get the creator of the token type `id`.
     /// @param id the id of the token to get the creator of.
     /// @return the creator of the token type `id`.
-    function creatorOf(uint256 id) external view override returns (address) {
+    function creatorOf(uint256 id) public view override returns (address) {
         require(id != uint256(0), "GAME_NEVER_MINTED");
         address originalCreator = address(id / CREATOR_OFFSET_MULTIPLIER);
         address newCreator = _creatorship[originalCreator];
