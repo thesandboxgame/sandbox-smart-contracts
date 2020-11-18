@@ -417,8 +417,6 @@ describe('GameToken', function () {
       let assetId: BigNumber;
       let assetId2: BigNumber;
       let assetContract: Contract;
-      // let assetTypes: number;
-      // let totalAssets: number;
 
       before(async function () {
         ({
@@ -524,8 +522,7 @@ describe('GameToken', function () {
         let [assetTypes, totalAssets] = await gameToken.getNumberOfAssets(
           gameId
         );
-        // const assetTypes = assetData[0];
-        // const totalAssets = assetData[1];
+
         expect(assetTypes).to.be.equal(0);
         expect(totalAssets).to.be.equal(0);
 
@@ -729,7 +726,6 @@ describe('GameToken', function () {
       });
 
       it('fails when removing more assets than the game contains', async function () {
-        const assets = await gameToken.getGameAssets(gameId);
         await expect(
           GameOwner.Game.removeMultipleAssets(
             gameId,
@@ -933,7 +929,6 @@ describe('GameToken', function () {
       expect(newOwner).to.be.equal(recipient);
     });
 
-    // @review is creatorship meant to remain independent of ownership?
     it('can transfer creatorship of a GAME', async function () {
       const others = await getUnnamedAccounts();
       const creatorBefore = await gameToken.creatorOf(gameId);
@@ -998,7 +993,6 @@ describe('GameToken', function () {
     });
 
     it('GAME owner can set the tokenURI', async function () {
-      // await GameOwner.Game.setTokenURI(gameId, 'Hello Sandbox');
       const URI = await gameToken.tokenURI(gameId);
       expect(URI).to.be.equal('Hello Sandbox');
     });
@@ -1096,11 +1090,7 @@ describe('GameToken', function () {
         receipt,
         'Transfer'
       );
-      const assetsAddedEvent = await expectEventWithArgsFromReceipt(
-        gameToken,
-        receipt,
-        'AssetsAdded'
-      );
+
       gameId = transferEvent.args[2];
     });
 
@@ -1234,8 +1224,6 @@ describe('GameToken', function () {
         'Forwarder',
         '0x956868751Cc565507B3B58E53a6f9f41B56bed74'
       );
-      // deployed rinkey address for forwarder:
-      // 0x956868751Cc565507B3B58E53a6f9f41B56bed74
 
       const GENERIC_PARAMS =
         'address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data';
@@ -1262,12 +1250,6 @@ describe('GameToken', function () {
         typeData.types
       );
       expect(calcType).to.be.equal(typeName);
-
-      const domainSeparator = TypedDataUtils.hashStruct(
-        'EIP712Domain',
-        typeData.domain,
-        typeData.types
-      );
     });
 
     /////////////////////// GSN Forwarder ///////////////////////////
@@ -1311,8 +1293,7 @@ describe('GameToken', function () {
       isTrustedForwarder = await gameToken.isTrustedForwarder(others[0]);
       expect(isTrustedForwarder).to.be.true;
     });
-    // should succeed:
-    // if processorType == METATX_SANDBOX
+
     it.skip('can process metaTransactions if processorType == METATX_SANDBOX', async function () {
       const isSkipped = true;
     });
