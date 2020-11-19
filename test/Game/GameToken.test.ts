@@ -1,7 +1,6 @@
 import {ethers, getUnnamedAccounts} from 'hardhat';
-import {BigNumber, utils, Contract, Wallet} from 'ethers';
-import {splitSignature, _TypedDataEncoder} from 'ethers/lib/utils';
-import {signTypedData_v4, TypedDataUtils} from 'eth-sig-util';
+import {BigNumber, utils, Contract} from 'ethers';
+import {_TypedDataEncoder} from 'ethers/lib/utils';
 import {Receipt, Address} from 'hardhat-deploy/types';
 import {expect} from '../chai-setup';
 import {data712} from './data712';
@@ -24,6 +23,8 @@ const dummyHash3 =
 const packId = 0;
 const packId2 = 1;
 const packId3 = 2;
+const METATX_SANDBOX = 1;
+const METATX_2771 = 2;
 
 describe('GameToken', function () {
   before(async function () {
@@ -1199,68 +1200,6 @@ describe('GameToken', function () {
   });
 
   describe('GameToken: MetaTransactions', function () {
-    /////////////////////// GSN Forwarder ///////////////////////////
-    let trustedForwarder: Contract;
-    let typeHash: string;
-    let typeData: any;
-    let wallet: Wallet;
-
-    // const EIP712DomainType = [
-    //   {name: 'name', type: 'string'},
-    //   {name: 'version', type: 'string'},
-    //   {name: 'chainId', type: 'uint256'},
-    //   {name: 'verifyingContract', type: 'address'},
-    // ];
-
-    // const ForwardRequestType = [
-    //   {name: 'from', type: 'address'},
-    //   {name: 'to', type: 'address'},
-    //   {name: 'value', type: 'uint256'},
-    //   {name: 'gas', type: 'uint256'},
-    //   {name: 'nonce', type: 'uint256'},
-    //   {name: 'data', type: 'bytes'},
-    // ];
-
-    before(async function () {
-      trustedForwarder = await ethers.getContractAt(
-        'Forwarder',
-        '0x956868751Cc565507B3B58E53a6f9f41B56bed74'
-      );
-
-      const GENERIC_PARAMS =
-        'address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data';
-
-      const typeName = `ForwardRequest(${GENERIC_PARAMS})`;
-      typeHash = utils.keccak256(utils.toUtf8Bytes(typeName));
-      await trustedForwarder.registerRequestType('TestCall', '0x');
-      // typeData = {
-      //   domain: {
-      //     name: 'GameToken GSN-MetaTx',
-      //     version: '1',
-      //     chainId: 1234,
-      //     verifyingContract: trustedForwarder.address,
-      //   },
-      //   primaryType: 'ForwardRequest',
-      //   types: {
-      //     EIP712Domain: EIP712DomainType,
-      //     ForwardRequest: ForwardRequestType,
-      //   },
-      //   message: {},
-      // };
-
-      // @review
-      // const calcType = TypedDataUtils.encodeType(
-      //   'ForwardRequest',
-      //   typeData.types
-      // );
-      // expect(calcType).to.be.equal(typeName);
-    });
-
-    /////////////////////// GSN Forwarder ///////////////////////////
-
-    const METATX_SANDBOX = 1;
-    const METATX_2771 = 2;
-
     it('can set the MetaTransactionProcessor type', async function () {
       const {gameToken, gameTokenAsAdmin} = await setupTest();
       const NativeMetaTransactionProcessor = await ethers.getContract(
@@ -1305,9 +1244,23 @@ describe('GameToken', function () {
     it('can process metaTransactions if processorType == METATX_2771', async function () {
       const {gameToken, GameOwner} = await setupTest();
       const others = await getUnnamedAccounts();
-      const amount = 1;
-      // @review
-      // wallet = Wallet.createRandom();
+
+      const trustedForwarder: Contract = await ethers.getContractAt(
+        'Forwarder',
+        '0x956868751Cc565507B3B58E53a6f9f41B56bed74'
+      );
+
+      const GENERIC_PARAMS =
+        'address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data';
+
+      const typeName = `ForwardRequest(${GENERIC_PARAMS})`;
+
+      const typeHash: string = utils.hexlify(
+        utils.keccak256(utils.toUtf8Bytes(typeName))
+      );
+
+      // @review - still needed ?
+      await trustedForwarder.registerRequestType('TestCall', '0x');
 
       const receipt = await waitFor(
         GameOwner.Game.createGame(
@@ -1325,86 +1278,59 @@ describe('GameToken', function () {
         'Transfer'
       );
       const gameId = transferEvent.args[2];
-      // @review
-      const gameAs7 = await gameToken.connect(
-        ethers.provider.getSigner(others[7])
-      );
-      // @review
+
+      // @review - needed ?
       await waitFor(
-        gameAs7.approveFor(others[7], trustedForwarder.address, gameId)
-      );
-      // @review
-      await GameOwner.Game.safeTransferFrom(
-        GameOwner.address,
-        others[7],
-        gameId
+        GameOwner.Game.approveFor(
+          GameOwner.address,
+          trustedForwarder.address,
+          gameId
+        )
       );
 
-      // @review
-      const txObj = await gameToken.populateTransaction.safeTransferFrom(
-        others[7],
-        others[3],
-        amount
-      );
-      const to = txObj.to;
+      const txObj = await gameToken.populateTransaction[
+        'safeTransferFrom(address,address,uint256)'
+      ](GameOwner.address, others[3], gameId);
+
       let data = txObj.data;
+      data += GameOwner.address.replace('0x', '');
 
-      data += others[7].replace('0x', '');
-      // @review
       const transfer = {
-        to: to,
+        to: txObj.to,
         data: data,
-        value: '0',
-        from: others[7],
-        nonce: '0',
+        value: 0,
+        from: GameOwner.address,
+        nonce: 0,
         gas: 1e6,
       };
-      // @review
-      // const privateKey = wallet.privateKey;
-      // const privateKeyAsBuffer = Buffer.from(privateKey.substr(2), 'hex');
-
-      // @review
-      // const Sig = signTypedData_v4(privateKeyAsBuffer, {
-      //   data: {...typeData, message: req1},
-      // });
-
-      // const approve = {
-      //   owner: others[5],
-      //   spender: others[3],
-      //   value: TEST_AMOUNT._hex,
-      //   nonce: nonce._hex,
-      //   deadline: deadline._hex,
-      // };
 
       const transferData712 = data712(gameToken, transfer);
 
-      // // @note get sig from others[5]
       const flatSig = await ethers.provider.send('eth_signTypedData', [
-        others[7],
+        GameOwner.address,
         transferData712,
       ]);
-      // // @note split sig
-      const sig = splitSignature(flatSig);
 
-      // const domainSeparator = await permitContract.DOMAIN_SEPARATOR();
       const domainSeparator = _TypedDataEncoder.hashDomain(
         transferData712.domain
       );
-      // expect(domainSeparator).to.equal(expectedDomainSeparator);
 
-      // @review
-      // const domainSeparator = TypedDataUtils.hashStruct(
-      //   'EIP712Domain',
-      //   typeData.domain,
-      //   typeData.types
-      // );
-      // @review
-      // still need this execute function
-      await expect(
-        trustedForwarder.execute(transfer, domainSeparator, typeHash, '0x', sig)
-      )
-        .to.emit(gameToken, 'Transfer')
-        .withArgs(to, others[7], gameId);
+      const forwardingObject = await trustedForwarder.callStatic.execute(
+        transfer,
+        domainSeparator,
+        typeHash,
+        '0x',
+        flatSig
+      );
+
+      console.log(`forwardingObject:   ${forwardingObject}`);
+
+      const newOwner = await gameToken.ownerOf(gameId);
+      console.log(`newOwner:   ${newOwner}`);
+      console.log(`3:   ${others[3]}`);
+      console.log(`GameOwner.address:   ${GameOwner.address}`);
+      expect(newOwner).to.be.equal(others[3]);
+      expect(await gameToken.creatorOf(gameId)).to.be.equal(GameOwner.address);
     });
 
     /**
