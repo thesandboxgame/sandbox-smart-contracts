@@ -11,9 +11,6 @@ import {
 } from '../utils';
 import {setupTest, User} from './fixtures';
 import {supplyAssets} from './assets';
-import {getSigner} from 'hardhat-deploy-ethers/dist/src/helpers';
-const forwarderJSON =
-  '../../artifacts/src/solc_0.6/metaTx/forwarder/Forwarder.sol/Forwarder.json';
 
 let id: BigNumber;
 
@@ -1267,7 +1264,7 @@ describe('GameToken', function () {
       );
 
       // @review - still needed ?
-      await trustedForwarder.registerRequestType('TestCall', '0x');
+      // await trustedForwarder.registerRequestType('ForwardTransfer', '0x');
 
       const receipt = await waitFor(
         GameOwner.Game.createGame(
@@ -1295,7 +1292,7 @@ describe('GameToken', function () {
         )
       );
 
-      const txObj = await gameToken.populateTransaction[
+      const txObj = await GameOwner.Game.populateTransaction[
         'safeTransferFrom(address,address,uint256)'
       ](GameOwner.address, others[3], gameId);
 
@@ -1329,7 +1326,13 @@ describe('GameToken', function () {
         transferData712.domain
       );
 
-      const forwardingObject = await trustedForwarder.callStatic.execute(
+      const accounts = await ethers.getSigners();
+      for (const account of accounts) {
+        console.log(`HH account: ${account.address}`);
+      }
+      console.log(`GameOwner.address:   ${GameOwner.address}`);
+
+      const forwardingObject = await trustedForwarder.execute(
         transfer,
         domainSeparator,
         typeHash,
