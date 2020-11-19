@@ -1,9 +1,9 @@
 type Message = {
   to: string | undefined;
   data: string | undefined;
-  value: string;
+  value: number;
   from: string;
-  nonce: string;
+  nonce: number;
   gas: number;
 };
 
@@ -31,7 +31,7 @@ type Data712 = {
         type: 'address';
       }
     ];
-    ForwardRequestType: [
+    ForwardRequest: [
       {
         name: 'from';
         type: 'address';
@@ -92,7 +92,7 @@ export const data712 = function (
           type: 'address',
         },
       ],
-      ForwardRequestType: [
+      ForwardRequest: [
         {
           name: 'from',
           type: 'address',
