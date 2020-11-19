@@ -8,7 +8,6 @@ const {smoddit} = require('@eth-optimism/smock');
 const {BigNumber} = require('@ethersproject/bignumber');
 const {expect} = require('../chai-setup');
 const {mine} = require('../utils');
-const {deploy} = deployments;
 
 const STAKE_TOKEN = 'UNI_SAND_ETH';
 const REWARD_TOKEN = 'Sand';
@@ -22,8 +21,8 @@ const ACTUAL_REWARD_AMOUNT = REWARD_AMOUNT.div(REWARD_DURATION).mul(
 
 const STAKE_AMOUNT = BigNumber.from(10000).mul('1000000000000000000');
 
-describe.only('SmockitSANDRewardPool', function (supplyRewardTokens, notifyReward) {
-  async function createFixture() {
+describe.only('SmockitSANDRewardPool', function () {
+  async function createFixture(supplyRewardTokens, notifyReward) {
     await deployments.fixture(POOL);
     const {
       deployer,
@@ -50,22 +49,34 @@ describe.only('SmockitSANDRewardPool', function (supplyRewardTokens, notifyRewar
       2592000
     );
 
+    // Function to modify user's staked balance in Reward Contract
+    async function setUserStakedBalance(stakedBalance, user) {
+      modifiableRewardContract.smodify.put({
+        _balances: {
+          [user]: stakedBalance,
+        },
+      });
+      const userStakedBal = await modifiableRewardContract.balanceOf(user);
+      expect(userStakedBal).to.equal(stakedBalance);
+    }
+
     // Create modifiable MockLand contract uing Smoddit
-    const modifiableLandContractFactory = await smoddit('MockLand'); // TODO: MockLand contract works here because the artifact can be found, but ideally we want this to be Land
-    const modifiableLandContract = await modifiableLandContractFactory.deploy(
+    const modifiableNFTContractFactory = await smoddit('MockLand'); // TODO: MockLand contract works here because the artifact can be found, but ideally we want this to be Land
+    const modifiableNFTContract = await modifiableNFTContractFactory.deploy(
       rewardToken.address,
       landAdmin
     );
 
-    // Modify user's NFT balance
-    const user = others[1];
-    modifiableLandContract.smodify.put({
-      // TODO: fix error: Cannot read property 'storage' of undefined
-      _numNFTPerAddress: {
-        [user]: 10,
-      },
-    });
-    console.log('user bal', await modifiableLandContract.balanceOf(user));
+    // Function to modify user's NFT balance in MockLand Contract
+    async function setUserNftBalance(numberOfNfts, user) {
+      modifiableNFTContract.smodify.put({
+        _numNFTPerAddress: {
+          [user]: numberOfNfts,
+        },
+      });
+      const userNftBal = await modifiableNFTContract.balanceOf(user);
+      expect(userNftBal).to.equal(numberOfNfts);
+    }
 
     const rewardPoolAsUser = {
       0: modifiableRewardContract.connect(ethers.provider.getSigner(others[0])),
@@ -96,6 +107,7 @@ describe.only('SmockitSANDRewardPool', function (supplyRewardTokens, notifyRewar
     // Send reward to pool
     await modifiableRewardContract.setRewardDistribution(liquidityRewardAdmin);
 
+    // Supply pool
     if (supplyRewardTokens === true) {
       await rewardTokenAsAdmin.transfer(
         modifiableRewardContract.address,
@@ -103,9 +115,11 @@ describe.only('SmockitSANDRewardPool', function (supplyRewardTokens, notifyRewar
       );
     }
 
+    // Start reward period
     if (notifyReward === true) {
       await rewardPoolAsAdmin.notifyRewardAmount(REWARD_AMOUNT);
     }
+
     // Give users some stakeTokens
     for (let i = 0; i < 3; i++) {
       await stakeTokenAsAdmin.transfer(others[i], STAKE_AMOUNT.mul(10));
@@ -122,14 +136,37 @@ describe.only('SmockitSANDRewardPool', function (supplyRewardTokens, notifyRewar
       landAdmin,
       sandBeneficiary,
       others,
+      stakeToken,
+      rewardToken,
+      modifiableNFTContract,
       modifiableRewardContract,
       rewardPoolAsUser,
+      setUserNftBalance,
     };
   }
 
   it('User earnings for 89 NFTs match expected reward', async function () {
-    await createFixture(true, true);
-    // change LAND balance for given user
-    // calculate earnings
+    const {
+      setUserNftBalance,
+      rewardPoolAsUser,
+      stakeToken,
+      modifiableRewardContract,
+      others,
+    } = await createFixture(true, true);
+    await setUserNftBalance(89, others[0]);
+    await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+
+    const stakedBalance = await stakeToken.balanceOf(
+      modifiableRewardContract.address
+    );
+    expect(stakedBalance).to.equal(STAKE_AMOUNT);
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+    const earned = await rewardPoolAsUser[0].earned(others[0]);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
   });
 });
