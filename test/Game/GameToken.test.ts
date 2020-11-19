@@ -11,6 +11,9 @@ import {
 } from '../utils';
 import {setupTest, User} from './fixtures';
 import {supplyAssets} from './assets';
+import {getSigner} from 'hardhat-deploy-ethers/dist/src/helpers';
+const forwarderJSON =
+  '../../artifacts/src/solc_0.6/metaTx/forwarder/Forwarder.sol/Forwarder.json';
 
 let id: BigNumber;
 
@@ -1244,11 +1247,15 @@ describe('GameToken', function () {
     it('can process metaTransactions if processorType == METATX_2771', async function () {
       const {gameToken, GameOwner} = await setupTest();
       const others = await getUnnamedAccounts();
+      const signers = await ethers.getSigners();
 
-      const trustedForwarder: Contract = await ethers.getContractAt(
+      // @review trying to use rinkeby address !!!
+      const trustedForwarderFactory = await ethers.getContractFactory(
         'Forwarder',
-        '0x956868751Cc565507B3B58E53a6f9f41B56bed74'
+        signers[0]
       );
+      const trustedForwarder: Contract = await trustedForwarderFactory.deploy();
+      await trustedForwarder.deployed();
 
       const GENERIC_PARAMS =
         'address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data';
@@ -1305,6 +1312,13 @@ describe('GameToken', function () {
       };
 
       const transferData712 = data712(gameToken, transfer);
+
+      // const zeroSigner = ethers.provider.getSigner(others[0]);
+      // const sig = await zeroSigner._signTypedData(
+      //   transferData712.domain,
+      //   transferData712.types,
+      //   transferData712
+      // );
 
       const flatSig = await ethers.provider.send('eth_signTypedData', [
         GameOwner.address,
