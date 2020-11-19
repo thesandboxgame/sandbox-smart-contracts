@@ -22,7 +22,7 @@ const ACTUAL_REWARD_AMOUNT = REWARD_AMOUNT.div(REWARD_DURATION).mul(
 
 const STAKE_AMOUNT = BigNumber.from(10000).mul('1000000000000000000');
 
-describe('SmockitSANDRewardPool', function (supplyRewardTokens, notifyReward) {
+describe.only('SmockitSANDRewardPool', function (supplyRewardTokens, notifyReward) {
   async function createFixture() {
     await deployments.fixture(POOL);
     const {
@@ -62,7 +62,7 @@ describe('SmockitSANDRewardPool', function (supplyRewardTokens, notifyReward) {
     modifiableLandContract.smodify.put({
       // TODO: fix error: Cannot read property 'storage' of undefined
       _numNFTPerAddress: {
-        user: 10,
+        [user]: 10,
       },
     });
     console.log('user bal', await modifiableLandContract.balanceOf(user));

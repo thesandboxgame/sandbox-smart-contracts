@@ -206,4 +206,17 @@ const config: HardhatUserConfig = {
   },
 };
 
+// TASK to get artifact.storageLayout for smock
+// TODO use : import '@eth-optimism/smock/buidler-plugins/compiler-storage-layout' instead (it do an extra step that hardhat-deploy already do)?
+import {subtask} from 'hardhat/config';
+import {TASK_COMPILE_SOLIDITY_GET_ARTIFACT_FROM_COMPILATION_OUTPUT} from 'hardhat/builtin-tasks/task-names';
+subtask(
+  TASK_COMPILE_SOLIDITY_GET_ARTIFACT_FROM_COMPILATION_OUTPUT,
+  async ({contractOutput}: {contractOutput: any}, __, runSuper) => {
+    const artifact = await runSuper();
+    artifact.storageLayout = contractOutput.storageLayout;
+    return artifact;
+  }
+);
+
 export default config;
