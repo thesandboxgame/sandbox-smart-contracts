@@ -3,12 +3,13 @@
 pragma solidity ^0.6.2;
 pragma experimental ABIEncoderV2;
 
-import "../../common/Libraries/SigUtil.sol";
+import "@openzeppelin/contracts-0.6/cryptography/ECDSA.sol";
 import "./IForwarder.sol";
+import "hardhat/console.sol";
 
 
 contract Forwarder is IForwarder {
-    using SigUtil for bytes32;
+    using ECDSA for bytes32;
 
     string public constant GENERIC_PARAMS = "address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data";
 
@@ -95,6 +96,9 @@ contract Forwarder is IForwarder {
     ) internal view {
         require(typeHashes[requestTypeHash], "invalid request typehash");
         bytes32 digest = keccak256(abi.encodePacked("\x19\x01", domainSeparator, keccak256(_getEncoded(req, requestTypeHash, suffixData))));
+        console.log("");
+        console.log("sig.from: ", req.from);
+        console.log("ecr sig.: ", digest.recover(sig));
         require(digest.recover(sig) == req.from, "signature mismatch");
     }
 
