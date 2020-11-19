@@ -62,7 +62,7 @@ type Data712 = {
   domain: {
     name: 'The Sandbox';
     version: '1';
-    chainId: '1234';
+    chainId: 1234;
     verifyingContract: string;
   };
   message: Message;
@@ -123,7 +123,7 @@ export const data712 = function (
     domain: {
       name: 'The Sandbox',
       version: '1',
-      chainId: '1234',
+      chainId: 1234,
       verifyingContract: verifyingContract.address,
     },
     message: message,
