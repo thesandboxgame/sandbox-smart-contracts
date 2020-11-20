@@ -9,13 +9,10 @@ import "../../contracts_common/Interfaces/ERC1654Constants.sol";
 import "../../TheSandbox712.sol";
 
 interface ExecutionableERC20 {
+
     function balanceOf(address who) external view returns (uint256);
 
-    function transferFrom(
-        address from,
-        address to,
-        uint256 amount
-    ) external returns (bool);
+    function transferFrom(address from, address to, uint256 amount) external returns(bool);
 
     function approveAndExecuteWithSpecificGas(
         address from,
@@ -48,14 +45,18 @@ interface ExecutionableERC20 {
 }
 
 contract NativeMetaTransactionProcessor is ERC1654Constants, ERC1271Constants, TheSandbox712 {
-    enum SignatureType {DIRECT, EIP1654, EIP1271}
+    enum SignatureType { DIRECT, EIP1654, EIP1271 }
 
     bytes32 constant ERC20METATRANSACTION_TYPEHASH = keccak256(
         "ERC20MetaTransaction(address from,address to,uint256 amount,bytes data,uint256 nonce,uint256 minGasPrice,uint256 txGas,uint256 baseGas,uint256 tokenGasPrice,address relayer)"
     );
     mapping(address => uint256) nonces;
 
-    event MetaTx(address indexed from, uint256 indexed nonce, bool success);
+    event MetaTx(
+        address indexed from,
+        uint256 indexed nonce,
+        bool success
+    );
 
     ExecutionableERC20 _tokenContract;
 
@@ -106,7 +107,15 @@ contract NativeMetaTransactionProcessor is ERC1654Constants, ERC1271Constants, T
             ERC20METATRANSACTION_TYPEHASH,
             signatureType
         );
-        return performERC20MetaTx(from, to, amount, data, params, tokenReceiver);
+        return
+            performERC20MetaTx(
+                from,
+                to,
+                amount,
+                data,
+                params,
+                tokenReceiver
+            );
     }
 
     /// @notice perform the meta-tx using personal_sign message.
@@ -144,7 +153,15 @@ contract NativeMetaTransactionProcessor is ERC1654Constants, ERC1271Constants, T
             ERC20METATRANSACTION_TYPEHASH,
             signatureType
         );
-        return performERC20MetaTx(from, to, amount, data, params, tokenReceiver);
+        return
+            performERC20MetaTx(
+                from,
+                to,
+                amount,
+                data,
+                params,
+                tokenReceiver
+            );
     }
 
     function ensureParametersValidity(
@@ -152,7 +169,10 @@ contract NativeMetaTransactionProcessor is ERC1654Constants, ERC1271Constants, T
         uint256[5] memory params, // nonce, minGasPrice, txGas, baseGas, tokenGasPrice
         address relayer
     ) internal view {
-        require(relayer == address(0) || relayer == msg.sender, "wrong relayer");
+        require(
+            relayer == address(0) || relayer == msg.sender,
+            "wrong relayer"
+        );
         require(nonces[from] + 1 == params[0], "nonce out of order");
         require(tx.gasprice >= params[1], "gasPrice < signer minGasPrice");
     }
@@ -192,7 +212,7 @@ contract NativeMetaTransactionProcessor is ERC1654Constants, ERC1271Constants, T
                 ERC1271(from).isValidSignature(dataToHash, signature) == ERC1271_MAGICVALUE,
                 "invalid 1271 signature"
             );
-        } else if (signatureType == SignatureType.EIP1654) {
+        } else if(signatureType == SignatureType.EIP1654){
             require(
                 ERC1654(from).isValidSignature(keccak256(dataToHash), signature) == ERC1654_MAGICVALUE,
                 "invalid 1654 signature"
@@ -243,7 +263,15 @@ contract NativeMetaTransactionProcessor is ERC1654Constants, ERC1271Constants, T
         SignatureType signatureType
     ) internal view {
         bytes memory dataToHash = SigUtil.prefixed(
-            encodeBasicSignatureData(typeHash, from, to, amount, data, params, relayer)
+            encodeBasicSignatureData(
+                typeHash,
+                from,
+                to,
+                amount,
+                data,
+                params,
+                relayer
+            )
         );
         if (signatureType == SignatureType.EIP1271) {
             require(
@@ -272,7 +300,7 @@ contract NativeMetaTransactionProcessor is ERC1654Constants, ERC1271Constants, T
         nonces[from] = params[0];
 
         if (data.length == 0) {
-            if (params[4] > 0) {
+            if(params[4] > 0) {
                 _tokenContract.transferAndChargeForGas(
                     from,
                     to,
@@ -287,8 +315,11 @@ contract NativeMetaTransactionProcessor is ERC1654Constants, ERC1271Constants, T
             }
             success = true;
         } else {
-            require(BytesUtil.doFirstParamEqualsAddress(data, from), "first param != from");
-            if (params[4] > 0) {
+            require(
+                BytesUtil.doFirstParamEqualsAddress(data, from),
+                "first param != from"
+            );
+            if(params[4] > 0) {
                 (success, returnData) = _tokenContract.approveAndExecuteWithSpecificGasAndChargeForIt(
                     from,
                     to,
@@ -300,13 +331,7 @@ contract NativeMetaTransactionProcessor is ERC1654Constants, ERC1271Constants, T
                     data
                 );
             } else {
-                (success, returnData) = _tokenContract.approveAndExecuteWithSpecificGas(
-                    from,
-                    to,
-                    amount,
-                    params[2],
-                    data
-                );
+                (success, returnData) = _tokenContract.approveAndExecuteWithSpecificGas(from, to, amount, params[2], data);
             }
         }
 

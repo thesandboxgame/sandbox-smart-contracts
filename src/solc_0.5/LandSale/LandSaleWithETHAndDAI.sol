@@ -63,7 +63,7 @@ contract LandSaleWithETHAndDAI is MetaTransactionReceiver {
 
     /// @notice set the wallet receiving the proceeds
     /// @param newWallet address of the new receiving wallet
-    function setReceivingWallet(address payable newWallet) external {
+    function setReceivingWallet(address payable newWallet) external{
         require(newWallet != address(0), "receiving wallet cannot be zero address");
         require(msg.sender == _admin, "only admin can change the receiving wallet");
         _wallet = newWallet;
@@ -124,19 +124,13 @@ contract LandSaleWithETHAndDAI is MetaTransactionReceiver {
         require(reserved == address(0) || reserved == buyer, "cannot buy reserved Land");
         bytes32 leaf = _generateLandHash(x, y, size, price, reserved, salt);
 
-        require(_verify(proof, leaf), "Invalid land provided");
+        require(
+            _verify(proof, leaf),
+            "Invalid land provided"
+        );
     }
 
-    function _mint(
-        address buyer,
-        address to,
-        uint256 x,
-        uint256 y,
-        uint256 size,
-        uint256 price,
-        address token,
-        uint256 tokenAmount
-    ) internal {
+    function _mint(address buyer, address to, uint256 x, uint256 y, uint256 size, uint256 price, address token, uint256 tokenAmount) internal {
         _land.mintQuad(to, size, x, y, "");
         emit LandQuadPurchased(buyer, to, x + (y * GRID_SIZE), size, price, token, tokenAmount);
     }
@@ -166,7 +160,14 @@ contract LandSaleWithETHAndDAI is MetaTransactionReceiver {
     ) external {
         require(_sandEnabled, "sand payments not enabled");
         _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, proof);
-        require(_sand.transferFrom(buyer, _wallet, priceInSand), "sand token transfer failed");
+        require(
+            _sand.transferFrom(
+                buyer,
+                _wallet,
+                priceInSand
+            ),
+            "sand token transfer failed"
+        );
         _mint(buyer, to, x, y, size, priceInSand, address(_sand), priceInSand);
     }
 
@@ -199,7 +200,7 @@ contract LandSaleWithETHAndDAI is MetaTransactionReceiver {
         uint256 ETHRequired = getEtherAmountWithSAND(priceInSand);
         require(msg.value >= ETHRequired, "not enough ether sent");
         uint256 leftOver = msg.value - ETHRequired;
-        if (leftOver > 0) {
+        if(leftOver > 0) {
             msg.sender.transfer(leftOver); // refund extra
         }
         address(_wallet).transfer(ETHRequired);
@@ -243,7 +244,7 @@ contract LandSaleWithETHAndDAI is MetaTransactionReceiver {
      * @notice Gets the expiry time for the current sale
      * @return The expiry time, as a unix epoch
      */
-    function getExpiryTime() external view returns (uint256) {
+    function getExpiryTime() external view returns(uint256) {
         return _expiryTime;
     }
 
@@ -251,7 +252,7 @@ contract LandSaleWithETHAndDAI is MetaTransactionReceiver {
      * @notice Gets the Merkle root associated with the current sale
      * @return The Merkle root, as a bytes32 hash
      */
-    function merkleRoot() external view returns (bytes32) {
+    function merkleRoot() external view returns(bytes32) {
         return _merkleRoot;
     }
 
@@ -262,8 +263,19 @@ contract LandSaleWithETHAndDAI is MetaTransactionReceiver {
         uint256 price,
         address reserved,
         bytes32 salt
-    ) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(x, y, size, price, reserved, salt));
+    ) internal pure returns (
+        bytes32
+    ) {
+        return keccak256(
+            abi.encodePacked(
+                x,
+                y,
+                size,
+                price,
+                reserved,
+                salt
+            )
+        );
     }
 
     function _verify(bytes32[] memory proof, bytes32 leaf) internal view returns (bool) {

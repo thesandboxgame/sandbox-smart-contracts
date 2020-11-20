@@ -3,22 +3,24 @@ pragma solidity 0.5.9;
 import {ERC20} from "../contracts_common/Interfaces/ERC20.sol";
 
 contract LockedFundWithReleaseSchedule {
+
     ERC20 _erc20;
     address _from;
 
     struct Lock {
         uint128 period;
         uint128 amountPerPeriod;
+
         uint128 amountLeft;
         uint128 nextTime;
     }
-    mapping(address => Lock) _locks;
+    mapping (address => Lock) _locks;
 
-    function getAmountLeft(address to) external view returns (uint256) {
+    function getAmountLeft(address to) external view returns(uint256) {
         return _locks[to].amountLeft;
     }
 
-    function getUnlockedAmountAt(address to, uint128 timestamp) external view returns (uint256) {
+    function getUnlockedAmountAt(address to, uint128 timestamp) external view returns(uint256) {
         uint128 timePassed = timestamp - _locks[to].nextTime;
         uint128 numPeriodsPassed = _getNumPeriodsPassed(timePassed, _locks[to].period);
         return _getAmountToWithdraw(numPeriodsPassed, _locks[to].amountPerPeriod, _locks[to].amountLeft);
@@ -33,13 +35,7 @@ contract LockedFundWithReleaseSchedule {
         _from = from;
     }
 
-    function lock(
-        address to,
-        uint128 amount,
-        uint128 firstWithdrawal,
-        uint128 period,
-        uint128 numPeriods
-    ) external {
+    function lock(address to, uint128 amount, uint128 firstWithdrawal, uint128 period, uint128 numPeriods) external {
         require(msg.sender == _from, "only the specified sender is allowed to lock"); // TODO instead comparmentalise locks per sender
 
         require(_locks[to].amountLeft == 0, "cannot lock while fund already locked");
@@ -59,19 +55,22 @@ contract LockedFundWithReleaseSchedule {
         require(_erc20.transferFrom(msg.sender, address(this), uint256(amount)), "could not lock tokens");
 
         uint256 extra = amount - (numPeriods * amountPerPeriod);
-        if (extra > 0) {
+        if(extra > 0) {
             require(_erc20.transferFrom(msg.sender, to, extra), "could not send extra tokens");
         }
 
         emit Deposit(msg.sender, to, amount);
 
         // solium-disable-next-line security/no-block-members
-        if (block.timestamp >= firstWithdrawal) {
+        if(block.timestamp >= firstWithdrawal) {
             withdraw(to);
         }
     }
 
-    function _getNumPeriodsPassed(uint128 timePassed, uint128 period) internal view returns (uint128) {
+    function _getNumPeriodsPassed(
+        uint128 timePassed,
+        uint128 period
+    ) internal view returns (uint128) {
         return (1 + (timePassed / period));
     }
 
@@ -82,7 +81,7 @@ contract LockedFundWithReleaseSchedule {
     ) internal view returns (uint128) {
         uint128 amountToWithdraw = numPeriodsPassed * amountPerPeriod;
 
-        if (amountLeft < amountToWithdraw) {
+        if(amountLeft < amountToWithdraw) {
             amountToWithdraw = amountLeft;
         }
         return amountToWithdraw;
@@ -109,7 +108,7 @@ contract LockedFundWithReleaseSchedule {
 
         emit Withdrawal(to, amountToWithdraw);
 
-        if (amountLeft == amountToWithdraw) {
+        if(amountLeft == amountToWithdraw) {
             emit AllFundUnlocked(to);
         }
     }

@@ -15,13 +15,9 @@ contract CommonMinter is MetaTransactionReceiver {
     address _feeReceiver;
     ERC20 _sand;
 
-    constructor(
-        ERC1155ERC721 asset,
-        ERC20 sand,
-        uint256 feePerCopy,
-        address admin,
-        address feeReceiver
-    ) public {
+    constructor(ERC1155ERC721 asset, ERC20 sand, uint256 feePerCopy, address admin, address feeReceiver)
+        public
+    {
         _sand = sand;
         _asset = asset;
         _feePerCopy = feePerCopy;
@@ -92,6 +88,15 @@ contract CommonMinter is MetaTransactionReceiver {
             totalCopies = totalCopies.add(supplies[i]);
         }
         require(_sand.transferFrom(creator, _feeReceiver, totalCopies.mul(feePerCopy)), "failed to transfer SAND");
-        return _asset.mintMultiple(creator, packId, hash, supplies, "", owner, data);
+        return
+            _asset.mintMultiple(
+                creator,
+                packId,
+                hash,
+                supplies,
+                "",
+                owner,
+                data
+            );
     }
 }

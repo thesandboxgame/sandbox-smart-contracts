@@ -4,6 +4,7 @@ import "../contracts_common/Libraries/SafeMathWithRequire.sol";
 import "../contracts_common/Interfaces/ERC20.sol";
 import "../contracts_common/Interfaces/Medianizer.sol";
 
+
 /**
  * @title SAND tokens sale contract
  * @notice This contract is used to sell SAND tokens (accepts ETH and DAI) at a fixed USD price
@@ -19,7 +20,7 @@ contract SandSale {
     bool public isPaused;
 
     /* We set the USD price here, 1 SAND = 0.0144 USD */
-    uint256 private constant sandPriceInUsd = 14400000000000000;
+    uint256 constant private sandPriceInUsd = 14400000000000000;
 
     /**
      * @notice Initializes the contract
@@ -51,7 +52,10 @@ contract SandSale {
     function buySandWithEther(address to) external payable whenNotPaused() {
         uint256 sandAmount = getSandAmountWithEther(msg.value);
 
-        require(sand.transferFrom(address(this), to, sandAmount), "Transfer failed");
+        require(
+            sand.transferFrom(address(this), to, sandAmount),
+            "Transfer failed"
+        );
 
         address(wallet).transfer(msg.value);
     }
@@ -62,11 +66,17 @@ contract SandSale {
      * @param to The address that will receive the SAND
      */
     function buySandWithDai(uint256 daiAmount, address to) external whenNotPaused() {
-        require(dai.transferFrom(msg.sender, wallet, daiAmount), "Transfer failed");
+        require(
+            dai.transferFrom(msg.sender, wallet, daiAmount),
+            "Transfer failed"
+        );
 
         uint256 sandAmount = getSandAmountWithDai(daiAmount);
 
-        require(sand.transferFrom(address(this), to, sandAmount), "Transfer failed");
+        require(
+            sand.transferFrom(address(this), to, sandAmount),
+            "Transfer failed"
+        );
     }
 
     /**
@@ -75,7 +85,10 @@ contract SandSale {
      * @param amount The amount to transfer
      */
     function withdrawSand(address to, uint256 amount) external onlyAdmin() {
-        require(sand.transferFrom(address(this), to, amount), "Transfer failed");
+        require(
+            sand.transferFrom(address(this), to, amount),
+            "Transfer failed"
+        );
     }
 
     /**
@@ -107,7 +120,7 @@ contract SandSale {
      * @param newAdmin The address of the new admin
      */
     function changeAdmin(address newAdmin) external onlyAdmin() {
-        admin = newAdmin;
+         admin = newAdmin;
     }
 
     /**
@@ -128,17 +141,17 @@ contract SandSale {
     }
 
     modifier onlyAdmin() {
-        require(msg.sender == admin, "only admin allowed");
+        require (msg.sender == admin, "only admin allowed");
         _;
     }
 
     modifier whenNotPaused() {
-        require(isPaused == false, "Contract is paused");
+        require (isPaused == false, "Contract is paused");
         _;
     }
 
     modifier whenPaused() {
-        require(isPaused == true, "Contract is not paused");
+        require (isPaused == true, "Contract is not paused");
         _;
     }
 }

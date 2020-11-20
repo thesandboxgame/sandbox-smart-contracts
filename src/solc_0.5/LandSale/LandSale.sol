@@ -4,11 +4,13 @@ import "../Land.sol";
 import "../contracts_common/Interfaces/ERC20.sol";
 import "../contracts_common/BaseWithStorage/MetaTransactionReceiver.sol";
 
+
 /**
  * @title Land Sale contract
  * @notice This contract mananges the sale of our lands
  */
 contract LandSale is MetaTransactionReceiver {
+
     uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
 
     Land internal _land;
@@ -45,7 +47,7 @@ contract LandSale is MetaTransactionReceiver {
 
     /// @notice set the wallet receiving the proceeds
     /// @param newWallet address of the new receiving wallet
-    function setReceivingWallet(address payable newWallet) external {
+    function setReceivingWallet(address payable newWallet) external{
         require(newWallet != address(0), "receiving wallet cannot be zero address");
         require(msg.sender == _admin, "only admin can change the receiving wallet");
         _wallet = newWallet;
@@ -80,9 +82,19 @@ contract LandSale is MetaTransactionReceiver {
         require(reserved == address(0) || reserved == buyer, "cannot buy reserved Land");
         bytes32 leaf = _generateLandHash(x, y, size, price, reserved, salt);
 
-        require(_verify(proof, leaf), "Invalid land provided");
+        require(
+            _verify(proof, leaf),
+            "Invalid land provided"
+        );
 
-        require(_sand.transferFrom(buyer, _wallet, price), "sand transfer failed");
+        require(
+            _sand.transferFrom(
+                buyer,
+                _wallet,
+                price
+            ),
+            "sand transfer failed"
+        );
 
         _land.mintQuad(to, size, x, y, "");
         emit LandQuadPurchased(buyer, to, x + (y * GRID_SIZE), size, price);
@@ -92,7 +104,7 @@ contract LandSale is MetaTransactionReceiver {
      * @notice Gets the expiry time for the current sale
      * @return The expiry time, as a unix epoch
      */
-    function getExpiryTime() external view returns (uint256) {
+    function getExpiryTime() external view returns(uint256) {
         return _expiryTime;
     }
 
@@ -100,7 +112,7 @@ contract LandSale is MetaTransactionReceiver {
      * @notice Gets the Merkle root associated with the current sale
      * @return The Merkle root, as a bytes32 hash
      */
-    function merkleRoot() external view returns (bytes32) {
+    function merkleRoot() external view returns(bytes32) {
         return _merkleRoot;
     }
 
@@ -111,8 +123,19 @@ contract LandSale is MetaTransactionReceiver {
         uint256 price,
         address reserved,
         bytes32 salt
-    ) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(x, y, size, price, reserved, salt));
+    ) internal pure returns (
+        bytes32
+    ) {
+        return keccak256(
+            abi.encodePacked(
+                x,
+                y,
+                size,
+                price,
+                reserved,
+                salt
+            )
+        );
     }
 
     function _verify(bytes32[] memory proof, bytes32 leaf) internal view returns (bool) {

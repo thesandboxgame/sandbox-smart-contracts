@@ -3,6 +3,7 @@ pragma solidity 0.5.9;
 import "../../contracts_common/Libraries/BytesUtil.sol";
 
 contract ERC20BasicApproveExtension {
+
     /// @notice approve `target` to spend `amount` and call it with data.
     /// @param target address to be given rights to transfer and destination of the call.
     /// @param amount the number of tokens allowed.
@@ -13,7 +14,10 @@ contract ERC20BasicApproveExtension {
         uint256 amount,
         bytes calldata data
     ) external payable returns (bytes memory) {
-        require(BytesUtil.doFirstParamEqualsAddress(data, msg.sender), "first param != sender");
+        require(
+            BytesUtil.doFirstParamEqualsAddress(data, msg.sender),
+            "first param != sender"
+        );
 
         _approveFor(msg.sender, target, amount);
 
@@ -33,7 +37,10 @@ contract ERC20BasicApproveExtension {
         uint256 amount,
         bytes calldata data
     ) external payable returns (bytes memory) {
-        require(BytesUtil.doFirstParamEqualsAddress(data, msg.sender), "first param != sender");
+        require(
+            BytesUtil.doFirstParamEqualsAddress(data, msg.sender),
+            "first param != sender"
+        );
 
         if (amount > 0) {
             _addAllowanceIfNeeded(msg.sender, target, amount);
@@ -46,15 +53,6 @@ contract ERC20BasicApproveExtension {
         return returnData;
     }
 
-    function _approveFor(
-        address owner,
-        address target,
-        uint256 amount
-    ) internal;
-
-    function _addAllowanceIfNeeded(
-        address owner,
-        address spender,
-        uint256 amountNeeded
-    ) internal;
+    function _approveFor(address owner, address target, uint256 amount) internal;
+    function _addAllowanceIfNeeded(address owner, address spender, uint256 amountNeeded) internal;
 }

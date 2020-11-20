@@ -3,7 +3,9 @@ pragma solidity 0.5.9;
 import "../contracts_common/Interfaces/ERC777TokensRecipient.sol";
 import "../contracts_common/Interfaces/ERC777Token.sol";
 import "../contracts_common/Interfaces/ERC20.sol";
-import {ERC820Implementer} from "../contracts_common/Base/ERC820Implementer.sol";
+import {
+    ERC820Implementer
+} from "../contracts_common/Base/ERC820Implementer.sol";
 
 contract Sand777Sender is ERC777TokensRecipient, ERC820Implementer {
     bool private allowTokensSent;
@@ -42,7 +44,10 @@ contract Sand777Sender is ERC777TokensRecipient, ERC820Implementer {
         bytes memory, // data,
         bytes memory // operatorData
     ) public {
-        require(address(tokenContract) == msg.sender, "only accept tokenContract as sender");
+        require(
+            address(tokenContract) == msg.sender,
+            "only accept tokenContract as sender"
+        );
         tokenBalance += amount;
     }
 
@@ -54,7 +59,10 @@ contract Sand777Sender is ERC777TokensRecipient, ERC820Implementer {
         bytes memory, // data,
         bytes memory // operatorData
     ) public {
-        require(address(tokenContract) == msg.sender, "only accept tokenContract as sender");
+        require(
+            address(tokenContract) == msg.sender,
+            "only accept tokenContract as sender"
+        );
         require(allowTokensSent, "Sending not allowed");
         tokenBalance -= amount;
     }
@@ -62,8 +70,8 @@ contract Sand777Sender is ERC777TokensRecipient, ERC820Implementer {
     function acceptTokens() public onlyOwner {
         allowTokensSent = true;
     }
-
     function rejectTokens() public onlyOwner {
         allowTokensSent = false;
     }
+
 }

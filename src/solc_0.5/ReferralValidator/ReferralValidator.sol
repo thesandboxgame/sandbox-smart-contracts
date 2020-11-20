@@ -7,6 +7,7 @@ import "../contracts_common/Libraries/SafeMathWithRequire.sol";
 import "../contracts_common/Interfaces/ERC20.sol";
 import "../contracts_common/BaseWithStorage/Admin.sol";
 
+
 /**
  * @title Referral Validator
  * @notice This contract verifies if a referral is valid
@@ -15,7 +16,7 @@ contract ReferralValidator is Admin {
     address private _signingWallet;
     uint256 private _maxCommissionRate;
 
-    mapping(address => uint256) private _previousSigningWallets;
+    mapping (address => uint256) private _previousSigningWallets;
     uint256 private _previousSigningDelay = 60 * 60 * 24 * 10;
 
     event ReferralUsed(
@@ -27,7 +28,10 @@ contract ReferralValidator is Admin {
         uint256 commissionRate
     );
 
-    constructor(address initialSigningWallet, uint256 initialMaxCommissionRate) public {
+    constructor(
+        address initialSigningWallet,
+        uint256 initialMaxCommissionRate
+    ) public {
         _signingWallet = initialSigningWallet;
         _maxCommissionRate = initialMaxCommissionRate;
     }
@@ -71,10 +75,23 @@ contract ReferralValidator is Admin {
             uint256 commission = 0;
 
             if (isReferralValid(signature, referrer, referee, expiryTime, commissionRate)) {
-                commission = SafeMathWithRequire.div(SafeMathWithRequire.mul(amount, commissionRate), 10000);
+                commission = SafeMathWithRequire.div(
+                    SafeMathWithRequire.mul(amount, commissionRate),
+                    10000
+                );
 
-                emit ReferralUsed(referrer, referee, address(0), amount, commission, commissionRate);
-                amountForDestination = SafeMathWithRequire.sub(amountForDestination, commission);
+                emit ReferralUsed(
+                    referrer,
+                    referee,
+                    address(0),
+                    amount,
+                    commission,
+                    commissionRate
+                );
+                amountForDestination = SafeMathWithRequire.sub(
+                    amountForDestination,
+                    commission
+                );
             }
 
             if (commission > 0) {
@@ -107,10 +124,23 @@ contract ReferralValidator is Admin {
             uint256 commission = 0;
 
             if (isReferralValid(signature, referrer, referee, expiryTime, commissionRate)) {
-                commission = SafeMathWithRequire.div(SafeMathWithRequire.mul(amount, commissionRate), 10000);
+                commission = SafeMathWithRequire.div(
+                    SafeMathWithRequire.mul(amount, commissionRate),
+                    10000
+                );
 
-                emit ReferralUsed(referrer, referee, tokenAddress, amount, commission, commissionRate);
-                amountForDestination = SafeMathWithRequire.sub(amountForDestination, commission);
+                emit ReferralUsed(
+                    referrer,
+                    referee,
+                    tokenAddress,
+                    amount,
+                    commission,
+                    commissionRate
+                );
+                amountForDestination = SafeMathWithRequire.sub(
+                    amountForDestination,
+                    commission
+                );
             }
 
             if (commission > 0) {
@@ -136,15 +166,26 @@ contract ReferralValidator is Admin {
         address referee,
         uint256 expiryTime,
         uint256 commissionRate
-    ) public view returns (bool) {
+    ) public view returns (
+        bool
+    ) {
         if (commissionRate > _maxCommissionRate || referrer == referee || now > expiryTime) {
             return false;
         }
 
-        bytes32 hashedData = keccak256(abi.encodePacked(referrer, referee, expiryTime, commissionRate));
+        bytes32 hashedData = keccak256(
+            abi.encodePacked(
+                referrer,
+                referee,
+                expiryTime,
+                commissionRate
+            )
+        );
 
         address signer = SigUtil.recover(
-            keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)),
+            keccak256(
+                abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)
+            ),
             signature
         );
 
@@ -155,20 +196,29 @@ contract ReferralValidator is Admin {
         return _signingWallet == signer;
     }
 
-    function decodeReferral(bytes memory referral)
-        public
-        pure
-        returns (
-            bytes memory,
-            address,
-            address,
-            uint256,
-            uint256
-        )
-    {
-        (bytes memory signature, address referrer, address referee, uint256 expiryTime, uint256 commissionRate) = abi
-            .decode(referral, (bytes, address, address, uint256, uint256));
+    function decodeReferral(
+        bytes memory referral
+    ) public pure returns (
+        bytes memory,
+        address,
+        address,
+        uint256,
+        uint256
+    ) {
+        (
+            bytes memory signature,
+            address referrer,
+            address referee,
+            uint256 expiryTime,
+            uint256 commissionRate
+        ) = abi.decode(referral, (bytes, address, address, uint256, uint256));
 
-        return (signature, referrer, referee, expiryTime, commissionRate);
+        return (
+            signature,
+            referrer,
+            referee,
+            expiryTime,
+            commissionRate
+        );
     }
 }

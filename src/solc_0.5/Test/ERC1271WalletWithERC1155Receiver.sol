@@ -16,8 +16,15 @@ contract ERC1271WalletWithERC1155Receiver is ERC1271, ERC1271Constants {
         authorizedSigners[_signer] = true;
     }
 
-    function isValidSignature(bytes memory _data, bytes memory _signature) public view returns (bytes4 magicValue) {
-        address signer = SigUtil.recoverWithZeroOnFailure(keccak256(_data), _signature);
+    function isValidSignature(bytes memory _data, bytes memory _signature)
+        public
+        view
+        returns (bytes4 magicValue)
+    {
+        address signer = SigUtil.recoverWithZeroOnFailure(
+            keccak256(_data),
+            _signature
+        );
         if (authorizedSigners[signer]) {
             return ERC1271_MAGICVALUE;
         }

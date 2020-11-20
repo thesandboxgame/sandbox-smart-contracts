@@ -13,12 +13,9 @@ contract TestMintingFeeCollector is MintingFeeCollector {
     address owner;
     uint256 feePerToken;
     ERC20 acceptedFeeToken;
-
-    constructor(
-        address _owner,
-        AssetBouncer _from,
-        ERC20 _acceptedFeeToken
-    ) public {
+    constructor(address _owner, AssetBouncer _from, ERC20 _acceptedFeeToken)
+        public
+    {
         from = _from;
         owner = _owner;
         acceptedFeeToken = _acceptedFeeToken;
@@ -47,4 +44,5 @@ contract TestMintingFeeCollector is MintingFeeCollector {
     //     require(msg.sender == owner);
     //     from.setFeeCollection(newCollector, newFeeToken, newFee);
     // }
+
 }

@@ -20,27 +20,19 @@ contract ORBCore is SuperOperators, ERC1155 {
     mapping(address => mapping(address => bool)) operatorsForAll;
 
     mapping(address => bool) metaTransactionContracts; // native meta-transaction support
-
+    
     uint256[3] totalSupplies;
     ERC20ORB[3] erc20s;
     event ORB(ERC20ORB orb);
-
-    constructor(
-        address _to,
-        uint256 supply0,
-        uint256 supply1,
-        uint256 supply2
-    ) public {
+    constructor(address _to, uint256 supply0, uint256 supply1, uint256 supply2)
+        public
+    {
         deployORB(0, supply0, _to);
         deployORB(1, supply1, _to);
         deployORB(2, supply2, _to);
     }
 
-    function deployORB(
-        uint8 index,
-        uint256 supply,
-        address _to
-    ) internal {
+    function deployORB(uint8 index, uint256 supply, address _to) internal {
         ERC20ORB orb = new ERC20ORB(this, index);
 
         packedTokenBalance[_to] = packedTokenBalance[_to].updateTokenBalance(
@@ -93,17 +85,32 @@ contract ORBCore is SuperOperators, ERC1155 {
     ) internal {
         require(_to != address(0), "Invalid to address");
         ERC20ORB erc20 = erc20s[_id];
-        if (_from != msg.sender && !metaTransactionContracts[msg.sender] && msg.sender != address(erc20)) {
-            require(_superOperators[msg.sender] || operatorsForAll[_from][msg.sender], "Operator not approved");
+        if (
+            _from != msg.sender &&
+            !metaTransactionContracts[msg.sender] &&
+            msg.sender != address(erc20)
+        ) {
+            require(
+                _superOperators[msg.sender] ||
+                    operatorsForAll[_from][msg.sender],
+                "Operator not approved"
+            );
         }
 
-        packedTokenBalance[_from] = packedTokenBalance[_from].updateTokenBalance(
+        packedTokenBalance[_from] = packedTokenBalance[_from]
+            .updateTokenBalance(_id, _value, ObjectLib64.Operations.SUB);
+        packedTokenBalance[_to] = packedTokenBalance[_to].updateTokenBalance(
             _id,
             _value,
-            ObjectLib64.Operations.SUB
+            ObjectLib64.Operations.ADD
         );
-        packedTokenBalance[_to] = packedTokenBalance[_to].updateTokenBalance(_id, _value, ObjectLib64.Operations.ADD);
-        emit TransferSingle(metaTransactionContracts[msg.sender] ? _from : msg.sender, _from, _to, _id, _value);
+        emit TransferSingle(
+            metaTransactionContracts[msg.sender] ? _from : msg.sender,
+            _from,
+            _to,
+            _id,
+            _value
+        );
         erc20.emitTransferEvent(_from, _to, _value);
     }
 
@@ -156,7 +163,10 @@ contract ORBCore is SuperOperators, ERC1155 {
         uint256[] memory _ids,
         uint256[] memory _values
     ) internal {
-        require(_ids.length == _values.length, "Inconsistent array length between args");
+        require(
+            _ids.length == _values.length,
+            "Inconsistent array length between args"
+        );
         require(_to != address(0), "Invalid recipient");
         require(
             _from == msg.sender ||
@@ -170,28 +180,50 @@ contract ORBCore is SuperOperators, ERC1155 {
         uint256 balTo = packedTokenBalance[_to];
         for (uint256 i = 0; i < _ids.length; i++) {
             ERC20ORB erc20 = erc20s[_ids[i]];
-            balFrom = ObjectLib64.updateTokenBalance(balFrom, _ids[i], _values[i], ObjectLib64.Operations.SUB);
-            balTo = ObjectLib64.updateTokenBalance(balTo, _ids[i], _values[i], ObjectLib64.Operations.ADD);
+            balFrom = ObjectLib64.updateTokenBalance(
+                balFrom,
+                _ids[i],
+                _values[i],
+                ObjectLib64.Operations.SUB
+            );
+            balTo = ObjectLib64.updateTokenBalance(
+                balTo,
+                _ids[i],
+                _values[i],
+                ObjectLib64.Operations.ADD
+            );
             erc20.emitTransferEvent(_from, _to, _values[i]);
         }
         packedTokenBalance[_from] = balFrom;
         packedTokenBalance[_to] = balTo;
-        emit TransferBatch(metaTransactionContracts[msg.sender] ? _from : msg.sender, _from, _to, _ids, _values);
+        emit TransferBatch(
+            metaTransactionContracts[msg.sender] ? _from : msg.sender,
+            _from,
+            _to,
+            _ids,
+            _values
+        );
     }
 
-    function balanceOf(address _owner, uint256 _tokenId) public view returns (uint256) {
+    function balanceOf(address _owner, uint256 _tokenId)
+        public
+        view
+        returns (uint256)
+    {
         if (_tokenId > 2) {
             return 0;
         }
         return packedTokenBalance[_owner].getValueInBin(_tokenId);
     }
 
-    function balanceOfBatch(address[] calldata _owners, uint256[] calldata _tokenIds)
-        external
-        view
-        returns (uint256[] memory)
-    {
-        require(_owners.length == _tokenIds.length, "Inconsistent array length between args");
+    function balanceOfBatch(
+        address[] calldata _owners,
+        uint256[] calldata _tokenIds
+    ) external view returns (uint256[] memory) {
+        require(
+            _owners.length == _tokenIds.length,
+            "Inconsistent array length between args"
+        );
         uint256[] memory balances = new uint256[](_tokenIds.length);
         for (uint256 i = 0; i < _tokenIds.length; i++) {
             balances[i] = balanceOf(_owners[i], _tokenIds[i]);
@@ -205,27 +237,33 @@ contract ORBCore is SuperOperators, ERC1155 {
         bool _approved
     ) external {
         require(
-            msg.sender == _sender || metaTransactionContracts[msg.sender] || _superOperators[msg.sender],
+            msg.sender == _sender ||
+                metaTransactionContracts[msg.sender] ||
+                _superOperators[msg.sender],
             "require meta approval"
         );
         _setApprovalForAll(_sender, _operator, _approved);
     }
-
     function setApprovalForAll(address _operator, bool _approved) external {
         _setApprovalForAll(msg.sender, _operator, _approved);
     }
-
     function _setApprovalForAll(
         address _sender,
         address _operator,
         bool _approved
     ) internal {
-        require(!_superOperators[_operator], "super operator can't have their approvalForAll changed");
+        require(
+            !_superOperators[_operator],
+            "super operator can't have their approvalForAll changed"
+        );
         operatorsForAll[_sender][_operator] = _approved;
         emit ApprovalForAll(_sender, _operator, _approved);
     }
-
-    function isApprovedForAll(address _owner, address _operator) external view returns (bool isOperator) {
+    function isApprovedForAll(address _owner, address _operator)
+        external
+        view
+        returns (bool isOperator)
+    {
         return operatorsForAll[_owner][_operator] || _superOperators[_operator];
     }
 
@@ -239,7 +277,11 @@ contract ORBCore is SuperOperators, ERC1155 {
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     bytes4 constant ERC165ID = 0x01ffc9a7;
 
-    function checkIsERC1155Receiver(address _contract) internal view returns (bool) {
+    function checkIsERC1155Receiver(address _contract)
+        internal
+        view
+        returns (bool)
+    {
         bytes4 erc1155ReceiverID = ERC1155_IS_RECEIVER;
         bytes4 erc165ID = ERC165ID;
         bool success;
@@ -281,7 +323,15 @@ contract ORBCore is SuperOperators, ERC1155 {
         if (_unsafe && !checkIsERC1155Receiver(_to)) {
             return true;
         }
-        return ERC1155TokenReceiver(_to).onERC1155Received(_operator, _from, _id, _value, _data) == ERC1155_RECEIVED;
+        return
+            ERC1155TokenReceiver(_to).onERC1155Received(
+                    _operator,
+                    _from,
+                    _id,
+                    _value,
+                    _data
+                ) ==
+                ERC1155_RECEIVED;
     }
 
     function _checkERC1155AndCallSafeBatchTransfer(
@@ -295,7 +345,14 @@ contract ORBCore is SuperOperators, ERC1155 {
         if (!_to.isContract()) {
             return true;
         }
-        bytes4 retval = ERC1155TokenReceiver(_to).onERC1155BatchReceived(_operator, _from, _ids, _values, _data);
+        bytes4 retval = ERC1155TokenReceiver(_to).onERC1155BatchReceived(
+            _operator,
+            _from,
+            _ids,
+            _values,
+            _data
+        );
         return (retval == ERC1155_BATCH_RECEIVED);
     }
+
 }

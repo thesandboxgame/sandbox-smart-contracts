@@ -12,7 +12,6 @@ contract ORBBouncer is AssetBouncer {
         asset = _asset;
         metaTransactionContracts[_metaTransactionContract] = true;
     }
-
     // TODO add metatransaction contract
 
     function mint(
@@ -25,7 +24,10 @@ contract ORBBouncer is AssetBouncer {
         address _owner,
         bytes memory _data
     ) public returns (uint256 tokenId) {
-        require(msg.sender == _sender || metaTransactionContracts[msg.sender], "not authorized");
+        require(
+            msg.sender == _sender || metaTransactionContracts[msg.sender],
+            "not authorized"
+        );
         return asset.mint(_sender, _packId, _hash, _supply, 0, _owner, _data); // TODO compare gas cost of paramter vs callData
     }
 
@@ -39,8 +41,20 @@ contract ORBBouncer is AssetBouncer {
         address _owner,
         bytes memory _data
     ) public returns (uint256[] memory tokenIds) {
-        require(msg.sender == _sender || metaTransactionContracts[msg.sender], "not authorized");
+        require(
+            msg.sender == _sender || metaTransactionContracts[msg.sender],
+            "not authorized"
+        );
         bytes memory rarityPack = new bytes(0);
-        return asset.mintMultiple(_sender, _packId, _hash, _supplies, rarityPack, _owner, _data);
+        return
+            asset.mintMultiple(
+                _sender,
+                _packId,
+                _hash,
+                _supplies,
+                rarityPack,
+                _owner,
+                _data
+            );
     }
 }

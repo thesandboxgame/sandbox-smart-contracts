@@ -34,10 +34,14 @@ contract GenericMetaTransaction is TheSandbox712, ERC1271Constants {
         uint256[4] memory params, // _nonce, _gasPrice, _txGas, _tokenGasPrice
         address _relayer
     ) internal view {
-        require(_relayer == address(0) || _relayer == msg.sender, "wrong relayer");
+        require(
+            _relayer == address(0) || _relayer == msg.sender,
+            "wrong relayer"
+        );
         require(nonces[_from] + 1 == params[0], "nonce out of order");
         require(
-            ERC20(_gasToken).balanceOf(_from) >= (params[2].add(BASE_GAS)).mul(params[3]),
+            ERC20(_gasToken).balanceOf(_from) >=
+                (params[2].add(BASE_GAS)).mul(params[3]),
             "_from not enough balance"
         );
         require(tx.gasprice == params[1], "gasPrice != signer gasPrice"); // need to provide same gasPrice as requested by signer // TODO consider allowing higher value
@@ -87,7 +91,11 @@ contract GenericMetaTransaction is TheSandbox712, ERC1271Constants {
             encodeData(typeHash, _from, _to, _gasToken, _data, params, _relayer)
         );
         if (signedOnBehalf) {
-            require(ERC1271(_from).isValidSignature(data, _sig) == ERC1271_MAGICVALUE, "invalid signature");
+            require(
+                ERC1271(_from).isValidSignature(data, _sig) ==
+                    ERC1271_MAGICVALUE,
+                "invalid signature"
+            );
         } else {
             address signer = SigUtil.recover(keccak256(data), _sig);
             require(signer == _from, "signer != _from");
@@ -161,7 +169,16 @@ contract GenericMetaTransaction is TheSandbox712, ERC1271Constants {
             ERC20METATRANSACTION_TYPEHASH,
             signedOnBehalf
         );
-        return performERC20MetaTx(_from, _to, _gasToken, _data, params, initialGas, _tokenReceiver);
+        return
+            performERC20MetaTx(
+                _from,
+                _to,
+                _gasToken,
+                _data,
+                params,
+                initialGas,
+                _tokenReceiver
+            );
     }
 
     function performERC20MetaTx(
@@ -179,18 +196,31 @@ contract GenericMetaTransaction is TheSandbox712, ERC1271Constants {
         bytes memory returnData;
 
         if (_to == address(this)) {
-            require(BytesUtil.doFirstParamEqualsAddress(_data, _from), "first param != _from");
+            require(
+                BytesUtil.doFirstParamEqualsAddress(_data, _from),
+                "first param != _from"
+            );
             uint256 gasAvailable = gasleft() - WORST_CASE_EPSILON;
-            require(gasAvailable - gasAvailable / 64 > params[2], "not enough gas");
+            require(
+                gasAvailable - gasAvailable / 64 > params[2],
+                "not enough gas"
+            );
             (success, returnData) = _to.call.gas(params[2])(_data);
         } else {
             // can't accept any call since this contract willmost likely be approved by ERC20 or ERC777 contract and if those have function that
             // have such signature for example differentTransfer(uint256 amount, address from, ...) they would be vulnerable
             //so instead we define a meta_transaction hook
             uint256 gasAvailable = gasleft() - WORST_CASE_EPSILON;
-            require(gasAvailable - gasAvailable / 64 > params[2], "not enough gas");
+            require(
+                gasAvailable - gasAvailable / 64 > params[2],
+                "not enough gas"
+            );
             (success, returnData) = _to.call.gas(params[2])(
-                abi.encodeWithSignature("meta_transaction_received(address,bytes)", _from, _data)
+                abi.encodeWithSignature(
+                    "meta_transaction_received(address,bytes)",
+                    _from,
+                    _data
+                )
             );
         }
 
@@ -202,7 +232,11 @@ contract GenericMetaTransaction is TheSandbox712, ERC1271Constants {
                 gasConsumed = BASE_GAS + params[2];
                 // idealy we would like to charge only max(BASE_GAS, gas consumed outside the inner call) + gas consumed as part of the inner call
             }
-            ERC20(_gasToken).transferFrom(_from, _tokenReceiver, gasConsumed * params[3]);
+            ERC20(_gasToken).transferFrom(
+                _from,
+                _tokenReceiver,
+                gasConsumed * params[3]
+            );
         }
 
         return (success, returnData);

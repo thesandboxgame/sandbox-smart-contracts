@@ -13,8 +13,15 @@ contract ERC1654Wallet is ERC1654, ERC1654Constants {
         authorizedSigners[_signer] = true;
     }
 
-    function isValidSignature(bytes32 _hash, bytes memory _signature) public view returns (bytes4 magicValue) {
-        address signer = SigUtil.recoverWithZeroOnFailure(_hash, _signature);
+    function isValidSignature(bytes32 _hash, bytes memory _signature)
+        public
+        view
+        returns (bytes4 magicValue)
+    {
+        address signer = SigUtil.recoverWithZeroOnFailure(
+            _hash,
+            _signature
+        );
         if (authorizedSigners[signer]) {
             return ERC1654_MAGICVALUE;
         }

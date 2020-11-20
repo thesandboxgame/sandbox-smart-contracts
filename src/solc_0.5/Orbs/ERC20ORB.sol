@@ -1,7 +1,9 @@
 pragma solidity 0.5.9;
 
 import {ERC20} from "../contracts_common/Interfaces/ERC20.sol";
-import {ERC20Events} from "../contracts_common/Interfaces/ERC20Events.sol";
+import {
+    ERC20Events
+} from "../contracts_common/Interfaces/ERC20Events.sol";
 import "../contracts_common/Libraries/SafeMath.sol";
 import "../contracts_common/BaseWithStorage/SuperOperators.sol";
 
@@ -37,16 +39,18 @@ contract ERC20ORB is
         return uint8(18);
     }
 
-    function transfer(address _to, uint256 _amount) public returns (bool success) {
+    function transfer(address _to, uint256 _amount)
+        public
+        returns (bool success)
+    {
         _transfer(msg.sender, _to, _amount);
         return true;
     }
 
-    function transferFrom(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) public returns (bool success) {
+    function transferFrom(address _from, address _to, uint256 _amount)
+        public
+        returns (bool success)
+    {
         if (msg.sender != _from && !_superOperators[msg.sender]) {
             uint256 allowance = mAllowed[_from][msg.sender];
             if (allowance != (2**256) - 1) {
@@ -59,48 +63,52 @@ contract ERC20ORB is
         return true;
     }
 
-    function approve(address _spender, uint256 _amount) public returns (bool success) {
+    function approve(address _spender, uint256 _amount)
+        public
+        returns (bool success)
+    {
         _approveFor(msg.sender, _spender, _amount);
         return true;
     }
 
-    function approveFor(
-        address from,
-        address _spender,
-        uint256 _amount
-    ) public returns (bool success) {
-        require(msg.sender == from || _superOperators[msg.sender], "msg.sender != from || superOperator");
+    function approveFor(address from, address _spender, uint256 _amount)
+        public
+        returns (bool success)
+    {
+        require(
+            msg.sender == from || _superOperators[msg.sender],
+            "msg.sender != from || superOperator"
+        );
         _approveFor(from, _spender, _amount);
         return true;
     }
 
-    function _approveFor(
-        address _owner,
-        address _spender,
-        uint256 _amount
-    ) internal {
-        require(_owner != address(0) && _spender != address(0), "Cannot approve with 0x0");
+    function _approveFor(address _owner, address _spender, uint256 _amount)
+        internal
+    {
+        require(
+            _owner != address(0) && _spender != address(0),
+            "Cannot approve with 0x0"
+        );
         mAllowed[_owner][_spender] = _amount;
         emit Approval(_owner, _spender, _amount);
     }
 
-    function allowance(address _owner, address _spender) public view returns (uint256 remaining) {
+    function allowance(address _owner, address _spender)
+        public
+        view
+        returns (uint256 remaining)
+    {
         return mAllowed[_owner][_spender];
     }
 
-    function _transfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) internal {
+    function _transfer(address _from, address _to, uint256 _amount) internal {
         origin.core.transferFrom(_from, _to, origin.index, _amount);
     }
 
-    function emitTransferEvent(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) external {
+    function emitTransferEvent(address _from, address _to, uint256 _amount)
+        external
+    {
         require(msg.sender == address(origin.core), "only core");
         emit Transfer(_from, _to, _amount);
     }

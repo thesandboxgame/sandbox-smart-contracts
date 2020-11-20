@@ -17,7 +17,12 @@ contract ERC20MetaTxExtension is ERC1271Constants {
     uint256 constant GAS_LIMIT_OFFSET = 112000;
     uint256 constant MIN_GAS = 23000 + 17500; // ~ 13000 (transfer with non-zero receiver balance) + ~ 4500 (Sent event)
 
-    event MetaTx(address indexed from, uint256 indexed nonce, bool success, bytes returnData);
+    event MetaTx(
+        address indexed from,
+        uint256 indexed nonce,
+        bool success,
+        bytes returnData
+    );
 
     function ensureParametersValidity(
         address _from,
@@ -26,10 +31,14 @@ contract ERC20MetaTxExtension is ERC1271Constants {
         address _relayer,
         uint256 initialGas
     ) internal view {
-        require(_relayer == address(0) || _relayer == msg.sender, "wrong relayer");
+        require(
+            _relayer == address(0) || _relayer == msg.sender,
+            "wrong relayer"
+        );
         require(nonces[_from] + 1 == params[0], "nonce out of order");
         require(
-            balanceOf(_from) >= _amount.add((params[2].add(GAS_LIMIT_OFFSET)).mul(params[3])),
+            balanceOf(_from) >=
+                _amount.add((params[2].add(GAS_LIMIT_OFFSET)).mul(params[3])),
             "_from not enough balance"
         );
         require(tx.gasprice >= params[1], "gasPrice < signer gasPrice"); // need to provide at least as much gasPrice as requested by signer
@@ -66,7 +75,11 @@ contract ERC20MetaTxExtension is ERC1271Constants {
             )
         );
         if (signedOnBehalf) {
-            require(ERC1271(_from).isValidSignature(data, _sig) == ERC1271_MAGICVALUE, "invalid signature");
+            require(
+                ERC1271(_from).isValidSignature(data, _sig) ==
+                    ERC1271_MAGICVALUE,
+                "invalid signature"
+            );
         } else {
             address signer = SigUtil.recover(keccak256(data), _sig);
             require(signer == _from, "signer != _from");
@@ -113,10 +126,22 @@ contract ERC20MetaTxExtension is ERC1271Constants {
         bool signedOnBehalf
     ) internal view {
         bytes memory data = SigUtil.prefixed(
-            encodeBasicSignatureData(typeHash, _from, _to, _amount, _data, params, _relayer)
+            encodeBasicSignatureData(
+                typeHash,
+                _from,
+                _to,
+                _amount,
+                _data,
+                params,
+                _relayer
+            )
         );
         if (signedOnBehalf) {
-            require(ERC1271(_from).isValidSignature(data, _sig) == ERC1271_MAGICVALUE, "invalid signature");
+            require(
+                ERC1271(_from).isValidSignature(data, _sig) ==
+                    ERC1271_MAGICVALUE,
+                "invalid signature"
+            );
         } else {
             address signer = SigUtil.recover(keccak256(data), _sig);
             require(signer == _from, "signer != _from");
@@ -147,7 +172,16 @@ contract ERC20MetaTxExtension is ERC1271Constants {
             ERC20METATRANSACTION_TYPEHASH,
             signedOnBehalf
         );
-        return performERC20MetaTx(_from, _to, _amount, _data, params, initialGas, _tokenReceiver);
+        return
+            performERC20MetaTx(
+                _from,
+                _to,
+                _amount,
+                _data,
+                params,
+                initialGas,
+                _tokenReceiver
+            );
     }
 
     function executeERC20MetaTxViaBasicSignature(
@@ -174,7 +208,16 @@ contract ERC20MetaTxExtension is ERC1271Constants {
             ERC20METATRANSACTION_TYPEHASH,
             signedOnBehalf
         );
-        return performERC20MetaTx(_from, _to, _amount, _data, params, initialGas, _tokenReceiver);
+        return
+            performERC20MetaTx(
+                _from,
+                _to,
+                _amount,
+                _data,
+                params,
+                initialGas,
+                _tokenReceiver
+            );
     }
 
     function performERC20MetaTx(
@@ -194,7 +237,10 @@ contract ERC20MetaTxExtension is ERC1271Constants {
             _transfer(_from, _to, _amount);
             success = true;
         } else {
-            require(BytesUtil.doFirstParamEqualsAddress(_data, _from), "first param != _from");
+            require(
+                BytesUtil.doFirstParamEqualsAddress(_data, _from),
+                "first param != _from"
+            );
             bool allowanceChanged = false;
             uint256 before = 0;
             if (_amount > 0 && !isSuperOperator(_to)) {
@@ -231,22 +277,16 @@ contract ERC20MetaTxExtension is ERC1271Constants {
     }
 
     function isSuperOperator(address who) public view returns (bool);
-
-    function allowance(address _owner, address _spender) public view returns (uint256 remaining);
-
+    function allowance(address _owner, address _spender)
+        public
+        view
+        returns (uint256 remaining);
     function domainSeparator() internal view returns (bytes32);
-
     function balanceOf(address who) public view returns (uint256);
-
     function _approveForWithoutEvent(
         address _owner,
         address _target,
         uint256 _amount
     ) internal;
-
-    function _transfer(
-        address _from,
-        address _to,
-        uint256 _amount
-    ) internal;
+    function _transfer(address _from, address _to, uint256 _amount) internal;
 }
