@@ -25,6 +25,8 @@ interface AssetToken {
     // fails on non-NFT or nft who do not have collection (was a mistake)
     function collectionOf(uint256 id) external view returns (uint256);
 
+    function balanceOf(address owner, uint256 id) external view returns (uint256);
+
     // return true for Non-NFT ERC1155 tokens which exists
     function isCollection(uint256 id) external view returns (bool);
 
@@ -36,9 +38,38 @@ interface AssetToken {
         address to
     ) external returns (uint256 newId);
 
+    function transferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) external;
+
     function safeTransferFrom(
         address from,
         address to,
         uint256 id
+    ) external;
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 value,
+        bytes calldata data
+    ) external;
+
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids,
+        bytes calldata data
+    ) external;
+
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids,
+        uint256[] calldata values,
+        bytes calldata data
     ) external;
 }
