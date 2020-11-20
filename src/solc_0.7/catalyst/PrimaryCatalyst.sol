@@ -14,7 +14,7 @@ contract PrimaryCatalyst is CatalystToken {
         string memory symbol,
         address admin,
         uint8 maxGems,
-        uint256 _catalystId
+        uint16 _catalystId
     ) CatalystToken(name, symbol, admin, maxGems, _catalystId) {}
 
     function getMaxGems() external view override returns (uint8) {

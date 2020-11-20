@@ -5,9 +5,8 @@ pragma experimental ABIEncoderV2;
 import "../AssetAttributesRegistry.sol";
 import "../ERC20Token.sol";
 
-// TODO ERC20
 abstract contract CatalystToken is ERC20Token {
-    uint256 public immutable catalystId;
+    uint16 public immutable catalystId;
     uint8 internal immutable _maxGems;
 
     function getMaxGems() external view virtual returns (uint8);
@@ -23,7 +22,7 @@ abstract contract CatalystToken is ERC20Token {
         string memory symbol,
         address admin,
         uint8 maxGems,
-        uint256 _catalystId
+        uint16 _catalystId
     ) ERC20Token(name, symbol, admin) {
         _maxGems = maxGems;
         catalystId = _catalystId;

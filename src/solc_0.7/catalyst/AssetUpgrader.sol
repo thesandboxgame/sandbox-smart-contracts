@@ -167,7 +167,7 @@ contract AssetUpgrader is WithMetaTransaction {
     }
 
     function _burnGems(address from, uint16[] memory gemIds) internal {
-        _gemsAndCatalysts.burnDiferentGems(from, gemIds);
+        _gemsAndCatalysts.burnDifferentGems(from, gemIds);
     }
 
     function _burnCatalyst(address from, uint16 catalystId) internal {

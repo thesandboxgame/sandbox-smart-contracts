@@ -1,7 +1,6 @@
-import {ethers, deployments, getNamedAccounts} from 'hardhat';
+import { ethers, deployments, getNamedAccounts } from 'hardhat';
 
-import {BigNumber} from 'ethers';
-import {Contract} from 'ethers';
+import { Contract, BigNumber } from 'ethers';
 
 export const setupERC677 = deployments.createFixture(async () => {
   await deployments.fixture('Gems');
