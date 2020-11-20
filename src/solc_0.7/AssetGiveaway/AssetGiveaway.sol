@@ -12,7 +12,9 @@ contract AssetGiveaway is WithAdmin, WithMetaTransaction, ClaimERC1155 {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
 
-    constructor(AssetToken asset) ClaimERC1155(asset) {}
+    constructor(AssetToken asset, bytes32 merkleRoot) ClaimERC1155(asset, merkleRoot) {}
+
+    // TODO: add _expiryTime for giveaway
 
     function claimAssets(
         address from,
@@ -22,6 +24,7 @@ contract AssetGiveaway is WithAdmin, WithMetaTransaction, ClaimERC1155 {
         bytes32[] calldata proof
     ) external {
         require(msg.sender == from || _metaTransactionContracts[msg.sender] > 0, "INVALID_SENDER"); // TODO: check bool
+        // require(block.timestamp < _expiryTime, "CLAIM_PERIOD_IS_OVER");
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         _claimERC1155(from, to, assetIds, assetValues, proof);
     }
