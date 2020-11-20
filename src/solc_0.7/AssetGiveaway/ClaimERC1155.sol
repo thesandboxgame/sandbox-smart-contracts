@@ -2,19 +2,25 @@
 pragma solidity 0.7.1;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "../common/Interfaces/AssetToken.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
 contract ClaimERC1155 {
     using SafeMath for uint256;
 
     bytes32 internal immutable _merkleRoot;
 
-    AssetToken _asset;
+    IERC1155 _asset;
+    address _assetsHolder;
     event ClaimedAssets(address to, uint256[] assetIds, uint256[] assetValues);
 
-    constructor(AssetToken asset, bytes32 merkleRoot) {
+    constructor(
+        IERC1155 asset,
+        bytes32 merkleRoot,
+        address assetsHolder
+    ) {
         _asset = asset;
         _merkleRoot = merkleRoot;
+        _assetsHolder = assetsHolder;
     }
 
     function _claimERC1155(
@@ -73,6 +79,10 @@ contract ClaimERC1155 {
         uint256[] memory assetIds,
         uint256[] memory assetValues
     ) internal returns (bool) {
-        _asset.safeBatchTransferFrom(address(this), to, assetIds, assetValues, "");
+        if (_assetsHolder != address(0)) {
+            _asset.safeBatchTransferFrom(address(this), to, assetIds, assetValues, "");
+        } else {
+            _asset.safeBatchTransferFrom(_assetsHolder, to, assetIds, assetValues, "");
+        }
     }
 }

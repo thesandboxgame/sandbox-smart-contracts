@@ -2,6 +2,7 @@
 pragma solidity 0.7.1;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "./ClaimERC1155.sol";
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
@@ -12,7 +13,11 @@ contract AssetGiveaway is WithAdmin, WithMetaTransaction, ClaimERC1155 {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
 
-    constructor(AssetToken asset, bytes32 merkleRoot) ClaimERC1155(asset, merkleRoot) {}
+    constructor(
+        IERC1155 asset,
+        bytes32 merkleRoot,
+        address assetsHolder
+    ) ClaimERC1155(asset, merkleRoot, assetsHolder) {}
 
     // TODO: add _expiryTime for giveaway
 
