@@ -14,10 +14,10 @@ contract AssetGiveaway is WithAdmin, WithMetaTransaction, ClaimERC1155 {
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
 
     constructor(
-        IERC1155 asset,
+        address asset,
         bytes32 merkleRoot,
         address assetsHolder
-    ) ClaimERC1155(asset, merkleRoot, assetsHolder) {}
+    ) ClaimERC1155(IERC1155(asset), merkleRoot, assetsHolder) {}
 
     // TODO: add _expiryTime for giveaway
 
