@@ -31,7 +31,7 @@ contract GemsAndCatalysts is WithAdmin {
     }
 
     function getMaxGems(uint16 catalystId) external view returns (uint8) {
-        require(catalystId > 0, "INVALID_CATALYST_ID");
+        require(isCatalystExists(catalystId), "CATALYST_DOES_NOT_EXIST");
         CatalystToken catalyst = _catalysts[catalystId];
         return catalyst.getMaxGems();
     }
@@ -73,7 +73,7 @@ contract GemsAndCatalysts is WithAdmin {
         uint16 catalystId,
         uint256 amount
     ) public {
-        require(catalystId > 0, "INVALID_CATALYST_ID");
+        require(isCatalystExists(catalystId), "CATALYST_DOES_NOT_EXIST");
         _catalysts[catalystId].burnFor(from, amount);
     }
 
@@ -82,7 +82,7 @@ contract GemsAndCatalysts is WithAdmin {
         uint16 gemId,
         uint256 amount
     ) public {
-        require(gemId > 0, "INVALID_GEM_ID");
+        require(isGemExists(gemId), "GEM_DOES_NOT_EXIST");
         _gems[gemId].burnFor(from, amount);
     }
 
