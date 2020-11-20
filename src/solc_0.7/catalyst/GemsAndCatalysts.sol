@@ -2,7 +2,7 @@
 pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
-import "./interfaces/GemToken.sol";
+import "./Gem.sol";
 import "./interfaces/CatalystToken.sol";
 import "./AssetAttributesRegistry.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
@@ -12,7 +12,7 @@ import "../common/BaseWithStorage/WithAdmin.sol";
 /// Each new Gem get assigned a new id (starting at 1)
 /// Each new Catalyst get assigned a new id (starting at 1)
 contract GemsAndCatalysts is WithAdmin {
-    GemToken[] internal _gems;
+    Gem[] internal _gems;
     CatalystToken[] internal _catalysts;
 
     constructor(address admin) {
@@ -85,16 +85,16 @@ contract GemsAndCatalysts is WithAdmin {
         // TODO _gems[gemId].burnFrom(from, amount);
     }
 
-    function addGemsAndCatalysts(GemToken[] calldata gems, CatalystToken[] calldata catalysts) external {
+    function addGemsAndCatalysts(Gem[] calldata gems, CatalystToken[] calldata catalysts) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
         for (uint256 i = 0; i < gems.length; i++) {
+            require(address(_gems[gems[i].gemId() - 1]) == address(0));
             _gems.push(gems[i]);
-            // TODO check Id
         }
 
         for (uint256 i = 0; i < catalysts.length; i++) {
+            require(address(_catalysts[catalysts[i].catalystId() - 1]) == address(0));
             _catalysts.push(catalysts[i]);
-            // TODO check Id
         }
     }
 }
