@@ -12,15 +12,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const gemsToAdd = [];
 
   for (const catalyst of catalysts) {
-    const isCatalystExists = false;
-    // const isCatalystExists = await read(
-    //   `GemsAndCatalysts`,
-    //   'isCatalystExists',
-    //   catalyst.catalystId
-    // );
+    const isCatalystExists = await read(
+      `GemsAndCatalysts`,
+      'isCatalystExists',
+      catalyst.catalystId
+    );
     if (!isCatalystExists) {
-      const catalystAddress = await deployments.get(`Catalyst_${catalyst.name}`);
-      catalystsToAdd.push(catalystAddress)
+      const { address } = await deployments.get(`Catalyst_${catalyst.name}`);
+      catalystsToAdd.push(address);
     }
   }
 
@@ -31,8 +30,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       gem.gemId
     );
     if (!isGemExists) {
-      const gemAddress = await deployments.get(`Gem_${gem.name}`);
-      gemsToAdd.push(gemAddress)
+      const { address } = await deployments.get(`Gem_${gem.name}`);
+      gemsToAdd.push(address);
     }
   }
 

@@ -6,6 +6,7 @@ import "./Gem.sol";
 import "./interfaces/CatalystToken.sol";
 import "./AssetAttributesRegistry.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
+import "hardhat/console.sol";
 
 /// @notice Contract managing the Gems and Catalysts
 /// Each Gems and Catalys must be registered here.
@@ -88,21 +89,21 @@ contract GemsAndCatalysts is WithAdmin {
     function addGemsAndCatalysts(Gem[] calldata gems, CatalystToken[] calldata catalysts) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
         for (uint256 i = 0; i < gems.length; i++) {
-            require(isGemExists(gems[i].gemId()), "GEM_ALREADY_EXISTS");
+            require(!isGemExists(gems[i].gemId()), "GEM_ALREADY_EXISTS");
             _gems.push(gems[i]);
         }
 
         for (uint256 i = 0; i < catalysts.length; i++) {
-            require(isCatalystExists(catalysts[i].catalystId()), "CATALYST_ALREADY_EXISTS");
+            require(!isCatalystExists(catalysts[i].catalystId()), "CATALYST_ALREADY_EXISTS");
             _catalysts.push(catalysts[i]);
         }
     }
 
     function isGemExists(uint16 gemId) public view returns (bool) {
-        return _gems.length > 0 && address(_gems[gemId - 1]) == address(0);
+        return gemId <= _gems.length && address(_gems[gemId - 1]) != address(0);
     }
 
     function isCatalystExists(uint16 catalystId) public view returns (bool) {
-        return _catalysts.length > 0 && address(_catalysts[catalystId - 1]) == address(0);
+        return catalystId <= _catalysts.length && address(_catalysts[catalystId - 1]) != address(0);
     }
 }
