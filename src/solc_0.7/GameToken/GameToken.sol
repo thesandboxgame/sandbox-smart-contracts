@@ -90,7 +90,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
             require(_gameData[gameId]._assets.remove(assetId), "ASSET_NOT_IN_GAME");
         }
 
-        _asset.safeTransferFrom(address(this), to, assetId);
+        _asset.safeTransferFrom(address(this), to, assetId, 1, "");
         uint256[] memory assets = new uint256[](1);
         uint256[] memory values = new uint256[](1);
         assets[0] = assetId;
