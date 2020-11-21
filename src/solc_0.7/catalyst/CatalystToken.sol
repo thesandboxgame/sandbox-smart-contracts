@@ -2,8 +2,8 @@
 pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
-import "../AssetAttributesRegistry.sol";
-import "../ERC20Token.sol";
+import "./AssetAttributesRegistry.sol";
+import "./ERC20Token.sol";
 
 abstract contract CatalystToken is ERC20Token {
     uint16 public immutable catalystId;

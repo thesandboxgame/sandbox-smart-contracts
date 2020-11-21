@@ -2,7 +2,7 @@
 pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
-import "./interfaces/CatalystToken.sol";
+import "./CatalystToken.sol";
 import "./AssetAttributesRegistry.sol";
 
 contract PrimaryCatalyst is CatalystToken {

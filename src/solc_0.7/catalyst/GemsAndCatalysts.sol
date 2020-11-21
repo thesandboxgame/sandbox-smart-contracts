@@ -3,7 +3,7 @@ pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
 import "./Gem.sol";
-import "./interfaces/CatalystToken.sol";
+import "./CatalystToken.sol";
 import "./AssetAttributesRegistry.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
 import "hardhat/console.sol";
@@ -68,6 +68,21 @@ contract GemsAndCatalysts is WithAdmin {
         }
     }
 
+    function addGemsAndCatalysts(Gem[] calldata gems, CatalystToken[] calldata catalysts) external {
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
+        for (uint256 i = 0; i < gems.length; i++) {
+            Gem gem = gems[i];
+            require(!isGemExists(gem.gemId()), "GEM_ALREADY_EXISTS");
+            _gems.push(gem);
+        }
+
+        for (uint256 i = 0; i < catalysts.length; i++) {
+            CatalystToken catalyst = catalysts[i];
+            require(!isCatalystExists(catalyst.catalystId()), "CATALYST_ALREADY_EXISTS");
+            _catalysts.push(catalyst);
+        }
+    }
+
     function burnCatalyst(
         address from,
         uint16 catalystId,
@@ -86,21 +101,6 @@ contract GemsAndCatalysts is WithAdmin {
         Gem gem = getGem(gemId);
         require(gem != Gem(0), "GEM_DOES_NOT_EXIST");
         gem.burnFor(from, amount);
-    }
-
-    function addGemsAndCatalysts(Gem[] calldata gems, CatalystToken[] calldata catalysts) external {
-        require(msg.sender == _admin, "NOT_AUTHORIZED");
-        for (uint256 i = 0; i < gems.length; i++) {
-            Gem gem = gems[i];
-            require(!isGemExists(gem.gemId()), "GEM_ALREADY_EXISTS");
-            _gems.push(gem);
-        }
-
-        for (uint256 i = 0; i < catalysts.length; i++) {
-            CatalystToken catalyst = catalysts[i];
-            require(!isCatalystExists(catalyst.catalystId()), "CATALYST_ALREADY_EXISTS");
-            _catalysts.push(catalyst);
-        }
     }
 
     function isGemExists(uint16 gemId) public view returns (bool) {
