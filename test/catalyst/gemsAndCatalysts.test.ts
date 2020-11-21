@@ -15,15 +15,18 @@ describe('GemsAndCatalysts', function () {
     expect(gemsAndCatalysts.getMaxGems(10)).to.be.revertedWith("CATALYST_DOES_NOT_EXIST");
   });
 
-  it('burnCatalyst', async function () {
+  it('burnCatalyst should burn 2 common catalysts from deployer account', async function () {
     const { gemsAndCatalysts, commonCatalyst, accounts } = await setupGemsAndCatalysts();
     const { deployer } = accounts;
     const catalystId = await commonCatalyst.catalystId();
+    const totalSupplyBefore = await commonCatalyst.totalSupply();
     const balanceBeforeBurning = await commonCatalyst.balanceOf(deployer);
     const burnAmount = BigNumber.from("2");
     await gemsAndCatalysts.connect(ethers.provider.getSigner(deployer)).burnCatalyst(deployer, catalystId, burnAmount);
+    const totalSupplyAfter = await commonCatalyst.totalSupply();
     const balanceAfterBurning = await commonCatalyst.balanceOf(deployer);
     expect(balanceAfterBurning).to.equal(balanceBeforeBurning.sub(burnAmount));
+    expect(totalSupplyAfter).to.equal(totalSupplyBefore.sub(burnAmount));
   });
 
   it('burnCatalyst should fail for non existing catalystId', async function () {
@@ -35,15 +38,18 @@ describe('GemsAndCatalysts', function () {
       burnCatalyst(deployer, 101, burnAmount)).to.be.revertedWith("CATALYST_DOES_NOT_EXIST");
   });
 
-  it('burnGem', async function () {
+  it('burnGem should burn 3 power gems from deployer account', async function () {
     const { gemsAndCatalysts, powerGem, accounts } = await setupGemsAndCatalysts();
     const { deployer } = accounts;
     const gemId = await powerGem.gemId();
+    const totalSupplyBefore = await powerGem.totalSupply();
     const balanceBeforeBurning = await powerGem.balanceOf(deployer);
     const burnAmount = BigNumber.from("3");
     await gemsAndCatalysts.connect(ethers.provider.getSigner(deployer)).burnGem(deployer, gemId, burnAmount);
     const balanceAfterBurning = await powerGem.balanceOf(deployer);
+    const totalSupplyAfter = await powerGem.totalSupply();
     expect(balanceAfterBurning).to.equal(balanceBeforeBurning.sub(burnAmount));
+    expect(totalSupplyAfter).to.equal(totalSupplyBefore.sub(burnAmount));
   });
 
   it('burnGem should fail for non existing gemId', async function () {
@@ -53,6 +59,16 @@ describe('GemsAndCatalysts', function () {
     expect(gemsAndCatalysts.
       connect(ethers.provider.getSigner(deployer)).
       burnGem(deployer, 101, burnAmount)).to.be.revertedWith("GEM_DOES_NOT_EXIST");
+  });
+
+  it('burnGem should fail for insufficient amount', async function () {
+    const { gemsAndCatalysts, powerGem, accounts } = await setupGemsAndCatalysts();
+    const { deployer } = accounts;
+    const gemId = await powerGem.gemId();
+    const burnAmount = BigNumber.from("200");
+    expect(gemsAndCatalysts.
+      connect(ethers.provider.getSigner(deployer)).
+      burnGem(deployer, gemId, burnAmount)).to.be.revertedWith("Not enough funds");
   });
 
   it('addGemsAndCatalysts should fail for existing gemId', async function () {
@@ -74,6 +90,16 @@ describe('GemsAndCatalysts', function () {
     expect(await gemsAndCatalysts.isGemExists(gemId)).to.equal(true);
   });
 
+  it('addGemsAndCatalysts should add catalystExample', async function () {
+    const { gemsAndCatalysts, catalystExample, accounts } = await setupGemsAndCatalysts();
+    const { deployer } = accounts;
+    const tx = await gemsAndCatalysts.
+      connect(ethers.provider.getSigner(deployer)).
+      addGemsAndCatalysts([], [catalystExample.address])
+    await tx.wait();
+    const catalystId = await catalystExample.catalystId();
+    expect(await gemsAndCatalysts.isCatalystExists(catalystId)).to.equal(true);
+  });
   it('addGemsAndCatalysts should fail for gem id not in order', async function () {
     const { gemsAndCatalysts, gemNotInOrder, accounts } = await setupGemsAndCatalysts();
     const { deployer } = accounts;

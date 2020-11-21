@@ -25,6 +25,14 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   });
   const gemNotInOrder: Contract = await ethers.getContract('Gem_NotInOrder');
 
+  await deployments.deploy(`Catalyst_Example`, {
+    contract: 'PrimaryCatalyst',
+    from: accounts.deployer,
+    log: true,
+    args: ['Catalyst_Example', 'Catalyst_Example', accounts.deployer, 5, 5],
+  });
+  const catalystExample: Contract = await ethers.getContract('Catalyst_Example');
+
   await commonCatalyst
     .connect(ethers.provider.getSigner(accounts.deployer))
     .mint(accounts.deployer, BigNumber.from('8'));
@@ -43,8 +51,9 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     gemsAndCatalysts,
     powerGem,
     gemExample,
-    commonCatalyst,
     gemNotInOrder,
+    commonCatalyst,
+    catalystExample,
     accounts
   };
 });

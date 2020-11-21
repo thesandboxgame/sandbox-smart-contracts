@@ -2,8 +2,7 @@ pragma solidity 0.5.9;
 
 import "../../../contracts_common/src/Interfaces/ERC20Events.sol";
 import "../../../contracts_common/src/BaseWithStorage/SuperOperators.sol";
-
-
+import "hardhat/console.sol"
 contract ERC20BaseToken is SuperOperators, ERC20Events {
     uint256 internal _totalSupply;
     mapping(address => uint256) internal _balances;
@@ -166,6 +165,7 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
     }
 
     function _burn(address from, uint256 amount) internal {
+        console.log(amount);
         require(amount > 0, "cannot burn 0 tokens");
         if (msg.sender != from && !_superOperators[msg.sender]) {
             uint256 currentAllowance = _allowances[from][msg.sender];
@@ -175,7 +175,6 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
                 _allowances[from][msg.sender] = currentAllowance - amount;
             }
         }
-
         uint256 currentBalance = _balances[from];
         require(currentBalance >= amount, "Not enough funds");
         _balances[from] = currentBalance - amount;
