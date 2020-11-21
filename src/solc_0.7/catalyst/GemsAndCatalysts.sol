@@ -72,12 +72,16 @@ contract GemsAndCatalysts is WithAdmin {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
         for (uint256 i = 0; i < gems.length; i++) {
             Gem gem = gems[i];
-            require(!isGemExists(gem.gemId()), "GEM_ALREADY_EXISTS");
+            uint16 gemId = gem.gemId();
+            require(gemId == _gems.length + 1, "GEM_ID_NOT_IN_ORDER");
+            require(!isGemExists(gemId), "GEM_ALREADY_EXISTS");
             _gems.push(gem);
         }
 
         for (uint256 i = 0; i < catalysts.length; i++) {
             CatalystToken catalyst = catalysts[i];
+            uint16 catalystId = catalyst.catalystId();
+            require(catalystId == _catalysts.length + 1, "CATALYST_ID_NOT_IN_ORDER");
             require(!isCatalystExists(catalyst.catalystId()), "CATALYST_ALREADY_EXISTS");
             _catalysts.push(catalyst);
         }

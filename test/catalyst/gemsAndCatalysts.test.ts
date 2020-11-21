@@ -73,4 +73,20 @@ describe('GemsAndCatalysts', function () {
     const gemId = await gemExample.gemId();
     expect(await gemsAndCatalysts.isGemExists(gemId)).to.equal(true);
   });
+
+  it('addGemsAndCatalysts should fail for gem id not in order', async function () {
+    const { gemsAndCatalysts, gemNotInOrder, accounts } = await setupGemsAndCatalysts();
+    const { deployer } = accounts;
+    expect(gemsAndCatalysts.
+      connect(ethers.provider.getSigner(deployer)).
+      addGemsAndCatalysts([gemNotInOrder.address], [])).to.be.revertedWith("GEM_ID_NOT_IN_ORDER");
+  });
+
+  it('addGemsAndCatalysts should fail for unauthorized user', async function () {
+    const { gemsAndCatalysts, gemExample, accounts } = await setupGemsAndCatalysts();
+    const { estateAdmin } = accounts;
+    expect(gemsAndCatalysts.
+      connect(ethers.provider.getSigner(estateAdmin)).
+      addGemsAndCatalysts([gemExample.address], [])).to.be.revertedWith("GEM_ID_NOT_IN_ORDER");
+  });
 });
