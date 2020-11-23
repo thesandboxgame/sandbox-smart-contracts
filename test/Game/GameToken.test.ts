@@ -1,7 +1,8 @@
 import {ethers, getUnnamedAccounts} from 'hardhat';
-import {BigNumber, utils, Contract} from 'ethers';
-import {_TypedDataEncoder} from 'ethers/lib/utils';
+import {BigNumber, utils, Contract, Wallet} from 'ethers';
 import {Receipt, Address} from 'hardhat-deploy/types';
+import {signTypedData_v4} from 'eth-sig-util';
+// import {bufferToHex, keccak256} from 'ethereumjs-util';
 import {expect} from '../chai-setup';
 import {data712} from './data712';
 import {
@@ -1246,7 +1247,6 @@ describe('GameToken', function () {
       const others = await getUnnamedAccounts();
       const signers = await ethers.getSigners();
 
-      // @review trying to use rinkeby address !!!
       const trustedForwarderFactory = await ethers.getContractFactory(
         'Forwarder',
         signers[0]
@@ -1254,10 +1254,14 @@ describe('GameToken', function () {
       const trustedForwarder: Contract = await trustedForwarderFactory.deploy();
       await trustedForwarder.deployed();
 
+      const senderWallet = Wallet.createRandom();
+      const privateKey = senderWallet.privateKey;
+      const privateKeyAsBuffer = Buffer.from(privateKey.substr(2), 'hex');
+
       const receipt = await waitFor(
         GameOwner.Game.createGame(
           GameOwner.address,
-          GameOwner.address,
+          senderWallet.address,
           [],
           [],
           [],
@@ -1280,30 +1284,35 @@ describe('GameToken', function () {
         )
       );
 
-      const txObj = await GameOwner.Game.populateTransaction[
+      const txObj = await gameToken.populateTransaction[
         'safeTransferFrom(address,address,uint256)'
-      ](GameOwner.address, others[3], gameId);
+      ](senderWallet.address, others[3], gameId);
 
       let data = txObj.data;
       // @review
-      data += GameOwner.address.replace('0x', '');
+      data += senderWallet.address.replace('0x', '');
 
       const transfer = {
         to: txObj.to,
         data: data,
         value: 0,
-        from: GameOwner.address,
+        from: senderWallet.address,
         nonce: 0,
         gas: 1e6,
       };
 
       const transferData712 = data712(gameToken, transfer);
 
+      const sig = signTypedData_v4(privateKeyAsBuffer, {
+        data: {...transferData712, message: transfer},
+      });
+
       const flatSig = await ethers.provider.send('eth_signTypedData', [
         GameOwner.address,
         transferData712,
       ]);
       console.log(`sig: ${flatSig}`);
+      console.log(`sig: ${sig}`);
 
       const domainRegReceipt = await trustedForwarder.registerDomainSeparator(
         'The Sandbox',
@@ -1319,8 +1328,8 @@ describe('GameToken', function () {
       const registeredDomainHash = domainRegistrationEvent.args[0];
 
       const requestRegReceipt = await trustedForwarder.registerRequestType(
-        'The Sandbox',
-        '1'
+        'Test Transfer Request',
+        ''
       );
 
       const requestRegistrationEvent = await expectEventWithArgsFromReceipt(
@@ -1343,7 +1352,7 @@ describe('GameToken', function () {
         registeredDomainHash,
         registeredRequestHash,
         '0x',
-        flatSig
+        sig
       );
 
       console.log(`forwardingObject:   ${forwardingObject}`);
