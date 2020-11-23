@@ -15,8 +15,6 @@ describe('NFT_Lottery_1', function () {
     const setUp = await setupGiveaway();
     const {giveawayContract, others} = setUp;
 
-    console.log(giveawayContract);
-
     // TODO: tests for claim
     const receipt = await waitFor(
       giveawayContract.claimAssets(
