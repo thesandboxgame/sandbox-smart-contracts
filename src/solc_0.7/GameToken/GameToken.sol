@@ -185,8 +185,8 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     /// @param to The address who will be assigned ownership of this game
     /// @param assetIds The ids of the assets to add to this game
     /// @param values the amount of each token id to add to game
-    /// @param editors The addresses to allow to edit (Can also be set later)
-    /// @return id The id of the new GAME token (er1c721)
+    /// @param editors The addresses to allow to edit (can also be set later)
+    /// @return id The id of the new GAME token (erc721)
     function createGame(
         address from,
         address to,
@@ -195,7 +195,7 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         address[] memory editors,
         string memory uri
     ) external override minterGuard() notToZero(to) returns (uint256 id) {
-        // @review metaTransactions !
+        // @review support metaTransactions ?
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
         uint256 gameId = _mintGame(from, to);
 
@@ -206,12 +206,9 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         }
 
         if (assetIds.length != 0) {
-            // @review cases (erc721/1155)
             if (assetIds.length == 1 && values[0] == 1) {
-                // Case: a single asset id with a value of 1
                 addSingleAsset(from, gameId, assetIds[0], uri);
             } else {
-                // Case: Either multiple assetIds, or single assetId with value > 1
                 addMultipleAssets(from, gameId, assetIds, values, uri);
             }
         }
@@ -229,17 +226,15 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         address to,
         uint256 gameId
     ) external override minterGuard() {
-        // @review enforce fromm == msg.sender & add metaTx support
         require(from == _ownerOf(gameId), "DESTROY_ACCESS_DENIED");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
-        // @review ensure all assets are removed first
         (uint256[] memory assets, uint256[] memory values) = getGameAssets(gameId);
         removeMultipleAssets(gameId, assets, values, to, "");
         assert(_gameData[gameId]._assets.length() == 0);
-        _burnGame(from, gameId);
+        _burn(from, gameId);
     }
 
-    function _burnGame(address from, uint256 gameId) private {
+    function _burn(address from, uint256 gameId) private {
         delete _gameData[gameId];
         delete _metaData[gameId];
         _creatorship[creatorOf(gameId)] = address(0);
@@ -327,7 +322,6 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
     /// @notice Return the name of the token contract
     /// @return The name of the token contract
     // @review What should the actual name be?
-    // @review Do we want to be able to update metadata?
     function name() external pure override returns (string memory) {
         return "Sandbox's GAMEs";
     }
@@ -401,8 +395,10 @@ contract GameToken is ERC721BaseToken, GameTokenInterface {
         _metaData[gameId] = URI;
     }
 
-    // @review add docs
-    // make it return both number of assetIds(asset-types) & total number of assets
+    /// @notice Function to get the numnber of assets in a game
+    /// @param gameId The is of the GAME to query
+    /// @return assetTypes The ids of each asset in the game
+    /// @return totalAssets The quantity of each asset ID in the game
     function getNumberOfAssets(uint256 gameId) public view override returns (uint256 assetTypes, uint256 totalAssets) {
         uint256 assets = _gameData[gameId]._assets.length();
         uint256 total;
