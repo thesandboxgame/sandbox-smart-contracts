@@ -1254,18 +1254,6 @@ describe('GameToken', function () {
       const trustedForwarder: Contract = await trustedForwarderFactory.deploy();
       await trustedForwarder.deployed();
 
-      const GENERIC_PARAMS =
-        'address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data';
-
-      const typeName = `ForwardRequest(${GENERIC_PARAMS})`;
-
-      const typeHash: string = utils.hexlify(
-        utils.keccak256(utils.toUtf8Bytes(typeName))
-      );
-
-      // @review - still needed ?
-      // await trustedForwarder.registerRequestType('ForwardTransfer', '0x');
-
       const receipt = await waitFor(
         GameOwner.Game.createGame(
           GameOwner.address,
@@ -1297,6 +1285,7 @@ describe('GameToken', function () {
       ](GameOwner.address, others[3], gameId);
 
       let data = txObj.data;
+      // @review
       data += GameOwner.address.replace('0x', '');
 
       const transfer = {
@@ -1310,32 +1299,49 @@ describe('GameToken', function () {
 
       const transferData712 = data712(gameToken, transfer);
 
-      // const zeroSigner = ethers.provider.getSigner(others[0]);
-      // const sig = await zeroSigner._signTypedData(
-      //   transferData712.domain,
-      //   transferData712.types,
-      //   transferData712
-      // );
-
       const flatSig = await ethers.provider.send('eth_signTypedData', [
         GameOwner.address,
         transferData712,
       ]);
+      console.log(`sig: ${flatSig}`);
 
-      const domainSeparator = _TypedDataEncoder.hashDomain(
-        transferData712.domain
+      const domainRegReceipt = await trustedForwarder.registerDomainSeparator(
+        'The Sandbox',
+        '1'
       );
 
-      const accounts = await ethers.getSigners();
-      for (const account of accounts) {
-        console.log(`HH account: ${account.address}`);
-      }
-      console.log(`GameOwner.address:   ${GameOwner.address}`);
+      const domainRegistrationEvent = await expectEventWithArgsFromReceipt(
+        trustedForwarder,
+        domainRegReceipt,
+        'DomainRegistered'
+      );
+
+      const registeredDomainHash = domainRegistrationEvent.args[0];
+
+      const requestRegReceipt = await trustedForwarder.registerRequestType(
+        'The Sandbox',
+        '1'
+      );
+
+      const requestRegistrationEvent = await expectEventWithArgsFromReceipt(
+        trustedForwarder,
+        requestRegReceipt,
+        'RequestTypeRegistered'
+      );
+
+      const registeredRequestHash = requestRegistrationEvent.args[0];
+
+      expect(await trustedForwarder.domains(registeredDomainHash)).to.be.equal(
+        true
+      );
+      expect(
+        await trustedForwarder.typeHashes(registeredRequestHash)
+      ).to.be.equal(true);
 
       const forwardingObject = await trustedForwarder.execute(
         transfer,
-        domainSeparator,
-        typeHash,
+        registeredDomainHash,
+        registeredRequestHash,
         '0x',
         flatSig
       );
