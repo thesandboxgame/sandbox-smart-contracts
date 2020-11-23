@@ -103,7 +103,7 @@ function saltAssets(assets: any, secret?: any) {
   const saltedAssets = [];
   for (const asset of assets) {
     let salt = asset.salt;
-    if (!salt || salt === undefined) {
+    if (!salt) {
       if (!secret) {
         throw new Error('Asset need to have a salt or be generated via secret');
       }
@@ -141,7 +141,7 @@ function createDataArrayAssets(assets: any, secret?: any) {
 
   assets.forEach((asset: asset) => {
     let salt = asset.salt;
-    if (!salt || salt === undefined) {
+    if (!salt) {
       if (!secret) {
         throw new Error('Asset need to have a salt or be generated via secret');
       }
