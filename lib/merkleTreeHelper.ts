@@ -91,7 +91,7 @@ function createDataArray(lands: any, secret?: any) {
 function calculateAssetHash(asset: any, salt?: any) {
   const types = ['address', 'uint256[]', 'uint256[]', 'bytes32'];
   const values = [
-    asset.reserved,
+    asset.reservedAddress,
     asset.assetIds,
     asset.assetValues,
     asset.salt || salt,
@@ -120,7 +120,7 @@ function saltAssets(assets: any, secret?: any) {
           .digest('hex');
     }
     saltedAssets.push({
-      reserved: asset.reserved,
+      reservedAddress: asset.reservedAddress,
       assetIds: asset.assetIds,
       assetValues: asset.assetValues,
       salt,
@@ -133,7 +133,7 @@ function createDataArrayAssets(assets: any, secret?: any) {
   const data: any = [];
 
   interface asset {
-    reserved: string;
+    reservedAddress: string;
     assetIds: Array<string>;
     assetValues: Array<string>;
     salt?: string;

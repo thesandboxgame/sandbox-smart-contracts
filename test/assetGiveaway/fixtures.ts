@@ -18,5 +18,6 @@ export const setupGiveaway = deployments.createFixture(async function () {
     giveawayContract,
     others,
     tree,
+    assets,
   };
 });

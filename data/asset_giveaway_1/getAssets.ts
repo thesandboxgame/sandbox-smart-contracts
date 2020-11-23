@@ -34,11 +34,11 @@ function generateAssetsForMerkleTree(assetData: Assets) {
   let numAssets = 0;
 
   for (const claim of assetData.assets) {
-    const reserved = claim.reservedAddress;
+    const reservedAddress = claim.reservedAddress;
     const assetIds = claim.assetIds;
     const assetValues = claim.assetValues;
     assets.push({
-      reserved,
+      reservedAddress,
       assetIds,
       assetValues,
     });

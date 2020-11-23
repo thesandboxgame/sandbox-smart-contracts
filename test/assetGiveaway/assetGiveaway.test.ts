@@ -17,13 +17,9 @@ const zeroAddress = constants.AddressZero;
 describe('NFT_Lottery_1', function () {
   it('exists', async function () {
     const setUp = await setupGiveaway();
-    const {giveawayContract, others, tree} = setUp;
+    const {giveawayContract, others, tree, assets} = setUp;
 
-    const asset = {
-      reservedAddress: others[1],
-      assetIds: [0, 1, 2],
-      assetValues: [5, 5, 5],
-    };
+    const asset = assets[0];
 
     const proof = tree.getProof(calculateAssetHash(asset));
 
