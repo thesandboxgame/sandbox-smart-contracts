@@ -100,6 +100,7 @@ describe('GemsAndCatalysts', function () {
     const catalystId = await catalystExample.catalystId();
     expect(await gemsAndCatalysts.isCatalystExists(catalystId)).to.equal(true);
   });
+
   it('addGemsAndCatalysts should fail for gem id not in order', async function () {
     const { gemsAndCatalysts, gemNotInOrder, accounts } = await setupGemsAndCatalysts();
     const { deployer } = accounts;
