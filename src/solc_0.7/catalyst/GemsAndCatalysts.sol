@@ -39,7 +39,7 @@ contract GemsAndCatalysts is WithAdmin {
     function burnDifferentGems(address from, uint16[] calldata gemIds) external {
         uint16 last = gemIds[0];
         uint256 count = 1;
-        for (uint256 i = 1; i > gemIds.length; i++) {
+        for (uint256 i = 1; i < gemIds.length; i++) {
             if (last != gemIds[i]) {
                 burnGem(from, last, count);
                 count = 1;
@@ -55,7 +55,7 @@ contract GemsAndCatalysts is WithAdmin {
     function burnDifferentCatalysts(address from, uint16[] calldata catalystIds) external {
         uint16 last = catalystIds[0];
         uint256 count = 1;
-        for (uint256 i = 1; i > catalystIds.length; i++) {
+        for (uint256 i = 1; i < catalystIds.length; i++) {
             if (last != catalystIds[i]) {
                 burnCatalyst(from, last, count);
                 count = 1;
@@ -74,7 +74,6 @@ contract GemsAndCatalysts is WithAdmin {
             Gem gem = gems[i];
             uint16 gemId = gem.gemId();
             require(gemId == _gems.length + 1, "GEM_ID_NOT_IN_ORDER");
-            require(!isGemExists(gemId), "GEM_ALREADY_EXISTS");
             _gems.push(gem);
         }
 
@@ -82,9 +81,16 @@ contract GemsAndCatalysts is WithAdmin {
             CatalystToken catalyst = catalysts[i];
             uint16 catalystId = catalyst.catalystId();
             require(catalystId == _catalysts.length + 1, "CATALYST_ID_NOT_IN_ORDER");
-            require(!isCatalystExists(catalyst.catalystId()), "CATALYST_ALREADY_EXISTS");
             _catalysts.push(catalyst);
         }
+    }
+
+    function isGemExists(uint16 gemId) external view returns (bool) {
+        return getGem(gemId) != Gem(0);
+    }
+
+    function isCatalystExists(uint16 catalystId) external view returns (bool) {
+        return getCatalyst(catalystId) != CatalystToken(0);
     }
 
     function burnCatalyst(
@@ -105,14 +111,6 @@ contract GemsAndCatalysts is WithAdmin {
         Gem gem = getGem(gemId);
         require(gem != Gem(0), "GEM_DOES_NOT_EXIST");
         gem.burnFor(from, amount);
-    }
-
-    function isGemExists(uint16 gemId) public view returns (bool) {
-        return getGem(gemId) != Gem(0);
-    }
-
-    function isCatalystExists(uint16 catalystId) public view returns (bool) {
-        return getCatalyst(catalystId) != CatalystToken(0);
     }
 
     function getCatalyst(uint16 catalystId) internal view returns (CatalystToken) {

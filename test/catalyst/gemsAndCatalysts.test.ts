@@ -38,6 +38,26 @@ describe('GemsAndCatalysts', function () {
       burnCatalyst(deployer, 101, burnAmount)).to.be.revertedWith("CATALYST_DOES_NOT_EXIST");
   });
 
+  it('burnCatalyst should fail for insufficient amount', async function () {
+    const { gemsAndCatalysts, commonCatalyst, accounts } = await setupGemsAndCatalysts();
+    const { deployer } = accounts;
+    const catalystId = await commonCatalyst.catalystId();
+    const burnAmount = BigNumber.from("200");
+    expect(gemsAndCatalysts.
+      connect(ethers.provider.getSigner(deployer)).
+      burnGem(deployer, catalystId, burnAmount)).to.be.revertedWith("Not enough funds");
+  });
+
+  it('burnCatalyst should fail for account with no gems', async function () {
+    const { gemsAndCatalysts, commonCatalyst, accounts } = await setupGemsAndCatalysts();
+    const { assetAdmin } = accounts;
+    const catalystId = await commonCatalyst.catalystId();
+    const burnAmount = BigNumber.from("200");
+    expect(gemsAndCatalysts.
+      connect(ethers.provider.getSigner(assetAdmin)).
+      burnGem(assetAdmin, catalystId, burnAmount)).to.be.revertedWith("Not enough funds");
+  });
+
   it('burnGem should burn 3 power gems from deployer account', async function () {
     const { gemsAndCatalysts, powerGem, accounts } = await setupGemsAndCatalysts();
     const { deployer } = accounts;
@@ -71,12 +91,29 @@ describe('GemsAndCatalysts', function () {
       burnGem(deployer, gemId, burnAmount)).to.be.revertedWith("Not enough funds");
   });
 
+  it('burnGem should fail for account with no gems', async function () {
+    const { gemsAndCatalysts, powerGem, accounts } = await setupGemsAndCatalysts();
+    const { assetAdmin } = accounts;
+    const gemId = await powerGem.gemId();
+    const burnAmount = BigNumber.from("200");
+    expect(gemsAndCatalysts.
+      connect(ethers.provider.getSigner(assetAdmin)).
+      burnGem(assetAdmin, gemId, burnAmount)).to.be.revertedWith("Not enough funds");
+  });
   it('addGemsAndCatalysts should fail for existing gemId', async function () {
     const { gemsAndCatalysts, powerGem, commonCatalyst, accounts } = await setupGemsAndCatalysts();
     const { deployer } = accounts;
     expect(gemsAndCatalysts.
       connect(ethers.provider.getSigner(deployer)).
-      addGemsAndCatalysts([powerGem.address], [commonCatalyst.address])).to.be.revertedWith("GEM_DOES_NOT_EXIST");
+      addGemsAndCatalysts([powerGem.address], [commonCatalyst.address])).to.be.revertedWith("GEM_ID_NOT_IN_ORDER");
+  });
+
+  it('addGemsAndCatalysts should fail for existing catalystd', async function () {
+    const { gemsAndCatalysts, commonCatalyst, accounts } = await setupGemsAndCatalysts();
+    const { deployer } = accounts;
+    expect(gemsAndCatalysts.
+      connect(ethers.provider.getSigner(deployer)).
+      addGemsAndCatalysts([], [commonCatalyst.address])).to.be.revertedWith("CATALYST_ID_NOT_IN_ORDER");
   });
 
   it('addGemsAndCatalysts should add gemExample', async function () {
@@ -116,4 +153,12 @@ describe('GemsAndCatalysts', function () {
       connect(ethers.provider.getSigner(estateAdmin)).
       addGemsAndCatalysts([gemExample.address], [])).to.be.revertedWith("GEM_ID_NOT_IN_ORDER");
   });
+
+  // it('burnDifferentGems', async function () {
+  //   const { gemsAndCatalysts, gemExample, accounts } = await setupGemsAndCatalysts();
+  //   const { estateAdmin } = accounts;
+  //   expect(gemsAndCatalysts.
+  //     connect(ethers.provider.getSigner(estateAdmin)).
+  //     addGemsAndCatalysts([gemExample.address], [])).to.be.revertedWith("GEM_ID_NOT_IN_ORDER");
+  // });
 });
