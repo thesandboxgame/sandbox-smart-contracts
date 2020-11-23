@@ -24,7 +24,10 @@ describe('MerkleTree_assets', function () {
       },
     ];
 
-    const data = createDataArrayAssets(assets, 'secret');
+    const data = createDataArrayAssets(
+      assets,
+      '0x4467363716526536000005451427798982881775318563547751090997863683'
+    );
     const tree = new MerkleTree(data);
 
     for (let i = 0; i < data.length; i += 1) {
