@@ -1,1 +1,19 @@
-{}
+{
+  "assets": [
+    {
+      "reservedAddress": "0x0000000000000000000000000000000000000000",
+      "assetIds": [0, 1, 2],
+      "assetValues": [5, 5, 5]
+    },
+    {
+      "reservedAddress": "0x0000000000000000000000000000000000000000",
+      "assetIds": [3, 4, 5],
+      "assetValues": [5, 5, 5]
+    },
+    {
+      "reservedAddress": "0x0000000000000000000000000000000000000000",
+      "assetIds": [6, 7, 8],
+      "assetValues": [5, 5, 5]
+    }
+  ]
+}

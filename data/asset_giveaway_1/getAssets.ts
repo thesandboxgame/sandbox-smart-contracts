@@ -18,29 +18,33 @@ function exitIfError() {
   }
 }
 
-type Claim = {
-  reservedAddress: string;
-  assetIds: Array<string>;
-  assetValues: Array<string>;
+type Assets = {
+  assets: Claim[];
 };
 
-function generateAssetsForMerkleTree(assetData: Claim[]) {
+type Claim = {
+  reservedAddress: string;
+  assetIds: Array<number>;
+  assetValues: Array<number>;
+};
+
+function generateAssetsForMerkleTree(assetData: Assets) {
   const assets = [];
   let numClaims = 0;
   let numAssets = 0;
 
-  for (const claim of assetData) {
+  for (const claim of assetData.assets) {
     const reserved = claim.reservedAddress;
-    const ids = claim.assetIds;
-    const values = claim.assetValues;
+    const assetIds = claim.assetIds;
+    const assetValues = claim.assetValues;
     assets.push({
       reserved,
-      ids,
-      values,
+      assetIds,
+      assetValues,
     });
     let i;
     for (i = 0; i < claim.assetIds.length; i++) {
-      numAssets += parseInt(claim.assetValues[i]);
+      numAssets += claim.assetValues[i];
     }
     numClaims++;
   }

@@ -10,8 +10,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const chainId = await getChainId();
   const {deployer} = await getNamedAccounts();
 
-  const assetContract = await deployments.get('Asset');
   const {assets, merkleRootHash} = getAssets(network.live, chainId);
+
+  const assetContract = await deployments.get('Asset');
 
   await deploy('NFT_Lottery_1', {
     contract: 'AssetGiveaway',
@@ -22,4 +23,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['NFT_Lottery_1'];
+func.tags = ['NFT_Lottery_1', 'NFT_Lottery_1_deploy'];

@@ -1,8 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import ethers from 'ethers';
-const {BigNumber} = ethers;
-const {solidityKeccak256} = ethers.utils;
+import {BigNumber, utils} from 'ethers';
+const {solidityKeccak256} = utils;
 
 interface MerkleTree {
   leavesByHash: any;
@@ -11,7 +10,7 @@ interface MerkleTree {
 }
 
 class MerkleTree {
-  constructor(data) {
+  constructor(data: any) {
     this.leavesByHash = {};
     this.leaves = this.buildLeaves(data);
     for (const leaf of this.leaves) {
@@ -25,7 +24,7 @@ class MerkleTree {
    * @param {array} elements An array
    * @returns {array} A new array
    */
-  makeEvenElements(elements) {
+  makeEvenElements(elements: any) {
     if (elements.length === 0) {
       throw new Error('No data was provided...');
     }
@@ -44,7 +43,7 @@ class MerkleTree {
    * @param {array} arrayToSort The array to sort
    * @returns {array} The sorted array
    */
-  sort(arrayToSort) {
+  sort(arrayToSort: any) {
     const sortedArray = [...arrayToSort];
     return sortedArray.sort((a, b) =>
       BigNumber.from(a.hash).gt(b.hash) ? 1 : -1
@@ -56,8 +55,8 @@ class MerkleTree {
    * @param {array} data An array of data
    * @returns {array} The leaves of the Merkle tree (as an even and sorted array)
    */
-  buildLeaves(data) {
-    const leaves = this.makeEvenElements(data).map((leaf) => {
+  buildLeaves(data: any) {
+    const leaves = this.makeEvenElements(data).map((leaf: any) => {
       return {hash: leaf};
     });
     return this.sort(leaves);
@@ -69,7 +68,7 @@ class MerkleTree {
    * @param {string} right The right parameter for the new node
    * @returns {string} The new node (hash)
    */
-  calculateParentNode(left, right) {
+  calculateParentNode(left: any, right: any) {
     let hash;
     // If a node doesn't have a sibling, it will be hashed with itself
     if (left === undefined || right === undefined) {
@@ -100,7 +99,7 @@ class MerkleTree {
    * @param {array} nodes The current nodes
    * @returns {array} The parent nodes
    */
-  createParentNodes(nodes) {
+  createParentNodes(nodes: any) {
     const parentsNodes = [];
 
     for (let i = 0; i < nodes.length; i += 2) {
@@ -119,7 +118,7 @@ class MerkleTree {
    * @param {array} leaves The initial leaves of the tree
    * @returns {object} A merkle tree
    */
-  computeMerkleTree(leaves) {
+  computeMerkleTree(leaves: any) {
     let nodes = leaves;
 
     while (nodes.length > 1) {
@@ -151,7 +150,7 @@ class MerkleTree {
    * @param {string} leafHash The leaf to be proven
    * @returns {array} The array of proofs for the leaf
    */
-  getProof(leafHash) {
+  getProof(leafHash: any) {
     let leaf = this.leavesByHash[leafHash];
     if (!leaf) {
       throw new Error('Leaf not found');
@@ -179,7 +178,7 @@ class MerkleTree {
    * @param {*} proof The proof to validate the leaf
    * @returns {boolean} True if the lead if valid
    */
-  isDataValid(leaf, proof) {
+  isDataValid(leaf: any, proof: any) {
     let potentialRoot = leaf;
     for (let i = 0; i < proof.length; i += 1) {
       if (BigNumber.from(potentialRoot).lt(proof[i])) {

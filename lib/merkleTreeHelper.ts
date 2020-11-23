@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import ethers from 'ethers';
-const {solidityKeccak256} = ethers.utils;
+import {utils} from 'ethers';
+const {solidityKeccak256} = utils;
 import crypto from 'crypto';
 
-function calculateLandHash(land, salt) {
+function calculateLandHash(land: any, salt: any) {
   const types = [
     'uint256',
     'uint256',
@@ -28,7 +28,7 @@ function calculateLandHash(land, salt) {
   return solidityKeccak256(types, values);
 }
 
-function saltLands(lands, secret) {
+function saltLands(lands: any, secret: any) {
   const saltedLands = [];
   for (const land of lands) {
     let salt = land.salt;
@@ -61,10 +61,10 @@ function saltLands(lands, secret) {
   return saltedLands;
 }
 
-function createDataArray(lands, secret) {
-  const data = [];
+function createDataArray(lands: any, secret: any) {
+  const data: any = [];
 
-  lands.forEach((land) => {
+  lands.forEach((land: any) => {
     let salt = land.salt;
     if (!salt) {
       if (!secret) {
@@ -88,7 +88,7 @@ function createDataArray(lands, secret) {
   return data;
 }
 
-function calculateAssetHash(asset, salt) {
+function calculateAssetHash(asset: any, salt: any) {
   const types = ['address', 'uint256[]', 'uint256[]', 'bytes32'];
   const values = [
     asset.reserved,
@@ -99,7 +99,7 @@ function calculateAssetHash(asset, salt) {
   return solidityKeccak256(types, values);
 }
 
-function saltAssets(assets, secret) {
+function saltAssets(assets: any, secret: any) {
   const saltedAssets = [];
   for (const asset of assets) {
     let salt = asset.salt;
@@ -130,7 +130,7 @@ function saltAssets(assets, secret) {
 }
 
 function createDataArrayAssets(assets: any, secret: any) {
-  const data = [];
+  const data: any = [];
 
   interface asset {
     reserved: string;
@@ -139,7 +139,7 @@ function createDataArrayAssets(assets: any, secret: any) {
     salt?: string;
   }
 
-  assets.forEach((asset: asset[]) => {
+  assets.forEach((asset: asset) => {
     let salt = asset.salt;
     if (!salt) {
       if (!secret) {
