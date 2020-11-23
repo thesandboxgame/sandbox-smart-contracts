@@ -19,8 +19,6 @@ describe('NFT_Lottery_1', function () {
     const setUp = await setupGiveaway();
     const {giveawayContract, others, tree} = setUp;
 
-    console.log('user', others[1]);
-
     const asset = {
       reservedAddress: others[1],
       assetIds: [0, 1, 2],
@@ -38,7 +36,7 @@ describe('NFT_Lottery_1', function () {
         others[2],
         [0, 1, 2],
         [5, 5, 5],
-        '0x'
+        proof
       )
     );
   });

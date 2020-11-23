@@ -28,7 +28,7 @@ function calculateLandHash(land: any, salt?: any) {
   return solidityKeccak256(types, values);
 }
 
-function saltLands(lands: any, secret: any) {
+function saltLands(lands: any, secret?: any) {
   const saltedLands = [];
   for (const land of lands) {
     let salt = land.salt;
@@ -99,7 +99,7 @@ function calculateAssetHash(asset: any, salt?: any) {
   return solidityKeccak256(types, values);
 }
 
-function saltAssets(assets: any, secret: any) {
+function saltAssets(assets: any, secret?: any) {
   const saltedAssets = [];
   for (const asset of assets) {
     let salt = asset.salt;
@@ -157,7 +157,6 @@ function createDataArrayAssets(assets: any, secret?: any) {
           )
           .digest('hex');
     }
-    console.log('new_salt', salt);
     data.push(calculateAssetHash(asset, salt));
   });
 

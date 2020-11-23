@@ -11,7 +11,7 @@ export const setupGiveaway = deployments.createFixture(async function () {
   const deployment = await deployments.get('NFT_Lottery_1');
 
   const assets = deployment.linkedData;
-  const assetHashArray = createDataArrayAssets(assets, null);
+  const assetHashArray = createDataArrayAssets(assets);
   const tree = new MerkleTree(assetHashArray);
 
   return {
