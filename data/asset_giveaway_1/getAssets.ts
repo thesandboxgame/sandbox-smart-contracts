@@ -83,7 +83,7 @@ function getAssets(isDeploymentChainId: any, chainId: any) {
   const {assets} = generateAssetsForMerkleTree(assetData);
 
   const saltedAssets = saltAssets(assets, secret);
-  const tree = new MerkleTree(createDataArrayAssets(saltedAssets, null));
+  const tree = new MerkleTree(createDataArrayAssets(saltedAssets));
   const merkleRootHash = tree.getRoot().hash;
 
   return {

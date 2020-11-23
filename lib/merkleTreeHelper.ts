@@ -4,7 +4,7 @@ import {utils} from 'ethers';
 const {solidityKeccak256} = utils;
 import crypto from 'crypto';
 
-function calculateLandHash(land: any, salt: any) {
+function calculateLandHash(land: any, salt?: any) {
   const types = [
     'uint256',
     'uint256',
@@ -61,7 +61,7 @@ function saltLands(lands: any, secret: any) {
   return saltedLands;
 }
 
-function createDataArray(lands: any, secret: any) {
+function createDataArray(lands: any, secret?: any) {
   const data: any = [];
 
   lands.forEach((land: any) => {
@@ -88,7 +88,7 @@ function createDataArray(lands: any, secret: any) {
   return data;
 }
 
-function calculateAssetHash(asset: any, salt: any) {
+function calculateAssetHash(asset: any, salt?: any) {
   const types = ['address', 'uint256[]', 'uint256[]', 'bytes32'];
   const values = [
     asset.reserved,
@@ -103,7 +103,7 @@ function saltAssets(assets: any, secret: any) {
   const saltedAssets = [];
   for (const asset of assets) {
     let salt = asset.salt;
-    if (!salt) {
+    if (!salt || salt === undefined) {
       if (!secret) {
         throw new Error('Asset need to have a salt or be generated via secret');
       }
@@ -129,7 +129,7 @@ function saltAssets(assets: any, secret: any) {
   return saltedAssets;
 }
 
-function createDataArrayAssets(assets: any, secret: any) {
+function createDataArrayAssets(assets: any, secret?: any) {
   const data: any = [];
 
   interface asset {
@@ -141,7 +141,7 @@ function createDataArrayAssets(assets: any, secret: any) {
 
   assets.forEach((asset: asset) => {
     let salt = asset.salt;
-    if (!salt) {
+    if (!salt || salt === undefined) {
       if (!secret) {
         throw new Error('Asset need to have a salt or be generated via secret');
       }
@@ -157,6 +157,7 @@ function createDataArrayAssets(assets: any, secret: any) {
           )
           .digest('hex');
     }
+    console.log('new_salt', salt);
     data.push(calculateAssetHash(asset, salt));
   });
 
