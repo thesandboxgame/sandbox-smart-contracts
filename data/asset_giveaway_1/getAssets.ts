@@ -53,7 +53,9 @@ function generateAssetsForMerkleTree(assetData: Assets) {
   return {assets};
 }
 
-function getAssets(isDeploymentChainId: any, chainId: any) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+function getAssets(isDeploymentChainId: any, chainId: any): any {
   if (typeof chainId !== 'string') {
     throw new Error('chainId not a string');
   }
