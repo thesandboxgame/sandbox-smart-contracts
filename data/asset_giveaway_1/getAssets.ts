@@ -1,8 +1,10 @@
 import fs from 'fs';
 import {BigNumber} from 'ethers';
 import MerkleTree from '../../lib/merkleTree';
-import {createDataArrayAssets, saltAssets} from '../../lib/merkleTreeHelper';
+import helpers from '../../lib/merkleTreeHelper';
 import * as assetData from './assets.json';
+
+const {createDataArrayAssets, saltAssets} = helpers;
 
 let errors = false;
 function reportError(e: string) {
@@ -47,45 +49,45 @@ function generateAssetsForMerkleTree(assetData: Claim[]) {
   return {assets};
 }
 
-export = {
-  getAssets: (isDeploymentChainId: any, chainId: any) => {
-    if (typeof chainId !== 'string') {
-      throw new Error('chainId not a string');
+function getAssets(isDeploymentChainId: any, chainId: any) {
+  if (typeof chainId !== 'string') {
+    throw new Error('chainId not a string');
+  }
+
+  let secretPath = './.asset_giveaway_1_secret';
+  if (BigNumber.from(chainId).toString() === '1') {
+    console.log('MAINNET secret');
+    secretPath = './.asset_giveaway_1_secret.mainnet';
+  }
+
+  let expose = false;
+  let secret;
+  try {
+    secret = fs.readFileSync(secretPath);
+  } catch (e) {
+    if (isDeploymentChainId) {
+      throw e;
     }
+    secret =
+      '0x4467363716526536535425451427798982881775318563547751090997863683';
+  }
 
-    let secretPath = './.asset_giveaway_1_secret';
-    if (BigNumber.from(chainId).toString() === '1') {
-      console.log('MAINNET secret');
-      secretPath = './.asset_giveaway_1_secret.mainnet';
-    }
+  if (!isDeploymentChainId) {
+    expose = true;
+  }
 
-    let expose = false;
-    let secret;
-    try {
-      secret = fs.readFileSync(secretPath);
-    } catch (e) {
-      if (isDeploymentChainId) {
-        throw e;
-      }
-      secret =
-        '0x4467363716526536535425451427798982881775318563547751090997863683';
-    }
+  const {assets} = generateAssetsForMerkleTree(assetData);
 
-    if (!isDeploymentChainId) {
-      expose = true;
-    }
+  const saltedAssets = saltAssets(assets, secret);
+  const tree = new MerkleTree(createDataArrayAssets(saltedAssets, null));
+  const merkleRootHash = tree.getRoot().hash;
 
-    const {assets} = generateAssetsForMerkleTree(assetData);
+  return {
+    assets: expose ? saltedAssets : assets,
+    merkleRootHash,
+    saltedAssets,
+    tree,
+  };
+}
 
-    const saltedAssets = saltAssets(assets, secret);
-    const tree = new MerkleTree(createDataArrayAssets(saltedAssets, null));
-    const merkleRootHash = tree.getRoot().hash;
-
-    return {
-      assets: expose ? saltedAssets : assets,
-      merkleRootHash,
-      saltedAssets,
-      tree,
-    };
-  },
-};
+export default getAssets;

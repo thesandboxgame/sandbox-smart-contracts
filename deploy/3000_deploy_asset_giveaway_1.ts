@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {getAssets} from '../data/asset_giveaway_1/getAssets';
+import getAssets from '../data/asset_giveaway_1/getAssets';
 
 const ASSETS_HOLDER = '0x0000000000000000000000000000000000000000';
 

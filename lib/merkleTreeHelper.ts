@@ -163,7 +163,7 @@ function createDataArrayAssets(assets: any, secret: any) {
   return data;
 }
 
-export = {
+const helpers = {
   createDataArray,
   calculateLandHash,
   saltLands,
@@ -171,3 +171,5 @@ export = {
   saltAssets,
   createDataArrayAssets,
 };
+
+export default helpers;
