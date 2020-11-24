@@ -1,5 +1,6 @@
 import {ethers, getUnnamedAccounts} from 'hardhat';
 import {BigNumber, utils, Contract} from 'ethers';
+import Prando from 'prando';
 import {_TypedDataEncoder} from 'ethers/lib/utils';
 import {Receipt, Address} from 'hardhat-deploy/types';
 import {expect} from '../chai-setup';
@@ -25,6 +26,13 @@ const packId2 = 1;
 const packId3 = 2;
 const METATX_SANDBOX = 1;
 const METATX_2771 = 2;
+const rng = new Prando('GameToken');
+// const MAX_UINT96 = BigNumber.from('39614081257132170000000000000');
+
+// for prod use 39614081257132170000000000000(MAX_UINT96) as upper limit
+async function getRandom(): Promise<number> {
+  return rng.nextInt(1, 1000000000);
+}
 
 describe('GameToken', function () {
   before(async function () {
@@ -64,13 +72,15 @@ describe('GameToken', function () {
         it('minter can create GAMEs when _minter is set', async function () {
           await gameTokenAsAdmin.setMinter(users[3].address);
           const Minter = users[3];
+          const randomId = await getRandom();
           const minterReceipt = Minter.Game.createGame(
             users[3].address,
             users[4].address,
             [],
             [],
             [],
-            ''
+            '',
+            randomId
           );
           const transferEvent = await expectEventWithArgs(
             gameToken,
@@ -87,6 +97,7 @@ describe('GameToken', function () {
         });
 
         it('reverts if non-minter trys to mint Game when _minter set', async function () {
+          const randomId = await getRandom();
           await expect(
             gameToken.createGame(
               users[2].address,
@@ -94,7 +105,8 @@ describe('GameToken', function () {
               [],
               [],
               [],
-              ''
+              '',
+              randomId
             )
           ).to.be.revertedWith('INVALID_MINTER');
         });
@@ -108,6 +120,7 @@ describe('GameToken', function () {
         let GameEditor2: User;
 
         it('anyone can mint Games with no Assets', async function () {
+          const randomId = await getRandom();
           ({
             gameToken,
             GameOwner,
@@ -121,7 +134,8 @@ describe('GameToken', function () {
               [],
               [],
               [],
-              ''
+              '',
+              randomId
             )
           );
           const transferEvent = await expectEventWithArgs(
@@ -160,6 +174,7 @@ describe('GameToken', function () {
 
         it('anyone can mint Games with Editors', async function () {
           ({gameToken, GameOwner} = await setupTest());
+          const randomId = await getRandom();
           const receipt = await waitFor(
             GameOwner.Game.createGame(
               GameOwner.address,
@@ -167,7 +182,8 @@ describe('GameToken', function () {
               [],
               [],
               [GameEditor1.address, GameEditor2.address],
-              ''
+              '',
+              randomId
             )
           );
           const transferEvent = await expectEventWithArgs(
@@ -227,6 +243,7 @@ describe('GameToken', function () {
           gameToken.address,
           id
         );
+        const randomId = await getRandom();
 
         const receipt = await waitFor(
           GameOwner.Game.createGame(
@@ -235,7 +252,8 @@ describe('GameToken', function () {
             [assetId],
             [1],
             [],
-            ''
+            '',
+            randomId
           )
         );
         const balanceAfter = await assetContract['balanceOf(address,uint256)'](
@@ -313,6 +331,7 @@ describe('GameToken', function () {
         const balanceBefore2 = await assetContract[
           'balanceOf(address,uint256)'
         ](gameToken.address, assetId2);
+        const randomId = await getRandom();
 
         const receipt = await waitFor(
           GameOwner.Game.createGame(
@@ -321,7 +340,8 @@ describe('GameToken', function () {
             [assetId, assetId2],
             [quantity, quantity2],
             [],
-            ''
+            '',
+            randomId
           )
         );
 
@@ -393,6 +413,7 @@ describe('GameToken', function () {
         );
 
         const assetId = assetTransferEvent.args[3];
+        const randomId = await getRandom();
         await expect(
           waitFor(
             GameOwner.Game.createGame(
@@ -401,7 +422,8 @@ describe('GameToken', function () {
               [assetId],
               [11, 42],
               [],
-              ''
+              '',
+              randomId
             )
           )
         ).to.be.revertedWith('INVALID_INPUT_LENGTHS');
@@ -443,6 +465,7 @@ describe('GameToken', function () {
         );
 
         assetId = assetTransferEvent.args[2];
+        const randomId = await getRandom();
 
         const receipt = await waitFor(
           GameOwner.Game.createGame(
@@ -451,7 +474,8 @@ describe('GameToken', function () {
             [],
             [],
             [],
-            'Uri is this'
+            'Uri is this',
+            randomId
           )
         );
         const transferEvent = await expectEventWithArgs(
@@ -895,6 +919,7 @@ describe('GameToken', function () {
         'Transfer'
       );
       assetId = assetTransferEvent.args[2];
+      const randomId = await getRandom();
 
       const receipt = await waitFor(
         GameOwner.Game.createGame(
@@ -903,7 +928,8 @@ describe('GameToken', function () {
           [assetId],
           [1],
           [],
-          ''
+          '',
+          randomId
         )
       );
       const transferEvent = await expectEventWithArgs(
@@ -965,6 +991,7 @@ describe('GameToken', function () {
 
     before(async function () {
       ({gameToken, GameOwner, GameEditor1} = await setupTest());
+      const randomId = await getRandom();
       const receipt = await waitFor(
         GameOwner.Game.createGame(
           GameOwner.address,
@@ -972,7 +999,8 @@ describe('GameToken', function () {
           [],
           [],
           [],
-          'Hello Sandbox'
+          'Hello Sandbox',
+          randomId
         )
       );
       const transferEvent = await expectEventWithArgs(
@@ -1075,6 +1103,7 @@ describe('GameToken', function () {
 
       assetId = assetTransferEvent.args[3];
       assetId2 = assetTransferEvent2.args[3];
+      const randomId = await getRandom();
 
       const receipt = await waitFor(
         GameOwner.Game.createGame(
@@ -1083,7 +1112,8 @@ describe('GameToken', function () {
           [assetId, assetId2],
           [quantity, quantity2],
           [],
-          ''
+          '',
+          randomId
         )
       );
 
@@ -1247,6 +1277,7 @@ describe('GameToken', function () {
       );
       const trustedForwarder: Contract = await trustedForwarderFactory.deploy();
       await trustedForwarder.deployed();
+      const randomId = await getRandom();
 
       const receipt = await waitFor(
         GameOwner.Game.createGame(
@@ -1255,7 +1286,8 @@ describe('GameToken', function () {
           [],
           [],
           [],
-          ''
+          '',
+          randomId
         )
       );
       const transferEvent = await expectEventWithArgs(
@@ -1372,6 +1404,7 @@ describe('GameToken', function () {
       before(async function () {
         ({gameToken, GameOwner, gameTokenAsAdmin} = await setupTest());
         others = await getUnnamedAccounts();
+        const randomId = await getRandom();
         const receipt = await waitFor(
           GameOwner.Game.createGame(
             GameOwner.address,
@@ -1379,7 +1412,8 @@ describe('GameToken', function () {
             [],
             [],
             [],
-            ''
+            '',
+            randomId
           )
         );
         const transferEvent = await expectEventWithArgs(
