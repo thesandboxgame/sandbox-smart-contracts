@@ -41,6 +41,7 @@
     "hardhat-deploy-ethers": "^0.3.0-beta.7",
     "hardhat-gas-reporter": "^1.0.0",
     "mocha": "^8.1.1",
+    "prando": "^5.1.2",
     "prettier": "^2.0.5",
     "prettier-plugin-solidity": "^1.0.0-alpha.57",
     "solhint": "^3.3.1",
