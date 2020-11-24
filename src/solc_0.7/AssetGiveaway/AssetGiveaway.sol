@@ -13,15 +13,18 @@ contract AssetGiveaway is WithAdmin, WithMetaTransaction, ClaimERC1155 {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
 
+    uint256 internal _expiryTime;
+
     mapping(address => bool) public claimed;
 
     constructor(
         address asset,
         bytes32 merkleRoot,
-        address assetsHolder
-    ) ClaimERC1155(IERC1155(asset), merkleRoot, assetsHolder) {}
-
-    // TODO: add _expiryTime for giveaway
+        address assetsHolder,
+        uint256 expiryTime
+    ) ClaimERC1155(IERC1155(asset), merkleRoot, assetsHolder) {
+        _expiryTime = expiryTime;
+    }
 
     function claimAssets(
         address from,
@@ -31,10 +34,9 @@ contract AssetGiveaway is WithAdmin, WithMetaTransaction, ClaimERC1155 {
         bytes32[] calldata proof,
         bytes32 salt
     ) external {
-        require(msg.sender == from || _metaTransactionContracts[msg.sender] > 0, "INVALID_SENDER"); // TODO: check bool
-        // require(block.timestamp < _expiryTime, "CLAIM_PERIOD_IS_OVER");
-        require(to != address(0), "DESTINATION_ZERO_ADDRESS");
+        require(block.timestamp < _expiryTime, "CLAIM_PERIOD_IS_OVER");
         require(claimed[to] == false, "DESTINATION_ALREADY_CLAIMED");
+        _checkAuthorization(from, to);
         claimed[to] = true;
         _claimERC1155(from, to, assetIds, assetValues, proof, salt);
     }
@@ -63,5 +65,16 @@ contract AssetGiveaway is WithAdmin, WithMetaTransaction, ClaimERC1155 {
             return ERC1155_RECEIVED;
         }
         revert("ERC1155_REJECTED");
+    }
+
+    function _checkAuthorization(address from, address to) internal view {
+        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
+        if (from != msg.sender) {
+            uint256 processorType = _metaTransactionContracts[msg.sender];
+            require(processorType != 0, "INVALID SENDER");
+            if (processorType == METATX_2771) {
+                require(from == _forceMsgSender(), "INVALID_SENDER");
+            }
+        }
     }
 }

@@ -19,7 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     linkedData: assets,
     log: true,
-    args: [assetContract.address, merkleRootHash, ASSETS_HOLDER],
+    args: [assetContract.address, merkleRootHash, ASSETS_HOLDER, 2597755600], // TODO: expiryTime
   });
 };
 export default func;
