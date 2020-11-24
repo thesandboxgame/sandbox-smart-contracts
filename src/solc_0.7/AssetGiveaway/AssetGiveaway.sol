@@ -13,6 +13,8 @@ contract AssetGiveaway is WithAdmin, WithMetaTransaction, ClaimERC1155 {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
 
+    mapping(address => bool) public claimed;
+
     constructor(
         address asset,
         bytes32 merkleRoot,
@@ -32,6 +34,8 @@ contract AssetGiveaway is WithAdmin, WithMetaTransaction, ClaimERC1155 {
         require(msg.sender == from || _metaTransactionContracts[msg.sender] > 0, "INVALID_SENDER"); // TODO: check bool
         // require(block.timestamp < _expiryTime, "CLAIM_PERIOD_IS_OVER");
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
+        require(claimed[to] == false, "DESTINATION_ALREADY_CLAIMED");
+        claimed[to] = true;
         _claimERC1155(from, to, assetIds, assetValues, proof, salt);
     }
 
