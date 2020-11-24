@@ -14,7 +14,8 @@ interface IGameToken {
         uint256[] calldata assetIds,
         uint256[] calldata values,
         address[] calldata editors,
-        string calldata uri
+        string calldata uri,
+        uint96 randomId
     ) external returns (uint256 id);
 
     function destroyGame(
