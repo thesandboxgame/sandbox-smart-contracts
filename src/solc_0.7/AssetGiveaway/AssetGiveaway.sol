@@ -26,12 +26,13 @@ contract AssetGiveaway is WithAdmin, WithMetaTransaction, ClaimERC1155 {
         address to,
         uint256[] calldata assetIds,
         uint256[] calldata assetValues,
-        bytes32[] calldata proof
+        bytes32[] calldata proof,
+        bytes32 salt
     ) external {
         require(msg.sender == from || _metaTransactionContracts[msg.sender] > 0, "INVALID_SENDER"); // TODO: check bool
         // require(block.timestamp < _expiryTime, "CLAIM_PERIOD_IS_OVER");
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
-        _claimERC1155(from, to, assetIds, assetValues, proof);
+        _claimERC1155(from, to, assetIds, assetValues, proof, salt);
     }
 
     function onERC1155BatchReceived(

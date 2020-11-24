@@ -8,7 +8,6 @@ import {
 } from '../utils';
 import {expect} from '../chai-setup';
 
-import MerkleTree from '../../lib/merkleTree';
 import helpers from '../../lib/merkleTreeHelper';
 const {calculateAssetHash} = helpers;
 
@@ -18,23 +17,26 @@ describe('NFT_Lottery_1', function () {
   it('exists', async function () {
     const setUp = await setupGiveaway();
     const {giveawayContract, others, tree, assets} = setUp;
-
     const asset = assets[0];
-
     const proof = tree.getProof(calculateAssetHash(asset));
+    const giveawayContractAsUser = await giveawayContract.connect(
+      ethers.provider.getSigner(others[1])
+    );
 
-    console.log('proof', proof);
-
-    // TODO: tests for claim
     const receipt = await waitFor(
-      giveawayContract.claimAssets(
+      giveawayContractAsUser.claimAssets(
         others[1],
-        others[2],
+        others[1],
         [0, 1, 2],
         [5, 5, 5],
-        proof
+        proof,
+        asset.salt
       )
     );
+
+    console.log(receipt);
+
+    // TODO: can't substract more than there is
   });
 
   // giveaway contract can hold assets --> set up contract with assets in it
