@@ -1,3 +1,4 @@
+const {guard} = require("../lib");
 module.exports = async ({deployments}) => {
   const {read, execute} = deployments;
 
@@ -11,6 +12,4 @@ module.exports = async ({deployments}) => {
     salesDistribution.address
   );
 };
-
-const {guard} = require("../lib");
-module.exports.skip = guard(["1", "4"]); // TODO
+module.exports.skip = guard(["1", "4", "314159"]);
