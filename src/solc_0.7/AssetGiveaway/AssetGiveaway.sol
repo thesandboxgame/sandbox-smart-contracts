@@ -5,9 +5,8 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "./ClaimERC1155.sol";
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
-import "../common/BaseWithStorage/WithAdmin.sol";
 
-contract AssetGiveaway is WithAdmin, WithMetaTransaction, ClaimERC1155 {
+contract AssetGiveaway is WithMetaTransaction, ClaimERC1155 {
     using SafeMath for uint256;
 
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
