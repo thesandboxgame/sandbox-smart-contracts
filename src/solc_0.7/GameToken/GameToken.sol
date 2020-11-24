@@ -5,10 +5,10 @@ pragma experimental ABIEncoderV2;
 import "../common/BaseWithStorage/ERC721BaseToken.sol";
 import "@openzeppelin/contracts/utils/EnumerableSet.sol";
 import "../common/Interfaces/AssetToken.sol";
-import "../common/Interfaces/GameToken.sol";
+import "../common/Interfaces/IGameToken.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-contract GameToken is ERC721BaseToken, GameTokenInterface {
+contract GameToken is ERC721BaseToken, IGameToken {
     ///////////////////////////////  Libs //////////////////////////////
 
     using EnumerableSet for EnumerableSet.UintSet;
