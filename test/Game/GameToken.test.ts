@@ -1241,7 +1241,7 @@ describe('GameToken', function () {
       const isSkipped = true;
     });
 
-    it('can process metaTransactions if processorType == METATX_2771', async function () {
+    it.skip('can process metaTransactions if processorType == METATX_2771', async function () {
       const {gameToken, GameOwner} = await setupTest();
       const others = await getUnnamedAccounts();
       const signers = await ethers.getSigners();
