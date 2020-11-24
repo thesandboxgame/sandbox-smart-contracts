@@ -21,8 +21,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
         mapping(uint256 => uint256) _values;
     }
 
-    uint256 public _nextId;
-
     address internal _minter;
     AssetToken _asset;
 
@@ -49,7 +47,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
         AssetToken asset
     ) ERC721BaseToken(metaTransactionContract, admin) {
         _asset = asset;
-        _nextId = 1;
     }
 
     ///////////////////////////////  Modifiers //////////////////////////////
@@ -431,7 +428,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint96 randomId
     ) internal returns (uint256 id) {
         uint256 gameId = generateGameId(from, randomId);
-        _nextId = _nextId + 1;
         _owners[gameId] = uint256(to);
         _numNFTPerAddress[to]++;
         emit Transfer(address(0), to, gameId);
@@ -442,6 +438,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
     /// @param creator The address of the Game creator
     /// @param randomId The id to use when generating the new GameId
     function generateGameId(address creator, uint96 randomId) internal view returns (uint256) {
-        return uint256(creator) * CREATOR_OFFSET_MULTIPLIER + uint96(_nextId);
+        return uint256(creator) * CREATOR_OFFSET_MULTIPLIER + uint96(randomId);
     }
 }

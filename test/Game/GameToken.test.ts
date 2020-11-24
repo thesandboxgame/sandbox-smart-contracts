@@ -208,10 +208,13 @@ describe('GameToken', function () {
 
         it('gameId contains creator address', async function () {
           const idAsHex = utils.hexValue(gameId);
+          console.log(`id: ${idAsHex}`);
           const slicedId = idAsHex.slice(0, 42);
-          const secondSlice = idAsHex.slice(65);
+          console.log(`slicedId: ${slicedId}`);
+          const secondSlice = idAsHex.slice(58);
+          console.log(`secondSlice: ${secondSlice}`);
           expect(utils.getAddress(slicedId)).to.be.equal(GameOwner.address);
-          expect(secondSlice).to.be.equal(String(1));
+          expect(secondSlice).to.be.equal('24a3d57c');
         });
       });
     });
