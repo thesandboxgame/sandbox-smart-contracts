@@ -1202,21 +1202,15 @@ describe('GameToken', function () {
   describe('GameToken: MetaTransactions', function () {
     it('can set the MetaTransactionProcessor type', async function () {
       const {gameToken, gameTokenAsAdmin} = await setupTest();
-      const NativeMetaTransactionProcessor = await ethers.getContract(
-        'NativeMetaTransactionProcessor'
-      );
-      await expect(
-        gameTokenAsAdmin.setMetaTransactionProcessor(
-          NativeMetaTransactionProcessor.address,
-          1
-        )
-      )
+      // const NativeMetaTransactionProcessor = await ethers.getContract(
+      //   'NativeMetaTransactionProcessor'
+      // );
+      const others = await getUnnamedAccounts();
+      await expect(gameTokenAsAdmin.setMetaTransactionProcessor(others[8], 1))
         .to.emit(gameTokenAsAdmin, 'MetaTransactionProcessor')
-        .withArgs(NativeMetaTransactionProcessor.address, METATX_SANDBOX);
+        .withArgs(others[8], METATX_SANDBOX);
 
-      const type = await gameToken.getMetaTransactionProcessorType(
-        NativeMetaTransactionProcessor.address
-      );
+      const type = await gameToken.getMetaTransactionProcessorType(others[8]);
       expect(type).to.be.equal(METATX_SANDBOX);
     });
 
