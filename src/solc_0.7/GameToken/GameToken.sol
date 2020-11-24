@@ -186,6 +186,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
     /// @param assetIds The ids of the assets to add to this game
     /// @param values the amount of each token id to add to game
     /// @param editors The addresses to allow to edit (can also be set later)
+    /// @param randomId A random id created on the backend.
     /// @return id The id of the new GAME token (erc721)
     function createGame(
         address from,
@@ -193,11 +194,12 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256[] memory assetIds,
         uint256[] memory values,
         address[] memory editors,
-        string memory uri
+        string memory uri,
+        uint96 randomId
     ) external override minterGuard() notToZero(to) returns (uint256 id) {
         // @review support metaTransactions ?
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
-        uint256 gameId = _mintGame(from, to);
+        uint256 gameId = _mintGame(from, to, randomId);
 
         if (editors.length != 0) {
             for (uint256 i = 0; i < editors.length; i++) {
@@ -419,10 +421,16 @@ contract GameToken is ERC721BaseToken, IGameToken {
     }
 
     /// @dev Function to create a new gameId and associate it with an owner
+    /// @param from The address of the Game creator
     /// @param to The address of the Game owner
+    /// @param randomId The id to use when generating the new GameId
     /// @return id The newly created gameId
-    function _mintGame(address from, address to) internal returns (uint256 id) {
-        uint256 gameId = generateGameId(from);
+    function _mintGame(
+        address from,
+        address to,
+        uint96 randomId
+    ) internal returns (uint256 id) {
+        uint256 gameId = generateGameId(from, randomId);
         _nextId = _nextId + 1;
         _owners[gameId] = uint256(to);
         _numNFTPerAddress[to]++;
@@ -430,7 +438,10 @@ contract GameToken is ERC721BaseToken, IGameToken {
         return gameId;
     }
 
-    function generateGameId(address creator) internal view returns (uint256) {
+    /// @dev Function to create a new gameId and associate it with an owner
+    /// @param creator The address of the Game creator
+    /// @param randomId The id to use when generating the new GameId
+    function generateGameId(address creator, uint96 randomId) internal view returns (uint256) {
         return uint256(creator) * CREATOR_OFFSET_MULTIPLIER + uint96(_nextId);
     }
 }
