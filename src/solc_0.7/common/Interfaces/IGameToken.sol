@@ -21,17 +21,12 @@ interface IGameToken {
     function destroyGame(
         address from,
         address to,
-        uint256 gameId
-    ) external;
-
-    function addSingleAsset(
-        address from,
         uint256 gameId,
-        uint256 assetId,
-        string calldata uri
+        uint256[] calldata assetIds,
+        uint256[] calldata values
     ) external;
 
-    function addMultipleAssets(
+    function addAssets(
         address from,
         uint256 gameId,
         uint256[] memory assetIds,
@@ -39,24 +34,13 @@ interface IGameToken {
         string calldata uri
     ) external;
 
-    function removeSingleAsset(
-        uint256 gameId,
-        uint256 assetId,
-        address to,
-        string calldata uri
-    ) external;
-
-    function removeMultipleAssets(
+    function removeAssets(
         uint256 gameId,
         uint256[] calldata assetIds,
         uint256[] calldata values,
         address to,
         string calldata uri
     ) external;
-
-    function getNumberOfAssets(uint256 gameId) external view returns (uint256 assetTypes, uint256 totalAssets);
-
-    function getGameAssets(uint256 gameId) external view returns (uint256[] memory, uint256[] memory);
 
     function setGameEditor(
         uint256 gameId,
