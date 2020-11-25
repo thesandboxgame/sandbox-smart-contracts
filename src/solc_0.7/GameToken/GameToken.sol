@@ -28,7 +28,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     uint256 private constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
 
-    mapping(uint256 => Data) private _gameData;
+    mapping(uint256 => mapping(uint256 => uint256)) private _gameAssets;
     mapping(address => address) private _creatorship; // creatorship transfer
 
     mapping(uint256 => string) private _metaData;
