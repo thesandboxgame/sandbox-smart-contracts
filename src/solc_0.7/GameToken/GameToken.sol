@@ -61,59 +61,31 @@ contract GameToken is ERC721BaseToken, IGameToken {
 
     ///////////////////////////////  Functions //////////////////////////////
 
-    /// @notice Function to remove multiple assets from a GAME
-    /// @param gameId The GAME to remove assets from
-    /// @param assetId The asset Id to remove
-    /// @param to The address to send the removed asset to
-    /// @param uri The URI string to update the GAME token's URI
-    function removeSingleAsset(
-        uint256 gameId,
-        uint256 assetId,
-        address to,
-        string memory uri
-    ) external override minterGuard() onlyOwnerOrEditor(gameId) notToZero(to) {
-        _gameData[gameId]._values[assetId] = _gameData[gameId]._values[assetId].sub(1);
-        uint256 remainingAssets = _gameData[gameId]._values[assetId];
-
-        if (remainingAssets == 0) {
-            // "remove" is from EnumerableSet.sol
-            require(_gameData[gameId]._assets.remove(assetId), "ASSET_NOT_IN_GAME");
-        }
-
-        _asset.safeTransferFrom(address(this), to, assetId, 1, "");
-        uint256[] memory assets = new uint256[](1);
-        uint256[] memory values = new uint256[](1);
-        assets[0] = assetId;
-        values[0] = uint256(1);
-
-        setTokenURI(gameId, uri);
-        emit AssetsRemoved(gameId, assets, values, to);
-    }
-
-    /// @notice Function to remove multiple assets from a GAME
+    /// @notice Function to remove assets from a GAME
     /// @param gameId The GAME to remove assets from
     /// @param assetIds An array of asset Ids to remove
     /// @param values An array of the number of each asset id to remove
     /// @param to The address to send removed assets to
     /// @param uri The URI string to update the GAME token's URI
-    function removeMultipleAssets(
+    function removeAssets(
         uint256 gameId,
         uint256[] memory assetIds,
         uint256[] memory values,
         address to,
         string memory uri
     ) public override minterGuard() onlyOwnerOrEditor(gameId) notToZero(to) {
-        (uint256 assetTypes, ) = getNumberOfAssets(gameId);
-        require(assetIds.length == values.length && assetIds.length <= assetTypes, "INVALID_INPUT_LENGTHS");
+        // (uint256 assetTypes, ) = getNumberOfAssets(gameId);
+        require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
+
         for (uint256 i = 0; i < assetIds.length; i++) {
-            // "remove" is from EnumerableSet.sol
-            uint256 assetValues = _gameData[gameId]._values[assetIds[i]];
-            if (values[i] >= _gameData[gameId]._values[assetIds[i]]) {
-                _gameData[gameId]._assets.remove(assetIds[i]);
-            }
-            _gameData[gameId]._values[assetIds[i]] = assetValues.sub(values[i]);
+            _gameAssets[gameId][assetIds[i]] = values[i];
         }
-        _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
+
+        if (assetIds.length == 1) {
+            _asset.safeTransferFrom(address(this), to, assetIds[0], values[0], "");
+        } else {
+            _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
+        }
 
         setTokenURI(gameId, uri);
         emit AssetsRemoved(gameId, assetIds, values, to);
@@ -160,6 +132,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         emit CreatorshipTransfer(original, current, to);
     }
 
+    // @review comments !
     /// @notice Set the Minter that will be the only address able to create Estate.
     /// If set at deployment, resetting to address(0) will allow anyone to mint games
     /// @param minter address of the minter
@@ -187,7 +160,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
         string memory uri,
         uint96 randomId
     ) external override minterGuard() notToZero(to) returns (uint256 id) {
-        // @review support metaTransactions ?
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
         uint256 gameId = _mintGame(from, to, randomId);
 
@@ -198,12 +170,9 @@ contract GameToken is ERC721BaseToken, IGameToken {
         }
 
         if (assetIds.length != 0) {
-            if (assetIds.length == 1 && values[0] == 1) {
-                addSingleAsset(from, gameId, assetIds[0], uri);
-            } else {
-                addMultipleAssets(from, gameId, assetIds, values, uri);
-            }
+            addAssets(from, gameId, assetIds, values, uri);
         }
+
         setTokenURI(gameId, uri);
         emit AssetsAdded(gameId, assetIds, values);
         return gameId;
@@ -213,24 +182,27 @@ contract GameToken is ERC721BaseToken, IGameToken {
     /// @param from The address of the one destroying the game
     /// @param to The address to send all game assets to
     /// @param gameId The id of the game to destroy
+
+    // @refactor ! https://github.com/thesandboxgame/sandbox-private-contracts/pull/152#discussion_r529665097
     function destroyGame(
         address from,
         address to,
-        uint256 gameId
+        uint256 gameId,
+        uint256[] calldata assetIds,
+        uint256[] calldata values
     ) external override minterGuard() {
         require(from == _ownerOf(gameId), "DESTROY_ACCESS_DENIED");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
-        (uint256[] memory assets, uint256[] memory values) = getGameAssets(gameId);
-        removeMultipleAssets(gameId, assets, values, to, "");
-        assert(_gameData[gameId]._assets.length() == 0);
+        (gameId);
+        removeAssets(gameId, assetIds, values, to, "");
         _burn(from, gameId);
     }
 
     function _burn(address from, uint256 gameId) private {
-        delete _gameData[gameId];
+        // delete _gameData[gameId];
         delete _metaData[gameId];
         _creatorship[creatorOf(gameId)] = address(0);
-        // @review best practices re: transfer to zero address
+        _numNFTPerAddress[from]--;
         _transferFrom(from, address(0), gameId);
         emit Transfer(from, address(0), gameId);
     }
@@ -254,29 +226,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
             return newCreator;
         }
         return originalCreator;
-    }
-
-    /// @notice Function to get all assets and their quantities for a GAME
-    /// @param gameId The id of the GAME to get assets for
-    function getGameAssets(uint256 gameId) public view override returns (uint256[] memory, uint256[] memory) {
-        uint256 assetLength = _gameData[gameId]._assets.length();
-        uint256[] memory gameAssets;
-        uint256[] memory quantities;
-
-        if (assetLength != 0) {
-            gameAssets = new uint256[](assetLength);
-            quantities = new uint256[](assetLength);
-            for (uint256 i = 0; i < assetLength; i++) {
-                gameAssets[i] = _gameData[gameId]._assets.at(i);
-                quantities[i] = _gameData[gameId]._values[gameAssets[i]];
-            }
-        } else {
-            gameAssets = new uint256[](1);
-            quantities = new uint256[](1);
-            gameAssets[0] = uint256(0);
-            quantities[0] = uint256(0);
-        }
-        return (gameAssets, quantities);
     }
 
     /// @notice return the current minter
@@ -325,52 +274,28 @@ contract GameToken is ERC721BaseToken, IGameToken {
         return "GAME";
     }
 
-    /// @notice Function to add a single asset to an existing GAME
-    /// @param from The address of the one creating the game (may be different from msg.sender if metaTx)
-    /// @param gameId The id of the GAME to add asset to
-    /// @param assetId The id of the asset to add to GAME. Single asset defined as 1 tokenID && value = 1. Otherwise use addMultipleAssets
-
-    function addSingleAsset(
-        address from,
-        uint256 gameId,
-        uint256 assetId,
-        string memory uri
-    ) public override minterGuard() onlyOwnerOrEditor(gameId) {
-        // here "add" is from EnumerableSet.sol
-        _gameData[gameId]._assets.add(assetId);
-        uint256 assetValues = _gameData[gameId]._values[assetId];
-        // here "add" is from SafeMath.sol
-        _gameData[gameId]._values[assetId] = assetValues.add(1);
-        _asset.safeTransferFrom(from, address(this), assetId, 1, "");
-        uint256[] memory assets = new uint256[](1);
-        uint256[] memory values = new uint256[](1);
-        assets[0] = assetId;
-        values[0] = uint256(1);
-
-        setTokenURI(gameId, uri);
-        emit AssetsAdded(gameId, assets, values);
-    }
-
-    /// @notice Function to add multiple assets to an existing GAME
+    /// @notice Function to add assets to an existing GAME
     /// @param from The address of the one creating the game (may be different from msg.sender if metaTx)
     /// @param gameId The id of the GAME to add asset to
     /// @param assetIds The id of the asset to add to GAME
     /// @param values The amount of each asset to add to GAME
-    function addMultipleAssets(
+    /// @param uri The new uri to set
+    function addAssets(
         address from,
         uint256 gameId,
         uint256[] memory assetIds,
         uint256[] memory values,
         string memory uri
     ) public override minterGuard() onlyOwnerOrEditor(gameId) {
-        require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
+        require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
         for (uint256 i = 0; i < assetIds.length; i++) {
-            _gameData[gameId]._assets.add(assetIds[i]);
-            uint256 assetValues = _gameData[gameId]._values[assetIds[i]];
-            _gameData[gameId]._values[assetIds[i]] = assetValues.add(values[i]);
+            _gameAssets[gameId][assetIds[i]] = values[i];
         }
-        _asset.safeBatchTransferFrom(from, address(this), assetIds, values, "");
-
+        if (assetIds.length == 1) {
+            _asset.safeTransferFrom(from, address(this), assetIds[0], values[0], "");
+        } else {
+            _asset.safeBatchTransferFrom(from, address(this), assetIds, values, "");
+        }
         setTokenURI(gameId, uri);
         emit AssetsAdded(gameId, assetIds, values);
     }
@@ -385,20 +310,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
             "URI_ACCESS_DENIED"
         );
         _metaData[gameId] = URI;
-    }
-
-    /// @notice Function to get the numnber of assets in a game
-    /// @param gameId The is of the GAME to query
-    /// @return assetTypes The ids of each asset in the game
-    /// @return totalAssets The quantity of each asset ID in the game
-    function getNumberOfAssets(uint256 gameId) public view override returns (uint256 assetTypes, uint256 totalAssets) {
-        uint256 assets = _gameData[gameId]._assets.length();
-        uint256 total;
-        for (uint256 i = 0; i < assets; i++) {
-            total += _gameData[gameId]._values[_gameData[gameId]._assets.at(i)];
-        }
-        // get each value and add together
-        return (assets, total);
     }
 
     /// @notice Return the URI of a specific token
@@ -430,7 +341,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
     /// @dev Function to create a new gameId and associate it with an owner
     /// @param creator The address of the Game creator
     /// @param randomId The id to use when generating the new GameId
-    function generateGameId(address creator, uint96 randomId) internal view returns (uint256) {
+    function generateGameId(address creator, uint96 randomId) internal pure returns (uint256) {
         return uint256(creator) * CREATOR_OFFSET_MULTIPLIER + uint96(randomId);
     }
 }
