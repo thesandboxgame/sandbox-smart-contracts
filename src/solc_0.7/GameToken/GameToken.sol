@@ -16,11 +16,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
 
     ///////////////////////////////  Data //////////////////////////////
 
-    struct Data {
-        EnumerableSet.UintSet _assets;
-        mapping(uint256 => uint256) _values;
-    }
-
     address internal _minter;
     AssetToken _asset;
 
