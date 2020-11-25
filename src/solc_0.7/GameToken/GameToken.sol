@@ -7,6 +7,8 @@ import "../common/Interfaces/AssetToken.sol";
 import "../common/Interfaces/IGameToken.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
+import "hardhat/console.sol";
+
 contract GameToken is ERC721BaseToken, IGameToken {
     ///////////////////////////////  Libs //////////////////////////////
 
@@ -67,6 +69,8 @@ contract GameToken is ERC721BaseToken, IGameToken {
     /// @param values An array of the number of each asset id to remove
     /// @param to The address to send removed assets to
     /// @param uri The URI string to update the GAME token's URI
+
+    // @refactor ! https://github.com/thesandboxgame/sandbox-private-contracts/pull/152#discussion_r529665560
     function removeAssets(
         uint256 gameId,
         uint256[] memory assetIds,
@@ -74,11 +78,12 @@ contract GameToken is ERC721BaseToken, IGameToken {
         address to,
         string memory uri
     ) public override minterGuard() onlyOwnerOrEditor(gameId) notToZero(to) {
-        // (uint256 assetTypes, ) = getNumberOfAssets(gameId);
         require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
 
         for (uint256 i = 0; i < assetIds.length; i++) {
-            _gameAssets[gameId][assetIds[i]] = values[i];
+            uint256 currentValue = _gameAssets[gameId][assetIds[i]];
+            require(values[i] <= currentValue, "INVALID_ASSET_REMOVAL");
+            _gameAssets[gameId][assetIds[i]] = currentValue.sub(values[i]);
         }
 
         if (assetIds.length == 1) {
@@ -174,7 +179,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         }
 
         setTokenURI(gameId, uri);
-        emit AssetsAdded(gameId, assetIds, values);
+        // emit AssetsAdded(gameId, assetIds, values);
         return gameId;
     }
 
