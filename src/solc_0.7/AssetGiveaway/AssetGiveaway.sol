@@ -3,6 +3,7 @@ pragma solidity 0.7.1;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "./ClaimERC1155.sol";
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 
@@ -40,30 +41,24 @@ contract AssetGiveaway is WithMetaTransaction, ClaimERC1155 {
         _claimERC1155(from, to, assetIds, assetValues, proof, salt);
     }
 
-    function onERC1155BatchReceived(
-        address operator,
-        address, /*from*/
-        uint256[] calldata, /*ids*/
-        uint256[] calldata, /*values*/
-        bytes calldata /*data*/
-    ) external view returns (bytes4) {
-        if (operator == address(this)) {
-            return ERC1155_BATCH_RECEIVED;
-        }
-        revert("ERC1155_BATCH_REJECTED");
-    }
-
     function onERC1155Received(
-        address operator,
+        address, /*operator*/
         address, /*from*/
         uint256, /*id*/
         uint256, /*value*/
         bytes calldata /*data*/
-    ) external view returns (bytes4) {
-        if (operator == address(this)) {
-            return ERC1155_RECEIVED;
-        }
-        revert("ERC1155_REJECTED");
+    ) external pure returns (bytes4) {
+        return ERC1155_RECEIVED;
+    }
+
+    function onERC1155BatchReceived(
+        address, /*operator*/
+        address, /*from*/
+        uint256[] calldata, /*ids*/
+        uint256[] calldata, /*values*/
+        bytes calldata /*data*/
+    ) external pure returns (bytes4) {
+        return ERC1155_BATCH_RECEIVED;
     }
 
     function _checkAuthorization(address from, address to) internal view {

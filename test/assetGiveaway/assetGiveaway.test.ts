@@ -35,12 +35,28 @@ describe('NFT_Lottery_1', function () {
     ).to.be.revertedWith(`can't substract more than there is`);
   });
 
-  it('User can claim their allocated assets', async function () {
+  it('User can claim their allocated assets from Giveaway contract', async function () {
     const setUp = await setupGiveaway();
+    const {
+      giveawayContract,
+      others,
+      tree,
+      assets,
+      mintTestAssets,
+      assetContract,
+    } = setUp;
+    console.log(assetContract);
 
-    // Add setup step to put assets in contract
+    for (let i = 0; i < 3; i++) {
+      await mintTestAssets(i, 5, giveawayContract.address);
+    }
 
-    const {giveawayContract, others, tree, assets} = setUp;
+    // TODO: fix balanceOf; check contract receives assets
+    // const balanceA = await assetContract.balanceOf(giveawayContract.address, 0);
+    // console.log('bal', balanceA);
+
+    // Correct asset supply numbers
+
     const asset = assets[0];
     const proof = tree.getProof(calculateAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
@@ -58,9 +74,6 @@ describe('NFT_Lottery_1', function () {
       )
     );
   });
-
-  // giveaway contract can hold assets --> set up contract with assets in it
-  // assets can be claimed from giveaway contract --> set up proof for user to claim assets
 
   // a different address can hold assets
   // assets can be claimed from that address

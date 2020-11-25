@@ -3,6 +3,7 @@ import {BigNumber} from 'ethers';
 import MerkleTree from '../../lib/merkleTree';
 import helpers from '../../lib/merkleTreeHelper';
 import * as assetData from './assets.json';
+import * as testAssetData from './testAssets.json';
 
 const {createDataArrayAssets, saltAssets} = helpers;
 
@@ -60,10 +61,18 @@ function getAssets(isDeploymentChainId: any, chainId: any): any {
     throw new Error('chainId not a string');
   }
 
+  let assets;
+  console.log('chainId', chainId);
+
   let secretPath = './.asset_giveaway_1_secret';
   if (BigNumber.from(chainId).toString() === '1') {
     console.log('MAINNET secret');
     secretPath = './.asset_giveaway_1_secret.mainnet';
+  }
+  if (BigNumber.from(chainId).toString() === '31337') {
+    ({assets} = generateAssetsForMerkleTree(testAssetData));
+  } else {
+    ({assets} = generateAssetsForMerkleTree(assetData));
   }
 
   let expose = false;
@@ -81,8 +90,6 @@ function getAssets(isDeploymentChainId: any, chainId: any): any {
   if (!isDeploymentChainId) {
     expose = true;
   }
-
-  const {assets} = generateAssetsForMerkleTree(assetData);
 
   const saltedAssets = saltAssets(assets, secret);
   const tree = new MerkleTree(createDataArrayAssets(saltedAssets));

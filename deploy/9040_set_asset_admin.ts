@@ -38,6 +38,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         'changeBouncerAdmin',
         assetBouncerAdmin
       );
+
+      // Need to execute setBouncer in order for assetBouncerAdmin to be able to mint
+      await execute(
+        'Asset',
+        {from: assetBouncerAdmin, log: true},
+        'setBouncer',
+        assetBouncerAdmin,
+        true
+      );
     }
   }
 };

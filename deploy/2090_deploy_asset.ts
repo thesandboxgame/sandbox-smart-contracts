@@ -11,11 +11,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deploy('Asset', {
     from: deployer,
-    args: [
-      sandContract.address,
-      deployer, // TODO set_asset_admin
-      deployer, // TODO set_asset_admin
-    ],
+    args: [sandContract.address, deployer, deployer],
     log: true,
     skipIfAlreadyDeployed: true,
   });
