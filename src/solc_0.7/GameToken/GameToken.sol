@@ -179,7 +179,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
         }
 
         setTokenURI(gameId, uri);
-        // emit AssetsAdded(gameId, assetIds, values);
         return gameId;
     }
 
@@ -195,11 +194,13 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256 gameId,
         uint256[] calldata assetIds,
         uint256[] calldata values
-    ) external override minterGuard() {
+    ) external override minterGuard() notToZero(to) {
         require(from == _ownerOf(gameId), "DESTROY_ACCESS_DENIED");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
         (gameId);
-        removeAssets(gameId, assetIds, values, to, "");
+        if (assetIds.length != 0) {
+            removeAssets(gameId, assetIds, values, to, "");
+        }
         _burn(from, gameId);
     }
 
