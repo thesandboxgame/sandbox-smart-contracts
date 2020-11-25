@@ -143,33 +143,14 @@ describe('GameToken', function () {
             receipt,
             'Transfer'
           );
-          const assetsAddedEvent = await expectEventWithArgs(
-            gameToken,
-            receipt,
-            'AssetsAdded'
-          );
+
           gameId = transferEvent.args[2];
           const eventGameOwner = transferEvent.args[1];
-          const assets = assetsAddedEvent.args[1];
           const contractGameOwner = await gameToken.ownerOf(gameId);
-          const [gameAssets, quantities] = await gameToken.getGameAssets(
-            gameId
-          );
 
-          expect(gameAssets[0]).to.be.equal(['0x00']);
-          expect(quantities[0]).to.be.equal(['0x00']);
-          expect(assets).to.eql([]);
           expect(eventGameOwner).to.be.equal(GameOwner.address);
           expect(contractGameOwner).to.be.equal(GameOwner.address);
           expect(contractGameOwner).to.be.equal(eventGameOwner);
-        });
-
-        it('fails to get GAME data when no assets', async function () {
-          const [gameAssets, quantities] = await gameToken.getGameAssets(
-            gameId
-          );
-          expect(gameAssets[0]).to.be.equal('0x00');
-          expect(quantities[0]).to.be.equal('0x00');
         });
 
         it('anyone can mint Games with Editors', async function () {
@@ -384,22 +365,6 @@ describe('GameToken', function () {
         expect(values).to.be.eql([BigNumber.from(3), BigNumber.from(2)]);
       });
 
-      it('can get the number of assets', async function () {
-        const [assetTypes, totalAssets] = await gameToken.getNumberOfAssets(
-          gameId
-        );
-        expect(assetTypes).to.be.equal(2);
-        expect(totalAssets).to.be.equal(5);
-      });
-
-      it('can get all assets at once from a game', async function () {
-        const [gameAssets, quantities] = await gameToken.getGameAssets(gameId);
-        expect(gameAssets[0]).to.be.equal(assetId);
-        expect(gameAssets[1]).to.be.equal(assetId2);
-        expect(quantities[0]).to.be.equal(3);
-        expect(quantities[1]).to.be.equal(2);
-      });
-
       it('should fail if length of assetIds and values dont match', async function () {
         const assetContract = await ethers.getContract('Asset');
         const assetReceipt = await supplyAssets(
@@ -548,21 +513,16 @@ describe('GameToken', function () {
         const ownerBalanceBefore = await assetContract[
           'balanceOf(address,uint256)'
         ](GameOwner.address, singleAssetId);
-        let [assetTypes, totalAssets] = await gameToken.getNumberOfAssets(
-          gameId
-        );
-
-        expect(assetTypes).to.be.equal(0);
-        expect(totalAssets).to.be.equal(0);
 
         const uriBefore = await gameToken.tokenURI(gameId);
         expect(uriBefore).to.be.equal('Uri is this');
 
         const receipt = await waitFor(
-          GameOwner.Game.addSingleAsset(
+          GameOwner.Game.addAssets(
             GameOwner.address,
             gameId,
-            singleAssetId,
+            [singleAssetId],
+            [1],
             'Uri is different now'
           )
         );
@@ -576,9 +536,7 @@ describe('GameToken', function () {
         const ownerBalanceAfter = await assetContract[
           'balanceOf(address,uint256)'
         ](GameOwner.address, singleAssetId);
-        [assetTypes, totalAssets] = await gameToken.getNumberOfAssets(gameId);
-        expect(assetTypes).to.be.equal(1);
-        expect(totalAssets).to.be.equal(1);
+
         const assetsAddedEvent = await expectEventWithArgs(
           gameToken,
           receipt,
@@ -587,17 +545,9 @@ describe('GameToken', function () {
         const id = assetsAddedEvent.args[0];
         const assets = assetsAddedEvent.args[1];
         const values = assetsAddedEvent.args[2];
-        const [gameAssets, quantities] = await gameToken.getGameAssets(gameId);
-        [assetTypes, totalAssets] = await GameOwner.Game.getNumberOfAssets(
-          gameId
-        );
 
-        expect(assetTypes).to.be.equal(1);
-        expect(totalAssets).to.be.equal(1);
         expect(contractBalanceAfter).to.be.equal(contractBalanceBefore + 1);
         expect(ownerBalanceAfter).to.be.equal(ownerBalanceBefore - 1);
-        expect(gameAssets[0]).to.be.equal(singleAssetId);
-        expect(quantities[0]).to.be.equal(values[0]);
         expect(id).to.be.equal(gameId);
         expect(assets[0]).to.be.equal(singleAssetId);
         expect(values[0]).to.be.equal(1);
