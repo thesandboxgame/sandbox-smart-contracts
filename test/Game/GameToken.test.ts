@@ -1098,7 +1098,9 @@ describe('GameToken', function () {
         await GameOwner.Game.destroyGame(
           GameOwner.address,
           GameOwner.address,
-          gameId
+          gameId,
+          [assetId, assetId2],
+          [7, 11]
         );
 
         const ownerBalanceAfter = await assetContract[
