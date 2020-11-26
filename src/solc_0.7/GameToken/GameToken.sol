@@ -46,7 +46,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
 
     ///////////////////////////////  Modifiers //////////////////////////////
 
-    modifier minterGuard() {
+    modifier minterOnly() {
         require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
         _;
     }
@@ -77,7 +77,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256[] memory values,
         address to,
         string memory uri
-    ) public override minterGuard() onlyOwnerOrEditor(gameId) notToZero(to) {
+    ) public override minterOnly() onlyOwnerOrEditor(gameId) notToZero(to) {
         require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
 
         for (uint256 i = 0; i < assetIds.length; i++) {
@@ -92,7 +92,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
             _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
         }
 
-        setTokenURI(gameId, uri);
+        _setTokenURI(gameId, uri);
         emit AssetsRemoved(gameId, assetIds, values, to);
     }
 
@@ -164,7 +164,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         address[] memory editors,
         string memory uri,
         uint96 randomId
-    ) external override minterGuard() notToZero(to) returns (uint256 id) {
+    ) external override minterOnly() notToZero(to) returns (uint256 id) {
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
         uint256 gameId = _mintGame(from, to, randomId);
 
@@ -178,7 +178,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
             addAssets(from, gameId, assetIds, values, uri);
         }
 
-        setTokenURI(gameId, uri);
+        _setTokenURI(gameId, uri);
         return gameId;
     }
 
@@ -194,7 +194,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256 gameId,
         uint256[] calldata assetIds,
         uint256[] calldata values
-    ) external override minterGuard() notToZero(to) {
+    ) external override minterOnly() notToZero(to) {
         require(from == _ownerOf(gameId), "DESTROY_ACCESS_DENIED");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
         (gameId);
@@ -292,7 +292,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256[] memory assetIds,
         uint256[] memory values,
         string memory uri
-    ) public override minterGuard() onlyOwnerOrEditor(gameId) {
+    ) public override minterOnly() onlyOwnerOrEditor(gameId) {
         require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
         for (uint256 i = 0; i < assetIds.length; i++) {
             _gameAssets[gameId][assetIds[i]] = values[i];
@@ -302,19 +302,22 @@ contract GameToken is ERC721BaseToken, IGameToken {
         } else {
             _asset.safeBatchTransferFrom(from, address(this), assetIds, values, "");
         }
-        setTokenURI(gameId, uri);
+        _setTokenURI(gameId, uri);
         emit AssetsAdded(gameId, assetIds, values);
     }
 
     /// @notice Set the URI of a specific game token
     /// @param gameId The id of the game token
     /// @param URI The URI string for the token's metadata
-    function setTokenURI(uint256 gameId, string memory URI) public override {
+    function setTokenURI(uint256 gameId, string calldata URI) external override {
         require(
-            // @review !
             msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender] || msg.sender == _minter,
             "URI_ACCESS_DENIED"
         );
+        _setTokenURI(gameId, URI);
+    }
+
+    function _setTokenURI(uint256 gameId, string memory URI) private {
         _metaData[gameId] = URI;
     }
 
