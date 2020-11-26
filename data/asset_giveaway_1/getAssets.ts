@@ -25,7 +25,7 @@ type Assets = {
 
 type Claim = {
   reservedAddress: string;
-  assetIds: Array<number>;
+  assetIds: Array<BigNumber> | Array<string> | Array<number>;
   assetValues: Array<number>;
 };
 
@@ -62,7 +62,6 @@ function getAssets(isDeploymentChainId: any, chainId: any): any {
   }
 
   let assets;
-  console.log('chainId', chainId);
 
   let secretPath = './.asset_giveaway_1_secret';
   if (BigNumber.from(chainId).toString() === '1') {

@@ -15,7 +15,7 @@ const zeroAddress = constants.AddressZero;
 
 describe('NFT_Lottery_1', function () {
   it('User cannot claim when contract holds zero assets', async function () {
-    const setUp = await setupGiveaway();
+    const setUp = await setupGiveaway('test', false);
     const {giveawayContract, others, tree, assets} = setUp;
     const asset = assets[0];
     const proof = tree.getProof(calculateAssetHash(asset));
@@ -27,7 +27,11 @@ describe('NFT_Lottery_1', function () {
       giveawayContractAsUser.claimAssets(
         others[1],
         others[1],
-        [0, 1, 2],
+        [
+          '20753672845763602908712305506126331087417629839765087575719790731796278151168',
+          '20753672845763602908712305506126331087417629839765087575719790731796286539776',
+          '20753672845763602908712305506126331087417629839765087575719790731796294928384',
+        ],
         [5, 5, 5],
         proof,
         asset.salt
@@ -36,26 +40,8 @@ describe('NFT_Lottery_1', function () {
   });
 
   it('User can claim their allocated assets from Giveaway contract', async function () {
-    const setUp = await setupGiveaway();
-    const {
-      giveawayContract,
-      others,
-      tree,
-      assets,
-      mintTestAssets,
-      assetContract,
-    } = setUp;
-    console.log(assetContract);
-
-    for (let i = 0; i < 3; i++) {
-      await mintTestAssets(i, 5, giveawayContract.address);
-    }
-
-    // TODO: fix balanceOf; check contract receives assets
-    // const balanceA = await assetContract.balanceOf(giveawayContract.address, 0);
-    // console.log('bal', balanceA);
-
-    // Correct asset supply numbers
+    const setUp = await setupGiveaway('test', true);
+    const {giveawayContract, others, tree, assets} = setUp;
 
     const asset = assets[0];
     const proof = tree.getProof(calculateAssetHash(asset));
@@ -67,7 +53,11 @@ describe('NFT_Lottery_1', function () {
       giveawayContractAsUser.claimAssets(
         others[1],
         others[1],
-        [0, 1, 2],
+        [
+          '20753672845763602908712305506126331087417629839765087575719790731796278151168',
+          '20753672845763602908712305506126331087417629839765087575719790731796286539776',
+          '20753672845763602908712305506126331087417629839765087575719790731796294928384',
+        ],
         [5, 5, 5],
         proof,
         asset.salt

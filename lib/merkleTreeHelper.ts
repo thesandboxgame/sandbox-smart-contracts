@@ -1,4 +1,4 @@
-import {utils} from 'ethers';
+import {BigNumber, utils} from 'ethers';
 const {solidityKeccak256} = utils;
 import crypto from 'crypto';
 
@@ -14,7 +14,7 @@ interface land {
 
 interface asset {
   reservedAddress: string;
-  assetIds: Array<number>;
+  assetIds: Array<BigNumber> | Array<string> | Array<number>;
   assetValues: Array<number>;
   salt?: string;
 }
