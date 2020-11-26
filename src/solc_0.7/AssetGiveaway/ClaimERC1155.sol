@@ -24,42 +24,38 @@ contract ClaimERC1155 {
     }
 
     function _claimERC1155(
-        address from,
         address to,
         uint256[] calldata assetIds,
         uint256[] calldata assetValues,
         bytes32[] calldata proof,
         bytes32 salt
     ) internal {
-        _checkValidity(from, assetIds, assetValues, proof, salt);
+        _checkValidity(to, assetIds, assetValues, proof, salt);
         _sendAssets(to, assetIds, assetValues);
         emit ClaimedAssets(to, assetIds, assetValues);
     }
 
     function _checkValidity(
-        address from,
+        address to,
         uint256[] memory assetIds,
         uint256[] memory assetValues,
         bytes32[] memory proof,
         bytes32 salt
     ) internal view {
-        // TODO:
-        // check length assetIds is the same as assetValues
-        // check contract actually holds these assets(?)
-        bytes32 leaf = _generateClaimHash(from, assetIds, assetValues, salt);
+        require(assetIds.length == assetValues.length, "INVALID_INPUT");
+        bytes32 leaf = _generateClaimHash(to, assetIds, assetValues, salt);
         require(_verify(proof, leaf), "INVALID_CLAIM");
     }
 
     function _generateClaimHash(
-        address from,
+        address to,
         uint256[] memory assetIds,
         uint256[] memory assetValues,
         bytes32 salt
     ) internal pure returns (bytes32) {
-        return keccak256(abi.encodePacked(from, assetIds, assetValues, salt));
+        return keccak256(abi.encodePacked(to, assetIds, assetValues, salt));
     }
 
-    // TODO: review
     function _verify(bytes32[] memory proof, bytes32 leaf) internal view returns (bool) {
         bytes32 computedHash = leaf;
 

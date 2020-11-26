@@ -14,22 +14,28 @@ const ipfsHashString =
 
 import {expectReceiptEventWithArgs, waitFor} from '../utils';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const setupGiveaway = async (
   assetType: string,
-  mint: boolean
+  mint?: boolean,
+  amount?: number,
+  supply?: number,
+  to?: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): Promise<any> => {
   const {
     giveawayContract,
+    sandContract,
+    assetContract,
     others,
     tree,
     assets,
+    sandAdmin,
   } = await deployments.createFixture(async function () {
-    const {assetBouncerAdmin} = await getNamedAccounts();
+    const {assetBouncerAdmin, sandAdmin} = await getNamedAccounts();
     const others = await getUnnamedAccounts();
     await deployments.fixture('NFT_Lottery_1');
     const giveawayContract = await ethers.getContract('NFT_Lottery_1');
+    const sandContract = await ethers.getContract('Sand');
     const deployment = await deployments.get('NFT_Lottery_1');
 
     // Supply assets to contract for testing
@@ -45,7 +51,7 @@ export const setupGiveaway = async (
       const hash = ipfsHashString;
       const supply = value;
       const rarity = 1;
-      const owner = to;
+      const owner = to === 'contract' ? giveawayContract.address : to;
       const data = '0x';
 
       const receipt = await waitFor(
@@ -70,6 +76,7 @@ export const setupGiveaway = async (
         transferEvent.args[3]
       );
       expect(balanceAssetId).to.equal(supply);
+      // console.log(transferEvent.args[3].toString());
       return transferEvent.args[3].toString(); // asset ID
     }
 
@@ -83,9 +90,9 @@ export const setupGiveaway = async (
       tree = new MerkleTree(assetHashArray);
     } else if (assetType === 'test') {
       // Set up tree with test assets
-      if (mint) {
-        for (let i = 0; i < 3; i++) {
-          await mintTestAssets(i, 5, giveawayContract.address);
+      if (mint && amount && supply && to) {
+        for (let i = 0; i < amount; i++) {
+          await mintTestAssets(i, supply, to);
         }
       }
       assets = deployment.linkedData;
@@ -95,15 +102,21 @@ export const setupGiveaway = async (
 
     return {
       giveawayContract,
+      sandContract,
+      assetContract,
       others,
       tree,
       assets,
+      sandAdmin,
     };
   })();
   return {
     giveawayContract,
+    sandContract,
+    assetContract,
     others,
     tree,
     assets,
+    sandAdmin,
   };
 };

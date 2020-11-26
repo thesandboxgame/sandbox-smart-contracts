@@ -38,7 +38,7 @@ contract AssetGiveaway is WithMetaTransaction, ClaimERC1155 {
         require(claimed[to] == false, "DESTINATION_ALREADY_CLAIMED");
         _checkAuthorization(from, to);
         claimed[to] = true;
-        _claimERC1155(from, to, assetIds, assetValues, proof, salt);
+        _claimERC1155(to, assetIds, assetValues, proof, salt);
     }
 
     function onERC1155Received(
