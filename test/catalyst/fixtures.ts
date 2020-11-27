@@ -4,7 +4,7 @@ import { Contract, BigNumber } from 'ethers';
 
 export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   await deployments.fixture();
-  const gemsAndCatalysts: Contract = await ethers.getContract('GemsAndCatalysts');
+  const gemsCatalystsRegistry: Contract = await ethers.getContract('GemsCatalystsRegistry');
   const powerGem: Contract = await ethers.getContract('Gem_Power');
   const commonCatalyst: Contract = await ethers.getContract('Catalyst_Common');
   const accounts = await getNamedAccounts();
@@ -38,17 +38,17 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     .mint(accounts.deployer, BigNumber.from('8'));
   await commonCatalyst
     .connect(ethers.provider.getSigner(accounts.deployer))
-    .setSuperOperator(gemsAndCatalysts.address, true);
+    .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await powerGem
     .connect(ethers.provider.getSigner(accounts.deployer))
     .mint(accounts.deployer, BigNumber.from('100'));
   await powerGem
     .connect(ethers.provider.getSigner(accounts.deployer))
-    .setSuperOperator(gemsAndCatalysts.address, true);
+    .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   return {
-    gemsAndCatalysts,
+    gemsCatalystsRegistry,
     powerGem,
     gemExample,
     gemNotInOrder,

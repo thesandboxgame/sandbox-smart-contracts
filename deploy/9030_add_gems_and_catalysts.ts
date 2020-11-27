@@ -13,7 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   for (const catalyst of catalysts) {
     const isCatalystExists = await read(
-      `GemsAndCatalysts`,
+      `GemsCatalystsRegistry`,
       'isCatalystExists',
       catalyst.catalystId
     );
@@ -25,7 +25,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   for (const gem of gems) {
     const isGemExists = await read(
-      `GemsAndCatalysts`,
+      `GemsCatalystsRegistry`,
       'isGemExists',
       gem.gemId
     );
@@ -36,7 +36,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   await execute(
-    'GemsAndCatalysts',
+    'GemsCatalystsRegistry',
     { from: deployer, log: true },
     'addGemsAndCatalysts',
     gemsToAdd,
@@ -45,5 +45,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 };
 export default func;
-func.tags = ['GemsAndCatalysts_setup'];
-func.dependencies = ['GemsAndCatalysts_deploy'];
+func.tags = ['GemsCatalystsRegistry_setup'];
+func.dependencies = ['GemsCatalystsRegistry_deploy'];

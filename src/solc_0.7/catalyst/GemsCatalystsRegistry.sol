@@ -6,20 +6,12 @@ import "./Gem.sol";
 import "./CatalystToken.sol";
 import "./AssetAttributesRegistry.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
-import "hardhat/console.sol";
 
 /// @notice Contract managing the Gems and Catalysts
 /// Each Gems and Catalys must be registered here.
 /// Each new Gem get assigned a new id (starting at 1)
 /// Each new Catalyst get assigned a new id (starting at 1)
-contract GemsAndCatalysts is WithAdmin {
-    Gem[] internal _gems;
-    CatalystToken[] internal _catalysts;
-
-    constructor(address admin) {
-        _admin = admin;
-    }
-
+contract GemsCatalystsRegistry is WithAdmin {
     function getAttributes(
         uint16 catalystId,
         uint256 assetId,
@@ -30,6 +22,8 @@ contract GemsAndCatalysts is WithAdmin {
         return catalyst.getAttributes(assetId, events);
     }
 
+    /// @notice Returns the maximum number of gems for a given catalyst
+    /// @param catalystId catalyst identifier
     function getMaxGems(uint16 catalystId) external view returns (uint8) {
         CatalystToken catalyst = getCatalyst(catalystId);
         require(catalyst != CatalystToken(0), "CATALYST_DOES_NOT_EXIST");
@@ -68,6 +62,9 @@ contract GemsAndCatalysts is WithAdmin {
         }
     }
 
+    /// @notice Adds both arrays of gems and catalysts to registry
+    /// @param gems array of gems to be added
+    /// @param catalysts array of catalysts to be added
     function addGemsAndCatalysts(Gem[] calldata gems, CatalystToken[] calldata catalysts) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
         for (uint256 i = 0; i < gems.length; i++) {
@@ -113,6 +110,8 @@ contract GemsAndCatalysts is WithAdmin {
         gem.burnFor(from, amount);
     }
 
+    // //////////////////// INTERNALS ////////////////////
+
     function getCatalyst(uint16 catalystId) internal view returns (CatalystToken) {
         if (catalystId > 0 && catalystId <= _catalysts.length) {
             return _catalysts[catalystId - 1];
@@ -127,5 +126,15 @@ contract GemsAndCatalysts is WithAdmin {
         } else {
             return Gem(0);
         }
+    }
+
+    // //////////////////////// DATA /////////////////////
+
+    Gem[] internal _gems;
+    CatalystToken[] internal _catalysts;
+
+    // /////////////////// CONSTRUCTOR ////////////////////
+    constructor(address admin) {
+        _admin = admin;
     }
 }

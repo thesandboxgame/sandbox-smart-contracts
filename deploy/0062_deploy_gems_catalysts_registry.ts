@@ -6,11 +6,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deploy } = deployments;
 
   const { deployer } = await getNamedAccounts();
-  await deploy(`GemsAndCatalysts`, {
+  await deploy(`GemsCatalystsRegistry`, {
     from: deployer,
     log: true,
     args: [deployer],
   });
 };
 export default func;
-func.tags = ['GemsAndCatalysts', 'GemsAndCatalysts_deploy'];
+func.tags = ['GemsCatalystsRegistry', 'GemsCatalystsRegistry_deploy'];
