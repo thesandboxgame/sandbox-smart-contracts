@@ -61,6 +61,7 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         uint16 catalystId,
         uint16[] calldata gemIds
     ) external {
+        // TODO require that asset do not need migrations
         _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber());
     }
 
@@ -78,7 +79,8 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         require(msg.sender == _minter, "NOT_AUTHORIZED_MINTER");
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT");
         require(gemIds.length != 0, "INVALID_GEMS_0");
-        uint16[15] memory gemIdsToStore = _records[assetId].gemIds;
+        // TODO rquire catalyst exists
+        uint16[15] memory gemIdsToStore = _records[assetId].gemIds; // TODO support Collection Catalysts and Gems when adding gems // perform copy of catalyst and gems in record // emit specific Event ?
         uint8 j = 0;
         uint8 i = 0;
         for (i = 0; i < MAX_NUM_GEMS; i++) {
@@ -121,7 +123,7 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         uint64 blockNumber
     ) internal {
         require(msg.sender == _minter, "NOT_AUTHORIZED_MINTER");
-        require(assetId & IS_NFT != 0, "INVALID_NOT_NFT");
+        require(assetId & IS_NFT != 0, "INVALID_NOT_NFT"); // TODO support Collection Catalysts
         require(gemIds.length <= MAX_NUM_GEMS, "GEMS_MAX_REACHED");
         uint8 maxGems = _gemsAndCatalysts.getMaxGems(_records[assetId].catalystId);
         require(gemIds.length <= maxGems, "GEMS_TOO_MANY");
