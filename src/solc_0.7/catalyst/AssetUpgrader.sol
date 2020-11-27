@@ -10,44 +10,8 @@ import "../common/BaseWithStorage/WithMetaTransaction.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetUpgrader is WithMetaTransaction {
-    using SafeMath for uint256;
-
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
     address private constant BURN_ADDRESS = 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF;
-
-    ERC20Extended internal immutable _sand;
-    AssetAttributesRegistry internal immutable _registry;
-    AssetToken internal immutable _asset;
-    GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
-    uint256 internal immutable _upgradeFee;
-    uint256 internal immutable _gemAdditionFee;
-    address internal immutable _feeRecipient;
-
-    /// @notice AssetUpgrader depends on
-    /// @param registry: AssetAttributesRegistry for recording catalyst and gems used
-    /// @param sand: ERC20 for fee payment
-    /// @param asset: Asset Token Contract (dual ERC1155/ERC721)
-    /// @param gemsCatalystsRegistry: that track the canonical catalyst and gems and provide batch burning facility
-    /// @param upgradeFee: the fee in Sand paid for an upgrade (setting or replacing a catalyst)
-    /// @param gemAdditionFee: the fee in Sand paid for adding gems
-    /// @param feeRecipient: address receiving the Sand fee
-    constructor(
-        AssetAttributesRegistry registry,
-        ERC20Extended sand,
-        AssetToken asset,
-        GemsCatalystsRegistry gemsCatalystsRegistry,
-        uint256 upgradeFee,
-        uint256 gemAdditionFee,
-        address feeRecipient
-    ) {
-        _registry = registry;
-        _sand = sand;
-        _asset = asset;
-        _gemsCatalystsRegistry = gemsCatalystsRegistry;
-        _upgradeFee = upgradeFee;
-        _gemAdditionFee = gemAdditionFee;
-        _feeRecipient = feeRecipient;
-    }
 
     /// @notice associate a catalyst to a fungible Asset token by extracting it as ERC721 first.
     /// @param from address from which the Asset token belongs to.
@@ -99,6 +63,8 @@ contract AssetUpgrader is WithMetaTransaction {
         _checkAuthorization(from, to);
         _addGems(from, assetId, gemIds, to);
     }
+
+    // //////////////////// INTERNALS ////////////////////
 
     function _chargeSand(address from, uint256 sandFee) internal {
         if (_feeRecipient != address(0) && sandFee != 0) {
@@ -172,5 +138,44 @@ contract AssetUpgrader is WithMetaTransaction {
 
     function _burnCatalyst(address from, uint16 catalystId) internal {
         _gemsCatalystsRegistry.burnCatalyst(from, catalystId, 1);
+    }
+
+    // /////////////////// UTILITIES /////////////////////
+    using SafeMath for uint256;
+
+    // //////////////////////// DATA /////////////////////
+    ERC20Extended internal immutable _sand;
+    AssetAttributesRegistry internal immutable _registry;
+    AssetToken internal immutable _asset;
+    GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
+    uint256 internal immutable _upgradeFee;
+    uint256 internal immutable _gemAdditionFee;
+    address internal immutable _feeRecipient;
+
+    // /////////////////// CONSTRUCTOR ////////////////////
+    /// @notice AssetUpgrader depends on
+    /// @param registry: AssetAttributesRegistry for recording catalyst and gems used
+    /// @param sand: ERC20 for fee payment
+    /// @param asset: Asset Token Contract (dual ERC1155/ERC721)
+    /// @param gemsCatalystsRegistry: that track the canonical catalyst and gems and provide batch burning facility
+    /// @param upgradeFee: the fee in Sand paid for an upgrade (setting or replacing a catalyst)
+    /// @param gemAdditionFee: the fee in Sand paid for adding gems
+    /// @param feeRecipient: address receiving the Sand fee
+    constructor(
+        AssetAttributesRegistry registry,
+        ERC20Extended sand,
+        AssetToken asset,
+        GemsCatalystsRegistry gemsCatalystsRegistry,
+        uint256 upgradeFee,
+        uint256 gemAdditionFee,
+        address feeRecipient
+    ) {
+        _registry = registry;
+        _sand = sand;
+        _asset = asset;
+        _gemsCatalystsRegistry = gemsCatalystsRegistry;
+        _upgradeFee = upgradeFee;
+        _gemAdditionFee = gemAdditionFee;
+        _feeRecipient = feeRecipient;
     }
 }

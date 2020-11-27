@@ -7,17 +7,7 @@ import "../common/BaseWithStorage/WithMinter.sol";
 import "./GemsCatalystsRegistry.sol";
 
 contract AssetAttributesRegistry is WithAdmin, WithMinter {
-    uint256 internal constant MAX_NUM_GEMS = 15;
-    uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
-    uint256 private constant NOT_IS_NFT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFFFFFFFF;
-    uint256 private constant NOT_NFT_INDEX = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF800000007FFFFFFFFFFFFFFF;
-
     GemsCatalystsRegistry immutable _gemsCatalystsRegistry;
-    mapping(uint256 => Record) internal _records;
-
-    // used to allow migration to specify blockNumber when setting catalyst/gems
-    address internal _migrationContract;
-
     struct GemEvent {
         uint16[] gemIds;
         bytes32 blockHash;
@@ -30,11 +20,6 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
 
     event CatalystApplied(uint256 indexed assetId, uint16 indexed catalystId, uint16[] gemIds, uint64 blockNumber);
     event GemsAdded(uint256 indexed assetId, uint16[] gemIds, uint64 blockNumber);
-
-    constructor(GemsCatalystsRegistry gemsCatalystsRegistry, address admin) {
-        _gemsCatalystsRegistry = gemsCatalystsRegistry;
-        _admin = admin;
-    }
 
     function getRecord(uint256 assetId)
         external
@@ -114,6 +99,8 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         }
     }
 
+    // //////////////////// INTERNALS ////////////////////
+
     function _setCatalyst(
         uint256 assetId,
         uint16 catalystId,
@@ -136,5 +123,23 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
 
     function _getBlockNumber() internal view returns (uint64 blockNumber) {
         blockNumber = uint64(block.number + 1);
+    }
+
+    // //////////////////////// DATA /////////////////////
+
+    uint256 internal constant MAX_NUM_GEMS = 15;
+    uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
+    uint256 private constant NOT_IS_NFT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFFFFFFFF;
+    uint256 private constant NOT_NFT_INDEX = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF800000007FFFFFFFFFFFFFFF;
+
+    mapping(uint256 => Record) internal _records;
+
+    // used to allow migration to specify blockNumber when setting catalyst/gems
+    address internal _migrationContract;
+
+    // /////////////////// CONSTRUCTOR ////////////////////
+    constructor(GemsCatalystsRegistry gemsCatalystsRegistry, address admin) {
+        _gemsCatalystsRegistry = gemsCatalystsRegistry;
+        _admin = admin;
     }
 }

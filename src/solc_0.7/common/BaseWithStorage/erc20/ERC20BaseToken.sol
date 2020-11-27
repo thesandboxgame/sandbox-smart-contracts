@@ -6,28 +6,6 @@ import "../../Interfaces/ERC20Extended.sol";
 import "../WithSuperOperators.sol";
 
 abstract contract ERC20BaseToken is WithSuperOperators, ERC20, ERC20Extended, ERC20Internal {
-    bytes32 internal immutable _name; // work only for string that can fit into 32 bytes
-    bytes32 internal immutable _symbol; // work only for string that can fit into 32 bytes
-
-    uint256 internal _totalSupply;
-    mapping(address => uint256) internal _balances;
-    mapping(address => mapping(address => uint256)) internal _allowances;
-
-    constructor(
-        string memory tokenName,
-        string memory tokenSymbol,
-        address admin
-    ) {
-        require(bytes(tokenName).length > 0, "INVALID_NAME_REQUIRED");
-        require(bytes(tokenName).length <= 32, "INVALID_NAME_TOO_LONG");
-        _name = _firstBytes32(bytes(tokenName));
-        require(bytes(tokenSymbol).length > 0, "INVALID_SYMBOL_REQUIRED");
-        require(bytes(tokenSymbol).length <= 32, "INVALID_SYMBOL_TOO_LONG");
-        _symbol = _firstBytes32(bytes(tokenSymbol));
-
-        _admin = admin;
-    }
-
     /// @notice A descriptive name for the tokens
     /// @return name of the tokens
     function name() external view returns (string memory) {
@@ -152,6 +130,15 @@ abstract contract ERC20BaseToken is WithSuperOperators, ERC20, ERC20Extended, ER
         return true;
     }
 
+    function _firstBytes32(bytes memory src) public pure returns (bytes32 output) {
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            output := mload(add(src, 32))
+        }
+    }
+
+    // //////////////////// INTERNALS ////////////////////
+
     function _addAllowanceIfNeeded(
         address owner,
         address spender,
@@ -218,10 +205,26 @@ abstract contract ERC20BaseToken is WithSuperOperators, ERC20, ERC20Extended, ER
         emit Transfer(from, address(0), amount);
     }
 
-    function _firstBytes32(bytes memory src) public pure returns (bytes32 output) {
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            output := mload(add(src, 32))
-        }
+    // //////////////////////// DATA /////////////////////
+    bytes32 internal immutable _name; // work only for string that can fit into 32 bytes
+    bytes32 internal immutable _symbol; // work only for string that can fit into 32 bytes
+
+    uint256 internal _totalSupply;
+    mapping(address => uint256) internal _balances;
+    mapping(address => mapping(address => uint256)) internal _allowances;
+
+    // /////////////////// CONSTRUCTOR ////////////////////
+    constructor(
+        string memory tokenName,
+        string memory tokenSymbol,
+        address admin
+    ) {
+        require(bytes(tokenName).length > 0, "INVALID_NAME_REQUIRED");
+        require(bytes(tokenName).length <= 32, "INVALID_NAME_TOO_LONG");
+        _name = _firstBytes32(bytes(tokenName));
+        require(bytes(tokenSymbol).length > 0, "INVALID_SYMBOL_REQUIRED");
+        require(bytes(tokenSymbol).length <= 32, "INVALID_SYMBOL_TOO_LONG");
+        _symbol = _firstBytes32(bytes(tokenSymbol));
+        _admin = admin;
     }
 }
