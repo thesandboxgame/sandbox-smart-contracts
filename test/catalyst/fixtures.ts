@@ -1,10 +1,11 @@
-import { ethers, deployments, getNamedAccounts } from 'hardhat';
-import { Contract, BigNumber } from 'ethers';
-
+import {ethers, deployments, getNamedAccounts} from 'hardhat';
+import {Contract, BigNumber} from 'ethers';
 
 export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   await deployments.fixture();
-  const gemsCatalystsRegistry: Contract = await ethers.getContract('GemsCatalystsRegistry');
+  const gemsCatalystsRegistry: Contract = await ethers.getContract(
+    'GemsCatalystsRegistry'
+  );
   const powerGem: Contract = await ethers.getContract('Gem_Power');
   const commonCatalyst: Contract = await ethers.getContract('Catalyst_Common');
   const accounts = await getNamedAccounts();
@@ -31,7 +32,9 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     log: true,
     args: ['Catalyst_Example', 'Catalyst_Example', accounts.deployer, 5, 5],
   });
-  const catalystExample: Contract = await ethers.getContract('Catalyst_Example');
+  const catalystExample: Contract = await ethers.getContract(
+    'Catalyst_Example'
+  );
 
   await commonCatalyst
     .connect(ethers.provider.getSigner(accounts.deployer))
@@ -54,6 +57,6 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     gemNotInOrder,
     commonCatalyst,
     catalystExample,
-    accounts
+    accounts,
   };
 });
