@@ -9,8 +9,8 @@ contract ClaimERC1155 {
 
     bytes32 internal immutable _merkleRoot;
 
-    IERC1155 _asset;
-    address _assetsHolder;
+    IERC1155 immutable _asset;
+    address immutable _assetsHolder;
     event ClaimedAssets(address to, uint256[] assetIds, uint256[] assetValues);
 
     constructor(

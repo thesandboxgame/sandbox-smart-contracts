@@ -13,7 +13,7 @@ contract AssetGiveaway is WithMetaTransaction, ClaimERC1155 {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
 
-    uint256 internal _expiryTime;
+    uint256 internal immutable _expiryTime;
 
     mapping(address => bool) public claimed;
 
