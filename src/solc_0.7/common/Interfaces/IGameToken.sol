@@ -4,9 +4,9 @@ pragma solidity 0.7.1;
 /// @title Interface for the Game token
 
 interface IGameToken {
-    function getMinter() external view returns (address);
+    function getGameManager() external view returns (address);
 
-    function setMinter(address minter) external;
+    function setGameManager(address gameManager) external;
 
     function createGame(
         address from,
@@ -26,11 +26,19 @@ interface IGameToken {
         uint256[] calldata values
     ) external;
 
+    function withdrawFromDestroyedGame(
+        address from,
+        address to,
+        uint256 gameId,
+        uint256[] calldata assetIds,
+        uint256[] calldata values
+    ) external;
+
     function addAssets(
         address from,
         uint256 gameId,
-        uint256[] memory assetIds,
-        uint256[] memory values,
+        uint256[] calldata assetIds,
+        uint256[] calldata values,
         string calldata uri
     ) external;
 
