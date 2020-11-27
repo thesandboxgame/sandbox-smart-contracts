@@ -16,7 +16,8 @@ contract GameToken is ERC721BaseToken, IGameToken {
 
     ///////////////////////////////  Data //////////////////////////////
 
-    address internal _minter;
+    // contract responsible for forwarding specific calls to GameToken contract.
+    address internal _gameManager;
     AssetToken _asset;
 
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
@@ -39,19 +40,21 @@ contract GameToken is ERC721BaseToken, IGameToken {
     constructor(
         address metaTransactionContract,
         address admin,
+        address gameManager,
         AssetToken asset
     ) ERC721BaseToken(metaTransactionContract, admin) {
         _asset = asset;
+        _gameManager = gameManager;
     }
 
     ///////////////////////////////  Modifiers //////////////////////////////
 
-    modifier minterOnly() {
-        require(msg.sender == _minter || _minter == address(0), "INVALID_MINTER");
+    modifier gameManagerOnly() {
+        require(msg.sender == _gameManager || _gameManager == address(0), "INVALID_GAME_MANAGER");
         _;
     }
 
-    modifier onlyOwnerOrEditor(uint256 id) {
+    modifier ownerOrEditorOnly(uint256 id) {
         require(msg.sender == _ownerOf(id) || _gameEditors[id][msg.sender], "OWNER_EDITOR_ACCESS_DENIED");
         _;
     }
@@ -77,7 +80,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256[] memory values,
         address to,
         string memory uri
-    ) public override minterOnly() onlyOwnerOrEditor(gameId) notToZero(to) {
+    ) public override gameManagerOnly() ownerOrEditorOnly(gameId) notToZero(to) {
         require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
 
         for (uint256 i = 0; i < assetIds.length; i++) {
@@ -138,14 +141,14 @@ contract GameToken is ERC721BaseToken, IGameToken {
     }
 
     // @review comments !
-    /// @notice Set the Minter that will be the only address able to create Estate.
+    /// @notice Set the GameManager contract address
     /// If set at deployment, resetting to address(0) will allow anyone to mint games
-    /// @param minter address of the minter
-    function setMinter(address minter) external override {
+    /// @param gameManager address of the GameManager
+    function setGameManager(address gameManager) external override {
         require(msg.sender == _admin, "ADMIN_NOT_AUTHORIZED");
-        require(minter != _minter, "MINTER_SAME_ALREADY_SET");
-        _minter = minter;
-        emit Minter(minter);
+        require(gameManager != _gameManager, "GAME_MANAGER_ALREADY_SET");
+        _gameManager = gameManager;
+        emit Minter(gameManager);
     }
 
     /// @notice Function to create a new GAME token
@@ -164,7 +167,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         address[] memory editors,
         string memory uri,
         uint96 randomId
-    ) external override minterOnly() notToZero(to) returns (uint256 id) {
+    ) external override gameManagerOnly() notToZero(to) returns (uint256 id) {
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
         uint256 gameId = _mintGame(from, to, randomId);
 
@@ -194,24 +197,25 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256 gameId,
         uint256[] calldata assetIds,
         uint256[] calldata values
-    ) external override minterOnly() notToZero(to) {
-        require(from == _ownerOf(gameId), "DESTROY_ACCESS_DENIED");
+    ) external override gameManagerOnly() notToZero(to) {
+        address owner = _ownerOf(gameId);
+        require(from == owner, "DESTROY_ACCESS_DENIED");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
         (gameId);
+        // @review don't try to do this here (block gas limit)
+        // extract to transferAllFromDestroyedGame()
         if (assetIds.length != 0) {
             removeAssets(gameId, assetIds, values, to, "");
         }
-        _burn(from, gameId);
-    }
-
-    function _burn(address from, uint256 gameId) private {
-        // delete _gameData[gameId];
         delete _metaData[gameId];
         _creatorship[creatorOf(gameId)] = address(0);
-        _numNFTPerAddress[from]--;
-        _transferFrom(from, address(0), gameId);
-        emit Transfer(from, address(0), gameId);
+        _burn(from, owner, gameId);
     }
+
+    // function _burn(address from, uint256 gameId) private {
+    //     _transferFrom(from, address(0), gameId);
+    //     emit Transfer(from, address(0), gameId);
+    // }
 
     /// @notice Function to get game editor status
     /// @param gameId The id of the GAME token owned by owner
@@ -234,10 +238,10 @@ contract GameToken is ERC721BaseToken, IGameToken {
         return originalCreator;
     }
 
-    /// @notice return the current minter
-    /// @return address of minter
-    function getMinter() external view override returns (address) {
-        return _minter;
+    /// @notice return the current gameManager
+    /// @return address of gameManager
+    function getGameManager() external view override returns (address) {
+        return _gameManager;
     }
 
     function onERC1155BatchReceived(
@@ -292,7 +296,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256[] memory assetIds,
         uint256[] memory values,
         string memory uri
-    ) public override minterOnly() onlyOwnerOrEditor(gameId) {
+    ) public override gameManagerOnly() ownerOrEditorOnly(gameId) {
         require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
         for (uint256 i = 0; i < assetIds.length; i++) {
             _gameAssets[gameId][assetIds[i]] = values[i];
@@ -310,14 +314,11 @@ contract GameToken is ERC721BaseToken, IGameToken {
     /// @param gameId The id of the game token
     /// @param URI The URI string for the token's metadata
     function setTokenURI(uint256 gameId, string calldata URI) external override {
-        require(
-            msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender] || msg.sender == _minter,
-            "URI_ACCESS_DENIED"
-        );
+        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "URI_ACCESS_DENIED");
         _setTokenURI(gameId, URI);
     }
 
-    function _setTokenURI(uint256 gameId, string memory URI) private {
+    function _setTokenURI(uint256 gameId, string memory URI) internal {
         _metaData[gameId] = URI;
     }
 
@@ -328,6 +329,57 @@ contract GameToken is ERC721BaseToken, IGameToken {
         require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
         string memory URI = _metaData[gameId];
         return URI;
+    }
+
+    /// @notice transfer all assets from a burnt game
+    /// @param from previous owner of the burnt game
+    /// @param gameId estate id
+    /// @param to address that will receive the assets
+    function withdrawFromDestroyedGame(
+        address from,
+        address to,
+        uint256 gameId,
+        uint256[] memory assetIds,
+        uint256[] memory values
+    ) public override notToZero(to) {
+        require(to != address(this), "DESTINATION_GAME_CONTRACT");
+        _check_withdrawal_authorized(from, gameId);
+        uint256 length = assetIds.length;
+        require(length > 0, "WITHDRAWAL_COMPLETE");
+        uint256[] memory amounts = new uint256[](length);
+
+        if (values[0] == uint256(0)) {
+            for (uint256 i = 0; i < length; i++) {
+                amounts[i] = _gameAssets[gameId][i];
+            }
+            _asset.safeBatchTransferFrom(address(this), to, assetIds, amounts, "");
+            emit AssetsRemoved(gameId, assetIds, amounts, to);
+        } else {
+            require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
+            _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
+            emit AssetsRemoved(gameId, assetIds, values, to);
+        }
+    }
+
+    function _check_withdrawal_authorized(address from, uint256 gameId) internal view {
+        require(from != address(0), "SENDER_ZERO_ADDRESS");
+        require(from == _withdrawalOwnerOf(gameId), "LAST_OWNER_NOT_EQUAL_SENDER");
+        // @review does this need metaTx support?
+        require(
+            msg.sender == from ||
+                _isValidMetaTx(msg.sender) ||
+                _superOperators[msg.sender] ||
+                _operatorsForAll[from][msg.sender],
+            "WITHDRAWAL_NOT_AUTHORIZED"
+        );
+    }
+
+    function _withdrawalOwnerOf(uint256 id) internal view returns (address) {
+        uint256 data = _owners[id];
+        if ((data & (2**160)) == 2**160) {
+            return address(data);
+        }
+        return address(0);
     }
 
     /// @dev Function to create a new gameId and associate it with an owner
