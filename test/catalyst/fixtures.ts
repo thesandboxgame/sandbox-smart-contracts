@@ -1,5 +1,5 @@
-import { ethers, deployments, getNamedAccounts } from 'hardhat';
-import { Contract, BigNumber } from 'ethers';
+import {ethers, deployments, getNamedAccounts} from 'hardhat';
+import {Contract, BigNumber} from 'ethers';
 
 const exampleGemId = 6;
 const notInOrderGemId = 56;
@@ -31,7 +31,12 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     contract: 'Gem',
     from: accounts.deployer,
     log: true,
-    args: ['Gem_NotInOrder', 'Gem_NotInOrder', accounts.deployer, notInOrderGemId],
+    args: [
+      'Gem_NotInOrder',
+      'Gem_NotInOrder',
+      accounts.deployer,
+      notInOrderGemId,
+    ],
   });
   const gemNotInOrder: Contract = await ethers.getContract('Gem_NotInOrder');
 
@@ -39,7 +44,13 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     contract: 'PrimaryCatalyst',
     from: accounts.deployer,
     log: true,
-    args: ['Catalyst_Example', 'Catalyst_Example', accounts.deployer, 5, exampleCatalystId],
+    args: [
+      'Catalyst_Example',
+      'Catalyst_Example',
+      accounts.deployer,
+      5,
+      exampleCatalystId,
+    ],
   });
   const catalystExample: Contract = await ethers.getContract(
     'Catalyst_Example'
