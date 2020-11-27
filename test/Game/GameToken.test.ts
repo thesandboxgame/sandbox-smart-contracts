@@ -70,10 +70,10 @@ describe('GameToken', function () {
         });
 
         it('minter can create GAMEs when _minter is set', async function () {
-          await gameTokenAsAdmin.setMinter(users[3].address);
-          const Minter = users[3];
+          await gameTokenAsAdmin.setGameManager(users[3].address);
+          const GameManager = users[3];
           const randomId = await getRandom();
-          const minterReceipt = Minter.Game.createGame(
+          const managerReceipt = GameManager.Game.createGame(
             users[3].address,
             users[4].address,
             [],
@@ -84,19 +84,19 @@ describe('GameToken', function () {
           );
           const transferEvent = await expectEventWithArgs(
             gameToken,
-            minterReceipt,
+            managerReceipt,
             'Transfer'
           );
-          const minterGameId = transferEvent.args[2];
+          const managerGameId = transferEvent.args[2];
           const gameOwner = transferEvent.args[1];
 
-          expect(await gameToken.ownerOf(minterGameId)).to.be.equal(
+          expect(await gameToken.ownerOf(managerGameId)).to.be.equal(
             users[4].address
           );
           expect(gameOwner).to.be.equal(users[4].address);
         });
 
-        it('reverts if non-minter trys to mint Game when _minter set', async function () {
+        it('reverts if non-manager trys to mint Game when _gameManager is set', async function () {
           const randomId = await getRandom();
           await expect(
             gameToken.createGame(
@@ -108,11 +108,11 @@ describe('GameToken', function () {
               '',
               randomId
             )
-          ).to.be.revertedWith('INVALID_MINTER');
+          ).to.be.revertedWith('INVALID_GAME_MANAGER');
         });
       });
 
-      describe('GameToken: No Minter', function () {
+      describe('GameToken: No Game Manager', function () {
         let gameToken: Contract;
         let GameOwner: User;
         let gameId: BigNumber;
@@ -1065,17 +1065,17 @@ describe('GameToken', function () {
         GameOwner.Game.destroyGame(others[2], others[1], gameId, [], [])
       ).to.be.revertedWith('DESTROY_ACCESS_DENIED');
     });
-    it('fails if called by non-minter when minter is set', async function () {
-      await gameTokenAsAdmin.setMinter(others[9]);
+    it('fails if called by non-Manager when gameManager is set', async function () {
+      await gameTokenAsAdmin.setGameManager(others[9]);
       await expect(
         gameToken.destroyGame(others[0], others[0], gameId, [], [])
-      ).to.be.revertedWith('INVALID_MINTER');
+      ).to.be.revertedWith('INVALID_GAME_MANAGER');
     });
 
     describe('GameToken: After Burning...', function () {
       before(async function () {
         const assetContract = await ethers.getContract('Asset');
-        await gameTokenAsAdmin.setMinter(ethers.constants.AddressZero);
+        await gameTokenAsAdmin.setGameManager(ethers.constants.AddressZero);
 
         const ownerBalanceBefore = await assetContract[
           'balanceOf(address,uint256)'
