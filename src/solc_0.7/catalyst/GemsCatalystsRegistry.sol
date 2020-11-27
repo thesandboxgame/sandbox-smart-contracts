@@ -30,35 +30,49 @@ contract GemsCatalystsRegistry is WithAdmin {
         return catalyst.getMaxGems();
     }
 
+    /// @notice Burns one gem unit from each gem id on behalf of a beneficiary
+    /// @param from address of the beneficiary to burn on behalf of
+    /// @param gemIds list of gems to burn one gem from each
     function burnDifferentGems(address from, uint16[] calldata gemIds) external {
-        uint16 last = gemIds[0];
-        uint256 count = 1;
-        for (uint256 i = 1; i < gemIds.length; i++) {
-            if (last != gemIds[i]) {
-                burnGem(from, last, count);
-                count = 1;
-                last = gemIds[i];
-            }
-            count++;
-        }
-        if (count > 0) {
-            burnGem(from, last, count);
+        for (uint256 i = 0; i < gemIds.length; i++) {
+            burnGem(from, gemIds[i], 1);
         }
     }
 
+    /// @notice Burns one catalyst unit from each catalyst id on behalf of a beneficiary
+    /// @param from address of the beneficiary to burn on behalf of
+    /// @param catalystIds list of catalysts to burn one catalyst from each
     function burnDifferentCatalysts(address from, uint16[] calldata catalystIds) external {
-        uint16 last = catalystIds[0];
-        uint256 count = 1;
-        for (uint256 i = 1; i < catalystIds.length; i++) {
-            if (last != catalystIds[i]) {
-                burnCatalyst(from, last, count);
-                count = 1;
-                last = catalystIds[i];
-            }
-            count++;
+        for (uint256 i = 0; i < catalystIds.length; i++) {
+            burnCatalyst(from, catalystIds[i], 1);
         }
-        if (count > 0) {
-            burnCatalyst(from, last, count);
+    }
+
+    /// @notice Burns few gem units from each gem id on behalf of a beneficiary
+    /// @param from address of the beneficiary to burn on behalf of
+    /// @param gemIds list of gems to burn gem units from each
+    /// @param amounts list of amounts of units to burn
+    function batchBurnGems(
+        address from,
+        uint16[] calldata gemIds,
+        uint256[] calldata amounts
+    ) public {
+        for (uint256 i = 0; i < gemIds.length; i++) {
+            burnGem(from, gemIds[i], amounts[i]);
+        }
+    }
+
+    /// @notice Burns few catalyst units from each catalyst id on behalf of a beneficiary
+    /// @param from address of the beneficiary to burn on behalf of
+    /// @param catalystIds list of catalysts to burn catalyst units from each
+    /// @param amounts list of amounts of units to burn
+    function batchBurnCatalysyts(
+        address from,
+        uint16[] calldata catalystIds,
+        uint256[] calldata amounts
+    ) public {
+        for (uint256 i = 0; i < catalystIds.length; i++) {
+            burnCatalyst(from, catalystIds[i], amounts[i]);
         }
     }
 
