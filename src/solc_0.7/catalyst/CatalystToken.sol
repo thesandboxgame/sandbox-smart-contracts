@@ -7,7 +7,6 @@ import "./ERC20Token.sol";
 
 abstract contract CatalystToken is ERC20Token {
     uint16 public immutable catalystId;
-    uint8 internal immutable _maxGems;
 
     function getMaxGems() external view virtual returns (uint8);
 
@@ -16,6 +15,12 @@ abstract contract CatalystToken is ERC20Token {
         view
         virtual
         returns (uint32[] memory values);
+
+    // //////////////////////// DATA /////////////////////
+
+    uint8 internal immutable _maxGems;
+
+    // /////////////////// CONSTRUCTOR ////////////////////
 
     constructor(
         string memory name,
