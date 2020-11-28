@@ -6,6 +6,17 @@ import "./CatalystToken.sol";
 import "./AssetAttributesRegistry.sol";
 
 contract PrimaryCatalyst is CatalystToken {
+    uint256 internal constant MAX_NUM_GEMS = 15;
+    uint256 internal constant MAX_NUM_GEM_TYPES = 256;
+
+    constructor(
+        string memory name,
+        string memory symbol,
+        address admin,
+        uint8 maxGems,
+        uint16 _catalystId
+    ) CatalystToken(name, symbol, admin, maxGems, _catalystId) {}
+
     function getMaxGems() external view override returns (uint8) {
         return _maxGems;
     }
@@ -54,8 +65,6 @@ contract PrimaryCatalyst is CatalystToken {
         }
     }
 
-    // //////////////////// INTERNALS ////////////////////
-
     ///@dev compute a random value between min to 25.
     //. example: 1-25, 6-25, 11-25, 16-25
     function _computeValue(
@@ -67,19 +76,4 @@ contract PrimaryCatalyst is CatalystToken {
     ) internal pure returns (uint32) {
         return min + uint16(uint256(keccak256(abi.encodePacked(gemId, assetId, blockHash, slotIndex))) % (26 - min));
     }
-
-    // //////////////////////// DATA /////////////////////
-
-    uint256 internal constant MAX_NUM_GEMS = 15;
-    uint256 internal constant MAX_NUM_GEM_TYPES = 256;
-
-    // /////////////////// CONSTRUCTOR ////////////////////
-
-    constructor(
-        string memory name,
-        string memory symbol,
-        address admin,
-        uint8 maxGems,
-        uint16 _catalystId
-    ) CatalystToken(name, symbol, admin, maxGems, _catalystId) {}
 }
