@@ -152,6 +152,13 @@ abstract contract ERC20BaseToken is WithSuperOperators, ERC20, ERC20Extended, ER
         return true;
     }
 
+    function _firstBytes32(bytes memory src) public pure returns (bytes32 output) {
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            output := mload(add(src, 32))
+        }
+    }
+
     function _addAllowanceIfNeeded(
         address owner,
         address spender,
@@ -216,12 +223,5 @@ abstract contract ERC20BaseToken is WithSuperOperators, ERC20, ERC20Extended, ER
         _balances[from] = currentBalance - amount;
         _totalSupply -= amount;
         emit Transfer(from, address(0), amount);
-    }
-
-    function _firstBytes32(bytes memory src) public pure returns (bytes32 output) {
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            output := mload(add(src, 32))
-        }
     }
 }
