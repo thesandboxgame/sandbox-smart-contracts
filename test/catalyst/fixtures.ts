@@ -96,6 +96,5 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     commonCatalyst,
     rareCatalyst,
     catalystExample,
-    accounts,
   };
 });
