@@ -12,6 +12,13 @@ import "../common/BaseWithStorage/WithAdmin.sol";
 /// Each new Gem get assigned a new id (starting at 1)
 /// Each new Catalyst get assigned a new id (starting at 1)
 contract GemsCatalystsRegistry is WithAdmin {
+    Gem[] internal _gems;
+    CatalystToken[] internal _catalysts;
+
+    constructor(address admin) {
+        _admin = admin;
+    }
+
     function getAttributes(
         uint16 catalystId,
         uint256 assetId,
@@ -140,15 +147,5 @@ contract GemsCatalystsRegistry is WithAdmin {
         } else {
             return Gem(0);
         }
-    }
-
-    // //////////////////////// DATA /////////////////////
-
-    Gem[] internal _gems;
-    CatalystToken[] internal _catalysts;
-
-    // /////////////////// CONSTRUCTOR ////////////////////
-    constructor(address admin) {
-        _admin = admin;
     }
 }
