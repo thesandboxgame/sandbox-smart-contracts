@@ -2,6 +2,8 @@ pragma solidity 0.5.9;
 
 import "../../../contracts_common/src/Interfaces/ERC20Events.sol";
 import "../../../contracts_common/src/BaseWithStorage/SuperOperators.sol";
+
+
 contract ERC20BaseToken is SuperOperators, ERC20Events {
     uint256 internal _totalSupply;
     mapping(address => uint256) internal _balances;
@@ -173,6 +175,7 @@ contract ERC20BaseToken is SuperOperators, ERC20Events {
                 _allowances[from][msg.sender] = currentAllowance - amount;
             }
         }
+
         uint256 currentBalance = _balances[from];
         require(currentBalance >= amount, "Not enough funds");
         _balances[from] = currentBalance - amount;
