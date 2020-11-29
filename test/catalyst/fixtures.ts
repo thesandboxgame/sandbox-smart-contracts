@@ -1,5 +1,5 @@
-import { ethers, deployments, getNamedAccounts } from 'hardhat';
-import { Contract, BigNumber } from 'ethers';
+import {ethers, deployments, getNamedAccounts} from 'hardhat';
+import {Contract, BigNumber} from 'ethers';
 
 const exampleGemId = 6;
 const notInOrderGemId = 56;

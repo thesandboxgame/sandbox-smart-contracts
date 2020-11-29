@@ -1,7 +1,7 @@
-import { ethers, getNamedAccounts } from 'hardhat';
-import { BigNumber } from '@ethersproject/bignumber';
-import { expect } from '../chai-setup';
-import { setupGemsAndCatalysts } from './fixtures';
+import {ethers, getNamedAccounts} from 'hardhat';
+import {BigNumber} from '@ethersproject/bignumber';
+import {expect} from '../chai-setup';
+import {setupGemsAndCatalysts} from './fixtures';
 describe('GemsCatalystsRegistry', function () {
   it('getMaxGems for catalystId = 1 should be 1', async function () {
     const {
@@ -14,7 +14,7 @@ describe('GemsCatalystsRegistry', function () {
   });
 
   it('getMaxGems for non existing catalystId should fail', async function () {
-    const { gemsCatalystsRegistry } = await setupGemsAndCatalysts();
+    const {gemsCatalystsRegistry} = await setupGemsAndCatalysts();
     expect(gemsCatalystsRegistry.getMaxGems(10)).to.be.revertedWith(
       'CATALYST_DOES_NOT_EXIST'
     );
@@ -25,7 +25,7 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry,
       commonCatalyst,
     } = await setupGemsAndCatalysts();
-    const { catalystOwner } = await getNamedAccounts();
+    const {catalystOwner} = await getNamedAccounts();
     const catalystId = await commonCatalyst.catalystId();
     const totalSupplyBefore = await commonCatalyst.totalSupply();
     const balanceBeforeBurning = await commonCatalyst.balanceOf(catalystOwner);
@@ -40,8 +40,8 @@ describe('GemsCatalystsRegistry', function () {
   });
 
   it('burnCatalyst should fail for non existing catalystId', async function () {
-    const { gemsCatalystsRegistry } = await setupGemsAndCatalysts();
-    const { deployer } = await getNamedAccounts();
+    const {gemsCatalystsRegistry} = await setupGemsAndCatalysts();
+    const {deployer} = await getNamedAccounts();
     const burnAmount = BigNumber.from('2');
     expect(
       gemsCatalystsRegistry
@@ -55,7 +55,7 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry,
       commonCatalyst,
     } = await setupGemsAndCatalysts();
-    const { catalystOwner } = await getNamedAccounts();
+    const {catalystOwner} = await getNamedAccounts();
     const catalystId = await commonCatalyst.catalystId();
     const burnAmount = BigNumber.from('200');
     expect(
@@ -70,7 +70,7 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry,
       commonCatalyst,
     } = await setupGemsAndCatalysts();
-    const { assetAdmin } = await getNamedAccounts();
+    const {assetAdmin} = await getNamedAccounts();
     const catalystId = await commonCatalyst.catalystId();
     const burnAmount = BigNumber.from('200');
     expect(
@@ -81,11 +81,8 @@ describe('GemsCatalystsRegistry', function () {
   });
 
   it('burnGem should burn 3 power gems from gemOwner account', async function () {
-    const {
-      gemsCatalystsRegistry,
-      powerGem,
-    } = await setupGemsAndCatalysts();
-    const { gemOwner } = await getNamedAccounts();
+    const {gemsCatalystsRegistry, powerGem} = await setupGemsAndCatalysts();
+    const {gemOwner} = await getNamedAccounts();
     const gemId = await powerGem.gemId();
     const totalSupplyBefore = await powerGem.totalSupply();
     const balanceBeforeBurning = await powerGem.balanceOf(gemOwner);
@@ -100,8 +97,8 @@ describe('GemsCatalystsRegistry', function () {
   });
 
   it('burnGem should fail for non existing gemId', async function () {
-    const { gemsCatalystsRegistry } = await setupGemsAndCatalysts();
-    const { gemOwner } = await getNamedAccounts();
+    const {gemsCatalystsRegistry} = await setupGemsAndCatalysts();
+    const {gemOwner} = await getNamedAccounts();
     const burnAmount = BigNumber.from('2');
     expect(
       gemsCatalystsRegistry
@@ -111,11 +108,8 @@ describe('GemsCatalystsRegistry', function () {
   });
 
   it('burnGem should fail for insufficient amount', async function () {
-    const {
-      gemsCatalystsRegistry,
-      powerGem,
-    } = await setupGemsAndCatalysts();
-    const { gemOwner } = await getNamedAccounts();
+    const {gemsCatalystsRegistry, powerGem} = await setupGemsAndCatalysts();
+    const {gemOwner} = await getNamedAccounts();
     const gemId = await powerGem.gemId();
     const burnAmount = BigNumber.from('200');
     expect(
@@ -126,11 +120,8 @@ describe('GemsCatalystsRegistry', function () {
   });
 
   it('burnGem should fail for account with no gems', async function () {
-    const {
-      gemsCatalystsRegistry,
-      powerGem,
-    } = await setupGemsAndCatalysts();
-    const { assetAdmin } = await getNamedAccounts();
+    const {gemsCatalystsRegistry, powerGem} = await setupGemsAndCatalysts();
+    const {assetAdmin} = await getNamedAccounts();
     const gemId = await powerGem.gemId();
     const burnAmount = BigNumber.from('200');
     expect(
@@ -146,7 +137,7 @@ describe('GemsCatalystsRegistry', function () {
       powerGem,
       commonCatalyst,
     } = await setupGemsAndCatalysts();
-    const { gemsCatalystsRegistryOwner } = await getNamedAccounts();
+    const {gemsCatalystsRegistryOwner} = await getNamedAccounts();
     expect(
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(gemsCatalystsRegistryOwner))
@@ -159,7 +150,7 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry,
       commonCatalyst,
     } = await setupGemsAndCatalysts();
-    const { gemsCatalystsRegistryOwner } = await getNamedAccounts();
+    const {gemsCatalystsRegistryOwner} = await getNamedAccounts();
     expect(
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(gemsCatalystsRegistryOwner))
@@ -168,11 +159,8 @@ describe('GemsCatalystsRegistry', function () {
   });
 
   it('addGemsAndCatalysts should add gemExample', async function () {
-    const {
-      gemsCatalystsRegistry,
-      gemExample,
-    } = await setupGemsAndCatalysts();
-    const { gemsCatalystsRegistryOwner } = await getNamedAccounts();
+    const {gemsCatalystsRegistry, gemExample} = await setupGemsAndCatalysts();
+    const {gemsCatalystsRegistryOwner} = await getNamedAccounts();
     const tx = await gemsCatalystsRegistry
       .connect(ethers.provider.getSigner(gemsCatalystsRegistryOwner))
       .addGemsAndCatalysts([gemExample.address], []);
@@ -186,7 +174,7 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry,
       catalystExample,
     } = await setupGemsAndCatalysts();
-    const { gemsCatalystsRegistryOwner } = await getNamedAccounts();
+    const {gemsCatalystsRegistryOwner} = await getNamedAccounts();
     const tx = await gemsCatalystsRegistry
       .connect(ethers.provider.getSigner(gemsCatalystsRegistryOwner))
       .addGemsAndCatalysts([], [catalystExample.address]);
@@ -202,7 +190,7 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry,
       gemNotInOrder,
     } = await setupGemsAndCatalysts();
-    const { gemsCatalystsRegistryOwner } = await getNamedAccounts();
+    const {gemsCatalystsRegistryOwner} = await getNamedAccounts();
     expect(
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(gemsCatalystsRegistryOwner))
@@ -211,11 +199,8 @@ describe('GemsCatalystsRegistry', function () {
   });
 
   it('addGemsAndCatalysts should fail for unauthorized user', async function () {
-    const {
-      gemsCatalystsRegistry,
-      gemExample,
-    } = await setupGemsAndCatalysts();
-    const { estateAdmin } = await getNamedAccounts();
+    const {gemsCatalystsRegistry, gemExample} = await setupGemsAndCatalysts();
+    const {estateAdmin} = await getNamedAccounts();
     expect(
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(estateAdmin))
@@ -229,7 +214,7 @@ describe('GemsCatalystsRegistry', function () {
       powerGem,
       defenseGem,
     } = await setupGemsAndCatalysts();
-    const { gemOwner } = await getNamedAccounts();
+    const {gemOwner} = await getNamedAccounts();
     const powerGemId = await powerGem.gemId();
     const defenseGemId = await defenseGem.gemId();
     const balanceBeforeBurningPowerGem = await powerGem.balanceOf(gemOwner);
@@ -264,7 +249,7 @@ describe('GemsCatalystsRegistry', function () {
       rareCatalyst,
       commonCatalyst,
     } = await setupGemsAndCatalysts();
-    const { catalystOwner } = await getNamedAccounts();
+    const {catalystOwner} = await getNamedAccounts();
     const rareCatalystId = await rareCatalyst.catalystId();
     const commonCatalystId = await commonCatalyst.catalystId();
     const balanceBeforeBurningRareCatalyst = await rareCatalyst.balanceOf(
@@ -277,7 +262,10 @@ describe('GemsCatalystsRegistry', function () {
     const totalSupplyBeforeBurningDefenseGem = await commonCatalyst.totalSupply();
     await gemsCatalystsRegistry
       .connect(ethers.provider.getSigner(catalystOwner))
-      .burnDifferentCatalysts(catalystOwner, [rareCatalystId, commonCatalystId]);
+      .burnDifferentCatalysts(catalystOwner, [
+        rareCatalystId,
+        commonCatalystId,
+      ]);
     const balanceAfterBurningRareCatalyst = await rareCatalyst.balanceOf(
       catalystOwner
     );
@@ -307,7 +295,7 @@ describe('GemsCatalystsRegistry', function () {
       powerGem,
       defenseGem,
     } = await setupGemsAndCatalysts();
-    const { gemOwner } = await getNamedAccounts();
+    const {gemOwner} = await getNamedAccounts();
     const powerGemId = await powerGem.gemId();
     const defenseGemId = await defenseGem.gemId();
     const balanceBeforeBurningPowerGem = await powerGem.balanceOf(gemOwner);
