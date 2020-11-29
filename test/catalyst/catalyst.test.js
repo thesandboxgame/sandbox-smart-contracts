@@ -11,13 +11,15 @@ function testCatalyst(catalystName) {
   const erc20Tests = generateERC20Tests(
     async () => {
       const others = await getUnnamedAccounts();
-      const {deployer} = await getNamedAccounts();
+      const {catalystOwner} = await getNamedAccounts();
       await deployments.fixture();
       const contract = await ethers.getContract(catalystName);
 
       function mint(to, amount) {
         return waitFor(
-          contract.connect(ethers.provider.getSigner(deployer)).mint(to, amount)
+          contract
+            .connect(ethers.provider.getSigner(catalystOwner))
+            .mint(to, amount)
         );
       }
 

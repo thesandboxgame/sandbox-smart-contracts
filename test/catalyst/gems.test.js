@@ -11,13 +11,13 @@ function testGem(gemName) {
   const erc20Tests = generateERC20Tests(
     async () => {
       const others = await getUnnamedAccounts();
-      const {deployer} = await getNamedAccounts();
+      const {gemOwner} = await getNamedAccounts();
       await deployments.fixture();
       const contract = await ethers.getContract(gemName);
 
       function mint(to, amount) {
         return waitFor(
-          contract.connect(ethers.provider.getSigner(deployer)).mint(to, amount)
+          contract.connect(ethers.provider.getSigner(gemOwner)).mint(to, amount)
         );
       }
 
