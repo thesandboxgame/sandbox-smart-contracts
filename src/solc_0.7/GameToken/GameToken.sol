@@ -315,34 +315,20 @@ contract GameToken is ERC721BaseToken, IGameToken {
         return URI;
     }
 
-    /// @notice transfer all assets from a burnt game
-    /// @param from previous owner of the burnt game
-    /// @param gameId estate id
-    /// @param to address that will receive the assets
+    /// @notice Function to transfer assets from a burnt GAME
+    /// @param from Previous owner of the burnt game
+    /// @param to Address that will receive the assets
+    /// @param gameId Id of the burnt GAME token
+    /// @param assetIds The assets to recover from the burnt GAME
+    /// @param values The amount of each asset to recover
     function withdrawFromDestroyedGame(
         address from,
         address to,
         uint256 gameId,
         uint256[] memory assetIds,
         uint256[] memory values
-    ) public override notToZero(to) {
-        require(to != address(this), "DESTINATION_GAME_CONTRACT");
-        _check_withdrawal_authorized(from, gameId);
-        uint256 length = assetIds.length;
-        require(length > 0, "WITHDRAWAL_COMPLETE");
-        uint256[] memory amounts = new uint256[](length);
-
-        if (values[0] == uint256(0)) {
-            for (uint256 i = 0; i < length; i++) {
-                amounts[i] = _gameAssets[gameId][i];
-            }
-            _asset.safeBatchTransferFrom(address(this), to, assetIds, amounts, "");
-            emit AssetsRemoved(gameId, assetIds, amounts, to);
-        } else {
-            require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
-            _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
-            emit AssetsRemoved(gameId, assetIds, values, to);
-        }
+    ) public override {
+        _recoverAssets(from, to, gameId, assetIds, values);
     }
 
     function _destroyGame(
@@ -363,6 +349,32 @@ contract GameToken is ERC721BaseToken, IGameToken {
         delete _metaData[gameId];
         _creatorship[creatorOf(gameId)] = address(0);
         _burn(from, owner, gameId);
+    }
+
+    function _recoverAssets(
+        address from,
+        address to,
+        uint256 gameId,
+        uint256[] memory assetIds,
+        uint256[] memory values
+    ) internal notToZero(to) {
+        require(to != address(this), "DESTINATION_GAME_CONTRACT");
+        _check_withdrawal_authorized(from, gameId);
+        uint256 length = assetIds.length;
+        require(length > 0, "WITHDRAWAL_COMPLETE");
+        uint256[] memory amounts = new uint256[](length);
+
+        if (values[0] == uint256(0)) {
+            for (uint256 i = 0; i < length; i++) {
+                amounts[i] = _gameAssets[gameId][i];
+            }
+            _asset.safeBatchTransferFrom(address(this), to, assetIds, amounts, "");
+            emit AssetsRemoved(gameId, assetIds, amounts, to);
+        } else {
+            require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
+            _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
+            emit AssetsRemoved(gameId, assetIds, values, to);
+        }
     }
 
     function _check_withdrawal_authorized(address from, uint256 gameId) internal view {
