@@ -34,6 +34,31 @@ async function getRandom(): Promise<number> {
   return rng.nextInt(1, 1000000000);
 }
 
+async function getBalances(
+  assetContract: Contract,
+  addresses: Address[],
+  assets: BigNumber[]
+): Promise<number[]> {
+  const balances: number[] = [];
+  balances[0] = await assetContract['balanceOf(address,uint256)'](
+    addresses[0],
+    assets[0]
+  );
+  balances[1] = await assetContract['balanceOf(address,uint256)'](
+    addresses[0],
+    assets[1]
+  );
+  balances[2] = await assetContract['balanceOf(address,uint256)'](
+    addresses[1],
+    assets[0]
+  );
+  balances[3] = await assetContract['balanceOf(address,uint256)'](
+    addresses[1],
+    assets[1]
+  );
+  return balances;
+}
+
 describe('GameToken', function () {
   before(async function () {
     const {GameOwner, gameToken} = await setupTest();
@@ -1070,18 +1095,16 @@ describe('GameToken', function () {
         const assetContract = await ethers.getContract('Asset');
         await gameTokenAsAdmin.setGameManager(ethers.constants.AddressZero);
 
-        const ownerBalanceBefore = await assetContract[
-          'balanceOf(address,uint256)'
-        ](GameOwner.address, assetId);
-        const ownerBalanceBefore2 = await assetContract[
-          'balanceOf(address,uint256)'
-        ](GameOwner.address, assetId2);
-        const contractBalanceBefore = await assetContract[
-          'balanceOf(address,uint256)'
-        ](gameToken.address, assetId);
-        const contractBalanceBefore2 = await assetContract[
-          'balanceOf(address,uint256)'
-        ](gameToken.address, assetId2);
+        const balancesBefore = await getBalances(
+          assetContract,
+          [GameOwner.address, gameToken.address],
+          [assetId, assetId2]
+        );
+
+        const ownerBalanceBefore = balancesBefore[0];
+        const ownerBalanceBefore2 = balancesBefore[1];
+        const contractBalanceBefore = balancesBefore[2];
+        const contractBalanceBefore2 = balancesBefore[3];
 
         expect(ownerBalanceBefore).to.be.equal(0);
         expect(ownerBalanceBefore2).to.be.equal(0);
@@ -1096,18 +1119,16 @@ describe('GameToken', function () {
           [quantity, quantity2]
         );
 
-        const ownerBalanceAfter = await assetContract[
-          'balanceOf(address,uint256)'
-        ](GameOwner.address, assetId);
-        const ownerBalanceAfter2 = await assetContract[
-          'balanceOf(address,uint256)'
-        ](GameOwner.address, assetId2);
-        const contractBalanceAfter = await assetContract[
-          'balanceOf(address,uint256)'
-        ](gameToken.address, assetId);
-        const contractBalanceAfter2 = await assetContract[
-          'balanceOf(address,uint256)'
-        ](gameToken.address, assetId2);
+        const balancesAfter = await getBalances(
+          assetContract,
+          [GameOwner.address, gameToken.address],
+          [assetId, assetId2]
+        );
+
+        const ownerBalanceAfter = balancesAfter[0];
+        const ownerBalanceAfter2 = balancesAfter[1];
+        const contractBalanceAfter = balancesAfter[2];
+        const contractBalanceAfter2 = balancesAfter[3];
 
         expect(ownerBalanceAfter).to.be.equal(7);
         expect(ownerBalanceAfter2).to.be.equal(11);
@@ -1125,13 +1146,17 @@ describe('GameToken', function () {
           'token does not exist'
         );
       });
+    });
+
+    describe('GameToken: Burn... then Recover', function () {
+      before(async function () {
+        gameId = await getNewGame();
+      });
 
       it('can burn without transfer of assets', async function () {});
 
       it('can recover remaining assets from burnt GAME in batches', async function () {});
     });
-
-    describe('GameToken: Burn... then Recover', function () {});
   });
 
   describe('GameToken: MetaTransactions', function () {
