@@ -73,7 +73,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
     /// @param to The address to send removed assets to
     /// @param uri The URI string to update the GAME token's URI
 
-    // @refactor ! https://github.com/thesandboxgame/sandbox-private-contracts/pull/152#discussion_r529665560
     function removeAssets(
         uint256 gameId,
         uint256[] memory assetIds,
@@ -85,7 +84,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
 
         for (uint256 i = 0; i < assetIds.length; i++) {
             uint256 currentValue = _gameAssets[gameId][assetIds[i]];
-            require(values[i] <= currentValue, "INVALID_ASSET_REMOVAL");
+            require(currentValue != 0 && values[i] != 0 && values[i] <= currentValue, "INVALID_ASSET_REMOVAL");
             _gameAssets[gameId][assetIds[i]] = currentValue.sub(values[i]);
         }
 
@@ -365,22 +364,19 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256[] memory values
     ) internal notToZero(to) {
         _check_withdrawal_authorized(from, gameId);
-        require(to != address(this), "DESTINATION_GAME_CONTRACT");
         uint256 length = assetIds.length;
         require(length > 0, "WITHDRAWAL_COMPLETE");
-        uint256[] memory amounts = new uint256[](length);
+        require(to != address(this), "DESTINATION_GAME_CONTRACT");
+        require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
 
-        if (values[0] == uint256(0)) {
-            for (uint256 i = 0; i < length; i++) {
-                amounts[i] = _gameAssets[gameId][i];
-            }
-            _asset.safeBatchTransferFrom(address(this), to, assetIds, amounts, "");
-            emit AssetsRemoved(gameId, assetIds, amounts, to);
-        } else {
-            require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
-            _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
-            emit AssetsRemoved(gameId, assetIds, values, to);
+        for (uint256 i = 0; i < assetIds.length; i++) {
+            uint256 currentValue = _gameAssets[gameId][assetIds[i]];
+            require(currentValue != 0 && values[i] != 0 && values[i] <= currentValue, "INVALID_ASSET_REMOVAL");
+            _gameAssets[gameId][assetIds[i]] = currentValue.sub(values[i]);
         }
+
+        _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
+        emit AssetsRemoved(gameId, assetIds, values, to);
     }
 
     function _check_withdrawal_authorized(address from, uint256 gameId) internal view {
