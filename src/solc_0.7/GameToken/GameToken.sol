@@ -197,25 +197,9 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256 gameId,
         uint256[] calldata assetIds,
         uint256[] calldata values
-    ) external override gameManagerOnly() notToZero(to) {
-        address owner = _ownerOf(gameId);
-        require(from == owner, "DESTROY_ACCESS_DENIED");
-        require(to != address(this), "DESTINATION_GAME_CONTRACT");
-        (gameId);
-        // @review don't try to do this here (block gas limit)
-        // extract to transferAllFromDestroyedGame()
-        if (assetIds.length != 0) {
-            removeAssets(gameId, assetIds, values, to, "");
-        }
-        delete _metaData[gameId];
-        _creatorship[creatorOf(gameId)] = address(0);
-        _burn(from, owner, gameId);
+    ) external override gameManagerOnly() {
+        _destroyGame(from, to, gameId, assetIds, values);
     }
-
-    // function _burn(address from, uint256 gameId) private {
-    //     _transferFrom(from, address(0), gameId);
-    //     emit Transfer(from, address(0), gameId);
-    // }
 
     /// @notice Function to get game editor status
     /// @param gameId The id of the GAME token owned by owner
@@ -359,6 +343,26 @@ contract GameToken is ERC721BaseToken, IGameToken {
             _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
             emit AssetsRemoved(gameId, assetIds, values, to);
         }
+    }
+
+    function _destroyGame(
+        address from,
+        address to,
+        uint256 gameId,
+        uint256[] calldata assetIds,
+        uint256[] calldata values
+    ) internal notToZero(to) {
+        address owner = _ownerOf(gameId);
+        require(from == owner, "DESTROY_ACCESS_DENIED");
+        require(to != address(this), "DESTINATION_GAME_CONTRACT");
+        // @review don't try to do this here (block gas limit)
+        // extract to transferAllFromDestroyedGame()
+        if (assetIds.length != 0) {
+            removeAssets(gameId, assetIds, values, to, "");
+        }
+        delete _metaData[gameId];
+        _creatorship[creatorOf(gameId)] = address(0);
+        _burn(from, owner, gameId);
     }
 
     function _check_withdrawal_authorized(address from, uint256 gameId) internal view {
