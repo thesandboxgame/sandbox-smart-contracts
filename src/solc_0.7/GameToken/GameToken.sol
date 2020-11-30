@@ -299,6 +299,23 @@ contract GameToken is ERC721BaseToken, IGameToken {
         return URI;
     }
 
+    /// @notice Function to burn a GAME token and recover assets
+    /// @param from The address of the one destroying the game
+    /// @param to The address to send all GAME assets to
+    /// @param gameId The id of the GAME to destroy
+    /// @param assetIds The assets to recover from the burnt GAME
+    /// @param values The amount of each asset to recover
+    function destroyAndRecover(
+        address from,
+        address to,
+        uint256 gameId,
+        uint256[] calldata assetIds,
+        uint256[] calldata values
+    ) external override gameManagerOnly() {
+        _destroyGame(from, to, gameId);
+        _recoverAssets(from, to, gameId, assetIds, values);
+    }
+
     /// @notice Function to burn a GAME token
     /// @param from The address of the one destroying the game
     /// @param to The address to send all GAME assets to
@@ -324,8 +341,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256[] memory assetIds,
         uint256[] memory values
     ) public override {
-        _check_withdrawal_authorized(from, gameId);
-        _recoverAssets(to, gameId, assetIds, values);
+        _recoverAssets(from, to, gameId, assetIds, values);
     }
 
     function _destroyGame(
@@ -342,11 +358,13 @@ contract GameToken is ERC721BaseToken, IGameToken {
     }
 
     function _recoverAssets(
+        address from,
         address to,
         uint256 gameId,
         uint256[] memory assetIds,
         uint256[] memory values
     ) internal notToZero(to) {
+        _check_withdrawal_authorized(from, gameId);
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
         uint256 length = assetIds.length;
         require(length > 0, "WITHDRAWAL_COMPLETE");
