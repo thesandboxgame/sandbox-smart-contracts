@@ -26,7 +26,7 @@ interface IGameToken {
         uint256[] calldata values
     ) external;
 
-    function withdrawFromDestroyedGame(
+    function recoverAssets(
         address from,
         address to,
         uint256 gameId,
