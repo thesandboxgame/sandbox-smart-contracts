@@ -1,5 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
+pragma experimental ABIEncoderV2;
 
 import "./interfaces/OldCatalystRegistry.sol";
 import "./AssetAttributesRegistry.sol";
@@ -13,6 +14,12 @@ contract CollectionCatalystMigrations is WithAdmin {
     OldCatalystRegistry internal immutable _oldRegistry;
     AssetAttributesRegistry internal immutable _registry;
     AssetToken internal immutable _asset;
+
+    struct Migration {
+        uint256 assetId;
+        uint16[] gemIds;
+        uint64 blockNumber;
+    }
 
     /// @notice CollectionCatalystMigrations depends on:
     /// @param asset: Asset Token Contract
@@ -36,6 +43,21 @@ contract CollectionCatalystMigrations is WithAdmin {
         uint64 blockNumber
     ) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
+        _migrate(assetId, gemIds, blockNumber);
+    }
+
+    function batchMigrate(Migration[] calldata migrations) external {
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
+        for (uint256 i = 0; i < migrations.length; i++) {
+            _migrate(migrations[i].assetId, migrations[i].gemIds, migrations[i].blockNumber);
+        }
+    }
+
+    function _migrate(
+        uint256 assetId,
+        uint16[] memory gemIds,
+        uint64 blockNumber
+    ) internal {
         (bool oldExists, uint256 catalystId) = _oldRegistry.getCatalyst(assetId);
         require(oldExists, "OLD_CATALYST_NOT_EXIST");
         (bool exists, , ) = _registry.getRecord(assetId);
