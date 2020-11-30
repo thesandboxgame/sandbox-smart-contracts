@@ -1,9 +1,4 @@
-const {
-  ethers,
-  getUnnamedAccounts,
-  getNamedAccounts,
-  deployments,
-} = require('hardhat');
+const {ethers, getUnnamedAccounts, deployments} = require('hardhat');
 const {waitFor, recurseTests} = require('../utils');
 const generateERC20Tests = require('../erc20');
 
@@ -11,7 +6,7 @@ function testCatalyst(catalystName) {
   const erc20Tests = generateERC20Tests(
     async () => {
       const others = await getUnnamedAccounts();
-      const {catalystOwner} = await getNamedAccounts();
+      const catalystOwner = others[0];
       await deployments.fixture();
       const contract = await ethers.getContract(catalystName);
 

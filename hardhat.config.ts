@@ -1,9 +1,9 @@
 import 'dotenv/config';
-import {HardhatUserConfig} from 'hardhat/types';
+import { HardhatUserConfig } from 'hardhat/types';
 import 'hardhat-deploy';
 import 'hardhat-deploy-ethers';
 import 'hardhat-gas-reporter';
-import {eth_node} from './utils/deployments';
+import { eth_node } from './utils/deployments';
 
 let mnemonic = process.env.MNEMONIC;
 if (!mnemonic) {
@@ -15,19 +15,19 @@ const mnemonic_mainnet = process.env.MNEMONIC_MAINNET;
 const mnemonic_rinkeby = process.env.MNEMONIC_RINKEBY;
 const accounts = mnemonic
   ? {
-      mnemonic,
-    }
+    mnemonic,
+  }
   : undefined;
 const accounts_mainnet = mnemonic_mainnet
   ? {
-      mnemonic: mnemonic_mainnet,
-    }
+    mnemonic: mnemonic_mainnet,
+  }
   : undefined;
 
 const accounts_rinkeby = mnemonic_rinkeby
   ? {
-      mnemonic: mnemonic_rinkeby,
-    }
+    mnemonic: mnemonic_rinkeby,
+  }
   : undefined;
 
 const config: HardhatUserConfig = {
@@ -169,9 +169,7 @@ const config: HardhatUserConfig = {
     starterPackSaleBeneficiary: 'treasury', // collect funds from starter pack sales
     backendMessageSigner: 'backendReferralWallet', // account that sign message for the starter pack
     kyberLiquidityProvider: 'sandBeneficiary', //TODO check what should be the value
-    catalystOwner: 'sandAdmin',
-    gemOwner: 'sandAdmin',
-    gemsCatalystsRegistryOwner: 'sandAdmin',
+    gemsCatalystsRegistryAdmin: 'sandAdmin',
     // testing
     others: {
       default: 'from:5',

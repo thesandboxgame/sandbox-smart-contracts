@@ -1,5 +1,5 @@
-import {ethers, deployments, getNamedAccounts} from 'hardhat';
-import {Contract, BigNumber} from 'ethers';
+import { ethers, deployments, getUnnamedAccounts } from 'hardhat';
+import { Contract, BigNumber } from 'ethers';
 
 const exampleGemId = 6;
 const notInOrderGemId = 56;
@@ -17,24 +17,26 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   const luckGem: Contract = await ethers.getContract('Gem_Luck');
   const commonCatalyst: Contract = await ethers.getContract('Catalyst_Common');
   const rareCatalyst: Contract = await ethers.getContract('Catalyst_Rare');
-  const accounts = await getNamedAccounts();
+  const users = await getUnnamedAccounts();
+  const catalystOwner = users[0];
+  const gemOwner = users[0];
 
   await deployments.deploy(`Gem_Example`, {
     contract: 'Gem',
-    from: accounts.gemOwner,
+    from: gemOwner,
     log: true,
-    args: ['Gem_Example', 'Gem_Example', accounts.gemOwner, exampleGemId],
+    args: ['Gem_Example', 'Gem_Example', gemOwner, exampleGemId],
   });
   const gemExample: Contract = await ethers.getContract('Gem_Example');
 
   await deployments.deploy(`Gem_NotInOrder`, {
     contract: 'Gem',
-    from: accounts.gemOwner,
+    from: gemOwner,
     log: true,
     args: [
       'Gem_NotInOrder',
       'Gem_NotInOrder',
-      accounts.gemOwner,
+      gemOwner,
       notInOrderGemId,
     ],
   });
@@ -42,12 +44,12 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
 
   await deployments.deploy(`Catalyst_Example`, {
     contract: 'PrimaryCatalyst',
-    from: accounts.catalystOwner,
+    from: catalystOwner,
     log: true,
     args: [
       'Catalyst_Example',
       'Catalyst_Example',
-      accounts.catalystOwner,
+      catalystOwner,
       5,
       exampleCatalystId,
     ],
@@ -57,31 +59,31 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   );
 
   await commonCatalyst
-    .connect(ethers.provider.getSigner(accounts.catalystOwner))
-    .mint(accounts.catalystOwner, BigNumber.from('8'));
+    .connect(ethers.provider.getSigner(catalystOwner))
+    .mint(catalystOwner, BigNumber.from('8'));
   await commonCatalyst
-    .connect(ethers.provider.getSigner(accounts.catalystOwner))
+    .connect(ethers.provider.getSigner(catalystOwner))
     .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await rareCatalyst
-    .connect(ethers.provider.getSigner(accounts.catalystOwner))
-    .mint(accounts.catalystOwner, BigNumber.from('8'));
+    .connect(ethers.provider.getSigner(catalystOwner))
+    .mint(catalystOwner, BigNumber.from('8'));
   await rareCatalyst
-    .connect(ethers.provider.getSigner(accounts.catalystOwner))
+    .connect(ethers.provider.getSigner(catalystOwner))
     .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await powerGem
-    .connect(ethers.provider.getSigner(accounts.gemOwner))
-    .mint(accounts.gemOwner, BigNumber.from('100'));
+    .connect(ethers.provider.getSigner(gemOwner))
+    .mint(gemOwner, BigNumber.from('100'));
   await powerGem
-    .connect(ethers.provider.getSigner(accounts.gemOwner))
+    .connect(ethers.provider.getSigner(gemOwner))
     .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await defenseGem
-    .connect(ethers.provider.getSigner(accounts.gemOwner))
-    .mint(accounts.gemOwner, BigNumber.from('50'));
+    .connect(ethers.provider.getSigner(gemOwner))
+    .mint(gemOwner, BigNumber.from('50'));
   await defenseGem
-    .connect(ethers.provider.getSigner(accounts.gemOwner))
+    .connect(ethers.provider.getSigner(gemOwner))
     .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   return {
@@ -96,5 +98,7 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     commonCatalyst,
     rareCatalyst,
     catalystExample,
+    catalystOwner,
+    gemOwner
   };
 });

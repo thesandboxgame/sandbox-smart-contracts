@@ -1,18 +1,18 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { DeployFunction } from 'hardhat-deploy/types';
 import gems from '../data/gems';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
-  const {deploy} = deployments;
+  const { deployments, getNamedAccounts } = hre;
+  const { deploy } = deployments;
 
-  const {gemOwner} = await getNamedAccounts();
+  const { gemAdmin, deployer } = await getNamedAccounts();
   for (const gem of gems) {
     await deploy(`Gem_${gem.name}`, {
       contract: 'Gem',
-      from: gemOwner,
+      from: deployer,
       log: true,
-      args: [gem.name, gem.name, gemOwner, gem.gemId],
+      args: [gem.name, gem.name, gemAdmin, gem.gemId],
     });
   }
 };

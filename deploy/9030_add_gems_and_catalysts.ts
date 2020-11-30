@@ -1,12 +1,12 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { DeployFunction } from 'hardhat-deploy/types';
 import gems from '../data/gems';
 import catalysts from '../data/catalysts';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
-  const {execute, read} = deployments;
-  const {gemsCatalystsRegistryOwner} = await getNamedAccounts();
+  const { deployments, getNamedAccounts } = hre;
+  const { execute, read } = deployments;
+  const { gemsCatalystsRegistryAdmin } = await getNamedAccounts();
 
   const catalystsToAdd = [];
   const gemsToAdd = [];
@@ -18,7 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       catalyst.catalystId
     );
     if (!isCatalystExists) {
-      const {address} = await deployments.get(`Catalyst_${catalyst.name}`);
+      const { address } = await deployments.get(`Catalyst_${catalyst.name}`);
       catalystsToAdd.push(address);
     }
   }
@@ -30,14 +30,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       gem.gemId
     );
     if (!isGemExists) {
-      const {address} = await deployments.get(`Gem_${gem.name}`);
+      const { address } = await deployments.get(`Gem_${gem.name}`);
       gemsToAdd.push(address);
     }
   }
 
   await execute(
     'GemsCatalystsRegistry',
-    {from: gemsCatalystsRegistryOwner, log: true},
+    { from: gemsCatalystsRegistryAdmin, log: true },
     'addGemsAndCatalysts',
     gemsToAdd,
     catalystsToAdd
