@@ -1084,10 +1084,12 @@ describe('GameToken', function () {
         expect(contractBalanceBefore).to.be.equal(7);
         expect(contractBalanceBefore2).to.be.equal(11);
 
-        await GameOwner.Game.destroyGame(
+        await GameOwner.Game.destroyAndRecover(
           GameOwner.address,
           GameOwner.address,
-          gameId
+          gameId,
+          [assetId, assetId2],
+          [quantity, quantity2]
         );
 
         const ownerBalanceAfter = await assetContract[
