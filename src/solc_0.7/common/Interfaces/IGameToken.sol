@@ -21,9 +21,7 @@ interface IGameToken {
     function destroyGame(
         address from,
         address to,
-        uint256 gameId,
-        uint256[] calldata assetIds,
-        uint256[] calldata values
+        uint256 gameId
     ) external;
 
     function recoverAssets(

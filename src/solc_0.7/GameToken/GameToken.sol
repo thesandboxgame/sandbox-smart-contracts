@@ -185,22 +185,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
         return gameId;
     }
 
-    /// @notice Function to burn a GAME token
-    /// @param from The address of the one destroying the game
-    /// @param to The address to send all game assets to
-    /// @param gameId The id of the game to destroy
-
-    // @refactor ! https://github.com/thesandboxgame/sandbox-private-contracts/pull/152#discussion_r529665097
-    function destroyGame(
-        address from,
-        address to,
-        uint256 gameId,
-        uint256[] calldata assetIds,
-        uint256[] calldata values
-    ) external override gameManagerOnly() {
-        _destroyGame(from, to, gameId, assetIds, values);
-    }
-
     /// @notice Function to get game editor status
     /// @param gameId The id of the GAME token owned by owner
     /// @param editor The address of the editor to set
@@ -315,6 +299,18 @@ contract GameToken is ERC721BaseToken, IGameToken {
         return URI;
     }
 
+    /// @notice Function to burn a GAME token
+    /// @param from The address of the one destroying the game
+    /// @param to The address to send all GAME assets to
+    /// @param gameId The id of the GAME to destroy
+    function destroyGame(
+        address from,
+        address to,
+        uint256 gameId
+    ) external override gameManagerOnly() {
+        _destroyGame(from, to, gameId);
+    }
+
     /// @notice Function to transfer assets from a burnt GAME
     /// @param from Previous owner of the burnt game
     /// @param to Address that will receive the assets
@@ -328,38 +324,30 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256[] memory assetIds,
         uint256[] memory values
     ) public override {
-        _recoverAssets(from, to, gameId, assetIds, values);
+        _check_withdrawal_authorized(from, gameId);
+        _recoverAssets(to, gameId, assetIds, values);
     }
 
     function _destroyGame(
         address from,
         address to,
-        uint256 gameId,
-        uint256[] calldata assetIds,
-        uint256[] calldata values
+        uint256 gameId
     ) internal notToZero(to) {
         address owner = _ownerOf(gameId);
         require(from == owner, "DESTROY_ACCESS_DENIED");
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
-        // @review don't try to do this here (block gas limit)
-        // extract to transferAllFromDestroyedGame()
-        // if (assetIds.length != 0) {
-        //     removeAssets(gameId, assetIds, values, to, "");
-        // }
         delete _metaData[gameId];
         _creatorship[creatorOf(gameId)] = address(0);
         _burn(from, owner, gameId);
     }
 
     function _recoverAssets(
-        address from,
         address to,
         uint256 gameId,
         uint256[] memory assetIds,
         uint256[] memory values
     ) internal notToZero(to) {
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
-        _check_withdrawal_authorized(from, gameId);
         uint256 length = assetIds.length;
         require(length > 0, "WITHDRAWAL_COMPLETE");
         uint256[] memory amounts = new uint256[](length);
