@@ -51,7 +51,7 @@ export const setupTestGiveaway: (
       nftGiveawayAdmin,
       emptyBytes32,
       assetsHolder ? others[5] : ASSETS_HOLDER,
-      2597755600,
+      1615194000, // Sunday, 08-Mar-21 09:00:00 UTC
     ],
   });
 
@@ -74,7 +74,7 @@ export const setupTestGiveaway: (
     const hash = ipfsHashString;
     const supply = value;
     const rarity = 1;
-    const owner = assetsHolder ? assetContract.address : testContract.address;
+    const owner = assetsHolder ? others[5] : testContract.address;
     const data = '0x';
 
     const receipt = await waitFor(
@@ -95,7 +95,7 @@ export const setupTestGiveaway: (
     );
 
     const balanceAssetId = await assetContract['balanceOf(address,uint256)'](
-      assetsHolder ? assetContract.address : testContract.address,
+      assetsHolder ? others[5] : testContract.address,
       transferEvent.args[3]
     );
     expect(balanceAssetId).to.equal(supply);

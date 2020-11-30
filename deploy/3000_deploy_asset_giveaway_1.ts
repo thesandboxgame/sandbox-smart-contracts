@@ -25,7 +25,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       deployer,
       merkleRootHash,
       ASSETS_HOLDER,
-      2597755600,
+      1615194000, // Sunday, 08-Mar-21 09:00:00 UTC
     ], // TODO: expiryTime
   });
 };
