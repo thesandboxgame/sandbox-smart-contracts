@@ -321,7 +321,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
     /// @param gameId Id of the burnt GAME token
     /// @param assetIds The assets to recover from the burnt GAME
     /// @param values The amount of each asset to recover
-    function withdrawFromDestroyedGame(
+    function recoverAssets(
         address from,
         address to,
         uint256 gameId,
@@ -343,9 +343,9 @@ contract GameToken is ERC721BaseToken, IGameToken {
         require(to != address(this), "DESTINATION_GAME_CONTRACT");
         // @review don't try to do this here (block gas limit)
         // extract to transferAllFromDestroyedGame()
-        if (assetIds.length != 0) {
-            removeAssets(gameId, assetIds, values, to, "");
-        }
+        // if (assetIds.length != 0) {
+        //     removeAssets(gameId, assetIds, values, to, "");
+        // }
         delete _metaData[gameId];
         _creatorship[creatorOf(gameId)] = address(0);
         _burn(from, owner, gameId);
