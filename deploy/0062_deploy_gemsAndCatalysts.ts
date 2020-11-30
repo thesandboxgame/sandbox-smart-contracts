@@ -5,19 +5,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
-  const {deployer} = await getNamedAccounts();
-
-  const sandContract = await deployments.get('Sand');
-
-  await deploy('Land', {
+  const {deployer, gemsAndCatalystsAdmin} = await getNamedAccounts();
+  await deploy(`GemsAndCatalysts`, {
     from: deployer,
-    args: [
-      sandContract.address,
-      deployer, // set_land_admin set it later to correct address
-    ],
     log: true,
+    args: [gemsAndCatalystsAdmin],
   });
 };
 export default func;
-func.tags = ['Land', 'Land_deploy'];
-func.dependencies = ['Sand_deploy'];
+func.tags = ['GemsAndCatalysts', 'GemsAndCatalysts_deploy'];

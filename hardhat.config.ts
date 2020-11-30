@@ -139,6 +139,9 @@ const config: HardhatUserConfig = {
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
     }, // can add super operators and change admin
 
+    gemsAndCatalystsAdmin: 'sandAdmin',
+    assetAttributesRegistryAdmin: 'sandAdmin',
+
     landSaleAdmin: 'sandAdmin', // can enable currencies
     estateAdmin: 'sandAdmin', // can add super operators and change admin
     P2PERC721SaleAdmin: 'sandAdmin', // can set fees
