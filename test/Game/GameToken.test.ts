@@ -1039,33 +1039,25 @@ describe('GameToken', function () {
         GameOwner.Game.destroyGame(
           GameOwner.address,
           ethers.constants.AddressZero,
-          gameId,
-          [],
-          []
+          gameId
         )
       ).to.be.revertedWith('DESTINATION_ZERO_ADDRESS');
     });
 
     it('fails if "to" == Game Token contract', async function () {
       await expect(
-        gameToken.destroyGame(
-          GameOwner.address,
-          gameToken.address,
-          gameId,
-          [],
-          []
-        )
+        gameToken.destroyGame(GameOwner.address, gameToken.address, gameId)
       ).to.be.revertedWith('DESTINATION_GAME_CONTRACT');
     });
     it('fails if "from" != game owner', async function () {
       await expect(
-        GameOwner.Game.destroyGame(others[2], others[1], gameId, [], [])
+        GameOwner.Game.destroyGame(others[2], others[1], gameId)
       ).to.be.revertedWith('DESTROY_ACCESS_DENIED');
     });
     it('fails if called by non-Manager when gameManager is set', async function () {
       await gameTokenAsAdmin.setGameManager(others[9]);
       await expect(
-        gameToken.destroyGame(others[0], others[0], gameId, [], [])
+        gameToken.destroyGame(others[0], others[0], gameId)
       ).to.be.revertedWith('INVALID_GAME_MANAGER');
     });
 
@@ -1095,9 +1087,7 @@ describe('GameToken', function () {
         await GameOwner.Game.destroyGame(
           GameOwner.address,
           GameOwner.address,
-          gameId,
-          [assetId, assetId2],
-          [7, 11]
+          gameId
         );
 
         const ownerBalanceAfter = await assetContract[
