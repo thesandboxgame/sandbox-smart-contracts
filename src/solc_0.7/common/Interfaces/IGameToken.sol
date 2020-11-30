@@ -56,6 +56,8 @@ interface IGameToken {
         string calldata uri
     ) external;
 
+    function getAssets(uint256 gameId, uint256[] calldata assetIds) external view returns (uint256[] calldata);
+
     function setGameEditor(
         uint256 gameId,
         address editor,
