@@ -1153,9 +1153,104 @@ describe('GameToken', function () {
         gameId = await getNewGame();
       });
 
-      it('can burn without transfer of assets', async function () {});
+      it('can burn without transfer of assets', async function () {
+        const assetContract = await ethers.getContract('Asset');
+        const balancesBefore = await getBalances(
+          assetContract,
+          [GameOwner.address, gameToken.address],
+          [assetId, assetId2]
+        );
 
-      it('can recover remaining assets from burnt GAME in batches', async function () {});
+        const ownerBalanceBefore = balancesBefore[0];
+        const ownerBalanceBefore2 = balancesBefore[1];
+        const contractBalanceBefore = balancesBefore[2];
+        const contractBalanceBefore2 = balancesBefore[3];
+
+        expect(ownerBalanceBefore).to.be.equal(0);
+        expect(ownerBalanceBefore2).to.be.equal(0);
+        expect(contractBalanceBefore).to.be.equal(7);
+        expect(contractBalanceBefore2).to.be.equal(11);
+
+        await GameOwner.Game.destroyGame(
+          GameOwner.address,
+          GameOwner.address,
+          gameId
+        );
+
+        await expect(gameToken.ownerOf(gameId)).to.be.revertedWith(
+          'token does not exist'
+        );
+
+        const balancesAfter = await getBalances(
+          assetContract,
+          [GameOwner.address, gameToken.address],
+          [assetId, assetId2]
+        );
+
+        const ownerBalanceAfter = balancesAfter[0];
+        const ownerBalanceAfter2 = balancesAfter[1];
+        const contractBalanceAfter = balancesAfter[2];
+        const contractBalanceAfter2 = balancesAfter[3];
+
+        expect(ownerBalanceAfter).to.be.equal(0);
+        expect(ownerBalanceAfter2).to.be.equal(0);
+        expect(contractBalanceAfter).to.be.equal(7);
+        expect(contractBalanceAfter2).to.be.equal(11);
+      });
+
+      it('can recover remaining assets from burnt GAME in batches', async function () {
+        const assetContract = await ethers.getContract('Asset');
+        await expect(gameToken.ownerOf(gameId)).to.be.revertedWith(
+          'token does not exist'
+        );
+        // @review make sure we check asset amounts for given id for a given game, not just the overall balance of the contract for that given asset !!!
+        await GameOwner.Game.recoverAssets(
+          GameOwner.address,
+          GameOwner.address,
+          gameId,
+          [assetId],
+          [7]
+        );
+
+        const balancesAfter = await getBalances(
+          assetContract,
+          [GameOwner.address, gameToken.address],
+          [assetId, assetId2]
+        );
+
+        const ownerBalanceAfter = balancesAfter[0];
+        const ownerBalanceAfter2 = balancesAfter[1];
+        const contractBalanceAfter = balancesAfter[2];
+        const contractBalanceAfter2 = balancesAfter[3];
+
+        expect(ownerBalanceAfter).to.be.equal(7);
+        expect(ownerBalanceAfter2).to.be.equal(0);
+        expect(contractBalanceAfter).to.be.equal(0);
+        expect(contractBalanceAfter2).to.be.equal(11);
+
+        await GameOwner.Game.recoverAssets(
+          GameOwner.address,
+          GameOwner.address,
+          gameId,
+          [assetId2],
+          [11]
+        );
+        const balancesFinal = await getBalances(
+          assetContract,
+          [GameOwner.address, gameToken.address],
+          [assetId, assetId2]
+        );
+
+        const ownerBalanceFinal = balancesFinal[0];
+        const ownerBalanceFinal2 = balancesFinal[1];
+        const contractBalanceFinal = balancesFinal[2];
+        const contractBalanceFinal2 = balancesFinal[3];
+
+        expect(ownerBalanceFinal).to.be.equal(7);
+        expect(ownerBalanceFinal2).to.be.equal(11);
+        expect(contractBalanceFinal).to.be.equal(0);
+        expect(contractBalanceFinal2).to.be.equal(0);
+      });
     });
   });
 
