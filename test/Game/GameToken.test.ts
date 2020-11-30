@@ -974,7 +974,7 @@ describe('GameToken', function () {
     const quantity = 7;
     const quantity2 = 11;
 
-    before(async function () {
+    async function getNewGame() {
       ({gameToken, gameTokenAsAdmin, GameOwner} = await setupTest());
       others = await getUnnamedAccounts();
 
@@ -1031,7 +1031,11 @@ describe('GameToken', function () {
         'Transfer'
       );
 
-      gameId = transferEvent.args[2];
+      return transferEvent.args[2];
+    }
+
+    before(async function () {
+      gameId = await getNewGame();
     });
 
     it('fails if "to" == address(0)', async function () {
@@ -1061,8 +1065,8 @@ describe('GameToken', function () {
       ).to.be.revertedWith('INVALID_GAME_MANAGER');
     });
 
-    describe('GameToken: After Burning...', function () {
-      before(async function () {
+    describe('GameToken: burnAndRecover', function () {
+      it('can burn and recover assets in 1 tx', async function () {
         const assetContract = await ethers.getContract('Asset');
         await gameTokenAsAdmin.setGameManager(ethers.constants.AddressZero);
 
@@ -1121,7 +1125,13 @@ describe('GameToken', function () {
           'token does not exist'
         );
       });
+
+      it('can burn without transfer of assets', async function () {});
+
+      it('can recover remaining assets from burnt GAME in batches', async function () {});
     });
+
+    describe('GameToken: Burn... then Recover', function () {});
   });
 
   describe('GameToken: MetaTransactions', function () {
