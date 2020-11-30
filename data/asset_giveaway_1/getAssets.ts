@@ -2,8 +2,6 @@ import fs from 'fs';
 import {BigNumber} from 'ethers';
 import MerkleTree from '../../lib/merkleTree';
 import helpers from '../../lib/merkleTreeHelper';
-import * as assetData from './assets.json';
-import * as testAssetData from './testAssets.json';
 
 const {createDataArrayAssets, saltAssets} = helpers;
 
@@ -56,23 +54,22 @@ function generateAssetsForMerkleTree(assetData: Assets) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-function getAssets(isDeploymentChainId: any, chainId: any): any {
+function getAssets(
+  isDeploymentChainId: any,
+  chainId: any,
+  assetData: any
+): any {
   if (typeof chainId !== 'string') {
     throw new Error('chainId not a string');
   }
-
-  let assets;
 
   let secretPath = './.asset_giveaway_1_secret';
   if (BigNumber.from(chainId).toString() === '1') {
     console.log('MAINNET secret');
     secretPath = './.asset_giveaway_1_secret.mainnet';
   }
-  if (BigNumber.from(chainId).toString() === '31337') {
-    ({assets} = generateAssetsForMerkleTree(testAssetData));
-  } else {
-    ({assets} = generateAssetsForMerkleTree(assetData));
-  }
+
+  const {assets} = generateAssetsForMerkleTree(assetData);
 
   let expose = false;
   let secret;

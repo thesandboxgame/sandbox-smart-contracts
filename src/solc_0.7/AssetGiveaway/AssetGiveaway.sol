@@ -6,8 +6,9 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "./ClaimERC1155.sol";
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
+import "../common/BaseWithStorage/WithAdmin.sol";
 
-contract AssetGiveaway is WithMetaTransaction, ClaimERC1155 {
+contract AssetGiveaway is WithAdmin, ClaimERC1155, WithMetaTransaction {
     using SafeMath for uint256;
 
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
@@ -19,11 +20,19 @@ contract AssetGiveaway is WithMetaTransaction, ClaimERC1155 {
 
     constructor(
         address asset,
+        address admin,
         bytes32 merkleRoot,
         address assetsHolder,
         uint256 expiryTime
-    ) ClaimERC1155(IERC1155(asset), merkleRoot, assetsHolder) {
+    ) ClaimERC1155(IERC1155(asset), assetsHolder) {
+        _admin = admin;
+        _merkleRoot = merkleRoot;
         _expiryTime = expiryTime;
+    }
+
+    function setMerkleRoot(bytes32 merkleRoot) external onlyAdmin {
+        require(_merkleRoot == 0, "MERKLE_ROOT_ALREADY_SET");
+        _merkleRoot = merkleRoot;
     }
 
     function claimAssets(

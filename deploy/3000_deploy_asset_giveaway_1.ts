@@ -1,6 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import getAssets from '../data/asset_giveaway_1/getAssets';
+import * as assetData from '../data/asset_giveaway_1/assets.json';
 
 const ASSETS_HOLDER = '0x0000000000000000000000000000000000000000';
 
@@ -10,7 +11,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const chainId = await getChainId();
   const {deployer} = await getNamedAccounts();
 
-  const {assets, merkleRootHash} = getAssets(network.live, chainId);
+  const {assets, merkleRootHash} = getAssets(network.live, chainId, assetData);
 
   const assetContract = await deployments.get('Asset');
 
@@ -19,7 +20,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     linkedData: assets,
     log: true,
-    args: [assetContract.address, merkleRootHash, ASSETS_HOLDER, 2597755600], // TODO: expiryTime
+    args: [
+      assetContract.address,
+      deployer,
+      merkleRootHash,
+      ASSETS_HOLDER,
+      2597755600,
+    ], // TODO: expiryTime
   });
 };
 export default func;

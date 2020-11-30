@@ -7,19 +7,14 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 contract ClaimERC1155 {
     using SafeMath for uint256;
 
-    bytes32 internal immutable _merkleRoot;
+    bytes32 internal _merkleRoot;
 
     IERC1155 immutable _asset;
     address immutable _assetsHolder;
     event ClaimedAssets(address to, uint256[] assetIds, uint256[] assetValues);
 
-    constructor(
-        IERC1155 asset,
-        bytes32 merkleRoot,
-        address assetsHolder
-    ) {
+    constructor(IERC1155 asset, address assetsHolder) {
         _asset = asset;
-        _merkleRoot = merkleRoot;
         _assetsHolder = assetsHolder;
     }
 
