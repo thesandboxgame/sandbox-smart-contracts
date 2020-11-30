@@ -66,36 +66,15 @@ contract GameToken is ERC721BaseToken, IGameToken {
 
     ///////////////////////////////  Functions //////////////////////////////
 
-    /// @notice Function to remove assets from a GAME
-    /// @param gameId The GAME to remove assets from
-    /// @param assetIds An array of asset Ids to remove
-    /// @param values An array of the number of each asset id to remove
-    /// @param to The address to send removed assets to
-    /// @param uri The URI string to update the GAME token's URI
-
-    function removeAssets(
-        uint256 gameId,
-        uint256[] memory assetIds,
-        uint256[] memory values,
-        address to,
-        string memory uri
-    ) public override gameManagerOnly() ownerOrEditorOnly(gameId) notToZero(to) {
-        require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
-
-        for (uint256 i = 0; i < assetIds.length; i++) {
-            uint256 currentValue = _gameAssets[gameId][assetIds[i]];
-            require(currentValue != 0 && values[i] != 0 && values[i] <= currentValue, "INVALID_ASSET_REMOVAL");
-            _gameAssets[gameId][assetIds[i]] = currentValue.sub(values[i]);
+    /// @notice Function to get the amount of each assetId in a GAME
+    function getAssets(uint256 gameId, uint256[] calldata assetIds) external view override returns (uint256[] memory) {
+        uint256 length = assetIds.length;
+        uint256[] memory assets;
+        assets = new uint256[](length);
+        for (uint256 i = 0; i < length; i++) {
+            assets[i] = _gameAssets[gameId][assetIds[i]];
         }
-
-        if (assetIds.length == 1) {
-            _asset.safeTransferFrom(address(this), to, assetIds[0], values[0], "");
-        } else {
-            _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
-        }
-
-        _setTokenURI(gameId, uri);
-        emit AssetsRemoved(gameId, assetIds, values, to);
+        return assets;
     }
 
     /// @notice Function to allow token owner to set game editors
@@ -192,19 +171,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
         return _gameEditors[gameId][editor];
     }
 
-    /// @notice Get the creator of the token type `id`.
-    /// @param id the id of the token to get the creator of.
-    /// @return the creator of the token type `id`.
-    function creatorOf(uint256 id) public view override returns (address) {
-        require(id != uint256(0), "GAME_NEVER_MINTED");
-        address originalCreator = address(id / CREATOR_OFFSET_MULTIPLIER);
-        address newCreator = _creatorship[originalCreator];
-        if (newCreator != address(0)) {
-            return newCreator;
-        }
-        return originalCreator;
-    }
-
     /// @notice return the current gameManager
     /// @return address of gameManager
     function getGameManager() external view override returns (address) {
@@ -251,51 +217,12 @@ contract GameToken is ERC721BaseToken, IGameToken {
         return "GAME";
     }
 
-    /// @notice Function to add assets to an existing GAME
-    /// @param from The address of the one creating the game (may be different from msg.sender if metaTx)
-    /// @param gameId The id of the GAME to add asset to
-    /// @param assetIds The id of the asset to add to GAME
-    /// @param values The amount of each asset to add to GAME
-    /// @param uri The new uri to set
-    function addAssets(
-        address from,
-        uint256 gameId,
-        uint256[] memory assetIds,
-        uint256[] memory values,
-        string memory uri
-    ) public override gameManagerOnly() ownerOrEditorOnly(gameId) {
-        require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
-        for (uint256 i = 0; i < assetIds.length; i++) {
-            _gameAssets[gameId][assetIds[i]] = values[i];
-        }
-        if (assetIds.length == 1) {
-            _asset.safeTransferFrom(from, address(this), assetIds[0], values[0], "");
-        } else {
-            _asset.safeBatchTransferFrom(from, address(this), assetIds, values, "");
-        }
-        _setTokenURI(gameId, uri);
-        emit AssetsAdded(gameId, assetIds, values);
-    }
-
     /// @notice Set the URI of a specific game token
     /// @param gameId The id of the game token
     /// @param URI The URI string for the token's metadata
     function setTokenURI(uint256 gameId, string calldata URI) external override {
         require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "URI_ACCESS_DENIED");
         _setTokenURI(gameId, URI);
-    }
-
-    function _setTokenURI(uint256 gameId, string memory URI) internal {
-        _metaData[gameId] = URI;
-    }
-
-    /// @notice Return the URI of a specific token
-    /// @param gameId The id of the token
-    /// @return uri The URI of the token
-    function tokenURI(uint256 gameId) public view override returns (string memory uri) {
-        require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
-        string memory URI = _metaData[gameId];
-        return URI;
     }
 
     /// @notice Function to burn a GAME token and recover assets
@@ -327,6 +254,86 @@ contract GameToken is ERC721BaseToken, IGameToken {
         _destroyGame(from, to, gameId);
     }
 
+    /// @notice Function to add assets to an existing GAME
+    /// @param from The address of the one creating the game (may be different from msg.sender if metaTx)
+    /// @param gameId The id of the GAME to add asset to
+    /// @param assetIds The id of the asset to add to GAME
+    /// @param values The amount of each asset to add to GAME
+    /// @param uri The new uri to set
+    function addAssets(
+        address from,
+        uint256 gameId,
+        uint256[] memory assetIds,
+        uint256[] memory values,
+        string memory uri
+    ) public override gameManagerOnly() ownerOrEditorOnly(gameId) {
+        require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
+        for (uint256 i = 0; i < assetIds.length; i++) {
+            _gameAssets[gameId][assetIds[i]] = values[i];
+        }
+        if (assetIds.length == 1) {
+            _asset.safeTransferFrom(from, address(this), assetIds[0], values[0], "");
+        } else {
+            _asset.safeBatchTransferFrom(from, address(this), assetIds, values, "");
+        }
+        _setTokenURI(gameId, uri);
+        emit AssetsAdded(gameId, assetIds, values);
+    }
+
+    /// @notice Function to remove assets from a GAME
+    /// @param gameId The GAME to remove assets from
+    /// @param assetIds An array of asset Ids to remove
+    /// @param values An array of the number of each asset id to remove
+    /// @param to The address to send removed assets to
+    /// @param uri The URI string to update the GAME token's URI
+
+    function removeAssets(
+        uint256 gameId,
+        uint256[] memory assetIds,
+        uint256[] memory values,
+        address to,
+        string memory uri
+    ) public override gameManagerOnly() ownerOrEditorOnly(gameId) notToZero(to) {
+        require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
+
+        for (uint256 i = 0; i < assetIds.length; i++) {
+            uint256 currentValue = _gameAssets[gameId][assetIds[i]];
+            require(currentValue != 0 && values[i] != 0 && values[i] <= currentValue, "INVALID_ASSET_REMOVAL");
+            _gameAssets[gameId][assetIds[i]] = currentValue.sub(values[i]);
+        }
+
+        if (assetIds.length == 1) {
+            _asset.safeTransferFrom(address(this), to, assetIds[0], values[0], "");
+        } else {
+            _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
+        }
+
+        _setTokenURI(gameId, uri);
+        emit AssetsRemoved(gameId, assetIds, values, to);
+    }
+
+    /// @notice Get the creator of the token type `id`.
+    /// @param id the id of the token to get the creator of.
+    /// @return the creator of the token type `id`.
+    function creatorOf(uint256 id) public view override returns (address) {
+        require(id != uint256(0), "GAME_NEVER_MINTED");
+        address originalCreator = address(id / CREATOR_OFFSET_MULTIPLIER);
+        address newCreator = _creatorship[originalCreator];
+        if (newCreator != address(0)) {
+            return newCreator;
+        }
+        return originalCreator;
+    }
+
+    /// @notice Return the URI of a specific token
+    /// @param gameId The id of the token
+    /// @return uri The URI of the token
+    function tokenURI(uint256 gameId) public view override returns (string memory uri) {
+        require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
+        string memory URI = _metaData[gameId];
+        return URI;
+    }
+
     /// @notice Function to transfer assets from a burnt GAME
     /// @param from Previous owner of the burnt game
     /// @param to Address that will receive the assets
@@ -341,6 +348,10 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256[] memory values
     ) public override {
         _recoverAssets(from, to, gameId, assetIds, values);
+    }
+
+    function _setTokenURI(uint256 gameId, string memory URI) internal {
+        _metaData[gameId] = URI;
     }
 
     function _destroyGame(
