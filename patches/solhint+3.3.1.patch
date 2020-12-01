@@ -1,0 +1,13 @@
+diff --git a/node_modules/solhint/solhint.js b/node_modules/solhint/solhint.js
+index eff8b64..05dd548 100644
+--- a/node_modules/solhint/solhint.js
++++ b/node_modules/solhint/solhint.js
+@@ -94,7 +94,7 @@ function execMainAction() {
+   }
+ 
+   if (printReports(reports, formatterFn)) {
+-    if (program.maxWarnings && !reports[0].errorCount && warningsNumberExceeded) {
++    if (program.maxWarnings && !(reports[0] && reports[0].errorCount) && warningsNumberExceeded) {
+       console.log(
+         'Solhint found more warnings than the maximum specified (maximum: %s)',
+         program.maxWarnings
