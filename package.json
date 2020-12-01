@@ -39,8 +39,6 @@
     "hardhat-deploy-ethers": "^0.3.0-beta.5",
     "hardhat-gas-reporter": "^1.0.0",
     "mocha": "^8.1.1",
-    "patch-package": "^6.2.2",
-    "postinstall-postinstall": "^2.1.0",
     "prettier": "^2.0.5",
     "prettier-plugin-solidity": "^1.0.0-alpha.57",
     "solhint": "^3.3.1",
@@ -50,7 +48,7 @@
     "typescript": "^4.0.5"
   },
   "scripts": {
-    "postinstall": "node ./.setup.js && patch-package",
+    "postinstall": "node ./.setup.js",
     "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 \"src/**/*.sol\"",
     "lint:fix": "eslint --fix \"**/*.{js,ts}\" && solhint --fix src/**/*.sol",
     "format": "prettier --check \"**/*.{ts,js,sol}\"",
