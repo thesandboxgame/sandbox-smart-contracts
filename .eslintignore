@@ -8,5 +8,5 @@ package.json
 src/
 documentation/
 sandbox-subgraph/
-old_src/
 src/solc_0.6
+src/solc_0.5
