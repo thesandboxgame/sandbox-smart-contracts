@@ -51,7 +51,7 @@
   },
   "scripts": {
     "postinstall": "node ./.setup.js && patch-package",
-    "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 src/**/*.sol",
+    "lint": "eslint --max-warnings 0 \"**/*.{js,ts}\" && solhint --max-warnings 0 \"src/**/*.sol\"",
     "lint:fix": "eslint --fix \"**/*.{js,ts}\" && solhint --fix src/**/*.sol",
     "format": "prettier --check \"**/*.{ts,js,sol}\"",
     "format:fix": "prettier --write \"**/*.{ts,js,sol}\"",
