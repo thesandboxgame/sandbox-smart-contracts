@@ -7,8 +7,6 @@ import "../common/Interfaces/AssetToken.sol";
 import "../common/Interfaces/IGameToken.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-import "hardhat/console.sol";
-
 contract GameToken is ERC721BaseToken, IGameToken {
     ///////////////////////////////  Libs //////////////////////////////
 
@@ -81,7 +79,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
     /// @param gameId The id of the GAME token owned by owner
     /// @param editor The address of the editor to set
     /// @param isEditor Add or remove the ability to edit
-    // @review maybe allow editors access ?
     function setGameEditor(
         uint256 gameId,
         address editor,
@@ -202,14 +199,12 @@ contract GameToken is ERC721BaseToken, IGameToken {
 
     /// @notice Return the name of the token contract
     /// @return The name of the token contract
-    // @review What should the actual name be?
     function name() external pure override returns (string memory) {
         return "The Sandbox: GAME token";
     }
 
     /// @notice Function to get the symbol of the token contract
     /// @return The symbol of the token contract
-    // @review What should the actual symbol be?
     function symbol() external pure override returns (string memory) {
         return "GAME";
     }

@@ -307,6 +307,20 @@ describe('GameToken', function () {
       let assets: BigNumber[];
       let values: BigNumber[];
 
+      it('fails to create if "to" address is the gameToken contract', async function () {
+        await expect(
+          GameManager.Game.createGame(
+            GameOwner.address,
+            gameToken.address,
+            [],
+            [],
+            [],
+            '',
+            42
+          )
+        ).to.be.revertedWith('DESTINATION_GAME_CONTRACT');
+      });
+
       it('can mint Games with single Asset', async function () {
         const assetContract = await ethers.getContract('Asset');
 
@@ -394,7 +408,6 @@ describe('GameToken', function () {
           'balanceOf(address,uint256)'
         ](gameToken.address, assetId2);
         const randomId = await getRandom();
-        // @refactor to use getNewGame()
         const receipt = await waitFor(
           GameManager.Game.createGame(
             GameOwner.address,
@@ -457,7 +470,6 @@ describe('GameToken', function () {
 
         const assetId = assetTransferEvent.args[3];
         const randomId = await getRandom();
-        // @refactor to use getNewGame()
         await expect(
           waitFor(
             GameManager.Game.createGame(
@@ -513,7 +525,6 @@ describe('GameToken', function () {
 
         assetId = assetTransferEvent.args[2];
         const randomId = await getRandom();
-        // @refactor to use getNewGame()
         const receipt = await waitFor(
           GameManager.Game.createGame(
             GameOwner.address,
@@ -845,7 +856,6 @@ describe('GameToken', function () {
       );
       assetId = assetTransferEvent.args[2];
       const randomId = await getRandom();
-      // @refactor to use getNewGame()
       const receipt = await waitFor(
         GameOwner.Game.createGame(
           GameOwner.address,
@@ -917,7 +927,6 @@ describe('GameToken', function () {
     before(async function () {
       ({gameToken, GameOwner, GameEditor1} = await setupTest());
       const randomId = await getRandom();
-      // @refactor to use getNewGame()
       const receipt = await waitFor(
         GameOwner.Game.createGame(
           GameOwner.address,
@@ -1020,7 +1029,7 @@ describe('GameToken', function () {
       ).to.be.revertedWith('DESTINATION_ZERO_ADDRESS');
     });
 
-    it('fails if "to" == Game Token contract', async function () {
+    it('fails to destroy if "to" == Game Token contract', async function () {
       await expect(
         GameManager.Game.destroyGame(
           GameOwner.address,
@@ -1169,6 +1178,18 @@ describe('GameToken', function () {
         expect(contractBalanceAfter2).to.be.equal(quantities[1]);
       });
 
+      it('fails to recover if "to" address is the gameToken contract', async function () {
+        await expect(
+          GameManager.Game.recoverAssets(
+            GameOwner.address,
+            gameToken.address,
+            gameId,
+            [assets[0]],
+            [quantities[0]]
+          )
+        ).to.be.revertedWith('DESTINATION_GAME_CONTRACT');
+      });
+
       it('can recover remaining assets from burnt GAME in batches', async function () {
         const assetContract = await ethers.getContract('Asset');
         await expect(gameToken.ownerOf(gameId)).to.be.revertedWith(
@@ -1266,7 +1287,6 @@ describe('GameToken', function () {
       const others = await getUnnamedAccounts();
       const signers = await ethers.getSigners();
 
-      // @review trying to use rinkeby address !!!
       const trustedForwarderFactory = await ethers.getContractFactory(
         'Forwarder',
         signers[0]
@@ -1274,7 +1294,6 @@ describe('GameToken', function () {
       const trustedForwarder: Contract = await trustedForwarderFactory.deploy();
       await trustedForwarder.deployed();
       const randomId = await getRandom();
-      // @refactor to use getNewGame()
       const receipt = await waitFor(
         GameOwner.Game.createGame(
           GameOwner.address,
@@ -1293,21 +1312,11 @@ describe('GameToken', function () {
       );
       const gameId = transferEvent.args[2];
 
-      // @review - needed ?
-      await waitFor(
-        GameOwner.Game.approveFor(
-          GameOwner.address,
-          trustedForwarder.address,
-          gameId
-        )
-      );
-
       const txObj = await GameOwner.Game.populateTransaction[
         'safeTransferFrom(address,address,uint256)'
       ](GameOwner.address, others[3], gameId);
 
       let data = txObj.data;
-      // @review
       data += GameOwner.address.replace('0x', '');
 
       const transfer = {
@@ -1401,7 +1410,6 @@ describe('GameToken', function () {
         ({gameToken, GameOwner, gameTokenAsAdmin} = await setupTest());
         others = await getUnnamedAccounts();
         const randomId = await getRandom();
-        // @refactor to use getNewGame()
         const receipt = await waitFor(
           GameOwner.Game.createGame(
             GameOwner.address,
