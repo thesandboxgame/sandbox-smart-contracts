@@ -16,17 +16,18 @@ const ipfsHashString =
 
 import {expectReceiptEventWithArgs, waitFor} from '../utils';
 
-type options = {
+type Options = {
   mint?: boolean;
   assetsHolder?: boolean;
 };
 
-export const setupTestGiveaway: (
-  options: options
-) => any = deployments.createFixture(async function (hre, options: any) {
+export const setupTestGiveaway = deployments.createFixture(async function (
+  hre,
+  options?: Options
+) {
   const {network, getChainId} = hre;
   const chainId = await getChainId();
-  const {mint, assetsHolder} = options;
+  const {mint, assetsHolder} = options || {};
   const {
     deployer,
     assetAdmin,
@@ -102,8 +103,7 @@ export const setupTestGiveaway: (
     return transferEvent.args[3].toString(); // asset ID
   }
 
-  // TODO: types
-  const dataWithIds: any = {...testAssetData};
+  const dataWithIds = {...testAssetData};
 
   async function mintAssetsWithNewIds() {
     return await Promise.all(
@@ -165,9 +165,7 @@ export const setupTestGiveaway: (
   };
 });
 
-export const setupGiveaway: (
-  options: options
-) => any = deployments.createFixture(async function () {
+export const setupGiveaway = deployments.createFixture(async function () {
   const {nftGiveawayAdmin} = await getNamedAccounts();
   const others = await getUnnamedAccounts();
   await deployments.fixture('NFT_Lottery_1');
