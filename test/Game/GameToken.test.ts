@@ -83,154 +83,147 @@ describe('GameToken', function () {
     expect(isSuperOperator).to.be.true;
   });
 
-  describe('GameToken: Minting GAMEs', function () {
-    describe('GameToken: Mint Without Assets', function () {
-      describe('GameToken: No Game Manager', function () {
-        let gameToken: Contract;
-        let GameOwner: User;
-        let gameId: BigNumber;
-        let GameEditor1: User;
-        let GameEditor2: User;
+  describe('GameToken: No Game Manager Set', function () {
+    let gameToken: Contract;
+    let GameOwner: User;
+    let gameId: BigNumber;
+    let GameEditor1: User;
+    let GameEditor2: User;
 
-        it('anyone can mint Games with no Assets', async function () {
-          const randomId = await getRandom();
-          ({
-            gameToken,
-            GameOwner,
-            GameEditor1,
-            GameEditor2,
-          } = await setupTest());
-          const receipt = await waitFor(
-            GameOwner.Game.createGame(
-              GameOwner.address,
-              GameOwner.address,
-              [],
-              [],
-              [],
-              '',
-              randomId
-            )
-          );
-          const transferEvent = await expectEventWithArgs(
-            gameToken,
-            receipt,
-            'Transfer'
-          );
-
-          gameId = transferEvent.args[2];
-          const eventGameOwner = transferEvent.args[1];
-          const contractGameOwner = await gameToken.ownerOf(gameId);
-
-          expect(eventGameOwner).to.be.equal(GameOwner.address);
-          expect(contractGameOwner).to.be.equal(GameOwner.address);
-          expect(contractGameOwner).to.be.equal(eventGameOwner);
-        });
-
-        it('anyone can mint Games with Editors', async function () {
-          ({gameToken, GameOwner} = await setupTest());
-          const randomId = await getRandom();
-          const receipt = await waitFor(
-            GameOwner.Game.createGame(
-              GameOwner.address,
-              GameOwner.address,
-              [],
-              [],
-              [GameEditor1.address, GameEditor2.address],
-              '',
-              randomId
-            )
-          );
-          const transferEvent = await expectEventWithArgs(
-            gameToken,
-            receipt,
-            'Transfer'
-          );
-
-          gameId = transferEvent.args[2];
-          const isEditor1 = await gameToken.isGameEditor(
-            gameId,
-            GameEditor1.address
-          );
-          const isEditor2 = await gameToken.isGameEditor(
-            gameId,
-            GameEditor2.address
-          );
-
-          expect(isEditor1).to.be.true;
-          expect(isEditor2).to.be.true;
-        });
-
-        it('gameId contains creator address', async function () {
-          const idAsHex = utils.hexValue(gameId);
-          const slicedId = idAsHex.slice(0, 42);
-          const secondSlice = idAsHex.slice(58);
-          expect(utils.getAddress(slicedId)).to.be.equal(GameOwner.address);
-          expect(secondSlice).to.be.equal('25105c39');
-        });
-      });
-    });
-
-    describe('GameToken: With Game Manager', function () {
-      let gameToken: Contract;
-      let gameTokenAsAdmin: Contract;
-      let users: User[];
-
-      before(async function () {
-        ({gameToken, gameTokenAsAdmin, users} = await setupTest());
-      });
-
-      it('Game Manager can create GAMEs when _gameManager is set', async function () {
-        const GameManager = users[3];
-        await gameTokenAsAdmin.setGameManager(GameManager.address);
-        const randomId = await getRandom();
-        const managerReceipt = GameManager.Game.createGame(
-          users[3].address,
-          users[4].address,
+    it('anyone can mint Games with no Assets', async function () {
+      const randomId = await getRandom();
+      ({gameToken, GameOwner, GameEditor1, GameEditor2} = await setupTest());
+      const receipt = await waitFor(
+        GameOwner.Game.createGame(
+          GameOwner.address,
+          GameOwner.address,
           [],
           [],
           [],
           '',
           randomId
-        );
-        const transferEvent = await expectEventWithArgs(
-          gameToken,
-          managerReceipt,
-          'Transfer'
-        );
-        const managerGameId = transferEvent.args[2];
-        const gameOwner = transferEvent.args[1];
+        )
+      );
+      const transferEvent = await expectEventWithArgs(
+        gameToken,
+        receipt,
+        'Transfer'
+      );
 
-        expect(await gameToken.ownerOf(managerGameId)).to.be.equal(
-          users[4].address
-        );
-        expect(gameOwner).to.be.equal(users[4].address);
-      });
+      gameId = transferEvent.args[2];
+      const eventGameOwner = transferEvent.args[1];
+      const contractGameOwner = await gameToken.ownerOf(gameId);
 
-      it('reverts if non-manager trys to mint Game when _gameManager is set', async function () {
-        const randomId = await getRandom();
-        await expect(
-          gameToken.createGame(
-            users[2].address,
-            users[2].address,
-            [],
-            [],
-            [],
-            '',
-            randomId
-          )
-        ).to.be.revertedWith('INVALID_GAME_MANAGER');
-      });
+      expect(eventGameOwner).to.be.equal(GameOwner.address);
+      expect(contractGameOwner).to.be.equal(GameOwner.address);
+      expect(contractGameOwner).to.be.equal(eventGameOwner);
     });
+
+    it('anyone can mint Games with Editors', async function () {
+      ({gameToken, GameOwner} = await setupTest());
+      const randomId = await getRandom();
+      const receipt = await waitFor(
+        GameOwner.Game.createGame(
+          GameOwner.address,
+          GameOwner.address,
+          [],
+          [],
+          [GameEditor1.address, GameEditor2.address],
+          '',
+          randomId
+        )
+      );
+      const transferEvent = await expectEventWithArgs(
+        gameToken,
+        receipt,
+        'Transfer'
+      );
+
+      gameId = transferEvent.args[2];
+      const isEditor1 = await gameToken.isGameEditor(
+        gameId,
+        GameEditor1.address
+      );
+      const isEditor2 = await gameToken.isGameEditor(
+        gameId,
+        GameEditor2.address
+      );
+
+      expect(isEditor1).to.be.true;
+      expect(isEditor2).to.be.true;
+    });
+
+    it('gameId contains creator address', async function () {
+      const idAsHex = utils.hexValue(gameId);
+      const slicedId = idAsHex.slice(0, 42);
+      const secondSlice = idAsHex.slice(58);
+      expect(utils.getAddress(slicedId)).to.be.equal(GameOwner.address);
+      expect(secondSlice).to.be.equal('25105c39');
+    });
+  });
+
+  describe('GameToken: Minting GAMEs', function () {
+    let users: User[];
+    let gameToken: Contract;
+    let gameTokenAsAdmin: Contract;
+    let GameManager: User;
+    let GameOwner: User;
+
+    before(async function () {
+      ({gameToken, gameTokenAsAdmin, users, GameOwner} = await setupTest());
+      GameManager = users[11];
+      await gameTokenAsAdmin.setGameManager(GameManager.address);
+      expect(await gameToken.getGameManager()).to.be.equal(GameManager.address);
+    });
+
+    it('Game Manager can create GAMEs when _gameManager is set', async function () {
+      const randomId = await getRandom();
+      const managerReceipt = GameManager.Game.createGame(
+        users[3].address,
+        users[4].address,
+        [],
+        [],
+        [],
+        '',
+        randomId
+      );
+      const transferEvent = await expectEventWithArgs(
+        gameToken,
+        managerReceipt,
+        'Transfer'
+      );
+      const managerGameId = transferEvent.args[2];
+      const gameOwner = transferEvent.args[1];
+
+      expect(await gameToken.ownerOf(managerGameId)).to.be.equal(
+        users[4].address
+      );
+      expect(gameOwner).to.be.equal(users[4].address);
+    });
+
+    it('reverts if non-manager trys to mint Game when _gameManager is set', async function () {
+      const randomId = await getRandom();
+      await expect(
+        gameToken.createGame(
+          users[2].address,
+          users[2].address,
+          [],
+          [],
+          [],
+          '',
+          randomId
+        )
+      ).to.be.revertedWith('INVALID_GAME_MANAGER');
+    });
+
     describe('GameToken: Mint With Assets', function () {
       let assetId: BigNumber;
       let assetId2: BigNumber;
       let gameId: BigNumber;
       let assets: BigNumber[];
       let values: BigNumber[];
-      let gameToken: Contract;
-      let GameOwner: User;
-      it('anyone can mint Games with single Asset', async function () {
-        ({gameToken, GameOwner} = await setupTest());
+
+      it('can mint Games with single Asset', async function () {
         const assetReceipt = await supplyAssets(
           GameOwner.address,
           packId,
@@ -252,7 +245,7 @@ describe('GameToken', function () {
         const randomId = await getRandom();
 
         const receipt = await waitFor(
-          GameOwner.Game.createGame(
+          GameManager.Game.createGame(
             GameOwner.address,
             GameOwner.address,
             [assetId],
@@ -281,7 +274,7 @@ describe('GameToken', function () {
         expect(ownerOf).to.be.equal(GameOwner.address);
       });
 
-      it('anyone can mint Games with many Assets', async function () {
+      it('can mint Games with many Assets', async function () {
         const {gameToken, GameOwner} = await setupTest();
         const assetContract = await ethers.getContract('Asset');
         let assetReceipt: Receipt;
@@ -340,7 +333,7 @@ describe('GameToken', function () {
         const randomId = await getRandom();
 
         const receipt = await waitFor(
-          GameOwner.Game.createGame(
+          GameManager.Game.createGame(
             GameOwner.address,
             GameOwner.address,
             [assetId, assetId2],
@@ -406,7 +399,7 @@ describe('GameToken', function () {
         const randomId = await getRandom();
         await expect(
           waitFor(
-            GameOwner.Game.createGame(
+            GameManager.Game.createGame(
               GameOwner.address,
               GameOwner.address,
               [assetId],
@@ -423,6 +416,7 @@ describe('GameToken', function () {
     describe('GameToken: Modifying GAMEs', function () {
       let gameToken: Contract;
       let GameOwner: User;
+      let GameManager: User;
       let GameEditor1: User;
       let GameEditor2: User;
       let users: User[];
@@ -431,15 +425,19 @@ describe('GameToken', function () {
       let assetId: BigNumber;
       let assetId2: BigNumber;
       let assetContract: Contract;
+      let gameTokenAsAdmin: Contract;
 
       before(async function () {
         ({
           gameToken,
+          gameTokenAsAdmin,
           GameOwner,
           GameEditor1,
           GameEditor2,
           users,
         } = await setupTest());
+        GameManager = users[11];
+        await gameTokenAsAdmin.setGameManager(GameManager.address);
         assetContract = await ethers.getContract('Asset');
         const assetReceipt = await supplyAssets(
           GameOwner.address,
@@ -458,7 +456,7 @@ describe('GameToken', function () {
         const randomId = await getRandom();
 
         const receipt = await waitFor(
-          GameOwner.Game.createGame(
+          GameManager.Game.createGame(
             GameOwner.address,
             GameOwner.address,
             [],
@@ -514,7 +512,7 @@ describe('GameToken', function () {
         ).to.be.revertedWith('EDITOR_ACCESS_DENIED');
       });
 
-      it('Owner can add single Asset', async function () {
+      it('Manager can add single Asset', async function () {
         const assetContract = await ethers.getContract('Asset');
         const assetReceipt = await supplyAssets(
           GameOwner.address,
@@ -540,7 +538,7 @@ describe('GameToken', function () {
         expect(uriBefore).to.be.equal('Uri is this');
 
         const receipt = await waitFor(
-          GameOwner.Game.addAssets(
+          GameManager.Game.addAssets(
             GameOwner.address,
             gameId,
             [singleAssetId],
@@ -575,7 +573,7 @@ describe('GameToken', function () {
         expect(values[0]).to.be.equal(1);
       });
 
-      it('Owner can add multiple Assets', async function () {
+      it('Manager can add multiple Assets', async function () {
         const assetContract = await ethers.getContract('Asset');
         const assetReceipt = await supplyAssets(
           GameOwner.address,
@@ -619,7 +617,7 @@ describe('GameToken', function () {
           'balanceOf(address,uint256)'
         ](GameOwner.address, assetId2);
 
-        const assetsAddedReceipt = await GameOwner.Game.addAssets(
+        const assetsAddedReceipt = await GameManager.Game.addAssets(
           GameOwner.address,
           gameId,
           [assetId, assetId2],
@@ -661,7 +659,7 @@ describe('GameToken', function () {
         expect(values[1]).to.be.equal(42);
       });
 
-      it('Owner can remove single Asset', async function () {
+      it('Manager can remove single Asset', async function () {
         const contractBalanceBefore = await assetContract[
           'balanceOf(address,uint256)'
         ](gameToken.address, singleAssetId);
@@ -669,7 +667,7 @@ describe('GameToken', function () {
           'balanceOf(address,uint256)'
         ](GameOwner.address, singleAssetId);
 
-        const assetRemovalReceipt = await GameOwner.Game.removeAssets(
+        const assetRemovalReceipt = await GameManager.Game.removeAssets(
           gameId,
           [singleAssetId],
           [1],
@@ -703,7 +701,7 @@ describe('GameToken', function () {
 
       it('fails when removing more assets than the game contains', async function () {
         await expect(
-          GameOwner.Game.removeAssets(
+          GameManager.Game.removeAssets(
             gameId,
             [assetId, assetId2, assetId2],
             [25, 31, 2],
@@ -713,7 +711,7 @@ describe('GameToken', function () {
         ).to.be.revertedWith('INVALID_ASSET_REMOVAL');
       });
 
-      it('Owner can remove multiple Assets', async function () {
+      it('Manager can remove multiple Assets', async function () {
         const contractBalanceBefore = await assetContract[
           'balanceOf(address,uint256)'
         ](gameToken.address, assetId);
@@ -727,7 +725,7 @@ describe('GameToken', function () {
           'balanceOf(address,uint256)'
         ](GameOwner.address, assetId2);
 
-        const assetRemovalReceipt = await GameOwner.Game.removeAssets(
+        const assetRemovalReceipt = await GameManager.Game.removeAssets(
           gameId,
           [assetId, assetId2],
           [7, 31],
@@ -768,63 +766,6 @@ describe('GameToken', function () {
         expect(values[0]).to.be.equal(7);
         expect(values[1]).to.be.equal(31);
         expect(to).to.be.equal(GameOwner.address);
-      });
-
-      it('Editor can add & remove Assets', async function () {
-        await waitFor(
-          GameOwner.Game.setGameEditor(gameId, GameEditor1.address, true)
-        );
-
-        const assetContract = await ethers.getContract('Asset');
-        const assetReceipt = await supplyAssets(
-          GameEditor1.address,
-          packId3,
-          GameEditor1.address,
-          1,
-          dummyHash3
-        );
-
-        const assetTransferEvent = await expectEventWithArgsFromReceipt(
-          assetContract,
-          assetReceipt,
-          'TransferSingle'
-        );
-        const editorAssetId = assetTransferEvent.args[3];
-        const balance1 = await assetContract['balanceOf(address,uint256)'](
-          gameToken.address,
-          editorAssetId
-        );
-        expect(balance1).to.be.equal(0);
-
-        await waitFor(
-          GameEditor1.Game.addAssets(
-            GameEditor1.address,
-            gameId,
-            [editorAssetId],
-            [1],
-            ''
-          )
-        );
-
-        const balance2 = await assetContract['balanceOf(address,uint256)'](
-          gameToken.address,
-          editorAssetId
-        );
-        expect(balance2).to.be.equal(1);
-        await waitFor(
-          GameEditor1.Game.removeAssets(
-            gameId,
-            [editorAssetId],
-            [1],
-            GameEditor1.address,
-            ''
-          )
-        );
-        const balance3 = await assetContract['balanceOf(address,uint256)'](
-          gameToken.address,
-          editorAssetId
-        );
-        expect(balance3).to.be.equal(0);
       });
     });
   });
@@ -990,7 +931,9 @@ describe('GameToken', function () {
     let gameToken: Contract;
     let gameTokenAsAdmin: Contract;
     let GameOwner: User;
+    let GameManager: User;
     let others: Address[];
+    let users: User[];
 
     let assetId: BigNumber;
     let assetId2: BigNumber;
@@ -1000,8 +943,10 @@ describe('GameToken', function () {
     const quantity2 = 11;
 
     async function getNewGame() {
-      ({gameToken, gameTokenAsAdmin, GameOwner} = await setupTest());
+      ({gameToken, gameTokenAsAdmin, GameOwner, users} = await setupTest());
       others = await getUnnamedAccounts();
+      GameManager = users[11];
+      await gameTokenAsAdmin.setGameManager(GameManager.address);
 
       const assetContract = await ethers.getContract('Asset');
       let assetReceipt: Receipt;
@@ -1039,7 +984,7 @@ describe('GameToken', function () {
       const randomId = await getRandom();
 
       const receipt = await waitFor(
-        GameOwner.Game.createGame(
+        GameManager.Game.createGame(
           GameOwner.address,
           GameOwner.address,
           [assetId, assetId2],
@@ -1065,7 +1010,7 @@ describe('GameToken', function () {
 
     it('fails if "to" == address(0)', async function () {
       await expect(
-        GameOwner.Game.destroyGame(
+        GameManager.Game.destroyGame(
           GameOwner.address,
           ethers.constants.AddressZero,
           gameId
@@ -1075,23 +1020,26 @@ describe('GameToken', function () {
 
     it('fails if "to" == Game Token contract', async function () {
       await expect(
-        gameToken.destroyGame(GameOwner.address, gameToken.address, gameId)
+        GameManager.Game.destroyGame(
+          GameOwner.address,
+          gameToken.address,
+          gameId
+        )
       ).to.be.revertedWith('DESTINATION_GAME_CONTRACT');
     });
     it('fails if "from" != game owner', async function () {
       await expect(
-        GameOwner.Game.destroyGame(others[2], others[1], gameId)
+        GameManager.Game.destroyGame(others[2], others[1], gameId)
       ).to.be.revertedWith('DESTROY_ACCESS_DENIED');
     });
     it('fails if called by non-Manager when gameManager is set', async function () {
-      await gameTokenAsAdmin.setGameManager(others[9]);
       await expect(
         gameToken.destroyGame(others[0], others[0], gameId)
       ).to.be.revertedWith('INVALID_GAME_MANAGER');
     });
 
-    describe('GameToken: burnAndRecover', function () {
-      it('can burn and recover assets in 1 tx', async function () {
+    describe('GameToken: destroyAndRecover', function () {
+      it('can destroy GAME and recover assets in 1 tx if not too many assets', async function () {
         const assetContract = await ethers.getContract('Asset');
         await gameTokenAsAdmin.setGameManager(ethers.constants.AddressZero);
 
@@ -1148,12 +1096,12 @@ describe('GameToken', function () {
       });
     });
 
-    describe('GameToken: Burn... then Recover', function () {
+    describe('GameToken: Destroy... then Recover', function () {
       before(async function () {
         gameId = await getNewGame();
       });
 
-      it('can burn without transfer of assets', async function () {
+      it('can destroy without transfer of assets', async function () {
         const assetContract = await ethers.getContract('Asset');
         const balancesBefore = await getBalances(
           assetContract,
@@ -1171,7 +1119,7 @@ describe('GameToken', function () {
         expect(contractBalanceBefore).to.be.equal(7);
         expect(contractBalanceBefore2).to.be.equal(11);
 
-        await GameOwner.Game.destroyGame(
+        await GameManager.Game.destroyGame(
           GameOwner.address,
           GameOwner.address,
           gameId
@@ -1203,8 +1151,8 @@ describe('GameToken', function () {
         await expect(gameToken.ownerOf(gameId)).to.be.revertedWith(
           'token does not exist'
         );
-        // @review make sure we check asset amounts for given id for a given game, not just the overall balance of the contract for that given asset !!!
-        await GameOwner.Game.recoverAssets(
+
+        await GameManager.Game.recoverAssets(
           GameOwner.address,
           GameOwner.address,
           gameId,
@@ -1228,7 +1176,7 @@ describe('GameToken', function () {
         expect(contractBalanceAfter).to.be.equal(0);
         expect(contractBalanceAfter2).to.be.equal(11);
 
-        await GameOwner.Game.recoverAssets(
+        await GameManager.Game.recoverAssets(
           GameOwner.address,
           GameOwner.address,
           gameId,
