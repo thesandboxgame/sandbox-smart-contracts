@@ -85,58 +85,6 @@ describe('GameToken', function () {
 
   describe('GameToken: Minting GAMEs', function () {
     describe('GameToken: Mint Without Assets', function () {
-      describe('GameToken: With Game Manager', function () {
-        let gameToken: Contract;
-        let gameTokenAsAdmin: Contract;
-        let users: User[];
-
-        before(async function () {
-          ({gameToken, gameTokenAsAdmin, users} = await setupTest());
-        });
-
-        it('minter can create GAMEs when _gameManager is set', async function () {
-          const GameManager = users[3];
-          await gameTokenAsAdmin.setGameManager(GameManager.address);
-          const randomId = await getRandom();
-          const managerReceipt = GameManager.Game.createGame(
-            users[3].address,
-            users[4].address,
-            [],
-            [],
-            [],
-            '',
-            randomId
-          );
-          const transferEvent = await expectEventWithArgs(
-            gameToken,
-            managerReceipt,
-            'Transfer'
-          );
-          const managerGameId = transferEvent.args[2];
-          const gameOwner = transferEvent.args[1];
-
-          expect(await gameToken.ownerOf(managerGameId)).to.be.equal(
-            users[4].address
-          );
-          expect(gameOwner).to.be.equal(users[4].address);
-        });
-
-        it('reverts if non-manager trys to mint Game when _gameManager is set', async function () {
-          const randomId = await getRandom();
-          await expect(
-            gameToken.createGame(
-              users[2].address,
-              users[2].address,
-              [],
-              [],
-              [],
-              '',
-              randomId
-            )
-          ).to.be.revertedWith('INVALID_GAME_MANAGER');
-        });
-      });
-
       describe('GameToken: No Game Manager', function () {
         let gameToken: Contract;
         let GameOwner: User;
@@ -217,8 +165,60 @@ describe('GameToken', function () {
           const slicedId = idAsHex.slice(0, 42);
           const secondSlice = idAsHex.slice(58);
           expect(utils.getAddress(slicedId)).to.be.equal(GameOwner.address);
-          expect(secondSlice).to.be.equal('24a3d57c');
+          expect(secondSlice).to.be.equal('25105c39');
         });
+      });
+    });
+
+    describe('GameToken: With Game Manager', function () {
+      let gameToken: Contract;
+      let gameTokenAsAdmin: Contract;
+      let users: User[];
+
+      before(async function () {
+        ({gameToken, gameTokenAsAdmin, users} = await setupTest());
+      });
+
+      it('Game Manager can create GAMEs when _gameManager is set', async function () {
+        const GameManager = users[3];
+        await gameTokenAsAdmin.setGameManager(GameManager.address);
+        const randomId = await getRandom();
+        const managerReceipt = GameManager.Game.createGame(
+          users[3].address,
+          users[4].address,
+          [],
+          [],
+          [],
+          '',
+          randomId
+        );
+        const transferEvent = await expectEventWithArgs(
+          gameToken,
+          managerReceipt,
+          'Transfer'
+        );
+        const managerGameId = transferEvent.args[2];
+        const gameOwner = transferEvent.args[1];
+
+        expect(await gameToken.ownerOf(managerGameId)).to.be.equal(
+          users[4].address
+        );
+        expect(gameOwner).to.be.equal(users[4].address);
+      });
+
+      it('reverts if non-manager trys to mint Game when _gameManager is set', async function () {
+        const randomId = await getRandom();
+        await expect(
+          gameToken.createGame(
+            users[2].address,
+            users[2].address,
+            [],
+            [],
+            [],
+            '',
+            randomId
+          )
+        ).to.be.revertedWith('INVALID_GAME_MANAGER');
       });
     });
     describe('GameToken: Mint With Assets', function () {
