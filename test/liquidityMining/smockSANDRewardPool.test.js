@@ -21,7 +21,8 @@ const ACTUAL_REWARD_AMOUNT = REWARD_AMOUNT.div(REWARD_DURATION).mul(
 
 const STAKE_AMOUNT = BigNumber.from(10000).mul('1000000000000000000');
 
-describe.only('SmockitSANDRewardPool', function () {
+// Tests for single stakes but modifying NFT numbers with a modifiable NFT contract
+describe('SmockitSANDRewardPool', function () {
   async function createFixture(supplyRewardTokens, notifyReward) {
     await deployments.fixture(POOL);
     const {
@@ -167,6 +168,254 @@ describe.only('SmockitSANDRewardPool', function () {
     ]);
     await mine();
     const earned = await rewardPoolAsUser[0].earned(others[0]);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+  });
+
+  it('User earnings for 1 NFTs match expected reward', async function () {
+    const {
+      setUserNftBalance,
+      rewardPoolAsUser,
+      stakeToken,
+      modifiableRewardContract,
+      others,
+    } = await createFixture(true, true);
+    await setUserNftBalance(1, others[0]);
+    await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    const stakedBalance = await stakeToken.balanceOf(
+      modifiableRewardContract.address
+    );
+    expect(stakedBalance).to.equal(STAKE_AMOUNT);
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+    const earned = await rewardPoolAsUser[0].earned(others[0]);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+  });
+
+  it('User earnings for 2 NFTs match expected reward', async function () {
+    const {
+      setUserNftBalance,
+      rewardPoolAsUser,
+      stakeToken,
+      modifiableRewardContract,
+      others,
+    } = await createFixture(true, true);
+    await setUserNftBalance(2, others[0]);
+    await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    const stakedBalance = await stakeToken.balanceOf(
+      modifiableRewardContract.address
+    );
+    expect(stakedBalance).to.equal(STAKE_AMOUNT);
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+    const earned = await rewardPoolAsUser[0].earned(others[0]);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+  });
+
+  it('User earnings for 3 NFTs match expected reward', async function () {
+    const {
+      setUserNftBalance,
+      rewardPoolAsUser,
+      stakeToken,
+      modifiableRewardContract,
+      others,
+    } = await createFixture(true, true);
+    await setUserNftBalance(3, others[0]);
+    await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    const stakedBalance = await stakeToken.balanceOf(
+      modifiableRewardContract.address
+    );
+    expect(stakedBalance).to.equal(STAKE_AMOUNT);
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+    const earned = await rewardPoolAsUser[0].earned(others[0]);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+  });
+
+  it('User earnings for 500 NFTs match expected reward', async function () {
+    const {
+      setUserNftBalance,
+      rewardPoolAsUser,
+      stakeToken,
+      modifiableRewardContract,
+      others,
+    } = await createFixture(true, true);
+    await setUserNftBalance(500, others[0]);
+    await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    const stakedBalance = await stakeToken.balanceOf(
+      modifiableRewardContract.address
+    );
+    expect(stakedBalance).to.equal(STAKE_AMOUNT);
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+    const earned = await rewardPoolAsUser[0].earned(others[0]);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+  });
+
+  it('User earnings for 10000 NFTs match expected reward', async function () {
+    const {
+      setUserNftBalance,
+      rewardPoolAsUser,
+      stakeToken,
+      modifiableRewardContract,
+      others,
+    } = await createFixture(true, true);
+    await setUserNftBalance(10000, others[0]);
+    await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    const stakedBalance = await stakeToken.balanceOf(
+      modifiableRewardContract.address
+    );
+    expect(stakedBalance).to.equal(STAKE_AMOUNT);
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+    const earned = await rewardPoolAsUser[0].earned(others[0]);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+  });
+
+  it("Multiple Users' earnings for 1 NFTs match expected reward: 2 users, 1 stake each", async function () {
+    const {
+      setUserNftBalance,
+      rewardPoolAsUser,
+      stakeToken,
+      modifiableRewardContract,
+      others,
+    } = await createFixture(true, true);
+    await setUserNftBalance(1, others[0]);
+    await setUserNftBalance(1, others[1]);
+    await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
+    const stakedBalance = await stakeToken.balanceOf(
+      modifiableRewardContract.address
+    );
+    expect(stakedBalance).to.equal(STAKE_AMOUNT.mul(2));
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+    const earned0 = await rewardPoolAsUser[0].earned(others[0]);
+    const earned1 = await rewardPoolAsUser[1].earned(others[1]);
+    const earned = earned0.add(earned1);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+  });
+
+  it("Multiple Users' earnings for 3 NFTs match expected reward: 2 users, 1 stake each", async function () {
+    const {
+      setUserNftBalance,
+      rewardPoolAsUser,
+      stakeToken,
+      modifiableRewardContract,
+      others,
+    } = await createFixture(true, true);
+    await setUserNftBalance(3, others[0]);
+    await setUserNftBalance(3, others[1]);
+    await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
+    const stakedBalance = await stakeToken.balanceOf(
+      modifiableRewardContract.address
+    );
+    expect(stakedBalance).to.equal(STAKE_AMOUNT.mul(2));
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+    const earned0 = await rewardPoolAsUser[0].earned(others[0]);
+    const earned1 = await rewardPoolAsUser[1].earned(others[1]);
+    const earned = earned0.add(earned1);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+  });
+
+  it("Multiple Users' earnings for 100 NFTs match expected reward: 2 users, 1 stake each", async function () {
+    const {
+      setUserNftBalance,
+      rewardPoolAsUser,
+      stakeToken,
+      modifiableRewardContract,
+      others,
+    } = await createFixture(true, true);
+    await setUserNftBalance(100, others[0]);
+    await setUserNftBalance(100, others[1]);
+    await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
+    const stakedBalance = await stakeToken.balanceOf(
+      modifiableRewardContract.address
+    );
+    expect(stakedBalance).to.equal(STAKE_AMOUNT.mul(2));
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+    const earned0 = await rewardPoolAsUser[0].earned(others[0]);
+    const earned1 = await rewardPoolAsUser[1].earned(others[1]);
+    const earned = earned0.add(earned1);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+  });
+
+  it('Earlier staker gets more rewards with same NFT amount - small NFT number', async function () {
+    const {setUserNftBalance, rewardPoolAsUser, others} = await createFixture(
+      true,
+      true
+    );
+    await setUserNftBalance(1, others[0]);
+    await setUserNftBalance(1, others[1]);
+    await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+    const earned0 = await rewardPoolAsUser[0].earned(others[0]);
+    const earned1 = await rewardPoolAsUser[1].earned(others[1]);
+    expect(earned0).to.be.gte(earned1);
+    const earned = earned0.add(earned1);
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+  });
+
+  it('Earlier staker gets more rewards with same NFT amount - large NFT number', async function () {
+    const {setUserNftBalance, rewardPoolAsUser, others} = await createFixture(
+      true,
+      true
+    );
+    await setUserNftBalance(100, others[0]);
+    await setUserNftBalance(100, others[1]);
+    await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+    const earned0 = await rewardPoolAsUser[0].earned(others[0]);
+    const earned1 = await rewardPoolAsUser[1].earned(others[1]);
+    expect(earned0).to.be.gte(earned1);
+    const earned = earned0.add(earned1);
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
   });
 });
