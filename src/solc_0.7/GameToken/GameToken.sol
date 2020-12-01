@@ -59,6 +59,11 @@ contract GameToken is ERC721BaseToken, IGameToken {
         _;
     }
 
+    modifier notToThis(address to) {
+        require(to != address(this), "DESTINATION_GAME_CONTRACT");
+        _;
+    }
+
     ///////////////////////////////  Functions //////////////////////////////
 
     /// @notice Function to get the amount of each assetId in a GAME
@@ -138,8 +143,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         address[] memory editors,
         string memory uri,
         uint96 randomId
-    ) external override gameManagerOnly() notToZero(to) returns (uint256 id) {
-        require(to != address(this), "DESTINATION_GAME_CONTRACT");
+    ) external override gameManagerOnly() notToZero(to) notToThis(to) returns (uint256 id) {
         uint256 gameId = _mintGame(from, to, randomId);
 
         if (editors.length != 0) {
@@ -351,10 +355,9 @@ contract GameToken is ERC721BaseToken, IGameToken {
         address from,
         address to,
         uint256 gameId
-    ) internal notToZero(to) {
+    ) internal notToZero(to) notToThis(to) {
         address owner = _ownerOf(gameId);
         require(from == owner, "DESTROY_ACCESS_DENIED");
-        require(to != address(this), "DESTINATION_GAME_CONTRACT");
         delete _metaData[gameId];
         _creatorship[creatorOf(gameId)] = address(0);
         _burn(from, owner, gameId);
@@ -366,11 +369,10 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256 gameId,
         uint256[] memory assetIds,
         uint256[] memory values
-    ) internal notToZero(to) {
+    ) internal notToZero(to) notToThis(to) {
         _check_withdrawal_authorized(from, gameId);
         uint256 length = assetIds.length;
         require(length > 0, "WITHDRAWAL_COMPLETE");
-        require(to != address(this), "DESTINATION_GAME_CONTRACT");
         require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
 
         for (uint256 i = 0; i < assetIds.length; i++) {
