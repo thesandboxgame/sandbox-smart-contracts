@@ -5,10 +5,9 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "./ClaimERC1155.sol";
-import "../common/BaseWithStorage/WithMetaTransaction.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
 
-contract AssetGiveaway is WithAdmin, ClaimERC1155, WithMetaTransaction {
+contract AssetGiveaway is WithAdmin, ClaimERC1155 {
     using SafeMath for uint256;
 
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
@@ -36,7 +35,6 @@ contract AssetGiveaway is WithAdmin, ClaimERC1155, WithMetaTransaction {
     }
 
     function claimAssets(
-        address from,
         address to,
         uint256[] calldata assetIds,
         uint256[] calldata assetValues,
@@ -44,8 +42,8 @@ contract AssetGiveaway is WithAdmin, ClaimERC1155, WithMetaTransaction {
         bytes32 salt
     ) external {
         require(block.timestamp < _expiryTime, "CLAIM_PERIOD_IS_OVER");
+        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         require(claimed[to] == false, "DESTINATION_ALREADY_CLAIMED");
-        _checkAuthorization(from, to);
         claimed[to] = true;
         _claimERC1155(to, assetIds, assetValues, proof, salt);
     }
@@ -68,16 +66,5 @@ contract AssetGiveaway is WithAdmin, ClaimERC1155, WithMetaTransaction {
         bytes calldata /*data*/
     ) external pure returns (bytes4) {
         return ERC1155_BATCH_RECEIVED;
-    }
-
-    function _checkAuthorization(address from, address to) internal view {
-        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        if (from != msg.sender) {
-            uint256 processorType = _metaTransactionContracts[msg.sender];
-            require(processorType != 0, "INVALID SENDER");
-            if (processorType == METATX_2771) {
-                require(from == _forceMsgSender(), "INVALID_SENDER");
-            }
-        }
     }
 }

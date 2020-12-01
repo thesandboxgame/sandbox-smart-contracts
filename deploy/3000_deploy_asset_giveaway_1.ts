@@ -15,7 +15,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const assetContract = await deployments.get('Asset');
 
-  await deploy('NFT_Lottery_1', {
+  await deploy('Asset_Giveaway_1', {
     contract: 'AssetGiveaway',
     from: deployer,
     linkedData: assets,
@@ -30,4 +30,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['NFT_Lottery_1', 'NFT_Lottery_1_deploy'];
+func.tags = ['Asset_Giveaway_1', 'Asset_Giveaway_1_deploy'];

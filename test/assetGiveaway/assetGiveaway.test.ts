@@ -9,29 +9,7 @@ const {calculateAssetHash} = helpers;
 
 const zeroAddress = constants.AddressZero;
 
-describe('NFT_Lottery_1', function () {
-  it('User cannot claim when real contract holds zero assets', async function () {
-    const options = {};
-    const setUp = await setupGiveaway(options);
-    const {giveawayContract, others, tree, assets} = setUp;
-    const asset = assets[0];
-    const proof = tree.getProof(calculateAssetHash(asset));
-    const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
-    );
-
-    await expect(
-      giveawayContractAsUser.claimAssets(
-        others[1],
-        others[1],
-        asset.assetIds,
-        asset.assetValues,
-        proof,
-        asset.salt
-      )
-    ).to.be.revertedWith(`can't substract more than there is`);
-  });
-
+describe('Asset_Giveaway_1', function () {
   it('User cannot claim when test contract holds zero assets', async function () {
     const options = {
       assetsHolder: true,
@@ -46,7 +24,6 @@ describe('NFT_Lottery_1', function () {
 
     await expect(
       giveawayContractAsUser.claimAssets(
-        others[1],
         others[1],
         asset.assetIds,
         asset.assetValues,
@@ -84,7 +61,6 @@ describe('NFT_Lottery_1', function () {
 
     await waitFor(
       giveawayContractAsUser.claimAssets(
-        others[1],
         others[1],
         asset.assetIds,
         asset.assetValues,
@@ -128,7 +104,6 @@ describe('NFT_Lottery_1', function () {
     const receipt = await waitFor(
       giveawayContractAsUser.claimAssets(
         others[1],
-        others[1],
         asset.assetIds,
         asset.assetValues,
         proof,
@@ -168,7 +143,6 @@ describe('NFT_Lottery_1', function () {
     await waitFor(
       giveawayContractAsUser.claimAssets(
         others[1],
-        others[1],
         asset.assetIds,
         asset.assetValues,
         proof,
@@ -194,7 +168,6 @@ describe('NFT_Lottery_1', function () {
 
     await expect(
       giveawayContractAsUser.claimAssets(
-        others[1],
         others[1],
         asset.assetIds,
         [0], // bad param
@@ -222,7 +195,6 @@ describe('NFT_Lottery_1', function () {
     await waitFor(
       giveawayContractAsUser.claimAssets(
         others[1],
-        others[1],
         asset.assetIds,
         asset.assetValues,
         proof,
@@ -231,7 +203,6 @@ describe('NFT_Lottery_1', function () {
     );
     await expect(
       giveawayContractAsUser.claimAssets(
-        others[1],
         others[1],
         asset.assetIds,
         asset.assetValues,
@@ -258,7 +229,6 @@ describe('NFT_Lottery_1', function () {
 
     await expect(
       giveawayContractAsUser.claimAssets(
-        others[1],
         others[2], // bad param
         asset.assetIds,
         asset.assetValues,
@@ -285,7 +255,6 @@ describe('NFT_Lottery_1', function () {
 
     await expect(
       giveawayContractAsUser.claimAssets(
-        others[1],
         zeroAddress,
         asset.assetIds,
         asset.assetValues,
@@ -312,40 +281,12 @@ describe('NFT_Lottery_1', function () {
     await expect(
       giveawayContractAsUser.claimAssets(
         others[1],
-        others[1],
         asset.assetIds,
         [5, 5], // length too short
         proof,
         asset.salt
       )
     ).to.be.revertedWith('INVALID_INPUT');
-  });
-
-  it('Invalid MetaTx sender cannot claim on behalf of a reservedAddress', async function () {
-    const options = {
-      mint: true,
-      amount: 3,
-      supply: 5,
-    };
-    const setUp = await setupGiveaway(options);
-    const {giveawayContract, others, tree, assets, nftGiveawayAdmin} = setUp;
-
-    const asset = assets[0];
-    const proof = tree.getProof(calculateAssetHash(asset));
-    const giveawayContractAsAdmin = await giveawayContract.connect(
-      ethers.provider.getSigner(nftGiveawayAdmin)
-    );
-
-    await expect(
-      giveawayContractAsAdmin.claimAssets(
-        others[1],
-        others[1],
-        asset.assetIds,
-        asset.assetValues,
-        proof,
-        asset.salt
-      )
-    ).to.be.revertedWith('INVALID SENDER');
   });
 
   it('User can claim allocated multiple assets for multiple assetIds from alternate address', async function () {
@@ -377,7 +318,6 @@ describe('NFT_Lottery_1', function () {
 
     await waitFor(
       giveawayContractAsUser.claimAssets(
-        others[1],
         others[1],
         asset.assetIds,
         asset.assetValues,
@@ -451,7 +391,6 @@ describe('NFT_Lottery_1', function () {
     await expect(
       giveawayContractAsUser.claimAssets(
         others[1],
-        others[1],
         asset.assetIds,
         asset.assetValues,
         proof,
@@ -459,7 +398,4 @@ describe('NFT_Lottery_1', function () {
       )
     ).to.be.revertedWith('CLAIM_PERIOD_IS_OVER');
   });
-
-  // TODO
-  // valid metatx sender
 });

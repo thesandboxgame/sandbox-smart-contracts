@@ -9,14 +9,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   let currentAdmin;
   try {
-    currentAdmin = await read('NFT_Lottery_1', 'getAdmin');
+    currentAdmin = await read('Asset_Giveaway_1', 'getAdmin');
   } catch (e) {
     // no admin
   }
   if (currentAdmin) {
     if (currentAdmin.toLowerCase() !== nftGiveawayAdmin.toLowerCase()) {
       await execute(
-        'NFT_Lottery_1',
+        'Asset_Giveaway_1',
         {from: currentAdmin, log: true},
         'changeAdmin',
         nftGiveawayAdmin
@@ -24,9 +24,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
   }
 
-  // Set NFT_Lottery_1 contract as superOperator for Asset
-  // This is needed when NFT_Lottery_1 is not the assetsHolder
-  const giveawayContract = await deployments.get('NFT_Lottery_1');
+  // Set Asset_Giveaway_1 contract as superOperator for Asset
+  // This is needed when Asset_Giveaway_1 is not the assetsHolder
+  const giveawayContract = await deployments.get('Asset_Giveaway_1');
 
   const isAssetSuperOperator = await read(
     'Asset',
@@ -48,5 +48,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.runAtTheEnd = true;
-func.tags = ['NFT_Lottery_1', 'NFT_Lottery_1_setup'];
-func.dependencies = ['NFT_Lottery_1_deploy'];
+func.tags = ['Asset_Giveaway_1', 'Asset_Giveaway_1_setup'];
+func.dependencies = ['Asset_Giveaway_1_deploy'];

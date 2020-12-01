@@ -35,7 +35,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     nftGiveawayAdmin,
   } = await getNamedAccounts();
   const others = await getUnnamedAccounts();
-  await deployments.fixture('NFT_Lottery_1');
+  await deployments.fixture('Asset_Giveaway_1');
   const sandContract = await ethers.getContract('Sand');
   const assetContract = await ethers.getContract('Asset');
 
@@ -44,7 +44,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   const ASSETS_HOLDER = '0x0000000000000000000000000000000000000000';
 
-  const testContract = await deployments.deploy('Test_NFT_Lottery_1', {
+  const testContract = await deployments.deploy('Test_Asset_Giveaway_1', {
     from: deployer,
     contract: 'AssetGiveaway',
     args: [
@@ -138,16 +138,16 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   );
 
   // Update the deployment with test asset data
-  const deployment = await deployments.get('Test_NFT_Lottery_1');
+  const deployment = await deployments.get('Test_Asset_Giveaway_1');
   deployment.linkedData = assets;
-  await deployments.save('Test_NFT_Lottery_1', deployment);
+  await deployments.save('Test_Asset_Giveaway_1', deployment);
 
-  const giveawayContract = await ethers.getContract('Test_NFT_Lottery_1');
+  const giveawayContract = await ethers.getContract('Test_Asset_Giveaway_1');
   const giveawayContractAsAdmin = await giveawayContract.connect(
     ethers.provider.getSigner(nftGiveawayAdmin)
   );
 
-  const updatedDeployment = await deployments.get('Test_NFT_Lottery_1');
+  const updatedDeployment = await deployments.get('Test_Asset_Giveaway_1');
   const updatedAssets = updatedDeployment.linkedData;
   const assetHashArray = createDataArrayAssets(updatedAssets);
   const tree = new MerkleTree(assetHashArray);
@@ -168,11 +168,11 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 export const setupGiveaway = deployments.createFixture(async function () {
   const {nftGiveawayAdmin} = await getNamedAccounts();
   const others = await getUnnamedAccounts();
-  await deployments.fixture('NFT_Lottery_1');
-  const giveawayContract = await ethers.getContract('NFT_Lottery_1');
+  await deployments.fixture('Asset_Giveaway_1');
+  const giveawayContract = await ethers.getContract('Asset_Giveaway_1');
   const sandContract = await ethers.getContract('Sand');
   const assetContract = await ethers.getContract('Asset');
-  const deployment = await deployments.get('NFT_Lottery_1');
+  const deployment = await deployments.get('Asset_Giveaway_1');
 
   // Set up tree with real assets
   const assets = deployment.linkedData;
