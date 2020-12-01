@@ -27,7 +27,6 @@ const packId3 = 2;
 const METATX_SANDBOX = 1;
 const METATX_2771 = 2;
 const rng = new Prando('GameToken');
-// const MAX_UINT96 = BigNumber.from('39614081257132170000000000000');
 
 // for prod use 39614081257132170000000000000(MAX_UINT96) as upper limit
 async function getRandom(): Promise<number> {
@@ -255,6 +254,7 @@ describe('GameToken', function () {
             randomId
           )
         );
+
         const balanceAfter = await assetContract['balanceOf(address,uint256)'](
           gameToken.address,
           assetId
@@ -343,7 +343,6 @@ describe('GameToken', function () {
             randomId
           )
         );
-
         const balanceAfter = await assetContract['balanceOf(address,uint256)'](
           gameToken.address,
           assetId
