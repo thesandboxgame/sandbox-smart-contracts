@@ -81,6 +81,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
     /// @param gameId The id of the GAME token owned by owner
     /// @param editor The address of the editor to set
     /// @param isEditor Add or remove the ability to edit
+    // @review maybe allow editors access ?
     function setGameEditor(
         uint256 gameId,
         address editor,
@@ -118,12 +119,9 @@ contract GameToken is ERC721BaseToken, IGameToken {
         emit CreatorshipTransfer(original, current, to);
     }
 
-    // @review comments !
     /// @notice Set the GameManager contract address
-    /// If set at deployment, resetting to address(0) will allow anyone to mint games
     /// @param gameManager address of the GameManager
-    function setGameManager(address gameManager) external override {
-        require(msg.sender == _admin, "ADMIN_NOT_AUTHORIZED");
+    function setGameManager(address gameManager) external override onlyAdmin() {
         require(gameManager != _gameManager, "GAME_MANAGER_ALREADY_SET");
         _gameManager = gameManager;
         emit Minter(gameManager);
@@ -207,7 +205,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
     /// @return The name of the token contract
     // @review What should the actual name be?
     function name() external pure override returns (string memory) {
-        return "Sandbox's GAMEs";
+        return "The Sandbox: GAME token";
     }
 
     /// @notice Function to get the symbol of the token contract
@@ -346,7 +344,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256 gameId,
         uint256[] memory assetIds,
         uint256[] memory values
-    ) public override {
+    ) public override gameManagerOnly() {
         _recoverAssets(from, to, gameId, assetIds, values);
     }
 
@@ -393,14 +391,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
     function _check_withdrawal_authorized(address from, uint256 gameId) internal view {
         require(from != address(0), "SENDER_ZERO_ADDRESS");
         require(from == _withdrawalOwnerOf(gameId), "LAST_OWNER_NOT_EQUAL_SENDER");
-        // @review does this need metaTx support?
-        require(
-            msg.sender == from ||
-                _isValidMetaTx(msg.sender) ||
-                _superOperators[msg.sender] ||
-                _operatorsForAll[from][msg.sender],
-            "WITHDRAWAL_NOT_AUTHORIZED"
-        );
     }
 
     function _withdrawalOwnerOf(uint256 id) internal view returns (address) {
