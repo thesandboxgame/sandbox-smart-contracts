@@ -1,16 +1,19 @@
 import {Address, Receipt} from 'hardhat-deploy/types';
-import {ContractReceipt} from 'ethers';
+import {ContractReceipt, utils, BigNumber, ethers} from 'ethers';
 import {deployments, getNamedAccounts} from 'hardhat';
 
 const emptyBytes = '0x';
 const rarity = 3;
+let dummyHash =
+  // '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
+  '0x0000000000000000000000000000000000000000000000000000000000000001';
+
+let packId = 0;
 
 export async function supplyAssets(
   creator: Address,
-  packId: number,
   owner: Address,
-  supply: number,
-  hash: string
+  supply: number
 ): Promise<Receipt> {
   const {execute} = deployments;
   const {assetBouncerAdmin, assetAdmin} = await getNamedAccounts();
@@ -22,19 +25,22 @@ export async function supplyAssets(
     assetAdmin,
     true
   );
-
   const assetReceipt = await execute(
     'Asset',
     {from: assetAdmin, log: true},
     'mint',
     creator,
     packId,
-    hash,
+    dummyHash,
     supply,
     rarity,
     creator,
     emptyBytes
   );
+  packId++;
+  const hashAsNum = BigNumber.from(dummyHash);
+  const incrementedHash = hashAsNum.add(1);
+  dummyHash = utils.hexZeroPad(utils.hexValue(incrementedHash), 32);
   return assetReceipt;
 }
 
