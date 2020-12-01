@@ -85,7 +85,7 @@ describe('GameToken', function () {
 
   describe('GameToken: Minting GAMEs', function () {
     describe('GameToken: Mint Without Assets', function () {
-      describe('GameToken: With Minter', function () {
+      describe('GameToken: With Game Manager', function () {
         let gameToken: Contract;
         let gameTokenAsAdmin: Contract;
         let users: User[];
@@ -94,9 +94,9 @@ describe('GameToken', function () {
           ({gameToken, gameTokenAsAdmin, users} = await setupTest());
         });
 
-        it('minter can create GAMEs when _minter is set', async function () {
-          await gameTokenAsAdmin.setGameManager(users[3].address);
+        it('minter can create GAMEs when _gameManager is set', async function () {
           const GameManager = users[3];
+          await gameTokenAsAdmin.setGameManager(GameManager.address);
           const randomId = await getRandom();
           const managerReceipt = GameManager.Game.createGame(
             users[3].address,
@@ -947,7 +947,7 @@ describe('GameToken', function () {
 
     it('can get the ERC721 token contract name', async function () {
       const name = await gameToken.name();
-      expect(name).to.be.equal("Sandbox's GAMEs");
+      expect(name).to.be.equal('The Sandbox: GAME token');
     });
 
     it('can get the ERC721 token contract symbol', async function () {
