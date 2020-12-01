@@ -59,8 +59,8 @@ async function getNewGame(
   const tempQuantities: number[] = [];
 
   if (assetReceipts) {
-    let rec: any;
-    for (rec in assetReceipts) {
+    let rec: Receipt;
+    for (rec of assetReceipts) {
       const event = await expectEventWithArgsFromReceipt(
         assetContract,
         rec,
@@ -979,12 +979,11 @@ describe('GameToken', function () {
     });
   });
 
-  describe.skip('GameToken: Destroying Games', function () {
+  describe('GameToken: Destroying Games', function () {
     let gameToken: Contract;
     let gameTokenAsAdmin: Contract;
     let GameOwner: User;
     let GameManager: User;
-    let others: Address[];
     let users: User[];
     let gameId: BigNumber;
     let assets: BigNumber[];
@@ -1030,14 +1029,20 @@ describe('GameToken', function () {
         )
       ).to.be.revertedWith('DESTINATION_GAME_CONTRACT');
     });
-    it('fails if "from" != game owner', async function () {
-      await expect(
-        GameManager.Game.destroyGame(others[2], others[1], gameId)
-      ).to.be.revertedWith('DESTROY_ACCESS_DENIED');
-    });
+
+    // it('fails if "from" != game owner', async function () {
+    //   await expect(
+    //     GameManager.Game.destroyGame(
+    //       GameOwner.address,
+    //       GameOwner.address,
+    //       gameId
+    //     )
+    //   ).to.be.revertedWith('DESTROY_ACCESS_DENIED');
+    // });
+
     it('fails if called by non-Manager when gameManager is set', async function () {
       await expect(
-        gameToken.destroyGame(others[0], others[0], gameId)
+        gameToken.destroyGame(GameOwner.address, GameOwner.address, gameId)
       ).to.be.revertedWith('INVALID_GAME_MANAGER');
     });
 
@@ -1101,7 +1106,6 @@ describe('GameToken', function () {
 
     describe('GameToken: Destroy... then Recover', function () {
       before(async function () {
-        // const quantities = [7, 11];
         const assetReceipts: Receipt[] = [];
         assetReceipts.push(
           await supplyAssets(GameOwner.address, GameOwner.address, 7)
@@ -1175,8 +1179,8 @@ describe('GameToken', function () {
           GameOwner.address,
           GameOwner.address,
           gameId,
-          assets[0],
-          quantities[0]
+          [assets[0]],
+          [quantities[0]]
         );
 
         const balancesAfter = await getBalances(
@@ -1199,8 +1203,8 @@ describe('GameToken', function () {
           GameOwner.address,
           GameOwner.address,
           gameId,
-          assets[1],
-          quantities[1]
+          [assets[1]],
+          [quantities[1]]
         );
         const balancesFinal = await getBalances(
           assetContract,
