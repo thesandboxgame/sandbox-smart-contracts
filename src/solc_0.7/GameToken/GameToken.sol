@@ -54,11 +54,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
         _;
     }
 
-    modifier ownerOrEditorOnly(uint256 id) {
-        require(msg.sender == _ownerOf(id) || _gameEditors[id][msg.sender], "OWNER_EDITOR_ACCESS_DENIED");
-        _;
-    }
-
     modifier notToZero(address to) {
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
         _;
@@ -264,7 +259,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256[] memory assetIds,
         uint256[] memory values,
         string memory uri
-    ) public override gameManagerOnly() ownerOrEditorOnly(gameId) {
+    ) public override gameManagerOnly() {
         require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
         for (uint256 i = 0; i < assetIds.length; i++) {
             _gameAssets[gameId][assetIds[i]] = values[i];
@@ -291,7 +286,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256[] memory values,
         address to,
         string memory uri
-    ) public override gameManagerOnly() ownerOrEditorOnly(gameId) notToZero(to) {
+    ) public override gameManagerOnly() notToZero(to) {
         require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
 
         for (uint256 i = 0; i < assetIds.length; i++) {
