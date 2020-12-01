@@ -28,13 +28,14 @@ contract ERC20Token is ERC20BasicApproveExtension, ERC677Extension, TheSandbox71
         bytes32 s
     ) public {
         require(deadline >= block.timestamp, "PAST_DEADLINE");
-        bytes32 digest = keccak256(
-            abi.encodePacked(
-                "\x19\x01",
-                DOMAIN_SEPARATOR,
-                keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
-            )
-        );
+        bytes32 digest =
+            keccak256(
+                abi.encodePacked(
+                    "\x19\x01",
+                    DOMAIN_SEPARATOR,
+                    keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+                )
+            );
         address recoveredAddress = ecrecover(digest, v, r, s);
         require(recoveredAddress != address(0) && recoveredAddress == owner, "INVALID_SIGNATURE");
         _approveFor(owner, spender, value);
@@ -45,9 +46,8 @@ contract ERC20Token is ERC20BasicApproveExtension, ERC677Extension, TheSandbox71
     }
 
     // //////////////////////// DATA /////////////////////
-    bytes32 internal constant PERMIT_TYPEHASH = keccak256(
-        "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-    );
+    bytes32 internal constant PERMIT_TYPEHASH =
+        keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
     // /////////////////// CONSTRUCTOR ////////////////////
     constructor(
