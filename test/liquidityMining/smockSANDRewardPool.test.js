@@ -51,15 +51,15 @@ describe('SmockitSANDRewardPool', function () {
     );
 
     // Function to modify user's staked balance in Reward Contract
-    async function setUserStakedBalance(stakedBalance, user) {
-      modifiableRewardContract.smodify.put({
-        _balances: {
-          [user]: stakedBalance,
-        },
-      });
-      const userStakedBal = await modifiableRewardContract.balanceOf(user);
-      expect(userStakedBal).to.equal(stakedBalance);
-    }
+    // async function setUserStakedBalance(stakedBalance, user) {
+    //   modifiableRewardContract.smodify.put({
+    //     _balances: {
+    //       [user]: stakedBalance,
+    //     },
+    //   });
+    //   const userStakedBal = await modifiableRewardContract.balanceOf(user);
+    //   expect(userStakedBal).to.equal(stakedBalance);
+    // }
 
     // Create modifiable MockLand contract uing Smoddit
     const modifiableNFTContractFactory = await smoddit('MockLand'); // TODO: MockLand contract works here because the artifact can be found, but ideally we want this to be Land
