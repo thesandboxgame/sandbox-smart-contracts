@@ -19,11 +19,9 @@ const dummyHash =
   '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
 const dummyHash2 =
   '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE';
-const dummyHash3 =
-  '0xAAAAAAAFFFFFFFFFFFFFFFFFFFFFFFEEEEEEEEEEEEEEEEEEEEEEEEEEEAAAAAAA';
-const packId = 0;
-const packId2 = 1;
-const packId3 = 2;
+let packId = 0;
+// const packId2 = 1;
+
 const METATX_SANDBOX = 1;
 const METATX_2771 = 2;
 const rng = new Prando('GameToken');
@@ -31,6 +29,75 @@ const rng = new Prando('GameToken');
 // for prod use 39614081257132170000000000000(MAX_UINT96) as upper limit
 async function getRandom(): Promise<number> {
   return rng.nextInt(1, 1000000000);
+}
+
+async function getNewGame(
+  gameToken: Contract,
+  gameTokenAsAdmin: Contract,
+  GameOwner: User,
+  users: User[],
+  quantities: number[]
+) {
+  const GameManager = users[11];
+  await gameTokenAsAdmin.setGameManager(GameManager.address);
+  const assetContract = await ethers.getContract('Asset');
+
+  let assetReceipt: Receipt;
+  assetReceipt = await supplyAssets(
+    GameOwner.address,
+    packId,
+    GameOwner.address,
+    quantities[0],
+    dummyHash
+  );
+  packId++;
+  const assetReceipt1 = assetReceipt;
+  assetReceipt = await supplyAssets(
+    GameOwner.address,
+    packId,
+    GameOwner.address,
+    quantities[1],
+    dummyHash2
+  );
+  packId++;
+  const assetReceipt2 = assetReceipt;
+  9;
+
+  const assetTransferEvent = await expectEventWithArgsFromReceipt(
+    assetContract,
+    assetReceipt1,
+    'TransferSingle'
+  );
+  const assetTransferEvent2 = await expectEventWithArgsFromReceipt(
+    assetContract,
+    assetReceipt2,
+    'TransferSingle'
+  );
+
+  const assetId = assetTransferEvent.args[3];
+  const assetId2 = assetTransferEvent2.args[3];
+  const randomId = await getRandom();
+
+  const receipt = await waitFor(
+    GameManager.Game.createGame(
+      GameOwner.address,
+      GameOwner.address,
+      [assetId, assetId2],
+      [quantities[0], quantities[1]],
+      [],
+      '',
+      randomId
+    )
+  );
+
+  const transferEvent = await expectEventWithArgsFromReceipt(
+    gameToken,
+    receipt,
+    'Transfer'
+  );
+  const gameId = transferEvent.args[2];
+
+  return {gameId, assetId, assetId2};
 }
 
 async function getBalances(
@@ -280,7 +347,7 @@ describe('GameToken', function () {
         let assetReceipt: Receipt;
         assetReceipt = await supplyAssets(
           GameOwner.address,
-          packId,
+          packId++,
           GameOwner.address,
           3,
           dummyHash
@@ -288,7 +355,7 @@ describe('GameToken', function () {
         const assetReceipt1 = assetReceipt;
         assetReceipt = await supplyAssets(
           GameOwner.address,
-          packId2,
+          packId++,
           GameOwner.address,
           2,
           dummyHash2
@@ -576,14 +643,14 @@ describe('GameToken', function () {
         const assetContract = await ethers.getContract('Asset');
         const assetReceipt = await supplyAssets(
           GameOwner.address,
-          packId,
+          packId++,
           GameOwner.address,
           7,
           dummyHash
         );
         const assetReceipt2 = await supplyAssets(
           GameOwner.address,
-          packId2,
+          packId++,
           GameOwner.address,
           42,
           dummyHash2
@@ -941,70 +1008,18 @@ describe('GameToken', function () {
     const quantity = 7;
     const quantity2 = 11;
 
-    async function getNewGame() {
-      ({gameToken, gameTokenAsAdmin, GameOwner, users} = await setupTest());
-      others = await getUnnamedAccounts();
-      GameManager = users[11];
-      await gameTokenAsAdmin.setGameManager(GameManager.address);
-
-      const assetContract = await ethers.getContract('Asset');
-      let assetReceipt: Receipt;
-      assetReceipt = await supplyAssets(
-        GameOwner.address,
-        packId,
-        GameOwner.address,
-        quantity,
-        dummyHash
-      );
-      const assetReceipt1 = assetReceipt;
-      assetReceipt = await supplyAssets(
-        GameOwner.address,
-        packId2,
-        GameOwner.address,
-        quantity2,
-        dummyHash2
-      );
-      const assetReceipt2 = assetReceipt;
-      9;
-
-      const assetTransferEvent = await expectEventWithArgsFromReceipt(
-        assetContract,
-        assetReceipt1,
-        'TransferSingle'
-      );
-      const assetTransferEvent2 = await expectEventWithArgsFromReceipt(
-        assetContract,
-        assetReceipt2,
-        'TransferSingle'
-      );
-
-      assetId = assetTransferEvent.args[3];
-      assetId2 = assetTransferEvent2.args[3];
-      const randomId = await getRandom();
-
-      const receipt = await waitFor(
-        GameManager.Game.createGame(
-          GameOwner.address,
-          GameOwner.address,
-          [assetId, assetId2],
-          [quantity, quantity2],
-          [],
-          '',
-          randomId
-        )
-      );
-
-      const transferEvent = await expectEventWithArgsFromReceipt(
-        gameToken,
-        receipt,
-        'Transfer'
-      );
-
-      return transferEvent.args[2];
-    }
-
     before(async function () {
-      gameId = await getNewGame();
+      const quantities = [7, 11];
+      ({gameToken, gameTokenAsAdmin, users, GameOwner} = await setupTest());
+      others = await getUnnamedAccounts();
+      ({gameId, assetId, assetId2} = await getNewGame(
+        gameToken,
+        gameTokenAsAdmin,
+        GameOwner,
+        users,
+        quantities
+      ));
+      GameManager = users[11];
     });
 
     it('fails if "to" == address(0)', async function () {
@@ -1097,7 +1112,14 @@ describe('GameToken', function () {
 
     describe('GameToken: Destroy... then Recover', function () {
       before(async function () {
-        gameId = await getNewGame();
+        const quantities = [7, 11];
+        ({gameId, assetId, assetId2} = await getNewGame(
+          gameToken,
+          gameTokenAsAdmin,
+          GameOwner,
+          users,
+          quantities
+        ));
       });
 
       it('can destroy without transfer of assets', async function () {
