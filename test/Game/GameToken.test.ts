@@ -1030,15 +1030,15 @@ describe('GameToken', function () {
       ).to.be.revertedWith('DESTINATION_GAME_CONTRACT');
     });
 
-    // it('fails if "from" != game owner', async function () {
-    //   await expect(
-    //     GameManager.Game.destroyGame(
-    //       GameOwner.address,
-    //       GameOwner.address,
-    //       gameId
-    //     )
-    //   ).to.be.revertedWith('DESTROY_ACCESS_DENIED');
-    // });
+    it('fails if "from" != game owner', async function () {
+      await expect(
+        GameManager.Game.destroyGame(
+          gameToken.address,
+          GameOwner.address,
+          gameId
+        )
+      ).to.be.revertedWith('DESTROY_ACCESS_DENIED');
+    });
 
     it('fails if called by non-Manager when gameManager is set', async function () {
       await expect(
