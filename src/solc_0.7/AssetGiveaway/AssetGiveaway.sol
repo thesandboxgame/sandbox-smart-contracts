@@ -7,6 +7,8 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "./ClaimERC1155.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
 
+/// @title AssetGiveaway contract
+/// @notice This contract manages ERC1155 claims
 contract AssetGiveaway is WithAdmin, ClaimERC1155 {
     using SafeMath for uint256;
 
@@ -29,11 +31,19 @@ contract AssetGiveaway is WithAdmin, ClaimERC1155 {
         _expiryTime = expiryTime;
     }
 
+    /// @notice Function to set the merkle root hash for the asset data, if it is 0
+    /// @param merkleRoot the merkle root hash of the asset data
     function setMerkleRoot(bytes32 merkleRoot) external onlyAdmin {
         require(_merkleRoot == 0, "MERKLE_ROOT_ALREADY_SET");
         _merkleRoot = merkleRoot;
     }
 
+    /// @notice Function to permit the claiming of an asset to a reserved address
+    /// @param to the intended recipient (reserved address) of the ERC1155 tokens
+    /// @param assetIds the array of IDs of the asset tokens
+    /// @param assetValues the amounts of each token ID to transfer
+    /// @param proof the proof submitted for verification
+    /// @param salt the salt submitted for verification
     function claimAssets(
         address to,
         uint256[] calldata assetIds,
