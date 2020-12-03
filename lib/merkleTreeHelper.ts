@@ -45,8 +45,7 @@ function calculateLandHash(land: land, salt?: string): string {
   return solidityKeccak256(types, values);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function saltLands(lands: land[], secret?: any): Array<land> {
+function saltLands(lands: land[], secret?: string): Array<land> {
   const saltedLands = [];
   for (const land of lands) {
     let salt = land.salt;
@@ -118,8 +117,7 @@ function calculateAssetHash(asset: asset, salt?: string): string {
   return solidityKeccak256(types, values);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function saltAssets(assets: asset[], secret?: any): Array<asset> {
+function saltAssets(assets: asset[], secret?: string): Array<asset> {
   const saltedAssets = [];
   for (const asset of assets) {
     let salt = asset.salt;
