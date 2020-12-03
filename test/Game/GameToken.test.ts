@@ -1081,6 +1081,57 @@ describe('GameToken', function () {
     });
 
     describe('GameToken: destroyAndRecover', function () {
+      it('fails if "to" == address(0)', async function () {
+        await expect(
+          GameOwner.Game.destroyAndRecover(
+            GameOwner.address,
+            ethers.constants.AddressZero,
+            gameId,
+            [],
+            []
+          )
+        ).to.be.revertedWith('DESTINATION_ZERO_ADDRESS');
+      });
+
+      it('fails to destroy if "to" == Game Token contract', async function () {
+        await expect(
+          GameOwner.Game.destroyAndRecover(
+            GameOwner.address,
+            gameToken.address,
+            gameId,
+            [],
+            []
+          )
+        ).to.be.revertedWith('DESTINATION_GAME_CONTRACT');
+      });
+
+      it('fails if "from" != game owner', async function () {
+        await expect(
+          GameOwner.Game.destroyAndRecover(
+            gameToken.address,
+            GameOwner.address,
+            gameId,
+            [],
+            []
+          )
+        ).to.be.revertedWith('DESTROY_INVALID_FROM');
+      });
+
+      it('fails if sender != game owner and not metatx', async function () {
+        const gameAsOther = await gameToken.connect(
+          ethers.provider.getSigner(users[6].address)
+        );
+        await expect(
+          gameAsOther.destroyAndRecover(
+            gameToken.address,
+            GameOwner.address,
+            gameId,
+            [],
+            []
+          )
+        ).to.be.revertedWith('DESTROY_ACCESS_DENIED');
+      });
+
       it('can destroy GAME and recover assets in 1 tx if not too many assets', async function () {
         const assetContract = await ethers.getContract('Asset');
         await gameTokenAsAdmin.setGameManager(ethers.constants.AddressZero);
