@@ -20,21 +20,21 @@ describe('GemsCatalystsRegistry', function () {
     );
   });
 
-  it('burnCatalyst should burn 2 common catalysts from catalystMinter account', async function () {
+  it('burnCatalyst should burn 2 common catalysts from catalystOwner account', async function () {
     const {
       gemsCatalystsRegistry,
       commonCatalyst,
-      catalystMinter,
+      catalystOwner,
     } = await setupGemsAndCatalysts();
     const catalystId = await commonCatalyst.catalystId();
     const totalSupplyBefore = await commonCatalyst.totalSupply();
-    const balanceBeforeBurning = await commonCatalyst.balanceOf(catalystMinter);
+    const balanceBeforeBurning = await commonCatalyst.balanceOf(catalystOwner);
     const burnAmount = BigNumber.from('2');
     await gemsCatalystsRegistry
-      .connect(ethers.provider.getSigner(catalystMinter))
-      .burnCatalyst(catalystMinter, catalystId, burnAmount);
+      .connect(ethers.provider.getSigner(catalystOwner))
+      .burnCatalyst(catalystOwner, catalystId, burnAmount);
     const totalSupplyAfter = await commonCatalyst.totalSupply();
-    const balanceAfterBurning = await commonCatalyst.balanceOf(catalystMinter);
+    const balanceAfterBurning = await commonCatalyst.balanceOf(catalystOwner);
     expect(balanceAfterBurning).to.equal(balanceBeforeBurning.sub(burnAmount));
     expect(totalSupplyAfter).to.equal(totalSupplyBefore.sub(burnAmount));
   });
@@ -82,20 +82,20 @@ describe('GemsCatalystsRegistry', function () {
     ).to.be.revertedWith('Not enough funds');
   });
 
-  it('burnGem should burn 3 power gems from gemMinter account', async function () {
+  it('burnGem should burn 3 power gems from gemOwner account', async function () {
     const {
       gemsCatalystsRegistry,
       powerGem,
-      gemMinter,
+      gemOwner,
     } = await setupGemsAndCatalysts();
     const gemId = await powerGem.gemId();
     const totalSupplyBefore = await powerGem.totalSupply();
-    const balanceBeforeBurning = await powerGem.balanceOf(gemMinter);
+    const balanceBeforeBurning = await powerGem.balanceOf(gemOwner);
     const burnAmount = BigNumber.from('3');
     await gemsCatalystsRegistry
-      .connect(ethers.provider.getSigner(gemMinter))
-      .burnGem(gemMinter, gemId, burnAmount);
-    const balanceAfterBurning = await powerGem.balanceOf(gemMinter);
+      .connect(ethers.provider.getSigner(gemOwner))
+      .burnGem(gemOwner, gemId, burnAmount);
+    const balanceAfterBurning = await powerGem.balanceOf(gemOwner);
     const totalSupplyAfter = await powerGem.totalSupply();
     expect(balanceAfterBurning).to.equal(balanceBeforeBurning.sub(burnAmount));
     expect(totalSupplyAfter).to.equal(totalSupplyBefore.sub(burnAmount));
@@ -223,21 +223,19 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry,
       powerGem,
       defenseGem,
-      gemMinter,
+      gemOwner,
     } = await setupGemsAndCatalysts();
     const powerGemId = await powerGem.gemId();
     const defenseGemId = await defenseGem.gemId();
-    const balanceBeforeBurningPowerGem = await powerGem.balanceOf(gemMinter);
-    const balanceBeforeBurningDefenseGem = await defenseGem.balanceOf(
-      gemMinter
-    );
+    const balanceBeforeBurningPowerGem = await powerGem.balanceOf(gemOwner);
+    const balanceBeforeBurningDefenseGem = await defenseGem.balanceOf(gemOwner);
     const totalSupplyBeforeBurningPowerGem = await powerGem.totalSupply();
     const totalSupplyBeforeBurningDefenseGem = await defenseGem.totalSupply();
     await gemsCatalystsRegistry
-      .connect(ethers.provider.getSigner(gemMinter))
-      .burnDifferentGems(gemMinter, [defenseGemId, powerGemId]);
-    const balanceAfterBurningPowerGem = await powerGem.balanceOf(gemMinter);
-    const balanceAfterBurningDefenseGem = await defenseGem.balanceOf(gemMinter);
+      .connect(ethers.provider.getSigner(gemOwner))
+      .burnDifferentGems(gemOwner, [defenseGemId, powerGemId]);
+    const balanceAfterBurningPowerGem = await powerGem.balanceOf(gemOwner);
+    const balanceAfterBurningDefenseGem = await defenseGem.balanceOf(gemOwner);
     const totalSupplyAfterBurningPowerGem = await powerGem.totalSupply();
     const totalSupplyAfterBurningDefenseGem = await defenseGem.totalSupply();
     const burnAmount = BigNumber.from('1');
@@ -260,29 +258,29 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry,
       rareCatalyst,
       commonCatalyst,
-      catalystMinter,
+      catalystOwner,
     } = await setupGemsAndCatalysts();
     const rareCatalystId = await rareCatalyst.catalystId();
     const commonCatalystId = await commonCatalyst.catalystId();
     const balanceBeforeBurningRareCatalyst = await rareCatalyst.balanceOf(
-      catalystMinter
+      catalystOwner
     );
     const balanceBeforeBurningCommonCatalyst = await commonCatalyst.balanceOf(
-      catalystMinter
+      catalystOwner
     );
     const totalSupplyBeforeBurningRareCatalyst = await rareCatalyst.totalSupply();
     const totalSupplyBeforeBurningDefenseGem = await commonCatalyst.totalSupply();
     await gemsCatalystsRegistry
-      .connect(ethers.provider.getSigner(catalystMinter))
-      .burnDifferentCatalysts(catalystMinter, [
+      .connect(ethers.provider.getSigner(catalystOwner))
+      .burnDifferentCatalysts(catalystOwner, [
         rareCatalystId,
         commonCatalystId,
       ]);
     const balanceAfterBurningRareCatalyst = await rareCatalyst.balanceOf(
-      catalystMinter
+      catalystOwner
     );
     const balanceAfterBurningCommonCatalyst = await commonCatalyst.balanceOf(
-      catalystMinter
+      catalystOwner
     );
     const totalSupplyAfterBurningRareCatalyst = await rareCatalyst.totalSupply();
     const totalSupplyAfterBurningDefenseGem = await commonCatalyst.totalSupply();
@@ -306,22 +304,20 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry,
       powerGem,
       defenseGem,
-      gemMinter,
+      gemOwner,
     } = await setupGemsAndCatalysts();
     const powerGemId = await powerGem.gemId();
     const defenseGemId = await defenseGem.gemId();
-    const balanceBeforeBurningPowerGem = await powerGem.balanceOf(gemMinter);
-    const balanceBeforeBurningDefenseGem = await defenseGem.balanceOf(
-      gemMinter
-    );
+    const balanceBeforeBurningPowerGem = await powerGem.balanceOf(gemOwner);
+    const balanceBeforeBurningDefenseGem = await defenseGem.balanceOf(gemOwner);
     const totalSupplyBeforeBurningPowerGem = await powerGem.totalSupply();
     const totalSupplyBeforeBurningDefenseGem = await defenseGem.totalSupply();
     const burnAmounts = [BigNumber.from('4'), BigNumber.from('6')];
     await gemsCatalystsRegistry
-      .connect(ethers.provider.getSigner(gemMinter))
-      .batchBurnGems(gemMinter, [defenseGemId, powerGemId], burnAmounts);
-    const balanceAfterBurningPowerGem = await powerGem.balanceOf(gemMinter);
-    const balanceAfterBurningDefenseGem = await defenseGem.balanceOf(gemMinter);
+      .connect(ethers.provider.getSigner(gemOwner))
+      .batchBurnGems(gemOwner, [defenseGemId, powerGemId], burnAmounts);
+    const balanceAfterBurningPowerGem = await powerGem.balanceOf(gemOwner);
+    const balanceAfterBurningDefenseGem = await defenseGem.balanceOf(gemOwner);
     const totalSupplyAfterBurningPowerGem = await powerGem.totalSupply();
     const totalSupplyAfterBurningDefenseGem = await defenseGem.totalSupply();
     expect(balanceAfterBurningPowerGem).to.equal(

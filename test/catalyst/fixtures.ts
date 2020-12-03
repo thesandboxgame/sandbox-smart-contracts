@@ -65,28 +65,28 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
 
   await commonCatalyst
     .connect(ethers.provider.getSigner(catalystMinter))
-    .mint(catalystMinter, BigNumber.from('8'));
+    .mint(catalystOwner, BigNumber.from('8'));
   await commonCatalyst
     .connect(ethers.provider.getSigner(catalystMinter))
     .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await rareCatalyst
     .connect(ethers.provider.getSigner(catalystMinter))
-    .mint(catalystMinter, BigNumber.from('8'));
+    .mint(catalystOwner, BigNumber.from('8'));
   await rareCatalyst
     .connect(ethers.provider.getSigner(catalystMinter))
     .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await powerGem
     .connect(ethers.provider.getSigner(gemMinter))
-    .mint(gemMinter, BigNumber.from('100'));
+    .mint(gemOwner, BigNumber.from('100'));
   await powerGem
     .connect(ethers.provider.getSigner(gemMinter))
     .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await defenseGem
     .connect(ethers.provider.getSigner(gemMinter))
-    .mint(gemMinter, BigNumber.from('50'));
+    .mint(gemOwner, BigNumber.from('50'));
   await defenseGem
     .connect(ethers.provider.getSigner(gemMinter))
     .setSuperOperator(gemsCatalystsRegistry.address, true);
@@ -106,5 +106,7 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     gemsCatalystsRegistryAdmin,
     catalystMinter,
     gemMinter,
+    catalystOwner,
+    gemOwner,
   };
 });
