@@ -278,7 +278,9 @@ contract GameToken is ERC721BaseToken, IGameToken {
     ) public override gameManagerOnly() {
         require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
         for (uint256 i = 0; i < assetIds.length; i++) {
-            _gameAssets[gameId][assetIds[i]] = values[i];
+            uint256 currentValue = _gameAssets[gameId][assetIds[i]];
+            require(values[i] != 0, "INVALID_ASSET_ADDITION");
+            _gameAssets[gameId][assetIds[i]] = currentValue.add(values[i]);
         }
         if (assetIds.length == 1) {
             _asset.safeTransferFrom(from, address(this), assetIds[0], values[0], "");
