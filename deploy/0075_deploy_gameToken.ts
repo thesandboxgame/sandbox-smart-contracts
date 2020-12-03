@@ -12,9 +12,7 @@ const func: DeployFunction = async function (hre) {
   const gameManagerContract = await deployments.getOrNull('GameTokenManager');
 
   if (!gameManagerContract) {
-    gameManager = ethers.utils.getAddress(
-      '0x0000000000000000000000000000000000000000'
-    );
+    gameManager = ethers.constants.AddressZero;
     // @review in this case we should only allow deploying to hardhat-network !
     const message =
       '!!! GameManager not deployed, using address(0) instead !!!';
