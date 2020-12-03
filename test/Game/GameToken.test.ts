@@ -546,8 +546,18 @@ describe('GameToken', function () {
       });
 
       it('should allow the owner to add game editors', async function () {
-        await GameOwner.Game.setGameEditor(gameId, GameEditor1.address, true);
-        await GameOwner.Game.setGameEditor(gameId, GameEditor2.address, true);
+        await GameOwner.Game.setGameEditor(
+          GameOwner.address,
+          gameId,
+          GameEditor1.address,
+          true
+        );
+        await GameOwner.Game.setGameEditor(
+          GameOwner.address,
+          gameId,
+          GameEditor2.address,
+          true
+        );
         const isEditor1 = await gameToken.isGameEditor(
           gameId,
           GameEditor1.address
@@ -561,8 +571,18 @@ describe('GameToken', function () {
         expect(isEditor2).to.be.true;
       });
       it('should allow the owner to remove game editors', async function () {
-        await GameOwner.Game.setGameEditor(gameId, GameEditor1.address, false);
-        await GameOwner.Game.setGameEditor(gameId, GameEditor2.address, false);
+        await GameOwner.Game.setGameEditor(
+          GameOwner.address,
+          gameId,
+          GameEditor1.address,
+          false
+        );
+        await GameOwner.Game.setGameEditor(
+          GameOwner.address,
+          gameId,
+          GameEditor2.address,
+          false
+        );
         const isEditor1 = await gameToken.isGameEditor(
           gameId,
           GameEditor1.address
@@ -578,7 +598,7 @@ describe('GameToken', function () {
       it('should revert if non-owner trys to set Game Editors', async function () {
         const editor = users[1];
         await expect(
-          gameToken.setGameEditor(42, editor.address, false)
+          gameToken.setGameEditor(users[1].address, 42, editor.address, false)
         ).to.be.revertedWith('EDITOR_ACCESS_DENIED');
       });
 
@@ -923,9 +943,10 @@ describe('GameToken', function () {
     let gameId: BigNumber;
     let GameOwner: User;
     let GameEditor1: User;
+    let users: User[];
 
     before(async function () {
-      ({gameToken, GameOwner, GameEditor1} = await setupTest());
+      ({gameToken, GameOwner, GameEditor1, users} = await setupTest());
       const randomId = await getRandom();
       const receipt = await waitFor(
         GameOwner.Game.createGame(
@@ -944,7 +965,12 @@ describe('GameToken', function () {
         'Transfer'
       );
       gameId = transferEvent.args[2];
-      await GameOwner.Game.setGameEditor(gameId, GameEditor1.address, true);
+      await GameOwner.Game.setGameEditor(
+        GameOwner.address,
+        gameId,
+        GameEditor1.address,
+        true
+      );
     });
 
     it('can get the ERC721 token contract name', async function () {
@@ -963,7 +989,11 @@ describe('GameToken', function () {
     });
 
     it('GAME editors can set the tokenURI', async function () {
-      await GameEditor1.Game.setTokenURI(gameId, 'Hello Sandbox');
+      await GameEditor1.Game.setTokenURI(
+        GameEditor1.address,
+        gameId,
+        'Hello Sandbox'
+      );
       const URI = await gameToken.tokenURI(gameId);
       expect(URI).to.be.equal('Hello Sandbox');
     });
@@ -977,9 +1007,9 @@ describe('GameToken', function () {
 
     it('should revert if not ownerOf or gameEditor', async function () {
       const {gameToken} = await setupTest();
-      await expect(gameToken.setTokenURI(11, 'New URI')).to.be.revertedWith(
-        'URI_ACCESS_DENIED'
-      );
+      await expect(
+        gameToken.setTokenURI(users[0].address, 11, 'New URI')
+      ).to.be.revertedWith('URI_ACCESS_DENIED');
     });
 
     it('should be able to retrieve the creator address from the gameId', async function () {
