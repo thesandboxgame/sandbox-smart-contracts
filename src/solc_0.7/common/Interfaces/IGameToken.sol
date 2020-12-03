@@ -56,9 +56,10 @@ interface IGameToken {
         string calldata uri
     ) external;
 
-    function getAssets(uint256 gameId, uint256[] calldata assetIds) external view returns (uint256[] calldata);
+    function getAssetBalances(uint256 gameId, uint256[] calldata assetIds) external view returns (uint256[] calldata);
 
     function setGameEditor(
+        address from,
         uint256 gameId,
         address editor,
         bool isEditor
@@ -80,7 +81,11 @@ interface IGameToken {
 
     function tokenURI(uint256 gameId) external view returns (string memory uri);
 
-    function setTokenURI(uint256 gameId, string calldata URI) external;
+    function setTokenURI(
+        address from,
+        uint256 gameId,
+        string calldata URI
+    ) external;
 
     function onERC1155Received(
         address operator,

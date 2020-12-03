@@ -65,7 +65,12 @@ contract GameToken is ERC721BaseToken, IGameToken {
     ///////////////////////////////  Functions //////////////////////////////
 
     /// @notice Function to get the amount of each assetId in a GAME
-    function getAssets(uint256 gameId, uint256[] calldata assetIds) external view override returns (uint256[] memory) {
+    function getAssetBalances(uint256 gameId, uint256[] calldata assetIds)
+        external
+        view
+        override
+        returns (uint256[] memory)
+    {
         uint256 length = assetIds.length;
         uint256[] memory assets;
         assets = new uint256[](length);
@@ -76,15 +81,17 @@ contract GameToken is ERC721BaseToken, IGameToken {
     }
 
     /// @notice Function to allow token owner to set game editors
+    /// @param from The address of the one creating the game (may be different from msg.sender if metaTx)
     /// @param gameId The id of the GAME token owned by owner
     /// @param editor The address of the editor to set
     /// @param isEditor Add or remove the ability to edit
     function setGameEditor(
+        address from,
         uint256 gameId,
         address editor,
         bool isEditor
     ) external override {
-        require(msg.sender == _ownerOf(gameId), "EDITOR_ACCESS_DENIED");
+        require(msg.sender == _ownerOf(gameId) || _isValidMetaTx(from), "EDITOR_ACCESS_DENIED");
         _gameEditors[gameId][editor] = isEditor;
     }
 
@@ -210,10 +217,18 @@ contract GameToken is ERC721BaseToken, IGameToken {
     }
 
     /// @notice Set the URI of a specific game token
+    /// @param from The address of the one creating the game (may be different from msg.sender if metaTx)
     /// @param gameId The id of the game token
     /// @param URI The URI string for the token's metadata
-    function setTokenURI(uint256 gameId, string calldata URI) external override {
-        require(msg.sender == _ownerOf(gameId) || _gameEditors[gameId][msg.sender], "URI_ACCESS_DENIED");
+    function setTokenURI(
+        address from,
+        uint256 gameId,
+        string calldata URI
+    ) external override {
+        require(
+            msg.sender == _ownerOf(gameId) || _isValidMetaTx(from) || _gameEditors[gameId][msg.sender],
+            "URI_ACCESS_DENIED"
+        );
         _setTokenURI(gameId, URI);
     }
 
@@ -332,6 +347,8 @@ contract GameToken is ERC721BaseToken, IGameToken {
     /// @param gameId Id of the burnt GAME token
     /// @param assetIds The assets to recover from the burnt GAME
     /// @param values The amount of each asset to recover
+    // @review should not be manager protected
+    // add metaTx support
     function recoverAssets(
         address from,
         address to,
