@@ -28,16 +28,14 @@ interface IGameToken {
         address from,
         address to,
         uint256 gameId,
-        uint256[] calldata assetIds,
-        uint256[] calldata values
+        uint256[] calldata assetIds
     ) external;
 
     function destroyAndRecover(
         address from,
         address to,
         uint256 gameId,
-        uint256[] calldata assetIds,
-        uint256[] calldata values
+        uint256[] calldata assetIds
     ) external;
 
     function addAssets(
