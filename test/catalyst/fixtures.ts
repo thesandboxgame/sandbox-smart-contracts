@@ -1,5 +1,10 @@
-import { ethers, deployments, getUnnamedAccounts, getNamedAccounts } from 'hardhat';
-import { Contract, BigNumber } from 'ethers';
+import {
+  ethers,
+  deployments,
+  getUnnamedAccounts,
+  getNamedAccounts,
+} from 'hardhat';
+import {Contract, BigNumber} from 'ethers';
 
 const exampleGemId = 6;
 const notInOrderGemId = 56;
@@ -18,7 +23,11 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   const commonCatalyst: Contract = await ethers.getContract('Catalyst_Common');
   const rareCatalyst: Contract = await ethers.getContract('Catalyst_Rare');
   const users = await getUnnamedAccounts();
-  const { catalystMinter, gemMinter } = await getNamedAccounts();
+  const {
+    catalystMinter,
+    gemMinter,
+    gemsCatalystsRegistryAdmin,
+  } = await getNamedAccounts();
   const catalystOwner = users[0];
   const gemOwner = users[0];
 
@@ -34,12 +43,7 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     contract: 'Gem',
     from: gemOwner,
     log: true,
-    args: [
-      'Gem_NotInOrder',
-      'Gem_NotInOrder',
-      gemOwner,
-      notInOrderGemId,
-    ],
+    args: ['Gem_NotInOrder', 'Gem_NotInOrder', gemOwner, notInOrderGemId],
   });
   const gemNotInOrder: Contract = await ethers.getContract('Gem_NotInOrder');
 
@@ -96,10 +100,11 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     luckGem,
     gemExample,
     gemNotInOrder,
+    catalystExample,
     commonCatalyst,
     rareCatalyst,
-    catalystExample,
+    gemsCatalystsRegistryAdmin,
     catalystMinter,
-    gemMinter
+    gemMinter,
   };
 });
