@@ -1210,7 +1210,7 @@ describe('GameToken', function () {
 
       it('fails to recover if "to" address is the gameToken contract', async function () {
         await expect(
-          GameManager.Game.recoverAssets(
+          GameOwner.Game.recoverAssets(
             GameOwner.address,
             gameToken.address,
             gameId,
@@ -1220,13 +1220,28 @@ describe('GameToken', function () {
         ).to.be.revertedWith('DESTINATION_GAME_CONTRACT');
       });
 
+      it('fails to recover assets if caller is not from or validMetaTx', async function () {
+        const gameAsOther = await gameToken.connect(
+          ethers.provider.getSigner(users[6].address)
+        );
+        await expect(
+          gameAsOther.recoverAssets(
+            GameOwner.address,
+            GameOwner.address,
+            gameId,
+            [assets[0]],
+            [quantities[0]]
+          )
+        ).to.be.revertedWith('INVALID_RECOVERY_CALLER');
+      });
+
       it('can recover remaining assets from burnt GAME in batches', async function () {
         const assetContract = await ethers.getContract('Asset');
         await expect(gameToken.ownerOf(gameId)).to.be.revertedWith(
           'token does not exist'
         );
 
-        await GameManager.Game.recoverAssets(
+        await GameOwner.Game.recoverAssets(
           GameOwner.address,
           GameOwner.address,
           gameId,
@@ -1250,7 +1265,7 @@ describe('GameToken', function () {
         expect(contractBalanceAfter).to.be.equal(0);
         expect(contractBalanceAfter2).to.be.equal(quantities[1]);
 
-        await GameManager.Game.recoverAssets(
+        await GameOwner.Game.recoverAssets(
           GameOwner.address,
           GameOwner.address,
           gameId,
