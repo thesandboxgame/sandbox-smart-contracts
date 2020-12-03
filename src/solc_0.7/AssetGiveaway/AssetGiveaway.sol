@@ -2,56 +2,79 @@
 pragma solidity 0.7.1;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
+import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "./ClaimERC1155.sol";
-import "../common/BaseWithStorage/WithMetaTransaction.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
 
-contract AssetGiveaway is WithAdmin, WithMetaTransaction, ClaimERC1155 {
+/// @title AssetGiveaway contract
+/// @notice This contract manages ERC1155 claims
+contract AssetGiveaway is WithAdmin, ClaimERC1155 {
     using SafeMath for uint256;
 
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
 
-    constructor(AssetToken asset, bytes32 merkleRoot) ClaimERC1155(asset, merkleRoot) {}
+    uint256 internal immutable _expiryTime;
 
-    // TODO: add _expiryTime for giveaway
+    mapping(address => bool) public claimed;
 
+    constructor(
+        address asset,
+        address admin,
+        bytes32 merkleRoot,
+        address assetsHolder,
+        uint256 expiryTime
+    ) ClaimERC1155(IERC1155(asset), assetsHolder) {
+        _admin = admin;
+        _merkleRoot = merkleRoot;
+        _expiryTime = expiryTime;
+    }
+
+    /// @notice Function to set the merkle root hash for the asset data, if it is 0
+    /// @param merkleRoot the merkle root hash of the asset data
+    function setMerkleRoot(bytes32 merkleRoot) external onlyAdmin {
+        require(_merkleRoot == 0, "MERKLE_ROOT_ALREADY_SET");
+        _merkleRoot = merkleRoot;
+    }
+
+    /// @notice Function to permit the claiming of an asset to a reserved address
+    /// @param to the intended recipient (reserved address) of the ERC1155 tokens
+    /// @param assetIds the array of IDs of the asset tokens
+    /// @param assetValues the amounts of each token ID to transfer
+    /// @param proof the proof submitted for verification
+    /// @param salt the salt submitted for verification
     function claimAssets(
-        address from,
         address to,
         uint256[] calldata assetIds,
         uint256[] calldata assetValues,
-        bytes32[] calldata proof
+        bytes32[] calldata proof,
+        bytes32 salt
     ) external {
-        require(msg.sender == from || _metaTransactionContracts[msg.sender] > 0, "INVALID_SENDER"); // TODO: check bool
-        // require(block.timestamp < _expiryTime, "CLAIM_PERIOD_IS_OVER");
-        require(to != address(0), "DESTINATION_ZERO_ADDRESS");
-        _claimERC1155(from, to, assetIds, assetValues, proof);
-    }
-
-    function onERC1155BatchReceived(
-        address operator,
-        address, /*from*/
-        uint256[] calldata, /*ids*/
-        uint256[] calldata, /*values*/
-        bytes calldata /*data*/
-    ) external view returns (bytes4) {
-        if (operator == address(this)) {
-            return ERC1155_BATCH_RECEIVED;
-        }
-        revert("ERC1155_BATCH_REJECTED");
+        require(block.timestamp < _expiryTime, "CLAIM_PERIOD_IS_OVER");
+        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
+        require(claimed[to] == false, "DESTINATION_ALREADY_CLAIMED");
+        claimed[to] = true;
+        _claimERC1155(to, assetIds, assetValues, proof, salt);
     }
 
     function onERC1155Received(
-        address operator,
+        address, /*operator*/
         address, /*from*/
         uint256, /*id*/
         uint256, /*value*/
         bytes calldata /*data*/
-    ) external view returns (bytes4) {
-        if (operator == address(this)) {
-            return ERC1155_RECEIVED;
-        }
-        revert("ERC1155_REJECTED");
+    ) external pure returns (bytes4) {
+        return ERC1155_RECEIVED;
+    }
+
+    function onERC1155BatchReceived(
+        address, /*operator*/
+        address, /*from*/
+        uint256[] calldata, /*ids*/
+        uint256[] calldata, /*values*/
+        bytes calldata /*data*/
+    ) external pure returns (bytes4) {
+        return ERC1155_BATCH_RECEIVED;
     }
 }
