@@ -1051,7 +1051,7 @@ describe('GameToken', function () {
 
     it('fails if "to" == address(0)', async function () {
       await expect(
-        GameManager.Game.destroyGame(
+        GameOwner.Game.destroyGame(
           GameOwner.address,
           ethers.constants.AddressZero,
           gameId
@@ -1061,28 +1061,23 @@ describe('GameToken', function () {
 
     it('fails to destroy if "to" == Game Token contract', async function () {
       await expect(
-        GameManager.Game.destroyGame(
-          GameOwner.address,
-          gameToken.address,
-          gameId
-        )
+        GameOwner.Game.destroyGame(GameOwner.address, gameToken.address, gameId)
       ).to.be.revertedWith('DESTINATION_GAME_CONTRACT');
     });
 
     it('fails if "from" != game owner', async function () {
       await expect(
-        GameManager.Game.destroyGame(
-          gameToken.address,
-          GameOwner.address,
-          gameId
-        )
-      ).to.be.revertedWith('DESTROY_ACCESS_DENIED');
+        GameOwner.Game.destroyGame(gameToken.address, GameOwner.address, gameId)
+      ).to.be.revertedWith('DESTROY_INVALID_FROM');
     });
 
-    it('fails if called by non-Manager when gameManager is set', async function () {
+    it('fails if sender != game owner and not metatx', async function () {
+      const gameAsOther = await gameToken.connect(
+        ethers.provider.getSigner(users[6].address)
+      );
       await expect(
-        gameToken.destroyGame(GameOwner.address, GameOwner.address, gameId)
-      ).to.be.revertedWith('INVALID_GAME_MANAGER');
+        gameAsOther.destroyGame(gameToken.address, GameOwner.address, gameId)
+      ).to.be.revertedWith('DESTROY_ACCESS_DENIED');
     });
 
     describe('GameToken: destroyAndRecover', function () {
@@ -1181,7 +1176,7 @@ describe('GameToken', function () {
         expect(contractBalanceBefore).to.be.equal(quantities[0]);
         expect(contractBalanceBefore2).to.be.equal(quantities[1]);
 
-        await GameManager.Game.destroyGame(
+        await GameOwner.Game.destroyGame(
           GameOwner.address,
           GameOwner.address,
           gameId
