@@ -41,17 +41,11 @@ contract GemsCatalystsRegistry is WithAdmin {
     /// @param from address of the beneficiary to burn on behalf of
     /// @param gemIds list of gems to burn one gem from each
     function burnDifferentGems(address from, uint16[] calldata gemIds) external {
-        uint256[] memory amounts = new uint256[](gemIds.length);
-        uint16[] memory gemIdsDedup = new uint16[](gemIds.length);
         for (uint256 i = 0; i < gemIds.length; i++) {
-            gemIdsDedup[gemIds[i] - 1] = gemIds[i];
-            amounts[gemIds[i] - 1] += 1;
+            burnGem(from, gemIds[i], 1);
         }
     }
 
-    //input [5,2,4,1,1,4,2]
-    //gemIdsDedup [1,2,0,4,5]
-    //amounts     [2,2,0,2,1]
     /// @notice Burns one catalyst unit from each catalyst id on behalf of a beneficiary
     /// @param from address of the beneficiary to burn on behalf of
     /// @param catalystIds list of catalysts to burn one catalyst from each

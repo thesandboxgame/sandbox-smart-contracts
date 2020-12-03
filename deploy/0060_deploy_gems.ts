@@ -6,13 +6,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { deployments, getNamedAccounts } = hre;
   const { deploy } = deployments;
 
-  const { gemAdmin, deployer } = await getNamedAccounts();
+  const { gemMinter, deployer } = await getNamedAccounts();
   for (const gem of gems) {
     await deploy(`Gem_${gem.name}`, {
       contract: 'Gem',
       from: deployer,
       log: true,
-      args: [gem.name, gem.name, gemAdmin, gem.gemId],
+      args: [gem.name, gem.name, gemMinter, gem.gemId],
     });
   }
 };

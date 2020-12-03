@@ -1,4 +1,4 @@
-import { ethers, deployments, getUnnamedAccounts } from 'hardhat';
+import { ethers, deployments, getUnnamedAccounts, getNamedAccounts } from 'hardhat';
 import { Contract, BigNumber } from 'ethers';
 
 const exampleGemId = 6;
@@ -18,6 +18,7 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   const commonCatalyst: Contract = await ethers.getContract('Catalyst_Common');
   const rareCatalyst: Contract = await ethers.getContract('Catalyst_Rare');
   const users = await getUnnamedAccounts();
+  const { catalystMinter, gemMinter } = await getNamedAccounts();
   const catalystOwner = users[0];
   const gemOwner = users[0];
 
@@ -59,31 +60,31 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   );
 
   await commonCatalyst
-    .connect(ethers.provider.getSigner(catalystOwner))
-    .mint(catalystOwner, BigNumber.from('8'));
+    .connect(ethers.provider.getSigner(catalystMinter))
+    .mint(catalystMinter, BigNumber.from('8'));
   await commonCatalyst
-    .connect(ethers.provider.getSigner(catalystOwner))
+    .connect(ethers.provider.getSigner(catalystMinter))
     .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await rareCatalyst
-    .connect(ethers.provider.getSigner(catalystOwner))
-    .mint(catalystOwner, BigNumber.from('8'));
+    .connect(ethers.provider.getSigner(catalystMinter))
+    .mint(catalystMinter, BigNumber.from('8'));
   await rareCatalyst
-    .connect(ethers.provider.getSigner(catalystOwner))
+    .connect(ethers.provider.getSigner(catalystMinter))
     .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await powerGem
-    .connect(ethers.provider.getSigner(gemOwner))
-    .mint(gemOwner, BigNumber.from('100'));
+    .connect(ethers.provider.getSigner(gemMinter))
+    .mint(gemMinter, BigNumber.from('100'));
   await powerGem
-    .connect(ethers.provider.getSigner(gemOwner))
+    .connect(ethers.provider.getSigner(gemMinter))
     .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await defenseGem
-    .connect(ethers.provider.getSigner(gemOwner))
-    .mint(gemOwner, BigNumber.from('50'));
+    .connect(ethers.provider.getSigner(gemMinter))
+    .mint(gemMinter, BigNumber.from('50'));
   await defenseGem
-    .connect(ethers.provider.getSigner(gemOwner))
+    .connect(ethers.provider.getSigner(gemMinter))
     .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   return {
@@ -98,7 +99,7 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     commonCatalyst,
     rareCatalyst,
     catalystExample,
-    catalystOwner,
-    gemOwner
+    catalystMinter,
+    gemMinter
   };
 });
