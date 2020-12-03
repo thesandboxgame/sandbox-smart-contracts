@@ -1,5 +1,4 @@
 import {DeployFunction} from 'hardhat-deploy/types';
-import {ethers} from 'hardhat';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
@@ -8,28 +7,14 @@ const func: DeployFunction = async function (hre) {
   const sandContract = await deployments.get('Sand');
   const assetContract = await deployments.get('Asset');
 
-  let gameManager;
-  const gameManagerContract = await deployments.getOrNull('GameTokenManager');
-
-  if (!gameManagerContract) {
-    gameManager = ethers.constants.AddressZero;
-    // @review in this case we should only allow deploying to hardhat-network !
-    const message =
-      '!!! GameManager not deployed, using address(0) instead !!!';
-    console.log('\n \x1b[31m%s\x1b[0m \n', message);
-  } else {
-    gameManager = gameManagerContract.address;
-  }
+  const message =
+    '!!! GameManager not yet deployed !!! Add a script to set Game Manager address after we add the GM contract.';
+  console.log('\n \x1b[31m%s\x1b[0m \n', message);
 
   await deploy('GameToken', {
     from: deployer,
     log: true,
-    args: [
-      sandContract.address,
-      gameTokenAdmin,
-      gameManager,
-      assetContract.address,
-    ],
+    args: [sandContract.address, gameTokenAdmin, assetContract.address],
   });
 };
 
