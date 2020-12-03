@@ -7,8 +7,6 @@ import "../common/Interfaces/AssetToken.sol";
 import "../common/Interfaces/IGameToken.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-import "hardhat/console.sol";
-
 contract GameToken is ERC721BaseToken, IGameToken {
     ///////////////////////////////  Libs //////////////////////////////
 
@@ -40,17 +38,15 @@ contract GameToken is ERC721BaseToken, IGameToken {
     constructor(
         address metaTransactionContract,
         address admin,
-        address gameManager,
         AssetToken asset
     ) ERC721BaseToken(metaTransactionContract, admin) {
         _asset = asset;
-        _gameManager = gameManager;
     }
 
     ///////////////////////////////  Modifiers //////////////////////////////
 
     modifier gameManagerOnly() {
-        require(msg.sender == _gameManager || _gameManager == address(0), "INVALID_GAME_MANAGER");
+        require(msg.sender == _gameManager, "INVALID_GAME_MANAGER");
         _;
     }
 
@@ -67,6 +63,8 @@ contract GameToken is ERC721BaseToken, IGameToken {
     ///////////////////////////////  Functions //////////////////////////////
 
     /// @notice Function to get the amount of each assetId in a GAME
+    /// @param gameId The game to query
+    /// @param assetIds The assets to get balances for
     function getAssetBalances(uint256 gameId, uint256[] calldata assetIds)
         external
         view
