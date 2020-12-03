@@ -1156,7 +1156,6 @@ describe('GameToken', function () {
             GameOwner.address,
             ethers.constants.AddressZero,
             gameId,
-            [],
             []
           )
         ).to.be.revertedWith('DESTINATION_ZERO_ADDRESS');
@@ -1168,7 +1167,6 @@ describe('GameToken', function () {
             GameOwner.address,
             gameToken.address,
             gameId,
-            [],
             []
           )
         ).to.be.revertedWith('DESTINATION_GAME_CONTRACT');
@@ -1180,7 +1178,6 @@ describe('GameToken', function () {
             gameToken.address,
             GameOwner.address,
             gameId,
-            [],
             []
           )
         ).to.be.revertedWith('DESTROY_INVALID_FROM');
@@ -1195,7 +1192,6 @@ describe('GameToken', function () {
             gameToken.address,
             GameOwner.address,
             gameId,
-            [],
             []
           )
         ).to.be.revertedWith('DESTROY_ACCESS_DENIED');
@@ -1225,8 +1221,7 @@ describe('GameToken', function () {
           GameOwner.address,
           GameOwner.address,
           gameId,
-          assets,
-          quantities
+          assets
         );
 
         const balancesAfter = await getBalances(
@@ -1329,8 +1324,7 @@ describe('GameToken', function () {
             GameOwner.address,
             gameToken.address,
             gameId,
-            [assets[0]],
-            [quantities[0]]
+            [assets[0]]
           )
         ).to.be.revertedWith('DESTINATION_GAME_CONTRACT');
       });
@@ -1344,8 +1338,7 @@ describe('GameToken', function () {
             GameOwner.address,
             GameOwner.address,
             gameId,
-            [assets[0]],
-            [quantities[0]]
+            [assets[0]]
           )
         ).to.be.revertedWith('INVALID_RECOVERY_CALLER');
       });
@@ -1360,8 +1353,7 @@ describe('GameToken', function () {
           GameOwner.address,
           GameOwner.address,
           gameId,
-          [assets[0]],
-          [quantities[0]]
+          [assets[0]]
         );
 
         const balancesAfter = await getBalances(
@@ -1384,8 +1376,7 @@ describe('GameToken', function () {
           GameOwner.address,
           GameOwner.address,
           gameId,
-          [assets[1]],
-          [quantities[1]]
+          [assets[1]]
         );
         const balancesFinal = await getBalances(
           assetContract,

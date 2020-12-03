@@ -239,16 +239,14 @@ contract GameToken is ERC721BaseToken, IGameToken {
     /// @param to The address to send all GAME assets to
     /// @param gameId The id of the GAME to destroy
     /// @param assetIds The assets to recover from the burnt GAME
-    /// @param values The amount of each asset to recover
     function destroyAndRecover(
         address from,
         address to,
         uint256 gameId,
-        uint256[] calldata assetIds,
-        uint256[] calldata values
+        uint256[] calldata assetIds
     ) external override {
         _destroyGame(from, to, gameId);
-        _recoverAssets(from, to, gameId, assetIds, values);
+        _recoverAssets(from, to, gameId, assetIds);
     }
 
     /// @notice Function to burn a GAME token
@@ -350,15 +348,13 @@ contract GameToken is ERC721BaseToken, IGameToken {
     /// @param to Address that will receive the assets
     /// @param gameId Id of the burnt GAME token
     /// @param assetIds The assets to recover from the burnt GAME
-    /// @param values The amount of each asset to recover
     function recoverAssets(
         address from,
         address to,
         uint256 gameId,
-        uint256[] memory assetIds,
-        uint256[] memory values
+        uint256[] memory assetIds
     ) public override {
-        _recoverAssets(from, to, gameId, assetIds, values);
+        _recoverAssets(from, to, gameId, assetIds);
     }
 
     function _setTokenURI(uint256 gameId, string memory URI) internal {
@@ -382,22 +378,19 @@ contract GameToken is ERC721BaseToken, IGameToken {
         address from,
         address to,
         uint256 gameId,
-        uint256[] memory assetIds,
-        uint256[] memory values
+        uint256[] memory assetIds
     ) internal notToZero(to) notToThis(to) {
         bool validMetaTx = _isValidMetaTx(from);
         if (!validMetaTx) {
             require(from == msg.sender, "INVALID_RECOVERY_CALLER");
             _check_withdrawal_authorized(from, gameId);
         }
-        uint256 length = assetIds.length;
-        require(length > 0, "WITHDRAWAL_COMPLETE");
-        require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
-
+        require(assetIds.length > 0, "WITHDRAWAL_COMPLETE");
+        uint256[] memory values;
+        values = new uint256[](assetIds.length);
         for (uint256 i = 0; i < assetIds.length; i++) {
-            uint256 currentValue = _gameAssets[gameId][assetIds[i]];
-            require(currentValue != 0 && values[i] != 0 && values[i] <= currentValue, "INVALID_ASSET_REMOVAL");
-            _gameAssets[gameId][assetIds[i]] = currentValue.sub(values[i]);
+            values[i] = _gameAssets[gameId][assetIds[i]];
+            delete _gameAssets[gameId][assetIds[i]];
         }
 
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
