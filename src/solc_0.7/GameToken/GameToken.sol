@@ -246,7 +246,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256 gameId,
         uint256[] calldata assetIds,
         uint256[] calldata values
-    ) external override gameManagerOnly() {
+    ) external override {
         _destroyGame(from, to, gameId);
         _recoverAssets(from, to, gameId, assetIds, values);
     }
