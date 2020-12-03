@@ -115,6 +115,11 @@ async function getNewGame(
   );
   const gameId = transferEvent.args[2];
 
+  const gameStateAfter = await gameToken.getAssetBalances(gameId, assets);
+  for (let i = 0; i < assets.length; i++) {
+    expect(gameStateAfter[i]).to.be.equal(quantities[i]);
+  }
+
   return {gameId, assets, quantities};
 }
 
@@ -408,6 +413,8 @@ describe('GameToken', function () {
           'balanceOf(address,uint256)'
         ](gameToken.address, assetId2);
         const randomId = await getRandom();
+        expect(quantity).to.be.equal(3);
+        expect(quantity2).to.be.equal(2);
         const receipt = await waitFor(
           GameManager.Game.createGame(
             GameOwner.address,
@@ -419,6 +426,7 @@ describe('GameToken', function () {
             randomId
           )
         );
+
         const balanceAfter = await assetContract['balanceOf(address,uint256)'](
           gameToken.address,
           assetId
@@ -442,6 +450,13 @@ describe('GameToken', function () {
         id = assetsAddedEvent.args[0];
         assets = assetsAddedEvent.args[1];
         values = assetsAddedEvent.args[2];
+
+        const gameStateAfter = await gameToken.getAssetBalances(gameId, [
+          assetId,
+          assetId2,
+        ]);
+        expect(gameStateAfter[0]).to.be.equal(quantity);
+        expect(gameStateAfter[1]).to.be.equal(quantity2);
 
         const balanceOf = await gameToken.balanceOf(GameOwner.address);
         const ownerOf = await gameToken.ownerOf(gameId);
@@ -775,6 +790,11 @@ describe('GameToken', function () {
           'balanceOf(address,uint256)'
         ](GameOwner.address, singleAssetId);
 
+        const gameStateBefore = await gameToken.getAssetBalances(gameId, [
+          singleAssetId,
+        ]);
+        expect(gameStateBefore[0]).to.be.equal(1);
+
         const assetRemovalReceipt = await GameManager.Game.removeAssets(
           gameId,
           [singleAssetId],
@@ -782,6 +802,11 @@ describe('GameToken', function () {
           GameOwner.address,
           ''
         );
+
+        const gameStateAfter = await gameToken.getAssetBalances(gameId, [
+          singleAssetId,
+        ]);
+        expect(gameStateAfter[0]).to.be.equal(0);
 
         const assetsRemovedEvent = await expectEventWithArgs(
           gameToken,
@@ -833,6 +858,13 @@ describe('GameToken', function () {
           'balanceOf(address,uint256)'
         ](GameOwner.address, assetId2);
 
+        const gameStateBefore = await gameToken.getAssetBalances(gameId, [
+          assetId,
+          assetId2,
+        ]);
+        expect(gameStateBefore[0]).to.be.equal(7);
+        expect(gameStateBefore[1]).to.be.equal(42);
+
         const assetRemovalReceipt = await GameManager.Game.removeAssets(
           gameId,
           [assetId, assetId2],
@@ -840,6 +872,13 @@ describe('GameToken', function () {
           GameOwner.address,
           ''
         );
+
+        const gameStateAfter = await gameToken.getAssetBalances(gameId, [
+          assetId,
+          assetId2,
+        ]);
+        expect(gameStateAfter[0]).to.be.equal(0);
+        expect(gameStateAfter[1]).to.be.equal(11);
 
         const assetsRemovedEvent = await expectEventWithArgs(
           gameToken,
@@ -911,12 +950,18 @@ describe('GameToken', function () {
           randomId
         )
       );
+
       const transferEvent = await expectEventWithArgs(
         gameToken,
         receipt,
         'Transfer'
       );
       gameId = transferEvent.args[2];
+
+      const gameStateAfter = await gameToken.getAssetBalances(gameId, [
+        assetId,
+      ]);
+      expect(gameStateAfter[0]).to.be.equal(1);
     });
 
     it('current owner can transfer ownership of a GAME', async function () {
