@@ -22,130 +22,133 @@ const ACTUAL_REWARD_AMOUNT = REWARD_AMOUNT.div(REWARD_DURATION).mul(
 const STAKE_AMOUNT = BigNumber.from(10000).mul('1000000000000000000');
 
 // Tests for single stakes but modifying NFT numbers with a modifiable NFT contract
-describe('SmockitSANDRewardPool', function () {
-  async function createFixture(supplyRewardTokens, notifyReward) {
-    await deployments.fixture(POOL);
-    const {
-      deployer,
-      sandAdmin,
-      liquidityRewardAdmin,
-      landAdmin,
-      sandBeneficiary,
-    } = await getNamedAccounts();
 
-    const others = await getUnnamedAccounts();
+const setupTestRewardPool = deployments.createFixture(async function (
+  hre,
+  options
+) {
+  const {supplyRewardTokens, notifyReward} = options || {};
+  const {
+    deployer,
+    sandAdmin,
+    liquidityRewardAdmin,
+    landAdmin,
+    sandBeneficiary,
+  } = await getNamedAccounts();
 
-    // Get contracts
-    const rewardToken = await ethers.getContract(REWARD_TOKEN);
-    const multiplierNFToken = await ethers.getContract(MULTIPLIER_NFToken);
-    const stakeToken = await ethers.getContract(STAKE_TOKEN);
+  const others = await getUnnamedAccounts();
 
-    // Create modifiable Reward contract using Smoddit
-    const modifiableRewardContractFactory = await smoddit(POOL);
+  // Get contracts
+  const rewardToken = await ethers.getContract(REWARD_TOKEN);
+  const multiplierNFToken = await ethers.getContract(MULTIPLIER_NFToken);
+  const stakeToken = await ethers.getContract(STAKE_TOKEN);
 
-    const modifiableRewardContract = await modifiableRewardContractFactory.deploy(
-      stakeToken.address,
-      rewardToken.address,
-      multiplierNFToken.address,
-      2592000
-    );
+  // Create modifiable Reward contract using Smoddit
+  const modifiableRewardContractFactory = await smoddit(POOL);
 
-    // Function to modify user's staked balance in Reward Contract
-    // async function setUserStakedBalance(stakedBalance, user) {
-    //   modifiableRewardContract.smodify.put({
-    //     _balances: {
-    //       [user]: stakedBalance,
-    //     },
-    //   });
-    //   const userStakedBal = await modifiableRewardContract.balanceOf(user);
-    //   expect(userStakedBal).to.equal(stakedBalance);
-    // }
+  const modifiableRewardContract = await modifiableRewardContractFactory.deploy(
+    stakeToken.address,
+    rewardToken.address,
+    multiplierNFToken.address,
+    2592000
+  );
 
-    // Create modifiable MockLand contract uing Smoddit
-    const modifiableNFTContractFactory = await smoddit('MockLand'); // TODO: MockLand contract works here because the artifact can be found, but ideally we want this to be Land
-    const modifiableNFTContract = await modifiableNFTContractFactory.deploy(
-      rewardToken.address,
-      landAdmin
-    );
+  // Function to modify user's staked balance in Reward Contract
+  // async function setUserStakedBalance(stakedBalance, user) {
+  //   modifiableRewardContract.smodify.put({
+  //     _balances: {
+  //       [user]: stakedBalance,
+  //     },
+  //   });
+  //   const userStakedBal = await modifiableRewardContract.balanceOf(user);
+  //   expect(userStakedBal).to.equal(stakedBalance);
+  // }
 
-    // Function to modify user's NFT balance in MockLand Contract
-    async function setUserNftBalance(numberOfNfts, user) {
-      modifiableNFTContract.smodify.put({
-        _numNFTPerAddress: {
-          [user]: numberOfNfts,
-        },
-      });
-      const userNftBal = await modifiableNFTContract.balanceOf(user);
-      expect(userNftBal).to.equal(numberOfNfts);
-    }
+  // Create modifiable MockLand contract uing Smoddit
+  const modifiableNFTContractFactory = await smoddit('MockLand'); // TODO: MockLand contract works here because the artifact can be found, but ideally we want this to be Land
+  const modifiableNFTContract = await modifiableNFTContractFactory.deploy(
+    rewardToken.address,
+    landAdmin
+  );
 
-    const rewardPoolAsUser = {
-      0: modifiableRewardContract.connect(ethers.provider.getSigner(others[0])),
-      1: modifiableRewardContract.connect(ethers.provider.getSigner(others[1])),
-      2: modifiableRewardContract.connect(ethers.provider.getSigner(others[2])),
-    };
-
-    const rewardTokenAdmin = sandAdmin;
-    const stakeTokenAdmin = deployer;
-
-    const stakeTokenAsAdmin = stakeToken.connect(
-      ethers.provider.getSigner(stakeTokenAdmin)
-    );
-
-    const stakeTokenAsUser = {
-      0: stakeToken.connect(ethers.provider.getSigner(others[0])),
-      1: stakeToken.connect(ethers.provider.getSigner(others[1])),
-      2: stakeToken.connect(ethers.provider.getSigner(others[2])),
-    };
-    const rewardTokenAsAdmin = rewardToken.connect(
-      ethers.provider.getSigner(rewardTokenAdmin)
-    );
-
-    const rewardPoolAsAdmin = modifiableRewardContract.connect(
-      ethers.provider.getSigner(liquidityRewardAdmin)
-    );
-
-    // Send reward to pool
-    await modifiableRewardContract.setRewardDistribution(liquidityRewardAdmin);
-
-    // Supply pool
-    if (supplyRewardTokens === true) {
-      await rewardTokenAsAdmin.transfer(
-        modifiableRewardContract.address,
-        REWARD_AMOUNT
-      );
-    }
-
-    // Start reward period
-    if (notifyReward === true) {
-      await rewardPoolAsAdmin.notifyRewardAmount(REWARD_AMOUNT);
-    }
-
-    // Give users some stakeTokens
-    for (let i = 0; i < 3; i++) {
-      await stakeTokenAsAdmin.transfer(others[i], STAKE_AMOUNT.mul(10));
-      await stakeTokenAsUser[i].approve(
-        modifiableRewardContract.address,
-        STAKE_AMOUNT.mul(10)
-      );
-    }
-
-    return {
-      deployer,
-      sandAdmin,
-      liquidityRewardAdmin,
-      landAdmin,
-      sandBeneficiary,
-      others,
-      stakeToken,
-      rewardToken,
-      modifiableNFTContract,
-      modifiableRewardContract,
-      rewardPoolAsUser,
-      setUserNftBalance,
-    };
+  // Function to modify user's NFT balance in MockLand Contract
+  async function setUserNftBalance(numberOfNfts, user) {
+    modifiableNFTContract.smodify.put({
+      _numNFTPerAddress: {
+        [user]: numberOfNfts,
+      },
+    });
+    const userNftBal = await modifiableNFTContract.balanceOf(user);
+    expect(userNftBal).to.equal(numberOfNfts);
   }
 
+  const rewardPoolAsUser = {
+    0: modifiableRewardContract.connect(ethers.provider.getSigner(others[0])),
+    1: modifiableRewardContract.connect(ethers.provider.getSigner(others[1])),
+    2: modifiableRewardContract.connect(ethers.provider.getSigner(others[2])),
+  };
+
+  const rewardTokenAdmin = sandAdmin;
+  const stakeTokenAdmin = deployer;
+
+  const stakeTokenAsAdmin = stakeToken.connect(
+    ethers.provider.getSigner(stakeTokenAdmin)
+  );
+
+  const stakeTokenAsUser = {
+    0: stakeToken.connect(ethers.provider.getSigner(others[0])),
+    1: stakeToken.connect(ethers.provider.getSigner(others[1])),
+    2: stakeToken.connect(ethers.provider.getSigner(others[2])),
+  };
+  const rewardTokenAsAdmin = rewardToken.connect(
+    ethers.provider.getSigner(rewardTokenAdmin)
+  );
+
+  const rewardPoolAsAdmin = modifiableRewardContract.connect(
+    ethers.provider.getSigner(liquidityRewardAdmin)
+  );
+
+  // Send reward to pool
+  await modifiableRewardContract.setRewardDistribution(liquidityRewardAdmin);
+
+  // Supply pool
+  if (supplyRewardTokens === true) {
+    await rewardTokenAsAdmin.transfer(
+      modifiableRewardContract.address,
+      REWARD_AMOUNT
+    );
+  }
+
+  // Start reward period
+  if (notifyReward === true) {
+    await rewardPoolAsAdmin.notifyRewardAmount(REWARD_AMOUNT);
+  }
+
+  // Give users some stakeTokens
+  for (let i = 0; i < 3; i++) {
+    await stakeTokenAsAdmin.transfer(others[i], STAKE_AMOUNT.mul(10));
+    await stakeTokenAsUser[i].approve(
+      modifiableRewardContract.address,
+      STAKE_AMOUNT.mul(10)
+    );
+  }
+
+  return {
+    deployer,
+    sandAdmin,
+    liquidityRewardAdmin,
+    landAdmin,
+    sandBeneficiary,
+    others,
+    stakeToken,
+    rewardToken,
+    modifiableNFTContract,
+    modifiableRewardContract,
+    rewardPoolAsUser,
+    setUserNftBalance,
+  };
+});
+describe.only('SmockitSANDRewardPool', function () {
   it('User earnings for 89 NFTs match expected reward', async function () {
     const {
       setUserNftBalance,
@@ -153,7 +156,7 @@ describe('SmockitSANDRewardPool', function () {
       stakeToken,
       modifiableRewardContract,
       others,
-    } = await createFixture(true, true);
+    } = await setupTestRewardPool(true, true);
     await setUserNftBalance(89, others[0]);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
 
@@ -178,7 +181,7 @@ describe('SmockitSANDRewardPool', function () {
       stakeToken,
       modifiableRewardContract,
       others,
-    } = await createFixture(true, true);
+    } = await setupTestRewardPool(true, true);
     await setUserNftBalance(1, others[0]);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(
@@ -202,7 +205,7 @@ describe('SmockitSANDRewardPool', function () {
       stakeToken,
       modifiableRewardContract,
       others,
-    } = await createFixture(true, true);
+    } = await setupTestRewardPool(true, true);
     await setUserNftBalance(2, others[0]);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(
@@ -226,7 +229,7 @@ describe('SmockitSANDRewardPool', function () {
       stakeToken,
       modifiableRewardContract,
       others,
-    } = await createFixture(true, true);
+    } = await setupTestRewardPool(true, true);
     await setUserNftBalance(3, others[0]);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(
@@ -250,7 +253,7 @@ describe('SmockitSANDRewardPool', function () {
       stakeToken,
       modifiableRewardContract,
       others,
-    } = await createFixture(true, true);
+    } = await setupTestRewardPool(true, true);
     await setUserNftBalance(500, others[0]);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(
@@ -274,7 +277,7 @@ describe('SmockitSANDRewardPool', function () {
       stakeToken,
       modifiableRewardContract,
       others,
-    } = await createFixture(true, true);
+    } = await setupTestRewardPool(true, true);
     await setUserNftBalance(10000, others[0]);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(
@@ -298,7 +301,7 @@ describe('SmockitSANDRewardPool', function () {
       stakeToken,
       modifiableRewardContract,
       others,
-    } = await createFixture(true, true);
+    } = await setupTestRewardPool(true, true);
     await setUserNftBalance(1, others[0]);
     await setUserNftBalance(1, others[1]);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
@@ -326,7 +329,7 @@ describe('SmockitSANDRewardPool', function () {
       stakeToken,
       modifiableRewardContract,
       others,
-    } = await createFixture(true, true);
+    } = await setupTestRewardPool(true, true);
     await setUserNftBalance(3, others[0]);
     await setUserNftBalance(3, others[1]);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
@@ -354,7 +357,7 @@ describe('SmockitSANDRewardPool', function () {
       stakeToken,
       modifiableRewardContract,
       others,
-    } = await createFixture(true, true);
+    } = await setupTestRewardPool(true, true);
     await setUserNftBalance(100, others[0]);
     await setUserNftBalance(100, others[1]);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
@@ -376,10 +379,11 @@ describe('SmockitSANDRewardPool', function () {
   });
 
   it('Earlier staker gets more rewards with same NFT amount - small NFT number', async function () {
-    const {setUserNftBalance, rewardPoolAsUser, others} = await createFixture(
-      true,
-      true
-    );
+    const {
+      setUserNftBalance,
+      rewardPoolAsUser,
+      others,
+    } = await setupTestRewardPool(true, true);
     await setUserNftBalance(1, others[0]);
     await setUserNftBalance(1, others[1]);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
@@ -398,10 +402,11 @@ describe('SmockitSANDRewardPool', function () {
   });
 
   it('Earlier staker gets more rewards with same NFT amount - large NFT number', async function () {
-    const {setUserNftBalance, rewardPoolAsUser, others} = await createFixture(
-      true,
-      true
-    );
+    const {
+      setUserNftBalance,
+      rewardPoolAsUser,
+      others,
+    } = await setupTestRewardPool(true, true);
     await setUserNftBalance(100, others[0]);
     await setUserNftBalance(100, others[1]);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
