@@ -5,11 +5,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
-  const {gemsCatalystsRegistryAdmin, deployer} = await getNamedAccounts();
+  const {deployer} = await getNamedAccounts();
   await deploy(`GemsCatalystsRegistry`, {
     from: deployer,
     log: true,
-    args: [gemsCatalystsRegistryAdmin],
+    args: [deployer],
   });
 };
 export default func;

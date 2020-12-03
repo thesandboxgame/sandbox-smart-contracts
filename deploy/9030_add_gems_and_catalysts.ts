@@ -5,8 +5,8 @@ import catalysts from '../data/catalysts';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {execute, read} = deployments;
-  const {gemsCatalystsRegistryAdmin} = await getNamedAccounts();
+  const {log, execute, read} = deployments;
+  const {deployer} = await getNamedAccounts();
 
   const catalystsToAdd = [];
   const gemsToAdd = [];
@@ -34,15 +34,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       gemsToAdd.push(address);
     }
   }
-
+  const currentAdmin = await read('GemsCatalystsRegistry', 'getAdmin');
+  log(currentAdmin);
   await execute(
     'GemsCatalystsRegistry',
-    {from: gemsCatalystsRegistryAdmin, log: true},
+    {from: deployer, log: true},
     'addGemsAndCatalysts',
     gemsToAdd,
     catalystsToAdd
   );
 };
 export default func;
-func.tags = ['GemsCatalystsRegistry_setup'];
+func.tags = ['GemsCatalystsRegistry', 'GemsCatalystsRegistry_setup'];
 func.dependencies = ['GemsCatalystsRegistry_deploy'];
