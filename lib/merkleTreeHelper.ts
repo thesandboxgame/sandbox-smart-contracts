@@ -117,7 +117,8 @@ function calculateAssetHash(asset: asset, salt?: string): string {
   return solidityKeccak256(types, values);
 }
 
-function saltAssets(assets: asset[], secret?: string): Array<asset> {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function saltAssets(assets: asset[], secret?: string | Buffer): Array<asset> {
   const saltedAssets = [];
   for (const asset of assets) {
     let salt = asset.salt;
