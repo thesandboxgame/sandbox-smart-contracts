@@ -7,6 +7,8 @@ import "../common/Interfaces/AssetToken.sol";
 import "../common/Interfaces/IGameToken.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
+import "hardhat/console.sol";
+
 contract GameToken is ERC721BaseToken, IGameToken {
     ///////////////////////////////  Libs //////////////////////////////
 
@@ -347,15 +349,13 @@ contract GameToken is ERC721BaseToken, IGameToken {
     /// @param gameId Id of the burnt GAME token
     /// @param assetIds The assets to recover from the burnt GAME
     /// @param values The amount of each asset to recover
-    // @review should not be manager protected
-    // add metaTx support
     function recoverAssets(
         address from,
         address to,
         uint256 gameId,
         uint256[] memory assetIds,
         uint256[] memory values
-    ) public override gameManagerOnly() {
+    ) public override {
         _recoverAssets(from, to, gameId, assetIds, values);
     }
 
@@ -382,7 +382,11 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256[] memory assetIds,
         uint256[] memory values
     ) internal notToZero(to) notToThis(to) {
-        _check_withdrawal_authorized(from, gameId);
+        bool validMetaTx = _isValidMetaTx(from);
+        if (!validMetaTx) {
+            require(from == msg.sender, "INVALID_RECOVERY_CALLER");
+            _check_withdrawal_authorized(from, gameId);
+        }
         uint256 length = assetIds.length;
         require(length > 0, "WITHDRAWAL_COMPLETE");
         require(assetIds.length == values.length, "INVALID_INPUT_LENGTHS");
