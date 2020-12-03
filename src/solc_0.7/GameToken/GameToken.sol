@@ -259,7 +259,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         address from,
         address to,
         uint256 gameId
-    ) external override gameManagerOnly() {
+    ) external override {
         _destroyGame(from, to, gameId);
     }
 
@@ -369,7 +369,8 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256 gameId
     ) internal notToZero(to) notToThis(to) {
         address owner = _ownerOf(gameId);
-        require(from == owner, "DESTROY_ACCESS_DENIED");
+        require(msg.sender == owner || _isValidMetaTx(from), "DESTROY_ACCESS_DENIED");
+        require(from == owner, "DESTROY_INVALID_FROM");
         delete _metaData[gameId];
         _creatorship[creatorOf(gameId)] = address(0);
         _burn(from, owner, gameId);
