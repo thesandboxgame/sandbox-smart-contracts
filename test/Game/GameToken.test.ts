@@ -625,6 +625,11 @@ describe('GameToken', function () {
         const uriBefore = await gameToken.tokenURI(gameId);
         expect(uriBefore).to.be.equal('Uri is this');
 
+        const gameStateBefore = await gameToken.getAssetBalances(gameId, [
+          singleAssetId,
+        ]);
+        expect(gameStateBefore[0]).to.be.equal(0);
+
         const receipt = await waitFor(
           GameManager.Game.addAssets(
             GameOwner.address,
@@ -637,6 +642,11 @@ describe('GameToken', function () {
 
         const uriAfter = await gameToken.tokenURI(gameId);
         expect(uriAfter).to.be.equal('Uri is different now');
+
+        const gameStateAfter = await gameToken.getAssetBalances(gameId, [
+          singleAssetId,
+        ]);
+        expect(gameStateAfter[0]).to.be.equal(1);
 
         const contractBalanceAfter = await assetContract[
           'balanceOf(address,uint256)'
@@ -701,6 +711,13 @@ describe('GameToken', function () {
           'balanceOf(address,uint256)'
         ](GameOwner.address, assetId2);
 
+        const gameStateBefore = await gameToken.getAssetBalances(gameId, [
+          assetId,
+          assetId2,
+        ]);
+        expect(gameStateBefore[0]).to.be.equal(0);
+        expect(gameStateBefore[1]).to.be.equal(0);
+
         const assetsAddedReceipt = await GameManager.Game.addAssets(
           GameOwner.address,
           gameId,
@@ -708,6 +725,13 @@ describe('GameToken', function () {
           [7, 42],
           ''
         );
+
+        const gameStateAfter = await gameToken.getAssetBalances(gameId, [
+          assetId,
+          assetId2,
+        ]);
+        expect(gameStateAfter[0]).to.be.equal(7);
+        expect(gameStateAfter[1]).to.be.equal(42);
 
         const contractBalanceAfter = await assetContract[
           'balanceOf(address,uint256)'
