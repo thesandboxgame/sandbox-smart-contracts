@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import fs from 'fs';
 import {BigNumber} from 'ethers';
 import MerkleTree from '../../lib/merkleTree';
@@ -5,11 +7,7 @@ import helpers from '../../lib/merkleTreeHelper';
 
 const {createDataArrayAssets, saltAssets} = helpers;
 
-let errors = false;
-function reportError(e: string) {
-  errors = true;
-  console.error(e);
-}
+const errors = false;
 
 function exitIfError() {
   if (errors) {
@@ -46,14 +44,14 @@ function generateAssetsForMerkleTree(assetData: Assets) {
       numAssets += claim.assetValues[i];
     }
     numClaims++;
+    console.log('Asset count: ', numAssets);
+    console.log('Claim count: ', numClaims);
   }
 
   exitIfError();
   return {assets};
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 function getAssets(
   isDeploymentChainId: any,
   chainId: any,

@@ -1,5 +1,5 @@
 import {ethers} from 'hardhat';
-import {setupGiveaway, setupTestGiveaway} from './fixtures';
+import {setupTestGiveaway} from './fixtures';
 import {constants} from 'ethers';
 import {waitFor, expectReceiptEventWithArgs, increaseTime} from '../utils';
 import {expect} from '../chai-setup';
