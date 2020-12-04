@@ -3,7 +3,13 @@ pragma solidity 0.7.5;
 
 /// @title Interface for the Game token
 
-interface IGameToken {
+import "./ERC721.sol";
+
+interface IGameToken is ERC721 {
+    function getGameManager() external view returns (address);
+
+    function setGameManager(address gameManager) external;
+
     function createGame(
         address from,
         address to,
@@ -75,7 +81,11 @@ interface IGameToken {
 
     function tokenURI(uint256 gameId) external view returns (string memory uri);
 
-    function setTokenURI(uint256 gameId, string calldata uri) external;
+    function setTokenURI(
+        address from,
+        uint256 gameId,
+        string calldata URI
+    ) external;
 
     function onERC1155Received(
         address operator,
