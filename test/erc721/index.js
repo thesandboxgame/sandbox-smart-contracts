@@ -1,6 +1,5 @@
 const {assert, expect} = require('../chai-setup');
 const {ethers} = require('hardhat');
-const {emptyBytes, expectRevert} = require('../utils');
 const {constants, Contract, ContractFactory} = require('ethers');
 
 const zeroAddress = constants.AddressZero;
@@ -1777,7 +1776,7 @@ module.exports = (init, extensions) => {
         const transferEvent = eventsMatching[0];
         assert.equal(transferEvent.args[0], user0);
         assert.equal(transferEvent.args[1], zeroAddress);
-        assert.equal(transferEvent.args[2], tokenId);
+        expect(transferEvent.args[2]).to.deep.equal(tokenId);
       });
       it('burn result in ownerOf throwing', async function ({
         contract,
@@ -1788,7 +1787,7 @@ module.exports = (init, extensions) => {
         const {tokenId} = await mint(user0);
         await contract.callStatic.ownerOf(tokenId);
         await contractAsUser0.burn(tokenId).then((tx) => tx.wait());
-        await expectRevert(contract.callStatic.ownerOf(tokenId));
+        await expect(contract.callStatic.ownerOf(tokenId)).to.be.reverted;
       });
     });
   }
@@ -1801,27 +1800,25 @@ module.exports = (init, extensions) => {
         user0,
         tokenIds,
       }) {
-        await expectRevert(
-          contractAsOwner
-            .batchTransferFrom(
-              owner,
-              user0,
-              [tokenIds[1], tokenIds[1], tokenIds[0]],
-              emptyBytes
-            )
-            .then((tx) => tx.wait())
-        );
+        await expect(
+          contractAsOwner.batchTransferFrom(
+            owner,
+            user0,
+            [tokenIds[1], tokenIds[1], tokenIds[0]],
+            '0x'
+          )
+        ).to.be.reverted;
       });
       // it('batch transfer of same NFT ids should fails even if from == to', async () => {
       //     let reverted = false;
       //     try {
-      //         await tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[1], tokenIds[1], tokenIds[0]], emptyBytes);
+      //         await tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[1], tokenIds[1], tokenIds[0]], '0x');
       //     } catch (e) {
       //         reverted = true;
       //         console.log('ERROR', e);
       //     }
       //     assert.equal(reverted, true);
-      //     // await expectRevert(tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[1], tokenIds[1], tokenIds[0]], emptyBytes));
+      //     // await expectRevert(tx(contract, 'batchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[1], tokenIds[1], tokenIds[0]], '0x'));
       // });
       it('batch transfer works', async function ({
         contractAsOwner,
@@ -1830,7 +1827,7 @@ module.exports = (init, extensions) => {
         tokenIds,
       }) {
         await contractAsOwner
-          .batchTransferFrom(owner, user0, tokenIds, emptyBytes)
+          .batchTransferFrom(owner, user0, tokenIds, '0x')
           .then((tx) => tx.wait());
       });
     });
@@ -1853,12 +1850,7 @@ module.exports = (init, extensions) => {
           );
           const receiverAddress = receiverContract.address;
           await contractAsOwner
-            .batchTransferFrom(
-              owner,
-              receiverAddress,
-              [tokenIds[0]],
-              emptyBytes
-            )
+            .batchTransferFrom(owner, receiverAddress, [tokenIds[0]], '0x')
             .then((tx) => tx.wait());
           const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
           assert.equal(newOwner, receiverAddress);
@@ -1876,16 +1868,14 @@ module.exports = (init, extensions) => {
             true
           );
           const receiverAddress = receiverContract.address;
-          await expectRevert(
-            contractAsOwner
-              .batchTransferFrom(
-                owner,
-                receiverAddress,
-                [tokenIds[0]],
-                emptyBytes
-              )
-              .then((tx) => tx.wait())
-          );
+          await expect(
+            contractAsOwner.batchTransferFrom(
+              owner,
+              receiverAddress,
+              [tokenIds[0]],
+              '0x'
+            )
+          ).to.be.reverted;
         });
         it('batch transfering to a contract that do not accept erc721 token should fail', async function ({
           deployMandatoryERC721TokenReceiver,
@@ -1900,16 +1890,14 @@ module.exports = (init, extensions) => {
             true
           );
           const receiverAddress = receiverContract.address;
-          await expectRevert(
-            contractAsOwner
-              .batchTransferFrom(
-                owner,
-                receiverAddress,
-                [tokenIds[0]],
-                emptyBytes
-              )
-              .then((tx) => tx.wait())
-          );
+          await expect(
+            contractAsOwner.batchTransferFrom(
+              owner,
+              receiverAddress,
+              [tokenIds[0]],
+              '0x'
+            )
+          ).to.be.reverted;
         });
 
         it('batch transfering to a contract that do not return the correct onERC721Received bytes shoudl fail', async function ({
@@ -1925,16 +1913,14 @@ module.exports = (init, extensions) => {
             false
           );
           const receiverAddress = receiverContract.address;
-          await expectRevert(
-            contractAsOwner
-              .batchTransferFrom(
-                owner,
-                receiverAddress,
-                [tokenIds[0]],
-                emptyBytes
-              )
-              .then((tx) => tx.wait())
-          );
+          await expect(
+            contractAsOwner.batchTransferFrom(
+              owner,
+              receiverAddress,
+              [tokenIds[0]],
+              '0x'
+            )
+          ).to.be.reverted;
         });
 
         it('batch transfering to a contract that do not implemented mandatory receiver should not fail', async function ({
@@ -1949,12 +1935,7 @@ module.exports = (init, extensions) => {
           );
           const receiverAddress = receiverContract.address;
           await contractAsOwner
-            .batchTransferFrom(
-              owner,
-              receiverAddress,
-              [tokenIds[0]],
-              emptyBytes
-            )
+            .batchTransferFrom(owner, receiverAddress, [tokenIds[0]], '0x')
             .then((tx) => tx.wait());
         });
 
@@ -1972,12 +1953,7 @@ module.exports = (init, extensions) => {
           );
           const receiverAddress = receiverContract.address;
           await contractAsOwner
-            .batchTransferFrom(
-              owner,
-              receiverAddress,
-              [tokenIds[0]],
-              emptyBytes
-            )
+            .batchTransferFrom(owner, receiverAddress, [tokenIds[0]], '0x')
             .then((tx) => tx.wait());
           const newOwner = await contract.callStatic.ownerOf(tokenIds[0]);
           assert.equal(newOwner, receiverAddress);
@@ -2017,11 +1993,9 @@ module.exports = (init, extensions) => {
           true
         );
         const receiverAddress = receiverContract.address;
-        await expectRevert(
-          contractAsOwner
-            .transferFrom(owner, receiverAddress, tokenIds[0])
-            .then((tx) => tx.wait())
-        );
+        await expect(
+          contractAsOwner.transferFrom(owner, receiverAddress, tokenIds[0])
+        ).to.be.reverted;
       });
       it('transfering to a contract that do not accept erc721 token should fail', async function ({
         deployMandatoryERC721TokenReceiver,
@@ -2036,11 +2010,9 @@ module.exports = (init, extensions) => {
           true
         );
         const receiverAddress = receiverContract.address;
-        await expectRevert(
-          contractAsOwner
-            .transferFrom(owner, receiverAddress, tokenIds[0])
-            .then((tx) => tx.wait())
-        );
+        await expect(
+          contractAsOwner.transferFrom(owner, receiverAddress, tokenIds[0])
+        ).to.be.reverted;
       });
 
       it('transfering to a contract that do not return the correct onERC721Received bytes shoudl fail', async function ({
@@ -2056,11 +2028,9 @@ module.exports = (init, extensions) => {
           false
         );
         const receiverAddress = receiverContract.address;
-        await expectRevert(
-          contractAsOwner
-            .transferFrom(owner, receiverAddress, tokenIds[0])
-            .then((tx) => tx.wait())
-        );
+        await expect(
+          contractAsOwner.transferFrom(owner, receiverAddress, tokenIds[0])
+        ).to.be.reverted;
       });
 
       it('transfering to a contract that do not implemented mandatory receiver should not fail', async function ({
@@ -2117,27 +2087,25 @@ module.exports = (init, extensions) => {
         owner,
         user0,
       }) {
-        await expectRevert(
-          contractAsOwner
-            .safeBatchTransferFrom(
-              owner,
-              user0,
-              [tokenIds[0], tokenIds[1], tokenIds[0]],
-              emptyBytes
-            )
-            .then((tx) => tx.wait())
-        );
+        await expect(
+          contractAsOwner.safeBatchTransferFrom(
+            owner,
+            user0,
+            [tokenIds[0], tokenIds[1], tokenIds[0]],
+            '0x'
+          )
+        ).to.be.reverted;
       });
       // it('safe batch transfer of same NFT ids should fails even if from == to', async () => {
       //     let reverted = false;
       //     try {
-      //         await tx(contract, 'safeBatchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[0], tokenIds[1], tokenIds[0]], emptyBytes);
+      //         await tx(contract, 'safeBatchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[0], tokenIds[1], tokenIds[0]], '0x');
       //     } catch (e) {
       //         reverted = true;
       //         console.log('ERROR', e);
       //     }
       //     assert.equal(reverted, true);
-      //     // await expectRevert(tx(contract, 'safeBatchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[0], tokenIds[1], tokenIds[0]], emptyBytes));
+      //     // await expectRevert(tx(contract, 'safeBatchTransferFrom', {from: user0, gas}, user0, user0, [tokenIds[0], tokenIds[1], tokenIds[0]], '0x'));
       // });
       it('safe batch transfer works', async function ({
         contractAsOwner,
@@ -2146,7 +2114,7 @@ module.exports = (init, extensions) => {
         user0,
       }) {
         await contractAsOwner
-          .safeBatchTransferFrom(owner, user0, tokenIds, emptyBytes)
+          .safeBatchTransferFrom(owner, user0, tokenIds, '0x')
           .then((tx) => tx.wait());
         // console.log('gas used for safe batch transfer = ' + receipt.gasUsed);
       });
@@ -2222,11 +2190,8 @@ module.exports = (init, extensions) => {
       user0,
       tokenIds,
     }) {
-      await expectRevert(
-        contractAsUser0
-          .transferFrom(owner, user0, tokenIds[0])
-          .then((tx) => tx.wait())
-      );
+      await expect(contractAsUser0.transferFrom(owner, user0, tokenIds[0])).to
+        .be.reverted;
     });
 
     it('transfering to zero address should fails', async function ({
@@ -2234,11 +2199,9 @@ module.exports = (init, extensions) => {
       owner,
       tokenIds,
     }) {
-      await expectRevert(
-        contractAsOwner
-          .transferFrom(owner, zeroAddress, tokenIds[0])
-          .then((tx) => tx.wait())
-      );
+      await expect(
+        contractAsOwner.transferFrom(owner, zeroAddress, tokenIds[0])
+      ).to.be.reverted;
     });
 
     it('transfering to a contract that do not accept erc721 token should not fail', async function ({
@@ -2306,9 +2269,9 @@ module.exports = (init, extensions) => {
     it(
       prefix + 'safe transfering to zero address should fails',
       async function ({contractAsOwner, owner, tokenIds}) {
-        await expectRevert(
+        await expect(
           safeTransferFrom(contractAsOwner, owner, zeroAddress, tokenIds[0])
-        );
+        ).to.be.reverted;
       }
     );
 
@@ -2324,9 +2287,9 @@ module.exports = (init, extensions) => {
     it(
       prefix + 'safe transfering from without approval should fails',
       async function ({contractAsUser0, owner, user0, tokenIds}) {
-        await expectRevert(
+        await expect(
           safeTransferFrom(contractAsUser0, owner, user0, tokenIds[0])
-        );
+        ).to.be.reverted;
       }
     );
 
@@ -2346,9 +2309,9 @@ module.exports = (init, extensions) => {
           true
         );
         const receiverAddress = receiverContract.address;
-        await expectRevert(
+        await expect(
           safeTransferFrom(contractAsOwner, owner, receiverAddress, tokenIds[0])
-        );
+        ).to.be.reverted;
       }
     );
 
@@ -2368,9 +2331,9 @@ module.exports = (init, extensions) => {
           false
         );
         const receiverAddress = receiverContract.address;
-        await expectRevert(
+        await expect(
           safeTransferFrom(contractAsOwner, owner, receiverAddress, tokenIds[0])
-        );
+        ).to.be.reverted;
       }
     );
 
@@ -2388,9 +2351,9 @@ module.exports = (init, extensions) => {
           contract.address
         );
         const receiverAddress = receiverContract.address;
-        await expectRevert(
+        await expect(
           safeTransferFrom(contractAsOwner, owner, receiverAddress, tokenIds[0])
-        );
+        ).to.be.reverted;
       }
     );
 
@@ -2428,7 +2391,7 @@ module.exports = (init, extensions) => {
   });
   describe('safeTransfer with empty bytes', function (it) {
     // eslint-disable-next-line mocha/no-setup-in-describe
-    testSafeTransfers(it, emptyBytes);
+    testSafeTransfers(it, '0x');
   });
   describe('safeTransfer with data', function (it) {
     // eslint-disable-next-line mocha/no-setup-in-describe
@@ -2530,9 +2493,7 @@ module.exports = (init, extensions) => {
       await contractAsOwner
         .transferFrom(owner, user0, tokenIds[0])
         .then((tx) => tx.wait());
-      await expectRevert(
-        contractAsOwner.approve(user0, tokenIds[0]).then((tx) => tx.wait())
-      );
+      await expect(contractAsOwner.approve(user0, tokenIds[0])).to.be.reverted;
     });
 
     it('approving allows transfer from the approved party', async function ({
@@ -2601,11 +2562,8 @@ module.exports = (init, extensions) => {
       await contractAsUser1
         .transferFrom(owner, user0, tokenIds[0])
         .then((tx) => tx.wait());
-      await expectRevert(
-        contractAsUser1
-          .transferFrom(user0, owner, tokenIds[0])
-          .then((tx) => tx.wait())
-      );
+      await expect(contractAsUser1.transferFrom(user0, owner, tokenIds[0])).to
+        .be.reverted;
     });
 
     it('approval by operator works', async function ({
@@ -2763,11 +2721,8 @@ module.exports = (init, extensions) => {
       await contractAsOwner
         .transferFrom(owner, user0, tokenIds[0])
         .then((tx) => tx.wait());
-      await expectRevert(
-        contractAsUser1
-          .transferFrom(user0, user1, tokenIds[0])
-          .then((tx) => tx.wait())
-      );
+      await expect(contractAsUser1.transferFrom(user0, user1, tokenIds[0])).to
+        .be.reverted;
     });
 
     it('approval for all set before will work on a transfered NFT', async function ({
