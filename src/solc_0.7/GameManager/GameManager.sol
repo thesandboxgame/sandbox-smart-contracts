@@ -2,7 +2,8 @@
 pragma solidity 0.7.1;
 
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
-import "../common/interfaces/IGameToken.sol";
+import "../common/Interfaces/IGameToken.sol";
+import "../common/Interfaces/IGameManager.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
 contract GameManager is WithMetaTransaction, IGameManager {
@@ -37,7 +38,7 @@ contract GameManager is WithMetaTransaction, IGameManager {
     ///////////////////////////////  Functions /////////////////////////
 
     constructor(address gameTokenContract, address admin) {
-        gameToken = gameTokenContract;
+        gameToken = IGameToken(gameTokenContract);
         _admin = admin;
     }
 
@@ -48,7 +49,7 @@ contract GameManager is WithMetaTransaction, IGameManager {
     /// @param values the amount of each token id to add to game
     /// @param editors The addresses to allow to edit (can also be set later)
     /// @param randomId A random id created on the backend.
-    /// @return id The id of the new GAME token (erc721)
+    /// @return gameId The id of the new GAME token (erc721)
     function createGame(
         address from,
         address to,
@@ -58,8 +59,8 @@ contract GameManager is WithMetaTransaction, IGameManager {
         string memory uri,
         uint96 randomId
     ) external override returns (uint256 gameId) {
-      require(msg.sender == from || _isValidMetaTx(from), "UNAUTHORIZED_ACCESS")
-      gameToken.createGame(from, to, assetIds, values, editors,uri, randomId);
+        require(msg.sender == from || _isValidMetaTx(from), "UNAUTHORIZED_ACCESS");
+        gameToken.createGame(from, to, assetIds, values, editors, uri, randomId);
     }
 
     /// @notice Function to add assets to an existing GAME
@@ -75,7 +76,6 @@ contract GameManager is WithMetaTransaction, IGameManager {
         uint256[] memory values,
         string memory uri
     ) external override ownerOrEditorsOnly(gameId, from) {
-
         gameToken.addAssets(from, gameId, assetIds, values, uri);
     }
 
@@ -93,6 +93,6 @@ contract GameManager is WithMetaTransaction, IGameManager {
         address to,
         string memory uri
     ) external override ownerOrEditorsOnly(gameId, from) {
-        gameToken.removeAssets(gameId, assetIds, values, uri);
+        gameToken.removeAssets(gameId, assetIds, values, to, uri);
     }
 }
