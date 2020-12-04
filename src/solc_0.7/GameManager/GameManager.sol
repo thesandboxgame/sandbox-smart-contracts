@@ -14,10 +14,6 @@ contract GameManager is WithMetaTransaction, IGameManager {
 
     IGameToken gameToken;
 
-    bool _feesEnabled;
-
-    mapping(address => bool) internal _whitelisted;
-
     ///////////////////////////////  Functions /////////////////////////
 
     constructor(address gameTokenContract, address admin) {
