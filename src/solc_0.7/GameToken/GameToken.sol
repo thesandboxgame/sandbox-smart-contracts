@@ -260,7 +260,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
     }
 
     /// @notice Function to add assets to an existing GAME
-    /// @param from The address of the one creating the game (may be different from msg.sender if metaTx)
+    /// @param from The address of the current owner of assets
     /// @param gameId The id of the GAME to add asset to
     /// @param assetIds The id of the asset to add to GAME
     /// @param values The amount of each asset to add to GAME
