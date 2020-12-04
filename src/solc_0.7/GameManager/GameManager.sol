@@ -16,9 +16,14 @@ contract GameManager is WithMetaTransaction, IGameManager {
 
     ///////////////////////////////  Functions /////////////////////////
 
-    constructor(address gameTokenContract, address admin) {
+    constructor(
+        address gameTokenContract,
+        address admin,
+        address metaTransactionContract
+    ) {
         gameToken = IGameToken(gameTokenContract);
         _admin = admin;
+        _setMetaTransactionProcessor(metaTransactionContract, METATX_SANDBOX);
     }
 
     /// @notice Function to create a new GAME token
