@@ -355,6 +355,17 @@ contract GameToken is ERC721BaseToken, IGameToken {
         _recoverAssets(from, to, gameId, assetIds);
     }
 
+    /**
+     * @notice Check if the contract supports an interface
+     * 0x01ffc9a7 is ERC-165
+     * 0x80ac58cd is ERC-721
+     * @param id The id of the interface
+     * @return True if the interface is supported
+     */
+    function supportsInterface(bytes4 id) public pure override returns (bool) {
+        return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
+    }
+
     function _setTokenURI(uint256 gameId, string memory URI) internal {
         _metaData[gameId] = URI;
     }
