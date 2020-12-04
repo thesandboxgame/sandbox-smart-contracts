@@ -4,11 +4,9 @@ pragma solidity 0.7.1;
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 import "../common/Interfaces/IGameToken.sol";
 import "../common/Interfaces/IGameManager.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
 
 contract GameManager is WithMetaTransaction, IGameManager {
     ///////////////////////////////  Libs //////////////////////////////
-    using SafeMath for uint256;
 
     ///////////////////////////////  Data //////////////////////////////
 

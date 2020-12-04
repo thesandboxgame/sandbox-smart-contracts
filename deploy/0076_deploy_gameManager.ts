@@ -5,14 +5,15 @@ const func: DeployFunction = async function (hre) {
   const {deploy} = deployments;
   const {deployer, gameManagerAdmin} = await getNamedAccounts();
   const gameContract = await deployments.get('GameToken');
+  const sandContract = await deployments.get('Sand');
 
   await deploy('GameManager', {
     from: deployer,
     log: true,
-    args: [gameContract.address, gameManagerAdmin],
+    args: [gameContract.address, gameManagerAdmin, sandContract.address],
   });
 };
 
 export default func;
 func.tags = ['GameManager', 'GameManager_deploy'];
-func.dependencies = ['GameToken'];
+func.dependencies = ['GameToken', 'Sand'];
