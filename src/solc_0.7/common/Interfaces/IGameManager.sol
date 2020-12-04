@@ -17,7 +17,8 @@ interface IGameManager {
         uint256 gameId,
         uint256[] memory assetIds,
         uint256[] memory values,
-        string memory uri
+        string memory uri,
+        address editor
     ) external;
 
     function removeAssets(
@@ -26,6 +27,7 @@ interface IGameManager {
         uint256[] memory assetIds,
         uint256[] memory values,
         address to,
-        string memory uri
+        string memory uri,
+        address editor
     ) external;
 }
