@@ -20,12 +20,11 @@ contract GameManager is WithMetaTransaction, IGameManager {
     ///////////////////////////////  Events ////////////////////////////
 
     ///////////////////////////////  Modifiers /////////////////////////
-    // @review RE: whitelist
-    // If we implement a whitelist for creating games, how do we manage a whitelisted user who wants to sell their GAME token to a non-whitelisted user?
-    modifier whitelistedOnly(from) {
-        require(whitelisted[msg.sender] || _isValidMetaTx(from), "WHITELIST_ACCESS_DENIED");
-        _;
-    }
+
+    // modifier authorizedAccessOnly(from) {
+    //     require(msg.sender == from || _isValidMetaTx(from), "UNAUTHORIZED_ACCESS");
+    //     _;
+    // }
 
     modifier ownerOrEditorsOnly(uint256 id, address from) {
         require(
@@ -42,16 +41,6 @@ contract GameManager is WithMetaTransaction, IGameManager {
         _admin = admin;
     }
 
-    // @note Add functions to manage whitelist
-
-    // @note Add functions and storage to manage fees
-
-    // @note add to interface
-    function setFeesEnabled(bool enabled) external adminOny() {
-        require(enabled != _feesEnabled, "ENABLED_ALREADY_SET");
-        _feesEnabled = enabled;
-    }
-
     // @review do we want to support metaTxs for these functions?
     function createGame(
         address from,
@@ -61,8 +50,9 @@ contract GameManager is WithMetaTransaction, IGameManager {
         address[] memory editors,
         string memory uri,
         uint96 randomId
-    ) external override whitelistedOnly(from) returns (uint256 gameId) {
-        require(msg.sender == from || _isValidMetaTx(from), "UNAUTHORIZED_ACCESS");
+    ) external override returns (uint256 gameId) {
+      require(msg.sender == from || _isValidMetaTx(from), "UNAUTHORIZED_ACCESS")
+      gameToken.createGame(from, to, assetIds, values, editors,uri, randomId);
     }
 
     function addAssets(
@@ -72,43 +62,19 @@ contract GameManager is WithMetaTransaction, IGameManager {
         uint256[] memory values,
         string memory uri
     ) external override ownerOrEditorsOnly(gameId, from) {
-        gameToken.recoverAssets(from, gameId, assetIds, values, uri);
+
+        gameToken.addAssets(from, gameId, assetIds, values, uri);
     }
 
     // @review on gameToken, should this func have a "from" param ?
     function removeAssets(
+        address from,
         uint256 gameId,
         uint256[] memory assetIds,
         uint256[] memory values,
         address to,
         string memory uri
     ) external override ownerOrEditorsOnly(gameId, from) {
-        gameToken.recoverAssets(from, gameId, assetIds, values, uri);
-    }
-
-    function destroyAndRecover(
-        address from,
-        address to,
-        uint256 gameId,
-        uint256[] calldata assetIds,
-        uint256[] calldata values
-    ) external override ownerOrEditorsOnly(gameId, from) {
-        gameToken.recoverAssets(from, to, gameId, assetIds, values);
-    }
-
-    function destroyGame(
-        address from,
-        address to,
-        uint256 gameId
-    ) external override ownerOrEditorsOnly(gameId, from) {}
-
-    function recoverAssets(
-        address from,
-        address to,
-        uint256 gameId,
-        uint256[] memory assetIds,
-        uint256[] memory values
-    ) external override ownerOrEditorsOnly(gameId, from) {
-        gameToken.recoverAssets(from, to, gameId, assetIds, values);
+        gameToken.removeAssets(gameId, assetIds, values, uri);
     }
 }
