@@ -18,23 +18,6 @@ contract GameManager is WithMetaTransaction, IGameManager {
 
     mapping(address => bool) internal _whitelisted;
 
-    ///////////////////////////////  Events ////////////////////////////
-
-    ///////////////////////////////  Modifiers /////////////////////////
-
-    // modifier authorizedAccessOnly(from) {
-    //     require(msg.sender == from || _isValidMetaTx(from), "UNAUTHORIZED_ACCESS");
-    //     _;
-    // }
-
-    modifier ownerOrEditorsOnly(uint256 id, address from) {
-        require(
-            gameToken.ownerOf(id) == msg.sender || gameToken.isGameEditor(id, msg.sender) || _isValidMetaTx(from),
-            "EDITOR_ACCESS_DENIED"
-        );
-        _;
-    }
-
     ///////////////////////////////  Functions /////////////////////////
 
     constructor(address gameTokenContract, address admin) {
@@ -59,8 +42,9 @@ contract GameManager is WithMetaTransaction, IGameManager {
         string memory uri,
         uint96 randomId
     ) external override returns (uint256 gameId) {
-        require(msg.sender == from || _isValidMetaTx(from), "UNAUTHORIZED_ACCESS");
-        gameToken.createGame(from, to, assetIds, values, editors, uri, randomId);
+        require(msg.sender == from || _isValidMetaTx(from), "CREATE_ACCESS_DENIED");
+        uint256 id = gameToken.createGame(from, to, assetIds, values, editors, uri, randomId);
+        return id;
     }
 
     /// @notice Function to add assets to an existing GAME
@@ -69,13 +53,27 @@ contract GameManager is WithMetaTransaction, IGameManager {
     /// @param assetIds The id of the asset to add to GAME
     /// @param values The amount of each asset to add to GAME
     /// @param uri The new uri to set
+    /// @param editor The game editor address (ignored if address(0)). Use only to perform
+    /// a metaTx on behalf of editor instead of owner.
     function addAssets(
         address from,
         uint256 gameId,
         uint256[] memory assetIds,
         uint256[] memory values,
-        string memory uri
-    ) external override ownerOrEditorsOnly(gameId, from) {
+        string memory uri,
+        address editor
+    ) external override {
+        if (editor == address(0)) {
+            require(
+                gameToken.ownerOf(gameId) == msg.sender ||
+                    gameToken.isGameEditor(gameId, msg.sender) ||
+                    _isValidMetaTx(from),
+                "ADD_ACCESS_DENIED"
+            );
+        } else {
+            require(_isValidMetaTx(editor), "ADD_EDITOR_ACCESS_DENIED");
+        }
+
         gameToken.addAssets(from, gameId, assetIds, values, uri);
     }
 
@@ -85,14 +83,27 @@ contract GameManager is WithMetaTransaction, IGameManager {
     /// @param values An array of the number of each asset id to remove
     /// @param to The address to send removed assets to
     /// @param uri The URI string to update the GAME token's URI
+    /// @param editor The game editor address (ignored if address(0)). Use only to perform
+    /// a metaTx on behalf of editor instead of owner.
     function removeAssets(
         address from,
         uint256 gameId,
         uint256[] memory assetIds,
         uint256[] memory values,
         address to,
-        string memory uri
-    ) external override ownerOrEditorsOnly(gameId, from) {
+        string memory uri,
+        address editor
+    ) external override {
+        if (editor == address(0)) {
+            require(
+                gameToken.ownerOf(gameId) == msg.sender ||
+                    gameToken.isGameEditor(gameId, msg.sender) ||
+                    _isValidMetaTx(from),
+                "REMOVE_ACCESS_DENIED"
+            );
+        } else {
+            require(_isValidMetaTx(editor), "REMOVE_EDITOR_ACCESS_DENIED");
+        }
         gameToken.removeAssets(gameId, assetIds, values, to, uri);
     }
 }
