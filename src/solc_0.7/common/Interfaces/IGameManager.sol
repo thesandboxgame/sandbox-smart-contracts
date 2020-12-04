@@ -27,26 +27,4 @@ interface IGameManager {
         address to,
         string memory uri
     ) external;
-
-    function destroyAndRecover(
-        address from,
-        address to,
-        uint256 gameId,
-        uint256[] calldata assetIds,
-        uint256[] calldata values
-    ) external;
-
-    function destroyGame(
-        address from,
-        address to,
-        uint256 gameId
-    ) external;
-
-    function recoverAssets(
-        address from,
-        address to,
-        uint256 gameId,
-        uint256[] memory assetIds,
-        uint256[] memory values
-    ) external;
 }
