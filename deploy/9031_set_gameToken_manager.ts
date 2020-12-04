@@ -5,7 +5,6 @@ const func: DeployFunction = async function (hre) {
   const {execute, read} = deployments;
 
   const {assetAdmin} = await getNamedAccounts();
-  const gameToken = await deployments.get('GameToken');
   const gameManager = await deployments.get('GameManager');
 
   const isGameManager = await read(
