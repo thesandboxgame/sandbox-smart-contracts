@@ -465,7 +465,16 @@ describe('GameToken', function () {
           'Transfer'
         );
 
+        const editorEvent = await expectEventWithArgs(
+          gameToken,
+          receipt,
+          'GameEditorSet'
+        );
+
         gameId = transferEvent.args[2];
+        expect(editorEvent.args[0]).to.be.equal(gameId);
+        expect(editorEvent.args[1]).to.be.equal(users[10].address);
+        expect(editorEvent.args[2]).to.be.equal(true);
       });
 
       it('should allow the owner to add game editors', async function () {
