@@ -20,4 +20,4 @@ const func: DeployFunction = async function (hre) {
 
 export default func;
 func.tags = ['GameToken', 'GameToken_deploy'];
-func.dependencies = ['Sand', 'Asset'];
+func.dependencies = ['Sand_deploy', 'Asset_deploy'];
