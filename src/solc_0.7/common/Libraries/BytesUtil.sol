@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
 library BytesUtil {
     function doFirstParamEqualsAddress(bytes memory data, address _address) internal pure returns (bool) {
