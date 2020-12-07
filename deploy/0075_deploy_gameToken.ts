@@ -7,14 +7,17 @@ const func: DeployFunction = async function (hre) {
   const sandContract = await deployments.get('Sand');
   const assetContract = await deployments.get('Asset');
 
-  const message =
-    '!!! GameManager not yet deployed !!! Add a script to set Game Manager address after we add the GM contract.';
-  console.log('\n \x1b[31m%s\x1b[0m \n', message);
+  const inititalMinter = gameTokenAdmin;
 
   await deploy('GameToken', {
     from: deployer,
     log: true,
-    args: [sandContract.address, gameTokenAdmin, assetContract.address],
+    args: [
+      sandContract.address,
+      gameTokenAdmin,
+      assetContract.address,
+      inititalMinter,
+    ],
   });
 };
 
