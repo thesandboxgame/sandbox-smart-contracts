@@ -43,7 +43,7 @@ const erc721Tests = require('../erc721')(
         to,
         [assetId],
         [1],
-        [],
+        ethers.constants.AddressZero,
         'My GAME token URI!',
         randomId
       );
