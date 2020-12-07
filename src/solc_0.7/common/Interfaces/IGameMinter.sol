@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
-interface IGameManager {
+interface IGameMinter {
     function createGame(
         address from,
         address to,
@@ -30,4 +30,6 @@ interface IGameManager {
         string memory uri,
         address editor
     ) external;
+
+    function setTokenUri(uint256 gameId, string calldata URI) external;
 }
