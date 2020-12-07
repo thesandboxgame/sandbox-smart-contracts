@@ -15,7 +15,7 @@ describe('GemsCatalystsRegistry', function () {
 
   it('getMaxGems for non existing catalystId should fail', async function () {
     const {gemsCatalystsRegistry} = await setupGemsAndCatalysts();
-    expect(gemsCatalystsRegistry.getMaxGems(10)).to.be.revertedWith(
+    await expect(gemsCatalystsRegistry.getMaxGems(10)).to.be.revertedWith(
       'CATALYST_DOES_NOT_EXIST'
     );
   });
@@ -45,10 +45,15 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistryAdmin,
     } = await setupGemsAndCatalysts();
     const burnAmount = BigNumber.from('2');
-    expect(
-      gemsCatalystsRegistry
-        .connect(ethers.provider.getSigner(gemsCatalystsRegistryAdmin))
-        .burnCatalyst(gemsCatalystsRegistryAdmin, 101, burnAmount)
+    const gemsCatalystsRegistryAsAdmin = await gemsCatalystsRegistry.connect(
+      ethers.provider.getSigner(gemsCatalystsRegistryAdmin)
+    );
+    await expect(
+      gemsCatalystsRegistryAsAdmin.burnCatalyst(
+        gemsCatalystsRegistryAdmin,
+        101,
+        burnAmount
+      )
     ).to.be.revertedWith('CATALYST_DOES_NOT_EXIST');
   });
 
@@ -60,7 +65,7 @@ describe('GemsCatalystsRegistry', function () {
     } = await setupGemsAndCatalysts();
     const catalystId = await commonCatalyst.catalystId();
     const burnAmount = BigNumber.from('200');
-    expect(
+    await expect(
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(catalystMinter))
         .burnCatalyst(catalystMinter, catalystId, burnAmount)
@@ -75,7 +80,7 @@ describe('GemsCatalystsRegistry', function () {
     const others = await getUnnamedAccounts();
     const catalystId = await commonCatalyst.catalystId();
     const burnAmount = BigNumber.from('200');
-    expect(
+    await expect(
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(others[0]))
         .burnGem(others[0], catalystId, burnAmount)
@@ -104,7 +109,7 @@ describe('GemsCatalystsRegistry', function () {
   it('burnGem should fail for non existing gemId', async function () {
     const {gemsCatalystsRegistry, gemMinter} = await setupGemsAndCatalysts();
     const burnAmount = BigNumber.from('2');
-    expect(
+    await expect(
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(gemMinter))
         .burnGem(gemMinter, 101, burnAmount)
@@ -119,7 +124,7 @@ describe('GemsCatalystsRegistry', function () {
     } = await setupGemsAndCatalysts();
     const gemId = await powerGem.gemId();
     const burnAmount = BigNumber.from('200');
-    expect(
+    await expect(
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(gemMinter))
         .burnGem(gemMinter, gemId, burnAmount)
@@ -145,7 +150,7 @@ describe('GemsCatalystsRegistry', function () {
       commonCatalyst,
       gemsCatalystsRegistryAdmin,
     } = await setupGemsAndCatalysts();
-    expect(
+    await expect(
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(gemsCatalystsRegistryAdmin))
         .addGemsAndCatalysts([powerGem.address], [commonCatalyst.address])
@@ -158,7 +163,7 @@ describe('GemsCatalystsRegistry', function () {
       commonCatalyst,
       gemsCatalystsRegistryAdmin,
     } = await setupGemsAndCatalysts();
-    expect(
+    await expect(
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(gemsCatalystsRegistryAdmin))
         .addGemsAndCatalysts([], [commonCatalyst.address])
@@ -201,7 +206,7 @@ describe('GemsCatalystsRegistry', function () {
       gemNotInOrder,
       gemsCatalystsRegistryAdmin,
     } = await setupGemsAndCatalysts();
-    expect(
+    await expect(
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(gemsCatalystsRegistryAdmin))
         .addGemsAndCatalysts([gemNotInOrder.address], [])
@@ -211,11 +216,11 @@ describe('GemsCatalystsRegistry', function () {
   it('addGemsAndCatalysts should fail for unauthorized user', async function () {
     const {gemsCatalystsRegistry, gemExample} = await setupGemsAndCatalysts();
     const others = await getUnnamedAccounts();
-    expect(
+    await expect(
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(others[0]))
         .addGemsAndCatalysts([gemExample.address], [])
-    ).to.be.revertedWith('GEM_ID_NOT_IN_ORDER');
+    ).to.be.revertedWith('NOT_AUTHORIZED');
   });
 
   it('burnDifferentGems for two different gem tokens', async function () {
