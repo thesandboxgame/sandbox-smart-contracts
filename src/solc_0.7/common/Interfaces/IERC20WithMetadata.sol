@@ -9,11 +9,12 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
-interface ERC721TokenReceiver {
-    function onERC721Received(
-        address operator,
-        address from,
-        uint256 tokenId,
-        bytes calldata data
-    ) external returns (bytes4);
+import "./IERC20.sol";
+
+interface IERC20WithMetadata is IERC20 {
+    function name() external view returns (string memory);
+
+    function symbol() external view returns (string memory);
+
+    function decimals() external view returns (uint8);
 }

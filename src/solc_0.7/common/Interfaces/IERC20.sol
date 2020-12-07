@@ -2,7 +2,7 @@
 pragma solidity 0.7.5;
 
 /// @dev see https://eips.ethereum.org/EIPS/eip-20
-interface ERC20 {
+interface IERC20 {
     /// @notice emitted when tokens are transfered from one address to another.
     /// @param from address from which the token are transfered from (zero means tokens are minted).
     /// @param to destination address which the token are transfered to (zero means tokens are burnt).

@@ -5,7 +5,7 @@ pragma solidity 0.7.5;
  * @title ERC165
  * @dev https://eips.ethereum.org/EIPS/eip-165
  */
-interface ERC165 {
+interface IERC165 {
     /**
      * @notice Query if a contract implements interface `interfaceId`
      * @param interfaceId The interface identifier, as specified in ERC-165

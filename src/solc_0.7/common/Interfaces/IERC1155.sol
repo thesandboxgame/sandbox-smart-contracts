@@ -6,7 +6,7 @@ pragma solidity 0.7.5;
     @dev See https://eips.ethereum.org/EIPS/eip-1155
     Note: The ERC-165 identifier for this interface is 0xd9b67a26.
  */
-interface ERC1155 {
+interface IERC1155 {
     event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);
 
     event TransferBatch(

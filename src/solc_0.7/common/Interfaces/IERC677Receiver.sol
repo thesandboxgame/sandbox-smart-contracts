@@ -1,11 +1,10 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
-interface ERC20Receiver {
-    function receiveApproval(
-        address _from,
+interface IERC677Receiver {
+    function onTokenTransfer(
+        address _sender,
         uint256 _value,
-        address _tokenAddress,
         bytes calldata _data
     ) external;
 }

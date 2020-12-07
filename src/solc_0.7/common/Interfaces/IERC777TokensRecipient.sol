@@ -9,7 +9,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
-interface ERC777TokensRecipient {
+interface IERC777TokensRecipient {
     function tokensReceived(
         address operator,
         address from,

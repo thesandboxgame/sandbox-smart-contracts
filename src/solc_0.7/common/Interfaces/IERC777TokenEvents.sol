@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
-interface ERC777TokenEvents {
+interface IERC777TokenEvents {
     event Sent(
         address indexed operator,
         address indexed from,
