@@ -15,17 +15,15 @@ function exitIfError() {
   }
 }
 
-type Assets = {
-  assets: Claim[];
+type AssetClaims = {
+  assets: {
+    reservedAddress: string;
+    assetIds: Array<BigNumber> | Array<string> | Array<number>;
+    assetValues: Array<number>;
+  }[];
 };
 
-type Claim = {
-  reservedAddress: string;
-  assetIds: Array<BigNumber> | Array<string> | Array<number>;
-  assetValues: Array<number>;
-};
-
-function generateAssetsForMerkleTree(assetData: Assets) {
+function generateAssetsForMerkleTree(assetData: AssetClaims) {
   const assets = [];
   let numClaims = 0;
   let numAssets = 0;
