@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "../common/BaseWithStorage/WithAdmin.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
-import "./GemsAndCatalysts.sol";
+import "./GemsCatalystsRegistry.sol";
 
 contract AssetAttributesRegistry is WithAdmin, WithMinter {
     uint256 internal constant MAX_NUM_GEMS = 15;
@@ -12,7 +12,7 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
     uint256 private constant NOT_IS_NFT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFFFFFFFF;
     uint256 private constant NOT_NFT_INDEX = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF800000007FFFFFFFFFFFFFFF;
 
-    GemsAndCatalysts immutable _gemsAndCatalysts;
+    GemsCatalystsRegistry immutable _gemsCatalystsRegistry;
     mapping(uint256 => Record) internal _records;
 
     // used to allow migration to specify blockNumber when setting catalyst/gems
@@ -31,8 +31,8 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
     event CatalystApplied(uint256 indexed assetId, uint16 indexed catalystId, uint16[] gemIds, uint64 blockNumber);
     event GemsAdded(uint256 indexed assetId, uint16[] gemIds, uint64 blockNumber);
 
-    constructor(GemsAndCatalysts gemsAndCatalysts, address admin) {
-        _gemsAndCatalysts = gemsAndCatalysts;
+    constructor(GemsCatalystsRegistry gemsCatalystsRegistry, address admin) {
+        _gemsCatalystsRegistry = gemsCatalystsRegistry;
         _admin = admin;
     }
 
@@ -91,7 +91,7 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
             }
             i++;
         }
-        uint8 maxGems = _gemsAndCatalysts.getMaxGems(_records[assetId].catalystId);
+        uint8 maxGems = _gemsCatalystsRegistry.getMaxGems(_records[assetId].catalystId);
         require(i <= maxGems, "GEMS_TOO_MANY");
         require(j >= gemIds.length, "GEMS_MAX_REACHED");
         _records[assetId].gemIds = gemIdsToStore;
@@ -100,7 +100,7 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
     }
 
     function getAttributes(uint256 assetId, GemEvent[] calldata events) external view returns (uint32[] memory values) {
-        return _gemsAndCatalysts.getAttributes(_records[assetId].catalystId, assetId, events);
+        return _gemsCatalystsRegistry.getAttributes(_records[assetId].catalystId, assetId, events);
     }
 
     function setMigrationContract(address migrationContract) external {
@@ -123,7 +123,7 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         require(msg.sender == _minter, "NOT_AUTHORIZED_MINTER");
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT");
         require(gemIds.length <= MAX_NUM_GEMS, "GEMS_MAX_REACHED");
-        uint8 maxGems = _gemsAndCatalysts.getMaxGems(_records[assetId].catalystId);
+        uint8 maxGems = _gemsCatalystsRegistry.getMaxGems(_records[assetId].catalystId);
         require(gemIds.length <= maxGems, "GEMS_TOO_MANY");
 
         uint16[MAX_NUM_GEMS] memory gemIdsToStore;

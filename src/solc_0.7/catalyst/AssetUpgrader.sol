@@ -3,7 +3,7 @@ pragma solidity 0.7.1;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./AssetAttributesRegistry.sol";
-import "./GemsAndCatalysts.sol";
+import "./GemsCatalystsRegistry.sol";
 import "../common/Interfaces/ERC20Extended.sol";
 import "../common/Interfaces/AssetToken.sol";
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
@@ -18,7 +18,7 @@ contract AssetUpgrader is WithMetaTransaction {
     ERC20Extended internal immutable _sand;
     AssetAttributesRegistry internal immutable _registry;
     AssetToken internal immutable _asset;
-    GemsAndCatalysts internal immutable _gemsAndCatalysts;
+    GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
     uint256 internal immutable _upgradeFee;
     uint256 internal immutable _gemAdditionFee;
     address internal immutable _feeRecipient;
@@ -27,7 +27,7 @@ contract AssetUpgrader is WithMetaTransaction {
     /// @param registry: AssetAttributesRegistry for recording catalyst and gems used
     /// @param sand: ERC20 for fee payment
     /// @param asset: Asset Token Contract (dual ERC1155/ERC721)
-    /// @param gemsAndCatalysts: that track the canonical catalyst and gems and provide batch burning facility
+    /// @param gemsCatalystsRegistry: that track the canonical catalyst and gems and provide batch burning facility
     /// @param upgradeFee: the fee in Sand paid for an upgrade (setting or replacing a catalyst)
     /// @param gemAdditionFee: the fee in Sand paid for adding gems
     /// @param feeRecipient: address receiving the Sand fee
@@ -35,7 +35,7 @@ contract AssetUpgrader is WithMetaTransaction {
         AssetAttributesRegistry registry,
         ERC20Extended sand,
         AssetToken asset,
-        GemsAndCatalysts gemsAndCatalysts,
+        GemsCatalystsRegistry gemsCatalystsRegistry,
         uint256 upgradeFee,
         uint256 gemAdditionFee,
         address feeRecipient
@@ -43,7 +43,7 @@ contract AssetUpgrader is WithMetaTransaction {
         _registry = registry;
         _sand = sand;
         _asset = asset;
-        _gemsAndCatalysts = gemsAndCatalysts;
+        _gemsCatalystsRegistry = gemsCatalystsRegistry;
         _upgradeFee = upgradeFee;
         _gemAdditionFee = gemAdditionFee;
         _feeRecipient = feeRecipient;
@@ -167,10 +167,10 @@ contract AssetUpgrader is WithMetaTransaction {
     }
 
     function _burnGems(address from, uint16[] memory gemIds) internal {
-        _gemsAndCatalysts.burnDiferentGems(from, gemIds);
+        _gemsCatalystsRegistry.burnDifferentGems(from, gemIds);
     }
 
     function _burnCatalyst(address from, uint16 catalystId) internal {
-        _gemsAndCatalysts.burnCatalyst(from, catalystId, 1);
+        _gemsCatalystsRegistry.burnCatalyst(from, catalystId, 1);
     }
 }

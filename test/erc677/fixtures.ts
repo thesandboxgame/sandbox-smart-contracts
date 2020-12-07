@@ -1,12 +1,11 @@
 import {ethers, deployments, getNamedAccounts} from 'hardhat';
 
-import {BigNumber} from 'ethers';
-import {Contract} from 'ethers';
+import {Contract, BigNumber} from 'ethers';
 
 export const setupERC677 = deployments.createFixture(async () => {
   await deployments.fixture('Gems');
   const accounts = await getNamedAccounts();
-  const gemToken: Contract = await ethers.getContract('Gem_Power');
+  const gemToken: Contract = await ethers.getContract('Gem_POWER');
   await deployments.deploy('MockERC677Receiver', {
     from: accounts.deployer,
     args: [],
@@ -27,7 +26,7 @@ export const setupERC677 = deployments.createFixture(async () => {
     'FallBackContract'
   );
   const tx = await gemToken
-    .connect(ethers.provider.getSigner(accounts.deployer))
+    .connect(ethers.provider.getSigner(accounts.gemMinter))
     .mint(accounts.deployer, BigNumber.from('800000000000000000'));
   await tx.wait();
   return {

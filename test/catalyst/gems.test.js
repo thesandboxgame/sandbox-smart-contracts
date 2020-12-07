@@ -1,8 +1,8 @@
 const {
   ethers,
-  getUnnamedAccounts,
-  getNamedAccounts,
   deployments,
+  getNamedAccounts,
+  getUnnamedAccounts,
 } = require('hardhat');
 const {waitFor, recurseTests} = require('../utils');
 const generateERC20Tests = require('../erc20');
@@ -11,13 +11,15 @@ function testGem(gemName) {
   const erc20Tests = generateERC20Tests(
     async () => {
       const others = await getUnnamedAccounts();
-      const {deployer} = await getNamedAccounts();
+      const {gemMinter} = await getNamedAccounts();
       await deployments.fixture();
       const contract = await ethers.getContract(gemName);
 
       function mint(to, amount) {
         return waitFor(
-          contract.connect(ethers.provider.getSigner(deployer)).mint(to, amount)
+          contract
+            .connect(ethers.provider.getSigner(gemMinter))
+            .mint(to, amount)
         );
       }
 
@@ -42,8 +44,8 @@ function testGem(gemName) {
   });
 }
 
-testGem('Gem_Power');
-// testGem('Gem_Defense');
-// testGem('Gem_Speed');
-// testGem('Gem_Magic');
-// testGem('Gem_Luck');
+testGem('Gem_POWER');
+// testGem('Gem_DEFENSE');
+// testGem('Gem_SPEED');
+// testGem('Gem_MAGIC');
+// testGem('Gem_LUCK');
