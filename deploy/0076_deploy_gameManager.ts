@@ -16,4 +16,4 @@ const func: DeployFunction = async function (hre) {
 
 export default func;
 func.tags = ['GameManager', 'GameManager_deploy'];
-func.dependencies = ['GameToken', 'Sand'];
+func.dependencies = ['GameToken_deploy', 'Sand_deploy'];
