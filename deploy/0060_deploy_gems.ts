@@ -8,11 +8,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {gemMinter, deployer} = await getNamedAccounts();
   for (const gem of gems) {
-    await deploy(`Gem_${gem.name}`, {
+    await deploy(`Gem_${gem.symbol}`, {
       contract: 'Gem',
       from: deployer,
       log: true,
-      args: [gem.name, gem.name, gemMinter, gem.gemId],
+      args: [`Sandbox's ${gem.symbol} Gems`, gem.symbol, gemMinter, gem.gemId],
     });
   }
 };

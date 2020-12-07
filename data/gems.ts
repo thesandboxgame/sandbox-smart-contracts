@@ -1,22 +1,22 @@
 export = [
   {
-    name: 'Power',
+    symbol: 'POWER',
     gemId: 1,
   },
   {
-    name: 'Defense',
+    symbol: 'DEFENSE',
     gemId: 2,
   },
   {
-    name: 'Speed',
+    symbol: 'SPEED',
     gemId: 3,
   },
   {
-    name: 'Magic',
+    symbol: 'MAGIC',
     gemId: 4,
   },
   {
-    name: 'Luck',
+    symbol: 'LUCK',
     gemId: 5,
   },
 ];

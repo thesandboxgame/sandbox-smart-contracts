@@ -103,11 +103,11 @@ contract GemsCatalystsRegistry is WithAdmin {
         }
     }
 
-    function isGemExists(uint16 gemId) external view returns (bool) {
+    function doesGemExist(uint16 gemId) external view returns (bool) {
         return getGem(gemId) != Gem(0);
     }
 
-    function isCatalystExists(uint16 catalystId) external view returns (bool) {
+    function doesCatalystExist(uint16 catalystId) external view returns (bool) {
         return getCatalyst(catalystId) != CatalystToken(0);
     }
 

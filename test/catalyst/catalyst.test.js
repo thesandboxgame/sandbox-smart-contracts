@@ -44,7 +44,7 @@ function testCatalyst(catalystName) {
   });
 }
 
-testCatalyst('Catalyst_Epic');
-// testCatalyst('Catalyst_Common');
-// testCatalyst('Catalyst_Rare');
-// testCatalyst('Catalyst_Legendary');
+testCatalyst('Catalyst_EPIC');
+// testCatalyst('Catalyst_COMMON');
+// testCatalyst('Catalyst_RARE');
+// testCatalyst('Catalyst_LEGENDARY');

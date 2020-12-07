@@ -8,12 +8,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {catalystMinter, deployer} = await getNamedAccounts();
   for (const catalyst of catalysts) {
-    await deploy(`Catalyst_${catalyst.name}`, {
+    await deploy(`Catalyst_${catalyst.symbol}`, {
       contract: 'PrimaryCatalyst',
       from: deployer,
       log: true,
       args: [
-        catalyst.name,
+        `Sandbox's ${catalyst.symbol} Catalysts`,
         catalyst.symbol,
         catalystMinter,
         catalyst.maxGems,

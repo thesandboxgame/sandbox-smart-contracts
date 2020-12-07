@@ -15,13 +15,13 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   const gemsCatalystsRegistry: Contract = await ethers.getContract(
     'GemsCatalystsRegistry'
   );
-  const powerGem: Contract = await ethers.getContract('Gem_Power');
-  const defenseGem: Contract = await ethers.getContract('Gem_Defense');
-  const speedGem: Contract = await ethers.getContract('Gem_Speed');
-  const magicGem: Contract = await ethers.getContract('Gem_Magic');
-  const luckGem: Contract = await ethers.getContract('Gem_Luck');
-  const commonCatalyst: Contract = await ethers.getContract('Catalyst_Common');
-  const rareCatalyst: Contract = await ethers.getContract('Catalyst_Rare');
+  const powerGem: Contract = await ethers.getContract('Gem_POWER');
+  const defenseGem: Contract = await ethers.getContract('Gem_DEFENSE');
+  const speedGem: Contract = await ethers.getContract('Gem_SPEED');
+  const magicGem: Contract = await ethers.getContract('Gem_MAGIC');
+  const luckGem: Contract = await ethers.getContract('Gem_LUCK');
+  const commonCatalyst: Contract = await ethers.getContract('Catalyst_COMMON');
+  const rareCatalyst: Contract = await ethers.getContract('Catalyst_RARE');
   const users = await getUnnamedAccounts();
   const {
     catalystMinter,

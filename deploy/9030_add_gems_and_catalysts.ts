@@ -4,41 +4,39 @@ import gems from '../data/gems';
 import catalysts from '../data/catalysts';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
-  const {log, execute, read} = deployments;
-  const {deployer} = await getNamedAccounts();
+  const {deployments} = hre;
+  const {execute, read} = deployments;
 
   const catalystsToAdd = [];
   const gemsToAdd = [];
 
   for (const catalyst of catalysts) {
-    const isCatalystExists = await read(
+    const doesCatalystExist = await read(
       `GemsCatalystsRegistry`,
-      'isCatalystExists',
+      'doesCatalystExist',
       catalyst.catalystId
     );
-    if (!isCatalystExists) {
-      const {address} = await deployments.get(`Catalyst_${catalyst.name}`);
+    if (!doesCatalystExist) {
+      const {address} = await deployments.get(`Catalyst_${catalyst.symbol}`);
       catalystsToAdd.push(address);
     }
   }
 
   for (const gem of gems) {
-    const isGemExists = await read(
+    const doesGemExist = await read(
       `GemsCatalystsRegistry`,
-      'isGemExists',
+      'doesGemExist',
       gem.gemId
     );
-    if (!isGemExists) {
-      const {address} = await deployments.get(`Gem_${gem.name}`);
+    if (!doesGemExist) {
+      const {address} = await deployments.get(`Gem_${gem.symbol}`);
       gemsToAdd.push(address);
     }
   }
   const currentAdmin = await read('GemsCatalystsRegistry', 'getAdmin');
-  log(currentAdmin);
   await execute(
     'GemsCatalystsRegistry',
-    {from: deployer, log: true},
+    {from: currentAdmin, log: true},
     'addGemsAndCatalysts',
     gemsToAdd,
     catalystsToAdd

@@ -176,7 +176,7 @@ describe('GemsCatalystsRegistry', function () {
       .addGemsAndCatalysts([gemExample.address], []);
     await tx.wait();
     const gemId = await gemExample.gemId();
-    expect(await gemsCatalystsRegistry.isGemExists(gemId)).to.equal(true);
+    expect(await gemsCatalystsRegistry.doesGemExist(gemId)).to.equal(true);
   });
 
   it('addGemsAndCatalysts should add catalystExample', async function () {
@@ -190,7 +190,7 @@ describe('GemsCatalystsRegistry', function () {
       .addGemsAndCatalysts([], [catalystExample.address]);
     await tx.wait();
     const catalystId = await catalystExample.catalystId();
-    expect(await gemsCatalystsRegistry.isCatalystExists(catalystId)).to.equal(
+    expect(await gemsCatalystsRegistry.doesCatalystExist(catalystId)).to.equal(
       true
     );
   });
