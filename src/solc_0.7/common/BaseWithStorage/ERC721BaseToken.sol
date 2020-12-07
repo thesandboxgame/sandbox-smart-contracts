@@ -413,7 +413,7 @@ contract ERC721BaseToken is IERC721Events, WithSuperOperators, WithMetaTransacti
         uint256 tokenId,
         bytes memory _data
     ) internal returns (bool) {
-        bytes4 retval = ERC721TokenReceiver(to).onERC721Received(operator, from, tokenId, _data);
+        bytes4 retval = IERC721TokenReceiver(to).onERC721Received(operator, from, tokenId, _data);
         return (retval == _ERC721_RECEIVED);
     }
 
@@ -424,7 +424,7 @@ contract ERC721BaseToken is IERC721Events, WithSuperOperators, WithMetaTransacti
         uint256[] memory ids,
         bytes memory _data
     ) internal returns (bool) {
-        bytes4 retval = ERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);
+        bytes4 retval = IERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);
         return (retval == _ERC721_BATCH_RECEIVED);
     }
 }

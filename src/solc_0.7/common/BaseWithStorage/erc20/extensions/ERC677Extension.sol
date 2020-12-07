@@ -1,12 +1,12 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
-import "../../../Interfaces/IIERC677.sol";
+import "../../../Interfaces/IERC677.sol";
 import "../../../Interfaces/IERC677Receiver.sol";
 import "./ERC20Internal.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
-abstract contract IERC677Extension is ERC20Internal, IIERC677 {
+abstract contract ERC677Extension is ERC20Internal, IERC677 {
     using Address for address;
 
     /**
