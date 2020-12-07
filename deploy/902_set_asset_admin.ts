@@ -29,4 +29,5 @@ const func: DeployFunction = async function (hre) {
 
 export default func;
 func.runAtTheEnd = true;
-func.dependencies = ['Asset'];
+func.tags = ['Asset', 'Asset_setup'];
+func.dependencies = ['Asset_deploy'];

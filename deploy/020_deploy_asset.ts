@@ -19,4 +19,4 @@ const func: DeployFunction = async function (hre) {
 };
 export default func;
 func.tags = ['Asset', 'Asset_deploy'];
-func.dependencies = ['Sand'];
+func.dependencies = ['Sand_deploy'];
