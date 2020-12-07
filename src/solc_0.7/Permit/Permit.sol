@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
-import "../common/Interfaces/ERC20Extended.sol";
+import "../common/Interfaces/IERC20Extended.sol";
 import "../Base/TheSandbox712.sol";
 
 /// @title Permit contract
