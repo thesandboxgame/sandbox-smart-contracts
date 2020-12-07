@@ -1,21 +1,21 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
 contract ClaimERC1155 {
-    using SafeMath for uint256;
-
     bytes32 internal _merkleRoot;
-
     IERC1155 internal immutable _asset;
-    address internal immutable _assetsHolder;
+    address internal _assetsHolder;
     event ClaimedAssets(address to, uint256[] assetIds, uint256[] assetValues);
 
     constructor(IERC1155 asset, address assetsHolder) {
         _asset = asset;
-        _assetsHolder = assetsHolder;
+        if (assetsHolder == address(0)) {
+            _assetsHolder = address(this);
+        } else {
+            _assetsHolder = assetsHolder;
+        }
     }
 
     function _claimERC1155(
@@ -72,10 +72,6 @@ contract ClaimERC1155 {
         uint256[] memory assetIds,
         uint256[] memory assetValues
     ) internal returns (bool) {
-        if (_assetsHolder == address(0)) {
-            _asset.safeBatchTransferFrom(address(this), to, assetIds, assetValues, "");
-        } else {
-            _asset.safeBatchTransferFrom(_assetsHolder, to, assetIds, assetValues, "");
-        }
+        _asset.safeBatchTransferFrom(_assetsHolder, to, assetIds, assetValues, "");
     }
 }
