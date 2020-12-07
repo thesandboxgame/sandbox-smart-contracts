@@ -14,13 +14,13 @@ contract WithMinter {
     /// @dev change the minter to be `newMinter`.
     /// @param newMinter address of the new minter.
     function changeMinter(address newMinter) external {
-        require(msg.sender == _minter, "only admin can change admin");
+        require(msg.sender == _minter, "MINTER_ACCESS_DENIED");
         emit MinterChanged(_minter, newMinter);
         _minter = newMinter;
     }
 
     modifier onlyMinter() {
-        require(msg.sender == _minter, "only minter allowed");
+        require(msg.sender == _minter, "MINTER_ONLY");
         _;
     }
 }
