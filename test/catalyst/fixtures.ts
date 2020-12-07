@@ -4,7 +4,7 @@ import {
   getUnnamedAccounts,
   getNamedAccounts,
 } from 'hardhat';
-import { Contract, BigNumber } from 'ethers';
+import {Contract, BigNumber} from 'ethers';
 
 const exampleGemId = 6;
 const notInOrderGemId = 56;
