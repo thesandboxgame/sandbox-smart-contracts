@@ -3,14 +3,14 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer, gameManagerAdmin} = await getNamedAccounts();
+  const {deployer, gameMinterAdmin} = await getNamedAccounts();
   const gameContract = await deployments.get('GameToken');
   const sandContract = await deployments.get('Sand');
 
-  await deploy('GameManager', {
+  await deploy('GameMinter', {
     from: deployer,
     log: true,
-    args: [gameContract.address, gameManagerAdmin, sandContract.address],
+    args: [gameContract.address, gameMinterAdmin, sandContract.address],
   });
 };
 
