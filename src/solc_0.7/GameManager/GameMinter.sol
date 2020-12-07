@@ -3,9 +3,9 @@ pragma solidity 0.7.1;
 
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 import "../common/Interfaces/IGameToken.sol";
-import "../common/Interfaces/IGameManager.sol";
+import "../common/Interfaces/IGameMinter.sol";
 
-contract GameManager is WithMetaTransaction, IGameManager {
+contract GameMinter is WithMetaTransaction, IGameMinter {
     ///////////////////////////////  Libs //////////////////////////////
 
     ///////////////////////////////  Data //////////////////////////////
@@ -70,7 +70,7 @@ contract GameManager is WithMetaTransaction, IGameManager {
                 "ADD_ACCESS_DENIED"
             );
         } else {
-            require(_isValidMetaTx(editor), "ADD_EDITOR_ACCESS_DENIED");
+            require(_isValidMetaTx(editor), "METATX_ACCESS_DENIED");
         }
 
         gameToken.addAssets(from, gameId, assetIds, values, uri);
@@ -101,8 +101,27 @@ contract GameManager is WithMetaTransaction, IGameManager {
                 "REMOVE_ACCESS_DENIED"
             );
         } else {
-            require(_isValidMetaTx(editor), "REMOVE_EDITOR_ACCESS_DENIED");
+            require(_isValidMetaTx(editor), "METATX_ACCESS_DENIED");
         }
         gameToken.removeAssets(gameId, assetIds, values, to, uri);
+    }
+
+    /// @notice Set the URI of a specific game token
+    /// @param from The address of the game owner
+    /// @param gameId The id of the game token
+    /// @param URI The URI string for the token's metadata
+    /// @param editor The game editor address (ignored if address(0)). Use only to perform
+    /// a metaTx on behalf of editor instead of owner.
+    function setTokenUri(uint256 gameId, string calldata URI) external override {
+        if (editor == address(0)) {
+            require(
+                gameToken.ownerOf(gameId) == msg.sender ||
+                    gameToken.isGameEditor(gameId, msg.sender) ||
+                    _isValidMetaTx(from),
+                "URI_ACCESS_DENIED"
+            );
+        } else {
+            require(_isValidMetaTx(editor), "METATX_ACCESS_DENIED");
+        }
     }
 }
