@@ -28,8 +28,6 @@ const erc721Tests = require('../erc721')(
       ethers.provider.getSigner(gameTokenAdmin)
     );
 
-    await gameAsAdmin.setGameManager(others[11]);
-
     async function mint(to) {
       const assetReceipt = await supplyAssets(to, to, 1);
       const transferEvent = await expectEventWithArgs(
@@ -38,12 +36,9 @@ const erc721Tests = require('../erc721')(
         'Transfer'
       );
       const assetId = transferEvent.args[2];
-      const gameAsGameManager = await contract.connect(
-        ethers.provider.getSigner(others[11])
-      );
       const randomId = await getRandom();
 
-      const receipt = await gameAsGameManager.createGame(
+      const receipt = await gameAsAdmin.createGame(
         to,
         to,
         [assetId],
