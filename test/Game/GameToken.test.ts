@@ -981,17 +981,13 @@ describe('GameToken', function () {
       expect(symbol).to.be.equal('GAME');
     });
 
-    it('GAME owner can set the tokenURI', async function () {
+    it('can get the tokenURI', async function () {
       const URI = await gameToken.tokenURI(gameId);
       expect(URI).to.be.equal('Hello Sandbox');
     });
 
-    it('GAME editors can set the tokenURI', async function () {
-      await GameEditor1.Game.setTokenURI(
-        GameEditor1.address,
-        gameId,
-        'Hello Sandbox'
-      );
+    it('GameManager can set the tokenURI', async function () {
+      await GameManager.Game.setTokenURI(gameId, 'Hello Sandbox');
       const URI = await gameToken.tokenURI(gameId);
       expect(URI).to.be.equal('Hello Sandbox');
     });
@@ -1005,9 +1001,9 @@ describe('GameToken', function () {
 
     it('should revert if not ownerOf or gameEditor', async function () {
       const {gameToken} = await setupTest();
-      await expect(
-        gameToken.setTokenURI(users[0].address, 11, 'New URI')
-      ).to.be.revertedWith('URI_ACCESS_DENIED');
+      await expect(gameToken.setTokenURI(11, 'New URI')).to.be.revertedWith(
+        'INVALID_GAME_MANAGER'
+      );
     });
 
     it('should be able to retrieve the creator address from the gameId', async function () {

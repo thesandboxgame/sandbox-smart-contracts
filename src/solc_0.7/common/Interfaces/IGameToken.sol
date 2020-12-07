@@ -79,11 +79,7 @@ interface IGameToken {
 
     function tokenURI(uint256 gameId) external view returns (string memory uri);
 
-    function setTokenURI(
-        address from,
-        uint256 gameId,
-        string calldata URI
-    ) external;
+    function setTokenURI(uint256 gameId, string calldata URI) external;
 
     function onERC1155Received(
         address operator,
