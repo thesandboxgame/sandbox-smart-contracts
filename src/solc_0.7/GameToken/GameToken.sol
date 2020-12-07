@@ -217,18 +217,9 @@ contract GameToken is ERC721BaseToken, IGameToken {
     }
 
     /// @notice Set the URI of a specific game token
-    /// @param from The address of the one creating the game (may be different from msg.sender if metaTx)
     /// @param gameId The id of the game token
     /// @param URI The URI string for the token's metadata
-    function setTokenURI(
-        address from,
-        uint256 gameId,
-        string calldata URI
-    ) external override {
-        require(
-            msg.sender == _ownerOf(gameId) || _isValidMetaTx(from) || _gameEditors[gameId][msg.sender],
-            "URI_ACCESS_DENIED"
-        );
+    function setTokenURI(uint256 gameId, string calldata URI) external override gameManagerOnly() {
         _setTokenURI(gameId, URI);
     }
 
