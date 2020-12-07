@@ -169,7 +169,7 @@ const config: HardhatUserConfig = {
     starterPackSaleBeneficiary: 'treasury', // collect funds from starter pack sales
     backendMessageSigner: 'backendReferralWallet', // account that sign message for the starter pack
     kyberLiquidityProvider: 'sandBeneficiary', //TODO check what should be the value
-
+    gemsCatalystsRegistryAdmin: 'sandAdmin',
     // testing
     others: {
       default: 'from:5',

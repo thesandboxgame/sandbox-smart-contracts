@@ -11,13 +11,15 @@ function testCatalyst(catalystName) {
   const erc20Tests = generateERC20Tests(
     async () => {
       const others = await getUnnamedAccounts();
-      const {deployer} = await getNamedAccounts();
+      const {catalystMinter} = await getNamedAccounts();
       await deployments.fixture();
       const contract = await ethers.getContract(catalystName);
 
       function mint(to, amount) {
         return waitFor(
-          contract.connect(ethers.provider.getSigner(deployer)).mint(to, amount)
+          contract
+            .connect(ethers.provider.getSigner(catalystMinter))
+            .mint(to, amount)
         );
       }
 
@@ -42,7 +44,7 @@ function testCatalyst(catalystName) {
   });
 }
 
-testCatalyst('Catalyst_Epic');
-// testCatalyst('Catalyst_Common');
-// testCatalyst('Catalyst_Rare');
-// testCatalyst('Catalyst_Legendary');
+testCatalyst('Catalyst_EPIC');
+// testCatalyst('Catalyst_COMMON');
+// testCatalyst('Catalyst_RARE');
+// testCatalyst('Catalyst_LEGENDARY');
