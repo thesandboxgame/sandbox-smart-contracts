@@ -3,19 +3,18 @@ pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
 import "../common/BaseWithStorage/ERC721BaseToken.sol";
+import "../common/BaseWithStorage/WithMinter.sol";
 import "../common/Interfaces/AssetToken.sol";
 import "../common/Interfaces/IGameToken.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
-contract GameToken is ERC721BaseToken, IGameToken {
+contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     ///////////////////////////////  Libs //////////////////////////////
 
     using SafeMath for uint256;
 
     ///////////////////////////////  Data //////////////////////////////
 
-    // contract responsible for forwarding specific calls to GameToken contract.
-    address internal _gameManager;
     AssetToken internal immutable _asset;
 
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
@@ -30,7 +29,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
 
     ///////////////////////////////  Events //////////////////////////////
 
-    event Minter(address newMinter);
     event AssetsAdded(uint256 indexed id, uint256[] assets, uint256[] values);
     event AssetsRemoved(uint256 indexed id, uint256[] assets, uint256[] values, address to);
     event CreatorshipTransfer(address indexed original, address indexed from, address indexed to);
@@ -38,17 +36,14 @@ contract GameToken is ERC721BaseToken, IGameToken {
     constructor(
         address metaTransactionContract,
         address admin,
-        AssetToken asset
+        AssetToken asset,
+        address initialMinter
     ) ERC721BaseToken(metaTransactionContract, admin) {
         _asset = asset;
+        _minter = initialMinter;
     }
 
     ///////////////////////////////  Modifiers //////////////////////////////
-
-    modifier gameManagerOnly() {
-        require(msg.sender == _gameManager, "INVALID_GAME_MANAGER");
-        _;
-    }
 
     modifier notToZero(address to) {
         require(to != address(0), "DESTINATION_ZERO_ADDRESS");
@@ -123,14 +118,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
         emit CreatorshipTransfer(original, current, to);
     }
 
-    /// @notice Set the GameManager contract address
-    /// @param gameManager address of the GameManager
-    function setGameManager(address gameManager) external override onlyAdmin() {
-        require(gameManager != _gameManager, "GAME_MANAGER_ALREADY_SET");
-        _gameManager = gameManager;
-        emit Minter(gameManager);
-    }
-
     /// @notice Function to create a new GAME token
     /// @param from The address of the one creating the game (may be different from msg.sender if metaTx)
     /// @param to The address who will be assigned ownership of this game
@@ -147,7 +134,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         address[] memory editors,
         string memory uri,
         uint96 randomId
-    ) external override gameManagerOnly() notToZero(to) notToThis(to) returns (uint256 id) {
+    ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256 id) {
         uint256 gameId = _mintGame(from, to, randomId);
 
         if (editors.length != 0) {
@@ -170,12 +157,6 @@ contract GameToken is ERC721BaseToken, IGameToken {
     /// @return isEditor Editor status of editor for given tokenId
     function isGameEditor(uint256 gameId, address editor) external view override returns (bool isEditor) {
         return _gameEditors[gameId][editor];
-    }
-
-    /// @notice return the current gameManager
-    /// @return address of gameManager
-    function getGameManager() external view override returns (address) {
-        return _gameManager;
     }
 
     function onERC1155BatchReceived(
@@ -219,7 +200,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
     /// @notice Set the URI of a specific game token
     /// @param gameId The id of the game token
     /// @param URI The URI string for the token's metadata
-    function setTokenURI(uint256 gameId, string calldata URI) external override gameManagerOnly() {
+    function setTokenURI(uint256 gameId, string calldata URI) external override onlyMinter() {
         _setTokenURI(gameId, URI);
     }
 
@@ -262,7 +243,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256[] memory assetIds,
         uint256[] memory values,
         string memory uri
-    ) public override gameManagerOnly() {
+    ) public override onlyMinter() {
         require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
         for (uint256 i = 0; i < assetIds.length; i++) {
             uint256 currentValue = _gameAssets[gameId][assetIds[i]];
@@ -291,7 +272,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
         uint256[] memory values,
         address to,
         string memory uri
-    ) public override gameManagerOnly() notToZero(to) {
+    ) public override onlyMinter() notToZero(to) {
         require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
 
         for (uint256 i = 0; i < assetIds.length; i++) {
