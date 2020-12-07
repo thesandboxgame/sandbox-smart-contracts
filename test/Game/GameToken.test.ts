@@ -86,7 +86,7 @@ async function getNewGame(
       to.address,
       assets,
       quantities,
-      [],
+      ethers.constants.AddressZero,
       '',
       randomId
     )
@@ -176,7 +176,7 @@ describe('GameToken', function () {
         users[4].address,
         [],
         [],
-        [],
+        ethers.constants.AddressZero,
         '',
         randomId
       );
@@ -208,7 +208,7 @@ describe('GameToken', function () {
           users[2].address,
           [],
           [],
-          [],
+          ethers.constants.AddressZero,
           '',
           randomId
         )
@@ -229,7 +229,7 @@ describe('GameToken', function () {
             gameToken.address,
             [],
             [],
-            [],
+            ethers.constants.AddressZero,
             '',
             42
           )
@@ -330,7 +330,7 @@ describe('GameToken', function () {
             GameOwner.address,
             [assetId, assetId2],
             [quantity, quantity2],
-            [],
+            ethers.constants.AddressZero,
             '',
             randomId
           )
@@ -401,7 +401,7 @@ describe('GameToken', function () {
               GameOwner.address,
               [assetId],
               [11, 42],
-              [],
+              ethers.constants.AddressZero,
               '',
               randomId
             )
@@ -454,7 +454,7 @@ describe('GameToken', function () {
             GameOwner.address,
             [],
             [],
-            [users[10].address],
+            users[10].address,
             'Uri is this',
             randomId
           )
@@ -854,7 +854,7 @@ describe('GameToken', function () {
           GameOwner.address,
           [assetId],
           [1],
-          [],
+          ethers.constants.AddressZero,
           '',
           randomId
         )
@@ -938,7 +938,7 @@ describe('GameToken', function () {
           GameOwner.address,
           [],
           [],
-          [],
+          ethers.constants.AddressZero,
           'Hello Sandbox',
           randomId
         )
@@ -1359,7 +1359,7 @@ describe('GameToken', function () {
           GameOwner.address,
           [],
           [],
-          [],
+          ethers.constants.AddressZero,
           '',
           randomId
         )
@@ -1475,7 +1475,7 @@ describe('GameToken', function () {
             GameOwner.address,
             [],
             [],
-            [],
+            ethers.constants.AddressZero,
             '',
             randomId
           )
