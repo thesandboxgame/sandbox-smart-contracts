@@ -52,7 +52,7 @@ function generateAssetsForMerkleTree(assetData: Assets) {
   return {assets};
 }
 
-function getAssets(
+function createAssetClaimMerkleTree(
   isDeploymentChainId: any,
   chainId: any,
   assetData: any
@@ -97,4 +97,4 @@ function getAssets(
   };
 }
 
-export default getAssets;
+export default createAssetClaimMerkleTree;

@@ -6,7 +6,7 @@ import {
 } from 'hardhat';
 import {expect} from '../chai-setup';
 import MerkleTree from '../../lib/merkleTree';
-import getAssets from '../../data/asset_giveaway_1/getAssets';
+import createAssetClaimMerkleTree from '../../data/asset_giveaway_1/getAssets';
 import helpers from '../../lib/merkleTreeHelper';
 const {createDataArrayAssets} = helpers;
 import * as testAssetData from '../../data/asset_giveaway_1/testAssets.json';
@@ -131,7 +131,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   }
 
   // Set up tree with test assets
-  const {assets, merkleRootHash} = getAssets(
+  const {assets, merkleRootHash} = createAssetClaimMerkleTree(
     network.live,
     chainId,
     dataWithIds
