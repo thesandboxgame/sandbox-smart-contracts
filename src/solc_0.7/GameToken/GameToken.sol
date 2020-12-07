@@ -32,6 +32,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     event AssetsAdded(uint256 indexed id, uint256[] assets, uint256[] values);
     event AssetsRemoved(uint256 indexed id, uint256[] assets, uint256[] values, address to);
     event CreatorshipTransfer(address indexed original, address indexed from, address indexed to);
+    event GameEditorSet(uint256 indexed id, address gameEditor, bool isEditor);
 
     constructor(
         address metaTransactionContract,
@@ -87,6 +88,19 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         bool isEditor
     ) external override {
         require(msg.sender == _ownerOf(gameId) || _isValidMetaTx(from), "EDITOR_ACCESS_DENIED");
+        _setGameEditor(gameId, editor, isEditor);
+    }
+
+    /// @dev Function to allow token owner to set game editors
+    /// @param gameId The id of the GAME token owned by owner
+    /// @param editor The address of the editor to set
+    /// @param isEditor Add or remove the ability to edit
+    function _setGameEditor(
+        uint256 gameId,
+        address editor,
+        bool isEditor
+    ) internal {
+        emit GameEditorSet(gameId, editor, isEditor);
         _gameEditors[gameId][editor] = isEditor;
     }
 
@@ -123,7 +137,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @param to The address who will be assigned ownership of this game
     /// @param assetIds The ids of the assets to add to this game
     /// @param values the amount of each token id to add to game
-    /// @param editors The addresses to allow to edit (can also be set later)
+    /// @param editor The address to allow to edit (can also be set later)
     /// @param randomId A random id created on the backend.
     /// @return id The id of the new GAME token (erc721)
     function createGame(
@@ -131,16 +145,14 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         address to,
         uint256[] memory assetIds,
         uint256[] memory values,
-        address[] memory editors,
+        address editor,
         string memory uri,
         uint96 randomId
     ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256 id) {
         uint256 gameId = _mintGame(from, to, randomId);
 
-        if (editors.length != 0) {
-            for (uint256 i = 0; i < editors.length; i++) {
-                _gameEditors[gameId][editors[i]] = true;
-            }
+        if (editor != address(0)) {
+            _setGameEditor(gameId, editor, true);
         }
 
         if (assetIds.length != 0) {
