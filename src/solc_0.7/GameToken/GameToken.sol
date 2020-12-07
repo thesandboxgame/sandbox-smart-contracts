@@ -16,7 +16,7 @@ contract GameToken is ERC721BaseToken, IGameToken {
 
     // contract responsible for forwarding specific calls to GameToken contract.
     address internal _gameManager;
-    AssetToken _asset;
+    AssetToken internal immutable _asset;
 
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
