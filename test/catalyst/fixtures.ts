@@ -4,7 +4,7 @@ import {
   getUnnamedAccounts,
   getNamedAccounts,
 } from 'hardhat';
-import {Contract, BigNumber} from 'ethers';
+import { Contract, BigNumber } from 'ethers';
 
 const exampleGemId = 6;
 const notInOrderGemId = 56;
@@ -30,6 +30,7 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   } = await getNamedAccounts();
   const catalystOwner = users[0];
   const gemOwner = users[0];
+  const gemsCatalystsRegistrySuperOperator = users[1];
 
   await deployments.deploy(`Gem_Example`, {
     contract: 'Gem',
@@ -91,8 +92,13 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     .connect(ethers.provider.getSigner(gemMinter))
     .setSuperOperator(gemsCatalystsRegistry.address, true);
 
+  await gemsCatalystsRegistry
+    .connect(ethers.provider.getSigner(gemsCatalystsRegistryAdmin))
+    .setSuperOperator(gemsCatalystsRegistrySuperOperator, true);
+
   return {
     gemsCatalystsRegistry,
+    gemsCatalystsRegistrySuperOperator,
     powerGem,
     defenseGem,
     speedGem,

@@ -39,6 +39,41 @@ describe('GemsCatalystsRegistry', function () {
     expect(totalSupplyAfter).to.equal(totalSupplyBefore.sub(burnAmount));
   });
 
+  it('burnCatalyst should burn 2 common catalysts from superOperator account', async function () {
+    const {
+      gemsCatalystsRegistry,
+      gemsCatalystsRegistrySuperOperator,
+      commonCatalyst,
+      catalystOwner,
+    } = await setupGemsAndCatalysts();
+    const catalystId = await commonCatalyst.catalystId();
+    const totalSupplyBefore = await commonCatalyst.totalSupply();
+    const balanceBeforeBurning = await commonCatalyst.balanceOf(catalystOwner);
+    const burnAmount = BigNumber.from('2');
+    await gemsCatalystsRegistry
+      .connect(ethers.provider.getSigner(gemsCatalystsRegistrySuperOperator))
+      .burnCatalyst(catalystOwner, catalystId, burnAmount);
+    const totalSupplyAfter = await commonCatalyst.totalSupply();
+    const balanceAfterBurning = await commonCatalyst.balanceOf(catalystOwner);
+    expect(balanceAfterBurning).to.equal(balanceBeforeBurning.sub(burnAmount));
+    expect(totalSupplyAfter).to.equal(totalSupplyBefore.sub(burnAmount));
+  });
+  it('burnCatalyst should fail for unauthorized account', async function () {
+    const {
+      gemsCatalystsRegistry,
+      commonCatalyst,
+      catalystOwner,
+    } = await setupGemsAndCatalysts();
+    const catalystId = await commonCatalyst.catalystId();
+    const burnAmount = BigNumber.from('2');
+    const users = await getUnnamedAccounts();
+    await expect(
+      gemsCatalystsRegistry
+        .connect(ethers.provider.getSigner(users[3]))
+        .burnCatalyst(catalystOwner, catalystId, burnAmount)
+    ).to.be.revertedWith('NOT_AUTHORIZED');
+  });
+
   it('burnCatalyst should fail for non existing catalystId', async function () {
     const {
       gemsCatalystsRegistry,
@@ -77,13 +112,13 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry,
       commonCatalyst,
     } = await setupGemsAndCatalysts();
-    const others = await getUnnamedAccounts();
+    const users = await getUnnamedAccounts();
     const catalystId = await commonCatalyst.catalystId();
     const burnAmount = BigNumber.from('200');
     await expect(
       gemsCatalystsRegistry
-        .connect(ethers.provider.getSigner(others[0]))
-        .burnGem(others[0], catalystId, burnAmount)
+        .connect(ethers.provider.getSigner(users[3]))
+        .burnGem(users[3], catalystId, burnAmount)
     ).to.be.revertedWith('Not enough funds');
   });
 
@@ -106,6 +141,41 @@ describe('GemsCatalystsRegistry', function () {
     expect(totalSupplyAfter).to.equal(totalSupplyBefore.sub(burnAmount));
   });
 
+  it('burnGem should burn 3 power gems from superOperator account', async function () {
+    const {
+      gemsCatalystsRegistry,
+      gemsCatalystsRegistrySuperOperator,
+      powerGem,
+      gemOwner,
+    } = await setupGemsAndCatalysts();
+    const gemId = await powerGem.gemId();
+    const totalSupplyBefore = await powerGem.totalSupply();
+    const balanceBeforeBurning = await powerGem.balanceOf(gemOwner);
+    const burnAmount = BigNumber.from('3');
+    await gemsCatalystsRegistry
+      .connect(ethers.provider.getSigner(gemsCatalystsRegistrySuperOperator))
+      .burnGem(gemOwner, gemId, burnAmount);
+    const balanceAfterBurning = await powerGem.balanceOf(gemOwner);
+    const totalSupplyAfter = await powerGem.totalSupply();
+    expect(balanceAfterBurning).to.equal(balanceBeforeBurning.sub(burnAmount));
+    expect(totalSupplyAfter).to.equal(totalSupplyBefore.sub(burnAmount));
+  });
+
+  it('burnGem should fail for unauthorized account', async function () {
+    const {
+      gemsCatalystsRegistry,
+      powerGem,
+      gemOwner,
+    } = await setupGemsAndCatalysts();
+    const gemId = await powerGem.gemId();
+    const burnAmount = BigNumber.from('2');
+    const users = await getUnnamedAccounts();
+    await expect(
+      gemsCatalystsRegistry
+        .connect(ethers.provider.getSigner(users[3]))
+        .burnGem(gemOwner, gemId, burnAmount)
+    ).to.be.revertedWith('NOT_AUTHORIZED');
+  });
   it('burnGem should fail for non existing gemId', async function () {
     const {gemsCatalystsRegistry, gemMinter} = await setupGemsAndCatalysts();
     const burnAmount = BigNumber.from('2');
@@ -133,13 +203,13 @@ describe('GemsCatalystsRegistry', function () {
 
   it('burnGem should fail for account with no gems', async function () {
     const {gemsCatalystsRegistry, powerGem} = await setupGemsAndCatalysts();
-    const others = await getUnnamedAccounts();
+    const users = await getUnnamedAccounts();
     const gemId = await powerGem.gemId();
     const burnAmount = BigNumber.from('200');
     expect(
       gemsCatalystsRegistry
-        .connect(ethers.provider.getSigner(others[0]))
-        .burnGem(others[0], gemId, burnAmount)
+        .connect(ethers.provider.getSigner(users[3]))
+        .burnGem(users[3], gemId, burnAmount)
     ).to.be.revertedWith('Not enough funds');
   });
 
@@ -215,10 +285,10 @@ describe('GemsCatalystsRegistry', function () {
 
   it('addGemsAndCatalysts should fail for unauthorized user', async function () {
     const {gemsCatalystsRegistry, gemExample} = await setupGemsAndCatalysts();
-    const others = await getUnnamedAccounts();
+    const users = await getUnnamedAccounts();
     await expect(
       gemsCatalystsRegistry
-        .connect(ethers.provider.getSigner(others[0]))
+        .connect(ethers.provider.getSigner(users[3]))
         .addGemsAndCatalysts([gemExample.address], [])
     ).to.be.revertedWith('NOT_AUTHORIZED');
   });
