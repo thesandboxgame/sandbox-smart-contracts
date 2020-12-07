@@ -9,7 +9,7 @@ interface IGameToken {
         address to,
         uint256[] calldata assetIds,
         uint256[] calldata values,
-        address[] calldata editors,
+        address editor,
         string calldata uri,
         uint96 randomId
     ) external returns (uint256 id);
