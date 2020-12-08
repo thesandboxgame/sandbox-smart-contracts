@@ -11,22 +11,23 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   const OldCatalystRegistry = await deployments.get('OldCatalystRegistry');
 
-  const {deployer} = await getNamedAccounts();
-  const merkleRoot =
-    '0x0000000000000000000000000000000000000000000000000000000000000000'; // TODO
-  await deploy(`CatalystMigrations`, {
+  const {
+    deployer,
+    collectionCatalystMigrationsAdmin,
+  } = await getNamedAccounts();
+  await deploy(`CollectionCatalystMigrations`, {
     from: deployer,
     log: true,
     args: [
       Asset.address,
       AssetAttributesRegistry.address,
       OldCatalystRegistry.address,
-      merkleRoot,
+      collectionCatalystMigrationsAdmin,
     ],
   });
 };
 export default func;
-func.tags = ['CatalystMigrations', 'CatalystMigrations_deploy'];
+func.tags = ['CollectionCatalystMigrations', 'CollectionCatalystMigrations'];
 func.dependencies = [
   'OldCatalystRegistry_deploy',
   'Asset_deploy',
