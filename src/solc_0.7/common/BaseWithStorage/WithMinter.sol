@@ -20,7 +20,7 @@ contract WithMinter {
     }
 
     modifier onlyMinter() {
-        require(msg.sender == _minter, "MINTER_ONLY");
+        require(msg.sender == _minter, "MINTER_ACCESS_DENIED");
         _;
     }
 }
