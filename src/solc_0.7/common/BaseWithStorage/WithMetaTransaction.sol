@@ -17,7 +17,7 @@ contract WithMetaTransaction is WithAdmin {
     /// @param metaTransactionProcessor address that will be given/removed metaTransactionProcessor rights.
     /// @param processorType set the metaTransactionProcessor type
     function setMetaTransactionProcessor(address metaTransactionProcessor, uint8 processorType) public {
-        require(msg.sender == _admin, "SET_PROCESSOR_ACCESS_DENIED");
+        require(msg.sender == _admin, "ADMIN_ACCESS_DENIED");
         _setMetaTransactionProcessor(metaTransactionProcessor, processorType);
     }
 
