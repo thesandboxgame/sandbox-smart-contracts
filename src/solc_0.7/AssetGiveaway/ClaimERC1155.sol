@@ -71,6 +71,6 @@ contract ClaimERC1155 {
         uint256[] memory assetIds,
         uint256[] memory assetValues
     ) internal {
-        return _asset.safeBatchTransferFrom(_assetsHolder, to, assetIds, assetValues, "");
+        _asset.safeBatchTransferFrom(_assetsHolder, to, assetIds, assetValues, "");
     }
 }
