@@ -50,6 +50,8 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         uint96 randomId
     ) external payable override returns (uint256 gameId) {
         require(msg.sender == from || _isValidMetaTx(from), "CREATE_ACCESS_DENIED");
+        // @review
+        require(msg.value >= GAME_MINTING_FEE, "INSUFFICIENT_FUNDS");
         uint256 id = gameToken.createGame(from, to, assetIds, values, editors, uri, randomId);
         return id;
     }
