@@ -14,7 +14,7 @@ contract WithMinter {
     /// @dev change the minter to be `newMinter`.
     /// @param newMinter address of the new minter.
     function changeMinter(address newMinter) external {
-        require(msg.sender == _minter, "MINTER_ACCESS_DENIED");
+        require(msg.sender == _admin, "ADMIN_ACCESS_DENIED");
         emit MinterChanged(_minter, newMinter);
         _minter = newMinter;
     }
