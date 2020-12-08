@@ -25,7 +25,7 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
 
     struct Record {
         uint16 catalystId; // start at 1
-        uint16[MAX_NUM_GEMS] gemIds; // start at 1 test compression ? // TODO check with Design if the limit make sense
+        uint16[MAX_NUM_GEMS] gemIds; // start at 1 test compression ?
     }
 
     event CatalystApplied(uint256 indexed assetId, uint16 indexed catalystId, uint16[] gemIds, uint64 blockNumber);
@@ -46,6 +46,11 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         )
     {
         catalystId = _records[assetId].catalystId;
+        if (catalystId == 0 && assetId & IS_NFT != 0) {
+            // fallback on collection catalyst
+            assetId = _getCollectionId(assetId);
+            catalystId = _records[assetId].catalystId;
+        }
         uint16[MAX_NUM_GEMS] memory fixedGemIds = _records[assetId].gemIds;
         exists = catalystId != 0;
         gemIds = new uint16[](0);
@@ -78,7 +83,22 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         require(msg.sender == _minter, "NOT_AUTHORIZED_MINTER");
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT");
         require(gemIds.length != 0, "INVALID_GEMS_0");
-        uint16[15] memory gemIdsToStore = _records[assetId].gemIds;
+
+        uint16 catalystId = _records[assetId].catalystId;
+        uint16[15] memory gemIdsToStore;
+        if (catalystId == 0) {
+            // fallback on collection catalyst
+            uint256 collectionId = _getCollectionId(assetId);
+            catalystId = _records[collectionId].catalystId;
+            if (catalystId != 0) {
+                _records[assetId].catalystId = catalystId;
+                gemIdsToStore = _records[collectionId].gemIds;
+            }
+        } else {
+            gemIdsToStore = _records[assetId].gemIds;
+        }
+
+        require(catalystId != 0, "NO_CATALYST_SET");
         uint8 j = 0;
         uint8 i = 0;
         for (i = 0; i < MAX_NUM_GEMS; i++) {
@@ -91,7 +111,7 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
             }
             i++;
         }
-        uint8 maxGems = _gemsCatalystsRegistry.getMaxGems(_records[assetId].catalystId);
+        uint8 maxGems = _gemsCatalystsRegistry.getMaxGems(catalystId);
         require(i <= maxGems, "GEMS_TOO_MANY");
         require(j >= gemIds.length, "GEMS_MAX_REACHED");
         _records[assetId].gemIds = gemIdsToStore;
@@ -121,9 +141,8 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         uint64 blockNumber
     ) internal {
         require(msg.sender == _minter, "NOT_AUTHORIZED_MINTER");
-        require(assetId & IS_NFT != 0, "INVALID_NOT_NFT");
         require(gemIds.length <= MAX_NUM_GEMS, "GEMS_MAX_REACHED");
-        uint8 maxGems = _gemsCatalystsRegistry.getMaxGems(_records[assetId].catalystId);
+        uint8 maxGems = _gemsCatalystsRegistry.getMaxGems(catalystId);
         require(gemIds.length <= maxGems, "GEMS_TOO_MANY");
 
         uint16[MAX_NUM_GEMS] memory gemIdsToStore;
@@ -132,6 +151,10 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         }
         _records[assetId] = Record(catalystId, gemIdsToStore);
         emit CatalystApplied(assetId, catalystId, gemIds, blockNumber);
+    }
+
+    function _getCollectionId(uint256 assetId) internal pure returns (uint256) {
+        return assetId & NOT_NFT_INDEX & NOT_IS_NFT; // compute the same as Asset to get collectionId
     }
 
     function _getBlockNumber() internal view returns (uint64 blockNumber) {
