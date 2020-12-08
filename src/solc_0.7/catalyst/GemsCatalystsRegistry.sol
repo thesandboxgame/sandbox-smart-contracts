@@ -5,13 +5,13 @@ pragma experimental ABIEncoderV2;
 import "./Gem.sol";
 import "./CatalystToken.sol";
 import "./AssetAttributesRegistry.sol";
-import "../common/BaseWithStorage/WithAdmin.sol";
+import "../common/BaseWithStorage/WithSuperOperators.sol";
 
 /// @notice Contract managing the Gems and Catalysts
 /// Each Gems and Catalys must be registered here.
 /// Each new Gem get assigned a new id (starting at 1)
 /// Each new Catalyst get assigned a new id (starting at 1)
-contract GemsCatalystsRegistry is WithAdmin {
+contract GemsCatalystsRegistry is WithSuperOperators {
     Gem[] internal _gems;
     CatalystToken[] internal _catalysts;
 
@@ -116,6 +116,7 @@ contract GemsCatalystsRegistry is WithAdmin {
         uint16 catalystId,
         uint256 amount
     ) public {
+        require(msg.sender == from || isSuperOperator(msg.sender), "NOT_AUTHORIZED");
         CatalystToken catalyst = getCatalyst(catalystId);
         require(catalyst != CatalystToken(0), "CATALYST_DOES_NOT_EXIST");
         catalyst.burnFor(from, amount);
@@ -126,6 +127,7 @@ contract GemsCatalystsRegistry is WithAdmin {
         uint16 gemId,
         uint256 amount
     ) public {
+        require(msg.sender == from || isSuperOperator(msg.sender), "NOT_AUTHORIZED");
         Gem gem = getGem(gemId);
         require(gem != Gem(0), "GEM_DOES_NOT_EXIST");
         gem.burnFor(from, amount);
