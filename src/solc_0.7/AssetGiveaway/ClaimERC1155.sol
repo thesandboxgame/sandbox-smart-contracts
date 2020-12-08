@@ -6,16 +6,15 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 contract ClaimERC1155 {
     bytes32 internal _merkleRoot;
     IERC1155 internal immutable _asset;
-    address internal _assetsHolder;
+    address internal immutable _assetsHolder;
     event ClaimedAssets(address to, uint256[] assetIds, uint256[] assetValues);
 
     constructor(IERC1155 asset, address assetsHolder) {
         _asset = asset;
         if (assetsHolder == address(0)) {
-            _assetsHolder = address(this);
-        } else {
-            _assetsHolder = assetsHolder;
+            assetsHolder = address(this);
         }
+        _assetsHolder = assetsHolder;
     }
 
     function _claimERC1155(
