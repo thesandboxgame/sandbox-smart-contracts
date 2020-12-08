@@ -372,7 +372,7 @@ describe('Asset_Giveaway_1', function () {
       giveawayContractAsUser.setMerkleRoot(
         '0x0000000000000000000000000000000000000000000000000000000000000000'
       )
-    ).to.be.revertedWith('only admin allowed');
+    ).to.be.revertedWith('ADMIN_ONLY');
   });
 
   it('User cannot claim assets after the expiryTime', async function () {
