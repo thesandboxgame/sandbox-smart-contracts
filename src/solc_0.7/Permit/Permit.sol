@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
 import "../common/Interfaces/ERC20Extended.sol";
 import "../Base/TheSandbox712.sol";

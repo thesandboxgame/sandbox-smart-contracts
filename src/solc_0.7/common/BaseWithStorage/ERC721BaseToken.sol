@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
 /* solhint-disable func-order, code-complexity */
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
 import "@openzeppelin/contracts/utils/Address.sol";
 import "../Interfaces/ERC721TokenReceiver.sol";

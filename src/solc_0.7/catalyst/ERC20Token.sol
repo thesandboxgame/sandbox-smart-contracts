@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
 import "../common/BaseWithStorage/erc20/ERC20BaseToken.sol";
 import "../common/BaseWithStorage/erc20/extensions/ERC20BasicApproveExtension.sol";

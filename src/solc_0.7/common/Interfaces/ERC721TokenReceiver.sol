@@ -7,7 +7,7 @@
  */
 // solhint-disable-next-line compiler-fixed
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
 interface ERC721TokenReceiver {
     function onERC721Received(

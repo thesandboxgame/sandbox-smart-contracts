@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
 /// @dev Note: The ERC-165 identifier for this interface is 0x4e2312e0.
 interface ERC1155TokenReceiver {
