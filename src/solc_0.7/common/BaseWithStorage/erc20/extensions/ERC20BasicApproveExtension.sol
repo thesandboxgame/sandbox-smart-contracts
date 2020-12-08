@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
 import "./ERC20Internal.sol";
 import "../../../Libraries/BytesUtil.sol";
@@ -15,7 +15,7 @@ abstract contract ERC20BasicApproveExtension is ERC20Internal {
         uint256 amount,
         bytes calldata data
     ) external payable returns (bytes memory) {
-        require(BytesUtil.doFirstParamEqualsAddress(data, msg.sender), "first param != sender");
+        require(BytesUtil.doFirstParamEqualsAddress(data, msg.sender), "FIRST_PARAM_NOT_SENDER");
 
         _approveFor(msg.sender, target, amount);
 
@@ -35,7 +35,7 @@ abstract contract ERC20BasicApproveExtension is ERC20Internal {
         uint256 amount,
         bytes calldata data
     ) external payable returns (bytes memory) {
-        require(BytesUtil.doFirstParamEqualsAddress(data, msg.sender), "first param != sender");
+        require(BytesUtil.doFirstParamEqualsAddress(data, msg.sender), "FIRST_PARAM_NOT_SENDER");
 
         if (amount > 0) {
             _addAllowanceIfNeeded(msg.sender, target, amount);

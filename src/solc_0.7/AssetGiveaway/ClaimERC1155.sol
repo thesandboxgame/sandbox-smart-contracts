@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 
@@ -70,7 +70,7 @@ contract ClaimERC1155 {
         address to,
         uint256[] memory assetIds,
         uint256[] memory assetValues
-    ) internal returns (bool) {
+    ) internal {
         _asset.safeBatchTransferFrom(_assetsHolder, to, assetIds, assetValues, "");
     }
 }

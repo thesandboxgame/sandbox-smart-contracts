@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
 import "./WithAdmin.sol";
 
@@ -17,7 +17,7 @@ contract WithMetaTransaction is WithAdmin {
     /// @param metaTransactionProcessor address that will be given/removed metaTransactionProcessor rights.
     /// @param processorType set the metaTransactionProcessor type
     function setMetaTransactionProcessor(address metaTransactionProcessor, uint8 processorType) public {
-        require(msg.sender == _admin, "only admin can setup metaTransactionProcessors");
+        require(msg.sender == _admin, "ADMIN_ACCESS_DENIED");
         _setMetaTransactionProcessor(metaTransactionProcessor, processorType);
     }
 

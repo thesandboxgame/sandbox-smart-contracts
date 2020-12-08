@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
-interface ERC677 {
+interface IERC677 {
     function transferAndCall(
         address to,
         uint256 value,

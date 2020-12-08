@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
 contract TheSandbox712 {
     bytes32 internal constant EIP712DOMAIN_TYPEHASH = keccak256(

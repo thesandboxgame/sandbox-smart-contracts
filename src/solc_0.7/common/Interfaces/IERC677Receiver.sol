@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
-interface ERC677Receiver {
+interface IERC677Receiver {
     function onTokenTransfer(
         address _sender,
         uint256 _value,

@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
 import "./WithAdmin.sol";
 
@@ -12,7 +12,7 @@ contract WithSuperOperators is WithAdmin {
     /// @param superOperator address that will be given/removed superOperator right.
     /// @param enabled set whether the superOperator is enabled or disabled.
     function setSuperOperator(address superOperator, bool enabled) external {
-        require(msg.sender == _admin, "only admin is allowed to add super operators");
+        require(msg.sender == _admin, "ADMIN_ACCESS_DENIED");
         _superOperators[superOperator] = enabled;
         emit SuperOperator(superOperator, enabled);
     }
