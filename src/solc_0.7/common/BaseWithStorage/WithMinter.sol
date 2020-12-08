@@ -15,8 +15,7 @@ contract WithMinter is WithAdmin {
 
     /// @dev change the minter to be `newMinter`.
     /// @param newMinter address of the new minter.
-    function changeMinter(address newMinter) external {
-        require(msg.sender == _admin, "ADMIN_ACCESS_DENIED");
+    function changeMinter(address newMinter) external onlyAdmin() {
         emit MinterChanged(_minter, newMinter);
         _minter = newMinter;
     }
