@@ -1,11 +1,11 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
 import "../common/BaseWithStorage/erc20/ERC20BaseToken.sol";
 import "../common/BaseWithStorage/erc20/extensions/ERC20BasicApproveExtension.sol";
 import "../Base/TheSandbox712.sol";
 import "../common/BaseWithStorage/erc20/extensions/ERC677Extension.sol";
-import "../common/Interfaces/ERC677Receiver.sol";
+import "../common/Interfaces/IERC677Receiver.sol";
 
 contract ERC20Token is ERC20BasicApproveExtension, ERC677Extension, TheSandbox712, ERC20BaseToken {
     mapping(address => uint256) public nonces;

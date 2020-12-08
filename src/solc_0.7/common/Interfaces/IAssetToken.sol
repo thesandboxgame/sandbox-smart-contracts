@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
-interface AssetToken {
+interface IAssetToken {
     function mint(
         address creator,
         uint40 packId,
