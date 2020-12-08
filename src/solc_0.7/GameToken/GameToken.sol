@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "../common/BaseWithStorage/ERC721BaseToken.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
-import "../common/Interfaces/AssetToken.sol";
+import "../common/Interfaces/IAssetToken.sol";
 import "../common/Interfaces/IGameToken.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
@@ -15,7 +15,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
 
     ///////////////////////////////  Data //////////////////////////////
 
-    AssetToken internal immutable _asset;
+    IAssetToken internal immutable _asset;
 
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
@@ -33,11 +33,12 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     event AssetsRemoved(uint256 indexed id, uint256[] assets, uint256[] values, address to);
     event CreatorshipTransfer(address indexed original, address indexed from, address indexed to);
     event GameEditorSet(uint256 indexed id, address gameEditor, bool isEditor);
+    event TokenURIChanged(uint256 indexed id, string URI);
 
     constructor(
         address metaTransactionContract,
         address admin,
-        AssetToken asset,
+        IAssetToken asset,
         address initialMinter
     ) ERC721BaseToken(metaTransactionContract, admin) {
         _asset = asset;
@@ -339,6 +340,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
 
     function _setTokenURI(uint256 gameId, string memory URI) internal {
         _metaData[gameId] = URI;
+        emit TokenURIChanged(gameId, URI);
     }
 
     function _destroyGame(

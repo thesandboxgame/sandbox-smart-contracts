@@ -212,7 +212,7 @@ describe('GameToken', function () {
           '',
           randomId
         )
-      ).to.be.revertedWith('INVALID_MINTER');
+      ).to.be.revertedWith('MINTER_ACCESS_DENIED');
     });
 
     describe('GameToken: Mint With Assets', function () {
@@ -921,7 +921,7 @@ describe('GameToken', function () {
           users[10].address,
           gameId
         )
-      ).to.be.revertedWith('not approved to transfer');
+      ).to.be.revertedWith('UNAUTHORIZED_TRANSFER');
     });
   });
 
@@ -983,7 +983,18 @@ describe('GameToken', function () {
     });
 
     it('Minter can set the tokenURI', async function () {
-      await gameTokenAsAdmin.setTokenURI(gameId, 'Hello Sandbox');
+      const receipt = await gameTokenAsAdmin.setTokenURI(
+        gameId,
+        'Hello Sandbox'
+      );
+      const uriEvent = await expectEventWithArgs(
+        gameToken,
+        receipt,
+        'TokenURIChanged'
+      );
+      expect(uriEvent.args[0]).to.be.equal(gameId);
+      expect(uriEvent.args[1]).to.be.equal('Hello Sandbox');
+
       const URI = await gameToken.tokenURI(gameId);
       expect(URI).to.be.equal('Hello Sandbox');
     });
@@ -998,7 +1009,7 @@ describe('GameToken', function () {
     it('should revert if not Minter', async function () {
       const {gameToken} = await setupTest();
       await expect(gameToken.setTokenURI(11, 'New URI')).to.be.revertedWith(
-        'INVALID_MINTER'
+        'MINTER_ACCESS_DENIED'
       );
     });
 
@@ -1166,7 +1177,7 @@ describe('GameToken', function () {
 
       it('game should no longer exist', async function () {
         await expect(gameToken.ownerOf(gameId)).to.be.revertedWith(
-          'token does not exist'
+          'NONEXISTANT_TOKEN'
         );
       });
     });
@@ -1215,7 +1226,7 @@ describe('GameToken', function () {
         );
 
         await expect(gameToken.ownerOf(gameId)).to.be.revertedWith(
-          'token does not exist'
+          'NONEXISTANT_TOKEN'
         );
 
         const balancesAfter = await getBalances(
@@ -1263,7 +1274,7 @@ describe('GameToken', function () {
       it('can recover remaining assets from burnt GAME in batches', async function () {
         const assetContract = await ethers.getContract('Asset');
         await expect(gameToken.ownerOf(gameId)).to.be.revertedWith(
-          'token does not exist'
+          'NONEXISTANT_TOKEN'
         );
 
         await GameOwner.Game.recoverAssets(
@@ -1515,7 +1526,7 @@ describe('GameToken', function () {
         expect(type).to.be.equal(METATX_2771);
         await expect(
           gameAsUser7.transferFrom(GameOwner.address, others[7], gameId)
-        ).to.be.revertedWith('not approved to transfer');
+        ).to.be.revertedWith('UNAUTHORIZED_TRANSFER');
       });
     });
   });
