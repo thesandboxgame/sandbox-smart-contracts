@@ -4,13 +4,21 @@ pragma solidity 0.7.5;
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 import "../common/Interfaces/IGameToken.sol";
 import "../common/Interfaces/IGameMinter.sol";
+import "openzeppelin/contracts/math/SafeMath.sol";
 
 contract GameMinter is WithMetaTransaction, IGameMinter {
     ///////////////////////////////  Libs //////////////////////////////
+    using SafeMath for uint256;
 
     ///////////////////////////////  Data //////////////////////////////
 
     IGameToken gameToken;
+
+    // BPs: BP / 100 = %
+    // The denominator component for values specified in basis points.
+    uint internal constant BASIS_POINTS_DENOMINATOR = 10000;
+    uint256 constant GAME_MINTING_FEE = 300
+    uint256 constant GAME_MODIFICATION_FEE = 300
 
     ///////////////////////////////  Functions /////////////////////////
 
@@ -40,7 +48,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         address[] memory editors,
         string memory uri,
         uint96 randomId
-    ) external override returns (uint256 gameId) {
+    ) external payable override returns (uint256 gameId) {
         require(msg.sender == from || _isValidMetaTx(from), "CREATE_ACCESS_DENIED");
         uint256 id = gameToken.createGame(from, to, assetIds, values, editors, uri, randomId);
         return id;
@@ -61,7 +69,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         uint256[] memory values,
         string memory uri,
         address editor
-    ) external override {
+    ) external payable override {
         if (editor == address(0)) {
             require(
                 gameToken.ownerOf(gameId) == msg.sender ||
@@ -92,7 +100,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         address to,
         string memory uri,
         address editor
-    ) external override {
+    ) external payable override {
         if (editor == address(0)) {
             require(
                 gameToken.ownerOf(gameId) == msg.sender ||
@@ -112,7 +120,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
     /// @param URI The URI string for the token's metadata
     /// @param editor The game editor address (ignored if address(0)). Use only to perform
     /// a metaTx on behalf of editor instead of owner.
-    function setTokenUri(uint256 gameId, string calldata URI) external override {
+    function setTokenUri(uint256 gameId, string calldata URI) external payable override {
         if (editor == address(0)) {
             require(
                 gameToken.ownerOf(gameId) == msg.sender ||
@@ -123,5 +131,9 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         } else {
             require(_isValidMetaTx(editor), "METATX_ACCESS_DENIED");
         }
+    }
+
+    function calculateFee() internal view returns (uint256) {
+
     }
 }
