@@ -91,19 +91,6 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         _setGameEditor(gameId, editor, isEditor);
     }
 
-    /// @dev Function to allow token owner to set game editors
-    /// @param gameId The id of the GAME token owned by owner
-    /// @param editor The address of the editor to set
-    /// @param isEditor Add or remove the ability to edit
-    function _setGameEditor(
-        uint256 gameId,
-        address editor,
-        bool isEditor
-    ) internal {
-        emit GameEditorSet(gameId, editor, isEditor);
-        _gameEditors[gameId][editor] = isEditor;
-    }
-
     /// @notice Transfers creatorship of `original` from `sender` to `to`.
     /// @param sender address of current registered creator.
     /// @param original address of the original creator whose creation are saved in the ids themselves.
@@ -425,5 +412,18 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @param randomId The id to use when generating the new GameId
     function generateGameId(address creator, uint96 randomId) internal pure returns (uint256) {
         return uint256(creator) * CREATOR_OFFSET_MULTIPLIER + uint96(randomId);
+    }
+
+    /// @dev Function to allow token owner to set game editors
+    /// @param gameId The id of the GAME token owned by owner
+    /// @param editor The address of the editor to set
+    /// @param isEditor Add or remove the ability to edit
+    function _setGameEditor(
+        uint256 gameId,
+        address editor,
+        bool isEditor
+    ) internal {
+        emit GameEditorSet(gameId, editor, isEditor);
+        _gameEditors[gameId][editor] = isEditor;
     }
 }
