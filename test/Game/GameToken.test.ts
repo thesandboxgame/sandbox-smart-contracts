@@ -1,10 +1,9 @@
 import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
 import {BigNumber, utils, Contract} from 'ethers';
 import Prando from 'prando';
-import {_TypedDataEncoder} from 'ethers/lib/utils';
 import {Receipt, Address} from 'hardhat-deploy/types';
 import {expect} from '../chai-setup';
-import {data712} from './data712';
+// import {data712} from './data712';
 import {
   waitFor,
   expectEventWithArgs,
@@ -12,7 +11,6 @@ import {
 } from '../utils';
 import {setupTest, User} from './fixtures';
 import {supplyAssets} from './assets';
-import {constants} from 'buffer';
 
 let id: BigNumber;
 
@@ -25,14 +23,19 @@ async function getRandom(): Promise<number> {
   return rng.nextInt(1, 1000000000);
 }
 
+type AssetsObj = {
+  assets: BigNumber[];
+  quantities: number[];
+};
+
 async function getAssetsFromReceipts(
   assetContract: Contract,
   receipts: Receipt[]
-): Promise<any> {
-  let rec: any;
+): Promise<AssetsObj> {
+  let rec: Receipt;
   const assets: BigNumber[] = [];
   const quantities: number[] = [];
-  for (rec in receipts) {
+  for (rec of receipts) {
     const event = await expectEventWithArgsFromReceipt(
       assetContract,
       rec,
@@ -158,7 +161,6 @@ describe('GameToken', function () {
     let users: User[];
     let gameToken: Contract;
     let gameTokenAsAdmin: Contract;
-    let Minter: User;
     let GameOwner: User;
     let gameId: BigNumber;
 
@@ -413,7 +415,6 @@ describe('GameToken', function () {
     describe('GameToken: Modifying GAMEs', function () {
       let gameToken: Contract;
       let GameOwner: User;
-      let Minter: User;
       let GameEditor1: User;
       let GameEditor2: User;
       let users: User[];
@@ -1023,7 +1024,6 @@ describe('GameToken', function () {
     let gameToken: Contract;
     let gameTokenAsAdmin: Contract;
     let GameOwner: User;
-    let Minter: User;
     let users: User[];
     let gameId: BigNumber;
     let assets: BigNumber[];
@@ -1357,114 +1357,112 @@ describe('GameToken', function () {
       expect(isTrustedForwarder).to.be.true;
     });
 
-    it.skip('can process metaTransactions if processorType == METATX_SANDBOX', async function () {
-      const isSkipped = true;
-    });
+    // it.skip('can process metaTransactions if processorType == METATX_SANDBOX', async function () {});
 
-    it.skip('can process metaTransactions if processorType == METATX_2771', async function () {
-      const {gameToken, gameTokenAsAdmin, GameOwner} = await setupTest();
-      const others = await getUnnamedAccounts();
-      const signers = await ethers.getSigners();
+    // it.skip('can process metaTransactions if processorType == METATX_2771', async function () {
+    //   const {gameToken, gameTokenAsAdmin, GameOwner} = await setupTest();
+    //   const others = await getUnnamedAccounts();
+    //   const signers = await ethers.getSigners();
 
-      const trustedForwarderFactory = await ethers.getContractFactory(
-        'Forwarder',
-        signers[0]
-      );
-      const trustedForwarder: Contract = await trustedForwarderFactory.deploy();
-      await trustedForwarder.deployed();
-      const randomId = await getRandom();
-      const receipt = await waitFor(
-        gameTokenAsAdmin.createGame(
-          GameOwner.address,
-          GameOwner.address,
-          [],
-          [],
-          ethers.constants.AddressZero,
-          '',
-          randomId
-        )
-      );
-      const transferEvent = await expectEventWithArgs(
-        gameToken,
-        receipt,
-        'Transfer'
-      );
-      const gameId = transferEvent.args[2];
+    //   const trustedForwarderFactory = await ethers.getContractFactory(
+    //     'Forwarder',
+    //     signers[0]
+    //   );
+    //   const trustedForwarder: Contract = await trustedForwarderFactory.deploy();
+    //   await trustedForwarder.deployed();
+    //   const randomId = await getRandom();
+    //   const receipt = await waitFor(
+    //     gameTokenAsAdmin.createGame(
+    //       GameOwner.address,
+    //       GameOwner.address,
+    //       [],
+    //       [],
+    //       ethers.constants.AddressZero,
+    //       '',
+    //       randomId
+    //     )
+    //   );
+    //   const transferEvent = await expectEventWithArgs(
+    //     gameToken,
+    //     receipt,
+    //     'Transfer'
+    //   );
+    //   const gameId = transferEvent.args[2];
 
-      const txObj = await GameOwner.Game.populateTransaction[
-        'safeTransferFrom(address,address,uint256)'
-      ](GameOwner.address, others[3], gameId);
+    //   const txObj = await GameOwner.Game.populateTransaction[
+    //     'safeTransferFrom(address,address,uint256)'
+    //   ](GameOwner.address, others[3], gameId);
 
-      let data = txObj.data;
-      data += GameOwner.address.replace('0x', '');
+    //   let data = txObj.data;
+    //   data += GameOwner.address.replace('0x', '');
 
-      const transfer = {
-        to: txObj.to,
-        data: data,
-        value: 0,
-        from: GameOwner.address,
-        nonce: 0,
-        gas: 1e6,
-      };
+    //   const transfer = {
+    //     to: txObj.to,
+    //     data: data,
+    //     value: 0,
+    //     from: GameOwner.address,
+    //     nonce: 0,
+    //     gas: 1e6,
+    //   };
 
-      const transferData712 = data712(gameToken, transfer);
+    //   const transferData712 = data712(gameToken, transfer);
 
-      const flatSig = await ethers.provider.send('eth_signTypedData', [
-        GameOwner.address,
-        transferData712,
-      ]);
-      console.log(`sig: ${flatSig}`);
+    //   const flatSig = await ethers.provider.send('eth_signTypedData', [
+    //     GameOwner.address,
+    //     transferData712,
+    //   ]);
+    //   console.log(`sig: ${flatSig}`);
 
-      const domainRegReceipt = await trustedForwarder.registerDomainSeparator(
-        'The Sandbox',
-        '1'
-      );
+    //   const domainRegReceipt = await trustedForwarder.registerDomainSeparator(
+    //     'The Sandbox',
+    //     '1'
+    //   );
 
-      const domainRegistrationEvent = await expectEventWithArgsFromReceipt(
-        trustedForwarder,
-        domainRegReceipt,
-        'DomainRegistered'
-      );
+    //   const domainRegistrationEvent = await expectEventWithArgsFromReceipt(
+    //     trustedForwarder,
+    //     domainRegReceipt,
+    //     'DomainRegistered'
+    //   );
 
-      const registeredDomainHash = domainRegistrationEvent.args[0];
+    //   const registeredDomainHash = domainRegistrationEvent.args[0];
 
-      const requestRegReceipt = await trustedForwarder.registerRequestType(
-        'The Sandbox',
-        '1'
-      );
+    //   const requestRegReceipt = await trustedForwarder.registerRequestType(
+    //     'The Sandbox',
+    //     '1'
+    //   );
 
-      const requestRegistrationEvent = await expectEventWithArgsFromReceipt(
-        trustedForwarder,
-        requestRegReceipt,
-        'RequestTypeRegistered'
-      );
+    //   const requestRegistrationEvent = await expectEventWithArgsFromReceipt(
+    //     trustedForwarder,
+    //     requestRegReceipt,
+    //     'RequestTypeRegistered'
+    //   );
 
-      const registeredRequestHash = requestRegistrationEvent.args[0];
+    //   const registeredRequestHash = requestRegistrationEvent.args[0];
 
-      expect(await trustedForwarder.domains(registeredDomainHash)).to.be.equal(
-        true
-      );
-      expect(
-        await trustedForwarder.typeHashes(registeredRequestHash)
-      ).to.be.equal(true);
+    //   expect(await trustedForwarder.domains(registeredDomainHash)).to.be.equal(
+    //     true
+    //   );
+    //   expect(
+    //     await trustedForwarder.typeHashes(registeredRequestHash)
+    //   ).to.be.equal(true);
 
-      const forwardingObject = await trustedForwarder.execute(
-        transfer,
-        registeredDomainHash,
-        registeredRequestHash,
-        '0x',
-        flatSig
-      );
+    //   const forwardingObject = await trustedForwarder.execute(
+    //     transfer,
+    //     registeredDomainHash,
+    //     registeredRequestHash,
+    //     '0x',
+    //     flatSig
+    //   );
 
-      console.log(`forwardingObject:   ${forwardingObject}`);
+    //   console.log(`forwardingObject:   ${forwardingObject}`);
 
-      const newOwner = await gameToken.ownerOf(gameId);
-      console.log(`newOwner:   ${newOwner}`);
-      console.log(`3:   ${others[3]}`);
-      console.log(`GameOwner.address:   ${GameOwner.address}`);
-      expect(newOwner).to.be.equal(others[3]);
-      expect(await gameToken.creatorOf(gameId)).to.be.equal(GameOwner.address);
-    });
+    //   const newOwner = await gameToken.ownerOf(gameId);
+    //   console.log(`newOwner:   ${newOwner}`);
+    //   console.log(`3:   ${others[3]}`);
+    //   console.log(`GameOwner.address:   ${GameOwner.address}`);
+    //   expect(newOwner).to.be.equal(others[3]);
+    //   expect(await gameToken.creatorOf(gameId)).to.be.equal(GameOwner.address);
+    // });
 
     /**
      * @note ==========================`
@@ -1485,7 +1483,8 @@ describe('GameToken', function () {
       let GameOwner: User;
       let gameTokenAsAdmin: Contract;
 
-      before(async function () {
+      it('should fail if processorType == METATX_2771 && from != _forceMsgSender()', async function () {
+        // Before:
         ({gameToken, GameOwner, gameTokenAsAdmin} = await setupTest());
         others = await getUnnamedAccounts();
         const randomId = await getRandom();
@@ -1515,9 +1514,8 @@ describe('GameToken', function () {
         // Force metaTx conditions: (msg.sender != from && msg.sender != any type of operator(operator, superOperator, operatorForAll)
         expect(approvedAddress).to.not.equal(others[7]);
         expect(isApprovedForAll).to.be.false;
-      });
 
-      it('should fail if processorType == METATX_2771 && from != _forceMsgSender()', async function () {
+        // Then:
         await gameTokenAsAdmin.setMetaTransactionProcessor(
           others[7],
           METATX_2771

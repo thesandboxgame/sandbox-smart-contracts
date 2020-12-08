@@ -1,5 +1,5 @@
 import {Address, Receipt} from 'hardhat-deploy/types';
-import {ContractReceipt, utils, BigNumber, ethers} from 'ethers';
+import {utils, BigNumber} from 'ethers';
 import {deployments, getNamedAccounts} from 'hardhat';
 
 const emptyBytes = '0x';
@@ -25,7 +25,7 @@ export async function supplyAssets(
     assetAdmin,
     true
   );
-  const assetReceipt = await execute(
+  const assetReceipt: Receipt = await execute(
     'Asset',
     {from: assetAdmin, log: true},
     'mint',

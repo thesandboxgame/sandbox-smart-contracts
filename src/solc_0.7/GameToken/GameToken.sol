@@ -33,7 +33,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     event AssetsRemoved(uint256 indexed id, uint256[] assets, uint256[] values, address to);
     event CreatorshipTransfer(address indexed original, address indexed from, address indexed to);
     event GameEditorSet(uint256 indexed id, address gameEditor, bool isEditor);
-    event TokenURIChanged(uint256 indexed id, string URI);
+    event TokenURIChanged(uint256 indexed id, string uri);
 
     constructor(
         address metaTransactionContract,
@@ -199,9 +199,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
 
     /// @notice Set the URI of a specific game token
     /// @param gameId The id of the game token
-    /// @param URI The URI string for the token's metadata
-    function setTokenURI(uint256 gameId, string calldata URI) external override onlyMinter() {
-        _setTokenURI(gameId, URI);
+    /// @param uri The uri string for the token's metadata
+    function setTokenURI(uint256 gameId, string calldata uri) external override onlyMinter() {
+        _setTokenURI(gameId, uri);
     }
 
     /// @notice Function to burn a GAME token and recover assets
@@ -309,8 +309,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @return uri The URI of the token
     function tokenURI(uint256 gameId) public view override returns (string memory uri) {
         require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
-        string memory URI = _metaData[gameId];
-        return URI;
+        return _metaData[gameId];
     }
 
     /// @notice Function to transfer assets from a burnt GAME
@@ -338,9 +337,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
     }
 
-    function _setTokenURI(uint256 gameId, string memory URI) internal {
-        _metaData[gameId] = URI;
-        emit TokenURIChanged(gameId, URI);
+    function _setTokenURI(uint256 gameId, string memory uri) internal {
+        _metaData[gameId] = uri;
+        emit TokenURIChanged(gameId, uri);
     }
 
     function _destroyGame(
