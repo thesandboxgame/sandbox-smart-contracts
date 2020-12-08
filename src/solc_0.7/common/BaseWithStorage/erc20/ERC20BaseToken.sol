@@ -190,7 +190,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     }
 
     function _mint(address to, uint256 amount) internal {
-        require(to != address(0), "NO_MINT_TO_ZEROADDRESS");
+        require(to != address(0), "NOT_TO_ZEROADDRESS");
         require(amount > 0, "MINT_O_TOKENS");
         uint256 currentTotalSupply = _totalSupply;
         uint256 newTotalSupply = currentTotalSupply + amount;
