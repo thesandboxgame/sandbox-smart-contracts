@@ -1,7 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
-contract WithMinter {
+import "./WithAdmin.sol";
+
+contract WithMinter is WithAdmin {
     address internal _minter;
     event MinterChanged(address oldMinter, address newMinter);
 
