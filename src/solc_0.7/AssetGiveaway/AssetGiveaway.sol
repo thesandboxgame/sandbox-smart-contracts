@@ -1,7 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "./ClaimERC1155.sol";
@@ -10,13 +9,9 @@ import "../common/BaseWithStorage/WithAdmin.sol";
 /// @title AssetGiveaway contract
 /// @notice This contract manages ERC1155 claims
 contract AssetGiveaway is WithAdmin, ClaimERC1155 {
-    using SafeMath for uint256;
-
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
-
     uint256 internal immutable _expiryTime;
-
     mapping(address => bool) public claimed;
 
     constructor(

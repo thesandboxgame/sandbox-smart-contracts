@@ -117,35 +117,31 @@ function calculateAssetHash(asset: asset, salt?: string): string {
   return solidityKeccak256(types, values);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function saltAssets(assets: asset[], secret?: string | Buffer): Array<asset> {
-  const saltedAssets = [];
-  for (const asset of assets) {
-    let salt = asset.salt;
+  return assets.map((asset) => {
+    const salt = asset.salt;
     if (!salt) {
       if (!secret) {
         throw new Error('Asset need to have a salt or be generated via secret');
       }
-      salt =
-        '0x' +
-        crypto
-          .createHmac('sha256', secret)
-          .update(
-            calculateAssetHash(
-              asset,
-              '0x0000000000000000000000000000000000000000000000000000000000000000'
+      return {
+        reservedAddress: asset.reservedAddress,
+        assetIds: asset.assetIds,
+        assetValues: asset.assetValues,
+        salt:
+          '0x' +
+          crypto
+            .createHmac('sha256', secret)
+            .update(
+              calculateAssetHash(
+                asset,
+                '0x0000000000000000000000000000000000000000000000000000000000000000'
+              )
             )
-          )
-          .digest('hex');
-    }
-    saltedAssets.push({
-      reservedAddress: asset.reservedAddress,
-      assetIds: asset.assetIds,
-      assetValues: asset.assetValues,
-      salt,
-    });
-  }
-  return saltedAssets;
+            .digest('hex'),
+      };
+    } else return asset;
+  });
 }
 
 function createDataArrayAssets(assets: asset[], secret?: string): Array<asset> {

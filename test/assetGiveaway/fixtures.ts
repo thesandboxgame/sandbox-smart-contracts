@@ -6,10 +6,10 @@ import {
 } from 'hardhat';
 import {expect} from '../chai-setup';
 import MerkleTree from '../../lib/merkleTree';
-import getAssets from '../../data/asset_giveaway_1/getAssets';
+import {createAssetClaimMerkleTree} from '../../data/asset_giveaway_1/getAssets';
 import helpers from '../../lib/merkleTreeHelper';
 const {createDataArrayAssets} = helpers;
-import * as testAssetData from '../../data/asset_giveaway_1/testAssets.json';
+import {default as testAssetData} from '../../data/asset_giveaway_1/testAssets.json';
 
 const ipfsHashString =
   '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
@@ -103,17 +103,19 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     return transferEvent.args[3].toString(); // asset ID
   }
 
-  const dataWithIds = {...testAssetData};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let dataWithIds: any = testAssetData;
 
   async function mintAssetsWithNewIds() {
     return await Promise.all(
-      testAssetData.assets.map(async (claim) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      testAssetData.map(async (claim: any) => {
         return {
           assetValues: claim.assetValues,
           reservedAddress: claim.reservedAddress,
           assetIds: await Promise.all(
             claim.assetIds.map(
-              async (assetPackId) =>
+              async (assetPackId: number) =>
                 await mintTestAssets(
                   assetPackId,
                   claim.assetValues[assetPackId]
@@ -127,11 +129,11 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   if (mint) {
     const assetsWithIds = await mintAssetsWithNewIds();
-    dataWithIds.assets = assetsWithIds;
+    dataWithIds = assetsWithIds;
   }
 
   // Set up tree with test assets
-  const {assets, merkleRootHash} = getAssets(
+  const {assets, merkleRootHash} = createAssetClaimMerkleTree(
     network.live,
     chainId,
     dataWithIds
