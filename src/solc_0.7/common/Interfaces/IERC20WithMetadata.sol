@@ -7,11 +7,11 @@
  */
 // solhint-disable-next-line compiler-fixed
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
-import "./ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-interface ERC20WithMetadata is ERC20 {
+interface IERC20WithMetadata is IERC20 {
     function name() external view returns (string memory);
 
     function symbol() external view returns (string memory);

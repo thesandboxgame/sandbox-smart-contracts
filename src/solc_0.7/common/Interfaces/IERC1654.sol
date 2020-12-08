@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
-interface ERC1654 {
+interface IERC1654 {
     /**
      * @dev Should return whether the signature provided is valid for the provided hash
      * @param hash 32 bytes hash to be signed

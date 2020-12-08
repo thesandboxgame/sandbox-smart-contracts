@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
 contract WithAdmin {
     address internal _admin;
@@ -18,13 +18,13 @@ contract WithAdmin {
     /// @dev change the administrator to be `newAdmin`.
     /// @param newAdmin address of the new administrator.
     function changeAdmin(address newAdmin) external {
-        require(msg.sender == _admin, "only admin can change admin");
+        require(msg.sender == _admin, "ADMIN_ACCESS_DENIED");
         emit AdminChanged(_admin, newAdmin);
         _admin = newAdmin;
     }
 
     modifier onlyAdmin() {
-        require(msg.sender == _admin, "only admin allowed");
+        require(msg.sender == _admin, "ADMIN_ONLY");
         _;
     }
 }
