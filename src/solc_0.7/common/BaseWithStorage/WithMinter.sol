@@ -7,6 +7,11 @@ contract WithMinter is WithAdmin {
     address internal _minter;
     event MinterChanged(address oldMinter, address newMinter);
 
+    modifier onlyMinter() {
+        require(msg.sender == _minter, "MINTER_ACCESS_DENIED");
+        _;
+    }
+
     /// @dev gives the current minter of this contract.
     /// @return the current minter of this contract.
     function getMinter() external view returns (address) {
@@ -18,10 +23,5 @@ contract WithMinter is WithAdmin {
     function changeMinter(address newMinter) external onlyAdmin() {
         emit MinterChanged(_minter, newMinter);
         _minter = newMinter;
-    }
-
-    modifier onlyMinter() {
-        require(msg.sender == _minter, "MINTER_ACCESS_DENIED");
-        _;
     }
 }
