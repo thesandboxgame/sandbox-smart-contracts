@@ -5,15 +5,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
-  const GemsAndCatalysts = await deployments.get('GemsAndCatalysts');
+  const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
 
   const {deployer, assetAttributesRegistryAdmin} = await getNamedAccounts();
   await deploy(`AssetAttributesRegistry`, {
     from: deployer,
     log: true,
-    args: [GemsAndCatalysts.address, assetAttributesRegistryAdmin],
+    args: [GemsCatalystsRegistry.address, assetAttributesRegistryAdmin],
   });
 };
 export default func;
 func.tags = ['AssetAttributesRegistry', 'AssetAttributesRegistry_deploy'];
-func.dependencies = ['GemsAndCatalysts_deploy'];
+func.dependencies = ['GemsCatalystsRegistry_deploy'];
