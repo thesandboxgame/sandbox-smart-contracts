@@ -9,7 +9,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
-import "./IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 interface IERC20WithMetadata is IERC20 {
     function name() external view returns (string memory);
