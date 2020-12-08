@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
-import "../common/Interfaces/ERC20Extended.sol";
+import "../common/Interfaces/IERC20Extended.sol";
 import "../Base/TheSandbox712.sol";
 
 /// @title Permit contract
@@ -37,7 +37,7 @@ contract Permit is TheSandbox712 {
         _sand.approveFor(owner, spender, value);
     }
 
-    ERC20Extended internal immutable _sand;
+    IERC20Extended internal immutable _sand;
 
     mapping(address => uint256) public nonces;
 
@@ -45,7 +45,7 @@ contract Permit is TheSandbox712 {
         "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
     );
 
-    constructor(ERC20Extended sandContractAddress) {
+    constructor(IERC20Extended sandContractAddress) {
         _sand = sandContractAddress;
     }
 }

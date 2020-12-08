@@ -3,13 +3,13 @@
 pragma solidity 0.7.5;
 
 import "@openzeppelin/contracts/utils/Address.sol";
-import "../Interfaces/ERC721TokenReceiver.sol";
-import "../Interfaces/ERC721Events.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "../BaseWithStorage/WithSuperOperators.sol";
 import "../BaseWithStorage/WithMetaTransaction.sol";
-import "../Interfaces/ERC721MandatoryTokenReceiver.sol";
+import "../Interfaces/IERC721MandatoryTokenReceiver.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
-contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransaction {
+contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     using Address for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
@@ -44,7 +44,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
      * @param owner The address to look for
      * @return The number of Land token owned by the address
      */
-    function balanceOf(address owner) external view returns (uint256) {
+    function balanceOf(address owner) external view override returns (uint256) {
         require(owner != address(0), "owner is zero address");
         return _numNFTPerAddress[owner];
     }
@@ -72,7 +72,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
      * @param id The id of the Land
      * @return owner The address of the owner
      */
-    function ownerOf(uint256 id) external view returns (address owner) {
+    function ownerOf(uint256 id) external view override returns (address owner) {
         owner = _ownerOf(id);
         require(owner != address(0), "token does not exist");
     }
@@ -120,7 +120,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
      * @param operator The address receiving the approval
      * @param id The id of the token
      */
-    function approve(address operator, uint256 id) external {
+    function approve(address operator, uint256 id) external override {
         address owner = _ownerOf(id);
         require(owner != address(0), "token does not exist");
         require(
@@ -135,7 +135,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
      * @param id The id of the token
      * @return The address of the operator
      */
-    function getApproved(uint256 id) external view returns (address) {
+    function getApproved(uint256 id) external view override returns (address) {
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(owner != address(0), "token does not exist");
         if (operatorEnabled) {
@@ -193,7 +193,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         address from,
         address to,
         uint256 id
-    ) external {
+    ) external override {
         bool metaTx = _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
@@ -216,7 +216,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         address to,
         uint256 id,
         bytes memory data
-    ) public {
+    ) public override {
         bool metaTx = _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract()) {
@@ -237,7 +237,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         address from,
         address to,
         uint256 id
-    ) external {
+    ) external override {
         safeTransferFrom(from, to, id, "");
     }
 
@@ -318,7 +318,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
      * @param id The id of the interface
      * @return True if the interface is supported
      */
-    function supportsInterface(bytes4 id) public pure virtual returns (bool) {
+    function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd;
     }
 
@@ -347,7 +347,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
      * @param operator The address receiving the approval
      * @param approved The determination of the approval
      */
-    function setApprovalForAll(address operator, bool approved) external {
+    function setApprovalForAll(address operator, bool approved) external override {
         _setApprovalForAll(msg.sender, operator, approved);
     }
 
@@ -368,7 +368,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
      * @param operator The address of the operator
      * @return isOperator The status of the approval
      */
-    function isApprovedForAll(address owner, address operator) external view returns (bool isOperator) {
+    function isApprovedForAll(address owner, address operator) external view override returns (bool isOperator) {
         return _operatorsForAll[owner][operator] || _superOperators[operator];
     }
 
@@ -413,7 +413,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         uint256 tokenId,
         bytes memory _data
     ) internal returns (bool) {
-        bytes4 retval = ERC721TokenReceiver(to).onERC721Received(operator, from, tokenId, _data);
+        bytes4 retval = IERC721Receiver(to).onERC721Received(operator, from, tokenId, _data);
         return (retval == _ERC721_RECEIVED);
     }
 
@@ -424,7 +424,7 @@ contract ERC721BaseToken is ERC721Events, WithSuperOperators, WithMetaTransactio
         uint256[] memory ids,
         bytes memory _data
     ) internal returns (bool) {
-        bytes4 retval = ERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);
+        bytes4 retval = IERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);
         return (retval == _ERC721_BATCH_RECEIVED);
     }
 }

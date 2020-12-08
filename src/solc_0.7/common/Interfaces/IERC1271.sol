@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
-interface ERC1271 {
+interface IERC1271 {
     /**
      * @dev Should return whether the signature provided is valid for the provided data
      * @param data Arbitrary length data signed on the behalf of address(this)

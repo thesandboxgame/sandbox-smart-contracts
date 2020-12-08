@@ -9,13 +9,12 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
-interface ERC777TokensRecipient {
-    function tokensReceived(
-        address operator,
-        address from,
-        address to,
-        uint256 amount,
-        bytes calldata data,
-        bytes calldata operatorData
-    ) external;
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
+interface IERC20WithMetadata is IERC20 {
+    function name() external view returns (string memory);
+
+    function symbol() external view returns (string memory);
+
+    function decimals() external view returns (uint8);
 }

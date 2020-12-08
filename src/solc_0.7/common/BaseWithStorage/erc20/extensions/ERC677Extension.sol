@@ -1,12 +1,12 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
-import "../../../Interfaces/ERC677.sol";
-import "../../../Interfaces/ERC677Receiver.sol";
+import "../../../Interfaces/IERC677.sol";
+import "../../../Interfaces/IERC677Receiver.sol";
 import "./ERC20Internal.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 
-abstract contract ERC677Extension is ERC20Internal, ERC677 {
+abstract contract ERC677Extension is ERC20Internal, IERC677 {
     using Address for address;
 
     /**
@@ -22,7 +22,7 @@ abstract contract ERC677Extension is ERC20Internal, ERC677 {
     ) external override returns (bool success) {
         _transfer(msg.sender, _to, _value);
         if (_to.isContract()) {
-            ERC677Receiver receiver = ERC677Receiver(_to);
+            IERC677Receiver receiver = IERC677Receiver(_to);
             receiver.onTokenTransfer(msg.sender, _value, _data);
         }
         return true;
