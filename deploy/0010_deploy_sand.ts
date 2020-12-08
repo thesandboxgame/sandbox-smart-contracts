@@ -11,7 +11,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     args: [deployer, deployer, sandBeneficiary],
     log: true,
-    skipIfAlreadyDeployed: true,
   });
 };
 export default func;
