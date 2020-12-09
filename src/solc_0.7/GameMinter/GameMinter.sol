@@ -14,22 +14,25 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
 
     IGameToken gameToken;
 
-    // BPs: BP / 100 = %
-    // The denominator component for values specified in basis points.
-    uint internal constant BASIS_POINTS_DENOMINATOR = 10000;
-    uint256 constant GAME_MINTING_FEE = 300
-    uint256 constant GAME_MODIFICATION_FEE = 300
+    uint256 internal constant SAND_DECIMALS = 10**18;
+    uint256 internal immutable GAME_MINTING_FEE;
+    uint256 internal immutable GAME_MODIFICATION_FEE;;
+    address internal immutable _feeCollector;
 
     ///////////////////////////////  Functions /////////////////////////
 
     constructor(
         address gameTokenContract,
-        address admin,
-        address metaTransactionContract
+        address metaTransactionContract,
+        uint256 gameMintingFee,
+        uint256 gameModificationFee,
+        address feeCollector
     ) {
         gameToken = IGameToken(gameTokenContract);
-        _admin = admin;
         _setMetaTransactionProcessor(metaTransactionContract, METATX_SANDBOX);
+        GAME_MINTING_FEE = gameMintingFee;
+        GAME_MODIFICATION_FEE = gameModificationFee;
+        _feeCollector = feeCollector;
     }
 
     /// @notice Function to create a new GAME token
@@ -50,8 +53,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         uint96 randomId
     ) external payable override returns (uint256 gameId) {
         require(msg.sender == from || _isValidMetaTx(from), "CREATE_ACCESS_DENIED");
-        // @review
-        require(msg.value >= GAME_MINTING_FEE, "INSUFFICIENT_FUNDS");
+        _chargeSand(from, assetIds.length.mul(GAME_MINTING_FEE));
         uint256 id = gameToken.createGame(from, to, assetIds, values, editors, uri, randomId);
         return id;
     }
@@ -72,17 +74,8 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         string memory uri,
         address editor
     ) external payable override {
-        if (editor == address(0)) {
-            require(
-                gameToken.ownerOf(gameId) == msg.sender ||
-                    gameToken.isGameEditor(gameId, msg.sender) ||
-                    _isValidMetaTx(from),
-                "ADD_ACCESS_DENIED"
-            );
-        } else {
-            require(_isValidMetaTx(editor), "METATX_ACCESS_DENIED");
-        }
-
+        _checkAuthorization(from, gameId, editor);
+        _chargeSand(from, assetIds.length.mul(GAME_MODIFICATION_FEE));
         gameToken.addAssets(from, gameId, assetIds, values, uri);
     }
 
@@ -103,16 +96,8 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         string memory uri,
         address editor
     ) external payable override {
-        if (editor == address(0)) {
-            require(
-                gameToken.ownerOf(gameId) == msg.sender ||
-                    gameToken.isGameEditor(gameId, msg.sender) ||
-                    _isValidMetaTx(from),
-                "REMOVE_ACCESS_DENIED"
-            );
-        } else {
-            require(_isValidMetaTx(editor), "METATX_ACCESS_DENIED");
-        }
+        _checkAuthorization(from, gameId, editor);
+        _chargeSand(from, assetIds.length.mul(GAME_MODIFICATION_FEE));
         gameToken.removeAssets(gameId, assetIds, values, to, uri);
     }
 
@@ -123,19 +108,27 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
     /// @param editor The game editor address (ignored if address(0)). Use only to perform
     /// a metaTx on behalf of editor instead of owner.
     function setTokenUri(uint256 gameId, string calldata URI) external payable override {
+        _checkAuthorization(from, gameId, editor);
+        _chargeSand(from, GAME_MODIFICATION_FEE);
+    }
+
+    function _chargeSand(address from, uint256 sandFee) internal {
+        address feeCollector = _feeCollector;
+        if (feeCollector != address(0) && sandFee != 0) {
+            _sand.transferFrom(from, _feeCollector, sandFee);
+        }
+    }
+
+    function _checkAuthorization(address from, uint256 id, address editor) internal view {
         if (editor == address(0)) {
             require(
-                gameToken.ownerOf(gameId) == msg.sender ||
-                    gameToken.isGameEditor(gameId, msg.sender) ||
+                gameToken.ownerOf(id) == msg.sender ||
+                    gameToken.isGameEditor(id, msg.sender) ||
                     _isValidMetaTx(from),
                 "URI_ACCESS_DENIED"
             );
         } else {
             require(_isValidMetaTx(editor), "METATX_ACCESS_DENIED");
         }
-    }
-
-    function calculateFee() internal view returns (uint256) {
-
     }
 }
