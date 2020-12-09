@@ -360,7 +360,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// 0x80ac58cd is ERC-721.
     /// @param id The id of the interface.
     /// @return if the interface is supported.
-    function supportsInterface(bytes4 id) public pure override returns (bool) {
+    function supportsInterface(bytes4 id) public pure override(ERC721BaseToken, IERC165) returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
     }
 
