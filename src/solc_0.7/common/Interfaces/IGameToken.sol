@@ -3,7 +3,9 @@ pragma solidity 0.7.5;
 
 /// @title Interface for the Game token
 
-interface IGameToken {
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+
+interface IGameToken is IERC721 {
     function createGame(
         address from,
         address to,
