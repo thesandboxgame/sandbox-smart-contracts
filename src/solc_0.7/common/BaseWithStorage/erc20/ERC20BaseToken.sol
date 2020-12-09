@@ -28,45 +28,6 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         _admin = admin;
     }
 
-    /// @notice A descriptive name for the tokens
-    /// @return name of the tokens
-    function name() external view returns (string memory) {
-        return string(abi.encodePacked(_name));
-    }
-
-    /// @notice An abbreviated name for the tokens
-    /// @return symbol of the tokens
-    function symbol() external view returns (string memory) {
-        return string(abi.encodePacked(_symbol));
-    }
-
-    /// @notice Gets the total number of tokens in existence.
-    /// @return the total number of tokens in existence.
-    function totalSupply() external view override returns (uint256) {
-        return _totalSupply;
-    }
-
-    /// @notice Gets the balance of `owner`.
-    /// @param owner The address to query the balance of.
-    /// @return The amount owned by `owner`.
-    function balanceOf(address owner) external view override returns (uint256) {
-        return _balances[owner];
-    }
-
-    /// @notice gets allowance of `spender` for `owner`'s tokens.
-    /// @param owner address whose token is allowed.
-    /// @param spender address allowed to transfer.
-    /// @return remaining the amount of token `spender` is allowed to transfer on behalf of `owner`.
-    function allowance(address owner, address spender) external view override returns (uint256 remaining) {
-        return _allowances[owner][spender];
-    }
-
-    /// @notice returns the number of decimals for that token.
-    /// @return the number of decimals.
-    function decimals() external pure virtual returns (uint8) {
-        return uint8(18);
-    }
-
     /// @notice Transfer `amount` tokens to `to`.
     /// @param to the recipient address of the tokens transfered.
     /// @param amount the number of tokens transfered.
@@ -127,6 +88,45 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         return true;
     }
 
+    /// @notice A descriptive name for the tokens
+    /// @return name of the tokens
+    function name() external view returns (string memory) {
+        return string(abi.encodePacked(_name));
+    }
+
+    /// @notice An abbreviated name for the tokens
+    /// @return symbol of the tokens
+    function symbol() external view returns (string memory) {
+        return string(abi.encodePacked(_symbol));
+    }
+
+    /// @notice Gets the total number of tokens in existence.
+    /// @return the total number of tokens in existence.
+    function totalSupply() external view override returns (uint256) {
+        return _totalSupply;
+    }
+
+    /// @notice Gets the balance of `owner`.
+    /// @param owner The address to query the balance of.
+    /// @return The amount owned by `owner`.
+    function balanceOf(address owner) external view override returns (uint256) {
+        return _balances[owner];
+    }
+
+    /// @notice gets allowance of `spender` for `owner`'s tokens.
+    /// @param owner address whose token is allowed.
+    /// @param spender address allowed to transfer.
+    /// @return remaining the amount of token `spender` is allowed to transfer on behalf of `owner`.
+    function allowance(address owner, address spender) external view override returns (uint256 remaining) {
+        return _allowances[owner][spender];
+    }
+
+    /// @notice returns the number of decimals for that token.
+    /// @return the number of decimals.
+    function decimals() external pure virtual returns (uint8) {
+        return uint8(18);
+    }
+
     /// @notice approve `spender` to transfer `amount` tokens from `owner`.
     /// @param owner address whose token is allowed.
     /// @param spender  address to be given rights to transfer.
@@ -150,6 +150,13 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         require(msg.sender == owner || _superOperators[msg.sender], "INVALID_SENDER");
         _addAllowanceIfNeeded(owner, spender, amountNeeded);
         return true;
+    }
+
+    function _firstBytes32(bytes memory src) public pure returns (bytes32 output) {
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            output := mload(add(src, 32))
+        }
     }
 
     function _addAllowanceIfNeeded(
@@ -216,12 +223,5 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         _balances[from] = currentBalance - amount;
         _totalSupply -= amount;
         emit Transfer(from, address(0), amount);
-    }
-
-    function _firstBytes32(bytes memory src) public pure returns (bytes32 output) {
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            output := mload(add(src, 32))
-        }
     }
 }
