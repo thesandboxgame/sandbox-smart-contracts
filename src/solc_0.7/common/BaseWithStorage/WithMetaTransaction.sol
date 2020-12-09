@@ -6,6 +6,7 @@ import "./WithAdmin.sol";
 contract WithMetaTransaction is WithAdmin {
     uint8 internal constant METATX_SANDBOX = 1;
     uint8 internal constant METATX_2771 = 2;
+
     mapping(address => uint8) internal _metaTransactionContracts;
 
     /// @dev Emits when a meta transaction processor is enabled / disabled.

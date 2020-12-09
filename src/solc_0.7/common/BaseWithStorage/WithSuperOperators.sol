@@ -5,6 +5,7 @@ import "./WithAdmin.sol";
 
 contract WithSuperOperators is WithAdmin {
     mapping(address => bool) internal _superOperators;
+
     /// @dev Emits when superOperator rights are set
     /// @param superOperator The address whose rights are being granted / evoked
     /// @param enabled Whether or not this address has superOperator rights
