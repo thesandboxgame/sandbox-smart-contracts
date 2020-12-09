@@ -52,7 +52,7 @@ describe('GameMinter', function () {
         users[1].address,
         [],
         [],
-        [],
+        ethers.constants.AddressZero,
         'Test Game URI',
         await getRandom()
       )
