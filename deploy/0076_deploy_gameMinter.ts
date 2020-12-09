@@ -17,6 +17,7 @@ const func: DeployFunction = async function (hre) {
       gameMintingFee,
       gameModificationFee,
       mintingFeeCollector,
+      sandContract.address,
     ],
   });
 };
