@@ -385,7 +385,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     /// @param from The address who initiated the transfer (may differ from msg.sender).
     /// @param to The address recieving the token.
     /// @param id The token being transferred.
-    /// @return Whether or not the transaction is a MetaTx.
+    /// @return isMetaTx Whether or not the transaction is a MetaTx.
     function _checkTransfer(
         address from,
         address to,
