@@ -2,6 +2,10 @@
 pragma solidity 0.7.5;
 
 library BytesUtil {
+    /// @dev Function to check if the data == _address
+    /// @param data The bytes passed to the function
+    /// @param _address The address to compare to
+    /// returns whether the first parm == _address
     function doFirstParamEqualsAddress(bytes memory data, address _address) internal pure returns (bool) {
         if (data.length < (36 + 32)) {
             return false;
