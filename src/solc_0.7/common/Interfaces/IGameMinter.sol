@@ -7,7 +7,7 @@ interface IGameMinter {
         address to,
         uint256[] memory assetIds,
         uint256[] memory values,
-        address[] memory editors,
+        address editor,
         string memory uri,
         uint96 randomId
     ) external returns (uint256 gameId);
@@ -31,5 +31,10 @@ interface IGameMinter {
         address editor
     ) external;
 
-    function setTokenUri(uint256 gameId, string calldata URI) external;
+    function setTokenUri(
+        address from,
+        uint256 gameId,
+        string calldata URI,
+        address editor
+    ) external;
 }
