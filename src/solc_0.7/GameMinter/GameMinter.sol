@@ -4,7 +4,7 @@ pragma solidity 0.7.5;
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 import "../common/Interfaces/IGameToken.sol";
 import "../common/Interfaces/IGameMinter.sol";
-import "openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
 
 contract GameMinter is WithMetaTransaction, IGameMinter {
     ///////////////////////////////  Libs //////////////////////////////
@@ -16,8 +16,9 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
 
     uint256 internal constant SAND_DECIMALS = 10**18;
     uint256 internal immutable GAME_MINTING_FEE;
-    uint256 internal immutable GAME_MODIFICATION_FEE;;
+    uint256 internal immutable GAME_MODIFICATION_FEE;
     address internal immutable _feeCollector;
+    ERC20Extended internal immutable _sand;
 
     ///////////////////////////////  Functions /////////////////////////
 
@@ -26,13 +27,15 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         address metaTransactionContract,
         uint256 gameMintingFee,
         uint256 gameModificationFee,
-        address feeCollector
+        address feeCollector,
+        ERC20Extended sand
     ) {
         gameToken = IGameToken(gameTokenContract);
         _setMetaTransactionProcessor(metaTransactionContract, METATX_SANDBOX);
         GAME_MINTING_FEE = gameMintingFee;
         GAME_MODIFICATION_FEE = gameModificationFee;
         _feeCollector = feeCollector;
+        _sand = sand;
     }
 
     /// @notice Function to create a new GAME token
@@ -119,12 +122,14 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         }
     }
 
-    function _checkAuthorization(address from, uint256 id, address editor) internal view {
+    function _checkAuthorization(
+        address from,
+        uint256 id,
+        address editor
+    ) internal view {
         if (editor == address(0)) {
             require(
-                gameToken.ownerOf(id) == msg.sender ||
-                    gameToken.isGameEditor(id, msg.sender) ||
-                    _isValidMetaTx(from),
+                gameToken.ownerOf(id) == msg.sender || gameToken.isGameEditor(id, msg.sender) || _isValidMetaTx(from),
                 "URI_ACCESS_DENIED"
             );
         } else {
