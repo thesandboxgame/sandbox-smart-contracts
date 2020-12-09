@@ -70,7 +70,7 @@ contract ClaimERC1155 {
         address to,
         uint256[] memory assetIds,
         uint256[] memory assetValues
-    ) internal returns (bool) {
+    ) internal {
         _asset.safeBatchTransferFrom(_assetsHolder, to, assetIds, assetValues, "");
     }
 }
