@@ -4,6 +4,7 @@ pragma solidity 0.7.5;
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 import "../common/Interfaces/IGameToken.sol";
 import "../common/Interfaces/IGameMinter.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
 contract GameMinter is WithMetaTransaction, IGameMinter {
@@ -12,25 +13,25 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
 
     ///////////////////////////////  Data //////////////////////////////
 
-    IGameToken gameToken;
+    IGameToken internal immutable _gameToken;
 
     uint256 internal constant SAND_DECIMALS = 10**18;
     uint256 internal immutable GAME_MINTING_FEE;
     uint256 internal immutable GAME_MODIFICATION_FEE;
     address internal immutable _feeCollector;
-    ERC20Extended internal immutable _sand;
+    IERC20 internal immutable _sand;
 
     ///////////////////////////////  Functions /////////////////////////
 
     constructor(
-        address gameTokenContract,
+        IGameToken gameTokenContract,
         address metaTransactionContract,
         uint256 gameMintingFee,
         uint256 gameModificationFee,
         address feeCollector,
-        ERC20Extended sand
+        IERC20 sand
     ) {
-        gameToken = IGameToken(gameTokenContract);
+        _gameToken = gameTokenContract;
         _setMetaTransactionProcessor(metaTransactionContract, METATX_SANDBOX);
         GAME_MINTING_FEE = gameMintingFee;
         GAME_MODIFICATION_FEE = gameModificationFee;
@@ -43,7 +44,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
     /// @param to The address who will be assigned ownership of this game
     /// @param assetIds The ids of the assets to add to this game
     /// @param values the amount of each token id to add to game
-    /// @param editors The addresses to allow to edit (can also be set later)
+    /// @param editor The address to allow to edit (can also be set later)
     /// @param randomId A random id created on the backend.
     /// @return gameId The id of the new GAME token (erc721)
     function createGame(
@@ -51,13 +52,13 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         address to,
         uint256[] memory assetIds,
         uint256[] memory values,
-        address[] memory editors,
+        address editor,
         string memory uri,
         uint96 randomId
-    ) external payable override returns (uint256 gameId) {
+    ) external override returns (uint256 gameId) {
         require(msg.sender == from || _isValidMetaTx(from), "CREATE_ACCESS_DENIED");
         _chargeSand(from, assetIds.length.mul(GAME_MINTING_FEE));
-        uint256 id = gameToken.createGame(from, to, assetIds, values, editors, uri, randomId);
+        uint256 id = _gameToken.createGame(from, to, assetIds, values, editor, uri, randomId);
         return id;
     }
 
@@ -76,10 +77,10 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         uint256[] memory values,
         string memory uri,
         address editor
-    ) external payable override {
+    ) external override {
         _checkAuthorization(from, gameId, editor);
         _chargeSand(from, assetIds.length.mul(GAME_MODIFICATION_FEE));
-        gameToken.addAssets(from, gameId, assetIds, values, uri);
+        _gameToken.addAssets(from, gameId, assetIds, values, uri);
     }
 
     /// @notice Function to remove assets from a GAME
@@ -98,10 +99,10 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         address to,
         string memory uri,
         address editor
-    ) external payable override {
+    ) external override {
         _checkAuthorization(from, gameId, editor);
         _chargeSand(from, assetIds.length.mul(GAME_MODIFICATION_FEE));
-        gameToken.removeAssets(gameId, assetIds, values, to, uri);
+        _gameToken.removeAssets(gameId, assetIds, values, to, uri);
     }
 
     /// @notice Set the URI of a specific game token
@@ -110,7 +111,12 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
     /// @param URI The URI string for the token's metadata
     /// @param editor The game editor address (ignored if address(0)). Use only to perform
     /// a metaTx on behalf of editor instead of owner.
-    function setTokenUri(uint256 gameId, string calldata URI) external payable override {
+    function setTokenUri(
+        address from,
+        uint256 gameId,
+        string calldata URI,
+        address editor
+    ) external override {
         _checkAuthorization(from, gameId, editor);
         _chargeSand(from, GAME_MODIFICATION_FEE);
     }
@@ -129,7 +135,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
     ) internal view {
         if (editor == address(0)) {
             require(
-                gameToken.ownerOf(id) == msg.sender || gameToken.isGameEditor(id, msg.sender) || _isValidMetaTx(from),
+                _gameToken.ownerOf(id) == msg.sender || _gameToken.isGameEditor(id, msg.sender) || _isValidMetaTx(from),
                 "URI_ACCESS_DENIED"
             );
         } else {
