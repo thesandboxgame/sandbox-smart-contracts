@@ -4,7 +4,6 @@ const {createDataArray, saltLands} = require("../../lib/merkleTreeHelper");
 const {BigNumber} = require("ethers");
 const addresses = require("../addresses.json");
 const prices = require("./prices");
-const bundles = require("./bundles.json");
 
 const sandboxWallet = addresses["sandbox"];
 
@@ -20,7 +19,9 @@ function exitIfError() {
   }
 }
 
-function generateLandsForMerkleTree(sectorData) {
+function generateLandsForMerkleTree(sectorData, bundlesPath) {
+  const bundles = require(bundlesPath);
+
   const partnersLands = [];
   const lands = [];
   let numLands = 0;
@@ -212,8 +213,11 @@ module.exports = {
       expose = true;
     }
 
-    const sectorData = require(`./sector${sector}.json`)[0];
-    const {lands} = generateLandsForMerkleTree(sectorData);
+    const sectorPath = `./sector${sector}_${chainId}.json`;
+    const bundlesPath = `./bundles_${chainId}.json`;
+
+    const sectorData = require(sectorPath)[0];
+    const {lands} = generateLandsForMerkleTree(sectorData, bundlesPath);
 
     const saltedLands = saltLands(lands, secret);
     const tree = new MerkleTree(createDataArray(saltedLands));
