@@ -43,18 +43,21 @@ const {execute} = deployments;
     ids
   );
 
+  console.log(JSON.stringify(ids, null, "  "));
   console.log(
-    destination,
-    ids,
-    balances.map((v) => v.toString())
+    JSON.stringify(
+      balances.map((v) => v.toString()),
+      null,
+      "  "
+    )
   );
 
-  // await execute(
-  //   "LandPreSale_4_3",
-  //   {from: landSaleAdmin, skipUnknownSigner: true},
-  //   "withdrawAssets",
-  //   destination,
-  //   ids,
-  //   balances
-  // );
+  await execute(
+    "LandPreSale_4_3",
+    {from: landSaleAdmin, skipUnknownSigner: true},
+    "withdrawAssets",
+    destination,
+    ids,
+    balances
+  );
 })();
