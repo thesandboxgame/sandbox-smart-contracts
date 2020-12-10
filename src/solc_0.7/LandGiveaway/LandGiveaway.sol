@@ -11,26 +11,26 @@ import "../common/BaseWithStorage/WithAdmin.sol";
 contract LandGiveaway is WithAdmin, ClaimERC721 {
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
     bytes4 internal constant ERC721_BATCH_RECEIVED = 0x4b808c46;
-    uint256 internal immutable _expiryTime;
-    mapping(address => bool) public claimed;
+    uint256 internal immutable _expiryTimeLandGiveaway;
+    mapping(address => bool) public claimedLands;
 
     constructor(
         address land,
         address admin,
-        bytes32 merkleRoot,
+        bytes32 merkleRootLand,
         address landHolder,
         uint256 expiryTime
     ) ClaimERC721(ERC721BaseToken(land), landHolder) {
         _admin = admin;
-        _merkleRoot = merkleRoot;
-        _expiryTime = expiryTime;
+        _merkleRootLand = merkleRootLand;
+        _expiryTimeLandGiveaway = expiryTime;
     }
 
     /// @notice Function to set the merkle root hash for the land data, if it is 0
     /// @param merkleRoot the merkle root hash of the asset data
-    function setMerkleRoot(bytes32 merkleRoot) external onlyAdmin {
-        require(_merkleRoot == 0, "MERKLE_ROOT_ALREADY_SET");
-        _merkleRoot = merkleRoot;
+    function setMerkleRootLands(bytes32 merkleRoot) external onlyAdmin {
+        require(_merkleRootLand == 0, "MERKLE_ROOT_ALREADY_SET");
+        _merkleRootLand = merkleRoot;
     }
 
     /// @notice Function to permit the claiming of an asset to a reserved address
@@ -44,10 +44,10 @@ contract LandGiveaway is WithAdmin, ClaimERC721 {
         bytes32[] calldata proof,
         bytes32 salt
     ) external {
-        require(block.timestamp < _expiryTime, "CLAIM_PERIOD_IS_OVER");
+        require(block.timestamp < _expiryTimeLandGiveaway, "CLAIM_PERIOD_IS_OVER");
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        require(claimed[to] == false, "DESTINATION_ALREADY_CLAIMED");
-        claimed[to] = true;
+        require(claimedLands[to] == false, "DESTINATION_ALREADY_CLAIMED");
+        claimedLands[to] = true;
         _claimERC721(to, ids, proof, salt);
     }
 

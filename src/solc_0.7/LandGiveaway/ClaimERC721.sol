@@ -5,7 +5,7 @@ import "../common/BaseWithStorage/ERC721BaseToken.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract ClaimERC721 {
-    bytes32 internal _merkleRoot;
+    bytes32 internal _merkleRootLand;
     ERC721BaseToken internal immutable _land;
     address internal immutable _landHolder;
     event ClaimedLands(address to, uint256[] ids);
@@ -24,19 +24,19 @@ contract ClaimERC721 {
         bytes32[] calldata proof,
         bytes32 salt
     ) internal {
-        _checkValidity(to, ids, proof, salt);
-        _sendAssets(to, ids);
+        _checkValidityERC721Claim(to, ids, proof, salt);
+        _sendLands(to, ids);
         emit ClaimedLands(to, ids);
     }
 
-    function _checkValidity(
+    function _checkValidityERC721Claim(
         address to,
         uint256[] memory ids,
         bytes32[] memory proof,
         bytes32 salt
     ) internal view {
         bytes32 leaf = _generateClaimHash(to, ids, salt);
-        require(_verify(proof, leaf), "INVALID_CLAIM");
+        require(_verifyMerkleRootLand(proof, leaf), "INVALID_CLAIM");
     }
 
     function _generateClaimHash(
@@ -47,7 +47,7 @@ contract ClaimERC721 {
         return keccak256(abi.encodePacked(to, ids, salt));
     }
 
-    function _verify(bytes32[] memory proof, bytes32 leaf) internal view returns (bool) {
+    function _verifyMerkleRootLand(bytes32[] memory proof, bytes32 leaf) internal view returns (bool) {
         bytes32 computedHash = leaf;
 
         for (uint256 i = 0; i < proof.length; i++) {
@@ -60,10 +60,10 @@ contract ClaimERC721 {
             }
         }
 
-        return computedHash == _merkleRoot;
+        return computedHash == _merkleRootLand;
     }
 
-    function _sendAssets(address to, uint256[] memory ids) internal {
+    function _sendLands(address to, uint256[] memory ids) internal {
         _land.safeBatchTransferFrom(_landHolder, to, ids, "");
     }
 }
