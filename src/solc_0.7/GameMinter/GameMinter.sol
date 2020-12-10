@@ -57,7 +57,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         uint96 randomId
     ) external override returns (uint256 gameId) {
         require(msg.sender == from || _isValidMetaTx(from), "CREATE_ACCESS_DENIED");
-        _chargeSand(from, assetIds.length.mul(GAME_MINTING_FEE));
+        _chargeSand(from, GAME_MINTING_FEE);
         uint256 id = _gameToken.createGame(from, to, assetIds, values, editor, uri, randomId);
         return id;
     }
@@ -79,7 +79,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         address editor
     ) external override {
         _checkAuthorization(from, gameId, editor);
-        _chargeSand(from, assetIds.length.mul(GAME_MODIFICATION_FEE));
+        _chargeSand(from, GAME_MODIFICATION_FEE);
         _gameToken.addAssets(from, gameId, assetIds, values, uri);
     }
 
@@ -101,7 +101,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         address editor
     ) external override {
         _checkAuthorization(from, gameId, editor);
-        _chargeSand(from, assetIds.length.mul(GAME_MODIFICATION_FEE));
+        _chargeSand(from, GAME_MODIFICATION_FEE);
         _gameToken.removeAssets(gameId, assetIds, values, to, uri);
     }
 
