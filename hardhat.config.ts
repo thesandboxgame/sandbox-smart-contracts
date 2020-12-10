@@ -127,6 +127,8 @@ const config: HardhatUserConfig = {
       1: 'treasury',
     }, // updated to company treasury wallet 9th September - collect funds from land sales
 
+    catalystAssetFeeRecipient: 'treasury',
+
     landSaleFeeRecipient: {
       default: 3,
       rinkeby: 5,
