@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {createAssetClaimMerkleTree} from '../data/land_giveaway_1/getLands';
+import {createLandClaimMerkleTree} from '../data/land_giveaway_1/getLands';
 import {default as landData} from '../data/land_giveaway_1/lands.json';
 
 const LAND_HOLDER = '0x0000000000000000000000000000000000000000';
@@ -11,7 +11,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const chainId = await getChainId();
   const {deployer} = await getNamedAccounts();
 
-  const {lands, merkleRootHash} = createAssetClaimMerkleTree(
+  const {lands, merkleRootHash} = createLandClaimMerkleTree(
     network.live,
     chainId,
     landData

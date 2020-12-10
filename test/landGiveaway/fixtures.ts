@@ -8,7 +8,7 @@ import {expect} from '../chai-setup';
 import MerkleTree from '../../lib/merkleTree';
 import {createAssetClaimMerkleTree} from '../../data/asset_giveaway_1/getAssets';
 import helpers from '../../lib/merkleTreeHelper';
-const {createDataArrayAssets} = helpers;
+const {createDataArrayClaimableAssets} = helpers;
 import {default as testAssetData} from '../../data/asset_giveaway_1/testAssets.json';
 
 const ipfsHashString =
@@ -151,7 +151,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   const updatedDeployment = await deployments.get('Test_Asset_Giveaway_1');
   const updatedAssets = updatedDeployment.linkedData;
-  const assetHashArray = createDataArrayAssets(updatedAssets);
+  const assetHashArray = createDataArrayClaimableAssets(updatedAssets);
   const tree = new MerkleTree(assetHashArray);
   await giveawayContractAsAdmin.setMerkleRoot(merkleRootHash); // Set the merkleRoot which could not have been known prior to generating the test asset IDs
 
@@ -178,7 +178,7 @@ export const setupGiveaway = deployments.createFixture(async function () {
 
   // Set up tree with real assets
   const assets = deployment.linkedData;
-  const assetHashArray = createDataArrayAssets(assets);
+  const assetHashArray = createDataArrayClaimableAssets(assets);
   const tree = new MerkleTree(assetHashArray);
 
   return {

@@ -3,24 +3,23 @@ import {BigNumber} from 'ethers';
 import MerkleTree from '../../lib/merkleTree';
 import helpers from '../../lib/merkleTreeHelper';
 
-const {createDataArrayAssets, saltAssets} = helpers;
+const {createDataArrayClaimableLands, saltClaimableLands} = helpers;
 
-type AssetClaim = {
+type LandClaim = {
   reservedAddress: string;
-  assetIds: Array<BigNumber> | Array<string> | Array<number>;
-  assetValues: Array<number>;
+  ids: Array<BigNumber> | Array<string> | Array<number>;
 };
 
-export function createAssetClaimMerkleTree(
+export function createLandClaimMerkleTree(
   isDeploymentChainId: boolean,
   chainId: string,
-  assetData: Array<AssetClaim>
+  landData: Array<LandClaim>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any {
-  let secretPath = './.asset_giveaway_1_secret';
+  let secretPath = './.land_giveaway_1_secret';
   if (BigNumber.from(chainId).toString() === '1') {
     console.log('MAINNET secret');
-    secretPath = './.asset_giveaway_1_secret.mainnet';
+    secretPath = './.land_giveaway_1_secret.mainnet';
   }
 
   let expose = false;
@@ -39,14 +38,14 @@ export function createAssetClaimMerkleTree(
     expose = true;
   }
 
-  const saltedAssets = saltAssets(assetData, secret);
-  const tree = new MerkleTree(createDataArrayAssets(saltedAssets));
+  const saltedLands = saltClaimableLands(landData, secret);
+  const tree = new MerkleTree(createDataArrayClaimableLands(saltedLands));
   const merkleRootHash = tree.getRoot().hash;
 
   return {
-    assets: expose ? saltedAssets : assetData,
+    lands: expose ? saltedLands : landData,
     merkleRootHash,
-    saltedAssets,
+    saltedLands,
     tree,
   };
 }
