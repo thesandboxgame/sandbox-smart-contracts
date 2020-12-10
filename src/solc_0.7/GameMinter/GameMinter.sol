@@ -84,6 +84,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
     }
 
     /// @notice Function to remove assets from a GAME
+    /// @param from The address of the one initiating the call
     /// @param gameId The GAME to remove assets from
     /// @param assetIds An array of asset Ids to remove
     /// @param values An array of the number of each asset id to remove
@@ -138,7 +139,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         if (editor == address(0)) {
             require(
                 _gameToken.ownerOf(id) == msg.sender || _gameToken.isGameEditor(id, msg.sender) || _isValidMetaTx(from),
-                "URI_ACCESS_DENIED"
+                "AUTH_ACCESS_DENIED"
             );
         } else {
             require(_isValidMetaTx(editor), "METATX_ACCESS_DENIED");
