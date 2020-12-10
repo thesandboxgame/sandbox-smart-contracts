@@ -18,7 +18,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
     uint256 internal constant SAND_DECIMALS = 10**18;
     uint256 internal immutable GAME_MINTING_FEE;
     uint256 internal immutable GAME_MODIFICATION_FEE;
-    address internal immutable _feeCollector;
+    address internal immutable _feeBeneficiary;
     IERC20 internal immutable _sand;
 
     ///////////////////////////////  Functions /////////////////////////
@@ -28,14 +28,14 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         address metaTransactionContract,
         uint256 gameMintingFee,
         uint256 gameModificationFee,
-        address feeCollector,
+        address feeBeneficiary,
         IERC20 sand
     ) {
         _gameToken = gameTokenContract;
         _setMetaTransactionProcessor(metaTransactionContract, METATX_SANDBOX);
         GAME_MINTING_FEE = gameMintingFee;
         GAME_MODIFICATION_FEE = gameModificationFee;
-        _feeCollector = feeCollector;
+        _feeBeneficiary = feeBeneficiary;
         _sand = sand;
     }
 
@@ -122,9 +122,10 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
     }
 
     function _chargeSand(address from, uint256 sandFee) internal {
-        address feeCollector = _feeCollector;
-        if (feeCollector != address(0) && sandFee != 0) {
-            _sand.transferFrom(from, _feeCollector, sandFee);
+        // @review is this assignment needed?
+        address feeBeneficiary = _feeBeneficiary;
+        if (feeBeneficiary != address(0) && sandFee != 0) {
+            _sand.transferFrom(from, _feeBeneficiary, sandFee);
         }
     }
 
