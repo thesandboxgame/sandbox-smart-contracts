@@ -155,6 +155,7 @@ const config: HardhatUserConfig = {
     }, // can add super operators and change admin
 
     landSaleAdmin: 'sandAdmin', // can enable currencies
+    gameTokenAdmin: 'sandAdmin', // can set minter address
     gameMinterAdmin: 'sandAdmin', // can set fees
     estateAdmin: 'sandAdmin', // can add super operators and change admin
     P2PERC721SaleAdmin: 'sandAdmin', // can set fees
