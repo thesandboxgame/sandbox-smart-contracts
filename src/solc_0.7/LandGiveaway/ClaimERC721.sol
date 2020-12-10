@@ -2,6 +2,7 @@
 pragma solidity 0.7.5;
 
 import "../common/BaseWithStorage/ERC721BaseToken.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 contract ClaimERC721 {
     bytes32 internal _merkleRoot;
@@ -62,7 +63,7 @@ contract ClaimERC721 {
         return computedHash == _merkleRoot;
     }
 
-    function _sendAssets(address to, uint256[] memory ids) internal returns (bool) {
+    function _sendAssets(address to, uint256[] memory ids) internal {
         _land.safeBatchTransferFrom(_landHolder, to, ids, "");
     }
 }
