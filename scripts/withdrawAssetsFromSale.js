@@ -30,23 +30,31 @@ const {execute} = deployments;
 
   const ids = [...assetIds];
 
-  console.log(assetIds, JSON.stringify(ids, null, "  "));
-
   const Asset = await ethers.getContract("Asset");
   const Presale = await ethers.getContract("LandPreSale_4_3");
-  const destination = "0x7A9fe22691c811ea339D9B73150e6911a5343DcA";
+  const destination = process.argv[2]; // 0x7A9fe22691c811ea339D9B73150e6911a5343DcA
+
+  if (!destination || destination === "") {
+    throw new Error("destination required");
+  }
 
   const balances = await Asset.balanceOfBatch(
     ids.map(() => Presale.address),
     ids
   );
 
-  await execute(
-    "LandPreSale_4_3",
-    {from: landSaleAdmin, skipUnknownSigner: true},
-    "withdrawAssets",
+  console.log(
     destination,
     ids,
-    balances
+    balances.map((v) => v.toString())
   );
+
+  // await execute(
+  //   "LandPreSale_4_3",
+  //   {from: landSaleAdmin, skipUnknownSigner: true},
+  //   "withdrawAssets",
+  //   destination,
+  //   ids,
+  //   balances
+  // );
 })();
