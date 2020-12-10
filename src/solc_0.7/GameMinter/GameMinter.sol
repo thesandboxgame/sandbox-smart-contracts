@@ -108,17 +108,18 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
     /// @notice Set the URI of a specific game token
     /// @param from The address of the game owner
     /// @param gameId The id of the game token
-    /// @param URI The URI string for the token's metadata
+    /// @param uri The URI string for the token's metadata
     /// @param editor The game editor address (ignored if address(0)). Use only to perform
     /// a metaTx on behalf of editor instead of owner.
     function setTokenUri(
         address from,
         uint256 gameId,
-        string calldata URI,
+        string calldata uri,
         address editor
     ) external override {
         _checkAuthorization(from, gameId, editor);
         _chargeSand(from, GAME_MODIFICATION_FEE);
+        _gameToken.setTokenURI(gameId, uri);
     }
 
     function _chargeSand(address from, uint256 sandFee) internal {

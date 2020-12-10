@@ -34,7 +34,7 @@ interface IGameMinter {
     function setTokenUri(
         address from,
         uint256 gameId,
-        string calldata URI,
+        string calldata uri,
         address editor
     ) external;
 }
