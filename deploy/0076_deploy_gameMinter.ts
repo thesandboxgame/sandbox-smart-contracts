@@ -4,7 +4,7 @@ import {gameMintingFee, gameModificationFee} from '../data/gameMinterFees';
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer, mintingFeeCollector} = await getNamedAccounts();
+  const {deployer, gameTokenFeeBeneficiary} = await getNamedAccounts();
   const gameContract = await deployments.get('GameToken');
   const sandContract = await deployments.get('Sand');
 
@@ -16,7 +16,7 @@ const func: DeployFunction = async function (hre) {
       sandContract.address,
       gameMintingFee,
       gameModificationFee,
-      mintingFeeCollector,
+      gameTokenFeeBeneficiary,
       sandContract.address,
     ],
   });

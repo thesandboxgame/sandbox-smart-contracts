@@ -102,7 +102,8 @@ const config: HardhatUserConfig = {
     },
 
     sandExecutionAdmin: 'sandAdmin', // can add execution extension to SAND (used for Native metatx support)
-    mintingFeeCollector: 'sandAdmin', // will receiver the fee from Asset minting
+    mintingFeeCollector: 'sandAdmin', // receives fees from Asset minting
+    gameTokenFeeBeneficiary: 'treasury', // receives fees from GAME token  minting / Mods
     sandBeneficiary: 'sandAdmin', // will be the owner of all initial SAND
     assetAdmin: 'sandAdmin', // can add super operator and change admin to Asset
     assetBouncerAdmin: 'sandAdmin', // setup the contract allowed to mint Assets
