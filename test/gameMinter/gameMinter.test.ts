@@ -44,7 +44,7 @@ describe('GameMinter', function () {
   });
   // describe('GameMinter: MetaTXs', function () {}); // TODO
 
-  it('calling it directly without pre-approval result in Allowance error', async function () {
+  it('should fail if not authorized to create a game', async function () {
     const {users} = await setupTest();
     await expect(
       users[0].GameMinter.createGame(
