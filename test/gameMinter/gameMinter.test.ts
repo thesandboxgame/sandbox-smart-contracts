@@ -22,7 +22,6 @@ type User = {
   GameMinter: Contract;
 };
 
-
 const setupTest = deployments.createFixture(
   async (): Promise<{
     GameMinter: Contract;
@@ -112,8 +111,8 @@ describe('GameMinter', function () {
         gameId1 = event.args[2];
       });
 
-  //     await expect(() => token.transfer(walletTo.address, 200))
-  // .to.changeTokenBalances(token, [wallet, walletTo], [-200, 200]);
+      //     await expect(() => token.transfer(walletTo.address, 200))
+      // .to.changeTokenBalances(token, [wallet, walletTo], [-200, 200]);
 
       it('should fail if not authorized to add assets', async function () {
         await expect(
@@ -153,13 +152,13 @@ describe('GameMinter', function () {
         ).to.be.revertedWith('AUTH_ACCESS_DENIED');
       });
 
-      it('allows GAME owner to add assets', async () {})
-      it('allows GAME owner to remove assets', async () {})
-      it('allows GAME owner to set GAME URI', async () {})
+      it('allows GAME owner to add assets', async function () {});
+      it('allows GAME owner to remove assets', async function () {});
+      it('allows GAME owner to set GAME URI', async function () {});
 
-      it('allows GAME editor to add assets', async () {})
-      it('allows GAME editor to remove assets', async () {})
-      it('allows GAME editor to set GAME URI', async () {})
+      it('allows GAME editor to add assets', async function () {});
+      it('allows GAME editor to remove assets', async function () {});
+      it('allows GAME editor to set GAME URI', async function () {});
     });
     // describe('GameMinter: MetaTXs', function () {}); TODO
   });
