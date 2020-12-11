@@ -28,6 +28,7 @@ const setupTest = deployments.createFixture(
     users: User[];
   }> => {
     await deployments.fixture('GameMinter');
+    const {sandAdmin} = await getNamedAccounts();
     const users = await getUnnamedAccounts();
     return {
       GameMinter: await ethers.getContract('GameMinter'),
@@ -59,9 +60,30 @@ describe('GameMinter', function () {
       let gameId1: BigNumber;
       let users: User[];
       let GameMinter: Contract;
+      let sandAsAdmin: Contract;
+      let gameTokenContract: Contract;
+
+      before(async function () {
+        ({GameMinter, users} = await setupTest());
+        const {sandAdmin, gameTokenAdmin} = await getNamedAccounts();
+        gameTokenContract = await ethers.getContract('GameToken');
+        const sandContract = await ethers.getContract('Sand');
+        sandAsAdmin = await sandContract.connect(
+          ethers.provider.getSigner(sandAdmin)
+        );
+        await sandAsAdmin.setSuperOperator(GameMinter.address, true);
+        const gameAsAdmin = await gameTokenContract.connect(
+          ethers.provider.getSigner(gameTokenAdmin)
+        );
+        await gameAsAdmin.changeMinter(GameMinter.address);
+
+        await sandAsAdmin.transfer(
+          users[1].address,
+          BigNumber.from('1000000000000000000000000')
+        );
+      });
 
       it('should fail with incorrect "from" address', async function () {
-        ({users, GameMinter} = await setupTest());
         await expect(
           users[0].GameMinter.createGame(
             users[1].address,
@@ -76,24 +98,6 @@ describe('GameMinter', function () {
       });
 
       it('should allow anyone to create a game', async function () {
-        const {sandAdmin, gameTokenAdmin} = await getNamedAccounts();
-        const sandContract = await ethers.getContract('Sand');
-        const sandAsAdmin = await sandContract.connect(
-          ethers.provider.getSigner(sandAdmin)
-        );
-        await sandAsAdmin.setSuperOperator(GameMinter.address, true);
-
-        const gameTokenContract = await ethers.getContract('GameToken');
-        const gameAsAdmin = await gameTokenContract.connect(
-          ethers.provider.getSigner(gameTokenAdmin)
-        );
-        await gameAsAdmin.changeMinter(GameMinter.address);
-
-        await sandAsAdmin.transfer(
-          users[1].address,
-          BigNumber.from('1000000000000000000000000')
-        );
-
         const receipt = await users[1].GameMinter.createGame(
           users[1].address,
           users[1].address,
