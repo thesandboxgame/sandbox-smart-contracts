@@ -22,27 +22,20 @@ const erc721Tests = require('../erc721')(
     await deployments.fixture();
 
     const contract = await ethers.getContract('GameToken');
-    const assetContract = await ethers.getContract('Asset');
 
     const gameAsAdmin = await contract.connect(
       ethers.provider.getSigner(gameTokenAdmin)
     );
 
     async function mint(to) {
-      const assetReceipt = await supplyAssets(to, to, 1);
-      const transferEvent = await expectEventWithArgs(
-        assetContract,
-        assetReceipt,
-        'Transfer'
-      );
-      const assetId = transferEvent.args[2];
+      const {assets, quantities} = await supplyAssets(to, to, [1]);
       const randomId = await getRandom();
 
       const receipt = await gameAsAdmin.createGame(
         to,
         to,
-        [assetId],
-        [1],
+        assets,
+        quantities,
         ethers.constants.AddressZero,
         'My GAME token URI!',
         randomId
