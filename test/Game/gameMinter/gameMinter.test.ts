@@ -6,10 +6,10 @@ import {
 } from 'hardhat';
 import {BigNumber, Contract} from 'ethers';
 import Prando from 'prando';
-import {expect} from '../chai-setup';
-import {expectEventWithArgs} from '../utils';
+import {expect} from '../../chai-setup';
+import {expectEventWithArgs} from '../../utils';
 import {Address} from 'hardhat-deploy/types';
-import {supplyAssets} from './supplyAssets';
+import {supplyAssets} from '../assets';
 
 const rng = new Prando('GameMinter');
 
@@ -28,7 +28,6 @@ const setupTest = deployments.createFixture(
     users: User[];
   }> => {
     await deployments.fixture('GameMinter');
-    const {sandAdmin} = await getNamedAccounts();
     const users = await getUnnamedAccounts();
     return {
       GameMinter: await ethers.getContract('GameMinter'),
@@ -62,6 +61,8 @@ describe('GameMinter', function () {
       let GameMinter: Contract;
       let sandAsAdmin: Contract;
       let gameTokenContract: Contract;
+      let assets: BigNumber[];
+      let quantities: number[];
 
       before(async function () {
         ({GameMinter, users} = await setupTest());
@@ -77,10 +78,20 @@ describe('GameMinter', function () {
         );
         await gameAsAdmin.changeMinter(GameMinter.address);
 
+        // Supply users with sand and assets:
         await sandAsAdmin.transfer(
           users[1].address,
           BigNumber.from('1000000000000000000000000')
         );
+        await sandAsAdmin.transfer(
+          users[2].address,
+          BigNumber.from('1000000000000000000000000')
+        );
+        ({assets, quantities} = await supplyAssets(
+          users[1].address,
+          users[1].address,
+          [77, 3, 14]
+        ));
       });
 
       it('should fail with incorrect "from" address', async function () {
