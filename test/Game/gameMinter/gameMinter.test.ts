@@ -47,7 +47,10 @@ const setupTest = deployments.createFixture(
 
 describe('GameMinter', function () {
   describe('GameMinter: Fees', function () {
-    it.skip('should charge the correct fee', async function () {});
+    it.skip('should charge the correct fee', async function () {
+      //  await expect(() => token.transfer(walletTo.address, 200))
+      // .to.changeTokenBalances(token, [wallet, walletTo], [-200, 200]);
+    });
     it.skip('should handle not enough funds', async function () {});
   });
 
@@ -59,16 +62,19 @@ describe('GameMinter', function () {
       let gameId1: BigNumber;
       let users: User[];
       let GameMinter: Contract;
+      let sandContract: Contract;
       let sandAsAdmin: Contract;
       let gameTokenContract: Contract;
       let assets: BigNumber[];
       let quantities: number[];
+      let editorAssets: BigNumber[];
+      let editorQuantities: number[];
 
       before(async function () {
         ({GameMinter, users} = await setupTest());
         const {sandAdmin, gameTokenAdmin} = await getNamedAccounts();
         gameTokenContract = await ethers.getContract('GameToken');
-        const sandContract = await ethers.getContract('Sand');
+        sandContract = await ethers.getContract('Sand');
         sandAsAdmin = await sandContract.connect(
           ethers.provider.getSigner(sandAdmin)
         );
@@ -87,11 +93,21 @@ describe('GameMinter', function () {
           users[2].address,
           BigNumber.from('1000000000000000000000000')
         );
+        await sandAsAdmin.transfer(
+          users[8].address,
+          BigNumber.from('1000000000000000000000000')
+        );
+
         ({assets, quantities} = await supplyAssets(
           users[1].address,
           users[1].address,
           [77, 3, 14]
         ));
+
+        ({
+          assets: editorAssets,
+          quantities: editorQuantities,
+        } = await supplyAssets(users[8].address, users[8].address, [11]));
       });
 
       it('should fail with incorrect "from" address', async function () {
@@ -126,8 +142,91 @@ describe('GameMinter', function () {
         gameId1 = event.args[2];
       });
 
-      //     await expect(() => token.transfer(walletTo.address, 200))
-      // .to.changeTokenBalances(token, [wallet, walletTo], [-200, 200]);
+      it('should allow owner to add assets', async function () {
+        await expect(
+          users[1].GameMinter.addAssets(
+            users[1].address,
+            gameId1,
+            [assets[0], assets[1]],
+            [quantities[0], quantities[1]],
+            'Updated URI with Assets!',
+            ethers.constants.AddressZero
+          )
+        )
+          .to.emit(gameTokenContract, 'AssetsAdded')
+          .withArgs(
+            gameId1,
+            [assets[0], assets[1]],
+            [quantities[0], quantities[1]]
+          );
+      });
+
+      // it('should charge a fee when owner adds assets', async function () {
+      //   const signers = await ethers.getSigners();
+      //   const gameTokenFeeBeneficiary = signers[3];
+
+      //   await expect(() =>
+      //     users[1].GameMinter.addAssets(
+      //       users[1].address,
+      //       gameId1,
+      //       [assets[2]],
+      //       [quantities[2]],
+      //       'Updated URI with Assets!',
+      //       ethers.constants.AddressZero
+      //     )
+      //   ).to.changeTokenBalance(
+      //     sandContract,
+      //     [users[1], gameTokenFeeBeneficiary],
+      //     [-100, 100]
+      //   );
+      // });
+
+      it('should allow editor to add assets', async function () {
+        await expect(
+          users[8].GameMinter.addAssets(
+            users[8].address,
+            gameId1,
+            editorAssets,
+            editorQuantities,
+            'Updated URI with Assets!',
+            ethers.constants.AddressZero
+          )
+        )
+          .to.emit(gameTokenContract, 'AssetsAdded')
+          .withArgs(gameId1, editorAssets, editorQuantities);
+      });
+
+      it('should allow owner to remove assets', async function () {
+        await expect(
+          users[1].GameMinter.removeAssets(
+            users[1].address,
+            gameId1,
+            [assets[1]],
+            [quantities[1]],
+            users[1].address,
+            'Updated URI when removing Assets',
+            ethers.constants.AddressZero
+          )
+        )
+          .to.emit(gameTokenContract, 'AssetsRemoved')
+          .withArgs(gameId1, [assets[1]], [quantities[1]], users[1].address);
+      });
+
+      it('should allow editor to remove assets', async function () {
+        await expect(
+          users[8].GameMinter.removeAssets(
+            users[8].address,
+            gameId1,
+            [assets[0]],
+            [quantities[0]],
+            users[1].address,
+            'Updated URI when editor removing Assets',
+            ethers.constants.AddressZero
+          )
+        )
+          .to.emit(gameTokenContract, 'AssetsRemoved')
+          .withArgs(gameId1, [assets[0]], [quantities[0]], users[1].address);
+      });
 
       it('should fail if not authorized to add assets', async function () {
         await expect(
@@ -166,13 +265,7 @@ describe('GameMinter', function () {
           )
         ).to.be.revertedWith('AUTH_ACCESS_DENIED');
       });
-
-      it('allows GAME owner to add assets', async function () {});
-      it('allows GAME owner to remove assets', async function () {});
       it('allows GAME owner to set GAME URI', async function () {});
-
-      it('allows GAME editor to add assets', async function () {});
-      it('allows GAME editor to remove assets', async function () {});
       it('allows GAME editor to set GAME URI', async function () {});
     });
     // describe('GameMinter: MetaTXs', function () {}); TODO
