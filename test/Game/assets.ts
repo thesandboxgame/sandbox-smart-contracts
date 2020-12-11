@@ -1,4 +1,4 @@
-import {ethers, deployments, getNamedAccounts} from 'hardhat';
+import {ethers, getNamedAccounts} from 'hardhat';
 import {utils, BigNumber, Contract} from 'ethers';
 import {Address, Receipt} from 'hardhat-deploy/types';
 import {expectEventWithArgsFromReceipt} from '../utils';
@@ -41,7 +41,6 @@ export async function supplyAssets(
   owner: Address,
   supplies: number[]
 ): Promise<AssetsObj> {
-  // const {execute} = deployments;
   const {assetBouncerAdmin, assetAdmin} = await getNamedAccounts();
   const assetContract = await ethers.getContract('Asset');
   const assetAsBouncerAdmin = await assetContract.connect(
@@ -54,7 +53,6 @@ export async function supplyAssets(
   await assetAsBouncerAdmin.setBouncer(assetAdmin, true);
   const assetReceipts: Receipt[] = [];
 
-  // for (const n of supplies) {
   for (let i = 0; i < supplies.length; i++) {
     assetReceipts.push(
       await assetAsAdmin.mint(
