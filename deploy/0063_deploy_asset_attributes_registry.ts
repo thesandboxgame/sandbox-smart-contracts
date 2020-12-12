@@ -1,17 +1,17 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { DeployFunction } from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
-  const {deploy} = deployments;
+  const { deployments, getNamedAccounts } = hre;
+  const { deploy } = deployments;
 
   const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
 
-  const {deployer, assetAttributesRegistryAdmin} = await getNamedAccounts();
+  const { deployer, assetAttributesRegistryAdmin } = await getNamedAccounts();
   await deploy(`AssetAttributesRegistry`, {
     from: deployer,
     log: true,
-    args: [GemsCatalystsRegistry.address, assetAttributesRegistryAdmin],
+    args: [GemsCatalystsRegistry.address, assetAttributesRegistryAdmin, assetAttributesRegistryAdmin],
   });
 };
 export default func;

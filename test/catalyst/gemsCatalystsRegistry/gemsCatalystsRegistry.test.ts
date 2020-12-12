@@ -1,7 +1,7 @@
-import {ethers, getUnnamedAccounts} from 'hardhat';
-import {BigNumber} from '@ethersproject/bignumber';
-import {expect} from '../chai-setup';
-import {setupGemsAndCatalysts} from './fixtures';
+import { ethers, getUnnamedAccounts } from 'hardhat';
+import { BigNumber } from '@ethersproject/bignumber';
+import { expect } from '../../chai-setup';
+import { setupGemsAndCatalysts } from './fixtures';
 describe('GemsCatalystsRegistry', function () {
   it('getMaxGems for catalystId = 1 should be 1', async function () {
     const {
@@ -14,7 +14,7 @@ describe('GemsCatalystsRegistry', function () {
   });
 
   it('getMaxGems for non existing catalystId should fail', async function () {
-    const {gemsCatalystsRegistry} = await setupGemsAndCatalysts();
+    const { gemsCatalystsRegistry } = await setupGemsAndCatalysts();
     await expect(gemsCatalystsRegistry.getMaxGems(10)).to.be.revertedWith(
       'CATALYST_DOES_NOT_EXIST'
     );
@@ -177,7 +177,7 @@ describe('GemsCatalystsRegistry', function () {
     ).to.be.revertedWith('NOT_AUTHORIZED');
   });
   it('burnGem should fail for non existing gemId', async function () {
-    const {gemsCatalystsRegistry, gemMinter} = await setupGemsAndCatalysts();
+    const { gemsCatalystsRegistry, gemMinter } = await setupGemsAndCatalysts();
     const burnAmount = BigNumber.from('2');
     await expect(
       gemsCatalystsRegistry
@@ -202,7 +202,7 @@ describe('GemsCatalystsRegistry', function () {
   });
 
   it('burnGem should fail for account with no gems', async function () {
-    const {gemsCatalystsRegistry, powerGem} = await setupGemsAndCatalysts();
+    const { gemsCatalystsRegistry, powerGem } = await setupGemsAndCatalysts();
     const users = await getUnnamedAccounts();
     const gemId = await powerGem.gemId();
     const burnAmount = BigNumber.from('200');
@@ -284,7 +284,7 @@ describe('GemsCatalystsRegistry', function () {
   });
 
   it('addGemsAndCatalysts should fail for unauthorized user', async function () {
-    const {gemsCatalystsRegistry, gemExample} = await setupGemsAndCatalysts();
+    const { gemsCatalystsRegistry, gemExample } = await setupGemsAndCatalysts();
     const users = await getUnnamedAccounts();
     await expect(
       gemsCatalystsRegistry

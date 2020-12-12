@@ -5,6 +5,7 @@ pragma experimental ABIEncoderV2;
 import "../common/BaseWithStorage/WithAdmin.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
 import "./GemsCatalystsRegistry.sol";
+import "hardhat/console.sol";
 
 contract AssetAttributesRegistry is WithAdmin, WithMinter {
     uint256 internal constant MAX_NUM_GEMS = 15;
@@ -16,7 +17,7 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
     mapping(uint256 => Record) internal _records;
 
     // used to allow migration to specify blockNumber when setting catalyst/gems
-    address internal _migrationContract;
+    address public migrationContract;
 
     struct GemEvent {
         uint16[] gemIds;
@@ -25,15 +26,20 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
 
     struct Record {
         uint16 catalystId; // start at 1
-        uint16[MAX_NUM_GEMS] gemIds; // start at 1 test compression ?
+        uint16[] gemIds; // start at 1 test compression ?
     }
 
     event CatalystApplied(uint256 indexed assetId, uint16 indexed catalystId, uint16[] gemIds, uint64 blockNumber);
     event GemsAdded(uint256 indexed assetId, uint16[] gemIds, uint64 blockNumber);
 
-    constructor(GemsCatalystsRegistry gemsCatalystsRegistry, address admin) {
+    constructor(
+        GemsCatalystsRegistry gemsCatalystsRegistry,
+        address admin,
+        address minter
+    ) {
         _gemsCatalystsRegistry = gemsCatalystsRegistry;
         _admin = admin;
+        _minter = minter;
     }
 
     function getRecord(uint256 assetId)
@@ -51,9 +57,9 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
             assetId = _getCollectionId(assetId);
             catalystId = _records[assetId].catalystId;
         }
-        uint16[MAX_NUM_GEMS] memory fixedGemIds = _records[assetId].gemIds;
+        uint16[] memory fixedGemIds = _records[assetId].gemIds;
         exists = catalystId != 0;
-        gemIds = new uint16[](0);
+        gemIds = new uint16[](MAX_NUM_GEMS);
         uint8 i = 0;
         while (fixedGemIds[i] != 0) {
             gemIds[i] = (fixedGemIds[i]);
@@ -75,7 +81,7 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         uint16[] calldata gemIds,
         uint64 blockNumber
     ) external {
-        require(msg.sender == _migrationContract, "ONLY_FOR_MIGRATION");
+        require(msg.sender == migrationContract, "ONLY_FOR_MIGRATION");
         _setCatalyst(assetId, catalystId, gemIds, blockNumber);
     }
 
@@ -85,7 +91,7 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         require(gemIds.length != 0, "INVALID_GEMS_0");
 
         uint16 catalystId = _records[assetId].catalystId;
-        uint16[15] memory gemIdsToStore;
+        uint16[] memory gemIdsToStore = new uint16[](MAX_NUM_GEMS);
         if (catalystId == 0) {
             // fallback on collection catalyst
             uint256 collectionId = _getCollectionId(assetId);
@@ -101,7 +107,7 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         require(catalystId != 0, "NO_CATALYST_SET");
         uint8 j = 0;
         uint8 i = 0;
-        for (i = 0; i < MAX_NUM_GEMS; i++) {
+        for (i = 0; i < gemIds.length; i++) {
             if (j >= gemIds.length) {
                 break;
             }
@@ -123,14 +129,14 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         return _gemsCatalystsRegistry.getAttributes(_records[assetId].catalystId, assetId, events);
     }
 
-    function setMigrationContract(address migrationContract) external {
-        address currentMigrationContract = _migrationContract;
+    function setMigrationContract(address _migrationContract) external {
+        address currentMigrationContract = migrationContract;
         if (currentMigrationContract == address(0)) {
             require(msg.sender == _admin, "NOT_AUTHORIZED");
-            _migrationContract = migrationContract;
+            migrationContract = _migrationContract;
         } else {
             require(msg.sender == currentMigrationContract, "NOT_AUTHORIZED_MIGRATION");
-            _migrationContract = migrationContract;
+            migrationContract = _migrationContract;
         }
     }
 
@@ -145,8 +151,8 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         uint8 maxGems = _gemsCatalystsRegistry.getMaxGems(catalystId);
         require(gemIds.length <= maxGems, "GEMS_TOO_MANY");
 
-        uint16[MAX_NUM_GEMS] memory gemIdsToStore;
-        for (uint8 i = 0; i < MAX_NUM_GEMS; i++) {
+        uint16[] memory gemIdsToStore = new uint16[](MAX_NUM_GEMS);
+        for (uint8 i = 0; i < gemIds.length; i++) {
             gemIdsToStore[i] = gemIds[i];
         }
         _records[assetId] = Record(catalystId, gemIdsToStore);
