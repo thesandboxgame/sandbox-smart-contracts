@@ -1,13 +1,13 @@
 import {ethers} from 'hardhat';
 import {setupTestGiveaway} from './fixtures';
-import {constants} from 'ethers';
-import {waitFor, expectReceiptEventWithArgs, increaseTime} from '../utils';
+// import {constants} from 'ethers';
+import {waitFor, expectReceiptEventWithArgs} from '../utils';
 import {expect} from '../chai-setup';
 
 import helpers from '../../lib/merkleTreeHelper';
 const {calculateClaimableAssetAndLandHash} = helpers;
 
-const zeroAddress = constants.AddressZero;
+// const zeroAddress = constants.AddressZero;
 
 describe('Multi_Giveaway_1', function () {
   it('User cannot claim when test contract holds zero assets/lands', async function () {

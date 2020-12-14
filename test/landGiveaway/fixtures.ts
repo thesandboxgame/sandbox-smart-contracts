@@ -4,7 +4,6 @@ import {
   getUnnamedAccounts,
   getNamedAccounts,
 } from 'hardhat';
-import {expect} from '../chai-setup';
 import MerkleTree from '../../lib/merkleTree';
 import {createLandClaimMerkleTree} from '../../data/land_giveaway_1/getLands';
 import helpers from '../../lib/merkleTreeHelper';
