@@ -10,11 +10,26 @@ import {expect} from '../../chai-setup';
 import {expectEventWithArgs} from '../../utils';
 import {Address} from 'hardhat-deploy/types';
 import {supplyAssets} from '../assets';
+import {
+  gameMintingFee,
+  gameModificationFee,
+} from '../../../data/gameMinterFees';
 
 const rng = new Prando('GameMinter');
 
 async function getRandom(): Promise<number> {
   return rng.nextInt(1, 1000000000);
+}
+
+async function getTokenBalances(
+  contract: Contract,
+  addr1: Address,
+  addr2: Address
+): Promise<BigNumber[]> {
+  const balances: BigNumber[] = [];
+  balances.push(await contract.balanceOf(addr1));
+  balances.push(await contract.balanceOf(addr2));
+  return balances;
 }
 
 type User = {
@@ -69,6 +84,7 @@ describe('GameMinter', function () {
       let quantities: number[];
       let editorAssets: BigNumber[];
       let editorQuantities: number[];
+      let gameTokenFeeBeneficiary: Address;
 
       before(async function () {
         ({GameMinter, users} = await setupTest());
@@ -83,6 +99,8 @@ describe('GameMinter', function () {
           ethers.provider.getSigner(gameTokenAdmin)
         );
         await gameAsAdmin.changeMinter(GameMinter.address);
+        const signers = await ethers.getSigners();
+        gameTokenFeeBeneficiary = await signers[3].getAddress();
 
         // Supply users with sand and assets:
         await sandAsAdmin.transfer(
@@ -125,6 +143,12 @@ describe('GameMinter', function () {
       });
 
       it('should allow anyone to create a game', async function () {
+        const balancesBefore = await getTokenBalances(
+          sandContract,
+          users[1].address,
+          gameTokenFeeBeneficiary
+        );
+
         const receipt = await users[1].GameMinter.createGame(
           users[1].address,
           users[1].address,
@@ -140,6 +164,19 @@ describe('GameMinter', function () {
           'Transfer'
         );
         gameId1 = event.args[2];
+
+        const balancesAfter = await getTokenBalances(
+          sandContract,
+          users[1].address,
+          gameTokenFeeBeneficiary
+        );
+
+        expect(balancesAfter[0]).to.be.equal(
+          balancesBefore[0].sub(gameMintingFee)
+        );
+        expect(balancesAfter[1]).to.be.equal(
+          balancesBefore[1].add(gameMintingFee)
+        );
       });
 
       it('should allow owner to add assets', async function () {
@@ -161,25 +198,35 @@ describe('GameMinter', function () {
           );
       });
 
-      // it('should charge a fee when owner adds assets', async function () {
-      //   const signers = await ethers.getSigners();
-      //   const gameTokenFeeBeneficiary = signers[3];
+      it('should charge a fee when owner adds assets', async function () {
+        const balancesBefore = await getTokenBalances(
+          sandContract,
+          users[1].address,
+          gameTokenFeeBeneficiary
+        );
 
-      //   await expect(() =>
-      //     users[1].GameMinter.addAssets(
-      //       users[1].address,
-      //       gameId1,
-      //       [assets[2]],
-      //       [quantities[2]],
-      //       'Updated URI with Assets!',
-      //       ethers.constants.AddressZero
-      //     )
-      //   ).to.changeTokenBalance(
-      //     sandContract,
-      //     [users[1], gameTokenFeeBeneficiary],
-      //     [-100, 100]
-      //   );
-      // });
+        await users[1].GameMinter.addAssets(
+          users[1].address,
+          gameId1,
+          [assets[2]],
+          [quantities[2]],
+          'Updated URI with Assets!',
+          ethers.constants.AddressZero
+        );
+
+        const balancesAfter = await getTokenBalances(
+          sandContract,
+          users[1].address,
+          gameTokenFeeBeneficiary
+        );
+
+        expect(balancesAfter[0]).to.be.equal(
+          balancesBefore[0].sub(gameModificationFee)
+        );
+        expect(balancesAfter[1]).to.be.equal(
+          balancesBefore[1].add(gameModificationFee)
+        );
+      });
 
       it('should allow editor to add assets', async function () {
         await expect(
