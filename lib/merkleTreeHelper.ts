@@ -272,9 +272,7 @@ function createDataArrayClaimableLands(
 
 // Multi Giveaway (Assets and Lands)
 
-// ASSET GIVEAWAY
-
-function calculateClaimableAssetAndLandHash(
+function calculateClaimableAssetAndLandHash( // TODO: invalid BigNumber value
   claim: claimableAssetAndLand,
   salt?: string
 ): string {
