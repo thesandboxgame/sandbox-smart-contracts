@@ -27,7 +27,6 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   const others = await getUnnamedAccounts();
   await deployments.fixture('Land_Giveaway_1');
   const sandContract = await ethers.getContract('Sand');
-  const landContract = await ethers.getContract('Land');
 
   const LAND_HOLDER = '0x0000000000000000000000000000000000000000';
 
@@ -36,6 +35,17 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     network.live,
     chainId,
     testLandData
+  );
+
+  await deployments.deploy('MockLand', {
+    from: deployer,
+    args: [sandContract.address, landAdmin],
+  });
+
+  const landContract = await ethers.getContract('MockLand');
+
+  const landContractAsAdmin = await landContract.connect(
+    ethers.provider.getSigner(landAdmin)
   );
 
   const testContract = await deployments.deploy('Test_Land_Giveaway_1', {
@@ -51,16 +61,17 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     ],
   });
 
-  const landContractAsAdmin = await landContract.connect(
-    ethers.provider.getSigner(landAdmin)
-  );
   if (landHolder) {
     await landContractAsAdmin.setSuperOperator(testContract.address, true);
   }
 
-  // Supply assets to contract for testing
+  // Supply lands to contract for testing
   async function mintTestLands() {
-    // TODO:
+    // TODO: mocklands
+    const owner = landHolder ? others[5] : testContract.address;
+    for (let i = 0; i < 40; i++) {
+      await landContractAsAdmin.mint(owner, i);
+    }
   }
 
   if (mint) {

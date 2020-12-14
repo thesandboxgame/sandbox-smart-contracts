@@ -24,372 +24,202 @@ describe('Land_Giveaway_1', function () {
 
     await expect(
       giveawayContractAsUser.claimLands(others[1], land.ids, proof, land.salt)
-    ).to.be.revertedWith(`can't substract more than there is`); // TODO: not owner in batchTransferFrom
+    ).to.be.revertedWith(`not owner in batchTransferFrom`);
   });
 
-  // it('User can claim allocated multiple assets for multiple assetIds from Giveaway contract', async function () {
-  //   const options = {
-  //     mint: true,
-  //   };
-  //   const setUp = await setupTestGiveaway(options);
-  //   const {giveawayContract, others, tree, assets, assetContract} = setUp;
+  it('User can claim allocated multiple assets for multiple assetIds from Giveaway contract', async function () {
+    const options = {
+      mint: true,
+    };
+    const setUp = await setupTestGiveaway(options);
+    const {giveawayContract, others, tree, lands} = setUp;
 
-  //   const asset = assets[0];
-  //   const proof = tree.getProof(calculateClaimableAssetHash(asset));
-  //   const giveawayContractAsUser = await giveawayContract.connect(
-  //     ethers.provider.getSigner(others[1])
-  //   );
+    const land = lands[0];
+    const proof = tree.getProof(calculateClaimableLandHash(land));
+    const giveawayContractAsUser = await giveawayContract.connect(
+      ethers.provider.getSigner(others[1])
+    );
 
-  //   const initBalanceAssetId1 = await assetContract[
-  //     'balanceOf(address,uint256)'
-  //   ](giveawayContract.address, asset.assetIds[0]);
-  //   expect(initBalanceAssetId1).to.equal(asset.assetValues[0]);
-  //   const initBalanceAssetId2 = await assetContract[
-  //     'balanceOf(address,uint256)'
-  //   ](giveawayContract.address, asset.assetIds[1]);
-  //   expect(initBalanceAssetId2).to.equal(asset.assetValues[1]);
-  //   const initBalanceAssetId3 = await assetContract[
-  //     'balanceOf(address,uint256)'
-  //   ](giveawayContract.address, asset.assetIds[2]);
-  //   expect(initBalanceAssetId3).to.equal(asset.assetValues[2]);
+    await waitFor(
+      giveawayContractAsUser.claimLands(others[1], land.ids, proof, land.salt)
+    );
 
-  //   await waitFor(
-  //     giveawayContractAsUser.claimAssets(
-  //       others[1],
-  //       asset.assetIds,
-  //       asset.assetValues,
-  //       proof,
-  //       asset.salt
-  //     )
-  //   );
+    // TODO: check owner of NFTs
+  });
 
-  //   const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
-  //     others[1],
-  //     asset.assetIds[0]
-  //   );
-  //   expect(balanceAssetId1).to.equal(asset.assetValues[0]);
-  //   const balanceAssetId2 = await assetContract['balanceOf(address,uint256)'](
-  //     others[1],
-  //     asset.assetIds[1]
-  //   );
-  //   expect(balanceAssetId2).to.equal(asset.assetValues[1]);
-  //   const balanceAssetId3 = await assetContract['balanceOf(address,uint256)'](
-  //     others[1],
-  //     asset.assetIds[2]
-  //   );
-  //   expect(balanceAssetId3).to.equal(asset.assetValues[2]);
-  // });
+  it('Claimed Event is emitted for successful claim', async function () {
+    const options = {
+      mint: true,
+    };
+    const setUp = await setupTestGiveaway(options);
+    const {giveawayContract, others, tree, lands} = setUp;
 
-  // it('Claimed Event is emitted for successful claim', async function () {
-  //   const options = {
-  //     mint: true,
-  //     amount: 3,
-  //     supply: 5,
-  //   };
-  //   const setUp = await setupTestGiveaway(options);
-  //   const {giveawayContract, others, tree, assets} = setUp;
+    const land = lands[0];
+    const proof = tree.getProof(calculateClaimableLandHash(land));
+    const giveawayContractAsUser = await giveawayContract.connect(
+      ethers.provider.getSigner(others[1])
+    );
 
-  //   const asset = assets[0];
-  //   const proof = tree.getProof(calculateClaimableAssetHash(asset));
-  //   const giveawayContractAsUser = await giveawayContract.connect(
-  //     ethers.provider.getSigner(others[1])
-  //   );
+    const receipt = await waitFor(
+      giveawayContractAsUser.claimLands(others[1], land.ids, proof, land.salt)
+    );
 
-  //   const receipt = await waitFor(
-  //     giveawayContractAsUser.claimAssets(
-  //       others[1],
-  //       asset.assetIds,
-  //       asset.assetValues,
-  //       proof,
-  //       asset.salt
-  //     )
-  //   );
+    const claimedEvent = await expectReceiptEventWithArgs(
+      receipt,
+      'ClaimedLands'
+    );
 
-  //   const claimedEvent = await expectReceiptEventWithArgs(
-  //     receipt,
-  //     'ClaimedAssets'
-  //   );
+    expect(claimedEvent.args[0]).to.equal(others[1]); // to
+    expect(claimedEvent.args[1][0]).to.equal(land.ids[0]);
+    expect(claimedEvent.args[1][1]).to.equal(land.ids[1]);
+    expect(claimedEvent.args[1][2]).to.equal(land.ids[2]);
+  });
 
-  //   expect(claimedEvent.args[0]).to.equal(others[1]); // to
-  //   expect(claimedEvent.args[1][0]).to.equal(asset.assetIds[0]);
-  //   expect(claimedEvent.args[1][1]).to.equal(asset.assetIds[1]);
-  //   expect(claimedEvent.args[1][2]).to.equal(asset.assetIds[2]);
-  //   expect(claimedEvent.args[2][0]).to.equal(asset.assetValues[0]);
-  //   expect(claimedEvent.args[2][1]).to.equal(asset.assetValues[1]);
-  //   expect(claimedEvent.args[2][2]).to.equal(asset.assetValues[2]);
-  // });
+  it('User can claim allocated single asset for single assetId from Giveaway contract', async function () {
+    const options = {
+      mint: true,
+    };
+    const setUp = await setupTestGiveaway(options);
+    const {giveawayContract, others, tree, lands} = setUp;
 
-  // it('User can claim allocated single asset for single assetId from Giveaway contract', async function () {
-  //   const options = {
-  //     mint: true,
-  //     amount: 1,
-  //     supply: 1,
-  //   };
-  //   const setUp = await setupTestGiveaway(options);
-  //   const {giveawayContract, others, tree, assets} = setUp;
+    const land = lands[1];
+    const proof = tree.getProof(calculateClaimableLandHash(land));
+    const giveawayContractAsUser = await giveawayContract.connect(
+      ethers.provider.getSigner(others[1])
+    );
 
-  //   const asset = assets[1];
-  //   const proof = tree.getProof(calculateClaimableAssetHash(asset));
-  //   const giveawayContractAsUser = await giveawayContract.connect(
-  //     ethers.provider.getSigner(others[1])
-  //   );
+    await waitFor(
+      giveawayContractAsUser.claimLands(others[1], land.ids, proof, land.salt)
+    );
+  });
 
-  //   await waitFor(
-  //     giveawayContractAsUser.claimAssets(
-  //       others[1],
-  //       asset.assetIds,
-  //       asset.assetValues,
-  //       proof,
-  //       asset.salt
-  //     )
-  //   );
-  // });
+  it('User cannot claim their lands more than once', async function () {
+    const options = {
+      mint: true,
+    };
+    const setUp = await setupTestGiveaway(options);
+    const {giveawayContract, others, tree, lands} = setUp;
 
-  // it('User tries to claim the wrong amount of an assetID', async function () {
-  //   const options = {
-  //     mint: true,
-  //     amount: 1,
-  //     supply: 0,
-  //   };
-  //   const setUp = await setupTestGiveaway(options);
-  //   const {giveawayContract, others, tree, assets} = setUp;
+    const land = lands[0];
+    const proof = tree.getProof(calculateClaimableLandHash(land));
+    const giveawayContractAsUser = await giveawayContract.connect(
+      ethers.provider.getSigner(others[1])
+    );
 
-  //   const asset = assets[1];
-  //   const proof = tree.getProof(calculateClaimableAssetHash(asset));
-  //   const giveawayContractAsUser = await giveawayContract.connect(
-  //     ethers.provider.getSigner(others[1])
-  //   );
+    await waitFor(
+      giveawayContractAsUser.claimLands(others[1], land.ids, proof, land.salt)
+    );
+    await expect(
+      giveawayContractAsUser.claimLands(others[1], land.ids, proof, land.salt)
+    ).to.be.revertedWith('DESTINATION_ALREADY_CLAIMED');
+  });
 
-  //   await expect(
-  //     giveawayContractAsUser.claimAssets(
-  //       others[1],
-  //       asset.assetIds,
-  //       [0], // bad param
-  //       proof,
-  //       asset.salt
-  //     )
-  //   ).to.be.revertedWith('INVALID_CLAIM');
-  // });
+  it('User cannot claim lands from Giveaway contract if destination is not the reserved address', async function () {
+    const options = {
+      mint: true,
+    };
+    const setUp = await setupTestGiveaway(options);
+    const {giveawayContract, others, tree, lands} = setUp;
 
-  // it('User cannot claim their assets more than once', async function () {
-  //   const options = {
-  //     mint: true,
-  //     amount: 3,
-  //     supply: 5,
-  //   };
-  //   const setUp = await setupTestGiveaway(options);
-  //   const {giveawayContract, others, tree, assets} = setUp;
+    const land = lands[0];
+    const proof = tree.getProof(calculateClaimableLandHash(land));
+    const giveawayContractAsUser = await giveawayContract.connect(
+      ethers.provider.getSigner(others[1])
+    );
 
-  //   const asset = assets[0];
-  //   const proof = tree.getProof(calculateClaimableAssetHash(asset));
-  //   const giveawayContractAsUser = await giveawayContract.connect(
-  //     ethers.provider.getSigner(others[1])
-  //   );
+    await expect(
+      giveawayContractAsUser.claimLands(
+        others[2], // bad param
+        land.ids,
+        proof,
+        land.salt
+      )
+    ).to.be.revertedWith('INVALID_CLAIM');
+  });
 
-  //   await waitFor(
-  //     giveawayContractAsUser.claimAssets(
-  //       others[1],
-  //       asset.assetIds,
-  //       asset.assetValues,
-  //       proof,
-  //       asset.salt
-  //     )
-  //   );
-  //   await expect(
-  //     giveawayContractAsUser.claimAssets(
-  //       others[1],
-  //       asset.assetIds,
-  //       asset.assetValues,
-  //       proof,
-  //       asset.salt
-  //     )
-  //   ).to.be.revertedWith('DESTINATION_ALREADY_CLAIMED');
-  // });
+  it('User cannot claim lands from Giveaway contract to destination zeroAddress', async function () {
+    const options = {
+      mint: true,
+    };
+    const setUp = await setupTestGiveaway(options);
+    const {giveawayContract, others, tree, lands} = setUp;
 
-  // it('User cannot claim assets from Giveaway contract if destination is not the reserved address', async function () {
-  //   const options = {
-  //     mint: true,
-  //     amount: 3,
-  //     supply: 5,
-  //   };
-  //   const setUp = await setupTestGiveaway(options);
-  //   const {giveawayContract, others, tree, assets} = setUp;
+    const land = lands[0];
+    const proof = tree.getProof(calculateClaimableLandHash(land));
+    const giveawayContractAsUser = await giveawayContract.connect(
+      ethers.provider.getSigner(others[1])
+    );
 
-  //   const asset = assets[0];
-  //   const proof = tree.getProof(calculateClaimableAssetHash(asset));
-  //   const giveawayContractAsUser = await giveawayContract.connect(
-  //     ethers.provider.getSigner(others[1])
-  //   );
+    await expect(
+      giveawayContractAsUser.claimLands(zeroAddress, land.ids, proof, land.salt)
+    ).to.be.revertedWith('INVALID_TO_ZERO_ADDRESS');
+  });
 
-  //   await expect(
-  //     giveawayContractAsUser.claimAssets(
-  //       others[2], // bad param
-  //       asset.assetIds,
-  //       asset.assetValues,
-  //       proof,
-  //       asset.salt
-  //     )
-  //   ).to.be.revertedWith('INVALID_CLAIM');
-  // });
+  it('User can claim allocated lands from alternate address', async function () {
+    const options = {
+      mint: true,
+      assetsHolder: true, // others[5]
+    };
+    const setUp = await setupTestGiveaway(options);
+    const {giveawayContract, others, tree, lands} = setUp;
 
-  // it('User cannot claim assets from Giveaway contract to destination zeroAddress', async function () {
-  //   const options = {
-  //     mint: true,
-  //     amount: 3,
-  //     supply: 5,
-  //   };
-  //   const setUp = await setupTestGiveaway(options);
-  //   const {giveawayContract, others, tree, assets} = setUp;
+    const land = lands[0];
+    const proof = tree.getProof(calculateClaimableLandHash(land));
+    const giveawayContractAsUser = await giveawayContract.connect(
+      ethers.provider.getSigner(others[1])
+    );
+    await waitFor(
+      giveawayContractAsUser.claimLands(others[1], land.ids, proof, land.salt)
+    );
+  });
 
-  //   const asset = assets[0];
-  //   const proof = tree.getProof(calculateClaimableAssetHash(asset));
-  //   const giveawayContractAsUser = await giveawayContract.connect(
-  //     ethers.provider.getSigner(others[1])
-  //   );
+  it('merkleRoot cannot be set twice', async function () {
+    const options = {};
+    const setUp = await setupTestGiveaway(options);
+    const {giveawayContract, nftGiveawayAdmin} = setUp;
 
-  //   await expect(
-  //     giveawayContractAsUser.claimAssets(
-  //       zeroAddress,
-  //       asset.assetIds,
-  //       asset.assetValues,
-  //       proof,
-  //       asset.salt
-  //     )
-  //   ).to.be.revertedWith('INVALID_TO_ZERO_ADDRESS');
-  // });
-  // it('User cannot claim assets from Giveaway contract with incorrect asset param', async function () {
-  //   const options = {
-  //     mint: true,
-  //     amount: 3,
-  //     supply: 5,
-  //   };
-  //   const setUp = await setupTestGiveaway(options);
-  //   const {giveawayContract, others, tree, assets} = setUp;
+    const giveawayContractAsAdmin = await giveawayContract.connect(
+      ethers.provider.getSigner(nftGiveawayAdmin)
+    );
 
-  //   const asset = assets[0];
-  //   const proof = tree.getProof(calculateClaimableAssetHash(asset));
-  //   const giveawayContractAsUser = await giveawayContract.connect(
-  //     ethers.provider.getSigner(others[1])
-  //   );
+    await expect(
+      giveawayContractAsAdmin.setMerkleRootLands(
+        '0x0000000000000000000000000000000000000000000000000000000000000000'
+      )
+    ).to.be.revertedWith('MERKLE_ROOT_ALREADY_SET');
+  });
 
-  //   await expect(
-  //     giveawayContractAsUser.claimAssets(
-  //       others[1],
-  //       asset.assetIds,
-  //       [5, 5], // length too short
-  //       proof,
-  //       asset.salt
-  //     )
-  //   ).to.be.revertedWith('INVALID_INPUT');
-  // });
+  it('merkleRoot can only be set by admin', async function () {
+    const options = {};
+    const setUp = await setupTestGiveaway(options);
+    const {giveawayContract, others} = setUp;
 
-  // it('User can claim allocated multiple assets for multiple assetIds from alternate address', async function () {
-  //   const options = {
-  //     mint: true,
-  //     assetsHolder: true, // others[5]
-  //   };
-  //   const setUp = await setupTestGiveaway(options);
-  //   const {giveawayContract, others, tree, assets, assetContract} = setUp;
+    const giveawayContractAsUser = await giveawayContract.connect(
+      ethers.provider.getSigner(others[8])
+    );
 
-  //   const asset = assets[0];
-  //   const proof = tree.getProof(calculateClaimableAssetHash(asset));
-  //   const giveawayContractAsUser = await giveawayContract.connect(
-  //     ethers.provider.getSigner(others[1])
-  //   );
+    await expect(
+      giveawayContractAsUser.setMerkleRootLands(
+        '0x0000000000000000000000000000000000000000000000000000000000000000'
+      )
+    ).to.be.revertedWith('ADMIN_ONLY');
+  });
 
-  //   const initBalanceAssetId1 = await assetContract[
-  //     'balanceOf(address,uint256)'
-  //   ](others[5], asset.assetIds[0]);
-  //   expect(initBalanceAssetId1).to.equal(asset.assetValues[0]);
-  //   const initBalanceAssetId2 = await assetContract[
-  //     'balanceOf(address,uint256)'
-  //   ](others[5], asset.assetIds[1]);
-  //   expect(initBalanceAssetId2).to.equal(asset.assetValues[1]);
-  //   const initBalanceAssetId3 = await assetContract[
-  //     'balanceOf(address,uint256)'
-  //   ](others[5], asset.assetIds[2]);
-  //   expect(initBalanceAssetId3).to.equal(asset.assetValues[2]);
+  it('User cannot claim assets after the expiryTime', async function () {
+    const options = {};
+    const setUp = await setupTestGiveaway(options);
+    const {giveawayContract, others, tree, lands} = setUp;
 
-  //   await waitFor(
-  //     giveawayContractAsUser.claimAssets(
-  //       others[1],
-  //       asset.assetIds,
-  //       asset.assetValues,
-  //       proof,
-  //       asset.salt
-  //     )
-  //   );
+    const land = lands[0];
+    const proof = tree.getProof(calculateClaimableLandHash(land));
+    const giveawayContractAsUser = await giveawayContract.connect(
+      ethers.provider.getSigner(others[1])
+    );
 
-  //   const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
-  //     others[1],
-  //     asset.assetIds[0]
-  //   );
-  //   expect(balanceAssetId1).to.equal(asset.assetValues[0]);
-  //   const balanceAssetId2 = await assetContract['balanceOf(address,uint256)'](
-  //     others[1],
-  //     asset.assetIds[1]
-  //   );
-  //   expect(balanceAssetId2).to.equal(asset.assetValues[1]);
-  //   const balanceAssetId3 = await assetContract['balanceOf(address,uint256)'](
-  //     others[1],
-  //     asset.assetIds[2]
-  //   );
-  //   expect(balanceAssetId3).to.equal(asset.assetValues[2]);
-  // });
+    await increaseTime(60 * 60 * 24 * 30 * 4);
 
-  // it('merkleRoot cannot be set twice', async function () {
-  //   const options = {};
-  //   const setUp = await setupTestGiveaway(options);
-  //   const {giveawayContract, nftGiveawayAdmin} = setUp;
-
-  //   const giveawayContractAsAdmin = await giveawayContract.connect(
-  //     ethers.provider.getSigner(nftGiveawayAdmin)
-  //   );
-
-  //   await expect(
-  //     giveawayContractAsAdmin.setMerkleRoot(
-  //       '0x0000000000000000000000000000000000000000000000000000000000000000'
-  //     )
-  //   ).to.be.revertedWith('MERKLE_ROOT_ALREADY_SET');
-  // });
-
-  // it('merkleRoot can only be set by admin', async function () {
-  //   const options = {};
-  //   const setUp = await setupTestGiveaway(options);
-  //   const {giveawayContract, others} = setUp;
-
-  //   const giveawayContractAsUser = await giveawayContract.connect(
-  //     ethers.provider.getSigner(others[8])
-  //   );
-
-  //   await expect(
-  //     giveawayContractAsUser.setMerkleRoot(
-  //       '0x0000000000000000000000000000000000000000000000000000000000000000'
-  //     )
-  //   ).to.be.revertedWith('ADMIN_ONLY');
-  // });
-
-  // it('User cannot claim assets after the expiryTime', async function () {
-  //   const options = {};
-  //   const setUp = await setupTestGiveaway(options);
-  //   const {giveawayContract, others, tree, assets} = setUp;
-
-  //   const asset = assets[0];
-  //   const proof = tree.getProof(calculateClaimableAssetHash(asset));
-  //   const giveawayContractAsUser = await giveawayContract.connect(
-  //     ethers.provider.getSigner(others[1])
-  //   );
-
-  //   await increaseTime(60 * 60 * 24 * 30 * 4);
-
-  //   await expect(
-  //     giveawayContractAsUser.claimAssets(
-  //       others[1],
-  //       asset.assetIds,
-  //       asset.assetValues,
-  //       proof,
-  //       asset.salt
-  //     )
-  //   ).to.be.revertedWith('CLAIM_PERIOD_IS_OVER');
-  // });
+    await expect(
+      giveawayContractAsUser.claimLands(others[1], land.ids, proof, land.salt)
+    ).to.be.revertedWith('CLAIM_PERIOD_IS_OVER');
+  });
 });
