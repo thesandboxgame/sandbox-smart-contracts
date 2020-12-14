@@ -25,6 +25,14 @@ interface claimableLand {
   salt?: string;
 }
 
+interface claimableAssetAndLand {
+  reservedAddress: string;
+  assetIds?: Array<BigNumber> | Array<string> | Array<number>;
+  assetValues?: Array<number>;
+  landIds?: Array<BigNumber> | Array<string> | Array<number>;
+  salt?: string;
+}
+
 // LAND PRESALE
 
 function calculateLandHash(land: land, salt?: string): string {
@@ -262,6 +270,98 @@ function createDataArrayClaimableLands(
   return data;
 }
 
+// Multi Giveaway (Assets and Lands)
+
+// ASSET GIVEAWAY
+
+function calculateClaimableAssetAndLandHash(
+  claim: claimableAssetAndLand,
+  salt?: string
+): string {
+  const types = [];
+  const values = [];
+  types.push('address');
+  values.push(claim.reservedAddress);
+  if (claim.assetIds) {
+    types.push('uint256[]');
+    values.push(claim.assetIds);
+  }
+  if (claim.assetValues) {
+    types.push('uint256[]');
+    values.push(claim.assetValues);
+  }
+  if (claim.landIds) {
+    types.push('uint256[]');
+    values.push(claim.landIds);
+  }
+  types.push('bytes32');
+  values.push(claim.salt || salt);
+
+  return solidityKeccak256(types, values);
+}
+
+function saltClaimableAssetsAndLands(
+  claims: claimableAssetAndLand[],
+  secret?: string | Buffer
+): Array<claimableAssetAndLand> {
+  return claims.map((claim) => {
+    const salt = claim.salt;
+    if (!salt) {
+      if (!secret) {
+        throw new Error('Claim need to have a salt or be generated via secret');
+      }
+      return {
+        reservedAddress: claim.reservedAddress,
+        assetIds: claim.assetIds,
+        assetValues: claim.assetValues,
+        landIds: claim.landIds,
+        salt:
+          '0x' +
+          crypto
+            .createHmac('sha256', secret)
+            .update(
+              calculateClaimableAssetAndLandHash(
+                claim,
+                '0x0000000000000000000000000000000000000000000000000000000000000000'
+              )
+            )
+            .digest('hex'),
+      };
+    } else return claim;
+  });
+}
+
+function createDataArrayClaimableAssetsAndLands(
+  claims: claimableAssetAndLand[],
+  secret?: string
+): Array<claimableAssetAndLand> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data: any = [];
+
+  claims.forEach((claim: claimableAssetAndLand) => {
+    let salt = claim.salt;
+    if (!salt) {
+      if (!secret) {
+        throw new Error('Claim need to have a salt or be generated via secret');
+      }
+      salt =
+        '0x' +
+        crypto
+          .createHmac('sha256', secret)
+          .update(
+            calculateClaimableAssetAndLandHash(
+              claim,
+              '0x0000000000000000000000000000000000000000000000000000000000000000'
+            )
+          )
+          .digest('hex');
+    }
+    data.push(calculateClaimableAssetAndLandHash(claim, salt));
+  });
+
+  return data;
+}
+
 const helpers = {
   createDataArray,
   calculateLandHash,
@@ -272,6 +372,9 @@ const helpers = {
   calculateClaimableLandHash,
   saltClaimableLands,
   createDataArrayClaimableLands,
+  calculateClaimableAssetAndLandHash,
+  saltClaimableAssetsAndLands,
+  createDataArrayClaimableAssetsAndLands,
 };
 
 export default helpers;
