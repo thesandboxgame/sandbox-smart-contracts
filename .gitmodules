@@ -1,0 +1,3 @@
+[submodule "sandbox-subgraph"]
+	path = sandbox-subgraph
+		url = git@github.com:thesandboxgame/sandbox-subgraph.git
