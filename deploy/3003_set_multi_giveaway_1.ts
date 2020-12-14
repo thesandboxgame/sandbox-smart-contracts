@@ -9,14 +9,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   let currentAdmin;
   try {
-    currentAdmin = await read('Land_Giveaway_1', 'getAdmin');
+    currentAdmin = await read('Multi_Giveaway_1', 'getAdmin');
   } catch (e) {
     // no admin
   }
   if (currentAdmin) {
     if (currentAdmin.toLowerCase() !== nftGiveawayAdmin.toLowerCase()) {
       await execute(
-        'Land_Giveaway_1',
+        'Multi_Giveaway_1',
         {from: currentAdmin, log: true},
         'changeAdmin',
         nftGiveawayAdmin
@@ -24,10 +24,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
   }
 
-  // TODO: check if needed
-  // Set Land_Giveaway_1 contract as superOperator for Land
-  // This is needed when Land_Giveaway_1 is not the landHolder
-  const giveawayContract = await deployments.get('Land_Giveaway_1');
+  // Set Multi_Giveaway_1 contract as superOperator for Asset
+  // This is needed when Asset_Giveaway_1 is not the assetsHolder
+  const giveawayContract = await deployments.get('Multi_Giveaway_1');
 
   const isAssetSuperOperator = await read(
     'Land',
@@ -36,6 +35,27 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   if (!isAssetSuperOperator) {
+    log('setting Giveaway contract as Super Operator for LAND');
+    const currentAssetAdmin = await read('Asset', 'getAdmin');
+    await execute(
+      'Asset',
+      {from: currentAssetAdmin, log: true},
+      'setSuperOperator',
+      giveawayContract.address,
+      true
+    );
+  }
+
+  // TODO: check if needed
+  // Set Multi_Giveaway_1 contract as superOperator for Land
+
+  const isLandSuperOperator = await read(
+    'Land',
+    'isSuperOperator',
+    giveawayContract.address
+  );
+
+  if (!isLandSuperOperator) {
     log('setting Giveaway contract as Super Operator for LAND');
     const currentAssetAdmin = await read('Land', 'getAdmin');
     await execute(
@@ -49,5 +69,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.runAtTheEnd = true;
-func.tags = ['Land_Giveaway_1', 'Land_Giveaway_1_setup'];
-func.dependencies = ['Land_Giveaway_1_deploy'];
+func.tags = ['Multi_Giveaway_1', 'Multi_Giveaway_1_setup'];
+func.dependencies = ['Multi_Giveaway_1_deploy'];
