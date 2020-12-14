@@ -1,15 +1,28 @@
+import fs from 'fs';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {createAssetClaimMerkleTree} from '../data/asset_giveaway_1/getAssets';
-import {default as assetData} from '../data/asset_giveaway_1/assets.json';
-
-const ASSETS_HOLDER = '0x0000000000000000000000000000000000000000';
+import {
+  createAssetClaimMerkleTree,
+  AssetClaim,
+} from '../data/asset_giveaway_1/getAssets';
+import {AddressZero} from '@ethersproject/constants';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, network, getChainId} = hre;
   const {deploy} = deployments;
   const chainId = await getChainId();
   const {deployer} = await getNamedAccounts();
+
+  let assetData: AssetClaim[];
+  try {
+    assetData = JSON.parse(
+      fs
+        .readFileSync(`data/asset_giveaway_1/assets_${hre.network.name}.json`)
+        .toString()
+    );
+  } catch (e) {
+    return;
+  }
 
   const {assets, merkleRootHash} = createAssetClaimMerkleTree(
     network.live,
@@ -26,11 +39,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     args: [
       assetContract.address,
-      deployer,
+      AddressZero, // no admin needed
       merkleRootHash,
-      ASSETS_HOLDER,
-      1615194000, // Sunday, 08-Mar-21 09:00:00 UTC
-    ], // TODO: expiryTime
+      AddressZero, // owns the assets
+      '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', // do not expire
+    ],
   });
 };
 export default func;

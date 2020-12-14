@@ -1,50 +1,39 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {AssetClaim} from '../data/asset_giveaway_1/getAssets';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
-  const {execute, read, log} = deployments;
+  const {deployments} = hre;
+  const {execute} = deployments;
 
-  const {nftGiveawayAdmin} = await getNamedAccounts();
+  let smurfOwner;
+  let smurfId;
 
-  let currentAdmin;
-  try {
-    currentAdmin = await read('Asset_Giveaway_1', 'getAdmin');
-  } catch (e) {
-    // no admin
-  }
-  if (currentAdmin) {
-    if (currentAdmin.toLowerCase() !== nftGiveawayAdmin.toLowerCase()) {
-      await execute(
-        'Asset_Giveaway_1',
-        {from: currentAdmin, log: true},
-        'changeAdmin',
-        nftGiveawayAdmin
-      );
-    }
+  switch (hre.network.name) {
+    case 'mainnet':
+      smurfOwner = '0x7a9fe22691c811ea339d9b73150e6911a5343dca';
+      smurfId =
+        '55464657044963196816950587289035428064568320970692304673817341489687505668096';
+      break;
   }
 
-  // Set Asset_Giveaway_1 contract as superOperator for Asset
-  // This is needed when Asset_Giveaway_1 is not the assetsHolder
-  const giveawayContract = await deployments.get('Asset_Giveaway_1');
+  if (!smurfOwner || smurfOwner === '') {
+    return;
+  }
 
-  const isAssetSuperOperator = await read(
+  const AssetGiveaway = await deployments.get('Asset_Giveaway_1');
+
+  const assetData: AssetClaim[] = AssetGiveaway.linkedData;
+
+  await execute(
     'Asset',
-    'isSuperOperator',
-    giveawayContract.address
+    {from: smurfOwner},
+    'safeTransferFrom',
+    smurfOwner,
+    smurfId,
+    assetData.length,
+    '0x'
   );
-
-  if (!isAssetSuperOperator) {
-    log('setting Giveaway contract as Super Operator for ASSET');
-    const currentAssetAdmin = await read('Asset', 'getAdmin');
-    await execute(
-      'Asset',
-      {from: currentAssetAdmin, log: true},
-      'setSuperOperator',
-      giveawayContract.address,
-      true
-    );
-  }
 };
 export default func;
 func.runAtTheEnd = true;

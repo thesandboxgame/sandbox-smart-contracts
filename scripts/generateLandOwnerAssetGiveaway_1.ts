@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import fs from 'fs';
 import 'isomorphic-unfetch';
 import {createClient} from '@urql/core';
 import {write} from './utils/spreadsheet';
@@ -76,4 +77,18 @@ const blockNumber = 11438254; // Dec-12-2020 12:59:57 PM +UTC
     // range: 'C2:D' + (entries.length + 2),
     range: 'C2:C' + (entries.length + 2),
   });
+
+  const assetClaims = [];
+
+  for (const landOwner of landOwners) {
+    assetClaims.push({
+      reservedAddress: landOwner.id,
+      assetIds: [''],
+      assetValues: [1],
+    });
+  }
+  fs.writeFileSync(
+    'data/asset_giveaway_1/assets_mainnet.json',
+    JSON.stringify(assetClaims, null, '  ')
+  );
 })();

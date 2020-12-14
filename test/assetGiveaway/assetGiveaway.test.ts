@@ -9,7 +9,7 @@ const {calculateAssetHash} = helpers;
 
 const zeroAddress = constants.AddressZero;
 
-describe('Asset_Giveaway_1', function () {
+describe('Asset_Giveaway', function () {
   it('User cannot claim when test contract holds zero assets', async function () {
     const options = {
       assetsHolder: true,
@@ -19,12 +19,12 @@ describe('Asset_Giveaway_1', function () {
     const asset = assets[0];
     const proof = tree.getProof(calculateAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await expect(
       giveawayContractAsUser.claimAssets(
-        others[1],
+        others[0],
         asset.assetIds,
         asset.assetValues,
         proof,
@@ -43,7 +43,7 @@ describe('Asset_Giveaway_1', function () {
     const asset = assets[0];
     const proof = tree.getProof(calculateAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     const initBalanceAssetId1 = await assetContract[
@@ -61,7 +61,7 @@ describe('Asset_Giveaway_1', function () {
 
     await waitFor(
       giveawayContractAsUser.claimAssets(
-        others[1],
+        others[0],
         asset.assetIds,
         asset.assetValues,
         proof,
@@ -70,17 +70,17 @@ describe('Asset_Giveaway_1', function () {
     );
 
     const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
+      others[0],
       asset.assetIds[0]
     );
     expect(balanceAssetId1).to.equal(asset.assetValues[0]);
     const balanceAssetId2 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
+      others[0],
       asset.assetIds[1]
     );
     expect(balanceAssetId2).to.equal(asset.assetValues[1]);
     const balanceAssetId3 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
+      others[0],
       asset.assetIds[2]
     );
     expect(balanceAssetId3).to.equal(asset.assetValues[2]);
@@ -98,12 +98,12 @@ describe('Asset_Giveaway_1', function () {
     const asset = assets[0];
     const proof = tree.getProof(calculateAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     const receipt = await waitFor(
       giveawayContractAsUser.claimAssets(
-        others[1],
+        others[0],
         asset.assetIds,
         asset.assetValues,
         proof,
@@ -116,7 +116,7 @@ describe('Asset_Giveaway_1', function () {
       'ClaimedAssets'
     );
 
-    expect(claimedEvent.args[0]).to.equal(others[1]); // to
+    expect(claimedEvent.args[0]).to.equal(others[0]); // to
     expect(claimedEvent.args[1][0]).to.equal(asset.assetIds[0]);
     expect(claimedEvent.args[1][1]).to.equal(asset.assetIds[1]);
     expect(claimedEvent.args[1][2]).to.equal(asset.assetIds[2]);
@@ -137,12 +137,12 @@ describe('Asset_Giveaway_1', function () {
     const asset = assets[1];
     const proof = tree.getProof(calculateAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await waitFor(
       giveawayContractAsUser.claimAssets(
-        others[1],
+        others[0],
         asset.assetIds,
         asset.assetValues,
         proof,
@@ -163,12 +163,12 @@ describe('Asset_Giveaway_1', function () {
     const asset = assets[1];
     const proof = tree.getProof(calculateAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await expect(
       giveawayContractAsUser.claimAssets(
-        others[1],
+        others[0],
         asset.assetIds,
         [0], // bad param
         proof,
@@ -189,12 +189,12 @@ describe('Asset_Giveaway_1', function () {
     const asset = assets[0];
     const proof = tree.getProof(calculateAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await waitFor(
       giveawayContractAsUser.claimAssets(
-        others[1],
+        others[0],
         asset.assetIds,
         asset.assetValues,
         proof,
@@ -203,7 +203,7 @@ describe('Asset_Giveaway_1', function () {
     );
     await expect(
       giveawayContractAsUser.claimAssets(
-        others[1],
+        others[0],
         asset.assetIds,
         asset.assetValues,
         proof,
@@ -224,12 +224,12 @@ describe('Asset_Giveaway_1', function () {
     const asset = assets[0];
     const proof = tree.getProof(calculateAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await expect(
       giveawayContractAsUser.claimAssets(
-        others[2], // bad param
+        others[1], // bad param
         asset.assetIds,
         asset.assetValues,
         proof,
@@ -250,7 +250,7 @@ describe('Asset_Giveaway_1', function () {
     const asset = assets[0];
     const proof = tree.getProof(calculateAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await expect(
@@ -275,12 +275,12 @@ describe('Asset_Giveaway_1', function () {
     const asset = assets[0];
     const proof = tree.getProof(calculateAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await expect(
       giveawayContractAsUser.claimAssets(
-        others[1],
+        others[0],
         asset.assetIds,
         [5, 5], // length too short
         proof,
@@ -300,7 +300,7 @@ describe('Asset_Giveaway_1', function () {
     const asset = assets[0];
     const proof = tree.getProof(calculateAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     const initBalanceAssetId1 = await assetContract[
@@ -318,7 +318,7 @@ describe('Asset_Giveaway_1', function () {
 
     await waitFor(
       giveawayContractAsUser.claimAssets(
-        others[1],
+        others[0],
         asset.assetIds,
         asset.assetValues,
         proof,
@@ -327,17 +327,17 @@ describe('Asset_Giveaway_1', function () {
     );
 
     const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
+      others[0],
       asset.assetIds[0]
     );
     expect(balanceAssetId1).to.equal(asset.assetValues[0]);
     const balanceAssetId2 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
+      others[0],
       asset.assetIds[1]
     );
     expect(balanceAssetId2).to.equal(asset.assetValues[1]);
     const balanceAssetId3 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
+      others[0],
       asset.assetIds[2]
     );
     expect(balanceAssetId3).to.equal(asset.assetValues[2]);
@@ -383,14 +383,14 @@ describe('Asset_Giveaway_1', function () {
     const asset = assets[0];
     const proof = tree.getProof(calculateAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await increaseTime(60 * 60 * 24 * 30 * 4);
 
     await expect(
       giveawayContractAsUser.claimAssets(
-        others[1],
+        others[0],
         asset.assetIds,
         asset.assetValues,
         proof,
