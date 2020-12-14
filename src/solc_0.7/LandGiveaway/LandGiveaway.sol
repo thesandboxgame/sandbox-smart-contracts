@@ -1,10 +1,10 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
-import "../common/BaseWithStorage/ERC721BaseToken.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import "./ClaimERC721.sol";
+import "../common/Interfaces/IERC721Extended.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
+import "./ClaimERC721.sol";
 
 /// @title LandGiveaway contract
 /// @notice This contract manages ERC721claims
@@ -20,7 +20,7 @@ contract LandGiveaway is WithAdmin, ClaimERC721 {
         bytes32 merkleRootLand,
         address landHolder,
         uint256 expiryTime
-    ) ClaimERC721(ERC721BaseToken(land), landHolder) {
+    ) ClaimERC721(IERC721Extended(land), landHolder) {
         _admin = admin;
         _merkleRootLand = merkleRootLand;
         _expiryTimeLandGiveaway = expiryTime;

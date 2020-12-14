@@ -1,16 +1,15 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
-import "../common/BaseWithStorage/ERC721BaseToken.sol";
-import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
+import "../common/Interfaces/IERC721Extended.sol";
 
 contract ClaimERC721 {
     bytes32 internal _merkleRootLand;
-    ERC721BaseToken internal immutable _land;
+    IERC721Extended internal immutable _land;
     address internal immutable _landHolder;
     event ClaimedLands(address to, uint256[] ids);
 
-    constructor(ERC721BaseToken land, address landHolder) {
+    constructor(IERC721Extended land, address landHolder) {
         _land = land;
         if (landHolder == address(0)) {
             landHolder = address(this);
