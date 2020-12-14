@@ -15,17 +15,17 @@ describe('MerkleTree_multi', function () {
       },
       {
         reservedAddress: '0x14dC79964da2C08b23698B3D3cc7Ca32193d9955',
-        assetIds: [0],
+        assetIds: [3],
         assetValues: [1],
-        landIds: [5],
+        landIds: [6],
       },
       {
         reservedAddress: '0x14dC79964da2C08b23698B3D3cc7Ca32193d9955',
-        landIds: [5],
+        landIds: [7],
       },
       {
         reservedAddress: '0x14dC79964da2C08b23698B3D3cc7Ca32193d9955',
-        assetIds: [0, 1, 2],
+        assetIds: [4, 5, 6],
         assetValues: [5, 5, 5],
       },
     ];
