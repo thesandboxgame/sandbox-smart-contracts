@@ -67,7 +67,6 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   // Supply lands to contract for testing
   async function mintTestLands() {
-    // TODO: mocklands
     const owner = landHolder ? others[5] : testContract.address;
     for (let i = 0; i < 40; i++) {
       await landContractAsAdmin.mint(owner, i);
