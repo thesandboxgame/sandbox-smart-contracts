@@ -2,24 +2,11 @@
 pragma solidity 0.7.1;
 pragma experimental ABIEncoderV2;
 
-import "./CatalystToken.sol";
-import "./AssetAttributesRegistry.sol";
+import "./IAttributes.sol";
 
-contract PrimaryCatalyst is CatalystToken {
+contract DefaultAttributes is IAttributes {
     uint256 internal constant MAX_NUM_GEMS = 15;
     uint256 internal constant MAX_NUM_GEM_TYPES = 256;
-
-    constructor(
-        string memory name,
-        string memory symbol,
-        address admin,
-        uint8 maxGems,
-        uint16 _catalystId
-    ) CatalystToken(name, symbol, admin, maxGems, _catalystId) {}
-
-    function getMaxGems() external view override returns (uint8) {
-        return _maxGems;
-    }
 
     function getAttributes(uint256 assetId, AssetAttributesRegistry.GemEvent[] calldata events)
         external
