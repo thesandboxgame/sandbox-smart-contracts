@@ -61,6 +61,14 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @param uri The new URI to set for the token.
     event TokenURIChanged(uint256 indexed id, string uri);
 
+    /// @dev Emits when a GAME token has it's ID version bumped.
+    /// @param id The GAME token to updatethe version of.
+    /// @param uri The id for the (new) token.
+    /// As per ERC721 standard, a token's id is immutable. When changes are made to a GAME,
+    /// we burn the old token and mint a new one, while preserving the relationship between
+    /// the unchanging portions of the tokenId and the Assets & metadata associated with the token.
+    event GameVersionChanged(uint256 indexed id, uint256 newId);
+
     constructor(
         address metaTransactionContract,
         address admin,
@@ -449,14 +457,22 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         return gameId;
     }
 
-    /// @dev Create a new gameId and associate it with an owner.
-    /// This is a packed id, consisting of 3 parts:
-    /// the creator's address, a uint64 randomID and a uint32 version number.
-    /// The version starts with 1(hard-coded) for all new tokens
-    /// @param creator The address of the Game creator.
-    /// @param randomId The id to use when generating the new GameId.
-    function _generateGameId(address creator, uint96 randomId) internal pure returns (uint256) {
-        return uint256(creator) * CREATOR_OFFSET_MULTIPLIER + uint64(randomId) * RANDOM_ID_MULTIPLIER + uint32(1);
+    /// @dev Allow token owner to set game editors.
+    /// @param gameId The id of the GAME token owned by owner.
+    /// @param editor The address of the editor to set.
+    /// @param isEditor Add or remove the ability to edit.
+    function _setGameEditor(
+        uint256 gameId,
+        address editor,
+        bool isEditor
+    ) internal {
+        emit GameEditorSet(gameId, editor, isEditor);
+        _gameEditors[gameId][editor] = isEditor;
+    }
+
+    function _bumpGameVersion(uint256 id) internal returns (uint256 newId) {
+        emit GameVersionChanged(id, newId);
+        return _incrementGameId(id);
     }
 
     /// @dev Increment to version-number part of the gameId.
@@ -470,16 +486,13 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         return uint256(originalCreator) * CREATOR_OFFSET_MULTIPLIER + uint64(randomId) * RANDOM_ID_MULTIPLIER + version;
     }
 
-    /// @dev Allow token owner to set game editors.
-    /// @param gameId The id of the GAME token owned by owner.
-    /// @param editor The address of the editor to set.
-    /// @param isEditor Add or remove the ability to edit.
-    function _setGameEditor(
-        uint256 gameId,
-        address editor,
-        bool isEditor
-    ) internal {
-        emit GameEditorSet(gameId, editor, isEditor);
-        _gameEditors[gameId][editor] = isEditor;
+    /// @dev Create a new gameId and associate it with an owner.
+    /// This is a packed id, consisting of 3 parts:
+    /// the creator's address, a uint64 randomID and a uint32 version number.
+    /// The version starts with 1(hard-coded) for all new tokens
+    /// @param creator The address of the Game creator.
+    /// @param randomId The id to use when generating the new GameId.
+    function _generateGameId(address creator, uint96 randomId) internal pure returns (uint256) {
+        return uint256(creator) * CREATOR_OFFSET_MULTIPLIER + uint64(randomId) * RANDOM_ID_MULTIPLIER + uint32(1);
     }
 }
