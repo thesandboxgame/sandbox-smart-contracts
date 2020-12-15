@@ -89,19 +89,19 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     }
 
     /// @notice Get the name of the token collection.
-    /// @return the name of the token collection.
+    /// @return The name of the token collection.
     function name() external view returns (string memory) {
         return string(abi.encodePacked(_name));
     }
 
     /// @notice Get the symbol for the token collection.
-    /// @return symbol of the token collection.
+    /// @return The symbol of the token collection.
     function symbol() external view returns (string memory) {
         return string(abi.encodePacked(_symbol));
     }
 
     /// @notice Get the total number of tokens in existence.
-    /// @return the total number of tokens in existence.
+    /// @return The total number of tokens in existence.
     function totalSupply() external view override returns (uint256) {
         return _totalSupply;
     }
@@ -122,7 +122,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     }
 
     /// @notice Get the number of decimals for the token collection.
-    /// @return the number of decimals.
+    /// @return The number of decimals.
     function decimals() external pure virtual returns (uint8) {
         return uint8(18);
     }

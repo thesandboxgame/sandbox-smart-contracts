@@ -62,6 +62,9 @@ contract WithMetaTransaction is WithAdmin {
     }
 
     /// @dev Get the actual sender of call.
+    /// if the call came through our trusted forwarder, return the original sender.
+    /// otherwise, return `msg.sender`.
+    /// should be used in the contract anywhere instead of msg.sender
     /// @return ret The sender of this call.
     function _forceMsgSender() internal view virtual returns (address payable ret) {
         // solhint-disable-next-line no-inline-assembly
@@ -72,7 +75,7 @@ contract WithMetaTransaction is WithAdmin {
 
     /// @dev Test if a tx is a valid Sandbox or EIP-2771 metaTransaction.
     /// @param from The address passed as either "from" or "sender" to the func which called this one.
-    /// @return whether this is a valid metaTransaction.
+    /// @return Whether this is a valid metaTransaction.
     function _isValidMetaTx(address from) internal view returns (bool) {
         uint256 processorType = _metaTransactionContracts[msg.sender];
         if (msg.sender == from || processorType == 0) {

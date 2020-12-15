@@ -9,7 +9,7 @@ abstract contract ERC20BasicApproveExtension is ERC20Internal {
     /// @param target The address to be given rights to transfer and destination of the call.
     /// @param amount The number of tokens allowed.
     /// @param data The bytes for the call.
-    /// @return the data of the call.
+    /// @return The data of the call.
     function approveAndCall(
         address target,
         uint256 amount,
@@ -25,12 +25,12 @@ abstract contract ERC20BasicApproveExtension is ERC20Internal {
         return returnData;
     }
 
-    /// @notice Temporarly approve `target` to spend `amount` and call it with data.
+    /// @notice Temporarily approve `target` to spend `amount` and call it with data.
     /// Previous approvals remains unchanged.
     /// @param target The destination of the call, allowed to spend the amount specified
     /// @param amount The number of tokens allowed to spend.
     /// @param data The bytes for the call.
-    /// @return the data of the call.
+    /// @return The data of the call.
     function paidCall(
         address target,
         uint256 amount,

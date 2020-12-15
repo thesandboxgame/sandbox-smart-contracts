@@ -110,7 +110,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     /// @param from The sender of the token.
     /// @param to The recipient of the token.
     /// @param ids The ids of the tokens.
-    /// @param data additional data.
+    /// @param data Additional data.
     function safeBatchTransferFrom(
         address from,
         address to,
@@ -153,7 +153,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
 
     /// @notice Burn token`id` from `from`.
     /// @param from address whose token is to be burnt.
-    /// @param id token which will be burnt.
+    /// @param id The token which will be burnt.
     function burnFrom(address from, uint256 id) external virtual {
         require(from != address(0), "NOT_FROM_ZEROADDRESS");
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
@@ -170,7 +170,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
 
     /// @notice Get the number of tokens owned by an address.
     /// @param owner The address to look for.
-    /// @return the number of tokens owned by the address.
+    /// @return The number of tokens owned by the address.
     function balanceOf(address owner) external view override returns (uint256) {
         require(owner != address(0), "ZERO_ADDRESS_OWNER");
         return _numNFTPerAddress[owner];
@@ -186,7 +186,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
 
     /// @notice Get the approved operator for a specific token.
     /// @param id The id of the token.
-    /// @return the address of the operator.
+    /// @return The address of the operator.
     function getApproved(uint256 id) external view override returns (address) {
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(owner != address(0), "NONEXISTENT_TOKEN");
@@ -227,7 +227,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     /// 0x01ffc9a7 is ERC-165.
     /// 0x80ac58cd is ERC-721
     /// @param id The id of the interface.
-    /// @return whether the interface is supported.
+    /// @return Whether the interface is supported.
     function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd;
     }

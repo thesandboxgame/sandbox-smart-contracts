@@ -5,7 +5,7 @@ library BytesUtil {
     /// @dev Check if the data == _address.
     /// @param data The bytes passed to the function.
     /// @param _address The address to compare to.
-    /// @return whether the first parm == _address.
+    /// @return Whether the first param == _address.
     function doFirstParamEqualsAddress(bytes memory data, address _address) internal pure returns (bool) {
         if (data.length < (36 + 32)) {
             return false;

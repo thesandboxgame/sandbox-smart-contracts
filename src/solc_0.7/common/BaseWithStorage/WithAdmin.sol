@@ -15,7 +15,7 @@ contract WithAdmin {
     }
 
     /// @dev Get the current administrator of this contract.
-    /// @return the current administrator of this contract.
+    /// @return The current administrator of this contract.
     function getAdmin() external view returns (address) {
         return _admin;
     }
