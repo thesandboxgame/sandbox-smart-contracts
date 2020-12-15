@@ -11,6 +11,11 @@ contract WithMinter is WithAdmin {
     /// @param newMinter The new Minter address
     event MinterChanged(address oldMinter, address newMinter);
 
+    modifier onlyMinter() {
+        require(msg.sender == _minter, "MINTER_ACCESS_DENIED");
+        _;
+    }
+
     /// @dev Get the current minter of this contract.
     /// @return The current minter of this contract.
     function getMinter() external view returns (address) {
