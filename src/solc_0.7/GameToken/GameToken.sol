@@ -7,6 +7,7 @@ import "../common/BaseWithStorage/WithMinter.sol";
 import "../common/Interfaces/IAssetToken.sol";
 import "../common/Interfaces/IGameToken.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
+import "hardhat/console.sol";
 
 contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     ///////////////////////////////  Libs //////////////////////////////
@@ -20,6 +21,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     uint256 private constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
+    uint256 private constant RANDOM_ID_MULTIPLIER = uint256(2)**(256 - 224);
 
     mapping(uint256 => mapping(uint256 => uint256)) private _gameAssets;
     mapping(address => address) private _creatorship; // creatorship transfer
@@ -440,7 +442,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         address to,
         uint96 randomId
     ) internal returns (uint256 id) {
-        uint256 gameId = generateGameId(from, randomId);
+        uint256 gameId = _generateGameId(from, randomId);
         _owners[gameId] = uint256(to);
         _numNFTPerAddress[to]++;
         emit Transfer(address(0), to, gameId);
@@ -448,10 +450,24 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     }
 
     /// @dev Create a new gameId and associate it with an owner.
+    /// This is a packed id, consisting of 3 parts:
+    /// the creator's address, a uint64 randomID and a uint32 version number.
+    /// The version starts with 1(hard-coded) for all new tokens
     /// @param creator The address of the Game creator.
     /// @param randomId The id to use when generating the new GameId.
-    function generateGameId(address creator, uint96 randomId) internal pure returns (uint256) {
-        return uint256(creator) * CREATOR_OFFSET_MULTIPLIER + uint96(randomId);
+    function _generateGameId(address creator, uint96 randomId) internal pure returns (uint256) {
+        return uint256(creator) * CREATOR_OFFSET_MULTIPLIER + uint64(randomId) * RANDOM_ID_MULTIPLIER + uint32(1);
+    }
+
+    /// @dev Increment to version-number part of the gameId.
+    /// @param currentId The current ID of the GAME token
+    /// @return incrementedId  The new id, consisting of the same creator address + randomId as contained in `currentId`
+    function _incrementGameId(uint256 currentId) internal view returns (uint256 incrementedId) {
+        address originalCreator = address(currentId / CREATOR_OFFSET_MULTIPLIER);
+        uint64 randomId = uint64(currentId / RANDOM_ID_MULTIPLIER);
+        uint32 version = uint32(currentId);
+        version++;
+        return uint256(originalCreator) * CREATOR_OFFSET_MULTIPLIER + uint64(randomId) * RANDOM_ID_MULTIPLIER + version;
     }
 
     /// @dev Allow token owner to set game editors.
