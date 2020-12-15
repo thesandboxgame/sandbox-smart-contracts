@@ -12,6 +12,8 @@ import "../common/BaseWithStorage/WithMetaTransaction.sol";
 contract AssetUpgrader is WithMetaTransaction {
     using SafeMath for uint256;
 
+    uint256 private constant GEM_UNIT = 1000000000000000000;
+    uint256 private constant CATALYST_UNIT = 1000000000000000000;
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
     address private constant BURN_ADDRESS = 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF;
 
@@ -167,10 +169,10 @@ contract AssetUpgrader is WithMetaTransaction {
     }
 
     function _burnGems(address from, uint16[] memory gemIds) internal {
-        _gemsCatalystsRegistry.burnDifferentGems(from, gemIds);
+        _gemsCatalystsRegistry.burnDifferentGems(from, gemIds, GEM_UNIT);
     }
 
     function _burnCatalyst(address from, uint16 catalystId) internal {
-        _gemsCatalystsRegistry.burnCatalyst(from, catalystId, 1);
+        _gemsCatalystsRegistry.burnCatalyst(from, catalystId, CATALYST_UNIT);
     }
 }
