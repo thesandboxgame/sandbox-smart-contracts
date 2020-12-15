@@ -12,7 +12,7 @@ type AssetAndLandClaim = {
   reservedAddress: string;
   assetIds?: Array<BigNumber> | Array<string> | Array<number>;
   assetValues?: Array<number>;
-  landIds?: Array<BigNumber> | Array<string> | Array<number>;
+  landIds?: Array<number>;
 };
 
 export function createAssetAndLandClaimMerkleTree(

@@ -29,7 +29,7 @@ interface claimableAssetAndLand {
   reservedAddress: string;
   assetIds?: Array<BigNumber> | Array<string> | Array<number>;
   assetValues?: Array<number>;
-  landIds?: Array<BigNumber> | Array<string> | Array<number>;
+  landIds?: Array<number>;
   salt?: string;
 }
 
@@ -272,7 +272,7 @@ function createDataArrayClaimableLands(
 
 // Multi Giveaway (Assets and Lands)
 
-function calculateClaimableAssetAndLandHash( // TODO: invalid BigNumber value
+function calculateClaimableAssetAndLandHash(
   claim: claimableAssetAndLand,
   salt?: string
 ): string {
@@ -308,11 +308,8 @@ function saltClaimableAssetsAndLands(
       if (!secret) {
         throw new Error('Claim need to have a salt or be generated via secret');
       }
-      return {
+      const newClaim: claimableAssetAndLand = {
         reservedAddress: claim.reservedAddress,
-        assetIds: claim.assetIds,
-        assetValues: claim.assetValues,
-        landIds: claim.landIds,
         salt:
           '0x' +
           crypto
@@ -325,6 +322,10 @@ function saltClaimableAssetsAndLands(
             )
             .digest('hex'),
       };
+      if (claim.assetIds) newClaim.assetIds = claim.assetIds;
+      if (claim.assetValues) newClaim.assetValues = claim.assetValues;
+      if (claim.landIds) newClaim.landIds = claim.landIds;
+      return newClaim;
     } else return claim;
   });
 }

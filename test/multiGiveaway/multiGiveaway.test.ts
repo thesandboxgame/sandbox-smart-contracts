@@ -1,7 +1,7 @@
 import {ethers} from 'hardhat';
 import {setupTestGiveaway} from './fixtures';
 // import {constants} from 'ethers';
-import {waitFor, expectReceiptEventWithArgs} from '../utils';
+import {waitFor, expectReceiptEventWithArgs, increaseTime} from '../utils';
 import {expect} from '../chai-setup';
 
 import helpers from '../../lib/merkleTreeHelper';
@@ -43,6 +43,7 @@ describe('Multi_Giveaway_1', function () {
     const {giveawayContract, others, tree, claims, assetContract} = setUp;
 
     const claim = claims[0];
+
     const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
@@ -117,7 +118,7 @@ describe('Multi_Giveaway_1', function () {
 
     const claimedEvent = await expectReceiptEventWithArgs(
       receipt,
-      'ClaimedAssets'
+      'ClaimedAssetsAndLands'
     );
 
     expect(claimedEvent.args[0]).to.equal(others[1]); // to

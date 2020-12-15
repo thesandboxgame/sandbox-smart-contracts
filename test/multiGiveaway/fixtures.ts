@@ -134,33 +134,28 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let dataWithIds: any = testData;
 
-  async function mintAssetsWithNewIds() {
+  async function mintNewAssetIds() {
     return await Promise.all(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       testData.map(async (claim: any) => {
         if (claim.assetIds) {
-          return {
-            assetValues: claim.assetValues,
-            reservedAddress: claim.reservedAddress,
+          const newClaim = {
+            ...claim,
             assetIds: await Promise.all(
               claim.assetIds.map(
-                async (assetPackId: number) =>
-                  await mintTestAssets(
-                    assetPackId,
-                    claim.assetValues[assetPackId]
-                  )
+                async (assetPackId: number, index: number) =>
+                  await mintTestAssets(assetPackId, claim.assetValues[index])
               )
             ),
-            landIds: claim.landIds,
           };
+          return newClaim;
         } else return claim;
       })
     );
   }
 
   if (mint) {
-    const assetsWithIds = await mintAssetsWithNewIds();
-    dataWithIds = assetsWithIds;
+    const claimsWithAssetIds = await mintNewAssetIds();
+    dataWithIds = claimsWithAssetIds;
     await mintTestLands();
   }
 

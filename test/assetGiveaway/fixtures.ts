@@ -115,11 +115,8 @@ export const setupTestGiveaway = deployments.createFixture(async function (
           reservedAddress: claim.reservedAddress,
           assetIds: await Promise.all(
             claim.assetIds.map(
-              async (assetPackId: number) =>
-                await mintTestAssets(
-                  assetPackId,
-                  claim.assetValues[assetPackId]
-                )
+              async (assetPackId: number, index: number) =>
+                await mintTestAssets(assetPackId, claim.assetValues[index])
             )
           ),
         };
