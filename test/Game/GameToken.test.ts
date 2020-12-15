@@ -18,7 +18,7 @@ const METATX_SANDBOX = 1;
 const METATX_2771 = 2;
 const rng = new Prando('GameToken');
 
-// for prod use 39614081257132170000000000000(MAX_UINT96) as upper limit
+// for prod, use maximum uint64 (2^64-1) as upper limit
 async function getRandom(): Promise<number> {
   return rng.nextInt(1, 1000000000);
 }
@@ -151,10 +151,12 @@ describe('GameToken', function () {
 
     it('gameId contains creator address', async function () {
       const idAsHex = utils.hexValue(gameId);
-      const slicedId = idAsHex.slice(0, 42);
-      const secondSlice = idAsHex.slice(58);
-      expect(utils.getAddress(slicedId)).to.be.equal(users[3].address);
-      expect(secondSlice).to.be.equal('16721787');
+      const creatorSlice = idAsHex.slice(0, 42);
+      const randomIdSlice = idAsHex.slice(43, 58);
+      const versionSlice = idAsHex.slice(58);
+      expect(utils.getAddress(creatorSlice)).to.be.equal(users[3].address);
+      expect(randomIdSlice).to.be.equal('000000016721787');
+      expect(versionSlice).to.be.equal('00000001');
     });
 
     it('reverts if non-minter trys to mint Game when _Minter is set', async function () {
@@ -1224,6 +1226,22 @@ describe('GameToken', function () {
         expect(contractBalanceFinal2).to.be.equal(0);
       });
     });
+  });
+
+  describe('GameToken: Token Immutability', function () {
+    //@note 3-part ID:
+    it('should store the creator address, randomID & version in the gameId', async function () {});
+
+    it('should update the version every time assets are added or removed', async function () {});
+
+    //@note modifying the token should retain mappings to assets
+    it('should map to game Assets using ONLY the creator address + randomId portion of the gameId', async function () {});
+
+    //@note modifying the token should retain mappings to metadata
+    it('should map to game MetaData using ONLY the creator address + randomId portion of the gameId', async function () {});
+
+    // @note this is to prevent frontrunning a GAME-token purchase tx
+    it('calling "destroyAndRecover" or "destroyGame" should increment the gameId version', async function () {});
   });
 
   describe('GameToken: MetaTransactions', function () {
