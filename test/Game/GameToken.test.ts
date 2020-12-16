@@ -522,13 +522,12 @@ describe('GameToken', function () {
           newIdFromTransfer = transferEvents[0].args[2];
         }
 
-        const newGameIdFromAdd = assetsAddedEvent.args[3];
-        const uriAfter = await gameToken.tokenURI(newGameIdFromAdd);
+        gameId = assetsAddedEvent.args[3];
+        const uriAfter = await gameToken.tokenURI(gameId);
 
-        const gameStateAfter = await gameToken.getAssetBalances(
-          newGameIdFromAdd,
-          [singleAssetId]
-        );
+        const gameStateAfter = await gameToken.getAssetBalances(gameId, [
+          singleAssetId,
+        ]);
 
         const contractBalanceAfter = await assetContract[
           'balanceOf(address,uint256)'
@@ -546,7 +545,7 @@ describe('GameToken', function () {
         expect(gameStateAfter[0]).to.be.equal(1);
         expect(contractBalanceAfter).to.be.equal(contractBalanceBefore + 1);
         expect(ownerBalanceAfter).to.be.equal(ownerBalanceBefore - 1);
-        expect(newIdFromTransfer).to.be.equal(newGameIdFromAdd);
+        expect(newIdFromTransfer).to.be.equal(gameId);
         expect(eventAssets[0]).to.be.equal(singleAssetId);
         expect(values[0]).to.be.equal(1);
       });
@@ -597,9 +596,9 @@ describe('GameToken', function () {
           assetsAddedReceipt,
           'AssetsAdded'
         );
-        gameId = assetsAddedEvent.args[3];
+        const newGameId = assetsAddedEvent.args[3];
 
-        const gameStateAfter = await gameToken.getAssetBalances(gameId, [
+        const gameStateAfter = await gameToken.getAssetBalances(newGameId, [
           assetId,
           assetId2,
         ]);
@@ -619,7 +618,7 @@ describe('GameToken', function () {
           'balanceOf(address,uint256)'
         ](GameOwner.address, assetId2);
 
-        const id = assetsAddedEvent.args[0];
+        const oldId = assetsAddedEvent.args[0];
         const eventAssets = assetsAddedEvent.args[1];
         const values = assetsAddedEvent.args[2];
 
@@ -628,7 +627,7 @@ describe('GameToken', function () {
         expect(ownerBalanceAfter2).to.be.equal(ownerBalanceBefore2 - 42);
         expect(contractBalanceAfter2).to.be.equal(contractBalanceBefore2 + 42);
 
-        expect(id).to.be.equal(gameId);
+        expect(oldId).to.be.equal(gameId);
         expect(eventAssets[0]).to.be.equal(assetId);
         expect(eventAssets[1]).to.be.equal(assetId2);
         expect(values[0]).to.be.equal(quantities[0]);
