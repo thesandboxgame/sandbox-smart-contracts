@@ -11,7 +11,7 @@ interface IGameToken {
         uint256[] calldata values,
         address editor,
         string calldata uri,
-        uint96 randomId
+        uint64 randomId
     ) external returns (uint256 id);
 
     function destroyGame(
@@ -39,8 +39,9 @@ interface IGameToken {
         uint256 gameId,
         uint256[] calldata assetIds,
         uint256[] calldata values,
-        string calldata uri
-    ) external;
+        string calldata uri,
+        bool isCreation
+    ) external returns (uint256);
 
     function removeAssets(
         uint256 gameId,
@@ -48,7 +49,7 @@ interface IGameToken {
         uint256[] calldata values,
         address to,
         string calldata uri
-    ) external;
+    ) external returns (uint256);
 
     function getAssetBalances(uint256 gameId, uint256[] calldata assetIds) external view returns (uint256[] calldata);
 
@@ -73,7 +74,7 @@ interface IGameToken {
 
     function symbol() external pure returns (string memory);
 
-    function tokenURI(uint256 gameId) external view returns (string memory uri);
+    function tokenURI(uint256 gameId) external returns (string memory uri);
 
     function setTokenURI(uint256 gameId, string calldata uri) external;
 
