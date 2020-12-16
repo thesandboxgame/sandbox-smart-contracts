@@ -136,6 +136,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   async function mintNewAssetIds() {
     return await Promise.all(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       testData.map(async (claim: any) => {
         if (claim.assetIds) {
           const newClaim = {
