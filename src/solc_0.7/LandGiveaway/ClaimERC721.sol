@@ -17,6 +17,7 @@ contract ClaimERC721 {
         _landHolder = landHolder;
     }
 
+    /// @dev See for example LandGiveaway.sol claimLands.
     function _claimERC721(
         address to,
         uint256[] calldata ids,

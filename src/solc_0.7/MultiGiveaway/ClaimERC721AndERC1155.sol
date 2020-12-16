@@ -30,7 +30,7 @@ contract ClaimERC721AndERC1155 {
         _landHolder = landHolder;
     }
 
-    /// @dev See for example MultiGiveaway.sol claimERC721AndERC1155.
+    /// @dev See for example MultiGiveaway.sol claimAssetsAndLands.
     function _claimERC721AndERC1155(
         address to,
         uint256[] calldata assetIds,

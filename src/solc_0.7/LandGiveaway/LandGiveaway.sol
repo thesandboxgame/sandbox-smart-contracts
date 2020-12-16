@@ -6,8 +6,8 @@ import "../common/Interfaces/IERC721Extended.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
 import "./ClaimERC721.sol";
 
-/// @title LandGiveaway contract
-/// @notice This contract manages ERC721claims
+/// @title LandGiveaway contract.
+/// @notice This contract manages ERC721claims.
 contract LandGiveaway is WithAdmin, ClaimERC721 {
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
     bytes4 internal constant ERC721_BATCH_RECEIVED = 0x4b808c46;
@@ -26,18 +26,18 @@ contract LandGiveaway is WithAdmin, ClaimERC721 {
         _expiryTimeLandGiveaway = expiryTime;
     }
 
-    /// @notice Function to set the merkle root hash for the land data, if it is 0
-    /// @param merkleRoot the merkle root hash of the asset data
+    /// @notice Function to set the merkle root hash for the land data, if it is 0.
+    /// @param merkleRoot The merkle root hash of the asset data.
     function setMerkleRootLands(bytes32 merkleRoot) external onlyAdmin {
         require(_merkleRootLand == 0, "MERKLE_ROOT_ALREADY_SET");
         _merkleRootLand = merkleRoot;
     }
 
-    /// @notice Function to permit the claiming of an asset to a reserved address
-    /// @param to the intended recipient (reserved address) of the ERC721 tokens
-    /// @param ids the array of IDs of the LAND tokens
-    /// @param proof the proof submitted for verification
-    /// @param salt the salt submitted for verification
+    /// @notice Function to permit the claiming of an asset to a reserved address.
+    /// @param to The intended recipient (reserved address) of the ERC721 tokens.
+    /// @param ids The array of IDs of the LAND tokens.
+    /// @param proof The proof submitted for verification.
+    /// @param salt The salt submitted for verification.
     function claimLands(
         address to,
         uint256[] calldata ids,
