@@ -39,8 +39,8 @@ contract ClaimERC721AndERC1155 {
         bytes32 salt
     ) internal {
         _checkValidity(to, assetIds, assetValues, landIds, proof, salt);
-        _sendAssets(to, assetIds, assetValues); // TODO: if assetIds and values > 0
-        _sendLands(to, landIds); // TODO: if lands
+        _sendAssets(to, assetIds, assetValues);
+        _sendLands(to, landIds);
         emit ClaimedAssetsAndLands(to, assetIds, assetValues, landIds);
     }
 
