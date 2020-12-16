@@ -96,6 +96,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         override
         returns (uint256[] memory)
     {
+        require(_ownerOf(gameId) != address(0), "NONEXISTANT_TOKEN");
         uint256 length = assetIds.length;
         uint256[] memory assets;
         assets = new uint256[](length);
