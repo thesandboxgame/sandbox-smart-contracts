@@ -7,7 +7,6 @@ import {expect} from '../chai-setup';
 import {
   waitFor,
   expectEventWithArgs,
-  expectReceiptEventWithArgs,
   expectEventWithArgsFromReceipt,
   findEvents,
 } from '../utils';
@@ -1249,21 +1248,19 @@ describe('GameToken', function () {
     });
   });
 
-  describe('GameToken: Token Immutability', function () {
-    //@note 3-part ID:
-    it('should store the creator address, randomID & version in the gameId', async function () {});
+  // describe('GameToken: Token Immutability', function () {
+  //   //@note 3-part ID:
+  //   it('should store the creator address, randomID & version in the gameId', async function () {});
 
-    it('should update the version every time assets are added or removed', async function () {});
+  //   it('should update the version every time assets are added or removed', async function () {});
 
-    //@note modifying the token should retain mappings to assets
-    it('should map to game Assets using ONLY the creator address + randomId portion of the gameId', async function () {});
+  //   //@note modifying the token should retain mappings to assets
+  //   it('should map to game Assets using ONLY the creator address + randomId portion of the gameId', async function () {});
 
-    //@note modifying the token should retain mappings to metadata
-    it('should map to game MetaData using ONLY the creator address + randomId portion of the gameId', async function () {});
+  //   //@note modifying the token should retain mappings to metadata
+  //   it('should map to game MetaData using ONLY the creator address + randomId portion of the gameId', async function () {});
 
-    // @note this is to prevent frontrunning a GAME-token purchase tx
-    it('calling "destroyAndRecover" or "destroyGame" should increment the gameId version', async function () {});
-  });
+  // });
 
   describe('GameToken: MetaTransactions', function () {
     it('can set the MetaTransactionProcessor type', async function () {
