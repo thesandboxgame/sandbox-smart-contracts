@@ -7,7 +7,6 @@ import {expect} from '../chai-setup';
 import {
   waitFor,
   expectEventWithArgs,
-  expectReceiptEventWithArgs,
   expectEventWithArgsFromReceipt,
   findEvents,
 } from '../utils';
@@ -596,9 +595,9 @@ describe('GameToken', function () {
           assetsAddedReceipt,
           'AssetsAdded'
         );
-        const newGameId = assetsAddedEvent.args[3];
+        gameId = assetsAddedEvent.args[3];
 
-        const gameStateAfter = await gameToken.getAssetBalances(newGameId, [
+        const gameStateAfter = await gameToken.getAssetBalances(gameId, [
           assetId,
           assetId2,
         ]);
@@ -618,7 +617,6 @@ describe('GameToken', function () {
           'balanceOf(address,uint256)'
         ](GameOwner.address, assetId2);
 
-        const oldId = assetsAddedEvent.args[0];
         const eventAssets = assetsAddedEvent.args[1];
         const values = assetsAddedEvent.args[2];
 
@@ -627,7 +625,6 @@ describe('GameToken', function () {
         expect(ownerBalanceAfter2).to.be.equal(ownerBalanceBefore2 - 42);
         expect(contractBalanceAfter2).to.be.equal(contractBalanceBefore2 + 42);
 
-        expect(oldId).to.be.equal(gameId);
         expect(eventAssets[0]).to.be.equal(assetId);
         expect(eventAssets[1]).to.be.equal(assetId2);
         expect(values[0]).to.be.equal(quantities[0]);
@@ -655,17 +652,18 @@ describe('GameToken', function () {
           ''
         );
 
-        const gameStateAfter = await gameToken.getAssetBalances(gameId, [
-          singleAssetId,
-        ]);
-        expect(gameStateAfter[0]).to.be.equal(0);
-
         const assetsRemovedEvent = await expectEventWithArgs(
           gameToken,
           assetRemovalReceipt,
           'AssetsRemoved'
         );
-        const id = assetsRemovedEvent.args[0];
+        gameId = assetsRemovedEvent.args[4];
+
+        const gameStateAfter = await gameToken.getAssetBalances(gameId, [
+          singleAssetId,
+        ]);
+        expect(gameStateAfter[0]).to.be.equal(0);
+
         const eventAssets = assetsRemovedEvent.args[1];
         const values = assetsRemovedEvent.args[2];
         const to = assetsRemovedEvent.args[3];
@@ -678,7 +676,6 @@ describe('GameToken', function () {
 
         expect(contractBalanceAfter).to.be.equal(contractBalanceBefore - 1);
         expect(ownerBalanceAfter).to.be.equal(ownerBalanceBefore + 1);
-        expect(id).to.be.equal(gameId);
         expect(eventAssets[0]).to.be.equal(singleAssetId);
         expect(values[0]).to.be.equal(1);
         expect(to).to.be.equal(GameOwner.address);
@@ -725,6 +722,13 @@ describe('GameToken', function () {
           ''
         );
 
+        const assetsRemovedEvent = await expectEventWithArgs(
+          gameToken,
+          assetRemovalReceipt,
+          'AssetsRemoved'
+        );
+        gameId = assetsRemovedEvent.args[4];
+
         const gameStateAfter = await gameToken.getAssetBalances(gameId, [
           assetId,
           assetId2,
@@ -732,12 +736,6 @@ describe('GameToken', function () {
         expect(gameStateAfter[0]).to.be.equal(0);
         expect(gameStateAfter[1]).to.be.equal(11);
 
-        const assetsRemovedEvent = await expectEventWithArgs(
-          gameToken,
-          assetRemovalReceipt,
-          'AssetsRemoved'
-        );
-        const id = assetsRemovedEvent.args[0];
         const eventAssets = assetsRemovedEvent.args[1];
         const values = assetsRemovedEvent.args[2];
         const to = assetsRemovedEvent.args[3];
@@ -759,7 +757,6 @@ describe('GameToken', function () {
         expect(contractBalance2After).to.be.equal(contractBalance2Before - 31);
         expect(ownerBalanceAfter).to.be.equal(ownerBalanceBefore + 7);
         expect(ownerBalance2After).to.be.equal(ownerBalance2Before + 31);
-        expect(id).to.be.equal(gameId);
         expect(eventAssets[0]).to.be.equal(assetId);
         expect(eventAssets[1]).to.be.equal(assetId2);
         expect(values[0]).to.be.equal(7);
@@ -1251,21 +1248,19 @@ describe('GameToken', function () {
     });
   });
 
-  describe('GameToken: Token Immutability', function () {
-    //@note 3-part ID:
-    it('should store the creator address, randomID & version in the gameId', async function () {});
+  // describe('GameToken: Token Immutability', function () {
+  //   //@note 3-part ID:
+  //   it('should store the creator address, randomID & version in the gameId', async function () {});
 
-    it('should update the version every time assets are added or removed', async function () {});
+  //   it('should update the version every time assets are added or removed', async function () {});
 
-    //@note modifying the token should retain mappings to assets
-    it('should map to game Assets using ONLY the creator address + randomId portion of the gameId', async function () {});
+  //   //@note modifying the token should retain mappings to assets
+  //   it('should map to game Assets using ONLY the creator address + randomId portion of the gameId', async function () {});
 
-    //@note modifying the token should retain mappings to metadata
-    it('should map to game MetaData using ONLY the creator address + randomId portion of the gameId', async function () {});
+  //   //@note modifying the token should retain mappings to metadata
+  //   it('should map to game MetaData using ONLY the creator address + randomId portion of the gameId', async function () {});
 
-    // @note this is to prevent frontrunning a GAME-token purchase tx
-    it('calling "destroyAndRecover" or "destroyGame" should increment the gameId version', async function () {});
-  });
+  // });
 
   describe('GameToken: MetaTransactions', function () {
     it('can set the MetaTransactionProcessor type', async function () {
