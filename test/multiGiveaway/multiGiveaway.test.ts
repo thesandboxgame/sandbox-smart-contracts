@@ -192,13 +192,16 @@ describe('Multi_Giveaway_1', function () {
       mint: true,
     };
     const setUp = await setupTestGiveaway(options);
-    const {giveawayContract, others, tree, claims} = setUp;
+    const {giveawayContract, others, tree, claims, landContract} = setUp;
 
     const claim = claims[2];
     const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
+
+    const originalOwnerLandId1 = await landContract.ownerOf(0);
+    expect(originalOwnerLandId1).to.equal(giveawayContract.address);
 
     await waitFor(
       giveawayContractAsUser.claimAssetsAndLands(
@@ -210,6 +213,9 @@ describe('Multi_Giveaway_1', function () {
         claim.salt
       )
     );
+
+    const ownerLandId1 = await landContract.ownerOf(7);
+    expect(ownerLandId1).to.equal(claim.reservedAddress);
   });
 
   it('User can claim allocated assets (when there are no lands allocated) from Giveaway contract', async function () {
@@ -217,13 +223,26 @@ describe('Multi_Giveaway_1', function () {
       mint: true,
     };
     const setUp = await setupTestGiveaway(options);
-    const {giveawayContract, others, tree, claims} = setUp;
+    const {giveawayContract, others, tree, claims, assetContract} = setUp;
 
     const claim = claims[3];
     const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
+
+    const initBalanceAssetId1 = await assetContract[
+      'balanceOf(address,uint256)'
+    ](giveawayContract.address, claim.assetIds[0]);
+    expect(initBalanceAssetId1).to.equal(claim.assetValues[0]);
+    const initBalanceAssetId2 = await assetContract[
+      'balanceOf(address,uint256)'
+    ](giveawayContract.address, claim.assetIds[1]);
+    expect(initBalanceAssetId2).to.equal(claim.assetValues[1]);
+    const initBalanceAssetId3 = await assetContract[
+      'balanceOf(address,uint256)'
+    ](giveawayContract.address, claim.assetIds[2]);
+    expect(initBalanceAssetId3).to.equal(claim.assetValues[2]);
 
     await waitFor(
       giveawayContractAsUser.claimAssetsAndLands(
@@ -235,6 +254,22 @@ describe('Multi_Giveaway_1', function () {
         claim.salt
       )
     );
+
+    const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
+      others[1],
+      claim.assetIds[0]
+    );
+    expect(balanceAssetId1).to.equal(claim.assetValues[0]);
+    const balanceAssetId2 = await assetContract['balanceOf(address,uint256)'](
+      others[1],
+      claim.assetIds[1]
+    );
+    expect(balanceAssetId2).to.equal(claim.assetValues[1]);
+    const balanceAssetId3 = await assetContract['balanceOf(address,uint256)'](
+      others[1],
+      claim.assetIds[2]
+    );
+    expect(balanceAssetId3).to.equal(claim.assetValues[2]);
   });
 
   it('User tries to claim the wrong amount of an assetID', async function () {
