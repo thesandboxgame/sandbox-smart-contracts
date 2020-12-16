@@ -5,10 +5,10 @@ import {
   getNamedAccounts,
 } from 'hardhat';
 import MerkleTree from '../../lib/merkleTree';
-import {createLandClaimMerkleTree} from '../../data/land_giveaway_1/getLands';
+import {createLandClaimMerkleTree} from '../../data/giveaways/land_giveaway_1/getLands';
 import helpers from '../../lib/merkleTreeHelper';
 const {createDataArrayClaimableLands} = helpers;
-import {default as testLandData} from '../../data/land_giveaway_1/testLands.json';
+import {default as testLandData} from '../../data/giveaways/land_giveaway_1/testLands.json';
 
 type Options = {
   mint?: boolean;

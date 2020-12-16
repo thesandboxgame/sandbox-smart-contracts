@@ -6,10 +6,10 @@ import {
 } from 'hardhat';
 import {expect} from '../chai-setup';
 import MerkleTree from '../../lib/merkleTree';
-import {createAssetAndLandClaimMerkleTree} from '../../data/multi_giveaway_1/getClaims';
+import {createAssetAndLandClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getClaims';
 import helpers from '../../lib/merkleTreeHelper';
 const {createDataArrayClaimableAssetsAndLands} = helpers;
-import {default as testData} from '../../data/multi_giveaway_1/testClaims.json';
+import {default as testData} from '../../data/giveaways/multi_giveaway_1/testClaims.json';
 
 const ipfsHashString =
   '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';

@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {createAssetAndLandClaimMerkleTree} from '../data/multi_giveaway_1/getClaims';
-import {default as claimData} from '../data/multi_giveaway_1/claims.json';
+import {createAssetAndLandClaimMerkleTree} from '../data/giveaways/multi_giveaway_1/getClaims';
+import {default as claimData} from '../data/giveaways/multi_giveaway_1/claims.json';
 const ASSETS_HOLDER = '0x0000000000000000000000000000000000000000';
 
 const LAND_HOLDER = '0x0000000000000000000000000000000000000000';

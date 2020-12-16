@@ -1,7 +1,7 @@
 import fs from 'fs';
 import {BigNumber} from 'ethers';
-import MerkleTree from '../../lib/merkleTree';
-import helpers from '../../lib/merkleTreeHelper';
+import MerkleTree from '../../../lib/merkleTree';
+import helpers from '../../../lib/merkleTreeHelper';
 
 const {createDataArrayClaimableLands, saltClaimableLands} = helpers;
 

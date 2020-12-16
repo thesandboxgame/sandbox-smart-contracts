@@ -1,7 +1,7 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {createAssetClaimMerkleTree} from '../data/asset_giveaway_1/getAssets';
-import {default as assetData} from '../data/asset_giveaway_1/assets.json';
+import {createAssetClaimMerkleTree} from '../data/giveaways/asset_giveaway_1/getAssets';
+import {default as assetData} from '../data/giveaways/asset_giveaway_1/assets.json';
 
 const ASSETS_HOLDER = '0x0000000000000000000000000000000000000000';
 
