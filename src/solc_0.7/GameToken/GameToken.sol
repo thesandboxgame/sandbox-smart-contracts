@@ -33,20 +33,16 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
 
     /// @dev Emits when a game is updated.
     /// @param newId The id of the newly minted token.
-    /// @param addedAssets An array of asset Ids that were added.
-    /// @param addedAmounts An array of asset values that were added.
+    /// @param addedAssets A 2d array of [assetIds] and [amounts] that were added.
     /// @param uri The new URI that was set for the token.
-    /// @param removedAssets An array of asset Ids that were removed.
-    /// @param removedAmounts An array of asset values that were removed.
+    /// @param removedAssets A 2d array of [assetIds] and [amounts] that were removed.
     /// @param to The receiving address for the removed assets.
     /// @param oldId The id of the previous erc721 GAME token.
     event GameTokenUpdated(
         uint256 indexed newId,
-        uint256[] addedAssets,
-        uint256[] addedAmounts,
+        uint256[][2] addedAssets,
         string uri,
-        uint256[] removedAssets,
-        uint256[] removedAmounts,
+        uint256[][2] removedAssets,
         address to,
         uint256 indexed oldId
     );
@@ -265,7 +261,6 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         address from,
         address to,
         uint256 gameId,
-        // @note try out 2d arrays to avoid stack too deep error
         uint256[][2] calldata addAssets,
         uint256[][2] calldata removeAssets,
         string calldata uri
@@ -285,7 +280,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         }
 
         uint256 newId = _bumpGameVersion(from, gameId);
-        emit GameTokenUpdated(newId, addAssets[0], addAssets[1], uri, removeAssets[0], removeAssets[1], to, gameId);
+        emit GameTokenUpdated(newId, addAssets, uri, removeAssets, to, gameId);
         return newId;
     }
 
@@ -422,9 +417,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
             values[i] = _gameAssets[baseId][assetIds[i]];
             delete _gameAssets[baseId][assetIds[i]];
         }
-        uint256[] memory emptyArray = new uint256[](0);
+        // uint256[][2] memory emptyArray = new uint256[][](0);
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
-        emit GameTokenUpdated(gameId, emptyArray, emptyArray, "", assetIds, values, to, gameId);
+        // emit GameTokenUpdated(gameId, emptyArray, "", assetIds, values, to, gameId);
     }
 
     /// @dev Check if a withdrawal is allowed.
