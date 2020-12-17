@@ -1,27 +1,24 @@
 import {ethers} from 'hardhat';
 import {setupTestGiveaway} from './fixtures';
-import {constants} from 'ethers';
-import {waitFor, expectReceiptEventWithArgs, increaseTime} from '../utils';
-import {expect} from '../chai-setup';
-
+import {waitFor} from '../utils';
 import helpers from '../../lib/merkleTreeHelper';
 const {calculateClaimableAssetHash} = helpers;
 
-const zeroAddress = constants.AddressZero;
-
 describe('GAS:Asset_Giveaway_1:Claiming', function () {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const gasReport: any = {};
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function record(name: any, gasUsed: any) {
-    gasReport[name] = gasUsed.toNumber(); // TODO average...
+    gasReport[name] = gasUsed.toNumber();
   }
   after(function () {
     console.log(JSON.stringify(gasReport, null, '  '));
   });
 
-  it('User claims assets', async function () {
+  it('4000 claims', async function () {
     const options = {
       assetsHolder: true,
-      mint: true,
+      mintSingleAsset: 4000,
     };
     const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, assets} = setUp;
@@ -30,7 +27,6 @@ describe('GAS:Asset_Giveaway_1:Claiming', function () {
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
-
     const receipt = await waitFor(
       giveawayContractAsUser.claimAssets(
         others[1],
@@ -40,6 +36,30 @@ describe('GAS:Asset_Giveaway_1:Claiming', function () {
         asset.salt
       )
     );
-    record('singleClaimAssets', receipt.gasUsed);
+    record('Gas per claim - 4000 claims total', receipt.gasUsed);
+  });
+
+  it('10000 claims', async function () {
+    const options = {
+      assetsHolder: true,
+      mintSingleAsset: 10000,
+    };
+    const setUp = await setupTestGiveaway(options);
+    const {giveawayContract, others, tree, assets} = setUp;
+    const asset = assets[0];
+    const proof = tree.getProof(calculateClaimableAssetHash(asset));
+    const giveawayContractAsUser = await giveawayContract.connect(
+      ethers.provider.getSigner(others[1])
+    );
+    const receipt = await waitFor(
+      giveawayContractAsUser.claimAssets(
+        others[1],
+        asset.assetIds,
+        asset.assetValues,
+        proof,
+        asset.salt
+      )
+    );
+    record('Gas per claim - 10000 claims total', receipt.gasUsed);
   });
 });

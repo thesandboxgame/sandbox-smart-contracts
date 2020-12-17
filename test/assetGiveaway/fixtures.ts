@@ -18,6 +18,7 @@ import {expectReceiptEventWithArgs, waitFor} from '../utils';
 
 type Options = {
   mint?: boolean;
+  mintSingleAsset?: number;
   assetsHolder?: boolean;
 };
 
@@ -27,7 +28,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 ) {
   const {network, getChainId} = hre;
   const chainId = await getChainId();
-  const {mint, assetsHolder} = options || {};
+  const {mint, mintSingleAsset, assetsHolder} = options || {};
   const {
     deployer,
     assetAdmin,
@@ -127,6 +128,40 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   if (mint) {
     const assetsWithIds = await mintAssetsWithNewIds();
     dataWithIds = assetsWithIds;
+  }
+
+  async function mintSingleAssetWithId(claim: any) {
+    return {
+      ...claim,
+      assetIds: await Promise.all(
+        claim.assetIds.map(
+          async (assetPackId: number, index: number) =>
+            await mintTestAssets(assetPackId, claim.assetValues[index])
+        )
+      ),
+    };
+  }
+
+  if (mintSingleAsset) {
+    // Set up blank testData for thousands of users
+    const emptyData: any = [];
+    for (let i = 0; i < 1; i++) {
+      const claim: any = {
+        reservedAddress: others[1],
+        assetIds: [i],
+        assetValues: [1],
+      };
+      emptyData.push(await mintSingleAssetWithId(claim));
+    }
+    for (let i = 1; i < mintSingleAsset; i++) {
+      const claim: any = {
+        reservedAddress: others[1],
+        assetIds: [i],
+        assetValues: [1],
+      };
+      emptyData.push(claim);
+    }
+    dataWithIds = emptyData;
   }
 
   // Set up tree with test assets
