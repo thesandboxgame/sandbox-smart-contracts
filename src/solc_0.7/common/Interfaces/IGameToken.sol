@@ -1,5 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
+pragma abicoder v2;
 
 /// @title Interface for the Game token
 
@@ -38,10 +39,8 @@ interface IGameToken {
         address from,
         address to,
         uint256 gameId,
-        uint256[] calldata addAssets,
-        uint256[] calldata addAmounts,
-        uint256[] calldata removeAssets,
-        uint256[] calldata removeAmounts,
+        uint256[][2] calldata addAssets,
+        uint256[][2] calldata removeAssets,
         string calldata uri
     ) external returns (uint256);
 
