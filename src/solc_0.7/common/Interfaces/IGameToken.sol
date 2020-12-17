@@ -44,6 +44,7 @@ interface IGameToken {
     ) external returns (uint256);
 
     function removeAssets(
+        address from,
         uint256 gameId,
         uint256[] calldata assetIds,
         uint256[] calldata values,
