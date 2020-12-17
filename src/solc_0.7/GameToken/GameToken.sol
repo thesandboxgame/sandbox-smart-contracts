@@ -424,6 +424,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     ) internal notToZero(to) notToThis(to) {
         require(_ownerOf(gameId) == address(0), "ONLY_FROM_BURNED_TOKEN");
         bool validMetaTx = _isValidMetaTx(from);
+        // @review if it is a valid metaTx, we still need to check the _owners mapping
         if (!validMetaTx) {
             require(from == msg.sender, "INVALID_RECOVERY_CALLER");
             _check_withdrawal_authorized(from, gameId);
@@ -506,18 +507,17 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         address originalCreator = address(gameId / CREATOR_OFFSET_MULTIPLIER);
         uint64 randomId = uint64(gameId / RANDOM_ID_MULTIPLIER);
         uint32 version = uint32(gameId);
-        uint32 newVersion = version + 1;
+        version++;
         address owner = _ownerOf(gameId);
-        uint256 newId = _mintGame(originalCreator, owner, randomId, newVersion);
-        address owner2 = _ownerOf(newId);
+        uint256 newId = _mintGame(originalCreator, owner, randomId, version);
+        address newOwner = _ownerOf(newId);
+        assert(owner == newOwner);
         _burn(from, owner, gameId);
-        assert(owner == owner2);
         return newId;
     }
 
     function _extractBaseId(uint256 gameId) internal pure returns (uint224) {
-        uint224 shiftedId = uint224(gameId / 10**8);
-        return shiftedId;
+        return uint224(gameId / 10**8);
     }
 
     /// @dev Create a new gameId and associate it with an owner.
