@@ -34,21 +34,14 @@ interface IGameToken {
         uint256[] calldata assetIds
     ) external;
 
-    function addAssets(
+    function updateGame(
         address from,
-        uint256 gameId,
-        uint256[] calldata assetIds,
-        uint256[] calldata values,
-        string calldata uri,
-        bool isCreation
-    ) external returns (uint256);
-
-    function removeAssets(
-        address from,
-        uint256 gameId,
-        uint256[] calldata assetIds,
-        uint256[] calldata values,
         address to,
+        uint256 gameId,
+        uint256[] calldata addAssets,
+        uint256[] calldata addAmounts,
+        uint256[] calldata removeAssets,
+        uint256[] calldata removeAmounts,
         string calldata uri
     ) external returns (uint256);
 
@@ -76,8 +69,6 @@ interface IGameToken {
     function symbol() external pure returns (string memory);
 
     function tokenURI(uint256 gameId) external returns (string memory uri);
-
-    function setTokenURI(uint256 gameId, string calldata uri) external;
 
     function onERC1155Received(
         address operator,
