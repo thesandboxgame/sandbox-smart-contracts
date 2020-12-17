@@ -20,7 +20,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     uint256 private constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
-    uint256 private constant RANDOM_ID_MULTIPLIER = uint256(2)**(256 - 224);
+    uint256 private constant SUBID_MULTIPLIER = uint256(2)**(256 - 224);
 
     mapping(uint224 => mapping(uint256 => uint256)) private _gameAssets;
     mapping(address => address) private _creatorship; // creatorship transfer
@@ -156,7 +156,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @param assetIds The ids of the assets to add to this game.
     /// @param values the amount of each token id to add to game.
     /// @param editor The address to allow to edit (can also be set later).
-    /// @param randomId A random id created on the backend.
+    /// @param subId A random id created on the backend.
     /// @return id The id of the new GAME token (erc721).
     function createGame(
         address from,
@@ -165,9 +165,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint256[] memory values,
         address editor,
         string memory uri,
-        uint64 randomId
+        uint64 subId
     ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256 id) {
-        uint256 gameId = _mintGame(from, to, randomId, 0);
+        uint256 gameId = _mintGame(from, to, subId, 0);
         uint224 baseId = _extractBaseId(gameId);
 
         if (editor != address(0)) {
@@ -477,13 +477,13 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @dev Create a new gameId and associate it with an owner.
     /// @param from The address of one creating the game.
     /// @param to The address of the Game owner.
-    /// @param randomId The id to use when generating the new GameId.
+    /// @param subId The id to use when generating the new GameId.
     /// @param version The version number part of the gameId.
     /// @return id The newly created gameId.
     function _mintGame(
         address from,
         address to,
-        uint64 randomId,
+        uint64 subId,
         uint32 version
     ) internal returns (uint256 id) {
         uint32 idVersion;
@@ -492,7 +492,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         } else {
             idVersion = version;
         }
-        uint256 gameId = _generateGameId(from, randomId, idVersion);
+        uint256 gameId = _generateGameId(from, subId, idVersion);
         _owners[gameId] = uint256(to);
         _numNFTPerAddress[to]++;
         emit Transfer(address(0), to, gameId);
@@ -515,11 +515,11 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
 
     function _bumpGameVersion(address from, uint256 gameId) internal returns (uint256) {
         address originalCreator = address(gameId / CREATOR_OFFSET_MULTIPLIER);
-        uint64 randomId = uint64(gameId / RANDOM_ID_MULTIPLIER);
+        uint64 subId = uint64(gameId / SUBID_MULTIPLIER);
         uint32 version = uint32(gameId);
         version++;
         address owner = _ownerOf(gameId);
-        uint256 newId = _mintGame(originalCreator, owner, randomId, version);
+        uint256 newId = _mintGame(originalCreator, owner, subId, version);
         address newOwner = _ownerOf(newId);
         assert(owner == newOwner);
         _burn(from, owner, gameId);
@@ -532,14 +532,14 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
 
     /// @dev Create a new gameId and associate it with an owner.
     /// This is a packed id, consisting of 3 parts:
-    /// the creator's address, a uint64 randomID and a uint32 version number.
+    /// the creator's address, a uint64 subId and a uint32 version number.
     /// @param creator The address of the Game creator.
-    /// @param randomId The id to use when generating the new GameId.
+    /// @param subId The id to use when generating the new GameId.
     function _generateGameId(
         address creator,
-        uint64 randomId,
+        uint64 subId,
         uint32 version
     ) internal pure returns (uint256) {
-        return uint256(creator) * CREATOR_OFFSET_MULTIPLIER + uint64(randomId) * RANDOM_ID_MULTIPLIER + uint32(version);
+        return uint256(creator) * CREATOR_OFFSET_MULTIPLIER + uint64(subId) * SUBID_MULTIPLIER + uint32(version);
     }
 }
