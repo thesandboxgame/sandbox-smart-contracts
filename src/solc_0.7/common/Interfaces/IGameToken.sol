@@ -35,14 +35,14 @@ interface IGameToken {
         uint256[] calldata assetIds
     ) external;
 
-    // function updateGame(
-    //     address from,
-    //     address to,
-    //     uint256 gameId,
-    //     uint256[][2] calldata addAssets,
-    //     uint256[][2] calldata removeAssets,
-    //     string calldata uri
-    // ) external returns (uint256);
+    function updateGame(
+        address from,
+        address to,
+        uint256 gameId,
+        uint256[][2] calldata addAssets,
+        uint256[][2] calldata removeAssets,
+        string calldata uri
+    ) external returns (uint256);
 
     function getAssetBalances(uint256 gameId, uint256[] calldata assetIds) external view returns (uint256[] calldata);
 
