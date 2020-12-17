@@ -27,7 +27,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
 
     mapping(uint224 => string) private _metaData;
     // @review Can/should we force removing gameEditors on transfer (sale) of game t0oken?
-    mapping(uint224 => mapping(address => bool)) private _gameEditors;
+    mapping(address => mapping(address => bool)) private _gameEditors;
 
     ///////////////////////////////  Events //////////////////////////////
 
@@ -54,10 +54,10 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     event CreatorshipTransfer(address indexed original, address indexed from, address indexed to);
 
     /// @dev Emits when an address has its gameEditor status changed.
-    /// @param id The original creator of the GAME token.
+    /// @param gameOwner The owner of the GAME token.
     /// @param gameEditor The address whose editor rights to update.
     /// @param isEditor WHether the address 'gameEditor' should be an editor.
-    event GameEditorSet(uint256 indexed id, address gameEditor, bool isEditor);
+    event GameEditorSet(address indexed gameOwner, address gameEditor, bool isEditor);
 
     constructor(
         address metaTransactionContract,
@@ -104,18 +104,16 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     }
 
     /// @notice Allow token owner to set game editors.
-    /// @param from The address of the one creating the game (may be different from msg.sender if metaTx).
-    /// @param gameId The id of the GAME token owned by owner.
+    /// @param gameCreator The address of a GAME token creator.
     /// @param editor The address of the editor to set.
     /// @param isEditor Add or remove the ability to edit.
     function setGameEditor(
-        address from,
-        uint256 gameId,
+        address gameCreator,
         address editor,
         bool isEditor
     ) external override {
-        require(msg.sender == _ownerOf(gameId) || _isValidMetaTx(from), "EDITOR_ACCESS_DENIED");
-        _setGameEditor(gameId, editor, isEditor);
+        require(msg.sender == gameCreator || _isValidMetaTx(gameCreator), "EDITOR_ACCESS_DENIED");
+        _setGameEditor(gameCreator, editor, isEditor);
     }
 
     /// @notice Transfers creatorship of `original` from `sender` to `to`.
@@ -167,7 +165,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint224 baseId = _extractBaseId(gameId);
 
         if (editor != address(0)) {
-            _setGameEditor(gameId, editor, true);
+            _setGameEditor(to, editor, true);
         }
 
         if (assetIds.length != 0) {
@@ -178,12 +176,11 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     }
 
     /// @notice Get game editor status.
-    /// @param gameId The id of the GAME token owned by owner.
+    /// @param gameOwner The address of the owner of the GAME.
     /// @param editor The address of the editor to set.
     /// @return isEditor Editor status of editor for given tokenId.
-    function isGameEditor(uint256 gameId, address editor) external view override returns (bool isEditor) {
-        uint224 baseId = _extractBaseId(gameId);
-        return _gameEditors[baseId][editor];
+    function isGameEditor(address gameOwner, address editor) external view override returns (bool isEditor) {
+        return _gameEditors[gameOwner][editor];
     }
 
     /// @notice Called by other contracts to check if this can receive erc1155 batch.
@@ -257,32 +254,32 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         _destroyGame(from, to, gameId);
     }
 
-    function updateGame(
-        address from,
-        address to,
-        uint256 gameId,
-        uint256[][2] calldata addAssets,
-        uint256[][2] calldata removeAssets,
-        string calldata uri
-    ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256) {
-        uint224 baseId = _extractBaseId(gameId);
-        bool uriUpdated = keccak256(bytes(uri)) != keccak256(bytes(_metaData[baseId]));
-        require(addAssets[0].length != 0 || removeAssets[0].length != 0 || uriUpdated, "INVALID_UPDATE");
+    // function updateGame(
+    //     address from,
+    //     address to,
+    //     uint256 gameId,
+    //     uint256[][2] calldata addAssets,
+    //     uint256[][2] calldata removeAssets,
+    //     string calldata uri
+    // ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256) {
+    //     uint224 baseId = _extractBaseId(gameId);
+    //     bool uriUpdated = keccak256(bytes(uri)) != keccak256(bytes(_metaData[baseId]));
+    //     require(addAssets[0].length != 0 || removeAssets[0].length != 0 || uriUpdated, "INVALID_UPDATE");
 
-        if (addAssets[0].length != 0) {
-            _addAssets(from, baseId, addAssets[0], addAssets[1]);
-        }
-        if (removeAssets[0].length != 0) {
-            _removeAssets(baseId, removeAssets[0], removeAssets[1], to);
-        }
-        if (uriUpdated) {
-            _metaData[baseId] = uri;
-        }
+    //     if (addAssets[0].length != 0) {
+    //         _addAssets(from, baseId, addAssets[0], addAssets[1]);
+    //     }
+    //     if (removeAssets[0].length != 0) {
+    //         _removeAssets(baseId, removeAssets[0], removeAssets[1], to);
+    //     }
+    //     if (uriUpdated) {
+    //         _metaData[baseId] = uri;
+    //     }
 
-        uint256 newId = _bumpGameVersion(from, gameId);
-        emit GameTokenUpdated(newId, addAssets, uri, removeAssets, to, gameId);
-        return newId;
-    }
+    //     uint256 newId = _bumpGameVersion(from, gameId);
+    //     emit GameTokenUpdated(newId, addAssets, uri, removeAssets, to, gameId);
+    //     return newId;
+    // }
 
     /// @notice Add assets to an existing GAME.
     /// @param from The address of the current owner of assets.
@@ -470,17 +467,16 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     }
 
     /// @dev Allow token owner to set game editors.
-    /// @param gameId The id of the GAME token owned by owner.
+    /// @param gameCreator The address of a GAME creator,
     /// @param editor The address of the editor to set.
     /// @param isEditor Add or remove the ability to edit.
     function _setGameEditor(
-        uint256 gameId,
+        address gameCreator,
         address editor,
         bool isEditor
     ) internal {
-        emit GameEditorSet(gameId, editor, isEditor);
-        uint224 baseId = _extractBaseId(gameId);
-        _gameEditors[baseId][editor] = isEditor;
+        emit GameEditorSet(gameCreator, editor, isEditor);
+        _gameEditors[gameCreator][editor] = isEditor;
     }
 
     function _bumpGameVersion(address from, uint256 gameId) internal returns (uint256) {
