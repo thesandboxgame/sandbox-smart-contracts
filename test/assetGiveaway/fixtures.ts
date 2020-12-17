@@ -130,6 +130,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     dataWithIds = assetsWithIds;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function mintSingleAssetWithId(claim: any) {
     return {
       ...claim,
@@ -144,8 +145,10 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   if (mintSingleAsset) {
     // Set up blank testData for thousands of users
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const emptyData: any = [];
     for (let i = 0; i < 1; i++) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const claim: any = {
         reservedAddress: others[1],
         assetIds: [i],
@@ -154,6 +157,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
       emptyData.push(await mintSingleAssetWithId(claim));
     }
     for (let i = 1; i < mintSingleAsset; i++) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const claim: any = {
         reservedAddress: others[1],
         assetIds: [i],
