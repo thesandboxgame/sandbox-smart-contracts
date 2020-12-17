@@ -299,13 +299,14 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
             _asset.safeBatchTransferFrom(from, address(this), assetIds, values, "");
         }
 
-        _setTokenURI(gameId, baseId, uri);
         if (!isCreation) {
             uint256 newId = _bumpGameVersion(from, gameId);
             emit AssetsAdded(gameId, assetIds, values, newId);
+            _setTokenURI(newId, baseId, uri);
             return newId;
         } else {
             emit AssetsAdded(gameId, assetIds, values, gameId);
+            _setTokenURI(gameId, baseId, uri);
             return gameId;
         }
     }
