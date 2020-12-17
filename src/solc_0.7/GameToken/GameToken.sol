@@ -261,33 +261,33 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         _destroyGame(from, to, gameId);
     }
 
-    // function updateGame(
-    //     address from,
-    //     address to,
-    //     uint256 gameId,
-    //     // @note try out 2d arrays to avoid stack too deep error
-    //     uint256[][2] calldata addAssets,
-    //     uint256[][2] calldata removeAssets,
-    //     string calldata uri
-    // ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256) {
-    //     uint224 baseId = _extractBaseId(gameId);
-    //     bool uriUpdated = keccak256(bytes(uri)) != keccak256(bytes(_metaData[baseId]));
-    //     require(addAssets[0].length != 0 || removeAssets[0].length != 0 || uriUpdated, "INVALID_UPDATE");
+    function updateGame(
+        address from,
+        address to,
+        uint256 gameId,
+        // @note try out 2d arrays to avoid stack too deep error
+        uint256[][2] calldata addAssets,
+        uint256[][2] calldata removeAssets,
+        string calldata uri
+    ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256) {
+        uint224 baseId = _extractBaseId(gameId);
+        bool uriUpdated = keccak256(bytes(uri)) != keccak256(bytes(_metaData[baseId]));
+        require(addAssets[0].length != 0 || removeAssets[0].length != 0 || uriUpdated, "INVALID_UPDATE");
 
-    //     if (addAssets[0].length != 0) {
-    //         _addAssets(from, baseId, addAssets[0], addAssets[1]);
-    //     }
-    //     if (removeAssets[0].length != 0) {
-    //         _removeAssets(from, baseId, removeAssets[0], removeAssets[1], to);
-    //     }
-    //     if (uriUpdated) {
-    //         _metaData[baseId] = uri;
-    //     }
+        if (addAssets[0].length != 0) {
+            _addAssets(from, baseId, addAssets[0], addAssets[1]);
+        }
+        if (removeAssets[0].length != 0) {
+            _removeAssets(baseId, removeAssets[0], removeAssets[1], to);
+        }
+        if (uriUpdated) {
+            _metaData[baseId] = uri;
+        }
 
-    //     uint256 newId = _bumpGameVersion(from, gameId);
-    //     emit GameTokenUpdated(newId, addAssets[0], addAssets[1], uri, removeAssets[0], removeAssets[1], to, gameId);
-    //     return newId;
-    // }
+        uint256 newId = _bumpGameVersion(from, gameId);
+        emit GameTokenUpdated(newId, addAssets[0], addAssets[1], uri, removeAssets[0], removeAssets[1], to, gameId);
+        return newId;
+    }
 
     /// @notice Add assets to an existing GAME.
     /// @param from The address of the current owner of assets.
