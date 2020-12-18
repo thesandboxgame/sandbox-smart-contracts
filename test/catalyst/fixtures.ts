@@ -1,11 +1,9 @@
 import {
   ethers,
   deployments,
-  getUnnamedAccounts,
   getNamedAccounts,
 } from 'hardhat';
-import { Contract, BigNumber } from 'ethers';
-
+import { Contract } from 'ethers';
 
 export const setupAssetAttributesRegistry = deployments.createFixture(async () => {
   await deployments.fixture();
@@ -13,8 +11,6 @@ export const setupAssetAttributesRegistry = deployments.createFixture(async () =
     'AssetAttributesRegistry'
   );
   const { assetAttributesRegistryAdmin } = await getNamedAccounts();
-
-
 
   return {
     assetAttributesRegistry,
