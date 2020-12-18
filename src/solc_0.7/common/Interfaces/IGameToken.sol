@@ -10,17 +10,15 @@ interface IGameToken {
         uint256[] assetAmountsToRemove;
         uint256[] assetIdsToAdd;
         uint256[] assetAmountsToAdd;
-        string uri;
+        bytes32 uri;
     }
 
     function createGame(
         address from,
         address to,
-        uint256[] calldata assetIds,
-        uint256[] calldata values,
+        Update calldata creation,
         address editor,
-        string calldata uri,
-        uint64 randomId
+        uint64 subId
     ) external returns (uint256 id);
 
     function destroyGame(
@@ -72,7 +70,7 @@ interface IGameToken {
 
     function symbol() external pure returns (string memory);
 
-    function tokenURI(uint256 gameId) external returns (string memory uri);
+    function tokenURI(uint256 gameId) external returns (bytes32 uri);
 
     function onERC1155Received(
         address operator,
