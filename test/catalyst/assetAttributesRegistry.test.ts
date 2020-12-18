@@ -231,6 +231,18 @@ describe('AssetAttributesRegistry', function () {
     }
   });
 
+  it('addGems should fail for non-nft', async function () {
+    const { assetAttributesRegistry, assetAttributesRegistryAdmin } = await setupAssetAttributesRegistry();
+    const assetId = BigNumber.from("9435802489392532849329415225251965785597302377102806428109850929297113483264");
+    const gemsIds = [gems[0].gemId];
+    const rareCatalystId = catalysts[1].catalystId;
+
+    await setCatalyst(assetId, rareCatalystId, gemsIds);
+    await expect(assetAttributesRegistry
+      .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
+      .addGems(assetId, [gems[1].gemId])).to.be.revertedWith("INVALID_NOT_NFT");
+  });
+
   it('addGems should fail for non minter account', async function () {
     const { assetAttributesRegistry } = await setupAssetAttributesRegistry();
     const assetId = BigNumber.from("0x0000000000000000000000000000000000000000800000000000000000000000");
