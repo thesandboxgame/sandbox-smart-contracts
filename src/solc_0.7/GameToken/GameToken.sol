@@ -169,6 +169,13 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         }
         _metaData[baseId] = uri;
         _numNFTPerAddress[to]++;
+
+        Update memory creation;
+        creation.assetIdToAdd = assetIds;
+        creation.assetAmountsToAdd = values;
+        creation.uri = uri;
+
+        emit GameTokenUpdated(0, gameId, creation, to);
         return gameId;
     }
 
