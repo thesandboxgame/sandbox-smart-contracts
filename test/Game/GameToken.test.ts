@@ -132,7 +132,7 @@ describe('GameToken', function () {
     it('Minter can create GAMEs when _Minter is set', async function () {
       const randomId = await getRandom();
 
-      const minterReceipt = gameTokenAsMinter.createGame(
+      const minterReceipt = await gameTokenAsMinter.createGame(
         users[3].address,
         users[4].address,
         [],
@@ -149,6 +149,11 @@ describe('GameToken', function () {
       gameId = transferEvent.args[2];
       const gameOwner = transferEvent.args[1];
 
+      // @review I think this fails because were checking ownerOf with full id, not base id
+      // const shiftedId = gameId.div(10 ** 8);
+      // const baseId = shiftedId.mul(10 ** 8);
+
+      // expect(await gameToken.ownerOf(baseId)).to.be.equal(users[4].address);
       expect(await gameToken.ownerOf(gameId)).to.be.equal(users[4].address);
       expect(gameOwner).to.be.equal(users[4].address);
     });
