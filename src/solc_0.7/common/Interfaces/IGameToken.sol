@@ -6,9 +6,9 @@ pragma abicoder v2;
 
 interface IGameToken {
     struct Update {
-        uint256[] assetIdToRemove;
+        uint256[] assetIdsToRemove;
         uint256[] assetAmountsToRemove;
-        uint256[] assetIdToAdd;
+        uint256[] assetIdsToAdd;
         uint256[] assetAmountsToAdd;
         string uri;
     }

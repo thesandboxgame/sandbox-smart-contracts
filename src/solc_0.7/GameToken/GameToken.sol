@@ -170,8 +170,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         _metaData[baseId] = uri;
         _numNFTPerAddress[to]++;
 
+        // @review An optimization here would be to take anUpdate struct as a param, rather than creating one in memory each time.
         Update memory creation;
-        creation.assetIdToAdd = assetIds;
+        creation.assetIdsToAdd = assetIds;
         creation.assetAmountsToAdd = values;
         creation.uri = uri;
 
@@ -266,8 +267,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         IGameToken.Update memory update
     ) public override onlyMinter() notToZero(to) notToThis(to) returns (uint256) {
         uint256 baseId = _extractBaseId(gameId);
-        _addAssets(from, baseId, update.assetIdToAdd, update.assetAmountsToAdd);
-        _removeAssets(baseId, update.assetIdToRemove, update.assetAmountsToRemove, to);
+        _addAssets(from, baseId, update.assetIdsToAdd, update.assetAmountsToAdd);
+        _removeAssets(baseId, update.assetIdsToRemove, update.assetAmountsToRemove, to);
 
         // do not check for changes as uri is most likely to change if using ipfs
         // on that note, using ipfs solely would allow us to use 32bytes only : reducing the cost and ensuring token is fully immutable
@@ -420,9 +421,12 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
             values[i] = _gameAssets[baseId][assetIds[i]];
             delete _gameAssets[baseId][assetIds[i]];
         }
-        // uint256[][2] memory emptyArray = new uint256[][](0);
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
-        // emit GameTokenUpdated(gameId, emptyArray, "", assetIds, values, to, gameId);
+
+        Update memory recovery;
+        recovery.assetIdsToRemove = assetIds;
+        recovery.assetAmountsToRemove = values;
+        emit GameTokenUpdated(gameId, 0, recovery, to);
     }
 
     /// @dev Check if a withdrawal is allowed.
