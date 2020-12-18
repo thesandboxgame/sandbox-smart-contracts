@@ -248,7 +248,6 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         _destroyGame(from, to, gameId);
     }
 
-    // minter need to ensure from is checked
     function updateGame(
         address from,
         address to,
@@ -258,16 +257,10 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint256 baseId = _extractBaseId(gameId);
         _addAssets(from, baseId, update.assetIdsToAdd, update.assetAmountsToAdd);
         _removeAssets(baseId, update.assetIdsToRemove, update.assetAmountsToRemove, to);
-
-        // do not check for changes as uri is most likely to change if using ipfs
-        // on that note, using ipfs solely would allow us to use 32bytes only : reducing the cost and ensuring token is fully immutable
-        // should we reconsider ?
-        // use dns url does not bring advantage as we could always have a centralised mapping `baseId -> uri` that would fit the same purpose
         _metaData[baseId] = update.uri;
-
         uint256 newId = _bumpGameVersion(from, gameId);
-        emit GameTokenUpdated(gameId, newId, update, to);
 
+        emit GameTokenUpdated(gameId, newId, update, to);
         return newId;
     }
 
@@ -379,10 +372,10 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         address to,
         uint256 gameId
     ) internal notToZero(to) notToThis(to) {
-        address owner = _ownerOf(gameId);
+        uint256 baseId = _extractBaseId(gameId);
+        address owner = _ownerOf(baseId);
         require(msg.sender == owner || _isValidMetaTx(from), "DESTROY_ACCESS_DENIED");
         require(from == owner, "DESTROY_INVALID_FROM");
-        uint256 baseId = _extractBaseId(gameId);
         delete _metaData[baseId];
         _creatorship[creatorOf(gameId)] = address(0);
         _burn(from, owner, gameId);
@@ -498,9 +491,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
 
     function _extractBaseId(uint256 gameId) internal pure returns (uint256) {
         // Right-shift to drop the version
-        uint224 shiftedBaseId = uint224(gameId / 10**8);
+        uint224 shiftedBaseId = uint224(gameId >> 8);
         // Left-shift to pad with 0s again
-        return shiftedBaseId * 10**8;
+        return shiftedBaseId << 8;
     }
 
     /// @dev Create a new gameId and associate it with an owner.
