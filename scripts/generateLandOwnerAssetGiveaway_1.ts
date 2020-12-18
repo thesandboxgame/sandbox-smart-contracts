@@ -83,7 +83,9 @@ const blockNumber = 11438254; // Dec-12-2020 12:59:57 PM +UTC
   for (const landOwner of landOwners) {
     assetClaims.push({
       reservedAddress: landOwner.id,
-      assetIds: [''],
+      assetIds: [
+        '55464657044963196816950587289035428064568320970692304673817341489687505668096',
+      ],
       assetValues: [1],
     });
   }
