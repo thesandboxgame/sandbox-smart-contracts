@@ -9,14 +9,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   let currentAdmin;
   try {
-    currentAdmin = await read('Multi_Giveaway_1', 'getAdmin');
+    currentAdmin = await read('Multi_Giveaway_1_with_ERC20', 'getAdmin');
   } catch (e) {
     // no admin
   }
   if (currentAdmin) {
     if (currentAdmin.toLowerCase() !== nftGiveawayAdmin.toLowerCase()) {
       await execute(
-        'Multi_Giveaway_1',
+        'Multi_Giveaway_1_with_ERC20',
         {from: currentAdmin, log: true},
         'changeAdmin',
         nftGiveawayAdmin
@@ -24,9 +24,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
   }
 
-  // Set Multi_Giveaway_1 contract as superOperator for Asset
-  // This is needed when Asset_Giveaway_1 is not the assetsHolder
-  const giveawayContract = await deployments.get('Multi_Giveaway_1');
+  // Set Multi_Giveaway_1_with_ERC20 contract as superOperator for Asset
+  // This is needed when the contract is not the assetsHolder
+  const giveawayContract = await deployments.get('Multi_Giveaway_1_with_ERC20');
 
   const isAssetSuperOperator = await read(
     'Land',
@@ -47,7 +47,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   // TODO: check if needed
-  // Set Multi_Giveaway_1 contract as superOperator for Land
+  // Set giveaway contract as superOperator for Land
 
   const isLandSuperOperator = await read(
     'Land',
@@ -60,6 +60,27 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const currentAssetAdmin = await read('Land', 'getAdmin');
     await execute(
       'Land',
+      {from: currentAssetAdmin, log: true},
+      'setSuperOperator',
+      giveawayContract.address,
+      true
+    );
+  }
+
+  // TODO: check if needed
+  // Set giveaway contract as superOperator for Sand
+
+  const isSandSuperOperator = await read(
+    'Sand',
+    'isSuperOperator',
+    giveawayContract.address
+  );
+
+  if (!isSandSuperOperator) {
+    log('setting Giveaway contract as Super Operator for SAND');
+    const currentAssetAdmin = await read('Sand', 'getAdmin');
+    await execute(
+      'Sand',
       {from: currentAssetAdmin, log: true},
       'setSuperOperator',
       giveawayContract.address,
