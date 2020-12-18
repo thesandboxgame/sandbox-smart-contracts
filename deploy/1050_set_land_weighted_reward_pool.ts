@@ -57,3 +57,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['LandWeightedSANDRewardPool', 'LandWeightedSANDRewardPool_setup'];
 func.dependencies = ['LandWeightedSANDRewardPool_deploy', 'Sand'];
+func.skip = async (hre) => hre.network.name !== 'hardhat';

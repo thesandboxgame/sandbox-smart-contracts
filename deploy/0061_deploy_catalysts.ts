@@ -18,3 +18,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['Catalysts'];
+func.skip = async (hre) => hre.network.name !== 'hardhat';

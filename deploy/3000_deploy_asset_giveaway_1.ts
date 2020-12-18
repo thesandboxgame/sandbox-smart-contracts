@@ -7,6 +7,9 @@ import {
 } from '../data/asset_giveaway_1/getAssets';
 import {AddressZero} from '@ethersproject/constants';
 
+import helpers from '../lib/merkleTreeHelper';
+const {calculateAssetHash} = helpers;
+
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, network, getChainId} = hre;
   const {deploy} = deployments;
@@ -24,11 +27,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     return;
   }
 
-  const {assets, merkleRootHash} = createAssetClaimMerkleTree(
-    network.live,
-    chainId,
-    assetData
-  );
+  const {
+    assets,
+    merkleRootHash,
+    saltedAssets,
+    tree,
+  } = createAssetClaimMerkleTree(network.live, chainId, assetData);
 
   const assetContract = await deployments.get('Asset');
 
@@ -45,7 +49,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', // do not expire
     ],
   });
+
+  const claimsWithProofs: (AssetClaim & {proof: string[]})[] = [];
+  for (const claim of saltedAssets) {
+    claimsWithProofs.push({
+      ...claim,
+      proof: tree.getProof(calculateAssetHash(claim)),
+    });
+  }
+  fs.writeFileSync(
+    `./secret/.asset_claims_proofs_${chainId}.json`,
+    JSON.stringify(claimsWithProofs, null, '  ')
+  );
 };
 export default func;
 func.tags = ['Asset_Giveaway_1', 'Asset_Giveaway_1_deploy'];
 func.dependencies = ['Asset_deploy'];
+func.skip = async (hre) => hre.network.name !== 'hardhat';

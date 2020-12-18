@@ -15,6 +15,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       smurfId =
         '55464657044963196816950587289035428064568320970692304673817341489687505668096';
       break;
+    case 'rinkeby':
+      smurfOwner = '0x60927eB036621b801491B6c5e9A60A8d2dEeD75A';
+      smurfId =
+        '43680867506168749228565131403402869733336284654176091019334004301894460114944';
+      break;
   }
 
   if (!smurfOwner || smurfOwner === '') {
@@ -27,9 +32,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await execute(
     'Asset',
-    {from: smurfOwner},
-    'safeTransferFrom',
+    {from: smurfOwner, log: true},
+    'safeTransferFrom(address,address,uint256,uint256,bytes)',
     smurfOwner,
+    AssetGiveaway.address,
     smurfId,
     assetData.length,
     '0x'
@@ -39,3 +45,4 @@ export default func;
 func.runAtTheEnd = true;
 func.tags = ['Asset_Giveaway_1', 'Asset_Giveaway_1_setup'];
 func.dependencies = ['Asset_Giveaway_1_deploy'];
+func.skip = async (hre) => hre.network.name !== 'hardhat';
