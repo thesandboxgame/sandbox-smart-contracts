@@ -13,7 +13,7 @@ contract ClaimERC721AndERC1155WithERC20 {
     address internal immutable _assetsHolder;
     address internal immutable _landHolder;
     address internal immutable _erc20TokenHolder;
-    event ClaimedAssetsAndLands(
+    event ClaimedAssetsAndLandsWithERC20(
         address to,
         uint256[] assetIds,
         uint256[] assetValues,
@@ -27,7 +27,7 @@ contract ClaimERC721AndERC1155WithERC20 {
         IERC20 erc20Token,
         address assetsHolder,
         address landHolder,
-        address erc20TokenHolder,
+        address erc20TokenHolder
     ) {
         _asset = asset;
         _land = land;
@@ -59,7 +59,7 @@ contract ClaimERC721AndERC1155WithERC20 {
         _checkValidity(to, assetIds, assetValues, landIds, erc20Amount, proof, salt);
         _sendAssets(to, assetIds, assetValues);
         _sendLands(to, landIds);
-        _transferERC20(to, erc20Amount)
+        _transferERC20(to, erc20Amount);
         emit ClaimedAssetsAndLandsWithERC20(to, assetIds, assetValues, landIds, erc20Amount);
     }
 
@@ -71,7 +71,7 @@ contract ClaimERC721AndERC1155WithERC20 {
         uint256 erc20Amount,
         bytes32[] memory proof,
         bytes32 salt
-    ) internal view {
+    ) private view {
         require(assetIds.length == assetValues.length, "INVALID_INPUT");
         bytes32 leaf = _generateClaimHash(to, assetIds, assetValues, landIds, erc20Amount, salt);
         require(_verify(proof, leaf), "INVALID_CLAIM");
@@ -84,11 +84,11 @@ contract ClaimERC721AndERC1155WithERC20 {
         uint256[] memory landIds,
         uint256 erc20Amount,
         bytes32 salt
-    ) internal pure returns (bytes32) {
+    ) private pure returns (bytes32) {
         return keccak256(abi.encodePacked(to, assetIds, assetValues, landIds, erc20Amount, salt));
     }
 
-    function _verify(bytes32[] memory proof, bytes32 leaf) internal view returns (bool) {
+    function _verify(bytes32[] memory proof, bytes32 leaf) private view returns (bool) {
         bytes32 computedHash = leaf;
 
         for (uint256 i = 0; i < proof.length; i++) {
@@ -108,15 +108,15 @@ contract ClaimERC721AndERC1155WithERC20 {
         address to,
         uint256[] memory assetIds,
         uint256[] memory assetValues
-    ) internal {
+    ) private {
         _asset.safeBatchTransferFrom(_assetsHolder, to, assetIds, assetValues, "");
     }
 
-    function _sendLands(address to, uint256[] memory ids) internal {
+    function _sendLands(address to, uint256[] memory ids) private {
         _land.safeBatchTransferFrom(_landHolder, to, ids, "");
     }
 
-    function _transferERC20(to, erc20Amount) {
+    function _transferERC20(address to, uint256 erc20Amount) private {
         require(_erc20Token.transferFrom(_erc20TokenHolder, to, erc20Amount), "ERC20_TRANSFER_FAILED");
     }
 }

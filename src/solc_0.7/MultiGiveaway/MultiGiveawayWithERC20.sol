@@ -24,9 +24,18 @@ contract MultiGiveawayWithERC20 is WithAdmin, ClaimERC721AndERC1155WithERC20 {
         bytes32 merkleRoot,
         address assetsHolder,
         address landHolder,
-        address tokenHolder,
+        address erc20TokenHolder,
         uint256 expiryTime
-    ) ClaimERC721AndERC1155(IERC1155(asset), IERC721Extended(land), IERC20(erc20Token), assetsHolder, landHolder) {
+    )
+        ClaimERC721AndERC1155WithERC20(
+            IERC1155(asset),
+            IERC721Extended(land),
+            IERC20(erc20Token),
+            assetsHolder,
+            landHolder,
+            erc20TokenHolder
+        )
+    {
         _admin = admin;
         _merkleRoot = merkleRoot;
         _expiryTime = expiryTime;
