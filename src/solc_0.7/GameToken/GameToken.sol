@@ -258,7 +258,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint256 gameId,
         IGameToken.Update memory update
     ) public override onlyMinter() notToZero(to) notToThis(to) returns (uint256) {
-        uint224 baseId = _extractBaseId(gameId);
+        uint256 baseId = _extractBaseId(gameId);
         _addAssets(from, baseId, update.assetIdToAdd, update.assetAmountsToAdd);
         _removeAssets(baseId, update.assetIdToRemove, update.assetAmountsToRemove, to);
 
