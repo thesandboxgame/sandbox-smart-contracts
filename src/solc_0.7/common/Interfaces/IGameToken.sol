@@ -5,6 +5,14 @@ pragma abicoder v2;
 /// @title Interface for the Game token
 
 interface IGameToken {
+    struct Update {
+        uint256[] assetIdToRemove;
+        uint256[] assetAmountsToRemove;
+        uint256[] assetIdToAdd;
+        uint256[] assetAmountsToAdd;
+        string uri;
+    }
+
     function createGame(
         address from,
         address to,
@@ -39,9 +47,7 @@ interface IGameToken {
         address from,
         address to,
         uint256 gameId,
-        uint256[][2] calldata addAssets,
-        uint256[][2] calldata removeAssets,
-        string calldata uri
+        Update calldata update
     ) external returns (uint256);
 
     function getAssetBalances(uint256 gameId, uint256[] calldata assetIds) external view returns (uint256[] calldata);

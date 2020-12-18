@@ -32,20 +32,12 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     ///////////////////////////////  Events //////////////////////////////
 
     /// @dev Emits when a game is updated.
-    /// @param newId The id of the newly minted token.
-    /// @param addedAssets A 2d array of [assetIds] and [amounts] that were added.
-    /// @param uri The new URI that was set for the token.
-    /// @param removedAssets A 2d array of [assetIds] and [amounts] that were removed.
-    /// @param to The receiving address for the removed assets.
     /// @param oldId The id of the previous erc721 GAME token.
-    event GameTokenUpdated(
-        uint256 indexed newId,
-        uint256[][2] addedAssets,
-        string uri,
-        uint256[][2] removedAssets,
-        address to,
-        uint256 indexed oldId
-    );
+    /// @param newId The id of the newly minted token.
+    /// @param update The changes made to the Game: new assets, removed assets, uri
+    /// @param to The receiving address for the removed assets.
+
+    event GameTokenUpdated(uint256 indexed oldId, uint256 indexed newId, IGameToken.Update update, address to);
 
     /// @dev Emits when creatorship of a GAME token is transferred.
     /// @param original The original creator of the GAME token.
@@ -257,30 +249,26 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         _destroyGame(from, to, gameId);
     }
 
+    // minter need to ensure from is checked
     function updateGame(
         address from,
         address to,
         uint256 gameId,
-        uint256[][2] calldata addAssets,
-        uint256[][2] calldata removeAssets,
-        string calldata uri
-    ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256) {
+        IGameToken.Update memory update
+    ) public override onlyMinter() notToZero(to) notToThis(to) returns (uint256) {
         uint224 baseId = _extractBaseId(gameId);
-        bool uriUpdated = keccak256(bytes(uri)) != keccak256(bytes(_metaData[baseId]));
-        require(addAssets[0].length != 0 || removeAssets[0].length != 0 || uriUpdated, "INVALID_UPDATE");
+        _addAssets(from, baseId, update.assetIdToAdd, update.assetAmountsToAdd);
+        _removeAssets(baseId, update.assetIdToRemove, update.assetAmountsToRemove, to);
 
-        if (addAssets[0].length != 0) {
-            _addAssets(from, baseId, addAssets[0], addAssets[1]);
-        }
-        if (removeAssets[0].length != 0) {
-            _removeAssets(baseId, removeAssets[0], removeAssets[1], to);
-        }
-        if (uriUpdated) {
-            _metaData[baseId] = uri;
-        }
+        // do not check for changes as uri is most likely to change if using ipfs
+        // on that note, using ipfs solely would allow us to use 32bytes only : reducing the cost and ensuring token is fully immutable
+        // should we reconsider ?
+        // use dns url does not bring advantage as we could always have a centralised mapping `baseId -> uri` that would fit the same purpose
+        _metaData[baseId] = update.uri;
 
         uint256 newId = _bumpGameVersion(from, gameId);
-        emit GameTokenUpdated(newId, addAssets, uri, removeAssets, to, gameId);
+        emit GameTokenUpdated(gameId, newId, update, to);
+
         return newId;
     }
 
@@ -295,6 +283,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint256[] memory assetIds,
         uint256[] memory amounts
     ) internal {
+        if (assetIds.length == 0) {
+            return;
+        }
         require(assetIds.length == amounts.length, "INVALID_INPUT_LENGTHS");
         uint256 currentValue;
         for (uint256 i = 0; i < assetIds.length; i++) {
@@ -320,6 +311,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint256[] memory values,
         address to
     ) internal {
+        if (assetIds.length == 0) {
+            return;
+        }
         require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
         uint256 currentValue;
         for (uint256 i = 0; i < assetIds.length; i++) {
