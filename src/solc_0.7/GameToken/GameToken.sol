@@ -27,7 +27,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     mapping(uint256 => mapping(uint256 => uint256)) private _gameAssets;
     mapping(address => address) private _creatorship; // creatorship transfer
 
-    mapping(uint256 => string) private _metaData;
+    mapping(uint256 => bytes32) private _metaData;
     mapping(address => mapping(address => bool)) private _gameEditors;
 
     ///////////////////////////////  Events //////////////////////////////
@@ -140,42 +140,31 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @notice Create a new GAME token.
     /// @param from The address of the one creating the game (may be different from msg.sender if metaTx).
     /// @param to The address who will be assigned ownership of this game.
-    /// @param assetIds The ids of the assets to add to this game.
-    /// @param values the amount of each token id to add to game.
+    /// @param creation The struct containing ids & ammounts of assets to add to this game,
+    /// along with the uri to set.
     /// @param editor The address to allow to edit (can also be set later).
     /// @param subId A random id created on the backend.
     /// @return id The id of the new GAME token (erc721).
     function createGame(
         address from,
         address to,
-        uint256[] memory assetIds,
-        uint256[] memory values,
+        Update calldata creation,
         address editor,
-        string memory uri,
         uint64 subId
     ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256 id) {
         uint256 gameId = _mintGame(from, to, subId, 0);
         uint256 baseId = _extractBaseId(gameId);
-        // @review goal: prevent id reuse.
-        // caller should not be able to pass an already-used address + subId combo
-        // require(_owners[baseId] == 0, "NO_ID_REUSE");
-        // require(_withdrawalOwnerOf(baseId) == address(0), "NO_ID_REUSE");
+        require(_ownerOf(baseId) == address(0), "NO_ID_REUSE");
+
         if (editor != address(0)) {
             _setGameEditor(to, editor, true);
         }
-
-        if (assetIds.length != 0) {
-            _addAssets(from, baseId, assetIds, values);
+        if (creation.assetIdsToAdd.length != 0) {
+            _addAssets(from, baseId, creation.assetIdsToAdd, creation.assetAmountsToAdd);
         }
-        _metaData[baseId] = uri;
+
+        _metaData[baseId] = creation.uri;
         _numNFTPerAddress[to]++;
-
-        // @review An optimization here would be to take anUpdate struct as a param, rather than creating one in memory each time.
-        Update memory creation;
-        creation.assetIdsToAdd = assetIds;
-        creation.assetAmountsToAdd = values;
-        creation.uri = uri;
-
         emit GameTokenUpdated(0, gameId, creation, to);
         return gameId;
     }
@@ -354,8 +343,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
 
     /// @notice Return the URI of a specific token.
     /// @param gameId The id of the token.
-    /// @return uri The URI of the token.
-    function tokenURI(uint256 gameId) public view override returns (string memory uri) {
+    /// @return uri The URI hash of the token.
+    function tokenURI(uint256 gameId) public view override returns (bytes32 uri) {
         require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
         uint256 baseId = _extractBaseId(gameId);
         return _metaData[baseId];
@@ -472,6 +461,11 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         }
         uint256 gameId = _generateGameId(from, subId, idVersion);
         _owners[gameId] = uint256(to);
+        // uint256 addressAsUint = uint256(to);
+        // uint256 shiftedVersion = uint256(idVersion) * uint256(2)**(256 - 32); // VERSION_OFFSET_MULTIPLIER
+        // uint256 packedValues = shiftedVersion + addressAsUint;
+        // _owners[gameId] = uint256(packedValues);
+
         emit Transfer(address(0), to, gameId);
         return gameId;
     }
