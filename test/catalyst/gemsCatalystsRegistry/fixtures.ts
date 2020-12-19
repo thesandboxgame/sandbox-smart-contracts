@@ -64,31 +64,32 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   const catalystExample: Contract = await ethers.getContract(
     'Catalyst_Example'
   );
-
+  const gemsCatalystsUnit = "1000000000000000000";
+  const mintingAmount = BigNumber.from("8").mul(BigNumber.from(gemsCatalystsUnit))
   await commonCatalyst
     .connect(ethers.provider.getSigner(catalystMinter))
-    .mint(catalystOwner, BigNumber.from('8'));
+    .mint(catalystOwner, mintingAmount);
   await commonCatalyst
     .connect(ethers.provider.getSigner(catalystMinter))
     .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await rareCatalyst
     .connect(ethers.provider.getSigner(catalystMinter))
-    .mint(catalystOwner, BigNumber.from('8'));
+    .mint(catalystOwner, mintingAmount);
   await rareCatalyst
     .connect(ethers.provider.getSigner(catalystMinter))
     .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await powerGem
     .connect(ethers.provider.getSigner(gemMinter))
-    .mint(gemOwner, BigNumber.from('100'));
+    .mint(gemOwner, mintingAmount);
   await powerGem
     .connect(ethers.provider.getSigner(gemMinter))
     .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await defenseGem
     .connect(ethers.provider.getSigner(gemMinter))
-    .mint(gemOwner, BigNumber.from('50'));
+    .mint(gemOwner, mintingAmount);
   await defenseGem
     .connect(ethers.provider.getSigner(gemMinter))
     .setSuperOperator(gemsCatalystsRegistry.address, true);

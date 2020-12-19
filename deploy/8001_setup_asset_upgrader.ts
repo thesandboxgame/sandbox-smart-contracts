@@ -1,9 +1,9 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { DeployFunction } from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments} = hre;
-  const {log, execute, read} = deployments;
+  const { deployments } = hre;
+  const { execute, read } = deployments;
 
   const AssetUpgrader = await deployments.get('AssetUpgrader');
 
@@ -17,7 +17,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const currentAdmin = await read('Sand', 'getAdmin');
     await execute(
       'Sand',
-      {from: currentAdmin, log: true},
+      { from: currentAdmin, log: true },
       'setSuperOperator',
       AssetUpgrader.address,
       true
@@ -34,7 +34,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     const currentAdmin = await read('GemsCatalystsRegistry', 'getAdmin');
     await execute(
       'GemsCatalystsRegistry',
-      {from: currentAdmin, log: true},
+      { from: currentAdmin, log: true },
       'setSuperOperator',
       AssetUpgrader.address,
       true

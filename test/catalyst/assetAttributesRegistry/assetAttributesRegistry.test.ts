@@ -1,9 +1,9 @@
 import { ethers, getUnnamedAccounts } from 'hardhat';
 import { BigNumber } from '@ethersproject/bignumber';
-import { expect } from '../chai-setup';
+import { expect } from '../../chai-setup';
 import { setupAssetAttributesRegistry } from './fixtures';
-import catalysts from '../../data/catalysts';
-import gems from '../../data/gems';
+import catalysts from '../../../data/catalysts';
+import gems from '../../../data/gems';
 
 describe('AssetAttributesRegistry', function () {
 
