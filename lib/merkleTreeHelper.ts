@@ -16,8 +16,8 @@ interface claim {
   reservedAddress: string;
   assetIds?: Array<BigNumber> | Array<string> | Array<number>;
   assetValues?: Array<number>;
-  landIds?: Array<number>;
-  ids?: Array<BigNumber> | Array<string> | Array<number>;
+  landIds?: Array<number>; // multi claim
+  ids?: Array<BigNumber> | Array<string> | Array<number>; // land claim only
   sand?: number | BigNumber;
   salt?: string;
 }
