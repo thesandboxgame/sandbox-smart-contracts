@@ -3,7 +3,10 @@ import {BigNumber} from 'ethers';
 import MerkleTree from '../../../lib/merkleTree';
 import helpers from '../../../lib/merkleTreeHelper';
 
-const {createDataArrayClaimableAssets, saltClaimableAssets} = helpers;
+const {
+  createDataArrayClaimableAssetsLandsAndSand,
+  saltClaimableAssetsLandsAndSand,
+} = helpers;
 
 type AssetClaim = {
   reservedAddress: string;
@@ -39,8 +42,10 @@ export function createAssetClaimMerkleTree(
     expose = true;
   }
 
-  const saltedAssets = saltClaimableAssets(assetData, secret);
-  const tree = new MerkleTree(createDataArrayClaimableAssets(saltedAssets));
+  const saltedAssets = saltClaimableAssetsLandsAndSand(assetData, secret);
+  const tree = new MerkleTree(
+    createDataArrayClaimableAssetsLandsAndSand(saltedAssets)
+  );
   const merkleRootHash = tree.getRoot().hash;
 
   return {

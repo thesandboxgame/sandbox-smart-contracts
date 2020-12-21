@@ -2,7 +2,7 @@ import {ethers} from 'hardhat';
 import {setupTestGiveaway} from './fixtures';
 import {waitFor} from '../utils';
 import helpers from '../../lib/merkleTreeHelper';
-const {calculateClaimableAssetHash} = helpers;
+const {calculateClaimableAssetLandAndSandHash} = helpers;
 
 describe('GAS:Asset_Giveaway_1:Claiming', function () {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,7 +23,7 @@ describe('GAS:Asset_Giveaway_1:Claiming', function () {
     const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, assets} = setUp;
     const asset = assets[0];
-    const proof = tree.getProof(calculateClaimableAssetHash(asset));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -47,7 +47,7 @@ describe('GAS:Asset_Giveaway_1:Claiming', function () {
     const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, assets} = setUp;
     const asset = assets[0];
-    const proof = tree.getProof(calculateClaimableAssetHash(asset));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -71,7 +71,7 @@ describe('GAS:Asset_Giveaway_1:Claiming', function () {
     const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, assets} = setUp;
     const asset = assets[0];
-    const proof = tree.getProof(calculateClaimableAssetHash(asset));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -95,7 +95,7 @@ describe('GAS:Asset_Giveaway_1:Claiming', function () {
     const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, assets} = setUp;
     const asset = assets[0];
-    const proof = tree.getProof(calculateClaimableAssetHash(asset));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
