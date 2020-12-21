@@ -18,6 +18,10 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     bytes4 internal constant ERC165ID = 0x01ffc9a7;
     bytes4 internal constant ERC721_MANDATORY_RECEIVER = 0x5e8bf644;
 
+    uint256 internal constant NOT_ADDRESS = 0xFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000;
+    uint256 internal constant OPERATOR_FLAG = (2**255);
+    uint256 internal constant NOT_OPERATOR_FLAG = OPERATOR_FLAG - 1;
+
     mapping(address => uint256) internal _numNFTPerAddress;
     mapping(uint256 => uint256) internal _owners;
     mapping(address => mapping(address => bool)) internal _operatorsForAll;
@@ -32,13 +36,14 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     /// @param operator The address receiving the approval.
     /// @param id The id of the token.
     function approve(address operator, uint256 id) external override {
-        address owner = _ownerOf(id);
+        uint256 ownerData = _owners[id];
+        address owner = address(ownerData);
         require(owner != address(0), "NONEXISTENT_TOKEN");
         require(
             owner == msg.sender || _superOperators[msg.sender] || _operatorsForAll[owner][msg.sender],
             "UNAUTHORIZED_APPROVAL"
         );
-        _approveFor(owner, operator, id);
+        _approveFor(ownerData, operator, id);
     }
 
     /// @notice Approve an operator to spend tokens on the sender behalf.
@@ -50,7 +55,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         address operator,
         uint256 id
     ) external {
-        address owner = _ownerOf(id);
+        uint256 ownerData = _owners[id];
         require(sender != address(0), "ZERO_ADDRESS_SENDER");
         require(
             msg.sender == sender ||
@@ -59,8 +64,8 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
                 _operatorsForAll[sender][msg.sender],
             "UNAUTHORIZED_APPROVAL"
         );
-        require(owner == sender, "OWNER_NOT_SENDER");
-        _approveFor(owner, operator, id);
+        require(address(ownerData) == sender, "OWNER_NOT_SENDER");
+        _approveFor(ownerData, operator, id);
     }
 
     /// @notice Transfer a token between 2 addresses.
@@ -232,7 +237,19 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         return id == 0x01ffc9a7 || id == 0x80ac58cd;
     }
 
-    /// @dev See transferFrom.
+    function _updateOwner(
+        uint256 id,
+        uint256 oldData,
+        address newOwner,
+        bool hasOperator
+    ) internal virtual {
+        if (hasOperator) {
+            _owners[id] = (oldData & NOT_ADDRESS) | OPERATOR_FLAG | uint256(newOwner);
+        } else {
+            _owners[id] = ((oldData & NOT_ADDRESS) & NOT_OPERATOR_FLAG) | uint256(newOwner);
+        }
+    }
+
     function _transferFrom(
         address from,
         address to,
@@ -240,20 +257,21 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     ) internal {
         _numNFTPerAddress[from]--;
         _numNFTPerAddress[to]++;
-        _owners[id] = uint256(to);
+        _updateOwner(id, _owners[id], to, false);
         emit Transfer(from, to, id);
     }
 
     /// @dev See approveFor.
     function _approveFor(
-        address owner,
+        uint256 ownerData,
         address operator,
         uint256 id
     ) internal {
+        address owner = address(ownerData);
         if (operator == address(0)) {
-            _owners[id] = _owners[id] & (2**255 - 1); // no need to resset the operator, it will be overriden next time
+            _updateOwner(id, ownerData, owner, false);
         } else {
-            _owners[id] = _owners[id] | (2**255);
+            _updateOwner(id, ownerData, owner, true);
             _operators[id] = operator;
         }
         emit Approval(owner, operator, id);
@@ -282,7 +300,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
             (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
             require(owner == from, "BATCHTRANSFERFROM_NOT_OWNER");
             require(authorized || (operatorEnabled && _operators[id] == msg.sender), "NOT_AUTHORIZED");
-            _owners[id] = uint256(to);
+            _updateOwner(id, _owners[id], to, false);
             emit Transfer(from, to, id);
         }
         if (from != to) {
