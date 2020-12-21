@@ -20,11 +20,6 @@ const func: DeployFunction = async function () {
       smurfId =
         '43680867506168749228565131403402869733336284654176091019334004301894460114944';
       break;
-    // case 'rinkeby_test':
-    //   smurfOwner = '0x60927eB036621b801491B6c5e9A60A8d2dEeD75A';
-    //   smurfId =
-    //     '43680867506168749228565131403402869733336284654176091019334004301894460114944';
-    //   break;
   }
 
   if (!smurfOwner || smurfOwner === '') {
