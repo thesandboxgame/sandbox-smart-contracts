@@ -5,7 +5,7 @@ import {waitFor, expectReceiptEventWithArgs, increaseTime} from '../utils';
 import {expect} from '../chai-setup';
 
 import helpers from '../../lib/merkleTreeHelper';
-const {calculateClaimableAssetAndLandHash} = helpers;
+const {calculateClaimableAssetLandAndSandHash} = helpers;
 
 const zeroAddress = constants.AddressZero;
 
@@ -18,7 +18,7 @@ describe('Multi_Giveaway_1', function () {
     const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, claims} = setUp;
     const claim = claims[0];
-    const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -51,7 +51,7 @@ describe('Multi_Giveaway_1', function () {
 
     const claim = claims[0];
 
-    const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -127,7 +127,7 @@ describe('Multi_Giveaway_1', function () {
     const {giveawayContract, others, tree, claims} = setUp;
 
     const claim = claims[0];
-    const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -170,7 +170,7 @@ describe('Multi_Giveaway_1', function () {
     const {giveawayContract, others, tree, claims} = setUp;
 
     const claim = claims[1];
-    const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -195,7 +195,7 @@ describe('Multi_Giveaway_1', function () {
     const {giveawayContract, others, tree, claims, landContract} = setUp;
 
     const claim = claims[2];
-    const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -226,7 +226,7 @@ describe('Multi_Giveaway_1', function () {
     const {giveawayContract, others, tree, claims, assetContract} = setUp;
 
     const claim = claims[3];
-    const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -280,7 +280,7 @@ describe('Multi_Giveaway_1', function () {
     const {giveawayContract, others, tree, claims} = setUp;
 
     const claim = claims[1];
-    const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -305,7 +305,7 @@ describe('Multi_Giveaway_1', function () {
     const {giveawayContract, others, tree, claims} = setUp;
 
     const claim = claims[0];
-    const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -340,7 +340,7 @@ describe('Multi_Giveaway_1', function () {
     const {giveawayContract, others, tree, claims} = setUp;
 
     const claim = claims[0];
-    const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -365,7 +365,7 @@ describe('Multi_Giveaway_1', function () {
     const {giveawayContract, others, tree, claims} = setUp;
 
     const claim = claims[0];
-    const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -390,7 +390,7 @@ describe('Multi_Giveaway_1', function () {
     const {giveawayContract, others, tree, claims} = setUp;
 
     const claim = claims[0];
-    const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -423,7 +423,7 @@ describe('Multi_Giveaway_1', function () {
     } = setUp;
 
     const claim = claims[0];
-    const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -507,7 +507,7 @@ describe('Multi_Giveaway_1', function () {
     } = setUp;
 
     const claim = claims[0];
-    const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -585,7 +585,7 @@ describe('Multi_Giveaway_1', function () {
     const {giveawayContract, others, tree, claims} = setUp;
 
     const claim = claims[0];
-    const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -640,7 +640,7 @@ describe('Multi_Giveaway_1', function () {
     const {giveawayContract, others, tree, claims} = setUp;
 
     const claim = claims[0];
-    const proof = tree.getProof(calculateClaimableAssetAndLandHash(claim));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );

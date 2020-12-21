@@ -25,13 +25,13 @@ interface land {
 //   salt?: string;
 // }
 
-interface claimableAssetAndLand {
-  reservedAddress: string;
-  assetIds?: Array<BigNumber> | Array<string> | Array<number>;
-  assetValues?: Array<number>;
-  landIds?: Array<number>;
-  salt?: string;
-}
+// interface claimableAssetAndLand {
+//   reservedAddress: string;
+//   assetIds?: Array<BigNumber> | Array<string> | Array<number>;
+//   assetValues?: Array<number>;
+//   landIds?: Array<number>;
+//   salt?: string;
+// }
 
 interface claimableAssetLandAndSand {
   reservedAddress: string;
@@ -282,94 +282,94 @@ function createDataArray(lands: land[], secret?: string): Array<land> {
 
 // Multi Giveaway (Assets and Lands)
 
-function calculateClaimableAssetAndLandHash(
-  claim: claimableAssetAndLand,
-  salt?: string
-): string {
-  const types = [];
-  const values = [];
-  types.push('address');
-  values.push(claim.reservedAddress);
-  if (claim.assetIds) {
-    types.push('uint256[]');
-    values.push(claim.assetIds);
-  }
-  if (claim.assetValues) {
-    types.push('uint256[]');
-    values.push(claim.assetValues);
-  }
-  if (claim.landIds) {
-    types.push('uint256[]');
-    values.push(claim.landIds);
-  }
-  types.push('bytes32');
-  values.push(claim.salt || salt);
+// function calculateClaimableAssetAndLandHash(
+//   claim: claimableAssetAndLand,
+//   salt?: string
+// ): string {
+//   const types = [];
+//   const values = [];
+//   types.push('address');
+//   values.push(claim.reservedAddress);
+//   if (claim.assetIds) {
+//     types.push('uint256[]');
+//     values.push(claim.assetIds);
+//   }
+//   if (claim.assetValues) {
+//     types.push('uint256[]');
+//     values.push(claim.assetValues);
+//   }
+//   if (claim.landIds) {
+//     types.push('uint256[]');
+//     values.push(claim.landIds);
+//   }
+//   types.push('bytes32');
+//   values.push(claim.salt || salt);
 
-  return solidityKeccak256(types, values);
-}
+//   return solidityKeccak256(types, values);
+// }
 
-function saltClaimableAssetsAndLands(
-  claims: claimableAssetAndLand[],
-  secret?: string | Buffer
-): Array<claimableAssetAndLand> {
-  return claims.map((claim) => {
-    const salt = claim.salt;
-    if (!salt) {
-      if (!secret) {
-        throw new Error('Claim need to have a salt or be generated via secret');
-      }
-      const newClaim: claimableAssetAndLand = {
-        reservedAddress: claim.reservedAddress,
-        salt:
-          '0x' +
-          crypto
-            .createHmac('sha256', secret)
-            .update(
-              calculateClaimableAssetAndLandHash(
-                claim,
-                '0x0000000000000000000000000000000000000000000000000000000000000000'
-              )
-            )
-            .digest('hex'),
-      };
-      if (claim.assetIds) newClaim.assetIds = claim.assetIds;
-      if (claim.assetValues) newClaim.assetValues = claim.assetValues;
-      if (claim.landIds) newClaim.landIds = claim.landIds;
-      return newClaim;
-    } else return claim;
-  });
-}
+// function saltClaimableAssetsAndLands(
+//   claims: claimableAssetAndLand[],
+//   secret?: string | Buffer
+// ): Array<claimableAssetAndLand> {
+//   return claims.map((claim) => {
+//     const salt = claim.salt;
+//     if (!salt) {
+//       if (!secret) {
+//         throw new Error('Claim need to have a salt or be generated via secret');
+//       }
+//       const newClaim: claimableAssetAndLand = {
+//         reservedAddress: claim.reservedAddress,
+//         salt:
+//           '0x' +
+//           crypto
+//             .createHmac('sha256', secret)
+//             .update(
+//               calculateClaimableAssetAndLandHash(
+//                 claim,
+//                 '0x0000000000000000000000000000000000000000000000000000000000000000'
+//               )
+//             )
+//             .digest('hex'),
+//       };
+//       if (claim.assetIds) newClaim.assetIds = claim.assetIds;
+//       if (claim.assetValues) newClaim.assetValues = claim.assetValues;
+//       if (claim.landIds) newClaim.landIds = claim.landIds;
+//       return newClaim;
+//     } else return claim;
+//   });
+// }
 
-function createDataArrayClaimableAssetsAndLands(
-  claims: claimableAssetAndLand[],
-  secret?: string
-): Array<claimableAssetAndLand> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data: any = [];
+// function createDataArrayClaimableAssetsAndLands(
+//   claims: claimableAssetAndLand[],
+//   secret?: string
+// ): Array<claimableAssetAndLand> {
+//   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//   const data: any = [];
 
-  claims.forEach((claim: claimableAssetAndLand) => {
-    let salt = claim.salt;
-    if (!salt) {
-      if (!secret) {
-        throw new Error('Claim need to have a salt or be generated via secret');
-      }
-      salt =
-        '0x' +
-        crypto
-          .createHmac('sha256', secret)
-          .update(
-            calculateClaimableAssetAndLandHash(
-              claim,
-              '0x0000000000000000000000000000000000000000000000000000000000000000'
-            )
-          )
-          .digest('hex');
-    }
-    data.push(calculateClaimableAssetAndLandHash(claim, salt));
-  });
+//   claims.forEach((claim: claimableAssetAndLand) => {
+//     let salt = claim.salt;
+//     if (!salt) {
+//       if (!secret) {
+//         throw new Error('Claim need to have a salt or be generated via secret');
+//       }
+//       salt =
+//         '0x' +
+//         crypto
+//           .createHmac('sha256', secret)
+//           .update(
+//             calculateClaimableAssetAndLandHash(
+//               claim,
+//               '0x0000000000000000000000000000000000000000000000000000000000000000'
+//             )
+//           )
+//           .digest('hex');
+//     }
+//     data.push(calculateClaimableAssetAndLandHash(claim, salt));
+//   });
 
-  return data;
-}
+//   return data;
+// }
 
 // Multi Giveaway With ERC20 (Assets, Lands and SAND)
 
@@ -482,9 +482,9 @@ const helpers = {
   // calculateClaimableLandHash,
   // saltClaimableLands,
   // createDataArrayClaimableLands,
-  calculateClaimableAssetAndLandHash,
-  saltClaimableAssetsAndLands,
-  createDataArrayClaimableAssetsAndLands,
+  // calculateClaimableAssetAndLandHash,
+  // saltClaimableAssetsAndLands,
+  // createDataArrayClaimableAssetsAndLands,
   calculateClaimableAssetLandAndSandHash,
   saltClaimableAssetsLandsAndSand,
   createDataArrayClaimableAssetsLandsAndSand,

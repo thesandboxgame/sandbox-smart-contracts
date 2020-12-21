@@ -2,10 +2,7 @@ import {assert} from '../chai-setup';
 
 import MerkleTree from '../../lib/merkleTree';
 import helpers from '../../lib/merkleTreeHelper';
-const {
-  createDataArrayClaimableAssetsAndLands,
-  createDataArrayClaimableAssetsLandsAndSand,
-} = helpers;
+const {createDataArrayClaimableAssetsLandsAndSand} = helpers;
 
 describe('MerkleTree_multi', function () {
   it('should validate the data for assets and lands', async function () {
@@ -33,7 +30,7 @@ describe('MerkleTree_multi', function () {
       },
     ];
 
-    const data = createDataArrayClaimableAssetsAndLands(
+    const data = createDataArrayClaimableAssetsLandsAndSand(
       claims,
       '0x4467363716526536000005451427798982881775318563547751090997863683'
     );

@@ -10,10 +10,7 @@ import MerkleTree from '../../lib/merkleTree';
 import {createAssetAndLandClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getClaims';
 import {createAssetLandAndSandClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1_with_erc20/getClaims';
 import helpers from '../../lib/merkleTreeHelper';
-const {
-  createDataArrayClaimableAssetsAndLands,
-  createDataArrayClaimableAssetsLandsAndSand,
-} = helpers;
+const {createDataArrayClaimableAssetsLandsAndSand} = helpers;
 import {default as testData} from '../../data/giveaways/multi_giveaway_1/testClaims.json';
 import {default as testDataWithERC20} from '../../data/giveaways/multi_giveaway_1_with_erc20/testClaims.json';
 
@@ -193,7 +190,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   const updatedDeployment = await deployments.get('Test_Multi_Giveaway_1');
   const updatedClaims = updatedDeployment.linkedData;
-  const assetAndLandHashArray = createDataArrayClaimableAssetsAndLands(
+  const assetAndLandHashArray = createDataArrayClaimableAssetsLandsAndSand(
     updatedClaims
   );
   const tree = new MerkleTree(assetAndLandHashArray);
@@ -435,7 +432,9 @@ export const setupGiveaway = deployments.createFixture(async function () {
 
   // Set up tree with real assets
   const claims = deployment.linkedData;
-  const assetAndLandHashArray = createDataArrayClaimableAssetsAndLands(claims);
+  const assetAndLandHashArray = createDataArrayClaimableAssetsLandsAndSand(
+    claims
+  );
   const tree = new MerkleTree(assetAndLandHashArray);
 
   return {
