@@ -21,6 +21,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     uint256 internal constant NOT_ADDRESS = 0xFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000;
     uint256 internal constant OPERATOR_FLAG = (2**255);
     uint256 internal constant NOT_OPERATOR_FLAG = OPERATOR_FLAG - 1;
+    uint256 internal constant BURNED_FLAG = (2**160);
 
     mapping(address => uint256) internal _numNFTPerAddress;
     mapping(uint256 => uint256) internal _owners;
@@ -237,7 +238,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         return id == 0x01ffc9a7 || id == 0x80ac58cd;
     }
 
-    function _updateOwner(
+    function _updateOwnerData(
         uint256 id,
         uint256 oldData,
         address newOwner,
@@ -257,7 +258,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     ) internal {
         _numNFTPerAddress[from]--;
         _numNFTPerAddress[to]++;
-        _updateOwner(id, _owners[id], to, false);
+        _updateOwnerData(id, _owners[id], to, false);
         emit Transfer(from, to, id);
     }
 
@@ -269,9 +270,9 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     ) internal {
         address owner = address(ownerData);
         if (operator == address(0)) {
-            _updateOwner(id, ownerData, owner, false);
+            _updateOwnerData(id, ownerData, owner, false);
         } else {
-            _updateOwner(id, ownerData, owner, true);
+            _updateOwnerData(id, ownerData, owner, true);
             _operators[id] = operator;
         }
         emit Approval(owner, operator, id);
@@ -300,7 +301,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
             (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
             require(owner == from, "BATCHTRANSFERFROM_NOT_OWNER");
             require(authorized || (operatorEnabled && _operators[id] == msg.sender), "NOT_AUTHORIZED");
-            _updateOwner(id, _owners[id], to, false);
+            _updateOwnerData(id, _owners[id], to, false);
             emit Transfer(from, to, id);
         }
         if (from != to) {
@@ -335,7 +336,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         uint256 id
     ) internal {
         require(from == owner, "NOT_OWNER");
-        _owners[id] = (_owners[id] & (2**255 - 1)) | (2**160); // record as non owner but keep track of last owner
+        _owners[id] = (_owners[id] & NOT_OPERATOR_FLAG) | BURNED_FLAG; // record as non owner but keep track of last owner
         _numNFTPerAddress[from]--;
         emit Transfer(from, address(0), id);
     }
@@ -379,7 +380,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     /// @dev See ownerOf
     function _ownerOf(uint256 id) internal view virtual returns (address) {
         uint256 data = _owners[id];
-        if ((data & (2**160)) == 2**160) {
+        if ((data & BURNED_FLAG) == BURNED_FLAG) {
             return address(0);
         }
         return address(data);
@@ -391,7 +392,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     /// @return operatorEnabled Whether or not operators are enabled for this token.
     function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {
         uint256 data = _owners[id];
-        if ((data & (2**160)) == 2**160) {
+        if ((data & BURNED_FLAG) == BURNED_FLAG) {
             owner = address(0);
         } else {
             owner = address(data);
