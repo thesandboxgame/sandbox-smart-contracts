@@ -9,9 +9,6 @@ const {calculateClaimableAssetLandAndSandHash} = helpers;
 
 const zeroAddress = constants.AddressZero;
 
-// const getSandAmount = (amount: number) =>
-//   BigNumber.from(amount).mul('1000000000000000000');
-
 describe('Multi_Giveaway_1_with_ERC20', function () {
   it('User cannot claim when test contract holds zero assets/lands', async function () {
     const options = {
@@ -113,6 +110,8 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     expect(originalOwnerLandId4).to.equal(giveawayContract.address);
     const originalOwnerLandId5 = await landContract.ownerOf(4);
     expect(originalOwnerLandId5).to.equal(giveawayContract.address);
+    const originalOwnerLandId6 = await landContract.ownerOf(5);
+    expect(originalOwnerLandId6).to.equal(giveawayContract.address);
 
     const initialSandBalance = await sandContract.balanceOf(others[1]);
     expect(initialSandBalance).to.equal(0);
@@ -130,7 +129,7 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     );
 
     const updatedSandBalance = await sandContract.balanceOf(others[1]);
-    expect(updatedSandBalance).to.equal(claim.sand); // TODO: check BigNumber
+    expect(updatedSandBalance).to.equal(claim.sand);
 
     const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
       others[1],
@@ -158,6 +157,8 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     expect(ownerLandId4).to.equal(claim.reservedAddress);
     const ownerLandId5 = await landContract.ownerOf(4);
     expect(ownerLandId5).to.equal(claim.reservedAddress);
+    const ownerLandId6 = await landContract.ownerOf(5);
+    expect(ownerLandId6).to.equal(claim.reservedAddress);
   });
 
   it('Claimed Event is emitted for successful claim', async function () {
@@ -203,15 +204,69 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     expect(claimedEvent.args[3][2]).to.equal(claim.landIds[2]);
     expect(claimedEvent.args[3][3]).to.equal(claim.landIds[3]);
     expect(claimedEvent.args[3][4]).to.equal(claim.landIds[4]);
+    expect(claimedEvent.args[3][5]).to.equal(claim.landIds[5]);
     expect(claimedEvent.args[4]).to.equal(claim.sand);
   });
 
   it('User can claim allocated sand from Giveaway contract when there are no assets or lands allocated', async function () {
-    // TODO:
+    const options = {
+      mint: true,
+      sand: true,
+    };
+    const setUp = await setupTestGiveawayWithERC20(options);
+    const {giveawayContract, others, tree, claims, sandContract} = setUp;
+
+    const claim = claims[4];
+
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
+    const giveawayContractAsUser = await giveawayContract.connect(
+      ethers.provider.getSigner(others[1])
+    );
+
+    const initialSandBalance = await sandContract.balanceOf(others[1]);
+    expect(initialSandBalance).to.equal(0);
+
+    await waitFor(
+      giveawayContractAsUser.claimAssetsAndLandsWithERC20(
+        others[1],
+        [],
+        [],
+        [],
+        claim.sand,
+        proof,
+        claim.salt
+      )
+    );
+
+    const updatedSandBalance = await sandContract.balanceOf(others[1]);
+    expect(updatedSandBalance).to.equal(claim.sand);
   });
 
   it('User cannot claim if they claim the wrong amount of sand', async function () {
-    // TODO:
+    const options = {
+      mint: true,
+      sand: true,
+    };
+    const setUp = await setupTestGiveawayWithERC20(options);
+    const {giveawayContract, others, tree, claims} = setUp;
+
+    const claim = claims[0];
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
+    const giveawayContractAsUser = await giveawayContract.connect(
+      ethers.provider.getSigner(others[1])
+    );
+
+    await expect(
+      giveawayContractAsUser.claimAssetsAndLandsWithERC20(
+        others[1],
+        claim.assetIds,
+        claim.assetValues,
+        claim.landIds,
+        250, // bad param
+        proof,
+        claim.salt
+      )
+    ).to.be.revertedWith('INVALID_CLAIM');
   });
 
   it('User cannot claim more than once', async function () {
@@ -322,6 +377,7 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
       claims,
       assetContract,
       landContract,
+      sandContract,
     } = setUp;
 
     const claim = claims[0];
@@ -353,6 +409,11 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     expect(originalOwnerLandId4).to.equal(others[7]);
     const originalOwnerLandId5 = await landContract.ownerOf(4);
     expect(originalOwnerLandId5).to.equal(others[7]);
+    const originalOwnerLandId6 = await landContract.ownerOf(5);
+    expect(originalOwnerLandId6).to.equal(others[7]);
+
+    const initialSandBalance = await sandContract.balanceOf(others[1]);
+    expect(initialSandBalance).to.equal(0);
 
     await waitFor(
       giveawayContractAsUser.claimAssetsAndLandsWithERC20(
@@ -392,8 +453,11 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     expect(ownerLandId4).to.equal(claim.reservedAddress);
     const ownerLandId5 = await landContract.ownerOf(4);
     expect(ownerLandId5).to.equal(claim.reservedAddress);
+    const ownerLandId6 = await landContract.ownerOf(5);
+    expect(ownerLandId6).to.equal(claim.reservedAddress);
 
-    // TODO: sand balances
+    const updatedSandBalance = await sandContract.balanceOf(others[1]);
+    expect(updatedSandBalance).to.equal(claim.sand);
   });
 
   it('merkleRoot cannot be set twice', async function () {

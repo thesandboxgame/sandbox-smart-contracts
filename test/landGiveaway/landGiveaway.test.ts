@@ -32,7 +32,7 @@ describe('Land_Giveaway_1', function () {
       mint: true,
     };
     const setUp = await setupTestGiveaway(options);
-    const {giveawayContract, others, tree, lands} = setUp;
+    const {giveawayContract, others, tree, lands, landContract} = setUp;
 
     const land = lands[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
@@ -40,11 +40,23 @@ describe('Land_Giveaway_1', function () {
       ethers.provider.getSigner(others[1])
     );
 
+    const originalOwnerLandId1 = await landContract.ownerOf(0);
+    expect(originalOwnerLandId1).to.equal(giveawayContract.address);
+    const originalOwnerLandId2 = await landContract.ownerOf(1);
+    expect(originalOwnerLandId2).to.equal(giveawayContract.address);
+    const originalOwnerLandId3 = await landContract.ownerOf(2);
+    expect(originalOwnerLandId3).to.equal(giveawayContract.address);
+
     await waitFor(
       giveawayContractAsUser.claimLands(others[1], land.ids, proof, land.salt)
     );
 
-    // TODO: check owner of NFTs
+    const ownerLandId1 = await landContract.ownerOf(0);
+    expect(ownerLandId1).to.equal(land.reservedAddress);
+    const ownerLandId2 = await landContract.ownerOf(1);
+    expect(ownerLandId2).to.equal(land.reservedAddress);
+    const ownerLandId3 = await landContract.ownerOf(2);
+    expect(ownerLandId3).to.equal(land.reservedAddress);
   });
 
   it('Claimed Event is emitted for successful claim', async function () {

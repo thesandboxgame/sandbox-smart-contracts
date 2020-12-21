@@ -30,8 +30,8 @@ contract MultiGiveaway is WithAdmin, ClaimERC721AndERC1155 {
         _expiryTime = expiryTime;
     }
 
-    /// @notice Function to set the merkle root hash for the asset data, if it is 0.
-    /// @param merkleRoot The merkle root hash of the asset data.
+    /// @notice Function to set the merkle root hash for the claim data, if it is 0.
+    /// @param merkleRoot The merkle root hash of the claim data.
     function setMerkleRoot(bytes32 merkleRoot) external onlyAdmin {
         require(_merkleRoot == 0, "MERKLE_ROOT_ALREADY_SET");
         _merkleRoot = merkleRoot;

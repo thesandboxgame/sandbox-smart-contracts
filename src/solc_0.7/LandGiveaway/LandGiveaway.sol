@@ -27,7 +27,7 @@ contract LandGiveaway is WithAdmin, ClaimERC721 {
     }
 
     /// @notice Function to set the merkle root hash for the land data, if it is 0.
-    /// @param merkleRoot The merkle root hash of the asset data.
+    /// @param merkleRoot The merkle root hash of the LAND data.
     function setMerkleRootLands(bytes32 merkleRoot) external onlyAdmin {
         require(_merkleRootLand == 0, "MERKLE_ROOT_ALREADY_SET");
         _merkleRootLand = merkleRoot;

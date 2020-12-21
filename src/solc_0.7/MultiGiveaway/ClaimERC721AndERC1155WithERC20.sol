@@ -18,7 +18,7 @@ contract ClaimERC721AndERC1155WithERC20 {
         uint256[] assetIds,
         uint256[] assetValues,
         uint256[] landIds,
-        uint256 erc20TokenAmount // TODO: add contract address?
+        uint256 erc20TokenAmount
     );
 
     constructor(
