@@ -250,6 +250,13 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         _destroyGame(from, to, gameId);
     }
 
+    /// @notice Update an existing GAME token.This actually burns old token
+    /// and mints new token with same basId & incremented version.
+    /// @param from The one updating the GAME token.
+    /// @param to The receiving address if assets are removed.
+    /// @param gameId The current id of the GAME token.
+    /// @param update The values to use for the update.
+    /// @return The new gameId.
     function updateGame(
         address from,
         address to,
@@ -468,7 +475,6 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
             data = _owners[storageId];
         }
 
-        // @review do I need to clear owner-address bits before doing this if it's an update ?
         _owners[storageId] = (uint256(idVersion) << 200) + uint256(to);
 
         emit Transfer(address(0), to, gameId);
@@ -501,6 +507,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         return newId;
     }
 
+    /// @dev Get the baseId (full id without the version number) from the full tokenId.
+    /// @param id The full tokenId for the GAME token.
+    /// @return The baseId.
     function _storageId(uint256 id) internal pure override returns (uint256) {
         return uint256(id & BASEID_MASK);
     }
@@ -518,6 +527,10 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         return uint256(creator) * CREATOR_OFFSET_MULTIPLIER + uint64(subId) * SUBID_MULTIPLIER + uint32(version);
     }
 
+    // @ review do we need this ?
+    /// @notice Get the stored version number for a given baseId.
+    /// @param baseId The baseId to query.
+    /// @return version The current stored version number for the given baseId.
     function getVersion(uint256 baseId) public view returns (uint32 version) {
         return uint32((_owners[baseId] & VERSION_MASK) >> 200);
     }
