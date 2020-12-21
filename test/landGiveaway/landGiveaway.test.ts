@@ -5,7 +5,7 @@ import {waitFor, expectReceiptEventWithArgs, increaseTime} from '../utils';
 import {expect} from '../chai-setup';
 
 import helpers from '../../lib/merkleTreeHelper';
-const {calculateClaimableLandHash} = helpers;
+const {calculateClaimableAssetLandAndSandHash} = helpers;
 
 const zeroAddress = constants.AddressZero;
 
@@ -17,7 +17,7 @@ describe('Land_Giveaway_1', function () {
     const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, lands} = setUp;
     const land = lands[0];
-    const proof = tree.getProof(calculateClaimableLandHash(land));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -35,7 +35,7 @@ describe('Land_Giveaway_1', function () {
     const {giveawayContract, others, tree, lands} = setUp;
 
     const land = lands[0];
-    const proof = tree.getProof(calculateClaimableLandHash(land));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -55,7 +55,7 @@ describe('Land_Giveaway_1', function () {
     const {giveawayContract, others, tree, lands} = setUp;
 
     const land = lands[0];
-    const proof = tree.getProof(calculateClaimableLandHash(land));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -83,7 +83,7 @@ describe('Land_Giveaway_1', function () {
     const {giveawayContract, others, tree, lands} = setUp;
 
     const land = lands[1];
-    const proof = tree.getProof(calculateClaimableLandHash(land));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -101,7 +101,7 @@ describe('Land_Giveaway_1', function () {
     const {giveawayContract, others, tree, lands} = setUp;
 
     const land = lands[0];
-    const proof = tree.getProof(calculateClaimableLandHash(land));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -122,7 +122,7 @@ describe('Land_Giveaway_1', function () {
     const {giveawayContract, others, tree, lands} = setUp;
 
     const land = lands[0];
-    const proof = tree.getProof(calculateClaimableLandHash(land));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -145,7 +145,7 @@ describe('Land_Giveaway_1', function () {
     const {giveawayContract, others, tree, lands} = setUp;
 
     const land = lands[0];
-    const proof = tree.getProof(calculateClaimableLandHash(land));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -164,7 +164,7 @@ describe('Land_Giveaway_1', function () {
     const {giveawayContract, others, tree, lands} = setUp;
 
     const land = lands[0];
-    const proof = tree.getProof(calculateClaimableLandHash(land));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );
@@ -211,7 +211,7 @@ describe('Land_Giveaway_1', function () {
     const {giveawayContract, others, tree, lands} = setUp;
 
     const land = lands[0];
-    const proof = tree.getProof(calculateClaimableLandHash(land));
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[1])
     );

@@ -7,7 +7,7 @@ import {
 import MerkleTree from '../../lib/merkleTree';
 import {createLandClaimMerkleTree} from '../../data/giveaways/land_giveaway_1/getLands';
 import helpers from '../../lib/merkleTreeHelper';
-const {createDataArrayClaimableLands} = helpers;
+const {createDataArrayClaimableAssetsLandsAndSand} = helpers;
 import {default as testLandData} from '../../data/giveaways/land_giveaway_1/testLands.json';
 
 type Options = {
@@ -78,7 +78,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   const giveawayContract = await ethers.getContract('Test_Land_Giveaway_1');
 
-  const landHashArray = createDataArrayClaimableLands(lands);
+  const landHashArray = createDataArrayClaimableAssetsLandsAndSand(lands);
   const tree = new MerkleTree(landHashArray);
 
   return {
@@ -104,7 +104,7 @@ export const setupGiveaway = deployments.createFixture(async function () {
 
   // Set up tree with real lands
   const lands = deployment.linkedData;
-  const landHashArray = createDataArrayClaimableLands(lands);
+  const landHashArray = createDataArrayClaimableAssetsLandsAndSand(lands);
   const tree = new MerkleTree(landHashArray);
 
   return {
