@@ -18,11 +18,6 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     bytes4 internal constant ERC165ID = 0x01ffc9a7;
     bytes4 internal constant ERC721_MANDATORY_RECEIVER = 0x5e8bf644;
 
-    uint256 internal constant NOT_ADDRESS = 0xFFFFFFFFFFFFFFFFFFFFFFFF0000000000000000000000000000000000000000;
-    uint256 internal constant OPERATOR_FLAG = (2**255);
-    uint256 internal constant NOT_OPERATOR_FLAG = OPERATOR_FLAG - 1;
-    uint256 internal constant BURNED_FLAG = (2**160);
-
     mapping(address => uint256) internal _numNFTPerAddress;
     mapping(uint256 => uint256) internal _owners;
     mapping(address => mapping(address => bool)) internal _operatorsForAll;
@@ -39,14 +34,13 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
      * @param id The id of the token
      */
     function approve(address operator, uint256 id) external override {
-        uint256 ownerData = _owners[_storageId(id)];
-        address owner = address(ownerData);
+        address owner = _ownerOf(id);
         require(owner != address(0), "NONEXISTENT_TOKEN");
         require(
             owner == msg.sender || _superOperators[msg.sender] || _operatorsForAll[owner][msg.sender],
             "UNAUTHORIZED_APPROVAL"
         );
-        _approveFor(ownerData, operator, id);
+        _approveFor(owner, operator, id);
     }
 
     /**
@@ -60,7 +54,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         address operator,
         uint256 id
     ) external {
-        uint256 ownerData = _owners[_storageId(id)];
+        address owner = _ownerOf(id);
         require(sender != address(0), "ZERO_ADDRESS_SENDER");
         require(
             msg.sender == sender ||
@@ -69,8 +63,8 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
                 _operatorsForAll[sender][msg.sender],
             "UNAUTHORIZED_APPROVAL"
         );
-        require(address(ownerData) == sender, "OWNER_NOT_SENDER");
-        _approveFor(ownerData, operator, id);
+        require(owner == sender, "OWNER_NOT_SENDER");
+        _approveFor(owner, operator, id);
     }
 
     /**
@@ -265,23 +259,6 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         return id == 0x01ffc9a7 || id == 0x80ac58cd;
     }
 
-    function _storageId(uint256 id) internal view virtual returns (uint256) {
-        return id;
-    }
-
-    function _updateOwnerData(
-        uint256 id,
-        uint256 oldData,
-        address newOwner,
-        bool hasOperator
-    ) internal virtual {
-        if (hasOperator) {
-            _owners[_storageId(id)] = (oldData & NOT_ADDRESS) | OPERATOR_FLAG | uint256(newOwner);
-        } else {
-            _owners[_storageId(id)] = ((oldData & NOT_ADDRESS) & NOT_OPERATOR_FLAG) | uint256(newOwner);
-        }
-    }
-
     function _transferFrom(
         address from,
         address to,
@@ -289,20 +266,19 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     ) internal {
         _numNFTPerAddress[from]--;
         _numNFTPerAddress[to]++;
-        _updateOwnerData(id, _owners[_storageId(id)], to, false);
+        _owners[id] = uint256(to);
         emit Transfer(from, to, id);
     }
 
     function _approveFor(
-        uint256 ownerData,
+        address owner,
         address operator,
         uint256 id
     ) internal {
-        address owner = address(ownerData);
         if (operator == address(0)) {
-            _updateOwnerData(id, ownerData, owner, false);
+            _owners[id] = _owners[id] & (2**255 - 1); // no need to resset the operator, it will be overriden next time
         } else {
-            _updateOwnerData(id, ownerData, owner, true);
+            _owners[id] = _owners[id] | (2**255);
             _operators[id] = operator;
         }
         emit Approval(owner, operator, id);
@@ -330,7 +306,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
             (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
             require(owner == from, "BATCHTRANSFERFROM_NOT_OWNER");
             require(authorized || (operatorEnabled && _operators[id] == msg.sender), "NOT_AUTHORIZED");
-            _updateOwnerData(id, _owners[_storageId(id)], to, false);
+            _owners[id] = uint256(to);
             emit Transfer(from, to, id);
         }
         if (from != to) {
@@ -363,8 +339,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         uint256 id
     ) internal {
         require(from == owner, "NOT_OWNER");
-        uint256 storageId = _storageId(id);
-        _owners[storageId] = (_owners[storageId] & NOT_OPERATOR_FLAG) | BURNED_FLAG; // record as non owner but keep track of last owner
+        _owners[id] = (_owners[id] & (2**255 - 1)) | (2**160); // record as non owner but keep track of last owner
         _numNFTPerAddress[from]--;
         emit Transfer(from, address(0), id);
     }
@@ -392,16 +367,16 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     }
 
     function _ownerOf(uint256 id) internal view virtual returns (address) {
-        uint256 data = _owners[_storageId(id)];
-        if ((data & BURNED_FLAG) == BURNED_FLAG) {
+        uint256 data = _owners[id];
+        if ((data & (2**160)) == 2**160) {
             return address(0);
         }
         return address(data);
     }
 
     function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {
-        uint256 data = _owners[_storageId(id)];
-        if ((data & BURNED_FLAG) == BURNED_FLAG) {
+        uint256 data = _owners[id];
+        if ((data & (2**160)) == 2**160) {
             owner = address(0);
         } else {
             owner = address(data);
