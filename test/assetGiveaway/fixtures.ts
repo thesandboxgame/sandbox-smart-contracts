@@ -9,7 +9,7 @@ import MerkleTree from '../../lib/merkleTree';
 import {createAssetClaimMerkleTree} from '../../data/asset_giveaway_1/getAssets';
 import helpers from '../../lib/merkleTreeHelper';
 const {createDataArrayAssets} = helpers;
-import {default as testAssetData} from '../../data/asset_giveaway_1/testAssets.json';
+import {default as testAssetData} from '../../data/asset_giveaway_1/assets_hardhat.json';
 
 const ipfsHashString =
   '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
@@ -28,21 +28,19 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   const {network, getChainId} = hre;
   const chainId = await getChainId();
   const {mint, assetsHolder} = options || {};
-  const {
-    deployer,
-    assetAdmin,
-    assetBouncerAdmin,
-    nftGiveawayAdmin,
-  } = await getNamedAccounts();
-  const others = await getUnnamedAccounts();
-  await deployments.fixture('Asset_Giveaway_1');
-  const sandContract = await ethers.getContract('Sand');
+  const {deployer, assetAdmin, assetBouncerAdmin} = await getNamedAccounts();
+  const otherAccounts = await getUnnamedAccounts();
+
+  await deployments.fixture(['Asset']);
   const assetContract = await ethers.getContract('Asset');
 
   const emptyBytes32 =
     '0x0000000000000000000000000000000000000000000000000000000000000000';
 
   const ASSETS_HOLDER = '0x0000000000000000000000000000000000000000';
+
+  const nftGiveawayAdmin = otherAccounts[0];
+  const others = otherAccounts.slice(1);
 
   const testContract = await deployments.deploy('Test_Asset_Giveaway_1', {
     from: deployer,
@@ -157,37 +155,11 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   return {
     giveawayContract,
-    sandContract,
     assetContract,
     others,
     tree,
     assets: updatedAssets,
     nftGiveawayAdmin,
     merkleRootHash,
-  };
-});
-
-export const setupGiveaway = deployments.createFixture(async function () {
-  const {nftGiveawayAdmin} = await getNamedAccounts();
-  const others = await getUnnamedAccounts();
-  await deployments.fixture('Asset_Giveaway_1');
-  const giveawayContract = await ethers.getContract('Asset_Giveaway_1');
-  const sandContract = await ethers.getContract('Sand');
-  const assetContract = await ethers.getContract('Asset');
-  const deployment = await deployments.get('Asset_Giveaway_1');
-
-  // Set up tree with real assets
-  const assets = deployment.linkedData;
-  const assetHashArray = createDataArrayAssets(assets);
-  const tree = new MerkleTree(assetHashArray);
-
-  return {
-    giveawayContract,
-    sandContract,
-    assetContract,
-    others,
-    tree,
-    assets,
-    nftGiveawayAdmin,
   };
 });

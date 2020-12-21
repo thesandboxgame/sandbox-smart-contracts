@@ -11,7 +11,7 @@ trim_trailing_whitespace = true
 [*.sol]
 indent_size = 4
 
-[{/deployments/**,/artifacts/**,/cache/**,/coverage/**,/node_modules/**,package.json,/imports/**}]
+[{/deployments/**,/artifacts/**,/cache/**,/coverage/**,/node_modules/**,package.json,/imports/**,secret/**}]
 charset = unset
 end_of_line = unset
 insert_final_newline = unset

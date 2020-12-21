@@ -21,4 +21,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['Land', 'Land_deploy'];
-func.dependencies = ['Sand'];
+func.dependencies = ['Sand_deploy'];
