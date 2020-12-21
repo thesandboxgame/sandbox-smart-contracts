@@ -157,7 +157,6 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint64 subId
     ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256 id) {
         (uint256 gameId, uint256 baseId) = _mintGame(from, to, subId, 0, true);
-        uint256 data = _owners[baseId];
 
         if (editor != address(0)) {
             _setGameEditor(to, editor, true);
@@ -454,26 +453,26 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     ) internal returns (uint256 id, uint256 baseId) {
         uint32 idVersion;
         uint256 gameId;
-        uint256 baseId;
+        uint256 storageId;
         uint256 data;
         if (isCreation) {
             idVersion = 1;
             gameId = _generateGameId(from, subId, idVersion);
-            baseId = _storageId(gameId);
-            data = _owners[baseId];
+            storageId = _storageId(gameId);
+            data = _owners[storageId];
             require(data == 0, "BASEID_REUSE_FORBIDDEN");
         } else {
             idVersion = version;
             gameId = _generateGameId(from, subId, idVersion);
-            baseId = _storageId(gameId);
-            data = _owners[baseId];
+            storageId = _storageId(gameId);
+            data = _owners[storageId];
         }
 
         // @review do I need to clear owner-address bits before doing this if it's an update ?
-        _owners[baseId] = (uint256(idVersion) << 200) + uint256(to);
+        _owners[storageId] = (uint256(idVersion) << 200) + uint256(to);
 
         emit Transfer(address(0), to, gameId);
-        return (gameId, baseId);
+        return (gameId, storageId);
     }
 
     /// @dev Allow token owner to set game editors.
