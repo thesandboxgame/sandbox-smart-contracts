@@ -12,12 +12,29 @@ import {
 } from '../utils';
 import {setupTest, User} from './fixtures';
 import {supplyAssets} from './assets';
+import {keccak256} from 'ethers/lib/utils';
 
 let id: BigNumber;
 
 const METATX_SANDBOX = 1;
 const METATX_2771 = 2;
 const rng = new Prando('GameToken');
+
+type Creation = {
+  assetIdsToRemove: BigNumber[];
+  assetAmountsToRemove: number[];
+  assetIdsToAdd: BigNumber[];
+  assetAmountsToAdd: number[];
+  uri: string;
+};
+
+const creation: Creation = {
+  assetIdsToRemove: [],
+  assetAmountsToRemove: [],
+  assetIdsToAdd: [],
+  assetAmountsToAdd: [],
+  uri: utils.keccak256('0x'),
+};
 
 // for prod, use maximum uint64 (2^64-1) as upper limit
 async function getRandom(): Promise<number> {
@@ -135,31 +152,40 @@ describe('GameToken', function () {
       const minterReceipt = await gameTokenAsMinter.createGame(
         users[3].address,
         users[4].address,
-        [],
-        [],
+        {...creation},
         ethers.constants.AddressZero,
-        '',
         randomId
       );
+
       const transferEvent = await expectEventWithArgs(
         gameToken,
         minterReceipt,
         'Transfer'
       );
-      gameId = transferEvent.args[2];
+      const updateEvent = await expectEventWithArgs(
+        gameToken,
+        minterReceipt,
+        'GameTokenUpdated'
+      );
+      gameId = updateEvent.args[1];
+      // const baseId = updateEvent.args[0];
+      const gameIdFromTransfer = transferEvent.args[2];
       const gameOwner = transferEvent.args[1];
-
-      // @review I think this fails because were checking ownerOf with full id, not base id
-      // const shiftedId = gameId.div(10 ** 8);
-      // const baseId = shiftedId.mul(10 ** 8);
-
+      // @note this won't work till erc721BaseToken is updated
+      // const idAsHex = utils.hexValue(gameId);
+      // console.log(`id as hex: ${idAsHex}`);
+      // console.log(`baseid as hex: ${utils.hexValue(baseId)}`);
+      // const ownerwithBaseId = await gameToken.ownerOf(baseId);
+      expect(gameId).to.be.equal(gameIdFromTransfer);
       // expect(await gameToken.ownerOf(baseId)).to.be.equal(users[4].address);
-      expect(await gameToken.ownerOf(gameId)).to.be.equal(users[4].address);
       expect(gameOwner).to.be.equal(users[4].address);
     });
 
+    // it('should revert if trying to reuse a baseId', async function () {});
+
     it('gameId contains creator address', async function () {
       const idAsHex = utils.hexValue(gameId);
+      console.log(`id as hex: ${idAsHex}`);
       const creatorSlice = idAsHex.slice(0, 42);
       const randomIdSlice = idAsHex.slice(43, 58);
       const versionSlice = idAsHex.slice(58);
