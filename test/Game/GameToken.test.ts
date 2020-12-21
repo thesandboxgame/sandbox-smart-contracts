@@ -65,10 +65,8 @@ async function getNewGame(
     gameTokenAsMinter.createGame(
       from.address,
       to.address,
-      assetIds,
-      assetAmounts,
+      {...creation, assetIdsToAdd: assetIds, assetAmountsToAdd: assetAmounts},
       ethers.constants.AddressZero,
-      '',
       randomId
     )
   );
@@ -168,20 +166,38 @@ describe('GameToken', function () {
         'GameTokenUpdated'
       );
       gameId = updateEvent.args[1];
-      // const baseId = updateEvent.args[0];
+      const baseId = updateEvent.args[0];
       const gameIdFromTransfer = transferEvent.args[2];
       const gameOwner = transferEvent.args[1];
       // @note this won't work till erc721BaseToken is updated
       // const idAsHex = utils.hexValue(gameId);
       // console.log(`id as hex: ${idAsHex}`);
       // console.log(`baseid as hex: ${utils.hexValue(baseId)}`);
-      // const ownerwithBaseId = await gameToken.ownerOf(baseId);
+      const ownerwithBaseId = await gameToken.ownerOf(baseId);
       expect(gameId).to.be.equal(gameIdFromTransfer);
-      // expect(await gameToken.ownerOf(baseId)).to.be.equal(users[4].address);
+      expect(ownerwithBaseId).to.be.equal(users[4].address);
       expect(gameOwner).to.be.equal(users[4].address);
     });
 
-    // it('should revert if trying to reuse a baseId', async function () {});
+    it('should revert if trying to reuse a baseId', async function () {
+      const randomId = await getRandom();
+      await gameTokenAsMinter.createGame(
+        users[3].address,
+        users[4].address,
+        {...creation},
+        ethers.constants.AddressZero,
+        randomId
+      );
+      await expect(
+        gameTokenAsMinter.createGame(
+          users[3].address,
+          users[4].address,
+          {...creation},
+          ethers.constants.AddressZero,
+          randomId
+        )
+      ).to.be.revertedWith('BASEID_REUSE_FORBIDDEN');
+    });
 
     it('gameId contains creator address', async function () {
       const idAsHex = utils.hexValue(gameId);
@@ -200,10 +216,8 @@ describe('GameToken', function () {
         gameToken.createGame(
           users[2].address,
           users[2].address,
-          [],
-          [],
+          {...creation},
           ethers.constants.AddressZero,
-          '',
           randomId
         )
       ).to.be.revertedWith('MINTER_ACCESS_DENIED');
@@ -221,10 +235,8 @@ describe('GameToken', function () {
           gameTokenAsMinter.createGame(
             GameOwner.address,
             gameToken.address,
-            [],
-            [],
+            {...creation},
             ethers.constants.AddressZero,
-            '',
             42
           )
         ).to.be.revertedWith('DESTINATION_GAME_CONTRACT');
