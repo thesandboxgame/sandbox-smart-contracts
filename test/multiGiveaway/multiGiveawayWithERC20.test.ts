@@ -1,6 +1,6 @@
 import {ethers} from 'hardhat';
 import {setupTestGiveawayWithERC20} from './fixtures';
-import {BigNumber, constants} from 'ethers';
+import {constants} from 'ethers';
 import {waitFor, expectReceiptEventWithArgs, increaseTime} from '../utils';
 import {expect} from '../chai-setup';
 
@@ -206,11 +206,11 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     expect(claimedEvent.args[4]).to.equal(claim.sand);
   });
 
-  it('User can claim allocated sand from Giveaway contract if there are no assets or lands', async function () {
+  it('User can claim allocated sand from Giveaway contract when there are no assets or lands allocated', async function () {
     // TODO:
   });
 
-  it('User tries to claim the wrong amount of sand', async function () {
+  it('User cannot claim if they claim the wrong amount of sand', async function () {
     // TODO:
   });
 
