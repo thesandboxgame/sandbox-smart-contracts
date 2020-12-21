@@ -28,11 +28,9 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         _setMetaTransactionProcessor(metaTransactionContract, METATX_SANDBOX);
     }
 
-    /**
-     * @notice Approve an operator to spend tokens on the sender behalf
-     * @param operator The address receiving the approval
-     * @param id The id of the token
-     */
+    /// @notice Approve an operator to spend tokens on the senders behalf.
+    /// @param operator The address receiving the approval.
+    /// @param id The id of the token.
     function approve(address operator, uint256 id) external override {
         address owner = _ownerOf(id);
         require(owner != address(0), "NONEXISTENT_TOKEN");
@@ -43,12 +41,10 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         _approveFor(owner, operator, id);
     }
 
-    /**
-     * @notice Approve an operator to spend tokens on the sender behalf
-     * @param sender The address giving the approval
-     * @param operator The address receiving the approval
-     * @param id The id of the token
-     */
+    /// @notice Approve an operator to spend tokens on the sender behalf.
+    /// @param sender The address giving the approval.
+    /// @param operator The address receiving the approval.
+    /// @param id The id of the token.
     function approveFor(
         address sender,
         address operator,
@@ -67,12 +63,10 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         _approveFor(owner, operator, id);
     }
 
-    /**
-     * @notice Transfer a token between 2 addresses
-     * @param from The sender of the token
-     * @param to The recipient of the token
-     * @param id The id of the token
-     */
+    /// @notice Transfer a token between 2 addresses.
+    /// @param from The sender of the token.
+    /// @param to The recipient of the token.
+    /// @param id The id of the token.
     function transferFrom(
         address from,
         address to,
@@ -85,12 +79,10 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         }
     }
 
-    /**
-     * @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
-     * @param from The send of the token
-     * @param to The recipient of the token
-     * @param id The id of the token
-     */
+    /// @notice Transfer a token between 2 addresses letting the receiver know of the transfer.
+    /// @param from The send of the token.
+    /// @param to The recipient of the token.
+    /// @param id The id of the token.
     function safeTransferFrom(
         address from,
         address to,
@@ -99,13 +91,11 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         safeTransferFrom(from, to, id, "");
     }
 
-    /**
-     * @notice Transfer many tokens between 2 addresses
-     * @param from The sender of the token
-     * @param to The recipient of the token
-     * @param ids The ids of the tokens
-     * @param data additional data
-     */
+    /// @notice Transfer many tokens between 2 addresses.
+    /// @param from The sender of the token.
+    /// @param to The recipient of the token.
+    /// @param ids The ids of the tokens.
+    /// @param data Additional data.
     function batchTransferFrom(
         address from,
         address to,
@@ -115,13 +105,12 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         _batchTransferFrom(from, to, ids, data, false);
     }
 
-    /**
-     * @notice Transfer many tokens between 2 addresses ensuring the receiving contract has a receiver method
-     * @param from The sender of the token
-     * @param to The recipient of the token
-     * @param ids The ids of the tokens
-     * @param data additional data
-     */
+    /// @notice Transfer many tokens between 2 addresses, while
+    /// ensuring the receiving contract has a receiver method.
+    /// @param from The sender of the token.
+    /// @param to The recipient of the token.
+    /// @param ids The ids of the tokens.
+    /// @param data Additional data.
     function safeBatchTransferFrom(
         address from,
         address to,
@@ -131,12 +120,10 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         _batchTransferFrom(from, to, ids, data, true);
     }
 
-    /**
-     * @notice Set the approval for an operator to manage all the tokens of the sender
-     * @param sender The address giving the approval
-     * @param operator The address receiving the approval
-     * @param approved The determination of the approval
-     */
+    /// @notice Set the approval for an operator to manage all the tokens of the sender.
+    /// @param sender The address giving the approval.
+    /// @param operator The address receiving the approval.
+    /// @param approved The determination of the approval.
     function setApprovalForAllFor(
         address sender,
         address operator,
@@ -151,24 +138,22 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         _setApprovalForAll(sender, operator, approved);
     }
 
-    /**
-     * @notice Set the approval for an operator to manage all the tokens of the sender
-     * @param operator The address receiving the approval
-     * @param approved The determination of the approval
-     */
+    /// @notice Set the approval for an operator to manage all the tokens of the sender.
+    /// @param operator The address receiving the approval.
+    /// @param approved The determination of the approval.
     function setApprovalForAll(address operator, bool approved) external override {
         _setApprovalForAll(msg.sender, operator, approved);
     }
 
     /// @notice Burns token `id`.
-    /// @param id token which will be burnt.
+    /// @param id The token which will be burnt.
     function burn(uint256 id) external virtual {
         _burn(msg.sender, _ownerOf(id), id);
     }
 
     /// @notice Burn token`id` from `from`.
     /// @param from address whose token is to be burnt.
-    /// @param id token which will be burnt.
+    /// @param id The token which will be burnt.
     function burnFrom(address from, uint256 id) external virtual {
         require(from != address(0), "NOT_FROM_ZEROADDRESS");
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
@@ -183,31 +168,25 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         _burn(from, owner, id);
     }
 
-    /**
-     * @notice Return the number of Land owned by an address
-     * @param owner The address to look for
-     * @return The number of Land token owned by the address
-     */
+    /// @notice Get the number of tokens owned by an address.
+    /// @param owner The address to look for.
+    /// @return The number of tokens owned by the address.
     function balanceOf(address owner) external view override returns (uint256) {
         require(owner != address(0), "ZERO_ADDRESS_OWNER");
         return _numNFTPerAddress[owner];
     }
 
-    /**
-     * @notice Return the owner of a Land
-     * @param id The id of the Land
-     * @return owner The address of the owner
-     */
+    /// @notice Get the owner of a token.
+    /// @param id The id of the token.
+    /// @return owner The address of the token owner.
     function ownerOf(uint256 id) external view override returns (address owner) {
         owner = _ownerOf(id);
         require(owner != address(0), "NONEXISTANT_TOKEN");
     }
 
-    /**
-     * @notice Get the approved operator for a specific token
-     * @param id The id of the token
-     * @return The address of the operator
-     */
+    /// @notice Get the approved operator for a specific token.
+    /// @param id The id of the token.
+    /// @return The address of the operator.
     function getApproved(uint256 id) external view override returns (address) {
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(owner != address(0), "NONEXISTENT_TOKEN");
@@ -218,23 +197,19 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         }
     }
 
-    /**
-     * @notice Check if the sender approved the operator
-     * @param owner The address of the owner
-     * @param operator The address of the operator
-     * @return isOperator The status of the approval
-     */
+    /// @notice Check if the sender approved the operator.
+    /// @param owner The address of the owner.
+    /// @param operator The address of the operator.
+    /// @return isOperator The status of the approval.
     function isApprovedForAll(address owner, address operator) external view override returns (bool isOperator) {
         return _operatorsForAll[owner][operator] || _superOperators[operator];
     }
 
-    /**
-     * @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
-     * @param from The sender of the token
-     * @param to The recipient of the token
-     * @param id The id of the token
-     * @param data Additional data
-     */
+    /// @notice Transfer a token between 2 addresses letting the receiver knows of the transfer.
+    /// @param from The sender of the token.
+    /// @param to The recipient of the token.
+    /// @param id The id of the token.
+    /// @param data Additional data.
     function safeTransferFrom(
         address from,
         address to,
@@ -248,17 +223,16 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         }
     }
 
-    /**
-     * @notice Check if the contract supports an interface
-     * 0x01ffc9a7 is ERC-165
-     * 0x80ac58cd is ERC-721
-     * @param id The id of the interface
-     * @return True if the interface is supported
-     */
+    /// @notice Check if the contract supports an interface.
+    /// 0x01ffc9a7 is ERC-165.
+    /// 0x80ac58cd is ERC-721
+    /// @param id The id of the interface.
+    /// @return Whether the interface is supported.
     function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd;
     }
 
+    /// @dev See transferFrom.
     function _transferFrom(
         address from,
         address to,
@@ -270,6 +244,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         emit Transfer(from, to, id);
     }
 
+    /// @dev See approveFor.
     function _approveFor(
         address owner,
         address operator,
@@ -284,6 +259,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         emit Approval(owner, operator, id);
     }
 
+    /// @dev See batchTransferFrom.
     function _batchTransferFrom(
         address from,
         address to,
@@ -322,6 +298,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         }
     }
 
+    /// @dev See setApprovalForAll.
     function _setApprovalForAll(
         address sender,
         address operator,
@@ -333,6 +310,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         emit ApprovalForAll(sender, operator, approved);
     }
 
+    /// @dev See burn.
     function _burn(
         address from,
         address owner,
@@ -344,6 +322,13 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         emit Transfer(from, address(0), id);
     }
 
+    /// @dev Check if receiving contract accepts erc721 transfers.
+    /// @param operator The address of the operator.
+    /// @param from The from address, may be different from msg.sender.
+    /// @param to The adddress we want to transfer to.
+    /// @param tokenId The id of the token we would like to transfer.
+    /// @param _data Any additional data to send with the transfer.
+    /// @return Whether the expected value of 0x150b7a02 is returned.
     function _checkOnERC721Received(
         address operator,
         address from,
@@ -355,6 +340,13 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         return (retval == _ERC721_RECEIVED);
     }
 
+    /// @dev Check if receiving contract accepts erc721 batch transfers.
+    /// @param operator The address of the operator.
+    /// @param from The from address, may be different from msg.sender.
+    /// @param to The adddress we want to transfer to.
+    /// @param ids The ids of the tokens we would like to transfer.
+    /// @param _data Any additional data to send with the transfer.
+    /// @return Whether the expected value of 0x4b808c46 is returned.
     function _checkOnERC721BatchReceived(
         address operator,
         address from,
@@ -366,6 +358,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         return (retval == _ERC721_BATCH_RECEIVED);
     }
 
+    /// @dev See ownerOf
     function _ownerOf(uint256 id) internal view virtual returns (address) {
         uint256 data = _owners[id];
         if ((data & (2**160)) == 2**160) {
@@ -374,6 +367,10 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         return address(data);
     }
 
+    /// @dev Get the owner and operatorEnabled status of a token.
+    /// @param id The token to query.
+    /// @return owner The owner of the token.
+    /// @return operatorEnabled Whether or not operators are enabled for this token.
     function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {
         uint256 data = _owners[id];
         if ((data & (2**160)) == 2**160) {
@@ -384,6 +381,11 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         operatorEnabled = (data / 2**255) == 1;
     }
 
+    /// @dev Check whether a transfer is a meta Transaction or not.
+    /// @param from The address who initiated the transfer (may differ from msg.sender).
+    /// @param to The address recieving the token.
+    /// @param id The token being transferred.
+    /// @return isMetaTx Whether or not the transaction is a MetaTx.
     function _checkTransfer(
         address from,
         address to,
@@ -404,6 +406,10 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         }
     }
 
+    /// @dev Check if there was enough gas.
+    /// @param _contract The address of the contract to check.
+    /// @param interfaceId The id of the interface we want to test.
+    /// @return Whether or not this check succeeded.
     function _checkInterfaceWith10000Gas(address _contract, bytes4 interfaceId) internal view returns (bool) {
         bool success;
         bool result;

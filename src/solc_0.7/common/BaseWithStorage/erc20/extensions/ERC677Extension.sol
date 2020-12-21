@@ -9,12 +9,10 @@ import "@openzeppelin/contracts/utils/Address.sol";
 abstract contract ERC677Extension is ERC20Internal, IERC677 {
     using Address for address;
 
-    /**
-     * @dev transfer token to a contract address with additional data if the recipient is a contact.
-     * @param _to The address to transfer to.
-     * @param _value The amount to be transferred.
-     * @param _data The extra data to be passed to the receiving contract.
-     */
+    /// @notice Transfers tokens to an address with _data if the recipient is a contact.
+    /// @param _to The address to transfer to.
+    /// @param _value The amount to be transferred.
+    /// @param _data The extra data to be passed to the receiving contract.
     function transferAndCall(
         address _to,
         uint256 _value,
