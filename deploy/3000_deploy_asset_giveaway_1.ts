@@ -65,4 +65,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['Asset_Giveaway_1', 'Asset_Giveaway_1_deploy'];
 func.dependencies = ['Asset_deploy'];
-func.skip = async (hre) => hre.network.name !== 'hardhat';

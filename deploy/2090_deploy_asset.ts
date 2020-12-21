@@ -19,4 +19,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['Asset', 'Asset_deploy'];
 func.dependencies = ['Sand', 'Sand_deploy'];
-func.skip = async (hre) => hre.network.name !== 'hardhat';

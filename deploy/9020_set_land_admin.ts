@@ -28,4 +28,3 @@ export default func;
 func.runAtTheEnd = true;
 func.tags = ['Land', 'Land_setup'];
 func.dependencies = ['Land_deploy'];
-func.skip = async (hre) => hre.network.name !== 'hardhat';

@@ -13,9 +13,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       from: deployer,
       log: true,
       args: [gemName, gemName, deployer],
+      skipIfAlreadyDeployed: true,
     });
   }
 };
 export default func;
 func.tags = ['Gems'];
-func.skip = async (hre) => hre.network.name !== 'hardhat';
+func.skip = async (hre) => hre.network.name !== 'hardhat'; // TODO

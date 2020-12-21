@@ -16,4 +16,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['Sand', 'Sand_deploy'];
-func.skip = async (hre) => hre.network.name !== 'hardhat';

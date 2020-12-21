@@ -1,8 +1,8 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {AssetClaim} from '../data/asset_giveaway_1/getAssets';
 
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+const func: DeployFunction = async function () {
   const {deployments} = hre;
   const {execute} = deployments;
 
@@ -20,6 +20,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       smurfId =
         '43680867506168749228565131403402869733336284654176091019334004301894460114944';
       break;
+    // case 'rinkeby_test':
+    //   smurfOwner = '0x60927eB036621b801491B6c5e9A60A8d2dEeD75A';
+    //   smurfId =
+    //     '43680867506168749228565131403402869733336284654176091019334004301894460114944';
+    //   break;
   }
 
   if (!smurfOwner || smurfOwner === '') {
@@ -42,7 +47,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 };
 export default func;
-func.runAtTheEnd = true;
-func.tags = ['Asset_Giveaway_1', 'Asset_Giveaway_1_setup'];
-func.dependencies = ['Asset_Giveaway_1_deploy'];
-func.skip = async (hre) => hre.network.name !== 'hardhat';
+
+if (require.main === module) {
+  func(hre);
+}

@@ -16,9 +16,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     log: true,
     args: [stakeToken.address, sand.address, land.address, durationInSeconds],
+    skipIfAlreadyDeployed: true,
   });
 };
 export default func;
 func.tags = ['LandWeightedSANDRewardPool', 'LandWeightedSANDRewardPool_deploy'];
-func.dependencies = ['Land', 'Sand', 'UNI_SAND_ETH']; // TODO what if no uni_sand is to be executed ?
-func.skip = async (hre) => hre.network.name !== 'hardhat';
+func.dependencies = ['Land_deploy', 'Sand_Deploy', 'UNI_SAND_ETH']; // TODO what if no uni_sand is to be executed ?
