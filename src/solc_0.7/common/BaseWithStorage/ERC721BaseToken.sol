@@ -37,7 +37,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     /// @param operator The address receiving the approval.
     /// @param id The id of the token.
     function approve(address operator, uint256 id) external override {
-        uint256 ownerData = _owners[id];
+        uint256 ownerData = _owners[_storageId(id)];
         address owner = address(ownerData);
         require(owner != address(0), "NONEXISTENT_TOKEN");
         require(
@@ -56,7 +56,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         address operator,
         uint256 id
     ) external {
-        uint256 ownerData = _owners[id];
+        uint256 ownerData = _owners[_storageId(id)];
         require(sender != address(0), "ZERO_ADDRESS_SENDER");
         require(
             msg.sender == sender ||
@@ -238,6 +238,10 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         return id == 0x01ffc9a7 || id == 0x80ac58cd;
     }
 
+    function _storageId(uint256 id) internal view virtual returns (uint256) {
+        return id;
+    }
+
     function _updateOwnerData(
         uint256 id,
         uint256 oldData,
@@ -245,9 +249,9 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         bool hasOperator
     ) internal virtual {
         if (hasOperator) {
-            _owners[id] = (oldData & NOT_ADDRESS) | OPERATOR_FLAG | uint256(newOwner);
+            _owners[_storageId(id)] = (oldData & NOT_ADDRESS) | OPERATOR_FLAG | uint256(newOwner);
         } else {
-            _owners[id] = ((oldData & NOT_ADDRESS) & NOT_OPERATOR_FLAG) | uint256(newOwner);
+            _owners[_storageId(id)] = ((oldData & NOT_ADDRESS) & NOT_OPERATOR_FLAG) | uint256(newOwner);
         }
     }
 
@@ -258,7 +262,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     ) internal {
         _numNFTPerAddress[from]--;
         _numNFTPerAddress[to]++;
-        _updateOwnerData(id, _owners[id], to, false);
+        _updateOwnerData(id, _owners[_storageId(id)], to, false);
         emit Transfer(from, to, id);
     }
 
@@ -301,7 +305,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
             (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
             require(owner == from, "BATCHTRANSFERFROM_NOT_OWNER");
             require(authorized || (operatorEnabled && _operators[id] == msg.sender), "NOT_AUTHORIZED");
-            _updateOwnerData(id, _owners[id], to, false);
+            _updateOwnerData(id, _owners[_storageId(id)], to, false);
             emit Transfer(from, to, id);
         }
         if (from != to) {
@@ -336,7 +340,8 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         uint256 id
     ) internal {
         require(from == owner, "NOT_OWNER");
-        _owners[id] = (_owners[id] & NOT_OPERATOR_FLAG) | BURNED_FLAG; // record as non owner but keep track of last owner
+        uint256 storageId = _storageId(id);
+        _owners[storageId] = (_owners[storageId] & NOT_OPERATOR_FLAG) | BURNED_FLAG; // record as non owner but keep track of last owner
         _numNFTPerAddress[from]--;
         emit Transfer(from, address(0), id);
     }
@@ -379,7 +384,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
 
     /// @dev See ownerOf
     function _ownerOf(uint256 id) internal view virtual returns (address) {
-        uint256 data = _owners[id];
+        uint256 data = _owners[_storageId(id)];
         if ((data & BURNED_FLAG) == BURNED_FLAG) {
             return address(0);
         }
@@ -391,7 +396,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     /// @return owner The owner of the token.
     /// @return operatorEnabled Whether or not operators are enabled for this token.
     function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {
-        uint256 data = _owners[id];
+        uint256 data = _owners[_storageId(id)];
         if ((data & BURNED_FLAG) == BURNED_FLAG) {
             owner = address(0);
         } else {
