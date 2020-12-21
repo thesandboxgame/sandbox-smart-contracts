@@ -7,10 +7,23 @@ import "../Base/TheSandbox712.sol";
 /// @title Permit contract
 /// @notice This contract manages approvals of SAND via signature
 contract Permit is TheSandbox712 {
+    IERC20Extended internal immutable _sand;
+
+    mapping(address => uint256) public nonces;
+
+    bytes32 public constant PERMIT_TYPEHASH = keccak256(
+        "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
+    );
+
+    constructor(IERC20Extended sandContractAddress) {
+        _sand = sandContractAddress;
+    }
+
     /// @notice Function to permit the expenditure of SAND by a nominated spender
     /// @param owner the owner of the ERC20 tokens
     /// @param spender the nominated spender of the ERC20 tokens
-    /// @param value the value (allowance) of the ERC20 tokens that the nominated spender will be allowed to spend
+    /// @param value the value (allowance) of the ERC20 tokens that the nominated
+    /// spender will be allowed to spend
     /// @param deadline the deadline for granting permission to the spender
     /// @param v the final 1 byte of signature
     /// @param r the first 32 bytes of signature
@@ -35,17 +48,5 @@ contract Permit is TheSandbox712 {
         address recoveredAddress = ecrecover(digest, v, r, s);
         require(recoveredAddress != address(0) && recoveredAddress == owner, "INVALID_SIGNATURE");
         _sand.approveFor(owner, spender, value);
-    }
-
-    IERC20Extended internal immutable _sand;
-
-    mapping(address => uint256) public nonces;
-
-    bytes32 public constant PERMIT_TYPEHASH = keccak256(
-        "Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)"
-    );
-
-    constructor(IERC20Extended sandContractAddress) {
-        _sand = sandContractAddress;
     }
 }

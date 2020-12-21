@@ -28,67 +28,19 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         _setMetaTransactionProcessor(metaTransactionContract, METATX_SANDBOX);
     }
 
-    function _transferFrom(
-        address from,
-        address to,
-        uint256 id
-    ) internal {
-        _numNFTPerAddress[from]--;
-        _numNFTPerAddress[to]++;
-        _owners[id] = uint256(to);
-        emit Transfer(from, to, id);
-    }
-
     /**
-     * @notice Return the number of Land owned by an address
-     * @param owner The address to look for
-     * @return The number of Land token owned by the address
+     * @notice Approve an operator to spend tokens on the sender behalf
+     * @param operator The address receiving the approval
+     * @param id The id of the token
      */
-    function balanceOf(address owner) external view override returns (uint256) {
-        require(owner != address(0), "ZERO_ADDRESS_OWNER");
-        return _numNFTPerAddress[owner];
-    }
-
-    function _ownerOf(uint256 id) internal view virtual returns (address) {
-        uint256 data = _owners[id];
-        if ((data & (2**160)) == 2**160) {
-            return address(0);
-        }
-        return address(data);
-    }
-
-    function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {
-        uint256 data = _owners[id];
-        if ((data & (2**160)) == 2**160) {
-            owner = address(0);
-        } else {
-            owner = address(data);
-        }
-        operatorEnabled = (data / 2**255) == 1;
-    }
-
-    /**
-     * @notice Return the owner of a Land
-     * @param id The id of the Land
-     * @return owner The address of the owner
-     */
-    function ownerOf(uint256 id) external view override returns (address owner) {
-        owner = _ownerOf(id);
-        require(owner != address(0), "NONEXISTANT_TOKEN");
-    }
-
-    function _approveFor(
-        address owner,
-        address operator,
-        uint256 id
-    ) internal {
-        if (operator == address(0)) {
-            _owners[id] = _owners[id] & (2**255 - 1); // no need to resset the operator, it will be overriden next time
-        } else {
-            _owners[id] = _owners[id] | (2**255);
-            _operators[id] = operator;
-        }
-        emit Approval(owner, operator, id);
+    function approve(address operator, uint256 id) external override {
+        address owner = _ownerOf(id);
+        require(owner != address(0), "NONEXISTENT_TOKEN");
+        require(
+            owner == msg.sender || _superOperators[msg.sender] || _operatorsForAll[owner][msg.sender],
+            "UNAUTHORIZED_APPROVAL"
+        );
+        _approveFor(owner, operator, id);
     }
 
     /**
@@ -116,74 +68,6 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     }
 
     /**
-     * @notice Approve an operator to spend tokens on the sender behalf
-     * @param operator The address receiving the approval
-     * @param id The id of the token
-     */
-    function approve(address operator, uint256 id) external override {
-        address owner = _ownerOf(id);
-        require(owner != address(0), "NONEXISTENT_TOKEN");
-        require(
-            owner == msg.sender || _superOperators[msg.sender] || _operatorsForAll[owner][msg.sender],
-            "UNAUTHORIZED_APPROVAL"
-        );
-        _approveFor(owner, operator, id);
-    }
-
-    /**
-     * @notice Get the approved operator for a specific token
-     * @param id The id of the token
-     * @return The address of the operator
-     */
-    function getApproved(uint256 id) external view override returns (address) {
-        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
-        require(owner != address(0), "NONEXISTENT_TOKEN");
-        if (operatorEnabled) {
-            return _operators[id];
-        } else {
-            return address(0);
-        }
-    }
-
-    function _checkTransfer(
-        address from,
-        address to,
-        uint256 id
-    ) internal view returns (bool isMetaTx) {
-        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
-        require(owner != address(0), "NONEXISTENT_TOKEN");
-        require(owner == from, "CHECKTRANSFER_NOT_OWNER");
-        require(to != address(0), "NOT_TO_ZEROADDRESS");
-        isMetaTx = _isValidMetaTx(from);
-        if (msg.sender != from && !isMetaTx) {
-            require(
-                _superOperators[msg.sender] ||
-                    _operatorsForAll[from][msg.sender] ||
-                    (operatorEnabled && _operators[id] == msg.sender),
-                "UNAUTHORIZED_TRANSFER"
-            );
-        }
-    }
-
-    function _checkInterfaceWith10000Gas(address _contract, bytes4 interfaceId) internal view returns (bool) {
-        bool success;
-        bool result;
-        bytes memory callData = abi.encodeWithSelector(ERC165ID, interfaceId);
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            let call_ptr := add(0x20, callData)
-            let call_size := mload(callData)
-            let output := mload(0x40) // Find empty storage location using "free memory pointer"
-            mstore(output, 0x0)
-            success := staticcall(10000, _contract, call_ptr, call_size, output, 0x20) // 32 bytes
-            result := mload(output)
-        }
-        // (10000 / 63) "not enough for supportsInterface(...)" // consume all gas, so caller can potentially know that there was not enough gas
-        assert(gasleft() > 158);
-        return success && result;
-    }
-
-    /**
      * @notice Transfer a token between 2 addresses
      * @param from The sender of the token
      * @param to The recipient of the token
@@ -198,26 +82,6 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         _transferFrom(from, to, id);
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
             require(_checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, ""), "ERC721_TRANSFER_REJECTED");
-        }
-    }
-
-    /**
-     * @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
-     * @param from The sender of the token
-     * @param to The recipient of the token
-     * @param id The id of the token
-     * @param data Additional data
-     */
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        bytes memory data
-    ) public override {
-        bool metaTx = _checkTransfer(from, to, id);
-        _transferFrom(from, to, id);
-        if (to.isContract()) {
-            require(_checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, data), "ERC721_TRANSFER_REJECTED");
         }
     }
 
@@ -249,6 +113,175 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         bytes calldata data
     ) external {
         _batchTransferFrom(from, to, ids, data, false);
+    }
+
+    /**
+     * @notice Transfer many tokens between 2 addresses ensuring the receiving contract has a receiver method
+     * @param from The sender of the token
+     * @param to The recipient of the token
+     * @param ids The ids of the tokens
+     * @param data additional data
+     */
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids,
+        bytes calldata data
+    ) external {
+        _batchTransferFrom(from, to, ids, data, true);
+    }
+
+    /**
+     * @notice Set the approval for an operator to manage all the tokens of the sender
+     * @param sender The address giving the approval
+     * @param operator The address receiving the approval
+     * @param approved The determination of the approval
+     */
+    function setApprovalForAllFor(
+        address sender,
+        address operator,
+        bool approved
+    ) external {
+        require(sender != address(0), "Invalid sender address");
+        require(
+            msg.sender == sender || _isValidMetaTx(sender) || _superOperators[msg.sender],
+            "UNAUTHORIZED_APPROVE_FOR_ALL"
+        );
+
+        _setApprovalForAll(sender, operator, approved);
+    }
+
+    /**
+     * @notice Set the approval for an operator to manage all the tokens of the sender
+     * @param operator The address receiving the approval
+     * @param approved The determination of the approval
+     */
+    function setApprovalForAll(address operator, bool approved) external override {
+        _setApprovalForAll(msg.sender, operator, approved);
+    }
+
+    /// @notice Burns token `id`.
+    /// @param id token which will be burnt.
+    function burn(uint256 id) external virtual {
+        _burn(msg.sender, _ownerOf(id), id);
+    }
+
+    /// @notice Burn token`id` from `from`.
+    /// @param from address whose token is to be burnt.
+    /// @param id token which will be burnt.
+    function burnFrom(address from, uint256 id) external virtual {
+        require(from != address(0), "NOT_FROM_ZEROADDRESS");
+        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
+        require(
+            msg.sender == from ||
+                _isValidMetaTx(from) ||
+                (operatorEnabled && _operators[id] == msg.sender) ||
+                _superOperators[msg.sender] ||
+                _operatorsForAll[from][msg.sender],
+            "UNAUTHORIZED_BURN"
+        );
+        _burn(from, owner, id);
+    }
+
+    /**
+     * @notice Return the number of Land owned by an address
+     * @param owner The address to look for
+     * @return The number of Land token owned by the address
+     */
+    function balanceOf(address owner) external view override returns (uint256) {
+        require(owner != address(0), "ZERO_ADDRESS_OWNER");
+        return _numNFTPerAddress[owner];
+    }
+
+    /**
+     * @notice Return the owner of a Land
+     * @param id The id of the Land
+     * @return owner The address of the owner
+     */
+    function ownerOf(uint256 id) external view override returns (address owner) {
+        owner = _ownerOf(id);
+        require(owner != address(0), "NONEXISTANT_TOKEN");
+    }
+
+    /**
+     * @notice Get the approved operator for a specific token
+     * @param id The id of the token
+     * @return The address of the operator
+     */
+    function getApproved(uint256 id) external view override returns (address) {
+        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
+        require(owner != address(0), "NONEXISTENT_TOKEN");
+        if (operatorEnabled) {
+            return _operators[id];
+        } else {
+            return address(0);
+        }
+    }
+
+    /**
+     * @notice Check if the sender approved the operator
+     * @param owner The address of the owner
+     * @param operator The address of the operator
+     * @return isOperator The status of the approval
+     */
+    function isApprovedForAll(address owner, address operator) external view override returns (bool isOperator) {
+        return _operatorsForAll[owner][operator] || _superOperators[operator];
+    }
+
+    /**
+     * @notice Transfer a token between 2 addresses letting the receiver knows of the transfer
+     * @param from The sender of the token
+     * @param to The recipient of the token
+     * @param id The id of the token
+     * @param data Additional data
+     */
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        bytes memory data
+    ) public override {
+        bool metaTx = _checkTransfer(from, to, id);
+        _transferFrom(from, to, id);
+        if (to.isContract()) {
+            require(_checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, data), "ERC721_TRANSFER_REJECTED");
+        }
+    }
+
+    /**
+     * @notice Check if the contract supports an interface
+     * 0x01ffc9a7 is ERC-165
+     * 0x80ac58cd is ERC-721
+     * @param id The id of the interface
+     * @return True if the interface is supported
+     */
+    function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
+        return id == 0x01ffc9a7 || id == 0x80ac58cd;
+    }
+
+    function _transferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) internal {
+        _numNFTPerAddress[from]--;
+        _numNFTPerAddress[to]++;
+        _owners[id] = uint256(to);
+        emit Transfer(from, to, id);
+    }
+
+    function _approveFor(
+        address owner,
+        address operator,
+        uint256 id
+    ) internal {
+        if (operator == address(0)) {
+            _owners[id] = _owners[id] & (2**255 - 1); // no need to resset the operator, it will be overriden next time
+        } else {
+            _owners[id] = _owners[id] | (2**255);
+            _operators[id] = operator;
+        }
+        emit Approval(owner, operator, id);
     }
 
     function _batchTransferFrom(
@@ -289,62 +322,6 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         }
     }
 
-    /**
-     * @notice Transfer many tokens between 2 addresses ensuring the receiving contract has a receiver method
-     * @param from The sender of the token
-     * @param to The recipient of the token
-     * @param ids The ids of the tokens
-     * @param data additional data
-     */
-    function safeBatchTransferFrom(
-        address from,
-        address to,
-        uint256[] calldata ids,
-        bytes calldata data
-    ) external {
-        _batchTransferFrom(from, to, ids, data, true);
-    }
-
-    /**
-     * @notice Check if the contract supports an interface
-     * 0x01ffc9a7 is ERC-165
-     * 0x80ac58cd is ERC-721
-     * @param id The id of the interface
-     * @return True if the interface is supported
-     */
-    function supportsInterface(bytes4 id) public pure virtual override returns (bool) {
-        return id == 0x01ffc9a7 || id == 0x80ac58cd;
-    }
-
-    /**
-     * @notice Set the approval for an operator to manage all the tokens of the sender
-     * @param sender The address giving the approval
-     * @param operator The address receiving the approval
-     * @param approved The determination of the approval
-     */
-    function setApprovalForAllFor(
-        address sender,
-        address operator,
-        bool approved
-    ) external {
-        require(sender != address(0), "Invalid sender address");
-        require(
-            msg.sender == sender || _isValidMetaTx(sender) || _superOperators[msg.sender],
-            "UNAUTHORIZED_APPROVE_FOR_ALL"
-        );
-
-        _setApprovalForAll(sender, operator, approved);
-    }
-
-    /**
-     * @notice Set the approval for an operator to manage all the tokens of the sender
-     * @param operator The address receiving the approval
-     * @param approved The determination of the approval
-     */
-    function setApprovalForAll(address operator, bool approved) external override {
-        _setApprovalForAll(msg.sender, operator, approved);
-    }
-
     function _setApprovalForAll(
         address sender,
         address operator,
@@ -356,16 +333,6 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         emit ApprovalForAll(sender, operator, approved);
     }
 
-    /**
-     * @notice Check if the sender approved the operator
-     * @param owner The address of the owner
-     * @param operator The address of the operator
-     * @return isOperator The status of the approval
-     */
-    function isApprovedForAll(address owner, address operator) external view override returns (bool isOperator) {
-        return _operatorsForAll[owner][operator] || _superOperators[operator];
-    }
-
     function _burn(
         address from,
         address owner,
@@ -375,29 +342,6 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         _owners[id] = (_owners[id] & (2**255 - 1)) | (2**160); // record as non owner but keep track of last owner
         _numNFTPerAddress[from]--;
         emit Transfer(from, address(0), id);
-    }
-
-    /// @notice Burns token `id`.
-    /// @param id token which will be burnt.
-    function burn(uint256 id) external virtual {
-        _burn(msg.sender, _ownerOf(id), id);
-    }
-
-    /// @notice Burn token`id` from `from`.
-    /// @param from address whose token is to be burnt.
-    /// @param id token which will be burnt.
-    function burnFrom(address from, uint256 id) external virtual {
-        require(from != address(0), "NOT_FROM_ZEROADDRESS");
-        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
-        require(
-            msg.sender == from ||
-                _isValidMetaTx(from) ||
-                (operatorEnabled && _operators[id] == msg.sender) ||
-                _superOperators[msg.sender] ||
-                _operatorsForAll[from][msg.sender],
-            "UNAUTHORIZED_BURN"
-        );
-        _burn(from, owner, id);
     }
 
     function _checkOnERC721Received(
@@ -420,5 +364,61 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     ) internal returns (bool) {
         bytes4 retval = IERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);
         return (retval == _ERC721_BATCH_RECEIVED);
+    }
+
+    function _ownerOf(uint256 id) internal view virtual returns (address) {
+        uint256 data = _owners[id];
+        if ((data & (2**160)) == 2**160) {
+            return address(0);
+        }
+        return address(data);
+    }
+
+    function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {
+        uint256 data = _owners[id];
+        if ((data & (2**160)) == 2**160) {
+            owner = address(0);
+        } else {
+            owner = address(data);
+        }
+        operatorEnabled = (data / 2**255) == 1;
+    }
+
+    function _checkTransfer(
+        address from,
+        address to,
+        uint256 id
+    ) internal view returns (bool isMetaTx) {
+        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
+        require(owner != address(0), "NONEXISTENT_TOKEN");
+        require(owner == from, "CHECKTRANSFER_NOT_OWNER");
+        require(to != address(0), "NOT_TO_ZEROADDRESS");
+        isMetaTx = _isValidMetaTx(from);
+        if (msg.sender != from && !isMetaTx) {
+            require(
+                _superOperators[msg.sender] ||
+                    _operatorsForAll[from][msg.sender] ||
+                    (operatorEnabled && _operators[id] == msg.sender),
+                "UNAUTHORIZED_TRANSFER"
+            );
+        }
+    }
+
+    function _checkInterfaceWith10000Gas(address _contract, bytes4 interfaceId) internal view returns (bool) {
+        bool success;
+        bool result;
+        bytes memory callData = abi.encodeWithSelector(ERC165ID, interfaceId);
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            let call_ptr := add(0x20, callData)
+            let call_size := mload(callData)
+            let output := mload(0x40) // Find empty storage location using "free memory pointer"
+            mstore(output, 0x0)
+            success := staticcall(10000, _contract, call_ptr, call_size, output, 0x20) // 32 bytes
+            result := mload(output)
+        }
+        // (10000 / 63) "not enough for supportsInterface(...)" // consume all gas, so caller can potentially know that there was not enough gas
+        assert(gasleft() > 158);
+        return success && result;
     }
 }

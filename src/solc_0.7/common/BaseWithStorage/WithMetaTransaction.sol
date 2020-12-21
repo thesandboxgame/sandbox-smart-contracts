@@ -13,6 +13,13 @@ contract WithMetaTransaction is WithAdmin {
     /// @param processorType set the metaTransactionProcessor type
     event MetaTransactionProcessor(address metaTransactionProcessor, uint8 processorType);
 
+    /// @dev check whether address `who` is given meta-transaction execution rights.
+    /// @param who The address to query.
+    /// @return the type of metatx processor (0 for none)
+    function getMetaTransactionProcessorType(address who) external view returns (uint8) {
+        return _metaTransactionContracts[who];
+    }
+
     /// @dev Enable or disable the ability of `metaTransactionProcessor` to perform meta-tx (metaTransactionProcessor rights).
     /// @param metaTransactionProcessor address that will be given/removed metaTransactionProcessor rights.
     /// @param processorType set the metaTransactionProcessor type
@@ -21,24 +28,14 @@ contract WithMetaTransaction is WithAdmin {
         _setMetaTransactionProcessor(metaTransactionProcessor, processorType);
     }
 
+    // EIP-2771 Meta Transaction Recipient
+    function isTrustedForwarder(address forwarder) public view returns (bool) {
+        return _metaTransactionContracts[forwarder] == METATX_2771;
+    }
+
     function _setMetaTransactionProcessor(address metaTransactionProcessor, uint8 processorType) internal {
         _metaTransactionContracts[metaTransactionProcessor] = processorType;
         emit MetaTransactionProcessor(metaTransactionProcessor, processorType);
-    }
-
-    /// @dev check whether address `who` is given meta-transaction execution rights.
-    /// @param who The address to query.
-    /// @return the type of metatx processor (0 for none)
-    function getMetaTransactionProcessorType(address who) external view returns (uint8) {
-        return _metaTransactionContracts[who];
-    }
-
-    // --------------------------------------------------------------------------------
-    // EIP-2771 Meta Transaction Recipient
-    // --------------------------------------------------------------------------------
-
-    function isTrustedForwarder(address forwarder) public view returns (bool) {
-        return _metaTransactionContracts[forwarder] == METATX_2771;
     }
 
     /**
