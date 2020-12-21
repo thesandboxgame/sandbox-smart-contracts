@@ -89,7 +89,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         override
         returns (uint256[] memory)
     {
-        uint256 baseId = _extractBaseId(gameId);
+        uint256 baseId = _storageId(gameId);
         require(_ownerOf(baseId) != address(0), "NONEXISTANT_TOKEN");
         uint256 length = assetIds.length;
         uint256[] memory assets;
@@ -257,7 +257,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint256 gameId,
         IGameToken.Update memory update
     ) public override onlyMinter() notToZero(to) notToThis(to) returns (uint256) {
-        uint256 baseId = _extractBaseId(gameId);
+        uint256 baseId = _storageId(gameId);
         _addAssets(from, baseId, update.assetIdsToAdd, update.assetAmountsToAdd);
         _removeAssets(baseId, update.assetIdsToRemove, update.assetAmountsToRemove, to);
         _metaData[baseId] = update.uri;
@@ -342,7 +342,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @return uri The URI hash of the token.
     function tokenURI(uint256 gameId) public view override returns (bytes32 uri) {
         require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
-        uint256 baseId = _extractBaseId(gameId);
+        uint256 baseId = _storageId(gameId);
         return _metaData[baseId];
     }
 
@@ -375,7 +375,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         address to,
         uint256 gameId
     ) internal notToZero(to) notToThis(to) {
-        uint256 baseId = _extractBaseId(gameId);
+        uint256 baseId = _storageId(gameId);
         address owner = _ownerOf(baseId);
         require(msg.sender == owner || _isValidMetaTx(from), "DESTROY_ACCESS_DENIED");
         require(from == owner, "DESTROY_INVALID_FROM");
@@ -393,7 +393,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     ) internal notToZero(to) notToThis(to) {
         require(_ownerOf(gameId) == address(0), "ONLY_FROM_BURNED_TOKEN");
         bool validMetaTx = _isValidMetaTx(from);
-        uint256 baseId = _extractBaseId(gameId);
+        uint256 baseId = _storageId(gameId);
         if (!validMetaTx) {
             require(from == msg.sender, "INVALID_RECOVERY");
             _check_withdrawal_authorized(from, gameId);
@@ -459,13 +459,13 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         if (isCreation) {
             idVersion = 1;
             gameId = _generateGameId(from, subId, idVersion);
-            baseId = _extractBaseId(gameId);
+            baseId = _storageId(gameId);
             data = _owners[baseId];
             require(data == 0, "BASEID_REUSE_FORBIDDEN");
         } else {
             idVersion = version;
             gameId = _generateGameId(from, subId, idVersion);
-            baseId = _extractBaseId(gameId);
+            baseId = _storageId(gameId);
             data = _owners[baseId];
         }
 
@@ -502,9 +502,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         return newId;
     }
 
-    // @note rename to _storageId(...) and override base class once implemented.
-    function _extractBaseId(uint256 gameId) internal pure returns (uint256) {
-        return uint256(gameId & BASEID_MASK);
+    function _storageId(uint256 id) internal pure override returns (uint256) {
+        return uint256(id & BASEID_MASK);
     }
 
     /// @dev Create a new gameId and associate it with an owner.
