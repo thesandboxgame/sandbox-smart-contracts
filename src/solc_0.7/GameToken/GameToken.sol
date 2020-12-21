@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
-pragma abicoder v2;
+pragma experimental ABIEncoderV2;
 
 import "../common/BaseWithStorage/ERC721BaseToken.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
@@ -23,6 +23,10 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     uint256 private constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
     uint256 private constant SUBID_MULTIPLIER = uint256(2)**(256 - 224);
+    // ((uint256(1) * 2**224) - 1) << 32;
+    uint256 private constant BASEID_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000;
+    // ((uint256(1) * 2**32) - 1) << 200;
+    uint256 private constant VERSION_MASK = 0x000000FFFFFFFF00000000000000000000000000000000000000000000000000;
 
     mapping(uint256 => mapping(uint256 => uint256)) private _gameAssets;
     mapping(address => address) private _creatorship; // creatorship transfer
@@ -33,12 +37,12 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     ///////////////////////////////  Events //////////////////////////////
 
     /// @dev Emits when a game is updated.
-    /// @param oldId The id of the previous erc721 GAME token.
+    /// @param baseId The id of the previous erc721 GAME token.
     /// @param newId The id of the newly minted token.
     /// @param update The changes made to the Game: new assets, removed assets, uri
     /// @param to The receiving address for the removed assets.
 
-    event GameTokenUpdated(uint256 indexed oldId, uint256 indexed newId, IGameToken.Update update, address to);
+    event GameTokenUpdated(uint256 indexed baseId, uint256 indexed newId, IGameToken.Update update, address to);
 
     /// @dev Emits when creatorship of a GAME token is transferred.
     /// @param original The original creator of the GAME token.
@@ -152,9 +156,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         address editor,
         uint64 subId
     ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256 id) {
-        uint256 gameId = _mintGame(from, to, subId, 0);
-        uint256 baseId = _extractBaseId(gameId);
-        require(_ownerOf(baseId) == address(0), "NO_ID_REUSE");
+        (uint256 gameId, uint256 baseId) = _mintGame(from, to, subId, 0, true);
+        uint256 data = _owners[baseId];
 
         if (editor != address(0)) {
             _setGameEditor(to, editor, true);
@@ -165,7 +168,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
 
         _metaData[baseId] = creation.uri;
         _numNFTPerAddress[to]++;
-        emit GameTokenUpdated(0, gameId, creation, to);
+        emit GameTokenUpdated(baseId, gameId, creation, to);
         return gameId;
     }
 
@@ -260,7 +263,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         _metaData[baseId] = update.uri;
         uint256 newId = _bumpGameVersion(from, gameId);
 
-        emit GameTokenUpdated(gameId, newId, update, to);
+        emit GameTokenUpdated(baseId, newId, update, to);
         return newId;
     }
 
@@ -390,15 +393,17 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     ) internal notToZero(to) notToThis(to) {
         require(_ownerOf(gameId) == address(0), "ONLY_FROM_BURNED_TOKEN");
         bool validMetaTx = _isValidMetaTx(from);
-        // @review if it is a valid metaTx, we still need to check the _owners mapping
+        uint256 baseId = _extractBaseId(gameId);
         if (!validMetaTx) {
-            require(from == msg.sender, "INVALID_RECOVERY_CALLER");
+            require(from == msg.sender, "INVALID_RECOVERY");
             _check_withdrawal_authorized(from, gameId);
+            // @review
+        } else {
+            require(from == address(_owners[baseId]), "INVALID_RECOVERY_METATX");
         }
         require(assetIds.length > 0, "WITHDRAWAL_COMPLETE");
         uint256[] memory values;
         values = new uint256[](assetIds.length);
-        uint256 baseId = _extractBaseId(gameId);
         for (uint256 i = 0; i < assetIds.length; i++) {
             values[i] = _gameAssets[baseId][assetIds[i]];
             delete _gameAssets[baseId][assetIds[i]];
@@ -425,7 +430,6 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// though ownerOf(id) would be address(0) after burning.)
     /// @param id The id of the GAME token to query.
     /// @return the address of the owner before burning.
-    // @review compare this to _ownerOf()
     function _withdrawalOwnerOf(uint256 id) internal view returns (address) {
         uint256 data = _owners[id];
         if ((data & (2**160)) == 2**160) {
@@ -439,28 +443,37 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @param to The address of the Game owner.
     /// @param subId The id to use when generating the new GameId.
     /// @param version The version number part of the gameId.
+    /// @param isCreation Whether this is a brand new GAME (as opposed to an update).
     /// @return id The newly created gameId.
     function _mintGame(
         address from,
         address to,
         uint64 subId,
-        uint32 version
-    ) internal returns (uint256 id) {
+        uint32 version,
+        bool isCreation
+    ) internal returns (uint256 id, uint256 baseId) {
         uint32 idVersion;
-        if (version == 0) {
+        uint256 gameId;
+        uint256 baseId;
+        uint256 data;
+        if (isCreation) {
             idVersion = 1;
+            gameId = _generateGameId(from, subId, idVersion);
+            baseId = _extractBaseId(gameId);
+            data = _owners[baseId];
+            require(data == 0, "BASEID_REUSE_FORBIDDEN");
         } else {
             idVersion = version;
+            gameId = _generateGameId(from, subId, idVersion);
+            baseId = _extractBaseId(gameId);
+            data = _owners[baseId];
         }
-        uint256 gameId = _generateGameId(from, subId, idVersion);
-        _owners[gameId] = uint256(to);
-        // uint256 addressAsUint = uint256(to);
-        // uint256 shiftedVersion = uint256(idVersion) * uint256(2)**(256 - 32); // VERSION_OFFSET_MULTIPLIER
-        // uint256 packedValues = shiftedVersion + addressAsUint;
-        // _owners[gameId] = uint256(packedValues);
+
+        // @review do I need to clear owner-address bits before doing this if it's an update ?
+        _owners[baseId] = (uint256(idVersion) << 200) + uint256(to);
 
         emit Transfer(address(0), to, gameId);
-        return gameId;
+        return (gameId, baseId);
     }
 
     /// @dev Allow token owner to set game editors.
@@ -482,18 +495,16 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint32 version = uint32(gameId);
         version++;
         address owner = _ownerOf(gameId);
-        uint256 newId = _mintGame(originalCreator, owner, subId, version);
+        (uint256 newId, ) = _mintGame(originalCreator, owner, subId, version, false);
         address newOwner = _ownerOf(newId);
         assert(owner == newOwner);
         _burn(from, owner, gameId);
         return newId;
     }
 
+    // @note rename to _storageId(...) and override base class once implemented.
     function _extractBaseId(uint256 gameId) internal pure returns (uint256) {
-        // Right-shift to drop the version
-        uint224 shiftedBaseId = uint224(gameId >> 8);
-        // Left-shift to pad with 0s again
-        return shiftedBaseId << 8;
+        return uint256(gameId & BASEID_MASK);
     }
 
     /// @dev Create a new gameId and associate it with an owner.
@@ -507,5 +518,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint32 version
     ) internal pure returns (uint256) {
         return uint256(creator) * CREATOR_OFFSET_MULTIPLIER + uint64(subId) * SUBID_MULTIPLIER + uint32(version);
+    }
+
+    function getVersion(uint256 baseId) public view returns (uint32 version) {
+        return uint32((_owners[baseId] & VERSION_MASK) >> 200);
     }
 }
