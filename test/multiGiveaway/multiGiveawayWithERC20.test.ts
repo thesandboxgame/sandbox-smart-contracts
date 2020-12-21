@@ -1,6 +1,6 @@
 import {ethers} from 'hardhat';
 import {setupTestGiveawayWithERC20} from './fixtures';
-import {constants} from 'ethers';
+import {BigNumber, constants} from 'ethers';
 import {waitFor, expectReceiptEventWithArgs, increaseTime} from '../utils';
 import {expect} from '../chai-setup';
 
@@ -8,6 +8,9 @@ import helpers from '../../lib/merkleTreeHelper';
 const {calculateClaimableAssetLandAndSandHash} = helpers;
 
 const zeroAddress = constants.AddressZero;
+
+// const getSandAmount = (amount: number) =>
+//   BigNumber.from(amount).mul('1000000000000000000');
 
 describe('Multi_Giveaway_1_with_ERC20', function () {
   it('User cannot claim when test contract holds zero assets/lands', async function () {
@@ -24,20 +27,50 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     );
 
     await expect(
-      giveawayContractAsUser.claimAssetsAndLands(
+      giveawayContractAsUser.claimAssetsAndLandsWithERC20(
         others[1],
         claim.assetIds,
         claim.assetValues,
         claim.landIds,
+        claim.sand,
         proof,
         claim.salt
       )
     ).to.be.revertedWith(`can't substract more than there is`);
   });
 
-  it('User can claim allocated multiple assets for multiple assetIds together with lands from Giveaway contract', async function () {
+  it('User cannot claim sand when contract does not hold any', async function () {
     const options = {
       mint: true,
+      assetsHolder: true,
+      landHolder: true,
+      sandHolder: true,
+    };
+    const setUp = await setupTestGiveawayWithERC20(options);
+    const {giveawayContract, others, tree, claims} = setUp;
+    const claim = claims[0];
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
+    const giveawayContractAsUser = await giveawayContract.connect(
+      ethers.provider.getSigner(others[1])
+    );
+
+    await expect(
+      giveawayContractAsUser.claimAssetsAndLandsWithERC20(
+        others[1],
+        claim.assetIds,
+        claim.assetValues,
+        claim.landIds,
+        claim.sand,
+        proof,
+        claim.salt
+      )
+    ).to.be.revertedWith(`not enough fund`);
+  });
+
+  it('User can claim allocated multiple assets for multiple assetIds together with lands and sand from Giveaway contract', async function () {
+    const options = {
+      mint: true,
+      sand: true,
     };
     const setUp = await setupTestGiveawayWithERC20(options);
     const {
@@ -47,6 +80,7 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
       claims,
       assetContract,
       landContract,
+      sandContract,
     } = setUp;
 
     const claim = claims[0];
@@ -80,16 +114,23 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     const originalOwnerLandId5 = await landContract.ownerOf(4);
     expect(originalOwnerLandId5).to.equal(giveawayContract.address);
 
+    const initialSandBalance = await sandContract.balanceOf(others[1]);
+    expect(initialSandBalance).to.equal(0);
+
     await waitFor(
-      giveawayContractAsUser.claimAssetsAndLands(
+      giveawayContractAsUser.claimAssetsAndLandsWithERC20(
         others[1],
         claim.assetIds,
         claim.assetValues,
         claim.landIds,
+        claim.sand,
         proof,
         claim.salt
       )
     );
+
+    const updatedSandBalance = await sandContract.balanceOf(others[1]);
+    expect(updatedSandBalance).to.equal(claim.sand); // TODO: check BigNumber
 
     const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
       others[1],
@@ -122,6 +163,7 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
   it('Claimed Event is emitted for successful claim', async function () {
     const options = {
       mint: true,
+      sand: true,
     };
     const setUp = await setupTestGiveawayWithERC20(options);
     const {giveawayContract, others, tree, claims} = setUp;
@@ -133,11 +175,12 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     );
 
     const receipt = await waitFor(
-      giveawayContractAsUser.claimAssetsAndLands(
+      giveawayContractAsUser.claimAssetsAndLandsWithERC20(
         others[1],
         claim.assetIds,
         claim.assetValues,
         claim.landIds,
+        claim.sand,
         proof,
         claim.salt
       )
@@ -145,7 +188,7 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
 
     const claimedEvent = await expectReceiptEventWithArgs(
       receipt,
-      'ClaimedAssetsAndLands'
+      'ClaimedAssetsAndLandsWithERC20'
     );
 
     expect(claimedEvent.args[0]).to.equal(others[1]); // to
@@ -160,146 +203,21 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     expect(claimedEvent.args[3][2]).to.equal(claim.landIds[2]);
     expect(claimedEvent.args[3][3]).to.equal(claim.landIds[3]);
     expect(claimedEvent.args[3][4]).to.equal(claim.landIds[4]);
+    expect(claimedEvent.args[4]).to.equal(claim.sand);
   });
 
-  it('User can claim allocated single asset for single assetId and single land from Giveaway contract', async function () {
-    const options = {
-      mint: true,
-    };
-    const setUp = await setupTestGiveawayWithERC20(options);
-    const {giveawayContract, others, tree, claims} = setUp;
-
-    const claim = claims[1];
-    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
-    const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
-    );
-
-    await waitFor(
-      giveawayContractAsUser.claimAssetsAndLands(
-        others[1],
-        claim.assetIds,
-        claim.assetValues,
-        claim.landIds,
-        proof,
-        claim.salt
-      )
-    );
+  it('User can claim allocated sand from Giveaway contract if there are no assets or lands', async function () {
+    // TODO:
   });
 
-  it('User can claim allocated lands (when there are no assets allocated) from Giveaway contract', async function () {
-    const options = {
-      mint: true,
-    };
-    const setUp = await setupTestGiveawayWithERC20(options);
-    const {giveawayContract, others, tree, claims, landContract} = setUp;
-
-    const claim = claims[2];
-    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
-    const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
-    );
-
-    const originalOwnerLandId1 = await landContract.ownerOf(0);
-    expect(originalOwnerLandId1).to.equal(giveawayContract.address);
-
-    await waitFor(
-      giveawayContractAsUser.claimAssetsAndLands(
-        others[1],
-        [],
-        [],
-        claim.landIds,
-        proof,
-        claim.salt
-      )
-    );
-
-    const ownerLandId1 = await landContract.ownerOf(7);
-    expect(ownerLandId1).to.equal(claim.reservedAddress);
-  });
-
-  it('User can claim allocated assets (when there are no lands allocated) from Giveaway contract', async function () {
-    const options = {
-      mint: true,
-    };
-    const setUp = await setupTestGiveawayWithERC20(options);
-    const {giveawayContract, others, tree, claims, assetContract} = setUp;
-
-    const claim = claims[3];
-    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
-    const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
-    );
-
-    const initBalanceAssetId1 = await assetContract[
-      'balanceOf(address,uint256)'
-    ](giveawayContract.address, claim.assetIds[0]);
-    expect(initBalanceAssetId1).to.equal(claim.assetValues[0]);
-    const initBalanceAssetId2 = await assetContract[
-      'balanceOf(address,uint256)'
-    ](giveawayContract.address, claim.assetIds[1]);
-    expect(initBalanceAssetId2).to.equal(claim.assetValues[1]);
-    const initBalanceAssetId3 = await assetContract[
-      'balanceOf(address,uint256)'
-    ](giveawayContract.address, claim.assetIds[2]);
-    expect(initBalanceAssetId3).to.equal(claim.assetValues[2]);
-
-    await waitFor(
-      giveawayContractAsUser.claimAssetsAndLands(
-        others[1],
-        claim.assetIds,
-        claim.assetValues,
-        [],
-        proof,
-        claim.salt
-      )
-    );
-
-    const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
-      claim.assetIds[0]
-    );
-    expect(balanceAssetId1).to.equal(claim.assetValues[0]);
-    const balanceAssetId2 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
-      claim.assetIds[1]
-    );
-    expect(balanceAssetId2).to.equal(claim.assetValues[1]);
-    const balanceAssetId3 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
-      claim.assetIds[2]
-    );
-    expect(balanceAssetId3).to.equal(claim.assetValues[2]);
-  });
-
-  it('User tries to claim the wrong amount of an assetID', async function () {
-    const options = {
-      mint: true,
-    };
-    const setUp = await setupTestGiveawayWithERC20(options);
-    const {giveawayContract, others, tree, claims} = setUp;
-
-    const claim = claims[1];
-    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
-    const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
-    );
-
-    await expect(
-      giveawayContractAsUser.claimAssetsAndLands(
-        others[1],
-        claim.assetIds,
-        [0], // bad param
-        claim.landIds,
-        proof,
-        claim.salt
-      )
-    ).to.be.revertedWith('INVALID_CLAIM');
+  it('User tries to claim the wrong amount of sand', async function () {
+    // TODO:
   });
 
   it('User cannot claim more than once', async function () {
     const options = {
       mint: true,
+      sand: true,
     };
     const setUp = await setupTestGiveawayWithERC20(options);
     const {giveawayContract, others, tree, claims} = setUp;
@@ -311,21 +229,23 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     );
 
     await waitFor(
-      giveawayContractAsUser.claimAssetsAndLands(
+      giveawayContractAsUser.claimAssetsAndLandsWithERC20(
         others[1],
         claim.assetIds,
         claim.assetValues,
         claim.landIds,
+        claim.sand,
         proof,
         claim.salt
       )
     );
     await expect(
-      giveawayContractAsUser.claimAssetsAndLands(
+      giveawayContractAsUser.claimAssetsAndLandsWithERC20(
         others[1],
         claim.assetIds,
         claim.assetValues,
         claim.landIds,
+        claim.sand,
         proof,
         claim.salt
       )
@@ -335,6 +255,7 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
   it('User cannot claim assets from Giveaway contract if destination is not the reserved address', async function () {
     const options = {
       mint: true,
+      sand: true,
     };
     const setUp = await setupTestGiveawayWithERC20(options);
     const {giveawayContract, others, tree, claims} = setUp;
@@ -346,11 +267,12 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     );
 
     await expect(
-      giveawayContractAsUser.claimAssetsAndLands(
+      giveawayContractAsUser.claimAssetsAndLandsWithERC20(
         others[2], // bad param
         claim.assetIds,
         claim.assetValues,
         claim.landIds,
+        claim.sand,
         proof,
         claim.salt
       )
@@ -360,6 +282,7 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
   it('User cannot claim from Giveaway contract to destination zeroAddress', async function () {
     const options = {
       mint: true,
+      sand: true,
     };
     const setUp = await setupTestGiveawayWithERC20(options);
     const {giveawayContract, others, tree, claims} = setUp;
@@ -371,46 +294,25 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     );
 
     await expect(
-      giveawayContractAsUser.claimAssetsAndLands(
+      giveawayContractAsUser.claimAssetsAndLandsWithERC20(
         zeroAddress,
         claim.assetIds,
         claim.assetValues,
         claim.landIds,
+        claim.sand,
         proof,
         claim.salt
       )
     ).to.be.revertedWith('INVALID_TO_ZERO_ADDRESS');
   });
 
-  it('User cannot claim assets from Giveaway contract with incorrect asset param', async function () {
-    const options = {
-      mint: true,
-    };
-    const setUp = await setupTestGiveawayWithERC20(options);
-    const {giveawayContract, others, tree, claims} = setUp;
-
-    const claim = claims[0];
-    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
-    const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
-    );
-
-    await expect(
-      giveawayContractAsUser.claimAssetsAndLands(
-        others[1],
-        claim.assetIds,
-        [5, 5], // length too short
-        claim.landIds,
-        proof,
-        claim.salt
-      )
-    ).to.be.revertedWith('INVALID_INPUT');
-  });
-
-  it('User can claim allocated multiple assets for multiple assetIds from alternate address, but landHolder is Giveaway contract', async function () {
+  it('User can claim allocated assets, lands and sand from 3 alternate addresses', async function () {
     const options = {
       mint: true,
       assetsHolder: true, // others[5]
+      landHolder: true, // others[7]
+      sandHolder: true, // others[6]
+      sand: true,
     };
     const setUp = await setupTestGiveawayWithERC20(options);
     const {
@@ -442,22 +344,23 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     expect(initBalanceAssetId3).to.equal(claim.assetValues[2]);
 
     const originalOwnerLandId1 = await landContract.ownerOf(0);
-    expect(originalOwnerLandId1).to.equal(giveawayContract.address);
+    expect(originalOwnerLandId1).to.equal(others[7]);
     const originalOwnerLandId2 = await landContract.ownerOf(1);
-    expect(originalOwnerLandId2).to.equal(giveawayContract.address);
+    expect(originalOwnerLandId2).to.equal(others[7]);
     const originalOwnerLandId3 = await landContract.ownerOf(2);
-    expect(originalOwnerLandId3).to.equal(giveawayContract.address);
+    expect(originalOwnerLandId3).to.equal(others[7]);
     const originalOwnerLandId4 = await landContract.ownerOf(3);
-    expect(originalOwnerLandId4).to.equal(giveawayContract.address);
+    expect(originalOwnerLandId4).to.equal(others[7]);
     const originalOwnerLandId5 = await landContract.ownerOf(4);
-    expect(originalOwnerLandId5).to.equal(giveawayContract.address);
+    expect(originalOwnerLandId5).to.equal(others[7]);
 
     await waitFor(
-      giveawayContractAsUser.claimAssetsAndLands(
+      giveawayContractAsUser.claimAssetsAndLandsWithERC20(
         others[1],
         claim.assetIds,
         claim.assetValues,
         claim.landIds,
+        claim.sand,
         proof,
         claim.salt
       )
@@ -489,117 +392,8 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     expect(ownerLandId4).to.equal(claim.reservedAddress);
     const ownerLandId5 = await landContract.ownerOf(4);
     expect(ownerLandId5).to.equal(claim.reservedAddress);
-  });
 
-  it('User can claim allocated lands from alternate address, but assetsHolder is Giveaway contract', async function () {
-    const options = {
-      mint: true,
-      landHolder: true, // others[5]
-    };
-    const setUp = await setupTestGiveawayWithERC20(options);
-    const {
-      giveawayContract,
-      others,
-      tree,
-      claims,
-      assetContract,
-      landContract,
-    } = setUp;
-
-    const claim = claims[0];
-    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
-    const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
-    );
-
-    const initBalanceAssetId1 = await assetContract[
-      'balanceOf(address,uint256)'
-    ](giveawayContract.address, claim.assetIds[0]);
-    expect(initBalanceAssetId1).to.equal(claim.assetValues[0]);
-    const initBalanceAssetId2 = await assetContract[
-      'balanceOf(address,uint256)'
-    ](giveawayContract.address, claim.assetIds[1]);
-    expect(initBalanceAssetId2).to.equal(claim.assetValues[1]);
-    const initBalanceAssetId3 = await assetContract[
-      'balanceOf(address,uint256)'
-    ](giveawayContract.address, claim.assetIds[2]);
-    expect(initBalanceAssetId3).to.equal(claim.assetValues[2]);
-
-    const originalOwnerLandId1 = await landContract.ownerOf(0);
-    expect(originalOwnerLandId1).to.equal(others[5]);
-    const originalOwnerLandId2 = await landContract.ownerOf(1);
-    expect(originalOwnerLandId2).to.equal(others[5]);
-    const originalOwnerLandId3 = await landContract.ownerOf(2);
-    expect(originalOwnerLandId3).to.equal(others[5]);
-    const originalOwnerLandId4 = await landContract.ownerOf(3);
-    expect(originalOwnerLandId4).to.equal(others[5]);
-    const originalOwnerLandId5 = await landContract.ownerOf(4);
-    expect(originalOwnerLandId5).to.equal(others[5]);
-
-    await waitFor(
-      giveawayContractAsUser.claimAssetsAndLands(
-        others[1],
-        claim.assetIds,
-        claim.assetValues,
-        claim.landIds,
-        proof,
-        claim.salt
-      )
-    );
-
-    const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
-      claim.assetIds[0]
-    );
-    expect(balanceAssetId1).to.equal(claim.assetValues[0]);
-    const balanceAssetId2 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
-      claim.assetIds[1]
-    );
-    expect(balanceAssetId2).to.equal(claim.assetValues[1]);
-    const balanceAssetId3 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
-      claim.assetIds[2]
-    );
-    expect(balanceAssetId3).to.equal(claim.assetValues[2]);
-
-    const ownerLandId1 = await landContract.ownerOf(0);
-    expect(ownerLandId1).to.equal(claim.reservedAddress);
-    const ownerLandId2 = await landContract.ownerOf(1);
-    expect(ownerLandId2).to.equal(claim.reservedAddress);
-    const ownerLandId3 = await landContract.ownerOf(2);
-    expect(ownerLandId3).to.equal(claim.reservedAddress);
-    const ownerLandId4 = await landContract.ownerOf(3);
-    expect(ownerLandId4).to.equal(claim.reservedAddress);
-    const ownerLandId5 = await landContract.ownerOf(4);
-    expect(ownerLandId5).to.equal(claim.reservedAddress);
-  });
-
-  it('User can claim allocated assets and lands from alternate addresses', async function () {
-    const options = {
-      mint: true,
-      assetsHolder: true, // others[5]
-      landHolder: true, // others[5]
-    };
-    const setUp = await setupTestGiveawayWithERC20(options);
-    const {giveawayContract, others, tree, claims} = setUp;
-
-    const claim = claims[0];
-    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
-    const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
-    );
-
-    await waitFor(
-      giveawayContractAsUser.claimAssetsAndLands(
-        others[1],
-        claim.assetIds,
-        claim.assetValues,
-        claim.landIds,
-        proof,
-        claim.salt
-      )
-    );
+    // TODO: sand balances
   });
 
   it('merkleRoot cannot be set twice', async function () {
@@ -648,11 +442,12 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     await increaseTime(60 * 60 * 24 * 30 * 4);
 
     await expect(
-      giveawayContractAsUser.claimAssetsAndLands(
+      giveawayContractAsUser.claimAssetsAndLandsWithERC20(
         others[1],
         claim.assetIds,
         claim.assetValues,
         claim.landIds,
+        claim.sand,
         proof,
         claim.salt
       )

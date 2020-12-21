@@ -5,6 +5,7 @@ import {default as claimData} from '../data/giveaways/multi_giveaway_1_with_erc2
 const ASSETS_HOLDER = '0x0000000000000000000000000000000000000000';
 
 const LAND_HOLDER = '0x0000000000000000000000000000000000000000';
+const SAND_HOLDER = '0x0000000000000000000000000000000000000000';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, network, getChainId} = hre;
@@ -20,6 +21,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const assetContract = await deployments.get('Asset');
   const landContract = await deployments.get('Land');
+  const sandContract = await deployments.get('Sand');
 
   await deploy('Multi_Giveaway_1_with_ERC20', {
     contract: 'MultiGiveawayWithERC20',
@@ -29,10 +31,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     args: [
       assetContract.address,
       landContract.address,
+      sandContract.address,
       deployer,
       merkleRootHash,
       ASSETS_HOLDER,
       LAND_HOLDER,
+      SAND_HOLDER,
       1615194000, // Sunday, 08-Mar-21 09:00:00 UTC
     ], // TODO: expiryTime
   });
@@ -42,4 +46,4 @@ func.tags = [
   'Multi_Giveaway_1_with_ERC20',
   'Multi_Giveaway_1_deploy_with_ERC20',
 ];
-func.dependencies = ['Land_deploy', 'Asset_deploy'];
+func.dependencies = ['Land_deploy', 'Asset_deploy', 'Sand_deploy'];

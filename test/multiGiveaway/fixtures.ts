@@ -4,6 +4,7 @@ import {
   getUnnamedAccounts,
   getNamedAccounts,
 } from 'hardhat';
+import {BigNumber} from 'ethers';
 import {expect} from '../chai-setup';
 import MerkleTree from '../../lib/merkleTree';
 import {createAssetAndLandClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getClaims';
@@ -32,6 +33,7 @@ type OptionsWithERC20 = {
   assetsHolder?: boolean;
   landHolder?: boolean;
   sandHolder?: boolean;
+  sand?: boolean;
 };
 
 export const setupTestGiveaway = deployments.createFixture(async function (
@@ -214,7 +216,7 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
   async function (hre, options?: OptionsWithERC20) {
     const {network, getChainId} = hre;
     const chainId = await getChainId();
-    const {mint, assetsHolder, landHolder, sandHolder} = options || {};
+    const {mint, assetsHolder, landHolder, sandHolder, sand} = options || {};
     const {
       deployer,
       assetAdmin,
@@ -250,24 +252,34 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
     const LAND_HOLDER = '0x0000000000000000000000000000000000000000';
     const SAND_HOLDER = '0x0000000000000000000000000000000000000000';
 
+    const SAND_AMOUNT = BigNumber.from(20000).mul('1000000000000000000');
+
+    const assetDeployAddress = assetsHolder ? others[5] : ASSETS_HOLDER;
+    const landDeployAddress = assetsHolder ? others[7] : LAND_HOLDER;
+    const sandDeployAddress = assetsHolder ? others[6] : SAND_HOLDER;
+
     const testContract = await deployments.deploy(
       'Test_Multi_Giveaway_1_with_ERC20',
       {
         from: deployer,
-        contract: 'MultiGiveaway',
+        contract: 'MultiGiveawayWithERC20',
         args: [
           assetContract.address,
           landContract.address,
           sandContract.address,
           nftGiveawayAdmin,
           emptyBytes32,
-          assetsHolder ? others[5] : ASSETS_HOLDER,
-          landHolder ? others[5] : LAND_HOLDER,
-          sandHolder ? others[5] : SAND_HOLDER,
+          assetDeployAddress,
+          landDeployAddress,
+          sandDeployAddress,
           1615194000, // Sunday, 08-Mar-21 09:00:00 UTC
         ],
       }
     );
+
+    const assetTestAddress = assetsHolder ? others[5] : testContract.address;
+    const landTestAddress = assetsHolder ? others[7] : testContract.address;
+    const sandTestAddress = assetsHolder ? others[6] : testContract.address;
 
     if (assetsHolder) {
       const assetContractAsAdmin = await assetContract.connect(
@@ -284,6 +296,11 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
       await sandContractAsAdmin.setSuperOperator(testContract.address, true);
     }
 
+    // Supply SAND
+    if (sand) {
+      await sandContractAsAdmin.transfer(sandTestAddress, SAND_AMOUNT);
+    }
+
     // Supply assets to contract for testing
     async function mintTestAssets(id: number, value: number) {
       const assetContractAsBouncer = await assetContract.connect(
@@ -296,7 +313,7 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
       const hash = ipfsHashString;
       const supply = value;
       const rarity = 1;
-      const owner = assetsHolder ? others[5] : testContract.address;
+      const owner = assetTestAddress;
       const data = '0x';
 
       const receipt = await waitFor(
@@ -317,7 +334,7 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
       );
 
       const balanceAssetId = await assetContract['balanceOf(address,uint256)'](
-        assetsHolder ? others[5] : testContract.address,
+        assetTestAddress,
         transferEvent.args[3]
       );
       expect(balanceAssetId).to.equal(supply);
@@ -326,7 +343,7 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
 
     // Supply lands to contract for testing
     async function mintTestLands() {
-      const owner = landHolder ? others[5] : testContract.address;
+      const owner = landTestAddress;
       for (let i = 0; i < 8; i++) {
         await landContractAsAdmin.mint(owner, i);
       }
