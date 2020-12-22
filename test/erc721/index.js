@@ -16,11 +16,6 @@ const erc721ABI = [
         name: 'admin',
         type: 'address',
       },
-      {
-        internalType: 'contract LandToken',
-        name: 'land',
-        type: 'address',
-      },
     ],
     stateMutability: 'nonpayable',
     type: 'constructor',
@@ -50,19 +45,19 @@ const erc721ABI = [
       {
         indexed: true,
         internalType: 'address',
-        name: '_owner',
+        name: 'owner',
         type: 'address',
       },
       {
         indexed: true,
         internalType: 'address',
-        name: '_approved',
+        name: 'approved',
         type: 'address',
       },
       {
         indexed: true,
         internalType: 'uint256',
-        name: '_tokenId',
+        name: 'tokenId',
         type: 'uint256',
       },
     ],
@@ -75,36 +70,23 @@ const erc721ABI = [
       {
         indexed: true,
         internalType: 'address',
-        name: '_owner',
+        name: 'owner',
         type: 'address',
       },
       {
         indexed: true,
         internalType: 'address',
-        name: '_operator',
+        name: 'operator',
         type: 'address',
       },
       {
         indexed: false,
         internalType: 'bool',
-        name: '_approved',
+        name: 'approved',
         type: 'bool',
       },
     ],
     name: 'ApprovalForAll',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'address',
-        name: 'newBreaker',
-        type: 'address',
-      },
-    ],
-    name: 'Breaker',
     type: 'event',
   },
   {
@@ -118,63 +100,12 @@ const erc721ABI = [
       },
       {
         indexed: false,
-        internalType: 'bool',
-        name: 'enabled',
-        type: 'bool',
+        internalType: 'uint8',
+        name: 'processorType',
+        type: 'uint8',
       },
     ],
     name: 'MetaTransactionProcessor',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        internalType: 'address',
-        name: 'newMinter',
-        type: 'address',
-      },
-    ],
-    name: 'Minter',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: 'uint256',
-        name: 'id',
-        type: 'uint256',
-      },
-      {
-        indexed: false,
-        internalType: 'uint24[]',
-        name: 'list',
-        type: 'uint24[]',
-      },
-    ],
-    name: 'QuadsAdded',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        internalType: 'uint256',
-        name: 'id',
-        type: 'uint256',
-      },
-      {
-        indexed: false,
-        internalType: 'uint256',
-        name: 'numRemoved',
-        type: 'uint256',
-      },
-    ],
-    name: 'QuadsRemoved',
     type: 'event',
   },
   {
@@ -202,260 +133,24 @@ const erc721ABI = [
       {
         indexed: true,
         internalType: 'address',
-        name: '_from',
+        name: 'from',
         type: 'address',
       },
       {
         indexed: true,
         internalType: 'address',
-        name: '_to',
+        name: 'to',
         type: 'address',
       },
       {
         indexed: true,
         internalType: 'uint256',
-        name: '_tokenId',
+        name: 'tokenId',
         type: 'uint256',
       },
     ],
     name: 'Transfer',
     type: 'event',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'from',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'owner',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'id',
-        type: 'uint256',
-      },
-    ],
-    name: '_burn',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address',
-      },
-    ],
-    name: '_numNFTPerAddress',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    name: '_operators',
-    outputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: '',
-        type: 'address',
-      },
-    ],
-    name: '_operatorsForAll',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    name: '_owners',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'estateId',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'ids',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'junctions',
-        type: 'uint256[]',
-      },
-    ],
-    name: 'addMultipleLands',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'estateId',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'sizes',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'xs',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'ys',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'junctions',
-        type: 'uint256[]',
-      },
-    ],
-    name: 'addMultipleQuads',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'estateId',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'size',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'x',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'y',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'junction',
-        type: 'uint256',
-      },
-    ],
-    name: 'addQuad',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'estateId',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'id',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'junction',
-        type: 'uint256',
-      },
-    ],
-    name: 'addSingleLand',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
   },
   {
     inputs: [
@@ -562,29 +257,6 @@ const erc721ABI = [
     inputs: [
       {
         internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'estateId',
-        type: 'uint256',
-      },
-      {
-        internalType: 'address',
-        name: 'to',
-        type: 'address',
-      },
-    ],
-    name: 'burnAndTransferFrom',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
         name: 'from',
         type: 'address',
       },
@@ -609,123 +281,6 @@ const erc721ABI = [
     ],
     name: 'changeAdmin',
     outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'to',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'ids',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'junctions',
-        type: 'uint256[]',
-      },
-    ],
-    name: 'createFromMultipleLands',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'to',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'sizes',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'xs',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'ys',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'junctions',
-        type: 'uint256[]',
-      },
-    ],
-    name: 'createFromMultipleQuads',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'to',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'size',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'x',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'y',
-        type: 'uint256',
-      },
-    ],
-    name: 'createFromQuad',
-    outputs: [
-      {
-        internalType: 'uint256',
-        name: '',
-        type: 'uint256',
-      },
-    ],
     stateMutability: 'nonpayable',
     type: 'function',
   },
@@ -762,26 +317,19 @@ const erc721ABI = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'getBreaker',
-    outputs: [
+    inputs: [
       {
         internalType: 'address',
-        name: '',
+        name: 'who',
         type: 'address',
       },
     ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'getMinter',
+    name: 'getMetaTransactionProcessorType',
     outputs: [
       {
-        internalType: 'address',
+        internalType: 'uint8',
         name: '',
-        type: 'address',
+        type: 'uint8',
       },
     ],
     stateMutability: 'view',
@@ -819,25 +367,6 @@ const erc721ABI = [
         type: 'address',
       },
     ],
-    name: 'isMetaTransactionProcessor',
-    outputs: [
-      {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'who',
-        type: 'address',
-      },
-    ],
     name: 'isSuperOperator',
     outputs: [
       {
@@ -850,84 +379,22 @@ const erc721ABI = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'name',
-    outputs: [
-      {
-        internalType: 'string',
-        name: '',
-        type: 'string',
-      },
-    ],
-    stateMutability: 'pure',
-    type: 'function',
-  },
-  {
     inputs: [
       {
         internalType: 'address',
-        name: 'operator',
+        name: 'forwarder',
         type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'from',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256[]',
-        name: 'ids',
-        type: 'uint256[]',
-      },
-      {
-        internalType: 'bytes',
-        name: 'data',
-        type: 'bytes',
       },
     ],
-    name: 'onERC721BatchReceived',
+    name: 'isTrustedForwarder',
     outputs: [
       {
-        internalType: 'bytes4',
+        internalType: 'bool',
         name: '',
-        type: 'bytes4',
+        type: 'bool',
       },
     ],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'operator',
-        type: 'address',
-      },
-      {
-        internalType: 'address',
-        name: 'from',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'tokenId',
-        type: 'uint256',
-      },
-      {
-        internalType: 'bytes',
-        name: 'data',
-        type: 'bytes',
-      },
-    ],
-    name: 'onERC721Received',
-    outputs: [
-      {
-        internalType: 'bytes4',
-        name: '',
-        type: 'bytes4',
-      },
-    ],
-    stateMutability: 'nonpayable',
+    stateMutability: 'view',
     type: 'function',
   },
   {
@@ -1073,42 +540,16 @@ const erc721ABI = [
     inputs: [
       {
         internalType: 'address',
-        name: 'breaker',
-        type: 'address',
-      },
-    ],
-    name: 'setBreaker',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
         name: 'metaTransactionProcessor',
         type: 'address',
       },
       {
-        internalType: 'bool',
-        name: 'enabled',
-        type: 'bool',
+        internalType: 'uint8',
+        name: 'processorType',
+        type: 'uint8',
       },
     ],
     name: 'setMetaTransactionProcessor',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'minter',
-        type: 'address',
-      },
-    ],
-    name: 'setMinter',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -1151,61 +592,6 @@ const erc721ABI = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'symbol',
-    outputs: [
-      {
-        internalType: 'string',
-        name: '',
-        type: 'string',
-      },
-    ],
-    stateMutability: 'pure',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'uint256',
-        name: 'id',
-        type: 'uint256',
-      },
-    ],
-    name: 'tokenURI',
-    outputs: [
-      {
-        internalType: 'string',
-        name: '',
-        type: 'string',
-      },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'estateId',
-        type: 'uint256',
-      },
-      {
-        internalType: 'address',
-        name: 'to',
-        type: 'address',
-      },
-    ],
-    name: 'transferAllFromDestroyedEstate',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
     inputs: [
       {
         internalType: 'address',
@@ -1224,34 +610,6 @@ const erc721ABI = [
       },
     ],
     name: 'transferFrom',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        internalType: 'address',
-        name: 'sender',
-        type: 'address',
-      },
-      {
-        internalType: 'uint256',
-        name: 'estateId',
-        type: 'uint256',
-      },
-      {
-        internalType: 'uint256',
-        name: 'num',
-        type: 'uint256',
-      },
-      {
-        internalType: 'address',
-        name: 'to',
-        type: 'address',
-      },
-    ],
-    name: 'transferFromDestroyedEstate',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -1578,6 +936,7 @@ module.exports = (init, extensions) => {
       const tokenIds = [];
       for (let i = 0; i < 3; i++) {
         const {tokenId} = await mint(owner);
+        console.log(`loop id: ${tokenId}`);
         tokenIds.push(tokenId);
       }
       const contractAsOwner = contract.connect(
@@ -1707,12 +1066,16 @@ module.exports = (init, extensions) => {
       const balance = await contract.callStatic.balanceOf(user0);
       assert.equal(balance.toNumber(), 0);
 
+      console.log(`id 0: ${tokenIds}`);
+      console.log(`id 0: ${tokenIds[0]}`);
+      console.log(`owner: ${owner}`);
+      console.log(`user0: ${user0}`);
       await contractAsOwner
         .transferFrom(owner, user0, tokenIds[0])
         .then((tx) => tx.wait());
       let newBalance = await contract.callStatic.balanceOf(user0);
       assert.equal(newBalance.toNumber(), 1);
-
+      console.log(`id 1: ${tokenIds[1]}`);
       await contractAsOwner
         .transferFrom(owner, user0, tokenIds[1])
         .then((tx) => tx.wait());
