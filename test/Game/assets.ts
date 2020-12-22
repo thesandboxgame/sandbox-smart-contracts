@@ -16,7 +16,6 @@ async function getAssetsFromReceipts(
 ): Promise<BigNumber[]> {
   let rec: Receipt;
   const assets: BigNumber[] = [];
-  const quantities: number[] = [];
   for (rec of receipts) {
     const event = await expectEventWithArgsFromReceipt(
       assetContract,
@@ -24,9 +23,7 @@ async function getAssetsFromReceipts(
       'TransferSingle'
     );
     const id = event.args[3];
-    const amount = event.args[4];
     assets.push(id);
-    quantities.push(amount);
   }
   return assets;
 }
