@@ -7,8 +7,6 @@ import "../common/BaseWithStorage/WithMinter.sol";
 import "../common/Interfaces/IAssetToken.sol";
 import "../common/Interfaces/IGameToken.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
-// @review remove import !!!
-import "hardhat/console.sol";
 
 contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     ///////////////////////////////  Libs //////////////////////////////
@@ -37,12 +35,12 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     ///////////////////////////////  Events //////////////////////////////
 
     /// @dev Emits when a game is updated.
-    /// @param baseId The id of the previous erc721 GAME token.
+    /// @param oldId The id of the previous erc721 GAME token.
     /// @param newId The id of the newly minted token.
     /// @param update The changes made to the Game: new assets, removed assets, uri
     /// @param to The receiving address for the removed assets.
 
-    event GameTokenUpdated(uint256 indexed baseId, uint256 indexed newId, IGameToken.Update update, address to);
+    event GameTokenUpdated(uint256 indexed oldId, uint256 indexed newId, IGameToken.Update update, address to);
 
     /// @dev Emits when creatorship of a GAME token is transferred.
     /// @param original The original creator of the GAME token.
@@ -90,7 +88,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         returns (uint256[] memory)
     {
         uint256 baseId = _storageId(gameId);
-        require(_ownerOf(baseId) != address(0), "NONEXISTANT_TOKEN");
+        require(_ownerOf(gameId) != address(0), "NONEXISTANT_TOKEN");
         uint256 length = assetIds.length;
         uint256[] memory assets;
         assets = new uint256[](length);
@@ -167,7 +165,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
 
         _metaData[baseId] = creation.uri;
         _numNFTPerAddress[to]++;
-        emit GameTokenUpdated(baseId, gameId, creation, to);
+        emit GameTokenUpdated(0, gameId, creation, to);
         return gameId;
     }
 
@@ -268,8 +266,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         _removeAssets(baseId, update.assetIdsToRemove, update.assetAmountsToRemove, to);
         _metaData[baseId] = update.uri;
         uint256 newId = _bumpGameVersion(from, gameId);
-
-        emit GameTokenUpdated(baseId, newId, update, to);
+        emit GameTokenUpdated(gameId, newId, update, to);
         return newId;
     }
 
@@ -382,7 +379,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint256 gameId
     ) internal notToZero(to) notToThis(to) {
         uint256 baseId = _storageId(gameId);
-        address owner = _ownerOf(baseId);
+        address owner = _ownerOf(gameId);
         require(msg.sender == owner || _isValidMetaTx(from), "DESTROY_ACCESS_DENIED");
         require(from == owner, "DESTROY_INVALID_FROM");
         delete _metaData[baseId];
@@ -500,10 +497,10 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint32 version = uint32(gameId);
         version++;
         address owner = _ownerOf(gameId);
+        _burn(from, owner, gameId);
         (uint256 newId, ) = _mintGame(originalCreator, owner, subId, version, false);
         address newOwner = _ownerOf(newId);
         assert(owner == newOwner);
-        _burn(from, owner, gameId);
         return newId;
     }
 
