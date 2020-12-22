@@ -981,7 +981,6 @@ describe('GameToken', function () {
     let users: User[];
     let gameId: BigNumber;
     let assets: BigNumber[];
-    let quantities: number[];
 
     before(async function () {
       ({gameToken, gameTokenAsAdmin, users, GameOwner} = await setupTest());

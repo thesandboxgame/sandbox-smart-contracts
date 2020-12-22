@@ -936,7 +936,6 @@ module.exports = (init, extensions) => {
       const tokenIds = [];
       for (let i = 0; i < 3; i++) {
         const {tokenId} = await mint(owner);
-        console.log(`loop id: ${tokenId}`);
         tokenIds.push(tokenId);
       }
       const contractAsOwner = contract.connect(
@@ -1066,16 +1065,11 @@ module.exports = (init, extensions) => {
       const balance = await contract.callStatic.balanceOf(user0);
       assert.equal(balance.toNumber(), 0);
 
-      console.log(`id 0: ${tokenIds}`);
-      console.log(`id 0: ${tokenIds[0]}`);
-      console.log(`owner: ${owner}`);
-      console.log(`user0: ${user0}`);
       await contractAsOwner
         .transferFrom(owner, user0, tokenIds[0])
         .then((tx) => tx.wait());
       let newBalance = await contract.callStatic.balanceOf(user0);
       assert.equal(newBalance.toNumber(), 1);
-      console.log(`id 1: ${tokenIds[1]}`);
       await contractAsOwner
         .transferFrom(owner, user0, tokenIds[1])
         .then((tx) => tx.wait());
