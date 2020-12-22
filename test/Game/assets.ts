@@ -10,15 +10,10 @@ let dummyHash =
 
 let packId = 0;
 
-type AssetsObj = {
-  assets: BigNumber[];
-  quantities: number[];
-};
-
 async function getAssetsFromReceipts(
   assetContract: Contract,
   receipts: Receipt[]
-): Promise<AssetsObj> {
+): Promise<BigNumber[]> {
   let rec: Receipt;
   const assets: BigNumber[] = [];
   const quantities: number[] = [];
@@ -33,13 +28,13 @@ async function getAssetsFromReceipts(
     assets.push(id);
     quantities.push(amount);
   }
-  return {assets, quantities};
+  return assets;
 }
 
 export async function supplyAssets(
   creator: Address,
   supplies: number[]
-): Promise<AssetsObj> {
+): Promise<BigNumber[]> {
   const {assetBouncerAdmin, assetAdmin} = await getNamedAccounts();
   const assetContract = await ethers.getContract('Asset');
   const assetAsBouncerAdmin = await assetContract.connect(
