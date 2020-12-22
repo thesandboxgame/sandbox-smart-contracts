@@ -5,15 +5,24 @@ const {
   getNamedAccounts,
   getUnnamedAccounts,
 } = require('hardhat');
-const {BigNumber} = require('ethers');
+const {BigNumber, utils} = require('ethers');
 const Prando = require('prando');
 const {supplyAssets} = require('./assets');
 const {expectEventWithArgs} = require('../utils');
+const {toUtf8Bytes} = require('ethers/lib/utils');
 
 const rng = new Prando('GameToken ERC721 tests');
 async function getRandom() {
   return rng.nextInt(1, 1000000000);
 }
+
+const creation = {
+  assetIdsToRemove: [],
+  assetAmountsToRemove: [],
+  assetIdsToAdd: [],
+  assetAmountsToAdd: [1],
+  uri: utils.keccak256(toUtf8Bytes('My GAME token URI!')),
+};
 
 const erc721Tests = require('../erc721')(
   async () => {
@@ -28,24 +37,25 @@ const erc721Tests = require('../erc721')(
     );
 
     async function mint(to) {
-      const {assets, quantities} = await supplyAssets(to, to, [1]);
+      const assets = await supplyAssets(to, [1]);
       const randomId = await getRandom();
 
       const receipt = await gameAsAdmin.createGame(
         to,
         to,
-        assets,
-        quantities,
+        {
+          ...creation,
+          assetIdsToAdd: assets,
+        },
         ethers.constants.AddressZero,
-        'My GAME token URI!',
         randomId
       );
-      const gameTransferEvent = await expectEventWithArgs(
+      const updateEvent = await expectEventWithArgs(
         contract,
         receipt,
-        'Transfer'
+        'GameTokenUpdated'
       );
-      const tokenId = BigNumber.from(gameTransferEvent.args[2]);
+      const tokenId = BigNumber.from(updateEvent.args[1]);
       return {receipt, tokenId};
     }
     return {contractAddress: contract.address, users: others, mint};
