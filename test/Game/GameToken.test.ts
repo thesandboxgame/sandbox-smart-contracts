@@ -743,20 +743,23 @@ describe('GameToken', function () {
         expect(gameStateBefore[0]).to.be.equal(7);
         expect(gameStateBefore[1]).to.be.equal(42);
 
-        const assetRemovalReceipt = await gameTokenAsMinter.removeAssets(
-          gameId,
-          [assetId, assetId2],
-          [7, 31],
+        const assetRemovalReceipt = await gameTokenAsMinter.updateGame(
           GameOwner.address,
-          ''
+          GameOwner.address,
+          gameId,
+          {
+            ...update,
+            assetIdsToRemove: [assetId, assetId2],
+            assetAmountsToRemove: [7, 31],
+          }
         );
 
-        const assetsRemovedEvent = await expectEventWithArgs(
+        const updateEvent = await expectEventWithArgs(
           gameToken,
           assetRemovalReceipt,
-          'AssetsRemoved'
+          'GameTokenUpdated'
         );
-        gameId = assetsRemovedEvent.args[4];
+        gameId = updateEvent.args[1];
 
         const gameStateAfter = await gameToken.getAssetBalances(gameId, [
           assetId,
@@ -765,9 +768,9 @@ describe('GameToken', function () {
         expect(gameStateAfter[0]).to.be.equal(0);
         expect(gameStateAfter[1]).to.be.equal(11);
 
-        const eventAssets = assetsRemovedEvent.args[1];
-        const values = assetsRemovedEvent.args[2];
-        const to = assetsRemovedEvent.args[3];
+        const eventAssets = updateEvent.args[2].assetIdsToRemove;
+        const values = updateEvent.args[2].assetAmountsToRemove;
+        const to = updateEvent.args[3];
 
         const contractBalanceAfter = await assetContract[
           'balanceOf(address,uint256)'
@@ -811,10 +814,8 @@ describe('GameToken', function () {
         gameTokenAsAdmin.createGame(
           GameOwner.address,
           GameOwner.address,
-          [assetId],
-          [1],
+          {...update, assetIdsToAdd: [assetId], assetAmountsToAdd: [1]},
           ethers.constants.AddressZero,
-          '',
           randomId
         )
       );
@@ -895,10 +896,8 @@ describe('GameToken', function () {
         gameTokenAsAdmin.createGame(
           GameOwner.address,
           GameOwner.address,
-          [],
-          [],
+          {...update, uri: utils.keccak256(toUtf8Bytes('Hello Sandbox'))},
           ethers.constants.AddressZero,
-          'Hello Sandbox',
           randomId
         )
       );
@@ -911,7 +910,6 @@ describe('GameToken', function () {
 
       await GameOwner.Game.setGameEditor(
         GameOwner.address,
-        gameId,
         GameEditor1.address,
         true
       );
@@ -929,24 +927,28 @@ describe('GameToken', function () {
 
     it('can get the tokenURI', async function () {
       const URI = await gameToken.tokenURI(gameId);
-      expect(URI).to.be.equal('Hello Sandbox');
+      expect(URI).to.be.equal(utils.keccak256(toUtf8Bytes('Hello Sandbox')));
     });
 
     it('Minter can set the tokenURI', async function () {
-      const receipt = await gameTokenAsAdmin.setTokenURI(
+      const receipt = await gameTokenAsAdmin.updateGame(
+        GameOwner.address,
+        GameOwner.address,
         gameId,
-        'Hello Sandbox'
+        {...update, uri: utils.keccak256(toUtf8Bytes('This is new.'))}
       );
-      const uriEvent = await expectEventWithArgs(
+      const updateEvent = await expectEventWithArgs(
         gameToken,
         receipt,
-        'TokenURIChanged'
+        'GameTokenUpdated'
       );
-      expect(uriEvent.args[0]).to.be.equal(gameId);
-      expect(uriEvent.args[1]).to.be.equal('Hello Sandbox');
+      gameId = updateEvent.args[1];
+      expect(updateEvent.args[2].uri).to.be.equal(
+        utils.keccak256(toUtf8Bytes('This is new.'))
+      );
 
       const URI = await gameToken.tokenURI(gameId);
-      expect(URI).to.be.equal('Hello Sandbox');
+      expect(URI).to.be.equal(utils.keccak256(toUtf8Bytes('This is new.')));
     });
 
     it('should revert if ownerOf == address(0)', async function () {
@@ -958,9 +960,12 @@ describe('GameToken', function () {
 
     it('should revert if not Minter', async function () {
       const {gameToken} = await setupTest();
-      await expect(gameToken.setTokenURI(11, 'New URI')).to.be.revertedWith(
-        'MINTER_ACCESS_DENIED'
-      );
+      await expect(
+        gameToken.updateGame(GameOwner.address, GameOwner.address, 11, {
+          ...update,
+          uri: utils.keccak256(toUtf8Bytes('New URI')),
+        })
+      ).to.be.revertedWith('MINTER_ACCESS_DENIED');
     });
 
     it('should be able to retrieve the creator address from the gameId', async function () {
@@ -1208,7 +1213,7 @@ describe('GameToken', function () {
             gameId,
             [assets[0]]
           )
-        ).to.be.revertedWith('INVALID_RECOVERY_CALLER');
+        ).to.be.revertedWith('INVALID_RECOVERY');
       });
 
       it('can recover remaining assets from burnt GAME in batches', async function () {
@@ -1446,10 +1451,8 @@ describe('GameToken', function () {
           gameTokenAsAdmin.createGame(
             GameOwner.address,
             GameOwner.address,
-            [],
-            [],
+            {...update},
             ethers.constants.AddressZero,
-            '',
             randomId
           )
         );
