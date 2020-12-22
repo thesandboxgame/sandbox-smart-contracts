@@ -38,7 +38,6 @@ async function getAssetsFromReceipts(
 
 export async function supplyAssets(
   creator: Address,
-  owner: Address,
   supplies: number[]
 ): Promise<AssetsObj> {
   const {assetBouncerAdmin, assetAdmin} = await getNamedAccounts();
