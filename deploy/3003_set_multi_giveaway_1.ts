@@ -5,25 +5,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments} = hre;
   const {execute, read, log} = deployments;
 
-  // const {nftGiveawayAdmin} = await getNamedAccounts();
-
-  // let currentAdmin;
-  // try {
-  //   currentAdmin = await read('Multi_Giveaway_1_with_ERC20', 'getAdmin');
-  // } catch (e) {
-  //   // no admin
-  // }
-  // if (currentAdmin) {
-  //   if (currentAdmin.toLowerCase() !== nftGiveawayAdmin.toLowerCase()) {
-  //     await execute(
-  //       'Multi_Giveaway_1_with_ERC20',
-  //       {from: currentAdmin, log: true},
-  //       'changeAdmin',
-  //       nftGiveawayAdmin
-  //     );
-  //   }
-  // }
-
   // Set Multi_Giveaway_1_with_ERC20 contract as superOperator for Asset
   // This is needed when the contract is not the assetsHolder
   const giveawayContract = await deployments.get('Multi_Giveaway_1_with_ERC20');
