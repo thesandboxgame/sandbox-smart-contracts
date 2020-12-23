@@ -95,28 +95,3 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     merkleRootHash,
   };
 });
-
-export const setupGiveaway = deployments.createFixture(async function () {
-  const {nftGiveawayAdmin} = await getNamedAccounts();
-  const others = await getUnnamedAccounts();
-  await deployments.fixture('Land_Giveaway_1');
-  const giveawayContract = await ethers.getContract('Land_Giveaway_1');
-  const sandContract = await ethers.getContract('Sand');
-  const landContract = await ethers.getContract('Land');
-  const deployment = await deployments.get('Land_Giveaway_1');
-
-  // Set up tree with real lands
-  const lands = deployment.linkedData;
-  const landHashArray = createDataArrayClaimableAssetsLandsAndSand(lands);
-  const tree = new MerkleTree(landHashArray);
-
-  return {
-    giveawayContract,
-    sandContract,
-    landContract,
-    others,
-    tree,
-    lands,
-    nftGiveawayAdmin,
-  };
-});
