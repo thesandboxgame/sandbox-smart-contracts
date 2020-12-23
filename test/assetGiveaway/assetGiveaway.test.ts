@@ -10,28 +10,28 @@ const {calculateClaimableAssetLandAndSandHash} = helpers;
 const zeroAddress = constants.AddressZero;
 
 describe('Asset_Giveaway', function () {
-  // it('User cannot claim when test contract holds zero assets', async function () {
-  //   const options = {
-  //     assetsHolder: true,
-  //   };
-  //   const setUp = await setupTestGiveaway(options);
-  //   const {giveawayContract, others, tree, assets} = setUp;
-  //   const asset = assets[0];
-  //   const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(asset));
-  //   const giveawayContractAsUser = await giveawayContract.connect(
-  //     ethers.provider.getSigner(others[0])
-  //   );
+  it('User cannot claim when test contract holds zero assets', async function () {
+    const options = {
+      assetsHolder: true,
+    };
+    const setUp = await setupTestGiveaway(options);
+    const {giveawayContract, others, tree, assets} = setUp;
+    const asset = assets[0];
+    const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(asset));
+    const giveawayContractAsUser = await giveawayContract.connect(
+      ethers.provider.getSigner(others[0])
+    );
 
-  //   await expect(
-  //     giveawayContractAsUser.claimAssets(
-  //       others[0],
-  //       asset.assetIds,
-  //       asset.assetValues,
-  //       proof,
-  //       asset.salt
-  //     )
-  //   ).to.be.revertedWith(`can't substract more than there is`);
-  // });
+    await expect(
+      giveawayContractAsUser.claimAssets(
+        others[0],
+        asset.assetIds,
+        asset.assetValues,
+        proof,
+        asset.salt
+      )
+    ).to.be.revertedWith(`can't substract more than there is`);
+  });
 
   it('User can claim allocated multiple assets for multiple assetIds from Giveaway contract', async function () {
     const options = {
