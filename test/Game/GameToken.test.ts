@@ -188,7 +188,6 @@ describe('GameToken', function () {
 
     it('gameId contains creator address', async function () {
       const idAsHex = utils.hexValue(gameId);
-      console.log(`id as hex: ${idAsHex}`);
       const creatorSlice = idAsHex.slice(0, 42);
       const randomIdSlice = idAsHex.slice(43, 58);
       const versionSlice = idAsHex.slice(58);
@@ -1260,16 +1259,83 @@ describe('GameToken', function () {
     });
   });
 
-  // describe('GameToken: Token Immutability', function () {
-  //   //   //@note Finish these:
-  //   it('should store the creator address, randomID & version in the gameId', async function () {});
+  // @note Finish these:
+  describe('GameToken: Token Immutability', function () {
+    let gameToken: Contract;
+    let gameTokenAsMinter: Contract;
+    let gameTokenAsAdmin: Contract;
+    let GameOwner: User;
+    let users: User[];
+    let gameId: BigNumber;
+    let updatedGameId: BigNumber;
+    let assets: BigNumber[];
 
-  //   it('should update version when assets added/removed || uri changed', async function () {});
+    before(async function () {
+      ({gameToken, gameTokenAsAdmin, users, GameOwner} = await setupTest());
+      assets = await supplyAssets(GameOwner.address, [7, 11]);
+      gameId = await getNewGame(
+        gameToken,
+        gameTokenAsAdmin,
+        GameOwner,
+        GameOwner,
+        assets,
+        [7, 11]
+      );
 
-  //   it('should use baseId (creator address + subId) to map to game Assets ', async function () {});
+      const {gameTokenAdmin} = await getNamedAccounts();
+      gameTokenAsMinter = await gameToken.connect(
+        ethers.provider.getSigner(gameTokenAdmin)
+      );
+    });
 
-  //   it('should use baseId (creator address + subId) to map to game metadata ', async function () {});
-  // });
+    it('should store the creator address, subID & version in the gameId', async function () {
+      const idAsHex = utils.hexValue(gameId);
+      console.log(`id as hex: ${idAsHex}`);
+      console.log(`owner Address: ${GameOwner.address}`);
+      const creator = idAsHex.slice(0, 42);
+      const subId = idAsHex.slice(43, 58);
+      const version = idAsHex.slice(58);
+      expect(utils.getAddress(creator)).to.be.equal(users[0].address);
+      expect(subId).to.be.equal('000000002cc26bf');
+      expect(version).to.be.equal('00000001');
+    });
+
+    it('should update version when changes are made', async function () {
+      let idAsHex = utils.hexValue(gameId);
+      const versionBefore = idAsHex.slice(58);
+      expect(versionBefore).to.be.equal('00000001');
+      const receipt = await gameTokenAsMinter.updateGame(
+        GameOwner.address,
+        GameOwner.address,
+        gameId,
+        {...update, uri: utils.keccak256(toUtf8Bytes('Changing URI'))}
+      );
+      const updateEvent = await expectEventWithArgs(
+        gameToken,
+        receipt,
+        'GameTokenUpdated'
+      );
+      updatedGameId = updateEvent.args[1];
+      idAsHex = utils.hexValue(updatedGameId);
+      const versionAfter = idAsHex.slice(58);
+      expect(versionAfter).to.be.equal('00000002');
+    });
+
+    it('should use baseId (creator address + subId) to map to game Assets & metaData ', async function () {
+      const uriWithOldId = await gameToken.tokenURI(gameId);
+      const uriWithUpdatedId = await gameToken.tokenURI(updatedGameId);
+      const gameAssetsWithOldId = await gameToken.getAssetBalances(
+        gameId,
+        assets
+      );
+      const gameAssetsWithUpdatedId = await gameToken.getAssetBalances(
+        updatedGameId,
+        assets
+      );
+      expect(uriWithUpdatedId).to.be.equal(uriWithOldId);
+      expect(gameAssetsWithOldId).to.deep.equal(gameAssetsWithUpdatedId);
+    });
+  });
 
   describe('GameToken: MetaTransactions', function () {
     it('can check "Trusted Forwarder" if MetaTransactionProcessor = METATX_2771', async function () {
@@ -1298,12 +1364,6 @@ describe('GameToken', function () {
       const type = await gameToken.getMetaTransactionProcessorType(others[8]);
       expect(type).to.be.equal(METATX_SANDBOX);
     });
-
-    // @note finish these tests .
-    // it.skip('can call setGameEditor if type == METATX_SANDBOX', async function () {});
-    // it.skip('can call transferCreatorship if type == METATX_SANDBOX', async function () {});
-    // it.skip('can call _destroyGame if type == METATX_SANDBOX', async function () {});
-    // it.skip('can call _recoverAssets if type == METATX_SANDBOX', async function () {});
 
     describe('GameToken: Invalid metaTransactions', function () {
       let gameAsUser7: Contract;
