@@ -19,11 +19,11 @@ describe('Land_Giveaway_1', function () {
     const land = lands[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await expect(
-      giveawayContractAsUser.claimLands(others[1], land.ids, proof, land.salt)
+      giveawayContractAsUser.claimLands(others[0], land.ids, proof, land.salt)
     ).to.be.revertedWith(`not owner in batchTransferFrom`);
   });
 
@@ -37,7 +37,7 @@ describe('Land_Giveaway_1', function () {
     const land = lands[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     const originalOwnerLandId1 = await landContract.ownerOf(0);
@@ -48,7 +48,7 @@ describe('Land_Giveaway_1', function () {
     expect(originalOwnerLandId3).to.equal(giveawayContract.address);
 
     await waitFor(
-      giveawayContractAsUser.claimLands(others[1], land.ids, proof, land.salt)
+      giveawayContractAsUser.claimLands(others[0], land.ids, proof, land.salt)
     );
 
     const ownerLandId1 = await landContract.ownerOf(0);
@@ -69,11 +69,11 @@ describe('Land_Giveaway_1', function () {
     const land = lands[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     const receipt = await waitFor(
-      giveawayContractAsUser.claimLands(others[1], land.ids, proof, land.salt)
+      giveawayContractAsUser.claimLands(others[0], land.ids, proof, land.salt)
     );
 
     const claimedEvent = await expectReceiptEventWithArgs(
@@ -81,10 +81,10 @@ describe('Land_Giveaway_1', function () {
       'ClaimedLands'
     );
 
-    expect(claimedEvent.args[0]).to.equal(others[1]); // to
-    expect(claimedEvent.args[1][0]).to.equal(land.ids[0]);
-    expect(claimedEvent.args[1][1]).to.equal(land.ids[1]);
-    expect(claimedEvent.args[1][2]).to.equal(land.ids[2]);
+    expect(claimedEvent.args[0]).to.equal(others[0]); // to
+    if (land.ids) expect(claimedEvent.args[1][0]).to.equal(land.ids[0]);
+    if (land.ids) expect(claimedEvent.args[1][1]).to.equal(land.ids[1]);
+    if (land.ids) expect(claimedEvent.args[1][2]).to.equal(land.ids[2]);
   });
 
   it('User can claim allocated single asset for single assetId from Giveaway contract', async function () {
@@ -97,11 +97,11 @@ describe('Land_Giveaway_1', function () {
     const land = lands[1];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await waitFor(
-      giveawayContractAsUser.claimLands(others[1], land.ids, proof, land.salt)
+      giveawayContractAsUser.claimLands(others[0], land.ids, proof, land.salt)
     );
   });
 
@@ -115,14 +115,14 @@ describe('Land_Giveaway_1', function () {
     const land = lands[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await waitFor(
-      giveawayContractAsUser.claimLands(others[1], land.ids, proof, land.salt)
+      giveawayContractAsUser.claimLands(others[0], land.ids, proof, land.salt)
     );
     await expect(
-      giveawayContractAsUser.claimLands(others[1], land.ids, proof, land.salt)
+      giveawayContractAsUser.claimLands(others[0], land.ids, proof, land.salt)
     ).to.be.revertedWith('DESTINATION_ALREADY_CLAIMED');
   });
 
@@ -136,7 +136,7 @@ describe('Land_Giveaway_1', function () {
     const land = lands[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await expect(
@@ -159,7 +159,7 @@ describe('Land_Giveaway_1', function () {
     const land = lands[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await expect(
@@ -178,10 +178,10 @@ describe('Land_Giveaway_1', function () {
     const land = lands[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
     await waitFor(
-      giveawayContractAsUser.claimLands(others[1], land.ids, proof, land.salt)
+      giveawayContractAsUser.claimLands(others[0], land.ids, proof, land.salt)
     );
   });
 
@@ -225,13 +225,13 @@ describe('Land_Giveaway_1', function () {
     const land = lands[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(land));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await increaseTime(60 * 60 * 24 * 30 * 4);
 
     await expect(
-      giveawayContractAsUser.claimLands(others[1], land.ids, proof, land.salt)
+      giveawayContractAsUser.claimLands(others[0], land.ids, proof, land.salt)
     ).to.be.revertedWith('CLAIM_PERIOD_IS_OVER');
   });
 });

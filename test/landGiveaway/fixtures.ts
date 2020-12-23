@@ -8,7 +8,7 @@ import MerkleTree from '../../lib/merkleTree';
 import {createLandClaimMerkleTree} from '../../data/giveaways/land_giveaway_1/getLands';
 import helpers from '../../lib/merkleTreeHelper';
 const {createDataArrayClaimableAssetsLandsAndSand} = helpers;
-import {default as testLandData} from '../../data/giveaways/land_giveaway_1/testLands.json';
+import {default as testLandData} from '../../data/giveaways/land_giveaway_1/lands_hardhat.json';
 
 type Options = {
   mint?: boolean;
@@ -22,8 +22,11 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   const {network, getChainId} = hre;
   const chainId = await getChainId();
   const {mint, landHolder} = options || {};
-  const {deployer, landAdmin, nftGiveawayAdmin} = await getNamedAccounts();
-  const others = await getUnnamedAccounts();
+  const {deployer, landAdmin} = await getNamedAccounts();
+  const otherAccounts = await getUnnamedAccounts();
+  const nftGiveawayAdmin = otherAccounts[0];
+  const others = otherAccounts.slice(1);
+
   await deployments.fixture('Land_Giveaway_1');
   const sandContract = await ethers.getContract('Sand');
 

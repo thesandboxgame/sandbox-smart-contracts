@@ -1,7 +1,7 @@
 import fs from 'fs';
 import {BigNumber} from 'ethers';
 import MerkleTree from '../../../lib/merkleTree';
-import helpers from '../../../lib/merkleTreeHelper';
+import helpers, {Claim} from '../../../lib/merkleTreeHelper';
 
 const {
   createDataArrayClaimableAssetsLandsAndSand,
@@ -18,11 +18,16 @@ export function createLandClaimMerkleTree(
   chainId: string,
   landData: Array<LandClaim>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): any {
-  let secretPath = './.land_giveaway_1_secret';
+): {
+  lands: Claim[];
+  merkleRootHash: string;
+  saltedLands: Claim[];
+  tree: MerkleTree;
+} {
+  let secretPath = './secret/.land_giveaway_1_secret';
   if (BigNumber.from(chainId).toString() === '1') {
     console.log('MAINNET secret');
-    secretPath = './.land_giveaway_1_secret.mainnet';
+    secretPath = './secret/.land_giveaway_1_secret.mainnet';
   }
 
   let expose = false;
