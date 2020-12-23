@@ -9,7 +9,7 @@ const {calculateClaimableAssetLandAndSandHash} = helpers;
 
 const zeroAddress = constants.AddressZero;
 
-describe('Land_Giveaway_1', function () {
+describe('Land_Giveaway', function () {
   it('User cannot claim when test contract holds zero assets', async function () {
     const options = {
       landHolder: true,
