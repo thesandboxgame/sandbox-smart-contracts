@@ -3,17 +3,10 @@ import {BigNumber, utils, Contract, BytesLike} from 'ethers';
 import Prando from 'prando';
 import {Address} from 'hardhat-deploy/types';
 import {expect} from '../chai-setup';
-// import {data712} from './data712';
-import {
-  waitFor,
-  expectEventWithArgs,
-  // expectEventWithArgsFromReceipt,
-  findEvents,
-} from '../utils';
+import {waitFor, expectEventWithArgs, findEvents} from '../utils';
 import {setupTest, User} from './fixtures';
 import {supplyAssets} from './assets';
 import {toUtf8Bytes} from 'ethers/lib/utils';
-// import {keccak256} from 'ethers/lib/utils';
 
 let id: BigNumber;
 
@@ -34,7 +27,6 @@ const update: Update = {
   assetAmountsToRemove: [],
   assetIdsToAdd: [],
   assetAmountsToAdd: [],
-  // uri: utils.keccak256(['0x']),
   uri: utils.keccak256(ethers.utils.toUtf8Bytes('')),
 };
 
@@ -492,7 +484,6 @@ describe('GameToken', function () {
         expect(isEditor2).to.be.false;
       });
 
-      // @review should we block non game owners?
       it('should revert if non-owner trys to set Game Editors', async function () {
         const editor = users[1];
         await expect(
@@ -547,7 +538,7 @@ describe('GameToken', function () {
         }
 
         gameId = updateEvent.args[1];
-        const uriAfter = await gameToken.tokenURI(gameId); // I'm passing an old id !
+        const uriAfter = await gameToken.tokenURI(gameId);
         const gameStateAfter = await gameToken.getAssetBalances(gameId, [
           singleAssetId,
         ]);
@@ -1270,35 +1261,18 @@ describe('GameToken', function () {
   });
 
   // describe('GameToken: Token Immutability', function () {
-  //   //@note 3-part ID:
+  //   //   //@note Finish these:
   //   it('should store the creator address, randomID & version in the gameId', async function () {});
 
-  //   it('should update the version every time assets are added or removed', async function () {});
+  //   it('should update version when assets added/removed || uri changed', async function () {});
 
-  //   //@note modifying the token should retain mappings to assets
-  //   it('should map to game Assets using ONLY the creator address + randomId portion of the gameId', async function () {});
+  //   it('should use baseId (creator address + subId) to map to game Assets ', async function () {});
 
-  //   //@note modifying the token should retain mappings to metadata
-  //   it('should map to game MetaData using ONLY the creator address + randomId portion of the gameId', async function () {});
-
+  //   it('should use baseId (creator address + subId) to map to game metadata ', async function () {});
   // });
 
   describe('GameToken: MetaTransactions', function () {
-    it('can set the MetaTransactionProcessor type', async function () {
-      const {gameToken, gameTokenAsAdmin} = await setupTest();
-      // const NativeMetaTransactionProcessor = await ethers.getContract(
-      //   'NativeMetaTransactionProcessor'
-      // );
-      const others = await getUnnamedAccounts();
-      await expect(gameTokenAsAdmin.setMetaTransactionProcessor(others[8], 1))
-        .to.emit(gameTokenAsAdmin, 'MetaTransactionProcessor')
-        .withArgs(others[8], METATX_SANDBOX);
-
-      const type = await gameToken.getMetaTransactionProcessorType(others[8]);
-      expect(type).to.be.equal(METATX_SANDBOX);
-    });
-
-    it('can check if contract is a Trusted Forwarder', async function () {
+    it('can check "Trusted Forwarder" if MetaTransactionProcessor = METATX_2771', async function () {
       const {gameToken, gameTokenAsAdmin} = await setupTest();
       const others = await getUnnamedAccounts();
 
@@ -1314,124 +1288,22 @@ describe('GameToken', function () {
       isTrustedForwarder = await gameToken.isTrustedForwarder(others[0]);
       expect(isTrustedForwarder).to.be.true;
     });
+    it('can set the MetaTransactionProcessor = METATX_SANDBOX', async function () {
+      const {gameToken, gameTokenAsAdmin} = await setupTest();
+      const others = await getUnnamedAccounts();
+      await expect(gameTokenAsAdmin.setMetaTransactionProcessor(others[8], 1))
+        .to.emit(gameTokenAsAdmin, 'MetaTransactionProcessor')
+        .withArgs(others[8], METATX_SANDBOX);
 
-    // it.skip('can process metaTransactions if processorType == METATX_SANDBOX', async function () {});
+      const type = await gameToken.getMetaTransactionProcessorType(others[8]);
+      expect(type).to.be.equal(METATX_SANDBOX);
+    });
 
-    // it.skip('can process metaTransactions if processorType == METATX_2771', async function () {
-    //   const {gameToken, gameTokenAsAdmin, GameOwner} = await setupTest();
-    //   const others = await getUnnamedAccounts();
-    //   const signers = await ethers.getSigners();
-
-    //   const trustedForwarderFactory = await ethers.getContractFactory(
-    //     'Forwarder',
-    //     signers[0]
-    //   );
-    //   const trustedForwarder: Contract = await trustedForwarderFactory.deploy();
-    //   await trustedForwarder.deployed();
-    //   const randomId = await getRandom();
-    //   const receipt = await waitFor(
-    //     gameTokenAsAdmin.createGame(
-    //       GameOwner.address,
-    //       GameOwner.address,
-    //       [],
-    //       [],
-    //       ethers.constants.AddressZero,
-    //       '',
-    //       randomId
-    //     )
-    //   );
-    //   const transferEvent = await expectEventWithArgs(
-    //     gameToken,
-    //     receipt,
-    //     'Transfer'
-    //   );
-    //   const gameId = transferEvent.args[2];
-
-    //   const txObj = await GameOwner.Game.populateTransaction[
-    //     'safeTransferFrom(address,address,uint256)'
-    //   ](GameOwner.address, others[3], gameId);
-
-    //   let data = txObj.data;
-    //   data += GameOwner.address.replace('0x', '');
-
-    //   const transfer = {
-    //     to: txObj.to,
-    //     data: data,
-    //     value: 0,
-    //     from: GameOwner.address,
-    //     nonce: 0,
-    //     gas: 1e6,
-    //   };
-
-    //   const transferData712 = data712(gameToken, transfer);
-
-    //   const flatSig = await ethers.provider.send('eth_signTypedData', [
-    //     GameOwner.address,
-    //     transferData712,
-    //   ]);
-    //   console.log(`sig: ${flatSig}`);
-
-    //   const domainRegReceipt = await trustedForwarder.registerDomainSeparator(
-    //     'The Sandbox',
-    //     '1'
-    //   );
-
-    //   const domainRegistrationEvent = await expectEventWithArgsFromReceipt(
-    //     trustedForwarder,
-    //     domainRegReceipt,
-    //     'DomainRegistered'
-    //   );
-
-    //   const registeredDomainHash = domainRegistrationEvent.args[0];
-
-    //   const requestRegReceipt = await trustedForwarder.registerRequestType(
-    //     'The Sandbox',
-    //     '1'
-    //   );
-
-    //   const requestRegistrationEvent = await expectEventWithArgsFromReceipt(
-    //     trustedForwarder,
-    //     requestRegReceipt,
-    //     'RequestTypeRegistered'
-    //   );
-
-    //   const registeredRequestHash = requestRegistrationEvent.args[0];
-
-    //   expect(await trustedForwarder.domains(registeredDomainHash)).to.be.equal(
-    //     true
-    //   );
-    //   expect(
-    //     await trustedForwarder.typeHashes(registeredRequestHash)
-    //   ).to.be.equal(true);
-
-    //   const forwardingObject = await trustedForwarder.execute(
-    //     transfer,
-    //     registeredDomainHash,
-    //     registeredRequestHash,
-    //     '0x',
-    //     flatSig
-    //   );
-
-    //   console.log(`forwardingObject:   ${forwardingObject}`);
-
-    //   const newOwner = await gameToken.ownerOf(gameId);
-    //   console.log(`newOwner:   ${newOwner}`);
-    //   console.log(`3:   ${others[3]}`);
-    //   console.log(`GameOwner.address:   ${GameOwner.address}`);
-    //   expect(newOwner).to.be.equal(others[3]);
-    //   expect(await gameToken.creatorOf(gameId)).to.be.equal(GameOwner.address);
-    // });
-
-    /**
-     * @note ==========================`
-     * -Extracting the metaTx tests-
-     * params to pass to the metaTx suite:
-     * - contract to test (GameToken)
-     * - function to test (createGame)
-     * - native metaTx processor address ?
-     * - trustedForwarder address ?
-     * @note ==========================
-     */
+    // @note finish these tests .
+    // it.skip('can call setGameEditor if type == METATX_SANDBOX', async function () {});
+    // it.skip('can call transferCreatorship if type == METATX_SANDBOX', async function () {});
+    // it.skip('can call _destroyGame if type == METATX_SANDBOX', async function () {});
+    // it.skip('can call _recoverAssets if type == METATX_SANDBOX', async function () {});
 
     describe('GameToken: Invalid metaTransactions', function () {
       let gameAsUser7: Contract;
@@ -1442,7 +1314,6 @@ describe('GameToken', function () {
       let gameTokenAsAdmin: Contract;
 
       it('should fail if processorType == METATX_2771 && from != _forceMsgSender()', async function () {
-        // Before:
         ({gameToken, GameOwner, gameTokenAsAdmin} = await setupTest());
         others = await getUnnamedAccounts();
         const randomId = await getRandom();
