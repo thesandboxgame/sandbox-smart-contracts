@@ -20,12 +20,12 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     const claim = claims[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await expect(
       giveawayContractAsUser.claimAssetsAndLandsWithERC20(
-        others[1],
+        others[0],
         claim.assetIds,
         claim.assetValues,
         claim.landIds,
@@ -48,12 +48,12 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     const claim = claims[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await expect(
       giveawayContractAsUser.claimAssetsAndLandsWithERC20(
-        others[1],
+        others[0],
         claim.assetIds,
         claim.assetValues,
         claim.landIds,
@@ -84,7 +84,7 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
 
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     const initBalanceAssetId1 = await assetContract[
@@ -113,12 +113,12 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     const originalOwnerLandId6 = await landContract.ownerOf(5);
     expect(originalOwnerLandId6).to.equal(giveawayContract.address);
 
-    const initialSandBalance = await sandContract.balanceOf(others[1]);
+    const initialSandBalance = await sandContract.balanceOf(others[0]);
     expect(initialSandBalance).to.equal(0);
 
     await waitFor(
       giveawayContractAsUser.claimAssetsAndLandsWithERC20(
-        others[1],
+        others[0],
         claim.assetIds,
         claim.assetValues,
         claim.landIds,
@@ -128,21 +128,21 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
       )
     );
 
-    const updatedSandBalance = await sandContract.balanceOf(others[1]);
+    const updatedSandBalance = await sandContract.balanceOf(others[0]);
     expect(updatedSandBalance).to.equal(claim.sand);
 
     const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
+      others[0],
       claim.assetIds[0]
     );
     expect(balanceAssetId1).to.equal(claim.assetValues[0]);
     const balanceAssetId2 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
+      others[0],
       claim.assetIds[1]
     );
     expect(balanceAssetId2).to.equal(claim.assetValues[1]);
     const balanceAssetId3 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
+      others[0],
       claim.assetIds[2]
     );
     expect(balanceAssetId3).to.equal(claim.assetValues[2]);
@@ -172,12 +172,12 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     const claim = claims[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     const receipt = await waitFor(
       giveawayContractAsUser.claimAssetsAndLandsWithERC20(
-        others[1],
+        others[0],
         claim.assetIds,
         claim.assetValues,
         claim.landIds,
@@ -192,7 +192,7 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
       'ClaimedAssetsAndLandsWithERC20'
     );
 
-    expect(claimedEvent.args[0]).to.equal(others[1]); // to
+    expect(claimedEvent.args[0]).to.equal(others[0]); // to
     expect(claimedEvent.args[1][0]).to.equal(claim.assetIds[0]);
     expect(claimedEvent.args[1][1]).to.equal(claim.assetIds[1]);
     expect(claimedEvent.args[1][2]).to.equal(claim.assetIds[2]);
@@ -220,15 +220,15 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
 
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
-    const initialSandBalance = await sandContract.balanceOf(others[1]);
+    const initialSandBalance = await sandContract.balanceOf(others[0]);
     expect(initialSandBalance).to.equal(0);
 
     await waitFor(
       giveawayContractAsUser.claimAssetsAndLandsWithERC20(
-        others[1],
+        others[0],
         [],
         [],
         [],
@@ -238,7 +238,7 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
       )
     );
 
-    const updatedSandBalance = await sandContract.balanceOf(others[1]);
+    const updatedSandBalance = await sandContract.balanceOf(others[0]);
     expect(updatedSandBalance).to.equal(claim.sand);
   });
 
@@ -253,12 +253,12 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     const claim = claims[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await expect(
       giveawayContractAsUser.claimAssetsAndLandsWithERC20(
-        others[1],
+        others[0],
         claim.assetIds,
         claim.assetValues,
         claim.landIds,
@@ -280,12 +280,12 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     const claim = claims[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await waitFor(
       giveawayContractAsUser.claimAssetsAndLandsWithERC20(
-        others[1],
+        others[0],
         claim.assetIds,
         claim.assetValues,
         claim.landIds,
@@ -296,7 +296,7 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     );
     await expect(
       giveawayContractAsUser.claimAssetsAndLandsWithERC20(
-        others[1],
+        others[0],
         claim.assetIds,
         claim.assetValues,
         claim.landIds,
@@ -318,7 +318,7 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     const claim = claims[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await expect(
@@ -345,7 +345,7 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     const claim = claims[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await expect(
@@ -383,7 +383,7 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     const claim = claims[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     const initBalanceAssetId1 = await assetContract[
@@ -412,12 +412,12 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     const originalOwnerLandId6 = await landContract.ownerOf(5);
     expect(originalOwnerLandId6).to.equal(others[7]);
 
-    const initialSandBalance = await sandContract.balanceOf(others[1]);
+    const initialSandBalance = await sandContract.balanceOf(others[0]);
     expect(initialSandBalance).to.equal(0);
 
     await waitFor(
       giveawayContractAsUser.claimAssetsAndLandsWithERC20(
-        others[1],
+        others[0],
         claim.assetIds,
         claim.assetValues,
         claim.landIds,
@@ -428,17 +428,17 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     );
 
     const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
+      others[0],
       claim.assetIds[0]
     );
     expect(balanceAssetId1).to.equal(claim.assetValues[0]);
     const balanceAssetId2 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
+      others[0],
       claim.assetIds[1]
     );
     expect(balanceAssetId2).to.equal(claim.assetValues[1]);
     const balanceAssetId3 = await assetContract['balanceOf(address,uint256)'](
-      others[1],
+      others[0],
       claim.assetIds[2]
     );
     expect(balanceAssetId3).to.equal(claim.assetValues[2]);
@@ -456,7 +456,7 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     const ownerLandId6 = await landContract.ownerOf(5);
     expect(ownerLandId6).to.equal(claim.reservedAddress);
 
-    const updatedSandBalance = await sandContract.balanceOf(others[1]);
+    const updatedSandBalance = await sandContract.balanceOf(others[0]);
     expect(updatedSandBalance).to.equal(claim.sand);
   });
 
@@ -500,14 +500,14 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     const claim = claims[0];
     const proof = tree.getProof(calculateClaimableAssetLandAndSandHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
 
     await increaseTime(60 * 60 * 24 * 30 * 4);
 
     await expect(
       giveawayContractAsUser.claimAssetsAndLandsWithERC20(
-        others[1],
+        others[0],
         claim.assetIds,
         claim.assetValues,
         claim.landIds,

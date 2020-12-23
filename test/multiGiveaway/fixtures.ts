@@ -45,11 +45,14 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     assetAdmin,
     assetBouncerAdmin,
     landAdmin,
-    nftGiveawayAdmin,
   } = await getNamedAccounts();
-  const others = await getUnnamedAccounts();
+  const otherAccounts = await getUnnamedAccounts();
+  const nftGiveawayAdmin = otherAccounts[0];
+  const others = otherAccounts.slice(1);
+
   await deployments.fixture('Multi_Giveaway_1');
   const sandContract = await ethers.getContract('Sand');
+  await deployments.fixture(['Asset']);
   const assetContract = await ethers.getContract('Asset');
 
   await deployments.deploy('MockLand', {
@@ -219,12 +222,15 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
       assetAdmin,
       assetBouncerAdmin,
       landAdmin,
-      nftGiveawayAdmin,
       sandAdmin,
     } = await getNamedAccounts();
-    const others = await getUnnamedAccounts();
+    const otherAccounts = await getUnnamedAccounts();
+    const nftGiveawayAdmin = otherAccounts[0];
+    const others = otherAccounts.slice(1);
+
     await deployments.fixture('Multi_Giveaway_1_with_ERC20');
     const sandContract = await ethers.getContract('Sand');
+    await deployments.fixture(['Asset']);
     const assetContract = await ethers.getContract('Asset');
 
     await deployments.deploy('MockLand', {
@@ -448,36 +454,3 @@ export const setupGiveaway = deployments.createFixture(async function () {
     nftGiveawayAdmin,
   };
 });
-
-export const setupGiveawayWithERC20 = deployments.createFixture(
-  async function () {
-    const {nftGiveawayAdmin} = await getNamedAccounts();
-    const others = await getUnnamedAccounts();
-    await deployments.fixture('Multi_Giveaway_1_with_ERC20');
-    const giveawayContract = await ethers.getContract(
-      'Multi_Giveaway_1_with_ERC20'
-    );
-    const sandContract = await ethers.getContract('Sand');
-    const assetContract = await ethers.getContract('Asset');
-    const landContract = await ethers.getContract('Land');
-    const deployment = await deployments.get('Multi_Giveaway_1_with_ERC20');
-
-    // Set up tree with real assets
-    const claims = deployment.linkedData;
-    const assetLandAndSandHashArray = createDataArrayClaimableAssetsLandsAndSand(
-      claims
-    );
-    const tree = new MerkleTree(assetLandAndSandHashArray);
-
-    return {
-      giveawayContract,
-      sandContract,
-      assetContract,
-      landContract,
-      others,
-      tree,
-      claims,
-      nftGiveawayAdmin,
-    };
-  }
-);
