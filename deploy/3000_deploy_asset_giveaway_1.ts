@@ -1,9 +1,11 @@
+import fs from 'fs';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {createAssetClaimMerkleTree} from '../data/giveaways/asset_giveaway_1/getAssets';
-import {default as assetData} from '../data/giveaways/asset_giveaway_1/assets.json';
+import {AddressZero} from '@ethersproject/constants';
 
-const ASSETS_HOLDER = '0x0000000000000000000000000000000000000000';
+import helpers, {Claim} from '../lib/merkleTreeHelper';
+const {calculateClaimableAssetLandAndSandHash} = helpers;
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, network, getChainId} = hre;
@@ -11,11 +13,25 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const chainId = await getChainId();
   const {deployer} = await getNamedAccounts();
 
-  const {assets, merkleRootHash} = createAssetClaimMerkleTree(
-    network.live,
-    chainId,
-    assetData
-  );
+  let assetData: Claim[];
+  try {
+    assetData = JSON.parse(
+      fs
+        .readFileSync(
+          `data/giveaways/asset_giveaway_1/assets_${hre.network.name}.json`
+        )
+        .toString()
+    );
+  } catch (e) {
+    return;
+  }
+
+  const {
+    assets,
+    merkleRootHash,
+    saltedAssets,
+    tree,
+  } = createAssetClaimMerkleTree(network.live, chainId, assetData);
 
   const assetContract = await deployments.get('Asset');
 
@@ -26,12 +42,24 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     args: [
       assetContract.address,
-      deployer,
+      AddressZero, // no admin needed
       merkleRootHash,
-      ASSETS_HOLDER,
-      1615194000, // Sunday, 08-Mar-21 09:00:00 UTC
-    ], // TODO: expiryTime
+      AddressZero, // owns the assets
+      '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', // do not expire
+    ],
   });
+
+  const claimsWithProofs: (Claim & {proof: string[]})[] = [];
+  for (const claim of saltedAssets) {
+    claimsWithProofs.push({
+      ...claim,
+      proof: tree.getProof(calculateClaimableAssetLandAndSandHash(claim)),
+    });
+  }
+  fs.writeFileSync(
+    `./secret/.asset_claims_proofs_${chainId}.json`,
+    JSON.stringify(claimsWithProofs, null, '  ')
+  );
 };
 export default func;
 func.tags = ['Asset_Giveaway_1', 'Asset_Giveaway_1_deploy'];

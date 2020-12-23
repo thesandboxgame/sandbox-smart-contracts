@@ -2,7 +2,7 @@ import {BigNumber, utils} from 'ethers';
 const {solidityKeccak256} = utils;
 import crypto from 'crypto';
 
-interface land {
+interface Land {
   x: number;
   y: number;
   size: number;
@@ -12,7 +12,7 @@ interface land {
   assetIds?: Array<number>;
 }
 
-interface claim {
+export interface Claim {
   reservedAddress: string;
   assetIds?: Array<BigNumber> | Array<string> | Array<number>;
   assetValues?: Array<number>;
@@ -24,7 +24,7 @@ interface claim {
 
 // LAND PRESALE
 
-function calculateLandHash(land: land, salt?: string): string {
+function calculateLandHash(land: Land, salt?: string): string {
   const types = [
     'uint256',
     'uint256',
@@ -50,7 +50,7 @@ function calculateLandHash(land: land, salt?: string): string {
   return solidityKeccak256(types, values);
 }
 
-function saltLands(lands: land[], secret?: string): Array<land> {
+function saltLands(lands: Land[], secret?: string): Array<Land> {
   const saltedLands = [];
   for (const land of lands) {
     let salt = land.salt;
@@ -83,11 +83,11 @@ function saltLands(lands: land[], secret?: string): Array<land> {
   return saltedLands;
 }
 
-function createDataArray(lands: land[], secret?: string): Array<land> {
+function createDataArray(lands: Land[], secret?: string): Array<Land> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: any = [];
 
-  lands.forEach((land: land) => {
+  lands.forEach((land: Land) => {
     let salt = land.salt;
     if (!salt) {
       if (!secret) {
@@ -114,7 +114,7 @@ function createDataArray(lands: land[], secret?: string): Array<land> {
 // Multi Giveaway With ERC20 (Assets, Lands and SAND)
 
 function calculateClaimableAssetLandAndSandHash(
-  claim: claim,
+  claim: Claim,
   salt?: string
 ): string {
   const types = [];
@@ -148,17 +148,17 @@ function calculateClaimableAssetLandAndSandHash(
 }
 
 function saltClaimableAssetsLandsAndSand(
-  claims: claim[],
+  claims: Claim[],
   secret?: string | Buffer
-): Array<claim> {
+): Array<Claim> {
   return claims.map((claim) => {
     const salt = claim.salt;
     if (!salt) {
       if (!secret) {
         throw new Error('Claim need to have a salt or be generated via secret');
       }
-      const newClaim: claim = {
-        reservedAddress: claim.reservedAddress,
+      const newClaim: Claim = {
+        ...claim,
         salt:
           '0x' +
           crypto
@@ -171,24 +171,19 @@ function saltClaimableAssetsLandsAndSand(
             )
             .digest('hex'),
       };
-      if (claim.assetIds) newClaim.assetIds = claim.assetIds;
-      if (claim.assetValues) newClaim.assetValues = claim.assetValues;
-      if (claim.landIds) newClaim.landIds = claim.landIds;
-      if (claim.ids) newClaim.ids = claim.ids;
-      if (claim.sand) newClaim.sand = claim.sand;
       return newClaim;
     } else return claim;
   });
 }
 
 function createDataArrayClaimableAssetsLandsAndSand(
-  claims: claim[],
+  claims: Claim[],
   secret?: string
-): Array<claim> {
+): Array<Claim> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: any = [];
 
-  claims.forEach((claim: claim) => {
+  claims.forEach((claim: Claim) => {
     let salt = claim.salt;
     if (!salt) {
       if (!secret) {

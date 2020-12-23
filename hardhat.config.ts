@@ -3,32 +3,7 @@ import {HardhatUserConfig} from 'hardhat/types';
 import 'hardhat-deploy';
 import 'hardhat-deploy-ethers';
 import 'hardhat-gas-reporter';
-import {eth_node} from './utils/deployments';
-
-let mnemonic = process.env.MNEMONIC;
-if (!mnemonic) {
-  // FOR DEV ONLY, SET IT IN .env files if you want to keep it private
-  // (IT IS IMPORTANT TO HAVE A NON RANDOM MNEMONIC SO THAT SCRIPTS CAN ACT ON THE SAME ACCOUNTS)
-  mnemonic = 'test test test test test test test test test test test junk';
-}
-const mnemonic_mainnet = process.env.MNEMONIC_MAINNET;
-const mnemonic_rinkeby = process.env.MNEMONIC_RINKEBY;
-const accounts = mnemonic
-  ? {
-      mnemonic,
-    }
-  : undefined;
-const accounts_mainnet = mnemonic_mainnet
-  ? {
-      mnemonic: mnemonic_mainnet,
-    }
-  : undefined;
-
-const accounts_rinkeby = mnemonic_rinkeby
-  ? {
-      mnemonic: mnemonic_rinkeby,
-    }
-  : undefined;
+import {node_url, accounts} from './utils/network';
 
 const config: HardhatUserConfig = {
   gasReporter: {
@@ -92,11 +67,6 @@ const config: HardhatUserConfig = {
     liquidityRewardAdmin: 'sandAdmin',
 
     kyberDepositor: {
-      default: 'sandBeneficiary',
-      1: '0x8FFA64FB50559c3Ff09a1022b84B2c5233ed8068',
-    },
-
-    nftGiveawayAdmin: {
       default: 'sandBeneficiary',
       1: '0x8FFA64FB50559c3Ff09a1022b84B2c5233ed8068',
     },
@@ -183,38 +153,26 @@ const config: HardhatUserConfig = {
     starterPackSaleBeneficiary: 'treasury', // collect funds from starter pack sales
     backendMessageSigner: 'backendReferralWallet', // account that sign message for the starter pack
     kyberLiquidityProvider: 'sandBeneficiary', //TODO check what should be the value
-
-    // testing
-    others: {
-      default: 'from:5',
-      deployments: '', // TODO builder-deploy support live
-    },
   },
   networks: {
-    coverage: {
-      url: 'http://localhost:5458',
-      accounts,
-    },
     hardhat: {
-      accounts: {
-        mnemonic: 'test test test test test test test test test test test junk',
-      },
+      accounts: accounts(),
     },
     localhost: {
       url: 'http://localhost:8545',
-      accounts,
+      accounts: accounts(),
     },
     rinkeby_test: {
-      url: eth_node('rinkeby'),
-      accounts,
+      url: node_url('rinkeby'),
+      accounts: accounts('rinkeby_test'),
     },
     rinkeby: {
-      url: eth_node('rinkeby'),
-      accounts: accounts_rinkeby,
+      url: node_url('rinkeby'),
+      accounts: accounts('rinkeby'),
     },
     mainnet: {
-      url: eth_node('mainnet'),
-      accounts: accounts_mainnet,
+      url: node_url('mainnet'),
+      accounts: accounts('mainnet'),
     },
   },
   paths: {

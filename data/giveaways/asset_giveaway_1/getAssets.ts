@@ -1,29 +1,28 @@
 import fs from 'fs';
 import {BigNumber} from 'ethers';
 import MerkleTree from '../../../lib/merkleTree';
-import helpers from '../../../lib/merkleTreeHelper';
+import helpers, {Claim} from '../../../lib/merkleTreeHelper';
 
 const {
   createDataArrayClaimableAssetsLandsAndSand,
   saltClaimableAssetsLandsAndSand,
 } = helpers;
 
-type AssetClaim = {
-  reservedAddress: string;
-  assetIds: Array<BigNumber> | Array<string> | Array<number>;
-  assetValues: Array<number>;
-};
-
 export function createAssetClaimMerkleTree(
   isDeploymentChainId: boolean,
   chainId: string,
-  assetData: Array<AssetClaim>
+  assetData: Array<Claim>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): any {
-  let secretPath = './.asset_giveaway_1_secret';
+): {
+  assets: Claim[];
+  merkleRootHash: string;
+  saltedAssets: Claim[];
+  tree: MerkleTree;
+} {
+  let secretPath = './secret/.asset_giveaway_1_secret';
   if (BigNumber.from(chainId).toString() === '1') {
     console.log('MAINNET secret');
-    secretPath = './.asset_giveaway_1_secret.mainnet';
+    secretPath = './secret/.asset_giveaway_1_secret.mainnet';
   }
 
   let expose = false;

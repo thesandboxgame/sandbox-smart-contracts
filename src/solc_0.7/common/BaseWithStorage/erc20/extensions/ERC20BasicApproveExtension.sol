@@ -5,11 +5,11 @@ import "./ERC20Internal.sol";
 import "../../../Libraries/BytesUtil.sol";
 
 abstract contract ERC20BasicApproveExtension is ERC20Internal {
-    /// @notice approve `target` to spend `amount` and call it with data.
-    /// @param target address to be given rights to transfer and destination of the call.
-    /// @param amount the number of tokens allowed.
-    /// @param data bytes for the call.
-    /// @return data of the call.
+    /// @notice Approve `target` to spend `amount` and call it with data.
+    /// @param target The address to be given rights to transfer and destination of the call.
+    /// @param amount The number of tokens allowed.
+    /// @param data The bytes for the call.
+    /// @return The data of the call.
     function approveAndCall(
         address target,
         uint256 amount,
@@ -25,11 +25,12 @@ abstract contract ERC20BasicApproveExtension is ERC20Internal {
         return returnData;
     }
 
-    /// @notice temporarly approve `target` to spend `amount` and call it with data. Previous approvals remains unchanged.
-    /// @param target destination of the call, allowed to spend the amount specified
-    /// @param amount the number of tokens allowed to spend.
-    /// @param data bytes for the call.
-    /// @return data of the call.
+    /// @notice Temporarily approve `target` to spend `amount` and call it with data.
+    /// Previous approvals remains unchanged.
+    /// @param target The destination of the call, allowed to spend the amount specified
+    /// @param amount The number of tokens allowed to spend.
+    /// @param data The bytes for the call.
+    /// @return The data of the call.
     function paidCall(
         address target,
         uint256 amount,

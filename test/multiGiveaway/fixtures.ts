@@ -11,8 +11,8 @@ import {createAssetAndLandClaimMerkleTree} from '../../data/giveaways/multi_give
 import {createAssetLandAndSandClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1_with_erc20/getClaims';
 import helpers from '../../lib/merkleTreeHelper';
 const {createDataArrayClaimableAssetsLandsAndSand} = helpers;
-import {default as testData} from '../../data/giveaways/multi_giveaway_1/testClaims.json';
-import {default as testDataWithERC20} from '../../data/giveaways/multi_giveaway_1_with_erc20/testClaims.json';
+import {default as testData} from '../../data/giveaways/multi_giveaway_1/claims_hardhat.json';
+import {default as testDataWithERC20} from '../../data/giveaways/multi_giveaway_1_with_erc20/claims_hardhat.json';
 
 const ipfsHashString =
   '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';

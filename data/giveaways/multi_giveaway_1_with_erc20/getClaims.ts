@@ -44,19 +44,16 @@ export function createAssetLandAndSandClaimMerkleTree(
     expose = true;
   }
 
-  const saltedAssetsAndLands = saltClaimableAssetsLandsAndSand(
-    claimData,
-    secret
-  );
+  const saltedClaims = saltClaimableAssetsLandsAndSand(claimData, secret);
   const tree = new MerkleTree(
-    createDataArrayClaimableAssetsLandsAndSand(saltedAssetsAndLands)
+    createDataArrayClaimableAssetsLandsAndSand(saltedClaims)
   );
   const merkleRootHash = tree.getRoot().hash;
 
   return {
-    claims: expose ? saltedAssetsAndLands : claimData,
+    claims: expose ? saltedClaims : claimData,
     merkleRootHash,
-    saltedAssetsAndLands,
+    saltedClaims,
     tree,
   };
 }

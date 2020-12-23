@@ -1,8 +1,8 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {BigNumber} from '@ethersproject/bignumber';
 
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+const func: DeployFunction = async function () {
   const {deployments, getNamedAccounts, ethers} = hre;
   const {execute, read} = deployments;
 
@@ -55,5 +55,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deployments.save('REWARD_NAME', rewardPool);
 };
 export default func;
-func.tags = ['LandWeightedSANDRewardPool', 'LandWeightedSANDRewardPool_setup'];
-func.dependencies = ['LandWeightedSANDRewardPool_deploy', 'Sand'];
+if (require.main === module) {
+  func(hre);
+}

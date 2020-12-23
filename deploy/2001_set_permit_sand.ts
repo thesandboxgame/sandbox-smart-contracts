@@ -27,4 +27,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['Permit', 'Permit_setup'];
-func.dependencies = ['Permit_deploy'];
+func.dependencies = ['Permit_deploy', 'Sand_deploy'];
+func.skip = async (hre) => hre.network.name !== 'hardhat'; // TODO
