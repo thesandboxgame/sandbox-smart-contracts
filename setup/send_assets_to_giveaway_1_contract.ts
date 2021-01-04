@@ -4,7 +4,7 @@ import {Claim} from '../lib/merkleTreeHelper';
 
 const func: DeployFunction = async function () {
   const {deployments} = hre;
-  const {execute} = deployments;
+  const {execute, catchUnknownSigner} = deployments;
 
   let smurfOwner;
   let smurfId;
@@ -30,15 +30,17 @@ const func: DeployFunction = async function () {
 
   const assetData: Claim[] = AssetGiveaway.linkedData;
 
-  await execute(
-    'Asset',
-    {from: smurfOwner, log: true},
-    'safeTransferFrom(address,address,uint256,uint256,bytes)',
-    smurfOwner,
-    AssetGiveaway.address,
-    smurfId,
-    assetData.length,
-    '0x'
+  await catchUnknownSigner(
+    execute(
+      'Asset',
+      {from: smurfOwner, log: true},
+      'safeTransferFrom(address,address,uint256,uint256,bytes)',
+      smurfOwner,
+      AssetGiveaway.address,
+      smurfId,
+      assetData.length,
+      '0x'
+    )
   );
 };
 export default func;

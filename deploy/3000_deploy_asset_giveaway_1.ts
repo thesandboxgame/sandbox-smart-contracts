@@ -56,10 +56,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       proof: tree.getProof(calculateClaimableAssetLandAndSandHash(claim)),
     });
   }
-  fs.writeFileSync(
-    `./secret/.asset_claims_proofs_${chainId}.json`,
-    JSON.stringify(claimsWithProofs, null, '  ')
-  );
+  if (network.name !== 'hardhat') {
+    fs.writeFileSync(
+      `./secret/.asset_claims_proofs_${chainId}.json`,
+      JSON.stringify(claimsWithProofs, null, '  ')
+    );
+  }
 };
 export default func;
 func.tags = ['Asset_Giveaway_1', 'Asset_Giveaway_1_deploy'];
