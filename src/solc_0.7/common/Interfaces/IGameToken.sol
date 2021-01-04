@@ -87,4 +87,6 @@ interface IGameToken {
         uint256[] calldata, /*values*/
         bytes calldata /*data*/
     ) external view returns (bytes4);
+
+    function originalId(uint256 gameId) external view returns (uint256);
 }
