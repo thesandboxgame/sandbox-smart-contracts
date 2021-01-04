@@ -702,7 +702,6 @@ describe('GameToken', function () {
 
         const eventAssets = updateEvent.args[2].assetIdsToRemove;
         const values = updateEvent.args[2].assetAmountsToRemove;
-        const to = updateEvent.args[3];
         const contractBalanceAfter = await assetContract[
           'balanceOf(address,uint256)'
         ](gameToken.address, singleAssetId);
@@ -714,7 +713,6 @@ describe('GameToken', function () {
         expect(ownerBalanceAfter).to.be.equal(ownerBalanceBefore + 1);
         expect(eventAssets[0]).to.be.equal(singleAssetId);
         expect(values[0]).to.be.equal(1);
-        expect(to).to.be.equal(GameOwner.address);
       });
 
       it('fails when removing more assets than the game contains', async function () {
@@ -780,7 +778,6 @@ describe('GameToken', function () {
 
         const eventAssets = updateEvent.args[2].assetIdsToRemove;
         const values = updateEvent.args[2].assetAmountsToRemove;
-        const to = updateEvent.args[3];
 
         const contractBalanceAfter = await assetContract[
           'balanceOf(address,uint256)'
@@ -803,7 +800,6 @@ describe('GameToken', function () {
         expect(eventAssets[1]).to.be.equal(assetId2);
         expect(values[0]).to.be.equal(7);
         expect(values[1]).to.be.equal(31);
-        expect(to).to.be.equal(GameOwner.address);
       });
     });
   });
