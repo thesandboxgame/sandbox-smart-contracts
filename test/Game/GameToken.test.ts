@@ -565,6 +565,26 @@ describe('GameToken', function () {
         expect(values[0]).to.be.equal(1);
       });
 
+      it('should bump the version number in the gameId', async function () {
+        const idAsHex = utils.hexValue(gameId);
+        const creatorSlice = idAsHex.slice(0, 42);
+        const randomIdSlice = idAsHex.slice(43, 58);
+        const versionSlice = idAsHex.slice(58);
+        expect(utils.getAddress(creatorSlice)).to.be.equal(GameOwner.address);
+        expect(randomIdSlice).to.be.equal('000000020708760');
+        expect(versionSlice).to.be.equal('00000002');
+      });
+      it('can get the original version of the gameId', async function () {
+        const originalId = await gameToken.originalId(gameId);
+        const originalAsHex = utils.hexValue(originalId);
+        const creatorSlice = originalAsHex.slice(0, 42);
+        const randomIdSlice = originalAsHex.slice(43, 58);
+        const versionSlice = originalAsHex.slice(58);
+        expect(utils.getAddress(creatorSlice)).to.be.equal(GameOwner.address);
+        expect(randomIdSlice).to.be.equal('000000020708760');
+        expect(versionSlice).to.be.equal('00000001');
+      });
+
       it('Minter can add multiple Assets', async function () {
         const assetContract = await ethers.getContract('Asset');
         const assets = await supplyAssets(GameOwner.address, [7, 42]);
