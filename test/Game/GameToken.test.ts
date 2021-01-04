@@ -507,17 +507,12 @@ describe('GameToken', function () {
         ]);
         const hashedUri = utils.keccak256(toUtf8Bytes('Uri is different now'));
         const receipt = await waitFor(
-          gameTokenAsMinter.updateGame(
-            GameOwner.address,
-            GameOwner.address,
-            gameId,
-            {
-              ...update,
-              assetIdsToAdd: [singleAssetId],
-              assetAmountsToAdd: [1],
-              uri: hashedUri,
-            }
-          )
+          gameTokenAsMinter.updateGame(GameOwner.address, gameId, {
+            ...update,
+            assetIdsToAdd: [singleAssetId],
+            assetAmountsToAdd: [1],
+            uri: hashedUri,
+          })
         );
         const updateEvent = await expectEventWithArgs(
           gameToken,
@@ -616,7 +611,6 @@ describe('GameToken', function () {
 
         const assetsAddedReceipt = await gameTokenAsMinter.updateGame(
           GameOwner.address,
-          GameOwner.address,
           gameId,
           {
             ...update,
@@ -681,7 +675,6 @@ describe('GameToken', function () {
 
         const assetRemovalReceipt = await gameTokenAsMinter.updateGame(
           GameOwner.address,
-          GameOwner.address,
           gameId,
           {
             ...update,
@@ -719,16 +712,11 @@ describe('GameToken', function () {
 
       it('fails when removing more assets than the game contains', async function () {
         await expect(
-          gameTokenAsMinter.updateGame(
-            GameOwner.address,
-            GameOwner.address,
-            gameId,
-            {
-              ...update,
-              assetIdsToRemove: [singleAssetId, assetId, assetId2],
-              assetAmountsToRemove: [25, 31, 2],
-            }
-          )
+          gameTokenAsMinter.updateGame(GameOwner.address, gameId, {
+            ...update,
+            assetIdsToRemove: [singleAssetId, assetId, assetId2],
+            assetAmountsToRemove: [25, 31, 2],
+          })
         ).to.be.revertedWith('INVALID_ASSET_REMOVAL');
       });
 
@@ -754,7 +742,6 @@ describe('GameToken', function () {
         expect(gameStateBefore[1]).to.be.equal(42);
 
         const assetRemovalReceipt = await gameTokenAsMinter.updateGame(
-          GameOwner.address,
           GameOwner.address,
           gameId,
           {
@@ -943,7 +930,6 @@ describe('GameToken', function () {
     it('Minter can set the tokenURI', async function () {
       const receipt = await gameTokenAsAdmin.updateGame(
         GameOwner.address,
-        GameOwner.address,
         gameId,
         {...update, uri: utils.keccak256(toUtf8Bytes('This is new.'))}
       );
@@ -973,7 +959,7 @@ describe('GameToken', function () {
     it('should revert if not Minter', async function () {
       const {gameToken} = await setupTest();
       await expect(
-        gameToken.updateGame(GameOwner.address, GameOwner.address, 11, {
+        gameToken.updateGame(GameOwner.address, 11, {
           ...update,
           uri: utils.keccak256(toUtf8Bytes('New URI')),
         })
@@ -1325,7 +1311,6 @@ describe('GameToken', function () {
       const versionBefore = idAsHex.slice(58);
       expect(versionBefore).to.be.equal('00000001');
       const receipt = await gameTokenAsMinter.updateGame(
-        GameOwner.address,
         GameOwner.address,
         gameId,
         {...update, uri: utils.keccak256(toUtf8Bytes('Changing URI'))}
