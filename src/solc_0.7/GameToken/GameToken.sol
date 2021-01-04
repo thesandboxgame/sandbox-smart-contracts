@@ -356,7 +356,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     function tokenURI(uint256 gameId) public view override returns (string memory uri) {
         require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
         uint256 baseId = _storageId(gameId);
-        return toFullURI(_metaData[baseId], gameId);
+        return toFullURI(_metaData[baseId], baseId);
     }
 
     /// @notice Transfer assets from a burnt GAME.
