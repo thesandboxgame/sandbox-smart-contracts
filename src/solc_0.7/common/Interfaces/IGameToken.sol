@@ -43,7 +43,6 @@ interface IGameToken {
 
     function updateGame(
         address from,
-        address to,
         uint256 gameId,
         Update calldata update
     ) external returns (uint256);

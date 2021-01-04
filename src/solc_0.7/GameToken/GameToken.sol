@@ -261,19 +261,17 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @notice Update an existing GAME token.This actually burns old token
     /// and mints new token with same basId & incremented version.
     /// @param from The one updating the GAME token.
-    /// @param to The receiving address if assets are removed.
     /// @param gameId The current id of the GAME token.
     /// @param update The values to use for the update.
     /// @return The new gameId.
     function updateGame(
         address from,
-        address to,
         uint256 gameId,
         IGameToken.Update memory update
     ) public override onlyMinter() notToZero(to) notToThis(to) returns (uint256) {
         uint256 baseId = _storageId(gameId);
         _addAssets(from, baseId, update.assetIdsToAdd, update.assetAmountsToAdd);
-        _removeAssets(baseId, update.assetIdsToRemove, update.assetAmountsToRemove, to);
+        _removeAssets(baseId, update.assetIdsToRemove, update.assetAmountsToRemove, _ownerOf(gameId));
         _metaData[baseId] = update.uri;
         uint256 newId = _bumpGameVersion(from, gameId);
         emit GameTokenUpdated(gameId, newId, update);
