@@ -38,9 +38,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @param oldId The id of the previous erc721 GAME token.
     /// @param newId The id of the newly minted token.
     /// @param update The changes made to the Game: new assets, removed assets, uri
-    /// @param to The receiving address for the removed assets.
 
-    event GameTokenUpdated(uint256 indexed oldId, uint256 indexed newId, IGameToken.Update update, address to);
+    event GameTokenUpdated(uint256 indexed oldId, uint256 indexed newId, IGameToken.Update update);
 
     /// @dev Emits when creatorship of a GAME token is transferred.
     /// @param original The original creator of the GAME token.
@@ -165,7 +164,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
 
         _metaData[baseId] = creation.uri;
         _numNFTPerAddress[to]++;
-        emit GameTokenUpdated(0, gameId, creation, to);
+        emit GameTokenUpdated(0, gameId, creation);
         return gameId;
     }
 
@@ -274,7 +273,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         _removeAssets(baseId, update.assetIdsToRemove, update.assetAmountsToRemove, to);
         _metaData[baseId] = update.uri;
         uint256 newId = _bumpGameVersion(from, gameId);
-        emit GameTokenUpdated(gameId, newId, update, to);
+        emit GameTokenUpdated(gameId, newId, update);
         return newId;
     }
 
@@ -424,7 +423,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         Update memory recovery;
         recovery.assetIdsToRemove = assetIds;
         recovery.assetAmountsToRemove = values;
-        emit GameTokenUpdated(gameId, 0, recovery, to);
+        emit GameTokenUpdated(gameId, 0, recovery);
     }
 
     /// @dev Check if a withdrawal is allowed.
