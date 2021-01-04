@@ -458,18 +458,15 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint32 idVersion;
         uint256 gameId;
         uint256 storageId;
-        uint256 data;
         if (isCreation) {
             idVersion = 1;
             gameId = _generateGameId(from, subId, idVersion);
             storageId = _storageId(gameId);
-            data = _owners[storageId];
-            require(data == 0, "BASEID_REUSE_FORBIDDEN");
+            require(_owners[storageId] == 0, "BASEID_REUSE_FORBIDDEN");
         } else {
             idVersion = version;
             gameId = _generateGameId(from, subId, idVersion);
             storageId = _storageId(gameId);
-            data = _owners[storageId];
         }
 
         _owners[storageId] = (uint256(idVersion) << 200) + uint256(to);
