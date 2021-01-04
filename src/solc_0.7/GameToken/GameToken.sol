@@ -13,6 +13,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     ///////////////////////////////  Libs //////////////////////////////
 
     using SafeMath for uint256;
+    using Strings for uint256;
 
     ///////////////////////////////  Data //////////////////////////////
 
@@ -26,6 +27,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     uint256 private constant BASEID_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000;
     // ((uint256(1) * 2**32) - 1) << 200;
     uint256 private constant VERSION_MASK = 0x000000FFFFFFFF00000000000000000000000000000000000000000000000000;
+    bytes32 private constant base32Alphabet = 0x6162636465666768696A6B6C6D6E6F707172737475767778797A323334353637;
 
     mapping(uint256 => mapping(uint256 => uint256)) private _gameAssets;
     mapping(address => address) private _creatorship; // creatorship transfer
@@ -213,7 +215,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// Can be useful in tracking lineage of a token.
     /// @param gameId The tokenId for which to find the first token Id.
     /// @return The first token minted with this base id.
-    function originalId(uint256 gameId) external view override returns (uint256) {
+    function originalId(uint256 gameId) external pure override returns (uint256) {
         return _storageId(gameId) + uint32(1);
     }
 
@@ -530,7 +532,21 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     }
 
     function toFullURI(bytes32 hash, uint256 id) internal pure returns (string memory) {
-        return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", uint2str(id), ".json"));
+        return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", id.toString(), ".json"));
+    }
+
+    // solium-disable-next-line security/no-assign-params
+    function hash2base32(bytes32 hash) private pure returns (string memory _uintAsString) {
+        uint256 _i = uint256(hash);
+        uint256 k = 52;
+        bytes memory bstr = new bytes(k);
+        bstr[--k] = base32Alphabet[uint8((_i % 8) << 2)]; // uint8 s = uint8((256 - skip) % 5);  // (_i % (2**s)) << (5-s)
+        _i /= 8;
+        while (k > 0) {
+            bstr[--k] = base32Alphabet[_i % 32];
+            _i /= 32;
+        }
+        return string(bstr);
     }
 
     // @ review do we need this ?
