@@ -506,7 +506,6 @@ describe('GameToken', function () {
           singleAssetId,
         ]);
         const hashedUri = utils.keccak256(toUtf8Bytes('Uri is different now'));
-        console.log(`id before: ${gameId}`);
         const receipt = await waitFor(
           gameTokenAsMinter.updateGame(
             GameOwner.address,
@@ -553,10 +552,13 @@ describe('GameToken', function () {
         const values = updateEvent.args[2].assetAmountsToAdd;
 
         expect(uriBefore).to.be.equal(
-          utils.keccak256(toUtf8Bytes('Uri is this'))
+          'ipfs://bafybeifi4cv5sur4aljxzfma65zuemblnsahchn2pnji4h7cso63g3euha/110194434039389003190498847789203126033799499726478230611235431964839692468224.json'
         );
+
         expect(gameStateBefore[0]).to.be.equal(0);
-        expect(uriAfter).to.be.equal(hashedUri);
+        expect(uriAfter).to.be.equal(
+          'ipfs://bafybeidm5kllzr2y3gbos3odrvw4irqla45jbvhiiknn537wlu6tnjhcmq/110194434039389003190498847789203126033799499726478230611235431964839692468224.json'
+        );
         expect(gameStateAfter[0]).to.be.equal(1);
         expect(contractBalanceAfter).to.be.equal(contractBalanceBefore + 1);
         expect(ownerBalanceAfter).to.be.equal(ownerBalanceBefore - 1);
@@ -933,7 +935,9 @@ describe('GameToken', function () {
 
     it('can get the tokenURI', async function () {
       const URI = await gameToken.tokenURI(gameId);
-      expect(URI).to.be.equal(utils.keccak256(toUtf8Bytes('Hello Sandbox')));
+      expect(URI).to.be.equal(
+        'ipfs://bafybeih3z54v2d44nlci7gcha5edbu7johlt34mz2b3usdtpfwtvn3tsfa/110194434039389003190498847789203126033799499726478230611235542899988067516416.json'
+      );
     });
 
     it('Minter can set the tokenURI', async function () {
@@ -954,7 +958,9 @@ describe('GameToken', function () {
       );
 
       const URI = await gameToken.tokenURI(gameId);
-      expect(URI).to.be.equal(utils.keccak256(toUtf8Bytes('This is new.')));
+      expect(URI).to.be.equal(
+        'ipfs://bafybeibjjuirh6mb3gq36smqasbpz5vxf2ftxs2ezydxiauwkezw5abaqy/110194434039389003190498847789203126033799499726478230611235542899988067516416.json'
+      );
     });
 
     it('should revert if ownerOf == address(0)', async function () {
@@ -1306,8 +1312,6 @@ describe('GameToken', function () {
 
     it('should store the creator address, subID & version in the gameId', async function () {
       const idAsHex = utils.hexValue(gameId);
-      console.log(`id as hex: ${idAsHex}`);
-      console.log(`owner Address: ${GameOwner.address}`);
       const creator = idAsHex.slice(0, 42);
       const subId = idAsHex.slice(43, 58);
       const version = idAsHex.slice(58);
