@@ -2,7 +2,7 @@ import 'dotenv/config';
 import fs from 'fs';
 import 'isomorphic-unfetch';
 import {createClient} from '@urql/core';
-import {write} from './utils/spreadsheet';
+import {write} from '../utils/spreadsheet';
 
 async function query<T>(
   queryString: string,

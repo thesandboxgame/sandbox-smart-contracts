@@ -1,6 +1,7 @@
 cache/
 artifacts/
 secret/
+tmp/
 
 yarn.error.log
 

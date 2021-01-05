@@ -157,6 +157,12 @@ const config: HardhatUserConfig = {
   networks: {
     hardhat: {
       accounts: accounts(),
+      forking: process.env.HARDHAT_FORK
+        ? {
+            url: node_url('mainnet'),
+            blockNumber: 11593528,
+          }
+        : undefined,
     },
     localhost: {
       url: 'http://localhost:8545',
@@ -178,6 +184,14 @@ const config: HardhatUserConfig = {
   paths: {
     sources: 'src',
   },
+
+  external: process.env.HARDHAT_FORK
+    ? {
+        deployments: {
+          hardhat: ['deployments/mainnet'],
+        },
+      }
+    : undefined,
 };
 
 export default config;
