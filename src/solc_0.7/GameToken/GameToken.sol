@@ -407,11 +407,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint256 baseId = _storageId(gameId);
         if (!validMetaTx) {
             require(from == msg.sender, "INVALID_RECOVERY");
-            _check_withdrawal_authorized(from, gameId);
-            // @review
-        } else {
-            require(from == address(_owners[baseId]), "INVALID_RECOVERY_METATX");
         }
+        _check_withdrawal_authorized(from, gameId);
         require(assetIds.length > 0, "WITHDRAWAL_COMPLETE");
         uint256[] memory values;
         values = new uint256[](assetIds.length);
