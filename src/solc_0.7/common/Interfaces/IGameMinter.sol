@@ -1,5 +1,6 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
+pragma experimental ABIEncoderV2;
 
 import "./IGameToken.sol";
 
@@ -15,6 +16,7 @@ interface IGameMinter {
     function updateGame(
         address from,
         uint256 gameId,
-        IGameToken.Update memory update
+        IGameToken.Update memory update,
+        address editor
     ) external returns (uint256 newId);
 }
