@@ -792,6 +792,7 @@ describe('GameToken', function () {
       });
     });
   });
+
   describe('GameToken: Transferring GAMEs', function () {
     let gameId: BigNumber;
     let assetId: BigNumber;
@@ -1267,7 +1268,6 @@ describe('GameToken', function () {
     });
   });
 
-  // @note Finish these:
   describe('GameToken: Token Immutability', function () {
     let gameToken: Contract;
     let gameTokenAsMinter: Contract;
