@@ -151,6 +151,26 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         return gameId;
     }
 
+    /// @notice Update an existing GAME token.This actually burns old token
+    /// and mints new token with same basId & incremented version.
+    /// @param from The one updating the GAME token.
+    /// @param gameId The current id of the GAME token.
+    /// @param update The values to use for the update.
+    /// @return The new gameId.
+    function updateGame(
+        address from,
+        uint256 gameId,
+        IGameToken.Update memory update
+    ) external override onlyMinter() returns (uint256) {
+        uint256 baseId = _storageId(gameId);
+        _addAssets(from, baseId, update.assetIdsToAdd, update.assetAmountsToAdd);
+        _removeAssets(baseId, update.assetIdsToRemove, update.assetAmountsToRemove, _ownerOf(gameId));
+        _metaData[baseId] = update.uri;
+        uint256 newId = _bumpGameVersion(from, gameId);
+        emit GameTokenUpdated(gameId, newId, update);
+        return newId;
+    }
+
     /// @notice Burn a GAME token and recover assets.
     /// @param from The address of the one destroying the game.
     /// @param to The address to send all GAME assets to.
@@ -258,32 +278,49 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         return "GAME";
     }
 
-    // @ review do we need this ?
-    /// @notice Get the stored version number for a given baseId.
-    /// @param baseId The baseId to query.
-    /// @return version The current stored version number for the given baseId.
-    function getVersion(uint256 baseId) public view returns (uint32 version) {
-        return uint32((_owners[baseId] & VERSION_MASK) >> 200);
+    /// @notice Get the creator of the token type `id`.
+    /// @param id The id of the token to get the creator of.
+    /// @return the creator of the token type `id`.
+    function creatorOf(uint256 id) public view override returns (address) {
+        require(id != uint256(0), "GAME_NEVER_MINTED");
+        address originalCreator = address(id / CREATOR_OFFSET_MULTIPLIER);
+        address newCreator = _creatorship[originalCreator];
+        if (newCreator != address(0)) {
+            return newCreator;
+        }
+        return originalCreator;
     }
 
-    /// @notice Update an existing GAME token.This actually burns old token
-    /// and mints new token with same basId & incremented version.
-    /// @param from The one updating the GAME token.
-    /// @param gameId The current id of the GAME token.
-    /// @param update The values to use for the update.
-    /// @return The new gameId.
-    function updateGame(
-        address from,
-        uint256 gameId,
-        IGameToken.Update memory update
-    ) public override onlyMinter() returns (uint256) {
+    /// @notice Return the URI of a specific token.
+    /// @param gameId The id of the token.
+    /// @return uri The URI of the token metadata.
+    function tokenURI(uint256 gameId) public view override returns (string memory uri) {
+        require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
         uint256 baseId = _storageId(gameId);
-        _addAssets(from, baseId, update.assetIdsToAdd, update.assetAmountsToAdd);
-        _removeAssets(baseId, update.assetIdsToRemove, update.assetAmountsToRemove, _ownerOf(gameId));
-        _metaData[baseId] = update.uri;
-        uint256 newId = _bumpGameVersion(from, gameId);
-        emit GameTokenUpdated(gameId, newId, update);
-        return newId;
+        return toFullURI(_metaData[baseId], baseId);
+    }
+
+    /// @notice Transfer assets from a burnt GAME.
+    /// @param from Previous owner of the burnt game.
+    /// @param to Address that will receive the assets.
+    /// @param gameId Id of the burnt GAME token.
+    /// @param assetIds The assets to recover from the burnt GAME.
+    function recoverAssets(
+        address from,
+        address to,
+        uint256 gameId,
+        uint256[] memory assetIds
+    ) public override {
+        _recoverAssets(from, to, gameId, assetIds);
+    }
+
+    /// @notice Check if the contract supports an interface.
+    /// 0x01ffc9a7 is ERC-165.
+    /// 0x80ac58cd is ERC-721.
+    /// @param id The id of the interface.
+    /// @return if the interface is supported.
+    function supportsInterface(bytes4 id) public pure override returns (bool) {
+        return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
     }
 
     /// @notice Add assets to an existing GAME.
@@ -341,51 +378,6 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         } else {
             _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
         }
-    }
-
-    /// @notice Get the creator of the token type `id`.
-    /// @param id The id of the token to get the creator of.
-    /// @return the creator of the token type `id`.
-    function creatorOf(uint256 id) public view override returns (address) {
-        require(id != uint256(0), "GAME_NEVER_MINTED");
-        address originalCreator = address(id / CREATOR_OFFSET_MULTIPLIER);
-        address newCreator = _creatorship[originalCreator];
-        if (newCreator != address(0)) {
-            return newCreator;
-        }
-        return originalCreator;
-    }
-
-    /// @notice Return the URI of a specific token.
-    /// @param gameId The id of the token.
-    /// @return uri The URI of the token metadata.
-    function tokenURI(uint256 gameId) public view override returns (string memory uri) {
-        require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
-        uint256 baseId = _storageId(gameId);
-        return toFullURI(_metaData[baseId], baseId);
-    }
-
-    /// @notice Transfer assets from a burnt GAME.
-    /// @param from Previous owner of the burnt game.
-    /// @param to Address that will receive the assets.
-    /// @param gameId Id of the burnt GAME token.
-    /// @param assetIds The assets to recover from the burnt GAME.
-    function recoverAssets(
-        address from,
-        address to,
-        uint256 gameId,
-        uint256[] memory assetIds
-    ) public override {
-        _recoverAssets(from, to, gameId, assetIds);
-    }
-
-    /// @notice Check if the contract supports an interface.
-    /// 0x01ffc9a7 is ERC-165.
-    /// 0x80ac58cd is ERC-721.
-    /// @param id The id of the interface.
-    /// @return if the interface is supported.
-    function supportsInterface(bytes4 id) public pure override returns (bool) {
-        return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
     }
 
     /// @dev See destroyGame.
@@ -504,6 +496,11 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         _gameEditors[gameCreator][editor] = isEditor;
     }
 
+    /// @dev Bumps the version number of a game token, buring the previous
+    /// version and minting a new one.
+    /// @param from The address of the GAME token owner.
+    /// @param gameId The Game token to bump the version of.
+    /// @return The new gameId.
     function _bumpGameVersion(address from, uint256 gameId) internal returns (uint256) {
         address originalCreator = address(gameId / CREATOR_OFFSET_MULTIPLIER);
         uint64 subId = uint64(gameId / SUBID_MULTIPLIER);
@@ -537,10 +534,17 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         return uint256(creator) * CREATOR_OFFSET_MULTIPLIER + uint64(subId) * SUBID_MULTIPLIER + uint32(version);
     }
 
+    /// @dev Get the a full URI string for a given hash + gameId.
+    /// @param hash The 32 byte IPFS hash.
+    /// @param id The token Id for the GAME.
+    /// @return The URI string.
     function toFullURI(bytes32 hash, uint256 id) internal pure returns (string memory) {
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", id.toString(), ".json"));
     }
 
+    /// @dev Convert a 32 byte hash to a base 32 string.
+    /// @param hash A 32 byte (IPFS) hash.
+    /// @return _uintAsString The hash as a base 32 string.
     // solium-disable-next-line security/no-assign-params
     function hash2base32(bytes32 hash) private pure returns (string memory _uintAsString) {
         uint256 _i = uint256(hash);
