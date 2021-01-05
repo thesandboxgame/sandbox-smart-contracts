@@ -80,26 +80,6 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
 
     ///////////////////////////////  Functions //////////////////////////////
 
-    /// @notice Get the amount of each assetId in a GAME.
-    /// @param gameId The game to query.
-    /// @param assetIds The assets to get balances for.
-    function getAssetBalances(uint256 gameId, uint256[] calldata assetIds)
-        external
-        view
-        override
-        returns (uint256[] memory)
-    {
-        uint256 baseId = _storageId(gameId);
-        require(_ownerOf(gameId) != address(0), "NONEXISTANT_TOKEN");
-        uint256 length = assetIds.length;
-        uint256[] memory assets;
-        assets = new uint256[](length);
-        for (uint256 i = 0; i < length; i++) {
-            assets[i] = _gameAssets[baseId][assetIds[i]];
-        }
-        return assets;
-    }
-
     /// @notice Allow token owner to set game editors.
     /// @param gameCreator The address of a GAME token creator.
     /// @param editor The address of the editor to set.
@@ -171,6 +151,53 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         return gameId;
     }
 
+    /// @notice Burn a GAME token and recover assets.
+    /// @param from The address of the one destroying the game.
+    /// @param to The address to send all GAME assets to.
+    /// @param gameId The id of the GAME to destroy.
+    /// @param assetIds The assets to recover from the burnt GAME.
+    function destroyAndRecover(
+        address from,
+        address to,
+        uint256 gameId,
+        uint256[] calldata assetIds
+    ) external override {
+        _destroyGame(from, to, gameId);
+        _recoverAssets(from, to, gameId, assetIds);
+    }
+
+    /// @notice Burn a GAME token.
+    /// @param from The address of the one destroying the game.
+    /// @param to The address to send all GAME assets to.
+    /// @param gameId The id of the GAME to destroy.
+    function destroyGame(
+        address from,
+        address to,
+        uint256 gameId
+    ) external override {
+        _destroyGame(from, to, gameId);
+    }
+
+    /// @notice Get the amount of each assetId in a GAME.
+    /// @param gameId The game to query.
+    /// @param assetIds The assets to get balances for.
+    function getAssetBalances(uint256 gameId, uint256[] calldata assetIds)
+        external
+        view
+        override
+        returns (uint256[] memory)
+    {
+        uint256 baseId = _storageId(gameId);
+        require(_ownerOf(gameId) != address(0), "NONEXISTANT_TOKEN");
+        uint256 length = assetIds.length;
+        uint256[] memory assets;
+        assets = new uint256[](length);
+        for (uint256 i = 0; i < length; i++) {
+            assets[i] = _gameAssets[baseId][assetIds[i]];
+        }
+        return assets;
+    }
+
     /// @notice Get game editor status.
     /// @param gameOwner The address of the owner of the GAME.
     /// @param editor The address of the editor to set.
@@ -231,31 +258,12 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         return "GAME";
     }
 
-    /// @notice Burn a GAME token and recover assets.
-    /// @param from The address of the one destroying the game.
-    /// @param to The address to send all GAME assets to.
-    /// @param gameId The id of the GAME to destroy.
-    /// @param assetIds The assets to recover from the burnt GAME.
-    function destroyAndRecover(
-        address from,
-        address to,
-        uint256 gameId,
-        uint256[] calldata assetIds
-    ) external override {
-        _destroyGame(from, to, gameId);
-        _recoverAssets(from, to, gameId, assetIds);
-    }
-
-    /// @notice Burn a GAME token.
-    /// @param from The address of the one destroying the game.
-    /// @param to The address to send all GAME assets to.
-    /// @param gameId The id of the GAME to destroy.
-    function destroyGame(
-        address from,
-        address to,
-        uint256 gameId
-    ) external override {
-        _destroyGame(from, to, gameId);
+    // @ review do we need this ?
+    /// @notice Get the stored version number for a given baseId.
+    /// @param baseId The baseId to query.
+    /// @return version The current stored version number for the given baseId.
+    function getVersion(uint256 baseId) public view returns (uint32 version) {
+        return uint32((_owners[baseId] & VERSION_MASK) >> 200);
     }
 
     /// @notice Update an existing GAME token.This actually burns old token
@@ -545,13 +553,5 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
             _i /= 32;
         }
         return string(bstr);
-    }
-
-    // @ review do we need this ?
-    /// @notice Get the stored version number for a given baseId.
-    /// @param baseId The baseId to query.
-    /// @return version The current stored version number for the given baseId.
-    function getVersion(uint256 baseId) public view returns (uint32 version) {
-        return uint32((_owners[baseId] & VERSION_MASK) >> 200);
     }
 }
