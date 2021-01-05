@@ -1,40 +1,20 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
+import "./IGameToken.sol";
+
 interface IGameMinter {
     function createGame(
         address from,
         address to,
-        uint256[] memory assetIds,
-        uint256[] memory values,
+        IGameToken.Update calldata creation,
         address editor,
-        string memory uri,
-        uint96 randomId
+        uint64 subId
     ) external returns (uint256 gameId);
 
-    function addAssets(
+    function updateGame(
         address from,
         uint256 gameId,
-        uint256[] memory assetIds,
-        uint256[] memory values,
-        string memory uri,
-        address editor
-    ) external;
-
-    function removeAssets(
-        address from,
-        uint256 gameId,
-        uint256[] memory assetIds,
-        uint256[] memory values,
-        address to,
-        string memory uri,
-        address editor
-    ) external;
-
-    function setTokenUri(
-        address from,
-        uint256 gameId,
-        string calldata uri,
-        address editor
-    ) external;
+        IGameToken.Update memory update
+    ) external returns (uint256 newId);
 }
