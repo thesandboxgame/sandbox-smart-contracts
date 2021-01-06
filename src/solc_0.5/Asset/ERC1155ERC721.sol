@@ -550,7 +550,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
                 }
             } else {
                 require(authorized, "Operator not approved");
-                if(values[i] > 0) {
+                if(values[i] > 0 && from != to) {
                     (bin, index) = ids[i].getTokenBinIndex();
                     if (lastBin == 0) {
                         lastBin = bin;
@@ -589,12 +589,12 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
                 }
             }
         }
-        if (numNFTs > 0) {
+        if (numNFTs > 0 && from != to) {
             _numNFTPerAddress[from] -= numNFTs;
             _numNFTPerAddress[to] += numNFTs;
         }
 
-        if (bin != 0) {
+        if (bin != 0 && from != to) {
             _packedTokenBalance[from][bin] = balFrom;
             _packedTokenBalance[to][bin] = balTo;
         }
