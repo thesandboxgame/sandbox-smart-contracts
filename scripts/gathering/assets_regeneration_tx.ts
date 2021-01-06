@@ -37,12 +37,13 @@ function extractFromId(
   // isNFT: boolean;
   // uriID: BigNumber;
   // packIndex: BigNumber;
-  // packNumNFTtypes: BigNumber;
+  numFTTypes: number;
 } {
   const bn = BigNumber.from(tokenID);
   return {
     packID: bn.shr(19).mod(bn2.pow(15)),
     creator: bn.shr(96).toHexString(),
+    numFTTypes: bn.shr(11).mod(bn2.pow(12)).toNumber(),
   };
 }
 
@@ -57,6 +58,7 @@ type Token = {
   ipfsHash: string;
   supply: number;
   rarity: number;
+  numFTTypes: number;
 };
 
 type BatchMint = {
@@ -66,6 +68,7 @@ type BatchMint = {
   supplies: number[];
   rarities: number[];
   tokenURIs: string[];
+  numFTs: number;
 };
 
 const collections: Record<string, Token> = {};
@@ -85,7 +88,7 @@ for (const owner of owners) {
     const collectionId = assetToken.token.collection.id;
     if (!collections[collectionId]) {
       const tokenURI = assetToken.token.collection.tokenURI;
-      const {packID, creator} = extractFromId(collectionId);
+      const {packID, creator, numFTTypes} = extractFromId(collectionId);
       collections[collectionId] = {
         idHex: BigNumber.from(collectionId).toHexString(), // TODO extract packID and creator, etc... (rarity ?)
         id: collectionId,
@@ -95,6 +98,7 @@ for (const owner of owners) {
         ipfsHash: toHash(tokenURI),
         supply: assetToken.token.collection.supply,
         rarity: assetToken.token.rarity,
+        numFTTypes,
       };
     }
     ids.push(assetToken.token.id);
@@ -156,6 +160,7 @@ for (const collectionMint of collectionMints) {
         supplies: currentBatch.map((c) => c.supply),
         rarities: currentBatch.map((c) => c.rarity),
         tokenURIs: currentBatch.map((c) => c.tokenURI),
+        numFTs: currentBatch[0].numFTTypes,
       });
     }
     currentBatch = [];
