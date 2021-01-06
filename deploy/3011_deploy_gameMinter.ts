@@ -1,5 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
-import {gameMintingFee, gameModificationFee} from '../data/gameMinterFees';
+import {gameMintingFee, gameUpdateFee} from '../data/gameMinterFees';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
@@ -15,7 +15,7 @@ const func: DeployFunction = async function (hre) {
       gameContract.address,
       sandContract.address,
       gameMintingFee,
-      gameModificationFee,
+      gameUpdateFee,
       gameTokenFeeBeneficiary,
       sandContract.address,
     ],
