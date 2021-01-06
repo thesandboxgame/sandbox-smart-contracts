@@ -56,6 +56,16 @@ type Token = {
   tokenURI: string;
   ipfsHash: string;
   supply: number;
+  rarity: number;
+};
+
+type BatchMint = {
+  creator: string;
+  packID: string;
+  ipfsHash: string;
+  supplies: number[];
+  rarities: number[];
+  tokenURIs: string[];
 };
 
 const collections: Record<string, Token> = {};
@@ -84,6 +94,7 @@ for (const owner of owners) {
         tokenURI,
         ipfsHash: toHash(tokenURI),
         supply: assetToken.token.collection.supply,
+        rarity: assetToken.token.rarity,
       };
     }
     ids.push(assetToken.token.id);
@@ -131,14 +142,23 @@ collectionMints.sort((c1, c2) => {
   return ipfsBase1 < ipfsBase2 ? -1 : 1;
 });
 
-const batchMints = [];
+const batchMints: BatchMint[] = [];
 let lastIpfsString = '';
 let currentBatch: Token[] = [];
 for (const collectionMint of collectionMints) {
   const {ipfsBase, counter} = extractIpfsString(collectionMint.tokenURI);
   if (lastIpfsString != ipfsBase) {
+    if (lastIpfsString !== '') {
+      batchMints.push({
+        creator: currentBatch[0].creator,
+        ipfsHash: currentBatch[0].ipfsHash,
+        packID: currentBatch[0].packID,
+        supplies: currentBatch.map((c) => c.supply),
+        rarities: currentBatch.map((c) => c.rarity),
+        tokenURIs: currentBatch.map((c) => c.tokenURI),
+      });
+    }
     currentBatch = [];
-    batchMints.push(currentBatch);
     lastIpfsString = ipfsBase;
   }
   currentBatch.push(collectionMint);

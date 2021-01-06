@@ -19,6 +19,7 @@ query($blockNumber: Int! $first: Int! $lastId: ID!) {
             supply
             tokenURI
           }
+          rarity
           supply
         }
         quantity
