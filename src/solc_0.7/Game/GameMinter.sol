@@ -16,8 +16,9 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
     ///////////////////////////////  Data //////////////////////////////
 
     GameToken internal immutable _gameToken;
-
+    // @review
     uint256 internal constant SAND_DECIMALS = 10**18;
+
     uint256 internal immutable _gameMintingFee;
     uint256 internal immutable _gameUpdateFee;
     address internal immutable _feeBeneficiary;
@@ -70,6 +71,8 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
     /// Use only to perform a metaTx on behalf of editor instead of owner.
     /// @return newId The new gameId.
     function updateGame(
+        // @review consider removing editor param.
+        // If aditor is the one calling, from should maybe be editor address ?
         address from,
         uint256 gameId,
         IGameToken.Update memory update,
@@ -94,6 +97,10 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         address editor
     ) internal view {
         address gameOwner = _gameToken.ownerOf(id);
+        // @review clean this up. check if:
+        // Base Case: caller is game owner, or caller is game editor.
+        // MetaTx Case: isValidMetaTx, and (from == owner or from == editor)
+        // is valid metaTx from either and from is correct
         if (editor == address(0)) {
             require(
                 gameOwner == msg.sender || _gameToken.isGameEditor(gameOwner, msg.sender) || _isValidMetaTx(from),
@@ -102,5 +109,6 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         } else {
             require(_isValidMetaTx(editor) && _gameToken.isGameEditor(gameOwner, editor), "METATX_ACCESS_DENIED");
         }
+        // require(msg.sender == gameOwner || _gameToken.isGameEditor(gameOwner, msg.sender) || _isValidMetaTx(from))
     }
 }
