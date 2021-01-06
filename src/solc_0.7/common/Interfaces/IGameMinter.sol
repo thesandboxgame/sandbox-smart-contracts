@@ -16,7 +16,6 @@ interface IGameMinter {
     function updateGame(
         address from,
         uint256 gameId,
-        IGameToken.Update memory update,
-        address editor
+        IGameToken.Update memory update
     ) external returns (uint256 newId);
 }
