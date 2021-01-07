@@ -35,6 +35,8 @@ const func: DeployFunction = async function () {
   const {deployer} = await getNamedAccounts();
   const DeployerBatch = await ethers.getContract('DeployerBatch', deployer);
 
+  console.log({DeployerBatch: DeployerBatch.address});
+
   const Asset = await ethers.getContract('NewAsset');
 
   const {batchMints, extractions} = JSON.parse(
@@ -60,8 +62,12 @@ const func: DeployFunction = async function () {
       currentBatch = [];
     }
     const {creator, packID, supplies, ipfsHash, rarities, numFTs} = batch;
-    const available = await Asset.isPackIdUsed(creator, packID, numFTs);
-    if (available) {
+    const packIdUsed = await Asset.callStatic.isPackIdUsed(
+      creator,
+      packID,
+      numFTs
+    );
+    if (!packIdUsed) {
       currentBatch.push({
         creator,
         packID,
@@ -70,7 +76,9 @@ const func: DeployFunction = async function () {
         rarities,
       });
     } else {
-      console.log(`creator (${creator}) packID ${packID} already minted`);
+      console.log(
+        `creator (${creator}) packID ${packID} numFTs ${numFTs} already minted`
+      );
     }
   }
   if (currentBatch.length > 0) {
@@ -85,6 +93,13 @@ const func: DeployFunction = async function () {
       const {creator, packID, supplies, ipfsHash, rarities} = batch;
       const raritiesPack = generateRaritiesPack(rarities);
       console.log(JSON.stringify(batch));
+      // console.log({
+      //   creator,
+      //   packID,
+      //   ipfsHash,
+      //   supplies,
+      //   raritiesPack,
+      // });
       const {data} = await Asset.populateTransaction.mintMultiple(
         creator,
         packID,
@@ -105,6 +120,20 @@ const func: DeployFunction = async function () {
         tx: tx.hash,
       });
       const receipt = await tx.wait();
+      const TransferBatchEvents = await Asset.queryFilter(
+        Asset.filters.TransferBatch(),
+        receipt.blockNumber
+      );
+      console.log({
+        TransferBatchEvents: TransferBatchEvents.map((e) => {
+          return JSON.stringify({
+            to: e.args?.to,
+            from: e.args?.from,
+            ids: e.args?.ids.map((bn: BigNumber) => bn.toString()),
+            values: e.args?.[4].map((bn: BigNumber) => bn.toString()),
+          });
+        }),
+      });
       const gasUsed = receipt.gasUsed;
       totalGasUsed = totalGasUsed.add(gasUsed);
       console.log({

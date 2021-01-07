@@ -1,4 +1,4 @@
-import {
+import hre, {
   ethers,
   deployments,
   getUnnamedAccounts,
@@ -6,9 +6,11 @@ import {
 } from 'hardhat';
 
 import {waitFor, setupUsers} from '../utils';
+import asset_regenerate_and_distribute from '../../setup/asset_regenerate_and_distribute';
 
 export const setupAsset = deployments.createFixture(async function () {
-  await deployments.fixture(['Asset']);
+  await deployments.fixture(['NewAsset']);
+  await asset_regenerate_and_distribute(hre);
   const otherAccounts = await getUnnamedAccounts();
   const minter = otherAccounts[0];
   otherAccounts.splice(0, 1);
@@ -16,12 +18,12 @@ export const setupAsset = deployments.createFixture(async function () {
   const {assetBouncerAdmin} = await getNamedAccounts();
 
   const assetContractAsBouncerAdmin = await ethers.getContract(
-    'Asset',
+    'NewAsset',
     assetBouncerAdmin
   );
   await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
 
-  const Asset = await ethers.getContract('Asset', minter);
+  const Asset = await ethers.getContract('NewAsset', minter);
 
   let id = 0;
   const ipfsHashString =

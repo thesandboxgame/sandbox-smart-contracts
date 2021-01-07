@@ -12,6 +12,7 @@ query($blockNumber: Int! $first: Int! $lastId: ID!) {
     id
     supply
     numTokenTypes
+    tokenURI
     tokens {
       id
       owner {

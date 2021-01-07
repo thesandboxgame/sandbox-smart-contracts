@@ -41,12 +41,11 @@ function extractFromId(
 } {
   const bn = BigNumber.from(tokenID);
   return {
-    packID: bn.shr(19).mod(bn2.pow(15)),
+    packID: bn.shr(23).mod(bn2.pow(32)),
     creator: bn.shr(96).toHexString(),
     numFTTypes: bn.shr(11).mod(bn2.pow(12)).toNumber(),
   };
 }
-
 const owners = JSON.parse(fs.readFileSync('tmp/asset_owners.json').toString());
 
 const assetCollections = JSON.parse(
@@ -60,7 +59,7 @@ type Token = {
   packID: string;
   tokenURI: string;
   ipfsHash: string;
-  supply: number;
+  supply: string;
   rarity: number;
   numFTTypes: number;
 };
@@ -71,7 +70,7 @@ type BatchMint = {
   creator: string;
   packID: string;
   ipfsHash: string;
-  supplies: number[];
+  supplies: string[];
   rarities: number[];
   tokenURIs: string[];
   tokenIDs: string[];
@@ -125,10 +124,32 @@ for (const owner of owners) {
   });
 }
 
+const extraCollections = [];
 for (const assetCollection of assetCollections) {
   if (!collectionsDict[assetCollection.id]) {
     console.log(`missing collection : ${assetCollection.id}`);
+    extraCollections.push(assetCollection);
   }
+}
+if (extraCollections.length !== 2) {
+  throw new Error('Expected 2 extra collection that were fully burnt');
+}
+
+for (const extraCollection of extraCollections) {
+  const tokenURI = extraCollection.tokenURI;
+  const {packID, creator, numFTTypes} = extractFromId(extraCollection.id);
+  collectionsDict[extraCollection.id] = {
+    idHex: BigNumber.from(extraCollection.id).toHexString(), // TODO extract packID and creator, etc... (rarity ?)
+    id: extraCollection.id,
+    creator,
+    packID: packID.toString(),
+    tokenURI,
+    ipfsHash: toHash(tokenURI),
+    supply: '850', // these 2 had 850 supply
+    rarity: 0, // these 2 have zero rarity
+    numFTTypes,
+  };
+  console.log(collectionsDict[extraCollection.id]);
 }
 
 const collectionIds = Object.keys(collectionsDict);
@@ -169,6 +190,10 @@ collectionMints.sort((c1, c2) => {
 let lastIpfsString = '';
 let currentBatch: Token[] = [];
 for (const collectionMint of collectionMints) {
+  console.log({
+    collectionId: collectionMint.id,
+    tokenURI: collectionMint.tokenURI,
+  });
   const {ipfsBase, counter} = extractIpfsString(collectionMint.tokenURI);
   if (lastIpfsString != ipfsBase) {
     if (lastIpfsString !== '') {
@@ -187,6 +212,18 @@ for (const collectionMint of collectionMints) {
     lastIpfsString = ipfsBase;
   }
   currentBatch.push(collectionMint);
+}
+if (currentBatch.length > 0) {
+  batchMints.push({
+    creator: currentBatch[0].creator,
+    ipfsHash: currentBatch[0].ipfsHash,
+    packID: currentBatch[0].packID,
+    supplies: currentBatch.map((c) => c.supply),
+    rarities: currentBatch.map((c) => c.rarity),
+    tokenURIs: currentBatch.map((c) => c.tokenURI),
+    numFTs: currentBatch[0].numFTTypes,
+    tokenIDs: currentBatch.map((c) => c.id),
+  });
 }
 
 for (const assetCollection of assetCollections) {
