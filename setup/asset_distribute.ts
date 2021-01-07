@@ -9,10 +9,10 @@ const BATCH_SIZE = 50;
 let totalGasUsed = BigNumber.from(0);
 
 const func: DeployFunction = async function () {
-  const {ethers, getNamedAccounts} = hre;
+  const {ethers, getNamedAccounts, network} = hre;
 
+  const transfer_executed_file = `tmp/transfer_executed_${network.name}.json`;
   const {deployer} = await getNamedAccounts();
-  console.log({deployer});
   const DeployerBatch = await ethers.getContract('DeployerBatch', deployer);
 
   const Asset = await ethers.getContract('NewAsset');
@@ -25,7 +25,7 @@ const func: DeployFunction = async function () {
   let transferExecuted: Record<number, {hash: string; nonce: number}>;
   try {
     transferExecuted = JSON.parse(
-      fs.readFileSync('tmp/transfer_executed.json').toString()
+      fs.readFileSync(transfer_executed_file).toString()
     );
   } catch (e) {
     transferExecuted = {};
@@ -34,11 +34,14 @@ const func: DeployFunction = async function () {
     transfers: number[],
     tx: {hash: string; nonce: number}
   ) {
+    if (network.name === 'hardhat') {
+      return;
+    }
     for (const index of transfers) {
       transferExecuted[index] = {hash: tx.hash, nonce: tx.nonce};
     }
     fs.writeFileSync(
-      'tmp/transfer_executed.json',
+      transfer_executed_file,
       JSON.stringify(transferExecuted, null, '  ')
     );
   }
@@ -196,7 +199,14 @@ const func: DeployFunction = async function () {
     console.log(batch[batch.length - 1].index);
   }
 
-  console.log({toContracts: Object.keys(toContracts)});
+  const contractsToCheck = [];
+  for (const contractAddress of Object.keys(toContracts)) {
+    const isContract = toContracts[contractAddress] === 'yes';
+    if (isContract) {
+      contractsToCheck.push(contractAddress);
+    }
+  }
+  console.log({contractsToCheck});
 };
 export default func;
 

@@ -78,7 +78,7 @@
     "mainnet:export": "hardhat --network mainnet export",
     "mainnet:run": "cross-env HARDHAT_NETWORK=mainnet ts-node --files",
     "mainnet:fork:run": "cross-env HARDHAT_DEPLOY_ACCOUNTS_NETWORK=mainnet HARDHAT_FORK=mainnet HARDHAT_FORK_NUMBER=11593528 ts-node --files",
-    "rinkeby:fork:run": "cross-env HARDHAT_DEPLOY_ACCOUNTS_NETWORK=rinkeby HARDHAT_FORK=rinkeby HARDHAT_FORK_NUMBER=7853618 ts-node --files",
+    "rinkeby:fork:run": "cross-env HARDHAT_DEPLOY_ACCOUNTS_NETWORK=rinkeby HARDHAT_FORK=rinkeby HARDHAT_FORK_NUMBER=7854431 ts-node --files",
     "rinkeby_test:deploy": "hardhat --network rinkeby_test deploy",
     "rinkeby_test:export": "hardhat --network rinkeby_test export",
     "rinkeby_test:run": "cross-env HARDHAT_NETWORK=rinkeby_test ts-node --files",
