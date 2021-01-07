@@ -7,13 +7,11 @@ import "../common/BaseWithStorage/WithMinter.sol";
 import "../common/Interfaces/IAssetToken.sol";
 import "../common/Interfaces/IGameToken.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
 
 contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     ///////////////////////////////  Libs //////////////////////////////
 
     using SafeMath for uint256;
-    using Strings for uint256;
 
     ///////////////////////////////  Data //////////////////////////////
 
@@ -297,7 +295,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     function tokenURI(uint256 gameId) public view override returns (string memory uri) {
         require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
         uint256 baseId = _storageId(gameId);
-        return toFullURI(_metaData[baseId], baseId);
+        return _toFullURI(_metaData[baseId]);
     }
 
     /// @notice Transfer assets from a burnt GAME.
@@ -533,10 +531,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
 
     /// @dev Get the a full URI string for a given hash + gameId.
     /// @param hash The 32 byte IPFS hash.
-    /// @param id The token Id for the GAME.
     /// @return The URI string.
-    function toFullURI(bytes32 hash, uint256 id) internal pure returns (string memory) {
-        return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", id.toString(), ".json"));
+    function _toFullURI(bytes32 hash) internal pure returns (string memory) {
+        return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", "game.json"));
     }
 
     /// @dev Convert a 32 byte hash to a base 32 string.
