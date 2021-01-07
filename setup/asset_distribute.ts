@@ -46,6 +46,22 @@ const func: DeployFunction = async function () {
     );
   }
 
+  // fetch contract address from file if any
+  let contracts_checked = false;
+  try {
+    const contractsDict = JSON.parse(
+      fs
+        .readFileSync(`tmp/asset_owner_contracts_${network.name}.json`)
+        .toString()
+    );
+    for (const contractAddress of Object.keys(contractsDict)) {
+      toContracts[contractAddress] = 'yes';
+    }
+    contracts_checked = true;
+  } catch (e) {
+    //
+  }
+
   type Transfer = {
     index: number;
     to: string;
@@ -92,7 +108,7 @@ const func: DeployFunction = async function () {
     const performed = transferExecuted[index];
 
     let recordedContract = toContracts[to];
-    if (!recordedContract) {
+    if (!recordedContract && !contracts_checked) {
       // console.log(`${index}: checking contract. ${to}..`);
       const codeAtTo = await ethers.provider.getCode(to);
       if (codeAtTo !== '0x') {
@@ -104,6 +120,10 @@ const func: DeployFunction = async function () {
     }
 
     const toIsContract = recordedContract === 'yes';
+
+    if (!contracts_checked) {
+      console.log(index);
+    }
 
     if (toIsContract) {
       console.log(`contract at ${to}`);
@@ -175,24 +195,29 @@ const func: DeployFunction = async function () {
       // }
     }
     if (!readOnly) {
-      const tx = await DeployerBatch.singleTargetAtomicBatch(
-        Asset.address,
-        datas
-      );
-      saveTransfersTransaction(
-        batch.map((b) => b.index),
-        tx
-      );
-      console.log(`transfers`, {
-        tx: tx.hash,
-      });
-      const receipt = await tx.wait();
-      const gasUsed = receipt.gasUsed;
-      totalGasUsed = totalGasUsed.add(gasUsed);
-      console.log({
-        gasUsed: gasUsed.toString(),
-        totalGasUsed: totalGasUsed.toString(),
-      });
+      try {
+        const tx = await DeployerBatch.singleTargetAtomicBatch(
+          Asset.address,
+          datas
+        );
+        saveTransfersTransaction(
+          batch.map((b) => b.index),
+          tx
+        );
+        console.log(`transfers`, {
+          tx: tx.hash,
+        });
+        const receipt = await tx.wait();
+        const gasUsed = receipt.gasUsed;
+        totalGasUsed = totalGasUsed.add(gasUsed);
+        console.log({
+          gasUsed: gasUsed.toString(),
+          totalGasUsed: totalGasUsed.toString(),
+        });
+      } catch (e) {
+        console.error(e);
+        console.error(JSON.stringify(batch));
+      }
     } else {
       console.log(`transfer`, datas.length);
     }
