@@ -156,11 +156,13 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      accounts: accounts(),
+      accounts: accounts(process.env.HARDHAT_FORK),
       forking: process.env.HARDHAT_FORK
         ? {
-            url: node_url('mainnet'),
-            blockNumber: 11593528,
+            url: node_url(process.env.HARDHAT_FORK),
+            blockNumber: process.env.HARDHAT_FORK_NUMBER
+              ? parseInt(process.env.HARDHAT_FORK_NUMBER)
+              : undefined,
           }
         : undefined,
     },
@@ -188,7 +190,7 @@ const config: HardhatUserConfig = {
   external: process.env.HARDHAT_FORK
     ? {
         deployments: {
-          hardhat: ['deployments/mainnet'],
+          hardhat: ['deployments/' + process.env.HARDHAT_FORK],
         },
       }
     : undefined,

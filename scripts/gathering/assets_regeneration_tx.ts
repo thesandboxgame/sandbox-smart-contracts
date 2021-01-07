@@ -49,6 +49,10 @@ function extractFromId(
 
 const owners = JSON.parse(fs.readFileSync('tmp/asset_owners.json').toString());
 
+const assetCollections = JSON.parse(
+  fs.readFileSync('tmp/asset_collections.json').toString()
+);
+
 type Token = {
   idHex: string;
   id: string;
@@ -61,6 +65,8 @@ type Token = {
   numFTTypes: number;
 };
 
+const collectionsDict: Record<string, Token> = {};
+
 type BatchMint = {
   creator: string;
   packID: string;
@@ -68,10 +74,18 @@ type BatchMint = {
   supplies: number[];
   rarities: number[];
   tokenURIs: string[];
+  tokenIDs: string[];
   numFTs: number;
 };
+const batchMints: BatchMint[] = [];
 
-const collections: Record<string, Token> = {};
+type ExtractionTx = {
+  to: string;
+  id: string;
+  extractedTokenId: string;
+};
+
+const extractions: ExtractionTx[] = [];
 
 type TransferTX = {
   to: string;
@@ -79,17 +93,17 @@ type TransferTX = {
   values: number[];
 };
 
-const transferTxs: TransferTX[] = [];
+const transfers: TransferTX[] = [];
 
 for (const owner of owners) {
   const ids = [];
   const values = [];
   for (const assetToken of owner.assetTokens) {
     const collectionId = assetToken.token.collection.id;
-    if (!collections[collectionId]) {
+    if (!collectionsDict[collectionId]) {
       const tokenURI = assetToken.token.collection.tokenURI;
       const {packID, creator, numFTTypes} = extractFromId(collectionId);
-      collections[collectionId] = {
+      collectionsDict[collectionId] = {
         idHex: BigNumber.from(collectionId).toHexString(), // TODO extract packID and creator, etc... (rarity ?)
         id: collectionId,
         creator,
@@ -104,18 +118,24 @@ for (const owner of owners) {
     ids.push(assetToken.token.id);
     values.push(assetToken.quantity);
   }
-  transferTxs.push({
+  transfers.push({
     to: owner.id,
-    ids,
+    ids, // TODO order ids (nft at the end, automatically via extra bit ?)
     values,
   });
 }
 
-const collectionIds = Object.keys(collections);
+for (const assetCollection of assetCollections) {
+  if (!collectionsDict[assetCollection.id]) {
+    console.log(`missing collection : ${assetCollection.id}`);
+  }
+}
+
+const collectionIds = Object.keys(collectionsDict);
 const collectionMints = [];
 console.log({numCollection: collectionIds.length});
 for (const collectionId of collectionIds) {
-  const collection = collections[collectionId];
+  const collection = collectionsDict[collectionId];
   // console.log({collectionId, supply: collection.supply});
   collectionMints.push(collection);
 }
@@ -146,7 +166,6 @@ collectionMints.sort((c1, c2) => {
   return ipfsBase1 < ipfsBase2 ? -1 : 1;
 });
 
-const batchMints: BatchMint[] = [];
 let lastIpfsString = '';
 let currentBatch: Token[] = [];
 for (const collectionMint of collectionMints) {
@@ -161,6 +180,7 @@ for (const collectionMint of collectionMints) {
         rarities: currentBatch.map((c) => c.rarity),
         tokenURIs: currentBatch.map((c) => c.tokenURI),
         numFTs: currentBatch[0].numFTTypes,
+        tokenIDs: currentBatch.map((c) => c.id),
       });
     }
     currentBatch = [];
@@ -169,8 +189,23 @@ for (const collectionMint of collectionMints) {
   currentBatch.push(collectionMint);
 }
 
+for (const assetCollection of assetCollections) {
+  const numTokenTypes = parseInt(assetCollection.numTokenTypes);
+  if (numTokenTypes > 1) {
+    for (const token of assetCollection.tokens) {
+      if (token.owner) {
+        extractions.push({
+          to: '',
+          id: assetCollection.id,
+          extractedTokenId: token.id,
+        });
+      }
+    }
+  }
+}
+
 let maxNum = 0;
-for (const tx of transferTxs) {
+for (const tx of transfers) {
   if (tx.ids.length > maxNum) {
     maxNum = tx.ids.length;
   }
@@ -182,5 +217,5 @@ for (const tx of transferTxs) {
 fs.ensureDirSync('tmp');
 fs.writeFileSync(
   'tmp/asset_regenerations.json',
-  JSON.stringify({batchMints, transferTxs}, null, '  ')
+  JSON.stringify({batchMints, extractions, transfers}, null, '  ')
 );

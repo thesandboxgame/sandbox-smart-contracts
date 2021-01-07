@@ -32,7 +32,7 @@ async function main() {
     total: 0,
     num: 0,
   };
-  const {collectionMints, transferTxs} = JSON.parse(
+  const {batchMints, transfers, extractions} = JSON.parse(
     fs.readFileSync('tmp/asset_regenerations.json').toString()
   );
 
@@ -41,9 +41,9 @@ async function main() {
   console.log({latestBlockGasLimit: latestBlock.gasLimit.toString()});
   console.log({gasPrice: gasPrice.toString()});
 
-  const numTx = transferTxs.length;
+  const numTx = transfers.length;
   let i = 0;
-  for (const transfer of transferTxs) {
+  for (const transfer of transfers) {
     const from = transfer.to;
     const to = Wallet.createRandom().address;
     const ids = transfer.ids;
