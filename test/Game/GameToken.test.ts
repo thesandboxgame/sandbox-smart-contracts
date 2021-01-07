@@ -547,12 +547,12 @@ describe('GameToken', function () {
         const values = updateEvent.args[2].assetAmountsToAdd;
 
         expect(uriBefore).to.be.equal(
-          'ipfs://bafybeifi4cv5sur4aljxzfma65zuemblnsahchn2pnji4h7cso63g3euha/110194434039389003190498847789203126033799499726478230611235431964839692468224.json'
+          'ipfs://bafybeifi4cv5sur4aljxzfma65zuemblnsahchn2pnji4h7cso63g3euha/game.json'
         );
 
         expect(gameStateBefore[0]).to.be.equal(0);
         expect(uriAfter).to.be.equal(
-          'ipfs://bafybeidm5kllzr2y3gbos3odrvw4irqla45jbvhiiknn537wlu6tnjhcmq/110194434039389003190498847789203126033799499726478230611235431964839692468224.json'
+          'ipfs://bafybeidm5kllzr2y3gbos3odrvw4irqla45jbvhiiknn537wlu6tnjhcmq/game.json'
         );
         expect(gameStateAfter[0]).to.be.equal(1);
         expect(contractBalanceAfter).to.be.equal(contractBalanceBefore + 1);
@@ -924,7 +924,7 @@ describe('GameToken', function () {
     it('can get the tokenURI', async function () {
       const URI = await gameToken.tokenURI(gameId);
       expect(URI).to.be.equal(
-        'ipfs://bafybeih3z54v2d44nlci7gcha5edbu7johlt34mz2b3usdtpfwtvn3tsfa/110194434039389003190498847789203126033799499726478230611235542899988067516416.json'
+        'ipfs://bafybeih3z54v2d44nlci7gcha5edbu7johlt34mz2b3usdtpfwtvn3tsfa/game.json'
       );
     });
 
@@ -946,7 +946,7 @@ describe('GameToken', function () {
 
       const URI = await gameToken.tokenURI(gameId);
       expect(URI).to.be.equal(
-        'ipfs://bafybeibjjuirh6mb3gq36smqasbpz5vxf2ftxs2ezydxiauwkezw5abaqy/110194434039389003190498847789203126033799499726478230611235542899988067516416.json'
+        'ipfs://bafybeibjjuirh6mb3gq36smqasbpz5vxf2ftxs2ezydxiauwkezw5abaqy/game.json'
       );
     });
 
