@@ -23,6 +23,9 @@ export class TheGraph {
       const result = await this.client
         .query(queryString, {first, lastId, ...variables})
         .toPromise();
+      if (result.error) {
+        throw new Error(result.error.message);
+      }
       const data = result.data;
       let newEntries = [];
       if (data) {
