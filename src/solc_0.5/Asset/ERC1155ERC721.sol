@@ -61,11 +61,23 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
 
     address private _bouncerAdmin;
 
+    bool internal _init = false;
+
     constructor(
         address metaTransactionContract,
         address admin,
         address bouncerAdmin
     ) public {
+        init(metaTransactionContract, admin, bouncerAdmin);
+    }
+
+    function init(
+        address metaTransactionContract,
+        address admin,
+        address bouncerAdmin
+    ) public {
+        require(!_init, "ALREADY_INITIALISED");
+        _init = true;
         _metaTransactionContracts[metaTransactionContract] = true;
         _admin = admin;
         _bouncerAdmin = bouncerAdmin;
