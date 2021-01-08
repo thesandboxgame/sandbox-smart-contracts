@@ -15,7 +15,7 @@ const func: DeployFunction = async function () {
   const {deployer} = await getNamedAccounts();
   const DeployerBatch = await ethers.getContract('DeployerBatch', deployer);
 
-  const Asset = await ethers.getContract('NewAsset');
+  const Asset = await ethers.getContract('Asset');
 
   const toContracts: Record<string, string> = {};
 

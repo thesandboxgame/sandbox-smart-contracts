@@ -37,7 +37,7 @@ const func: DeployFunction = async function () {
 
   console.log({DeployerBatch: DeployerBatch.address});
 
-  const Asset = await ethers.getContract('NewAsset');
+  const Asset = await ethers.getContract('Asset');
 
   const {batchMints, extractions} = JSON.parse(
     fs.readFileSync('tmp/asset_regenerations.json').toString()

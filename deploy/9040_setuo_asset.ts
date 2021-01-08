@@ -11,14 +11,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   let currentAdmin;
   try {
-    currentAdmin = await read('NewAsset', 'getAdmin');
+    currentAdmin = await read('Asset', 'getAdmin');
   } catch (e) {
     // no admin
   }
   if (currentAdmin) {
     if (currentAdmin.toLowerCase() !== assetAdmin.toLowerCase()) {
       await execute(
-        'NewAsset',
+        'Asset',
         {from: currentAdmin, log: true},
         'changeAdmin',
         assetAdmin
@@ -28,14 +28,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   let currentBouncerAdmin;
   try {
-    currentBouncerAdmin = await read('NewAsset', 'getBouncerAdmin');
+    currentBouncerAdmin = await read('Asset', 'getBouncerAdmin');
   } catch (e) {
     // no admin
   }
   if (currentBouncerAdmin) {
     if (currentBouncerAdmin.toLowerCase() !== assetBouncerAdmin.toLowerCase()) {
       await execute(
-        'NewAsset',
+        'Asset',
         {from: currentAdmin, log: true},
         'changeBouncerAdmin',
         assetBouncerAdmin
@@ -46,7 +46,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   let deployerBatchIsBouncer;
   try {
     deployerBatchIsBouncer = await read(
-      'NewAsset',
+      'Asset',
       'isBouncer',
       DeployerBatch.address
     );
@@ -56,7 +56,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (!deployerBatchIsBouncer) {
     // Need to execute setBouncer in order for DeployerBatch to be able to mint
     await execute(
-      'NewAsset',
+      'Asset',
       {from: assetBouncerAdmin, log: true},
       'setBouncer',
       DeployerBatch.address,
@@ -66,5 +66,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.runAtTheEnd = true;
-func.tags = ['NewAsset', 'NewAsset_setup'];
-func.dependencies = ['NewAsset_deploy', 'DeployerBatch_deploy'];
+func.tags = ['Asset', 'Asset_setup'];
+func.dependencies = ['Asset_deploy', 'DeployerBatch_deploy'];

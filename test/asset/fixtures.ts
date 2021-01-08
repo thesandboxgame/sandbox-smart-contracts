@@ -9,7 +9,7 @@ import {waitFor, setupUsers} from '../utils';
 import asset_regenerate_and_distribute from '../../setup/asset_regenerate_and_distribute';
 
 export const setupAsset = deployments.createFixture(async function () {
-  await deployments.fixture(['NewAsset']);
+  await deployments.fixture(['Asset']);
   await asset_regenerate_and_distribute(hre);
   const otherAccounts = await getUnnamedAccounts();
   const minter = otherAccounts[0];
@@ -18,12 +18,12 @@ export const setupAsset = deployments.createFixture(async function () {
   const {assetBouncerAdmin} = await getNamedAccounts();
 
   const assetContractAsBouncerAdmin = await ethers.getContract(
-    'NewAsset',
+    'Asset',
     assetBouncerAdmin
   );
   await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
 
-  const Asset = await ethers.getContract('NewAsset', minter);
+  const Asset = await ethers.getContract('Asset', minter);
 
   let id = 0;
   const ipfsHashString =

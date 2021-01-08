@@ -9,8 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const sandContract = await deployments.get('Sand');
 
-  await deploy('NewAsset', {
-    contract: 'Asset',
+  await deploy('Asset', {
     from: deployer,
     args: [sandContract.address, deployer, deployer],
     log: true,
@@ -19,5 +18,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['NewAsset', 'NewAsset_deploy'];
+func.tags = ['Asset', 'Asset_deploy'];
 func.dependencies = ['Sand', 'Sand_deploy'];
