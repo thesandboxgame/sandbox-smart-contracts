@@ -402,7 +402,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         } else {
             owner = address(data);
         }
-        operatorEnabled = (data / 2**255) == 1;
+        operatorEnabled = (data / OPERATOR_FLAG) == 1;
     }
 
     /// @dev Check whether a transfer is a meta Transaction or not.
