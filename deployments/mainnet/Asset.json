@@ -1340,7 +1340,8 @@
   ],
   "address": "0x067a1Eb5E383eD24b66D72aAf80d8D7dB3d299A8",
   "receipt": {
-    "transactionHash": "0x4349bf325c3ba98469a1fe7322dd2282da80cb39e363fb19fdfd75dc6392e61b"
+    "transactionHash": "0x4349bf325c3ba98469a1fe7322dd2282da80cb39e363fb19fdfd75dc6392e61b",
+    "blockNumber": 9040032
   },
   "args": [
     "0x3845badAde8e6dFF049820680d1F14bD3903a5d0",
