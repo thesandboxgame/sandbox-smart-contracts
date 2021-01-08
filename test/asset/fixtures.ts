@@ -6,11 +6,11 @@ import hre, {
 } from 'hardhat';
 
 import {waitFor, setupUsers} from '../utils';
-import asset_regenerate_and_distribute from '../../setup/asset_regenerate_and_distribute';
+// import asset_regenerate_and_distribute from '../../setup/asset_regenerate_and_distribute';
 
 export const setupAsset = deployments.createFixture(async function () {
   await deployments.fixture(['Asset']);
-  await asset_regenerate_and_distribute(hre);
+  // await asset_regenerate_and_distribute(hre);
   const otherAccounts = await getUnnamedAccounts();
   const minter = otherAccounts[0];
   otherAccounts.splice(0, 1);
