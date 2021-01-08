@@ -39,6 +39,10 @@ async function getURI(string: string): Promise<string> {
   return utils.keccak256(toUtf8Bytes(string));
 }
 
+function increment(id: BigNumber): BigNumber {
+  return id.add(1);
+}
+
 async function getTokenBalances(
   contract: Contract,
   addr1: Address,
@@ -186,14 +190,13 @@ describe('GameMinter', function () {
       );
     });
 
-    // assetIdsToRemove
-    // assetAmountsToRemove
-    // assetIdsToAdd
-    // assetAmountsToAdd
-
-    // @review Be sure to test fees thoroughly.
-    // Also, confirm state changes on gameToken contract are as expected.
+    // @review Be sure to confirm state changes on gameToken contract are as expected.
     it('should allow owner to add assets', async function () {
+      const gameAssetsBefore = await gameTokenContract.getAssetBalances(
+        gameId1,
+        [assets[0], assets[1]]
+      );
+
       const receipt = await users[1].GameMinter.updateGame(
         users[1].address,
         gameId1,
@@ -204,6 +207,9 @@ describe('GameMinter', function () {
           uri: await getURI('Updated URI with Assets!'),
         }
       );
+
+      gameId1 = increment(gameId1);
+
       const updateEvent = await expectEventWithArgs(
         gameTokenContract,
         receipt,
@@ -212,8 +218,16 @@ describe('GameMinter', function () {
       const oldId = updateEvent.args[0];
       const newId = updateEvent.args[1];
       const updateArgs = updateEvent.args[2];
-      expect(oldId).to.be.equal(gameId1);
-      expect(newId).to.be.equal(gameId1.add(1));
+
+      const gameAssetsAfter = await gameTokenContract.getAssetBalances(newId, [
+        assets[0],
+        assets[1],
+      ]);
+
+      expect(gameAssetsAfter[0]).to.be.equal(gameAssetsBefore[0].add(77));
+      expect(gameAssetsAfter[1]).to.be.equal(gameAssetsBefore[1].add(3));
+      expect(oldId).to.be.equal(gameId1.sub(1));
+      expect(newId).to.be.equal(gameId1);
       expect(updateArgs[0]).to.deep.equal([]);
       expect(updateArgs[1]).to.deep.equal([]);
       expect(updateArgs[2]).to.deep.equal([assets[0], assets[1]]);
@@ -237,6 +251,7 @@ describe('GameMinter', function () {
         assetAmountsToAdd: [14],
         uri: await getURI('Updated URI with Assets!'),
       });
+      gameId1 = increment(gameId1);
 
       const balancesAfter = await getTokenBalances(
         sandContract,
@@ -258,6 +273,10 @@ describe('GameMinter', function () {
         users[8].address,
         gameTokenFeeBeneficiary
       );
+      const gameAssetsBefore = await gameTokenContract.getAssetBalances(
+        gameId1,
+        editorAssets
+      );
 
       await users[8].GameMinter.updateGame(users[8].address, gameId1, {
         ...update,
@@ -265,11 +284,16 @@ describe('GameMinter', function () {
         assetAmountsToAdd: [11],
         uri: await getURI('Updated URI with Assets!'),
       });
+      gameId1 = increment(gameId1);
 
       const balancesAfter = await getTokenBalances(
         sandContract,
         users[8].address,
         gameTokenFeeBeneficiary
+      );
+      const gameAssetsAfter = await gameTokenContract.getAssetBalances(
+        gameId1,
+        editorAssets
       );
 
       expect(balancesAfter[0]).to.be.equal(
@@ -278,6 +302,7 @@ describe('GameMinter', function () {
       expect(balancesAfter[1]).to.be.equal(
         balancesBefore[1].add(gameUpdateFee)
       );
+      expect(gameAssetsAfter[0]).to.be.equal(gameAssetsBefore[0].add(11));
     });
 
     it('should allow owner to remove assets', async function () {
@@ -285,6 +310,10 @@ describe('GameMinter', function () {
         sandContract,
         users[1].address,
         gameTokenFeeBeneficiary
+      );
+      const gameAssetsBefore = await gameTokenContract.getAssetBalances(
+        gameId1,
+        [assets[1]]
       );
 
       await users[1].GameMinter.updateGame(users[1].address, gameId1, {
@@ -294,10 +323,16 @@ describe('GameMinter', function () {
         uri: await getURI('Updated URI when removing Assets'),
       });
 
+      gameId1 = increment(gameId1);
+
       const balancesAfter = await getTokenBalances(
         sandContract,
         users[1].address,
         gameTokenFeeBeneficiary
+      );
+      const gameAssetsAfter = await gameTokenContract.getAssetBalances(
+        gameId1,
+        [assets[1]]
       );
 
       expect(balancesAfter[0]).to.be.equal(
@@ -306,6 +341,7 @@ describe('GameMinter', function () {
       expect(balancesAfter[1]).to.be.equal(
         balancesBefore[1].add(gameUpdateFee)
       );
+      expect(gameAssetsAfter[0]).to.be.equal(gameAssetsBefore[0].sub(3));
     });
 
     it('should allow editor to remove assets', async function () {
@@ -321,6 +357,8 @@ describe('GameMinter', function () {
         assetAmountsToRemove: [3],
         uri: await getURI('Updated URI when editor removing Assets'),
       });
+
+      gameId1 = increment(gameId1);
 
       const balancesAfter = await getTokenBalances(
         sandContract,
@@ -385,6 +423,9 @@ describe('GameMinter', function () {
           uri: await getURI('Updating URI'),
         }
       );
+
+      gameId1 = increment(gameId1);
+
       const updateEvent = await expectEventWithArgs(
         gameTokenContract,
         receipt,
@@ -421,6 +462,9 @@ describe('GameMinter', function () {
           uri: await getURI('Updating URI Again ...'),
         }
       );
+
+      gameId1 = increment(gameId1);
+
       const updateEvent = await expectEventWithArgs(
         gameTokenContract,
         receipt,
@@ -565,6 +609,8 @@ describe('GameMinter', function () {
         }
       );
 
+      gameId2 = increment(gameId2);
+
       const receipt = await sandAsExecutionOperator.executeWithSpecificGas(
         GameMinter.address,
         gas,
@@ -588,8 +634,8 @@ describe('GameMinter', function () {
         balancesBefore[1].add(gameUpdateFee)
       );
 
-      expect(event.args[0]).to.be.equal(gameId2);
-      expect(event.args[1]).to.be.equal(gameId2.add(1));
+      expect(event.args[0]).to.be.equal(gameId2.sub(1));
+      expect(event.args[1]).to.be.equal(gameId2);
       expect(event.args[2][2]).to.deep.equal(assets);
       expect(event.args[2][3][0]).to.deep.equal(42);
       expect(event.args[2][3][1]).to.deep.equal(3);
@@ -616,6 +662,8 @@ describe('GameMinter', function () {
         }
       );
 
+      gameId2 = increment(gameId2);
+
       const receipt = await sandAsExecutionOperator.executeWithSpecificGas(
         GameMinter.address,
         gas,
@@ -638,8 +686,8 @@ describe('GameMinter', function () {
       expect(balancesAfter[1]).to.be.equal(
         balancesBefore[1].add(gameUpdateFee)
       );
-      expect(event.args[0]).to.be.equal(gameId2);
-      expect(event.args[1]).to.be.equal(gameId2.add(1));
+      expect(event.args[0]).to.be.equal(gameId2.sub(1));
+      expect(event.args[1]).to.be.equal(gameId2);
       expect(event.args[2][0]).to.deep.equal([assets[0]]);
       expect(event.args[2][1][0]).to.deep.equal(42);
       expect(event.args[2][4]).to.be.equal(await getURI('Sandbox MetaTx URI'));
@@ -657,6 +705,9 @@ describe('GameMinter', function () {
         gameId2,
         {...update, uri: await getURI('Sandbox MetaTx change URI')}
       );
+
+      gameId2 = increment(gameId2);
+
       const receipt = await sandAsExecutionOperator.executeWithSpecificGas(
         GameMinter.address,
         gas,
@@ -677,8 +728,8 @@ describe('GameMinter', function () {
       expect(newURI).to.be.equal(
         'ipfs://bafybeicjgxfke4ojlythuopitdce6gdyheikqdtumnbrwlk4iottqksb6e/9435802489392532849329415225251965785597302377102806428111914279337516335104.json'
       );
-      expect(event.args[0]).to.be.equal(gameId2);
-      expect(event.args[1]).to.be.equal(gameId2.add(1));
+      expect(event.args[0]).to.be.equal(gameId2.sub(1));
+      expect(event.args[1]).to.be.equal(gameId2);
       expect(event.args[2][4]).to.be.equal(
         await getURI('Sandbox MetaTx change URI')
       );
@@ -691,6 +742,10 @@ describe('GameMinter', function () {
     });
 
     it('MetaTx should fail with wrong "from" address', async function () {
+      let idAsHex = utils.hexValue(gameId2);
+      let versionSlice = idAsHex.slice(58);
+      expect(versionSlice).to.be.equal('00000004');
+
       const gas = 1000000;
       const {data} = await GameMinter.populateTransaction.updateGame(
         users[4].address,
@@ -698,22 +753,26 @@ describe('GameMinter', function () {
         {...update}
       );
 
-      const assetsBefore = await gameTokenContract.getAssetBalances(gameId2, [
-        assets[0],
-        assets[1],
-      ]);
-
       await sandAsExecutionOperator.executeWithSpecificGas(
         GameMinter.address,
         gas,
         data
       );
 
-      const assetsAfter = await gameTokenContract.getAssetBalances(gameId2, [
-        assets[0],
-        assets[1],
-      ]);
-      expect(assetsAfter).to.deep.equal(assetsBefore);
+      // original token was not burned:
+      expect(await gameTokenContract.ownerOf(gameId2)).to.be.equal(
+        users[1].address
+      );
+
+      // tokenId version was not incremented:
+      idAsHex = utils.hexValue(gameId2);
+      versionSlice = idAsHex.slice(58);
+      expect(versionSlice).to.be.equal('00000004');
+
+      // @note a future version of a token still maps to the current owner address!
+      expect(await gameTokenContract.ownerOf(gameId2.add(1))).to.be.equal(
+        ethers.constants.AddressZero
+      );
     });
 
     it('should allow GAME Editor to add assets via MetaTx', async function () {
@@ -734,16 +793,16 @@ describe('GameMinter', function () {
         data
       );
 
-      const assetsAfter = await gameTokenContract.getAssetBalances(
-        gameId2.add(1),
-        [editorAssets[0]]
-      );
+      gameId2 = increment(gameId2);
+
+      const assetsAfter = await gameTokenContract.getAssetBalances(gameId2, [
+        editorAssets[0],
+      ]);
       expect(assetsBefore[0]).to.deep.equal(0);
       expect(assetsAfter[0]).to.deep.equal(5);
     });
 
     it('should allow GAME Editor to remove assets via MetaTx', async function () {
-      gameId2 = gameId2.add(1);
       const gas = 1000000;
       const {data} = await GameMinter.populateTransaction.updateGame(
         users[8].address,
@@ -761,16 +820,16 @@ describe('GameMinter', function () {
         data
       );
 
-      const assetsAfter = await gameTokenContract.getAssetBalances(
-        gameId2.add(1),
-        [editorAssets[0]]
-      );
+      gameId2 = increment(gameId2);
+
+      const assetsAfter = await gameTokenContract.getAssetBalances(gameId2, [
+        editorAssets[0],
+      ]);
       expect(assetsBefore[0]).to.deep.equal(5);
       expect(assetsAfter[0]).to.deep.equal(2);
     });
 
     it('should allow GAME Editor to set URI via MetaTx', async function () {
-      gameId2 = gameId2.add(1);
       const gas = 1000000;
       const {data} = await GameMinter.populateTransaction.updateGame(
         users[8].address,
@@ -784,7 +843,10 @@ describe('GameMinter', function () {
         gas,
         data
       );
-      const uriAfter = await gameTokenContract.tokenURI(gameId2.add(1));
+
+      gameId2 = increment(gameId2);
+
+      const uriAfter = await gameTokenContract.tokenURI(gameId2);
 
       expect(uriBefore).to.be.equal(
         'ipfs://bafybeigf2jdadbxxem6je7t5wlomoa6a4ualmu6kqittw6723acf3bneoa/9435802489392532849329415225251965785597302377102806428111914279337516335104.json'
