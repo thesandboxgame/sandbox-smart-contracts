@@ -1046,8 +1046,8 @@ describe('GameToken', function () {
 
     it('fails if "from" != game owner', async function () {
       await expect(
-        GameOwner.Game.destroyGame(gameToken.address, gameId)
-      ).to.be.revertedWith('DESTROY_INVALID_FROM');
+        GameOwner.Game.burnFrom(gameToken.address, gameId)
+      ).to.be.revertedWith('NOT_OWNER');
     });
 
     it('fails if sender != game owner and not metatx', async function () {
@@ -1055,8 +1055,8 @@ describe('GameToken', function () {
         ethers.provider.getSigner(users[6].address)
       );
       await expect(
-        gameAsOther.destroyGame(gameToken.address, gameId)
-      ).to.be.revertedWith('DESTROY_ACCESS_DENIED');
+        gameAsOther.burnFrom(gameToken.address, gameId)
+      ).to.be.revertedWith('UNAUTHORIZED_BURN');
     });
 
     describe('GameToken: destroyAndRecover', function () {
@@ -1090,7 +1090,7 @@ describe('GameToken', function () {
             gameId,
             []
           )
-        ).to.be.revertedWith('DESTROY_INVALID_FROM');
+        ).to.be.revertedWith('NOT_OWNER');
       });
 
       it('fails if sender != game owner and not metatx', async function () {
@@ -1104,7 +1104,7 @@ describe('GameToken', function () {
             gameId,
             []
           )
-        ).to.be.revertedWith('DESTROY_ACCESS_DENIED');
+        ).to.be.revertedWith('UNAUTHORIZED_BURN');
       });
 
       it('can destroy GAME and recover assets in 1 tx if not too many assets', async function () {
@@ -1194,7 +1194,7 @@ describe('GameToken', function () {
         expect(contractBalanceBefore).to.be.equal(7);
         expect(contractBalanceBefore2).to.be.equal(11);
 
-        await GameOwner.Game.destroyGame(GameOwner.address, gameId);
+        await GameOwner.Game.burn(gameId);
 
         await expect(gameToken.ownerOf(gameId)).to.be.revertedWith(
           'NONEXISTANT_TOKEN'
