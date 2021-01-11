@@ -1,6 +1,9 @@
 import 'dotenv/config';
 import fs from 'fs-extra';
 import {TheGraph} from '../utils/thegraph';
+import {getBlockArgs} from '../utils/utils';
+
+const blockNumber = getBlockArgs(0);
 
 const theGraph = new TheGraph(
   'https://api.thegraph.com/subgraphs/name/pixowl/the-sandbox'
@@ -23,8 +26,6 @@ query($blockNumber: Int! $first: Int! $lastId: ID!) {
   }
 }
 `;
-
-const blockNumber = 11593528; // Jan-05-2021 08:47:59 AM +UTC
 
 (async () => {
   const assetCollections: {id: string}[] = await theGraph.query(

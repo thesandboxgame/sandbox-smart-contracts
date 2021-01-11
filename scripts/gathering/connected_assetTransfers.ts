@@ -4,13 +4,14 @@ import {ethers} from 'hardhat';
 
 const startBlock = 9040032;
 
-const blockNumber = 11593528; // Jan-05-2021 08:47:59 AM +UTC
-
 async function queryEvents(
   filterFunc: (startBlock: number, endBlock: number) => Promise<Event[]>,
   startBlock: number,
-  endBlock: number
+  endBlock?: number
 ) {
+  if (!endBlock) {
+    endBlock = await ethers.provider.getBlockNumber();
+  }
   let consecutiveSuccess = 0;
   const successes: Record<number, boolean> = {};
   const failures: Record<number, boolean> = {};
@@ -53,16 +54,14 @@ async function queryEvents(
   const Asset = await ethers.getContract('Asset');
   const singleTransferEvents = await queryEvents(
     Asset.queryFilter.bind(Asset, Asset.filters.TransferSingle()),
-    startBlock,
-    blockNumber
+    startBlock
   );
 
   console.log('SINGLE TRANSFERS', singleTransferEvents.length);
 
   const batchTransferEvents = await queryEvents(
     Asset.queryFilter.bind(Asset, Asset.filters.TransferBatch()),
-    startBlock,
-    blockNumber
+    startBlock
   );
 
   console.log('BATCH TRANSFERS', singleTransferEvents.length);
