@@ -139,6 +139,8 @@ describe('GameToken', function () {
     it('Minter can create GAMEs when _Minter is set', async function () {
       const randomId = await getRandom();
 
+      expect(await gameToken.balanceOf(users[4].address)).to.be.equal(0);
+
       const minterReceipt = await gameTokenAsMinter.createGame(
         users[3].address,
         users[4].address,
@@ -379,6 +381,11 @@ describe('GameToken', function () {
       let assetId2: BigNumber;
       let assetContract: Contract;
       let gameTokenAsMinter: Contract;
+      let initialGameTokenBalance: number;
+      let intermediateGameTokenBalance: number;
+      let intermediateGameTokenBalance2: number;
+      let intermediateGameTokenBalance3: number;
+      let intermediateGameTokenBalance4: number;
 
       before(async function () {
         ({
@@ -429,6 +436,7 @@ describe('GameToken', function () {
         );
 
         const uriHash = updateEvent.args[2].uri;
+        initialGameTokenBalance = await gameToken.balanceOf(GameOwner.address);
 
         gameId = transferEvent.args[2];
         expect(uriHash).to.be.equal(hashedUri);
@@ -545,6 +553,9 @@ describe('GameToken', function () {
 
         const eventAssets = updateEvent.args[2].assetIdsToAdd;
         const values = updateEvent.args[2].assetAmountsToAdd;
+        intermediateGameTokenBalance = await gameToken.balanceOf(
+          GameOwner.address
+        );
 
         expect(uriBefore).to.be.equal(
           'ipfs://bafybeifi4cv5sur4aljxzfma65zuemblnsahchn2pnji4h7cso63g3euha/game.json'
@@ -648,6 +659,9 @@ describe('GameToken', function () {
 
         const eventAssets = updateEvent.args[2].assetIdsToAdd;
         const values = updateEvent.args[2].assetAmountsToAdd;
+        intermediateGameTokenBalance2 = await gameToken.balanceOf(
+          GameOwner.address
+        );
 
         expect(contractBalanceAfter).to.be.equal(contractBalanceBefore + 7);
         expect(ownerBalanceAfter).to.be.equal(ownerBalanceBefore - 7);
@@ -703,6 +717,9 @@ describe('GameToken', function () {
         const ownerBalanceAfter = await assetContract[
           'balanceOf(address,uint256)'
         ](GameOwner.address, singleAssetId);
+        intermediateGameTokenBalance3 = await gameToken.balanceOf(
+          GameOwner.address
+        );
 
         expect(contractBalanceAfter).to.be.equal(contractBalanceBefore - 1);
         expect(ownerBalanceAfter).to.be.equal(ownerBalanceBefore + 1);
@@ -767,6 +784,9 @@ describe('GameToken', function () {
 
         const eventAssets = updateEvent.args[2].assetIdsToRemove;
         const values = updateEvent.args[2].assetAmountsToRemove;
+        intermediateGameTokenBalance4 = await gameToken.balanceOf(
+          GameOwner.address
+        );
 
         const contractBalanceAfter = await assetContract[
           'balanceOf(address,uint256)'
@@ -789,6 +809,34 @@ describe('GameToken', function () {
         expect(eventAssets[1]).to.be.equal(assetId2);
         expect(values[0]).to.be.equal(7);
         expect(values[1]).to.be.equal(31);
+      });
+
+      it('Game token should acurately track token balances for owners', async function () {
+        const finalGameTokenBalance = await gameToken.balanceOf(
+          GameOwner.address
+        );
+        expect(initialGameTokenBalance).to.be.equal(1);
+        expect(intermediateGameTokenBalance).to.be.equal(1);
+        expect(intermediateGameTokenBalance2).to.be.equal(1);
+        expect(intermediateGameTokenBalance2).to.be.equal(1);
+        expect(intermediateGameTokenBalance2).to.be.equal(1);
+        expect(finalGameTokenBalance).to.be.equal(1);
+
+        const randomId = await getRandom();
+        await waitFor(
+          gameTokenAsMinter.createGame(
+            GameOwner.address,
+            GameOwner.address,
+            {...update},
+            ethers.constants.AddressZero,
+            randomId
+          )
+        );
+
+        const gameTokenBalanceWith2Games: number = await gameToken.balanceOf(
+          GameOwner.address
+        );
+        expect(gameTokenBalanceWith2Games).to.be.equal(2);
       });
     });
   });
@@ -1302,7 +1350,7 @@ describe('GameToken', function () {
       const subId = idAsHex.slice(43, 58);
       const version = idAsHex.slice(58);
       expect(utils.getAddress(creator)).to.be.equal(users[0].address);
-      expect(subId).to.be.equal('000000002cc26bf');
+      expect(subId).to.be.equal('000000022d64acd');
       expect(version).to.be.equal('00000001');
     });
 
