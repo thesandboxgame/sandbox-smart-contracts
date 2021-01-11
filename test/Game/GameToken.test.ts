@@ -1044,25 +1044,9 @@ describe('GameToken', function () {
       );
     });
 
-    it('fails if "to" == address(0)', async function () {
-      await expect(
-        GameOwner.Game.destroyGame(
-          GameOwner.address,
-          ethers.constants.AddressZero,
-          gameId
-        )
-      ).to.be.revertedWith('DESTINATION_ZERO_ADDRESS');
-    });
-
-    it('fails to destroy if "to" == Game Token contract', async function () {
-      await expect(
-        GameOwner.Game.destroyGame(GameOwner.address, gameToken.address, gameId)
-      ).to.be.revertedWith('DESTINATION_GAME_CONTRACT');
-    });
-
     it('fails if "from" != game owner', async function () {
       await expect(
-        GameOwner.Game.destroyGame(gameToken.address, GameOwner.address, gameId)
+        GameOwner.Game.destroyGame(gameToken.address, gameId)
       ).to.be.revertedWith('DESTROY_INVALID_FROM');
     });
 
@@ -1071,7 +1055,7 @@ describe('GameToken', function () {
         ethers.provider.getSigner(users[6].address)
       );
       await expect(
-        gameAsOther.destroyGame(gameToken.address, GameOwner.address, gameId)
+        gameAsOther.destroyGame(gameToken.address, gameId)
       ).to.be.revertedWith('DESTROY_ACCESS_DENIED');
     });
 
@@ -1210,11 +1194,7 @@ describe('GameToken', function () {
         expect(contractBalanceBefore).to.be.equal(7);
         expect(contractBalanceBefore2).to.be.equal(11);
 
-        await GameOwner.Game.destroyGame(
-          GameOwner.address,
-          GameOwner.address,
-          gameId
-        );
+        await GameOwner.Game.destroyGame(GameOwner.address, gameId);
 
         await expect(gameToken.ownerOf(gameId)).to.be.revertedWith(
           'NONEXISTANT_TOKEN'
