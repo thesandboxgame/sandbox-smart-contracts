@@ -79,16 +79,16 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     ///////////////////////////////  Functions //////////////////////////////
 
     /// @notice Allow token owner to set game editors.
-    /// @param gameCreator The address of a GAME token creator.
+    /// @param gameOwner The address of a GAME token creator.
     /// @param editor The address of the editor to set.
     /// @param isEditor Add or remove the ability to edit.
     function setGameEditor(
-        address gameCreator,
+        address gameOwner,
         address editor,
         bool isEditor
     ) external override {
-        require(msg.sender == gameCreator || _isValidMetaTx(gameCreator), "EDITOR_ACCESS_DENIED");
-        _setGameEditor(gameCreator, editor, isEditor);
+        require(msg.sender == gameOwner || _isValidMetaTx(gameOwner), "EDITOR_ACCESS_DENIED");
+        _setGameEditor(gameOwner, editor, isEditor);
     }
 
     /// @notice Transfers creatorship of `original` from `sender` to `to`.
