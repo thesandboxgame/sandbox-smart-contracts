@@ -144,7 +144,6 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         }
 
         _metaData[baseId] = creation.uri;
-        _numNFTPerAddress[to]++;
         emit GameTokenUpdated(0, gameId, creation);
         return gameId;
     }
@@ -473,7 +472,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         }
 
         _owners[storageId] = (uint256(idVersion) << 200) + uint256(to);
-
+        _numNFTPerAddress[to]++;
         emit Transfer(address(0), to, gameId);
         return (gameId, storageId);
     }
