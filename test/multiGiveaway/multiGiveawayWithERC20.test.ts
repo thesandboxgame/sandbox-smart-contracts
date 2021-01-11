@@ -460,7 +460,7 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
     expect(updatedSandBalance).to.equal(claim.sand);
   });
 
-  it('merkleRoot cannot be set twice', async function () {
+  it('merkleRoot can be set more than once, because the contract is reusable', async function () {
     const options = {};
     const setUp = await setupTestGiveawayWithERC20(options);
     const {giveawayContract, nftGiveawayAdmin} = setUp;
@@ -469,11 +469,12 @@ describe('Multi_Giveaway_1_with_ERC20', function () {
       ethers.provider.getSigner(nftGiveawayAdmin)
     );
 
-    await expect(
-      giveawayContractAsAdmin.setMerkleRoot(
-        '0x0000000000000000000000000000000000000000000000000000000000000000'
-      )
-    ).to.be.revertedWith('MERKLE_ROOT_ALREADY_SET');
+    await giveawayContractAsAdmin.setMerkleRoot(
+      '0x0000000000000000000000000000000000000000000000000000000000000000'
+    );
+    await giveawayContractAsAdmin.setMerkleRoot(
+      '0x0000000000000000000000000000000000000000000000000000000000000000'
+    );
   });
 
   it('merkleRoot can only be set by admin', async function () {

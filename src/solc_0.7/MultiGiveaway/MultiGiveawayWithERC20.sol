@@ -14,7 +14,7 @@ contract MultiGiveawayWithERC20 is WithAdmin, ClaimERC721AndERC1155WithERC20 {
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
     bytes4 internal constant ERC721_BATCH_RECEIVED = 0x4b808c46;
     uint256 internal immutable _expiryTime;
-    mapping(address => bool) public claimed;
+    mapping(address => mapping(bytes32 => bool)) public claimed;
 
     constructor(
         address asset,
@@ -44,7 +44,7 @@ contract MultiGiveawayWithERC20 is WithAdmin, ClaimERC721AndERC1155WithERC20 {
     /// @notice Function to set the merkle root hash for the claim data, if it is 0.
     /// @param merkleRoot The merkle root hash of the claim data.
     function setMerkleRoot(bytes32 merkleRoot) external onlyAdmin {
-        require(_merkleRoot == 0, "MERKLE_ROOT_ALREADY_SET");
+        // require(_merkleRoot == 0, "MERKLE_ROOT_ALREADY_SET"); // TODO: discuss approach to merkle root hash
         _merkleRoot = merkleRoot;
     }
 
@@ -65,8 +65,8 @@ contract MultiGiveawayWithERC20 is WithAdmin, ClaimERC721AndERC1155WithERC20 {
     ) external {
         require(block.timestamp < _expiryTime, "CLAIM_PERIOD_IS_OVER");
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        require(claimed[to] == false, "DESTINATION_ALREADY_CLAIMED");
-        claimed[to] = true;
+        require(claimed[to][_merkleRoot] == false, "DESTINATION_ALREADY_CLAIMED");
+        claimed[to][_merkleRoot] = true;
         _claimERC721AndERC1155WithERC20(to, assetIds, assetValues, landIds, erc20Amount, proof, salt);
     }
 
