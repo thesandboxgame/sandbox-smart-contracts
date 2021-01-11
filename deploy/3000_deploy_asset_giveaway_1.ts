@@ -39,8 +39,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy('Asset_Giveaway_1', {
     contract: 'AssetGiveaway',
     from: deployer,
-    linkedData: assets,
+    linkedData: assets, // TODO reenable claims
     log: true,
+    skipIfAlreadyDeployed: true,
     args: [
       assetContract.address,
       AddressZero, // no admin needed
