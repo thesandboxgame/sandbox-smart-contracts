@@ -173,7 +173,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @param to The address to send all GAME assets to.
     /// @param gameId The id of the GAME to destroy.
     /// @param assetIds The assets to recover from the burnt GAME.
-    function destroyAndRecover(
+    function burnAndRecover(
         address from,
         address to,
         uint256 gameId,
