@@ -21,11 +21,7 @@ interface IGameToken {
         uint64 subId
     ) external returns (uint256 id);
 
-    function destroyGame(
-        address from,
-        address to,
-        uint256 gameId
-    ) external;
+    function destroyGame(address from, uint256 gameId) external;
 
     function recoverAssets(
         address from,

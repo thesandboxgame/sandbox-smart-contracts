@@ -185,14 +185,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
 
     /// @notice Burn a GAME token.
     /// @param from The address of the one destroying the game.
-    /// @param to The address to send all GAME assets to.
     /// @param gameId The id of the GAME to destroy.
-    function destroyGame(
-        address from,
-        address to,
-        uint256 gameId
-    ) external override {
-        _destroyGame(from, to, gameId);
+    function destroyGame(address from, uint256 gameId) external override {
+        _destroyGame(from, gameId);
     }
 
     /// @notice Get the amount of each assetId in a GAME.
@@ -378,11 +373,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     }
 
     /// @dev See destroyGame.
-    function _destroyGame(
-        address from,
-        address to,
-        uint256 gameId
-    ) internal notToZero(to) notToThis(to) {
+    function _destroyGame(address from, uint256 gameId) internal {
         uint256 baseId = _storageId(gameId);
         address owner = _ownerOf(gameId);
         require(msg.sender == owner || _isValidMetaTx(from), "DESTROY_ACCESS_DENIED");
