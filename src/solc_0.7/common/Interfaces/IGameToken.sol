@@ -32,7 +32,7 @@ interface IGameToken {
         uint256[] calldata assetIds
     ) external;
 
-    function destroyAndRecover(
+    function burnAndRecover(
         address from,
         address to,
         uint256 gameId,
