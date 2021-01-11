@@ -179,14 +179,21 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint256 gameId,
         uint256[] calldata assetIds
     ) external override {
-        _destroyGame(from, gameId);
+        _burnGame(from, gameId);
         _recoverAssets(from, to, gameId, assetIds);
     }
 
     /// @notice Burn a GAME token.
-    /// @param from The address of the one destroying the game.
     /// @param gameId The id of the GAME to destroy.
-    function destroyGame(address from, uint256 gameId) external override {
+    function burn(uint256 gameId) external override(ERC721BaseToken, IGameToken) {
+        _burnGame(msg.sender, gameId);
+    }
+
+    /// @notice Burn a GAME token on behalf of owner.
+    /// @param from The address whose GAME is being burnt.
+    /// @param gameId The id of the GAME to burn.
+    function burnFrom(address from, uint256 gameId) external override(ERC721BaseToken, IGameToken) {
+        require(from != address(0), "NOT_FROM_ZEROADDRESS");
         _burnGame(from, gameId);
     }
 
@@ -372,13 +379,20 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         }
     }
 
-    /// @dev See destroyGame.
+    /// @dev See burn / burnFrom.
     function _burnGame(address from, uint256 gameId) internal {
-        uint256 baseId = _storageId(gameId);
-        address owner = _ownerOf(gameId);
-        require(msg.sender == owner || _isValidMetaTx(from), "DESTROY_ACCESS_DENIED");
-        require(from == owner, "DESTROY_INVALID_FROM");
-        delete _metaData[baseId];
+        uint256 storageId = _storageId(gameId);
+        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(storageId);
+        require(
+            msg.sender == owner ||
+                _isValidMetaTx(from) ||
+                (operatorEnabled && _operators[storageId] == msg.sender) ||
+                _superOperators[msg.sender] ||
+                _operatorsForAll[from][msg.sender],
+            "UNAUTHORIZED_BURN"
+        );
+
+        delete _metaData[storageId];
         _creatorship[creatorOf(gameId)] = address(0);
         _burn(from, owner, gameId);
     }
