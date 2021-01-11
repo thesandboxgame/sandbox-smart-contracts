@@ -179,7 +179,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint256 gameId,
         uint256[] calldata assetIds
     ) external override {
-        _destroyGame(from, to, gameId);
+        _destroyGame(from, gameId);
         _recoverAssets(from, to, gameId, assetIds);
     }
 
