@@ -60,24 +60,10 @@ describe('Asset.sol', function () {
     expect(balance).to.be.equal(20);
   });
 
-  // it('user batch sending more asset that it owns should fails', async function () {
-  //   const {users, mintAsset} = await setupAsset();
-  //   const tokenId = await mintAsset(users[0].address, 20);
-  //   await expect(
-  //     users[0].Asset.safeBatchTransferFrom(
-  //       users[0].address,
-  //       users[0].address,
-  //       [tokenId],
-  //       [30],
-  //       '0x'
-  //     )
-  //   ).to.be.revertedWith(`can't substract more than there is`);
-  // });
-
-  it('user batch sending more asset that it owns still works', async function () {
-    const {Asset, users, mintAsset} = await setupAsset();
+  it('user batch sending more asset that it owns should fails', async function () {
+    const {users, mintAsset} = await setupAsset();
     const tokenId = await mintAsset(users[0].address, 20);
-    await waitFor(
+    await expect(
       users[0].Asset.safeBatchTransferFrom(
         users[0].address,
         users[0].address,
@@ -85,30 +71,6 @@ describe('Asset.sol', function () {
         [30],
         '0x'
       )
-    );
-    const balance = await Asset['balanceOf(address,uint256)'](
-      users[0].address,
-      tokenId
-    );
-    expect(balance).to.be.equal(20);
-  });
-
-  it('user batch sending more asset that is even possible still works', async function () {
-    const {Asset, users, mintAsset} = await setupAsset();
-    const tokenId = await mintAsset(users[0].address, 20);
-    await waitFor(
-      users[0].Asset.safeBatchTransferFrom(
-        users[0].address,
-        users[0].address,
-        [tokenId],
-        ['4294967296'], // more than 2^32-1
-        '0x'
-      )
-    );
-    const balance = await Asset['balanceOf(address,uint256)'](
-      users[0].address,
-      tokenId
-    );
-    expect(balance).to.be.equal(20);
+    ).to.be.revertedWith(`can't substract more than there is`);
   });
 });
