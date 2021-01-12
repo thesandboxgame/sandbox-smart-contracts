@@ -1347,7 +1347,6 @@ describe('GameToken', function () {
         ).to.be.reverted;
 
         // assets can be recovered in multiple steps
-
         await GameOwner.Game.burnAndRecover(
           GameOwner.address,
           GameOwner.address,
