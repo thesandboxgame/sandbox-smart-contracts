@@ -1379,6 +1379,7 @@ describe('GameToken', function () {
     let sandAsExecutionAdmin: Contract;
     let sandAsExecutionOperator: Contract;
     let gameId: BigNumber;
+    let gameId2: BigNumber;
     let users: User[];
     let sandContract: Contract;
     let sandAsAdmin: Contract;
@@ -1410,7 +1411,7 @@ describe('GameToken', function () {
         ethers.provider.getSigner(sandAdmin)
       );
       await sandAsAdmin.setSuperOperator(gameToken.address, true);
-      // @note creat a new GAME first to use for these tests
+
       assets = await supplyAssets(GameOwner.address, [10, 8]);
       gameId = await getNewGame(
         gameToken,
@@ -1469,21 +1470,6 @@ describe('GameToken', function () {
       ).to.be.equal(true);
     });
 
-    it('can call transferCreatorship via metaTx', async function () {
-      const {data} = await gameToken.populateTransaction.transferCreatorship(
-        GameOwner.address,
-        GameOwner.address,
-        users[2].address
-      );
-
-      await sandAsExecutionOperator.executeWithSpecificGas(
-        gameToken.address,
-        gas,
-        data
-      );
-      expect(await gameToken.creatorOf(gameId)).to.be.equal(users[2].address);
-    });
-
     it('can call burnAndRecover via metaTx', async function () {
       const balancesBefore = await getBalances(
         assetContract,
@@ -1530,8 +1516,102 @@ describe('GameToken', function () {
       expect(contractBalanceAfter).to.be.equal(0);
       expect(contractBalanceAfter2).to.be.equal(0);
     });
-    it.skip('can call burnFrom via metaTx', async function () {});
-    it.skip('can call recoverAssets via metaTx', async function () {});
+    it('can call burnFrom via metaTx', async function () {
+      assets = await supplyAssets(GameOwner.address, [5, 7]);
+      gameId2 = await getNewGame(
+        gameToken,
+        gameTokenAsAdmin,
+        GameOwner,
+        GameOwner,
+        assets,
+        [5, 7]
+      );
+
+      const idAsHex = utils.hexValue(gameId2);
+      const creatorSlice = idAsHex.slice(0, 42);
+
+      console.log(`ex op: ${users[6].address}`);
+      console.log(`sand address: ${sandContract.address}`);
+      console.log(`creator: ${utils.getAddress(creatorSlice)}`);
+
+      expect(await gameToken.creatorOf(gameId2)).to.be.equal(GameOwner.address);
+
+      const {data} = await gameToken.populateTransaction.burnFrom(
+        GameOwner.address,
+        gameId2
+      );
+
+      await sandAsExecutionOperator.executeWithSpecificGas(
+        gameToken.address,
+        gas,
+        data
+      );
+
+      expect(await gameToken.creatorOf(gameId2)).to.be.equal(GameOwner.address);
+      await expect(gameToken.ownerOf(gameId2)).to.be.revertedWith(
+        'NONEXISTANT_TOKEN'
+      );
+    });
+
+    it('can call recoverAssets via metaTx', async function () {
+      const balancesBefore = await getBalances(
+        assetContract,
+        [GameOwner.address, gameToken.address],
+        assets
+      );
+      const ownerBalanceBefore = balancesBefore[0];
+      const ownerBalanceBefore2 = balancesBefore[1];
+      const contractBalanceBefore = balancesBefore[2];
+      const contractBalanceBefore2 = balancesBefore[3];
+
+      expect(ownerBalanceBefore).to.be.equal(0);
+      expect(ownerBalanceBefore2).to.be.equal(0);
+      expect(contractBalanceBefore).to.be.equal(5);
+      expect(contractBalanceBefore2).to.be.equal(7);
+
+      const {data} = await gameToken.populateTransaction.recoverAssets(
+        GameOwner.address,
+        GameOwner.address,
+        gameId2,
+        assets
+      );
+
+      await sandAsExecutionOperator.executeWithSpecificGas(
+        gameToken.address,
+        gas,
+        data
+      );
+
+      const balancesAfter = await getBalances(
+        assetContract,
+        [GameOwner.address, gameToken.address],
+        assets
+      );
+      const ownerBalanceAfter = balancesAfter[0];
+      const ownerBalanceAfter2 = balancesAfter[1];
+      const contractBalanceAfter = balancesAfter[2];
+      const contractBalanceAfter2 = balancesAfter[3];
+
+      expect(ownerBalanceAfter).to.be.equal(5);
+      expect(ownerBalanceAfter2).to.be.equal(7);
+      expect(contractBalanceAfter).to.be.equal(0);
+      expect(contractBalanceAfter2).to.be.equal(0);
+    });
+
+    it('can call transferCreatorship via metaTx', async function () {
+      const {data} = await gameToken.populateTransaction.transferCreatorship(
+        GameOwner.address,
+        GameOwner.address,
+        users[2].address
+      );
+
+      await sandAsExecutionOperator.executeWithSpecificGas(
+        gameToken.address,
+        gas,
+        data
+      );
+      expect(await gameToken.creatorOf(gameId)).to.be.equal(users[2].address);
+    });
 
     describe('GameToken: Invalid metaTransactions', function () {
       let gameAsUser7: Contract;
