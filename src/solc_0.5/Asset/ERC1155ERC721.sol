@@ -563,7 +563,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
             } else {
                 require(authorized, "Operator not approved");
                 if (from == to) {
-                    _checkSelf(from, ids[i], values[i]);
+                    _checkEnoughBalance(from, ids[i], values[i]);
                 } else if(values[i] > 0) {
                     (bin, index) = ids[i].getTokenBinIndex();
                     if (lastBin == 0) {
@@ -614,7 +614,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         }
     }
 
-    function _checkSelf(address from, uint256 id, uint256 value) internal {
+    function _checkEnoughBalance(address from, uint256 id, uint256 value) internal {
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         require(_packedTokenBalance[from][bin].getValueInBin(index) >= value, "can't substract more than there is");
     }
