@@ -1044,8 +1044,7 @@ describe('GameToken', function () {
       );
     });
 
-    // @note test burnFrom as metaTx
-    // review meataTx tests and look for vulnerabilities
+    // @review meataTx tests and look for vulnerabilities.
 
     it('fails if "from" != game owner', async function () {
       await expect(
@@ -1298,6 +1297,71 @@ describe('GameToken', function () {
         expect(contractBalanceFinal).to.be.equal(0);
         expect(contractBalanceFinal2).to.be.equal(0);
       });
+
+      it('allows asset recovery even when too many assets', async function () {
+        const manyQuantities1 = [...Array(150)].map(() => 3);
+        const manyQuantities2 = [...Array(150)].map(() => 3);
+        const manyAssets1 = await supplyAssets(
+          GameOwner.address,
+          manyQuantities1
+        );
+        const manyAssets2 = await supplyAssets(
+          GameOwner.address,
+          manyQuantities2
+        );
+
+        let tooManyAssetsGameId = await getNewGame(
+          gameToken,
+          gameTokenAsAdmin,
+          GameOwner,
+          GameOwner,
+          manyAssets1,
+          manyQuantities1
+        );
+
+        const {gameTokenAdmin} = await getNamedAccounts();
+        const gameTokenAsMinter = await gameToken.connect(
+          ethers.provider.getSigner(gameTokenAdmin)
+        );
+
+        await gameTokenAsMinter.updateGame(
+          GameOwner.address,
+          tooManyAssetsGameId,
+          {
+            ...update,
+            assetIdsToAdd: manyAssets2,
+            assetAmountsToAdd: manyQuantities2,
+          }
+        );
+        tooManyAssetsGameId = tooManyAssetsGameId.add(1);
+        const allAtOnce = manyAssets1.concat(manyAssets2);
+
+        // too many assets to perform burnAndRecover within the gas limit
+        await expect(
+          GameOwner.Game.burnAndRecover(
+            GameOwner.address,
+            GameOwner.address,
+            tooManyAssetsGameId,
+            allAtOnce
+          )
+        ).to.be.reverted;
+
+        // assets can be recovered in multiple steps
+
+        await GameOwner.Game.burnAndRecover(
+          GameOwner.address,
+          GameOwner.address,
+          tooManyAssetsGameId,
+          manyAssets1
+        );
+
+        await GameOwner.Game.recoverAssets(
+          GameOwner.address,
+          GameOwner.address,
+          tooManyAssetsGameId,
+          manyAssets2
+        );
+      });
     });
   });
 
@@ -1335,7 +1399,7 @@ describe('GameToken', function () {
       const subId = idAsHex.slice(43, 58);
       const version = idAsHex.slice(58);
       expect(utils.getAddress(creator)).to.be.equal(users[0].address);
-      expect(subId).to.be.equal('000000022d64acd');
+      expect(subId).to.be.equal('00000002eccadc6');
       expect(version).to.be.equal('00000001');
     });
 
@@ -1526,15 +1590,6 @@ describe('GameToken', function () {
         assets,
         [5, 7]
       );
-
-      const idAsHex = utils.hexValue(gameId2);
-      const creatorSlice = idAsHex.slice(0, 42);
-
-      console.log(`ex op: ${users[6].address}`);
-      console.log(`sand address: ${sandContract.address}`);
-      console.log(`creator: ${utils.getAddress(creatorSlice)}`);
-
-      expect(await gameToken.creatorOf(gameId2)).to.be.equal(GameOwner.address);
 
       const {data} = await gameToken.populateTransaction.burnFrom(
         GameOwner.address,
