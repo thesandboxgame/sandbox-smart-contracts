@@ -8,6 +8,6 @@ contract Asset is ERC1155ERC721 {
         address assetAdmin,
         address bouncerAdmin
     ) public {
-      ERC1155ERC721.init(metaTransactionContract, assetAdmin, bouncerAdmin);
+      ERC1155ERC721.init_ERC1155ERC721(metaTransactionContract, assetAdmin, bouncerAdmin);
     }
 }
