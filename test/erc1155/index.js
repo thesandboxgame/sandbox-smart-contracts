@@ -1,5 +1,6 @@
 // TODO: check correct imports
 const {assert, expect} = require('../chai-setup');
+const {waitFor} = require('../utils');
 const ethers = require('ethers');
 const {BigNumber, constants} = require('ethers');
 const {Contract, ContractFactory} = ethers;
@@ -928,6 +929,8 @@ module.exports = (init, extensions) => {
         mint,
         deployer,
         users,
+        tokenIds,
+        minter,
       } = await init();
 
       const mandatoryReceiverFactory = new ContractFactory(
@@ -960,11 +963,12 @@ module.exports = (init, extensions) => {
         erc1155ABI,
         ethersProvider
       );
-      const owner = users[0];
-      const user0 = users[1];
-      const user1 = users[2];
-      const user2 = users[3];
-      const contractAsOwner = contract.connect(ethersProvider.getSigner(owner));
+      const user0 = users[0];
+      const user1 = users[1];
+      const user2 = users[2];
+      const contractAsMinter = contract.connect(
+        ethersProvider.getSigner(minter)
+      );
       const contractAsUser0 = contract.connect(ethersProvider.getSigner(user0));
       const contractAsUser1 = contract.connect(ethersProvider.getSigner(user1));
       const contractAsUser2 = contract.connect(ethersProvider.getSigner(user2));
@@ -973,15 +977,17 @@ module.exports = (init, extensions) => {
         deployNonReceivingContract,
         deployERC1155TokenReceiver,
         contract,
-        contractAsOwner,
+        contractAsMinter,
         mint,
         contractAsUser0,
         contractAsUser1,
         contractAsUser2,
-        owner,
+        minter,
         user0,
         user1,
         user2,
+        tokenIds,
+        contract,
       });
     };
   }
@@ -1000,8 +1006,7 @@ module.exports = (init, extensions) => {
       mint,
       user0,
     }) {
-      const testPackId = 01;
-      const {receipt, tokenId} = await mint(testPackId, user0);
+      const {receipt, tokenId} = await mint(8, user0, 1);
       const eventsMatching = receipt.events.filter(
         (v) => v.event === 'TransferSingle'
       );
@@ -1012,6 +1017,289 @@ module.exports = (init, extensions) => {
       assert.ok(transferEvent.args[3].eq(BigNumber.from(tokenId)));
     });
   });
+
+  describe('transfers', function (it) {
+    beforeEach(() => {
+      // TODO: reset tokens for transfers
+    });
+
+    it('transferring one instance of an item results in an ERC1155 TransferSingle event', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      const receipt = await waitFor(
+        contractAsMinter.safeTransferFrom(minter, user0, tokenIds[1], 1, '0x')
+      );
+      const eventsMatching = receipt.events.filter(
+        (v) => v.event === 'TransferSingle'
+      );
+      assert.equal(eventsMatching.length, 1);
+      const transferEvent = eventsMatching[0];
+      assert.equal(transferEvent.args[1], minter);
+      assert.equal(transferEvent.args[2], user0);
+      assert.ok(transferEvent.args[3].eq(tokenIds[1]));
+    });
+
+    it('transferring multiple instances of an item results in an ERC1155 TransferSingle event', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      const receipt = await waitFor(
+        contractAsMinter.safeTransferFrom(minter, user0, tokenIds[0], 2, '0x')
+      );
+      const eventsMatching = receipt.events.filter(
+        (v) => v.event === 'TransferSingle'
+      );
+      assert.equal(eventsMatching.length, 1);
+      const transferEvent = eventsMatching[0];
+      assert.equal(transferEvent.args[1], minter);
+      assert.equal(transferEvent.args[2], user0);
+      assert.ok(transferEvent.args[3].eq(tokenIds[0]));
+    });
+
+    it('transferring zero instances of an item results in an ERC1155 TransferSingle event', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      const receipt = await waitFor(
+        contractAsMinter.safeTransferFrom(minter, user0, tokenIds[1], 0, '0x')
+      );
+      const eventsMatching = receipt.events.filter(
+        (v) => v.event === 'TransferSingle'
+      );
+      assert.equal(eventsMatching.length, 1);
+      const transferEvent = eventsMatching[0];
+      assert.equal(transferEvent.args[1], minter);
+      assert.equal(transferEvent.args[2], user0);
+      assert.ok(transferEvent.args[3].eq(tokenIds[1]));
+    });
+
+    it('transferring an item with 1 supply does not result in an ERC1155 TransferBatch event', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      const receipt = await waitFor(
+        contractAsMinter.safeTransferFrom(minter, user0, tokenIds[1], 1, '0x')
+      );
+      const eventsMatching = receipt.events.filter(
+        (v) => v.event === 'TransferBatch'
+      );
+      assert.equal(eventsMatching.length, 0);
+    });
+
+    it('transferring an item with >1 supply does not result in an ERC1155 TransferBatch event', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      const receipt = await waitFor(
+        contractAsMinter.safeTransferFrom(minter, user0, tokenIds[0], 2, '0x')
+      );
+      const eventsMatching = receipt.events.filter(
+        (v) => v.event === 'TransferBatch'
+      );
+      assert.equal(eventsMatching.length, 0);
+    });
+
+    it('can be transferred to a normal address', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      await contractAsMinter.safeTransferFrom(
+        minter,
+        user0,
+        tokenIds[0],
+        4,
+        '0x'
+      );
+    });
+
+    it('cannot be transferred to zero address', async function ({
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      await expect(
+        contractAsMinter.safeTransferFrom(
+          minter,
+          zeroAddress,
+          tokenIds[0],
+          4,
+          '0x'
+        )
+      ).to.be.revertedWith('destination is zero address');
+    });
+
+    it('cannot transfer more items than you own', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      await expect(
+        contractAsMinter.safeTransferFrom(minter, user0, tokenIds[0], 11, '0x')
+      ).to.be.revertedWith(`can't substract more than there is`);
+    });
+
+    it('cannot transfer an item with supply 1 that you do not own', async function ({
+      user0,
+      tokenIds,
+      contractAsUser0,
+      minter,
+    }) {
+      await expect(
+        contractAsUser0.safeTransferFrom(minter, user0, tokenIds[1], 1, '0x')
+      ).to.be.revertedWith('Operator not approved');
+    });
+
+    it('cannot transfer an item that you do not own', async function ({
+      user0,
+      tokenIds,
+      contractAsUser0,
+      minter,
+    }) {
+      await expect(
+        contractAsUser0.safeTransferFrom(minter, user0, tokenIds[0], 8, '0x')
+      ).to.be.revertedWith('Operator not approved');
+    });
+
+    it('cannot transfer more item of 1 supply', async function ({
+      // TODO: reword
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      await expect(
+        contractAsMinter.safeTransferFrom(minter, user0, tokenIds[1], 2, '0x')
+      ).to.be.revertedWith('cannot transfer nft if amount not 1');
+    });
+
+    it('cannot transfer to a contract that does not accept ERC1155', async function ({
+      tokenIds,
+      contractAsMinter,
+      minter,
+      deployNonReceivingContract,
+      contract,
+    }) {
+      const receiverContract = await deployNonReceivingContract(
+        contract.address
+      );
+      const receiverAddress = receiverContract.address;
+      await expect(
+        contractAsMinter.safeTransferFrom(
+          minter,
+          receiverAddress,
+          tokenIds[0],
+          1,
+          '0x'
+        )
+      ).to.be.reverted;
+    });
+
+    it('cannot transfer multiple instances of an item to a contract that does not accept ERC1155', async function ({
+      tokenIds,
+      contractAsMinter,
+      minter,
+      deployNonReceivingContract,
+      contract,
+    }) {
+      const receiverContract = await deployNonReceivingContract(
+        contract.address
+      );
+      const receiverAddress = receiverContract.address;
+      await expect(
+        contractAsMinter.safeTransferFrom(
+          minter,
+          receiverAddress,
+          tokenIds[0],
+          3,
+          '0x'
+        )
+      ).to.be.reverted;
+    });
+
+    it('cannot transfer an item of supply 1 to a contract that does not accept ERC1155', async function ({
+      tokenIds,
+      contractAsMinter,
+      minter,
+      deployNonReceivingContract,
+      contract,
+    }) {
+      const receiverContract = await deployNonReceivingContract(
+        contract.address
+      );
+      const receiverAddress = receiverContract.address;
+      await expect(
+        contractAsMinter.safeTransferFrom(
+          minter,
+          receiverAddress,
+          tokenIds[1],
+          1,
+          '0x'
+        )
+      ).to.be.reverted;
+    });
+
+    // it('cannot transfer an item of supply 1 to a contract that does not return the correct ERC1155_IS_RECEIVER value', async function ({
+    //   tokenIds,
+    //   contractAsMinter,
+    //   minter,
+    //   deployNonReceivingContract,
+    //   contract,
+    // }) {
+    //   const receiverContract = await deployNonReceivingContract( // TODO: magic value setup
+    //     contract.address
+    //   );
+    //   const receiverAddress = receiverContract.address;
+    //   await expect(
+    //     contractAsMinter.safeTransferFrom(
+    //       minter,
+    //       receiverAddress,
+    //       tokenIds[1],
+    //       1,
+    //       '0x'
+    //     )
+    //   ).to.be.reverted;
+    // });
+
+    it('can transfer to a contract that does accept ERC1155', async function ({
+      tokenIds,
+      contractAsMinter,
+      minter,
+      deployERC1155TokenReceiver,
+      contract,
+    }) {
+      const receiverContract = await deployERC1155TokenReceiver(
+        contract.address // TODO: review args
+      ); // TODO: review diff between Mandatory Receiver and Receiver
+      const receiverAddress = receiverContract.address;
+      await contractAsMinter.safeTransferFrom(
+        minter,
+        receiverAddress,
+        tokenIds[0],
+        3,
+        '0x'
+      );
+      // TODO: balance check
+    });
+  });
+
+  // batch transfers
+  // ordering
+  // approvalForAll
+  // supportsInterface
 
   return tests;
 };

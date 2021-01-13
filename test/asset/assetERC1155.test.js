@@ -4,6 +4,7 @@ const {
   getNamedAccounts,
   deployments,
 } = require('hardhat');
+const {BigNumber} = require('ethers');
 const {waitFor, recurseTests} = require('../utils');
 const generateERC1155Tests = require('../erc1155');
 
@@ -13,6 +14,7 @@ function testAsset() {
       const {deployer, assetBouncerAdmin} = await getNamedAccounts();
       const otherAccounts = await getUnnamedAccounts();
       const minter = otherAccounts[0];
+      const users = otherAccounts.slice(1);
       await deployments.fixture();
 
       const assetContractAsBouncerAdmin = await ethers.getContract(
@@ -25,17 +27,28 @@ function testAsset() {
 
       const testMetadataHash = ethers.utils.formatBytes32String('metadataHash');
 
+      let counter = 0;
+
       // eslint-disable-next-line max-params
-      async function mint(testPackId, user) {
+      async function mint(id, user, supply) {
+        // address creator,
+        // uint40 packId,
+        // bytes32 hash,
+        // uint256 supply,
+        // uint8 rarity,
+        // address owner,
+        // bytes calldata data
+
         const tx = await Asset.mint(
           user,
-          testPackId,
+          id,
           testMetadataHash,
-          1,
+          supply,
           1,
           user,
           '0x'
         );
+        counter++;
         const receipt = await tx.wait();
         return {
           receipt,
@@ -45,12 +58,25 @@ function testAsset() {
         };
       }
 
+      const assetIds = [];
+      assetIds.push((await mint(counter, minter, 10)).tokenId);
+      assetIds.push((await mint(counter, minter, 1)).tokenId);
+      assetIds.push((await mint(counter, minter, 5)).tokenId);
+      assetIds.push((await mint(counter, minter, 1)).tokenId);
+      assetIds.push((await mint(counter, minter, 12)).tokenId);
+      assetIds.push((await mint(counter, minter, 1)).tokenId);
+      assetIds.push((await mint(counter, minter, 1111)).tokenId);
+      assetIds.push((await mint(counter, minter, 1)).tokenId);
+
       return {
         ethersProvider: ethers.provider,
         contractAddress: Asset.address,
-        users: otherAccounts,
+        contract: Asset,
+        users,
         mint,
         deployer,
+        tokenIds: assetIds,
+        minter,
       };
     },
     {
