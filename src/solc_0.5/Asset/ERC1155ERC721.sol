@@ -61,7 +61,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
 
     address private _bouncerAdmin;
 
-    bool internal _init = false;
+    bool internal _init;
 
     constructor(
         address metaTransactionContract,
