@@ -1,5 +1,9 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction, DeploymentSubmission} from 'hardhat-deploy/types';
+import {
+  DeployFunction,
+  DeploymentSubmission,
+  DeployedContract,
+} from 'hardhat-deploy/types';
 import {Contract} from 'ethers';
 
 const func: DeployFunction = async function (
@@ -16,10 +20,15 @@ const func: DeployFunction = async function (
   const asset = await upgrades.deployProxy(
     Asset,
     [sandContract.address, deployer, deployer],
-    {initializer: 'init', unsafeAllowCustomTypes: true}
+    {initializer: 'init', unsafeAllowCustomTypes: false}
   );
-
   await asset.deployed();
+
+  // const assetAsDeployment: Contract & DeploymentSubmission = {
+  //   ...asset,
+  //   abi: asset.interface,
+  // };
+
   // @todo does this this save impl or proxy address?
   //@note type error: Argument of type 'Contract' is not assignable to parameter of type 'DeploymentSubmission'.
   // await deployments.save('Asset', asset);
