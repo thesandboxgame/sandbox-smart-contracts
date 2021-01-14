@@ -16,7 +16,6 @@ const func: DeployFunction = async function (
 
   const sandContract = await deployments.get('Sand');
   const Asset = await ethers.getContractFactory('Asset');
-  // const ProxyAdmin = require('@openzeppelin/contracts/proxy/ProxyAdmin.sol');
 
   const asset = await upgrades.deployProxy(
     Asset,
@@ -30,8 +29,6 @@ const func: DeployFunction = async function (
       .readFileSync(`.openzeppelin/unknown-${await getChainId()}.json`)
       .toString()
   );
-  // @note not sure how to access the "address" key reliably for the implementation
-  // const implementationAddress = networkFile.impls.43e9f835061868149e723d1c736f131594517a3acbba8e4cbdfdf5fe48610a8a.address;
 
   const proxyAdminAddress = networkFile.admin.address;
 
@@ -44,12 +41,8 @@ const func: DeployFunction = async function (
 
   // @note this saves the proxy address
   await deployments.save('Asset', assetAsDeployment);
-  // @note these addresses are in sandbox-smart-contracts-private/.openzeppelin/unknown-31337.json
-  // await deployments.save('Asset_Impl', assetAsDeployment);
-  // await deployments.save('Proxy_Admin', assetAsDeployment);
 
   console.log('Asset Proxy deployed to:', asset.address);
-  console.log('Asset Implementation deployed to:', 'TODO');
   console.log('Proxy Admin Contract deployed to:', proxyAdminAddress);
 };
 
