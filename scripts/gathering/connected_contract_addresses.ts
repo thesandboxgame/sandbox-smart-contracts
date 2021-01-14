@@ -34,17 +34,10 @@ const func: DeployFunction = async function () {
     console.log(index);
     index++;
   }
-  const contractsToCheck: Record<string, string> = {};
-  for (const contractAddress of Object.keys(toContracts)) {
-    const isContract = toContracts[contractAddress] === 'yes';
-    if (isContract) {
-      contractsToCheck[contractAddress] = '';
-    }
-  }
   fs.ensureDirSync('tmp');
   fs.writeFileSync(
     `tmp/asset_owner_contracts_${network.name}.json`,
-    JSON.stringify(contractsToCheck, null, '  ')
+    JSON.stringify(toContracts, null, '  ')
   );
 };
 export default func;

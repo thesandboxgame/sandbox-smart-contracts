@@ -42,6 +42,7 @@ yarn mainnet:run setup/asset_regenerate.ts
 7. distribute
 
 ```sh
+rm -Rf tmp/transfer_executed_<networkName>.json
 yarn mainnet:run setup/asset_distribute.ts
 ```
 

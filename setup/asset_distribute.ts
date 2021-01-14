@@ -17,7 +17,7 @@ const func: DeployFunction = async function () {
 
   const Asset = await ethers.getContract('Asset');
 
-  const toContracts: Record<string, string> = {};
+  let toContracts: Record<string, string> = {};
 
   const {transfers} = JSON.parse(
     fs.readFileSync('tmp/asset_regenerations.json').toString()
@@ -47,17 +47,12 @@ const func: DeployFunction = async function () {
   }
 
   // fetch contract address from file if any
-  let contracts_checked = false;
   try {
-    const contractsDict = JSON.parse(
+    toContracts = JSON.parse(
       fs
         .readFileSync(`tmp/asset_owner_contracts_${network.name}.json`)
         .toString()
     );
-    for (const contractAddress of Object.keys(contractsDict)) {
-      toContracts[contractAddress] = 'yes';
-    }
-    contracts_checked = true;
   } catch (e) {
     //
   }
@@ -108,7 +103,7 @@ const func: DeployFunction = async function () {
     const performed = transferExecuted[index];
 
     let recordedContract = toContracts[to];
-    if (!recordedContract && !contracts_checked) {
+    if (!recordedContract) {
       // console.log(`${index}: checking contract. ${to}..`);
       const codeAtTo = await ethers.provider.getCode(to);
       if (codeAtTo !== '0x') {
@@ -117,13 +112,11 @@ const func: DeployFunction = async function () {
         recordedContract = 'no';
       }
       toContracts[to] = recordedContract;
+
+      console.log(index);
     }
 
     const toIsContract = recordedContract === 'yes';
-
-    if (!contracts_checked) {
-      console.log(index);
-    }
 
     if (toIsContract) {
       console.log(`contract at ${to}`);
@@ -136,7 +129,7 @@ const func: DeployFunction = async function () {
       });
     } else {
       console.log(
-        `transfer in batch (${performed.hash})  nonce :${performed.nonce}`
+        `already being transfered in batch (${performed.hash})  nonce :${performed.nonce}`
       );
     }
     index++;
