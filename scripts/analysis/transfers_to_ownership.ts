@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from 'fs-extra';
 import {BigNumber} from '@ethersproject/bignumber';
 // import {AddressZero} from '@ethersproject/constants';
