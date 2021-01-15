@@ -32,6 +32,15 @@ function generateRaritiesPack(raritiesArr: number[]) {
 const func: DeployFunction = async function () {
   const {ethers, getNamedAccounts} = hre;
 
+  const gasPriceFromNode = await ethers.provider.getGasPrice();
+  let gasPrice = gasPriceFromNode;
+  if (hre.network.name === 'mainnet') {
+    gasPrice = '50000000000';
+  }
+  gasPrice = '50000000000';
+  console.log({gasPriceFromNode, gasPrice});
+  process.exit();
+
   const {deployer} = await getNamedAccounts();
   const DeployerBatch = await ethers.getContract('DeployerBatch', deployer);
 

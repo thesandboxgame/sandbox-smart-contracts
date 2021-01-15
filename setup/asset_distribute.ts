@@ -11,6 +11,15 @@ let totalGasUsed = BigNumber.from(0);
 const func: DeployFunction = async function () {
   const {ethers, getNamedAccounts, network} = hre;
 
+  const gasPriceFromNode = await ethers.provider.getGasPrice();
+  let gasPrice = gasPriceFromNode;
+  if (hre.network.name === 'mainnet') {
+    gasPrice = '50000000000';
+  }
+  gasPrice = '50000000000';
+  console.log({gasPriceFromNode, gasPrice});
+  process.exit();
+
   const transfer_executed_file = `tmp/transfer_executed_${network.name}.json`;
   const {deployer} = await getNamedAccounts();
   const DeployerBatch = await ethers.getContract('DeployerBatch', deployer);
