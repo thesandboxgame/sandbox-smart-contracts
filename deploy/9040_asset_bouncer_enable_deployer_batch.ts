@@ -2,45 +2,16 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
+  const {deployments} = hre;
   const {execute, read} = deployments;
 
-  const {assetAdmin, assetBouncerAdmin} = await getNamedAccounts();
-
   const DeployerBatch = await deployments.get('DeployerBatch');
-
-  let currentAdmin;
-  try {
-    currentAdmin = await read('Asset', 'getAdmin');
-  } catch (e) {
-    // no admin
-  }
-  if (currentAdmin) {
-    if (currentAdmin.toLowerCase() !== assetAdmin.toLowerCase()) {
-      await execute(
-        'Asset',
-        {from: currentAdmin, log: true},
-        'changeAdmin',
-        assetAdmin
-      );
-    }
-  }
 
   let currentBouncerAdmin;
   try {
     currentBouncerAdmin = await read('Asset', 'getBouncerAdmin');
   } catch (e) {
     // no admin
-  }
-  if (currentBouncerAdmin) {
-    if (currentBouncerAdmin.toLowerCase() !== assetBouncerAdmin.toLowerCase()) {
-      await execute(
-        'Asset',
-        {from: currentAdmin, log: true},
-        'changeBouncerAdmin',
-        assetBouncerAdmin
-      );
-    }
   }
 
   let deployerBatchIsBouncer;
@@ -57,7 +28,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     // Need to execute setBouncer in order for DeployerBatch to be able to mint
     await execute(
       'Asset',
-      {from: assetBouncerAdmin, log: true},
+      {from: currentBouncerAdmin, log: true},
       'setBouncer',
       DeployerBatch.address,
       true
@@ -68,3 +39,5 @@ export default func;
 func.runAtTheEnd = true;
 func.tags = ['Asset', 'Asset_setup'];
 func.dependencies = ['Asset_deploy', 'DeployerBatch_deploy'];
+
+func.skip = async () => false; // TODO remove script once done

@@ -4,11 +4,21 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function () {
   const {ethers, network} = hre;
-  const toContracts: Record<string, string> = {};
 
   const {transfers} = JSON.parse(
     fs.readFileSync('tmp/asset_regenerations.json').toString()
   );
+
+  let toContracts: Record<string, string> = {};
+  try {
+    toContracts = JSON.parse(
+      fs
+        .readFileSync(`tmp/asset_owner_contracts_${network.name}.json`)
+        .toString()
+    );
+  } catch (e) {
+    //
+  }
 
   let index = 0;
   for (const transfer of transfers) {
@@ -19,11 +29,13 @@ const func: DeployFunction = async function () {
       // console.log(`${index}: checking contract. ${to}..`);
       const codeAtTo = await ethers.provider.getCode(to);
       if (codeAtTo !== '0x') {
+        // console.log(`contract at ${to}`);
         recordedContract = 'yes';
       } else {
         recordedContract = 'no';
       }
       toContracts[to] = recordedContract;
+      console.log(index);
     }
 
     const toIsContract = recordedContract === 'yes';
@@ -31,20 +43,13 @@ const func: DeployFunction = async function () {
     if (toIsContract) {
       console.log(`contract at ${to}`);
     }
-    console.log(index);
+
     index++;
-  }
-  const contractsToCheck: Record<string, string> = {};
-  for (const contractAddress of Object.keys(toContracts)) {
-    const isContract = toContracts[contractAddress] === 'yes';
-    if (isContract) {
-      contractsToCheck[contractAddress] = '';
-    }
   }
   fs.ensureDirSync('tmp');
   fs.writeFileSync(
     `tmp/asset_owner_contracts_${network.name}.json`,
-    JSON.stringify(contractsToCheck, null, '  ')
+    JSON.stringify(toContracts, null, '  ')
   );
 };
 export default func;
