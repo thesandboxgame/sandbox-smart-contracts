@@ -61,7 +61,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
 
     address private _bouncerAdmin;
 
-    bool internal _init = false;
+    bool internal _init;
 
     constructor(
         address metaTransactionContract,
@@ -562,7 +562,9 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
                 }
             } else {
                 require(authorized, "Operator not approved");
-                if(values[i] > 0 && from != to) {
+                if (from == to) {
+                    _checkEnoughBalance(from, ids[i], values[i]);
+                } else if(values[i] > 0) {
                     (bin, index) = ids[i].getTokenBinIndex();
                     if (lastBin == 0) {
                         lastBin = bin;
@@ -610,6 +612,11 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
             _packedTokenBalance[from][bin] = balFrom;
             _packedTokenBalance[to][bin] = balTo;
         }
+    }
+
+    function _checkEnoughBalance(address from, uint256 id, uint256 value) internal {
+        (uint256 bin, uint256 index) = id.getTokenBinIndex();
+        require(_packedTokenBalance[from][bin].getValueInBin(index) >= value, "can't substract more than there is");
     }
 
     /// @notice Get the balance of `owner` for the token type `id`.
