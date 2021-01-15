@@ -8,14 +8,18 @@ const func: DeployFunction = async function (
   const {deployments, getNamedAccounts, getChainId, upgrades, ethers} = hre;
   const {deployer} = await getNamedAccounts();
 
-  const Asset = await deployments.get('Asset');
-  const TestAsset = await ethers.getContractFactory('TestAsset', deployer);
-  const upgraded = await upgrades.upgradeProxy(Asset.address, TestAsset);
+  const AssetInstance = await deployments.get('Asset');
+  const Asset = await ethers.getContractFactory('Asset', deployer);
+  const upgraded = await upgrades.upgradeProxy(AssetInstance.address, Asset);
 
   await upgraded.deployed();
 
-  const hello = await upgraded.callStatic.test();
-  console.log({hello});
+  try {
+    const hello = await upgraded.callStatic.test();
+    console.log({hello});
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 export default func;
