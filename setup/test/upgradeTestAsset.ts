@@ -1,12 +1,20 @@
-import hre from 'hardhat';
+import hre, {getUnnamedAccounts} from 'hardhat';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction, DeploymentSubmission} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
-  const {deployments, getNamedAccounts, getChainId, upgrades, ethers} = hre;
+  const {
+    deployments,
+    getNamedAccounts,
+    getUnnamedAccounts,
+    getChainId,
+    upgrades,
+    ethers,
+  } = hre;
   const {deployer} = await getNamedAccounts();
+  const others = await getUnnamedAccounts();
 
   const Asset = await deployments.get('Asset');
   const TestAsset = await ethers.getContractFactory('TestAsset', deployer);
@@ -14,7 +22,8 @@ const func: DeployFunction = async function (
 
   await upgraded.deployed();
 
-  const hello = await upgraded.callStatic.test();
+  const AssetContract = TestAsset.attach(Asset.address).connect(others[0]);
+  const hello = await AssetContract.callStatic.test();
   console.log({hello});
 };
 
