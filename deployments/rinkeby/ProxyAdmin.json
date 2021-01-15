@@ -1,0 +1,34 @@
+{
+    "address": "0x96291306303069189Fe1049e9045eCECB5dFe9a9",
+    "abi": [{
+        "constant": false,
+        "inputs": [
+          {
+            "name": "newOwner",
+            "type": "address"
+          }
+        ],
+        "name": "transferOwnership",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "owner",
+        "outputs": [
+          {
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      }
+    ],
+    "transactionHash": "0x73be9da4593e267bc3e6fc9b6813336428b1eb7a2729eb745329ce402869242a",
+    "TODO": "abi and more"
+}

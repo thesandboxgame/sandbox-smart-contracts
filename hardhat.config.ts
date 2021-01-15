@@ -124,6 +124,12 @@ const config: HardhatUserConfig = {
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
     }, // can add super operators and change admin
 
+    proxyAdminOwner: {
+      default: 2,
+      1: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
+      rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
+    },
+
     landSaleAdmin: 'sandAdmin', // can enable currencies
     estateAdmin: 'sandAdmin', // can add super operators and change admin
     P2PERC721SaleAdmin: 'sandAdmin', // can set fees
