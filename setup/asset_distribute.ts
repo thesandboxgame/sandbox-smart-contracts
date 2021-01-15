@@ -14,11 +14,12 @@ const func: DeployFunction = async function () {
   const gasPriceFromNode = await ethers.provider.getGasPrice();
   let gasPrice = gasPriceFromNode;
   if (hre.network.name === 'mainnet') {
-    gasPrice = '50000000000';
+    gasPrice = BigNumber.from('50000000000'); // TODO
   }
-  gasPrice = '50000000000';
-  console.log({gasPriceFromNode, gasPrice});
-  process.exit();
+  console.log({
+    gasPriceFromNode: gasPriceFromNode.toString(),
+    gasPrice: gasPrice.toString(),
+  });
 
   const transfer_executed_file = `tmp/transfer_executed_${network.name}.json`;
   const {deployer} = await getNamedAccounts();
@@ -200,7 +201,8 @@ const func: DeployFunction = async function () {
       try {
         const tx = await DeployerBatch.singleTargetAtomicBatch(
           Asset.address,
-          datas
+          datas,
+          {gasPrice}
         );
         saveTransfersTransaction(
           batch.map((b) => b.index),
