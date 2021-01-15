@@ -1,6 +1,8 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import fs from 'fs-extra';
 import {DeployFunction, DeploymentSubmission} from 'hardhat-deploy/types';
+import {BigNumber} from '@ethersproject/bignumber';
+import {getAddress} from '@ethersproject/address';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -9,26 +11,31 @@ const func: DeployFunction = async function (
   const {deployer} = await getNamedAccounts();
   const {log} = deployments;
 
+  const chainId = await getChainId();
+
   const sandContract = await deployments.get('Sand');
 
-  const Asset = await (ethers as any).getContractFactory('Asset', deployer); // TODO check types with hardhat-ethers and hardhat-deploy-ethers
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const Asset = await (ethers as any).getContractFactory('Asset', deployer); // TODO check types with hardhat-ethers and hardhat-deploy-ethers, for now use `any`
+
+  // Problem : cannot use deterministic deployment with openzepelin proxies ?
   const asset = await upgrades.deployProxy(
     Asset,
     [sandContract.address, deployer, deployer],
     {initializer: 'init', unsafeAllowCustomTypes: false}
   );
   await asset.deployed();
-
-  // Questions :
-  // Why is .openzeppelin file is called unknow ? What happen if multiple contract use proxy, is there one proxy admin for all ?
-  // how do we get metadata for ProxyAdmin so we can verify it on any network we choose to deploy one
-  // same for Proxy code
-  const networkFile = JSON.parse(
-    fs
-      .readFileSync(`.openzeppelin/unknown-${await getChainId()}.json`)
-      .toString()
+  const implementationStorage = await ethers.provider.getStorageAt(
+    asset.address,
+    '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc'
   );
-  const proxyAdminAddress = networkFile.admin.address;
+  const implementationAddress = getAddress(
+    BigNumber.from(implementationStorage).toHexString()
+  );
+
+  log(
+    `Asset deployed as Proxy at : ${asset.address}, implementation: ${implementationAddress}`
+  );
 
   const AssetArtifact = await deployments.getExtendedArtifact('Asset');
   const assetAsDeployment: DeploymentSubmission = {
@@ -42,15 +49,46 @@ const func: DeployFunction = async function (
   };
   await deployments.save('Asset', assetAsDeployment);
 
-  // TODO perform the same for openzeppelin Proxy and ProxyAdmin
+  const assetImplementation = {
+    address: implementationAddress,
+    ...AssetArtifact,
+    // TODO :transactionHash: transactionHash for Proxy deployment
+    // args ?
+    // linkedData ?
+    // receipt?
+    // libraries ?
+  };
+  await deployments.save('Asset_Implementation', assetImplementation);
 
   // TODO:
   // await deployments.save('Asset_Proxy', assetProxy); // How do we access the Proxy abi/metadata from openzepeelin. if openzeppelin lib do not provide it, we will need to fetch manually from hre artifacts
-  // await deployments.save('Asset_Implementation', assetImplementation); // how do we easily access the implementation address// we could fetch from Proxy via ProxyAdmin call
   // await deployments.save('Asset_ProxyAdmin', assetImplementation); // how do we access the Proxy abi/metadata from openzepeelin. if openzeppelin lib do not provide it, we will need to fetch manually from hre artifacts
 
-  log('Asset Proxy deployed to:', asset.address);
-  log('Proxy Admin Contract deployed to:', proxyAdminAddress);
+  // --------------------------------------------------
+  // Logging Proxy Admin
+  // --------------------------------------------------
+  try {
+    // Problems:
+    // - openzeppelin do not support multiple network name for same network chainId
+    let openzeppelinNetworkName = `unknown-${chainId}`;
+    switch (chainId) {
+      case '4':
+        openzeppelinNetworkName = 'rinkeby';
+        break;
+      case '1':
+        openzeppelinNetworkName = 'mainnet'; // ???? TO CHECK
+        break;
+      // TODO more + move to lib
+    }
+    const openzeppelinFileName = `.openzeppelin/${openzeppelinNetworkName}.json`;
+    const networkFile = JSON.parse(
+      fs.readFileSync(openzeppelinFileName).toString()
+    );
+    const proxyAdminAddress = networkFile.admin.address;
+    log('Proxy Admin Contract deployed to:', proxyAdminAddress);
+  } catch (e) {
+    console.error(e);
+  }
 };
 
 export default func;
