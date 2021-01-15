@@ -15,6 +15,12 @@ const func: DeployFunction = async function (
 
   const sandContract = await deployments.get('Sand');
 
+  const assetContract = await deployments.getOrNull('Asset');
+  if (assetContract) {
+    log(`Asset already deployed at ${assetContract.address}`);
+    return;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const Asset = await (ethers as any).getContractFactory('Asset', deployer); // TODO check types with hardhat-ethers and hardhat-deploy-ethers, for now use `any`
 
