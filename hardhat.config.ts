@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import {HardhatUserConfig} from 'hardhat/types';
 import 'hardhat-deploy';
-import 'hardhat-deploy-ethers';
+import '@nomiclabs/hardhat-ethers'; // aliased to hardhat-deploy-ethers
 import 'hardhat-gas-reporter';
 import '@openzeppelin/hardhat-upgrades';
 import {node_url, accounts} from './utils/network';

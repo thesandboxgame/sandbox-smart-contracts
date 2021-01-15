@@ -10,7 +10,7 @@ import {Contract} from 'ethers';
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
-  const {deployments, getNamedAccounts, getChainId, upgrades} = hre;
+  const {deployments, getNamedAccounts, getChainId, upgrades, ethers} = hre;
   const {deploy, read} = deployments;
   const {deployer} = await getNamedAccounts();
 
@@ -33,14 +33,19 @@ const func: DeployFunction = async function (
   const proxyAdminAddress = networkFile.admin.address;
 
   const assetAsDeployment: DeploymentSubmission = {
-    ...asset,
-    abi: await ethers.ContractFactory.getInterface(asset.interface),
+    address: asset.address,
+    abi: hre.artifacts.readArtifactSync('Asset').abi,
     // @note need to get the metadata
-    // metadata: '',
+    // TODO metadata + other info
   };
 
   // @note this saves the proxy address
   await deployments.save('Asset', assetAsDeployment);
+
+  // TODO:
+  // await deployments.save('Asset_Proxy', assetProxy);
+  // await deployments.save('Asset_Implementation', assetImplementation);
+  // await deployments.save('Asset_ProxyAdmin', assetImplementation);
 
   console.log('Asset Proxy deployed to:', asset.address);
   console.log('Proxy Admin Contract deployed to:', proxyAdminAddress);
