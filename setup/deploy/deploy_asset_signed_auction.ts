@@ -32,34 +32,34 @@ const func: DeployFunction = async function (hre) {
 
   const assetAuction = await ethers.getContract('AssetSignedAuction');
 
-  const isSandSuperOperator = await read(
-    'Sand',
-    'isSuperOperator',
-    assetAuction.address
-  );
-  if (!isSandSuperOperator) {
-    log('setting AssetSignedAuction as super operator for Sand');
-    const currentSandAdmin = await read('Sand', 'getAdmin');
-    await execute(
-      'Sand',
-      {from: currentSandAdmin},
-      'setSuperOperator',
-      assetAuction.address,
-      true
-    );
-  }
-
   const isAssetSuperOperator = await read(
     'Asset',
     'isSuperOperator',
     assetAuction.address
   );
   if (!isAssetSuperOperator) {
-    log('setting AssetSignedAuction as super operator for Asset');
+    console.log('setting AssetSignedAuction as super operator for Asset');
     const currentAssetAdmin = await read('Asset', 'getAdmin');
     await execute(
       'Asset',
       {from: currentAssetAdmin},
+      'setSuperOperator',
+      assetAuction.address,
+      true
+    );
+  }
+
+  const isSandSuperOperator = await read(
+    'Sand',
+    'isSuperOperator',
+    assetAuction.address
+  );
+  if (!isSandSuperOperator) {
+    console.log('setting AssetSignedAuction as super operator for Sand');
+    const currentSandAdmin = await read('Sand', 'getAdmin');
+    await execute(
+      'Sand',
+      {from: currentSandAdmin},
       'setSuperOperator',
       assetAuction.address,
       true
@@ -88,7 +88,7 @@ const func: DeployFunction = async function (hre) {
   }
 
   if (feeToSet) {
-    log("set AssetSignedAuction's fee to 5%");
+    console.log("set AssetSignedAuction's fee to 5%");
     const currentAssetAuctionAdmin = await read(
       'AssetSignedAuction',
       'getAdmin'

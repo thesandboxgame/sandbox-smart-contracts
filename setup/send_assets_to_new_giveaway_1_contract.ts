@@ -24,6 +24,7 @@ const func: DeployFunction = async function () {
   );
 
   const tx = await DeployerBatch.singleTargetAtomicBatch(Asset.address, [data]);
+  console.log({txHash: tx.hash});
   await tx.wait();
 };
 export default func;
