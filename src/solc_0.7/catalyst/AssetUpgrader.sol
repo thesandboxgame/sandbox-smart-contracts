@@ -7,11 +7,14 @@ import "./GemsCatalystsRegistry.sol";
 import "../common/Interfaces/ERC20Extended.sol";
 import "../common/Interfaces/AssetToken.sol";
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
+import "hardhat/console.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetUpgrader is WithMetaTransaction {
     using SafeMath for uint256;
 
+    address public immutable feeRecipient;
+    uint256 public immutable upgradeFee;
     uint256 private constant GEM_UNIT = 1000000000000000000;
     uint256 private constant CATALYST_UNIT = 1000000000000000000;
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
@@ -21,34 +24,32 @@ contract AssetUpgrader is WithMetaTransaction {
     AssetAttributesRegistry internal immutable _registry;
     AssetToken internal immutable _asset;
     GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
-    uint256 internal immutable _upgradeFee;
     uint256 internal immutable _gemAdditionFee;
-    address internal immutable _feeRecipient;
 
     /// @notice AssetUpgrader depends on
     /// @param registry: AssetAttributesRegistry for recording catalyst and gems used
     /// @param sand: ERC20 for fee payment
     /// @param asset: Asset Token Contract (dual ERC1155/ERC721)
     /// @param gemsCatalystsRegistry: that track the canonical catalyst and gems and provide batch burning facility
-    /// @param upgradeFee: the fee in Sand paid for an upgrade (setting or replacing a catalyst)
+    /// @param _upgradeFee: the fee in Sand paid for an upgrade (setting or replacing a catalyst)
     /// @param gemAdditionFee: the fee in Sand paid for adding gems
-    /// @param feeRecipient: address receiving the Sand fee
+    /// @param _feeRecipient: address receiving the Sand fee
     constructor(
         AssetAttributesRegistry registry,
         ERC20Extended sand,
         AssetToken asset,
         GemsCatalystsRegistry gemsCatalystsRegistry,
-        uint256 upgradeFee,
+        uint256 _upgradeFee,
         uint256 gemAdditionFee,
-        address feeRecipient
+        address _feeRecipient
     ) {
         _registry = registry;
         _sand = sand;
         _asset = asset;
         _gemsCatalystsRegistry = gemsCatalystsRegistry;
-        _upgradeFee = upgradeFee;
+        upgradeFee = _upgradeFee;
         _gemAdditionFee = gemAdditionFee;
-        _feeRecipient = feeRecipient;
+        feeRecipient = _feeRecipient;
     }
 
     /// @notice associate a catalyst to a fungible Asset token by extracting it as ERC721 first.
@@ -103,12 +104,12 @@ contract AssetUpgrader is WithMetaTransaction {
     }
 
     function _chargeSand(address from, uint256 sandFee) internal {
-        if (_feeRecipient != address(0) && sandFee != 0) {
-            if (_feeRecipient == address(BURN_ADDRESS)) {
+        if (feeRecipient != address(0) && sandFee != 0) {
+            if (feeRecipient == address(BURN_ADDRESS)) {
                 // special address for burn
                 _sand.burnFor(from, sandFee);
             } else {
-                _sand.transferFrom(from, _feeRecipient, sandFee);
+                _sand.transferFrom(from, feeRecipient, sandFee);
             }
         }
     }
@@ -121,13 +122,11 @@ contract AssetUpgrader is WithMetaTransaction {
         address to
     ) internal {
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will return false
-
         _burnCatalyst(from, catalystId);
         _burnGems(from, gemIds);
-        _chargeSand(from, _upgradeFee);
+        _chargeSand(from, upgradeFee);
 
         _registry.setCatalyst(assetId, catalystId, gemIds);
-
         _transfer(from, to, assetId);
     }
 

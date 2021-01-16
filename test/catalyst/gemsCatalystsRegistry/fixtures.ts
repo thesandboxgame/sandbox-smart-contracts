@@ -4,14 +4,36 @@ import {
   getUnnamedAccounts,
   getNamedAccounts,
 } from 'hardhat';
-import { Contract, BigNumber } from 'ethers';
+import {Contract, BigNumber} from 'ethers';
 
 const exampleGemId = 6;
 const notInOrderGemId = 56;
 const exampleCatalystId = 5;
 
 export const setupGemsAndCatalysts = deployments.createFixture(async () => {
-  await deployments.fixture(); // TODO which fixture do we need ?
+  await deployments.fixture();
+  return _setupGemsAndCatalysts();
+});
+
+export const _setupGemsAndCatalysts = async function (): Promise<{
+  gemsCatalystsRegistry: any;
+  gemsCatalystsRegistrySuperOperator: any;
+  powerGem: any;
+  defenseGem: any;
+  speedGem: any;
+  magicGem: any;
+  luckGem: any;
+  gemExample: any;
+  gemNotInOrder: any;
+  catalystExample: any;
+  commonCatalyst: any;
+  rareCatalyst: any;
+  gemsCatalystsRegistryAdmin: any;
+  catalystMinter: any;
+  gemMinter: any;
+  catalystOwner: any;
+  gemOwner: any;
+}> {
   const gemsCatalystsRegistry: Contract = await ethers.getContract(
     'GemsCatalystsRegistry'
   );
@@ -64,8 +86,10 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   const catalystExample: Contract = await ethers.getContract(
     'Catalyst_Example'
   );
-  const gemsCatalystsUnit = "1000000000000000000";
-  const mintingAmount = BigNumber.from("8").mul(BigNumber.from(gemsCatalystsUnit))
+  const gemsCatalystsUnit = '1000000000000000000';
+  const mintingAmount = BigNumber.from('8').mul(
+    BigNumber.from(gemsCatalystsUnit)
+  );
   await commonCatalyst
     .connect(ethers.provider.getSigner(catalystMinter))
     .mint(catalystOwner, mintingAmount);
@@ -117,4 +141,4 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     catalystOwner,
     gemOwner,
   };
-});
+};
