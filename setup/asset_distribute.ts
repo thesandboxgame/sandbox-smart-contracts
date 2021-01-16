@@ -2,11 +2,16 @@ import {BigNumber} from 'ethers';
 import fs from 'fs-extra';
 import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
+import inquirer from 'inquirer';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const beep = require('node-beep');
 
 const readOnly = false;
 const BATCH_SIZE = 50;
 
 let totalGasUsed = BigNumber.from(0);
+
+let promptCounter = 1;
 
 const func: DeployFunction = async function () {
   const {ethers, getNamedAccounts, network} = hre;
@@ -60,6 +65,7 @@ const func: DeployFunction = async function () {
   try {
     toContracts = JSON.parse(
       fs
+        // .readFileSync(`tmp/asset_owner_contracts_mainnet.json`)
         .readFileSync(`tmp/asset_owner_contracts_${network.name}.json`)
         .toString()
     );
@@ -87,18 +93,18 @@ const func: DeployFunction = async function () {
     }
   }
 
-  for (const tokenId of Object.keys(suppliesRequired)) {
-    const supplyRequired = suppliesRequired[tokenId];
-    const balance = await Asset.callStatic['balanceOf(address,uint256)'](
-      DeployerBatch.address,
-      tokenId
-    );
-    if (balance.toNumber() < supplyRequired) {
-      console.log(
-        `not enough balance for ${tokenId}: ${balance.toNumber()} vs ${supplyRequired} (required)`
-      );
-    }
-  }
+  // for (const tokenId of Object.keys(suppliesRequired)) {
+  //   const supplyRequired = suppliesRequired[tokenId];
+  //   const balance = await Asset.callStatic['balanceOf(address,uint256)'](
+  //     DeployerBatch.address,
+  //     tokenId
+  //   );
+  //   if (balance.toNumber() < supplyRequired) {
+  //     console.log(
+  //       `not enough balance for ${tokenId}: ${balance.toNumber()} vs ${supplyRequired} (required)`
+  //     );
+  //   }
+  // }
 
   const batches: Transfer[][] = [];
 
@@ -222,10 +228,36 @@ const func: DeployFunction = async function () {
         console.error(e);
         console.error(JSON.stringify(batch));
       }
+
+      console.log(batch[batch.length - 1].index);
+      promptCounter--;
+      if (promptCounter <= 0) {
+        beep(3);
+        // const answers = await inquirer.prompt([
+        //   {type: 'confirm', name: 'continue', message: 'continue?'},
+        // ]);
+        // if (answers.continue) {
+        //  promptCounter = 1;
+        //   console.log('continuing...');
+        // } else {
+        //   console.log('stoping...');
+        //   process.exit(0);
+        // }
+        const answers = await inquirer.prompt([
+          {type: 'number', name: 'continue', message: 'continue?', default: 1},
+        ]);
+        if (answers.continue > 0) {
+          promptCounter = answers.continue;
+          console.log('continuing...');
+        } else {
+          console.log('stoping...');
+          process.exit(0);
+        }
+      }
     } else {
+      console.log(batch[batch.length - 1].index);
       console.log(`transfer`, datas.length);
     }
-    console.log(batch[batch.length - 1].index);
   }
 
   const contractsToCheck = [];
