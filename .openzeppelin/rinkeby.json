@@ -2,144 +2,8 @@
   "manifestVersion": "3.1",
   "impls": {
     "06d8a28afd86df2672f68c9115f527f6ecd7dfac50b80d887648ac2569121096": {
-      "address": "0xA584f6c3F8e3C647679333bB527ab109d5e98555",
-      "txHash": "0xd40de7cdf526774458ff1bc974d7a98798ae98c4c5b58f57d600f52a48834981",
-      "layout": {
-        "storage": [
-          {
-            "contract": "Admin",
-            "label": "_admin",
-            "type": "t_address",
-            "src": "src\\solc_0.5\\contracts_common\\BaseWithStorage\\Admin.sol:5"
-          },
-          {
-            "contract": "SuperOperators",
-            "label": "_superOperators",
-            "type": "t_mapping(t_address,t_bool)",
-            "src": "src\\solc_0.5\\contracts_common\\BaseWithStorage\\SuperOperators.sol:7"
-          },
-          {
-            "contract": "ERC1155ERC721",
-            "label": "_numNFTPerAddress",
-            "type": "t_mapping(t_address,t_uint256)",
-            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:48"
-          },
-          {
-            "contract": "ERC1155ERC721",
-            "label": "_owners",
-            "type": "t_mapping(t_uint256,t_uint256)",
-            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:49"
-          },
-          {
-            "contract": "ERC1155ERC721",
-            "label": "_packedTokenBalance",
-            "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))",
-            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:50"
-          },
-          {
-            "contract": "ERC1155ERC721",
-            "label": "_operatorsForAll",
-            "type": "t_mapping(t_address,t_mapping(t_address,t_bool))",
-            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:51"
-          },
-          {
-            "contract": "ERC1155ERC721",
-            "label": "_erc721operators",
-            "type": "t_mapping(t_uint256,t_address)",
-            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:52"
-          },
-          {
-            "contract": "ERC1155ERC721",
-            "label": "_metadataHash",
-            "type": "t_mapping(t_uint256,t_bytes32)",
-            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:53"
-          },
-          {
-            "contract": "ERC1155ERC721",
-            "label": "_rarityPacks",
-            "type": "t_mapping(t_uint256,t_bytes_storage)",
-            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:54"
-          },
-          {
-            "contract": "ERC1155ERC721",
-            "label": "_nextCollectionIndex",
-            "type": "t_mapping(t_uint256,t_uint32)",
-            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:55"
-          },
-          {
-            "contract": "ERC1155ERC721",
-            "label": "_creatorship",
-            "type": "t_mapping(t_address,t_address)",
-            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:57"
-          },
-          {
-            "contract": "ERC1155ERC721",
-            "label": "_bouncers",
-            "type": "t_mapping(t_address,t_bool)",
-            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:59"
-          },
-          {
-            "contract": "ERC1155ERC721",
-            "label": "_metaTransactionContracts",
-            "type": "t_mapping(t_address,t_bool)",
-            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:60"
-          },
-          {
-            "contract": "ERC1155ERC721",
-            "label": "_bouncerAdmin",
-            "type": "t_address",
-            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:62"
-          },
-          {
-            "contract": "ERC1155ERC721",
-            "label": "_init",
-            "type": "t_bool",
-            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:64"
-          }
-        ],
-        "types": {
-          "t_mapping(t_address,t_uint256)": {
-            "label": "mapping(address => uint256)"
-          },
-          "t_mapping(t_uint256,t_uint256)": {
-            "label": "mapping(uint256 => uint256)"
-          },
-          "t_mapping(t_address,t_mapping(t_uint256,t_uint256))": {
-            "label": "mapping(address => mapping(uint256 => uint256))"
-          },
-          "t_mapping(t_address,t_mapping(t_address,t_bool))": {
-            "label": "mapping(address => mapping(address => bool))"
-          },
-          "t_mapping(t_uint256,t_address)": {
-            "label": "mapping(uint256 => address)"
-          },
-          "t_mapping(t_uint256,t_bytes32)": {
-            "label": "mapping(uint256 => bytes32)"
-          },
-          "t_mapping(t_uint256,t_bytes_storage)": {
-            "label": "mapping(uint256 => bytes)"
-          },
-          "t_mapping(t_uint256,t_uint32)": {
-            "label": "mapping(uint256 => uint32)"
-          },
-          "t_mapping(t_address,t_address)": {
-            "label": "mapping(address => address)"
-          },
-          "t_mapping(t_address,t_bool)": {
-            "label": "mapping(address => bool)"
-          },
-          "t_address": {
-            "label": "address"
-          },
-          "t_bool": {
-            "label": "bool"
-          }
-        }
-      }
-    },
-    "4918fe87359649918a41d4875214dfd732f5537e2d558d085bc8c12b835673ad": {
-      "address": "0x8CD16Ce629a2C23C2F92710892395362de0Fc12B",
-      "txHash": "0xf5bf0dc4df8b43587aa9d21f88d61bd1e22be9738e7b6c942cf5ba28236cf506",
+      "address": "0xaae4DE2276641d6CE1DF73c0Eb772dC17a086D32",
+      "txHash": "0xb281f88c33ae92793dccf1efdda56be192edd1bfb7542aa252909bd249d28575",
       "layout": {
         "storage": [
           {
@@ -275,7 +139,7 @@
     }
   },
   "admin": {
-    "address": "0x96291306303069189Fe1049e9045eCECB5dFe9a9",
-    "txHash": "0x73be9da4593e267bc3e6fc9b6813336428b1eb7a2729eb745329ce402869242a"
+    "address": "0x713614fc9AA9c1cD39E20D2a783330a99c44a67D",
+    "txHash": "0xd3612e76231855e4e5824a4d603bf658d0f7b09afe07435eada32eb2bd81ebd5"
   }
 }
