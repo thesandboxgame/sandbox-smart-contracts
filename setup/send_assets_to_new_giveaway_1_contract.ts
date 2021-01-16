@@ -23,7 +23,11 @@ const func: DeployFunction = async function () {
     '0x'
   );
 
-  const tx = await DeployerBatch.singleTargetAtomicBatch(Asset.address, [data]);
+  const tx = await DeployerBatch.singleTargetAtomicBatch(
+    Asset.address,
+    [data],
+    {gasPrice: '56000000000'}
+  ); // TODO gasprice
   console.log({txHash: tx.hash});
   await tx.wait();
 };

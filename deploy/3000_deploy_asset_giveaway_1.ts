@@ -39,7 +39,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy('Asset_Giveaway_1', {
     contract: 'AssetGiveaway',
     from: deployer,
-    linkedData: assets, // TODO reenable claims
+    linkedData: assets,
     log: true,
     skipIfAlreadyDeployed: true,
     args: [
@@ -68,5 +68,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['Asset_Giveaway_1', 'Asset_Giveaway_1_deploy'];
 func.dependencies = ['Asset_deploy'];
-
-func.skip = async () => true; // TODO reenable once new Asset is deployed
