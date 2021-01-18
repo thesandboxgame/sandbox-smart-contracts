@@ -4,7 +4,6 @@ const {
   getNamedAccounts,
   deployments,
 } = require('hardhat');
-const {BigNumber} = require('ethers');
 const {waitFor, recurseTests} = require('../utils');
 const generateERC1155Tests = require('../erc1155');
 

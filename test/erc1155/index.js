@@ -1,11 +1,8 @@
-// TODO: check correct imports
 const {assert, expect} = require('../chai-setup');
 const {waitFor} = require('../utils');
-// const ethers = require('ethers');
 const {ethers} = require('hardhat');
 const {BigNumber, constants} = ethers;
-const {Contract, ContractFactory} = ethers;
-const {Web3Provider} = ethers.providers;
+const {Contract} = ethers;
 const zeroAddress = constants.AddressZero;
 
 // TODO: check correct ABI
@@ -773,7 +770,6 @@ module.exports = (init, extensions) => {
         user1,
         user2,
         tokenIds,
-        contract,
       });
     };
   }
@@ -1032,14 +1028,14 @@ module.exports = (init, extensions) => {
         contractAsMinter.safeTransferFrom(
           minter,
           receiverAddress,
-          tokenIds[1],
-          1,
+          tokenIds[0],
+          3,
           '0x'
         )
       ).to.be.reverted;
     });
 
-    it('cannot transfer an item of supply 1 to a contract that does not return the correct ERC1155_IS_RECEIVER value', async function ({
+    it('cannot transfer an item of supply >1 to a contract that does not return the correct ERC1155_IS_RECEIVER value', async function ({
       tokenIds,
       contractAsMinter,
       minter,
