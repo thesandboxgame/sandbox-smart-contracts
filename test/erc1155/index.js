@@ -1,13 +1,14 @@
 // TODO: check correct imports
 const {assert, expect} = require('../chai-setup');
 const {waitFor} = require('../utils');
-const ethers = require('ethers');
-const {BigNumber, constants} = require('ethers');
+// const ethers = require('ethers');
+const {ethers} = require('hardhat');
+const {BigNumber, constants} = ethers;
 const {Contract, ContractFactory} = ethers;
 const {Web3Provider} = ethers.providers;
 const zeroAddress = constants.AddressZero;
 
-// TODO: check correct ABIs
+// TODO: check correct ABI
 // MintableERC1155Token
 const erc1155ABI = [
   {
@@ -672,252 +673,6 @@ const erc1155ABI = [
   },
 ];
 
-// ERC1155TokenReceiver
-const receiver = {
-  contractName: 'ERC1155TokenReceiver',
-  abi: [
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: 'operator',
-          type: 'address',
-        },
-        {
-          internalType: 'address',
-          name: 'from',
-          type: 'address',
-        },
-        {
-          internalType: 'uint256[]',
-          name: 'ids',
-          type: 'uint256[]',
-        },
-        {
-          internalType: 'uint256[]',
-          name: 'values',
-          type: 'uint256[]',
-        },
-        {
-          internalType: 'bytes',
-          name: 'data',
-          type: 'bytes',
-        },
-      ],
-      name: 'onERC1155BatchReceived',
-      outputs: [
-        {
-          internalType: 'bytes4',
-          name: '',
-          type: 'bytes4',
-        },
-      ],
-      stateMutability: 'nonpayable',
-      type: 'function',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: 'operator',
-          type: 'address',
-        },
-        {
-          internalType: 'address',
-          name: 'from',
-          type: 'address',
-        },
-        {
-          internalType: 'uint256',
-          name: 'id',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'value',
-          type: 'uint256',
-        },
-        {
-          internalType: 'bytes',
-          name: 'data',
-          type: 'bytes',
-        },
-      ],
-      name: 'onERC1155Received',
-      outputs: [
-        {
-          internalType: 'bytes4',
-          name: '',
-          type: 'bytes4',
-        },
-      ],
-      stateMutability: 'nonpayable',
-      type: 'function',
-    },
-  ],
-  bytecode: '0x',
-};
-
-// contract ERC20
-const nonReceiving = {
-  abi: [
-    {
-      inputs: [
-        {
-          internalType: 'contract ERC20',
-          name: '_token',
-          type: 'address',
-        },
-      ],
-      stateMutability: 'nonpayable',
-      type: 'constructor',
-    },
-    {
-      inputs: [],
-      name: 'fail',
-      outputs: [],
-      stateMutability: 'pure',
-      type: 'function',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: '_to',
-          type: 'address',
-        },
-        {
-          internalType: 'uint256',
-          name: '_amount',
-          type: 'uint256',
-        },
-      ],
-      name: 'give',
-      outputs: [
-        {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
-      ],
-      stateMutability: 'nonpayable',
-      type: 'function',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: '_from',
-          type: 'address',
-        },
-        {
-          internalType: 'uint256',
-          name: '_amount',
-          type: 'uint256',
-        },
-      ],
-      name: 'take',
-      outputs: [
-        {
-          internalType: 'bool',
-          name: '',
-          type: 'bool',
-        },
-      ],
-      stateMutability: 'nonpayable',
-      type: 'function',
-    },
-  ],
-  bytecode:
-    '0x608060405234801561001057600080fd5b5060405161039f38038061039f8339818101604052602081101561003357600080fd5b5051600080546001600160a01b039092166001600160a01b031992831617905560018054909116331790556103328061006d6000396000f3fe608060405234801561001057600080fd5b50600436106100415760003560e01c80635218020814610046578063a9cc471814610093578063f00388f71461009d575b600080fd5b61007f6004803603604081101561005c57600080fd5b5073ffffffffffffffffffffffffffffffffffffffff81351690602001356100d6565b604080519115158252519081900360200190f35b61009b61018b565b005b61007f600480360360408110156100b357600080fd5b5073ffffffffffffffffffffffffffffffffffffffff81351690602001356101f4565b60008054604080517f23b872dd00000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff868116600483015230602483015260448201869052915191909216916323b872dd91606480830192602092919082900301818787803b15801561015857600080fd5b505af115801561016c573d6000803e3d6000fd5b505050506040513d602081101561018257600080fd5b50519392505050565b604080517f08c379a0000000000000000000000000000000000000000000000000000000008152602060048083019190915260248201527f6661696c00000000000000000000000000000000000000000000000000000000604482015290519081900360640190fd5b60015460009073ffffffffffffffffffffffffffffffffffffffff16331461027d57604080517f08c379a000000000000000000000000000000000000000000000000000000000815260206004820152601360248201527f6f6e6c79206f6e7765722063616e206769766500000000000000000000000000604482015290519081900360640190fd5b60008054604080517fa9059cbb00000000000000000000000000000000000000000000000000000000815273ffffffffffffffffffffffffffffffffffffffff8781166004830152602482018790529151919092169263a9059cbb92604480820193602093909283900390910190829087803b15801561015857600080fdfea264697066735822122091466859c825b114e195bc77fe6c1387de9f16fcd42863c6af51a91ba41eddbe64736f6c63430006040033',
-};
-
-// ERC1155TokenReceiver
-const mandatoryReceiver = {
-  contractName: 'ERC1155TokenReceiver',
-  abi: [
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: 'operator',
-          type: 'address',
-        },
-        {
-          internalType: 'address',
-          name: 'from',
-          type: 'address',
-        },
-        {
-          internalType: 'uint256[]',
-          name: 'ids',
-          type: 'uint256[]',
-        },
-        {
-          internalType: 'uint256[]',
-          name: 'values',
-          type: 'uint256[]',
-        },
-        {
-          internalType: 'bytes',
-          name: 'data',
-          type: 'bytes',
-        },
-      ],
-      name: 'onERC1155BatchReceived',
-      outputs: [
-        {
-          internalType: 'bytes4',
-          name: '',
-          type: 'bytes4',
-        },
-      ],
-      stateMutability: 'nonpayable',
-      type: 'function',
-    },
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: 'operator',
-          type: 'address',
-        },
-        {
-          internalType: 'address',
-          name: 'from',
-          type: 'address',
-        },
-        {
-          internalType: 'uint256',
-          name: 'id',
-          type: 'uint256',
-        },
-        {
-          internalType: 'uint256',
-          name: 'value',
-          type: 'uint256',
-        },
-        {
-          internalType: 'bytes',
-          name: 'data',
-          type: 'bytes',
-        },
-      ],
-      name: 'onERC1155Received',
-      outputs: [
-        {
-          internalType: 'bytes4',
-          name: '',
-          type: 'bytes4',
-        },
-      ],
-      stateMutability: 'nonpayable',
-      type: 'function',
-    },
-  ],
-  bytecode: '0x',
-};
-
 module.exports = (init, extensions) => {
   const tests = [];
 
@@ -931,33 +686,64 @@ module.exports = (init, extensions) => {
         users,
         tokenIds,
         minter,
+        deployments,
+        receiverAddress,
       } = await init();
 
-      const mandatoryReceiverFactory = new ContractFactory(
-        mandatoryReceiver.abi,
-        mandatoryReceiver.bytecode,
-        ethersProvider.getSigner(deployer)
-      );
-      const receiverFactory = new ContractFactory(
-        receiver.abi,
-        receiver.bytecode,
-        ethersProvider.getSigner(deployer)
-      );
-      const nonReceivingFactory = new ContractFactory(
-        nonReceiving.abi,
-        nonReceiving.bytecode,
-        ethersProvider.getSigner(deployer)
+      // Receiver
+      await deployments.deploy('TestERC1155Receiver', {
+        from: deployer,
+        contract: 'TestERC1155Receiver',
+        args: [
+          receiverAddress, // address _tokenContract,
+          true, // bool _allowTokensReceived,
+          true, // bool _returnCorrectBytes,
+          true, // bool _allowBatchTokensReceived,
+          true, // bool _returnCorrectBytesOnBatch
+        ],
+      });
+
+      // Non-receiver
+      await deployments.deploy('TestERC1155NonReceiver', {
+        from: deployer,
+        contract: 'TestERC1155Receiver',
+        args: [
+          receiverAddress, // address _tokenContract,
+          false, // bool _allowTokensReceived,
+          true, // bool _returnCorrectBytes,
+          false, // bool _allowBatchTokensReceived,
+          true, // bool _returnCorrectBytesOnBatch
+        ],
+      });
+
+      // Receiver - incorrect magic value
+      await deployments.deploy('TestERC1155ReceiverIncorrectValue', {
+        from: deployer,
+        contract: 'TestERC1155Receiver',
+        args: [
+          receiverAddress, // address _tokenContract,
+          true, // bool _allowTokensReceived,
+          false, // bool _returnCorrectBytes,
+          true, // bool _allowBatchTokensReceived,
+          false, // bool _returnCorrectBytesOnBatch
+        ],
+      });
+
+      const receiver = await ethers.getContract(
+        'TestERC1155Receiver',
+        deployer
       );
 
-      function deployMandatoryERC1155TokenReceiver(...args) {
-        return mandatoryReceiverFactory.deploy(...args);
-      }
-      function deployNonReceivingContract(...args) {
-        return nonReceivingFactory.deploy(...args);
-      }
-      function deployERC1155TokenReceiver(...args) {
-        return receiverFactory.deploy(...args);
-      }
+      const nonReceiver = await ethers.getContract(
+        'TestERC1155NonReceiver',
+        deployer
+      );
+
+      const receiverIncorrectValue = await ethers.getContract(
+        'TestERC1155ReceiverIncorrectValue',
+        deployer
+      );
+
       const contract = new Contract(
         contractAddress,
         erc1155ABI,
@@ -973,9 +759,9 @@ module.exports = (init, extensions) => {
       const contractAsUser1 = contract.connect(ethersProvider.getSigner(user1));
       const contractAsUser2 = contract.connect(ethersProvider.getSigner(user2));
       return test({
-        deployMandatoryERC1155TokenReceiver,
-        deployNonReceivingContract,
-        deployERC1155TokenReceiver,
+        receiver,
+        nonReceiver,
+        receiverIncorrectValue,
         contract,
         contractAsMinter,
         mint,
@@ -1000,7 +786,6 @@ module.exports = (init, extensions) => {
     tests.push({title, subTests});
   }
 
-  // add tests
   describe('mint', function (it) {
     it('minting an item results in a TransferSingle event', async function ({
       mint,
@@ -1019,10 +804,6 @@ module.exports = (init, extensions) => {
   });
 
   describe('transfers', function (it) {
-    beforeEach(() => {
-      // TODO: reset tokens for transfers
-    });
-
     it('transferring one instance of an item results in an ERC1155 TransferSingle event', async function ({
       user0,
       tokenIds,
@@ -1175,7 +956,7 @@ module.exports = (init, extensions) => {
     });
 
     it('cannot transfer more item of 1 supply', async function ({
-      // TODO: reword
+      // TODO: reword name of test
       user0,
       tokenIds,
       contractAsMinter,
@@ -1190,13 +971,9 @@ module.exports = (init, extensions) => {
       tokenIds,
       contractAsMinter,
       minter,
-      deployNonReceivingContract,
-      contract,
+      nonReceiver,
     }) {
-      const receiverContract = await deployNonReceivingContract(
-        contract.address
-      );
-      const receiverAddress = receiverContract.address;
+      const receiverAddress = nonReceiver.address;
       await expect(
         contractAsMinter.safeTransferFrom(
           minter,
@@ -1212,13 +989,9 @@ module.exports = (init, extensions) => {
       tokenIds,
       contractAsMinter,
       minter,
-      deployNonReceivingContract,
-      contract,
+      nonReceiver,
     }) {
-      const receiverContract = await deployNonReceivingContract(
-        contract.address
-      );
-      const receiverAddress = receiverContract.address;
+      const receiverAddress = nonReceiver.address;
       await expect(
         contractAsMinter.safeTransferFrom(
           minter,
@@ -1234,13 +1007,9 @@ module.exports = (init, extensions) => {
       tokenIds,
       contractAsMinter,
       minter,
-      deployNonReceivingContract,
-      contract,
+      nonReceiver,
     }) {
-      const receiverContract = await deployNonReceivingContract(
-        contract.address
-      );
-      const receiverAddress = receiverContract.address;
+      const receiverAddress = nonReceiver.address;
       await expect(
         contractAsMinter.safeTransferFrom(
           minter,
@@ -1252,54 +1021,79 @@ module.exports = (init, extensions) => {
       ).to.be.reverted;
     });
 
-    // it('cannot transfer an item of supply 1 to a contract that does not return the correct ERC1155_IS_RECEIVER value', async function ({
-    //   tokenIds,
-    //   contractAsMinter,
-    //   minter,
-    //   deployNonReceivingContract,
-    //   contract,
-    // }) {
-    //   const receiverContract = await deployNonReceivingContract( // TODO: magic value setup
-    //     contract.address
-    //   );
-    //   const receiverAddress = receiverContract.address;
-    //   await expect(
-    //     contractAsMinter.safeTransferFrom(
-    //       minter,
-    //       receiverAddress,
-    //       tokenIds[1],
-    //       1,
-    //       '0x'
-    //     )
-    //   ).to.be.reverted;
-    // });
-
-    it('can transfer to a contract that does accept ERC1155', async function ({
+    it('cannot transfer an item of supply 1 to a contract that does not return the correct ERC1155_IS_RECEIVER value', async function ({
       tokenIds,
       contractAsMinter,
       minter,
-      deployERC1155TokenReceiver,
-      contract,
+      receiverIncorrectValue,
     }) {
-      const receiverContract = await deployERC1155TokenReceiver(
-        contract.address // TODO: review args
-      ); // TODO: review diff between Mandatory Receiver and Receiver
-      const receiverAddress = receiverContract.address;
-      await contractAsMinter.safeTransferFrom(
-        minter,
-        receiverAddress,
-        tokenIds[0],
-        3,
-        '0x'
-      );
-      // TODO: balance check
+      const receiverAddress = receiverIncorrectValue.address;
+      await expect(
+        contractAsMinter.safeTransferFrom(
+          minter,
+          receiverAddress,
+          tokenIds[1],
+          1,
+          '0x'
+        )
+      ).to.be.reverted;
+    });
+
+    it('cannot transfer an item of supply 1 to a contract that does not return the correct ERC1155_IS_RECEIVER value', async function ({
+      tokenIds,
+      contractAsMinter,
+      minter,
+      receiverIncorrectValue,
+    }) {
+      const receiverAddress = receiverIncorrectValue.address;
+      await expect(
+        contractAsMinter.safeTransferFrom(
+          minter,
+          receiverAddress,
+          tokenIds[1],
+          1,
+          '0x'
+        )
+      ).to.be.reverted;
     });
   });
 
-  // batch transfers
-  // ordering
-  // approvalForAll
-  // supportsInterface
+  describe('batch transfers', function (it) {
+    it('transferring an item with 1 supply results in an ERC1155 BatchTransfer event', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      const receipt = await waitFor(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          user0,
+          [tokenIds[1]],
+          [1],
+          '0x'
+        )
+      );
+      const eventsMatching = receipt.events.filter(
+        (v) => v.event === 'TransferBatch'
+      );
+      assert.equal(eventsMatching.length, 1);
+      const transferEvent = eventsMatching[0];
+      assert.equal(transferEvent.args[1], minter);
+      assert.equal(transferEvent.args[2], user0);
+      assert.ok(transferEvent.args[3][0].eq(tokenIds[1]));
+      assert.ok(transferEvent.args[4][0].eq(1));
+    });
+
+    // describe('ordering', function (it) {
+    // });
+
+    // describe('approvalForAll', function (it) {
+    // });
+
+    // describe('supportsInterface', function (it) {
+    // });
+  });
 
   return tests;
 };

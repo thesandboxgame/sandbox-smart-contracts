@@ -14,13 +14,15 @@ function testAsset() {
       const {deployer, assetBouncerAdmin} = await getNamedAccounts();
       const otherAccounts = await getUnnamedAccounts();
       const minter = otherAccounts[0];
-      const users = otherAccounts.slice(1);
+      const receiverAddress = otherAccounts[1];
+      const users = otherAccounts.slice(2);
       await deployments.fixture();
 
       const assetContractAsBouncerAdmin = await ethers.getContract(
         'Asset',
         assetBouncerAdmin
       );
+
       await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
 
       const Asset = await ethers.getContract('Asset', minter);
@@ -77,6 +79,8 @@ function testAsset() {
         deployer,
         tokenIds: assetIds,
         minter,
+        deployments,
+        receiverAddress,
       };
     },
     {
