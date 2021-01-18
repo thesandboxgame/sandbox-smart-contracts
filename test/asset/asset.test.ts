@@ -40,4 +40,37 @@ describe('Asset.sol', function () {
     );
     expect(balance).to.be.equal(20);
   });
+
+  it('user batch sending in series whose total is more than its balance', async function () {
+    const {Asset, users, mintAsset} = await setupAsset();
+    const tokenId = await mintAsset(users[0].address, 20);
+    await waitFor(
+      users[0].Asset.safeBatchTransferFrom(
+        users[0].address,
+        users[0].address,
+        [tokenId, tokenId, tokenId],
+        [10, 20, 20],
+        '0x'
+      )
+    );
+    const balance = await Asset['balanceOf(address,uint256)'](
+      users[0].address,
+      tokenId
+    );
+    expect(balance).to.be.equal(20);
+  });
+
+  it('user batch sending more asset that it owns should fails', async function () {
+    const {users, mintAsset} = await setupAsset();
+    const tokenId = await mintAsset(users[0].address, 20);
+    await expect(
+      users[0].Asset.safeBatchTransferFrom(
+        users[0].address,
+        users[0].address,
+        [tokenId],
+        [30],
+        '0x'
+      )
+    ).to.be.revertedWith(`can't substract more than there is`);
+  });
 });

@@ -1,4 +1,5 @@
 import {Event} from 'ethers';
+// import {BigNumber} from '@ethersproject/bignumber';
 import fs from 'fs-extra';
 import {ethers} from 'hardhat';
 
@@ -16,16 +17,17 @@ async function queryEvents(
   const successes: Record<number, boolean> = {};
   const failures: Record<number, boolean> = {};
   const events = [];
-  let blockRange = 200000;
-  let midBlock = Math.min(startBlock + blockRange, endBlock);
-  while (startBlock <= endBlock) {
+  let blockRange = 100000;
+  let fromBlock = startBlock;
+  let toBlock = Math.min(fromBlock + blockRange, endBlock);
+  while (fromBlock <= endBlock) {
     try {
-      const midEvents = await filterFunc(startBlock, midBlock);
+      const moreEvents = await filterFunc(fromBlock, toBlock);
 
-      console.log({startBlock, midBlock, numEvents: midEvents.length});
+      console.log({fromBlock, toBlock, numEvents: moreEvents.length});
       successes[blockRange] = true;
       consecutiveSuccess++;
-      if (consecutiveSuccess > 3) {
+      if (consecutiveSuccess > 6) {
         const newBlockRange = blockRange * 2;
         if (!failures[newBlockRange] || successes[newBlockRange]) {
           blockRange = newBlockRange;
@@ -33,16 +35,16 @@ async function queryEvents(
         }
       }
 
-      startBlock = midBlock + 1;
-      midBlock = Math.min(startBlock + blockRange, endBlock);
-      events.push(...midEvents);
+      fromBlock = toBlock + 1;
+      toBlock = Math.min(fromBlock + blockRange, endBlock);
+      events.push(...moreEvents);
     } catch (e) {
       failures[blockRange] = true;
       consecutiveSuccess = 0;
       blockRange /= 2;
-      midBlock = Math.min(startBlock + blockRange, endBlock);
+      toBlock = Math.min(fromBlock + blockRange, endBlock);
 
-      console.log({startBlock, midBlock, numEvents: 'ERROR'});
+      console.log({fromBlock, toBlock, numEvents: 'ERROR'});
       console.log({blockRange});
       console.error(e);
     }
@@ -51,7 +53,7 @@ async function queryEvents(
 }
 
 (async () => {
-  const Asset = await ethers.getContract('Asset');
+  const Asset = await ethers.getContract('OldAsset');
   const singleTransferEvents = await queryEvents(
     Asset.queryFilter.bind(Asset, Asset.filters.TransferSingle()),
     startBlock
@@ -65,6 +67,18 @@ async function queryEvents(
   );
 
   console.log('BATCH TRANSFERS', singleTransferEvents.length);
+
+  // for (const transfer of singleTransferEvents) {
+  //   const t = transfer as any;
+  //   t.args[3] = t.args[3].toString();
+  //   t.args[4] = t.args[4].toString();
+  // }
+
+  // for (const transfer of batchTransferEvents) {
+  //   const t = transfer as any;
+  //   t.args[3] = t.args[3].map((v: BigNumber) => v.toString());
+  //   t.args[4] = t.args[4].map((v: BigNumber) => v.toString());
+  // }
 
   // write to disk
   fs.ensureDirSync('tmp');

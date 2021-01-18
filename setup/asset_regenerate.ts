@@ -1,4 +1,4 @@
-import {BigNumber} from 'ethers';
+import {BigNumber, Event} from 'ethers';
 import fs from 'fs-extra';
 import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
@@ -31,6 +31,16 @@ function generateRaritiesPack(raritiesArr: number[]) {
 
 const func: DeployFunction = async function () {
   const {ethers, getNamedAccounts} = hre;
+
+  const gasPriceFromNode = await ethers.provider.getGasPrice();
+  let gasPrice = gasPriceFromNode;
+  if (hre.network.name === 'mainnet') {
+    gasPrice = BigNumber.from('56000000000'); // TODO
+  }
+  console.log({
+    gasPriceFromNode: gasPriceFromNode.toString(),
+    gasPrice: gasPrice.toString(),
+  });
 
   const {deployer} = await getNamedAccounts();
   const DeployerBatch = await ethers.getContract('DeployerBatch', deployer);
@@ -114,7 +124,8 @@ const func: DeployFunction = async function () {
     if (!readOnly) {
       const tx = await DeployerBatch.singleTargetAtomicBatch(
         Asset.address,
-        datas
+        datas,
+        {gasPrice}
       );
       console.log(`batchMint`, {
         tx: tx.hash,
@@ -125,7 +136,7 @@ const func: DeployFunction = async function () {
         receipt.blockNumber
       );
       console.log({
-        TransferBatchEvents: TransferBatchEvents.map((e) => {
+        TransferBatchEvents: TransferBatchEvents.map((e: Event) => {
           return JSON.stringify({
             to: e.args?.to,
             from: e.args?.from,
@@ -189,7 +200,8 @@ const func: DeployFunction = async function () {
     if (!readOnly) {
       const tx = await DeployerBatch.singleTargetAtomicBatch(
         Asset.address,
-        datas
+        datas,
+        {gasPrice}
       );
       console.log(`extracting`, {tx: tx.hash});
       const receipt = await tx.wait();

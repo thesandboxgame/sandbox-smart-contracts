@@ -1,0 +1,145 @@
+{
+  "manifestVersion": "3.1",
+  "impls": {
+    "06d8a28afd86df2672f68c9115f527f6ecd7dfac50b80d887648ac2569121096": {
+      "address": "0xaae4DE2276641d6CE1DF73c0Eb772dC17a086D32",
+      "txHash": "0xb281f88c33ae92793dccf1efdda56be192edd1bfb7542aa252909bd249d28575",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Admin",
+            "label": "_admin",
+            "type": "t_address",
+            "src": "src\\solc_0.5\\contracts_common\\BaseWithStorage\\Admin.sol:5"
+          },
+          {
+            "contract": "SuperOperators",
+            "label": "_superOperators",
+            "type": "t_mapping(t_address,t_bool)",
+            "src": "src\\solc_0.5\\contracts_common\\BaseWithStorage\\SuperOperators.sol:7"
+          },
+          {
+            "contract": "ERC1155ERC721",
+            "label": "_numNFTPerAddress",
+            "type": "t_mapping(t_address,t_uint256)",
+            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:48"
+          },
+          {
+            "contract": "ERC1155ERC721",
+            "label": "_owners",
+            "type": "t_mapping(t_uint256,t_uint256)",
+            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:49"
+          },
+          {
+            "contract": "ERC1155ERC721",
+            "label": "_packedTokenBalance",
+            "type": "t_mapping(t_address,t_mapping(t_uint256,t_uint256))",
+            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:50"
+          },
+          {
+            "contract": "ERC1155ERC721",
+            "label": "_operatorsForAll",
+            "type": "t_mapping(t_address,t_mapping(t_address,t_bool))",
+            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:51"
+          },
+          {
+            "contract": "ERC1155ERC721",
+            "label": "_erc721operators",
+            "type": "t_mapping(t_uint256,t_address)",
+            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:52"
+          },
+          {
+            "contract": "ERC1155ERC721",
+            "label": "_metadataHash",
+            "type": "t_mapping(t_uint256,t_bytes32)",
+            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:53"
+          },
+          {
+            "contract": "ERC1155ERC721",
+            "label": "_rarityPacks",
+            "type": "t_mapping(t_uint256,t_bytes_storage)",
+            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:54"
+          },
+          {
+            "contract": "ERC1155ERC721",
+            "label": "_nextCollectionIndex",
+            "type": "t_mapping(t_uint256,t_uint32)",
+            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:55"
+          },
+          {
+            "contract": "ERC1155ERC721",
+            "label": "_creatorship",
+            "type": "t_mapping(t_address,t_address)",
+            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:57"
+          },
+          {
+            "contract": "ERC1155ERC721",
+            "label": "_bouncers",
+            "type": "t_mapping(t_address,t_bool)",
+            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:59"
+          },
+          {
+            "contract": "ERC1155ERC721",
+            "label": "_metaTransactionContracts",
+            "type": "t_mapping(t_address,t_bool)",
+            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:60"
+          },
+          {
+            "contract": "ERC1155ERC721",
+            "label": "_bouncerAdmin",
+            "type": "t_address",
+            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:62"
+          },
+          {
+            "contract": "ERC1155ERC721",
+            "label": "_init",
+            "type": "t_bool",
+            "src": "src\\solc_0.5\\Asset\\ERC1155ERC721.sol:64"
+          }
+        ],
+        "types": {
+          "t_mapping(t_address,t_uint256)": {
+            "label": "mapping(address => uint256)"
+          },
+          "t_mapping(t_uint256,t_uint256)": {
+            "label": "mapping(uint256 => uint256)"
+          },
+          "t_mapping(t_address,t_mapping(t_uint256,t_uint256))": {
+            "label": "mapping(address => mapping(uint256 => uint256))"
+          },
+          "t_mapping(t_address,t_mapping(t_address,t_bool))": {
+            "label": "mapping(address => mapping(address => bool))"
+          },
+          "t_mapping(t_uint256,t_address)": {
+            "label": "mapping(uint256 => address)"
+          },
+          "t_mapping(t_uint256,t_bytes32)": {
+            "label": "mapping(uint256 => bytes32)"
+          },
+          "t_mapping(t_uint256,t_bytes_storage)": {
+            "label": "mapping(uint256 => bytes)"
+          },
+          "t_mapping(t_uint256,t_uint32)": {
+            "label": "mapping(uint256 => uint32)"
+          },
+          "t_mapping(t_address,t_address)": {
+            "label": "mapping(address => address)"
+          },
+          "t_mapping(t_address,t_bool)": {
+            "label": "mapping(address => bool)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    }
+  },
+  "admin": {
+    "address": "0x713614fc9AA9c1cD39E20D2a783330a99c44a67D",
+    "txHash": "0xd3612e76231855e4e5824a4d603bf658d0f7b09afe07435eada32eb2bd81ebd5"
+  }
+}

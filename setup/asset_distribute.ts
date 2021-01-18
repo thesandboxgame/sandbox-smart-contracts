@@ -2,14 +2,29 @@ import {BigNumber} from 'ethers';
 import fs from 'fs-extra';
 import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
+import inquirer from 'inquirer';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const beep = require('node-beep');
 
 const readOnly = false;
 const BATCH_SIZE = 50;
 
 let totalGasUsed = BigNumber.from(0);
 
+let promptCounter = 1;
+
 const func: DeployFunction = async function () {
   const {ethers, getNamedAccounts, network} = hre;
+
+  const gasPriceFromNode = await ethers.provider.getGasPrice();
+  let gasPrice = gasPriceFromNode;
+  if (hre.network.name === 'mainnet') {
+    gasPrice = BigNumber.from('56000000000'); // TODO
+  }
+  console.log({
+    gasPriceFromNode: gasPriceFromNode.toString(),
+    gasPrice: gasPrice.toString(),
+  });
 
   const transfer_executed_file = `tmp/transfer_executed_${network.name}.json`;
   const {deployer} = await getNamedAccounts();
@@ -17,7 +32,7 @@ const func: DeployFunction = async function () {
 
   const Asset = await ethers.getContract('Asset');
 
-  const toContracts: Record<string, string> = {};
+  let toContracts: Record<string, string> = {};
 
   const {transfers} = JSON.parse(
     fs.readFileSync('tmp/asset_regenerations.json').toString()
@@ -47,17 +62,13 @@ const func: DeployFunction = async function () {
   }
 
   // fetch contract address from file if any
-  let contracts_checked = false;
   try {
-    const contractsDict = JSON.parse(
+    toContracts = JSON.parse(
       fs
+        // .readFileSync(`tmp/asset_owner_contracts_mainnet.json`)
         .readFileSync(`tmp/asset_owner_contracts_${network.name}.json`)
         .toString()
     );
-    for (const contractAddress of Object.keys(contractsDict)) {
-      toContracts[contractAddress] = 'yes';
-    }
-    contracts_checked = true;
   } catch (e) {
     //
   }
@@ -82,18 +93,18 @@ const func: DeployFunction = async function () {
     }
   }
 
-  for (const tokenId of Object.keys(suppliesRequired)) {
-    const supplyRequired = suppliesRequired[tokenId];
-    const balance = await Asset.callStatic['balanceOf(address,uint256)'](
-      DeployerBatch.address,
-      tokenId
-    );
-    if (balance.toNumber() < supplyRequired) {
-      console.log(
-        `not enough balance for ${tokenId}: ${balance.toNumber()} vs ${supplyRequired} (required)`
-      );
-    }
-  }
+  // for (const tokenId of Object.keys(suppliesRequired)) {
+  //   const supplyRequired = suppliesRequired[tokenId];
+  //   const balance = await Asset.callStatic['balanceOf(address,uint256)'](
+  //     DeployerBatch.address,
+  //     tokenId
+  //   );
+  //   if (balance.toNumber() < supplyRequired) {
+  //     console.log(
+  //       `not enough balance for ${tokenId}: ${balance.toNumber()} vs ${supplyRequired} (required)`
+  //     );
+  //   }
+  // }
 
   const batches: Transfer[][] = [];
 
@@ -108,7 +119,7 @@ const func: DeployFunction = async function () {
     const performed = transferExecuted[index];
 
     let recordedContract = toContracts[to];
-    if (!recordedContract && !contracts_checked) {
+    if (!recordedContract) {
       // console.log(`${index}: checking contract. ${to}..`);
       const codeAtTo = await ethers.provider.getCode(to);
       if (codeAtTo !== '0x') {
@@ -117,13 +128,11 @@ const func: DeployFunction = async function () {
         recordedContract = 'no';
       }
       toContracts[to] = recordedContract;
+
+      console.log(index);
     }
 
     const toIsContract = recordedContract === 'yes';
-
-    if (!contracts_checked) {
-      console.log(index);
-    }
 
     if (toIsContract) {
       console.log(`contract at ${to}`);
@@ -136,7 +145,7 @@ const func: DeployFunction = async function () {
       });
     } else {
       console.log(
-        `transfer in batch (${performed.hash})  nonce :${performed.nonce}`
+        `already being transfered in batch (${performed.hash})  nonce :${performed.nonce}`
       );
     }
     index++;
@@ -198,7 +207,8 @@ const func: DeployFunction = async function () {
       try {
         const tx = await DeployerBatch.singleTargetAtomicBatch(
           Asset.address,
-          datas
+          datas,
+          {gasPrice}
         );
         saveTransfersTransaction(
           batch.map((b) => b.index),
@@ -218,10 +228,36 @@ const func: DeployFunction = async function () {
         console.error(e);
         console.error(JSON.stringify(batch));
       }
+
+      console.log(batch[batch.length - 1].index);
+      promptCounter--;
+      if (promptCounter <= 0) {
+        beep(3);
+        // const answers = await inquirer.prompt([
+        //   {type: 'confirm', name: 'continue', message: 'continue?'},
+        // ]);
+        // if (answers.continue) {
+        //  promptCounter = 1;
+        //   console.log('continuing...');
+        // } else {
+        //   console.log('stoping...');
+        //   process.exit(0);
+        // }
+        const answers = await inquirer.prompt([
+          {type: 'number', name: 'continue', message: 'continue?', default: 1},
+        ]);
+        if (answers.continue > 0) {
+          promptCounter = answers.continue;
+          console.log('continuing...');
+        } else {
+          console.log('stoping...');
+          process.exit(0);
+        }
+      }
     } else {
+      console.log(batch[batch.length - 1].index);
       console.log(`transfer`, datas.length);
     }
-    console.log(batch[batch.length - 1].index);
   }
 
   const contractsToCheck = [];

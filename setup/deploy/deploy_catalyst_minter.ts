@@ -12,12 +12,12 @@ const func: DeployFunction = async function (hre) {
   const registry = await deployments.get('CatalystRegistry');
   const sand = await deployments.get('Sand');
   const asset = await deployments.get('Asset');
-  const gem = await deployments.get('Gems');
-  const catalyst = await deployments.get('Catalysts');
+  const gem = await deployments.get('Gem');
+  const catalyst = await deployments.get('Catalyst');
 
   const bakedMintData = [];
   for (let i = 0; i < 4; i++) {
-    const mintData = await read('Catalysts', 'getMintData', i);
+    const mintData = await read('Catalyst', 'getMintData', i);
     const maxGems = BigNumber.from(mintData.maxGems).mul(
       BigNumber.from(2).pow(240)
     );
@@ -58,21 +58,9 @@ const func: DeployFunction = async function (hre) {
     ],
   });
 
-  const currentMinter = await read('CatalystRegistry', 'getMinter');
-  if (currentMinter.toLowerCase() != catalystMinter.address.toLowerCase()) {
-    log('setting CatalystMinter as CatalystRegistry minter');
-    const currentRegistryAdmin = await read('CatalystRegistry', 'getAdmin');
-    await execute(
-      'CatalystRegistry',
-      {from: currentRegistryAdmin},
-      'setMinter',
-      catalystMinter.address
-    );
-  }
-
   const isBouncer = await read('Asset', 'isBouncer', catalystMinter.address);
   if (!isBouncer) {
-    log('setting CatalystMinter as Asset bouncer');
+    console.log('setting CatalystMinter as Asset bouncer');
     const currentBouncerAdmin = await read('Asset', 'getBouncerAdmin');
     await execute(
       'Asset',
@@ -83,6 +71,18 @@ const func: DeployFunction = async function (hre) {
     );
   }
 
+  const currentMinter = await read('CatalystRegistry', 'getMinter');
+  if (currentMinter.toLowerCase() != catalystMinter.address.toLowerCase()) {
+    console.log('setting CatalystMinter as CatalystRegistry minter');
+    const currentRegistryAdmin = await read('CatalystRegistry', 'getAdmin');
+    await execute(
+      'CatalystRegistry',
+      {from: currentRegistryAdmin},
+      'setMinter',
+      catalystMinter.address
+    );
+  }
+
   async function setSuperOperatorFor(contractName: string, address: string) {
     const isSuperOperator = await read(
       contractName,
@@ -90,7 +90,9 @@ const func: DeployFunction = async function (hre) {
       address
     );
     if (!isSuperOperator) {
-      log('setting CatalystMinter as super operator for ' + contractName);
+      console.log(
+        'setting CatalystMinter as super operator for ' + contractName
+      );
       const currentSandAdmin = await read(contractName, 'getAdmin');
       await execute(
         contractName,
@@ -103,9 +105,9 @@ const func: DeployFunction = async function (hre) {
   }
 
   await setSuperOperatorFor('Sand', catalystMinter.address);
-  await setSuperOperatorFor('Gems', catalystMinter.address);
+  await setSuperOperatorFor('Gem', catalystMinter.address);
   await setSuperOperatorFor('Asset', catalystMinter.address);
-  await setSuperOperatorFor(`Catalysts`, catalystMinter.address);
+  await setSuperOperatorFor(`Catalyst`, catalystMinter.address);
 };
 export default func;
 if (require.main === module) {

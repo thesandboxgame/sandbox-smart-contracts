@@ -1,8 +1,9 @@
 import 'dotenv/config';
 import {HardhatUserConfig} from 'hardhat/types';
 import 'hardhat-deploy';
-import 'hardhat-deploy-ethers';
+import '@nomiclabs/hardhat-ethers'; // aliased to hardhat-deploy-ethers
 import 'hardhat-gas-reporter';
+import '@openzeppelin/hardhat-upgrades';
 import {node_url, accounts} from './utils/network';
 
 const config: HardhatUserConfig = {
@@ -122,6 +123,12 @@ const config: HardhatUserConfig = {
       1: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
     }, // can add super operators and change admin
+
+    proxyAdminOwner: {
+      default: 2,
+      1: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
+      rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
+    },
 
     landSaleAdmin: 'sandAdmin', // can enable currencies
     estateAdmin: 'sandAdmin', // can add super operators and change admin
