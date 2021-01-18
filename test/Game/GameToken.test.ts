@@ -384,8 +384,6 @@ describe('GameToken', function () {
       let initialGameTokenBalance: number;
       let intermediateGameTokenBalance: number;
       let intermediateGameTokenBalance2: number;
-      let intermediateGameTokenBalance3: number;
-      let intermediateGameTokenBalance4: number;
 
       before(async function () {
         ({
@@ -717,9 +715,6 @@ describe('GameToken', function () {
         const ownerBalanceAfter = await assetContract[
           'balanceOf(address,uint256)'
         ](GameOwner.address, singleAssetId);
-        intermediateGameTokenBalance3 = await gameToken.balanceOf(
-          GameOwner.address
-        );
 
         expect(contractBalanceAfter).to.be.equal(contractBalanceBefore - 1);
         expect(ownerBalanceAfter).to.be.equal(ownerBalanceBefore + 1);
@@ -784,9 +779,6 @@ describe('GameToken', function () {
 
         const eventAssets = updateEvent.args[2].assetIdsToRemove;
         const values = updateEvent.args[2].assetAmountsToRemove;
-        intermediateGameTokenBalance4 = await gameToken.balanceOf(
-          GameOwner.address
-        );
 
         const contractBalanceAfter = await assetContract[
           'balanceOf(address,uint256)'
