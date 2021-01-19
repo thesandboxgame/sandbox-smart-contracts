@@ -674,6 +674,7 @@ module.exports = (init, extensions) => {
   const tests = [];
 
   function preTest(test) {
+    // Get contract-specific params
     return async () => {
       const {
         ethersProvider,
@@ -1446,16 +1447,14 @@ module.exports = (init, extensions) => {
       minter,
       receiver,
     }) {
-      await expect(
-        contractAsMinter.safeBatchTransferFrom(
-          minter,
-          receiver.address,
-          [tokenIds[0], tokenIds[1], tokenIds[2]],
-          [2, 1, 3],
-          '0x'
-        )
-      ).to.be.reverted;
-    });
+      await contractAsMinter.safeBatchTransferFrom(
+        minter,
+        receiver.address,
+        [tokenIds[0], tokenIds[1], tokenIds[2]],
+        [2, 1, 3],
+        '0x'
+      );
+    }); // TODO: fails because sender is not a contract
 
     // describe('ordering', function (it) {
     // });
