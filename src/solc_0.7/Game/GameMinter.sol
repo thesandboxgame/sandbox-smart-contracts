@@ -3,7 +3,6 @@ pragma solidity 0.7.5;
 pragma experimental ABIEncoderV2;
 
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
-// import "../common/Interfaces/IGameToken.sol";
 import "./GameToken.sol";
 import "../common/Interfaces/IGameMinter.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
@@ -50,7 +49,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
     function createGame(
         address from,
         address to,
-        IGameToken.Update calldata creation,
+        GameToken.Update calldata creation,
         address editor,
         uint64 subId
     ) external override returns (uint256 gameId) {
@@ -68,7 +67,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
     function updateGame(
         address from,
         uint256 gameId,
-        IGameToken.Update memory update
+        GameToken.Update memory update
     ) external override returns (uint256 newId) {
         _checkAuthorization(from, gameId);
         _chargeSand(from, _gameUpdateFee);
