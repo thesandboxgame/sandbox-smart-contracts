@@ -40,8 +40,8 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
     }
 
     /// @notice Function to create a new GAME token
-    /// @param from The address of the one creating the game, included in the gameId
-    /// @param to The address who will be assigned ownership of this game
+    /// @param from The address of the one creating the game (included in the gameId).
+    /// @param to The address who will be assigned ownership of this game.
     /// @param creation The struct containing ids & ammounts of assets to add to this game,
     /// along with the uri to set.
     /// @param editor The address to allow to edit (can also be set later).
@@ -61,7 +61,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
 
     /// @notice Update an existing GAME token.This actually burns old token
     /// and mints new token with same basId & incremented version.
-    /// @param from The one updating the GAME token.
+    /// @param from The address whose GAME token is to be updated.
     /// @param gameId The current id of the GAME token.
     /// @param update The values to use for the update.
     /// @return newId The new gameId.
@@ -75,12 +75,18 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         return _gameToken.updateGame(from, gameId, update);
     }
 
+    /// @dev Charge a fee in Sand if conditions are met.
+    /// @param from The address responsible for paying the fee.
+    /// @param sandFee The fee that applies to the current operation (create || update).
     function _chargeSand(address from, uint256 sandFee) internal {
         if (_feeBeneficiary != address(0) && sandFee != 0) {
             _sand.transferFrom(from, _feeBeneficiary, sandFee);
         }
     }
 
+    /// @dev Ensures that only authorized callers can update functionality.
+    /// @param from The from address passed to the update function
+    /// @param id The tokenId to update.
     function _checkAuthorization(address from, uint256 id) internal view {
         address gameOwner = _gameToken.ownerOf(id);
         require(
