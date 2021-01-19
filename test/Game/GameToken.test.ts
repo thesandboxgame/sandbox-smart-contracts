@@ -7,7 +7,6 @@ import {waitFor, expectEventWithArgs, findEvents} from '../utils';
 import {setupTest, User} from './fixtures';
 import {supplyAssets} from './assets';
 import {toUtf8Bytes} from 'ethers/lib/utils';
-import {stringifyDocument} from '@urql/core/dist/types/utils';
 
 let id: BigNumber;
 
@@ -1394,6 +1393,13 @@ describe('GameToken', function () {
       expect(utils.getAddress(creator)).to.be.equal(users[0].address);
       expect(subId).to.be.equal('00000002eccadc6');
       expect(version).to.be.equal('00000001');
+    });
+
+    it('should consider future versions of gameIds as invalid', async function () {
+      const futureIdVersion = gameId.add(42);
+      await expect(gameToken.ownerOf(futureIdVersion)).to.be.revertedWith(
+        'NONEXISTANT_TOKEN'
+      );
     });
 
     it('should update version when changes are made', async function () {
