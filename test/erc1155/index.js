@@ -1028,8 +1028,8 @@ module.exports = (init, extensions) => {
         contractAsMinter.safeTransferFrom(
           minter,
           receiverAddress,
-          tokenIds[0],
-          3,
+          tokenIds[1],
+          1,
           '0x'
         )
       ).to.be.reverted;
@@ -1046,12 +1046,13 @@ module.exports = (init, extensions) => {
         contractAsMinter.safeTransferFrom(
           minter,
           receiverAddress,
-          tokenIds[1],
-          1,
+          tokenIds[0],
+          3,
           '0x'
         )
       ).to.be.reverted;
     });
+    // TODO: can transfer to receiver contract (with balance checks)
   });
 
   describe('batch transfers', function (it) {
@@ -1079,6 +1080,381 @@ module.exports = (init, extensions) => {
       assert.equal(transferEvent.args[2], user0);
       assert.ok(transferEvent.args[3][0].eq(tokenIds[1]));
       assert.ok(transferEvent.args[4][0].eq(1));
+    });
+
+    it('transferring an item with >1 supply results in an ERC1155 BatchTransfer event', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      const receipt = await waitFor(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          user0,
+          [tokenIds[0]],
+          [3],
+          '0x'
+        )
+      );
+      const eventsMatching = receipt.events.filter(
+        (v) => v.event === 'TransferBatch'
+      );
+      assert.equal(eventsMatching.length, 1);
+      const transferEvent = eventsMatching[0];
+      assert.equal(transferEvent.args[1], minter);
+      assert.equal(transferEvent.args[2], user0);
+      assert.ok(transferEvent.args[3][0].eq(tokenIds[0]));
+      assert.ok(transferEvent.args[4][0].eq(3));
+    });
+
+    it('transferring zero items with 1 supply results in an ERC1155 BatchTransfer event', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      const receipt = await waitFor(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          user0,
+          [tokenIds[1]],
+          [0],
+          '0x'
+        )
+      );
+      const eventsMatching = receipt.events.filter(
+        (v) => v.event === 'TransferBatch'
+      );
+      assert.equal(eventsMatching.length, 1);
+      const transferEvent = eventsMatching[0];
+      assert.equal(transferEvent.args[1], minter);
+      assert.equal(transferEvent.args[2], user0);
+      assert.ok(transferEvent.args[3][0].eq(tokenIds[1]));
+      assert.ok(transferEvent.args[4][0].eq(0));
+    });
+
+    it('transferring zero items with >1 supply results in an ERC1155 BatchTransfer event', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      const receipt = await waitFor(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          user0,
+          [tokenIds[0]],
+          [0],
+          '0x'
+        )
+      );
+      const eventsMatching = receipt.events.filter(
+        (v) => v.event === 'TransferBatch'
+      );
+      assert.equal(eventsMatching.length, 1);
+      const transferEvent = eventsMatching[0];
+      assert.equal(transferEvent.args[1], minter);
+      assert.equal(transferEvent.args[2], user0);
+      assert.ok(transferEvent.args[3][0].eq(tokenIds[0]));
+      assert.ok(transferEvent.args[4][0].eq(0));
+    });
+
+    it('transferring empty list results in an ERC1155 BatchTransfer event', async function ({
+      user0,
+      contractAsMinter,
+      minter,
+    }) {
+      const receipt = await waitFor(
+        contractAsMinter.safeBatchTransferFrom(minter, user0, [], [], '0x')
+      );
+      const eventsMatching = receipt.events.filter(
+        (v) => v.event === 'TransferBatch'
+      );
+      assert.equal(eventsMatching.length, 1);
+      const transferEvent = eventsMatching[0];
+      assert.equal(transferEvent.args[1], minter);
+      assert.equal(transferEvent.args[2], user0);
+      assert.equal(transferEvent.args[3].length, 0);
+      assert.equal(transferEvent.args[4].length, 0);
+    });
+
+    it('transferring multiple items results in an ERC1155 BatchTransfer event', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      const receipt = await waitFor(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          user0,
+          [tokenIds[0], tokenIds[2], tokenIds[1], tokenIds[3], tokenIds[4]],
+          [3, 4, 1, 1, 3],
+          '0x'
+        )
+      );
+      const eventsMatching = receipt.events.filter(
+        (v) => v.event === 'TransferBatch'
+      );
+      assert.equal(eventsMatching.length, 1);
+      const transferEvent = eventsMatching[0];
+      assert.equal(transferEvent.args[1], minter);
+      assert.equal(transferEvent.args[2], user0);
+      assert.ok(transferEvent.args[3][0].eq(tokenIds[0]));
+      assert.ok(transferEvent.args[3][1].eq(tokenIds[2]));
+      assert.ok(transferEvent.args[3][2].eq(tokenIds[1]));
+      assert.ok(transferEvent.args[3][3].eq(tokenIds[3]));
+      assert.ok(transferEvent.args[3][4].eq(tokenIds[4]));
+      assert.ok(transferEvent.args[4][0].eq(3));
+      assert.ok(transferEvent.args[4][1].eq(4));
+      assert.ok(transferEvent.args[4][2].eq(1));
+      assert.ok(transferEvent.args[4][3].eq(1));
+      assert.ok(transferEvent.args[4][4].eq(3));
+    });
+
+    it('transferring multiple items including zero amount results in an ERC1155 BatchTransfer event', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      const receipt = await waitFor(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          user0,
+          [tokenIds[0], tokenIds[2], tokenIds[1], tokenIds[3], tokenIds[4]],
+          [3, 0, 1, 0, 3],
+          '0x'
+        )
+      );
+      const eventsMatching = receipt.events.filter(
+        (v) => v.event === 'TransferBatch'
+      );
+      assert.equal(eventsMatching.length, 1);
+      const transferEvent = eventsMatching[0];
+      assert.equal(transferEvent.args[1], minter);
+      assert.equal(transferEvent.args[2], user0);
+      assert.ok(transferEvent.args[3][0].eq(tokenIds[0]));
+      assert.ok(transferEvent.args[3][1].eq(tokenIds[2]));
+      assert.ok(transferEvent.args[3][2].eq(tokenIds[1]));
+      assert.ok(transferEvent.args[3][3].eq(tokenIds[3]));
+      assert.ok(transferEvent.args[3][4].eq(tokenIds[4]));
+      assert.ok(transferEvent.args[4][0].eq(3));
+      assert.ok(transferEvent.args[4][1].eq(0));
+      assert.ok(transferEvent.args[4][2].eq(1));
+      assert.ok(transferEvent.args[4][3].eq(0));
+      assert.ok(transferEvent.args[4][4].eq(3));
+    });
+
+    it('transferring an item with 1 supply with batch transfer does not result in a TransferSingle event', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      const receipt = await waitFor(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          user0,
+          [tokenIds[0]],
+          [1],
+          '0x'
+        )
+      );
+      const eventsMatching = receipt.events.filter(
+        (v) => v.event === 'TransferSingle'
+      );
+      assert.equal(eventsMatching.length, 0);
+    });
+
+    it('transferring an item with >1 supply with batch transfer does not result in a TransferSingle event', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      const receipt = await waitFor(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          user0,
+          [tokenIds[0]],
+          [3],
+          '0x'
+        )
+      );
+      const eventsMatching = receipt.events.filter(
+        (v) => v.event === 'TransferSingle'
+      );
+      assert.equal(eventsMatching.length, 0);
+    });
+
+    it('can use batch transfer to send tokens to a normal address', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      await waitFor(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          user0,
+          [tokenIds[0]],
+          [3],
+          '0x'
+        )
+      );
+    });
+
+    it('cannot batch transfer the same token twice and exceed the amount owned', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      await expect(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          user0,
+          [tokenIds[0], tokenIds[1], tokenIds[0]],
+          [2, 1, 1000],
+          '0x'
+        )
+      ).to.be.revertedWith(`can't substract more than there is`);
+    });
+
+    it('can use batch transfer to send token twice if there is sufficient amount owned', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      await waitFor(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          user0,
+          [tokenIds[0], tokenIds[1], tokenIds[0]],
+          [2, 1, 1],
+          '0x'
+        )
+      );
+    });
+
+    it('cannot batch transfer tokens to zeroAddress', async function ({
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      await expect(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          zeroAddress,
+          [tokenIds[0], tokenIds[1], tokenIds[0]],
+          [2, 1, 1],
+          '0x'
+        )
+      ).to.be.revertedWith('destination is zero address');
+    });
+
+    it('cannot batch transfer tokens if array lengths do not match', async function ({
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      await expect(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          zeroAddress,
+          [tokenIds[0], tokenIds[1], tokenIds[0]],
+          [2, 1],
+          '0x'
+        )
+      ).to.be.revertedWith('Inconsistent array length between args');
+    });
+
+    it('cannot batch transfer more than the amount owned', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      await expect(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          user0,
+          [tokenIds[0]],
+          [11],
+          '0x'
+        )
+      ).to.be.revertedWith(`can't substract more than there is`);
+    });
+
+    it('cannot batch transfer more items of 1 supply', async function ({
+      user0,
+      tokenIds,
+      contractAsMinter,
+      minter,
+    }) {
+      await expect(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          user0,
+          [tokenIds[1]],
+          [2],
+          '0x'
+        )
+      ).to.be.revertedWith(`cannot transfer nft if amount not 1`); //  TODO: check this is working correctly
+    });
+
+    it('cannot batch transfer to a contract that does not accept ERC1155', async function ({
+      tokenIds,
+      contractAsMinter,
+      minter,
+      nonReceiver,
+    }) {
+      await expect(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          nonReceiver.address,
+          [tokenIds[0], tokenIds[1], tokenIds[2]],
+          [2, 1, 3],
+          '0x'
+        )
+      ).to.be.reverted;
+    });
+
+    it('cannot batch transfer to a contract that does not return the correct magic value', async function ({
+      tokenIds,
+      contractAsMinter,
+      minter,
+      receiverIncorrectValue,
+    }) {
+      await expect(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          receiverIncorrectValue.address,
+          [tokenIds[0], tokenIds[1], tokenIds[2]],
+          [2, 1, 3],
+          '0x'
+        )
+      ).to.be.reverted;
+    });
+
+    it('can batch transfer to a contract that does accept ERC1155 and which returns the correct magic value', async function ({
+      tokenIds,
+      contractAsMinter,
+      minter,
+      receiver,
+    }) {
+      await expect(
+        contractAsMinter.safeBatchTransferFrom(
+          minter,
+          receiver.address,
+          [tokenIds[0], tokenIds[1], tokenIds[2]],
+          [2, 1, 3],
+          '0x'
+        )
+      ).to.be.reverted;
     });
 
     // describe('ordering', function (it) {
