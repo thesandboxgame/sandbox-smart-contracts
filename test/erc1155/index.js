@@ -1453,8 +1453,26 @@ module.exports = (init, extensions) => {
         [tokenIds[0], tokenIds[1], tokenIds[2]],
         [2, 1, 3],
         '0x'
-      );
-    }); // TODO: fails because sender is not a contract
+      ); // TODO: fails because sender is not a contract
+
+      it('can batch transfer item with 1 or more supply at the same time', async function ({
+        tokenIds,
+        contractAsMinter,
+        minter,
+        receiver,
+      }) {
+        // TODO:
+      });
+
+      it('can obtain balance of batch', async function ({
+        tokenIds,
+        contractAsMinter,
+        minter,
+        receiver,
+      }) {
+        // TODO:
+      });
+    });
 
     // describe('ordering', function (it) {
     // });
