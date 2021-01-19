@@ -7,6 +7,7 @@ import {waitFor, expectEventWithArgs, findEvents} from '../utils';
 import {setupTest, User} from './fixtures';
 import {supplyAssets} from './assets';
 import {toUtf8Bytes} from 'ethers/lib/utils';
+import {stringifyDocument} from '@urql/core/dist/types/utils';
 
 let id: BigNumber;
 
@@ -1365,6 +1366,7 @@ describe('GameToken', function () {
     let gameId: BigNumber;
     let updatedGameId: BigNumber;
     let assets: BigNumber[];
+    let gameAssetsWithOldId: BigNumber[];
 
     before(async function () {
       ({gameToken, gameTokenAsAdmin, users, GameOwner} = await setupTest());
@@ -1398,6 +1400,8 @@ describe('GameToken', function () {
       let idAsHex = utils.hexValue(gameId);
       const versionBefore = idAsHex.slice(58);
       expect(versionBefore).to.be.equal('00000001');
+
+      gameAssetsWithOldId = await gameToken.getAssetBalances(gameId, assets);
       const receipt = await gameTokenAsMinter.updateGame(
         GameOwner.address,
         gameId,
@@ -1414,18 +1418,11 @@ describe('GameToken', function () {
       expect(versionAfter).to.be.equal('00000002');
     });
 
-    it('should use baseId (creator address + subId) to map to game Assets & metaData ', async function () {
-      const uriWithOldId = await gameToken.tokenURI(gameId);
-      const uriWithUpdatedId = await gameToken.tokenURI(updatedGameId);
-      const gameAssetsWithOldId = await gameToken.getAssetBalances(
-        gameId,
-        assets
-      );
+    it('should use baseId (creator address + subId) to map to game Assets  ', async function () {
       const gameAssetsWithUpdatedId = await gameToken.getAssetBalances(
         updatedGameId,
         assets
       );
-      expect(uriWithUpdatedId).to.be.equal(uriWithOldId);
       expect(gameAssetsWithOldId).to.deep.equal(gameAssetsWithUpdatedId);
     });
   });
