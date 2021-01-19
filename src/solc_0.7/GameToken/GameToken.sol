@@ -513,6 +513,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         return newId;
     }
 
+    /// @dev A GameToken-specific implementation which handles versioned tokenIds.
+    /// @param id The tokenId to get the owner of.
+    /// @return The address of the owner.
     function _ownerOf(uint256 id) internal view override returns (address) {
         uint256 data = _owners[_storageId(id)];
         uint32 idVersion = uint32(id);
