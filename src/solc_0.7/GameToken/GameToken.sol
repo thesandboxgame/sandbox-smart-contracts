@@ -426,28 +426,6 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         emit GameTokenUpdated(gameId, 0, recovery);
     }
 
-    /// @dev Check if a withdrawal is allowed.
-    /// @param from The address requesting the withdrawal.
-    /// @param gameId The id of the GAME token to withdraw assets from.
-    function _check_withdrawal_authorized(address from, uint256 gameId) internal view {
-        require(from != address(0), "SENDER_ZERO_ADDRESS");
-        require(from == _withdrawalOwnerOf(gameId), "LAST_OWNER_NOT_EQUAL_SENDER");
-    }
-
-    /// @dev Get the address allowed to withdraw assets from the GAME token.
-    /// If too many assets in GAME, block.gaslimit won't allow detroy and withdraw in 1 tx.
-    /// A game owner may destroy their GAME token, then withdraw assets in a later tx (even
-    /// though ownerOf(id) would be address(0) after burning.)
-    /// @param id The id of the GAME token to query.
-    /// @return the address of the owner before burning.
-    function _withdrawalOwnerOf(uint256 id) internal view returns (address) {
-        uint256 data = _owners[_storageId(id)];
-        if ((data & (2**160)) == 2**160) {
-            return address(data);
-        }
-        return address(0);
-    }
-
     /// @dev Create a new gameId and associate it with an owner.
     /// @param from The address of one creating the game.
     /// @param to The address of the Game owner.
@@ -511,6 +489,28 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         address newOwner = _ownerOf(newId);
         assert(owner == newOwner);
         return newId;
+    }
+
+    /// @dev Check if a withdrawal is allowed.
+    /// @param from The address requesting the withdrawal.
+    /// @param gameId The id of the GAME token to withdraw assets from.
+    function _check_withdrawal_authorized(address from, uint256 gameId) internal view {
+        require(from != address(0), "SENDER_ZERO_ADDRESS");
+        require(from == _withdrawalOwnerOf(gameId), "LAST_OWNER_NOT_EQUAL_SENDER");
+    }
+
+    /// @dev Get the address allowed to withdraw assets from the GAME token.
+    /// If too many assets in GAME, block.gaslimit won't allow detroy and withdraw in 1 tx.
+    /// A game owner may destroy their GAME token, then withdraw assets in a later tx (even
+    /// though ownerOf(id) would be address(0) after burning.)
+    /// @param id The id of the GAME token to query.
+    /// @return the address of the owner before burning.
+    function _withdrawalOwnerOf(uint256 id) internal view returns (address) {
+        uint256 data = _owners[_storageId(id)];
+        if ((data & (2**160)) == 2**160) {
+            return address(data);
+        }
+        return address(0);
     }
 
     /// @dev A GameToken-specific implementation which handles versioned tokenIds.
