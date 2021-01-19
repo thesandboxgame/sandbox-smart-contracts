@@ -15,6 +15,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
     ///////////////////////////////  Data //////////////////////////////
 
     GameToken internal immutable _gameToken;
+    // @todo confirm actual fees
     uint256 internal immutable _gameMintingFee;
     uint256 internal immutable _gameUpdateFee;
     address internal immutable _feeBeneficiary;
