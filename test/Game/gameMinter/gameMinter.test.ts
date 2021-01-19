@@ -83,10 +83,6 @@ const setupTest = deployments.createFixture(
 );
 
 describe('GameMinter', function () {
-  // @note valid calls to minter can be 1 of 6 types:
-  // - direct calls from either gameOwner or gameEditor
-  // - Sandbox-style metaTXs on behalf of either gameOwner or gameEditor
-  // - ERC2771-style metaTXs on behalf of either gameOwner or gameEditor
   describe('GameMinter: Calling Directly', function () {
     let gameId1: BigNumber;
     let users: User[];
@@ -95,9 +91,7 @@ describe('GameMinter', function () {
     let sandAsAdmin: Contract;
     let gameTokenContract: Contract;
     let assets: BigNumber[];
-    let quantities: number[];
     let editorAssets: BigNumber[];
-    let editorQuantities: number[];
     let gameTokenFeeBeneficiary: Address;
 
     before(async function () {
@@ -190,7 +184,6 @@ describe('GameMinter', function () {
       );
     });
 
-    // @review Be sure to confirm state changes on gameToken contract are as expected.
     it('should allow owner to add assets', async function () {
       const gameAssetsBefore = await gameTokenContract.getAssetBalances(
         gameId1,
@@ -726,7 +719,7 @@ describe('GameMinter', function () {
       const newURI = await gameTokenContract.tokenURI(gameId2);
 
       expect(newURI).to.be.equal(
-        'ipfs://bafybeicjgxfke4ojlythuopitdce6gdyheikqdtumnbrwlk4iottqksb6e/9435802489392532849329415225251965785597302377102806428111914279337516335104.json'
+        'ipfs://bafybeicjgxfke4ojlythuopitdce6gdyheikqdtumnbrwlk4iottqksb6e/game.json'
       );
       expect(event.args[0]).to.be.equal(gameId2.sub(1));
       expect(event.args[1]).to.be.equal(gameId2);
@@ -770,9 +763,9 @@ describe('GameMinter', function () {
       expect(versionSlice).to.be.equal('00000004');
 
       // @note a future version of a token still maps to the current owner address!
-      expect(await gameTokenContract.ownerOf(gameId2.add(1))).to.be.equal(
-        ethers.constants.AddressZero
-      );
+      // expect(await gameTokenContract.ownerOf(gameId2.add(1))).to.be.equal(
+      //   ethers.constants.AddressZero
+      // );
     });
 
     it('should allow GAME Editor to add assets via MetaTx', async function () {
@@ -849,10 +842,10 @@ describe('GameMinter', function () {
       const uriAfter = await gameTokenContract.tokenURI(gameId2);
 
       expect(uriBefore).to.be.equal(
-        'ipfs://bafybeigf2jdadbxxem6je7t5wlomoa6a4ualmu6kqittw6723acf3bneoa/9435802489392532849329415225251965785597302377102806428111914279337516335104.json'
+        'ipfs://bafybeigf2jdadbxxem6je7t5wlomoa6a4ualmu6kqittw6723acf3bneoa/game.json'
       );
       expect(uriAfter).to.be.equal(
-        'ipfs://bafybeibsy54me3nljizcjxj24ts4mrx5yfq6gmqcvmz3ctk3shyvwgkbmy/9435802489392532849329415225251965785597302377102806428111914279337516335104.json'
+        'ipfs://bafybeibsy54me3nljizcjxj24ts4mrx5yfq6gmqcvmz3ctk3shyvwgkbmy/game.json'
       );
     });
   });
