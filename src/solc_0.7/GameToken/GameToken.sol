@@ -513,6 +513,17 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         return newId;
     }
 
+    function _ownerOf(uint256 id) internal view override returns (address) {
+        uint256 data = _owners[_storageId(id)];
+        uint32 idVersion = uint32(id);
+        uint32 storageVersion = uint32((data & VERSION_MASK) >> 200);
+
+        if (((data & BURNED_FLAG) == BURNED_FLAG) || idVersion != storageVersion) {
+            return address(0);
+        }
+        return address(data);
+    }
+
     /// @dev Get the baseId (full id without the version number) from the full tokenId.
     /// @param id The full tokenId for the GAME token.
     /// @return The baseId.
