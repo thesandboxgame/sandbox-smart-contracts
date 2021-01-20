@@ -136,6 +136,14 @@ describe('GameToken', function () {
       expect(await gameToken.getMinter()).to.be.equal(gameTokenAdmin);
     });
 
+    it('can update the GameMinter address', async function () {
+      const originalMinter = await gameToken.getMinter();
+      await gameToken.changeMinter(users[8].address);
+      const newMinter = await gameToken.getMinter();
+      expect(newMinter).to.be.equal(users[8].address);
+      expect(newMinter).to.not.equal(originalMinter);
+    });
+
     it('Minter can create GAMEs when _Minter is set', async function () {
       const randomId = await getRandom();
 
