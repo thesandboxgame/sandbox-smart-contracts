@@ -1041,6 +1041,7 @@ module.exports = (init, extensions) => {
       contractAsMinter,
       minter,
       receiverIncorrectValue,
+      contract,
     }) {
       const receiverAddress = receiverIncorrectValue.address;
       await expect(
@@ -1052,8 +1053,9 @@ module.exports = (init, extensions) => {
           '0x'
         )
       ).to.be.reverted;
+      const balance = await contract.balanceOf(receiverAddress, tokenIds[0]);
+      expect(balance).to.be.equal(0);
     });
-    // TODO: can transfer to receiver contract (with balance checks)
   });
 
   describe('batch transfers', function (it) {
@@ -1404,7 +1406,7 @@ module.exports = (init, extensions) => {
           [2],
           '0x'
         )
-      ).to.be.revertedWith(`cannot transfer nft if amount not 1`); //  TODO: check this is working correctly
+      ).to.be.revertedWith(`cannot transfer nft if amount not 1`);
     });
 
     it('cannot batch transfer to a contract that does not accept ERC1155', async function ({
@@ -1441,48 +1443,82 @@ module.exports = (init, extensions) => {
       ).to.be.reverted;
     });
 
-    it('can batch transfer to a contract that does accept ERC1155 and which returns the correct magic value', async function ({
+    // it('can batch transfer to a contract that does accept ERC1155 and which returns the correct magic value', async function ({
+    //   tokenIds,
+    //   contractAsMinter,
+    //   minter,
+    //   receiver,
+    // }) {
+    //   await contractAsMinter.safeBatchTransferFrom(
+    //     minter,
+    //     receiver.address,
+    //     [tokenIds[0], tokenIds[1], tokenIds[2]],
+    //     [2, 1, 3],
+    //     '0x'
+    //   ); // TODO: fails because sender is not a contract
+    // });
+
+    it('can batch transfer item with 1 or more supply at the same time', async function ({
       tokenIds,
       contractAsMinter,
       minter,
-      receiver,
+      contract,
+      user0,
     }) {
+      const tokenIdsToTransfer = [tokenIds[0], tokenIds[1]];
+      const balancesToTransfer = [3, 1];
+
       await contractAsMinter.safeBatchTransferFrom(
         minter,
-        receiver.address,
-        [tokenIds[0], tokenIds[1], tokenIds[2]],
-        [2, 1, 3],
+        user0,
+        tokenIdsToTransfer,
+        balancesToTransfer,
         '0x'
-      ); // TODO: fails because sender is not a contract
-
-      it('can batch transfer item with 1 or more supply at the same time', async function ({
-        tokenIds,
-        contractAsMinter,
-        minter,
-        receiver,
-      }) {
-        // TODO:
-      });
-
-      it('can obtain balance of batch', async function ({
-        tokenIds,
-        contractAsMinter,
-        minter,
-        receiver,
-      }) {
-        // TODO:
-      });
+      );
+      for (let i = 0; i < tokenIdsToTransfer.length; i++) {
+        const tokenId = tokenIdsToTransfer[i];
+        const expectedbalance = balancesToTransfer[i];
+        const balance = await contract.balanceOf(user0, tokenId);
+        assert.equal(balance, expectedbalance);
+      }
     });
 
-    // describe('ordering', function (it) {
-    // });
+    it('can obtain balance of batch', async function ({
+      tokenIds,
+      contractAsMinter,
+      minter,
+      contract,
+      user0,
+    }) {
+      const tokenIdsToTransfer = [tokenIds[0], tokenIds[1]];
+      const balancesToTransfer = [3, 1];
 
-    // describe('approvalForAll', function (it) {
-    // });
+      await contractAsMinter.safeBatchTransferFrom(
+        minter,
+        user0,
+        tokenIdsToTransfer,
+        balancesToTransfer,
+        '0x'
+      );
 
-    // describe('supportsInterface', function (it) {
-    // });
+      const balances = await contract.balanceOfBatch(
+        [user0, user0],
+        tokenIdsToTransfer
+      );
+      for (let i = 0; i < tokenIdsToTransfer.length; i++) {
+        assert.equal(balancesToTransfer[i], balances[i]);
+      }
+    });
   });
+
+  // describe('ordering', function (it) {
+  // });
+
+  // describe('approvalForAll', function (it) {
+  // });
+
+  // describe('supportsInterface', function (it) {
+  // });
 
   return tests;
 };
