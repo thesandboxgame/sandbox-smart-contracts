@@ -57,11 +57,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     constructor(
         address metaTransactionContract,
         address admin,
-        IAssetToken asset,
-        address initialMinter
+        IAssetToken asset
     ) ERC721BaseToken(metaTransactionContract, admin) {
         _asset = asset;
-        _minter = initialMinter;
     }
 
     ///////////////////////////////  Modifiers //////////////////////////////
