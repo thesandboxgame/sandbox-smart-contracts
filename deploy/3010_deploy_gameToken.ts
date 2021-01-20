@@ -7,18 +7,10 @@ const func: DeployFunction = async function (hre) {
   const sandContract = await deployments.get('Sand');
   const assetContract = await deployments.get('Asset');
 
-  // for testing purposes. Use GameMinter contract when ready.
-  const inititalMinter = gameTokenAdmin;
-
   await deploy('GameToken', {
     from: deployer,
     log: true,
-    args: [
-      sandContract.address,
-      gameTokenAdmin,
-      assetContract.address,
-      inititalMinter,
-    ],
+    args: [sandContract.address, gameTokenAdmin, assetContract.address],
   });
 };
 
