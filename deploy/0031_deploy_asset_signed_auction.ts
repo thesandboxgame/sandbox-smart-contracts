@@ -1,5 +1,4 @@
 import {Event} from 'ethers';
-import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre) {
@@ -43,7 +42,7 @@ const func: DeployFunction = async function (hre) {
     await catchUnknownSigner(
       execute(
         'Asset',
-        {from: currentAssetAdmin},
+        {from: currentAssetAdmin, log: true},
         'setSuperOperator',
         assetAuction.address,
         true
@@ -62,7 +61,7 @@ const func: DeployFunction = async function (hre) {
     await catchUnknownSigner(
       execute(
         'Sand',
-        {from: currentSandAdmin},
+        {from: currentSandAdmin, log: true},
         'setSuperOperator',
         assetAuction.address,
         true
@@ -99,7 +98,7 @@ const func: DeployFunction = async function (hre) {
     await catchUnknownSigner(
       execute(
         'AssetSignedAuction',
-        {from: currentAssetAuctionAdmin},
+        {from: currentAssetAuctionAdmin, log: true},
         'setFee',
         assetAuctionFeeCollector,
         fee10000th
@@ -108,6 +107,9 @@ const func: DeployFunction = async function (hre) {
   }
 };
 export default func;
-if (require.main === module) {
-  func(hre);
-}
+func.tags = [
+  'AssetSignedAuction',
+  'AssetSignedAuction_deploy',
+  'AssetSignedAuction_setup',
+];
+func.dependencies = ['Asset_deploy', 'Sand_deploy'];

@@ -1,4 +1,3 @@
-import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {BigNumber} from '@ethersproject/bignumber';
 import {parseEther} from '@ethersproject/units';
@@ -65,7 +64,7 @@ const func: DeployFunction = async function (hre) {
     await catchUnknownSigner(
       execute(
         'Asset',
-        {from: currentBouncerAdmin},
+        {from: currentBouncerAdmin, log: true},
         'setBouncer',
         catalystMinter.address,
         true
@@ -80,7 +79,7 @@ const func: DeployFunction = async function (hre) {
     await catchUnknownSigner(
       execute(
         'CatalystRegistry',
-        {from: currentRegistryAdmin},
+        {from: currentRegistryAdmin, log: true},
         'setMinter',
         catalystMinter.address
       )
@@ -101,7 +100,7 @@ const func: DeployFunction = async function (hre) {
       await catchUnknownSigner(
         execute(
           contractName,
-          {from: currentSandAdmin},
+          {from: currentSandAdmin, log: true},
           'setSuperOperator',
           address,
           true
@@ -116,6 +115,12 @@ const func: DeployFunction = async function (hre) {
   await setSuperOperatorFor(`Catalyst`, catalystMinter.address);
 };
 export default func;
-if (require.main === module) {
-  func(hre);
-}
+func.tags = ['CatalystMinter', 'CatalystMinter_setup', 'CatalystMinter_deploy'];
+func.dependencies = [
+  'Sand_deploy',
+  'Asset_deploy',
+  // 'Gems_deploy', // old Gem is assumed to be deployed
+  // 'Catalysts_deploy', // old Catalyst is assumed to be deployed
+  // 'CatalystRegistry_deploy', // old CatalystRegistry is assumed to be deployed
+];
+func.skip = async (hre) => hre.network.name === 'hardhat'; // skip running in test as this is not to be used, require putting the whole Gem/Catalyst deployment back
