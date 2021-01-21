@@ -2,7 +2,7 @@ import {BigNumber, Wallet} from 'ethers';
 import fs from 'fs-extra';
 import hre, {ethers, network} from 'hardhat';
 import {waitFor} from '../utils/utils';
-import {AddressZero} from '@ethersproject/constants';
+// import {AddressZero} from '@ethersproject/constants';
 
 async function main() {
   const readOnly = network.name !== 'hardhat';
@@ -32,7 +32,7 @@ async function main() {
     total: 0,
     num: 0,
   };
-  const {batchMints, transfers, extractions} = JSON.parse(
+  const {transfers} = JSON.parse(
     fs.readFileSync('tmp/asset_regenerations.json').toString()
   );
 

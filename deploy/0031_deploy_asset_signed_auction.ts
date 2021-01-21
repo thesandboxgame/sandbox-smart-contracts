@@ -1,10 +1,9 @@
 import {Event} from 'ethers';
-import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre) {
   const {ethers, deployments, getNamedAccounts} = hre;
-  const {deploy, log, read, execute} = deployments;
+  const {deploy, read, execute, catchUnknownSigner} = deployments;
 
   const {
     deployer,
@@ -12,7 +11,7 @@ const func: DeployFunction = async function (hre) {
     assetAuctionFeeCollector,
   } = await getNamedAccounts();
 
-  const assetAuctionFee10000th = 500;
+  const fee10000th = 500;
 
   const asset = await deployments.get('Asset');
   const sandContract = await deployments.get('Sand');
@@ -24,7 +23,7 @@ const func: DeployFunction = async function (hre) {
       assetAuctionAdmin,
       sandContract.address,
       assetAuctionFeeCollector,
-      assetAuctionFee10000th,
+      fee10000th,
     ],
     log: true,
     skipIfAlreadyDeployed: true,
@@ -40,12 +39,14 @@ const func: DeployFunction = async function (hre) {
   if (!isAssetSuperOperator) {
     console.log('setting AssetSignedAuction as super operator for Asset');
     const currentAssetAdmin = await read('Asset', 'getAdmin');
-    await execute(
-      'Asset',
-      {from: currentAssetAdmin},
-      'setSuperOperator',
-      assetAuction.address,
-      true
+    await catchUnknownSigner(
+      execute(
+        'Asset',
+        {from: currentAssetAdmin, log: true},
+        'setSuperOperator',
+        assetAuction.address,
+        true
+      )
     );
   }
 
@@ -57,16 +58,17 @@ const func: DeployFunction = async function (hre) {
   if (!isSandSuperOperator) {
     console.log('setting AssetSignedAuction as super operator for Sand');
     const currentSandAdmin = await read('Sand', 'getAdmin');
-    await execute(
-      'Sand',
-      {from: currentSandAdmin},
-      'setSuperOperator',
-      assetAuction.address,
-      true
+    await catchUnknownSigner(
+      execute(
+        'Sand',
+        {from: currentSandAdmin, log: true},
+        'setSuperOperator',
+        assetAuction.address,
+        true
+      )
     );
   }
 
-  const fee10000th = 500;
   const feeEvents = await assetAuction.queryFilter(
     assetAuction.filters.FeeSetup()
   );
@@ -93,16 +95,21 @@ const func: DeployFunction = async function (hre) {
       'AssetSignedAuction',
       'getAdmin'
     );
-    await execute(
-      'AssetSignedAuction',
-      {from: currentAssetAuctionAdmin},
-      'setFee',
-      assetAuctionFeeCollector,
-      fee10000th
+    await catchUnknownSigner(
+      execute(
+        'AssetSignedAuction',
+        {from: currentAssetAuctionAdmin, log: true},
+        'setFee',
+        assetAuctionFeeCollector,
+        fee10000th
+      )
     );
   }
 };
 export default func;
-if (require.main === module) {
-  func(hre);
-}
+func.tags = [
+  'AssetSignedAuction',
+  'AssetSignedAuction_deploy',
+  'AssetSignedAuction_setup',
+];
+func.dependencies = ['Asset_deploy', 'Sand_deploy'];

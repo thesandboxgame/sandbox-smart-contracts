@@ -1804,11 +1804,6 @@ bindings@^1.5.0:
   dependencies:
     file-uri-to-path "1.0.0"
 
-bindings@~1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/bindings/-/bindings-1.2.1.tgz#14ad6113812d2d37d72e67b4cacb4bb726505f11"
-  integrity sha1-FK1hE4EtLTfXLme0ystLtyZQXxE=
-
 bip39@2.5.0:
   version "2.5.0"
   resolved "https://registry.yarnpkg.com/bip39/-/bip39-2.5.0.tgz#51cbd5179460504a63ea3c000db3f787ca051235"
@@ -6649,13 +6644,6 @@ node-addon-api@^2.0.0:
   resolved "https://registry.yarnpkg.com/node-addon-api/-/node-addon-api-2.0.2.tgz#432cfa82962ce494b132e9d72a15b29f71ff5d32"
   integrity sha512-Ntyt4AIXyaLIuMHF6IOoTakB3K+RWxwtsHNRxllEoA6vPwP9o4866g6YWDLUdnucilZhmkxiHwHr11gAENw+QA==
 
-node-beep@^0.0.3:
-  version "0.0.3"
-  resolved "https://registry.yarnpkg.com/node-beep/-/node-beep-0.0.3.tgz#8b376c0b33fae36a3a103ea9d35cd156125f1332"
-  integrity sha1-izdsCzP642o6ED6p01zRVhJfEzI=
-  dependencies:
-    bindings "~1.2.1"
-
 node-emoji@^1.10.0, node-emoji@^1.4.1:
   version "1.10.0"
   resolved "https://registry.yarnpkg.com/node-emoji/-/node-emoji-1.10.0.tgz#8886abd25d9c7bb61802a658523d1f8d2a89b2da"
@@ -7220,6 +7208,11 @@ postinstall-postinstall@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/postinstall-postinstall/-/postinstall-postinstall-2.1.0.tgz#4f7f77441ef539d1512c40bd04c71b06a4704ca3"
   integrity sha512-7hQX6ZlZXIoRiWNrbMQaLzUUfH+sSx39u8EJ9HYuDc1kLo9IXKWjM5RSquZN1ad5GnH8CGFM78fsAAQi3OKEEQ==
+
+prando@^5.1.2:
+  version "5.1.2"
+  resolved "https://registry.yarnpkg.com/prando/-/prando-5.1.2.tgz#1c7f9b8f543bf335d44a2aadcaa1b3163f3b8fb8"
+  integrity sha512-PaJxPMw8UugKUeUq27oZ8dqW2CgysXf2MjmlyCcRq+Es8Bcxgac7+nO6/tRGKmLOnUG1GPbAATNAZmzwD1hbIA==
 
 precond@0.2:
   version "0.2.3"

@@ -1,6 +1,7 @@
 /* eslint-disable mocha/no-exports */
 import {BigNumber} from '@ethersproject/bignumber';
 import {ContractReceipt, Event, Contract, ContractTransaction} from 'ethers';
+import {Receipt} from 'hardhat-deploy/types';
 import {Result} from 'ethers/lib/utils';
 import {ethers} from 'hardhat';
 
@@ -88,6 +89,21 @@ export async function expectReceiptEventWithArgs(
 export async function expectEventWithArgs(
   contract: Contract,
   receipt: ContractReceipt,
+  event: string
+): Promise<EventWithArgs> {
+  const events = await findEvents(contract, event, receipt.blockHash);
+  if (events.length == 0) {
+    throw new Error('no events');
+  }
+  if (!events[0].args) {
+    throw new Error('event has no args');
+  }
+  return events[0] as EventWithArgs;
+}
+
+export async function expectEventWithArgsFromReceipt(
+  contract: Contract,
+  receipt: Receipt,
   event: string
 ): Promise<EventWithArgs> {
   const events = await findEvents(contract, event, receipt.blockHash);

@@ -1,4 +1,4 @@
-import hre, {
+import {
   ethers,
   deployments,
   getUnnamedAccounts,

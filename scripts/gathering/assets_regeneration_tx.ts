@@ -194,7 +194,7 @@ for (const collectionMint of collectionMints) {
     collectionId: collectionMint.id,
     tokenURI: collectionMint.tokenURI,
   });
-  const {ipfsBase, counter} = extractIpfsString(collectionMint.tokenURI);
+  const {ipfsBase} = extractIpfsString(collectionMint.tokenURI);
   if (lastIpfsString != ipfsBase) {
     if (lastIpfsString !== '') {
       batchMints.push({

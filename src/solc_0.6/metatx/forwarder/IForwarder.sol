@@ -2,8 +2,8 @@
 pragma solidity ^0.6.2;
 pragma experimental ABIEncoderV2;
 
-
 interface IForwarder {
+
     struct ForwardRequest {
         address from;
         address to;
@@ -13,7 +13,9 @@ interface IForwarder {
         bytes data;
     }
 
-    function getNonce(address from) external view returns (uint256);
+    function getNonce(address from)
+    external view
+    returns(uint256);
 
     /**
      * verify the transaction would execute.
@@ -47,7 +49,9 @@ interface IForwarder {
         bytes32 requestTypeHash,
         bytes calldata suffixData,
         bytes calldata signature
-    ) external payable returns (bool success, bytes memory ret);
+    )
+    external payable
+    returns (bool success, bytes memory ret);
 
     /**
      * Register a new Request typehash.
@@ -56,4 +60,14 @@ interface IForwarder {
      *        if it does contain a value, then a comma is added first.
      */
     function registerRequestType(string calldata typeName, string calldata typeSuffix) external;
+
+    /**
+     * Register a new domain separator.
+     * The domain separator must have the following fields: name,version,chainId, verifyingContract.
+     * the chainId is the current network's chainId, and the verifyingContract is this forwarder.
+     * This method is given the domain name and version to create and register the domain separator value.
+     * @param name the domain's display name
+     * @param version the domain/protocol version
+     */
+    function registerDomainSeparator(string calldata name, string calldata version) external;
 }
