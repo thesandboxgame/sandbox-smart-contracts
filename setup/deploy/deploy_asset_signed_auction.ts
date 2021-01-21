@@ -4,7 +4,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre) {
   const {ethers, deployments, getNamedAccounts} = hre;
-  const {deploy, read, execute} = deployments;
+  const {deploy, read, execute, catchUnknownSigner} = deployments;
 
   const {
     deployer,
@@ -40,12 +40,14 @@ const func: DeployFunction = async function (hre) {
   if (!isAssetSuperOperator) {
     console.log('setting AssetSignedAuction as super operator for Asset');
     const currentAssetAdmin = await read('Asset', 'getAdmin');
-    await execute(
-      'Asset',
-      {from: currentAssetAdmin},
-      'setSuperOperator',
-      assetAuction.address,
-      true
+    await catchUnknownSigner(
+      execute(
+        'Asset',
+        {from: currentAssetAdmin},
+        'setSuperOperator',
+        assetAuction.address,
+        true
+      )
     );
   }
 
@@ -57,12 +59,14 @@ const func: DeployFunction = async function (hre) {
   if (!isSandSuperOperator) {
     console.log('setting AssetSignedAuction as super operator for Sand');
     const currentSandAdmin = await read('Sand', 'getAdmin');
-    await execute(
-      'Sand',
-      {from: currentSandAdmin},
-      'setSuperOperator',
-      assetAuction.address,
-      true
+    await catchUnknownSigner(
+      execute(
+        'Sand',
+        {from: currentSandAdmin},
+        'setSuperOperator',
+        assetAuction.address,
+        true
+      )
     );
   }
 
@@ -92,12 +96,14 @@ const func: DeployFunction = async function (hre) {
       'AssetSignedAuction',
       'getAdmin'
     );
-    await execute(
-      'AssetSignedAuction',
-      {from: currentAssetAuctionAdmin},
-      'setFee',
-      assetAuctionFeeCollector,
-      fee10000th
+    await catchUnknownSigner(
+      execute(
+        'AssetSignedAuction',
+        {from: currentAssetAuctionAdmin},
+        'setFee',
+        assetAuctionFeeCollector,
+        fee10000th
+      )
     );
   }
 };

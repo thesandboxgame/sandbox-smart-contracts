@@ -5,7 +5,7 @@ import {parseEther} from '@ethersproject/units';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy, read, execute} = deployments;
+  const {deploy, read, execute, catchUnknownSigner} = deployments;
 
   const {deployer, catalystMinterAdmin} = await getNamedAccounts();
 
@@ -62,12 +62,14 @@ const func: DeployFunction = async function (hre) {
   if (!isBouncer) {
     console.log('setting CatalystMinter as Asset bouncer');
     const currentBouncerAdmin = await read('Asset', 'getBouncerAdmin');
-    await execute(
-      'Asset',
-      {from: currentBouncerAdmin},
-      'setBouncer',
-      catalystMinter.address,
-      true
+    await catchUnknownSigner(
+      execute(
+        'Asset',
+        {from: currentBouncerAdmin},
+        'setBouncer',
+        catalystMinter.address,
+        true
+      )
     );
   }
 
@@ -75,11 +77,13 @@ const func: DeployFunction = async function (hre) {
   if (currentMinter.toLowerCase() != catalystMinter.address.toLowerCase()) {
     console.log('setting CatalystMinter as CatalystRegistry minter');
     const currentRegistryAdmin = await read('CatalystRegistry', 'getAdmin');
-    await execute(
-      'CatalystRegistry',
-      {from: currentRegistryAdmin},
-      'setMinter',
-      catalystMinter.address
+    await catchUnknownSigner(
+      execute(
+        'CatalystRegistry',
+        {from: currentRegistryAdmin},
+        'setMinter',
+        catalystMinter.address
+      )
     );
   }
 
@@ -94,12 +98,14 @@ const func: DeployFunction = async function (hre) {
         'setting CatalystMinter as super operator for ' + contractName
       );
       const currentSandAdmin = await read(contractName, 'getAdmin');
-      await execute(
-        contractName,
-        {from: currentSandAdmin},
-        'setSuperOperator',
-        address,
-        true
+      await catchUnknownSigner(
+        execute(
+          contractName,
+          {from: currentSandAdmin},
+          'setSuperOperator',
+          address,
+          true
+        )
       );
     }
   }
