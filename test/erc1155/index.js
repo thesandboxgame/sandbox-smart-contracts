@@ -670,7 +670,7 @@ const erc1155ABI = [
   },
 ];
 
-module.exports = (init, extensions) => {
+module.exports = (init) => {
   const tests = [];
 
   function preTest(test) {
