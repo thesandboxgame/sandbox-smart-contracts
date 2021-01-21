@@ -753,6 +753,9 @@ module.exports = (init, extensions) => {
       const contractAsMinter = contract.connect(
         ethersProvider.getSigner(minter)
       );
+      const contractAsDeployer = contract.connect(
+        ethersProvider.getSigner(deployer)
+      );
       const contractAsUser0 = contract.connect(ethersProvider.getSigner(user0));
       const contractAsUser1 = contract.connect(ethersProvider.getSigner(user1));
       const contractAsUser2 = contract.connect(ethersProvider.getSigner(user2));
@@ -762,11 +765,13 @@ module.exports = (init, extensions) => {
         receiverIncorrectValue,
         contract,
         contractAsMinter,
+        contractAsDeployer,
         mint,
         contractAsUser0,
         contractAsUser1,
         contractAsUser2,
         minter,
+        deployer,
         user0,
         user1,
         user2,
@@ -953,7 +958,6 @@ module.exports = (init, extensions) => {
     });
 
     it('cannot transfer more item of 1 supply', async function ({
-      // TODO: reword name of test
       user0,
       tokenIds,
       contractAsMinter,
@@ -1511,13 +1515,114 @@ module.exports = (init, extensions) => {
     });
   });
 
+  describe('approvalForAll', function (it) {
+    it('setting approval results in ApprovalForAll event', async function ({
+      contractAsDeployer,
+      minter,
+      deployer,
+    }) {
+      const receipt = await waitFor(
+        contractAsDeployer.setApprovalForAll(minter, true)
+      );
+      const eventsMatching = receipt.events.filter(
+        (v) => v.event === 'ApprovalForAll'
+      );
+      assert.equal(eventsMatching.length, 1);
+      const event = eventsMatching[0];
+      assert.equal(event.args[0], deployer);
+      assert.equal(event.args[1], minter);
+      assert.equal(event.args[2], true);
+    });
+
+    it('setting approval fails if sender is operator', async function ({
+      contractAsMinter,
+      minter,
+    }) {
+      await expect(
+        contractAsMinter.setApprovalForAll(minter, true)
+      ).to.be.revertedWith('sender = operator');
+    });
+
+    it('operator cannot transfer without approval', async function ({
+      contractAsUser0,
+      minter,
+      user0,
+      tokenIds,
+    }) {
+      await expect(
+        contractAsUser0.safeTransferFrom(minter, user0, tokenIds[1], 1, '0x')
+      ).to.be.revertedWith('Operator not approved');
+    });
+
+    // it('operator can transfer after approval', async function ({
+    //   contractAsUser0,
+    //   contractAsDeployer,
+    //   minter,
+    //   user0,
+    //   user1,
+    //   tokenIds,
+    // }) {
+    //   await expect(
+    //     contractAsUser0.safeTransferFrom(minter, user1, tokenIds[0], 1, '0x')
+    //   ).to.be.revertedWith('Operator not approved');
+    //   await contractAsDeployer.setApprovalForAll(user0, true);
+    //   await contractAsUser0.safeTransferFrom(
+    //     minter,
+    //     user1,
+    //     tokenIds[0],
+    //     1,
+    //     '0x'
+    //   );
+    // }); // TODO: fix
+
+    // it('operator cannot transfer after approval is removed', async function ({
+    //   contractAsUser0,
+    //   contractAsDeployer,
+    //   minter,
+    //   user0,
+    //   user1,
+    //   tokenIds,
+    // }) {
+    //   await expect(
+    //     contractAsUser0.safeTransferFrom(minter, user1, tokenIds[0], 1, '0x')
+    //   ).to.be.revertedWith('Operator not approved');
+    //   await contractAsDeployer.setApprovalForAll(user0, true);
+    //   await contractAsUser0.safeTransferFrom(
+    //     minter,
+    //     user1,
+    //     tokenIds[1],
+    //     1,
+    //     '0x'
+    //   );
+    //   await contractAsDeployer.setApprovalForAll(user0, false);
+    //   await expect(
+    //     contractAsUser0.safeTransferFrom(minter, user1, tokenIds[0], 1, '0x')
+    //   ).to.be.revertedWith('Operator not approved');
+    // }); // TODO: fix
+  });
+
+  describe('supportsInterface', function (it) {
+    it('contract claims to supports ERC165', async function ({contract}) {
+      const result = await contract.supportsInterface('0x01ffc9a7');
+      assert.equal(result, true);
+    });
+
+    it('contract does not claim to support random interface', async function ({
+      contract,
+    }) {
+      const result = await contract.supportsInterface('0x77777777');
+      assert.equal(result, false);
+    });
+
+    it('contract does not claim to support invalid interface', async function ({
+      contract,
+    }) {
+      const result = await contract.supportsInterface('0xFFFFFFFF');
+      assert.equal(result, false);
+    });
+  });
+
   // describe('ordering', function (it) {
-  // });
-
-  // describe('approvalForAll', function (it) {
-  // });
-
-  // describe('supportsInterface', function (it) {
   // });
 
   return tests;
