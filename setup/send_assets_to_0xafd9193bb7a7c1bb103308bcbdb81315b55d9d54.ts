@@ -3,7 +3,7 @@ import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function () {
-  const {deployments, ethers, getNamedAccounts} = hre;
+  const {ethers, getNamedAccounts} = hre;
 
   const owners = JSON.parse(
     fs.readFileSync('tmp/asset_owners.json').toString()

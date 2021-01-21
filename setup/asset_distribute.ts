@@ -3,8 +3,14 @@ import fs from 'fs-extra';
 import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 import inquirer from 'inquirer';
+
+const beep = (num: number) => {
+  for (let i = 0; i < num; i++) {
+    console.log('---------------------------------------------------------');
+  }
+};
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const beep = require('node-beep');
+//require('node-beep');
 
 const readOnly = false;
 const BATCH_SIZE = 50;
@@ -84,7 +90,7 @@ const func: DeployFunction = async function () {
 
   const suppliesRequired: Record<string, number> = {};
   for (const transfer of transfers) {
-    const {to, ids, values} = transfer;
+    const {ids, values} = transfer;
     for (let i = 0; i < ids.length; i++) {
       if (!suppliesRequired[ids[i]]) {
         suppliesRequired[ids[i]] = 0;
@@ -168,7 +174,7 @@ const func: DeployFunction = async function () {
     const datas = [];
     console.log();
     for (const transfer of batch) {
-      const {to, ids, values, index} = transfer;
+      const {to, ids, values} = transfer;
       // console.log(JSON.stringify(transfer));
       // console.log({
       //   creator,

@@ -5,7 +5,7 @@ import {parseEther} from '@ethersproject/units';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy, log, read, execute} = deployments;
+  const {deploy, read, execute} = deployments;
 
   const {deployer, catalystMinterAdmin} = await getNamedAccounts();
 

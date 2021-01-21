@@ -1,6 +1,6 @@
-import hre, {getUnnamedAccounts} from 'hardhat';
+import hre from 'hardhat';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction, DeploymentSubmission} from 'hardhat-deploy/types';
+import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -9,7 +9,6 @@ const func: DeployFunction = async function (
     deployments,
     getNamedAccounts,
     getUnnamedAccounts,
-    getChainId,
     upgrades,
     ethers,
   } = hre;

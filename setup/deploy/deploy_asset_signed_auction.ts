@@ -4,7 +4,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre) {
   const {ethers, deployments, getNamedAccounts} = hre;
-  const {deploy, log, read, execute} = deployments;
+  const {deploy, read, execute} = deployments;
 
   const {
     deployer,
@@ -12,7 +12,7 @@ const func: DeployFunction = async function (hre) {
     assetAuctionFeeCollector,
   } = await getNamedAccounts();
 
-  const assetAuctionFee10000th = 500;
+  const fee10000th = 500;
 
   const asset = await deployments.get('Asset');
   const sandContract = await deployments.get('Sand');
@@ -24,7 +24,7 @@ const func: DeployFunction = async function (hre) {
       assetAuctionAdmin,
       sandContract.address,
       assetAuctionFeeCollector,
-      assetAuctionFee10000th,
+      fee10000th,
     ],
     log: true,
     skipIfAlreadyDeployed: true,
@@ -66,7 +66,6 @@ const func: DeployFunction = async function (hre) {
     );
   }
 
-  const fee10000th = 500;
   const feeEvents = await assetAuction.queryFilter(
     assetAuction.filters.FeeSetup()
   );
