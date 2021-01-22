@@ -10,7 +10,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy, read, execute, catchUnknownSigner} = deployments;
+  const {deploy, read, execute, catchUnknownSigner, log} = deployments;
   const {
     deployer,
     landSaleBeneficiary,
@@ -27,10 +27,15 @@ const func: DeployFunction = async function (hre) {
     const {lands, merkleRootHash, saltedLands, tree, sector} = landSale;
 
     const landSaleName = `${LANDSALE_PREFIX}_${sector}`;
-    const deadline = deadlines[sector];
+    let deadline = deadlines[sector];
 
     if (!deadline) {
       throw new Error(`no deadline for sector ${sector}`);
+    }
+
+    if (hre.network.name !== 'mainnet') {
+      log('increasing deadline by 1 year');
+      deadline += 365 * 24 * 60 * 60; //add 1 year on rinkeby
     }
 
     const landSaleDeployment = await deploy(landSaleName, {
@@ -126,4 +131,4 @@ const func: DeployFunction = async function (hre) {
 export default func;
 func.tags = ['LandPreSale_5', 'LandPreSale_5_deploy'];
 func.dependencies = ['Sand_deploy', 'Land_deploy', 'Asset_deploy'];
-func.skip = async (hre) => hre.network.name !== 'hardhat'; // TODO enable
+// func.skip = async (hre) => hre.network.name !== 'hardhat'; // TODO enable

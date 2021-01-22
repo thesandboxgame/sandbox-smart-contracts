@@ -46,7 +46,7 @@ const landSalePrefix = args[0];
 
     const landSaleName = `${landSalePrefix}_${sector.sector}`;
 
-    console.log(landSaleName, JSON.stringify(assetIdsCount, null, '  '));
+    console.log({landSaleName});
 
     const presale = await deployments.get(landSaleName);
     const owner =
@@ -60,6 +60,8 @@ const landSalePrefix = args[0];
       values.push(assetIdsCount[assetId]);
     }
     if (ids.length > 0) {
+      console.log(landSaleName, JSON.stringify(assetIdsCount, null, '  '));
+
       await catchUnknownSigner(
         execute(
           'Asset',

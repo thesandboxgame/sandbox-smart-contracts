@@ -221,7 +221,7 @@ async function generateLandsForMerkleTree(sectorData: SectorData, bundles: {[id:
 }
 
 export async function getLandSales(presale: string, networkName: string, expose?: boolean): Promise<LandSale[]>{
-  const secretPath = `./.land_presale_5_${networkName}_secret`;
+  const secretPath = `./secret/.${presale}_${networkName}_secret`;
   let secret;
   try {
     secret = fs.readFileSync(secretPath).toString();
