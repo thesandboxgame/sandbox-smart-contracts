@@ -4,12 +4,12 @@ import {expect} from '../../chai-setup';
 import {setCatalyst, setupAssetAttributesRegistry} from './fixtures';
 import catalysts from '../../../data/catalysts';
 import gems from '../../../data/gems';
-
+import {Block} from '@ethersproject/providers';
 describe('AssetAttributesRegistry', function () {
   function testSetCatalyst(
     record: {catalystId: number; exists: boolean; gemIds: []},
     event: Event,
-    block: any,
+    block: Block,
     gemsIds: number[],
     catalystId: number,
     assetId: BigNumber

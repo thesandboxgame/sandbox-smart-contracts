@@ -1,6 +1,7 @@
 import {ethers, deployments, getNamedAccounts} from 'hardhat';
 import {BigNumber, Contract, Event} from 'ethers';
 import {waitFor} from '../../utils';
+import {Block} from '@ethersproject/providers';
 
 export const setupAssetAttributesRegistry = deployments.createFixture(
   async () => {
@@ -28,7 +29,7 @@ export async function setCatalyst(
 ): Promise<{
   record: {catalystId: number; exists: boolean; gemIds: []};
   event: Event;
-  block: any;
+  block: Block;
 }> {
   const {
     assetAttributesRegistry,
