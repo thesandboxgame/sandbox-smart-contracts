@@ -1,34 +1,10 @@
 import 'dotenv/config';
 import {HardhatUserConfig} from 'hardhat/types';
 import 'hardhat-deploy';
-import 'hardhat-deploy-ethers';
+import '@nomiclabs/hardhat-ethers'; // aliased to hardhat-deploy-ethers
 import 'hardhat-gas-reporter';
-import {eth_node} from './utils/deployments';
-
-let mnemonic = process.env.MNEMONIC;
-if (!mnemonic) {
-  // FOR DEV ONLY, SET IT IN .env files if you want to keep it private
-  // (IT IS IMPORTANT TO HAVE A NON RANDOM MNEMONIC SO THAT SCRIPTS CAN ACT ON THE SAME ACCOUNTS)
-  mnemonic = 'test test test test test test test test test test test junk';
-}
-const mnemonic_mainnet = process.env.MNEMONIC_MAINNET;
-const mnemonic_rinkeby = process.env.MNEMONIC_RINKEBY;
-const accounts = mnemonic
-  ? {
-      mnemonic,
-    }
-  : undefined;
-const accounts_mainnet = mnemonic_mainnet
-  ? {
-      mnemonic: mnemonic_mainnet,
-    }
-  : undefined;
-
-const accounts_rinkeby = mnemonic_rinkeby
-  ? {
-      mnemonic: mnemonic_rinkeby,
-    }
-  : undefined;
+import '@openzeppelin/hardhat-upgrades';
+import {node_url, accounts} from './utils/network';
 
 const config: HardhatUserConfig = {
   gasReporter: {
@@ -44,7 +20,7 @@ const config: HardhatUserConfig = {
   solidity: {
     compilers: [
       {
-        version: '0.7.1',
+        version: '0.7.5',
         settings: {
           optimizer: {
             enabled: true,
@@ -54,6 +30,15 @@ const config: HardhatUserConfig = {
       },
       {
         version: '0.6.5',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 2000,
+          },
+        },
+      },
+      {
+        version: '0.5.9',
         settings: {
           optimizer: {
             enabled: true,
@@ -143,8 +128,15 @@ const config: HardhatUserConfig = {
 
     gemsAndCatalystsAdmin: 'sandAdmin',
     assetAttributesRegistryAdmin: 'sandAdmin',
+    proxyAdminOwner: {
+      default: 2,
+      1: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
+      rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
+    },
 
     landSaleAdmin: 'sandAdmin', // can enable currencies
+    gameTokenAdmin: 'sandAdmin', // can set minter address
+    gameTokenFeeBeneficiary: 'treasury', // receives fees from GAME token  minting / Mods
     estateAdmin: 'sandAdmin', // can add super operators and change admin
     P2PERC721SaleAdmin: 'sandAdmin', // can set fees
     backendReferralWallet: {
@@ -175,41 +167,49 @@ const config: HardhatUserConfig = {
     starterPackSaleBeneficiary: 'treasury', // collect funds from starter pack sales
     backendMessageSigner: 'backendReferralWallet', // account that sign message for the starter pack
     kyberLiquidityProvider: 'sandBeneficiary', //TODO check what should be the value
+
     gemsCatalystsRegistryAdmin: 'sandAdmin',
-    // testing
-    others: {
-      default: 'from:5',
-      deployments: '', // TODO builder-deploy support live
-    },
   },
   networks: {
-    coverage: {
-      url: 'http://localhost:5458',
-      accounts,
-    },
     hardhat: {
-      accounts,
+      accounts: accounts(process.env.HARDHAT_FORK),
+      forking: process.env.HARDHAT_FORK
+        ? {
+            url: node_url(process.env.HARDHAT_FORK),
+            blockNumber: process.env.HARDHAT_FORK_NUMBER
+              ? parseInt(process.env.HARDHAT_FORK_NUMBER)
+              : undefined,
+          }
+        : undefined,
     },
     localhost: {
       url: 'http://localhost:8545',
-      accounts,
+      accounts: accounts(),
     },
     rinkeby_test: {
-      url: eth_node('rinkeby'),
-      accounts,
+      url: node_url('rinkeby'),
+      accounts: accounts('rinkeby_test'),
     },
     rinkeby: {
-      url: eth_node('rinkeby'),
-      accounts: accounts_rinkeby,
+      url: node_url('rinkeby'),
+      accounts: accounts('rinkeby'),
     },
     mainnet: {
-      url: eth_node('mainnet'),
-      accounts: accounts_mainnet,
+      url: node_url('mainnet'),
+      accounts: accounts('mainnet'),
     },
   },
   paths: {
     sources: 'src',
   },
+
+  external: process.env.HARDHAT_FORK
+    ? {
+        deployments: {
+          hardhat: ['deployments/' + process.env.HARDHAT_FORK],
+        },
+      }
+    : undefined,
 };
 
 export default config;

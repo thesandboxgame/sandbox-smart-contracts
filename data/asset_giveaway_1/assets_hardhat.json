@@ -1,0 +1,12 @@
+[
+  {
+    "reservedAddress": "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955",
+    "assetIds": [0, 1, 2],
+    "assetValues": [5, 5, 5]
+  },
+  {
+    "reservedAddress": "0x14dC79964da2C08b23698B3D3cc7Ca32193d9955",
+    "assetIds": [0],
+    "assetValues": [1]
+  }
+]

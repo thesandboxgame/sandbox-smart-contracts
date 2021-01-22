@@ -1,5 +1,8 @@
 cache/
 artifacts/
+secret/
+tmp/
+tmp.copy/
 
 yarn.error.log
 
@@ -36,4 +39,4 @@ presale_2*
 giveaway.json
 .proofs*
 
-
+.openzeppelin/unknown-*.json

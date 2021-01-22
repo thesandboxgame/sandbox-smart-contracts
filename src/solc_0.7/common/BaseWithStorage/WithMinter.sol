@@ -1,32 +1,31 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
+
 import "./WithAdmin.sol";
 
 contract WithMinter is WithAdmin {
     address internal _minter;
+
+    /// @dev Emits when the Minter address is changed
+    /// @param oldMinter The previous Minter address
+    /// @param newMinter The new Minter address
     event MinterChanged(address oldMinter, address newMinter);
 
-    constructor(address admin, address minter) {
-        _admin = admin;
-        _minter = minter;
+    modifier onlyMinter() {
+        require(msg.sender == _minter, "MINTER_ACCESS_DENIED");
+        _;
     }
 
-    /// @dev gives the current minter of this contract.
-    /// @return the current minter of this contract.
+    /// @dev Get the current minter of this contract.
+    /// @return The current minter of this contract.
     function getMinter() external view returns (address) {
         return _minter;
     }
 
-    /// @dev change the minter to be `newMinter`.
-    /// @param newMinter address of the new minter.
-    function changeMinter(address newMinter) external {
-        require(msg.sender == _admin, "only admin can change admin");
+    /// @dev Change the minter to be `newMinter`.
+    /// @param newMinter The address of the new minter.
+    function changeMinter(address newMinter) external onlyAdmin() {
         emit MinterChanged(_minter, newMinter);
         _minter = newMinter;
-    }
-
-    modifier onlyMinter() {
-        require(msg.sender == _minter, "only minter allowed");
-        _;
     }
 }

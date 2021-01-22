@@ -1,10 +1,14 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
-import "../common/Interfaces/ERC677Receiver.sol";
+pragma solidity 0.7.5;
+import "../common/Interfaces/IERC677Receiver.sol";
 
-contract MockERC677Receiver is ERC677Receiver {
+contract MockERC677Receiver is IERC677Receiver {
     event OnTokenTransferEvent(address indexed _sender, uint256 _value, bytes _data);
 
+    /// @dev Emits the OnTokenTransferEvent.
+    /// @param _sender The address of the sender.
+    /// @param _value The value sent with the tx.
+    /// @param _data The data sent with the tx.
     function onTokenTransfer(
         address _sender,
         uint256 _value,
