@@ -46,9 +46,6 @@ const landSalePrefix = args[0];
 
     const landSaleName = `${landSalePrefix}_${sector.sector}`;
 
-    console.log(landSaleName, JSON.stringify(assetIdsCount, null, '  '));
-
-    const presale = await deployments.get(landSaleName);
     const owner =
       networkName === 'mainnet'
         ? '0x7A9fe22691c811ea339D9B73150e6911a5343DcA'
@@ -59,17 +56,16 @@ const landSalePrefix = args[0];
       ids.push(assetId);
       values.push(assetIdsCount[assetId]);
     }
+    // TODO check balance, currently it withdraw as if nothing has been taken yet
     if (ids.length > 0) {
       await catchUnknownSigner(
         execute(
-          'Asset',
+          landSaleName,
           {from: owner, log: true},
-          'safeBatchTransferFrom',
+          'withdrawAssets',
           owner,
-          presale.address,
           ids,
-          values,
-          '0x'
+          values
         )
       );
     }
