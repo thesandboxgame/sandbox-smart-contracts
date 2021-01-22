@@ -1,51 +1,14 @@
 import {ethers, getUnnamedAccounts} from 'hardhat';
-import {BigNumber} from '@ethersproject/bignumber';
+import {BigNumber, Event} from 'ethers';
 import {expect} from '../../chai-setup';
 import {setCatalyst, setupAssetAttributesRegistry} from './fixtures';
 import catalysts from '../../../data/catalysts';
 import gems from '../../../data/gems';
 
 describe('AssetAttributesRegistry', function () {
-  // async function setCatalyst(
-  //   assetId: BigNumber,
-  //   catalystId: number,
-  //   gemsIds: number[]
-  // ) {
-  //   const {
-  //     assetAttributesRegistry,
-  //     assetAttributesRegistryAdmin,
-  //   } = await setupAssetAttributesRegistry();
-  //   await assetAttributesRegistry
-  //     .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-  //     .setCatalyst(assetId, catalystId, gemsIds);
-  //   const record = await assetAttributesRegistry.getRecord(assetId);
-  //   expect(record.catalystId).to.equal(catalystId);
-  //   expect(record.exists).to.equal(true);
-  //   for (let i = 0; i < gemsIds.length; i++) {
-  //     expect(record.gemIds[i]).to.equal(i + 1);
-  //   }
-  //   const assetAttributesRegistryEvents = await assetAttributesRegistry.queryFilter(
-  //     assetAttributesRegistry.filters.CatalystApplied()
-  //   );
-  //   const event = assetAttributesRegistryEvents.filter(
-  //     (e) => e.event === 'CatalystApplied'
-  //   )[0];
-  //   const block = await ethers.provider.getBlock('latest');
-
-  //   expect(event.args).not.to.equal(null || undefined);
-  //   if (event.args) {
-  //     expect(event.args[0]).to.equal(BigNumber.from(assetId));
-  //     expect(event.args[1]).to.equal(BigNumber.from(catalystId));
-  //     expect(event.args[2]).to.eql(gemsIds);
-  //     expect(event.args[3]).to.equal(
-  //       BigNumber.from(block.number).add(BigNumber.from('1'))
-  //     );
-  //   }
-  // }
-
   function testSetCatalyst(
-    record: any,
-    event: any,
+    record: {catalystId: number; exists: boolean; gemIds: []},
+    event: Event,
     block: any,
     gemsIds: number[],
     catalystId: number,

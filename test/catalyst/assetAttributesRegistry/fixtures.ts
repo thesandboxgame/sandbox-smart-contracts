@@ -1,5 +1,5 @@
 import {ethers, deployments, getNamedAccounts} from 'hardhat';
-import {BigNumber, Contract} from 'ethers';
+import {BigNumber, Contract, Event} from 'ethers';
 import {waitFor} from '../../utils';
 
 export const setupAssetAttributesRegistry = deployments.createFixture(
@@ -25,7 +25,11 @@ export async function setCatalyst(
   assetId: BigNumber,
   catalystId: number,
   gemsIds: number[]
-): Promise<{record: any; event: any; block: any}> {
+): Promise<{
+  record: {catalystId: number; exists: boolean; gemIds: []};
+  event: Event;
+  block: any;
+}> {
   const {
     assetAttributesRegistry,
     assetAttributesRegistryAdmin,
