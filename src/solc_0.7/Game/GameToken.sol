@@ -57,11 +57,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     constructor(
         address metaTransactionContract,
         address admin,
-        IAssetToken asset,
-        address initialMinter
+        IAssetToken asset
     ) ERC721BaseToken(metaTransactionContract, admin) {
         _asset = asset;
-        _minter = initialMinter;
     }
 
     ///////////////////////////////  Modifiers //////////////////////////////
@@ -506,7 +504,14 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint32 version = uint32(gameId);
         version++;
         address owner = _ownerOf(gameId);
-        _burn(from, owner, gameId);
+        if (from == owner) {
+            // caller is owner or metaTx on owner's behalf
+            _burn(from, owner, gameId);
+        } else if (_gameEditors[owner][from]) {
+            // caller is editor or metaTx on editor's behalf, so we need to pass owner
+            // instead of from or _burn will fail
+            _burn(owner, owner, gameId);
+        }
         (uint256 newId, ) = _mintGame(originalCreator, owner, subId, version, false);
         address newOwner = _ownerOf(newId);
         assert(owner == newOwner);

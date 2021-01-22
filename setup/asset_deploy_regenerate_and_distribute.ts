@@ -1,7 +1,7 @@
 import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
-import deploy from '../deploy/0030_deploy_asset';
-import setupBatchDeployerAsAssetBouncer from '../deploy/9040_asset_bouncer_enable_deployer_batch';
+import deploy from '../deploy/06_asset/09_deploy_asset';
+import setupBatchDeployerAsAssetBouncer from '../deploy/10_helpers/9040_asset_bouncer_enable_deployer_batch';
 import regenerate from './asset_regenerate';
 import distribute from './asset_distribute';
 

@@ -21,4 +21,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['LandWeightedSANDRewardPool', 'LandWeightedSANDRewardPool_deploy'];
-func.dependencies = ['Land_deploy', 'Sand_Deploy', 'UNI_SAND_ETH']; // TODO what if no uni_sand is to be executed ?
+func.dependencies = ['Land_deploy', 'Sand_deploy', 'UNI_SAND_ETH']; // TODO what if no uni_sand is to be executed ?

@@ -4,10 +4,10 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {
   createAssetClaimMerkleTree,
   AssetClaim,
-} from '../data/asset_giveaway_1/getAssets';
+} from '../../data/asset_giveaway_1/getAssets';
 import {AddressZero} from '@ethersproject/constants';
 
-import helpers from '../lib/merkleTreeHelper';
+import helpers from '../../lib/merkleTreeHelper';
 const {calculateAssetHash} = helpers;
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {

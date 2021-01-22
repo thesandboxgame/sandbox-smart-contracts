@@ -1,21 +1,22 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import gems from '../../data/gems';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
   const {deployer} = await getNamedAccounts();
-
-  const sand = await deployments.get('Sand');
-
-  await deploy('Permit', {
-    from: deployer,
-    log: true,
-    args: [sand.address],
-  });
+  for (const gemName of gems) {
+    await deploy(`Gem_${gemName}`, {
+      contract: 'ERC20Token',
+      from: deployer,
+      log: true,
+      args: [gemName, gemName, deployer],
+      skipIfAlreadyDeployed: true,
+    });
+  }
 };
 export default func;
-func.tags = ['Permit', 'Permit_deploy'];
-func.dependencies = ['Sand_deploy'];
+func.tags = ['Gems', 'Gems_deploy'];
 func.skip = async (hre) => hre.network.name !== 'hardhat'; // TODO
