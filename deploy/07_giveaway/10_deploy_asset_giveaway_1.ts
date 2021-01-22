@@ -1,13 +1,10 @@
 import fs from 'fs';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {
-  createAssetClaimMerkleTree,
-  AssetClaim,
-} from '../../data/asset_giveaway_1/getAssets';
+import {createAssetClaimMerkleTree} from '../../data/asset_giveaway_1/getAssets';
 import {AddressZero} from '@ethersproject/constants';
 
-import helpers from '../../lib/merkleTreeHelper';
+import helpers, {AssetGiveawayInfo} from '../../lib/merkleTreeHelper';
 const {calculateAssetHash} = helpers;
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -16,7 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const chainId = await getChainId();
   const {deployer} = await getNamedAccounts();
 
-  let assetData: AssetClaim[];
+  let assetData: AssetGiveawayInfo[];
   try {
     assetData = JSON.parse(
       fs
@@ -51,7 +48,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     ],
   });
 
-  const claimsWithProofs: (AssetClaim & {proof: string[]})[] = [];
+  const claimsWithProofs: (AssetGiveawayInfo & {proof: string[]})[] = [];
   for (const claim of saltedAssets) {
     claimsWithProofs.push({
       ...claim,
