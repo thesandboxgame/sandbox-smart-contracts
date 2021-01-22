@@ -1,7 +1,11 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
 library BytesUtil {
+    /// @dev Check if the data == _address.
+    /// @param data The bytes passed to the function.
+    /// @param _address The address to compare to.
+    /// @return Whether the first param == _address.
     function doFirstParamEqualsAddress(bytes memory data, address _address) internal pure returns (bool) {
         if (data.length < (36 + 32)) {
             return false;

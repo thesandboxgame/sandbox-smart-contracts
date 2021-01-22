@@ -10,8 +10,11 @@ contract MetaTxWrapper is BaseRelayRecipient {
         _forwardTo = forwardTo;
     }
 
+    receive() external payable {
+        revert("ETHER_TRANSFER_BLOCKED");
+    }
+
     fallback() external payable trustedForwarderOnly() {
-        uint256 length = msg.data.length;
         // retrieve the msg sender as per EIP-2771
         address signer = _msgSender();
         address firstParam = abi.decode(msg.data[4:], (address));

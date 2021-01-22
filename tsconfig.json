@@ -6,7 +6,15 @@
     "esModuleInterop": true,
     "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true,
-    "outDir": "dist"
+    "outDir": "dist",
+    "resolveJsonModule": true
   },
-  "include": ["hardhat.config.ts", "./scripts", "./deploy", "./test", "./utils"]
+  "include": [
+    "hardhat.config.ts",
+    "./scripts",
+    "./setup",
+    "./deploy",
+    "./test",
+    "./utils"
+  ]
 }

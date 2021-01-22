@@ -1,11 +1,11 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./AssetAttributesRegistry.sol";
 import "./GemsCatalystsRegistry.sol";
-import "../common/Interfaces/ERC20Extended.sol";
-import "../common/Interfaces/AssetToken.sol";
+import "../common/Interfaces/IERC20Extended.sol";
+import "../common/Interfaces/IAssetToken.sol";
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
@@ -17,9 +17,9 @@ contract AssetUpgrader is WithMetaTransaction {
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
     address private constant BURN_ADDRESS = 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF;
 
-    ERC20Extended internal immutable _sand;
+    IERC20Extended internal immutable _sand;
     AssetAttributesRegistry internal immutable _registry;
-    AssetToken internal immutable _asset;
+    IAssetToken internal immutable _asset;
     GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
     uint256 internal immutable _upgradeFee;
     uint256 internal immutable _gemAdditionFee;
@@ -35,8 +35,8 @@ contract AssetUpgrader is WithMetaTransaction {
     /// @param feeRecipient: address receiving the Sand fee
     constructor(
         AssetAttributesRegistry registry,
-        ERC20Extended sand,
-        AssetToken asset,
+        IERC20Extended sand,
+        IAssetToken asset,
         GemsCatalystsRegistry gemsCatalystsRegistry,
         uint256 upgradeFee,
         uint256 gemAdditionFee,

@@ -1,10 +1,10 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 pragma experimental ABIEncoderV2;
 
 import "./interfaces/OldCatalystRegistry.sol";
 import "./AssetAttributesRegistry.sol";
-import "../common/Interfaces/AssetToken.sol";
+import "../common/Interfaces/IAssetToken.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
 
 /// @notice Contract performing migrations for collections, do not require owner approval
@@ -13,7 +13,7 @@ contract CollectionCatalystMigrations is WithAdmin {
 
     OldCatalystRegistry internal immutable _oldRegistry;
     AssetAttributesRegistry internal immutable _registry;
-    AssetToken internal immutable _asset;
+    IAssetToken internal immutable _asset;
 
     struct Migration {
         uint256 assetId;
@@ -26,7 +26,7 @@ contract CollectionCatalystMigrations is WithAdmin {
     /// @param registry: New AssetAttributesRegistry
     /// @param oldRegistry: Old CatalystRegistry
     constructor(
-        AssetToken asset,
+        IAssetToken asset,
         AssetAttributesRegistry registry,
         OldCatalystRegistry oldRegistry,
         address admin
