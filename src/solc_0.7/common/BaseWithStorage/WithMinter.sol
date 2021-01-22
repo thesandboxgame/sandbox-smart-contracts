@@ -1,9 +1,15 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.1;
+import "./WithAdmin.sol";
 
-contract WithMinter {
+contract WithMinter is WithAdmin {
     address internal _minter;
     event MinterChanged(address oldMinter, address newMinter);
+
+    constructor(address admin, address minter) {
+        _admin = admin;
+        _minter = minter;
+    }
 
     /// @dev gives the current minter of this contract.
     /// @return the current minter of this contract.
@@ -14,7 +20,7 @@ contract WithMinter {
     /// @dev change the minter to be `newMinter`.
     /// @param newMinter address of the new minter.
     function changeMinter(address newMinter) external {
-        require(msg.sender == _minter, "only admin can change admin");
+        require(msg.sender == _admin, "only admin can change admin");
         emit MinterChanged(_minter, newMinter);
         _minter = newMinter;
     }

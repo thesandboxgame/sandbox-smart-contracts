@@ -1,5 +1,6 @@
 import {ethers, deployments, getNamedAccounts} from 'hardhat';
 import {BigNumber, Contract} from 'ethers';
+import {waitFor} from '../../utils';
 
 export const setupAssetAttributesRegistry = deployments.createFixture(
   async () => {
@@ -9,6 +10,11 @@ export const setupAssetAttributesRegistry = deployments.createFixture(
     );
     const {assetAttributesRegistryAdmin} = await getNamedAccounts();
 
+    await waitFor(
+      assetAttributesRegistry
+        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
+        .changeMinter(assetAttributesRegistryAdmin)
+    );
     return {
       assetAttributesRegistry,
       assetAttributesRegistryAdmin,

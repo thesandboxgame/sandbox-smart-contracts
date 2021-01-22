@@ -7,7 +7,7 @@ import "../common/BaseWithStorage/WithMinter.sol";
 import "./GemsCatalystsRegistry.sol";
 import "hardhat/console.sol";
 
-contract AssetAttributesRegistry is WithAdmin, WithMinter {
+contract AssetAttributesRegistry is WithMinter {
     uint256 internal constant MAX_NUM_GEMS = 15;
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
     uint256 private constant NOT_IS_NFT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFFFFFFFF;
@@ -36,10 +36,8 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         GemsCatalystsRegistry gemsCatalystsRegistry,
         address admin,
         address minter
-    ) {
+    ) WithMinter(admin, minter) {
         _gemsCatalystsRegistry = gemsCatalystsRegistry;
-        _admin = admin;
-        _minter = minter;
     }
 
     function getRecord(uint256 assetId)
