@@ -7,7 +7,7 @@ import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
 import {setupAssetMinter} from './fixtures';
 
 describe('AssetMinter', function () {
-  it('mint x', async function () {
+  it('', async function () {
     // const { assetMinterContract } = await setupAssetMinter();
     // const { catalystOwner, rareCatalyst } = await setupGemsAndCatalysts();
     // const packId = BigNumber.from("1");

@@ -9,16 +9,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const registryMinter = await read('AssetAttributesRegistry', 'getMinter');
   const AssetMinter = await deployments.get('AssetMinter');
-  const assetUpgraderContract = await deployments.get('AssetUpgrader');
 
-  // if (registryMinter !== AssetMinter.address) {
-  //   await execute(
-  //     'AssetAttributesRegistry',
-  //     {from: assetAttributesRegistryAdmin, log: true},
-  //     'changeMinter',
-  //     assetUpgraderContract.address
-  //   );
-  // }
+  if (registryMinter !== AssetMinter.address) {
+    await execute(
+      'AssetAttributesRegistry',
+      {from: assetAttributesRegistryAdmin, log: true},
+      'changeMinter',
+      AssetMinter.address
+    );
+  }
 };
 export default func;
 func.tags = ['AssetAttributesRegistry', 'AssetAttributesRegistry_setup'];

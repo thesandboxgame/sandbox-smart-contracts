@@ -2,7 +2,7 @@ import {ethers, deployments, getNamedAccounts} from 'hardhat';
 import {BigNumber, Contract} from 'ethers';
 
 export const setupAssetUpgrader = deployments.createFixture(async () => {
-  await deployments.fixture();
+  await deployments.fixture(['AssetUpgrader']);
   const {assetAttributesRegistryAdmin} = await getNamedAccounts();
   const assetUpgraderContract: Contract = await ethers.getContract(
     'AssetUpgrader'
