@@ -4,16 +4,19 @@ import fs from 'fs';
 import helpers, {SaltedSaleLandInfo} from '../../lib/merkleTreeHelper';
 const {calculateLandHash} = helpers;
 
+const LANDSALE_PREFIX = 'LandPreSale_5';
+
 import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy} = deployments;
+  const {deploy, read, execute, catchUnknownSigner} = deployments;
   const {
     deployer,
     landSaleBeneficiary,
     backendReferralWallet,
     landSaleFeeRecipient,
+    landSaleAdmin,
   } = await getNamedAccounts();
 
   const sandContract = await deployments.get('Sand');
@@ -23,13 +26,14 @@ const func: DeployFunction = async function (hre) {
   async function deployLandSale(landSale: LandSale) {
     const {lands, merkleRootHash, saltedLands, tree, sector} = landSale;
 
+    const landSaleName = `${LANDSALE_PREFIX}_${sector}`;
     const deadline = deadlines[sector];
 
     if (!deadline) {
       throw new Error(`no deadline for sector ${sector}`);
     }
 
-    await deploy('LandPreSale_5', {
+    const landSaleDeployment = await deploy(landSaleName, {
       from: deployer,
       linkedData: lands,
       contract: 'EstateSaleWithFee',
@@ -58,8 +62,52 @@ const func: DeployFunction = async function (hre) {
         landsWithProof.push({...land, proof});
       }
       fs.writeFileSync(
-        `./.presale_5_proofs_${hre.network.name}.json`,
+        `./.proofs_${landSaleName}_${hre.network.name}.json`,
         JSON.stringify(landsWithProof, null, '  ')
+      );
+    }
+
+    const isMinter = await read('Land', 'isMinter', landSaleDeployment.address);
+    if (!isMinter) {
+      const currentLandAdmin = await read('Land', 'getAdmin');
+      await catchUnknownSigner(
+        execute(
+          'Land',
+          {from: currentLandAdmin, log: true},
+          'setMinter',
+          landSaleDeployment.address,
+          true
+        )
+      );
+    }
+
+    const currentAdmin = await read(landSaleName, 'getAdmin');
+    if (currentAdmin.toLowerCase() !== landSaleAdmin.toLowerCase()) {
+      await catchUnknownSigner(
+        execute(
+          landSaleName,
+          {from: currentAdmin, log: true},
+          'changeAdmin',
+          landSaleAdmin
+        )
+      );
+    }
+
+    const isSandSuperOperator = await read(
+      'Sand',
+      'isSuperOperator',
+      landSaleDeployment.address
+    );
+    if (!isSandSuperOperator) {
+      const currentSandAdmin = await read('Sand', 'getAdmin');
+      await catchUnknownSigner(
+        execute(
+          'Sand',
+          {from: currentSandAdmin, log: true},
+          'setSuperOperator',
+          landSaleDeployment.address,
+          true
+        )
       );
     }
   }
