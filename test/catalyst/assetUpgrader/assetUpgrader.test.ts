@@ -51,9 +51,8 @@ describe('AssetUpgrader', function () {
       .connect(ethers.provider.getSigner(assetAdmin))
       .setSuperOperator(superOperator, true);
   }
-  it('changeCatalyst for rareCatalyst ', async function () {
+  it('changeCatalyst for rareCatalyst', async function () {
     const {
-      assetAttributesRegistryAdmin,
       assetUpgraderContract,
       assetAttributesRegistry,
       sandContract,
