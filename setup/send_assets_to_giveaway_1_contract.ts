@@ -1,6 +1,6 @@
 import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {AssetClaim} from '../data/asset_giveaway_1/getAssets';
+import {AssetGiveawayInfo} from '../lib/merkleTreeHelper';
 
 const func: DeployFunction = async function () {
   const {deployments} = hre;
@@ -28,7 +28,7 @@ const func: DeployFunction = async function () {
 
   const AssetGiveaway = await deployments.get('Asset_Giveaway_1');
 
-  const assetData: AssetClaim[] = AssetGiveaway.linkedData;
+  const assetData: AssetGiveawayInfo[] = AssetGiveaway.linkedData;
 
   await catchUnknownSigner(
     execute(
