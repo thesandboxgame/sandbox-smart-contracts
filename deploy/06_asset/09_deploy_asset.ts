@@ -82,7 +82,7 @@ const func: DeployFunction = async function (
         openzeppelinNetworkName = 'rinkeby';
         break;
       case '1':
-        openzeppelinNetworkName = 'mainnet'; // ???? TO CHECK
+        openzeppelinNetworkName = 'mainnet';
         break;
       // TODO more + move to lib
     }

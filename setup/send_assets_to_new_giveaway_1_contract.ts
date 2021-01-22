@@ -27,7 +27,7 @@ const func: DeployFunction = async function () {
     Asset.address,
     [data],
     {gasPrice: '56000000000'}
-  ); // TODO gasprice
+  ); // TODO allow gasprice to be passed as parameter to the script
   console.log({txHash: tx.hash});
   await tx.wait();
 };
