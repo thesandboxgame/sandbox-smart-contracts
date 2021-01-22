@@ -15,9 +15,11 @@ describe('AssetUpgrader', function () {
     const {assetBouncerAdmin} = await getNamedAccounts();
     const assetContract = await ethers.getContract('Asset');
 
-    await assetContract
-      .connect(ethers.provider.getSigner(assetBouncerAdmin))
-      .setBouncer(assetBouncerAdmin, true);
+    await waitFor(
+      assetContract
+        .connect(ethers.provider.getSigner(assetBouncerAdmin))
+        .setBouncer(assetBouncerAdmin, true)
+    );
 
     const assetId = await assetContract
       .connect(ethers.provider.getSigner(assetBouncerAdmin))
@@ -30,27 +32,32 @@ describe('AssetUpgrader', function () {
         minter,
         Buffer.from('data')
       );
-    await assetContract
-      .connect(ethers.provider.getSigner(assetBouncerAdmin))
-      .mint(
-        minter,
-        22,
-        '0x1111111111111111111111111111111111111111111111111111111111111111',
-        1,
-        1,
-        minter,
-        Buffer.from('data')
-      );
+
+    await waitFor(
+      assetContract
+        .connect(ethers.provider.getSigner(assetBouncerAdmin))
+        .mint(
+          minter,
+          22,
+          '0x1111111111111111111111111111111111111111111111111111111111111111',
+          1,
+          1,
+          minter,
+          Buffer.from('data')
+        )
+    );
     return assetId;
   }
 
-  async function setSuperOperator(superOperator: string) {
-    const {assetAdmin} = await getNamedAccounts();
-    const assetContract = await ethers.getContract('Asset');
-    await assetContract
-      .connect(ethers.provider.getSigner(assetAdmin))
-      .setSuperOperator(superOperator, true);
-  }
+  // async function setSuperOperator(superOperator: string) {
+  //   const {assetAdmin} = await getNamedAccounts();
+  //   const assetContract = await ethers.getContract('Asset');
+  //   await waitFor(
+  //     assetContract
+  //       .connect(ethers.provider.getSigner(assetAdmin))
+  //       .setSuperOperator(superOperator, true)
+  //   );
+  // }
   it('changeCatalyst for rareCatalyst', async function () {
     const {
       assetUpgraderContract,
@@ -66,8 +73,6 @@ describe('AssetUpgrader', function () {
       powerGem,
       defenseGem,
     } = await _setupGemsAndCatalysts();
-
-    await setSuperOperator(assetUpgraderContract.address);
 
     const users = await getUnnamedAccounts();
     const assetId = await mintAsset(catalystOwner);
@@ -90,15 +95,17 @@ describe('AssetUpgrader', function () {
     const sandBalanceFromBefore = await sandContract.balanceOf(catalystOwner);
     const sandBalanceToBefore = await sandContract.balanceOf(feeRecipient);
 
-    await assetUpgraderContract
-      .connect(ethers.provider.getSigner(catalystOwner))
-      .changeCatalyst(
-        catalystOwner,
-        assetId,
-        catalystId,
-        [powerGemId, defenseGemId],
-        users[2]
-      );
+    await waitFor(
+      assetUpgraderContract
+        .connect(ethers.provider.getSigner(catalystOwner))
+        .changeCatalyst(
+          catalystOwner,
+          assetId,
+          catalystId,
+          [powerGemId, defenseGemId],
+          users[2]
+        )
+    );
 
     const sandBalanceFromAfter = await sandContract.balanceOf(catalystOwner);
     const sandBalanceToAfter = await sandContract.balanceOf(feeRecipient);
@@ -164,10 +171,7 @@ describe('AssetUpgrader', function () {
       powerGem,
       defenseGem,
     } = await _setupGemsAndCatalysts();
-    await setSuperOperator(assetUpgraderContract.address);
-    await assetAttributesRegistry
-      .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-      .changeMinter(assetAttributesRegistryAdmin);
+
     const users = await getUnnamedAccounts();
     const assetId = await mintAsset(catalystOwner);
     const powerGemId = await powerGem.gemId();
@@ -182,17 +186,23 @@ describe('AssetUpgrader', function () {
     );
     const totalSupplyBeforeBurningPowerGem = await powerGem.totalSupply();
     const totalSupplyBeforeBurningDefenseGem = await defenseGem.totalSupply();
-    await powerGem
-      .connect(ethers.provider.getSigner(catalystOwner))
-      .approve(gemsCatalystsRegistry, 100000000000000);
-    await defenseGem
-      .connect(ethers.provider.getSigner(catalystOwner))
-      .approve(gemsCatalystsRegistry, 100000000000000);
+    await waitFor(
+      powerGem
+        .connect(ethers.provider.getSigner(catalystOwner))
+        .approve(gemsCatalystsRegistry.address, 100000000000000)
+    );
+    await waitFor(
+      defenseGem
+        .connect(ethers.provider.getSigner(catalystOwner))
+        .approve(gemsCatalystsRegistry.address, 100000000000000)
+    );
 
     await setCatalyst(assetId, catalystId, []);
-    await assetUpgraderContract
-      .connect(ethers.provider.getSigner(catalystOwner))
-      .addGems(catalystOwner, assetId, [powerGemId, defenseGemId], users[2]);
+    await waitFor(
+      assetUpgraderContract
+        .connect(ethers.provider.getSigner(catalystOwner))
+        .addGems(catalystOwner, assetId, [powerGemId, defenseGemId], users[2])
+    );
 
     const balanceAfterBurningPowerGem = await powerGem.balanceOf(catalystOwner);
     const balanceAfterBurningDefenseGem = await defenseGem.balanceOf(
