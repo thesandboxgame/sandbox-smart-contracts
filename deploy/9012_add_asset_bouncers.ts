@@ -1,18 +1,22 @@
-import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { DeployFunction } from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const { deployments, getNamedAccounts } = hre;
-  const { execute, read } = deployments;
+  const {deployments, getNamedAccounts} = hre;
+  const {execute, read} = deployments;
 
-  const { assetBouncerAdmin } = await getNamedAccounts();
+  const {assetBouncerAdmin} = await getNamedAccounts();
   const assetMinter = await deployments.get('AssetMinter');
-  const isAssetAdmimBouncer = await read('Asset', 'isBouncer', assetMinter.address);
+  const isAssetAdmimBouncer = await read(
+    'Asset',
+    'isBouncer',
+    assetMinter.address
+  );
 
   if (!isAssetAdmimBouncer) {
     await execute(
       'Asset',
-      { from: assetBouncerAdmin, log: true },
+      {from: assetBouncerAdmin, log: true},
       'setBouncer',
       assetMinter.address,
       true

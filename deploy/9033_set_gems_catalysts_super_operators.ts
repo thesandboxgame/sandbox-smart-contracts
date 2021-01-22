@@ -1,12 +1,12 @@
-import { HardhatRuntimeEnvironment } from 'hardhat/types';
-import { DeployFunction } from 'hardhat-deploy/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const { deployments, getNamedAccounts } = hre;
-  const { execute, read } = deployments;
+  const {deployments, getNamedAccounts} = hre;
+  const {execute, read} = deployments;
 
   const AssetMinter = await deployments.get('AssetMinter');
-  const { gemsCatalystsRegistryAdmin } = await getNamedAccounts();
+  const {gemsCatalystsRegistryAdmin} = await getNamedAccounts();
 
   const isAssetMinterSuperOperator = await read(
     'GemsCatalystsRegistry',
@@ -17,7 +17,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (!isAssetMinterSuperOperator) {
     await execute(
       'GemsCatalystsRegistry',
-      { from: gemsCatalystsRegistryAdmin, log: true },
+      {from: gemsCatalystsRegistryAdmin, log: true},
       'setSuperOperator',
       AssetMinter.address,
       true
