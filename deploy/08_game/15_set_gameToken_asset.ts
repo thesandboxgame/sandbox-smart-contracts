@@ -5,7 +5,11 @@ const func: DeployFunction = async function (hre) {
   const {execute, read} = deployments;
 
   const {assetAdmin} = await getNamedAccounts();
-  const gameToken = await deployments.get('GameToken');
+
+  const gameToken = await deployments.getOrNull('GameToken');
+  if (!gameToken) {
+    return;
+  }
 
   const isSuperOperator = await read(
     'Asset',

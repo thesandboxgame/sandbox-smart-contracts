@@ -5,7 +5,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments} = hre;
   const {log, execute, read} = deployments;
 
-  const permit = await deployments.get('Permit');
+  const permit = await deployments.getOrNull('Permit');
+  if (!permit) {
+    return;
+  }
 
   const isSandSuperOperator = await read(
     'Sand',

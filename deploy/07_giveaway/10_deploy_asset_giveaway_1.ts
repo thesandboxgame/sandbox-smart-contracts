@@ -41,6 +41,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     linkedData: assets,
     log: true,
+    skipIfAlreadyDeployed: true,
     args: [
       assetContract.address,
       AddressZero, // no admin needed
