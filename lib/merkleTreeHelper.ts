@@ -1,4 +1,4 @@
-import {BigNumber, utils} from 'ethers';
+import {utils} from 'ethers';
 const {solidityKeccak256} = utils;
 import crypto from 'crypto';
 
