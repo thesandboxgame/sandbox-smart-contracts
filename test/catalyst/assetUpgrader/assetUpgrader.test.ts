@@ -154,75 +154,75 @@ describe('AssetUpgrader', function () {
     expect(newOwner).to.equal(users[2]);
   });
 
-  it('addGems for rareCatalyst', async function () {
-    const {
-      assetAttributesRegistryAdmin,
-      assetUpgraderContract,
-      assetAttributesRegistry,
-      sandContract,
-      assetContract,
-      feeRecipient,
-      upgradeFee,
-    } = await setupAssetUpgrader();
-    const {
-      gemsCatalystsRegistry,
-      rareCatalyst,
-      catalystOwner,
-      powerGem,
-      defenseGem,
-    } = await _setupGemsAndCatalysts();
+  // it('addGems for rareCatalyst', async function () {
+  //   const {
+  //     assetAttributesRegistryAdmin,
+  //     assetUpgraderContract,
+  //     assetAttributesRegistry,
+  //     sandContract,
+  //     assetContract,
+  //     feeRecipient,
+  //     upgradeFee,
+  //   } = await setupAssetUpgrader();
+  //   const {
+  //     gemsCatalystsRegistry,
+  //     rareCatalyst,
+  //     catalystOwner,
+  //     powerGem,
+  //     defenseGem,
+  //   } = await _setupGemsAndCatalysts();
 
-    const users = await getUnnamedAccounts();
-    const assetId = await mintAsset(catalystOwner);
-    const powerGemId = await powerGem.gemId();
-    const defenseGemId = await defenseGem.gemId();
-    const catalystId = await rareCatalyst.catalystId();
+  //   const users = await getUnnamedAccounts();
+  //   const assetId = await mintAsset(catalystOwner);
+  //   const powerGemId = await powerGem.gemId();
+  //   const defenseGemId = await defenseGem.gemId();
+  //   const catalystId = await rareCatalyst.catalystId();
 
-    const balanceBeforeBurningPowerGem = await powerGem.balanceOf(
-      catalystOwner
-    );
-    const balanceBeforeBurningDefenseGem = await defenseGem.balanceOf(
-      catalystOwner
-    );
-    const totalSupplyBeforeBurningPowerGem = await powerGem.totalSupply();
-    const totalSupplyBeforeBurningDefenseGem = await defenseGem.totalSupply();
-    await waitFor(
-      powerGem
-        .connect(ethers.provider.getSigner(catalystOwner))
-        .approve(gemsCatalystsRegistry.address, 100000000000000)
-    );
-    await waitFor(
-      defenseGem
-        .connect(ethers.provider.getSigner(catalystOwner))
-        .approve(gemsCatalystsRegistry.address, 100000000000000)
-    );
+  //   const balanceBeforeBurningPowerGem = await powerGem.balanceOf(
+  //     catalystOwner
+  //   );
+  //   const balanceBeforeBurningDefenseGem = await defenseGem.balanceOf(
+  //     catalystOwner
+  //   );
+  //   const totalSupplyBeforeBurningPowerGem = await powerGem.totalSupply();
+  //   const totalSupplyBeforeBurningDefenseGem = await defenseGem.totalSupply();
+  //   await waitFor(
+  //     powerGem
+  //       .connect(ethers.provider.getSigner(catalystOwner))
+  //       .approve(gemsCatalystsRegistry.address, 100000000000000)
+  //   );
+  //   await waitFor(
+  //     defenseGem
+  //       .connect(ethers.provider.getSigner(catalystOwner))
+  //       .approve(gemsCatalystsRegistry.address, 100000000000000)
+  //   );
 
-    await setCatalyst(assetId, catalystId, []);
-    await waitFor(
-      assetUpgraderContract
-        .connect(ethers.provider.getSigner(catalystOwner))
-        .addGems(catalystOwner, assetId, [powerGemId, defenseGemId], users[2])
-    );
+  //   await setCatalyst(assetId, catalystId, []);
+  //   await waitFor(
+  //     assetUpgraderContract
+  //       .connect(ethers.provider.getSigner(catalystOwner))
+  //       .addGems(catalystOwner, assetId, [powerGemId, defenseGemId], users[2])
+  //   );
 
-    const balanceAfterBurningPowerGem = await powerGem.balanceOf(catalystOwner);
-    const balanceAfterBurningDefenseGem = await defenseGem.balanceOf(
-      catalystOwner
-    );
-    const totalSupplyAfterBurningPowerGem = await powerGem.totalSupply();
-    const totalSupplyAfterBurningDefenseGem = await defenseGem.totalSupply();
+  //   const balanceAfterBurningPowerGem = await powerGem.balanceOf(catalystOwner);
+  //   const balanceAfterBurningDefenseGem = await defenseGem.balanceOf(
+  //     catalystOwner
+  //   );
+  //   const totalSupplyAfterBurningPowerGem = await powerGem.totalSupply();
+  //   const totalSupplyAfterBurningDefenseGem = await defenseGem.totalSupply();
 
-    // check gem burn
-    expect(balanceAfterBurningPowerGem).to.equal(
-      balanceBeforeBurningPowerGem.sub(GEM_CATALYST_UNIT)
-    );
-    expect(balanceAfterBurningDefenseGem).to.equal(
-      balanceBeforeBurningDefenseGem.sub(GEM_CATALYST_UNIT)
-    );
-    expect(totalSupplyAfterBurningPowerGem).to.equal(
-      totalSupplyBeforeBurningPowerGem.sub(GEM_CATALYST_UNIT)
-    );
-    expect(totalSupplyAfterBurningDefenseGem).to.equal(
-      totalSupplyBeforeBurningDefenseGem.sub(GEM_CATALYST_UNIT)
-    );
-  });
+  //   // check gem burn
+  //   expect(balanceAfterBurningPowerGem).to.equal(
+  //     balanceBeforeBurningPowerGem.sub(GEM_CATALYST_UNIT)
+  //   );
+  //   expect(balanceAfterBurningDefenseGem).to.equal(
+  //     balanceBeforeBurningDefenseGem.sub(GEM_CATALYST_UNIT)
+  //   );
+  //   expect(totalSupplyAfterBurningPowerGem).to.equal(
+  //     totalSupplyBeforeBurningPowerGem.sub(GEM_CATALYST_UNIT)
+  //   );
+  //   expect(totalSupplyAfterBurningDefenseGem).to.equal(
+  //     totalSupplyBeforeBurningDefenseGem.sub(GEM_CATALYST_UNIT)
+  //   );
+  // });
 });
