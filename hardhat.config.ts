@@ -112,6 +112,8 @@ const config: HardhatUserConfig = {
       1: 'treasury',
     }, // updated to company treasury wallet 9th September - collect funds from land sales
 
+    catalystAssetFeeRecipient: 'treasury',
+
     landSaleFeeRecipient: {
       default: 3,
       rinkeby: 5,
@@ -124,6 +126,8 @@ const config: HardhatUserConfig = {
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
     }, // can add super operators and change admin
 
+    gemsAndCatalystsAdmin: 'sandAdmin',
+    assetAttributesRegistryAdmin: 'sandAdmin',
     proxyAdminOwner: {
       default: 2,
       1: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
@@ -152,6 +156,7 @@ const config: HardhatUserConfig = {
       1: null,
       rinkeby: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
     },
+    collectionCatalystMigrationsAdmin: 'sandAdmin', // TODO use special account or deployer ?
     catalystMinter: 'sandAdmin', // account that can mint catalysts
     catalystAdmin: 'sandAdmin', // can set minter and admin for catatalyt, as well as super operators
     gemAdmin: 'sandAdmin', // can set minter and admin for gems, as well as super operators
@@ -162,6 +167,8 @@ const config: HardhatUserConfig = {
     starterPackSaleBeneficiary: 'treasury', // collect funds from starter pack sales
     backendMessageSigner: 'backendReferralWallet', // account that sign message for the starter pack
     kyberLiquidityProvider: 'sandBeneficiary', //TODO check what should be the value
+
+    gemsCatalystsRegistryAdmin: 'sandAdmin',
   },
   networks: {
     hardhat: {
