@@ -156,6 +156,14 @@ contract AssetUpgrader is WithMetaTransaction {
         }
     }
 
+    function _burnGems(address from, uint16[] memory gemIds) internal {
+        _gemsCatalystsRegistry.burnDifferentGems(from, gemIds, GEM_UNIT);
+    }
+
+    function _burnCatalyst(address from, uint16 catalystId) internal {
+        _gemsCatalystsRegistry.burnCatalyst(from, catalystId, CATALYST_UNIT);
+    }
+
     function _checkAuthorization(address from, address to) internal view {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         if (from != msg.sender) {
@@ -165,13 +173,5 @@ contract AssetUpgrader is WithMetaTransaction {
                 require(from == _forceMsgSender(), "INVALID_SENDER");
             }
         }
-    }
-
-    function _burnGems(address from, uint16[] memory gemIds) internal {
-        _gemsCatalystsRegistry.burnDifferentGems(from, gemIds, GEM_UNIT);
-    }
-
-    function _burnCatalyst(address from, uint16 catalystId) internal {
-        _gemsCatalystsRegistry.burnCatalyst(from, catalystId, CATALYST_UNIT);
     }
 }

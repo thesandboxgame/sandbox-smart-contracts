@@ -67,6 +67,10 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         }
     }
 
+    function getAttributes(uint256 assetId, GemEvent[] calldata events) external view returns (uint32[] memory values) {
+        return _gemsCatalystsRegistry.getAttributes(_records[assetId].catalystId, assetId, events);
+    }
+
     function setCatalyst(
         uint256 assetId,
         uint16 catalystId,
@@ -122,10 +126,6 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
         _records[assetId].gemIds = gemIdsToStore;
         uint64 blockNumber = _getBlockNumber();
         emit GemsAdded(assetId, gemIds, blockNumber);
-    }
-
-    function getAttributes(uint256 assetId, GemEvent[] calldata events) external view returns (uint32[] memory values) {
-        return _gemsCatalystsRegistry.getAttributes(_records[assetId].catalystId, assetId, events);
     }
 
     function setMigrationContract(address _migrationContract) external {

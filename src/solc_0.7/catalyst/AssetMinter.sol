@@ -163,17 +163,6 @@ contract AssetMinter is WithMetaTransaction {
         _registry.setCatalyst(assetId, catalystId, gemIds);
     }
 
-    function _checkAuthorization(address from, address to) internal view {
-        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        if (from != msg.sender) {
-            uint256 processorType = _metaTransactionContracts[msg.sender];
-            require(processorType != 0, "INVALID SENDER");
-            if (processorType == METATX_2771) {
-                require(from == _forceMsgSender(), "INVALID_SENDER");
-            }
-        }
-    }
-
     function _burnGems(
         address from,
         uint16[] memory gemIds,
@@ -188,5 +177,16 @@ contract AssetMinter is WithMetaTransaction {
         uint32 numTimes
     ) internal {
         _gemsCatalystsRegistry.burnCatalyst(from, catalystId, numTimes * CATALYST_UNIT);
+    }
+
+    function _checkAuthorization(address from, address to) internal view {
+        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
+        if (from != msg.sender) {
+            uint256 processorType = _metaTransactionContracts[msg.sender];
+            require(processorType != 0, "INVALID SENDER");
+            if (processorType == METATX_2771) {
+                require(from == _forceMsgSender(), "INVALID_SENDER");
+            }
+        }
     }
 }
