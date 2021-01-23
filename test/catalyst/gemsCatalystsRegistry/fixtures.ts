@@ -16,23 +16,23 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
 });
 
 export const _setupGemsAndCatalysts = async function (): Promise<{
-  gemsCatalystsRegistry: any;
-  gemsCatalystsRegistrySuperOperator: any;
-  powerGem: any;
-  defenseGem: any;
-  speedGem: any;
-  magicGem: any;
-  luckGem: any;
-  gemExample: any;
-  gemNotInOrder: any;
-  catalystExample: any;
-  commonCatalyst: any;
-  rareCatalyst: any;
-  gemsCatalystsRegistryAdmin: any;
-  catalystMinter: any;
-  gemMinter: any;
-  catalystOwner: any;
-  gemOwner: any;
+  gemsCatalystsRegistry: Contract;
+  gemsCatalystsRegistrySuperOperator: string;
+  powerGem: Contract;
+  defenseGem: Contract;
+  speedGem: Contract;
+  magicGem: Contract;
+  luckGem: Contract;
+  gemExample: Contract;
+  gemNotInOrder: Contract;
+  catalystExample: Contract;
+  commonCatalyst: Contract;
+  rareCatalyst: Contract;
+  gemsCatalystsRegistryAdmin: string;
+  catalystMinter: string;
+  gemMinter: string;
+  catalystOwner: string;
+  gemOwner: string;
 }> {
   const gemsCatalystsRegistry: Contract = await ethers.getContract(
     'GemsCatalystsRegistry'

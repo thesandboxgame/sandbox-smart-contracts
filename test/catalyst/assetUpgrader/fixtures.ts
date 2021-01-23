@@ -1,6 +1,6 @@
 import {ethers, deployments, getNamedAccounts} from 'hardhat';
 import {BigNumber, Contract} from 'ethers';
-import {waitFor} from '../../utils';
+import {setupUsers, waitFor} from '../../utils';
 
 export const setupAssetUpgrader = deployments.createFixture(async () => {
   await deployments.fixture();
