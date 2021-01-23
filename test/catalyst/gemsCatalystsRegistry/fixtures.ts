@@ -12,28 +12,6 @@ const exampleCatalystId = 5;
 
 export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   await deployments.fixture();
-  return _setupGemsAndCatalysts();
-});
-
-export const _setupGemsAndCatalysts = async function (): Promise<{
-  gemsCatalystsRegistry: Contract;
-  gemsCatalystsRegistrySuperOperator: string;
-  powerGem: Contract;
-  defenseGem: Contract;
-  speedGem: Contract;
-  magicGem: Contract;
-  luckGem: Contract;
-  gemExample: Contract;
-  gemNotInOrder: Contract;
-  catalystExample: Contract;
-  commonCatalyst: Contract;
-  rareCatalyst: Contract;
-  gemsCatalystsRegistryAdmin: string;
-  catalystMinter: string;
-  gemMinter: string;
-  catalystOwner: string;
-  gemOwner: string;
-}> {
   const gemsCatalystsRegistry: Contract = await ethers.getContract(
     'GemsCatalystsRegistry'
   );
@@ -106,30 +84,18 @@ export const _setupGemsAndCatalysts = async function (): Promise<{
   await commonCatalyst
     .connect(ethers.provider.getSigner(catalystMinter))
     .mint(catalystOwner, mintingAmount);
-  // await commonCatalyst
-  //   .connect(ethers.provider.getSigner(catalystMinter))
-  //   .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await rareCatalyst
     .connect(ethers.provider.getSigner(catalystMinter))
     .mint(catalystOwner, mintingAmount);
-  // await rareCatalyst
-  //   .connect(ethers.provider.getSigner(catalystMinter))
-  //   .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await powerGem
     .connect(ethers.provider.getSigner(gemMinter))
     .mint(gemOwner, mintingAmount);
-  // await powerGem
-  //   .connect(ethers.provider.getSigner(gemMinter))
-  //   .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await defenseGem
     .connect(ethers.provider.getSigner(gemMinter))
     .mint(gemOwner, mintingAmount);
-  // await defenseGem
-  //   .connect(ethers.provider.getSigner(gemMinter))
-  //   .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await gemsCatalystsRegistry
     .connect(ethers.provider.getSigner(gemsCatalystsRegistryAdmin))
@@ -154,4 +120,4 @@ export const _setupGemsAndCatalysts = async function (): Promise<{
     catalystOwner,
     gemOwner,
   };
-};
+});

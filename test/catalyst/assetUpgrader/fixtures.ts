@@ -1,6 +1,6 @@
 import {ethers, deployments, getNamedAccounts} from 'hardhat';
 import {BigNumber, Contract} from 'ethers';
-import {setupUsers, waitFor} from '../../utils';
+import {waitFor} from '../../utils';
 
 export const setupAssetUpgrader = deployments.createFixture(async () => {
   await deployments.fixture();
@@ -13,6 +13,15 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
   );
   const assetContract = await ethers.getContract('Asset');
   const sandContract: Contract = await ethers.getContract('Sand');
+  const feeRecipient: string = await assetUpgraderContract.callStatic.feeRecipient();
+  const upgradeFee: BigNumber = await assetUpgraderContract.callStatic.upgradeFee();
+  const rareCatalyst: Contract = await ethers.getContract('Catalyst_RARE');
+  const powerGem: Contract = await ethers.getContract('Gem_POWER');
+  const defenseGem: Contract = await ethers.getContract('Gem_DEFENSE');
+  const gemsCatalystsRegistry: Contract = await ethers.getContract(
+    'GemsCatalystsRegistry'
+  );
+  const gemsCatalystsUnit = '1000000000000000000';
 
   await waitFor(
     assetAttributesRegistry
@@ -24,10 +33,11 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
       .connect(ethers.provider.getSigner(assetAdmin))
       .setSuperOperator(assetUpgraderContract.address, true)
   );
-  const feeRecipient: string = await assetUpgraderContract.callStatic.feeRecipient();
-  const upgradeFee: BigNumber = await assetUpgraderContract.callStatic.upgradeFee();
 
   return {
+    rareCatalyst,
+    powerGem,
+    defenseGem,
     assetAttributesRegistryAdmin,
     assetUpgraderContract,
     assetAttributesRegistry,
@@ -35,5 +45,7 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
     assetContract,
     feeRecipient,
     upgradeFee,
+    gemsCatalystsUnit,
+    gemsCatalystsRegistry,
   };
 });
