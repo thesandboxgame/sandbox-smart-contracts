@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
 import "./ERC20Token.sol";
 
@@ -10,8 +10,9 @@ contract Gem is ERC20Token {
         string memory name,
         string memory symbol,
         address admin,
-        uint16 _gemId
-    ) ERC20Token(name, symbol, admin) {
+        uint16 _gemId,
+        address operator
+    ) ERC20Token(name, symbol, admin, operator) {
         gemId = _gemId;
     }
 }

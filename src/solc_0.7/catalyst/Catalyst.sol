@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 pragma experimental ABIEncoderV2;
 
 import "./AssetAttributesRegistry.sol";
@@ -18,8 +18,9 @@ contract Catalyst is ERC20Token, IAttributes {
         address admin,
         uint8 maxGems,
         uint16 _catalystId,
-        IAttributes attributes
-    ) ERC20Token(name, symbol, admin) {
+        IAttributes attributes,
+        address operator
+    ) ERC20Token(name, symbol, admin, operator) {
         _maxGems = maxGems;
         catalystId = _catalystId;
         _attributes = attributes;

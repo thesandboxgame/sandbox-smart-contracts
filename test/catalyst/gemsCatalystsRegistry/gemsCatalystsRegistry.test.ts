@@ -104,7 +104,7 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(catalystMinter))
         .burnCatalyst(catalystMinter, catalystId, burnAmount)
-    ).to.be.revertedWith('Not enough funds');
+    ).to.be.revertedWith('INSUFFICIENT_FUNDS');
   });
 
   it('burnCatalyst should fail for account with no gems', async function () {
@@ -119,7 +119,7 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(users[3]))
         .burnGem(users[3], catalystId, burnAmount)
-    ).to.be.revertedWith('Not enough funds');
+    ).to.be.revertedWith('INSUFFICIENT_FUNDS');
   });
 
   it('burnGem should burn 3 power gems from gemOwner account', async function () {
@@ -198,7 +198,7 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(gemMinter))
         .burnGem(gemMinter, gemId, burnAmount)
-    ).to.be.revertedWith('Not enough funds');
+    ).to.be.revertedWith('INSUFFICIENT_FUNDS');
   });
 
   it('burnGem should fail for account with no gems', async function () {
@@ -210,7 +210,7 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(users[3]))
         .burnGem(users[3], gemId, burnAmount)
-    ).to.be.revertedWith('Not enough funds');
+    ).to.be.revertedWith('INSUFFICIENT_FUNDS');
   });
 
   it('addGemsAndCatalysts should fail for existing gemId', async function () {

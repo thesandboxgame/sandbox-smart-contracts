@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 pragma experimental ABIEncoderV2;
 
 import "../common/BaseWithStorage/WithAdmin.sol";
@@ -7,7 +7,7 @@ import "../common/BaseWithStorage/WithMinter.sol";
 import "./GemsCatalystsRegistry.sol";
 import "hardhat/console.sol";
 
-contract AssetAttributesRegistry is WithAdmin, WithMinter {
+contract AssetAttributesRegistry is WithMinter {
     uint256 internal constant MAX_NUM_GEMS = 15;
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
     uint256 private constant NOT_IS_NFT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFFFFFFFF;

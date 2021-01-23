@@ -1,12 +1,12 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./AssetAttributesRegistry.sol";
 import "./GemsCatalystsRegistry.sol";
-import "../common/Interfaces/ERC20Extended.sol";
-import "../common/Interfaces/AssetToken.sol";
+import "../common/Interfaces/IERC20Extended.sol";
+import "../common/Interfaces/IAssetToken.sol";
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
@@ -17,7 +17,7 @@ contract AssetMinter is WithMetaTransaction {
     uint256 private constant CATALYST_UNIT = 1000000000000000000;
 
     AssetAttributesRegistry internal immutable _registry;
-    AssetToken internal immutable _asset;
+    IAssetToken internal immutable _asset;
     GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
 
     struct AssetData {
@@ -32,7 +32,7 @@ contract AssetMinter is WithMetaTransaction {
     /// @param gemsCatalystsRegistry: that track the canonical catalyst and gems and provide batch burning facility
     constructor(
         AssetAttributesRegistry registry,
-        AssetToken asset,
+        IAssetToken asset,
         GemsCatalystsRegistry gemsCatalystsRegistry
     ) {
         _registry = registry;

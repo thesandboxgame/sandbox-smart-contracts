@@ -9,6 +9,8 @@ const {expect} = require('../chai-setup');
 const {mine} = require('../utils');
 const {replicateEarned, replicateRewardPerToken} = require('./_testHelper');
 const {contribution} = require('./contributionEquation.test');
+const setupLandWeightedRewardPool = require('../../setup/send_sand_to_land_weighted_reward_pool')
+  .default;
 
 const STAKE_TOKEN = 'UNI_SAND_ETH';
 const REWARD_TOKEN = 'Sand';
@@ -44,7 +46,10 @@ describe('ActualSANDRewardPool', function () {
   let liquidityRewardAdmin;
 
   async function createFixture() {
+    // TODO use deployments.createFixture()
     await deployments.fixture('LandWeightedSANDRewardPool');
+    await setupLandWeightedRewardPool();
+
     ({deployer, liquidityRewardAdmin, landAdmin} = await getNamedAccounts());
 
     others = await getUnnamedAccounts();

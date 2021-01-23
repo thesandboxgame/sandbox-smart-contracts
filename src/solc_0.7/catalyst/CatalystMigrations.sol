@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.1;
+pragma solidity 0.7.5;
 
 import "./interfaces/OldCatalystRegistry.sol";
 import "./AssetAttributesRegistry.sol";
-import "../common/Interfaces/AssetToken.sol";
+import "../common/Interfaces/IAssetToken.sol";
 
 /// @notice Contract allowing owner of asset registered with old registry to get new catalyst/gems
 contract CatalystMigrations {
@@ -11,7 +11,7 @@ contract CatalystMigrations {
 
     OldCatalystRegistry internal immutable _oldRegistry;
     AssetAttributesRegistry internal immutable _registry;
-    AssetToken internal immutable _asset;
+    IAssetToken internal immutable _asset;
     bytes32 immutable _merkleRoot;
 
     /// @notice CatalystMigrations depends on:
@@ -20,7 +20,7 @@ contract CatalystMigrations {
     /// @param oldRegistry: Old CatalystRegistry
     /// @param merkleRoot: root hash of the merkleTree containing info on gems and blockNumber for each collection
     constructor(
-        AssetToken asset,
+        IAssetToken asset,
         AssetAttributesRegistry registry,
         OldCatalystRegistry oldRegistry,
         bytes32 merkleRoot
