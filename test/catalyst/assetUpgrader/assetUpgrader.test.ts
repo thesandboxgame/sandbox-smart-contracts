@@ -72,11 +72,15 @@ describe('AssetUpgrader', function () {
         .transfer(to, amount)
     );
   }
-  async function mintCatalyst(catalystContract: Contract, beneficiary: string) {
-    const gemsCatalystsUnit = '1000000000000000000';
-    const mintingAmount = BigNumber.from('8').mul(
-      BigNumber.from(gemsCatalystsUnit)
-    );
+  async function mintCatalyst(
+    catalystContract: Contract,
+    mintingAmount: BigNumber,
+    beneficiary: string
+  ) {
+    // const gemsCatalystsUnit = '1000000000000000000';
+    // const mintingAmount = BigNumber.from('8').mul(
+    //   BigNumber.from(gemsCatalystsUnit)
+    // );
     const {catalystMinter} = await getNamedAccounts();
 
     await waitFor(

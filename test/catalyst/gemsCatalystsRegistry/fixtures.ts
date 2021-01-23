@@ -58,14 +58,26 @@ export const _setupGemsAndCatalysts = async function (): Promise<{
     contract: 'Gem',
     from: gemOwner,
     log: true,
-    args: ['Gem_Example', 'Gem_Example', gemOwner, exampleGemId],
+    args: [
+      'Gem_Example',
+      'Gem_Example',
+      gemOwner,
+      exampleGemId,
+      gemsCatalystsRegistry.address,
+    ],
   });
   const gemExample: Contract = await ethers.getContract('Gem_Example');
 
   await deployments.deploy(`Gem_NotInOrder`, {
     contract: 'Gem',
     from: gemOwner,
-    args: ['Gem_NotInOrder', 'Gem_NotInOrder', gemOwner, notInOrderGemId],
+    args: [
+      'Gem_NotInOrder',
+      'Gem_NotInOrder',
+      gemOwner,
+      notInOrderGemId,
+      gemsCatalystsRegistry.address,
+    ],
   });
   const gemNotInOrder: Contract = await ethers.getContract('Gem_NotInOrder');
 
@@ -81,6 +93,7 @@ export const _setupGemsAndCatalysts = async function (): Promise<{
       5,
       exampleCatalystId,
       DefaultAttributes.address,
+      gemsCatalystsRegistry.address,
     ],
   });
   const catalystExample: Contract = await ethers.getContract(
@@ -93,30 +106,30 @@ export const _setupGemsAndCatalysts = async function (): Promise<{
   await commonCatalyst
     .connect(ethers.provider.getSigner(catalystMinter))
     .mint(catalystOwner, mintingAmount);
-  await commonCatalyst
-    .connect(ethers.provider.getSigner(catalystMinter))
-    .setSuperOperator(gemsCatalystsRegistry.address, true);
+  // await commonCatalyst
+  //   .connect(ethers.provider.getSigner(catalystMinter))
+  //   .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await rareCatalyst
     .connect(ethers.provider.getSigner(catalystMinter))
     .mint(catalystOwner, mintingAmount);
-  await rareCatalyst
-    .connect(ethers.provider.getSigner(catalystMinter))
-    .setSuperOperator(gemsCatalystsRegistry.address, true);
+  // await rareCatalyst
+  //   .connect(ethers.provider.getSigner(catalystMinter))
+  //   .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await powerGem
     .connect(ethers.provider.getSigner(gemMinter))
     .mint(gemOwner, mintingAmount);
-  await powerGem
-    .connect(ethers.provider.getSigner(gemMinter))
-    .setSuperOperator(gemsCatalystsRegistry.address, true);
+  // await powerGem
+  //   .connect(ethers.provider.getSigner(gemMinter))
+  //   .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await defenseGem
     .connect(ethers.provider.getSigner(gemMinter))
     .mint(gemOwner, mintingAmount);
-  await defenseGem
-    .connect(ethers.provider.getSigner(gemMinter))
-    .setSuperOperator(gemsCatalystsRegistry.address, true);
+  // await defenseGem
+  //   .connect(ethers.provider.getSigner(gemMinter))
+  //   .setSuperOperator(gemsCatalystsRegistry.address, true);
 
   await gemsCatalystsRegistry
     .connect(ethers.provider.getSigner(gemsCatalystsRegistryAdmin))

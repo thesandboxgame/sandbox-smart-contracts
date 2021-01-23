@@ -7,6 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
 
   const DefaultAttributes = await deployments.get('DefaultAttributes');
+  const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
 
   const {catalystMinter, deployer} = await getNamedAccounts();
   for (const catalyst of catalysts) {
@@ -21,6 +22,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         catalyst.maxGems,
         catalyst.catalystId,
         DefaultAttributes.address,
+        GemsCatalystsRegistry.address,
       ],
       skipIfAlreadyDeployed: true,
     });

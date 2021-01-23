@@ -8,7 +8,7 @@ import "../WithSuperOperators.sol";
 abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, ERC20Internal {
     bytes32 internal immutable _name; // works only for string that can fit into 32 bytes
     bytes32 internal immutable _symbol; // works only for string that can fit into 32 bytes
-
+    address internal immutable _operator;
     uint256 internal _totalSupply;
     mapping(address => uint256) internal _balances;
     mapping(address => mapping(address => uint256)) internal _allowances;
@@ -16,7 +16,8 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     constructor(
         string memory tokenName,
         string memory tokenSymbol,
-        address admin
+        address admin,
+        address operator
     ) {
         require(bytes(tokenName).length > 0, "INVALID_NAME_REQUIRED");
         require(bytes(tokenName).length <= 32, "INVALID_NAME_TOO_LONG");
@@ -24,8 +25,8 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         require(bytes(tokenSymbol).length > 0, "INVALID_SYMBOL_REQUIRED");
         require(bytes(tokenSymbol).length <= 32, "INVALID_SYMBOL_TOO_LONG");
         _symbol = _firstBytes32(bytes(tokenSymbol));
-
         _admin = admin;
+        _operator = operator;
     }
 
     /// @notice Transfer `amount` tokens to `to`.
@@ -47,7 +48,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         address to,
         uint256 amount
     ) external override returns (bool success) {
-        if (msg.sender != from && !_superOperators[msg.sender]) {
+        if (msg.sender != from && !_superOperators[msg.sender] && msg.sender != _operator) {
             uint256 currentAllowance = _allowances[from][msg.sender];
             if (currentAllowance != ~uint256(0)) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
@@ -69,7 +70,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     /// @param from The address whose token to burn.
     /// @param amount The number of tokens to burn.
     function burnFor(address from, uint256 amount) external override {
-        if (msg.sender != from && !_superOperators[msg.sender]) {
+        if (msg.sender != from && !_superOperators[msg.sender] && msg.sender != _operator) {
             uint256 currentAllowance = _allowances[from][msg.sender];
             if (currentAllowance != ~uint256(0)) {
                 require(currentAllowance >= amount, "NOT_AUTHORIZED_ALLOWANCE");
@@ -137,7 +138,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         address spender,
         uint256 amount
     ) public override returns (bool success) {
-        require(msg.sender == owner || _superOperators[msg.sender], "NOT_AUTHORIZED"); // TODO metatx
+        require(msg.sender == owner || _superOperators[msg.sender] || msg.sender == _operator, "NOT_AUTHORIZED"); // TODO metatx
         _approveFor(owner, spender, amount);
         return true;
     }
@@ -152,7 +153,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         address spender,
         uint256 amountNeeded
     ) public returns (bool success) {
-        require(msg.sender == owner || _superOperators[msg.sender], "INVALID_SENDER");
+        require(msg.sender == owner || _superOperators[msg.sender] || msg.sender == _operator, "INVALID_SENDER");
         _addAllowanceIfNeeded(owner, spender, amountNeeded);
         return true;
     }
@@ -173,7 +174,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         address spender,
         uint256 amountNeeded
     ) internal override {
-        if (amountNeeded > 0 && !isSuperOperator(spender)) {
+        if (amountNeeded > 0 && !isSuperOperator(spender) && spender != _operator) {
             uint256 currentAllowance = _allowances[owner][spender];
             if (currentAllowance < amountNeeded) {
                 _approveFor(owner, spender, amountNeeded);
@@ -226,7 +227,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     /// @param amount The number of token to burn.
     function _burn(address from, uint256 amount) internal {
         require(amount > 0, "BURN_O_TOKENS");
-        if (msg.sender != from && !_superOperators[msg.sender]) {
+        if (msg.sender != from && !_superOperators[msg.sender] && msg.sender != _operator) {
             uint256 currentAllowance = _allowances[from][msg.sender];
             require(currentAllowance >= amount, "INSUFFICIENT_ALLOWANCE");
             if (currentAllowance != ~uint256(0)) {
