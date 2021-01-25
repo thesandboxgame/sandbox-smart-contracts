@@ -9,7 +9,7 @@ import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
 import {setupAssetAttributesRegistry} from '../assetAttributesRegistry/fixtures';
 import {setupAssetMinter} from './fixtures';
 import {isAddress} from 'ethers/lib/utils';
-// import {transferSand} from '../utils';
+import {mintCatalyst, mintGem} from '../utils';
 
 type MintOptions = {
   from: Address;
@@ -31,8 +31,8 @@ const ids = [gems[0].gemId, gems[1].gemId];
 const supply = 1;
 const callData = Buffer.from('');
 
-const METATX_SANDBOX = 1;
 const METATX_2771 = 2;
+const gemsCatalystsUnit = '1000000000000000000';
 
 describe('AssetMinter', function () {
   before(async function () {
@@ -166,13 +166,83 @@ describe('AssetMinter', function () {
       ).to.be.revertedWith('INVALID_SENDER');
     });
 
-    it.skip('should fail if catalyst == Catalyst(0)', async function () {});
+    it('should fail if gem == Gem(0)', async function () {
+      await expect(
+        assetMinterAsCatalystOwner.mint(
+          catalystOwner,
+          mintOptions.packId,
+          mintOptions.metaDataHash,
+          mintOptions.catalystId,
+          [0, gems[1].gemId],
+          mintOptions.quantity,
+          mintOptions.rarity,
+          catalystOwner,
+          mintOptions.data
+        )
+      ).to.be.revertedWith('GEM_DOES_NOT_EXIST');
+    });
 
-    it.skip('should fail if gem == Gem(0)', async function () {});
+    it('should fail if gemIds.length > MAX_NUM_GEMS', async function () {
+      const {
+        catalystOwner,
+        rareCatalyst,
+        luckGem,
+      } = await setupGemsAndCatalysts();
+      await mintCatalyst(
+        rareCatalyst,
+        BigNumber.from('1').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
+      await mintGem(
+        luckGem,
+        BigNumber.from('17').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
 
-    it.skip('should fail if gemIds.length > MAX_NUM_GEMS', async function () {});
+      const catBalance = await rareCatalyst.balanceOf(catalystOwner);
+      const gemBalance = await luckGem.balanceOf(catalystOwner);
+      console.log(`balance here: ${catBalance}`);
+      console.log(`gem balance here: ${gemBalance}`);
+      await expect(
+        assetMinterAsCatalystOwner.mint(
+          catalystOwner,
+          mintOptions.packId,
+          mintOptions.metaDataHash,
+          mintOptions.catalystId,
+          [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+          mintOptions.quantity,
+          mintOptions.rarity,
+          catalystOwner,
+          mintOptions.data
+        )
+      ).to.be.revertedWith('GEMS_MAX_REACHED');
+    });
 
-    it.skip('should fail if gemIds.length > maxGems', async function () {});
+    it('should fail if gemIds.length > maxGems', async function () {
+      const {
+        catalystOwner,
+        rareCatalyst,
+        powerGem,
+      } = await setupGemsAndCatalysts();
+      await mintGem(
+        powerGem,
+        BigNumber.from('4').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
+      await expect(
+        assetMinterAsCatalystOwner.mint(
+          catalystOwner,
+          mintOptions.packId,
+          mintOptions.metaDataHash,
+          mintOptions.catalystId,
+          [gems[0].gemId, gems[0].gemId, gems[0].gemId, gems[0].gemId],
+          mintOptions.quantity,
+          mintOptions.rarity,
+          catalystOwner,
+          mintOptions.data
+        )
+      ).to.be.revertedWith('GEMS_TOO_MANY');
+    });
 
     it.skip('mintMultiple should fail if assets.length == 0', async function () {});
 
