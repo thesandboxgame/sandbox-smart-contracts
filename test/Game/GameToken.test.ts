@@ -116,9 +116,7 @@ describe('GameToken', function () {
     const isSuperOperator = await assetContract.isSuperOperator(
       gameToken.address
     );
-    const initialMinter = await gameToken.getMinter();
     expect(isSuperOperator).to.be.true;
-    expect(initialMinter).to.be.equal(ethers.constants.AddressZero);
   });
 
   describe('GameToken: Minting GAMEs', function () {
@@ -135,8 +133,10 @@ describe('GameToken', function () {
       gameTokenAsMinter = await gameToken.connect(
         ethers.provider.getSigner(gameTokenAdmin)
       );
+      // For tests, minter should be set to deployed minter contract address
+      // on hardhat network.
       expect(await gameToken.getMinter()).to.be.equal(
-        ethers.constants.AddressZero
+        ethers.utils.getAddress('0x2fc631e4B3018258759C52AF169200213e84ABab')
       );
     });
 
