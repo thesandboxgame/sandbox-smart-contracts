@@ -35,6 +35,7 @@ const erc721Tests = require('../erc721')(
     const gameAsAdmin = await contract.connect(
       ethers.provider.getSigner(gameTokenAdmin)
     );
+    await gameAsAdmin.changeMinter(gameTokenAdmin);
 
     async function mint(to) {
       const assets = await supplyAssets(to, [1]);

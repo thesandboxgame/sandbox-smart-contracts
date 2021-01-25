@@ -1,26 +1,19 @@
 import fs from 'fs';
 import {BigNumber} from 'ethers';
 import MerkleTree from '../../lib/merkleTree';
-import helpers from '../../lib/merkleTreeHelper';
+import helpers, { AssetGiveawayInfo } from '../../lib/merkleTreeHelper';
 
 const {createDataArrayAssets, saltAssets} = helpers;
-
-export type AssetClaim = {
-  reservedAddress: string;
-  assetIds: Array<BigNumber> | Array<string> | Array<number>;
-  assetValues: Array<number>;
-  salt?: string;
-};
 
 export function createAssetClaimMerkleTree(
   isDeploymentChainId: boolean,
   chainId: string,
-  assetData: Array<AssetClaim>
+  assetData: Array<AssetGiveawayInfo>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): {
-  assets: AssetClaim[];
+  assets: AssetGiveawayInfo[];
   merkleRootHash: string;
-  saltedAssets: AssetClaim[];
+  saltedAssets: AssetGiveawayInfo[];
   tree: MerkleTree;
 } {
   let secretPath = './secret/.asset_giveaway_1_secret';
