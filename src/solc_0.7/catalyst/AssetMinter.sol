@@ -44,7 +44,7 @@ contract AssetMinter is WithMetaTransaction {
     /// @param from address creating the Asset, need to be the tx sender or meta tx signer.
     /// @param packId unused packId that will let you predict the resulting tokenId.
     /// @param metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata.
-    /// @param catalystId address of the Catalyst ERC20 token to burn.
+    /// @param catalystId Id of the Catalyst ERC20 token to burn (1, 2, 3 or 4).
     /// @param gemIds list of gem ids to burn in the catalyst.
     /// @param quantity asset supply to mint
     /// @param to destination address receiving the minted tokens.
