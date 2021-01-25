@@ -126,6 +126,7 @@ contract GemsCatalystsRegistry is WithSuperOperators {
         uint16 catalystId,
         uint256 amount
     ) public {
+        // @review what about metaTxs ?
         require(msg.sender == from || isSuperOperator(msg.sender), "NOT_AUTHORIZED");
         Catalyst catalyst = getCatalyst(catalystId);
         require(catalyst != Catalyst(0), "CATALYST_DOES_NOT_EXIST");
@@ -137,6 +138,7 @@ contract GemsCatalystsRegistry is WithSuperOperators {
         uint16 gemId,
         uint256 amount
     ) public {
+        // @review what about metaTxs ?
         require(msg.sender == from || isSuperOperator(msg.sender), "NOT_AUTHORIZED");
         Gem gem = getGem(gemId);
         require(gem != Gem(0), "GEM_DOES_NOT_EXIST");
