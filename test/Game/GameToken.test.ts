@@ -116,7 +116,9 @@ describe('GameToken', function () {
     const isSuperOperator = await assetContract.isSuperOperator(
       gameToken.address
     );
+    const initialMinter = await gameToken.getMinter();
     expect(isSuperOperator).to.be.true;
+    expect(initialMinter).to.be.equal(ethers.constants.AddressZero);
   });
 
   describe('GameToken: Minting GAMEs', function () {
@@ -201,7 +203,7 @@ describe('GameToken', function () {
           ethers.constants.AddressZero,
           randomId
         )
-      ).to.be.revertedWith('BASEID_REUSE_FORBIDDEN');
+      ).to.be.revertedWith('STORAGE_ID_REUSE_FORBIDDEN');
     });
 
     it('gameId contains creator address', async function () {
