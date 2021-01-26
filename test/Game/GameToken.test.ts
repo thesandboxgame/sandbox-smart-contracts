@@ -1,4 +1,9 @@
-import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
+import {
+  ethers,
+  deployments,
+  getNamedAccounts,
+  getUnnamedAccounts,
+} from 'hardhat';
 import {BigNumber, utils, Contract, BytesLike} from 'ethers';
 import Prando from 'prando';
 import {Address} from 'hardhat-deploy/types';
@@ -133,11 +138,8 @@ describe('GameToken', function () {
       gameTokenAsMinter = await gameToken.connect(
         ethers.provider.getSigner(gameTokenAdmin)
       );
-      // For tests, minter should be set to deployed minter contract address
-      // on hardhat network.
-      expect(await gameToken.getMinter()).to.be.equal(
-        ethers.utils.getAddress('0x2fc631e4B3018258759C52AF169200213e84ABab')
-      );
+      const minterContract = await deployments.get('GameMinter');
+      expect(await gameToken.getMinter()).to.be.equal(minterContract.address);
     });
 
     it('can update the GameMinter address', async function () {
