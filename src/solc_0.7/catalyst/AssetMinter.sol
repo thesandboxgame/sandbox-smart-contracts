@@ -112,7 +112,7 @@ contract AssetMinter is WithMetaTransaction {
 
         for (uint256 i = 0; i < assets.length; i++) {
             if (assets[i].catalystId != 0) {
-                require(catalystsQuantities[assets[i].catalystId] != 0, "INVALID_CATALYST_NOT_ENOUGH");
+                require(catalystsQuantities[i] != 0, "INVALID_CATALYST_NOT_ENOUGH");
                 uint16 maxGems = _gemsCatalystsRegistry.getMaxGems(assets[i].catalystId);
                 require(assets[i].gemIds.length <= maxGems, "INVALID_GEMS_TOO_MANY");
                 catalystsQuantities[assets[i].catalystId]--;
@@ -137,15 +137,16 @@ contract AssetMinter is WithMetaTransaction {
     function _batchBurnCatalysts(address from, uint256[] memory catalystsQuantities) internal {
         uint16[] memory ids = new uint16[](catalystsQuantities.length);
         for (uint16 i = 0; i < ids.length; i++) {
-            ids[i] = i;
+            ids[i] = i + 1;
         }
-        _gemsCatalystsRegistry.batchBurnCatalysyts(from, ids, catalystsQuantities);
+
+        _gemsCatalystsRegistry.batchBurnCatalysts(from, ids, catalystsQuantities);
     }
 
     function _batchBurnGems(address from, uint256[] memory gemsQuantities) internal {
         uint16[] memory ids = new uint16[](gemsQuantities.length);
         for (uint16 i = 0; i < ids.length; i++) {
-            ids[i] = i;
+            ids[i] = i + 1;
         }
         _gemsCatalystsRegistry.batchBurnGems(from, ids, gemsQuantities);
     }
