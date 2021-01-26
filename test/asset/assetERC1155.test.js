@@ -59,6 +59,32 @@ function testAsset() {
         };
       }
 
+      async function mintMultiple(id, user, supplies) {
+        // address creator,
+        // uint40 packId,
+        // bytes32 hash,
+        // uint256[] calldata supplies,
+        // bytes calldata rarityPack,
+        // address owner,
+        // bytes calldata data
+
+        const tx = await Asset.mintMultiple(
+          user,
+          id,
+          testMetadataHash,
+          supplies,
+          1,
+          user,
+          '0x'
+        );
+        counter++;
+        const receipt = await tx.wait();
+        return {
+          receipt,
+          tokenIds: receipt.events.find((v) => v.event === 'TransferBatch')
+            .args[3],
+        };
+      }
       const assetIds = [];
       assetIds.push((await mint(counter, minter, 10)).tokenId);
       assetIds.push((await mint(counter, minter, 1)).tokenId);
@@ -69,14 +95,34 @@ function testAsset() {
       assetIds.push((await mint(counter, minter, 1111)).tokenId);
       assetIds.push((await mint(counter, minter, 1)).tokenId);
 
+      const batchIds = (
+        await mintMultiple(counter, minter, [
+          10,
+          5,
+          8,
+          9,
+          10,
+          6,
+          8,
+          8,
+          10,
+          12,
+          1,
+          1,
+          1,
+        ])
+      ).tokenIds;
+
       return {
         ethersProvider: ethers.provider,
         contractAddress: Asset.address,
         contract: Asset,
         users,
         mint,
+        mintMultiple,
         deployer,
         tokenIds: assetIds,
+        batchIds,
         minter,
         deployments,
         receiverAddress,
