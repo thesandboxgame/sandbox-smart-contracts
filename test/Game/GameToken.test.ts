@@ -1,4 +1,9 @@
-import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
+import {
+  ethers,
+  deployments,
+  getNamedAccounts,
+  getUnnamedAccounts,
+} from 'hardhat';
 import {BigNumber, utils, Contract, BytesLike} from 'ethers';
 import Prando from 'prando';
 import {Address} from 'hardhat-deploy/types';
@@ -133,9 +138,8 @@ describe('GameToken', function () {
       gameTokenAsMinter = await gameToken.connect(
         ethers.provider.getSigner(gameTokenAdmin)
       );
-      expect(await gameToken.getMinter()).to.be.equal(
-        ethers.constants.AddressZero
-      );
+      const minterContract = await deployments.get('GameMinter');
+      expect(await gameToken.getMinter()).to.be.equal(minterContract.address);
     });
 
     it('can update the GameMinter address', async function () {
@@ -201,7 +205,7 @@ describe('GameToken', function () {
           ethers.constants.AddressZero,
           randomId
         )
-      ).to.be.revertedWith('BASEID_REUSE_FORBIDDEN');
+      ).to.be.revertedWith('STORAGE_ID_REUSE_FORBIDDEN');
     });
 
     it('gameId contains creator address', async function () {
