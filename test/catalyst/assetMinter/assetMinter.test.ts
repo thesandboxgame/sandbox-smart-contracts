@@ -358,5 +358,8 @@ describe('AssetMinter', function () {
     it.skip('mintMultiple should fail if catalystId == 0', async function () {});
     // test "BURN_O_TOKENS"
     it.skip('mintMultiple should fail if trying to burn 0 tokens', async function () {});
+
+    // test: gemsQuantities.length != 5 (ie: 4, 6)
+    // test: catalystsQuantities.length != 4 (ie: 3, 5)
   });
 });
