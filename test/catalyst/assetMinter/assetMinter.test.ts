@@ -353,11 +353,71 @@ describe('AssetMinter', function () {
       ).to.be.revertedWith('INVALID_0_ASSETS');
     });
 
-    it.skip('mintMultiple should fail if trying to add too many gems', async function () {});
-    // test "CATALYST_DOES_NOT_EXIST"
-    it.skip('mintMultiple should fail if catalystId == 0', async function () {});
+    it('mintMultiple should fail if trying to add too many gems', async function () {
+      // const {
+      //   catalystOwner,
+      //   rareCatalyst,
+      //   powerGem,
+      //   speedGem,
+      // } = await setupGemsAndCatalysts();
+
+      // await mintGem(
+      //   speedGem,
+      //   BigNumber.from('1').mul(BigNumber.from(gemsCatalystsUnit)),
+      //   catalystOwner
+      // );
+
+      await expect(
+        assetMinterAsCatalystOwner.mintMultiple(
+          catalystOwner,
+          mintMultiOptions.packId,
+          mintMultiOptions.metadataHash,
+          [3, 0, 0, 0, 0],
+          [1, 0, 0, 0],
+          [
+            {
+              gemIds: [1, 1, 1],
+              quantity: 1,
+              catalystId: 1,
+            },
+          ],
+          catalystOwner,
+          mintMultiOptions.data
+        )
+      ).to.be.revertedWith('INVALID_GEMS_TOO_MANY');
+    });
+
+    it.skip('mintMultiple should fail if catalystId == 0', async function () {
+      await expect(
+        assetMinterAsCatalystOwner.mintMultiple(
+          catalystOwner,
+          mintMultiOptions.packId,
+          mintMultiOptions.metadataHash,
+          [],
+          mintMultiOptions.catalystsQuantities,
+          mintMultiOptions.assets,
+          catalystOwner,
+          mintMultiOptions.data
+        )
+      ).to.be.revertedWith('CATALYST_DOES_NOT_EXIST');
+    });
+
     // test "BURN_O_TOKENS"
-    it.skip('mintMultiple should fail if trying to burn 0 tokens', async function () {});
+    // @note this may fail silently with addition of conditionals in bugfix pr !
+    it.skip('mintMultiple should fail if trying to burn 0 tokens', async function () {
+      await expect(
+        assetMinterAsCatalystOwner.mintMultiple(
+          catalystOwner,
+          mintMultiOptions.packId,
+          mintMultiOptions.metadataHash,
+          [],
+          mintMultiOptions.catalystsQuantities,
+          mintMultiOptions.assets,
+          catalystOwner,
+          mintMultiOptions.data
+        )
+      ).to.be.revertedWith('BURN_O_TOKENS');
+    });
 
     // test: gemsQuantities.length != 5 (ie: 4, 6)
     // test: catalystsQuantities.length != 4 (ie: 3, 5)
