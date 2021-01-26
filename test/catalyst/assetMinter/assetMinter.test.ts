@@ -24,6 +24,24 @@ type MintOptions = {
 };
 let mintOptions: MintOptions;
 
+type AssetData = {
+  gemIds: number[];
+  quantity: number;
+  catalystId: number;
+};
+
+type MintMultiOptions = {
+  from: Address;
+  packId: BigNumber;
+  metadataHash: string;
+  gemsQuantities: number[];
+  catalystsQuantities: number[];
+  assets: AssetData[];
+  to: Address;
+  data: Buffer;
+};
+let mintMultiOptions: MintMultiOptions;
+
 const packId = BigNumber.from('1');
 const hash = ethers.utils.keccak256('0x42');
 const catalyst = catalysts[1].catalystId;
@@ -45,6 +63,29 @@ describe('AssetMinter', function () {
       gemIds: ids,
       quantity: supply,
       rarity: 0,
+      to: ethers.constants.AddressZero,
+      data: callData,
+    };
+
+    const assetData1: AssetData = {
+      gemIds: [1],
+      quantity: 1,
+      catalystId: 1,
+    };
+
+    const assetData2: AssetData = {
+      gemIds: [2],
+      quantity: 1,
+      catalystId: 2,
+    };
+
+    mintMultiOptions = {
+      from: ethers.constants.AddressZero,
+      packId: packId,
+      metadataHash: hash,
+      gemsQuantities: [0, 0, 0, 0, 0],
+      catalystsQuantities: [0, 0, 0, 0],
+      assets: [],
       to: ethers.constants.AddressZero,
       data: callData,
     };
@@ -187,6 +228,7 @@ describe('AssetMinter', function () {
         catalystOwner,
         rareCatalyst,
         luckGem,
+        speedGem,
       } = await setupGemsAndCatalysts();
       await mintCatalyst(
         rareCatalyst,
@@ -201,8 +243,6 @@ describe('AssetMinter', function () {
 
       const catBalance = await rareCatalyst.balanceOf(catalystOwner);
       const gemBalance = await luckGem.balanceOf(catalystOwner);
-      console.log(`balance here: ${catBalance}`);
-      console.log(`gem balance here: ${gemBalance}`);
       await expect(
         assetMinterAsCatalystOwner.mint(
           catalystOwner,
@@ -244,12 +284,79 @@ describe('AssetMinter', function () {
       ).to.be.revertedWith('GEMS_TOO_MANY');
     });
 
-    it.skip('mintMultiple should fail if assets.length == 0', async function () {});
+    it('mintMultiple should fail if assets.length == 0', async function () {
+      await expect(
+        assetMinterAsCatalystOwner.mintMultiple(
+          catalystOwner,
+          mintMultiOptions.packId,
+          mintMultiOptions.metadataHash,
+          mintMultiOptions.gemsQuantities,
+          mintMultiOptions.catalystsQuantities,
+          [],
+          catalystOwner,
+          mintMultiOptions.data
+        )
+      ).to.be.revertedWith('INVALID_0_ASSETS');
+    });
 
-    it.skip('mintMultiple should fail catalystsQuantities == 0', async function () {});
+    it('mintMultiple should fail if catalystsQuantities == 0', async function () {
+      const {
+        catalystOwner,
+        rareCatalyst,
+        powerGem,
+        speedGem,
+      } = await setupGemsAndCatalysts();
 
-    it.skip('mintMultiple should fail if gemsQuantities == 0', async function () {});
+      await mintGem(
+        speedGem,
+        BigNumber.from('1').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
+
+      await expect(
+        assetMinterAsCatalystOwner.mintMultiple(
+          catalystOwner,
+          mintMultiOptions.packId,
+          mintMultiOptions.metadataHash,
+          [1, 0, 1, 0, 0],
+          [0, 1, 0, 0],
+          [
+            {
+              gemIds: [1],
+              quantity: 1,
+              catalystId: 1,
+            },
+            {
+              gemIds: [3],
+              quantity: 1,
+              catalystId: 2,
+            },
+          ],
+          catalystOwner,
+          mintMultiOptions.data
+        )
+      ).to.be.revertedWith('INVALID_CATALYST_NOT_ENOUGH');
+    });
+
+    it('mintMultiple should fail if gemsQuantities == 0', async function () {
+      await expect(
+        assetMinterAsCatalystOwner.mintMultiple(
+          catalystOwner,
+          mintMultiOptions.packId,
+          mintMultiOptions.metadataHash,
+          [],
+          mintMultiOptions.catalystsQuantities,
+          mintMultiOptions.assets,
+          catalystOwner,
+          mintMultiOptions.data
+        )
+      ).to.be.revertedWith('INVALID_0_ASSETS');
+    });
 
     it.skip('mintMultiple should fail if trying to add too many gems', async function () {});
+    // test "CATALYST_DOES_NOT_EXIST"
+    it.skip('mintMultiple should fail if catalystId == 0', async function () {});
+    // test "BURN_O_TOKENS"
+    it.skip('mintMultiple should fail if trying to burn 0 tokens', async function () {});
   });
 });
