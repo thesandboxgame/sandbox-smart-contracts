@@ -131,4 +131,4 @@ const func: DeployFunction = async function (hre) {
 export default func;
 func.tags = ['LandPreSale_5', 'LandPreSale_5_deploy'];
 func.dependencies = ['Sand_deploy', 'Land_deploy', 'Asset_deploy'];
-// func.skip = async (hre) => hre.network.name !== 'hardhat'; // TODO enable
+func.skip = async (hre) => hre.network.name !== 'hardhat'; // TODO enable
