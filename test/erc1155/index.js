@@ -1704,20 +1704,30 @@ module.exports = (init) => {
         '0x'
       );
       for (let i = 0; i < tokenIdsToTransfer2.length; i++) {
-        const tokenId = tokenIdsToTransfer2[i];
-        console.log(balancesToTransfer2[i]);
-        console.log(balancesToTransfer[reverse[tokenId]]);
-        const expectedbalance = BigNumber.from(balancesToTransfer2[i]).add(
-          BigNumber.from(balancesToTransfer[reverse[tokenId]])
-        );
-        console.log('exp', expectedbalance);
+        const tokenId1 = tokenIdsToTransfer[i];
+        const tokenId2 = tokenIdsToTransfer2[i];
+        // console.log(balancesToTransfer2[i]);
+        console.log(tokenIdsToTransfer);
+        console.log(order);
+        console.log(tokenIdsToTransfer2);
+        console.log(order2);
+        // console.log('id', tokenId);
+        // console.log('[reverse[tokenId]]', [reverse[tokenId]]);
+        // console.log('rev', reverse);
+        // console.log('bals', balancesToTransfer);
+        // console.log(balancesToTransfer[reverse[tokenId1]]);
+        const expectedbalance = BigNumber.from(
+          balancesToTransfer2[reverse2[tokenId2]]
+        ).add(BigNumber.from(balancesToTransfer[reverse[tokenId1]]));
+        //console.log('exp', expectedbalance);
 
         //.toString(10);
         // = new BN(balancesToTransfer2[i]).add(new BN(balancesToTransfer[reverse[tokenId]])).toString(10);
-        const balance = await contractAsMinter.balanceOf(user0, tokenId);
-        console.log('bal', balance);
+        const balance1 = await contractAsMinter.balanceOf(user0, tokenId1);
+        const balance2 = await contractAsMinter.balanceOf(user0, tokenId2);
+        // console.log('bal', balance);
 
-        expect(balance).to.be.equal(expectedbalance);
+        expect(balance1).to.be.equal(expectedbalance);
       }
     }
 
@@ -1833,25 +1843,95 @@ module.exports = (init) => {
       );
     });
 
-    // it('transfer multiple items in any order twice', async () => {
-    //     await testOrder2([10, 5, 8, 9, 10, 6, 8, 8, 10, 12, 1, 1, 1], [3, 4, 9, 2], [2, 2, 2, 2], [3, 4, 10, 9, 2], [2, 2, 1, 2, 2]);
-    // });
+    it('transfer multiple items in any order twice', async ({
+      batchIds,
+      contractAsMinter,
+      minter,
+      user0,
+    }) => {
+      await testOrder2(
+        contractAsMinter,
+        minter,
+        user0,
+        batchIds,
+        [3, 4, 9, 2],
+        [2, 2, 2, 2],
+        [3, 4, 10, 9, 2],
+        [2, 2, 1, 2, 2]
+      );
+    });
 
-    // it('transfer multiple items in any order twice', async () => {
-    //     await testOrder2([10, 5, 8, 9, 10, 6, 8, 8, 10, 12, 1, 1, 1], [3, 4, 2], [2, 2, 2], [3, 4, 2], [2, 2, 2]);
-    // });
+    it('transfer multiple items in any order twice', async ({
+      batchIds,
+      contractAsMinter,
+      minter,
+      user0,
+    }) => {
+      await testOrder2(
+        contractAsMinter,
+        minter,
+        user0,
+        batchIds,
+        [3, 4, 2],
+        [2, 2, 2],
+        [3, 4, 2],
+        [2, 2, 2]
+      );
+    });
 
-    // it('transfer multiple items in any order twice', async () => {
-    //     await testOrder2([10, 5, 8, 9, 10, 6, 8, 8, 10, 12, 1, 1, 1], [3, 4, 9, 2], [2, 2, 2, 2], [3, 4, 9, 2], [2, 2, 2, 2]);
-    // });
+    it('transfer multiple items in any order twice', async ({
+      batchIds,
+      contractAsMinter,
+      minter,
+      user0,
+    }) => {
+      await testOrder2(
+        contractAsMinter,
+        minter,
+        user0,
+        batchIds,
+        [3, 4, 9, 2],
+        [2, 2, 2, 2],
+        [3, 4, 9, 2],
+        [2, 2, 2, 2]
+      );
+    });
 
-    // it('transfer multiple items in any order twice', async () => {
-    //     await testOrder2([10, 5, 8, 9, 10, 6, 8, 8, 10, 12, 1, 1, 1], [3, 4, 5], [2, 2, 2], [3, 4, 10, 5], [2, 2, 1, 2]);
-    // });
+    it('transfer multiple items in any order twice', async ({
+      batchIds,
+      contractAsMinter,
+      minter,
+      user0,
+    }) => {
+      await testOrder2(
+        contractAsMinter,
+        minter,
+        user0,
+        batchIds,
+        [3, 4, 5],
+        [2, 2, 2],
+        [3, 4, 10, 5],
+        [2, 2, 1, 2]
+      );
+    });
 
-    // it('transfer multiple items in any order twice', async () => {
-    //     await testOrder2([10, 5, 8, 9, 10, 6, 8, 8, 10, 12, 1, 1, 1], [3, 4, 5], [2, 2, 2], [10, 3, 4, 5], [1, 2, 2, 2]);
-    // });
+    it('transfer multiple items in any order twice', async ({
+      batchIds,
+      contractAsMinter,
+      minter,
+      user0,
+    }) => {
+      await testOrder2(
+        contractAsMinter,
+        minter,
+        user0,
+        batchIds,
+        [3, 4, 5],
+        [2, 2, 2],
+        [10, 3, 4, 5],
+        [1, 2, 2, 2]
+      );
+    });
   });
 
   return tests;
