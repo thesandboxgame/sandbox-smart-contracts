@@ -83,7 +83,7 @@ contract GemsCatalystsRegistry is WithSuperOperators {
     /// @param from address of the beneficiary to burn on behalf of
     /// @param catalystIds list of catalysts to burn catalyst units from each
     /// @param amounts list of amounts of units to burn
-    function batchBurnCatalysyts(
+    function batchBurnCatalysts(
         address from,
         uint16[] calldata catalystIds,
         uint256[] calldata amounts

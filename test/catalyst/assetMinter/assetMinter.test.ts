@@ -306,6 +306,11 @@ describe('AssetMinter', function () {
         BigNumber.from('1').mul(BigNumber.from(gemsCatalystsUnit)),
         catalystOwner
       );
+      await mintGem(
+        powerGem,
+        BigNumber.from('1').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
 
       await expect(
         assetMinterAsCatalystOwner.mintMultiple(

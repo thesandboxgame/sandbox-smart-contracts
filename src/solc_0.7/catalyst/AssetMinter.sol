@@ -143,7 +143,7 @@ contract AssetMinter is WithMetaTransaction {
         for (uint16 i = 0; i < ids.length; i++) {
             ids[i] = i;
         }
-        _gemsCatalystsRegistry.batchBurnCatalysyts(from, ids, catalystsQuantities);
+        _gemsCatalystsRegistry.batchBurnCatalysts(from, ids, catalystsQuantities);
     }
 
     function _batchBurnGems(address from, uint256[] memory gemsQuantities) internal {
