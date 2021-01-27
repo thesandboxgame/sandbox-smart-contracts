@@ -1704,30 +1704,15 @@ module.exports = (init) => {
         '0x'
       );
       for (let i = 0; i < tokenIdsToTransfer2.length; i++) {
-        const tokenId1 = tokenIdsToTransfer[i];
-        const tokenId2 = tokenIdsToTransfer2[i];
-        // console.log(balancesToTransfer2[i]);
-        console.log(tokenIdsToTransfer);
-        console.log(order);
-        console.log(tokenIdsToTransfer2);
-        console.log(order2);
-        // console.log('id', tokenId);
-        // console.log('[reverse[tokenId]]', [reverse[tokenId]]);
-        // console.log('rev', reverse);
-        // console.log('bals', balancesToTransfer);
-        // console.log(balancesToTransfer[reverse[tokenId1]]);
-        const expectedbalance = BigNumber.from(
-          balancesToTransfer2[reverse2[tokenId2]]
-        ).add(BigNumber.from(balancesToTransfer[reverse[tokenId1]]));
-        //console.log('exp', expectedbalance);
+        const tokenId = tokenIdsToTransfer2[i];
 
-        //.toString(10);
+        // TODO: fix
+        const expectedbalance = BigNumber.from(balancesToTransfer2[i]).add(
+          BigNumber.from(balancesToTransfer[reverse[tokenId]])
+        );
         // = new BN(balancesToTransfer2[i]).add(new BN(balancesToTransfer[reverse[tokenId]])).toString(10);
-        const balance1 = await contractAsMinter.balanceOf(user0, tokenId1);
-        const balance2 = await contractAsMinter.balanceOf(user0, tokenId2);
-        // console.log('bal', balance);
-
-        expect(balance1).to.be.equal(expectedbalance);
+        const balance = await contractAsMinter.balanceOf(user0, tokenId);
+        expect(balance).to.be.equal(expectedbalance);
       }
     }
 
