@@ -75,7 +75,9 @@ contract GemsCatalystsRegistry is WithSuperOperators {
         uint256[] calldata amounts
     ) public {
         for (uint256 i = 0; i < gemIds.length; i++) {
-            burnGem(from, gemIds[i], amounts[i]);
+            if (gemIds[i] != 0 && amounts[i] != 0) {
+                burnGem(from, gemIds[i], amounts[i]);
+            }
         }
     }
 
@@ -89,7 +91,9 @@ contract GemsCatalystsRegistry is WithSuperOperators {
         uint256[] calldata amounts
     ) public {
         for (uint256 i = 0; i < catalystIds.length; i++) {
-            burnCatalyst(from, catalystIds[i], amounts[i]);
+            if (catalystIds[i] != 0 && amounts[i] != 0) {
+                burnCatalyst(from, catalystIds[i], amounts[i]);
+            }
         }
     }
 
