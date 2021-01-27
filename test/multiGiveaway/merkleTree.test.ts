@@ -9,13 +9,13 @@ describe('MerkleTree_multi', function () {
     const claims = [
       {
         reservedAddress: '0x14dC79964da2C08b23698B3D3cc7Ca32193d9955',
-        assetIds: [0, 1, 2],
+        assetIds: ['0', '1', '2'],
         assetValues: [5, 5, 5],
         landIds: [0, 1, 2, 3, 4, 5],
       },
       {
         reservedAddress: '0x14dC79964da2C08b23698B3D3cc7Ca32193d9955',
-        assetIds: [3],
+        assetIds: ['3'],
         assetValues: [1],
         landIds: [6],
       },
@@ -25,7 +25,7 @@ describe('MerkleTree_multi', function () {
       },
       {
         reservedAddress: '0x14dC79964da2C08b23698B3D3cc7Ca32193d9955',
-        assetIds: [4, 5, 6],
+        assetIds: ['4', '5', '6'],
         assetValues: [5, 5, 5],
       },
     ];
@@ -58,14 +58,14 @@ describe('MerkleTree_multi', function () {
     const claims = [
       {
         reservedAddress: '0x14dC79964da2C08b23698B3D3cc7Ca32193d9955',
-        assetIds: [0, 1, 2],
+        assetIds: ['0', '1', '2'],
         assetValues: [5, 5, 5],
         landIds: [0, 1, 2, 3, 4, 5],
         sand: 200,
       },
       {
         reservedAddress: '0x14dC79964da2C08b23698B3D3cc7Ca32193d9955',
-        assetIds: [3],
+        assetIds: ['3'],
         assetValues: [1],
         landIds: [6],
         sand: 1000,
@@ -77,7 +77,7 @@ describe('MerkleTree_multi', function () {
       },
       {
         reservedAddress: '0x14dC79964da2C08b23698B3D3cc7Ca32193d9955',
-        assetIds: [4, 5, 6],
+        assetIds: ['4', '5', '6'],
         assetValues: [5, 5, 5],
         sand: 10000,
       },

@@ -1,8 +1,9 @@
 import 'dotenv/config';
 import {HardhatUserConfig} from 'hardhat/types';
 import 'hardhat-deploy';
-import 'hardhat-deploy-ethers';
+import '@nomiclabs/hardhat-ethers'; // aliased to hardhat-deploy-ethers
 import 'hardhat-gas-reporter';
+import '@openzeppelin/hardhat-upgrades';
 import {node_url, accounts} from './utils/network';
 
 const config: HardhatUserConfig = {
@@ -123,7 +124,15 @@ const config: HardhatUserConfig = {
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
     }, // can add super operators and change admin
 
+    proxyAdminOwner: {
+      default: 2,
+      1: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
+      rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
+    },
+
     landSaleAdmin: 'sandAdmin', // can enable currencies
+    gameTokenAdmin: 'sandAdmin', // can set minter address
+    gameTokenFeeBeneficiary: 'treasury', // receives fees from GAME token  minting / Mods
     estateAdmin: 'sandAdmin', // can add super operators and change admin
     P2PERC721SaleAdmin: 'sandAdmin', // can set fees
     backendReferralWallet: {
@@ -156,7 +165,15 @@ const config: HardhatUserConfig = {
   },
   networks: {
     hardhat: {
-      accounts: accounts(),
+      accounts: accounts(process.env.HARDHAT_FORK),
+      forking: process.env.HARDHAT_FORK
+        ? {
+            url: node_url(process.env.HARDHAT_FORK),
+            blockNumber: process.env.HARDHAT_FORK_NUMBER
+              ? parseInt(process.env.HARDHAT_FORK_NUMBER)
+              : undefined,
+          }
+        : undefined,
     },
     localhost: {
       url: 'http://localhost:8545',
@@ -178,6 +195,14 @@ const config: HardhatUserConfig = {
   paths: {
     sources: 'src',
   },
+
+  external: process.env.HARDHAT_FORK
+    ? {
+        deployments: {
+          hardhat: ['deployments/' + process.env.HARDHAT_FORK],
+        },
+      }
+    : undefined,
 };
 
 export default config;

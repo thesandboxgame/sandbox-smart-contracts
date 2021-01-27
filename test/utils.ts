@@ -1,6 +1,7 @@
 /* eslint-disable mocha/no-exports */
 import {BigNumber} from '@ethersproject/bignumber';
 import {ContractReceipt, Event, Contract, ContractTransaction} from 'ethers';
+import {Receipt} from 'hardhat-deploy/types';
 import {Result} from 'ethers/lib/utils';
 import {ethers} from 'hardhat';
 
@@ -100,8 +101,39 @@ export async function expectEventWithArgs(
   return events[0] as EventWithArgs;
 }
 
+export async function expectEventWithArgsFromReceipt(
+  contract: Contract,
+  receipt: Receipt,
+  event: string
+): Promise<EventWithArgs> {
+  const events = await findEvents(contract, event, receipt.blockHash);
+  if (events.length == 0) {
+    throw new Error('no events');
+  }
+  if (!events[0].args) {
+    throw new Error('event has no args');
+  }
+  return events[0] as EventWithArgs;
+}
+
 export function waitFor(
   p: Promise<ContractTransaction>
 ): Promise<ContractReceipt> {
   return p.then((tx) => tx.wait());
+}
+
+export async function setupUsers<T extends {[contractName: string]: Contract}>(
+  addresses: string[],
+  contracts: T
+): Promise<({address: string} & T)[]> {
+  const users: ({address: string} & T)[] = [];
+  for (const address of addresses) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const user: any = {address};
+    for (const key of Object.keys(contracts)) {
+      user[key] = contracts[key].connect(await ethers.getSigner(address));
+    }
+    users.push(user);
+  }
+  return users;
 }

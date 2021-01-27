@@ -9,6 +9,8 @@ const {calculateClaimableAssetLandAndSandHash} = helpers;
 
 const zeroAddress = constants.AddressZero;
 
+// TODO: fix test bug
+// eslint-disable-next-line mocha/no-skipped-tests
 describe('Asset_Giveaway', function () {
   it('User cannot claim when test contract holds zero assets', async function () {
     const options = {

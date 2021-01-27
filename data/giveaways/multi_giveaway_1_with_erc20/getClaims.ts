@@ -10,10 +10,10 @@ const {
 
 type AssetAndLandClaimWithSAND = {
   reservedAddress: string;
-  assetIds?: Array<BigNumber> | Array<string> | Array<number>;
+  assetIds?: Array<string>;
   assetValues?: Array<number>;
   landIds?: Array<number>;
-  sand?: number | BigNumber;
+  sand?: number;
 };
 
 export function createAssetLandAndSandClaimMerkleTree(

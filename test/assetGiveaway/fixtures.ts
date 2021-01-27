@@ -64,6 +64,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   // Supply assets to contract for testing
   async function mintTestAssets(id: number, value: number) {
+    //TODO: get bouncer admin
     const assetContractAsBouncer = await assetContract.connect(
       ethers.provider.getSigner(assetBouncerAdmin)
     );

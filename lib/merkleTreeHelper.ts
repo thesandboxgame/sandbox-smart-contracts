@@ -1,30 +1,35 @@
-import {BigNumber, utils} from 'ethers';
+import {utils} from 'ethers';
 const {solidityKeccak256} = utils;
 import crypto from 'crypto';
 
-interface Land {
+export type SaleLandInfo = {
   x: number;
   y: number;
   size: number;
-  price: number;
+  price: string;
   reserved: string;
   salt?: string;
-  assetIds?: Array<number>;
-}
+  assetIds?: Array<string>;
+};
+
+export type SaltedSaleLandInfo = SaleLandInfo & {
+  salt: string;
+};
 
 export interface Claim {
   reservedAddress: string;
-  assetIds?: Array<BigNumber> | Array<string> | Array<number>;
+  assetIds?: Array<string>;
   assetValues?: Array<number>;
   landIds?: Array<number>; // multi claim
-  ids?: Array<BigNumber> | Array<string> | Array<number>; // land claim only
-  sand?: number | BigNumber;
+  ids?: Array<string>; // land claim only // TODO: delete
+  sand?: number; // | BigNumber;
   salt?: string;
 }
 
-// LAND PRESALE
-
-function calculateLandHash(land: Land, salt?: string): string {
+function calculateLandHash(
+  land: SaleLandInfo | SaltedSaleLandInfo,
+  salt?: string
+): string {
   const types = [
     'uint256',
     'uint256',
@@ -50,7 +55,10 @@ function calculateLandHash(land: Land, salt?: string): string {
   return solidityKeccak256(types, values);
 }
 
-function saltLands(lands: Land[], secret?: string): Array<Land> {
+function saltLands(
+  lands: SaleLandInfo[],
+  secret?: string
+): Array<SaltedSaleLandInfo> {
   const saltedLands = [];
   for (const land of lands) {
     let salt = land.salt;
@@ -83,11 +91,13 @@ function saltLands(lands: Land[], secret?: string): Array<Land> {
   return saltedLands;
 }
 
-function createDataArray(lands: Land[], secret?: string): Array<Land> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data: any = [];
+function createDataArray(
+  lands: SaltedSaleLandInfo[],
+  secret?: string
+): string[] {
+  const data: string[] = [];
 
-  lands.forEach((land: Land) => {
+  lands.forEach((land: SaltedSaleLandInfo) => {
     let salt = land.salt;
     if (!salt) {
       if (!secret) {
@@ -179,9 +189,9 @@ function saltClaimableAssetsLandsAndSand(
 function createDataArrayClaimableAssetsLandsAndSand(
   claims: Claim[],
   secret?: string
-): Array<Claim> {
+): string[] {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data: any = [];
+  const data: string[] = [];
 
   claims.forEach((claim: Claim) => {
     let salt = claim.salt;

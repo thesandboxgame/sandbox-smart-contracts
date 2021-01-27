@@ -7,11 +7,11 @@ import {
 import {BigNumber} from 'ethers';
 import {expect} from '../chai-setup';
 import MerkleTree from '../../lib/merkleTree';
-import {createAssetAndLandClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getClaims';
+// import {createAssetAndLandClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getClaims';
 import {createAssetLandAndSandClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1_with_erc20/getClaims';
 import helpers from '../../lib/merkleTreeHelper';
 const {createDataArrayClaimableAssetsLandsAndSand} = helpers;
-import {default as testData} from '../../data/giveaways/multi_giveaway_1/claims_hardhat.json';
+// import {default as testData} from '../../data/giveaways/multi_giveaway_1/claims_hardhat.json';
 import {default as testDataWithERC20} from '../../data/giveaways/multi_giveaway_1_with_erc20/claims_hardhat.json';
 
 const ipfsHashString =
@@ -19,11 +19,11 @@ const ipfsHashString =
 
 import {expectReceiptEventWithArgs, waitFor} from '../utils';
 
-type Options = {
-  mint?: boolean;
-  assetsHolder?: boolean;
-  landHolder?: boolean;
-};
+// type Options = {
+//   mint?: boolean;
+//   assetsHolder?: boolean;
+//   landHolder?: boolean;
+// };
 
 type OptionsWithERC20 = {
   mint?: boolean;
@@ -33,184 +33,184 @@ type OptionsWithERC20 = {
   sand?: boolean;
 };
 
-export const setupTestGiveaway = deployments.createFixture(async function (
-  hre,
-  options?: Options
-) {
-  const {network, getChainId} = hre;
-  const chainId = await getChainId();
-  const {mint, assetsHolder, landHolder} = options || {};
-  const {
-    deployer,
-    assetAdmin,
-    assetBouncerAdmin,
-    landAdmin,
-  } = await getNamedAccounts();
-  const otherAccounts = await getUnnamedAccounts();
-  const nftGiveawayAdmin = otherAccounts[0];
-  const others = otherAccounts.slice(1);
+// export const setupTestGiveaway = deployments.createFixture(async function (
+//   hre,
+//   options?: Options
+// ) {
+//   const {network, getChainId} = hre;
+//   const chainId = await getChainId();
+//   const {mint, assetsHolder, landHolder} = options || {};
+//   const {
+//     deployer,
+//     assetAdmin,
+//     assetBouncerAdmin,
+//     landAdmin,
+//   } = await getNamedAccounts();
+//   const otherAccounts = await getUnnamedAccounts();
+//   const nftGiveawayAdmin = otherAccounts[0];
+//   const others = otherAccounts.slice(1);
 
-  await deployments.fixture('Multi_Giveaway_1');
-  const sandContract = await ethers.getContract('Sand');
-  await deployments.fixture(['Asset']);
-  const assetContract = await ethers.getContract('Asset');
+//   await deployments.fixture('Multi_Giveaway_1');
+//   const sandContract = await ethers.getContract('Sand');
+//   await deployments.fixture(['Asset']);
+//   const assetContract = await ethers.getContract('Asset');
 
-  await deployments.deploy('MockLand', {
-    from: deployer,
-    args: [sandContract.address, landAdmin],
-  });
+//   await deployments.deploy('MockLand', {
+//     from: deployer,
+//     args: [sandContract.address, landAdmin],
+//   });
 
-  const landContract = await ethers.getContract('MockLand');
+//   const landContract = await ethers.getContract('MockLand');
 
-  const landContractAsAdmin = await landContract.connect(
-    ethers.provider.getSigner(landAdmin)
-  );
+//   const landContractAsAdmin = await landContract.connect(
+//     ethers.provider.getSigner(landAdmin)
+//   );
 
-  const emptyBytes32 =
-    '0x0000000000000000000000000000000000000000000000000000000000000000';
+//   const emptyBytes32 =
+//     '0x0000000000000000000000000000000000000000000000000000000000000000';
 
-  const ASSETS_HOLDER = '0x0000000000000000000000000000000000000000';
-  const LAND_HOLDER = '0x0000000000000000000000000000000000000000';
+//   const ASSETS_HOLDER = '0x0000000000000000000000000000000000000000';
+//   const LAND_HOLDER = '0x0000000000000000000000000000000000000000';
 
-  const testContract = await deployments.deploy('Test_Multi_Giveaway_1', {
-    from: deployer,
-    contract: 'MultiGiveaway',
-    args: [
-      assetContract.address,
-      landContract.address,
-      nftGiveawayAdmin,
-      emptyBytes32,
-      assetsHolder ? others[5] : ASSETS_HOLDER,
-      landHolder ? others[5] : LAND_HOLDER,
-      1615194000, // Sunday, 08-Mar-21 09:00:00 UTC
-    ],
-  });
+//   const testContract = await deployments.deploy('Test_Multi_Giveaway_1', {
+//     from: deployer,
+//     contract: 'MultiGiveaway',
+//     args: [
+//       assetContract.address,
+//       landContract.address,
+//       nftGiveawayAdmin,
+//       emptyBytes32,
+//       assetsHolder ? others[5] : ASSETS_HOLDER,
+//       landHolder ? others[5] : LAND_HOLDER,
+//       1615194000, // Sunday, 08-Mar-21 09:00:00 UTC
+//     ],
+//   });
 
-  if (assetsHolder) {
-    const assetContractAsAdmin = await assetContract.connect(
-      ethers.provider.getSigner(assetAdmin)
-    );
-    await assetContractAsAdmin.setSuperOperator(testContract.address, true);
-  }
+//   if (assetsHolder) {
+//     const assetContractAsAdmin = await assetContract.connect(
+//       ethers.provider.getSigner(assetAdmin)
+//     );
+//     await assetContractAsAdmin.setSuperOperator(testContract.address, true);
+//   }
 
-  if (landHolder) {
-    await landContractAsAdmin.setSuperOperator(testContract.address, true);
-  }
+//   if (landHolder) {
+//     await landContractAsAdmin.setSuperOperator(testContract.address, true);
+//   }
 
-  // Supply assets to contract for testing
-  async function mintTestAssets(id: number, value: number) {
-    const assetContractAsBouncer = await assetContract.connect(
-      ethers.provider.getSigner(assetBouncerAdmin)
-    );
+//   // Supply assets to contract for testing
+//   async function mintTestAssets(id: number, value: number) {
+//     const assetContractAsBouncer = await assetContract.connect(
+//       ethers.provider.getSigner(assetBouncerAdmin)
+//     );
 
-    // Asset to be minted
-    const creator = others[0];
-    const packId = id;
-    const hash = ipfsHashString;
-    const supply = value;
-    const rarity = 1;
-    const owner = assetsHolder ? others[5] : testContract.address;
-    const data = '0x';
+//     // Asset to be minted
+//     const creator = others[0];
+//     const packId = id;
+//     const hash = ipfsHashString;
+//     const supply = value;
+//     const rarity = 1;
+//     const owner = assetsHolder ? others[5] : testContract.address;
+//     const data = '0x';
 
-    const receipt = await waitFor(
-      assetContractAsBouncer.mint(
-        creator,
-        packId,
-        hash,
-        supply,
-        rarity,
-        owner,
-        data
-      )
-    );
+//     const receipt = await waitFor(
+//       assetContractAsBouncer.mint(
+//         creator,
+//         packId,
+//         hash,
+//         supply,
+//         rarity,
+//         owner,
+//         data
+//       )
+//     );
 
-    const transferEvent = await expectReceiptEventWithArgs(
-      receipt,
-      'TransferSingle'
-    );
+//     const transferEvent = await expectReceiptEventWithArgs(
+//       receipt,
+//       'TransferSingle'
+//     );
 
-    const balanceAssetId = await assetContract['balanceOf(address,uint256)'](
-      assetsHolder ? others[5] : testContract.address,
-      transferEvent.args[3]
-    );
-    expect(balanceAssetId).to.equal(supply);
-    return transferEvent.args[3].toString(); // asset ID
-  }
+//     const balanceAssetId = await assetContract['balanceOf(address,uint256)'](
+//       assetsHolder ? others[5] : testContract.address,
+//       transferEvent.args[3]
+//     );
+//     expect(balanceAssetId).to.equal(supply);
+//     return transferEvent.args[3].toString(); // asset ID
+//   }
 
-  // Supply lands to contract for testing
-  async function mintTestLands() {
-    const owner = landHolder ? others[5] : testContract.address;
-    for (let i = 0; i < 8; i++) {
-      await landContractAsAdmin.mint(owner, i);
-    }
-  }
+//   // Supply lands to contract for testing
+//   async function mintTestLands() {
+//     const owner = landHolder ? others[5] : testContract.address;
+//     for (let i = 0; i < 8; i++) {
+//       await landContractAsAdmin.mint(owner, i);
+//     }
+//   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let dataWithIds: any = testData;
+//   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//   let dataWithIds: any = testData;
 
-  async function mintNewAssetIds() {
-    return await Promise.all(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      testData.map(async (claim: any) => {
-        if (claim.assetIds) {
-          const newClaim = {
-            ...claim,
-            assetIds: await Promise.all(
-              claim.assetIds.map(
-                async (assetPackId: number, index: number) =>
-                  await mintTestAssets(assetPackId, claim.assetValues[index])
-              )
-            ),
-          };
-          return newClaim;
-        } else return claim;
-      })
-    );
-  }
+//   async function mintNewAssetIds() {
+//     return await Promise.all(
+//       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//       testData.map(async (claim: any) => {
+//         if (claim.assetIds) {
+//           const newClaim = {
+//             ...claim,
+//             assetIds: await Promise.all(
+//               claim.assetIds.map(
+//                 async (assetPackId: number, index: number) =>
+//                   await mintTestAssets(assetPackId, claim.assetValues[index])
+//               )
+//             ),
+//           };
+//           return newClaim;
+//         } else return claim;
+//       })
+//     );
+//   }
 
-  if (mint) {
-    const claimsWithAssetIds = await mintNewAssetIds();
-    dataWithIds = claimsWithAssetIds;
-    await mintTestLands();
-  }
+//   if (mint) {
+//     const claimsWithAssetIds = await mintNewAssetIds();
+//     dataWithIds = claimsWithAssetIds;
+//     await mintTestLands();
+//   }
 
-  // Set up tree with test assets
-  const {claims, merkleRootHash} = createAssetAndLandClaimMerkleTree(
-    network.live,
-    chainId,
-    dataWithIds
-  );
+//   // Set up tree with test assets
+//   const {claims, merkleRootHash} = createAssetAndLandClaimMerkleTree(
+//     network.live,
+//     chainId,
+//     dataWithIds
+//   );
 
-  // Update the deployment with test asset data
-  const deployment = await deployments.get('Test_Multi_Giveaway_1');
-  deployment.linkedData = claims;
-  await deployments.save('Test_Multi_Giveaway_1', deployment);
+//   // Update the deployment with test asset data
+//   const deployment = await deployments.get('Test_Multi_Giveaway_1');
+//   deployment.linkedData = claims;
+//   await deployments.save('Test_Multi_Giveaway_1', deployment);
 
-  const giveawayContract = await ethers.getContract('Test_Multi_Giveaway_1');
-  const giveawayContractAsAdmin = await giveawayContract.connect(
-    ethers.provider.getSigner(nftGiveawayAdmin)
-  );
+//   const giveawayContract = await ethers.getContract('Test_Multi_Giveaway_1');
+//   const giveawayContractAsAdmin = await giveawayContract.connect(
+//     ethers.provider.getSigner(nftGiveawayAdmin)
+//   );
 
-  const updatedDeployment = await deployments.get('Test_Multi_Giveaway_1');
-  const updatedClaims = updatedDeployment.linkedData;
-  const assetAndLandHashArray = createDataArrayClaimableAssetsLandsAndSand(
-    updatedClaims
-  );
-  const tree = new MerkleTree(assetAndLandHashArray);
-  await giveawayContractAsAdmin.setMerkleRoot(merkleRootHash); // Set the merkleRoot which could not have been known prior to generating the test asset IDs
+//   const updatedDeployment = await deployments.get('Test_Multi_Giveaway_1');
+//   const updatedClaims = updatedDeployment.linkedData;
+//   const assetAndLandHashArray = createDataArrayClaimableAssetsLandsAndSand(
+//     updatedClaims
+//   );
+//   const tree = new MerkleTree(assetAndLandHashArray);
+//   await giveawayContractAsAdmin.setMerkleRoot(merkleRootHash); // Set the merkleRoot which could not have been known prior to generating the test asset IDs
 
-  return {
-    giveawayContract,
-    sandContract,
-    assetContract,
-    landContract,
-    others,
-    tree,
-    claims: updatedClaims,
-    nftGiveawayAdmin,
-    merkleRootHash,
-  };
-});
+//   return {
+//     giveawayContract,
+//     sandContract,
+//     assetContract,
+//     landContract,
+//     others,
+//     tree,
+//     claims: updatedClaims,
+//     nftGiveawayAdmin,
+//     merkleRootHash,
+//   };
+// });
 
 export const setupTestGiveawayWithERC20 = deployments.createFixture(
   async function (hre, options?: OptionsWithERC20) {

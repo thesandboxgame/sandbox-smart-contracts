@@ -61,11 +61,15 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
 
     address private _bouncerAdmin;
 
-    constructor(
+    bool internal _init;
+
+    function init(
         address metaTransactionContract,
         address admin,
         address bouncerAdmin
     ) public {
+        require(!_init, "ALREADY_INITIALISED");
+        _init = true;
         _metaTransactionContracts[metaTransactionContract] = true;
         _admin = admin;
         _bouncerAdmin = bouncerAdmin;
@@ -550,7 +554,9 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
                 }
             } else {
                 require(authorized, "Operator not approved");
-                if(values[i] > 0) {
+                if (from == to) {
+                    _checkEnoughBalance(from, ids[i], values[i]);
+                } else if(values[i] > 0) {
                     (bin, index) = ids[i].getTokenBinIndex();
                     if (lastBin == 0) {
                         lastBin = bin;
@@ -589,15 +595,20 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
                 }
             }
         }
-        if (numNFTs > 0) {
+        if (numNFTs > 0 && from != to) {
             _numNFTPerAddress[from] -= numNFTs;
             _numNFTPerAddress[to] += numNFTs;
         }
 
-        if (bin != 0) {
+        if (bin != 0 && from != to) {
             _packedTokenBalance[from][bin] = balFrom;
             _packedTokenBalance[to][bin] = balTo;
         }
+    }
+
+    function _checkEnoughBalance(address from, uint256 id, uint256 value) internal {
+        (uint256 bin, uint256 index) = id.getTokenBinIndex();
+        require(_packedTokenBalance[from][bin].getValueInBin(index) >= value, "can't substract more than there is");
     }
 
     /// @notice Get the balance of `owner` for the token type `id`.
