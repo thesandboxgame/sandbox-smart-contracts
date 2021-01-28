@@ -22,6 +22,10 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   const luckGem: Contract = await ethers.getContract('Gem_LUCK');
   const commonCatalyst: Contract = await ethers.getContract('Catalyst_COMMON');
   const rareCatalyst: Contract = await ethers.getContract('Catalyst_RARE');
+  const epicCatalyst: Contract = await ethers.getContract('Catalyst_EPIC');
+  const legendaryCatalyst: Contract = await ethers.getContract(
+    'Catalyst_LEGENDARY'
+  );
   const users = await getUnnamedAccounts();
   const {
     catalystMinter,
@@ -89,11 +93,31 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     .connect(ethers.provider.getSigner(catalystMinter))
     .mint(catalystOwner, mintingAmount);
 
+  await epicCatalyst
+    .connect(ethers.provider.getSigner(catalystMinter))
+    .mint(catalystOwner, mintingAmount);
+
+  await legendaryCatalyst
+    .connect(ethers.provider.getSigner(catalystMinter))
+    .mint(catalystOwner, mintingAmount);
+
   await powerGem
     .connect(ethers.provider.getSigner(gemMinter))
     .mint(gemOwner, mintingAmount);
 
   await defenseGem
+    .connect(ethers.provider.getSigner(gemMinter))
+    .mint(gemOwner, mintingAmount);
+
+  await speedGem
+    .connect(ethers.provider.getSigner(gemMinter))
+    .mint(gemOwner, mintingAmount);
+
+  await magicGem
+    .connect(ethers.provider.getSigner(gemMinter))
+    .mint(gemOwner, mintingAmount);
+
+  await luckGem
     .connect(ethers.provider.getSigner(gemMinter))
     .mint(gemOwner, mintingAmount);
 
@@ -114,6 +138,8 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     catalystExample,
     commonCatalyst,
     rareCatalyst,
+    epicCatalyst,
+    legendaryCatalyst,
     gemsCatalystsRegistryAdmin,
     catalystMinter,
     gemMinter,

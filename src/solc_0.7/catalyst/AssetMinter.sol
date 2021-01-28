@@ -120,6 +120,7 @@ contract AssetMinter is WithMetaTransaction {
                 uint16 maxGems = _gemsCatalystsRegistry.getMaxGems(assets[i].catalystId);
                 require(assets[i].gemIds.length <= maxGems, "INVALID_GEMS_TOO_MANY");
                 catalystsQuantities[assets[i].catalystId]--;
+                // @review why assign a new decremented value to gemsQuantities here if it's not used again?
                 gemsQuantities = _checkGemsQuantities(gemsQuantities, assets[i].gemIds);
             }
             supplies[i] = assets[i].quantity;
