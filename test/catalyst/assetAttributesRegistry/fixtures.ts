@@ -11,11 +11,6 @@ export const setupAssetAttributesRegistry = deployments.createFixture(
     );
     const {assetAttributesRegistryAdmin} = await getNamedAccounts();
 
-    await waitFor(
-      assetAttributesRegistry
-        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-        .changeMinter(assetAttributesRegistryAdmin)
-    );
     return {
       assetAttributesRegistry,
       assetAttributesRegistryAdmin,
