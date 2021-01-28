@@ -142,6 +142,7 @@ contract AssetMinter is WithMetaTransaction {
     function _batchBurnCatalysts(address from, uint256[] memory catalystsQuantities) internal {
         uint16[] memory ids = new uint16[](catalystsQuantities.length);
         for (uint16 i = 0; i < ids.length; i++) {
+            // @review why is this needed if catalystsQuantities' indexes are equal to id ?
             ids[i] = i;
         }
         _gemsCatalystsRegistry.batchBurnCatalysts(from, ids, catalystsQuantities);
