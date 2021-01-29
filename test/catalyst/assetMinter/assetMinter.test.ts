@@ -136,7 +136,7 @@ describe('AssetMinter', function () {
       expect(record.gemIds[0]).to.equal(1);
     });
 
-    it.skip('only erc721 assets will have a catalyst set', async function () {
+    it('only erc721 assets will have a catalyst set', async function () {
       const {assetMinterContract, assetContract} = await setupAssetMinter();
       const {
         catalystOwner,
@@ -163,9 +163,19 @@ describe('AssetMinter', function () {
         BigNumber.from('7').mul(BigNumber.from(gemsCatalystsUnit)),
         catalystOwner
       );
-      const minter = await assetAttributesRegistry.getMinter();
 
-      // @note : should emit TransferSingle event
+      const assetId = await assetMinterAsCatalystOwner.callStatic.mint(
+        catalystOwner,
+        mintOptions.packId,
+        mintOptions.metaDataHash,
+        catalysts[1].catalystId,
+        [gems[0].gemId, gems[1].gemId],
+        FT_SUPPLY,
+        0,
+        catalystOwner,
+        mintOptions.data
+      );
+
       const receipt = await assetMinterAsCatalystOwner.mint(
         catalystOwner,
         mintOptions.packId,
@@ -177,7 +187,7 @@ describe('AssetMinter', function () {
         catalystOwner,
         mintOptions.data
       );
-      // @note InvalidArgumentsError: blockHash cannot be found
+
       const mintEvent = await expectEventWithArgs(
         assetContract,
         receipt,
@@ -185,24 +195,28 @@ describe('AssetMinter', function () {
       );
       //  TransferSingle(operator, address(0), owner, id, supply);
       const args = mintEvent.args;
-      const operator = args[0];
-      const from = args[1];
-      const owner = args[2];
-      const id = args[3];
-      const supply = args[4];
-      // const record = await assetAttributesRegistry.getRecord(assetId);
-      // const balancesOfBatch = await assetContract.balanceOfBatch(
-      //   [catalystOwner],
-      //   [assetId]
-      // );
 
-      // expect(balancesOfBatch[0]).to.be.equal(FT_SUPPLY);
+      expect(args[0]).to.be.equal(assetMinterContract.address);
+      expect(args[1]).to.be.equal(ethers.constants.AddressZero);
+      expect(args[2]).to.be.equal(catalystOwner);
+      expect(args[3]).to.be.equal(assetId);
+      expect(args[4]).to.be.equal(7);
+
+      const record = await assetAttributesRegistry.getRecord(assetId);
+      const balancesOfBatch = await assetContract.balanceOfBatch(
+        [catalystOwner],
+        [assetId]
+      );
+
+      expect(balancesOfBatch[0]).to.be.equal(FT_SUPPLY);
       // @review id here is currently 2. Should it be 0?
       // "Catalyst will only be associated to ERC721 Assets"
       // https://docs.google.com/document/d/1B_r6v3KA-kdtdPEQjpei2E2s0YObbo2mGWe1yGZIPt8/edit
       // expect(record.catalystId).to.be.equal(0);
-      // expect(record.exists).to.be.equal(true);
-      // expect(record.gemIds).to.deep.equal([]);
+      expect(record.exists).to.be.equal(true);
+      // expect(record.gemIds).to.deep.equal(emptyRecordGemIds); // ?
+      expect(record.gemIds[0]).to.be.equal(1);
+      expect(record.gemIds[1]).to.be.equal(2);
     });
 
     it('Transfer event is emitted on minting an NFT', async function () {
@@ -434,7 +448,19 @@ describe('AssetMinter', function () {
     // For mintMultiple() success cases, test:
     // - operator can mint
     // - state: _records should be updated, use getAttributes to check
-    it.skip('only erc721 assets will have a catalyst set', async function () {});
+    it.skip('only erc721 assets will have a catalyst set', async function () {
+      const {
+        catalystOwner,
+        powerGem,
+        speedGem,
+        commonCatalyst,
+        rareCatalyst,
+      } = await setupGemsAndCatalysts();
+      const {assetMinterContract} = await setupAssetMinter();
+      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
+    });
 
     it.skip('TransferSingle event is emitted on minting a single FT', async function () {});
 
@@ -781,7 +807,7 @@ describe('AssetMinter', function () {
       ).to.be.revertedWith('INVALID_GEMS_NOT_ENOUGH');
     });
 
-    it.skip('should fail if gemsQuantities.length != 5', async function () {
+    it('should fail if gemsQuantities.length != 5', async function () {
       const {assetMinterContract} = await setupAssetMinter();
       const {catalystOwner} = await setupGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
@@ -792,9 +818,8 @@ describe('AssetMinter', function () {
           catalystOwner,
           mintMultiOptions.packId,
           mintMultiOptions.metadataHash,
-          // only allowing 2 powerGems here, but trying to add 3 in assets[]
-          [2, 0, 0, 0],
-          [1, 0, 0, 0],
+          [0, 2],
+          [0, 1, 0, 0, 0],
           [
             {
               gemIds: [5],
@@ -805,18 +830,87 @@ describe('AssetMinter', function () {
           catalystOwner,
           mintMultiOptions.data
         )
-      ).to.be.revertedWith('FAIL');
+      ).to.be.reverted; // Error: VM Exception while processing transaction: invalid opcode
     });
-    it.skip('should fail if catalystsQuantities.length != 4', async function () {
+    it('should fail if catalystsQuantities.length != 4', async function () {
       const {assetMinterContract} = await setupAssetMinter();
       const {catalystOwner} = await setupGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
+
+      await expect(
+        assetMinterAsCatalystOwner.mintMultiple(
+          catalystOwner,
+          mintMultiOptions.packId,
+          mintMultiOptions.metadataHash,
+          [0, 2, 0, 0, 0],
+          [0, 1],
+          [
+            {
+              gemIds: [5],
+              quantity: 1,
+              catalystId: 1,
+            },
+          ],
+          catalystOwner,
+          mintMultiOptions.data
+        )
+      ).to.be.reverted; // Error: VM Exception while processing transaction: invalid opcode
     });
 
-    // @note This won't revert, but the assets minted will have no catalyst set.
-    // Finish test by checking the contract state
+    it('should fail if gemsQuantities are out of order', async function () {
+      // The quantity of each gem must be at the index corresponding to the gemId. This requires a 0 value to pad the 0-index of the gemsQuantities array
+      const {assetMinterContract} = await setupAssetMinter();
+      const {catalystOwner} = await setupGemsAndCatalysts();
+      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
+      await expect(
+        assetMinterAsCatalystOwner.mintMultiple(
+          catalystOwner,
+          mintMultiOptions.packId,
+          mintMultiOptions.metadataHash,
+          [1, 0, 0, 0, 0],
+          [0, 1, 0, 0, 0],
+          [
+            {
+              gemIds: [1],
+              quantity: 1,
+              catalystId: 1,
+            },
+          ],
+          catalystOwner,
+          mintMultiOptions.data
+        )
+      ).to.be.revertedWith('INVALID_GEMS_NOT_ENOUGH');
+    });
+    it('should fail if catalystsQuantities are out of order', async function () {
+      const {assetMinterContract} = await setupAssetMinter();
+      const {catalystOwner} = await setupGemsAndCatalysts();
+      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
+      await expect(
+        assetMinterAsCatalystOwner.mintMultiple(
+          catalystOwner,
+          mintMultiOptions.packId,
+          mintMultiOptions.metadataHash,
+          [0, 1, 0, 0, 0, 0],
+          [1, 0, 0, 0],
+          [
+            {
+              gemIds: [1],
+              quantity: 1,
+              catalystId: 1,
+            },
+          ],
+          catalystOwner,
+          mintMultiOptions.data
+        )
+      ).to.be.revertedWith('INVALID_CATALYST_NOT_ENOUGH');
+    });
+
     it('mintMultiple should not set catalyst if catalystId == 0', async function () {
       const {assetMinterContract, assetContract} = await setupAssetMinter();
       const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
@@ -857,8 +951,10 @@ describe('AssetMinter', function () {
         catalystOwner,
         mintMultiOptions.data
       );
+
       const assetId = staticIds[0];
-      await assetMinterAsCatalystOwner.mintMultiple(
+
+      const receipt = await assetMinterAsCatalystOwner.mintMultiple(
         catalystOwner,
         mintMultiOptions.packId,
         mintMultiOptions.metadataHash,
@@ -875,50 +971,29 @@ describe('AssetMinter', function () {
         mintMultiOptions.data
       );
 
-      const record = await assetAttributesRegistry.getRecord(assetId);
+      const {
+        exists,
+        catalystId,
+        gemIds,
+      } = await assetAttributesRegistry.getRecord(assetId);
       const assetOwner = await assetContract.ownerOf(assetId);
-      expect(record.exists).to.be.equal(false);
-      expect(record.catalystId).to.be.equal(0);
-      expect(record.gemIds).to.deep.equal(emptyRecordGemIds);
+      expect(exists).to.be.equal(false);
+      expect(catalystId).to.be.equal(0);
+      expect(gemIds).to.deep.equal(emptyRecordGemIds);
       expect(assetOwner).to.be.equal(catalystOwner);
 
-      // const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
-
-      // console.log(`blockhash: ${receipt.blockHash}`);
-      // // TransferBatch(operator, address(0), owner, ids, supplies)
-      // const mintMultiEvent = await expectEventWithArgs(
-      //   assetContract,
-      //   receipt,
-      //   'TransferBatch'
-      // );
-      // const args = mintMultiEvent.args;
-      // const operator = args[0];
-      // const from = args[1];
-      // const owner = args[2];
-      // const ids = args[3];
-      // const supplies = args[4];
-
-      // expect(operator).to.be.equal(true);
-      // expect(from).to.be.equal(ethers.constants.AddressZero);
-      // expect(owner).to.be.equal(catalystOwner);
-      // expect(ids).to.deep.equal(staticIds);
-      // expect(supplies).to.deep.equal([1]);
-      // const {
-      //   exists,
-      //   catalystId,
-      //   gemIds,
-      // } = await assetAttributesRegistry.getRecord(assetId);
-      // expect(exists).to.be.equal(true);
-      // expect(catalystId).to.be.equal(0);
-      // expect(gemIds).to.deep.equal([]);
-    });
-
-    it.skip('can get attributes for an asset', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
-      const {catalystOwner} = await setupGemsAndCatalysts();
-      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
-        ethers.provider.getSigner(catalystOwner)
+      const mintMultiEvent = await expectEventWithArgs(
+        assetContract,
+        receipt,
+        'TransferBatch'
       );
+      const args = mintMultiEvent.args;
+
+      expect(args[0]).to.be.equal(assetMinterContract.address);
+      expect(args[1]).to.be.equal(ethers.constants.AddressZero);
+      expect(args[2]).to.be.equal(catalystOwner);
+      expect(args[3]).to.deep.equal(staticIds);
+      expect(args[4]).to.deep.equal([BigNumber.from(1)]);
     });
   });
 });
