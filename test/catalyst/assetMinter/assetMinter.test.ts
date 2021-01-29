@@ -55,6 +55,10 @@ const NFT_SUPPLY = 1;
 const FT_SUPPLY = 7;
 const emptyRecordGemIds = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
+function bn(x: number): BigNumber {
+  return BigNumber.from(x);
+}
+
 describe('AssetMinter', function () {
   before(async function () {
     mintOptions = {
@@ -193,7 +197,6 @@ describe('AssetMinter', function () {
         receipt,
         'TransferSingle'
       );
-      //  TransferSingle(operator, address(0), owner, id, supply);
       const args = mintEvent.args;
 
       expect(args[0]).to.be.equal(assetMinterContract.address);
@@ -212,9 +215,13 @@ describe('AssetMinter', function () {
       // @review id here is currently 2. Should it be 0?
       // "Catalyst will only be associated to ERC721 Assets"
       // https://docs.google.com/document/d/1B_r6v3KA-kdtdPEQjpei2E2s0YObbo2mGWe1yGZIPt8/edit
+
       // expect(record.catalystId).to.be.equal(0);
+
       expect(record.exists).to.be.equal(true);
+
       // expect(record.gemIds).to.deep.equal(emptyRecordGemIds); // ?
+
       expect(record.gemIds[0]).to.be.equal(1);
       expect(record.gemIds[1]).to.be.equal(2);
     });
@@ -448,7 +455,200 @@ describe('AssetMinter', function () {
     // For mintMultiple() success cases, test:
     // - operator can mint
     // - state: _records should be updated, use getAttributes to check
-    it.skip('only erc721 assets will have a catalyst set', async function () {
+    // @review this assumption. see also same test for mint()
+    it.skip('only erc721 assets will have a catalyst set', async function () {});
+
+    it('TransferBatch event is emitted on minting a single FT via mintMultiple', async function () {
+      const {
+        catalystOwner,
+        powerGem,
+        commonCatalyst,
+      } = await setupGemsAndCatalysts();
+      const {assetMinterContract, assetContract} = await setupAssetMinter();
+      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
+
+      await mintCatalyst(
+        commonCatalyst,
+        BigNumber.from('7').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
+      await mintGem(
+        powerGem,
+        BigNumber.from('7').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
+
+      const assetIds = await assetMinterAsCatalystOwner.callStatic.mintMultiple(
+        catalystOwner,
+        mintMultiOptions.packId,
+        mintMultiOptions.metadataHash,
+        [0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0],
+        [
+          {
+            gemIds: [1],
+            quantity: FT_SUPPLY,
+            catalystId: 1,
+          },
+        ],
+        catalystOwner,
+        mintMultiOptions.data
+      );
+
+      const receipt = await assetMinterAsCatalystOwner.mintMultiple(
+        catalystOwner,
+        mintMultiOptions.packId,
+        mintMultiOptions.metadataHash,
+        [0, 1, 0, 0, 0, 0],
+        [0, 1, 0, 0, 0],
+        [
+          {
+            gemIds: [1],
+            quantity: FT_SUPPLY,
+            catalystId: 1,
+          },
+        ],
+        catalystOwner,
+        mintMultiOptions.data
+      );
+
+      const mintEvent = await expectEventWithArgs(
+        assetContract,
+        receipt,
+        'TransferBatch'
+      );
+      const args = mintEvent.args;
+
+      // const assetEvents = await assetContract.queryFilter(
+      //   assetContract.filters.TransferSingle()
+      // );
+      // const event = assetEvents.filter((e) => e.event === 'TransferBatch')[0];
+      // TypeError: Cannot read property 'args' of undefined
+
+      expect(args[0]).to.equal(assetMinterContract.address);
+      expect(args[1]).to.equal(ethers.constants.AddressZero);
+      expect(args[2]).to.equal(catalystOwner);
+      expect(args[3]).to.deep.equal(assetIds);
+      expect(args[4]).to.deep.equal([bn(7)]);
+    });
+
+    it('TransferBatch event is emitted on minting a multiple FTs', async function () {
+      const {
+        catalystOwner,
+        powerGem,
+        defenseGem,
+        speedGem,
+        commonCatalyst,
+        rareCatalyst,
+        epicCatalyst,
+      } = await setupGemsAndCatalysts();
+      const {assetMinterContract, assetContract} = await setupAssetMinter();
+      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
+
+      await mintCatalyst(
+        commonCatalyst,
+        BigNumber.from('1').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
+      await mintCatalyst(
+        rareCatalyst,
+        BigNumber.from('1').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
+      await mintCatalyst(
+        epicCatalyst,
+        BigNumber.from('1').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
+      await mintGem(
+        powerGem,
+        BigNumber.from('3').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
+      await mintGem(
+        defenseGem,
+        BigNumber.from('2').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
+      await mintGem(
+        speedGem,
+        BigNumber.from('1').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
+
+      const assetIds = await assetMinterAsCatalystOwner.callStatic.mintMultiple(
+        catalystOwner,
+        mintMultiOptions.packId,
+        mintMultiOptions.metadataHash,
+        [0, 3, 2, 1, 0, 0],
+        [0, 1, 1, 1, 0],
+        [
+          {
+            gemIds: [1],
+            quantity: FT_SUPPLY + 1,
+            catalystId: 1,
+          },
+          {
+            gemIds: [2, 1],
+            quantity: FT_SUPPLY,
+            catalystId: 2,
+          },
+          {
+            gemIds: [1, 3, 2],
+            quantity: FT_SUPPLY - 1,
+            catalystId: 3,
+          },
+        ],
+        catalystOwner,
+        mintMultiOptions.data
+      );
+
+      const receipt = await assetMinterAsCatalystOwner.mintMultiple(
+        catalystOwner,
+        mintMultiOptions.packId,
+        mintMultiOptions.metadataHash,
+        [0, 3, 2, 1, 0, 0],
+        [0, 1, 1, 1, 0],
+        [
+          {
+            gemIds: [1],
+            quantity: FT_SUPPLY + 1,
+            catalystId: 1,
+          },
+          {
+            gemIds: [2, 1],
+            quantity: FT_SUPPLY,
+            catalystId: 2,
+          },
+          {
+            gemIds: [1, 3, 2],
+            quantity: FT_SUPPLY - 1,
+            catalystId: 3,
+          },
+        ],
+        catalystOwner,
+        mintMultiOptions.data
+      );
+
+      const mintEvent = await expectEventWithArgs(
+        assetContract,
+        receipt,
+        'TransferBatch'
+      );
+      const args = mintEvent.args;
+
+      expect(args[0]).to.equal(assetMinterContract.address);
+      expect(args[1]).to.equal(ethers.constants.AddressZero);
+      expect(args[2]).to.equal(catalystOwner);
+      expect(args[3]).to.deep.equal(assetIds);
+      expect(args[4]).to.deep.equal([bn(8), bn(7), bn(6)]);
+    });
+
+    it.skip('CatalystApplied event is emitted for each NFT minted with a catalyst', async function () {
       const {
         catalystOwner,
         powerGem,
@@ -462,19 +662,61 @@ describe('AssetMinter', function () {
       );
     });
 
-    it.skip('TransferSingle event is emitted on minting a single FT', async function () {});
+    it.skip('records should be updated correctly for each asset minted', async function () {
+      const {
+        catalystOwner,
+        powerGem,
+        speedGem,
+        commonCatalyst,
+        rareCatalyst,
+      } = await setupGemsAndCatalysts();
+      const {assetMinterContract} = await setupAssetMinter();
+      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
+    });
 
-    it.skip('TransferBatch event is emitted on minting a multiple FTs', async function () {});
+    it.skip('totalSupply & balance should be reduced for burnt gems & catalysts', async function () {
+      const {
+        catalystOwner,
+        powerGem,
+        speedGem,
+        commonCatalyst,
+        rareCatalyst,
+      } = await setupGemsAndCatalysts();
+      const {assetMinterContract} = await setupAssetMinter();
+      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
+    });
 
-    it.skip('CatalystApplied event is emitted for each NFT minted with a catalyst', async function () {});
+    it.skip('Extra gems will be burnt even if not added to asset', async function () {
+      const {
+        catalystOwner,
+        powerGem,
+        speedGem,
+        commonCatalyst,
+        rareCatalyst,
+      } = await setupGemsAndCatalysts();
+      const {assetMinterContract} = await setupAssetMinter();
+      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
+    });
 
-    it.skip('records should be updated correctly for each asset minted', async function () {});
-
-    it.skip('totalSupply & balance should be reduced for burnt gems & catalysts', async function () {});
-
-    it.skip('Extra gems will be burnt even if not added to asset', async function () {});
-
-    it.skip('Extra catalysts will be burnt even if not added to asset', async function () {});
+    it.skip('Extra catalysts will be burnt even if not added to asset', async function () {
+      const {
+        catalystOwner,
+        powerGem,
+        speedGem,
+        commonCatalyst,
+        rareCatalyst,
+      } = await setupGemsAndCatalysts();
+      const {assetMinterContract} = await setupAssetMinter();
+      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
+    });
   });
 
   describe('AssetMinter: Failures', function () {
