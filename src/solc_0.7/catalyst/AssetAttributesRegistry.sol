@@ -5,7 +5,6 @@ pragma experimental ABIEncoderV2;
 import "../common/BaseWithStorage/WithAdmin.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
 import "./GemsCatalystsRegistry.sol";
-import "hardhat/console.sol";
 
 contract AssetAttributesRegistry is WithMinter {
     uint256 internal constant MAX_NUM_GEMS = 15;

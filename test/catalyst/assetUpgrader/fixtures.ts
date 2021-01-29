@@ -1,10 +1,18 @@
-import {ethers, deployments, getNamedAccounts} from 'hardhat';
+import {
+  ethers,
+  deployments,
+  getUnnamedAccounts,
+  getNamedAccounts,
+} from 'hardhat';
 import {BigNumber, Contract} from 'ethers';
 import {waitFor} from '../../utils';
 
 export const setupAssetUpgrader = deployments.createFixture(async () => {
   await deployments.fixture();
   const {assetAttributesRegistryAdmin, assetAdmin} = await getNamedAccounts();
+  const users = await getUnnamedAccounts();
+  const catalystOwner = users[0];
+
   const assetUpgraderContract: Contract = await ethers.getContract(
     'AssetUpgrader'
   );
@@ -35,6 +43,8 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
   );
 
   return {
+    users,
+    catalystOwner,
     rareCatalyst,
     powerGem,
     defenseGem,

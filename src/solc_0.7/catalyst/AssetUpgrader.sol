@@ -7,7 +7,6 @@ import "./GemsCatalystsRegistry.sol";
 import "../common/Interfaces/IERC20Extended.sol";
 import "../common/Interfaces/IAssetToken.sol";
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
-import "hardhat/console.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetUpgrader is WithMetaTransaction {

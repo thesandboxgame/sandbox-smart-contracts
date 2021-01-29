@@ -2,7 +2,15 @@ import {BigNumber, Contract} from 'ethers';
 import {ethers, getNamedAccounts} from 'hardhat';
 import {waitFor} from '../../scripts/utils/utils';
 
-export async function mintAsset(minter: string, supply: number) {
+export async function mintAsset(
+  creator: string,
+  packId: BigNumber,
+  hash: string,
+  supply: number | BigNumber,
+  rarity: number,
+  owner: string,
+  callData: Buffer
+): Promise<BigNumber> {
   const {assetBouncerAdmin} = await getNamedAccounts();
   const assetContract = await ethers.getContract('Asset');
 
@@ -14,39 +22,23 @@ export async function mintAsset(minter: string, supply: number) {
 
   const assetId = await assetContract
     .connect(ethers.provider.getSigner(assetBouncerAdmin))
-    .callStatic.mint(
-      minter,
-      22,
-      '0x1111111111111111111111111111111111111111111111111111111111111111',
-      1,
-      1,
-      minter,
-      Buffer.from('data')
-    );
+    .callStatic.mint(creator, packId, hash, supply, rarity, owner, callData);
 
   await waitFor(
     assetContract
       .connect(ethers.provider.getSigner(assetBouncerAdmin))
-      .mint(
-        minter,
-        22,
-        '0x1111111111111111111111111111111111111111111111111111111111111111',
-        supply,
-        0,
-        minter,
-        Buffer.from('data')
-      )
+      .mint(creator, packId, hash, supply, rarity, owner, callData)
   );
   return assetId;
 }
 export async function changeCatalyst(
   assetUpgraderContract: Contract,
   from: string,
-  assetId: string,
+  assetId: BigNumber,
   catalystId: string,
   gemsIds: string[],
   to: string
-) {
+): Promise<void> {
   await waitFor(
     assetUpgraderContract
       .connect(ethers.provider.getSigner(from))
@@ -57,7 +49,7 @@ export async function transferSand(
   sandContract: Contract,
   to: string,
   amount: BigNumber
-) {
+): Promise<void> {
   const {sandBeneficiary} = await getNamedAccounts();
   await waitFor(
     sandContract
@@ -69,7 +61,7 @@ export async function mintCatalyst(
   catalystContract: Contract,
   mintingAmount: BigNumber,
   beneficiary: string
-) {
+): Promise<void> {
   const {catalystMinter} = await getNamedAccounts();
 
   await waitFor(
@@ -82,7 +74,7 @@ export async function mintGem(
   gemContract: Contract,
   mintingAmount: BigNumber,
   beneficiary: string
-) {
+): Promise<void> {
   const {gemMinter} = await getNamedAccounts();
 
   await waitFor(
