@@ -8,7 +8,7 @@ import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
 import {setupAssetAttributesRegistry} from '../assetAttributesRegistry/fixtures';
 import {setupAssetMinter} from './fixtures';
 import {mintCatalyst, mintGem} from '../utils';
-import {waitFor, expectEventWithArgs} from '../../utils';
+import {waitFor, expectEventWithArgs, findEvents} from '../../utils';
 
 type MintOptions = {
   from: Address;
@@ -319,6 +319,17 @@ describe('AssetMinter', function () {
       );
 
       const metaDataHash = ethers.utils.keccak256('0x11111111');
+      const assetId = await assetMinterAsCatalystOwner.callStatic.mint(
+        catalystOwner,
+        packId,
+        metaDataHash,
+        mintOptions.catalystId,
+        mintOptions.gemIds,
+        NFT_SUPPLY,
+        0,
+        catalystOwner,
+        mintOptions.data
+      );
 
       const receipt = await assetMinterAsCatalystOwner.mint(
         catalystOwner,
@@ -339,6 +350,7 @@ describe('AssetMinter', function () {
       );
       const args = catalystEvent.args;
 
+      expect(args[0]).to.be.equal(assetId);
       expect(args[1]).to.be.equal(catalysts[1].catalystId);
       expect(args[2]).to.deep.equal(mintOptions.gemIds);
       expect(args[3]).to.be.equal(receipt.blockNumber + 1);
@@ -648,18 +660,142 @@ describe('AssetMinter', function () {
       expect(args[4]).to.deep.equal([bn(8), bn(7), bn(6)]);
     });
 
-    it.skip('CatalystApplied event is emitted for each NFT minted with a catalyst', async function () {
+    it('CatalystApplied event is emitted for each NFT minted with a catalyst', async function () {
       const {
         catalystOwner,
         powerGem,
+        defenseGem,
         speedGem,
         commonCatalyst,
         rareCatalyst,
+        epicCatalyst,
       } = await setupGemsAndCatalysts();
-      const {assetMinterContract} = await setupAssetMinter();
+      const {assetMinterContract, assetContract} = await setupAssetMinter();
+      const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
+
+      await mintCatalyst(
+        commonCatalyst,
+        BigNumber.from('1').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
+      await mintCatalyst(
+        rareCatalyst,
+        BigNumber.from('1').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
+      await mintCatalyst(
+        epicCatalyst,
+        BigNumber.from('1').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
+      await mintGem(
+        powerGem,
+        BigNumber.from('3').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
+      await mintGem(
+        defenseGem,
+        BigNumber.from('2').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
+      await mintGem(
+        speedGem,
+        BigNumber.from('1').mul(BigNumber.from(gemsCatalystsUnit)),
+        catalystOwner
+      );
+
+      const assetIds = await assetMinterAsCatalystOwner.callStatic.mintMultiple(
+        catalystOwner,
+        mintMultiOptions.packId,
+        mintMultiOptions.metadataHash,
+        [0, 3, 2, 1, 0, 0],
+        [0, 1, 1, 1, 0],
+        [
+          {
+            gemIds: [1],
+            quantity: NFT_SUPPLY,
+            catalystId: 1,
+          },
+          {
+            gemIds: [2, 1],
+            quantity: NFT_SUPPLY,
+            catalystId: 2,
+          },
+          {
+            gemIds: [1, 3, 2],
+            quantity: NFT_SUPPLY,
+            catalystId: 3,
+          },
+        ],
+        catalystOwner,
+        mintMultiOptions.data
+      );
+
+      const receipt = await assetMinterAsCatalystOwner.mintMultiple(
+        catalystOwner,
+        mintMultiOptions.packId,
+        mintMultiOptions.metadataHash,
+        [0, 3, 2, 1, 0, 0],
+        [0, 1, 1, 1, 0],
+        [
+          {
+            gemIds: [1],
+            quantity: NFT_SUPPLY,
+            catalystId: 1,
+          },
+          {
+            gemIds: [2, 1],
+            quantity: NFT_SUPPLY,
+            catalystId: 2,
+          },
+          {
+            gemIds: [1, 3, 2],
+            quantity: NFT_SUPPLY,
+            catalystId: 3,
+          },
+        ],
+        catalystOwner,
+        mintMultiOptions.data
+      );
+
+      // function findEvents(
+      //   contract: Contract,
+      //   event: string,
+      //   blockHash: string
+      // ): Promise<Event[]> {
+      //   const filter = contract.filters[event]();
+      //   const events = await contract.queryFilter(filter, blockHash);
+      //   return events;
+      // }
+
+      const catalystAppliedEvents = await findEvents(
+        assetAttributesRegistry,
+        'CatalystApplied',
+        receipt.blockHash
+      );
+      expect(catalystAppliedEvents).to.have.lengthOf(3);
+
+      for (const event of catalystAppliedEvents) {
+        console.log(`event:${event}`);
+        // do stuff ...
+      }
+
+      // @note iterate over catalystAppliedEvents for these assertions
+      // event CatalystApplied(uint256 indexed assetId, uint16 indexed catalystId, uint16[] gemIds, uint64 blockNumber);
+      // expect(event.args).not.to.equal(null || undefined);
+      // if (event.args) {
+      //   expect(event.args[0]).to.equal(assetIds[0]);
+      //   console.log('checkpoint B');
+      //   expect(event.args[1]).to.be.equal(catalysts[1].catalystId);
+      //   console.log('checkpoint C');
+      //   expect(event.args[2]).to.deep.equal(mintOptions.gemIds);
+      //   console.log('checkpoint D');
+      //   expect(event.args[3]).to.be.equal(receipt.blockNumber + 1);
+      //   console.log('checkpoint E');
+      // }
     });
 
     it.skip('records should be updated correctly for each asset minted', async function () {
