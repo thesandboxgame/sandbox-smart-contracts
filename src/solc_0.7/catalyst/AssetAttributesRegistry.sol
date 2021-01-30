@@ -111,7 +111,7 @@ contract AssetAttributesRegistry is WithMinter {
         uint8 j = 0;
         uint8 i = 0;
         for (i = 0; i < MAX_NUM_GEMS; i++) {
-            if (j >= gemIds.length) {
+            if (j == gemIds.length) {
                 break;
             }
             if (gemIdsToStore[i] == 0) {
