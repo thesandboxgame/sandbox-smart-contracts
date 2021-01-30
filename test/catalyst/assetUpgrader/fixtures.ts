@@ -23,6 +23,7 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
   const sandContract: Contract = await ethers.getContract('Sand');
   const feeRecipient: string = await assetUpgraderContract.callStatic.feeRecipient();
   const upgradeFee: BigNumber = await assetUpgraderContract.callStatic.upgradeFee();
+  const gemAdditionFee: BigNumber = await assetUpgraderContract.callStatic.gemAdditionFee();
   const rareCatalyst: Contract = await ethers.getContract('Catalyst_RARE');
   const powerGem: Contract = await ethers.getContract('Gem_POWER');
   const defenseGem: Contract = await ethers.getContract('Gem_DEFENSE');
@@ -55,6 +56,7 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
     assetContract,
     feeRecipient,
     upgradeFee,
+    gemAdditionFee,
     gemsCatalystsUnit,
     gemsCatalystsRegistry,
   };

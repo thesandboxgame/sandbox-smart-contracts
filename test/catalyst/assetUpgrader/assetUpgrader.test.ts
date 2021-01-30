@@ -269,7 +269,7 @@ describe('AssetUpgrader', function () {
       rareCatalyst,
       powerGem,
       defenseGem,
-      upgradeFee,
+      gemAdditionFee,
       gemsCatalystsUnit,
       gemsCatalystsRegistry,
     } = await setupAssetUpgrader();
@@ -277,7 +277,7 @@ describe('AssetUpgrader', function () {
     await transferSand(
       sandContract,
       users[4],
-      BigNumber.from('2').mul(upgradeFee)
+      BigNumber.from('2').mul(gemAdditionFee)
     );
     const mintingAmount = BigNumber.from('8').mul(
       BigNumber.from(gemsCatalystsUnit)
@@ -353,9 +353,11 @@ describe('AssetUpgrader', function () {
 
     // check sand fee transfer
     expect(sandBalanceFromAfter).to.equal(
-      sandBalanceFromBefore.sub(upgradeFee)
+      sandBalanceFromBefore.sub(gemAdditionFee)
     );
-    expect(sandBalanceToAfter).to.equal(sandBalanceToBefore.add(upgradeFee));
+    expect(sandBalanceToAfter).to.equal(
+      sandBalanceToBefore.add(gemAdditionFee)
+    );
 
     // check assetAttributesRegistry
     const record = await assetAttributesRegistry.getRecord(assetId);
