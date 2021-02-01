@@ -1,6 +1,5 @@
 import {ethers, deployments, getNamedAccounts} from 'hardhat';
 import {BigNumber, Contract, Event} from 'ethers';
-import {waitFor} from '../../utils';
 import {Block} from '@ethersproject/providers';
 
 export const setupAssetAttributesRegistry = deployments.createFixture(
