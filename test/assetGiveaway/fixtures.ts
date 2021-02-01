@@ -30,7 +30,6 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   const chainId = await getChainId();
   const {mint, assetsHolder, mintSingleAsset} = options || {};
   const {deployer, assetAdmin, assetBouncerAdmin} = await getNamedAccounts();
-  console.log('assetB', assetBouncerAdmin);
   const otherAccounts = await getUnnamedAccounts();
 
   await deployments.fixture(['Asset']);
@@ -71,11 +70,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   // Supply assets to contract for testing
   async function mintTestAssets(id: number, value: number) {
-    // const assetContractAsBouncer = await assetContract.connect(
-    //   ethers.provider.getSigner(assetBouncerAdmin)
-    // );
-
-    await waitFor(assetContractAsBouncerAdmin.setBouncer(creator, true));
+    await assetContractAsBouncerAdmin.setBouncer(creator, true);
 
     // Asset to be minted
     const packId = id;
@@ -85,8 +80,12 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     const owner = assetsHolder ? others[5] : testContract.address;
     const data = '0x';
 
+    const assetContractAsCreator = await assetContract.connect(
+      ethers.provider.getSigner(creator)
+    );
+
     const receipt = await waitFor(
-      assetContractAsBouncerAdmin.mint(
+      assetContractAsCreator.mint(
         creator,
         packId,
         hash,
