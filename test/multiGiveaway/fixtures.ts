@@ -304,12 +304,13 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
       await sandContractAsAdmin.transfer(sandTestAddress, SAND_AMOUNT);
     }
 
+    const assetContractAsBouncerAdmin = await ethers.getContract(
+      'Asset',
+      assetBouncerAdmin
+    );
+
     // Supply assets to contract for testing
     async function mintTestAssets(id: number, value: number) {
-      const assetContractAsBouncer = await assetContract.connect(
-        ethers.provider.getSigner(assetBouncerAdmin)
-      );
-
       // Asset to be minted
       const creator = others[0];
       const packId = id;
@@ -319,8 +320,14 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
       const owner = assetTestAddress;
       const data = '0x';
 
+      await assetContractAsBouncerAdmin.setBouncer(creator, true);
+
+      const assetContractAsCreator = await assetContract.connect(
+        ethers.provider.getSigner(creator)
+      );
+
       const receipt = await waitFor(
-        assetContractAsBouncer.mint(
+        assetContractAsCreator.mint(
           creator,
           packId,
           hash,
