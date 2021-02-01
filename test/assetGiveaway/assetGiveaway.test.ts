@@ -9,7 +9,7 @@ const {calculateClaimableAssetLandAndSandHash} = helpers;
 
 const zeroAddress = constants.AddressZero;
 
-// TODO: fix test bug
+// TODO: fix test bug // only bouncer allowed to mint
 // eslint-disable-next-line mocha/no-skipped-tests
 describe('Asset_Giveaway', function () {
   it('User cannot claim when test contract holds zero assets', async function () {

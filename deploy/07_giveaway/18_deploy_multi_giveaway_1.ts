@@ -1,9 +1,9 @@
 import fs from 'fs';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {createAssetLandAndSandClaimMerkleTree} from '../data/giveaways/multi_giveaway_1_with_erc20/getClaims';
+import {createAssetLandAndSandClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1_with_erc20/getClaims';
 
-import helpers, {Claim} from '../lib/merkleTreeHelper';
+import helpers, {Claim} from '../../lib/merkleTreeHelper';
 const {calculateClaimableAssetLandAndSandHash} = helpers;
 
 const ASSETS_HOLDER = '0x0000000000000000000000000000000000000000';
@@ -72,9 +72,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 };
 export default func;
-func.tags = [
-  'Multi_Giveaway_1_with_ERC20',
-  'Multi_Giveaway_1_deploy_with_ERC20',
-];
+func.tags = ['Multi_Giveaway_1_deploy_with_ERC20'];
 func.dependencies = ['Land_deploy', 'Asset_deploy', 'Sand_deploy'];
 func.skip = async (hre) => hre.network.name !== 'hardhat'; // TODO

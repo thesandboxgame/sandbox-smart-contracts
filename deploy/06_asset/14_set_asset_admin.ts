@@ -20,6 +20,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   } catch (e) {
     // no admin
   }
+  console.log('current', currentBouncerAdmin);
 
   if (currentBouncerAdmin) {
     if (currentBouncerAdmin.toLowerCase() !== assetBouncerAdmin.toLowerCase()) {
@@ -29,8 +30,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         'changeBouncerAdmin',
         assetBouncerAdmin
       );
+      console.log('asset', assetBouncerAdmin);
     }
   }
+
+  try {
+    currentBouncerAdmin = await read('Asset', 'getBouncerAdmin');
+  } catch (e) {
+    // no admin
+  }
+  console.log('new', currentBouncerAdmin);
 
   if (currentAdmin) {
     if (currentAdmin.toLowerCase() !== assetAdmin.toLowerCase()) {

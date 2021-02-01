@@ -9,7 +9,7 @@ const {calculateClaimableAssetLandAndSandHash} = helpers;
 
 const zeroAddress = constants.AddressZero;
 
-describe('Multi_Giveaway_1_with_ERC20', function () {
+describe('Multi_Giveaway', function () {
   it('User cannot claim when test contract holds zero assets/lands', async function () {
     const options = {
       assetsHolder: true,

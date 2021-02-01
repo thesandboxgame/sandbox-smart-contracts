@@ -30,6 +30,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   const chainId = await getChainId();
   const {mint, assetsHolder, mintSingleAsset} = options || {};
   const {deployer, assetAdmin, assetBouncerAdmin} = await getNamedAccounts();
+  console.log('assetB', assetBouncerAdmin);
   const otherAccounts = await getUnnamedAccounts();
 
   await deployments.fixture(['Asset']);
@@ -42,6 +43,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   const nftGiveawayAdmin = otherAccounts[0];
   const others = otherAccounts.slice(1);
+  const creator = others[0];
 
   const testContract = await deployments.deploy('Test_Asset_Giveaway_1', {
     from: deployer,
@@ -62,15 +64,20 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     await assetContractAsAdmin.setSuperOperator(testContract.address, true);
   }
 
+  const assetContractAsBouncerAdmin = await ethers.getContract(
+    'Asset',
+    assetBouncerAdmin
+  );
+
   // Supply assets to contract for testing
   async function mintTestAssets(id: number, value: number) {
-    //TODO: get bouncer admin
-    const assetContractAsBouncer = await assetContract.connect(
-      ethers.provider.getSigner(assetBouncerAdmin)
-    );
+    // const assetContractAsBouncer = await assetContract.connect(
+    //   ethers.provider.getSigner(assetBouncerAdmin)
+    // );
+
+    await waitFor(assetContractAsBouncerAdmin.setBouncer(creator, true));
 
     // Asset to be minted
-    const creator = others[0];
     const packId = id;
     const hash = ipfsHashString;
     const supply = value;
@@ -79,7 +86,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     const data = '0x';
 
     const receipt = await waitFor(
-      assetContractAsBouncer.mint(
+      assetContractAsBouncerAdmin.mint(
         creator,
         packId,
         hash,
