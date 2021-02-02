@@ -1537,4 +1537,172 @@ describe('AssetMinter', function () {
       expect(args[4]).to.deep.equal([BigNumber.from(1)]);
     });
   });
+
+  //   struct GemEvent {
+  //     uint16[] gemIds;
+  //     bytes32 blockHash;
+  // }
+  // @note move to assetAttributesRegistryTests.ts...
+  describe('AssetMinter: getAttributes', function () {
+    function range(size: number, startAt = 0): number[] {
+      return [...Array(size).keys()].map((i) => i + startAt);
+    }
+
+    function minValue(gems: number): number {
+      return (gems - 1) * 5 + 1;
+    }
+    /*
+   Attributes rules:
+   1 gem: 1-25
+   2 different gems: 6-25 each
+   3 different gems: 11-25 each
+
+
+   // `values` is an empty arry of 256 0's
+   // add gemIds.length from each gemEvent to get `numGems` (15 is Max)
+   //
+
+
+   doubling up:
+   2 same gems: 26-50
+   3 same gems: 51-75
+
+
+   **/
+
+    // type BagOfGems = {
+    //   1: number;
+    //   2: number;
+    //   3: number;
+    //   4: number;
+    //   5: number;
+    // };
+
+    //   type Attributes = number[];
+
+    //   const gems: BagOfGems = {
+    //     1: 1,
+    //     2: 2,
+    //     3: 1,
+    //     4: 3,
+    //     5: 0,
+    //   };
+
+    //   function gemAppraiser(gems: BagOfGems): any {
+    // validate total number of gems, max 4 !
+    // tally gems for final attributes range
+
+    //   let attributeRange: number[]
+    //   for (const gem in gems) {
+    //     let rangeMin: number;
+    //     let tempAttributeRange: number[];
+    //     switch (gem) {
+    //       case '1':
+    //         rangeMin = 0;
+    //         tempAttributeRange = range(25, 0)
+    //         if(rangeMin >= tempAttributeRange[0]) {
+
+    //         }
+    //         break;
+    //       case '2':
+    //         attributeRange = range
+
+    //     }
+
+    //     }
+    //   }
+    //   return [1];
+    // }
+
+    it('can get attributes for 1 gem', async function () {
+      // expected range = minValue(1) - 25
+      const {assetMinterContract, assetContract} = await setupAssetMinter();
+      const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
+      const {
+        commonCatalyst,
+        powerGem,
+        catalystOwner,
+      } = await setupGemsAndCatalysts();
+      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
+
+      const receipt = await assetMinterAsCatalystOwner.mint(
+        catalystOwner,
+        mintOptions.packId,
+        mintOptions.metaDataHash,
+        catalysts[0].catalystId,
+        [gems[0].gemId],
+        NFT_SUPPLY,
+        0,
+        catalystOwner,
+        mintOptions.data
+      );
+
+      const gemsAddedEvents = await findEvents(
+        assetAttributesRegistry,
+        'CatalystApplied',
+        receipt.blockHash
+      );
+      console.log(`events length: ${gemsAddedEvents.length}`);
+      let assetId;
+      let ids;
+      // let blockNum;
+      for (const event of gemsAddedEvents) {
+        if (event.args) {
+          assetId = event.args[0];
+          ids = event.args[2];
+        }
+      }
+
+      interface GemEvent {
+        gemIds: number[];
+        blockHash: string;
+      }
+      const gemEvent: GemEvent = {
+        gemIds: ids,
+        blockHash: receipt.blockHash,
+      };
+      const attributes = await assetAttributesRegistry.getAttributes(assetId, [
+        gemEvent,
+      ]);
+      console.log(`attributes: ${attributes}`);
+      expect(attributes[1]).to.be.within(minValue(1), 25);
+    });
+
+    it.skip('can get attributes for 2 identical gems', async function () {
+      // expected range = minValue(2) - 50
+    });
+    it.skip('can get attributes for 3 identical gems', async function () {
+      // expected range = minValue(3) - 75
+    });
+    it.skip('can get attributes for 4 identical gems', async function () {
+      // @review
+      // expected range = minValue(4) - 100
+    });
+    it.skip('can get attributes for 2 different gems', async function () {
+      // expected range = 6 - 25 for each different gem
+    });
+    it.skip('can get attributes for 3 different gems', async function () {
+      // expected range = 11 - 25 for each different gem
+    });
+    it.skip('can get attributes for 4 different gems', async function () {
+      // @review
+      // expected range = 16 - 25 for each different gem
+    });
+    it.skip('can get attributes for 2 identical gems + 1 different gem', async function () {
+      // expected range = 26 - 50 for 2 identical gems
+      // expected range = 11 - 25 for 1 different gem
+    });
+    it.skip('can get attributes for 3 identical gems + 1 different gem', async function () {
+      // expected range = minValue(3) - 75 for 3 identical gems
+      // expected range = 16 - 25 for 1 different gem
+    });
+    it.skip('can get attributes for 2 identical gems + 2 different identical gems', async function () {
+      // expected range = minValue(2) - 50 for 2 identical gems
+      // expected range = minValue(2) - 50 for 2 (different)identical gems
+    });
+    // require(numGems <= MAX_NUM_GEMS, "TOO_MANY_GEMS");
+    it('should fail if numGems > MAX-NUM_GEMS', async function () {});
+  });
 });
