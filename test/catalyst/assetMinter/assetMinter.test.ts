@@ -1733,7 +1733,6 @@ describe('AssetMinter', function () {
       expect(attributes[3]).to.be.within(51, 75);
     });
     it('can get attributes for 4 identical gems', async function () {
-      // @review
       // expected range = minValue(4) - 100
       const mintReceipt = await waitFor(
         assetMinterAsCatalystOwner.mint(
@@ -1757,15 +1756,83 @@ describe('AssetMinter', function () {
       console.log(`attributes: ${attributes}`);
       expect(attributes[4]).to.be.within(76, 100);
     });
-    it.skip('can get attributes for 2 different gems', async function () {
+    it('can get attributes for 2 different gems', async function () {
       // expected range = 6 - 25 for each different gem
+      const mintReceipt = await waitFor(
+        assetMinterAsCatalystOwner.mint(
+          catalystOwner,
+          mintOptions.packId,
+          mintOptions.metaDataHash,
+          catalysts[1].catalystId,
+          [gems[0].gemId, gems[1].gemId],
+          NFT_SUPPLY,
+          0,
+          catalystOwner,
+          mintOptions.data
+        )
+      );
+
+      const {assetId, gemEvents} = await prepareGemEventData(mintReceipt);
+      const attributes = await assetAttributesRegistry.getAttributes(
+        assetId,
+        gemEvents
+      );
+      console.log(`attributes: ${attributes}`);
+      expect(attributes[1]).to.be.within(minValue(2), 25);
+      expect(attributes[2]).to.be.within(minValue(2), 25);
     });
-    it.skip('can get attributes for 3 different gems', async function () {
+    it('can get attributes for 3 different gems', async function () {
       // expected range = 11 - 25 for each different gem
+      const mintReceipt = await waitFor(
+        assetMinterAsCatalystOwner.mint(
+          catalystOwner,
+          mintOptions.packId,
+          mintOptions.metaDataHash,
+          catalysts[2].catalystId,
+          [gems[0].gemId, gems[1].gemId, gems[2].gemId],
+          NFT_SUPPLY,
+          0,
+          catalystOwner,
+          mintOptions.data
+        )
+      );
+
+      const {assetId, gemEvents} = await prepareGemEventData(mintReceipt);
+      const attributes = await assetAttributesRegistry.getAttributes(
+        assetId,
+        gemEvents
+      );
+      console.log(`attributes: ${attributes}`);
+      expect(attributes[1]).to.be.within(minValue(3), 25);
+      expect(attributes[2]).to.be.within(minValue(3), 25);
+      expect(attributes[3]).to.be.within(minValue(3), 25);
     });
-    it.skip('can get attributes for 4 different gems', async function () {
-      // @review
+    it('can get attributes for 4 different gems', async function () {
       // expected range = 16 - 25 for each different gem
+      const mintReceipt = await waitFor(
+        assetMinterAsCatalystOwner.mint(
+          catalystOwner,
+          mintOptions.packId,
+          mintOptions.metaDataHash,
+          catalysts[3].catalystId,
+          [gems[0].gemId, gems[1].gemId, gems[2].gemId, gems[3].gemId],
+          NFT_SUPPLY,
+          0,
+          catalystOwner,
+          mintOptions.data
+        )
+      );
+
+      const {assetId, gemEvents} = await prepareGemEventData(mintReceipt);
+      const attributes = await assetAttributesRegistry.getAttributes(
+        assetId,
+        gemEvents
+      );
+      console.log(`attributes: ${attributes}`);
+      expect(attributes[1]).to.be.within(minValue(4), 25);
+      expect(attributes[2]).to.be.within(minValue(4), 25);
+      expect(attributes[3]).to.be.within(minValue(4), 25);
+      expect(attributes[4]).to.be.within(minValue(4), 25);
     });
     it.skip('can get attributes for 2 identical gems + 1 different gem', async function () {
       // expected range = 26 - 50 for 2 identical gems
