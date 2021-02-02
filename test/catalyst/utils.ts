@@ -1,6 +1,8 @@
-import {BigNumber, Contract} from 'ethers';
+import {BigNumber, Contract, Event} from 'ethers';
 import {ethers, getNamedAccounts} from 'hardhat';
+import {Receipt} from 'hardhat-deploy/types';
 import {waitFor} from '../../scripts/utils/utils';
+import {findEvents} from '../utils';
 
 export async function mintAsset(
   creator: string,
@@ -82,4 +84,74 @@ export async function mintGem(
       .connect(ethers.provider.getSigner(gemMinter))
       .mint(beneficiary, mintingAmount)
   );
+}
+
+class GemEvent {
+  gemIds: number[];
+  blockHash: string;
+  constructor(ids: number[], hash: string) {
+    this.gemIds = ids;
+    this.blockHash = hash;
+  }
+}
+
+async function getGemEvent(ids: number[], hash: string): Promise<GemEvent> {
+  return new GemEvent(ids, hash);
+}
+
+async function findFilteredGemEvents(
+  blockHash: string,
+  id: BigNumber,
+  registry: Contract
+): Promise<Event[]> {
+  const filter = registry.filters.GemsAdded(id);
+  const events = await registry.queryFilter(filter, blockHash);
+  return events;
+}
+
+interface AttributesObj {
+  assetId: BigNumber;
+  gemEvents: GemEvent[];
+}
+
+export async function prepareGemEventData(
+  registry: Contract,
+  mintReceipt: Receipt,
+  upgradeReceipt?: Receipt
+): Promise<AttributesObj> {
+  const catalystAppliedEvents = await findEvents(
+    registry,
+    'CatalystApplied',
+    mintReceipt.blockHash
+  );
+  let assetId;
+  let initialGemEvent: GemEvent;
+  const gemEvents: GemEvent[] = [];
+
+  if (catalystAppliedEvents[0].args) {
+    assetId = catalystAppliedEvents[0].args[0];
+    initialGemEvent = await getGemEvent(
+      catalystAppliedEvents[0].args[2],
+      mintReceipt.blockHash
+    );
+    gemEvents.push(initialGemEvent);
+  }
+
+  if (upgradeReceipt) {
+    const gemsAddedEvents = await findFilteredGemEvents(
+      upgradeReceipt.blockHash,
+      assetId,
+      registry
+    );
+    for (const event of gemsAddedEvents) {
+      if (event.args) {
+        const gemEvent = await getGemEvent(
+          event.args[1],
+          upgradeReceipt.blockHash
+        );
+        gemEvents.push(gemEvent);
+      }
+    }
+  }
+  return {assetId, gemEvents};
 }

@@ -1,6 +1,6 @@
-import {ethers, getUnnamedAccounts, getNamedAccounts} from 'hardhat';
-import {Address, Receipt} from 'hardhat-deploy/types';
-import {BigNumber, Contract, Event} from 'ethers';
+import {ethers} from 'hardhat';
+import {Address} from 'hardhat-deploy/types';
+import {BigNumber, Contract} from 'ethers';
 import {expect} from '../../chai-setup';
 import catalysts from '../../../data/catalysts';
 import gems from '../../../data/gems';
@@ -11,8 +11,8 @@ import {
   MintOptions,
   MintMultiOptions,
 } from '../assetMinter/fixtures';
-import {mintCatalyst, mintGem} from '../utils';
-import {findEvents, waitFor} from '../../utils';
+import {waitFor} from '../../utils';
+import {prepareGemEventData} from '../utils';
 import {setupAssetUpgrader} from '../assetUpgrader/fixtures';
 
 const NFT_SUPPLY = 1;
@@ -51,83 +51,14 @@ const mintMultiOptions: MintMultiOptions = {
   data: Buffer.from(''),
 };
 
-class GemEvent {
-  gemIds: number[];
-  blockHash: string;
-  constructor(ids: number[], hash: string) {
-    this.gemIds = ids;
-    this.blockHash = hash;
-  }
-}
-interface AttributesObj {
-  assetId: BigNumber;
-  gemEvents: GemEvent[];
-}
-
-async function getGemEvent(ids: number[], hash: string): Promise<GemEvent> {
-  return new GemEvent(ids, hash);
-}
-
 function minValue(gems: number): number {
   return (gems - 1) * 5 + 1;
-}
-
-async function findFilteredGemEvents(
-  blockHash: string,
-  id: BigNumber,
-  registry: Contract
-): Promise<Event[]> {
-  const filter = registry.filters.GemsAdded(id);
-  const events = await registry.queryFilter(filter, blockHash);
-  return events;
-}
-
-async function prepareGemEventData(
-  registry: Contract,
-  mintReceipt: Receipt,
-  upgradeReceipt?: Receipt
-): Promise<AttributesObj> {
-  const catalystAppliedEvents = await findEvents(
-    registry,
-    'CatalystApplied',
-    mintReceipt.blockHash
-  );
-  let assetId;
-  let initialGemEvent: GemEvent;
-  const gemEvents: GemEvent[] = [];
-
-  if (catalystAppliedEvents[0].args) {
-    assetId = catalystAppliedEvents[0].args[0];
-    initialGemEvent = await getGemEvent(
-      catalystAppliedEvents[0].args[2],
-      mintReceipt.blockHash
-    );
-    gemEvents.push(initialGemEvent);
-  }
-
-  if (upgradeReceipt) {
-    const gemsAddedEvents = await findFilteredGemEvents(
-      upgradeReceipt.blockHash,
-      assetId,
-      registry
-    );
-    for (const event of gemsAddedEvents) {
-      if (event.args) {
-        const gemEvent = await getGemEvent(
-          event.args[1],
-          upgradeReceipt.blockHash
-        );
-        gemEvents.push(gemEvent);
-      }
-    }
-  }
-  return {assetId, gemEvents};
 }
 
 // on minting an asset, the CatalystApplied event is emitted. When gems are added(upgrade) the GemsAdded event is emitted. In order to getAttributes, we need to collect all CatalystApplied && GemsAdded events, from the blocknumber when the catalyst was applied onwards...
 // so:
 // 1.) mint the asset w/catalyst and get the assetId & blockNumber
-// 2.) find all GemsAdded events after this with matching assetId
+// 2.) find all GemsAdded events after this filtered by assetId
 // 3.) from each found event (including the original CatalystApplied event) construct a GemEvent{} and add to an array  gemEvents[]
 // 4.) call getAttributes with assetId and gemEvents
 describe('AssetAttributesRegistry: getAttributes', function () {
