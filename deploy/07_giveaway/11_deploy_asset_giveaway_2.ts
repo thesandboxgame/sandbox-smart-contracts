@@ -16,7 +16,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   let assetData: AssetGiveawayInfo[];
   try {
     assetData = JSON.parse(
-      fs.readFileSync(`data/asset_giveaway_2/assets.json`).toString()
+      fs
+        .readFileSync(`data/asset_giveaway_2/assets_${hre.network.name}.json`)
+        .toString()
     );
   } catch (e) {
     return;
