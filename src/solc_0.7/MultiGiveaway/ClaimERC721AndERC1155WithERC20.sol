@@ -5,62 +5,60 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../common/Interfaces/IERC721Extended.sol";
 
-contract ClaimERC721AndERC1155WithERC20 {
-    bytes32 internal _merkleRoot;
-    IERC1155 internal immutable _asset;
-    IERC20 internal immutable _erc20Token;
-    IERC721Extended internal immutable _land;
-    address internal immutable _assetsHolder;
-    address internal immutable _landHolder;
-    address internal immutable _erc20TokenHolder;
-    event ClaimedAssetsAndLandsWithERC20(
+contract ClaimMultipleTokens {
+    event ClaimedMultipleTokens(
         address to,
         uint256[] assetIds,
         uint256[] assetValues,
+        address[] assetContractAddresses,
         uint256[] landIds,
-        uint256 erc20TokenAmount
+        address[] landContractAddresses,
+        uint256[] erc20Amounts,
+        address[] erc20ContractAddresses
     );
 
-    constructor(
-        IERC1155 asset,
-        IERC721Extended land,
-        IERC20 erc20Token,
-        address assetsHolder,
-        address landHolder,
-        address erc20TokenHolder
-    ) {
-        _asset = asset;
-        _land = land;
-        _erc20Token = erc20Token;
-        if (assetsHolder == address(0)) {
-            assetsHolder = address(this);
-        }
-        if (landHolder == address(0)) {
-            landHolder = address(this);
-        }
-        if (erc20TokenHolder == address(0)) {
-            erc20TokenHolder = address(this);
-        }
-        _assetsHolder = assetsHolder;
-        _landHolder = landHolder;
-        _erc20TokenHolder = erc20TokenHolder;
-    }
+    // constructor() {}
 
-    /// @dev See for example MultiGiveawayWithERC20.sol claimAssetsAndLandsWithERC20.
-    function _claimERC721AndERC1155WithERC20(
+    /// @dev TODO.
+    function _claimMultipleTokens(
         address to,
         uint256[] calldata assetIds,
         uint256[] calldata assetValues,
+        address[] calldata assetContractAddresses,
         uint256[] calldata landIds,
-        uint256 erc20Amount,
+        address[] calldata landContractAddresses,
+        uint256[] calldata erc20Amounts,
+        address[] calldata erc20ContractAddresses,
         bytes32[] calldata proof,
         bytes32 salt
     ) internal {
-        _checkValidity(to, assetIds, assetValues, landIds, erc20Amount, proof, salt);
+        _checkValidity(
+            to,
+            assetIds,
+            assetValues,
+            assetContractAddresses,
+            landIds,
+            landContractAddresses,
+            erc20Amounts,
+            erc20ContractAddresses,
+            proof,
+            salt
+        );
+
+        // TODO: for each
         _sendAssets(to, assetIds, assetValues);
         _sendLands(to, landIds);
         _transferERC20(to, erc20Amount);
-        emit ClaimedAssetsAndLandsWithERC20(to, assetIds, assetValues, landIds, erc20Amount);
+        emit ClaimedMultipleTokens(
+            to,
+            assetIds,
+            assetValues,
+            assetContractAddresses,
+            landIds,
+            landContractAddresses,
+            erc20Amounts,
+            erc20ContractAddresses
+        );
     }
 
     function _checkValidity(
