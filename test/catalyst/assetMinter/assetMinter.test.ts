@@ -9,6 +9,7 @@ import {setupAssetAttributesRegistry} from '../assetAttributesRegistry/fixtures'
 import {setupAssetMinter} from './fixtures';
 import {mintCatalyst, mintGem} from '../utils';
 import {expectEventWithArgs, findEvents} from '../../utils';
+import {setupAssetUpgrader} from '../assetUpgrader/fixtures';
 
 type MintOptions = {
   from: Address;
@@ -1543,90 +1544,69 @@ describe('AssetMinter', function () {
   //     bytes32 blockHash;
   // }
   // @note move to assetAttributesRegistryTests.ts...
+  // on minting an asset, the CatalystApplied event is emitted. WHen gems are added(upgrade) the GemsAdded event is emitted. in order to getAttributes, we need to collect all CatalystApplied && GemsAdded events, from the blocknumber when the catalyst was applied onwards...
+  // so:
+  // 1.) mint the asset w/catalyst and get the assetId & blockNumber
+  // 2.) find all GemsAdded events after this with matching assetId
+  // 3.) from each found event (including the original CatalystApplied event) construct a GemEvent{} and add to an array  gemEvents[]
+  // 4.) call getAttributes with assetId and gemEvents
   describe('AssetMinter: getAttributes', function () {
-    function range(size: number, startAt = 0): number[] {
-      return [...Array(size).keys()].map((i) => i + startAt);
-    }
+    let assetMinterContract: Contract;
+    let assetMinterAsCatalystOwner: Contract;
+    let assetUpgraderContract: Contract;
+    let assetAttributesRegistry: Contract;
+    let catalystOwner: Address;
+    let commonCatalyst: Contract;
+    let rareCatalyst: Contract;
+    let epicCatalyst: Contract;
+    let legendaryCatalyst: Contract;
+    let powerGem: Contract;
+    let defenseGem: Contract;
+    let speedGem: Contract;
+    let magicGem: Contract;
+    let luckGem: Contract;
 
     function minValue(gems: number): number {
       return (gems - 1) * 5 + 1;
     }
-    /*
-   Attributes rules:
-   1 gem: 1-25
-   2 different gems: 6-25 each
-   3 different gems: 11-25 each
 
+    interface GemEvent {
+      gemIds: number[];
+      blockHash: string;
+    }
 
-   // `values` is an empty arry of 256 0's
-   // add gemIds.length from each gemEvent to get `numGems` (15 is Max)
-   //
-
-
-   doubling up:
-   2 same gems: 26-50
-   3 same gems: 51-75
-
-
-   **/
-
-    // type BagOfGems = {
-    //   1: number;
-    //   2: number;
-    //   3: number;
-    //   4: number;
-    //   5: number;
-    // };
-
-    //   type Attributes = number[];
-
-    //   const gems: BagOfGems = {
-    //     1: 1,
-    //     2: 2,
-    //     3: 1,
-    //     4: 3,
-    //     5: 0,
-    //   };
-
-    //   function gemAppraiser(gems: BagOfGems): any {
-    // validate total number of gems, max 4 !
-    // tally gems for final attributes range
-
-    //   let attributeRange: number[]
-    //   for (const gem in gems) {
-    //     let rangeMin: number;
-    //     let tempAttributeRange: number[];
-    //     switch (gem) {
-    //       case '1':
-    //         rangeMin = 0;
-    //         tempAttributeRange = range(25, 0)
-    //         if(rangeMin >= tempAttributeRange[0]) {
-
-    //         }
-    //         break;
-    //       case '2':
-    //         attributeRange = range
-
-    //     }
-
-    //     }
-    //   }
-    //   return [1];
+    beforeEach(async function () {
+      ({assetMinterContract} = await setupAssetMinter());
+      ({assetUpgraderContract} = await setupAssetUpgrader());
+      ({assetAttributesRegistry} = await setupAssetAttributesRegistry());
+      ({
+        commonCatalyst,
+        rareCatalyst,
+        epicCatalyst,
+        legendaryCatalyst,
+        powerGem,
+        defenseGem,
+        speedGem,
+        magicGem,
+        luckGem,
+        catalystOwner,
+      } = await setupGemsAndCatalysts());
+      assetMinterAsCatalystOwner = await assetMinterContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
+    });
+    // function range(size: number, startAt = 0): number[] {
+    //   return [...Array(size).keys()].map((i) => i + startAt);
     // }
+
+    // `values` is an empty arry of 256 0's
+    // add gemIds.length from each gemEvent to get `numGems` (15 is Max)
+    //
+
+    // await assetUpgraderContractAsAssetOwner.addGems(from, assetId, gemIds, to);
 
     it('can get attributes for 1 gem', async function () {
       // expected range = minValue(1) - 25
-      const {assetMinterContract, assetContract} = await setupAssetMinter();
-      const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
-      const {
-        commonCatalyst,
-        powerGem,
-        catalystOwner,
-      } = await setupGemsAndCatalysts();
-      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
-        ethers.provider.getSigner(catalystOwner)
-      );
-
       const receipt = await assetMinterAsCatalystOwner.mint(
         catalystOwner,
         mintOptions.packId,
@@ -1655,10 +1635,6 @@ describe('AssetMinter', function () {
         }
       }
 
-      interface GemEvent {
-        gemIds: number[];
-        blockHash: string;
-      }
       const gemEvent: GemEvent = {
         gemIds: ids,
         blockHash: receipt.blockHash,
