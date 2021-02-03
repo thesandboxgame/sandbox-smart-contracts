@@ -653,7 +653,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const upgradeReceipt1 = await assetUpgraderContract.addGems(
         catalystOwner,
         assetId,
-        [1, 2],
+        [1],
         catalystOwner
       );
       const upgradeReceipt2 = await assetUpgraderContract.addGems(
@@ -674,10 +674,8 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       );
 
       console.log(`attributes: ${attributes}`);
-      expect(attributes[1]).to.be.within(minValue(4), 25);
+      expect(attributes[1]).to.be.within(51, 75);
       expect(attributes[2]).to.be.within(minValue(4), 25);
-      expect(attributes[3]).to.be.within(minValue(4), 25);
-      expect(attributes[4]).to.be.within(minValue(4), 25);
     });
 
     it.skip('attributes after multiple upgrades are correct', async function () {});
