@@ -157,7 +157,8 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const {id: assetId, receipt: mintReceipt} = await getAssetId(1, [1]);
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
-        mintReceipt
+        mintReceipt,
+        []
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -171,7 +172,8 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const {id: assetId, receipt: mintReceipt} = await getAssetId(2, [2, 2]);
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
-        mintReceipt
+        mintReceipt,
+        []
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -189,7 +191,8 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       ]);
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
-        mintReceipt
+        mintReceipt,
+        []
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -208,7 +211,8 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       ]);
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
-        mintReceipt
+        mintReceipt,
+        []
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -222,7 +226,8 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const {id: assetId, receipt: mintReceipt} = await getAssetId(2, [1, 2]);
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
-        mintReceipt
+        mintReceipt,
+        []
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -241,7 +246,8 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       ]);
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
-        mintReceipt
+        mintReceipt,
+        []
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -262,7 +268,8 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       ]);
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
-        mintReceipt
+        mintReceipt,
+        []
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -283,7 +290,8 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       ]);
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
-        mintReceipt
+        mintReceipt,
+        []
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -303,7 +311,8 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       ]);
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
-        mintReceipt
+        mintReceipt,
+        []
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -323,7 +332,8 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       ]);
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
-        mintReceipt
+        mintReceipt,
+        []
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -348,7 +358,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
         mintReceipt,
-        upgradeReceipt
+        [upgradeReceipt]
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -370,7 +380,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
         mintReceipt,
-        upgradeReceipt
+        [upgradeReceipt]
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -392,7 +402,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
         mintReceipt,
-        upgradeReceipt
+        [upgradeReceipt]
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -414,7 +424,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
         mintReceipt,
-        upgradeReceipt
+        [upgradeReceipt]
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -436,7 +446,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
         mintReceipt,
-        upgradeReceipt
+        [upgradeReceipt]
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -459,7 +469,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
         mintReceipt,
-        upgradeReceipt
+        [upgradeReceipt]
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -483,7 +493,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
         mintReceipt,
-        upgradeReceipt
+        [upgradeReceipt]
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -508,7 +518,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
         mintReceipt,
-        upgradeReceipt
+        [upgradeReceipt]
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -530,7 +540,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
         mintReceipt,
-        upgradeReceipt
+        [upgradeReceipt]
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -553,7 +563,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
         mintReceipt,
-        upgradeReceipt
+        [upgradeReceipt]
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -576,7 +586,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
         mintReceipt,
-        upgradeReceipt
+        [upgradeReceipt]
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -601,7 +611,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
         mintReceipt,
-        upgradeReceipt
+        [upgradeReceipt]
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -624,7 +634,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const {gemEvents} = await prepareGemEventData(
         assetAttributesRegistry,
         mintReceipt,
-        upgradeReceipt
+        [upgradeReceipt]
       );
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
@@ -638,7 +648,37 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       expect(attributes[4]).to.be.within(minValue(4), 25);
     });
 
-    it.skip('can get attributes when adding gems to an asset with multiple upgrades', async function () {});
+    it('can get attributes when adding gems to an asset with multiple upgrades', async function () {
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, [1]);
+      const upgradeReceipt1 = await assetUpgraderContract.addGems(
+        catalystOwner,
+        assetId,
+        [1, 2],
+        catalystOwner
+      );
+      const upgradeReceipt2 = await assetUpgraderContract.addGems(
+        catalystOwner,
+        assetId,
+        [1, 2],
+        catalystOwner
+      );
+
+      const {gemEvents} = await prepareGemEventData(
+        assetAttributesRegistry,
+        mintReceipt,
+        [upgradeReceipt1, upgradeReceipt2]
+      );
+      const attributes = await assetAttributesRegistry.getAttributes(
+        assetId,
+        gemEvents
+      );
+
+      console.log(`attributes: ${attributes}`);
+      expect(attributes[1]).to.be.within(minValue(4), 25);
+      expect(attributes[2]).to.be.within(minValue(4), 25);
+      expect(attributes[3]).to.be.within(minValue(4), 25);
+      expect(attributes[4]).to.be.within(minValue(4), 25);
+    });
 
     it.skip('attributes after multiple upgrades are correct', async function () {});
 
