@@ -707,10 +707,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         gemEvents
       );
       console.log(`attributes: ${attributes}`);
-      // expect(attributes[1]).to.be.within(minValue(4), 25);
-      // expect(attributes[2]).to.be.within(minValue(4), 25);
-      // expect(attributes[3]).to.be.within(minValue(4), 25);
-      // expect(attributes[4]).to.be.within(minValue(4), 25);
+      expect(attributes[1]).to.be.within(26, 50);
     });
 
     it('can get attributes when adding 1 different gem to an asset with existing gems', async function () {
@@ -752,19 +749,186 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         gemEvents
       );
       console.log(`attributes: ${attributes}`);
-      // expect(attributes[1]).to.be.within(minValue(4), 25);
-      // expect(attributes[2]).to.be.within(minValue(4), 25);
-      // expect(attributes[3]).to.be.within(minValue(4), 25);
-      // expect(attributes[4]).to.be.within(minValue(4), 25);
+      expect(attributes[1]).to.be.within(minValue(2), 25);
+      expect(attributes[2]).to.be.within(minValue(2), 25);
     });
 
-    it('can get attributes when adding 2 gems to an asset with existing gems', async function () {});
+    it('can get attributes when adding 2 similar gems to an asset with existing gems', async function () {
+      const mintReceipt = await assetMinterAsCatalystOwner.mint(
+        catalystOwner,
+        mintOptions.packId,
+        mintOptions.metaDataHash,
+        catalysts[3].catalystId,
+        [1],
+        NFT_SUPPLY,
+        mintOptions.rarity,
+        catalystOwner,
+        mintOptions.data
+      );
+      const catalystAppliedEvents = await findEvents(
+        assetAttributesRegistry,
+        'CatalystApplied',
+        mintReceipt.blockHash
+      );
+      let assetId;
+      if (catalystAppliedEvents[0].args) {
+        assetId = catalystAppliedEvents[0].args[0];
+      }
+      const gemIds = [1, 1];
+      const upgradeReceipt = await assetUpgraderContract.addGems(
+        catalystOwner,
+        assetId,
+        gemIds,
+        catalystOwner
+      );
 
-    it('can get attributes when adding 3 gems to an asset with existing gems', async function () {});
+      const {gemEvents} = await prepareGemEventData(
+        assetAttributesRegistry,
+        mintReceipt,
+        upgradeReceipt
+      );
+      const attributes = await assetAttributesRegistry.getAttributes(
+        assetId,
+        gemEvents
+      );
+      console.log(`attributes: ${attributes}`);
+      expect(attributes[1]).to.be.within(51, 75);
+    });
 
-    it('can get attributes when adding gems to an asset with multiple upgrades', async function () {});
+    it('can get attributes when adding 2 different gems to an asset with existing gems', async function () {
+      const mintReceipt = await assetMinterAsCatalystOwner.mint(
+        catalystOwner,
+        mintOptions.packId,
+        mintOptions.metaDataHash,
+        catalysts[3].catalystId,
+        [1],
+        NFT_SUPPLY,
+        mintOptions.rarity,
+        catalystOwner,
+        mintOptions.data
+      );
+      const catalystAppliedEvents = await findEvents(
+        assetAttributesRegistry,
+        'CatalystApplied',
+        mintReceipt.blockHash
+      );
+      let assetId;
+      if (catalystAppliedEvents[0].args) {
+        assetId = catalystAppliedEvents[0].args[0];
+      }
+      const gemIds = [2, 3];
+      const upgradeReceipt = await assetUpgraderContract.addGems(
+        catalystOwner,
+        assetId,
+        gemIds,
+        catalystOwner
+      );
 
-    it('attributes after multiple upgrades are correct', async function () {});
+      const {gemEvents} = await prepareGemEventData(
+        assetAttributesRegistry,
+        mintReceipt,
+        upgradeReceipt
+      );
+      const attributes = await assetAttributesRegistry.getAttributes(
+        assetId,
+        gemEvents
+      );
+      console.log(`attributes: ${attributes}`);
+      expect(attributes[1]).to.be.within(minValue(3), 25);
+      expect(attributes[2]).to.be.within(minValue(3), 25);
+      expect(attributes[3]).to.be.within(minValue(3), 25);
+    });
+
+    it('can get attributes when adding 3 similar gems to an asset with existing gems', async function () {
+      const mintReceipt = await assetMinterAsCatalystOwner.mint(
+        catalystOwner,
+        mintOptions.packId,
+        mintOptions.metaDataHash,
+        catalysts[3].catalystId,
+        [5],
+        NFT_SUPPLY,
+        mintOptions.rarity,
+        catalystOwner,
+        mintOptions.data
+      );
+      const catalystAppliedEvents = await findEvents(
+        assetAttributesRegistry,
+        'CatalystApplied',
+        mintReceipt.blockHash
+      );
+      let assetId;
+      if (catalystAppliedEvents[0].args) {
+        assetId = catalystAppliedEvents[0].args[0];
+      }
+      const gemIds = [5, 5, 5];
+      const upgradeReceipt = await assetUpgraderContract.addGems(
+        catalystOwner,
+        assetId,
+        gemIds,
+        catalystOwner
+      );
+
+      const {gemEvents} = await prepareGemEventData(
+        assetAttributesRegistry,
+        mintReceipt,
+        upgradeReceipt
+      );
+      const attributes = await assetAttributesRegistry.getAttributes(
+        assetId,
+        gemEvents
+      );
+      console.log(`attributes: ${attributes}`);
+      expect(attributes[5]).to.be.within(76, 100);
+    });
+
+    it('can get attributes when adding 3 different gems to an asset with existing gems', async function () {
+      const mintReceipt = await assetMinterAsCatalystOwner.mint(
+        catalystOwner,
+        mintOptions.packId,
+        mintOptions.metaDataHash,
+        catalysts[3].catalystId,
+        [1],
+        NFT_SUPPLY,
+        mintOptions.rarity,
+        catalystOwner,
+        mintOptions.data
+      );
+      const catalystAppliedEvents = await findEvents(
+        assetAttributesRegistry,
+        'CatalystApplied',
+        mintReceipt.blockHash
+      );
+      let assetId;
+      if (catalystAppliedEvents[0].args) {
+        assetId = catalystAppliedEvents[0].args[0];
+      }
+      const gemIds = [2, 3, 4];
+      const upgradeReceipt = await assetUpgraderContract.addGems(
+        catalystOwner,
+        assetId,
+        gemIds,
+        catalystOwner
+      );
+
+      const {gemEvents} = await prepareGemEventData(
+        assetAttributesRegistry,
+        mintReceipt,
+        upgradeReceipt
+      );
+      const attributes = await assetAttributesRegistry.getAttributes(
+        assetId,
+        gemEvents
+      );
+      console.log(`attributes: ${attributes}`);
+      expect(attributes[1]).to.be.within(minValue(4), 25);
+      expect(attributes[2]).to.be.within(minValue(4), 25);
+      expect(attributes[3]).to.be.within(minValue(4), 25);
+      expect(attributes[4]).to.be.within(minValue(4), 25);
+    });
+
+    it.skip('can get attributes when adding gems to an asset with multiple upgrades', async function () {});
+
+    it.skip('attributes after multiple upgrades are correct', async function () {});
 
     // require(numGems <= MAX_NUM_GEMS, "TOO_MANY_GEMS");
     it.skip('should fail if numGems > MAX-NUM_GEMS', async function () {});
