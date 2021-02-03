@@ -16,15 +16,24 @@ export type SaltedSaleLandInfo = SaleLandInfo & {
   salt: string;
 };
 
-export interface Claim {
+export type AssetClaim = {
   reservedAddress: string;
-  assetIds?: Array<string>;
-  assetValues?: Array<number>;
-  landIds?: Array<number>; // multi claim
-  ids?: Array<string>; // land claim only // TODO: delete
-  sand?: number; // | BigNumber;
+  assetIds: Array<string>;
+  assetValues: Array<number>;
   salt?: string;
-}
+};
+
+export type MultiClaim = {
+  reservedAddress: string;
+  assetIds: Array<string>;
+  assetValues: Array<number>;
+  landIds: Array<number>;
+  assetContractAddress: string;
+  landContractAddress: string;
+  erc20Amounts: Array<number>;
+  erc20ContractAddresses: Array<string>;
+  salt?: string;
+};
 
 function calculateLandHash(
   land: SaleLandInfo | SaltedSaleLandInfo,
@@ -121,10 +130,10 @@ function createDataArray(
   return data;
 }
 
-// Multi Giveaway With ERC20 (Assets, Lands and SAND)
+// Multi Giveaway
 
 function calculateClaimableAssetLandAndSandHash(
-  claim: Claim,
+  claim: MultiClaim,
   salt?: string
 ): string {
   const types = [];
@@ -139,17 +148,25 @@ function calculateClaimableAssetLandAndSandHash(
     types.push('uint256[]');
     values.push(claim.assetValues);
   }
+  if (claim.assetContractAddress) {
+    types.push('address');
+    values.push(claim.assetContractAddress);
+  }
   if (claim.landIds) {
     types.push('uint256[]');
     values.push(claim.landIds);
   }
-  if (claim.ids) {
-    types.push('uint256[]');
-    values.push(claim.ids);
+  if (claim.landContractAddress) {
+    types.push('address');
+    values.push(claim.landContractAddress);
   }
-  if (claim.sand) {
-    types.push('uint256');
-    values.push(claim.sand);
+  if (claim.erc20Amounts) {
+    types.push('uint256[]');
+    values.push(claim.erc20ContractAddresses);
+  }
+  if (claim.erc20ContractAddresses) {
+    types.push('address[]');
+    values.push(claim.erc20ContractAddresses);
   }
   types.push('bytes32');
   values.push(claim.salt || salt);
@@ -158,16 +175,16 @@ function calculateClaimableAssetLandAndSandHash(
 }
 
 function saltClaimableAssetsLandsAndSand(
-  claims: Claim[],
+  claims: MultiClaim[],
   secret?: string | Buffer
-): Array<Claim> {
+): Array<MultiClaim> {
   return claims.map((claim) => {
     const salt = claim.salt;
     if (!salt) {
       if (!secret) {
         throw new Error('Claim need to have a salt or be generated via secret');
       }
-      const newClaim: Claim = {
+      const newClaim: MultiClaim = {
         ...claim,
         salt:
           '0x' +
@@ -187,13 +204,13 @@ function saltClaimableAssetsLandsAndSand(
 }
 
 function createDataArrayClaimableAssetsLandsAndSand(
-  claims: Claim[],
+  claims: MultiClaim[],
   secret?: string
 ): string[] {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data: string[] = [];
 
-  claims.forEach((claim: Claim) => {
+  claims.forEach((claim: MultiClaim) => {
     let salt = claim.salt;
     if (!salt) {
       if (!secret) {

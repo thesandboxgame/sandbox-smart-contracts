@@ -18,9 +18,14 @@ contract MultiGiveawayWithERC20 is WithAdmin, ClaimMultipleTokens {
     mapping(address => mapping(bytes32 => bool)) public claimed;
     mapping(bytes32 => uint256) internal _expiryTime;
 
-    constructor(address admin, uint256 expiryTime) {
+    constructor(
+        address admin,
+        bytes32 merkleRoot,
+        uint256 expiryTime
+    ) {
         _admin = admin;
-        _expiryTime[_merkleRoot] = expiryTime; // TODO: can only do this if have a non-zero initial merkleRoot
+        _merkleRoot = merkleRoot;
+        _expiryTime[_merkleRoot] = expiryTime; // TODO: can only do this if have a non-zero initial merkleRoot?
         // TODO: merkleRoot in constructor for ClaimMultipleTokens?
     }
 

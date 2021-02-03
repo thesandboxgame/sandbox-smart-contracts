@@ -1,25 +1,17 @@
 import fs from 'fs';
 import {BigNumber} from 'ethers';
 import MerkleTree from '../../../lib/merkleTree';
-import helpers from '../../../lib/merkleTreeHelper';
+import helpers, {MultiClaim} from '../../../lib/merkleTreeHelper';
 
 const {
   createDataArrayClaimableAssetsLandsAndSand,
   saltClaimableAssetsLandsAndSand,
 } = helpers;
 
-type AssetAndLandClaimWithSAND = {
-  reservedAddress: string;
-  assetIds?: Array<string>;
-  assetValues?: Array<number>;
-  landIds?: Array<number>;
-  sand?: number;
-};
-
-export function createAssetLandAndSandClaimMerkleTree(
+export function createClaimMerkleTree(
   isDeploymentChainId: boolean,
   chainId: string,
-  claimData: Array<AssetAndLandClaimWithSAND>
+  claimData: Array<MultiClaim>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any {
   let secretPath = './.multi_giveaway_1_secret';

@@ -6,10 +6,10 @@ import {createAssetLandAndSandClaimMerkleTree} from '../../data/giveaways/multi_
 import helpers, {Claim} from '../../lib/merkleTreeHelper';
 const {calculateClaimableAssetLandAndSandHash} = helpers;
 
-const ASSETS_HOLDER = '0x0000000000000000000000000000000000000000';
+// const ASSETS_HOLDER = '0x0000000000000000000000000000000000000000';
 
-const LAND_HOLDER = '0x0000000000000000000000000000000000000000';
-const SAND_HOLDER = '0x0000000000000000000000000000000000000000';
+// const LAND_HOLDER = '0x0000000000000000000000000000000000000000';
+// const SAND_HOLDER = '0x0000000000000000000000000000000000000000';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, network, getChainId} = hre;
@@ -37,9 +37,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     tree,
   } = createAssetLandAndSandClaimMerkleTree(network.live, chainId, claimData);
 
-  const assetContract = await deployments.get('Asset');
-  const landContract = await deployments.get('Land');
-  const sandContract = await deployments.get('Sand');
+  // const assetContract = await deployments.get('Asset');
+  // const landContract = await deployments.get('Land');
+  // const sandContract = await deployments.get('Sand');
 
   await deploy('Multi_Giveaway_1_with_ERC20', {
     contract: 'MultiGiveawayWithERC20',
@@ -47,14 +47,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     linkedData: claims,
     log: true,
     args: [
-      assetContract.address,
-      landContract.address,
-      sandContract.address,
       deployer,
       merkleRootHash,
-      ASSETS_HOLDER,
-      LAND_HOLDER,
-      SAND_HOLDER,
       1615194000, // Sunday, 08-Mar-21 09:00:00 UTC
     ], // TODO: expiryTime
   });
