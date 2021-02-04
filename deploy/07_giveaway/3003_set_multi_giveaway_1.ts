@@ -30,13 +30,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     claimData
   );
 
-  const assetContract = await deployments.get('Asset');
-  console.log('asset', assetContract.address);
-  const landContract = await deployments.get('Land');
-  console.log('land', landContract.address);
-  const sandContract = await deployments.get('Sand');
-  console.log('sand', sandContract.address);
-
   const giveawayContract = await deployments.getOrNull('Multi_Giveaway_1');
   if (!giveawayContract) {
     return;
