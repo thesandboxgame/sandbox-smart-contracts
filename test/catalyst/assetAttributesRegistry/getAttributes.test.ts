@@ -12,7 +12,7 @@ import {
   MintMultiOptions,
 } from '../assetMinter/fixtures';
 import {findEvents, waitFor} from '../../utils';
-import {prepareGemEventData} from '../utils';
+import {prepareGemEventData, getReceiptObject} from '../utils';
 import {setupAssetUpgrader} from '../assetUpgrader/fixtures';
 
 const NFT_SUPPLY = 1;
@@ -155,11 +155,9 @@ describe('AssetAttributesRegistry: getAttributes', function () {
   describe('getAttributes: minting', function () {
     it('can get attributes for 1 gem', async function () {
       const {id: assetId, receipt: mintReceipt} = await getAssetId(1, [1]);
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        []
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -170,11 +168,9 @@ describe('AssetAttributesRegistry: getAttributes', function () {
 
     it('can get attributes for 2 identical gems', async function () {
       const {id: assetId, receipt: mintReceipt} = await getAssetId(2, [2, 2]);
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        []
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -189,11 +185,9 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         3,
         3,
       ]);
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        []
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -209,11 +203,9 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         4,
         4,
       ]);
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        []
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -224,11 +216,9 @@ describe('AssetAttributesRegistry: getAttributes', function () {
 
     it('can get attributes for 2 different gems', async function () {
       const {id: assetId, receipt: mintReceipt} = await getAssetId(2, [1, 2]);
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        []
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -244,11 +234,9 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         2,
         3,
       ]);
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        []
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -266,11 +254,9 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         3,
         4,
       ]);
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        []
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -288,11 +274,9 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         1,
         2,
       ]);
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        []
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -309,11 +293,9 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         2,
         3,
       ]);
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        []
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -330,11 +312,9 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         3,
         3,
       ]);
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        []
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -355,11 +335,11 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         catalystOwner
       );
 
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        [upgradeReceipt]
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+        await getReceiptObject(upgradeReceipt, 3),
+      ]);
+
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -377,11 +357,10 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         catalystOwner
       );
 
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        [upgradeReceipt]
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+        await getReceiptObject(upgradeReceipt, 3),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -399,11 +378,10 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         catalystOwner
       );
 
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        [upgradeReceipt]
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+        await getReceiptObject(upgradeReceipt, 3),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -421,11 +399,10 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         catalystOwner
       );
 
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        [upgradeReceipt]
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+        await getReceiptObject(upgradeReceipt, 3),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -443,11 +420,10 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         catalystOwner
       );
 
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        [upgradeReceipt]
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+        await getReceiptObject(upgradeReceipt, 3),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -466,11 +442,10 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         catalystOwner
       );
 
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        [upgradeReceipt]
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+        await getReceiptObject(upgradeReceipt, 3),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -490,11 +465,10 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         catalystOwner
       );
 
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        [upgradeReceipt]
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+        await getReceiptObject(upgradeReceipt, 3),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -515,11 +489,10 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         catalystOwner
       );
 
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        [upgradeReceipt]
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+        await getReceiptObject(upgradeReceipt, 3),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -537,11 +510,10 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         catalystOwner
       );
 
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        [upgradeReceipt]
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+        await getReceiptObject(upgradeReceipt, 3),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
@@ -560,17 +532,15 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         catalystOwner
       );
 
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        [upgradeReceipt]
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+        await getReceiptObject(upgradeReceipt, 3),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
       );
 
-      console.log(`attributes: ${attributes}`);
       expect(attributes[1]).to.be.within(51, 75);
     });
 
@@ -583,17 +553,15 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         catalystOwner
       );
 
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        [upgradeReceipt]
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+        await getReceiptObject(upgradeReceipt, 3),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
       );
 
-      console.log(`attributes: ${attributes}`);
       expect(attributes[1]).to.be.within(minValue(3), 25);
       expect(attributes[2]).to.be.within(minValue(3), 25);
       expect(attributes[3]).to.be.within(minValue(3), 25);
@@ -608,17 +576,15 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         catalystOwner
       );
 
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        [upgradeReceipt]
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+        await getReceiptObject(upgradeReceipt, 3),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
       );
 
-      console.log(`attributes: ${attributes}`);
       expect(attributes[5]).to.be.within(76, 100);
     });
 
@@ -631,24 +597,22 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         catalystOwner
       );
 
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        [upgradeReceipt]
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+        await getReceiptObject(upgradeReceipt, 3),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
       );
 
-      console.log(`attributes: ${attributes}`);
       expect(attributes[1]).to.be.within(minValue(4), 25);
       expect(attributes[2]).to.be.within(minValue(4), 25);
       expect(attributes[3]).to.be.within(minValue(4), 25);
       expect(attributes[4]).to.be.within(minValue(4), 25);
     });
 
-    it('can get attributes when adding gems to an asset with multiple upgrades', async function () {
+    it('can get attributes when adding gems to an asset multiple times', async function () {
       const {id: assetId, receipt: mintReceipt} = await getAssetId(4, [1]);
       const upgradeReceipt1 = await assetUpgraderContract.addGems(
         catalystOwner,
@@ -663,24 +627,188 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         catalystOwner
       );
 
-      const {gemEvents} = await prepareGemEventData(
-        assetAttributesRegistry,
-        mintReceipt,
-        [upgradeReceipt1, upgradeReceipt2]
-      );
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+        await getReceiptObject(upgradeReceipt1, 3),
+        await getReceiptObject(upgradeReceipt2, 3),
+      ]);
       const attributes = await assetAttributesRegistry.getAttributes(
         assetId,
         gemEvents
       );
 
-      console.log(`attributes: ${attributes}`);
       expect(attributes[1]).to.be.within(51, 75);
       expect(attributes[2]).to.be.within(minValue(4), 25);
     });
 
-    it.skip('attributes after multiple upgrades are correct', async function () {});
+    it('can get attributes when upgrading an asset multiple times', async function () {
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(3, [1]);
 
-    // require(numGems <= MAX_NUM_GEMS, "TOO_MANY_GEMS");
-    it.skip('should fail if numGems > MAX-NUM_GEMS', async function () {});
+      const {
+        gemEvents: gemEvnt1,
+      } = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+      ]);
+      const attributes1 = await assetAttributesRegistry.getAttributes(
+        assetId,
+        gemEvnt1
+      );
+      expect(attributes1[0]).to.equal(0);
+      expect(attributes1[1]).to.be.within(1, 25);
+      expect(attributes1[2]).to.equal(0);
+      expect(attributes1[3]).to.equal(0);
+      expect(attributes1[4]).to.equal(0);
+      expect(attributes1[5]).to.equal(0);
+
+      const upgradeReceipt1 = await assetUpgraderContract.addGems(
+        catalystOwner,
+        assetId,
+        [1, 4],
+        catalystOwner
+      );
+      const {
+        gemEvents: gemEvnt2,
+      } = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+        await getReceiptObject(upgradeReceipt1, 3),
+      ]);
+      const attributes2 = await assetAttributesRegistry.getAttributes(
+        assetId,
+        gemEvnt2
+      );
+      expect(attributes2[0]).to.equal(0);
+      expect(attributes2[1]).to.be.within(26, 50);
+      expect(attributes2[2]).to.equal(0);
+      expect(attributes2[3]).to.equal(0);
+      expect(attributes2[4]).to.be.within(minValue(3), 25);
+      expect(attributes2[5]).to.equal(0);
+
+      const changeCatReceipt = await assetUpgraderContract.changeCatalyst(
+        catalystOwner,
+        assetId,
+        4,
+        [5, 5, 5, 5],
+        catalystOwner
+      );
+
+      const {
+        gemEvents: gemEvnt3,
+      } = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(changeCatReceipt, 2),
+      ]);
+      const attributes3 = await assetAttributesRegistry.getAttributes(
+        assetId,
+        gemEvnt3
+      );
+
+      expect(attributes3[0]).to.equal(0);
+      expect(attributes3[1]).to.equal(0);
+      expect(attributes3[2]).to.equal(0);
+      expect(attributes3[3]).to.equal(0);
+      expect(attributes3[4]).to.equal(0);
+      expect(attributes3[5]).to.be.within(76, 100);
+    });
+
+    it('attributes after multiple upgrades are correct', async function () {
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, [1, 1]);
+      const gemReceipt = await assetUpgraderContract.addGems(
+        catalystOwner,
+        assetId,
+        [2, 5],
+        catalystOwner
+      );
+
+      const upgradeCatalystReceipt1 = await assetUpgraderContract.changeCatalyst(
+        catalystOwner,
+        assetId,
+        2,
+        [1, 1],
+        catalystOwner
+      );
+      const upgradeCatalystReceipt2 = await assetUpgraderContract.changeCatalyst(
+        catalystOwner,
+        assetId,
+        4,
+        [5, 5, 5, 5],
+        catalystOwner
+      );
+      const upgradeCatalystReceipt3 = await assetUpgraderContract.changeCatalyst(
+        catalystOwner,
+        assetId,
+        3,
+        [4, 2, 5],
+        catalystOwner
+      );
+
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        // await getReceiptObject(mintReceipt, 1),
+        // await getReceiptObject(gemReceipt, 3),
+        // await getReceiptObject(upgradeCatalystReceipt1, 2),
+        // await getReceiptObject(upgradeCatalystReceipt2, 2),
+        await getReceiptObject(upgradeCatalystReceipt3, 2),
+      ]);
+
+      const attributes = await assetAttributesRegistry.getAttributes(
+        assetId,
+        gemEvents
+      );
+
+      expect(attributes[0]).to.equal(0);
+      expect(attributes[1]).to.equal(0);
+      expect(attributes[2]).to.be.within(minValue(3), 25);
+      expect(attributes[3]).to.equal(0);
+      expect(attributes[4]).to.be.within(minValue(3), 25);
+      expect(attributes[5]).to.be.within(minValue(3), 25);
+    });
+
+    it('should fail if numGems > MAX-NUM_GEMS', async function () {
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, [
+        1,
+        1,
+        1,
+        1,
+      ]);
+
+      const upgradeCatalystReceipt1 = await assetUpgraderContract.changeCatalyst(
+        catalystOwner,
+        assetId,
+        2,
+        [1, 1],
+        catalystOwner
+      );
+      const upgradeCatalystReceipt2 = await assetUpgraderContract.changeCatalyst(
+        catalystOwner,
+        assetId,
+        4,
+        [5, 5, 5, 5],
+        catalystOwner
+      );
+      const upgradeCatalystReceipt3 = await assetUpgraderContract.changeCatalyst(
+        catalystOwner,
+        assetId,
+        3,
+        [4, 2, 5],
+        catalystOwner
+      );
+      const upgradeCatalystReceipt4 = await assetUpgraderContract.changeCatalyst(
+        catalystOwner,
+        assetId,
+        4,
+        [1, 3, 5, 2],
+        catalystOwner
+      );
+
+      const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
+        await getReceiptObject(mintReceipt, 1),
+        await getReceiptObject(upgradeCatalystReceipt1, 2),
+        await getReceiptObject(upgradeCatalystReceipt2, 2),
+        await getReceiptObject(upgradeCatalystReceipt3, 2),
+        await getReceiptObject(upgradeCatalystReceipt4, 2),
+      ]);
+
+      await expect(
+        assetAttributesRegistry.getAttributes(assetId, gemEvents)
+      ).to.be.revertedWith('TOO_MANY_GEMS');
+    });
   });
 });

@@ -1,4 +1,4 @@
-import {BigNumber, Contract, Event} from 'ethers';
+import {BigNumber, Contract} from 'ethers';
 import {ethers, getNamedAccounts} from 'hardhat';
 import {Receipt} from 'hardhat-deploy/types';
 import {waitFor} from '../../scripts/utils/utils';
@@ -115,16 +115,6 @@ export async function getReceiptObject(
   return new ReceiptObject(receipt, type);
 }
 
-async function findFilteredGemEvents(
-  blockHash: string,
-  id: BigNumber,
-  registry: Contract
-): Promise<Event[]> {
-  const filter = registry.filters.GemsAdded(id);
-  const events = await registry.queryFilter(filter, blockHash);
-  return events;
-}
-
 interface AttributesObj {
   assetId: BigNumber;
   gemEvents: GemEvent[];
@@ -144,7 +134,7 @@ export async function prepareGemEventData(
   const assetId = args ? args[0] : null;
   const gemEvents: GemEvent[] = [];
 
-  for (const [i, obj] of receiptObjects.entries()) {
+  for (const obj of receiptObjects) {
     // mint || ChangeCatalyst
     if (obj.type == 1 || obj.type == 2) {
       const events = await findEvents(
