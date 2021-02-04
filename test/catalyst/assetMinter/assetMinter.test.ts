@@ -117,6 +117,13 @@ describe('AssetMinter', function () {
   });
 
   describe('AssetMinter: Mint', function () {
+    it('the assetMInterAdmin is set correctly', async function () {
+      const {assetMinterContract} = await setupAssetMinter();
+      const {assetMinterAdmin} = await getNamedAccounts();
+      const minterAdmin = await assetMinterContract.getAdmin();
+      expect(minterAdmin).to.equal(assetMinterAdmin);
+    });
+
     it('Record is created with correct data on minting an NFT', async function () {
       const {assetMinterContract} = await setupAssetMinter();
       const {
@@ -167,7 +174,7 @@ describe('AssetMinter', function () {
       expect(record.gemIds[0]).to.equal(1);
     });
 
-    it.skip('only erc721 assets will have a catalyst set', async function () {
+    it('only erc721 assets will have a catalyst set', async function () {
       const {assetMinterContract, assetContract} = await setupAssetMinter();
       const {
         catalystOwner,
@@ -444,7 +451,7 @@ describe('AssetMinter', function () {
   });
 
   describe('AssetMinter: MintMultiple', function () {
-    it.skip('only erc721 assets will have a catalyst set', async function () {
+    it('only erc721 assets will have a catalyst set', async function () {
       const {
         catalystOwner,
         luckGem,
