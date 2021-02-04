@@ -50,10 +50,8 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
 
     const landContract = await ethers.getContractAt(
       'MockLand',
-      '0x092796887ed12804AA949A3207CECA18998C90c7' // Set a fixed address for Mockland for using in test claims
+      '0x092796887ed12804AA949A3207CECA18998C90c7' // Set a fixed address for Mockland to use in test claim data as the landContractAddress
     );
-
-    console.log('mockland', landContract.address);
 
     const landContractAsAdmin = await landContract.connect(
       ethers.provider.getSigner(landAdmin)

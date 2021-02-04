@@ -25,6 +25,7 @@ describe('Multi_Giveaway', function () {
     ).to.be.revertedWith(`can't substract more than there is`);
   });
 
+  // TODO: review
   // it('User cannot claim sand when contract does not hold any', async function () {
   //   const options = {
   //     mint: true,
@@ -487,3 +488,5 @@ describe('Multi_Giveaway', function () {
     ).to.be.revertedWith('CLAIM_PERIOD_IS_OVER');
   });
 });
+
+// TODO: multi erc20 - add cats and gems
