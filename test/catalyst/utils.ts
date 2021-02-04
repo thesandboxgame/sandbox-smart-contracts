@@ -95,8 +95,24 @@ class GemEvent {
   }
 }
 
+class ReceiptObject {
+  receipt: Receipt;
+  type: number;
+  constructor(rec: Receipt, _type: number) {
+    this.receipt = rec;
+    this.type = _type;
+  }
+}
+
 async function getGemEvent(ids: number[], hash: string): Promise<GemEvent> {
   return new GemEvent(ids, hash);
+}
+
+export async function getReceiptObject(
+  receipt: Receipt,
+  type: number
+): Promise<ReceiptObject> {
+  return new ReceiptObject(receipt, type);
 }
 
 async function findFilteredGemEvents(
@@ -116,42 +132,61 @@ interface AttributesObj {
 
 export async function prepareGemEventData(
   registry: Contract,
-  mintReceipt: Receipt,
-  upgradeReceipts: Receipt[]
+  receiptObjects: ReceiptObject[]
 ): Promise<AttributesObj> {
-  const catalystAppliedEvents = await findEvents(
+  const mintReceipt = receiptObjects[0].receipt;
+  const mintEvents = await findEvents(
     registry,
     'CatalystApplied',
     mintReceipt.blockHash
   );
-  let assetId;
-  let initialGemEvent: GemEvent;
+  const args = mintEvents[0].args;
+  const assetId = args ? args[0] : null;
   const gemEvents: GemEvent[] = [];
 
-  if (catalystAppliedEvents[0].args) {
-    assetId = catalystAppliedEvents[0].args[0];
-    initialGemEvent = await getGemEvent(
-      catalystAppliedEvents[0].args[2],
-      mintReceipt.blockHash
-    );
-    gemEvents.push(initialGemEvent);
-  }
-
-  if (upgradeReceipts.length != 0) {
-    for (const rec of upgradeReceipts) {
-      const gemsAddedEvents = await findFilteredGemEvents(
-        rec.blockHash,
-        assetId,
-        registry
+  for (const [i, obj] of receiptObjects.entries()) {
+    // mint || ChangeCatalyst
+    if (obj.type == 1 || obj.type == 2) {
+      const events = await findEvents(
+        registry,
+        'CatalystApplied',
+        obj.receipt.blockHash
       );
-      console.log(`gemsAddedEvents.length: ${gemsAddedEvents.length}`);
-      for (const event of gemsAddedEvents) {
-        if (event.args) {
-          const gemEvent = await getGemEvent(event.args[1], rec.blockHash);
+      if (events.length != 1) {
+        console.log('Longer than 1 ! Need to fix prepareGemEventData()');
+      } else {
+        let gemEvent: GemEvent;
+        if (events[0].args) {
+          gemEvent = await getGemEvent(
+            events[0].args[2],
+            obj.receipt.blockHash
+          );
+          gemEvents.push(gemEvent);
+        }
+      }
+    }
+
+    // AddGems
+    if (obj.type == 3) {
+      const events = await findEvents(
+        registry,
+        'GemsAdded',
+        obj.receipt.blockHash
+      );
+      if (events.length != 1) {
+        console.log('Longer than 1 ! Need to fix prepareGemEventData() !');
+      } else {
+        let gemEvent: GemEvent;
+        if (events[0].args) {
+          gemEvent = await getGemEvent(
+            events[0].args[1],
+            obj.receipt.blockHash
+          );
           gemEvents.push(gemEvent);
         }
       }
     }
   }
+
   return {assetId, gemEvents};
 }
