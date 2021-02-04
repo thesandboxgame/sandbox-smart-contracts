@@ -17,12 +17,6 @@ const ipfsHashString =
 
 import {expectReceiptEventWithArgs, waitFor} from '../utils';
 
-// type Options = {
-//   mint?: boolean;
-//   assetsHolder?: boolean;
-//   landHolder?: boolean;
-// };
-
 type OptionsWithERC20 = {
   mint?: boolean;
   sand?: boolean;
@@ -54,7 +48,12 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
       args: [sandContract.address, landAdmin],
     });
 
-    const landContract = await ethers.getContract('MockLand');
+    const landContract = await ethers.getContractAt(
+      'MockLand',
+      '0x092796887ed12804AA949A3207CECA18998C90c7' // Set a fixed address for Mockland for using in test claims
+    );
+
+    console.log('mockland', landContract.address);
 
     const landContractAsAdmin = await landContract.connect(
       ethers.provider.getSigner(landAdmin)
@@ -74,11 +73,7 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
       {
         from: deployer,
         contract: 'MultiGiveawayWithERC20',
-        args: [
-          nftGiveawayAdmin,
-          emptyBytes32,
-          1615194000, // Sunday, 08-Mar-21 09:00:00 UTC
-        ],
+        args: [nftGiveawayAdmin],
       }
     );
 
@@ -178,13 +173,6 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
       dataWithIds
     );
 
-    // Update the deployment with test asset data
-    // const deployment = await deployments.get(
-    //   'Test_Multi_Giveaway_1_with_ERC20'
-    // );
-    // deployment.linkedData = claims;
-    // await deployments.save('Test_Multi_Giveaway_1_with_ERC20', deployment);
-
     const giveawayContract = await ethers.getContract(
       'Test_Multi_Giveaway_1_with_ERC20'
     );
@@ -193,15 +181,13 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
       ethers.provider.getSigner(nftGiveawayAdmin)
     );
 
-    // const updatedDeployment = await deployments.get(
-    //   'Test_Multi_Giveaway_1_with_ERC20'
-    // );
-    // const updatedClaims = updatedDeployment.linkedData;
     const assetAndLandHashArray = createDataArrayClaimableAssetsLandsAndSand(
       claims
     );
     const tree = new MerkleTree(assetAndLandHashArray);
-    await giveawayContractAsAdmin.setMerkleRoot(merkleRootHash); // Set the merkleRoot which could not have been known prior to generating the test asset IDs
+
+    // Add new giveaway data
+    await giveawayContractAsAdmin.addNewGiveaway(merkleRootHash, 1615194000);
 
     return {
       giveawayContract,

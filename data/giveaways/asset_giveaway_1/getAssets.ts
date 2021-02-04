@@ -1,22 +1,22 @@
 import fs from 'fs';
 import {BigNumber} from 'ethers';
 import MerkleTree from '../../../lib/merkleTree';
-import helpers, {Claim} from '../../../lib/merkleTreeHelper';
+import helpers, {AssetClaim} from '../../../lib/merkleTreeHelper';
 
 const {
-  createDataArrayClaimableAssetsLandsAndSand,
-  saltClaimableAssetsLandsAndSand,
+  createDataArrayClaimableAssets,
+  saltClaimableAssets,
 } = helpers;
 
 export function createAssetClaimMerkleTree(
   isDeploymentChainId: boolean,
   chainId: string,
-  assetData: Array<Claim>
+  assetData: Array<AssetClaim>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): {
-  assets: Claim[];
+  assets: AssetClaim[];
   merkleRootHash: string;
-  saltedAssets: Claim[];
+  saltedAssets: AssetClaim[];
   tree: MerkleTree;
 } {
   let secretPath = './secret/.asset_giveaway_1_secret';
@@ -41,9 +41,9 @@ export function createAssetClaimMerkleTree(
     expose = true;
   }
 
-  const saltedAssets = saltClaimableAssetsLandsAndSand(assetData, secret);
+  const saltedAssets = saltClaimableAssets(assetData, secret);
   const tree = new MerkleTree(
-    createDataArrayClaimableAssetsLandsAndSand(saltedAssets)
+    createDataArrayClaimableAssets(saltedAssets)
   );
   const merkleRootHash = tree.getRoot().hash;
 

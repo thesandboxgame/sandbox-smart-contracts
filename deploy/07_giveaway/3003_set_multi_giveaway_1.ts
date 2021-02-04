@@ -1,13 +1,72 @@
+import fs from 'fs';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments} = hre;
-  const {execute, read, log} = deployments;
+import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1_with_erc20/getClaims';
+import helpers, {MultiClaim} from '../../lib/merkleTreeHelper';
+const {calculateClaimableAssetLandAndSandHash} = helpers;
 
-  // Set Multi_Giveaway_1_with_ERC20 contract as superOperator for Asset
+const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+  const {deployments, getNamedAccounts, network, getChainId} = hre;
+  const {execute, read, log} = deployments;
+  const chainId = await getChainId();
+
+  let claimData: MultiClaim[];
+  try {
+    claimData = JSON.parse(
+      fs
+        .readFileSync(
+          `data/giveaways/multi_giveaway_1_with_erc20/claims_${hre.network.name}.json`
+        )
+        .toString()
+    );
+  } catch (e) {
+    return;
+  }
+
+  const {merkleRootHash, saltedClaims, tree} = createClaimMerkleTree(
+    network.live,
+    chainId,
+    claimData
+  );
+
+  const assetContract = await deployments.get('Asset');
+  console.log('asset', assetContract.address);
+  const landContract = await deployments.get('Land');
+  console.log('land', landContract.address);
+  const sandContract = await deployments.get('Sand');
+  console.log('sand', sandContract.address);
+
+  const giveawayContract = await deployments.getOrNull('Multi_Giveaway_1');
+  if (!giveawayContract) {
+    return;
+  }
+
+  // Add a new giveaway
+  const currentAdmin = await read('Multi_Giveaway_1', 'getAdmin');
+
+  await execute(
+    'Multi_Giveaway_1',
+    {from: currentAdmin, log: true},
+    'addNewGiveaway',
+    merkleRootHash,
+    1615194000 // Sunday, 08-Mar-21 09:00:00 UTC
+  );
+  // TODO: separate script to be used whenever a new giveaway is added to the reusable multigiveaway contract
+  const claimsWithProofs: (MultiClaim & {proof: string[]})[] = [];
+  for (const claim of saltedClaims) {
+    claimsWithProofs.push({
+      ...claim,
+      proof: tree.getProof(calculateClaimableAssetLandAndSandHash(claim)),
+    });
+  }
+  fs.writeFileSync(
+    `./secret/.multi_claims_proofs_${chainId}.json`,
+    JSON.stringify(claimsWithProofs, null, '  ')
+  );
+
+  // Set giveaway contract as superOperator for Asset
   // This is needed when the contract is not the assetsHolder
-  const giveawayContract = await deployments.get('Multi_Giveaway_1');
 
   const isAssetSuperOperator = await read(
     'Land',
@@ -72,5 +131,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.runAtTheEnd = true;
 func.tags = ['Multi_Giveaway_1', 'Multi_Giveaway_1_setup'];
-func.dependencies = ['Multi_Giveaway_1_deploy'];
+func.dependencies = [
+  'Multi_Giveaway_1_deploy',
+  'Asset_deploy',
+  'Land_deploy',
+  'Sand_deploy',
+];
 func.skip = async (hre) => hre.network.name !== 'hardhat'; // TODO

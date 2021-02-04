@@ -15,23 +15,29 @@ contract MultiGiveawayWithERC20 is WithAdmin, ClaimMultipleTokens {
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
     bytes4 internal constant ERC721_BATCH_RECEIVED = 0x4b808c46;
 
+    uint256 internal _counter = 1; // First giveaway is Multi_Giveaway_1
+
     mapping(address => mapping(bytes32 => bool)) public claimed; // TODO: change to uniswap version
     mapping(bytes32 => uint256) internal _expiryTime;
 
-    constructor(
-        address admin,
-        bytes32 merkleRoot,
-        uint256 expiryTime
-    ) {
+    constructor(address admin) {
         _admin = admin;
-        _merkleRoot = merkleRoot;
-        _expiryTime[_merkleRoot] = expiryTime; // TODO: can only do this if have a non-zero initial merkleRoot
+    }
+
+    /// @notice Function to set the merkle root hash for the claim data.
+    /// @param giveaway The giveaway number to change the merkle root hash for.
+    /// @param merkleRoot The merkle root hash of the claim data.
+    function setMerkleRoot(uint256 giveaway, bytes32 merkleRoot) external onlyAdmin {
+        _merkleRoots[giveaway] = merkleRoot;
     }
 
     /// @notice Function to set the merkle root hash for the claim data.
     /// @param merkleRoot The merkle root hash of the claim data.
-    function setMerkleRoot(bytes32 merkleRoot) external onlyAdmin {
-        _merkleRoot = merkleRoot; // TODO: discuss how to implement concurrent claims. Change to addNewGiveaway function?
+    /// @param expiryTime The expiry time for the giveaway.
+    function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime) external onlyAdmin {
+        _merkleRoots[_counter] = merkleRoot;
+        _expiryTime[merkleRoot] = expiryTime;
+        _counter++;
     }
 
     /// @notice Function to permit the claiming of multiple tokens to a reserved address.
@@ -41,10 +47,12 @@ contract MultiGiveawayWithERC20 is WithAdmin, ClaimMultipleTokens {
         Claim memory claim, // Note: if calldata, get UnimplementedFeatureError; possibly fixed in solc 0.7.6
         bytes32[] calldata proof
     ) external {
+        require(claim.giveawayNumber <= _counter, "GIVEAWAY_DOES_NOT_EXIST");
         // require(block.timestamp < _expiryTime[_merkleRoot], "CLAIM_PERIOD_IS_OVER"); TODO: fix
         require(claim.to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        require(claimed[claim.to][_merkleRoot] == false, "DESTINATION_ALREADY_CLAIMED");
-        claimed[claim.to][_merkleRoot] = true;
+        bytes32 merkleRoot = _merkleRoots[claim.giveawayNumber];
+        require(claimed[claim.to][merkleRoot] == false, "DESTINATION_ALREADY_CLAIMED");
+        claimed[claim.to][merkleRoot] = true;
         _claimMultipleTokens(claim, proof);
     }
 

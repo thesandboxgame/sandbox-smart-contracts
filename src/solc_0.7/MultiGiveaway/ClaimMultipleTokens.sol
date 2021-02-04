@@ -7,9 +7,10 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "../common/Interfaces/IERC721Extended.sol";
 
 contract ClaimMultipleTokens {
-    bytes32 internal _merkleRoot;
+    mapping(uint256 => bytes32) internal _merkleRoots;
 
     struct Claim {
+        uint256 giveawayNumber;
         address to;
         uint256[] assetIds;
         uint256[] assetValues;
@@ -22,6 +23,7 @@ contract ClaimMultipleTokens {
     }
 
     event ClaimedMultipleTokens(
+        uint256 giveawayNumber,
         address to,
         uint256[] assetIds,
         uint256[] assetValues,
@@ -32,8 +34,6 @@ contract ClaimMultipleTokens {
         address[] erc20ContractAddresses
     );
 
-    // constructor() {} // TODO:
-
     /// @dev TODO docs.
     function _claimMultipleTokens(Claim memory claim, bytes32[] calldata proof) internal {
         _checkValidity(claim, proof);
@@ -41,6 +41,7 @@ contract ClaimMultipleTokens {
         _transferERC721(claim.to, claim.landIds, claim.landContractAddress);
         _transferERC20(claim.to, claim.erc20Amounts, claim.erc20ContractAddresses);
         emit ClaimedMultipleTokens(
+            claim.giveawayNumber,
             claim.to,
             claim.assetIds,
             claim.assetValues,
@@ -56,13 +57,14 @@ contract ClaimMultipleTokens {
         require(claim.assetIds.length == claim.assetValues.length, "INVALID_INPUT");
         require(claim.erc20Amounts.length == claim.erc20ContractAddresses.length, "INVALID_INPUT");
         bytes32 leaf = _generateClaimHash(claim);
-        require(_verify(proof, leaf), "INVALID_CLAIM");
+        require(_verify(claim.giveawayNumber, proof, leaf), "INVALID_CLAIM");
     }
 
     function _generateClaimHash(Claim memory claim) private pure returns (bytes32) {
         return
             keccak256(
                 abi.encodePacked(
+                    claim.giveawayNumber,
                     claim.to,
                     claim.assetIds,
                     claim.assetValues,
@@ -76,7 +78,11 @@ contract ClaimMultipleTokens {
             );
     }
 
-    function _verify(bytes32[] memory proof, bytes32 leaf) private view returns (bool) {
+    function _verify(
+        uint256 giveawayNumber,
+        bytes32[] memory proof,
+        bytes32 leaf
+    ) private view returns (bool) {
         bytes32 computedHash = leaf;
 
         for (uint256 i = 0; i < proof.length; i++) {
@@ -89,7 +95,7 @@ contract ClaimMultipleTokens {
             }
         }
 
-        return computedHash == _merkleRoot;
+        return computedHash == _merkleRoots[giveawayNumber];
     }
 
     function _transferERC1155(

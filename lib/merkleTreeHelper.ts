@@ -24,6 +24,7 @@ export type AssetClaim = {
 };
 
 export type MultiClaim = {
+  giveawayNumber: number;
   to: string;
   assetIds: Array<string>;
   assetValues: Array<number>;
@@ -219,6 +220,8 @@ function calculateClaimableAssetLandAndSandHash(
 ): string {
   const types = [];
   const values = [];
+  types.push('uint256');
+  values.push(claim.giveawayNumber);
   types.push('address');
   values.push(claim.to);
   if (claim.assetIds) {
