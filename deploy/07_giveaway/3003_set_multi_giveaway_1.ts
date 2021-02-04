@@ -7,7 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   // Set Multi_Giveaway_1_with_ERC20 contract as superOperator for Asset
   // This is needed when the contract is not the assetsHolder
-  const giveawayContract = await deployments.get('Multi_Giveaway_1_with_ERC20');
+  const giveawayContract = await deployments.get('Multi_Giveaway_1');
 
   const isAssetSuperOperator = await read(
     'Land',

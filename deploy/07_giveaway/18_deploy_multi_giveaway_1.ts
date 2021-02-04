@@ -1,15 +1,10 @@
 import fs from 'fs';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {createAssetLandAndSandClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1_with_erc20/getClaims';
+import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1_with_erc20/getClaims';
 
-import helpers, {Claim} from '../../lib/merkleTreeHelper';
+import helpers, {MultiClaim} from '../../lib/merkleTreeHelper';
 const {calculateClaimableAssetLandAndSandHash} = helpers;
-
-// const ASSETS_HOLDER = '0x0000000000000000000000000000000000000000';
-
-// const LAND_HOLDER = '0x0000000000000000000000000000000000000000';
-// const SAND_HOLDER = '0x0000000000000000000000000000000000000000';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, network, getChainId} = hre;
@@ -17,7 +12,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const chainId = await getChainId();
   const {deployer} = await getNamedAccounts();
 
-  let claimData: Claim[];
+  let claimData: MultiClaim[];
   try {
     claimData = JSON.parse(
       fs
@@ -30,30 +25,25 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     return;
   }
 
-  const {
-    claims,
-    merkleRootHash,
-    saltedClaims,
-    tree,
-  } = createAssetLandAndSandClaimMerkleTree(network.live, chainId, claimData);
+  const {merkleRootHash, saltedClaims, tree} = createClaimMerkleTree(
+    network.live,
+    chainId,
+    claimData
+  );
 
-  // const assetContract = await deployments.get('Asset');
-  // const landContract = await deployments.get('Land');
-  // const sandContract = await deployments.get('Sand');
-
-  await deploy('Multi_Giveaway_1_with_ERC20', {
+  await deploy('Multi_Giveaway_1', {
     contract: 'MultiGiveawayWithERC20',
     from: deployer,
-    linkedData: claims,
     log: true,
     args: [
       deployer,
-      merkleRootHash,
+      merkleRootHash, // TODO: remove ?
       1615194000, // Sunday, 08-Mar-21 09:00:00 UTC
     ], // TODO: expiryTime
   });
 
-  const claimsWithProofs: (Claim & {proof: string[]})[] = [];
+  // TODO: separate script to be used whenever a new giveaway is sent to the reusable multigiveaway contract
+  const claimsWithProofs: (MultiClaim & {proof: string[]})[] = [];
   for (const claim of saltedClaims) {
     claimsWithProofs.push({
       ...claim,
@@ -66,6 +56,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 };
 export default func;
-func.tags = ['Multi_Giveaway_1_deploy_with_ERC20'];
+func.tags = ['Multi_Giveaway_1_deploy'];
 func.dependencies = ['Land_deploy', 'Asset_deploy', 'Sand_deploy'];
 func.skip = async (hre) => hre.network.name !== 'hardhat'; // TODO

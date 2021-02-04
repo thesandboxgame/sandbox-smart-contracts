@@ -15,7 +15,7 @@ contract MultiGiveawayWithERC20 is WithAdmin, ClaimMultipleTokens {
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
     bytes4 internal constant ERC721_BATCH_RECEIVED = 0x4b808c46;
 
-    mapping(address => mapping(bytes32 => bool)) public claimed;
+    mapping(address => mapping(bytes32 => bool)) public claimed; // TODO: change to uniswap version
     mapping(bytes32 => uint256) internal _expiryTime;
 
     constructor(
@@ -25,30 +25,27 @@ contract MultiGiveawayWithERC20 is WithAdmin, ClaimMultipleTokens {
     ) {
         _admin = admin;
         _merkleRoot = merkleRoot;
-        _expiryTime[_merkleRoot] = expiryTime; // TODO: can only do this if have a non-zero initial merkleRoot?
-        // TODO: merkleRoot in constructor for ClaimMultipleTokens?
+        _expiryTime[_merkleRoot] = expiryTime; // TODO: can only do this if have a non-zero initial merkleRoot
     }
 
     /// @notice Function to set the merkle root hash for the claim data.
     /// @param merkleRoot The merkle root hash of the claim data.
     function setMerkleRoot(bytes32 merkleRoot) external onlyAdmin {
-        _merkleRoot = merkleRoot; // TODO: discuss whether we need to be able to have concurrent claims
+        _merkleRoot = merkleRoot; // TODO: discuss how to implement concurrent claims. Change to addNewGiveaway function?
     }
 
     /// @notice Function to permit the claiming of multiple tokens to a reserved address.
     /// @param claim The claim.
     /// @param proof The proof submitted for verification.
-    /// @param salt The salt submitted for verification.
     function claimMultipleTokens(
         Claim memory claim, // Note: if calldata, get UnimplementedFeatureError; possibly fixed in solc 0.7.6
-        bytes32[] calldata proof,
-        bytes32 salt
+        bytes32[] calldata proof
     ) external {
-        require(block.timestamp < _expiryTime[_merkleRoot], "CLAIM_PERIOD_IS_OVER");
+        // require(block.timestamp < _expiryTime[_merkleRoot], "CLAIM_PERIOD_IS_OVER"); TODO: fix
         require(claim.to != address(0), "INVALID_TO_ZERO_ADDRESS");
         require(claimed[claim.to][_merkleRoot] == false, "DESTINATION_ALREADY_CLAIMED");
         claimed[claim.to][_merkleRoot] = true;
-        _claimMultipleTokens(claim, proof, salt);
+        _claimMultipleTokens(claim, proof);
     }
 
     function onERC721Received(

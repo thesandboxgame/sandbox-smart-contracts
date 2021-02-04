@@ -18,6 +18,7 @@ contract ClaimMultipleTokens {
         address landContractAddress;
         uint256[] erc20Amounts;
         address[] erc20ContractAddresses;
+        bytes32 salt;
     }
 
     event ClaimedMultipleTokens(
@@ -34,12 +35,8 @@ contract ClaimMultipleTokens {
     // constructor() {} // TODO:
 
     /// @dev TODO docs.
-    function _claimMultipleTokens(
-        Claim memory claim,
-        bytes32[] calldata proof,
-        bytes32 salt
-    ) internal {
-        _checkValidity(claim, proof, salt);
+    function _claimMultipleTokens(Claim memory claim, bytes32[] calldata proof) internal {
+        _checkValidity(claim, proof);
         _transferERC1155(claim.to, claim.assetIds, claim.assetValues, claim.assetContractAddress);
         _transferERC721(claim.to, claim.landIds, claim.landContractAddress);
         _transferERC20(claim.to, claim.erc20Amounts, claim.erc20ContractAddresses);
@@ -55,18 +52,14 @@ contract ClaimMultipleTokens {
         );
     }
 
-    function _checkValidity(
-        Claim memory claim,
-        bytes32[] memory proof,
-        bytes32 salt
-    ) private view {
+    function _checkValidity(Claim memory claim, bytes32[] memory proof) private view {
         require(claim.assetIds.length == claim.assetValues.length, "INVALID_INPUT");
         require(claim.erc20Amounts.length == claim.erc20ContractAddresses.length, "INVALID_INPUT");
-        bytes32 leaf = _generateClaimHash(claim, salt);
+        bytes32 leaf = _generateClaimHash(claim);
         require(_verify(proof, leaf), "INVALID_CLAIM");
     }
 
-    function _generateClaimHash(Claim memory claim, bytes32 salt) private pure returns (bytes32) {
+    function _generateClaimHash(Claim memory claim) private pure returns (bytes32) {
         return
             keccak256(
                 abi.encodePacked(
@@ -78,7 +71,7 @@ contract ClaimMultipleTokens {
                     claim.landContractAddress,
                     claim.erc20Amounts,
                     claim.erc20ContractAddresses,
-                    salt
+                    claim.salt
                 )
             );
     }

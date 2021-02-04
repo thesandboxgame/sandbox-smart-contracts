@@ -44,7 +44,7 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
     const nftGiveawayAdmin = otherAccounts[0];
     const others = otherAccounts.slice(1);
 
-    await deployments.fixture('Multi_Giveaway_1_with_ERC20');
+    await deployments.fixture('Multi_Giveaway_1');
     const sandContract = await ethers.getContract('Sand');
     await deployments.fixture(['Asset']);
     const assetContract = await ethers.getContract('Asset');
@@ -179,25 +179,26 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
     );
 
     // Update the deployment with test asset data
-    const deployment = await deployments.get(
-      'Test_Multi_Giveaway_1_with_ERC20'
-    );
-    deployment.linkedData = claims;
-    await deployments.save('Test_Multi_Giveaway_1_with_ERC20', deployment);
+    // const deployment = await deployments.get(
+    //   'Test_Multi_Giveaway_1_with_ERC20'
+    // );
+    // deployment.linkedData = claims;
+    // await deployments.save('Test_Multi_Giveaway_1_with_ERC20', deployment);
 
     const giveawayContract = await ethers.getContract(
       'Test_Multi_Giveaway_1_with_ERC20'
     );
+
     const giveawayContractAsAdmin = await giveawayContract.connect(
       ethers.provider.getSigner(nftGiveawayAdmin)
     );
 
-    const updatedDeployment = await deployments.get(
-      'Test_Multi_Giveaway_1_with_ERC20'
-    );
-    const updatedClaims = updatedDeployment.linkedData;
+    // const updatedDeployment = await deployments.get(
+    //   'Test_Multi_Giveaway_1_with_ERC20'
+    // );
+    // const updatedClaims = updatedDeployment.linkedData;
     const assetAndLandHashArray = createDataArrayClaimableAssetsLandsAndSand(
-      updatedClaims
+      claims
     );
     const tree = new MerkleTree(assetAndLandHashArray);
     await giveawayContractAsAdmin.setMerkleRoot(merkleRootHash); // Set the merkleRoot which could not have been known prior to generating the test asset IDs
@@ -209,7 +210,7 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
       landContract,
       others,
       tree,
-      claims: updatedClaims,
+      claims,
       nftGiveawayAdmin,
       merkleRootHash,
     };

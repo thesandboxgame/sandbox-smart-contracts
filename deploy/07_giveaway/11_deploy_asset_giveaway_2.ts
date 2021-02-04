@@ -4,8 +4,8 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {createAssetClaimMerkleTree} from '../../data/asset_giveaway_2/getAssets';
 import {AddressZero} from '@ethersproject/constants';
 
-import helpers, {Claim} from '../../lib/merkleTreeHelper';
-const {calculateClaimableAssetLandAndSandHash} = helpers;
+import helpers, {AssetClaim} from '../../lib/merkleTreeHelper';
+const {calculateClaimableAssetHash} = helpers;
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, network, getChainId} = hre;
@@ -13,7 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const chainId = await getChainId();
   const {deployer} = await getNamedAccounts();
 
-  let assetData: Claim[];
+  let assetData: AssetClaim[];
   try {
     assetData = JSON.parse(
       fs.readFileSync(`data/asset_giveaway_2/assets.json`).toString()
@@ -51,11 +51,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     ],
   });
 
-  const claimsWithProofs: (Claim & {proof: string[]})[] = [];
+  const claimsWithProofs: (AssetClaim & {proof: string[]})[] = [];
   for (const claim of saltedAssets) {
     claimsWithProofs.push({
       ...claim,
-      proof: tree.getProof(calculateClaimableAssetLandAndSandHash(claim)),
+      proof: tree.getProof(calculateClaimableAssetHash(claim)),
     });
   }
   if (network.name !== 'hardhat') {
