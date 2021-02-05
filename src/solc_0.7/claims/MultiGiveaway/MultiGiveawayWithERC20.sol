@@ -8,7 +8,7 @@ import "./ClaimERC1155ERC721ERC20.sol";
 import "../../common/BaseWithStorage/WithAdmin.sol";
 
 /// @title MultiGiveaway contract.
-/// @notice This contract manages claims.
+/// @notice This contract manages claims for multiple token types.
 contract MultiGiveawayWithERC20 is WithAdmin, ClaimERC1155ERC721ERC20 {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
@@ -17,7 +17,7 @@ contract MultiGiveawayWithERC20 is WithAdmin, ClaimERC1155ERC721ERC20 {
 
     uint256 internal _counter = 1; // First giveaway is Multi_Giveaway_1
 
-    mapping(address => mapping(bytes32 => bool)) public claimed; // TODO: change to uniswap version
+    mapping(address => mapping(bytes32 => bool)) public claimed; // TODO: change to index mapping - see uniswap
     mapping(bytes32 => uint256) internal _expiryTime;
 
     constructor(address admin) {
@@ -48,9 +48,10 @@ contract MultiGiveawayWithERC20 is WithAdmin, ClaimERC1155ERC721ERC20 {
         bytes32[] calldata proof
     ) external {
         require(claim.giveawayNumber <= _counter, "GIVEAWAY_DOES_NOT_EXIST");
-        // require(block.timestamp < _expiryTime[_merkleRoot], "CLAIM_PERIOD_IS_OVER"); TODO: fix
         require(claim.to != address(0), "INVALID_TO_ZERO_ADDRESS");
+        require(claim.to != address(this), "DESTINATION_MULTIGIVEAWAY_CONTRACT");
         bytes32 merkleRoot = _merkleRoots[claim.giveawayNumber];
+        require(block.timestamp < _expiryTime[merkleRoot], "CLAIM_PERIOD_IS_OVER");
         require(claimed[claim.to][merkleRoot] == false, "DESTINATION_ALREADY_CLAIMED");
         claimed[claim.to][merkleRoot] = true;
         _claimMultipleTokens(claim, proof);

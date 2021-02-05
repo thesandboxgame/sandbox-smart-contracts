@@ -104,7 +104,6 @@ contract ClaimERC1155ERC721ERC20 {
         uint256[] memory erc20Amounts,
         address[] memory erc20ContractAddresses
     ) private {
-        // TODO: review transfer pattern
         for (uint256 i = 0; i < erc20Amounts.length; i++) {
             address erc20ContractAddress = erc20ContractAddresses[i];
             uint256 erc20Amount = erc20Amounts[i];
