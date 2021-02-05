@@ -4,9 +4,10 @@ pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "../common/Interfaces/IERC721Extended.sol";
+import "../../common/Interfaces/IERC721Extended.sol";
+import "../../common/Libraries/Verify.sol";
 
-contract ClaimMultipleTokens {
+contract ClaimERC1155ERC721ERC20 {
     mapping(uint256 => bytes32) internal _merkleRoots;
 
     struct Claim {
@@ -57,7 +58,10 @@ contract ClaimMultipleTokens {
         require(claim.assetIds.length == claim.assetValues.length, "INVALID_INPUT");
         require(claim.erc20Amounts.length == claim.erc20ContractAddresses.length, "INVALID_INPUT");
         bytes32 leaf = _generateClaimHash(claim);
-        require(_verify(claim.giveawayNumber, proof, leaf), "INVALID_CLAIM");
+        require(
+            Verify.doesComputedHashMatchMerkleRootHash(_merkleRoots[claim.giveawayNumber], proof, leaf),
+            "INVALID_CLAIM"
+        );
     }
 
     function _generateClaimHash(Claim memory claim) private pure returns (bytes32) {
@@ -76,26 +80,6 @@ contract ClaimMultipleTokens {
                     claim.salt
                 )
             );
-    }
-
-    function _verify(
-        uint256 giveawayNumber,
-        bytes32[] memory proof,
-        bytes32 leaf
-    ) private view returns (bool) {
-        bytes32 computedHash = leaf;
-
-        for (uint256 i = 0; i < proof.length; i++) {
-            bytes32 proofElement = proof[i];
-
-            if (computedHash < proofElement) {
-                computedHash = keccak256(abi.encodePacked(computedHash, proofElement));
-            } else {
-                computedHash = keccak256(abi.encodePacked(proofElement, computedHash));
-            }
-        }
-
-        return computedHash == _merkleRoots[giveawayNumber];
     }
 
     function _transferERC1155(

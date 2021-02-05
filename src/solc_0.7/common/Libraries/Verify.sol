@@ -1,0 +1,31 @@
+//SPDX-License-Identifier: MIT
+pragma solidity 0.7.5;
+
+/**
+ * @title Verify
+ * @dev Math operations with safety checks that throw on error
+ */
+library Verify {
+    /// @dev Check if the computedHash == comparisonHash.
+    /// @param comparisonHash The merkle root hash passed to the function.
+    /// @param proof The proof.
+    /// @param leaf The leaf.
+    /// @return Whether the first param == comparisonHash.
+    function doesComputedHashMatchMerkleRootHash(
+        bytes32 comparisonHash,
+        bytes32[] memory proof,
+        bytes32 leaf
+    ) internal pure returns (bool) {
+        bytes32 computedHash = leaf;
+        for (uint256 i = 0; i < proof.length; i++) {
+            bytes32 proofElement = proof[i];
+
+            if (computedHash < proofElement) {
+                computedHash = keccak256(abi.encodePacked(computedHash, proofElement));
+            } else {
+                computedHash = keccak256(abi.encodePacked(proofElement, computedHash));
+            }
+        }
+        return computedHash == comparisonHash;
+    }
+}

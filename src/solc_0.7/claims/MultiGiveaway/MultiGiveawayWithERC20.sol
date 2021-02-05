@@ -4,12 +4,12 @@ pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
-import "./ClaimMultipleTokens.sol";
-import "../common/BaseWithStorage/WithAdmin.sol";
+import "./ClaimERC1155ERC721ERC20.sol";
+import "../../common/BaseWithStorage/WithAdmin.sol";
 
 /// @title MultiGiveaway contract.
 /// @notice This contract manages claims.
-contract MultiGiveawayWithERC20 is WithAdmin, ClaimMultipleTokens {
+contract MultiGiveawayWithERC20 is WithAdmin, ClaimERC1155ERC721ERC20 {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
