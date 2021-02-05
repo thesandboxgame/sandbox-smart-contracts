@@ -37,13 +37,17 @@ export async function setCatalyst(
     assetAttributesRegistryAdmin,
   } = await setupAssetAttributesRegistry();
   if (collectionId) {
-    await assetAttributesRegistry
-      .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-      .setCatalyst(collectionId, catalystId, gemsIds);
+    await waitFor(
+      assetAttributesRegistry
+        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
+        .setCatalyst(collectionId, catalystId, gemsIds)
+    );
   } else {
-    await assetAttributesRegistry
-      .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-      .setCatalyst(assetId, catalystId, gemsIds);
+    await waitFor(
+      assetAttributesRegistry
+        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
+        .setCatalyst(assetId, catalystId, gemsIds)
+    );
   }
   const record = await assetAttributesRegistry.getRecord(assetId);
 
