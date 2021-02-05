@@ -8104,6 +8104,11 @@ solhint@^3.3.1:
   optionalDependencies:
     prettier "^1.14.3"
 
+solidity-ast@^0.4.4:
+  version "0.4.17"
+  resolved "https://registry.yarnpkg.com/solidity-ast/-/solidity-ast-0.4.17.tgz#e857b4f64466f3eb94da78fe961c0d256c84b228"
+  integrity sha512-5jkkabmjPdy9W9c2DMQBlKobVBz7KDnipxn+0zW191uD6BML3w7dQ+ihUvwA9XOm9ILDECrb5Y8z2vu47STqCg==
+
 solidity-coverage@^0.7.14:
   version "0.7.14"
   resolved "https://registry.yarnpkg.com/solidity-coverage/-/solidity-coverage-0.7.14.tgz#88aa9d663dc82e9927275835703542a5e7931a03"
