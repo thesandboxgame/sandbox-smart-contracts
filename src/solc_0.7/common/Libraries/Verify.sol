@@ -10,7 +10,7 @@ library Verify {
     /// @param comparisonHash The merkle root hash passed to the function.
     /// @param proof The proof provided by the user.
     /// @param leaf The generated hash.
-    /// @return Whether the first param == comparisonHash.
+    /// @return Whether the computedHash == comparisonHash.
     function doesComputedHashMatchMerkleRootHash(
         bytes32 comparisonHash,
         bytes32[] memory proof,
