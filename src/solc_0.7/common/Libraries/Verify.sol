@@ -3,13 +3,13 @@ pragma solidity 0.7.5;
 
 /**
  * @title Verify
- * @dev Math operations with safety checks that throw on error
+ * @dev Merkle root comparison function.
  */
 library Verify {
     /// @dev Check if the computedHash == comparisonHash.
     /// @param comparisonHash The merkle root hash passed to the function.
-    /// @param proof The proof.
-    /// @param leaf The leaf.
+    /// @param proof The proof provided by the user.
+    /// @param leaf The generated hash.
     /// @return Whether the first param == comparisonHash.
     function doesComputedHashMatchMerkleRootHash(
         bytes32 comparisonHash,
