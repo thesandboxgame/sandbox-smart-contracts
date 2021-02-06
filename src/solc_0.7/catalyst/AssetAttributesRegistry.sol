@@ -6,6 +6,7 @@ import "../common/BaseWithStorage/WithAdmin.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
 import "./GemsCatalystsRegistry.sol";
 
+/// @notice Allows setting the gems and catalysts of an asset
 contract AssetAttributesRegistry is WithMinter {
     uint256 internal constant MAX_NUM_GEMS = 15;
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
@@ -31,6 +32,10 @@ contract AssetAttributesRegistry is WithMinter {
     event CatalystApplied(uint256 indexed assetId, uint16 indexed catalystId, uint16[] gemIds, uint64 blockNumber);
     event GemsAdded(uint256 indexed assetId, uint16[] gemIds, uint64 blockNumber);
 
+    /// @notice AssetAttributesRegistry depends on
+    /// @param gemsCatalystsRegistry: GemsCatalystsRegistry for fetching attributes
+    /// @param admin: for setting the migration contract address
+    /// @param minter: allowed to set gems and catalysts for a given asset
     constructor(
         GemsCatalystsRegistry gemsCatalystsRegistry,
         address admin,
@@ -41,6 +46,9 @@ contract AssetAttributesRegistry is WithMinter {
         _minter = minter;
     }
 
+    /// @notice get the record data (catalyst id, gems ids list) for an asset id
+    /// @param assetId id of the asset
+    /// @return record data (catalyst id, gems ids list), asset id existence status
     function getRecord(uint256 assetId)
         external
         view
@@ -66,10 +74,18 @@ contract AssetAttributesRegistry is WithMinter {
         }
     }
 
+    /// @notice
+    /// @param assetId id of the asset
+    /// @param events
+    /// @return
     function getAttributes(uint256 assetId, GemEvent[] calldata events) external view returns (uint32[] memory values) {
         return _gemsCatalystsRegistry.getAttributes(_records[assetId].catalystId, assetId, events);
     }
 
+    /// @notice sets the catalyst and gems for an asset, minter only
+    /// @param assetId id of the asset
+    /// @param catalystId id of the catalyst to set
+    /// @param gemIds list of gems ids to set
     function setCatalyst(
         uint256 assetId,
         uint16 catalystId,
@@ -78,6 +94,11 @@ contract AssetAttributesRegistry is WithMinter {
         _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber());
     }
 
+    /// @notice sets the catalyst and gems for an asset for a given block number, migration contract only
+    /// @param assetId id of the asset
+    /// @param catalystId id of the catalyst to set
+    /// @param gemIds list of gems ids to set
+    /// @param blockNumber block number
     function setCatalystWithBlockNumber(
         uint256 assetId,
         uint16 catalystId,
@@ -88,6 +109,9 @@ contract AssetAttributesRegistry is WithMinter {
         _setCatalyst(assetId, catalystId, gemIds, blockNumber);
     }
 
+    /// @notice adds gems to an existing list of gems of an asset, minter only
+    /// @param assetId id of the asset
+    /// @param gemIds list of gems ids to set
     function addGems(uint256 assetId, uint16[] calldata gemIds) external {
         require(msg.sender == _minter, "NOT_AUTHORIZED_MINTER");
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT");
@@ -127,6 +151,8 @@ contract AssetAttributesRegistry is WithMinter {
         emit GemsAdded(assetId, gemIds, blockNumber);
     }
 
+    /// @notice set the migratcion contract address, admin or migration contract only
+    /// @param _migrationContract address of the migration contract
     function setMigrationContract(address _migrationContract) external {
         address currentMigrationContract = migrationContract;
         if (currentMigrationContract == address(0)) {
