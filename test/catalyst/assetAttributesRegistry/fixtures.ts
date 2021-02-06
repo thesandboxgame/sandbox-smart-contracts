@@ -25,7 +25,8 @@ export const setupAssetAttributesRegistry = deployments.createFixture(
 export async function setCatalyst(
   assetId: BigNumber,
   catalystId: number,
-  gemsIds: number[]
+  gemsIds: number[],
+  collectionId?: BigNumber
 ): Promise<{
   record: {catalystId: number; exists: boolean; gemIds: []};
   event: Event;
@@ -35,11 +36,21 @@ export async function setCatalyst(
     assetAttributesRegistry,
     assetAttributesRegistryAdmin,
   } = await setupAssetAttributesRegistry();
-
-  await assetAttributesRegistry
-    .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-    .setCatalyst(assetId, catalystId, gemsIds);
+  if (collectionId) {
+    await waitFor(
+      assetAttributesRegistry
+        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
+        .setCatalyst(collectionId, catalystId, gemsIds)
+    );
+  } else {
+    await waitFor(
+      assetAttributesRegistry
+        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
+        .setCatalyst(assetId, catalystId, gemsIds)
+    );
+  }
   const record = await assetAttributesRegistry.getRecord(assetId);
+
   const assetAttributesRegistryEvents = await assetAttributesRegistry.queryFilter(
     assetAttributesRegistry.filters.CatalystApplied()
   );

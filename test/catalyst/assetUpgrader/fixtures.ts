@@ -1,10 +1,18 @@
-import {ethers, deployments, getNamedAccounts} from 'hardhat';
+import {
+  ethers,
+  deployments,
+  getUnnamedAccounts,
+  getNamedAccounts,
+} from 'hardhat';
 import {BigNumber, Contract} from 'ethers';
 import {waitFor} from '../../utils';
 
 export const setupAssetUpgrader = deployments.createFixture(async () => {
   await deployments.fixture();
   const {assetAttributesRegistryAdmin, assetAdmin} = await getNamedAccounts();
+  const users = await getUnnamedAccounts();
+  const catalystOwner = users[0];
+
   const assetUpgraderContract: Contract = await ethers.getContract(
     'AssetUpgrader'
   );
@@ -15,6 +23,7 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
   const sandContract: Contract = await ethers.getContract('Sand');
   const feeRecipient: string = await assetUpgraderContract.callStatic.feeRecipient();
   const upgradeFee: BigNumber = await assetUpgraderContract.callStatic.upgradeFee();
+  const gemAdditionFee: BigNumber = await assetUpgraderContract.callStatic.gemAdditionFee();
   const rareCatalyst: Contract = await ethers.getContract('Catalyst_RARE');
   const powerGem: Contract = await ethers.getContract('Gem_POWER');
   const defenseGem: Contract = await ethers.getContract('Gem_DEFENSE');
@@ -35,6 +44,8 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
   );
 
   return {
+    users,
+    catalystOwner,
     rareCatalyst,
     powerGem,
     defenseGem,
@@ -45,6 +56,7 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
     assetContract,
     feeRecipient,
     upgradeFee,
+    gemAdditionFee,
     gemsCatalystsUnit,
     gemsCatalystsRegistry,
   };

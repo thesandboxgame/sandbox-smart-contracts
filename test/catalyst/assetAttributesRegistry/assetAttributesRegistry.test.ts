@@ -5,6 +5,7 @@ import {setCatalyst, setupAssetAttributesRegistry} from './fixtures';
 import catalysts from '../../../data/catalysts';
 import gems from '../../../data/gems';
 import {Block} from '@ethersproject/providers';
+import {waitFor} from '../../utils';
 describe('AssetAttributesRegistry', function () {
   function testSetCatalyst(
     record: {catalystId: number; exists: boolean; gemIds: []},
@@ -53,6 +54,27 @@ describe('AssetAttributesRegistry', function () {
       gemsIds,
       legendaryCatalystId,
       assetId
+    );
+  });
+
+  it('setCatalyst for epic catalyst using collectionId with 3 gems', async function () {
+    const assetId = BigNumber.from('0x1ff80000800000000000000000000000');
+    const collectionId = BigNumber.from('0x1ff80000000000000000000000000000');
+    const epicCatalystId = catalysts[2].catalystId;
+    const gemsIds = gems.filter((gem) => gem.gemId < 4).map((gem) => gem.gemId);
+    const {record, event, block} = await setCatalyst(
+      assetId,
+      epicCatalystId,
+      gemsIds,
+      collectionId
+    );
+    testSetCatalyst(
+      record,
+      event,
+      block,
+      gemsIds,
+      epicCatalystId,
+      collectionId
     );
   });
 
@@ -107,9 +129,11 @@ describe('AssetAttributesRegistry', function () {
     const users = await getUnnamedAccounts();
     const mockedMigrationContractAddress = users[1];
 
-    await assetAttributesRegistry
-      .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-      .setMigrationContract(mockedMigrationContractAddress);
+    await waitFor(
+      assetAttributesRegistry
+        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
+        .setMigrationContract(mockedMigrationContractAddress)
+    );
 
     expect(await assetAttributesRegistry.migrationContract()).to.equal(
       mockedMigrationContractAddress
@@ -136,17 +160,21 @@ describe('AssetAttributesRegistry', function () {
     const mockedMigrationContractAddress = users[1];
     const newMigrationContract = users[2];
 
-    await assetAttributesRegistry
-      .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-      .setMigrationContract(mockedMigrationContractAddress);
+    await waitFor(
+      assetAttributesRegistry
+        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
+        .setMigrationContract(mockedMigrationContractAddress)
+    );
 
     expect(await assetAttributesRegistry.migrationContract()).to.equal(
       mockedMigrationContractAddress
     );
 
-    await assetAttributesRegistry
-      .connect(ethers.provider.getSigner(mockedMigrationContractAddress))
-      .setMigrationContract(newMigrationContract);
+    await waitFor(
+      assetAttributesRegistry
+        .connect(ethers.provider.getSigner(mockedMigrationContractAddress))
+        .setMigrationContract(newMigrationContract)
+    );
 
     expect(await assetAttributesRegistry.migrationContract()).to.equal(
       newMigrationContract
@@ -162,9 +190,11 @@ describe('AssetAttributesRegistry', function () {
     const mockedMigrationContractAddress = users[1];
     const newMigrationContract = users[2];
 
-    await assetAttributesRegistry
-      .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-      .setMigrationContract(mockedMigrationContractAddress);
+    await waitFor(
+      assetAttributesRegistry
+        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
+        .setMigrationContract(mockedMigrationContractAddress)
+    );
 
     expect(await assetAttributesRegistry.migrationContract()).to.equal(
       mockedMigrationContractAddress
@@ -208,18 +238,22 @@ describe('AssetAttributesRegistry', function () {
     const gemsIds = gems.filter((gem) => gem.gemId < 4).map((gem) => gem.gemId);
     const blockNumber = 100;
 
-    await assetAttributesRegistry
-      .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-      .setMigrationContract(assetAttributesRegistryAdmin);
+    await waitFor(
+      assetAttributesRegistry
+        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
+        .setMigrationContract(assetAttributesRegistryAdmin)
+    );
 
-    await assetAttributesRegistry
-      .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-      .setCatalystWithBlockNumber(
-        assetId,
-        epicCatalystId,
-        gemsIds,
-        blockNumber
-      );
+    await waitFor(
+      assetAttributesRegistry
+        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
+        .setCatalystWithBlockNumber(
+          assetId,
+          epicCatalystId,
+          gemsIds,
+          blockNumber
+        )
+    );
 
     const record = await assetAttributesRegistry.getRecord(assetId);
     expect(record.catalystId).to.equal(epicCatalystId);
@@ -254,12 +288,13 @@ describe('AssetAttributesRegistry', function () {
     const gemsIds = [gems[0].gemId];
     const rareCatalystId = catalysts[1].catalystId;
 
-    await setCatalyst(assetId, rareCatalystId, gemsIds);
+    const {record} = await setCatalyst(assetId, rareCatalystId, gemsIds);
 
-    await assetAttributesRegistry
-      .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-      .addGems(assetId, [gems[1].gemId]);
-    const record = await assetAttributesRegistry.getRecord(assetId);
+    await waitFor(
+      assetAttributesRegistry
+        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
+        .addGems(assetId, [gems[1].gemId])
+    );
     expect(record.exists).to.equal(true);
     for (let i = 0; i < gemsIds.length; i++) {
       expect(record.gemIds[i]).to.equal(i + 1);
@@ -278,6 +313,46 @@ describe('AssetAttributesRegistry', function () {
     }
   });
 
+  it('addGems to epic catalyst with collectionId', async function () {
+    const {
+      assetAttributesRegistry,
+      assetAttributesRegistryAdmin,
+    } = await setupAssetAttributesRegistry();
+    const assetId = BigNumber.from('0x1ff80000800000000000000000000000');
+    const collectionId = BigNumber.from('0x1ff80000000000000000000000000000');
+
+    const gemsIds = [gems[0].gemId];
+    const rareCatalystId = catalysts[1].catalystId;
+
+    const {record} = await setCatalyst(
+      assetId,
+      rareCatalystId,
+      gemsIds,
+      collectionId
+    );
+
+    await waitFor(
+      assetAttributesRegistry
+        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
+        .addGems(assetId, [gems[1].gemId])
+    );
+    expect(record.exists).to.equal(true);
+    for (let i = 0; i < gemsIds.length; i++) {
+      expect(record.gemIds[i]).to.equal(i + 1);
+    }
+    const assetAttributesRegistryEvents = await assetAttributesRegistry.queryFilter(
+      assetAttributesRegistry.filters.CatalystApplied()
+    );
+    const event = assetAttributesRegistryEvents.filter(
+      (e) => e.event === 'CatalystApplied'
+    )[0];
+
+    expect(event.args).not.to.equal(null || undefined);
+    if (event.args) {
+      expect(event.args[0]).to.equal(BigNumber.from(collectionId));
+      expect(event.args[2]).to.eql(gemsIds);
+    }
+  });
   it('addGems should fail for non-nft', async function () {
     const {
       assetAttributesRegistry,
