@@ -1,4 +1,4 @@
-import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
+import {ethers} from 'hardhat';
 import {BigNumber} from '@ethersproject/bignumber';
 import {expect} from '../../chai-setup';
 import {setupAssetUpgrader} from './fixtures';
@@ -368,5 +368,119 @@ describe('AssetUpgrader', function () {
     // check asset transfer
     const newOwner = await assetContract.callStatic.ownerOf(assetId);
     expect(newOwner).to.equal(users[4]);
+  });
+  it('setting a rareCatalyst where ownerOf(assetId)!= msg.sender', async function () {
+    const {
+      users,
+      upgradeFee,
+      assetUpgraderContract,
+      assetAttributesRegistry,
+      assetContract,
+      sandContract,
+      feeRecipient,
+      rareCatalyst,
+      powerGem,
+      defenseGem,
+      gemsCatalystsUnit,
+    } = await setupAssetUpgrader();
+
+    await transferSand(
+      sandContract,
+      users[5],
+      BigNumber.from('2').mul(upgradeFee)
+    );
+
+    await transferSand(
+      sandContract,
+      users[10],
+      BigNumber.from('2').mul(upgradeFee)
+    );
+
+    const assetId = await mintAsset(
+      users[5],
+      BigNumber.from('22'),
+      '0x1111111111111111111111111111111111111111111111111111111111111111',
+      1,
+      0,
+      users[5],
+      Buffer.from('ff')
+    );
+
+    const mintingAmount = BigNumber.from('8').mul(
+      BigNumber.from(gemsCatalystsUnit)
+    );
+    await mintCatalyst(rareCatalyst, mintingAmount, users[10]);
+    await mintGem(powerGem, mintingAmount, users[10]);
+    await mintGem(defenseGem, mintingAmount, users[10]);
+
+    const powerGemId = await powerGem.gemId();
+    const defenseGemId = await defenseGem.gemId();
+
+    const catalystId = await rareCatalyst.catalystId();
+    const totalSupplyBeforeRareCatalyst = await rareCatalyst.totalSupply();
+    const balanceBeforeBurning = await rareCatalyst.balanceOf(users[10]);
+
+    const balanceBeforeBurningPowerGem = await powerGem.balanceOf(users[10]);
+    const balanceBeforeBurningDefenseGem = await defenseGem.balanceOf(
+      users[10]
+    );
+    const totalSupplyBeforeBurningPowerGem = await powerGem.totalSupply();
+    const totalSupplyBeforeBurningDefenseGem = await defenseGem.totalSupply();
+
+    const sandBalanceFromBefore = await sandContract.balanceOf(users[10]);
+    const sandBalanceToBefore = await sandContract.balanceOf(feeRecipient);
+    await changeCatalyst(
+      assetUpgraderContract,
+      users[10],
+      assetId,
+      catalystId,
+      [powerGemId, defenseGemId],
+      users[10]
+    );
+    const sandBalanceFromAfter = await sandContract.balanceOf(users[10]);
+    const sandBalanceToAfter = await sandContract.balanceOf(feeRecipient);
+
+    const totalSupplyAfterRareCatalyst = await rareCatalyst.totalSupply();
+    const balanceAfterBurningRareCatalyst = await rareCatalyst.balanceOf(
+      users[10]
+    );
+    const balanceAfterBurningPowerGem = await powerGem.balanceOf(users[10]);
+    const balanceAfterBurningDefenseGem = await defenseGem.balanceOf(users[10]);
+    const totalSupplyAfterBurningPowerGem = await powerGem.totalSupply();
+    const totalSupplyAfterBurningDefenseGem = await defenseGem.totalSupply();
+
+    expect(users[5]).not.to.equal(users[10]);
+    // check catalyst burn
+    expect(balanceAfterBurningRareCatalyst).to.equal(
+      balanceBeforeBurning.sub(GEM_CATALYST_UNIT)
+    );
+    expect(totalSupplyAfterRareCatalyst).to.equal(
+      totalSupplyBeforeRareCatalyst.sub(GEM_CATALYST_UNIT)
+    );
+    // check gem burn
+    expect(balanceAfterBurningPowerGem).to.equal(
+      balanceBeforeBurningPowerGem.sub(GEM_CATALYST_UNIT)
+    );
+    expect(balanceAfterBurningDefenseGem).to.equal(
+      balanceBeforeBurningDefenseGem.sub(GEM_CATALYST_UNIT)
+    );
+    expect(totalSupplyAfterBurningPowerGem).to.equal(
+      totalSupplyBeforeBurningPowerGem.sub(GEM_CATALYST_UNIT)
+    );
+    expect(totalSupplyAfterBurningDefenseGem).to.equal(
+      totalSupplyBeforeBurningDefenseGem.sub(GEM_CATALYST_UNIT)
+    );
+    // check sand fee transfer
+    expect(sandBalanceFromAfter).to.equal(
+      sandBalanceFromBefore.sub(upgradeFee)
+    );
+    expect(sandBalanceToAfter).to.equal(sandBalanceToBefore.add(upgradeFee));
+    // check assetAttributesRegistry
+    const record = await assetAttributesRegistry.getRecord(assetId);
+    expect(record.catalystId).to.equal(catalystId);
+    expect(record.exists).to.equal(true);
+    // check asset transfer
+    const newOwner = await assetContract.callStatic.ownerOf(assetId);
+    expect(newOwner).to.equal(users[5]);
   });
 });

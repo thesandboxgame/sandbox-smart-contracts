@@ -48,7 +48,6 @@ contract AssetAttributesRegistry is WithMinter {
 
     /// @notice get the record data (catalyst id, gems ids list) for an asset id
     /// @param assetId id of the asset
-    /// @return record data (catalyst id, gems ids list), asset id existence status
     function getRecord(uint256 assetId)
         external
         view
@@ -74,10 +73,8 @@ contract AssetAttributesRegistry is WithMinter {
         }
     }
 
-    /// @notice
+    /// @notice getAttributes
     /// @param assetId id of the asset
-    /// @param events
-    /// @return
     function getAttributes(uint256 assetId, GemEvent[] calldata events) external view returns (uint32[] memory values) {
         return _gemsCatalystsRegistry.getAttributes(_records[assetId].catalystId, assetId, events);
     }

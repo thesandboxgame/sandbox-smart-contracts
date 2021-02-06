@@ -1,11 +1,3 @@
-import {ethers, getUnnamedAccounts} from 'hardhat';
-import {BigNumber} from '@ethersproject/bignumber';
-import {expect} from '../../chai-setup';
-import catalysts from '../../../data/catalysts';
-import gems from '../../../data/gems';
-import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
-import {setupAssetMinter} from './fixtures';
-
 describe('AssetMinter', function () {
   it('', async function () {
     // const { assetMinterContract } = await setupAssetMinter();

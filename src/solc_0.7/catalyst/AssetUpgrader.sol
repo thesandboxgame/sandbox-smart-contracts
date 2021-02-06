@@ -124,7 +124,6 @@ contract AssetUpgrader is WithMetaTransaction {
         _burnCatalyst(from, catalystId);
         _burnGems(from, gemIds);
         _chargeSand(from, upgradeFee);
-
         _registry.setCatalyst(assetId, catalystId, gemIds);
         _transfer(from, to, assetId);
     }
@@ -136,12 +135,9 @@ contract AssetUpgrader is WithMetaTransaction {
         address to
     ) internal {
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will return false
-
         _burnGems(from, gemIds);
         _chargeSand(from, gemAdditionFee); // TODO per gems or flat fee ?
-
         _registry.addGems(assetId, gemIds);
-
         _transfer(from, to, assetId);
     }
 
