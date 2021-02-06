@@ -142,7 +142,7 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
       return await Promise.all(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         testDataWithERC20.map(async (claim: any) => {
-          if (claim.erc1155) {
+          if (claim.erc1155 && claim.erc1155.ids) {
             const newClaim = {
               ...claim,
               erc1155: {

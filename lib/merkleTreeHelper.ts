@@ -231,24 +231,30 @@ function calculateClaimableAssetLandAndSandHash(
   types.push('address');
   values.push(claim.to);
   if (claim.erc1155) {
-    types.push('uint256[]');
-    values.push(claim.erc1155.ids);
-    types.push('uint256[]');
-    values.push(claim.erc1155.values);
-    types.push('address');
-    values.push(claim.erc1155.contractAddress);
+    if (claim.erc1155.ids) {
+      types.push('uint256[]');
+      values.push(claim.erc1155.ids);
+      types.push('uint256[]');
+      values.push(claim.erc1155.values);
+      types.push('address');
+      values.push(claim.erc1155.contractAddress);
+    }
   }
   if (claim.erc721) {
-    types.push('uint256[]');
-    values.push(claim.erc721.ids);
-    types.push('address');
-    values.push(claim.erc721.contractAddress);
+    if (claim.erc721.ids) {
+      types.push('uint256[]');
+      values.push(claim.erc721.ids);
+      types.push('address');
+      values.push(claim.erc721.contractAddress);
+    }
   }
   if (claim.erc20) {
-    types.push('uint256[]');
-    values.push(claim.erc20.amounts);
-    types.push('address[]');
-    values.push(claim.erc20.contractAddresses);
+    if (claim.erc20.amounts) {
+      types.push('uint256[]');
+      values.push(claim.erc20.amounts);
+      types.push('address[]');
+      values.push(claim.erc20.contractAddresses);
+    }
   }
   types.push('bytes32');
   values.push(claim.salt || salt);
