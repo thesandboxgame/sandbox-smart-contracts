@@ -2,13 +2,19 @@
   {
     "giveawayNumber": 1,
     "to": "0x0a4313eD0CA3de95a048FF1f8D693c4C1532dca7",
-    "assetIds": ["0", "1", "2"],
-    "assetValues": [5, 5, 5],
-    "landIds": [0, 1, 2, 3, 4, 5],
-    "erc20Amounts": [200],
-    "assetContractAddress": "0x0A9c4aD6F991Ec37E213C724C2e83373E225221C",
-    "landContractAddress": "0x092796887ed12804AA949A3207CECA18998C90c7",
-    "erc20ContractAddresses": ["0xB877Fc8Ee9C965Bb97207e3f9ad7e5761B8288B9"]
+    "erc1155": {
+      "ids": ["0", "1", "2"],
+      "values": [5, 5, 5],
+      "contractAddress": "0x0A9c4aD6F991Ec37E213C724C2e83373E225221C"
+    },
+    "erc721": {
+      "ids": [0, 1, 2, 3, 4, 5],
+      "contractAddress": "0x092796887ed12804AA949A3207CECA18998C90c7"
+    },
+    "erc20": {
+      "amounts": [200],
+      "contractAddresses": ["0xB877Fc8Ee9C965Bb97207e3f9ad7e5761B8288B9"]
+    }
   },
   {
     "giveawayNumber": 1,
@@ -16,18 +22,19 @@
     "assetIds": ["3"],
     "assetValues": [1],
     "landIds": [6],
-    "erc20Amounts": [],
     "assetContractAddress": "0x0A9c4aD6F991Ec37E213C724C2e83373E225221C",
     "landContractAddress": "0x092796887ed12804AA949A3207CECA18998C90c7",
+    "erc20Amounts": [],
     "erc20ContractAddresses": []
   },
   {
     "giveawayNumber": 1,
     "to": "0x0a4313eD0CA3de95a048FF1f8D693c4C1532dca7",
+    "assetIds": [],
+    "assetValues": [],
     "landIds": [7],
-    "erc20Amounts": [],
-    "assetContractAddress": "0x0A9c4aD6F991Ec37E213C724C2e83373E225221C",
     "landContractAddress": "0x092796887ed12804AA949A3207CECA18998C90c7",
+    "erc20Amounts": [],
     "erc20ContractAddresses": []
   },
   {
@@ -35,17 +42,18 @@
     "to": "0x0a4313eD0CA3de95a048FF1f8D693c4C1532dca7",
     "assetIds": ["4", "5", "6"],
     "assetValues": [5, 5, 5],
+    "landIds": [],
     "assetContractAddress": "0x0A9c4aD6F991Ec37E213C724C2e83373E225221C",
-    "landContractAddress": "0x092796887ed12804AA949A3207CECA18998C90c7",
     "erc20Amounts": [],
     "erc20ContractAddresses": []
   },
   {
     "giveawayNumber": 1,
     "to": "0x0a4313eD0CA3de95a048FF1f8D693c4C1532dca7",
-    "assetContractAddress": "0x0A9c4aD6F991Ec37E213C724C2e83373E225221C",
-    "landContractAddress": "0x092796887ed12804AA949A3207CECA18998C90c7",
-    "erc20Amounts": [],
-    "erc20ContractAddresses": []
+    "assetIds": [],
+    "assetValues": [],
+    "landIds": [],
+    "erc20Amounts": [300],
+    "erc20ContractAddresses": ["0xB877Fc8Ee9C965Bb97207e3f9ad7e5761B8288B9"]
   }
 ]

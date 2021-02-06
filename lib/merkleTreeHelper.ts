@@ -26,13 +26,19 @@ export type AssetClaim = {
 export type MultiClaim = {
   giveawayNumber: number;
   to: string;
-  assetIds: Array<string>;
-  assetValues: Array<number>;
-  landIds: Array<number>;
-  assetContractAddress: string;
-  landContractAddress: string;
-  erc20Amounts: Array<number>;
-  erc20ContractAddresses: Array<string>;
+  erc1155: {
+    ids: Array<string>;
+    values: Array<number>;
+    contractAddress: string;
+  };
+  erc721: {
+    ids: Array<number>;
+    contractAddress: string;
+  };
+  erc20: {
+    amounts: Array<number>;
+    contractAddresses: Array<string>;
+  };
   salt?: string;
 };
 
@@ -224,33 +230,25 @@ function calculateClaimableAssetLandAndSandHash(
   values.push(claim.giveawayNumber);
   types.push('address');
   values.push(claim.to);
-  if (claim.assetIds) {
+  if (claim.erc1155) {
     types.push('uint256[]');
-    values.push(claim.assetIds);
-  }
-  if (claim.assetValues) {
+    values.push(claim.erc1155.ids);
     types.push('uint256[]');
-    values.push(claim.assetValues);
-  }
-  if (claim.assetContractAddress) {
+    values.push(claim.erc1155.values);
     types.push('address');
-    values.push(claim.assetContractAddress);
+    values.push(claim.erc1155.contractAddress);
   }
-  if (claim.landIds) {
+  if (claim.erc721) {
     types.push('uint256[]');
-    values.push(claim.landIds);
-  }
-  if (claim.landContractAddress) {
+    values.push(claim.erc721.ids);
     types.push('address');
-    values.push(claim.landContractAddress);
+    values.push(claim.erc721.contractAddress);
   }
-  if (claim.erc20Amounts) {
+  if (claim.erc20) {
     types.push('uint256[]');
-    values.push(claim.erc20Amounts);
-  }
-  if (claim.erc20ContractAddresses) {
+    values.push(claim.erc20.amounts);
     types.push('address[]');
-    values.push(claim.erc20ContractAddresses);
+    values.push(claim.erc20.contractAddresses);
   }
   types.push('bytes32');
   values.push(claim.salt || salt);

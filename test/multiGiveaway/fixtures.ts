@@ -142,15 +142,22 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
       return await Promise.all(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         testDataWithERC20.map(async (claim: any) => {
-          if (claim.assetIds) {
+          if (claim.erc1155) {
             const newClaim = {
               ...claim,
-              assetIds: await Promise.all(
-                claim.assetIds.map(
-                  async (assetPackId: number, index: number) =>
-                    await mintTestAssets(assetPackId, claim.assetValues[index])
-                )
-              ),
+              erc1155: {
+                ids: await Promise.all(
+                  claim.erc1155.ids.map(
+                    async (assetPackId: number, index: number) =>
+                      await mintTestAssets(
+                        assetPackId,
+                        claim.erc1155.values[index]
+                      )
+                  )
+                ),
+                values: claim.erc1155.values,
+                contractAddress: claim.erc1155.contractAddress,
+              },
             };
             return newClaim;
           } else return claim;
