@@ -1,5 +1,5 @@
 import {ethers} from 'hardhat';
-import {setupTestGiveawayWithERC20} from './fixtures';
+import {setupTestGiveaway} from './fixtures';
 import {constants} from 'ethers';
 import {waitFor, expectReceiptEventWithArgs, increaseTime} from '../utils';
 import {expect} from '../chai-setup';
@@ -12,7 +12,7 @@ const zeroAddress = constants.AddressZero;
 describe('Multi_Giveaway', function () {
   it('User cannot claim when test contract holds no tokens', async function () {
     const options = {};
-    const setUp = await setupTestGiveawayWithERC20(options);
+    const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, claims} = setUp;
     const claim = claims[0];
     const proof = tree.getProof(calculateMultiClaimHash(claim));
@@ -29,7 +29,7 @@ describe('Multi_Giveaway', function () {
     const options = {
       mint: true,
     };
-    const setUp = await setupTestGiveawayWithERC20(options);
+    const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, claims} = setUp;
     const claim = claims[0];
     const proof = tree.getProof(calculateMultiClaimHash(claim));
@@ -47,7 +47,7 @@ describe('Multi_Giveaway', function () {
       mint: true,
       sand: true,
     };
-    const setUp = await setupTestGiveawayWithERC20(options);
+    const setUp = await setupTestGiveaway(options);
     const {
       giveawayContract,
       others,
@@ -134,7 +134,7 @@ describe('Multi_Giveaway', function () {
       mint: true,
       sand: true,
     };
-    const setUp = await setupTestGiveawayWithERC20(options);
+    const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, claims} = setUp;
 
     const claim = claims[0];
@@ -176,7 +176,7 @@ describe('Multi_Giveaway', function () {
       mint: true,
       sand: true,
     };
-    const setUp = await setupTestGiveawayWithERC20(options);
+    const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, claims, sandContract} = setUp;
 
     const claim = claims[4];
@@ -200,7 +200,7 @@ describe('Multi_Giveaway', function () {
       mint: true,
       sand: true,
     };
-    const setUp = await setupTestGiveawayWithERC20(options);
+    const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, claims} = setUp;
 
     const badClaim = JSON.parse(JSON.stringify(claims[0])); // deep clone
@@ -221,7 +221,7 @@ describe('Multi_Giveaway', function () {
       mint: true,
       sand: true,
     };
-    const setUp = await setupTestGiveawayWithERC20(options);
+    const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, claims} = setUp;
 
     const claim = claims[0];
@@ -241,7 +241,7 @@ describe('Multi_Giveaway', function () {
       mint: true,
       sand: true,
     };
-    const setUp = await setupTestGiveawayWithERC20(options);
+    const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, claims} = setUp;
 
     const badClaim = JSON.parse(JSON.stringify(claims[0])); // deep clone
@@ -261,7 +261,7 @@ describe('Multi_Giveaway', function () {
       mint: true,
       sand: true,
     };
-    const setUp = await setupTestGiveawayWithERC20(options);
+    const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, claims} = setUp;
 
     const badClaim = JSON.parse(JSON.stringify(claims[0])); // deep clone
@@ -278,7 +278,7 @@ describe('Multi_Giveaway', function () {
 
   it('merkleRoot can be set more than once, because the contract is reusable', async function () {
     const options = {};
-    const setUp = await setupTestGiveawayWithERC20(options);
+    const setUp = await setupTestGiveaway(options);
     const {giveawayContract, nftGiveawayAdmin} = setUp;
 
     const giveawayContractAsAdmin = await giveawayContract.connect(
@@ -297,7 +297,7 @@ describe('Multi_Giveaway', function () {
 
   it('merkleRoot can only be set by admin', async function () {
     const options = {};
-    const setUp = await setupTestGiveawayWithERC20(options);
+    const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others} = setUp;
 
     const giveawayContractAsUser = await giveawayContract.connect(
@@ -314,7 +314,7 @@ describe('Multi_Giveaway', function () {
 
   it('User cannot claim assets after the expiryTime', async function () {
     const options = {};
-    const setUp = await setupTestGiveawayWithERC20(options);
+    const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, claims} = setUp;
 
     const claim = claims[0];

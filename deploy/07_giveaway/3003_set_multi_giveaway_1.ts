@@ -2,7 +2,7 @@ import fs from 'fs';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1_with_erc20/getClaims';
+import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getClaims';
 import helpers, {MultiClaim} from '../../lib/merkleTreeHelper';
 const {calculateMultiClaimHash} = helpers;
 
@@ -16,7 +16,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     claimData = JSON.parse(
       fs
         .readFileSync(
-          `data/giveaways/multi_giveaway_1_with_erc20/claims_${hre.network.name}.json`
+          `data/giveaways/multi_giveaway_1/claims_${hre.network.name}.json`
         )
         .toString()
     );

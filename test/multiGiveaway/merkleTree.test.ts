@@ -3,7 +3,7 @@ import {assert} from '../chai-setup';
 import MerkleTree from '../../lib/merkleTree';
 import helpers from '../../lib/merkleTreeHelper';
 const {createDataArrayMultiClaim} = helpers;
-import {default as testDataWithERC20} from '../../data/giveaways/multi_giveaway_1_with_erc20/claims_hardhat.json';
+import {default as testDataWithERC20} from '../../data/giveaways/multi_giveaway_1/claims_hardhat.json';
 
 describe('MerkleTree_multi', function () {
   it('should validate the data', async function () {

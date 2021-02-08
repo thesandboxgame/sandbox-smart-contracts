@@ -9,7 +9,7 @@ import "../../common/BaseWithStorage/WithAdmin.sol";
 
 /// @title MultiGiveaway contract.
 /// @notice This contract manages claims for multiple token types.
-contract MultiGiveawayWithERC20 is WithAdmin, ClaimERC1155ERC721ERC20 {
+contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;

@@ -7,7 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer} = await getNamedAccounts();
 
   await deploy('Multi_Giveaway_1', {
-    contract: 'MultiGiveawayWithERC20',
+    contract: 'MultiGiveaway',
     from: deployer,
     log: true,
     skipIfAlreadyDeployed: true,
