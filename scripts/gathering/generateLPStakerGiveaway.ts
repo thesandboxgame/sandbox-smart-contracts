@@ -31,6 +31,8 @@ query($blockNumber: Int! $first: Int! $lastId: ID!) {
     blockNumber,
   });
 
+  console.log({numStakers: stakers.length});
+
   // const entries: string[][] = [];
   // for (const staker of stakers) {
   //   entries.push([staker.id]);
