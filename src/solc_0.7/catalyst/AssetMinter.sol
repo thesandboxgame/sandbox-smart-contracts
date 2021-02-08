@@ -76,8 +76,10 @@ contract AssetMinter is WithMetaTransaction {
     /// @param from address creating the Asset, need to be the tx sender or meta tx signer.
     /// @param packId unused packId that will let you predict the resulting tokenId.
     /// @param metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata.
-    /// @param gemsQuantities quantities of gems to be used for each id in order
-    /// @param catalystsQuantities quantities of catalyst to be used for each id in order
+    /// @param gemsQuantities quantities of gems to be used for each id in order, ie: [0, 1, 0, 2, 1, 0]
+    /// would be gemId1=1, gemId2=0, gemId3=2, gemId4=1, gemId5=0
+    /// @param catalystsQuantities quantities of catalyst to be used for each id in order, ie: [0, 1, 0, 3, 0]
+    // owuld be catalystId1=1, catalystId2=0, catalystId3=3, catalystId4=0,
     /// @param assets contains the data to associate catalyst and gems to the assets.
     /// @param to destination address receiving the minted tokens.
     /// @param data extra data.
