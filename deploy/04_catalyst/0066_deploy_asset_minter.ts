@@ -11,7 +11,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const Asset = await deployments.get('Asset');
   const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
 
-  const {deployer} = await getNamedAccounts();
+  const {deployer, assetMinterAdmin} = await getNamedAccounts();
 
   await deploy(`AssetMinter`, {
     from: deployer,
@@ -20,6 +20,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       AssetAttributesRegistry.address,
       Asset.address,
       GemsCatalystsRegistry.address,
+      assetMinterAdmin,
     ],
   });
 };

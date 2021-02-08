@@ -75,7 +75,9 @@ contract GemsCatalystsRegistry is WithSuperOperators {
         uint256[] calldata amounts
     ) public {
         for (uint256 i = 0; i < gemIds.length; i++) {
-            burnGem(from, gemIds[i], amounts[i]);
+            if (gemIds[i] != 0 && amounts[i] != 0) {
+                burnGem(from, gemIds[i], amounts[i]);
+            }
         }
     }
 
@@ -83,13 +85,15 @@ contract GemsCatalystsRegistry is WithSuperOperators {
     /// @param from address of the beneficiary to burn on behalf of
     /// @param catalystIds list of catalysts to burn catalyst units from each
     /// @param amounts list of amounts of units to burn
-    function batchBurnCatalysyts(
+    function batchBurnCatalysts(
         address from,
         uint16[] calldata catalystIds,
         uint256[] calldata amounts
     ) public {
         for (uint256 i = 0; i < catalystIds.length; i++) {
-            burnCatalyst(from, catalystIds[i], amounts[i]);
+            if (catalystIds[i] != 0 && amounts[i] != 0) {
+                burnCatalyst(from, catalystIds[i], amounts[i]);
+            }
         }
     }
 
@@ -126,6 +130,7 @@ contract GemsCatalystsRegistry is WithSuperOperators {
         uint16 catalystId,
         uint256 amount
     ) public {
+        // @review what about metaTxs ?
         require(msg.sender == from || isSuperOperator(msg.sender), "NOT_AUTHORIZED");
         Catalyst catalyst = getCatalyst(catalystId);
         require(catalyst != Catalyst(0), "CATALYST_DOES_NOT_EXIST");
@@ -137,6 +142,7 @@ contract GemsCatalystsRegistry is WithSuperOperators {
         uint16 gemId,
         uint256 amount
     ) public {
+        // @review what about metaTxs ?
         require(msg.sender == from || isSuperOperator(msg.sender), "NOT_AUTHORIZED");
         Gem gem = getGem(gemId);
         require(gem != Gem(0), "GEM_DOES_NOT_EXIST");
