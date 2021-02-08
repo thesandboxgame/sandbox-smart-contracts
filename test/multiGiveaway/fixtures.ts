@@ -9,7 +9,7 @@ import {expect} from '../chai-setup';
 import MerkleTree from '../../lib/merkleTree';
 import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1_with_erc20/getClaims';
 import helpers from '../../lib/merkleTreeHelper';
-const {createDataArrayClaimableAssetsLandsAndSand} = helpers;
+const {createDataArrayMultiClaim} = helpers;
 import {default as testDataWithERC20} from '../../data/giveaways/multi_giveaway_1_with_erc20/claims_hardhat.json';
 
 const ipfsHashString =
@@ -185,9 +185,7 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
       ethers.provider.getSigner(nftGiveawayAdmin)
     );
 
-    const assetAndLandHashArray = createDataArrayClaimableAssetsLandsAndSand(
-      claims
-    );
+    const assetAndLandHashArray = createDataArrayMultiClaim(claims);
     const tree = new MerkleTree(assetAndLandHashArray);
 
     // Add new giveaway data
@@ -219,9 +217,7 @@ export const setupGiveaway = deployments.createFixture(async function () {
 
   // Set up tree with real assets
   const claims = deployment.linkedData;
-  const assetAndLandHashArray = createDataArrayClaimableAssetsLandsAndSand(
-    claims
-  );
+  const assetAndLandHashArray = createDataArrayMultiClaim(claims);
   const tree = new MerkleTree(assetAndLandHashArray);
 
   return {

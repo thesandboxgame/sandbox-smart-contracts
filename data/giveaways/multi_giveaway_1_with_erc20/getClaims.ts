@@ -4,8 +4,8 @@ import MerkleTree from '../../../lib/merkleTree';
 import helpers, {MultiClaim} from '../../../lib/merkleTreeHelper';
 
 const {
-  createDataArrayClaimableAssetsLandsAndSand,
-  saltClaimableAssetsLandsAndSand,
+  createDataArrayMultiClaim,
+  saltMultiClaim,
 } = helpers;
 
 export function createClaimMerkleTree(
@@ -36,9 +36,9 @@ export function createClaimMerkleTree(
     expose = true;
   }
 
-  const saltedClaims = saltClaimableAssetsLandsAndSand(claimData, secret);
+  const saltedClaims = saltMultiClaim(claimData, secret);
   const tree = new MerkleTree(
-    createDataArrayClaimableAssetsLandsAndSand(saltedClaims)
+    createDataArrayMultiClaim(saltedClaims)
   );
   const merkleRootHash = tree.getRoot().hash;
 

@@ -2,14 +2,14 @@ import {assert} from '../chai-setup';
 
 import MerkleTree from '../../lib/merkleTree';
 import helpers from '../../lib/merkleTreeHelper';
-const {createDataArrayClaimableAssetsLandsAndSand} = helpers;
+const {createDataArrayMultiClaim} = helpers;
 import {default as testDataWithERC20} from '../../data/giveaways/multi_giveaway_1_with_erc20/claims_hardhat.json';
 
 describe('MerkleTree_multi', function () {
   it('should validate the data', async function () {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const claims: any = testDataWithERC20;
-    const data = createDataArrayClaimableAssetsLandsAndSand(
+    const data = createDataArrayMultiClaim(
       claims,
       '0x4467363716526536000005451427798982881775318563547751090997863683'
     );

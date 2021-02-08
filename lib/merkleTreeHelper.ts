@@ -220,10 +220,7 @@ function createDataArrayClaimableAssets(
 
 // Multi Giveaway
 
-function calculateClaimableAssetLandAndSandHash(
-  claim: MultiClaim,
-  salt?: string
-): string {
+function calculateMultiClaimHash(claim: MultiClaim, salt?: string): string {
   const types = [];
   const values = [];
   types.push('uint256');
@@ -269,35 +266,10 @@ function calculateClaimableAssetLandAndSandHash(
   }
   types.push('bytes32');
   values.push(claim.salt || salt);
-
-  // if (claim.erc1155) {
-  //   types.push('ERC1155Claim');
-  //   values.push(claim.erc1155);
-  // } else {
-  //   types.push('ERC1155Claim');
-  //   values.push({});
-  // }
-  // if (claim.erc1155) {
-  //   types.push('ERC721Claim');
-  //   values.push(claim.erc721);
-  // } else {
-  //   types.push('ERC721Claim');
-  //   values.push({});
-  // }
-  // if (claim.erc20) {
-  //   types.push('ERC20Claim');
-  //   values.push(claim.erc20);
-  // } else {
-  //   types.push('ERC20Claim');
-  //   values.push({});
-  // }
-  // types.push('bytes32');
-  // values.push(claim.salt || salt);
-
   return solidityKeccak256(types, values);
 }
 
-function saltClaimableAssetsLandsAndSand(
+function saltMultiClaim(
   claims: MultiClaim[],
   secret?: string | Buffer
 ): Array<MultiClaim> {
@@ -314,7 +286,7 @@ function saltClaimableAssetsLandsAndSand(
           crypto
             .createHmac('sha256', secret)
             .update(
-              calculateClaimableAssetLandAndSandHash(
+              calculateMultiClaimHash(
                 claim,
                 '0x0000000000000000000000000000000000000000000000000000000000000000'
               )
@@ -326,7 +298,7 @@ function saltClaimableAssetsLandsAndSand(
   });
 }
 
-function createDataArrayClaimableAssetsLandsAndSand(
+function createDataArrayMultiClaim(
   claims: MultiClaim[],
   secret?: string
 ): string[] {
@@ -344,14 +316,14 @@ function createDataArrayClaimableAssetsLandsAndSand(
         crypto
           .createHmac('sha256', secret)
           .update(
-            calculateClaimableAssetLandAndSandHash(
+            calculateMultiClaimHash(
               claim,
               '0x0000000000000000000000000000000000000000000000000000000000000000'
             )
           )
           .digest('hex');
     }
-    data.push(calculateClaimableAssetLandAndSandHash(claim, salt));
+    data.push(calculateMultiClaimHash(claim, salt));
   });
 
   return data;
@@ -364,9 +336,9 @@ const helpers = {
   calculateClaimableAssetHash,
   saltClaimableAssets,
   createDataArrayClaimableAssets,
-  calculateClaimableAssetLandAndSandHash,
-  saltClaimableAssetsLandsAndSand,
-  createDataArrayClaimableAssetsLandsAndSand,
+  calculateMultiClaimHash,
+  saltMultiClaim,
+  createDataArrayMultiClaim,
 };
 
 export default helpers;

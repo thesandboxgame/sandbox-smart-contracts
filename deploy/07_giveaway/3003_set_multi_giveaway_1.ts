@@ -4,7 +4,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1_with_erc20/getClaims';
 import helpers, {MultiClaim} from '../../lib/merkleTreeHelper';
-const {calculateClaimableAssetLandAndSandHash} = helpers;
+const {calculateMultiClaimHash} = helpers;
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, network, getChainId} = hre;
@@ -50,7 +50,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   for (const claim of saltedClaims) {
     claimsWithProofs.push({
       ...claim,
-      proof: tree.getProof(calculateClaimableAssetLandAndSandHash(claim)),
+      proof: tree.getProof(calculateMultiClaimHash(claim)),
     });
   }
   fs.writeFileSync(
