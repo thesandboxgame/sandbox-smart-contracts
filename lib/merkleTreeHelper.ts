@@ -1,5 +1,5 @@
 import {utils, constants} from 'ethers';
-const {solidityKeccak256, defaultAbiCoder} = utils;
+const {solidityKeccak256} = utils;
 import crypto from 'crypto';
 
 export type SaleLandInfo = {

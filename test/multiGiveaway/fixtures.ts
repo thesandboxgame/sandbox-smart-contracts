@@ -29,7 +29,6 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
     const {mint, sand} = options || {};
     const {
       deployer,
-      assetAdmin,
       assetBouncerAdmin,
       landAdmin,
       sandAdmin,
@@ -61,8 +60,8 @@ export const setupTestGiveawayWithERC20 = deployments.createFixture(
       ethers.provider.getSigner(sandAdmin)
     );
 
-    const emptyBytes32 =
-      '0x0000000000000000000000000000000000000000000000000000000000000000';
+    // const emptyBytes32 =
+    //   '0x0000000000000000000000000000000000000000000000000000000000000000';
 
     const SAND_AMOUNT = BigNumber.from(20000).mul('1000000000000000000');
 

@@ -7,7 +7,7 @@ import helpers, {MultiClaim} from '../../lib/merkleTreeHelper';
 const {calculateClaimableAssetLandAndSandHash} = helpers;
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts, network, getChainId} = hre;
+  const {deployments, network, getChainId} = hre;
   const {execute, read, log} = deployments;
   const chainId = await getChainId();
 
