@@ -1,5 +1,5 @@
-import {utils} from 'ethers';
-const {solidityKeccak256} = utils;
+import {utils, constants} from 'ethers';
+const {solidityKeccak256, defaultAbiCoder} = utils;
 import crypto from 'crypto';
 
 export type SaleLandInfo = {
@@ -230,34 +230,69 @@ function calculateClaimableAssetLandAndSandHash(
   values.push(claim.giveawayNumber);
   types.push('address');
   values.push(claim.to);
-  if (claim.erc1155) {
-    if (claim.erc1155.ids) {
-      types.push('uint256[]');
-      values.push(claim.erc1155.ids);
-      types.push('uint256[]');
-      values.push(claim.erc1155.values);
-      types.push('address');
-      values.push(claim.erc1155.contractAddress);
-    }
+  if (claim.erc1155 && claim.erc1155.ids) {
+    types.push('uint256[]');
+    values.push(claim.erc1155.ids);
+    types.push('uint256[]');
+    values.push(claim.erc1155.values);
+    types.push('address');
+    values.push(claim.erc1155.contractAddress);
+  } else {
+    types.push('uint256[]');
+    values.push([]);
+    types.push('uint256[]');
+    values.push([]);
+    types.push('address');
+    values.push(constants.AddressZero);
   }
-  if (claim.erc721) {
-    if (claim.erc721.ids) {
-      types.push('uint256[]');
-      values.push(claim.erc721.ids);
-      types.push('address');
-      values.push(claim.erc721.contractAddress);
-    }
+  if (claim.erc721 && claim.erc721.ids) {
+    types.push('uint256[]');
+    values.push(claim.erc721.ids);
+    types.push('address');
+    values.push(claim.erc721.contractAddress);
+  } else {
+    types.push('uint256[]');
+    values.push([]);
+    types.push('address');
+    values.push(constants.AddressZero);
   }
-  if (claim.erc20) {
-    if (claim.erc20.amounts) {
-      types.push('uint256[]');
-      values.push(claim.erc20.amounts);
-      types.push('address[]');
-      values.push(claim.erc20.contractAddresses);
-    }
+  if (claim.erc20 && claim.erc20.amounts) {
+    types.push('uint256[]');
+    values.push(claim.erc20.amounts);
+    types.push('address[]');
+    values.push(claim.erc20.contractAddresses);
+  } else {
+    types.push('uint256[]');
+    values.push([]);
+    types.push('address[]');
+    values.push([]);
   }
   types.push('bytes32');
   values.push(claim.salt || salt);
+
+  // if (claim.erc1155) {
+  //   types.push('ERC1155Claim');
+  //   values.push(claim.erc1155);
+  // } else {
+  //   types.push('ERC1155Claim');
+  //   values.push({});
+  // }
+  // if (claim.erc1155) {
+  //   types.push('ERC721Claim');
+  //   values.push(claim.erc721);
+  // } else {
+  //   types.push('ERC721Claim');
+  //   values.push({});
+  // }
+  // if (claim.erc20) {
+  //   types.push('ERC20Claim');
+  //   values.push(claim.erc20);
+  // } else {
+  //   types.push('ERC20Claim');
+  //   values.push({});
+  // }
+  // types.push('bytes32');
+  // values.push(claim.salt || salt);
 
   return solidityKeccak256(types, values);
 }

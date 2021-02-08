@@ -50,9 +50,11 @@ contract ClaimERC1155ERC721ERC20 {
     /// @dev TODO docs.
     function _claimMultipleTokens(Claim memory claim, bytes32[] calldata proof) internal {
         _checkValidity(claim, proof);
-        _transferERC1155(claim.to, claim.erc1155.ids, claim.erc1155.values, claim.erc1155.contractAddress);
-        _transferERC721(claim.to, claim.erc721.ids, claim.erc721.contractAddress);
-        _transferERC20(claim.to, claim.erc20.amounts, claim.erc20.contractAddresses);
+        if (claim.erc1155.ids.length != 0)
+            _transferERC1155(claim.to, claim.erc1155.ids, claim.erc1155.values, claim.erc1155.contractAddress);
+        if (claim.erc721.ids.length != 0) _transferERC721(claim.to, claim.erc721.ids, claim.erc721.contractAddress);
+        if (claim.erc20.amounts.length != 0)
+            _transferERC20(claim.to, claim.erc20.amounts, claim.erc20.contractAddresses);
         emit ClaimedMultipleTokens(
             claim.giveawayNumber,
             claim.to,
@@ -100,6 +102,7 @@ contract ClaimERC1155ERC721ERC20 {
         uint256[] memory values,
         address contractAddress
     ) private {
+        require(contractAddress != address(0), "INVALID_CONTRACT_ZERO_ADDRESS");
         IERC1155(contractAddress).safeBatchTransferFrom(address(this), to, ids, values, "");
     }
 
@@ -108,6 +111,7 @@ contract ClaimERC1155ERC721ERC20 {
         uint256[] memory ids,
         address contractAddress
     ) private {
+        require(contractAddress != address(0), "INVALID_CONTRACT_ZERO_ADDRESS");
         IERC721Extended(contractAddress).safeBatchTransferFrom(address(this), to, ids, "");
     }
 
@@ -119,6 +123,7 @@ contract ClaimERC1155ERC721ERC20 {
         for (uint256 i = 0; i < amounts.length; i++) {
             address erc20ContractAddress = contractAddresses[i];
             uint256 erc20Amount = amounts[i];
+            require(erc20ContractAddress != address(0), "INVALID_CONTRACT_ZERO_ADDRESS");
             require(IERC20(erc20ContractAddress).transferFrom(address(this), to, erc20Amount), "ERC20_TRANSFER_FAILED");
         }
     }
