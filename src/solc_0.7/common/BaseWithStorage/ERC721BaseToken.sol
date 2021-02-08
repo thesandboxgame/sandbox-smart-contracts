@@ -238,6 +238,12 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         return id == 0x01ffc9a7 || id == 0x80ac58cd;
     }
 
+    /// @dev By overriding this function in an implementation which inherits this contract, you can enable versioned tokenIds without the extra overhead of writing to a new storage slot in _owners each time a version is incremented. See GameToken._storageId() for an example, where the storageId is the tokenId minus the version number.
+    /// !!! Caution !!! Overriding this function without taking appropriate care could lead to
+    /// ownerOf() returning an owner for non-existent tokens. Tests should be written to
+    /// guard against introducing this bug.
+    /// @param id The id of a token.
+    /// @return The id used for storage mappings.
     function _storageId(uint256 id) internal view virtual returns (uint256) {
         return id;
     }
