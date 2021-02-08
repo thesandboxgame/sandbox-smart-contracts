@@ -25,17 +25,9 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
     }
 
     /// @notice Function to set the merkle root hash for the claim data.
-    /// @param giveaway The giveaway number to change the merkle root hash for.
-    /// @param merkleRoot The merkle root hash of the claim data.
-    function setMerkleRoot(uint256 giveaway, bytes32 merkleRoot) external onlyAdmin {
-        _merkleRoots[giveaway] = merkleRoot;
-    }
-
-    /// @notice Function to set the merkle root hash for the claim data.
     /// @param merkleRoot The merkle root hash of the claim data.
     /// @param expiryTime The expiry time for the giveaway.
     function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime) external onlyAdmin {
-        _merkleRoots[_counter] = merkleRoot;
         _expiryTime[merkleRoot] = expiryTime;
         _counter++;
     }
@@ -44,17 +36,17 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
     /// @param claim The claim.
     /// @param proof The proof submitted for verification.
     function claimMultipleTokens(
+        bytes32 merkleRoot,
         Claim memory claim, // Note: if calldata, get UnimplementedFeatureError; possibly fixed in solc 0.7.6
         bytes32[] calldata proof
     ) external {
-        require(claim.giveawayNumber <= _counter, "GIVEAWAY_DOES_NOT_EXIST");
         require(claim.to != address(0), "INVALID_TO_ZERO_ADDRESS");
         require(claim.to != address(this), "DESTINATION_MULTIGIVEAWAY_CONTRACT");
-        bytes32 merkleRoot = _merkleRoots[claim.giveawayNumber];
+        require(_expiryTime[merkleRoot] != 0, "GIVEAWAY_DOES_NOT_EXIST");
         require(block.timestamp < _expiryTime[merkleRoot], "CLAIM_PERIOD_IS_OVER");
         require(claimed[claim.to][merkleRoot] == false, "DESTINATION_ALREADY_CLAIMED");
         claimed[claim.to][merkleRoot] = true;
-        _claimMultipleTokens(claim, proof);
+        _claimMultipleTokens(merkleRoot, claim, proof);
     }
 
     function onERC721Received(

@@ -11,7 +11,7 @@ contract ClaimERC1155ERC721ERC20 {
     mapping(uint256 => bytes32) internal _merkleRoots;
 
     struct Claim {
-        uint256 giveawayNumber;
+        uint256 merkleRoot;
         address to;
         ERC1155Claim erc1155;
         ERC721Claim erc721;
@@ -36,7 +36,6 @@ contract ClaimERC1155ERC721ERC20 {
     }
 
     event ClaimedMultipleTokens(
-        uint256 giveawayNumber,
         address to,
         uint256[] erc1155Ids,
         uint256[] erc1155Values,
@@ -48,15 +47,18 @@ contract ClaimERC1155ERC721ERC20 {
     );
 
     /// @dev TODO docs.
-    function _claimMultipleTokens(Claim memory claim, bytes32[] calldata proof) internal {
-        _checkValidity(claim, proof);
+    function _claimMultipleTokens(
+        bytes32 merkleRoot,
+        Claim memory claim,
+        bytes32[] calldata proof
+    ) internal {
+        _checkValidity(merkleRoot, claim, proof);
         if (claim.erc1155.ids.length != 0)
             _transferERC1155(claim.to, claim.erc1155.ids, claim.erc1155.values, claim.erc1155.contractAddress);
         if (claim.erc721.ids.length != 0) _transferERC721(claim.to, claim.erc721.ids, claim.erc721.contractAddress);
         if (claim.erc20.amounts.length != 0)
             _transferERC20(claim.to, claim.erc20.amounts, claim.erc20.contractAddresses);
         emit ClaimedMultipleTokens(
-            claim.giveawayNumber,
             claim.to,
             claim.erc1155.ids,
             claim.erc1155.values,
@@ -68,21 +70,21 @@ contract ClaimERC1155ERC721ERC20 {
         );
     }
 
-    function _checkValidity(Claim memory claim, bytes32[] memory proof) private view {
+    function _checkValidity(
+        bytes32 merkleRoot,
+        Claim memory claim,
+        bytes32[] memory proof
+    ) private pure {
         require(claim.erc1155.ids.length == claim.erc1155.values.length, "INVALID_INPUT");
         require(claim.erc20.amounts.length == claim.erc20.contractAddresses.length, "INVALID_INPUT");
         bytes32 leaf = _generateClaimHash(claim);
-        require(
-            Verify.doesComputedHashMatchMerkleRootHash(_merkleRoots[claim.giveawayNumber], proof, leaf),
-            "INVALID_CLAIM"
-        );
+        require(Verify.doesComputedHashMatchMerkleRootHash(merkleRoot, proof, leaf), "INVALID_CLAIM");
     }
 
     function _generateClaimHash(Claim memory claim) private pure returns (bytes32) {
         return
             keccak256(
                 abi.encodePacked(
-                    claim.giveawayNumber,
                     claim.to,
                     claim.erc1155.ids,
                     claim.erc1155.values,
