@@ -33,22 +33,26 @@ contract AssetMinter is WithMetaTransaction {
     constructor(
         AssetAttributesRegistry registry,
         IAssetToken asset,
-        GemsCatalystsRegistry gemsCatalystsRegistry
+        GemsCatalystsRegistry gemsCatalystsRegistry,
+        address admin
     ) {
         _registry = registry;
         _asset = asset;
         _gemsCatalystsRegistry = gemsCatalystsRegistry;
+        _admin = admin;
     }
 
     /// @notice mint one Asset token.
     /// @param from address creating the Asset, need to be the tx sender or meta tx signer.
     /// @param packId unused packId that will let you predict the resulting tokenId.
     /// @param metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata.
-    /// @param catalystId address of the Catalyst ERC20 token to burn.
+    /// @param catalystId Id of the Catalyst ERC20 token to burn (1, 2, 3 or 4).
     /// @param gemIds list of gem ids to burn in the catalyst.
     /// @param quantity asset supply to mint
+    /// @param rarity rarity power of the token to mint.
     /// @param to destination address receiving the minted tokens.
     /// @param data extra data.
+    /// @return assetId The new token Id.
     function mint(
         address from,
         uint40 packId,
@@ -56,12 +60,12 @@ contract AssetMinter is WithMetaTransaction {
         uint16 catalystId,
         uint16[] calldata gemIds,
         uint32 quantity,
+        uint8 rarity,
         address to,
         bytes calldata data
     ) external returns (uint256 assetId) {
         _checkAuthorization(from, to);
-
-        assetId = _asset.mint(from, packId, metadataHash, quantity, 0, to, data);
+        assetId = _asset.mint(from, packId, metadataHash, quantity, rarity, to, data);
         if (catalystId != 0) {
             _setSingleCatalyst(from, assetId, quantity, catalystId, gemIds);
         }
@@ -116,6 +120,7 @@ contract AssetMinter is WithMetaTransaction {
                 uint16 maxGems = _gemsCatalystsRegistry.getMaxGems(assets[i].catalystId);
                 require(assets[i].gemIds.length <= maxGems, "INVALID_GEMS_TOO_MANY");
                 catalystsQuantities[assets[i].catalystId]--;
+                // @review handle underflow w/safeMath !
                 gemsQuantities = _checkGemsQuantities(gemsQuantities, assets[i].gemIds);
             }
             supplies[i] = assets[i].quantity;
@@ -139,7 +144,7 @@ contract AssetMinter is WithMetaTransaction {
         for (uint16 i = 0; i < ids.length; i++) {
             ids[i] = i;
         }
-        _gemsCatalystsRegistry.batchBurnCatalysyts(from, ids, catalystsQuantities);
+        _gemsCatalystsRegistry.batchBurnCatalysts(from, ids, catalystsQuantities);
     }
 
     function _batchBurnGems(address from, uint256[] memory gemsQuantities) internal {
@@ -183,7 +188,7 @@ contract AssetMinter is WithMetaTransaction {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         if (from != msg.sender) {
             uint256 processorType = _metaTransactionContracts[msg.sender];
-            require(processorType != 0, "INVALID SENDER");
+            require(processorType != 0, "INVALID_SENDER");
             if (processorType == METATX_2771) {
                 require(from == _forceMsgSender(), "INVALID_SENDER");
             }

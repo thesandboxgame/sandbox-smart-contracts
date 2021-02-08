@@ -21,4 +21,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['AssetAttributesRegistry', 'AssetAttributesRegistry_setup'];
-func.dependencies = ['AssetAttributesRegistry_deploy'];
+func.dependencies = ['AssetAttributesRegistry_deploy', 'AssetMinter_deploy'];
