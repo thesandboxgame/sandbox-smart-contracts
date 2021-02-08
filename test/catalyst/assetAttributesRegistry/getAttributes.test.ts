@@ -6,12 +6,8 @@ import catalysts from '../../../data/catalysts';
 import gems from '../../../data/gems';
 import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
 import {setupAssetAttributesRegistry} from '../assetAttributesRegistry/fixtures';
-import {
-  setupAssetMinter,
-  MintOptions,
-  MintMultiOptions,
-} from '../assetMinter/fixtures';
-import {findEvents, waitFor} from '../../utils';
+import {setupAssetMinter, MintOptions} from '../assetMinter/fixtures';
+import {findEvents} from '../../utils';
 import {prepareGemEventData, getReceiptObject} from '../utils';
 import {setupAssetUpgrader} from '../assetUpgrader/fixtures';
 
@@ -29,75 +25,16 @@ const mintOptions: MintOptions = {
   data: Buffer.from(''),
 };
 
-const mintMultiOptions: MintMultiOptions = {
-  from: ethers.constants.AddressZero,
-  packId: BigNumber.from('1'),
-  metadataHash: ethers.utils.keccak256('0x42'),
-  gemsQuantities: [0, 2, 0, 0, 0, 0],
-  catalystsQuantities: [0, 2, 0, 0, 0],
-  assets: [
-    {
-      gemIds: [1],
-      quantity: 1,
-      catalystId: 1,
-    },
-    {
-      gemIds: [1],
-      quantity: 1,
-      catalystId: 1,
-    },
-  ],
-  to: ethers.constants.AddressZero,
-  data: Buffer.from(''),
-};
-
 function minValue(gems: number): number {
   return (gems - 1) * 5 + 1;
 }
 
-// async function getMintReceipt(
-//   catId: number,
-//   gemIds: number[],
-//   minter: Contract,
-//   creator: Address,
-//   owner: Address,
-//   mintOptions: MintOptions
-// ): Promise<Receipt> {
-//   const mintReceipt = await minter.mint(
-//     creator,
-//     mintOptions.packId,
-//     mintOptions.metaDataHash,
-//     catId,
-//     gemIds,
-//     NFT_SUPPLY,
-//     mintOptions.rarity,
-//     owner,
-//     mintOptions.data
-//   );
-//   return mintReceipt;
-// }
-
-// on minting an asset, the CatalystApplied event is emitted. When gems are added(upgrade) the GemsAdded event is emitted. In order to getAttributes, we need to collect all CatalystApplied && GemsAdded events, from the blocknumber when the catalyst was applied onwards...
-// so:
-// 1.) mint the asset w/catalyst and get the assetId & blockNumber
-// 2.) find all GemsAdded events after this filtered by assetId
-// 3.) from each found event (including the original CatalystApplied event) construct a GemEvent{} and add to an array  gemEvents[]
-// 4.) call getAttributes with assetId and gemEvents
 describe('AssetAttributesRegistry: getAttributes', function () {
   let assetMinterContract: Contract;
   let assetMinterAsCatalystOwner: Contract;
   let assetUpgraderContract: Contract;
   let assetAttributesRegistry: Contract;
   let catalystOwner: Address;
-  let commonCatalyst: Contract;
-  let rareCatalyst: Contract;
-  let epicCatalyst: Contract;
-  let legendaryCatalyst: Contract;
-  let powerGem: Contract;
-  let defenseGem: Contract;
-  let speedGem: Contract;
-  let magicGem: Contract;
-  let luckGem: Contract;
 
   async function getMintReceipt(
     catId: number,
@@ -725,27 +662,11 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         [1, 1],
         catalystOwner
       );
-      const upgradeCatalystReceipt2 = await assetUpgraderContract.changeCatalyst(
-        catalystOwner,
-        assetId,
-        4,
-        [5, 5, 5, 5],
-        catalystOwner
-      );
-      const upgradeCatalystReceipt3 = await assetUpgraderContract.changeCatalyst(
-        catalystOwner,
-        assetId,
-        3,
-        [4, 2, 5],
-        catalystOwner
-      );
 
       const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
-        // await getReceiptObject(mintReceipt, 1),
-        // await getReceiptObject(gemReceipt, 3),
-        // await getReceiptObject(upgradeCatalystReceipt1, 2),
-        // await getReceiptObject(upgradeCatalystReceipt2, 2),
-        await getReceiptObject(upgradeCatalystReceipt3, 2),
+        await getReceiptObject(mintReceipt, 1),
+        await getReceiptObject(gemReceipt, 3),
+        await getReceiptObject(upgradeCatalystReceipt1, 2),
       ]);
 
       const attributes = await assetAttributesRegistry.getAttributes(
