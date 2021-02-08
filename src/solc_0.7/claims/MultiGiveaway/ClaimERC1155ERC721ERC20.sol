@@ -10,8 +10,8 @@ import "../../common/Libraries/Verify.sol";
 contract ClaimERC1155ERC721ERC20 {
     struct Claim {
         address to;
-        ERC1155Claim erc1155;
-        ERC721Claim erc721;
+        ERC1155Claim[] erc1155;
+        ERC721Claim[] erc721;
         ERC20Claim erc20;
         bytes32 salt;
     }
@@ -32,16 +32,7 @@ contract ClaimERC1155ERC721ERC20 {
         address[] contractAddresses;
     }
 
-    event ClaimedMultipleTokens(
-        address to,
-        uint256[] erc1155Ids,
-        uint256[] erc1155Values,
-        address erc1155ContractAddress,
-        uint256[] erc721Ids,
-        address erc721ContractAddress,
-        uint256[] erc20Amounts,
-        address[] erc20ContractAddresses
-    );
+    event ClaimedMultipleTokens(address to, ERC1155Claim[] erc1155, ERC721Claim[] erc721, ERC20Claim erc20);
 
     /// @dev TODO docs.
     function _claimMultipleTokens(
@@ -50,21 +41,18 @@ contract ClaimERC1155ERC721ERC20 {
         bytes32[] calldata proof
     ) internal {
         _checkValidity(merkleRoot, claim, proof);
-        if (claim.erc1155.ids.length != 0)
-            _transferERC1155(claim.to, claim.erc1155.ids, claim.erc1155.values, claim.erc1155.contractAddress);
-        if (claim.erc721.ids.length != 0) _transferERC721(claim.to, claim.erc721.ids, claim.erc721.contractAddress);
-        if (claim.erc20.amounts.length != 0)
+        for (uint256 i = 0; i < claim.erc1155.length; i++) {
+            require(claim.erc1155[i].ids.length == claim.erc1155[i].values.length, "INVALID_INPUT");
+            _transferERC1155(claim.to, claim.erc1155[i].ids, claim.erc1155[i].values, claim.erc1155[i].contractAddress);
+        }
+        for (uint256 i = 0; i < claim.erc721.length; i++) {
+            _transferERC721(claim.to, claim.erc721[i].ids, claim.erc721[i].contractAddress);
+        }
+        if (claim.erc20.amounts.length != 0) {
+            require(claim.erc20.amounts.length == claim.erc20.contractAddresses.length, "INVALID_INPUT");
             _transferERC20(claim.to, claim.erc20.amounts, claim.erc20.contractAddresses);
-        emit ClaimedMultipleTokens(
-            claim.to,
-            claim.erc1155.ids,
-            claim.erc1155.values,
-            claim.erc1155.contractAddress,
-            claim.erc721.ids,
-            claim.erc721.contractAddress,
-            claim.erc20.amounts,
-            claim.erc20.contractAddresses
-        );
+        }
+        emit ClaimedMultipleTokens(claim.to, claim.erc1155, claim.erc721, claim.erc20);
     }
 
     function _checkValidity(
@@ -72,27 +60,12 @@ contract ClaimERC1155ERC721ERC20 {
         Claim memory claim,
         bytes32[] memory proof
     ) private pure {
-        require(claim.erc1155.ids.length == claim.erc1155.values.length, "INVALID_INPUT");
-        require(claim.erc20.amounts.length == claim.erc20.contractAddresses.length, "INVALID_INPUT");
         bytes32 leaf = _generateClaimHash(claim);
         require(Verify.doesComputedHashMatchMerkleRootHash(merkleRoot, proof, leaf), "INVALID_CLAIM");
     }
 
     function _generateClaimHash(Claim memory claim) private pure returns (bytes32) {
-        return
-            keccak256(
-                abi.encodePacked(
-                    claim.to,
-                    claim.erc1155.ids,
-                    claim.erc1155.values,
-                    claim.erc1155.contractAddress,
-                    claim.erc721.ids,
-                    claim.erc721.contractAddress,
-                    claim.erc20.amounts,
-                    claim.erc20.contractAddresses,
-                    claim.salt
-                )
-            );
+        return keccak256(abi.encode(claim));
     }
 
     function _transferERC1155(
