@@ -24,7 +24,6 @@ export type AssetClaim = {
 };
 
 export type MultiClaim = {
-  giveawayNumber: number;
   to: string;
   erc1155: {
     ids: Array<string>;
@@ -223,8 +222,6 @@ function createDataArrayClaimableAssets(
 function calculateMultiClaimHash(claim: MultiClaim, salt?: string): string {
   const types = [];
   const values = [];
-  types.push('uint256');
-  values.push(claim.giveawayNumber);
   types.push('address');
   values.push(claim.to);
   if (claim.erc1155 && claim.erc1155.ids) {

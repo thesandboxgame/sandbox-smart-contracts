@@ -15,8 +15,6 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
     bytes4 internal constant ERC721_BATCH_RECEIVED = 0x4b808c46;
 
-    uint256 internal _counter = 1; // First giveaway is Multi_Giveaway_1
-
     mapping(address => mapping(bytes32 => bool)) public claimed; // TODO: change to index mapping - see uniswap
     mapping(bytes32 => uint256) internal _expiryTime;
 
@@ -29,7 +27,6 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
     /// @param expiryTime The expiry time for the giveaway.
     function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime) external onlyAdmin {
         _expiryTime[merkleRoot] = expiryTime;
-        _counter++;
     }
 
     /// @notice Function to permit the claiming of multiple tokens to a reserved address.

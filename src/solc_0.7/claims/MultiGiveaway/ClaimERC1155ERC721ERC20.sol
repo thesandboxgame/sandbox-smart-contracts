@@ -8,10 +8,7 @@ import "../../common/Interfaces/IERC721Extended.sol";
 import "../../common/Libraries/Verify.sol";
 
 contract ClaimERC1155ERC721ERC20 {
-    mapping(uint256 => bytes32) internal _merkleRoots;
-
     struct Claim {
-        uint256 merkleRoot;
         address to;
         ERC1155Claim erc1155;
         ERC721Claim erc721;
