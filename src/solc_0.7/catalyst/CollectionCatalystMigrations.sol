@@ -69,6 +69,7 @@ contract CollectionCatalystMigrations is WithAdmin {
             // If it has, the collection itself need to be migrated
             try _asset.collectionOf(assetId) returns (uint256 collId) {
                 require(collId == 0, "NOT_ORIGINAL_NFT");
+                // solhint-disable-next-line no-empty-blocks
             } catch {}
         }
         _registry.setCatalystWithBlockNumber(assetId, uint16(catalystId), gemIds, blockNumber);
