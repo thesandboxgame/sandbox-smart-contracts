@@ -120,7 +120,7 @@ contract AssetMinter is WithMetaTransaction {
                 uint16 maxGems = _gemsCatalystsRegistry.getMaxGems(assets[i].catalystId);
                 require(assets[i].gemIds.length <= maxGems, "INVALID_GEMS_TOO_MANY");
                 catalystsQuantities[assets[i].catalystId]--;
-                // @review why assign a new decremented value to gemsQuantities here if it's not used again?
+                // @review handle underflow w/safeMath !
                 gemsQuantities = _checkGemsQuantities(gemsQuantities, assets[i].gemIds);
             }
             supplies[i] = assets[i].quantity;
@@ -142,7 +142,6 @@ contract AssetMinter is WithMetaTransaction {
     function _batchBurnCatalysts(address from, uint256[] memory catalystsQuantities) internal {
         uint16[] memory ids = new uint16[](catalystsQuantities.length);
         for (uint16 i = 0; i < ids.length; i++) {
-            // @review why is this needed if catalystsQuantities' indexes are equal to id ?
             ids[i] = i;
         }
         _gemsCatalystsRegistry.batchBurnCatalysts(from, ids, catalystsQuantities);
