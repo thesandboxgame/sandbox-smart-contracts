@@ -106,13 +106,13 @@ describe('AssetAttributesRegistry', function () {
       assetAttributesRegistryAdmin,
       assetUpgrader,
     } = await setupAssetAttributesRegistry();
-    const assetId = 1;
+    const assetId = BigNumber.from('0x1ff80000800000000000000000000000');
     const users = await getUnnamedAccounts();
     const legendaryCatalystId = catalysts[3].catalystId;
-    const gemsIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16];
+    const gemsIds = [1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3];
     await expect(
       assetUpgrader
-        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
+        .connect(ethers.provider.getSigner(users[0]))
         .changeCatalyst(
           users[0],
           assetId,
@@ -127,15 +127,22 @@ describe('AssetAttributesRegistry', function () {
     const {
       assetAttributesRegistry,
       assetAttributesRegistryAdmin,
+      assetUpgrader,
     } = await setupAssetAttributesRegistry();
-    const assetId = 1;
+    const assetId = BigNumber.from('0x1ff80000800000000000000000000000');
     const users = await getUnnamedAccounts();
     const legendaryCatalystId = catalysts[3].catalystId;
-    const gemsIds = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
+    const gemsIds = [1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1];
     await expect(
-      assetAttributesRegistry
-        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-        .setCatalyst(users[0], assetId, legendaryCatalystId, gemsIds, users[0])
+      assetUpgrader
+        .connect(ethers.provider.getSigner(users[0]))
+        .changeCatalyst(
+          users[0],
+          assetId,
+          legendaryCatalystId,
+          gemsIds,
+          users[0]
+        )
     ).to.be.revertedWith('GEMS_TOO_MANY');
   });
 
