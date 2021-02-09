@@ -6,39 +6,11 @@ import catalysts from '../../../data/catalysts';
 import gems from '../../../data/gems';
 import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
 import {setupAssetAttributesRegistry} from '../assetAttributesRegistry/fixtures';
-import {setupAssetMinter} from './fixtures';
+import {setupAssetMinter, MintOptions, MintMultiOptions} from './fixtures';
 import {mintCatalyst, mintGem} from '../utils';
 import {expectEventWithArgs, findEvents} from '../../utils';
 
-type MintOptions = {
-  from: Address;
-  packId: BigNumber;
-  metaDataHash: string;
-  catalystId: number;
-  gemIds: number[];
-  quantity: number;
-  rarity: number;
-  to: Address;
-  data: Buffer;
-};
 let mintOptions: MintOptions;
-
-type AssetData = {
-  gemIds: number[];
-  quantity: number;
-  catalystId: number;
-};
-
-type MintMultiOptions = {
-  from: Address;
-  packId: BigNumber;
-  metadataHash: string;
-  gemsQuantities: number[];
-  catalystsQuantities: number[];
-  assets: AssetData[];
-  to: Address;
-  data: Buffer;
-};
 let mintMultiOptions: MintMultiOptions;
 
 const packId = BigNumber.from('1');
