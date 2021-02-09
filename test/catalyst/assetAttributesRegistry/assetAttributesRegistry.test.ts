@@ -5,7 +5,7 @@ import {setCatalyst, setupAssetAttributesRegistry} from './fixtures';
 import catalysts from '../../../data/catalysts';
 import gems from '../../../data/gems';
 import {Block} from '@ethersproject/providers';
-import {waitFor} from '../../utils';
+import {expectEventWithArgs, waitFor} from '../../utils';
 describe('AssetAttributesRegistry', function () {
   function testSetCatalyst(
     record: {catalystId: number; exists: boolean; gemIds: []},
@@ -60,20 +60,50 @@ describe('AssetAttributesRegistry', function () {
     );
   });
 
-  it.skip('setCatalyst for epic catalyst using collectionId with 3 gems', async function () {
-    const assetId = BigNumber.from('0x1ff80000800000000000000000000000');
+  // @review maybe we need to use assetUpgrader.extractAndSetCatalyst here ?
+  it('setCatalyst for epic catalyst using collectionId with 3 gems', async function () {
+    const {
+      assetAttributesRegistry,
+      assetUpgrader,
+    } = await setupAssetAttributesRegistry();
+    // const assetId = BigNumber.from('0x1ff80000800000000000000000000000');
     const collectionId = BigNumber.from('0x1ff80000000000000000000000000000');
     const epicCatalystId = catalysts[2].catalystId;
     const users = await getUnnamedAccounts();
     const gemsIds = gems.filter((gem) => gem.gemId < 4).map((gem) => gem.gemId);
-    const {record, event, block} = await setCatalyst(
-      users[0],
-      assetId,
-      epicCatalystId,
-      gemsIds,
-      users[0],
-      collectionId
+    // const {record, event, block} = await setCatalyst(
+    //   users[0],
+    //   assetId,
+    //   epicCatalystId,
+    //   gemsIds,
+    //   users[0],
+    //   collectionId
+    // );
+    const receipt = await assetUpgrader
+      .connect(ethers.provider.getSigner(users[0]))
+      .extractAndSetCatalyst(
+        users[0],
+        collectionId,
+        epicCatalystId,
+        gemsIds,
+        users[0]
+      );
+    const extractionEvent = await expectEventWithArgs(
+      assetUpgrader,
+      receipt,
+      'Extraction'
     );
+    const assetId = extractionEvent.args[1];
+
+    const record = await assetAttributesRegistry.getRecord(assetId);
+    const assetAttributesRegistryEvents = await assetAttributesRegistry.queryFilter(
+      assetAttributesRegistry.filters.CatalystApplied()
+    );
+    const event = assetAttributesRegistryEvents.filter(
+      (e) => e.event === 'CatalystApplied'
+    )[0];
+    const block = await ethers.provider.getBlock('latest');
+
     testSetCatalyst(
       record,
       event,
@@ -306,6 +336,7 @@ describe('AssetAttributesRegistry', function () {
     const {
       assetAttributesRegistry,
       assetAttributesRegistryAdmin,
+      assetUpgrader,
     } = await setupAssetAttributesRegistry();
     const assetId = BigNumber.from(
       '0x0000000000000000000000000000000000000000800000000000000000000000'
@@ -323,9 +354,9 @@ describe('AssetAttributesRegistry', function () {
     );
 
     await waitFor(
-      assetAttributesRegistry
-        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-        .addGems(assetId, [gems[1].gemId])
+      assetUpgrader
+        .connect(ethers.provider.getSigner(users[0]))
+        .addGems(users[0], assetId, [gems[1].gemId], users[0])
     );
     expect(record.exists).to.equal(true);
     for (let i = 0; i < gemsIds.length; i++) {
@@ -345,10 +376,12 @@ describe('AssetAttributesRegistry', function () {
     }
   });
 
+  // @review maybe we need to use assetUpgrader.extractAndSetCatalyst here ?
   it('addGems to epic catalyst with collectionId', async function () {
     const {
       assetAttributesRegistry,
       assetAttributesRegistryAdmin,
+      assetUpgrader,
     } = await setupAssetAttributesRegistry();
     const assetId = BigNumber.from('0x1ff80000800000000000000000000000');
     const collectionId = BigNumber.from('0x1ff80000000000000000000000000000');
@@ -366,9 +399,9 @@ describe('AssetAttributesRegistry', function () {
     );
 
     await waitFor(
-      assetAttributesRegistry
-        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-        .addGems(assetId, [gems[1].gemId])
+      assetUpgrader
+        .connect(ethers.provider.getSigner(users[0]))
+        .addGems(users[0], assetId, [gems[1].gemId], users[0])
     );
     expect(record.exists).to.equal(true);
     for (let i = 0; i < gemsIds.length; i++) {
