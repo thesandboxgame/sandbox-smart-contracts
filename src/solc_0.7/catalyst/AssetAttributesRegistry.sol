@@ -4,10 +4,11 @@ pragma experimental ABIEncoderV2;
 
 import "../common/BaseWithStorage/WithAdmin.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
+import "../common/BaseWithStorage/WithUpgrader.sol";
 import "./GemsCatalystsRegistry.sol";
 
 /// @notice Allows setting the gems and catalysts of an asset
-contract AssetAttributesRegistry is WithMinter {
+contract AssetAttributesRegistry is WithMinter, WithUpgrader {
     uint256 internal constant MAX_NUM_GEMS = 15;
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
     uint256 private constant NOT_IS_NFT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFFFFFFFF;
@@ -39,11 +40,13 @@ contract AssetAttributesRegistry is WithMinter {
     constructor(
         GemsCatalystsRegistry gemsCatalystsRegistry,
         address admin,
-        address minter
+        address minter,
+        address upgrader
     ) {
         _gemsCatalystsRegistry = gemsCatalystsRegistry;
         _admin = admin;
         _minter = minter;
+        _upgrader = upgrader;
     }
 
     /// @notice get the record data (catalyst id, gems ids list) for an asset id
@@ -110,7 +113,7 @@ contract AssetAttributesRegistry is WithMinter {
     /// @param assetId id of the asset
     /// @param gemIds list of gems ids to set
     function addGems(uint256 assetId, uint16[] calldata gemIds) external {
-        require(msg.sender == _minter, "NOT_AUTHORIZED_MINTER");
+        require(msg.sender == _minter || msg.sender == _upgrader, "NOT_AUTHORIZED_MINTER");
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT");
         require(gemIds.length != 0, "INVALID_GEMS_0");
 
@@ -167,7 +170,7 @@ contract AssetAttributesRegistry is WithMinter {
         uint16[] memory gemIds,
         uint64 blockNumber
     ) internal {
-        require(msg.sender == _minter, "NOT_AUTHORIZED_MINTER");
+        require(msg.sender == _minter || msg.sender == _upgrader, "NOT_AUTHORIZED_MINTER");
         require(gemIds.length <= MAX_NUM_GEMS, "GEMS_MAX_REACHED");
         uint8 maxGems = _gemsCatalystsRegistry.getMaxGems(catalystId);
         require(gemIds.length <= maxGems, "GEMS_TOO_MANY");
