@@ -14,7 +14,6 @@ describe('Multi_Giveaway', function () {
     const options = {};
     const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, claims, merkleRootHash} = setUp;
-    console.log('hash', merkleRootHash);
     const claim = claims[0];
     const proof = tree.getProof(calculateMultiClaimHash(claim));
     const giveawayContractAsUser = await giveawayContract.connect(

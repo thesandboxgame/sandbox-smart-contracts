@@ -1,5 +1,5 @@
 import {utils, constants} from 'ethers';
-const {solidityKeccak256} = utils;
+const {solidityKeccak256, defaultAbiCoder, keccak256} = utils;
 import crypto from 'crypto';
 
 export type SaleLandInfo = {
@@ -25,20 +25,24 @@ export type AssetClaim = {
 
 export type MultiClaim = {
   to: string;
-  erc1155: {
-    ids: Array<string>;
-    values: Array<number>;
-    contractAddress: string;
-  };
-  erc721: {
-    ids: Array<number>;
-    contractAddress: string;
-  };
+  erc1155: Array<ERC1155Claim>;
+  erc721: Array<ERC721Claim>;
   erc20: {
     amounts: Array<number>;
     contractAddresses: Array<string>;
   };
   salt?: string;
+};
+
+export type ERC1155Claim = {
+  ids: Array<string>;
+  values: Array<number>;
+  contractAddress: string;
+};
+
+export type ERC721Claim = {
+  ids: Array<number>;
+  contractAddress: string;
 };
 
 function calculateLandHash(
@@ -224,46 +228,23 @@ function calculateMultiClaimHash(claim: MultiClaim, salt?: string): string {
   const values = [];
   types.push('address');
   values.push(claim.to);
-  if (claim.erc1155 && claim.erc1155.ids) {
-    types.push('uint256[]');
-    values.push(claim.erc1155.ids);
-    types.push('uint256[]');
-    values.push(claim.erc1155.values);
-    types.push('address');
-    values.push(claim.erc1155.contractAddress);
-  } else {
-    types.push('uint256[]');
-    values.push([]);
-    types.push('uint256[]');
-    values.push([]);
-    types.push('address');
-    values.push(constants.AddressZero);
+  if (claim.erc1155) {
+    types.push('tuple[]');
+    values.push(claim.erc1155);
   }
-  if (claim.erc721 && claim.erc721.ids) {
-    types.push('uint256[]');
-    values.push(claim.erc721.ids);
-    types.push('address');
-    values.push(claim.erc721.contractAddress);
-  } else {
-    types.push('uint256[]');
-    values.push([]);
-    types.push('address');
-    values.push(constants.AddressZero);
+  if (claim.erc721) {
+    types.push('tuple[]');
+    values.push(claim.erc721);
   }
-  if (claim.erc20 && claim.erc20.amounts) {
+  if (claim.erc20) {
     types.push('uint256[]');
     values.push(claim.erc20.amounts);
     types.push('address[]');
     values.push(claim.erc20.contractAddresses);
-  } else {
-    types.push('uint256[]');
-    values.push([]);
-    types.push('address[]');
-    values.push([]);
   }
   types.push('bytes32');
   values.push(claim.salt || salt);
-  return solidityKeccak256(types, values);
+  return keccak256(defaultAbiCoder.encode(types, values));
 }
 
 function saltMultiClaim(
