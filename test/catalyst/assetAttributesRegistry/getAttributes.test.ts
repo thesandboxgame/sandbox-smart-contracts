@@ -651,8 +651,9 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('attributes after multiple upgrades are correct', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, [1, 1]);
-      const gemReceipt = await assetUpgraderAsCatalystOwner.addGems(
+      const {id: assetId} = await getAssetId(4, [1, 1]);
+
+      await assetUpgraderAsCatalystOwner.addGems(
         catalystOwner,
         assetId,
         [2, 5],
@@ -668,8 +669,6 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       );
 
       const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
-        await getReceiptObject(mintReceipt, 1),
-        await getReceiptObject(gemReceipt, 3),
         await getReceiptObject(upgradeCatalystReceipt1, 2),
       ]);
 
@@ -679,11 +678,11 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       );
 
       expect(attributes[0]).to.equal(0);
-      expect(attributes[1]).to.equal(0);
-      expect(attributes[2]).to.be.within(minValue(3), 25);
+      expect(attributes[1]).to.be.within(26, 50);
+      expect(attributes[2]).to.equal(0);
       expect(attributes[3]).to.equal(0);
-      expect(attributes[4]).to.be.within(minValue(3), 25);
-      expect(attributes[5]).to.be.within(minValue(3), 25);
+      expect(attributes[4]).to.equal(0);
+      expect(attributes[5]).to.equal(0);
     });
 
     it('should fail if numGems > MAX-NUM_GEMS', async function () {
