@@ -4,10 +4,13 @@ pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "../../common/Interfaces/IERC721Extended.sol";
 import "../../common/Libraries/Verify.sol";
 
 contract ClaimERC1155ERC721ERC20 {
+    using SafeERC20 for IERC20;
+
     struct Claim {
         address to;
         ERC1155Claim[] erc1155;
@@ -96,7 +99,7 @@ contract ClaimERC1155ERC721ERC20 {
             address erc20ContractAddress = contractAddresses[i];
             uint256 erc20Amount = amounts[i];
             require(erc20ContractAddress != address(0), "INVALID_CONTRACT_ZERO_ADDRESS");
-            require(IERC20(erc20ContractAddress).transferFrom(address(this), to, erc20Amount), "ERC20_TRANSFER_FAILED");
+            IERC20(erc20ContractAddress).safeTransferFrom(address(this), to, erc20Amount);
         }
     }
 }
