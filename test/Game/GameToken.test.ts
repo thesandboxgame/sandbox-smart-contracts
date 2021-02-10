@@ -1192,6 +1192,17 @@ describe('GameToken', function () {
         ]);
       });
 
+      it('fails to recover if the GAME token has not been burnt', async function () {
+        await expect(
+          GameOwner.Game.recoverAssets(
+            GameOwner.address,
+            GameOwner.address,
+            gameId,
+            [assets[0]]
+          )
+        ).to.be.revertedWith('ONLY_FROM_BURNED_TOKEN');
+      });
+
       it('can destroy without transfer of assets', async function () {
         const assetContract = await ethers.getContract('Asset');
         const balancesBefore = await getBalances(
