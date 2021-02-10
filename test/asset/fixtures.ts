@@ -1,3 +1,4 @@
+import {Event} from '@ethersproject/contracts';
 import {
   ethers,
   deployments,
@@ -43,7 +44,7 @@ export const setupAsset = deployments.createFixture(async function () {
       Asset.mint(creator, packId, hash, supply, rarity, owner, data)
     );
     const event = receipt.events?.filter(
-      (event) => event.event === 'TransferSingle'
+      (event: Event) => event.event === 'TransferSingle'
     )[0];
     if (!event) {
       throw new Error('no TransferSingle event after mint single');
