@@ -924,6 +924,24 @@ describe('GameToken', function () {
       expect(creatorAfter).to.not.equal(creatorBefore);
     });
 
+    it('can transfer creatorship of a GAME back to original creator', async function () {
+      const others = await getUnnamedAccounts();
+      const creatorBefore = await gameToken.creatorOf(gameId);
+      const gameTokenAsOther = await gameToken.connect(
+        await ethers.provider.getSigner(others[3])
+      );
+
+      await gameTokenAsOther.transferCreatorship(
+        others[3],
+        GameOwner.address,
+        GameOwner.address
+      );
+
+      const creatorAfter = await gameToken.creatorOf(gameId);
+      expect(creatorAfter).to.not.equal(creatorBefore);
+      expect(creatorAfter).to.equal(GameOwner.address);
+    });
+
     it('should fail if non-owner trys to transfer a GAME', async function () {
       const originalOwner = await gameToken.ownerOf(gameId);
       await expect(
