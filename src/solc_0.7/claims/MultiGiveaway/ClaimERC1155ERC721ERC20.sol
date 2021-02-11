@@ -38,7 +38,7 @@ contract ClaimERC1155ERC721ERC20 {
     event ClaimedMultipleTokens(address to, ERC1155Claim[] erc1155, ERC721Claim[] erc721, ERC20Claim erc20);
 
     /// @dev TODO docs.
-    function _claimMultipleTokens(
+    function _claimERC1155ERC721ERC20(
         bytes32 merkleRoot,
         Claim memory claim,
         bytes32[] calldata proof

@@ -49,11 +49,11 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
         bytes32[][] calldata proofs
     ) external {
         for (uint256 i = 0; i < rootHashes.length; i++) {
-            claimMultipleTokens(rootHashes[i], claims[i], proofs[i]);
+            _claimMultipleTokens(rootHashes[i], claims[i], proofs[i]);
         }
     }
 
-    function claimMultipleTokens(
+    function _claimMultipleTokens(
         bytes32 merkleRoot,
         Claim memory claim, // Note: if calldata, get UnimplementedFeatureError; possibly fixed in solc 0.7.6
         bytes32[] calldata proof
@@ -64,7 +64,7 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
         require(block.timestamp < _expiryTime[merkleRoot], "CLAIM_PERIOD_IS_OVER");
         require(claimed[claim.to][merkleRoot] == false, "DESTINATION_ALREADY_CLAIMED");
         claimed[claim.to][merkleRoot] = true;
-        _claimMultipleTokens(merkleRoot, claim, proof);
+        _claimERC1155ERC721ERC20(merkleRoot, claim, proof);
     }
 
     function onERC721Received(
