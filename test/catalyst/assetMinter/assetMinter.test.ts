@@ -919,7 +919,7 @@ describe('AssetMinter', function () {
           catalystOwner,
           mintOptions.data
         )
-      ).to.be.revertedWith('INVALID_SENDER');
+      ).to.be.revertedWith('AUTH_ACCESS_DENIED');
     });
 
     it('should fail if processorType == METATX_2771 && "from" != _forceMsgSender()', async function () {
@@ -949,7 +949,7 @@ describe('AssetMinter', function () {
           catalystOwner,
           mintOptions.data
         )
-      ).to.be.revertedWith('INVALID_SENDER');
+      ).to.be.revertedWith('AUTH_ACCESS_DENIED');
     });
 
     it('should fail if gem == Gem(0)', async function () {

@@ -76,7 +76,7 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(users[3]))
         .burnCatalyst(catalystOwner, catalystId, burnAmount)
-    ).to.be.revertedWith('NOT_AUTHORIZED');
+    ).to.be.revertedWith('AUTH_ACCESS_DENIED');
   });
 
   it('burnCatalyst should fail for non existing catalystId', async function () {
@@ -183,7 +183,7 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry
         .connect(ethers.provider.getSigner(users[3]))
         .burnGem(gemOwner, gemId, burnAmount)
-    ).to.be.revertedWith('NOT_AUTHORIZED');
+    ).to.be.revertedWith('AUTH_ACCESS_DENIED');
   });
   it('burnGem should fail for non existing gemId', async function () {
     const {gemsCatalystsRegistry, gemMinter} = await setupGemsAndCatalysts();
