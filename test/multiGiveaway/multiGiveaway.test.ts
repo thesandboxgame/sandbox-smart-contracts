@@ -24,22 +24,22 @@ describe('Multi_Giveaway', function () {
     ).to.be.revertedWith(`can't substract more than there is`);
   });
 
-  // it('User cannot claim sand when contract does not hold any', async function () {
-  //   const options = {
-  //     mint: true,
-  //   };
-  //   const setUp = await setupTestGiveaway(options);
-  //   const {giveawayContract, others, tree, claims, merkleRootHash} = setUp;
-  //   const claim = claims[0];
-  //   const proof = tree.getProof(calculateMultiClaimHash(claim));
-  //   const giveawayContractAsUser = await giveawayContract.connect(
-  //     ethers.provider.getSigner(others[0])
-  //   );
+  it('User cannot claim sand when contract does not hold any', async function () {
+    const options = {
+      mint: true,
+    };
+    const setUp = await setupTestGiveaway(options);
+    const {giveawayContract, others, tree, claims, merkleRootHash} = setUp;
+    const claim = claims[0];
+    const proof = tree.getProof(calculateMultiClaimHash(claim));
+    const giveawayContractAsUser = await giveawayContract.connect(
+      ethers.provider.getSigner(others[0])
+    );
 
-  //   await expect(
-  //     giveawayContractAsUser.claimMultipleTokens(merkleRootHash, claim, proof)
-  //   ).to.be.revertedWith(`not enough fund`);
-  // });
+    await expect(
+      giveawayContractAsUser.claimMultipleTokens(merkleRootHash, claim, proof)
+    ).to.be.revertedWith(`not enough fund`);
+  });
 
   it('User can claim allocated multiple tokens from Giveaway contract', async function () {
     const options = {
