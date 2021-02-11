@@ -64,7 +64,8 @@ contract AssetMinter is WithMetaTransaction {
         address to,
         bytes calldata data
     ) external returns (uint256 assetId) {
-        _checkAuthorization(from, to);
+        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
+        _checkAuthorization(from);
         assetId = _asset.mint(from, packId, metadataHash, quantity, rarity, to, data);
         if (catalystId != 0) {
             _setSingleCatalyst(from, assetId, quantity, catalystId, gemIds);
@@ -94,7 +95,8 @@ contract AssetMinter is WithMetaTransaction {
         bytes memory data
     ) public returns (uint256[] memory assetIds) {
         require(assets.length != 0, "INVALID_0_ASSETS");
-        _checkAuthorization(from, to);
+        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
+        _checkAuthorization(from);
         uint256[] memory supplies = _handleMultipleAssetRequirements(from, gemsQuantities, catalystsQuantities, assets);
         assetIds = _asset.mintMultiple(from, packId, metadataHash, supplies, "", to, data);
         for (uint256 i = 0; i < assetIds.length; i++) {
