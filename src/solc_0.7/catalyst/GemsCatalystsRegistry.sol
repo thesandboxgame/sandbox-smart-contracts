@@ -136,8 +136,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
         uint16 catalystId,
         uint256 amount
     ) public {
-        // @review what about metaTxs ?
-        require(msg.sender == from || _isValidMetaTx(from) || isSuperOperator(msg.sender), "NOT_AUTHORIZED");
+        _checkAuthorization(from);
         Catalyst catalyst = getCatalyst(catalystId);
         require(catalyst != Catalyst(0), "CATALYST_DOES_NOT_EXIST");
         catalyst.burnFor(from, amount);
@@ -148,8 +147,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
         uint16 gemId,
         uint256 amount
     ) public {
-        // @review what about metaTxs ?
-        require(msg.sender == from || _isValidMetaTx(from) || isSuperOperator(msg.sender), "NOT_AUTHORIZED");
+        _checkAuthorization(from);
         Gem gem = getGem(gemId);
         require(gem != Gem(0), "GEM_DOES_NOT_EXIST");
         gem.burnFor(from, amount);
@@ -171,5 +169,9 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
         } else {
             return Gem(0);
         }
+    }
+
+    function _checkAuthorization(address from) internal view override {
+        require(msg.sender == from || _isValidMetaTx(from) || isSuperOperator(msg.sender), "AUTH_ACCESS_DENIED");
     }
 }
