@@ -29,14 +29,35 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
         _expiryTime[merkleRoot] = expiryTime;
     }
 
-    /// @notice Function to permit the claiming of multiple tokens to a reserved address.
-    /// @param claim The claim.
-    /// @param proof The proof submitted for verification.
+    /// @notice Function to check which giveaways have been claimed by a particular user.
+    /// @param user The user (destination) address.
+    /// @param rootHashes The array of giveaway root hashes to check.
+    function getClaimedStatus(address user, bytes32[] calldata rootHashes) external returns (bool[] memory) {
+        bool[] memory claimedGiveaways = new bool[](rootHashes.length);
+        for (uint256 i = 0; i < rootHashes.length; i++) {
+            claimedGiveaways[i] = claimed[user][rootHashes[i]];
+        }
+        return claimedGiveaways;
+    }
+
+    /// @notice Function to permit the claiming of multiple tokens from multiple giveaways to a reserved address.
+    /// @param claims The claims.
+    /// @param proofs The proofs submitted for verification.
+    function claimMultipleTokensFromMultipleMerkleTree(
+        bytes32[] calldata rootHashes,
+        Claim[] memory claims,
+        bytes32[][] calldata proofs
+    ) external {
+        for (uint256 i = 0; i < rootHashes.length; i++) {
+            claimMultipleTokens(rootHashes[i], claims[i], proofs[i]);
+        }
+    }
+
     function claimMultipleTokens(
         bytes32 merkleRoot,
         Claim memory claim, // Note: if calldata, get UnimplementedFeatureError; possibly fixed in solc 0.7.6
         bytes32[] calldata proof
-    ) external {
+    ) private {
         require(claim.to != address(0), "INVALID_TO_ZERO_ADDRESS");
         require(claim.to != address(this), "DESTINATION_MULTIGIVEAWAY_CONTRACT");
         require(_expiryTime[merkleRoot] != 0, "GIVEAWAY_DOES_NOT_EXIST");
