@@ -158,15 +158,4 @@ contract AssetUpgrader is WithMetaTransaction {
     function _burnCatalyst(address from, uint16 catalystId) internal {
         _gemsCatalystsRegistry.burnCatalyst(from, catalystId, CATALYST_UNIT);
     }
-
-    function _checkAuthorization(address from, address to) internal view {
-        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        if (from != msg.sender) {
-            uint256 processorType = _metaTransactionContracts[msg.sender];
-            require(processorType != 0, "INVALID SENDER");
-            if (processorType == METATX_2771) {
-                require(from == _forceMsgSender(), "INVALID_SENDER");
-            }
-        }
-    }
 }
