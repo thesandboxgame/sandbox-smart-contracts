@@ -154,22 +154,32 @@ describe('Multi_Giveaway', function () {
       'ClaimedMultipleTokens'
     );
     expect(claimedEvent.args[0]).to.equal(others[0]); // to
-    expect(claimedEvent.args[1][0]).to.equal(claim.erc1155.ids[0]);
-    expect(claimedEvent.args[1][1]).to.equal(claim.erc1155.ids[1]);
-    expect(claimedEvent.args[1][2]).to.equal(claim.erc1155.ids[2]);
-    expect(claimedEvent.args[2][0]).to.equal(claim.erc1155.values[0]);
-    expect(claimedEvent.args[2][1]).to.equal(claim.erc1155.values[1]);
-    expect(claimedEvent.args[2][2]).to.equal(claim.erc1155.values[2]);
-    expect(claimedEvent.args[3]).to.equal(claim.erc1155.contractAddress);
-    expect(claimedEvent.args[4][0]).to.equal(claim.erc721.ids[0]);
-    expect(claimedEvent.args[4][1]).to.equal(claim.erc721.ids[1]);
-    expect(claimedEvent.args[4][2]).to.equal(claim.erc721.ids[2]);
-    expect(claimedEvent.args[4][3]).to.equal(claim.erc721.ids[3]);
-    expect(claimedEvent.args[4][4]).to.equal(claim.erc721.ids[4]);
-    expect(claimedEvent.args[4][5]).to.equal(claim.erc721.ids[5]);
-    expect(claimedEvent.args[5]).to.equal(claim.erc721.contractAddress);
-    expect(claimedEvent.args[6][0]).to.equal(claim.erc20.amounts[0]);
-    expect(claimedEvent.args[7][0]).to.equal(claim.erc20.contractAddresses[0]);
+
+    expect(claimedEvent.args[1][0][0][0]).to.equal(claim.erc1155[0].ids[0]);
+    expect(claimedEvent.args[1][0][0][1]).to.equal(claim.erc1155[0].ids[1]);
+    expect(claimedEvent.args[1][0][0][2]).to.equal(claim.erc1155[0].ids[2]);
+
+    expect(claimedEvent.args[1][0][1][0]).to.equal(claim.erc1155[0].values[0]);
+    expect(claimedEvent.args[1][0][1][1]).to.equal(claim.erc1155[0].values[1]);
+    expect(claimedEvent.args[1][0][1][2]).to.equal(claim.erc1155[0].values[2]);
+
+    expect(claimedEvent.args[1][0][2]).to.equal(
+      claim.erc1155[0].contractAddress
+    );
+
+    expect(claimedEvent.args[2][0][0][0]).to.equal(claim.erc721[0].ids[0]);
+    expect(claimedEvent.args[2][0][0][1]).to.equal(claim.erc721[0].ids[1]);
+    expect(claimedEvent.args[2][0][0][2]).to.equal(claim.erc721[0].ids[2]);
+    expect(claimedEvent.args[2][0][0][3]).to.equal(claim.erc721[0].ids[3]);
+    expect(claimedEvent.args[2][0][0][4]).to.equal(claim.erc721[0].ids[4]);
+    expect(claimedEvent.args[2][0][0][5]).to.equal(claim.erc721[0].ids[5]);
+    expect(claimedEvent.args[2][0][1]).to.equal(
+      claim.erc721[0].contractAddress
+    );
+    expect(claimedEvent.args[3][0][0]).to.equal(claim.erc20.amounts[0]);
+    expect(claimedEvent.args[3][1][0]).to.equal(
+      claim.erc20.contractAddresses[0]
+    );
   });
 
   it('User can claim allocated sand from Giveaway contract when there are no assets or lands allocated', async function () {
