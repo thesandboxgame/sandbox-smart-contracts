@@ -225,25 +225,12 @@ function createDataArrayClaimableAssets(
 
 function calculateMultiClaimHash(claim: MultiClaim, salt?: string): string {
   const types = [];
-  const values = [];
-  types.push('address');
-  values.push(claim.to);
-  if (claim.erc1155) {
-    types.push('tuple[]');
-    values.push(claim.erc1155);
-  }
-  if (claim.erc721) {
-    types.push('tuple[]');
-    values.push(claim.erc721);
-  }
-  if (claim.erc20) {
-    types.push('uint256[]');
-    values.push(claim.erc20.amounts);
-    types.push('address[]');
-    values.push(claim.erc20.contractAddresses);
-  }
-  types.push('bytes32');
-  values.push(claim.salt || salt);
+  const values: any = [];
+  if (!claim.salt) claim.salt = salt; // Ensure that a salt is included in the claim object to be hashed
+  types.push(
+    'tuple(address to, tuple(uint256[] ids, uint256[] values, address contractAddress)[] erc1155, tuple(uint256[] ids, address contractAddress)[] erc721, tuple(uint256[] amounts, address[] contractAddresses) erc20, bytes32 salt)'
+  );
+  values.push(claim);
   return keccak256(defaultAbiCoder.encode(types, values));
 }
 
