@@ -6,12 +6,13 @@ import "./Gem.sol";
 import "./Catalyst.sol";
 import "./AssetAttributesRegistry.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
+import "../common/BaseWithStorage/WithMetaTransaction.sol";
 
 /// @notice Contract managing the Gems and Catalysts
 /// Each Gems and Catalys must be registered here.
 /// Each new Gem get assigned a new id (starting at 1)
 /// Each new Catalyst get assigned a new id (starting at 1)
-contract GemsCatalystsRegistry is WithSuperOperators {
+contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
     Gem[] internal _gems;
     Catalyst[] internal _catalysts;
 
@@ -136,7 +137,7 @@ contract GemsCatalystsRegistry is WithSuperOperators {
         uint256 amount
     ) public {
         // @review what about metaTxs ?
-        require(msg.sender == from || isSuperOperator(msg.sender), "NOT_AUTHORIZED");
+        require(msg.sender == from || _isValidMetaTx(from) || isSuperOperator(msg.sender), "NOT_AUTHORIZED");
         Catalyst catalyst = getCatalyst(catalystId);
         require(catalyst != Catalyst(0), "CATALYST_DOES_NOT_EXIST");
         catalyst.burnFor(from, amount);
@@ -148,7 +149,7 @@ contract GemsCatalystsRegistry is WithSuperOperators {
         uint256 amount
     ) public {
         // @review what about metaTxs ?
-        require(msg.sender == from || isSuperOperator(msg.sender), "NOT_AUTHORIZED");
+        require(msg.sender == from || _isValidMetaTx(from) || isSuperOperator(msg.sender), "NOT_AUTHORIZED");
         Gem gem = getGem(gemId);
         require(gem != Gem(0), "GEM_DOES_NOT_EXIST");
         gem.burnFor(from, amount);
