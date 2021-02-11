@@ -94,8 +94,7 @@ contract WithMetaTransaction is WithAdmin {
         }
     }
 
-    function _checkAuthorization(address from, address to) internal view virtual {
-        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
+    function _checkAuthorization(address from) internal view virtual {
         require(msg.sender == from || _isValidMetaTx(from), "AUTH_ACCESS_DENIED");
     }
 }
