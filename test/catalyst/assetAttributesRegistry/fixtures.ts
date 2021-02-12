@@ -35,10 +35,6 @@ export async function setCatalyst(
   event: Event;
   block: Block;
 }> {
-  // const {
-  //   assetAttributesRegistry,
-  //   assetUpgrader,
-  // } = await setupAssetAttributesRegistry();
   if (collectionId) {
     await waitFor(
       assetUpgrader
