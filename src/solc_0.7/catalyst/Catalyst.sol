@@ -26,14 +26,21 @@ contract Catalyst is ERC20Token, IAttributes {
         _attributes = attributes;
     }
 
+    /// @notice Used by Admin to update the attributes contract.
+    /// @param attributes The new attributes contract.
     function changeAttributes(IAttributes attributes) external onlyAdmin {
         _attributes = attributes;
     }
 
+    /// @notice Get the value of _maxGems(the max number of gems that can be embeded in this type of catalyst).
+    /// @return The value of _maxGems.
     function getMaxGems() external view returns (uint8) {
         return _maxGems;
     }
 
+    /// @notice Get the attributes for each gem in an asset.
+    /// See DefaultAttributes.getAttributes for more.
+    /// @return values An array of values representing the "level" of each gem. ie: Power=14, speed=45, etc...
     function getAttributes(uint256 assetId, AssetAttributesRegistry.GemEvent[] calldata events)
         external
         view
