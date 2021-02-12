@@ -64,7 +64,8 @@ contract AssetUpgrader is WithMetaTransaction {
         uint16[] calldata gemIds,
         address to
     ) external returns (uint256 tokenId) {
-        _checkAuthorization(from, to);
+        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
+        _checkAuthorization(from);
         tokenId = _asset.extractERC721From(from, assetId, from);
         _changeCatalyst(from, tokenId, catalystId, gemIds, to);
     }
@@ -82,7 +83,8 @@ contract AssetUpgrader is WithMetaTransaction {
         uint16[] calldata gemIds,
         address to
     ) external returns (uint256 tokenId) {
-        _checkAuthorization(from, to);
+        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
+        _checkAuthorization(from);
         _changeCatalyst(from, assetId, catalystId, gemIds, to);
         return assetId;
     }
@@ -98,7 +100,8 @@ contract AssetUpgrader is WithMetaTransaction {
         uint16[] calldata gemIds,
         address to
     ) external {
-        _checkAuthorization(from, to);
+        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
+        _checkAuthorization(from);
         _addGems(from, assetId, gemIds, to);
     }
 
@@ -159,16 +162,5 @@ contract AssetUpgrader is WithMetaTransaction {
 
     function _burnCatalyst(address from, uint16 catalystId) internal {
         _gemsCatalystsRegistry.burnCatalyst(from, catalystId, CATALYST_UNIT);
-    }
-
-    function _checkAuthorization(address from, address to) internal view {
-        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        if (from != msg.sender) {
-            uint256 processorType = _metaTransactionContracts[msg.sender];
-            require(processorType != 0, "INVALID SENDER");
-            if (processorType == METATX_2771) {
-                require(from == _forceMsgSender(), "INVALID_SENDER");
-            }
-        }
     }
 }
