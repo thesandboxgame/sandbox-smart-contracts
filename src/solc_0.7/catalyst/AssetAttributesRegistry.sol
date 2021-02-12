@@ -135,6 +135,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
         uint8 j = 0;
         uint8 i = 0;
         for (i = 0; i < MAX_NUM_GEMS; i++) {
+            // TODO: verify audit comment
             if (j == gemIds.length) {
                 break;
             }
@@ -171,10 +172,12 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
         uint64 blockNumber
     ) internal {
         require(msg.sender == _minter || msg.sender == _upgrader, "NOT_AUTHORIZED_MINTER");
+        // TODO: verify audit comment
         require(gemIds.length <= MAX_NUM_GEMS, "GEMS_MAX_REACHED");
         uint8 maxGems = _gemsCatalystsRegistry.getMaxGems(catalystId);
         require(gemIds.length <= maxGems, "GEMS_TOO_MANY");
         uint16[MAX_NUM_GEMS] memory gemIdsToStore;
+        // TODO: verify audit comment
         for (uint8 i = 0; i < gemIds.length; i++) {
             require(gemIds[i] != 0, "INVALID_GEM_ID");
             gemIdsToStore[i] = gemIds[i];
