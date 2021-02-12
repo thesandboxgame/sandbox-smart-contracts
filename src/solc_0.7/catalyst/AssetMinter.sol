@@ -64,7 +64,8 @@ contract AssetMinter is WithMetaTransaction {
         address to,
         bytes calldata data
     ) external returns (uint256 assetId) {
-        _checkAuthorization(from, to);
+        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
+        _checkAuthorization(from);
         assetId = _asset.mint(from, packId, metadataHash, quantity, rarity, to, data);
         if (catalystId != 0) {
             _setSingleCatalyst(from, assetId, quantity, catalystId, gemIds);
@@ -94,7 +95,8 @@ contract AssetMinter is WithMetaTransaction {
         bytes memory data
     ) public returns (uint256[] memory assetIds) {
         require(assets.length != 0, "INVALID_0_ASSETS");
-        _checkAuthorization(from, to);
+        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
+        _checkAuthorization(from);
         uint256[] memory supplies = _handleMultipleAssetRequirements(from, gemsQuantities, catalystsQuantities, assets);
         assetIds = _asset.mintMultiple(from, packId, metadataHash, supplies, "", to, data);
         for (uint256 i = 0; i < assetIds.length; i++) {
@@ -183,16 +185,5 @@ contract AssetMinter is WithMetaTransaction {
         uint32 numTimes
     ) internal {
         _gemsCatalystsRegistry.burnCatalyst(from, catalystId, numTimes * CATALYST_UNIT);
-    }
-
-    function _checkAuthorization(address from, address to) internal view {
-        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        if (from != msg.sender) {
-            uint256 processorType = _metaTransactionContracts[msg.sender];
-            require(processorType != 0, "INVALID_SENDER");
-            if (processorType == METATX_2771) {
-                require(from == _forceMsgSender(), "INVALID_SENDER");
-            }
-        }
     }
 }
