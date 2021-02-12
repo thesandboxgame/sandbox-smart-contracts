@@ -1,10 +1,10 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
-import {DeployFunction} from 'hardhat-deploy/types';
-import {BigNumber} from 'ethers';
+import { HardhatRuntimeEnvironment } from 'hardhat/types';
+import { DeployFunction } from 'hardhat-deploy/types';
+import { BigNumber } from 'ethers';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
-  const {deploy} = deployments;
+  const { deployments, getNamedAccounts } = hre;
+  const { deploy } = deployments;
 
   const AssetAttributesRegistry = await deployments.get(
     'AssetAttributesRegistry'
@@ -13,8 +13,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const Asset = await deployments.get('Asset');
   const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
 
-  const {deployer, catalystAssetFeeRecipient} = await getNamedAccounts();
-
+  const { deployer, catalystAssetFeeRecipient } = await getNamedAccounts();
+  // TODO: verify audit comment
   const upgradeFee = BigNumber.from(0); // TODO
   const gemAdditionFee = BigNumber.from(0); // TODO
 
