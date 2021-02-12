@@ -8,6 +8,10 @@ contract DefaultAttributes is IAttributes {
     uint256 internal constant MAX_NUM_GEMS = 15;
     uint256 internal constant MAX_NUM_GEM_TYPES = 256;
 
+    /// @notice Returns the values for each gem included in a given asset.
+    /// @param assetId The asset tokenId.
+    /// @param events An array of GemEvents. Be aware that only gemEvents from the last CatalystApplied event onwards should be used to populate a query. If gemEvents from multiple CatalystApplied events are included the output values will be incorrect.
+    /// @return values An array of values for each gem present in the asset.
     function getAttributes(uint256 assetId, AssetAttributesRegistry.GemEvent[] calldata events)
         external
         pure
