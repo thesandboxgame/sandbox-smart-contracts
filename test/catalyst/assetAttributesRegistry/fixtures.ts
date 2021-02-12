@@ -2,25 +2,31 @@ import {ethers, deployments, getNamedAccounts} from 'hardhat';
 import {BigNumber, Contract, Event} from 'ethers';
 import {Block} from '@ethersproject/providers';
 import {waitFor} from '../../utils';
+import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
 
 export const setupAssetAttributesRegistry = deployments.createFixture(
   async () => {
     await deployments.fixture();
+    await setupGemsAndCatalysts();
     const assetAttributesRegistry: Contract = await ethers.getContract(
       'AssetAttributesRegistry'
     );
+    const assetUpgrader: Contract = await ethers.getContract('AssetUpgrader');
     const {assetAttributesRegistryAdmin} = await getNamedAccounts();
 
     return {
       assetAttributesRegistry,
       assetAttributesRegistryAdmin,
+      assetUpgrader,
     };
   }
 );
 export async function setCatalyst(
+  from: string,
   assetId: BigNumber,
   catalystId: number,
   gemsIds: number[],
+  to: string,
   collectionId?: BigNumber
 ): Promise<{
   record: {catalystId: number; exists: boolean; gemIds: []};
@@ -29,19 +35,19 @@ export async function setCatalyst(
 }> {
   const {
     assetAttributesRegistry,
-    assetAttributesRegistryAdmin,
+    assetUpgrader,
   } = await setupAssetAttributesRegistry();
   if (collectionId) {
     await waitFor(
-      assetAttributesRegistry
-        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-        .setCatalyst(collectionId, catalystId, gemsIds)
+      assetUpgrader
+        .connect(ethers.provider.getSigner(from))
+        .changeCatalyst(from, collectionId, catalystId, gemsIds, to)
     );
   } else {
     await waitFor(
-      assetAttributesRegistry
-        .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-        .setCatalyst(assetId, catalystId, gemsIds)
+      assetUpgrader
+        .connect(ethers.provider.getSigner(from))
+        .changeCatalyst(from, assetId, catalystId, gemsIds, to)
     );
   }
   const record = await assetAttributesRegistry.getRecord(assetId);

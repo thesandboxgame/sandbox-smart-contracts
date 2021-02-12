@@ -170,7 +170,10 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
         uint16[] memory gemIds,
         uint64 blockNumber
     ) internal {
-        require(msg.sender == _minter || msg.sender == _upgrader, "NOT_AUTHORIZED_MINTER");
+        require(
+            msg.sender == _minter || msg.sender == _upgrader || msg.sender == migrationContract,
+            "NOT_AUTHORIZED_MINTER"
+        );
         require(gemIds.length <= MAX_NUM_GEMS, "GEMS_MAX_REACHED");
         uint8 maxGems = _gemsCatalystsRegistry.getMaxGems(catalystId);
         require(gemIds.length <= maxGems, "GEMS_TOO_MANY");
