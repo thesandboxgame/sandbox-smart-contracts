@@ -18,6 +18,8 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
     mapping(address => mapping(bytes32 => bool)) public claimed; // TODO: change to index mapping - see uniswap
     mapping(bytes32 => uint256) internal _expiryTime;
 
+    event NewGiveaway(bytes32 merkleRoot, uint256 expiryTime);
+
     constructor(address admin) {
         _admin = admin;
     }
@@ -27,6 +29,7 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
     /// @param expiryTime The expiry time for the giveaway.
     function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime) external onlyAdmin {
         _expiryTime[merkleRoot] = expiryTime;
+        emit NewGiveaway(merkleRoot, expiryTime);
     }
 
     /// @notice Function to check which giveaways have been claimed by a particular user.
@@ -58,10 +61,11 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
         Claim memory claim, // Note: if calldata, get UnimplementedFeatureError; possibly fixed in solc 0.7.6
         bytes32[] calldata proof
     ) private {
+        uint256 giveawayExpiryTime = _expiryTime[merkleRoot];
         require(claim.to != address(0), "INVALID_TO_ZERO_ADDRESS");
         require(claim.to != address(this), "DESTINATION_MULTIGIVEAWAY_CONTRACT");
-        require(_expiryTime[merkleRoot] != 0, "GIVEAWAY_DOES_NOT_EXIST");
-        require(block.timestamp < _expiryTime[merkleRoot], "CLAIM_PERIOD_IS_OVER");
+        require(giveawayExpiryTime != 0, "GIVEAWAY_DOES_NOT_EXIST");
+        require(block.timestamp < giveawayExpiryTime, "CLAIM_PERIOD_IS_OVER");
         require(claimed[claim.to][merkleRoot] == false, "DESTINATION_ALREADY_CLAIMED");
         claimed[claim.to][merkleRoot] = true;
         _claimERC1155ERC721ERC20(merkleRoot, claim, proof);
