@@ -7,14 +7,7 @@ import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
 import "./ClaimERC1155ERC721ERC20.sol";
 import "../../common/BaseWithStorage/WithAdmin.sol";
 import "../../Utils/Clones.sol";
-
-interface Holder {
-    function approve(
-        IERC721[] calldata erc721s,
-        IERC1155[] calldata erc1155s,
-        IERC20[] calldata erc20s
-    ) external;
-}
+import "./ImmutableHolder.sol";
 
 /// @title MultiGiveaway contract.
 /// @notice This contract manages claims for multiple token types.
@@ -31,9 +24,11 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
 
     mapping(address => mapping(bytes32 => bool)) public claimed; // TODO: change to index mapping - see uniswap
     mapping(bytes32 => MerkleRootInfo) internal _merkleRoots;
+    address internal immutable _holderCodeAddress;
 
-    constructor(address admin) {
+    constructor(address admin, address holderCodeAddress) {
         _admin = admin;
+        _holderCodeAddress = holderCodeAddress;
     }
 
     /// @notice Function to set the merkle root hash for the claim data.
@@ -46,22 +41,18 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
 
     /// @notice Function to set the merkle root hash for the claim data.
     /// @param merkleRoot The merkle root hash of the claim data.
-    /// @param expiryTime The expiry time for the giveaway.
-    /// @param holderCodeAddress the contract to clone from
     /// @param erc721s list of erc721 to be approved by the holder (not that if one is missing the claim will not work)
     /// @param erc1155s list of erc1155 to be approved by the holder (not that if one is missing the claim will not work)
     /// @param erc20s list of erc20 to be approved by the holder (not that if one is missing the claim will not work)
-    function addGiveawayWithSeparateHolder(
+    function addTrustlessGiveaway(
         bytes32 merkleRoot,
-        uint96 expiryTime,
-        address holderCodeAddress,
         IERC721[] calldata erc721s,
         IERC1155[] calldata erc1155s,
         IERC20[] calldata erc20s
     ) external onlyAdmin {
-        address holder = Clones.cloneDeterministic(holderCodeAddress, merkleRoot);
-        Holder(holder).approve(erc721s, erc1155s, erc20s);
-        _merkleRoots[merkleRoot] = MerkleRootInfo(expiryTime, holder);
+        address holder = Clones.cloneDeterministic(_holderCodeAddress, merkleRoot);
+        ImmutableHolder(holder).approve(erc721s, erc1155s, erc20s);
+        _merkleRoots[merkleRoot] = MerkleRootInfo(2**96 - 1, holder);
         // TODO emit event
     }
 
