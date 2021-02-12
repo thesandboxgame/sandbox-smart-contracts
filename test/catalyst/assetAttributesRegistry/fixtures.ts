@@ -27,16 +27,18 @@ export async function setCatalyst(
   catalystId: number,
   gemsIds: number[],
   to: string,
+  assetUpgrader: Contract,
+  assetAttributesRegistry: Contract,
   collectionId?: BigNumber
 ): Promise<{
   record: {catalystId: number; exists: boolean; gemIds: []};
   event: Event;
   block: Block;
 }> {
-  const {
-    assetAttributesRegistry,
-    assetUpgrader,
-  } = await setupAssetAttributesRegistry();
+  // const {
+  //   assetAttributesRegistry,
+  //   assetUpgrader,
+  // } = await setupAssetAttributesRegistry();
   if (collectionId) {
     await waitFor(
       assetUpgrader

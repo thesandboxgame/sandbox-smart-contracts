@@ -1,8 +1,8 @@
-import { ethers } from 'hardhat';
-import { BigNumber } from '@ethersproject/bignumber';
-import { expect } from '../../chai-setup';
-import { setupAssetUpgrader } from './fixtures';
-import { waitFor } from '../../utils';
+import {ethers} from 'hardhat';
+import {BigNumber} from '@ethersproject/bignumber';
+import {expect} from '../../chai-setup';
+import {setupAssetUpgrader} from './fixtures';
+import {waitFor} from '../../utils';
 import {
   changeCatalyst,
   mintAsset,
@@ -417,8 +417,13 @@ describe('AssetUpgrader', function () {
     await expect(
       assetUpgraderContract
         .connect(ethers.provider.getSigner(users[10]))
-        .changeCatalyst(users[10], assetId, catalystId, [powerGemId, defenseGemId], users[10])
+        .changeCatalyst(
+          users[10],
+          assetId,
+          catalystId,
+          [powerGemId, defenseGemId],
+          users[10]
+        )
     ).to.be.revertedWith('NOT_AUTHORIZED_ASSET_OWNER');
-
   });
 });
