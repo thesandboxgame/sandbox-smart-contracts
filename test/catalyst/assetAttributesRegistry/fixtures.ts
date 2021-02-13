@@ -1,8 +1,8 @@
-import {ethers, deployments, getNamedAccounts} from 'hardhat';
-import {BigNumber, Contract, Event} from 'ethers';
-import {Block} from '@ethersproject/providers';
-import {waitFor} from '../../utils';
-import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
+import { ethers, deployments, getNamedAccounts, getUnnamedAccounts } from 'hardhat';
+import { BigNumber, Contract, Event } from 'ethers';
+import { Block } from '@ethersproject/providers';
+import { waitFor } from '../../utils';
+import { setupGemsAndCatalysts } from '../gemsCatalystsRegistry/fixtures';
 
 export const setupAssetAttributesRegistry = deployments.createFixture(
   async () => {
@@ -12,12 +12,30 @@ export const setupAssetAttributesRegistry = deployments.createFixture(
       'AssetAttributesRegistry'
     );
     const assetUpgrader: Contract = await ethers.getContract('AssetUpgrader');
-    const {assetAttributesRegistryAdmin} = await getNamedAccounts();
+    const { assetAttributesRegistryAdmin } = await getNamedAccounts();
+    const users = await getUnnamedAccounts();
+    const mockedMigrationContractAddress = users[1];
 
+    const assetAttributesRegistryAsUser0 = await assetAttributesRegistry.connect(
+      ethers.provider.getSigner(users[0])
+    );
+    const assetAttributesRegistryAsRegistryAdmin = await assetAttributesRegistry.connect(
+      ethers.provider.getSigner(assetAttributesRegistryAdmin)
+    );
+    const assetUpgraderAsUser0 = await assetUpgrader.connect(
+      ethers.provider.getSigner(users[0])
+    );
+    const assetAttributesRegistryAsmockedMigrationContract = await assetAttributesRegistry.connect(
+      ethers.provider.getSigner(mockedMigrationContractAddress)
+    );
     return {
       assetAttributesRegistry,
       assetAttributesRegistryAdmin,
       assetUpgrader,
+      assetAttributesRegistryAsUser0,
+      assetAttributesRegistryAsRegistryAdmin,
+      assetAttributesRegistryAsmockedMigrationContract,
+      assetUpgraderAsUser0
     };
   }
 );
@@ -29,7 +47,7 @@ export async function setCatalyst(
   to: string,
   collectionId?: BigNumber
 ): Promise<{
-  record: {catalystId: number; exists: boolean; gemIds: []};
+  record: { catalystId: number; exists: boolean; gemIds: [] };
   event: Event;
   block: Block;
 }> {
@@ -59,5 +77,5 @@ export async function setCatalyst(
     (e) => e.event === 'CatalystApplied'
   )[0];
   const block = await ethers.provider.getBlock('latest');
-  return {record, event, block};
+  return { record, event, block };
 }
