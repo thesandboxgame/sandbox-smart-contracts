@@ -14,21 +14,23 @@ export const setupAssetAttributesRegistry = deployments.createFixture(
     const assetUpgrader: Contract = await ethers.getContract('AssetUpgrader');
     const { assetAttributesRegistryAdmin } = await getNamedAccounts();
     const users = await getUnnamedAccounts();
+    const user0 = users[0];
     const mockedMigrationContractAddress = users[1];
 
     const assetAttributesRegistryAsUser0 = await assetAttributesRegistry.connect(
-      ethers.provider.getSigner(users[0])
+      ethers.provider.getSigner(user0)
     );
     const assetAttributesRegistryAsRegistryAdmin = await assetAttributesRegistry.connect(
       ethers.provider.getSigner(assetAttributesRegistryAdmin)
     );
     const assetUpgraderAsUser0 = await assetUpgrader.connect(
-      ethers.provider.getSigner(users[0])
+      ethers.provider.getSigner(user0)
     );
     const assetAttributesRegistryAsmockedMigrationContract = await assetAttributesRegistry.connect(
       ethers.provider.getSigner(mockedMigrationContractAddress)
     );
     return {
+      user0,
       assetAttributesRegistry,
       assetAttributesRegistryAdmin,
       assetUpgrader,
