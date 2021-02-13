@@ -2,15 +2,16 @@ import { BigNumber } from '@ethersproject/bignumber';
 import { expect } from '../../chai-setup';
 import { setupGemsAndCatalysts } from './fixtures';
 import { waitFor } from '../../utils';
+import catalysts from '../../../data/catalysts';
 describe('GemsCatalystsRegistry', function () {
-  it('getMaxGems for catalystId = 1 should be 1', async function () {
+  it('getMaxGems for commonCatalyst should be 1', async function () {
     const {
       gemsCatalystsRegistry,
       commonCatalyst,
     } = await setupGemsAndCatalysts();
     const catalystId = await commonCatalyst.catalystId();
     const maxGems = await gemsCatalystsRegistry.getMaxGems(catalystId);
-    expect(maxGems).to.equal(1);
+    expect(maxGems).to.equal(catalysts[0].maxGems);
   });
 
   it('getMaxGems for non existing catalystId should fail', async function () {
@@ -288,15 +289,15 @@ describe('GemsCatalystsRegistry', function () {
     const balanceBeforeBurningDefenseGem = await defenseGem.balanceOf(gemOwner);
     const totalSupplyBeforeBurningPowerGem = await powerGem.totalSupply();
     const totalSupplyBeforeBurningDefenseGem = await defenseGem.totalSupply();
+    const burnAmount = BigNumber.from('15555');
     await waitFor(
       gemsCatalystsRegistryAsGemOwner
-        .burnDifferentGems(gemOwner, [defenseGemId, powerGemId], 1)
-    ); // TODO test multiple
+        .burnDifferentGems(gemOwner, [defenseGemId, powerGemId], burnAmount)
+    );
     const balanceAfterBurningPowerGem = await powerGem.balanceOf(gemOwner);
     const balanceAfterBurningDefenseGem = await defenseGem.balanceOf(gemOwner);
     const totalSupplyAfterBurningPowerGem = await powerGem.totalSupply();
     const totalSupplyAfterBurningDefenseGem = await defenseGem.totalSupply();
-    const burnAmount = BigNumber.from('1');
     expect(balanceAfterBurningPowerGem).to.equal(
       balanceBeforeBurningPowerGem.sub(burnAmount)
     );
@@ -311,41 +312,6 @@ describe('GemsCatalystsRegistry', function () {
     );
   });
 
-  it('burnDifferentGems for two different gem tokens', async function () {
-    const {
-      gemsCatalystsRegistryAsGemOwner,
-      powerGem,
-      defenseGem,
-      gemOwner,
-    } = await setupGemsAndCatalysts();
-    const powerGemId = await powerGem.gemId();
-    const defenseGemId = await defenseGem.gemId();
-    const balanceBeforeBurningPowerGem = await powerGem.balanceOf(gemOwner);
-    const balanceBeforeBurningDefenseGem = await defenseGem.balanceOf(gemOwner);
-    const totalSupplyBeforeBurningPowerGem = await powerGem.totalSupply();
-    const totalSupplyBeforeBurningDefenseGem = await defenseGem.totalSupply();
-    await waitFor(
-      gemsCatalystsRegistryAsGemOwner
-        .burnDifferentGems(gemOwner, [defenseGemId, powerGemId], 1)
-    ); // TODO test multiple
-    const balanceAfterBurningPowerGem = await powerGem.balanceOf(gemOwner);
-    const balanceAfterBurningDefenseGem = await defenseGem.balanceOf(gemOwner);
-    const totalSupplyAfterBurningPowerGem = await powerGem.totalSupply();
-    const totalSupplyAfterBurningDefenseGem = await defenseGem.totalSupply();
-    const burnAmount = BigNumber.from('1');
-    expect(balanceAfterBurningPowerGem).to.equal(
-      balanceBeforeBurningPowerGem.sub(burnAmount)
-    );
-    expect(balanceAfterBurningDefenseGem).to.equal(
-      balanceBeforeBurningDefenseGem.sub(burnAmount)
-    );
-    expect(totalSupplyAfterBurningPowerGem).to.equal(
-      totalSupplyBeforeBurningPowerGem.sub(burnAmount)
-    );
-    expect(totalSupplyAfterBurningDefenseGem).to.equal(
-      totalSupplyBeforeBurningDefenseGem.sub(burnAmount)
-    );
-  });
   it('burnDifferentCatalysts for two different catalyst tokens', async function () {
     const {
       gemsCatalystsRegistryAsCataystOwner,
@@ -363,14 +329,15 @@ describe('GemsCatalystsRegistry', function () {
     );
     const totalSupplyBeforeBurningRareCatalyst = await rareCatalyst.totalSupply();
     const totalSupplyBeforeBurningDefenseGem = await commonCatalyst.totalSupply();
+    const burnAmount = BigNumber.from('100');
     await waitFor(
       gemsCatalystsRegistryAsCataystOwner
         .burnDifferentCatalysts(
           catalystOwner,
           [rareCatalystId, commonCatalystId],
-          1
+          burnAmount
         )
-    ); // TODO test multiple
+    );
     const balanceAfterBurningRareCatalyst = await rareCatalyst.balanceOf(
       catalystOwner
     );
@@ -379,7 +346,6 @@ describe('GemsCatalystsRegistry', function () {
     );
     const totalSupplyAfterBurningRareCatalyst = await rareCatalyst.totalSupply();
     const totalSupplyAfterBurningDefenseGem = await commonCatalyst.totalSupply();
-    const burnAmount = BigNumber.from('1');
     expect(balanceAfterBurningRareCatalyst).to.equal(
       balanceBeforeBurningRareCatalyst.sub(burnAmount)
     );
