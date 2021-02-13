@@ -1,7 +1,7 @@
-import { BigNumber } from '@ethersproject/bignumber';
-import { expect } from '../../chai-setup';
-import { setupAssetUpgrader } from './fixtures';
-import { waitFor } from '../../utils';
+import {BigNumber} from '@ethersproject/bignumber';
+import {expect} from '../../chai-setup';
+import {setupAssetUpgrader} from './fixtures';
+import {waitFor} from '../../utils';
 import {
   changeCatalyst,
   mintAsset,
@@ -24,7 +24,7 @@ describe('AssetUpgrader', function () {
       rareCatalyst,
       powerGem,
       gemsCatalystsUnit,
-      assetUpgraderContractAsCatalystOwner
+      assetUpgraderContractAsCatalystOwner,
     } = await setupAssetUpgrader();
     const catalystId = await rareCatalyst.catalystId();
     const mintingAmount = BigNumber.from('8').mul(
@@ -55,23 +55,21 @@ describe('AssetUpgrader', function () {
       catalystOwner,
       Buffer.from('ff')
     );
-    const tokenId = await assetUpgraderContractAsCatalystOwner
-      .callStatic.extractAndSetCatalyst(
+    const tokenId = await assetUpgraderContractAsCatalystOwner.callStatic.extractAndSetCatalyst(
+      catalystOwner,
+      assetId,
+      catalystId,
+      [powerGemId],
+      catalystOwner
+    );
+    await waitFor(
+      assetUpgraderContractAsCatalystOwner.extractAndSetCatalyst(
         catalystOwner,
         assetId,
         catalystId,
         [powerGemId],
         catalystOwner
-      );
-    await waitFor(
-      assetUpgraderContractAsCatalystOwner
-        .extractAndSetCatalyst(
-          catalystOwner,
-          assetId,
-          catalystId,
-          [powerGemId],
-          catalystOwner
-        )
+      )
     );
     const balanceOldAsset = await assetContract['balanceOf(address,uint256)'](
       catalystOwner,
@@ -122,7 +120,7 @@ describe('AssetUpgrader', function () {
       rareCatalyst,
       powerGem,
       gemsCatalystsUnit,
-      assetUpgraderContractAsCatalystOwner
+      assetUpgraderContractAsCatalystOwner,
     } = await setupAssetUpgrader();
     const catalystId = await rareCatalyst.catalystId();
     const mintingAmount = BigNumber.from('8').mul(
@@ -143,14 +141,13 @@ describe('AssetUpgrader', function () {
       Buffer.from('ff')
     );
     await expect(
-      assetUpgraderContractAsCatalystOwner
-        .extractAndSetCatalyst(
-          catalystOwner,
-          assetId,
-          catalystId,
-          [powerGemId],
-          catalystOwner
-        )
+      assetUpgraderContractAsCatalystOwner.extractAndSetCatalyst(
+        catalystOwner,
+        assetId,
+        catalystId,
+        [powerGemId],
+        catalystOwner
+      )
     ).to.be.revertedWith(`Not an ERC1155 Token`);
   });
   it('setting a rareCatalyst with powerGem and defenseGem', async function () {
@@ -215,9 +212,7 @@ describe('AssetUpgrader', function () {
     const sandBalanceToAfter = await sandContract.balanceOf(feeRecipient);
 
     const totalSupplyAfterRareCatalyst = await rareCatalyst.totalSupply();
-    const balanceAfterBurningRareCatalyst = await rareCatalyst.balanceOf(
-      user5
-    );
+    const balanceAfterBurningRareCatalyst = await rareCatalyst.balanceOf(user5);
     const balanceAfterBurningPowerGem = await powerGem.balanceOf(user5);
     const balanceAfterBurningDefenseGem = await defenseGem.balanceOf(user5);
     const totalSupplyAfterBurningPowerGem = await powerGem.totalSupply();
@@ -271,7 +266,7 @@ describe('AssetUpgrader', function () {
       gemsCatalystsUnit,
       gemsCatalystsRegistry,
       assetUpgraderContractAsUser4,
-      user4
+      user4,
     } = await setupAssetUpgrader();
 
     await transferSand(
@@ -306,12 +301,10 @@ describe('AssetUpgrader', function () {
     const sandBalanceToBefore = await sandContract.balanceOf(feeRecipient);
     const gemIds = [powerGemId, defenseGemId];
     await waitFor(
-      powerGemAsUser4
-        .approve(gemsCatalystsRegistry.address, 100000000000000)
+      powerGemAsUser4.approve(gemsCatalystsRegistry.address, 100000000000000)
     );
     await waitFor(
-      defenseGemAsUser4
-        .approve(gemsCatalystsRegistry.address, 100000000000000)
+      defenseGemAsUser4.approve(gemsCatalystsRegistry.address, 100000000000000)
     );
 
     await changeCatalyst(
@@ -323,8 +316,7 @@ describe('AssetUpgrader', function () {
       user4
     );
     await waitFor(
-      assetUpgraderContractAsUser4
-        .addGems(user4, assetId, gemIds, user4)
+      assetUpgraderContractAsUser4.addGems(user4, assetId, gemIds, user4)
     );
 
     const balanceAfterBurningPowerGem = await powerGem.balanceOf(user4);
@@ -419,9 +411,7 @@ describe('AssetUpgrader', function () {
     const balanceBeforeBurning = await rareCatalyst.balanceOf(user10);
 
     const balanceBeforeBurningPowerGem = await powerGem.balanceOf(user10);
-    const balanceBeforeBurningDefenseGem = await defenseGem.balanceOf(
-      user10
-    );
+    const balanceBeforeBurningDefenseGem = await defenseGem.balanceOf(user10);
     const totalSupplyBeforeBurningPowerGem = await powerGem.totalSupply();
     const totalSupplyBeforeBurningDefenseGem = await defenseGem.totalSupply();
 

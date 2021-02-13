@@ -1,8 +1,13 @@
-import { ethers, deployments, getNamedAccounts, getUnnamedAccounts } from 'hardhat';
-import { BigNumber, Contract, Event } from 'ethers';
-import { Block } from '@ethersproject/providers';
-import { waitFor } from '../../utils';
-import { setupGemsAndCatalysts } from '../gemsCatalystsRegistry/fixtures';
+import {
+  ethers,
+  deployments,
+  getNamedAccounts,
+  getUnnamedAccounts,
+} from 'hardhat';
+import {BigNumber, Contract, Event} from 'ethers';
+import {Block} from '@ethersproject/providers';
+import {waitFor} from '../../utils';
+import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
 
 export const setupAssetAttributesRegistry = deployments.createFixture(
   async () => {
@@ -12,7 +17,7 @@ export const setupAssetAttributesRegistry = deployments.createFixture(
       'AssetAttributesRegistry'
     );
     const assetUpgrader: Contract = await ethers.getContract('AssetUpgrader');
-    const { assetAttributesRegistryAdmin } = await getNamedAccounts();
+    const {assetAttributesRegistryAdmin} = await getNamedAccounts();
     const users = await getUnnamedAccounts();
     const user0 = users[0];
     const mockedMigrationContractAddress = users[1];
@@ -40,7 +45,7 @@ export const setupAssetAttributesRegistry = deployments.createFixture(
       assetAttributesRegistryAsUser0,
       assetAttributesRegistryAsRegistryAdmin,
       assetAttributesRegistryAsmockedMigrationContract,
-      assetUpgraderAsUser0
+      assetUpgraderAsUser0,
     };
   }
 );
@@ -54,7 +59,7 @@ export async function setCatalyst(
   assetAttributesRegistry: Contract,
   collectionId?: BigNumber
 ): Promise<{
-  record: { catalystId: number; exists: boolean; gemIds: [] };
+  record: {catalystId: number; exists: boolean; gemIds: []};
   event: Event;
   block: Block;
 }> {
@@ -80,5 +85,5 @@ export async function setCatalyst(
     (e) => e.event === 'CatalystApplied'
   )[0];
   const block = await ethers.provider.getBlock('latest');
-  return { record, event, block };
+  return {record, event, block};
 }

@@ -4,7 +4,7 @@ import {
   getUnnamedAccounts,
   getNamedAccounts,
 } from 'hardhat';
-import { Contract, BigNumber } from 'ethers';
+import {Contract, BigNumber} from 'ethers';
 
 const exampleGemId = 6;
 const notInOrderGemId = 56;
@@ -126,26 +126,33 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     .connect(ethers.provider.getSigner(gemsCatalystsRegistryAdmin))
     .setSuperOperator(gemsCatalystsRegistrySuperOperator, true);
 
-  const gemsCatalystsRegistryAsCataystOwner = await gemsCatalystsRegistry
-    .connect(ethers.provider.getSigner(catalystOwner));
+  const gemsCatalystsRegistryAsCataystOwner = await gemsCatalystsRegistry.connect(
+    ethers.provider.getSigner(catalystOwner)
+  );
 
-  const gemsCatalystsRegistryAsRegistrySuperOperator = await gemsCatalystsRegistry
-    .connect(ethers.provider.getSigner(gemsCatalystsRegistrySuperOperator));
+  const gemsCatalystsRegistryAsRegistrySuperOperator = await gemsCatalystsRegistry.connect(
+    ethers.provider.getSigner(gemsCatalystsRegistrySuperOperator)
+  );
 
-  const gemsCatalystsRegistryAsUser3 = await gemsCatalystsRegistry
-    .connect(ethers.provider.getSigner(users[3]));
+  const gemsCatalystsRegistryAsUser3 = await gemsCatalystsRegistry.connect(
+    ethers.provider.getSigner(users[3])
+  );
 
-  const gemsCatalystsRegistryAsRegAdmin = await gemsCatalystsRegistry
-    .connect(ethers.provider.getSigner(gemsCatalystsRegistryAdmin));
+  const gemsCatalystsRegistryAsRegAdmin = await gemsCatalystsRegistry.connect(
+    ethers.provider.getSigner(gemsCatalystsRegistryAdmin)
+  );
 
-  const gemsCatalystsRegistryAsCataystMinter = await gemsCatalystsRegistry
-    .connect(ethers.provider.getSigner(catalystMinter));
+  const gemsCatalystsRegistryAsCataystMinter = await gemsCatalystsRegistry.connect(
+    ethers.provider.getSigner(catalystMinter)
+  );
 
-  const gemsCatalystsRegistryAsGemOwner = await gemsCatalystsRegistry
-    .connect(ethers.provider.getSigner(gemOwner));
+  const gemsCatalystsRegistryAsGemOwner = await gemsCatalystsRegistry.connect(
+    ethers.provider.getSigner(gemOwner)
+  );
 
-  const gemsCatalystsRegistryAsGemMinter = await gemsCatalystsRegistry
-    .connect(ethers.provider.getSigner(gemMinter));
+  const gemsCatalystsRegistryAsGemMinter = await gemsCatalystsRegistry.connect(
+    ethers.provider.getSigner(gemMinter)
+  );
   return {
     gemsCatalystsRegistry,
     gemsCatalystsRegistrySuperOperator,
@@ -173,6 +180,6 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     gemsCatalystsRegistryAsRegAdmin,
     gemsCatalystsRegistryAsCataystMinter,
     gemsCatalystsRegistryAsGemOwner,
-    gemsCatalystsRegistryAsGemMinter
+    gemsCatalystsRegistryAsGemMinter,
   };
 });

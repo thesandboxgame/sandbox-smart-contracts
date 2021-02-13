@@ -4,12 +4,12 @@ import {
   getUnnamedAccounts,
   getNamedAccounts,
 } from 'hardhat';
-import { BigNumber, Contract } from 'ethers';
-import { waitFor } from '../../utils';
+import {BigNumber, Contract} from 'ethers';
+import {waitFor} from '../../utils';
 
 export const setupAssetUpgrader = deployments.createFixture(async () => {
   await deployments.fixture();
-  const { assetAttributesRegistryAdmin, assetAdmin } = await getNamedAccounts();
+  const {assetAttributesRegistryAdmin, assetAdmin} = await getNamedAccounts();
   const users = await getUnnamedAccounts();
   const catalystOwner = users[0];
   const user2 = users[2];
@@ -47,17 +47,21 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
       .setSuperOperator(assetUpgraderContract.address, true)
   );
 
-  const assetUpgraderContractAsCatalystOwner = await assetUpgraderContract
-    .connect(ethers.provider.getSigner(catalystOwner));
+  const assetUpgraderContractAsCatalystOwner = await assetUpgraderContract.connect(
+    ethers.provider.getSigner(catalystOwner)
+  );
 
-  const assetUpgraderContractAsUser4 = await assetUpgraderContract
-    .connect(ethers.provider.getSigner(user4));
+  const assetUpgraderContractAsUser4 = await assetUpgraderContract.connect(
+    ethers.provider.getSigner(user4)
+  );
 
-  const powerGemAsUser4 = await powerGem
-    .connect(ethers.provider.getSigner(user4));
+  const powerGemAsUser4 = await powerGem.connect(
+    ethers.provider.getSigner(user4)
+  );
 
-  const defenseGemAsUser4 = await defenseGem
-    .connect(ethers.provider.getSigner(user4));
+  const defenseGemAsUser4 = await defenseGem.connect(
+    ethers.provider.getSigner(user4)
+  );
   return {
     user2,
     user4,
@@ -80,6 +84,6 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
     assetUpgraderContractAsCatalystOwner,
     powerGemAsUser4,
     defenseGemAsUser4,
-    assetUpgraderContractAsUser4
+    assetUpgraderContractAsUser4,
   };
 });
