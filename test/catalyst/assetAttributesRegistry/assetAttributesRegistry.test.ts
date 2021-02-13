@@ -117,7 +117,7 @@ describe('AssetAttributesRegistry', function () {
   it('setCatalyst should fail for non minter account', async function () {
     const { assetAttributesRegistry } = await setupAssetAttributesRegistry();
     const users = await getUnnamedAccounts();
-    const assetId = BigNumber.from('0x1ff80000800000000000000000000000');
+    const assetId = BigNumber.from('0x12000000000800000000000000000000000');
     const legendaryCatalystId = catalysts[3].catalystId;
     const gemsIds = gems.filter((gem) => gem.gemId < 5).map((gem) => gem.gemId);
     await expect(
@@ -129,7 +129,7 @@ describe('AssetAttributesRegistry', function () {
 
   it('setCatalyst with gems.length > MAX_NUM_GEMS should fail', async function () {
     const { assetUpgrader } = await setupAssetAttributesRegistry();
-    const assetId = BigNumber.from('0x1ff80000800000000000000000000000');
+    const assetId = BigNumber.from('0x100000000000000000012000000000800000000000000000000000');
     const users = await getUnnamedAccounts();
     const legendaryCatalystId = catalysts[3].catalystId;
     const gemsIds = [1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1, 2, 3];
@@ -148,7 +148,7 @@ describe('AssetAttributesRegistry', function () {
 
   it('setCatalyst with gems.length > maxGemForCatalyst should fail', async function () {
     const { assetUpgrader } = await setupAssetAttributesRegistry();
-    const assetId = BigNumber.from('0x1ff80000800000000000000000000000');
+    const assetId = BigNumber.from('0x12000000000000004000000000000000000');
     const users = await getUnnamedAccounts();
     const legendaryCatalystId = catalysts[3].catalystId;
     const gemsIds = [1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1];
