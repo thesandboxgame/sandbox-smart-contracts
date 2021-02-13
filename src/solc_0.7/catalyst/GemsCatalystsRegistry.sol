@@ -46,6 +46,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
     /// @notice Burns one gem unit from each gem id on behalf of a beneficiary
     /// @param from address of the beneficiary to burn on behalf of
     /// @param gemIds list of gems to burn one gem from each
+    /// @param numTimes number of units to burn
     function burnDifferentGems(
         address from,
         uint16[] calldata gemIds,
@@ -60,6 +61,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
     /// @notice Burns one catalyst unit from each catalyst id on behalf of a beneficiary
     /// @param from address of the beneficiary to burn on behalf of
     /// @param catalystIds list of catalysts to burn one catalyst from each
+    /// @param numTimes number of units to burn
     function burnDifferentCatalysts(
         address from,
         uint16[] calldata catalystIds,
