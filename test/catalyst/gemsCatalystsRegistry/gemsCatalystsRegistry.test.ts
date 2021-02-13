@@ -311,6 +311,41 @@ describe('GemsCatalystsRegistry', function () {
     );
   });
 
+  it('burnDifferentGems for two different gem tokens', async function () {
+    const {
+      gemsCatalystsRegistryAsGemOwner,
+      powerGem,
+      defenseGem,
+      gemOwner,
+    } = await setupGemsAndCatalysts();
+    const powerGemId = await powerGem.gemId();
+    const defenseGemId = await defenseGem.gemId();
+    const balanceBeforeBurningPowerGem = await powerGem.balanceOf(gemOwner);
+    const balanceBeforeBurningDefenseGem = await defenseGem.balanceOf(gemOwner);
+    const totalSupplyBeforeBurningPowerGem = await powerGem.totalSupply();
+    const totalSupplyBeforeBurningDefenseGem = await defenseGem.totalSupply();
+    await waitFor(
+      gemsCatalystsRegistryAsGemOwner
+        .burnDifferentGems(gemOwner, [defenseGemId, powerGemId], 1)
+    ); // TODO test multiple
+    const balanceAfterBurningPowerGem = await powerGem.balanceOf(gemOwner);
+    const balanceAfterBurningDefenseGem = await defenseGem.balanceOf(gemOwner);
+    const totalSupplyAfterBurningPowerGem = await powerGem.totalSupply();
+    const totalSupplyAfterBurningDefenseGem = await defenseGem.totalSupply();
+    const burnAmount = BigNumber.from('1');
+    expect(balanceAfterBurningPowerGem).to.equal(
+      balanceBeforeBurningPowerGem.sub(burnAmount)
+    );
+    expect(balanceAfterBurningDefenseGem).to.equal(
+      balanceBeforeBurningDefenseGem.sub(burnAmount)
+    );
+    expect(totalSupplyAfterBurningPowerGem).to.equal(
+      totalSupplyBeforeBurningPowerGem.sub(burnAmount)
+    );
+    expect(totalSupplyAfterBurningDefenseGem).to.equal(
+      totalSupplyBeforeBurningDefenseGem.sub(burnAmount)
+    );
+  });
   it('burnDifferentCatalysts for two different catalyst tokens', async function () {
     const {
       gemsCatalystsRegistryAsCataystOwner,
