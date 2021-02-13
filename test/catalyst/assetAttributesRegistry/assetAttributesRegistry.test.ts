@@ -1,14 +1,14 @@
-import {ethers, getUnnamedAccounts} from 'hardhat';
-import {BigNumber, Event} from 'ethers';
-import {expect} from '../../chai-setup';
-import {setCatalyst, setupAssetAttributesRegistry} from './fixtures';
+import { ethers, getUnnamedAccounts } from 'hardhat';
+import { BigNumber, Event } from 'ethers';
+import { expect } from '../../chai-setup';
+import { setCatalyst, setupAssetAttributesRegistry } from './fixtures';
 import catalysts from '../../../data/catalysts';
 import gems from '../../../data/gems';
-import {Block} from '@ethersproject/providers';
-import {expectEventWithArgs, waitFor} from '../../utils';
+import { Block } from '@ethersproject/providers';
+import { expectEventWithArgs, waitFor } from '../../utils';
 describe('AssetAttributesRegistry', function () {
   function testSetCatalyst(
-    record: {catalystId: number; exists: boolean; gemIds: []},
+    record: { catalystId: number; exists: boolean; gemIds: [] },
     event: Event,
     block: Block,
     gemsIds: number[],
@@ -31,7 +31,7 @@ describe('AssetAttributesRegistry', function () {
     }
   }
   it('getRecord for non existing assetId', async function () {
-    const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
+    const { assetAttributesRegistry } = await setupAssetAttributesRegistry();
     const record = await assetAttributesRegistry.getRecord(0);
     expect(record.catalystId).to.equal(0);
     expect(record.exists).to.equal(false);
@@ -43,7 +43,7 @@ describe('AssetAttributesRegistry', function () {
     const users = await getUnnamedAccounts();
     const legendaryCatalystId = catalysts[3].catalystId;
     const gemsIds = gems.filter((gem) => gem.gemId < 5).map((gem) => gem.gemId);
-    const {record, event, block} = await setCatalyst(
+    const { record, event, block } = await setCatalyst(
       users[0],
       assetId,
       legendaryCatalystId,
@@ -115,7 +115,7 @@ describe('AssetAttributesRegistry', function () {
   });
 
   it('setCatalyst should fail for non minter account', async function () {
-    const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
+    const { assetAttributesRegistry } = await setupAssetAttributesRegistry();
     const users = await getUnnamedAccounts();
     const assetId = BigNumber.from('0x1ff80000800000000000000000000000');
     const legendaryCatalystId = catalysts[3].catalystId;
@@ -128,7 +128,7 @@ describe('AssetAttributesRegistry', function () {
   });
 
   it('setCatalyst with gems.length > MAX_NUM_GEMS should fail', async function () {
-    const {assetUpgrader} = await setupAssetAttributesRegistry();
+    const { assetUpgrader } = await setupAssetAttributesRegistry();
     const assetId = BigNumber.from('0x1ff80000800000000000000000000000');
     const users = await getUnnamedAccounts();
     const legendaryCatalystId = catalysts[3].catalystId;
@@ -147,7 +147,7 @@ describe('AssetAttributesRegistry', function () {
   });
 
   it('setCatalyst with gems.length > maxGemForCatalyst should fail', async function () {
-    const {assetUpgrader} = await setupAssetAttributesRegistry();
+    const { assetUpgrader } = await setupAssetAttributesRegistry();
     const assetId = BigNumber.from('0x1ff80000800000000000000000000000');
     const users = await getUnnamedAccounts();
     const legendaryCatalystId = catalysts[3].catalystId;
@@ -185,7 +185,7 @@ describe('AssetAttributesRegistry', function () {
   });
 
   it('setMigrationContract first assignment should fail for non admin', async function () {
-    const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
+    const { assetAttributesRegistry } = await setupAssetAttributesRegistry();
     const users = await getUnnamedAccounts();
     const mockedMigrationContractAddress = users[1];
     await expect(
@@ -252,7 +252,7 @@ describe('AssetAttributesRegistry', function () {
   });
 
   it('setCatalystWithBlockNumber should fail for non migration contract', async function () {
-    const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
+    const { assetAttributesRegistry } = await setupAssetAttributesRegistry();
     const users = await getUnnamedAccounts();
     const mockedMigrationContractAddress = users[1];
     const assetId = 2;
@@ -330,10 +330,10 @@ describe('AssetAttributesRegistry', function () {
       '0x0000000000000000000000000000000000000000800000000000000000000000'
     );
     const users = await getUnnamedAccounts();
-    const gemsIds = [gems[0].gemId];
+    let gemsIds = [gems[0].gemId];
     const rareCatalystId = catalysts[1].catalystId;
 
-    const {record} = await setCatalyst(
+    const { record, event, block } = await setCatalyst(
       users[0],
       assetId,
       rareCatalystId,
@@ -341,26 +341,25 @@ describe('AssetAttributesRegistry', function () {
       users[0]
     );
 
+    testSetCatalyst(
+      record,
+      event,
+      block,
+      gemsIds,
+      rareCatalystId,
+      assetId
+    );
+    const gemsToAdd = [gems[1].gemId];
     await waitFor(
       assetUpgrader
         .connect(ethers.provider.getSigner(users[0]))
-        .addGems(users[0], assetId, [gems[1].gemId], users[0])
+        .addGems(users[0], assetId, gemsToAdd, users[0])
     );
-    expect(record.exists).to.equal(true);
+    gemsIds = [...gemsIds, ...gemsToAdd];
+    const newRecord = await assetAttributesRegistry.getRecord(assetId);
+    expect(newRecord.exists).to.equal(true);
     for (let i = 0; i < gemsIds.length; i++) {
-      expect(record.gemIds[i]).to.equal(i + 1);
-    }
-    const assetAttributesRegistryEvents = await assetAttributesRegistry.queryFilter(
-      assetAttributesRegistry.filters.CatalystApplied()
-    );
-    const event = assetAttributesRegistryEvents.filter(
-      (e) => e.event === 'CatalystApplied'
-    )[0];
-
-    expect(event.args).not.to.equal(null || undefined);
-    if (event.args) {
-      expect(event.args[0]).to.equal(BigNumber.from(assetId));
-      expect(event.args[2]).to.eql(gemsIds);
+      expect(newRecord.gemIds[i]).to.equal(i + 1);
     }
   });
 
@@ -376,7 +375,7 @@ describe('AssetAttributesRegistry', function () {
     const gemsIds = [gems[0].gemId];
     const rareCatalystId = catalysts[1].catalystId;
 
-    const {record} = await setCatalyst(
+    const { record } = await setCatalyst(
       users[0],
       assetId,
       rareCatalystId,
@@ -422,7 +421,7 @@ describe('AssetAttributesRegistry', function () {
   });
 
   it('addGems should fail for non minter account', async function () {
-    const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
+    const { assetAttributesRegistry } = await setupAssetAttributesRegistry();
     const assetId = BigNumber.from(
       '0x0000000000000000000000000000000000000000800000000000000000000000'
     );
@@ -439,7 +438,7 @@ describe('AssetAttributesRegistry', function () {
   });
 
   it('addGems should fail for empty gemsId array', async function () {
-    const {assetUpgrader} = await setupAssetAttributesRegistry();
+    const { assetUpgrader } = await setupAssetAttributesRegistry();
     const users = await getUnnamedAccounts();
     const assetId = BigNumber.from(
       '0x0000000000000000000000000000000000000000800000000000000000000000'
@@ -454,7 +453,7 @@ describe('AssetAttributesRegistry', function () {
   });
 
   it('addGems should fail for non existing catalystId', async function () {
-    const {assetUpgrader} = await setupAssetAttributesRegistry();
+    const { assetUpgrader } = await setupAssetAttributesRegistry();
     const users = await getUnnamedAccounts();
     const assetId = BigNumber.from(
       '0x0000000000000000000000000000000000000000800000000000000000000000'
@@ -482,7 +481,7 @@ describe('AssetAttributesRegistry', function () {
   });
 
   it('addGems should fail when trying to add two gems in total to commonCatalyst', async function () {
-    const {assetUpgrader} = await setupAssetAttributesRegistry();
+    const { assetUpgrader } = await setupAssetAttributesRegistry();
     const assetId = BigNumber.from(
       '0x0000000000000000000000000000000000000000800000000000000000000000'
     );
