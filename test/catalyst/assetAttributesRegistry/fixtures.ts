@@ -16,6 +16,7 @@ export const setupAssetAttributesRegistry = deployments.createFixture(
     const users = await getUnnamedAccounts();
     const user0 = users[0];
     const mockedMigrationContractAddress = users[1];
+    const newMigrationContract = users[2];
 
     const assetAttributesRegistryAsUser0 = await assetAttributesRegistry.connect(
       ethers.provider.getSigner(user0)
@@ -30,6 +31,8 @@ export const setupAssetAttributesRegistry = deployments.createFixture(
       ethers.provider.getSigner(mockedMigrationContractAddress)
     );
     return {
+      newMigrationContract,
+      mockedMigrationContractAddress,
       user0,
       assetAttributesRegistry,
       assetAttributesRegistryAdmin,
@@ -47,16 +50,14 @@ export async function setCatalyst(
   catalystId: number,
   gemsIds: number[],
   to: string,
+  assetUpgrader: Contract,
+  assetAttributesRegistry: Contract,
   collectionId?: BigNumber
 ): Promise<{
   record: { catalystId: number; exists: boolean; gemIds: [] };
   event: Event;
   block: Block;
 }> {
-  const {
-    assetAttributesRegistry,
-    assetUpgrader,
-  } = await setupAssetAttributesRegistry();
   if (collectionId) {
     await waitFor(
       assetUpgrader
