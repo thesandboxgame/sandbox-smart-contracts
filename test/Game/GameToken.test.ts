@@ -1,4 +1,9 @@
-import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
+import {
+  ethers,
+  deployments,
+  getNamedAccounts,
+  getUnnamedAccounts,
+} from 'hardhat';
 import {BigNumber, utils, Contract, BytesLike} from 'ethers';
 import Prando from 'prando';
 import {Address} from 'hardhat-deploy/types';
@@ -133,9 +138,8 @@ describe('GameToken', function () {
       gameTokenAsMinter = await gameToken.connect(
         ethers.provider.getSigner(gameTokenAdmin)
       );
-      expect(await gameToken.getMinter()).to.be.equal(
-        ethers.constants.AddressZero
-      );
+      const minterContract = await deployments.get('GameMinter');
+      expect(await gameToken.getMinter()).to.be.equal(minterContract.address);
     });
 
     it('can update the GameMinter address', async function () {
@@ -201,7 +205,7 @@ describe('GameToken', function () {
           ethers.constants.AddressZero,
           randomId
         )
-      ).to.be.revertedWith('BASEID_REUSE_FORBIDDEN');
+      ).to.be.revertedWith('STORAGE_ID_REUSE_FORBIDDEN');
     });
 
     it('gameId contains creator address', async function () {
@@ -1380,6 +1384,7 @@ describe('GameToken', function () {
     let gameId: BigNumber;
     let updatedGameId: BigNumber;
     let assets: BigNumber[];
+    let gameAssetsWithOldId: BigNumber[];
 
     before(async function () {
       ({gameToken, gameTokenAsAdmin, users, GameOwner} = await setupTest());
@@ -1406,10 +1411,19 @@ describe('GameToken', function () {
       expect(version).to.be.equal('00000001');
     });
 
+    it('should consider future versions of gameIds as invalid', async function () {
+      const futureIdVersion = gameId.add(42);
+      await expect(gameToken.ownerOf(futureIdVersion)).to.be.revertedWith(
+        'NONEXISTANT_TOKEN'
+      );
+    });
+
     it('should update version when changes are made', async function () {
       let idAsHex = utils.hexValue(gameId);
       const versionBefore = idAsHex.slice(58);
       expect(versionBefore).to.be.equal('00000001');
+
+      gameAssetsWithOldId = await gameToken.getAssetBalances(gameId, assets);
       const receipt = await gameTokenAsMinter.updateGame(
         GameOwner.address,
         gameId,
@@ -1426,18 +1440,11 @@ describe('GameToken', function () {
       expect(versionAfter).to.be.equal('00000002');
     });
 
-    it('should use baseId (creator address + subId) to map to game Assets & metaData ', async function () {
-      const uriWithOldId = await gameToken.tokenURI(gameId);
-      const uriWithUpdatedId = await gameToken.tokenURI(updatedGameId);
-      const gameAssetsWithOldId = await gameToken.getAssetBalances(
-        gameId,
-        assets
-      );
+    it('should use baseId (creator address + subId) to map to game Assets  ', async function () {
       const gameAssetsWithUpdatedId = await gameToken.getAssetBalances(
         updatedGameId,
         assets
       );
-      expect(uriWithUpdatedId).to.be.equal(uriWithOldId);
       expect(gameAssetsWithOldId).to.deep.equal(gameAssetsWithUpdatedId);
     });
   });
