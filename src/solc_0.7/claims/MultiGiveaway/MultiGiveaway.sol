@@ -10,6 +10,8 @@ import "../../common/BaseWithStorage/WithAdmin.sol";
 /// @title MultiGiveaway contract.
 /// @notice This contract manages claims for multiple token types.
 contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
+    ///////////////////////////////  Data //////////////////////////////
+
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
@@ -18,13 +20,19 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
     mapping(address => mapping(bytes32 => bool)) public claimed;
     mapping(bytes32 => uint256) internal _expiryTime;
 
+    ///////////////////////////////  Events //////////////////////////////
+
     event NewGiveaway(bytes32 merkleRoot, uint256 expiryTime);
+
+    ///////////////////////////////  Constructor /////////////////////////
 
     constructor(address admin) {
         _admin = admin;
     }
 
-    /// @notice Function to set the merkle root hash for the claim data.
+    ///////////////////////////////  Functions ///////////////////////////
+
+    /// @notice Function to add a new giveaway.
     /// @param merkleRoot The merkle root hash of the claim data.
     /// @param expiryTime The expiry time for the giveaway.
     function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime) external onlyAdmin {
@@ -33,9 +41,10 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
     }
 
     /// @notice Function to check which giveaways have been claimed by a particular user.
-    /// @param user The user (destination) address.
+    /// @param user The user (intended token destination) address.
     /// @param rootHashes The array of giveaway root hashes to check.
-    function getClaimedStatus(address user, bytes32[] calldata rootHashes) external returns (bool[] memory) {
+    /// @return claimedGiveaways The array of bools confirming whether or not the giveaways relating to the root hashes provided have been claimed.
+    function getClaimedStatus(address user, bytes32[] calldata rootHashes) external view returns (bool[] memory) {
         bool[] memory claimedGiveaways = new bool[](rootHashes.length);
         for (uint256 i = 0; i < rootHashes.length; i++) {
             claimedGiveaways[i] = claimed[user][rootHashes[i]];
@@ -44,21 +53,27 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
     }
 
     /// @notice Function to permit the claiming of multiple tokens from multiple giveaways to a reserved address.
-    /// @param claims The claims.
+    /// @param claims The array of claim structs, each containing a destination address, the giveaway items to be claimed and an optional salt param.
     /// @param proofs The proofs submitted for verification.
     function claimMultipleTokensFromMultipleMerkleTree(
         bytes32[] calldata rootHashes,
         Claim[] memory claims,
         bytes32[][] calldata proofs
     ) external {
+        require(claims.length == rootHashes.length, "INVALID_INPUT");
+        require(claims.length == proofs.length, "INVALID_INPUT");
         for (uint256 i = 0; i < rootHashes.length; i++) {
             _claimMultipleTokens(rootHashes[i], claims[i], proofs[i]);
         }
     }
 
+    /// @dev Private function used to perform validity checks and progress to claim multiple token types in one claim.
+    /// @param merkleRoot The merkle root hash for the specific set of items being claimed.
+    /// @param claim The claim struct containing the destination address, all items to be claimed and optional salt param.
+    /// @param proof The proof provided by the user performing the claim function.
     function _claimMultipleTokens(
         bytes32 merkleRoot,
-        Claim memory claim, // Note: if calldata, get UnimplementedFeatureError; possibly fixed in solc 0.7.6
+        Claim memory claim,
         bytes32[] calldata proof
     ) private {
         uint256 giveawayExpiryTime = _expiryTime[merkleRoot];

@@ -9,7 +9,11 @@ import "../../common/Interfaces/IERC721Extended.sol";
 import "../../common/Libraries/Verify.sol";
 
 contract ClaimERC1155ERC721ERC20 {
+    ///////////////////////////////  Libs //////////////////////////////
+
     using SafeERC20 for IERC20;
+
+    ///////////////////////////////  Data //////////////////////////////
 
     struct Claim {
         address to;
@@ -35,9 +39,21 @@ contract ClaimERC1155ERC721ERC20 {
         address[] contractAddresses;
     }
 
+    ///////////////////////////////  Events //////////////////////////////
+
+    /// @dev Emits when a successful claim occurs.
+    /// @param to The destination address for the claimed ERC1155, ERC721 and ERC20 tokens.
+    /// @param erc1155 The array of ERC1155Claim structs containing the ids, values and ERC1155 contract address.
+    /// @param erc721 The array of ERC721Claim structs containing the ids and ERC721 contract address.
+    /// @param erc20 The ERC20Claim struct containing the amounts and ERC20 contract addresses.
     event ClaimedMultipleTokens(address to, ERC1155Claim[] erc1155, ERC721Claim[] erc721, ERC20Claim erc20);
 
-    /// @dev TODO docs.
+    ///////////////////////////////  Functions ///////////////////////////
+
+    /// @dev Internal function used to claim multiple token types in one claim.
+    /// @param merkleRoot The merkle root hash for the specific set of items being claimed.
+    /// @param claim The claim struct containing the destination address, all items to be claimed and optional salt param.
+    /// @param proof The proof provided by the user performing the claim function.
     function _claimERC1155ERC721ERC20(
         bytes32 merkleRoot,
         Claim memory claim,
@@ -58,6 +74,10 @@ contract ClaimERC1155ERC721ERC20 {
         emit ClaimedMultipleTokens(claim.to, claim.erc1155, claim.erc721, claim.erc20);
     }
 
+    /// @dev Private function used to check the validity of a specific claim.
+    /// @param merkleRoot The merkle root hash for the specific set of items being claimed.
+    /// @param claim The claim struct containing the destination address, all items to be claimed and optional salt param.
+    /// @param proof The proof provided by the user performing the claim function.
     function _checkValidity(
         bytes32 merkleRoot,
         Claim memory claim,
@@ -67,10 +87,17 @@ contract ClaimERC1155ERC721ERC20 {
         require(Verify.doesComputedHashMatchMerkleRootHash(merkleRoot, proof, leaf), "INVALID_CLAIM");
     }
 
+    /// @dev Private function used to generate a hash from an encoded claim.
+    /// @param claim The claim struct.
     function _generateClaimHash(Claim memory claim) private pure returns (bytes32) {
         return keccak256(abi.encode(claim));
     }
 
+    /// @dev Private function used to transfer the ERC1155 tokens specified in a specific claim.
+    /// @param to The destination address for the claimed tokens.
+    /// @param ids The array of ERC1155 ids.
+    /// @param values The amount of ERC1155 tokens of each id to be transferred.
+    /// @param contractAddress The ERC1155 token contract address.
     function _transferERC1155(
         address to,
         uint256[] memory ids,
@@ -81,6 +108,10 @@ contract ClaimERC1155ERC721ERC20 {
         IERC1155(contractAddress).safeBatchTransferFrom(address(this), to, ids, values, "");
     }
 
+    /// @dev Private function used to transfer the ERC721tokens specified in a specific claim.
+    /// @param to The destination address for the claimed tokens.
+    /// @param ids The array of ERC721 ids.
+    /// @param contractAddress The ERC721 token contract address.
     function _transferERC721(
         address to,
         uint256[] memory ids,
@@ -90,6 +121,10 @@ contract ClaimERC1155ERC721ERC20 {
         IERC721Extended(contractAddress).safeBatchTransferFrom(address(this), to, ids, "");
     }
 
+    /// @dev Private function used to transfer the ERC20 tokens specified in a specific claim.
+    /// @param to The destination address for the claimed tokens.
+    /// @param amounts The array of amounts of ERC20 tokens to be transferred.
+    /// @param contractAddresses The array of ERC20 token contract addresses.
     function _transferERC20(
         address to,
         uint256[] memory amounts,
