@@ -78,7 +78,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
 
     /// @notice getAttributes
     /// @param assetId id of the asset
-    /// @return The array of values(256) requested.
+    /// @return values The array of values(256) requested.
     function getAttributes(uint256 assetId, GemEvent[] calldata events) external view returns (uint32[] memory values) {
         return _gemsCatalystsRegistry.getAttributes(_records[assetId].catalystId, assetId, events);
     }
@@ -200,7 +200,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
     }
 
     /// @dev Get a blocknumber for use when querying attributes.
-    /// @return The current blocknumber + 1.
+    /// @return blockNumber The current blocknumber + 1.
     function _getBlockNumber() internal view returns (uint64 blockNumber) {
         blockNumber = uint64(block.number + 1);
     }

@@ -165,7 +165,7 @@ contract AssetMinter is WithMetaTransaction {
 
     /// @dev Burn a batch of gems in one tx.
     /// @param from The original address that signed the tx.
-    /// @param catalystsQuantities An array of quantities for each type of gems to burn.
+    /// @param gemsQuantities An array of quantities for each type of gems to burn.
     function _batchBurnGems(address from, uint256[] memory gemsQuantities) internal {
         uint16[] memory ids = new uint16[](gemsQuantities.length);
         for (uint16 i = 0; i < ids.length; i++) {

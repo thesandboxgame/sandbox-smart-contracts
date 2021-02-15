@@ -183,7 +183,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
     }
 
     /// @dev Get the gem contract corresponding to the id.
-    /// @param catalystId The gem id to use to retrieve the contract.
+    /// @param gemId The gem id to use to retrieve the contract.
     /// @return The requested Gem contract.
     function getGem(uint16 gemId) internal view returns (Gem) {
         if (gemId > 0 && gemId <= _gems.length) {
