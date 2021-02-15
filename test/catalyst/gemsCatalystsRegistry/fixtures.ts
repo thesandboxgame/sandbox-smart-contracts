@@ -35,6 +35,7 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   const catalystOwner = users[0];
   const gemOwner = users[0];
   const gemsCatalystsRegistrySuperOperator = users[1];
+  const user3 = users[3];
 
   await deployments.deploy(`Gem_Example`, {
     contract: 'Gem',
@@ -125,6 +126,33 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     .connect(ethers.provider.getSigner(gemsCatalystsRegistryAdmin))
     .setSuperOperator(gemsCatalystsRegistrySuperOperator, true);
 
+  const gemsCatalystsRegistryAsCataystOwner = await gemsCatalystsRegistry.connect(
+    ethers.provider.getSigner(catalystOwner)
+  );
+
+  const gemsCatalystsRegistryAsRegistrySuperOperator = await gemsCatalystsRegistry.connect(
+    ethers.provider.getSigner(gemsCatalystsRegistrySuperOperator)
+  );
+
+  const gemsCatalystsRegistryAsUser3 = await gemsCatalystsRegistry.connect(
+    ethers.provider.getSigner(users[3])
+  );
+
+  const gemsCatalystsRegistryAsRegAdmin = await gemsCatalystsRegistry.connect(
+    ethers.provider.getSigner(gemsCatalystsRegistryAdmin)
+  );
+
+  const gemsCatalystsRegistryAsCataystMinter = await gemsCatalystsRegistry.connect(
+    ethers.provider.getSigner(catalystMinter)
+  );
+
+  const gemsCatalystsRegistryAsGemOwner = await gemsCatalystsRegistry.connect(
+    ethers.provider.getSigner(gemOwner)
+  );
+
+  const gemsCatalystsRegistryAsGemMinter = await gemsCatalystsRegistry.connect(
+    ethers.provider.getSigner(gemMinter)
+  );
   return {
     gemsCatalystsRegistry,
     gemsCatalystsRegistrySuperOperator,
@@ -145,5 +173,13 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     gemMinter,
     catalystOwner,
     gemOwner,
+    user3,
+    gemsCatalystsRegistryAsCataystOwner,
+    gemsCatalystsRegistryAsRegistrySuperOperator,
+    gemsCatalystsRegistryAsUser3,
+    gemsCatalystsRegistryAsRegAdmin,
+    gemsCatalystsRegistryAsCataystMinter,
+    gemsCatalystsRegistryAsGemOwner,
+    gemsCatalystsRegistryAsGemMinter,
   };
 });

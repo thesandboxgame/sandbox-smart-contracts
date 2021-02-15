@@ -1,4 +1,9 @@
-import {ethers, deployments, getNamedAccounts} from 'hardhat';
+import {
+  ethers,
+  deployments,
+  getNamedAccounts,
+  getUnnamedAccounts,
+} from 'hardhat';
 import {BigNumber, Contract, Event} from 'ethers';
 import {Block} from '@ethersproject/providers';
 import {waitFor} from '../../utils';
@@ -13,11 +18,34 @@ export const setupAssetAttributesRegistry = deployments.createFixture(
     );
     const assetUpgrader: Contract = await ethers.getContract('AssetUpgrader');
     const {assetAttributesRegistryAdmin} = await getNamedAccounts();
+    const users = await getUnnamedAccounts();
+    const user0 = users[0];
+    const mockedMigrationContractAddress = users[1];
+    const newMigrationContract = users[2];
 
+    const assetAttributesRegistryAsUser0 = await assetAttributesRegistry.connect(
+      ethers.provider.getSigner(user0)
+    );
+    const assetAttributesRegistryAsRegistryAdmin = await assetAttributesRegistry.connect(
+      ethers.provider.getSigner(assetAttributesRegistryAdmin)
+    );
+    const assetUpgraderAsUser0 = await assetUpgrader.connect(
+      ethers.provider.getSigner(user0)
+    );
+    const assetAttributesRegistryAsmockedMigrationContract = await assetAttributesRegistry.connect(
+      ethers.provider.getSigner(mockedMigrationContractAddress)
+    );
     return {
+      newMigrationContract,
+      mockedMigrationContractAddress,
+      user0,
       assetAttributesRegistry,
       assetAttributesRegistryAdmin,
       assetUpgrader,
+      assetAttributesRegistryAsUser0,
+      assetAttributesRegistryAsRegistryAdmin,
+      assetAttributesRegistryAsmockedMigrationContract,
+      assetUpgraderAsUser0,
     };
   }
 );
