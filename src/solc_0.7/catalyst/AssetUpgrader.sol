@@ -151,6 +151,8 @@ contract AssetUpgrader is WithMetaTransaction {
     ) internal {
         if (from != to) {
             _asset.safeTransferFrom(from, to, assetId);
+        } else {
+            require(_asset.balanceOf(from, assetId) > 0, "NOT_AUTHORIZED_ASSET_OWNER");
         }
     }
 
