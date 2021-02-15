@@ -5,7 +5,7 @@ import catalysts from '../../../data/catalysts';
 import gems from '../../../data/gems';
 import { Block } from '@ethersproject/providers';
 import { mintAsset } from '../utils';
-import { waitFor } from '../../../scripts/utils/utils';
+import { waitFor } from '../../utils';
 describe('AssetAttributesRegistry', function () {
   function testSetCatalyst(
     record: { catalystId: number; exists: boolean; gemIds: [] },
