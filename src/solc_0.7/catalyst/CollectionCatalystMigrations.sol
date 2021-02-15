@@ -37,6 +37,10 @@ contract CollectionCatalystMigrations is WithAdmin {
         _admin = admin;
     }
 
+    /// @notice Migrate the catalyst for a collection of assets.
+    /// @param assetId The id of the asset for which the catalyst is being migrated.
+    /// @param gemIds The gems currently embedded in the catalyst.
+    /// @param blockNumber The blocknumber to use when setting the catalyst.
     function migrate(
         uint256 assetId,
         uint16[] calldata gemIds,
@@ -46,6 +50,8 @@ contract CollectionCatalystMigrations is WithAdmin {
         _migrate(assetId, gemIds, blockNumber);
     }
 
+    /// @notice Migrate the catalysts for a batch of assets.
+    /// @param migrations The data to use for each migration in the batch.
     function batchMigrate(Migration[] calldata migrations) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
         for (uint256 i = 0; i < migrations.length; i++) {
@@ -53,6 +59,7 @@ contract CollectionCatalystMigrations is WithAdmin {
         }
     }
 
+    /// @dev Perform the migration of the catalyst. See `migrate(...)`
     function _migrate(
         uint256 assetId,
         uint16[] memory gemIds,
