@@ -1,14 +1,14 @@
-import { BigNumber, Event } from 'ethers';
-import { expect } from '../../chai-setup';
-import { setCatalyst, setupAssetAttributesRegistry } from './fixtures';
+import {BigNumber, Event} from 'ethers';
+import {expect} from '../../chai-setup';
+import {setCatalyst, setupAssetAttributesRegistry} from './fixtures';
 import catalysts from '../../../data/catalysts';
 import gems from '../../../data/gems';
-import { Block } from '@ethersproject/providers';
-import { mintAsset } from '../utils';
-import { waitFor } from '../../utils';
+import {Block} from '@ethersproject/providers';
+import {mintAsset} from '../utils';
+import {waitFor} from '../../utils';
 describe('AssetAttributesRegistry', function () {
   function testSetCatalyst(
-    record: { catalystId: number; exists: boolean; gemIds: [] },
+    record: {catalystId: number; exists: boolean; gemIds: []},
     event: Event,
     block: Block,
     gemsIds: number[],
@@ -31,7 +31,7 @@ describe('AssetAttributesRegistry', function () {
     }
   }
   it('getRecord for non existing assetId', async function () {
-    const { assetAttributesRegistry } = await setupAssetAttributesRegistry();
+    const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
     const record = await assetAttributesRegistry.getRecord(0);
     expect(record.catalystId).to.equal(0);
     expect(record.exists).to.equal(false);
@@ -55,7 +55,7 @@ describe('AssetAttributesRegistry', function () {
     );
     const legendaryCatalystId = catalysts[3].catalystId;
     const gemsIds = gems.filter((gem) => gem.gemId < 5).map((gem) => gem.gemId);
-    const { record, event, block } = await setCatalyst(
+    const {record, event, block} = await setCatalyst(
       user0,
       assetId,
       legendaryCatalystId,
@@ -90,7 +90,7 @@ describe('AssetAttributesRegistry', function () {
   });
 
   it('setCatalyst with gems.length > MAX_NUM_GEMS should fail', async function () {
-    const { assetUpgraderAsUser0, user0 } = await setupAssetAttributesRegistry();
+    const {assetUpgraderAsUser0, user0} = await setupAssetAttributesRegistry();
     const assetId = BigNumber.from(
       '0x100000000000000000012000000000800000000000000000000000'
     );
@@ -108,7 +108,7 @@ describe('AssetAttributesRegistry', function () {
   });
 
   it('setCatalyst with gems.length > maxGemForCatalyst should fail', async function () {
-    const { assetUpgraderAsUser0, user0 } = await setupAssetAttributesRegistry();
+    const {assetUpgraderAsUser0, user0} = await setupAssetAttributesRegistry();
     const assetId = BigNumber.from('0x1ff80000800000000000000080000000');
     const legendaryCatalystId = catalysts[3].catalystId;
     const gemsIds = [1, 2, 3, 4, 5, 1, 2, 3, 4, 5, 1];
@@ -294,7 +294,7 @@ describe('AssetAttributesRegistry', function () {
     let gemsIds = [gems[0].gemId];
     const rareCatalystId = catalysts[1].catalystId;
 
-    const { record, event, block } = await setCatalyst(
+    const {record, event, block} = await setCatalyst(
       user0,
       assetId,
       rareCatalystId,
@@ -376,7 +376,7 @@ describe('AssetAttributesRegistry', function () {
   });
 
   it('addGems should fail for empty gemsId array', async function () {
-    const { user0, assetUpgraderAsUser0 } = await setupAssetAttributesRegistry();
+    const {user0, assetUpgraderAsUser0} = await setupAssetAttributesRegistry();
     const assetId = BigNumber.from(
       '0x0000000000000000000000000000000000000000800000000000000000000000'
     );
@@ -388,7 +388,7 @@ describe('AssetAttributesRegistry', function () {
   });
 
   it('addGems should fail for non existing catalystId', async function () {
-    const { user0, assetUpgraderAsUser0 } = await setupAssetAttributesRegistry();
+    const {user0, assetUpgraderAsUser0} = await setupAssetAttributesRegistry();
     const assetId = BigNumber.from(
       '0x0000000000000000000000000000000000000000800000000000000000000000'
     );

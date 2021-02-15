@@ -1,7 +1,7 @@
-import { BigNumber } from '@ethersproject/bignumber';
-import { expect } from '../../chai-setup';
-import { setupAssetUpgrader } from './fixtures';
-import { waitFor } from '../../utils';
+import {BigNumber} from '@ethersproject/bignumber';
+import {expect} from '../../chai-setup';
+import {setupAssetUpgrader} from './fixtures';
+import {waitFor} from '../../utils';
 import {
   changeCatalyst,
   mintAsset,
@@ -9,7 +9,7 @@ import {
   mintGem,
   transferSand,
 } from '../utils';
-import { ethers } from 'hardhat';
+import {ethers} from 'hardhat';
 
 const GEM_CATALYST_UNIT = BigNumber.from('1000000000000000000');
 
