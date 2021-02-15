@@ -78,6 +78,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
 
     /// @notice getAttributes
     /// @param assetId id of the asset
+    /// @return The array of values(256) requested.
     function getAttributes(uint256 assetId, GemEvent[] calldata events) external view returns (uint32[] memory values) {
         return _gemsCatalystsRegistry.getAttributes(_records[assetId].catalystId, assetId, events);
     }
@@ -164,6 +165,11 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
         }
     }
 
+    /// @dev Set a catalyst for the given asset.
+    /// @param assetId The asset to set a catalyst on.
+    /// @param catalystId The catalyst to set.
+    /// @param gemIds The gems to embed in the catalyst.
+    /// @param blockNumber The blocknumber to emit in the event.
     function _setCatalyst(
         uint256 assetId,
         uint16 catalystId,
@@ -186,10 +192,15 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
         emit CatalystApplied(assetId, catalystId, gemIds, blockNumber);
     }
 
+    /// @dev Get the collection Id for an asset.
+    /// @param assetId The asset to get the collection id for.
+    /// @return The id of the collection the asset belongs to.
     function _getCollectionId(uint256 assetId) internal pure returns (uint256) {
         return assetId & NOT_NFT_INDEX & NOT_IS_NFT; // compute the same as Asset to get collectionId
     }
 
+    /// @dev Get a blocknumber for use when querying attributes.
+    /// @return The current blocknumber + 1.
     function _getBlockNumber() internal view returns (uint64 blockNumber) {
         blockNumber = uint64(block.number + 1);
     }
