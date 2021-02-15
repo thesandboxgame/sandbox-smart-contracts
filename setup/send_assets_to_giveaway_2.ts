@@ -6,38 +6,38 @@ const func: DeployFunction = async function () {
   const {deployments} = hre;
   const {execute, catchUnknownSigner} = deployments;
 
-  let smurfOwner;
-  let smurfId;
+  let owner;
+  let tokenId;
 
   switch (hre.network.name) {
     case 'mainnet':
-      smurfOwner = '0x7a9fe22691c811ea339d9b73150e6911a5343dca';
-      smurfId =
-        '55464657044963196816950587289035428064568320970692304673817341489687505668096';
+      owner = '0x7a9fe22691c811ea339d9b73150e6911a5343dca';
+      tokenId =
+        '55464657044963196816950587289035428064568320970692304673817341489687522457600';
       break;
     case 'rinkeby':
-      smurfOwner = '0x60927eB036621b801491B6c5e9A60A8d2dEeD75A';
-      smurfId =
+      owner = '0x60927eB036621b801491B6c5e9A60A8d2dEeD75A';
+      tokenId =
         '43680867506168749228565131403402869733336284654176091019334004301894460114944';
       break;
   }
 
-  if (!smurfOwner || smurfOwner === '') {
+  if (!owner || owner === '') {
     return;
   }
 
-  const AssetGiveaway = await deployments.get('Asset_Giveaway_1');
+  const AssetGiveaway = await deployments.get('Asset_Giveaway_2');
 
   const assetData: AssetGiveawayInfo[] = AssetGiveaway.linkedData;
 
   await catchUnknownSigner(
     execute(
       'Asset',
-      {from: smurfOwner, log: true},
+      {from: owner, log: true},
       'safeTransferFrom(address,address,uint256,uint256,bytes)',
-      smurfOwner,
+      owner,
       AssetGiveaway.address,
-      smurfId,
+      tokenId,
       assetData.length,
       '0x'
     )

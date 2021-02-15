@@ -16,10 +16,10 @@ export function createAssetClaimMerkleTree(
   saltedAssets: AssetGiveawayInfo[];
   tree: MerkleTree;
 } {
-  let secretPath = './secret/.asset_giveaway_1_secret';
+  let secretPath = './secret/.asset_giveaway_2_secret';
   if (BigNumber.from(chainId).toString() === '1') {
     console.log('MAINNET secret');
-    secretPath = './secret/.asset_giveaway_1_secret.mainnet';
+    secretPath = './secret/.asset_giveaway_2_secret.mainnet';
   }
 
   let expose = false;

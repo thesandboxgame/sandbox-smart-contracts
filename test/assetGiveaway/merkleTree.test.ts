@@ -9,17 +9,17 @@ describe('MerkleTree_assets', function () {
     const assets = [
       {
         reservedAddress: '0xfB56eb456045e22c9e78C560E9572801b011e8Eb',
-        assetIds: [0, 1, 2],
+        assetIds: ['0', '1', '2'],
         assetValues: [5, 5, 5],
       },
       {
         reservedAddress: '0xfB56eb456045e22c9e78C560E9572801b011e8Eb',
-        assetIds: [3, 4, 5],
+        assetIds: ['3', '4', '5'],
         assetValues: [5, 5, 5],
       },
       {
         reservedAddress: '0xfB56eb456045e22c9e78C560E9572801b011e8Eb',
-        assetIds: [6, 7, 8],
+        assetIds: ['6', '7', '8'],
         assetValues: [5, 5, 5],
       },
     ];

@@ -1,25 +1,32 @@
-import {BigNumber, utils} from 'ethers';
+import {utils} from 'ethers';
 const {solidityKeccak256} = utils;
 import crypto from 'crypto';
 
-interface land {
+export type SaleLandInfo = {
   x: number;
   y: number;
   size: number;
-  price: number;
+  price: string;
   reserved: string;
   salt?: string;
-  assetIds?: Array<number>;
-}
+  assetIds?: Array<string>;
+};
 
-interface asset {
+export type SaltedSaleLandInfo = SaleLandInfo & {
+  salt: string;
+};
+
+export type AssetGiveawayInfo = {
   reservedAddress: string;
-  assetIds: Array<BigNumber> | Array<string> | Array<number>;
+  assetIds: Array<string>;
   assetValues: Array<number>;
   salt?: string;
-}
+};
 
-function calculateLandHash(land: land, salt?: string): string {
+function calculateLandHash(
+  land: SaleLandInfo | SaltedSaleLandInfo,
+  salt?: string
+): string {
   const types = [
     'uint256',
     'uint256',
@@ -45,7 +52,10 @@ function calculateLandHash(land: land, salt?: string): string {
   return solidityKeccak256(types, values);
 }
 
-function saltLands(lands: land[], secret?: string): Array<land> {
+function saltLands(
+  lands: SaleLandInfo[],
+  secret?: string
+): Array<SaltedSaleLandInfo> {
   const saltedLands = [];
   for (const land of lands) {
     let salt = land.salt;
@@ -78,11 +88,13 @@ function saltLands(lands: land[], secret?: string): Array<land> {
   return saltedLands;
 }
 
-function createDataArray(lands: land[], secret?: string): Array<land> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data: any = [];
+function createDataArray(
+  lands: SaltedSaleLandInfo[],
+  secret?: string
+): string[] {
+  const data: string[] = [];
 
-  lands.forEach((land: land) => {
+  lands.forEach((land: SaltedSaleLandInfo) => {
     let salt = land.salt;
     if (!salt) {
       if (!secret) {
@@ -106,7 +118,7 @@ function createDataArray(lands: land[], secret?: string): Array<land> {
   return data;
 }
 
-function calculateAssetHash(asset: asset, salt?: string): string {
+function calculateAssetHash(asset: AssetGiveawayInfo, salt?: string): string {
   const types = ['address', 'uint256[]', 'uint256[]', 'bytes32'];
   const values = [
     asset.reservedAddress,
@@ -117,7 +129,10 @@ function calculateAssetHash(asset: asset, salt?: string): string {
   return solidityKeccak256(types, values);
 }
 
-function saltAssets(assets: asset[], secret?: string | Buffer): Array<asset> {
+function saltAssets(
+  assets: AssetGiveawayInfo[],
+  secret?: string | Buffer
+): Array<AssetGiveawayInfo> {
   return assets.map((asset) => {
     const salt = asset.salt;
     if (!salt) {
@@ -144,11 +159,13 @@ function saltAssets(assets: asset[], secret?: string | Buffer): Array<asset> {
   });
 }
 
-function createDataArrayAssets(assets: asset[], secret?: string): Array<asset> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data: any = [];
+function createDataArrayAssets(
+  assets: AssetGiveawayInfo[],
+  secret?: string
+): Array<string> {
+  const data: string[] = [];
 
-  assets.forEach((asset: asset) => {
+  assets.forEach((asset: AssetGiveawayInfo) => {
     let salt = asset.salt;
     if (!salt) {
       if (!secret) {
