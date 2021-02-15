@@ -15,7 +15,7 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
     bytes4 internal constant ERC721_BATCH_RECEIVED = 0x4b808c46;
 
-    mapping(address => mapping(bytes32 => bool)) public claimed; // TODO: change to index mapping - see uniswap
+    mapping(address => mapping(bytes32 => bool)) public claimed;
     mapping(bytes32 => uint256) internal _expiryTime;
 
     event NewGiveaway(bytes32 merkleRoot, uint256 expiryTime);
