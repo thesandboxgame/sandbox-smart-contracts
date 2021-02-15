@@ -125,14 +125,24 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
         }
     }
 
+    /// @notice Query whether a given gem exists.
+    /// @param gemId The gem being queried.
+    /// @return Whether the gem exists.
     function doesGemExist(uint16 gemId) external view returns (bool) {
         return getGem(gemId) != Gem(0);
     }
 
+    /// @notice Query whether a giving catalyst exists.
+    /// @param catalystId The catalyst being queried.
+    /// @return Whether the catalyst exists.
     function doesCatalystExist(uint16 catalystId) external view returns (bool) {
         return getCatalyst(catalystId) != Catalyst(0);
     }
 
+    /// @notice Burn a catalyst.
+    /// @param from The signing address for the tx.
+    /// @param catalystId The id of the catalyst to burn.
+    /// @param amount The number of catalyst tokens to burn.
     function burnCatalyst(
         address from,
         uint16 catalystId,
@@ -144,6 +154,10 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
         catalyst.burnFor(from, amount);
     }
 
+    /// @notice Burn a gem.
+    /// @param from The signing address for the tx.
+    /// @param gemId The id of the gem to burn.
+    /// @param amount The number of gem tokens to burn.
     function burnGem(
         address from,
         uint16 gemId,
@@ -157,6 +171,9 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
 
     // //////////////////// INTERNALS ////////////////////
 
+    /// @dev Get the catalyst contract corresponding to the id.
+    /// @param catalystId The catalyst id to use to retrieve the contract.
+    /// @return The requested Catalyst contract.
     function getCatalyst(uint16 catalystId) internal view returns (Catalyst) {
         if (catalystId > 0 && catalystId <= _catalysts.length) {
             return _catalysts[catalystId - 1];
@@ -165,6 +182,9 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
         }
     }
 
+    /// @dev Get the gem contract corresponding to the id.
+    /// @param catalystId The gem id to use to retrieve the contract.
+    /// @return The requested Gem contract.
     function getGem(uint16 gemId) internal view returns (Gem) {
         if (gemId > 0 && gemId <= _gems.length) {
             return _gems[gemId - 1];
@@ -173,6 +193,8 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
         }
     }
 
+    /// @dev verify that the caller is authorized for this function call.
+    /// @param from The original signer of the transaction.
     function _checkAuthorization(address from) internal view override {
         require(msg.sender == from || _isValidMetaTx(from) || isSuperOperator(msg.sender), "AUTH_ACCESS_DENIED");
     }
