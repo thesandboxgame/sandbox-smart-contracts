@@ -56,8 +56,14 @@ contract DefaultAttributes is IAttributes {
         }
     }
 
-    ///@dev compute a random value between min to 25.
-    //. example: 1-25, 6-25, 11-25, 16-25
+    /// @dev compute a random value between min to 25.
+    /// example: 1-25, 6-25, 11-25, 16-25
+    /// @param assetId The id of the asset.
+    /// @param gemId The id of the gem.
+    /// @param blockHash The blockHash from the gemEvent.
+    /// @param slotIndex Index of the current gem.
+    /// @param min The minumum value this gem can have.
+    /// @return The computed value for the given gem.
     function _computeValue(
         uint256 assetId,
         uint256 gemId,
