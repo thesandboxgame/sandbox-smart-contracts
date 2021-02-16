@@ -10,6 +10,88 @@ const {calculateMultiClaimHash} = helpers;
 const zeroAddress = constants.AddressZero;
 
 describe('Multi_Giveaway', function () {
+  describe('Multi_Giveaway_common_functionality', function () {
+    it('Admin can add a new giveaway', async function () {
+      const options = {};
+      const setUp = await setupTestGiveaway(options);
+      const {giveawayContract, nftGiveawayAdmin} = setUp;
+
+      const giveawayContractAsAdmin = await giveawayContract.connect(
+        ethers.provider.getSigner(nftGiveawayAdmin)
+      );
+
+      const receipt = await waitFor(
+        giveawayContractAsAdmin
+          .addNewGiveaway
+          //TODO:
+          ()
+      );
+
+      // TODO: event checks
+    });
+
+    it('Cannot add a new giveaway if not admin', async function () {
+      const options = {};
+      const setUp = await setupTestGiveaway(options);
+      const {giveawayContract, others} = setUp;
+
+      const giveawayContractAsUser = await giveawayContract.connect(
+        ethers.provider.getSigner(others[0])
+      );
+
+      await expect(
+        giveawayContractAsUser
+          .addNewGiveaway
+          //TODO:
+          ()
+      ).to.be.revertedWith('NOT_AITHORIZED');
+    });
+
+    it('User can get their claimed status', async function () {
+      const options = {};
+      const setUp = await setupTestGiveaway(options);
+      const {giveawayContract, others} = setUp;
+
+      const giveawayContractAsUser = await giveawayContract.connect(
+        ethers.provider.getSigner(others[0])
+      );
+
+      const statuses = await giveawayContractAsUser
+        .getClaimedStatus
+        //TODO:
+        ();
+    });
+
+    it('Claimed status is correctly updated after allocated tokens are claimed - 1 claim', async function () {
+      const options = {};
+      const setUp = await setupTestGiveaway(options);
+      const {giveawayContract, others} = setUp;
+
+      const giveawayContractAsUser = await giveawayContract.connect(
+        ethers.provider.getSigner(others[0])
+      );
+
+      const statuses = await giveawayContractAsUser
+        .getClaimedStatus
+        //TODO:
+        ();
+    });
+
+    it('Claimed status is correctly updated after allocated tokens are claimed - 2 claims', async function () {
+      const options = {};
+      const setUp = await setupTestGiveaway(options);
+      const {giveawayContract, others} = setUp;
+
+      const giveawayContractAsUser = await giveawayContract.connect(
+        ethers.provider.getSigner(others[0])
+      );
+
+      const statuses = await giveawayContractAsUser
+        .getClaimedStatus
+        //TODO:
+        ();
+    });
+  });
   describe('Multi_Giveaway_single_giveaway', function () {
     it('User cannot claim when test contract holds no tokens', async function () {
       const options = {};
