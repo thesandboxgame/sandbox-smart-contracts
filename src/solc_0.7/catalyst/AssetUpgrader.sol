@@ -57,6 +57,7 @@ contract AssetUpgrader is WithMetaTransaction {
     /// @param catalystId address of the catalyst token to use and burn.
     /// @param gemIds list of gems to socket into the catalyst (burned).
     /// @param to destination address receiving the extracted and upgraded ERC721 Asset token.
+    /// @return tokenId The Id of the extracted token.
     function extractAndSetCatalyst(
         address from,
         uint256 assetId,
@@ -76,6 +77,7 @@ contract AssetUpgrader is WithMetaTransaction {
     /// @param catalystId address of the catalyst token to use and burn.
     /// @param gemIds list of gems to socket into the catalyst (burned).
     /// @param to destination address receiving the Asset token.
+    /// @return tokenId The id of the asset.
     function changeCatalyst(
         address from,
         uint256 assetId,
@@ -105,6 +107,9 @@ contract AssetUpgrader is WithMetaTransaction {
         _addGems(from, assetId, gemIds, to);
     }
 
+    /// @dev Collect a fee in SAND tokens
+    /// @param from The address paying the fee.
+    /// @param sandFee The fee amount.
     function _chargeSand(address from, uint256 sandFee) internal {
         if (feeRecipient != address(0) && sandFee != 0) {
             if (feeRecipient == address(BURN_ADDRESS)) {
@@ -116,6 +121,12 @@ contract AssetUpgrader is WithMetaTransaction {
         }
     }
 
+    /// @dev Change the catalyst for an asset.
+    /// @param from The current owner of the asset.
+    /// @param assetId The id of the asset to change.
+    /// @param catalystId The id of the new catalyst to set.
+    /// @param gemIds An array of gemIds to embed.
+    /// @param to The address to transfer the asset to after the catalyst is changed.
     function _changeCatalyst(
         address from,
         uint256 assetId,
@@ -131,6 +142,11 @@ contract AssetUpgrader is WithMetaTransaction {
         _transfer(from, to, assetId);
     }
 
+    /// @dev Add gems to an existing asset.
+    /// @param from The current owner of the asset.
+    /// @param assetId The asset to add gems to.
+    /// @param gemIds An array of gemIds to add to the asset.
+    /// @param to The address to transfer the asset to after adding gems.
     function _addGems(
         address from,
         uint256 assetId,
@@ -144,6 +160,10 @@ contract AssetUpgrader is WithMetaTransaction {
         _transfer(from, to, assetId);
     }
 
+    /// @dev transfer an asset if from != to.
+    /// @param from The address to transfer the asset from.
+    /// @param to The address to transfer the asset to.
+    /// @param assetId The asset to transfer.
     function _transfer(
         address from,
         address to,
@@ -156,10 +176,16 @@ contract AssetUpgrader is WithMetaTransaction {
         }
     }
 
+    /// @dev Burn gems.
+    /// @param from The owner of the gems.
+    /// @param gemIds The gem types to burn.
     function _burnGems(address from, uint16[] memory gemIds) internal {
         _gemsCatalystsRegistry.burnDifferentGems(from, gemIds, GEM_UNIT);
     }
 
+    /// @dev Burn a catalyst.
+    /// @param from The owner of the catalyst.
+    /// @param catalystId The catalyst type to burn.
     function _burnCatalyst(address from, uint16 catalystId) internal {
         _gemsCatalystsRegistry.burnCatalyst(from, catalystId, CATALYST_UNIT);
     }

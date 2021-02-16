@@ -107,6 +107,12 @@ contract AssetMinter is WithMetaTransaction {
         return assetIds;
     }
 
+    /// @dev Handler for edaling with assets when minting multiple at once.
+    /// @param from The original address that signed the transaction.
+    /// @param gemsQuantities An array listing the quantity of each type of gem.
+    /// @param catalystsQuantities An array listing the quantity of each type of catalyst.
+    /// @param assets An array of AssetData structs to define how the total gems and catalysts are to be allocated.
+    /// @return supplies An array of the quantities for each asset being minted.
     function _handleMultipleAssetRequirements(
         address from,
         uint256[] memory gemsQuantities,
@@ -130,6 +136,10 @@ contract AssetMinter is WithMetaTransaction {
         }
     }
 
+    /// @dev Validate the quantities of each type of gem passed.
+    /// @param gemsQuantities An array of the quantities of each gem type to use for minting assets.
+    /// @param gemIds An array of gemIds to use for minting assets.
+    /// @return An array of quantities for aech gem type.
     function _checkGemsQuantities(uint256[] memory gemsQuantities, uint16[] memory gemIds)
         internal
         pure
@@ -142,6 +152,9 @@ contract AssetMinter is WithMetaTransaction {
         return gemsQuantities;
     }
 
+    /// @dev Burn a batch of catalysts in one tx.
+    /// @param from The original address that signed the tx.
+    /// @param catalystsQuantities An array of quantities for each type of catalyst to burn.
     function _batchBurnCatalysts(address from, uint256[] memory catalystsQuantities) internal {
         uint16[] memory ids = new uint16[](catalystsQuantities.length);
         for (uint16 i = 0; i < ids.length; i++) {
@@ -150,6 +163,9 @@ contract AssetMinter is WithMetaTransaction {
         _gemsCatalystsRegistry.batchBurnCatalysts(from, ids, catalystsQuantities);
     }
 
+    /// @dev Burn a batch of gems in one tx.
+    /// @param from The original address that signed the tx.
+    /// @param gemsQuantities An array of quantities for each type of gems to burn.
     function _batchBurnGems(address from, uint256[] memory gemsQuantities) internal {
         uint16[] memory ids = new uint16[](gemsQuantities.length);
         for (uint16 i = 0; i < ids.length; i++) {
@@ -158,6 +174,12 @@ contract AssetMinter is WithMetaTransaction {
         _gemsCatalystsRegistry.batchBurnGems(from, ids, gemsQuantities);
     }
 
+    /// @dev Set a single catalyst for an asset.
+    /// @param from The original address that signed the tx.
+    /// @param assetId The id of the asset to set a catalyst for.
+    /// @param supply The total number of catalysts to be set.
+    /// @param catalystId The type of catalyst to set.
+    /// @param gemIds An array of gems to be embedded.
     function _setSingleCatalyst(
         address from,
         uint256 assetId,
@@ -171,6 +193,10 @@ contract AssetMinter is WithMetaTransaction {
         _registry.setCatalyst(assetId, catalystId, gemIds);
     }
 
+    /// @dev Burn an array of gems.
+    /// @param from The original signer of the tx.
+    /// @param gemIds The array of gems to burn.
+    /// @param numTimes Amount of gems to burn.
     function _burnGems(
         address from,
         uint16[] memory gemIds,
@@ -179,6 +205,10 @@ contract AssetMinter is WithMetaTransaction {
         _gemsCatalystsRegistry.burnDifferentGems(from, gemIds, numTimes * GEM_UNIT);
     }
 
+    /// @dev Burn a single type of catalyst.
+    /// @param from The original signer of the tx.
+    /// @param catalystId The type of catalyst to burn.
+    /// @param numTimes Amount of catalysts of this type to burn.
     function _burnCatalyst(
         address from,
         uint16 catalystId,

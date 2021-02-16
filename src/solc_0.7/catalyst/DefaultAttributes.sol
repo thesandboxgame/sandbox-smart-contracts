@@ -8,6 +8,10 @@ contract DefaultAttributes is IAttributes {
     uint256 internal constant MAX_NUM_GEMS = 15;
     uint256 internal constant MAX_NUM_GEM_TYPES = 256;
 
+    /// @notice Returns the values for each gem included in a given asset.
+    /// @param assetId The asset tokenId.
+    /// @param events An array of GemEvents. Be aware that only gemEvents from the last CatalystApplied event onwards should be used to populate a query. If gemEvents from multiple CatalystApplied events are included the output values will be incorrect.
+    /// @return values An array of values for each gem present in the asset.
     function getAttributes(uint256 assetId, AssetAttributesRegistry.GemEvent[] calldata events)
         external
         pure
@@ -52,8 +56,14 @@ contract DefaultAttributes is IAttributes {
         }
     }
 
-    ///@dev compute a random value between min to 25.
-    //. example: 1-25, 6-25, 11-25, 16-25
+    /// @dev compute a random value between min to 25.
+    /// example: 1-25, 6-25, 11-25, 16-25
+    /// @param assetId The id of the asset.
+    /// @param gemId The id of the gem.
+    /// @param blockHash The blockHash from the gemEvent.
+    /// @param slotIndex Index of the current gem.
+    /// @param min The minumum value this gem can have.
+    /// @return The computed value for the given gem.
     function _computeValue(
         uint256 assetId,
         uint256 gemId,

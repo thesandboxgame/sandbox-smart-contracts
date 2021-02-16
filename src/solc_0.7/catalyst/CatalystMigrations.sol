@@ -31,6 +31,14 @@ contract CatalystMigrations {
         _merkleRoot = merkleRoot;
     }
 
+    /// @notice Migrate a catalyst to the new Catalyst system.
+    /// @param from The current owner of the catalyst.
+    /// @param to The address to transfer the catalyst to.
+    /// @param assetId The asset that the catalyst is associated with.
+    /// @param amount The amount of assets.
+    /// @param gemIds The gems currently embedded in the catalyst.
+    /// @param blockNumber The blockNumber to use when setting the catalyst.
+    /// @param proof The proof to use for verification.
     function migrate(
         address from,
         address to,
@@ -70,6 +78,11 @@ contract CatalystMigrations {
         }
     }
 
+    /// @dev Verify the given args before migrating a catalyst.
+    /// @param proof The merkle proof for the asset
+    /// @param collectionId The id of the asset collection.
+    /// @param gemIds The gems which need to be verified as being currently embedded in the catalyst.
+    /// @param blockNumber The blocknumber to use when computing the hash.
     function _verify(
         bytes32[] memory proof,
         uint256 collectionId,
