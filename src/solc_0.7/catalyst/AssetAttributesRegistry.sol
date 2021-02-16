@@ -92,6 +92,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
         uint16 catalystId,
         uint16[] calldata gemIds
     ) external {
+        require(msg.sender == _minter || msg.sender == _upgrader, "NOT_AUTHORIZED_MINTER");
         _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber());
     }
 
@@ -106,7 +107,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
         uint16[] calldata gemIds,
         uint64 blockNumber
     ) external {
-        require(msg.sender == migrationContract, "ONLY_FOR_MIGRATION");
+        require(msg.sender == migrationContract, "NOT_AUTHORIZED_MIGRATION");
         _setCatalyst(assetId, catalystId, gemIds, blockNumber);
     }
 
@@ -114,7 +115,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
     /// @param assetId id of the asset
     /// @param gemIds list of gems ids to set
     function addGems(uint256 assetId, uint16[] calldata gemIds) external {
-        require(msg.sender == _minter || msg.sender == _upgrader, "NOT_AUTHORIZED_MINTER");
+        require(msg.sender == _upgrader, "NOT_AUTHORIZED_UPGRADER");
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT");
         require(gemIds.length != 0, "INVALID_GEMS_0");
 
@@ -176,10 +177,6 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
         uint16[] memory gemIds,
         uint64 blockNumber
     ) internal {
-        require(
-            msg.sender == _minter || msg.sender == _upgrader || msg.sender == migrationContract,
-            "NOT_AUTHORIZED_MINTER"
-        );
         require(gemIds.length <= MAX_NUM_GEMS, "GEMS_MAX_REACHED");
         uint8 maxGems = _gemsCatalystsRegistry.getMaxGems(catalystId);
         require(gemIds.length <= maxGems, "GEMS_TOO_MANY");
