@@ -9,7 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const DefaultAttributes = await deployments.get('DefaultAttributes');
   const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
 
-  const {catalystMinter, deployer} = await getNamedAccounts();
+  const {catalystAdmin, deployer} = await getNamedAccounts();
   for (const catalyst of catalysts) {
     await deploy(`Catalyst_${catalyst.symbol}`, {
       contract: 'Catalyst',
@@ -18,7 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       args: [
         `Sandbox's ${catalyst.symbol} Catalysts`,
         catalyst.symbol,
-        catalystMinter,
+        catalystAdmin,
         catalyst.maxGems,
         catalyst.catalystId,
         DefaultAttributes.address,
