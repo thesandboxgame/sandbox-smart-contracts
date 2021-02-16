@@ -21,7 +21,7 @@ import {expectReceiptEventWithArgs, waitFor} from '../utils';
 type Options = {
   mint?: boolean;
   sand?: boolean;
-  multi?: true;
+  multi?: boolean;
 };
 
 export const setupTestGiveaway = deployments.createFixture(async function (
@@ -51,15 +51,6 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     args: [sandContract.address, landAdmin],
   });
 
-  const landContract = await ethers.getContractAt(
-    'MockLand',
-    '0x092796887ed12804AA949A3207CECA18998C90c7' // Set a fixed address for Mockland to use in test claim data as the landContractAddress
-  );
-
-  const landContractAsAdmin = await landContract.connect(
-    ethers.provider.getSigner(landAdmin)
-  );
-
   const sandContractAsAdmin = await sandContract.connect(
     ethers.provider.getSigner(sandAdmin)
   );
@@ -69,18 +60,23 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   const SAND_AMOUNT = BigNumber.from(20000).mul('1000000000000000000');
 
-  const testContract = await deployments.deploy(
-    'Test_Multi_Giveaway_1_with_ERC20',
-    {
-      from: deployer,
-      contract: 'MultiGiveaway',
-      args: [nftGiveawayAdmin],
-    }
+  await deployments.deploy('Test_Multi_Giveaway_1_with_ERC20', {
+    from: deployer,
+    contract: 'MultiGiveaway',
+    args: [nftGiveawayAdmin],
+  });
+
+  const giveawayContract = await ethers.getContract(
+    'Test_Multi_Giveaway_1_with_ERC20'
+  );
+
+  const giveawayContractAsAdmin = await giveawayContract.connect(
+    ethers.provider.getSigner(nftGiveawayAdmin)
   );
 
   // Supply SAND
   if (sand) {
-    await sandContractAsAdmin.transfer(testContract.address, SAND_AMOUNT);
+    await sandContractAsAdmin.transfer(giveawayContract.address, SAND_AMOUNT);
   }
 
   const assetContractAsBouncerAdmin = await ethers.getContract(
@@ -96,7 +92,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     const hash = ipfsHashString;
     const supply = value;
     const rarity = 1;
-    const owner = testContract.address;
+    const owner = giveawayContract.address;
     const data = '0x';
 
     await assetContractAsBouncerAdmin.setBouncer(creator, true);
@@ -123,16 +119,24 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     );
 
     const balanceAssetId = await assetContract['balanceOf(address,uint256)'](
-      testContract.address,
+      giveawayContract.address,
       transferEvent.args[3]
     );
     expect(balanceAssetId).to.equal(supply);
     return transferEvent.args[3].toString(); // asset ID
   }
 
+  const landContract = await ethers.getContractAt(
+    'MockLand',
+    '0x51d8e1CAADE79921017ae03a48eCA01d63D6e7Ee' // Set a fixed address for Mockland to use in test claim data as the landContractAddress // TODO: fix
+  );
+
   // Supply lands to contract for testing
   async function mintTestLands() {
-    const owner = testContract.address;
+    const landContractAsAdmin = await landContract.connect(
+      ethers.provider.getSigner(landAdmin)
+    );
+    const owner = giveawayContract.address;
     for (let i = 0; i < 18; i++) {
       await landContractAsAdmin.mint(owner, i);
     }
@@ -181,24 +185,13 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   if (mint) {
     const claimsWithAssetIds0 = await mintNewAssetIds(testData0);
     dataWithIds0 = claimsWithAssetIds0;
-    // TODO: fix scope
-    // if (multi) {
-    //   const claimsWithAssetIds1 = await mintNewAssetIds(testData1);
-    //   dataWithIds1 = claimsWithAssetIds1;
-    // }
+    if (multi) {
+      const claimsWithAssetIds1 = await mintNewAssetIds(testData1);
+      dataWithIds1 = claimsWithAssetIds1;
+    }
 
-    await mintTestLands();
+    await mintTestLands(); // TODO: fix
   }
-
-  console.log('last', dataWithIds0[0].erc1155);
-
-  const giveawayContract = await ethers.getContract(
-    'Test_Multi_Giveaway_1_with_ERC20'
-  );
-
-  const giveawayContractAsAdmin = await giveawayContract.connect(
-    ethers.provider.getSigner(nftGiveawayAdmin)
-  );
 
   // Set up tree with test assets for each applicable giveaway
   const {
@@ -206,24 +199,28 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     merkleRootHash: merkleRootHash0,
   } = createClaimMerkleTree(network.live, chainId, dataWithIds0);
 
-  const merkleRootHashes = [];
+  const allMerkleRoots = [];
   const allClaims = [claims0];
+  const allTrees = [];
 
   // Single giveaway
   const hashArray = createDataArrayMultiClaim(claims0);
-  const tree = new MerkleTree(hashArray);
   await giveawayContractAsAdmin.addNewGiveaway(merkleRootHash0, 1615194000);
-  merkleRootHashes.push(merkleRootHash0);
+  allMerkleRoots.push(merkleRootHash0);
+  allTrees.push(new MerkleTree(hashArray));
 
   // Multi giveaway
-  // if (multi) {
-  //   const {
-  //     claims: claims1,
-  //     merkleRootHash: merkleRootHash1,
-  //   } = createClaimMerkleTree(network.live, chainId, dataWithIds1);
-  //   allClaims.push(claims1);
-  //   merkleRootHashes.push(merkleRootHash1);
-  // }
+  if (multi) {
+    const {
+      claims: claims1,
+      merkleRootHash: merkleRootHash1,
+    } = createClaimMerkleTree(network.live, chainId, dataWithIds1);
+    allClaims.push(claims1);
+    allMerkleRoots.push(merkleRootHash1);
+    const hashArray2 = createDataArrayMultiClaim(claims1);
+    allTrees.push(new MerkleTree(hashArray2));
+    await giveawayContractAsAdmin.addNewGiveaway(merkleRootHash1, 1615194000);
+  }
 
   return {
     giveawayContract,
@@ -231,9 +228,9 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     assetContract,
     landContract,
     others,
-    tree,
-    allClaims, // TODO: multiple claims data files to test more than 1 giveaway
+    allTrees,
+    allClaims,
     nftGiveawayAdmin,
-    merkleRootHashArray: merkleRootHashes, // TODO: multiple merkleRoot hashes from multiple claims to test more than 1 giveaway
+    allMerkleRoots,
   };
 });

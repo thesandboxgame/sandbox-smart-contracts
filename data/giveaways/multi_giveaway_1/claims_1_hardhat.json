@@ -8,7 +8,7 @@
     }],
     "erc721": [{
       "ids": [8, 9, 10, 11, 12, 13],
-      "contractAddress": "0x092796887ed12804AA949A3207CECA18998C90c7"
+      "contractAddress": "0x51d8e1CAADE79921017ae03a48eCA01d63D6e7Ee"
     }],
     "erc20": {
       "amounts": [200],
@@ -24,7 +24,7 @@
     }],
     "erc721": [{
       "ids": [14],
-      "contractAddress": "0x092796887ed12804AA949A3207CECA18998C90c7"
+      "contractAddress": "0x51d8e1CAADE79921017ae03a48eCA01d63D6e7Ee"
     }],
     "erc20": {
       "amounts": [],
@@ -36,7 +36,7 @@
     "erc1155": [],
     "erc721": [{
       "ids": [15],
-      "contractAddress": "0x092796887ed12804AA949A3207CECA18998C90c7"
+      "contractAddress": "0x51d8e1CAADE79921017ae03a48eCA01d63D6e7Ee"
     }],
     "erc20": {
       "amounts": [],
