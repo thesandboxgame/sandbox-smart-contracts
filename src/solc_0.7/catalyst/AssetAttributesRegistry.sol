@@ -91,6 +91,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
         uint16 catalystId,
         uint16[] calldata gemIds
     ) external {
+        // TODO require(msg.sender == _minter || msg.sender == _upgrader, "NOT_AUTHORIZED_MINTER");
         _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber());
     }
 
@@ -113,7 +114,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
     /// @param assetId id of the asset
     /// @param gemIds list of gems ids to set
     function addGems(uint256 assetId, uint16[] calldata gemIds) external {
-        require(msg.sender == _minter || msg.sender == _upgrader, "NOT_AUTHORIZED_MINTER");
+        require(msg.sender == _minter || msg.sender == _upgrader, "NOT_AUTHORIZED_MINTER"); // TODO require(msg.sender == _upgrader, "NOT_AUTHORIZED_UPGRADER"); // only upgrader should be able to add gems
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT");
         require(gemIds.length != 0, "INVALID_GEMS_0");
 
@@ -154,6 +155,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
     /// @notice set the migratcion contract address, admin or migration contract only
     /// @param _migrationContract address of the migration contract
     function setMigrationContract(address _migrationContract) external {
+        // TODO use migrationAdminRole ?
         address currentMigrationContract = migrationContract;
         if (currentMigrationContract == address(0)) {
             require(msg.sender == _admin, "NOT_AUTHORIZED");
@@ -170,6 +172,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
         uint16[] memory gemIds,
         uint64 blockNumber
     ) internal {
+        // TOO might be better to have that check on external function to not repeat the check for migrationContract for example
         require(
             msg.sender == _minter || msg.sender == _upgrader || msg.sender == migrationContract,
             "NOT_AUTHORIZED_MINTER"

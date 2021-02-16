@@ -5,6 +5,8 @@ import "./interfaces/OldCatalystRegistry.sol";
 import "./AssetAttributesRegistry.sol";
 import "../common/Interfaces/IAssetToken.sol";
 
+// TODO delete as we are using CollectioNCatalystMigrations
+
 /// @notice Contract allowing owner of asset registered with old registry to get new catalyst/gems
 contract CatalystMigrations {
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;

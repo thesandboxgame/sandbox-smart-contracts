@@ -123,7 +123,7 @@ contract AssetMinter is WithMetaTransaction {
                 require(catalystsQuantities[assets[i].catalystId] != 0, "INVALID_CATALYST_NOT_ENOUGH");
                 uint16 maxGems = _gemsCatalystsRegistry.getMaxGems(assets[i].catalystId);
                 require(assets[i].gemIds.length <= maxGems, "INVALID_GEMS_TOO_MANY");
-                catalystsQuantities[assets[i].catalystId]--;
+                catalystsQuantities[assets[i].catalystId]--; // 1 should 1 UNIT, see CATALYST_UNIT ?
                 gemsQuantities = _checkGemsQuantities(gemsQuantities, assets[i].gemIds);
             }
             supplies[i] = assets[i].quantity;
@@ -137,7 +137,7 @@ contract AssetMinter is WithMetaTransaction {
     {
         for (uint256 i = 0; i < gemIds.length; i++) {
             require(gemsQuantities[gemIds[i]] != 0, "INVALID_GEMS_NOT_ENOUGH");
-            gemsQuantities[gemIds[i]] = gemsQuantities[gemIds[i]].sub(1);
+            gemsQuantities[gemIds[i]] = gemsQuantities[gemIds[i]].sub(1); // 1 should 1 UNIT, see GEM_UNIT ?
         }
         return gemsQuantities;
     }
