@@ -7,8 +7,9 @@ import gems from '../../../data/gems';
 import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
 import {setupAssetAttributesRegistry} from '../assetAttributesRegistry/fixtures';
 import {setupAssetMinter, MintOptions, MintMultiOptions} from './fixtures';
+import {setupAssetUpgrader} from '../assetUpgrader/fixtures';
 import {mintCatalyst, mintGem} from '../utils';
-import {expectEventWithArgs, findEvents} from '../../utils';
+import {expectEventWithArgs, findEvents, waitFor} from '../../utils';
 
 let mintOptions: MintOptions;
 let mintMultiOptions: MintMultiOptions;
@@ -870,6 +871,112 @@ describe('AssetMinter', function () {
       expect(speedSupplyAfter).to.be.equal(speedSupplyBefore.sub(1));
       expect(magicSupplyAfter).to.be.equal(magicSupplyBefore.sub(1));
       expect(luckSupplyAfter).to.be.equal(luckSupplyBefore.sub(1));
+    });
+  });
+
+  describe('AssetMinter: addGems', function () {
+    it('Can extract an erc721 & add Gems', async function () {
+      const {assetMinterContract} = await setupAssetMinter();
+      const {
+        assetUpgraderContract,
+        assetContract,
+        assetAttributesRegistry,
+      } = await setupAssetUpgrader();
+      const {
+        legendaryCatalyst,
+        defenseGem,
+        speedGem,
+        magicGem,
+        powerGem,
+        catalystOwner,
+      } = await setupGemsAndCatalysts();
+      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
+
+      await mintCats([
+        {contract: legendaryCatalyst, amount: 7, recipient: catalystOwner},
+      ]);
+      await mintGems([
+        {contract: powerGem, amount: 7, recipient: catalystOwner},
+        {contract: defenseGem, amount: 7, recipient: catalystOwner},
+        {contract: speedGem, amount: 7, recipient: catalystOwner},
+        {contract: magicGem, amount: 7, recipient: catalystOwner},
+      ]);
+
+      const assetUpgraderAsAssetOwner = await assetUpgraderContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
+      const assetAsAssetOwner = await assetContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
+
+      const assetId = await assetMinterAsCatalystOwner.callStatic.mint(
+        catalystOwner,
+        mintOptions.packId,
+        mintOptions.metaDataHash,
+        catalysts[3].catalystId,
+        [],
+        FT_SUPPLY,
+        mintOptions.rarity,
+        catalystOwner,
+        mintOptions.data
+      );
+
+      await assetMinterAsCatalystOwner.mint(
+        catalystOwner,
+        mintOptions.packId,
+        mintOptions.metaDataHash,
+        catalysts[3].catalystId,
+        [],
+        FT_SUPPLY,
+        mintOptions.rarity,
+        catalystOwner,
+        mintOptions.data
+      );
+
+      const receipt = await waitFor(
+        assetAsAssetOwner.extractERC721(assetId, catalystOwner)
+      );
+      const extractionEvent = await expectEventWithArgs(
+        assetContract,
+        receipt,
+        'Extraction'
+      );
+      const newId = extractionEvent.args[1];
+      const gemIds = [
+        gems[0].gemId,
+        gems[1].gemId,
+        gems[2].gemId,
+        gems[3].gemId,
+      ];
+
+      await waitFor(
+        assetUpgraderAsAssetOwner.addGems(
+          catalystOwner,
+          newId,
+          gemIds,
+          catalystOwner
+        )
+      );
+
+      const record = await assetAttributesRegistry.getRecord(newId);
+      expect(record.exists).to.equal(true);
+      expect(record.catalystId).to.equal(catalysts[3].catalystId);
+      expect(record.gemIds).to.deep.equal([
+        ...gemIds,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+      ]);
     });
   });
 
