@@ -1,3 +1,4 @@
+import {ethers, getUnnamedAccounts, getNamedAccounts} from 'hardhat';
 import {BigNumber, Event} from 'ethers';
 import {expect} from '../../chai-setup';
 import {setCatalyst, setupAssetAttributesRegistry} from './fixtures';
@@ -456,5 +457,25 @@ describe('AssetAttributesRegistry', function () {
     await expect(
       assetUpgraderAsUser0.addGems(user0, assetId, [gems[1].gemId], user0)
     ).to.be.revertedWith('GEMS_TOO_MANY');
+  });
+
+  it('admin can change attributes contract', async function () {
+    const {catalystAdmin} = await getNamedAccounts();
+    const users = await getUnnamedAccounts();
+    const commonCatalyst = await ethers.getContract('Catalyst_COMMON');
+    const catalystAsAdmin = await commonCatalyst.connect(
+      ethers.provider.getSigner(catalystAdmin)
+    );
+    const pretendAttributesContractAddress = users[9];
+    await catalystAsAdmin.changeAttributes(pretendAttributesContractAddress);
+    await expect(commonCatalyst.getAttributes(42, [])).to.be.reverted;
+  });
+
+  it('fails if anyone other than admin trys to change attributes', async function () {
+    const users = await getUnnamedAccounts();
+    const commonCatalyst = await ethers.getContract('Catalyst_COMMON');
+    await expect(commonCatalyst.changeAttributes(users[6])).to.be.revertedWith(
+      'ADMIN_ONLY'
+    );
   });
 });
