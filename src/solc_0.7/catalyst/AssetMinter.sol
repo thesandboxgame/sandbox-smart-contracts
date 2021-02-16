@@ -129,7 +129,7 @@ contract AssetMinter is WithMetaTransaction {
                 require(catalystsQuantities[assets[i].catalystId] != 0, "INVALID_CATALYST_NOT_ENOUGH");
                 uint16 maxGems = _gemsCatalystsRegistry.getMaxGems(assets[i].catalystId);
                 require(assets[i].gemIds.length <= maxGems, "INVALID_GEMS_TOO_MANY");
-                catalystsQuantities[assets[i].catalystId]--;
+                catalystsQuantities[assets[i].catalystId] = catalystsQuantities[assets[i].catalystId].sub(1);
                 gemsQuantities = _checkGemsQuantities(gemsQuantities, assets[i].gemIds);
             }
             supplies[i] = assets[i].quantity;
