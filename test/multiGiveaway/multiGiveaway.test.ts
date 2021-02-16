@@ -8,6 +8,8 @@ import helpers from '../../lib/merkleTreeHelper';
 const {calculateMultiClaimHash} = helpers;
 
 const zeroAddress = constants.AddressZero;
+const emptyBytes32 =
+  '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 describe('Multi_Giveaway', function () {
   describe('Multi_Giveaway_common_functionality', function () {
@@ -21,13 +23,12 @@ describe('Multi_Giveaway', function () {
       );
 
       const receipt = await waitFor(
-        giveawayContractAsAdmin
-          .addNewGiveaway
-          //TODO:
-          ()
+        giveawayContractAsAdmin.addNewGiveaway(emptyBytes32, 1615194000)
       );
 
-      // TODO: event checks
+      const event = await expectReceiptEventWithArgs(receipt, 'NewGiveaway');
+      expect(event.args[0]).to.equal(emptyBytes32);
+      expect(event.args[1]).to.equal(1615194000);
     });
 
     it('Cannot add a new giveaway if not admin', async function () {
@@ -40,56 +41,138 @@ describe('Multi_Giveaway', function () {
       );
 
       await expect(
-        giveawayContractAsUser
-          .addNewGiveaway
-          //TODO:
-          ()
-      ).to.be.revertedWith('NOT_AITHORIZED');
+        giveawayContractAsUser.addNewGiveaway(emptyBytes32, 1615194000)
+      ).to.be.revertedWith('ADMIN_ONLY');
     });
 
     it('User can get their claimed status', async function () {
-      const options = {};
+      const options = {multi: true};
       const setUp = await setupTestGiveaway(options);
-      const {giveawayContract, others} = setUp;
+      const {giveawayContract, others, allMerkleRoots} = setUp;
 
       const giveawayContractAsUser = await giveawayContract.connect(
         ethers.provider.getSigner(others[0])
       );
 
-      const statuses = await giveawayContractAsUser
-        .getClaimedStatus
-        //TODO:
-        ();
+      const statuses = await giveawayContractAsUser.getClaimedStatus(
+        others[0],
+        allMerkleRoots
+      );
+
+      expect(statuses[0]).to.equal(false);
+      expect(statuses[1]).to.equal(false);
     });
 
-    it('Claimed status is correctly updated after allocated tokens are claimed - 1 claim', async function () {
-      const options = {};
+    it('Claimed status is correctly updated after allocated tokens are claimed - 2 claims of 2 claimed', async function () {
+      const options = {
+        mint: true,
+        sand: true,
+        multi: true,
+      };
       const setUp = await setupTestGiveaway(options);
-      const {giveawayContract, others} = setUp;
+      const {
+        giveawayContract,
+        others,
+        allTrees,
+        allClaims,
+        allMerkleRoots,
+      } = setUp;
+
+      // make arrays of claims and proofs relevant to specific user
+      const userProofs: any = [];
+      const userClaims = [];
+      const claim = allClaims[0][0];
+      const secondClaim = allClaims[1][0];
+      userClaims.push(claim);
+      userClaims.push(secondClaim);
+
+      for (let i = 0; i < userClaims.length; i++) {
+        userProofs.push(
+          allTrees[i].getProof(calculateMultiClaimHash(userClaims[i]))
+        );
+      }
+      const userMerkleRoots = [];
+      userMerkleRoots.push(allMerkleRoots[0]);
+      userMerkleRoots.push(allMerkleRoots[1]);
 
       const giveawayContractAsUser = await giveawayContract.connect(
         ethers.provider.getSigner(others[0])
       );
 
-      const statuses = await giveawayContractAsUser
-        .getClaimedStatus
-        //TODO:
-        ();
+      const statuses = await giveawayContractAsUser.getClaimedStatus(
+        others[0],
+        allMerkleRoots
+      );
+
+      expect(statuses[0]).to.equal(false);
+      expect(statuses[1]).to.equal(false);
+
+      await giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
+        userMerkleRoots,
+        userClaims,
+        userProofs
+      );
+
+      const statusesAfterClaim = await giveawayContractAsUser.getClaimedStatus(
+        others[0],
+        allMerkleRoots
+      );
+
+      expect(statusesAfterClaim[0]).to.equal(true);
+      expect(statusesAfterClaim[1]).to.equal(true);
     });
 
-    it('Claimed status is correctly updated after allocated tokens are claimed - 2 claims', async function () {
-      const options = {};
+    it('Claimed status is correctly updated after allocated tokens are claimed - 1 claim of 2 claimed', async function () {
+      const options = {
+        mint: true,
+        sand: true,
+        multi: true,
+      };
       const setUp = await setupTestGiveaway(options);
-      const {giveawayContract, others} = setUp;
+      const {
+        giveawayContract,
+        others,
+        allTrees,
+        allClaims,
+        allMerkleRoots,
+      } = setUp;
+
+      // make arrays of claims and proofs relevant to specific user
+      const userProofs: any = [];
+      const userClaims = [];
+      const secondClaim = allClaims[1][0];
+      userClaims.push(secondClaim);
+      userProofs.push(
+        allTrees[1].getProof(calculateMultiClaimHash(userClaims[0]))
+      );
+      const userMerkleRoots = [];
+      userMerkleRoots.push(allMerkleRoots[1]);
 
       const giveawayContractAsUser = await giveawayContract.connect(
         ethers.provider.getSigner(others[0])
       );
 
-      const statuses = await giveawayContractAsUser
-        .getClaimedStatus
-        //TODO:
-        ();
+      const statuses = await giveawayContractAsUser.getClaimedStatus(
+        others[0],
+        allMerkleRoots
+      );
+
+      expect(statuses[0]).to.equal(false);
+      expect(statuses[1]).to.equal(false);
+
+      await giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
+        userMerkleRoots,
+        userClaims,
+        userProofs
+      );
+
+      const statusesAfterClaim = await giveawayContractAsUser.getClaimedStatus(
+        others[0],
+        allMerkleRoots
+      );
+
+      expect(statusesAfterClaim[0]).to.equal(false);
+      expect(statusesAfterClaim[1]).to.equal(true);
     });
   });
   describe('Multi_Giveaway_single_giveaway', function () {

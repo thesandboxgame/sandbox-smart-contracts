@@ -36,6 +36,8 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     assetBouncerAdmin,
     landAdmin,
     sandAdmin,
+    gemAdmin,
+    catalystAdmin,
   } = await getNamedAccounts();
   const otherAccounts = await getUnnamedAccounts();
   const nftGiveawayAdmin = otherAccounts[0];
@@ -45,6 +47,8 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   const sandContract = await ethers.getContract('Sand');
   await deployments.fixture(['Asset']);
   const assetContract = await ethers.getContract('Asset');
+  const speedGemContract = await ethers.getContract('Gem_Speed');
+  const rareCatalystContract = await ethers.getContract('Catalyst_Rare');
 
   await deployments.deploy('MockLand', {
     from: deployer,
@@ -54,11 +58,16 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   const sandContractAsAdmin = await sandContract.connect(
     ethers.provider.getSigner(sandAdmin)
   );
-
-  // const emptyBytes32 =
-  //   '0x0000000000000000000000000000000000000000000000000000000000000000';
+  const speedGemContractAsAdmin = await speedGemContract.connect(
+    ethers.provider.getSigner(gemAdmin)
+  );
+  const rareCatalystContractAsAdmin = await rareCatalystContract.connect(
+    ethers.provider.getSigner(catalystAdmin)
+  );
 
   const SAND_AMOUNT = BigNumber.from(20000).mul('1000000000000000000');
+  const GEM_AMOUNT = BigNumber.from(4).mul('1000000000000000000');
+  const CAT_AMOUNT = BigNumber.from(1).mul('1000000000000000000');
 
   await deployments.deploy('Test_Multi_Giveaway_1_with_ERC20', {
     from: deployer,
@@ -78,6 +87,24 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   if (sand) {
     await sandContractAsAdmin.transfer(giveawayContract.address, SAND_AMOUNT);
   }
+
+  // Supply Catalysts and Gems
+
+  // await speedGemContractAsAdmin.setSuperOperator(
+  //   giveawayContract.address,
+  //   true
+  // );
+  // await rareCatalystContractAsAdmin.setSuperOperator(
+  //   giveawayContract.address,
+  //   true
+  // );
+
+  // TODO: Mint
+  // await speedGemContractAsAdmin.transfer(giveawayContract.address, GEM_AMOUNT);
+  // await rareCatalystContractAsAdmin.transfer(
+  //   giveawayContract.address,
+  //   CAT_AMOUNT
+  // );
 
   const assetContractAsBouncerAdmin = await ethers.getContract(
     'Asset',
@@ -190,7 +217,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
       dataWithIds1 = claimsWithAssetIds1;
     }
 
-    await mintTestLands(); // TODO: fix
+    await mintTestLands();
   }
 
   // Set up tree with test assets for each applicable giveaway
@@ -227,6 +254,8 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     sandContract,
     assetContract,
     landContract,
+    speedGemContract,
+    rareCatalystContract,
     others,
     allTrees,
     allClaims,
