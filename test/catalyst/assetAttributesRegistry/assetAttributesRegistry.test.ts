@@ -224,7 +224,7 @@ describe('AssetAttributesRegistry', function () {
         gemsIds,
         blockNumber
       )
-    ).to.be.revertedWith('ONLY_FOR_MIGRATION');
+    ).to.be.revertedWith('NOT_AUTHORIZED_MIGRATION');
   });
 
   it('setCatalystWithBlockNumber for epic catalyst', async function () {
@@ -372,7 +372,7 @@ describe('AssetAttributesRegistry', function () {
     gemsIds = gems.filter((gem) => gem.gemId < 5).map((gem) => gem.gemId);
     await expect(
       assetAttributesRegistryAsUser0.addGems(assetId, gemsIds)
-    ).to.be.revertedWith('NOT_AUTHORIZED_MINTER');
+    ).to.be.revertedWith('NOT_AUTHORIZED_UPGRADER');
   });
 
   it('addGems should fail for empty gemsId array', async function () {
