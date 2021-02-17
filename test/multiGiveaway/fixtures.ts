@@ -89,29 +89,18 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   }
 
   // Supply Catalysts and Gems
+  await speedGemContract
+    .connect(ethers.provider.getSigner(deployer))
+    .mint(giveawayContract.address, 16);
+  await rareCatalystContract
+    .connect(ethers.provider.getSigner(deployer))
+    .mint(giveawayContract.address, 8);
 
-  // await speedGemContractAsAdmin.setSuperOperator(
-  //   giveawayContract.address,
-  //   true
-  // );
-  // await rareCatalystContractAsAdmin.setSuperOperator(
-  //   giveawayContract.address,
-  //   true
-  // );
-
-  // TODO: Mint
-  // await speedGemContractAsAdmin.transfer(giveawayContract.address, GEM_AMOUNT);
-  // await rareCatalystContractAsAdmin.transfer(
-  //   giveawayContract.address,
-  //   CAT_AMOUNT
-  // );
-
+  // Supply assets
   const assetContractAsBouncerAdmin = await ethers.getContract(
     'Asset',
     assetBouncerAdmin
   );
-
-  // Supply assets to contract for testing
   async function mintTestAssets(id: number, value: number) {
     // Asset to be minted
     const creator = others[0];
