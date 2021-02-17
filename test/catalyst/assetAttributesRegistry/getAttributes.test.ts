@@ -5,7 +5,10 @@ import {expect} from '../../chai-setup';
 import catalysts from '../../../data/catalysts';
 import gems from '../../../data/gems';
 import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
-import {setupAssetAttributesRegistry} from '../assetAttributesRegistry/fixtures';
+import {
+  setupAssetAttributesRegistry,
+  supplySand,
+} from '../assetAttributesRegistry/fixtures';
 import {setupAssetMinter, MintOptions} from '../assetMinter/fixtures';
 import {findEvents} from '../../utils';
 import {prepareGemEventData, getReceiptObject} from '../utils';
@@ -267,6 +270,10 @@ describe('AssetAttributesRegistry: getAttributes', function () {
   });
 
   describe('getAttributes: upgrading', function () {
+    beforeEach(async function () {
+      await supplySand(catalystOwner);
+    });
+
     it('can get attributes when adding 1 gem to an asset with an empty catalyst', async function () {
       const {id: assetId, receipt: mintReceipt} = await getAssetId(4, []);
       const upgradeReceipt = await assetUpgraderAsCatalystOwner.addGems(
