@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {BigNumber} from 'ethers';
+import {upgradeFee, gemAdditionFee} from '../../data/assetUpgraderFees';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -14,9 +14,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
 
   const {deployer, catalystAssetFeeRecipient} = await getNamedAccounts();
-
-  const upgradeFee = BigNumber.from(0); // TODO
-  const gemAdditionFee = BigNumber.from(0); // TODO
 
   await deploy(`AssetUpgrader`, {
     from: deployer,
