@@ -2,6 +2,10 @@
 pragma solidity 0.7.5;
 pragma experimental ABIEncoderV2;
 
+import "./IAssetAttributesRegistry.sol";
+import "../Gem.sol";
+import "../Catalyst.sol";
+
 interface IGemsCatalystsRegistry {
     function getAttributes(
         uint16 catalystId,

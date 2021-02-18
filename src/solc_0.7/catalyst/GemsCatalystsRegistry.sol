@@ -5,6 +5,7 @@ pragma experimental ABIEncoderV2;
 import "./Gem.sol";
 import "./Catalyst.sol";
 import "./interfaces/IAssetAttributesRegistry.sol";
+import "./interfaces/IGemsCatalystsRegistry.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 
@@ -12,7 +13,7 @@ import "../common/BaseWithStorage/WithMetaTransaction.sol";
 /// Each Gems and Catalys must be registered here.
 /// Each new Gem get assigned a new id (starting at 1)
 /// Each new Catalyst get assigned a new id (starting at 1)
-contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
+contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction, IGemsCatalystsRegistry {
     Gem[] internal _gems;
     Catalyst[] internal _catalysts;
 
@@ -29,7 +30,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
         uint16 catalystId,
         uint256 assetId,
         IAssetAttributesRegistry.GemEvent[] calldata events
-    ) external view returns (uint32[] memory values) {
+    ) external view override returns (uint32[] memory values) {
         Catalyst catalyst = getCatalyst(catalystId);
         require(catalyst != Catalyst(0), "CATALYST_DOES_NOT_EXIST");
         return catalyst.getAttributes(assetId, events);
@@ -37,7 +38,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
 
     /// @notice Returns the maximum number of gems for a given catalyst
     /// @param catalystId catalyst identifier
-    function getMaxGems(uint16 catalystId) external view returns (uint8) {
+    function getMaxGems(uint16 catalystId) external view override returns (uint8) {
         Catalyst catalyst = getCatalyst(catalystId);
         require(catalyst != Catalyst(0), "CATALYST_DOES_NOT_EXIST");
         return catalyst.getMaxGems();
@@ -51,7 +52,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
         address from,
         uint16[] calldata gemIds,
         uint256 amount
-    ) external {
+    ) external override {
         for (uint256 i = 0; i < gemIds.length; i++) {
             // TODO optimize it by checking adjacent gemIds
             burnGem(from, gemIds[i], amount);
@@ -66,7 +67,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
         address from,
         uint16[] calldata catalystIds,
         uint256 amount
-    ) external {
+    ) external override {
         for (uint256 i = 0; i < catalystIds.length; i++) {
             // TODO optimize it by checking adjacent catalystIds
             burnCatalyst(from, catalystIds[i], amount);
@@ -81,7 +82,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
         address from,
         uint16[] calldata gemIds,
         uint256[] calldata amounts
-    ) public {
+    ) public override {
         for (uint256 i = 0; i < gemIds.length; i++) {
             if (gemIds[i] != 0 && amounts[i] != 0) {
                 burnGem(from, gemIds[i], amounts[i]);
@@ -97,7 +98,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
         address from,
         uint16[] calldata catalystIds,
         uint256[] calldata amounts
-    ) public {
+    ) public override {
         for (uint256 i = 0; i < catalystIds.length; i++) {
             if (catalystIds[i] != 0 && amounts[i] != 0) {
                 burnCatalyst(from, catalystIds[i], amounts[i]);
@@ -108,7 +109,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
     /// @notice Adds both arrays of gems and catalysts to registry
     /// @param gems array of gems to be added
     /// @param catalysts array of catalysts to be added
-    function addGemsAndCatalysts(Gem[] calldata gems, Catalyst[] calldata catalysts) external {
+    function addGemsAndCatalysts(Gem[] calldata gems, Catalyst[] calldata catalysts) external override {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
         for (uint256 i = 0; i < gems.length; i++) {
             Gem gem = gems[i];
@@ -128,7 +129,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
     /// @notice Query whether a given gem exists.
     /// @param gemId The gem being queried.
     /// @return Whether the gem exists.
-    function doesGemExist(uint16 gemId) external view returns (bool) {
+    function doesGemExist(uint16 gemId) external view override returns (bool) {
         return getGem(gemId) != Gem(0);
     }
 
@@ -147,7 +148,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
         address from,
         uint16 catalystId,
         uint256 amount
-    ) public {
+    ) public override {
         _checkAuthorization(from);
         Catalyst catalyst = getCatalyst(catalystId);
         require(catalyst != Catalyst(0), "CATALYST_DOES_NOT_EXIST");
@@ -162,7 +163,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
         address from,
         uint16 gemId,
         uint256 amount
-    ) public {
+    ) public override {
         _checkAuthorization(from);
         Gem gem = getGem(gemId);
         require(gem != Gem(0), "GEM_DOES_NOT_EXIST");
