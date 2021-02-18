@@ -6,9 +6,10 @@ import "../common/BaseWithStorage/WithAdmin.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
 import "../common/BaseWithStorage/WithUpgrader.sol";
 import "./GemsCatalystsRegistry.sol";
+import "./interfaces/IAssetAttributesRegistry.sol";
 
 /// @notice Allows setting the gems and catalysts of an asset
-contract AssetAttributesRegistry is WithMinter, WithUpgrader {
+contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRegistry {
     uint256 internal constant MAX_NUM_GEMS = 15;
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
     uint256 private constant NOT_IS_NFT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFFFFFFFF;
@@ -19,11 +20,6 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
 
     // used to allow migration to specify blockNumber when setting catalyst/gems
     address public migrationContract;
-
-    struct GemEvent {
-        uint16[] gemIds;
-        bytes32 blockHash;
-    }
 
     struct Record {
         uint16 catalystId; // start at 1
@@ -54,6 +50,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
     function getRecord(uint256 assetId)
         external
         view
+        override
         returns (
             bool exists,
             uint16 catalystId,
@@ -79,7 +76,12 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
     /// @notice getAttributes
     /// @param assetId id of the asset
     /// @return values The array of values(256) requested.
-    function getAttributes(uint256 assetId, GemEvent[] calldata events) external view returns (uint32[] memory values) {
+    function getAttributes(uint256 assetId, GemEvent[] calldata events)
+        external
+        view
+        override
+        returns (uint32[] memory values)
+    {
         return _gemsCatalystsRegistry.getAttributes(_records[assetId].catalystId, assetId, events);
     }
 
@@ -91,7 +93,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
         uint256 assetId,
         uint16 catalystId,
         uint16[] calldata gemIds
-    ) external {
+    ) external override {
         require(msg.sender == _minter || msg.sender == _upgrader, "NOT_AUTHORIZED_MINTER");
         _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber());
     }
@@ -106,7 +108,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
         uint16 catalystId,
         uint16[] calldata gemIds,
         uint64 blockNumber
-    ) external {
+    ) external override {
         require(msg.sender == migrationContract, "NOT_AUTHORIZED_MIGRATION");
         _setCatalyst(assetId, catalystId, gemIds, blockNumber);
     }
@@ -114,7 +116,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
     /// @notice adds gems to an existing list of gems of an asset, minter only
     /// @param assetId id of the asset
     /// @param gemIds list of gems ids to set
-    function addGems(uint256 assetId, uint16[] calldata gemIds) external {
+    function addGems(uint256 assetId, uint16[] calldata gemIds) external override {
         require(msg.sender == _upgrader, "NOT_AUTHORIZED_UPGRADER");
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT");
         require(gemIds.length != 0, "INVALID_GEMS_0");
@@ -155,7 +157,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader {
 
     /// @notice set the migratcion contract address, admin or migration contract only
     /// @param _migrationContract address of the migration contract
-    function setMigrationContract(address _migrationContract) external {
+    function setMigrationContract(address _migrationContract) external override {
         address currentMigrationContract = migrationContract;
         if (currentMigrationContract == address(0)) {
             require(msg.sender == _admin, "NOT_AUTHORIZED");
