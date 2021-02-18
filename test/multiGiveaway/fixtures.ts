@@ -4,6 +4,7 @@ import {
   getUnnamedAccounts,
   getNamedAccounts,
 } from 'hardhat';
+import {BigNumber} from 'ethers';
 import {expect} from '../chai-setup';
 import MerkleTree from '../../lib/merkleTree';
 import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getClaims';
@@ -55,6 +56,8 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   const sandContractAsAdmin = await sandContract.connect(
     ethers.provider.getSigner(sandAdmin)
   );
+
+  const SAND_AMOUNT = BigNumber.from(20000).mul('1000000000000000000');
 
   await deployments.deploy('Test_Multi_Giveaway_1_with_ERC20', {
     from: deployer,
