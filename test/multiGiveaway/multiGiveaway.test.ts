@@ -1073,5 +1073,58 @@ describe('Multi_Giveaway', function () {
       const ownerLandId13 = await landContract.ownerOf(5);
       expect(ownerLandId13).to.equal(secondClaim.to);
     });
+
+    it('User cannot claim allocated tokens from Giveaway contract more than once - multiple giveaways, 2 claims', async function () {
+      const options = {
+        mint: true,
+        sand: true,
+        multi: true,
+      };
+      const setUp = await setupTestGiveaway(options);
+      const {
+        giveawayContract,
+        others,
+        allTrees,
+        allClaims,
+        allMerkleRoots,
+      } = setUp;
+
+      // make arrays of claims and proofs relevant to specific user
+      const userProofs: any = [];
+      const userClaims = [];
+      const claim = allClaims[0][0];
+      const secondClaim = allClaims[1][0];
+      userClaims.push(claim);
+      userClaims.push(secondClaim);
+
+      for (let i = 0; i < userClaims.length; i++) {
+        userProofs.push(
+          allTrees[i].getProof(calculateMultiClaimHash(userClaims[i]))
+        );
+      }
+      const userMerkleRoots = [];
+      userMerkleRoots.push(allMerkleRoots[0]);
+      userMerkleRoots.push(allMerkleRoots[1]);
+
+      const giveawayContractAsUser = await giveawayContract.connect(
+        ethers.provider.getSigner(others[0])
+      );
+
+      await waitFor(
+        giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
+          userMerkleRoots,
+          userClaims,
+          userProofs
+        )
+      );
+
+      await expect(
+        giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
+          userMerkleRoots,
+          userClaims,
+          userProofs
+        )
+      ).to.be.revertedWith(`DESTINATION_ALREADY_CLAIMED`);
+    });
   });
 });
