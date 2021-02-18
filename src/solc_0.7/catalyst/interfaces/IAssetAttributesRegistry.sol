@@ -11,33 +11,28 @@ interface IAssetAttributesRegistry {
     function getRecord(uint256 assetId)
         external
         view
-        virtual
         returns (
             bool exists,
             uint16 catalystId,
             uint16[] memory gemIds
         );
 
-    function getAttributes(uint256 assetId, GemEvent[] calldata events)
-        external
-        view
-        virtual
-        returns (uint32[] memory values);
+    function getAttributes(uint256 assetId, GemEvent[] calldata events) external view returns (uint32[] memory values);
 
     function setCatalyst(
         uint256 assetId,
         uint16 catalystId,
         uint16[] calldata gemIds
-    ) external virtual;
+    ) external;
 
     function setCatalystWithBlockNumber(
         uint256 assetId,
         uint16 catalystId,
         uint16[] calldata gemIds,
         uint64 blockNumber
-    ) external virtual;
+    ) external;
 
-    function addGems(uint256 assetId, uint16[] calldata gemIds) external virtual;
+    function addGems(uint256 assetId, uint16[] calldata gemIds) external;
 
-    function setMigrationContract(address _migrationContract) external virtual;
+    function setMigrationContract(address _migrationContract) external;
 }
