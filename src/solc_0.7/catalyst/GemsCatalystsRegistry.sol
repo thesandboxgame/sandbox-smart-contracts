@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "./Gem.sol";
 import "./Catalyst.sol";
-import "./AssetAttributesRegistry.sol";
+import "./interfaces/IAssetAttributesRegistry.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 
@@ -28,7 +28,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction {
     function getAttributes(
         uint16 catalystId,
         uint256 assetId,
-        AssetAttributesRegistry.GemEvent[] calldata events
+        IAssetAttributesRegistry.GemEvent[] calldata events
     ) external view returns (uint32[] memory values) {
         Catalyst catalyst = getCatalyst(catalystId);
         require(catalyst != Catalyst(0), "CATALYST_DOES_NOT_EXIST");

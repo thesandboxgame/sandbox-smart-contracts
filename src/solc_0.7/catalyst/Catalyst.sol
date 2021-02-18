@@ -2,9 +2,9 @@
 pragma solidity 0.7.5;
 pragma experimental ABIEncoderV2;
 
-import "./AssetAttributesRegistry.sol";
+import "./interfaces/IAssetAttributesRegistry.sol";
 import "./ERC20Token.sol";
-import "./IAttributes.sol";
+import "./interfaces/IAttributes.sol";
 
 contract Catalyst is ERC20Token, IAttributes {
     uint16 public immutable catalystId;
@@ -41,7 +41,7 @@ contract Catalyst is ERC20Token, IAttributes {
     /// @notice Get the attributes for each gem in an asset.
     /// See DefaultAttributes.getAttributes for more.
     /// @return values An array of values representing the "level" of each gem. ie: Power=14, speed=45, etc...
-    function getAttributes(uint256 assetId, AssetAttributesRegistry.GemEvent[] calldata events)
+    function getAttributes(uint256 assetId, IAssetAttributesRegistry.GemEvent[] calldata events)
         external
         view
         override
