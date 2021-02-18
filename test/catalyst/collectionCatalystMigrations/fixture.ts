@@ -4,9 +4,9 @@ import {
   getUnnamedAccounts,
   getNamedAccounts,
 } from 'hardhat';
-import { BigNumber, Contract } from 'ethers';
-import { toWei, waitFor } from '../../utils';
-import { mintCatalyst, transferSand } from '../utils';
+import { Contract } from 'ethers';
+import { toWei } from '../../utils';
+import { transferSand } from '../utils';
 
 export const setupCollectionCatalystMigrations = deployments.createFixture(async () => {
   await deployments.fixture();
@@ -23,6 +23,9 @@ export const setupCollectionCatalystMigrations = deployments.createFixture(async
   const oldCatalystMinter: Contract = await ethers.getContract(
     'OldCatalystMinter'
   );
+  const assetAttributesRegistry: Contract = await ethers.getContract(
+    'AssetAttributesRegistry'
+  );
 
   const collectionCatalystMigrationsContractAsAdmin = await collectionCatalystMigrationsContract.connect(
     ethers.provider.getSigner(collectionCatalystMigrationsAdmin)
@@ -30,10 +33,14 @@ export const setupCollectionCatalystMigrations = deployments.createFixture(async
   const oldCatalystMinterAsUser0 = await oldCatalystMinter.connect(
     ethers.provider.getSigner(user0)
   );
-
+  const collectionCatalystMigrationsContractAsUser0 = await collectionCatalystMigrationsContract.connect(
+    ethers.provider.getSigner(user0)
+  );
   return {
+    assetAttributesRegistry,
     oldCatalystMinterAsUser0,
     collectionCatalystMigrationsContractAsAdmin,
+    collectionCatalystMigrationsContractAsUser0,
     oldCatalystRegistry,
     oldCatalystMinter,
     user0
@@ -41,19 +48,21 @@ export const setupCollectionCatalystMigrations = deployments.createFixture(async
 });
 
 export const setupUser = async (user: string) => {
-  const { gemMinter } = await getNamedAccounts();
+  const { gemMinter, catalystMinter } = await getNamedAccounts();
 
   const gem: Contract = await ethers.getContract("OldGems");
+  const catalyst = await ethers.getContract(`OldCatalysts`);
+
   const gemAsGemMinter = await gem.connect(
     ethers.provider.getSigner(gemMinter)
   );
-  const catalyst = await ethers.getContract(`OldCatalysts`);
-  const sand = await ethers.getContract("Sand");
-  await transferSand(sand, user, toWei(4));
+  const catalystAsCatalystMinter = await catalyst.connect(ethers.provider.getSigner(catalystMinter));
+  const sandContract = await ethers.getContract("Sand");
+  await transferSand(sandContract, user, toWei(4));
   for (let i = 0; i < 5; i++) {
     await gemAsGemMinter.mint(user, i, 50);
   }
   for (let i = 0; i < 4; i++) {
-    await catalyst.mint(user, i, 20);
+    await catalystAsCatalystMinter.mint(user, i, 20);
   }
 };

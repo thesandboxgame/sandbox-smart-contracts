@@ -59,6 +59,11 @@ contract CollectionCatalystMigrations is WithAdmin {
         }
     }
 
+    function setAssetAttributesRegistryMigrationContract(address migrationContract) external {
+        require(msg.sender == _admin, "NOT_AUTHORIZED");
+        _registry.setMigrationContract(migrationContract);
+    }
+
     /// @dev Perform the migration of the catalyst. See `migrate(...)`
     function _migrate(
         uint256 assetId,
