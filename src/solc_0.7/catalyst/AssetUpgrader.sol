@@ -2,14 +2,15 @@
 pragma solidity 0.7.5;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "./AssetAttributesRegistry.sol";
+import "./interfaces/IAssetAttributesRegistry.sol";
+import "./interfaces/IAssetUpgrader.sol";
 import "./GemsCatalystsRegistry.sol";
 import "../common/Interfaces/IERC20Extended.sol";
 import "../common/Interfaces/IAssetToken.sol";
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
-contract AssetUpgrader is WithMetaTransaction {
+contract AssetUpgrader is WithMetaTransaction, IAssetUpgrader {
     using SafeMath for uint256;
 
     address public immutable feeRecipient;
@@ -21,7 +22,7 @@ contract AssetUpgrader is WithMetaTransaction {
     address private constant BURN_ADDRESS = 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF;
 
     IERC20Extended internal immutable _sand;
-    AssetAttributesRegistry internal immutable _registry;
+    IAssetAttributesRegistry internal immutable _registry;
     IAssetToken internal immutable _asset;
     GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
 
@@ -34,7 +35,7 @@ contract AssetUpgrader is WithMetaTransaction {
     /// @param _gemAdditionFee: the fee in Sand paid for adding gems
     /// @param _feeRecipient: address receiving the Sand fee
     constructor(
-        AssetAttributesRegistry registry,
+        IAssetAttributesRegistry registry,
         IERC20Extended sand,
         IAssetToken asset,
         GemsCatalystsRegistry gemsCatalystsRegistry,
@@ -64,7 +65,7 @@ contract AssetUpgrader is WithMetaTransaction {
         uint16 catalystId,
         uint16[] calldata gemIds,
         address to
-    ) external returns (uint256 tokenId) {
+    ) external override returns (uint256 tokenId) {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         _checkAuthorization(from);
         tokenId = _asset.extractERC721From(from, assetId, from);
@@ -84,7 +85,7 @@ contract AssetUpgrader is WithMetaTransaction {
         uint16 catalystId,
         uint16[] calldata gemIds,
         address to
-    ) external returns (uint256 tokenId) {
+    ) external override returns (uint256 tokenId) {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         _checkAuthorization(from);
         _changeCatalyst(from, assetId, catalystId, gemIds, to);
@@ -101,7 +102,7 @@ contract AssetUpgrader is WithMetaTransaction {
         uint256 assetId,
         uint16[] calldata gemIds,
         address to
-    ) external {
+    ) external override {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         _checkAuthorization(from);
         _addGems(from, assetId, gemIds, to);
