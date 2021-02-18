@@ -1,7 +1,7 @@
 import fs from 'fs';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {createAssetClaimMerkleTree} from '../../data/asset_giveaway_2/getAssets';
+import {createAssetClaimMerkleTree} from '../../data/giveaways/asset_giveaway_2/getAssets';
 import {AddressZero} from '@ethersproject/constants';
 
 import helpers, {AssetClaim} from '../../lib/merkleTreeHelper';
@@ -17,7 +17,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   try {
     assetData = JSON.parse(
       fs
-        .readFileSync(`data/asset_giveaway_2/assets_${hre.network.name}.json`)
+        .readFileSync(
+          `data/giveaways/asset_giveaway_2/assets_${hre.network.name}.json`
+        )
         .toString()
     );
   } catch (e) {
