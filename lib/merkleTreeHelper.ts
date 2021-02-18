@@ -1,4 +1,4 @@
-import {utils, constants} from 'ethers';
+import {utils} from 'ethers';
 const {solidityKeccak256, defaultAbiCoder, keccak256} = utils;
 import crypto from 'crypto';
 
@@ -225,6 +225,7 @@ function createDataArrayClaimableAssets(
 
 function calculateMultiClaimHash(claim: MultiClaim, salt?: string): string {
   const types = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const values: any = [];
   if (!claim.salt) claim.salt = salt; // Ensure that a salt is included in the claim object to be hashed
   types.push(

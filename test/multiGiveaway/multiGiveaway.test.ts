@@ -79,7 +79,7 @@ describe('Multi_Giveaway', function () {
       } = setUp;
 
       // make arrays of claims and proofs relevant to specific user
-      const userProofs: any = [];
+      const userProofs = [];
       const userClaims = [];
       const claim = allClaims[0][0];
       const secondClaim = allClaims[1][0];
@@ -138,7 +138,7 @@ describe('Multi_Giveaway', function () {
       } = setUp;
 
       // make arrays of claims and proofs relevant to specific user
-      const userProofs: any = [];
+      const userProofs = [];
       const userClaims = [];
       const secondClaim = allClaims[1][0];
       userClaims.push(secondClaim);
@@ -188,7 +188,7 @@ describe('Multi_Giveaway', function () {
       } = setUp;
 
       // make arrays of claims and proofs relevant to specific user
-      const userProofs: any = [];
+      const userProofs = [];
       const userTrees = [];
       userTrees.push(allTrees[0]);
       const userClaims = [];
@@ -228,7 +228,7 @@ describe('Multi_Giveaway', function () {
       } = setUp;
 
       // make arrays of claims and proofs relevant to specific user
-      const userProofs: any = [];
+      const userProofs = [];
       const userTrees = [];
       userTrees.push(allTrees[0]);
       const userClaims = [];
@@ -272,7 +272,7 @@ describe('Multi_Giveaway', function () {
       } = setUp;
 
       // make arrays of claims and proofs relevant to specific user
-      const userProofs: any = [];
+      const userProofs = [];
       const userTrees = [];
       userTrees.push(allTrees[0]);
       const userClaims = [];
@@ -374,7 +374,7 @@ describe('Multi_Giveaway', function () {
         allMerkleRoots,
       } = setUp;
 
-      const userProofs: any = [];
+      const userProofs = [];
       const userTrees = [];
       userTrees.push(allTrees[0]);
       const userClaims = [];
@@ -453,7 +453,7 @@ describe('Multi_Giveaway', function () {
         allMerkleRoots,
         sandContract,
       } = setUp;
-      const userProofs: any = [];
+      const userProofs = [];
       const userTrees = [];
       userTrees.push(allTrees[0]);
       const userClaims = [];
@@ -502,11 +502,10 @@ describe('Multi_Giveaway', function () {
       const badClaim = JSON.parse(JSON.stringify(allClaims[0][0])); // deep clone
       badClaim.erc20.amounts[0] = 250; // bad param
 
-      const userProofs: any = [];
+      const userProofs = [];
       const userTrees = [];
       userTrees.push(allTrees[0]);
       const userClaims = [];
-      const claim = badClaim;
       userClaims.push(badClaim);
       userProofs.push(
         userTrees[0].getProof(calculateMultiClaimHash(allClaims[0][0]))
@@ -541,7 +540,7 @@ describe('Multi_Giveaway', function () {
         allMerkleRoots,
       } = setUp;
 
-      const userProofs: any = [];
+      const userProofs = [];
       const userTrees = [];
       userTrees.push(allTrees[0]);
       const userClaims = [];
@@ -590,11 +589,10 @@ describe('Multi_Giveaway', function () {
 
       const badClaim = JSON.parse(JSON.stringify(allClaims[0][0])); // deep clone
       badClaim.to = others[2]; // bad param
-      const userProofs: any = [];
+      const userProofs = [];
       const userTrees = [];
       userTrees.push(allTrees[0]);
       const userClaims = [];
-      const claim = badClaim;
       userClaims.push(badClaim);
       userProofs.push(
         userTrees[0].getProof(calculateMultiClaimHash(allClaims[0][0]))
@@ -630,11 +628,10 @@ describe('Multi_Giveaway', function () {
 
       const badClaim = JSON.parse(JSON.stringify(allClaims[0][0])); // deep clone
       badClaim.to = zeroAddress; // bad param
-      const userProofs: any = [];
+      const userProofs = [];
       const userTrees = [];
       userTrees.push(allTrees[0]);
       const userClaims = [];
-      const claim = badClaim;
       userClaims.push(badClaim);
       userProofs.push(
         userTrees[0].getProof(calculateMultiClaimHash(allClaims[0][0]))
@@ -665,7 +662,7 @@ describe('Multi_Giveaway', function () {
         allMerkleRoots,
       } = setUp;
 
-      const userProofs: any = [];
+      const userProofs = [];
       const userTrees = [];
       userTrees.push(allTrees[0]);
       const userClaims = [];
@@ -707,7 +704,7 @@ describe('Multi_Giveaway', function () {
       } = setUp;
 
       // make arrays of claims and proofs relevant to specific user
-      const userProofs: any = [];
+      const userProofs = [];
       const userTrees = [];
       userTrees.push(allTrees[0]);
       const userClaims = [];
@@ -748,7 +745,7 @@ describe('Multi_Giveaway', function () {
       } = setUp;
 
       // make arrays of claims and proofs relevant to specific user
-      const userProofs: any = [];
+      const userProofs = [];
       const userTrees = [];
       userTrees.push(allTrees[0]);
       const userClaims = [];
@@ -793,7 +790,7 @@ describe('Multi_Giveaway', function () {
       } = setUp;
 
       // make arrays of claims and proofs relevant to specific user
-      const userProofs: any = [];
+      const userProofs = [];
       const userTrees = [];
       userTrees.push(allTrees[0]);
       const userClaims = [];
@@ -901,7 +898,7 @@ describe('Multi_Giveaway', function () {
       } = setUp;
 
       // make arrays of claims and proofs relevant to specific user
-      const userProofs: any = [];
+      const userProofs = [];
       const userClaims = [];
       const claim = allClaims[0][0];
       const secondClaim = allClaims[1][0];
@@ -1090,7 +1087,7 @@ describe('Multi_Giveaway', function () {
       } = setUp;
 
       // make arrays of claims and proofs relevant to specific user
-      const userProofs: any = [];
+      const userProofs = [];
       const userClaims = [];
       const claim = allClaims[0][0];
       const secondClaim = allClaims[1][0];

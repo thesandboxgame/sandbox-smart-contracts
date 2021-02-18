@@ -4,7 +4,6 @@ import {
   getUnnamedAccounts,
   getNamedAccounts,
 } from 'hardhat';
-import {BigNumber} from 'ethers';
 import {expect} from '../chai-setup';
 import MerkleTree from '../../lib/merkleTree';
 import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getClaims';
@@ -36,8 +35,6 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     assetBouncerAdmin,
     landAdmin,
     sandAdmin,
-    gemAdmin,
-    catalystAdmin,
   } = await getNamedAccounts();
   const otherAccounts = await getUnnamedAccounts();
   const nftGiveawayAdmin = otherAccounts[0];
@@ -58,16 +55,6 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   const sandContractAsAdmin = await sandContract.connect(
     ethers.provider.getSigner(sandAdmin)
   );
-  const speedGemContractAsAdmin = await speedGemContract.connect(
-    ethers.provider.getSigner(gemAdmin)
-  );
-  const rareCatalystContractAsAdmin = await rareCatalystContract.connect(
-    ethers.provider.getSigner(catalystAdmin)
-  );
-
-  const SAND_AMOUNT = BigNumber.from(20000).mul('1000000000000000000');
-  const GEM_AMOUNT = BigNumber.from(4).mul('1000000000000000000');
-  const CAT_AMOUNT = BigNumber.from(1).mul('1000000000000000000');
 
   await deployments.deploy('Test_Multi_Giveaway_1_with_ERC20', {
     from: deployer,
@@ -144,7 +131,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   const landContract = await ethers.getContractAt(
     'MockLand',
-    '0x51d8e1CAADE79921017ae03a48eCA01d63D6e7Ee' // Set a fixed address for Mockland to use in test claim data as the landContractAddress // TODO: fix
+    '0x51d8e1CAADE79921017ae03a48eCA01d63D6e7Ee' // Set a fixed address for Mockland to use in test claim data as the landContractAddress
   );
 
   // Supply lands to contract for testing
