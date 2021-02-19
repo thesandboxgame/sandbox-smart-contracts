@@ -10,6 +10,7 @@ import {
   transferSand,
 } from '../utils';
 import {ethers} from 'hardhat';
+import {upgradeFee} from '../../../data/assetUpgraderFees';
 
 const GEM_CATALYST_UNIT = BigNumber.from('1000000000000000000');
 
@@ -273,7 +274,7 @@ describe('AssetUpgrader', function () {
     await transferSand(
       sandContract,
       user4,
-      BigNumber.from('2').mul(gemAdditionFee)
+      BigNumber.from('100').mul(gemAdditionFee)
     );
     const mintingAmount = BigNumber.from('8').mul(
       BigNumber.from(gemsCatalystsUnit)
@@ -343,10 +344,10 @@ describe('AssetUpgrader', function () {
 
     // check sand fee transfer
     expect(sandBalanceFromAfter).to.equal(
-      sandBalanceFromBefore.sub(gemAdditionFee)
+      sandBalanceFromBefore.sub(gemAdditionFee.add(upgradeFee))
     );
     expect(sandBalanceToAfter).to.equal(
-      sandBalanceToBefore.add(gemAdditionFee)
+      sandBalanceToBefore.add(gemAdditionFee.add(upgradeFee))
     );
 
     // check assetAttributesRegistry
