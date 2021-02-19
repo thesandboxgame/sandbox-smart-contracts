@@ -8,7 +8,7 @@ import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
 import {setupAssetAttributesRegistry} from '../assetAttributesRegistry/fixtures';
 import {setupAssetMinter, MintOptions, MintMultiOptions} from './fixtures';
 import {setupAssetUpgrader} from '../assetUpgrader/fixtures';
-import {mintCatalyst, mintGem} from '../utils';
+import {mintCatalyst, mintGem, transferSand} from '../utils';
 import {expectEventWithArgs, findEvents, waitFor} from '../../utils';
 
 let mintOptions: MintOptions;
@@ -888,6 +888,7 @@ describe('AssetMinter', function () {
         assetAttributesRegistry,
       } = await setupAssetUpgrader();
       const {
+        sandContract,
         legendaryCatalyst,
         defenseGem,
         speedGem,
@@ -895,6 +896,11 @@ describe('AssetMinter', function () {
         powerGem,
         catalystOwner,
       } = await setupGemsAndCatalysts();
+      await transferSand(
+        sandContract,
+        catalystOwner,
+        BigNumber.from(100000).mul(`1000000000000000000`)
+      );
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
