@@ -6,6 +6,7 @@ import {
 } from 'hardhat';
 import {BigNumber, Contract} from 'ethers';
 import {waitFor} from '../../utils';
+import {transferSand} from '../utils';
 
 export const setupAssetUpgrader = deployments.createFixture(async () => {
   await deployments.fixture();
@@ -45,6 +46,11 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
     assetContract
       .connect(ethers.provider.getSigner(assetAdmin))
       .setSuperOperator(assetUpgraderContract.address, true)
+  );
+  await transferSand(
+    sandContract,
+    catalystOwner,
+    BigNumber.from(100000).mul(`1000000000000000000`)
   );
 
   const assetUpgraderContractAsCatalystOwner = await assetUpgraderContract.connect(
