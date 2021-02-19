@@ -5,14 +5,11 @@ import {expect} from '../../chai-setup';
 import catalysts from '../../../data/catalysts';
 import gems from '../../../data/gems';
 import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
-import {
-  setupAssetAttributesRegistry,
-  supplySand,
-} from '../assetAttributesRegistry/fixtures';
-import {setupAssetMinter, MintOptions} from '../assetMinter/fixtures';
+import {setupAssetAttributesRegistry} from '../assetAttributesRegistry/fixtures';
+import {MintOptions} from '../assetMinter/fixtures';
 import {findEvents} from '../../utils';
+import {transferSand} from '../utils';
 import {prepareGemEventData, getReceiptObject} from '../utils';
-import {setupAssetUpgrader} from '../assetUpgrader/fixtures';
 
 const NFT_SUPPLY = 1;
 
@@ -33,18 +30,18 @@ function minValue(gems: number): number {
 }
 
 describe('AssetAttributesRegistry: getAttributes', function () {
-  let assetMinterContract: Contract;
-  let assetMinterAsCatalystOwner: Contract;
-  let assetUpgraderContract: Contract;
-  let assetUpgraderAsCatalystOwner: Contract;
+  let assetUpgraderAsUser0: Contract;
+  let assetMinterAsUser0: Contract;
   let assetAttributesRegistry: Contract;
   let catalystOwner: Address;
 
   async function getMintReceipt(
     catId: number,
-    gemIds: number[]
+    gemIds: number[],
+    minter: Contract
   ): Promise<Receipt> {
-    const mintReceipt = await assetMinterAsCatalystOwner.mint(
+    console.log(`minter in getMintReceipt: ${minter.address}`);
+    const mintReceipt = await minter.mint(
       catalystOwner,
       mintOptions.packId,
       mintOptions.metaDataHash,
@@ -74,9 +71,11 @@ describe('AssetAttributesRegistry: getAttributes', function () {
 
   async function getAssetId(
     catalystId: number,
-    gemIds: number[]
+    gemIds: number[],
+    minter: Contract
   ): Promise<AssetMintObj> {
-    const mintReceipt = await getMintReceipt(catalystId, gemIds);
+    console.log(`minter in getAssetId: ${minter.address}`);
+    const mintReceipt = await getMintReceipt(catalystId, gemIds, minter);
     const catalystAppliedEvents = await getCatEvents(mintReceipt);
     const args = catalystAppliedEvents[0].args;
     const assetId = args ? args[0] : null;
@@ -84,21 +83,24 @@ describe('AssetAttributesRegistry: getAttributes', function () {
   }
 
   beforeEach(async function () {
-    ({assetMinterContract} = await setupAssetMinter());
-    ({assetUpgraderContract} = await setupAssetUpgrader());
-    ({assetAttributesRegistry} = await setupAssetAttributesRegistry());
+    ({
+      assetAttributesRegistry,
+      assetUpgraderAsUser0,
+      assetMinterAsUser0,
+    } = await setupAssetAttributesRegistry());
     ({catalystOwner} = await setupGemsAndCatalysts());
-    assetMinterAsCatalystOwner = await assetMinterContract.connect(
-      ethers.provider.getSigner(catalystOwner)
-    );
-    assetUpgraderAsCatalystOwner = await assetUpgraderContract.connect(
-      ethers.provider.getSigner(catalystOwner)
+    console.log(
+      `minter from contract call in test ${await assetAttributesRegistry.getMinter()}`
     );
   });
 
   describe('getAttributes: minting', function () {
     it('can get attributes for 1 gem', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(1, [1]);
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        1,
+        [1],
+        assetMinterAsUser0
+      );
       const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
         await getReceiptObject(mintReceipt, 1),
       ]);
@@ -111,7 +113,11 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes for 2 identical gems', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(2, [2, 2]);
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        2,
+        [2, 2],
+        assetMinterAsUser0
+      );
       const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
         await getReceiptObject(mintReceipt, 1),
       ]);
@@ -124,11 +130,11 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes for 3 identical gems', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(3, [
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
         3,
-        3,
-        3,
-      ]);
+        [3, 3, 3],
+        assetMinterAsUser0
+      );
       const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
         await getReceiptObject(mintReceipt, 1),
       ]);
@@ -141,12 +147,11 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes for 4 identical gems', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, [
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
         4,
-        4,
-        4,
-        4,
-      ]);
+        [4, 4, 4, 4],
+        assetMinterAsUser0
+      );
       const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
         await getReceiptObject(mintReceipt, 1),
       ]);
@@ -159,7 +164,11 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes for 2 different gems', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(2, [1, 2]);
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        2,
+        [1, 2],
+        assetMinterAsUser0
+      );
       const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
         await getReceiptObject(mintReceipt, 1),
       ]);
@@ -173,11 +182,11 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes for 3 different gems', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(3, [
-        1,
-        2,
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
         3,
-      ]);
+        [1, 2, 3],
+        assetMinterAsUser0
+      );
       const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
         await getReceiptObject(mintReceipt, 1),
       ]);
@@ -192,12 +201,11 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes for 4 different gems', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, [
-        1,
-        2,
-        3,
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
         4,
-      ]);
+        [1, 2, 3, 4],
+        assetMinterAsUser0
+      );
       const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
         await getReceiptObject(mintReceipt, 1),
       ]);
@@ -213,11 +221,11 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes for 2 identical gems + 1 different gem', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(3, [
-        1,
-        1,
-        2,
-      ]);
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        3,
+        [1, 1, 2],
+        assetMinterAsUser0
+      );
       const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
         await getReceiptObject(mintReceipt, 1),
       ]);
@@ -231,12 +239,11 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes for 3 identical gems + 1 different gem', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, [
-        2,
-        2,
-        2,
-        3,
-      ]);
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        4,
+        [2, 2, 2, 3],
+        assetMinterAsUser0
+      );
       const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
         await getReceiptObject(mintReceipt, 1),
       ]);
@@ -250,12 +257,11 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes for 2 identical gems + 2 different identical gems', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, [
-        2,
-        2,
-        3,
-        3,
-      ]);
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        4,
+        [2, 2, 3, 3],
+        assetMinterAsUser0
+      );
       const {gemEvents} = await prepareGemEventData(assetAttributesRegistry, [
         await getReceiptObject(mintReceipt, 1),
       ]);
@@ -270,13 +276,30 @@ describe('AssetAttributesRegistry: getAttributes', function () {
   });
 
   describe('getAttributes: upgrading', function () {
+    let catalystOwner: Address;
+
     beforeEach(async function () {
-      await supplySand(catalystOwner);
+      ({catalystOwner} = await setupGemsAndCatalysts());
+      const {sandContract} = await setupGemsAndCatalysts();
+      await transferSand(
+        sandContract,
+        catalystOwner,
+        BigNumber.from(100000).mul(`1000000000000000000`)
+      );
     });
 
     it('can get attributes when adding 1 gem to an asset with an empty catalyst', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, []);
-      const upgradeReceipt = await assetUpgraderAsCatalystOwner.addGems(
+      console.log(`minter in test: ${assetMinterAsUser0.address}`);
+      console.log(
+        `minter in test from contract: ${await assetAttributesRegistry.getMinter()}`
+      );
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        4,
+        [],
+        assetMinterAsUser0
+      );
+
+      const upgradeReceipt = await assetUpgraderAsUser0.addGems(
         catalystOwner,
         assetId,
         [1],
@@ -297,8 +320,12 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes when adding 2 identical gems to an asset with an empty catalyst', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, []);
-      const upgradeReceipt = await assetUpgraderAsCatalystOwner.addGems(
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        4,
+        [],
+        assetMinterAsUser0
+      );
+      const upgradeReceipt = await assetUpgraderAsUser0.addGems(
         catalystOwner,
         assetId,
         [2, 2],
@@ -318,8 +345,12 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes when adding 3 identical gems to an asset with an empty catalyst', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, []);
-      const upgradeReceipt = await assetUpgraderAsCatalystOwner.addGems(
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        4,
+        [],
+        assetMinterAsUser0
+      );
+      const upgradeReceipt = await assetUpgraderAsUser0.addGems(
         catalystOwner,
         assetId,
         [3, 3, 3],
@@ -339,8 +370,12 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes when adding 4 identical gems to an asset with an empty catalyst', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, []);
-      const upgradeReceipt = await assetUpgraderAsCatalystOwner.addGems(
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        4,
+        [],
+        assetMinterAsUser0
+      );
+      const upgradeReceipt = await assetUpgraderAsUser0.addGems(
         catalystOwner,
         assetId,
         [4, 4, 4, 4],
@@ -360,8 +395,12 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes when adding 2 different gems to an asset with an empty catalyst', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, []);
-      const upgradeReceipt = await assetUpgraderAsCatalystOwner.addGems(
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        4,
+        [],
+        assetMinterAsUser0
+      );
+      const upgradeReceipt = await assetUpgraderAsUser0.addGems(
         catalystOwner,
         assetId,
         [1, 2],
@@ -382,8 +421,12 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes when adding 3 different gems to an asset with an empty catalyst', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, []);
-      const upgradeReceipt = await assetUpgraderAsCatalystOwner.addGems(
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        4,
+        [],
+        assetMinterAsUser0
+      );
+      const upgradeReceipt = await assetUpgraderAsUser0.addGems(
         catalystOwner,
         assetId,
         [1, 2, 3],
@@ -405,8 +448,12 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes when adding 4 different gems to an asset with an empty catalyst', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, []);
-      const upgradeReceipt = await assetUpgraderAsCatalystOwner.addGems(
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        4,
+        [],
+        assetMinterAsUser0
+      );
+      const upgradeReceipt = await assetUpgraderAsUser0.addGems(
         catalystOwner,
         assetId,
         [1, 2, 3, 4],
@@ -429,8 +476,12 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes when adding 1 similar gem to an asset with existing gems', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, [1]);
-      const upgradeReceipt = await assetUpgraderAsCatalystOwner.addGems(
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        4,
+        [1],
+        assetMinterAsUser0
+      );
+      const upgradeReceipt = await assetUpgraderAsUser0.addGems(
         catalystOwner,
         assetId,
         [1],
@@ -450,8 +501,12 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes when adding 1 different gem to an asset with existing gems', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, [1]);
-      const upgradeReceipt = await assetUpgraderAsCatalystOwner.addGems(
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        4,
+        [1],
+        assetMinterAsUser0
+      );
+      const upgradeReceipt = await assetUpgraderAsUser0.addGems(
         catalystOwner,
         assetId,
         [2],
@@ -472,8 +527,12 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes when adding 2 similar gems to an asset with existing gems', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, [1]);
-      const upgradeReceipt = await assetUpgraderAsCatalystOwner.addGems(
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        4,
+        [1],
+        assetMinterAsUser0
+      );
+      const upgradeReceipt = await assetUpgraderAsUser0.addGems(
         catalystOwner,
         assetId,
         [1, 1],
@@ -493,8 +552,12 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes when adding 2 different gems to an asset with existing gems', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, [1]);
-      const upgradeReceipt = await assetUpgraderAsCatalystOwner.addGems(
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        4,
+        [1],
+        assetMinterAsUser0
+      );
+      const upgradeReceipt = await assetUpgraderAsUser0.addGems(
         catalystOwner,
         assetId,
         [2, 3],
@@ -516,8 +579,12 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes when adding 3 similar gems to an asset with existing gems', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, [5]);
-      const upgradeReceipt = await assetUpgraderAsCatalystOwner.addGems(
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        4,
+        [5],
+        assetMinterAsUser0
+      );
+      const upgradeReceipt = await assetUpgraderAsUser0.addGems(
         catalystOwner,
         assetId,
         [5, 5, 5],
@@ -537,8 +604,12 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes when adding 3 different gems to an asset with existing gems', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, [1]);
-      const upgradeReceipt = await assetUpgraderAsCatalystOwner.addGems(
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        4,
+        [1],
+        assetMinterAsUser0
+      );
+      const upgradeReceipt = await assetUpgraderAsUser0.addGems(
         catalystOwner,
         assetId,
         [2, 3, 4],
@@ -561,14 +632,18 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes when adding gems to an asset multiple times', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, [1]);
-      const upgradeReceipt1 = await assetUpgraderAsCatalystOwner.addGems(
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        4,
+        [1],
+        assetMinterAsUser0
+      );
+      const upgradeReceipt1 = await assetUpgraderAsUser0.addGems(
         catalystOwner,
         assetId,
         [1],
         catalystOwner
       );
-      const upgradeReceipt2 = await assetUpgraderAsCatalystOwner.addGems(
+      const upgradeReceipt2 = await assetUpgraderAsUser0.addGems(
         catalystOwner,
         assetId,
         [1, 2],
@@ -590,7 +665,11 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes when upgrading an asset multiple times', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(3, [1]);
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        3,
+        [1],
+        assetMinterAsUser0
+      );
 
       const {
         gemEvents: gemEvnt1,
@@ -608,7 +687,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       expect(attributes1[4]).to.equal(0);
       expect(attributes1[5]).to.equal(0);
 
-      const upgradeReceipt1 = await assetUpgraderAsCatalystOwner.addGems(
+      const upgradeReceipt1 = await assetUpgraderAsUser0.addGems(
         catalystOwner,
         assetId,
         [1, 4],
@@ -631,7 +710,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       expect(attributes2[4]).to.be.within(minValue(3), 25);
       expect(attributes2[5]).to.equal(0);
 
-      const changeCatReceipt = await assetUpgraderAsCatalystOwner.changeCatalyst(
+      const changeCatReceipt = await assetUpgraderAsUser0.changeCatalyst(
         catalystOwner,
         assetId,
         4,
@@ -658,16 +737,16 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('attributes after multiple upgrades are correct', async function () {
-      const {id: assetId} = await getAssetId(4, [1, 1]);
+      const {id: assetId} = await getAssetId(4, [1, 1], assetMinterAsUser0);
 
-      await assetUpgraderAsCatalystOwner.addGems(
+      await assetUpgraderAsUser0.addGems(
         catalystOwner,
         assetId,
         [2, 5],
         catalystOwner
       );
 
-      const upgradeCatalystReceipt1 = await assetUpgraderAsCatalystOwner.changeCatalyst(
+      const upgradeCatalystReceipt1 = await assetUpgraderAsUser0.changeCatalyst(
         catalystOwner,
         assetId,
         2,
@@ -693,35 +772,34 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('should fail if numGems > MAX-NUM_GEMS', async function () {
-      const {id: assetId, receipt: mintReceipt} = await getAssetId(4, [
-        1,
-        1,
-        1,
-        1,
-      ]);
+      const {id: assetId, receipt: mintReceipt} = await getAssetId(
+        4,
+        [1, 1, 1, 1],
+        assetMinterAsUser0
+      );
 
-      const upgradeCatalystReceipt1 = await assetUpgraderAsCatalystOwner.changeCatalyst(
+      const upgradeCatalystReceipt1 = await assetUpgraderAsUser0.changeCatalyst(
         catalystOwner,
         assetId,
         2,
         [1, 1],
         catalystOwner
       );
-      const upgradeCatalystReceipt2 = await assetUpgraderAsCatalystOwner.changeCatalyst(
+      const upgradeCatalystReceipt2 = await assetUpgraderAsUser0.changeCatalyst(
         catalystOwner,
         assetId,
         4,
         [5, 5, 5, 5],
         catalystOwner
       );
-      const upgradeCatalystReceipt3 = await assetUpgraderAsCatalystOwner.changeCatalyst(
+      const upgradeCatalystReceipt3 = await assetUpgraderAsUser0.changeCatalyst(
         catalystOwner,
         assetId,
         3,
         [4, 2, 5],
         catalystOwner
       );
-      const upgradeCatalystReceipt4 = await assetUpgraderAsCatalystOwner.changeCatalyst(
+      const upgradeCatalystReceipt4 = await assetUpgraderAsUser0.changeCatalyst(
         catalystOwner,
         assetId,
         4,
