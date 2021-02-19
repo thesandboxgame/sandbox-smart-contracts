@@ -129,7 +129,7 @@ contract AssetMinter is WithMetaTransaction {
                 require(catalystsQuantities[assets[i].catalystId] != 0, "INVALID_CATALYST_NOT_ENOUGH");
                 uint16 maxGems = _gemsCatalystsRegistry.getMaxGems(assets[i].catalystId);
                 require(assets[i].gemIds.length <= maxGems, "INVALID_GEMS_TOO_MANY");
-                catalystsQuantities[assets[i].catalystId]--;
+                catalystsQuantities[assets[i].catalystId] = catalystsQuantities[assets[i].catalystId].sub(1);
                 gemsQuantities = _checkGemsQuantities(gemsQuantities, assets[i].gemIds);
             }
             supplies[i] = assets[i].quantity;
@@ -160,7 +160,7 @@ contract AssetMinter is WithMetaTransaction {
         for (uint16 i = 0; i < ids.length; i++) {
             ids[i] = i;
         }
-        _gemsCatalystsRegistry.batchBurnCatalysts(from, ids, catalystsQuantities);
+        _gemsCatalystsRegistry.batchBurnCatalysts(from, ids, scaleQuantities(catalystsQuantities));
     }
 
     /// @dev Burn a batch of gems in one tx.
@@ -171,7 +171,7 @@ contract AssetMinter is WithMetaTransaction {
         for (uint16 i = 0; i < ids.length; i++) {
             ids[i] = i;
         }
-        _gemsCatalystsRegistry.batchBurnGems(from, ids, gemsQuantities);
+        _gemsCatalystsRegistry.batchBurnGems(from, ids, scaleQuantities(gemsQuantities));
     }
 
     /// @dev Set a single catalyst for an asset.
@@ -215,5 +215,16 @@ contract AssetMinter is WithMetaTransaction {
         uint32 numTimes
     ) internal {
         _gemsCatalystsRegistry.burnCatalyst(from, catalystId, numTimes * CATALYST_UNIT);
+    }
+
+    /// @dev Scale up each number in an array of quantities by a factor of 1000000000000000000.
+    /// @param quantities The array of numbers to scale.
+    /// @return scaledQuantities The scaled-up values.
+    function scaleQuantities(uint256[] memory quantities) internal pure returns (uint256[] memory scaledQuantities) {
+        uint256[] memory scaled = new uint256[](quantities.length);
+        for (uint256 i = 0; i < quantities.length; i++) {
+            scaled[i] = quantities[i] * GEM_UNIT;
+        }
+        return scaled;
     }
 }

@@ -769,16 +769,21 @@ describe('AssetMinter', function () {
       const magicSupplyAfter = await magicGem.totalSupply();
       const luckSupplyAfter = await luckGem.totalSupply();
 
-      expect(commonBalanceAfter).to.be.equal(commonBalanceBefore.sub(1));
-      expect(rareBalanceAfter).to.be.equal(rareBalanceBefore.sub(1));
-      expect(speedBalanceAfter).to.be.equal(speedBalanceBefore.sub(1));
-      expect(magicBalanceAfter).to.be.equal(magicBalanceBefore.sub(1));
-      expect(luckBalanceAfter).to.be.equal(luckBalanceBefore.sub(1));
-      expect(commonSupplyAfter).to.be.equal(commonSupplyBefore.sub(1));
-      expect(rareSupplyAfter).to.be.equal(rareSupplyBefore.sub(1));
-      expect(speedSupplyAfter).to.be.equal(speedSupplyBefore.sub(1));
-      expect(magicSupplyAfter).to.be.equal(magicSupplyBefore.sub(1));
-      expect(luckSupplyAfter).to.be.equal(luckSupplyBefore.sub(1));
+      console.log(`common token balance before: ${commonBalanceBefore}`);
+      console.log(`rare token balance before: ${rareBalanceBefore}`);
+      console.log(`common token balance after: ${commonBalanceAfter}`);
+      console.log(`rare token balance after: ${rareBalanceAfter}`);
+
+      expect(commonBalanceAfter).to.be.equal(commonBalanceBefore.sub(oneToken));
+      expect(rareBalanceAfter).to.be.equal(rareBalanceBefore.sub(oneToken));
+      expect(speedBalanceAfter).to.be.equal(speedBalanceBefore.sub(oneToken));
+      expect(magicBalanceAfter).to.be.equal(magicBalanceBefore.sub(oneToken));
+      expect(luckBalanceAfter).to.be.equal(luckBalanceBefore.sub(oneToken));
+      expect(commonSupplyAfter).to.be.equal(commonSupplyBefore.sub(oneToken));
+      expect(rareSupplyAfter).to.be.equal(rareSupplyBefore.sub(oneToken));
+      expect(speedSupplyAfter).to.be.equal(speedSupplyBefore.sub(oneToken));
+      expect(magicSupplyAfter).to.be.equal(magicSupplyBefore.sub(oneToken));
+      expect(luckSupplyAfter).to.be.equal(luckSupplyBefore.sub(oneToken));
     });
 
     it('Extra gems & catalysts passed will be burnt even if not added to asset', async function () {
@@ -861,16 +866,16 @@ describe('AssetMinter', function () {
       const magicSupplyAfter = await magicGem.totalSupply();
       const luckSupplyAfter = await luckGem.totalSupply();
 
-      expect(commonBalanceAfter).to.be.equal(commonBalanceBefore.sub(1));
-      expect(rareBalanceAfter).to.be.equal(rareBalanceBefore.sub(1));
-      expect(speedBalanceAfter).to.be.equal(speedBalanceBefore.sub(1));
-      expect(magicBalanceAfter).to.be.equal(magicBalanceBefore.sub(1));
-      expect(luckBalanceAfter).to.be.equal(luckBalanceBefore.sub(1));
-      expect(commonSupplyAfter).to.be.equal(commonSupplyBefore.sub(1));
-      expect(rareSupplyAfter).to.be.equal(rareSupplyBefore.sub(1));
-      expect(speedSupplyAfter).to.be.equal(speedSupplyBefore.sub(1));
-      expect(magicSupplyAfter).to.be.equal(magicSupplyBefore.sub(1));
-      expect(luckSupplyAfter).to.be.equal(luckSupplyBefore.sub(1));
+      expect(commonBalanceAfter).to.be.equal(commonBalanceBefore.sub(oneToken));
+      expect(rareBalanceAfter).to.be.equal(rareBalanceBefore.sub(oneToken));
+      expect(speedBalanceAfter).to.be.equal(speedBalanceBefore.sub(oneToken));
+      expect(magicBalanceAfter).to.be.equal(magicBalanceBefore.sub(oneToken));
+      expect(luckBalanceAfter).to.be.equal(luckBalanceBefore.sub(oneToken));
+      expect(commonSupplyAfter).to.be.equal(commonSupplyBefore.sub(oneToken));
+      expect(rareSupplyAfter).to.be.equal(rareSupplyBefore.sub(oneToken));
+      expect(speedSupplyAfter).to.be.equal(speedSupplyBefore.sub(oneToken));
+      expect(magicSupplyAfter).to.be.equal(magicSupplyBefore.sub(oneToken));
+      expect(luckSupplyAfter).to.be.equal(luckSupplyBefore.sub(oneToken));
     });
   });
 
