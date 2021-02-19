@@ -15,6 +15,7 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   const gemsCatalystsRegistry: Contract = await ethers.getContract(
     'GemsCatalystsRegistry'
   );
+  const sandContract: Contract = await ethers.getContract('Sand');
   const powerGem: Contract = await ethers.getContract('Gem_POWER');
   const defenseGem: Contract = await ethers.getContract('Gem_DEFENSE');
   const speedGem: Contract = await ethers.getContract('Gem_SPEED');
@@ -154,6 +155,7 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     ethers.provider.getSigner(gemMinter)
   );
   return {
+    sandContract,
     gemsCatalystsRegistry,
     gemsCatalystsRegistrySuperOperator,
     powerGem,
