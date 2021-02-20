@@ -74,7 +74,6 @@ contract CollectionCatalystMigrations is WithAdmin {
         require(oldExists, "OLD_CATALYST_NOT_EXIST");
         (bool exists, , ) = _registry.getRecord(assetId);
         require(!exists, "ALREADY_MIGRATED");
-
         catalystId += 1; // old catalyst were zero , new one start with common = 1
         if (assetId & IS_NFT != 0) {
             // ensure this NFT has no collection: original NFT
@@ -83,6 +82,9 @@ contract CollectionCatalystMigrations is WithAdmin {
                 require(collId == 0, "NOT_ORIGINAL_NFT");
                 // solhint-disable-next-line no-empty-blocks
             } catch {}
+        }
+        for (uint256 i = 0; i < gemIds.length; i++) {
+            gemIds[i] += 1;
         }
         _registry.setCatalystWithBlockNumber(assetId, uint16(catalystId), gemIds, blockNumber);
     }

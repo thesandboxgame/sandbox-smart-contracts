@@ -36,6 +36,7 @@ export const setupCollectionCatalystMigrations = deployments.createFixture(async
   const collectionCatalystMigrationsContractAsUser0 = await collectionCatalystMigrationsContract.connect(
     ethers.provider.getSigner(user0)
   );
+
   return {
     assetAttributesRegistry,
     oldCatalystMinterAsUser0,
@@ -47,7 +48,7 @@ export const setupCollectionCatalystMigrations = deployments.createFixture(async
   }
 });
 
-export const setupUser = async (user: string) => {
+export const setupUser = async (user: string): Promise<void> => {
   const { gemMinter, catalystMinter } = await getNamedAccounts();
 
   const gem: Contract = await ethers.getContract("OldGems");
