@@ -57,69 +57,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     `./secret/.multi_claims_proofs_${chainId}.json`,
     JSON.stringify(claimsWithProofs, null, '  ')
   );
-
-  // Set giveaway contract as superOperator for Asset
-  // This is needed when the contract is not the assetsHolder
-
-  const isAssetSuperOperator = await read(
-    'Land',
-    'isSuperOperator',
-    giveawayContract.address
-  );
-
-  if (!isAssetSuperOperator) {
-    log('setting Giveaway contract as Super Operator for LAND');
-    const currentAssetAdmin = await read('Asset', 'getAdmin');
-    await execute(
-      'Asset',
-      {from: currentAssetAdmin, log: true},
-      'setSuperOperator',
-      giveawayContract.address,
-      true
-    );
-  }
-
-  // TODO: check if needed
-  // Set giveaway contract as superOperator for Land
-
-  const isLandSuperOperator = await read(
-    'Land',
-    'isSuperOperator',
-    giveawayContract.address
-  );
-
-  if (!isLandSuperOperator) {
-    log('setting Giveaway contract as Super Operator for LAND');
-    const currentAssetAdmin = await read('Land', 'getAdmin');
-    await execute(
-      'Land',
-      {from: currentAssetAdmin, log: true},
-      'setSuperOperator',
-      giveawayContract.address,
-      true
-    );
-  }
-
-  // TODO: check if needed
-  // Set giveaway contract as superOperator for Sand
-
-  const isSandSuperOperator = await read(
-    'Sand',
-    'isSuperOperator',
-    giveawayContract.address
-  );
-
-  if (!isSandSuperOperator) {
-    log('setting Giveaway contract as Super Operator for SAND');
-    const currentAssetAdmin = await read('Sand', 'getAdmin');
-    await execute(
-      'Sand',
-      {from: currentAssetAdmin, log: true},
-      'setSuperOperator',
-      giveawayContract.address,
-      true
-    );
-  }
 };
 export default func;
 func.runAtTheEnd = true;
