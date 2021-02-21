@@ -43,7 +43,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     {from: currentAdmin, log: true},
     'addNewGiveaway',
     merkleRootHash,
-    1615194000 // Sunday, 08-Mar-21 09:00:00 UTC
+    '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF' // do not expire
   );
   // TODO: separate script to be used whenever a new giveaway is added to the reusable multigiveaway contract
   const claimsWithProofs: (MultiClaim & {proof: string[]})[] = [];
