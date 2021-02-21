@@ -8,7 +8,7 @@ const {calculateMultiClaimHash} = helpers;
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, network, getChainId} = hre;
-  const {execute, read, log} = deployments;
+  const {execute, read} = deployments;
   const chainId = await getChainId();
 
   let claimData: MultiClaim[];
