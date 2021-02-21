@@ -63,19 +63,19 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
         require(claims.length == rootHashes.length, "INVALID_INPUT");
         require(claims.length == proofs.length, "INVALID_INPUT");
         for (uint256 i = 0; i < rootHashes.length; i++) {
-            _claimMultipleTokens(rootHashes[i], claims[i], proofs[i]);
+            claimMultipleTokens(rootHashes[i], claims[i], proofs[i]);
         }
     }
 
-    /// @dev Private function used to perform validity checks and progress to claim multiple token types in one claim.
+    /// @dev Public function used to perform validity checks and progress to claim multiple token types in one claim.
     /// @param merkleRoot The merkle root hash for the specific set of items being claimed.
     /// @param claim The claim struct containing the destination address, all items to be claimed and optional salt param.
     /// @param proof The proof provided by the user performing the claim function.
-    function _claimMultipleTokens(
+    function claimMultipleTokens(
         bytes32 merkleRoot,
         Claim memory claim,
         bytes32[] calldata proof
-    ) private {
+    ) public {
         uint256 giveawayExpiryTime = _expiryTime[merkleRoot];
         require(claim.to != address(0), "INVALID_TO_ZERO_ADDRESS");
         require(claim.to != address(this), "DESTINATION_MULTIGIVEAWAY_CONTRACT");
