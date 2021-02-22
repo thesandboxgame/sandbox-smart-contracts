@@ -39,15 +39,15 @@ contract CollectionCatalystMigrations is WithAdmin {
 
     /// @notice Migrate the catalyst for a collection of assets.
     /// @param assetId The id of the asset for which the catalyst is being migrated.
-    /// @param gemIds The gems currently embedded in the catalyst.
+    /// @param oldGemIds The gems currently embedded in the catalyst.
     /// @param blockNumber The blocknumber to use when setting the catalyst.
     function migrate(
         uint256 assetId,
-        uint16[] calldata gemIds,
+        uint16[] calldata oldGemIds,
         uint64 blockNumber
     ) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
-        _migrate(assetId, gemIds, blockNumber);
+        _migrate(assetId, oldGemIds, blockNumber);
     }
 
     /// @notice Migrate the catalysts for a batch of assets.
@@ -67,14 +67,14 @@ contract CollectionCatalystMigrations is WithAdmin {
     /// @dev Perform the migration of the catalyst. See `migrate(...)`
     function _migrate(
         uint256 assetId,
-        uint16[] memory gemIds,
+        uint16[] memory oldGemIds,
         uint64 blockNumber
     ) internal {
-        (bool oldExists, uint256 catalystId) = _oldRegistry.getCatalyst(assetId);
+        (bool oldExists, uint256 oldCatalystId) = _oldRegistry.getCatalyst(assetId);
         require(oldExists, "OLD_CATALYST_NOT_EXIST");
         (bool exists, , ) = _registry.getRecord(assetId);
         require(!exists, "ALREADY_MIGRATED");
-        catalystId += 1; // old catalyst were zero , new one start with common = 1
+        oldCatalystId += 1; // old catalyst were zero , new one start with common = 1
         if (assetId & IS_NFT != 0) {
             // ensure this NFT has no collection: original NFT
             // If it has, the collection itself need to be migrated
@@ -83,9 +83,9 @@ contract CollectionCatalystMigrations is WithAdmin {
                 // solhint-disable-next-line no-empty-blocks
             } catch {}
         }
-        for (uint256 i = 0; i < gemIds.length; i++) {
-            gemIds[i] += 1;
+        for (uint256 i = 0; i < oldGemIds.length; i++) {
+            oldGemIds[i] += 1;
         }
-        _registry.setCatalystWithBlockNumber(assetId, uint16(catalystId), gemIds, blockNumber);
+        _registry.setCatalystWithBlockNumber(assetId, uint16(oldCatalystId), oldGemIds, blockNumber);
     }
 }
