@@ -25,6 +25,7 @@ contract CollectionCatalystMigrations is WithAdmin {
     /// @param asset: Asset Token Contract
     /// @param registry: New AssetAttributesRegistry
     /// @param oldRegistry: Old CatalystRegistry
+    /// @param admin: Contract admin
     constructor(
         IAssetToken asset,
         AssetAttributesRegistry registry,
@@ -39,7 +40,7 @@ contract CollectionCatalystMigrations is WithAdmin {
 
     /// @notice Migrate the catalyst for a collection of assets.
     /// @param assetId The id of the asset for which the catalyst is being migrated.
-    /// @param oldGemIds The gems currently embedded in the catalyst.
+    /// @param oldGemIds The gems currently embedded in the catalyst (old gems count starts from 0)
     /// @param blockNumber The blocknumber to use when setting the catalyst.
     function migrate(
         uint256 assetId,
@@ -59,6 +60,8 @@ contract CollectionCatalystMigrations is WithAdmin {
         }
     }
 
+    /// @notice Set the registry migration contract
+    /// @param migrationContract The migration contract for AssetAttributesRegistry
     function setAssetAttributesRegistryMigrationContract(address migrationContract) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
         _registry.setMigrationContract(migrationContract);
@@ -74,7 +77,7 @@ contract CollectionCatalystMigrations is WithAdmin {
         require(oldExists, "OLD_CATALYST_NOT_EXIST");
         (bool exists, , ) = _registry.getRecord(assetId);
         require(!exists, "ALREADY_MIGRATED");
-        oldCatalystId += 1; // old catalyst were zero , new one start with common = 1
+        oldCatalystId += 1; // old catalyst start from 0 , new one start with common = 1
         if (assetId & IS_NFT != 0) {
             // ensure this NFT has no collection: original NFT
             // If it has, the collection itself need to be migrated
@@ -83,6 +86,7 @@ contract CollectionCatalystMigrations is WithAdmin {
                 // solhint-disable-next-line no-empty-blocks
             } catch {}
         }
+        // old gems started from 0, new gems starts with power = 1
         for (uint256 i = 0; i < oldGemIds.length; i++) {
             oldGemIds[i] += 1;
         }
