@@ -37,6 +37,10 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
   );
   const gemsCatalystsUnit = '1000000000000000000';
 
+  const assetUpgraderFeeBurnerContract: Contract = await ethers.getContract(
+    'AssetUpgraderFeeBurner'
+  );
+
   await waitFor(
     assetAttributesRegistry
       .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
@@ -91,5 +95,6 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
     powerGemAsUser4,
     defenseGemAsUser4,
     assetUpgraderContractAsUser4,
+    assetUpgraderFeeBurnerContract,
   };
 });
