@@ -22,6 +22,7 @@ type Options = {
   mint?: boolean;
   sand?: boolean;
   multi?: boolean;
+  mintSingleAsset?: number;
 };
 
 export const setupTestGiveaway = deployments.createFixture(async function (
@@ -30,7 +31,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 ) {
   const {network, getChainId} = hre;
   const chainId = await getChainId();
-  const {mint, sand, multi} = options || {};
+  const {mint, sand, multi, mintSingleAsset} = options || {};
   const {
     deployer,
     assetBouncerAdmin,
@@ -197,6 +198,89 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     }
 
     await mintTestLands();
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function mintSingleAssetWithId(claim: any) {
+    const newAsset = {
+      ids: [],
+      values: [],
+      contractAddress: '',
+    };
+    return {
+      ...claim,
+      erc1155: await Promise.all(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        claim.erc1155.map(async (asset: any, assetIndex: number) => {
+          newAsset.ids = await Promise.all(
+            asset.ids.map(
+              async (assetPackId: number, index: number) =>
+                await mintTestAssets(assetPackId, asset.values[index])
+            )
+          );
+          (newAsset.values = claim.erc1155[assetIndex].values),
+            (newAsset.contractAddress =
+              claim.erc1155[assetIndex].contractAddress);
+          return newAsset;
+        })
+      ),
+    };
+  }
+
+  if (mintSingleAsset) {
+    await mintTestLands();
+    // Set up blank testData for thousands of users
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const emptyData: any = [];
+    for (let i = 0; i < 1; i++) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const claim: any = {
+        to: others[1],
+        erc1155: [
+          {
+            ids: [i],
+            values: [1],
+            contractAddress: '0x0A9c4aD6F991Ec37E213C724C2e83373E225221C',
+          },
+        ],
+        erc721: [
+          {
+            ids: [1],
+            contractAddress: '0x51d8e1CAADE79921017ae03a48eCA01d63D6e7Ee',
+          },
+        ],
+        erc20: {
+          amounts: [200],
+          contractAddresses: ['0xB877Fc8Ee9C965Bb97207e3f9ad7e5761B8288B9'],
+        },
+      };
+      emptyData.push(await mintSingleAssetWithId(claim));
+    }
+    for (let i = 1; i < mintSingleAsset; i++) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const claim: any = {
+        to: others[1],
+        erc1155: [
+          {
+            ids: [i],
+            values: [1],
+            contractAddress: '0x0A9c4aD6F991Ec37E213C724C2e83373E225221C',
+          },
+        ],
+        erc721: [
+          {
+            ids: [1],
+            contractAddress: '0x51d8e1CAADE79921017ae03a48eCA01d63D6e7Ee',
+          },
+        ],
+        erc20: {
+          amounts: [200],
+          contractAddresses: ['0xB877Fc8Ee9C965Bb97207e3f9ad7e5761B8288B9'],
+        },
+      };
+      emptyData.push(claim);
+    }
+    dataWithIds0 = emptyData;
   }
 
   // Set up tree with test assets for each applicable giveaway
