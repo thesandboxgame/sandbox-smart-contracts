@@ -32,12 +32,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     }
   }
 
-  try {
-    currentBouncerAdmin = await read('Asset', 'getBouncerAdmin');
-  } catch (e) {
-    // no admin
-  }
-
   if (currentAdmin) {
     if (currentAdmin.toLowerCase() !== assetAdmin.toLowerCase()) {
       await execute(
