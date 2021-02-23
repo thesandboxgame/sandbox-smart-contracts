@@ -1,14 +1,14 @@
 import fs from 'fs';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 
-import {createClaimMerkleTree} from '../../data/giveaways/multi_giveaway_1/getClaims';
-import helpers, {MultiClaim} from '../../lib/merkleTreeHelper';
+import {createClaimMerkleTree} from '../data/giveaways/multi_giveaway_1/getClaims';
+import helpers, {MultiClaim} from '../lib/merkleTreeHelper';
 const {calculateMultiClaimHash} = helpers;
 
-const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
+const func: DeployFunction = async function () {
   const {deployments, network, getChainId} = hre;
-  const {execute, read} = deployments;
+  const {execute, read, catchUnknownSigner} = deployments;
   const chainId = await getChainId();
 
   let claimData: MultiClaim[];
@@ -16,7 +16,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     claimData = JSON.parse(
       fs
         .readFileSync(
-          `data/giveaways/multi_giveaway_1/claims_${hre.network.name}.json`
+          `data/giveaways/multi_giveaway_1/claims_${hre.network.name}.json` // TODO: update for each claim file
         )
         .toString()
     );
@@ -38,14 +38,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // Add a new giveaway
   const currentAdmin = await read('Multi_Giveaway_1', 'getAdmin');
 
-  await execute(
-    'Multi_Giveaway_1',
-    {from: currentAdmin, log: true},
-    'addNewGiveaway',
-    merkleRootHash,
-    '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF' // do not expire
+  await catchUnknownSigner(
+    execute(
+      'Multi_Giveaway_1',
+      {from: currentAdmin, log: true},
+      'addNewGiveaway',
+      merkleRootHash,
+      '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF' // do not expire
+    )
   );
-  // TODO: separate script to be used whenever a new giveaway is added to the reusable multigiveaway contract
+
   const claimsWithProofs: (MultiClaim & {proof: string[]})[] = [];
   for (const claim of saltedClaims) {
     claimsWithProofs.push({
@@ -59,12 +61,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 };
 export default func;
-func.runAtTheEnd = true;
-func.tags = ['Multi_Giveaway_1', 'Multi_Giveaway_1_setup'];
-func.dependencies = [
-  'Multi_Giveaway_1_deploy',
-  'Asset_deploy',
-  'Land_deploy',
-  'Sand_deploy',
-];
-func.skip = async (hre) => hre.network.name !== 'hardhat'; // TODO
+
+if (require.main === module) {
+  func(hre);
+}
