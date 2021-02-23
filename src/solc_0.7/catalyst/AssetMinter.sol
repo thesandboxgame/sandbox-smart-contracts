@@ -3,35 +3,30 @@ pragma solidity 0.7.5;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/math/SafeMath.sol";
-import "./AssetAttributesRegistry.sol";
+import "./interfaces/IAssetAttributesRegistry.sol";
+import "./interfaces/IAssetMinter.sol";
 import "./GemsCatalystsRegistry.sol";
 import "../common/Interfaces/IERC20Extended.sol";
 import "../common/Interfaces/IAssetToken.sol";
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
-contract AssetMinter is WithMetaTransaction {
+contract AssetMinter is WithMetaTransaction, IAssetMinter {
     using SafeMath for uint256;
 
     uint256 private constant GEM_UNIT = 1000000000000000000;
     uint256 private constant CATALYST_UNIT = 1000000000000000000;
 
-    AssetAttributesRegistry internal immutable _registry;
+    IAssetAttributesRegistry internal immutable _registry;
     IAssetToken internal immutable _asset;
     GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
-
-    struct AssetData {
-        uint16[] gemIds;
-        uint32 quantity;
-        uint16 catalystId;
-    }
 
     /// @notice AssetMinter depends on
     /// @param registry: AssetAttributesRegistry for recording catalyst and gems used
     /// @param asset: Asset Token Contract (dual ERC1155/ERC721)
     /// @param gemsCatalystsRegistry: that track the canonical catalyst and gems and provide batch burning facility
     constructor(
-        AssetAttributesRegistry registry,
+        IAssetAttributesRegistry registry,
         IAssetToken asset,
         GemsCatalystsRegistry gemsCatalystsRegistry,
         address admin
@@ -63,7 +58,7 @@ contract AssetMinter is WithMetaTransaction {
         uint8 rarity,
         address to,
         bytes calldata data
-    ) external returns (uint256 assetId) {
+    ) external override returns (uint256 assetId) {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         _checkAuthorization(from);
         assetId = _asset.mint(from, packId, metadataHash, quantity, rarity, to, data);
@@ -93,7 +88,7 @@ contract AssetMinter is WithMetaTransaction {
         AssetData[] memory assets,
         address to,
         bytes memory data
-    ) public returns (uint256[] memory assetIds) {
+    ) public override returns (uint256[] memory assetIds) {
         require(assets.length != 0, "INVALID_0_ASSETS");
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         _checkAuthorization(from);

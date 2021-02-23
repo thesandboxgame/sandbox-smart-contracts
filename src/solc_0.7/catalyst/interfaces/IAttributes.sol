@@ -2,10 +2,10 @@
 pragma solidity 0.7.5;
 pragma experimental ABIEncoderV2;
 
-import "./AssetAttributesRegistry.sol";
+import "../interfaces/IAssetAttributesRegistry.sol";
 
 interface IAttributes {
-    function getAttributes(uint256 assetId, AssetAttributesRegistry.GemEvent[] calldata events)
+    function getAttributes(uint256 assetId, IAssetAttributesRegistry.GemEvent[] calldata events)
         external
         view
         returns (uint32[] memory values);
