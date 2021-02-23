@@ -13,5 +13,10 @@ contract AssetUpgraderFeeBurner is AssetUpgrader {
         uint256 _upgradeFee,
         uint256 _gemAdditionFee,
         address _feeRecipient
-    ) AssetUpgrader(registry, sand, asset, gemsCatalystsRegistry, _upgradeFee, _gemAdditionFee, _feeRecipient) {}
+    )
+        AssetUpgrader(registry, sand, asset, gemsCatalystsRegistry, _upgradeFee, _gemAdditionFee, _feeRecipient)
+    // solhint-disable-next-line no-empty-blocks
+    {
+
+    }
 }

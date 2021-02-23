@@ -426,7 +426,6 @@ describe('AssetUpgrader', function () {
       powerGemAsUser4,
       defenseGemAsUser4,
       sandContract,
-      feeRecipient,
       rareCatalyst,
       powerGem,
       defenseGem,

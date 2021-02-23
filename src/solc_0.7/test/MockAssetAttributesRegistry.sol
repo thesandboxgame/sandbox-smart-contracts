@@ -13,7 +13,12 @@ contract MockAssetAttributesRegistry is AssetAttributesRegistry {
         address admin,
         address minter,
         address upgrader
-    ) AssetAttributesRegistry(gemsCatalystsRegistry, admin, minter, upgrader) {}
+    )
+        AssetAttributesRegistry(gemsCatalystsRegistry, admin, minter, upgrader)
+    // solhint-disable-next-line no-empty-blocks
+    {
+
+    }
 
     function _setCatalyst(
         uint256 assetId,
