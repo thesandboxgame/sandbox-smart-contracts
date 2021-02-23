@@ -116,7 +116,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
     /// @notice adds gems to an existing list of gems of an asset, minter only
     /// @param assetId id of the asset
     /// @param gemIds list of gems ids to set
-    function addGems(uint256 assetId, uint16[] calldata gemIds) external override {
+    function addGems(uint256 assetId, uint16[] calldata gemIds) external virtual {
         require(msg.sender == _upgrader, "NOT_AUTHORIZED_UPGRADER");
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT");
         require(gemIds.length != 0, "INVALID_GEMS_0");
@@ -178,7 +178,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
         uint16 catalystId,
         uint16[] memory gemIds,
         uint64 blockNumber
-    ) internal {
+    ) internal virtual {
         require(gemIds.length <= MAX_NUM_GEMS, "GEMS_MAX_REACHED");
         uint8 maxGems = _gemsCatalystsRegistry.getMaxGems(catalystId);
         require(gemIds.length <= maxGems, "GEMS_TOO_MANY");
