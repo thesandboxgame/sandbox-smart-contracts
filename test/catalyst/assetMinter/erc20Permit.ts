@@ -1,6 +1,6 @@
 import {ethers, getUnnamedAccounts, getNamedAccounts} from 'hardhat';
 import {Address} from 'hardhat-deploy/types';
-import {splitSignature, _TypedDataEncoder} from 'ethers/lib/utils';
+import {splitSignature, zeroPad, _TypedDataEncoder} from 'ethers/lib/utils';
 import {BigNumber, Contract, constants} from 'ethers';
 import {expect} from '../../chai-setup';
 import catalysts from '../../../data/catalysts';
@@ -25,6 +25,7 @@ describe('Gems & Catalysts: Permit', function () {
   let user3: Address;
   let nonce: BigNumber;
   let deadline: BigNumber;
+  // let block: any;
 
   before(async function () {
     ({
@@ -76,9 +77,6 @@ describe('Gems & Catalysts: Permit', function () {
     expect(approvalEvent.args[0]).to.equal(gemOwner); // owner
     expect(approvalEvent.args[1]).to.equal(user3); // spender
     expect(approvalEvent.args[2]).to.equal(TEST_AMOUNT); // amount
-
-    const gemAllowanceAfter = await luckGem.allowance(gemOwner, user3);
-    expect(gemAllowanceAfter).to.equal('10000000000000000000');
   });
 
   it('user can use permit function to approve Catalysts via signature', async function () {
@@ -114,6 +112,8 @@ describe('Gems & Catalysts: Permit', function () {
       )
     );
 
+    // block = await ethers.provider.getBlock(receipt.blockNumber);
+
     const approvalEvent = await expectEventWithArgs(
       epicCatalyst,
       receipt,
@@ -122,24 +122,142 @@ describe('Gems & Catalysts: Permit', function () {
     expect(approvalEvent.args[0]).to.equal(catalystOwner); // owner
     expect(approvalEvent.args[1]).to.equal(user3); // spender
     expect(approvalEvent.args[2]).to.equal(TEST_AMOUNT); // amount
+  });
 
+  it('updates a users allowances correctly', async function () {
+    const gemAllowanceAfter = await luckGem.allowance(gemOwner, user3);
     const catalystAllowanceAfter = await epicCatalyst.allowance(
       catalystOwner,
       user3
     );
+
+    expect(gemAllowanceAfter).to.equal('10000000000000000000');
     expect(catalystAllowanceAfter).to.equal('10000000000000000000');
   });
 
-  // it('emits the Approval event', async function () {});
-
-  // it('updates  _allowances ([owner][spender] = amount)', async function () {});
-
   // // require(deadline >= block.timestamp, "PAST_DEADLINE");
-  // it('should fail if deadline < block.timestamp', async function () {});
+  it('should fail if deadline < block.timestamp', async function () {
+    // const deadline = BigNumber.from(block.timestamp().sub(1));
+    const deadline = BigNumber.from(1382718400);
+    const approve = {
+      owner: catalystOwner,
+      spender: user3,
+      value: TEST_AMOUNT._hex,
+      nonce: nonce._hex,
+      deadline: deadline._hex,
+    };
+    const permitData712 = data712(epicCatalyst, approve);
+    const flatSig = await ethers.provider.send('eth_signTypedData', [
+      catalystOwner,
+      permitData712,
+    ]);
+    const sig = splitSignature(flatSig);
+
+    await expect(
+      epicCatalyst.permit(
+        catalystOwner,
+        user3,
+        TEST_AMOUNT,
+        deadline,
+        sig.v,
+        sig.r,
+        sig.s
+      )
+    ).to.be.revertedWith('PAST_DEADLINE');
+  });
 
   // // require(recoveredAddress != address(0) && recoveredAddress == owner, "INVALID_SIGNATURE")
-  // it('should fail if recoveredAddress == address(0) || recoveredAddress != owner', async function () {});
+  it('should fail if recoveredAddress == address(0) || recoveredAddress != owner', async function () {
+    const approve = {
+      owner: zeroAddress,
+      spender: user3,
+      value: TEST_AMOUNT._hex,
+      nonce: nonce._hex,
+      deadline: deadline._hex,
+    };
+    const permitData712 = data712(epicCatalyst, approve);
+    const flatSig = await ethers.provider.send('eth_signTypedData', [
+      catalystOwner,
+      permitData712,
+    ]);
+    const sig = splitSignature(flatSig);
+
+    await expect(
+      epicCatalyst.permit(
+        catalystOwner,
+        user3,
+        TEST_AMOUNT,
+        deadline,
+        sig.v,
+        sig.r,
+        sig.s
+      )
+    ).to.be.revertedWith('INVALID_SIGNATURE');
+
+    const approve2 = {
+      owner: user3,
+      spender: user3,
+      value: TEST_AMOUNT._hex,
+      nonce: nonce._hex,
+      deadline: deadline._hex,
+    };
+    const permitData7122 = data712(epicCatalyst, approve2);
+    const flatSig2 = await ethers.provider.send('eth_signTypedData', [
+      catalystOwner,
+      permitData7122,
+    ]);
+    const sig2 = splitSignature(flatSig2);
+
+    await expect(
+      epicCatalyst.permit(
+        catalystOwner,
+        user3,
+        TEST_AMOUNT,
+        deadline,
+        sig2.v,
+        sig2.r,
+        sig2.s
+      )
+    ).to.be.revertedWith('INVALID_SIGNATURE');
+  });
 
   // // require(owner != address(0) && spender != address(0), "INVALID_OWNER_||_SPENDER");
-  // it('should fail if owner == address(0) || spender == address(0)', async function () {});
+  it('should fail if owner == address(0) || spender == address(0)', async function () {
+    const approve = {
+      owner: catalystOwner,
+      spender: user3,
+      value: TEST_AMOUNT._hex,
+      nonce: nonce._hex,
+      deadline: deadline._hex,
+    };
+    const permitData712 = data712(epicCatalyst, approve);
+    const flatSig = await ethers.provider.send('eth_signTypedData', [
+      catalystOwner,
+      permitData712,
+    ]);
+    const sig = splitSignature(flatSig);
+
+    await expect(
+      epicCatalyst.permit(
+        zeroAddress,
+        user3,
+        TEST_AMOUNT,
+        deadline,
+        sig.v,
+        sig.r,
+        sig.s
+      )
+    ).to.be.revertedWith('INVALID_OWNER_||_SPENDER');
+    await expect(
+      epicCatalyst.permit(
+        catalystOwner,
+        zeroAddress,
+        TEST_AMOUNT,
+        deadline,
+        sig.v,
+        sig.r,
+        sig.s
+      )
+    ).to.be.revertedWith('INVALID_OWNER_||_SPENDER');
+  });
 });
