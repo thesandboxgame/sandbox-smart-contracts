@@ -6,7 +6,7 @@ import "../catalyst/AssetUpgrader.sol";
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetUpgraderFeeBurner is AssetUpgrader {
     constructor(
-        AssetAttributesRegistry registry,
+        IAssetAttributesRegistry registry,
         IERC20Extended sand,
         IAssetToken asset,
         GemsCatalystsRegistry gemsCatalystsRegistry,

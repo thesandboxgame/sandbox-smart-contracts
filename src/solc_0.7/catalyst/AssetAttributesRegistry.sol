@@ -93,7 +93,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
         uint256 assetId,
         uint16 catalystId,
         uint16[] calldata gemIds
-    ) external override {
+    ) external virtual override {
         require(msg.sender == _minter || msg.sender == _upgrader, "NOT_AUTHORIZED_MINTER");
         _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber());
     }
@@ -116,7 +116,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
     /// @notice adds gems to an existing list of gems of an asset, minter only
     /// @param assetId id of the asset
     /// @param gemIds list of gems ids to set
-    function addGems(uint256 assetId, uint16[] calldata gemIds) external virtual {
+    function addGems(uint256 assetId, uint16[] calldata gemIds) external virtual override {
         require(msg.sender == _upgrader, "NOT_AUTHORIZED_UPGRADER");
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT");
         require(gemIds.length != 0, "INVALID_GEMS_0");

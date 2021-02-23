@@ -20,6 +20,15 @@ contract MockAssetAttributesRegistry is AssetAttributesRegistry {
 
     }
 
+    function setCatalyst(
+        uint256 assetId,
+        uint16 catalystId,
+        uint16[] calldata gemIds
+    ) external override {
+        // @note access control removed for testing
+        _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber());
+    }
+
     function _setCatalyst(
         uint256 assetId,
         uint16 catalystId,
