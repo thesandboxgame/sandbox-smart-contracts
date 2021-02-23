@@ -1,16 +1,10 @@
-import {ethers, getUnnamedAccounts, getNamedAccounts} from 'hardhat';
+import {ethers} from 'hardhat';
 import {Address} from 'hardhat-deploy/types';
-import {splitSignature, zeroPad, _TypedDataEncoder} from 'ethers/lib/utils';
+import {splitSignature} from 'ethers/lib/utils';
 import {BigNumber, Contract, constants} from 'ethers';
 import {expect} from '../../chai-setup';
-import catalysts from '../../../data/catalysts';
-import gems from '../../../data/gems';
 import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
-import {setupAssetAttributesRegistry} from '../assetAttributesRegistry/fixtures';
-import {setupAssetMinter, MintOptions, MintMultiOptions} from './fixtures';
-import {setupAssetUpgrader} from '../assetUpgrader/fixtures';
-import {mintCatalyst, mintGem} from '../utils';
-import {expectEventWithArgs, findEvents, waitFor} from '../../utils';
+import {expectEventWithArgs, waitFor} from '../../utils';
 import {setupPermit} from '../../permit/fixtures';
 import {data712} from '../../permit/data712';
 
@@ -25,7 +19,6 @@ describe('Gems & Catalysts: Permit', function () {
   let user3: Address;
   let nonce: BigNumber;
   let deadline: BigNumber;
-  // let block: any;
 
   before(async function () {
     ({
@@ -112,8 +105,6 @@ describe('Gems & Catalysts: Permit', function () {
       )
     );
 
-    // block = await ethers.provider.getBlock(receipt.blockNumber);
-
     const approvalEvent = await expectEventWithArgs(
       epicCatalyst,
       receipt,
@@ -135,9 +126,7 @@ describe('Gems & Catalysts: Permit', function () {
     expect(catalystAllowanceAfter).to.equal('10000000000000000000');
   });
 
-  // // require(deadline >= block.timestamp, "PAST_DEADLINE");
   it('should fail if deadline < block.timestamp', async function () {
-    // const deadline = BigNumber.from(block.timestamp().sub(1));
     const deadline = BigNumber.from(1382718400);
     const approve = {
       owner: catalystOwner,
@@ -166,7 +155,6 @@ describe('Gems & Catalysts: Permit', function () {
     ).to.be.revertedWith('PAST_DEADLINE');
   });
 
-  // // require(recoveredAddress != address(0) && recoveredAddress == owner, "INVALID_SIGNATURE")
   it('should fail if recoveredAddress == address(0) || recoveredAddress != owner', async function () {
     const approve = {
       owner: zeroAddress,
@@ -221,7 +209,6 @@ describe('Gems & Catalysts: Permit', function () {
     ).to.be.revertedWith('INVALID_SIGNATURE');
   });
 
-  // // require(owner != address(0) && spender != address(0), "INVALID_OWNER_||_SPENDER");
   it('should fail if owner == address(0) || spender == address(0)', async function () {
     const approve = {
       owner: catalystOwner,
