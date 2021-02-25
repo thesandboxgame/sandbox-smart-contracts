@@ -52,6 +52,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   await deployments.deploy('MockLand', {
     from: deployer,
     args: [sandContract.address, landAdmin],
+    deterministicDeployment: true, // Set a fixed address for MockLand, so that the address can be used in the test claim data
   });
 
   const sandContractAsAdmin = await sandContract.connect(
@@ -133,10 +134,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     return transferEvent.args[3].toString(); // asset ID
   }
 
-  const landContract = await ethers.getContractAt(
-    'MockLand',
-    '0x24AA958465EaD2c5C667aCBE616c89Cf7DBFfC44' // Set a fixed address for Mockland to use in test claim data as the landContractAddress
-  );
+  const landContract = await ethers.getContract('MockLand');
 
   // Supply lands to contract for testing
   async function mintTestLands() {
