@@ -10,6 +10,7 @@ import {
   transferSand,
 } from '../utils';
 import {ethers} from 'hardhat';
+import {upgradeFee} from '../../../data/assetUpgraderFees';
 
 const GEM_CATALYST_UNIT = BigNumber.from('1000000000000000000');
 
@@ -273,7 +274,7 @@ describe('AssetUpgrader', function () {
     await transferSand(
       sandContract,
       user4,
-      BigNumber.from('2').mul(gemAdditionFee)
+      BigNumber.from('100').mul(gemAdditionFee)
     );
     const mintingAmount = BigNumber.from('8').mul(
       BigNumber.from(gemsCatalystsUnit)
@@ -343,10 +344,10 @@ describe('AssetUpgrader', function () {
 
     // check sand fee transfer
     expect(sandBalanceFromAfter).to.equal(
-      sandBalanceFromBefore.sub(gemAdditionFee)
+      sandBalanceFromBefore.sub(gemAdditionFee.add(upgradeFee))
     );
     expect(sandBalanceToAfter).to.equal(
-      sandBalanceToBefore.add(gemAdditionFee)
+      sandBalanceToBefore.add(gemAdditionFee.add(upgradeFee))
     );
 
     // check assetAttributesRegistry
@@ -416,5 +417,88 @@ describe('AssetUpgrader', function () {
           user10
         )
     ).to.be.revertedWith('NOT_AUTHORIZED_ASSET_OWNER');
+  });
+
+  it('burns sand fees when feeRecipient = BURN_ADDRESS', async function () {
+    const BURN_ADDRESS = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
+
+    const {
+      powerGemAsUser4,
+      defenseGemAsUser4,
+      sandContract,
+      rareCatalyst,
+      powerGem,
+      defenseGem,
+      gemAdditionFee,
+      gemsCatalystsUnit,
+      gemsCatalystsRegistry,
+      user4,
+      assetUpgraderFeeBurnerContract,
+    } = await setupAssetUpgrader();
+
+    const currentFeeRecipient = await assetUpgraderFeeBurnerContract.feeRecipient();
+    expect(currentFeeRecipient).to.be.equal(BURN_ADDRESS);
+
+    const upgraderFeeBurnerAsUser4 = await assetUpgraderFeeBurnerContract.connect(
+      ethers.provider.getSigner(user4)
+    );
+
+    await transferSand(
+      sandContract,
+      user4,
+      BigNumber.from('100').mul(gemAdditionFee)
+    );
+    const mintingAmount = BigNumber.from('8').mul(
+      BigNumber.from(gemsCatalystsUnit)
+    );
+    await mintCatalyst(rareCatalyst, mintingAmount, user4);
+    await mintGem(powerGem, mintingAmount, user4);
+    await mintGem(defenseGem, mintingAmount, user4);
+    const assetId = await mintAsset(
+      user4,
+      BigNumber.from('2257'),
+      '0x2211111111111111111111111111111111111111111111111111111111111111',
+      1,
+      0,
+      user4,
+      Buffer.from('ff')
+    );
+    const powerGemId = await powerGem.gemId();
+    const defenseGemId = await defenseGem.gemId();
+    const catalystId = await rareCatalyst.catalystId();
+
+    const sandBalanceFromBefore = await sandContract.balanceOf(user4);
+    const totalSandSupplyBefore = await sandContract.totalSupply();
+
+    const gemIds = [powerGemId, defenseGemId];
+    await waitFor(
+      powerGemAsUser4.approve(gemsCatalystsRegistry.address, 100000000000000)
+    );
+    await waitFor(
+      defenseGemAsUser4.approve(gemsCatalystsRegistry.address, 100000000000000)
+    );
+
+    await changeCatalyst(
+      assetUpgraderFeeBurnerContract,
+      user4,
+      assetId,
+      catalystId,
+      [],
+      user4
+    );
+    await waitFor(
+      upgraderFeeBurnerAsUser4.addGems(user4, assetId, gemIds, user4)
+    );
+
+    const sandBalanceFromAfter = await sandContract.balanceOf(user4);
+    const totalSandSupplyAfter = await sandContract.totalSupply();
+
+    // check sand burn
+    expect(sandBalanceFromAfter).to.equal(
+      sandBalanceFromBefore.sub(gemAdditionFee.add(upgradeFee))
+    );
+    expect(totalSandSupplyAfter).to.be.equal(
+      totalSandSupplyBefore.sub(gemAdditionFee.add(upgradeFee))
+    );
   });
 });

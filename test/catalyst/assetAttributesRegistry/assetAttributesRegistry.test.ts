@@ -31,6 +31,7 @@ describe('AssetAttributesRegistry', function () {
       );
     }
   }
+
   it('getRecord for non existing assetId', async function () {
     const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
     const record = await assetAttributesRegistry.getRecord(0);
