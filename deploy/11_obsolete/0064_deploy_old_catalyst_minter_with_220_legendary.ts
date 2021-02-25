@@ -23,7 +23,14 @@ const func: DeployFunction = async function (hre) {
     const minQuantity = BigNumber.from(mintData.minQuantity).mul(
       BigNumber.from(2).pow(224)
     );
-    const maxQuantity = BigNumber.from(mintData.maxQuantity).mul(
+    let mintDataMaxQuantity = mintData.maxQuantity;
+    if (i == 3) {
+      if (mintDataMaxQuantity !== 200) {
+        throw new Error('was supposed to be 200');
+      }
+      mintDataMaxQuantity = 220;
+    }
+    const maxQuantity = BigNumber.from(mintDataMaxQuantity).mul(
       BigNumber.from(2).pow(208)
     );
     const sandMintingFee = BigNumber.from(mintData.sandMintingFee).mul(
@@ -38,7 +45,7 @@ const func: DeployFunction = async function (hre) {
     bakedMintData.push(bakedData);
   }
 
-  const catalystMinter = await deploy('CatalystMinter', {
+  const catalystMinter = await deploy('CatalystMinterLegendary220', {
     contract: 'CatalystMinter',
     from: deployer,
     log: true,
@@ -72,20 +79,20 @@ const func: DeployFunction = async function (hre) {
     );
   }
 
-  // TODO reenable
-  // const currentMinter = await read('CatalystRegistry', 'getMinter');
-  // if (currentMinter.toLowerCase() != catalystMinter.address.toLowerCase()) {
-  //   console.log('setting CatalystMinter as CatalystRegistry minter');
-  //   const currentRegistryAdmin = await read('CatalystRegistry', 'getAdmin');
-  //   await catchUnknownSigner(
-  //     execute(
-  //       'CatalystRegistry',
-  //       {from: currentRegistryAdmin, log: true},
-  //       'setMinter',
-  //       catalystMinter.address
-  //     )
-  //   );
-  // }
+  // TODO disable (once this minter is not needed anymore, see also deploy\11_obsolete\0063_deploy_old_catalyst_minter.ts to enable back the old one)
+  const currentMinter = await read('CatalystRegistry', 'getMinter');
+  if (currentMinter.toLowerCase() != catalystMinter.address.toLowerCase()) {
+    console.log('setting CatalystMinter as CatalystRegistry minter');
+    const currentRegistryAdmin = await read('CatalystRegistry', 'getAdmin');
+    await catchUnknownSigner(
+      execute(
+        'CatalystRegistry',
+        {from: currentRegistryAdmin, log: true},
+        'setMinter',
+        catalystMinter.address
+      )
+    );
+  }
 
   async function setSuperOperatorFor(contractName: string, address: string) {
     const isSuperOperator = await read(
@@ -116,7 +123,11 @@ const func: DeployFunction = async function (hre) {
   await setSuperOperatorFor(`Catalyst`, catalystMinter.address);
 };
 export default func;
-func.tags = ['CatalystMinter', 'CatalystMinter_setup', 'CatalystMinter_deploy'];
+func.tags = [
+  'CatalystMinterLegendary220',
+  'CatalystMinterLegendary220_setup',
+  'CatalystMinterLegendary220_deploy',
+];
 func.dependencies = [
   'Sand_deploy',
   'Asset_deploy',
