@@ -40,8 +40,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   } = await getNamedAccounts();
   const otherAccounts = await getUnnamedAccounts();
   const nftGiveawayAdmin = otherAccounts[0];
-  const landContractAddress = otherAccounts[1];
-  const others = otherAccounts.slice(2);
+  const others = otherAccounts.slice(1);
 
   await deployments.fixture('Multi_Giveaway_1');
   const sandContract = await ethers.getContract('Sand');
@@ -136,7 +135,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   const landContract = await ethers.getContractAt(
     'MockLand',
-    landContractAddress // Set a fixed address for Mockland to use in test claim data as the landContractAddress
+    '0x24AA958465EaD2c5C667aCBE616c89Cf7DBFfC44' // Set a fixed address for Mockland to use in test claim data as the landContractAddress
   );
 
   // Supply lands to contract for testing
@@ -149,8 +148,6 @@ export const setupTestGiveaway = deployments.createFixture(async function (
       await landContractAsAdmin.mint(owner, i);
     }
   }
-
-  console.log('add', landContract);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async function mintNewAssetIds(dataSet: any) {

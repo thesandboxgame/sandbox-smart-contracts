@@ -23,12 +23,17 @@ describe.only('Multi_Giveaway', function () {
       );
 
       const receipt = await waitFor(
-        giveawayContractAsAdmin.addNewGiveaway(emptyBytes32, 1615194000)
+        giveawayContractAsAdmin.addNewGiveaway(
+          emptyBytes32,
+          '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF' // does not expire
+        )
       );
 
       const event = await expectReceiptEventWithArgs(receipt, 'NewGiveaway');
       expect(event.args[0]).to.equal(emptyBytes32);
-      expect(event.args[1]).to.equal(1615194000);
+      expect(event.args[1]).to.equal(
+        '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
+      );
     });
 
     it('Cannot add a new giveaway if not admin', async function () {
@@ -41,7 +46,10 @@ describe.only('Multi_Giveaway', function () {
       );
 
       await expect(
-        giveawayContractAsUser.addNewGiveaway(emptyBytes32, 1615194000)
+        giveawayContractAsUser.addNewGiveaway(
+          emptyBytes32,
+          '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
+        )
       ).to.be.revertedWith('ADMIN_ONLY');
     });
 
