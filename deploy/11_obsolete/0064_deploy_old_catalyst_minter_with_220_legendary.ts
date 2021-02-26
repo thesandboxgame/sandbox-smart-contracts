@@ -79,20 +79,20 @@ const func: DeployFunction = async function (hre) {
     );
   }
 
-  // TODO disable (once this minter is not needed anymore, see also deploy\11_obsolete\0063_deploy_old_catalyst_minter.ts to enable back the old one)
-  const currentMinter = await read('CatalystRegistry', 'getMinter');
-  if (currentMinter.toLowerCase() != catalystMinter.address.toLowerCase()) {
-    console.log('setting CatalystMinter as CatalystRegistry minter');
-    const currentRegistryAdmin = await read('CatalystRegistry', 'getAdmin');
-    await catchUnknownSigner(
-      execute(
-        'CatalystRegistry',
-        {from: currentRegistryAdmin, log: true},
-        'setMinter',
-        catalystMinter.address
-      )
-    );
-  }
+  // disabled for now, we use : deploy\11_obsolete\0063_deploy_old_catalyst_minter.ts to enable back the old one)
+  // const currentMinter = await read('CatalystRegistry', 'getMinter');
+  // if (currentMinter.toLowerCase() != catalystMinter.address.toLowerCase()) {
+  //   console.log('setting CatalystMinter as CatalystRegistry minter');
+  //   const currentRegistryAdmin = await read('CatalystRegistry', 'getAdmin');
+  //   await catchUnknownSigner(
+  //     execute(
+  //       'CatalystRegistry',
+  //       {from: currentRegistryAdmin, log: true},
+  //       'setMinter',
+  //       catalystMinter.address
+  //     )
+  //   );
+  // }
 
   async function setSuperOperatorFor(contractName: string, address: string) {
     const isSuperOperator = await read(
