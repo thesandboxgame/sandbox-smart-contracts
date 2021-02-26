@@ -32,7 +32,8 @@ describe('GAS:Multi_Giveaway_1:Claiming', function () {
     const userTrees = [];
     userTrees.push(allTrees[0]);
     const userClaims = [];
-    userClaims.push(allClaims[0][0]);
+    const claim = allClaims[0][0];
+    userClaims.push(claim);
     for (let i = 0; i < userClaims.length; i++) {
       userProofs.push(
         userTrees[i].getProof(calculateMultiClaimHash(userClaims[i]))
@@ -42,8 +43,9 @@ describe('GAS:Multi_Giveaway_1:Claiming', function () {
     userMerkleRoots.push(allMerkleRoots[0]);
 
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
+
     const receipt = await waitFor(
       giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
         userMerkleRoots,
@@ -81,7 +83,7 @@ describe('GAS:Multi_Giveaway_1:Claiming', function () {
     userMerkleRoots.push(allMerkleRoots[0]);
 
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
     const receipt = await waitFor(
       giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
@@ -120,7 +122,7 @@ describe('GAS:Multi_Giveaway_1:Claiming', function () {
     userMerkleRoots.push(allMerkleRoots[0]);
 
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
     const receipt = await waitFor(
       giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
@@ -159,7 +161,7 @@ describe('GAS:Multi_Giveaway_1:Claiming', function () {
     userMerkleRoots.push(allMerkleRoots[0]);
 
     const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[1])
+      ethers.provider.getSigner(others[0])
     );
     const receipt = await waitFor(
       giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(

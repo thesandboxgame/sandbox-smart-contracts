@@ -238,18 +238,18 @@ export const setupTestGiveaway = deployments.createFixture(async function (
           {
             ids: [i],
             values: [1],
-            contractAddress: '0x0A9c4aD6F991Ec37E213C724C2e83373E225221C',
+            contractAddress: assetContract.address,
           },
         ],
         erc721: [
           {
             ids: [1],
-            contractAddress: '0x51d8e1CAADE79921017ae03a48eCA01d63D6e7Ee',
+            contractAddress: landContract.address,
           },
         ],
         erc20: {
           amounts: [200],
-          contractAddresses: ['0xB877Fc8Ee9C965Bb97207e3f9ad7e5761B8288B9'],
+          contractAddresses: [sandContract.address],
         },
       };
       emptyData.push(await mintSingleAssetWithId(claim));
@@ -262,18 +262,18 @@ export const setupTestGiveaway = deployments.createFixture(async function (
           {
             ids: [i],
             values: [1],
-            contractAddress: '0x0A9c4aD6F991Ec37E213C724C2e83373E225221C',
+            contractAddress: assetContract.address,
           },
         ],
         erc721: [
           {
             ids: [1],
-            contractAddress: '0x51d8e1CAADE79921017ae03a48eCA01d63D6e7Ee',
+            contractAddress: landContract.address,
           },
         ],
         erc20: {
           amounts: [200],
-          contractAddresses: ['0xB877Fc8Ee9C965Bb97207e3f9ad7e5761B8288B9'],
+          contractAddresses: [sandContract.address],
         },
       };
       emptyData.push(claim);
