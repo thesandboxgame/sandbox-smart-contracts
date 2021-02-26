@@ -10,7 +10,7 @@ contract Catalyst is ERC20Token, IAttributes {
     uint16 public immutable catalystId;
     uint8 internal immutable _maxGems;
 
-    IAttributes _attributes;
+    IAttributes internal _attributes;
 
     constructor(
         string memory name,
