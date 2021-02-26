@@ -1,2 +1,2 @@
 checks:
-  - name: eth-gas-reporter/codechecks
+  # - name: eth-gas-reporter/codechecks

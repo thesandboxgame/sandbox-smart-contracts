@@ -12,7 +12,7 @@ contract CatalystMigrations {
     OldCatalystRegistry internal immutable _oldRegistry;
     AssetAttributesRegistry internal immutable _registry;
     IAssetToken internal immutable _asset;
-    bytes32 immutable _merkleRoot;
+    bytes32 internal immutable _merkleRoot;
 
     /// @notice CatalystMigrations depends on:
     /// @param asset: Asset Token Contract
@@ -57,6 +57,7 @@ contract CatalystMigrations {
             try _asset.collectionOf(assetId) returns (uint256 collId) {
                 // Need try/catch as collectionof throw on asset minted as NFT (initial supply = 1)
                 collectionId = collId;
+                // solhint-disable-next-line no-empty-blocks
             } catch {}
             require(_verify(proof, collectionId, gemIds, blockNumber), "INVALID_PROOF");
             _registry.setCatalystWithBlockNumber(assetId, uint16(catalystId), gemIds, blockNumber);

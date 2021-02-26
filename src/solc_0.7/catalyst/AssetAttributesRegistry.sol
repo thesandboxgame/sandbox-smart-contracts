@@ -12,7 +12,7 @@ contract AssetAttributesRegistry is WithAdmin, WithMinter {
     uint256 private constant NOT_IS_NFT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFFFFFFFF;
     uint256 private constant NOT_NFT_INDEX = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF800000007FFFFFFFFFFFFFFF;
 
-    GemsCatalystsRegistry immutable _gemsCatalystsRegistry;
+    GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
     mapping(uint256 => Record) internal _records;
 
     // used to allow migration to specify blockNumber when setting catalyst/gems

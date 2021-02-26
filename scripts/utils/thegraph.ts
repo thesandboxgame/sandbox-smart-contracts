@@ -13,8 +13,10 @@ export class TheGraph {
   async query<T>(
     queryString: string,
     field: string,
-    variables: Record<string, unknown>
+    variables: Record<string, unknown>,
+    getLastId?: (entries: T[]) => string
   ): Promise<T[]> {
+    const fields = field.split('.');
     const first = 100;
     let lastId = '0x0';
     let numEntries = first;
@@ -27,16 +29,23 @@ export class TheGraph {
         throw new Error(result.error.message);
       }
       const data = result.data;
+
+      // TODO deep access on root array
       let newEntries = [];
-      if (data) {
-        newEntries = data[field];
+      if (data && field) {
+        let tmp = data;
+        for (const fieldPart of fields) {
+          tmp = tmp[fieldPart];
+        }
+        newEntries = tmp;
       }
-      if (!entries) {
-        newEntries = [];
-      }
+
       numEntries = newEntries.length;
       if (numEntries > 0) {
-        const newLastId = newEntries[numEntries - 1].id;
+        const newLastId =
+          getLastId !== undefined
+            ? getLastId(entries)
+            : newEntries[numEntries - 1].id;
         if (lastId === newLastId) {
           console.log('same query, stop');
           break;
