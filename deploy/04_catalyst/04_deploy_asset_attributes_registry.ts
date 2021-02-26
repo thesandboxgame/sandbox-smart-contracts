@@ -11,7 +11,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy(`AssetAttributesRegistry`, {
     from: deployer,
     log: true,
-    args: [GemsCatalystsRegistry.address, assetAttributesRegistryAdmin],
+    args: [
+      GemsCatalystsRegistry.address,
+      assetAttributesRegistryAdmin,
+      assetAttributesRegistryAdmin,
+      assetAttributesRegistryAdmin,
+    ],
   });
 };
 export default func;

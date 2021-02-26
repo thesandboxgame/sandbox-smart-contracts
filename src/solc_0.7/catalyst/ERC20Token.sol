@@ -20,9 +20,10 @@ contract ERC20Token is ERC20BasicApproveExtension, ERC677Extension, TheSandbox71
     constructor(
         string memory name,
         string memory symbol,
-        address admin
+        address admin,
+        address operator
     )
-        ERC20BaseToken(name, symbol, admin) // solhint-disable-next-line no-empty-blocks
+        ERC20BaseToken(name, symbol, admin, operator) // solhint-disable-next-line no-empty-blocks
     {}
 
     function mint(address to, uint256 amount) external onlyAdmin {
