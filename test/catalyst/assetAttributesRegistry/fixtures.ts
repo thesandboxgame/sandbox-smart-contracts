@@ -23,7 +23,6 @@ export const setupAssetAttributesRegistry = deployments.createFixture(
     const users = await getUnnamedAccounts();
     const user0 = users[0];
     const mockedMigrationContractAddress = users[1];
-    const newMigrationContract = users[2];
     const sandContract = await ethers.getContract('Sand');
     await transferSand(
       sandContract,
@@ -46,8 +45,8 @@ export const setupAssetAttributesRegistry = deployments.createFixture(
     const assetAttributesRegistryAsmockedMigrationContract = await assetAttributesRegistry.connect(
       ethers.provider.getSigner(mockedMigrationContractAddress)
     );
+
     return {
-      newMigrationContract,
       mockedMigrationContractAddress,
       user0,
       assetAttributesRegistry,
