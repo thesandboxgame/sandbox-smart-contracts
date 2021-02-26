@@ -7,6 +7,7 @@ import {
 import {BigNumber, Contract, Event} from 'ethers';
 import {Block} from '@ethersproject/providers';
 import {waitFor} from '../../utils';
+import {transferSand} from '../utils';
 import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
 
 export const setupAssetAttributesRegistry = deployments.createFixture(
@@ -17,10 +18,17 @@ export const setupAssetAttributesRegistry = deployments.createFixture(
       'AssetAttributesRegistry'
     );
     const assetUpgrader: Contract = await ethers.getContract('AssetUpgrader');
+    const assetMinter: Contract = await ethers.getContract('AssetMinter');
     const {assetAttributesRegistryAdmin} = await getNamedAccounts();
     const users = await getUnnamedAccounts();
     const user0 = users[0];
     const mockedMigrationContractAddress = users[1];
+    const sandContract = await ethers.getContract('Sand');
+    await transferSand(
+      sandContract,
+      user0,
+      BigNumber.from(100000).mul('1000000000000000000')
+    );
 
     const assetAttributesRegistryAsUser0 = await assetAttributesRegistry.connect(
       ethers.provider.getSigner(user0)
@@ -29,6 +37,9 @@ export const setupAssetAttributesRegistry = deployments.createFixture(
       ethers.provider.getSigner(assetAttributesRegistryAdmin)
     );
     const assetUpgraderAsUser0 = await assetUpgrader.connect(
+      ethers.provider.getSigner(user0)
+    );
+    const assetMinterAsUser0 = await assetMinter.connect(
       ethers.provider.getSigner(user0)
     );
     const assetAttributesRegistryAsmockedMigrationContract = await assetAttributesRegistry.connect(
@@ -45,6 +56,7 @@ export const setupAssetAttributesRegistry = deployments.createFixture(
       assetAttributesRegistryAsRegistryAdmin,
       assetAttributesRegistryAsmockedMigrationContract,
       assetUpgraderAsUser0,
+      assetMinterAsUser0,
     };
   }
 );

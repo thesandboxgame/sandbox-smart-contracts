@@ -3,24 +3,19 @@ pragma solidity 0.7.5;
 pragma experimental ABIEncoderV2;
 
 import "./interfaces/OldCatalystRegistry.sol";
-import "./AssetAttributesRegistry.sol";
+import "./interfaces/IAssetAttributesRegistry.sol";
+import "./interfaces/ICollectionCatalystMigrations.sol";
 import "../common/Interfaces/IAssetToken.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
 import "hardhat/console.sol";
 
 /// @notice Contract performing migrations for collections, do not require owner approval
-contract CollectionCatalystMigrations is WithAdmin {
+contract CollectionCatalystMigrations is WithAdmin, ICollectionCatalystMigrations {
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
 
     OldCatalystRegistry internal immutable _oldRegistry;
-    AssetAttributesRegistry internal immutable _registry;
+    IAssetAttributesRegistry internal immutable _registry;
     IAssetToken internal immutable _asset;
-
-    struct Migration {
-        uint256 assetId;
-        uint16[] gemIds;
-        uint64 blockNumber;
-    }
 
     /// @notice CollectionCatalystMigrations depends on:
     /// @param asset: Asset Token Contract
@@ -29,7 +24,7 @@ contract CollectionCatalystMigrations is WithAdmin {
     /// @param admin: Contract admin
     constructor(
         IAssetToken asset,
-        AssetAttributesRegistry registry,
+        IAssetAttributesRegistry registry,
         OldCatalystRegistry oldRegistry,
         address admin
     ) {
@@ -47,14 +42,14 @@ contract CollectionCatalystMigrations is WithAdmin {
         uint256 assetId,
         uint16[] calldata oldGemIds,
         uint64 blockNumber
-    ) external {
+    ) external override {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
         _migrate(assetId, oldGemIds, blockNumber);
     }
 
     /// @notice Migrate the catalysts for a batch of assets.
     /// @param migrations The data to use for each migration in the batch.
-    function batchMigrate(Migration[] calldata migrations) external {
+    function batchMigrate(Migration[] calldata migrations) external override {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
         for (uint256 i = 0; i < migrations.length; i++) {
             _migrate(migrations[i].assetId, migrations[i].gemIds, migrations[i].blockNumber);
