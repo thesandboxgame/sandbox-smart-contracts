@@ -74,6 +74,25 @@ describe('CollectionCatalystMigrations', function () {
       gemIds[i]++;
     }
   }
+
+  async function extractAndAddGems(
+    catalystMinterAsUser: Contract,
+    from: string,
+    assetId: BigNumber,
+    gemIds: number[],
+    to: string
+  ) {
+    const newAssetId = await catalystMinterAsUser.callStatic.extractAndAddGems(
+      from,
+      assetId,
+      gemIds,
+      to
+    );
+    await waitFor(
+      catalystMinterAsUser.extractAndAddGems(from, assetId, gemIds, to)
+    );
+    return newAssetId;
+  }
   it('migrating assetId with epic catalyst and no gems', async function () {
     const {
       assetAttributesRegistry,
@@ -162,6 +181,98 @@ describe('CollectionCatalystMigrations', function () {
       blockNumber,
       0
     );
+  });
+  it('migrating assetId of quantity = 1 with legendary catalyst', async function () {
+    const {
+      assetAttributesRegistry,
+      oldCatalystMinterAsUser0,
+      collectionCatalystMigrationsContractAsAdmin,
+      user0,
+    } = await setupCollectionCatalystMigrations();
+    await setupUser(user0);
+    const powerGemId = 0;
+    const packId = BigNumber.from(0);
+    const gemIds: number[] = [];
+    const quantity = 1;
+    const dummyHash =
+      '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
+    const oldLegendaryCatalystId = 3;
+    const emptyBytes = Buffer.from('');
+    const assetId = await oldAssetMint(
+      oldCatalystMinterAsUser0,
+      user0,
+      packId,
+      dummyHash,
+      quantity,
+      user0,
+      emptyBytes,
+      oldLegendaryCatalystId,
+      gemIds
+    );
+    const blockNumber = 11874541;
+    const gemIdsForMigration = [powerGemId];
+    await waitFor(
+      collectionCatalystMigrationsContractAsAdmin.migrate(
+        assetId,
+        gemIdsForMigration,
+        blockNumber
+      )
+    );
+    incrementGemIds(gemIdsForMigration);
+    await testMigration(
+      assetAttributesRegistry,
+      assetId,
+      oldLegendaryCatalystId,
+      gemIdsForMigration,
+      blockNumber,
+      0
+    );
+  });
+
+  it('migrating asset with collection id != 0 should fail', async function () {
+    const {
+      oldCatalystMinterAsUser0,
+      collectionCatalystMigrationsContractAsAdmin,
+      user0,
+    } = await setupCollectionCatalystMigrations();
+    await setupUser(user0);
+    const powerGemId = 0;
+    const defenseGemId = 1;
+    const packId = BigNumber.from(0);
+    const gemIds: number[] = [];
+    const quantity = 1500;
+    const dummyHash =
+      '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF';
+    const oldRareCatalystId = 1;
+    const emptyBytes = Buffer.from('');
+    const assetId = await oldAssetMint(
+      oldCatalystMinterAsUser0,
+      user0,
+      packId,
+      dummyHash,
+      quantity,
+      user0,
+      emptyBytes,
+      oldRareCatalystId,
+      gemIds
+    );
+    const blockNumber = 11874541;
+    const gemIdsForMigration = [powerGemId];
+    const newAssetId = await extractAndAddGems(
+      oldCatalystMinterAsUser0,
+      user0,
+      assetId,
+      [defenseGemId],
+      user0
+    );
+
+    expect(
+      collectionCatalystMigrationsContractAsAdmin.migrate(
+        newAssetId,
+        gemIdsForMigration,
+        blockNumber
+      )
+    ).to.be.revertedWith('NOT_ORIGINAL_NFT');
   });
   it('migrating assetId not from admin account should fail', async function () {
     const {
@@ -337,7 +448,6 @@ describe('CollectionCatalystMigrations', function () {
       mockedMigrationContractAddress
     );
   });
-
   it('setAssetAttributesRegistryMigrationContract first assignment should fail for non admin', async function () {
     const {
       mockedMigrationContractAddress,
@@ -349,7 +459,6 @@ describe('CollectionCatalystMigrations', function () {
       )
     ).to.be.revertedWith('NOT_AUTHORIZED');
   });
-
   it('setAssetAttributesRegistryMigrationContract second assignment', async function () {
     const {
       assetAttributesRegistryAsCollectionCatalystMigrationsAdmin,
@@ -378,7 +487,6 @@ describe('CollectionCatalystMigrations', function () {
       newMigrationContract
     );
   });
-
   it('setAssetAttributesRegistryMigrationContract second assignment should fail for non migrationContract', async function () {
     const {
       newMigrationContract,

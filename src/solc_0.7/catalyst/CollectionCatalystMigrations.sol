@@ -6,6 +6,7 @@ import "./interfaces/OldCatalystRegistry.sol";
 import "./AssetAttributesRegistry.sol";
 import "../common/Interfaces/IAssetToken.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
+import "hardhat/console.sol";
 
 /// @notice Contract performing migrations for collections, do not require owner approval
 contract CollectionCatalystMigrations is WithAdmin {
@@ -82,6 +83,7 @@ contract CollectionCatalystMigrations is WithAdmin {
             // ensure this NFT has no collection: original NFT
             // If it has, the collection itself need to be migrated
             try _asset.collectionOf(assetId) returns (uint256 collId) {
+                console.log(collId);
                 require(collId == 0, "NOT_ORIGINAL_NFT");
                 // solhint-disable-next-line no-empty-blocks
             } catch {}
