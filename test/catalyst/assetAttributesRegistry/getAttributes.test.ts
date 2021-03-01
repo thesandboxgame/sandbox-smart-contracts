@@ -40,7 +40,6 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     gemIds: number[],
     minter: Contract
   ): Promise<Receipt> {
-    console.log(`minter in getMintReceipt: ${minter.address}`);
     const mintReceipt = await minter.mint(
       catalystOwner,
       mintOptions.packId,
@@ -74,7 +73,6 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     gemIds: number[],
     minter: Contract
   ): Promise<AssetMintObj> {
-    console.log(`minter in getAssetId: ${minter.address}`);
     const mintReceipt = await getMintReceipt(catalystId, gemIds, minter);
     const catalystAppliedEvents = await getCatEvents(mintReceipt);
     const args = catalystAppliedEvents[0].args;
@@ -89,9 +87,6 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       assetMinterAsUser0,
     } = await setupAssetAttributesRegistry());
     ({catalystOwner} = await setupGemsAndCatalysts());
-    console.log(
-      `minter from contract call in test ${await assetAttributesRegistry.getMinter()}`
-    );
   });
 
   describe('getAttributes: minting', function () {
@@ -289,10 +284,6 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     });
 
     it('can get attributes when adding 1 gem to an asset with an empty catalyst', async function () {
-      console.log(`minter in test: ${assetMinterAsUser0.address}`);
-      console.log(
-        `minter in test from contract: ${await assetAttributesRegistry.getMinter()}`
-      );
       const {id: assetId, receipt: mintReceipt} = await getAssetId(
         4,
         [],

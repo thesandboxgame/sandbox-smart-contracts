@@ -769,11 +769,6 @@ describe('AssetMinter', function () {
       const magicSupplyAfter = await magicGem.totalSupply();
       const luckSupplyAfter = await luckGem.totalSupply();
 
-      console.log(`common token balance before: ${commonBalanceBefore}`);
-      console.log(`rare token balance before: ${rareBalanceBefore}`);
-      console.log(`common token balance after: ${commonBalanceAfter}`);
-      console.log(`rare token balance after: ${rareBalanceAfter}`);
-
       expect(commonBalanceAfter).to.be.equal(commonBalanceBefore.sub(oneToken));
       expect(rareBalanceAfter).to.be.equal(rareBalanceBefore.sub(oneToken));
       expect(speedBalanceAfter).to.be.equal(speedBalanceBefore.sub(oneToken));
