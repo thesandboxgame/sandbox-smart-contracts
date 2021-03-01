@@ -75,7 +75,7 @@
     "local:run": "dotenv -- cross-env HARDHAT_NETWORK=localhost ts-node --files",
     "local:export": "hardhat --network localhost export",
     "void:deploy": "hardhat deploy",
-    "void:run": "dotenv cross-env ts-node --files",
+    "void:run": "dotenv -- cross-env ts-node --files",
     "rinkeby:deploy": "hardhat --network rinkeby deploy",
     "rinkeby:export": "hardhat --network rinkeby export",
     "rinkeby:run": "dotenv -- cross-env HARDHAT_NETWORK=rinkeby ts-node --files",
