@@ -16,11 +16,12 @@ const func: DeployFunction = async function () {
     claimData = JSON.parse(
       fs
         .readFileSync(
-          `data/giveaways/multi_giveaway_1/claims_${hre.network.name}.json` // TODO: update for each claim file
+          'data/giveaways/multi_giveaway_1/claims_0_hardhat.json' // TODO: update for each claim file
         )
         .toString()
     );
   } catch (e) {
+    console.log('Error', e);
     return;
   }
 
@@ -32,10 +33,10 @@ const func: DeployFunction = async function () {
 
   const giveawayContract = await deployments.getOrNull('Multi_Giveaway_1');
   if (!giveawayContract) {
+    console.log('No Multi_Giveaway_1 deployment');
     return;
   }
 
-  // Add a new giveaway
   const currentAdmin = await read('Multi_Giveaway_1', 'getAdmin');
 
   await catchUnknownSigner(
@@ -48,6 +49,8 @@ const func: DeployFunction = async function () {
     )
   );
 
+  console.log(`New giveaway added with merkleRootHash: ${merkleRootHash}`);
+
   const claimsWithProofs: (MultiClaim & {proof: string[]})[] = [];
   for (const claim of saltedClaims) {
     claimsWithProofs.push({
@@ -59,6 +62,7 @@ const func: DeployFunction = async function () {
     `./secret/.multi_claims_proofs_${chainId}.json`,
     JSON.stringify(claimsWithProofs, null, '  ')
   );
+  console.log(`Proofs at: ./secret/.multi_claims_proofs_${chainId}.json`);
 };
 export default func;
 
