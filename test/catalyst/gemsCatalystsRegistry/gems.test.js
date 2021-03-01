@@ -1,23 +1,25 @@
 const {
   ethers,
-  getUnnamedAccounts,
-  getNamedAccounts,
   deployments,
+  getNamedAccounts,
+  getUnnamedAccounts,
 } = require('hardhat');
-const {waitFor, recurseTests} = require('../utils');
-const generateERC20Tests = require('../erc20');
+const {waitFor, recurseTests} = require('../../utils');
+const generateERC20Tests = require('../../erc20');
 
-function testCatalyst(catalystName) {
+function testGem(gemName) {
   const erc20Tests = generateERC20Tests(
     async () => {
       const others = await getUnnamedAccounts();
-      const {deployer} = await getNamedAccounts();
+      const {gemMinter} = await getNamedAccounts();
       await deployments.fixture();
-      const contract = await ethers.getContract(catalystName);
+      const contract = await ethers.getContract(gemName);
 
       function mint(to, amount) {
         return waitFor(
-          contract.connect(ethers.provider.getSigner(deployer)).mint(to, amount)
+          contract
+            .connect(ethers.provider.getSigner(gemMinter))
+            .mint(to, amount)
         );
       }
 
@@ -34,7 +36,7 @@ function testCatalyst(catalystName) {
     }
   );
 
-  describe(catalystName, function () {
+  describe(gemName, function () {
     for (const test of erc20Tests) {
       // eslint-disable-next-line mocha/no-setup-in-describe
       recurseTests(test);
@@ -42,7 +44,8 @@ function testCatalyst(catalystName) {
   });
 }
 
-testCatalyst('Catalyst_Epic');
-// testCatalyst('Catalyst_Common');
-// testCatalyst('Catalyst_Rare');
-// testCatalyst('Catalyst_Legendary');
+testGem('Gem_POWER');
+// testGem('Gem_DEFENSE');
+// testGem('Gem_SPEED');
+// testGem('Gem_MAGIC');
+// testGem('Gem_LUCK');
