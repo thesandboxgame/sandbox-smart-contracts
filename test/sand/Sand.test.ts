@@ -132,10 +132,10 @@ describe('Sand.sol', function () {
       );
       const sandTransferValue = DECIMALS_18.mul(200);
       userWithSand.Sand.transfer(userWithSand.address, sandTransferValue);
-      const balanceUserWithsandAfter = await Sand.balanceOf(
+      const balanceUserWithSandAfter = await Sand.balanceOf(
         userWithSand.address
       );
-      expect(balanceUserWithsandBefore).to.equal(balanceUserWithsandAfter);
+      expect(balanceUserWithsandBefore).to.equal(balanceUserWithSandAfter);
     });
 
     it('total supply should not be affected by transfers', async function () {
@@ -157,38 +157,72 @@ describe('Sand.sol', function () {
   describe('Allowance', function () {
     it('user should not be able to transfer more token than their allowance permit', async function () {
       const {userWithSand, usersWithoutSand} = await setupTest();
-      userWithSand.Sand.approve(usersWithoutSand[0].address, 250);
+      const TOTAL_ALLOWANCE = DECIMALS_18.mul(250);
+      const USED_ALLOWANCE = DECIMALS_18.mul(350);
+      userWithSand.Sand.approve(usersWithoutSand[0].address, TOTAL_ALLOWANCE);
       await expect(
         usersWithoutSand[0].Sand.transferFrom(
           userWithSand.address,
           usersWithoutSand[1].address,
-          350
+          USED_ALLOWANCE
         )
       ).to.be.revertedWith('Not enough funds allowed');
     });
 
-    it('user should be able to transfer some tokens that their allowance permit', async function () {
-      const {userWithSand, usersWithoutSand} = await setupTest();
-      userWithSand.Sand.approve(usersWithoutSand[0].address, 250);
-      await expect(
-        usersWithoutSand[0].Sand.transferFrom(
-          userWithSand.address,
-          usersWithoutSand[1].address,
-          150
-        )
-      ).to.be.revertedWith('Not enough funds allowed');
+    it('user should be able to transfer some of the amount permitted by their allowance', async function () {
+      const {Sand, userWithSand, usersWithoutSand} = await setupTest();
+      const TOTAL_ALLOWANCE = DECIMALS_18.mul(250);
+      const TRANSFER = TOTAL_ALLOWANCE.sub(100);
+
+      const allowanceApprover = userWithSand;
+      const allowanceCarrier = usersWithoutSand[0];
+      const allowanceReceiver = usersWithoutSand[1];
+
+      allowanceApprover.Sand.approve(allowanceCarrier.address, TOTAL_ALLOWANCE);
+
+      const senderBefore = await Sand.balanceOf(allowanceApprover.address);
+      const receiverBefore = await Sand.balanceOf(allowanceCarrier.address);
+
+      allowanceCarrier.Sand.transferFrom(
+        allowanceApprover.address,
+        allowanceReceiver.address,
+        TRANSFER
+      );
+
+      const senderAfter = await Sand.balanceOf(allowanceApprover.address);
+      const receiverAfter = await Sand.balanceOf(allowanceReceiver.address);
+
+      expect(senderAfter).to.equal(senderBefore.sub(TRANSFER));
+      expect(receiverAfter).to.equal(receiverBefore.add(TRANSFER));
+      expect(receiverAfter).to.equal(TRANSFER);
     });
 
     it('user should be able to transfer all tokens that their allowance permit', async function () {
-      const {userWithSand, usersWithoutSand} = await setupTest();
-      userWithSand.Sand.approve(usersWithoutSand[0].address, 250);
-      await expect(
-        usersWithoutSand[0].Sand.transferFrom(
-          userWithSand.address,
-          usersWithoutSand[1].address,
-          250
-        )
-      ).to.be.revertedWith('Not enough funds allowed');
+      const {Sand, userWithSand, usersWithoutSand} = await setupTest();
+      const TOTAL_ALLOWANCE = DECIMALS_18.mul(250);
+      const TRANSFER = TOTAL_ALLOWANCE;
+
+      const allowanceApprover = userWithSand;
+      const allowanceCarrier = usersWithoutSand[0];
+      const allowanceReceiver = usersWithoutSand[1];
+
+      allowanceApprover.Sand.approve(allowanceCarrier.address, TOTAL_ALLOWANCE);
+
+      const senderBefore = await Sand.balanceOf(allowanceApprover.address);
+      const receiverBefore = await Sand.balanceOf(allowanceCarrier.address);
+
+      allowanceCarrier.Sand.transferFrom(
+        allowanceApprover.address,
+        allowanceReceiver.address,
+        TRANSFER
+      );
+
+      const senderAfter = await Sand.balanceOf(allowanceApprover.address);
+      const receiverAfter = await Sand.balanceOf(allowanceReceiver.address);
+
+      expect(senderAfter).to.equal(senderBefore.sub(TRANSFER));
+      expect(receiverAfter).to.equal(receiverBefore.add(TRANSFER));
+      expect(receiverAfter).to.equal(TRANSFER);
     });
   });
 });
