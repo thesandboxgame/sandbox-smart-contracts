@@ -2,7 +2,7 @@
 pragma solidity 0.7.5;
 pragma experimental ABIEncoderV2;
 
-import "./interfaces/OldCatalystRegistry.sol";
+import "./interfaces/IOldCatalystRegistry.sol";
 import "./interfaces/IAssetAttributesRegistry.sol";
 import "./interfaces/ICollectionCatalystMigrations.sol";
 import "../common/Interfaces/IAssetToken.sol";
@@ -12,7 +12,7 @@ import "../common/BaseWithStorage/WithAdmin.sol";
 contract CollectionCatalystMigrations is WithAdmin, ICollectionCatalystMigrations {
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
 
-    OldCatalystRegistry internal immutable _oldRegistry;
+    IOldCatalystRegistry internal immutable _oldRegistry;
     IAssetAttributesRegistry internal immutable _registry;
     IAssetToken internal immutable _asset;
 
@@ -24,7 +24,7 @@ contract CollectionCatalystMigrations is WithAdmin, ICollectionCatalystMigration
     constructor(
         IAssetToken asset,
         IAssetAttributesRegistry registry,
-        OldCatalystRegistry oldRegistry,
+        IOldCatalystRegistry oldRegistry,
         address admin
     ) {
         _oldRegistry = oldRegistry;
