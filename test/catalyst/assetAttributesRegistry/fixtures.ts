@@ -7,13 +7,11 @@ import {
 import {BigNumber, Contract, Event} from 'ethers';
 import {Block} from '@ethersproject/providers';
 import {waitFor} from '../../utils';
-import {transferSand} from '../utils';
-import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
+import {transferSand, mintCatalyst, mintGem} from '../utils';
 
 export const setupAssetAttributesRegistry = deployments.createFixture(
   async () => {
     await deployments.fixture();
-    await setupGemsAndCatalysts();
     const assetAttributesRegistry: Contract = await ethers.getContract(
       'AssetAttributesRegistry'
     );
