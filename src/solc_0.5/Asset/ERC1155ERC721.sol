@@ -11,7 +11,9 @@ import "../contracts_common/Interfaces/ERC721TokenReceiver.sol";
 
 import "../contracts_common/BaseWithStorage/SuperOperators.sol";
 
-contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
+import "@openzeppelin/contracts/access/AccessControl.sol";
+
+contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721, AccessControl {
     using AddressUtils for address;
     using ObjectLib32 for ObjectLib32.Operations;
     using ObjectLib32 for uint256;
@@ -62,6 +64,8 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     address private _bouncerAdmin;
 
     bool internal _init;
+
+    bytes32 public constant PREDICATE_ROLE = keccak256("PREDICATE_ROLE");
 
     function init(
         address metaTransactionContract,
@@ -170,6 +174,38 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
             false
         );
     }
+
+    /// @notice Mint function for use by Matic predicate contract for either:
+    /// A.) moving an asset originally created on L1 back to L1, or
+    /// B.) moving an asset originally created on L2 over to L1 for the fisrt time.
+    /// @param account
+    /// @param id The Id of the token to mint/unlock on L1.
+    /// @param amount The amount of tokens to mint/unlock.
+    /// @param data
+    function mint(
+        address account,
+        uint256 id,
+        uint256 amount,
+        bytes calldata data
+    ) external {
+      require( hasRole(PREDICATE_ROLE, msg.sender), "PREDICATE_ACCESS_DENIED");
+    }
+
+    /// @notice Batch version of mint() above.
+    /// @param to
+    /// @param ids The array of Ids of the tokens to mint/unlock on L1.
+    /// @param amounts The amounts of tokens for each Id to mint/unlock.
+    /// @param data
+     function mintBatch(
+        address to,
+        uint256[] calldata ids,
+        uint256[] calldata amounts,
+        bytes calldata data
+    ) external {
+      require( hasRole(PREDICATE_ROLE, msg.sender), "PREDICATE_ACCESS_DENIED");
+    }
+
+
 
     function generateTokenId(
         address creator,
