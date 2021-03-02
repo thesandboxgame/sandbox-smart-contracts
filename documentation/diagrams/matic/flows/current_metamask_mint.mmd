@@ -1,0 +1,7 @@
+sequenceDiagram
+    participant User
+    opt !chain(mainnet)
+        User->>Wallet: request_switchNetwork(mainnet)
+    end
+    User->>Wallet: sign(message)
+    User->>Wallet: tx(mint)

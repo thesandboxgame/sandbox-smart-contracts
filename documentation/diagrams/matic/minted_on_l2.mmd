@@ -10,7 +10,7 @@ sequenceDiagram
     end
     rect rgb(150, 240, 240)
         Note over User,Asset(L2): burn an Asset on L2
-        User->>Asset(L2):burn(...)
+        User->>Asset(L2):burnAsExit(...)
     end
     rect rgb(240, 240, 240)
         Note over User,RootChainManager: notify exit (back to L1)

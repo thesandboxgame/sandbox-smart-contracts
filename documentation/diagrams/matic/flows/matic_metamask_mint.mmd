@@ -1,0 +1,8 @@
+sequenceDiagram
+    participant User
+    opt !chain(matic)
+        User->>Wallet: request_settings(url)
+    end
+    User->>Wallet: sign(message)
+    User->>Wallet: sign(metatx(mint))
+
