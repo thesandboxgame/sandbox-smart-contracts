@@ -39,6 +39,15 @@ const config: HardhatUserConfig = {
         },
       },
       {
+        version: '0.6.6',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 2000,
+          },
+        },
+      },
+      {
         version: '0.5.9',
         settings: {
           optimizer: {
@@ -188,9 +197,18 @@ const config: HardhatUserConfig = {
       url: 'http://localhost:8545',
       accounts: accounts(),
     },
+    matic_mumbai: {
+      url: 'https://rpc-mumbai.matic.today',
+      chainId: 80001,
+      accounts: accounts('goerli'),
+    },
     rinkeby_test: {
       url: node_url('rinkeby'),
       accounts: accounts('rinkeby_test'),
+    },
+    goerli: {
+      url: node_url('goerli'),
+      accounts: accounts('goerli'),
     },
     rinkeby: {
       url: node_url('rinkeby'),
