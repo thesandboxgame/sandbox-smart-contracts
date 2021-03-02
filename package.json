@@ -68,7 +68,7 @@
     "test:single": "dotenv cross-env HARDHAT_COMPILE=true mocha --bail --recursive test",
     "gas": "dotenv cross-env REPORT_GAS=true hardhat test",
     "coverage": "dotenv cross-env HARDHAT_DEPLOY_FIXTURE=true hardhat coverage --testfiles 'test/*.ts''test/*.js'",
-    "dev": "hardhat node --reset --watch --export contractsInfo.json",
+    "dev": "hardhat node --watch --export contractsInfo.json",
     "compile": "hardhat compile",
     "local:dev": "hardhat --network localhost deploy --watch",
     "local:deploy": "hardhat --network localhost deploy",
