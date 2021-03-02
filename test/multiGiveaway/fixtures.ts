@@ -37,6 +37,8 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     assetBouncerAdmin,
     landAdmin,
     sandAdmin,
+    catalystMinter,
+    gemMinter,
   } = await getNamedAccounts();
   const otherAccounts = await getUnnamedAccounts();
   const nftGiveawayAdmin = otherAccounts[0];
@@ -46,8 +48,8 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   const sandContract = await ethers.getContract('Sand');
   await deployments.fixture(['Asset']);
   const assetContract = await ethers.getContract('Asset');
-  const speedGemContract = await ethers.getContract('Gem_Speed');
-  const rareCatalystContract = await ethers.getContract('Catalyst_Rare');
+  const speedGemContract = await ethers.getContract('Gem_SPEED');
+  const rareCatalystContract = await ethers.getContract('Catalyst_RARE');
 
   await deployments.deploy('MockLand', {
     from: deployer,
@@ -82,10 +84,10 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   // Supply Catalysts and Gems
   await speedGemContract
-    .connect(ethers.provider.getSigner(deployer))
+    .connect(ethers.provider.getSigner(gemMinter))
     .mint(giveawayContract.address, 16);
   await rareCatalystContract
-    .connect(ethers.provider.getSigner(deployer))
+    .connect(ethers.provider.getSigner(catalystMinter))
     .mint(giveawayContract.address, 8);
 
   // Supply assets
@@ -184,6 +186,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let dataWithIds0: any = testData0;
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let dataWithIds1: any = testData1;
 
