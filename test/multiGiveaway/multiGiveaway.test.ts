@@ -11,7 +11,7 @@ const zeroAddress = constants.AddressZero;
 const emptyBytes32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 
-describe.only('Multi_Giveaway', function () {
+describe('Multi_Giveaway', function () {
   describe('Multi_Giveaway_common_functionality', function () {
     it('Admin can add a new giveaway', async function () {
       const options = {};
