@@ -1,6 +1,6 @@
 import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {AssetGiveawayInfo} from '../lib/merkleTreeHelper';
+import {AssetClaim} from '../lib/merkleTreeHelper';
 
 const func: DeployFunction = async function () {
   const {deployments, ethers, getNamedAccounts} = hre;
@@ -11,7 +11,7 @@ const func: DeployFunction = async function () {
   const AssetGiveaway = await deployments.get('Asset_Giveaway_1');
   const smurfId =
     '55464657044963196816950587289035428064568320970692304673817341489687505668096';
-  const assetData: AssetGiveawayInfo[] = AssetGiveaway.linkedData;
+  const assetData: AssetClaim[] = AssetGiveaway.linkedData;
 
   const {data} = await Asset.populateTransaction[
     'safeTransferFrom(address,address,uint256,uint256,bytes)'
