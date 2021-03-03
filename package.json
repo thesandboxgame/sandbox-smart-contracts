@@ -17,6 +17,7 @@
   },
   "devDependencies": {
     "@codechecks/client": "^0.1.10",
+    "@eth-optimism/smock": "^0.2.1-alpha.0",
     "@ethereum-waffle/chai": "^3.0.2",
     "@ethersproject/wallet": "^5.0.5",
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
