@@ -198,8 +198,7 @@ const config: HardhatUserConfig = {
       accounts: accounts(),
     },
     matic_mumbai: {
-      url: 'https://rpc-mumbai.matic.today',
-      chainId: 80001,
+      url: 'https://rpc-mumbai.maticvigil.com',
       accounts: accounts('goerli'),
     },
     rinkeby_test: {
