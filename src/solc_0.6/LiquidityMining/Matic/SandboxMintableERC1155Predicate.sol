@@ -43,7 +43,7 @@ contract SandboxMintableERC1155Predicate is
     constructor() public {}
 
     function initialize(address _owner, address layer2Asset) external initializer {
-        _setupContractId("MintableERC1155Predicate");
+        _setupContractId("SandboxMintableERC1155Predicate");
         _setupRole(DEFAULT_ADMIN_ROLE, _owner);
         _setupRole(MANAGER_ROLE, _owner);
         // @review
@@ -196,7 +196,7 @@ contract SandboxMintableERC1155Predicate is
             "MintableERC1155Predicate: INVALID_RECEIVER"
         );
 
-        // @review
+        // @review topic1 is operator address
         require(address(logTopicRLPList[1].toUint()) != _layer2Asset, "ERC1155Predicate: EXTRACTION_NOT_EXIT");
 
         if (bytes32(logTopicRLPList[0].toUint()) == TRANSFER_SINGLE_EVENT_SIG) {
@@ -210,7 +210,7 @@ contract SandboxMintableERC1155Predicate is
             // Currently locked tokens for `id` in this contract
             uint256 tokenBalance = token.balanceOf(address(this), id);
 
-            // Checking whether MintableERC1155 contract has enough
+            // Checking whether SandboxMintableERC1155Predicate contract has enough
             // tokens locked in to transfer to withdrawer, if not
             // it'll mint those tokens for this contract and return
             // safely transfer those to withdrawer
