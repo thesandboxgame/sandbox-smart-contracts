@@ -177,11 +177,11 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721, AccessControl {
 
     /// @notice Mint function for use by Matic predicate contract for either:
     /// A.) moving an asset originally created on L1 back to L1, or
-    /// B.) moving an asset originally created on L2 over to L1 for the fisrt time.
-    /// @param account
+    /// B.) moving an asset originally created on L2 over to L1 for the first time.
+    /// @param account The address to mint to.
     /// @param id The Id of the token to mint/unlock on L1.
     /// @param amount The amount of tokens to mint/unlock.
-    /// @param data
+    /// @param data Extra data for minting
     function mint(
         address account,
         uint256 id,
@@ -189,13 +189,30 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721, AccessControl {
         bytes calldata data
     ) external {
       require( hasRole(PREDICATE_ROLE, msg.sender), "PREDICATE_ACCESS_DENIED");
+      // @review rarity should be part of id already
+      // hash √
+      // rarity ?
+      // should we use msg.sender here or account?
+      // false = isExtraction √
+      _mint(
+            // @review this gets the metadata hash currently stored on L1 for this asset(if it exists), but how to pass the hash stored in the L2 asset contract?
+            _metadataHash[id & URI_ID],
+            amount,
+            // @review can this be hard-coded for now ?
+            rarity,
+            msg.sender,
+            account,
+            id,
+            data,
+            false
+        );
     }
 
     /// @notice Batch version of mint() above.
-    /// @param to
+    /// @param to The address to mint to.
     /// @param ids The array of Ids of the tokens to mint/unlock on L1.
     /// @param amounts The amounts of tokens for each Id to mint/unlock.
-    /// @param data
+    /// @param data Extra data for minting
      function mintBatch(
         address to,
         uint256[] calldata ids,
@@ -203,6 +220,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721, AccessControl {
         bytes calldata data
     ) external {
       require( hasRole(PREDICATE_ROLE, msg.sender), "PREDICATE_ACCESS_DENIED");
+     // @review add call to _mint here.
     }
 
 
