@@ -185,6 +185,18 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function assignReservedAddressToClaim(dataSet: any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return dataSet.map(async (claim: any) => {
+      claim.to = others[0];
+      return claim;
+    });
+  }
+
+  assignReservedAddressToClaim(testData0);
+  assignReservedAddressToClaim(testData1);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let dataWithIds0: any = testData0;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -236,7 +248,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     for (let i = 0; i < 1; i++) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const claim: any = {
-        to: others[1],
+        to: others[0],
         erc1155: [
           {
             ids: [i],
@@ -260,7 +272,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     for (let i = 1; i < mintSingleAsset; i++) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const claim: any = {
-        to: others[1],
+        to: others[0],
         erc1155: [
           {
             ids: [i],
@@ -296,7 +308,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   // Single giveaway
   const hashArray = createDataArrayMultiClaim(claims0);
-  await giveawayContractAsAdmin.addNewGiveaway(merkleRootHash0, 1615194000);
+  await giveawayContractAsAdmin.addNewGiveaway(merkleRootHash0, 1615194000); // TODO: no expiry
   allMerkleRoots.push(merkleRootHash0);
   allTrees.push(new MerkleTree(hashArray));
 
@@ -310,7 +322,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     allMerkleRoots.push(merkleRootHash1);
     const hashArray2 = createDataArrayMultiClaim(claims1);
     allTrees.push(new MerkleTree(hashArray2));
-    await giveawayContractAsAdmin.addNewGiveaway(merkleRootHash1, 1615194000);
+    await giveawayContractAsAdmin.addNewGiveaway(merkleRootHash1, 1615194000); // TODO: no expiry
   }
 
   return {
