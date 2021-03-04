@@ -8,7 +8,6 @@ import {BigNumber, Contract} from 'ethers';
 export const setupPredicate = deployments.createFixture(async () => {
   await deployments.fixture();
 
-  // const assetContract: Contract = await ethers.getContract('Asset');
   const erc1155Predicate: Contract = await ethers.getContract(
     'SandboxMintableERC1155Predicate'
   );
