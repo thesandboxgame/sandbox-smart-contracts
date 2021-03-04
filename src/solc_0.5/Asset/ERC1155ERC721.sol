@@ -11,9 +11,9 @@ import "../contracts_common/Interfaces/ERC721TokenReceiver.sol";
 
 import "../contracts_common/BaseWithStorage/SuperOperators.sol";
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
+// import "@openzeppelin/contracts/access/AccessControl.sol";
 
-contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721, AccessControl {
+contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     using AddressUtils for address;
     using ObjectLib32 for ObjectLib32.Operations;
     using ObjectLib32 for uint256;
@@ -65,7 +65,11 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721, AccessControl {
 
     bool internal _init;
 
-    bytes32 public constant PREDICATE_ROLE = keccak256("PREDICATE_ROLE");
+    // bytes32 public constant PREDICATE_ROLE = keccak256("PREDICATE_ROLE");
+    address private _predicate1155;
+
+    // @review probably need an adminOnly _setPredicate function
+    // - might need to handle more than one type, is: predicate1155, predicate20, although // I think we only need to customize the 1155 version.
 
     function init(
         address metaTransactionContract,
@@ -188,7 +192,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721, AccessControl {
         uint256 amount,
         bytes calldata data
     ) external {
-      require( hasRole(PREDICATE_ROLE, msg.sender), "PREDICATE_ACCESS_DENIED");
+      require(msg.sender == _predicate1155, "PREDICATE_ACCESS_DENIED");
       // @review rarity should be part of id already
       // hash √
       // rarity ?
@@ -199,7 +203,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721, AccessControl {
             _metadataHash[id & URI_ID],
             amount,
             // @review can this be hard-coded for now ?
-            rarity,
+            0,
             msg.sender,
             account,
             id,
@@ -219,7 +223,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721, AccessControl {
         uint256[] calldata amounts,
         bytes calldata data
     ) external {
-      require( hasRole(PREDICATE_ROLE, msg.sender), "PREDICATE_ACCESS_DENIED");
+      // require( hasRole(PREDICATE_ROLE, msg.sender), "PREDICATE_ACCESS_DENIED");
      // @review add call to _mint here.
     }
 
