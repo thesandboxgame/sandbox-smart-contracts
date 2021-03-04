@@ -5,7 +5,7 @@ import '@nomiclabs/hardhat-ethers'; // aliased to hardhat-deploy-ethers
 import 'hardhat-gas-reporter';
 import '@openzeppelin/hardhat-upgrades';
 import 'solidity-coverage';
-import '@eth-optimism/smock/build/src/plugins/hardhat-storagelayout';
+// import '@eth-optimism/smock/build/src/plugins/hardhat-storagelayout';
 import {node_url, accounts} from './utils/network';
 
 const config: HardhatUserConfig = {
