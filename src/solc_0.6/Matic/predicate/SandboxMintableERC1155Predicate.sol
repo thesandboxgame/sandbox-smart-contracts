@@ -1,13 +1,13 @@
 pragma solidity 0.6.6;
 
-import {IMintableERC1155} from "../RootToken/IMintableERC1155.sol";
+import {IMintableERC1155} from "../interfaces/IMintableERC1155.sol";
 import {
     ERC1155Receiver
-} from "@openzeppelin/contracts/token/ERC1155/ERC1155Receiver.sol";
-import {AccessControlMixin} from "../../common/AccessControlMixin.sol";
-import {RLPReader} from "../../lib/RLPReader.sol";
-import {ITokenPredicate} from "./ITokenPredicate.sol";
-import {Initializable} from "../../common/Initializable.sol";
+} from "@openzeppelin/contracts-0.6/token/ERC1155/ERC1155Receiver.sol";
+import {AccessControlMixin} from "../AccessControlMixin.sol";
+import {RLPReader} from "../lib/RLPReader.sol";
+import {ITokenPredicate} from "../interfaces/ITokenPredicate.sol";
+import {Initializable} from "../Initializable.sol";
 
 contract SandboxMintableERC1155Predicate is
     ITokenPredicate,
@@ -30,7 +30,7 @@ contract SandboxMintableERC1155Predicate is
 
     // @review
     // address of L2 asset contract
-    address internal immutable _layer2Asset;
+    address internal _layer2Asset;
 
     event LockedBatchMintableERC1155(
         address indexed depositor,
