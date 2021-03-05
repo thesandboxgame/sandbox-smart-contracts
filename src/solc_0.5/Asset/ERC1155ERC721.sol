@@ -30,6 +30,7 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
     uint256 private constant NFT_INDEX_OFFSET = 63;
 
     uint256 private constant IS_NFT =            0x0000000000000000000000000000000000000000800000000000000000000000;
+    uint256 private constant IS_LAYER_TWO_MINTED =            0x0000000000000000000000000000000000000000400000000000000000000000;
     uint256 private constant NOT_IS_NFT =        0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFFFFFFFF;
     uint256 private constant NFT_INDEX =         0x00000000000000000000000000000000000000007FFFFFFF8000000000000000;
     uint256 private constant NOT_NFT_INDEX =     0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF800000007FFFFFFFFFFFFFFF;
@@ -193,16 +194,20 @@ contract ERC1155ERC721 is SuperOperators, ERC1155, ERC721 {
         bytes calldata data
     ) external {
       require(msg.sender == _predicate1155, "PREDICATE_ACCESS_DENIED");
-      // @review rarity should be part of id already
-      // hash √
-      // rarity ?
-      // should we use msg.sender here or account?
-      // false = isExtraction √
+      // @review how to pass the hash stored in the L2 asset contract?
+      // maybe via a new event emitted from L2Asset.mint, or we let user look up metadata an the layer wher token was originally minted.
+      bytes32 hash;
+      if (id & IS_LAYER_TWO_MINTED > 0) {
+        // L2-minted case
+        // retrieve hash from event (not implemented) or set to 0 and signal user that metadata resides on L2 ?
+        // hash = ...;
+      } else {
+        // L1-minted case
+        hash = _metadataHash[id & URI_ID];
+      }
       _mint(
-            // @review this gets the metadata hash currently stored on L1 for this asset(if it exists), but how to pass the hash stored in the L2 asset contract?
-            _metadataHash[id & URI_ID],
+            hash,
             amount,
-            // @review can this be hard-coded for now ?
             0,
             msg.sender,
             account,
