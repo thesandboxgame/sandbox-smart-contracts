@@ -1,6 +1,4 @@
-import {getNamedAccounts, ethers, network, deployments} from 'hardhat';
-
-const {read} = deployments;
+import {getNamedAccounts, ethers, network} from 'hardhat';
 
 const args = process.argv.slice(2);
 

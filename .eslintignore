@@ -10,3 +10,5 @@ documentation/
 sandbox-subgraph/
 src/solc_0.6
 src/solc_0.5
+tmp/
+secret/
