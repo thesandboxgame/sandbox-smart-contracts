@@ -30,7 +30,9 @@ contract SandboxMintableERC1155Predicate is
 
     // @review
     // address of L2 asset contract
-    address internal _layer2Asset;
+    // consider hardcoding a special address used to signify a "real" burn on L2 (as opposed to a burn-to-exit). Used to support extraction of erc721 from erc1155 on L2
+    // address internal _layer2Asset;
+    address internal immutable BURN_SIGNAL= 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF;
 
     event LockedBatchMintableERC1155(
         address indexed depositor,
@@ -47,7 +49,7 @@ contract SandboxMintableERC1155Predicate is
         _setupRole(DEFAULT_ADMIN_ROLE, _owner);
         _setupRole(MANAGER_ROLE, _owner);
         // @review
-        _layer2Asset = layer2Asset;
+        // _layer2Asset = layer2Asset;
     }
 
     /**
@@ -197,7 +199,8 @@ contract SandboxMintableERC1155Predicate is
         );
 
         // @review topic1 is operator address
-        require(address(logTopicRLPList[1].toUint()) != _layer2Asset, "ERC1155Predicate: EXTRACTION_NOT_EXIT");
+        // We could use a special address (ie: 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF) instead of the actual operator to signal a burn, allowing this address to be hardcoded in the predicate. It would also be more generic this way.
+        require(address(logTopicRLPList[1].toUint()) != BURN_SIGNAL, "ERC1155Predicate: EXTRACTION_NOT_EXIT");
 
         if (bytes32(logTopicRLPList[0].toUint()) == TRANSFER_SINGLE_EVENT_SIG) {
             // topic0 is event sig
@@ -215,6 +218,7 @@ contract SandboxMintableERC1155Predicate is
             // it'll mint those tokens for this contract and return
             // safely transfer those to withdrawer
             if (tokenBalance < amount) {
+              // @note Here, it makes sense to mint the entire totalSupply, even if only a portion is being transferred to L1 at this time. But, we need to get totalSupply here.
                 token.mint(address(this), id, amount - tokenBalance, bytes(""));
             }
 
@@ -234,7 +238,7 @@ contract SandboxMintableERC1155Predicate is
             );
 
             IMintableERC1155 token = IMintableERC1155(rootToken);
-
+            // @note same as above for token.mint
             token.mintBatch(
                 address(this),
                 ids,
