@@ -1,13 +1,13 @@
 sequenceDiagram
 autonumber
 
-    Note over AssetOwner, AssetUpgrader: Upgrade Asset
+    Note over owner, AssetUpgrader: Upgrade Asset
 
-    AssetOwner->>+AssetUpgrader:upgrade(id,catalyst,gems)
+    owner->>+AssetUpgrader:upgrade(id,catalyst,gems)
     opt if(not nft)
         AssetUpgrader->>+Asset:extractERC721(id)
-        Asset->>-AssetUpgrader:id
+        Asset-->>-AssetUpgrader:id
     end
     AssetUpgrader->>GemsAndCatalysts:burn(catalyst,gems)
     AssetUpgrader->>SAND:transferFrom(artist,feeRecipient,fee*supply)
-    AssetUpgrader->>-CatalystRegistry:record(id,catalyst,gems)
+    AssetUpgrader->>-AssetAttributesRegistry:setCatalyst(id,catalyst,gems)

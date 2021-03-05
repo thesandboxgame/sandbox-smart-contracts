@@ -5,14 +5,21 @@ import gems from '../../data/gems';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
+  const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
 
-  const {deployer} = await getNamedAccounts();
-  for (const gemName of gems) {
-    await deploy(`Gem_${gemName}`, {
-      contract: 'ERC20Token',
+  const {gemMinter, deployer} = await getNamedAccounts();
+  for (const gem of gems) {
+    await deploy(`Gem_${gem.symbol}`, {
+      contract: 'Gem',
       from: deployer,
       log: true,
-      args: [gemName, gemName, deployer],
+      args: [
+        `Sandbox's ${gem.symbol} Gems`,
+        gem.symbol,
+        gemMinter,
+        gem.gemId,
+        GemsCatalystsRegistry.address,
+      ],
       skipIfAlreadyDeployed: true,
     });
   }

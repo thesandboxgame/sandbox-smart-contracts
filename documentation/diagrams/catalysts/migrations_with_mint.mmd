@@ -1,0 +1,12 @@
+sequenceDiagram
+autonumber
+    Note over owner, AssetMigrations: Migrate Old Asset to use new Catalysts
+
+    owner->>+AssetMigrations:migrate(id,amount,idToGet)
+    Note over owner, AssetMigrations: merkle tree : id -> idToGet check
+
+    AssetMigrations->>+Asset:burn(id,amount)
+    loop for all amount
+      AssetMigrations->>-Asset:safeTransferFrom(_,idToGet,owner)
+    end
+
