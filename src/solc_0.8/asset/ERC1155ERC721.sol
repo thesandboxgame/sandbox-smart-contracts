@@ -723,11 +723,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     /// @notice Get the approved address for a single NFT.
     /// @param id the NFT to find the approved address for.
     /// @return operator the approved address for this NFT, or the zero address if there is none.
-    function getApproved(uint256 id)
-        external
-        view
-        returns (address operator)
-    {
+    function getApproved(uint256 id) external view override returns (address operator) {
         require(_ownerOf(id) != address(0), "NFT does not exist");
         return _erc721operators[id];
     }
