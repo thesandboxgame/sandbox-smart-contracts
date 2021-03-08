@@ -17,8 +17,8 @@ interface IERC1155 {
         uint256[] ids,
         uint256[] values
     );
-    // duplicate event sig with IERC721 ApprovalForAll
-    // event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
+
+    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
 
     event URI(string value, uint256 indexed id);
 
