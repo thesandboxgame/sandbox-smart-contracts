@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
+import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IAssetAttributesRegistry.sol";
 import "./interfaces/IAssetUpgrader.sol";
 import "./GemsCatalystsRegistry.sol";
@@ -10,6 +11,8 @@ import "../common/BaseWithStorage/WithMetaTransaction.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetUpgrader is WithMetaTransaction, IAssetUpgrader {
+    using SafeMath for uint256;
+
     address public immutable feeRecipient;
     uint256 public immutable upgradeFee;
     uint256 public immutable gemAdditionFee;
