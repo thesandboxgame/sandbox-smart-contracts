@@ -1,12 +1,15 @@
 //SPDX-License-Identifier: MIT
-// solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
+// @review
+import "./SafeMathWithRequire.sol";
+
 library ObjectLib32 {
+    using SafeMathWithRequire for uint256;
     enum Operations {ADD, SUB, REPLACE}
     // Constants regarding bin or chunk sizes for balance packing
-    uint256 internal constant TYPES_BITS_SIZE = 32; // Max size of each object
-    uint256 internal constant TYPES_PER_UINT256 = 256 / TYPES_BITS_SIZE; // Number of types per uint256
+    uint256 constant TYPES_BITS_SIZE = 32; // Max size of each object
+    uint256 constant TYPES_PER_UINT256 = 256 / TYPES_BITS_SIZE; // Number of types per uint256
 
     //
     // Objects and Tokens Functions
@@ -15,8 +18,7 @@ library ObjectLib32 {
     /**
      * @dev Return the bin number and index within that bin where ID is
      * @param tokenId Object type
-     * @return bin Bin number
-     * @return index ID's index within that bin)
+     * @return (Bin number, ID's index within that bin)
      */
     function getTokenBinIndex(uint256 tokenId) internal pure returns (uint256 bin, uint256 index) {
         bin = (tokenId * TYPES_BITS_SIZE) / 256;
@@ -43,11 +45,11 @@ library ObjectLib32 {
         uint256 objectBalance = 0;
         if (operation == Operations.ADD) {
             objectBalance = getValueInBin(binBalances, index);
-            newBinBalance = writeValueInBin(binBalances, index, objectBalance + amount);
+            newBinBalance = writeValueInBin(binBalances, index, objectBalance.add(amount));
         } else if (operation == Operations.SUB) {
             objectBalance = getValueInBin(binBalances, index);
             require(objectBalance >= amount, "can't substract more than there is");
-            newBinBalance = writeValueInBin(binBalances, index, objectBalance - amount);
+            newBinBalance = writeValueInBin(binBalances, index, objectBalance.sub(amount));
         } else if (operation == Operations.REPLACE) {
             newBinBalance = writeValueInBin(binBalances, index, amount);
         } else {
