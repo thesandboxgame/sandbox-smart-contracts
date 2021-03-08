@@ -1,9 +1,10 @@
-pragma solidity 0.5.9;
+//SPDX-License-Identifier: MIT
+pragma solidity 0.8.2;
 
 import "../interfaces/IERC1155.sol";
 import "../interfaces/IERC1155TokenReceiver.sol";
 
-import "../common/Libraries/AddressUtils.sol";
+import "@openzeppelin//contracts/utils/Address.sol";
 import "../common/Libraries/ObjectLib32.sol";
 
 import "../interfaces/IERC721.sol";
