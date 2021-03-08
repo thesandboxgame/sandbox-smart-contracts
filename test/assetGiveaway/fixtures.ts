@@ -6,10 +6,10 @@ import {
 } from 'hardhat';
 import {expect} from '../chai-setup';
 import MerkleTree from '../../lib/merkleTree';
-import {createAssetClaimMerkleTree} from '../../data/asset_giveaway_1/getAssets';
+import {createAssetClaimMerkleTree} from '../../data/giveaways/asset_giveaway_1/getAssets';
 import helpers from '../../lib/merkleTreeHelper';
-const {createDataArrayAssets} = helpers;
-import {default as testAssetData} from '../../data/asset_giveaway_1/assets_hardhat.json';
+const {createDataArrayClaimableAssets} = helpers;
+import {default as testAssetData} from '../../data/giveaways/asset_giveaway_1/assets_hardhat.json';
 
 const ipfsHashString =
   '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
@@ -18,6 +18,7 @@ import {expectReceiptEventWithArgs, waitFor} from '../utils';
 
 type Options = {
   mint?: boolean;
+  mintSingleAsset?: number;
   assetsHolder?: boolean;
 };
 
@@ -27,7 +28,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 ) {
   const {network, getChainId} = hre;
   const chainId = await getChainId();
-  const {mint, assetsHolder} = options || {};
+  const {mint, assetsHolder, mintSingleAsset} = options || {};
   const {deployer, assetAdmin, assetBouncerAdmin} = await getNamedAccounts();
   const otherAccounts = await getUnnamedAccounts();
 
@@ -41,6 +42,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   const nftGiveawayAdmin = otherAccounts[0];
   const others = otherAccounts.slice(1);
+  const creator = others[0];
 
   const testContract = await deployments.deploy('Test_Asset_Giveaway_1', {
     from: deployer,
@@ -61,14 +63,16 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     await assetContractAsAdmin.setSuperOperator(testContract.address, true);
   }
 
+  const assetContractAsBouncerAdmin = await ethers.getContract(
+    'Asset',
+    assetBouncerAdmin
+  );
+
   // Supply assets to contract for testing
   async function mintTestAssets(id: number, value: number) {
-    const assetContractAsBouncer = await assetContract.connect(
-      ethers.provider.getSigner(assetBouncerAdmin)
-    );
+    await assetContractAsBouncerAdmin.setBouncer(creator, true);
 
     // Asset to be minted
-    const creator = others[0];
     const packId = id;
     const hash = ipfsHashString;
     const supply = value;
@@ -76,8 +80,12 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     const owner = assetsHolder ? others[5] : testContract.address;
     const data = '0x';
 
+    const assetContractAsCreator = await assetContract.connect(
+      ethers.provider.getSigner(creator)
+    );
+
     const receipt = await waitFor(
-      assetContractAsBouncer.mint(
+      assetContractAsCreator.mint(
         creator,
         packId,
         hash,
@@ -109,17 +117,14 @@ export const setupTestGiveaway = deployments.createFixture(async function (
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       testAssetData.map(async (claim: any) => {
         return {
-          assetValues: claim.assetValues,
           reservedAddress: claim.reservedAddress,
           assetIds: await Promise.all(
             claim.assetIds.map(
-              async (assetPackId: number) =>
-                await mintTestAssets(
-                  assetPackId,
-                  claim.assetValues[assetPackId]
-                )
+              async (assetPackId: number, index: number) =>
+                await mintTestAssets(assetPackId, claim.assetValues[index])
             )
           ),
+          assetValues: claim.assetValues,
         };
       })
     );
@@ -128,6 +133,44 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   if (mint) {
     const assetsWithIds = await mintAssetsWithNewIds();
     dataWithIds = assetsWithIds;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  async function mintSingleAssetWithId(claim: any) {
+    return {
+      ...claim,
+      assetIds: await Promise.all(
+        claim.assetIds.map(
+          async (assetPackId: number, index: number) =>
+            await mintTestAssets(assetPackId, claim.assetValues[index])
+        )
+      ),
+    };
+  }
+
+  if (mintSingleAsset) {
+    // Set up blank testData for thousands of users
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const emptyData: any = [];
+    for (let i = 0; i < 1; i++) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const claim: any = {
+        reservedAddress: others[1],
+        assetIds: [i],
+        assetValues: [1],
+      };
+      emptyData.push(await mintSingleAssetWithId(claim));
+    }
+    for (let i = 1; i < mintSingleAsset; i++) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const claim: any = {
+        reservedAddress: others[1],
+        assetIds: [i],
+        assetValues: [1],
+      };
+      emptyData.push(claim);
+    }
+    dataWithIds = emptyData;
   }
 
   // Set up tree with test assets
@@ -149,7 +192,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   const updatedDeployment = await deployments.get('Test_Asset_Giveaway_1');
   const updatedAssets = updatedDeployment.linkedData;
-  const assetHashArray = createDataArrayAssets(updatedAssets);
+  const assetHashArray = createDataArrayClaimableAssets(updatedAssets);
   const tree = new MerkleTree(assetHashArray);
   await giveawayContractAsAdmin.setMerkleRoot(merkleRootHash); // Set the merkleRoot which could not have been known prior to generating the test asset IDs
 

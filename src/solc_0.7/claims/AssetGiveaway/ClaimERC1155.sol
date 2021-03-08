@@ -17,6 +17,7 @@ contract ClaimERC1155 {
         _assetsHolder = assetsHolder;
     }
 
+    /// @dev See for example AssetGiveaway.sol claimAssets.
     function _claimERC1155(
         address to,
         uint256[] calldata assetIds,
