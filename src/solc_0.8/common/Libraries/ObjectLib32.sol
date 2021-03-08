@@ -1,11 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-// @review
-import "./SafeMathWithRequire.sol";
-
 library ObjectLib32 {
-    using SafeMathWithRequire for uint256;
     enum Operations {ADD, SUB, REPLACE}
     // Constants regarding bin or chunk sizes for balance packing
     uint256 constant TYPES_BITS_SIZE = 32; // Max size of each object
@@ -45,11 +41,11 @@ library ObjectLib32 {
         uint256 objectBalance = 0;
         if (operation == Operations.ADD) {
             objectBalance = getValueInBin(binBalances, index);
-            newBinBalance = writeValueInBin(binBalances, index, objectBalance.add(amount));
+            newBinBalance = writeValueInBin(binBalances, index, objectBalance + amount);
         } else if (operation == Operations.SUB) {
             objectBalance = getValueInBin(binBalances, index);
             require(objectBalance >= amount, "can't substract more than there is");
-            newBinBalance = writeValueInBin(binBalances, index, objectBalance.sub(amount));
+            newBinBalance = writeValueInBin(binBalances, index, objectBalance - amount);
         } else if (operation == Operations.REPLACE) {
             newBinBalance = writeValueInBin(binBalances, index, amount);
         } else {
