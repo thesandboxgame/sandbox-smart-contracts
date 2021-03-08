@@ -4,7 +4,7 @@ pragma solidity 0.8.2;
 import "../interfaces/IERC1155.sol";
 import "../interfaces/IERC1155TokenReceiver.sol";
 
-import "@openzeppelin//contracts/utils/Address.sol";
+import "@openzeppelin//contracts-0.8/utils/Address.sol";
 import "../common/Libraries/ObjectLib32.sol";
 
 import "../interfaces/IERC721.sol";
