@@ -1,4 +1,5 @@
-pragma solidity ^0.5.2;
+//SPDX-License-Identifier: MIT
+pragma solidity 0.8.2;
 
 /**
  * @title ERC721 Non-Fungible Token Standard basic interface
