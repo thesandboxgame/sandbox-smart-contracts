@@ -2,7 +2,6 @@
 pragma solidity 0.7.5;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IAssetAttributesRegistry.sol";
 import "./interfaces/IAssetMinter.sol";
 import "./GemsCatalystsRegistry.sol";
@@ -12,8 +11,6 @@ import "../common/BaseWithStorage/WithMetaTransaction.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetMinter is WithMetaTransaction, IAssetMinter {
-    using SafeMath for uint256;
-
     uint256 private constant GEM_UNIT = 1000000000000000000;
     uint256 private constant CATALYST_UNIT = 1000000000000000000;
 
@@ -124,7 +121,7 @@ contract AssetMinter is WithMetaTransaction, IAssetMinter {
                 require(catalystsQuantities[assets[i].catalystId] != 0, "INVALID_CATALYST_NOT_ENOUGH");
                 uint16 maxGems = _gemsCatalystsRegistry.getMaxGems(assets[i].catalystId);
                 require(assets[i].gemIds.length <= maxGems, "INVALID_GEMS_TOO_MANY");
-                catalystsQuantities[assets[i].catalystId] = catalystsQuantities[assets[i].catalystId].sub(1);
+                catalystsQuantities[assets[i].catalystId] = catalystsQuantities[assets[i].catalystId] - 1;
                 gemsQuantities = _checkGemsQuantities(gemsQuantities, assets[i].gemIds);
             }
             supplies[i] = assets[i].quantity;
@@ -142,7 +139,7 @@ contract AssetMinter is WithMetaTransaction, IAssetMinter {
     {
         for (uint256 i = 0; i < gemIds.length; i++) {
             require(gemsQuantities[gemIds[i]] != 0, "INVALID_GEMS_NOT_ENOUGH");
-            gemsQuantities[gemIds[i]] = gemsQuantities[gemIds[i]].sub(1);
+            gemsQuantities[gemIds[i]] = gemsQuantities[gemIds[i]] - 1;
         }
         return gemsQuantities;
     }
