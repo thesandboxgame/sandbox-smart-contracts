@@ -9,7 +9,7 @@ import "./IERC721Events.sol";
  * @dev see https://eips.ethereum.org/EIPS/eip-721
  */
 /*interface*/
-contract IERC721 is IERC165, IERC721Events {
+interface IERC721 is IERC165, IERC721Events {
     function balanceOf(address owner) external view returns (uint256 balance);
 
     function ownerOf(uint256 tokenId) external view returns (address owner);
