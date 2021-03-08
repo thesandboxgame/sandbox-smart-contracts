@@ -1,5 +1,7 @@
-pragma solidity ^0.5.2;
+//SPDX-License-Identifier: MIT
+pragma solidity 0.8.2;
 
+// @review
 import "./SafeMathWithRequire.sol";
 
 library ObjectLib32 {
