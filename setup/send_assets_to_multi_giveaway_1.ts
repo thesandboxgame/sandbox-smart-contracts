@@ -1,5 +1,5 @@
-import {ethers} from 'ethers';
 import fs from 'fs';
+import {ethers} from 'ethers';
 import hre, {getNamedAccounts} from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {MultiClaim} from '../lib/merkleTreeHelper';
@@ -18,6 +18,7 @@ const func: DeployFunction = async function () {
   const landIdFinish = landIds[-1];
 
   const CLAIM_FILE = 'data/giveaways/multi_giveaway_1/claims_0_hardhat.json';
+  const CONFIG_FILE = 'data/giveaways/multi_giveaway_1/config.ts';
   const sandContract = await deployments.get('Sand');
   const catalystContract = await deployments.get('Catalyst_COMMON');
   const gemContract = await deployments.get('Gem_SPEED');
