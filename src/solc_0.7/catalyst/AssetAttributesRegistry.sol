@@ -23,7 +23,6 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
 
     struct Record {
         uint16 catalystId; // start at 1
-        // @todo start at 1 test compression ?
         uint16[MAX_NUM_GEMS] gemIds;
     }
 

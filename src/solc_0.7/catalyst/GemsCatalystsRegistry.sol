@@ -54,7 +54,6 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction, IGems
         uint256 amount
     ) external override {
         for (uint256 i = 0; i < gemIds.length; i++) {
-            // @todo optimize it by checking adjacent gemIds
             burnGem(from, gemIds[i], amount);
         }
     }
@@ -69,7 +68,6 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction, IGems
         uint256 amount
     ) external override {
         for (uint256 i = 0; i < catalystIds.length; i++) {
-            // @todo optimize it by checking adjacent catalystIds
             burnCatalyst(from, catalystIds[i], amount);
         }
     }
