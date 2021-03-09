@@ -1,7 +1,7 @@
 import {ethers} from 'hardhat';
 import {setupTestGiveaway} from './fixtures';
 import {constants} from 'ethers';
-import {waitFor, expectReceiptEventWithArgs, increaseTime} from '../utils';
+import {waitFor, expectReceiptEventWithArgs} from '../utils';
 import {expect} from '../chai-setup';
 
 import helpers from '../../lib/merkleTreeHelper';

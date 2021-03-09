@@ -193,6 +193,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     });
   }
 
+  // Hardhat does not consistently use the same address for others[0] if all tests are run vs only multiGiveaway
   assignReservedAddressToClaim(testData0);
   assignReservedAddressToClaim(testData1);
 
@@ -308,7 +309,10 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 
   // Single giveaway
   const hashArray = createDataArrayMultiClaim(claims0);
-  await giveawayContractAsAdmin.addNewGiveaway(merkleRootHash0, 1615194000); // TODO: no expiry
+  await giveawayContractAsAdmin.addNewGiveaway(
+    merkleRootHash0,
+    '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
+  ); // no expiry
   allMerkleRoots.push(merkleRootHash0);
   allTrees.push(new MerkleTree(hashArray));
 
@@ -322,7 +326,10 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     allMerkleRoots.push(merkleRootHash1);
     const hashArray2 = createDataArrayMultiClaim(claims1);
     allTrees.push(new MerkleTree(hashArray2));
-    await giveawayContractAsAdmin.addNewGiveaway(merkleRootHash1, 1615194000); // TODO: no expiry
+    await giveawayContractAsAdmin.addNewGiveaway(
+      merkleRootHash1,
+      '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
+    ); // no expiry
   }
 
   return {
