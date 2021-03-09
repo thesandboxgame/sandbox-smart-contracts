@@ -10,7 +10,7 @@ const {calculateClaimableAssetHash} = helpers;
 const zeroAddress = constants.AddressZero;
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe('Asset_Giveaway', function () {
+describe.only('Asset_Giveaway', function () {
   it('User cannot claim when test contract holds zero assets', async function () {
     const options = {
       assetsHolder: true,
@@ -363,27 +363,28 @@ describe('Asset_Giveaway', function () {
     ).to.be.revertedWith('ADMIN_ONLY');
   });
 
-  it('User cannot claim assets after the expiryTime', async function () {
-    const options = {};
-    const setUp = await setupTestGiveaway(options);
-    const {giveawayContract, others, tree, assets} = setUp;
+  // NOT USED BECAUSE NO EXPIRY
+  // it('User cannot claim assets after the expiryTime', async function () {
+  //   const options = {};
+  //   const setUp = await setupTestGiveaway(options);
+  //   const {giveawayContract, others, tree, assets} = setUp;
 
-    const asset = assets[0];
-    const proof = tree.getProof(calculateClaimableAssetHash(asset));
-    const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[0])
-    );
+  //   const asset = assets[0];
+  //   const proof = tree.getProof(calculateClaimableAssetHash(asset));
+  //   const giveawayContractAsUser = await giveawayContract.connect(
+  //     ethers.provider.getSigner(others[0])
+  //   );
 
-    await increaseTime(60 * 60 * 24 * 30 * 4);
+  //   await increaseTime(60 * 60 * 24 * 30 * 4);
 
-    await expect(
-      giveawayContractAsUser.claimAssets(
-        others[0],
-        asset.assetIds,
-        asset.assetValues,
-        proof,
-        asset.salt
-      )
-    ).to.be.revertedWith('CLAIM_PERIOD_IS_OVER');
-  });
+  //   await expect(
+  //     giveawayContractAsUser.claimAssets(
+  //       others[0],
+  //       asset.assetIds,
+  //       asset.assetValues,
+  //       proof,
+  //       asset.salt
+  //     )
+  //   ).to.be.revertedWith('CLAIM_PERIOD_IS_OVER');
+  // });
 });
