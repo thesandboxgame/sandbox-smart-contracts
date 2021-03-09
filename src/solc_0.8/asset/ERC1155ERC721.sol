@@ -1,4 +1,5 @@
 //SPDX-License-Identifier: MIT
+// solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
 import "../interfaces/IERC1155.sol";
@@ -444,6 +445,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         );
     }
 
+    /* solhint-disable code-complexity */
     function _batchTransferFrom(
         address from,
         address to,
@@ -518,6 +520,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
             _packedTokenBalance[to][bin] = balTo;
         }
     }
+
+    /* solhint-enable code-complexity */
 
     function _checkEnoughBalance(
         address from,
@@ -910,16 +914,16 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
             id == 0x0e89341c; // ERC1155 metadata
     }
 
-    bytes4 constant ERC165ID = 0x01ffc9a7;
+    bytes4 internal constant ERC165ID = 0x01ffc9a7;
 
     function checkIsERC1155Receiver(address _contract) internal view returns (bool) {
         bool success;
         bool result;
-        bytes memory call_data = abi.encodeWithSelector(ERC165ID, ERC1155_IS_RECEIVER);
-        // solium-disable-next-line security/no-inline-assembly
+        bytes memory callData = abi.encodeWithSelector(ERC165ID, ERC1155_IS_RECEIVER);
+        // solhint-disable-next-line no-inline-assembly
         assembly {
-            let call_ptr := add(0x20, call_data)
-            let call_size := mload(call_data)
+            let call_ptr := add(0x20, callData)
+            let call_size := mload(callData)
             let output := mload(0x40) // Find empty storage location using "free memory pointer"
             mstore(output, 0x0)
             success := staticcall(10000, _contract, call_ptr, call_size, output, 0x20) // 32 bytes
