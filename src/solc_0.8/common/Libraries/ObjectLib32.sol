@@ -1,11 +1,12 @@
 //SPDX-License-Identifier: MIT
+// solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
 library ObjectLib32 {
     enum Operations {ADD, SUB, REPLACE}
     // Constants regarding bin or chunk sizes for balance packing
-    uint256 constant TYPES_BITS_SIZE = 32; // Max size of each object
-    uint256 constant TYPES_PER_UINT256 = 256 / TYPES_BITS_SIZE; // Number of types per uint256
+    uint256 internal constant TYPES_BITS_SIZE = 32; // Max size of each object
+    uint256 internal constant TYPES_PER_UINT256 = 256 / TYPES_BITS_SIZE; // Number of types per uint256
 
     //
     // Objects and Tokens Functions
