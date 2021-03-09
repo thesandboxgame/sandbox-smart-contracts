@@ -26,7 +26,6 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            // @review
             runs: 1,
           },
         },
