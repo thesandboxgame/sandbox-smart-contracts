@@ -10,7 +10,7 @@ const {calculateClaimableAssetHash} = helpers;
 const zeroAddress = constants.AddressZero;
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe.only('Asset_Giveaway', function () {
+describe('Asset_Giveaway', function () {
   it('User cannot claim when test contract holds zero assets', async function () {
     const options = {
       assetsHolder: true,
