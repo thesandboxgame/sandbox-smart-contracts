@@ -156,7 +156,7 @@ contract AssetUpgrader is WithMetaTransaction, IAssetUpgrader {
     ) internal {
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT"); // Asset (ERC1155ERC721.sol) ensure NFT will return true here and non-NFT will return false
         _burnGems(from, gemIds);
-        _chargeSand(from, gemAdditionFee); // TODO per gems or flat fee ?
+        _chargeSand(from, gemAdditionFee);
         _registry.addGems(assetId, gemIds);
         _transfer(from, to, assetId);
     }
