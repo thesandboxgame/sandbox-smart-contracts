@@ -336,7 +336,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
         // @review Auth !!
-        metaTx = _metaTransactionContracts[msg.sender];
+        metaTx = _isValidMetaTx(msg.sender);
         bool authorized = from == msg.sender ||
             metaTx || isApprovedForAll(from, msg.sender);
 
@@ -415,7 +415,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
         // @review Auth !!
-        bool metaTx = _metaTransactionContracts[msg.sender];
+        bool metaTx = _isValidMetaTx(msg.sender);
         bool authorized = from == msg.sender ||
             metaTx || isApprovedForAll(from, msg.sender);
 
@@ -574,7 +574,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
     ) external {
       // @review Auth !!
         require(
-            msg.sender == sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender],
+            msg.sender == sender || _isValidMetaTx(msg.sender) || _superOperators[msg.sender],
             "!AUTHORIZED"
         );
         require(sender != address(0), "SENDER==0");
@@ -605,7 +605,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
     ) external {
       // @review Auth !!
         require(
-            msg.sender == sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender],
+            msg.sender == sender || _isValidMetaTx(msg.sender) || _superOperators[msg.sender],
             "!AUTHORIZED"
         );
         _setApprovalForAll(sender, operator, approved);
@@ -681,7 +681,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
         // @review Auth !!v
         require(
             msg.sender == sender ||
-                _metaTransactionContracts[msg.sender] || isApprovedForAll(sender, msg.sender), "!AUTHORIZED");
+                _isValidMetaTx(msg.sender) || isApprovedForAll(sender, msg.sender), "!AUTHORIZED");
         require(owner == sender, "OWNER!=SENDER");
         _erc721operators[id] = operator;
         emit Approval(owner, operator, id);
@@ -1017,7 +1017,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
         require(from != address(0), "FROM==0");
         // @review Auth !!
         require(
-            msg.sender == from || _metaTransactionContracts[msg.sender] || isApprovedForAll(from, msg.sender), "");
+            msg.sender == from || _isValidMetaTx(msg.sender) || isApprovedForAll(from, msg.sender), "");
         _burn(from, id, amount);
     }
 
@@ -1029,10 +1029,10 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
       // @review Auth !!
         if ((id & IS_NFT) > 0) {
             require(amount == 1, "AMOUNT!=1");
-            _burnERC721(_metaTransactionContracts[msg.sender] ? from : msg.sender, from, id);
+            _burnERC721(_isValidMetaTx(msg.sender) ? from : msg.sender, from, id);
         } else {
             require(amount > 0 && amount <= MAX_SUPPLY, "INVALID_AMOUNT");
-            _burnERC1155(_metaTransactionContracts[msg.sender] ? from : msg.sender, from, id, uint32(amount));
+            _burnERC1155(_isValidMetaTx(msg.sender) ? from : msg.sender, from, id, uint32(amount));
         }
     }
 
@@ -1086,7 +1086,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
         address to
     ) external returns (uint256 newId) {
       // @review Auth !!
-        bool metaTx = _metaTransactionContracts[msg.sender];
+        bool metaTx = _isValidMetaTx(msg.sender);
         require(msg.sender == sender || metaTx || isApprovedForAll(sender, msg.sender), "!AUTHORIZED");
         return _extractERC721From(metaTx ? sender : msg.sender, sender, id, to);
     }
