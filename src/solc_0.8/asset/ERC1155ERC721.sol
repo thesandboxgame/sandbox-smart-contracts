@@ -113,8 +113,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     /// @notice Enable or disable the ability of `metaTransactionProcessor` to perform meta-tx (metaTransactionProcessor rights).
     /// @param metaTransactionProcessor address that will be given/removed metaTransactionProcessor rights.
     /// @param enabled set whether the metaTransactionProcessor is enabled or disabled.
-    function setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) external {
-        require(msg.sender == _admin, "!ADMIN");
+    function setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) external onlyAdmin() {
         _metaTransactionContracts[metaTransactionProcessor] = enabled;
         emit MetaTransactionProcessor(metaTransactionProcessor, enabled);
     }
