@@ -350,6 +350,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
     ) internal returns (bool metaTx) {
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
+        // @review metaTx !
         metaTx = _metaTransactionContracts[msg.sender];
         bool authorized = from == msg.sender ||
             metaTx ||
@@ -430,6 +431,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
         require(ids.length == values.length, "MISMATCHED_ARR_LEN");
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
+        // @review metaTx !
         bool metaTx = _metaTransactionContracts[msg.sender];
         bool authorized = from == msg.sender ||
             metaTx ||
@@ -589,6 +591,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
         address original,
         address to
     ) external {
+      // @review metaTx !
         require(
             msg.sender == sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender],
             "!AUTHORIZED"
@@ -619,6 +622,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
         address operator,
         bool approved
     ) external {
+      // @review metaTx !
         require(
             msg.sender == sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender],
             "!AUTHORIZED"
@@ -651,7 +655,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
     /// @param operator address of authorized operator.
     /// @return isOperator true if the operator is approved, false if not.
     function isApprovedForAll(address owner, address operator)
-        external
+        public
         view
         override(IERC1155, IERC721)
         returns (bool isOperator)
@@ -693,6 +697,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
     ) external {
         address owner = _ownerOf(id);
         require(sender != address(0), "SENDER==0");
+        // @review metaTx !v
         require(
             msg.sender == sender ||
                 _metaTransactionContracts[msg.sender] ||
@@ -737,6 +742,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
         uint256 id
     ) external override {
         require(_ownerOf(id) == from, "OWNER!=FROM");
+        // @review metaTx !
         bool metaTx = _transferFrom(from, to, id, 1);
         require(
             _checkERC1155AndCallSafeTransfer(metaTx ? from : msg.sender, from, to, id, 1, "", true, false),
@@ -768,6 +774,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
         bytes memory data
     ) public override {
         require(_ownerOf(id) == from, "OWNER!=FROM");
+        // @review metaTx !
         bool metaTx = _transferFrom(from, to, id, 1);
         require(
             _checkERC1155AndCallSafeTransfer(metaTx ? from : msg.sender, from, to, id, 1, data, true, true),
@@ -1034,6 +1041,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
         uint256 amount
     ) external {
         require(from != address(0), "FROM==0");
+        // @review metaTx !
         require(
             msg.sender == from ||
                 _metaTransactionContracts[msg.sender] ||
@@ -1049,6 +1057,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
         uint256 id,
         uint256 amount
     ) internal {
+      // @review metaTx !
         if ((id & IS_NFT) > 0) {
             require(amount == 1, "AMOUNT!=1");
             _burnERC721(_metaTransactionContracts[msg.sender] ? from : msg.sender, from, id);
@@ -1107,6 +1116,7 @@ contract ERC1155ERC721 is SuperOperators, IERC1155, IERC721 {
         uint256 id,
         address to
     ) external returns (uint256 newId) {
+      // @review metaTx !
         bool metaTx = _metaTransactionContracts[msg.sender];
         require(
             msg.sender == sender || metaTx || _superOperators[msg.sender] || _operatorsForAll[sender][msg.sender],
