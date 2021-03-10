@@ -193,9 +193,45 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     });
   }
 
-  // Hardhat does not consistently use the same address for others[0] if all tests are run vs only multiGiveaway
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function assignTestContractAddressesToClaim(dataSet: any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return dataSet.map(async (claim: any) => {
+      if (claim.erc1155) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        claim.erc1155.map(async (asset: any) => {
+          asset.contractAddress = assetContract.address;
+          return asset;
+        });
+      }
+      if (claim.erc721) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        claim.erc721.map(async (land: any) => {
+          land.contractAddress = landContract.address;
+          return land;
+        });
+      }
+      if (claim.erc20) {
+        if (claim.erc20.amounts.length === 1)
+          claim.erc20.contractAddresses = [sandContract.address];
+        if (claim.erc20.amounts.length === 3)
+          claim.erc20.contractAddresses = [
+            sandContract.address,
+            speedGemContract.address,
+            rareCatalystContract.address,
+          ];
+      }
+      return claim;
+    });
+  }
+
+  // To ensure the same address for others[0] for all tests
   assignReservedAddressToClaim(testData0);
   assignReservedAddressToClaim(testData1);
+
+  // To ensure the claim data works for all developers
+  assignTestContractAddressesToClaim(testData0);
+  assignTestContractAddressesToClaim(testData1);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let dataWithIds0: any = testData0;
