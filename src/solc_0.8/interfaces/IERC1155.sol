@@ -1,4 +1,6 @@
-pragma solidity ^0.5.2;
+//SPDX-License-Identifier: MIT
+// solhint-disable-next-line compiler-version
+pragma solidity 0.8.2;
 
 /**
     @title ERC-1155 Multi Token Standard
@@ -15,8 +17,8 @@ interface IERC1155 {
         uint256[] ids,
         uint256[] values
     );
-
-    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
+    // duplicate event sig with IERC721 ApprovalForAll
+    // event ApprovalForAll(address indexed owner, address indexed operator, bool approved);
 
     event URI(string value, uint256 indexed id);
 
