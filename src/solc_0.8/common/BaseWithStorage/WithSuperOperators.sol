@@ -1,4 +1,6 @@
-pragma solidity ^0.5.2;
+//SPDX-License-Identifier: MIT
+// solhint-disable-next-line compiler-version
+pragma solidity 0.8.2;
 
 import "./WithAdmin.sol";
 
