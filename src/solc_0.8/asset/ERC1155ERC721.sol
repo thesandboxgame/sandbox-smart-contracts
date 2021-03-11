@@ -12,7 +12,6 @@ import "../interfaces/IERC721TokenReceiver.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 
-
 // @review Should we switch to using _msgSender() everywhere ?
 contract ERC1155ERC721 is WithMetaTransaction, WithSuperOperators, IERC1155, IERC721 {
     using Address for address;
@@ -338,8 +337,7 @@ contract ERC1155ERC721 is WithMetaTransaction, WithSuperOperators, IERC1155, IER
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
         metaTx = _isValidMetaTx(from);
-        bool authorized = from == msg.sender ||
-            metaTx || isApprovedForAll(from, msg.sender);
+        bool authorized = from == msg.sender || metaTx || isApprovedForAll(from, msg.sender);
 
         if (id & IS_NFT > 0) {
             require(authorized || _erc721operators[id] == msg.sender, "OPERATOR_!AUTH");
@@ -416,8 +414,7 @@ contract ERC1155ERC721 is WithMetaTransaction, WithSuperOperators, IERC1155, IER
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
         bool metaTx = _isValidMetaTx(from);
-        bool authorized = from == msg.sender ||
-            metaTx || isApprovedForAll(from, msg.sender);
+        bool authorized = from == msg.sender || metaTx || isApprovedForAll(from, msg.sender);
 
         _batchTransferFrom(from, to, ids, values, authorized);
         emit TransferBatch(metaTx ? from : msg.sender, from, to, ids, values);
@@ -572,10 +569,7 @@ contract ERC1155ERC721 is WithMetaTransaction, WithSuperOperators, IERC1155, IER
         address original,
         address to
     ) external {
-        require(
-            _isAuthorized(sender) || _superOperators[msg.sender],
-            "!AUTHORIZED"
-        );
+        require(_isAuthorized(sender) || _superOperators[msg.sender], "!AUTHORIZED");
         require(sender != address(0), "SENDER==0");
         require(to != address(0), "TO==0");
         address current = _creatorship[original];
@@ -602,10 +596,7 @@ contract ERC1155ERC721 is WithMetaTransaction, WithSuperOperators, IERC1155, IER
         address operator,
         bool approved
     ) external {
-        require(
-            _isAuthorized(sender) || _superOperators[msg.sender],
-            "!AUTHORIZED"
-        );
+        require(_isAuthorized(sender) || _superOperators[msg.sender], "!AUTHORIZED");
         _setApprovalForAll(sender, operator, approved);
     }
 
@@ -634,9 +625,11 @@ contract ERC1155ERC721 is WithMetaTransaction, WithSuperOperators, IERC1155, IER
     /// @param operator address of authorized operator.
     /// @return isOperator true if the operator is approved, false if not.
     function isApprovedForAll(address owner, address operator)
-        external
         public
+        view
+        override(IERC1155, IERC721)
         returns (bool isOperator)
+    {
         require(owner != address(0), "OWNER==0");
         require(operator != address(0), "OPERATOR==0");
         return _operatorsForAll[owner][operator] || _superOperators[operator];
@@ -674,8 +667,7 @@ contract ERC1155ERC721 is WithMetaTransaction, WithSuperOperators, IERC1155, IER
     ) external {
         address owner = _ownerOf(id);
         require(sender != address(0), "SENDER==0");
-        require(
-            _isAuthorized(sender) || isApprovedForAll(sender, msg.sender), "!AUTHORIZED");
+        require(_isAuthorized(sender) || isApprovedForAll(sender, msg.sender), "!AUTHORIZED");
         require(owner == sender, "OWNER!=SENDER");
         _erc721operators[id] = operator;
         emit Approval(owner, operator, id);
@@ -1007,8 +999,7 @@ contract ERC1155ERC721 is WithMetaTransaction, WithSuperOperators, IERC1155, IER
         uint256 amount
     ) external {
         require(from != address(0), "FROM==0");
-        require(
-            _isAuthorized(from) || isApprovedForAll(from, msg.sender), "");
+        require(_isAuthorized(from) || isApprovedForAll(from, msg.sender), "");
         _burn(from, id, amount);
     }
 
@@ -1077,12 +1068,13 @@ contract ERC1155ERC721 is WithMetaTransaction, WithSuperOperators, IERC1155, IER
         uint256 id,
         address to
     ) external returns (uint256 newId) {
-        bool metaTx = _metaTransactionContracts[msg.sender];
-        require(
-            msg.sender == sender || metaTx || _superOperators[msg.sender] || _operatorsForAll[sender][msg.sender],
+        bool metaTx = _isValidMetaTx(sender);
+        require(msg.sender == sender || metaTx || isApprovedForAll(sender, msg.sender), "!AUTHORIZED");
         return _extractERC721From(metaTx ? sender : msg.sender, sender, id, to);
     }
 
+    /// @dev See extractERC721From
+    function _extractERC721From(
         address operator,
         address sender,
         uint256 id,
@@ -1101,7 +1093,7 @@ contract ERC1155ERC721 is WithMetaTransaction, WithSuperOperators, IERC1155, IER
     /// @dev Check if address from is authorized to perform an action.
     /// @param from The address to check from.
     /// @return whether authorized or not.
-    function _isAuthorized(address from) internal view returns(bool) {
+    function _isAuthorized(address from) internal view returns (bool) {
         require(msg.sender == from || _isValidMetaTx(from), "AUTH_ACCESS_DENIED");
         return true;
     }
