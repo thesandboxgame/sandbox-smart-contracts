@@ -44,3 +44,4 @@ const func: DeployFunction = async function (hre) {
 export default func;
 func.tags = ['OldGems', 'OldGems_deploy'];
 func.dependencies = ['Sand'];
+func.skip = async (hre) => hre.network.name !== 'hardhat'; // not meant to be redeployed

@@ -66,3 +66,4 @@ export default func;
 func.tags = ['OldGems'];
 func.dependencies = ['OldGems_deploy'];
 func.runAtTheEnd = true;
+func.skip = async (hre) => hre.network.name !== 'hardhat'; // not meant to be redeployed

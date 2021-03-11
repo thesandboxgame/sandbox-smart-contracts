@@ -7,7 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {
     deployer,
-    commonMinterAdmin,
+    defaultMinterAdmin,
     mintingFeeCollector,
   } = await getNamedAccounts();
 
@@ -15,27 +15,28 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const Sand = await deployments.get('Sand');
 
   // constructor(ERC1155ERC721 asset, ERC20 sand, uint256 feePerCopy, address admin, address feeReceiver)
-  const CommonMinter = await deploy('CommonMinter', {
+  const DefaultMinter = await deploy('DefaultMinter', {
+    contract: 'CommonMinter',
     from: deployer,
     args: [
       Asset.address,
       Sand.address,
       0,
-      commonMinterAdmin,
+      defaultMinterAdmin,
       mintingFeeCollector,
     ],
     skipIfAlreadyDeployed: true,
     log: true,
   });
 
-  const isBouncer = await read('Asset', 'isBouncer', CommonMinter.address);
+  const isBouncer = await read('Asset', 'isBouncer', DefaultMinter.address);
   if (!isBouncer) {
     const bouncerAdmin = await read('Asset', 'getBouncerAdmin');
     await execute(
       'Asset',
       {from: bouncerAdmin, log: true},
       'setBouncer',
-      CommonMinter.address,
+      DefaultMinter.address,
       true
     );
   }
@@ -43,7 +44,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const isSandSuperOperator = await read(
     'Sand',
     'isSuperOperator',
-    CommonMinter.address
+    DefaultMinter.address
   );
   if (!isSandSuperOperator) {
     const sandAdmin = await read('Sand', 'getAdmin');
@@ -51,12 +52,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       'Sand',
       {from: sandAdmin, log: true},
       'setSuperOperator',
-      CommonMinter.address,
+      DefaultMinter.address,
       true
     );
   }
 };
 export default func;
-func.tags = ['CommonMinter', 'CommonMinter_deploy'];
+func.tags = ['DefaultMinter', 'DefaultMinter_deploy'];
 func.dependencies = ['Asset_deploy', 'Sand_deploy'];
-func.skip = async (hre) => hre.network.name !== 'hardhat';
