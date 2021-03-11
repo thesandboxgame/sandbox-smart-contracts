@@ -1,9 +1,11 @@
 import {ethers} from 'hardhat';
 import {setupERC20BasicApproveExtension} from './fixtures';
 import {BigNumber, constants, Contract} from 'ethers';
-import {toWei} from '../utils';
+import {toWei, waitFor} from '../utils';
 import {expect} from '../chai-setup';
 import {transferSand} from '../catalyst/utils';
+import MerkleTree = require('../../lib/merkleTree');
+import MerkleTreeHelper from '../../lib/merkleTreeHelper';
 
 const zeroAddress = constants.AddressZero;
 
@@ -322,32 +324,61 @@ describe('ERC20BasicApproveExtension', function () {
   });
   it('ApproveAndCall calling buyLandWithSand', async function () {
     const {
-      estateSaleContract,
+      lands,
+      landSaleContract,
       sandContractAsUser0,
       sandContract,
       user0,
     } = await setupERC20BasicApproveExtension();
-    const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
-    const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
-    const encodedABI = await estateSaleContract.populateTransaction.buyLandWithSand(
-      user0
-    );
-    if (encodedABI.data) {
-      const function4BytesId = encodedABI.data.substring(2, 10);
-      const paddedMsgSender = zeroPadding(user0.substring(2));
-      const paddedZeros = zeroPadding('0');
-      const data = `${function4BytesId}${paddedMsgSender}${paddedZeros}`;
-      await transferSand(sandContract, user0, totalSandBalance);
+    const emptyReferral = '0x';
+    const secret =
+      '0x4467363716526536535425451427798982881775318563547751090997863683';
+    const saltedLands = MerkleTreeHelper.saltLands(lands, secret);
+    const landHashArray = MerkleTreeHelper.createDataArray(saltedLands);
+    const land = saltedLands
+      .filter((l: any) => l.size === 6)
+      .find((l: any) => !l.reserved);
+    expect(land).to.not.be.equal(undefined);
+    if (land !== undefined) {
+      const tree = new MerkleTree(landHashArray);
+      const proof = tree.getProof(MerkleTreeHelper.calculateLandHash(land));
+      const totalSandBalance = BigNumber.from(100000).mul(
+        `1000000000000000000`
+      );
+      const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
+      const encodedABI = await landSaleContract.populateTransaction.buyLandWithSand(
+        user0,
+        user0,
+        zeroAddress,
+        land.x,
+        land.y,
+        land.size,
+        land.price,
+        land.price,
+        land.salt,
+        [],
+        proof,
+        emptyReferral
+      );
+      expect(encodedABI.data).to.not.be.equal(undefined);
+      if (encodedABI.data) {
+        const data = encodedABI.data;
+        await transferSand(sandContract, user0, totalSandBalance);
 
-      const txValue = toWei(0);
-      expect(
-        sandContractAsUser0.approveAndCall(
-          estateSaleContract.address,
-          approvalAmount,
-          Buffer.from(data, 'hex'),
-          {value: txValue}
-        )
-      ).to.be.revertedWith('REVERT_ON_CALL');
+        const txValue = toWei(0);
+        await waitFor(
+          sandContractAsUser0.approveAndCall(
+            landSaleContract.address,
+            approvalAmount,
+            Buffer.from(data, 'hex'),
+            {value: txValue}
+          )
+        );
+        // expect(
+
+        // ).to.be.revertedWith('REVERT_ON_CALL');
+      }
+      // const land = saltedLands[1256];
     }
   });
   it('PaidCall should fail for input data too short', async function () {

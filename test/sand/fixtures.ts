@@ -31,13 +31,13 @@ export const setupERC20BasicApproveExtension = deployments.createFixture(
     const mockERC20BasicApprovalTarget: Contract = await ethers.getContract(
       'MockERC20BasicApprovalTarget'
     );
-    const estateSaleContract: Contract = await ethers.getContract(
-      'EstateSaleWithFee'
-    );
-    const landSaleName = 'LandPreSale_5';
-    // const landSaleContract: Contract = await ethers.getContract(landSaleName);
+    const landSaleName = 'LandPreSale_5_16';
+    const landSaleContract: Contract = await ethers.getContract(landSaleName);
+    const deploymentData = await deployments.get(landSaleName);
+    const lands = deploymentData.linkedData;
     return {
-      estateSaleContract,
+      lands,
+      landSaleContract,
       mockERC20BasicApprovalTarget,
       emptyContract,
       sandContractAsUser0,
