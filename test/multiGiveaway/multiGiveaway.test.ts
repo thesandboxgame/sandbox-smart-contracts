@@ -1,7 +1,7 @@
 import {ethers} from 'hardhat';
 import {setupTestGiveaway} from './fixtures';
 import {constants, BigNumber} from 'ethers';
-import {waitFor, expectReceiptEventWithArgs, increaseTime} from '../utils';
+import {waitFor, expectReceiptEventWithArgs} from '../utils';
 import {expect} from '../chai-setup';
 
 import helpers from '../../lib/merkleTreeHelper';
@@ -659,44 +659,45 @@ describe('Multi_Giveaway', function () {
       ).to.be.revertedWith('INVALID_TO_ZERO_ADDRESS');
     });
 
-    it('User cannot claim after the expiryTime', async function () {
-      const options = {};
-      const setUp = await setupTestGiveaway(options);
-      const {
-        giveawayContract,
-        others,
-        allTrees,
-        allClaims,
-        allMerkleRoots,
-      } = setUp;
+    // NOT USED BECAUSE NO EXPIRY
+    // it('User cannot claim after the expiryTime', async function () {
+    //   const options = {};
+    //   const setUp = await setupTestGiveaway(options);
+    //   const {
+    //     giveawayContract,
+    //     others,
+    //     allTrees,
+    //     allClaims,
+    //     allMerkleRoots,
+    //   } = setUp;
 
-      const userProofs = [];
-      const userTrees = [];
-      userTrees.push(allTrees[0]);
-      const userClaims = [];
-      const claim = allClaims[0][0];
-      userClaims.push(claim);
-      for (let i = 0; i < userClaims.length; i++) {
-        userProofs.push(
-          userTrees[i].getProof(calculateMultiClaimHash(userClaims[i]))
-        );
-      }
-      const userMerkleRoots = [];
-      userMerkleRoots.push(allMerkleRoots[0]);
-      const giveawayContractAsUser = await giveawayContract.connect(
-        ethers.provider.getSigner(others[0])
-      );
+    //   const userProofs = [];
+    //   const userTrees = [];
+    //   userTrees.push(allTrees[0]);
+    //   const userClaims = [];
+    //   const claim = allClaims[0][0];
+    //   userClaims.push(claim);
+    //   for (let i = 0; i < userClaims.length; i++) {
+    //     userProofs.push(
+    //       userTrees[i].getProof(calculateMultiClaimHash(userClaims[i]))
+    //     );
+    //   }
+    //   const userMerkleRoots = [];
+    //   userMerkleRoots.push(allMerkleRoots[0]);
+    //   const giveawayContractAsUser = await giveawayContract.connect(
+    //     ethers.provider.getSigner(others[0])
+    //   );
 
-      await increaseTime(60 * 60 * 24 * 30 * 4);
+    //   await increaseTime(60 * 60 * 24 * 30 * 4);
 
-      await expect(
-        giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
-          userMerkleRoots,
-          userClaims,
-          userProofs
-        )
-      ).to.be.revertedWith('CLAIM_PERIOD_IS_OVER');
-    });
+    //   await expect(
+    //     giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
+    //       userMerkleRoots,
+    //       userClaims,
+    //       userProofs
+    //     )
+    //   ).to.be.revertedWith('CLAIM_PERIOD_IS_OVER');
+    // });
   });
 
   describe('Multi_Giveaway_two_giveaways', function () {
