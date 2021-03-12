@@ -2,7 +2,7 @@
 pragma solidity 0.5.9;
 
 import "./ERC721BaseToken.sol";
-
+import "hardhat/console.sol";
 contract LandBaseToken is ERC721BaseToken {
     // Our grid is 408 x 408 lands
     uint256 internal constant GRID_SIZE = 408;
@@ -149,7 +149,7 @@ contract LandBaseToken is ERC721BaseToken {
             require(_owners[id] == 0, "Already minted");
             emit Transfer(address(0), to, id);
         }
-
+        console.log(quadId);
         _owners[quadId] = uint256(to);
         _numNFTPerAddress[to] += size * size;
 

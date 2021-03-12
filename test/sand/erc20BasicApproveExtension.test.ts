@@ -324,12 +324,17 @@ describe('ERC20BasicApproveExtension', function () {
   });
   it('ApproveAndCall calling buyLandWithSand', async function () {
     const {
+      landContract,
       lands,
       landSaleContract,
       sandContractAsUser0,
       sandContract,
       user0,
     } = await setupERC20BasicApproveExtension();
+    const LAYER_6x6 = BigNumber.from(
+      '0x0200000000000000000000000000000000000000000000000000000000000000'
+    );
+    const GRID_SIZE = 408;
     const emptyReferral = '0x';
     const secret =
       '0x4467363716526536535425451427798982881775318563547751090997863683';
@@ -338,8 +343,10 @@ describe('ERC20BasicApproveExtension', function () {
     const land = saltedLands
       .filter((l: any) => l.size === 6)
       .find((l: any) => !l.reserved);
+
     expect(land).to.not.be.equal(undefined);
     if (land !== undefined) {
+      const quadId = LAYER_6x6.add(BigNumber.from(land.x + land.y * GRID_SIZE));
       const tree = new MerkleTree(landHashArray);
       const proof = tree.getProof(MerkleTreeHelper.calculateLandHash(land));
       const totalSandBalance = BigNumber.from(100000).mul(
@@ -373,6 +380,8 @@ describe('ERC20BasicApproveExtension', function () {
             {value: txValue}
           )
         );
+        // const landOwner = await landContract.callStatic.ownerOf(quadId);
+        // expect(landOwner).to.equal(user0);
       }
     }
   });
