@@ -1001,13 +1001,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         emit TransferSingle(operator, from, address(0), id, 1);
     }
 
-    /// @notice Burns `amount` tokens of type `id`.
-    /// @param id token type which will be burnt.
-    /// @param amount amount of token to burn.
-    function burn(uint256 id, uint256 amount) external {
-        _burn(msg.sender, id, amount);
-    }
-
     /// @notice Burns `amount` tokens of type `id` from `from`.
     /// @param from address whose token is to be burnt.
     /// @param id token type which will be burnt.
