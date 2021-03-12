@@ -5,7 +5,7 @@ import {toWei, waitFor} from '../utils';
 import {expect} from '../chai-setup';
 import {transferSand} from '../catalyst/utils';
 import MerkleTree = require('../../lib/merkleTree');
-import MerkleTreeHelper from '../../lib/merkleTreeHelper';
+import MerkleTreeHelper, {SaltedSaleLandInfo} from '../../lib/merkleTreeHelper';
 
 const zeroAddress = constants.AddressZero;
 
@@ -341,8 +341,8 @@ describe('ERC20BasicApproveExtension', function () {
     const saltedLands = MerkleTreeHelper.saltLands(lands, secret);
     const landHashArray = MerkleTreeHelper.createDataArray(saltedLands);
     const land = saltedLands
-      .filter((l: any) => l.size === 6)
-      .find((l: any) => !l.reserved);
+      .filter((l: SaltedSaleLandInfo) => l.size === 6)
+      .find((l: SaltedSaleLandInfo) => !l.reserved);
 
     expect(land).to.not.be.equal(undefined);
     if (land !== undefined) {
@@ -380,8 +380,8 @@ describe('ERC20BasicApproveExtension', function () {
             {value: txValue}
           )
         );
-        // const landOwner = await landContract.callStatic.ownerOf(quadId);
-        // expect(landOwner).to.equal(user0);
+        const landOwner = await landContract.callStatic.ownerOf(quadId);
+        expect(landOwner).to.equal(user0);
       }
     }
   });
