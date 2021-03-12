@@ -4719,10 +4719,10 @@ hardhat-contract-sizer@^2.0.2:
     cli-table3 "^0.6.0"
     colors "^1.4.0"
 
-hardhat-deploy@^0.7.0-beta.44:
-  version "0.7.0-beta.44"
-  resolved "https://registry.yarnpkg.com/hardhat-deploy/-/hardhat-deploy-0.7.0-beta.44.tgz#e03eb60765d4ecc3711dc7aadaba60c64b1d381c"
-  integrity sha512-eIM8RrLDgD12wINTdduYshxqNP/uz9qMCgao37jl6iiZ2LwHkNTL/X+RtTVfq/vS7bvLW7qpjymHJiak5rd1Pg==
+hardhat-deploy@^0.7.0-beta.48:
+  version "0.7.0-beta.48"
+  resolved "https://registry.yarnpkg.com/hardhat-deploy/-/hardhat-deploy-0.7.0-beta.48.tgz#33384aaca1f170c9cd162d9c0f0bda1e59ab01fb"
+  integrity sha512-Wn8xRpQdjrNf4fUHdx8ik0/qzccpdn9Ghi3sM7JYZ06/EYM1T48358Dv2MZWZmfI+1ZTlBaA9cLyN1R21+3yUQ==
   dependencies:
     "@ethersproject/abi" "^5.0.2"
     "@ethersproject/abstract-signer" "^5.0.2"

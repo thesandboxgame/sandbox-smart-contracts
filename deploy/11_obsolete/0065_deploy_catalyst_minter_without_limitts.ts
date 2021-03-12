@@ -40,7 +40,7 @@ const func: DeployFunction = async function (hre) {
     bakedMintData.push(bakedData);
   }
 
-  const catalystMinter = await deploy('SandboxMinter', {
+  const sandboxMinter = await deploy('SandboxMinter', {
     contract: 'CatalystMinter',
     from: deployer,
     log: true,
@@ -59,7 +59,7 @@ const func: DeployFunction = async function (hre) {
     ],
   });
 
-  const isBouncer = await read('Asset', 'isBouncer', catalystMinter.address);
+  const isBouncer = await read('Asset', 'isBouncer', sandboxMinter.address);
   if (!isBouncer) {
     console.log('setting SandboxMinter as Asset bouncer');
     const currentBouncerAdmin = await read('Asset', 'getBouncerAdmin');
@@ -68,14 +68,14 @@ const func: DeployFunction = async function (hre) {
         'Asset',
         {from: currentBouncerAdmin, log: true},
         'setBouncer',
-        catalystMinter.address,
+        sandboxMinter.address,
         true
       )
     );
   }
 
   const currentMinter = await read('CatalystRegistry', 'getMinter');
-  if (currentMinter.toLowerCase() != catalystMinter.address.toLowerCase()) {
+  if (currentMinter.toLowerCase() != sandboxMinter.address.toLowerCase()) {
     console.log('setting SandboxMinter as CatalystRegistry minter');
     const currentRegistryAdmin = await read('CatalystRegistry', 'getAdmin');
     await catchUnknownSigner(
@@ -83,7 +83,7 @@ const func: DeployFunction = async function (hre) {
         'CatalystRegistry',
         {from: currentRegistryAdmin, log: true},
         'setMinter',
-        catalystMinter.address
+        sandboxMinter.address
       )
     );
   }
@@ -111,10 +111,10 @@ const func: DeployFunction = async function (hre) {
     }
   }
 
-  await setSuperOperatorFor('Sand', catalystMinter.address);
-  await setSuperOperatorFor('Gem', catalystMinter.address);
-  await setSuperOperatorFor('Asset', catalystMinter.address);
-  await setSuperOperatorFor(`Catalyst`, catalystMinter.address);
+  await setSuperOperatorFor('Sand', sandboxMinter.address);
+  await setSuperOperatorFor('Gem', sandboxMinter.address);
+  await setSuperOperatorFor('Asset', sandboxMinter.address);
+  await setSuperOperatorFor(`Catalyst`, sandboxMinter.address);
 };
 export default func;
 func.tags = ['SandboxMinter', 'SandboxMinter_setup', 'SandboxMinter_deploy'];

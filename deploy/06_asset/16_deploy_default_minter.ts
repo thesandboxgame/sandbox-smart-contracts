@@ -3,7 +3,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy, read, execute} = deployments;
+  const {deploy, read, execute, catchUnknownSigner} = deployments;
 
   const {
     deployer,
@@ -32,12 +32,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const isBouncer = await read('Asset', 'isBouncer', DefaultMinter.address);
   if (!isBouncer) {
     const bouncerAdmin = await read('Asset', 'getBouncerAdmin');
-    await execute(
-      'Asset',
-      {from: bouncerAdmin, log: true},
-      'setBouncer',
-      DefaultMinter.address,
-      true
+    await await catchUnknownSigner(
+      execute(
+        'Asset',
+        {from: bouncerAdmin, log: true},
+        'setBouncer',
+        DefaultMinter.address,
+        true
+      )
     );
   }
 
@@ -48,12 +50,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   if (!isSandSuperOperator) {
     const sandAdmin = await read('Sand', 'getAdmin');
-    await execute(
-      'Sand',
-      {from: sandAdmin, log: true},
-      'setSuperOperator',
-      DefaultMinter.address,
-      true
+    await catchUnknownSigner(
+      execute(
+        'Sand',
+        {from: sandAdmin, log: true},
+        'setSuperOperator',
+        DefaultMinter.address,
+        true
+      )
     );
   }
 };
