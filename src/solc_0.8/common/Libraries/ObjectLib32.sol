@@ -12,10 +12,12 @@ library ObjectLib32 {
     // Objects and Tokens Functions
     //
 
-    /// @dev Return the bin number and index within that bin where ID is
-    /// @param tokenId Object type
-    /// @return bin Bin number.
-    /// @return index ID's index within that bin.
+    /**
+     * @dev Return the bin number and index within that bin where ID is
+     * @param tokenId Object type
+     * @return bin Bin number
+     * @return index ID's index within that bin
+     */
     function getTokenBinIndex(uint256 tokenId) internal pure returns (uint256 bin, uint256 index) {
         bin = (tokenId * TYPES_BITS_SIZE) / 256;
         index = tokenId % TYPES_PER_UINT256;

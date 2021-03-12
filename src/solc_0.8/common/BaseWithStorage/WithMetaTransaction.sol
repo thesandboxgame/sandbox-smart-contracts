@@ -8,7 +8,7 @@ contract WithMetaTransaction is WithAdmin {
     uint8 internal constant METATX_SANDBOX = 1;
     uint8 internal constant METATX_2771 = 2;
 
-    mapping(address => uint8) internal _metaTransactionContracts;
+    mapping(address => uint8) internal _metaTransactionProcessors;
 
     /// @dev Emits when a meta transaction processor is enabled / disabled.
     /// @param metaTransactionProcessor The address being enabled / disabled.
@@ -20,14 +20,8 @@ contract WithMetaTransaction is WithAdmin {
     /// @param metaTransactionProcessor The address that will have metaTransactionProcessor rights
     /// granted / revoked.
     /// @param processorType The metaTransactionProcessor type to set.
-    function setMetaTransactionProcessor(address metaTransactionProcessor, uint8 processorType) public {
-        require(msg.sender == _admin, "ADMIN_ACCESS_DENIED");
-        _setMetaTransactionProcessor(metaTransactionProcessor, processorType);
-    }
-
-    /// @dev See setMetaTransactionProcessor
-    function _setMetaTransactionProcessor(address metaTransactionProcessor, uint8 processorType) internal {
-        _metaTransactionContracts[metaTransactionProcessor] = processorType;
+    function setMetaTransactionProcessor(address metaTransactionProcessor, uint8 processorType) public onlyAdmin() {
+        _metaTransactionProcessors[metaTransactionProcessor] = processorType;
         emit MetaTransactionProcessor(metaTransactionProcessor, processorType);
     }
 
@@ -35,7 +29,7 @@ contract WithMetaTransaction is WithAdmin {
     /// @param who The address to query.
     /// @return The type of metatx processor (0 for none).
     function getMetaTransactionProcessorType(address who) external view returns (uint8) {
-        return _metaTransactionContracts[who];
+        return _metaTransactionProcessors[who];
     }
 
     // --------------------------------------------------------------------------------
@@ -46,31 +40,23 @@ contract WithMetaTransaction is WithAdmin {
     /// @param forwarder The address to query.
     /// @return whether or not forwarder is trusted.
     function isTrustedForwarder(address forwarder) public view returns (bool) {
-        return _metaTransactionContracts[forwarder] == METATX_2771;
+        return _metaTransactionProcessors[forwarder] == METATX_2771;
     }
 
     /// @dev Decide which sender address to use for this call.
     /// If the call came through our trusted forwarder, return the original sender.
     /// Otherwise, return `msg.sender`.
+    /// should be used in the contract anywhere instead of msg.sender !
     /// @return ret The sender of this call.
 
     function _msgSender() internal view virtual returns (address payable ret) {
         if (isTrustedForwarder(msg.sender)) {
-            return _forceMsgSender();
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                ret := shr(96, calldataload(sub(calldatasize(), 20)))
+            }
         } else {
             return payable(msg.sender);
-        }
-    }
-
-    /// @dev Get the actual sender of call.
-    /// if the call came through our trusted forwarder, return the original sender.
-    /// otherwise, return `msg.sender`.
-    /// should be used in the contract anywhere instead of msg.sender
-    /// @return ret The sender of this call.
-    function _forceMsgSender() internal view virtual returns (address payable ret) {
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            ret := shr(96, calldataload(sub(calldatasize(), 20)))
         }
     }
 
@@ -78,12 +64,12 @@ contract WithMetaTransaction is WithAdmin {
     /// @param from The address passed as either "from" or "sender" to the func which called this one.
     /// @return Whether this is a valid metaTransaction.
     function _isValidMetaTx(address from) internal view returns (bool) {
-        uint256 processorType = _metaTransactionContracts[msg.sender];
+        uint256 processorType = _metaTransactionProcessors[msg.sender];
         if (msg.sender == from || processorType == 0) {
             return false;
         }
         if (processorType == METATX_2771) {
-            if (from != _forceMsgSender()) {
+            if (from != _msgSender()) {
                 return false;
             } else {
                 return true;
