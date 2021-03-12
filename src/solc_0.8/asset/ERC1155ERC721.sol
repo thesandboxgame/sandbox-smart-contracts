@@ -1061,14 +1061,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     }
 
     /// @notice Extracts an EIP-721 NFT from an EIP-1155 token.
-    /// @param id the token type to extract from.
-    /// @param to address which will receive the token.
-    /// @return newId the id of the newly minted NFT.
-    function extractERC721(uint256 id, address to) external returns (uint256 newId) {
-        return _extractERC721From(msg.sender, msg.sender, id, to);
-    }
-
-    /// @notice Extracts an EIP-721 NFT from an EIP-1155 token.
     /// @param sender address which own the token to be extracted.
     /// @param id the token type to extract from.
     /// @param to address which will receive the token.
