@@ -9,7 +9,7 @@ contract MockERC20BasicApprovalTarget {
         return sender;
     }
 
-    function revertOnCall(address sender) external pure {
+    function revertOnCall() external pure {
         revert("REVERT_ON_CALL");
     }
 }
