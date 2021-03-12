@@ -356,7 +356,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     ) internal returns (bool metaTx) {
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
-        metaTx = _is2771MetaTx(sender);
+        metaTx = _is2771MetaTx(from);
         bool authorized = _isAuthorized(from) || isApprovedForAll(from, msg.sender);
 
         if (id & IS_NFT > 0) {
@@ -1029,10 +1029,10 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     ) internal {
         if ((id & IS_NFT) > 0) {
             require(amount == 1, "AMOUNT!=1");
-            _burnERC721(_metaTransactionContracts[msg.sender] ? from : msg.sender, from, id);
+            _burnERC721(_metaTransactionProcessors[msg.sender] ? from : msg.sender, from, id);
         } else {
             require(amount > 0 && amount <= MAX_SUPPLY, "INVALID_AMOUNT");
-            _burnERC1155(_metaTransactionContracts[msg.sender] ? from : msg.sender, from, id, uint32(amount));
+            _burnERC1155(_metaTransactionProcessors[msg.sender] ? from : msg.sender, from, id, uint32(amount));
         }
     }
 
@@ -1114,14 +1114,15 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         return true;
     }
 
-    function _msgSender() internal view virtual override returns (address sender, bool trusted) {
-        trusted = isTrustedForwarder(msg.sender);
+    function _msgSender() internal view returns (address sender, bool trusted) {
+        trusted = _metaTransactionProcessors[msg.sender] == true;
         if (trusted) {
+            // solhint-disable-next-line no-inline-assembly
             assembly {
                 sender := shr(96, calldataload(sub(calldatasize(), 20)))
             }
         } else {
-            return msg.sender;
+            return (msg.sender, trusted);
         }
     }
 
