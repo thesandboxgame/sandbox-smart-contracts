@@ -440,22 +440,22 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     ) internal returns (uint256 id, uint256 storageId) {
         uint32 idVersion;
         uint256 gameId;
-        uint256 storageId;
+        uint256 strgId;
         if (isCreation) {
             idVersion = 1;
             gameId = _generateGameId(from, subId, idVersion);
-            storageId = _storageId(gameId);
-            require(_owners[storageId] == 0, "STORAGE_ID_REUSE_FORBIDDEN");
+            strgId = _storageId(gameId);
+            require(_owners[strgId] == 0, "STORAGE_ID_REUSE_FORBIDDEN");
         } else {
             idVersion = version;
             gameId = _generateGameId(from, subId, idVersion);
-            storageId = _storageId(gameId);
+            strgId = _storageId(gameId);
         }
 
-        _owners[storageId] = (uint256(idVersion) << 200) + uint256(to);
+        _owners[strgId] = (uint256(idVersion) << 200) + uint256(to);
         _numNFTPerAddress[to]++;
         emit Transfer(address(0), to, gameId);
-        return (gameId, storageId);
+        return (gameId, strgId);
     }
 
     /// @dev Allow token owner to set game editors.
