@@ -292,6 +292,36 @@ describe('ERC20BasicApproveExtension', function () {
       );
     }
   });
+  it('ApproveAndCall with only one parameter should fail', async function () {
+    const {
+      mockERC20BasicApprovalTarget,
+      sandContractAsUser0,
+      sandContract,
+      user0,
+    } = await setupERC20BasicApproveExtension();
+    const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
+    const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
+    const encodedABI = await mockERC20BasicApprovalTarget.populateTransaction.logOnCall(
+      user0
+    );
+    if (encodedABI.data) {
+      const function4BytesId = encodedABI.data.substring(2, 10);
+      const paddedMsgSender = zeroPadding(user0.substring(2));
+      const data = `${function4BytesId}${paddedMsgSender}`;
+      await transferSand(sandContract, user0, totalSandBalance);
+
+      const txValue = toWei(0);
+
+      expect(
+        sandContractAsUser0.approveAndCall(
+          mockERC20BasicApprovalTarget.address,
+          approvalAmount,
+          Buffer.from(data, 'hex'),
+          {value: txValue}
+        )
+      ).to.be.revertedWith('first param != sender');
+    }
+  });
   it('ApproveAndCall calling revertOnCall of a mock contract should fail', async function () {
     const {
       mockERC20BasicApprovalTarget,
@@ -326,10 +356,6 @@ describe('ERC20BasicApproveExtension', function () {
       sandContract,
       user0,
     } = await setupERC20BasicApproveExtension();
-    const LAYER_6x6 = BigNumber.from(
-      '0x0200000000000000000000000000000000000000000000000000000000000000'
-    );
-    const GRID_SIZE = 408;
     const emptyReferral = '0x';
     const secret =
       '0x4467363716526536535425451427798982881775318563547751090997863683';
@@ -341,7 +367,6 @@ describe('ERC20BasicApproveExtension', function () {
 
     expect(land).to.not.be.equal(undefined);
     if (land !== undefined) {
-      const quadId = LAYER_6x6.add(BigNumber.from(land.x + land.y * GRID_SIZE));
       const tree = new MerkleTree(landHashArray);
       const proof = tree.getProof(MerkleTreeHelper.calculateLandHash(land));
       const totalSandBalance = BigNumber.from(100000).mul(
@@ -375,8 +400,21 @@ describe('ERC20BasicApproveExtension', function () {
             {value: txValue}
           )
         );
-        const landOwner = await landContract.callStatic.ownerOf(quadId);
-        expect(landOwner).to.equal(user0);
+        const landMintingEvents = await landContract.queryFilter(
+          landContract.filters.Transfer()
+        );
+        expect(landMintingEvents).to.not.equal(undefined);
+        if (landMintingEvents) {
+          for (let i = 0; i < landMintingEvents.length; i++) {
+            expect(landMintingEvents[i].args).to.not.equal(undefined);
+            if (landMintingEvents[i].args !== undefined) {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              expect(landMintingEvents[i].args![0]).to.equal(zeroAddress);
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              expect(landMintingEvents[i].args![1]).to.equal(user0);
+            }
+          }
+        }
       }
     }
   });
