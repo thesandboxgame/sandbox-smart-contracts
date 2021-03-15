@@ -75,7 +75,7 @@ contract AssetMinter is WithMetaTransaction, IAssetMinter {
     /// @param gemsQuantities quantities of gems to be used for each id in order, ie: [0, 1, 0, 2, 1, 0]
     /// would be gemId1=1, gemId2=0, gemId3=2, gemId4=1, gemId5=0
     /// @param catalystsQuantities quantities of catalyst to be used for each id in order, ie: [0, 1, 0, 3, 0]
-    // owuld be catalystId1=1, catalystId2=0, catalystId3=3, catalystId4=0,
+    /// would be catalystId1=1, catalystId2=0, catalystId3=3, catalystId4=0,
     /// @param assets contains the data to associate catalyst and gems to the assets.
     /// @param to destination address receiving the minted tokens.
     /// @param data extra data.

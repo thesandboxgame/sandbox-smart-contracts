@@ -11,3 +11,5 @@ src/solc_0.5
 src/solc_0.6
 data/*
 asset-snapshot-data/*
+tmp/
+secret/

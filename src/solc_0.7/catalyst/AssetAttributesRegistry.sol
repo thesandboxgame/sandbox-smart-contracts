@@ -23,7 +23,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
 
     struct Record {
         uint16 catalystId; // start at 1
-        uint16[MAX_NUM_GEMS] gemIds; // start at 1 test compression ?
+        uint16[MAX_NUM_GEMS] gemIds;
     }
 
     event CatalystApplied(uint256 indexed assetId, uint16 indexed catalystId, uint16[] gemIds, uint64 blockNumber);

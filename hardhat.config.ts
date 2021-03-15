@@ -5,6 +5,7 @@ import '@nomiclabs/hardhat-ethers'; // aliased to hardhat-deploy-ethers
 import 'hardhat-gas-reporter';
 import '@openzeppelin/hardhat-upgrades';
 import 'solidity-coverage';
+import 'hardhat-contract-sizer';
 import {node_url, accounts} from './utils/network';
 
 const config: HardhatUserConfig = {
