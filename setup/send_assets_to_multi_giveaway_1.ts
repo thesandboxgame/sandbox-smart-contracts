@@ -11,33 +11,32 @@ const func: DeployFunction = async function () {
   const {deployer} = await getNamedAccounts();
 
   let owner;
-  let tokenId0;
-  let tokenId1;
-  let landIds: number[] = [];
+  const assetIds: string[] = [];
+  const landIds: number[] = [];
   const landIdStart = landIds[0];
   const landIdFinish = landIds[-1];
 
-  const CLAIM_FILE = 'data/giveaways/multi_giveaway_1/claims_0_hardhat.json';
-  const CONFIG_FILE = 'data/giveaways/multi_giveaway_1/config.ts';
+  let CLAIM_FILE;
+  let CONFIG_FILE;
   const sandContract = await deployments.get('Sand');
   const catalystContract = await deployments.get('Catalyst_COMMON');
   const gemContract = await deployments.get('Gem_SPEED');
 
-  // TODO: update for the number of tokenIds
   switch (hre.network.name) {
     case 'mainnet':
       owner = '';
-      tokenId0 = '';
-      tokenId1 = '';
-      landIds = [];
-
+      CLAIM_FILE = 'data/giveaways/multi_giveaway_1/claims_0_mainnet.json';
+      CONFIG_FILE = 'data/giveaways/multi_giveaway_1/config_mainnet.ts';
       break;
     case 'rinkeby':
       owner = deployer;
-      tokenId0 = '';
-      tokenId1 = '';
-      landIds = [];
+      CLAIM_FILE = 'data/giveaways/multi_giveaway_1/claims_0_rinkeby.json';
+      CONFIG_FILE = 'data/giveaways/multi_giveaway_1/config_rinkeby.ts';
       break;
+    default:
+      owner = '';
+      CLAIM_FILE = 'data/giveaways/multi_giveaway_1/claims_0_hardhat.json';
+      CONFIG_FILE = 'data/giveaways/multi_giveaway_1/config_hardhat.ts';
   }
 
   if (!owner || owner === '') {
@@ -46,7 +45,6 @@ const func: DeployFunction = async function () {
 
   const MultiGiveaway = await deployments.get('Multi_Giveaway_1');
 
-  // TODO: update for each claim file
   let claimData: MultiClaim[];
   try {
     claimData = JSON.parse(fs.readFileSync(CLAIM_FILE).toString());
@@ -57,26 +55,23 @@ const func: DeployFunction = async function () {
 
   // Send Assets
 
-  let totalAsset0 = 0;
-  let totalAsset1 = 0;
+  const totalAssets: number[] = [];
   for (const claim of claimData) {
-    for (const asset of claim.erc1155) {
-      if (asset.ids[0] !== tokenId0) {
-        throw new Error(`invalid asset`);
+    for (let i = 0; i < claim.erc1155.length; i++) {
+      const asset = claim.erc1155[i];
+      for (let j = 0; j < asset.ids.length; j++) {
+        // Check claim file
+        if (asset.ids[j] !== assetIds[j]) {
+          throw new Error('invalid asset');
+        }
+        totalAssets[j] += asset.values[j];
       }
-      if (asset.ids[1] !== tokenId1) {
-        throw new Error(`invalid asset`);
-      }
-      totalAsset0 += asset.values[0];
-      totalAsset1 += asset.values[1];
     }
   }
 
   console.log({
-    assetId0: tokenId0,
-    assetId1: tokenId1,
-    totalAsset0,
-    totalAsset1,
+    assetIds,
+    totalAssets,
   });
 
   await catchUnknownSigner(
@@ -86,22 +81,30 @@ const func: DeployFunction = async function () {
       'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)',
       owner,
       MultiGiveaway.address,
-      [tokenId0, tokenId1],
-      [totalAsset0, totalAsset1],
+      [assetIds],
+      [totalAssets],
       '0x'
     )
   );
 
   // Send Lands
 
-  let totalLands = 0;
+  let totalLands: number[] = [];
   for (const claim of claimData) {
-    for (const land of claim.erc721) {
-      if (land.ids[0] < landIdStart || land.ids[0] > landIdFinish) {
-        throw new Error(`invalid land`);
+    for (let i = 0; i < claim.erc721.length; i++) {
+      const land = claim.erc721[i];
+
+      for (let j = 0; j < land.ids.length; j++) {
+        // Check claim file
+        if (land.ids[j] !== landIds[j]) {
+          throw new Error('invalid land');
+        }
+        // Land is within designated ID limits
+        if (land.ids[0] < landIdStart || land.ids[0] > landIdFinish) {
+          throw new Error('invalid land');
+        }
+        totalLands[j] += 1;
       }
-      totalLands += 1;
-    }
   }
 
   console.log({
@@ -125,7 +128,7 @@ const func: DeployFunction = async function () {
   let totalSand = 0;
   for (const claim of claimData) {
     if (claim.erc20.contractAddresses[0] !== sandContract.address) {
-      throw new Error(`incorrect ERC20 order`);
+      throw new Error('incorrect ERC20 order');
     }
     totalSand += claim.erc20.amounts[0];
   }
@@ -141,7 +144,7 @@ const func: DeployFunction = async function () {
   let totalCatalysts = 0;
   for (const claim of claimData) {
     if (claim.erc20.contractAddresses[1] !== catalystContract.address) {
-      throw new Error(`incorrect ERC20 order`);
+      throw new Error('incorrect ERC20 order');
     }
     totalCatalysts += claim.erc20.amounts[1];
   }
@@ -157,7 +160,7 @@ const func: DeployFunction = async function () {
   let totalGems = 0;
   for (const claim of claimData) {
     if (claim.erc20.contractAddresses[2] !== gemContract.address) {
-      throw new Error(`incorrect ERC20 order`);
+      throw new Error('incorrect ERC20 order');
     }
     totalGems += claim.erc20.amounts[2];
   }
