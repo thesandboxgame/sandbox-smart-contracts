@@ -52,7 +52,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
       nftGiveawayAdmin,
       emptyBytes32,
       assetsHolder ? others[5] : ASSETS_HOLDER,
-      1615194000, // Sunday, 08-Mar-21 09:00:00 UTC
+      '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF', // no expiry
     ],
   });
 
@@ -108,6 +108,17 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     expect(balanceAssetId).to.equal(supply);
     return transferEvent.args[3].toString(); // asset ID
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function assignReservedAddressToClaim(dataSet: any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return dataSet.map(async (claim: any) => {
+      claim.reservedAddress = others[0];
+      return claim;
+    });
+  }
+
+  assignReservedAddressToClaim(testAssetData); // Hardhat does not consistently use the same address for others[0] if all tests are run vs only assetGiveaway
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let dataWithIds: any = testAssetData;
