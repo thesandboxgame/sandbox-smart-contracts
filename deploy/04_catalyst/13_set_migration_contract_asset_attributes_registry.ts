@@ -29,3 +29,4 @@ export default func;
 func.runAtTheEnd = true;
 func.tags = ['AssetAttributesRegistry', 'AssetAttributesRegistry_setup'];
 func.dependencies = ['AssetAttributesRegistry_deploy'];
+func.skip = async (hre) => hre.network.name !== 'hardhat'; // disabled for now

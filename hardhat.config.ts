@@ -82,7 +82,7 @@ const config: HardhatUserConfig = {
     assetBouncerAdmin: 'sandAdmin', // setup the contract allowed to mint Assets
     sandSaleAdmin: 'sandAdmin', // can pause the sandSale and withdraw SAND
     genesisBouncerAdmin: 'sandAdmin', // can set who is allowed to mint
-    commonMinterAdmin: 'sandAdmin', // can change the fees
+    defaultMinterAdmin: 'sandAdmin', // can change the fees
     genesisMinter: 'deployer', // the first account allowed to mint genesis Assets
     assetAuctionFeeCollector: 'sandSaleBeneficiary', // collect fees from asset auctions
     assetAuctionAdmin: 'sandAdmin', // can change fee collector

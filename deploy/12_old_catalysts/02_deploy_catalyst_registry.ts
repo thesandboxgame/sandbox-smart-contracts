@@ -21,3 +21,4 @@ const func: DeployFunction = async function (hre) {
 export default func;
 func.tags = ['OldCatalystRegistry', 'OldCatalystRegistry_deploy'];
 func.dependencies = ['OldCatalysts_deploy', 'Sand_deploy'];
+func.skip = async (hre) => hre.network.name !== 'hardhat'; // not meant to be redeployed

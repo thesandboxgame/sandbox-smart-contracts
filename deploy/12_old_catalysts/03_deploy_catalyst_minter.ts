@@ -114,3 +114,4 @@ func.dependencies = [
   'Asset_deploy',
   'OldCatalystRegistry_deploy',
 ];
+func.skip = async (hre) => hre.network.name !== 'hardhat'; // not meant to be redeployed

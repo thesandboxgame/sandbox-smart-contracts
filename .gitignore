@@ -5,6 +5,8 @@ tmp/
 tmp.copy/
 
 yarn.error.log
+.yalc
+yalc.lock
 
 coverage*
 

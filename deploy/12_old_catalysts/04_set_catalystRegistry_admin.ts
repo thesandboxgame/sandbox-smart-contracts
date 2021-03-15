@@ -20,3 +20,4 @@ export default func;
 func.tags = ['OldCatalystRegistry'];
 func.dependencies = ['OldCatalystRegistry_deploy'];
 func.runAtTheEnd = true;
+func.skip = async (hre) => hre.network.name !== 'hardhat'; // not meant to be redeployed

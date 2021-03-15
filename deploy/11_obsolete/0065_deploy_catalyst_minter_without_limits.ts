@@ -20,10 +20,12 @@ const func: DeployFunction = async function (hre) {
     const maxGems = BigNumber.from(mintData.maxGems).mul(
       BigNumber.from(2).pow(240)
     );
-    const minQuantity = BigNumber.from(mintData.minQuantity).mul(
+    const mintDataMinQuantity = 1;
+    const minQuantity = BigNumber.from(mintDataMinQuantity).mul(
       BigNumber.from(2).pow(224)
     );
-    const maxQuantity = BigNumber.from(mintData.maxQuantity).mul(
+    const mintDataMaxQuantity = 65535;
+    const maxQuantity = BigNumber.from(mintDataMaxQuantity).mul(
       BigNumber.from(2).pow(208)
     );
     const sandMintingFee = BigNumber.from(mintData.sandMintingFee).mul(
@@ -38,7 +40,7 @@ const func: DeployFunction = async function (hre) {
     bakedMintData.push(bakedData);
   }
 
-  const catalystMinter = await deploy('CatalystMinter', {
+  const sandboxMinter = await deploy('SandboxMinter', {
     contract: 'CatalystMinter',
     from: deployer,
     log: true,
@@ -57,35 +59,34 @@ const func: DeployFunction = async function (hre) {
     ],
   });
 
-  const isBouncer = await read('Asset', 'isBouncer', catalystMinter.address);
+  const isBouncer = await read('Asset', 'isBouncer', sandboxMinter.address);
   if (!isBouncer) {
-    console.log('setting CatalystMinter as Asset bouncer');
+    console.log('setting SandboxMinter as Asset bouncer');
     const currentBouncerAdmin = await read('Asset', 'getBouncerAdmin');
     await catchUnknownSigner(
       execute(
         'Asset',
         {from: currentBouncerAdmin, log: true},
         'setBouncer',
-        catalystMinter.address,
+        sandboxMinter.address,
         true
       )
     );
   }
 
-  // disabled as we now use the one wtitout limit
-  // const currentMinter = await read('CatalystRegistry', 'getMinter');
-  // if (currentMinter.toLowerCase() != catalystMinter.address.toLowerCase()) {
-  //   console.log('setting CatalystMinter as CatalystRegistry minter');
-  //   const currentRegistryAdmin = await read('CatalystRegistry', 'getAdmin');
-  //   await catchUnknownSigner(
-  //     execute(
-  //       'CatalystRegistry',
-  //       {from: currentRegistryAdmin, log: true},
-  //       'setMinter',
-  //       catalystMinter.address
-  //     )
-  //   );
-  // }
+  const currentMinter = await read('CatalystRegistry', 'getMinter');
+  if (currentMinter.toLowerCase() != sandboxMinter.address.toLowerCase()) {
+    console.log('setting SandboxMinter as CatalystRegistry minter');
+    const currentRegistryAdmin = await read('CatalystRegistry', 'getAdmin');
+    await catchUnknownSigner(
+      execute(
+        'CatalystRegistry',
+        {from: currentRegistryAdmin, log: true},
+        'setMinter',
+        sandboxMinter.address
+      )
+    );
+  }
 
   async function setSuperOperatorFor(contractName: string, address: string) {
     const isSuperOperator = await read(
@@ -95,7 +96,7 @@ const func: DeployFunction = async function (hre) {
     );
     if (!isSuperOperator) {
       console.log(
-        'setting CatalystMinter as super operator for ' + contractName
+        'setting SandboxMinter as super operator for ' + contractName
       );
       const currentSandAdmin = await read(contractName, 'getAdmin');
       await catchUnknownSigner(
@@ -110,13 +111,13 @@ const func: DeployFunction = async function (hre) {
     }
   }
 
-  await setSuperOperatorFor('Sand', catalystMinter.address);
-  await setSuperOperatorFor('Gem', catalystMinter.address);
-  await setSuperOperatorFor('Asset', catalystMinter.address);
-  await setSuperOperatorFor(`Catalyst`, catalystMinter.address);
+  await setSuperOperatorFor('Sand', sandboxMinter.address);
+  await setSuperOperatorFor('Gem', sandboxMinter.address);
+  await setSuperOperatorFor('Asset', sandboxMinter.address);
+  await setSuperOperatorFor(`Catalyst`, sandboxMinter.address);
 };
 export default func;
-func.tags = ['CatalystMinter', 'CatalystMinter_setup', 'CatalystMinter_deploy'];
+func.tags = ['SandboxMinter', 'SandboxMinter_setup', 'SandboxMinter_deploy'];
 func.dependencies = [
   'Sand_deploy',
   'Asset_deploy',
