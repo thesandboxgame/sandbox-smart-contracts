@@ -9,5 +9,6 @@ pragma solidity 0.8.2;
 interface IERC721Events {
     event Transfer(address indexed _from, address indexed _to, uint256 indexed _tokenId);
     event Approval(address indexed _owner, address indexed _approved, uint256 indexed _tokenId);
-    event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
+    // Duplicate event, ERC1155 ApprovalForAll
+    // event ApprovalForAll(address indexed _owner, address indexed _operator, bool _approved);
 }
