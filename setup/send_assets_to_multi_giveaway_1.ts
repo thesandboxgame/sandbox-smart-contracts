@@ -11,16 +11,16 @@ const func: DeployFunction = async function () {
   const {deployer} = await getNamedAccounts();
 
   let owner;
-  const assetIds: string[] = [];
-  const landIds: number[] = [];
-  const landIdStart = landIds[0];
-  const landIdFinish = landIds[-1];
+  // const assetIds: string[] = [];
+  // const landIds: number[] = [];
+  // const landIdStart = landIds[0];
+  // const landIdFinish = landIds[-1];
 
   let CLAIM_FILE;
   let CONFIG_FILE;
-  const sandContract = await deployments.get('Sand');
-  const catalystContract = await deployments.get('Catalyst_COMMON');
-  const gemContract = await deployments.get('Gem_SPEED');
+  // const sandContract = await deployments.get('Sand');
+  // const catalystContract = await deployments.get('Catalyst_COMMON');
+  // const gemContract = await deployments.get('Gem_SPEED');
 
   switch (hre.network.name) {
     case 'mainnet':
@@ -34,7 +34,7 @@ const func: DeployFunction = async function () {
       CONFIG_FILE = 'data/giveaways/multi_giveaway_1/config_rinkeby.ts';
       break;
     default:
-      owner = '';
+      owner = deployer;
       CLAIM_FILE = 'data/giveaways/multi_giveaway_1/claims_0_hardhat.json';
       CONFIG_FILE = 'data/giveaways/multi_giveaway_1/config_hardhat.ts';
   }
@@ -46,8 +46,10 @@ const func: DeployFunction = async function () {
   const MultiGiveaway = await deployments.get('Multi_Giveaway_1');
 
   let claimData: MultiClaim[];
+  let config: any;
   try {
     claimData = JSON.parse(fs.readFileSync(CLAIM_FILE).toString());
+    config = JSON.parse(fs.readFileSync(CONFIG_FILE).toString());
   } catch (e) {
     console.log('Error', e);
     return;
@@ -60,36 +62,34 @@ const func: DeployFunction = async function () {
     for (let i = 0; i < claim.erc1155.length; i++) {
       const asset = claim.erc1155[i];
       for (let j = 0; j < asset.ids.length; j++) {
-        // Check claim file
-        if (asset.ids[j] !== assetIds[j]) {
-          throw new Error('invalid asset');
+        // Check claims against config file
+        if (asset.ids[j] !== config.erc1155.contracts[i].ids[j]) {
+          throw new Error('invalid asset ID');
+        }
+        if (asset.values[j] !== config.erc1155.contracts[i].supply[j]) {
+          throw new Error('invalid supply');
         }
         totalAssets[j] += asset.values[j];
       }
+
+      await catchUnknownSigner(
+        execute(
+          config.erc1155.contracts[i].contractName,
+          {from: owner, log: true},
+          'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)',
+          owner,
+          MultiGiveaway.address,
+          config.erc1155.contracts[i].ids,
+          totalAssets,
+          '0x'
+        )
+      );
     }
   }
 
-  console.log({
-    assetIds,
-    totalAssets,
-  });
-
-  await catchUnknownSigner(
-    execute(
-      'Asset',
-      {from: owner, log: true},
-      'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)',
-      owner,
-      MultiGiveaway.address,
-      [assetIds],
-      [totalAssets],
-      '0x'
-    )
-  );
-
   // Send Lands
 
-  let totalLands: number[] = [];
+  const totalLands: number[] = [];
   for (const claim of claimData) {
     for (let i = 0; i < claim.erc721.length; i++) {
       const land = claim.erc721[i];
@@ -105,6 +105,7 @@ const func: DeployFunction = async function () {
         }
         totalLands[j] += 1;
       }
+    }
   }
 
   console.log({
@@ -113,7 +114,7 @@ const func: DeployFunction = async function () {
 
   await catchUnknownSigner(
     execute(
-      'Land',
+      'Land', // TODO: update for multiple ERC721
       {from: owner, log: true},
       'safeBatchTransferFrom(address,address,uint256[],bytes)',
       owner,
