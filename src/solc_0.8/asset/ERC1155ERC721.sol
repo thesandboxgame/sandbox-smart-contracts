@@ -69,6 +69,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
 
     function init(
         address trustedForwarder,
+        // @review Admin
         address admin,
         // @review Bouncer
         address bouncerAdmin
@@ -76,6 +77,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         require(!_init, "ALREADY_INITIALISED");
         _init = true;
         _metaTransactionProcessors[trustedForwarder] = true;
+        // @review Admin
         _admin = admin;
         // @review Bouncer
         _bouncerAdmin = bouncerAdmin;
