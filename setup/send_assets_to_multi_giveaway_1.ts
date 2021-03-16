@@ -11,16 +11,14 @@ const func: DeployFunction = async function () {
   const {deployer} = await getNamedAccounts();
 
   let owner;
-  // const assetIds: string[] = [];
+
+  // TODO: consider land ID checks
   // const landIds: number[] = [];
   // const landIdStart = landIds[0];
   // const landIdFinish = landIds[-1];
 
   let CLAIM_FILE;
   let CONFIG_FILE;
-  // const sandContract = await deployments.get('Sand');
-  // const catalystContract = await deployments.get('Catalyst_COMMON');
-  // const gemContract = await deployments.get('Gem_SPEED');
 
   switch (hre.network.name) {
     case 'mainnet':
@@ -46,6 +44,7 @@ const func: DeployFunction = async function () {
   const MultiGiveaway = await deployments.get('Multi_Giveaway_1');
 
   let claimData: MultiClaim[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let config: any;
   try {
     claimData = JSON.parse(fs.readFileSync(CLAIM_FILE).toString());
@@ -55,7 +54,7 @@ const func: DeployFunction = async function () {
     return;
   }
 
-  // Send Assets
+  // Send ERC1155
 
   const totalAssets: number[] = [];
   for (const claim of claimData) {
@@ -87,90 +86,64 @@ const func: DeployFunction = async function () {
     }
   }
 
-  // Send Lands
+  // Send ERC721
 
   const totalLands: number[] = [];
   for (const claim of claimData) {
     for (let i = 0; i < claim.erc721.length; i++) {
       const land = claim.erc721[i];
-
       for (let j = 0; j < land.ids.length; j++) {
-        // Check claim file
-        if (land.ids[j] !== landIds[j]) {
-          throw new Error('invalid land');
-        }
-        // Land is within designated ID limits
-        if (land.ids[0] < landIdStart || land.ids[0] > landIdFinish) {
-          throw new Error('invalid land');
+        // Check claims against config file
+        if (land.ids[j] !== config.erc721.contracts[i].ids[j]) {
+          throw new Error('invalid asset ID');
         }
         totalLands[j] += 1;
       }
+
+      await catchUnknownSigner(
+        execute(
+          config.erc721.contracts[i].name,
+          {from: owner, log: true},
+          'safeBatchTransferFrom(address,address,uint256[],bytes)', // TODO: may need to split this into multiple tx
+          owner,
+          MultiGiveaway.address,
+          config.erc721.contracts[i].ids,
+          '0x'
+        )
+      );
     }
   }
 
-  console.log({
-    totalLands,
-  });
+  // Send ERC20
 
-  await catchUnknownSigner(
-    execute(
-      'Land', // TODO: update for multiple ERC721
-      {from: owner, log: true},
-      'safeBatchTransferFrom(address,address,uint256[],bytes)',
-      owner,
-      MultiGiveaway.address,
-      [landIds],
-      '0x'
-    )
-  );
-
-  // Send SAND
-
-  let totalSand = 0;
   for (const claim of claimData) {
-    if (claim.erc20.contractAddresses[0] !== sandContract.address) {
-      throw new Error('incorrect ERC20 order');
+    for (let i = 0; i < claim.erc20.amounts.length; i++) {
+      let totalTokens = 0;
+      // Check claims against config file
+      if (claim.erc20.amounts[i] !== config.erc20.contracts[i].amount) {
+        throw new Error('incorrect ERC20 amount');
+      }
+      if (
+        claim.erc20.contractAddresses[i] !==
+        config.erc20.contracts[i].contractAdddress
+      ) {
+        throw new Error('incorrect ERC20 address');
+      }
+      totalTokens += claim.erc20.amounts[0];
+
+      await catchUnknownSigner(
+        execute(
+          config.erc20.contracts[i].name,
+          {from: owner, log: true},
+          'safeTransferFrom(address,address,uint256)', // TODO: check
+          owner,
+          MultiGiveaway.address,
+          totalTokens,
+          '0x'
+        )
+      );
     }
-    totalSand += claim.erc20.amounts[0];
   }
-
-  console.log({
-    totalSand,
-  });
-
-  // TODO: send SAND
-
-  // Send Catalysts
-
-  let totalCatalysts = 0;
-  for (const claim of claimData) {
-    if (claim.erc20.contractAddresses[1] !== catalystContract.address) {
-      throw new Error('incorrect ERC20 order');
-    }
-    totalCatalysts += claim.erc20.amounts[1];
-  }
-
-  console.log({
-    totalCatalysts,
-  });
-
-  // TODO: send cats
-
-  // Send Gems
-
-  let totalGems = 0;
-  for (const claim of claimData) {
-    if (claim.erc20.contractAddresses[2] !== gemContract.address) {
-      throw new Error('incorrect ERC20 order');
-    }
-    totalGems += claim.erc20.amounts[2];
-  }
-
-  console.log({
-    totalGems,
-  });
-
-  // TODO: send gems
 };
 export default func;
 
