@@ -267,7 +267,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
                     numNFTs = uint16(numTokenTypes - i);
                 }
             } else {
-                require(supplies[i] == 1, "NFTs_MUST_BE_LAST");
+                require(supplies[i] == 1, "NFTS_MUST_BE_LAST");
             }
         }
         uint16 numFTs = numTokenTypes - numNFTs;
