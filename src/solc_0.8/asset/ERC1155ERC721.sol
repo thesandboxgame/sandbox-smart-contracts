@@ -68,13 +68,15 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     event MetaTransactionProcessor(address metaTransactionProcessor, bool enabled);
 
     function init(
-        address trustedForwarder,
+        address[] trustedForwarders,
         // @review Bouncer
         address bouncerAdmin
     ) public {
         require(!_init, "ALREADY_INITIALISED");
         _init = true;
-        _metaTransactionProcessors[trustedForwarder] = true;
+        for (uint256 i; i < trustedForwarders.length; i++) {
+            _metaTransactionProcessors[trustedForwarder] = true;
+        }
         _admin = address(0);
         // @review Bouncer
         _bouncerAdmin = bouncerAdmin;
