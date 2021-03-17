@@ -69,16 +69,13 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
 
     function init(
         address trustedForwarder,
-        // @review Admin
-        address admin,
         // @review Bouncer
         address bouncerAdmin
     ) public {
         require(!_init, "ALREADY_INITIALISED");
         _init = true;
         _metaTransactionProcessors[trustedForwarder] = true;
-        // @review Admin
-        _admin = admin;
+        _admin = address(0);
         // @review Bouncer
         _bouncerAdmin = bouncerAdmin;
         emit MetaTransactionProcessor(trustedForwarder, true);
@@ -116,14 +113,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     /// @return whether the address has minting rights.
     function isBouncer(address who) external view returns (bool) {
         return _bouncers[who];
-    }
-
-    /// @notice Enable or disable the ability of `metaTransactionProcessor` to perform meta-tx (metaTransactionProcessor rights).
-    /// @param metaTransactionProcessor address that will be given/removed metaTransactionProcessor rights.
-    /// @param enabled set whether the metaTransactionProcessor is enabled or disabled.
-    function setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) external onlyAdmin() {
-        _metaTransactionProcessors[metaTransactionProcessor] = enabled;
-        emit MetaTransactionProcessor(metaTransactionProcessor, enabled);
     }
 
     /// @notice check whether address `who` is given meta-transaction execution rights.
