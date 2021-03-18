@@ -1,7 +1,12 @@
 cache/
 artifacts/
+secret/
+tmp/
+tmp.copy/
 
 yarn.error.log
+.yalc
+yalc.lock
 
 coverage*
 
@@ -36,4 +41,4 @@ presale_2*
 giveaway.json
 .proofs*
 
-
+.openzeppelin/unknown-*.json
