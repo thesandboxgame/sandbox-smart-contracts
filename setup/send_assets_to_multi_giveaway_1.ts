@@ -1,5 +1,4 @@
 import fs from 'fs';
-import {ethers} from 'ethers';
 import hre, {getNamedAccounts} from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {MultiClaim} from '../lib/merkleTreeHelper';
@@ -11,12 +10,6 @@ const func: DeployFunction = async function () {
   const {deployer} = await getNamedAccounts();
 
   let owner;
-
-  // TODO: consider land ID checks
-  // const landIds: number[] = [];
-  // const landIdStart = landIds[0];
-  // const landIdFinish = landIds[-1];
-
   let CLAIM_FILE;
   let CONFIG_FILE;
 
@@ -104,7 +97,7 @@ const func: DeployFunction = async function () {
         execute(
           config.erc721.contracts[i].name,
           {from: owner, log: true},
-          'safeBatchTransferFrom(address,address,uint256[],bytes)', // TODO: may need to split this into multiple tx
+          'safeBatchTransferFrom(address,address,uint256[],bytes)', // may need to split this into multiple tx?
           owner,
           MultiGiveaway.address,
           config.erc721.contracts[i].ids,
@@ -127,7 +120,7 @@ const func: DeployFunction = async function () {
         claim.erc20.contractAddresses[i] !==
         config.erc20.contracts[i].contractAdddress
       ) {
-        throw new Error('incorrect ERC20 address');
+        throw new Error('incorrect ERC20 contract address');
       }
       totalTokens += claim.erc20.amounts[0];
 
@@ -135,7 +128,7 @@ const func: DeployFunction = async function () {
         execute(
           config.erc20.contracts[i].name,
           {from: owner, log: true},
-          'safeTransferFrom(address,address,uint256)', // TODO: check
+          'safeTransferFrom(address,address,uint256)',
           owner,
           MultiGiveaway.address,
           totalTokens,
