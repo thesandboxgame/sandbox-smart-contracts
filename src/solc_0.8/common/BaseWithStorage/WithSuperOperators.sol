@@ -5,7 +5,23 @@ pragma solidity 0.8.2;
 import "./WithAdmin.sol";
 
 contract WithSuperOperators is WithAdmin {
-    // @note : In an effort to both optimize the Asset contract for bytecode-size, as well as move towards a more decentralized system overall, All possible code has been removed from this contract. Storage variables have been preserved in order to not corrupt the Asset contract's storage layout during upgrades. For more info, see: https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable#modifying-your-contracts
-
     mapping(address => bool) internal _superOperators;
+
+    event SuperOperator(address superOperator, bool enabled);
+
+    /// @notice Enable or disable the ability of `superOperator` to transfer tokens of all (superOperator rights).
+    /// @param superOperator address that will be given/removed superOperator right.
+    /// @param enabled set whether the superOperator is enabled or disabled.
+    function setSuperOperator(address superOperator, bool enabled) external {
+        require(msg.sender == _admin, "only admin is allowed to add super operators");
+        _superOperators[superOperator] = enabled;
+        emit SuperOperator(superOperator, enabled);
+    }
+
+    /// @notice check whether address `who` is given superOperator rights.
+    /// @param who The address to query.
+    /// @return whether the address has superOperator rights.
+    function isSuperOperator(address who) public view returns (bool) {
+        return _superOperators[who];
+    }
 }
