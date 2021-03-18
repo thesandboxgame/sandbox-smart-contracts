@@ -11,7 +11,6 @@ const {mine} = require('../utils');
 
 const STAKE_TOKEN = 'UNI_SAND_ETH';
 const REWARD_TOKEN = 'Sand';
-// const MULTIPLIER_NFToken = 'Land';
 const POOL = 'LandWeightedSANDRewardPool';
 const REWARD_DURATION = 2592000; // 30 days in seconds
 const REWARD_AMOUNT = BigNumber.from(1500000).mul('1000000000000000000');
@@ -40,14 +39,13 @@ const setupTestRewardPool = deployments.createFixture(async function (
 
   // Get contracts
   const rewardToken = await ethers.getContract(REWARD_TOKEN);
-  // const multiplierNFToken = await ethers.getContract(MULTIPLIER_NFToken);
   const stakeToken = await ethers.getContract(STAKE_TOKEN);
 
   // Create modifiable Reward contract using Smoddit
   const modifiableRewardContractFactory = await smoddit(POOL);
 
   // Create modifiable MockLand contract uing Smoddit
-  const modifiableNFTContractFactory = await smoddit('MockLand'); // TODO: MockLand contract works here because the artifact can be found, but ideally we want this to be Land
+  const modifiableNFTContractFactory = await smoddit('MockLand'); // TODO for next Reward Contract: update to use real Land contract
   const modifiableNFTContract = await modifiableNFTContractFactory.deploy(
     rewardToken.address,
     landAdmin
@@ -59,17 +57,6 @@ const setupTestRewardPool = deployments.createFixture(async function (
     modifiableNFTContract.address,
     REWARD_DURATION
   );
-
-  // Function to modify user's staked balance in Reward Contract
-  // async function setUserStakedBalance(stakedBalance, user) {
-  //   modifiableRewardContract.smodify.put({
-  //     _balances: {
-  //       [user]: stakedBalance,
-  //     },
-  //   });
-  //   const userStakedBal = await modifiableRewardContract.balanceOf(user);
-  //   expect(userStakedBal).to.equal(stakedBalance);
-  // }
 
   // Function to modify user's NFT balance in MockLand Contract
   async function setUserNftBalance(numberOfNfts, user) {
@@ -148,7 +135,7 @@ const setupTestRewardPool = deployments.createFixture(async function (
     setUserNftBalance,
   };
 });
-describe.only('SmockitSANDRewardPool', function () {
+describe('SmockitSANDRewardPool', function () {
   it('User earnings for 89 NFTs match expected reward', async function () {
     const options = {
       supplyRewardTokens: true,
@@ -175,7 +162,10 @@ describe.only('SmockitSANDRewardPool', function () {
     ]);
     await mine();
     const earned = await rewardPoolAsUser[0].earned(others[0]);
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(2);
   });
 
   it('User earnings for 1 NFTs match expected reward', async function () {
@@ -203,7 +193,10 @@ describe.only('SmockitSANDRewardPool', function () {
     ]);
     await mine();
     const earned = await rewardPoolAsUser[0].earned(others[0]);
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(2);
   });
 
   it('User earnings for 2 NFTs match expected reward', async function () {
@@ -231,7 +224,10 @@ describe.only('SmockitSANDRewardPool', function () {
     ]);
     await mine();
     const earned = await rewardPoolAsUser[0].earned(others[0]);
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(2);
   });
 
   it('User earnings for 3 NFTs match expected reward', async function () {
@@ -259,7 +255,10 @@ describe.only('SmockitSANDRewardPool', function () {
     ]);
     await mine();
     const earned = await rewardPoolAsUser[0].earned(others[0]);
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(2);
   });
 
   it('User earnings for 500 NFTs match expected reward', async function () {
@@ -287,7 +286,10 @@ describe.only('SmockitSANDRewardPool', function () {
     ]);
     await mine();
     const earned = await rewardPoolAsUser[0].earned(others[0]);
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(2);
   });
 
   it('User earnings for 10000 NFTs match expected reward', async function () {
@@ -315,7 +317,10 @@ describe.only('SmockitSANDRewardPool', function () {
     ]);
     await mine();
     const earned = await rewardPoolAsUser[0].earned(others[0]);
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(2);
   });
 
   it("Multiple Users' earnings for 1 NFTs match expected reward: 2 users, 1 stake each", async function () {
@@ -347,7 +352,10 @@ describe.only('SmockitSANDRewardPool', function () {
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     const earned = earned0.add(earned1);
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(2);
   });
 
   it("Multiple Users' earnings for 3 NFTs match expected reward: 2 users, 1 stake each", async function () {
@@ -379,7 +387,10 @@ describe.only('SmockitSANDRewardPool', function () {
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     const earned = earned0.add(earned1);
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(2);
   });
 
   it("Multiple Users' earnings for 100 NFTs match expected reward: 2 users, 1 stake each", async function () {
@@ -411,7 +422,10 @@ describe.only('SmockitSANDRewardPool', function () {
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     const earned = earned0.add(earned1);
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(2);
   });
 
   it('Earlier staker gets more rewards with same NFT amount - small NFT number', async function () {
@@ -438,7 +452,10 @@ describe.only('SmockitSANDRewardPool', function () {
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     expect(earned0).to.be.gte(earned1);
     const earned = earned0.add(earned1);
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(2);
   });
 
   it('Earlier staker gets more rewards with same NFT amount - large NFT number', async function () {
@@ -465,6 +482,9 @@ describe.only('SmockitSANDRewardPool', function () {
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     expect(earned0).to.be.gte(earned1);
     const earned = earned0.add(earned1);
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(2);
   });
 });
