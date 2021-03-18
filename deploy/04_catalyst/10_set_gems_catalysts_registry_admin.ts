@@ -20,3 +20,4 @@ export default func;
 func.runAtTheEnd = true;
 func.tags = ['GemsCatalystsRegistry', 'GemsCatalystsRegistry_setup'];
 func.dependencies = ['GemsCatalystsRegistry_deploy'];
+func.skip = async (hre) => hre.network.name !== 'hardhat'; // disabled for now

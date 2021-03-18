@@ -14,3 +14,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['DefaultAttributes', 'DefaultAttributes_deploy'];
+func.skip = async (hre) => hre.network.name !== 'hardhat'; // disabled for now

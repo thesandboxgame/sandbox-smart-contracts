@@ -48,3 +48,4 @@ func.dependencies = [
   'Sand_deploy',
   'GemsCatalystsRegistry_deploy',
 ];
+func.skip = async (hre) => hre.network.name !== 'hardhat'; // disabled for now
