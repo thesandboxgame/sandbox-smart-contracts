@@ -10,9 +10,9 @@ import "../common/Libraries/ObjectLib32.sol";
 
 import "../interfaces/IERC721.sol";
 import "../interfaces/IERC721TokenReceiver.sol";
-import "../common/BaseWithStorage/WithSuperOperators.sol";
+import "../common/EmptyWithStorage/WithSuperOperatorsEmpty.sol";
 
-contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
+contract ERC1155ERC721 is WithSuperOperatorsEmpty, IERC1155, IERC721 {
     using Address for address;
     using ObjectLib32 for ObjectLib32.Operations;
     using ObjectLib32 for uint256;
