@@ -3,7 +3,29 @@
 pragma solidity 0.8.2;
 
 contract WithAdmin {
-    // @note : In an effort to both optimize the Asset contract for bytecode-size, as well as move towards a more decentralized system overall, All possible code has been removed from this contract. Storage variables have been preserved in order to not corrupt the Asset contract's storage layout during upgrades. For more info, see: https://docs.openzeppelin.com/upgrades-plugins/1.x/writing-upgradeable#modifying-your-contracts
-
     address internal _admin;
+
+    /// @dev Emits when the contract administrator is changed.
+    /// @param oldAdmin The address of the previous administrator.
+    /// @param newAdmin The address of the new administrator.
+    event AdminChanged(address oldAdmin, address newAdmin);
+
+    modifier onlyAdmin() {
+        require(msg.sender == _admin, "ADMIN_ONLY");
+        _;
+    }
+
+    /// @dev Get the current administrator of this contract.
+    /// @return The current administrator of this contract.
+    function getAdmin() external view returns (address) {
+        return _admin;
+    }
+
+    /// @dev Change the administrator to be `newAdmin`.
+    /// @param newAdmin The address of the new administrator.
+    function changeAdmin(address newAdmin) external {
+        require(msg.sender == _admin, "ADMIN_ACCESS_DENIED");
+        emit AdminChanged(_admin, newAdmin);
+        _admin = newAdmin;
+    }
 }
