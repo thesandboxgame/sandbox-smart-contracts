@@ -5,8 +5,7 @@ const {BigNumber, constants} = ethers;
 const {Contract} = ethers;
 const zeroAddress = constants.AddressZero;
 
-// TODO: check correct ABI
-// MintableERC1155Token
+// MintableERC1155Token ABI
 const erc1155ABI = [
   {
     inputs: [
@@ -715,7 +714,7 @@ module.exports = (init) => {
         ],
       });
 
-      // Receiver - incorrect magic value
+      // Receiver - provides an incorrect magic value
       await deployments.deploy('TestERC1155ReceiverIncorrectValue', {
         from: deployer,
         contract: 'TestERC1155Receiver',
@@ -1449,20 +1448,20 @@ module.exports = (init) => {
       ).to.be.reverted;
     });
 
-    // it('can batch transfer to a contract that does accept ERC1155 and which returns the correct magic value', async function ({
-    //   tokenIds,
-    //   contractAsMinter,
-    //   minter,
-    //   receiver,
-    // }) {
-    //   await contractAsMinter.safeBatchTransferFrom(
-    //     minter,
-    //     receiver.address,
-    //     [tokenIds[0], tokenIds[1], tokenIds[2]],
-    //     [2, 1, 3],
-    //     '0x'
-    //   ); // TODO: fails because sender is not a contract
-    // });
+    it('can batch transfer to a contract that does accept ERC1155 and which returns the correct magic value', async function ({
+      tokenIds,
+      contractAsMinter,
+      minter,
+      receiver,
+    }) {
+      await contractAsMinter.safeBatchTransferFrom(
+        minter,
+        receiver.address,
+        [tokenIds[0], tokenIds[1], tokenIds[2]],
+        [2, 1, 3],
+        '0x'
+      );
+    });
 
     it('can batch transfer item with 1 or more supply at the same time', async function ({
       tokenIds,
@@ -1556,51 +1555,54 @@ module.exports = (init) => {
       ).to.be.revertedWith('Operator not approved');
     });
 
-    // it('operator can transfer after approval', async function ({
-    //   contractAsUser0,
-    //   contractAsDeployer,
-    //   minter,
-    //   user0,
-    //   user1,
-    //   tokenIds,
-    // }) {
-    //   await expect(
-    //     contractAsUser0.safeTransferFrom(minter, user1, tokenIds[0], 1, '0x')
-    //   ).to.be.revertedWith('Operator not approved');
-    //   await contractAsDeployer.setApprovalForAll(user0, true);
-    //   await contractAsUser0.safeTransferFrom(
-    //     minter,
-    //     user1,
-    //     tokenIds[0],
-    //     1,
-    //     '0x'
-    //   );
-    // }); // TODO: fix
+    it('operator can transfer after approval', async function ({
+      contractAsUser0,
+      contractAsMinter,
+      minter,
+      user0,
+      user1,
+      tokenIds,
+    }) {
+      await expect(
+        contractAsUser0.safeTransferFrom(minter, user1, tokenIds[0], 1, '0x')
+      ).to.be.revertedWith('Operator not approved');
+      await contractAsMinter.setApprovalForAll(user0, true);
+      const result = await contractAsMinter.isApprovedForAll(minter, user0);
+      assert.equal(result, true);
 
-    // it('operator cannot transfer after approval is removed', async function ({
-    //   contractAsUser0,
-    //   contractAsDeployer,
-    //   minter,
-    //   user0,
-    //   user1,
-    //   tokenIds,
-    // }) {
-    //   await expect(
-    //     contractAsUser0.safeTransferFrom(minter, user1, tokenIds[0], 1, '0x')
-    //   ).to.be.revertedWith('Operator not approved');
-    //   await contractAsDeployer.setApprovalForAll(user0, true);
-    //   await contractAsUser0.safeTransferFrom(
-    //     minter,
-    //     user1,
-    //     tokenIds[1],
-    //     1,
-    //     '0x'
-    //   );
-    //   await contractAsDeployer.setApprovalForAll(user0, false);
-    //   await expect(
-    //     contractAsUser0.safeTransferFrom(minter, user1, tokenIds[0], 1, '0x')
-    //   ).to.be.revertedWith('Operator not approved');
-    // }); // TODO: fix
+      await contractAsUser0.safeTransferFrom(
+        minter,
+        user1,
+        tokenIds[0],
+        1,
+        '0x'
+      );
+    });
+
+    it('operator cannot transfer after approval is removed', async function ({
+      contractAsUser0,
+      contractAsMinter,
+      minter,
+      user0,
+      user1,
+      tokenIds,
+    }) {
+      await expect(
+        contractAsUser0.safeTransferFrom(minter, user1, tokenIds[0], 1, '0x')
+      ).to.be.revertedWith('Operator not approved');
+      await contractAsMinter.setApprovalForAll(user0, true);
+      await contractAsUser0.safeTransferFrom(
+        minter,
+        user1,
+        tokenIds[1],
+        1,
+        '0x'
+      );
+      await contractAsMinter.setApprovalForAll(user0, false);
+      await expect(
+        contractAsUser0.safeTransferFrom(minter, user1, tokenIds[0], 1, '0x')
+      ).to.be.revertedWith('Operator not approved');
+    });
   });
 
   describe('supportsInterface', function (it) {
@@ -1705,14 +1707,11 @@ module.exports = (init) => {
       );
       for (let i = 0; i < tokenIdsToTransfer2.length; i++) {
         const tokenId = tokenIdsToTransfer2[i];
-
-        // TODO: fix
-        // const expectedbalance = BigNumber.from(balancesToTransfer2[i]).add(
-        //   BigNumber.from(balancesToTransfer[reverse[tokenId]])
-        // );
-        // // = new BN(balancesToTransfer2[i]).add(new BN(balancesToTransfer[reverse[tokenId]])).toString(10);
-        // const balance = await contractAsMinter.balanceOf(user0, tokenId);
-        // expect(balance).to.be.equal(expectedbalance);
+        const expectedbalance = BigNumber.from(balancesToTransfer2[i] || 0).add(
+          BigNumber.from(balancesToTransfer[reverse[tokenId]] || 0)
+        );
+        const balance = await contractAsMinter.balanceOf(user0, tokenId);
+        expect(balance).to.be.equal(expectedbalance);
       }
     }
 
@@ -1725,7 +1724,7 @@ module.exports = (init) => {
       await testOrder(contractAsMinter, minter, user0, batchIds, []);
     });
 
-    it('transfer multiple items in any order', async ({
+    it('transfer multiple items in any order (i)', async ({
       batchIds,
       contractAsMinter,
       minter,
@@ -1734,7 +1733,7 @@ module.exports = (init) => {
       await testOrder(contractAsMinter, minter, user0, batchIds, [3, 4, 5]);
     });
 
-    it('transfer multiple items in any order', async ({
+    it('transfer multiple items in any order (ii)', async ({
       batchIds,
       contractAsMinter,
       minter,
@@ -1743,7 +1742,7 @@ module.exports = (init) => {
       await testOrder(contractAsMinter, minter, user0, batchIds, [3, 1, 2]);
     });
 
-    it('transfer multiple items in any order ', async ({
+    it('transfer multiple items in any order (iii)', async ({
       batchIds,
       contractAsMinter,
       minter,
@@ -1752,7 +1751,7 @@ module.exports = (init) => {
       await testOrder(contractAsMinter, minter, user0, batchIds, [3, 10, 2]);
     });
 
-    it('transfer multiple items in any order', async ({
+    it('transfer multiple items in any order (iv)', async ({
       batchIds,
       contractAsMinter,
       minter,
@@ -1767,7 +1766,7 @@ module.exports = (init) => {
       ]);
     });
 
-    it('transfer multiple items in any order', async ({
+    it('transfer multiple items in any order (v)', async ({
       batchIds,
       contractAsMinter,
       minter,
@@ -1776,7 +1775,7 @@ module.exports = (init) => {
       await testOrder(contractAsMinter, minter, user0, batchIds, [3, 4, 2]);
     });
 
-    it('transfer multiple items in any order', async ({
+    it('transfer multiple items in any order (vi)', async ({
       batchIds,
       contractAsMinter,
       minter,
@@ -1785,7 +1784,7 @@ module.exports = (init) => {
       await testOrder(contractAsMinter, minter, user0, batchIds, [3, 4, 9, 2]);
     });
 
-    it('transfer multiple items in any order', async ({
+    it('transfer multiple items in any order (vii)', async ({
       batchIds,
       contractAsMinter,
       minter,
@@ -1794,7 +1793,7 @@ module.exports = (init) => {
       await testOrder(contractAsMinter, minter, user0, batchIds, [3, 4, 10, 5]);
     });
 
-    it('transfer multiple items in any order', async ({
+    it('transfer multiple items in any order (viii)', async ({
       batchIds,
       contractAsMinter,
       minter,
@@ -1810,7 +1809,7 @@ module.exports = (init) => {
       );
     });
 
-    it('transfer multiple items in any order twice', async ({
+    it('transfer multiple items in any order twice (i)', async ({
       batchIds,
       contractAsMinter,
       minter,
@@ -1828,7 +1827,7 @@ module.exports = (init) => {
       );
     });
 
-    it('transfer multiple items in any order twice', async ({
+    it('transfer multiple items in any order twice (ii)', async ({
       batchIds,
       contractAsMinter,
       minter,
@@ -1846,7 +1845,7 @@ module.exports = (init) => {
       );
     });
 
-    it('transfer multiple items in any order twice', async ({
+    it('transfer multiple items in any order twice (iii)', async ({
       batchIds,
       contractAsMinter,
       minter,
@@ -1864,7 +1863,7 @@ module.exports = (init) => {
       );
     });
 
-    it('transfer multiple items in any order twice', async ({
+    it('transfer multiple items in any order twice (iv)', async ({
       batchIds,
       contractAsMinter,
       minter,
@@ -1882,7 +1881,7 @@ module.exports = (init) => {
       );
     });
 
-    it('transfer multiple items in any order twice', async ({
+    it('transfer multiple items in any order twice (v)', async ({
       batchIds,
       contractAsMinter,
       minter,
@@ -1900,7 +1899,7 @@ module.exports = (init) => {
       );
     });
 
-    it('transfer multiple items in any order twice', async ({
+    it('transfer multiple items in any order twice (vi)', async ({
       batchIds,
       contractAsMinter,
       minter,
