@@ -93,7 +93,7 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         uint256[] calldata values
     ) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
-        require(block.timestamp > _expiryTime, "SALE_NOT_OVER");
+        // require(block.timestamp > _expiryTime, "SALE_NOT_OVER"); // removed to recover in case of misconfigured sales
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
     }
 

@@ -25,7 +25,7 @@ const func: DeployFunction = async function () {
   const gasPriceFromNode = await ethers.provider.getGasPrice();
   let gasPrice = gasPriceFromNode;
   if (hre.network.name === 'mainnet') {
-    gasPrice = BigNumber.from('56000000000'); // TODO
+    gasPrice = BigNumber.from('56000000000'); // TODO allow it to be passed as parameter to the script
   }
   console.log({
     gasPriceFromNode: gasPriceFromNode.toString(),
@@ -160,16 +160,6 @@ const func: DeployFunction = async function () {
     batches.push(currentBatch);
   }
 
-  // TODO remove
-  // const {
-  //   data: approveForAllData,
-  // } = await Asset.populateTransaction.setApprovalForAll(deployer, true);
-  // const tx = await DeployerBatch.singleTargetAtomicBatch(Asset.address, [
-  //   approveForAllData,
-  // ]);
-  // await tx.wait();
-  // const deployerAsset = Asset.connect(await ethers.getSigner(deployer));
-
   for (const batch of batches) {
     const datas = [];
     console.log();
@@ -187,27 +177,6 @@ const func: DeployFunction = async function () {
         'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)'
       ](DeployerBatch.address, to, ids, values, '0x');
       datas.push(data);
-
-      // TODO remove
-      // try {
-      //   const tx = await deployerAsset[
-      //     'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)'
-      //   ](DeployerBatch.address, to, ids, values, '0x');
-      //   saveTransfersTransaction([index], tx);
-      //   console.log(`transfers`, {
-      //     tx: tx.hash,
-      //   });
-      //   const receipt = await tx.wait();
-      //   const gasUsed = receipt.gasUsed;
-      //   totalGasUsed = totalGasUsed.add(gasUsed);
-      //   console.log({
-      //     gasUsed: gasUsed.toString(),
-      //     totalGasUsed: totalGasUsed.toString(),
-      //   });
-      // } catch (e) {
-      //   console.error(JSON.stringify(transfer), e);
-      //   throw e;
-      // }
     }
     if (!readOnly) {
       try {

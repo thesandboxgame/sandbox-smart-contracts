@@ -35,7 +35,7 @@ const func: DeployFunction = async function () {
   const gasPriceFromNode = await ethers.provider.getGasPrice();
   let gasPrice = gasPriceFromNode;
   if (hre.network.name === 'mainnet') {
-    gasPrice = BigNumber.from('56000000000'); // TODO
+    gasPrice = BigNumber.from('56000000000'); // TODO allow it to be passed as parameter to the script
   }
   console.log({
     gasPriceFromNode: gasPriceFromNode.toString(),

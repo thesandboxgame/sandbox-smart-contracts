@@ -1,4 +1,9 @@
-import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
+import {
+  ethers,
+  deployments,
+  getNamedAccounts,
+  getUnnamedAccounts,
+} from 'hardhat';
 import {BigNumber, utils, Contract, BytesLike} from 'ethers';
 import Prando from 'prando';
 import {Address} from 'hardhat-deploy/types';
@@ -37,7 +42,6 @@ async function getRandom(): Promise<number> {
 
 async function getNewGame(
   gameToken: Contract,
-  gameTokenAsAdmin: Contract,
   from: User,
   to: User,
   assetIds: BigNumber[] | null,
@@ -124,16 +128,32 @@ describe('GameToken', function () {
     let users: User[];
     let gameToken: Contract;
     let gameTokenAsMinter: Contract;
+    let gameTokenAsAdmin: Contract;
     let GameOwner: User;
     let gameId: BigNumber;
 
     before(async function () {
-      ({gameToken, users, GameOwner} = await setupTest());
+      ({gameToken, users, GameOwner, gameTokenAsAdmin} = await setupTest());
       const {gameTokenAdmin} = await getNamedAccounts();
       gameTokenAsMinter = await gameToken.connect(
         ethers.provider.getSigner(gameTokenAdmin)
       );
-      expect(await gameToken.getMinter()).to.be.equal(gameTokenAdmin);
+      const minterContract = await deployments.get('GameMinter');
+      expect(await gameToken.getMinter()).to.be.equal(minterContract.address);
+    });
+
+    it('can update the GameMinter address', async function () {
+      await expect(gameToken.changeMinter(users[8].address)).to.be.revertedWith(
+        'ADMIN_ONLY'
+      );
+
+      const {gameTokenAdmin} = await getNamedAccounts();
+
+      const originalMinter = await gameToken.getMinter();
+      await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
+      const newMinter = await gameToken.getMinter();
+      expect(newMinter).to.be.equal(gameTokenAdmin);
+      expect(newMinter).to.not.equal(originalMinter);
     });
 
     it('Minter can create GAMEs when _Minter is set', async function () {
@@ -185,7 +205,7 @@ describe('GameToken', function () {
           ethers.constants.AddressZero,
           randomId
         )
-      ).to.be.revertedWith('BASEID_REUSE_FORBIDDEN');
+      ).to.be.revertedWith('STORAGE_ID_REUSE_FORBIDDEN');
     });
 
     it('gameId contains creator address', async function () {
@@ -218,6 +238,11 @@ describe('GameToken', function () {
       let eventAssets: BigNumber[];
       let values: BigNumber[];
 
+      before(async function () {
+        const {gameTokenAdmin} = await getNamedAccounts();
+        await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
+      });
+
       it('fails to create if "to" address is the gameToken contract', async function () {
         await expect(
           gameTokenAsMinter.createGame(
@@ -240,14 +265,7 @@ describe('GameToken', function () {
           assets[0]
         );
 
-        gameId = await getNewGame(
-          gameToken,
-          gameTokenAsMinter,
-          GameOwner,
-          GameOwner,
-          assets,
-          [1]
-        );
+        gameId = await getNewGame(gameToken, GameOwner, GameOwner, assets, [1]);
 
         const balanceAfter = await assetContract['balanceOf(address,uint256)'](
           gameToken.address,
@@ -263,7 +281,6 @@ describe('GameToken', function () {
       });
 
       it('can mint Games with many Assets', async function () {
-        const {gameToken, GameOwner} = await setupTest();
         const assetContract = await ethers.getContract('Asset');
 
         const assets = await supplyAssets(GameOwner.address, [3, 2]);
@@ -339,7 +356,7 @@ describe('GameToken', function () {
 
         expect(balanceAfter).to.be.equal(balanceBefore + 3);
         expect(balanceAfter2).to.be.equal(balanceBefore2 + 2);
-        expect(balanceOf).to.be.equal(1);
+        expect(balanceOf).to.be.equal(2);
         expect(ownerOf).to.be.equal(GameOwner.address);
         expect(id).to.be.equal(gameId);
         expect(eventAssets).to.be.eql([assetId, assetId2]);
@@ -395,6 +412,7 @@ describe('GameToken', function () {
         } = await setupTest());
 
         const {gameTokenAdmin} = await getNamedAccounts();
+        await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
         gameTokenAsMinter = await gameToken.connect(
           ethers.provider.getSigner(gameTokenAdmin)
         );
@@ -840,14 +858,20 @@ describe('GameToken', function () {
     let users: User[];
     let GameOwner: User;
     let gameTokenAsAdmin: Contract;
+    let gameTokenAsMinter: Contract;
 
     before(async function () {
       ({gameToken, users, GameOwner, gameTokenAsAdmin} = await setupTest());
+      const {gameTokenAdmin} = await getNamedAccounts();
+      await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
+      gameTokenAsMinter = await gameToken.connect(
+        ethers.provider.getSigner(gameTokenAdmin)
+      );
       const assets = await supplyAssets(GameOwner.address, [1]);
       assetId = assets[0];
       const randomId = await getRandom();
       const receipt = await waitFor(
-        gameTokenAsAdmin.createGame(
+        gameTokenAsMinter.createGame(
           GameOwner.address,
           GameOwner.address,
           {...update, assetIdsToAdd: [assetId], assetAmountsToAdd: [1]},
@@ -915,6 +939,7 @@ describe('GameToken', function () {
   describe('GameToken: MetaData', function () {
     let gameToken: Contract;
     let gameTokenAsAdmin: Contract;
+    let gameTokenAsMinter: Contract;
     let gameId: BigNumber;
     let GameOwner: User;
     let GameEditor1: User;
@@ -927,9 +952,14 @@ describe('GameToken', function () {
         gameTokenAsAdmin,
       } = await setupTest());
       const randomId = await getRandom();
+      const {gameTokenAdmin} = await getNamedAccounts();
+      await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
+      gameTokenAsMinter = await gameToken.connect(
+        ethers.provider.getSigner(gameTokenAdmin)
+      );
 
       const receipt = await waitFor(
-        gameTokenAsAdmin.createGame(
+        gameTokenAsMinter.createGame(
           GameOwner.address,
           GameOwner.address,
           {...update, uri: utils.keccak256(toUtf8Bytes('Hello Sandbox'))},
@@ -969,7 +999,7 @@ describe('GameToken', function () {
     });
 
     it('Minter can set the tokenURI', async function () {
-      const receipt = await gameTokenAsAdmin.updateGame(
+      const receipt = await gameTokenAsMinter.updateGame(
         GameOwner.address,
         gameId,
         {...update, uri: utils.keccak256(toUtf8Bytes('This is new.'))}
@@ -1023,25 +1053,19 @@ describe('GameToken', function () {
 
     before(async function () {
       ({gameToken, gameTokenAsAdmin, users, GameOwner} = await setupTest());
+      const {gameTokenAdmin} = await getNamedAccounts();
 
       assets = await supplyAssets(GameOwner.address, [7, 11]);
+      await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
 
-      gameId = await getNewGame(
-        gameToken,
-        gameTokenAsAdmin,
-        GameOwner,
-        GameOwner,
-        assets,
-        [7, 11]
-      );
+      gameId = await getNewGame(gameToken, GameOwner, GameOwner, assets, [
+        7,
+        11,
+      ]);
     });
-
-    // @review meataTx tests and look for vulnerabilities.
 
     it('fails if "from" != game owner', async function () {
       await expect(
-        // GameOwner could use the `burn` function, this is a contrived test
-        // to demonstrate a specific failure mode
         GameOwner.Game.burnFrom(gameToken.address, gameId)
       ).to.be.revertedWith('NOT_OWNER');
     });
@@ -1162,14 +1186,10 @@ describe('GameToken', function () {
       before(async function () {
         assets = await supplyAssets(GameOwner.address, [7, 11]);
 
-        gameId = await getNewGame(
-          gameToken,
-          gameTokenAsAdmin,
-          GameOwner,
-          GameOwner,
-          assets,
-          [7, 11]
-        );
+        gameId = await getNewGame(gameToken, GameOwner, GameOwner, assets, [
+          7,
+          11,
+        ]);
       });
 
       it('can destroy without transfer of assets', async function () {
@@ -1302,18 +1322,17 @@ describe('GameToken', function () {
           manyQuantities2
         );
 
+        const {gameTokenAdmin} = await getNamedAccounts();
+        const gameTokenAsMinter = await gameToken.connect(
+          ethers.provider.getSigner(gameTokenAdmin)
+        );
+
         let tooManyAssetsGameId = await getNewGame(
           gameToken,
-          gameTokenAsAdmin,
           GameOwner,
           GameOwner,
           manyAssets1,
           manyQuantities1
-        );
-
-        const {gameTokenAdmin} = await getNamedAccounts();
-        const gameTokenAsMinter = await gameToken.connect(
-          ethers.provider.getSigner(gameTokenAdmin)
         );
 
         await gameTokenAsMinter.updateGame(
@@ -1365,20 +1384,18 @@ describe('GameToken', function () {
     let gameId: BigNumber;
     let updatedGameId: BigNumber;
     let assets: BigNumber[];
+    let gameAssetsWithOldId: BigNumber[];
 
     before(async function () {
       ({gameToken, gameTokenAsAdmin, users, GameOwner} = await setupTest());
-      assets = await supplyAssets(GameOwner.address, [7, 11]);
-      gameId = await getNewGame(
-        gameToken,
-        gameTokenAsAdmin,
-        GameOwner,
-        GameOwner,
-        assets,
-        [7, 11]
-      );
-
       const {gameTokenAdmin} = await getNamedAccounts();
+      await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
+      assets = await supplyAssets(GameOwner.address, [7, 11]);
+      gameId = await getNewGame(gameToken, GameOwner, GameOwner, assets, [
+        7,
+        11,
+      ]);
+
       gameTokenAsMinter = await gameToken.connect(
         ethers.provider.getSigner(gameTokenAdmin)
       );
@@ -1394,10 +1411,19 @@ describe('GameToken', function () {
       expect(version).to.be.equal('00000001');
     });
 
+    it('should consider future versions of gameIds as invalid', async function () {
+      const futureIdVersion = gameId.add(42);
+      await expect(gameToken.ownerOf(futureIdVersion)).to.be.revertedWith(
+        'NONEXISTANT_TOKEN'
+      );
+    });
+
     it('should update version when changes are made', async function () {
       let idAsHex = utils.hexValue(gameId);
       const versionBefore = idAsHex.slice(58);
       expect(versionBefore).to.be.equal('00000001');
+
+      gameAssetsWithOldId = await gameToken.getAssetBalances(gameId, assets);
       const receipt = await gameTokenAsMinter.updateGame(
         GameOwner.address,
         gameId,
@@ -1414,18 +1440,11 @@ describe('GameToken', function () {
       expect(versionAfter).to.be.equal('00000002');
     });
 
-    it('should use baseId (creator address + subId) to map to game Assets & metaData ', async function () {
-      const uriWithOldId = await gameToken.tokenURI(gameId);
-      const uriWithUpdatedId = await gameToken.tokenURI(updatedGameId);
-      const gameAssetsWithOldId = await gameToken.getAssetBalances(
-        gameId,
-        assets
-      );
+    it('should use baseId (creator address + subId) to map to game Assets  ', async function () {
       const gameAssetsWithUpdatedId = await gameToken.getAssetBalances(
         updatedGameId,
         assets
       );
-      expect(uriWithUpdatedId).to.be.equal(uriWithOldId);
       expect(gameAssetsWithOldId).to.deep.equal(gameAssetsWithUpdatedId);
     });
   });
@@ -1447,7 +1466,13 @@ describe('GameToken', function () {
 
     before(async function () {
       ({gameToken, users, GameOwner, gameTokenAsAdmin} = await setupTest());
-      const {sandExecutionAdmin, sandAdmin} = await getNamedAccounts();
+      const {
+        sandExecutionAdmin,
+        sandAdmin,
+        gameTokenAdmin,
+      } = await getNamedAccounts();
+      await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
+
       sandContract = await ethers.getContract('Sand');
       sandAsExecutionAdmin = await sandContract.connect(
         ethers.provider.getSigner(sandExecutionAdmin)
@@ -1468,14 +1493,10 @@ describe('GameToken', function () {
       await sandAsAdmin.setSuperOperator(gameToken.address, true);
 
       assets = await supplyAssets(GameOwner.address, [10, 8]);
-      gameId = await getNewGame(
-        gameToken,
-        gameTokenAsAdmin,
-        GameOwner,
-        GameOwner,
-        assets,
-        [10, 8]
-      );
+      gameId = await getNewGame(gameToken, GameOwner, GameOwner, assets, [
+        10,
+        8,
+      ]);
     });
 
     it('can check "Trusted Forwarder" if MetaTransactionProcessor = METATX_2771', async function () {
@@ -1573,14 +1594,10 @@ describe('GameToken', function () {
     });
     it('can call burnFrom via metaTx', async function () {
       assets = await supplyAssets(GameOwner.address, [5, 7]);
-      gameId2 = await getNewGame(
-        gameToken,
-        gameTokenAsAdmin,
-        GameOwner,
-        GameOwner,
-        assets,
-        [5, 7]
-      );
+      gameId2 = await getNewGame(gameToken, GameOwner, GameOwner, assets, [
+        5,
+        7,
+      ]);
 
       const {data} = await gameToken.populateTransaction.burnFrom(
         GameOwner.address,
@@ -1666,13 +1683,21 @@ describe('GameToken', function () {
       let gameToken: Contract;
       let GameOwner: User;
       let gameTokenAsAdmin: Contract;
+      let gameTokenAsMinter: Contract;
 
       it('should fail if processorType == METATX_2771 && from != _forceMsgSender()', async function () {
         ({gameToken, GameOwner, gameTokenAsAdmin} = await setupTest());
+        const {gameTokenAdmin} = await getNamedAccounts();
         others = await getUnnamedAccounts();
+        await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
+        gameTokenAsMinter = await gameToken.connect(
+          ethers.provider.getSigner(gameTokenAdmin)
+        );
+
         const randomId = await getRandom();
+
         const receipt = await waitFor(
-          gameTokenAsAdmin.createGame(
+          gameTokenAsMinter.createGame(
             GameOwner.address,
             GameOwner.address,
             {...update},

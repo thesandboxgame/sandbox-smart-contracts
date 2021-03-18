@@ -1,6 +1,6 @@
 import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {AssetClaim} from '../data/asset_giveaway_1/getAssets';
+import {AssetClaim} from '../lib/merkleTreeHelper';
 
 const func: DeployFunction = async function () {
   const {deployments, ethers, getNamedAccounts} = hre;
@@ -27,7 +27,7 @@ const func: DeployFunction = async function () {
     Asset.address,
     [data],
     {gasPrice: '56000000000'}
-  ); // TODO gasprice
+  ); // TODO allow gasprice to be passed as parameter to the script
   console.log({txHash: tx.hash});
   await tx.wait();
 };
