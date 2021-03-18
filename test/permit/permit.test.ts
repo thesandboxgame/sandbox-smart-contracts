@@ -13,7 +13,7 @@ import {data712} from './data712';
 const zeroAddress = constants.AddressZero;
 const TEST_AMOUNT = BigNumber.from(10).mul('1000000000000000000');
 
-describe('Permit', function () {
+describe.only('Permit', function () {
   // Note: on test network, others[1] is sandAdmin, others[2] is sandBeneficiary
 
   it('ERC20 Approval event is emitted when msg signer == owner', async function () {
