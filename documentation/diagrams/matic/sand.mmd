@@ -1,0 +1,34 @@
+sequenceDiagram
+
+    participant User
+
+    rect rgb(240, 240, 240)
+        Note over Matic Team,RootChainManager: Map token (L1 <-> L2) (once)
+        Matic Team->>RootChainManager:mapToken(Sand,Sand_Matic,ERC20)
+    end
+    rect rgb(240, 240, 240)
+        Note over User,Sand(L1): L1 -> L2
+        User->>Sand(L1): approveAndCal(SandMaticDepositor, despoitToMatic)
+        Sand(L1)->>SandMaticDepositor: despositToMatic
+        SandMaticDepositor->>Sand(L1): transferFrom(User,this...)
+        SandMaticDepositor->>RootChainManager:depositFor(to, Sand(L1), data)
+        RootChainManager->>ERC20Predicate: lockTokens(...)
+        ERC20Predicate->>Sand(L1):transferFrom(User,this,...)
+    end
+    rect rgb(150, 240, 240)
+        Note over Matic Syncer,ChildChainManager: sync state from L1
+        Matic Syncer->>+ChildChainManager:onStateReceive(...)
+        ChildChainManager->>Sand(L2): deposit(...) (mint)
+    end
+    rect rgb(150, 240, 240)
+        Note over User,Sand(L2): burn Sand on L2
+        User->>Sand(L2):burn
+    end
+     rect rgb(240, 240, 240)
+        Note over User,RootChainManager: notify exit (back to L1)
+        User->>+RootChainManager:exit(...)
+        RootChainManager->>+ERC20Predicate: exitTokens(User,Sand(L1),...)
+        ERC20Predicate->>Sand(L1): transferFrom(this,User...)
+    end
+
+
