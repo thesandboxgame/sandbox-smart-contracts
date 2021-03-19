@@ -40,8 +40,6 @@ contract ERC1155ERC721 is WithSuperOperatorsEmpty, IERC1155, IERC721 {
     uint256 private constant MAX_SUPPLY = uint256(2)**32 - 1;
     uint256 private constant MAX_PACK_SIZE = uint256(2)**11;
 
-    event CreatorshipTransfer(address indexed original, address indexed from, address indexed to);
-
     mapping(address => uint256) private _numNFTPerAddress; // erc721
     mapping(uint256 => uint256) private _owners; // erc721
     mapping(address => mapping(uint256 => uint256)) private _packedTokenBalance; // erc1155
@@ -53,24 +51,27 @@ contract ERC1155ERC721 is WithSuperOperatorsEmpty, IERC1155, IERC721 {
 
     mapping(address => address) private _creatorship; // creatorship transfer
 
-    // @review Bouncer
     mapping(address => bool) private _bouncers; // the contracts allowed to mint
     mapping(address => bool) private _metaTransactionProcessors; // meta-transaction support
-    // @review Bouncer ... Deprecate?
+
     address private _bouncerAdmin;
 
     bool internal _init;
 
-    // @review Bouncer
+    event CreatorshipTransfer(address indexed original, address indexed from, address indexed to);
     event Bouncer(address bouncer, bool enabled);
-    // @review Bouncer
     event BouncerAdminChanged(address oldBouncerAdmin, address newBouncerAdmin);
     event MetaTransactionProcessor(address metaTransactionProcessor, bool enabled);
 
+    struct Minter {
+        address minter;
+        bool allowedToMint;
+    }
+
     function init(
         address[] calldata trustedForwarders,
-        // @review Bouncer
-        address bouncerAdmin
+        address bouncerAdmin,
+        Minter[] calldata minters
     ) public {
         require(!_init, "ALREADY_INITIALISED");
         _init = true;
@@ -78,38 +79,15 @@ contract ERC1155ERC721 is WithSuperOperatorsEmpty, IERC1155, IERC721 {
             _metaTransactionProcessors[trustedForwarders[i]] = true;
             emit MetaTransactionProcessor(trustedForwarders[i], true);
         }
+        for (uint256 i; i < minters.length; i++) {
+            _bouncers[minters[i].minter] = minters[i].allowedToMint;
+            emit Bouncer(minters[i].minter, minters[i].allowedToMint);
+        }
         _admin = address(0);
-        // @review Bouncer
+        emit BouncerAdminChanged(_bouncerAdmin, bouncerAdmin);
         _bouncerAdmin = bouncerAdmin;
     }
 
-    // @review Bouncer
-    /// @notice Returns the current administrator in charge of minting rights.
-    /// @return the current minting administrator in charge of minting rights.
-    function getBouncerAdmin() external view returns (address) {
-        return _bouncerAdmin;
-    }
-
-    // @review Bouncer
-    /// @notice Change the minting administrator to be `newBouncerAdmin`.
-    /// @param newBouncerAdmin address of the new minting administrator.
-    function changeBouncerAdmin(address newBouncerAdmin) external {
-        require(msg.sender == _bouncerAdmin, "!BOUNCER_ADMIN");
-        emit BouncerAdminChanged(_bouncerAdmin, newBouncerAdmin);
-        _bouncerAdmin = newBouncerAdmin;
-    }
-
-    // @review Bouncer
-    /// @notice Enable or disable the ability of `bouncer` to mint tokens (minting bouncer rights).
-    /// @param bouncer address that will be given/removed minting bouncer rights.
-    /// @param enabled set whether the address is enabled or disabled as a minting bouncer.
-    function setBouncer(address bouncer, bool enabled) external {
-        require(msg.sender == _bouncerAdmin, "!BOUNCER_ADMIN");
-        _bouncers[bouncer] = enabled;
-        emit Bouncer(bouncer, enabled);
-    }
-
-    // @review Bouncer
     /// @notice check whether address `who` is given minting bouncer rights.
     /// @param who The address to query.
     /// @return whether the address has minting rights.
