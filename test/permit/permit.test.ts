@@ -13,9 +13,7 @@ import {data712} from './data712';
 const zeroAddress = constants.AddressZero;
 const TEST_AMOUNT = BigNumber.from(10).mul('1000000000000000000');
 
-describe.only('Permit', function () {
-  // Note: on test network, others[1] is sandAdmin, others[2] is sandBeneficiary
-
+describe('Permit', function () {
   it('ERC20 Approval event is emitted when msg signer == owner', async function () {
     const setUp = await setupPermit();
     const {permitContract, sandContract, others, nonce, deadline} = setUp;
@@ -29,7 +27,8 @@ describe.only('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
@@ -71,7 +70,7 @@ describe.only('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
@@ -111,7 +110,7 @@ describe.only('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
@@ -144,7 +143,7 @@ describe.only('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
@@ -177,7 +176,7 @@ describe.only('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
@@ -210,7 +209,7 @@ describe.only('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
@@ -274,7 +273,7 @@ describe.only('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
@@ -343,7 +342,7 @@ describe.only('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
@@ -406,7 +405,7 @@ describe.only('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
