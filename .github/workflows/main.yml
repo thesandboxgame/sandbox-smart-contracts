@@ -35,7 +35,7 @@ jobs:
         run: yarn format
 
       - name: Running tests
-        run: yarn gas
+        run: yarn test
 
       # - name: Codechecks
       #   env:
