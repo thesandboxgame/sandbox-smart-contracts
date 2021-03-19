@@ -255,6 +255,30 @@ describe('GameToken', function () {
         ).to.be.revertedWith('DESTINATION_GAME_CONTRACT');
       });
 
+      it('fails to add ERC1155 tokens to the game if Operator != GAME contract', async function () {
+        const assetContract = await ethers.getContract('Asset');
+        const assets = await supplyAssets(GameOwner.address, [11]);
+        await expect(
+          assetContract[
+            'safeTransferFrom(address,address,uint256,uint256,bytes)'
+          ](GameOwner.address, gameToken.address, assets[0], 11, '')
+        ).to.be.revertedWith('ERC1155_REJECTED');
+      });
+
+      it('fails to add ERC1155 token batch to the game if Operator != GAME contract', async function () {
+        const assetContract = await ethers.getContract('Asset');
+        const assets = await supplyAssets(GameOwner.address, [11, 42, 7]);
+        await expect(
+          assetContract.safeBatchTransferFrom(
+            GameOwner.address,
+            gameToken.address,
+            assets,
+            [11, 42, 7],
+            ''
+          )
+        ).to.be.revertedWith('ERC1155_BATCH_REJECTED');
+      });
+
       it('can mint Games with single Asset', async function () {
         const assetContract = await ethers.getContract('Asset');
 
