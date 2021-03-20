@@ -329,23 +329,29 @@ describe('ERC20BasicApproveExtension', function () {
       sandContract,
       user0,
     } = await setupERC20BasicApproveExtension();
-    const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
-    const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
-    const function4BytesId = 'e804ff3c';
-    const paddedMsgSender = zeroPadding(user0.substring(2));
-    const paddedZeros = zeroPadding('0');
-    const data = `${function4BytesId}${paddedMsgSender}${paddedZeros}`;
-    await transferSand(sandContract, user0, totalSandBalance);
-    const txValue = toWei(0);
+    const encodedABI = await mockERC20BasicApprovalTarget.populateTransaction.revertOnCall();
+    expect(encodedABI.data).to.not.be.equal(undefined);
+    if (encodedABI.data) {
+      const totalSandBalance = BigNumber.from(100000).mul(
+        `1000000000000000000`
+      );
+      const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
+      const function4BytesId = encodedABI.data.substring(2);
+      const paddedMsgSender = zeroPadding(user0.substring(2));
+      const paddedZeros = zeroPadding('0');
+      const data = `${function4BytesId}${paddedMsgSender}${paddedZeros}`;
+      await transferSand(sandContract, user0, totalSandBalance);
+      const txValue = toWei(0);
 
-    expect(
-      sandContractAsUser0.approveAndCall(
-        mockERC20BasicApprovalTarget.address,
-        approvalAmount,
-        Buffer.from(data, 'hex'),
-        {value: txValue}
-      )
-    ).to.be.revertedWith('REVERT_ON_CALL');
+      await expect(
+        sandContractAsUser0.approveAndCall(
+          mockERC20BasicApprovalTarget.address,
+          approvalAmount,
+          Buffer.from(data, 'hex'),
+          {value: txValue}
+        )
+      ).to.be.revertedWith('REVERT_ON_CALL');
+    }
   });
   it('ApproveAndCall calling buyLandWithSand', async function () {
     const {
@@ -683,20 +689,24 @@ describe('ERC20BasicApproveExtension', function () {
     } = await setupERC20BasicApproveExtension();
     const totalSandBalance = BigNumber.from(100000).mul(`1000000000000000000`);
     const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
-    const function4BytesId = 'e804ff3c';
-    const paddedMsgSender = zeroPadding(user0.substring(2));
-    const paddedZeros = zeroPadding('0');
-    const data = `${function4BytesId}${paddedMsgSender}${paddedZeros}`;
-    await transferSand(sandContract, user0, totalSandBalance);
+    const encodedABI = await mockERC20BasicApprovalTarget.populateTransaction.revertOnCall();
+    expect(encodedABI.data).to.not.be.equal(undefined);
+    if (encodedABI.data) {
+      const function4BytesId = encodedABI.data.substring(2);
+      const paddedMsgSender = zeroPadding(user0.substring(2));
+      const paddedZeros = zeroPadding('0');
+      const data = `${function4BytesId}${paddedMsgSender}${paddedZeros}`;
+      await transferSand(sandContract, user0, totalSandBalance);
 
-    const txValue = toWei(0);
-    expect(
-      sandContractAsUser0.paidCall(
-        mockERC20BasicApprovalTarget.address,
-        approvalAmount,
-        Buffer.from(data, 'hex'),
-        {value: txValue}
-      )
-    ).to.be.revertedWith('REVERT_ON_CALL');
+      const txValue = toWei(0);
+      await expect(
+        sandContractAsUser0.paidCall(
+          mockERC20BasicApprovalTarget.address,
+          approvalAmount,
+          Buffer.from(data, 'hex'),
+          {value: txValue}
+        )
+      ).to.be.revertedWith('REVERT_ON_CALL');
+    }
   });
 });
