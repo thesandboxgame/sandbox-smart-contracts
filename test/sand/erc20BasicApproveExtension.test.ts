@@ -134,7 +134,7 @@ describe('ERC20BasicApproveExtension', function () {
     const senderEthBalanceBefore = await ethers.provider.getBalance(user0);
     const targetEthBalanceBefore = await ethers.provider.getBalance(user1);
     const txValue = toWei(1);
-    const returnData = await sandContract.callStatic.approveAndCall(
+    const returnData = await sandContractAsUser0.callStatic.approveAndCall(
       user1,
       approvalAmount,
       Buffer.from(data, 'hex')
@@ -178,7 +178,7 @@ describe('ERC20BasicApproveExtension', function () {
     const senderEthBalanceBefore = await ethers.provider.getBalance(user0);
     const targetEthBalanceBefore = await ethers.provider.getBalance(user1);
     const txValue = toWei(0);
-    const returnData = await sandContract.callStatic.approveAndCall(
+    const returnData = await sandContractAsUser0.callStatic.approveAndCall(
       user1,
       approvalAmount,
       Buffer.from(data, 'hex')
@@ -255,7 +255,7 @@ describe('ERC20BasicApproveExtension', function () {
 
       const txValue = toWei(0);
 
-      const returnData = await sandContract.callStatic.approveAndCall(
+      const returnData = await sandContractAsUser0.callStatic.approveAndCall(
         mockERC20BasicApprovalTarget.address,
         approvalAmount,
         Buffer.from(data, 'hex')
@@ -521,7 +521,7 @@ describe('ERC20BasicApproveExtension', function () {
     const senderEthBalanceBefore = await ethers.provider.getBalance(user0);
     const targetEthBalanceBefore = await ethers.provider.getBalance(user1);
     const txValue = toWei(1);
-    const returnData = await sandContract.callStatic.paidCall(
+    const returnData = await sandContractAsUser0.callStatic.paidCall(
       user1,
       approvalAmount,
       Buffer.from(data, 'hex')
@@ -565,7 +565,7 @@ describe('ERC20BasicApproveExtension', function () {
     const senderEthBalanceBefore = await ethers.provider.getBalance(user0);
     const targetEthBalanceBefore = await ethers.provider.getBalance(user1);
     const txValue = toWei(0);
-    const returnData = await sandContract.callStatic.paidCall(
+    const returnData = await sandContractAsUser0.callStatic.paidCall(
       user1,
       approvalAmount,
       Buffer.from(data, 'hex')
@@ -642,7 +642,7 @@ describe('ERC20BasicApproveExtension', function () {
 
       const txValue = toWei(0);
 
-      const returnData = await sandContract.callStatic.paidCall(
+      const returnData = await sandContractAsUser0.callStatic.paidCall(
         mockERC20BasicApprovalTarget.address,
         approvalAmount,
         Buffer.from(data, 'hex')
