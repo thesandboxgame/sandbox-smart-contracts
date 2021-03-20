@@ -37,6 +37,77 @@ async function testFunction(
 }
 
 describe('ERC20BasicApproveExtension', function () {
+  it('ApproveAndCall calling buyLandWithSand', async function () {
+    const {
+      landContract,
+      lands,
+      landSaleContract,
+      sandContractAsUser0,
+      sandContract,
+      user0,
+    } = await setupERC20BasicApproveExtension();
+    const emptyReferral = '0x';
+    const secret =
+      '0x4467363716526536535425451427798982881775318563547751090997863683';
+    const saltedLands = MerkleTreeHelper.saltLands(lands, secret);
+    const landHashArray = MerkleTreeHelper.createDataArray(saltedLands);
+    const land = saltedLands
+      .filter((l: SaltedSaleLandInfo) => l.size === 6)
+      .find((l: SaltedSaleLandInfo) => !l.reserved);
+
+    expect(land).to.not.be.equal(undefined);
+    if (land !== undefined) {
+      const tree = new MerkleTree(landHashArray);
+      const proof = tree.getProof(MerkleTreeHelper.calculateLandHash(land));
+      const totalSandBalance = BigNumber.from(100000).mul(
+        `1000000000000000000`
+      );
+      const approvalAmount = BigNumber.from(5000).mul(`1000000000000000000`);
+      const encodedABI = await landSaleContract.populateTransaction.buyLandWithSand(
+        user0,
+        user0,
+        zeroAddress,
+        land.x,
+        land.y,
+        land.size,
+        land.price,
+        land.price,
+        land.salt,
+        [],
+        proof,
+        emptyReferral
+      );
+      expect(encodedABI.data).to.not.be.equal(undefined);
+      if (encodedABI.data) {
+        const data = encodedABI.data.substring(2);
+        await transferSand(sandContract, user0, totalSandBalance);
+        const txValue = toWei(0);
+        await waitFor(
+          sandContractAsUser0.approveAndCall(
+            landSaleContract.address,
+            approvalAmount,
+            Buffer.from(data, 'hex'),
+            {value: txValue}
+          )
+        );
+        const landMintingEvents = await landContract.queryFilter(
+          landContract.filters.Transfer()
+        );
+        expect(landMintingEvents).to.not.equal(undefined);
+        if (landMintingEvents) {
+          for (let i = 0; i < landMintingEvents.length; i++) {
+            expect(landMintingEvents[i].args).to.not.equal(undefined);
+            if (landMintingEvents[i].args !== undefined) {
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              expect(landMintingEvents[i].args![0]).to.equal(zeroAddress);
+              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+              expect(landMintingEvents[i].args![1]).to.equal(user0);
+            }
+          }
+        }
+      }
+    }
+  });
   it('ApproveAndCall should fail for input data too short', async function () {
     const {
       sandContractAsUser0,
@@ -353,7 +424,7 @@ describe('ERC20BasicApproveExtension', function () {
       ).to.be.revertedWith('REVERT_ON_CALL');
     }
   });
-  it('ApproveAndCall calling buyLandWithSand', async function () {
+  it('PaidCall calling buyLandWithSand', async function () {
     const {
       landContract,
       lands,
@@ -399,7 +470,7 @@ describe('ERC20BasicApproveExtension', function () {
         await transferSand(sandContract, user0, totalSandBalance);
         const txValue = toWei(0);
         await waitFor(
-          sandContractAsUser0.approveAndCall(
+          sandContractAsUser0.paidCall(
             landSaleContract.address,
             approvalAmount,
             Buffer.from(data, 'hex'),
