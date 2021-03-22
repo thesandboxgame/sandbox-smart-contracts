@@ -512,10 +512,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @return the address of the owner before burning.
     function _withdrawalOwnerOf(uint256 id) internal view returns (address) {
         uint256 packedData = _owners[_storageId(id)];
-        if ((packedData & BURNED_FLAG) == BURNED_FLAG) {
-            return address(packedData);
-        }
-        return address(0);
+        return address(packedData);
     }
 
     /// @dev A GameToken-specific implementation which handles versioned tokenIds.

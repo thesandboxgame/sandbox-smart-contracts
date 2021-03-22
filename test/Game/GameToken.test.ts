@@ -255,6 +255,38 @@ describe('GameToken', function () {
         ).to.be.revertedWith('DESTINATION_GAME_CONTRACT');
       });
 
+      it('fails to add ERC1155 tokens to the game if Operator != GAME contract', async function () {
+        const assetContract = await ethers.getContract('Asset');
+        const assetAsGameOwner = await assetContract.connect(
+          ethers.provider.getSigner(GameOwner.address)
+        );
+        const assets = await supplyAssets(GameOwner.address, [11]);
+
+        await expect(
+          assetAsGameOwner[
+            'safeTransferFrom(address,address,uint256,uint256,bytes)'
+          ](GameOwner.address, gameToken.address, assets[0], 11, '0x')
+        ).to.be.revertedWith('ERC1155_REJECTED');
+      });
+
+      it('fails to add ERC1155 token batch to the game if Operator != GAME contract', async function () {
+        const assetContract = await ethers.getContract('Asset');
+        const assetAsGameOwner = await assetContract.connect(
+          ethers.provider.getSigner(GameOwner.address)
+        );
+        const assets = await supplyAssets(GameOwner.address, [11, 42, 7]);
+
+        await expect(
+          assetAsGameOwner.safeBatchTransferFrom(
+            GameOwner.address,
+            gameToken.address,
+            assets,
+            [11, 42, 7],
+            '0x'
+          )
+        ).to.be.revertedWith('ERC1155_BATCH_REJECTED');
+      });
+
       it('can mint Games with single Asset', async function () {
         const assetContract = await ethers.getContract('Asset');
 
@@ -924,6 +956,24 @@ describe('GameToken', function () {
       expect(creatorAfter).to.not.equal(creatorBefore);
     });
 
+    it('can transfer creatorship of a GAME back to original creator', async function () {
+      const others = await getUnnamedAccounts();
+      const creatorBefore = await gameToken.creatorOf(gameId);
+      const gameTokenAsOther = await gameToken.connect(
+        await ethers.provider.getSigner(others[3])
+      );
+
+      await gameTokenAsOther.transferCreatorship(
+        others[3],
+        GameOwner.address,
+        GameOwner.address
+      );
+
+      const creatorAfter = await gameToken.creatorOf(gameId);
+      expect(creatorAfter).to.not.equal(creatorBefore);
+      expect(creatorAfter).to.equal(GameOwner.address);
+    });
+
     it('should fail if non-owner trys to transfer a GAME', async function () {
       const originalOwner = await gameToken.ownerOf(gameId);
       await expect(
@@ -1190,6 +1240,17 @@ describe('GameToken', function () {
           7,
           11,
         ]);
+      });
+
+      it('fails to recover if the GAME token has not been burnt', async function () {
+        await expect(
+          GameOwner.Game.recoverAssets(
+            GameOwner.address,
+            GameOwner.address,
+            gameId,
+            [assets[0]]
+          )
+        ).to.be.revertedWith('ONLY_FROM_BURNED_TOKEN');
       });
 
       it('can destroy without transfer of assets', async function () {
