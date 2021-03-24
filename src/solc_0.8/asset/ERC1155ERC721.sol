@@ -52,7 +52,7 @@ contract ERC1155ERC721 is WithSuperOperatorsEmpty, IERC1155, IERC721 {
     mapping(address => address) private _creatorship; // creatorship transfer
 
     mapping(address => bool) private _bouncers; // the contracts allowed to mint
-    mapping(address => bool) private _metaTransactionProcessors; // meta-transaction support
+    mapping(address => bool) private _metaTransactionContracts; // meta-transaction support
 
     address private _bouncerAdmin;
 
@@ -76,7 +76,7 @@ contract ERC1155ERC721 is WithSuperOperatorsEmpty, IERC1155, IERC721 {
         require(!_init, "ALREADY_INITIALISED");
         _init = true;
         for (uint256 i; i < trustedForwarders.length; i++) {
-            _metaTransactionProcessors[trustedForwarders[i]] = true;
+            _metaTransactionContracts[trustedForwarders[i]] = true;
             emit MetaTransactionProcessor(trustedForwarders[i], true);
         }
         for (uint256 i; i < minters.length; i++) {
@@ -99,7 +99,7 @@ contract ERC1155ERC721 is WithSuperOperatorsEmpty, IERC1155, IERC721 {
     /// @param who The address to query.
     /// @return whether the address has meta-transaction execution rights.
     function isMetaTransactionProcessor(address who) external view returns (bool) {
-        return _metaTransactionProcessors[who];
+        return _metaTransactionContracts[who];
     }
 
     /// @notice Mint a token type for `creator` on slot `packId`.
@@ -993,10 +993,10 @@ contract ERC1155ERC721 is WithSuperOperatorsEmpty, IERC1155, IERC721 {
     ) internal {
         if ((id & IS_NFT) > 0) {
             require(amount == 1, "AMOUNT!=1");
-            _burnERC721(_metaTransactionProcessors[msg.sender] ? from : msg.sender, from, id);
+            _burnERC721(_metaTransactionContracts[msg.sender] ? from : msg.sender, from, id);
         } else {
             require(amount > 0 && amount <= MAX_SUPPLY, "INVALID_AMOUNT");
-            _burnERC1155(_metaTransactionProcessors[msg.sender] ? from : msg.sender, from, id, uint32(amount));
+            _burnERC1155(_metaTransactionContracts[msg.sender] ? from : msg.sender, from, id, uint32(amount));
         }
     }
 
@@ -1071,7 +1071,7 @@ contract ERC1155ERC721 is WithSuperOperatorsEmpty, IERC1155, IERC721 {
     }
 
     function _msgSender() internal view returns (address sender, bool trusted) {
-        trusted = _metaTransactionProcessors[msg.sender] == true;
+        trusted = _metaTransactionContracts[msg.sender] == true;
         if (trusted) {
             // solhint-disable-next-line no-inline-assembly
             assembly {
