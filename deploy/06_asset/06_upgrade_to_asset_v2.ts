@@ -27,51 +27,47 @@ const func: DeployFunction = async function (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const AssetV2 = await (ethers as any).getContractFactory('AssetV2', deployer); // TODO check types with hardhat-ethers and hardhat-deploy-ethers, for now use `any`
 
-  await upgrades.prepareUpgrade(assetProxy.address, AssetV2, {
-    unsafeAllowCustomTypes: true,
-  });
-  upgrades.silenceWarnings();
-
   const asset = await upgrades.upgradeProxy(assetProxy.address, AssetV2, {
-    unsafeAllowCustomTypes: true,
+    unsafeAllowCustomTypes: false,
   });
 
   console.log('Asset upgraded to AssetV2');
 
-  const V2implementationStorage = await ethers.provider.getStorageAt(
+  const implementationStorage = await ethers.provider.getStorageAt(
     asset.address,
     '0x360894a13ba1a3210667c828492db98dca3e2076cc3735a920a3ca505d382bbc'
   );
-  const V2implementationAddress = getAddress(
-    BigNumber.from(V2implementationStorage).toHexString()
+  const implementationAddress = getAddress(
+    BigNumber.from(implementationStorage).toHexString()
   );
-
+  // @note here,implementationAddress is correct (the new implementation).
   log(
-    `AssetV2 deployed as Proxy at : ${asset.address}, implementation: ${V2implementationAddress}`
+    `AssetV2 deployed as Proxy at : ${asset.address}, implementation: ${implementationAddress}`
   );
 
-  const AssetV2Artifact = await deployments.getExtendedArtifact('AssetV2');
-  const assetV2AsDeployment: DeploymentSubmission = {
+  const AssetArtifact = await deployments.getExtendedArtifact('AssetV2');
+  const assetAsDeployment: DeploymentSubmission = {
     address: asset.address,
-    ...AssetV2Artifact,
+    ...AssetArtifact,
     // TODO :transactionHash: transactionHash for Proxy deployment
     // args ?
     // linkedData ?
     // receipt?
     // libraries ?
   };
-  await deployments.save('Asset', assetV2AsDeployment);
+  await deployments.save('Asset', assetAsDeployment);
 
-  const assetV2Implementation = {
-    address: V2implementationAddress,
-    ...AssetV2Artifact,
+  const assetImplementation = {
+    address: implementationAddress,
+    ...AssetArtifact,
     // TODO :transactionHash: transactionHash for Proxy deployment
     // args ?
     // linkedData ?
     // receipt?
     // libraries ?
   };
-  await deployments.save('Asset_Implementation', assetV2Implementation);
+  // @note looking up the address for Asset_implementation in deployments/localhost/, the address is the old implementation.
+  await deployments.save('Asset_Implementation', assetImplementation);
 
   // TODO:
   // await deployments.save('Asset_Proxy', assetProxy); // How do we access the Proxy abi/metadata from openzepeelin. if openzeppelin lib do not provide it, we will need to fetch manually from hre artifacts
@@ -143,7 +139,7 @@ const func: DeployFunction = async function (
   await execute(
     'Asset',
     {from: assetBouncerAdmin, log: true},
-    'init',
+    'initV2',
     forwarder.address,
     assetAdmin,
     assetBouncerAdmin
