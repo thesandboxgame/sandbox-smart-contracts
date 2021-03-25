@@ -62,7 +62,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     bool internal _init;
     bool internal _init2;
 
-    function init(
+    function initV2(
         address metaTransactionContract,
         address admin,
         address bouncerAdmin
