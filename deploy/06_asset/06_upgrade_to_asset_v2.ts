@@ -21,7 +21,7 @@ const func: DeployFunction = async function (
 
   const chainId = await getChainId();
   const assetMinter = await deployments.get('AssetMinter');
-  const forwarder = await deployments.get('MetaTxForwarder');
+  const forwarder = await deployments.get('TestMetaTxForwarder');
 
   const assetProxy = await deployments.get('Asset');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -144,7 +144,7 @@ const func: DeployFunction = async function (
     'Asset',
     {from: assetBouncerAdmin, log: true},
     'init',
-    [forwarder.address],
+    forwarder.address,
     assetAdmin,
     assetBouncerAdmin
   );
@@ -157,8 +157,7 @@ func.dependencies = [
   'Asset_deploy',
   'Asset_setup',
   'AssetMinter_deploy',
-  'MetaTxForwarder_deploy',
+  'TestMetaTxForwarder_deploy',
   'GameToken_setup',
-  'OldCatalystMinter_deploy',
 ];
 func.skip = async (hre) => hre.network.name !== 'hardhat';
