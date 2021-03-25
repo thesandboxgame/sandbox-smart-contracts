@@ -15,7 +15,7 @@ const func: DeployFunction = async function (
     upgrades,
     ethers,
   } = hre;
-  const {deployer, assetBouncerAdmin} = await getNamedAccounts();
+  const {deployer, assetBouncerAdmin, assetAdmin} = await getNamedAccounts();
   const otherAccounts = await getUnnamedAccounts();
   const {log, execute} = deployments;
 
@@ -102,44 +102,41 @@ const func: DeployFunction = async function (
   } catch (e) {
     console.error(e);
   }
-  class Minter {
-    minter: string;
-    allowedToMint: boolean;
-    constructor(address: string, allowed: boolean) {
-      this.minter = address;
-      this.allowedToMint = allowed;
-    }
-  }
+  // class Minter {
+  //   minter: string;
+  //   allowedToMint: boolean;
+  //   constructor(address: string, allowed: boolean) {
+  //     this.minter = address;
+  //     this.allowedToMint = allowed;
+  //   }
+  // }
 
   // for hardhat-network testing we set some simple EOA minters:
-  const dummyMinter = otherAccounts[0];
-  const dummyMinter1 = otherAccounts[1];
+  // const dummyMinter = otherAccounts[0];
+  // const dummyMinter1 = otherAccounts[1];
 
-  async function getNetworkMinters(chain: string): Promise<Minter[]> {
-    const minterArray: Minter[] = [];
-    let allowed: boolean[];
-    let addresses: string[];
+  // async function getNetworkMinters(chain: string): Promise<Minter[]> {
+  //   const minterArray: Minter[] = [];
+  //   let allowed: boolean[];
+  //   let addresses: string[];
 
-    if (chain == '31337') {
-      addresses = [assetMinter.address, dummyMinter, dummyMinter1];
-      allowed = [true, true, true];
-      for (let i = 0; i < addresses.length; i++) {
-        minterArray.push(new Minter(addresses[i], allowed[i]));
-      }
-    } else {
-      addresses = [assetMinter.address];
-      allowed = [true];
-      for (let i = 0; i < addresses.length; i++) {
-        minterArray.push(new Minter(addresses[i], allowed[i]));
-      }
-    }
-    return minterArray;
-  }
+  //   if (chain == '31337') {
+  //     addresses = [assetMinter.address, dummyMinter, dummyMinter1];
+  //     allowed = [true, true, true];
+  //     for (let i = 0; i < addresses.length; i++) {
+  //       minterArray.push(new Minter(addresses[i], allowed[i]));
+  //     }
+  //   } else {
+  //     addresses = [assetMinter.address];
+  //     allowed = [true];
+  //     for (let i = 0; i < addresses.length; i++) {
+  //       minterArray.push(new Minter(addresses[i], allowed[i]));
+  //     }
+  //   }
+  //   return minterArray;
+  // }
 
-  const networkMinters = await getNetworkMinters(chainId);
-
-  console.log(`networkMinters: ${networkMinters}`);
-  console.log(`networkMinters: ${networkMinters[0]}`);
+  // const networkMinters = await getNetworkMinters(chainId);
 
   // @review move to set/init script ?
   // possible to use ProxyAdmin.upgradeToAndCall() to perform upgrade + init in 1 tx ?
@@ -148,8 +145,8 @@ const func: DeployFunction = async function (
     {from: assetBouncerAdmin, log: true},
     'init',
     [forwarder.address],
-    assetBouncerAdmin,
-    networkMinters
+    assetAdmin,
+    assetBouncerAdmin
   );
 };
 
