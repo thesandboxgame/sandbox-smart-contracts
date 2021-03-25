@@ -59,8 +59,28 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
 
     address private _bouncerAdmin;
 
-    bool internal _init;
+    bool internal _init; // as _init is true when we try to initialize v2, a new var is used.
     bool internal _init2;
+
+    // @note consider use of a bitfield here instead of adding a new storage var for each upgrade. Pros: only 1 storage slot. Cons: more bytecode upfront to implement.
+    // src: https://mudit.blog/solidity-tips-and-tricks-to-save-gas-and-reduce-bytecode-size/#2a76
+
+    // function getBoolean(
+    //     uint256 _initBitfield,
+    //     uint256 assetVersion
+    // )
+    // internal view returns(bool) {
+    //     uint256 flag = (_initBitfield >> assetVersion) & uint256(1);
+    //     return (flag == 1 ? true : false);
+    // }
+
+    // function setBoolean(
+    //     uint256 _initBitfield,
+    //     uint256 assetVersion
+    // ) internal {
+    //      _packedBools | uint256(1) << _boolNumber;
+    // }
+
 
     function initV2(
         address metaTransactionContract,
