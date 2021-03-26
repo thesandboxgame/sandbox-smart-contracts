@@ -22,7 +22,7 @@
     "@nomiclabs/hardhat-ethers": "npm:hardhat-deploy-ethers",
     "@openzeppelin/contracts": "^3.2.1-solc-0.7",
     "@openzeppelin/contracts-0.6": "npm:@openzeppelin/contracts@latest",
-    "@openzeppelin/contracts-0.8": "npm:@openzeppelin/contracts@4.0.0-beta.0",
+    "@openzeppelin/contracts-0.8": "npm:@openzeppelin/contracts@4.0.0",
     "@openzeppelin/hardhat-upgrades": "^1.4.3",
     "@types/chai": "^4.2.11",
     "@types/fs-extra": "^9.0.6",
