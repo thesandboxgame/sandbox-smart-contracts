@@ -79,14 +79,13 @@ describe('ERC20BasicApproveExtension', function () {
       );
       expect(encodedABI.data).to.not.be.equal(undefined);
       if (encodedABI.data) {
-        const data = encodedABI.data.substring(2);
         await transferSand(sandContract, user0, totalSandBalance);
         const txValue = toWei(0);
         await waitFor(
           sandContractAsUser0.approveAndCall(
             landSaleContract.address,
             approvalAmount,
-            Buffer.from(data, 'hex'),
+            encodedABI.data,
             {value: txValue}
           )
         );
@@ -468,14 +467,13 @@ describe('ERC20BasicApproveExtension', function () {
       );
       expect(encodedABI.data).to.not.be.equal(undefined);
       if (encodedABI.data) {
-        const data = encodedABI.data.substring(2);
         await transferSand(sandContract, user0, totalSandBalance);
         const txValue = toWei(0);
         await waitFor(
           sandContractAsUser0.paidCall(
             landSaleContract.address,
             approvalAmount,
-            Buffer.from(data, 'hex'),
+            encodedABI.data,
             {value: txValue}
           )
         );
