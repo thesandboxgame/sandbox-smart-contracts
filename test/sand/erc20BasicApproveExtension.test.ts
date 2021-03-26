@@ -317,6 +317,7 @@ describe('ERC20BasicApproveExtension', function () {
     const targetEthBalanceBefore = await ethers.provider.getBalance(
       mockERC20BasicApprovalTarget.address
     );
+    expect(encodedABI.data).to.not.be.equal(undefined);
     if (encodedABI.data) {
       const function4BytesId = encodedABI.data.substring(2, 10);
       const paddedMsgSender = zeroPadding(user0.substring(2));
@@ -375,6 +376,7 @@ describe('ERC20BasicApproveExtension', function () {
     const encodedABI = await mockERC20BasicApprovalTarget.populateTransaction.logOnCall(
       user0
     );
+    expect(encodedABI.data).to.not.be.equal(undefined);
     if (encodedABI.data) {
       const function4BytesId = encodedABI.data.substring(2, 10);
       const paddedMsgSender = zeroPadding(user0.substring(2));
@@ -704,6 +706,7 @@ describe('ERC20BasicApproveExtension', function () {
     const targetEthBalanceBefore = await ethers.provider.getBalance(
       mockERC20BasicApprovalTarget.address
     );
+    expect(encodedABI.data).to.not.be.equal(undefined);
     if (encodedABI.data) {
       const function4BytesId = encodedABI.data.substring(2, 10);
       const paddedMsgSender = zeroPadding(user0.substring(2));
