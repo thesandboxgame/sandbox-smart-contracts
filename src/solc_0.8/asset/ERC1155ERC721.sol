@@ -71,6 +71,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         address admin,
         address bouncerAdmin
     ) public {
+        // initialize the bitfield for previous versions just in case
         _checkInit(0);
         _checkInit(1);
         _checkInit(2);
@@ -1143,6 +1144,10 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         emit Extraction(id, newId);
     }
 
+    /// @dev Allows the use of a bitfield to track the initialized status of the version `v` passed in as an arg.
+    /// If the bit at the index corresponding to the given version is already set, revert.
+    /// Otherwise, set the bit and return.
+    /// @param v The version of this contract.
     function _checkInit(uint256 v) internal {
         require((_initBits >> v) & uint256(1) != 1, "ALREADY_INITIALISED");
         _initBits = _initBits | (uint256(1) << v);
