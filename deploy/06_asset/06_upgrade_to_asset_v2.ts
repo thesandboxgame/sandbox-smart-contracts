@@ -16,11 +16,9 @@ const func: DeployFunction = async function (
     ethers,
   } = hre;
   const {deployer, assetBouncerAdmin, assetAdmin} = await getNamedAccounts();
-  const otherAccounts = await getUnnamedAccounts();
   const {log, execute} = deployments;
 
   const chainId = await getChainId();
-  const assetMinter = await deployments.get('AssetMinter');
   const forwarder = await deployments.get('TestMetaTxForwarder');
 
   const assetProxy = await deployments.get('Asset');
@@ -30,7 +28,7 @@ const func: DeployFunction = async function (
   const asset = await upgrades.upgradeProxy(assetProxy.address, AssetV2, {
     unsafeAllowCustomTypes: false,
   });
-
+  await asset.deployed();
   console.log('Asset upgraded to AssetV2');
 
   const implementationStorage = await ethers.provider.getStorageAt(
@@ -40,7 +38,10 @@ const func: DeployFunction = async function (
   const implementationAddress = getAddress(
     BigNumber.from(implementationStorage).toHexString()
   );
-  // @note here,implementationAddress is correct (the new implementation).
+
+  // @note logged implementationAddress below is correct, but is not saved in /deployments/Asset_Implementation.json
+  // /deployments/Asset.json does not seem to be updated with the new v2 abi
+
   log(
     `AssetV2 deployed as Proxy at : ${asset.address}, implementation: ${implementationAddress}`
   );
@@ -66,7 +67,6 @@ const func: DeployFunction = async function (
     // receipt?
     // libraries ?
   };
-  // @note looking up the address for Asset_implementation in deployments/localhost/, the address is the old implementation.
   await deployments.save('Asset_Implementation', assetImplementation);
 
   // TODO:
@@ -107,7 +107,7 @@ const func: DeployFunction = async function (
   //   }
   // }
 
-  // for hardhat-network testing we set some simple EOA minters:
+  // for hardhat-network testing we set some simple EOA minters as expected by tests:
   // const dummyMinter = otherAccounts[0];
   // const dummyMinter1 = otherAccounts[1];
 
@@ -144,6 +144,7 @@ const func: DeployFunction = async function (
     assetAdmin,
     assetBouncerAdmin
   );
+
 };
 
 export default func;
