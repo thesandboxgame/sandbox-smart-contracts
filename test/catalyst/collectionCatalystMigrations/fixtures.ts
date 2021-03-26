@@ -11,7 +11,10 @@ import {transferSand} from '../utils';
 export const setupCollectionCatalystMigrations = deployments.createFixture(
   async () => {
     await deployments.fixture();
-    const {collectionCatalystMigrationsAdmin} = await getNamedAccounts();
+    const {
+      collectionCatalystMigrationsAdmin,
+      assetAttributesRegistryAdmin,
+    } = await getNamedAccounts();
     const users = await getUnnamedAccounts();
     const user0 = users[0];
     const mockedMigrationContractAddress = users[1];
@@ -42,13 +45,18 @@ export const setupCollectionCatalystMigrations = deployments.createFixture(
     const assetAttributesRegistryAsCollectionCatalystMigrationsAdmin = await assetAttributesRegistry.connect(
       ethers.provider.getSigner(collectionCatalystMigrationsAdmin)
     );
+    const assetAttributesRegistryAsRegistryAdmin = await assetAttributesRegistry.connect(
+      ethers.provider.getSigner(assetAttributesRegistryAdmin)
+    );
     return {
+      assetAttributesRegistryAsRegistryAdmin,
       assetAttributesRegistryAsCollectionCatalystMigrationsAdmin,
       collectionCatalystMigrationsAdmin,
       newMigrationContract,
       mockedMigrationContractAddress,
       assetAttributesRegistry,
       oldCatalystMinterAsUser0,
+      collectionCatalystMigrationsContract,
       collectionCatalystMigrationsContractAsAdmin,
       collectionCatalystMigrationsContractAsUser0,
       oldCatalystRegistry,
