@@ -10,7 +10,6 @@ import {waitFor, setupUsers} from '../utils';
 // import asset_regenerate_and_distribute from '../../setup/asset_regenerate_and_distribute';
 
 export const setupAsset = deployments.createFixture(async function () {
-  console.log('Checkpoint I')
   await deployments.fixture(['Asset']);
   // await asset_regenerate_and_distribute(hre);
   const otherAccounts = await getUnnamedAccounts();
@@ -18,19 +17,13 @@ export const setupAsset = deployments.createFixture(async function () {
   otherAccounts.splice(0, 1);
 
   const {assetBouncerAdmin} = await getNamedAccounts();
-  console.log('Checkpoint J')
 
-  // @review this never returns
   const assetContractAsBouncerAdmin = await ethers.getContract(
     'Asset',
     assetBouncerAdmin
     );
-    console.log('Checkpoint K')
     await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
-    console.log('Checkpoint L')
-
     const Asset = await ethers.getContract('Asset', minter);
-    console.log('Checkpoint M')
 
   let id = 0;
   const ipfsHashString =
@@ -54,8 +47,7 @@ export const setupAsset = deployments.createFixture(async function () {
     } catch(e) {
       console.log(e)
     }
-    console.log(`receipt: ${receipt}`)
-    console.log('Checkpoint N')
+
     const event = receipt?.events?.filter(
       (event: Event) => event.event === 'TransferSingle'
     )[0];
