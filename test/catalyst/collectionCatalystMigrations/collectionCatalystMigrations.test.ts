@@ -97,7 +97,9 @@ describe('CollectionCatalystMigrations', function () {
     const {
       assetAttributesRegistry,
       oldCatalystMinterAsUser0,
+      collectionCatalystMigrationsContract,
       collectionCatalystMigrationsContractAsAdmin,
+      assetAttributesRegistryAsRegistryAdmin,
       user0,
     } = await setupCollectionCatalystMigrations();
     await setupUser(user0);
@@ -121,6 +123,11 @@ describe('CollectionCatalystMigrations', function () {
     );
     const blockNumber = 11874541;
     await waitFor(
+      assetAttributesRegistryAsRegistryAdmin.setMigrationContract(
+        collectionCatalystMigrationsContract.address
+      )
+    );
+    await waitFor(
       collectionCatalystMigrationsContractAsAdmin.migrate(
         assetId,
         [],
@@ -140,6 +147,8 @@ describe('CollectionCatalystMigrations', function () {
     const {
       assetAttributesRegistry,
       oldCatalystMinterAsUser0,
+      assetAttributesRegistryAsRegistryAdmin,
+      collectionCatalystMigrationsContract,
       collectionCatalystMigrationsContractAsAdmin,
       user0,
     } = await setupCollectionCatalystMigrations();
@@ -166,6 +175,11 @@ describe('CollectionCatalystMigrations', function () {
     const blockNumber = 11874541;
     const gemIdsForMigration = [powerGemId];
     await waitFor(
+      assetAttributesRegistryAsRegistryAdmin.setMigrationContract(
+        collectionCatalystMigrationsContract.address
+      )
+    );
+    await waitFor(
       collectionCatalystMigrationsContractAsAdmin.migrate(
         assetId,
         gemIdsForMigration,
@@ -185,6 +199,8 @@ describe('CollectionCatalystMigrations', function () {
   it('migrating assetId of quantity = 1 with legendary catalyst', async function () {
     const {
       assetAttributesRegistry,
+      assetAttributesRegistryAsRegistryAdmin,
+      collectionCatalystMigrationsContract,
       oldCatalystMinterAsUser0,
       collectionCatalystMigrationsContractAsAdmin,
       user0,
@@ -211,6 +227,12 @@ describe('CollectionCatalystMigrations', function () {
     );
     const blockNumber = 11874541;
     const gemIdsForMigration = [powerGemId];
+
+    await waitFor(
+      assetAttributesRegistryAsRegistryAdmin.setMigrationContract(
+        collectionCatalystMigrationsContract.address
+      )
+    );
     await waitFor(
       collectionCatalystMigrationsContractAsAdmin.migrate(
         assetId,
@@ -228,7 +250,6 @@ describe('CollectionCatalystMigrations', function () {
       0
     );
   });
-
   it('migrating asset with collection id != 0 should fail', async function () {
     const {
       oldCatalystMinterAsUser0,
@@ -308,6 +329,8 @@ describe('CollectionCatalystMigrations', function () {
   });
   it('migrating assetId that has already been migrated should fail', async function () {
     const {
+      assetAttributesRegistryAsRegistryAdmin,
+      collectionCatalystMigrationsContract,
       oldCatalystMinterAsUser0,
       collectionCatalystMigrationsContractAsAdmin,
       user0,
@@ -343,6 +366,12 @@ describe('CollectionCatalystMigrations', function () {
       )
     );
     const blockNumber = 11874541;
+
+    await waitFor(
+      assetAttributesRegistryAsRegistryAdmin.setMigrationContract(
+        collectionCatalystMigrationsContract.address
+      )
+    );
     await waitFor(
       collectionCatalystMigrationsContractAsAdmin.migrate(
         assetId,
@@ -368,6 +397,8 @@ describe('CollectionCatalystMigrations', function () {
   });
   it('batchMigrate two assets', async function () {
     const {
+      assetAttributesRegistryAsRegistryAdmin,
+      collectionCatalystMigrationsContract,
       assetAttributesRegistry,
       oldCatalystMinterAsUser0,
       collectionCatalystMigrationsContractAsAdmin,
@@ -413,6 +444,11 @@ describe('CollectionCatalystMigrations', function () {
       {assetId: assetId2, gemIds: gemIdsForMigration, blockNumber},
     ];
     await waitFor(
+      assetAttributesRegistryAsRegistryAdmin.setMigrationContract(
+        collectionCatalystMigrationsContract.address
+      )
+    );
+    await waitFor(
       collectionCatalystMigrationsContractAsAdmin.batchMigrate(migrations)
     );
     incrementGemIds(gemIdsForMigration);
@@ -435,10 +471,18 @@ describe('CollectionCatalystMigrations', function () {
   });
   it('setAssetAttributesRegistryMigrationContract first assignment', async function () {
     const {
+      assetAttributesRegistryAsRegistryAdmin,
+      collectionCatalystMigrationsContract,
       mockedMigrationContractAddress,
       assetAttributesRegistry,
       collectionCatalystMigrationsContractAsAdmin,
     } = await setupCollectionCatalystMigrations();
+
+    await waitFor(
+      assetAttributesRegistryAsRegistryAdmin.setMigrationContract(
+        collectionCatalystMigrationsContract.address
+      )
+    );
     await waitFor(
       collectionCatalystMigrationsContractAsAdmin.setAssetAttributesRegistryMigrationContract(
         mockedMigrationContractAddress
@@ -461,12 +505,20 @@ describe('CollectionCatalystMigrations', function () {
   });
   it('setAssetAttributesRegistryMigrationContract second assignment', async function () {
     const {
+      assetAttributesRegistryAsRegistryAdmin,
+      collectionCatalystMigrationsContract,
       assetAttributesRegistryAsCollectionCatalystMigrationsAdmin,
       collectionCatalystMigrationsAdmin,
       newMigrationContract,
       assetAttributesRegistry,
       collectionCatalystMigrationsContractAsAdmin,
     } = await setupCollectionCatalystMigrations();
+
+    await waitFor(
+      assetAttributesRegistryAsRegistryAdmin.setMigrationContract(
+        collectionCatalystMigrationsContract.address
+      )
+    );
     await waitFor(
       collectionCatalystMigrationsContractAsAdmin.setAssetAttributesRegistryMigrationContract(
         collectionCatalystMigrationsAdmin
@@ -489,12 +541,19 @@ describe('CollectionCatalystMigrations', function () {
   });
   it('setAssetAttributesRegistryMigrationContract second assignment should fail for non migrationContract', async function () {
     const {
+      assetAttributesRegistryAsRegistryAdmin,
+      collectionCatalystMigrationsContract,
       newMigrationContract,
       mockedMigrationContractAddress,
       assetAttributesRegistry,
       collectionCatalystMigrationsContractAsAdmin,
     } = await setupCollectionCatalystMigrations();
 
+    await waitFor(
+      assetAttributesRegistryAsRegistryAdmin.setMigrationContract(
+        collectionCatalystMigrationsContract.address
+      )
+    );
     await waitFor(
       collectionCatalystMigrationsContractAsAdmin.setAssetAttributesRegistryMigrationContract(
         mockedMigrationContractAddress
