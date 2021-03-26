@@ -59,36 +59,17 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
 
     address private _bouncerAdmin;
 
-    bool internal _init; // as _init is true when we try to initialize v2, a new var is used.
-    bool internal _init2;
-
-    // @note consider use of a bitfield here instead of adding a new storage var for each upgrade. Pros: only 1 storage slot. Cons: more bytecode upfront to implement.
-    // src: https://mudit.blog/solidity-tips-and-tricks-to-save-gas-and-reduce-bytecode-size/#2a76
-
-    // function getBoolean(
-    //     uint256 _initBitfield,
-    //     uint256 assetVersion
-    // )
-    // internal view returns(bool) {
-    //     uint256 flag = (_initBitfield >> assetVersion) & uint256(1);
-    //     return (flag == 1 ? true : false);
-    // }
-
-    // function setBoolean(
-    //     uint256 _initBitfield,
-    //     uint256 assetVersion
-    // ) internal {
-    //      _packedBools | uint256(1) << _boolNumber;
-    // }
-
+    bool internal _init;
+    uint256 internal _initBits;
 
     function initV2(
         address metaTransactionContract,
         address admin,
         address bouncerAdmin
     ) public {
-        require(!_init2, "ALREADY_INITIALISED");
-        _init2 = true;
+        _checkInit(0);
+        _checkInit(1);
+        _checkInit(2);
         _metaTransactionContracts[metaTransactionContract] = true;
         _admin = admin;
         _bouncerAdmin = bouncerAdmin;
@@ -1150,5 +1131,10 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         _burnERC1155(operator, sender, id, 1);
         _mint(_metadataHash[id & URI_ID], 1, 0, operator, to, newId, "", true);
         emit Extraction(id, newId);
+    }
+
+    function _checkInit(uint256 v) internal {
+        require((_initBits >> v) & uint256(1) != 1, "ALREADY_INITIALISED");
+        _initBits = _initBits | (uint256(1) << v);
     }
 }
