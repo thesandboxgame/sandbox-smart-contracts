@@ -12,7 +12,6 @@ import "../interfaces/IERC721.sol";
 import "../interfaces/IERC721TokenReceiver.sol";
 
 import "../common/BaseWithStorage/WithSuperOperators.sol";
-import "hardhat/console.sol";
 
 contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     using Address for address;
@@ -63,9 +62,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     bool internal _init;
     uint256 internal _initBits;
 
-    // @review remove this!
-    uint256 internal _version;
-
     function initV2(
         address metaTransactionContract,
         address admin,
@@ -75,15 +71,10 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         _checkInit(0);
         _checkInit(1);
         _checkInit(2);
-        _version = 2;
         _metaTransactionContracts[metaTransactionContract] = true;
         _admin = admin;
         _bouncerAdmin = bouncerAdmin;
         emit MetaTransactionProcessor(metaTransactionContract, true);
-    }
-
-    function getVersion() public view returns (uint256) {
-      return _version;
     }
 
     event BouncerAdminChanged(address oldBouncerAdmin, address newBouncerAdmin);
@@ -207,7 +198,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
             _owners[id] = uint256(uint160(owner));
             emit Transfer(address(0), owner, id);
         } else {
-          console.log("tokenId in Asset contract", id);
             (uint256 bin, uint256 index) = id.getTokenBinIndex();
             _packedTokenBalance[owner][bin] = _packedTokenBalance[owner][bin].updateTokenBalance(
                 index,
