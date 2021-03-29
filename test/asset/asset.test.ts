@@ -71,6 +71,6 @@ describe('Asset.sol', function () {
         [30],
         '0x'
       )
-    ).to.be.revertedWith(`can't substract more than there is`);
+    ).to.be.revertedWith(`BALANCE_TOO_LOW`);
   });
 });
