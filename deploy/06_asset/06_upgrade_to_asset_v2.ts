@@ -21,11 +21,14 @@ const func: DeployFunction = async function (
   const chainId = await getChainId();
   const forwarder = await deployments.get('TestMetaTxForwarder');
 
-  const assetProxy = await deployments.get('Asset');
+  const proxy = await deployments.get('Asset');
+
+  console.log(`proxy address: ${ proxy.address}`)
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const AssetV2 = await (ethers as any).getContractFactory('AssetV2', deployer); // TODO check types with hardhat-ethers and hardhat-deploy-ethers, for now use `any`
 
-  const asset = await upgrades.upgradeProxy(assetProxy.address, AssetV2, {
+  const asset = await upgrades.upgradeProxy(proxy.address, AssetV2, {
     unsafeAllowCustomTypes: false,
   });
   await asset.deployed();
@@ -38,9 +41,6 @@ const func: DeployFunction = async function (
   const implementationAddress = getAddress(
     BigNumber.from(implementationStorage).toHexString()
   );
-
-  // @note logged implementationAddress below is correct, but is not saved in /deployments/Asset_Implementation.json
-  // /deployments/Asset.json does not seem to be updated with the new v2 abi
 
   log(
     `AssetV2 deployed as Proxy at : ${asset.address}, implementation: ${implementationAddress}`
