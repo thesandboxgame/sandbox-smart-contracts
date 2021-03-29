@@ -297,10 +297,8 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         bool safe
     ) internal {
         bool metaTx = _isValidMetaTx(from);
-        bool authorized = msg.sender == from ||
-            metaTx ||
-            _superOperators[msg.sender] ||
-            _operatorsForAll[from][msg.sender];
+        bool authorized =
+            msg.sender == from || metaTx || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender];
 
         require(from != address(0), "NOT_FROM_ZEROADDRESS");
         require(to != address(0), "NOT_TO_ZEROADDRESS");

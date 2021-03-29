@@ -21,9 +21,9 @@ export const setupAsset = deployments.createFixture(async function () {
   const assetContractAsBouncerAdmin = await ethers.getContract(
     'Asset',
     assetBouncerAdmin
-    );
-    await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
-    const Asset = await ethers.getContract('Asset', minter);
+  );
+  await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
+  const Asset = await ethers.getContract('Asset', minter);
 
   let id = 0;
   const ipfsHashString =
@@ -44,8 +44,8 @@ export const setupAsset = deployments.createFixture(async function () {
       receipt = await waitFor(
         Asset.mint(creator, packId, hash, supply, rarity, owner, data)
       );
-    } catch(e) {
-      console.log(e)
+    } catch (e) {
+      console.log(e);
     }
 
     const event = receipt?.events?.filter(

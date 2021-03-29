@@ -7,14 +7,7 @@ import {getAddress} from '@ethersproject/address';
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
-  const {
-    deployments,
-    getNamedAccounts,
-    getUnnamedAccounts,
-    getChainId,
-    upgrades,
-    ethers,
-  } = hre;
+  const {deployments, getNamedAccounts, getChainId, upgrades, ethers} = hre;
   const {deployer, assetBouncerAdmin, assetAdmin} = await getNamedAccounts();
   const {log, execute} = deployments;
 
@@ -23,7 +16,7 @@ const func: DeployFunction = async function (
 
   const proxy = await deployments.get('Asset');
 
-  console.log(`proxy address: ${ proxy.address}`)
+  console.log(`proxy address: ${proxy.address}`);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const AssetV2 = await (ethers as any).getContractFactory('AssetV2', deployer); // TODO check types with hardhat-ethers and hardhat-deploy-ethers, for now use `any`
@@ -144,7 +137,6 @@ const func: DeployFunction = async function (
     assetAdmin,
     assetBouncerAdmin
   );
-
 };
 
 export default func;

@@ -354,10 +354,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
         metaTx = _metaTransactionContracts[msg.sender];
-        bool authorized = from == msg.sender ||
-            metaTx ||
-            _superOperators[msg.sender] ||
-            _operatorsForAll[from][msg.sender];
+        bool authorized =
+            from == msg.sender || metaTx || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender];
 
         if (id & IS_NFT > 0) {
             require(authorized || _erc721operators[id] == msg.sender, "OPERATOR_!AUTH");
@@ -434,10 +432,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
         bool metaTx = _metaTransactionContracts[msg.sender];
-        bool authorized = from == msg.sender ||
-            metaTx ||
-            _superOperators[msg.sender] ||
-            _operatorsForAll[from][msg.sender]; // solium-disable-line max-len
+        bool authorized =
+            from == msg.sender || metaTx || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender]; // solium-disable-line max-len
 
         _batchTransferFrom(from, to, ids, values, authorized);
         emit TransferBatch(metaTx ? from : msg.sender, from, to, ids, values);
@@ -840,12 +836,13 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         uint40 packId,
         uint16 numFTs
     ) external view returns (bool) {
-        uint256 uriId = uint256(uint160(creator)) *
-            CREATOR_OFFSET_MULTIPLIER + // CREATOR
-            uint256(packId) *
-            PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // PACk_ID
-            numFTs *
-            PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER; // number of fungible token in the pack // PACK_NUM_FT_TYPES
+        uint256 uriId =
+            uint256(uint160(creator)) *
+                CREATOR_OFFSET_MULTIPLIER + // CREATOR
+                uint256(packId) *
+                PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // PACk_ID
+                numFTs *
+                PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER; // number of fungible token in the pack // PACK_NUM_FT_TYPES
         return _metadataHash[uriId] != 0;
     }
 
