@@ -642,7 +642,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     /// @param operator address of authorized operator.
     /// @return isOperator true if the operator is approved, false if not.
     function isApprovedForAll(address owner, address operator)
-        external
+        public
         view
         override(IERC1155, IERC721)
         returns (bool isOperator)
