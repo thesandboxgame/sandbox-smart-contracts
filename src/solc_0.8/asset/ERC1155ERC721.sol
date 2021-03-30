@@ -889,7 +889,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
 
     bytes4 internal constant ERC165ID = 0x01ffc9a7;
 
-    function checkIsERC1155Receiver(address _contract) internal view returns (bool) {
+    function _checkIsERC1155Receiver(address _contract) internal view returns (bool) {
         bool success;
         bool result;
         bytes memory callData = abi.encodeWithSelector(ERC165ID, ERC1155_IS_RECEIVER);
@@ -921,7 +921,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
             return true;
         }
         if (erc721) {
-            if (!checkIsERC1155Receiver(to)) {
+            if (!_checkIsERC1155Receiver(to)) {
                 if (erc721Safe) {
                     return _checkERC721AndCallSafeTransfer(operator, from, to, id, data);
                 } else {
