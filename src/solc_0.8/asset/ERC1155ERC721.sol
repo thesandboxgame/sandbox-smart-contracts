@@ -55,7 +55,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     mapping(address => address) private _creatorship; // creatorship transfer
 
     mapping(address => bool) private _bouncers; // the contracts allowed to mint
-    mapping(address => bool) private _metaTransactionContracts; // native meta-transaction support
+    mapping(address => bool) private _metaTransactionContracts; //ERC2771 meta-transaction support
 
     address private _bouncerAdmin;
 
@@ -1130,5 +1130,39 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     function _checkInit(uint256 v) internal {
         require((_initBits >> v) & uint256(1) != 1, "ALREADY_INITIALISED");
         _initBits = _initBits | (uint256(1) << v);
+    }
+
+    /// @dev Check if address from is authorized to perform an action.
+    /// @param from The address to check from.
+    /// @return whether authorized or not.
+    function _isAuthorized(address from) internal view returns (bool) {
+        require(msg.sender == from || _is2771MetaTx(from), "AUTH_ACCESS_DENIED");
+        return true;
+    }
+
+    function _msgSender() internal view returns (address sender, bool trusted) {
+        trusted = _metaTransactionContracts[msg.sender] == true;
+        if (trusted) {
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                sender := shr(96, calldataload(sub(calldatasize(), 20)))
+            }
+        } else {
+            return (msg.sender, trusted);
+        }
+    }
+
+    /// @dev Test if a tx is a valid EIP-2771 metaTransaction.
+    /// @param from The address passed as either "from" or "sender" to the func which called this one.
+    /// @return Whether this is a valid metaTransaction.
+    function _is2771MetaTx(address from) internal view returns (bool) {
+        address sender;
+        bool trusted;
+        (sender, trusted) = _msgSender();
+        if (trusted && from == sender) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
