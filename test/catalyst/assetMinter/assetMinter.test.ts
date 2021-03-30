@@ -942,7 +942,7 @@ describe('AssetMinter', function () {
       );
 
       const receipt = await waitFor(
-        assetAsAssetOwner.extractERC721(assetId, catalystOwner)
+        assetAsAssetOwner.extractERC721From(catalystOwner, assetId, catalystOwner)
       );
       const extractionEvent = await expectEventWithArgs(
         assetContract,
