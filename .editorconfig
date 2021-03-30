@@ -6,14 +6,15 @@ insert_final_newline = true
 charset = utf-8
 indent_style = space
 indent_size = 2
+trim_trailing_whitespace = true
 
-# 4 space indentation
 [*.sol]
-indent_style = space
 indent_size = 4
 
-[.mnemonic*]
-insert_final_newline = false
-
-[.land_presale*]
-insert_final_newline = false
+[{/deployments/**,/artifacts/**,/cache/**,/coverage/**,/node_modules/**,package.json,/imports/**,secret/**}]
+charset = unset
+end_of_line = unset
+insert_final_newline = unset
+trim_trailing_whitespace = unset
+indent_style = unset
+indent_size = unset

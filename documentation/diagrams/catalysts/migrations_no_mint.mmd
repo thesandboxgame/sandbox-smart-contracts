@@ -1,0 +1,15 @@
+sequenceDiagram
+autonumber
+    Note over owner, CatalystMigrations: Migrate Old Asset to use new Catalysts
+
+    owner->>+CatalystMigrations:migrate(id,amount)
+    CatalystMigrations->>+OldCatalystRegistry:getCatalyst(id)
+    OldCatalystRegistry-->>-CatalystMigrations:catalystId
+    loop for all amount
+      opt if(not nft)
+          CatalystMigrations->>+Asset:extractERC721(id)
+          Asset-->>-CatalystMigrations:id
+      end
+      CatalystMigrations->>-AssetAttributesRegistry:setCatalyst(id,catalystId,gemIds)
+    end
+

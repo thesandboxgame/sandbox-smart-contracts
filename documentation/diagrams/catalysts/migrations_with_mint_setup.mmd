@@ -1,0 +1,15 @@
+sequenceDiagram
+autonumber
+    Note over sandbox: Mint Assets to replace past ones
+
+    loop for all old asset
+      sandbox->>Asset:mint(hash,supply)
+    end
+    loop for all just minted asset
+      sandbox->>+AssetUpgrader:extractAndSetCatalyst(id,catalystId,gemIds)
+      AssetUpgrader->>+Asset:extractERC721(id)
+      Asset-->>-AssetUpgrader:id
+      AssetUpgrader->>-Asset:transferFrom(_,id,CatalystMigrations)
+    end
+    sandbox->>CatalystMigrations:DEPLOY(merkleTreeRoot)
+

@@ -1,0 +1,10 @@
+export/
+deployments/
+artifacts/
+cache/
+coverage/
+node_modules/
+src/solc_0.5
+src/solc_0.6
+tmp/
+secret/

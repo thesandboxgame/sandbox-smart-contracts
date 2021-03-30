@@ -1,0 +1,15 @@
+imports/
+deployments/
+artifacts/
+cache/
+coverage/
+node_modules/
+package.json
+documentation/
+sandbox-subgraph/
+src/solc_0.5
+src/solc_0.6
+data/*
+asset-snapshot-data/*
+tmp/
+secret/
