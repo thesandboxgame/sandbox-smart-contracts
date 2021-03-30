@@ -141,11 +141,11 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         require(hash != 0, "HASH==0");
         require(_bouncers[msg.sender], "!BOUNCER");
         require(owner != address(0), "TO==0");
-        id = generateTokenId(creator, supply, packId, supply == 1 ? 0 : 1, 0);
+        id = _generateTokenId(creator, supply, packId, supply == 1 ? 0 : 1, 0);
         _mint(hash, supply, rarity, msg.sender, owner, id, data, false);
     }
 
-    function generateTokenId(
+    function _generateTokenId(
         address creator,
         uint256 supply,
         uint40 packId,
@@ -227,12 +227,12 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         require(_bouncers[msg.sender], "!BOUNCER");
         require(owner != address(0), "TO==0");
         uint16 numNFTs;
-        (ids, numNFTs) = allocateIds(creator, supplies, rarityPack, packId, hash);
+        (ids, numNFTs) = _allocateIds(creator, supplies, rarityPack, packId, hash);
         _mintBatches(supplies, owner, ids, numNFTs);
-        completeMultiMint(msg.sender, owner, ids, supplies, data);
+        _completeMultiMint(msg.sender, owner, ids, supplies, data);
     }
 
-    function allocateIds(
+    function _allocateIds(
         address creator,
         uint256[] memory supplies,
         bytes memory rarityPack,
@@ -241,14 +241,14 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     ) internal returns (uint256[] memory ids, uint16 numNFTs) {
         require(supplies.length > 0, "SUPPLIES<=0");
         require(supplies.length <= MAX_PACK_SIZE, "BATCH_TOO_BIG");
-        (ids, numNFTs) = generateTokenIds(creator, supplies, packId);
+        (ids, numNFTs) = _generateTokenIds(creator, supplies, packId);
         uint256 uriId = ids[0] & URI_ID;
         require(uint256(_metadataHash[uriId]) == 0, "ID_TAKEN");
         _metadataHash[uriId] = hash;
         _rarityPacks[uriId] = rarityPack;
     }
 
-    function generateTokenIds(
+    function _generateTokenIds(
         address creator,
         uint256[] memory supplies,
         uint40 packId
@@ -267,12 +267,12 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         }
         uint16 numFTs = numTokenTypes - numNFTs;
         for (uint16 i = 0; i < numTokenTypes; i++) {
-            ids[i] = generateTokenId(creator, supplies[i], packId, numFTs, i);
+            ids[i] = _generateTokenId(creator, supplies[i], packId, numFTs, i);
         }
         return (ids, numNFTs);
     }
 
-    function completeMultiMint(
+    function _completeMultiMint(
         address operator,
         address owner,
         uint256[] memory ids,
@@ -786,7 +786,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         return uint32((id & NFT_INDEX) >> NFT_INDEX_OFFSET);
     }
 
-    function toFullURI(bytes32 hash, uint256 id) internal pure returns (string memory) {
+    function _toFullURI(bytes32 hash, uint256 id) internal pure returns (string memory) {
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", uint2str(id & PACK_INDEX), ".json"));
     }
 
@@ -825,7 +825,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     /// @return URI string
     function uri(uint256 id) public view returns (string memory) {
         require(wasEverMinted(id), "TOKEN_!MINTED"); // prevent returning invalid uri
-        return toFullURI(_metadataHash[id & URI_ID], id);
+        return _toFullURI(_metadataHash[id & URI_ID], id);
     }
 
     /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
@@ -833,7 +833,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     /// @return URI string
     function tokenURI(uint256 id) public view returns (string memory) {
         require(_ownerOf(id) != address(0), "NFT_!EXIST");
-        return toFullURI(_metadataHash[id & URI_ID], id);
+        return _toFullURI(_metadataHash[id & URI_ID], id);
     }
 
     bytes32 private constant base32Alphabet = 0x6162636465666768696A6B6C6D6E6F707172737475767778797A323334353637;
@@ -1044,7 +1044,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
 
         _burnERC721(msg.sender, from, id);
 
-        uint256 newId = generateTokenId(from, 1, packId, 0, 0);
+        uint256 newId = _generateTokenId(from, 1, packId, 0, 0);
         _mint(hash, 1, newRarity, msg.sender, to, newId, data, false);
         emit AssetUpdate(id, newId);
         return newId;
