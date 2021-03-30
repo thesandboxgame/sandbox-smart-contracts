@@ -41,8 +41,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     uint256 private constant MAX_SUPPLY = uint256(2)**32 - 1;
     uint256 private constant MAX_PACK_SIZE = uint256(2)**11;
 
-    event CreatorshipTransfer(address indexed original, address indexed from, address indexed to);
-
     mapping(address => uint256) private _numNFTPerAddress; // erc721
     mapping(uint256 => uint256) private _owners; // erc721
     mapping(address => mapping(uint256 => uint256)) private _packedTokenBalance; // erc1155
@@ -60,7 +58,19 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     address private _bouncerAdmin;
 
     bool internal _init;
+
+    bytes32 private constant base32Alphabet = 0x6162636465666768696A6B6C6D6E6F707172737475767778797A323334353637;
+
+    bytes4 internal constant ERC165ID = 0x01ffc9a7;
+
     uint256 internal _initBits;
+
+    event BouncerAdminChanged(address oldBouncerAdmin, address newBouncerAdmin);
+    event Bouncer(address bouncer, bool enabled);
+    event MetaTransactionProcessor(address metaTransactionProcessor, bool enabled);
+    event CreatorshipTransfer(address indexed original, address indexed from, address indexed to);
+    event Extraction(uint256 indexed fromId, uint256 toId);
+    event AssetUpdate(uint256 indexed fromId, uint256 toId);
 
     function initV2(
         address metaTransactionContract,
@@ -77,7 +87,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         emit MetaTransactionProcessor(metaTransactionContract, true);
     }
 
-    event BouncerAdminChanged(address oldBouncerAdmin, address newBouncerAdmin);
+
 
     /// @notice Returns the current administrator in charge of minting rights.
     /// @return the current minting administrator in charge of minting rights.
@@ -93,7 +103,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         _bouncerAdmin = newBouncerAdmin;
     }
 
-    event Bouncer(address bouncer, bool enabled);
+
 
     /// @notice Enable or disable the ability of `bouncer` to mint tokens (minting bouncer rights).
     /// @param bouncer address that will be given/removed minting bouncer rights.
@@ -111,7 +121,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         return _bouncers[who];
     }
 
-    event MetaTransactionProcessor(address metaTransactionProcessor, bool enabled);
+
 
     /// @notice check whether address `who` is given meta-transaction execution rights.
     /// @param who The address to query.
@@ -144,10 +154,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         id = _generateTokenId(creator, supply, packId, supply == 1 ? 0 : 1, 0);
         _mint(hash, supply, rarity, msg.sender, owner, id, data, false);
     }
-
-
-
-
 
     /// @notice Mint multiple token types for `creator` on slot `packId`.
     /// @param creator address of the creator of the tokens.
@@ -305,26 +311,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
 
     /* solhint-enable code-complexity */
 
-
-
-    /// @notice Get the balance of `owner` for the token type `id`.
-    /// @param owner The address of the token holder.
-    /// @param id the token type of which to get the balance of.
-    /// @return the balance of `owner` for the token type `id`.
-    function balanceOf(address owner, uint256 id) public view override returns (uint256) {
-        // do not check for existence, balance is zero if never minted
-        // require(wasEverMinted(id), "token was never minted");
-        if (id & IS_NFT > 0) {
-            if (_ownerOf(id) == owner) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }
-        (uint256 bin, uint256 index) = id.getTokenBinIndex();
-        return _packedTokenBalance[owner][bin].getValueInBin(index);
-    }
-
     /// @notice Get the balance of `owners` for each token type `ids`.
     /// @param owners the addresses of the token holders queried.
     /// @param ids ids of each token type to query.
@@ -414,6 +400,24 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         require(!_superOperators[operator], "APPR_EXISTING_SUPEROPERATOR");
         _operatorsForAll[sender][operator] = approved;
         emit ApprovalForAll(sender, operator, approved);
+    }
+
+    /// @notice Get the balance of `owner` for the token type `id`.
+    /// @param owner The address of the token holder.
+    /// @param id the token type of which to get the balance of.
+    /// @return the balance of `owner` for the token type `id`.
+    function balanceOf(address owner, uint256 id) public view override returns (uint256) {
+        // do not check for existence, balance is zero if never minted
+        // require(wasEverMinted(id), "token was never minted");
+        if (id & IS_NFT > 0) {
+            if (_ownerOf(id) == owner) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+        (uint256 bin, uint256 index) = id.getTokenBinIndex();
+        return _packedTokenBalance[owner][bin].getValueInBin(index);
     }
 
     /// @notice Queries the approval status of `operator` for owner `owner`.
@@ -515,25 +519,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         safeTransferFrom(from, to, id, "");
     }
 
-    /// @notice Transfers the ownership of an NFT from one address to another address.
-    /// @param from the current owner of the NFT.
-    /// @param to the new owner.
-    /// @param id the NFT to transfer.
-    /// @param data additional data with no specified format, sent in call to `to`.
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        bytes memory data
-    ) public override {
-        require(_ownerOf(id) == from, "OWNER!=FROM");
-        bool metaTx = _transferFrom(from, to, id, 1);
-        require(
-            _checkERC1155AndCallSafeTransfer(metaTx ? from : msg.sender, from, to, id, 1, data, true, true),
-            "721/1155_TRANSFER_REJECTED"
-        );
-    }
-
     /// @notice A descriptive name for the collection of tokens in this contract.
     /// @return _name the name of the tokens.
     function name() external pure returns (string memory _name) {
@@ -584,6 +569,25 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         }
     }
 
+    /// @notice Transfers the ownership of an NFT from one address to another address.
+    /// @param from the current owner of the NFT.
+    /// @param to the new owner.
+    /// @param id the NFT to transfer.
+    /// @param data additional data with no specified format, sent in call to `to`.
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        bytes memory data
+    ) public override {
+        require(_ownerOf(id) == from, "OWNER!=FROM");
+        bool metaTx = _transferFrom(from, to, id, 1);
+        require(
+            _checkERC1155AndCallSafeTransfer(metaTx ? from : msg.sender, from, to, id, 1, data, true, true),
+            "721/1155_TRANSFER_REJECTED"
+        );
+    }
+
     /// @notice check whether a packId/numFT tupple has been used
     /// @param creator for which creator
     /// @param packId the packId to check
@@ -620,45 +624,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         return _toFullURI(_metadataHash[id & URI_ID], id);
     }
 
-    bytes32 private constant base32Alphabet = 0x6162636465666768696A6B6C6D6E6F707172737475767778797A323334353637;
-
-    // solium-disable-next-line security/no-assign-params
-    function hash2base32(bytes32 hash) private pure returns (string memory _uintAsString) {
-        uint256 _i = uint256(hash);
-        uint256 k = 52;
-        bytes memory bstr = new bytes(k);
-        bstr[--k] = base32Alphabet[uint8((_i % 8) << 2)]; // uint8 s = uint8((256 - skip) % 5);  // (_i % (2**s)) << (5-s)
-        _i /= 8;
-        while (k > 0) {
-            bstr[--k] = base32Alphabet[_i % 32];
-            _i /= 32;
-        }
-        return string(bstr);
-    }
-
-    // solium-disable-next-line security/no-assign-params
-    function uint2str(uint256 _i) private pure returns (string memory _uintAsString) {
-        if (_i == 0) {
-            return "0";
-        }
-
-        uint256 j = _i;
-        uint256 len;
-        while (j != 0) {
-            len++;
-            j /= 10;
-        }
-
-        bytes memory bstr = new bytes(len);
-        uint256 k = len - 1;
-        while (_i != 0) {
-            bstr[k--] = bytes1(uint8(48 + (_i % 10)));
-            _i /= 10;
-        }
-
-        return string(bstr);
-    }
-
     /// @notice Query if a contract implements interface `id`.
     /// @param id the interface identifier, as specified in ERC-165.
     /// @return `true` if the contract implements `id`.
@@ -670,11 +635,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
             id == 0x5b5e139f || // ERC721 metadata
             id == 0x0e89341c; // ERC1155 metadata
     }
-
-    bytes4 internal constant ERC165ID = 0x01ffc9a7;
-
-    event Extraction(uint256 indexed fromId, uint256 toId);
-    event AssetUpdate(uint256 indexed fromId, uint256 toId);
 
     /// @notice Burns `amount` tokens of type `id` from `from`.
     /// @param from address whose token is to be burnt.
@@ -1134,5 +1094,42 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
 
     function _toFullURI(bytes32 hash, uint256 id) internal pure returns (string memory) {
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", uint2str(id & PACK_INDEX), ".json"));
+    }
+
+     // solium-disable-next-line security/no-assign-params
+    function hash2base32(bytes32 hash) private pure returns (string memory _uintAsString) {
+        uint256 _i = uint256(hash);
+        uint256 k = 52;
+        bytes memory bstr = new bytes(k);
+        bstr[--k] = base32Alphabet[uint8((_i % 8) << 2)]; // uint8 s = uint8((256 - skip) % 5);  // (_i % (2**s)) << (5-s)
+        _i /= 8;
+        while (k > 0) {
+            bstr[--k] = base32Alphabet[_i % 32];
+            _i /= 32;
+        }
+        return string(bstr);
+    }
+
+    // solium-disable-next-line security/no-assign-params
+    function uint2str(uint256 _i) private pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
+        }
+
+        uint256 j = _i;
+        uint256 len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+
+        bytes memory bstr = new bytes(len);
+        uint256 k = len - 1;
+        while (_i != 0) {
+            bstr[k--] = bytes1(uint8(48 + (_i % 10)));
+            _i /= 10;
+        }
+
+        return string(bstr);
     }
 }
