@@ -55,9 +55,7 @@ const func: DeployFunction = async function (
   await deploy('Asset', {
     from: deployer,
     contract: 'AssetV2',
-    args: [forwarder.address,
-      assetAdmin,
-      assetBouncerAdmin],
+    args: [forwarder.address, assetAdmin, assetBouncerAdmin],
     proxy: {
       owner: deployer,
       proxyContract: 'OpenZeppelinTransparentProxy',
