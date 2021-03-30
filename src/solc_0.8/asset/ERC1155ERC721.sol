@@ -145,65 +145,9 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         _mint(hash, supply, rarity, msg.sender, owner, id, data, false);
     }
 
-    function _generateTokenId(
-        address creator,
-        uint256 supply,
-        uint40 packId,
-        uint16 numFTs,
-        uint16 packIndex
-    ) internal pure returns (uint256) {
-        require(supply > 0 && supply <= MAX_SUPPLY, "SUPPLY_OUT_OF_BOUNDS");
 
-        return
-            uint256(uint160(creator)) *
-            CREATOR_OFFSET_MULTIPLIER + // CREATOR
-            (supply == 1 ? uint256(1) * IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT (1) or FT (0) // IS_NFT
-            uint256(packId) *
-            PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // PACk_ID
-            numFTs *
-            PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack // PACK_NUM_FT_TYPES
-            packIndex; // packIndex (position in the pack) // PACK_INDEX
-    }
 
-    function _mint(
-        bytes32 hash,
-        uint256 supply,
-        uint8 rarity,
-        address operator,
-        address owner,
-        uint256 id,
-        bytes memory data,
-        bool extraction
-    ) internal {
-        uint256 uriId = id & URI_ID;
-        if (!extraction) {
-            require(uint256(_metadataHash[uriId]) == 0, "ID_TAKEN");
-            _metadataHash[uriId] = hash;
-            require(rarity < 4, "RARITY>=4");
-            bytes memory pack = new bytes(1);
-            pack[0] = bytes1(rarity * 64);
-            _rarityPacks[uriId] = pack;
-        }
-        if (supply == 1) {
-            // ERC721
-            _numNFTPerAddress[owner]++;
-            _owners[id] = uint256(uint160(owner));
-            emit Transfer(address(0), owner, id);
-        } else {
-            (uint256 bin, uint256 index) = id.getTokenBinIndex();
-            _packedTokenBalance[owner][bin] = _packedTokenBalance[owner][bin].updateTokenBalance(
-                index,
-                supply,
-                ObjectLib32.Operations.REPLACE
-            );
-        }
 
-        emit TransferSingle(operator, address(0), owner, id, supply);
-        require(
-            _checkERC1155AndCallSafeTransfer(operator, address(0), owner, id, supply, data, false, false),
-            "TRANSFER_REJECTED"
-        );
-    }
 
     /// @notice Mint multiple token types for `creator` on slot `packId`.
     /// @param creator address of the creator of the tokens.
@@ -230,155 +174,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         (ids, numNFTs) = _allocateIds(creator, supplies, rarityPack, packId, hash);
         _mintBatches(supplies, owner, ids, numNFTs);
         _completeMultiMint(msg.sender, owner, ids, supplies, data);
-    }
-
-    function _allocateIds(
-        address creator,
-        uint256[] memory supplies,
-        bytes memory rarityPack,
-        uint40 packId,
-        bytes32 hash
-    ) internal returns (uint256[] memory ids, uint16 numNFTs) {
-        require(supplies.length > 0, "SUPPLIES<=0");
-        require(supplies.length <= MAX_PACK_SIZE, "BATCH_TOO_BIG");
-        (ids, numNFTs) = _generateTokenIds(creator, supplies, packId);
-        uint256 uriId = ids[0] & URI_ID;
-        require(uint256(_metadataHash[uriId]) == 0, "ID_TAKEN");
-        _metadataHash[uriId] = hash;
-        _rarityPacks[uriId] = rarityPack;
-    }
-
-    function _generateTokenIds(
-        address creator,
-        uint256[] memory supplies,
-        uint40 packId
-    ) internal pure returns (uint256[] memory, uint16) {
-        uint16 numTokenTypes = uint16(supplies.length);
-        uint256[] memory ids = new uint256[](numTokenTypes);
-        uint16 numNFTs = 0;
-        for (uint16 i = 0; i < numTokenTypes; i++) {
-            if (numNFTs == 0) {
-                if (supplies[i] == 1) {
-                    numNFTs = uint16(numTokenTypes - i);
-                }
-            } else {
-                require(supplies[i] == 1, "NFTS_MUST_BE_LAST");
-            }
-        }
-        uint16 numFTs = numTokenTypes - numNFTs;
-        for (uint16 i = 0; i < numTokenTypes; i++) {
-            ids[i] = _generateTokenId(creator, supplies[i], packId, numFTs, i);
-        }
-        return (ids, numNFTs);
-    }
-
-    function _completeMultiMint(
-        address operator,
-        address owner,
-        uint256[] memory ids,
-        uint256[] memory supplies,
-        bytes memory data
-    ) internal {
-        emit TransferBatch(operator, address(0), owner, ids, supplies);
-        require(
-            _checkERC1155AndCallSafeBatchTransfer(operator, address(0), owner, ids, supplies, data),
-            "TRANSFER_REJECTED"
-        );
-    }
-
-    function _mintBatches(
-        uint256[] memory supplies,
-        address owner,
-        uint256[] memory ids,
-        uint16 numNFTs
-    ) internal {
-        uint16 offset = 0;
-        while (offset < supplies.length - numNFTs) {
-            _mintBatch(offset, supplies, owner, ids);
-            offset += 8;
-        }
-        // deal with NFT last. they do not care of balance packing
-        if (numNFTs > 0) {
-            _mintNFTs(uint16(supplies.length - numNFTs), numNFTs, owner, ids);
-        }
-    }
-
-    function _mintNFTs(
-        uint16 offset,
-        uint32 numNFTs,
-        address owner,
-        uint256[] memory ids
-    ) internal {
-        for (uint16 i = 0; i < numNFTs; i++) {
-            uint256 id = ids[i + offset];
-            _owners[id] = uint256(uint160(owner));
-            emit Transfer(address(0), owner, id);
-        }
-        _numNFTPerAddress[owner] += numNFTs;
-    }
-
-    function _mintBatch(
-        uint16 offset,
-        uint256[] memory supplies,
-        address owner,
-        uint256[] memory ids
-    ) internal {
-        uint256 firstId = ids[offset];
-        (uint256 bin, uint256 index) = firstId.getTokenBinIndex();
-        uint256 balances = _packedTokenBalance[owner][bin];
-        for (uint256 i = 0; i < 8 && offset + i < supplies.length; i++) {
-            uint256 j = offset + i;
-            if (supplies[j] > 1) {
-                balances = balances.updateTokenBalance(index + i, supplies[j], ObjectLib32.Operations.REPLACE);
-            } else {
-                break;
-            }
-        }
-        _packedTokenBalance[owner][bin] = balances;
-    }
-
-    function _transferFrom(
-        address from,
-        address to,
-        uint256 id,
-        uint256 value
-    ) internal returns (bool metaTx) {
-        require(to != address(0), "TO==0");
-        require(from != address(0), "FROM==0");
-        metaTx = _is2771MetaTx(from);
-        bool authorized = from == msg.sender || metaTx || isApprovedForAll(from, msg.sender);
-
-        if (id & IS_NFT > 0) {
-            require(authorized || _erc721operators[id] == msg.sender, "OPERATOR_!AUTH");
-            if (value > 0) {
-                require(value == 1, "NFT!=1");
-                _numNFTPerAddress[from]--;
-                _numNFTPerAddress[to]++;
-                _owners[id] = uint256(uint160(to));
-                if (_erc721operators[id] != address(0)) {
-                    _erc721operators[id] = address(0);
-                }
-                emit Transfer(from, to, id);
-            }
-        } else {
-            require(authorized, "OPERATOR_!AUTH");
-            if (value > 0) {
-                // if different owners it will fails
-                (uint256 bin, uint256 index) = id.getTokenBinIndex();
-                _packedTokenBalance[from][bin] = _packedTokenBalance[from][bin].updateTokenBalance(
-                    index,
-                    value,
-                    ObjectLib32.Operations.SUB
-                );
-                _packedTokenBalance[to][bin] = _packedTokenBalance[to][bin].updateTokenBalance(
-                    index,
-                    value,
-                    ObjectLib32.Operations.ADD
-                );
-            }
-        }
-
-        emit TransferSingle(metaTx ? from : msg.sender, from, to, id, value);
     }
 
     /// @notice Transfers `value` tokens of type `id` from  `from` to `to`  (with safety call).
@@ -510,14 +305,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
 
     /* solhint-enable code-complexity */
 
-    function _checkEnoughBalance(
-        address from,
-        uint256 id,
-        uint256 value
-    ) internal view {
-        (uint256 bin, uint256 index) = id.getTokenBinIndex();
-        require(_packedTokenBalance[from][bin].getValueInBin(index) >= value, "BALANCE_TOO_LOW");
-    }
+
 
     /// @notice Get the balance of `owner` for the token type `id`.
     /// @param owner The address of the token holder.
@@ -659,9 +447,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         require(owner != address(0), "NFT_!EXIST");
     }
 
-    function _ownerOf(uint256 id) internal view returns (address) {
-        return address(uint160(_owners[id]));
-    }
+
 
     /// @notice Change or reaffirm the approved address for an NFT for `sender`.
     /// @dev used for Meta Transaction (from metaTransactionContract).
@@ -786,9 +572,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         return uint32((id & NFT_INDEX) >> NFT_INDEX_OFFSET);
     }
 
-    function _toFullURI(bytes32 hash, uint256 id) internal pure returns (string memory) {
-        return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", uint2str(id & PACK_INDEX), ".json"));
-    }
+
 
     function wasEverMinted(uint256 id) public view returns (bool) {
         if ((id & IS_NFT) > 0) {
@@ -889,107 +673,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
 
     bytes4 internal constant ERC165ID = 0x01ffc9a7;
 
-    function _checkIsERC1155Receiver(address _contract) internal view returns (bool) {
-        bool success;
-        bool result;
-        bytes memory callData = abi.encodeWithSelector(ERC165ID, ERC1155_IS_RECEIVER);
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            let call_ptr := add(0x20, callData)
-            let call_size := mload(callData)
-            let output := mload(0x40) // Find empty storage location using "free memory pointer"
-            mstore(output, 0x0)
-            success := staticcall(10000, _contract, call_ptr, call_size, output, 0x20) // 32 bytes
-            result := mload(output)
-        }
-        // (10000 / 63) "not enough for supportsInterface(...)" // consume all gas, so caller can potentially know that there was not enough gas
-        assert(gasleft() > 158);
-        return success && result;
-    }
-
-    function _checkERC1155AndCallSafeTransfer(
-        address operator,
-        address from,
-        address to,
-        uint256 id,
-        uint256 value,
-        bytes memory data,
-        bool erc721,
-        bool erc721Safe
-    ) internal returns (bool) {
-        if (!to.isContract()) {
-            return true;
-        }
-        if (erc721) {
-            if (!_checkIsERC1155Receiver(to)) {
-                if (erc721Safe) {
-                    return _checkERC721AndCallSafeTransfer(operator, from, to, id, data);
-                } else {
-                    return true;
-                }
-            }
-        }
-        return IERC1155TokenReceiver(to).onERC1155Received(operator, from, id, value, data) == ERC1155_RECEIVED;
-    }
-
-    function _checkERC1155AndCallSafeBatchTransfer(
-        address operator,
-        address from,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory values,
-        bytes memory data
-    ) internal returns (bool) {
-        if (!to.isContract()) {
-            return true;
-        }
-        bytes4 retval = IERC1155TokenReceiver(to).onERC1155BatchReceived(operator, from, ids, values, data);
-        return (retval == ERC1155_BATCH_RECEIVED);
-    }
-
-    function _checkERC721AndCallSafeTransfer(
-        address operator,
-        address from,
-        address to,
-        uint256 id,
-        bytes memory data
-    ) internal returns (bool) {
-        // following not required as this function is always called as part of ERC1155 checks that include such check already
-        // if (!to.isContract()) {
-        //     return true;
-        // }
-        return (IERC721TokenReceiver(to).onERC721Received(operator, from, id, data) == ERC721_RECEIVED);
-    }
-
     event Extraction(uint256 indexed fromId, uint256 toId);
     event AssetUpdate(uint256 indexed fromId, uint256 toId);
-
-    function _burnERC1155(
-        address operator,
-        address from,
-        uint256 id,
-        uint32 amount
-    ) internal {
-        (uint256 bin, uint256 index) = (id).getTokenBinIndex();
-        _packedTokenBalance[from][bin] = _packedTokenBalance[from][bin].updateTokenBalance(
-            index,
-            amount,
-            ObjectLib32.Operations.SUB
-        );
-        emit TransferSingle(operator, from, address(0), id, amount);
-    }
-
-    function _burnERC721(
-        address operator,
-        address from,
-        uint256 id
-    ) internal {
-        require(from == _ownerOf(id), "OWNER!=FROM");
-        _owners[id] = 2**160; // equivalent to zero address when casted but ensure we track minted status
-        _numNFTPerAddress[from]--;
-        emit Transfer(from, address(0), id);
-        emit TransferSingle(operator, from, address(0), id, 1);
-    }
 
     /// @notice Burns `amount` tokens of type `id` from `from`.
     /// @param from address whose token is to be burnt.
@@ -1003,20 +688,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         require(from != address(0), "FROM==0");
         require(_isAuthorized(from) || isApprovedForAll(from, msg.sender), "!AUTHORIZED");
         _burn(from, id, amount);
-    }
-
-    function _burn(
-        address from,
-        uint256 id,
-        uint256 amount
-    ) internal {
-        if ((id & IS_NFT) > 0) {
-            require(amount == 1, "AMOUNT!=1");
-            _burnERC721(_metaTransactionContracts[msg.sender] ? from : msg.sender, from, id);
-        } else {
-            require(amount > 0 && amount <= MAX_SUPPLY, "INVALID_AMOUNT");
-            _burnERC1155(_metaTransactionContracts[msg.sender] ? from : msg.sender, from, id, uint32(amount));
-        }
     }
 
     /// @notice Upgrades an NFT with new metadata and rarity.
@@ -1065,6 +736,228 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         return _extractERC721From(metaTx ? sender : msg.sender, sender, id, to);
     }
 
+    function _checkERC1155AndCallSafeTransfer(
+        address operator,
+        address from,
+        address to,
+        uint256 id,
+        uint256 value,
+        bytes memory data,
+        bool erc721,
+        bool erc721Safe
+    ) internal returns (bool) {
+        if (!to.isContract()) {
+            return true;
+        }
+        if (erc721) {
+            if (!_checkIsERC1155Receiver(to)) {
+                if (erc721Safe) {
+                    return _checkERC721AndCallSafeTransfer(operator, from, to, id, data);
+                } else {
+                    return true;
+                }
+            }
+        }
+        return IERC1155TokenReceiver(to).onERC1155Received(operator, from, id, value, data) == ERC1155_RECEIVED;
+    }
+
+
+    function _checkERC1155AndCallSafeBatchTransfer(
+        address operator,
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory values,
+        bytes memory data
+    ) internal returns (bool) {
+        if (!to.isContract()) {
+            return true;
+        }
+        bytes4 retval = IERC1155TokenReceiver(to).onERC1155BatchReceived(operator, from, ids, values, data);
+        return (retval == ERC1155_BATCH_RECEIVED);
+    }
+
+    function _checkERC721AndCallSafeTransfer(
+        address operator,
+        address from,
+        address to,
+        uint256 id,
+        bytes memory data
+    ) internal returns (bool) {
+        // following not required as this function is always called as part of ERC1155 checks that include such check already
+        // if (!to.isContract()) {
+        //     return true;
+        // }
+        return (IERC721TokenReceiver(to).onERC721Received(operator, from, id, data) == ERC721_RECEIVED);
+    }
+
+    function _burnERC1155(
+        address operator,
+        address from,
+        uint256 id,
+        uint32 amount
+    ) internal {
+        (uint256 bin, uint256 index) = (id).getTokenBinIndex();
+        _packedTokenBalance[from][bin] = _packedTokenBalance[from][bin].updateTokenBalance(
+            index,
+            amount,
+            ObjectLib32.Operations.SUB
+        );
+        emit TransferSingle(operator, from, address(0), id, amount);
+    }
+
+    function _burnERC721(
+        address operator,
+        address from,
+        uint256 id
+    ) internal {
+        require(from == _ownerOf(id), "OWNER!=FROM");
+        _owners[id] = 2**160; // equivalent to zero address when casted but ensure we track minted status
+        _numNFTPerAddress[from]--;
+        emit Transfer(from, address(0), id);
+        emit TransferSingle(operator, from, address(0), id, 1);
+    }
+
+    function _burn(
+        address from,
+        uint256 id,
+        uint256 amount
+    ) internal {
+        if ((id & IS_NFT) > 0) {
+            require(amount == 1, "AMOUNT!=1");
+            _burnERC721(_metaTransactionContracts[msg.sender] ? from : msg.sender, from, id);
+        } else {
+            require(amount > 0 && amount <= MAX_SUPPLY, "INVALID_AMOUNT");
+            _burnERC1155(_metaTransactionContracts[msg.sender] ? from : msg.sender, from, id, uint32(amount));
+        }
+    }
+
+    function _allocateIds(
+        address creator,
+        uint256[] memory supplies,
+        bytes memory rarityPack,
+        uint40 packId,
+        bytes32 hash
+    ) internal returns (uint256[] memory ids, uint16 numNFTs) {
+        require(supplies.length > 0, "SUPPLIES<=0");
+        require(supplies.length <= MAX_PACK_SIZE, "BATCH_TOO_BIG");
+        (ids, numNFTs) = _generateTokenIds(creator, supplies, packId);
+        uint256 uriId = ids[0] & URI_ID;
+        require(uint256(_metadataHash[uriId]) == 0, "ID_TAKEN");
+        _metadataHash[uriId] = hash;
+        _rarityPacks[uriId] = rarityPack;
+    }
+
+    function _completeMultiMint(
+        address operator,
+        address owner,
+        uint256[] memory ids,
+        uint256[] memory supplies,
+        bytes memory data
+    ) internal {
+        emit TransferBatch(operator, address(0), owner, ids, supplies);
+        require(
+            _checkERC1155AndCallSafeBatchTransfer(operator, address(0), owner, ids, supplies, data),
+            "TRANSFER_REJECTED"
+        );
+    }
+
+    function _mintBatches(
+        uint256[] memory supplies,
+        address owner,
+        uint256[] memory ids,
+        uint16 numNFTs
+    ) internal {
+        uint16 offset = 0;
+        while (offset < supplies.length - numNFTs) {
+            _mintBatch(offset, supplies, owner, ids);
+            offset += 8;
+        }
+        // deal with NFT last. they do not care of balance packing
+        if (numNFTs > 0) {
+            _mintNFTs(uint16(supplies.length - numNFTs), numNFTs, owner, ids);
+        }
+    }
+
+    function _mintNFTs(
+        uint16 offset,
+        uint32 numNFTs,
+        address owner,
+        uint256[] memory ids
+    ) internal {
+        for (uint16 i = 0; i < numNFTs; i++) {
+            uint256 id = ids[i + offset];
+            _owners[id] = uint256(uint160(owner));
+            emit Transfer(address(0), owner, id);
+        }
+        _numNFTPerAddress[owner] += numNFTs;
+    }
+
+    function _mintBatch(
+        uint16 offset,
+        uint256[] memory supplies,
+        address owner,
+        uint256[] memory ids
+    ) internal {
+        uint256 firstId = ids[offset];
+        (uint256 bin, uint256 index) = firstId.getTokenBinIndex();
+        uint256 balances = _packedTokenBalance[owner][bin];
+        for (uint256 i = 0; i < 8 && offset + i < supplies.length; i++) {
+            uint256 j = offset + i;
+            if (supplies[j] > 1) {
+                balances = balances.updateTokenBalance(index + i, supplies[j], ObjectLib32.Operations.REPLACE);
+            } else {
+                break;
+            }
+        }
+        _packedTokenBalance[owner][bin] = balances;
+    }
+
+    function _transferFrom(
+        address from,
+        address to,
+        uint256 id,
+        uint256 value
+    ) internal returns (bool metaTx) {
+        require(to != address(0), "TO==0");
+        require(from != address(0), "FROM==0");
+        metaTx = _is2771MetaTx(from);
+        // bool authorized = _isAuthorized(from) || isApprovedForAll(from, msg.sender);
+        bool authorized = from == msg.sender || metaTx || isApprovedForAll(from, msg.sender);
+
+        if (id & IS_NFT > 0) {
+            require(authorized || _erc721operators[id] == msg.sender, "OPERATOR_!AUTH");
+            if (value > 0) {
+                require(value == 1, "NFT!=1");
+                _numNFTPerAddress[from]--;
+                _numNFTPerAddress[to]++;
+                _owners[id] = uint256(uint160(to));
+                if (_erc721operators[id] != address(0)) {
+                    _erc721operators[id] = address(0);
+                }
+                emit Transfer(from, to, id);
+            }
+        } else {
+            require(authorized, "OPERATOR_!AUTH");
+            if (value > 0) {
+                // if different owners it will fails
+                (uint256 bin, uint256 index) = id.getTokenBinIndex();
+                _packedTokenBalance[from][bin] = _packedTokenBalance[from][bin].updateTokenBalance(
+                    index,
+                    value,
+                    ObjectLib32.Operations.SUB
+                );
+                _packedTokenBalance[to][bin] = _packedTokenBalance[to][bin].updateTokenBalance(
+                    index,
+                    value,
+                    ObjectLib32.Operations.ADD
+                );
+            }
+        }
+
+        emit TransferSingle(metaTx ? from : msg.sender, from, to, id, value);
+    }
+
     function _extractERC721From(
         address operator,
         address sender,
@@ -1081,6 +974,46 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         emit Extraction(id, newId);
     }
 
+    function _mint(
+        bytes32 hash,
+        uint256 supply,
+        uint8 rarity,
+        address operator,
+        address owner,
+        uint256 id,
+        bytes memory data,
+        bool extraction
+    ) internal {
+        uint256 uriId = id & URI_ID;
+        if (!extraction) {
+            require(uint256(_metadataHash[uriId]) == 0, "ID_TAKEN");
+            _metadataHash[uriId] = hash;
+            require(rarity < 4, "RARITY>=4");
+            bytes memory pack = new bytes(1);
+            pack[0] = bytes1(rarity * 64);
+            _rarityPacks[uriId] = pack;
+        }
+        if (supply == 1) {
+            // ERC721
+            _numNFTPerAddress[owner]++;
+            _owners[id] = uint256(uint160(owner));
+            emit Transfer(address(0), owner, id);
+        } else {
+            (uint256 bin, uint256 index) = id.getTokenBinIndex();
+            _packedTokenBalance[owner][bin] = _packedTokenBalance[owner][bin].updateTokenBalance(
+                index,
+                supply,
+                ObjectLib32.Operations.REPLACE
+            );
+        }
+
+        emit TransferSingle(operator, address(0), owner, id, supply);
+        require(
+            _checkERC1155AndCallSafeTransfer(operator, address(0), owner, id, supply, data, false, false),
+            "TRANSFER_REJECTED"
+        );
+    }
+
     /// @dev Allows the use of a bitfield to track the initialized status of the version `v` passed in as an arg.
     /// If the bit at the index corresponding to the given version is already set, revert.
     /// Otherwise, set the bit and return.
@@ -1088,6 +1021,24 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     function _checkInit(uint256 v) internal {
         require((_initBits >> v) & uint256(1) != 1, "ALREADY_INITIALISED");
         _initBits = _initBits | (uint256(1) << v);
+    }
+
+    function _checkIsERC1155Receiver(address _contract) internal view returns (bool) {
+        bool success;
+        bool result;
+        bytes memory callData = abi.encodeWithSelector(ERC165ID, ERC1155_IS_RECEIVER);
+        // solhint-disable-next-line no-inline-assembly
+        assembly {
+            let call_ptr := add(0x20, callData)
+            let call_size := mload(callData)
+            let output := mload(0x40) // Find empty storage location using "free memory pointer"
+            mstore(output, 0x0)
+            success := staticcall(10000, _contract, call_ptr, call_size, output, 0x20) // 32 bytes
+            result := mload(output)
+        }
+        // (10000 / 63) "not enough for supportsInterface(...)" // consume all gas, so caller can potentially know that there was not enough gas
+        assert(gasleft() > 158);
+        return success && result;
     }
 
     /// @dev Check if address from is authorized to perform an action.
@@ -1122,5 +1073,66 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         } else {
             return false;
         }
+    }
+
+    function _checkEnoughBalance(
+        address from,
+        uint256 id,
+        uint256 value
+    ) internal view {
+        (uint256 bin, uint256 index) = id.getTokenBinIndex();
+        require(_packedTokenBalance[from][bin].getValueInBin(index) >= value, "BALANCE_TOO_LOW");
+    }
+
+    function _ownerOf(uint256 id) internal view returns (address) {
+        return address(uint160(_owners[id]));
+    }
+
+    function _generateTokenId(
+        address creator,
+        uint256 supply,
+        uint40 packId,
+        uint16 numFTs,
+        uint16 packIndex
+    ) internal pure returns (uint256) {
+        require(supply > 0 && supply <= MAX_SUPPLY, "SUPPLY_OUT_OF_BOUNDS");
+
+        return
+            uint256(uint160(creator)) *
+            CREATOR_OFFSET_MULTIPLIER + // CREATOR
+            (supply == 1 ? uint256(1) * IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT (1) or FT (0) // IS_NFT
+            uint256(packId) *
+            PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // PACk_ID
+            numFTs *
+            PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack // PACK_NUM_FT_TYPES
+            packIndex; // packIndex (position in the pack) // PACK_INDEX
+    }
+
+    function _generateTokenIds(
+        address creator,
+        uint256[] memory supplies,
+        uint40 packId
+    ) internal pure returns (uint256[] memory, uint16) {
+        uint16 numTokenTypes = uint16(supplies.length);
+        uint256[] memory ids = new uint256[](numTokenTypes);
+        uint16 numNFTs = 0;
+        for (uint16 i = 0; i < numTokenTypes; i++) {
+            if (numNFTs == 0) {
+                if (supplies[i] == 1) {
+                    numNFTs = uint16(numTokenTypes - i);
+                }
+            } else {
+                require(supplies[i] == 1, "NFTS_MUST_BE_LAST");
+            }
+        }
+        uint16 numFTs = numTokenTypes - numNFTs;
+        for (uint16 i = 0; i < numTokenTypes; i++) {
+            ids[i] = _generateTokenId(creator, supplies[i], packId, numFTs, i);
+        }
+        return (ids, numNFTs);
+    }
+
+    function _toFullURI(bytes32 hash, uint256 id) internal pure returns (string memory) {
+        return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", uint2str(id & PACK_INDEX), ".json"));
     }
 }
