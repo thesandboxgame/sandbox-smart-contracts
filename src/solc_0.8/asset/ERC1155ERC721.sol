@@ -345,9 +345,10 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     ) internal returns (bool metaTx) {
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
-        metaTx = _metaTransactionContracts[msg.sender];
+        metaTx = _is2771MetaTx(from);
+        // bool authorized = _isAuthorized(from) || isApprovedForAll(from, msg.sender);
         bool authorized =
-            from == msg.sender || metaTx || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender];
+            from == msg.sender || metaTx || isApprovedForAll(from, msg.sender);
 
         if (id & IS_NFT > 0) {
             require(authorized || _erc721operators[id] == msg.sender, "OPERATOR_!AUTH");
@@ -357,7 +358,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
                 _numNFTPerAddress[to]++;
                 _owners[id] = uint256(uint160(to));
                 if (_erc721operators[id] != address(0)) {
-                    // TODO operatorEnabled flag optimization (like in ERC721BaseToken)
                     _erc721operators[id] = address(0);
                 }
                 emit Transfer(from, to, id);
@@ -423,9 +423,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         require(ids.length == values.length, "MISMATCHED_ARR_LEN");
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
-        bool metaTx = _metaTransactionContracts[msg.sender];
-        bool authorized =
-            from == msg.sender || metaTx || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender]; // solium-disable-line max-len
+        bool metaTx = _is2771MetaTx(from);
+        bool authorized = from == msg.sender || metaTx || isApprovedForAll(from, msg.sender);
 
         _batchTransferFrom(from, to, ids, values, authorized);
         emit TransferBatch(metaTx ? from : msg.sender, from, to, ids, values);
@@ -580,10 +579,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         address original,
         address to
     ) external {
-        require(
-            msg.sender == sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender],
-            "!AUTHORIZED"
-        );
+        require(_isAuthorized(sender) || _superOperators[msg.sender], "!AUTHORIZED");
         require(sender != address(0), "SENDER==0");
         require(to != address(0), "TO==0");
         address current = _creatorship[original];
@@ -610,10 +606,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         address operator,
         bool approved
     ) external {
-        require(
-            msg.sender == sender || _metaTransactionContracts[msg.sender] || _superOperators[msg.sender],
-            "!AUTHORIZED"
-        );
+        require(_isAuthorized(sender) || _superOperators[msg.sender], "!AUTHORIZED");
         _setApprovalForAll(sender, operator, approved);
     }
 
@@ -672,7 +665,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         return address(uint160(_owners[id]));
     }
 
-    /// @notice Change or reaffirm the approved address for an NFT for `sender`.
+     /// @notice Change or reaffirm the approved address for an NFT for `sender`.
     /// @dev used for Meta Transaction (from metaTransactionContract).
     /// @param sender the sender granting control.
     /// @param operator the address to approve as NFT controller.
@@ -684,13 +677,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     ) external {
         address owner = _ownerOf(id);
         require(sender != address(0), "SENDER==0");
-        require(
-            msg.sender == sender ||
-                _metaTransactionContracts[msg.sender] ||
-                _superOperators[msg.sender] ||
-                _operatorsForAll[sender][msg.sender],
-            "!AUTHORIZED"
-        ); // solium-disable-line max-len
+        require(_isAuthorized(sender) || isApprovedForAll(sender, msg.sender), "!AUTHORIZED");
         require(owner == sender, "OWNER!=SENDER");
         _erc721operators[id] = operator;
         emit Approval(owner, operator, id);
@@ -702,10 +689,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     function approve(address operator, uint256 id) external override {
         address owner = _ownerOf(id);
         require(owner != address(0), "NFT_!EXIST");
-        require(
-            owner == msg.sender || _superOperators[msg.sender] || _operatorsForAll[owner][msg.sender],
-            "!AUTHORIZED"
-        );
+        require(owner == msg.sender || isApprovedForAll(owner, msg.sender), "!AUTHORIZED");
         _erc721operators[id] = operator;
         emit Approval(owner, operator, id);
     }
@@ -1009,13 +993,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         emit TransferSingle(operator, from, address(0), id, 1);
     }
 
-    /// @notice Burns `amount` tokens of type `id`.
-    /// @param id token type which will be burnt.
-    /// @param amount amount of token to burn.
-    function burn(uint256 id, uint256 amount) external {
-        _burn(msg.sender, id, amount);
-    }
-
     /// @notice Burns `amount` tokens of type `id` from `from`.
     /// @param from address whose token is to be burnt.
     /// @param id token type which will be burnt.
@@ -1026,13 +1003,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         uint256 amount
     ) external {
         require(from != address(0), "FROM==0");
-        require(
-            msg.sender == from ||
-                _metaTransactionContracts[msg.sender] ||
-                _superOperators[msg.sender] ||
-                _operatorsForAll[from][msg.sender],
-            ""
-        );
+        require(_isAuthorized(from) || isApprovedForAll(from, msg.sender), "!AUTHORIZED");
         _burn(from, id, amount);
     }
 
@@ -1082,14 +1053,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     }
 
     /// @notice Extracts an EIP-721 NFT from an EIP-1155 token.
-    /// @param id the token type to extract from.
-    /// @param to address which will receive the token.
-    /// @return newId the id of the newly minted NFT.
-    function extractERC721(uint256 id, address to) external returns (uint256 newId) {
-        return _extractERC721From(msg.sender, msg.sender, id, to);
-    }
-
-    /// @notice Extracts an EIP-721 NFT from an EIP-1155 token.
     /// @param sender address which own the token to be extracted.
     /// @param id the token type to extract from.
     /// @param to address which will receive the token.
@@ -1099,11 +1062,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         uint256 id,
         address to
     ) external returns (uint256 newId) {
-        bool metaTx = _metaTransactionContracts[msg.sender];
-        require(
-            msg.sender == sender || metaTx || _superOperators[msg.sender] || _operatorsForAll[sender][msg.sender],
-            "!AUTHORIZED"
-        );
+        bool metaTx = _is2771MetaTx(sender);
+        require(msg.sender == sender || metaTx || isApprovedForAll(sender, msg.sender), "!AUTHORIZED");
         return _extractERC721From(metaTx ? sender : msg.sender, sender, id, to);
     }
 
