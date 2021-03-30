@@ -347,8 +347,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         require(from != address(0), "FROM==0");
         metaTx = _is2771MetaTx(from);
         // bool authorized = _isAuthorized(from) || isApprovedForAll(from, msg.sender);
-        bool authorized =
-            from == msg.sender || metaTx || isApprovedForAll(from, msg.sender);
+        bool authorized = from == msg.sender || metaTx || isApprovedForAll(from, msg.sender);
 
         if (id & IS_NFT > 0) {
             require(authorized || _erc721operators[id] == msg.sender, "OPERATOR_!AUTH");
@@ -665,7 +664,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         return address(uint160(_owners[id]));
     }
 
-     /// @notice Change or reaffirm the approved address for an NFT for `sender`.
+    /// @notice Change or reaffirm the approved address for an NFT for `sender`.
     /// @dev used for Meta Transaction (from metaTransactionContract).
     /// @param sender the sender granting control.
     /// @param operator the address to approve as NFT controller.
