@@ -711,7 +711,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         return IERC1155TokenReceiver(to).onERC1155Received(operator, from, id, value, data) == ERC1155_RECEIVED;
     }
 
-
     function _checkERC1155AndCallSafeBatchTransfer(
         address operator,
         address from,
@@ -1086,7 +1085,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", uint2str(id & PACK_INDEX), ".json"));
     }
 
-     // solium-disable-next-line security/no-assign-params
+    // solium-disable-next-line security/no-assign-params
     function hash2base32(bytes32 hash) private pure returns (string memory _uintAsString) {
         uint256 _i = uint256(hash);
         uint256 k = 52;
