@@ -87,14 +87,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         emit MetaTransactionProcessor(metaTransactionContract, true);
     }
 
-
-
-    /// @notice Returns the current administrator in charge of minting rights.
-    /// @return the current minting administrator in charge of minting rights.
-    function getBouncerAdmin() external view returns (address) {
-        return _bouncerAdmin;
-    }
-
     /// @notice Change the minting administrator to be `newBouncerAdmin`.
     /// @param newBouncerAdmin address of the new minting administrator.
     function changeBouncerAdmin(address newBouncerAdmin) external {
@@ -103,8 +95,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         _bouncerAdmin = newBouncerAdmin;
     }
 
-
-
     /// @notice Enable or disable the ability of `bouncer` to mint tokens (minting bouncer rights).
     /// @param bouncer address that will be given/removed minting bouncer rights.
     /// @param enabled set whether the address is enabled or disabled as a minting bouncer.
@@ -112,22 +102,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         require(msg.sender == _bouncerAdmin, "!BOUNCER_ADMIN");
         _bouncers[bouncer] = enabled;
         emit Bouncer(bouncer, enabled);
-    }
-
-    /// @notice check whether address `who` is given minting bouncer rights.
-    /// @param who The address to query.
-    /// @return whether the address has minting rights.
-    function isBouncer(address who) external view returns (bool) {
-        return _bouncers[who];
-    }
-
-
-
-    /// @notice check whether address `who` is given meta-transaction execution rights.
-    /// @param who The address to query.
-    /// @return whether the address has meta-transaction execution rights.
-    function isMetaTransactionProcessor(address who) external view returns (bool) {
-        return _metaTransactionContracts[who];
     }
 
     /// @notice Mint a token type for `creator` on slot `packId`.
@@ -233,6 +207,407 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         );
     }
 
+    /// @notice Transfers creatorship of `original` from `sender` to `to`.
+    /// @param sender address of current registered creator.
+    /// @param original address of the original creator whose creation are saved in the ids themselves.
+    /// @param to address which will be given creatorship for all tokens originally minted by `original`.
+    function transferCreatorship(
+        address sender,
+        address original,
+        address to
+    ) external {
+        require(_isAuthorized(sender) || _superOperators[msg.sender], "!AUTHORIZED");
+        require(sender != address(0), "SENDER==0");
+        require(to != address(0), "TO==0");
+        address current = _creatorship[original];
+        if (current == address(0)) {
+            current = original;
+        }
+        require(current != to, "CURRENT==TO");
+        require(current == sender, "CURRENT!=SENDER");
+        if (to == original) {
+            _creatorship[original] = address(0);
+        } else {
+            _creatorship[original] = to;
+        }
+        emit CreatorshipTransfer(original, current, to);
+    }
+
+    /// @notice Enable or disable approval for `operator` to manage all `sender`'s tokens.
+    /// @dev used for Meta Transaction (from metaTransactionContract).
+    /// @param sender address which grant approval.
+    /// @param operator address which will be granted rights to transfer all token owned by `sender`.
+    /// @param approved whether to approve or revoke.
+    function setApprovalForAllFor(
+        address sender,
+        address operator,
+        bool approved
+    ) external {
+        require(_isAuthorized(sender) || _superOperators[msg.sender], "!AUTHORIZED");
+        _setApprovalForAll(sender, operator, approved);
+    }
+
+    /// @notice Enable or disable approval for `operator` to manage all of the caller's tokens.
+    /// @param operator address which will be granted rights to transfer all tokens of the caller.
+    /// @param approved whether to approve or revoke
+    function setApprovalForAll(address operator, bool approved) external override(IERC1155, IERC721) {
+        _setApprovalForAll(msg.sender, operator, approved);
+    }
+
+    /// @notice Change or reaffirm the approved address for an NFT for `sender`.
+    /// @dev used for Meta Transaction (from metaTransactionContract).
+    /// @param sender the sender granting control.
+    /// @param operator the address to approve as NFT controller.
+    /// @param id the NFT to approve.
+    function approveFor(
+        address sender,
+        address operator,
+        uint256 id
+    ) external {
+        address owner = _ownerOf(id);
+        require(sender != address(0), "SENDER==0");
+        require(_isAuthorized(sender) || isApprovedForAll(sender, msg.sender), "!AUTHORIZED");
+        require(owner == sender, "OWNER!=SENDER");
+        _erc721operators[id] = operator;
+        emit Approval(owner, operator, id);
+    }
+
+    /// @notice Change or reaffirm the approved address for an NFT.
+    /// @param operator the address to approve as NFT controller.
+    /// @param id the id of the NFT to approve.
+    function approve(address operator, uint256 id) external override {
+        address owner = _ownerOf(id);
+        require(owner != address(0), "NFT_!EXIST");
+        require(owner == msg.sender || isApprovedForAll(owner, msg.sender), "!AUTHORIZED");
+        _erc721operators[id] = operator;
+        emit Approval(owner, operator, id);
+    }
+
+    /// @notice Transfers ownership of an NFT.
+    /// @param from the current owner of the NFT.
+    /// @param to the new owner.
+    /// @param id the NFT to transfer.
+    function transferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) external override {
+        require(_ownerOf(id) == from, "OWNER!=FROM");
+        bool metaTx = _transferFrom(from, to, id, 1);
+        require(
+            _checkERC1155AndCallSafeTransfer(metaTx ? from : msg.sender, from, to, id, 1, "", true, false),
+            "1155_TRANSFER_REJECTED"
+        );
+    }
+
+    /// @notice Transfers the ownership of an NFT from one address to another address.
+    /// @param from the current owner of the NFT.
+    /// @param to the new owner.
+    /// @param id the NFT to transfer.
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id
+    ) external override {
+        safeTransferFrom(from, to, id, "");
+    }
+
+    /// @notice Burns `amount` tokens of type `id` from `from`.
+    /// @param from address whose token is to be burnt.
+    /// @param id token type which will be burnt.
+    /// @param amount amount of token to burn.
+    function burnFrom(
+        address from,
+        uint256 id,
+        uint256 amount
+    ) external {
+        require(from != address(0), "FROM==0");
+        require(_isAuthorized(from) || isApprovedForAll(from, msg.sender), "!AUTHORIZED");
+        _burn(from, id, amount);
+    }
+
+    /// @notice Upgrades an NFT with new metadata and rarity.
+    /// @param from address which own the NFT to be upgraded.
+    /// @param id the NFT that will be burnt to be upgraded.
+    /// @param packId unqiue packId for the token.
+    /// @param hash hash of an IPFS cidv1 folder that contains the metadata of the new token type in the file 0.json.
+    /// @param newRarity rarity power of the new NFT.
+    /// @param to address which will receive the NFT.
+    /// @param data bytes to be transmitted as part of the minted token.
+    /// @return the id of the newly minted NFT.
+    function updateERC721(
+        address from,
+        uint256 id,
+        uint40 packId,
+        bytes32 hash,
+        uint8 newRarity,
+        address to,
+        bytes calldata data
+    ) external returns (uint256) {
+        require(hash != 0, "HASH==0");
+        require(_bouncers[msg.sender], "!BOUNCER");
+        require(to != address(0), "TO==0");
+        require(from != address(0), "FROM==0");
+
+        _burnERC721(msg.sender, from, id);
+
+        uint256 newId = _generateTokenId(from, 1, packId, 0, 0);
+        _mint(hash, 1, newRarity, msg.sender, to, newId, data, false);
+        emit AssetUpdate(id, newId);
+        return newId;
+    }
+
+    /// @notice Extracts an EIP-721 NFT from an EIP-1155 token.
+    /// @param sender address which own the token to be extracted.
+    /// @param id the token type to extract from.
+    /// @param to address which will receive the token.
+    /// @return newId the id of the newly minted NFT.
+    function extractERC721From(
+        address sender,
+        uint256 id,
+        address to
+    ) external returns (uint256 newId) {
+        bool metaTx = _is2771MetaTx(sender);
+        require(msg.sender == sender || metaTx || isApprovedForAll(sender, msg.sender), "!AUTHORIZED");
+        return _extractERC721From(metaTx ? sender : msg.sender, sender, id, to);
+    }
+
+    /// @notice Returns the current administrator in charge of minting rights.
+    /// @return the current minting administrator in charge of minting rights.
+    function getBouncerAdmin() external view returns (address) {
+        return _bouncerAdmin;
+    }
+
+    /// @notice check whether address `who` is given minting bouncer rights.
+    /// @param who The address to query.
+    /// @return whether the address has minting rights.
+    function isBouncer(address who) external view returns (bool) {
+        return _bouncers[who];
+    }
+
+    /// @notice check whether address `who` is given meta-transaction execution rights.
+    /// @param who The address to query.
+    /// @return whether the address has meta-transaction execution rights.
+    function isMetaTransactionProcessor(address who) external view returns (bool) {
+        return _metaTransactionContracts[who];
+    }
+
+    /// @notice Get the balance of `owners` for each token type `ids`.
+    /// @param owners the addresses of the token holders queried.
+    /// @param ids ids of each token type to query.
+    /// @return the balance of each `owners` for each token type `ids`.
+    function balanceOfBatch(address[] calldata owners, uint256[] calldata ids)
+        external
+        view
+        override
+        returns (uint256[] memory)
+    {
+        require(owners.length == ids.length, "ARG_LENGTH_MISMATCH");
+        uint256[] memory balances = new uint256[](ids.length);
+        for (uint256 i = 0; i < ids.length; i++) {
+            balances[i] = balanceOf(owners[i], ids[i]);
+        }
+        return balances;
+    }
+
+    /// @notice Get the creator of the token type `id`.
+    /// @param id the id of the token to get the creator of.
+    /// @return the creator of the token type `id`.
+    function creatorOf(uint256 id) external view returns (address) {
+        require(wasEverMinted(id), "TOKEN_!MINTED");
+        address originalCreator = address(uint160(id / CREATOR_OFFSET_MULTIPLIER));
+        address newCreator = _creatorship[originalCreator];
+        if (newCreator != address(0)) {
+            return newCreator;
+        }
+        return originalCreator;
+    }
+
+    /// @notice Count all NFTs assigned to `owner`.
+    /// @param owner address for whom to query the balance.
+    /// @return balance the number of NFTs owned by `owner`, possibly zero.
+    function balanceOf(address owner) external view override returns (uint256 balance) {
+        require(owner != address(0), "OWNER==0");
+        return _numNFTPerAddress[owner];
+    }
+
+    /// @notice Find the owner of an NFT.
+    /// @param id the identifier for an NFT.
+    /// @return owner the address of the owner of the NFT.
+    function ownerOf(uint256 id) external view override returns (address owner) {
+        owner = _ownerOf(id);
+        require(owner != address(0), "NFT_!EXIST");
+    }
+
+    /// @notice Get the approved address for a single NFT.
+    /// @param id the NFT to find the approved address for.
+    /// @return operator the approved address for this NFT, or the zero address if there is none.
+    function getApproved(uint256 id) external view override returns (address operator) {
+        require(_ownerOf(id) != address(0), "NFT_!EXIST");
+        return _erc721operators[id];
+    }
+
+    /// @notice check whether a packId/numFT tupple has been used
+    /// @param creator for which creator
+    /// @param packId the packId to check
+    /// @param numFTs number of Fungible Token in that pack (can reuse packId if different)
+    /// @return whether the pack has already been used
+    function isPackIdUsed(
+        address creator,
+        uint40 packId,
+        uint16 numFTs
+    ) external view returns (bool) {
+        uint256 uriId =
+            uint256(uint160(creator)) *
+                CREATOR_OFFSET_MULTIPLIER + // CREATOR
+                uint256(packId) *
+                PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // PACk_ID
+                numFTs *
+                PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER; // number of fungible token in the pack // PACK_NUM_FT_TYPES
+        return _metadataHash[uriId] != 0;
+    }
+
+    /// @notice A descriptive name for the collection of tokens in this contract.
+    /// @return _name the name of the tokens.
+    function name() external pure returns (string memory _name) {
+        return "Sandbox's ASSETs";
+    }
+
+    /// @notice An abbreviated name for the collection of tokens in this contract.
+    /// @return _symbol the symbol of the tokens.
+    function symbol() external pure returns (string memory _symbol) {
+        return "ASSET";
+    }
+
+    /// @notice Query if a contract implements interface `id`.
+    /// @param id the interface identifier, as specified in ERC-165.
+    /// @return `true` if the contract implements `id`.
+    function supportsInterface(bytes4 id) external pure override returns (bool) {
+        return
+            id == 0x01ffc9a7 || //ERC165
+            id == 0xd9b67a26 || // ERC1155
+            id == 0x80ac58cd || // ERC721
+            id == 0x5b5e139f || // ERC721 metadata
+            id == 0x0e89341c; // ERC1155 metadata
+    }
+
+    /// @notice Transfers the ownership of an NFT from one address to another address.
+    /// @param from the current owner of the NFT.
+    /// @param to the new owner.
+    /// @param id the NFT to transfer.
+    /// @param data additional data with no specified format, sent in call to `to`.
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 id,
+        bytes memory data
+    ) public override {
+        require(_ownerOf(id) == from, "OWNER!=FROM");
+        bool metaTx = _transferFrom(from, to, id, 1);
+        require(
+            _checkERC1155AndCallSafeTransfer(metaTx ? from : msg.sender, from, to, id, 1, data, true, true),
+            "721/1155_TRANSFER_REJECTED"
+        );
+    }
+
+    /// @notice Gives the collection a specific token belongs to.
+    /// @param id the token to get the collection of.
+    /// @return the collection the NFT is part of.
+    function collectionOf(uint256 id) public view returns (uint256) {
+        require(_ownerOf(id) != address(0), "NFT_!EXIST");
+        uint256 collectionId = id & NOT_NFT_INDEX & NOT_IS_NFT;
+        require(wasEverMinted(collectionId), "UNMINTED_COLLECTION");
+        return collectionId;
+    }
+
+    /// @notice Return wether the id is a collection
+    /// @param id collectionId to check.
+    /// @return whether the id is a collection.
+    function isCollection(uint256 id) public view returns (bool) {
+        uint256 collectionId = id & NOT_NFT_INDEX & NOT_IS_NFT;
+        return wasEverMinted(collectionId);
+    }
+
+    /// @notice Gives the index at which an NFT was minted in a collection : first of a collection get the zero index.
+    /// @param id the token to get the index of.
+    /// @return the index/order at which the token `id` was minted in a collection.
+    function collectionIndexOf(uint256 id) public view returns (uint256) {
+        collectionOf(id); // this check if id and collection indeed was ever minted
+        return uint32((id & NFT_INDEX) >> NFT_INDEX_OFFSET);
+    }
+
+    function wasEverMinted(uint256 id) public view returns (bool) {
+        if ((id & IS_NFT) > 0) {
+            return _owners[id] != 0;
+        } else {
+            return
+                ((id & PACK_INDEX) < ((id & PACK_NUM_FT_TYPES) / PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
+                _metadataHash[id & URI_ID] != 0;
+        }
+    }
+
+    /// @notice A distinct Uniform Resource Identifier (URI) for a given token.
+    /// @param id token to get the uri of.
+    /// @return URI string
+    function uri(uint256 id) public view returns (string memory) {
+        require(wasEverMinted(id), "TOKEN_!MINTED"); // prevent returning invalid uri
+        return _toFullURI(_metadataHash[id & URI_ID], id);
+    }
+
+    /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
+    /// @param id token to get the uri of.
+    /// @return URI string
+    function tokenURI(uint256 id) public view returns (string memory) {
+        require(_ownerOf(id) != address(0), "NFT_!EXIST");
+        return _toFullURI(_metadataHash[id & URI_ID], id);
+    }
+
+    /// @notice Get the balance of `owner` for the token type `id`.
+    /// @param owner The address of the token holder.
+    /// @param id the token type of which to get the balance of.
+    /// @return the balance of `owner` for the token type `id`.
+    function balanceOf(address owner, uint256 id) public view override returns (uint256) {
+        // do not check for existence, balance is zero if never minted
+        // require(wasEverMinted(id), "token was never minted");
+        if (id & IS_NFT > 0) {
+            if (_ownerOf(id) == owner) {
+                return 1;
+            } else {
+                return 0;
+            }
+        }
+        (uint256 bin, uint256 index) = id.getTokenBinIndex();
+        return _packedTokenBalance[owner][bin].getValueInBin(index);
+    }
+
+    /// @notice Queries the approval status of `operator` for owner `owner`.
+    /// @param owner the owner of the tokens.
+    /// @param operator address of authorized operator.
+    /// @return isOperator true if the operator is approved, false if not.
+    function isApprovedForAll(address owner, address operator)
+        public
+        view
+        override(IERC1155, IERC721)
+        returns (bool isOperator)
+    {
+        require(owner != address(0), "OWNER==0");
+        require(operator != address(0), "OPERATOR==0");
+        return _operatorsForAll[owner][operator] || _superOperators[operator];
+    }
+
+    function _setApprovalForAll(
+        address sender,
+        address operator,
+        bool approved
+    ) internal {
+        require(sender != address(0), "SENDER==0");
+        require(sender != operator, "SENDER==OPERATOR");
+        require(operator != address(0), "OPERATOR==0");
+        require(!_superOperators[operator], "APPR_EXISTING_SUPEROPERATOR");
+        _operatorsForAll[sender][operator] = approved;
+        emit ApprovalForAll(sender, operator, approved);
+    }
+
     /* solhint-disable code-complexity */
     function _batchTransferFrom(
         address from,
@@ -310,391 +685,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     }
 
     /* solhint-enable code-complexity */
-
-    /// @notice Get the balance of `owners` for each token type `ids`.
-    /// @param owners the addresses of the token holders queried.
-    /// @param ids ids of each token type to query.
-    /// @return the balance of each `owners` for each token type `ids`.
-    function balanceOfBatch(address[] calldata owners, uint256[] calldata ids)
-        external
-        view
-        override
-        returns (uint256[] memory)
-    {
-        require(owners.length == ids.length, "ARG_LENGTH_MISMATCH");
-        uint256[] memory balances = new uint256[](ids.length);
-        for (uint256 i = 0; i < ids.length; i++) {
-            balances[i] = balanceOf(owners[i], ids[i]);
-        }
-        return balances;
-    }
-
-    /// @notice Get the creator of the token type `id`.
-    /// @param id the id of the token to get the creator of.
-    /// @return the creator of the token type `id`.
-    function creatorOf(uint256 id) external view returns (address) {
-        require(wasEverMinted(id), "TOKEN_!MINTED");
-        address originalCreator = address(uint160(id / CREATOR_OFFSET_MULTIPLIER));
-        address newCreator = _creatorship[originalCreator];
-        if (newCreator != address(0)) {
-            return newCreator;
-        }
-        return originalCreator;
-    }
-
-    /// @notice Transfers creatorship of `original` from `sender` to `to`.
-    /// @param sender address of current registered creator.
-    /// @param original address of the original creator whose creation are saved in the ids themselves.
-    /// @param to address which will be given creatorship for all tokens originally minted by `original`.
-    function transferCreatorship(
-        address sender,
-        address original,
-        address to
-    ) external {
-        require(_isAuthorized(sender) || _superOperators[msg.sender], "!AUTHORIZED");
-        require(sender != address(0), "SENDER==0");
-        require(to != address(0), "TO==0");
-        address current = _creatorship[original];
-        if (current == address(0)) {
-            current = original;
-        }
-        require(current != to, "CURRENT==TO");
-        require(current == sender, "CURRENT!=SENDER");
-        if (to == original) {
-            _creatorship[original] = address(0);
-        } else {
-            _creatorship[original] = to;
-        }
-        emit CreatorshipTransfer(original, current, to);
-    }
-
-    /// @notice Enable or disable approval for `operator` to manage all `sender`'s tokens.
-    /// @dev used for Meta Transaction (from metaTransactionContract).
-    /// @param sender address which grant approval.
-    /// @param operator address which will be granted rights to transfer all token owned by `sender`.
-    /// @param approved whether to approve or revoke.
-    function setApprovalForAllFor(
-        address sender,
-        address operator,
-        bool approved
-    ) external {
-        require(_isAuthorized(sender) || _superOperators[msg.sender], "!AUTHORIZED");
-        _setApprovalForAll(sender, operator, approved);
-    }
-
-    /// @notice Enable or disable approval for `operator` to manage all of the caller's tokens.
-    /// @param operator address which will be granted rights to transfer all tokens of the caller.
-    /// @param approved whether to approve or revoke
-    function setApprovalForAll(address operator, bool approved) external override(IERC1155, IERC721) {
-        _setApprovalForAll(msg.sender, operator, approved);
-    }
-
-    function _setApprovalForAll(
-        address sender,
-        address operator,
-        bool approved
-    ) internal {
-        require(sender != address(0), "SENDER==0");
-        require(sender != operator, "SENDER==OPERATOR");
-        require(operator != address(0), "OPERATOR==0");
-        require(!_superOperators[operator], "APPR_EXISTING_SUPEROPERATOR");
-        _operatorsForAll[sender][operator] = approved;
-        emit ApprovalForAll(sender, operator, approved);
-    }
-
-    /// @notice Get the balance of `owner` for the token type `id`.
-    /// @param owner The address of the token holder.
-    /// @param id the token type of which to get the balance of.
-    /// @return the balance of `owner` for the token type `id`.
-    function balanceOf(address owner, uint256 id) public view override returns (uint256) {
-        // do not check for existence, balance is zero if never minted
-        // require(wasEverMinted(id), "token was never minted");
-        if (id & IS_NFT > 0) {
-            if (_ownerOf(id) == owner) {
-                return 1;
-            } else {
-                return 0;
-            }
-        }
-        (uint256 bin, uint256 index) = id.getTokenBinIndex();
-        return _packedTokenBalance[owner][bin].getValueInBin(index);
-    }
-
-    /// @notice Queries the approval status of `operator` for owner `owner`.
-    /// @param owner the owner of the tokens.
-    /// @param operator address of authorized operator.
-    /// @return isOperator true if the operator is approved, false if not.
-    function isApprovedForAll(address owner, address operator)
-        public
-        view
-        override(IERC1155, IERC721)
-        returns (bool isOperator)
-    {
-        require(owner != address(0), "OWNER==0");
-        require(operator != address(0), "OPERATOR==0");
-        return _operatorsForAll[owner][operator] || _superOperators[operator];
-    }
-
-    /// @notice Count all NFTs assigned to `owner`.
-    /// @param owner address for whom to query the balance.
-    /// @return balance the number of NFTs owned by `owner`, possibly zero.
-    function balanceOf(address owner) external view override returns (uint256 balance) {
-        require(owner != address(0), "OWNER==0");
-        return _numNFTPerAddress[owner];
-    }
-
-    /// @notice Find the owner of an NFT.
-    /// @param id the identifier for an NFT.
-    /// @return owner the address of the owner of the NFT.
-    function ownerOf(uint256 id) external view override returns (address owner) {
-        owner = _ownerOf(id);
-        require(owner != address(0), "NFT_!EXIST");
-    }
-
-
-
-    /// @notice Change or reaffirm the approved address for an NFT for `sender`.
-    /// @dev used for Meta Transaction (from metaTransactionContract).
-    /// @param sender the sender granting control.
-    /// @param operator the address to approve as NFT controller.
-    /// @param id the NFT to approve.
-    function approveFor(
-        address sender,
-        address operator,
-        uint256 id
-    ) external {
-        address owner = _ownerOf(id);
-        require(sender != address(0), "SENDER==0");
-        require(_isAuthorized(sender) || isApprovedForAll(sender, msg.sender), "!AUTHORIZED");
-        require(owner == sender, "OWNER!=SENDER");
-        _erc721operators[id] = operator;
-        emit Approval(owner, operator, id);
-    }
-
-    /// @notice Change or reaffirm the approved address for an NFT.
-    /// @param operator the address to approve as NFT controller.
-    /// @param id the id of the NFT to approve.
-    function approve(address operator, uint256 id) external override {
-        address owner = _ownerOf(id);
-        require(owner != address(0), "NFT_!EXIST");
-        require(owner == msg.sender || isApprovedForAll(owner, msg.sender), "!AUTHORIZED");
-        _erc721operators[id] = operator;
-        emit Approval(owner, operator, id);
-    }
-
-    /// @notice Get the approved address for a single NFT.
-    /// @param id the NFT to find the approved address for.
-    /// @return operator the approved address for this NFT, or the zero address if there is none.
-    function getApproved(uint256 id) external view override returns (address operator) {
-        require(_ownerOf(id) != address(0), "NFT_!EXIST");
-        return _erc721operators[id];
-    }
-
-    /// @notice Transfers ownership of an NFT.
-    /// @param from the current owner of the NFT.
-    /// @param to the new owner.
-    /// @param id the NFT to transfer.
-    function transferFrom(
-        address from,
-        address to,
-        uint256 id
-    ) external override {
-        require(_ownerOf(id) == from, "OWNER!=FROM");
-        bool metaTx = _transferFrom(from, to, id, 1);
-        require(
-            _checkERC1155AndCallSafeTransfer(metaTx ? from : msg.sender, from, to, id, 1, "", true, false),
-            "1155_TRANSFER_REJECTED"
-        );
-    }
-
-    /// @notice Transfers the ownership of an NFT from one address to another address.
-    /// @param from the current owner of the NFT.
-    /// @param to the new owner.
-    /// @param id the NFT to transfer.
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id
-    ) external override {
-        safeTransferFrom(from, to, id, "");
-    }
-
-    /// @notice A descriptive name for the collection of tokens in this contract.
-    /// @return _name the name of the tokens.
-    function name() external pure returns (string memory _name) {
-        return "Sandbox's ASSETs";
-    }
-
-    /// @notice An abbreviated name for the collection of tokens in this contract.
-    /// @return _symbol the symbol of the tokens.
-    function symbol() external pure returns (string memory _symbol) {
-        return "ASSET";
-    }
-
-    /// @notice Gives the collection a specific token belongs to.
-    /// @param id the token to get the collection of.
-    /// @return the collection the NFT is part of.
-    function collectionOf(uint256 id) public view returns (uint256) {
-        require(_ownerOf(id) != address(0), "NFT_!EXIST");
-        uint256 collectionId = id & NOT_NFT_INDEX & NOT_IS_NFT;
-        require(wasEverMinted(collectionId), "UNMINTED_COLLECTION");
-        return collectionId;
-    }
-
-    /// @notice Return wether the id is a collection
-    /// @param id collectionId to check.
-    /// @return whether the id is a collection.
-    function isCollection(uint256 id) public view returns (bool) {
-        uint256 collectionId = id & NOT_NFT_INDEX & NOT_IS_NFT;
-        return wasEverMinted(collectionId);
-    }
-
-    /// @notice Gives the index at which an NFT was minted in a collection : first of a collection get the zero index.
-    /// @param id the token to get the index of.
-    /// @return the index/order at which the token `id` was minted in a collection.
-    function collectionIndexOf(uint256 id) public view returns (uint256) {
-        collectionOf(id); // this check if id and collection indeed was ever minted
-        return uint32((id & NFT_INDEX) >> NFT_INDEX_OFFSET);
-    }
-
-
-
-    function wasEverMinted(uint256 id) public view returns (bool) {
-        if ((id & IS_NFT) > 0) {
-            return _owners[id] != 0;
-        } else {
-            return
-                ((id & PACK_INDEX) < ((id & PACK_NUM_FT_TYPES) / PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
-                _metadataHash[id & URI_ID] != 0;
-        }
-    }
-
-    /// @notice Transfers the ownership of an NFT from one address to another address.
-    /// @param from the current owner of the NFT.
-    /// @param to the new owner.
-    /// @param id the NFT to transfer.
-    /// @param data additional data with no specified format, sent in call to `to`.
-    function safeTransferFrom(
-        address from,
-        address to,
-        uint256 id,
-        bytes memory data
-    ) public override {
-        require(_ownerOf(id) == from, "OWNER!=FROM");
-        bool metaTx = _transferFrom(from, to, id, 1);
-        require(
-            _checkERC1155AndCallSafeTransfer(metaTx ? from : msg.sender, from, to, id, 1, data, true, true),
-            "721/1155_TRANSFER_REJECTED"
-        );
-    }
-
-    /// @notice check whether a packId/numFT tupple has been used
-    /// @param creator for which creator
-    /// @param packId the packId to check
-    /// @param numFTs number of Fungible Token in that pack (can reuse packId if different)
-    /// @return whether the pack has already been used
-    function isPackIdUsed(
-        address creator,
-        uint40 packId,
-        uint16 numFTs
-    ) external view returns (bool) {
-        uint256 uriId =
-            uint256(uint160(creator)) *
-                CREATOR_OFFSET_MULTIPLIER + // CREATOR
-                uint256(packId) *
-                PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // PACk_ID
-                numFTs *
-                PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER; // number of fungible token in the pack // PACK_NUM_FT_TYPES
-        return _metadataHash[uriId] != 0;
-    }
-
-    /// @notice A distinct Uniform Resource Identifier (URI) for a given token.
-    /// @param id token to get the uri of.
-    /// @return URI string
-    function uri(uint256 id) public view returns (string memory) {
-        require(wasEverMinted(id), "TOKEN_!MINTED"); // prevent returning invalid uri
-        return _toFullURI(_metadataHash[id & URI_ID], id);
-    }
-
-    /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
-    /// @param id token to get the uri of.
-    /// @return URI string
-    function tokenURI(uint256 id) public view returns (string memory) {
-        require(_ownerOf(id) != address(0), "NFT_!EXIST");
-        return _toFullURI(_metadataHash[id & URI_ID], id);
-    }
-
-    /// @notice Query if a contract implements interface `id`.
-    /// @param id the interface identifier, as specified in ERC-165.
-    /// @return `true` if the contract implements `id`.
-    function supportsInterface(bytes4 id) external pure override returns (bool) {
-        return
-            id == 0x01ffc9a7 || //ERC165
-            id == 0xd9b67a26 || // ERC1155
-            id == 0x80ac58cd || // ERC721
-            id == 0x5b5e139f || // ERC721 metadata
-            id == 0x0e89341c; // ERC1155 metadata
-    }
-
-    /// @notice Burns `amount` tokens of type `id` from `from`.
-    /// @param from address whose token is to be burnt.
-    /// @param id token type which will be burnt.
-    /// @param amount amount of token to burn.
-    function burnFrom(
-        address from,
-        uint256 id,
-        uint256 amount
-    ) external {
-        require(from != address(0), "FROM==0");
-        require(_isAuthorized(from) || isApprovedForAll(from, msg.sender), "!AUTHORIZED");
-        _burn(from, id, amount);
-    }
-
-    /// @notice Upgrades an NFT with new metadata and rarity.
-    /// @param from address which own the NFT to be upgraded.
-    /// @param id the NFT that will be burnt to be upgraded.
-    /// @param packId unqiue packId for the token.
-    /// @param hash hash of an IPFS cidv1 folder that contains the metadata of the new token type in the file 0.json.
-    /// @param newRarity rarity power of the new NFT.
-    /// @param to address which will receive the NFT.
-    /// @param data bytes to be transmitted as part of the minted token.
-    /// @return the id of the newly minted NFT.
-    function updateERC721(
-        address from,
-        uint256 id,
-        uint40 packId,
-        bytes32 hash,
-        uint8 newRarity,
-        address to,
-        bytes calldata data
-    ) external returns (uint256) {
-        require(hash != 0, "HASH==0");
-        require(_bouncers[msg.sender], "!BOUNCER");
-        require(to != address(0), "TO==0");
-        require(from != address(0), "FROM==0");
-
-        _burnERC721(msg.sender, from, id);
-
-        uint256 newId = _generateTokenId(from, 1, packId, 0, 0);
-        _mint(hash, 1, newRarity, msg.sender, to, newId, data, false);
-        emit AssetUpdate(id, newId);
-        return newId;
-    }
-
-    /// @notice Extracts an EIP-721 NFT from an EIP-1155 token.
-    /// @param sender address which own the token to be extracted.
-    /// @param id the token type to extract from.
-    /// @param to address which will receive the token.
-    /// @return newId the id of the newly minted NFT.
-    function extractERC721From(
-        address sender,
-        uint256 id,
-        address to
-    ) external returns (uint256 newId) {
-        bool metaTx = _is2771MetaTx(sender);
-        require(msg.sender == sender || metaTx || isApprovedForAll(sender, msg.sender), "!AUTHORIZED");
-        return _extractERC721From(metaTx ? sender : msg.sender, sender, id, to);
-    }
 
     function _checkERC1155AndCallSafeTransfer(
         address operator,
