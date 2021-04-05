@@ -23,7 +23,6 @@ export const setupAsset = deployments.createFixture(async function () {
     assetBouncerAdmin
   );
   await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
-
   const Asset = await ethers.getContract('Asset', minter);
 
   let id = 0;
@@ -40,10 +39,16 @@ export const setupAsset = deployments.createFixture(async function () {
     const owner = to;
     const data = '0x';
 
-    const receipt = await waitFor(
-      Asset.mint(creator, packId, hash, supply, rarity, owner, data)
-    );
-    const event = receipt.events?.filter(
+    let receipt;
+    try {
+      receipt = await waitFor(
+        Asset.mint(creator, packId, hash, supply, rarity, owner, data)
+      );
+    } catch (e) {
+      console.log(e);
+    }
+
+    const event = receipt?.events?.filter(
       (event: Event) => event.event === 'TransferSingle'
     )[0];
     if (!event) {

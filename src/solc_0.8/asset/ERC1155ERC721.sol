@@ -60,14 +60,17 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     address private _bouncerAdmin;
 
     bool internal _init;
+    uint256 internal _initBits;
 
-    function init(
+    function initV2(
         address metaTransactionContract,
         address admin,
         address bouncerAdmin
     ) public {
-        require(!_init, "ALREADY_INITIALISED");
-        _init = true;
+        // initialize the bitfield for previous versions just in case
+        _checkInit(0);
+        _checkInit(1);
+        _checkInit(2);
         _metaTransactionContracts[metaTransactionContract] = true;
         _admin = admin;
         _bouncerAdmin = bouncerAdmin;
@@ -351,10 +354,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
         metaTx = _metaTransactionContracts[msg.sender];
-        bool authorized = from == msg.sender ||
-            metaTx ||
-            _superOperators[msg.sender] ||
-            _operatorsForAll[from][msg.sender];
+        bool authorized =
+            from == msg.sender || metaTx || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender];
 
         if (id & IS_NFT > 0) {
             require(authorized || _erc721operators[id] == msg.sender, "OPERATOR_!AUTH");
@@ -431,10 +432,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
         bool metaTx = _metaTransactionContracts[msg.sender];
-        bool authorized = from == msg.sender ||
-            metaTx ||
-            _superOperators[msg.sender] ||
-            _operatorsForAll[from][msg.sender]; // solium-disable-line max-len
+        bool authorized =
+            from == msg.sender || metaTx || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender]; // solium-disable-line max-len
 
         _batchTransferFrom(from, to, ids, values, authorized);
         emit TransferBatch(metaTx ? from : msg.sender, from, to, ids, values);
@@ -837,12 +836,13 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         uint40 packId,
         uint16 numFTs
     ) external view returns (bool) {
-        uint256 uriId = uint256(uint160(creator)) *
-            CREATOR_OFFSET_MULTIPLIER + // CREATOR
-            uint256(packId) *
-            PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // PACk_ID
-            numFTs *
-            PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER; // number of fungible token in the pack // PACK_NUM_FT_TYPES
+        uint256 uriId =
+            uint256(uint160(creator)) *
+                CREATOR_OFFSET_MULTIPLIER + // CREATOR
+                uint256(packId) *
+                PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // PACk_ID
+                numFTs *
+                PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER; // number of fungible token in the pack // PACK_NUM_FT_TYPES
         return _metadataHash[uriId] != 0;
     }
 
@@ -1129,5 +1129,14 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         _burnERC1155(operator, sender, id, 1);
         _mint(_metadataHash[id & URI_ID], 1, 0, operator, to, newId, "", true);
         emit Extraction(id, newId);
+    }
+
+    /// @dev Allows the use of a bitfield to track the initialized status of the version `v` passed in as an arg.
+    /// If the bit at the index corresponding to the given version is already set, revert.
+    /// Otherwise, set the bit and return.
+    /// @param v The version of this contract.
+    function _checkInit(uint256 v) internal {
+        require((_initBits >> v) & uint256(1) != 1, "ALREADY_INITIALISED");
+        _initBits = _initBits | (uint256(1) << v);
     }
 }

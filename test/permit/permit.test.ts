@@ -29,7 +29,7 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
@@ -71,7 +71,7 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
@@ -111,7 +111,7 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
@@ -144,7 +144,7 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
@@ -177,7 +177,7 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
@@ -210,7 +210,7 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
@@ -274,7 +274,7 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
@@ -343,7 +343,7 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
@@ -406,7 +406,7 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);

@@ -17,7 +17,9 @@ library ObjectLib32 {
     /// @return bin Bin number.
     /// @return index ID's index within that bin.
     function getTokenBinIndex(uint256 tokenId) internal pure returns (uint256 bin, uint256 index) {
-        bin = (tokenId * TYPES_BITS_SIZE) / 256;
+        unchecked {
+            bin = (tokenId * TYPES_BITS_SIZE) / 256;
+        }
         index = tokenId % TYPES_PER_UINT256;
         return (bin, index);
     }
