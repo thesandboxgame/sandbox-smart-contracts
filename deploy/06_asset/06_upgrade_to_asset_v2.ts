@@ -60,6 +60,7 @@ const func: DeployFunction = async function (
       owner: deployer,
       proxyContract: 'OpenZeppelinTransparentProxy',
       methodName: 'initV2',
+      upgradeIndex: 1,
     },
     log: true,
   });
