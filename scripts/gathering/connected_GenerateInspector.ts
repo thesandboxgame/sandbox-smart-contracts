@@ -1,6 +1,7 @@
 import {ethers} from 'hardhat';
 import {read} from '../utils/spreadsheet';
 
+// $ yarn mainnet:run scripts/gathering/connected_GenerateInspector.ts > InspectorGumShoe
 // This script prepare data for an external contract (0xc653e1b3a971078812a72d11c45ad71e00f3ad1f)
 // The function called is send1155ToAddresses() - check the source code => https://etherscan.io/address/0xc653e1b3a971078812a72d11c45ad71e00f3ad1f#code
 // This function takes in 4 parameters
@@ -10,17 +11,12 @@ import {read} from '../utils/spreadsheet';
 //   uint256[] calldata amounts,
 //   address tokenAddress
 
-// The script takes a list of address from a spreadsheet.
-// 1. remove the enclosing array (from string[][] to string[])
-// 2. ensure the array only contain unique data (no doublons)
-// 3. trim for whitespaces (as users often put some before/after)
-// 4. check the format address is valid && address is not a contract
-// 5. if address was not valid, check if it's an ens address
-// 6. await all promises (because of ens resolution)
-// 7. match address array with 2nd and 3rd params (tokenIds & amounts)
+// The script takes a list of address from a spreadsheet
+// It performs basic verifications on the address
+// Then output the parameters to send to the batch transaction contract
+// The output is split in batch of 200 elements in order to fit in a block
 
-// 8. console.log on the terminal, redirect: $ yarn mainnet:run scripts/gathering/connected_GenerateInspector.ts > InspectorGumShoe
-// 9. console.error on the terminal, show invalid address (contract / not ens)
+// invalid address, contract address will be shown in the terminal
 
 async function main() {
   const provider = ethers.provider;
@@ -28,6 +24,7 @@ async function main() {
   const AssetId =
     '55464657044963196816950587289035428064568320970692304673817341489687556012032';
 
+  // pull data from the spreadsheet - you need to setup .google_credentials.json for this to work
   const data: Array<string[]> = await read(
     {
       document: '1aSFdWvHpQEQrUu6eRVRNfVan8-OVILS16ft6uowhX5c',
@@ -36,8 +33,8 @@ async function main() {
     'E2:E1530'
   );
 
+  // remove the enclosing array (string[][] to string[]) and insure data are uniques
   const cleanedData: string[] = [];
-
   data.map((val) => cleanedData.push(val[0]));
   const cleanUniqueData = [...new Set(cleanedData)];
 
@@ -49,6 +46,7 @@ async function main() {
     return result === '0x';
   };
 
+  // remove whitespaces, check address is valid, is not a contract, if it's an ens
   const verifyAddress = async (address: string) => {
     const addressClean: string = address.replace(/\s/g, '');
     if (ethers.utils.isAddress(addressClean)) {
@@ -71,9 +69,11 @@ async function main() {
     }
   };
 
+  // await all ens resolutions
   const script = async () =>
     Promise.all(cleanUniqueData.map((add) => verifyAddress(add)));
 
+  // output the params split in batch of 200
   const scriptLog = (
     arrayResolvedAddress: Array<string | false | undefined>
   ) => {
@@ -102,6 +102,7 @@ async function main() {
     }
   };
 
+  // remove false value and fill the ids and amouts values (ids and amounts are always the same in this case)
   script()
     .then(async (add) => {
       const finalArray: (string | false | undefined)[] = add.filter(Boolean);
