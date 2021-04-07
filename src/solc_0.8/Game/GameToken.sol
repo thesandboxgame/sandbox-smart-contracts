@@ -4,8 +4,8 @@ pragma solidity 0.8.2;
 
 import "../common/BaseWithStorage/ERC721BaseToken.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
-import "../interfaces/IAssetToken.sol";
-import "../interfaces/IGameToken.sol";
+import "../common/interfaces/IAssetToken.sol";
+import "../common/interfaces/IGameToken.sol";
 
 contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
 
@@ -276,7 +276,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @return the creator of the token type `id`.
     function creatorOf(uint256 id) public view override returns (address) {
         require(id != uint256(0), "GAME_NEVER_MINTED");
-        address originalCreator = address(id / CREATOR_OFFSET_MULTIPLIER);
+        address originalCreator = address(uint160(id / CREATOR_OFFSET_MULTIPLIER));
         address newCreator = _creatorship[originalCreator];
         if (newCreator != address(0)) {
             return newCreator;
@@ -448,7 +448,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
             strgId = _storageId(gameId);
         }
 
-        _owners[strgId] = (uint256(idVersion) << 200) + uint256(to);
+        _owners[strgId] = (uint256(idVersion) << 200) + uint256(uint160(to));
         _numNFTPerAddress[to]++;
         emit Transfer(address(0), to, gameId);
         return (gameId, strgId);
@@ -473,7 +473,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @param gameId The Game token to bump the version of.
     /// @return The new gameId.
     function _bumpGameVersion(address from, uint256 gameId) internal returns (uint256) {
-        address originalCreator = address(gameId / CREATOR_OFFSET_MULTIPLIER);
+        address originalCreator = address(uint160(gameId / CREATOR_OFFSET_MULTIPLIER));
         uint64 subId = uint64(gameId / SUBID_MULTIPLIER);
         uint32 version = uint32(gameId);
         version++;
@@ -508,7 +508,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @return the address of the owner before burning.
     function _withdrawalOwnerOf(uint256 id) internal view returns (address) {
         uint256 packedData = _owners[_storageId(id)];
-        return address(packedData);
+        return address(uint160(packedData));
     }
 
     /// @dev A GameToken-specific implementation which handles versioned tokenIds.
@@ -522,7 +522,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         if (((packedData & BURNED_FLAG) == BURNED_FLAG) || idVersion != storageVersion) {
             return address(0);
         }
-        return address(packedData);
+        return address(uint160(packedData));
     }
 
     /// @dev Get the storageId (full id without the version number) from the full tokenId.
@@ -542,7 +542,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint64 subId,
         uint32 version
     ) internal pure returns (uint256) {
-        return uint256(creator) * CREATOR_OFFSET_MULTIPLIER + uint64(subId) * SUBID_MULTIPLIER + uint32(version);
+        return uint256(uint160(creator)) * CREATOR_OFFSET_MULTIPLIER + uint64(subId) * SUBID_MULTIPLIER + uint32(version);
     }
 
     /// @dev Get the a full URI string for a given hash + gameId.
