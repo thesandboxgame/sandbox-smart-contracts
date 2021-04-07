@@ -1,17 +1,13 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.5;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.2;
+
 
 import "../common/BaseWithStorage/ERC721BaseToken.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
-import "../common/Interfaces/IAssetToken.sol";
-import "../common/Interfaces/IGameToken.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "../interfaces/IAssetToken.sol";
+import "../interfaces/IGameToken.sol";
 
 contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
-    ///////////////////////////////  Libs //////////////////////////////
-
-    using SafeMath for uint256;
 
     ///////////////////////////////  Data //////////////////////////////
 
@@ -339,7 +335,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         for (uint256 i = 0; i < assetIds.length; i++) {
             currentValue = _gameAssets[storageId][assetIds[i]];
             require(amounts[i] != 0, "INVALID_ASSET_ADDITION");
-            _gameAssets[storageId][assetIds[i]] = currentValue.add(amounts[i]);
+            _gameAssets[storageId][assetIds[i]] = currentValue + amounts[i];
         }
         if (assetIds.length == 1) {
             _asset.safeTransferFrom(from, address(this), assetIds[0], amounts[0], "");
@@ -367,7 +363,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         for (uint256 i = 0; i < assetIds.length; i++) {
             currentValue = _gameAssets[storageId][assetIds[i]];
             require(currentValue != 0 && values[i] != 0 && values[i] <= currentValue, "INVALID_ASSET_REMOVAL");
-            _gameAssets[storageId][assetIds[i]] = currentValue.sub(values[i]);
+            _gameAssets[storageId][assetIds[i]] = currentValue - values[i];
         }
 
         if (assetIds.length == 1) {
