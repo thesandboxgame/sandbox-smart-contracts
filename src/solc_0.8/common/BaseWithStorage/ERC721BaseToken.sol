@@ -1,5 +1,6 @@
 //SPDX-License-Identifier: MIT
 /* solhint-disable func-order, code-complexity */
+// solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/utils/Address.sol";

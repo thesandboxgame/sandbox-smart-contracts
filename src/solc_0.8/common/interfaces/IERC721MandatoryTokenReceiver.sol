@@ -1,4 +1,5 @@
 //SPDX-License-Identifier: MIT
+// solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
 /// @dev Note: The ERC-165 identifier for this interface is 0x5e8bf644.

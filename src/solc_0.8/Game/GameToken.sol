@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
+// solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
-
 
 import "../common/BaseWithStorage/ERC721BaseToken.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
@@ -8,7 +8,6 @@ import "../common/interfaces/IAssetToken.sol";
 import "../common/interfaces/IGameToken.sol";
 
 contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
-
     ///////////////////////////////  Data //////////////////////////////
 
     IAssetToken internal immutable _asset;
@@ -542,7 +541,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint64 subId,
         uint32 version
     ) internal pure returns (uint256) {
-        return uint256(uint160(creator)) * CREATOR_OFFSET_MULTIPLIER + uint64(subId) * SUBID_MULTIPLIER + uint32(version);
+        return
+            uint256(uint160(creator)) * CREATOR_OFFSET_MULTIPLIER + uint64(subId) * SUBID_MULTIPLIER + uint32(version);
     }
 
     /// @dev Get the a full URI string for a given hash + gameId.
