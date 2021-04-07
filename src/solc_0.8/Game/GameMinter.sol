@@ -4,7 +4,7 @@ pragma solidity 0.8.2;
 
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 import "./GameToken.sol";
-import "../interfaces/IGameMinter.sol";
+import "../common/interfaces/IGameMinter.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 
 contract GameMinter is WithMetaTransaction, IGameMinter {
