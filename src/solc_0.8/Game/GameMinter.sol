@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 import "./GameToken.sol";
-import "../common/Interfaces/IGameMinter.sol";
+import "../interfaces/IGameMinter.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 
