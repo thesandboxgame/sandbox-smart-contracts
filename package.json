@@ -83,5 +83,8 @@
     "fork:dev": "node ./scripts.js fork:dev",
     "fork:test": "node ./scripts.js fork:test",
     "hardhat": "hardhat"
+  },
+  "dependencies": {
+    "@maticnetwork/pos-portal": "^1.5.1"
   }
 }
