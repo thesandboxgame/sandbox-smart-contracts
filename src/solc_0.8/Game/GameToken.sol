@@ -6,8 +6,9 @@ import "../common/BaseWithStorage/ERC721BaseToken.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
 import "../common/interfaces/IAssetToken.sol";
 import "../common/interfaces/IGameToken.sol";
+import "../common/interfaces/IMintableERC721.sol";
 
-contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
+contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     ///////////////////////////////  Data //////////////////////////////
 
     IAssetToken internal immutable _asset;
@@ -15,7 +16,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     uint256 private constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
-    uint256 private constant SUBID_MULTIPLIER = uint256(2)**(256 - 224);
+    uint256 private constant SUBID_MULTIPLIER = uint256(2)**(256 - 160 - 64);
     // ((uint256(1) * 2**224) - 1) << 32;
     uint256 private constant STORAGE_ID_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000;
     // ((uint256(1) * 2**32) - 1) << 200;
@@ -190,6 +191,21 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         _burnGame(from, gameId);
     }
 
+    // @review only(PREDICATE_ROLE) or onlyMinter() ?
+    /// @notice Matic Integration: See IMintableERC721.mint()
+    function mint(address user, uint256 tokenId) external override onlyMinter() {
+      //  _mint(user, tokenId);
+      // can we reuse _mintGame here ?
+    }
+
+    // @review
+    /// @notice Matic Integration: See IMintableERC721.mint()
+    function mint(address user, uint256 tokenId, bytes calldata metaData) external override {
+      //  _mint(user, tokenId);
+      // setTokenMetadata(tokenId, metaData);
+      // can we reuse _mintGame here ?
+    }
+
     /// @notice Get the amount of each assetId in a GAME.
     /// @param gameId The game to query.
     /// @param assetIds The assets to get balances for.
@@ -248,6 +264,13 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
             return ERC1155_RECEIVED;
         }
         revert("ERC1155_REJECTED");
+    }
+
+    // @review
+    /// @notice See IMintableERC721.exists()
+    function exists(uint256 tokenId) external view override returns (bool) {
+      address owner = _ownerOf(tokenId);
+      return owner != address(0);
     }
 
     /// @notice Get the first token id minted using the same storageId as given tokenId.
@@ -489,6 +512,22 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         address newOwner = _ownerOf(newId);
         assert(owner == newOwner);
         return newId;
+    }
+
+    // @review
+    /// @dev Used when bringing token metadata from L2 to L1 during exit
+    /// @param tokenId The token to set the data for
+    /// @param data Arbitrary token metadata from L2 token
+    function setTokenMetadata(uint256 tokenId, bytes memory data) internal virtual {
+        (bytes32 uri, uint256[] memory assetIds, uint256[] memory amounts) = abi.decode(data, (bytes32, uint256[], uint256[]));
+
+        uint256 storageId = _storageId(tokenId);
+        _metaData[storageId] = uri;
+        // hardcode L2 GameToken address, or lookup from mapping contract ?
+        // _addAssets(L2GameTokenContract, storageId, assetIds, amounts );
+        // @review game editors are mapped to gameCreators, not tokenIds ...
+        // _setGameEditor(user, editor, isEditor);
+        // Add _creatorship ? _owners? version? Minted on l1 or l2?
     }
 
     /// @dev Check if a withdrawal is allowed.
