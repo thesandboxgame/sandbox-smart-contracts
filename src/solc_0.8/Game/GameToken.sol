@@ -20,7 +20,10 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     // ((uint256(1) * 2**224) - 1) << 32;
     uint256 private constant STORAGE_ID_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000;
     // ((uint256(1) * 2**32) - 1) << 200;
-    uint256 private constant VERSION_MASK = 0x000000FFFFFFFF00000000000000000000000000000000000000000000000000;
+    uint256 private constant VERSION_MASK = 0x0000000000FFFF00000000000000000000000000000000000000000000000000;
+
+    // when set, signifies the token was minted on l2
+    uint256 private constant LAYER_TWO_FLAG = 0x0000000000000000000000000000000000000000000000000000000000010000;
     bytes32 private constant base32Alphabet = 0x6162636465666768696A6B6C6D6E6F707172737475767778797A323334353637;
 
     mapping(uint256 => mapping(uint256 => uint256)) private _gameAssets;
@@ -449,10 +452,10 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         address from,
         address to,
         uint64 subId,
-        uint32 version,
+        uint16 version,
         bool isCreation
     ) internal returns (uint256 id, uint256 storageId) {
-        uint32 idVersion;
+        uint16 idVersion;
         uint256 gameId;
         uint256 strgId;
         if (isCreation) {
@@ -493,7 +496,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     function _bumpGameVersion(address from, uint256 gameId) internal returns (uint256) {
         address originalCreator = address(uint160(gameId / CREATOR_OFFSET_MULTIPLIER));
         uint64 subId = uint64(gameId / SUBID_MULTIPLIER);
-        uint32 version = uint32(gameId);
+        uint16 version = uint16(gameId);
         version++;
         address owner = _ownerOf(gameId);
         if (from == owner) {
@@ -550,13 +553,23 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     /// @return The address of the owner.
     function _ownerOf(uint256 id) internal view override returns (address) {
         uint256 packedData = _owners[_storageId(id)];
-        uint32 idVersion = uint32(id);
-        uint32 storageVersion = uint32((packedData & VERSION_MASK) >> 200);
+        uint16 idVersion = uint16(id);
+        uint16 storageVersion = uint16((packedData & VERSION_MASK) >> 200);
 
         if (((packedData & BURNED_FLAG) == BURNED_FLAG) || idVersion != storageVersion) {
             return address(0);
         }
         return address(uint160(packedData));
+    }
+
+    /// @dev get the layer a token was minted on from its id.
+    /// @param id The id of the token to query.
+    /// @return layer The original layer of minting (1 || 2).
+    function _mintOrigin(uint256 id) internal view returns(uint256 layer) {
+      if((id | LAYER_TWO_FLAG) >> 17 == 1) {
+        return 2;
+      } else
+      return 1;
     }
 
     /// @dev Get the storageId (full id without the version number) from the full tokenId.
@@ -574,10 +587,10 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     function _generateGameId(
         address creator,
         uint64 subId,
-        uint32 version
+        uint16 version
     ) internal pure returns (uint256) {
         return
-            uint256(uint160(creator)) * CREATOR_OFFSET_MULTIPLIER + uint64(subId) * SUBID_MULTIPLIER + uint32(version);
+            uint256(uint160(creator)) * CREATOR_OFFSET_MULTIPLIER + uint64(subId) * SUBID_MULTIPLIER + uint16(version);
     }
 
     /// @dev Get the a full URI string for a given hash + gameId.
