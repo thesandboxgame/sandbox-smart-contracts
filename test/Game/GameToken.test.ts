@@ -210,12 +210,13 @@ describe('GameToken', function () {
 
     it('gameId contains creator address', async function () {
       const idAsHex = utils.hexValue(gameId);
+      console.log(`tokenId: ${idAsHex}`)
       const creatorSlice = idAsHex.slice(0, 42);
       const randomIdSlice = idAsHex.slice(43, 58);
-      const versionSlice = idAsHex.slice(58);
+      const versionSlice = idAsHex.slice(62);
       expect(utils.getAddress(creatorSlice)).to.be.equal(users[3].address);
       expect(randomIdSlice).to.be.equal('000000016721787');
-      expect(versionSlice).to.be.equal('00000001');
+      expect(versionSlice).to.be.equal('0001');
     });
 
     it('reverts if non-minter trys to mint Game when _Minter is set', async function () {
@@ -625,20 +626,20 @@ describe('GameToken', function () {
         const idAsHex = utils.hexValue(gameId);
         const creatorSlice = idAsHex.slice(0, 42);
         const randomIdSlice = idAsHex.slice(43, 58);
-        const versionSlice = idAsHex.slice(58);
+        const versionSlice = idAsHex.slice(62);
         expect(utils.getAddress(creatorSlice)).to.be.equal(GameOwner.address);
         expect(randomIdSlice).to.be.equal('000000020708760');
-        expect(versionSlice).to.be.equal('00000002');
+        expect(versionSlice).to.be.equal('0002');
       });
       it('can get the original version of the gameId', async function () {
         const originalId = await gameToken.originalId(gameId);
         const originalAsHex = utils.hexValue(originalId);
         const creatorSlice = originalAsHex.slice(0, 42);
         const randomIdSlice = originalAsHex.slice(43, 58);
-        const versionSlice = originalAsHex.slice(58);
+        const versionSlice = originalAsHex.slice(62);
         expect(utils.getAddress(creatorSlice)).to.be.equal(GameOwner.address);
         expect(randomIdSlice).to.be.equal('000000020708760');
-        expect(versionSlice).to.be.equal('00000001');
+        expect(versionSlice).to.be.equal('0001');
       });
 
       it('Minter can add multiple Assets', async function () {
