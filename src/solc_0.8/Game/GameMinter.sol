@@ -46,7 +46,7 @@ contract GameMinter is ERC2771Context, IGameMinter {
         address to,
         GameToken.Update calldata creation,
         address editor,
-        uint64 subId
+        uint48 subId
     ) external override returns (uint256 gameId) {
         address msgSender = _msgSender();
         _chargeSand(msgSender, _gameMintingFee);

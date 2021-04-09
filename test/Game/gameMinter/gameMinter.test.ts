@@ -735,6 +735,40 @@ describe('GameMinter', function () {
       );
     });
 
+    it('MetaTx should fail with wrong "from" address', async function () {
+      let idAsHex = utils.hexValue(gameId2);
+      let versionSlice = idAsHex.slice(62);
+      expect(versionSlice).to.be.equal('0004');
+
+      const gas = 1000000;
+      const {data} = await GameMinter.populateTransaction.updateGame(
+        users[4].address,
+        gameId2,
+        {...update}
+      );
+
+      await sandAsExecutionOperator.executeWithSpecificGas(
+        GameMinter.address,
+        gas,
+        data
+      );
+
+      // original token was not burned:
+      expect(await gameTokenContract.ownerOf(gameId2)).to.be.equal(
+        users[1].address
+      );
+
+      // tokenId version was not incremented:
+      idAsHex = utils.hexValue(gameId2);
+      versionSlice = idAsHex.slice(62);
+      expect(versionSlice).to.be.equal('0004');
+
+      // @note a future version of a token still maps to the current owner address!
+      // expect(await gameTokenContract.ownerOf(gameId2.add(1))).to.be.equal(
+      //   ethers.constants.AddressZero
+      // );
+    });
+
     it('should allow GAME Editor to add assets via MetaTx', async function () {
       const {to, data} = await GameMinter.populateTransaction.updateGame(
         gameId2,
