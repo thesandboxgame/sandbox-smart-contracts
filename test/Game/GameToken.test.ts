@@ -210,12 +210,14 @@ describe('GameToken', function () {
 
     it('gameId contains creator address', async function () {
       const idAsHex = utils.hexValue(gameId);
-      console.log(`tokenId: ${idAsHex}`)
+      console.log(`tokenId: ${idAsHex}`);
       const creatorSlice = idAsHex.slice(0, 42);
-      const randomIdSlice = idAsHex.slice(43, 58);
+      const randomIdSlice = idAsHex.slice(42, 54);
+      const chainIdSlice = idAsHex.slice(54, 62);
       const versionSlice = idAsHex.slice(62);
       expect(utils.getAddress(creatorSlice)).to.be.equal(users[3].address);
-      expect(randomIdSlice).to.be.equal('000000016721787');
+      expect(randomIdSlice).to.be.equal('000016721787');
+      expect(chainIdSlice).to.be.equal('00007a69');
       expect(versionSlice).to.be.equal('0001');
     });
 
@@ -622,23 +624,24 @@ describe('GameToken', function () {
         expect(values[0]).to.be.equal(1);
       });
 
-      it('should bump the version number in the gameId', async function () {
+      it('gameId contains the incremented version number', async function () {
         const idAsHex = utils.hexValue(gameId);
         const creatorSlice = idAsHex.slice(0, 42);
-        const randomIdSlice = idAsHex.slice(43, 58);
+        const randomIdSlice = idAsHex.slice(42, 54);
         const versionSlice = idAsHex.slice(62);
         expect(utils.getAddress(creatorSlice)).to.be.equal(GameOwner.address);
-        expect(randomIdSlice).to.be.equal('000000020708760');
+        expect(randomIdSlice).to.be.equal('000020708760');
         expect(versionSlice).to.be.equal('0002');
       });
+
       it('can get the original version of the gameId', async function () {
         const originalId = await gameToken.originalId(gameId);
         const originalAsHex = utils.hexValue(originalId);
         const creatorSlice = originalAsHex.slice(0, 42);
-        const randomIdSlice = originalAsHex.slice(43, 58);
+        const randomIdSlice = originalAsHex.slice(42, 54);
         const versionSlice = originalAsHex.slice(62);
         expect(utils.getAddress(creatorSlice)).to.be.equal(GameOwner.address);
-        expect(randomIdSlice).to.be.equal('000000020708760');
+        expect(randomIdSlice).to.be.equal('000020708760');
         expect(versionSlice).to.be.equal('0001');
       });
 
@@ -1463,14 +1466,16 @@ describe('GameToken', function () {
       );
     });
 
-    it('should store the creator address, subID & version in the gameId', async function () {
+    it('gameId contains creator address, subID, chainId & version', async function () {
       const idAsHex = utils.hexValue(gameId);
       const creator = idAsHex.slice(0, 42);
-      const subId = idAsHex.slice(43, 58);
-      const version = idAsHex.slice(58);
+      const subId = idAsHex.slice(42, 54);
+      const chainId = idAsHex.slice(54, 62);
+      const version = idAsHex.slice(62);
       expect(utils.getAddress(creator)).to.be.equal(users[0].address);
-      expect(subId).to.be.equal('00000002eccadc6');
-      expect(version).to.be.equal('00000001');
+      expect(subId).to.be.equal('00002eccadc6');
+      expect(chainId).to.be.equal('00007a69');
+      expect(version).to.be.equal('0001');
     });
 
     it('should consider future versions of gameIds as invalid', async function () {
@@ -1482,8 +1487,8 @@ describe('GameToken', function () {
 
     it('should update version when changes are made', async function () {
       let idAsHex = utils.hexValue(gameId);
-      const versionBefore = idAsHex.slice(58);
-      expect(versionBefore).to.be.equal('00000001');
+      const versionBefore = idAsHex.slice(62);
+      expect(versionBefore).to.be.equal('0001');
 
       gameAssetsWithOldId = await gameToken.getAssetBalances(gameId, assets);
       const receipt = await gameTokenAsMinter.updateGame(
@@ -1498,8 +1503,8 @@ describe('GameToken', function () {
       );
       updatedGameId = updateEvent.args[1];
       idAsHex = utils.hexValue(updatedGameId);
-      const versionAfter = idAsHex.slice(58);
-      expect(versionAfter).to.be.equal('00000002');
+      const versionAfter = idAsHex.slice(62);
+      expect(versionAfter).to.be.equal('0002');
     });
 
     it('should use baseId (creator address + subId) to map to game Assets  ', async function () {

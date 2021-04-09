@@ -48,7 +48,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         address to,
         GameToken.Update calldata creation,
         address editor,
-        uint64 subId
+        uint48 subId
     ) external override returns (uint256 gameId) {
         require(msg.sender == from || _isValidMetaTx(from), "CREATE_ACCESS_DENIED");
         _chargeSand(from, _gameMintingFee);
