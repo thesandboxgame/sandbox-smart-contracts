@@ -16,13 +16,14 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     uint256 private constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
-    uint256 private constant SUBID_MULTIPLIER = uint256(2)**(256 - 160 - 48);
-    uint256 private constant CHAINID_MULTIPLIER = uint256(2)**(256 - 160 - 48 - 32);
+    uint256 private constant SUBID_MULTIPLIER = uint256(2)**(256 - 160 - 64);
     // ((uint256(1) * 2**224) - 1) << 32;
     uint256 private constant STORAGE_ID_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000;
     // ((uint256(1) * 2**32) - 1) << 200;
     uint256 private constant VERSION_MASK = 0x0000000000FFFF00000000000000000000000000000000000000000000000000;
-    uint256 private constant CHAINID_MASK = 0x0000000000000000000000000000000000000000000000000000FFFFFFFF0000;
+
+    // when set, signifies the token was minted on l2
+    uint256 private constant LAYER_TWO_FLAG = 0x0000000000000000000000000000000000000000000000000000000000010000;
     bytes32 private constant base32Alphabet = 0x6162636465666768696A6B6C6D6E6F707172737475767778797A323334353637;
 
     mapping(uint256 => mapping(uint256 => uint256)) private _gameAssets;
@@ -128,7 +129,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         address to,
         Update calldata creation,
         address editor,
-        uint48 subId
+        uint64 subId
     ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256 id) {
         (uint256 gameId, uint256 storageId) = _mintGame(from, to, subId, 0, true);
 
@@ -281,8 +282,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     // @review
     /// @notice See IMintableERC721.exists()
     function exists(uint256 tokenId) external view override returns (bool) {
-        address owner = _ownerOf(tokenId);
-        return owner != address(0);
+      address owner = _ownerOf(tokenId);
+      return owner != address(0);
     }
 
     /// @notice Get the first token id minted using the same storageId as given tokenId.
@@ -466,7 +467,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     function _mintGame(
         address from,
         address to,
-        uint48 subId,
+        uint64 subId,
         uint16 version,
         bool isCreation,
         bool isCrossChainTransfer
@@ -516,7 +517,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     /// @return The new gameId.
     function _bumpGameVersion(address from, uint256 gameId) internal returns (uint256) {
         address originalCreator = address(uint160(gameId / CREATOR_OFFSET_MULTIPLIER));
-        uint48 subId = uint48(gameId / SUBID_MULTIPLIER);
+        uint64 subId = uint64(gameId / SUBID_MULTIPLIER);
         uint16 version = uint16(gameId);
         version++;
         address owner = _ownerOf(gameId);
@@ -539,8 +540,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     /// @param tokenId The token to set the data for
     /// @param data Arbitrary token metadata from L2 token
     function setTokenMetadata(uint256 tokenId, bytes memory data) internal virtual {
-        (bytes32 uri, uint256[] memory assetIds, uint256[] memory amounts) =
-            abi.decode(data, (bytes32, uint256[], uint256[]));
+        (bytes32 uri, uint256[] memory assetIds, uint256[] memory amounts) = abi.decode(data, (bytes32, uint256[], uint256[]));
 
         uint256 storageId = _storageId(tokenId);
         _metaData[storageId] = uri;
@@ -584,11 +584,14 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         return address(uint160(packedData));
     }
 
-    /// @dev get the chain a token was minted on from its id.
+    /// @dev get the layer a token was minted on from its id.
     /// @param id The id of the token to query.
-    /// @return chainId The chainId this token was originally minted on.
-    function _mintOrigin(uint256 id) internal view returns (uint256 chainId) {
-        return ((id & CHAINID_MASK) >> 16);
+    /// @return layer The original layer of minting (1 || 2).
+    function _mintOrigin(uint256 id) internal view returns(uint256 layer) {
+      if((id | LAYER_TWO_FLAG) >> 17 == 1) {
+        return 2;
+      } else
+      return 1;
     }
 
     /// @dev Get the storageId (full id without the version number) from the full tokenId.
@@ -605,22 +608,11 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     /// @param subId The id to use when generating the new GameId.
     function _generateGameId(
         address creator,
-        uint48 subId,
+        uint64 subId,
         uint16 version
-    ) internal view returns (uint256) {
-        uint32 chainId;
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            chainId := chainid()
-        }
+    ) internal pure returns (uint256) {
         return
-            uint256(uint160(creator)) *
-            CREATOR_OFFSET_MULTIPLIER +
-            uint48(subId) *
-            SUBID_MULTIPLIER +
-            chainId *
-            CHAINID_MULTIPLIER +
-            uint16(version);
+            uint256(uint160(creator)) * CREATOR_OFFSET_MULTIPLIER + uint64(subId) * SUBID_MULTIPLIER + uint16(version);
     }
 
     /// @dev Get the a full URI string for a given hash + gameId.

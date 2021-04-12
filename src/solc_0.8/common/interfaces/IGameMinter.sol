@@ -10,7 +10,7 @@ interface IGameMinter {
         address to,
         IGameToken.Update calldata creation,
         address editor,
-        uint48 subId
+        uint64 subId
     ) external returns (uint256 gameId);
 
     function updateGame(

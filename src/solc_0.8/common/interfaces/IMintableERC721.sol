@@ -4,6 +4,7 @@ pragma solidity 0.8.2;
 
 // src: https://github.com/maticnetwork/pos-portal/blob/master/contracts/root/RootToken/IMintableERC721.sol
 
+
 interface IMintableERC721 {
     /**
      * @notice called by predicate contract to mint tokens while withdrawing
@@ -25,11 +26,7 @@ interface IMintableERC721 {
      * Note : If you're interested in taking token metadata from L2 to L1 during exit, you must
      * implement this method
      */
-    function mint(
-        address user,
-        uint256 tokenId,
-        bytes calldata metaData
-    ) external;
+    function mint(address user, uint256 tokenId, bytes calldata metaData) external;
 
     /**
      * @notice check if token already exists, return true if it does exist

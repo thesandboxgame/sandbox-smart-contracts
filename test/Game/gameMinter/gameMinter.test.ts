@@ -736,8 +736,8 @@ describe('GameMinter', function () {
 
     it('MetaTx should fail with wrong "from" address', async function () {
       let idAsHex = utils.hexValue(gameId2);
-      let versionSlice = idAsHex.slice(62);
-      expect(versionSlice).to.be.equal('0004');
+      let versionSlice = idAsHex.slice(58);
+      expect(versionSlice).to.be.equal('00000004');
 
       const gas = 1000000;
       const {data} = await GameMinter.populateTransaction.updateGame(
@@ -759,8 +759,8 @@ describe('GameMinter', function () {
 
       // tokenId version was not incremented:
       idAsHex = utils.hexValue(gameId2);
-      versionSlice = idAsHex.slice(62);
-      expect(versionSlice).to.be.equal('0004');
+      versionSlice = idAsHex.slice(58);
+      expect(versionSlice).to.be.equal('00000004');
 
       // @note a future version of a token still maps to the current owner address!
       // expect(await gameTokenContract.ownerOf(gameId2.add(1))).to.be.equal(
