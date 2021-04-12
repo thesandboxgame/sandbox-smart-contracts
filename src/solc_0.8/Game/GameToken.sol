@@ -17,13 +17,13 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     uint256 private constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
     uint256 private constant SUBID_MULTIPLIER = uint256(2)**(256 - 160 - 64);
+    uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 64 - 16);
     // ((uint256(1) * 2**224) - 1) << 32;
     uint256 private constant STORAGE_ID_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000;
     // ((uint256(1) * 2**32) - 1) << 200;
     uint256 private constant VERSION_MASK = 0x0000000000FFFF00000000000000000000000000000000000000000000000000;
 
-    // when set, signifies the token was minted on l2
-    uint256 private constant LAYER_TWO_FLAG = 0x0000000000000000000000000000000000000000000000000000000000010000;
+    uint256 private constant CHAIN_INDEX_MASK = 0x0000000000000000000000000000000000000000000000000000000000FF0000;
     bytes32 private constant base32Alphabet = 0x6162636465666768696A6B6C6D6E6F707172737475767778797A323334353637;
 
     mapping(uint256 => mapping(uint256 => uint256)) private _gameAssets;
@@ -198,8 +198,14 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     /// @notice Matic Integration: See IMintableERC721.mint()
     // @note Add onlyMintableAssetPredicate()
     function mint(address user, uint256 tokenId) external override {
-        //  _mint(user, tokenId);
-        // can we reuse _mintGame here ?
+        _mintGame(
+            address(0), // not used in this context
+            user,
+            0, // not used in this context
+            0, // not used in this context
+            false, // signifies not a brand new token creation
+            true // signifies a cross-chain token transfer
+        );
     }
 
     // @review
@@ -588,12 +594,10 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
 
     /// @dev get the layer a token was minted on from its id.
     /// @param id The id of the token to query.
-    /// @return layer The original layer of minting (1 || 2).
-    function _mintOrigin(uint256 id) internal view returns(uint256 layer) {
-      if((id | LAYER_TWO_FLAG) >> 17 == 1) {
-        return 2;
-      } else
-      return 1;
+    /// @return chainIndex The index of the original layer of minting.
+    /// 0 = eth mainnet, 1 == matic mainnet
+    function _mintOrigin(uint256 id) internal view returns(uint256 chainIndex) {
+      return uint256((id & CHAIN_INDEX_MASK) >> 16);
     }
 
     /// @dev Get the storageId (full id without the version number) from the full tokenId.
@@ -613,8 +617,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         uint64 subId,
         uint16 version
     ) internal pure returns (uint256) {
+      uint8 chainIndex = 0;
         return
-            uint256(uint160(creator)) * CREATOR_OFFSET_MULTIPLIER + uint64(subId) * SUBID_MULTIPLIER + uint16(version);
+            uint256(uint160(creator)) * CREATOR_OFFSET_MULTIPLIER + uint64(subId) * SUBID_MULTIPLIER + chainIndex * CHAIN_INDEX_OFFSET_MULTIPLIER + uint16(version);
     }
 
     /// @dev Get the a full URI string for a given hash + gameId.
