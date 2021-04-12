@@ -192,9 +192,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         _burnGame(from, gameId);
     }
 
-    // @review only(PREDICATE_ROLE) or onlyMinter() ?
+    // @review onlyMintableAssetPredicate() can call, as thes functions are only meant to be used in the case of matic-minted tokens. Token that were originally minted on L1 would have been locked in a predicate and don't need to be minted.
     /// @notice Matic Integration: See IMintableERC721.mint()
-    function mint(address user, uint256 tokenId) external override onlyMinter() {
+    function mint(address user, uint256 tokenId) external override onlyMintableAssetPredicate() {
         //  _mint(user, tokenId);
         // can we reuse _mintGame here ?
     }
@@ -206,9 +206,15 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         uint256 tokenId,
         bytes calldata metaData
     ) external override {
-        //  _mint(user, tokenId);
-        // setTokenMetadata(tokenId, metaData);
-        // can we reuse _mintGame here ?
+        setTokenMetadata(tokenId, metaData);
+        _mintGame(
+            address(0), // not used in this context
+            user,
+            0, // not used in this context
+            0, // not used in this context
+            false, // signifies not a brand new token creation
+            true // signifies a cross-chain token transfer
+        )
     }
 
     /// @notice Get the amount of each assetId in a GAME.
@@ -450,23 +456,31 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     /// @param subId The id to use when generating the new GameId.
     /// @param version The version number part of the gameId.
     /// @param isCreation Whether this is a brand new GAME (as opposed to an update).
+    /// @param isCrossChainTransfer Whether this is a token that was exited from L2.
+    /// @dev Neither CrossChainTransfers or updates are considered Creations.
     /// @return id The newly created gameId.
     function _mintGame(
         address from,
         address to,
         uint48 subId,
         uint16 version,
-        bool isCreation
+        bool isCreation,
+        bool isCrossChainTransfer
     ) internal returns (uint256 id, uint256 storageId) {
         uint16 idVersion;
         uint256 gameId;
         uint256 strgId;
-        if (isCreation) {
+        if (isCrossChainTransfer) {
+          // This is a token which has exited L2.
+          strgId = _storageId(gameId);
+        } else if (isCreation && !isCrossChainTransfer) {
+            // This is a brand new token which has never existed on L2
             idVersion = 1;
             gameId = _generateGameId(from, subId, idVersion);
             strgId = _storageId(gameId);
             require(_owners[strgId] == 0, "STORAGE_ID_REUSE_FORBIDDEN");
-        } else {
+        } else if (!isCreation && !isCrossChainTransfer) {
+            // This is an update
             idVersion = version;
             gameId = _generateGameId(from, subId, idVersion);
             strgId = _storageId(gameId);
