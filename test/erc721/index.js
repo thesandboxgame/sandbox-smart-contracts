@@ -256,6 +256,24 @@ const erc721ABI = [
   {
     inputs: [
       {
+        internalType: 'uint256',
+        name: 'id',
+        type: 'uint256',
+      },
+      {
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256',
+      },
+    ],
+    name: 'burn',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
         internalType: 'address',
         name: 'from',
         type: 'address',
@@ -1122,9 +1140,9 @@ module.exports = (init, extensions) => {
         user0,
       }) {
         const {tokenId} = await mint(user0);
-        const receipt = await contractAsUser0
-          .burn(tokenId)
-          .then((tx) => tx.wait());
+        const receipt = await contractAsUser0['burn(uint256)'](
+          tokenId
+        ).then((tx) => tx.wait());
         const eventsMatching = await contract.queryFilter(
           contract.filters.Transfer(),
           receipt.blockNumber
@@ -1143,7 +1161,46 @@ module.exports = (init, extensions) => {
       }) {
         const {tokenId} = await mint(user0);
         await contract.callStatic.ownerOf(tokenId);
-        await contractAsUser0.burn(tokenId).then((tx) => tx.wait());
+        await contractAsUser0['burn(uint256)'](tokenId).then((tx) => tx.wait());
+        await expect(contract.callStatic.ownerOf(tokenId)).to.be.reverted;
+      });
+    });
+  }
+
+  if (extensions.burnAsset) {
+    describe('burnAsset', function (it) {
+      it('burn result in a transfer to 0 event', async function ({
+        contract,
+        contractAsUser0,
+        mint,
+        user0,
+      }) {
+        const {tokenId} = await mint(user0);
+        const receipt = await contractAsUser0['burn(uint256,uint256)'](
+          tokenId,
+          1
+        ).then((tx) => tx.wait());
+        const eventsMatching = await contract.queryFilter(
+          contract.filters.Transfer(),
+          receipt.blockNumber
+        );
+        assert.equal(eventsMatching.length, 1);
+        const transferEvent = eventsMatching[0];
+        assert.equal(transferEvent.args[0], user0);
+        assert.equal(transferEvent.args[1], zeroAddress);
+        expect(transferEvent.args[2]).to.deep.equal(tokenId);
+      });
+      it('burn result in ownerOf throwing', async function ({
+        contract,
+        contractAsUser0,
+        mint,
+        user0,
+      }) {
+        const {tokenId} = await mint(user0);
+        await contract.callStatic.ownerOf(tokenId);
+        await contractAsUser0['burn(uint256,uint256)'](tokenId, 1).then((tx) =>
+          tx.wait()
+        );
         await expect(contract.callStatic.ownerOf(tokenId)).to.be.reverted;
       });
     });
