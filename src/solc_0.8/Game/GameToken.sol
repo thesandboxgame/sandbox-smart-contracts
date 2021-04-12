@@ -130,7 +130,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         address editor,
         uint64 subId
     ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256 id) {
-        (uint256 gameId, uint256 storageId) = _mintGame(from, to, subId, 0, true);
+        (uint256 gameId, uint256 storageId) = _mintGame(from, to, subId, 0, true, false);
 
         if (editor != address(0)) {
             _setGameEditor(to, editor, true);
@@ -195,13 +195,15 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
 
     // @review onlyMintableAssetPredicate() can call, as thes functions are only meant to be used in the case of matic-minted tokens. Token that were originally minted on L1 would have been locked in a predicate and don't need to be minted.
     /// @notice Matic Integration: See IMintableERC721.mint()
-    function mint(address user, uint256 tokenId) external override onlyMintableAssetPredicate() {
+    // @note Add onlyMintableAssetPredicate()
+    function mint(address user, uint256 tokenId) external override {
         //  _mint(user, tokenId);
         // can we reuse _mintGame here ?
     }
 
     // @review
     /// @notice Matic Integration: See IMintableERC721.mint()
+    // @note Add onlyMintableAssetPredicate()
     function mint(
         address user,
         uint256 tokenId,
@@ -215,7 +217,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
             0, // not used in this context
             false, // signifies not a brand new token creation
             true // signifies a cross-chain token transfer
-        )
+        );
     }
 
     /// @notice Get the amount of each assetId in a GAME.
@@ -525,7 +527,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
             // instead of from or _burn will fail
             _burn(owner, owner, gameId);
         }
-        (uint256 newId, ) = _mintGame(originalCreator, owner, subId, version, false);
+        (uint256 newId, ) = _mintGame(originalCreator, owner, subId, version, false, false);
         address newOwner = _ownerOf(newId);
         assert(owner == newOwner);
         return newId;
