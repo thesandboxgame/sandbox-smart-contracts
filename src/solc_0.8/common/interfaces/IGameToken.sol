@@ -18,7 +18,7 @@ interface IGameToken {
         address to,
         Update calldata creation,
         address editor,
-        uint48 subId
+        uint64 subId
     ) external returns (uint256 id);
 
     function burn(uint256 gameId) external;
