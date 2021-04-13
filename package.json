@@ -66,7 +66,7 @@
     "lint:fix": "eslint --fix \"**/*.{js,ts}\" && solhint --fix \"src/**/*.sol\"",
     "format": "prettier --check \"**/*.{ts,js,sol}\"",
     "format:fix": "prettier --write \"**/*.{ts,js,sol}\"",
-    "test": "dotenv -- cross-env HARDHAT_DEPLOY_FIXTURE=true HARDHAT_COMPILE=true mocha --bail --recursive test",
+    "test": "dotenv -- cross-env NODE_OPTIONS=--max-old-space-size=4096 HARDHAT_DEPLOY_FIXTURE=true HARDHAT_COMPILE=true mocha --bail --recursive test",
     "test:single": "dotenv -- cross-env HARDHAT_COMPILE=true mocha --bail --recursive test",
     "gas": "dotenv -- cross-env REPORT_GAS=true NODE_OPTIONS=--max-old-space-size=4096 hardhat test",
     "sizer": "hardhat size-contracts",
