@@ -256,6 +256,11 @@ const erc721ABI = [
   {
     inputs: [
       {
+        internalType: 'address',
+        name: 'from',
+        type: 'address',
+      },
+      {
         internalType: 'uint256',
         name: 'id',
         type: 'uint256',
@@ -266,7 +271,7 @@ const erc721ABI = [
         type: 'uint256',
       },
     ],
-    name: 'burn',
+    name: 'burnFrom',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -1176,10 +1181,9 @@ module.exports = (init, extensions) => {
         user0,
       }) {
         const {tokenId} = await mint(user0);
-        const receipt = await contractAsUser0['burn(uint256,uint256)'](
-          tokenId,
-          1
-        ).then((tx) => tx.wait());
+        const receipt = await contractAsUser0[
+          'burnFrom(address,uint256,uint256)'
+        ](user0, tokenId, 1).then((tx) => tx.wait());
         const eventsMatching = await contract.queryFilter(
           contract.filters.Transfer(),
           receipt.blockNumber
@@ -1198,9 +1202,11 @@ module.exports = (init, extensions) => {
       }) {
         const {tokenId} = await mint(user0);
         await contract.callStatic.ownerOf(tokenId);
-        await contractAsUser0['burn(uint256,uint256)'](tokenId, 1).then((tx) =>
-          tx.wait()
-        );
+        await contractAsUser0['burnFrom(address,uint256,uint256)'](
+          user0,
+          tokenId,
+          1
+        ).then((tx) => tx.wait());
         await expect(contract.callStatic.ownerOf(tokenId)).to.be.reverted;
       });
     });
