@@ -1513,25 +1513,24 @@ describe('GameToken', function () {
 
   describe('GameToken: Matic Integration', function () {
     let gameToken: Contract;
+    let L2_gameToken: Contract;
     let gameTokenAsMinter: Contract;
     let gameTokenAsAdmin: Contract;
     let gameTokenAsPredicate: Contract;
     let GameOwner: User;
     let users: User[];
-    let gameId: BigNumber;
+    let maticGameId1: BigNumber;
     // let updatedGameId: BigNumber;
     let assets: BigNumber[];
     // let gameAssetsWithOldId: BigNumber[];
 
     before(async function () {
-      ({gameToken, gameTokenAsAdmin, users, GameOwner} = await setupTest());
+      ({gameToken, L2_gameToken, users, GameOwner} = await setupTest());
       const {gameTokenAdmin, mintableAssetPredicate} = await getNamedAccounts();
-      await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
+      const L2_gameTokenAsAdmin = await L2_gameToken.connect(ethers.provider.getSigner(gameTokenAdmin))
+      await L2_gameTokenAsAdmin.changeMinter(gameTokenAdmin);
       assets = await supplyAssets(GameOwner.address, [7, 11]);
-      gameId = await getNewGame(gameToken, GameOwner, GameOwner, assets, [
-        7,
-        11,
-      ]);
+      maticGameId1 = await getNewGame(L2_gameToken, GameOwner, GameOwner, [], []);
 
       gameTokenAsMinter = await gameToken.connect(
         ethers.provider.getSigner(gameTokenAdmin)
@@ -1542,11 +1541,11 @@ describe('GameToken', function () {
       );
     });
     it('mint fails if called by other than the mintableAssetPredicate contract', async function () {
-        await expect(gameToken['mint(address,uint256)'](users[1].address, gameId)).to.be.revertedWith("PREDICATE_ONLY")
+        await expect(gameToken['mint(address,uint256)'](users[1].address, maticGameId1)).to.be.revertedWith("PREDICATE_ONLY")
     });
 
     it('mint w/metaData fails if called by other than the mintableAssetPredicate contract', async function () {
-      await expect(gameToken['mint(address,uint256,bytes)'](users[1].address, gameId, '0x')).to.be.revertedWith("PREDICATE_ONLY")
+      await expect(gameToken['mint(address,uint256,bytes)'](users[1].address, maticGameId1, '0x')).to.be.revertedWith("PREDICATE_ONLY")
     });
 
     // it('mint fails if passed a malformed tokenId', async function () {
@@ -1559,11 +1558,39 @@ describe('GameToken', function () {
     //   await expect(gameToken['mint(address,uint256,bytes)'](users[1].address, badGameId, '0x')).to.be.revertedWith("MALFORMED_TOKENID")
     // });
 
-    it('mints a new L1 GAME when transferring a GAME from Matic', async function () {});
-    it('unlocks an existing L1 GAME when transferring a GAME from Matic', async function () {});
-    it('sets the correct metaData when transferring a GAME from Matic', async function () {});
-    it('transfers & links the correct assets when transferring a GAME from Matic', async function () {});
+    it('mints a new L1 GAME when transferring a GAME from Matic', async function () {
+      expect(await gameToken.exists(maticGameId1)).to.be.equal(false);
+      expect(await gameToken.balanceOf(GameOwner.address)).to.be.equal(0);
+      const receipt = await waitFor(gameTokenAsPredicate['mint(address,uint256)'](GameOwner.address, maticGameId1))
+      const transferEvent = await expectEventWithArgs(
+        gameToken,
+        receipt,
+        'Transfer'
+      );
+      const transferredGameId1 = transferEvent.args[2];
+      const mintOrigin = await gameToken.mintOrigin(transferredGameId1)
+
+      expect(await gameToken.exists(transferredGameId1)).to.be.equal(true);
+      expect(transferredGameId1).to.equal(maticGameId1)
+      expect(mintOrigin).to.equal(1) // originally minted on Matic
+      expect(await gameToken.balanceOf(GameOwner.address)).to.be.equal(1);
+
+      // before: expect numNFTs == 0, maticGameId1 !exists
+      // expect gameId == maticGameId1
+      // after: numNFTs == 1, maticGameId1 exists, _owners set, _creatorship set
+    });
+
+    it('sets the correct metaData when transferring a GAME from Matic', async function () {
+      // metaData set, gameEditors set ?
+    });
+
+    it('transfers & links the correct assets when transferring a GAME from Matic', async function () {
+      // _gameAssets set
+    });
+
     it('only burns one token on L1 when transferring a GAME with multiple upgrades from Matic', async function () {});
+
+    it('unlocks an existing L1 GAME when transferring a GAME from Matic', async function () {});
 
   })
 
