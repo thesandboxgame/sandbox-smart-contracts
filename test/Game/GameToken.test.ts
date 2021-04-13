@@ -1509,6 +1509,62 @@ describe('GameToken', function () {
     });
   });
 
+  describe('GameToken: Matic Integration', function () {
+    let gameToken: Contract;
+    let gameTokenAsMinter: Contract;
+    let gameTokenAsAdmin: Contract;
+    let gameTokenAsPredicate: Contract;
+    let GameOwner: User;
+    let users: User[];
+    let gameId: BigNumber;
+    // let updatedGameId: BigNumber;
+    let assets: BigNumber[];
+    // let gameAssetsWithOldId: BigNumber[];
+
+    before(async function () {
+      ({gameToken, gameTokenAsAdmin, users, GameOwner} = await setupTest());
+      const {gameTokenAdmin, mintableAssetPredicate} = await getNamedAccounts();
+      await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
+      assets = await supplyAssets(GameOwner.address, [7, 11]);
+      gameId = await getNewGame(gameToken, GameOwner, GameOwner, assets, [
+        7,
+        11,
+      ]);
+
+      gameTokenAsMinter = await gameToken.connect(
+        ethers.provider.getSigner(gameTokenAdmin)
+      );
+
+      gameTokenAsPredicate = await gameToken.connect(
+        ethers.provider.getSigner(mintableAssetPredicate)
+      );
+    });
+    it('mint fails if called by other than the mintableAssetPredicate contract', async function () {
+        await expect(gameToken['mint(address,uint256)'](users[1].address, gameId)).to.be.revertedWith("PREDICATE_ONLY")
+    });
+
+    it('mint w/metaData fails if called by other than the mintableAssetPredicate contract', async function () {
+      await expect(gameToken['mint(address,uint256,bytes)'](users[1].address, gameId, '0x')).to.be.revertedWith("PREDICATE_ONLY")
+    });
+
+    // it('mint fails if passed a malformed tokenId', async function () {
+    //   const badGameId = gameId.slice()
+    //   await expect(gameToken['mint(address,uint256)'](users[1].address, badGameId)).to.be.revertedWith("MALFORMED_TOKENID")
+    // });
+
+    // it('mint w/metaData fails if passed a malformed tokenId', async function () {
+    //   const badGameId =
+    //   await expect(gameToken['mint(address,uint256,bytes)'](users[1].address, badGameId, '0x')).to.be.revertedWith("MALFORMED_TOKENID")
+    // });
+
+    it('mints a new L1 GAME when transferring a GAME from Matic', async function () {});
+    it('unlocks an existing L1 GAME when transferring a GAME from Matic', async function () {});
+    it('sets the correct metaData when transferring a GAME from Matic', async function () {});
+    it('transfers & links the correct assets when transferring a GAME from Matic', async function () {});
+    it('only burns one token on L1 when transferring a GAME with multiple upgrades from Matic', async function () {});
+
+  })
+
   describe('GameToken: MetaTransactions', function () {
     let testMetaTxForwarder: Contract;
     let gameId: BigNumber;
