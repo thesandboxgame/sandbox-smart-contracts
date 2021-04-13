@@ -68,7 +68,7 @@
     "format:fix": "prettier --write \"**/*.{ts,js,sol}\"",
     "test": "dotenv -- cross-env HARDHAT_DEPLOY_FIXTURE=true HARDHAT_COMPILE=true mocha --bail --recursive test",
     "test:single": "dotenv -- cross-env HARDHAT_COMPILE=true mocha --bail --recursive test",
-    "gas": "dotenv -- cross-env REPORT_GAS=true hardhat test",
+    "gas": "dotenv -- cross-env REPORT_GAS=true NODE_OPTIONS=--max-old-space-size=4096 hardhat test",
     "sizer": "hardhat size-contracts",
     "coverage": "dotenv -- cross-env HARDHAT_DEPLOY_FIXTURE=true hardhat coverage --testfiles 'test/*.ts''test/*.js'",
     "dev": "hardhat node --watch --export contractsInfo.json",
