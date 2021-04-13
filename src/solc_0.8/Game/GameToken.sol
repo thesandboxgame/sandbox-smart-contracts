@@ -497,9 +497,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         if (isCrossChainTransfer) {
           require(existingTokenId != uint256(0), "INVALID_ID");
           // This is a token which has exited L2.
+          gameId = existingTokenId;
           strgId = _storageId(gameId);
           idVersion = uint16(existingTokenId);
-          gameId = existingTokenId;
         } else if (isCreation && !isCrossChainTransfer) {
             // This is a brand new token which has never existed on L2
             idVersion = 1;
