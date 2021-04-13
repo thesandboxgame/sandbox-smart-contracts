@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.5;
-pragma experimental ABIEncoderV2;
+// solhint-disable-next-line compiler-version
+pragma solidity 0.8.2;
 
 /// @title Interface for the Game token
 
