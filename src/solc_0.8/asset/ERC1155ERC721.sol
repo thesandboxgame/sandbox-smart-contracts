@@ -346,7 +346,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
         metaTx = _is2771MetaTx(from);
-        // bool authorized = _isAuthorized(from) || isApprovedForAll(from, msg.sender);
         bool authorized = from == msg.sender || metaTx || isApprovedForAll(from, msg.sender);
 
         if (id & IS_NFT > 0) {
