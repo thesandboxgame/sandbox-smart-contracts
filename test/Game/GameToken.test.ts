@@ -1561,6 +1561,7 @@ describe('GameToken', function () {
     it('mints a new L1 GAME when transferring a GAME from Matic', async function () {
       expect(await gameToken.exists(maticGameId1)).to.be.equal(false);
       expect(await gameToken.balanceOf(GameOwner.address)).to.be.equal(0);
+
       const receipt = await waitFor(gameTokenAsPredicate['mint(address,uint256)'](GameOwner.address, maticGameId1))
       const transferEvent = await expectEventWithArgs(
         gameToken,
@@ -1574,14 +1575,11 @@ describe('GameToken', function () {
       expect(transferredGameId1).to.equal(maticGameId1)
       expect(mintOrigin).to.equal(1) // originally minted on Matic
       expect(await gameToken.balanceOf(GameOwner.address)).to.be.equal(1);
-
-      // before: expect numNFTs == 0, maticGameId1 !exists
-      // expect gameId == maticGameId1
-      // after: numNFTs == 1, maticGameId1 exists, _owners set, _creatorship set
+      expect(await gameToken.ownerOf(transferredGameId1)).to.be.equal(GameOwner.address);
     });
 
     it('sets the correct metaData when transferring a GAME from Matic', async function () {
-      // metaData set, gameEditors set ?
+      // metaData set, gameEditors set ? _creatorship set (if it was ever transferred on L2)
     });
 
     it('transfers & links the correct assets when transferring a GAME from Matic', async function () {
