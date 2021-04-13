@@ -31,6 +31,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
 
     mapping(uint256 => bytes32) private _metaData;
     mapping(address => mapping(address => bool)) private _gameEditors;
+    // for matic integration
+    address private immutable _mintableAssetPredicate;
 
     ///////////////////////////////  Events //////////////////////////////
 
@@ -56,9 +58,11 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     constructor(
         address metaTransactionContract,
         address admin,
-        IAssetToken asset
+        IAssetToken asset,
+        address mintableAssetPredicate
     ) ERC721BaseToken(metaTransactionContract, admin) {
         _asset = asset;
+        _mintableAssetPredicate = mintableAssetPredicate;
     }
 
     ///////////////////////////////  Modifiers //////////////////////////////
@@ -194,10 +198,11 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         _burnGame(from, gameId);
     }
 
-    // @review onlyMintableAssetPredicate() can call, as thes functions are only meant to be used in the case of matic-minted tokens. Token that were originally minted on L1 would have been locked in a predicate and don't need to be minted.
+    // @review Only meant to be used in the case of matic-minted tokens.
     /// @notice Matic Integration: See IMintableERC721.mint()
-    // @note Add onlyMintableAssetPredicate()
     function mint(address user, uint256 tokenId) external override {
+        require(msg.sender == _mintableAssetPredicate, "PREDICATE_ONLY");
+        // @review validation of tokenId required here?
         _mintGame(
             address(0), // not used in this context
             user,
@@ -210,12 +215,13 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
 
     // @review
     /// @notice Matic Integration: See IMintableERC721.mint()
-    // @note Add onlyMintableAssetPredicate()
     function mint(
         address user,
         uint256 tokenId,
         bytes calldata metaData
     ) external override {
+        require(msg.sender == _mintableAssetPredicate, "PREDICATE_ONLY");
+        // @review validation of tokenId required here?
         setTokenMetadata(tokenId, metaData);
         _mintGame(
             address(0), // not used in this context
@@ -595,7 +601,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     /// @dev get the layer a token was minted on from its id.
     /// @param id The id of the token to query.
     /// @return chainIndex The index of the original layer of minting.
-    /// 0 = eth mainnet, 1 == matic mainnet
+    /// 0 = eth mainnet, 1 == matic mainnet, etc...
     function _mintOrigin(uint256 id) internal view returns(uint256 chainIndex) {
       return uint256((id & CHAIN_INDEX_MASK) >> 16);
     }
