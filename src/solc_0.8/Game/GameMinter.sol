@@ -46,7 +46,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
     function createGame(
         address from,
         address to,
-        GameToken.Update calldata creation,
+        GameToken.GameData calldata creation,
         address editor,
         uint64 subId
     ) external override returns (uint256 gameId) {
@@ -64,7 +64,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
     function updateGame(
         address from,
         uint256 gameId,
-        GameToken.Update memory update
+        GameToken.GameData memory update
     ) external override returns (uint256 newId) {
         _checkAuthorization(from, gameId);
         _chargeSand(from, _gameUpdateFee);

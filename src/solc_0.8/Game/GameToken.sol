@@ -41,7 +41,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     /// @param newId The id of the newly minted token.
     /// @param update The changes made to the Game: new assets, removed assets, uri
 
-    event GameTokenUpdated(uint256 indexed oldId, uint256 indexed newId, IGameToken.Update update);
+    event GameTokenUpdated(uint256 indexed oldId, uint256 indexed newId, IGameToken.GameData update);
 
     /// @dev Emits when creatorship of a GAME token is transferred.
     /// @param original The original creator of the GAME token.
@@ -131,7 +131,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     function createGame(
         address from,
         address to,
-        Update calldata creation,
+        GameData calldata creation,
         address editor,
         uint64 subId
     ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256 id) {
@@ -158,7 +158,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     function updateGame(
         address from,
         uint256 gameId,
-        IGameToken.Update memory update
+        IGameToken.GameData memory update
     ) external override onlyMinter() returns (uint256) {
         uint256 storageId = _storageId(gameId);
         _addAssets(from, storageId, update.assetIdsToAdd, update.assetAmountsToAdd);
@@ -465,7 +465,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         }
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
 
-        Update memory recovery;
+        GameData memory recovery;
         recovery.assetIdsToRemove = assetIds;
         recovery.assetAmountsToRemove = values;
         emit GameTokenUpdated(gameId, 0, recovery);
@@ -556,8 +556,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         return newId;
     }
 
-    // @review
-    /// @dev Used when bringing token metadata from L2 to L1 during exit
+    // @review maybe reuse the 'GameData' struct as part of the passed data field
+    /// @dev Used when bringing token metadata from L2 to L1 during exit ?
     /// @param tokenId The token to set the data for
     /// @param data Arbitrary token metadata from L2 token
     function setTokenMetadata(uint256 tokenId, bytes memory data) internal virtual {
