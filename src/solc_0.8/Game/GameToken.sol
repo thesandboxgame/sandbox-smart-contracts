@@ -135,7 +135,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         address editor,
         uint64 subId
     ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256 id) {
-        (uint256 gameId, uint256 storageId) = _mintGame(from, to, subId, 0, true, false);
+        (uint256 gameId, uint256 storageId) = _mintGame(from, to, subId, 0, true, false, 0);
 
         if (editor != address(0)) {
             _setGameEditor(to, editor, true);
@@ -209,7 +209,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
             0, // not used in this context
             0, // not used in this context
             false, // signifies not a brand new token creation
-            true // signifies a cross-chain token transfer
+            true, // signifies a cross-chain token transfer
+            tokenId
         );
     }
 
@@ -229,7 +230,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
             0, // not used in this context
             0, // not used in this context
             false, // signifies not a brand new token creation
-            true // signifies a cross-chain token transfer
+            true, // signifies a cross-chain token transfer
+            tokenId
         );
     }
 
@@ -476,6 +478,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     /// @param version The version number part of the gameId.
     /// @param isCreation Whether this is a brand new GAME (as opposed to an update).
     /// @param isCrossChainTransfer Whether this is a token that was exited from L2.
+    /// @param existingTokenId If this is a token that was exited from L2, use the exisiting Id.
     /// @dev Neither CrossChainTransfers or updates are considered Creations.
     /// @return id The newly created gameId.
     function _mintGame(
@@ -484,14 +487,18 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         uint64 subId,
         uint16 version,
         bool isCreation,
-        bool isCrossChainTransfer
+        bool isCrossChainTransfer,
+        uint256 existingTokenId
     ) internal returns (uint256 id, uint256 storageId) {
         uint16 idVersion;
         uint256 gameId;
         uint256 strgId;
         if (isCrossChainTransfer) {
+          require(existingTokenId != uint256(0), "INVALID_ID");
           // This is a token which has exited L2.
           strgId = _storageId(gameId);
+          idVersion = uint16(existingTokenId);
+          gameId = existingTokenId;
         } else if (isCreation && !isCrossChainTransfer) {
             // This is a brand new token which has never existed on L2
             idVersion = 1;
@@ -543,7 +550,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
             // instead of from or _burn will fail
             _burn(owner, owner, gameId);
         }
-        (uint256 newId, ) = _mintGame(originalCreator, owner, subId, version, false, false);
+        (uint256 newId, ) = _mintGame(originalCreator, owner, subId, version, false, false, 0);
         address newOwner = _ownerOf(newId);
         assert(owner == newOwner);
         return newId;
