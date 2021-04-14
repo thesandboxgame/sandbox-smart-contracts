@@ -16,7 +16,13 @@ const func: DeployFunction = async function (hre) {
   await deploy('L2_GameToken', {
     from: deployer,
     log: true,
-    args: [sandContract.address, gameTokenAdmin, assetContract.address, mintableAssetPredicate, depositor],
+    args: [
+      sandContract.address,
+      gameTokenAdmin,
+      assetContract.address,
+      mintableAssetPredicate,
+      depositor,
+    ],
     skipIfAlreadyDeployed: true,
   });
 
@@ -63,5 +69,10 @@ const func: DeployFunction = async function (hre) {
 
 export default func;
 func.tags = ['L2_gameToken', 'L2_gameToken_deploy', 'L2_gameToken_setup'];
-func.dependencies = ['Sand_deploy', 'Asset_deploy', 'Asset_setup', 'GameMinter_deploy'];
+func.dependencies = [
+  'Sand_deploy',
+  'Asset_deploy',
+  'Asset_setup',
+  'GameMinter_deploy',
+];
 func.skip = async (hre) => hre.network.name !== 'hardhat'; // TODO enable
