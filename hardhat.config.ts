@@ -168,9 +168,6 @@ const config: HardhatUserConfig = {
       1: null,
       rinkeby: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
     },
-    mintableAssetPredicate: {
-      default: 5,
-    },
     collectionCatalystMigrationsAdmin: 'sandAdmin', // TODO use special account or deployer ?
     catalystMinter: 'sandAdmin', // account that can mint catalysts
     catalystAdmin: 'sandAdmin', // can set minter and admin for catatalyt, as well as super operators
