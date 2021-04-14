@@ -93,5 +93,8 @@
     "rinkeby_test:export": "hardhat --network rinkeby_test export",
     "rinkeby_test:run": "dotenv -- cross-env HARDHAT_NETWORK=rinkeby_test ts-node --files",
     "hardhat": "hardhat"
+  },
+  "dependencies": {
+    "@maticnetwork/pos-portal": "^1.5.1"
   }
 }
