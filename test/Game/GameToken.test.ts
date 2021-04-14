@@ -113,12 +113,7 @@ async function getBalances(
 }
 
 function encodeMetaData(uri: string): string {
-  return abi.encode([
-    'string'
-  ],
-  [
-    '0x0'
-  ])
+  return abi.encode(['string'], ['0x0']);
 }
 
 describe('GameToken', function () {
@@ -220,7 +215,7 @@ describe('GameToken', function () {
 
     it('gameId contains creator address', async function () {
       const idAsHex = utils.hexValue(gameId);
-      console.log(`tokenId: ${idAsHex}`)
+      console.log(`tokenId: ${idAsHex}`);
       const creatorSlice = idAsHex.slice(0, 42);
       const randomIdSlice = idAsHex.slice(43, 58);
       const versionSlice = idAsHex.slice(62);
@@ -1535,11 +1530,25 @@ describe('GameToken', function () {
     before(async function () {
       ({gameToken, L2_gameToken, users, GameOwner} = await setupTest());
       const {gameTokenAdmin, mintableAssetPredicate} = await getNamedAccounts();
-      const L2_gameTokenAsAdmin = await L2_gameToken.connect(ethers.provider.getSigner(gameTokenAdmin))
+      const L2_gameTokenAsAdmin = await L2_gameToken.connect(
+        ethers.provider.getSigner(gameTokenAdmin)
+      );
       await L2_gameTokenAsAdmin.changeMinter(gameTokenAdmin);
       assets = await supplyAssets(GameOwner.address, [7, 11]);
-      maticGameId1 = await getNewGame(L2_gameToken, GameOwner, GameOwner, [], []);
-      maticGameId2 = await getNewGame(L2_gameToken, GameOwner, GameOwner, [], []);
+      maticGameId1 = await getNewGame(
+        L2_gameToken,
+        GameOwner,
+        GameOwner,
+        [],
+        []
+      );
+      maticGameId2 = await getNewGame(
+        L2_gameToken,
+        GameOwner,
+        GameOwner,
+        [],
+        []
+      );
 
       gameTokenAsMinter = await gameToken.connect(
         ethers.provider.getSigner(gameTokenAdmin)
@@ -1550,11 +1559,19 @@ describe('GameToken', function () {
       );
     });
     it('mint fails if called by other than the mintableAssetPredicate contract', async function () {
-        await expect(gameToken['mint(address,uint256)'](users[1].address, maticGameId1)).to.be.revertedWith("PREDICATE_ONLY")
+      await expect(
+        gameToken['mint(address,uint256)'](users[1].address, maticGameId1)
+      ).to.be.revertedWith('PREDICATE_ONLY');
     });
 
     it('mint w/metaData fails if called by other than the mintableAssetPredicate contract', async function () {
-      await expect(gameToken['mint(address,uint256,bytes)'](users[1].address, maticGameId1, '0x')).to.be.revertedWith("PREDICATE_ONLY")
+      await expect(
+        gameToken['mint(address,uint256,bytes)'](
+          users[1].address,
+          maticGameId1,
+          '0x'
+        )
+      ).to.be.revertedWith('PREDICATE_ONLY');
     });
 
     // it('mint fails if passed a malformed tokenId', async function () {
@@ -1571,44 +1588,60 @@ describe('GameToken', function () {
       expect(await gameToken.exists(maticGameId1)).to.be.equal(false);
       expect(await gameToken.balanceOf(GameOwner.address)).to.be.equal(0);
 
-      const receipt = await waitFor(gameTokenAsPredicate['mint(address,uint256)'](GameOwner.address, maticGameId1))
+      const receipt = await waitFor(
+        gameTokenAsPredicate['mint(address,uint256)'](
+          GameOwner.address,
+          maticGameId1
+        )
+      );
       const transferEvent = await expectEventWithArgs(
         gameToken,
         receipt,
         'Transfer'
       );
       const transferredGameId1 = transferEvent.args[2];
-      const mintOrigin = await gameToken.mintOrigin(transferredGameId1)
+      const mintOrigin = await gameToken.mintOrigin(transferredGameId1);
 
       expect(await gameToken.exists(transferredGameId1)).to.be.equal(true);
-      expect(transferredGameId1).to.equal(maticGameId1)
-      expect(mintOrigin).to.equal(1) // originally minted on Matic
+      expect(transferredGameId1).to.equal(maticGameId1);
+      expect(mintOrigin).to.equal(1); // originally minted on Matic
       expect(await gameToken.balanceOf(GameOwner.address)).to.be.equal(1);
-      expect(await gameToken.ownerOf(transferredGameId1)).to.be.equal(GameOwner.address);
+      expect(await gameToken.ownerOf(transferredGameId1)).to.be.equal(
+        GameOwner.address
+      );
     });
 
     it('sets the correct metaData when transferring a GAME from Matic', async function () {
       expect(await gameToken.exists(maticGameId2)).to.be.equal(false);
       expect(await gameToken.balanceOf(GameOwner.address)).to.be.equal(1);
 
-      const hashedUri = utils.keccak256(toUtf8Bytes('0xdeadbeef'))
+      const hashedUri = utils.keccak256(toUtf8Bytes('0xdeadbeef'));
       const encodedMetadata = encodeMetaData(hashedUri);
-      const receipt = await waitFor(gameTokenAsPredicate['mint(address,uint256,bytes)']
-      (GameOwner.address, maticGameId2, encodedMetadata))
+      const receipt = await waitFor(
+        gameTokenAsPredicate['mint(address,uint256,bytes)'](
+          GameOwner.address,
+          maticGameId2,
+          encodedMetadata
+        )
+      );
       const transferEvent = await expectEventWithArgs(
         gameToken,
         receipt,
         'Transfer'
       );
       const transferredGameId2 = transferEvent.args[2];
-      const mintOrigin = await gameToken.mintOrigin(transferredGameId2)
+      const mintOrigin = await gameToken.mintOrigin(transferredGameId2);
 
       expect(await gameToken.exists(transferredGameId2)).to.be.equal(true);
-      expect(transferredGameId2).to.equal(maticGameId2)
-      expect(mintOrigin).to.equal(1) // originally minted on Matic
+      expect(transferredGameId2).to.equal(maticGameId2);
+      expect(mintOrigin).to.equal(1); // originally minted on Matic
       expect(await gameToken.balanceOf(GameOwner.address)).to.be.equal(2);
-      expect(await gameToken.ownerOf(transferredGameId2)).to.be.equal(GameOwner.address);
-      expect(await gameToken.tokenURI(transferredGameId2)).to.be.equal('ipfs://bafybeiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaea/game.json');
+      expect(await gameToken.ownerOf(transferredGameId2)).to.be.equal(
+        GameOwner.address
+      );
+      expect(await gameToken.tokenURI(transferredGameId2)).to.be.equal(
+        'ipfs://bafybeiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaea/game.json'
+      );
     });
 
     it('transfers & links the correct assets when transferring a GAME from Matic', async function () {
@@ -1625,8 +1658,7 @@ describe('GameToken', function () {
     });
 
     it('unlocks an existing L1 GAME when transferring a GAME from Matic', async function () {});
-
-  })
+  });
 
   describe('GameToken: MetaTransactions', function () {
     let sandAsExecutionAdmin: Contract;

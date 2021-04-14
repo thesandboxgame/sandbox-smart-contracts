@@ -224,15 +224,16 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         require(msg.sender == _mintableAssetPredicate, "PREDICATE_ONLY");
         // @review validation of tokenId required here?
         setTokenMetadata(tokenId, metaData);
-        (uint256 id, uint256 storageId) = _mintGame(
-            address(0), // not used in this context
-            user,
-            0, // not used in this context
-            0, // not used in this context
-            false, // signifies not a brand new token creation
-            true, // signifies a cross-chain token transfer
-            tokenId
-        );
+        (uint256 id, uint256 storageId) =
+            _mintGame(
+                address(0), // not used in this context
+                user,
+                0, // not used in this context
+                0, // not used in this context
+                false, // signifies not a brand new token creation
+                true, // signifies a cross-chain token transfer
+                tokenId
+            );
         // @todo call _addAssets(L2GameTokenContract, storageId, assetIds, amounts );
     }
 
@@ -299,8 +300,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     // @review
     /// @notice See IMintableERC721.exists()
     function exists(uint256 tokenId) external view override returns (bool) {
-      address owner = _ownerOf(tokenId);
-      return owner != address(0);
+        address owner = _ownerOf(tokenId);
+        return owner != address(0);
     }
 
     /// @notice Get the first token id minted using the same storageId as given tokenId.
@@ -496,11 +497,11 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         uint256 gameId;
         uint256 strgId;
         if (isCrossChainTransfer) {
-          require(existingTokenId != uint256(0), "INVALID_ID");
-          // This is a token which has exited L2.
-          gameId = existingTokenId;
-          strgId = _storageId(gameId);
-          idVersion = uint16(existingTokenId);
+            require(existingTokenId != uint256(0), "INVALID_ID");
+            // This is a token which has exited L2.
+            gameId = existingTokenId;
+            strgId = _storageId(gameId);
+            idVersion = uint16(existingTokenId);
         } else if (isCreation && !isCrossChainTransfer) {
             // This is a brand new token which has never existed on L2
             idVersion = 1;
@@ -563,14 +564,12 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     /// @param tokenId The token to set the data for
     /// @param data Arbitrary token metadata from L2 token
     function setTokenMetadata(uint256 tokenId, bytes memory data) internal virtual {
-
-        (bytes32 uri) = abi.decode(data, (bytes32));
+        bytes32 uri = abi.decode(data, (bytes32));
 
         uint256 storageId = _storageId(tokenId);
         _metaData[storageId] = uri;
         // @note any game Editors set for address `to` on L2 will need to be reset manually on L1
         // @todo if creatorship was transferred on L2, L1 mapping needs to be updated now
-
     }
 
     /// @dev Check if a withdrawal is allowed.
@@ -610,8 +609,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     /// @param id The id of the token to query.
     /// @return chainIndex The index of the original layer of minting.
     /// 0 = eth mainnet, 1 == matic mainnet, etc...
-    function mintOrigin(uint256 id) public view returns(uint256 chainIndex) {
-      return uint256((id & CHAIN_INDEX_MASK) >> 16);
+    function mintOrigin(uint256 id) public view returns (uint256 chainIndex) {
+        return uint256((id & CHAIN_INDEX_MASK) >> 16);
     }
 
     /// @dev Get the storageId (full id without the version number) from the full tokenId.
@@ -631,9 +630,15 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         uint64 subId,
         uint16 version
     ) internal pure returns (uint256) {
-      uint8 chainIndex = 0;
+        uint8 chainIndex = 0;
         return
-            uint256(uint160(creator)) * CREATOR_OFFSET_MULTIPLIER + uint64(subId) * SUBID_MULTIPLIER + chainIndex * CHAIN_INDEX_OFFSET_MULTIPLIER + uint16(version);
+            uint256(uint160(creator)) *
+            CREATOR_OFFSET_MULTIPLIER +
+            uint64(subId) *
+            SUBID_MULTIPLIER +
+            chainIndex *
+            CHAIN_INDEX_OFFSET_MULTIPLIER +
+            uint16(version);
     }
 
     /// @dev Get the a full URI string for a given hash + gameId.
