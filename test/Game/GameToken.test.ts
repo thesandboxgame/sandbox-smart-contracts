@@ -1642,10 +1642,17 @@ describe('GameToken', function () {
     });
 
     it('transfers & links the correct assets when transferring a GAME from Matic', async function () {
-      // _gameAssets set
+      // _gameAssets needs to be set. either updateGame() or write a new func which wraps _addAssets()
+      // requires assets to be first burnt on L2
+      // requires proof of burn
     });
 
-    it('only burns one token on L1 when transferring a GAME with multiple upgrades from Matic', async function () {});
+    it('only burns one token on L1 when transferring a GAME with multiple upgrades from Matic', async function () {
+      // mint on L1
+      // transfer to L2
+      // upgrade a few times
+      // exit back to L1
+    });
 
     it('unlocks an existing L1 GAME when transferring a GAME from Matic', async function () {});
   });
