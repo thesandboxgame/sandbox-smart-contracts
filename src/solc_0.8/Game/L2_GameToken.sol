@@ -34,7 +34,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
 
     // @review Matic
     // for matic integration
-    address private immutable _mintableAssetPredicate;
+    address private immutable _mintGameableAssetPredicate;
     address private immutable _depositor;
     mapping (uint256 => bool) public withdrawnTokens;
     uint256 public constant BATCH_LIMIT = 20; // do we need this?
@@ -64,15 +64,16 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     event TransferWithMetadata(address indexed from, address indexed to, uint256 indexed tokenId, bytes metaData);
 
     // @review Matic set up ROLES or access-control address variables
-    // DEFAULT_ADMIN_ROLE, DEPOSITOR_ROLE
       constructor(
         address metaTransactionContract,
         address admin,
         IAssetToken asset,
-        address mintableAssetPredicate
+        address mintableAssetPredicate,
+        address depositor
     ) ERC721BaseToken(metaTransactionContract, admin) {
         _asset = asset;
-        _mintableAssetPredicate = mintableAssetPredicate;
+        _mintGameableAssetPredicate = mintableAssetPredicate;
+        _depositor = depositor;
     }
 
     ///////////////////////////////  Modifiers //////////////////////////////
@@ -221,14 +222,14 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     function deposit(address user, bytes calldata depositData)
         external
         override
-        only(DEPOSITOR_ROLE)
     {
-
+        require(msg.sender == _depositor, "DEPOSITOR_ONLY");
         // deposit single
         if (depositData.length == 32) {
             uint256 tokenId = abi.decode(depositData, (uint256));
             withdrawnTokens[tokenId] = false;
-            _mint(user, tokenId);
+            // @review modify this to use _mintGameGame
+            _mintGame(user, tokenId);
 
         // deposit batch
         } else {
@@ -236,7 +237,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
             uint256 length = tokenIds.length;
             for (uint256 i; i < length; i++) {
                 withdrawnTokens[tokenIds[i]] = false;
-                _mint(user, tokenIds[i]);
+                _mintGame(user, tokenIds[i]);
             }
         }
 
@@ -406,7 +407,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         return "GAME";
     }
 
-    // @review Matic
+    // @review Matic Do we even need this? If so, make it minterOnly()
     /**
      * @notice Example function to handle minting tokens on matic chain
      * @dev Minting can be done as per requirement,
@@ -415,9 +416,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
      * @param user user for whom tokens are being minted
      * @param tokenId tokenId to mint
      */
-    function mint(address user, uint256 tokenId) public only(DEFAULT_ADMIN_ROLE) {
+    function mint(address user, uint256 tokenId) public onlyMinter() {
         require(!withdrawnTokens[tokenId], "ChildMintableERC721: TOKEN_EXISTS_ON_ROOT_CHAIN");
-        _mint(user, tokenId);
+        _mintGame(user, tokenId);
     }
 
     /// @notice Get the creator of the token type `id`.
