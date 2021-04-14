@@ -3,17 +3,20 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts, getUnnamedAccounts} = hre;
   const {deploy, execute, read} = deployments;
-  const {deployer, gameTokenAdmin, mintableAssetPredicate} = await getNamedAccounts();
+  const {deployer, gameTokenAdmin} = await getNamedAccounts();
   const sandContract = await deployments.get('Sand');
   const assetContract = await deployments.get('Asset');
 
-  // @review mintableAssetPredicate doesn't belong in namedAccounts (it's a contract, not an EOA).
-  // make its value network-dependent and use dummy address for testing
+  const others = await getUnnamedAccounts();
+  const mintableAssetPredicate = others[7];
+  const depositor = others[8];
+
+  // @todo make mintableAssetPredicate network-dependent and use dummy address for testing
 
   await deploy('L2_GameToken', {
     from: deployer,
     log: true,
-    args: [sandContract.address, gameTokenAdmin, assetContract.address, mintableAssetPredicate],
+    args: [sandContract.address, gameTokenAdmin, assetContract.address, mintableAssetPredicate, depositor],
     skipIfAlreadyDeployed: true,
   });
 
