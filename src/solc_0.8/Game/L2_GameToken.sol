@@ -36,7 +36,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     // for matic integration
     address private immutable _mintGameableAssetPredicate;
     address private immutable _depositor;
-    mapping (uint256 => bool) public withdrawnTokens;
+    mapping(uint256 => bool) public withdrawnTokens;
     uint256 public constant BATCH_LIMIT = 20; // do we need this?
 
     ///////////////////////////////  Events //////////////////////////////
@@ -64,7 +64,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     event TransferWithMetadata(address indexed from, address indexed to, uint256 indexed tokenId, bytes metaData);
 
     // @review Matic set up ROLES or access-control address variables
-      constructor(
+    constructor(
         address metaTransactionContract,
         address admin,
         IAssetToken asset,
@@ -219,28 +219,31 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
      * @param user user address for whom deposit is being done
      * @param depositData abi encoded tokenIds. Batch deposit also supported.
      */
-    function deposit(address user, bytes calldata depositData)
-        external
-        override
-    {
+    function deposit(address user, bytes calldata depositData) external override {
         require(msg.sender == _depositor, "DEPOSITOR_ONLY");
         // deposit single
         if (depositData.length == 32) {
             uint256 tokenId = abi.decode(depositData, (uint256));
             withdrawnTokens[tokenId] = false;
-            // @review modify this to use _mintGameGame
-            _mintGame(user, tokenId);
+            _mintGame(
+                address(0), // not used in this context
+                user,
+                0, // not used in this context
+                0, // not used in this context
+                false, // signifies not a brand new token creation
+                true, // signifies a cross-chain token transfer
+                tokenId
+            );
 
-        // deposit batch
+            // deposit batch
         } else {
             uint256[] memory tokenIds = abi.decode(depositData, (uint256[]));
             uint256 length = tokenIds.length;
             for (uint256 i; i < length; i++) {
                 withdrawnTokens[tokenIds[i]] = false;
-                _mintGame(user, tokenIds[i]);
+                _mintGame(address(0), user, 0, 0, false, true, tokenIds[i]);
             }
         }
-
     }
 
     // @review Matic
@@ -264,27 +267,26 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
      * @param tokenIds tokenId list to withdraw
      */
     function withdrawBatch(uint256[] calldata tokenIds) external {
-
         uint256 length = tokenIds.length;
         require(length <= BATCH_LIMIT, "ChildMintableERC721: EXCEEDS_BATCH_LIMIT");
 
         // Iteratively burn ERC721 tokens, for performing
         // batch withdraw
         for (uint256 i; i < length; i++) {
-
             uint256 tokenId = tokenIds[i];
 
-            require(_msgSender() == ownerOf(tokenId), string(abi.encodePacked("ChildMintableERC721: INVALID_TOKEN_OWNER ", tokenId)));
+            require(
+                _msgSender() == ownerOf(tokenId),
+                string(abi.encodePacked("ChildMintableERC721: INVALID_TOKEN_OWNER ", tokenId))
+            );
             withdrawnTokens[tokenId] = true;
             _burn(tokenId);
-
         }
 
         // At last emit this event, which will be used
         // in MintableERC721 predicate contract on L1
         // while verifying burn proof
         emit WithdrawnBatch(_msgSender(), tokenIds);
-
     }
 
     // @review Matic
@@ -297,7 +299,6 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
      * @param tokenId tokenId to withdraw
      */
     function withdrawWithMetadata(uint256 tokenId) external {
-
         require(_msgSender() == ownerOf(tokenId), "ChildMintableERC721: INVALID_TOKEN_OWNER");
         withdrawnTokens[tokenId] = true;
 
@@ -305,7 +306,6 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         emit TransferWithMetadata(ownerOf(tokenId), address(0), tokenId, this.encodeTokenMetadata(tokenId));
 
         _burn(tokenId);
-
     }
 
     /// @review Matic
@@ -319,12 +319,10 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
      * @param tokenId Token for which URI to be fetched
      */
     function encodeTokenMetadata(uint256 tokenId) external view virtual returns (bytes memory) {
-
         // You're always free to change this default implementation
         // and pack more data in byte array which can be decoded back
         // in L1
         return abi.encode(tokenURI(tokenId));
-
     }
 
     /// @notice Get the amount of each assetId in a GAME.
@@ -407,7 +405,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         return "GAME";
     }
 
-    // @review Matic Do we even need this? If so, make it minterOnly()
+    // @review Matic Do we even need this? if not needed by Matic system , remove it.
     /**
      * @notice Example function to handle minting tokens on matic chain
      * @dev Minting can be done as per requirement,
@@ -418,7 +416,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
      */
     function mint(address user, uint256 tokenId) public onlyMinter() {
         require(!withdrawnTokens[tokenId], "ChildMintableERC721: TOKEN_EXISTS_ON_ROOT_CHAIN");
-        _mintGame(user, tokenId);
+        _mintGame(address(0), user, 0, 0, false, false, 0);
+
     }
 
     /// @notice Get the creator of the token type `id`.
@@ -594,11 +593,11 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         uint256 gameId;
         uint256 strgId;
         if (isCrossChainTransfer) {
-          require(existingTokenId != uint256(0), "INVALID_ID");
-          // This is a token which has exited L2.
-          gameId = existingTokenId;
-          strgId = _storageId(gameId);
-          idVersion = uint16(existingTokenId);
+            require(existingTokenId != uint256(0), "INVALID_ID");
+            // This is a token which has exited L2.
+            gameId = existingTokenId;
+            strgId = _storageId(gameId);
+            idVersion = uint16(existingTokenId);
         } else if (isCreation && !isCrossChainTransfer) {
             // This is a brand new token which has never existed on L2
             idVersion = 1;
@@ -693,8 +692,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     /// @param id The id of the token to query.
     /// @return chainIndex The index of the original layer of minting.
     /// 0 = eth mainnet, 1 == matic mainnet, etc...
-    function mintOrigin(uint256 id) public view returns(uint256 chainIndex) {
-      return uint256((id & CHAIN_INDEX_MASK) >> 16);
+    function mintOrigin(uint256 id) public view returns (uint256 chainIndex) {
+        return uint256((id & CHAIN_INDEX_MASK) >> 16);
     }
 
     /// @dev Get the storageId (full id without the version number) from the full tokenId.
@@ -714,9 +713,15 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         uint64 subId,
         uint16 version
     ) internal pure returns (uint256) {
-      uint8 chainIndex = 1; // index for matic-mainnet
+        uint8 chainIndex = 1; // index for matic-mainnet
         return
-            uint256(uint160(creator)) * CREATOR_OFFSET_MULTIPLIER + uint64(subId) * SUBID_MULTIPLIER + chainIndex * CHAIN_INDEX_OFFSET_MULTIPLIER + uint16(version);
+            uint256(uint160(creator)) *
+            CREATOR_OFFSET_MULTIPLIER +
+            uint64(subId) *
+            SUBID_MULTIPLIER +
+            chainIndex *
+            CHAIN_INDEX_OFFSET_MULTIPLIER +
+            uint16(version);
     }
 
     /// @dev Get the a full URI string for a given hash + gameId.
