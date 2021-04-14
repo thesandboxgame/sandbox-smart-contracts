@@ -439,6 +439,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         );
 
         delete _metaData[storageId];
+        // @review should creatorship be zeroed here?
         _creatorship[creatorOf(gameId)] = address(0);
         _burn(from, owner, gameId);
     }
@@ -563,7 +564,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     /// @param data Arbitrary token metadata from L2 token
     function setTokenMetadata(uint256 tokenId, bytes memory data) internal virtual {
 
-        (bytes32 uri, uint256[] memory assetIds, uint256[] memory amounts) = abi.decode(data, (bytes32, uint256[], uint256[]));
+        (bytes32 uri) = abi.decode(data, (bytes32));
 
         uint256 storageId = _storageId(tokenId);
         _metaData[storageId] = uri;
