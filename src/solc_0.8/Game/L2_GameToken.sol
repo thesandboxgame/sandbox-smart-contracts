@@ -8,6 +8,9 @@ import "../common/interfaces/IAssetToken.sol";
 import "../common/interfaces/IGameToken.sol";
 import "../common/interfaces/IMintableERC721.sol";
 
+// @review should we add simple metaTx support?
+// either WithMetaTransaction.sol, or openzeppelin _msgSender style only...
+
 contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     ///////////////////////////////  Data //////////////////////////////
 
@@ -255,7 +258,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
      * @param tokenId tokenId to withdraw
      */
     function withdraw(uint256 tokenId) external {
-        require(_msgSender() == ownerOf(tokenId), "ChildMintableERC721: INVALID_TOKEN_OWNER");
+        require(_msgSender() ==_ownerOf(tokenId), "ChildMintableERC721: INVALID_TOKEN_OWNER");
         withdrawnTokens[tokenId] = true;
         _burn(tokenId);
     }
@@ -276,7 +279,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
             uint256 tokenId = tokenIds[i];
 
             require(
-                _msgSender() == ownerOf(tokenId),
+                _msgSender() ==_ownerOf(tokenId),
                 string(abi.encodePacked("ChildMintableERC721: INVALID_TOKEN_OWNER ", tokenId))
             );
             withdrawnTokens[tokenId] = true;
@@ -299,7 +302,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
      * @param tokenId tokenId to withdraw
      */
     function withdrawWithMetadata(uint256 tokenId) external {
-        require(_msgSender() == ownerOf(tokenId), "ChildMintableERC721: INVALID_TOKEN_OWNER");
+        require(_msgSender() ==_ownerOf(tokenId), "ChildMintableERC721: INVALID_TOKEN_OWNER");
         withdrawnTokens[tokenId] = true;
 
         // Encoding metadata associated with tokenId & emitting event
@@ -666,7 +669,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     /// @dev Get the address allowed to withdraw assets from the GAME token.
     /// If too many assets in GAME, block.gaslimit won't allow detroy and withdraw in 1 tx.
     /// A game owner may destroy their GAME token, then withdraw assets in a later tx (even
-    /// though ownerOf(id) would be address(0) after burning.)
+    /// though_ownerOf(id) would be address(0) after burning.)
     /// @param id The id of the GAME token to query.
     /// @return the address of the owner before burning.
     function _withdrawalOwnerOf(uint256 id) internal view returns (address) {
