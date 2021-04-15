@@ -10,7 +10,7 @@ import "../common/interfaces/IGameToken.sol";
 // @review should we add simple metaTx support?
 // either WithMetaTransaction.sol, or openzeppelin _msgSender style only...
 
-contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
+contract L2_GameToken is ERC721BaseToken, WithMinter, IGameToken {
     ///////////////////////////////  Data //////////////////////////////
 
     IAssetToken internal immutable _asset;
