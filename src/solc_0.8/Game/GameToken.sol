@@ -604,7 +604,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     /// @param id The id of the token to query.
     /// @return chainIndex The index of the original layer of minting.
     /// 0 = eth mainnet, 1 == matic mainnet, etc...
-    function mintOrigin(uint256 id) public view returns (uint256 chainIndex) {
+    function mintOrigin(uint256 id) public pure returns (uint256 chainIndex) {
         return uint256((id & CHAIN_INDEX_MASK) >> 16);
     }
 

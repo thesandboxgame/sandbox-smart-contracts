@@ -1526,7 +1526,9 @@ describe('GameToken', function () {
 
     before(async function () {
       ({gameToken, L2_gameToken, users, GameOwner} = await setupTest());
-      const {gameTokenAdmin, mintableAssetPredicate} = await getNamedAccounts();
+      const {gameTokenAdmin} = await getNamedAccounts();
+      const others = await getUnnamedAccounts();
+      const mintableAssetPredicate = others[7];
       const L2_gameTokenAsAdmin = await L2_gameToken.connect(
         ethers.provider.getSigner(gameTokenAdmin)
       );
