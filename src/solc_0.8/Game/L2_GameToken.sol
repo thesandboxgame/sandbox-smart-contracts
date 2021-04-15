@@ -6,12 +6,11 @@ import "../common/BaseWithStorage/ERC721BaseToken.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
 import "../common/interfaces/IAssetToken.sol";
 import "../common/interfaces/IGameToken.sol";
-import "../common/interfaces/IMintableERC721.sol";
 
 // @review should we add simple metaTx support?
 // either WithMetaTransaction.sol, or openzeppelin _msgSender style only...
 
-contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
+contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     ///////////////////////////////  Data //////////////////////////////
 
     IAssetToken internal immutable _asset;
@@ -222,7 +221,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
      * @param user user address for whom deposit is being done
      * @param depositData abi encoded tokenIds. Batch deposit also supported.
      */
-    function deposit(address user, bytes calldata depositData) external override {
+    function deposit(address user, bytes calldata depositData) external {
         require(msg.sender == _depositor, "DEPOSITOR_ONLY");
         // deposit single
         if (depositData.length == 32) {
@@ -258,9 +257,10 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
      * @param tokenId tokenId to withdraw
      */
     function withdraw(uint256 tokenId) external {
-        require(_msgSender() ==_ownerOf(tokenId), "ChildMintableERC721: INVALID_TOKEN_OWNER");
+        address owner = _ownerOf(tokenId);
+        require(_msgSender() == owner, "ChildMintableERC721: INVALID_TOKEN_OWNER");
         withdrawnTokens[tokenId] = true;
-        _burn(tokenId);
+        _burn(msg.sender, owner, tokenId);
     }
 
     // @review Matic
@@ -277,13 +277,13 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         // batch withdraw
         for (uint256 i; i < length; i++) {
             uint256 tokenId = tokenIds[i];
-
+            address owner = _ownerOf(tokenId);
             require(
-                _msgSender() ==_ownerOf(tokenId),
+                _msgSender() == owner,
                 string(abi.encodePacked("ChildMintableERC721: INVALID_TOKEN_OWNER ", tokenId))
             );
             withdrawnTokens[tokenId] = true;
-            _burn(tokenId);
+            _burn(msg.sender, owner, tokenId);
         }
 
         // At last emit this event, which will be used
@@ -302,13 +302,14 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
      * @param tokenId tokenId to withdraw
      */
     function withdrawWithMetadata(uint256 tokenId) external {
-        require(_msgSender() ==_ownerOf(tokenId), "ChildMintableERC721: INVALID_TOKEN_OWNER");
+        address owner = _ownerOf(tokenId);
+        require(_msgSender() == owner, "ChildMintableERC721: INVALID_TOKEN_OWNER");
         withdrawnTokens[tokenId] = true;
 
         // Encoding metadata associated with tokenId & emitting event
-        emit TransferWithMetadata(ownerOf(tokenId), address(0), tokenId, this.encodeTokenMetadata(tokenId));
+        emit TransferWithMetadata(owner, address(0), tokenId, this.encodeTokenMetadata(tokenId));
 
-        _burn(tokenId);
+        _burn(msg.sender, owner, tokenId);
     }
 
     /// @review Matic
@@ -695,7 +696,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     /// @param id The id of the token to query.
     /// @return chainIndex The index of the original layer of minting.
     /// 0 = eth mainnet, 1 == matic mainnet, etc...
-    function mintOrigin(uint256 id) public view returns (uint256 chainIndex) {
+    function mintOrigin(uint256 id) public pure returns (uint256 chainIndex) {
         return uint256((id & CHAIN_INDEX_MASK) >> 16);
     }
 
