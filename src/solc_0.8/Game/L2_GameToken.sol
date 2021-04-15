@@ -421,7 +421,6 @@ contract L2_GameToken is ERC721BaseToken, WithMinter, IGameToken {
     function mint(address user, uint256 tokenId) public onlyMinter() {
         require(!withdrawnTokens[tokenId], "ChildMintableERC721: TOKEN_EXISTS_ON_ROOT_CHAIN");
         _mintGame(address(0), user, 0, 0, false, false, 0);
-
     }
 
     /// @notice Get the creator of the token type `id`.
