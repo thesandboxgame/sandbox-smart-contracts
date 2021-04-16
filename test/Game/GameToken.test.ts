@@ -113,7 +113,7 @@ async function getBalances(
 }
 
 function encodeMetaData(uri: string): string {
-  return abi.encode(['string'], ['0x0']);
+  return abi.encode(['string'], [uri]);
 }
 
 describe('GameToken', function () {
@@ -229,7 +229,9 @@ describe('GameToken', function () {
       const storageIdAsHex = utils.hexValue(await gameToken.storageId(gameId));
       console.log(`tokenId: ${idAsHex}`);
       console.log(`storageId: ${storageIdAsHex}`);
-      expect(storageIdAsHex).to.be.equal('0xa0ee7a142d267c1f36714e4a8f75612f20a79720000000001672178700000000');
+      expect(storageIdAsHex).to.be.equal(
+        '0xa0ee7a142d267c1f36714e4a8f75612f20a79720000000001672178700000000'
+      );
     });
 
     it('can get the chainIndex for a GAME', async function () {
@@ -1621,8 +1623,8 @@ describe('GameToken', function () {
       expect(await gameToken.exists(maticGameId2)).to.be.equal(false);
       expect(await gameToken.balanceOf(GameOwner.address)).to.be.equal(1);
 
-      const hashedUri = utils.keccak256(toUtf8Bytes('0xdeadbeef'));
-      const encodedMetadata = encodeMetaData(hashedUri);
+      // const hashedUri = utils.keccak256(toUtf8Bytes('https://0xdeadbeef'));
+      const encodedMetadata = encodeMetaData('https://0xdeadbeef');
       const receipt = await waitFor(
         gameTokenAsPredicate['mint(address,uint256,bytes)'](
           GameOwner.address,
@@ -1646,7 +1648,7 @@ describe('GameToken', function () {
         GameOwner.address
       );
       expect(await gameToken.tokenURI(transferredGameId2)).to.be.equal(
-        'ipfs://bafybeiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaea/game.json'
+        'ipfs://bafybeif7r7n5gmu5bz7tlawpjazlqp3uic4z2yd5i4amn73igauftafpdq/game.json'
       );
     });
 
