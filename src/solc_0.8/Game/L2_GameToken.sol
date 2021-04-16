@@ -21,7 +21,7 @@ contract L2_GameToken is ERC721BaseToken, WithMinter, IGameToken {
     uint256 private constant SUBID_MULTIPLIER = uint256(2)**(256 - 160 - 64);
     uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 64 - 16);
     // ((uint256(1) * 2**224) - 1) << 32;
-    uint256 private constant STORAGE_ID_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF0000;
+    uint256 private constant STORAGE_ID_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000;
     // ((uint256(1) * 2**32) - 1) << 200;
     uint256 private constant VERSION_MASK = 0x0000000000FFFF00000000000000000000000000000000000000000000000000;
 
@@ -389,12 +389,11 @@ contract L2_GameToken is ERC721BaseToken, WithMinter, IGameToken {
         revert("ERC1155_REJECTED");
     }
 
-    /// @notice Get the first token id minted using the same storageId as given tokenId.
-    /// Can be useful in tracking lineage of a token.
+    /// @notice Get the storageID (no chainIndex or version data), which is constant for a given token.
     /// @param gameId The tokenId for which to find the first token Id.
-    /// @return The first token minted with this base id.
-    function originalId(uint256 gameId) external pure override returns (uint256) {
-        return _storageId(gameId) + uint32(1);
+    /// @return The storage id for this token.
+    function storageId(uint256 gameId) external pure override returns (uint256) {
+        return _storageId(gameId);
     }
 
     /// @notice Return the name of the token contract.
@@ -695,7 +694,7 @@ contract L2_GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @param id The id of the token to query.
     /// @return chainIndex The index of the original layer of minting.
     /// 0 = eth mainnet, 1 == matic mainnet, etc...
-    function mintOrigin(uint256 id) public pure returns (uint256 chainIndex) {
+    function chainIndex(uint256 id) public pure returns (uint256 chainIndex) {
         return uint256((id & CHAIN_INDEX_MASK) >> 16);
     }
 

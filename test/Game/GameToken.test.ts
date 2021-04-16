@@ -221,6 +221,20 @@ describe('GameToken', function () {
       expect(versionSlice).to.be.equal('0001');
     });
 
+    it('can get the storageId for a GAME', async function () {
+      const idAsHex = utils.hexValue(gameId);
+      const storageIdAsHex = utils.hexValue(await gameToken.storageId(gameId));
+      console.log(`tokenId: ${idAsHex}`);
+      console.log(`storageId: ${storageIdAsHex}`);
+      expect(storageIdAsHex).to.be.equal('0xa0ee7a142d267c1f36714e4a8f75612f20a79720000000001672178700000000');
+    });
+
+    it('can get the chainIndex for a GAME', async function () {
+      const idAsHex = utils.hexValue(gameId);
+      const chainIndex = await gameToken.chainIndex(gameId);
+      expect(chainIndex).to.be.equal(0);
+    });
+
     it('reverts if non-minter trys to mint Game when _Minter is set', async function () {
       const randomId = await getRandom();
       await expect(
@@ -632,16 +646,6 @@ describe('GameToken', function () {
         expect(utils.getAddress(creatorSlice)).to.be.equal(GameOwner.address);
         expect(randomIdSlice).to.be.equal('000000020708760');
         expect(versionSlice).to.be.equal('0002');
-      });
-      it('can get the original version of the gameId', async function () {
-        const originalId = await gameToken.originalId(gameId);
-        const originalAsHex = utils.hexValue(originalId);
-        const creatorSlice = originalAsHex.slice(0, 42);
-        const randomIdSlice = originalAsHex.slice(43, 58);
-        const versionSlice = originalAsHex.slice(62);
-        expect(utils.getAddress(creatorSlice)).to.be.equal(GameOwner.address);
-        expect(randomIdSlice).to.be.equal('000000020708760');
-        expect(versionSlice).to.be.equal('0001');
       });
 
       it('Minter can add multiple Assets', async function () {
@@ -1599,11 +1603,11 @@ describe('GameToken', function () {
         'Transfer'
       );
       const transferredGameId1 = transferEvent.args[2];
-      const mintOrigin = await gameToken.mintOrigin(transferredGameId1);
+      const chainIndex = await gameToken.chainIndex(transferredGameId1);
 
       expect(await gameToken.exists(transferredGameId1)).to.be.equal(true);
       expect(transferredGameId1).to.equal(maticGameId1);
-      expect(mintOrigin).to.equal(1); // originally minted on Matic
+      expect(chainIndex).to.equal(1); // originally minted on Matic
       expect(await gameToken.balanceOf(GameOwner.address)).to.be.equal(1);
       expect(await gameToken.ownerOf(transferredGameId1)).to.be.equal(
         GameOwner.address
@@ -1629,11 +1633,11 @@ describe('GameToken', function () {
         'Transfer'
       );
       const transferredGameId2 = transferEvent.args[2];
-      const mintOrigin = await gameToken.mintOrigin(transferredGameId2);
+      const chainIndex = await gameToken.chainIndex(transferredGameId2);
 
       expect(await gameToken.exists(transferredGameId2)).to.be.equal(true);
       expect(transferredGameId2).to.equal(maticGameId2);
-      expect(mintOrigin).to.equal(1); // originally minted on Matic
+      expect(chainIndex).to.equal(1); // originally minted on Matic
       expect(await gameToken.balanceOf(GameOwner.address)).to.be.equal(2);
       expect(await gameToken.ownerOf(transferredGameId2)).to.be.equal(
         GameOwner.address
