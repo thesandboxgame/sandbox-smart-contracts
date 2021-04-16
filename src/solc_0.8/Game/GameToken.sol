@@ -558,10 +558,10 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
     /// @param tokenId The token to set the data for
     /// @param data Arbitrary token metadata from L2 token
     function setTokenMetadata(uint256 tokenId, bytes memory data) internal virtual {
-        bytes32 uri = abi.decode(data, (bytes32));
-
+        string memory uri = abi.decode(data, (string));
+        bytes32 hashedUri = keccak256(abi.encodePacked(uri));
         uint256 storageId = _storageId(tokenId);
-        _metaData[storageId] = uri;
+        _metaData[storageId] = hashedUri;
         // @note any game Editors set for address `to` on L2 will need to be reset manually on L1
         // @todo if creatorship was transferred on L2, L1 mapping needs to be updated now
     }
