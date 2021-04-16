@@ -1,23 +1,13 @@
-import {
-  ethers,
-  deployments,
-  getNamedAccounts,
-  getUnnamedAccounts,
-} from 'hardhat';
+import {ethers, getNamedAccounts} from 'hardhat';
 import {BigNumber, utils, Contract, BytesLike} from 'ethers';
 import Prando from 'prando';
 import {Address} from 'hardhat-deploy/types';
 import {expect} from '../chai-setup';
-import {waitFor, expectEventWithArgs, findEvents} from '../utils';
+import {waitFor, expectEventWithArgs} from '../utils';
 import {setupTest, User} from './fixtures';
 import {supplyAssets} from './assets';
-import {toUtf8Bytes} from 'ethers/lib/utils';
 const {defaultAbiCoder: abi} = utils;
 
-let id: BigNumber;
-
-const METATX_SANDBOX = 1;
-const METATX_2771 = 2;
 const rng = new Prando('GameToken');
 
 type Update = {
@@ -128,7 +118,7 @@ describe('L2_GameToken: Matic L2 Integration', function () {
   let assets: BigNumber[];
 
   before(async function () {
-    ({gameToken, L2_gameToken, users, GameOwner} = await setupTest());
+    ({gameToken, L2_gameToken, GameOwner} = await setupTest());
     const {gameTokenAdmin, mintableAssetPredicate} = await getNamedAccounts();
     const L2_gameTokenAsAdmin = await L2_gameToken.connect(
       ethers.provider.getSigner(gameTokenAdmin)

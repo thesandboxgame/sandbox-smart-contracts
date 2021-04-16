@@ -26,7 +26,6 @@ const func: DeployFunction = async function (hre) {
     skipIfAlreadyDeployed: true,
   });
 
-  const {assetAdmin} = await getNamedAccounts();
   const L2_gameToken = await deployments.getOrNull('L2_GameToken');
   if (!L2_gameToken) {
     return;
