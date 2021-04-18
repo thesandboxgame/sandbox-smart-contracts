@@ -19,7 +19,7 @@ contract SandPolygonDepositor {
         _rootChainManager = rootChainManager;
     }
 
-    function depositToPolygon(uint256 amount, address beneficiary) public {
+    function depositToPolygon(address beneficiary, uint256 amount) public {
         _sand.transferFrom(beneficiary, address(this), amount);
         _sand.approve(_predicate, amount);
         _rootChainManager.depositFor(beneficiary, address(_sand), abi.encode(amount));

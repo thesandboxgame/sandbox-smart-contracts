@@ -16,9 +16,7 @@ contract MockSandPredicate {
         address depositReceiver,
         address rootToken,
         bytes calldata depositData
-    )
-        external
-    {
+    ) external {
         uint256 amount = abi.decode(depositData, (uint256));
         emit LockedERC20(depositor, depositReceiver, rootToken, amount);
         ERC20Extended(rootToken).transferFrom(depositor, address(this), amount);
