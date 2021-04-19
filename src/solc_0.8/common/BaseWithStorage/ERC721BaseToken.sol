@@ -6,11 +6,11 @@ pragma solidity 0.8.2;
 import "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "@openzeppelin/contracts-0.8/token/ERC721/IERC721Receiver.sol";
 import "../BaseWithStorage/WithSuperOperators.sol";
-import "../BaseWithStorage/WithMetaTransaction.sol";
 import "../interfaces/IERC721MandatoryTokenReceiver.sol";
 import "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
+import "@openzeppelin/contracts-0.8/metatx/ERC2771Context.sol";
 
-contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
+contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Context {
     using Address for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
@@ -29,9 +29,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     mapping(address => mapping(address => bool)) internal _operatorsForAll;
     mapping(uint256 => address) internal _operators;
 
-    constructor(address metaTransactionContract, address admin) {
-        _admin = admin;
-        _setMetaTransactionProcessor(metaTransactionContract, METATX_SANDBOX);
+    constructor(address trustedForwarder) ERC2771Context(trustedForwarder) {
     }
 
     /// @notice Approve an operator to spend tokens on the senders behalf.
@@ -42,7 +40,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         address owner = address(uint160(ownerData));
         require(owner != address(0), "NONEXISTENT_TOKEN");
         require(
-            owner == msg.sender || _superOperators[msg.sender] || _operatorsForAll[owner][msg.sender],
+            owner == _msgSender() || _superOperators[_msgSender()] || _operatorsForAll[owner][_msgSender()],
             "UNAUTHORIZED_APPROVAL"
         );
         _approveFor(ownerData, operator, id);
@@ -60,10 +58,9 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         uint256 ownerData = _owners[_storageId(id)];
         require(sender != address(0), "ZERO_ADDRESS_SENDER");
         require(
-            msg.sender == sender ||
-                _isValidMetaTx(sender) ||
-                _superOperators[msg.sender] ||
-                _operatorsForAll[sender][msg.sender],
+            _msgSender() == sender ||
+                _superOperators[_msgSender()] ||
+                _operatorsForAll[sender][_msgSender()],
             "UNAUTHORIZED_APPROVAL"
         );
         require(address(uint160(ownerData)) == sender, "OWNER_NOT_SENDER");
@@ -79,10 +76,10 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         address to,
         uint256 id
     ) external override {
-        bool metaTx = _checkTransfer(from, to, id);
+        _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
-            require(_checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, ""), "ERC721_TRANSFER_REJECTED");
+            require(_checkOnERC721Received(_msgSender(), from, to, id, ""), "ERC721_TRANSFER_REJECTED");
         }
     }
 
@@ -138,7 +135,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     ) external {
         require(sender != address(0), "Invalid sender address");
         require(
-            msg.sender == sender || _isValidMetaTx(sender) || _superOperators[msg.sender],
+            _msgSender() == sender || _superOperators[_msgSender()],
             "UNAUTHORIZED_APPROVE_FOR_ALL"
         );
 
@@ -149,13 +146,13 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
     /// @param operator The address receiving the approval.
     /// @param approved The determination of the approval.
     function setApprovalForAll(address operator, bool approved) external override {
-        _setApprovalForAll(msg.sender, operator, approved);
+        _setApprovalForAll(_msgSender(), operator, approved);
     }
 
     /// @notice Burns token `id`.
     /// @param id The token which will be burnt.
     function burn(uint256 id) external virtual {
-        _burn(msg.sender, _ownerOf(id), id);
+        _burn(_msgSender(), _ownerOf(id), id);
     }
 
     /// @notice Burn token`id` from `from`.
@@ -165,11 +162,10 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         require(from != address(0), "NOT_FROM_ZEROADDRESS");
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(
-            msg.sender == from ||
-                _isValidMetaTx(from) ||
-                (operatorEnabled && _operators[id] == msg.sender) ||
-                _superOperators[msg.sender] ||
-                _operatorsForAll[from][msg.sender],
+            _msgSender() == from||
+                (operatorEnabled && _operators[id] == _msgSender()) ||
+                _superOperators[_msgSender()] ||
+                _operatorsForAll[from][_msgSender()],
             "UNAUTHORIZED_BURN"
         );
         _burn(from, owner, id);
@@ -223,10 +219,10 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         uint256 id,
         bytes memory data
     ) public override {
-        bool metaTx = _checkTransfer(from, to, id);
+        _checkTransfer(from, to, id);
         _transferFrom(from, to, id);
         if (to.isContract()) {
-            require(_checkOnERC721Received(metaTx ? from : msg.sender, from, to, id, data), "ERC721_TRANSFER_REJECTED");
+            require(_checkOnERC721Received(_msgSender(), from, to, id, data), "ERC721_TRANSFER_REJECTED");
         }
     }
 
@@ -297,9 +293,8 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         bytes memory data,
         bool safe
     ) internal {
-        bool metaTx = _isValidMetaTx(from);
         bool authorized =
-            msg.sender == from || metaTx || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender];
+            _msgSender() == from|| _superOperators[_msgSender()] || _operatorsForAll[from][_msgSender()];
 
         require(from != address(0), "NOT_FROM_ZEROADDRESS");
         require(to != address(0), "NOT_TO_ZEROADDRESS");
@@ -309,7 +304,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
             uint256 id = ids[i];
             (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
             require(owner == from, "BATCHTRANSFERFROM_NOT_OWNER");
-            require(authorized || (operatorEnabled && _operators[id] == msg.sender), "NOT_AUTHORIZED");
+            require(authorized || (operatorEnabled && _operators[id] == _msgSender()), "NOT_AUTHORIZED");
             _updateOwnerData(id, _owners[_storageId(id)], to, false);
             emit Transfer(from, to, id);
         }
@@ -320,7 +315,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
 
         if (to.isContract() && (safe || _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER))) {
             require(
-                _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, data),
+                _checkOnERC721BatchReceived(_msgSender(), from, to, ids, data),
                 "ERC721_BATCH_TRANSFER_REJECTED"
             );
         }
@@ -424,15 +419,10 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, WithMetaTransaction {
         require(owner != address(0), "NONEXISTENT_TOKEN");
         require(owner == from, "CHECKTRANSFER_NOT_OWNER");
         require(to != address(0), "NOT_TO_ZEROADDRESS");
-        isMetaTx = _isValidMetaTx(from);
-        if (msg.sender != from && !isMetaTx) {
-            require(
-                _superOperators[msg.sender] ||
-                    _operatorsForAll[from][msg.sender] ||
-                    (operatorEnabled && _operators[id] == msg.sender),
+        require(_msgSender() == owner || _superOperators[_msgSender()] || _operatorsForAll[from][_msgSender()] ||
+                    (operatorEnabled && _operators[id] == _msgSender()),
                 "UNAUTHORIZED_TRANSFER"
             );
-        }
     }
 
     /// @dev Check if there was enough gas.
