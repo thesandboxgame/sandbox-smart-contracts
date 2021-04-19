@@ -67,12 +67,13 @@ contract L2_GameToken is ERC721BaseToken, WithMinter, IGameToken {
 
     // @review Matic set up ROLES or access-control address variables
     constructor(
-        address metaTransactionContract,
         address admin,
         IAssetToken asset,
         address mintableAssetPredicate,
+        address trustedForwarder,
         address depositor
-    ) ERC721BaseToken(metaTransactionContract, admin) {
+    ) ERC721BaseToken(trustedForwarder) {
+        _admin = admin;
         _asset = asset;
         _mintGameableAssetPredicate = mintableAssetPredicate;
         _depositor = depositor;
@@ -101,7 +102,7 @@ contract L2_GameToken is ERC721BaseToken, WithMinter, IGameToken {
         address editor,
         bool isEditor
     ) external override {
-        require(msg.sender == gameOwner || _isValidMetaTx(gameOwner), "EDITOR_ACCESS_DENIED");
+        require(_msgSender() == gameOwner, "EDITOR_ACCESS_DENIED");
         _setGameEditor(gameOwner, editor, isEditor);
     }
 
@@ -115,7 +116,7 @@ contract L2_GameToken is ERC721BaseToken, WithMinter, IGameToken {
         address to
     ) external override notToZero(to) {
         require(
-            msg.sender == sender || _isValidMetaTx(sender) || _superOperators[msg.sender],
+            _msgSender() == sender|| _superOperators[msg.sender],
             "TRANSFER_ACCESS_DENIED"
         );
         require(sender != address(0), "NOT_FROM_ZEROADDRESS");
@@ -529,8 +530,7 @@ contract L2_GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint256 storageId = _storageId(gameId);
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(storageId);
         require(
-            msg.sender == owner ||
-                _isValidMetaTx(from) ||
+            _msgSender() == owner ||
                 (operatorEnabled && _operators[storageId] == msg.sender) ||
                 _superOperators[msg.sender] ||
                 _operatorsForAll[from][msg.sender],
@@ -551,11 +551,8 @@ contract L2_GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint256[] memory assetIds
     ) internal notToZero(to) notToThis(to) {
         require(_ownerOf(gameId) == address(0), "ONLY_FROM_BURNED_TOKEN");
-        bool validMetaTx = _isValidMetaTx(from);
         uint256 storageId = _storageId(gameId);
-        if (!validMetaTx) {
-            require(from == msg.sender, "INVALID_RECOVERY");
-        }
+        require(from == _msgSender(), "INVALID_RECOVERY");
         _check_withdrawal_authorized(from, gameId);
         require(assetIds.length > 0, "WITHDRAWAL_COMPLETE");
         uint256[] memory values;

@@ -29,9 +29,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Context {
     mapping(address => mapping(address => bool)) internal _operatorsForAll;
     mapping(uint256 => address) internal _operators;
 
-    constructor(address metaTransactionContract, address admin) {
-        _admin = admin;
-        _setMetaTransactionProcessor(metaTransactionContract, METATX_SANDBOX);
+    constructor(address trustedForwarder) ERC2771Context(trustedForwarder) {
     }
 
     /// @notice Approve an operator to spend tokens on the senders behalf.
@@ -60,8 +58,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Context {
         uint256 ownerData = _owners[_storageId(id)];
         require(sender != address(0), "ZERO_ADDRESS_SENDER");
         require(
-            msg.sender == sender ||
-                _isValidMetaTx(sender) ||
+            _msgSender() == sender ||
                 _superOperators[msg.sender] ||
                 _operatorsForAll[sender][msg.sender],
             "UNAUTHORIZED_APPROVAL"
@@ -138,7 +135,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Context {
     ) external {
         require(sender != address(0), "Invalid sender address");
         require(
-            msg.sender == sender || _isValidMetaTx(sender) || _superOperators[msg.sender],
+            _msgSender() == sender || _superOperators[_msgSender()],
             "UNAUTHORIZED_APPROVE_FOR_ALL"
         );
 
@@ -165,8 +162,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Context {
         require(from != address(0), "NOT_FROM_ZEROADDRESS");
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(
-            msg.sender == from ||
-                _isValidMetaTx(from) ||
+            _msgSender() == from ||
                 (operatorEnabled && _operators[id] == msg.sender) ||
                 _superOperators[msg.sender] ||
                 _operatorsForAll[from][msg.sender],
@@ -297,7 +293,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Context {
         bytes memory data,
         bool safe
     ) internal {
-        bool metaTx = _isValidMetaTx(from);
+        bool metaTx = isTrustedForwarder(msg.sender);
         bool authorized =
             msg.sender == from || metaTx || _superOperators[msg.sender] || _operatorsForAll[from][msg.sender];
 
@@ -424,7 +420,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Context {
         require(owner != address(0), "NONEXISTENT_TOKEN");
         require(owner == from, "CHECKTRANSFER_NOT_OWNER");
         require(to != address(0), "NOT_TO_ZEROADDRESS");
-        isMetaTx = _isValidMetaTx(from);
+        isMetaTx = isTrustedForwarder(msg.sender);
         if (msg.sender != from && !isMetaTx) {
             require(
                 _superOperators[msg.sender] ||

@@ -9,17 +9,20 @@ const func: DeployFunction = async function (hre) {
 
   const others = await getUnnamedAccounts();
   const mintableAssetPredicate = others[7];
+  const trustedForwarder = others[9];
 
+  // @todo setup minimal trustedForwarder contract for testing.
   // @todo make mintableAssetPredicate network-dependent and use dummy address for testing
+  // @todo make trustedForwarder network-dependent and use dummy address for testing
 
   await deploy('GameToken', {
     from: deployer,
     log: true,
     args: [
-      sandContract.address,
       gameTokenAdmin,
       assetContract.address,
       mintableAssetPredicate,
+      trustedForwarder,
     ],
     skipIfAlreadyDeployed: true,
   });

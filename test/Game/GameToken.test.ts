@@ -1718,29 +1718,11 @@ describe('GameToken', function () {
       ]);
     });
 
-    it('can check "Trusted Forwarder" if MetaTransactionProcessor = METATX_2771', async function () {
+    it('can get isTrustedForwarder" ', async function () {
       const others = await getUnnamedAccounts();
 
-      let isTrustedForwarder = await gameToken.isTrustedForwarder(others[0]);
-      expect(isTrustedForwarder).to.be.false;
-
-      await expect(
-        gameTokenAsAdmin.setMetaTransactionProcessor(others[0], METATX_2771)
-      )
-        .to.emit(gameTokenAsAdmin, 'MetaTransactionProcessor')
-        .withArgs(others[0], METATX_2771);
-
-      isTrustedForwarder = await gameToken.isTrustedForwarder(others[0]);
+      const isTrustedForwarder = await gameToken.isTrustedForwarder(others[9]);
       expect(isTrustedForwarder).to.be.true;
-    });
-    it('can set the MetaTransactionProcessor = METATX_SANDBOX', async function () {
-      const others = await getUnnamedAccounts();
-      await expect(gameTokenAsAdmin.setMetaTransactionProcessor(others[8], 1))
-        .to.emit(gameTokenAsAdmin, 'MetaTransactionProcessor')
-        .withArgs(others[8], METATX_SANDBOX);
-
-      const type = await gameToken.getMetaTransactionProcessorType(others[8]);
-      expect(type).to.be.equal(METATX_SANDBOX);
     });
 
     it('can call setGameEditor via metaTx', async function () {

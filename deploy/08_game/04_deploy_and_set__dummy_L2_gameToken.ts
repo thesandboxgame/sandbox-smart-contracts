@@ -9,6 +9,7 @@ const func: DeployFunction = async function (hre) {
 
   const others = await getUnnamedAccounts();
   const mintableAssetPredicate = others[7];
+  const trustedForwarder = others[9];
   const depositor = others[8];
 
   // @todo make mintableAssetPredicate network-dependent and use dummy address for testing
@@ -17,10 +18,10 @@ const func: DeployFunction = async function (hre) {
     from: deployer,
     log: true,
     args: [
-      sandContract.address,
       gameTokenAdmin,
       assetContract.address,
       mintableAssetPredicate,
+      trustedForwarder,
       depositor,
     ],
     skipIfAlreadyDeployed: true,
