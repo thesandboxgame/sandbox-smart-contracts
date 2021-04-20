@@ -1,17 +1,16 @@
 import {ethers} from 'hardhat';
 import {setupTestGiveaway} from './fixtures';
 import {constants} from 'ethers';
-import {waitFor, expectReceiptEventWithArgs, increaseTime} from '../utils';
+import {waitFor, expectReceiptEventWithArgs} from '../utils';
 import {expect} from '../chai-setup';
 
 import helpers from '../../lib/merkleTreeHelper';
-const {calculateAssetHash} = helpers;
+const {calculateClaimableAssetHash} = helpers;
 
 const zeroAddress = constants.AddressZero;
 
-// TODO fix test bug
 // eslint-disable-next-line mocha/no-skipped-tests
-describe.skip('Asset_Giveaway', function () {
+describe('Asset_Giveaway', function () {
   it('User cannot claim when test contract holds zero assets', async function () {
     const options = {
       assetsHolder: true,
@@ -19,7 +18,7 @@ describe.skip('Asset_Giveaway', function () {
     const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, assets} = setUp;
     const asset = assets[0];
-    const proof = tree.getProof(calculateAssetHash(asset));
+    const proof = tree.getProof(calculateClaimableAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[0])
     );
@@ -43,7 +42,8 @@ describe.skip('Asset_Giveaway', function () {
     const {giveawayContract, others, tree, assets, assetContract} = setUp;
 
     const asset = assets[0];
-    const proof = tree.getProof(calculateAssetHash(asset));
+
+    const proof = tree.getProof(calculateClaimableAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[0])
     );
@@ -91,14 +91,12 @@ describe.skip('Asset_Giveaway', function () {
   it('Claimed Event is emitted for successful claim', async function () {
     const options = {
       mint: true,
-      amount: 3,
-      supply: 5,
     };
     const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, assets} = setUp;
 
     const asset = assets[0];
-    const proof = tree.getProof(calculateAssetHash(asset));
+    const proof = tree.getProof(calculateClaimableAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[0])
     );
@@ -130,14 +128,12 @@ describe.skip('Asset_Giveaway', function () {
   it('User can claim allocated single asset for single assetId from Giveaway contract', async function () {
     const options = {
       mint: true,
-      amount: 1,
-      supply: 1,
     };
     const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, assets} = setUp;
 
     const asset = assets[1];
-    const proof = tree.getProof(calculateAssetHash(asset));
+    const proof = tree.getProof(calculateClaimableAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[0])
     );
@@ -156,14 +152,12 @@ describe.skip('Asset_Giveaway', function () {
   it('User tries to claim the wrong amount of an assetID', async function () {
     const options = {
       mint: true,
-      amount: 1,
-      supply: 0,
     };
     const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, assets} = setUp;
 
     const asset = assets[1];
-    const proof = tree.getProof(calculateAssetHash(asset));
+    const proof = tree.getProof(calculateClaimableAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[0])
     );
@@ -182,14 +176,12 @@ describe.skip('Asset_Giveaway', function () {
   it('User cannot claim their assets more than once', async function () {
     const options = {
       mint: true,
-      amount: 3,
-      supply: 5,
     };
     const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, assets} = setUp;
 
     const asset = assets[0];
-    const proof = tree.getProof(calculateAssetHash(asset));
+    const proof = tree.getProof(calculateClaimableAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[0])
     );
@@ -217,14 +209,12 @@ describe.skip('Asset_Giveaway', function () {
   it('User cannot claim assets from Giveaway contract if destination is not the reserved address', async function () {
     const options = {
       mint: true,
-      amount: 3,
-      supply: 5,
     };
     const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, assets} = setUp;
 
     const asset = assets[0];
-    const proof = tree.getProof(calculateAssetHash(asset));
+    const proof = tree.getProof(calculateClaimableAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[0])
     );
@@ -243,14 +233,12 @@ describe.skip('Asset_Giveaway', function () {
   it('User cannot claim assets from Giveaway contract to destination zeroAddress', async function () {
     const options = {
       mint: true,
-      amount: 3,
-      supply: 5,
     };
     const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, assets} = setUp;
 
     const asset = assets[0];
-    const proof = tree.getProof(calculateAssetHash(asset));
+    const proof = tree.getProof(calculateClaimableAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[0])
     );
@@ -268,14 +256,12 @@ describe.skip('Asset_Giveaway', function () {
   it('User cannot claim assets from Giveaway contract with incorrect asset param', async function () {
     const options = {
       mint: true,
-      amount: 3,
-      supply: 5,
     };
     const setUp = await setupTestGiveaway(options);
     const {giveawayContract, others, tree, assets} = setUp;
 
     const asset = assets[0];
-    const proof = tree.getProof(calculateAssetHash(asset));
+    const proof = tree.getProof(calculateClaimableAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[0])
     );
@@ -300,7 +286,7 @@ describe.skip('Asset_Giveaway', function () {
     const {giveawayContract, others, tree, assets, assetContract} = setUp;
 
     const asset = assets[0];
-    const proof = tree.getProof(calculateAssetHash(asset));
+    const proof = tree.getProof(calculateClaimableAssetHash(asset));
     const giveawayContractAsUser = await giveawayContract.connect(
       ethers.provider.getSigner(others[0])
     );
@@ -377,27 +363,28 @@ describe.skip('Asset_Giveaway', function () {
     ).to.be.revertedWith('ADMIN_ONLY');
   });
 
-  it('User cannot claim assets after the expiryTime', async function () {
-    const options = {};
-    const setUp = await setupTestGiveaway(options);
-    const {giveawayContract, others, tree, assets} = setUp;
+  // NOT USED BECAUSE NO EXPIRY
+  // it('User cannot claim assets after the expiryTime', async function () {
+  //   const options = {};
+  //   const setUp = await setupTestGiveaway(options);
+  //   const {giveawayContract, others, tree, assets} = setUp;
 
-    const asset = assets[0];
-    const proof = tree.getProof(calculateAssetHash(asset));
-    const giveawayContractAsUser = await giveawayContract.connect(
-      ethers.provider.getSigner(others[0])
-    );
+  //   const asset = assets[0];
+  //   const proof = tree.getProof(calculateClaimableAssetHash(asset));
+  //   const giveawayContractAsUser = await giveawayContract.connect(
+  //     ethers.provider.getSigner(others[0])
+  //   );
 
-    await increaseTime(60 * 60 * 24 * 30 * 4);
+  //   await increaseTime(60 * 60 * 24 * 30 * 4);
 
-    await expect(
-      giveawayContractAsUser.claimAssets(
-        others[0],
-        asset.assetIds,
-        asset.assetValues,
-        proof,
-        asset.salt
-      )
-    ).to.be.revertedWith('CLAIM_PERIOD_IS_OVER');
-  });
+  //   await expect(
+  //     giveawayContractAsUser.claimAssets(
+  //       others[0],
+  //       asset.assetIds,
+  //       asset.assetValues,
+  //       proof,
+  //       asset.salt
+  //     )
+  //   ).to.be.revertedWith('CLAIM_PERIOD_IS_OVER');
+  // });
 });

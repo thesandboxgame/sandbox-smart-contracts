@@ -5,6 +5,7 @@ import '@nomiclabs/hardhat-ethers'; // aliased to hardhat-deploy-ethers
 import 'hardhat-gas-reporter';
 import '@openzeppelin/hardhat-upgrades';
 import 'solidity-coverage';
+import 'hardhat-contract-sizer';
 import {node_url, accounts} from './utils/network';
 
 const config: HardhatUserConfig = {
@@ -20,6 +21,15 @@ const config: HardhatUserConfig = {
   },
   solidity: {
     compilers: [
+      {
+        version: '0.8.2',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 2000,
+          },
+        },
+      },
       {
         version: '0.7.5',
         settings: {
@@ -81,7 +91,7 @@ const config: HardhatUserConfig = {
     assetBouncerAdmin: 'sandAdmin', // setup the contract allowed to mint Assets
     sandSaleAdmin: 'sandAdmin', // can pause the sandSale and withdraw SAND
     genesisBouncerAdmin: 'sandAdmin', // can set who is allowed to mint
-    commonMinterAdmin: 'sandAdmin', // can change the fees
+    defaultMinterAdmin: 'sandAdmin', // can change the fees
     genesisMinter: 'deployer', // the first account allowed to mint genesis Assets
     assetAuctionFeeCollector: 'sandSaleBeneficiary', // collect fees from asset auctions
     assetAuctionAdmin: 'sandAdmin', // can change fee collector

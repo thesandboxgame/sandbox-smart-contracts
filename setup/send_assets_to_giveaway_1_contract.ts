@@ -1,6 +1,6 @@
 import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {AssetGiveawayInfo} from '../lib/merkleTreeHelper';
+import {AssetClaim} from '../lib/merkleTreeHelper';
 
 const func: DeployFunction = async function () {
   const {deployments} = hre;
@@ -11,7 +11,7 @@ const func: DeployFunction = async function () {
 
   switch (hre.network.name) {
     case 'mainnet':
-      smurfOwner = '0x7a9fe22691c811ea339d9b73150e6911a5343dca';
+      smurfOwner = '0x7A9fe22691c811ea339D9B73150e6911a5343DcA';
       smurfId =
         '55464657044963196816950587289035428064568320970692304673817341489687505668096';
       break;
@@ -28,7 +28,7 @@ const func: DeployFunction = async function () {
 
   const AssetGiveaway = await deployments.get('Asset_Giveaway_1');
 
-  const assetData: AssetGiveawayInfo[] = AssetGiveaway.linkedData;
+  const assetData: AssetClaim[] = AssetGiveaway.linkedData;
 
   await catchUnknownSigner(
     execute(
