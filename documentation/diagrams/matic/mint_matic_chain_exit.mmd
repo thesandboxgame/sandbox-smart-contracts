@@ -1,0 +1,31 @@
+sequenceDiagram
+    participant User
+    rect rgb(240, 240, 240)
+        Matic Team->>RootChainManager:mapToken(Asset,MaticAsset,ChainExitPredicate)
+    end
+    rect rgb(150, 240, 240)
+        User->>Asset(L2):mint(...)
+    end
+    rect rgb(150, 240, 240)
+        Note over Asset(L2): emit ChainExit
+        User->>Asset(L2):burnAsExit(...)
+    end
+    rect rgb(240, 240, 240)
+        User->>+RootChainManager:exit(ChainExit)
+        RootChainManager->>+ChainExitPredicate: exitTokens(User,Asset,...)
+        ChainExitPredicate->>Asset: mint(...)
+    end
+    rect rgb(240, 240, 240)
+        User->>Asset:setApprovalForAll(ChainExitPredicate, true)
+    end
+    rect rgb(240, 240, 240)
+        User->>+RootChainManager:depositFor(to, Asset, data)
+        RootChainManager->>+ChainExitPredicate: lockTokens(...)
+        ChainExitPredicate->>-Asset:safeBatchTransferFrom(User,this,...)
+        deactivate RootChainManager
+    end
+    rect rgb(150, 240, 240)
+        Matic Syncer->>+ChildChainManager:onStateReceive(...)
+        ChildChainManager->>Asset(L2): deposit(...) (mint)
+    end
+
