@@ -14,7 +14,6 @@ import "../common/interfaces/IERC721TokenReceiver.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
 import "../common/Libraries/ERC2771Context.sol";
 
-
 contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context {
     using Address for address;
     using ObjectLib32 for ObjectLib32.Operations;
@@ -87,7 +86,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context 
         _admin = admin;
         _bouncerAdmin = bouncerAdmin;
         ERC2771Context.initialize(trustedForwarder);
-
     }
 
     /// @notice Change the minting administrator to be `newBouncerAdmin`.
@@ -179,7 +177,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context 
         }
         bool metaTx = _transferFrom(from, to, id, value);
         require(
-            _checkERC1155AndCallSafeTransfer(metaTx? from : msg.sender, from, to, id, value, data, false, false),
+            _checkERC1155AndCallSafeTransfer(metaTx ? from : msg.sender, from, to, id, value, data, false, false),
             "1155_TRANSFER_REJECTED"
         );
     }
@@ -285,7 +283,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context 
         address owner = _ownerOf(id);
         address sender = _msgSender();
         require(owner != address(0), "NFT_!EXIST");
-        require(owner ==sender || isApprovedForAll(owner, sender), "!AUTHORIZED");
+        require(owner == sender || isApprovedForAll(owner, sender), "!AUTHORIZED");
         _erc721operators[id] = operator;
         emit Approval(owner, operator, id);
     }

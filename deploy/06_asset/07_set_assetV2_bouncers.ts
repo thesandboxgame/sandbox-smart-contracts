@@ -29,7 +29,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     );
   }
   // @review do we want this on new asset, or just for testing?
-  // probably need to set up a dummy-asset on hardhat network
   if (!isCatalystMinterBouncer) {
     await execute(
       'Asset',
