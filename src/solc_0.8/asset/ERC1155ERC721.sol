@@ -12,8 +12,10 @@ import "../common/interfaces/IERC721.sol";
 import "../common/interfaces/IERC721TokenReceiver.sol";
 
 import "../common/BaseWithStorage/WithSuperOperators.sol";
+import "../common/Libraries/ERC2771Context.sol";
 
-contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
+
+contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context {
     using Address for address;
     using ObjectLib32 for ObjectLib32.Operations;
     using ObjectLib32 for uint256;
@@ -53,7 +55,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     mapping(address => address) private _creatorship; // creatorship transfer
 
     mapping(address => bool) private _bouncers; // the contracts allowed to mint
-    mapping(address => bool) private _metaTransactionContracts; //ERC2771 meta-transaction support
+    // @note : Deprecated.
+    mapping(address => bool) private _metaTransactionContracts;
 
     address private _bouncerAdmin;
 
@@ -73,7 +76,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     event AssetUpdate(uint256 indexed fromId, uint256 toId);
 
     function initV2(
-        address metaTransactionContract,
+        address trustedForwarder,
         address admin,
         address bouncerAdmin
     ) public {
@@ -81,16 +84,16 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         _checkInit(0);
         _checkInit(1);
         _checkInit(2);
-        _metaTransactionContracts[metaTransactionContract] = true;
         _admin = admin;
         _bouncerAdmin = bouncerAdmin;
-        emit MetaTransactionProcessor(metaTransactionContract, true);
+        ERC2771Context.initialize(trustedForwarder);
+
     }
 
     /// @notice Change the minting administrator to be `newBouncerAdmin`.
     /// @param newBouncerAdmin address of the new minting administrator.
     function changeBouncerAdmin(address newBouncerAdmin) external {
-        require(msg.sender == _bouncerAdmin, "!BOUNCER_ADMIN");
+        require(_msgSender() == _bouncerAdmin, "!BOUNCER_ADMIN");
         emit BouncerAdminChanged(_bouncerAdmin, newBouncerAdmin);
         _bouncerAdmin = newBouncerAdmin;
     }
@@ -99,7 +102,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     /// @param bouncer address that will be given/removed minting bouncer rights.
     /// @param enabled set whether the address is enabled or disabled as a minting bouncer.
     function setBouncer(address bouncer, bool enabled) external {
-        require(msg.sender == _bouncerAdmin, "!BOUNCER_ADMIN");
+        require(_msgSender() == _bouncerAdmin, "!BOUNCER_ADMIN");
         _bouncers[bouncer] = enabled;
         emit Bouncer(bouncer, enabled);
     }
@@ -122,11 +125,12 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         address owner,
         bytes calldata data
     ) external returns (uint256 id) {
+        address sender = _msgSender();
         require(hash != 0, "HASH==0");
-        require(_bouncers[msg.sender], "!BOUNCER");
+        require(_bouncers[sender], "!BOUNCER");
         require(owner != address(0), "TO==0");
         id = _generateTokenId(creator, supply, packId, supply == 1 ? 0 : 1, 0);
-        _mint(hash, supply, rarity, msg.sender, owner, id, data, false);
+        _mint(hash, supply, rarity, sender, owner, id, data, false);
     }
 
     /// @notice Mint multiple token types for `creator` on slot `packId`.
@@ -147,13 +151,14 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         address owner,
         bytes calldata data
     ) external returns (uint256[] memory ids) {
+        address sender = _msgSender();
         require(hash != 0, "HASH==0");
-        require(_bouncers[msg.sender], "!BOUNCER");
+        require(_bouncers[sender], "!BOUNCER");
         require(owner != address(0), "TO==0");
         uint16 numNFTs;
         (ids, numNFTs) = _allocateIds(creator, supplies, rarityPack, packId, hash);
         _mintBatches(supplies, owner, ids, numNFTs);
-        _completeMultiMint(msg.sender, owner, ids, supplies, data);
+        _completeMultiMint(sender, owner, ids, supplies, data);
     }
 
     /// @notice Transfers `value` tokens of type `id` from  `from` to `to`  (with safety call).
@@ -174,7 +179,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         }
         bool metaTx = _transferFrom(from, to, id, value);
         require(
-            _checkERC1155AndCallSafeTransfer(metaTx ? from : msg.sender, from, to, id, value, data, false, false),
+            _checkERC1155AndCallSafeTransfer(metaTx? from : msg.sender, from, to, id, value, data, false, false),
             "1155_TRANSFER_REJECTED"
         );
     }
@@ -196,13 +201,14 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         require(ids.length == values.length, "MISMATCHED_ARR_LEN");
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
-        bool metaTx = _is2771MetaTx(from);
-        bool authorized = from == msg.sender || metaTx || isApprovedForAll(from, msg.sender);
+        address sender = _msgSender();
+        bool metaTx = isTrustedForwarder(sender);
+        bool authorized = from == sender || isApprovedForAll(from, sender);
 
         _batchTransferFrom(from, to, ids, values, authorized);
-        emit TransferBatch(metaTx ? from : msg.sender, from, to, ids, values);
+        emit TransferBatch(metaTx ? from : sender, from, to, ids, values);
         require(
-            _checkERC1155AndCallSafeBatchTransfer(metaTx ? from : msg.sender, from, to, ids, values, data),
+            _checkERC1155AndCallSafeBatchTransfer(metaTx ? from : sender, from, to, ids, values, data),
             "1155_TRANSFER_REJECTED"
         );
     }
@@ -216,7 +222,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         address original,
         address to
     ) external {
-        require(_isAuthorized(sender) || _superOperators[msg.sender], "!AUTHORIZED");
+        require(_isAuthorized(sender) || _superOperators[_msgSender()], "!AUTHORIZED");
         require(sender != address(0), "SENDER==0");
         require(to != address(0), "TO==0");
         address current = _creatorship[original];
@@ -243,7 +249,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         address operator,
         bool approved
     ) external {
-        require(_isAuthorized(sender) || _superOperators[msg.sender], "!AUTHORIZED");
+        require(_isAuthorized(sender) || _superOperators[_msgSender()], "!AUTHORIZED");
         _setApprovalForAll(sender, operator, approved);
     }
 
@@ -251,7 +257,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     /// @param operator address which will be granted rights to transfer all tokens of the caller.
     /// @param approved whether to approve or revoke
     function setApprovalForAll(address operator, bool approved) external override(IERC1155, IERC721) {
-        _setApprovalForAll(msg.sender, operator, approved);
+        _setApprovalForAll(_msgSender(), operator, approved);
     }
 
     /// @notice Change or reaffirm the approved address for an NFT for `sender`.
@@ -266,7 +272,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     ) external {
         address owner = _ownerOf(id);
         require(sender != address(0), "SENDER==0");
-        require(_isAuthorized(sender) || isApprovedForAll(sender, msg.sender), "!AUTHORIZED");
+        require(_isAuthorized(sender) || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
         require(owner == sender, "OWNER!=SENDER");
         _erc721operators[id] = operator;
         emit Approval(owner, operator, id);
@@ -277,8 +283,9 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     /// @param id the id of the NFT to approve.
     function approve(address operator, uint256 id) external override {
         address owner = _ownerOf(id);
+        address sender = _msgSender();
         require(owner != address(0), "NFT_!EXIST");
-        require(owner == msg.sender || isApprovedForAll(owner, msg.sender), "!AUTHORIZED");
+        require(owner ==sender || isApprovedForAll(owner, sender), "!AUTHORIZED");
         _erc721operators[id] = operator;
         emit Approval(owner, operator, id);
     }
@@ -295,7 +302,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         require(_ownerOf(id) == from, "OWNER!=FROM");
         bool metaTx = _transferFrom(from, to, id, 1);
         require(
-            _checkERC1155AndCallSafeTransfer(metaTx ? from : msg.sender, from, to, id, 1, "", true, false),
+            _checkERC1155AndCallSafeTransfer(metaTx ? from : _msgSender(), from, to, id, 1, "", true, false),
             "1155_TRANSFER_REJECTED"
         );
     }
@@ -322,7 +329,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         uint256 amount
     ) external {
         require(from != address(0), "FROM==0");
-        require(_isAuthorized(from) || isApprovedForAll(from, msg.sender), "!AUTHORIZED");
+        require(_isAuthorized(from) || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
         _burn(from, id, amount);
     }
 
@@ -344,15 +351,16 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         address to,
         bytes calldata data
     ) external returns (uint256) {
+        address sender = _msgSender();
         require(hash != 0, "HASH==0");
-        require(_bouncers[msg.sender], "!BOUNCER");
+        require(_bouncers[sender], "!BOUNCER");
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
 
-        _burnERC721(msg.sender, from, id);
+        _burnERC721(sender, from, id);
 
         uint256 newId = _generateTokenId(from, 1, packId, 0, 0);
-        _mint(hash, 1, newRarity, msg.sender, to, newId, data, false);
+        _mint(hash, 1, newRarity, sender, to, newId, data, false);
         emit AssetUpdate(id, newId);
         return newId;
     }
@@ -367,9 +375,10 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         uint256 id,
         address to
     ) external returns (uint256 newId) {
-        bool metaTx = _is2771MetaTx(sender);
-        require(msg.sender == sender || metaTx || isApprovedForAll(sender, msg.sender), "!AUTHORIZED");
-        return _extractERC721From(metaTx ? sender : msg.sender, sender, id, to);
+        address msgSender = _msgSender();
+        bool metaTx = isTrustedForwarder(msgSender);
+        require(sender == msgSender || isApprovedForAll(sender, msgSender), "!AUTHORIZED");
+        return _extractERC721From(metaTx ? sender : msgSender, sender, id, to);
     }
 
     /// @notice Returns the current administrator in charge of minting rights.
@@ -505,7 +514,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         require(_ownerOf(id) == from, "OWNER!=FROM");
         bool metaTx = _transferFrom(from, to, id, 1);
         require(
-            _checkERC1155AndCallSafeTransfer(metaTx ? from : msg.sender, from, to, id, 1, data, true, true),
+            _checkERC1155AndCallSafeTransfer(metaTx ? from : _msgSender(), from, to, id, 1, data, true, true),
             "721/1155_TRANSFER_REJECTED"
         );
     }
@@ -626,7 +635,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         uint256 numNFTs = 0;
         for (uint256 i = 0; i < numItems; i++) {
             if (ids[i] & IS_NFT > 0) {
-                require(authorized || _erc721operators[ids[i]] == msg.sender, "OPERATOR_!AUTH");
+                require(authorized || _erc721operators[ids[i]] == _msgSender(), "OPERATOR_!AUTH");
                 if (values[i] > 0) {
                     require(values[i] == 1, "NFT!=1");
                     require(_ownerOf(ids[i]) == from, "OWNER!=FROM");
@@ -772,12 +781,13 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         uint256 id,
         uint256 amount
     ) internal {
+        address sender = _msgSender();
         if ((id & IS_NFT) > 0) {
             require(amount == 1, "AMOUNT!=1");
-            _burnERC721(_metaTransactionContracts[msg.sender] ? from : msg.sender, from, id);
+            _burnERC721(isTrustedForwarder(sender) ? from : sender, from, id);
         } else {
             require(amount > 0 && amount <= MAX_SUPPLY, "INVALID_AMOUNT");
-            _burnERC1155(_metaTransactionContracts[msg.sender] ? from : msg.sender, from, id, uint32(amount));
+            _burnERC1155(isTrustedForwarder(sender) ? from : sender, from, id, uint32(amount));
         }
     }
 
@@ -870,12 +880,12 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     ) internal returns (bool metaTx) {
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
-        metaTx = _is2771MetaTx(from);
-        // bool authorized = _isAuthorized(from) || isApprovedForAll(from, msg.sender);
-        bool authorized = from == msg.sender || metaTx || isApprovedForAll(from, msg.sender);
+        address sender = _msgSender();
+        metaTx = isTrustedForwarder(sender);
+        bool authorized = from == sender || isApprovedForAll(from, sender);
 
         if (id & IS_NFT > 0) {
-            require(authorized || _erc721operators[id] == msg.sender, "OPERATOR_!AUTH");
+            require(authorized || _erc721operators[id] == sender, "OPERATOR_!AUTH");
             if (value > 0) {
                 require(value == 1, "NFT!=1");
                 _numNFTPerAddress[from]--;
@@ -904,7 +914,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
             }
         }
 
-        emit TransferSingle(metaTx ? from : msg.sender, from, to, id, value);
+        emit TransferSingle(metaTx ? from : sender, from, to, id, value);
     }
 
     function _extractERC721From(
@@ -994,34 +1004,9 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     /// @param from The address to check from.
     /// @return whether authorized or not.
     function _isAuthorized(address from) internal view returns (bool) {
-        require(msg.sender == from || _is2771MetaTx(from), "AUTH_ACCESS_DENIED");
+        address sender = _msgSender();
+        require(sender == from || isTrustedForwarder(sender), "AUTH_ACCESS_DENIED");
         return true;
-    }
-
-    function _msgSender() internal view returns (address sender, bool trusted) {
-        trusted = _metaTransactionContracts[msg.sender] == true;
-        if (trusted) {
-            // solhint-disable-next-line no-inline-assembly
-            assembly {
-                sender := shr(96, calldataload(sub(calldatasize(), 20)))
-            }
-        } else {
-            return (msg.sender, trusted);
-        }
-    }
-
-    /// @dev Test if a tx is a valid EIP-2771 metaTransaction.
-    /// @param from The address passed as either "from" or "sender" to the func which called this one.
-    /// @return Whether this is a valid metaTransaction.
-    function _is2771MetaTx(address from) internal view returns (bool) {
-        address sender;
-        bool trusted;
-        (sender, trusted) = _msgSender();
-        if (trusted && from == sender) {
-            return true;
-        } else {
-            return false;
-        }
     }
 
     function _checkEnoughBalance(
