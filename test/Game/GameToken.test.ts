@@ -6,8 +6,11 @@ import {
   getChainId,
 } from 'hardhat';
 import {BigNumber, utils, Contract, BytesLike, constants} from 'ethers';
+import {_TypedDataEncoder} from 'ethers/lib/utils';
+import {TypedDataDomain} from '@ethersproject/abstract-signer';
 import Prando from 'prando';
 import {Address} from 'hardhat-deploy/types';
+import {signTypedMessage, signTypedData_v4, TypedDataUtils} from 'eth-sig-util';
 import {expect} from '../chai-setup';
 import {waitFor, expectEventWithArgs, findEvents} from '../utils';
 import {setupTest, User} from './fixtures';
@@ -1525,6 +1528,15 @@ describe('GameToken', function () {
     let GameOwner: User;
     let assets: BigNumber[];
     const gas = 1000000;
+    let domain: any;
+    let types: any;
+
+    const EIP712Domain = [
+      {name: 'name', type: 'string'},
+      {name: 'version', type: 'string'},
+      {name: 'chainId', type: 'uint256'},
+      {name: 'verifyingContract', type: 'address'},
+    ];
 
     before(async function () {
       ({
@@ -1552,6 +1564,26 @@ describe('GameToken', function () {
       ]);
     });
 
+    beforeEach(async function () {
+      domain = {
+        name: 'The Sandbox',
+        version: '1',
+        chainId: Number(await getChainId()),
+        verifyingContract: testMetaTxForwarder.address,
+      };
+
+      types = {
+        ForwardRequest: [
+          {name: 'from', type: 'address'},
+          {name: 'to', type: 'address'},
+          {name: 'value', type: 'uint256'},
+          {name: 'gas', type: 'uint256'},
+          {name: 'nonce', type: 'uint256'},
+          {name: 'data', type: 'bytes'},
+        ],
+      };
+    });
+
     it('can get isTrustedForwarder', async function () {
       const isTrustedForwarder = await gameToken.isTrustedForwarder(
         testMetaTxForwarder.address
@@ -1560,28 +1592,77 @@ describe('GameToken', function () {
     });
 
     it('can call setGameEditor via metaTx', async function () {
-      const {data} = await gameToken.populateTransaction.setGameEditor(
+      const signer = await ethers.Wallet.createRandom();
+      const {to, data} = await gameToken.populateTransaction.setGameEditor(
         GameOwner.address,
         users[1].address,
         true
       );
 
-      const forwardRequest = {
+      const EIP712DomainType = [
+        {name: 'name', type: 'string'},
+        {name: 'version', type: 'string'},
+        {name: 'chainId', type: 'uint256'},
+        {name: 'verifyingContract', type: 'address'},
+      ];
+
+      const ForwardRequestType = [
+        {name: 'from', type: 'address'},
+        {name: 'to', type: 'address'},
+        {name: 'value', type: 'uint256'},
+        {name: 'gas', type: 'uint256'},
+        {name: 'nonce', type: 'uint256'},
+        {name: 'data', type: 'bytes'},
+      ];
+
+      // The data to sign
+      const message = {
         from: GameOwner.address,
-        to: constants.AddressZero,
+        to: to ? to : '0x0',
         value: '0',
         gas: '100000',
         nonce: Number(await testMetaTxForwarder.getNonce(GameOwner.address)),
         data: data ? data : '0x',
       };
 
-      const metaTxData712 = data712(testMetaTxForwarder, forwardRequest);
-      const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
-        GameOwner.address,
-        metaTxData712,
-      ]);
+      // const metaTxData712 = await data712(testMetaTxForwarder, message);
 
-      await testMetaTxForwarder.execute(forwardRequest, flatSig);
+      // const signedData = await ethers.provider.send('eth_signTypedData_v4', [
+      //   GameOwner.address,
+      //   metaTxData712,
+      // ]);
+
+      // const signedData = signTypedMessage(this.wallet.getPrivateKey(), {
+      //   data: {
+      //     types: types,
+      //     domain: domain,
+      //     primaryType: 'ForwardRequest',
+      //     message: message,
+      //   },
+      // });
+
+      const typeData = {
+        domain: domain,
+        primaryType: 'ForwardRequest',
+        types: types,
+        message: {},
+      };
+
+      const privateKey = signer.privateKey;
+      const privateKeyAsBuffer = Buffer.from(privateKey.substr(2), 'hex');
+      const signedData = await signTypedData_v4(privateKeyAsBuffer, {
+        data: {...typeData, message: message},
+      });
+
+      // Sanity checks:
+      expect(await testMetaTxForwarder.getNonce(message.from)).to.be.equal(
+        BigNumber.from(message.nonce)
+      );
+      expect(await testMetaTxForwarder.verify(message, signedData)).to.be.equal(
+        true
+      );
+
+      await testMetaTxForwarder.execute(message, signedData);
 
       expect(
         await gameToken.isGameEditor(GameOwner.address, users[1].address)
