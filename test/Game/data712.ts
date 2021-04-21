@@ -1,3 +1,5 @@
+import {getChainId} from 'hardhat';
+
 type Message = {
   from: string;
   to: string;
@@ -23,6 +25,10 @@ type Data712 = {
         type: 'string';
       },
       {
+        name: 'chainId';
+        type: 'uint256';
+      },
+      {
         name: 'verifyingContract';
         type: 'address';
       }
@@ -40,15 +46,16 @@ type Data712 = {
   domain: {
     name: 'The Sandbox';
     version: '1';
+    chainId: number;
     verifyingContract: string;
   };
   message: Message;
 };
 
-export const data712 = function (
+export const data712 = async function (
   verifyingContract: Contract,
   message: Message
-): Data712 {
+): Promise<Data712> {
   return {
     types: {
       EIP712Domain: [
@@ -59,6 +66,10 @@ export const data712 = function (
         {
           name: 'version',
           type: 'string',
+        },
+        {
+          name: 'chainId',
+          type: 'uint256',
         },
         {
           name: 'verifyingContract',
@@ -78,6 +89,7 @@ export const data712 = function (
     domain: {
       name: 'The Sandbox',
       version: '1',
+      chainId: Number(await getChainId()),
       verifyingContract: verifyingContract.address,
     },
     message: message,
