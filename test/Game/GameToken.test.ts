@@ -1527,16 +1527,7 @@ describe('GameToken', function () {
     let gameTokenAsAdmin: Contract;
     let GameOwner: User;
     let assets: BigNumber[];
-    const gas = 1000000;
-    let domain: any;
-    let types: any;
-
-    const EIP712Domain = [
-      {name: 'name', type: 'string'},
-      {name: 'version', type: 'string'},
-      {name: 'chainId', type: 'uint256'},
-      {name: 'verifyingContract', type: 'address'},
-    ];
+    // const gas = 1000000;
 
     before(async function () {
       ({
@@ -1564,26 +1555,6 @@ describe('GameToken', function () {
       ]);
     });
 
-    // beforeEach(async function () {
-    //   domain = {
-    //     name: 'The Sandbox',
-    //     version: '1',
-    //     chainId: Number(await getChainId()),
-    //     verifyingContract: testMetaTxForwarder.address,
-    //   };
-
-    //   types = {
-    //     ForwardRequest: [
-    //       {name: 'from', type: 'address'},
-    //       {name: 'to', type: 'address'},
-    //       {name: 'value', type: 'uint256'},
-    //       {name: 'gas', type: 'uint256'},
-    //       {name: 'nonce', type: 'uint256'},
-    //       {name: 'data', type: 'bytes'},
-    //     ],
-    //   };
-    // });
-
     it('can get isTrustedForwarder', async function () {
       const isTrustedForwarder = await gameToken.isTrustedForwarder(
         testMetaTxForwarder.address
@@ -1592,33 +1563,15 @@ describe('GameToken', function () {
     });
 
     it('can call setGameEditor via metaTx', async function () {
-      const signer = await ethers.Wallet.createRandom();
-      const {to, data} = await gameToken.populateTransaction.setGameEditor(
+      const {data} = await gameToken.populateTransaction.setGameEditor(
         GameOwner.address,
         users[1].address,
         true
       );
 
-      // const EIP712DomainType = [
-      //   {name: 'name', type: 'string'},
-      //   {name: 'version', type: 'string'},
-      //   {name: 'chainId', type: 'uint256'},
-      //   {name: 'verifyingContract', type: 'address'},
-      // ];
-
-      // const ForwardRequestType = [
-      //   {name: 'from', type: 'address'},
-      //   {name: 'to', type: 'address'},
-      //   {name: 'value', type: 'uint256'},
-      //   {name: 'gas', type: 'uint256'},
-      //   {name: 'nonce', type: 'uint256'},
-      //   {name: 'data', type: 'bytes'},
-      // ];
-
-      // The data to sign
       const message = {
         from: GameOwner.address,
-        to: to ? to : '0x0',
+        to: gameToken.address,
         value: '0',
         gas: '100000',
         nonce: Number(await testMetaTxForwarder.getNonce(GameOwner.address)),
@@ -1626,41 +1579,10 @@ describe('GameToken', function () {
       };
 
       const metaTxData712 = await data712(testMetaTxForwarder, message);
-
       const signedData = await ethers.provider.send('eth_signTypedData_v4', [
         GameOwner.address,
         metaTxData712,
       ]);
-
-      // const signedData = signTypedMessage(this.wallet.getPrivateKey(), {
-      //   data: {
-      //     types: types,
-      //     domain: domain,
-      //     primaryType: 'ForwardRequest',
-      //     message: message,
-      //   },
-      // });
-
-      const typeData = {
-        domain: domain,
-        primaryType: 'ForwardRequest',
-        types: types,
-        message: {},
-      };
-
-      const privateKey = signer.privateKey;
-      const privateKeyAsBuffer = Buffer.from(privateKey.substr(2), 'hex');
-      // const signedData = await signTypedData_v4(privateKeyAsBuffer, {
-      //   data: {...typeData, message: message},
-      // });
-
-      // Sanity checks:
-      expect(await testMetaTxForwarder.getNonce(message.from)).to.be.equal(
-        BigNumber.from(message.nonce)
-      );
-      expect(await testMetaTxForwarder.verify(message, signedData)).to.be.equal(
-        true
-      );
 
       await testMetaTxForwarder.execute(message, signedData);
 
@@ -1693,12 +1615,6 @@ describe('GameToken', function () {
         assets
       );
 
-      // await sandAsExecutionOperator.executeWithSpecificGas(
-      //   gameToken.address,
-      //   gas,
-      //   data
-      // );
-
       const balancesAfter = await getBalances(
         assetContract,
         [GameOwner.address, gameToken.address],
@@ -1726,12 +1642,6 @@ describe('GameToken', function () {
         GameOwner.address,
         gameId2
       );
-
-      // await sandAsExecutionOperator.executeWithSpecificGas(
-      //   gameToken.address,
-      //   gas,
-      //   data
-      // );
 
       expect(await gameToken.creatorOf(gameId2)).to.be.equal(GameOwner.address);
       await expect(gameToken.ownerOf(gameId2)).to.be.revertedWith(
@@ -1762,12 +1672,6 @@ describe('GameToken', function () {
         assets
       );
 
-      // await sandAsExecutionOperator.executeWithSpecificGas(
-      //   gameToken.address,
-      //   gas,
-      //   data
-      // );
-
       const balancesAfter = await getBalances(
         assetContract,
         [GameOwner.address, gameToken.address],
@@ -1790,12 +1694,6 @@ describe('GameToken', function () {
         GameOwner.address,
         users[2].address
       );
-
-      // await sandAsExecutionOperator.executeWithSpecificGas(
-      //   gameToken.address,
-      //   gas,
-      //   data
-      // );
       expect(await gameToken.creatorOf(gameId)).to.be.equal(users[2].address);
     });
   });
