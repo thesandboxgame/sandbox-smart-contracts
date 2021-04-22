@@ -1,5 +1,3 @@
-import {getChainId} from 'hardhat';
-
 type Message = {
   from: string;
   to: string;
@@ -25,10 +23,6 @@ type Data712 = {
         type: 'string';
       },
       {
-        name: 'chainId';
-        type: 'uint256';
-      },
-      {
         name: 'verifyingContract';
         type: 'address';
       }
@@ -46,7 +40,6 @@ type Data712 = {
   domain: {
     name: 'The Sandbox';
     version: '1';
-    chainId: number;
     verifyingContract: string;
   };
   message: Message;
@@ -68,10 +61,6 @@ export const data712 = async function (
           type: 'string',
         },
         {
-          name: 'chainId',
-          type: 'uint256',
-        },
-        {
           name: 'verifyingContract',
           type: 'address',
         },
@@ -89,7 +78,6 @@ export const data712 = async function (
     domain: {
       name: 'The Sandbox',
       version: '1',
-      chainId: Number(await getChainId()),
       verifyingContract: verifyingContract.address,
     },
     message: message,

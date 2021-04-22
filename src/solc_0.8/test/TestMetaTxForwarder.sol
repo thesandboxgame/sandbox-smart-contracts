@@ -3,7 +3,7 @@
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol";
-import "@openzeppelin/contracts-0.8/utils/cryptography/draft-EIP712.sol";
+import "./TestEIP712.sol";
 
 // @note !!! For Testing Only !!!
 // Based on https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/metatx/ERC2771Context.sol
