@@ -2,12 +2,13 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-import "../common/BaseWithStorage/WithMetaTransaction.sol";
 import "./GameToken.sol";
 import "../common/interfaces/IGameMinter.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 
-contract GameMinter is WithMetaTransaction, IGameMinter {
+import "@openzeppelin/contracts-0.8/metatx/ERC2771Context.sol";
+
+contract GameMinter is ERC2771Context, IGameMinter {
     ///////////////////////////////  Data //////////////////////////////
 
     GameToken internal immutable _gameToken;
@@ -21,14 +22,13 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
 
     constructor(
         GameToken gameTokenContract,
-        address metaTransactionContract,
+        address trustedForwarder,
         uint256 gameMintingFee,
         uint256 gameUpdateFee,
         address feeBeneficiary,
         IERC20 sand
-    ) {
+    ) ERC2771Context(trustedForwarder) {
         _gameToken = gameTokenContract;
-        _setMetaTransactionProcessor(metaTransactionContract, METATX_SANDBOX);
         _gameMintingFee = gameMintingFee;
         _gameUpdateFee = gameUpdateFee;
         _feeBeneficiary = feeBeneficiary;
@@ -50,7 +50,7 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         address editor,
         uint64 subId
     ) external override returns (uint256 gameId) {
-        require(msg.sender == from || _isValidMetaTx(from), "CREATE_ACCESS_DENIED");
+        require(_msgSender() == from, "CREATE_ACCESS_DENIED");
         _chargeSand(from, _gameMintingFee);
         return _gameToken.createGame(from, to, creation, editor, subId);
     }
@@ -66,9 +66,14 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         uint256 gameId,
         GameToken.Update memory update
     ) external override returns (uint256 newId) {
-        _checkAuthorization(from, gameId);
-        _chargeSand(from, _gameUpdateFee);
-        return _gameToken.updateGame(from, gameId, update);
+        address gameOwner = _gameToken.ownerOf(id);
+        address msgSender = _msgSender();
+        require(
+            msgSender == gameOwner || _gameToken.isGameEditor(gameOwner, msgSender),
+            "AUTH_ACCESS_DENIED"
+        );
+        _chargeSand(msgSender, _gameUpdateFee);
+        return _gameToken.updateGame(msgSender, gameId, update);
     }
 
     /// @dev Charge a fee in Sand if conditions are met.
@@ -78,18 +83,5 @@ contract GameMinter is WithMetaTransaction, IGameMinter {
         if (_feeBeneficiary != address(0) && sandFee != 0) {
             _sand.transferFrom(from, _feeBeneficiary, sandFee);
         }
-    }
-
-    /// @dev Ensures that only authorized callers can update functionality.
-    /// @param from The from address passed to the update function
-    /// @param id The tokenId to update.
-    function _checkAuthorization(address from, uint256 id) internal view {
-        address gameOwner = _gameToken.ownerOf(id);
-        require(
-            msg.sender == gameOwner ||
-                _gameToken.isGameEditor(gameOwner, msg.sender) ||
-                (_isValidMetaTx(from) && (from == gameOwner || _gameToken.isGameEditor(gameOwner, from))),
-            "AUTH_ACCESS_DENIED"
-        );
     }
 }
