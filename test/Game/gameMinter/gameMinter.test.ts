@@ -4,14 +4,10 @@ import {
   getUnnamedAccounts,
   getNamedAccounts,
 } from 'hardhat';
-import {BigNumber, Contract, BytesLike, utils, ContractReceipt} from 'ethers';
+import {BigNumber, Contract, BytesLike, utils} from 'ethers';
 import Prando from 'prando';
 import {expect} from '../../chai-setup';
-import {
-  expectEventWithArgs,
-  expectReceiptEventWithArgs,
-  expectEventWithArgsFromReceipt,
-} from '../../utils';
+import {expectEventWithArgs, expectEventWithArgsFromReceipt} from '../../utils';
 import {Address, Receipt} from 'hardhat-deploy/types';
 import {supplyAssets} from '../assets';
 import {toUtf8Bytes} from 'ethers/lib/utils';
@@ -460,8 +456,6 @@ describe('GameMinter', function () {
     });
   });
   describe('GameMinter: Sandbox MetaTXs', function () {
-    let sandAsExecutionAdmin: Contract;
-    let sandAsExecutionOperator: Contract;
     let gameId2: BigNumber;
     let users: User[];
     let GameMinter: Contract;
@@ -502,21 +496,10 @@ describe('GameMinter', function () {
 
     before(async function () {
       ({GameMinter, users} = await setupTest());
-      const {
-        sandExecutionAdmin,
-        sandAdmin,
-        gameTokenAdmin,
-      } = await getNamedAccounts();
+      const {sandAdmin, gameTokenAdmin} = await getNamedAccounts();
       sandContract = await ethers.getContract('Sand');
       testForwarder = await ethers.getContract('TestMetaTxForwarder');
-      sandAsExecutionAdmin = await sandContract.connect(
-        ethers.provider.getSigner(sandExecutionAdmin)
-      );
 
-      sandAsExecutionOperator = await sandContract.connect(
-        ethers.provider.getSigner(users[6].address)
-      );
-      await sandAsExecutionAdmin.setExecutionOperator(users[6].address, true);
       gameTokenContract = await ethers.getContract('GameToken');
       sandAsAdmin = await sandContract.connect(
         ethers.provider.getSigner(sandAdmin)

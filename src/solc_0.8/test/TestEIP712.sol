@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
-
-pragma solidity ^0.8.0;
+// solhint-disable-next-line compiler-version
+pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol";
 
@@ -33,6 +33,7 @@ abstract contract EIP712 {
     bytes32 private immutable _HASHED_NAME;
     bytes32 private immutable _HASHED_VERSION;
     bytes32 private immutable _TYPE_HASH;
+
     /* solhint-enable var-name-mixedcase */
 
     /**
@@ -69,15 +70,12 @@ abstract contract EIP712 {
         // }
     }
 
-    function _buildDomainSeparator(bytes32 typeHash, bytes32 name, bytes32 version) private view returns (bytes32) {
-        return keccak256(
-            abi.encode(
-                typeHash,
-                name,
-                version,
-                address(this)
-            )
-        );
+    function _buildDomainSeparator(
+        bytes32 typeHash,
+        bytes32 name,
+        bytes32 version
+    ) private view returns (bytes32) {
+        return keccak256(abi.encode(typeHash, name, version, address(this)));
     }
 
     /**

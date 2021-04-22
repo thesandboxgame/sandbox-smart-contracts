@@ -58,17 +58,11 @@ contract GameMinter is ERC2771Context, IGameMinter {
     /// @param gameId The current id of the GAME token.
     /// @param update The values to use for the update.
     /// @return newId The new gameId.
-    function updateGame(
-        uint256 gameId,
-        GameToken.Update memory update
-    ) external override returns (uint256 newId) {
+    function updateGame(uint256 gameId, GameToken.Update memory update) external override returns (uint256 newId) {
         address gameOwner = _gameToken.ownerOf(gameId);
         address msgSender = _msgSender();
         bool isEditor = _gameToken.isGameEditor(gameOwner, msgSender);
-        require(
-            msgSender == gameOwner || isEditor,
-            "AUTH_ACCESS_DENIED"
-        );
+        require(msgSender == gameOwner || isEditor, "AUTH_ACCESS_DENIED");
         _chargeSand(msgSender, _gameUpdateFee);
         return _gameToken.updateGame(msgSender, gameId, update);
     }

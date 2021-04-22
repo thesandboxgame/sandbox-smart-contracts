@@ -24,7 +24,10 @@ contract TestMetaTxForwarder is EIP712 {
 
     mapping(address => uint256) private _nonces;
 
+    // solhint-disable no-empty-blocks
     constructor() EIP712("The Sandbox", "1") {}
+
+    // solhint-enable no-empty-blocks
 
     function getNonce(address from) public view returns (uint256) {
         return _nonces[from];
@@ -47,12 +50,13 @@ contract TestMetaTxForwarder is EIP712 {
         require(verify(req, signature), "MinimalForwarder: signature does not match request");
         _nonces[req.from] = req.nonce + 1;
 
-        // solhint-disable-next-line avoid-low-level-calls
+        // solhint-disable avoid-low-level-calls
         (bool success, bytes memory returndata) =
             req.to.call{gas: req.gas, value: req.value}(abi.encodePacked(req.data, req.from));
         // Validate that the relayer has sent enough gas for the call.
         // See https://ronan.eth.link/blog/ethereum-gas-dangers/
         assert(gasleft() > req.gas / 63);
+        // solhint-enable avoid-low-level-calls
 
         return (success, returndata);
     }
