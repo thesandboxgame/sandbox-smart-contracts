@@ -1615,6 +1615,23 @@ describe('GameToken', function () {
         assets
       );
 
+      const message = {
+        from: GameOwner.address,
+        to: gameToken.address,
+        value: '0',
+        gas: '1000000',
+        nonce: Number(await testMetaTxForwarder.getNonce(GameOwner.address)),
+        data: data ? data : '0x',
+      };
+
+      const metaTxData712 = await data712(testMetaTxForwarder, message);
+      const signedData = await ethers.provider.send('eth_signTypedData_v4', [
+        GameOwner.address,
+        metaTxData712,
+      ]);
+
+      await waitFor(testMetaTxForwarder.execute(message, signedData));
+
       const balancesAfter = await getBalances(
         assetContract,
         [GameOwner.address, gameToken.address],
