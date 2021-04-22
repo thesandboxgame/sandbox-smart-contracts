@@ -4,14 +4,19 @@ import {
   getUnnamedAccounts,
   getNamedAccounts,
 } from 'hardhat';
-import {BigNumber, Contract, BytesLike, utils} from 'ethers';
+import {BigNumber, Contract, BytesLike, utils, ContractReceipt} from 'ethers';
 import Prando from 'prando';
 import {expect} from '../../chai-setup';
-import {expectEventWithArgs} from '../../utils';
-import {Address} from 'hardhat-deploy/types';
+import {
+  expectEventWithArgs,
+  expectReceiptEventWithArgs,
+  expectEventWithArgsFromReceipt,
+} from '../../utils';
+import {Address, Receipt} from 'hardhat-deploy/types';
 import {supplyAssets} from '../assets';
 import {toUtf8Bytes} from 'ethers/lib/utils';
 import {gameMintingFee, gameUpdateFee} from '../../../data/gameMinterFees';
+import {data712} from '../data712';
 
 const rng = new Prando('GameMinter');
 
@@ -463,9 +468,37 @@ describe('GameMinter', function () {
     let sandContract: Contract;
     let sandAsAdmin: Contract;
     let gameTokenContract: Contract;
+    let testForwarder: Contract;
     let assets: BigNumber[];
     let editorAssets: BigNumber[];
     let gameTokenFeeBeneficiary: Address;
+
+    async function sendMetaTx(
+      to = '',
+      forwarder: Contract,
+      data = '',
+      signer: string,
+      gas = '100000',
+      value = '0'
+    ): Promise<Receipt> {
+      const message = {
+        from: signer,
+        to: to,
+        value: value,
+        gas: gas,
+        nonce: Number(await forwarder.getNonce(signer)),
+        data: data,
+      };
+
+      const metaTxData712 = await data712(forwarder, message);
+      const signedData = await ethers.provider.send('eth_signTypedData_v4', [
+        signer,
+        metaTxData712,
+      ]);
+
+      const receipt = await forwarder.execute(message, signedData);
+      return receipt;
+    }
 
     before(async function () {
       ({GameMinter, users} = await setupTest());
@@ -475,6 +508,7 @@ describe('GameMinter', function () {
         gameTokenAdmin,
       } = await getNamedAccounts();
       sandContract = await ethers.getContract('Sand');
+      testForwarder = await ethers.getContract('TestMetaTxForwarder');
       sandAsExecutionAdmin = await sandContract.connect(
         ethers.provider.getSigner(sandExecutionAdmin)
       );
@@ -511,8 +545,6 @@ describe('GameMinter', function () {
     });
 
     it('should allow anyone to create a game via MetaTx', async function () {
-      const gas = 1000000;
-
       const balancesBefore = await getTokenBalances(
         sandContract,
         users[1].address,
@@ -520,24 +552,27 @@ describe('GameMinter', function () {
       );
       const gamesBefore = await gameTokenContract.balanceOf(users[1].address);
 
-      const {data} = await GameMinter.populateTransaction.createGame(
+      const {to, data} = await GameMinter.populateTransaction.createGame(
         users[1].address,
         {...update, uri: await getURI('Sandbox MetaTx URI')},
         users[8].address,
         await getRandom()
       );
-
-      const receipt = await sandAsExecutionOperator.executeWithSpecificGas(
-        GameMinter.address,
-        gas,
-        data
+      const gas = '1000000';
+      const receipt = await sendMetaTx(
+        to,
+        testForwarder,
+        data,
+        users[1].address,
+        gas
       );
 
-      const event = await expectEventWithArgs(
+      const event = await expectEventWithArgsFromReceipt(
         gameTokenContract,
         receipt,
         'Transfer'
       );
+
       gameId2 = event.args[2];
       const balancesAfter = await getTokenBalances(
         sandContract,
@@ -557,32 +592,39 @@ describe('GameMinter', function () {
     });
 
     it('should allow GAME Owner to add assets via MetaTx', async function () {
-      const gas = 1000000;
       const balancesBefore = await getTokenBalances(
         sandContract,
         users[1].address,
         gameTokenFeeBeneficiary
       );
 
-      const {data} = await GameMinter.populateTransaction.updateGame(gameId2, {
-        ...update,
-        assetIdsToAdd: assets,
-        assetAmountsToAdd: [42, 3],
-        uri: await getURI('Sandbox MetaTx URI'),
-      });
+      const {to, data} = await GameMinter.populateTransaction.updateGame(
+        gameId2,
+        {
+          ...update,
+          assetIdsToAdd: assets,
+          assetAmountsToAdd: [42, 3],
+          uri: await getURI('Sandbox MetaTx URI'),
+        }
+      );
 
       gameId2 = increment(gameId2);
 
-      const receipt = await sandAsExecutionOperator.executeWithSpecificGas(
-        GameMinter.address,
-        gas,
-        data
+      const gas = '1000000';
+      const receipt = await sendMetaTx(
+        to,
+        testForwarder,
+        data,
+        users[1].address,
+        gas
       );
-      const event = await expectEventWithArgs(
+
+      const event = await expectEventWithArgsFromReceipt(
         gameTokenContract,
         receipt,
         'GameTokenUpdated'
       );
+
       const balancesAfter = await getTokenBalances(
         sandContract,
         users[1].address,
@@ -605,33 +647,39 @@ describe('GameMinter', function () {
     });
 
     it('should allow GAME Owner to remove assets via MetaTx', async function () {
-      const gas = 1000000;
-
       const balancesBefore = await getTokenBalances(
         sandContract,
         users[1].address,
         gameTokenFeeBeneficiary
       );
 
-      const {data} = await GameMinter.populateTransaction.updateGame(gameId2, {
-        ...update,
-        assetIdsToRemove: [assets[0]],
-        assetAmountsToRemove: [42],
-        uri: await getURI('Sandbox MetaTx URI'),
-      });
+      const {to, data} = await GameMinter.populateTransaction.updateGame(
+        gameId2,
+        {
+          ...update,
+          assetIdsToRemove: [assets[0]],
+          assetAmountsToRemove: [42],
+          uri: await getURI('Sandbox MetaTx URI'),
+        }
+      );
 
       gameId2 = increment(gameId2);
 
-      const receipt = await sandAsExecutionOperator.executeWithSpecificGas(
-        GameMinter.address,
-        gas,
-        data
+      const gas = '1000000';
+      const receipt = await sendMetaTx(
+        to,
+        testForwarder,
+        data,
+        users[1].address,
+        gas
       );
-      const event = await expectEventWithArgs(
+
+      const event = await expectEventWithArgsFromReceipt(
         gameTokenContract,
         receipt,
         'GameTokenUpdated'
       );
+
       const balancesAfter = await getTokenBalances(
         sandContract,
         users[1].address,
@@ -652,29 +700,35 @@ describe('GameMinter', function () {
     });
 
     it('should allow GAME Owner to set URI via MetaTx', async function () {
-      const gas = 1000000;
       const balancesBefore = await getTokenBalances(
         sandContract,
         users[1].address,
         gameTokenFeeBeneficiary
       );
-      const {data} = await GameMinter.populateTransaction.updateGame(gameId2, {
-        ...update,
-        uri: await getURI('Sandbox MetaTx change URI'),
-      });
+      const {to, data} = await GameMinter.populateTransaction.updateGame(
+        gameId2,
+        {
+          ...update,
+          uri: await getURI('Sandbox MetaTx change URI'),
+        }
+      );
 
       gameId2 = increment(gameId2);
-
-      const receipt = await sandAsExecutionOperator.executeWithSpecificGas(
-        GameMinter.address,
-        gas,
-        data
+      const gas = '1000000';
+      const receipt = await sendMetaTx(
+        to,
+        testForwarder,
+        data,
+        users[1].address,
+        gas
       );
-      const event = await expectEventWithArgs(
+
+      const event = await expectEventWithArgsFromReceipt(
         gameTokenContract,
         receipt,
         'GameTokenUpdated'
       );
+
       const balancesAfter = await getTokenBalances(
         sandContract,
         users[1].address,
@@ -698,55 +752,22 @@ describe('GameMinter', function () {
       );
     });
 
-    it('MetaTx should fail with wrong "from" address', async function () {
-      let idAsHex = utils.hexValue(gameId2);
-      let versionSlice = idAsHex.slice(58);
-      expect(versionSlice).to.be.equal('00000004');
-
-      const gas = 1000000;
-      const {data} = await GameMinter.populateTransaction.updateGame(gameId2, {
-        ...update,
-      });
-
-      await sandAsExecutionOperator.executeWithSpecificGas(
-        GameMinter.address,
-        gas,
-        data
-      );
-
-      // original token was not burned:
-      expect(await gameTokenContract.ownerOf(gameId2)).to.be.equal(
-        users[1].address
-      );
-
-      // tokenId version was not incremented:
-      idAsHex = utils.hexValue(gameId2);
-      versionSlice = idAsHex.slice(58);
-      expect(versionSlice).to.be.equal('00000004');
-
-      // @note a future version of a token still maps to the current owner address!
-      // expect(await gameTokenContract.ownerOf(gameId2.add(1))).to.be.equal(
-      //   ethers.constants.AddressZero
-      // );
-    });
-
     it('should allow GAME Editor to add assets via MetaTx', async function () {
-      const gas = 1000000;
-      const {data} = await GameMinter.populateTransaction.updateGame(gameId2, {
-        ...update,
-        assetIdsToAdd: editorAssets,
-        assetAmountsToAdd: [5],
-      });
+      const {to, data} = await GameMinter.populateTransaction.updateGame(
+        gameId2,
+        {
+          ...update,
+          assetIdsToAdd: editorAssets,
+          assetAmountsToAdd: [5],
+        }
+      );
 
       const assetsBefore = await gameTokenContract.getAssetBalances(gameId2, [
         editorAssets[0],
       ]);
 
-      await sandAsExecutionOperator.executeWithSpecificGas(
-        GameMinter.address,
-        gas,
-        data
-      );
+      const gas = '10000000';
+      await sendMetaTx(to, testForwarder, data, users[8].address, gas);
 
       gameId2 = increment(gameId2);
 
@@ -758,22 +779,21 @@ describe('GameMinter', function () {
     });
 
     it('should allow GAME Editor to remove assets via MetaTx', async function () {
-      const gas = 1000000;
-      const {data} = await GameMinter.populateTransaction.updateGame(gameId2, {
-        ...update,
-        assetIdsToRemove: editorAssets,
-        assetAmountsToRemove: [3],
-      });
+      const {to, data} = await GameMinter.populateTransaction.updateGame(
+        gameId2,
+        {
+          ...update,
+          assetIdsToRemove: editorAssets,
+          assetAmountsToRemove: [3],
+        }
+      );
 
       const assetsBefore = await gameTokenContract.getAssetBalances(gameId2, [
         editorAssets[0],
       ]);
 
-      await sandAsExecutionOperator.executeWithSpecificGas(
-        GameMinter.address,
-        gas,
-        data
-      );
+      const gas = '1000000';
+      await sendMetaTx(to, testForwarder, data, users[1].address, gas);
 
       gameId2 = increment(gameId2);
 
@@ -785,18 +805,18 @@ describe('GameMinter', function () {
     });
 
     it('should allow GAME Editor to set URI via MetaTx', async function () {
-      const gas = 1000000;
-      const {data} = await GameMinter.populateTransaction.updateGame(gameId2, {
-        ...update,
-        uri: await getURI('New uri set via metatransaction'),
-      });
+      const {to, data} = await GameMinter.populateTransaction.updateGame(
+        gameId2,
+        {
+          ...update,
+          uri: await getURI('New uri set via metatransaction'),
+        }
+      );
 
       const uriBefore = await gameTokenContract.tokenURI(gameId2);
-      await sandAsExecutionOperator.executeWithSpecificGas(
-        GameMinter.address,
-        gas,
-        data
-      );
+
+      const gas = '1000000';
+      await sendMetaTx(to, testForwarder, data, users[8].address, gas);
 
       gameId2 = increment(gameId2);
 

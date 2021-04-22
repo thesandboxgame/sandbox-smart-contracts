@@ -64,8 +64,9 @@ contract GameMinter is ERC2771Context, IGameMinter {
     ) external override returns (uint256 newId) {
         address gameOwner = _gameToken.ownerOf(gameId);
         address msgSender = _msgSender();
+        bool isEditor = _gameToken.isGameEditor(gameOwner, msgSender);
         require(
-            msgSender == gameOwner || _gameToken.isGameEditor(gameOwner, msgSender),
+            msgSender == gameOwner || isEditor,
             "AUTH_ACCESS_DENIED"
         );
         _chargeSand(msgSender, _gameUpdateFee);
