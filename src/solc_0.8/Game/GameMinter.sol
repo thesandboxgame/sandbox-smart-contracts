@@ -1,17 +1,13 @@
 // SPDX-License-Identifier: MIT
-pragma solidity 0.7.5;
-pragma experimental ABIEncoderV2;
+// solhint-disable-next-line compiler-version
+pragma solidity 0.8.2;
 
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
 import "./GameToken.sol";
-import "../common/Interfaces/IGameMinter.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "../common/interfaces/IGameMinter.sol";
+import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 
 contract GameMinter is WithMetaTransaction, IGameMinter {
-    ///////////////////////////////  Libs //////////////////////////////
-    using SafeMath for uint256;
-
     ///////////////////////////////  Data //////////////////////////////
 
     GameToken internal immutable _gameToken;

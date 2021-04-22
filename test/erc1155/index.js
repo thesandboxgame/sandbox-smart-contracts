@@ -922,7 +922,7 @@ module.exports = (init) => {
           4,
           '0x'
         )
-      ).to.be.revertedWith('destination is zero address');
+      ).to.be.revertedWith('TO==0');
     });
 
     it('cannot transfer more items than you own', async function ({
@@ -944,7 +944,7 @@ module.exports = (init) => {
     }) {
       await expect(
         contractAsUser0.safeTransferFrom(minter, user0, tokenIds[1], 1, '0x')
-      ).to.be.revertedWith('Operator not approved');
+      ).to.be.revertedWith('OPERATOR_!AUTH');
     });
 
     it('cannot transfer an item that you do not own', async function ({
@@ -955,7 +955,7 @@ module.exports = (init) => {
     }) {
       await expect(
         contractAsUser0.safeTransferFrom(minter, user0, tokenIds[0], 8, '0x')
-      ).to.be.revertedWith('Operator not approved');
+      ).to.be.revertedWith('OPERATOR_!AUTH');
     });
 
     it('cannot transfer more item of 1 supply', async function ({
@@ -966,7 +966,7 @@ module.exports = (init) => {
     }) {
       await expect(
         contractAsMinter.safeTransferFrom(minter, user0, tokenIds[1], 2, '0x')
-      ).to.be.revertedWith('cannot transfer nft if amount not 1');
+      ).to.be.revertedWith('NFT!=1');
     });
 
     it('cannot transfer to a contract that does not accept ERC1155', async function ({
@@ -1361,7 +1361,7 @@ module.exports = (init) => {
           [2, 1, 1],
           '0x'
         )
-      ).to.be.revertedWith('destination is zero address');
+      ).to.be.revertedWith('TO==0');
     });
 
     it('cannot batch transfer tokens if array lengths do not match', async function ({
@@ -1377,7 +1377,7 @@ module.exports = (init) => {
           [2, 1],
           '0x'
         )
-      ).to.be.revertedWith('Inconsistent array length between args');
+      ).to.be.revertedWith('MISMATCHED_ARR_LEN');
     });
 
     it('cannot batch transfer more than the amount owned', async function ({
@@ -1411,7 +1411,7 @@ module.exports = (init) => {
           [2],
           '0x'
         )
-      ).to.be.revertedWith(`cannot transfer nft if amount not 1`);
+      ).to.be.revertedWith(`NFT!=1`);
     });
 
     it('cannot batch transfer to a contract that does not accept ERC1155', async function ({
@@ -1541,7 +1541,7 @@ module.exports = (init) => {
     }) {
       await expect(
         contractAsMinter.setApprovalForAll(minter, true)
-      ).to.be.revertedWith('sender = operator');
+      ).to.be.revertedWith('SENDER==OPERATOR');
     });
 
     it('operator cannot transfer without approval', async function ({
@@ -1552,7 +1552,7 @@ module.exports = (init) => {
     }) {
       await expect(
         contractAsUser0.safeTransferFrom(minter, user0, tokenIds[1], 1, '0x')
-      ).to.be.revertedWith('Operator not approved');
+      ).to.be.revertedWith('OPERATOR_!AUTH');
     });
 
     it('operator can transfer after approval', async function ({
@@ -1565,7 +1565,7 @@ module.exports = (init) => {
     }) {
       await expect(
         contractAsUser0.safeTransferFrom(minter, user1, tokenIds[0], 1, '0x')
-      ).to.be.revertedWith('Operator not approved');
+      ).to.be.revertedWith('OPERATOR_!AUTH');
       await contractAsMinter.setApprovalForAll(user0, true);
       const result = await contractAsMinter.isApprovedForAll(minter, user0);
       assert.equal(result, true);
@@ -1589,7 +1589,7 @@ module.exports = (init) => {
     }) {
       await expect(
         contractAsUser0.safeTransferFrom(minter, user1, tokenIds[0], 1, '0x')
-      ).to.be.revertedWith('Operator not approved');
+      ).to.be.revertedWith('OPERATOR_!AUTH');
       await contractAsMinter.setApprovalForAll(user0, true);
       await contractAsUser0.safeTransferFrom(
         minter,
@@ -1601,7 +1601,7 @@ module.exports = (init) => {
       await contractAsMinter.setApprovalForAll(user0, false);
       await expect(
         contractAsUser0.safeTransferFrom(minter, user1, tokenIds[0], 1, '0x')
-      ).to.be.revertedWith('Operator not approved');
+      ).to.be.revertedWith('OPERATOR_!AUTH');
     });
   });
 
