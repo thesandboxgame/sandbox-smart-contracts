@@ -1660,6 +1660,23 @@ describe('GameToken', function () {
         gameId2
       );
 
+      const message = {
+        from: GameOwner.address,
+        to: gameToken.address,
+        value: '0',
+        gas: '100000',
+        nonce: Number(await testMetaTxForwarder.getNonce(GameOwner.address)),
+        data: data ? data : '0x',
+      };
+
+      const metaTxData712 = await data712(testMetaTxForwarder, message);
+      const signedData = await ethers.provider.send('eth_signTypedData_v4', [
+        GameOwner.address,
+        metaTxData712,
+      ]);
+
+      await waitFor(testMetaTxForwarder.execute(message, signedData));
+
       expect(await gameToken.creatorOf(gameId2)).to.be.equal(GameOwner.address);
       await expect(gameToken.ownerOf(gameId2)).to.be.revertedWith(
         'NONEXISTANT_TOKEN'
@@ -1689,6 +1706,23 @@ describe('GameToken', function () {
         assets
       );
 
+      const message = {
+        from: GameOwner.address,
+        to: gameToken.address,
+        value: '0',
+        gas: '100000',
+        nonce: Number(await testMetaTxForwarder.getNonce(GameOwner.address)),
+        data: data ? data : '0x',
+      };
+
+      const metaTxData712 = await data712(testMetaTxForwarder, message);
+      const signedData = await ethers.provider.send('eth_signTypedData_v4', [
+        GameOwner.address,
+        metaTxData712,
+      ]);
+
+      await waitFor(testMetaTxForwarder.execute(message, signedData));
+
       const balancesAfter = await getBalances(
         assetContract,
         [GameOwner.address, gameToken.address],
@@ -1711,6 +1745,24 @@ describe('GameToken', function () {
         GameOwner.address,
         users[2].address
       );
+
+      const message = {
+        from: GameOwner.address,
+        to: gameToken.address,
+        value: '0',
+        gas: '100000',
+        nonce: Number(await testMetaTxForwarder.getNonce(GameOwner.address)),
+        data: data ? data : '0x',
+      };
+
+      const metaTxData712 = await data712(testMetaTxForwarder, message);
+      const signedData = await ethers.provider.send('eth_signTypedData_v4', [
+        GameOwner.address,
+        metaTxData712,
+      ]);
+
+      await waitFor(testMetaTxForwarder.execute(message, signedData));
+
       expect(await gameToken.creatorOf(gameId)).to.be.equal(users[2].address);
     });
   });
