@@ -3,14 +3,10 @@ import {
   deployments,
   getNamedAccounts,
   getUnnamedAccounts,
-  getChainId,
 } from 'hardhat';
-import {BigNumber, utils, Contract, BytesLike, constants} from 'ethers';
-import {_TypedDataEncoder} from 'ethers/lib/utils';
-import {TypedDataDomain} from '@ethersproject/abstract-signer';
+import {BigNumber, utils, Contract, BytesLike} from 'ethers';
 import Prando from 'prando';
 import {Address} from 'hardhat-deploy/types';
-import {signTypedMessage, signTypedData_v4, TypedDataUtils} from 'eth-sig-util';
 import {expect} from '../chai-setup';
 import {waitFor, expectEventWithArgs, findEvents} from '../utils';
 import {setupTest, User} from './fixtures';
@@ -19,9 +15,6 @@ import {toUtf8Bytes} from 'ethers/lib/utils';
 import {data712} from './data712';
 
 let id: BigNumber;
-
-const METATX_SANDBOX = 1;
-const METATX_2771 = 2;
 const rng = new Prando('GameToken');
 
 type Update = {
@@ -1527,7 +1520,6 @@ describe('GameToken', function () {
     let gameTokenAsAdmin: Contract;
     let GameOwner: User;
     let assets: BigNumber[];
-    // const gas = 1000000;
 
     before(async function () {
       ({

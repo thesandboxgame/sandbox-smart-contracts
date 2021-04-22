@@ -29,8 +29,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Context {
     mapping(address => mapping(address => bool)) internal _operatorsForAll;
     mapping(uint256 => address) internal _operators;
 
-    constructor(address trustedForwarder) ERC2771Context(trustedForwarder) {
-    }
+    constructor(address trustedForwarder) ERC2771Context(trustedForwarder) {}
 
     /// @notice Approve an operator to spend tokens on the senders behalf.
     /// @param operator The address receiving the approval.
@@ -58,9 +57,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Context {
         uint256 ownerData = _owners[_storageId(id)];
         require(sender != address(0), "ZERO_ADDRESS_SENDER");
         require(
-            _msgSender() == sender ||
-                _superOperators[_msgSender()] ||
-                _operatorsForAll[sender][_msgSender()],
+            _msgSender() == sender || _superOperators[_msgSender()] || _operatorsForAll[sender][_msgSender()],
             "UNAUTHORIZED_APPROVAL"
         );
         require(address(uint160(ownerData)) == sender, "OWNER_NOT_SENDER");
@@ -134,10 +131,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Context {
         bool approved
     ) external {
         require(sender != address(0), "Invalid sender address");
-        require(
-            _msgSender() == sender || _superOperators[_msgSender()],
-            "UNAUTHORIZED_APPROVE_FOR_ALL"
-        );
+        require(_msgSender() == sender || _superOperators[_msgSender()], "UNAUTHORIZED_APPROVE_FOR_ALL");
 
         _setApprovalForAll(sender, operator, approved);
     }
@@ -162,7 +156,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Context {
         require(from != address(0), "NOT_FROM_ZEROADDRESS");
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         require(
-            _msgSender() == from||
+            _msgSender() == from ||
                 (operatorEnabled && _operators[id] == _msgSender()) ||
                 _superOperators[_msgSender()] ||
                 _operatorsForAll[from][_msgSender()],
@@ -293,8 +287,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Context {
         bytes memory data,
         bool safe
     ) internal {
-        bool authorized =
-            _msgSender() == from|| _superOperators[_msgSender()] || _operatorsForAll[from][_msgSender()];
+        bool authorized = _msgSender() == from || _superOperators[_msgSender()] || _operatorsForAll[from][_msgSender()];
 
         require(from != address(0), "NOT_FROM_ZEROADDRESS");
         require(to != address(0), "NOT_TO_ZEROADDRESS");
@@ -314,10 +307,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Context {
         }
 
         if (to.isContract() && (safe || _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER))) {
-            require(
-                _checkOnERC721BatchReceived(_msgSender(), from, to, ids, data),
-                "ERC721_BATCH_TRANSFER_REJECTED"
-            );
+            require(_checkOnERC721BatchReceived(_msgSender(), from, to, ids, data), "ERC721_BATCH_TRANSFER_REJECTED");
         }
     }
 
@@ -419,10 +409,13 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Context {
         require(owner != address(0), "NONEXISTENT_TOKEN");
         require(owner == from, "CHECKTRANSFER_NOT_OWNER");
         require(to != address(0), "NOT_TO_ZEROADDRESS");
-        require(_msgSender() == owner || _superOperators[_msgSender()] || _operatorsForAll[from][_msgSender()] ||
-                    (operatorEnabled && _operators[id] == _msgSender()),
-                "UNAUTHORIZED_TRANSFER"
-            );
+        require(
+            _msgSender() == owner ||
+                _superOperators[_msgSender()] ||
+                _operatorsForAll[from][_msgSender()] ||
+                (operatorEnabled && _operators[id] == _msgSender()),
+            "UNAUTHORIZED_TRANSFER"
+        );
     }
 
     /// @dev Check if there was enough gas.

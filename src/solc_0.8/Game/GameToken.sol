@@ -94,10 +94,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         address original,
         address to
     ) external override notToZero(to) {
-        require(
-            _msgSender() == sender|| _superOperators[_msgSender()],
-            "TRANSFER_ACCESS_DENIED"
-        );
+        require(_msgSender() == sender || _superOperators[_msgSender()], "TRANSFER_ACCESS_DENIED");
         require(sender != address(0), "NOT_FROM_ZEROADDRESS");
         address current = _creatorship[original];
         if (current == address(0)) {
