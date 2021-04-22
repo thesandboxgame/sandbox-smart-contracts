@@ -1564,25 +1564,25 @@ describe('GameToken', function () {
       ]);
     });
 
-    beforeEach(async function () {
-      domain = {
-        name: 'The Sandbox',
-        version: '1',
-        chainId: Number(await getChainId()),
-        verifyingContract: testMetaTxForwarder.address,
-      };
+    // beforeEach(async function () {
+    //   domain = {
+    //     name: 'The Sandbox',
+    //     version: '1',
+    //     chainId: Number(await getChainId()),
+    //     verifyingContract: testMetaTxForwarder.address,
+    //   };
 
-      types = {
-        ForwardRequest: [
-          {name: 'from', type: 'address'},
-          {name: 'to', type: 'address'},
-          {name: 'value', type: 'uint256'},
-          {name: 'gas', type: 'uint256'},
-          {name: 'nonce', type: 'uint256'},
-          {name: 'data', type: 'bytes'},
-        ],
-      };
-    });
+    //   types = {
+    //     ForwardRequest: [
+    //       {name: 'from', type: 'address'},
+    //       {name: 'to', type: 'address'},
+    //       {name: 'value', type: 'uint256'},
+    //       {name: 'gas', type: 'uint256'},
+    //       {name: 'nonce', type: 'uint256'},
+    //       {name: 'data', type: 'bytes'},
+    //     ],
+    //   };
+    // });
 
     it('can get isTrustedForwarder', async function () {
       const isTrustedForwarder = await gameToken.isTrustedForwarder(
@@ -1599,21 +1599,21 @@ describe('GameToken', function () {
         true
       );
 
-      const EIP712DomainType = [
-        {name: 'name', type: 'string'},
-        {name: 'version', type: 'string'},
-        {name: 'chainId', type: 'uint256'},
-        {name: 'verifyingContract', type: 'address'},
-      ];
+      // const EIP712DomainType = [
+      //   {name: 'name', type: 'string'},
+      //   {name: 'version', type: 'string'},
+      //   {name: 'chainId', type: 'uint256'},
+      //   {name: 'verifyingContract', type: 'address'},
+      // ];
 
-      const ForwardRequestType = [
-        {name: 'from', type: 'address'},
-        {name: 'to', type: 'address'},
-        {name: 'value', type: 'uint256'},
-        {name: 'gas', type: 'uint256'},
-        {name: 'nonce', type: 'uint256'},
-        {name: 'data', type: 'bytes'},
-      ];
+      // const ForwardRequestType = [
+      //   {name: 'from', type: 'address'},
+      //   {name: 'to', type: 'address'},
+      //   {name: 'value', type: 'uint256'},
+      //   {name: 'gas', type: 'uint256'},
+      //   {name: 'nonce', type: 'uint256'},
+      //   {name: 'data', type: 'bytes'},
+      // ];
 
       // The data to sign
       const message = {
@@ -1625,12 +1625,12 @@ describe('GameToken', function () {
         data: data ? data : '0x',
       };
 
-      // const metaTxData712 = await data712(testMetaTxForwarder, message);
+      const metaTxData712 = await data712(testMetaTxForwarder, message);
 
-      // const signedData = await ethers.provider.send('eth_signTypedData_v4', [
-      //   GameOwner.address,
-      //   metaTxData712,
-      // ]);
+      const signedData = await ethers.provider.send('eth_signTypedData_v4', [
+        GameOwner.address,
+        metaTxData712,
+      ]);
 
       // const signedData = signTypedMessage(this.wallet.getPrivateKey(), {
       //   data: {
@@ -1650,9 +1650,9 @@ describe('GameToken', function () {
 
       const privateKey = signer.privateKey;
       const privateKeyAsBuffer = Buffer.from(privateKey.substr(2), 'hex');
-      const signedData = await signTypedData_v4(privateKeyAsBuffer, {
-        data: {...typeData, message: message},
-      });
+      // const signedData = await signTypedData_v4(privateKeyAsBuffer, {
+      //   data: {...typeData, message: message},
+      // });
 
       // Sanity checks:
       expect(await testMetaTxForwarder.getNonce(message.from)).to.be.equal(
