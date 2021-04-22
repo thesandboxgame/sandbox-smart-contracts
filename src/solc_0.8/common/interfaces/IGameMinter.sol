@@ -6,7 +6,6 @@ import "./IGameToken.sol";
 
 interface IGameMinter {
     function createGame(
-        address from,
         address to,
         IGameToken.Update calldata creation,
         address editor,
@@ -14,7 +13,6 @@ interface IGameMinter {
     ) external returns (uint256 gameId);
 
     function updateGame(
-        address from,
         uint256 gameId,
         IGameToken.Update memory update
     ) external returns (uint256 newId);

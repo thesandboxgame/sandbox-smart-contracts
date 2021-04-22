@@ -36,7 +36,6 @@ contract GameMinter is ERC2771Context, IGameMinter {
     }
 
     /// @notice Function to create a new GAME token
-    /// @param from The address of the one creating the game (included in the gameId).
     /// @param to The address who will be assigned ownership of this game.
     /// @param creation The struct containing ids & ammounts of assets to add to this game,
     /// along with the uri to set.
@@ -44,29 +43,26 @@ contract GameMinter is ERC2771Context, IGameMinter {
     /// @param subId A random id created on the backend.
     /// @return gameId The id of the new GAME token (erc721)
     function createGame(
-        address from,
         address to,
         GameToken.Update calldata creation,
         address editor,
         uint64 subId
     ) external override returns (uint256 gameId) {
-        require(_msgSender() == from, "CREATE_ACCESS_DENIED");
-        _chargeSand(from, _gameMintingFee);
-        return _gameToken.createGame(from, to, creation, editor, subId);
+        address msgSender = _msgSender();
+        _chargeSand(msgSender, _gameMintingFee);
+        return _gameToken.createGame(msgSender, to, creation, editor, subId);
     }
 
     /// @notice Update an existing GAME token.This actually burns old token
     /// and mints new token with same basId & incremented version.
-    /// @param from The address whose GAME token is to be updated.
     /// @param gameId The current id of the GAME token.
     /// @param update The values to use for the update.
     /// @return newId The new gameId.
     function updateGame(
-        address from,
         uint256 gameId,
         GameToken.Update memory update
     ) external override returns (uint256 newId) {
-        address gameOwner = _gameToken.ownerOf(id);
+        address gameOwner = _gameToken.ownerOf(gameId);
         address msgSender = _msgSender();
         require(
             msgSender == gameOwner || _gameToken.isGameEditor(gameOwner, msgSender),
