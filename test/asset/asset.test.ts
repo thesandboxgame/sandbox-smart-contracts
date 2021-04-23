@@ -79,21 +79,37 @@ describe('Asset.sol', function () {
     it('can transfer by metaTx', async function () {
       const {Asset, users, mintAsset, forwarder} = await setupAsset();
       const tokenId = await mintAsset(users[1].address, 11);
-      // await waitFor(
-      //   users[0].Asset[
-      //     'safeTransferFrom(address,address,uint256,uint256,bytes)'
-      //   ](users[1].address, users[2].address, tokenId, 10, '0x')
-      // );
+
       const {to, data} = await Asset.populateTransaction[
         'safeTransferFrom(address,address,uint256,uint256,bytes)'
       ](users[1].address, users[2].address, tokenId, 10, '0x');
 
       await sendMetaTx(to, forwarder, data, users[1].address);
+
       const balance = await Asset['balanceOf(address,uint256)'](
         users[2].address,
         tokenId
       );
       expect(balance).to.be.equal(10);
+    });
+
+    it('fails to transfer others token by metaTx', async function () {
+      const {Asset, users, mintAsset, forwarder} = await setupAsset();
+      const tokenId = await mintAsset(users[1].address, 11);
+
+      const {to, data} = await Asset.populateTransaction[
+        'safeTransferFrom(address,address,uint256,uint256,bytes)'
+      ](users[1].address, users[2].address, tokenId, 10, '0x');
+
+      // users[2] trys to transfer users[1]'s token
+      await sendMetaTx(to, forwarder, data, users[2].address);
+
+      const balance = await Asset['balanceOf(address,uint256)'](
+        users[2].address,
+        tokenId
+      );
+      // but it fails, and balance is not 10
+      expect(balance).to.be.equal(0);
     });
   });
 });
