@@ -1,6 +1,7 @@
 import {setupAsset} from './fixtures';
 import {waitFor} from '../utils';
 import {expect} from '../chai-setup';
+import {sendMetaTx} from './sendMetaTx';
 
 describe('Asset.sol', function () {
   it('user sending asset to itself keep the same balance', async function () {
@@ -72,5 +73,15 @@ describe('Asset.sol', function () {
         '0x'
       )
     ).to.be.revertedWith(`BALANCE_TOO_LOW`);
+  });
+
+  describe('Asset: MetaTransactions', function () {
+    it('metaaaaaa-TTT-X!', async function () {
+      const {Asset, users} = await setupAsset();
+      const {to, data} = await Asset.populateTransaction.mint();
+      console.log('yo!');
+
+      // await sendMetaTx();
+    });
   });
 });
