@@ -76,12 +76,24 @@ describe('Asset.sol', function () {
   });
 
   describe('Asset: MetaTransactions', function () {
-    it('metaaaaaa-TTT-X!', async function () {
-      const {Asset, users} = await setupAsset();
-      const {to, data} = await Asset.populateTransaction.mint();
-      console.log('yo!');
+    it('can transfer by metaTx', async function () {
+      const {Asset, users, mintAsset, forwarder} = await setupAsset();
+      const tokenId = await mintAsset(users[1].address, 11);
+      // await waitFor(
+      //   users[0].Asset[
+      //     'safeTransferFrom(address,address,uint256,uint256,bytes)'
+      //   ](users[1].address, users[2].address, tokenId, 10, '0x')
+      // );
+      const {to, data} = await Asset.populateTransaction[
+        'safeTransferFrom(address,address,uint256,uint256,bytes)'
+      ](users[1].address, users[2].address, tokenId, 10, '0x');
 
-      // await sendMetaTx();
+      await sendMetaTx(to, forwarder, data, users[1].address);
+      const balance = await Asset['balanceOf(address,uint256)'](
+        users[2].address,
+        tokenId
+      );
+      expect(balance).to.be.equal(10);
     });
   });
 });
