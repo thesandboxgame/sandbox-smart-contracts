@@ -200,7 +200,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context 
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
         address sender = _msgSender();
-        bool metaTx = isTrustedForwarder(sender);
+        bool metaTx = isTrustedForwarder(msg.sender);
         bool authorized = from == sender || isApprovedForAll(from, sender);
 
         _batchTransferFrom(from, to, ids, values, authorized);
@@ -374,7 +374,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context 
         address to
     ) external returns (uint256 newId) {
         address msgSender = _msgSender();
-        bool metaTx = isTrustedForwarder(msgSender);
+        bool metaTx = isTrustedForwarder(msg.sender);
         require(sender == msgSender || isApprovedForAll(sender, msgSender), "!AUTHORIZED");
         return _extractERC721From(metaTx ? sender : msgSender, sender, id, to);
     }
@@ -879,7 +879,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context 
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
         address sender = _msgSender();
-        metaTx = isTrustedForwarder(sender);
+        metaTx = isTrustedForwarder(msg.sender);
         bool authorized = from == sender || isApprovedForAll(from, sender);
 
         if (id & IS_NFT > 0) {
