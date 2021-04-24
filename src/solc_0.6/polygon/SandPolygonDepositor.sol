@@ -1,9 +1,8 @@
 //SPDX-License-Identifier: MIT
 // solhint-disable-next-line compiler-version
-pragma solidity 0.6.6;
-import "./ERC20Extended.sol";
-import "@maticnetwork/pos-portal/contracts/root/RootChainManager/IRootChainManager.sol";
-
+pragma solidity 0.6.5;
+import "../Interfaces/ERC20Extended.sol";
+import "./IRootChainManager.sol";
 contract SandPolygonDepositor {
     ERC20Extended internal immutable _sand;
     address internal immutable _predicate;
