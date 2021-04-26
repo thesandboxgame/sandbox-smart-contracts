@@ -220,7 +220,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context 
         address original,
         address to
     ) external {
-        require(_isAuthorized(sender) || _superOperators[_msgSender()], "!AUTHORIZED");
+        require(sender == _msgSender() || _superOperators[_msgSender()], "!AUTHORIZED");
         require(sender != address(0), "SENDER==0");
         require(to != address(0), "TO==0");
         address current = _creatorship[original];
@@ -247,7 +247,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context 
         address operator,
         bool approved
     ) external {
-        require(_isAuthorized(sender) || _superOperators[_msgSender()], "!AUTHORIZED");
+        require(sender == _msgSender() || _superOperators[_msgSender()], "!AUTHORIZED");
         _setApprovalForAll(sender, operator, approved);
     }
 
@@ -270,7 +270,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context 
     ) external {
         address owner = _ownerOf(id);
         require(sender != address(0), "SENDER==0");
-        require(_isAuthorized(sender) || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
+        require(sender == _msgSender() || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
         require(owner == sender, "OWNER!=SENDER");
         _erc721operators[id] = operator;
         emit Approval(owner, operator, id);
@@ -326,8 +326,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context 
         uint256 id,
         uint256 amount
     ) external {
-        require(from != address(0), "FROM==0");
-        require(_isAuthorized(from) || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
+        require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
         _burn(from, id, amount);
     }
 
@@ -996,15 +995,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context 
         // (10000 / 63) "not enough for supportsInterface(...)" // consume all gas, so caller can potentially know that there was not enough gas
         assert(gasleft() > 158);
         return success && result;
-    }
-
-    /// @dev Check if address from is authorized to perform an action.
-    /// @param from The address to check from.
-    /// @return whether authorized or not.
-    function _isAuthorized(address from) internal view returns (bool) {
-        address sender = _msgSender();
-        require(sender == from || isTrustedForwarder(msg.sender), "AUTH_ACCESS_DENIED");
-        return true;
     }
 
     function _checkEnoughBalance(
