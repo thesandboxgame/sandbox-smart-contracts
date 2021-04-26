@@ -782,10 +782,10 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context 
         address sender = _msgSender();
         if ((id & IS_NFT) > 0) {
             require(amount == 1, "AMOUNT!=1");
-            _burnERC721(isTrustedForwarder(sender) ? from : sender, from, id);
+            _burnERC721(isTrustedForwarder(msg.sender) ? from : sender, from, id);
         } else {
             require(amount > 0 && amount <= MAX_SUPPLY, "INVALID_AMOUNT");
-            _burnERC1155(isTrustedForwarder(sender) ? from : sender, from, id, uint32(amount));
+            _burnERC1155(isTrustedForwarder(msg.sender) ? from : sender, from, id, uint32(amount));
         }
     }
 
@@ -1003,7 +1003,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context 
     /// @return whether authorized or not.
     function _isAuthorized(address from) internal view returns (bool) {
         address sender = _msgSender();
-        require(sender == from || isTrustedForwarder(sender), "AUTH_ACCESS_DENIED");
+        require(sender == from || isTrustedForwarder(msg.sender), "AUTH_ACCESS_DENIED");
         return true;
     }
 
