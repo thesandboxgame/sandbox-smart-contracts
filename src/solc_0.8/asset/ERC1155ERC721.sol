@@ -220,7 +220,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context 
         address original,
         address to
     ) external {
-        require(sender == _msgSender() || _superOperators[_msgSender()], "!AUTHORIZED");
+        address msgSender = _msgSender();
+        require(sender == msgSender || _superOperators[msgSender], "!AUTHORIZED");
         require(sender != address(0), "SENDER==0");
         require(to != address(0), "TO==0");
         address current = _creatorship[original];
@@ -247,7 +248,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context 
         address operator,
         bool approved
     ) external {
-        require(sender == _msgSender() || _superOperators[_msgSender()], "!AUTHORIZED");
+        address msgSender = _msgSender();
+        require(sender == msgSender || _superOperators[msgSender], "!AUTHORIZED");
         _setApprovalForAll(sender, operator, approved);
     }
 
@@ -269,8 +271,9 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context 
         uint256 id
     ) external {
         address owner = _ownerOf(id);
+        address msgSender = _msgSender();
         require(sender != address(0), "SENDER==0");
-        require(sender == _msgSender() || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
+        require(sender == msgSender || isApprovedForAll(sender, msgSender), "!AUTHORIZED");
         require(owner == sender, "OWNER!=SENDER");
         _erc721operators[id] = operator;
         emit Approval(owner, operator, id);
