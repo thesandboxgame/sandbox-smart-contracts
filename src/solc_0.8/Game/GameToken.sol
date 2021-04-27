@@ -60,7 +60,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken, IMintableERC721 {
         address admin,
         IAssetToken asset,
         address mintableAssetPredicate
-    ) ERC721BaseToken(metaTransactionContract, admin) {
+    ) ERC721BaseToken(trustedForwarder) {
+        _admin = admin;
         _asset = asset;
         _mintableAssetPredicate = mintableAssetPredicate;
     }
