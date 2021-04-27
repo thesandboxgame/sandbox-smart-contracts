@@ -193,6 +193,7 @@ const config: HardhatUserConfig = {
               : undefined,
           }
         : undefined,
+      deploy: ['deploy-for-test', 'deploy'],
     },
     localhost: {
       url: 'http://localhost:8545',

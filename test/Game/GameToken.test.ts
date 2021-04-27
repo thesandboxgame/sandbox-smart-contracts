@@ -12,11 +12,9 @@ import {waitFor, expectEventWithArgs, findEvents} from '../utils';
 import {setupTest, User} from './fixtures';
 import {supplyAssets} from './assets';
 import {toUtf8Bytes} from 'ethers/lib/utils';
+import {data712} from './data712';
 
 let id: BigNumber;
-
-const METATX_SANDBOX = 1;
-const METATX_2771 = 2;
 const rng = new Prando('GameToken');
 
 type Update = {
@@ -1511,8 +1509,7 @@ describe('GameToken', function () {
   });
 
   describe('GameToken: MetaTransactions', function () {
-    let sandAsExecutionAdmin: Contract;
-    let sandAsExecutionOperator: Contract;
+    let testMetaTxForwarder: Contract;
     let gameId: BigNumber;
     let gameId2: BigNumber;
     let users: User[];
@@ -1523,31 +1520,47 @@ describe('GameToken', function () {
     let gameTokenAsAdmin: Contract;
     let GameOwner: User;
     let assets: BigNumber[];
-    const gas = 1000000;
+
+    async function sendMetaTx(
+      to = '',
+      forwarder: Contract,
+      data = '',
+      signer: string,
+      gas = '100000',
+      value = '0'
+    ): Promise<void> {
+      const message = {
+        from: signer,
+        to: to,
+        value: value,
+        gas: gas,
+        nonce: Number(await forwarder.getNonce(signer)),
+        data: data,
+      };
+
+      const metaTxData712 = await data712(forwarder, message);
+      const signedData = await ethers.provider.send('eth_signTypedData_v4', [
+        signer,
+        metaTxData712,
+      ]);
+
+      await forwarder.execute(message, signedData);
+    }
 
     before(async function () {
-      ({gameToken, users, GameOwner, gameTokenAsAdmin} = await setupTest());
-      const {
-        sandExecutionAdmin,
-        sandAdmin,
-        gameTokenAdmin,
-      } = await getNamedAccounts();
+      ({
+        gameToken,
+        users,
+        GameOwner,
+        gameTokenAsAdmin,
+        testMetaTxForwarder,
+      } = await setupTest());
+      const {sandAdmin, gameTokenAdmin} = await getNamedAccounts();
       await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
 
       sandContract = await ethers.getContract('Sand');
-      sandAsExecutionAdmin = await sandContract.connect(
-        ethers.provider.getSigner(sandExecutionAdmin)
-      );
       assetContract = await ethers.getContract('Asset');
-      await sandAsExecutionAdmin.setExecutionOperator(users[6].address, true);
 
-      expect(
-        await sandContract.isExecutionOperator(users[6].address)
-      ).to.be.equal(true);
-
-      sandAsExecutionOperator = await sandContract.connect(
-        ethers.provider.getSigner(users[6].address)
-      );
       sandAsAdmin = await sandContract.connect(
         ethers.provider.getSigner(sandAdmin)
       );
@@ -1560,48 +1573,22 @@ describe('GameToken', function () {
       ]);
     });
 
-    it('can check "Trusted Forwarder" if MetaTransactionProcessor = METATX_2771', async function () {
-      const others = await getUnnamedAccounts();
-
-      let isTrustedForwarder = await gameToken.isTrustedForwarder(others[0]);
-      expect(isTrustedForwarder).to.be.false;
-
-      await expect(
-        gameTokenAsAdmin.setMetaTransactionProcessor(others[0], METATX_2771)
-      )
-        .to.emit(gameTokenAsAdmin, 'MetaTransactionProcessor')
-        .withArgs(others[0], METATX_2771);
-
-      isTrustedForwarder = await gameToken.isTrustedForwarder(others[0]);
+    it('can get isTrustedForwarder', async function () {
+      const isTrustedForwarder = await gameToken.isTrustedForwarder(
+        testMetaTxForwarder.address
+      );
       expect(isTrustedForwarder).to.be.true;
-    });
-    it('can set the MetaTransactionProcessor = METATX_SANDBOX', async function () {
-      const others = await getUnnamedAccounts();
-      await expect(gameTokenAsAdmin.setMetaTransactionProcessor(others[8], 1))
-        .to.emit(gameTokenAsAdmin, 'MetaTransactionProcessor')
-        .withArgs(others[8], METATX_SANDBOX);
-
-      const type = await gameToken.getMetaTransactionProcessorType(others[8]);
-      expect(type).to.be.equal(METATX_SANDBOX);
     });
 
     it('can call setGameEditor via metaTx', async function () {
-      const {data} = await gameToken.populateTransaction.setGameEditor(
+      const {to, data} = await gameToken.populateTransaction.setGameEditor(
         GameOwner.address,
         users[1].address,
         true
       );
-      await sandAsExecutionAdmin.setExecutionOperator(users[6].address, true);
 
-      sandAsExecutionOperator = await sandContract.connect(
-        ethers.provider.getSigner(users[6].address)
-      );
+      await sendMetaTx(to, testMetaTxForwarder, data, GameOwner.address);
 
-      await sandAsExecutionOperator.executeWithSpecificGas(
-        gameToken.address,
-        gas,
-        data
-      );
       expect(
         await gameToken.isGameEditor(GameOwner.address, users[1].address)
       ).to.be.equal(true);
@@ -1624,17 +1611,19 @@ describe('GameToken', function () {
       expect(contractBalanceBefore).to.be.equal(10);
       expect(contractBalanceBefore2).to.be.equal(8);
 
-      const {data} = await gameToken.populateTransaction.burnAndRecover(
+      const {to, data} = await gameToken.populateTransaction.burnAndRecover(
         GameOwner.address,
         GameOwner.address,
         gameId,
         assets
       );
 
-      await sandAsExecutionOperator.executeWithSpecificGas(
-        gameToken.address,
-        gas,
-        data
+      await sendMetaTx(
+        to,
+        testMetaTxForwarder,
+        data,
+        GameOwner.address,
+        '1000000'
       );
 
       const balancesAfter = await getBalances(
@@ -1660,16 +1649,12 @@ describe('GameToken', function () {
         7,
       ]);
 
-      const {data} = await gameToken.populateTransaction.burnFrom(
+      const {to, data} = await gameToken.populateTransaction.burnFrom(
         GameOwner.address,
         gameId2
       );
 
-      await sandAsExecutionOperator.executeWithSpecificGas(
-        gameToken.address,
-        gas,
-        data
-      );
+      await sendMetaTx(to, testMetaTxForwarder, data, GameOwner.address);
 
       expect(await gameToken.creatorOf(gameId2)).to.be.equal(GameOwner.address);
       await expect(gameToken.ownerOf(gameId2)).to.be.revertedWith(
@@ -1693,18 +1678,14 @@ describe('GameToken', function () {
       expect(contractBalanceBefore).to.be.equal(5);
       expect(contractBalanceBefore2).to.be.equal(7);
 
-      const {data} = await gameToken.populateTransaction.recoverAssets(
+      const {to, data} = await gameToken.populateTransaction.recoverAssets(
         GameOwner.address,
         GameOwner.address,
         gameId2,
         assets
       );
 
-      await sandAsExecutionOperator.executeWithSpecificGas(
-        gameToken.address,
-        gas,
-        data
-      );
+      await sendMetaTx(to, testMetaTxForwarder, data, GameOwner.address);
 
       const balancesAfter = await getBalances(
         assetContract,
@@ -1723,76 +1704,17 @@ describe('GameToken', function () {
     });
 
     it('can call transferCreatorship via metaTx', async function () {
-      const {data} = await gameToken.populateTransaction.transferCreatorship(
+      const {
+        to,
+        data,
+      } = await gameToken.populateTransaction.transferCreatorship(
         GameOwner.address,
         GameOwner.address,
         users[2].address
       );
 
-      await sandAsExecutionOperator.executeWithSpecificGas(
-        gameToken.address,
-        gas,
-        data
-      );
+      await sendMetaTx(to, testMetaTxForwarder, data, GameOwner.address);
       expect(await gameToken.creatorOf(gameId)).to.be.equal(users[2].address);
-    });
-
-    describe('GameToken: Invalid metaTransactions', function () {
-      let gameAsUser7: Contract;
-      let others: Address[];
-      let gameId: BigNumber;
-      let gameToken: Contract;
-      let GameOwner: User;
-      let gameTokenAsAdmin: Contract;
-      let gameTokenAsMinter: Contract;
-
-      it('should fail if processorType == METATX_2771 && from != _forceMsgSender()', async function () {
-        ({gameToken, GameOwner, gameTokenAsAdmin} = await setupTest());
-        const {gameTokenAdmin} = await getNamedAccounts();
-        others = await getUnnamedAccounts();
-        await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
-        gameTokenAsMinter = await gameToken.connect(
-          ethers.provider.getSigner(gameTokenAdmin)
-        );
-
-        const randomId = await getRandom();
-
-        const receipt = await waitFor(
-          gameTokenAsMinter.createGame(
-            GameOwner.address,
-            GameOwner.address,
-            {...update},
-            ethers.constants.AddressZero,
-            randomId
-          )
-        );
-        const transferEvent = await expectEventWithArgs(
-          gameToken,
-          receipt,
-          'Transfer'
-        );
-        gameId = transferEvent.args[2];
-        gameAsUser7 = gameToken.connect(ethers.provider.getSigner(others[7]));
-        const approvedAddress = await gameToken.getApproved(gameId);
-        const isApprovedForAll = await gameToken.isApprovedForAll(
-          GameOwner.address,
-          others[7]
-        );
-        // Force metaTx conditions: (msg.sender != from && msg.sender != any type of operator(operator, superOperator, operatorForAll)
-        expect(approvedAddress).to.not.equal(others[7]);
-        expect(isApprovedForAll).to.be.false;
-
-        // Then:
-        await gameTokenAsAdmin.setMetaTransactionProcessor(
-          others[7],
-          METATX_2771
-        );
-        const type = await gameToken.getMetaTransactionProcessorType(others[7]);
-        expect(type).to.be.equal(METATX_2771);
-        await expect(
-          gameAsUser7.transferFrom(GameOwner.address, others[7], gameId)
-        ).to.be.revertedWith('UNAUTHORIZED_TRANSFER');
-      });
     });
   });
 });

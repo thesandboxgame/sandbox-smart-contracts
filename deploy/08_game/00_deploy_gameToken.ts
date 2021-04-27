@@ -4,18 +4,18 @@ const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
   const {deployer, gameTokenAdmin} = await getNamedAccounts();
-  const sandContract = await deployments.get('Sand');
   const assetContract = await deployments.get('Asset');
+  const testMetaTxForwarder = await deployments.get('TestMetaTxForwarder');
 
   await deploy('GameToken', {
     from: deployer,
     log: true,
-    args: [sandContract.address, gameTokenAdmin, assetContract.address],
+    args: [testMetaTxForwarder.address, gameTokenAdmin, assetContract.address],
     skipIfAlreadyDeployed: true,
   });
 };
 
 export default func;
 func.tags = ['GameToken', 'GameToken_deploy'];
-func.dependencies = ['Sand_deploy', 'Asset_deploy'];
+func.dependencies = ['Asset_deploy', 'TestMetaTxForwarder_deploy'];
 func.skip = async (hre) => hre.network.name !== 'hardhat'; // TODO enable

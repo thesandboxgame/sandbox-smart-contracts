@@ -50,10 +50,11 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     event GameEditorSet(address indexed gameOwner, address gameEditor, bool isEditor);
 
     constructor(
-        address metaTransactionContract,
+        address trustedForwarder,
         address admin,
         IAssetToken asset
-    ) ERC721BaseToken(metaTransactionContract, admin) {
+    ) ERC721BaseToken(trustedForwarder) {
+        _admin = admin;
         _asset = asset;
     }
 
@@ -80,7 +81,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         address editor,
         bool isEditor
     ) external override {
-        require(msg.sender == gameOwner || _isValidMetaTx(gameOwner), "EDITOR_ACCESS_DENIED");
+        require(_msgSender() == gameOwner, "EDITOR_ACCESS_DENIED");
         _setGameEditor(gameOwner, editor, isEditor);
     }
 
@@ -93,10 +94,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         address original,
         address to
     ) external override notToZero(to) {
-        require(
-            msg.sender == sender || _isValidMetaTx(sender) || _superOperators[msg.sender],
-            "TRANSFER_ACCESS_DENIED"
-        );
+        address msgSender = _msgSender();
+        require(msgSender == sender || _superOperators[msgSender], "TRANSFER_ACCESS_DENIED");
         require(sender != address(0), "NOT_FROM_ZEROADDRESS");
         address current = _creatorship[original];
         if (current == address(0)) {
@@ -179,7 +178,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @notice Burn a GAME token.
     /// @param gameId The id of the GAME to destroy.
     function burn(uint256 gameId) external override(ERC721BaseToken, IGameToken) {
-        _burnGame(msg.sender, gameId);
+        _burnGame(_msgSender(), gameId);
     }
 
     /// @notice Burn a GAME token on behalf of owner.
@@ -376,12 +375,12 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     function _burnGame(address from, uint256 gameId) internal {
         uint256 storageId = _storageId(gameId);
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(storageId);
+        address msgSender = _msgSender();
         require(
-            msg.sender == owner ||
-                _isValidMetaTx(from) ||
-                (operatorEnabled && _operators[storageId] == msg.sender) ||
-                _superOperators[msg.sender] ||
-                _operatorsForAll[from][msg.sender],
+            msgSender == owner ||
+                (operatorEnabled && _operators[storageId] == msgSender) ||
+                _superOperators[msgSender] ||
+                _operatorsForAll[from][msgSender],
             "UNAUTHORIZED_BURN"
         );
 
@@ -398,11 +397,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         uint256[] memory assetIds
     ) internal notToZero(to) notToThis(to) {
         require(_ownerOf(gameId) == address(0), "ONLY_FROM_BURNED_TOKEN");
-        bool validMetaTx = _isValidMetaTx(from);
         uint256 storageId = _storageId(gameId);
-        if (!validMetaTx) {
-            require(from == msg.sender, "INVALID_RECOVERY");
-        }
+        require(from == _msgSender(), "INVALID_RECOVERY");
         _check_withdrawal_authorized(from, gameId);
         require(assetIds.length > 0, "WITHDRAWAL_COMPLETE");
         uint256[] memory values;
