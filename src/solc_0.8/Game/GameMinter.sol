@@ -6,9 +6,9 @@ import "./GameToken.sol";
 import "../common/interfaces/IGameMinter.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 
-import "@openzeppelin/contracts-0.8/metatx/ERC2771Context.sol";
+import "../common/Libraries/ERC2771Handler.sol";
 
-contract GameMinter is ERC2771Context, IGameMinter {
+contract GameMinter is ERC2771Handler, IGameMinter {
     ///////////////////////////////  Data //////////////////////////////
 
     GameToken internal immutable _gameToken;
@@ -27,12 +27,13 @@ contract GameMinter is ERC2771Context, IGameMinter {
         uint256 gameUpdateFee,
         address feeBeneficiary,
         IERC20 sand
-    ) ERC2771Context(trustedForwarder) {
+    ) {
         _gameToken = gameTokenContract;
         _gameMintingFee = gameMintingFee;
         _gameUpdateFee = gameUpdateFee;
         _feeBeneficiary = feeBeneficiary;
         _sand = sand;
+        ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder)
     }
 
     /// @notice Function to create a new GAME token
