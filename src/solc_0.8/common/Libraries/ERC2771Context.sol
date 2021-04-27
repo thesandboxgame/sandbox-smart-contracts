@@ -9,10 +9,10 @@ contract ERC2771Context {
     address internal _trustedForwarder;
 
     function initialize(address forwarder) internal {
-      _trustedForwarder = forwarder;
+        _trustedForwarder = forwarder;
     }
 
-    function isTrustedForwarder(address forwarder) public view returns(bool) {
+    function isTrustedForwarder(address forwarder) public view returns (bool) {
         return forwarder == _trustedForwarder;
     }
 
@@ -20,7 +20,9 @@ contract ERC2771Context {
         if (isTrustedForwarder(msg.sender)) {
             // The assembly code is more direct than the Solidity version using `abi.decode`.
             // solhint-disable-next-line no-inline-assembly
-            assembly { sender := shr(96, calldataload(sub(calldatasize(), 20))) }
+            assembly {
+                sender := shr(96, calldataload(sub(calldatasize(), 20)))
+            }
         } else {
             return msg.sender;
         }
@@ -28,7 +30,7 @@ contract ERC2771Context {
 
     function _msgData() internal view returns (bytes calldata) {
         if (isTrustedForwarder(msg.sender)) {
-            return msg.data[:msg.data.length-20];
+            return msg.data[:msg.data.length - 20];
         } else {
             return msg.data;
         }
