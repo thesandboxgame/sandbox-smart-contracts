@@ -12,9 +12,9 @@ import "../common/interfaces/IERC721.sol";
 import "../common/interfaces/IERC721TokenReceiver.sol";
 
 import "../common/BaseWithStorage/WithSuperOperators.sol";
-import "../common/Libraries/ERC2771Context.sol";
+import "../common/Libraries/ERC2771Handler.sol";
 
-contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context {
+contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler {
     using Address for address;
     using ObjectLib32 for ObjectLib32.Operations;
     using ObjectLib32 for uint256;
@@ -85,7 +85,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Context 
         _checkInit(2);
         _admin = admin;
         _bouncerAdmin = bouncerAdmin;
-        ERC2771Context.initialize(trustedForwarder);
+        ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
 
     /// @notice Change the minting administrator to be `newBouncerAdmin`.

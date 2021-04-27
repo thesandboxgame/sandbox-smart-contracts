@@ -2,13 +2,13 @@
 // solhint-disable-next-line compiler-version
 pragma solidity ^0.8.0;
 
-/// @dev upgradable variant of openzeppelin contract.
-/// src: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/metatx/ERC2771Context.sol
+/// @dev minimal ERC2771 handler to keep bytecode-size down.
+/// based on: https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/metatx/ERC2771Context.sol
 
-contract ERC2771Context {
+contract ERC2771Handler {
     address internal _trustedForwarder;
 
-    function initialize(address forwarder) internal {
+    function __ERC2771Handler_initialize(address forwarder) internal {
         _trustedForwarder = forwarder;
     }
 
