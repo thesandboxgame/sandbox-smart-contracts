@@ -1,4 +1,4 @@
-pragma solidity 0.6.5;
+pragma solidity 0.8.2;
 
 interface IRootChainManager {
     event TokenMapped(

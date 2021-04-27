@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
 // solhint-disable-next-line compiler-version
-pragma solidity 0.6.5;
+pragma solidity 0.8.2;
 import "../Interfaces/ERC20Extended.sol";
 import "./IRootChainManager.sol";
 contract SandPolygonDepositor {
