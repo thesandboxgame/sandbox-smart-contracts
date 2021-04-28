@@ -3,6 +3,7 @@
 pragma solidity 0.8.2;
 import "../Interfaces/ERC20Extended.sol";
 import "./IRootChainManager.sol";
+
 contract SandPolygonDepositor {
     ERC20Extended internal immutable _sand;
     address internal immutable _predicate;

@@ -1,19 +1,11 @@
 pragma solidity 0.8.2;
 
 interface IRootChainManager {
-    event TokenMapped(
-        address indexed rootToken,
-        address indexed childToken,
-        bytes32 indexed tokenType
-    );
+    event TokenMapped(address indexed rootToken, address indexed childToken, bytes32 indexed tokenType);
 
-    event PredicateRegistered(
-        bytes32 indexed tokenType,
-        address indexed predicateAddress
-    );
+    event PredicateRegistered(bytes32 indexed tokenType, address indexed predicateAddress);
 
-    function registerPredicate(bytes32 tokenType, address predicateAddress)
-        external;
+    function registerPredicate(bytes32 tokenType, address predicateAddress) external;
 
     function mapToken(
         address rootToken,
@@ -21,10 +13,7 @@ interface IRootChainManager {
         bytes32 tokenType
     ) external;
 
-    function cleanMapToken(
-        address rootToken,
-        address childToken
-    ) external;
+    function cleanMapToken(address rootToken, address childToken) external;
 
     function remapToken(
         address rootToken,
