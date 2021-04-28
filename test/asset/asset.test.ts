@@ -75,26 +75,12 @@ describe('Asset.sol', function () {
       )
     ).to.be.revertedWith(`BALANCE_TOO_LOW`);
   });
-  /**
-  it('gameId contains creator address', async function () {
-    const idAsHex = utils.hexValue(gameId);
-    const creatorSlice = idAsHex.slice(0, 42);
-    const randomIdSlice = idAsHex.slice(43, 58);
-    const versionSlice = idAsHex.slice(58);
-    expect(utils.getAddress(creatorSlice)).to.be.equal(users[3].address);
-    expect(randomIdSlice).to.be.equal('000000016721787');
-    expect(versionSlice).to.be.equal('00000001');
-  });
-*/
 
-  describe('Asset: tokenId', function () {
-    it('...', async function () {
-      const {Asset, users, mintAsset} = await setupAsset();
-      const tokenId = await mintAsset(users[1].address, 11);
-      const tokenIdHex = utils.hexValue(tokenId);
-      console.log(`tokenId: ${tokenId}`);
-      console.log(`tokenId as hex: ${tokenIdHex}`);
-    });
+  it('can get the chainIndex from the tokenId', async function () {
+    const {Asset, users, mintAsset} = await setupAsset();
+    const tokenId = await mintAsset(users[1].address, 11);
+    const chainIndex = await Asset.callStatic.chainIndex(tokenId);
+    expect(chainIndex).to.be.equal(0);
   });
 
   describe('Asset: MetaTransactions', function () {

@@ -66,11 +66,11 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     bytes4 internal constant ERC165ID = 0x01ffc9a7;
 
     uint256 internal _initBits;
+    address internal _predicate; // used in place of polygon's `PREDICATE_ROLE`
 
-    address internal _predicate;
-    // @review
+    uint8 internal constant CHAIN_INDEX = 0; // modify this for l2
     uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 32);
-    uint256 private constant CHAIN_INDEX_MASK = 0x0000000000000000000000000000000000000000000000FF0000000000000000;
+    uint256 private constant CHAIN_INDEX_MASK = 0x0000000000000000000000000000000000000000000007F8000000000000000;
 
     event BouncerAdminChanged(address oldBouncerAdmin, address newBouncerAdmin);
     event Bouncer(address bouncer, bool enabled);
@@ -86,7 +86,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         address bouncerAdmin
         // address predicate
     ) public {
-        // initialize the bitfield for previous versions just in case
+        // one-time init of bitfield's previous versions
         _checkInit(0);
         _checkInit(1);
         _checkInit(2);
@@ -1032,17 +1032,16 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     function _generateTokenId(
         address creator,
         uint256 supply,
-        uint40 packId,
+        uint40 packId
         uint16 numFTs,
         uint16 packIndex
-    ) internal virtual pure returns (uint256) {
+    ) internal pure returns (uint256) {
         require(supply > 0 && supply <= MAX_SUPPLY, "SUPPLY_OUT_OF_BOUNDS");
-        // override this function on L2 to change chainIndex
-        uint8 chainIndex = 0;
         return
             uint256(uint160(creator)) *
             CREATOR_OFFSET_MULTIPLIER + // CREATOR
-            (supply == 1 ? uint256(1) * IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT (1) or FT (0) // IS_NFT
+            (supply == 1 ? uint256(1) * IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT(1)|FT(0) // IS_NFT
+            uint256(CHAIN_INDEX) * CHAIN_INDEX_OFFSET_MULTIPLIER + // mainnet = 0, polygon = 1
             uint256(packId) *
             PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // PACk_ID
             numFTs *
