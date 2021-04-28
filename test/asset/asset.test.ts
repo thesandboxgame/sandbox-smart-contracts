@@ -1,4 +1,5 @@
 import {setupAsset} from './fixtures';
+import {utils} from 'ethers';
 import {waitFor} from '../utils';
 import {expect} from '../chai-setup';
 import {sendMetaTx} from './sendMetaTx';
@@ -73,6 +74,27 @@ describe('Asset.sol', function () {
         '0x'
       )
     ).to.be.revertedWith(`BALANCE_TOO_LOW`);
+  });
+  /**
+  it('gameId contains creator address', async function () {
+    const idAsHex = utils.hexValue(gameId);
+    const creatorSlice = idAsHex.slice(0, 42);
+    const randomIdSlice = idAsHex.slice(43, 58);
+    const versionSlice = idAsHex.slice(58);
+    expect(utils.getAddress(creatorSlice)).to.be.equal(users[3].address);
+    expect(randomIdSlice).to.be.equal('000000016721787');
+    expect(versionSlice).to.be.equal('00000001');
+  });
+*/
+
+  describe('Asset: tokenId', function () {
+    it('...', async function () {
+      const {Asset, users, mintAsset} = await setupAsset();
+      const tokenId = await mintAsset(users[1].address, 11);
+      const tokenIdHex = utils.hexValue(tokenId);
+      console.log(`tokenId: ${tokenId}`);
+      console.log(`tokenId as hex: ${tokenIdHex}`);
+    });
   });
 
   describe('Asset: MetaTransactions', function () {

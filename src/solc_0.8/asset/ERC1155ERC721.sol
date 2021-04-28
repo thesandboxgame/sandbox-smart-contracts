@@ -67,6 +67,11 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
 
     uint256 internal _initBits;
 
+    address internal _predicate;
+    // @review
+    uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 32);
+    uint256 private constant CHAIN_INDEX_MASK = 0x0000000000000000000000000000000000000000000000FF0000000000000000;
+
     event BouncerAdminChanged(address oldBouncerAdmin, address newBouncerAdmin);
     event Bouncer(address bouncer, bool enabled);
     event MetaTransactionProcessor(address metaTransactionProcessor, bool enabled);
@@ -74,10 +79,12 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     event Extraction(uint256 indexed fromId, uint256 toId);
     event AssetUpdate(uint256 indexed fromId, uint256 toId);
 
+    // @review setup predicate
     function initV2(
         address trustedForwarder,
         address admin,
         address bouncerAdmin
+        // address predicate
     ) public {
         // initialize the bitfield for previous versions just in case
         _checkInit(0);
@@ -604,6 +611,15 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         return _operatorsForAll[owner][operator] || _superOperators[operator];
     }
 
+    // @review
+    /// @dev get the layer a token was minted on from its id.
+    /// @param id The id of the token to query.
+    /// @return chainIndex The index of the original layer of minting.
+    /// 0 = eth mainnet, 1 == matic mainnet, etc...
+    function chainIndex(uint256 id) public pure returns (uint256 chainIndex) {
+        return uint256((id & CHAIN_INDEX_MASK) >> 63);
+    }
+
     function _setApprovalForAll(
         address sender,
         address operator,
@@ -1019,9 +1035,10 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         uint40 packId,
         uint16 numFTs,
         uint16 packIndex
-    ) internal pure returns (uint256) {
+    ) internal virtual pure returns (uint256) {
         require(supply > 0 && supply <= MAX_SUPPLY, "SUPPLY_OUT_OF_BOUNDS");
-
+        // override this function on L2 to change chainIndex
+        uint8 chainIndex = 0;
         return
             uint256(uint160(creator)) *
             CREATOR_OFFSET_MULTIPLIER + // CREATOR
