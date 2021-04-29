@@ -83,8 +83,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     function initV2(
         address trustedForwarder,
         address admin,
-        address bouncerAdmin
-        // address predicate
+        address bouncerAdmin,
+        address predicate
     ) public {
         // one-time init of bitfield's previous versions
         _checkInit(0);
@@ -92,6 +92,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         _checkInit(2);
         _admin = admin;
         _bouncerAdmin = bouncerAdmin;
+        _predicate = predicate;
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
 
@@ -1032,7 +1033,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     function _generateTokenId(
         address creator,
         uint256 supply,
-        uint40 packId
+        uint40 packId,
         uint16 numFTs,
         uint16 packIndex
     ) internal pure returns (uint256) {
