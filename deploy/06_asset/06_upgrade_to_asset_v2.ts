@@ -10,10 +10,24 @@ const func: DeployFunction = async function (
 
   const forwarder = await deployments.get('TestMetaTxForwarder');
 
+  let ERC1155_PREDICATE = await deployments.getOrNull('ERC1155_PREDICATE');
+  if (!ERC1155_PREDICATE) {
+    ERC1155_PREDICATE = await deploy('ERC1155_PREDICATE', {
+      from: deployer,
+      contract: 'FakePredicateForwarder',
+      log: true,
+    });
+  }
+
   await deploy('Asset', {
     from: deployer,
     contract: 'AssetV2',
-    args: [forwarder.address, assetAdmin, assetBouncerAdmin],
+    args: [
+      forwarder.address,
+      assetAdmin,
+      assetBouncerAdmin,
+      ERC1155_PREDICATE.address,
+    ],
     proxy: {
       owner: deployer,
       proxyContract: 'OpenZeppelinTransparentProxy',
