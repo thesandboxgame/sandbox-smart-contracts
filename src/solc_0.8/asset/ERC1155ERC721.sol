@@ -1042,7 +1042,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
             uint256(uint160(creator)) *
             CREATOR_OFFSET_MULTIPLIER + // CREATOR
             (supply == 1 ? uint256(1) * IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT(1)|FT(0) // IS_NFT
-            uint256(CHAIN_INDEX) * CHAIN_INDEX_OFFSET_MULTIPLIER + // mainnet = 0, polygon = 1
+            uint256(CHAIN_INDEX) *
+            CHAIN_INDEX_OFFSET_MULTIPLIER + // mainnet = 0, polygon = 1
             uint256(packId) *
             PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // PACk_ID
             numFTs *

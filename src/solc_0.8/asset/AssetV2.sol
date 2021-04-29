@@ -13,7 +13,7 @@ contract AssetV2 is ERC1155ERC721 {
         uint256[] calldata amounts,
         bytes calldata data
     ) external {
-      // @review
+        // @review
         require(_msgSender() == _predicate, "!PREDICATE");
         // operator here could be predicate... is there a benefit?
         // hash should be the bytes32 metaData-hash.
@@ -21,5 +21,4 @@ contract AssetV2 is ERC1155ERC721 {
         address operator = address(uint160(0));
         _mint(dummyHash, amounts[0], 0, operator, to, ids[0], data, false);
     }
-
 }
