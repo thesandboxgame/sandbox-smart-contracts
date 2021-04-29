@@ -171,7 +171,7 @@ describe('Asset.sol', function () {
         'mintBatch(address,uint256[],uint256[],bytes)'
       ](users[1].address, [tokenId], [1], '0x');
 
-      await predicate.forward(Asset.address, {
+      await predicate.forward({
         ...defaultRequest,
         to: to,
         data: data,
@@ -197,7 +197,7 @@ describe('Asset.sol', function () {
       );
 
       await waitFor(
-        predicate.forward(Asset.address, {
+        predicate.forward({
           ...defaultRequest,
           to: to,
           data: data,
