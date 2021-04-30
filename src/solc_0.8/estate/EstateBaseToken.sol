@@ -167,7 +167,7 @@ contract EstateBaseToken is ERC721BaseToken {
     function _mintEstate(address to) internal returns (uint256) {
         require(to != address(uint160(0)), "can't send to zero address");
         uint256 estateId = _nextId++;
-        _owners[estateId] = uint256(to);
+        _owners[estateId] = uint256(uint160(to));
         _numNFTPerAddress[to]++;
         emit Transfer(address((0)), to, estateId);
         return estateId;
