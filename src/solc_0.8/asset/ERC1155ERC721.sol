@@ -204,6 +204,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         uint256[] calldata values,
         bytes calldata data
     ) external override {
+        // @review should we also check the length of data.URIs[] if we use something like that?
+        // not sure if we want to try to set/update all URIs at once(both for newly-minted tokens & unlock tokens? Or do we rely on a second TX to update URIs for tokens that were locked in the predicate and may have new metaData from L2 to be set?)
         require(ids.length == values.length, "MISMATCHED_ARR_LEN");
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
@@ -563,19 +565,11 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         }
     }
 
-    /// @notice A distinct Uniform Resource Identifier (URI) for a given token.
-    /// @param id token to get the uri of.
-    /// @return URI string
-    function uri(uint256 id) public view returns (string memory) {
-        require(wasEverMinted(id), "TOKEN_!MINTED"); // prevent returning invalid uri
-        return _toFullURI(_metadataHash[id & URI_ID], id);
-    }
-
     /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
     /// @param id token to get the uri of.
     /// @return URI string
     function tokenURI(uint256 id) public view returns (string memory) {
-        require(_ownerOf(id) != address(0), "NFT_!EXIST");
+        require(_ownerOf(id) != address(0) || wasEverMinted(id), "NFT_!EXIST_||_FT_!MINTED");
         return _toFullURI(_metadataHash[id & URI_ID], id);
     }
 
