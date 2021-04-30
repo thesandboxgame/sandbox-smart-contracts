@@ -10,7 +10,7 @@ const func: DeployFunction = async function (
 
   const forwarder = await deployments.get('TestMetaTxForwarder');
 
-  let ERC1155_PREDICATE = await deployments.get('ERC1155_PREDICATE');
+  const ERC1155_PREDICATE = await deployments.get('ERC1155_PREDICATE');
 
   await deploy('Asset', {
     from: deployer,
