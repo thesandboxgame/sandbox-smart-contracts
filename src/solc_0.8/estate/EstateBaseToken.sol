@@ -119,9 +119,9 @@ contract EstateBaseToken is ERC721BaseToken {
 
     function _check_authorized(address sender, uint8 action) internal {
         require(sender != address(uint160(0)), "sender is zero address");
+        address msgSender = _msgSender();
         if (action == ADD) {
             address minter = _minter;
-            address msgSender = _msgSender();
             if (minter == address(uint160(0))) {
                 require(msgSender == sender, "not _check_authorized");
             } else {
