@@ -22,9 +22,9 @@ contract EstateBaseToken is ERC721BaseToken {
     event QuadsAddedInEstate(uint256 indexed id, uint24[] list);
 
     constructor(
-        address forwarder,
+        address trustedForwarder,
         LandToken land
-    ) public ERC721BaseToken(forwarder) {
+    ) ERC721BaseToken(trustedForwarder) {
         _land = land;
     }
 
