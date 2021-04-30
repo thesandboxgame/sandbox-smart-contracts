@@ -426,6 +426,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Context {
                 (operatorEnabled && _operators[id] == msgSender),
             "UNAUTHORIZED_TRANSFER"
         );
+        return true;
     }
 
     /// @dev Check if there was enough gas.
