@@ -143,10 +143,11 @@ contract EstateBaseToken is ERC721BaseToken {
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(estateId);
         require(owner != address(uint160(0)), "token does not exist");
         require(owner == sender, "not owner");
+        address msgSender = _msgSender();
         require(
-            _superOperators[msg.sender] ||
-            _operatorsForAll[sender][msg.sender] ||
-            (operatorEnabled && _operators[estateId] == msg.sender),
+            _superOperators[msgSender] ||
+            _operatorsForAll[sender][msgSender] ||
+            (operatorEnabled && _operators[estateId] == msgSender),
             "not approved"
         );
     }
