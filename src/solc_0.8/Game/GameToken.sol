@@ -16,11 +16,15 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     uint256 private constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
     uint256 private constant SUBID_MULTIPLIER = uint256(2)**(256 - 224);
+    uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 64 - 16);
     // ((uint256(1) * 2**224) - 1) << 32;
     uint256 private constant STORAGE_ID_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000;
     // ((uint256(1) * 2**32) - 1) << 200;
     uint256 private constant VERSION_MASK = 0x000000FFFFFFFF00000000000000000000000000000000000000000000000000;
+    uint256 private constant CHAIN_INDEX_MASK = 0x0000000000000000000000000000000000000000000000000000000000FF0000;
     bytes32 private constant base32Alphabet = 0x6162636465666768696A6B6C6D6E6F707172737475767778797A323334353637;
+
+    uint8 internal constant CHAIN_INDEX = 1; // L2: Polygon
 
     mapping(uint256 => mapping(uint256 => uint256)) private _gameAssets;
     mapping(address => address) private _creatorship; // creatorship transfer
@@ -314,6 +318,14 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
     }
 
+    /// @dev get the layer a token was minted on from its id.
+    /// @param id The id of the token to query.
+    /// @return index The index of the original layer of minting.
+    /// 0 = eth mainnet, 1 == Polygon, etc...
+    function chainIndex(uint256 id) public pure returns (uint256 index) {
+        return uint256((id & CHAIN_INDEX_MASK) >> 16);
+    }
+
     /// @notice Add assets to an existing GAME.
     /// @param from The address of the current owner of assets.
     /// @param storageId The storageId of the GAME to add assets to.
@@ -426,10 +438,10 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         address from,
         address to,
         uint64 subId,
-        uint32 version,
+        uint16 version,
         bool isCreation
     ) internal returns (uint256 id, uint256 storageId) {
-        uint32 idVersion;
+        uint16 idVersion;
         uint256 gameId;
         uint256 strgId;
         if (isCreation) {
@@ -470,7 +482,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     function _bumpGameVersion(address from, uint256 gameId) internal returns (uint256) {
         address originalCreator = address(uint160(gameId / CREATOR_OFFSET_MULTIPLIER));
         uint64 subId = uint64(gameId / SUBID_MULTIPLIER);
-        uint32 version = uint32(gameId);
+        uint16 version = uint16(gameId);
         version++;
         address owner = _ownerOf(gameId);
         if (from == owner) {
@@ -535,10 +547,16 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     function _generateGameId(
         address creator,
         uint64 subId,
-        uint32 version
+        uint16 version
     ) internal pure returns (uint256) {
         return
-            uint256(uint160(creator)) * CREATOR_OFFSET_MULTIPLIER + uint64(subId) * SUBID_MULTIPLIER + uint32(version);
+            uint256(uint160(creator)) *
+            CREATOR_OFFSET_MULTIPLIER +
+            uint64(subId) *
+            SUBID_MULTIPLIER +
+            CHAIN_INDEX *
+            CHAIN_INDEX_OFFSET_MULTIPLIER +
+            uint16(version);
     }
 
     /// @dev Get the a full URI string for a given hash + gameId.
