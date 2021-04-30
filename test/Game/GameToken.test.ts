@@ -216,6 +216,11 @@ describe('GameToken', function () {
       expect(versionSlice).to.be.equal('00000001');
     });
 
+    it('can get the chainIndex for a GAME', async function () {
+      const chainIndex = await gameToken.chainIndex(gameId);
+      expect(chainIndex).to.be.equal(1);
+    });
+
     it('reverts if non-minter trys to mint Game when _Minter is set', async function () {
       const randomId = await getRandom();
       await expect(
