@@ -206,6 +206,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     ) external override {
         // @review should we also check the length of data.URIs[] if we use something like that?
         // not sure if we want to try to set/update all URIs at once(both for newly-minted tokens & unlock tokens? Or do we rely on a second TX to update URIs for tokens that were locked in the predicate and may have new metaData from L2 to be set?)
+        // metadataHash updates only applicable to erc721 tokens
         require(ids.length == values.length, "MISMATCHED_ARR_LEN");
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
@@ -214,6 +215,9 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         bool authorized = from == sender || isApprovedForAll(from, sender);
 
         _batchTransferFrom(from, to, ids, values, authorized);
+        // @note need to decode data here
+        // bytes32[] hashes = abi.decode(data, {...});
+        _setMetadataHashes(ids, hashes);
         emit TransferBatch(metaTx ? from : sender, from, to, ids, values);
         require(
             _checkERC1155AndCallSafeBatchTransfer(metaTx ? from : sender, from, to, ids, values, data),
@@ -404,13 +408,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         return _bouncers[who];
     }
 
-    /// @notice check whether address `who` is given meta-transaction execution rights.
-    /// @param who The address to query.
-    /// @return whether the address has meta-transaction execution rights.
-    function isMetaTransactionProcessor(address who) external view returns (bool) {
-        return _metaTransactionContracts[who];
-    }
-
     /// @notice Get the balance of `owners` for each token type `ids`.
     /// @param owners the addresses of the token holders queried.
     /// @param ids ids of each token type to query.
@@ -566,6 +563,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     }
 
     /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
+    /// This supports both erc721 & erc1155 tokens.
     /// @param id token to get the uri of.
     /// @return URI string
     function tokenURI(uint256 id) public view returns (string memory) {
@@ -606,7 +604,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         return _operatorsForAll[owner][operator] || _superOperators[operator];
     }
 
-    // @review
     /// @dev get the layer a token was minted on from its id.
     /// @param id The id of the token to query.
     /// @return chainIndex The index of the original layer of minting.
@@ -991,6 +988,13 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     function _checkInit(uint256 v) internal {
         require((_initBits >> v) & uint256(1) != 1, "ALREADY_INITIALISED");
         _initBits = _initBits | (uint256(1) << v);
+    }
+
+    function _setMetadataHashes(uint256[] memory ids, bytes32[] hashes) internal returns (bool) {
+        require(ids.length == hashes.length, "MISMATCHED_ARR_LEN");
+        for (uint256 i; i < hashes.length; i++) {
+          _metadataHash[ids[i] = hashes[i]]
+        }
     }
 
     function _checkIsERC1155Receiver(address _contract) internal view returns (bool) {
