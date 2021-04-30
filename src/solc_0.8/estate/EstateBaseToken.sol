@@ -1,4 +1,5 @@
 //SPDX-License-Identifier: MIT
+// solhint-disable code-complexity
 pragma solidity 0.8.2;
 
 import "../common/BaseWithStorage/ERC721BaseToken.sol";
@@ -13,11 +14,11 @@ contract EstateBaseToken is ERC721BaseToken {
 
     uint16 internal constant GRID_SIZE = 408;
 
-    uint256 _nextId = 1;
-    mapping(uint256 => uint24[]) _quadsInEstate;
-    LandToken _land;
-    address _minter;
-    address _breaker;
+    uint256 internal _nextId = 1;
+    mapping(uint256 => uint24[]) internal _quadsInEstate;
+    LandToken internal _land;
+    address internal _minter;
+    address internal _breaker;
 
     event QuadsAddedInEstate(uint256 indexed id, uint24[] list);
 
@@ -110,6 +111,7 @@ contract EstateBaseToken is ERC721BaseToken {
         emit Transfer(sender, address(uint160(0)), estateId);
     }
 
+    // solhint-disable no-unused-vars
     function transferFromDestroyedEstate(
         address sender,
         address to,
@@ -126,6 +128,8 @@ contract EstateBaseToken is ERC721BaseToken {
         // require(sender == _pastOwnerOf(estateId), "only owner can transfer land from destroyed estate");
         // TODO
     }
+
+    // solhint-enable no-unused-vars
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -218,7 +222,7 @@ contract EstateBaseToken is ERC721BaseToken {
         uint256[] memory sizes,
         uint256[] memory xs,
         uint256[] memory ys,
-        uint256[] memory junctions,
+        uint256[] memory, // junctions,
         bool justCreated
     ) internal {
         _land.batchTransferQuad(sender, address(this), sizes, xs, ys, "");
@@ -276,7 +280,7 @@ contract EstateBaseToken is ERC721BaseToken {
             uint16 y = uint16(ids[i] / GRID_SIZE);
             list[i] = _encode(x, y, 1);
         }
-
+        // solhint-disable-next-line use-forbidden-name
         uint256 l = _quadsInEstate[estateId].length;
         uint16 lastX = 409;
         uint16 lastY = 409;
@@ -320,7 +324,7 @@ contract EstateBaseToken is ERC721BaseToken {
     }
 
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+    // solhint-disable no-unused-vars
     function onERC721BatchReceived(
         address operator,
         address from,
@@ -338,4 +342,6 @@ contract EstateBaseToken is ERC721BaseToken {
     ) external returns (bytes4) {
         revert("please call add* or createFrom* functions");
     }
+    // solhint-enable no-unused-vars
+    // solhint-enable code-complexity
 }
