@@ -122,20 +122,21 @@ contract EstateBaseToken is ERC721BaseToken {
         require(sender != address(uint160(0)), "sender is zero address");
         if (action == ADD) {
             address minter = _minter;
+            address msgSender = _msgSender();
             if (minter == address(uint160(0))) {
-                require(msg.sender == sender || _metaTransactionContracts[msg.sender], "not _check_authorized");
+                require(msgSender == sender, "not _check_authorized");
             } else {
-                require(msg.sender == minter, "only minter allowed");
+                require(msgSender == minter, "only minter allowed");
             }
         } else if (action == BREAK) {
             address breaker = _breaker;
             if (breaker == address(uint160(0))) {
-                require(msg.sender == sender || _metaTransactionContracts[msg.sender], "not _check_authorized");
+                require(msgSender == sender, "not _check_authorized");
             } else {
-                require(msg.sender == breaker, "only breaker allowed");
+                require(msgSender == breaker, "only breaker allowed");
             }
         } else {
-            require(msg.sender == sender || _metaTransactionContracts[msg.sender], "not _check_authorized");
+            require(msgSender == sender, "not _check_authorized");
         }
     }
 
