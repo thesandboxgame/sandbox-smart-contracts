@@ -22,10 +22,9 @@ contract EstateBaseToken is ERC721BaseToken {
     event QuadsAddedInEstate(uint256 indexed id, uint24[] list);
 
     constructor(
-        address metaTransactionContract,
-        address admin,
+        address forwarder,
         LandToken land
-    ) public ERC721BaseToken(metaTransactionContract, admin) {
+    ) public ERC721BaseToken(forwarder) {
         _land = land;
     }
 
