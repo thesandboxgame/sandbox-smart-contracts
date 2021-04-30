@@ -10,14 +10,7 @@ const func: DeployFunction = async function (
 
   const forwarder = await deployments.get('TestMetaTxForwarder');
 
-  let ERC1155_PREDICATE = await deployments.getOrNull('ERC1155_PREDICATE');
-  if (!ERC1155_PREDICATE) {
-    ERC1155_PREDICATE = await deploy('ERC1155_PREDICATE', {
-      from: deployer,
-      contract: 'FakePredicateForwarder',
-      log: true,
-    });
-  }
+  let ERC1155_PREDICATE = await deployments.get('ERC1155_PREDICATE');
 
   await deploy('Asset', {
     from: deployer,
@@ -48,6 +41,7 @@ func.dependencies = [
   'Asset_setup',
   'AssetMinter_deploy',
   'TestMetaTxForwarder_deploy',
-  'GameToken_setup',
+  'ERC1155_PREDICATE',
+  // 'GameToken_setup',
 ];
 func.skip = async (hre) => hre.network.name !== 'hardhat';
