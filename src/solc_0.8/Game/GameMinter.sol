@@ -44,7 +44,7 @@ contract GameMinter is ERC2771Context, IGameMinter {
     /// @return gameId The id of the new GAME token (erc721)
     function createGame(
         address to,
-        GameToken.Update calldata creation,
+        GameToken.GameData calldata creation,
         address editor,
         uint64 subId
     ) external override returns (uint256 gameId) {
@@ -58,7 +58,7 @@ contract GameMinter is ERC2771Context, IGameMinter {
     /// @param gameId The current id of the GAME token.
     /// @param update The values to use for the update.
     /// @return newId The new gameId.
-    function updateGame(uint256 gameId, GameToken.Update memory update) external override returns (uint256 newId) {
+    function updateGame(uint256 gameId, GameToken.GameData memory update) external override returns (uint256 newId) {
         address gameOwner = _gameToken.ownerOf(gameId);
         address msgSender = _msgSender();
         require(msgSender == gameOwner || _gameToken.isGameEditor(gameOwner, msgSender), "AUTH_ACCESS_DENIED");
