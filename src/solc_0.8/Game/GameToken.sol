@@ -39,7 +39,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @param newId The id of the newly minted token.
     /// @param update The changes made to the Game: new assets, removed assets, uri
 
-    event GameTokenUpdated(uint256 indexed oldId, uint256 indexed newId, IGameToken.Update update);
+    event GameTokenUpdated(uint256 indexed oldId, uint256 indexed newId, IGameToken.GameData update);
 
     /// @dev Emits when creatorship of a GAME token is transferred.
     /// @param original The original creator of the GAME token.
@@ -126,7 +126,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     function createGame(
         address from,
         address to,
-        Update calldata creation,
+        GameData calldata creation,
         address editor,
         uint64 subId
     ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256 id) {
@@ -153,7 +153,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     function updateGame(
         address from,
         uint256 gameId,
-        IGameToken.Update memory update
+        IGameToken.GameData memory update
     ) external override onlyMinter() returns (uint256) {
         uint256 storageId = _storageId(gameId);
         _addAssets(from, storageId, update.assetIdsToAdd, update.assetAmountsToAdd);
@@ -420,7 +420,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         }
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
 
-        Update memory recovery;
+        GameData memory recovery;
         recovery.assetIdsToRemove = assetIds;
         recovery.assetAmountsToRemove = values;
         emit GameTokenUpdated(gameId, 0, recovery);
