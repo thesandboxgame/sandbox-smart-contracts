@@ -8,9 +8,9 @@ import "@openzeppelin/contracts-0.8/token/ERC721/IERC721Receiver.sol";
 import "../BaseWithStorage/WithSuperOperators.sol";
 import "../interfaces/IERC721MandatoryTokenReceiver.sol";
 import "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
-import "@openzeppelin/contracts-0.8/metatx/ERC2771Context.sol";
+import "../common/Libraries/ERC2771Handler.sol";
 
-contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Context {
+contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Handler {
     using Address for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
