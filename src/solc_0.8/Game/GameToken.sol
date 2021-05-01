@@ -253,12 +253,11 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         revert("ERC1155_REJECTED");
     }
 
-    /// @notice Get the first token id minted using the same storageId as given tokenId.
-    /// Can be useful in tracking lineage of a token.
+    /// @notice Get the storageID (no chainIndex or version data), which is constant for a given token.
     /// @param gameId The tokenId for which to find the first token Id.
-    /// @return The first token minted with this base id.
-    function originalId(uint256 gameId) external pure override returns (uint256) {
-        return _storageId(gameId) + uint32(1);
+    /// @return The storage id for this token.
+    function storageId(uint256 gameId) external pure override returns (uint256) {
+        return _storageId(gameId);
     }
 
     /// @notice Return the name of the token contract.
