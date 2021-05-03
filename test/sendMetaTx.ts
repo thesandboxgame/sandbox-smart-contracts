@@ -1,4 +1,5 @@
 import {ethers} from 'hardhat';
+import {Receipt} from 'hardhat-deploy/types';
 import {Contract} from 'ethers';
 import {data712} from './forwardRequestData712';
 
@@ -9,7 +10,7 @@ export async function sendMetaTx(
   signer: string,
   gas = '100000',
   value = '0'
-): Promise<void> {
+): Promise<Receipt> {
   const message = {
     from: signer,
     to: to,
@@ -25,5 +26,6 @@ export async function sendMetaTx(
     forwardRequestData,
   ]);
 
-  await forwarder.execute(message, signedData);
+  const receipt = await forwarder.execute(message, signedData);
+  return receipt;
 }
