@@ -12,5 +12,5 @@ interface IGameMinter {
         uint64 subId
     ) external returns (uint256 gameId);
 
-    function updateGame(address from, uint256 gameId, IGameToken.GameData memory update) external returns (uint256 newId);
+    function updateGame(uint256 gameId, IGameToken.GameData memory update) external returns (uint256 newId);
 }
