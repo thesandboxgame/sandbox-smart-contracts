@@ -13,6 +13,7 @@ import {setupTest, User} from './fixtures';
 import {supplyAssets} from './assets';
 import {toUtf8Bytes} from 'ethers/lib/utils';
 const {defaultAbiCoder: abi} = utils;
+import {sendMetaTx} from '../sendMetaTx';
 
 let id: BigNumber;
 const rng = new Prando('GameToken');
@@ -162,6 +163,7 @@ describe('GameToken', function () {
       const randomId = await getRandom();
 
       expect(await gameToken.balanceOf(users[4].address)).to.be.equal(0);
+      console.log('Checkpoint A');
 
       const minterReceipt = await gameTokenAsMinter.createGame(
         users[3].address,
@@ -170,6 +172,7 @@ describe('GameToken', function () {
         ethers.constants.AddressZero,
         randomId
       );
+      console.log('Checkpoint B');
 
       const transferEvent = await expectEventWithArgs(
         gameToken,
@@ -185,6 +188,9 @@ describe('GameToken', function () {
       const gameIdFromTransfer = transferEvent.args[2];
       const ownerFromEvent = transferEvent.args[1];
       const ownerFromStorage = await gameToken.ownerOf(gameId);
+      console.log('Checkpoint C');
+      console.log('Checkpoint D');
+      console.log('Checkpoint E');
       expect(gameId).to.be.equal(gameIdFromTransfer);
       expect(ownerFromStorage).to.be.equal(users[4].address);
       expect(ownerFromEvent).to.be.equal(ownerFromStorage);
@@ -234,7 +240,7 @@ describe('GameToken', function () {
     it('can get the chainIndex for a GAME', async function () {
       const idAsHex = utils.hexValue(gameId);
       const chainIndex = await gameToken.chainIndex(gameId);
-      expect(chainIndex).to.be.equal(0);
+      expect(chainIndex).to.be.equal(1);
     });
 
     it('reverts if non-minter trys to mint Game when _Minter is set', async function () {
@@ -1475,10 +1481,10 @@ describe('GameToken', function () {
       const idAsHex = utils.hexValue(gameId);
       const creator = idAsHex.slice(0, 42);
       const subId = idAsHex.slice(43, 58);
-      const version = idAsHex.slice(58);
+      const version = idAsHex.slice(62);
       expect(utils.getAddress(creator)).to.be.equal(users[0].address);
       expect(subId).to.be.equal('00000002eccadc6');
-      expect(version).to.be.equal('00000001');
+      expect(version).to.be.equal('0001');
     });
 
     it('should consider future versions of gameIds as invalid', async function () {
@@ -1490,8 +1496,8 @@ describe('GameToken', function () {
 
     it('should update version when changes are made', async function () {
       let idAsHex = utils.hexValue(gameId);
-      const versionBefore = idAsHex.slice(58);
-      expect(versionBefore).to.be.equal('00000001');
+      const versionBefore = idAsHex.slice(62);
+      expect(versionBefore).to.be.equal('0001');
 
       gameAssetsWithOldId = await gameToken.getAssetBalances(gameId, assets);
       const receipt = await gameTokenAsMinter.updateGame(
@@ -1506,8 +1512,8 @@ describe('GameToken', function () {
       );
       updatedGameId = updateEvent.args[1];
       idAsHex = utils.hexValue(updatedGameId);
-      const versionAfter = idAsHex.slice(58);
-      expect(versionAfter).to.be.equal('00000002');
+      const versionAfter = idAsHex.slice(62);
+      expect(versionAfter).to.be.equal('0002');
     });
 
     it('should use baseId (creator address + subId) to map to game Assets  ', async function () {
@@ -1531,32 +1537,6 @@ describe('GameToken', function () {
     let gameTokenAsAdmin: Contract;
     let GameOwner: User;
     let assets: BigNumber[];
-
-    async function sendMetaTx(
-      to = '',
-      forwarder: Contract,
-      data = '',
-      signer: string,
-      gas = '100000',
-      value = '0'
-    ): Promise<void> {
-      const message = {
-        from: signer,
-        to: to,
-        value: value,
-        gas: gas,
-        nonce: Number(await forwarder.getNonce(signer)),
-        data: data,
-      };
-
-      const metaTxData712 = await data712(forwarder, message);
-      const signedData = await ethers.provider.send('eth_signTypedData_v4', [
-        signer,
-        metaTxData712,
-      ]);
-
-      await forwarder.execute(message, signedData);
-    }
 
     before(async function () {
       ({
