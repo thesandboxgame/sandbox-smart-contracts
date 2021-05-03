@@ -522,8 +522,8 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @return The address of the owner.
     function _ownerOf(uint256 id) internal view override returns (address) {
         uint256 packedData = _owners[_storageId(id)];
-        uint32 idVersion = uint32(id);
-        uint32 storageVersion = uint32((packedData & VERSION_MASK) >> 200);
+        uint16 idVersion = uint16(id);
+        uint16 storageVersion = uint16((packedData & VERSION_MASK) >> 200);
 
         if (((packedData & BURNED_FLAG) == BURNED_FLAG) || idVersion != storageVersion) {
             return address(0);
