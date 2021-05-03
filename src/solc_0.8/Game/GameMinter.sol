@@ -59,15 +59,14 @@ contract GameMinter is ERC2771Handler, IGameMinter {
     /// @param update The values to use for the update.
     /// @return newId The new gameId.
     function updateGame(
-        address from,
         uint256 gameId,
         GameToken.GameData memory update
     ) external override returns (uint256 newId) {
         address gameOwner = _gameToken.ownerOf(gameId);
         address msgSender = _msgSender();
         require(msgSender == gameOwner || _gameToken.isGameEditor(gameOwner, msgSender),"AUTH_ACCESS_DENIED");
-        _chargeSand(from, _gameUpdateFee);
-        return _gameToken.updateGame(from, gameId, update);
+        _chargeSand(msgSender, _gameUpdateFee);
+        return _gameToken.updateGame(msgSender, gameId, update);
     }
 
     /// @dev Charge a fee in Sand if conditions are met.
