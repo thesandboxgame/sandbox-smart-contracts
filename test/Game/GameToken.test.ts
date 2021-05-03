@@ -12,7 +12,6 @@ import {waitFor, expectEventWithArgs, findEvents} from '../utils';
 import {setupTest, User} from './fixtures';
 import {supplyAssets} from './assets';
 import {toUtf8Bytes} from 'ethers/lib/utils';
-const {defaultAbiCoder: abi} = utils;
 import {sendMetaTx} from '../sendMetaTx';
 
 let id: BigNumber;
@@ -108,10 +107,6 @@ async function getBalances(
     assets[1]
   );
   return balances;
-}
-
-function encodeMetaData(uri: string): string {
-  return abi.encode(['string'], [uri]);
 }
 
 describe('GameToken', function () {
@@ -238,7 +233,6 @@ describe('GameToken', function () {
     });
 
     it('can get the chainIndex for a GAME', async function () {
-      const idAsHex = utils.hexValue(gameId);
       const chainIndex = await gameToken.chainIndex(gameId);
       expect(chainIndex).to.be.equal(1);
     });
