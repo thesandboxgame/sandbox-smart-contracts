@@ -5,7 +5,7 @@ pragma solidity 0.8.2;
 import "./GameToken.sol";
 import "../common/interfaces/IGameMinter.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
-import "../common/Libraries/ERC2771Handler.sol";
+import "../common/BaseWithStorage/ERC2771Handler.sol";
 
 contract GameMinter is ERC2771Handler, IGameMinter {
     ///////////////////////////////  Data //////////////////////////////

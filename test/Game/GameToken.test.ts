@@ -158,7 +158,6 @@ describe('GameToken', function () {
       const randomId = await getRandom();
 
       expect(await gameToken.balanceOf(users[4].address)).to.be.equal(0);
-      console.log('Checkpoint A');
 
       const minterReceipt = await gameTokenAsMinter.createGame(
         users[3].address,
@@ -167,7 +166,6 @@ describe('GameToken', function () {
         ethers.constants.AddressZero,
         randomId
       );
-      console.log('Checkpoint B');
 
       const transferEvent = await expectEventWithArgs(
         gameToken,
@@ -183,9 +181,6 @@ describe('GameToken', function () {
       const gameIdFromTransfer = transferEvent.args[2];
       const ownerFromEvent = transferEvent.args[1];
       const ownerFromStorage = await gameToken.ownerOf(gameId);
-      console.log('Checkpoint C');
-      console.log('Checkpoint D');
-      console.log('Checkpoint E');
       expect(gameId).to.be.equal(gameIdFromTransfer);
       expect(ownerFromStorage).to.be.equal(users[4].address);
       expect(ownerFromEvent).to.be.equal(ownerFromStorage);
@@ -211,22 +206,20 @@ describe('GameToken', function () {
       ).to.be.revertedWith('STORAGE_ID_REUSE_FORBIDDEN');
     });
 
-    it('gameId contains creator address', async function () {
+    it('gameId contains creator, randomId, chainIndex & version data', async function () {
       const idAsHex = utils.hexValue(gameId);
-      console.log(`tokenId: ${idAsHex}`);
       const creatorSlice = idAsHex.slice(0, 42);
       const randomIdSlice = idAsHex.slice(43, 58);
+      const chainIndexSlice = idAsHex.slice(58, 62);
       const versionSlice = idAsHex.slice(62);
       expect(utils.getAddress(creatorSlice)).to.be.equal(users[3].address);
       expect(randomIdSlice).to.be.equal('000000016721787');
+      expect(chainIndexSlice).to.be.equal('0001');
       expect(versionSlice).to.be.equal('0001');
     });
 
     it('can get the storageId for a GAME', async function () {
-      const idAsHex = utils.hexValue(gameId);
       const storageIdAsHex = utils.hexValue(await gameToken.storageId(gameId));
-      console.log(`tokenId: ${idAsHex}`);
-      console.log(`storageId: ${storageIdAsHex}`);
       expect(storageIdAsHex).to.be.equal(
         '0xa0ee7a142d267c1f36714e4a8f75612f20a79720000000001672178700000000'
       );
