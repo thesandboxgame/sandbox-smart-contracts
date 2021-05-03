@@ -8,11 +8,11 @@ import {BigNumber, Contract, BytesLike, utils} from 'ethers';
 import Prando from 'prando';
 import {expect} from '../../chai-setup';
 import {expectEventWithArgs, expectEventWithArgsFromReceipt} from '../../utils';
-import {Address, Receipt} from 'hardhat-deploy/types';
+import {Address} from 'hardhat-deploy/types';
 import {supplyAssets} from '../assets';
 import {toUtf8Bytes} from 'ethers/lib/utils';
 import {gameMintingFee, gameUpdateFee} from '../../../data/gameMinterFees';
-import {data712} from '../data712';
+import {sendMetaTx} from '../../sendMetaTx';
 
 const rng = new Prando('GameMinter');
 
@@ -466,33 +466,6 @@ describe('GameMinter', function () {
     let assets: BigNumber[];
     let editorAssets: BigNumber[];
     let gameTokenFeeBeneficiary: Address;
-
-    async function sendMetaTx(
-      to = '',
-      forwarder: Contract,
-      data = '',
-      signer: string,
-      gas = '100000',
-      value = '0'
-    ): Promise<Receipt> {
-      const message = {
-        from: signer,
-        to: to,
-        value: value,
-        gas: gas,
-        nonce: Number(await forwarder.getNonce(signer)),
-        data: data,
-      };
-
-      const metaTxData712 = await data712(forwarder, message);
-      const signedData = await ethers.provider.send('eth_signTypedData_v4', [
-        signer,
-        metaTxData712,
-      ]);
-
-      const receipt = await forwarder.execute(message, signedData);
-      return receipt;
-    }
 
     before(async function () {
       ({GameMinter, users} = await setupTest());

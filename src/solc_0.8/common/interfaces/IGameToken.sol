@@ -5,7 +5,7 @@ pragma solidity 0.8.2;
 /// @title Interface for the Game token
 
 interface IGameToken {
-    struct Update {
+    struct GameData {
         uint256[] assetIdsToRemove;
         uint256[] assetAmountsToRemove;
         uint256[] assetIdsToAdd;
@@ -16,7 +16,7 @@ interface IGameToken {
     function createGame(
         address from,
         address to,
-        Update calldata creation,
+        GameData calldata creation,
         address editor,
         uint64 subId
     ) external returns (uint256 id);
@@ -42,7 +42,7 @@ interface IGameToken {
     function updateGame(
         address from,
         uint256 gameId,
-        Update calldata update
+        GameData calldata update
     ) external returns (uint256);
 
     function getAssetBalances(uint256 gameId, uint256[] calldata assetIds) external view returns (uint256[] calldata);
@@ -85,5 +85,5 @@ interface IGameToken {
         bytes calldata /*data*/
     ) external view returns (bytes4);
 
-    function originalId(uint256 gameId) external view returns (uint256);
+    function storageId(uint256 gameId) external view returns (uint256);
 }

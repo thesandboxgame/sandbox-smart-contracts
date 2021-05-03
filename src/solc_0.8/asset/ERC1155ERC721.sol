@@ -12,7 +12,7 @@ import "../common/interfaces/IERC721.sol";
 import "../common/interfaces/IERC721TokenReceiver.sol";
 
 import "../common/BaseWithStorage/WithSuperOperators.sol";
-import "../common/Libraries/ERC2771Handler.sol";
+import "../common/BaseWithStorage/ERC2771Handler.sol";
 
 contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler {
     using Address for address;

@@ -5,10 +5,9 @@ pragma solidity 0.8.2;
 import "./GameToken.sol";
 import "../common/interfaces/IGameMinter.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
+import "../common/BaseWithStorage/ERC2771Handler.sol";
 
-import "@openzeppelin/contracts-0.8/metatx/ERC2771Context.sol";
-
-contract GameMinter is ERC2771Context, IGameMinter {
+contract GameMinter is ERC2771Handler, IGameMinter {
     ///////////////////////////////  Data //////////////////////////////
 
     GameToken internal immutable _gameToken;
@@ -27,12 +26,13 @@ contract GameMinter is ERC2771Context, IGameMinter {
         uint256 gameUpdateFee,
         address feeBeneficiary,
         IERC20 sand
-    ) ERC2771Context(trustedForwarder) {
+    ) {
         _gameToken = gameTokenContract;
         _gameMintingFee = gameMintingFee;
         _gameUpdateFee = gameUpdateFee;
         _feeBeneficiary = feeBeneficiary;
         _sand = sand;
+        ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
 
     /// @notice Function to create a new GAME token
@@ -44,7 +44,7 @@ contract GameMinter is ERC2771Context, IGameMinter {
     /// @return gameId The id of the new GAME token (erc721)
     function createGame(
         address to,
-        GameToken.Update calldata creation,
+        GameToken.GameData calldata creation,
         address editor,
         uint64 subId
     ) external override returns (uint256 gameId) {
@@ -58,7 +58,7 @@ contract GameMinter is ERC2771Context, IGameMinter {
     /// @param gameId The current id of the GAME token.
     /// @param update The values to use for the update.
     /// @return newId The new gameId.
-    function updateGame(uint256 gameId, GameToken.Update memory update) external override returns (uint256 newId) {
+    function updateGame(uint256 gameId, GameToken.GameData memory update) external override returns (uint256 newId) {
         address gameOwner = _gameToken.ownerOf(gameId);
         address msgSender = _msgSender();
         require(msgSender == gameOwner || _gameToken.isGameEditor(gameOwner, msgSender), "AUTH_ACCESS_DENIED");
