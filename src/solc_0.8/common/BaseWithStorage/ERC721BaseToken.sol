@@ -8,7 +8,7 @@ import "@openzeppelin/contracts-0.8/token/ERC721/IERC721Receiver.sol";
 import "../BaseWithStorage/WithSuperOperators.sol";
 import "../interfaces/IERC721MandatoryTokenReceiver.sol";
 import "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
-import "../common/Libraries/ERC2771Handler.sol";
+import "../Libraries/ERC2771Handler.sol";
 
 contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Handler {
     using Address for address;
@@ -29,9 +29,9 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Handler {
     mapping(address => mapping(address => bool)) internal _operatorsForAll;
     mapping(uint256 => address) internal _operators;
 
-    constructor(address trustedForwarder)
-        ERC2771Context(trustedForwarder) // solhint-disable no-empty-blocks
-    {}
+    constructor(address trustedForwarder) {
+        ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
+    }
 
     // solhint-enable no-empty-blocks
 
