@@ -2,11 +2,11 @@
 // solhint-disable code-complexity
 pragma solidity 0.8.2;
 
-import "../common/BaseWithStorage/ERC721BaseToken.sol";
+import "../common/BaseWithStorage/ImmutableERC721.sol";
 import "../common/interfaces/ILandToken.sol";
 import "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 
-contract EstateBaseToken is ERC721BaseToken {
+contract EstateBaseToken is ImmutableERC721 {
     uint8 internal constant OWNER = 0;
     uint8 internal constant ADD = 1;
     uint8 internal constant BREAK = 2;
