@@ -1,16 +1,8 @@
 import {setupAsset} from './fixtures';
-import {constants, BigNumber} from 'ethers';
+import {constants} from 'ethers';
 import {waitFor} from '../utils';
 import {expect} from '../chai-setup';
 import {sendMetaTx} from './sendMetaTx';
-
-const defaultRequest = {
-  from: constants.AddressZero,
-  to: constants.AddressZero,
-  value: '0',
-  gas: '10000',
-  data: '0x',
-};
 
 describe('Asset.sol', function () {
   it('user sending asset to itself keep the same balance', async function () {
@@ -177,70 +169,6 @@ describe('Asset.sol', function () {
       );
       expect(balance1).to.be.equal(7);
       expect(balance2).to.be.equal(3);
-    });
-  });
-
-  describe('Asset: Matic Integration', function () {
-    it('should fail if called by other than predicate', async function () {
-      // @note enhance dummy predicate to use actual predicate code
-      const {Asset, users} = await setupAsset();
-
-      await expect(
-        Asset.mintBatch(users[1].address, [11], [3], '0x')
-      ).to.be.revertedWith('!PREDICATE');
-    });
-
-    it('predicate can call mintBatch with a single NFT', async function () {
-      const {Asset, users, predicate} = await setupAsset();
-      const tokenId = 1111111111;
-      const {to, data} = await Asset.populateTransaction[
-        'mintBatch(address,uint256[],uint256[],bytes)'
-      ](users[1].address, [tokenId], [1], '0x');
-
-      await predicate.forward({
-        ...defaultRequest,
-        to: to,
-        data: data,
-        gas: '1000000',
-      });
-
-      expect(await Asset.ownerOf(tokenId)).to.be.equal(users[1].address);
-    });
-
-    it('predicate can call mintBatch with FTs', async function () {
-      const {Asset, users, predicate} = await setupAsset();
-      const tokenId = BigNumber.from(
-        '0x23618e81e3f5cdf7f54c3d65f7fbc0abf5b21e8f000000008000000000800800'
-      );
-      const {to, data} = await Asset.populateTransaction[
-        'mintBatch(address,uint256[],uint256[],bytes)'
-      ](users[1].address, [tokenId], [3], '0x');
-
-      const wasMintedBefore = await Asset.wasEverMinted(tokenId);
-      const balanceBefore = await Asset['balanceOf(address,uint256)'](
-        users[1].address,
-        tokenId
-      );
-
-      await waitFor(
-        predicate.forward({
-          ...defaultRequest,
-          to: to,
-          data: data,
-          gas: '1000000',
-        })
-      );
-
-      const wasMintedAfter = await Asset.wasEverMinted(tokenId);
-      const balanceAfter = await Asset['balanceOf(address,uint256)'](
-        users[1].address,
-        tokenId
-      );
-
-      expect(wasMintedBefore).to.be.equal(false);
-      expect(balanceBefore).to.be.equal(0);
-      expect(wasMintedAfter).to.be.equal(true);
-      expect(balanceAfter).to.be.equal(3);
     });
   });
 });
