@@ -20,6 +20,7 @@ const func: DeployFunction = async function (
       assetAdmin,
       assetBouncerAdmin,
       ERC1155_PREDICATE.address,
+      0,
     ],
     proxy: {
       owner: deployer,
