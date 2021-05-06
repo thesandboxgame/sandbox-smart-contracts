@@ -17,7 +17,7 @@ const func: DeployFunction = async function (
   const forwarder = await deployments.get('TestMetaTxForwarder');
 
   await deploy('Asset', {
-    from: deployer,
+    from: upgradeAdmin,
     contract: 'AssetV2',
     args: [forwarder.address, assetAdmin, assetBouncerAdmin],
     proxy: {
