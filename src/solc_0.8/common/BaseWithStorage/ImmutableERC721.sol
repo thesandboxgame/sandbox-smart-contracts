@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-import '../BaseWithStorage/ERC721BaseToken.sol';
+import "../BaseWithStorage/ERC721BaseToken.sol";
 
 contract ImmutableERC721 is ERC721BaseToken {
-
     uint256 private constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
     uint256 private constant SUBID_MULTIPLIER = uint256(2)**(256 - 224);
     uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 64 - 16);
@@ -15,6 +14,7 @@ contract ImmutableERC721 is ERC721BaseToken {
 
     uint8 internal _chainIndex;
 
+    // solhint-disable-next-line no-empty-blocks
     constructor(address trustedForwarder) ERC721BaseToken(trustedForwarder) {}
 
     /// @dev get the layer a token was minted on from its id.
@@ -45,7 +45,7 @@ contract ImmutableERC721 is ERC721BaseToken {
     /// though ownerOf(id) would be address(0) after burning.)
     /// @param id The id of the token to query.
     /// @return the address of the owner before burning.
-    function _withdrawalOwnerOf(uint256 id) internal virtual view returns (address) {
+    function _withdrawalOwnerOf(uint256 id) internal view virtual returns (address) {
         uint256 packedData = _owners[_storageId(id)];
         return address(uint160(packedData));
     }
@@ -60,7 +60,7 @@ contract ImmutableERC721 is ERC721BaseToken {
     /// @dev Get the a full URI string for a given hash + gameId.
     /// @param hash The 32 byte IPFS hash.
     /// @return The URI string.
-    function _toFullURI(bytes32 hash) internal virtual pure returns (string memory) {
+    function _toFullURI(bytes32 hash) internal pure virtual returns (string memory) {
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", "token.json"));
     }
 
@@ -89,7 +89,7 @@ contract ImmutableERC721 is ERC721BaseToken {
     /// @dev Convert a 32 byte hash to a base 32 string.
     /// @param hash A 32 byte (IPFS) hash.
     /// @return _uintAsString The hash as a base 32 string.
-    // solium-disable-next-line security/no-assign-params
+    // solhint-disable-next-line security/no-assign-params
     function hash2base32(bytes32 hash) private pure returns (string memory _uintAsString) {
         uint256 _i = uint256(hash);
         uint256 k = 52;

@@ -21,7 +21,6 @@ contract EstateBaseToken is ImmutableERC721 {
     address internal _minter;
     address internal _breaker;
 
-
     event QuadsAddedInEstate(uint256 indexed id, uint24[] list);
 
     constructor(address trustedForwarder, LandToken land) ImmutableERC721(trustedForwarder) {
