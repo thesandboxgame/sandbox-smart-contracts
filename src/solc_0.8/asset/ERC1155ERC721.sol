@@ -68,7 +68,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     uint256 internal _initBits;
     address internal _predicate; // used in place of polygon's `PREDICATE_ROLE`
 
-    uint8 internal constant CHAIN_INDEX = 0; // modify this for l2
+    uint8 internal _chainIndex; // modify this for l2
     uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 32);
     uint256 private constant CHAIN_INDEX_MASK = 0x0000000000000000000000000000000000000000000007F8000000000000000;
 
@@ -83,7 +83,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         address trustedForwarder,
         address admin,
         address bouncerAdmin,
-        address predicate
+        address predicate,
+        uint8 chainIndex
     ) public {
         // one-time init of bitfield's previous versions
         _checkInit(0);
@@ -93,6 +94,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         _bouncerAdmin = bouncerAdmin;
         _predicate = predicate;
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
+        _chainIndex = chainIndex;
     }
 
     /// @notice Change the minting administrator to be `newBouncerAdmin`.
@@ -1023,13 +1025,13 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         uint40 packId,
         uint16 numFTs,
         uint16 packIndex
-    ) internal pure returns (uint256) {
+    ) internal view returns (uint256) {
         require(supply > 0 && supply <= MAX_SUPPLY, "SUPPLY_OUT_OF_BOUNDS");
         return
             uint256(uint160(creator)) *
             CREATOR_OFFSET_MULTIPLIER + // CREATOR
             (supply == 1 ? uint256(1) * IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT(1)|FT(0) // IS_NFT
-            uint256(CHAIN_INDEX) *
+            uint256(_chainIndex) *
             CHAIN_INDEX_OFFSET_MULTIPLIER + // mainnet = 0, polygon = 1
             uint256(packId) *
             PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // PACk_ID
@@ -1042,7 +1044,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         address creator,
         uint256[] memory supplies,
         uint40 packId
-    ) internal pure returns (uint256[] memory, uint16) {
+    ) internal view returns (uint256[] memory, uint16) {
         uint16 numTokenTypes = uint16(supplies.length);
         uint256[] memory ids = new uint256[](numTokenTypes);
         uint16 numNFTs = 0;
