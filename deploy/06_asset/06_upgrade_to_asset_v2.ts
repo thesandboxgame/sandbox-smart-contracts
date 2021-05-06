@@ -7,7 +7,6 @@ const func: DeployFunction = async function (
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
   const {
-    deployer,
     assetBouncerAdmin,
     assetAdmin,
     upgradeAdmin,
