@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 import '../BaseWithStorage/ERC721BaseToken.sol';
 
-contract ImmutableERC721 {
+contract ImmutableERC721 is ERC721BaseToken {
 
     uint256 private constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
     uint256 private constant SUBID_MULTIPLIER = uint256(2)**(256 - 224);
@@ -15,14 +15,7 @@ contract ImmutableERC721 {
 
     uint8 internal _chainIndex;
 
-    /// @notice Return the URI of a specific token.
-    /// @param id The id of the token.
-    /// @return uri The URI of the token metadata.
-    function tokenURI(uint256 id) public view virtual override returns (string memory uri) {
-        require(_ownerOf(id) != address(0), "BURNED_OR_NEVER_MINTED");
-        uint256 storageId = _storageId(id);
-        return _toFullURI(_metaData[storageId]);
-    }
+    constructor(address trustedForwarder) ERC721BaseToken(trustedForwarder) {}
 
     /// @dev get the layer a token was minted on from its id.
     /// @param id The id of the token to query.
