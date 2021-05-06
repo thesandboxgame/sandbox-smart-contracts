@@ -1,5 +1,4 @@
 import {setupAsset} from './fixtures';
-import {constants} from 'ethers';
 import {waitFor} from '../utils';
 import {expect} from '../chai-setup';
 import {sendMetaTx} from './sendMetaTx';
