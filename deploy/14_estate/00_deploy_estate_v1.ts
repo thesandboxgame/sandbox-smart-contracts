@@ -1,5 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -22,4 +23,4 @@ const func: DeployFunction = async function (
 export default func;
 func.tags = ['Asset', 'Asset_deploy'];
 func.dependencies = ['Land_deploy', 'TestMetaTxForwarder_deploy'];
-func.skip = async (hre) => hre.network.name !== 'hardhat';
+func.skip = skipUnlessTest;

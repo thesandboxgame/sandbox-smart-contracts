@@ -5,7 +5,7 @@ const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
-  const {deployer} = await getNamedAccounts();
+  const {deployer, upgradeAdmin} = await getNamedAccounts();
   const {deploy} = deployments;
 
   const sandContract = await deployments.get('Sand');
@@ -15,7 +15,7 @@ const func: DeployFunction = async function (
     contract: 'Asset',
     args: [sandContract.address, deployer, deployer],
     proxy: {
-      owner: deployer,
+      owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
       methodName: 'init',
       upgradeIndex: 0,

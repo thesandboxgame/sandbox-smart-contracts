@@ -1,4 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
+import {skipUnlessTest} from '../../utils/network';
 import {gameMintingFee, gameUpdateFee} from '../../data/gameMinterFees';
 
 const func: DeployFunction = async function (hre) {
@@ -31,4 +32,4 @@ func.dependencies = [
   'Sand_deploy',
   'TestMetaTxForwarder_deploy',
 ];
-func.skip = async (hre) => hre.network.name !== 'hardhat'; // TODO enable
+func.skip = skipUnlessTest; // TODO enable

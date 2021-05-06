@@ -1,0 +1,25 @@
+import hre, {getNamedAccounts} from 'hardhat';
+import {DeployFunction} from 'hardhat-deploy/types';
+
+const func: DeployFunction = async function () {
+  const {deployments} = hre;
+  const {execute, read, catchUnknownSigner} = deployments;
+  const {upgradeAdmin} = await getNamedAccounts();
+
+  const currentOwner = await read('DefaultProxyAdmin', 'owner');
+  if (currentOwner !== upgradeAdmin) {
+    await catchUnknownSigner(
+      execute(
+        'DefaultProxyAdmin',
+        {from: currentOwner},
+        'transferOwnership',
+        upgradeAdmin
+      )
+    );
+  }
+};
+export default func;
+
+if (require.main === module) {
+  func(hre);
+}
