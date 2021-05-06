@@ -11,11 +11,13 @@ const func: DeployFunction = async function () {
     await catchUnknownSigner(
       execute(
         'DefaultProxyAdmin',
-        {from: currentOwner},
+        {from: currentOwner, log: true},
         'transferOwnership',
         upgradeAdmin
       )
     );
+  } else {
+    console.log('already set to ' + currentOwner);
   }
 };
 export default func;
