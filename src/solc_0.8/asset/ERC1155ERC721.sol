@@ -79,7 +79,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     event Extraction(uint256 indexed fromId, uint256 toId);
     event AssetUpdate(uint256 indexed fromId, uint256 toId);
 
-    // @review setup predicate
     function initV2(
         address trustedForwarder,
         address admin,
@@ -215,9 +214,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         bool authorized = from == sender || isApprovedForAll(from, sender);
 
         _batchTransferFrom(from, to, ids, values, authorized);
-        // @note need to decode data here
-        // bytes32[] hashes = abi.decode(data, {...});
-        // _setMetadataHashes(ids, hashes);
         emit TransferBatch(metaTx ? from : sender, from, to, ids, values);
         require(
             _checkERC1155AndCallSafeBatchTransfer(metaTx ? from : sender, from, to, ids, values, data),
@@ -989,13 +985,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         require((_initBits >> v) & uint256(1) != 1, "ALREADY_INITIALISED");
         _initBits = _initBits | (uint256(1) << v);
     }
-
-    // function _setMetadataHashes(uint256[] memory ids, bytes32[] memory hashes) internal returns (bool) {
-    //     require(ids.length == hashes.length, "MISMATCHED_ARR_LEN");
-    //     for (uint256 i; i < hashes.length; i++) {
-    //       _metadataHash[ids[i] = hashes[i]];
-    //     }
-    // }
 
     function _checkIsERC1155Receiver(address _contract) internal view returns (bool) {
         bool success;
