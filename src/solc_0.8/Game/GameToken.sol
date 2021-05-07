@@ -2,12 +2,12 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-import "../common/BaseWithStorage/ERC721BaseToken.sol";
+import "../common/BaseWithStorage/ImmutableERC721.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
 import "../common/interfaces/IAssetToken.sol";
 import "../common/interfaces/IGameToken.sol";
 
-contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
+contract GameToken is ImmutableERC721, WithMinter, IGameToken {
     ///////////////////////////////  Data //////////////////////////////
 
     IAssetToken internal immutable _asset;
@@ -23,8 +23,6 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     uint256 private constant VERSION_MASK = 0x000000FFFFFFFF00000000000000000000000000000000000000000000000000;
     uint256 private constant CHAIN_INDEX_MASK = 0x0000000000000000000000000000000000000000000000000000000000FF0000;
     bytes32 private constant base32Alphabet = 0x6162636465666768696A6B6C6D6E6F707172737475767778797A323334353637;
-
-    uint8 internal constant CHAIN_INDEX = 1; // L2: Polygon
 
     mapping(uint256 => mapping(uint256 => uint256)) private _gameAssets;
     mapping(address => address) private _creatorship; // creatorship transfer
@@ -56,8 +54,9 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     constructor(
         address trustedForwarder,
         address admin,
-        IAssetToken asset
-    ) ERC721BaseToken(trustedForwarder) {
+        IAssetToken asset,
+        uint8 chainIndex
+    ) ImmutableERC721(trustedForwarder, chainIndex) {
         _admin = admin;
         _asset = asset;
     }
@@ -317,14 +316,6 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
     }
 
-    /// @dev get the layer a token was minted on from its id.
-    /// @param id The id of the token to query.
-    /// @return index The index of the original layer of minting.
-    /// 0 = eth mainnet, 1 == Polygon, etc...
-    function chainIndex(uint256 id) public pure returns (uint256 index) {
-        return uint256((id & CHAIN_INDEX_MASK) >> 16);
-    }
-
     /// @notice Add assets to an existing GAME.
     /// @param from The address of the current owner of assets.
     /// @param storageId The storageId of the GAME to add assets to.
@@ -506,17 +497,6 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         require(from == _withdrawalOwnerOf(gameId), "LAST_OWNER_NOT_EQUAL_SENDER");
     }
 
-    /// @dev Get the address allowed to withdraw assets from the GAME token.
-    /// If too many assets in GAME, block.gaslimit won't allow detroy and withdraw in 1 tx.
-    /// A game owner may destroy their GAME token, then withdraw assets in a later tx (even
-    /// though ownerOf(id) would be address(0) after burning.)
-    /// @param id The id of the GAME token to query.
-    /// @return the address of the owner before burning.
-    function _withdrawalOwnerOf(uint256 id) internal view returns (address) {
-        uint256 packedData = _owners[_storageId(id)];
-        return address(uint160(packedData));
-    }
-
     /// @dev A GameToken-specific implementation which handles versioned tokenIds.
     /// @param id The tokenId to get the owner of.
     /// @return The address of the owner.
@@ -547,13 +527,13 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
         address creator,
         uint64 subId,
         uint16 version
-    ) internal pure returns (uint256) {
+    ) internal view returns (uint256) {
         return
             uint256(uint160(creator)) *
             CREATOR_OFFSET_MULTIPLIER +
             uint64(subId) *
             SUBID_MULTIPLIER +
-            CHAIN_INDEX *
+            _chainIndex *
             CHAIN_INDEX_OFFSET_MULTIPLIER +
             uint16(version);
     }
@@ -561,24 +541,7 @@ contract GameToken is ERC721BaseToken, WithMinter, IGameToken {
     /// @dev Get the a full URI string for a given hash + gameId.
     /// @param hash The 32 byte IPFS hash.
     /// @return The URI string.
-    function _toFullURI(bytes32 hash) internal pure returns (string memory) {
+    function _toFullURI(bytes32 hash) internal override pure returns (string memory) {
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", "game.json"));
-    }
-
-    /// @dev Convert a 32 byte hash to a base 32 string.
-    /// @param hash A 32 byte (IPFS) hash.
-    /// @return _uintAsString The hash as a base 32 string.
-    // solium-disable-next-line security/no-assign-params
-    function hash2base32(bytes32 hash) private pure returns (string memory _uintAsString) {
-        uint256 _i = uint256(hash);
-        uint256 k = 52;
-        bytes memory bstr = new bytes(k);
-        bstr[--k] = base32Alphabet[uint8((_i % 8) << 2)]; // uint8 s = uint8((256 - skip) % 5);  // (_i % (2**s)) << (5-s)
-        _i /= 8;
-        while (k > 0) {
-            bstr[--k] = base32Alphabet[_i % 32];
-            _i /= 32;
-        }
-        return string(bstr);
     }
 }
