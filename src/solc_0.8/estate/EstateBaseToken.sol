@@ -121,9 +121,9 @@ contract EstateBaseToken is ImmutableERC721 {
     // solhint-disable no-unused-vars
     function transferFromDestroyedEstate(
         address sender,
-        address to,
-        uint256 num
-    ) external {
+        address,// to,
+        uint256// num
+    ) external view {
         _check_authorized(sender, WITHDRAWAL);
         // TODO
         // require(sender != address(this), "from itself");
@@ -143,13 +143,13 @@ contract EstateBaseToken is ImmutableERC721 {
     /// @return uri The URI of the token metadata.
     function tokenURI(uint256 id) public view returns (string memory uri) {
         require(_ownerOf(id) != address(0), "BURNED_OR_NEVER_MINTED");
-        uint256 storageId = _storageId(id);
-        return _toFullURI(_metaData[storageId]);
+        uint256 immutableId = _storageId(id);
+        return _toFullURI(_metaData[immutableId]);
     }
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    function _check_authorized(address sender, uint8 action) internal {
+    function _check_authorized(address sender, uint8 action) internal view {
         require(sender != address(uint160(0)), "sender is zero address");
         address msgSender = _msgSender();
         if (action == ADD) {
@@ -171,7 +171,7 @@ contract EstateBaseToken is ImmutableERC721 {
         }
     }
 
-    function _check_hasOwnerRights(address sender, uint256 estateId) internal {
+    function _check_hasOwnerRights(address sender, uint256 estateId) internal view {
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(estateId);
         require(owner != address(uint160(0)), "token does not exist");
         require(owner == sender, "not owner");
@@ -342,20 +342,20 @@ contract EstateBaseToken is ImmutableERC721 {
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // solhint-disable no-unused-vars
     function onERC721BatchReceived(
-        address operator,
-        address from,
-        uint256[] calldata ids,
-        bytes calldata data
-    ) external returns (bytes4) {
+        address,// operator,
+        address,// from,
+        uint256[] calldata,// ids,
+        bytes calldata// data
+    ) external pure returns (bytes4) {
         revert("please call add* or createFrom* functions");
     }
 
     function onERC721Received(
-        address operator,
-        address from,
-        uint256 tokenId,
-        bytes calldata data
-    ) external returns (bytes4) {
+        address,// operator,
+        address,// from,
+        uint256,// tokenId,
+        bytes calldata// data
+    ) external pure returns (bytes4) {
         revert("please call add* or createFrom* functions");
     }
     // solhint-enable no-unused-vars
