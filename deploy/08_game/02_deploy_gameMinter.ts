@@ -6,16 +6,16 @@ const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
   const {deployer, gameTokenFeeBeneficiary} = await getNamedAccounts();
-  const gameContract = await deployments.get('GameToken');
+  const childGameContract = await deployments.get('ChildGameToken');
   const sandContract = await deployments.get('Sand');
-  const testMetaTxForwarder = await deployments.get('TestMetaTxForwarder');
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
 
   await deploy('GameMinter', {
     from: deployer,
     log: true,
     args: [
-      gameContract.address,
-      testMetaTxForwarder.address,
+      childGameContract.address,
+      TRUSTED_FORWARDER.address,
       gameMintingFee,
       gameUpdateFee,
       gameTokenFeeBeneficiary,
@@ -28,7 +28,7 @@ const func: DeployFunction = async function (hre) {
 export default func;
 func.tags = ['GameMinter', 'GameMinter_deploy'];
 func.dependencies = [
-  'GameToken_deploy',
+  'ChildGameToken_deploy',
   'Sand_deploy',
   'TestMetaTxForwarder_deploy',
 ];

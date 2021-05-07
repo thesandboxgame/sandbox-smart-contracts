@@ -6,8 +6,8 @@ const func: DeployFunction = async function (hre) {
 
   const {gameTokenAdmin} = await getNamedAccounts();
 
-  const gameToken = await deployments.getOrNull('GameToken');
-  if (!gameToken) {
+  const childGameToken = await deployments.getOrNull('ChildGameToken');
+  if (!childGameToken) {
     return;
   }
 
@@ -16,12 +16,12 @@ const func: DeployFunction = async function (hre) {
     return;
   }
 
-  const currentMinter = await read('GameToken', 'getMinter');
+  const currentMinter = await read('ChildGameToken', 'getMinter');
   const isMinter = currentMinter == gameMinter.address;
 
   if (!isMinter) {
     await execute(
-      'GameToken',
+      'ChildGameToken',
       {from: gameTokenAdmin, log: true},
       'changeMinter',
       gameMinter.address
@@ -30,5 +30,5 @@ const func: DeployFunction = async function (hre) {
 };
 export default func;
 func.runAtTheEnd = true;
-func.tags = ['GameToken', 'GameToken_setup'];
-func.dependencies = ['GameToken_deploy, GameMinter_deploy'];
+func.tags = ['ChildGameToken', 'GameToken_setup'];
+func.dependencies = ['ChildGameToken_deploy, GameMinter_deploy'];
