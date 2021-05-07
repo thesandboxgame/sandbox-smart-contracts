@@ -14,6 +14,8 @@ import "../common/interfaces/IERC721TokenReceiver.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
 
+// solhint-disable max-states-count
+
 contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler {
     using Address for address;
     using ObjectLib32 for ObjectLib32.Operations;
@@ -66,6 +68,13 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     bytes4 internal constant ERC165ID = 0x01ffc9a7;
 
     uint256 internal _initBits;
+    address internal _predicate; // used in place of polygon's `PREDICATE_ROLE`
+
+    uint8 internal _chainIndex; // modify this for l2
+    uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 32);
+    uint256 private constant CHAIN_INDEX_MASK = 0x0000000000000000000000000000000000000000000007F8000000000000000;
+
+    // solhint-enable max-states-count
 
     event BouncerAdminChanged(address oldBouncerAdmin, address newBouncerAdmin);
     event Bouncer(address bouncer, bool enabled);
@@ -77,15 +86,19 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     function initV2(
         address trustedForwarder,
         address admin,
-        address bouncerAdmin
+        address bouncerAdmin,
+        address predicate,
+        uint8 chainIndex
     ) public {
-        // initialize the bitfield for previous versions just in case
+        // one-time init of bitfield's previous versions
         _checkInit(0);
         _checkInit(1);
         _checkInit(2);
         _admin = admin;
         _bouncerAdmin = bouncerAdmin;
+        _predicate = predicate;
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
+        _chainIndex = chainIndex;
     }
 
     /// @notice Change the minting administrator to be `newBouncerAdmin`.
@@ -196,6 +209,9 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         uint256[] calldata values,
         bytes calldata data
     ) external override {
+        // @review should we also check the length of data.URIs[] if we use something like that?
+        // not sure if we want to try to set/update all URIs at once(both for newly-minted tokens & unlock tokens? Or do we rely on a second TX to update URIs for tokens that were locked in the predicate and may have new metaData from L2 to be set?)
+        // metadataHash updates only applicable to erc721 tokens
         require(ids.length == values.length, "MISMATCHED_ARR_LEN");
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
@@ -394,13 +410,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         return _bouncers[who];
     }
 
-    /// @notice check whether address `who` is given meta-transaction execution rights.
-    /// @param who The address to query.
-    /// @return whether the address has meta-transaction execution rights.
-    function isMetaTransactionProcessor(address who) external view returns (bool) {
-        return _metaTransactionContracts[who];
-    }
-
     /// @notice Get the balance of `owners` for each token type `ids`.
     /// @param owners the addresses of the token holders queried.
     /// @param ids ids of each token type to query.
@@ -555,19 +564,12 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         }
     }
 
-    /// @notice A distinct Uniform Resource Identifier (URI) for a given token.
-    /// @param id token to get the uri of.
-    /// @return URI string
-    function uri(uint256 id) public view returns (string memory) {
-        require(wasEverMinted(id), "TOKEN_!MINTED"); // prevent returning invalid uri
-        return _toFullURI(_metadataHash[id & URI_ID], id);
-    }
-
     /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
+    /// This supports both erc721 & erc1155 tokens.
     /// @param id token to get the uri of.
     /// @return URI string
     function tokenURI(uint256 id) public view returns (string memory) {
-        require(_ownerOf(id) != address(0), "NFT_!EXIST");
+        require(_ownerOf(id) != address(0) || wasEverMinted(id), "NFT_!EXIST_||_FT_!MINTED");
         return _toFullURI(_metadataHash[id & URI_ID], id);
     }
 
@@ -602,6 +604,14 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         require(owner != address(0), "OWNER==0");
         require(operator != address(0), "OPERATOR==0");
         return _operatorsForAll[owner][operator] || _superOperators[operator];
+    }
+
+    /// @dev get the layer a token was minted on from its id.
+    /// @param id The id of the token to query.
+    /// @return chainIndex The index of the original layer of minting.
+    /// 0 = eth mainnet, 1 == matic mainnet, etc...
+    function chainIndex(uint256 id) public pure returns (uint256 chainIndex) {
+        return uint256((id & CHAIN_INDEX_MASK) >> 63);
     }
 
     function _setApprovalForAll(
@@ -1019,13 +1029,14 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         uint40 packId,
         uint16 numFTs,
         uint16 packIndex
-    ) internal pure returns (uint256) {
+    ) internal view returns (uint256) {
         require(supply > 0 && supply <= MAX_SUPPLY, "SUPPLY_OUT_OF_BOUNDS");
-
         return
             uint256(uint160(creator)) *
             CREATOR_OFFSET_MULTIPLIER + // CREATOR
-            (supply == 1 ? uint256(1) * IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT (1) or FT (0) // IS_NFT
+            (supply == 1 ? uint256(1) * IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT(1)|FT(0) // IS_NFT
+            uint256(_chainIndex) *
+            CHAIN_INDEX_OFFSET_MULTIPLIER + // mainnet = 0, polygon = 1
             uint256(packId) *
             PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // PACk_ID
             numFTs *
@@ -1037,7 +1048,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         address creator,
         uint256[] memory supplies,
         uint40 packId
-    ) internal pure returns (uint256[] memory, uint16) {
+    ) internal view returns (uint256[] memory, uint16) {
         uint16 numTokenTypes = uint16(supplies.length);
         uint256[] memory ids = new uint256[](numTokenTypes);
         uint16 numNFTs = 0;

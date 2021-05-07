@@ -24,6 +24,7 @@ export const setupAsset = deployments.createFixture(async function () {
   );
   await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
   const Asset = await ethers.getContract('Asset', minter);
+  const predicate = await ethers.getContract('ERC1155_PREDICATE');
   const forwarder = await ethers.getContract('TestMetaTxForwarder');
 
   let id = 0;
@@ -65,5 +66,6 @@ export const setupAsset = deployments.createFixture(async function () {
     users,
     mintAsset,
     forwarder,
+    predicate,
   };
 });

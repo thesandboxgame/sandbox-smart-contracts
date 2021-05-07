@@ -15,10 +15,18 @@ const func: DeployFunction = async function (
 
   const forwarder = await deployments.get('TestMetaTxForwarder');
 
+  const ERC1155_PREDICATE = await deployments.get('ERC1155_PREDICATE');
+
   await deploy('Asset', {
     from: upgradeAdmin,
     contract: 'AssetV2',
-    args: [forwarder.address, assetAdmin, assetBouncerAdmin],
+    args: [
+      forwarder.address,
+      assetAdmin,
+      assetBouncerAdmin,
+      ERC1155_PREDICATE.address,
+      0,
+    ],
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
@@ -39,6 +47,7 @@ func.dependencies = [
   'Asset_setup',
   'AssetMinter_deploy',
   'TestMetaTxForwarder_deploy',
-  'GameToken_setup',
+  'ERC1155_PREDICATE',
+  // 'GameToken_setup',
 ];
 func.skip = skipUnlessTest;
