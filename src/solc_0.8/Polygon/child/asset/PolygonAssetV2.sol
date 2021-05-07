@@ -10,6 +10,23 @@ contract PolygonAssetV2 is ERC1155ERC721 {
     using Address for address;
     address private _childChainManager;
 
+    /// @notice fulfills the purpose of a constructor in upgradeabale contracts
+    function initialize(
+        address trustedForwarder,
+        address admin,
+        address bouncerAdmin,
+        address predicate,
+        address childChainManager,
+        uint8 chainIndex
+    ) external {
+        // @review check isContract?
+        require(trustedForwarder.isContract(), "TRUSTERFORWARDER_NOT_CONTRACT");
+        require(predicate.isContract(), "PREDICATE_NOT_CONTRACT");
+        require(childChainManager.isContract(), "CHILDCHAINMANAGER_NOT_CONTRACT");
+        initV2(trustedForwarder, admin, bouncerAdmin, predicate, chainIndex);
+        _childChainManager = childChainManager;
+    }
+
     /// @notice called when tokens are deposited on root chain
     /// @dev Should be callable only by ChildChainManager
     /// @dev Should handle deposit by minting the required tokens for user
