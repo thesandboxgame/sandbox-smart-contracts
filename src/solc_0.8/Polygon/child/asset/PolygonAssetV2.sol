@@ -66,6 +66,15 @@ contract PolygonAssetV2 is ERC1155ERC721 {
         // emit ChainExit()
     }
 
+    /// @notice called when user wants to batch withdraw tokens back to root chain
+    /// @dev Should burn user's tokens. This transaction will be verified when exiting on root chain
+    /// @param ids ids to withdraw
+    /// @param amounts amounts to withdraw
+    function withdrawBatch(uint256[] calldata ids, uint256[] calldata amounts) external {
+        // _burnBatch(_msgSender(), ids, amounts);
+        // emit ChainExit()
+    }
+
     /// @notice Throws if called by any address other than depositor
     modifier onlyDepositor() {
         require(_msgSender() == _childChainManager, "!DEPOSITOR");
