@@ -8,7 +8,10 @@ import "@openzeppelin/contracts-0.8/utils/Address.sol";
 // solhint-disable-next-line no-empty-blocks
 contract PolygonAssetV2 is ERC1155ERC721 {
     using Address for address;
+
     address private _childChainManager;
+
+    event ChainExit(address indexed to, uint256[] tokenIds, uint256[] amounts, bytes data);
 
     /// @notice fulfills the purpose of a constructor in upgradeabale contracts
     function initialize(
@@ -52,6 +55,15 @@ contract PolygonAssetV2 is ERC1155ERC721 {
                 _mint(dummyHash, amounts[i], rarity, sender, user, ids[0], data, false);
             }
         }
+    }
+
+    /// @notice called when user wants to withdraw single token back to root chain
+    /// @dev Should burn user's tokens. This transaction will be verified when exiting on root chain
+    /// @param id id to withdraw
+    /// @param amount amount to withdraw
+    function withdrawSingle(uint256 id, uint256 amount) external {
+        _burn(_msgSender(), id, amount);
+        // emit ChainExit()
     }
 
     /// @notice Throws if called by any address other than depositor
