@@ -62,25 +62,27 @@ const config: HardhatUserConfig = {
   namedAccounts: {
     deployer: {
       default: 1,
-      1: '0x18dd4e0eb8699eA4FeE238dE41ECfb95e32272f8',
+      mainnet: '0x18dd4e0eb8699eA4FeE238dE41ECfb95e32272f8',
       rinkeby: '0x8A0e83DE499d7543CF486974a6196a35B5F573E7',
     }, // deploy contracts and make sure they are set up correctly
 
     sandAdmin: {
       default: 2,
-      1: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
+      mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
     }, // can add super operators and change admin
 
+    upgradeAdmin: 'sandAdmin',
+
     liquidityRewardProvider: {
       default: 'sandBeneficiary',
-      1: '0x8FFA64FB50559c3Ff09a1022b84B2c5233ed8068',
+      mainnet: '0x8FFA64FB50559c3Ff09a1022b84B2c5233ed8068',
     },
     liquidityRewardAdmin: 'sandAdmin',
 
     kyberDepositor: {
       default: 'sandBeneficiary',
-      1: '0x8FFA64FB50559c3Ff09a1022b84B2c5233ed8068',
+      mainnet: '0x8FFA64FB50559c3Ff09a1022b84B2c5233ed8068',
     },
 
     sandExecutionAdmin: 'sandAdmin', // can add execution extension to SAND (used for Native metatx support)
@@ -98,30 +100,30 @@ const config: HardhatUserConfig = {
 
     sandSaleBeneficiary: {
       default: 3,
-      1: '0x9695ed5020BB47880738Db356678fe8cBc8FF60b', // TODO use another wallet ?
+      mainnet: '0x9695ed5020BB47880738Db356678fe8cBc8FF60b', // TODO use another wallet ?
       rinkeby: '0x60927eB036621b801491B6c5e9A60A8d2dEeD75A',
     },
 
     Foundation: {
       default: 5,
-      1: '', // TODO
+      mainnet: '', // TODO
     },
 
     StakingPool: {
       default: 6,
-      1: '', // TODO
+      mainnet: '', // TODO
     },
 
     treasury: {
       default: 'sandSaleBeneficiary',
       rinkeby: 'sandSaleBeneficiary',
-      1: '0x4489590a116618B506F0EfE885432F6A8ED998E9',
+      mainnet: '0x4489590a116618B506F0EfE885432F6A8ED998E9',
     },
 
     landSaleBeneficiary: {
       default: 'sandSaleBeneficiary',
       rinkeby: 'sandSaleBeneficiary',
-      1: 'treasury',
+      mainnet: 'treasury',
     }, // updated to company treasury wallet 9th September - collect funds from land sales
 
     catalystAssetFeeRecipient: 'treasury',
@@ -129,12 +131,12 @@ const config: HardhatUserConfig = {
     landSaleFeeRecipient: {
       default: 3,
       rinkeby: 5,
-      1: '0x0EB04462D69B1D267d269377E34f60b9De1c8510',
+      mainnet: '0x0EB04462D69B1D267d269377E34f60b9De1c8510',
     }, // collect 5% fee from land sales (prior to implementation of FeeDistributor)
 
     landAdmin: {
       default: 2,
-      1: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
+      mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
     }, // can add super operators and change admin
 
@@ -142,7 +144,7 @@ const config: HardhatUserConfig = {
     assetAttributesRegistryAdmin: 'sandAdmin',
     proxyAdminOwner: {
       default: 2,
-      1: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
+      mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
     },
 
@@ -155,17 +157,17 @@ const config: HardhatUserConfig = {
       // default is computed from private key:
       // "0x4242424242424242424242424242424242424242424242424242424242424242"
       default: '0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025',
-      1: '0x3044719d139F866a44c988823513eCB93060bF1b',
+      mainnet: '0x3044719d139F866a44c988823513eCB93060bF1b',
       rinkeby: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
     },
     sandboxAccount: {
       default: 4,
-      1: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA',
+      mainnet: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA',
       rinkeby: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
     },
     extraCatalystAndGemMinter: {
       default: null,
-      1: null,
+      mainnet: null,
       rinkeby: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
     },
     collectionCatalystMigrationsAdmin: 'sandAdmin', // TODO use special account or deployer ?
@@ -193,7 +195,7 @@ const config: HardhatUserConfig = {
               : undefined,
           }
         : undefined,
-      deploy: ['deploy-for-test', 'deploy'],
+      // deploy: ['deploy-for-test', 'deploy'],
     },
     localhost: {
       url: 'http://localhost:8545',

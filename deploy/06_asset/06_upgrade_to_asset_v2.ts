@@ -1,21 +1,26 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
-  const {deployer, assetBouncerAdmin, assetAdmin} = await getNamedAccounts();
+  const {
+    assetBouncerAdmin,
+    assetAdmin,
+    upgradeAdmin,
+  } = await getNamedAccounts();
   const {deploy} = deployments;
 
   const forwarder = await deployments.get('TestMetaTxForwarder');
 
   await deploy('Asset', {
-    from: deployer,
+    from: upgradeAdmin,
     contract: 'AssetV2',
     args: [forwarder.address, assetAdmin, assetBouncerAdmin],
     proxy: {
-      owner: deployer,
+      owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
       methodName: 'initV2',
       upgradeIndex: 1,
@@ -36,4 +41,4 @@ func.dependencies = [
   'TestMetaTxForwarder_deploy',
   'GameToken_setup',
 ];
-func.skip = async (hre) => hre.network.name !== 'hardhat';
+func.skip = skipUnlessTest;
