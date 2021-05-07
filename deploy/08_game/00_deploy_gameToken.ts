@@ -7,11 +7,17 @@ const func: DeployFunction = async function (hre) {
   const {deployer, gameTokenAdmin} = await getNamedAccounts();
   const assetContract = await deployments.get('Asset');
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+  const chainIndex = 0; // Ethereum-Mainnet. Use 1 for polygon L2
 
   await deploy('GameToken', {
     from: deployer,
     log: true,
-    args: [TRUSTED_FORWARDER.address, gameTokenAdmin, assetContract.address],
+    args: [
+      TRUSTED_FORWARDER.address,
+      gameTokenAdmin,
+      assetContract.address,
+      chainIndex,
+    ],
     skipIfAlreadyDeployed: true,
   });
 };
