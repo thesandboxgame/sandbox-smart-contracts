@@ -29,12 +29,6 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Handler {
     mapping(address => mapping(address => bool)) internal _operatorsForAll;
     mapping(uint256 => address) internal _operators;
 
-    constructor(address trustedForwarder) {
-        ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
-    }
-
-    // solhint-enable no-empty-blocks
-
     /// @notice Approve an operator to spend tokens on the senders behalf.
     /// @param operator The address receiving the approval.
     /// @param id The id of the token.

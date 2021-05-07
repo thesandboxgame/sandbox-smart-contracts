@@ -27,8 +27,10 @@ contract EstateBaseToken is ImmutableERC721 {
         address trustedForwarder,
         LandToken land,
         uint8 chainIndex
-    ) ImmutableERC721(trustedForwarder, chainIndex) {
+    ) {
         _land = land;
+        ImmutableERC721.__ImmutableERC721_initialize(chainIndex);
+        ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
 
     function createFromQuad(
