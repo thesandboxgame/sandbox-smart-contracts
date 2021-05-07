@@ -19,7 +19,11 @@ export const setupTest = deployments.createFixture(async () => {
   await deployments.fixture('GameToken');
 
   const gameToken = await ethers.getContract('GameToken');
-  const testMetaTxForwarder = await ethers.getContract('TestMetaTxForwarder');
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+  const trustedForwarder = await ethers.getContractAt(
+    'TestMetaTxForwarder',
+    TRUSTED_FORWARDER.address
+  );
   const gameTokenAsAdmin = await ethers.getContract(
     'GameToken',
     gameTokenAdmin
@@ -55,6 +59,6 @@ export const setupTest = deployments.createFixture(async () => {
     GameEditor1,
     GameEditor2,
     users,
-    testMetaTxForwarder,
+    trustedForwarder,
   };
 });
