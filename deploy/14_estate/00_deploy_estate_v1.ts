@@ -21,6 +21,6 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['Asset', 'Asset_deploy'];
+func.tags = ['Estate', 'Estate_deploy'];
 func.dependencies = ['Land_deploy', 'TRUSTED_FORWARDER'];
 func.skip = async (hre) => hre.network.name !== 'hardhat';

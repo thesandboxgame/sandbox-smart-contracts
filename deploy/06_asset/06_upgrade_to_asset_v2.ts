@@ -13,7 +13,7 @@ const func: DeployFunction = async function (
   } = await getNamedAccounts();
   const {deploy} = deployments;
 
-  const forwarder = await deployments.get('TestMetaTxForwarder');
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
 
   const ERC1155_PREDICATE = await deployments.get('ERC1155_PREDICATE');
 
@@ -21,7 +21,7 @@ const func: DeployFunction = async function (
     from: upgradeAdmin,
     contract: 'AssetV2',
     args: [
-      forwarder.address,
+      TRUSTED_FORWARDER.address,
       assetAdmin,
       assetBouncerAdmin,
       ERC1155_PREDICATE.address,
@@ -46,7 +46,7 @@ func.dependencies = [
   'Asset_deploy',
   'Asset_setup',
   'AssetMinter_deploy',
-  'TestMetaTxForwarder_deploy',
+  'TRUSTED_FORWARDER',
   'ERC1155_PREDICATE',
   // 'GameToken_setup',
 ];
