@@ -25,7 +25,11 @@ export const setupAsset = deployments.createFixture(async function () {
   await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
   const Asset = await ethers.getContract('Asset', minter);
   const predicate = await ethers.getContract('ERC1155_PREDICATE');
-  const forwarder = await ethers.getContract('TestMetaTxForwarder');
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+  const trustedForwarder = await ethers.getContractAt(
+    'TestMetaTxForwarder',
+    TRUSTED_FORWARDER.address
+  );
 
   let id = 0;
   const ipfsHashString =
@@ -65,7 +69,7 @@ export const setupAsset = deployments.createFixture(async function () {
     Asset,
     users,
     mintAsset,
-    forwarder,
+    trustedForwarder,
     predicate,
   };
 });

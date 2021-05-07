@@ -110,14 +110,14 @@ describe('Asset.sol', function () {
 
   describe('Asset: MetaTransactions', function () {
     it('can transfer by metaTx', async function () {
-      const {Asset, users, mintAsset, forwarder} = await setupAsset();
+      const {Asset, users, mintAsset, trustedForwarder} = await setupAsset();
       const tokenId = await mintAsset(users[1].address, 11);
 
       const {to, data} = await Asset.populateTransaction[
         'safeTransferFrom(address,address,uint256,uint256,bytes)'
       ](users[1].address, users[2].address, tokenId, 10, '0x');
 
-      await sendMetaTx(to, forwarder, data, users[1].address);
+      await sendMetaTx(to, trustedForwarder, data, users[1].address);
 
       const balance = await Asset['balanceOf(address,uint256)'](
         users[2].address,
@@ -127,7 +127,7 @@ describe('Asset.sol', function () {
     });
 
     it('fails to transfer someone else token by metaTx', async function () {
-      const {Asset, users, mintAsset, forwarder} = await setupAsset();
+      const {Asset, users, mintAsset, trustedForwarder} = await setupAsset();
       const tokenId = await mintAsset(users[1].address, 11);
 
       const {to, data} = await Asset.populateTransaction[
@@ -135,7 +135,7 @@ describe('Asset.sol', function () {
       ](users[1].address, users[2].address, tokenId, 10, '0x');
 
       // users[2] trys to transfer users[1]'s token
-      await sendMetaTx(to, forwarder, data, users[2].address);
+      await sendMetaTx(to, trustedForwarder, data, users[2].address);
 
       const balance = await Asset['balanceOf(address,uint256)'](
         users[2].address,
@@ -146,7 +146,7 @@ describe('Asset.sol', function () {
     });
 
     it('can batch-transfer by metaTx', async function () {
-      const {Asset, users, mintAsset, forwarder} = await setupAsset();
+      const {Asset, users, mintAsset, trustedForwarder} = await setupAsset();
       const tokenId1 = await mintAsset(users[1].address, 7);
       const tokenId2 = await mintAsset(users[1].address, 3);
       const tokenIds = [tokenId1, tokenId2];
@@ -156,7 +156,7 @@ describe('Asset.sol', function () {
         'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)'
       ](users[1].address, users[2].address, tokenIds, values, '0x');
 
-      await sendMetaTx(to, forwarder, data, users[1].address);
+      await sendMetaTx(to, trustedForwarder, data, users[1].address);
 
       const balance1 = await Asset['balanceOf(address,uint256)'](
         users[2].address,
