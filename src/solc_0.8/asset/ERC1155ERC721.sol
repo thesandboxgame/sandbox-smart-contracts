@@ -330,6 +330,19 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         _burn(from, id, amount);
     }
 
+    /// @notice Burns `amount` tokens of type `ids` from `from`.
+    /// @param from address whose token is to be burnt.
+    /// @param ids ids of each token type to be burnt.
+    /// @param amounts amount of each token typeto be burnt.
+    function burnBatchFrom(
+        address from,
+        uint256[] memory ids,
+        uint256[] memory amounts
+    ) external {
+        require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
+        _burnBatch(from, ids, amounts);
+    }
+
     /// @notice Upgrades an NFT with new metadata and rarity.
     /// @param from address which own the NFT to be upgraded.
     /// @param id the NFT that will be burnt to be upgraded.
