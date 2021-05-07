@@ -4,13 +4,14 @@ import {skipUnlessTest} from '../../utils/network';
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer, gameTokenAdmin} = await getNamedAccounts();
+  const {deployer, gameTokenAdmin, upgradeAdmin} = await getNamedAccounts();
   const assetContract = await deployments.get('Asset');
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const chainIndex = 1; // L2 (Polygon). Use 0 for Ethereum-Mainnet.
 
-  await deploy('GameToken', {
+  await deploy('ChildGameToken', {
     from: deployer,
+    contract: 'ChildGameTokenV1',
     log: true,
     args: [
       TRUSTED_FORWARDER.address,
@@ -18,11 +19,17 @@ const func: DeployFunction = async function (hre) {
       assetContract.address,
       chainIndex,
     ],
+    proxy: {
+      owner: upgradeAdmin,
+      proxyContract: 'OpenZeppelinTransparentProxy',
+      methodName: 'initV1',
+      upgradeIndex: 0,
+    },
     skipIfAlreadyDeployed: true,
   });
 };
 
 export default func;
-func.tags = ['GameToken', 'GameToken_deploy'];
+func.tags = ['ChildGameToken', 'ChildGameToken_deploy'];
 func.dependencies = ['Asset_deploy', 'TRUSTED_FORWARDER'];
 func.skip = skipUnlessTest; // TODO enable
