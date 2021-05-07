@@ -1,16 +1,16 @@
 //SPDX-License-Identifier: MIT
-// solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
 import "../common/BaseWithStorage/ImmutableERC721.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
 import "../common/interfaces/IAssetToken.sol";
 import "../common/interfaces/IGameToken.sol";
+import "../common/Initializable.sol";
 
-contract GameToken is ImmutableERC721, WithMinter, IGameToken {
+contract BaseGameToken is ImmutableERC721, WithMinter, Initializable, IGameToken {
     ///////////////////////////////  Data //////////////////////////////
 
-    IAssetToken internal immutable _asset;
+    IAssetToken internal _asset;
 
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
@@ -51,15 +51,27 @@ contract GameToken is ImmutableERC721, WithMinter, IGameToken {
     /// @param isEditor WHether the address 'gameEditor' should be an editor.
     event GameEditorSet(address indexed gameOwner, address gameEditor, bool isEditor);
 
-    constructor(
+    function initV1(
         address trustedForwarder,
         address admin,
         IAssetToken asset,
         uint8 chainIndex
-    ) ImmutableERC721(trustedForwarder, chainIndex) {
+    ) public initializer() {
         _admin = admin;
         _asset = asset;
+        ImmutableERC721.__ImmutableERC721_initialize(chainIndex);
+        ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
+
+    // constructor(
+    //     address trustedForwarder,
+    //     address admin,
+    //     IAssetToken asset,
+    //     uint8 chainIndex
+    // ) ImmutableERC721(trustedForwarder, chainIndex) {
+    //     _admin = admin;
+    //     _asset = asset;
+    // }
 
     ///////////////////////////////  Modifiers //////////////////////////////
 
