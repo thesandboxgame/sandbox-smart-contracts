@@ -2,11 +2,11 @@
 // solhint-disable code-complexity
 pragma solidity 0.8.2;
 
-import "../common/BaseWithStorage/ERC721BaseToken.sol";
+import "../common/BaseWithStorage/ImmutableERC721.sol";
 import "../common/interfaces/ILandToken.sol";
 import "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 
-contract EstateBaseToken is ERC721BaseToken {
+contract EstateBaseToken is ImmutableERC721 {
     uint8 internal constant OWNER = 0;
     uint8 internal constant ADD = 1;
     uint8 internal constant BREAK = 2;
@@ -16,13 +16,14 @@ contract EstateBaseToken is ERC721BaseToken {
 
     uint256 internal _nextId = 1;
     mapping(uint256 => uint24[]) internal _quadsInEstate;
+    mapping(uint256 => bytes32) internal _metaData;
     LandToken internal _land;
     address internal _minter;
     address internal _breaker;
 
     event QuadsAddedInEstate(uint256 indexed id, uint24[] list);
 
-    constructor(address trustedForwarder, LandToken land) ERC721BaseToken(trustedForwarder) {
+    constructor(address trustedForwarder, LandToken land) ImmutableERC721(trustedForwarder) {
         _land = land;
     }
 
@@ -130,6 +131,15 @@ contract EstateBaseToken is ERC721BaseToken {
     }
 
     // solhint-enable no-unused-vars
+
+    /// @notice Return the URI of a specific token.
+    /// @param id The id of the token.
+    /// @return uri The URI of the token metadata.
+    function tokenURI(uint256 id) public view returns (string memory uri) {
+        require(_ownerOf(id) != address(0), "BURNED_OR_NEVER_MINTED");
+        uint256 storageId = _storageId(id);
+        return _toFullURI(_metaData[storageId]);
+    }
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////
 
