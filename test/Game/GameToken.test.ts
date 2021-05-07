@@ -1513,7 +1513,7 @@ describe('GameToken', function () {
   });
 
   describe('GameToken: MetaTransactions', function () {
-    let testMetaTxForwarder: Contract;
+    let trustedForwarder: Contract;
     let gameId: BigNumber;
     let gameId2: BigNumber;
     let users: User[];
@@ -1531,7 +1531,7 @@ describe('GameToken', function () {
         users,
         GameOwner,
         gameTokenAsAdmin,
-        testMetaTxForwarder,
+        trustedForwarder,
       } = await setupTest());
       const {sandAdmin, gameTokenAdmin} = await getNamedAccounts();
       await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
@@ -1553,7 +1553,7 @@ describe('GameToken', function () {
 
     it('can get isTrustedForwarder', async function () {
       const isTrustedForwarder = await gameToken.isTrustedForwarder(
-        testMetaTxForwarder.address
+        trustedForwarder.address
       );
       expect(isTrustedForwarder).to.be.true;
     });
@@ -1565,7 +1565,7 @@ describe('GameToken', function () {
         true
       );
 
-      await sendMetaTx(to, testMetaTxForwarder, data, GameOwner.address);
+      await sendMetaTx(to, trustedForwarder, data, GameOwner.address);
 
       expect(
         await gameToken.isGameEditor(GameOwner.address, users[1].address)
@@ -1598,7 +1598,7 @@ describe('GameToken', function () {
 
       await sendMetaTx(
         to,
-        testMetaTxForwarder,
+        trustedForwarder,
         data,
         GameOwner.address,
         '1000000'
@@ -1632,7 +1632,7 @@ describe('GameToken', function () {
         gameId2
       );
 
-      await sendMetaTx(to, testMetaTxForwarder, data, GameOwner.address);
+      await sendMetaTx(to, trustedForwarder, data, GameOwner.address);
 
       expect(await gameToken.creatorOf(gameId2)).to.be.equal(GameOwner.address);
       await expect(gameToken.ownerOf(gameId2)).to.be.revertedWith(
@@ -1663,7 +1663,7 @@ describe('GameToken', function () {
         assets
       );
 
-      await sendMetaTx(to, testMetaTxForwarder, data, GameOwner.address);
+      await sendMetaTx(to, trustedForwarder, data, GameOwner.address);
 
       const balancesAfter = await getBalances(
         assetContract,
@@ -1691,7 +1691,7 @@ describe('GameToken', function () {
         users[2].address
       );
 
-      await sendMetaTx(to, testMetaTxForwarder, data, GameOwner.address);
+      await sendMetaTx(to, trustedForwarder, data, GameOwner.address);
       expect(await gameToken.creatorOf(gameId)).to.be.equal(users[2].address);
     });
   });
