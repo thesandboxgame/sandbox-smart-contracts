@@ -48,6 +48,5 @@ func.dependencies = [
   'AssetMinter_deploy',
   'TRUSTED_FORWARDER',
   'ERC1155_PREDICATE',
-  // 'GameToken_setup',
 ];
 func.skip = skipUnlessTest;
