@@ -15,7 +15,9 @@ contract ImmutableERC721 is ERC721BaseToken {
     uint8 internal _chainIndex;
 
     // solhint-disable-next-line no-empty-blocks
-    constructor(address trustedForwarder) ERC721BaseToken(trustedForwarder) {}
+    constructor(address trustedForwarder, uint8 chainIndex) ERC721BaseToken(trustedForwarder) {
+        _chainIndex = chainIndex;
+    }
 
     /// @dev get the layer a token was minted on from its id.
     /// @param id The id of the token to query.
@@ -90,7 +92,7 @@ contract ImmutableERC721 is ERC721BaseToken {
     /// @param hash A 32 byte (IPFS) hash.
     /// @return _uintAsString The hash as a base 32 string.
     // solhint-disable-next-line security/no-assign-params
-    function hash2base32(bytes32 hash) private pure returns (string memory _uintAsString) {
+    function hash2base32(bytes32 hash) internal pure returns (string memory _uintAsString) {
         uint256 _i = uint256(hash);
         uint256 k = 52;
         bytes memory bstr = new bytes(k);

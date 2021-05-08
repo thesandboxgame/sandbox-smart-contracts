@@ -11,10 +11,11 @@ const func: DeployFunction = async function (
 
   const landContract = await deployments.get('Land');
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+  const chainIndex = 0; // Ethereum-Mainnet. Use 1 for polygon L2
 
   await deploy('EstateV1', {
     from: deployer,
-    args: [TRUSTED_FORWARDER.address, landContract.address],
+    args: [TRUSTED_FORWARDER.address, landContract.address, chainIndex],
     log: true,
     skipIfAlreadyDeployed: true,
   });
