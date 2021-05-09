@@ -1,25 +1,30 @@
-import {Event} from '@ethersproject/contracts';
-import {
-  ethers,
-  deployments,
-  getUnnamedAccounts,
-  getNamedAccounts,
-} from 'hardhat';
-
-import {waitFor, setupUsers} from '../utils';
+import {ethers, deployments, getUnnamedAccounts} from 'hardhat';
+import {waitFor} from '../utils';
+import {EstateTestHelper} from './estateTestHelper';
 
 export const setupEstate = deployments.createFixture(async function () {
-  await deployments.fixture(['Estate']);
-  // await asset_regenerate_and_distribute(hre);
+  await deployments.fixture(['EstateV1']);
   const others = await getUnnamedAccounts();
-  const minter = others[0];
-  others.splice(0, 1);
+  const minter = others[4];
+  const user0 = others[0];
+  const user1 = others[2];
+  const estateContract = await ethers.getContract('EstateV1', minter);
+  const landContract = await ethers.getContract('Land');
+  const landAdmin = await landContract.callStatic.getAdmin();
+  const landContractAsMinter = await landContract.connect(
+    ethers.provider.getSigner(minter)
+  );
+  await waitFor(
+    landContract
+      .connect(ethers.provider.getSigner(landAdmin))
+      .setMinter(minter, true)
+  );
 
-  const {assetBouncerAdmin} = await getNamedAccounts();
-  const Estate = await ethers.getContract('Estate', minter);
-
-  const users = await setupUsers(others, {Estate});
-
+  await waitFor(
+    landContract
+      .connect(ethers.provider.getSigner(landAdmin))
+      .setSuperOperator(estateContract.address, true)
+  );
   async function mintEstate(to: string, value: number) {
     // Estate to be minted
     // const creator = to;
@@ -47,8 +52,15 @@ export const setupEstate = deployments.createFixture(async function () {
   }
 
   return {
-    Estate,
-    users,
-    mintEstate,
+    estateContract,
+    landContractAsMinter,
+    minter,
+    user0,
+    user1,
+    helper: new EstateTestHelper({
+      Estate: estateContract,
+      LandFromMinter: landContract,
+      Land: landContract,
+    }),
   };
 });
