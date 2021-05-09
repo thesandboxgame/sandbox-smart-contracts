@@ -59,7 +59,7 @@ export const setupEstate = deployments.createFixture(async function () {
     user1,
     helper: new EstateTestHelper({
       Estate: estateContract,
-      LandFromMinter: landContract,
+      LandFromMinter: landContractAsMinter,
       Land: landContract,
     }),
   };

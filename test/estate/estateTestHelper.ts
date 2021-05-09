@@ -1,5 +1,6 @@
 import {Contract} from '@ethersproject/contracts';
 import {ethers} from 'hardhat';
+import {waitFor} from '../../scripts/utils/utils';
 import {assert} from '../chai-setup';
 const emptyBytes = Buffer.from('');
 
@@ -14,7 +15,7 @@ export class EstateTestHelper {
     this.contracts = contracts;
   }
 
-  private selectQuads(landQuads: string | any[], indices: number[]) {
+  public static selectQuads(landQuads: string | any[], indices?: number[]) {
     const xs = [];
     const ys = [];
     const sizes = [];
@@ -35,7 +36,7 @@ export class EstateTestHelper {
     return {xs, ys, sizes, selection};
   }
 
-  public assignIds(landQuads: any) {
+  public static assignIds(landQuads: any) {
     for (const landQuad of landQuads) {
       landQuad.topCornerId = landQuad.x + landQuad.y * 408;
     }
@@ -45,20 +46,26 @@ export class EstateTestHelper {
   public async mintQuads(to: any, landSpecs: any) {
     const contracts = this.contracts;
     for (const landSpec of landSpecs) {
-      await contracts.LandFromMinter.functions
-        .mintQuad(to, landSpec.size, landSpec.x, landSpec.y, emptyBytes)
-        .then((tx) => tx.wait());
+      await waitFor(
+        contracts.LandFromMinter.mintQuad(
+          to,
+          landSpec.size,
+          landSpec.x,
+          landSpec.y,
+          emptyBytes
+        )
+      );
     }
   }
 
   public async mintQuadsAndCreateEstate(
-    map: {quads: any; selection: number[]; junctions: any},
+    map: {quads: any; selection?: number[]; junctions: number[]},
     to: any
   ) {
     const contracts = this.contracts;
-    const landQuads = this.assignIds(map.quads);
+    const landQuads = EstateTestHelper.assignIds(map.quads);
     await this.mintQuads(to, landQuads);
-    const {xs, ys, sizes, selection} = this.selectQuads(
+    const {xs, ys, sizes, selection} = EstateTestHelper.selectQuads(
       landQuads,
       map.selection
     );
