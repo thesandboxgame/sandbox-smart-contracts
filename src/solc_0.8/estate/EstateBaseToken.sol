@@ -111,30 +111,56 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         _addQuads(sender, estateId, sizes, xs, ys, junctions, false);
     }
 
-    function destroy(address sender, uint256 estateId) external {
+    /// @notice Burns token `id`.
+    /// @param id The token which will be burnt.
+    function burn(uint256 id) external virtual {
+        // @review
         _check_authorized(sender, BREAK);
+        // @review what is this for? why not in burnFrom?
         _check_hasOwnerRights(sender, estateId);
-        _owners[estateId] = 0; // TODO keep track of it so it can transfer Land back
-        _numNFTPerAddress[sender]--;
-        emit Transfer(sender, address(uint160(0)), estateId);
+        _burn(_msgSender(), _ownerOf(id), id);
     }
 
-    // solhint-disable no-unused-vars
+    /// @notice Burn token`id` from `from`.
+    /// @param from address whose token is to be burnt.
+    /// @param id The token which will be burnt.
+    function burnFrom(address from, uint256 id) external virtual {
+      // @review
+        require(from != address(uint160(0)), "NOT_FROM_ZERO_ADDRESS");
+        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
+        // @review - taken from _check_hasOwnerRights()
+        require(owner != address(uint160(0)), "NONEXISTENT_TOKEN");
+        address msgSender = _msgSender();
+        require(
+            msgSender == from ||
+                (operatorEnabled && _operators[id] == msgSender) ||
+                _superOperators[msgSender] ||
+                _operatorsForAll[from][msgSender],
+            "UNAUTHORIZED_BURN"
+        );
+        _burn(from, owner, id);
+    }
+
+    /// @notice Used to recover Land tokens from a burned estate.
+    /// Note: Implemented separately from burn to avoid hitting the block gas-limit if estate has too many lands.
+    /// @param sender The sender of the request.
+    /// @param to The recipient of the Land tokens.
+    /// @param num The number of Lands to transfer.
+    /// @param estateId The esteate to recover lands from.
     function transferFromDestroyedEstate(
         address sender,
-        address, // to,
-        uint256 // num
+        address to,
+        uint256 num,
+        uint256 estateId
     ) external view {
+      // @review
         _check_authorized(sender, WITHDRAWAL);
-        // TODO
-        // require(sender != address(this), "from itself");
-        // require(sender != address(0), "sender is zero address");
-        // require(msg.sender == sender ||
-        //     _metaTransactionContracts[msg.sender] ||
-        //     _superOperators[msg.sender],
-        //     "not _check_authorized");
-        // require(sender == _pastOwnerOf(estateId), "only owner can transfer land from destroyed estate");
-        // TODO
+        require(sender != address(this), "NOT_FROM_THIS");
+        require(sender != address(uint160(0)), "NOT_FROM_ZERO");
+        address msgSender = _msgSender();
+        require(msgSender == sender || _superOperators[msgSender],
+            "not _check_authorized");
+        require(sender == _withdrawalOwnerOf(estateId), "NOT_WITHDRAWAL_OWNER");
     }
 
     // solhint-enable no-unused-vars
@@ -185,16 +211,16 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     }
 
     function _check_hasOwnerRights(address sender, uint256 estateId) internal view {
-        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(estateId);
-        require(owner != address(uint160(0)), "token does not exist");
-        require(owner == sender, "not owner");
+        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(estateId);// get owner & operator enabled flag
+        require(owner != address(uint160(0)), "token does not exist");// make sure token has not been burnt
+        require(owner == sender, "not owner");// require sender is the owner
         address msgSender = _msgSender();
         require(
             _superOperators[msgSender] ||
                 _operatorsForAll[sender][msgSender] ||
                 (operatorEnabled && _operators[estateId] == msgSender),
             "not approved"
-        );
+        );// make sure some operator is valid
     }
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////////
