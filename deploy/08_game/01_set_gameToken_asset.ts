@@ -6,7 +6,7 @@ const func: DeployFunction = async function (hre) {
 
   const {assetAdmin} = await getNamedAccounts();
 
-  const gameToken = await deployments.getOrNull('GameToken');
+  const gameToken = await deployments.getOrNull('ChildGameToken');
   if (!gameToken) {
     return;
   }
