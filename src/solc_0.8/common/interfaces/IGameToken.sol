@@ -84,5 +84,4 @@ interface IGameToken {
         uint256[] calldata, /*values*/
         bytes calldata /*data*/
     ) external view returns (bytes4);
-
 }
