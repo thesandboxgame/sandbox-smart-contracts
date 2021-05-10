@@ -5,8 +5,9 @@ pragma solidity 0.8.2;
 import "../common/BaseWithStorage/ImmutableERC721.sol";
 import "../common/interfaces/ILandToken.sol";
 import "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract EstateBaseToken is ImmutableERC721 {
+contract BaseEstateToken is ImmutableERC721, Initializable {
     uint8 internal constant OWNER = 0;
     uint8 internal constant ADD = 1;
     uint8 internal constant BREAK = 2;
@@ -23,11 +24,11 @@ contract EstateBaseToken is ImmutableERC721 {
 
     event QuadsAddedInEstate(uint256 indexed id, uint24[] list);
 
-    constructor(
+    function initV1(
         address trustedForwarder,
         LandToken land,
         uint8 chainIndex
-    ) {
+    ) public initializer() {
         _land = land;
         ImmutableERC721.__ImmutableERC721_initialize(chainIndex);
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
