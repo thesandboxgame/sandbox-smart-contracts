@@ -359,6 +359,14 @@ contract BaseEstateToken is ImmutableERC721, Initializable {
     ) external pure returns (bytes4) {
         revert("please call add* or createFrom* functions");
     }
+
+    /// @dev Get the a full URI string for a given hash + gameId.
+    /// @param hash The 32 byte IPFS hash.
+    /// @return The URI string.
+    function _toFullURI(bytes32 hash) internal pure override returns (string memory) {
+        return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", "estate.json"));
+    }
+
     // solhint-enable no-unused-vars
     // solhint-enable code-complexity
 }

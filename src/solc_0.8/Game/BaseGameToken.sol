@@ -475,4 +475,11 @@ contract BaseGameToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         return newId;
     }
 
+    /// @dev Get the a full URI string for a given hash + gameId.
+    /// @param hash The 32 byte IPFS hash.
+    /// @return The URI string.
+    function _toFullURI(bytes32 hash) internal pure override returns (string memory) {
+        return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", "game.json"));
+    }
+
 }
