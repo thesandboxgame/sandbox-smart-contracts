@@ -121,8 +121,8 @@ contract EstateBaseToken is ImmutableERC721 {
     // solhint-disable no-unused-vars
     function transferFromDestroyedEstate(
         address sender,
-        address,// to,
-        uint256// num
+        address, // to,
+        uint256 // num
     ) external view {
         _check_authorized(sender, WITHDRAWAL);
         // TODO
@@ -342,19 +342,19 @@ contract EstateBaseToken is ImmutableERC721 {
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     // solhint-disable no-unused-vars
     function onERC721BatchReceived(
-        address,// operator,
-        address,// from,
-        uint256[] calldata,// ids,
-        bytes calldata// data
+        address, // operator,
+        address, // from,
+        uint256[] calldata, // ids,
+        bytes calldata // data
     ) external pure returns (bytes4) {
         revert("please call add* or createFrom* functions");
     }
 
     function onERC721Received(
-        address,// operator,
-        address,// from,
-        uint256,// tokenId,
-        bytes calldata// data
+        address, // operator,
+        address, // from,
+        uint256, // tokenId,
+        bytes calldata // data
     ) external pure returns (bytes4) {
         revert("please call add* or createFrom* functions");
     }
