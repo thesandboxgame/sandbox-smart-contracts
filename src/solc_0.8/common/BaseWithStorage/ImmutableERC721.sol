@@ -52,7 +52,7 @@ contract ImmutableERC721 is ERC721BaseToken {
     }
 
     /// @notice Get the storageID (no chainIndex or version data), which is constant for a given token.
-    /// @param gameId The tokenId for which to find the first token Id.
+    /// @param tokenId The tokenId for which to find the first token Id.
     /// @return The storage id for this token.
     function getStorageId(uint256 tokenId) external pure virtual returns (uint256) {
         return _storageId(tokenId);
