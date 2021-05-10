@@ -40,6 +40,14 @@ contract ImmutableERC721 is ERC721BaseToken {
         return address(uint160(packedData));
     }
 
+    /// @dev Check if a withdrawal is allowed.
+    /// @param from The address requesting the withdrawal.
+    /// @param gameId The id of the GAME token to withdraw assets from.
+    function _check_withdrawal_authorized(address from, uint256 gameId) internal virtual view {
+        require(from != address(0), "SENDER_ZERO_ADDRESS");
+        require(from == _withdrawalOwnerOf(gameId), "LAST_OWNER_NOT_EQUAL_SENDER");
+    }
+
     /// @dev Get the address allowed to withdraw associated tokens from the parent token.
     /// If too many associated tokens in TOKEN, block.gaslimit won't allow detroy and withdraw in 1 tx.
     /// An owner may destroy their token, then withdraw associated tokens in a later tx (even

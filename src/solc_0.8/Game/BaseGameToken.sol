@@ -475,39 +475,4 @@ contract BaseGameToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         return newId;
     }
 
-    /// @dev Check if a withdrawal is allowed.
-    /// @param from The address requesting the withdrawal.
-    /// @param gameId The id of the GAME token to withdraw assets from.
-    function _check_withdrawal_authorized(address from, uint256 gameId) internal view {
-        require(from != address(0), "SENDER_ZERO_ADDRESS");
-        require(from == _withdrawalOwnerOf(gameId), "LAST_OWNER_NOT_EQUAL_SENDER");
-    }
-
-    /// @dev A GameToken-specific implementation which handles versioned tokenIds.
-    /// @param id The tokenId to get the owner of.
-    /// @return The address of the owner.
-    function _ownerOf(uint256 id) internal view override returns (address) {
-        uint256 packedData = _owners[_storageId(id)];
-        uint16 idVersion = uint16(id);
-        uint16 storageVersion = uint16((packedData & VERSION_MASK) >> 200);
-
-        if (((packedData & BURNED_FLAG) == BURNED_FLAG) || idVersion != storageVersion) {
-            return address(0);
-        }
-        return address(uint160(packedData));
-    }
-
-    /// @dev Get the storageId (full id without the version number) from the full tokenId.
-    /// @param id The full tokenId for the GAME token.
-    /// @return The storageId.
-    function _storageId(uint256 id) internal pure override returns (uint256) {
-        return uint256(id & STORAGE_ID_MASK);
-    }
-
-    /// @dev Get the a full URI string for a given hash + gameId.
-    /// @param hash The 32 byte IPFS hash.
-    /// @return The URI string.
-    function _toFullURI(bytes32 hash) internal pure override returns (string memory) {
-        return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", "game.json"));
-    }
 }
