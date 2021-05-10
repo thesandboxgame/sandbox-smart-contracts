@@ -481,5 +481,4 @@ contract BaseGameToken is ImmutableERC721, WithMinter, Initializable, IGameToken
     function _toFullURI(bytes32 hash) internal pure override returns (string memory) {
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", "game.json"));
     }
-
 }
