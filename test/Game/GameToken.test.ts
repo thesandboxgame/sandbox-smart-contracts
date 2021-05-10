@@ -228,7 +228,7 @@ describe('GameToken', function () {
     });
 
     it('can get the chainIndex for a GAME', async function () {
-      const chainIndex = await gameToken.chainIndex(gameId);
+      const chainIndex = await gameToken.getChainIndex(gameId);
       expect(chainIndex).to.be.equal(1);
     });
 
