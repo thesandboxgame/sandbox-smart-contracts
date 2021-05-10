@@ -1665,13 +1665,21 @@ describe('GameToken', function () {
         assets
       );
 
-      await sendMetaTx(to, trustedForwarder, data, GameOwner.address);
+      await sendMetaTx(
+        to,
+        trustedForwarder,
+        data,
+        GameOwner.address,
+        '1000000'
+      );
 
       const balancesAfter = await getBalances(
         assetContract,
         [GameOwner.address, gameToken.address],
         assets
       );
+      console.log(`BanancesAfter: ${balancesAfter}`);
+
       const ownerBalanceAfter = balancesAfter[0];
       const ownerBalanceAfter2 = balancesAfter[1];
       const contractBalanceAfter = balancesAfter[2];
