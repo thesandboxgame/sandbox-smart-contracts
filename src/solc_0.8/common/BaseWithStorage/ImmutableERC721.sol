@@ -42,10 +42,10 @@ contract ImmutableERC721 is ERC721BaseToken {
 
     /// @dev Check if a withdrawal is allowed.
     /// @param from The address requesting the withdrawal.
-    /// @param gameId The id of the GAME token to withdraw assets from.
-    function _check_withdrawal_authorized(address from, uint256 gameId) internal view virtual {
-        require(from != address(0), "SENDER_ZERO_ADDRESS");
-        require(from == _withdrawalOwnerOf(gameId), "LAST_OWNER_NOT_EQUAL_SENDER");
+    /// @param tokenId The id of the token to withdraw assets from.
+    function _check_withdrawal_authorized(address from, uint256 tokenId) internal view virtual {
+        require(from != address(uint160(0)), "SENDER_ZERO_ADDRESS");
+        require(from == _withdrawalOwnerOf(tokenId), "LAST_OWNER_NOT_EQUAL_SENDER");
     }
 
     /// @dev Get the address allowed to withdraw associated tokens from the parent token.
