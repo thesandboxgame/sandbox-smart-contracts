@@ -18,11 +18,6 @@ contract ImmutableERC721 is ERC721BaseToken {
         _chainIndex = index;
     }
 
-    // // solhint-disable-next-line no-empty-blocks
-    // constructor(address trustedForwarder, uint8 chainIndex) ERC721BaseToken(trustedForwarder) {
-    //     _chainIndex = chainIndex;
-    // }
-
     /// @dev get the layer a token was minted on from its id.
     /// @param id The id of the token to query.
     /// @return The index of the original layer of minting.

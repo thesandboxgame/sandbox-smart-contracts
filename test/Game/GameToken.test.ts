@@ -1678,7 +1678,6 @@ describe('GameToken', function () {
         [GameOwner.address, gameToken.address],
         assets
       );
-      console.log(`BanancesAfter: ${balancesAfter}`);
 
       const ownerBalanceAfter = balancesAfter[0];
       const ownerBalanceAfter2 = balancesAfter[1];

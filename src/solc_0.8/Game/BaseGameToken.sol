@@ -63,16 +63,6 @@ contract BaseGameToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
 
-    // constructor(
-    //     address trustedForwarder,
-    //     address admin,
-    //     IAssetToken asset,
-    //     uint8 chainIndex
-    // ) ImmutableERC721(trustedForwarder, chainIndex) {
-    //     _admin = admin;
-    //     _asset = asset;
-    // }
-
     ///////////////////////////////  Modifiers //////////////////////////////
 
     modifier notToZero(address to) {
