@@ -219,7 +219,9 @@ describe('GameToken', function () {
     });
 
     it('can get the storageId for a GAME', async function () {
-      const storageIdAsHex = utils.hexValue(await gameToken.storageId(gameId));
+      const storageIdAsHex = utils.hexValue(
+        await gameToken.getStorageId(gameId)
+      );
       expect(storageIdAsHex).to.be.equal(
         '0xa0ee7a142d267c1f36714e4a8f75612f20a79720000000001672178700000000'
       );
