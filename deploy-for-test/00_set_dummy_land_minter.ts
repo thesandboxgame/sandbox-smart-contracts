@@ -6,20 +6,20 @@ const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
   const {deployments, getUnnamedAccounts} = hre;
-  const {log, execute, read} = deployments;
+  const {execute, read} = deployments;
 
   const others = await getUnnamedAccounts();
   const dummyMinter = others[4];
 
-    const currentLandAdmin = await read('Land', 'getAdmin');
-    await execute(
-        'Land',
-        {from: currentLandAdmin, log: true},
-        'setMinter',
-        dummyMinter,
-        true
-      )
-
+  const currentLandAdmin = await read('Land', 'getAdmin');
+  await execute(
+    'Land',
+    {from: currentLandAdmin, log: true},
+    'setMinter',
+    dummyMinter,
+    true
+  );
+};
 
 export default func;
 func.runAtTheEnd = true;
