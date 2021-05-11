@@ -30,5 +30,5 @@ const func: DeployFunction = async function (hre) {
 };
 export default func;
 func.runAtTheEnd = true;
-func.tags = ['ChildGameToken', 'GameToken_setup'];
+func.tags = ['ChildGameToken', 'ChildGameToken_setup'];
 func.dependencies = ['ChildGameToken_deploy, GameMinter_deploy'];
