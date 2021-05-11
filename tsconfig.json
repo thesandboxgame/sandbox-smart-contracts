@@ -14,7 +14,7 @@
     "./scripts",
     "./setup",
     "./deploy",
-    "./deploy-for-test",
+    // "./deploy-for-test",
     "./test",
     "./utils"
   ]
