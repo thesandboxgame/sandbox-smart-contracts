@@ -1,4 +1,3 @@
-import {Event} from '@ethersproject/contracts';
 import {ethers, deployments, getUnnamedAccounts} from 'hardhat';
 import {waitFor} from '../utils';
 import {EstateTestHelper} from './estateTestHelper';
