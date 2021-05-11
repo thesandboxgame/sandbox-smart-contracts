@@ -290,6 +290,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
 
     function _mintEstate(address to) internal returns (uint256) {
         require(to != address(uint160(0)), "can't send to zero address");
+        // @todo use _generateTokenId here instead
         uint256 estateId = _nextId++;
         _owners[estateId] = uint256(uint160(to));
         _numNFTPerAddress[to]++;
