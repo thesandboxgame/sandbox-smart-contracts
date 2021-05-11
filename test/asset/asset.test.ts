@@ -1,7 +1,7 @@
 import {setupAsset} from './fixtures';
 import {waitFor} from '../utils';
 import {expect} from '../chai-setup';
-import {sendMetaTx} from './sendMetaTx';
+import {sendMetaTx} from '../sendMetaTx';
 
 describe('Asset.sol', function () {
   it('user sending asset to itself keep the same balance', async function () {
