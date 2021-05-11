@@ -1,9 +1,10 @@
+import {Event} from '@ethersproject/contracts';
 import {ethers, deployments, getUnnamedAccounts} from 'hardhat';
 import {waitFor} from '../utils';
 import {EstateTestHelper} from './estateTestHelper';
 
 export const setupEstate = deployments.createFixture(async function () {
-  await deployments.fixture(['EstateV1']);
+  await deployments.fixture(['ChildEstateToken']);
   const others = await getUnnamedAccounts();
   const minter = others[4];
   const user0 = others[0];

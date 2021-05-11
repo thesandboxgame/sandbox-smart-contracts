@@ -9,7 +9,7 @@ const func: DeployFunction = async function (
   const {log, execute, read} = deployments;
 
   const others = await getUnnamedAccounts();
-  const dummyMinter = others[7];
+  const dummyMinter = others[4];
 
     const currentLandAdmin = await read('Land', 'getAdmin');
     await execute(
