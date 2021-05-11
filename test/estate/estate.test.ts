@@ -27,7 +27,7 @@ describe('Estate', function () {
     const estateOwner = await estateContract.callStatic.ownerOf(1);
     expect(estateOwner).to.equal(user0);
   });
-
+  /**
   it.skip('creating from Lands with junctions', async function () {
     const {estateContract, landContractAsMinter, user0} = await setupEstate();
     const size = 6;
@@ -57,7 +57,7 @@ describe('Estate', function () {
     const estateOwner = await estateContract.callStatic.ownerOf(1);
     expect(estateOwner).to.equal(user0);
   });
-
+*/
   it('creating from multiple quads', async function () {
     const {
       estateContract,
@@ -98,7 +98,7 @@ describe('Estate', function () {
     const estateOwner = await estateContract.callStatic.ownerOf(1);
     expect(estateOwner).to.equal(user0);
   });
-
+  /**
   it.skip('creating from multiple quads fails if not connected', async function () {
     const {estateContract, user0, helper} = await setupEstate();
     const landQuads = EstateTestHelper.assignIds([
@@ -124,7 +124,7 @@ describe('Estate', function () {
         .createFromMultipleQuads(user0, user0, sizes, xs, ys, junctions)
     ).to.be.revertedWith('JUNCTIONS_MISSING');
   });
-
+*/
   it('creating from multiple quads with junctions', async function () {
     const {estateContract, user0, helper} = await setupEstate();
     const landQuads = EstateTestHelper.assignIds([
@@ -151,7 +151,7 @@ describe('Estate', function () {
         .createFromMultipleQuads(user0, user0, sizes, xs, ys, junctions)
     );
   });
-
+  /**
   it.skip('creating from multiple quads without junctions fails', async function () {
     const {estateContract, user0, helper} = await setupEstate();
     const landQuads = EstateTestHelper.assignIds([
@@ -178,7 +178,8 @@ describe('Estate', function () {
         .createFromMultipleQuads(user0, user0, sizes, xs, ys, junctions)
     ).to.be.revertedWith('JUNCTIONS_MISSING');
   });
-
+*/
+  /**
   it.skip('creating from multiple quads with invalid junctions fails', async function () {
     const {estateContract, user0, helper} = await setupEstate();
     const landQuads = EstateTestHelper.assignIds([
@@ -205,6 +206,8 @@ describe('Estate', function () {
         .createFromMultipleQuads(user0, user0, sizes, xs, ys, junctions)
     ).to.be.revertedWith('JUNCTION_NOT_ADJACENT');
   });
+*/
+  /**
   // function does not exist
   it.skip('creating from multiple quads with junctions and destroying get them back', async function () {
     const {estateContract, user0, helper} = await setupEstate();
@@ -232,6 +235,8 @@ describe('Estate', function () {
     );
     helper.checkLandOwnership(selection, user0);
   });
+*/
+  /**
   // function does not exist
   it.skip('creating from multiple quads and adding more and destroying get them back', async function () {
     const {estateContract, user0, helper} = await setupEstate();
@@ -279,7 +284,7 @@ describe('Estate', function () {
     );
     helper.checkLandOwnership(selection, user0);
   });
-
+*/
   it('creating from multiple quads and adding more with gaps fails', async function () {
     const {estateContract, user0, helper} = await setupEstate();
     const {selection} = await helper.mintQuadsAndCreateEstate(
@@ -319,6 +324,7 @@ describe('Estate', function () {
         .addMultipleQuads(user0, 1, sizes, xs, ys, [])
     ).to.be.reverted;
   });
+  /**
   // function does not exist
   it.skip('creating from multiple quads and adding more with junctions and destroying get them back', async function () {
     const {estateContract, user0, helper} = await setupEstate();
@@ -364,7 +370,8 @@ describe('Estate', function () {
       .burnAndTransferFrom(user0, 1, user0);
     helper.checkLandOwnership(selection, user0);
   });
-
+*/
+  /**
   // function does not exist
   it.skip('creating Estate with many Lands and destroying get them back', async function () {
     const {estateContract, user0, helper} = await setupEstate();
@@ -418,7 +425,7 @@ describe('Estate', function () {
     );
     helper.checkLandOwnership(selection, user0);
   });
-
+*/
   it('creating Estate with many Lands and destroying in 2 step get them back', async function () {
     const {estateContract, user0, helper} = await setupEstate();
     const {selection} = await helper.mintQuadsAndCreateEstate(
@@ -474,7 +481,7 @@ describe('Estate', function () {
     );
     helper.checkLandOwnership(selection, user0);
   });
-
+  /**
   it.skip('creating estate with gap fails', async function () {
     const {user0, helper} = await setupEstate();
     await expect(
@@ -523,4 +530,5 @@ describe('Estate', function () {
       )
     ).to.be.revertedWith('JUNCTIONS_MISSING');
   });
+*/
 });
