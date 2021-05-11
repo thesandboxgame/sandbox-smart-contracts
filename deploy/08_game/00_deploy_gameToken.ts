@@ -32,4 +32,5 @@ const func: DeployFunction = async function (hre) {
 export default func;
 func.tags = ['ChildGameToken', 'ChildGameToken_deploy'];
 func.dependencies = ['Asset_deploy', 'TRUSTED_FORWARDER'];
+// TODO: Setup deploy-polygon folder and network.
 func.skip = skipUnlessTest; // TODO enable

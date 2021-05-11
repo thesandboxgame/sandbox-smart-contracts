@@ -32,3 +32,4 @@ export default func;
 func.runAtTheEnd = true;
 func.tags = ['ChildGameToken', 'ChildGameToken_setup'];
 func.dependencies = ['ChildGameToken_deploy, GameMinter_deploy'];
+// TODO: Setup deploy-polygon folder and network.

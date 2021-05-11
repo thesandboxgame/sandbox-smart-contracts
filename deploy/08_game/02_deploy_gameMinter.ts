@@ -32,4 +32,5 @@ func.dependencies = [
   'Sand_deploy',
   'TestMetaTxForwarder_deploy',
 ];
+// TODO: Setup deploy-polygon folder and network.
 func.skip = skipUnlessTest; // TODO enable
