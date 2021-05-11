@@ -113,7 +113,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
 
     /// @notice Burns token `id`.
     /// @param id The token which will be burnt.
-    function burn(uint256 id) external virtual {
+    function burn(uint256 id) external override {
         // @review
         _check_authorized(sender, BREAK);
         // @review what is this for? why not in burnFrom?
@@ -124,7 +124,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @notice Burn token`id` from `from`.
     /// @param from address whose token is to be burnt.
     /// @param id The token which will be burnt.
-    function burnFrom(address from, uint256 id) external virtual {
+    function burnFrom(address from, uint256 id) external override {
       // @review
         require(from != address(uint160(0)), "NOT_FROM_ZERO_ADDRESS");
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
@@ -139,6 +139,26 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
             "UNAUTHORIZED_BURN"
         );
         _burn(from, owner, id);
+    }
+
+    /// @notice Update an existing ESTATE token.This actually burns old token
+    /// and mints new token with same basId & incremented version.
+    /// @param from The one updating the ESTATE token.
+    /// @param estateId The current id of the ESTATE token.
+    /// @param update The values to use for the update.
+    /// @return The new id.
+    function updateEstate(
+        address from,
+        uint256 estateId,
+        IGameToken.GameData memory update
+    ) external override returns (uint256) {
+        uint256 id = _storageId(estateId);
+        _addAssets(from, id, update.assetIdsToAdd, update.assetAmountsToAdd);
+        _removeAssets(id, update.assetIdsToRemove, update.assetAmountsToRemove, _ownerOf(estateId));
+        _metaData[id] = update.uri;
+        uint256 newId = _incrementTokenVersion(from, estateId);
+        emit GameTokenUpdated(estateId, newId, update);
+        return newId;
     }
 
     /// @notice Used to recover Land tokens from a burned estate.
@@ -187,6 +207,27 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     }
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+     /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to token-specific data are preserved via the storageId mechanism.
+    /// @param from The address of the token owner.
+    /// @param estateId The tokenId to increment.
+    /// @return the version-incremented tokenId.
+    function _incrementTokenVersion(address from, uint256 estateId) internal returns(uint256) {
+        address originalCreator = address(uint160(estateId / CREATOR_OFFSET_MULTIPLIER));
+        uint64 subId = uint64(estateId / SUBID_MULTIPLIER);
+        uint16 version = uint16(estateId);
+        version++;
+        address owner = _ownerOf(estateId);
+        // @review maybe use _check_hasOwnerRights() here?
+        if (from == owner) {
+            // caller is owner or metaTx on owner's behalf
+            _burn(from, owner, estateId);
+        }
+        (uint256 newId, ) = _mintGame(originalCreator, owner, subId, version, false);
+        address newOwner = _ownerOf(newId);
+        assert(owner == newOwner);
+        return newId;
+    }
 
     function _check_authorized(address sender, uint8 action) internal view {
         require(sender != address(uint160(0)), "sender is zero address");
