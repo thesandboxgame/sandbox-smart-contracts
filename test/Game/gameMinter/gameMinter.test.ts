@@ -98,7 +98,7 @@ describe('GameMinter', function () {
     before(async function () {
       ({GameMinter, users} = await setupTest());
       const {sandAdmin, gameTokenAdmin} = await getNamedAccounts();
-      gameTokenContract = await ethers.getContract('GameToken');
+      gameTokenContract = await ethers.getContract('ChildGameToken');
       sandContract = await ethers.getContract('Sand');
       sandAsAdmin = await sandContract.connect(
         ethers.provider.getSigner(sandAdmin)
@@ -471,9 +471,13 @@ describe('GameMinter', function () {
       ({GameMinter, users} = await setupTest());
       const {sandAdmin, gameTokenAdmin} = await getNamedAccounts();
       sandContract = await ethers.getContract('Sand');
-      testForwarder = await ethers.getContract('TestMetaTxForwarder');
+      const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+      testForwarder = await ethers.getContractAt(
+        'TestMetaTxForwarder',
+        TRUSTED_FORWARDER.address
+      );
 
-      gameTokenContract = await ethers.getContract('GameToken');
+      gameTokenContract = await ethers.getContract('ChildGameToken');
       sandAsAdmin = await sandContract.connect(
         ethers.provider.getSigner(sandAdmin)
       );

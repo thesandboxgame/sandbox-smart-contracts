@@ -219,14 +219,16 @@ describe('GameToken', function () {
     });
 
     it('can get the storageId for a GAME', async function () {
-      const storageIdAsHex = utils.hexValue(await gameToken.storageId(gameId));
+      const storageIdAsHex = utils.hexValue(
+        await gameToken.getStorageId(gameId)
+      );
       expect(storageIdAsHex).to.be.equal(
         '0xa0ee7a142d267c1f36714e4a8f75612f20a79720000000001672178700000000'
       );
     });
 
     it('can get the chainIndex for a GAME', async function () {
-      const chainIndex = await gameToken.chainIndex(gameId);
+      const chainIndex = await gameToken.getChainIndex(gameId);
       expect(chainIndex).to.be.equal(1);
     });
 
@@ -1663,13 +1665,20 @@ describe('GameToken', function () {
         assets
       );
 
-      await sendMetaTx(to, trustedForwarder, data, GameOwner.address);
+      await sendMetaTx(
+        to,
+        trustedForwarder,
+        data,
+        GameOwner.address,
+        '1000000'
+      );
 
       const balancesAfter = await getBalances(
         assetContract,
         [GameOwner.address, gameToken.address],
         assets
       );
+
       const ownerBalanceAfter = balancesAfter[0];
       const ownerBalanceAfter2 = balancesAfter[1];
       const contractBalanceAfter = balancesAfter[2];

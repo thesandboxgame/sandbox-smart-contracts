@@ -1,16 +1,16 @@
 //SPDX-License-Identifier: MIT
-// solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
 import "../common/BaseWithStorage/ImmutableERC721.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
 import "../common/interfaces/IAssetToken.sol";
 import "../common/interfaces/IGameToken.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract GameToken is ImmutableERC721, WithMinter, IGameToken {
+contract BaseGameToken is ImmutableERC721, WithMinter, Initializable, IGameToken {
     ///////////////////////////////  Data //////////////////////////////
 
-    IAssetToken internal immutable _asset;
+    IAssetToken internal _asset;
 
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
@@ -51,14 +51,16 @@ contract GameToken is ImmutableERC721, WithMinter, IGameToken {
     /// @param isEditor WHether the address 'gameEditor' should be an editor.
     event GameEditorSet(address indexed gameOwner, address gameEditor, bool isEditor);
 
-    constructor(
+    function initV1(
         address trustedForwarder,
         address admin,
         IAssetToken asset,
         uint8 chainIndex
-    ) ImmutableERC721(trustedForwarder, chainIndex) {
+    ) public initializer() {
         _admin = admin;
         _asset = asset;
+        ImmutableERC721.__ImmutableERC721_initialize(chainIndex);
+        ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
 
     ///////////////////////////////  Modifiers //////////////////////////////
@@ -129,16 +131,16 @@ contract GameToken is ImmutableERC721, WithMinter, IGameToken {
         address editor,
         uint64 subId
     ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256 id) {
-        (uint256 gameId, uint256 storageId) = _mintGame(from, to, subId, 0, true);
+        (uint256 gameId, uint256 strgId) = _mintGame(from, to, subId, 0, true);
 
         if (editor != address(0)) {
             _setGameEditor(to, editor, true);
         }
         if (creation.assetIdsToAdd.length != 0) {
-            _addAssets(from, storageId, creation.assetIdsToAdd, creation.assetAmountsToAdd);
+            _addAssets(from, strgId, creation.assetIdsToAdd, creation.assetAmountsToAdd);
         }
 
-        _metaData[storageId] = creation.uri;
+        _metaData[strgId] = creation.uri;
         emit GameTokenUpdated(0, gameId, creation);
         return gameId;
     }
@@ -154,10 +156,10 @@ contract GameToken is ImmutableERC721, WithMinter, IGameToken {
         uint256 gameId,
         IGameToken.GameData memory update
     ) external override onlyMinter() returns (uint256) {
-        uint256 storageId = _storageId(gameId);
-        _addAssets(from, storageId, update.assetIdsToAdd, update.assetAmountsToAdd);
-        _removeAssets(storageId, update.assetIdsToRemove, update.assetAmountsToRemove, _ownerOf(gameId));
-        _metaData[storageId] = update.uri;
+        uint256 id = _storageId(gameId);
+        _addAssets(from, id, update.assetIdsToAdd, update.assetAmountsToAdd);
+        _removeAssets(id, update.assetIdsToRemove, update.assetAmountsToRemove, _ownerOf(gameId));
+        _metaData[id] = update.uri;
         uint256 newId = _bumpGameVersion(from, gameId);
         emit GameTokenUpdated(gameId, newId, update);
         return newId;
@@ -255,7 +257,7 @@ contract GameToken is ImmutableERC721, WithMinter, IGameToken {
     /// @notice Get the storageID (no chainIndex or version data), which is constant for a given token.
     /// @param gameId The tokenId for which to find the first token Id.
     /// @return The storage id for this token.
-    function storageId(uint256 gameId) external pure override returns (uint256) {
+    function getStorageId(uint256 gameId) external pure override returns (uint256) {
         return _storageId(gameId);
     }
 
@@ -289,8 +291,8 @@ contract GameToken is ImmutableERC721, WithMinter, IGameToken {
     /// @return uri The URI of the token metadata.
     function tokenURI(uint256 gameId) public view override returns (string memory uri) {
         require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
-        uint256 storageId = _storageId(gameId);
-        return _toFullURI(_metaData[storageId]);
+        uint256 id = _storageId(gameId);
+        return _toFullURI(_metaData[id]);
     }
 
     /// @notice Transfer assets from a burnt GAME.
@@ -318,12 +320,12 @@ contract GameToken is ImmutableERC721, WithMinter, IGameToken {
 
     /// @notice Add assets to an existing GAME.
     /// @param from The address of the current owner of assets.
-    /// @param storageId The storageId of the GAME to add assets to.
+    /// @param strgId The storageId of the GAME to add assets to.
     /// @param assetIds The id of the asset to add to GAME.
     /// @param amounts The amount of each asset to add to GAME.
     function _addAssets(
         address from,
-        uint256 storageId,
+        uint256 strgId,
         uint256[] memory assetIds,
         uint256[] memory amounts
     ) internal {
@@ -333,9 +335,9 @@ contract GameToken is ImmutableERC721, WithMinter, IGameToken {
         require(assetIds.length == amounts.length, "INVALID_INPUT_LENGTHS");
         uint256 currentValue;
         for (uint256 i = 0; i < assetIds.length; i++) {
-            currentValue = _gameAssets[storageId][assetIds[i]];
+            currentValue = _gameAssets[strgId][assetIds[i]];
             require(amounts[i] != 0, "INVALID_ASSET_ADDITION");
-            _gameAssets[storageId][assetIds[i]] = currentValue + amounts[i];
+            _gameAssets[strgId][assetIds[i]] = currentValue + amounts[i];
         }
         if (assetIds.length == 1) {
             _asset.safeTransferFrom(from, address(this), assetIds[0], amounts[0], "");
@@ -345,12 +347,12 @@ contract GameToken is ImmutableERC721, WithMinter, IGameToken {
     }
 
     /// @notice Remove assets from a GAME.
-    /// @param storageId The storageId of the GAME to remove assets from.
+    /// @param id The storageId of the GAME to remove assets from.
     /// @param assetIds An array of asset Ids to remove.
     /// @param values An array of the number of each asset id to remove.
     /// @param to The address to send removed assets to.
     function _removeAssets(
-        uint256 storageId,
+        uint256 id,
         uint256[] memory assetIds,
         uint256[] memory values,
         address to
@@ -361,9 +363,9 @@ contract GameToken is ImmutableERC721, WithMinter, IGameToken {
         require(assetIds.length == values.length && assetIds.length != 0, "INVALID_INPUT_LENGTHS");
         uint256 currentValue;
         for (uint256 i = 0; i < assetIds.length; i++) {
-            currentValue = _gameAssets[storageId][assetIds[i]];
+            currentValue = _gameAssets[id][assetIds[i]];
             require(currentValue != 0 && values[i] != 0 && values[i] <= currentValue, "INVALID_ASSET_REMOVAL");
-            _gameAssets[storageId][assetIds[i]] = currentValue - values[i];
+            _gameAssets[id][assetIds[i]] = currentValue - values[i];
         }
 
         if (assetIds.length == 1) {
@@ -436,12 +438,12 @@ contract GameToken is ImmutableERC721, WithMinter, IGameToken {
         uint256 strgId;
         if (isCreation) {
             idVersion = 1;
-            gameId = _generateGameId(from, subId, idVersion);
+            gameId = _generateTokenId(from, subId, _chainIndex, idVersion);
             strgId = _storageId(gameId);
             require(_owners[strgId] == 0, "STORAGE_ID_REUSE_FORBIDDEN");
         } else {
             idVersion = version;
-            gameId = _generateGameId(from, subId, idVersion);
+            gameId = _generateTokenId(from, subId, _chainIndex, idVersion);
             strgId = _storageId(gameId);
         }
 
@@ -516,26 +518,6 @@ contract GameToken is ImmutableERC721, WithMinter, IGameToken {
     /// @return The storageId.
     function _storageId(uint256 id) internal pure override returns (uint256) {
         return uint256(id & STORAGE_ID_MASK);
-    }
-
-    /// @dev Create a new gameId and associate it with an owner.
-    /// This is a packed id, consisting of 3 parts:
-    /// the creator's address, a uint64 subId and a uint32 version number.
-    /// @param creator The address of the Game creator.
-    /// @param subId The id to use when generating the new GameId.
-    function _generateGameId(
-        address creator,
-        uint64 subId,
-        uint16 version
-    ) internal view returns (uint256) {
-        return
-            uint256(uint160(creator)) *
-            CREATOR_OFFSET_MULTIPLIER +
-            uint64(subId) *
-            SUBID_MULTIPLIER +
-            _chainIndex *
-            CHAIN_INDEX_OFFSET_MULTIPLIER +
-            uint16(version);
     }
 
     /// @dev Get the a full URI string for a given hash + gameId.

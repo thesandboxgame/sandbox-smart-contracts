@@ -30,7 +30,7 @@ const erc721Tests = require('../erc721')(
     const others = await getUnnamedAccounts();
     await deployments.fixture();
 
-    const contract = await ethers.getContract('GameToken');
+    const contract = await ethers.getContract('ChildGameToken');
 
     const gameAsAdmin = await contract.connect(
       ethers.provider.getSigner(gameTokenAdmin)

@@ -14,16 +14,15 @@ contract ImmutableERC721 is ERC721BaseToken {
 
     uint8 internal _chainIndex;
 
-    // solhint-disable-next-line no-empty-blocks
-    constructor(address trustedForwarder, uint8 chainIndex) ERC721BaseToken(trustedForwarder) {
-        _chainIndex = chainIndex;
+    function __ImmutableERC721_initialize(uint8 index) internal {
+        _chainIndex = index;
     }
 
     /// @dev get the layer a token was minted on from its id.
     /// @param id The id of the token to query.
-    /// @return index The index of the original layer of minting.
+    /// @return The index of the original layer of minting.
     /// 0 = eth mainnet, 1 == Polygon, etc...
-    function chainIndex(uint256 id) public pure virtual returns (uint256 index) {
+    function getChainIndex(uint256 id) public pure virtual returns (uint256) {
         return uint256((id & CHAIN_INDEX_MASK) >> 16);
     }
 
@@ -71,7 +70,7 @@ contract ImmutableERC721 is ERC721BaseToken {
     /// the creator's address, a uint64 subId, a uint18 chainIndex and a uint16 version.
     /// @param creator The address of the Token creator.
     /// @param subId The id used to generate the id.
-    /// @param version The version used to generate the id.
+    /// @param version The publicversion used to generate the id.
     function _generateTokenId(
         address creator,
         uint64 subId,

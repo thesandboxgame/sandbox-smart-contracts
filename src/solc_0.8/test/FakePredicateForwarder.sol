@@ -14,7 +14,7 @@ contract FakePredicateForwarder {
     }
 
     // solhint-disable-next-line no-empty-blocks
-    constructor() public {}
+    constructor() {}
 
     function forward(Request calldata req) public returns (bool, bytes memory) {
         // solhint-disable avoid-low-level-calls
