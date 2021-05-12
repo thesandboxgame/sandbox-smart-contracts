@@ -139,6 +139,18 @@ contract BaseEstateToken is ImmutableERC721, Initializable {
 
     // solhint-enable no-unused-vars
 
+    /// @notice Return the name of the token contract.
+    /// @return The name of the token contract.
+    function name() external pure returns (string memory) {
+        return "The Sandbox: ESTATE token";
+    }
+
+    /// @notice Get the symbol of the token contract.
+    /// @return the symbol of the token contract.
+    function symbol() external pure returns (string memory) {
+        return "ESTATE";
+    }
+
     /// @notice Return the URI of a specific token.
     /// @param id The id of the token.
     /// @return uri The URI of the token metadata.
