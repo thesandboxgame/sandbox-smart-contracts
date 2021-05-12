@@ -3,6 +3,7 @@ import {waitFor} from '../utils';
 import {expect} from '../chai-setup';
 import {ethers} from 'hardhat';
 import {EstateTestHelper} from './estateTestHelper';
+import {getId} from './utils';
 const emptyBytes = Buffer.from('');
 
 describe('Estate', function () {
@@ -11,16 +12,16 @@ describe('Estate', function () {
     const size = 6;
     const x = 6;
     const y = 12;
-    console.log('Checkpoint A');
 
     await waitFor(landContractAsMinter.mintQuad(user0, size, x, y, emptyBytes));
-    console.log('Checkpoint B');
-    await waitFor(
+    const receipt = await waitFor(
       estateContract
         .connect(ethers.provider.getSigner(user0))
         .createFromQuad(user0, user0, size, x, y)
     );
-    console.log('Checkpoint C');
+
+    const tokenId = await getId(estateContract, receipt, 'QuadsAddedInEstate');
+
     for (let sx = 0; sx < size; sx++) {
       for (let sy = 0; sy < size; sy++) {
         const id = x + sx + (y + sy) * 408;
@@ -28,9 +29,7 @@ describe('Estate', function () {
         expect(landOwner).to.equal(estateContract.address);
       }
     }
-    console.log('Checkpoint D');
-    const estateOwner = await estateContract.callStatic.ownerOf(1);
-    console.log('Checkpoint E');
+    const estateOwner = await estateContract.callStatic.ownerOf(tokenId);
     expect(estateOwner).to.equal(user0);
   });
   /**
