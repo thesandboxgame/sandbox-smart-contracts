@@ -141,23 +141,46 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         _burn(from, owner, id);
     }
 
+/**
+
+    function updateGame(
+        address from,
+        uint256 gameId,
+        IGameToken.GameData memory update
+    ) external override onlyMinter() returns (uint256) {
+        uint256 id = _storageId(gameId);
+        _addAssets(from, id, update.assetIdsToAdd, update.assetAmountsToAdd);
+        _removeAssets(id, update.assetIdsToRemove, update.assetAmountsToRemove, _ownerOf(gameId));
+        _metaData[id] = update.uri;
+        uint256 newId = _bumpGameVersion(from, gameId);
+        emit GameTokenUpdated(gameId, newId, update);
+        return newId;
+    }
+ */
+
+
     /// @notice Update an existing ESTATE token.This actually burns old token
     /// and mints new token with same basId & incremented version.
     /// @param from The one updating the ESTATE token.
     /// @param estateId The current id of the ESTATE token.
     /// @param update The values to use for the update.
-    /// @return The new id.
+    /// @return The new estateId.
     function updateEstate(
         address from,
         uint256 estateId,
-        IGameToken.GameData memory update
+        uint256[] memory ids,
+        uint256[] memory junctions
     ) external override returns (uint256) {
+      // @review can this function also handle removing lands?
+      // would involve breaking and reminting.
+      // could try to preserve internal data, ie: metaData hash, _owners[] mapping, etc...
         uint256 id = _storageId(estateId);
-        _addAssets(from, id, update.assetIdsToAdd, update.assetAmountsToAdd);
-        _removeAssets(id, update.assetIdsToRemove, update.assetAmountsToRemove, _ownerOf(estateId));
+        _addLands(from, estateId, ids, junctions, false);
+        // @review Not removeLands... must break the estate and mint new one(s)
         _metaData[id] = update.uri;
         uint256 newId = _incrementTokenVersion(from, estateId);
-        emit GameTokenUpdated(estateId, newId, update);
+        // @todo add Event EstateTokenUpdated
+        emit EstateTokenUpdated(estateId, newId, update);
         return newId;
     }
 
