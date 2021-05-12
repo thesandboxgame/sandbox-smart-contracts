@@ -141,24 +141,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         _burn(from, owner, id);
     }
 
-/**
-
-    function updateGame(
-        address from,
-        uint256 gameId,
-        IGameToken.GameData memory update
-    ) external override onlyMinter() returns (uint256) {
-        uint256 id = _storageId(gameId);
-        _addAssets(from, id, update.assetIdsToAdd, update.assetAmountsToAdd);
-        _removeAssets(id, update.assetIdsToRemove, update.assetAmountsToRemove, _ownerOf(gameId));
-        _metaData[id] = update.uri;
-        uint256 newId = _bumpGameVersion(from, gameId);
-        emit GameTokenUpdated(gameId, newId, update);
-        return newId;
-    }
- */
-
-
     /// @notice Update an existing ESTATE token.This actually burns old token
     /// and mints new token with same basId & incremented version.
     /// @param from The one updating the ESTATE token.
