@@ -15,7 +15,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
 
     uint16 internal constant GRID_SIZE = 408;
 
-    uint64 internal _nextId; // max = 18,446,744,073,709,551,615
+    uint64 internal _nextId; // max uint64 = 18,446,744,073,709,551,615
     mapping(uint256 => uint24[]) internal _quadsInEstate;
     mapping(uint256 => bytes32) internal _metaData;
     LandToken internal _land;
@@ -23,6 +23,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     address internal _breaker;
 
     event QuadsAddedInEstate(uint256 indexed id, uint24[] list);
+    event EstateTokenUpdated(uint256 indexed oldId, uint256 indexed newId, uint256[] ids, uint256[] junctions, bytes32 uri);
 
     function initV1(
         address trustedForwarder,
@@ -114,10 +115,8 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @notice Burns token `id`.
     /// @param id The token which will be burnt.
     function burn(uint256 id) external override {
-        // @review
         address sender = _msgSender();
         _check_authorized(sender, BREAK);
-        // @review what is this for? why not in burnFrom?
         _check_hasOwnerRights(sender, id);
         _burn(sender, _ownerOf(id), id);
     }
@@ -126,10 +125,8 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @param from address whose token is to be burnt.
     /// @param id The token which will be burnt.
     function burnFrom(address from, uint256 id) external override {
-        // @review
         require(from != address(uint160(0)), "NOT_FROM_ZERO_ADDRESS");
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
-        // @review - taken from _check_hasOwnerRights()
         require(owner != address(uint160(0)), "NONEXISTENT_TOKEN");
         address msgSender = _msgSender();
         require(
@@ -161,11 +158,9 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         // could try to preserve internal data, ie: metaData hash, _owners[] mapping, etc...
         uint256 id = _storageId(estateId);
         _addLands(from, estateId, ids, junctions, false);
-        // @review Not removeLands... must break the estate and mint new one(s)
         _metaData[id] = uri;
         uint256 newId = _incrementTokenVersion(from, estateId);
-        // @todo add Event EstateTokenUpdated
-        // emit EstateTokenUpdated(...);
+        emit EstateTokenUpdated(estateId, newId, ids, junctions, uri);
         return newId;
     }
 
@@ -174,14 +169,13 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @param sender The sender of the request.
     // / @param to The recipient of the Land tokens.
     // / @param num The number of Lands to transfer.
-    /// @param estateId The esteate to recover lands from.
+    /// @param estateId The estate to recover lands from.
     function transferFromDestroyedEstate(
         address sender,
         address, // to,
         uint256, // num,
         uint256 estateId
     ) external view {
-        // @review
         _check_authorized(sender, WITHDRAWAL);
         require(sender != address(this), "NOT_FROM_THIS");
         require(sender != address(uint160(0)), "NOT_FROM_ZERO");
@@ -189,6 +183,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         require(msgSender == sender || _superOperators[msgSender], "not _check_authorized");
         require(sender == _withdrawalOwnerOf(estateId), "NOT_WITHDRAWAL_OWNER");
         // @todo implement the actual transfer !
+        // need to validate lands, pass land ids ?
     }
 
     // solhint-enable no-unused-vars
@@ -225,9 +220,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         uint16 version = uint16(estateId);
         version++;
         address owner = _ownerOf(estateId);
-        // @review maybe use _check_hasOwnerRights() here?
         if (from == owner) {
-            // caller is owner or metaTx on owner's behalf
             _burn(from, owner, estateId);
         }
         (uint256 newId, ) = _mintEstate(originalCreator, owner, version, false);
@@ -259,16 +252,16 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     }
 
     function _check_hasOwnerRights(address sender, uint256 estateId) internal view {
-        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(estateId); // get owner & operator enabled flag
-        require(owner != address(uint160(0)), "token does not exist"); // make sure token has not been burnt
-        require(owner == sender, "not owner"); // require sender is the owner
+        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(estateId);
+        require(owner != address(uint160(0)), "token does not exist");
+        require(owner == sender, "not owner");
         address msgSender = _msgSender();
         require(
             _superOperators[msgSender] ||
                 _operatorsForAll[sender][msgSender] ||
                 (operatorEnabled && _operators[estateId] == msgSender),
             "not approved"
-        ); // make sure some operator is valid
+        );
     }
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -450,7 +443,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     }
 
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // solhint-disable no-unused-vars
     function onERC721BatchReceived(
         address, // operator,
         address, // from,
@@ -476,6 +468,5 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", "estate.json"));
     }
 
-    // solhint-enable no-unused-vars
     // solhint-enable code-complexity
 }
