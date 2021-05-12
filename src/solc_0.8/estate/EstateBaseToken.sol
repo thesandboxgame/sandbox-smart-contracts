@@ -42,7 +42,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         uint256 y
     ) external returns (uint256) {
         _check_authorized(sender, ADD);
-        (uint256 id,  ) = _mintEstate(sender, to, 1, true);
+        (uint256 id, ) = _mintEstate(sender, to, 1, true);
         _addSingleQuad(sender, id, size, x, y);
         return id;
     }
@@ -126,7 +126,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @param from address whose token is to be burnt.
     /// @param id The token which will be burnt.
     function burnFrom(address from, uint256 id) external override {
-      // @review
+        // @review
         require(from != address(uint160(0)), "NOT_FROM_ZERO_ADDRESS");
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
         // @review - taken from _check_hasOwnerRights()
@@ -156,9 +156,9 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         uint256[] memory junctions,
         bytes32 uri
     ) external returns (uint256) {
-      // @review can this function also handle removing lands?
-      // would involve breaking and reminting.
-      // could try to preserve internal data, ie: metaData hash, _owners[] mapping, etc...
+        // @review can this function also handle removing lands?
+        // would involve breaking and reminting.
+        // could try to preserve internal data, ie: metaData hash, _owners[] mapping, etc...
         uint256 id = _storageId(estateId);
         _addLands(from, estateId, ids, junctions, false);
         // @review Not removeLands... must break the estate and mint new one(s)
@@ -177,17 +177,16 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @param estateId The esteate to recover lands from.
     function transferFromDestroyedEstate(
         address sender,
-        address,// to,
-        uint256,// num,
+        address, // to,
+        uint256, // num,
         uint256 estateId
     ) external view {
-      // @review
+        // @review
         _check_authorized(sender, WITHDRAWAL);
         require(sender != address(this), "NOT_FROM_THIS");
         require(sender != address(uint160(0)), "NOT_FROM_ZERO");
         address msgSender = _msgSender();
-        require(msgSender == sender || _superOperators[msgSender],
-            "not _check_authorized");
+        require(msgSender == sender || _superOperators[msgSender], "not _check_authorized");
         require(sender == _withdrawalOwnerOf(estateId), "NOT_WITHDRAWAL_OWNER");
         // @todo implement the actual transfer !
     }
@@ -217,11 +216,11 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-     /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to token-specific data are preserved via the storageId mechanism.
+    /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to token-specific data are preserved via the storageId mechanism.
     /// @param from The address of the token owner.
     /// @param estateId The tokenId to increment.
     /// @return the version-incremented tokenId.
-    function _incrementTokenVersion(address from, uint256 estateId) internal returns(uint256) {
+    function _incrementTokenVersion(address from, uint256 estateId) internal returns (uint256) {
         address originalCreator = address(uint160(estateId / CREATOR_OFFSET_MULTIPLIER));
         uint16 version = uint16(estateId);
         version++;
@@ -260,16 +259,16 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     }
 
     function _check_hasOwnerRights(address sender, uint256 estateId) internal view {
-        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(estateId);// get owner & operator enabled flag
-        require(owner != address(uint160(0)), "token does not exist");// make sure token has not been burnt
-        require(owner == sender, "not owner");// require sender is the owner
+        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(estateId); // get owner & operator enabled flag
+        require(owner != address(uint160(0)), "token does not exist"); // make sure token has not been burnt
+        require(owner == sender, "not owner"); // require sender is the owner
         address msgSender = _msgSender();
         require(
             _superOperators[msgSender] ||
                 _operatorsForAll[sender][msgSender] ||
                 (operatorEnabled && _operators[estateId] == msgSender),
             "not approved"
-        );// make sure some operator is valid
+        ); // make sure some operator is valid
     }
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -303,7 +302,12 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @param isCreation Whether this is a brand new Estate (as opposed to an update).
     /// @return id The newly created estateId.
     /// @return storageId The staorage Id for the token.
-    function _mintEstate(address from, address to, uint16 version, bool isCreation) internal returns (uint256 id, uint256 storageId) {
+    function _mintEstate(
+        address from,
+        address to,
+        uint16 version,
+        bool isCreation
+    ) internal returns (uint256 id, uint256 storageId) {
         require(to != address(uint160(0)), "can't send to zero address");
         uint256 estateId;
         uint256 strgId;
