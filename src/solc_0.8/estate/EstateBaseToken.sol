@@ -15,7 +15,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
 
     uint16 internal constant GRID_SIZE = 408;
 
-    uint256 internal _nextId = 1;
+    uint64 internal _nextId; // max = 18,446,744,073,709,551,615
     mapping(uint256 => uint24[]) internal _quadsInEstate;
     mapping(uint256 => bytes32) internal _metaData;
     LandToken internal _land;
@@ -42,9 +42,9 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         uint256 y
     ) external returns (uint256) {
         _check_authorized(sender, ADD);
-        uint256 estateId = _mintEstate(to);
-        _addSingleQuad(sender, estateId, size, x, y);
-        return estateId;
+        (uint256 id,  ) = _mintEstate(sender, to, 1, true);
+        _addSingleQuad(sender, id, size, x, y);
+        return id;
     }
 
     function addQuad(
@@ -66,9 +66,9 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         uint256[] calldata junctions
     ) external returns (uint256) {
         _check_authorized(sender, ADD);
-        uint256 estateId = _mintEstate(to);
-        _addLands(sender, estateId, ids, junctions, true);
-        return estateId;
+        (uint256 id, ) = _mintEstate(sender, to, 1, true);
+        _addLands(sender, id, ids, junctions, true);
+        return id;
     }
 
     // TODO addSingleLand
@@ -93,9 +93,9 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         uint256[] calldata junctions
     ) external returns (uint256) {
         _check_authorized(sender, ADD);
-        uint256 estateId = _mintEstate(to);
-        _addQuads(sender, estateId, sizes, xs, ys, junctions, true);
-        return estateId;
+        (uint256 id, ) = _mintEstate(sender, to, 1, true);
+        _addQuads(sender, id, sizes, xs, ys, junctions, true);
+        return id;
     }
 
     function addMultipleQuads(
@@ -115,10 +115,11 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @param id The token which will be burnt.
     function burn(uint256 id) external override {
         // @review
+        address sender = _msgSender();
         _check_authorized(sender, BREAK);
         // @review what is this for? why not in burnFrom?
-        _check_hasOwnerRights(sender, estateId);
-        _burn(_msgSender(), _ownerOf(id), id);
+        _check_hasOwnerRights(sender, id);
+        _burn(sender, _ownerOf(id), id);
     }
 
     /// @notice Burn token`id` from `from`.
@@ -145,37 +146,39 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// and mints new token with same basId & incremented version.
     /// @param from The one updating the ESTATE token.
     /// @param estateId The current id of the ESTATE token.
-    /// @param update The values to use for the update.
+    /// @param ids The ids to use for the update.
+    /// @param junctions The junctions to use for the update.
     /// @return The new estateId.
     function updateEstate(
         address from,
         uint256 estateId,
         uint256[] memory ids,
-        uint256[] memory junctions
-    ) external override returns (uint256) {
+        uint256[] memory junctions,
+        bytes32 uri
+    ) external returns (uint256) {
       // @review can this function also handle removing lands?
       // would involve breaking and reminting.
       // could try to preserve internal data, ie: metaData hash, _owners[] mapping, etc...
         uint256 id = _storageId(estateId);
         _addLands(from, estateId, ids, junctions, false);
         // @review Not removeLands... must break the estate and mint new one(s)
-        _metaData[id] = update.uri;
+        _metaData[id] = uri;
         uint256 newId = _incrementTokenVersion(from, estateId);
         // @todo add Event EstateTokenUpdated
-        emit EstateTokenUpdated(estateId, newId, update);
+        // emit EstateTokenUpdated(...);
         return newId;
     }
 
     /// @notice Used to recover Land tokens from a burned estate.
     /// Note: Implemented separately from burn to avoid hitting the block gas-limit if estate has too many lands.
     /// @param sender The sender of the request.
-    /// @param to The recipient of the Land tokens.
-    /// @param num The number of Lands to transfer.
+    // / @param to The recipient of the Land tokens.
+    // / @param num The number of Lands to transfer.
     /// @param estateId The esteate to recover lands from.
     function transferFromDestroyedEstate(
         address sender,
-        address to,
-        uint256 num,
+        address,// to,
+        uint256,// num,
         uint256 estateId
     ) external view {
       // @review
@@ -186,6 +189,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         require(msgSender == sender || _superOperators[msgSender],
             "not _check_authorized");
         require(sender == _withdrawalOwnerOf(estateId), "NOT_WITHDRAWAL_OWNER");
+        // @todo implement the actual transfer !
     }
 
     // solhint-enable no-unused-vars
@@ -219,7 +223,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @return the version-incremented tokenId.
     function _incrementTokenVersion(address from, uint256 estateId) internal returns(uint256) {
         address originalCreator = address(uint160(estateId / CREATOR_OFFSET_MULTIPLIER));
-        uint64 subId = uint64(estateId / SUBID_MULTIPLIER);
         uint16 version = uint16(estateId);
         version++;
         address owner = _ownerOf(estateId);
@@ -228,7 +231,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
             // caller is owner or metaTx on owner's behalf
             _burn(from, owner, estateId);
         }
-        (uint256 newId, ) = _mintEstate(originalCreator, owner, subId, version, false);
+        (uint256 newId, ) = _mintEstate(originalCreator, owner, version, false);
         address newOwner = _ownerOf(newId);
         assert(owner == newOwner);
         return newId;
@@ -296,28 +299,25 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @dev Create a new estateId and associate it with an owner.
     /// @param from The address of one creating the Estate.
     /// @param to The address of the Estate owner.
-    /// @param subId The id to use when generating the new estateId.
     /// @param version The version number part of the estateId.
     /// @param isCreation Whether this is a brand new Estate (as opposed to an update).
     /// @return id The newly created estateId.
     /// @return storageId The staorage Id for the token.
-    function _mintEstate(address from, address to, uint64 subId, uint16 version, bool isCreation) internal returns (uint256 id, uint256 storageId) {
+    function _mintEstate(address from, address to, uint16 version, bool isCreation) internal returns (uint256 id, uint256 storageId) {
         require(to != address(uint160(0)), "can't send to zero address");
-        uint16 idVersion;
         uint256 estateId;
         uint256 strgId;
         if (isCreation) {
-            idVersion = 1;
-            estateId = _generateTokenId(from, subId, _chainIndex, idVersion);
+            estateId = _generateTokenId(from, _nextId++, _chainIndex, version);
             strgId = _storageId(estateId);
             require(_owners[strgId] == 0, "STORAGE_ID_REUSE_FORBIDDEN");
         } else {
-            idVersion = version;
-            estateId = _generateTokenId(from, subId, _chainIndex, idVersion);
+            uint64 subId = uint64(estateId / SUBID_MULTIPLIER);
+            estateId = _generateTokenId(from, subId, _chainIndex, version);
             strgId = _storageId(estateId);
         }
 
-        _owners[strgId] = (uint256(idVersion) << 200) + uint256(uint160(to));
+        _owners[strgId] = (uint256(version) << 200) + uint256(uint160(to));
         _numNFTPerAddress[to]++;
         emit Transfer(address(0), to, estateId);
         return (estateId, strgId);
