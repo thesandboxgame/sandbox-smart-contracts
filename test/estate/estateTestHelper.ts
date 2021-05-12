@@ -4,32 +4,6 @@ import {waitFor} from '../../scripts/utils/utils';
 import {assert} from '../chai-setup';
 const emptyBytes = Buffer.from('');
 
-interface Quads {
-  xs: number[];
-  ys: number[];
-  sizes: number[];
-  selection: LandQuad[];
-}
-
-interface LandQuad {
-  x: number;
-  y: number;
-  size: number;
-  topCornerId: number;
-}
-
-interface LandSpec {
-  x: number;
-  y: number;
-  size: number;
-}
-
-interface Map {
-  quads: LandQuad[];
-  selection?: LandQuad[];
-  junctions: number[];
-}
-
 export class EstateTestHelper {
   constructor(
     private contracts: {
@@ -41,11 +15,11 @@ export class EstateTestHelper {
     this.contracts = contracts;
   }
 
-  selectQuads(landQuads: LandQuad[], indices?: number[]): Quads {
+  public static selectQuads(landQuads: string | any[], indices?: number[]) {
     const xs = [];
     const ys = [];
     const sizes = [];
-    const selection: LandQuad[] = [];
+    const selection = [];
     if (!indices) {
       indices = [];
       for (let i = 0; i < landQuads.length; i++) {
@@ -62,14 +36,14 @@ export class EstateTestHelper {
     return {xs, ys, sizes, selection};
   }
 
-  assignIds(landQuads: LandQuad[]): LandQuad[] {
+  public static assignIds(landQuads: any) {
     for (const landQuad of landQuads) {
       landQuad.topCornerId = landQuad.x + landQuad.y * 408;
     }
     return landQuads;
   }
 
-  async mintQuads(to: string, landSpecs: LandSpec[]): Promise<void> {
+  public async mintQuads(to: any, landSpecs: any) {
     const contracts = this.contracts;
     for (const landSpec of landSpecs) {
       await waitFor(
@@ -84,16 +58,16 @@ export class EstateTestHelper {
     }
   }
 
-  async mintQuadsAndCreateEstate(
-    map: Map,
-    to: string
-  ): Promise<{selection: LandQuad[]}> {
+  public async mintQuadsAndCreateEstate(
+    map: {quads: any; selection?: number[]; junctions: number[]},
+    to: any
+  ) {
     const contracts = this.contracts;
-    const landQuads = this.assignIds(map.quads);
+    const landQuads = EstateTestHelper.assignIds(map.quads);
     await this.mintQuads(to, landQuads);
-    const {xs, ys, sizes, selection} = this.selectQuads(
+    const {xs, ys, sizes, selection} = EstateTestHelper.selectQuads(
       landQuads,
-      map.selection as number[] | undefined
+      map.selection
     );
     await contracts.Estate.connect(ethers.provider.getSigner(to))
       .functions.createFromMultipleQuads(to, to, sizes, xs, ys, map.junctions)
@@ -101,9 +75,9 @@ export class EstateTestHelper {
     return {selection};
   }
 
-  async checkLandOwnership(
-    selection: LandQuad[],
-    expectedOwner: string
+  public async checkLandOwnership(
+    selection: any,
+    expectedOwner: any
   ): Promise<void> {
     for (const landQuad of selection) {
       for (let sx = 0; sx < landQuad.size; sx++) {
