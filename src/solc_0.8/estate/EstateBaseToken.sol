@@ -223,7 +223,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
             // caller is owner or metaTx on owner's behalf
             _burn(from, owner, estateId);
         }
-        (uint256 newId, ) = _mintGame(originalCreator, owner, subId, version, false);
+        (uint256 newId, ) = _mintEstate(originalCreator, owner, subId, version, false);
         address newOwner = _ownerOf(newId);
         assert(owner == newOwner);
         return newId;
@@ -288,14 +288,34 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         x = uint16(data % GRID_SIZE);
     }
 
-    function _mintEstate(address to) internal returns (uint256) {
+    /// @dev Create a new estateId and associate it with an owner.
+    /// @param from The address of one creating the Estate.
+    /// @param to The address of the Estate owner.
+    /// @param subId The id to use when generating the new estateId.
+    /// @param version The version number part of the estateId.
+    /// @param isCreation Whether this is a brand new Estate (as opposed to an update).
+    /// @return id The newly created estateId.
+    /// @return storageId The staorage Id for the token.
+    function _mintEstate(address from, address to, uint64 subId, uint16 version, bool isCreation) internal returns (uint256 id, uint256 storageId) {
         require(to != address(uint160(0)), "can't send to zero address");
-        // @todo use _generateTokenId here instead
-        uint256 estateId = _nextId++;
-        _owners[estateId] = uint256(uint160(to));
+        uint16 idVersion;
+        uint256 estateId;
+        uint256 strgId;
+        if (isCreation) {
+            idVersion = 1;
+            estateId = _generateTokenId(from, subId, _chainIndex, idVersion);
+            strgId = _storageId(estateId);
+            require(_owners[strgId] == 0, "STORAGE_ID_REUSE_FORBIDDEN");
+        } else {
+            idVersion = version;
+            estateId = _generateTokenId(from, subId, _chainIndex, idVersion);
+            strgId = _storageId(estateId);
+        }
+
+        _owners[strgId] = (uint256(idVersion) << 200) + uint256(uint160(to));
         _numNFTPerAddress[to]++;
-        emit Transfer(address((0)), to, estateId);
-        return estateId;
+        emit Transfer(address(0), to, estateId);
+        return (estateId, strgId);
     }
 
     function _addSingleQuad(
