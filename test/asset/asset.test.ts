@@ -1,13 +1,7 @@
 import {setupAsset} from './fixtures';
-import {waitFor} from '../utils';
+import {waitFor, getChainIndex} from '../utils';
 import {expect} from '../chai-setup';
 import {sendMetaTx} from '../sendMetaTx';
-import {BigNumber} from 'ethers';
-
-function getChainIndex(id: BigNumber): number {
-  const CHAIN_INDEX_MASK = 0x0000000000000000000000000000000000000000000007f8000000000000000;
-  return (Number(id) & CHAIN_INDEX_MASK) >> 63;
-}
 
 describe('Asset.sol', function () {
   it('user sending asset to itself keep the same balance', async function () {

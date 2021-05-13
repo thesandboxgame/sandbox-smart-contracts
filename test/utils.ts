@@ -137,3 +137,8 @@ export async function setupUsers<T extends {[contractName: string]: Contract}>(
   }
   return users;
 }
+
+export function getChainIndex(id: BigNumber): number {
+  const CHAIN_INDEX_MASK = 0x0000000000000000000000000000000000000000000007f8000000000000000;
+  return (Number(id) & CHAIN_INDEX_MASK) >> 63;
+}
