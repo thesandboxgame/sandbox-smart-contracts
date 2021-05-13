@@ -294,7 +294,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         x = uint16(data % GRID_SIZE);
     }
 
-    /// @dev Create a new estateId and associate it with an owner.
+    /// @dev Create a new (or incremented) estateId and associate it with an owner.
     /// @param from The address of one creating the Estate.
     /// @param to The address of the Estate owner.
     /// @param version The version number part of the estateId.
