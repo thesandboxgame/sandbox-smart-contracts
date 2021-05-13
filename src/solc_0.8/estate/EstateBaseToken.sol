@@ -15,7 +15,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
 
     uint16 internal constant GRID_SIZE = 408;
 
-    uint256 internal _nextId = 1;
+    uint64 internal _nextId; // max uint64 = 18,446,744,073,709,551,615
     mapping(uint256 => uint24[]) internal _quadsInEstate;
     mapping(uint256 => bytes32) internal _metaData;
     LandToken internal _land;
@@ -23,6 +23,13 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     address internal _breaker;
 
     event QuadsAddedInEstate(uint256 indexed id, uint24[] list);
+    event EstateTokenUpdated(
+        uint256 indexed oldId,
+        uint256 indexed newId,
+        uint256[] ids,
+        uint256[] junctions,
+        bytes32 uri
+    );
 
     function initV1(
         address trustedForwarder,
@@ -42,9 +49,9 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         uint256 y
     ) external returns (uint256) {
         _check_authorized(sender, ADD);
-        uint256 estateId = _mintEstate(to);
-        _addSingleQuad(sender, estateId, size, x, y);
-        return estateId;
+        (uint256 id, ) = _mintEstate(sender, to, 1, true);
+        _addSingleQuad(sender, id, size, x, y);
+        return id;
     }
 
     function addQuad(
@@ -66,9 +73,9 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         uint256[] calldata junctions
     ) external returns (uint256) {
         _check_authorized(sender, ADD);
-        uint256 estateId = _mintEstate(to);
-        _addLands(sender, estateId, ids, junctions, true);
-        return estateId;
+        (uint256 id, ) = _mintEstate(sender, to, 1, true);
+        _addLands(sender, id, ids, junctions, true);
+        return id;
     }
 
     // TODO addSingleLand
@@ -93,9 +100,9 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         uint256[] calldata junctions
     ) external returns (uint256) {
         _check_authorized(sender, ADD);
-        uint256 estateId = _mintEstate(to);
-        _addQuads(sender, estateId, sizes, xs, ys, junctions, true);
-        return estateId;
+        (uint256 id, ) = _mintEstate(sender, to, 1, true);
+        _addQuads(sender, id, sizes, xs, ys, junctions, true);
+        return id;
     }
 
     function addMultipleQuads(
@@ -111,30 +118,78 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         _addQuads(sender, estateId, sizes, xs, ys, junctions, false);
     }
 
-    function destroy(address sender, uint256 estateId) external {
+    /// @notice Burns token `id`.
+    /// @param id The token which will be burnt.
+    function burn(uint256 id) external override {
+        address sender = _msgSender();
         _check_authorized(sender, BREAK);
-        _check_hasOwnerRights(sender, estateId);
-        _owners[estateId] = 0; // TODO keep track of it so it can transfer Land back
-        _numNFTPerAddress[sender]--;
-        emit Transfer(sender, address(uint160(0)), estateId);
+        _check_hasOwnerRights(sender, id);
+        _burn(sender, _ownerOf(id), id);
     }
 
-    // solhint-disable no-unused-vars
+    /// @notice Burn token`id` from `from`.
+    /// @param from address whose token is to be burnt.
+    /// @param id The token which will be burnt.
+    function burnFrom(address from, uint256 id) external override {
+        require(from != address(uint160(0)), "NOT_FROM_ZERO_ADDRESS");
+        (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
+        require(owner != address(uint160(0)), "NONEXISTENT_TOKEN");
+        address msgSender = _msgSender();
+        require(
+            msgSender == from ||
+                (operatorEnabled && _operators[id] == msgSender) ||
+                _superOperators[msgSender] ||
+                _operatorsForAll[from][msgSender],
+            "UNAUTHORIZED_BURN"
+        );
+        _burn(from, owner, id);
+    }
+
+    /// @notice Update an existing ESTATE token.This actually burns old token
+    /// and mints new token with same basId & incremented version.
+    /// @param from The one updating the ESTATE token.
+    /// @param estateId The current id of the ESTATE token.
+    /// @param ids The ids to use for the update.
+    /// @param junctions The junctions to use for the update.
+    /// @return The new estateId.
+    function updateEstate(
+        address from,
+        uint256 estateId,
+        uint256[] memory ids,
+        uint256[] memory junctions,
+        bytes32 uri
+    ) external returns (uint256) {
+        // @review can this function also handle removing lands?
+        // would involve breaking and reminting.
+        // could try to preserve internal data, ie: metaData hash, _owners[] mapping, etc...
+        uint256 id = _storageId(estateId);
+        _addLands(from, estateId, ids, junctions, false);
+        _metaData[id] = uri;
+        uint256 newId = _incrementTokenVersion(from, estateId);
+        emit EstateTokenUpdated(estateId, newId, ids, junctions, uri);
+        return newId;
+    }
+
+    /// @notice Used to recover Land tokens from a burned estate.
+    /// Note: Implemented separately from burn to avoid hitting the block gas-limit if estate has too many lands.
+    /// @param sender The sender of the request.
+    // / @param to The recipient of the Land tokens.
+    // / @param num The number of Lands to transfer.
+    /// @param estateId The estate to recover lands from.
     function transferFromDestroyedEstate(
         address sender,
         address, // to,
-        uint256 // num
+        uint256, // num,
+        uint256 estateId
     ) external view {
         _check_authorized(sender, WITHDRAWAL);
-        // TODO
-        // require(sender != address(this), "from itself");
-        // require(sender != address(0), "sender is zero address");
-        // require(msg.sender == sender ||
-        //     _metaTransactionContracts[msg.sender] ||
-        //     _superOperators[msg.sender],
-        //     "not _check_authorized");
-        // require(sender == _pastOwnerOf(estateId), "only owner can transfer land from destroyed estate");
-        // TODO
+        require(sender != address(this), "NOT_FROM_THIS");
+        require(sender != address(uint160(0)), "NOT_FROM_ZERO");
+        address msgSender = _msgSender();
+        require(msgSender == sender || _superOperators[msgSender], "not _check_authorized");
+        require(sender == _withdrawalOwnerOf(estateId), "NOT_WITHDRAWAL_OWNER");
+        // @todo implement the actual transfer !
+        // need to validate lands, pass land ids ?
     }
 
     // solhint-enable no-unused-vars
@@ -161,6 +216,24 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     }
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to token-specific data are preserved via the storageId mechanism.
+    /// @param from The address of the token owner.
+    /// @param estateId The tokenId to increment.
+    /// @return the version-incremented tokenId.
+    function _incrementTokenVersion(address from, uint256 estateId) internal returns (uint256) {
+        address originalCreator = address(uint160(estateId / CREATOR_OFFSET_MULTIPLIER));
+        uint16 version = uint16(estateId);
+        version++;
+        address owner = _ownerOf(estateId);
+        if (from == owner) {
+            _burn(from, owner, estateId);
+        }
+        (uint256 newId, ) = _mintEstate(originalCreator, owner, version, false);
+        address newOwner = _ownerOf(newId);
+        assert(owner == newOwner);
+        return newId;
+    }
 
     function _check_authorized(address sender, uint8 action) internal view {
         require(sender != address(uint160(0)), "sender is zero address");
@@ -221,13 +294,36 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         x = uint16(data % GRID_SIZE);
     }
 
-    function _mintEstate(address to) internal returns (uint256) {
+    /// @dev Create a new (or incremented) estateId and associate it with an owner.
+    /// @param from The address of one creating the Estate.
+    /// @param to The address of the Estate owner.
+    /// @param version The version number part of the estateId.
+    /// @param isCreation Whether this is a brand new Estate (as opposed to an update).
+    /// @return id The newly created estateId.
+    /// @return storageId The staorage Id for the token.
+    function _mintEstate(
+        address from,
+        address to,
+        uint16 version,
+        bool isCreation
+    ) internal returns (uint256 id, uint256 storageId) {
         require(to != address(uint160(0)), "can't send to zero address");
-        uint256 estateId = _nextId++;
-        _owners[estateId] = uint256(uint160(to));
+        uint256 estateId;
+        uint256 strgId;
+        if (isCreation) {
+            estateId = _generateTokenId(from, _nextId++, _chainIndex, version);
+            strgId = _storageId(estateId);
+            require(_owners[strgId] == 0, "STORAGE_ID_REUSE_FORBIDDEN");
+        } else {
+            uint64 subId = uint64(estateId / SUBID_MULTIPLIER);
+            estateId = _generateTokenId(from, subId, _chainIndex, version);
+            strgId = _storageId(estateId);
+        }
+
+        _owners[strgId] = (uint256(version) << 200) + uint256(uint160(to));
         _numNFTPerAddress[to]++;
-        emit Transfer(address((0)), to, estateId);
-        return estateId;
+        emit Transfer(address(0), to, estateId);
+        return (estateId, strgId);
     }
 
     function _addSingleQuad(
@@ -353,7 +449,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     }
 
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    // solhint-disable no-unused-vars
     function onERC721BatchReceived(
         address, // operator,
         address, // from,
@@ -379,6 +474,5 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", "estate.json"));
     }
 
-    // solhint-enable no-unused-vars
     // solhint-enable code-complexity
 }
