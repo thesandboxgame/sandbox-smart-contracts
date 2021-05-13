@@ -37,7 +37,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         uint8 chainIndex
     ) public initializer() {
         _land = land;
-        ImmutableERC721.__ImmutableERC721_initialize(chainIndex);
+        ERC721BaseToken.__ERC721BaseToken_initialize(chainIndex);
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
 
