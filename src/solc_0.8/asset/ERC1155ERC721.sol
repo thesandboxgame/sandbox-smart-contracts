@@ -610,7 +610,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     /// @param id The id of the token to query.
     /// @return chainIndex The index of the original layer of minting.
     /// 0 = eth mainnet, 1 == matic mainnet, etc...
-    function chainIndex(uint256 id) public pure returns (uint256 chainIndex) {
+    function getChainIndex(uint256 id) public pure returns (uint256 chainIndex) {
         return uint256((id & CHAIN_INDEX_MASK) >> 63);
     }
 
