@@ -30,7 +30,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Handler {
     uint8 internal _chainIndex;
 
     function __ERC721BaseToken_initialize(uint8 chainIndex) internal {
-      _chainIndex = chainIndex;
+        _chainIndex = chainIndex;
     }
 
     /// @notice Approve an operator to spend tokens on the senders behalf.

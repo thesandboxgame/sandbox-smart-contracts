@@ -7,7 +7,7 @@ import "../../common/BaseWithStorage/ERC721BaseToken.sol";
 contract ChildLandBaseToken is ERC721BaseToken {
     // Our grid is 408 x 408 lands
     uint256 internal constant GRID_SIZE = 408;
-// @review DO we need this?
+    // @review DO we need this?
     uint256 internal constant LAYER = 0xFF00000000000000000000000000000000000000000000000000000000000000;
 
     mapping(address => bool) internal _minters;
@@ -18,19 +18,16 @@ contract ChildLandBaseToken is ERC721BaseToken {
         uint8 chainIndex,
         address admin
     ) {
-      _admin = admin;
-      ERC721BaseToken.__ERC721BaseToken_initialize(chainIndex);
-      ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
+        _admin = admin;
+        ERC721BaseToken.__ERC721BaseToken_initialize(chainIndex);
+        ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
 
     /// @notice Enable or disable the ability of `minter` to mint tokens
     /// @param minter address that will be given/removed minter right.
     /// @param enabled set whether the minter is enabled or disabled.
     function setMinter(address minter, bool enabled) external {
-        require(
-            msg.sender == _admin,
-            "only admin is allowed to add minters"
-        );
+        require(msg.sender == _admin, "only admin is allowed to add minters");
         _minters[minter] = enabled;
         emit Minter(minter, enabled);
     }
@@ -44,20 +41,20 @@ contract ChildLandBaseToken is ERC721BaseToken {
 
     /// @notice total width of the map
     /// @return width
-    function width() external returns(uint256) {
+    function width() external returns (uint256) {
         return GRID_SIZE;
     }
 
     /// @notice total height of the map
     /// @return height
-    function height() external returns(uint256) {
+    function height() external returns (uint256) {
         return GRID_SIZE;
     }
 
     /// @notice x coordinate of Land token
     /// @param id tokenId
     /// @return the x coordinates
-    function x(uint256 id) external returns(uint256) {
+    function x(uint256 id) external returns (uint256) {
         require(_ownerOf(id) != address(0), "token does not exist");
         return id % GRID_SIZE;
     }
@@ -65,7 +62,7 @@ contract ChildLandBaseToken is ERC721BaseToken {
     /// @notice y coordinate of Land token
     /// @param id tokenId
     /// @return the y coordinates
-    function y(uint256 id) external returns(uint256) {
+    function y(uint256 id) external returns (uint256) {
         require(_ownerOf(id) != address(0), "token does not exist");
         return id / GRID_SIZE;
     }
@@ -85,5 +82,4 @@ contract ChildLandBaseToken is ERC721BaseToken {
     //     owner = address(uint160(packedOwnerData));
     //     operatorEnabled = (packedOwnerData / 2**255) == 1;
     // }
-
 }
