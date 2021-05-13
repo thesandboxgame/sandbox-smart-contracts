@@ -10,7 +10,7 @@ interface IGameToken {
         uint256[] assetAmountsToRemove;
         uint256[] assetIdsToAdd;
         uint256[] assetAmountsToAdd;
-        bytes32 uri;
+        bytes32 uri; // ipfs hash (without the prefix, assume cidv1 folder)
     }
 
     function createGame(

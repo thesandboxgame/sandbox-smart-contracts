@@ -74,6 +74,8 @@ const config: HardhatUserConfig = {
 
     upgradeAdmin: 'sandAdmin',
 
+    multiGiveawayAdmin: 'sandAdmin',
+
     liquidityRewardProvider: {
       default: 'sandBeneficiary',
       mainnet: '0x8FFA64FB50559c3Ff09a1022b84B2c5233ed8068',
@@ -94,7 +96,7 @@ const config: HardhatUserConfig = {
     sandSaleAdmin: 'sandAdmin', // can pause the sandSale and withdraw SAND
     genesisBouncerAdmin: 'sandAdmin', // can set who is allowed to mint
     defaultMinterAdmin: 'sandAdmin', // can change the fees
-    genesisMinter: 'deployer', // the first account allowed to mint genesis Assets
+    genesisMinter: 'sandAdmin', // the first account allowed to mint genesis Assets
     assetAuctionFeeCollector: 'sandSaleBeneficiary', // collect fees from asset auctions
     assetAuctionAdmin: 'sandAdmin', // can change fee collector
 

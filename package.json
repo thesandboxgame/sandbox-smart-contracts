@@ -2,7 +2,7 @@
   "name": "tsb-contracts",
   "version": "0.0.1",
   "description": "smart contracts for the sandbox",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "files": [
     "deployments/mainnet",
     "deployments/rinkeby"
