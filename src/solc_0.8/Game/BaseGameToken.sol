@@ -14,15 +14,6 @@ contract BaseGameToken is ImmutableERC721, WithMinter, Initializable, IGameToken
 
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
-    uint256 private constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
-    uint256 private constant SUBID_MULTIPLIER = uint256(2)**(256 - 224);
-    uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 64 - 16);
-    // ((uint256(1) * 2**224) - 1) << 32;
-    uint256 private constant STORAGE_ID_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000;
-    // ((uint256(1) * 2**32) - 1) << 200;
-    uint256 private constant VERSION_MASK = 0x000000FFFFFFFF00000000000000000000000000000000000000000000000000;
-    uint256 private constant CHAIN_INDEX_MASK = 0x0000000000000000000000000000000000000000000000000000000000FF0000;
-    bytes32 private constant base32Alphabet = 0x6162636465666768696A6B6C6D6E6F707172737475767778797A323334353637;
 
     mapping(uint256 => mapping(uint256 => uint256)) private _gameAssets;
     mapping(address => address) private _creatorship; // creatorship transfer
@@ -254,13 +245,6 @@ contract BaseGameToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         revert("ERC1155_REJECTED");
     }
 
-    /// @notice Get the storageID (no chainIndex or version data), which is constant for a given token.
-    /// @param gameId The tokenId for which to find the first token Id.
-    /// @return The storage id for this token.
-    function getStorageId(uint256 gameId) external pure override returns (uint256) {
-        return _storageId(gameId);
-    }
-
     /// @notice Return the name of the token contract.
     /// @return The name of the token contract.
     function name() external pure override returns (string memory) {
@@ -489,35 +473,6 @@ contract BaseGameToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         address newOwner = _ownerOf(newId);
         assert(owner == newOwner);
         return newId;
-    }
-
-    /// @dev Check if a withdrawal is allowed.
-    /// @param from The address requesting the withdrawal.
-    /// @param gameId The id of the GAME token to withdraw assets from.
-    function _check_withdrawal_authorized(address from, uint256 gameId) internal view {
-        require(from != address(0), "SENDER_ZERO_ADDRESS");
-        require(from == _withdrawalOwnerOf(gameId), "LAST_OWNER_NOT_EQUAL_SENDER");
-    }
-
-    /// @dev A GameToken-specific implementation which handles versioned tokenIds.
-    /// @param id The tokenId to get the owner of.
-    /// @return The address of the owner.
-    function _ownerOf(uint256 id) internal view override returns (address) {
-        uint256 packedData = _owners[_storageId(id)];
-        uint16 idVersion = uint16(id);
-        uint16 storageVersion = uint16((packedData & VERSION_MASK) >> 200);
-
-        if (((packedData & BURNED_FLAG) == BURNED_FLAG) || idVersion != storageVersion) {
-            return address(0);
-        }
-        return address(uint160(packedData));
-    }
-
-    /// @dev Get the storageId (full id without the version number) from the full tokenId.
-    /// @param id The full tokenId for the GAME token.
-    /// @return The storageId.
-    function _storageId(uint256 id) internal pure override returns (uint256) {
-        return uint256(id & STORAGE_ID_MASK);
     }
 
     /// @dev Get the a full URI string for a given hash + gameId.

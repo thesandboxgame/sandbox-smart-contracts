@@ -4,13 +4,13 @@ pragma solidity ^0.8.0;
 import "../BaseWithStorage/ERC721BaseToken.sol";
 
 contract ImmutableERC721 is ERC721BaseToken {
-    uint256 private constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
-    uint256 private constant SUBID_MULTIPLIER = uint256(2)**(256 - 224);
-    uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 64 - 16);
-    uint256 private constant STORAGE_ID_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000;
-    uint256 private constant VERSION_MASK = 0x000000FFFFFFFF00000000000000000000000000000000000000000000000000;
-    uint256 private constant CHAIN_INDEX_MASK = 0x0000000000000000000000000000000000000000000000000000000000FF0000;
-    bytes32 private constant base32Alphabet = 0x6162636465666768696A6B6C6D6E6F707172737475767778797A323334353637;
+    uint256 internal constant CREATOR_OFFSET_MULTIPLIER = uint256(2)**(256 - 160);
+    uint256 internal constant SUBID_MULTIPLIER = uint256(2)**(256 - 224);
+    uint256 internal constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 64 - 16);
+    uint256 internal constant STORAGE_ID_MASK = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000;
+    uint256 internal constant VERSION_MASK = 0x000000FFFFFFFF00000000000000000000000000000000000000000000000000;
+    uint256 internal constant CHAIN_INDEX_MASK = 0x0000000000000000000000000000000000000000000000000000000000FF0000;
+    bytes32 internal constant base32Alphabet = 0x6162636465666768696A6B6C6D6E6F707172737475767778797A323334353637;
 
     uint8 internal _chainIndex;
 
@@ -40,6 +40,14 @@ contract ImmutableERC721 is ERC721BaseToken {
         return address(uint160(packedData));
     }
 
+    /// @dev Check if a withdrawal is allowed.
+    /// @param from The address requesting the withdrawal.
+    /// @param gameId The id of the GAME token to withdraw assets from.
+    function _check_withdrawal_authorized(address from, uint256 gameId) internal view virtual {
+        require(from != address(0), "SENDER_ZERO_ADDRESS");
+        require(from == _withdrawalOwnerOf(gameId), "LAST_OWNER_NOT_EQUAL_SENDER");
+    }
+
     /// @dev Get the address allowed to withdraw associated tokens from the parent token.
     /// If too many associated tokens in TOKEN, block.gaslimit won't allow detroy and withdraw in 1 tx.
     /// An owner may destroy their token, then withdraw associated tokens in a later tx (even
@@ -49,6 +57,13 @@ contract ImmutableERC721 is ERC721BaseToken {
     function _withdrawalOwnerOf(uint256 id) internal view virtual returns (address) {
         uint256 packedData = _owners[_storageId(id)];
         return address(uint160(packedData));
+    }
+
+    /// @notice Get the storageID (no chainIndex or version data), which is constant for a given token.
+    /// @param tokenId The tokenId for which to find the first token Id.
+    /// @return The storage id for this token.
+    function getStorageId(uint256 tokenId) external pure virtual returns (uint256) {
+        return _storageId(tokenId);
     }
 
     /// @dev Get the storageId (full id without the version number) from the full tokenId.
