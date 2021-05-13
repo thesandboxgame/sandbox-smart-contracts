@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "../../estate/BaseEstateToken.sol";
+import "../../estate/EstateBaseToken.sol";
 
 // solhint-disable-next-line no-empty-blocks
-contract ChildEstateTokenV1 is BaseEstateToken {
+contract ChildEstateTokenV1 is EstateBaseToken {
 
 }

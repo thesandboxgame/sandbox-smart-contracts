@@ -7,7 +7,7 @@ import "../common/interfaces/ILandToken.sol";
 import "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract BaseEstateToken is ImmutableERC721, Initializable {
+contract EstateBaseToken is ImmutableERC721, Initializable {
     uint8 internal constant OWNER = 0;
     uint8 internal constant ADD = 1;
     uint8 internal constant BREAK = 2;

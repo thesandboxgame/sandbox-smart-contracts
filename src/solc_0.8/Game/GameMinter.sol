@@ -2,7 +2,7 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-import "./BaseGameToken.sol";
+import "./GameBaseToken.sol";
 import "../common/interfaces/IGameMinter.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
@@ -10,7 +10,7 @@ import "../common/BaseWithStorage/ERC2771Handler.sol";
 contract GameMinter is ERC2771Handler, IGameMinter {
     ///////////////////////////////  Data //////////////////////////////
 
-    BaseGameToken internal immutable _gameToken;
+    GameBaseToken internal immutable _gameToken;
     // @todo confirm actual fees
     uint256 internal immutable _gameMintingFee;
     uint256 internal immutable _gameUpdateFee;
@@ -20,7 +20,7 @@ contract GameMinter is ERC2771Handler, IGameMinter {
     ///////////////////////////////  Functions /////////////////////////
 
     constructor(
-        BaseGameToken gameTokenContract,
+        GameBaseToken gameTokenContract,
         address trustedForwarder,
         uint256 gameMintingFee,
         uint256 gameUpdateFee,
@@ -44,7 +44,7 @@ contract GameMinter is ERC2771Handler, IGameMinter {
     /// @return gameId The id of the new GAME token (erc721)
     function createGame(
         address to,
-        BaseGameToken.GameData calldata creation,
+        GameBaseToken.GameData calldata creation,
         address editor,
         uint64 subId
     ) external override returns (uint256 gameId) {
@@ -58,7 +58,7 @@ contract GameMinter is ERC2771Handler, IGameMinter {
     /// @param gameId The current id of the GAME token.
     /// @param update The values to use for the update.
     /// @return newId The new gameId.
-    function updateGame(uint256 gameId, BaseGameToken.GameData memory update)
+    function updateGame(uint256 gameId, GameBaseToken.GameData memory update)
         external
         override
         returns (uint256 newId)
