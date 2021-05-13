@@ -23,7 +23,13 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     address internal _breaker;
 
     event QuadsAddedInEstate(uint256 indexed id, uint24[] list);
-    event EstateTokenUpdated(uint256 indexed oldId, uint256 indexed newId, uint256[] ids, uint256[] junctions, bytes32 uri);
+    event EstateTokenUpdated(
+        uint256 indexed oldId,
+        uint256 indexed newId,
+        uint256[] ids,
+        uint256[] junctions,
+        bytes32 uri
+    );
 
     function initV1(
         address trustedForwarder,
