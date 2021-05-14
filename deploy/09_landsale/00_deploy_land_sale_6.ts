@@ -46,7 +46,7 @@ const func: DeployFunction = async function (hre) {
         landContract.address,
         sandContract.address,
         sandContract.address,
-        deployer,
+        landSaleAdmin,
         landSaleBeneficiary,
         merkleRootHash,
         deadline,
@@ -86,18 +86,7 @@ const func: DeployFunction = async function (hre) {
       );
     }
 
-    const currentAdmin = await read(landSaleName, 'getAdmin');
-    if (currentAdmin.toLowerCase() !== landSaleAdmin.toLowerCase()) {
-      await catchUnknownSigner(
-        execute(
-          landSaleName,
-          {from: currentAdmin, log: true},
-          'changeAdmin',
-          landSaleAdmin
-        )
-      );
-    }
-
+    // TODO remove that step for next Land Sale, use Sand.paidCall on the frontend
     const isSandSuperOperator = await read(
       'Sand',
       'isSuperOperator',
