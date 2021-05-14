@@ -12,7 +12,7 @@ const func: DeployFunction = async function (
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const chainIndex = 1; // L2 (Polygon). Use 0 for Ethereum-Mainnet.
 
-  await deploy('ChildLandBaseToken', {
+  await deploy('ChildLandToken', {
     from: deployer,
     args: [TRUSTED_FORWARDER.address, chainIndex, landAdmin],
     log: true,
@@ -21,6 +21,6 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['ChildLandBaseToken', 'ChildLandBaseToken_deploy'];
+func.tags = ['ChildLandToken', 'ChildLandToken_deploy'];
 func.dependencies = ['TRUSTED_FORWARDER'];
 func.skip = skipUnlessTest; // TODO: Setup deploy-polygon folder and network.
