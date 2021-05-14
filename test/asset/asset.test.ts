@@ -1,5 +1,5 @@
 import {setupAsset} from './fixtures';
-import {waitFor, getChainIndex} from '../utils';
+import {waitFor, getAssetChainIndex} from '../utils';
 import {expect} from '../chai-setup';
 import {sendMetaTx} from '../sendMetaTx';
 
@@ -78,7 +78,7 @@ describe('Asset.sol', function () {
   it('can get the chainIndex from the tokenId', async function () {
     const {users, mintAsset} = await setupAsset();
     const tokenId = await mintAsset(users[1].address, 11);
-    const chainIndex = getChainIndex(tokenId);
+    const chainIndex = getAssetChainIndex(tokenId);
     expect(chainIndex).to.be.equal(0);
   });
 
