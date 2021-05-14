@@ -21,11 +21,11 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     mapping(uint256 => bytes32) internal _metaData;
     // @review should we use:
     // mapping(uint256 => mapping(uint256 => bool)) _landsInEstate;
-    // mapping(uint256 => mapping(uint256 => bool)) _gamesInEstate;
     // and let backend handle enumeration like in GameToken?
     // but... This might not work for checking adjacency
-    mapping(uint256 => uint24[]) _landsInEstate;
-    mapping(uint256 => uint256[]) _gamesInEstate;
+    // @todo add view getters for these
+    mapping(uint256 => uint24[]) internal _landsInEstate;
+    mapping(uint256 => uint256[]) internal _gamesInEstate;
 
 
     LandToken internal _land;
@@ -92,7 +92,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @param estateId The current id of the ESTATE token.
     /// @param update The data to use for the Estate update.
     /// @return The new estateId.
-    // @todo add an update struct for Estate (like in IGameToken.sol). Allow for updating a linked gameToken directly to avoid getting out of sync? think some more...
+    // @todo  Allow for updating a linked gameToken directly to avoid getting out of sync? think some more...
     function updateEstate(
         address from,
         address to,
