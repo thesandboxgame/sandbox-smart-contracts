@@ -2,7 +2,7 @@
 /* solhint-disable func-order, code-complexity */
 pragma solidity 0.8.2;
 
-import "../../common/BaseWithStorage/ERC721BaseToken.sol";
+import "../common/BaseWithStorage/ERC721BaseToken.sol";
 
 contract SimplifiedLandBaseToken is ERC721BaseToken {
     // Our grid is 408 x 408 lands
