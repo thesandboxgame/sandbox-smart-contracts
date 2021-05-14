@@ -308,6 +308,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         uint256[] memory ids,
         uint256[] memory junctions,
         bool justCreated
+        // solhint-disable-next-line no-empty-blocks
     ) internal {} //temporarily disable function logic until it gets refactored in next PR
 
     /**
