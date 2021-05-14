@@ -6,4 +6,11 @@ import "../../land/SimplifiedLandBaseToken.sol";
 // solhint-disable-next-line no-empty-blocks
 contract ChildLandToken is SimplifiedLandBaseToken {
 
+    constructor(
+        address trustedForwarder,
+        uint8 chainIndex,
+        address admin
+  // solhint-disable-next-line no-empty-blocks
+    ) SimplifiedLandBaseToken(trustedForwarder, chainIndex, admin) {}
+
 }
