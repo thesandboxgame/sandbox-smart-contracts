@@ -276,25 +276,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         _setApprovalForAll(_msgSender(), operator, approved);
     }
 
-    /// @notice Change or reaffirm the approved address for an NFT for `sender`.
-    /// @dev used for Meta Transaction (from metaTransactionContract).
-    /// @param sender the sender granting control.
-    /// @param operator the address to approve as NFT controller.
-    /// @param id the NFT to approve.
-    function approveFor(
-        address sender,
-        address operator,
-        uint256 id
-    ) external {
-        address owner = _ownerOf(id);
-        address msgSender = _msgSender();
-        require(sender != address(0), "SENDER==0");
-        require(sender == msgSender || isApprovedForAll(sender, msgSender), "!AUTHORIZED");
-        require(owner == sender, "OWNER!=SENDER");
-        _erc721operators[id] = operator;
-        emit Approval(owner, operator, id);
-    }
-
     /// @notice Change or reaffirm the approved address for an NFT.
     /// @param operator the address to approve as NFT controller.
     /// @param id the id of the NFT to approve.
@@ -604,14 +585,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         require(owner != address(0), "OWNER==0");
         require(operator != address(0), "OPERATOR==0");
         return _operatorsForAll[owner][operator] || _superOperators[operator];
-    }
-
-    /// @dev get the layer a token was minted on from its id.
-    /// @param id The id of the token to query.
-    /// @return chainIndex The index of the original layer of minting.
-    /// 0 = eth mainnet, 1 == matic mainnet, etc...
-    function getChainIndex(uint256 id) public pure returns (uint256 chainIndex) {
-        return uint256((id & CHAIN_INDEX_MASK) >> 63);
     }
 
     function _setApprovalForAll(
