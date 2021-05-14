@@ -308,8 +308,9 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         uint256[] memory ids,
         uint256[] memory junctions,
         bool justCreated
-    ) internal {}//temporarily disable function logic until it gets refactored in next PR
-/**
+    ) internal {} //temporarily disable function logic until it gets refactored in next PR
+
+    /**
         _land.batchTransferFrom(sender, address(this), ids, "");
         uint24[] memory list = new uint24[](ids.length);
         for (uint256 i = 0; i < list.length; i++) {
