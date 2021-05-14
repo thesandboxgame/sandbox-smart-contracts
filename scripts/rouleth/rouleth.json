@@ -1,7 +1,8 @@
 {
   "blockNumber": "11438254",
-  "numWinnerTickets": "10",
+  "maxWinnerNb": "10",
   "tickets": [
+    "0xffc617a199e9717f0a3208371b026d93e56b10eb",
     "0x7466ebF3B8aF67511f7163Ab1E31f928b2E60330",
     "0x0081d6E0a5A7CB0C1a0636e276982d8Bbd12b71d",
     "0xc212Fc9E1A61b8400E0323FDe83ed1Fe359e3312",

@@ -1,31 +1,24 @@
 import fs from 'fs';
 import {ethers} from 'hardhat';
 import {BigNumber, utils} from 'ethers';
-import {createClient} from '@urql/core';
+import {TheGraph} from '../utils/thegraph';
 import 'dotenv/config';
-import 'isomorphic-unfetch';
 
 // run the script: yarn mainnet:run scripts/rouleth/rouleth.ts
 // this script need a json file with the same file name containing a block number, a number of ticket and a list of addresses
 
 const {solidityKeccak256} = utils;
 
-interface LandOwner {
-  id: string;
-  nb: number;
-}
-
 interface Owner {
   id: string;
   numLands: number;
 }
 
-const getAddressFromGraph = async (blockNb: number): Promise<LandOwner[]> => {
-  // connect to thegraph api
-  const client = createClient({
-    url: 'https://api.thegraph.com/subgraphs/name/pixowl/the-sandbox',
-  });
-
+const getAddressFromGraph = async (blockNb: number): Promise<Owner[]> => {
+  const theGraph = new TheGraph(
+    'https://api.thegraph.com/subgraphs/name/pixowl/the-sandbox'
+  );
+  
   // query for thegraph api that get adress from users who own more than a land
   const queryString = `
       query($blockNb: Int! $first: Int! $lastId: ID!) {
@@ -36,41 +29,10 @@ const getAddressFromGraph = async (blockNb: number): Promise<LandOwner[]> => {
       }
     `;
 
-  // query function that get all datas (thegraph only return 100 by 100 elements)
-  const query = async (
-    queryString: string,
-    field: string,
-    variables: Record<string, unknown>
-  ): Promise<Array<LandOwner>> => {
-    const first = 100;
-    let lastId = '0x0';
-    let resElemNb = first;
-    const addressArray: Array<LandOwner> = [];
-    while (resElemNb === first) {
-      const result = await client
-        .query(queryString, {first, lastId, ...variables})
-        .toPromise();
-      const data = result.data;
-      if (data) {
-        data.owners.map((elem: Owner) =>
-          addressArray.push({id: elem.id, nb: elem.numLands})
-        );
-      }
-      resElemNb = data[field].length;
-      if (resElemNb > 0) {
-        const newLastId = data[field][resElemNb - 1].id;
-        if (lastId === newLastId) {
-          console.log('same query, stop');
-          break;
-        }
-        lastId = newLastId;
-      }
-    }
-    return addressArray;
-  };
-
-  return await query(queryString, 'owners', {blockNb});
-};
+  return theGraph.query(queryString, 'owners', {
+    blockNb,
+  });
+}
 
 const getAddressFromBack = async (address: string[]): Promise<string[]> => {
   const provider = ethers.provider;
@@ -119,7 +81,7 @@ const getAddressFromBack = async (address: string[]): Promise<string[]> => {
 
 const lottery = async (
   addBack: Array<string>,
-  addGraph: Array<LandOwner>,
+  addGraph: Array<Owner>,
   maxWinnerNb: number,
   blockNumber: number
 ) => {
@@ -133,8 +95,7 @@ const lottery = async (
 
     nextInteger(): number {
       this.seed = solidityKeccak256(['bytes32'], [this.seed]);
-      return parseInt(this.seed, 16) % Math.floor(Math.random() * 100);
-      // return BigNumber.from(this.seed).mod(Number.MAX_SAFE_INTEGER).toNumber();
+      return BigNumber.from(this.seed).mod("" + Number.MAX_SAFE_INTEGER).toNumber();
     }
   }
 
@@ -144,9 +105,9 @@ const lottery = async (
     const extendedArray: Array<string> = [];
     addBack.filter((itemAddress: string) => {
       extendedArray.push(itemAddress);
-      addGraph.map((itemLandOwner: LandOwner) => {
+      addGraph.map((itemLandOwner: Owner) => {
         if (itemLandOwner.id === itemAddress) {
-          for (let i = 0; i < itemLandOwner.nb; i++) {
+          for (let i = 0; i < itemLandOwner.numLands; i++) {
             extendedArray.push(itemLandOwner.id);
           }
         }
@@ -197,7 +158,9 @@ const main = async () => {
   const maxWinnerNb = parseInt(data.maxWinnerNb);
 
   const addBack: Array<string> = await getAddressFromBack(addressBack);
-  const addGraph: Array<LandOwner> = await getAddressFromGraph(blockNumber);
+  const addGraph: Array<Owner> = await getAddressFromGraph(blockNumber);
+
+  console.log('graph', JSON.stringify(addGraph, null, 2));
 
   console.log(
     'ADDRESS THAT WON THE LOTTERY\n',
