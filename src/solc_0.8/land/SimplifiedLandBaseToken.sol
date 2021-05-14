@@ -9,7 +9,6 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
     uint256 internal constant GRID_SIZE = 408;
     // set ChildChainManager as only minter for Polygon, but keep flexibility for other L2s
     mapping(address => bool) internal _minters;
-    event Minter(address superOperator, bool enabled);
 
     constructor(
         address trustedForwarder,
