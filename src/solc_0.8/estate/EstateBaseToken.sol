@@ -7,6 +7,8 @@ import "../common/interfaces/ILandToken.sol";
 import "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
+/// @dev An updated Estate Token contract using a simplified verison of LAND with no Quads
+
 contract EstateBaseToken is ImmutableERC721, Initializable {
     uint8 internal constant OWNER = 0;
     uint8 internal constant ADD = 1;
@@ -16,13 +18,13 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     uint16 internal constant GRID_SIZE = 408;
 
     uint64 internal _nextId; // max uint64 = 18,446,744,073,709,551,615
-    mapping(uint256 => uint24[]) internal _quadsInEstate;
+    // mapping(uint256 => uint24[]) internal _quadsInEstate;
     mapping(uint256 => bytes32) internal _metaData;
     LandToken internal _land;
     address internal _minter;
+    // @review needed?
     address internal _breaker;
-
-    event QuadsAddedInEstate(uint256 indexed id, uint24[] list);
+    // @todoadd Update struct like GameToken ?
     event EstateTokenUpdated(
         uint256 indexed oldId,
         uint256 indexed newId,
@@ -41,31 +43,32 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
 
-    function createFromQuad(
-        address sender,
-        address to,
-        uint256 size,
-        uint256 x,
-        uint256 y
-    ) external returns (uint256) {
-        _check_authorized(sender, ADD);
-        (uint256 id, ) = _mintEstate(sender, to, 1, true);
-        _addSingleQuad(sender, id, size, x, y);
-        return id;
-    }
+    // function createFromQuad(
+    //     address sender,
+    //     address to,
+    //     uint256 size,
+    //     uint256 x,
+    //     uint256 y
+    // ) external returns (uint256) {
+    //     _check_authorized(sender, ADD);
+    //     (uint256 id, ) = _mintEstate(sender, to, 1, true);
+    //     _addSingleQuad(sender, id, size, x, y);
+    //     return id;
+    // }
 
-    function addQuad(
-        address sender,
-        uint256 estateId,
-        uint256 size,
-        uint256 x,
-        uint256 y
-    ) external {
-        _check_authorized(sender, ADD);
-        _check_hasOwnerRights(sender, estateId);
-        _addSingleQuad(sender, estateId, size, x, y);
-    }
+    // function addQuad(
+    //     address sender,
+    //     uint256 estateId,
+    //     uint256 size,
+    //     uint256 x,
+    //     uint256 y
+    // ) external {
+    //     _check_authorized(sender, ADD);
+    //     _check_hasOwnerRights(sender, estateId);
+    //     _addSingleQuad(sender, estateId, size, x, y);
+    // }
 
+    // @review rename createEstate to mimic GameToken funcs ?
     function createFromMultipleLands(
         address sender,
         address to,

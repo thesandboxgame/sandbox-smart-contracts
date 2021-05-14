@@ -4,10 +4,10 @@ pragma solidity 0.8.2;
 
 import "../../common/BaseWithStorage/ERC721BaseToken.sol";
 
-contract ChildLandBaseToken is ERC721BaseToken {
+contract SimplifiedLandBaseToken is ERC721BaseToken {
     // Our grid is 408 x 408 lands
     uint256 internal constant GRID_SIZE = 408;
-
+    // set ChildChainManager as only minter for Polygon, but keep flexibility for other L2s
     mapping(address => bool) internal _minters;
     event Minter(address superOperator, bool enabled);
 
@@ -19,15 +19,6 @@ contract ChildLandBaseToken is ERC721BaseToken {
         _admin = admin;
         ERC721BaseToken.__ERC721BaseToken_initialize(chainIndex);
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
-    }
-
-    /// @notice Enable or disable the ability of `minter` to mint tokens
-    /// @param minter address that will be given/removed minter right.
-    /// @param enabled set whether the minter is enabled or disabled.
-    function setMinter(address minter, bool enabled) external {
-        require(msg.sender == _admin, "only admin is allowed to add minters");
-        _minters[minter] = enabled;
-        emit Minter(minter, enabled);
     }
 
     /// @notice check whether address `who` is given minter rights.
