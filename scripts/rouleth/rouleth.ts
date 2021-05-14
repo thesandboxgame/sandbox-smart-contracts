@@ -120,15 +120,14 @@ const lottery = async (
   const randomWinnersSelection = (addresses: string[], seed: string) => {
     const result: Array<string> = [];
     const rand = new SeededRand(seed);
-    const sortedList = addresses.sort((address1, address2) =>
+    let sortedList = addresses.sort((address1, address2) =>
       BigNumber.from(address1).sub(BigNumber.from(address2)).gt(0) ? 1 : -1
     );
     for (let i = 0; i < maxWinnerNb; i++) {
       const index = rand.nextInteger() % sortedList.length;
       const address = sortedList[index];
       result.push(address);
-      sortedList.splice(index, 1);
-      // sortedList = sortedList.filter((v) => v.toLowerCase() !== address.toLowerCase()) // If only 1 winning ticket per address
+      sortedList = sortedList.filter((v) => v.toLowerCase() !== address.toLowerCase()) 
     }
     return result;
   };
