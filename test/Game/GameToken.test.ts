@@ -12,11 +12,9 @@ import {waitFor, expectEventWithArgs, findEvents} from '../utils';
 import {setupTest, User} from './fixtures';
 import {supplyAssets} from './assets';
 import {toUtf8Bytes} from 'ethers/lib/utils';
+import {sendMetaTx} from '../sendMetaTx';
 
 let id: BigNumber;
-
-const METATX_SANDBOX = 1;
-const METATX_2771 = 2;
 const rng = new Prando('GameToken');
 
 type Update = {
@@ -208,14 +206,30 @@ describe('GameToken', function () {
       ).to.be.revertedWith('STORAGE_ID_REUSE_FORBIDDEN');
     });
 
-    it('gameId contains creator address', async function () {
+    it('gameId contains creator, randomId, chainIndex & version data', async function () {
       const idAsHex = utils.hexValue(gameId);
       const creatorSlice = idAsHex.slice(0, 42);
       const randomIdSlice = idAsHex.slice(43, 58);
-      const versionSlice = idAsHex.slice(58);
+      const chainIndexSlice = idAsHex.slice(58, 62);
+      const versionSlice = idAsHex.slice(62);
       expect(utils.getAddress(creatorSlice)).to.be.equal(users[3].address);
       expect(randomIdSlice).to.be.equal('000000016721787');
-      expect(versionSlice).to.be.equal('00000001');
+      expect(chainIndexSlice).to.be.equal('0001');
+      expect(versionSlice).to.be.equal('0001');
+    });
+
+    it('can get the storageId for a GAME', async function () {
+      const storageIdAsHex = utils.hexValue(
+        await gameToken.getStorageId(gameId)
+      );
+      expect(storageIdAsHex).to.be.equal(
+        '0xa0ee7a142d267c1f36714e4a8f75612f20a79720000000001672178700000000'
+      );
+    });
+
+    it('can get the chainIndex for a GAME', async function () {
+      const chainIndex = await gameToken.getChainIndex(gameId);
+      expect(chainIndex).to.be.equal(1);
     });
 
     it('reverts if non-minter trys to mint Game when _Minter is set', async function () {
@@ -625,20 +639,10 @@ describe('GameToken', function () {
         const idAsHex = utils.hexValue(gameId);
         const creatorSlice = idAsHex.slice(0, 42);
         const randomIdSlice = idAsHex.slice(43, 58);
-        const versionSlice = idAsHex.slice(58);
+        const versionSlice = idAsHex.slice(62);
         expect(utils.getAddress(creatorSlice)).to.be.equal(GameOwner.address);
         expect(randomIdSlice).to.be.equal('000000020708760');
-        expect(versionSlice).to.be.equal('00000002');
-      });
-      it('can get the original version of the gameId', async function () {
-        const originalId = await gameToken.originalId(gameId);
-        const originalAsHex = utils.hexValue(originalId);
-        const creatorSlice = originalAsHex.slice(0, 42);
-        const randomIdSlice = originalAsHex.slice(43, 58);
-        const versionSlice = originalAsHex.slice(58);
-        expect(utils.getAddress(creatorSlice)).to.be.equal(GameOwner.address);
-        expect(randomIdSlice).to.be.equal('000000020708760');
-        expect(versionSlice).to.be.equal('00000001');
+        expect(versionSlice).to.be.equal('0002');
       });
 
       it('Minter can add multiple Assets', async function () {
@@ -1466,10 +1470,10 @@ describe('GameToken', function () {
       const idAsHex = utils.hexValue(gameId);
       const creator = idAsHex.slice(0, 42);
       const subId = idAsHex.slice(43, 58);
-      const version = idAsHex.slice(58);
+      const version = idAsHex.slice(62);
       expect(utils.getAddress(creator)).to.be.equal(users[0].address);
       expect(subId).to.be.equal('00000002eccadc6');
-      expect(version).to.be.equal('00000001');
+      expect(version).to.be.equal('0001');
     });
 
     it('should consider future versions of gameIds as invalid', async function () {
@@ -1481,8 +1485,8 @@ describe('GameToken', function () {
 
     it('should update version when changes are made', async function () {
       let idAsHex = utils.hexValue(gameId);
-      const versionBefore = idAsHex.slice(58);
-      expect(versionBefore).to.be.equal('00000001');
+      const versionBefore = idAsHex.slice(62);
+      expect(versionBefore).to.be.equal('0001');
 
       gameAssetsWithOldId = await gameToken.getAssetBalances(gameId, assets);
       const receipt = await gameTokenAsMinter.updateGame(
@@ -1497,8 +1501,8 @@ describe('GameToken', function () {
       );
       updatedGameId = updateEvent.args[1];
       idAsHex = utils.hexValue(updatedGameId);
-      const versionAfter = idAsHex.slice(58);
-      expect(versionAfter).to.be.equal('00000002');
+      const versionAfter = idAsHex.slice(62);
+      expect(versionAfter).to.be.equal('0002');
     });
 
     it('should use baseId (creator address + subId) to map to game Assets  ', async function () {
@@ -1511,8 +1515,7 @@ describe('GameToken', function () {
   });
 
   describe('GameToken: MetaTransactions', function () {
-    let sandAsExecutionAdmin: Contract;
-    let sandAsExecutionOperator: Contract;
+    let trustedForwarder: Contract;
     let gameId: BigNumber;
     let gameId2: BigNumber;
     let users: User[];
@@ -1523,31 +1526,21 @@ describe('GameToken', function () {
     let gameTokenAsAdmin: Contract;
     let GameOwner: User;
     let assets: BigNumber[];
-    const gas = 1000000;
 
     before(async function () {
-      ({gameToken, users, GameOwner, gameTokenAsAdmin} = await setupTest());
-      const {
-        sandExecutionAdmin,
-        sandAdmin,
-        gameTokenAdmin,
-      } = await getNamedAccounts();
+      ({
+        gameToken,
+        users,
+        GameOwner,
+        gameTokenAsAdmin,
+        trustedForwarder,
+      } = await setupTest());
+      const {sandAdmin, gameTokenAdmin} = await getNamedAccounts();
       await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
 
       sandContract = await ethers.getContract('Sand');
-      sandAsExecutionAdmin = await sandContract.connect(
-        ethers.provider.getSigner(sandExecutionAdmin)
-      );
       assetContract = await ethers.getContract('Asset');
-      await sandAsExecutionAdmin.setExecutionOperator(users[6].address, true);
 
-      expect(
-        await sandContract.isExecutionOperator(users[6].address)
-      ).to.be.equal(true);
-
-      sandAsExecutionOperator = await sandContract.connect(
-        ethers.provider.getSigner(users[6].address)
-      );
       sandAsAdmin = await sandContract.connect(
         ethers.provider.getSigner(sandAdmin)
       );
@@ -1560,48 +1553,22 @@ describe('GameToken', function () {
       ]);
     });
 
-    it('can check "Trusted Forwarder" if MetaTransactionProcessor = METATX_2771', async function () {
-      const others = await getUnnamedAccounts();
-
-      let isTrustedForwarder = await gameToken.isTrustedForwarder(others[0]);
-      expect(isTrustedForwarder).to.be.false;
-
-      await expect(
-        gameTokenAsAdmin.setMetaTransactionProcessor(others[0], METATX_2771)
-      )
-        .to.emit(gameTokenAsAdmin, 'MetaTransactionProcessor')
-        .withArgs(others[0], METATX_2771);
-
-      isTrustedForwarder = await gameToken.isTrustedForwarder(others[0]);
+    it('can get isTrustedForwarder', async function () {
+      const isTrustedForwarder = await gameToken.isTrustedForwarder(
+        trustedForwarder.address
+      );
       expect(isTrustedForwarder).to.be.true;
-    });
-    it('can set the MetaTransactionProcessor = METATX_SANDBOX', async function () {
-      const others = await getUnnamedAccounts();
-      await expect(gameTokenAsAdmin.setMetaTransactionProcessor(others[8], 1))
-        .to.emit(gameTokenAsAdmin, 'MetaTransactionProcessor')
-        .withArgs(others[8], METATX_SANDBOX);
-
-      const type = await gameToken.getMetaTransactionProcessorType(others[8]);
-      expect(type).to.be.equal(METATX_SANDBOX);
     });
 
     it('can call setGameEditor via metaTx', async function () {
-      const {data} = await gameToken.populateTransaction.setGameEditor(
+      const {to, data} = await gameToken.populateTransaction.setGameEditor(
         GameOwner.address,
         users[1].address,
         true
       );
-      await sandAsExecutionAdmin.setExecutionOperator(users[6].address, true);
 
-      sandAsExecutionOperator = await sandContract.connect(
-        ethers.provider.getSigner(users[6].address)
-      );
+      await sendMetaTx(to, trustedForwarder, data, GameOwner.address);
 
-      await sandAsExecutionOperator.executeWithSpecificGas(
-        gameToken.address,
-        gas,
-        data
-      );
       expect(
         await gameToken.isGameEditor(GameOwner.address, users[1].address)
       ).to.be.equal(true);
@@ -1624,17 +1591,19 @@ describe('GameToken', function () {
       expect(contractBalanceBefore).to.be.equal(10);
       expect(contractBalanceBefore2).to.be.equal(8);
 
-      const {data} = await gameToken.populateTransaction.burnAndRecover(
+      const {to, data} = await gameToken.populateTransaction.burnAndRecover(
         GameOwner.address,
         GameOwner.address,
         gameId,
         assets
       );
 
-      await sandAsExecutionOperator.executeWithSpecificGas(
-        gameToken.address,
-        gas,
-        data
+      await sendMetaTx(
+        to,
+        trustedForwarder,
+        data,
+        GameOwner.address,
+        '1000000'
       );
 
       const balancesAfter = await getBalances(
@@ -1660,16 +1629,12 @@ describe('GameToken', function () {
         7,
       ]);
 
-      const {data} = await gameToken.populateTransaction.burnFrom(
+      const {to, data} = await gameToken.populateTransaction.burnFrom(
         GameOwner.address,
         gameId2
       );
 
-      await sandAsExecutionOperator.executeWithSpecificGas(
-        gameToken.address,
-        gas,
-        data
-      );
+      await sendMetaTx(to, trustedForwarder, data, GameOwner.address);
 
       expect(await gameToken.creatorOf(gameId2)).to.be.equal(GameOwner.address);
       await expect(gameToken.ownerOf(gameId2)).to.be.revertedWith(
@@ -1693,17 +1658,19 @@ describe('GameToken', function () {
       expect(contractBalanceBefore).to.be.equal(5);
       expect(contractBalanceBefore2).to.be.equal(7);
 
-      const {data} = await gameToken.populateTransaction.recoverAssets(
+      const {to, data} = await gameToken.populateTransaction.recoverAssets(
         GameOwner.address,
         GameOwner.address,
         gameId2,
         assets
       );
 
-      await sandAsExecutionOperator.executeWithSpecificGas(
-        gameToken.address,
-        gas,
-        data
+      await sendMetaTx(
+        to,
+        trustedForwarder,
+        data,
+        GameOwner.address,
+        '1000000'
       );
 
       const balancesAfter = await getBalances(
@@ -1711,6 +1678,7 @@ describe('GameToken', function () {
         [GameOwner.address, gameToken.address],
         assets
       );
+
       const ownerBalanceAfter = balancesAfter[0];
       const ownerBalanceAfter2 = balancesAfter[1];
       const contractBalanceAfter = balancesAfter[2];
@@ -1723,76 +1691,17 @@ describe('GameToken', function () {
     });
 
     it('can call transferCreatorship via metaTx', async function () {
-      const {data} = await gameToken.populateTransaction.transferCreatorship(
+      const {
+        to,
+        data,
+      } = await gameToken.populateTransaction.transferCreatorship(
         GameOwner.address,
         GameOwner.address,
         users[2].address
       );
 
-      await sandAsExecutionOperator.executeWithSpecificGas(
-        gameToken.address,
-        gas,
-        data
-      );
+      await sendMetaTx(to, trustedForwarder, data, GameOwner.address);
       expect(await gameToken.creatorOf(gameId)).to.be.equal(users[2].address);
-    });
-
-    describe('GameToken: Invalid metaTransactions', function () {
-      let gameAsUser7: Contract;
-      let others: Address[];
-      let gameId: BigNumber;
-      let gameToken: Contract;
-      let GameOwner: User;
-      let gameTokenAsAdmin: Contract;
-      let gameTokenAsMinter: Contract;
-
-      it('should fail if processorType == METATX_2771 && from != _forceMsgSender()', async function () {
-        ({gameToken, GameOwner, gameTokenAsAdmin} = await setupTest());
-        const {gameTokenAdmin} = await getNamedAccounts();
-        others = await getUnnamedAccounts();
-        await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
-        gameTokenAsMinter = await gameToken.connect(
-          ethers.provider.getSigner(gameTokenAdmin)
-        );
-
-        const randomId = await getRandom();
-
-        const receipt = await waitFor(
-          gameTokenAsMinter.createGame(
-            GameOwner.address,
-            GameOwner.address,
-            {...update},
-            ethers.constants.AddressZero,
-            randomId
-          )
-        );
-        const transferEvent = await expectEventWithArgs(
-          gameToken,
-          receipt,
-          'Transfer'
-        );
-        gameId = transferEvent.args[2];
-        gameAsUser7 = gameToken.connect(ethers.provider.getSigner(others[7]));
-        const approvedAddress = await gameToken.getApproved(gameId);
-        const isApprovedForAll = await gameToken.isApprovedForAll(
-          GameOwner.address,
-          others[7]
-        );
-        // Force metaTx conditions: (msg.sender != from && msg.sender != any type of operator(operator, superOperator, operatorForAll)
-        expect(approvedAddress).to.not.equal(others[7]);
-        expect(isApprovedForAll).to.be.false;
-
-        // Then:
-        await gameTokenAsAdmin.setMetaTransactionProcessor(
-          others[7],
-          METATX_2771
-        );
-        const type = await gameToken.getMetaTransactionProcessorType(others[7]);
-        expect(type).to.be.equal(METATX_2771);
-        await expect(
-          gameAsUser7.transferFrom(GameOwner.address, others[7], gameId)
-        ).to.be.revertedWith('UNAUTHORIZED_TRANSFER');
-      });
     });
   });
 });

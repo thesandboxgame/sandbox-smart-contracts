@@ -41,7 +41,7 @@ describe('Gems & Catalysts: Permit', function () {
       deadline: deadline._hex,
     };
     const permitData712 = data712(luckGem, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       gemOwner,
       permitData712,
     ]);
@@ -81,7 +81,7 @@ describe('Gems & Catalysts: Permit', function () {
       deadline: deadline._hex,
     };
     const permitData712 = data712(epicCatalyst, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       catalystOwner,
       permitData712,
     ]);
@@ -136,7 +136,7 @@ describe('Gems & Catalysts: Permit', function () {
       deadline: deadline._hex,
     };
     const permitData712 = data712(epicCatalyst, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       catalystOwner,
       permitData712,
     ]);
@@ -164,7 +164,7 @@ describe('Gems & Catalysts: Permit', function () {
       deadline: deadline._hex,
     };
     const permitData712 = data712(epicCatalyst, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       catalystOwner,
       permitData712,
     ]);
@@ -190,7 +190,7 @@ describe('Gems & Catalysts: Permit', function () {
       deadline: deadline._hex,
     };
     const permitData7122 = data712(epicCatalyst, approve2);
-    const flatSig2 = await ethers.provider.send('eth_signTypedData', [
+    const flatSig2 = await ethers.provider.send('eth_signTypedData_v4', [
       catalystOwner,
       permitData7122,
     ]);
@@ -218,7 +218,7 @@ describe('Gems & Catalysts: Permit', function () {
       deadline: deadline._hex,
     };
     const permitData712 = data712(epicCatalyst, approve);
-    const flatSig = await ethers.provider.send('eth_signTypedData', [
+    const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       catalystOwner,
       permitData712,
     ]);
