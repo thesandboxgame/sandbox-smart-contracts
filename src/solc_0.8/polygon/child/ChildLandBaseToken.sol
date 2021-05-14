@@ -7,8 +7,6 @@ import "../../common/BaseWithStorage/ERC721BaseToken.sol";
 contract ChildLandBaseToken is ERC721BaseToken {
     // Our grid is 408 x 408 lands
     uint256 internal constant GRID_SIZE = 408;
-    // @review DO we need this?
-    uint256 internal constant LAYER = 0xFF00000000000000000000000000000000000000000000000000000000000000;
 
     mapping(address => bool) internal _minters;
     event Minter(address superOperator, bool enabled);
@@ -66,20 +64,4 @@ contract ChildLandBaseToken is ERC721BaseToken {
         require(_ownerOf(id) != address(0), "token does not exist");
         return id / GRID_SIZE;
     }
-
-    // function _ownerOf(uint256 id) internal view returns (address) {
-    //     require(id & LAYER == 0, "Invalid token id");
-    //     uint256 packedOwnerData = _owners[id];
-    //     require(packedOwnerData != 0, "NON_EXISTANT_TOKEN");
-    //     return address(uint160(packedOwnerData)); // cast to zero
-    // }
-
-    // function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {
-    //     // @review Do we need this check?
-    //     require(id & LAYER == 0, "Invalid token id");
-    //     uint256 packedOwnerData = _owners[id];
-    //     require(packedOwnerData != 0, "NON_EXISTANT_TOKEN");
-    //     owner = address(uint160(packedOwnerData));
-    //     operatorEnabled = (packedOwnerData / 2**255) == 1;
-    // }
 }
