@@ -16,7 +16,7 @@ describe('Child_Estate', function () {
   describe('Child_Estate: Update', function () {
     // @todo add tests for Updating Estate tokens: adding LAND(s), adding GAME(s) changing metaDataURI, etc
   });
-  describe('Child_Estate: Rebuild', function () {
-    // @todo add tests for Rebuilding Estate tokens (used when removing LAND(s))
+  describe('Child_Estate: Downsize', function () {
+    // @todo add tests for rebuilding of Estate tokens (used when removing LAND(s))
   });
 });
