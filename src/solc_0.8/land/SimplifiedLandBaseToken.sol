@@ -26,8 +26,6 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
     /// @param x An array of x coordinates for the top left corner of lands to mint
     /// @param y An array of y coordinates for the top left corner of lands to mint
     /// @param data extra data to pass to the transfer
-    // @review do we need the data param ? The ChildChainManager will be the one minting, and these are all lands which have been minted on L1 already
-    // @note what function name does ChildChainManager expect to find in childLandToken?
     function _mintLand(address to, uint256[] memory x, uint256[] memory y, bytes calldata data) internal {
         require(to != address(0), "to is zero address");
         require(
