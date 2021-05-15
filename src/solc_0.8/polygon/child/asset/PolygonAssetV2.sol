@@ -11,7 +11,9 @@ contract PolygonAssetV2 is ERC1155ERC721 {
 
     address private _childChainManager;
 
-    event ChainExit(address indexed to, uint256[] tokenIds, uint256[] amounts, bytes data);
+    // @review separate events for single & batch ChainExit - Similar to Transfer & TransferBatch
+    event ChainExitBatch(address indexed to, uint256[] tokenIds, uint256[] amounts, bytes data);
+    event ChainExit(address indexed to, uint256 tokenId, uint256 amount, bytes data);
 
     /// @notice fulfills the purpose of a constructor in upgradeabale contracts
     function initialize(
@@ -22,7 +24,6 @@ contract PolygonAssetV2 is ERC1155ERC721 {
         address childChainManager,
         uint8 chainIndex
     ) external {
-        // @review check isContract?
         require(trustedForwarder.isContract(), "TRUSTERFORWARDER_NOT_CONTRACT");
         require(predicate.isContract(), "PREDICATE_NOT_CONTRACT");
         require(childChainManager.isContract(), "CHILDCHAINMANAGER_NOT_CONTRACT");
@@ -44,12 +45,14 @@ contract PolygonAssetV2 is ERC1155ERC721 {
         for (uint256 i = 0; i < ids.length; i++) {
             // ERC-721
             if ((amounts[i] == 1) && (ids[i] & IS_NFT > 0)) {
+                // temp: to be replaced by encoded IPFS hash
                 bytes32 dummyHash = bytes32("0x00");
                 uint8 rarity = 0;
                 _mint(dummyHash, amounts[i], rarity, sender, user, ids[0], data, false);
             }
             // ERC-1155
             else {
+                // temp: to be replaced by encoded IPFS hash
                 bytes32 dummyHash = bytes32("0x00");
                 uint8 rarity = 0;
                 _mint(dummyHash, amounts[i], rarity, sender, user, ids[0], data, false);
@@ -63,7 +66,7 @@ contract PolygonAssetV2 is ERC1155ERC721 {
     /// @param amount amount to withdraw
     function withdrawSingle(uint256 id, uint256 amount) external {
         _burn(_msgSender(), id, amount);
-        // emit ChainExit()
+        emit ChainExit(_msgSender(), id, amount, "");
     }
 
     /// @notice called when user wants to batch withdraw tokens back to root chain
@@ -71,8 +74,8 @@ contract PolygonAssetV2 is ERC1155ERC721 {
     /// @param ids ids to withdraw
     /// @param amounts amounts to withdraw
     function withdrawBatch(uint256[] calldata ids, uint256[] calldata amounts) external {
-        // _burnBatch(_msgSender(), ids, amounts);
-        // emit ChainExit()
+        _burnBatch(_msgSender(), ids, amounts);
+        emit ChainExitBatch(_msgSender(), ids, amounts, "");
     }
 
     /// @notice Throws if called by any address other than depositor
