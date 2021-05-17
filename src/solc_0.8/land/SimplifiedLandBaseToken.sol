@@ -20,49 +20,55 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
 
-    // @todo implement land minting.
+    // @todo implement land minting without quads
     // consider seperating into _mintLand & _mintLandBatch...
     // It is likeky that existing L1 estates(with quads) will be migrated to L2. make it easy for them to be reminted on L2.
-    /**
     /// @notice Mint one or more lands
     /// @param to The recipient of the new quad
     /// @param x An array of x coordinates for the top left corner of lands to mint
     /// @param y An array of y coordinates for the top left corner of lands to mint
-    /// @param data extra data to pass to the transfer
+    /// @param landData extra data to pass to the transfer
     function _mintLand(
         address to,
-        uint256[] memory x,
-        uint256[] memory y,
-        bytes calldata // data
+        uint256[] memory xCoordinates,
+        uint256[] memory yCoordinates,
+        bytes[] calldata landData
     ) internal {
 
-
+        require(xCoordinates.length == yCoordinates.length == landData.length, "ARRAY_LENGTH_MISMATCH");
         require(to != address(0), "to is zero address");
         require(isMinter(msg.sender), "Only a minter can mint");
-        require(x % size == 0 && y % size == 0, "Invalid coordinates");
-        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
 
-        uint256 quadId;
-        uint256 id = x + y * GRID_SIZE;
-
-        if (size == 1) {
-            quadId = id;
-        } else if (size == 3) {
-            quadId = LAYER_3x3 + id;
-        } else if (size == 6) {
-            quadId = LAYER_6x6 + id;
-        } else if (size == 12) {
-            quadId = LAYER_12x12 + id;
-        } else if (size == 24) {
-            quadId = LAYER_24x24 + id;
-        } else {
-            require(false, "Invalid size");
+        for(uint256 i; i < xCoordinates.length; i++) {
+          uint256 x = xCoordinates[i];
+          uint256 y = yCoordinates[i];
+          bytes data = landData[i];
+          require(x % size == 0 && y % size == 0, "Invalid coordinates");
+          require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
+          uint256 id = x + y * GRID_SIZE;
         }
+
+        // uint256 quadId;
+
+        // if (size == 1) {
+        //     quadId = id;
+        // } else if (size == 3) {
+        //     quadId = LAYER_3x3 + id;
+        // } else if (size == 6) {
+        //     quadId = LAYER_6x6 + id;
+        // } else if (size == 12) {
+        //     quadId = LAYER_12x12 + id;
+        // } else if (size == 24) {
+        //     quadId = LAYER_24x24 + id;
+        // } else {
+        //     require(false, "Invalid size");
+        // }
 
         require(_owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] == 0, "Already minted as 24x24");
 
         uint256 toX = x + size;
         uint256 toY = y + size;
+
         if (size <= 12) {
             require(_owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE] == 0, "Already minted as 12x12");
         } else {
@@ -107,7 +113,6 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
         //@review
         // _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
     }
-*/
 
     /// @notice check whether address `who` is given minter rights.
     /// @param who The address to query.
