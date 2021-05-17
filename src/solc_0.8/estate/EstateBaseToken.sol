@@ -31,9 +31,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     // Build a data structure to record this. As in GameToken, might be simplest to perform enumeration off-chain for gametokens...ex: map estateId=>gameId=>lands associated with game(must be part of estate already)
     // mapping(uint256 => mapping(uint256 => uint256[])) internal _gamesInEstate;
 
-
-
-
     LandToken internal _land;
     address internal _minter;
     // @review needed?
@@ -56,11 +53,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @param oldId The id of the previous erc721 ESTATE token.
     /// @param newId The id of the newly minted token.
     /// @param update The changes made to the Estate.
-    event EstateTokenUpdated(
-        uint256 indexed oldId,
-        uint256 indexed newId,
-        EstateData update
-    );
+    event EstateTokenUpdated(uint256 indexed oldId, uint256 indexed newId, EstateData update);
 
     function initV1(
         address trustedForwarder,
@@ -107,7 +100,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     ) external returns (uint256) {
         _check_hasOwnerRights(from, estateId);
         uint256 storageId = _storageId(estateId);
-        if(update.ids.length != 0) {
+        if (update.ids.length != 0) {
             _check_authorized(from, ADD);
         }
         _addLands(from, estateId, update.ids, update.junctions, false);
@@ -128,19 +121,24 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @param rebuild The data to use when reconstructing the Estate.
     /// @dev Note that a valid estate can only contain adjacent lands, so it is possible to attempt to remove lands in a way that would result in an invalid estate, which must be prevented.
     // @todo decide how to handle the above case.
-    function downsizeEstate(address from, uint256 estateId, uint256[] ids, EstateData memory rebuild) external returns (uint256) {
+    function downsizeEstate(
+        address from,
+        uint256 estateId,
+        uint256[] ids,
+        EstateData memory rebuild
+    ) external returns (uint256) {
         _check_hasOwnerRights(from, estateId);
         _check_authorized(from, BREAK);
         _check_authorized(from, ADD);
-      // @todo implement.
-      // - [ ] ensure resultant estate's lands are still adjacent
-      // - [ ] _addLands(...);
-      // - [ ] remove and/or add Games. update _gamesInEstate[] mapping if needed.
-      // - [ ] _incrementTokenVersion(...)
-      // - [ ] emit EstateTokenUpdated(...)
+        // @todo implement.
+        // - [ ] ensure resultant estate's lands are still adjacent
+        // - [ ] _addLands(...);
+        // - [ ] remove and/or add Games. update _gamesInEstate[] mapping if needed.
+        // - [ ] _incrementTokenVersion(...)
+        // - [ ] emit EstateTokenUpdated(...)
     }
 
-     /// @notice Burns token `id`.
+    /// @notice Burns token `id`.
     /// @param id The token which will be burnt.
     function burn(uint256 id) external override {
         address sender = _msgSender();
@@ -214,13 +212,21 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        function _addGames(address from, uint256 estateId, uint256[] gamesToAdd) internal {
-            // @todo implement me
-        }
+    function _addGames(
+        address from,
+        uint256 estateId,
+        uint256[] gamesToAdd
+    ) internal {
+        // @todo implement me
+    }
 
-        function _removeGames(address to, uint256 estateId, uint256[]gamesToRemove) internal {
-            // @todo implement me
-        }
+    function _removeGames(
+        address to,
+        uint256 estateId,
+        uint256[] gamesToRemove
+    ) internal {
+        // @todo implement me
+    }
 
     /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to token-specific data are preserved via the storageId mechanism.
     /// @param from The address of the token owner.
@@ -228,7 +234,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @return the version-incremented tokenId.
     function _incrementTokenVersion(address from, uint256 estateId) internal returns (uint256) {
         address originalCreator = address(uint160(estateId / CREATOR_OFFSET_MULTIPLIER));
-        uint64 subId = uint64(gameId / SUBID_MULTIPLIER);
+        uint64 subId = uint64(estateId / SUBID_MULTIPLIER);
         uint16 version = uint16(estateId);
         version++;
         address owner = _ownerOf(estateId);

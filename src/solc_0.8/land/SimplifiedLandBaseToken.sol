@@ -34,23 +34,22 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
         uint256[] memory yCoordinates,
         bytes[] calldata landData
     ) internal {
-
         require(xCoordinates.length == yCoordinates.length == landData.length, "ARRAY_LENGTH_MISMATCH");
         require(to != address(0), "to is zero address");
         require(isMinter(msg.sender), "Only a minter can mint");
 
-        for(uint256 i; i < xCoordinates.length; i++) {
-          uint256 x = xCoordinates[i];
-          uint256 y = yCoordinates[i];
-          bytes data = landData[i];
-          require(x % size == 0 && y % size == 0, "Invalid coordinates");
-          require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
+        for (uint256 i; i < xCoordinates.length; i++) {
+            uint256 x = xCoordinates[i];
+            uint256 y = yCoordinates[i];
+            bytes data = landData[i];
+            require(x % size == 0 && y % size == 0, "Invalid coordinates");
+            require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
 
-          uint256 id = x + y * GRID_SIZE;
-          require(_owners[id] == 0, "ALREADY_MINTED");
-          _owners[id] = uint256(uint160(to));
-          _numNFTPerAddress[to] ++;
-          emit Transfer(address(0), to, id);
+            uint256 id = x + y * GRID_SIZE;
+            require(_owners[id] == 0, "ALREADY_MINTED");
+            _owners[id] = uint256(uint160(to));
+            _numNFTPerAddress[to]++;
+            emit Transfer(address(0), to, id);
         }
         // @todo keep _idInPath, but simplify
         /**
