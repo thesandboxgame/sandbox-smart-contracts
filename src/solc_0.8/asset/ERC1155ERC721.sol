@@ -779,8 +779,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         uint256[] memory ids,
         uint256[] memory amounts
     ) internal {
-        address sender = _msgSender();
-        address operator = isTrustedForwarder(msg.sender) ? from : sender;
+        address operator = isTrustedForwarder(msg.sender) ? from : _msgSender();
         for (uint256 i = 0; i < ids.length; i++) {
             uint256 id = ids[i];
             uint256 amount = amounts[i];
@@ -789,7 +788,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
                 require(from == _ownerOf(id), "OWNER!=FROM");
                 _owners[id] = 2**160; // equivalent to zero address when casted but ensure we track minted status
                 _numNFTPerAddress[from]--;
-                // @review Transfer required for ERC721? Is TransferBatch insufficient
                 emit Transfer(from, address(0), id);
             } else {
                 require(amount > 0 && amount <= MAX_SUPPLY, "INVALID_AMOUNT");
