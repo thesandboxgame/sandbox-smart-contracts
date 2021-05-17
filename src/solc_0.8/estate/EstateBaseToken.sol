@@ -77,7 +77,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         EstateData calldata creation
     ) external returns (uint256) {
         _check_authorized(from, ADD);
-        (uint256 estateId, uint256 storageId) = _mintEstate(from, to, 1, true);
+        (uint256 estateId, uint256 storageId) = _mintEstate(from, to, _nextId++, 1, true);
         _addLands(from, estateId, creation.ids, creation.junctions, true);
         _addGames(from, estateId, creation.gamesToAdd);
         _metaData[storageId] = creation.uri;
@@ -116,11 +116,15 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @notice Used to remove lands from an estate.
     // @review do we need from? only needed when called by approved/superoperators...
     /// @param from The address of the one removing lands.
-    /// @param estateId The estate tokne to remove lands from.
+    /// @param estateId The estate token to remove lands from.
     /// @param ids The tokenIds of the LANDs to remove
     /// @dev Note that a valid estate can only contain adjacent lands, so it is possible to attempt to remove lands in a way that would result in an invalid estate, which must be prevented.
     // @todo decide how to handle the above case.
-    function downsizeEstate(address from, uint256 estateId, uint256[] ids) external returns (uint256) {}
+    function downsizeEstate(address from, uint256 estateId, uint256[] ids) external returns (uint256) {
+      // @todo implement.
+      // - [ ] ensure resultant estate's lands are still adjacent
+      // - [ ]
+    }
 
      /// @notice Burns token `id`.
     /// @param id The token which will be burnt.
@@ -210,13 +214,14 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @return the version-incremented tokenId.
     function _incrementTokenVersion(address from, uint256 estateId) internal returns (uint256) {
         address originalCreator = address(uint160(estateId / CREATOR_OFFSET_MULTIPLIER));
+        uint64 subId = uint64(gameId / SUBID_MULTIPLIER);
         uint16 version = uint16(estateId);
         version++;
         address owner = _ownerOf(estateId);
         if (from == owner) {
             _burn(from, owner, estateId);
         }
-        (uint256 newId, ) = _mintEstate(originalCreator, owner, version, false);
+        (uint256 newId, ) = _mintEstate(originalCreator, owner, subId, version, false);
         address newOwner = _ownerOf(newId);
         assert(owner == newOwner);
         return newId;
@@ -284,6 +289,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @dev Create a new (or incremented) estateId and associate it with an owner.
     /// @param from The address of one creating the Estate.
     /// @param to The address of the Estate owner.
+    /// @param subId The id to use when generating the new estateId.
     /// @param version The version number part of the estateId.
     /// @param isCreation Whether this is a brand new Estate (as opposed to an update).
     /// @return id The newly created estateId.
@@ -291,23 +297,26 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     function _mintEstate(
         address from,
         address to,
+        uint64 subId,
         uint16 version,
         bool isCreation
     ) internal returns (uint256, uint256 storageId) {
         require(to != address(uint160(0)), "can't send to zero address");
+        uint16 idVersion;
         uint256 estateId;
         uint256 strgId;
         if (isCreation) {
-            estateId = _generateTokenId(from, _nextId++, _chainIndex, version);
+            idVersion = 1;
+            estateId = _generateTokenId(from, subId, _chainIndex, idVersion);
             strgId = _storageId(estateId);
             require(_owners[strgId] == 0, "STORAGE_ID_REUSE_FORBIDDEN");
         } else {
-            uint64 subId = uint64(estateId / SUBID_MULTIPLIER);
+            idVersion = version;
             estateId = _generateTokenId(from, subId, _chainIndex, version);
             strgId = _storageId(estateId);
         }
 
-        _owners[strgId] = (uint256(version) << 200) + uint256(uint160(to));
+        _owners[strgId] = (uint256(idVersion) << 200) + uint256(uint160(to));
         _numNFTPerAddress[to]++;
         emit Transfer(address(0), to, estateId);
         return (estateId, strgId);
@@ -338,17 +347,13 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
             (x1 == x2 - s2 && y1 >= y2 && y1 < y2 + s2));
     }
 
-    // solhint-disable no-empty-blocks
     function _addLands(
         address sender,
         uint256 estateId,
         uint256[] memory ids,
         uint256[] memory junctions,
         bool justCreated
-    ) internal {}
-
-    // solhint-enable no-empty-blocks
-
+    ) internal {
         _land.batchTransferFrom(sender, address(this), ids, "");
         uint24[] memory list = new uint24[](ids.length);
         for (uint256 i = 0; i < list.length; i++) {
