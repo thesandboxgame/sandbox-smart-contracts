@@ -27,6 +27,12 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     mapping(uint256 => uint24[]) internal _landsInEstate;
     mapping(uint256 => uint256[]) internal _gamesInEstate;
 
+    // @todo an estate can contain multiple games linked to adjacent lands in the estate.
+    // Build a data structure to record this. As in GameToken, might be simplest to perform enumeration off-chain for gametokens...ex: map estateId=>gameId=>lands associated with game(must be part of estate already)
+    // mapping(uint256 => mapping(uint256 => uint256[])) internal _gamesInEstate;
+
+
+
 
     LandToken internal _land;
     address internal _minter;
@@ -105,8 +111,8 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
             _check_authorized(from, ADD);
         }
         _addLands(from, estateId, update.ids, update.junctions, false);
-        _addGames(from, estateId, update.gamesToAdd);
         _removeGames(to, estateId, update.gamesToRemove);
+        _addGames(from, estateId, update.gamesToAdd);
         _metaData[storageId] = update.uri;
         uint256 newId = _incrementTokenVersion(from, estateId);
         emit EstateTokenUpdated(estateId, newId, update);
@@ -115,15 +121,23 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
 
     /// @notice Used to remove lands from an estate.
     // @review do we need from? only needed when called by approved/superoperators...
+    // @note see https://docs.google.com/document/d/1eXJP0Tp2C617kOkDNpLCS_hJXaGZizHkxJndMIlKpeQ/edit for offchain metadata solution
     /// @param from The address of the one removing lands.
     /// @param estateId The estate token to remove lands from.
     /// @param ids The tokenIds of the LANDs to remove
+    /// @param rebuild The data to use when reconstructing the Estate.
     /// @dev Note that a valid estate can only contain adjacent lands, so it is possible to attempt to remove lands in a way that would result in an invalid estate, which must be prevented.
     // @todo decide how to handle the above case.
-    function downsizeEstate(address from, uint256 estateId, uint256[] ids) external returns (uint256) {
+    function downsizeEstate(address from, uint256 estateId, uint256[] ids, EstateData memory rebuild) external returns (uint256) {
+        _check_hasOwnerRights(from, estateId);
+        _check_authorized(from, BREAK);
+        _check_authorized(from, ADD);
       // @todo implement.
       // - [ ] ensure resultant estate's lands are still adjacent
-      // - [ ]
+      // - [ ] _addLands(...);
+      // - [ ] remove and/or add Games. update _gamesInEstate[] mapping if needed.
+      // - [ ] _incrementTokenVersion(...)
+      // - [ ] emit EstateTokenUpdated(...)
     }
 
      /// @notice Burns token `id`.
@@ -362,11 +376,11 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
             list[i] = _encode(x, y, 1);
         }
         // solhint-disable-next-line use-forbidden-name
-        uint256 l = _quadsInEstate[estateId].length;
+        uint256 l = _landsInEstate[estateId].length;
         uint16 lastX = 409;
         uint16 lastY = 409;
         if (!justCreated) {
-            uint24 d = _quadsInEstate[estateId][l - 1];
+            uint24 d = _landsInEstate[estateId][l - 1];
             lastX = uint16(d % GRID_SIZE);
             lastY = uint16(d % GRID_SIZE);
         }
@@ -382,7 +396,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
                     require(index - l < j, "junctions need to refers to previously accepted land");
                     data = list[index - l];
                 } else {
-                    data = _quadsInEstate[estateId][j];
+                    data = _landsInEstate[estateId][j];
                 }
                 (uint16 jx, uint16 jy, uint8 jsize) = _decode(data);
                 if (jsize == 1) {
@@ -395,10 +409,10 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
             lastY = y;
         }
         if (justCreated) {
-            _quadsInEstate[estateId] = list;
+            _landsInEstate[estateId] = list;
         } else {
             for (uint256 i = 0; i < list.length; i++) {
-                _quadsInEstate[estateId].push(list[i]);
+                _landsInEstate[estateId].push(list[i]);
             }
         }
     }
