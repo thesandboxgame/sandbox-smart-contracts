@@ -20,8 +20,8 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
 
-// temporary disable, fix in next PR
-      /**
+    // temporary disable, fix in next PR
+    /**
     /// @notice Mint one or more lands
     /// @param to The recipient of the new quad
     /// @param x An array of x coordinates for the top left corner of lands to mint
