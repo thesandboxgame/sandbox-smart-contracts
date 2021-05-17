@@ -9,6 +9,8 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
     uint256 internal constant GRID_SIZE = 408;
     // set ChildChainManager as only minter for Polygon, but keep flexibility for other L2s
     mapping(address => bool) internal _minters;
+    // @review needed?
+    // mapping(uint256 => bytes32) internal _metaData;
 
     constructor(
         address trustedForwarder,
@@ -45,73 +47,15 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
           bytes data = landData[i];
           require(x % size == 0 && y % size == 0, "Invalid coordinates");
           require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
+
           uint256 id = x + y * GRID_SIZE;
+          require(_owners[id] == 0, "ALREADY_MINTED");
+          _owners[id] = uint256(uint160(to));
+          _numNFTPerAddress[to] ++;
+          // @review needed?
+          // _metaData[id] = uris[i];
+          emit Transfer(address(0), to, id);
         }
-
-        // uint256 quadId;
-
-        // if (size == 1) {
-        //     quadId = id;
-        // } else if (size == 3) {
-        //     quadId = LAYER_3x3 + id;
-        // } else if (size == 6) {
-        //     quadId = LAYER_6x6 + id;
-        // } else if (size == 12) {
-        //     quadId = LAYER_12x12 + id;
-        // } else if (size == 24) {
-        //     quadId = LAYER_24x24 + id;
-        // } else {
-        //     require(false, "Invalid size");
-        // }
-
-        require(_owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] == 0, "Already minted as 24x24");
-
-        uint256 toX = x + size;
-        uint256 toY = y + size;
-
-        if (size <= 12) {
-            require(_owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE] == 0, "Already minted as 12x12");
-        } else {
-            for (uint256 x12i = x; x12i < toX; x12i += 12) {
-                for (uint256 y12i = y; y12i < toY; y12i += 12) {
-                    uint256 id12x12 = LAYER_12x12 + x12i + y12i * GRID_SIZE;
-                    require(_owners[id12x12] == 0, "Already minted as 12x12");
-                }
-            }
-        }
-
-        if (size <= 6) {
-            require(_owners[LAYER_6x6 + (x / 6) * 6 + ((y / 6) * 6) * GRID_SIZE] == 0, "Already minted as 6x6");
-        } else {
-            for (uint256 x6i = x; x6i < toX; x6i += 6) {
-                for (uint256 y6i = y; y6i < toY; y6i += 6) {
-                    uint256 id6x6 = LAYER_6x6 + x6i + y6i * GRID_SIZE;
-                    require(_owners[id6x6] == 0, "Already minted as 6x6");
-                }
-            }
-        }
-
-        if (size <= 3) {
-            require(_owners[LAYER_3x3 + (x / 3) * 3 + ((y / 3) * 3) * GRID_SIZE] == 0, "Already minted as 3x3");
-        } else {
-            for (uint256 x3i = x; x3i < toX; x3i += 3) {
-                for (uint256 y3i = y; y3i < toY; y3i += 3) {
-                    uint256 id3x3 = LAYER_3x3 + x3i + y3i * GRID_SIZE;
-                    require(_owners[id3x3] == 0, "Already minted as 3x3");
-                }
-            }
-        }
-
-        for (uint256 i = 0; i < landIds.length; i++) {
-            uint256 id = _idInPath(i, landIds.length, x, y);
-            require(_owners[id] == 0, "Already minted");
-            emit Transfer(address(0), to, id);
-        }
-
-        // _owners[quadId] = uint256(to);
-        _numNFTPerAddress[to] += landIds.length;
-        //@review
-        // _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
     }
 
     /// @notice check whether address `who` is given minter rights.
@@ -149,18 +93,18 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
         return GRID_SIZE;
     }
 
-    function _idInPath(
-        uint256 i,
-        uint256 size,
-        uint256 x,
-        uint256 y
-    ) internal pure returns (uint256) {
-        uint256 row = i / size;
-        if (row % 2 == 0) {
-            // alow ids to follow a path in a quad
-            return (x + (i % size)) + ((y + row) * GRID_SIZE);
-        } else {
-            return ((x + size) - (1 + (i % size))) + ((y + row) * GRID_SIZE);
-        }
-    }
+    // function _idInPath(
+    //     uint256 i,
+    //     uint256 size,
+    //     uint256 x,
+    //     uint256 y
+    // ) internal pure returns (uint256) {
+    //     uint256 row = i / size;
+    //     if (row % 2 == 0) {
+    //         // alow ids to follow a path in a quad
+    //         return (x + (i % size)) + ((y + row) * GRID_SIZE);
+    //     } else {
+    //         return ((x + size) - (1 + (i % size))) + ((y + row) * GRID_SIZE);
+    //     }
+    // }
 }
