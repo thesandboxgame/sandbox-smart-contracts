@@ -20,7 +20,9 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
 
-    // temporary disable, fix in next PR
+    // @todo implement land minting.
+    // consider seperating into _mintLand & _mintLandBatch...
+    // It is likeky that existing L1 estates(with quads) will be migrated to L2. make it easy for them to be reminted on L2.
     /**
     /// @notice Mint one or more lands
     /// @param to The recipient of the new quad
