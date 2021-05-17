@@ -20,6 +20,8 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
 
+// temporary disable, fix in next PR
+      /**
     /// @notice Mint one or more lands
     /// @param to The recipient of the new quad
     /// @param x An array of x coordinates for the top left corner of lands to mint
@@ -31,6 +33,8 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
         uint256[] memory y,
         bytes calldata // data
     ) internal {
+
+
         require(to != address(0), "to is zero address");
         require(isMinter(msg.sender), "Only a minter can mint");
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
@@ -101,6 +105,7 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
         //@review
         // _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
     }
+*/
 
     /// @notice check whether address `who` is given minter rights.
     /// @param who The address to query.
