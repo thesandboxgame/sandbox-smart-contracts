@@ -20,18 +20,19 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
 
-
     /// @notice Mint one or more lands
     /// @param to The recipient of the new quad
     /// @param x An array of x coordinates for the top left corner of lands to mint
     /// @param y An array of y coordinates for the top left corner of lands to mint
     /// @param data extra data to pass to the transfer
-    function _mintLand(address to, uint256[] memory x, uint256[] memory y, bytes calldata data) internal {
+    function _mintLand(
+        address to,
+        uint256[] memory x,
+        uint256[] memory y,
+        bytes calldata // data
+    ) internal {
         require(to != address(0), "to is zero address");
-        require(
-            isMinter(msg.sender),
-            "Only a minter can mint"
-        );
+        require(isMinter(msg.sender), "Only a minter can mint");
         require(x % size == 0 && y % size == 0, "Invalid coordinates");
         require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
 
@@ -52,15 +53,12 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
             require(false, "Invalid size");
         }
 
-        require(_owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE] == 0, "Already minted as 24x24");
+        require(_owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] == 0, "Already minted as 24x24");
 
-        uint256 toX = x+size;
-        uint256 toY = y+size;
+        uint256 toX = x + size;
+        uint256 toY = y + size;
         if (size <= 12) {
-            require(
-                _owners[LAYER_12x12 + (x/12) * 12 + ((y/12) * 12) * GRID_SIZE] == 0,
-                "Already minted as 12x12"
-            );
+            require(_owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE] == 0, "Already minted as 12x12");
         } else {
             for (uint256 x12i = x; x12i < toX; x12i += 12) {
                 for (uint256 y12i = y; y12i < toY; y12i += 12) {
@@ -71,7 +69,7 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
         }
 
         if (size <= 6) {
-            require(_owners[LAYER_6x6 + (x/6) * 6 + ((y/6) * 6) * GRID_SIZE] == 0, "Already minted as 6x6");
+            require(_owners[LAYER_6x6 + (x / 6) * 6 + ((y / 6) * 6) * GRID_SIZE] == 0, "Already minted as 6x6");
         } else {
             for (uint256 x6i = x; x6i < toX; x6i += 6) {
                 for (uint256 y6i = y; y6i < toY; y6i += 6) {
@@ -82,7 +80,7 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
         }
 
         if (size <= 3) {
-            require(_owners[LAYER_3x3 + (x/3) * 3 + ((y/3) * 3) * GRID_SIZE] == 0, "Already minted as 3x3");
+            require(_owners[LAYER_3x3 + (x / 3) * 3 + ((y / 3) * 3) * GRID_SIZE] == 0, "Already minted as 3x3");
         } else {
             for (uint256 x3i = x; x3i < toX; x3i += 3) {
                 for (uint256 y3i = y; y3i < toY; y3i += 3) {
@@ -139,12 +137,18 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
         return GRID_SIZE;
     }
 
-    function _idInPath(uint256 i, uint256 size, uint256 x, uint256 y) internal pure returns(uint256) {
+    function _idInPath(
+        uint256 i,
+        uint256 size,
+        uint256 x,
+        uint256 y
+    ) internal pure returns (uint256) {
         uint256 row = i / size;
-        if(row % 2 == 0) { // alow ids to follow a path in a quad
-            return (x + (i%size)) + ((y + row) * GRID_SIZE);
+        if (row % 2 == 0) {
+            // alow ids to follow a path in a quad
+            return (x + (i % size)) + ((y + row) * GRID_SIZE);
         } else {
-            return ((x + size) - (1 + i%size)) + ((y + row) * GRID_SIZE);
+            return ((x + size) - (1 + (i % size))) + ((y + row) * GRID_SIZE);
         }
     }
 }

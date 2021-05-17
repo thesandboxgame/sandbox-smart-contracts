@@ -10,7 +10,8 @@ contract ChildLandToken is SimplifiedLandBaseToken {
         uint8 chainIndex,
         address admin
     )
+        // solhint-disable no-empty-blocks
         SimplifiedLandBaseToken(trustedForwarder, chainIndex, admin)
-        // solhint-disable-next-line no-empty-blocks
     {}
+    // solhint-enable no-empty-blocks
 }
