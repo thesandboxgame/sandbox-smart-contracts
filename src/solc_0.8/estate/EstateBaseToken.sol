@@ -66,7 +66,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
     }
 
-    // @review access-control: minter-only? could inherit WithMinter.sol
+    // @todo Add access-control: minter-only? could inherit WithMinter.sol
     /// @notice Create a new estate token with adjacent lands.
     /// @param from The address of the one creating the estate.
     /// @param to The address that will own the estate.
@@ -348,6 +348,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     ) internal {}
 
     // solhint-enable no-empty-blocks
+
         _land.batchTransferFrom(sender, address(this), ids, "");
         uint24[] memory list = new uint24[](ids.length);
         for (uint256 i = 0; i < list.length; i++) {
