@@ -142,32 +142,6 @@ describe('Asset.sol', function () {
     expect(balance).to.be.equal(0);
   });
 
-  // @review burn batch can be tested with the PolygonAsset `withdrawBatch` function
-  // it('can burn batch of assets', async function () {
-  //   const {Asset, users, mintAsset} = await setupAsset();
-  //   const tokenIds = [];
-  //   tokenIds.push(await mintAsset(users[0].address, 1));
-  //   tokenIds.push(await mintAsset(users[0].address, 20));
-  //   const amounts = [1, 10];
-  //   await waitFor(
-  //     users[0].Asset['burnBatchFrom(address,uint256[],uint256[])'](
-  //       users[0].address,
-  //       tokenIds,
-  //       amounts
-  //     )
-  //   );
-  //   const balance_ERC721 = await Asset['balanceOf(address,uint256)'](
-  //     users[0].address,
-  //     tokenIds[0]
-  //   );
-  //   expect(balance_ERC721).to.be.equal(0);
-  //   const balance_ERC1155 = await Asset['balanceOf(address,uint256)'](
-  //     users[0].address,
-  //     tokenIds[1]
-  //   );
-  //   expect(balance_ERC1155).to.be.equal(10);
-  // });
-
   describe('Asset: MetaTransactions', function () {
     it('can transfer by metaTx', async function () {
       const {Asset, users, mintAsset, trustedForwarder} = await setupAsset();
