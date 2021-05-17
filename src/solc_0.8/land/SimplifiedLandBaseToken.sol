@@ -9,8 +9,6 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
     uint256 internal constant GRID_SIZE = 408;
     // set ChildChainManager as only minter for Polygon, but keep flexibility for other L2s
     mapping(address => bool) internal _minters;
-    // @review needed?
-    // mapping(uint256 => bytes32) internal _metaData;
 
     constructor(
         address trustedForwarder,
@@ -52,10 +50,16 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
           require(_owners[id] == 0, "ALREADY_MINTED");
           _owners[id] = uint256(uint160(to));
           _numNFTPerAddress[to] ++;
-          // @review needed?
-          // _metaData[id] = uris[i];
           emit Transfer(address(0), to, id);
         }
+        // @todo keep _idInPath, but simplify
+        /**
+        for (uint256 i = 0; i < size*size; i++) {
+            uint256 id = _idInPath(i, size, x, y);
+            require(_owners[id] == 0, "Already minted");
+            emit Transfer(address(0), to, id);
+        }
+        */
     }
 
     /// @notice check whether address `who` is given minter rights.
@@ -93,18 +97,18 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
         return GRID_SIZE;
     }
 
-    // function _idInPath(
-    //     uint256 i,
-    //     uint256 size,
-    //     uint256 x,
-    //     uint256 y
-    // ) internal pure returns (uint256) {
-    //     uint256 row = i / size;
-    //     if (row % 2 == 0) {
-    //         // alow ids to follow a path in a quad
-    //         return (x + (i % size)) + ((y + row) * GRID_SIZE);
-    //     } else {
-    //         return ((x + size) - (1 + (i % size))) + ((y + row) * GRID_SIZE);
-    //     }
-    // }
+    function _idInPath(
+        uint256 i,
+        uint256 size,
+        uint256 x,
+        uint256 y
+    ) internal pure returns (uint256) {
+        uint256 row = i / size;
+        if (row % 2 == 0) {
+            // alow ids to follow a path in a quad
+            return (x + (i % size)) + ((y + row) * GRID_SIZE);
+        } else {
+            return ((x + size) - (1 + (i % size))) + ((y + row) * GRID_SIZE);
+        }
+    }
 }
