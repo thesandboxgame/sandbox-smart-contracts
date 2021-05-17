@@ -42,8 +42,7 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
             uint256 x = xCoordinates[i];
             uint256 y = yCoordinates[i];
             bytes data = landData[i];
-            require(x % size == 0 && y % size == 0, "Invalid coordinates");
-            require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
+            require(x <= GRID_SIZE - 1 && y <= GRID_SIZE - 1, "Out of bounds");
 
             uint256 id = x + y * GRID_SIZE;
             require(_owners[id] == 0, "ALREADY_MINTED");
@@ -51,7 +50,7 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
             _numNFTPerAddress[to]++;
             emit Transfer(address(0), to, id);
         }
-        // @todo keep _idInPath, but simplify
+        // @todo keep _idInPath, but simplify.
         /**
         for (uint256 i = 0; i < size*size; i++) {
             uint256 id = _idInPath(i, size, x, y);
@@ -96,6 +95,7 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
         return GRID_SIZE;
     }
 
+    // @note from Ronan: "the _idInPath is still needed to ensure lands are adjacent, but it could maybe be simplified if there are no quads."
     function _idInPath(
         uint256 i,
         uint256 size,
