@@ -37,7 +37,8 @@ contract PolygonAssetV2 is ERC1155ERC721 {
     /// @dev Make sure minting is done only by this function
     /// @param user user address for whom deposit is being done
     /// @param depositData abi encoded ids array and amounts array
-    function deposit(address user, bytes calldata depositData) external onlyDepositor {
+    function deposit(address user, bytes calldata depositData) external {
+        require(_msgSender() == _childChainManager, "!DEPOSITOR");
         require(user != address(0), "INVALID_DEPOSIT_USER");
         (uint256[] memory ids, uint256[] memory amounts, bytes memory data) =
             abi.decode(depositData, (uint256[], uint256[], bytes));
@@ -76,11 +77,5 @@ contract PolygonAssetV2 is ERC1155ERC721 {
     function withdrawBatch(uint256[] calldata ids, uint256[] calldata amounts) external {
         _burnBatch(_msgSender(), ids, amounts);
         emit ChainExitBatch(_msgSender(), ids, amounts, "");
-    }
-
-    /// @notice Throws if called by any address other than depositor
-    modifier onlyDepositor() {
-        require(_msgSender() == _childChainManager, "!DEPOSITOR");
-        _;
     }
 }
