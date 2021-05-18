@@ -108,6 +108,40 @@ describe('Asset.sol', function () {
     );
   });
 
+  it('can burn ERC1155 asset', async function () {
+    const {Asset, users, mintAsset} = await setupAsset();
+    const tokenId = await mintAsset(users[0].address, 20);
+    await waitFor(
+      users[0].Asset['burnFrom(address,uint256,uint256)'](
+        users[0].address,
+        tokenId,
+        10
+      )
+    );
+    const balance = await Asset['balanceOf(address,uint256)'](
+      users[0].address,
+      tokenId
+    );
+    expect(balance).to.be.equal(10);
+  });
+
+  it('can burn ERC721 asset', async function () {
+    const {Asset, users, mintAsset} = await setupAsset();
+    const tokenId = await mintAsset(users[0].address, 1);
+    await waitFor(
+      users[0].Asset['burnFrom(address,uint256,uint256)'](
+        users[0].address,
+        tokenId,
+        1
+      )
+    );
+    const balance = await Asset['balanceOf(address,uint256)'](
+      users[0].address,
+      tokenId
+    );
+    expect(balance).to.be.equal(0);
+  });
+
   describe('Asset: MetaTransactions', function () {
     it('can transfer by metaTx', async function () {
       const {Asset, users, mintAsset, trustedForwarder} = await setupAsset();
