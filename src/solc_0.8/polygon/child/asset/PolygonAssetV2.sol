@@ -58,4 +58,17 @@ contract PolygonAssetV2 is ERC1155ERC721 {
             }
         }
     }
+
+    /// @notice called when user wants to withdraw tokens back to root chain
+    /// @dev Should burn user's tokens. This transaction will be verified when exiting on root chain
+    /// @param ids ids to withdraw
+    /// @param amounts amounts to withdraw
+    function withdraw(uint256[] calldata ids, uint256[] calldata amounts) external {
+        if (ids.length == 1) {
+            _burn(_msgSender(), ids[0], amounts[0]);
+        } else {
+            _burnBatch(_msgSender(), ids, amounts);
+        }
+        emit ChainExit(_msgSender(), ids, amounts, "");
+    }
 }
