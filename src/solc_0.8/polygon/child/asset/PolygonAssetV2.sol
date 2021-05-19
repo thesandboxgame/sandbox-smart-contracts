@@ -11,9 +11,7 @@ contract PolygonAssetV2 is ERC1155ERC721 {
 
     address private _childChainManager;
 
-    // @review separate events for single & batch ChainExit - Similar to Transfer & TransferBatch
-    event ChainExitBatch(address indexed to, uint256[] tokenIds, uint256[] amounts, bytes data);
-    event ChainExit(address indexed to, uint256 tokenId, uint256 amount, bytes data);
+    event ChainExit(address indexed to, uint256[] tokenIds, uint256[] amounts, bytes data);
 
     /// @notice fulfills the purpose of a constructor in upgradeabale contracts
     function initialize(
