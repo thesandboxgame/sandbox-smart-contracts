@@ -41,20 +41,17 @@ contract PolygonAssetV2 is ERC1155ERC721 {
         (uint256[] memory ids, uint256[] memory amounts, bytes memory data) =
             abi.decode(depositData, (uint256[], uint256[], bytes));
         address sender = _msgSender();
+        bytes32 hash = abi.decode(data, (bytes32));
         for (uint256 i = 0; i < ids.length; i++) {
             // ERC-721
             if ((amounts[i] == 1) && (ids[i] & IS_NFT > 0)) {
-                // temp: to be replaced by encoded IPFS hash
-                bytes32 dummyHash = bytes32("0x00");
                 uint8 rarity = 0;
-                _mint(dummyHash, amounts[i], rarity, sender, user, ids[0], data, false);
+                _mint(hash, amounts[i], rarity, sender, user, ids[0], data, false);
             }
             // ERC-1155
             else {
-                // temp: to be replaced by encoded IPFS hash
-                bytes32 dummyHash = bytes32("0x00");
                 uint8 rarity = 0;
-                _mint(dummyHash, amounts[i], rarity, sender, user, ids[0], data, false);
+                _mint(hash, amounts[i], rarity, sender, user, ids[0], data, false);
             }
         }
     }
