@@ -55,7 +55,7 @@ contract AssetMinter is WithMetaTransaction, IAssetMinter {
         uint16 catalystId,
         uint16[] calldata gemIds,
         uint32 quantity,
-        uint8 rarity,
+        uint8 rarity, // TODO remove : rarity is unused so it should be zero, like for mintMultiple
         address to,
         bytes calldata data
     ) external override returns (uint256 assetId) {

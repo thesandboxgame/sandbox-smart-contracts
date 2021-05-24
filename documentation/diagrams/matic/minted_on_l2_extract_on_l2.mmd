@@ -1,0 +1,22 @@
+sequenceDiagram
+    participant User
+    rect rgb(240, 240, 240)
+        Note over Matic Team,RootChainManager: Map token (L1 <-> L2) (once)
+        Matic Team->>RootChainManager:mapToken(Asset,MaticAsset,ERC1155?)
+    end
+    rect rgb(150, 240, 240)
+        Note over User,Asset(L2): mint an Asset on L2
+        User->>Asset(L2):mint(...)
+    end
+    rect rgb(150, 240, 240)
+        Note over User,Asset(L2): burn an Asset on L2
+        User->>Asset(L2):extractERC721(...)
+    end
+    rect rgb(240, 200, 200)
+        Note over User,RootChainManager: notify exit (back to L1)
+        User->>+RootChainManager:exit(...)
+        RootChainManager->>+AssetPredicate: exitTokens(User,Asset,...)
+        RootChainManager->>-User: FAILED
+    end
+
+
