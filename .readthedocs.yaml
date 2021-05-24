@@ -9,4 +9,4 @@ mkdocs:
   configuration: mkdocs.yml
 
 submodules:
-  include: all
+  exclude: all
