@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 export function node_url(networkName: string): string {
   if (networkName) {
     const uri = process.env['ETH_NODE_URI_' + networkName.toUpperCase()];
@@ -40,4 +41,10 @@ export function getMnemonic(networkName?: string): string {
 
 export function accounts(networkName?: string): {mnemonic: string} {
   return {mnemonic: getMnemonic(networkName)};
+}
+
+export async function skipUnlessTest(
+  hre: HardhatRuntimeEnvironment
+): Promise<boolean> {
+  return hre.network.name !== 'hardhat' || !!process.env.HARDHAT_FORK;
 }

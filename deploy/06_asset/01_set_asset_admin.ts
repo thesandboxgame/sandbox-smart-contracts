@@ -47,5 +47,3 @@ export default func;
 func.runAtTheEnd = true;
 func.tags = ['Asset', 'Asset_setup'];
 func.dependencies = ['Asset_deploy'];
-
-func.skip = async (hre) => hre.network.name !== 'hardhat'; // TODO reenable once all assets are migrated

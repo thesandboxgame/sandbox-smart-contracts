@@ -1,0 +1,37 @@
+sequenceDiagram
+    participant User
+    rect rgb(240, 240, 240)
+        Note over Matic Team,RootChainManager: Map token (L1 <-> L2) (once)
+        Matic Team->>RootChainManager:mapToken(Asset,MaticAsset,ERC1155?)
+    end
+    rect rgb(240, 240, 240)
+        Note over User,Asset: mint an Asset on L1
+        User->>Asset:mint(...)
+    end
+    rect rgb(240, 240, 240)
+        Note over User,Asset: approve predicate (once)
+        User->>Asset:setApprovalForAll(ERC1155Predicate, true)
+    end
+    rect rgb(240, 240, 240)
+        Note over User,RootChainManager: L1 -> L2
+        User->>+RootChainManager:depositFor(to, Asset, data)
+        RootChainManager->>+AssetPredicate: lockTokens(...)
+        AssetPredicate->>-Asset:safeBatchTransferFrom(User,this,...)
+        deactivate RootChainManager
+    end
+    rect rgb(150, 240, 240)
+        Note over Matic Syncer,ChildChainManager: sync state from L1
+        Matic Syncer->>+ChildChainManager:onStateReceive(...)
+        ChildChainManager->>Asset(L2): deposit(...) (mint)
+    end
+    rect rgb(150, 240, 240)
+        Note over User,Asset(L2): burn an Asset on L2
+        User->>Asset(L2):burnAsExit(...)
+    end
+    rect rgb(240, 240, 240)
+        Note over User,RootChainManager: notify exit (back to L1)
+        User->>+RootChainManager:exit(...)
+        RootChainManager->>+AssetPredicate: exitTokens(User,Asset,...)
+        AssetPredicate->>Asset: safeBatchTransferFrom(...)
+    end
+
