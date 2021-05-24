@@ -10,7 +10,7 @@ The json file will contain three things
 2. maxWinnerNumber: the maximum number of users that can win the lottery
 3. tickets: an array of register eth address for the lottery
 
-yarn mainnet:run scripts/rouleth/rouleth.ts
+`yarn mainnet:run scripts/rouleth/rouleth.ts`
 
 ## How the script work
 
