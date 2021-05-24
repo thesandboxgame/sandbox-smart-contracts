@@ -10,6 +10,7 @@ interface Owner {
   id: string;
   numLands: number;
 }
+
 const getAddressFromGraph = async (blockNb: number): Promise<Owner[]> => {
   const theGraph = new TheGraph(
     'https://api.thegraph.com/subgraphs/name/pixowl/the-sandbox'
@@ -23,10 +24,12 @@ const getAddressFromGraph = async (blockNb: number): Promise<Owner[]> => {
         }
       }
     `;
+
   return theGraph.query(queryString, 'owners', {
     blockNb,
   });
 };
+
 const getAddressFromBack = async (address: string[]): Promise<string[]> => {
   const provider = ethers.provider;
   // check if address is a contract
@@ -66,6 +69,7 @@ const getAddressFromBack = async (address: string[]): Promise<string[]> => {
   ) as string[];
   return addressFromBack;
 };
+
 const lottery = async (
   addBack: Array<string>,
   addGraph: Array<Owner>,
@@ -129,6 +133,7 @@ const lottery = async (
   const addresses: Array<string> = await extendedAddressArray();
   return generateWinners(addresses, seed);
 };
+
 const main = async () => {
   const argv = process.argv;
   const jsonFilePath = argv[1].replace('.ts', '.json');
@@ -146,4 +151,5 @@ const main = async () => {
   );
   // fs.writeFileSync(`./roulethResult`, await lottery(addBack, addGraph, maxWinnerNb, blockNumber));
 };
+
 main();
