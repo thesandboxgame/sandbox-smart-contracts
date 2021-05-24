@@ -9,6 +9,15 @@
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/hardhat",
       "args": ["node"],
       "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "hardhat fork:deploy mainnet",
+      "skipFiles": ["<node_internals>/**"],
+      "runtimeExecutable": "yarn",
+      "args": ["fork:deploy", "mainnet", "--blockNumber", "12379516"],
+      "cwd": "${workspaceFolder}"
     }
   ]
 }

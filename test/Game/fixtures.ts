@@ -16,11 +16,16 @@ export interface User {
 export const setupTest = deployments.createFixture(async () => {
   const {gameTokenAdmin} = await getNamedAccounts();
   const others = await getUnnamedAccounts();
-  await deployments.fixture('GameToken');
+  await deployments.fixture('ChildGameToken');
 
-  const gameToken = await ethers.getContract('GameToken');
+  const gameToken = await ethers.getContract('ChildGameToken');
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+  const trustedForwarder = await ethers.getContractAt(
+    'TestMetaTxForwarder',
+    TRUSTED_FORWARDER.address
+  );
   const gameTokenAsAdmin = await ethers.getContract(
-    'GameToken',
+    'ChildGameToken',
     gameTokenAdmin
   );
 
@@ -54,5 +59,6 @@ export const setupTest = deployments.createFixture(async () => {
     GameEditor1,
     GameEditor2,
     users,
+    trustedForwarder,
   };
 });

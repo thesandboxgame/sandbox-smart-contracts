@@ -23,8 +23,13 @@ export const setupAsset = deployments.createFixture(async function () {
     assetBouncerAdmin
   );
   await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
-
   const Asset = await ethers.getContract('Asset', minter);
+  const predicate = await ethers.getContract('ERC1155_PREDICATE');
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+  const trustedForwarder = await ethers.getContractAt(
+    'TestMetaTxForwarder',
+    TRUSTED_FORWARDER.address
+  );
 
   let id = 0;
   const ipfsHashString =
@@ -40,10 +45,16 @@ export const setupAsset = deployments.createFixture(async function () {
     const owner = to;
     const data = '0x';
 
-    const receipt = await waitFor(
-      Asset.mint(creator, packId, hash, supply, rarity, owner, data)
-    );
-    const event = receipt.events?.filter(
+    let receipt;
+    try {
+      receipt = await waitFor(
+        Asset.mint(creator, packId, hash, supply, rarity, owner, data)
+      );
+    } catch (e) {
+      console.log(e);
+    }
+
+    const event = receipt?.events?.filter(
       (event: Event) => event.event === 'TransferSingle'
     )[0];
     if (!event) {
@@ -58,5 +69,7 @@ export const setupAsset = deployments.createFixture(async function () {
     Asset,
     users,
     mintAsset,
+    trustedForwarder,
+    predicate,
   };
 });

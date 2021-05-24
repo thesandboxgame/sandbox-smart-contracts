@@ -1,19 +1,21 @@
 import {DeployFunction} from 'hardhat-deploy/types';
+import {skipUnlessTest} from '../../utils/network';
 import {gameMintingFee, gameUpdateFee} from '../../data/gameMinterFees';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
   const {deployer, gameTokenFeeBeneficiary} = await getNamedAccounts();
-  const gameContract = await deployments.get('GameToken');
+  const childGameContract = await deployments.get('ChildGameToken');
   const sandContract = await deployments.get('Sand');
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
 
   await deploy('GameMinter', {
     from: deployer,
     log: true,
     args: [
-      gameContract.address,
-      sandContract.address,
+      childGameContract.address,
+      TRUSTED_FORWARDER.address,
       gameMintingFee,
       gameUpdateFee,
       gameTokenFeeBeneficiary,
@@ -25,5 +27,10 @@ const func: DeployFunction = async function (hre) {
 
 export default func;
 func.tags = ['GameMinter', 'GameMinter_deploy'];
-func.dependencies = ['GameToken_deploy', 'Sand_deploy'];
-func.skip = async (hre) => hre.network.name !== 'hardhat'; // TODO enable
+func.dependencies = [
+  'ChildGameToken_deploy',
+  'Sand_deploy',
+  'TestMetaTxForwarder_deploy',
+];
+// TODO: Setup deploy-polygon folder and network.
+func.skip = skipUnlessTest; // TODO enable

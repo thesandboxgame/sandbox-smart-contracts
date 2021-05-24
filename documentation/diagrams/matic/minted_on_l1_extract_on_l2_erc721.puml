@@ -1,0 +1,64 @@
+@startuml
+Actor User
+    participant Asset
+    participant RootChainManager
+    participant AssetPredicate
+    participant ChildChainManager
+    participant Asset_L2
+    participant MaticSyncer
+    participant MaticTeam
+
+== Mapping Both Tokens (once) ==
+
+MaticTeam->>RootChainManager:mapToken(Asset,MaticAsset,ERC1155?)
+
+
+== Mint Assets ==
+    User->>Asset:mint(...)
+
+== Approve Predicate to lock tokens ==
+
+    User->>Asset:setApprovalForAll(ERC1155Predicate, true)
+
+== Deposit ==
+
+    User->>RootChainManager:depositFor(to, Asset, data)
+        RootChainManager->>AssetPredicate: lockTokens(...)
+        AssetPredicate->>Asset:safeBatchTransferFrom(User,this,...)
+
+group #LightBlue On Matic
+== Matic Sync L1 -> L2 Step ==
+
+    MaticSyncer->>ChildChainManager:onStateReceive(...)
+        ChildChainManager->>Asset_L2: deposit(...) (mint)
+
+== Extract ERC721 ==
+
+    User->>Asset_L2:extractERC721
+
+== Burn for exit ==
+
+    User->>Asset_L2:burnAsExit(ERC721)
+end group
+
+== Submit Exit on L1 ==
+    User->>RootChainManager:exit(...)
+        RootChainManager->>AssetPredicate: exitTokens(User,Asset,...)
+        AssetPredicate->>Asset: mint(...)
+
+== Approve for Transfer to L2 ==
+
+    User->>Asset:setApprovalForAll(ERC1155Predicate, true)
+
+== Deposit for L2 ==
+
+    User->>RootChainManager:depositFor(to, Asset, data)
+        RootChainManager->>AssetPredicate: lockTokens(...)
+        AssetPredicate->>Asset:safeBatchTransferFrom(User,this,...)
+
+group #LightBlue On Matic
+== Matic Sync L1 -> L2 Step ==
+    MaticSyncer->>ChildChainManager:onStateReceive(...)
+        ChildChainManager->>Asset_L2: deposit(...) (mint)
+end group
+@enduml
