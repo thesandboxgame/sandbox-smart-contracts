@@ -1,4 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
+import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
@@ -66,3 +67,4 @@ export default func;
 func.tags = ['OldGems'];
 func.dependencies = ['OldGems_deploy'];
 func.runAtTheEnd = true;
+func.skip = skipUnlessTest; // not meant to be redeployed

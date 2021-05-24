@@ -150,7 +150,7 @@ describe('AssetUpgrader', function () {
         [powerGemId],
         catalystOwner
       )
-    ).to.be.revertedWith(`Not an ERC1155 Token`);
+    ).to.be.revertedWith(`!1155`);
   });
   it('setting a rareCatalyst with powerGem and defenseGem', async function () {
     const {

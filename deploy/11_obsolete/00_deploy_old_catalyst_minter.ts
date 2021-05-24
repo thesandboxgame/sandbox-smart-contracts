@@ -72,19 +72,20 @@ const func: DeployFunction = async function (hre) {
     );
   }
 
-  const currentMinter = await read('CatalystRegistry', 'getMinter');
-  if (currentMinter.toLowerCase() != catalystMinter.address.toLowerCase()) {
-    console.log('setting CatalystMinter as CatalystRegistry minter');
-    const currentRegistryAdmin = await read('CatalystRegistry', 'getAdmin');
-    await catchUnknownSigner(
-      execute(
-        'CatalystRegistry',
-        {from: currentRegistryAdmin, log: true},
-        'setMinter',
-        catalystMinter.address
-      )
-    );
-  }
+  // disabled as we now use the one wtitout limit
+  // const currentMinter = await read('CatalystRegistry', 'getMinter');
+  // if (currentMinter.toLowerCase() != catalystMinter.address.toLowerCase()) {
+  //   console.log('setting CatalystMinter as CatalystRegistry minter');
+  //   const currentRegistryAdmin = await read('CatalystRegistry', 'getAdmin');
+  //   await catchUnknownSigner(
+  //     execute(
+  //       'CatalystRegistry',
+  //       {from: currentRegistryAdmin, log: true},
+  //       'setMinter',
+  //       catalystMinter.address
+  //     )
+  //   );
+  // }
 
   async function setSuperOperatorFor(contractName: string, address: string) {
     const isSuperOperator = await read(

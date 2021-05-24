@@ -1,4 +1,5 @@
 import {DeployFunction} from 'hardhat-deploy/types';
+import {skipUnlessTest} from '../../utils/network';
 import {BigNumber} from '@ethersproject/bignumber';
 import {sandWei} from '../../utils/units';
 
@@ -114,3 +115,4 @@ func.dependencies = [
   'Asset_deploy',
   'OldCatalystRegistry_deploy',
 ];
+func.skip = skipUnlessTest; // not meant to be redeployed

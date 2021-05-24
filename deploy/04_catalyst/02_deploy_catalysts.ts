@@ -1,5 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {skipUnlessTest} from '../../utils/network';
 import catalysts from '../../data/catalysts';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -31,4 +32,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['Catalysts', 'Catalysts_deploy'];
 func.dependencies = ['DefaultAttributes_deploy'];
-func.skip = async (hre) => hre.network.name !== 'hardhat'; // TODO
+func.skip = skipUnlessTest; // disabled for now

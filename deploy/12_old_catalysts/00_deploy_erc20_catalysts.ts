@@ -1,5 +1,6 @@
 import {BigNumber} from 'ethers';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {skipUnlessTest} from '../../utils/network';
 import {sandWei} from '../../utils/units';
 
 const catalysts = [
@@ -105,3 +106,4 @@ const func: DeployFunction = async function (hre) {
 export default func;
 func.tags = ['OldCatalysts', 'OldCatalysts_deploy'];
 func.dependencies = ['Sand'];
+func.skip = skipUnlessTest; // not meant to be redeployed

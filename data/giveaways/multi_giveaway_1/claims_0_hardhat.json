@@ -1,0 +1,55 @@
+[
+  {
+    "erc1155": [{
+      "ids": ["0", "1", "2"],
+      "values": [5, 5, 5]
+    }],
+    "erc721": [{
+      "ids": [0, 1, 2, 3, 4, 5]
+    }],
+    "erc20": {
+      "amounts": [200]
+    }
+  },
+  {
+    "erc1155": [{
+      "ids": ["3"],
+      "values": [1]
+    }],
+    "erc721": [{
+      "ids": [6]
+    }],
+    "erc20": {
+      "amounts": [],
+      "contractAddresses": []
+    }
+  },
+  {
+    "erc1155": [],
+    "erc721": [{
+      "ids": [7]
+    }],
+    "erc20": {
+      "amounts": [],
+      "contractAddresses": []
+    }
+  },
+  {
+    "erc1155": [{
+      "ids": ["4", "5", "6"],
+      "values": [5, 5, 5]
+    }],
+    "erc721": [],
+    "erc20": {
+      "amounts": [],
+      "contractAddresses": []
+    }
+  },
+  {
+    "erc1155": [],
+    "erc721": [],
+    "erc20": {
+      "amounts": [300]
+    }
+  }
+]

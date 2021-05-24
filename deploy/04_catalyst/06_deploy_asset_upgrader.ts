@@ -1,5 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {skipUnlessTest} from '../../utils/network';
 import {upgradeFee, gemAdditionFee} from '../../data/assetUpgraderFees';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -37,3 +38,4 @@ func.dependencies = [
   'Asset_Deploy',
   'GemsCatalystsRegistry_deploy',
 ];
+func.skip = skipUnlessTest; // disabled for now

@@ -5,6 +5,8 @@ tmp/
 tmp.copy/
 
 yarn.error.log
+.yalc
+yalc.lock
 
 coverage*
 
@@ -40,3 +42,5 @@ giveaway.json
 .proofs*
 
 .openzeppelin/unknown-*.json
+
+.idea/

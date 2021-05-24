@@ -1,6 +1,6 @@
 import hre, {getNamedAccounts} from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {AssetGiveawayInfo} from '../lib/merkleTreeHelper';
+import {AssetClaim} from '../lib/merkleTreeHelper';
 
 const func: DeployFunction = async function () {
   const {deployments} = hre;
@@ -15,7 +15,7 @@ const func: DeployFunction = async function () {
     case 'mainnet':
       owner = '0x7a9fe22691c811ea339d9b73150e6911a5343dca';
       tokenId =
-        '55464657044963196816950587289035428064568320970692304673817341489687522457606';
+        '55464657044963196816950587289035428064568320970692304673817341489687572776960';
       break;
     case 'rinkeby':
       owner = deployer;
@@ -30,7 +30,7 @@ const func: DeployFunction = async function () {
 
   const AssetGiveaway = await deployments.get('Asset_Giveaway_3');
 
-  const assetData: AssetGiveawayInfo[] = AssetGiveaway.linkedData;
+  const assetData: AssetClaim[] = AssetGiveaway.linkedData;
   let totalAsset = 0;
   for (const asset of assetData) {
     if (asset.assetIds[0] !== tokenId) {
