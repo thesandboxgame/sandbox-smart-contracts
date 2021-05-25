@@ -1,17 +1,17 @@
-# Welcome to MkDocs
+Everything you need to know about The Sanbox Blockchain.
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+First steps
+==================================
 
-## Commands
+Are you new to Sandbox Blockchain? This is the place to start!
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+[Getting started](intro/index.md)
 
-## Project layout
+How the documentation is organized
+==================================
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+* [How-to guides](howto/index.md)
+
+* [Topic guides](topics/index.md)
+
+* [Reference guides](ref/index.md)

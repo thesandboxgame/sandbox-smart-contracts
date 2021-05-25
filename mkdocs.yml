@@ -1,3 +1,13 @@
 site_name: The Sandbox Game
 theme:
   name: material
+nav:
+  - Getting started: intro/index.md
+  - How to:
+    - Running the tests: howto/running-tests.md
+    - Writing documentation: howto/writing-documentation.md
+    - Fixing tests: howto/fixing-tests.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.superfences
