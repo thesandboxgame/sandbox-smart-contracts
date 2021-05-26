@@ -8,13 +8,13 @@ nav:
     - Install: intro/index.md
     - Running the tests: intro/running-tests.md
   - How to:
-    - Writing documentation: howto/writing-documentation.md
     - Fixing tests: howto/fixing-tests.md
   - Tutorials:
     - Developing your first feature: tutorials/developing-first-feature.md
   - Topics:
     - Blockchain:
       - Ethereum: topics/blockchain/ethereum.md
+      - Features: topics/blockchain/features.md
     - Architecture: topics/architecture/index.md
 
 markdown_extensions:
