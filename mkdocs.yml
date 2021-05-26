@@ -1,6 +1,8 @@
 site_name: The Sandbox Game
 theme:
   name: material
+  features:
+    - navigation.indexes
 nav:
   - Getting started:
     - Install: intro/index.md
@@ -8,6 +10,12 @@ nav:
   - How to:
     - Writing documentation: howto/writing-documentation.md
     - Fixing tests: howto/fixing-tests.md
+  - Tutorials:
+    - Developing your first feature: tutorials/developing-first-feature.md
+  - Topics:
+    - Blockchain:
+      - Ethereum: topics/blockchain/ethereum.md
+    - Architecture: topics/architecture/index.md
 
 markdown_extensions:
   - admonition

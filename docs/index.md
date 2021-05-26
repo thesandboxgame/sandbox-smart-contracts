@@ -1,17 +1,30 @@
-Everything you need to know about The Sanbox Blockchain.
+# Smart contracts for The Sandbox Game
 
-First steps
-==================================
+Everything you need to know about the smart contracts of The Sandbox Game.
 
-Are you new to Sandbox Blockchain? This is the place to start!
+# The Sandbox Game
+
+[The Sandbox](https://www.sandbox.game) is a user-generated content (UGC) gaming platform that will empower creators through digital ownership and monetization of 3D voxel creations made and shared by users around the world.
+
+Learn more:
+
+* [Website](https://www.sandbox.game)
+* [Discord](https://discordapp.com/invite/vAe4zvY)
+* [Telegram](https://t.me/sandboxgame)
+* [Medium](https://medium.com/sandbox-game)
+
+# First steps
+
+Are you new to The Sandbox Game ? This is the place to start!
 
 [Getting started](intro/index.md)
 
-How the documentation is organized
-==================================
+# How the documentation is organized
 
 * [How-to guides](howto/index.md)
 
 * [Topic guides](topics/index.md)
+
+* [Tutorials](tutorials/index.md)
 
 * [Reference guides](ref/index.md)
