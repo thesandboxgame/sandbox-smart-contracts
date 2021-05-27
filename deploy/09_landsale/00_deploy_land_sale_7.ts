@@ -4,7 +4,7 @@ import fs from 'fs';
 import helpers, {SaltedSaleLandInfo} from '../../lib/merkleTreeHelper';
 const {calculateLandHash} = helpers;
 
-const LANDSALE_PREFIX = 'LandPreSale_5';
+const LANDSALE_NAME = 'LandPreSale_7';
 
 import {DeployFunction} from 'hardhat-deploy/types';
 
@@ -26,7 +26,7 @@ const func: DeployFunction = async function (hre) {
   async function deployLandSale(landSale: LandSale) {
     const {lands, merkleRootHash, saltedLands, tree, sector} = landSale;
 
-    const landSaleName = `${LANDSALE_PREFIX}_${sector}`;
+    const landSaleName = `${LANDSALE_NAME}_${sector}`;
     let deadline = deadlines[sector];
 
     if (!deadline) {
@@ -85,29 +85,10 @@ const func: DeployFunction = async function (hre) {
         )
       );
     }
-
-    // TODO remove that step for next Land Sale, use Sand.paidCall on the frontend
-    const isSandSuperOperator = await read(
-      'Sand',
-      'isSuperOperator',
-      landSaleDeployment.address
-    );
-    if (!isSandSuperOperator) {
-      const currentSandAdmin = await read('Sand', 'getAdmin');
-      await catchUnknownSigner(
-        execute(
-          'Sand',
-          {from: currentSandAdmin, log: true},
-          'setSuperOperator',
-          landSaleDeployment.address,
-          true
-        )
-      );
-    }
   }
 
   const landSales = await getLandSales(
-    'LandPreSale_5',
+    LANDSALE_NAME,
     hre.network.name,
     hre.network.live
   );
@@ -118,5 +99,5 @@ const func: DeployFunction = async function (hre) {
 };
 
 export default func;
-func.tags = ['LandPreSale_5', 'LandPreSale_5_deploy'];
+func.tags = [LANDSALE_NAME, LANDSALE_NAME + '_deploy'];
 func.dependencies = ['Sand_deploy', 'Land_deploy', 'Asset_deploy'];
