@@ -12,7 +12,7 @@ function testCatalyst(catalystName) {
     async () => {
       const others = await getUnnamedAccounts();
       const {catalystMinter} = await getNamedAccounts();
-      await deployments.fixture();
+      await deployments.fixture('Catalysts');
       const contract = await ethers.getContract(catalystName);
 
       function mint(to, amount) {

@@ -8,7 +8,7 @@ import {
 
 export const setupERC20BasicApproveExtension = deployments.createFixture(
   async function () {
-    await deployments.fixture();
+    await deployments.fixture(['Land', 'Sand', 'LandPreSale_5']);
     const accounts = await getNamedAccounts();
     const others = await getUnnamedAccounts();
     const user0 = others[0];

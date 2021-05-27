@@ -8,7 +8,7 @@ import {Contract, BigNumber} from 'ethers';
 import {transferSand} from '../../catalyst/utils';
 
 export const setupSandPolygonDepositor = deployments.createFixture(async () => {
-  await deployments.fixture();
+  await deployments.fixture('Sand');
   const sandContract: Contract = await ethers.getContract('Sand');
   const users = await getUnnamedAccounts();
   const {catalystMinter} = await getNamedAccounts();

@@ -12,7 +12,7 @@ function testGem(gemName) {
     async () => {
       const others = await getUnnamedAccounts();
       const {gemMinter} = await getNamedAccounts();
-      await deployments.fixture();
+      await deployments.fixture('Gems');
       const contract = await ethers.getContract(gemName);
 
       function mint(to, amount) {

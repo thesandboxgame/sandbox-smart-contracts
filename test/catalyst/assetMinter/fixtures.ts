@@ -32,7 +32,7 @@ interface AssetData {
 }
 
 export const setupAssetMinter = deployments.createFixture(async () => {
-  await deployments.fixture();
+  await deployments.fixture(['AssetMinter', 'Asset']);
   const assetMinterContract: Contract = await ethers.getContract('AssetMinter');
   const assetContract: Contract = await ethers.getContract('Asset');
 
