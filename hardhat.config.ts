@@ -62,7 +62,7 @@ const config: HardhatUserConfig = {
   namedAccounts: {
     deployer: {
       default: 1,
-      mainnet: '0x18dd4e0eb8699eA4FeE238dE41ECfb95e32272f8',
+      mainnet: '0xe19ae8F9B36Ca43D12741288D0e311396140DF6F',
       rinkeby: '0x8A0e83DE499d7543CF486974a6196a35B5F573E7',
     }, // deploy contracts and make sure they are set up correctly
 

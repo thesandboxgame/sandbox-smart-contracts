@@ -4,7 +4,7 @@ import fs from 'fs';
 import helpers, {SaltedSaleLandInfo} from '../../lib/merkleTreeHelper';
 const {calculateLandHash} = helpers;
 
-const LANDSALE_NAME = 'LandPreSale_19';
+const LANDSALE_NAME = 'LandPreSale_7';
 
 import {DeployFunction} from 'hardhat-deploy/types';
 
@@ -60,7 +60,7 @@ const func: DeployFunction = async function (hre) {
       log: true,
     });
 
-    if (hre.network.name !== 'hardat') {
+    if (hre.network.name !== 'hardhat') {
       const landsWithProof: (SaltedSaleLandInfo & {proof: string[]})[] = [];
       for (const land of saltedLands) {
         const proof = tree.getProof(calculateLandHash(land));

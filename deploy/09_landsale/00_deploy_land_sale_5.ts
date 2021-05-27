@@ -60,7 +60,7 @@ const func: DeployFunction = async function (hre) {
       log: true,
     });
 
-    if (hre.network.name !== 'hardat') {
+    if (hre.network.name !== 'hardhat') {
       const landsWithProof: (SaltedSaleLandInfo & {proof: string[]})[] = [];
       for (const land of saltedLands) {
         const proof = tree.getProof(calculateLandHash(land));
