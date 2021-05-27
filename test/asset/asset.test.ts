@@ -23,6 +23,25 @@ describe('Asset.sol', function () {
     expect(balance).to.be.equal(20);
   });
 
+  it('can transfer assets', async function () {
+    const {Asset, users, mintAsset, trustedForwarder} = await setupAsset();
+    const tokenId = await mintAsset(users[1].address, 11);
+    await waitFor(
+      users[1].Asset['safeTransferFrom(address,address,uint256,uint256,bytes)'](
+        users[1].address,
+        users[2].address,
+        tokenId,
+        10,
+        '0x'
+      )
+    );
+    const balance = await Asset['balanceOf(address,uint256)'](
+      users[2].address,
+      tokenId
+    );
+    expect(balance).to.be.equal(10);
+  });
+
   it('user batch sending asset to itself keep the same balance', async function () {
     const {Asset, users, mintAsset} = await setupAsset();
     const tokenId = await mintAsset(users[0].address, 20);
