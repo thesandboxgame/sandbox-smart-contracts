@@ -4,7 +4,8 @@
     "editorconfig.editorconfig",
     "esbenp.prettier-vscode",
     "hbenl.vscode-mocha-test-adapter",
-    "juanblanco.solidity"
+    "juanblanco.solidity",
+    "atlassian.atlascode"
   ],
   "unwantedRecommendations": []
 }
