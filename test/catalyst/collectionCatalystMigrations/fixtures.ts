@@ -15,6 +15,10 @@ export const setupCollectionCatalystMigrations = deployments.createFixture(
       'OldCatalystRegistry',
       'OldCatalystMinter',
       'AssetAttributesRegistry',
+      'Sand',
+      'OldGems',
+      'OldCatalysts',
+      'GemsCatalystsRegistry',
     ]);
     const {
       collectionCatalystMigrationsAdmin,

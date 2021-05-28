@@ -16,6 +16,7 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     'Gems',
     'Catalysts',
     'Sand',
+    'AssetAttributesRegistry',
   ]);
   const gemsCatalystsRegistry: Contract = await ethers.getContract(
     'GemsCatalystsRegistry'
