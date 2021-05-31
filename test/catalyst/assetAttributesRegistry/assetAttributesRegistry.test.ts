@@ -37,7 +37,7 @@ describe('AssetAttributesRegistry', function () {
     }
   }
 
-  beforeEach(async () => {
+  beforeEach(async function () {
     await deployments.fixture();
   });
 

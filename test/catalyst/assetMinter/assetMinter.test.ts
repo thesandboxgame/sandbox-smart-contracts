@@ -69,7 +69,7 @@ async function mintGems(mintObjects: MintObj[]): Promise<void> {
 }
 
 describe('AssetMinter', function () {
-  beforeEach(async () => {
+  beforeEach(async function () {
     await deployments.fixture();
   });
 
