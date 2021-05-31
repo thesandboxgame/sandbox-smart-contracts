@@ -18,14 +18,12 @@ contract PolygonAssetV2 is ERC1155ERC721 {
         address trustedForwarder,
         address admin,
         address bouncerAdmin,
-        address predicate,
         address childChainManager,
         uint8 chainIndex
     ) external {
         require(trustedForwarder.isContract(), "TRUSTERFORWARDER_NOT_CONTRACT");
-        require(predicate.isContract(), "PREDICATE_NOT_CONTRACT");
         require(childChainManager.isContract(), "CHILDCHAINMANAGER_NOT_CONTRACT");
-        initV2(trustedForwarder, admin, bouncerAdmin, predicate, chainIndex);
+        initV2(trustedForwarder, admin, bouncerAdmin, address(0), chainIndex);
         _childChainManager = childChainManager;
     }
 
