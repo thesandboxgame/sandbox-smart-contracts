@@ -94,6 +94,7 @@ export const setupAssetAttributesRegistry = deployments.createFixture(
       assetAttributesRegistryAsmockedMigrationContract,
       assetUpgraderAsUser0,
       assetMinterAsUser0,
+      assetMinter,
     };
   }
 );
