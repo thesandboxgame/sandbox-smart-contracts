@@ -11,15 +11,6 @@ import {transferSand, mintCatalyst, mintGem} from '../utils';
 
 export const setupAssetAttributesRegistry = deployments.createFixture(
   async () => {
-    await deployments.fixture([
-      'AssetUpgrader',
-      'AssetMinter',
-      'Sand',
-      'Gems',
-      'Catalysts',
-      'GemsCatalystsRegistry',
-      'AssetAttributesRegistry',
-    ]);
     const assetAttributesRegistry: Contract = await ethers.getContract(
       'AssetAttributesRegistry'
     );

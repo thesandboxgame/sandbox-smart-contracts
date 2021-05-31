@@ -1,4 +1,9 @@
-import {ethers, getUnnamedAccounts, getNamedAccounts} from 'hardhat';
+import {
+  ethers,
+  getUnnamedAccounts,
+  getNamedAccounts,
+  deployments,
+} from 'hardhat';
 import {Address} from 'hardhat-deploy/types';
 import {BigNumber, Contract} from 'ethers';
 import {expect} from '../../chai-setup';
@@ -64,6 +69,10 @@ async function mintGems(mintObjects: MintObj[]): Promise<void> {
 }
 
 describe('AssetMinter', function () {
+  beforeEach(async () => {
+    await deployments.fixture();
+  });
+
   before(async function () {
     mintOptions = {
       from: ethers.constants.AddressZero,
@@ -104,11 +113,8 @@ describe('AssetMinter', function () {
         commonCatalyst,
         powerGem,
       } = await setupGemsAndCatalysts();
-      const {
-        assetAttributesRegistry,
-        assetMinter,
-      } = await setupAssetAttributesRegistry();
-      const assetMinterAsCatalystOwner = await assetMinter.connect(
+      const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
+      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
 
@@ -214,11 +220,8 @@ describe('AssetMinter', function () {
         powerGem,
         defenseGem,
       } = await setupGemsAndCatalysts();
-      const {
-        assetAttributesRegistry,
-        assetMinter,
-      } = await setupAssetAttributesRegistry();
-      const assetMinterAsCatalystOwner = await assetMinter.connect(
+      const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
+      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
 
@@ -529,11 +532,8 @@ describe('AssetMinter', function () {
         epicCatalyst,
       } = await setupGemsAndCatalysts();
       const {assetMinterContract} = await setupAssetMinter();
-      const {
-        assetAttributesRegistry,
-        assetMinter,
-      } = await setupAssetAttributesRegistry();
-      const assetMinterAsCatalystOwner = await assetMinter.connect(
+      const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
+      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
 
@@ -631,11 +631,8 @@ describe('AssetMinter', function () {
         rareCatalyst,
       } = await setupGemsAndCatalysts();
       const {assetMinterContract} = await setupAssetMinter();
-      const {
-        assetAttributesRegistry,
-        assetMinter,
-      } = await setupAssetAttributesRegistry();
-      const assetMinterAsCatalystOwner = await assetMinter.connect(
+      const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
+      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
 
@@ -803,11 +800,8 @@ describe('AssetMinter', function () {
         rareCatalyst,
       } = await setupGemsAndCatalysts();
       const {assetMinterContract} = await setupAssetMinter();
-      const {
-        assetAttributesRegistry,
-        assetMinter,
-      } = await setupAssetAttributesRegistry();
-      const assetMinterAsCatalystOwner = await assetMinter.connect(
+      const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
+      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
 
@@ -1417,16 +1411,13 @@ describe('AssetMinter', function () {
 
     it('mintMultiple should not set catalyst if catalystId == 0', async function () {
       const {assetMinterContract, assetContract} = await setupAssetMinter();
-      const {
-        assetAttributesRegistry,
-        assetMinter,
-      } = await setupAssetAttributesRegistry();
+      const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
       const {
         commonCatalyst,
         powerGem,
         catalystOwner,
       } = await setupGemsAndCatalysts();
-      const assetMinterAsCatalystOwner = await assetMinter.connect(
+      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
 
