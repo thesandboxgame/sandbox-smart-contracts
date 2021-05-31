@@ -24,7 +24,7 @@ describe('Asset.sol', function () {
   });
 
   it('can transfer assets', async function () {
-    const {Asset, users, mintAsset, trustedForwarder} = await setupAsset();
+    const {Asset, users, mintAsset} = await setupAsset();
     const tokenId = await mintAsset(users[1].address, 11);
     await waitFor(
       users[1].Asset['safeTransferFrom(address,address,uint256,uint256,bytes)'](
