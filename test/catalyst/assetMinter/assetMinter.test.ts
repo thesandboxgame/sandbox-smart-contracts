@@ -890,6 +890,7 @@ describe('AssetMinter', function () {
         assetUpgraderContract,
         assetContract,
         assetAttributesRegistry,
+        assetAttributesRegistryAdmin,
       } = await setupAssetUpgrader();
       const {
         sandContract,
@@ -924,6 +925,12 @@ describe('AssetMinter', function () {
       );
       const assetAsAssetOwner = await assetContract.connect(
         ethers.provider.getSigner(catalystOwner)
+      );
+
+      await waitFor(
+        assetAttributesRegistry
+          .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
+          .changeMinter(assetMinterContract.address)
       );
 
       const assetId = await assetMinterAsCatalystOwner.callStatic.mint(
