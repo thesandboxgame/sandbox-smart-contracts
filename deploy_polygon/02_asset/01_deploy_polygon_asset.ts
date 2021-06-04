@@ -5,7 +5,12 @@ const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
-  const {deployer, upgradeAdmin, assetAdmin, assetBouncerAdmin} = await getNamedAccounts();
+  const {
+    deployer,
+    upgradeAdmin,
+    assetAdmin,
+    assetBouncerAdmin,
+  } = await getNamedAccounts();
   const {deploy} = deployments;
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
@@ -19,7 +24,7 @@ const func: DeployFunction = async function (
       assetAdmin,
       assetBouncerAdmin,
       CHILD_CHAIN_MANAGER.address,
-      1
+      1,
     ],
     proxy: {
       owner: upgradeAdmin,
@@ -33,4 +38,4 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['PolygonAsset', 'PolygonAsset_deploy'];
-func.dependencies = ['TRUSTED_FORWARDER','CHILD_CHAIN_MANAGER'];
+func.dependencies = ['TRUSTED_FORWARDER', 'CHILD_CHAIN_MANAGER'];
