@@ -70,6 +70,6 @@ export const setupAsset = deployments.createFixture(async function () {
     users,
     mintAsset,
     trustedForwarder,
-    childChainManager
+    childChainManager,
   };
 });
