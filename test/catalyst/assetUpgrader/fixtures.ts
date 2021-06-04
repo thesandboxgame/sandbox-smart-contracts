@@ -41,11 +41,6 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
   );
 
   await waitFor(
-    assetAttributesRegistry
-      .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-      .changeMinter(assetUpgraderContract.address)
-  );
-  await waitFor(
     assetContract
       .connect(ethers.provider.getSigner(assetAdmin))
       .setSuperOperator(assetUpgraderContract.address, true)
