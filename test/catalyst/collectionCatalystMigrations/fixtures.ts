@@ -10,7 +10,16 @@ import {transferSand} from '../utils';
 
 export const setupCollectionCatalystMigrations = deployments.createFixture(
   async () => {
-    await deployments.fixture();
+    await deployments.fixture([
+      'CollectionCatalystMigrations',
+      'OldCatalystRegistry',
+      'OldCatalystMinter',
+      'AssetAttributesRegistry',
+      'Sand',
+      'OldGems',
+      'OldCatalysts',
+      'GemsCatalystsRegistry',
+    ]);
     const {
       collectionCatalystMigrationsAdmin,
       assetAttributesRegistryAdmin,

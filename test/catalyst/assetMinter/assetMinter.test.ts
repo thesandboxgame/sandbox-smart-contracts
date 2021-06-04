@@ -1,4 +1,9 @@
-import {ethers, getUnnamedAccounts, getNamedAccounts} from 'hardhat';
+import {
+  ethers,
+  getUnnamedAccounts,
+  getNamedAccounts,
+  deployments,
+} from 'hardhat';
 import {Address} from 'hardhat-deploy/types';
 import {BigNumber, Contract} from 'ethers';
 import {expect} from '../../chai-setup';
@@ -64,6 +69,10 @@ async function mintGems(mintObjects: MintObj[]): Promise<void> {
 }
 
 describe('AssetMinter', function () {
+  beforeEach(async function () {
+    await deployments.fixture();
+  });
+
   before(async function () {
     mintOptions = {
       from: ethers.constants.AddressZero,
@@ -881,6 +890,7 @@ describe('AssetMinter', function () {
         assetUpgraderContract,
         assetContract,
         assetAttributesRegistry,
+        assetAttributesRegistryAdmin,
       } = await setupAssetUpgrader();
       const {
         sandContract,
@@ -915,6 +925,12 @@ describe('AssetMinter', function () {
       );
       const assetAsAssetOwner = await assetContract.connect(
         ethers.provider.getSigner(catalystOwner)
+      );
+
+      await waitFor(
+        assetAttributesRegistry
+          .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
+          .changeMinter(assetMinterContract.address)
       );
 
       const assetId = await assetMinterAsCatalystOwner.callStatic.mint(

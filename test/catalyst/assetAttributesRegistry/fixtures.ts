@@ -11,7 +11,6 @@ import {transferSand, mintCatalyst, mintGem} from '../utils';
 
 export const setupAssetAttributesRegistry = deployments.createFixture(
   async () => {
-    await deployments.fixture();
     const assetAttributesRegistry: Contract = await ethers.getContract(
       'AssetAttributesRegistry'
     );
@@ -86,6 +85,7 @@ export const setupAssetAttributesRegistry = deployments.createFixture(
       assetAttributesRegistryAsmockedMigrationContract,
       assetUpgraderAsUser0,
       assetMinterAsUser0,
+      assetMinter,
     };
   }
 );

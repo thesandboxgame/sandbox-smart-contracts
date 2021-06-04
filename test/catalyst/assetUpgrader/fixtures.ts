@@ -9,7 +9,6 @@ import {waitFor} from '../../utils';
 import {transferSand} from '../utils';
 
 export const setupAssetUpgrader = deployments.createFixture(async () => {
-  await deployments.fixture();
   const {assetAttributesRegistryAdmin, assetAdmin} = await getNamedAccounts();
   const users = await getUnnamedAccounts();
   const catalystOwner = users[0];
@@ -41,11 +40,6 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
     'AssetUpgraderFeeBurner'
   );
 
-  await waitFor(
-    assetAttributesRegistry
-      .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
-      .changeMinter(assetUpgraderContract.address)
-  );
   await waitFor(
     assetContract
       .connect(ethers.provider.getSigner(assetAdmin))

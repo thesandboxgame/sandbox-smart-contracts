@@ -1,4 +1,9 @@
-import {ethers, getUnnamedAccounts, getNamedAccounts} from 'hardhat';
+import {
+  ethers,
+  getUnnamedAccounts,
+  getNamedAccounts,
+  deployments,
+} from 'hardhat';
 import {BigNumber, Event} from 'ethers';
 import {expect} from '../../chai-setup';
 import {setCatalyst, setupAssetAttributesRegistry} from './fixtures';
@@ -31,6 +36,10 @@ describe('AssetAttributesRegistry', function () {
       );
     }
   }
+
+  beforeEach(async function () {
+    await deployments.fixture();
+  });
 
   it('getRecord for non existing assetId', async function () {
     const {assetAttributesRegistry} = await setupAssetAttributesRegistry();

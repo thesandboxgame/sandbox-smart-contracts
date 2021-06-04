@@ -11,7 +11,6 @@ const notInOrderGemId = 56;
 const exampleCatalystId = 5;
 
 export const setupGemsAndCatalysts = deployments.createFixture(async () => {
-  await deployments.fixture();
   const gemsCatalystsRegistry: Contract = await ethers.getContract(
     'GemsCatalystsRegistry'
   );
