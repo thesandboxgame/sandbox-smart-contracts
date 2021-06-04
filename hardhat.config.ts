@@ -208,6 +208,7 @@ const config: HardhatUserConfig = {
               : undefined,
           }
         : undefined,
+      deploy: ['deploy_polygon', 'deploy'],
       // deploy: ['deploy-for-test', 'deploy'],
     },
     localhost: {
