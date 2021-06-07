@@ -17,7 +17,7 @@ contract PolygonSand is ERC20, Ownable {
     /// @param newChildChainManagerProxy address of the new childChainManagerProxy
     function updateChildChainManager(address newChildChainManagerProxy) external {
         require(newChildChainManagerProxy != address(0), "Bad ChildChainManagerProxy address");
-        require(msg.sender == owner(), "You're not allowed");
+        require(_msgSender() == owner(), "You're not allowed");
         childChainManagerProxy = newChildChainManagerProxy;
     }
 
@@ -25,7 +25,7 @@ contract PolygonSand is ERC20, Ownable {
     /// @param user user address for whom deposit is being done
     /// @param depositData abi encoded amount
     function deposit(address user, bytes calldata depositData) external {
-        require(msg.sender == childChainManagerProxy, "You're not allowed to deposit");
+        require(_msgSender() == childChainManagerProxy, "You're not allowed to deposit");
         uint256 amount = abi.decode(depositData, (uint256));
         _mint(user, amount);
     }
