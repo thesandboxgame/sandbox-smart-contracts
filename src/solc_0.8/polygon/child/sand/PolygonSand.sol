@@ -3,11 +3,9 @@
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts-0.8/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 
 contract PolygonSand is ERC20, Ownable {
-    using SafeMath for uint256;
     address public childChainManagerProxy;
 
     constructor(address _childChainManagerProxy) ERC20("SAND", "SAND") {
