@@ -58,6 +58,17 @@ const config: HardhatUserConfig = {
         },
       },
     ],
+    overrides: {
+      'src/solc_0.8/polygon/child/asset/PolygonAssetV2.sol': {
+        version: '0.8.2',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 550,
+          },
+        },
+      },
+    },
   },
   namedAccounts: {
     deployer: {
@@ -197,6 +208,7 @@ const config: HardhatUserConfig = {
               : undefined,
           }
         : undefined,
+      deploy: ['deploy_polygon', 'deploy'],
       // deploy: ['deploy-for-test', 'deploy'],
     },
     localhost: {
