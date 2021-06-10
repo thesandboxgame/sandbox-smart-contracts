@@ -26,4 +26,4 @@ You can decide to run a single test by selecting it and run it specifically.
 !!! note "Learn more about Mocha"
     Learn more about [Mocha](https://mochajs.org) and [this extension](https://marketplace.visualstudio.com/items?itemName=hbenl.vscode-mocha-test-adapter)
 
-Your next step is to [develop your first feature](../tutorials/developing-first-feature.md)
+Next step would be to [set your environment variables](setting-environment-variables.md) & subscribe to external services necessary to use different scripts.

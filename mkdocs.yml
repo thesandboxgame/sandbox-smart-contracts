@@ -7,9 +7,11 @@ nav:
   - Getting started:
     - Install: intro/index.md
     - Running the tests: intro/running-tests.md
+    - Setting environment variables: intro/setting-environment-variables.md
   - How to:
     - Fixing tests: howto/fixing-tests.md
     - Preparing a LAND sale: howto/preparing-land-sale.md
+    - Claiming an asset: howto/claiming-asset.md
   - Tutorials:
     - Developing your first feature: tutorials/developing-first-feature.md
   - Topics:
