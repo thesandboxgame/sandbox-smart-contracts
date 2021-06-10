@@ -22,10 +22,24 @@ Select your ticket and move it to the `In Progress` status.
 
 ### Create a branch & a pull request
 
+#### With Jira (Recommended)
+
 The recommended way to create a branch associated to a ticket is to use the Git integration plugin on Jira.
 Edit your ticket and on the menu, select `Open Git Integration`, it auto-selects the name of the branch based on the name of the ticket.
 Click the button `Create branch` to create a branch for this ticket.
 Repeat the same process to create a WIP (draft) pull request.
+
+#### With git
+
+If the jira plugin is inactive, you can still create a branch using git in a terminal.
+The branch name has to start with the name of the ticket. Don't forget to create your branch from master.
+
+!!! example
+    ```shell
+    git checkout master
+    git pull
+    git checkout -b TSBBLOC-xxx-name-of-your-branch
+    ```
 
 ### Checkout the branch
 
