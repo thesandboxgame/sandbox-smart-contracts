@@ -20,7 +20,7 @@ abstract contract ERC20BasicApproveExtension {
         _approveFor(msg.sender, target, amount);
 
         // solium-disable-next-line security/no-call-value
-        (bool success, bytes memory returnData) = target.call.value(msg.value)(data);
+        (bool success, bytes memory returnData) = target.call{value: msg.value}(data);
         require(success, string(returnData));
         return returnData;
     }
@@ -42,7 +42,7 @@ abstract contract ERC20BasicApproveExtension {
         }
 
         // solium-disable-next-line security/no-call-value
-        (bool success, bytes memory returnData) = target.call.value(msg.value)(data);
+        (bool success, bytes memory returnData) = target.call{value: msg.value}(data);
         require(success, string(returnData));
 
         return returnData;
@@ -52,11 +52,11 @@ abstract contract ERC20BasicApproveExtension {
         address owner,
         address target,
         uint256 amount
-    ) internal;
+    ) internal virtual;
 
     function _addAllowanceIfNeeded(
         address owner,
         address spender,
         uint256 amountNeeded
-    ) internal;
+    ) internal virtual;
 }

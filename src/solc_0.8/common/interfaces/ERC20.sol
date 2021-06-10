@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.8.2;
 
 /// @dev see https://eips.ethereum.org/EIPS/eip-20

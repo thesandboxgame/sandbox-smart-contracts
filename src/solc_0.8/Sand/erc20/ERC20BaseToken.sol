@@ -4,8 +4,10 @@ pragma solidity 0.8.2;
 
 import "../../common/interfaces/ERC20.sol";
 import "../../common/BaseWithStorage/WithSuperOperators.sol";
+import "./ERC20BasicApproveExtension.sol";
+import "./ERC20ExecuteExtension.sol";
 
-contract ERC20BaseToken is WithSuperOperators, ERC20 {
+contract ERC20BaseToken is WithSuperOperators, ERC20, ERC20BasicApproveExtension, ERC20ExecuteExtension {
     uint256 internal _totalSupply;
     mapping(address => uint256) internal _balances;
     mapping(address => mapping(address => uint256)) internal _allowances;
@@ -87,7 +89,7 @@ contract ERC20BaseToken is WithSuperOperators, ERC20 {
         address owner,
         address spender,
         uint256 amountNeeded
-    ) internal {
+    ) internal override(ERC20BasicApproveExtension, ERC20ExecuteExtension) {
         if (amountNeeded > 0 && !isSuperOperator(spender)) {
             uint256 currentAllowance = _allowances[owner][spender];
             if (currentAllowance < amountNeeded) {
@@ -100,7 +102,7 @@ contract ERC20BaseToken is WithSuperOperators, ERC20 {
         address owner,
         address spender,
         uint256 amount
-    ) internal {
+    ) internal override {
         require(owner != address(0) && spender != address(0), "Cannot approve with 0x0");
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
@@ -110,7 +112,7 @@ contract ERC20BaseToken is WithSuperOperators, ERC20 {
         address from,
         address to,
         uint256 amount
-    ) internal {
+    ) internal override {
         require(to != address(0), "Cannot send to 0x0");
         uint256 currentBalance = _balances[from];
         require(currentBalance >= amount, "not enough fund");
