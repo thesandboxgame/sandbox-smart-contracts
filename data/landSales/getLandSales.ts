@@ -220,21 +220,24 @@ async function generateLandsForMerkleTree(sectorData: SectorData, bundles: {[id:
   return {lands, partnersLands};
 }
 
-export async function getLandSales(presale: string, networkName: string, expose?: boolean): Promise<LandSale[]>{
-  const secretPath = `./secret/.${presale}_${networkName}_secret`;
+export async function getLandSales(presale: string, networkName: string, expose?: boolean): Promise<LandSale[]> {
+  const networkNameMap : {[name: string]: string} = {
+    mainnet: 'mainnet',
+    rinkeby: 'testnet',
+    goerli: 'testnet',
+    hardhat: 'testnet'
+  }
+  const name = networkNameMap[networkName];
+  const secretPath = `./secret/.${presale}_${name}_secret`;
   let secret;
   try {
     secret = fs.readFileSync(secretPath).toString();
   } catch (e) {
-    if (networkName === 'mainnet' || networkName === 'rinkeby') {
+    if (networkName === 'hardhat') {
+      secret = "0x4467363716526536535425451427798982881775318563547751090997863683";
+    } else {
       throw e;
     }
-    secret = "0x4467363716526536535425451427798982881775318563547751090997863683";
-  }
-
-  let name = networkName;
-  if (networkName === 'hardhat') {
-    name = 'rinkeby'; // use rinkeby data for tests
   }
 
   const sectorPath = `./${presale}/sectors.${name}.json`;
