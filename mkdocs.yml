@@ -11,14 +11,13 @@ nav:
   - How to:
     - Fixing tests: howto/fixing-tests.md
     - Preparing a LAND sale: howto/preparing-land-sale.md
-    - Claiming an asset: howto/claiming-asset.md
+    - Preparing an ASSET giveaway: howto/preparing-asset-giveaway.md
   - Tutorials:
     - Developing your first feature: tutorials/developing-first-feature.md
   - Topics:
     - Blockchain:
       - Ethereum: topics/blockchain/ethereum.md
       - Features: topics/blockchain/features.md
-    - Architecture: topics/architecture/index.md
 
 markdown_extensions:
   - admonition
