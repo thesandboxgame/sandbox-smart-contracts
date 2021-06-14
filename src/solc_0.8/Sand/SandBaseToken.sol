@@ -8,7 +8,7 @@ import "./erc20/ERC20BasicApproveExtension.sol";
 
 /*ERC20ExecuteExtension,*/
 /*ERC20BasicApproveExtension,*/
-contract Sand is ERC20BaseToken {
+contract SandBaseToken is ERC20BaseToken {
     constructor(
         address sandAdmin,
         address executionAdmin,
@@ -30,10 +30,4 @@ contract Sand is ERC20BaseToken {
     function symbol() public view returns (string memory) {
         return "SAND";
     }
-
-    /*function _addAllowanceIfNeeded(
-        address owner,
-        address spender,
-        uint256 amountNeeded
-    ) internal override(ERC20BasicApproveExtension, ERC20BaseToken);*/
 }
