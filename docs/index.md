@@ -21,10 +21,10 @@ Are you new to The Sandbox Game ? This is the place to start!
 
 # How the documentation is organized
 
-* [How-to guides](howto/index.md)
+* How-to guides
 
-* [Topic guides](topics/index.md)
+* Topic guides)
 
-* [Tutorials](tutorials/index.md)
+* Tutorials
 
-* [Reference guides](ref/index.md)
+* Reference guides
