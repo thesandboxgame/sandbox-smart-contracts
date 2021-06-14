@@ -20,6 +20,7 @@ abstract contract ERC20BasicApproveExtension {
         _approveFor(msg.sender, target, amount);
 
         // solium-disable-next-line security/no-call-value
+        // solhint-disable-next-line avoid-low-level-calls
         (bool success, bytes memory returnData) = target.call{value: msg.value}(data);
         require(success, string(returnData));
         return returnData;
@@ -42,6 +43,7 @@ abstract contract ERC20BasicApproveExtension {
         }
 
         // solium-disable-next-line security/no-call-value
+        // solhint-disable-next-line avoid-low-level-calls
         (bool success, bytes memory returnData) = target.call{value: msg.value}(data);
         require(success, string(returnData));
 
