@@ -2,12 +2,12 @@
 
 pragma solidity 0.8.2;
 
-import "../../common/interfaces/ERC20.sol";
+import "../../common/interfaces/IERC20.sol";
 import "../../common/BaseWithStorage/WithSuperOperators.sol";
 import "./ERC20BasicApproveExtension.sol";
 import "./ERC20ExecuteExtension.sol";
 
-contract ERC20BaseToken is WithSuperOperators, ERC20, ERC20BasicApproveExtension, ERC20ExecuteExtension {
+contract ERC20BaseToken is WithSuperOperators, IERC20, ERC20BasicApproveExtension, ERC20ExecuteExtension {
     uint256 internal _totalSupply;
     mapping(address => uint256) internal _balances;
     mapping(address => mapping(address => uint256)) internal _allowances;

@@ -16,6 +16,5 @@ library BytesUtil {
             value := mload(add(data, 36))
         }
         return value == uint256(uint160(_address));
-        //uint256(_address);
     }
 }
