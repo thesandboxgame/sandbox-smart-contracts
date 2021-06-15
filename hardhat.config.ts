@@ -237,6 +237,7 @@ const config: HardhatUserConfig = {
     goerli: {
       url: node_url('goerli'),
       accounts: accounts('goerli'),
+      gasPrice: 600000000000,
     },
     mainnet: {
       url: node_url('mainnet'),
