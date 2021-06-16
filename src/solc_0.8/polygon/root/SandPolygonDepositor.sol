@@ -13,7 +13,7 @@ contract SandPolygonDepositor {
         IERC20Extended sand,
         address predicate,
         IRootChainManager rootChainManager
-    ) public {
+    ) {
         _sand = sand;
         _predicate = predicate;
         _rootChainManager = rootChainManager;

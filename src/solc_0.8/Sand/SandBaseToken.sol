@@ -3,35 +3,43 @@
 pragma solidity 0.8.2;
 
 import "../common/BaseWithStorage/ERC20/extensions/ERC20ExecuteExtension.sol";
-//import "./erc20/ERC20BaseToken.sol";
+import "../common/BaseWithStorage/ERC20/extensions/ERC20BasicApproveExtension.sol";
 import "../common/BaseWithStorage/ERC20/ERC20BaseToken.sol";
 
-//import "./erc20/ERC20BasicApproveExtension.sol";
-
-/*ERC20ExecuteExtension,*/
-/*ERC20BasicApproveExtension,*/
-contract SandBaseToken is
-    ERC20BaseToken /*, ERC20ExecuteExtension*/
-{
+contract SandBaseToken is ERC20BaseToken, ERC20ExecuteExtension, ERC20BasicApproveExtension {
     constructor(
         address sandAdmin,
         address executionAdmin,
         address beneficiary
-    ) public {
+    )
+        ERC20BaseToken("SAND", "SAND", sandAdmin, executionAdmin) // solhint-disable-next-line no-empty-blocks
+    {
         _admin = sandAdmin;
         _executionAdmin = executionAdmin;
         _mint(beneficiary, 3000000000000000000000000000);
     }
 
-    /// @notice A descriptive name for the tokens
-    /// @return name of the tokens
-    function name() public view override returns (string memory) {
-        return "SAND";
+    function _addAllowanceIfNeeded(
+        address owner,
+        address spender,
+        uint256 amountNeeded
+    ) internal override(ERC20BaseToken, ERC20ExecuteExtension, ERC20BasicApproveExtension) {
+        return ERC20BaseToken._approveFor(owner, spender, amountNeeded);
     }
 
-    /// @notice An abbreviated name for the tokens
-    /// @return symbol of the tokens
-    function symbol() public view override returns (string memory) {
-        return "SAND";
+    function _approveFor(
+        address owner,
+        address spender,
+        uint256 amount
+    ) internal override(ERC20BaseToken, ERC20BasicApproveExtension) {
+        return ERC20BaseToken._approveFor(owner, spender, amount);
+    }
+
+    function _transfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal override(ERC20BaseToken, ERC20ExecuteExtension) {
+        return ERC20BaseToken._transfer(from, to, amount);
     }
 }

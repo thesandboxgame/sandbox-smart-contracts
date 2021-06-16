@@ -119,7 +119,7 @@ describe('SandBaseToken.sol', function () {
           userWithoutSand.address,
           sandTransferValue
         )
-      ).to.be.revertedWith('not enough fund');
+      ).to.be.revertedWith('INSUFFICIENT_FUNDS');
     });
 
     it('users should not be able to transfer token they dont have', async function () {
@@ -131,7 +131,7 @@ describe('SandBaseToken.sol', function () {
           userWithSand.address,
           sandTransferValue
         )
-      ).to.be.revertedWith('not enough fund');
+      ).to.be.revertedWith('INSUFFICIENT_FUNDS');
     });
 
     it('users balance should not move if they transfer token to themselves', async function () {
@@ -187,7 +187,7 @@ describe('SandBaseToken.sol', function () {
           usersWithoutSand[1].address,
           USED_ALLOWANCE
         )
-      ).to.be.revertedWith('Not enough funds allowed');
+      ).to.be.revertedWith('NOT_AUTHORIZED_ALLOWANCE');
     });
 
     it('user should be able to transfer some of the amount permitted by their allowance', async function () {

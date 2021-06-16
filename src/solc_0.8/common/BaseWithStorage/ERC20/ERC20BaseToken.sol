@@ -2,11 +2,10 @@
 pragma solidity 0.8.2;
 
 import "./extensions/ERC20Internal.sol";
-import "./extensions/ERC20ExecuteExtension.sol";
 import "../../interfaces/IERC20Extended.sol";
 import "../WithSuperOperators.sol";
 
-abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, ERC20Internal, ERC20ExecuteExtension {
+abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, ERC20Internal {
     bytes32 internal immutable _name; // works only for string that can fit into 32 bytes
     bytes32 internal immutable _symbol; // works only for string that can fit into 32 bytes
     address internal immutable _operator;
@@ -175,8 +174,8 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     function _addAllowanceIfNeeded(
         address owner,
         address spender,
-        uint256 amountNeeded
-    ) internal virtual override(ERC20Internal, ERC20ExecuteExtension) {
+        uint256 amountNeeded /*(ERC20Internal, ERC20ExecuteExtension, ERC20BasicApproveExtension)*/
+    ) internal virtual override {
         if (amountNeeded > 0 && !isSuperOperator(spender) && spender != _operator) {
             uint256 currentAllowance = _allowances[owner][spender];
             if (currentAllowance < amountNeeded) {
@@ -189,8 +188,8 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     function _approveFor(
         address owner,
         address spender,
-        uint256 amount
-    ) internal override {
+        uint256 amount /*(ERC20BasicApproveExtension, ERC20Internal)*/
+    ) internal virtual override {
         require(owner != address(0) && spender != address(0), "INVALID_OWNER_||_SPENDER");
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
@@ -200,8 +199,8 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     function _transfer(
         address from,
         address to,
-        uint256 amount
-    ) internal override(ERC20Internal, ERC20ExecuteExtension) {
+        uint256 amount /*(ERC20Internal, ERC20ExecuteExtension)*/
+    ) internal virtual override {
         require(to != address(0), "NOT_TO_ZEROADDRESS");
         require(to != address(this), "NOT_TO_THIS");
         uint256 currentBalance = _balances[from];
