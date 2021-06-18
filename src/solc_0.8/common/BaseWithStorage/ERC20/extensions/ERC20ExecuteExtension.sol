@@ -2,7 +2,9 @@
 
 pragma solidity 0.8.2;
 
-abstract contract ERC20ExecuteExtension {
+import "./ERC20Internal.sol";
+
+abstract contract ERC20ExecuteExtension is ERC20Internal {
     /// @dev _executionAdmin != _admin so that this super power can be disabled independently
     address internal _executionAdmin;
 
@@ -167,7 +169,7 @@ abstract contract ERC20ExecuteExtension {
         assert(gasleft() > gasLimit / 63); // not enough gas provided, assert to throw all gas // TODO use EIP-1930
     }
 
-    function _transfer(
+    /*function _transfer(
         address from,
         address to,
         uint256 amount
@@ -177,5 +179,5 @@ abstract contract ERC20ExecuteExtension {
         address owner,
         address spender,
         uint256 amountNeeded
-    ) internal virtual;
+    ) internal virtual;*/
 }

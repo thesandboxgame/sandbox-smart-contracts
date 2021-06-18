@@ -23,7 +23,7 @@ contract SandBaseToken is ERC20BaseToken, ERC20ExecuteExtension, ERC20BasicAppro
         address owner,
         address spender,
         uint256 amountNeeded
-    ) internal override(ERC20BaseToken, ERC20ExecuteExtension, ERC20BasicApproveExtension) {
+    ) internal override(ERC20BaseToken, ERC20Internal) {
         return ERC20BaseToken._approveFor(owner, spender, amountNeeded);
     }
 
@@ -31,7 +31,7 @@ contract SandBaseToken is ERC20BaseToken, ERC20ExecuteExtension, ERC20BasicAppro
         address owner,
         address spender,
         uint256 amount
-    ) internal override(ERC20BaseToken, ERC20BasicApproveExtension) {
+    ) internal override(ERC20BaseToken, ERC20Internal) {
         return ERC20BaseToken._approveFor(owner, spender, amount);
     }
 
@@ -39,7 +39,7 @@ contract SandBaseToken is ERC20BaseToken, ERC20ExecuteExtension, ERC20BasicAppro
         address from,
         address to,
         uint256 amount
-    ) internal override(ERC20BaseToken, ERC20ExecuteExtension) {
+    ) internal override(ERC20BaseToken, ERC20Internal) {
         return ERC20BaseToken._transfer(from, to, amount);
     }
 }
