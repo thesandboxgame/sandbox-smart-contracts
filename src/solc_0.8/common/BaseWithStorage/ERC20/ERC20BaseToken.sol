@@ -140,7 +140,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         address spender,
         uint256 amount
     ) public override returns (bool success) {
-        require(msg.sender == owner || _superOperators[msg.sender] || msg.sender == _operator, "NOT_AUTHORIZED"); // TODO metatx
+        require(msg.sender == owner || _superOperators[msg.sender] || msg.sender == _operator, "NOT_AUTHORIZED");
         _approveFor(owner, spender, amount);
         return true;
     }

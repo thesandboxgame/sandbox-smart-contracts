@@ -1,5 +1,4 @@
 //SPDX-License-Identifier: MIT
-// solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 import "../../common/interfaces/IERC20Extended.sol";
 import "./IRootChainManager.sol";

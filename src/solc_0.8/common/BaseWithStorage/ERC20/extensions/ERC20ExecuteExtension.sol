@@ -168,16 +168,4 @@ abstract contract ERC20ExecuteExtension is ERC20Internal {
         (success, returnData) = to.call{gas: gasLimit}(data);
         assert(gasleft() > gasLimit / 63); // not enough gas provided, assert to throw all gas // TODO use EIP-1930
     }
-
-    /*function _transfer(
-        address from,
-        address to,
-        uint256 amount
-    ) internal virtual;
-
-    function _addAllowanceIfNeeded(
-        address owner,
-        address spender,
-        uint256 amountNeeded
-    ) internal virtual;*/
 }
