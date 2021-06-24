@@ -2,7 +2,6 @@ import hre from 'hardhat';
 import {getLandSaleFiles} from '../../data/landSales/getLandSales';
 import {BigNumber} from '@ethersproject/bignumber';
 
-
 const {deployments} = hre;
 const {read, execute, catchUnknownSigner} = deployments;
 
@@ -11,7 +10,10 @@ const landSalePrefix = args[0];
 
 (async () => {
   const networkName = hre.network.name;
-  const {sectors, bundles} = await getLandSaleFiles(landSalePrefix, networkName)
+  const {sectors, bundles} = await getLandSaleFiles(
+    landSalePrefix,
+    networkName
+  );
 
   for (const sector of sectors) {
     const assetIdsCount: {[assetId: string]: number} = {};
@@ -43,7 +45,12 @@ const landSalePrefix = args[0];
     const ids = [];
     const values = [];
     for (const assetId of Object.keys(assetIdsCount)) {
-      const balance: BigNumber = await read('Asset', 'balanceOf(address,uint256)', presale.address, assetId);
+      const balance: BigNumber = await read(
+        'Asset',
+        'balanceOf(address,uint256)',
+        presale.address,
+        assetId
+      );
       const assetCount = BigNumber.from(assetIdsCount[assetId]);
       if (balance.lt(assetCount)) {
         ids.push(assetId);
