@@ -6,6 +6,7 @@ import 'hardhat-gas-reporter';
 import '@openzeppelin/hardhat-upgrades';
 import 'solidity-coverage';
 import 'hardhat-contract-sizer';
+import "@nomiclabs/hardhat-etherscan";
 import {node_url, accounts} from './utils/network';
 
 const config: HardhatUserConfig = {
@@ -255,6 +256,9 @@ const config: HardhatUserConfig = {
         },
       }
     : undefined,
+  etherscan: {
+    apiKey: process.env.ETHERSCAN_API_KEY || ""
+  }
 };
 
 export default config;
