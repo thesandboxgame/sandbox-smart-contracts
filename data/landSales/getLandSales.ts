@@ -262,14 +262,10 @@ export async function getLandSaleFiles(presale: string, networkName: string): Pr
   const sectorPath = `./${presale}/sectors.${name}.json`;
   const bundlesPath = `./${presale}/bundles.${name}.json`;
   let secret;
-  try {
+  if (networkName === 'hardhat') {
+    secret = "0x4467363716526536535425451427798982881775318563547751090997863683";
+  } else {
     secret = fs.readFileSync(secretPath).toString();
-  } catch (e) {
-    if (networkName === 'hardhat') {
-      secret = "0x4467363716526536535425451427798982881775318563547751090997863683";
-    } else {
-      throw e;
-    }
   }
   const sectors = (await import(sectorPath)).default;
   const bundles = (await import(bundlesPath)).default;

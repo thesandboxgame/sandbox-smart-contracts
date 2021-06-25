@@ -219,6 +219,7 @@ const config: HardhatUserConfig = {
      */
     hardhat: {
       accounts: accounts(process.env.HARDHAT_FORK),
+      tags: ['testnet'],
       forking: process.env.HARDHAT_FORK
         ? {
             url: node_url(process.env.HARDHAT_FORK),
@@ -233,10 +234,12 @@ const config: HardhatUserConfig = {
     localhost: {
       url: 'http://localhost:8545',
       accounts: accounts(),
+      tags: ['testnet'],
     },
     rinkeby_test: {
       url: node_url('rinkeby'),
       accounts: accounts('rinkeby_test'),
+      tags: ['testnet'],
     },
     rinkeby: {
       url: node_url('rinkeby'),
