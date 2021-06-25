@@ -83,7 +83,7 @@ const config: HardhatUserConfig = {
       default: 2,
       mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
-      goerli: '0xa4519D601F43D0b8f167842a367465681F652252',
+      goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
     }, // can add super operators and change admin
 
     upgradeAdmin: 'sandAdmin',
@@ -118,7 +118,7 @@ const config: HardhatUserConfig = {
       default: 3,
       mainnet: '0x9695ed5020BB47880738Db356678fe8cBc8FF60b', // TODO use another wallet ?
       rinkeby: '0x60927eB036621b801491B6c5e9A60A8d2dEeD75A',
-      goerli: '0x60927eB036621b801491B6c5e9A60A8d2dEeD75A',
+      goerli: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
     },
 
     Foundation: {
@@ -158,7 +158,7 @@ const config: HardhatUserConfig = {
       default: 2,
       mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
-      goerli: '0xa4519D601F43D0b8f167842a367465681F652252',
+      goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
     }, // can add super operators and change admin
 
     gemsAndCatalystsAdmin: 'sandAdmin',
@@ -167,7 +167,7 @@ const config: HardhatUserConfig = {
       default: 2,
       mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
-      goerli: '0xa4519D601F43D0b8f167842a367465681F652252',
+      goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
     },
 
     landSaleAdmin: 'sandAdmin', // can enable currencies
@@ -210,6 +210,13 @@ const config: HardhatUserConfig = {
     gemsCatalystsRegistryAdmin: 'sandAdmin',
   },
   networks: {
+    /**
+     * TAGS:
+     *  - mainnet -> production networks
+     *  - testnet -> non production networks
+     *  - L1      -> Layer 1 networks
+     *  - L2      -> Layer 2 networks
+     */
     hardhat: {
       accounts: accounts(process.env.HARDHAT_FORK),
       forking: process.env.HARDHAT_FORK
@@ -234,15 +241,18 @@ const config: HardhatUserConfig = {
     rinkeby: {
       url: node_url('rinkeby'),
       accounts: accounts('rinkeby'),
+      tags: ["testnet", "L1"],
     },
     goerli: {
       url: node_url('goerli'),
       accounts: accounts('goerli'),
+      tags: ["testnet", "L1"],
       gasPrice: 600000000000,
     },
     mainnet: {
       url: node_url('mainnet'),
       accounts: accounts('mainnet'),
+      tags: ["mainnet", "L1"],
     },
   },
   paths: {

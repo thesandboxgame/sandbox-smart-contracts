@@ -33,9 +33,9 @@ const func: DeployFunction = async function (hre) {
       throw new Error(`no deadline for sector ${sector}`);
     }
 
-    if (hre.network.name !== 'mainnet') {
+    if (hre.network.tags.testnet) {
       log('increasing deadline by 1 year');
-      deadline += 365 * 24 * 60 * 60; //add 1 year on rinkeby
+      deadline += 365 * 24 * 60 * 60; //add 1 year on testnets
     }
 
     const landSaleDeployment = await deploy(landSaleName, {
