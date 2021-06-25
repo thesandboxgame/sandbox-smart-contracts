@@ -6,7 +6,7 @@ import 'hardhat-gas-reporter';
 import '@openzeppelin/hardhat-upgrades';
 import 'solidity-coverage';
 import 'hardhat-contract-sizer';
-import "@nomiclabs/hardhat-etherscan";
+import '@nomiclabs/hardhat-etherscan';
 import {node_url, accounts} from './utils/network';
 
 const config: HardhatUserConfig = {
@@ -241,18 +241,18 @@ const config: HardhatUserConfig = {
     rinkeby: {
       url: node_url('rinkeby'),
       accounts: accounts('rinkeby'),
-      tags: ["testnet", "L1"],
+      tags: ['testnet', 'L1'],
     },
     goerli: {
       url: node_url('goerli'),
       accounts: accounts('goerli'),
-      tags: ["testnet", "L1"],
+      tags: ['testnet', 'L1'],
       gasPrice: 600000000000,
     },
     mainnet: {
       url: node_url('mainnet'),
       accounts: accounts('mainnet'),
-      tags: ["mainnet", "L1"],
+      tags: ['mainnet', 'L1'],
     },
   },
   paths: {
@@ -267,8 +267,8 @@ const config: HardhatUserConfig = {
       }
     : undefined,
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY || ""
-  }
+    apiKey: process.env.ETHERSCAN_API_KEY || '',
+  },
 };
 
 export default config;
