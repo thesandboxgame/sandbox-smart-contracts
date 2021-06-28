@@ -1,8 +1,10 @@
 import fs from 'fs';
 import {TheGraph} from '../utils/thegraph';
-import {getBlockArgs} from '../utils/utils';
-
-const blockNumber = getBlockArgs(0);
+import hre from 'hardhat';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const EthDater = require('ethereum-block-by-date');
+const {ethers} = hre;
+const args = process.argv.slice(2);
 
 interface Staker {
   id: string;
@@ -21,6 +23,10 @@ const queryString = `
 `;
 
 async function main() {
+  const date = args[0];
+  if (!date) throw new Error('Date must be provided');
+  const dater = new EthDater(ethers.provider);
+  const {block: blockNumber} = await dater.getDate(date);
   const addList: Array<string> = [];
 
   const stakers: Array<Staker> = await theGraph.query(queryString, 'stakers', {
@@ -31,7 +37,7 @@ async function main() {
     addList.push(staker.id);
   });
 
-  console.log({numStakers: stakers.length});
+  console.log({date, blockNumber, numStakers: stakers.length});
   fs.writeFileSync('result.json', JSON.stringify(addList, null, '  '));
 }
 
