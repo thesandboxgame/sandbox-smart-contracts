@@ -10,12 +10,17 @@ contract SandBaseToken is ERC20BaseToken, ERC20ExecuteExtension, ERC20BasicAppro
     constructor(
         address sandAdmin,
         address executionAdmin,
-        address beneficiary
+        address beneficiary,
+        uint256 amount
     )
         ERC20BaseToken("SAND", "SAND", sandAdmin, executionAdmin) // solhint-disable-next-line no-empty-blocks
     {
         _admin = sandAdmin;
         _executionAdmin = executionAdmin;
-        _mint(beneficiary, 3000000000000000000000000000);
+        // @review - allows testing SandBaseToken & PolygonSand individually, bad idea?
+        if (beneficiary != address(0)) {
+            uint256 initialSupply = amount * (1 ether);
+            _mint(beneficiary, initialSupply);
+        }
     }
 }
