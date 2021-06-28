@@ -5,6 +5,7 @@ import {
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
+import { waitFor, setupUser } from '../utils';
 
 export const setupERC20BasicApproveExtension = deployments.createFixture(
   async function () {
@@ -34,6 +35,14 @@ export const setupERC20BasicApproveExtension = deployments.createFixture(
     const mockERC20BasicApprovalTarget: Contract = await ethers.getContract(
       'MockERC20BasicApprovalTarget'
     );
+    const predicate = await ethers.getContract('ERC20_PREDICATE');
+    // Set predicate Sand
+    try {
+      await waitFor(predicate.setToken(sandContract.address));
+    } catch (e) {
+      console.log(e);
+    }
+    const sandBeneficiary = await setupUser(accounts.sandBeneficiary, { sandContract });
 
     return {
       landContract,
@@ -44,9 +53,10 @@ export const setupERC20BasicApproveExtension = deployments.createFixture(
       sandContractAsUser0,
       sandContract,
       sandAdmin: accounts.sandAdmin,
-      sandBeneficiary: accounts.sandBeneficiary,
+      sandBeneficiary,
       user0,
       user1,
+      predicate
     };
   }
 );
