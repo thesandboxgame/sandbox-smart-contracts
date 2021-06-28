@@ -7,10 +7,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
 
   const {sandBeneficiary, deployer} = await getNamedAccounts();
+  const supply = "3000000000";
 
   await deploy('SandBaseToken', {
     from: deployer,
-    args: [deployer, deployer, sandBeneficiary],
+    args: [deployer, deployer, sandBeneficiary,supply],
     log: true,
     skipIfAlreadyDeployed: true,
   });
