@@ -2,13 +2,17 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts-0.8/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
+import "../../../Sand/SandBaseToken.sol";
 
-contract PolygonSand is ERC20, Ownable {
+contract PolygonSand is SandBaseToken, Ownable {
     address public childChainManagerProxy;
 
-    constructor(address _childChainManagerProxy) ERC20("SAND", "SAND") {
+    constructor(
+        address _childChainManagerProxy,
+        address sandAdmin,
+        address executionAdmin
+    ) SandBaseToken(sandAdmin, executionAdmin, address(0), 0) {
         require(_childChainManagerProxy != address(0), "Bad ChildChainManagerProxy address");
         childChainManagerProxy = _childChainManagerProxy;
     }
