@@ -1,11 +1,11 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.5;
+pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
 import "./interfaces/IOldCatalystRegistry.sol";
 import "./interfaces/IAssetAttributesRegistry.sol";
 import "./interfaces/ICollectionCatalystMigrations.sol";
-import "../common/Interfaces/IAssetToken.sol";
+import "../common/interfaces/IAssetToken.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
 
 /// @notice Contract performing migrations for collections, do not require owner approval

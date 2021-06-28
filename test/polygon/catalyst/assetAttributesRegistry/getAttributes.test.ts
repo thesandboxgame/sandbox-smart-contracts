@@ -1,13 +1,13 @@
 import {ethers} from 'hardhat';
 import {Address, Receipt} from 'hardhat-deploy/types';
 import {BigNumber, Contract, Event} from 'ethers';
-import {expect} from '../../chai-setup';
-import catalysts from '../../../data/catalysts';
-import gems from '../../../data/gems';
+import {expect} from '../../../chai-setup';
+import catalysts from '../../../../data/catalysts';
+import gems from '../../../../data/gems';
 import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
 import {setupAssetAttributesRegistry} from '../assetAttributesRegistry/fixtures';
 import {MintOptions} from '../assetMinter/fixtures';
-import {findEvents} from '../../utils';
+import {findEvents} from '../../../utils';
 import {transferSand} from '../utils';
 import {prepareGemEventData, getReceiptObject} from '../utils';
 

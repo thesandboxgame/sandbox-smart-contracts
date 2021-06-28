@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.5;
+pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
-import "./interfaces/IAttributes.sol";
+import "../common/interfaces/IAttributes.sol";
 
 contract DefaultAttributes is IAttributes {
     uint256 internal constant MAX_NUM_GEMS = 15;

@@ -5,7 +5,7 @@ import {
   getNamedAccounts,
 } from 'hardhat';
 import {BigNumber, Contract} from 'ethers';
-import {waitFor} from '../../utils';
+import {waitFor} from '../../../utils';
 import {transferSand} from '../utils';
 
 export const setupAssetUpgrader = deployments.createFixture(async () => {

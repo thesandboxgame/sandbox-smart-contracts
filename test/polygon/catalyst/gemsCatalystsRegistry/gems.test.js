@@ -4,8 +4,8 @@ const {
   getNamedAccounts,
   getUnnamedAccounts,
 } = require('hardhat');
-const {waitFor, recurseTests} = require('../../utils');
-const generateERC20Tests = require('../../erc20');
+const {waitFor, recurseTests} = require('../../../utils');
+const generateERC20Tests = require('../../../erc20');
 
 function testGem(gemName) {
   const erc20Tests = generateERC20Tests(

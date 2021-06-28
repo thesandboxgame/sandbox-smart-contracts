@@ -6,15 +6,15 @@ import {
 } from 'hardhat';
 import {Address} from 'hardhat-deploy/types';
 import {BigNumber, Contract} from 'ethers';
-import {expect} from '../../chai-setup';
-import catalysts from '../../../data/catalysts';
-import gems from '../../../data/gems';
+import {expect} from '../../../chai-setup';
+import catalysts from '../../../../data/catalysts';
+import gems from '../../../../data/gems';
 import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
 import {setupAssetAttributesRegistry} from '../assetAttributesRegistry/fixtures';
 import {setupAssetMinter, MintOptions, MintMultiOptions} from './fixtures';
 import {setupAssetUpgrader} from '../assetUpgrader/fixtures';
 import {mintCatalyst, mintGem, transferSand} from '../utils';
-import {expectEventWithArgs, findEvents, waitFor} from '../../utils';
+import {expectEventWithArgs, findEvents, waitFor} from '../../../utils';
 
 let mintOptions: MintOptions;
 let mintMultiOptions: MintMultiOptions;

@@ -4,8 +4,8 @@ const {
   getNamedAccounts,
   deployments,
 } = require('hardhat');
-const {waitFor, recurseTests} = require('../../utils');
-const generateERC20Tests = require('../../erc20');
+const {waitFor, recurseTests} = require('../../../utils');
+const generateERC20Tests = require('../../../erc20');
 
 function testCatalyst(catalystName) {
   const erc20Tests = generateERC20Tests(

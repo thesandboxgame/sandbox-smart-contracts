@@ -1,6 +1,6 @@
-import {expect} from '../../chai-setup';
+import {expect} from '../../../chai-setup';
 import {BigNumber, Contract} from 'ethers';
-import {waitFor} from '../../utils';
+import {waitFor} from '../../../utils';
 import {setupCollectionCatalystMigrations, setupUser} from './fixtures';
 describe('CollectionCatalystMigrations', function () {
   async function oldAssetMint(

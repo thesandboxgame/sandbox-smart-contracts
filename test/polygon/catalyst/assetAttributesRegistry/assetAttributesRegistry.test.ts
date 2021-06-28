@@ -5,13 +5,13 @@ import {
   deployments,
 } from 'hardhat';
 import {BigNumber, Event} from 'ethers';
-import {expect} from '../../chai-setup';
+import {expect} from '../../../chai-setup';
 import {setCatalyst, setupAssetAttributesRegistry} from './fixtures';
-import catalysts from '../../../data/catalysts';
-import gems from '../../../data/gems';
+import catalysts from '../../../../data/catalysts';
+import gems from '../../../../data/gems';
 import {Block} from '@ethersproject/providers';
 import {mintAsset} from '../utils';
-import {waitFor} from '../../utils';
+import {waitFor} from '../../../utils';
 describe('AssetAttributesRegistry', function () {
   function testSetCatalyst(
     record: {catalystId: number; exists: boolean; gemIds: []},

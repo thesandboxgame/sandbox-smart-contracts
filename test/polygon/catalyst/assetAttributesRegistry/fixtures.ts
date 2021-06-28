@@ -6,7 +6,7 @@ import {
 } from 'hardhat';
 import {BigNumber, Contract, Event} from 'ethers';
 import {Block} from '@ethersproject/providers';
-import {waitFor} from '../../utils';
+import {waitFor} from '../../../utils';
 import {transferSand, mintCatalyst, mintGem} from '../utils';
 
 export const setupAssetAttributesRegistry = deployments.createFixture(

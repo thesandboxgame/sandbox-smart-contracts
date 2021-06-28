@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.5;
+pragma solidity 0.8.2;
 
-import "../catalyst/AssetUpgrader.sol";
+import "../common/Base/AssetUpgrader.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetUpgraderFeeBurner is AssetUpgrader {

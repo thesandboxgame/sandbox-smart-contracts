@@ -5,7 +5,7 @@ import {
   getNamedAccounts,
 } from 'hardhat';
 import {Contract, BigNumber} from 'ethers';
-import {transferSand} from '../../catalyst/utils';
+import {transferSand} from '../catalyst/utils';
 
 export const setupSandPolygonDepositor = deployments.createFixture(async () => {
   await deployments.fixture('Sand');

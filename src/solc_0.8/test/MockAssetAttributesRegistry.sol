@@ -1,8 +1,8 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.5;
+pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
-import "../catalyst/AssetAttributesRegistry.sol";
+import "../common/Base/AssetAttributesRegistry.sol";
 
 /// @notice Allows setting the gems and catalysts of an asset
 contract MockAssetAttributesRegistry is AssetAttributesRegistry {

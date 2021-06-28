@@ -1,8 +1,8 @@
 import {BigNumber, Contract} from 'ethers';
 import {ethers, getNamedAccounts} from 'hardhat';
 import {Receipt} from 'hardhat-deploy/types';
-import {waitFor} from '../../scripts/utils/utils';
-import {findEvents} from '../utils';
+import {waitFor} from '../../../scripts/utils/utils';
+import {findEvents} from '../../utils';
 
 export async function mintAsset(
   creator: string,
