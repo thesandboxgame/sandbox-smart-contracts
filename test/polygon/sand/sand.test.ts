@@ -8,9 +8,9 @@ import {BigNumber} from '@ethersproject/bignumber';
 
 const abiCoder = new AbiCoder();
 
-describe('PolygonSand.sol', function() {
-  describe('Bridging: L1 <> L2', function() {
-    it('should be able to transfer SAND: L1 to L2', async function() {
+describe('PolygonSand.sol', function () {
+  describe('Bridging: L1 <> L2', function () {
+    it('should be able to transfer SAND: L1 to L2', async function () {
       const polygon = await setupPolygonSand();
       const mainnet = await setupMainnetSand();
 
