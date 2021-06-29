@@ -2,11 +2,11 @@ import {ethers} from 'hardhat';
 import {Address} from 'hardhat-deploy/types';
 import {splitSignature} from 'ethers/lib/utils';
 import {BigNumber, Contract, constants} from 'ethers';
-import {expect} from '../../chai-setup';
+import {expect} from '../../../chai-setup';
 import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
-import {expectEventWithArgs, waitFor} from '../../utils';
-import {setupPermit} from '../../permit/fixtures';
-import {data712} from '../../permit/data712';
+import {expectEventWithArgs, waitFor} from '../../../utils';
+import {setupPermit} from '../../../permit/fixtures';
+import {data712} from '../../../permit/data712';
 
 const zeroAddress = constants.AddressZero;
 const TEST_AMOUNT = BigNumber.from(10).mul('1000000000000000000');
