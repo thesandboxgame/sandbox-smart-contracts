@@ -21,7 +21,11 @@ contract FakeChildChainManager {
         PolygonAssetV2(polygonAsset).deposit(user, depositData);
     }
 
-    function callSandDeposit(address polygonSand, address user, bytes calldata depositData) external {
+    function callSandDeposit(
+        address polygonSand,
+        address user,
+        bytes calldata depositData
+    ) external {
         PolygonSand(polygonSand).deposit(user, depositData);
     }
 }

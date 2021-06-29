@@ -5,7 +5,7 @@ import {
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
-import { waitFor, setupUser } from '../utils';
+import {waitFor, setupUser} from '../utils';
 
 export const setupERC20BasicApproveExtension = deployments.createFixture(
   async function () {
@@ -42,7 +42,9 @@ export const setupERC20BasicApproveExtension = deployments.createFixture(
     } catch (e) {
       console.log(e);
     }
-    const sandBeneficiary = await setupUser(accounts.sandBeneficiary, { sandContract });
+    const sandBeneficiary = await setupUser(accounts.sandBeneficiary, {
+      sandContract,
+    });
 
     return {
       landContract,
@@ -56,7 +58,7 @@ export const setupERC20BasicApproveExtension = deployments.createFixture(
       sandBeneficiary,
       user0,
       user1,
-      predicate
+      predicate,
     };
   }
 );

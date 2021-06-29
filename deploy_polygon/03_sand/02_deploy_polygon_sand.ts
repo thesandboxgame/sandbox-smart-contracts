@@ -11,11 +11,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deploy('PolygonSand', {
     from: deployer,
-    args: [
-      CHILD_CHAIN_MANAGER.address,
-      deployer, 
-      deployer
-    ],
+    args: [CHILD_CHAIN_MANAGER.address, deployer, deployer],
     log: true,
   });
 };
