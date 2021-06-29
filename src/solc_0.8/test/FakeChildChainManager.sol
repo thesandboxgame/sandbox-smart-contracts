@@ -9,7 +9,6 @@ import "../polygon/child/sand/PolygonSand.sol";
 
 contract FakeChildChainManager {
     address public polygonAsset;
-    address public polygonSand;
 
     // solhint-disable-next-line no-empty-blocks
     constructor() {}
@@ -17,16 +16,12 @@ contract FakeChildChainManager {
     function setPolygonAsset(address _polygonAsset) external {
         polygonAsset = _polygonAsset;
     }
-    
-    function setPolygonSand(address _polygonSand) external {
-        polygonSand = _polygonSand;
-    }
 
     function callDeposit(address user, bytes calldata depositData) external {
         PolygonAssetV2(polygonAsset).deposit(user, depositData);
     }
 
-    function callSandDeposit(address user, bytes calldata depositData) external {
+    function callSandDeposit(address polygonSand, address user, bytes calldata depositData) external {
         PolygonSand(polygonSand).deposit(user, depositData);
     }
 }

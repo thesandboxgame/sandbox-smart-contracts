@@ -13,12 +13,6 @@ export const setupSand = deployments.createFixture(
     const unnamedAccounts = await getUnnamedAccounts();
     let users = await setupUsers(unnamedAccounts, { Sand });
     const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
-    // Set childChainManager Sand
-    try {
-      await waitFor(childChainManager.setPolygonSand(Sand.address));
-    } catch (e) {
-      console.log(e);
-    }
     return { Sand, users, childChainManager };
   }
 );
