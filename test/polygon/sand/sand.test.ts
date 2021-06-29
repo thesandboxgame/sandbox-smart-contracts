@@ -17,7 +17,7 @@ describe('PolygonSand.sol', () => {
       const transferAmount = ethers.utils.parseEther("20").toString();
 
       const mainnet_balance = BigNumber.from(await mainnet.sandContractAsUser0.balanceOf(mainnet.sandBeneficiary.address));
-      const polygon_balance = BigNumber.from(await polygon.users[0].Sand.balanceOf(polygon.users[0].address));
+      const polygon_balance = BigNumber.from(await polygon.users[0].Sand.balanceOf(mainnet.sandBeneficiary.address));
 
       // Grant approval to ERC20 predicate contract
       await waitFor(
@@ -27,17 +27,17 @@ describe('PolygonSand.sol', () => {
       // Lock tokens on ERC20 predicate contract
       const data = abiCoder.encode(["uint256"], [transferAmount])
       await waitFor(
-        mainnet.predicate.lockTokens(mainnet.sandBeneficiary.address, polygon.users[0].address, data)
+        mainnet.predicate.lockTokens(mainnet.sandBeneficiary.address, mainnet.sandBeneficiary.address, data)
       );
 
       // Emulate the ChildChainManager call to deposit
       await waitFor(
-        polygon.childChainManager.callSandDeposit(polygon.users[0].address, data)
+        polygon.childChainManager.callSandDeposit(polygon.Sand.address,mainnet.sandBeneficiary.address, data)
       );
 
       // Ensure balance is updated on Mainnet & Polygon
       const updated_mainnet_balance = BigNumber.from(await mainnet.sandContractAsUser0.balanceOf(mainnet.sandBeneficiary.address));
-      const updated_polygon_balance = BigNumber.from(await polygon.users[0].Sand.balanceOf(polygon.users[0].address));
+      const updated_polygon_balance = BigNumber.from(await polygon.users[0].Sand.balanceOf(mainnet.sandBeneficiary.address));
       expect(updated_mainnet_balance).to.be.equal(mainnet_balance.sub(transferAmount));
       expect(updated_polygon_balance).to.be.equal(polygon_balance.add(transferAmount));
     });
