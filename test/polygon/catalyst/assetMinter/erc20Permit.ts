@@ -1,4 +1,4 @@
-import {ethers} from 'hardhat';
+import {ethers, deployments} from 'hardhat';
 import {Address} from 'hardhat-deploy/types';
 import {splitSignature} from 'ethers/lib/utils';
 import {BigNumber, Contract, constants} from 'ethers';
@@ -21,6 +21,7 @@ describe('Gems & Catalysts: Permit', function () {
   let deadline: BigNumber;
 
   before(async function () {
+    await deployments.fixture('GemsCatalystsRegistry');
     ({
       luckGem,
       epicCatalyst,
@@ -46,7 +47,9 @@ describe('Gems & Catalysts: Permit', function () {
       permitData712,
     ]);
     const sig = splitSignature(flatSig);
-
+    console.log('gemOwner', gemOwner);
+    console.log('user3', user3);
+    console.log('permitData712', permitData712);
     const gemAllowanceBefore = await luckGem.allowance(gemOwner, user3);
     expect(gemAllowanceBefore).to.equal(0);
 
