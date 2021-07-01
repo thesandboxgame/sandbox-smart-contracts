@@ -2,16 +2,16 @@ import {ethers, deployments} from 'hardhat';
 import {Address} from 'hardhat-deploy/types';
 import {splitSignature} from 'ethers/lib/utils';
 import {BigNumber, Contract, constants} from 'ethers';
-import {expect} from '../../../chai-setup';
-import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
-import {expectEventWithArgs, waitFor} from '../../../utils';
-import {setupPermit} from '../../../permit/fixtures';
-import {data712} from '../../../permit/data712';
+import {expect} from '../chai-setup';
+import {setupGemsAndCatalysts} from '../polygon/catalyst/gemsCatalystsRegistry/fixtures';
+import {expectEventWithArgs, waitFor} from '../utils';
+import {setupPermit} from '../permit/fixtures';
+import {data712} from '../permit/data712';
 
 const zeroAddress = constants.AddressZero;
 const TEST_AMOUNT = BigNumber.from(10).mul('1000000000000000000');
 
-describe('Gems & Catalysts: Permit', function () {
+describe('Gems & Catalysts permit', function () {
   let luckGem: Contract;
   let epicCatalyst: Contract;
   let catalystOwner: Address;
@@ -47,9 +47,6 @@ describe('Gems & Catalysts: Permit', function () {
       permitData712,
     ]);
     const sig = splitSignature(flatSig);
-    console.log('gemOwner', gemOwner);
-    console.log('user3', user3);
-    console.log('permitData712', permitData712);
     const gemAllowanceBefore = await luckGem.allowance(gemOwner, user3);
     expect(gemAllowanceBefore).to.equal(0);
 
