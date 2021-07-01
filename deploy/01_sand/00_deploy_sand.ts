@@ -16,5 +16,3 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['Sand', 'Sand_deploy'];
-// @review - would this affect mainnet deployment?
-func.dependencies = ['ERC20_PREDICATE'];
