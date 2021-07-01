@@ -17,7 +17,6 @@ contract SandBaseToken is ERC20BaseToken, ERC20ExecuteExtension, ERC20BasicAppro
     {
         _admin = sandAdmin;
         _executionAdmin = executionAdmin;
-        // @review - allows testing SandBaseToken & PolygonSand individually, bad idea?
         if (beneficiary != address(0)) {
             uint256 initialSupply = amount * (1 ether);
             _mint(beneficiary, initialSupply);
