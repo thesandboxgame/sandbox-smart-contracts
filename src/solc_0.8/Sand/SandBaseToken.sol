@@ -12,9 +12,7 @@ contract SandBaseToken is ERC20BaseToken, ERC20ExecuteExtension, ERC20BasicAppro
         address executionAdmin,
         address beneficiary,
         uint256 amount
-    )
-        ERC20BaseToken("SAND", "SAND", sandAdmin, executionAdmin)
-    {
+    ) ERC20BaseToken("SAND", "SAND", sandAdmin, executionAdmin) {
         _admin = sandAdmin;
         _executionAdmin = executionAdmin;
         if (beneficiary != address(0)) {
