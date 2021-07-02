@@ -262,13 +262,13 @@ const config: HardhatUserConfig = {
       url: node_url('mumbai'),
       accounts: accounts('mumbai'),
       tags: ['testnet', 'L2'],
-      deploy: ['deploy_polygon']
+      deploy: ['deploy_polygon'],
     },
     polygon: {
       url: node_url('polygon'),
       accounts: accounts('polygon'),
       tags: ['mainnet', 'L2'],
-      deploy: ['deploy_polygon']
+      deploy: ['deploy_polygon'],
     },
   },
   paths: {
