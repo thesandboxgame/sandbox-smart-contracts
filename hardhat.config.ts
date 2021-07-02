@@ -77,6 +77,7 @@ const config: HardhatUserConfig = {
       mainnet: '0xe19ae8F9B36Ca43D12741288D0e311396140DF6F',
       rinkeby: '0x8A0e83DE499d7543CF486974a6196a35B5F573E7',
       goerli: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
+      mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
     }, // deploy contracts and make sure they are set up correctly
 
     sandAdmin: {
@@ -219,7 +220,7 @@ const config: HardhatUserConfig = {
      */
     hardhat: {
       accounts: accounts(process.env.HARDHAT_FORK),
-      tags: ['testnet'],
+      tags: ['testnet', 'L1', 'L2'],
       forking: process.env.HARDHAT_FORK
         ? {
             url: node_url(process.env.HARDHAT_FORK),
@@ -234,7 +235,7 @@ const config: HardhatUserConfig = {
     localhost: {
       url: 'http://localhost:8545',
       accounts: accounts(),
-      tags: ['testnet'],
+      tags: ['testnet', 'L1', 'L2'],
     },
     rinkeby_test: {
       url: node_url('rinkeby'),
@@ -256,6 +257,18 @@ const config: HardhatUserConfig = {
       url: node_url('mainnet'),
       accounts: accounts('mainnet'),
       tags: ['mainnet', 'L1'],
+    },
+    mumbai: {
+      url: node_url('mumbai'),
+      accounts: accounts('mumbai'),
+      tags: ['testnet', 'L2'],
+      deploy: ['deploy_polygon']
+    },
+    polygon: {
+      url: node_url('polygon'),
+      accounts: accounts('polygon'),
+      tags: ['mainnet', 'L2'],
+      deploy: ['deploy_polygon']
     },
   },
   paths: {
