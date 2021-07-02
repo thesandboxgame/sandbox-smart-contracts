@@ -19,9 +19,8 @@ contract PolygonSand is SandBaseToken, Ownable {
 
     /// @notice update the ChildChainManager Proxy address
     /// @param newChildChainManagerProxy address of the new childChainManagerProxy
-    function updateChildChainManager(address newChildChainManagerProxy) external {
+    function updateChildChainManager(address newChildChainManagerProxy) external onlyOwner {
         require(newChildChainManagerProxy != address(0), "Bad ChildChainManagerProxy address");
-        require(_msgSender() == owner(), "You're not allowed");
         childChainManagerProxy = newChildChainManagerProxy;
     }
 
