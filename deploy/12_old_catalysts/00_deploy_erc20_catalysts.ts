@@ -92,8 +92,8 @@ const func: DeployFunction = async function (hre) {
         maxGems: catalyst.maxGems,
       });
     }
-    const contract = await ethers.getContract("OldCatalysts");
-    const filter = contract.filters["SubToken"]();
+    const contract = await ethers.getContract('OldCatalysts');
+    const filter = contract.filters['SubToken']();
     const res = await contract.queryFilter(filter);
     if (res.length === 0) {
       return execute(
@@ -104,8 +104,8 @@ const func: DeployFunction = async function (hre) {
         data,
         []
       );
-    } else{ 
-      console.log("Catalyst already setup")
+    } else {
+      console.log('Catalyst already setup');
     }
   }
   await addCatalysts(catalysts);

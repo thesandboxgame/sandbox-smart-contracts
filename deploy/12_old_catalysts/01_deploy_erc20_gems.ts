@@ -38,13 +38,13 @@ const func: DeployFunction = async function (hre) {
       });
       gems.push(result.address);
     }
-    const contract = await ethers.getContract("OldGems");
-    const filter = contract.filters["SubToken"]();
+    const contract = await ethers.getContract('OldGems');
+    const filter = contract.filters['SubToken']();
     const res = await contract.queryFilter(filter);
     if (res.length === 0) {
       return execute('OldGems', {from: deployer}, 'addGems', gems);
     } else {
-      console.log("Gems already setup")
+      console.log('Gems already setup');
     }
   }
   await addGems(['Power', 'Defense', 'Speed', 'Magic', 'Luck']);

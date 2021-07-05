@@ -116,7 +116,11 @@ const func: DeployFunction = async function (hre) {
   await setSuperOperatorFor('OldCatalysts', catalystMinter.address);
 };
 export default func;
-func.tags = ['ObsoleteCatalystMinter', 'ObsoleteCatalystMinter_setup', 'ObsoleteCatalystMinter_deploy'];
+func.tags = [
+  'ObsoleteCatalystMinter',
+  'ObsoleteCatalystMinter_setup',
+  'ObsoleteCatalystMinter_deploy',
+];
 func.dependencies = [
   'Sand_deploy',
   'Asset_deploy',
