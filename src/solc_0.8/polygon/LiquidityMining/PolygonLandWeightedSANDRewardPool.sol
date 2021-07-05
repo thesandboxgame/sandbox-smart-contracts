@@ -15,12 +15,12 @@ contract PolygonLPTokenWrapper {
 
     uint256 internal constant DECIMALS_18 = 1000000000000000000;
 
-    IERC20 internal immutable _stakeToken;
+    IERC20 internal _stakeToken;
 
     uint256 private _totalSupply;
     mapping(address => uint256) private _balances;
 
-    constructor(IERC20 stakeToken) public {
+    constructor(IERC20 stakeToken) {
         _stakeToken = stakeToken;
     }
 
@@ -50,6 +50,7 @@ contract PolygonLPTokenWrapper {
 contract PolygonLandWeightedSANDRewardPool is PolygonLPTokenWrapper, IRewardDistributionRecipient {
     using SafeMath for uint256;
     using SafeMathWithRequire for uint256;
+    using SafeERC20 for IERC20;
 
     event RewardAdded(uint256 reward);
     event Staked(address indexed user, uint256 amount);
@@ -71,8 +72,8 @@ contract PolygonLandWeightedSANDRewardPool is PolygonLPTokenWrapper, IRewardDist
     uint256 internal constant NFT_CONSTANT_3 = 9000;
     uint256 internal constant ROOT3_FACTOR = 697;
 
-    IERC20 internal immutable _rewardToken;
-    IERC721 internal immutable _multiplierNFToken;
+    IERC20 internal _rewardToken;
+    IERC721 internal _multiplierNFToken;
 
     uint256 internal _totalContributions;
     mapping(address => uint256) internal _contributions;
@@ -82,7 +83,7 @@ contract PolygonLandWeightedSANDRewardPool is PolygonLPTokenWrapper, IRewardDist
         IERC20 rewardToken,
         IERC721 multiplierNFToken,
         uint256 rewardDuration
-    ) public PolygonLPTokenWrapper(stakeToken) {
+    ) PolygonLPTokenWrapper(stakeToken) {
         _rewardToken = rewardToken;
         _multiplierNFToken = multiplierNFToken;
         duration = rewardDuration;
@@ -193,5 +194,23 @@ contract PolygonLandWeightedSANDRewardPool is PolygonLPTokenWrapper, IRewardDist
         emit RewardAdded(reward);
     }
 
-    //function SetStakeLPToken(IERC20 newStakeLPToken) external only
+    // Add Setter functions for every external contract
+
+    function SetRewardLPToken(address newRewardToken) external onlyOwner {
+        require(newRewardToken != address(0), "Bad RewardToken address");
+
+        _rewardToken = IERC20(newRewardToken);
+    }
+
+    function SetStakeLPToken(address newStakeLPToken) external onlyOwner {
+        require(newStakeLPToken != address(0), "Bad StakeToken address");
+
+        _stakeToken = IERC20(newStakeLPToken);
+    }
+
+    function SetNFTMultiplierLPToken(address newNFTMultiplierLPToken) external onlyOwner {
+        require(newNFTMultiplierLPToken != address(0), "Bad NFTMultiplierToken address");
+
+        _multiplierNFToken = IERC721(newNFTMultiplierLPToken);
+    }
 }

@@ -12,10 +12,14 @@ contract LPTokenWrapper {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
-    IERC20 public uni = IERC20(0x3dd49f67E9d5Bc4C5E6634b3F70BfD9dc1b6BD74); // lpToken contract address, currently set to the SAND-ETH pool contract address
+    IERC20 internal _stakeToken;
 
     uint256 private _totalSupply;
     mapping(address => uint256) private _balances;
+
+    constructor(IERC20 stakeToken) {
+        _stakeToken = stakeToken;
+    }
 
     function totalSupply() public view returns (uint256) {
         return _totalSupply;
@@ -28,18 +32,20 @@ contract LPTokenWrapper {
     function stake(uint256 amount) public virtual {
         _totalSupply = _totalSupply.add(amount);
         _balances[msg.sender] = _balances[msg.sender].add(amount);
-        uni.safeTransferFrom(msg.sender, address(this), amount);
+        _stakeToken.safeTransferFrom(msg.sender, address(this), amount);
     }
 
     function withdraw(uint256 amount) public virtual {
         _totalSupply = _totalSupply.sub(amount);
         _balances[msg.sender] = _balances[msg.sender].sub(amount);
-        uni.safeTransfer(msg.sender, amount);
+        _stakeToken.safeTransfer(msg.sender, amount);
     }
 }
 
 contract SANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
-    IERC20 public sand = IERC20(0x3845badAde8e6dFF049820680d1F14bD3903a5d0); // Reward token: SAND
+    using SafeMath for uint256;
+    using SafeERC20 for IERC20;
+
     uint256 public constant DURATION = 30 days; // Reward period
 
     uint256 public periodFinish = 0;
@@ -53,6 +59,12 @@ contract SANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
     event Staked(address indexed user, uint256 amount);
     event Withdrawn(address indexed user, uint256 amount);
     event RewardPaid(address indexed user, uint256 reward);
+
+    IERC20 internal _rewardToken;
+
+    constructor(IERC20 stakeToken, IERC20 rewardToken) LPTokenWrapper(stakeToken) {
+        _rewardToken = rewardToken;
+    }
 
     modifier updateReward(address account) {
         rewardPerTokenStored = rewardPerToken();
@@ -107,7 +119,7 @@ contract SANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
         uint256 reward = earned(msg.sender);
         if (reward > 0) {
             rewards[msg.sender] = 0;
-            sand.safeTransfer(msg.sender, reward);
+            _rewardToken.safeTransfer(msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
         }
     }
@@ -123,5 +135,19 @@ contract SANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
         lastUpdateTime = block.timestamp;
         periodFinish = block.timestamp.add(DURATION);
         emit RewardAdded(reward);
+    }
+
+    // Add Setter functions for every external contract
+
+    function SetRewardLPToken(address newRewardToken) external onlyOwner {
+        require(newRewardToken != address(0), "Bad RewardToken address");
+
+        _rewardToken = IERC20(newRewardToken);
+    }
+
+    function SetStakeLPToken(address newStakeLPToken) external onlyOwner {
+        require(newStakeLPToken != address(0), "Bad StakeToken address");
+
+        _stakeToken = IERC20(newStakeLPToken);
     }
 }
