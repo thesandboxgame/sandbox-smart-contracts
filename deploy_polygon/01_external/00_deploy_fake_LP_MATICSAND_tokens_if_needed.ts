@@ -1,5 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -7,9 +8,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  let UNI_SAND_ETH = await deployments.getOrNull('FakeLPSandMatic');
-  if (!UNI_SAND_ETH) {
-    UNI_SAND_ETH = await deploy('FakeLPSandMatic', {
+  let FAKE_LP_MATIC_SAND = await deployments.getOrNull('FakeLPSandMatic');
+  if (!FAKE_LP_MATIC_SAND) {
+    FAKE_LP_MATIC_SAND = await deploy('FakeLPSandMatic', {
       from: deployer,
       log: true,
     });
@@ -17,3 +18,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['FakeLPSandMatic', 'L2'];
+func.skip = skipUnlessTest;

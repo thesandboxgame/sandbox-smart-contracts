@@ -9,10 +9,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const stakeToken = await deployments.get('FakeLPSandMatic');
   const land = await deployments.get('Land');
-  const sand = await deployments.get('Sand');
+  const sand = await deployments.get('SandBaseToken');
 
   const durationInSeconds = 30 * 24 * 60 * 60;
-  await deploy('LandWeightedSANDRewardPool', {
+  await deploy('PolygonLandWeightedSANDRewardPool', {
     from: deployer,
     log: true,
     args: [stakeToken.address, sand.address, land.address, durationInSeconds],
@@ -25,4 +25,4 @@ func.tags = [
   'PolygonLandWeightedSANDRewardPool_deploy',
   'L2',
 ];
-func.dependencies = ['Land_deploy', 'PolygonSand_deploy', 'FakeLPSandMatic']; // TODO what if no uni_sand is to be executed ?
+func.dependencies = ['Land_deploy', 'SandBaseToken_deploy', 'FakeLPSandMatic'];
