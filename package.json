@@ -41,6 +41,7 @@
     "eslint": "^7.7.0",
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-mocha": "^8.0.0",
+    "ethereum-block-by-date": "^1.4.0",
     "ethers": "^5.0.17",
     "fs-extra": "^9.0.1",
     "googleapis": "^66.0.0",
