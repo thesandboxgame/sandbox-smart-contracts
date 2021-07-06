@@ -11,7 +11,7 @@ interface Staker {
 }
 
 const theGraph = new TheGraph(
-  'https://api.thegraph.com/subgraphs/name/nicovrg/liquidity-mining'
+  'https://api.thegraph.com/subgraphs/name/pixowl/staking'
 );
 
 const queryString = `
@@ -38,7 +38,11 @@ async function main() {
     addList.push(staker.id);
   });
 
-  console.log({date: new Date(timestamp * 1000).toISOString(), blockNumber, numStakers: stakers.length});
+  console.log({
+    date: new Date(timestamp * 1000).toISOString(),
+    blockNumber,
+    numStakers: stakers.length,
+  });
   fs.writeFileSync('result.json', JSON.stringify(addList, null, '  '));
 }
 
