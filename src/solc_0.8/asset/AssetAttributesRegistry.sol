@@ -2,11 +2,10 @@
 pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
-import "../BaseWithStorage/WithAdmin.sol";
-import "../BaseWithStorage/WithMinter.sol";
-import "../BaseWithStorage/WithUpgrader.sol";
-import "../../catalyst/GemsCatalystsRegistry.sol";
-import "../interfaces/IAssetAttributesRegistry.sol";
+import "../catalyst/GemsCatalystsRegistry.sol";
+import "../common/BaseWithStorage/WithAdmin.sol";
+import "../common/BaseWithStorage/WithMinter.sol";
+import "../common/BaseWithStorage/WithUpgrader.sol";
 
 /// @notice Allows setting the gems and catalysts of an asset
 contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRegistry {

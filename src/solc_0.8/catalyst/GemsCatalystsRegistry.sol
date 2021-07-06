@@ -4,7 +4,6 @@ pragma experimental ABIEncoderV2;
 
 import "./Gem.sol";
 import "./Catalyst.sol";
-import "../common/interfaces/IAssetAttributesRegistry.sol";
 import "./interfaces/IGemsCatalystsRegistry.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
 import "../common/BaseWithStorage/WithMetaTransaction.sol";
