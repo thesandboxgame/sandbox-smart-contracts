@@ -2,9 +2,10 @@ import {getLandSales, LandSale} from '../../data/landSales/getLandSales';
 import deadlines from '../../data/landSales/deadlines';
 import fs from 'fs';
 import helpers, {SaltedSaleLandInfo} from '../../lib/merkleTreeHelper';
+import {skipUnlessTest} from '../../utils/network';
 const {calculateLandHash} = helpers;
 
-const LANDSALE_NAME = 'LandPreSale_6';
+const LANDSALE_NAME = 'LandPreSale_7';
 
 import {DeployFunction} from 'hardhat-deploy/types';
 
@@ -33,9 +34,9 @@ const func: DeployFunction = async function (hre) {
       throw new Error(`no deadline for sector ${sector}`);
     }
 
-    if (hre.network.name !== 'mainnet') {
+    if (hre.network.tags.testnet) {
       log('increasing deadline by 1 year');
-      deadline += 365 * 24 * 60 * 60; //add 1 year on rinkeby
+      deadline += 365 * 24 * 60 * 60; //add 1 year on testnets
     }
 
     const landSaleDeployment = await deploy(landSaleName, {
@@ -85,25 +86,6 @@ const func: DeployFunction = async function (hre) {
         )
       );
     }
-
-    // TODO remove that step for next Land Sale, use Sand.paidCall on the frontend
-    const isSandSuperOperator = await read(
-      'Sand',
-      'isSuperOperator',
-      landSaleDeployment.address
-    );
-    if (!isSandSuperOperator) {
-      const currentSandAdmin = await read('Sand', 'getAdmin');
-      await catchUnknownSigner(
-        execute(
-          'Sand',
-          {from: currentSandAdmin, log: true},
-          'setSuperOperator',
-          landSaleDeployment.address,
-          true
-        )
-      );
-    }
   }
 
   const landSales = await getLandSales(
@@ -120,3 +102,4 @@ const func: DeployFunction = async function (hre) {
 export default func;
 func.tags = [LANDSALE_NAME, LANDSALE_NAME + '_deploy'];
 func.dependencies = ['Sand_deploy', 'Land_deploy', 'Asset_deploy'];
+func.skip = skipUnlessTest;
