@@ -3,10 +3,10 @@
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/utils/Address.sol";
-import "../common/BaseWithStorage/ERC721BaseToken.sol";
-import "../common/BaseWithStorage/WithMetaTransaction.sol";
+import "../../../common/BaseWithStorage/ERC721BaseToken.sol";
+import "../../../common/BaseWithStorage/WithMetaTransaction.sol";
 
-contract PolygonLandBaseToken is
+contract PolygonLand is
     ERC721BaseToken /*, WithMetaTransaction*/
 {
     using Address for address;
@@ -139,8 +139,8 @@ contract PolygonLandBaseToken is
         address to,
         uint256 size,
         uint256 x,
-        uint256 y,
-        bytes calldata data
+        uint256 y /*,
+        bytes calldata data*/
     ) external {
         if (size == 1) {
             uint256 id1x1 = x + y * GRID_SIZE;
