@@ -11,7 +11,7 @@ interface Staker {
 }
 
 const theGraph = new TheGraph(
-  'https://api.thegraph.com/subgraphs/name/nicovrg/liquidity-mining'
+  'https://api.thegraph.com/subgraphs/name/pixowl/staking'
 );
 
 const queryString = `
@@ -26,7 +26,8 @@ async function main() {
   const date = args[0];
   if (!date) throw new Error('Date must be provided');
   const dater = new EthDater(ethers.provider);
-  const {block: blockNumber} = await dater.getDate(date);
+  // Get closest block before date
+  const {block: blockNumber, timestamp} = await dater.getDate(date, false);
   const addList: Array<string> = [];
 
   const stakers: Array<Staker> = await theGraph.query(queryString, 'stakers', {
@@ -37,7 +38,11 @@ async function main() {
     addList.push(staker.id);
   });
 
-  console.log({date, blockNumber, numStakers: stakers.length});
+  console.log({
+    date: new Date(timestamp * 1000).toISOString(),
+    blockNumber,
+    numStakers: stakers.length,
+  });
   fs.writeFileSync('result.json', JSON.stringify(addList, null, '  '));
 }
 
