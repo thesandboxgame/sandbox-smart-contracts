@@ -2,7 +2,7 @@
 pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
-import "../common/Base/AssetAttributesRegistry.sol";
+import "../asset/AssetAttributesRegistry.sol";
 
 /// @notice Allows setting the gems and catalysts of an asset
 contract MockAssetAttributesRegistry is AssetAttributesRegistry {

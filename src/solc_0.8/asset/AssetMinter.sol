@@ -3,12 +3,11 @@ pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts-0.8/utils/math/SafeMath.sol";
-import "../interfaces/IAssetAttributesRegistry.sol";
-import "../interfaces/IAssetMinter.sol";
-import "../../catalyst/GemsCatalystsRegistry.sol";
-import "../interfaces/IERC20Extended.sol";
-import "../interfaces/IAssetToken.sol";
-import "../BaseWithStorage/WithMetaTransaction.sol";
+import "../common/interfaces/IAssetMinter.sol";
+import "../catalyst/GemsCatalystsRegistry.sol";
+import "../common/interfaces//IERC20Extended.sol";
+import "../common/interfaces//IAssetToken.sol";
+import "../common/BaseWithStorage/WithMetaTransaction.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetMinter is WithMetaTransaction, IAssetMinter {
