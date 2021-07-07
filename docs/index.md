@@ -8,10 +8,10 @@ Everything you need to know about the smart contracts of The Sandbox Game.
 
 Learn more:
 
-* [Website](https://www.sandbox.game)
-* [Discord](https://discordapp.com/invite/vAe4zvY)
-* [Telegram](https://t.me/sandboxgame)
-* [Medium](https://medium.com/sandbox-game)
+- [Website](https://www.sandbox.game)
+- [Discord](https://discordapp.com/invite/vAe4zvY)
+- [Telegram](https://t.me/sandboxgame)
+- [Medium](https://medium.com/sandbox-game)
 
 # First steps
 
@@ -21,10 +21,10 @@ Are you new to The Sandbox Game ? This is the place to start!
 
 # How the documentation is organized
 
-* How-to guides
+- How-to guides
 
-* Topic guides)
+- Topic guides
 
-* Tutorials
+- Tutorials
 
-* Reference guides
+- Reference guides
