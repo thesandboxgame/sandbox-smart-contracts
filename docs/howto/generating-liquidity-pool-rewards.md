@@ -16,7 +16,13 @@ Here the inputs you need to get a snapshot of everyone who staked SAND up until 
 
 ## The Graph service
 
-The script located at `scripts/gathering/generateLPRewards.ts` is using the service [The Graph](https://thegraph.com) to query the blockchain. A [subgraph API](https://api.thegraph.com/subgraphs/name/pixowl/staking) has been deployed and used by the script to determine the rewards with a graphql query.
+The script located at `scripts/gathering/generateLPRewards.ts` is using the service [The Graph](https://thegraph.com) to query the blockchain. A subgraph API has been already generated at this address:
+
+```url
+https://api.thegraph.com/subgraphs/name/pixowl/staking
+```
+
+And it is used by the script to determine the rewards with a graphql query.
 
 ```sql
 query($blockNumber: Int!, $first: Int!, $lastId: ID!) {
