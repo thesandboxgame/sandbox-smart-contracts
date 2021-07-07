@@ -13,6 +13,7 @@ nav:
       - Fixing tests: howto/fixing-tests.md
       - Preparing a LAND sale: howto/preparing-land-sale.md
       - Preparing an ASSET giveaway: howto/preparing-asset-giveaway.md
+      - Generating liquidity pool rewards: howto/generating-liquidity-pool-rewards.md
   - Tutorials:
       - Developing your first feature: tutorials/developing-first-feature.md
   - Topics:

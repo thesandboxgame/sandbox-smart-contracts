@@ -13,12 +13,6 @@ Learn more:
 - [Telegram](https://t.me/sandboxgame)
 - [Medium](https://medium.com/sandbox-game)
 
-# First steps
-
-Are you new to The Sandbox Game ? This is the place to start!
-
-[Getting started](intro/index.md)
-
 # How the documentation is organized
 
 - How-to guides
@@ -28,3 +22,9 @@ Are you new to The Sandbox Game ? This is the place to start!
 - Tutorials
 
 - Reference guides
+
+# First steps
+
+Are you new to The Sandbox Game ? This is the place to start!
+
+[Getting started](intro/index.md)
