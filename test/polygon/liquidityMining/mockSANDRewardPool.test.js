@@ -74,9 +74,7 @@ describe('Polygon MockSANDRewardPool', function () {
     const rewardTokenAdmin = sandBeneficiary;
     const stakeTokenAdmin = deployer;
     const multiplierNFTokenAdmin = landAdmin;
-    console.log(sandBeneficiary);
-    let balance = await rewardToken.balanceOf(rewardTokenAdmin);
-    console.log(balance);
+
     // Get contract roles
     rewardPoolAsAdmin = rewardPool.connect(
       ethers.provider.getSigner(liquidityRewardAdmin)

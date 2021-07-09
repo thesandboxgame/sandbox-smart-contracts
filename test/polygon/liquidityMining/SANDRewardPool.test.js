@@ -14,7 +14,7 @@ const setupLandWeightedRewardPool = require('../../../setup/send_sand_to_Polygon
 
 const STAKE_TOKEN = 'FakeLPSandMatic';
 const REWARD_TOKEN = 'SandBaseToken';
-const MULTIPLIER_NFToken = 'MockLand'; // YTH TODO replace by land when the polygon version will be ready
+const MULTIPLIER_NFToken = 'Land';
 const POOL = 'PolygonLandWeightedSANDRewardPool';
 const REWARD_DURATION = 2592000; // 30 days in seconds
 const REWARD_AMOUNT = BigNumber.from(1500000).mul('1000000000000000000');
@@ -44,6 +44,8 @@ describe('Polygon ActualSANDRewardPool', function () {
   let multiplierNFToken;
   let multiplierNFTokenAsAdmin;
   let liquidityRewardAdmin;
+  let sandBeneficiary;
+  let rewardTokenAsAdmin;
 
   async function createFixture() {
     // TODO use deployments.createFixture()
@@ -55,13 +57,19 @@ describe('Polygon ActualSANDRewardPool', function () {
     ]);
     await setupLandWeightedRewardPool();
 
-    ({deployer, liquidityRewardAdmin, landAdmin} = await getNamedAccounts());
+    ({
+      deployer,
+      liquidityRewardAdmin,
+      landAdmin,
+      sandBeneficiary,
+    } = await getNamedAccounts());
 
     others = await getUnnamedAccounts();
 
     // Define token admins
     const stakeTokenAdmin = deployer;
     const multiplierNFTokenAdmin = landAdmin;
+    const rewardTokenAdmin = sandBeneficiary;
 
     // Contracts
     rewardToken = await ethers.getContract(REWARD_TOKEN);
@@ -81,7 +89,10 @@ describe('Polygon ActualSANDRewardPool', function () {
     multiplierNFTokenAsAdmin = multiplierNFToken.connect(
       ethers.provider.getSigner(multiplierNFTokenAdmin)
     );
-
+    rewardTokenAsAdmin = rewardToken.connect(
+      ethers.provider.getSigner(rewardTokenAdmin)
+    );
+    await rewardTokenAsAdmin.transfer(rewardPool.address, REWARD_AMOUNT);
     // Give user some stakeTokens
     await stakeTokenAsAdmin.transfer(others[0], STAKE_AMOUNT);
     await stakeTokenAsUser.approve(rewardPool.address, STAKE_AMOUNT);

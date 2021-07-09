@@ -16,5 +16,8 @@ contract PolygonLandWeightedSANDRewardPoolNFTTest is PolygonLandWeightedSANDRewa
             IERC721(nftContract),
             rewardDuration
         )
-    {}
+    // solhint-disable-next-line no-empty-blocks
+    {
+
+    }
 }
