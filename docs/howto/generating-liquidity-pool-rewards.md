@@ -2,7 +2,7 @@
 description: Generating liquidity pool rewards
 ---
 
-# How to generate liquidity pool rewards
+# How to generate liquidity pool rewards ?
 
 When using [uniswap](https://uniswap.org), you can stake your SAND in liquidity pool to earn rewards tokens.
 
