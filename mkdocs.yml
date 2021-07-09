@@ -27,3 +27,5 @@ markdown_extensions:
   - pymdownx.superfences
   - toc:
       permalink: '#'
+  - plantuml_markdown:
+      server: http://www.plantuml.com/plantuml

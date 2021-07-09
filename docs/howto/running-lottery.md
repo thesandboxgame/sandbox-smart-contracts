@@ -71,3 +71,12 @@ The winners are displayed in a json containing the list of adresses
       "0xc212Fc9E1A61b8400E0323FDe83ed1Fe359e3312"
     ]
     ```
+
+## How the script works
+
+The script is divided in 4 main modules.
+
+- main() deal with the arguments, call the other modules
+- getAddressFromGraph() query the sandbox subgraph to get the 1. addresses that owned a land at the time of the snapshot and 2. the number of lands they had
+- getAddressFromBack() retrieve from the json the list of address that the back provides us and perform verification (validity and ens resolution)
+- lottery() will randomly select winners, weighting is function of how many lands each user owned at the time of the snapshot
