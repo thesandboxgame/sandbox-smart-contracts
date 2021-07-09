@@ -9,13 +9,13 @@ const {expect} = require('../chai-setup');
 const {mine} = require('../utils');
 const {replicateEarned, replicateRewardPerToken} = require('./_testHelper');
 const {contribution} = require('./contributionEquation.test');
-const setupLandWeightedRewardPool = require('../../setup/send_sand_to_land_weighted_reward_pool')
+const setupLandWeightedRewardPool = require('../../setup/send_sand_to_Polygon_land_weighted_reward_pool')
   .default;
 
-const STAKE_TOKEN = 'UNI_SAND_ETH';
-const REWARD_TOKEN = 'Sand';
+const STAKE_TOKEN = '';
+const REWARD_TOKEN = 'BaseSandToken';
 const MULTIPLIER_NFToken = 'Land';
-const POOL = 'LandWeightedSANDRewardPool';
+const POOL = 'PolygonLandWeightedSANDRewardPool';
 const REWARD_DURATION = 2592000; // 30 days in seconds
 const REWARD_AMOUNT = BigNumber.from(1500000).mul('1000000000000000000');
 const ACTUAL_REWARD_AMOUNT = REWARD_AMOUNT.div(REWARD_DURATION).mul(

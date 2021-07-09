@@ -9,12 +9,12 @@ const {expect} = require('../../chai-setup');
 const {mine} = require('../../utils');
 const {replicateEarned, replicateRewardPerToken} = require('./_testHelper');
 const {contribution} = require('./contributionEquation.test');
-const setupLandWeightedRewardPool = require('../../../setup/send_sand_to_land_weighted_reward_pool')
+const setupLandWeightedRewardPool = require('../../../setup/send_sand_to_Polygon_land_weighted_reward_pool')
   .default;
 
-const STAKE_TOKEN = 'UNI_SAND_ETH';
-const REWARD_TOKEN = 'Sand';
-const MULTIPLIER_NFToken = 'Land';
+const STAKE_TOKEN = 'FakeLPSandMatic';
+const REWARD_TOKEN = 'SandBaseToken';
+const MULTIPLIER_NFToken = 'MockLand'; // YTH TODO replace by land when the polygon version will be ready
 const POOL = 'PolygonLandWeightedSANDRewardPool';
 const REWARD_DURATION = 2592000; // 30 days in seconds
 const REWARD_AMOUNT = BigNumber.from(1500000).mul('1000000000000000000');
@@ -48,9 +48,9 @@ describe('Polygon ActualSANDRewardPool', function () {
   async function createFixture() {
     // TODO use deployments.createFixture()
     await deployments.fixture([
-      'LandWeightedSANDRewardPool',
-      'UNI_SAND_ETH',
-      'Sand',
+      'PolygonLandWeightedSANDRewardPool',
+      'FakeLPSandMatic',
+      'SandBaseToken',
       'Land',
     ]);
     await setupLandWeightedRewardPool();
