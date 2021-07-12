@@ -6,15 +6,15 @@ import "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "../../../common/BaseWithStorage/ERC721BaseToken.sol";
 import "../../../common/BaseWithStorage/WithMetaTransaction.sol";
 
-contract PolygonLand is
+contract PolygonLandBaseToken is
     ERC721BaseToken /*, WithMetaTransaction*/
 {
     using Address for address;
-    //address metaTransactionContract, address admin
-    /*constructor(address metaTransactionContract, address admin)
+
+    /* constructor(address metaTransactionContract, address admin)
         public
-        ERC721BaseToken() /*(metaTransactionContract, admin)*/
-    /*{}*/
+        ERC721BaseToken(metaTransactionContract, admin)
+    {}*/
 
     uint256 internal constant GRID_SIZE = 408;
 
@@ -92,8 +92,8 @@ contract PolygonLand is
         address to,
         uint256[] calldata sizes,
         uint256[] calldata xs,
-        uint256[] calldata ys,
-        bytes calldata data
+        uint256[] calldata ys /*,
+        bytes calldata data*/
     ) external {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
@@ -128,7 +128,13 @@ contract PolygonLand is
                 }
             }
             require(
-                _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, data),
+                _checkOnERC721BatchReceived(
+                    metaTx ? from : msg.sender,
+                    from,
+                    to,
+                    ids,
+                    "" /*data*/
+                ),
                 "erc721 batch transfer rejected by to"
             );
         }
@@ -139,21 +145,22 @@ contract PolygonLand is
         address to,
         uint256 size,
         uint256 x,
-        uint256 y /*,
-        bytes calldata data*/
+        uint256 y //, //bytes calldata data
     ) external {
-        if (size == 1) {
-            uint256 id1x1 = x + y * GRID_SIZE;
-            address owner = _ownerOf(id1x1);
-            require(owner != address(0), "token does not exist");
-            require(owner == from, "not owner in _transferQuad");
-            _owners[id1x1] = uint256(sha256(abi.encodePacked(to))); //uint256(to);
-        } else {
-            _regroup(from, to, size, x, y);
+        require(from != address(0), "from is zero address");
+        require(to != address(0), "can't send to zero address");
+        bool metaTx = msg.sender != from; /*&& _metaTransactionContracts[msg.sender]*/
+        if (msg.sender != from && !metaTx) {
+            require(
+                _superOperators[msg.sender] || _operatorsForAll[from][msg.sender],
+                "not authorized to transferQuad"
+            );
         }
-        for (uint256 i = 0; i < size * size; i++) {
-            emit Transfer(from, to, _idInPath(i, size, x, y));
-        }
+        _transferQuad(from, to, size, x, y);
+        _numNFTPerAddress[from] -= size * size;
+        _numNFTPerAddress[to] += size * size;
+
+        _checkBatchReceiverAcceptQuad(metaTx ? from : msg.sender, from, to, size, x, y, "");
     }
 
     function _transferQuad(
@@ -374,5 +381,23 @@ contract PolygonLand is
             return true;
         }
         return false;
+    }
+
+    function _checkBatchReceiverAcceptQuad(
+        address operator,
+        address from,
+        address to,
+        uint256 size,
+        uint256 x,
+        uint256 y,
+        bytes memory data
+    ) internal {
+        if (to.isContract() && _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER)) {
+            uint256[] memory ids = new uint256[](size * size);
+            for (uint256 i = 0; i < size * size; i++) {
+                ids[i] = _idInPath(i, size, x, y);
+            }
+            require(_checkOnERC721BatchReceived(operator, from, to, ids, data), "erc721 batch transfer rejected by to");
+        }
     }
 }
