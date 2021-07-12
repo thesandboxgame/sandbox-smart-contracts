@@ -9,6 +9,7 @@ const {expect} = require('../../chai-setup');
 const {mine} = require('../../utils');
 const {replicateEarned, replicateRewardPerToken} = require('./_testHelper');
 const {contribution} = require('./contributionEquation.test');
+const {constants} = require('ethers');
 const setupLandWeightedRewardPool = require('../../../setup/send_sand_to_Polygon_land_weighted_reward_pool')
   .default;
 
@@ -25,6 +26,7 @@ const ACTUAL_REWARD_AMOUNT = REWARD_AMOUNT.div(REWARD_DURATION).mul(
 const NEW_REWARD_AMOUNT = BigNumber.from(2000000).mul('1000000000000000000');
 const STAKE_AMOUNT = BigNumber.from(10000).mul('1000000000000000000');
 const LESS_PRECISE_STAKE_AMOUNT = BigNumber.from(7).mul('1000000000000000000');
+const zeroAddress = constants.AddressZero;
 
 const ONE_DAY = 86400;
 
@@ -46,6 +48,7 @@ describe('Polygon ActualSANDRewardPool', function () {
   let liquidityRewardAdmin;
   let sandBeneficiary;
   let rewardTokenAsAdmin;
+  let rewardPoolAsOwner;
 
   async function createFixture() {
     // TODO use deployments.createFixture()
@@ -82,6 +85,7 @@ describe('Polygon ActualSANDRewardPool', function () {
       ethers.provider.getSigner(liquidityRewardAdmin)
     );
     rewardPoolAsUser = rewardPool.connect(ethers.provider.getSigner(others[0]));
+    rewardPoolAsOwner = rewardPool.connect(ethers.provider.getSigner(deployer));
     stakeTokenAsAdmin = stakeToken.connect(
       ethers.provider.getSigner(stakeTokenAdmin)
     );
@@ -768,5 +772,27 @@ describe('Polygon ActualSANDRewardPool', function () {
       (event) => event.event === 'RewardPaid'
     );
     expect(eventsMatchingRewardPaid.length).to.equal(1);
+  });
+
+  it('Change externals contracts', async function () {
+    await createFixture();
+
+    // admin can change LPtoken contract
+    await expect(
+      rewardPoolAsOwner.SetRewardToken(zeroAddress)
+    ).to.be.revertedWith('Bad RewardToken address');
+
+    // use deployer.address as a not contract address
+    await expect(rewardPoolAsOwner.SetRewardToken(deployer)).to.be.revertedWith(
+      'Bad RewardToken address'
+    );
+
+    // owner only can change external contract
+    await expect(rewardPoolAsAdmin.SetNFTMultiplierToken(rewardToken.address))
+      .to.be.reverted;
+
+    // Change address with another contract in order to see if not reverted
+    await expect(rewardPoolAsOwner.SetNFTMultiplierToken(rewardToken.address))
+      .not.to.be.reverted;
   });
 });

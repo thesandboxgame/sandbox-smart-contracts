@@ -51,6 +51,7 @@ contract PolygonLandWeightedSANDRewardPool is PolygonLPTokenWrapper, IRewardDist
     using SafeMath for uint256;
     using SafeMathWithRequire for uint256;
     using SafeERC20 for IERC20;
+    using Address for address;
 
     event RewardAdded(uint256 reward);
     event Staked(address indexed user, uint256 amount);
@@ -196,21 +197,21 @@ contract PolygonLandWeightedSANDRewardPool is PolygonLPTokenWrapper, IRewardDist
 
     // Add Setter functions for every external contract
 
-    function SetRewardLPToken(address newRewardToken) external onlyOwner {
-        require(newRewardToken != address(0), "Bad RewardToken address");
+    function SetRewardToken(address newRewardToken) external onlyOwner {
+        require(newRewardToken.isContract(), "Bad RewardToken address");
 
         _rewardToken = IERC20(newRewardToken);
     }
 
     function SetStakeLPToken(address newStakeLPToken) external onlyOwner {
-        require(newStakeLPToken != address(0), "Bad StakeToken address");
+        require(newStakeLPToken.isContract(), "Bad StakeToken address");
 
         _stakeToken = IERC20(newStakeLPToken);
     }
 
-    function SetNFTMultiplierLPToken(address newNFTMultiplierLPToken) external onlyOwner {
-        require(newNFTMultiplierLPToken != address(0), "Bad NFTMultiplierToken address");
+    function SetNFTMultiplierToken(address newNFTMultiplierToken) external onlyOwner {
+        require(newNFTMultiplierToken.isContract(), "Bad NFTMultiplierToken address");
 
-        _multiplierNFToken = IERC721(newNFTMultiplierLPToken);
+        _multiplierNFToken = IERC721(newNFTMultiplierToken);
     }
 }

@@ -15,7 +15,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     skipIfAlreadyDeployed: true,
   });
-  console.log(sandBeneficiary);
 };
 export default func;
 func.tags = ['SandBaseToken', 'SandBaseToken_deploy'];
