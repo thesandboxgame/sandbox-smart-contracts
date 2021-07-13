@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "./IERC721.sol";
+import "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 
 interface IERC721Extended is IERC721 {
     function approveFor(
