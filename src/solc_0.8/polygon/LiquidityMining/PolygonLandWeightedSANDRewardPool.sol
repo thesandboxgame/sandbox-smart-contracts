@@ -4,7 +4,9 @@ pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts-0.8/utils/math/Math.sol";
+import "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
+
 import "../../common/Libraries/SafeMathWithRequire.sol";
 import "./IRewardDistributionRecipient.sol";
 import "../../common/interfaces/IERC721.sol";
@@ -47,7 +49,7 @@ contract PolygonLPTokenWrapper {
 
 ///@notice Reward Pool based on unipool contract : https://github.com/Synthetixio/Unipool/blob/master/contracts/Unipool.sol
 //with the addition of NFT multiplier reward
-contract PolygonLandWeightedSANDRewardPool is PolygonLPTokenWrapper, IRewardDistributionRecipient {
+contract PolygonLandWeightedSANDRewardPool is PolygonLPTokenWrapper, IRewardDistributionRecipient, ReentrancyGuard {
     using SafeMath for uint256;
     using SafeMathWithRequire for uint256;
     using SafeERC20 for IERC20;
@@ -144,7 +146,7 @@ contract PolygonLandWeightedSANDRewardPool is PolygonLPTokenWrapper, IRewardDist
         return amountStaked.add(amountStaked.mul(nftContrib).div(DECIMALS_9));
     }
 
-    function stake(uint256 amount) public override updateReward(msg.sender) {
+    function stake(uint256 amount) public override nonReentrant updateReward(msg.sender) {
         require(amount > 0, "Cannot stake 0");
         uint256 contribution = computeContribution(amount, _multiplierNFToken.balanceOf(msg.sender));
         _totalContributions = _totalContributions.add(contribution);
@@ -153,7 +155,7 @@ contract PolygonLandWeightedSANDRewardPool is PolygonLPTokenWrapper, IRewardDist
         emit Staked(msg.sender, amount);
     }
 
-    function withdraw(uint256 amount) public override updateReward(msg.sender) {
+    function withdraw(uint256 amount) public override nonReentrant updateReward(msg.sender) {
         require(amount > 0, "Cannot withdraw 0");
         uint256 balance = balanceOf(msg.sender);
         uint256 ratio = amount.mul(DECIMALS_18).div(balance);
@@ -170,7 +172,7 @@ contract PolygonLandWeightedSANDRewardPool is PolygonLPTokenWrapper, IRewardDist
         getReward();
     }
 
-    function getReward() public updateReward(msg.sender) {
+    function getReward() public nonReentrant updateReward(msg.sender) {
         uint256 reward = rewards[msg.sender];
         if (reward > 0) {
             rewards[msg.sender] = 0;

@@ -777,17 +777,16 @@ describe('Polygon ActualSANDRewardPool', function () {
   it('Change externals contracts', async function () {
     await createFixture();
 
-    // admin can change LPtoken contract
+    // owner can change LPtoken contract
     await expect(
       rewardPoolAsOwner.SetRewardToken(zeroAddress)
     ).to.be.revertedWith('Bad RewardToken address');
 
-    // use deployer.address as a not contract address
+    // use deployer address as not contract address
     await expect(rewardPoolAsOwner.SetRewardToken(deployer)).to.be.revertedWith(
       'Bad RewardToken address'
     );
 
-    // owner only can change external contract
     await expect(rewardPoolAsAdmin.SetNFTMultiplierToken(rewardToken.address))
       .to.be.reverted;
 
