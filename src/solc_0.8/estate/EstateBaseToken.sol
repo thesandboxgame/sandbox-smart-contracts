@@ -73,8 +73,8 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     ) external returns (uint256) {
         _check_authorized(from, ADD);
         (uint256 estateId, uint256 storageId) = _mintEstate(from, to, _nextId++, 1, true);
-        _addLands(from, estateId, creation.ids, creation.junctions, true);
-        _addGames(from, estateId, creation.gamesToAdd);
+        _addLands(from, storageId, creation.ids, creation.junctions, true);
+        _addGames(from, storageId, creation.gamesToAdd);
         _metaData[storageId] = creation.uri;
         emit EstateTokenUpdated(0, estateId, creation);
         return estateId;
@@ -99,9 +99,9 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         if (update.ids.length != 0) {
             _check_authorized(from, ADD);
         }
-        _addLands(from, estateId, update.ids, update.junctions, false);
-        _removeGames(to, estateId, update.gamesToRemove);
-        _addGames(from, estateId, update.gamesToAdd);
+        _addLands(from, storageId, update.ids, update.junctions, false);
+        _removeGames(to, storageId, update.gamesToRemove);
+        _addGames(from, storageId, update.gamesToAdd);
         _metaData[storageId] = update.uri;
         uint256 newId = _incrementTokenVersion(from, estateId);
         emit EstateTokenUpdated(estateId, newId, update);
@@ -183,7 +183,10 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         // need to validate lands, pass land ids ?
     }
 
-    // solhint-enable no-unused-vars
+    function getEstateData(uint256 estateId) external view returns (EstateData memory) {
+        uint256 storageId = _storageId(estateId);
+        return estates[storageId];
+    }
 
     /// @notice Return the name of the token contract.
     /// @return The name of the token contract.
@@ -210,28 +213,28 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
 
     function _addGames(
         address from,
-        uint256 estateId,
+        uint256 storageId,
         uint256[] memory gamesToAdd
     ) internal {
         _gameToken.batchTransferFrom(from, address(this), gamesToAdd, "");
         // no need to de-duplicate as gameId is unique
         for (uint256 i = 0; i < gamesToAdd.length; i++) {
             require(gamesToAdd[i] != 0);
-            estates[estateId].gameIds.push(gamesToAdd[i]);
+            estates[storageId].gameIds.push(gamesToAdd[i]);
         }
     }
 
     function _removeGames(
         address to,
-        uint256 estateId,
+        uint256 storageId,
         uint256[] memory gamesToRemove
     ) internal {
         _gameToken.batchTransferFrom(address(this), to, gamesToRemove, "");
-        uint256 len = estates[estateId].gameIds.length;
+        uint256 len = estates[storageId].gameIds.length;
         for (uint256 i = 0; i < gamesToRemove.length; i++) {
             for (uint256 j = 0; j < len; j++) {
-                if (gamesToRemove[i] == estates[estateId].gameIds[j]) {
-                    estates[estateId].gameIds[j] = 0;
+                if (gamesToRemove[i] == estates[storageId].gameIds[j]) {
+                    estates[storageId].gameIds[j] = 0;
                 }
             }
         }
@@ -239,7 +242,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
 
     function _addLands(
         address sender,
-        uint256 estateId,
+        uint256 storageId,
         uint256[] memory ids,
         uint256[] memory junctions,
         bool justCreated
@@ -252,11 +255,11 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
             list[i] = _encode(x, y, 1);
         }
         // solhint-disable-next-line use-forbidden-name
-        uint256 l = estates[estateId].landIds.length;
+        uint256 l = estates[storageId].landIds.length;
         uint16 lastX = 409;
         uint16 lastY = 409;
         if (!justCreated) {
-            uint24 d = estates[estateId].landIds[l - 1];
+            uint24 d = estates[storageId].landIds[l - 1];
             lastX = uint16(d % GRID_SIZE);
             lastY = uint16(d % GRID_SIZE);
         }
@@ -272,7 +275,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
                     require(index - l < j, "junctions need to refers to previously accepted land");
                     data = list[index - l];
                 } else {
-                    data = estates[estateId].landIds[j];
+                    data = estates[storageId].landIds[j];
                 }
                 (uint16 jx, uint16 jy, uint8 jsize) = _decode(data);
                 if (jsize == 1) {
@@ -285,10 +288,10 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
             lastY = y;
         }
         if (justCreated) {
-            estates[estateId].landIds = list;
+            estates[storageId].landIds = list;
         } else {
             for (uint256 i = 0; i < list.length; i++) {
-                estates[estateId].landIds.push(list[i]);
+                estates[storageId].landIds.push(list[i]);
             }
         }
     }
@@ -396,7 +399,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
             strgId = _storageId(estateId);
             require(_owners[strgId] == 0, "STORAGE_ID_REUSE_FORBIDDEN");
         } else {
-            idVersion = version;
             estateId = _generateTokenId(from, subId, _chainIndex, version);
             strgId = _storageId(estateId);
         }
