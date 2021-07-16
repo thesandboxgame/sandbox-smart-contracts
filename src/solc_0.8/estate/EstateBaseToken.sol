@@ -4,8 +4,7 @@ pragma solidity 0.8.2;
 
 import "../common/BaseWithStorage/ImmutableERC721.sol";
 import "../common/interfaces/ILandToken.sol";
-import "../common/interfaces/IGameToken.sol";
-// import "../Game/GameBaseToken.sol";
+import "../Game/GameBaseToken.sol";
 import "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
@@ -21,30 +20,24 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
 
     uint64 internal _nextId; // max uint64 = 18,446,744,073,709,551,615
     mapping(uint256 => bytes32) internal _metaData;
-    // @review should we use:
-    // mapping(uint256 => mapping(uint256 => bool)) _landsInEstate;
-    // and let backend handle enumeration like in GameToken?
-    // but... This might not work for checking adjacency
-    // @todo add view getters for these
-    mapping(uint256 => uint24[]) internal _landsInEstate;
-    mapping(uint256 => uint256[]) internal _gamesInEstate;
-
-    // @todo an estate can contain multiple games linked to adjacent lands in the estate.
-    // Build a data structure to record this. As in GameToken, might be simplest to perform enumeration off-chain for gametokens...ex: map estateId=>gameId=>lands associated with game(must be part of estate already)
-    // mapping(uint256 => mapping(uint256 => uint256[])) internal _gamesInEstate;
+    mapping(uint256 => EstateData) internal estates;
 
     LandToken internal _land;
-    IGameToken internal _gameToken;
+    GameBaseToken internal _gameToken;
     address internal _minter;
     // @review needed?
     address internal _breaker;
 
+    struct EstateData {
+        uint256[] gameIds;
+        uint24[] landIds;
+    }
     /// @param ids LAND tokenIds added, Games added, Games removed, uri
     /// @param junctions
     /// @param gamesToAdd Games added
     /// @param gamesToRemove Games removed
     /// @param uri ipfs hash (without the prefix, assume cidv1 folder)
-    struct EstateData {
+    struct EstateCRUDData {
         uint256[] ids;
         uint256[] junctions;
         uint256[] gamesToAdd;
@@ -56,7 +49,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @param oldId The id of the previous erc721 ESTATE token.
     /// @param newId The id of the newly minted token.
     /// @param update The changes made to the Estate.
-    event EstateTokenUpdated(uint256 indexed oldId, uint256 indexed newId, EstateData update);
+    event EstateTokenUpdated(uint256 indexed oldId, uint256 indexed newId, EstateCRUDData update);
 
     function initV1(
         address trustedForwarder,
@@ -76,7 +69,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     function createEstate(
         address from,
         address to,
-        EstateData calldata creation
+        EstateCRUDData calldata creation
     ) external returns (uint256) {
         _check_authorized(from, ADD);
         (uint256 estateId, uint256 storageId) = _mintEstate(from, to, _nextId++, 1, true);
@@ -99,7 +92,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         address from,
         address to,
         uint256 estateId,
-        EstateData memory update
+        EstateCRUDData memory update
     ) external returns (uint256) {
         _check_hasOwnerRights(from, estateId);
         uint256 storageId = _storageId(estateId);
@@ -128,7 +121,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         address from,
         uint256 estateId,
         uint256[] calldata ids,
-        EstateData memory rebuild
+        EstateCRUDData memory rebuild
     ) external returns (uint256) {
         _check_hasOwnerRights(from, estateId);
         _check_authorized(from, BREAK);
@@ -224,7 +217,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         // no need to de-duplicate as gameId is unique
         for (uint256 i = 0; i < gamesToAdd.length; i++) {
             require(gamesToAdd[i] != 0);
-            _gamesInEstate[estateId].push(gamesToAdd[i]);
+            estates[estateId].gameIds.push(gamesToAdd[i]);
         }
     }
 
@@ -234,10 +227,11 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         uint256[] memory gamesToRemove
     ) internal {
         _gameToken.batchTransferFrom(address(this), to, gamesToRemove, "");
+        uint256 len = estates[estateId].gameIds.length;
         for (uint256 i = 0; i < gamesToRemove.length; i++) {
-            for (uint256 j = 0; j < _gamesInEstate[estateId].length; j++) {
-                if (gamesToRemove[i] == _gamesInEstate[estateId][j]) {
-                    _gamesInEstate[estateId][j] = 0;
+            for (uint256 j = 0; j < len; j++) {
+                if (gamesToRemove[i] == estates[estateId].gameIds[j]) {
+                    estates[estateId].gameIds[j] = 0;
                 }
             }
         }
@@ -258,11 +252,11 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
             list[i] = _encode(x, y, 1);
         }
         // solhint-disable-next-line use-forbidden-name
-        uint256 l = _landsInEstate[estateId].length;
+        uint256 l = estates[estateId].landIds.length;
         uint16 lastX = 409;
         uint16 lastY = 409;
         if (!justCreated) {
-            uint24 d = _landsInEstate[estateId][l - 1];
+            uint24 d = estates[estateId].landIds[l - 1];
             lastX = uint16(d % GRID_SIZE);
             lastY = uint16(d % GRID_SIZE);
         }
@@ -278,7 +272,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
                     require(index - l < j, "junctions need to refers to previously accepted land");
                     data = list[index - l];
                 } else {
-                    data = _landsInEstate[estateId][j];
+                    data = estates[estateId].landIds[j];
                 }
                 (uint16 jx, uint16 jy, uint8 jsize) = _decode(data);
                 if (jsize == 1) {
@@ -291,10 +285,10 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
             lastY = y;
         }
         if (justCreated) {
-            _landsInEstate[estateId] = list;
+            estates[estateId].landIds = list;
         } else {
             for (uint256 i = 0; i < list.length; i++) {
-                _landsInEstate[estateId].push(list[i]);
+                estates[estateId].landIds.push(list[i]);
             }
         }
     }

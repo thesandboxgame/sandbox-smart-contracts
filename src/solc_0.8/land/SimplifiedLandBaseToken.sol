@@ -25,8 +25,8 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
     // It is likeky that existing L1 estates(with quads) will be migrated to L2. make it easy for them to be reminted on L2.
     /// @notice Mint one or more lands
     /// @param to The recipient of the new quad
-    /// @param x An array of x coordinates for the top left corner of lands to mint
-    /// @param y An array of y coordinates for the top left corner of lands to mint
+    /// @param xCoordinates An array of x coordinates for the top left corner of lands to mint
+    /// @param yCoordinates An array of y coordinates for the top left corner of lands to mint
     /// @param landData extra data to pass to the transfer
     function _mintLand(
         address to,

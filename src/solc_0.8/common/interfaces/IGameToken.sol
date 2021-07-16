@@ -84,11 +84,4 @@ interface IGameToken {
         uint256[] calldata, /*values*/
         bytes calldata /*data*/
     ) external view returns (bytes4);
-
-    function batchTransferFrom(
-        address from,
-        address to,
-        uint256[] calldata ids,
-        bytes calldata data
-    ) external;
 }
