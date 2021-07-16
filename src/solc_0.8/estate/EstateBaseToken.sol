@@ -4,6 +4,8 @@ pragma solidity 0.8.2;
 
 import "../common/BaseWithStorage/ImmutableERC721.sol";
 import "../common/interfaces/ILandToken.sol";
+import "../common/interfaces/IGameToken.sol";
+// import "../Game/GameBaseToken.sol";
 import "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
@@ -32,6 +34,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     // mapping(uint256 => mapping(uint256 => uint256[])) internal _gamesInEstate;
 
     LandToken internal _land;
+    IGameToken internal _gameToken;
     address internal _minter;
     // @review needed?
     address internal _breaker;
@@ -124,7 +127,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     function downsizeEstate(
         address from,
         uint256 estateId,
-        uint256[] ids,
+        uint256[] calldata ids,
         EstateData memory rebuild
     ) external returns (uint256) {
         _check_hasOwnerRights(from, estateId);
@@ -215,17 +218,85 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     function _addGames(
         address from,
         uint256 estateId,
-        uint256[] gamesToAdd
+        uint256[] memory gamesToAdd
     ) internal {
-        // @todo implement me
+        _gameToken.batchTransferFrom(from, address(this), gamesToAdd, "");
+        // no need to de-duplicate as gameId is unique
+        for (uint256 i = 0; i < gamesToAdd.length; i++) {
+            require(gamesToAdd[i] != 0);
+            _gamesInEstate[estateId].push(gamesToAdd[i]);
+        }
     }
 
     function _removeGames(
         address to,
         uint256 estateId,
-        uint256[] gamesToRemove
+        uint256[] memory gamesToRemove
     ) internal {
-        // @todo implement me
+        _gameToken.batchTransferFrom(address(this), to, gamesToRemove, "");
+        for (uint256 i = 0; i < gamesToRemove.length; i++) {
+            for (uint256 j = 0; j < _gamesInEstate[estateId].length; j++) {
+                if (gamesToRemove[i] == _gamesInEstate[estateId][j]) {
+                    _gamesInEstate[estateId][j] = 0;
+                }
+            }
+        }
+    }
+
+    function _addLands(
+        address sender,
+        uint256 estateId,
+        uint256[] memory ids,
+        uint256[] memory junctions,
+        bool justCreated
+    ) internal {
+        _land.batchTransferFrom(sender, address(this), ids, "");
+        uint24[] memory list = new uint24[](ids.length);
+        for (uint256 i = 0; i < list.length; i++) {
+            uint16 x = uint16(ids[i] % GRID_SIZE);
+            uint16 y = uint16(ids[i] / GRID_SIZE);
+            list[i] = _encode(x, y, 1);
+        }
+        // solhint-disable-next-line use-forbidden-name
+        uint256 l = _landsInEstate[estateId].length;
+        uint16 lastX = 409;
+        uint16 lastY = 409;
+        if (!justCreated) {
+            uint24 d = _landsInEstate[estateId][l - 1];
+            lastX = uint16(d % GRID_SIZE);
+            lastY = uint16(d % GRID_SIZE);
+        }
+        uint256 j = 0;
+        for (uint256 i = 0; i < list.length; i++) {
+            uint16 x = uint16(ids[i] % GRID_SIZE);
+            uint16 y = uint16(ids[i] / GRID_SIZE);
+            if (lastX != 409 && !_adjacent(x, y, lastX, lastY)) {
+                uint256 index = junctions[j];
+                j++;
+                uint24 data;
+                if (index >= l) {
+                    require(index - l < j, "junctions need to refers to previously accepted land");
+                    data = list[index - l];
+                } else {
+                    data = _landsInEstate[estateId][j];
+                }
+                (uint16 jx, uint16 jy, uint8 jsize) = _decode(data);
+                if (jsize == 1) {
+                    require(_adjacent(x, y, jx, jy), "need junctions to be adjacent");
+                } else {
+                    require(_adjacent(x, y, jx, jy, jsize), "need junctions to be adjacent");
+                }
+            }
+            lastX = x;
+            lastY = y;
+        }
+        if (justCreated) {
+            _landsInEstate[estateId] = list;
+        } else {
+            for (uint256 i = 0; i < list.length; i++) {
+                _landsInEstate[estateId].push(list[i]);
+            }
+        }
     }
 
     /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to token-specific data are preserved via the storageId mechanism.
@@ -365,62 +436,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
             (x1 >= x2 && x1 < x2 + s2 && y1 == y2 + s2) ||
             (x1 == x2 - 1 && y1 >= y2 && y1 < y2 + s2) ||
             (x1 == x2 - s2 && y1 >= y2 && y1 < y2 + s2));
-    }
-
-    function _addLands(
-        address sender,
-        uint256 estateId,
-        uint256[] memory ids,
-        uint256[] memory junctions,
-        bool justCreated
-    ) internal {
-        _land.batchTransferFrom(sender, address(this), ids, "");
-        uint24[] memory list = new uint24[](ids.length);
-        for (uint256 i = 0; i < list.length; i++) {
-            uint16 x = uint16(ids[i] % GRID_SIZE);
-            uint16 y = uint16(ids[i] / GRID_SIZE);
-            list[i] = _encode(x, y, 1);
-        }
-        // solhint-disable-next-line use-forbidden-name
-        uint256 l = _landsInEstate[estateId].length;
-        uint16 lastX = 409;
-        uint16 lastY = 409;
-        if (!justCreated) {
-            uint24 d = _landsInEstate[estateId][l - 1];
-            lastX = uint16(d % GRID_SIZE);
-            lastY = uint16(d % GRID_SIZE);
-        }
-        uint256 j = 0;
-        for (uint256 i = 0; i < list.length; i++) {
-            uint16 x = uint16(ids[i] % GRID_SIZE);
-            uint16 y = uint16(ids[i] / GRID_SIZE);
-            if (lastX != 409 && !_adjacent(x, y, lastX, lastY)) {
-                uint256 index = junctions[j];
-                j++;
-                uint24 data;
-                if (index >= l) {
-                    require(index - l < j, "junctions need to refers to previously accepted land");
-                    data = list[index - l];
-                } else {
-                    data = _landsInEstate[estateId][j];
-                }
-                (uint16 jx, uint16 jy, uint8 jsize) = _decode(data);
-                if (jsize == 1) {
-                    require(_adjacent(x, y, jx, jy), "need junctions to be adjacent");
-                } else {
-                    require(_adjacent(x, y, jx, jy, jsize), "need junctions to be adjacent");
-                }
-            }
-            lastX = x;
-            lastY = y;
-        }
-        if (justCreated) {
-            _landsInEstate[estateId] = list;
-        } else {
-            for (uint256 i = 0; i < list.length; i++) {
-                _landsInEstate[estateId].push(list[i]);
-            }
-        }
     }
 
     // ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

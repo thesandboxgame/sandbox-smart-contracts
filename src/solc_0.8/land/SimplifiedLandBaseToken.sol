@@ -34,14 +34,17 @@ contract SimplifiedLandBaseToken is ERC721BaseToken {
         uint256[] memory yCoordinates,
         bytes[] calldata landData
     ) internal {
-        require(xCoordinates.length == yCoordinates.length == landData.length, "ARRAY_LENGTH_MISMATCH");
+        require(
+            xCoordinates.length == yCoordinates.length && yCoordinates.length == landData.length,
+            "ARRAY_LENGTH_MISMATCH"
+        );
         require(to != address(0), "to is zero address");
         require(isMinter(msg.sender), "Only a minter can mint");
 
         for (uint256 i; i < xCoordinates.length; i++) {
             uint256 x = xCoordinates[i];
             uint256 y = yCoordinates[i];
-            bytes data = landData[i];
+            bytes memory data = landData[i];
             require(x <= GRID_SIZE - 1 && y <= GRID_SIZE - 1, "Out of bounds");
 
             uint256 id = x + y * GRID_SIZE;
