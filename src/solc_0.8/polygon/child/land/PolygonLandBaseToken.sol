@@ -6,10 +6,12 @@ import "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "../../../common/BaseWithStorage/ERC721BaseToken.sol";
 import "../../../common/BaseWithStorage/WithMetaTransaction.sol";
 
-contract PolygonLandBaseToken is ERC721BaseToken, WithMetaTransaction {
+contract PolygonLandBaseToken is
+    ERC721BaseToken /*, WithMetaTransaction*/
+{
     using Address for address;
 
-    /* constructor(address metaTransactionContract, address admin)
+    /*constructor(address metaTransactionContract, address admin)
         public
         ERC721BaseToken(metaTransactionContract, admin)
     {}*/
@@ -90,13 +92,13 @@ contract PolygonLandBaseToken is ERC721BaseToken, WithMetaTransaction {
         address to,
         uint256[] calldata sizes,
         uint256[] calldata xs,
-        uint256[] calldata ys /*,
-        bytes calldata data*/
+        uint256[] calldata ys,
+        bytes calldata data
     ) external {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
         require(sizes.length == xs.length && xs.length == ys.length, "invalid data");
-        bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
+        bool metaTx = msg.sender != from; /*&& _metaTransactionContracts[msg.sender]*/
         if (msg.sender != from && !metaTx) {
             require(
                 _superOperators[msg.sender] || _operatorsForAll[from][msg.sender],
@@ -123,13 +125,7 @@ contract PolygonLandBaseToken is ERC721BaseToken, WithMetaTransaction {
                 }
             }
             require(
-                _checkOnERC721BatchReceived(
-                    metaTx ? from : msg.sender,
-                    from,
-                    to,
-                    ids,
-                    "" /*data*/
-                ),
+                _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, data),
                 "erc721 batch transfer rejected by to"
             );
         }
@@ -140,11 +136,12 @@ contract PolygonLandBaseToken is ERC721BaseToken, WithMetaTransaction {
         address to,
         uint256 size,
         uint256 x,
-        uint256 y //, //bytes calldata data
+        uint256 y,
+        bytes calldata data
     ) external {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
-        bool metaTx = msg.sender != from && _metaTransactionContracts[msg.sender];
+        bool metaTx = msg.sender != from; /*&& _metaTransactionContracts[msg.sender]*/
         if (msg.sender != from && !metaTx) {
             require(
                 _superOperators[msg.sender] || _operatorsForAll[from][msg.sender],
