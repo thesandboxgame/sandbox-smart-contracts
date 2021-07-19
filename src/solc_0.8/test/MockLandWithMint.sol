@@ -19,7 +19,8 @@ contract MockLandWithMint is PolygonLandBaseToken {
         address to,
         uint256 size,
         uint256 x,
-        uint256 y //, //bytes calldata data
+        uint256 y,
+        bytes calldata data
     ) external {
         require(to != address(0), "to is zero address");
         //require(isMinter(msg.sender), "Only a minter can mint");
@@ -89,14 +90,6 @@ contract MockLandWithMint is PolygonLandBaseToken {
         _owners[quadId] = uint256(sha256(abi.encodePacked(to)));
         _numNFTPerAddress[to] += size * size;
 
-        _checkBatchReceiverAcceptQuad(
-            msg.sender,
-            address(0),
-            to,
-            size,
-            x,
-            y,
-            "" /*data*/
-        );
+        _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);
     }
 }
