@@ -20,6 +20,7 @@ nav:
       - Blockchain:
           - Ethereum: topics/blockchain/ethereum.md
           - Features: topics/blockchain/features.md
+          - Giveaway: topics/blockchain/giveaway.md
 
 markdown_extensions:
   - admonition
