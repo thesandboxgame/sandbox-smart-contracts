@@ -144,7 +144,7 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         _numNFTPerAddress[from] -= size * size;
         _numNFTPerAddress[to] += size * size;
 
-        _checkBatchReceiverAcceptQuad(metaTx ? from : msg.sender, from, to, size, x, y, "");
+        _checkBatchReceiverAcceptQuad(metaTx ? from : msg.sender, from, to, size, x, y, data);
     }
 
     function _transferQuad(
