@@ -1,4 +1,5 @@
 //SPDX-License-Identifier: MIT
+// solhint-disable code-complexity
 pragma solidity 0.8.2;
 
 import "../polygon/child/land/PolygonLandBaseToken.sol";
