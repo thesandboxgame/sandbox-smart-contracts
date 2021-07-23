@@ -73,9 +73,9 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     ) external returns (uint256) {
         _check_authorized(from, ADD);
         (uint256 estateId, uint256 storageId) = _mintEstate(from, to, _nextId++, 1, true);
+        _metaData[storageId] = creation.uri;
         _addLands(from, storageId, creation.ids, creation.junctions, true);
         _addGames(from, storageId, creation.gamesToAdd);
-        _metaData[storageId] = creation.uri;
         emit EstateTokenUpdated(0, estateId, creation);
         return estateId;
     }
@@ -169,18 +169,23 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @param estateId The estate to recover lands from.
     function transferFromDestroyedEstate(
         address sender,
-        address, // to,
-        uint256, // num,
-        uint256 estateId
-    ) external view {
+        address to,
+        uint256 estateId,
+        uint256[] memory landsToRemove,
+        uint256[] memory gamesToRemove
+    ) external {
         _check_authorized(sender, WITHDRAWAL);
         require(sender != address(this), "NOT_FROM_THIS");
         require(sender != address(uint160(0)), "NOT_FROM_ZERO");
         address msgSender = _msgSender();
         require(msgSender == sender || _superOperators[msgSender], "not _check_authorized");
         require(sender == _withdrawalOwnerOf(estateId), "NOT_WITHDRAWAL_OWNER");
-        // @todo implement the actual transfer ! see GameToken.recoverAssets()
-        // need to validate lands, pass land ids ?
+        (address owner, ) = _ownerAndOperatorEnabledOf(estateId);
+        // check that the estate has been burned
+        uint256 strgId = _storageId(estateId);
+        require(owner == address(0));
+        _removeGames(to, strgId, gamesToRemove);
+        _removeLands(to, strgId, landsToRemove);
     }
 
     function getEstateData(uint256 estateId) external view returns (EstateData memory) {
@@ -216,12 +221,12 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         uint256 storageId,
         uint256[] memory gamesToAdd
     ) internal {
-        _gameToken.batchTransferFrom(from, address(this), gamesToAdd, "");
         // no need to de-duplicate as gameId is unique
         for (uint256 i = 0; i < gamesToAdd.length; i++) {
             require(gamesToAdd[i] != 0);
             estates[storageId].gameIds.push(gamesToAdd[i]);
         }
+        _gameToken.batchTransferFrom(from, address(this), gamesToAdd, "");
     }
 
     function _removeGames(
@@ -229,7 +234,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         uint256 storageId,
         uint256[] memory gamesToRemove
     ) internal {
-        _gameToken.batchTransferFrom(address(this), to, gamesToRemove, "");
         uint256 len = estates[storageId].gameIds.length;
         for (uint256 i = 0; i < gamesToRemove.length; i++) {
             for (uint256 j = 0; j < len; j++) {
@@ -238,6 +242,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
                 }
             }
         }
+        _gameToken.batchTransferFrom(address(this), to, gamesToRemove, "");
     }
 
     function _addLands(
@@ -294,6 +299,22 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
                 estates[storageId].landIds.push(list[i]);
             }
         }
+    }
+
+    function _removeLands(
+        address to,
+        uint256 storageId,
+        uint256[] memory landsToRemove
+    ) internal {
+        uint256 len = estates[storageId].landIds.length;
+        for (uint256 i = 0; i < landsToRemove.length; i++) {
+            for (uint256 j = 0; j < len; j++) {
+                if (landsToRemove[i] == estates[storageId].landIds[j]) {
+                    estates[storageId].landIds[j] = 0;
+                }
+            }
+        }
+        _land.batchTransferFrom(address(this), to, landsToRemove, "");
     }
 
     /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to token-specific data are preserved via the storageId mechanism.
