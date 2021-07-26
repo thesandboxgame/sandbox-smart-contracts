@@ -33,7 +33,6 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         return "LAND";
     }
 
-    //check if I can get this from some other place
     // solium-disable-next-line security/no-assign-params
     function uint2str(uint256 _i) internal pure returns (string memory _uintAsString) {
         if (_i == 0) {
