@@ -340,10 +340,10 @@ describe('AssetAttributesRegistry', function () {
     const {catalystAdmin} = await getNamedAccounts();
     const users = await getUnnamedAccounts();
     const commonCatalyst = await ethers.getContract('Catalyst_COMMON');
-    const catalystAsAdmin = await commonCatalyst.connect(
+    const catalystAsAdmin = commonCatalyst.connect(
       ethers.provider.getSigner(catalystAdmin)
     );
-    const pretendAttributesContractAddress = users[9];
+    const pretendAttributesContractAddress = users[6];
     await catalystAsAdmin.changeAttributes(pretendAttributesContractAddress);
     await expect(commonCatalyst.getAttributes(42, [])).to.be.reverted;
   });
