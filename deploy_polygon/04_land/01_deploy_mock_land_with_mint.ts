@@ -9,7 +9,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deploy('MockLandWithMint', {
     from: deployer,
-    //rgs: [deployer, deployer, sandBeneficiary, supply],
     log: true,
     skipIfAlreadyDeployed: true,
   });
