@@ -39,10 +39,10 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
     address payable private _receivingWallet;
 
     struct Sale {
-        uint256[] ids;          // NFT ids
-        uint256[] amounts;      // Amount of sand
-        uint256 sandAmount;     //
-        uint256 priceUSD;       // Price in USD for this sale
+        uint256[] ids; // NFT ids
+        uint256[] amounts; // Amount of sand
+        uint256 sandAmount; //
+        uint256 priceUSD; // Price in USD
         uint256 numPacksLeft;
     }
 
@@ -180,7 +180,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         require(data.length > 0, "data need to contains the sale data");
 
         (uint256 numPacks, uint256 sandAmountPerPack, uint256 priceUSDPerPack) =
-        abi.decode(data, (uint256, uint256, uint256));
+            abi.decode(data, (uint256, uint256, uint256));
 
         uint256 amount = value / numPacks;
         require(amount * numPacks == value, "invalid amounts, not divisible by numPacks");
@@ -208,7 +208,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         require(data.length > 0, "data need to contains the sale data");
 
         (uint256 numPacks, uint256 sandAmountPerPack, uint256 priceUSDPerPack) =
-        abi.decode(data, (uint256, uint256, uint256));
+            abi.decode(data, (uint256, uint256, uint256));
 
         uint256[] memory amounts = new uint256[](ids.length);
         for (uint256 i = 0; i < amounts.length; i++) {
@@ -229,7 +229,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
      */
     function getEtherAmountWithUSD(uint256 usdAmount) public view returns (uint256) {
         uint256 ethUsdPair = getEthUsdPair();
-        return (usdAmount * 1000000000000000000) / ethUsdPair;
+        return (usdAmount * 1 ether) / ethUsdPair;
     }
 
     /**
@@ -268,12 +268,12 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         require(_sand.transferFrom(from, address(this), sandAmountPerPack * numPacks), "failed to transfer Sand");
         sales.push(
             Sale({
-        ids : ids,
-        amounts : amounts,
-        sandAmount : sandAmountPerPack,
-        priceUSD : priceUSDPerPack,
-        numPacksLeft : numPacks
-        })
+                ids: ids,
+                amounts: amounts,
+                sandAmount: sandAmountPerPack,
+                priceUSD: priceUSDPerPack,
+                numPacksLeft: numPacks
+            })
         );
         uint256 saleId = sales.length - 1;
         emit BundleSale(saleId, ids, amounts, sandAmountPerPack, priceUSDPerPack, numPacks);
