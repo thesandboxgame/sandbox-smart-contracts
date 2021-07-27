@@ -7,7 +7,6 @@ import "../common/interfaces/IERC1155TokenReceiver.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
 import "../asset/ERC1155ERC721.sol";
 
-
 /// @title PloygonBundleSandSale contract.
 /// @notice This contract receive ERC1155 and create sand bundle sales that users can buy using Ether or Dai.
 contract PloygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
@@ -78,25 +77,29 @@ contract PloygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
      * @param numPacks the amount of packs to buy
      * @param to The address that will receive the SAND
      */
-    function buyBundleWithEther(uint256 saleId, uint256 numPacks, address to) external payable {
+    function buyBundleWithEther(
+        uint256 saleId,
+        uint256 numPacks,
+        address to
+    ) external payable {
         require(saleId > 0, "invalid saleId");
         uint256 saleIndex = saleId - 1;
         uint256 numPacksLeft = sales[saleIndex].numPacksLeft;
         require(numPacksLeft >= numPacks, "not enough packs on sale");
         sales[saleIndex].numPacksLeft = numPacksLeft - numPacks;
 
-        uint256 USDRequired = numPacks * sales[saleIndex].priceUSD;
-        uint256 ETHRequired = getEtherAmountWithUSD(USDRequired);
-        require(msg.value >= ETHRequired, "not enough ether sent");
-        uint256 leftOver = msg.value - ETHRequired;
+        uint256 usdRequired = numPacks * sales[saleIndex].priceUSD;
+        uint256 ethRequired = getEtherAmountWithUSD(usdRequired);
+        require(msg.value >= ethRequired, "not enough ether sent");
+        uint256 leftOver = msg.value - ethRequired;
         if (leftOver > 0) {
             payable(msg.sender).transfer(leftOver);
             // refund extra
         }
-        payable(_receivingWallet).transfer(ETHRequired);
+        payable(_receivingWallet).transfer(ethRequired);
         _transferPack(saleIndex, numPacks, to);
 
-        emit BundleSold(saleId, msg.sender, numPacks, address(0), ETHRequired);
+        emit BundleSold(saleId, msg.sender, numPacks, address(0), ethRequired);
     }
 
     /**
@@ -105,18 +108,22 @@ contract PloygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
      * @param numPacks the amount of packs to buy
      * @param to The address that will receive the SAND
      */
-    function buyBundleWithDai(uint256 saleId, uint256 numPacks, address to) external {
+    function buyBundleWithDai(
+        uint256 saleId,
+        uint256 numPacks,
+        address to
+    ) external {
         require(saleId > 0, "invalid saleId");
         uint256 saleIndex = saleId - 1;
         uint256 numPacksLeft = sales[saleIndex].numPacksLeft;
         require(numPacksLeft >= numPacks, "not enough packs on sale");
         sales[saleIndex].numPacksLeft = numPacksLeft - numPacks;
 
-        uint256 USDRequired = numPacks * sales[saleIndex].priceUSD;
-        require(_dai.transferFrom(msg.sender, _receivingWallet, USDRequired), "failed to transfer dai");
+        uint256 usdRequired = numPacks * sales[saleIndex].priceUSD;
+        require(_dai.transferFrom(msg.sender, _receivingWallet, usdRequired), "failed to transfer dai");
         _transferPack(saleIndex, numPacks, to);
 
-        emit BundleSold(saleId, msg.sender, numPacks, address(_dai), USDRequired);
+        emit BundleSold(saleId, msg.sender, numPacks, address(_dai), usdRequired);
     }
 
     /**
@@ -131,7 +138,6 @@ contract PloygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         priceUSD = sales[saleIndex].priceUSD;
         numPacksLeft = sales[saleIndex].numPacksLeft;
     }
-
 
     /**
      * @notice Remove a sale returning everything to some address
@@ -150,7 +156,10 @@ contract PloygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         for (uint256 i = 0; i < numIds; i++) {
             amounts[i] = amounts[i] * numPacksLeft;
         }
-        require(_sand.transferFrom(address(this), to, numPacksLeft * sales[saleIndex].sandAmount), "transfer fo Sand failed");
+        require(
+            _sand.transferFrom(address(this), to, numPacksLeft * sales[saleIndex].sandAmount),
+            "transfer fo Sand failed"
+        );
         _asset.safeBatchTransferFrom(address(this), to, ids, amounts, "");
     }
 
@@ -169,11 +178,8 @@ contract PloygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         require(value > 0, "no Asset transfered");
         require(data.length > 0, "data need to contains the sale data");
 
-        (
-        uint256 numPacks,
-        uint256 sandAmountPerPack,
-        uint256 priceUSDPerPack
-        ) = abi.decode(data, (uint256, uint256, uint256));
+        (uint256 numPacks, uint256 sandAmountPerPack, uint256 priceUSDPerPack) =
+            abi.decode(data, (uint256, uint256, uint256));
 
         uint256 amount = value / numPacks;
         require(amount * numPacks == value, "invalid amounts, not divisible by numPacks");
@@ -200,14 +206,11 @@ contract PloygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         require(ids.length > 0, "need to contains Asset");
         require(data.length > 0, "data need to contains the sale data");
 
-        (
-        uint256 numPacks,
-        uint256 sandAmountPerPack,
-        uint256 priceUSDPerPack
-        ) = abi.decode(data, (uint256, uint256, uint256));
+        (uint256 numPacks, uint256 sandAmountPerPack, uint256 priceUSDPerPack) =
+            abi.decode(data, (uint256, uint256, uint256));
 
         uint256[] memory amounts = new uint256[](ids.length);
-        for (uint256 i = 0; i < amounts.length; i ++) {
+        for (uint256 i = 0; i < amounts.length; i++) {
             require(values[i] > 0, "asset transfer with zero values");
             uint256 amount = values[i] / numPacks;
             require(amount * numPacks == values[i], "invalid amounts, not divisible by numPacks");
@@ -225,7 +228,7 @@ contract PloygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
      */
     function getEtherAmountWithUSD(uint256 usdAmount) public view returns (uint256) {
         uint256 ethUsdPair = getEthUsdPair();
-        return usdAmount * 1000000000000000000 / ethUsdPair;
+        return (usdAmount * 1000000000000000000) / ethUsdPair;
     }
 
     /**
@@ -237,12 +240,13 @@ contract PloygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         return uint256(pair);
     }
 
-    function _transferPack(uint256 saleIndex, uint256 numPacks, address to) internal {
+    function _transferPack(
+        uint256 saleIndex,
+        uint256 numPacks,
+        address to
+    ) internal {
         uint256 sandAmountPerPack = sales[saleIndex].sandAmount;
-        require(
-            _sand.transferFrom(address(this), to, sandAmountPerPack * numPacks),
-            "Sand Transfer failed"
-        );
+        require(_sand.transferFrom(address(this), to, sandAmountPerPack * numPacks), "Sand Transfer failed");
         uint256[] memory ids = sales[saleIndex].ids;
         uint256[] memory amounts = sales[saleIndex].amounts;
         uint256 numIds = ids.length;
@@ -261,13 +265,15 @@ contract PloygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         uint256 priceUSDPerPack
     ) internal {
         require(_sand.transferFrom(from, address(this), sandAmountPerPack * numPacks), "failed to transfer Sand");
-        sales.push(Sale({
-        ids : ids,
-        amounts : amounts,
-        sandAmount : sandAmountPerPack,
-        priceUSD : priceUSDPerPack,
-        numPacksLeft : numPacks
-        }));
+        sales.push(
+            Sale({
+                ids: ids,
+                amounts: amounts,
+                sandAmount: sandAmountPerPack,
+                priceUSD: priceUSDPerPack,
+                numPacksLeft: numPacks
+            })
+        );
         uint256 saleId = sales.length - 1;
         emit BundleSale(saleId, ids, amounts, sandAmountPerPack, priceUSDPerPack, numPacks);
     }
