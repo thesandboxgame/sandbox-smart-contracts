@@ -7,9 +7,10 @@ import "../common/interfaces/IERC1155TokenReceiver.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
 import "../asset/ERC1155ERC721.sol";
 
-/// @title PloygonBundleSandSale contract.
-/// @notice This contract receive ERC1155 and create sand bundle sales that users can buy using Ether or Dai.
-contract PloygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
+/// @title PolygonBundleSandSale contract.
+/// @notice This contract receives bundles of: NFTs (ERC1155) + Sand.
+/// @notice Then those bundles are sold to users. Users can pay BaseCoin (Ethers) or Dais for the bundles.
+contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
 
@@ -38,10 +39,10 @@ contract PloygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
     address payable private _receivingWallet;
 
     struct Sale {
-        uint256[] ids;
-        uint256[] amounts;
-        uint256 sandAmount;
-        uint256 priceUSD;
+        uint256[] ids;          // NFT ids
+        uint256[] amounts;      // Amount of sand
+        uint256 sandAmount;     //
+        uint256 priceUSD;       // Price in USD for this sale
         uint256 numPacksLeft;
     }
 
