@@ -21,7 +21,9 @@ nav:
       - Blockchain:
           - Ethereum: topics/blockchain/ethereum.md
           - Features: topics/blockchain/features.md
-
+  - Reference:
+      - Contracts:
+        - BundeSandSale: reference/contracts/bundle-sand-sale.md
 markdown_extensions:
   - admonition
   - pymdownx.superfences
