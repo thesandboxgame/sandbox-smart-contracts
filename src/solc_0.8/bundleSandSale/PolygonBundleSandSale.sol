@@ -8,7 +8,7 @@ import "../common/BaseWithStorage/WithAdmin.sol";
 import "../asset/ERC1155ERC721.sol";
 
 /// @title PolygonBundleSandSale contract.
-/// @notice This contract receives bundles of: NFTs (ERC1155) + Sand.
+/// @notice This contract receives bundles of: Assets (ERC1155) + Sand.
 /// @notice Then those bundles are sold to users. Users can pay BaseCoin (Ethers) or Dais for the bundles.
 contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
@@ -38,12 +38,16 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
 
     address payable private _receivingWallet;
 
+    /*
+        This is the main structure representing a pack to be sold.
+        Each pack includes some Assets (NFTs or small collection of fungible tokens) plus Sand
+    */
     struct Sale {
-        uint256[] ids; // NFT ids
-        uint256[] amounts; // Amount of sand
-        uint256 sandAmount; //
-        uint256 priceUSD; // Price in USD
-        uint256 numPacksLeft;
+        uint256[] ids; // ids of the Assets in each pack
+        uint256[] amounts; // Amount of each Asset  in each pack
+        uint256 sandAmount; // Sands sold with each pack
+        uint256 priceUSD; // Price in USD for each Pack
+        uint256 numPacksLeft; // Number of packs left, used for accounting
     }
 
     Sale[] private sales;
@@ -257,6 +261,14 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         _asset.safeBatchTransferFrom(address(this), to, ids, amounts, "");
     }
 
+    /**
+     * @notice Create a Sale to be sold.
+     * @param from seller address
+     * @param sandAmountPerPack the sands that will be sell with the Sale
+     * @param numPacks number of packs that this sale contains
+     * @param sandAmountPerPack the sands that will be sell with the Sale
+     * @param sandAmountPerPack the sands that will be sell with the Sale
+     */
     function _setupBundle(
         address from,
         uint256 sandAmountPerPack,
