@@ -61,7 +61,7 @@ function onERC1155Received(address operator, address from, uint256 id, uint256 v
 external override returns (bytes4)
 ```
 
-### Batch reposit
+### Batch deposit
 
 ```solidity
 function onERC1155BatchReceived(address operator, address from, uint256[] calldata ids,
