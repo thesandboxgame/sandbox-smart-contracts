@@ -71,3 +71,37 @@ user -> "staking contract": exit()
 "staking contract" --> user: emit Withdrawn(msg.sender, balanceOfUser)
 "staking contract" --> user: emit RewardPaid(msg.sender, reward)
 @enduml
+
+
+```plantuml
+
+class PolygonLPTokenWrapper {
+    + stake(uint256 amount)
+    + withdraw(uint256 amount)
+} 
+class PolygonLandWeightedSANDRewardPool {
+    - modifier updateReward(address account)
+    + stake(uint256 amount)
+    + withdraw(uint256 amount)
+    + exit()
+    + getReward()
+    + notifyRewardAmount(uint256 reward)
+    + computeContribution(uint256 amountStaked, uint256 numLands) returns (uint256)
+    
+}
+class ReentrancyGuard #palegreen
+class Ownable #palegreen
+abstract IRewardDistributionRecipient {
+    + address rewardDistribution
+    + notifyRewardAmount(uint256 reward)
+}
+
+note "Openzeppelin contracts" as Oz
+Oz .. Ownable
+Oz .. ReentrancyGuard
+
+
+PolygonLPTokenWrapper <|-- PolygonLandWeightedSANDRewardPool
+ReentrancyGuard <|-- PolygonLandWeightedSANDRewardPool
+IRewardDistributionRecipient <|-- PolygonLandWeightedSANDRewardPool
+Ownable <|-- IRewardDistributionRecipient
