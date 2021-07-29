@@ -4,8 +4,9 @@ pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "../../../Sand/SandBaseToken.sol";
+import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 
-contract PolygonSand is SandBaseToken, Ownable {
+contract PolygonSand is SandBaseToken, Ownable, ERC2771Handler {
     address public childChainManagerProxy;
 
     constructor(
@@ -38,5 +39,13 @@ contract PolygonSand is SandBaseToken, Ownable {
     /// @param amount amount to withdraw
     function withdraw(uint256 amount) external {
         _burn(_msgSender(), amount);
+    }
+
+    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
+        return ERC2771Handler._msgSender();
+    }
+
+    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+        return ERC2771Handler._msgData();
     }
 }
