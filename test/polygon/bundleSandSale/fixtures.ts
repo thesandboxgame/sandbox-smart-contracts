@@ -10,16 +10,18 @@ import {expectEventWithArgs, waitFor} from '../../utils';
 import {defaultAbiCoder, keccak256, toUtf8Bytes} from 'ethers/lib/utils';
 
 export type Fixture = {
+  contract: Contract;
   sandContract: Contract;
   assetContract: Contract;
-  dai: Contract;
+  daiContract: Contract;
+  daiBeneficiary: Address;
   ethBeneficiary: Address;
   sandBeneficiary: Address;
-  dayBeneficiary: Address;
   polygonBundleSandSaleAdmin: Address;
   otherUsers: string[];
-  usdPrice: BigNumber;
+  ethUsdPrice: BigNumber;
   deployPolygonBundleSandSale: (receivingWallet: Address) => Promise<void>;
+  receivingWallet: Address;
 };
 export const setupFixtures = deployments.createFixture(async function () {
   await deployments.fixture(['DAI', 'Asset', 'Sand']);
@@ -29,11 +31,11 @@ export const setupFixtures = deployments.createFixture(async function () {
     deployer,
   } = await getNamedAccounts();
 
-  const dayBeneficiary = deployer;
-  const fakeDai = await ethers.getContract('DAI', dayBeneficiary);
+  const daiBeneficiary = deployer;
+  const fakeDai = await ethers.getContract('DAI', daiBeneficiary);
 
   const fakeMedianizer = await ethers.getContract('DAIMedianizer');
-  const usdPrice = BigNumber.from(await fakeMedianizer.read());
+  const ethUsdPrice = BigNumber.from(await fakeMedianizer.read());
   const [
     ethBeneficiary,
     polygonBundleSandSaleAdmin,
@@ -67,17 +69,26 @@ export const setupFixtures = deployments.createFixture(async function () {
     });
   }
 
+  const receivingWallet = otherUsers[1];
+  await deployPolygonBundleSandSale(receivingWallet);
+  const contract = await ethers.getContract(
+    'PolygonBundleSandSale',
+    polygonBundleSandSaleAdmin
+  );
+
   return {
+    contract,
     sandContract,
     assetContract,
-    dai: fakeDai,
+    daiContract: fakeDai,
+    daiBeneficiary,
     ethBeneficiary,
     sandBeneficiary,
-    dayBeneficiary,
     polygonBundleSandSaleAdmin,
     otherUsers,
-    usdPrice,
+    ethUsdPrice,
     deployPolygonBundleSandSale,
+    receivingWallet,
   };
 });
 
@@ -85,9 +96,9 @@ export const setupFixtures = deployments.createFixture(async function () {
 // to PolygonBundleSandSale to create a bundle.
 export async function mintMultiple(
   fixtures: Fixture,
-  packId: number,
-  supplies: number[]
-) {
+  packId: BigNumberish,
+  supplies: BigNumberish[]
+): Promise<BigNumberish[]> {
   const hash = keccak256(toUtf8Bytes('IPFS somehting'));
   const rarityPack = 0;
 
@@ -116,7 +127,7 @@ export async function mint(
   fixtures: Fixture,
   packId: BigNumberish,
   supply: BigNumberish
-) {
+): Promise<BigNumberish> {
   const hash = keccak256(toUtf8Bytes('IPFS somehting'));
   const rarity = 0;
 
@@ -141,13 +152,12 @@ export async function mint(
 
 export async function createBundle(
   fixtures: Fixture,
-  contract: Contract,
   numPacks: BigNumberish,
   sandAmountPerPack: BigNumberish,
   priceUSDPerPack: BigNumberish,
   transferId: BigNumberish,
   transferValue: BigNumberish
-) {
+): Promise<BigNumberish> {
   const data = defaultAbiCoder.encode(
     [
       'uint256 numPacks',
@@ -162,26 +172,29 @@ export async function createBundle(
       'safeTransferFrom(address,address,uint256,uint256,bytes)'
     ](
       fixtures.sandBeneficiary,
-      contract.address,
+      fixtures.contract.address,
       transferId,
       transferValue,
       data
     )
   );
-  const mintEvent = await expectEventWithArgs(contract, receipt, 'BundleSale');
+  const mintEvent = await expectEventWithArgs(
+    fixtures.contract,
+    receipt,
+    'BundleSale'
+  );
   // TODO: The contract is returning indexId, fix there and then remove add(1)
   return mintEvent.args.saleId.add(1);
 }
 
 export async function createBatchBundle(
   fixtures: Fixture,
-  contract: Contract,
   numPacks: BigNumberish,
   sandAmountPerPack: BigNumberish,
   priceUSDPerPack: BigNumberish,
-  transferIds: number[] | BigNumber[],
-  transferValues: number[] | BigNumber[]
-) {
+  transferIds: BigNumberish[],
+  transferValues: BigNumberish[]
+): Promise<BigNumberish> {
   const data = defaultAbiCoder.encode(
     [
       'uint256 numPacks',
@@ -190,20 +203,114 @@ export async function createBatchBundle(
     ],
     [numPacks, sandAmountPerPack, priceUSDPerPack]
   );
-  console.log(transferIds, transferValues);
   // End up calling onERC1155BatchReceived in PolygonBundleSandSale
   const receipt = await waitFor(
     fixtures.assetContract[
       'safeBatchTransferFrom(address,address,uint256[],uint256[],bytes)'
     ](
       fixtures.sandBeneficiary,
-      contract.address,
+      fixtures.contract.address,
       transferIds,
       transferValues,
       data
     )
   );
-  const mintEvent = await expectEventWithArgs(contract, receipt, 'BundleSale');
+  const mintEvent = await expectEventWithArgs(
+    fixtures.contract,
+    receipt,
+    'BundleSale'
+  );
   // TODO: The contract is returning indexId, fix there and then remove add(1)
   return mintEvent.args.saleId.add(1);
+}
+
+export async function createPackMultiple(
+  fixtures: Fixture,
+  packId: BigNumberish,
+  numPacks: BigNumberish,
+  supplies: BigNumberish[],
+  sandAmountPerPack: BigNumberish,
+  priceUSDPerPack: BigNumberish
+): Promise<{saleId: BigNumberish; tokenIds: BigNumberish[]}> {
+  const realSupplies = supplies.map((x) => BigNumber.from(x).mul(numPacks));
+  await waitFor(
+    fixtures.sandContract.approve(
+      fixtures.contract.address,
+      BigNumber.from(sandAmountPerPack).mul(numPacks)
+    )
+  );
+  const tokenIds = await mintMultiple(
+    fixtures,
+    BigNumber.from(packId),
+    realSupplies
+  );
+  const saleId = await createBatchBundle(
+    fixtures,
+    numPacks,
+    sandAmountPerPack,
+    priceUSDPerPack,
+    tokenIds,
+    realSupplies
+  );
+  return {saleId, tokenIds};
+}
+
+export async function getTokenBalance(
+  fixtures: Fixture,
+  someUser: Address,
+  tokenIds: BigNumberish[]
+): Promise<BigNumber[]> {
+  const tokenInfo = [];
+  for (const tokenId of tokenIds) {
+    const balance = await fixtures.assetContract['balanceOf(address,uint256)'](
+      someUser,
+      tokenId
+    );
+    tokenInfo.push(BigNumber.from(balance));
+  }
+  return tokenInfo;
+}
+
+export async function createPack(
+  fixtures: Fixture
+): Promise<{
+  saleId: BigNumberish;
+  tokenIds: BigNumberish[];
+  tokensPre: BigNumber[];
+  balancePre: BigNumber;
+  priceUSDPerPack: number;
+  numPacks: number;
+  sandAmountPerPack: number;
+  suppliesPerPack: number[];
+}> {
+  const priceUSDPerPack = 123456789;
+  const numPacks = 4;
+  const sandAmountPerPack = 1234;
+  const suppliesPerPack = [12, 44, 43, 12, 13];
+  const {saleId, tokenIds} = await createPackMultiple(
+    fixtures,
+    123,
+    numPacks,
+    suppliesPerPack,
+    sandAmountPerPack,
+    priceUSDPerPack
+  );
+  const tokensPre = await getTokenBalance(
+    fixtures,
+    fixtures.contract.address,
+    tokenIds
+  );
+  const balancePre = BigNumber.from(
+    await fixtures.sandContract.balanceOf(fixtures.contract.address)
+  );
+  return {
+    saleId,
+    tokenIds,
+    tokensPre,
+    balancePre,
+    priceUSDPerPack,
+    numPacks,
+    sandAmountPerPack,
+    suppliesPerPack,
+  };
 }
