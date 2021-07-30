@@ -16,7 +16,7 @@ contract ERC2771Handler {
         return forwarder == _trustedForwarder;
     }
 
-    function _msgSender() internal view returns (address sender) {
+    function _msgSender() internal view virtual returns (address sender) {
         if (isTrustedForwarder(msg.sender)) {
             // The assembly code is more direct than the Solidity version using `abi.decode`.
             // solhint-disable-next-line no-inline-assembly
@@ -28,7 +28,7 @@ contract ERC2771Handler {
         }
     }
 
-    function _msgData() internal view returns (bytes calldata) {
+    function _msgData() internal view virtual returns (bytes calldata) {
         if (isTrustedForwarder(msg.sender)) {
             return msg.data[:msg.data.length - 20];
         } else {
