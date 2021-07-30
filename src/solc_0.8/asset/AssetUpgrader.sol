@@ -7,10 +7,10 @@ import "../common/interfaces/IAssetUpgrader.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
 import "../common/interfaces/IERC20Extended.sol";
 import "../common/interfaces/IAssetToken.sol";
-import "../common/BaseWithStorage/WithMetaTransaction.sol";
+import "../common/BaseWithStorage/ERC2771Handler.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
-contract AssetUpgrader is WithMetaTransaction, IAssetUpgrader {
+contract AssetUpgrader is ERC2771Handler, IAssetUpgrader {
     using SafeMath for uint256;
 
     address public immutable feeRecipient;
@@ -67,7 +67,7 @@ contract AssetUpgrader is WithMetaTransaction, IAssetUpgrader {
         address to
     ) external override returns (uint256 tokenId) {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        _checkAuthorization(from);
+        require(_msgSender() == from, "AUTH_ACCESS_DENIED");
         tokenId = _asset.extractERC721From(from, assetId, from);
         _changeCatalyst(from, tokenId, catalystId, gemIds, to);
     }
@@ -80,7 +80,7 @@ contract AssetUpgrader is WithMetaTransaction, IAssetUpgrader {
     //     address to
     // ) external override returns (uint256 tokenId) {
     //     require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-    //     _checkAuthorization(from);
+    //     require(_msgSender() == from, "AUTH_ACCESS_DENIED");
     //     tokenId = _asset.extractERC721From(from, assetId, from);
     //     _addGems(from, assetId, gemIds, to);
     // }
@@ -100,7 +100,7 @@ contract AssetUpgrader is WithMetaTransaction, IAssetUpgrader {
         address to
     ) external override returns (uint256 tokenId) {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        _checkAuthorization(from);
+        require(_msgSender() == from, "AUTH_ACCESS_DENIED");
         _changeCatalyst(from, assetId, catalystId, gemIds, to);
         return assetId;
     }
@@ -117,7 +117,7 @@ contract AssetUpgrader is WithMetaTransaction, IAssetUpgrader {
         address to
     ) external override {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        _checkAuthorization(from);
+        require(_msgSender() == from, "AUTH_ACCESS_DENIED");
         _addGems(from, assetId, gemIds, to);
     }
 

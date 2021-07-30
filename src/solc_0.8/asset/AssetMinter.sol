@@ -5,12 +5,13 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts-0.8/utils/math/SafeMath.sol";
 import "../common/interfaces/IAssetMinter.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
-import "../common/interfaces//IERC20Extended.sol";
-import "../common/interfaces//IAssetToken.sol";
-import "../common/BaseWithStorage/WithMetaTransaction.sol";
+import "../common/interfaces/IERC20Extended.sol";
+import "../common/interfaces/IAssetToken.sol";
+import "../common/BaseWithStorage/ERC2771Handler.sol";
+import "../common/BaseWithStorage/WithAdmin.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
-contract AssetMinter is WithMetaTransaction, IAssetMinter {
+contract AssetMinter is ERC2771Handler, IAssetMinter, WithAdmin {
     using SafeMath for uint256;
 
     uint256 private constant GEM_UNIT = 1000000000000000000;
@@ -59,7 +60,8 @@ contract AssetMinter is WithMetaTransaction, IAssetMinter {
         bytes calldata data
     ) external override returns (uint256 assetId) {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        _checkAuthorization(from);
+        require(_msgSender() == from, "AUTH_ACCESS_DENIED");
+
         assetId = _asset.mint(from, packId, metadataHash, quantity, rarity, to, data);
         if (catalystId != 0) {
             _setSingleCatalyst(from, assetId, quantity, catalystId, gemIds);
@@ -90,7 +92,9 @@ contract AssetMinter is WithMetaTransaction, IAssetMinter {
     ) public override returns (uint256[] memory assetIds) {
         require(assets.length != 0, "INVALID_0_ASSETS");
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        _checkAuthorization(from);
+
+        require(_msgSender() == from, "AUTH_ACCESS_DENIED");
+
         uint256[] memory supplies = _handleMultipleAssetRequirements(from, gemsQuantities, catalystsQuantities, assets);
         assetIds = _asset.mintMultiple(from, packId, metadataHash, supplies, "", to, data);
         for (uint256 i = 0; i < assetIds.length; i++) {

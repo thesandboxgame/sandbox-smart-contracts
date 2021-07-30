@@ -6,13 +6,13 @@ import "./Gem.sol";
 import "./Catalyst.sol";
 import "./interfaces/IGemsCatalystsRegistry.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
-import "../common/BaseWithStorage/WithMetaTransaction.sol";
+import "../common/BaseWithStorage/ERC2771Handler.sol";
 
 /// @notice Contract managing the Gems and Catalysts
 /// Each Gems and Catalys must be registered here.
 /// Each new Gem get assigned a new id (starting at 1)
 /// Each new Catalyst get assigned a new id (starting at 1)
-contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction, IGemsCatalystsRegistry {
+contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatalystsRegistry {
     Gem[] internal _gems;
     Catalyst[] internal _catalysts;
 
@@ -107,7 +107,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction, IGems
     /// @param gems array of gems to be added
     /// @param catalysts array of catalysts to be added
     function addGemsAndCatalysts(Gem[] calldata gems, Catalyst[] calldata catalysts) external override {
-        require(msg.sender == _admin, "NOT_AUTHORIZED");
+        require(_msgSender() == _admin, "NOT_AUTHORIZED");
         for (uint256 i = 0; i < gems.length; i++) {
             Gem gem = gems[i];
             uint16 gemId = gem.gemId();
@@ -193,7 +193,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, WithMetaTransaction, IGems
 
     /// @dev verify that the caller is authorized for this function call.
     /// @param from The original signer of the transaction.
-    function _checkAuthorization(address from) internal view override {
-        require(msg.sender == from || _isValidMetaTx(from) || isSuperOperator(msg.sender), "AUTH_ACCESS_DENIED");
+    function _checkAuthorization(address from) internal view {
+        require(_msgSender() == from || isSuperOperator(_msgSender()), "AUTH_ACCESS_DENIED");
     }
 }
