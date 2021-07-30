@@ -26,7 +26,6 @@ const ids = [gems[0].gemId, gems[1].gemId];
 const supply = 1;
 const callData = Buffer.from('');
 
-const METATX_2771 = 2;
 const gemsCatalystsUnit = '1000000000000000000';
 
 const NFT_SUPPLY = 1;
@@ -1028,45 +1027,10 @@ describe('AssetMinter', function () {
       ).to.be.revertedWith('INVALID_TO_ZERO_ADDRESS');
     });
 
-    it('should fail if "from" != msg.sender && processorType == 0', async function () {
+    it('should fail if "from" != _msgSender()', async function () {
       const {assetMinterContract} = await setupAssetMinter();
       const {catalystOwner} = await setupGemsAndCatalysts();
-      const {assetMinterAdmin} = await getNamedAccounts();
       const users = await getUnnamedAccounts();
-      const assetMinterAsAdmin = await assetMinterContract.connect(
-        ethers.provider.getSigner(assetMinterAdmin)
-      );
-      await assetMinterAsAdmin.setMetaTransactionProcessor(users[9], 0);
-      const assetMinterAsMetaTxProcessor = await assetMinterContract.connect(
-        ethers.provider.getSigner(users[9])
-      );
-      await expect(
-        assetMinterAsMetaTxProcessor.mint(
-          catalystOwner,
-          mintOptions.packId,
-          mintOptions.metaDataHash,
-          mintOptions.catalystId,
-          mintOptions.gemIds,
-          mintOptions.quantity,
-          mintOptions.rarity,
-          catalystOwner,
-          mintOptions.data
-        )
-      ).to.be.revertedWith('AUTH_ACCESS_DENIED');
-    });
-
-    it('should fail if processorType == METATX_2771 && "from" != _forceMsgSender()', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
-      const {catalystOwner} = await setupGemsAndCatalysts();
-      const {assetMinterAdmin} = await getNamedAccounts();
-      const users = await getUnnamedAccounts();
-      const assetMinterAsAdmin = await assetMinterContract.connect(
-        ethers.provider.getSigner(assetMinterAdmin)
-      );
-      await assetMinterAsAdmin.setMetaTransactionProcessor(
-        users[9],
-        METATX_2771
-      );
       const assetMinterAsMetaTxProcessor = await assetMinterContract.connect(
         ethers.provider.getSigner(users[9])
       );

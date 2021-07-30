@@ -209,6 +209,11 @@ const config: HardhatUserConfig = {
     kyberLiquidityProvider: 'sandBeneficiary', //TODO check what should be the value
 
     gemsCatalystsRegistryAdmin: 'sandAdmin',
+    trustedForwarder: {
+      default: 7,
+      // mumbai: TODO add Biconomy @ if exist on it
+      // polygon: TODO add Biconomy @
+    },
   },
   networks: {
     /**
