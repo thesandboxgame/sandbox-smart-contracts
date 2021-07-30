@@ -83,9 +83,9 @@ contract MockLandWithMint is PolygonLandBaseToken {
         }
 
         for (uint256 i = 0; i < size * size; i++) {
-            uint256 id = _idInPath(i, size, x, y);
+            uint256 idPath = _idInPath(i, size, x, y);
             require(_owners[id] == 0, "Already minted");
-            emit Transfer(address(0), to, id);
+            emit Transfer(address(0), to, idPath);
         }
 
         _owners[quadId] = uint256(sha256(abi.encodePacked(to)));
