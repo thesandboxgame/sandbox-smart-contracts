@@ -2,21 +2,21 @@
 pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
+import "@openzeppelin/contracts-0.8/metatx/ERC2771Context.sol";
 import "./Gem.sol";
 import "./Catalyst.sol";
 import "./interfaces/IGemsCatalystsRegistry.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
-import "../common/BaseWithStorage/ERC2771Handler.sol";
 
 /// @notice Contract managing the Gems and Catalysts
 /// Each Gems and Catalys must be registered here.
 /// Each new Gem get assigned a new id (starting at 1)
 /// Each new Catalyst get assigned a new id (starting at 1)
-contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatalystsRegistry {
+contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Context, IGemsCatalystsRegistry {
     Gem[] internal _gems;
     Catalyst[] internal _catalysts;
 
-    constructor(address admin) {
+    constructor(address admin, address trustedForwarder) ERC2771Context(trustedForwarder) {
         _admin = admin;
     }
 

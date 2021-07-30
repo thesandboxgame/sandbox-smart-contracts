@@ -11,7 +11,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const Asset = await deployments.get('Asset');
   const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
 
-  const {deployer, assetAttributesRegistryAdmin} = await getNamedAccounts();
+  const {
+    deployer,
+    assetAttributesRegistryAdmin,
+    trustedForwarder,
+  } = await getNamedAccounts();
   const BURN_ADDRESS = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
 
   // @note For testing fee-burning only
@@ -42,6 +46,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         upgradeFee,
         gemAdditionFee,
         BURN_ADDRESS,
+        trustedForwarder,
       ],
     });
 

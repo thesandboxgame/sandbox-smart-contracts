@@ -14,7 +14,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const Asset = await deployments.get('Asset');
   const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
 
-  const {deployer, catalystAssetFeeRecipient} = await getNamedAccounts();
+  const {
+    deployer,
+    catalystAssetFeeRecipient,
+    trustedForwarder,
+  } = await getNamedAccounts();
 
   await deploy(`AssetUpgrader`, {
     from: deployer,
@@ -27,6 +31,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       upgradeFee,
       gemAdditionFee,
       catalystAssetFeeRecipient,
+      trustedForwarder,
     ],
   });
 };
