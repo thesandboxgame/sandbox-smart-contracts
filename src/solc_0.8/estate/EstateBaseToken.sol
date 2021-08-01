@@ -7,10 +7,12 @@ import "../common/interfaces/ILandToken.sol";
 import "../Game/GameBaseToken.sol";
 import "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "../libraries/UintToUintMap.sol";
 
 /// @dev An updated Estate Token contract using a simplified verison of LAND with no Quads
 
 contract EstateBaseToken is ImmutableERC721, Initializable {
+    using EnumerableMap for EnumerableMap.UintToUintMap;
     uint8 internal constant OWNER = 0;
     uint8 internal constant ADD = 1;
     uint8 internal constant BREAK = 2;
@@ -20,7 +22,10 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
 
     uint64 internal _nextId; // max uint64 = 18,446,744,073,709,551,615
     mapping(uint256 => bytes32) internal _metaData;
-    mapping(uint256 => EstateData) internal estates;
+    // estates key = storageId
+    // EnumerableMap.UintToUintMap keys = land ids
+    // EnumerableMap.UintToUintMap values = game ids
+    mapping(uint256 => EnumerableMap.UintToUintMap) internal estates;
 
     LandToken internal _land;
     GameBaseToken internal _gameToken;
@@ -28,23 +33,20 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     // @review needed?
     address internal _breaker;
 
-    struct EstateData {
-        uint256[] gameIds;
-        uint24[] landIds;
-    }
-    /// @param ids LAND tokenIds added, Games added, Games removed, uri
+    /// @param landIds LAND tokenIds added, Games added, Games removed, uri
     /// @param junctions
-    /// @param gamesToAdd Games added
-    /// @param gamesToRemove Games removed
+    /// @param gameId Games added
     /// @param uri ipfs hash (without the prefix, assume cidv1 folder)
     struct EstateCRUDData {
-        uint256[] ids;
+        uint256[] landIds;
         uint256[] junctions;
-        uint256[] gamesToAdd;
-        uint256[] gamesToRemove;
+        uint256[] gameIds;
         bytes32 uri;
     }
-
+    struct EstateData {
+        uint256[] landIds;
+        uint256[] gameIds;
+    }
     /// @dev Emits when a estate is updated.
     /// @param oldId The id of the previous erc721 ESTATE token.
     /// @param newId The id of the newly minted token.
@@ -74,8 +76,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         _check_authorized(from, ADD);
         (uint256 estateId, uint256 storageId) = _mintEstate(from, to, _nextId++, 1, true);
         _metaData[storageId] = creation.uri;
-        _addLands(from, storageId, creation.ids, creation.junctions, true);
-        _addGames(from, storageId, creation.gamesToAdd);
+        _addLandsGames(from, storageId, creation.landIds, creation.gameIds, creation.junctions, true);
         emit EstateTokenUpdated(0, estateId, creation);
         return estateId;
     }
@@ -87,7 +88,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     /// @param estateId The current id of the ESTATE token.
     /// @param update The data to use for the Estate update.
     /// @return The new estateId.
-    // @todo  Allow for updating a linked gameToken directly to avoid getting out of sync? think some more...
     function updateEstate(
         address from,
         address to,
@@ -96,13 +96,11 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     ) external returns (uint256) {
         _check_hasOwnerRights(from, estateId);
         uint256 storageId = _storageId(estateId);
-        if (update.ids.length != 0) {
+        _metaData[storageId] = update.uri;
+        if (update.landIds.length != 0) {
             _check_authorized(from, ADD);
         }
-        _addLands(from, storageId, update.ids, update.junctions, false);
-        _removeGames(to, storageId, update.gamesToRemove);
-        _addGames(from, storageId, update.gamesToAdd);
-        _metaData[storageId] = update.uri;
+        _addLandsGames(from, storageId, update.landIds, update.gameIds, update.junctions, false);
         uint256 newId = _incrementTokenVersion(from, estateId);
         emit EstateTokenUpdated(estateId, newId, update);
         return newId;
@@ -113,30 +111,27 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     // @note see https://docs.google.com/document/d/1eXJP0Tp2C617kOkDNpLCS_hJXaGZizHkxJndMIlKpeQ/edit for offchain metadata solution
     /// @param from The address of the one removing lands.
     /// @param estateId The estate token to remove lands from.
-    /// @param ids The tokenIds of the LANDs to remove
     /// @param rebuild The data to use when reconstructing the Estate.
     /// @dev Note that a valid estate can only contain adjacent lands, so it is possible to attempt to remove lands in a way that would result in an invalid estate, which must be prevented.
-    // @todo decide how to handle the above case.
     function downsizeEstate(
         address from,
         uint256 estateId,
-        uint256[] calldata ids,
         EstateCRUDData memory rebuild
     ) external returns (uint256) {
         _check_hasOwnerRights(from, estateId);
         _check_authorized(from, BREAK);
         _check_authorized(from, ADD);
-        // @todo implement.
-        // - [ ] ensure resultant estate's lands are still adjacent
-        // - [ ] _addLands(...);
-        // - [ ] remove and/or add Games. update _gamesInEstate[] mapping if needed.
-        // - [ ] _incrementTokenVersion(...)
-        // - [ ] emit EstateTokenUpdated(...)
+        uint256 storageId = _storageId(estateId);
+        // @todo ensure resultant estate's lands are still adjacent
+        _removeLandsGames(from, storageId, rebuild.landIds);
+        uint256 newId = _incrementTokenVersion(from, estateId);
+        emit EstateTokenUpdated(estateId, newId, rebuild);
+        return newId;
     }
 
     /// @notice Burns token `id`.
     /// @param id The token which will be burnt.
-    function burn(uint256 id) external override {
+    function burn(uint256 id) public override {
         address sender = _msgSender();
         _check_authorized(sender, BREAK);
         _check_hasOwnerRights(sender, id);
@@ -167,13 +162,12 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     // / @param to The recipient of the Land tokens.
     // / @param num The number of Lands to transfer.
     /// @param estateId The estate to recover lands from.
-    function transferFromDestroyedEstate(
+    function transferFromBurnedEstate(
         address sender,
         address to,
         uint256 estateId,
-        uint256[] memory landsToRemove,
-        uint256[] memory gamesToRemove
-    ) external {
+        uint256[] memory landsToRemove
+    ) public {
         _check_authorized(sender, WITHDRAWAL);
         require(sender != address(this), "NOT_FROM_THIS");
         require(sender != address(uint160(0)), "NOT_FROM_ZERO");
@@ -184,13 +178,32 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         // check that the estate has been burned
         uint256 strgId = _storageId(estateId);
         require(owner == address(0));
-        _removeGames(to, strgId, gamesToRemove);
-        _removeLands(to, strgId, landsToRemove);
+        _removeLandsGames(to, strgId, landsToRemove);
+    }
+
+    function burnAndTransferFromDestroyedEstate(
+        uint256 id,
+        address sender,
+        address to,
+        uint256 estateId,
+        uint256[] memory landsToRemove
+    ) external {
+        burn(id);
+        transferFromBurnedEstate(sender, to, estateId, landsToRemove);
     }
 
     function getEstateData(uint256 estateId) external view returns (EstateData memory) {
         uint256 storageId = _storageId(estateId);
-        return estates[storageId];
+        uint256 length = estates[storageId].length();
+        uint256[] memory landIds = new uint256[](length);
+        uint256[] memory gameIds = new uint256[](length);
+
+        for (uint256 i = 0; i < length; i++) {
+            (uint256 landId, uint256 gameId) = estates[storageId].at(i);
+            landIds[i] = landId;
+            gameIds[i] = gameId;
+        }
+        return EstateData({landIds: landIds, gameIds: gameIds});
     }
 
     /// @notice Return the name of the token contract.
@@ -216,62 +229,35 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    function _addGames(
-        address from,
-        uint256 storageId,
-        uint256[] memory gamesToAdd
-    ) internal {
-        // no need to de-duplicate as gameId is unique
-        for (uint256 i = 0; i < gamesToAdd.length; i++) {
-            require(gamesToAdd[i] != 0);
-            estates[storageId].gameIds.push(gamesToAdd[i]);
-        }
-        _gameToken.batchTransferFrom(from, address(this), gamesToAdd, "");
-    }
-
-    function _removeGames(
-        address to,
-        uint256 storageId,
-        uint256[] memory gamesToRemove
-    ) internal {
-        uint256 len = estates[storageId].gameIds.length;
-        for (uint256 i = 0; i < gamesToRemove.length; i++) {
-            for (uint256 j = 0; j < len; j++) {
-                if (gamesToRemove[i] == estates[storageId].gameIds[j]) {
-                    estates[storageId].gameIds[j] = 0;
-                }
-            }
-        }
-        _gameToken.batchTransferFrom(address(this), to, gamesToRemove, "");
-    }
-
-    function _addLands(
+    function _addLandsGames(
         address sender,
         uint256 storageId,
-        uint256[] memory ids,
+        uint256[] memory landIds,
+        uint256[] memory gameIds,
         uint256[] memory junctions,
         bool justCreated
     ) internal {
-        _land.batchTransferFrom(sender, address(this), ids, "");
-        uint24[] memory list = new uint24[](ids.length);
+        // lands without games will be represented as gameId = 0
+        require(landIds.length == gameIds.length);
+        uint24[] memory list = new uint24[](landIds.length);
         for (uint256 i = 0; i < list.length; i++) {
-            uint16 x = uint16(ids[i] % GRID_SIZE);
-            uint16 y = uint16(ids[i] / GRID_SIZE);
+            uint16 x = uint16(landIds[i] % GRID_SIZE);
+            uint16 y = uint16(landIds[i] / GRID_SIZE);
             list[i] = _encode(x, y, 1);
         }
         // solhint-disable-next-line use-forbidden-name
-        uint256 l = estates[storageId].landIds.length;
+        uint256 l = estates[storageId].length();
         uint16 lastX = 409;
         uint16 lastY = 409;
         if (!justCreated) {
-            uint24 d = estates[storageId].landIds[l - 1];
-            lastX = uint16(d % GRID_SIZE);
-            lastY = uint16(d % GRID_SIZE);
+            // uint24 d = estates[storageId].landIds[l - 1];
+            // lastX = uint16(d % GRID_SIZE);
+            // lastY = uint16(d % GRID_SIZE);
         }
         uint256 j = 0;
         for (uint256 i = 0; i < list.length; i++) {
-            uint16 x = uint16(ids[i] % GRID_SIZE);
-            uint16 y = uint16(ids[i] / GRID_SIZE);
+            uint16 x = uint16(landIds[i] % GRID_SIZE);
+            uint16 y = uint16(landIds[i] / GRID_SIZE);
             if (lastX != 409 && !_adjacent(x, y, lastX, lastY)) {
                 uint256 index = junctions[j];
                 j++;
@@ -280,7 +266,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
                     require(index - l < j, "junctions need to refers to previously accepted land");
                     data = list[index - l];
                 } else {
-                    data = estates[storageId].landIds[j];
+                    // data = estates[storageId].landIds[j];
                 }
                 (uint16 jx, uint16 jy, uint8 jsize) = _decode(data);
                 if (jsize == 1) {
@@ -292,29 +278,48 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
             lastX = x;
             lastY = y;
         }
-        if (justCreated) {
-            estates[storageId].landIds = list;
-        } else {
-            for (uint256 i = 0; i < list.length; i++) {
-                estates[storageId].landIds.push(list[i]);
-            }
-        }
+        _upsertLandsGames(sender, landIds, gameIds, storageId);
     }
 
-    function _removeLands(
+    function _upsertLandsGames(
+        address sender,
+        uint256[] memory landIds,
+        uint256[] memory gameIds,
+        uint256 storageId
+    ) internal {
+        uint256[] memory gamesToRemove = new uint256[](gameIds.length);
+        uint256[] memory gamesToAdd = new uint256[](gameIds.length);
+        for (uint256 i = 0; i < landIds.length; i++) {
+            (, uint256 oldGameId) = estates[storageId].tryGet(landIds[i]);
+            estates[storageId].set(landIds[i], gameIds[i]);
+            if (oldGameId != 0) {
+                gamesToRemove[i] = oldGameId;
+            }
+            if (gameIds[i] != 0) {
+                gamesToAdd[i] = gameIds[i];
+            }
+        }
+        _land.batchTransferFrom(sender, address(this), landIds, "");
+        _gameToken.batchTransferFrom(sender, address(this), gamesToAdd, "");
+        _gameToken.batchTransferFrom(address(this), sender, gamesToRemove, "");
+    }
+
+    function _removeLandsGames(
         address to,
         uint256 storageId,
         uint256[] memory landsToRemove
     ) internal {
-        uint256 len = estates[storageId].landIds.length;
-        for (uint256 i = 0; i < landsToRemove.length; i++) {
-            for (uint256 j = 0; j < len; j++) {
-                if (landsToRemove[i] == estates[storageId].landIds[j]) {
-                    estates[storageId].landIds[j] = 0;
-                }
+        uint256 length = landsToRemove.length;
+        uint256[] memory gameIdsToRemove = new uint256[](length);
+        for (uint256 i = 0; i < length; i++) {
+            uint256 gameId = estates[storageId].get(landsToRemove[i]);
+            if (gameId != 0) {
+                gameIdsToRemove[i] = gameId;
             }
+            require(estates[storageId].remove(landsToRemove[i]));
         }
         _land.batchTransferFrom(address(this), to, landsToRemove, "");
+        _gameToken.batchTransferFrom(address(this), to, gameIdsToRemove, "");
     }
 
     /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to token-specific data are preserved via the storageId mechanism.
