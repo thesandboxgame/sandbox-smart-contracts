@@ -21,8 +21,8 @@ nav:
       - Blockchain:
           - Ethereum: topics/blockchain/ethereum.md
           - Features: topics/blockchain/features.md
-  - Smartcontracts doc:
-      - LP staking: smartcontractdocs/LP-staking.md
+  - References:
+      - Liquidity provider: references/LP-staking.md
 
 markdown_extensions:
   - admonition
