@@ -22,7 +22,7 @@ nav:
           - Ethereum: topics/blockchain/ethereum.md
           - Features: topics/blockchain/features.md
       - Solidity:
-          - Guideline: topics/solidity/guideline.md
+          - Guideline: topics/guideline/solidity.md
 
 markdown_extensions:
   - admonition
