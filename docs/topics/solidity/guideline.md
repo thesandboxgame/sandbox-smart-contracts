@@ -17,7 +17,7 @@ The document is composed of three parts:
 
 # Coding Style
 
-This part is based heavily in: [Solidity Style Guide](https://docs.soliditylang.org/en/v0.5.9/style-guide.html)
+This part is based heavily in: [Solidity Style Guide](https://docs.soliditylang.org/en/latest/style-guide.html#contract-and-library-names)
 
 In the code we heavily recommend using linter and prettier to force a common style.
 
@@ -273,6 +273,7 @@ Base on [080-breaking-changes](https://docs.soliditylang.org/en/breaking/080-bre
 
 ## References
 
+- [Solidity Style Guide](https://docs.soliditylang.org/en/latest/style-guide.html#contract-and-library-names)
 - [Security Recommendations](https://consensys.github.io/smart-contract-best-practices/recommendations).
 - [Solidity Patterns](https://github.com/fravoll/solidity-patterns).
 - [060-breaking-changes](https://docs.soliditylang.org/en/v0.6.0/060-breaking-changes.html).
