@@ -22,18 +22,18 @@ on: [Solidity Style Guide](https://docs.soliditylang.org/en/latest/style-guide.h
 
 In the code we heavily recommend using linter and prettier to force a common style.
 
-Bellow is a summary and some extra guidelines to follow:
+Below is a summary and some extra guidelines to follow:
 
-- [NatSpec](https://docs.soliditylang.org/en/v0.5.9/style-guide.html#natspec): **Every function and variable declaration
+- [NatSpec](https://docs.soliditylang.org/en/latest/style-guide.html#natspec): **Every function and variable declaration
   must have NatSpec comments**.
 - File structure:
     - One contract, library or interface per file.
-    - [Order of Layout](https://docs.soliditylang.org/en/v0.5.9/style-guide.html#order-of-layout): `Type declarations`,
+    - [Order of Layout](https://docs.soliditylang.org/en/latest/style-guide.html#natspec): `Type declarations`,
       `State variables`, `Events`, `Functions`.
-    - [Order of Functions](https://docs.soliditylang.org/en/v0.5.9/style-guide.html#order-of-functions):
+    - [Order of Functions](https://docs.soliditylang.org/en/latest/style-guide.html#order-of-functions):
       `constructor`, `fallback function` (if exists), `external`, `public`, `internal`, `private`. Within a grouping,
       place the view and pure functions last.
-- [Naming Styles](https://docs.soliditylang.org/en/v0.5.9/style-guide.html#naming-styles):
+- [Naming Styles](https://docs.soliditylang.org/en/latest/style-guide.html#naming-styles):
     - Contracts, libraries, events, enums and structs should be named using the ***CapWords*** style and match their
       filenames.
     - Function, function arguments, local, state variable and modifiers should use ***mixedCase***. To avoid naming
@@ -56,7 +56,7 @@ Bellow is a summary and some extra guidelines to follow:
 
           ***WARNING***:  these units cannot be used to perform calendar calculation. The `block.timestamp` must be
       used with care too. See the note in the
-      following [document](https://docs.soliditylang.org/en/v0.4.21/units-and-global-variables.html).
+      following [document](https://docs.soliditylang.org/en/latest/units-and-global-variables.html).
 
 # Patterns and recommendations
 
@@ -75,7 +75,7 @@ libraries and the following pattern:
 - Define a struct that will be used to store class attributes.
 - Implement class methods as internal functions in a library that take the struct as the first parameter (calling
   it `self`).
-- Declare the struct and use the directive [using for](https://docs.soliditylang.org/en/v0.5.3/contracts.html#using-for)
+- Declare the struct and use the directive [using for](https://docs.soliditylang.org/en/latest/contracts.html#using-for)
   inside the contracts that needs to compose the class.
 - The library must have only internal functions if you want everything compiled inline in the smart contract.
 - Is ok to have a contract that delegates everything to the library like a Facade over it and other contracts that just
@@ -200,6 +200,20 @@ For some calculations take into account that uint8 used alone can be more expens
 Mapping are cheaper than arrays and a lot of times using a customization (solidity doesn't support generics)
 of: [EnumerableMap](https://docs.openzeppelin.com/contracts/3.x/api/utils#EnumerableMap) is better. Arrays can be useful
 when you use smaller types like uint8 because they can be packed.
+
+### Before repeating your self use known libraries as dependencies when possible
+
+Is a good idea to use known libraries that are well written, secure (search online for audits) and up to date. In any
+case before reinventing the wheel check available libraries.
+
+Yarn and npm can be used to include dependencies, but it must be used with care because you end up using code that came
+from a repository that is not under your control.
+
+Use:
+
+- [Openzeppelin contracts](https://github.com/OpenZeppelin/openzeppelin-contracts).
+- [Solidity patterns](https://github.com/fravoll/solidity-patterns). Some code and ideas can be reused with care because
+  part of might be outdated.
 
 # Contract upgrade
 
