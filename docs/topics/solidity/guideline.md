@@ -17,7 +17,8 @@ The document is composed of three parts:
 
 # Coding Style
 
-This part is based heavily in: [Solidity Style Guide](https://docs.soliditylang.org/en/latest/style-guide.html#contract-and-library-names)
+This part is based heavily
+on: [Solidity Style Guide](https://docs.soliditylang.org/en/latest/style-guide.html#contract-and-library-names)
 
 In the code we heavily recommend using linter and prettier to force a common style.
 
@@ -107,6 +108,16 @@ uint256[50] private ______gap;
 
 Create one storage contract and then inherit it into the implementation. This way it is easier to manage the storage and
 add variables during upgrade.
+
+### Loop length must be short and controlled
+
+All the iterations in the smart contract must be limited in their length. A permanent denial of service could happen if
+the gas consumed by a loop is too high.
+
+### Rounding
+
+Each time a division is done the numbers are rounded (the operation is like a `floor(a/b)`) and there is some remainder
+to take into account.
 
 ## Visibility
 
