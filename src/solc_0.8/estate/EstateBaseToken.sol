@@ -30,8 +30,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
     LandToken internal _land;
     GameBaseToken internal _gameToken;
     address internal _minter;
-    // @review needed?
-    address internal _breaker;
 
     /// @param landIds LAND tokenIds added, Games added, Games removed, uri
     /// @param junctions

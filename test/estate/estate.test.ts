@@ -6,7 +6,7 @@ import {EstateTestHelper} from './estateTestHelper';
 import {getId} from './utils';
 const emptyBytes = Buffer.from('');
 
-describe('Estate', function () {
+describe.skip('Estate', function () {
   it('creating from Land Quad', async function () {
     const {estateContract, landContractAsMinter, user0} = await setupEstate();
     const size = 6;
