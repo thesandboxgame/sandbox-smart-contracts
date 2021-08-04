@@ -446,7 +446,7 @@ describe('PolygonAsset.sol', function () {
       const tokenData = abiCoder.encode(['bytes32[]'], [ipfsHashes]);
 
       // Partial Transfer - 01
-      var data = abiCoder.encode(
+      let data = abiCoder.encode(
         ['uint256[]', 'uint256[]', 'bytes'],
         [tokenIds, supply_breakdown_01, tokenData]
       );
@@ -596,13 +596,13 @@ describe('PolygonAsset.sol', function () {
 
       // Partial Transfer - 01
       // User withdraws tokens from Polygon
-      var receipt = await waitFor(
+      let receipt = await waitFor(
         polygon.users[0].Asset.withdraw(tokenIds, supply_breakdown_01)
       );
-      var event = receipt?.events?.filter(
+      let event = receipt?.events?.filter(
         (event: Event) => event.event === 'ChainExit'
       )[0];
-      var tokenData = event?.args?.data;
+      let tokenData = event?.args?.data;
       // Emulate exit call
       await waitFor(
         mainnet.predicate.exitTokens(
@@ -866,7 +866,7 @@ describe('PolygonAsset.sol', function () {
       const ipfsHashes = [
         '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e',
       ];
-      var tokenData = abiCoder.encode(['bytes32[]'], [ipfsHashes]);
+      let tokenData = abiCoder.encode(['bytes32[]'], [ipfsHashes]);
       const data = abiCoder.encode(
         ['uint256[]', 'uint256[]', 'bytes'],
         [[tokenId], [balance], tokenData]
@@ -880,11 +880,11 @@ describe('PolygonAsset.sol', function () {
       // Emulate the ChildChainManager call to deposit
       await waitFor(polygon.childChainManager.callDeposit(user.address, data));
       // Ensure balance has been updated on Asset & PolygonAsset
-      var mainnet_balance = await mainnet.Asset['balanceOf(address,uint256)'](
+      let mainnet_balance = await mainnet.Asset['balanceOf(address,uint256)'](
         user.address,
         tokenId
       );
-      var polygon_balance = await polygon.Asset['balanceOf(address,uint256)'](
+      let polygon_balance = await polygon.Asset['balanceOf(address,uint256)'](
         user.address,
         tokenId
       );
@@ -949,7 +949,7 @@ describe('PolygonAsset.sol', function () {
       const event = receipt?.events?.filter(
         (event: Event) => event.event === 'ChainExit'
       )[0];
-      var tokenData = event?.args?.data;
+      let tokenData = event?.args?.data;
       // Emulate exit call
       await waitFor(
         mainnet.predicate.exitTokens(
