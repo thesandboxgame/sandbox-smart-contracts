@@ -349,13 +349,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
             } else {
                 require(msgSender == minter, "only minter allowed");
             }
-        } else if (action == BREAK) {
-            address breaker = _breaker;
-            if (breaker == address(uint160(0))) {
-                require(msgSender == sender, "not _check_authorized");
-            } else {
-                require(msgSender == breaker, "only breaker allowed");
-            }
         } else {
             require(msgSender == sender, "not _check_authorized");
         }
