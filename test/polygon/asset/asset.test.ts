@@ -960,11 +960,11 @@ describe('PolygonAsset.sol', function () {
         )
       );
       // Ensure balance has been updated on Asset & PolygonAsset
-      var mainnet_balance = await mainnet.Asset['balanceOf(address,uint256)'](
+      let mainnet_balance = await mainnet.Asset['balanceOf(address,uint256)'](
         user.address,
         tokenId
       );
-      var polygon_balance = await polygon.Asset['balanceOf(address,uint256)'](
+      let polygon_balance = await polygon.Asset['balanceOf(address,uint256)'](
         user.address,
         tokenId
       );
@@ -992,11 +992,11 @@ describe('PolygonAsset.sol', function () {
       // Emulate the ChildChainManager call to deposit
       await waitFor(polygon.childChainManager.callDeposit(user.address, data));
       // Ensure balance has been updated on Asset & PolygonAsset
-      var mainnet_balance = await mainnet.Asset['balanceOf(address,uint256)'](
+      mainnet_balance = await mainnet.Asset['balanceOf(address,uint256)'](
         user.address,
         tokenId
       );
-      var polygon_balance = await polygon.Asset['balanceOf(address,uint256)'](
+      polygon_balance = await polygon.Asset['balanceOf(address,uint256)'](
         user.address,
         tokenId
       );
