@@ -121,7 +121,7 @@ to take into account.
 
 ## Visibility
 
-### TO DISCUSS: Use of private attributes
+### Use of private attributes
 
 Private attributes just hide the internal state of the contract, child contracts (via inheritance), and make writing
 tests impossible.
@@ -133,7 +133,7 @@ Internal solve the testing issue. A mock child contract can be used to access th
 Public solve all the issues the only downside is that it adds a default getter and calling a public method can make the
 contract code and gas consumption higher.
 
-### TO DISCUSS: Use of private view methods
+### Use of private view methods
 
 Usually view methods are used as a getters or to do some reusable calculation. Exposing the method helps to test the
 contract and is useful to check the internal state of a deployed contract. Methods can be exposed using public or
@@ -195,19 +195,14 @@ clear: [Tight Variable Packing](https://fravoll.github.io/solidity-patterns/tigh
 For some calculations take into account that uint8 used alone can be more expensive than uint256 because the EVM word is
 32bytes/256bits.
 
-## Mapping are cheaper than arrays
-
-Mapping are cheaper than arrays and a lot of times using a customization (solidity doesn't support generics)
-of: [EnumerableMap](https://docs.openzeppelin.com/contracts/3.x/api/utils#EnumerableMap) is better. Arrays can be useful
-when you use smaller types like uint8 because they can be packed.
-
 ### Before repeating your self use known libraries as dependencies when possible
 
 Is a good idea to use known libraries that are well written, secure (search online for audits) and up to date. In any
 case before reinventing the wheel check available libraries.
 
 Yarn and npm can be used to include dependencies, but it must be used with care because you end up using code that came
-from a repository that is not under your control.
+from a repository that is not under your control. Another alternative is to copy the code from the library into your own
+source tree, the downside is that updating the code when the library is update is more complicated. 
 
 Use:
 
