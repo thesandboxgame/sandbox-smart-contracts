@@ -875,7 +875,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         for (uint256 i = 0; i < 8 && offset + i < supplies.length; i++) {
             uint256 j = offset + i;
             if (supplies[j] > 1) {
-                balances = balances.updateTokenBalance(index + i, supplies[j], ObjectLib32.Operations.REPLACE);
+                balances = balances.updateTokenBalance(index + i, supplies[j], ObjectLib32.Operations.ADD);
             } else {
                 break;
             }
