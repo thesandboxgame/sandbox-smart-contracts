@@ -7,6 +7,7 @@ pragma solidity 0.8.2;
 import "../common/Libraries/SigUtil.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 import "@openzeppelin/contracts-0.8/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol";
 import "../common/BaseWithStorage/ERC20/ERC20Token.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
 
@@ -30,9 +31,14 @@ contract ReferralValidator08 is WithAdmin {
         uint256 commissionRate
     );
 
-    constructor(address initialSigningWallet, uint256 initialMaxCommissionRate) public {
+    constructor(
+        address initialSigningWallet,
+        uint256 initialMaxCommissionRate,
+        address admin
+    ) {
         _signingWallet = initialSigningWallet;
         _maxCommissionRate = initialMaxCommissionRate;
+        _admin = admin;
     }
 
     /**
@@ -46,12 +52,28 @@ contract ReferralValidator08 is WithAdmin {
     }
 
     /**
+     * @dev signing wallet authorized for referral
+     * @return the address of the signing wallet
+     */
+    function getSigningWallet() external view returns (address) {
+        return _signingWallet;
+    }
+
+    /**
      * @dev Update the maximum commission rate
      * @param newMaxCommissionRate The new maximum commission rate
      */
     function updateMaxCommissionRate(uint256 newMaxCommissionRate) external {
         require(_admin == msg.sender, "Sender not admin");
         _maxCommissionRate = newMaxCommissionRate;
+    }
+
+    /**
+     * @notice the max commision rate
+     * @return the maximum commision rate that a referral can give
+     */
+    function getMaxCommisionRate() external view returns (uint256) {
+        return _maxCommissionRate;
     }
 
     function handleReferralWithETH(
@@ -136,7 +158,7 @@ contract ReferralValidator08 is WithAdmin {
         bytes32 hashedData = keccak256(abi.encodePacked(referrer, referee, expiryTime, commissionRate));
 
         address signer =
-            SigUtil.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
+            ECDSA.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
 
         if (_previousSigningWallets[signer] >= block.timestamp) {
             return true;

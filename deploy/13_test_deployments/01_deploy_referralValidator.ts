@@ -5,11 +5,11 @@ import {skipUnlessTest} from '../../utils/network';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer, backendReferralWallet} = await getNamedAccounts();
+  const {deployer, backendReferralWallet, sandAdmin} = await getNamedAccounts();
 
   await deploy('ReferralValidator08', {
     from: deployer,
-    args: [backendReferralWallet, 2000], //got 200 from 00_deploy_land_sale_5.ts
+    args: [backendReferralWallet, 2000, sandAdmin], //got 200 from 00_deploy_land_sale_5.ts
     log: true,
     skipIfAlreadyDeployed: true,
   });
