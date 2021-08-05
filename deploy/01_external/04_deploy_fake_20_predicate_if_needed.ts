@@ -12,7 +12,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (!ERC20_PREDICATE) {
     ERC20_PREDICATE = await deploy('ERC20_PREDICATE', {
       from: deployer,
-      contract: 'ERC20Predicate',
+      contract: 'FakeERC20Predicate',
       log: true,
     });
   }

@@ -23,7 +23,7 @@ interface IMintableERC1155 is IERC1155 {
 /// @dev This is NOT a secure ChildChainManager contract implementation!
 /// DO NOT USE in production.
 
-contract ERC1155Predicate is ERC1155Receiver {
+contract FakeERC1155Predicate is ERC1155Receiver {
     address private asset;
 
     function setAsset(address _asset) external {
