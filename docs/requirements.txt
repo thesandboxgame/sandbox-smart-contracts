@@ -1,2 +1,3 @@
 mkdocs-material
 plantuml-markdown
+mkdocs-literate-nav
