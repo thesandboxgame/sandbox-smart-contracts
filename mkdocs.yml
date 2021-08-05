@@ -21,8 +21,8 @@ nav:
       - Blockchain:
           - Ethereum: topics/blockchain/ethereum.md
           - Features: topics/blockchain/features.md
-  - References:
-      - Liquidity provider: references/LP-staking.md
+      - Defi:
+          - Liquidity provider: topics/defi/liquidity-pools/LP-staking.md
 
 markdown_extensions:
   - admonition

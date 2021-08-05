@@ -1,17 +1,17 @@
 # $SAND<>$ETH LP tokens staking
 
-## intro
+## Introduction
 
 The aim of this document is to explain how the LP token ($SAND-ETH) staking currently works in "The sandbox" environment.
 
-## liquidity pool explanation
+## Liquidity pool explanation
 
 First a brief explanation of how liquidity pool works: <https://www.youtube.com/watch?v=cizLhxSKrAc>
 
 The user who wants to stake his tokens has to follow a some steps outside the sandbox before he can stake.
 He has to go to the Dex (currently uniswap) and provide $SAND **AND** ETH. He receives in exchange some LP tokens that he can stake on <https://staking.sandbox.game>.
 
-## staking LP tokens
+## Staking LP tokens
 
 When the LP tokens are deposited on the staking contract, every user in this contract share the reward allocated by The sandbox.
 
@@ -36,7 +36,7 @@ Formula : SAND*EARNED (per tick) = POOL_SHARE * POOL*REWARD * TICK_RATE / POOL_D
 - POOL_DURATION
   The overall duration of the liquidity mining campaign
 
-## design
+## Design
 
 ```plantuml
 title sequence diagram
