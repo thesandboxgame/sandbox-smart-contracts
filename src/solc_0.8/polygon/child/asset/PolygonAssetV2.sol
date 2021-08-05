@@ -60,8 +60,6 @@ contract PolygonAssetV2 is ERC1155ERC721 {
     /// @param ids ids to withdraw
     /// @param amounts amounts to withdraw
     function withdraw(uint256[] calldata ids, uint256[] calldata amounts) external {
-        // @review - burn doesnt reset hash
-        // hash reset would need to be done to avoid failure when transferring the asset a second time
         bytes32[] memory hashes = new bytes32[](ids.length);
         for (uint256 i = 0; i < ids.length; i++) {
             bytes32 hash = _metadataHash[ids[i] & URI_ID];
