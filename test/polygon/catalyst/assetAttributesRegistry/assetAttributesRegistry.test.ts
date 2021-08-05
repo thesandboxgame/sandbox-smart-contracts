@@ -343,7 +343,7 @@ describe('AssetAttributesRegistry', function () {
     const catalystAsAdmin = commonCatalyst.connect(
       ethers.provider.getSigner(catalystAdmin)
     );
-    const pretendAttributesContractAddress = users[6];
+    const pretendAttributesContractAddress = users[9];
     await catalystAsAdmin.changeAttributes(pretendAttributesContractAddress);
     await expect(commonCatalyst.getAttributes(42, [])).to.be.reverted;
   });

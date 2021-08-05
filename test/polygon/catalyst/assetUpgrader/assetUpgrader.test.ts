@@ -363,7 +363,7 @@ describe('AssetUpgrader', function () {
   it('setting a rareCatalyst where ownerOf(assetId)!= msg.sender should fail', async function () {
     const {
       user5,
-      user6,
+      user10,
       upgradeFee,
       assetUpgraderContract,
       sandContract,
@@ -381,7 +381,7 @@ describe('AssetUpgrader', function () {
 
     await transferSand(
       sandContract,
-      user6,
+      user10,
       BigNumber.from('2').mul(upgradeFee)
     );
 
@@ -398,9 +398,9 @@ describe('AssetUpgrader', function () {
     const mintingAmount = BigNumber.from('8').mul(
       BigNumber.from(gemsCatalystsUnit)
     );
-    await mintCatalyst(rareCatalyst, mintingAmount, user6);
-    await mintGem(powerGem, mintingAmount, user6);
-    await mintGem(defenseGem, mintingAmount, user6);
+    await mintCatalyst(rareCatalyst, mintingAmount, user10);
+    await mintGem(powerGem, mintingAmount, user10);
+    await mintGem(defenseGem, mintingAmount, user10);
 
     const powerGemId = await powerGem.gemId();
     const defenseGemId = await defenseGem.gemId();
@@ -408,13 +408,13 @@ describe('AssetUpgrader', function () {
 
     await expect(
       assetUpgraderContract
-        .connect(ethers.provider.getSigner(user6))
+        .connect(ethers.provider.getSigner(user10))
         .changeCatalyst(
-          user6,
+          user10,
           assetId,
           catalystId,
           [powerGemId, defenseGemId],
-          user6
+          user10
         )
     ).to.be.revertedWith('NOT_AUTHORIZED_ASSET_OWNER');
   });

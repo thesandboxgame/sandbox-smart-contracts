@@ -15,7 +15,7 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
   const user2 = users[2];
   const user4 = users[4];
   const user5 = users[5];
-  const user6 = users[6];
+  const user10 = users[10];
 
   const assetUpgraderContract: Contract = await ethers.getContract(
     'AssetUpgrader'
@@ -70,7 +70,7 @@ export const setupAssetUpgrader = deployments.createFixture(async () => {
     user2,
     user4,
     user5,
-    user6,
+    user10,
     catalystOwner,
     rareCatalyst,
     powerGem,
