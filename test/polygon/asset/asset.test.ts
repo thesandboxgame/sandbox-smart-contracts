@@ -270,21 +270,21 @@ describe('PolygonAsset.sol', function () {
       );
 
       // Ensure balance has been updated on Asset & PolygonAsset
-      const mainnet_balance = await mainnet.Asset['balanceOf(address,uint256)'](
+      const mainnetBalance = await mainnet.Asset['balanceOf(address,uint256)'](
         mainnet.users[0].address,
         tokenId
       );
-      const polygon_balance = await polygon.Asset['balanceOf(address,uint256)'](
+      const polygonBalance = await polygon.Asset['balanceOf(address,uint256)'](
         mainnet.users[0].address,
         tokenId
       );
-      expect(polygon_balance).to.be.equal(balance);
-      expect(mainnet_balance).to.be.equal(0);
+      expect(polygonBalance).to.be.equal(balance);
+      expect(mainnetBalance).to.be.equal(0);
 
       // Ensure URI is same
-      const mainnet_URI = await mainnet.Asset['tokenURI(uint256)'](tokenId);
-      const polygon_URI = await polygon.Asset['tokenURI(uint256)'](tokenId);
-      expect(mainnet_URI).to.be.equal(polygon_URI);
+      const mainnetURI = await mainnet.Asset['tokenURI(uint256)'](tokenId);
+      const polygonURI = await polygon.Asset['tokenURI(uint256)'](tokenId);
+      expect(mainnetURI).to.be.equal(polygonURI);
     });
     it('can transfer L2 minted assets: L2 to L1', async function () {
       const mainnet = await setupMainnetAsset();
@@ -316,21 +316,21 @@ describe('PolygonAsset.sol', function () {
       );
 
       // Ensure balance has been updated on Asset & PolygonAsset
-      const mainnet_balance = await mainnet.Asset['balanceOf(address,uint256)'](
+      const mainnetBalance = await mainnet.Asset['balanceOf(address,uint256)'](
         polygon.users[0].address,
         tokenId
       );
-      const polygon_balance = await polygon.Asset['balanceOf(address,uint256)'](
+      const polygonBalance = await polygon.Asset['balanceOf(address,uint256)'](
         polygon.users[0].address,
         tokenId
       );
-      expect(polygon_balance).to.be.equal(0);
-      expect(mainnet_balance).to.be.equal(balance);
+      expect(polygonBalance).to.be.equal(0);
+      expect(mainnetBalance).to.be.equal(balance);
 
       // Ensure URI is same
-      const mainnet_URI = await mainnet.Asset['tokenURI(uint256)'](tokenId);
-      const polygon_URI = await polygon.Asset['tokenURI(uint256)'](tokenId);
-      expect(mainnet_URI).to.be.equal(polygon_URI);
+      const mainnetURI = await mainnet.Asset['tokenURI(uint256)'](tokenId);
+      const polygonURI = await polygon.Asset['tokenURI(uint256)'](tokenId);
+      expect(mainnetURI).to.be.equal(polygonURI);
     });
     it('can transfer multiple L1 minted assets: L1 to L2', async function () {
       const mainnet = await setupMainnetAsset();
@@ -344,13 +344,13 @@ describe('PolygonAsset.sol', function () {
         hash
       );
 
-      const initial_mainnet_balances = [];
+      const initialMainnetBalances = [];
       for (let i = 0; i < tokenIds.length; i++) {
         const balance = await mainnet.Asset['balanceOf(address,uint256)'](
           mainnet.users[0].address,
           tokenIds[i]
         );
-        initial_mainnet_balances.push(balance);
+        initialMainnetBalances.push(balance);
       }
 
       // Approve ERC1155 predicate contarct
@@ -387,26 +387,26 @@ describe('PolygonAsset.sol', function () {
 
       // Ensure balance has been updated on Asset & PolygonAsset
       for (let i = 0; i < tokenIds.length; i++) {
-        const mainnet_balance = await mainnet.Asset[
+        const mainnetBalance = await mainnet.Asset[
           'balanceOf(address,uint256)'
         ](mainnet.users[0].address, tokenIds[i]);
-        const polygon_balance = await polygon.Asset[
+        const polygonBalance = await polygon.Asset[
           'balanceOf(address,uint256)'
         ](mainnet.users[0].address, tokenIds[i]);
         // Check if balance is updated on L1 & L2
-        expect(polygon_balance).to.be.equal(supplies[i]);
-        expect(mainnet_balance).to.be.equal(0);
+        expect(polygonBalance).to.be.equal(supplies[i]);
+        expect(mainnetBalance).to.be.equal(0);
         // Check if correct balance is reflected on L2
-        expect(polygon_balance).to.be.equal(initial_mainnet_balances[i]);
+        expect(polygonBalance).to.be.equal(initialMainnetBalances[i]);
 
         // Ensure URI is same
-        const mainnet_URI = await mainnet.Asset['tokenURI(uint256)'](
+        const mainnetURI = await mainnet.Asset['tokenURI(uint256)'](
           tokenIds[i]
         );
-        const polygon_URI = await polygon.Asset['tokenURI(uint256)'](
+        const polygonURI = await polygon.Asset['tokenURI(uint256)'](
           tokenIds[i]
         );
-        expect(mainnet_URI).to.be.equal(polygon_URI);
+        expect(mainnetURI).to.be.equal(polygonURI);
       }
     });
     it('can transfer partial supplies of L1 minted assets: L1 to L2', async function () {
@@ -415,21 +415,21 @@ describe('PolygonAsset.sol', function () {
       const hash =
         '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
       const supplies = [20, 5, 10];
-      const supply_breakdown_01 = [10, 2, 5];
-      const supply_breakdown_02 = [10, 3, 5];
+      const supplyBreakdown01 = [10, 2, 5];
+      const supplyBreakdown02 = [10, 3, 5];
       const tokenIds = await mainnet.mintMultiple(
         mainnet.users[0].address,
         supplies,
         hash
       );
 
-      const initial_mainnet_balances = [];
+      const initialMainnetBalances = [];
       for (let i = 0; i < tokenIds.length; i++) {
         const balance = await mainnet.Asset['balanceOf(address,uint256)'](
           mainnet.users[0].address,
           tokenIds[i]
         );
-        initial_mainnet_balances.push(balance);
+        initialMainnetBalances.push(balance);
       }
 
       // Approve ERC1155 predicate contarct
@@ -448,14 +448,14 @@ describe('PolygonAsset.sol', function () {
       // Partial Transfer - 01
       let data = abiCoder.encode(
         ['uint256[]', 'uint256[]', 'bytes'],
-        [tokenIds, supply_breakdown_01, tokenData]
+        [tokenIds, supplyBreakdown01, tokenData]
       );
       // Lock tokens on ERC1155 predicate contract
       await waitFor(
         mainnet.predicate.lockTokens(
           mainnet.users[0].address,
           tokenIds,
-          supply_breakdown_01,
+          supplyBreakdown01,
           data
         )
       );
@@ -467,14 +467,14 @@ describe('PolygonAsset.sol', function () {
       // Partial Transfer - 02
       data = abiCoder.encode(
         ['uint256[]', 'uint256[]', 'bytes'],
-        [tokenIds, supply_breakdown_02, tokenData]
+        [tokenIds, supplyBreakdown02, tokenData]
       );
       // Lock tokens on ERC1155 predicate contract
       await waitFor(
         mainnet.predicate.lockTokens(
           mainnet.users[0].address,
           tokenIds,
-          supply_breakdown_02,
+          supplyBreakdown02,
           data
         )
       );
@@ -485,26 +485,26 @@ describe('PolygonAsset.sol', function () {
 
       // Ensure balance has been updated on Asset & PolygonAsset
       for (let i = 0; i < tokenIds.length; i++) {
-        const mainnet_balance = await mainnet.Asset[
+        const mainnetBalance = await mainnet.Asset[
           'balanceOf(address,uint256)'
         ](mainnet.users[0].address, tokenIds[i]);
-        const polygon_balance = await polygon.Asset[
+        const polygonBalance = await polygon.Asset[
           'balanceOf(address,uint256)'
         ](mainnet.users[0].address, tokenIds[i]);
         // Check if balance is updated on L1 & L2
-        expect(polygon_balance).to.be.equal(supplies[i]);
-        expect(mainnet_balance).to.be.equal(0);
+        expect(polygonBalance).to.be.equal(supplies[i]);
+        expect(mainnetBalance).to.be.equal(0);
         // Check if correct balance is reflected on L2
-        expect(polygon_balance).to.be.equal(initial_mainnet_balances[i]);
+        expect(polygonBalance).to.be.equal(initialMainnetBalances[i]);
 
         // Ensure URI is same
-        const mainnet_URI = await mainnet.Asset['tokenURI(uint256)'](
+        const mainnetURI = await mainnet.Asset['tokenURI(uint256)'](
           tokenIds[i]
         );
-        const polygon_URI = await polygon.Asset['tokenURI(uint256)'](
+        const polygonURI = await polygon.Asset['tokenURI(uint256)'](
           tokenIds[i]
         );
-        expect(mainnet_URI).to.be.equal(polygon_URI);
+        expect(mainnetURI).to.be.equal(polygonURI);
       }
     });
     it('can transfer multiple L2 minted assets: L2 to L1', async function () {
@@ -519,13 +519,13 @@ describe('PolygonAsset.sol', function () {
         hash
       );
 
-      const initial_polygon_balances = [];
+      const initialPolygonBalances = [];
       for (let i = 0; i < tokenIds.length; i++) {
         const balance = await polygon.Asset['balanceOf(address,uint256)'](
           polygon.users[0].address,
           tokenIds[i]
         );
-        initial_polygon_balances.push(balance);
+        initialPolygonBalances.push(balance);
       }
 
       // User withdraws tokens from Polygon
@@ -549,26 +549,26 @@ describe('PolygonAsset.sol', function () {
 
       // Ensure balance has been updated on Asset & PolygonAsset
       for (let i = 0; i < tokenIds.length; i++) {
-        const mainnet_balance = await mainnet.Asset[
+        const mainnetBalance = await mainnet.Asset[
           'balanceOf(address,uint256)'
         ](polygon.users[0].address, tokenIds[i]);
-        const polygon_balance = await polygon.Asset[
+        const polygonBalance = await polygon.Asset[
           'balanceOf(address,uint256)'
         ](polygon.users[0].address, tokenIds[i]);
         // Check if balance is updated on L1 & L2
-        expect(polygon_balance).to.be.equal(0);
-        expect(mainnet_balance).to.be.equal(supplies[i]);
+        expect(polygonBalance).to.be.equal(0);
+        expect(mainnetBalance).to.be.equal(supplies[i]);
         // Check if correct balance is reflected on L2
-        expect(mainnet_balance).to.be.equal(initial_polygon_balances[i]);
+        expect(mainnetBalance).to.be.equal(initialPolygonBalances[i]);
 
         // Ensure URI is same
-        const mainnet_URI = await mainnet.Asset['tokenURI(uint256)'](
+        const mainnetURI = await mainnet.Asset['tokenURI(uint256)'](
           tokenIds[i]
         );
-        const polygon_URI = await polygon.Asset['tokenURI(uint256)'](
+        const polygonURI = await polygon.Asset['tokenURI(uint256)'](
           tokenIds[i]
         );
-        expect(mainnet_URI).to.be.equal(polygon_URI);
+        expect(mainnetURI).to.be.equal(polygonURI);
       }
     });
     it('can transfer partial supplies of L2 minted assets: L2 to L1', async function () {
@@ -577,27 +577,27 @@ describe('PolygonAsset.sol', function () {
       const hash =
         '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
       const supplies = [20, 5, 10];
-      const supply_breakdown_01 = [10, 2, 5];
-      const supply_breakdown_02 = [10, 3, 5];
+      const supplyBreakdown01 = [10, 2, 5];
+      const supplyBreakdown02 = [10, 3, 5];
       const tokenIds = await polygon.mintMultiple(
         polygon.users[0].address,
         supplies,
         hash
       );
 
-      const initial_polygon_balances = [];
+      const initialPolygonBalances = [];
       for (let i = 0; i < tokenIds.length; i++) {
         const balance = await polygon.Asset['balanceOf(address,uint256)'](
           polygon.users[0].address,
           tokenIds[i]
         );
-        initial_polygon_balances.push(balance);
+        initialPolygonBalances.push(balance);
       }
 
       // Partial Transfer - 01
       // User withdraws tokens from Polygon
       let receipt = await waitFor(
-        polygon.users[0].Asset.withdraw(tokenIds, supply_breakdown_01)
+        polygon.users[0].Asset.withdraw(tokenIds, supplyBreakdown01)
       );
       let event = receipt?.events?.filter(
         (event: Event) => event.event === 'ChainExit'
@@ -608,7 +608,7 @@ describe('PolygonAsset.sol', function () {
         mainnet.predicate.exitTokens(
           polygon.users[0].address,
           tokenIds,
-          supply_breakdown_01,
+          supplyBreakdown01,
           tokenData
         )
       );
@@ -616,7 +616,7 @@ describe('PolygonAsset.sol', function () {
       // Partial Transfer - 02
       // User withdraws tokens from Polygon
       receipt = await waitFor(
-        polygon.users[0].Asset.withdraw(tokenIds, supply_breakdown_02)
+        polygon.users[0].Asset.withdraw(tokenIds, supplyBreakdown02)
       );
       event = receipt?.events?.filter(
         (event: Event) => event.event === 'ChainExit'
@@ -627,75 +627,75 @@ describe('PolygonAsset.sol', function () {
         mainnet.predicate.exitTokens(
           polygon.users[0].address,
           tokenIds,
-          supply_breakdown_02,
+          supplyBreakdown02,
           tokenData
         )
       );
 
       // Ensure balance has been updated on Asset & PolygonAsset
       for (let i = 0; i < tokenIds.length; i++) {
-        const mainnet_balance = await mainnet.Asset[
+        const mainnetBalance = await mainnet.Asset[
           'balanceOf(address,uint256)'
         ](polygon.users[0].address, tokenIds[i]);
-        const polygon_balance = await polygon.Asset[
+        const polygonBalance = await polygon.Asset[
           'balanceOf(address,uint256)'
         ](polygon.users[0].address, tokenIds[i]);
         // Check if balance is updated on L1 & L2
-        expect(polygon_balance).to.be.equal(0);
-        expect(mainnet_balance).to.be.equal(supplies[i]);
+        expect(polygonBalance).to.be.equal(0);
+        expect(mainnetBalance).to.be.equal(supplies[i]);
         // Check if correct balance is reflected on L2
-        expect(mainnet_balance).to.be.equal(initial_polygon_balances[i]);
+        expect(mainnetBalance).to.be.equal(initialPolygonBalances[i]);
 
         // Ensure URI is same
-        const mainnet_URI = await mainnet.Asset['tokenURI(uint256)'](
+        const mainnetURI = await mainnet.Asset['tokenURI(uint256)'](
           tokenIds[i]
         );
-        const polygon_URI = await polygon.Asset['tokenURI(uint256)'](
+        const polygonURI = await polygon.Asset['tokenURI(uint256)'](
           tokenIds[i]
         );
-        expect(mainnet_URI).to.be.equal(polygon_URI);
+        expect(mainnetURI).to.be.equal(polygonURI);
       }
     });
     it('can transfer assets from multiple L1 minted batches: L1 to L2', async function () {
       const mainnet = await setupMainnetAsset();
       const polygon = await setupPolygonAsset();
       // First batch of tokens
-      const hash_01 =
+      const hash01 =
         '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
-      const supplies_01 = [20, 5, 10];
-      const tokenIds_01 = await mainnet.mintMultiple(
+      const supplies01 = [20, 5, 10];
+      const tokenIds01 = await mainnet.mintMultiple(
         mainnet.users[0].address,
-        supplies_01,
-        hash_01
+        supplies01,
+        hash01
       );
       // Second batch of tokens
-      const hash_02 =
+      const hash02 =
         '0xd40f1ad7abf13696d469acf4d6f191da56a246149473821aef5fd24664c1989e';
-      const supplies_02 = [5, 25];
-      const tokenIds_02 = await mainnet.mintMultiple(
+      const supplies02 = [5, 25];
+      const tokenIds02 = await mainnet.mintMultiple(
         mainnet.users[0].address,
-        supplies_02,
-        hash_02
+        supplies02,
+        hash02
       );
 
-      const initial_mainnet_balances_01: number[] = [];
-      for (let i = 0; i < tokenIds_01.length; i++) {
+      const initialMainnetBalances01: number[] = [];
+      for (let i = 0; i < tokenIds01.length; i++) {
         const balance = await mainnet.Asset['balanceOf(address,uint256)'](
           mainnet.users[0].address,
-          tokenIds_01[i]
+          tokenIds01[i]
         );
-        initial_mainnet_balances_01.push(balance);
+        initialMainnetBalances01.push(balance);
       }
-      const initial_mainnet_balances_02: number[] = [];
-      for (let i = 0; i < tokenIds_02.length; i++) {
+      const initialMainnetBalances02: number[] = [];
+      for (let i = 0; i < tokenIds02.length; i++) {
         const balance = await mainnet.Asset['balanceOf(address,uint256)'](
           mainnet.users[0].address,
-          tokenIds_02[i]
+          tokenIds02[i]
         );
-        initial_mainnet_balances_02.push(balance);
+        initialMainnetBalances02.push(balance);
       }
-      const initial_mainnet_balances = initial_mainnet_balances_01.concat(
-        initial_mainnet_balances_02
+      const initialMainnetBalances = initialMainnetBalances01.concat(
+        initialMainnetBalances02
       );
 
       // Approve ERC1155 predicate contarct
@@ -707,9 +707,9 @@ describe('PolygonAsset.sol', function () {
       );
 
       // Generate data to be passed to Polygon
-      const tokenIds = tokenIds_01.concat(tokenIds_02);
-      const supplies = supplies_01.concat(supplies_02);
-      const ipfsHashes = [hash_01, hash_01, hash_01, hash_02, hash_02];
+      const tokenIds = tokenIds01.concat(tokenIds02);
+      const supplies = supplies01.concat(supplies02);
+      const ipfsHashes = [hash01, hash01, hash01, hash02, hash02];
 
       const tokenData = abiCoder.encode(['bytes32[]'], [ipfsHashes]);
       const data = abiCoder.encode(
@@ -732,73 +732,73 @@ describe('PolygonAsset.sol', function () {
 
       // Ensure balance has been updated on Asset & PolygonAsset
       for (let i = 0; i < tokenIds.length; i++) {
-        const mainnet_balance = await mainnet.Asset[
+        const mainnetBalance = await mainnet.Asset[
           'balanceOf(address,uint256)'
         ](mainnet.users[0].address, tokenIds[i]);
-        const polygon_balance = await polygon.Asset[
+        const polygonBalance = await polygon.Asset[
           'balanceOf(address,uint256)'
         ](mainnet.users[0].address, tokenIds[i]);
         // Check if balance is updated on L1 & L2
-        expect(polygon_balance).to.be.equal(supplies[i]);
-        expect(mainnet_balance).to.be.equal(0);
+        expect(polygonBalance).to.be.equal(supplies[i]);
+        expect(mainnetBalance).to.be.equal(0);
         // Check if correct balance is reflected on L2
-        expect(polygon_balance).to.be.equal(initial_mainnet_balances[i]);
+        expect(polygonBalance).to.be.equal(initialMainnetBalances[i]);
 
         // Ensure URI is same
-        const mainnet_URI = await mainnet.Asset['tokenURI(uint256)'](
+        const mainnetURI = await mainnet.Asset['tokenURI(uint256)'](
           tokenIds[i]
         );
-        const polygon_URI = await polygon.Asset['tokenURI(uint256)'](
+        const polygonURI = await polygon.Asset['tokenURI(uint256)'](
           tokenIds[i]
         );
-        expect(mainnet_URI).to.be.equal(polygon_URI);
+        expect(mainnetURI).to.be.equal(polygonURI);
       }
     });
     it('can transfer assets from multiple L2 minted batches: L2 to L1', async function () {
       const mainnet = await setupMainnetAsset();
       const polygon = await setupPolygonAsset();
       // First batch of tokens
-      const hash_01 =
+      const hash01 =
         '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
-      const supplies_01 = [20, 5, 10];
-      const tokenIds_01 = await polygon.mintMultiple(
+      const supplies01 = [20, 5, 10];
+      const tokenIds01 = await polygon.mintMultiple(
         polygon.users[0].address,
-        supplies_01,
-        hash_01
+        supplies01,
+        hash01
       );
       // Second batch of tokens
-      const hash_02 =
+      const hash02 =
         '0xd40f1ad7abf13696d469acf4d6f191da56a246149473821aef5fd24664c1989e';
-      const supplies_02 = [5, 25];
-      const tokenIds_02 = await polygon.mintMultiple(
+      const supplies02 = [5, 25];
+      const tokenIds02 = await polygon.mintMultiple(
         polygon.users[0].address,
-        supplies_02,
-        hash_02
+        supplies02,
+        hash02
       );
 
-      const initial_polygon_balances_01: number[] = [];
-      for (let i = 0; i < tokenIds_01.length; i++) {
+      const initialPolygonBalances01: number[] = [];
+      for (let i = 0; i < tokenIds01.length; i++) {
         const balance = await polygon.Asset['balanceOf(address,uint256)'](
           polygon.users[0].address,
-          tokenIds_01[i]
+          tokenIds01[i]
         );
-        initial_polygon_balances_01.push(balance);
+        initialPolygonBalances01.push(balance);
       }
-      const initial_polygon_balances_02: number[] = [];
-      for (let i = 0; i < tokenIds_02.length; i++) {
+      const initialPolygonBalances02: number[] = [];
+      for (let i = 0; i < tokenIds02.length; i++) {
         const balance = await polygon.Asset['balanceOf(address,uint256)'](
           polygon.users[0].address,
-          tokenIds_02[i]
+          tokenIds02[i]
         );
-        initial_polygon_balances_02.push(balance);
+        initialPolygonBalances02.push(balance);
       }
-      const initial_polygon_balances = initial_polygon_balances_01.concat(
-        initial_polygon_balances_02
+      const initialPolygonBalances = initialPolygonBalances01.concat(
+        initialPolygonBalances02
       );
 
       // Generate data to be passed to Polygon
-      const tokenIds = tokenIds_01.concat(tokenIds_02);
-      const supplies = supplies_01.concat(supplies_02);
+      const tokenIds = tokenIds01.concat(tokenIds02);
+      const supplies = supplies01.concat(supplies02);
 
       // User withdraws tokens from Polygon
       const receipt = await waitFor(
@@ -821,26 +821,26 @@ describe('PolygonAsset.sol', function () {
 
       // Ensure balance has been updated on Asset & PolygonAsset
       for (let i = 0; i < tokenIds.length; i++) {
-        const mainnet_balance = await mainnet.Asset[
+        const mainnetBalance = await mainnet.Asset[
           'balanceOf(address,uint256)'
         ](polygon.users[0].address, tokenIds[i]);
-        const polygon_balance = await polygon.Asset[
+        const polygonBalance = await polygon.Asset[
           'balanceOf(address,uint256)'
         ](polygon.users[0].address, tokenIds[i]);
         // Check if balance is updated on L1 & L2
-        expect(mainnet_balance).to.be.equal(supplies[i]);
-        expect(polygon_balance).to.be.equal(0);
+        expect(mainnetBalance).to.be.equal(supplies[i]);
+        expect(polygonBalance).to.be.equal(0);
         // Check if correct balance is reflected on L2
-        expect(mainnet_balance).to.be.equal(initial_polygon_balances[i]);
+        expect(mainnetBalance).to.be.equal(initialPolygonBalances[i]);
 
         // Ensure URI is same
-        const mainnet_URI = await mainnet.Asset['tokenURI(uint256)'](
+        const mainnetURI = await mainnet.Asset['tokenURI(uint256)'](
           tokenIds[i]
         );
-        const polygon_URI = await polygon.Asset['tokenURI(uint256)'](
+        const polygonURI = await polygon.Asset['tokenURI(uint256)'](
           tokenIds[i]
         );
-        expect(mainnet_URI).to.be.equal(polygon_URI);
+        expect(mainnetURI).to.be.equal(polygonURI);
       }
     });
     it('can return L1 minted assets: L1 to L2 to L1', async function () {
@@ -880,16 +880,16 @@ describe('PolygonAsset.sol', function () {
       // Emulate the ChildChainManager call to deposit
       await waitFor(polygon.childChainManager.callDeposit(user.address, data));
       // Ensure balance has been updated on Asset & PolygonAsset
-      let mainnet_balance = await mainnet.Asset['balanceOf(address,uint256)'](
+      let mainnetBalance = await mainnet.Asset['balanceOf(address,uint256)'](
         user.address,
         tokenId
       );
-      let polygon_balance = await polygon.Asset['balanceOf(address,uint256)'](
+      let polygonBalance = await polygon.Asset['balanceOf(address,uint256)'](
         user.address,
         tokenId
       );
-      expect(polygon_balance).to.be.equal(balance);
-      expect(mainnet_balance).to.be.equal(0);
+      expect(polygonBalance).to.be.equal(balance);
+      expect(mainnetBalance).to.be.equal(0);
 
       // L2 -> L1
       // User withdraws tokens from Polygon
@@ -911,21 +911,21 @@ describe('PolygonAsset.sol', function () {
       );
 
       // Ensure balance has been updated on Asset & PolygonAsset
-      mainnet_balance = await mainnet.Asset['balanceOf(address,uint256)'](
+      mainnetBalance = await mainnet.Asset['balanceOf(address,uint256)'](
         user.address,
         tokenId
       );
-      polygon_balance = await polygon.Asset['balanceOf(address,uint256)'](
+      polygonBalance = await polygon.Asset['balanceOf(address,uint256)'](
         user.address,
         tokenId
       );
-      expect(polygon_balance).to.be.equal(0);
-      expect(mainnet_balance).to.be.equal(balance);
+      expect(polygonBalance).to.be.equal(0);
+      expect(mainnetBalance).to.be.equal(balance);
 
       // Ensure URI is same
-      const mainnet_URI = await mainnet.Asset['tokenURI(uint256)'](tokenId);
-      const polygon_URI = await polygon.Asset['tokenURI(uint256)'](tokenId);
-      expect(mainnet_URI).to.be.equal(polygon_URI);
+      const mainnetURI = await mainnet.Asset['tokenURI(uint256)'](tokenId);
+      const polygonURI = await polygon.Asset['tokenURI(uint256)'](tokenId);
+      expect(mainnetURI).to.be.equal(polygonURI);
     });
     it('can return L2 minted assets: L2 to L1 to L2', async function () {
       const mainnet = await setupMainnetAsset();
@@ -960,16 +960,16 @@ describe('PolygonAsset.sol', function () {
         )
       );
       // Ensure balance has been updated on Asset & PolygonAsset
-      let mainnet_balance = await mainnet.Asset['balanceOf(address,uint256)'](
+      let mainnetBalance = await mainnet.Asset['balanceOf(address,uint256)'](
         user.address,
         tokenId
       );
-      let polygon_balance = await polygon.Asset['balanceOf(address,uint256)'](
+      let polygonBalance = await polygon.Asset['balanceOf(address,uint256)'](
         user.address,
         tokenId
       );
-      expect(polygon_balance).to.be.equal(0);
-      expect(mainnet_balance).to.be.equal(balance);
+      expect(polygonBalance).to.be.equal(0);
+      expect(mainnetBalance).to.be.equal(balance);
 
       // L1 -> L2
       // Approve ERC1155 predicate contarct
@@ -992,21 +992,21 @@ describe('PolygonAsset.sol', function () {
       // Emulate the ChildChainManager call to deposit
       await waitFor(polygon.childChainManager.callDeposit(user.address, data));
       // Ensure balance has been updated on Asset & PolygonAsset
-      mainnet_balance = await mainnet.Asset['balanceOf(address,uint256)'](
+      mainnetBalance = await mainnet.Asset['balanceOf(address,uint256)'](
         user.address,
         tokenId
       );
-      polygon_balance = await polygon.Asset['balanceOf(address,uint256)'](
+      polygonBalance = await polygon.Asset['balanceOf(address,uint256)'](
         user.address,
         tokenId
       );
-      expect(polygon_balance).to.be.equal(balance);
-      expect(mainnet_balance).to.be.equal(0);
+      expect(polygonBalance).to.be.equal(balance);
+      expect(mainnetBalance).to.be.equal(0);
 
       // Ensure URI is same
-      const mainnet_URI = await mainnet.Asset['tokenURI(uint256)'](tokenId);
-      const polygon_URI = await polygon.Asset['tokenURI(uint256)'](tokenId);
-      expect(mainnet_URI).to.be.equal(polygon_URI);
+      const mainnetURI = await mainnet.Asset['tokenURI(uint256)'](tokenId);
+      const polygonURI = await polygon.Asset['tokenURI(uint256)'](tokenId);
+      expect(mainnetURI).to.be.equal(polygonURI);
     });
   });
 });
