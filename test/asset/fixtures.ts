@@ -16,7 +16,8 @@ export const setupAsset = deployments.createFixture(async function () {
     'TRUSTED_FORWARDER',
   ]);
   // await asset_regenerate_and_distribute(hre);
-  const otherAccounts = await getUnnamedAccounts();
+  const unnamedAccounts = await getUnnamedAccounts();
+  const otherAccounts = [...unnamedAccounts];
   const minter = otherAccounts[0];
   otherAccounts.splice(0, 1);
 

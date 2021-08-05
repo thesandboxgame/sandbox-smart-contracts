@@ -12,7 +12,8 @@ import {waitFor, setupUsers} from '../../utils';
 export const setupAsset = deployments.createFixture(async function () {
   await deployments.fixture(['PolygonAsset']);
   // await asset_regenerate_and_distribute(hre);
-  const otherAccounts = await getUnnamedAccounts();
+  const unnamedAccounts = await getUnnamedAccounts();
+  const otherAccounts = [...unnamedAccounts];
   const minter = otherAccounts[0];
   otherAccounts.splice(0, 1);
 
