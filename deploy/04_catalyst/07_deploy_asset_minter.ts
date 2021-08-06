@@ -6,17 +6,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const AssetAttributesRegistry = await deployments.get(
     'AssetAttributesRegistry'
   );
   const Asset = await deployments.get('Asset');
   const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
 
-  const {
-    deployer,
-    assetMinterAdmin,
-    trustedForwarder,
-  } = await getNamedAccounts();
+  const {deployer, assetMinterAdmin} = await getNamedAccounts();
 
   await deploy(`AssetMinter`, {
     from: deployer,
@@ -26,7 +23,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       Asset.address,
       GemsCatalystsRegistry.address,
       assetMinterAdmin,
-      trustedForwarder,
+      TRUSTED_FORWARDER.address,
     ],
   });
 };
@@ -36,5 +33,6 @@ func.dependencies = [
   'AssetAttributesRegistry_deploy',
   'Asset_deploy',
   'GemsCatalystsRegistry_deploy',
+  'TRUSTED_FORWARDER',
 ];
 func.skip = skipUnlessTest; // disabled for now
