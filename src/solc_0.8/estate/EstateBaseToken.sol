@@ -8,10 +8,11 @@ import "../Game/GameBaseToken.sol";
 import "../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../libraries/UintToUintMap.sol";
+import "../common/BaseWithStorage/WithMinter.sol";
 
 /// @dev An updated Estate Token contract using a simplified verison of LAND with no Quads
 
-contract EstateBaseToken is ImmutableERC721, Initializable {
+contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
     using EnumerableMap for EnumerableMap.UintToUintMap;
     uint8 internal constant OWNER = 0;
     uint8 internal constant ADD = 1;
@@ -29,7 +30,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
 
     LandToken internal _land;
     GameBaseToken internal _gameToken;
-    address internal _minter;
 
     /// @param landIds LAND tokenIds added, Games added, Games removed, uri
     /// @param junctions
@@ -74,13 +74,12 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         _check_authorized(from, ADD);
         (uint256 estateId, uint256 storageId) = _mintEstate(from, to, _nextId++, 1, true);
         _metaData[storageId] = creation.uri;
-        _addLandsGames(from, storageId, creation.landIds, creation.gameIds, creation.junctions, true);
+        _addLandGames(from, storageId, creation.landIds, creation.gameIds, creation.junctions, true);
         emit EstateTokenUpdated(0, estateId, creation);
         return estateId;
     }
 
-    /// @notice Update an existing ESTATE token.This actually burns old token
-    /// and mints new token with same basId & incremented version.
+    /// @notice lets the estate owner to add lands and/or add/remove games for these lands
     /// @param from The one updating the ESTATE token.
     /// @param to The address to transfer removed GAMES to.
     /// @param estateId The current id of the ESTATE token.
@@ -95,10 +94,8 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         _check_hasOwnerRights(from, estateId);
         uint256 storageId = _storageId(estateId);
         _metaData[storageId] = update.uri;
-        if (update.landIds.length != 0) {
-            _check_authorized(from, ADD);
-        }
-        _addLandsGames(from, storageId, update.landIds, update.gameIds, update.junctions, false);
+        _check_authorized(from, ADD);
+        _addLandGames(from, storageId, update.landIds, update.gameIds, update.junctions, false);
         uint256 newId = _incrementTokenVersion(from, estateId);
         emit EstateTokenUpdated(estateId, newId, update);
         return newId;
@@ -117,7 +114,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         EstateCRUDData memory rebuild
     ) external returns (uint256) {
         _check_hasOwnerRights(from, estateId);
-        _check_authorized(from, BREAK);
         _check_authorized(from, ADD);
         uint256 storageId = _storageId(estateId);
         // @todo ensure resultant estate's lands are still adjacent
@@ -227,7 +223,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    function _addLandsGames(
+    function _addLandGames(
         address sender,
         uint256 storageId,
         uint256[] memory landIds,
@@ -276,7 +272,27 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
             lastX = x;
             lastY = y;
         }
+        // if adding a land that is not adjacent --> revert
+        // if removing a land that breaks up all estate -->
         _upsertLandsGames(sender, landIds, gameIds, storageId);
+    }
+
+    function _removeLandsGames(
+        address to,
+        uint256 storageId,
+        uint256[] memory landsToRemove
+    ) internal {
+        uint256 length = landsToRemove.length;
+        uint256[] memory gameIdsToRemove = new uint256[](length);
+        for (uint256 i = 0; i < length; i++) {
+            uint256 gameId = estates[storageId].get(landsToRemove[i]);
+            if (gameId != 0) {
+                gameIdsToRemove[i] = gameId;
+            }
+            require(estates[storageId].remove(landsToRemove[i]));
+        }
+        _land.batchTransferFrom(address(this), to, landsToRemove, "");
+        _gameToken.batchTransferFrom(address(this), to, gameIdsToRemove, "");
     }
 
     function _upsertLandsGames(
@@ -300,24 +316,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         _land.batchTransferFrom(sender, address(this), landIds, "");
         _gameToken.batchTransferFrom(sender, address(this), gamesToAdd, "");
         _gameToken.batchTransferFrom(address(this), sender, gamesToRemove, "");
-    }
-
-    function _removeLandsGames(
-        address to,
-        uint256 storageId,
-        uint256[] memory landsToRemove
-    ) internal {
-        uint256 length = landsToRemove.length;
-        uint256[] memory gameIdsToRemove = new uint256[](length);
-        for (uint256 i = 0; i < length; i++) {
-            uint256 gameId = estates[storageId].get(landsToRemove[i]);
-            if (gameId != 0) {
-                gameIdsToRemove[i] = gameId;
-            }
-            require(estates[storageId].remove(landsToRemove[i]));
-        }
-        _land.batchTransferFrom(address(this), to, landsToRemove, "");
-        _gameToken.batchTransferFrom(address(this), to, gameIdsToRemove, "");
     }
 
     /// @dev used to increment the version in a tokenId by burning the original and reminting a new token. Mappings to token-specific data are preserved via the storageId mechanism.
@@ -344,11 +342,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable {
         address msgSender = _msgSender();
         if (action == ADD) {
             address minter = _minter;
-            if (minter == address(uint160(0))) {
-                require(msgSender == sender, "not _check_authorized");
-            } else {
-                require(msgSender == minter, "only minter allowed");
-            }
+            require(msgSender == minter || msgSender == sender, "UNAUTHORIZED_ADD");
         } else {
             require(msgSender == sender, "not _check_authorized");
         }
