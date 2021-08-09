@@ -44,3 +44,6 @@ giveaway.json
 .openzeppelin/unknown-*.json
 
 .idea/
+
+# mkdocs site output
+site/
