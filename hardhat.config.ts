@@ -8,8 +8,13 @@ import 'solidity-coverage';
 import 'hardhat-contract-sizer';
 import '@nomiclabs/hardhat-etherscan';
 import {node_url, accounts} from './utils/network';
+import './utils/docgenMarkdown';
 
 const config: HardhatUserConfig = {
+  docgen: {
+    path: 'docs/reference/docgen',
+    clear: true,
+  },
   gasReporter: {
     currency: 'USD',
     gasPrice: 100,
