@@ -2,7 +2,7 @@
 description: Preparing a LAND sale
 ---
 
-# How to prepare a LAND sale
+# How to prepare a LAND sale ?
 
 ## Requirements
 

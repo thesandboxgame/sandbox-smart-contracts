@@ -1,9 +1,8 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.5;
-pragma experimental ABIEncoderV2;
+pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
-import "@openzeppelin/contracts/token/ERC1155/IERC1155Receiver.sol";
+import "@openzeppelin/contracts-0.8/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155Receiver.sol";
 import "./ClaimERC1155ERC721ERC20.sol";
 import "../../common/BaseWithStorage/WithAdmin.sol";
 

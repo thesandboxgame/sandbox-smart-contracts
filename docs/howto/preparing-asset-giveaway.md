@@ -2,7 +2,7 @@
 description: Preparing an ASSET giveaway
 ---
 
-# How to prepare an ASSET giveaway
+# How to prepare an ASSET giveaway ?
 
 If you haven't done it, follow the [getting started](../intro/index.md) tutorial first.
 
