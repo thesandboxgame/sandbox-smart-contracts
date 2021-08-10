@@ -93,8 +93,6 @@ structs, enums or variables but is clearer to use an interface to generate the a
 from outside the blockchain. On the other hand an abstract contract is more powerful. So use interfaces when possible
 and if not then use abstract contracts.
 
-### TO DISCUSS: Use of Libraries (except for the all-internal libraries)
-
 ## Upgradeable contracts
 
 ### Leave some space in the storage for future variables at the end
@@ -175,10 +173,16 @@ contract Example {
 The solidity linter warns about it. Reason strings (those used in `revert`) that takes more than 32 bytes make the
 contract byte code bigger.
 
-### TO DISCUSS: Pull over Push
+### Sending funds to an uncontrolled address
 
-From the list of [Solidity Patterns](https://github.com/fravoll/solidity-patterns) this one is a very important one: "
-Sending ether to another address in Ethereum involves a call to the receiving entity".
+Sending ether to another address in Ethereum involves a call to the receiving entity, if you are sending funds to an
+address that is not under your control this can be insecure.
+
+When possible use the [pull over push pattern](https://github.com/fravoll/solidity-patterns). This pattern involves more
+interactions with the end user which can have a negative impact. A weaker alternative is
+the [secure ether transfer](https://github.com/fravoll/solidity-patterns/blob/master/docs/secure_ether_transfer.md).
+
+In any case when sending fund to an address that is not under your control you must be very carefull about it.
 
 ### Use of view methods that reverts
 
@@ -202,7 +206,7 @@ case before reinventing the wheel check available libraries.
 
 Yarn and npm can be used to include dependencies, but it must be used with care because you end up using code that came
 from a repository that is not under your control. Another alternative is to copy the code from the library into your own
-source tree, the downside is that updating the code when the library is update is more complicated. 
+source tree, the downside is that updating the code when the library is update is more complicated.
 
 Use:
 
