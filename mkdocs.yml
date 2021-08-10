@@ -17,6 +17,7 @@ nav:
       - Running a lottery: howto/running-lottery.md
   - Tutorials:
       - Developing your first feature: tutorials/developing-first-feature.md
+      - Writing documentation: tutorials/writing-documentation.md
   - Topics:
       - Blockchain:
           - Ethereum: topics/blockchain/ethereum.md
@@ -24,6 +25,9 @@ nav:
   - Reference:
       - Contracts:
         - BundeSandSale: reference/contracts/bundle-sand-sale.md
+      - DeFi:
+          - Liquidity provider: topics/defi/liquidity-provider/sand-staking.md
+
 markdown_extensions:
   - admonition
   - pymdownx.superfences

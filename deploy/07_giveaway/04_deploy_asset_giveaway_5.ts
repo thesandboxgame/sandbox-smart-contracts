@@ -4,6 +4,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 import {createAssetClaimMerkleTree} from '../../data/giveaways/asset_giveaway_5/getAssets';
 import {AddressZero} from '@ethersproject/constants';
 import helpers, {AssetClaim} from '../../lib/merkleTreeHelper';
+import {skipUnlessL1} from '../../utils/network';
 const {calculateClaimableAssetHash} = helpers;
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -71,3 +72,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['Asset_Giveaway_5', 'Asset_Giveaway_5_deploy'];
 func.dependencies = ['Asset_deploy'];
+func.skip = skipUnlessL1;

@@ -38,19 +38,20 @@ contract PolygonAssetV2 is ERC1155ERC721 {
         require(user != address(0), "INVALID_DEPOSIT_USER");
         (uint256[] memory ids, uint256[] memory amounts, bytes memory data) =
             abi.decode(depositData, (uint256[], uint256[], bytes));
-        address sender = _msgSender();
-        bytes32 hash = abi.decode(data, (bytes32));
+        bytes32[] memory hashes = abi.decode(data, (bytes32[]));
         for (uint256 i = 0; i < ids.length; i++) {
-            // ERC-721
-            if ((amounts[i] == 1) && (ids[i] & IS_NFT > 0)) {
-                uint8 rarity = 0;
-                _mint(hash, amounts[i], rarity, sender, user, ids[0], data, false);
+            uint256 uriId = ids[i] & URI_ID;
+            _metadataHash[uriId] = hashes[i];
+            _rarityPacks[uriId] = "0x00";
+            uint16 numNFTs = 0;
+            if ((ids[i] & IS_NFT) > 0) {
+                numNFTs = 1;
             }
-            // ERC-1155
-            else {
-                uint8 rarity = 0;
-                _mint(hash, amounts[i], rarity, sender, user, ids[0], data, false);
-            }
+            uint256[] memory singleId = new uint256[](1);
+            singleId[0] = ids[i];
+            uint256[] memory singleAmount = new uint256[](1);
+            singleAmount[0] = amounts[i];
+            _mintBatches(singleAmount, user, singleId, numNFTs);
         }
     }
 
@@ -59,11 +60,17 @@ contract PolygonAssetV2 is ERC1155ERC721 {
     /// @param ids ids to withdraw
     /// @param amounts amounts to withdraw
     function withdraw(uint256[] calldata ids, uint256[] calldata amounts) external {
+        bytes32[] memory hashes = new bytes32[](ids.length);
+        for (uint256 i = 0; i < ids.length; i++) {
+            bytes32 hash = _metadataHash[ids[i] & URI_ID];
+            hashes[i] = hash;
+        }
+        bytes memory data = abi.encode(hashes);
         if (ids.length == 1) {
             _burn(_msgSender(), ids[0], amounts[0]);
         } else {
             _burnBatch(_msgSender(), ids, amounts);
         }
-        emit ChainExit(_msgSender(), ids, amounts, "");
+        emit ChainExit(_msgSender(), ids, amounts, data);
     }
 }

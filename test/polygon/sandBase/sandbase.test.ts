@@ -158,13 +158,16 @@ describe('SandBaseToken.sol', function () {
         usersWithoutSand,
       } = await setupTest();
       const sandTransferValue = DECIMALS_18.mul(200);
-      sandBeneficiary.SandBaseToken.transfer(
-        usersWithoutSand,
+      await sandBeneficiary.SandBaseToken.transfer(
+        usersWithoutSand[0].address,
         sandTransferValue
       );
-      userWithSand.SandBaseToken.transfer(usersWithoutSand, sandTransferValue);
-      usersWithoutSand[0].SandBaseToken.transfer(
-        usersWithoutSand,
+      await userWithSand.SandBaseToken.transfer(
+        usersWithoutSand[0].address,
+        sandTransferValue
+      );
+      await usersWithoutSand[0].SandBaseToken.transfer(
+        usersWithoutSand[0].address,
         sandTransferValue
       );
       const totalSupply = await SandBaseToken.totalSupply();
