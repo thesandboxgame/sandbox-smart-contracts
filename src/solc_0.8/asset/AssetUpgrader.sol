@@ -2,15 +2,15 @@
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/utils/math/SafeMath.sol";
+import "@openzeppelin/contracts-0.8/metatx/ERC2771Context.sol";
 import "../common/interfaces/IAssetAttributesRegistry.sol";
 import "../common/interfaces/IAssetUpgrader.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
 import "../common/interfaces/IERC20Extended.sol";
 import "../common/interfaces/IAssetToken.sol";
-import "../common/BaseWithStorage/WithMetaTransaction.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
-contract AssetUpgrader is WithMetaTransaction, IAssetUpgrader {
+contract AssetUpgrader is ERC2771Context, IAssetUpgrader {
     using SafeMath for uint256;
 
     address public immutable feeRecipient;
@@ -34,6 +34,7 @@ contract AssetUpgrader is WithMetaTransaction, IAssetUpgrader {
     /// @param _upgradeFee: the fee in Sand paid for an upgrade (setting or replacing a catalyst)
     /// @param _gemAdditionFee: the fee in Sand paid for adding gems
     /// @param _feeRecipient: address receiving the Sand fee
+    /// @param trustedForwarder: address of the trusted forwarder (used for metaTX)
     constructor(
         IAssetAttributesRegistry registry,
         IERC20Extended sand,
@@ -41,8 +42,9 @@ contract AssetUpgrader is WithMetaTransaction, IAssetUpgrader {
         GemsCatalystsRegistry gemsCatalystsRegistry,
         uint256 _upgradeFee,
         uint256 _gemAdditionFee,
-        address _feeRecipient
-    ) {
+        address _feeRecipient,
+        address trustedForwarder
+    ) ERC2771Context(trustedForwarder) {
         _registry = registry;
         _sand = sand;
         _asset = asset;
@@ -67,7 +69,7 @@ contract AssetUpgrader is WithMetaTransaction, IAssetUpgrader {
         address to
     ) external override returns (uint256 tokenId) {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        _checkAuthorization(from);
+        require(_msgSender() == from, "AUTH_ACCESS_DENIED");
         tokenId = _asset.extractERC721From(from, assetId, from);
         _changeCatalyst(from, tokenId, catalystId, gemIds, to);
     }
@@ -80,7 +82,7 @@ contract AssetUpgrader is WithMetaTransaction, IAssetUpgrader {
     //     address to
     // ) external override returns (uint256 tokenId) {
     //     require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-    //     _checkAuthorization(from);
+    //     require(_msgSender() == from, "AUTH_ACCESS_DENIED");
     //     tokenId = _asset.extractERC721From(from, assetId, from);
     //     _addGems(from, assetId, gemIds, to);
     // }
@@ -100,7 +102,7 @@ contract AssetUpgrader is WithMetaTransaction, IAssetUpgrader {
         address to
     ) external override returns (uint256 tokenId) {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        _checkAuthorization(from);
+        require(_msgSender() == from, "AUTH_ACCESS_DENIED");
         _changeCatalyst(from, assetId, catalystId, gemIds, to);
         return assetId;
     }
@@ -117,7 +119,7 @@ contract AssetUpgrader is WithMetaTransaction, IAssetUpgrader {
         address to
     ) external override {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        _checkAuthorization(from);
+        require(_msgSender() == from, "AUTH_ACCESS_DENIED");
         _addGems(from, assetId, gemIds, to);
     }
 

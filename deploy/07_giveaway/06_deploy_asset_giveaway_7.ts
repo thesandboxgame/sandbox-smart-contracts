@@ -1,10 +1,9 @@
 import fs from 'fs';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {createAssetClaimMerkleTree} from '../../data/giveaways/asset_giveaway_5/getAssets';
+import {createAssetClaimMerkleTree} from '../../data/giveaways/asset_giveaway_7/getAssets';
 import {AddressZero} from '@ethersproject/constants';
 import helpers, {AssetClaim} from '../../lib/merkleTreeHelper';
-import {skipUnlessL1} from '../../utils/network';
 const {calculateClaimableAssetHash} = helpers;
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -18,7 +17,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     assetData = JSON.parse(
       fs
         .readFileSync(
-          `data/giveaways/asset_giveaway_5/assets_${hre.network.name}.json`
+          `data/giveaways/asset_giveaway_7/assets_${hre.network.name}.json`
         )
         .toString()
     );
@@ -27,7 +26,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   if (assetData.length === 0) {
-    log('no assets for Asset_Giveaway_5');
+    log('no assets for Asset_Giveaway_7');
     return;
   }
 
@@ -40,7 +39,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const assetContract = await deployments.get('Asset');
 
-  await deploy('Asset_Giveaway_5', {
+  await deploy('Asset_Giveaway_7', {
     contract: 'AssetGiveaway',
     from: deployer,
     linkedData: assets,
@@ -64,12 +63,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
   if (network.name !== 'hardhat') {
     fs.writeFileSync(
-      `./secret/.asset_giveaway_5_claims_proofs_${chainId}.json`,
+      `./secret/.asset_giveaway_7_claims_proofs_${chainId}.json`,
       JSON.stringify(claimsWithProofs, null, '  ')
     );
   }
 };
 export default func;
-func.tags = ['Asset_Giveaway_5', 'Asset_Giveaway_5_deploy'];
+func.tags = ['Asset_Giveaway_7', 'Asset_Giveaway_7_deploy'];
 func.dependencies = ['Asset_deploy'];
-func.skip = skipUnlessL1;
