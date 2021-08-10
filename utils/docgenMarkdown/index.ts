@@ -24,7 +24,7 @@ extendConfig(function (config, userConfig) {
   );
 });
 
-const NAME = 'docgenMarkdown';
+const NAME = 'generate-docs';
 const DESC = 'Generate NatSpec documentation automatically on compilation';
 
 task(NAME, DESC, async function (args, hre) {
