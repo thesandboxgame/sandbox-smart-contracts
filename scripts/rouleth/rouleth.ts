@@ -3,7 +3,7 @@ import {ethers} from 'hardhat';
 import {BigNumber, utils} from 'ethers';
 import {TheGraph} from '../utils/thegraph';
 import 'dotenv/config';
-// run the script: yarn mainnet:run scripts/rouleth/rouleth.ts
+// run the script: yarn execute mainnet scripts/rouleth/rouleth.ts
 // this script need a json file with the same file name containing a block number, a number of ticket and a list of addresses
 const {solidityKeccak256} = utils;
 interface Owner {

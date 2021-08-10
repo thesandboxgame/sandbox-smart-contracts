@@ -21,7 +21,7 @@ describe('Gems & Catalysts permit', function () {
   let deadline: BigNumber;
 
   before(async function () {
-    await deployments.fixture('GemsCatalystsRegistry');
+    await deployments.fixture();
     ({
       luckGem,
       epicCatalyst,

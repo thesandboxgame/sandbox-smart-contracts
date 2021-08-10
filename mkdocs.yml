@@ -14,8 +14,10 @@ nav:
       - Preparing a LAND sale: howto/preparing-land-sale.md
       - Preparing an ASSET giveaway: howto/preparing-asset-giveaway.md
       - Generating liquidity pool rewards: howto/generating-liquidity-pool-rewards.md
+      - Running a lottery: howto/running-lottery.md
   - Tutorials:
       - Developing your first feature: tutorials/developing-first-feature.md
+      - Writing documentation: tutorials/writing-documentation.md
   - Topics:
       - Blockchain:
           - Ethereum: topics/blockchain/ethereum.md
@@ -24,9 +26,13 @@ nav:
           - Giveaway:
             - Single: topics/asset/giveaway/single.md
             - Multiple: topics/asset/giveaway/multiple.md
+      - DeFi:
+          - Liquidity provider: topics/defi/liquidity-provider/sand-staking.md
 
 markdown_extensions:
   - admonition
   - pymdownx.superfences
   - toc:
       permalink: '#'
+  - plantuml_markdown:
+      server: http://www.plantuml.com/plantuml

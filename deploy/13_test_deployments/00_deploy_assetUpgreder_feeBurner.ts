@@ -28,6 +28,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       ],
     });
 
+    const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
     const MockAssetAttributesRegistry = await deployments.get(
       'MockAssetAttributesRegistry'
     );
@@ -42,6 +43,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         upgradeFee,
         gemAdditionFee,
         BURN_ADDRESS,
+        TRUSTED_FORWARDER.address,
       ],
     });
 
@@ -76,5 +78,6 @@ func.dependencies = [
   'Sand_Deploy',
   'Asset_Deploy',
   'GemsCatalystsRegistry_deploy',
+  'TRUSTED_FORWARDER',
 ];
 func.skip = skipUnlessTest; // TODO remove this deployment if this is just for test

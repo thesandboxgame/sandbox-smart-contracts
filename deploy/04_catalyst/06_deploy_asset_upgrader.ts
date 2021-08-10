@@ -12,6 +12,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
   const Sand = await deployments.get('Sand');
   const Asset = await deployments.get('Asset');
+
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
 
   const {deployer, catalystAssetFeeRecipient} = await getNamedAccounts();
@@ -27,6 +29,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       upgradeFee,
       gemAdditionFee,
       catalystAssetFeeRecipient,
+      TRUSTED_FORWARDER.address,
     ],
   });
 };
@@ -37,5 +40,6 @@ func.dependencies = [
   'Sand_deploy',
   'Asset_deploy',
   'GemsCatalystsRegistry_deploy',
+  'TRUSTED_FORWARDER',
 ];
 func.skip = skipUnlessTest; // disabled for now
