@@ -24,8 +24,8 @@ In the code we heavily recommend using linter and prettier to force a common sty
 
 Below is a summary and some extra guidelines to follow:
 
-- [NatSpec](https://docs.soliditylang.org/en/latest/style-guide.html#natspec): **Every function and variable declaration
-  must have NatSpec comments**.
+- [NatSpec](https://docs.soliditylang.org/en/latest/style-guide.html#natspec): We encourage adding Natspec comments to
+  functions and variables, specially to public ones.
 - File structure:
     - One contract, library or interface per file.
     - [Order of Layout](https://docs.soliditylang.org/en/latest/style-guide.html#natspec): `Type declarations`,
