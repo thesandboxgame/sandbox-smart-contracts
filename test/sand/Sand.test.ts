@@ -146,9 +146,18 @@ describe('Sand.sol', function () {
         usersWithoutSand,
       } = await setupTest();
       const sandTransferValue = DECIMALS_18.mul(200);
-      sandBeneficiary.Sand.transfer(usersWithoutSand, sandTransferValue);
-      userWithSand.Sand.transfer(usersWithoutSand, sandTransferValue);
-      usersWithoutSand[0].Sand.transfer(usersWithoutSand, sandTransferValue);
+      await sandBeneficiary.Sand.transfer(
+        usersWithoutSand[0].address,
+        sandTransferValue
+      );
+      await userWithSand.Sand.transfer(
+        usersWithoutSand[0].address,
+        sandTransferValue
+      );
+      await usersWithoutSand[0].Sand.transfer(
+        usersWithoutSand[0].address,
+        sandTransferValue
+      );
       const totalSupply = await Sand.totalSupply();
       expect(totalSupply).to.equal(TOTAL_SUPPLY);
     });
