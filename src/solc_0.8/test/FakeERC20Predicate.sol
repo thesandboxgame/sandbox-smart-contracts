@@ -7,7 +7,7 @@ import {IERC20} from "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 /// @dev This is NOT a secure ERC20 Predicate contract implementation!
 /// DO NOT USE in production.
 
-contract ERC20Predicate {
+contract FakeERC20Predicate {
     address private token;
     using SafeERC20 for IERC20;
 

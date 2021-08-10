@@ -11,11 +11,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const Asset = await deployments.get('Asset');
   const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
 
-  const {
-    deployer,
-    assetAttributesRegistryAdmin,
-    trustedForwarder,
-  } = await getNamedAccounts();
+  const {deployer, assetAttributesRegistryAdmin} = await getNamedAccounts();
   const BURN_ADDRESS = '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF';
 
   // @note For testing fee-burning only
@@ -32,6 +28,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       ],
     });
 
+    const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
     const MockAssetAttributesRegistry = await deployments.get(
       'MockAssetAttributesRegistry'
     );
@@ -46,7 +43,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
         upgradeFee,
         gemAdditionFee,
         BURN_ADDRESS,
-        trustedForwarder,
+        TRUSTED_FORWARDER.address,
       ],
     });
 
@@ -81,5 +78,6 @@ func.dependencies = [
   'Sand_Deploy',
   'Asset_Deploy',
   'GemsCatalystsRegistry_deploy',
+  'TRUSTED_FORWARDER',
 ];
 func.skip = skipUnlessTest; // TODO remove this deployment if this is just for test
