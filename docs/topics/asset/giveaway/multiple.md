@@ -2,7 +2,7 @@
 
 ## Overview
 
-Admin locks multiple asset with merkle roots and user can claim the asset with matching params.
+Admin locks multiple assets with merkle roots and user can claim the asset with matching params.
 
 Similar to Land presales and the Asset giveaway, we have an off-chain merkle tree. The key is the user’s Ethereum address. This is a reusable contract, so multiple off-chain merkle trees can be used. Once a user claims their tokens relating to a particular merkle tree, it cannot claim them again.
 
@@ -12,20 +12,20 @@ On the frontend, we can show the list of tokens the user is entitled to, for eac
 
 ### 1. Add New Giveaway
 
-Only admin can add merkle roots and expiry times. Admin is determined while deploying the contract.
+Only admin can add merkle roots and expiry date. Admin is determined while deploying the contract.
 
 ### 2. Get Claimed Status
 
-To check the merkle trees for a particular user.
+Check the merkle trees for a particular user.
 
 ### 3. Claim MultipleTokens From Multiple MerkleTree
 
-Submit multiple Claims with multiple proofs and multiple merkle root hashes
+Submit multiple Claims with multiple proofs and multiple merkle root hashes.
 For multiple tokens from multiple giveaways (i.e. a Claim array) - see below for Claim object
 
 ### 4. Claim Multiple Tokens
 
-Submit one Claim with a proof and a merkle root hash
+Submit one Claim with a proof and a merkle root hash.
 For multiple tokens from 1 giveaway (i.e. a single Claim) - see below for Claim object
 
 -A Claim is made up of multiple ERC1155, ERC721 and ERC20 tokens as shown below. The salt param is optional.

@@ -9,7 +9,7 @@ This time the key is not the land id but the user’s ethereum address.
 
 Once a user claim its tokens, it cannot claim again
 
-On the frontend, we can show the list of assets the user entitled to. Once the user clicks claim, the frontend can fetch from the backend the merkle proof and any extra parameter to perform the tx call.
+On the frontend, we can show the list of assets the user is entitled to. Once the user claims the asset, the frontend can fetch from the backend the merkle proof and any extra parameter needed to perform the tx call.
 
 ## Features
 
