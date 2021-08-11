@@ -6,12 +6,12 @@ description: My smart contract
 
 ## Introduction
 
-*general explanation, context*
+*general explanation and/or context*
 
 ## Model
 
-*What is this contract dealing with (asset, sand, merkle tree, meta tx, L2,  etc) ?
-What are the features (asset is an ERC1155, etc) of those entities ?*
+*What is this contract dealing with (asset, sand, merkle tree, meta tx, L2, etc)?
+What are the features (asset is an ERC1155, etc) of those entities?*
 
 ### Entity 1 (ie: Asset)
 
