@@ -1,3 +1,4 @@
+import {BigNumber} from '@ethersproject/bignumber';
 import {expect} from '../../chai-setup';
 import {ethers, deployments, getUnnamedAccounts} from 'hardhat';
 import {Contract} from 'ethers';
@@ -35,6 +36,12 @@ describe('MockLandWithMint.sol', function () {
           bytes
         )
       );
+      const quadId =
+        '1356938545749799165119972480570561420155507632800475359837393562592731987968';
+
+      const addressMint = await landOwners[0].MockLandWithMint.ownerOf(quadId);
+      expect(addressMint).to.equal(landOwners[0].address);
+
       const num = await landOwners[0].MockLandWithMint.balanceOf(
         landOwners[0].address
       );
