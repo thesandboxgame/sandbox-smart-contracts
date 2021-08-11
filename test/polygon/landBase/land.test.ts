@@ -1,4 +1,3 @@
-import {BigNumber} from '@ethersproject/bignumber';
 import {expect} from '../../chai-setup';
 import {ethers, deployments, getUnnamedAccounts} from 'hardhat';
 import {Contract} from 'ethers';
