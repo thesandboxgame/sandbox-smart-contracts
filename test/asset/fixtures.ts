@@ -12,6 +12,7 @@ import {waitFor, setupUsers} from '../utils';
 export const setupAsset = deployments.createFixture(async function () {
   await deployments.fixture([
     'Asset',
+    'PolygonAsset',
     'ERC1155_PREDICATE',
     'TRUSTED_FORWARDER',
   ]);
