@@ -8,10 +8,11 @@ import 'solidity-coverage';
 import 'hardhat-contract-sizer';
 import '@nomiclabs/hardhat-etherscan';
 import {node_url, accounts} from './utils/network';
-import './utils/docgenMarkdown';
+import '@hardhat-docgen/core';
 
 const config: HardhatUserConfig = {
   docgen: {
+    theme: 'markdown',
     path: 'docs/reference/docgen',
     clear: true,
   },
