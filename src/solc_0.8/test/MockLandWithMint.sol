@@ -88,7 +88,7 @@ contract MockLandWithMint is PolygonLandBaseToken {
             emit Transfer(address(0), to, idPath);
         }
 
-        _owners[quadId] = uint256(sha256(abi.encodePacked(to)));
+        _owners[quadId] = uint256(uint160(address(to)));
         _numNFTPerAddress[to] += size * size;
 
         _checkBatchReceiverAcceptQuad(msg.sender, address(0), to, size, x, y, data);

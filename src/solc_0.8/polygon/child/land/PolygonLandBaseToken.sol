@@ -158,7 +158,7 @@ contract PolygonLandBaseToken is ERC721BaseToken {
             address owner = _ownerOf(id1x1);
             require(owner != address(0), "token does not exist");
             require(owner == from, "not owner in _transferQuad");
-            _owners[id1x1] = uint256(sha256(abi.encodePacked(to)));
+            _owners[id1x1] = uint256(uint160(address(to)));
         } else {
             _regroup(from, to, size, x, y);
         }
@@ -223,17 +223,17 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         if (set) {
             if (!ownerOfAll) {
                 require(
-                    _owners[quadId] == uint256(sha256(abi.encodePacked(from))) ||
+                    _owners[quadId] == uint256(uint160(address(from))) ||
                         _owners[LAYER_6x6 + (x / 6) * 6 + ((y / 6) * 6) * GRID_SIZE] ==
-                        uint256(sha256(abi.encodePacked(from))) ||
+                        uint256(uint160(address(from))) ||
                         _owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE] ==
-                        uint256(sha256(abi.encodePacked(from))) ||
+                        uint256(uint160(address(from))) ||
                         _owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] ==
-                        uint256(sha256(abi.encodePacked(from))),
+                        uint256(uint160(address(from))),
                     "not owner of all sub quads nor parent quads"
                 );
             }
-            _owners[quadId] = uint256(sha256(abi.encodePacked(to)));
+            _owners[quadId] = uint256(uint160(address(to)));
             return true;
         }
         return ownerOfAll;
@@ -256,7 +256,7 @@ contract PolygonLandBaseToken is ERC721BaseToken {
                 uint256 owner3x3 = _owners[id3x3];
                 if (owner3x3 != 0) {
                     if (!ownAllIndividual) {
-                        require(owner3x3 == uint256(sha256(abi.encodePacked(from))), "not owner of 3x3 quad");
+                        require(owner3x3 == uint256(uint160(address(from))), "not owner of 3x3 quad");
                     }
                     _owners[id3x3] = 0;
                 }
@@ -266,15 +266,15 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         if (set) {
             if (!ownerOfAll) {
                 require(
-                    _owners[quadId] == uint256(sha256(abi.encodePacked(from))) ||
+                    _owners[quadId] == uint256(uint160(address(from))) ||
                         _owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE] ==
-                        uint256(sha256(abi.encodePacked(from))) ||
+                        uint256(uint160(address(from))) ||
                         _owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] ==
-                        uint256(sha256(abi.encodePacked(from))),
+                        uint256(uint160(address(from))),
                     "not owner of all sub quads nor parent quads"
                 );
             }
-            _owners[quadId] = uint256(sha256(abi.encodePacked(to)));
+            _owners[quadId] = uint256(uint160(address(to)));
             return true;
         }
         return ownerOfAll;
@@ -297,7 +297,7 @@ contract PolygonLandBaseToken is ERC721BaseToken {
                 uint256 owner6x6 = _owners[id6x6];
                 if (owner6x6 != 0) {
                     if (!ownAllIndividual) {
-                        require(owner6x6 == uint256(sha256(abi.encodePacked(from))), "not owner of 6x6 quad");
+                        require(owner6x6 == uint256(uint160(address(from))), "not owner of 6x6 quad");
                     }
                     _owners[id6x6] = 0;
                 }
@@ -307,13 +307,13 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         if (set) {
             if (!ownerOfAll) {
                 require(
-                    _owners[quadId] == uint256(sha256(abi.encodePacked(from))) ||
+                    _owners[quadId] == uint256(uint160(address(from))) ||
                         _owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] ==
-                        uint256(sha256(abi.encodePacked(from))),
+                        uint256(uint160(address(from))),
                     "not owner of all sub quads nor parent quads"
                 );
             }
-            _owners[quadId] = uint256(sha256(abi.encodePacked(to)));
+            _owners[quadId] = uint256(uint160(address(to)));
             return true;
         }
         return ownerOfAll;
@@ -336,7 +336,7 @@ contract PolygonLandBaseToken is ERC721BaseToken {
                 uint256 owner12x12 = _owners[id12x12];
                 if (owner12x12 != 0) {
                     if (!ownAllIndividual) {
-                        require(owner12x12 == uint256(sha256(abi.encodePacked(from))), "not owner of 12x12 quad");
+                        require(owner12x12 == uint256(uint160(address(from))), "not owner of 12x12 quad");
                     }
                     _owners[id12x12] = 0;
                 }
@@ -346,14 +346,14 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         if (set) {
             if (!ownerOfAll) {
                 require(
-                    _owners[quadId] == uint256(sha256(abi.encodePacked(from))),
+                    _owners[quadId] == uint256(uint160(address(from))),
                     "not owner of all sub quads not parent quad"
                 );
             }
-            _owners[quadId] = uint256(sha256(abi.encodePacked(to)));
+            _owners[quadId] = uint256(uint160(address(to)));
             return true;
         }
-        return ownerOfAll || _owners[quadId] == uint256(sha256(abi.encodePacked(from)));
+        return ownerOfAll || _owners[quadId] == uint256(uint160(address(from)));
     }
 
     function _checkAndClear(address from, uint256 id) internal returns (bool) {
