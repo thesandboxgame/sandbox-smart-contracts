@@ -10,7 +10,7 @@ import {deployments} from 'hardhat';
 const abiCoder = new AbiCoder();
 
 describe('PolygonAsset.sol', function () {
-  beforeEach(async function() {
+  beforeEach(async function () {
     await deployments.fixture(['PolygonAsset']);
   });
   it('user sending asset to itself keep the same balance', async function () {
