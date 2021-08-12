@@ -183,8 +183,7 @@ export async function createBundle(
     receipt,
     'BundleSale'
   );
-  // TODO: The contract is returning indexId, fix there and then remove add(1)
-  return mintEvent.args.saleId.add(1);
+  return mintEvent.args.saleId;
 }
 
 export async function createBatchBundle(
@@ -220,8 +219,7 @@ export async function createBatchBundle(
     receipt,
     'BundleSale'
   );
-  // TODO: The contract is returning indexId, fix there and then remove add(1)
-  return mintEvent.args.saleId.add(1);
+  return mintEvent.args.saleId;
 }
 
 export async function createPackMultiple(
