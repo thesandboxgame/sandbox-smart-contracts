@@ -1,6 +1,8 @@
 ---
 breaks: false
+
 description: Bundle Sand Sale contract description
+
 ---
 
 # Bundle Sand Sale
