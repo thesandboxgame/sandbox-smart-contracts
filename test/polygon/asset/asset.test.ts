@@ -5,10 +5,14 @@ import {expect} from '../../chai-setup';
 import {sendMetaTx} from '../../sendMetaTx';
 import {AbiCoder} from 'ethers/lib/utils';
 import {Event} from '@ethersproject/contracts';
+import {deployments} from 'hardhat';
 
 const abiCoder = new AbiCoder();
 
 describe('PolygonAsset.sol', function () {
+  beforeEach(async function () {
+    await deployments.fixture(['PolygonAsset', 'Asset']);
+  });
   it('user sending asset to itself keep the same balance', async function () {
     const {Asset, users, mintAsset} = await setupPolygonAsset();
     const tokenId = await mintAsset(users[0].address, 20);
