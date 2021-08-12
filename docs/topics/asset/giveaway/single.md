@@ -1,17 +1,45 @@
 # Asset Single Giveaway Smart Contract
 
-## Overview
+## Introduction
 
-Admin locks asset with merkle root and user can claim the asset with matching params.
+Users can earn the assets in many ways like discord hunt, unicly contest and so on.
+Here admin lock their earned assets in this contract and users can claim them with matching params.
 
-Similarly to Land presales, we have an off-chain merkle tree.
+## Process
+
+Admin locks assets with a [merkle root](https://solidity-by-example.org/app/merkle-tree/) and users can claim their assets with matching params.
+
 This time the key is not the land id but the user’s ethereum address.
 
-Once a user claim its tokens, it cannot claim again
+Once a user claimed its tokens, it cannot be claimed again.
 
 On the frontend, we can show the list of assets the user is entitled to. Once the user claims the asset, the frontend can fetch from the backend the merkle proof and any extra parameter needed to perform the tx call.
 
-## Features
+```plantuml
+title sequence diagram
+
+actor User
+actor Admin
+entity Backend
+entity "Single Asset Giveaway"
+entity ClaimERC1155
+entity ERC1155
+
+== Generating Merkle Root ==
+Admin -> Backend : Generate Merkle Root
+Backend -> Admin: Return Merkle Root and Other extra params
+
+== Locking the asset ==
+Admin -> "Single Asset Giveaway": Deploy (merkle root, expiry time)
+Admin -> "Single Asset Giveaway": Set Merkle Root (merkle root)
+
+== Claim the asset ==
+User -> "Single Asset Giveaway": Claim Asset (to, asset ids, asset values, proof, salt)
+"Single Asset Giveaway" -> ClaimERC1155: Claim ERC1155 (to, asset ids, asset values, proof, salt)
+ClaimERC1155 -> ERC1155: Tranfer the Tokens(from, to, asset ids, asset values)
+```
+
+## Model
 
 ### 1. Set Merkle Tree
 
@@ -21,24 +49,6 @@ Only admin can set a merkle tree, only once. Admin is determined while deploying
 
 Claim assets with receiver address, token ids, token amounts, proof and salt.
 Once proof and salt are verified, claim works.
-
-## Diagram
-```plantuml
-title sequence diagram
-
-actor User
-actor Admin
-entity "Single Asset Giveaway"
-entity ClaimERC1155
-
-== Locking the asset ==
-Admin -> "Single Asset Giveaway": Deploy (merkle root, expiry time)
-Admin -> "Single Asset Giveaway": Set Merkle Root (merkle root)
-
-== Claim the asset ==
-User -> "Single Asset Giveaway": Claim Asset (to, asset ids, asset values, proof, salt)
-"Single Asset Giveaway" -> ClaimERC1155: Claim ERC1155 (to, asset ids, asset values, proof, salt)
-```
 
 ```plantuml
 title class diagram
@@ -65,7 +75,11 @@ class ClaimERC1155  {
   #_sendAssets(address to,uint256[] memory assetIds,uint256[] memory assetValues)
 }
 
+class ERC1155 {
+}
+
 ClaimERC1155 --|> AssetGiveaway
+ClaimERC1155 o-- ERC1155
 ```
 
 ## References

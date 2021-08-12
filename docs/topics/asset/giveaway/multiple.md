@@ -1,14 +1,51 @@
 # Asset Multiple Giveaway Smart Contract
 
-## Overview
+## Introduction
 
-Admin locks multiple assets with merkle roots and user can claim the asset with matching params.
+Users can earn the assets in many ways like discord hunt, unicly contest and so on.
+Here admin lock their earned assets in this contract and users can claim them with matching params.
 
-Similar to Land presales and the Asset giveaway, we have an off-chain merkle tree. The key is the user’s Ethereum address. This is a reusable contract, so multiple off-chain merkle trees can be used. Once a user claims their tokens relating to a particular merkle tree, it cannot claim them again.
+## Process
 
-On the frontend, we can show the list of tokens the user is entitled to, for each merkle tree. Once the user clicks ‘claim’, the frontend can fetch from the backend the relevant proof(s) and any extra parameter to perform the tx call.
+Admin locks multiple assets with a [merkle roots](https://solidity-by-example.org/app/merkle-tree/) and user can claim the asset with matching params.
 
-## Features
+The key is the user’s Ethereum address. This is a reusable contract, so multiple off-chain merkle trees can be used. Once a user claimed their tokens relating to a particular merkle tree, it cannot be claimed them again.
+
+On the frontend, we can show the list of tokens the user is entitled to, for each merkle tree. Once the user claims the asset, the frontend can fetch from the backend the relevant proof(s) and any extra parameter to perform the tx call.
+
+```plantuml
+title sequence diagram
+
+actor User
+actor Admin
+entity Backend
+entity "Multiple Asset Giveaway"
+entity ClaimERC1155ERC721ERC20
+entity ERC20
+entity ERC721
+entity ERC1155
+
+== Generating Merkle Root ==
+Admin -> Backend : Generate Merkle Root
+Backend -> Admin: Return Merkle Root and Other extra params
+
+== Locking the asset ==
+Admin -> "Multiple Asset Giveaway": Deploy
+Admin -> "Multiple Asset Giveaway": Add New Giveaway (merkle root, expiry time)
+
+== Claim the asset ==
+User -> "Multiple Asset Giveaway": Claim Multiple Tokens From Mutiple Merkle Tree (rootHashes, claim struct array, proofs)
+"Multiple Asset Giveaway" -> ClaimERC1155ERC721ERC20: Claim ERC1155, ERC721, ERC20 Tokens (merkle root, claim, proof)
+ClaimERC1155ERC721ERC20 -> ERC20: Transfer the Tokens (from, to, amount)
+ClaimERC1155ERC721ERC20 -> ERC721: Transfer the Tokens (from, to, id)
+ClaimERC1155ERC721ERC20 -> ERC1155: Transfer the Tokens (from, to, id, amount)
+
+== Get Claim Status ==
+User -> "Multiple Asset Giveaway": Get Claim Status (user, rootHashes)
+"Multiple Asset Giveaway" -> User: Return Claim Status (status array)
+```
+
+## Model
 
 ### 1. Add New Giveaway
 
@@ -29,28 +66,6 @@ Submit one Claim with a proof and a merkle root hash.
 For multiple tokens from 1 giveaway (i.e. a single Claim) - see below for Claim object
 
 -A Claim is made up of multiple ERC1155, ERC721 and ERC20 tokens as shown below. The salt param is optional.
-
-## Diagram
-```plantuml
-title sequence diagram
-
-actor User
-actor Admin
-entity "Multiple Asset Giveaway"
-entity ClaimERC1155ERC721ERC20 
-
-== Locking the asset ==
-Admin -> "Multiple Asset Giveaway": Deploy
-Admin -> "Multiple Asset Giveaway": Add New Giveaway (merkle root, expiry time)
-
-== Claim the asset ==
-User -> "Multiple Asset Giveaway": Claim Multiple Tokens From Mutiple Merkle Tree (rootHashes, claim struct array, proofs)
-"Multiple Asset Giveaway" -> ClaimERC1155ERC721ERC20: Claim ERC1155, ERC721, ERC20 Tokens (merkle root, claim, proof)
-
-== Get Claim Status ==
-User -> "Multiple Asset Giveaway": Get Claim Status (user, rootHashes)
-"Multiple Asset Giveaway" -> User: Return Claim Status (status array)
-```
 
 ```plantuml
 title class diagram
@@ -74,7 +89,22 @@ class ClaimERC1155ERC721ERC20 {
   -_transferERC20(address to,uint256[] memory amounts,address[] memory contractAddresses)
 }
 
+class ERC1155 {
+
+}
+
+class ERC721 {
+
+}
+
+class ERC20 {
+
+}
+
 ClaimERC1155ERC721ERC20 --|> MultiGiveaway
+ClaimERC1155ERC721ERC20 o-- ERC1155
+ClaimERC1155ERC721ERC20 o-- ERC721
+ClaimERC1155ERC721ERC20 o-- ERC20
 ```
 
 ## References
