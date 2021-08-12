@@ -11,7 +11,7 @@ const abiCoder = new AbiCoder();
 
 describe('PolygonAsset.sol', function () {
   beforeEach(async function () {
-    await deployments.fixture(['PolygonAsset']);
+    await deployments.fixture(['PolygonAsset', 'Asset']);
   });
   it('user sending asset to itself keep the same balance', async function () {
     const {Asset, users, mintAsset} = await setupPolygonAsset();
