@@ -11,8 +11,8 @@ import "../asset/ERC1155ERC721.sol";
 /// @notice This contract receives bundles of: Assets (ERC1155) + Sand.
 /// @notice Then those bundles are sold to users. Users can pay BaseCoin (Ethers) or Dais for the bundles.
 contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
-    bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
-    bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
+    bytes4 public constant ERC1155_RECEIVED = 0xf23a6e61;
+    bytes4 public constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
 
     event BundleSale(
         uint256 indexed saleId,
@@ -31,12 +31,11 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         uint256 tokenAmount
     );
 
-    Medianizer private _medianizer;
-    IERC20 private _dai;
-    IERC20 private _sand;
-    ERC1155ERC721 private _asset;
-
-    address payable private _receivingWallet;
+    Medianizer public medianizer;
+    IERC20 public dai;
+    IERC20 public sand;
+    ERC1155ERC721 public asset;
+    address payable public receivingWallet;
 
     /*
         This is the main structure representing a pack to be sold.
@@ -58,22 +57,22 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         Medianizer medianizerContractAddress,
         IERC20 daiTokenContractAddress,
         address admin,
-        address payable receivingWallet
+        address payable receivingWallet_
     ) {
-        require(receivingWallet != address(0), "need a wallet to receive funds");
-        _medianizer = medianizerContractAddress;
-        _sand = sandTokenContractAddress;
-        _asset = assetTokenContractAddress;
-        _dai = daiTokenContractAddress;
+        require(receivingWallet_ != address(0), "need a wallet to receive funds");
+        medianizer = medianizerContractAddress;
+        sand = sandTokenContractAddress;
+        asset = assetTokenContractAddress;
+        dai = daiTokenContractAddress;
         _admin = admin;
-        _receivingWallet = receivingWallet;
+        receivingWallet = receivingWallet_;
     }
 
     /// @notice set the wallet receiving the proceeds
     /// @param newWallet address of the new receiving wallet
     function setReceivingWallet(address payable newWallet) external onlyAdmin {
         require(newWallet != address(0), "receiving wallet cannot be zero address");
-        _receivingWallet = newWallet;
+        receivingWallet = newWallet;
     }
 
     /**
@@ -101,7 +100,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
             payable(msg.sender).transfer(leftOver);
             // refund extra
         }
-        payable(_receivingWallet).transfer(ethRequired);
+        payable(receivingWallet).transfer(ethRequired);
         _transferPack(saleIndex, numPacks, to);
 
         emit BundleSold(saleId, msg.sender, numPacks, address(0), ethRequired);
@@ -125,10 +124,10 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         sales[saleIndex].numPacksLeft = numPacksLeft - numPacks;
 
         uint256 usdRequired = numPacks * sales[saleIndex].priceUSD;
-        require(_dai.transferFrom(msg.sender, _receivingWallet, usdRequired), "failed to transfer dai");
+        require(dai.transferFrom(msg.sender, receivingWallet, usdRequired), "failed to transfer dai");
         _transferPack(saleIndex, numPacks, to);
 
-        emit BundleSold(saleId, msg.sender, numPacks, address(_dai), usdRequired);
+        emit BundleSold(saleId, msg.sender, numPacks, address(dai), usdRequired);
     }
 
     /**
@@ -162,10 +161,10 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
             amounts[i] = amounts[i] * numPacksLeft;
         }
         require(
-            _sand.transferFrom(address(this), to, numPacksLeft * sales[saleIndex].sandAmount),
+            sand.transferFrom(address(this), to, numPacksLeft * sales[saleIndex].sandAmount),
             "transfer fo Sand failed"
         );
-        _asset.safeBatchTransferFrom(address(this), to, ids, amounts, "");
+        asset.safeBatchTransferFrom(address(this), to, ids, amounts, "");
     }
 
     /**
@@ -178,7 +177,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         uint256 value,
         bytes calldata data
     ) external override returns (bytes4) {
-        require(address(_asset) == msg.sender, "only accept asset as sender");
+        require(address(asset) == msg.sender, "only accept asset as sender");
         require(from == operator, "only self executed transfer allowed");
         require(value > 0, "no Asset transfered");
         require(data.length > 0, "data need to contains the sale data");
@@ -206,7 +205,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         uint256[] calldata values,
         bytes calldata data
     ) external override returns (bytes4) {
-        require(address(_asset) == msg.sender, "only accept asset as sender");
+        require(address(asset) == msg.sender, "only accept asset as sender");
         require(from == operator, "only self executed transfer allowed");
         require(ids.length > 0, "need to contains Asset");
         require(data.length > 0, "data need to contains the sale data");
@@ -227,7 +226,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
     }
 
     /**
-     * @notice Returns the amount of ETH for a specific amount of USD
+     * @notice Returns the amount of ETH for a specific amount rounded up
      * @param usdAmount An amount of USD
      * @return The amount of ETH
      */
@@ -241,7 +240,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
      * @return The pair as an uint256
      */
     function getEthUsdPair() internal view returns (uint256) {
-        bytes32 pair = _medianizer.read();
+        bytes32 pair = medianizer.read();
         return uint256(pair);
     }
 
@@ -251,14 +250,14 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         address to
     ) internal {
         uint256 sandAmountPerPack = sales[saleIndex].sandAmount;
-        require(_sand.transferFrom(address(this), to, sandAmountPerPack * numPacks), "Sand Transfer failed");
+        require(sand.transferFrom(address(this), to, sandAmountPerPack * numPacks), "Sand Transfer failed");
         uint256[] memory ids = sales[saleIndex].ids;
         uint256[] memory amounts = sales[saleIndex].amounts;
         uint256 numIds = ids.length;
         for (uint256 i = 0; i < numIds; i++) {
             amounts[i] = amounts[i] * numPacks;
         }
-        _asset.safeBatchTransferFrom(address(this), to, ids, amounts, "");
+        asset.safeBatchTransferFrom(address(this), to, ids, amounts, "");
     }
 
     /**
@@ -277,7 +276,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         uint256[] memory amounts,
         uint256 priceUSDPerPack
     ) internal {
-        require(_sand.transferFrom(from, address(this), sandAmountPerPack * numPacks), "failed to transfer Sand");
+        require(sand.transferFrom(from, address(this), sandAmountPerPack * numPacks), "failed to transfer Sand");
         sales.push(
             Sale({
                 ids: ids,
