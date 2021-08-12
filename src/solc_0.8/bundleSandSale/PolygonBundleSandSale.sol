@@ -286,7 +286,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
                 numPacksLeft: numPacks
             })
         );
-        uint256 saleId = sales.length - 1;
+        uint256 saleId = sales.length;
         emit BundleSale(saleId, ids, amounts, sandAmountPerPack, priceUSDPerPack, numPacks);
     }
 }
