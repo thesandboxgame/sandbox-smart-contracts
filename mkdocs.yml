@@ -22,6 +22,8 @@ nav:
       - Blockchain:
           - Ethereum: topics/blockchain/ethereum.md
           - Features: topics/blockchain/features.md
+      - Solidity:
+          - Guideline: topics/guideline/solidity.md
       - DeFi:
           - Liquidity provider: topics/defi/liquidity-provider/sand-staking.md
 
