@@ -169,6 +169,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
 
     /**
      * @notice IERC1155TokenReceiver callback, creates a new Sale
+     * @notice OBS: in the case of NFTs (one of a kind) value is one so numPacks must be 1 too to be divisible.
      */
     function onERC1155Received(
         address operator,
@@ -197,6 +198,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
 
     /**
      * @notice IERC1155TokenReceiver callback, creates a new Sale
+     * @notice OBS: in the case of NFTs (one of a kind) value is one so numPacks must be 1 too to be divisible.
      */
     function onERC1155BatchReceived(
         address operator,
