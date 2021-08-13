@@ -32,15 +32,6 @@ contract EstateSaleWithAuth is MetaTransactionReceiver, ReferralValidator {
         _wallet = newWallet;
     }
 
-    function rebalanceSand(uint256 newMultiplier) external {
-        require(msg.sender == _admin, "NOT_AUTHORIZED");
-        _multiplier = newMultiplier;
-    }
-
-    function getSandMultiplier() external view returns (uint256) {
-        return _multiplier;
-    }
-
     /// @notice buy Land with SAND using the merkle proof associated with it
     /// @param addresses [0] address that perform the payment [1] address that will own the purchased Land [2] the reserved address (if any)
     /// @param x x coordinate of the Land
@@ -61,7 +52,6 @@ contract EstateSaleWithAuth is MetaTransactionReceiver, ReferralValidator {
         bytes calldata referral,
         bytes calldata signature
     ) external {
-        _checkPrices(priceInSand, priceInSand);
         _checkValidity2(addresses);
         _checkValidity(addresses, x, y, size, priceInSand, salt, assetIds, proof, signature);
         _handleFeeAndReferral(addresses[0], priceInSand, referral);
@@ -123,10 +113,6 @@ contract EstateSaleWithAuth is MetaTransactionReceiver, ReferralValidator {
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
     }
 
-    function _checkPrices(uint256 priceInSand, uint256 adjustedPriceInSand) internal view {
-        require(adjustedPriceInSand == priceInSand.mul(_multiplier).div(MULTIPLIER_DECIMALS), "INVALID_PRICE");
-    }
-
     function _checkValidity2(address[] memory addresses) internal view {
         require(addresses.length == 3, "INVALID_ADDRESSES");
         /* solium-disable-next-line security/no-block-members */
@@ -146,7 +132,7 @@ contract EstateSaleWithAuth is MetaTransactionReceiver, ReferralValidator {
         bytes32[] memory proof,
         bytes memory signature
     ) internal view {
-        bytes32 hashedData = keccak256(abi.encodePacked(addresses[1], addresses[2], x, y, size, price, salt, assetIds));
+        bytes32 hashedData = keccak256(abi.encodePacked(addresses[1], addresses[2], x, y, size, price, salt, assetIds, proof));
         require(_authValidator.isAuthValid(signature, hashedData), "INVALID_AUTH");
 
         bytes32 leaf = _generateLandHash(x, y, size, price, addresses[2], salt, assetIds);
@@ -237,9 +223,6 @@ contract EstateSaleWithAuth is MetaTransactionReceiver, ReferralValidator {
     bytes32 internal immutable _merkleRoot;
 
     uint256 private constant FEE = 5; // percentage of land sale price to be diverted to a specially configured instance of FeeDistributor, shown as an integer
-
-    uint256 private _multiplier = 1000; // multiplier used for rebalancing SAND values, 3 decimal places
-    uint256 private constant MULTIPLIER_DECIMALS = 1000;
 
     constructor(
         address landAddress,
