@@ -27,11 +27,29 @@ describe('PolygonBundleSandSale.sol', function () {
     ).to.be.revertedWith('need a wallet to receive funds');
   });
 
-  it('if you send the usd price amount you get 1 ether', async function () {
-    expect(
-      await fixtures.contract.getEtherAmountWithUSD(fixtures.ethUsdPrice)
-    ).to.be.equal(toWei(1));
-  });
+  it(
+    'assuming that the medianizer return the price in u$s * 1e18 and usdAmount is also in u$s * 1e18. ' +
+      'There is no need to round up at most you loose 1e-18 u$s.',
+    async function () {
+      // fixtures.ethUsdPrice == 171.415e18
+      // The error is 1e-18 u$s max
+      expect(await fixtures.contract.getEtherAmountWithUSD(171)).to.be.equal(0);
+      expect(await fixtures.contract.getEtherAmountWithUSD(172)).to.be.equal(1);
+      expect(
+        await fixtures.contract.getEtherAmountWithUSD(fixtures.ethUsdPrice)
+      ).to.be.equal(toWei(1));
+      expect(
+        await fixtures.contract.getEtherAmountWithUSD(
+          fixtures.ethUsdPrice.add(171)
+        )
+      ).to.be.equal(toWei(1));
+      expect(
+        await fixtures.contract.getEtherAmountWithUSD(
+          fixtures.ethUsdPrice.add(172)
+        )
+      ).to.be.equal(toWei(1).add(1));
+    }
+  );
 
   describe('setReceivingWallet', function () {
     it('should fail to setReceivingWallet if not admin', async function () {
@@ -335,15 +353,7 @@ describe('PolygonBundleSandSale.sol', function () {
           )
         ).to.revertedWith('not enough packs on sale');
       });
-      // it('Example of a bug in the smart contract!!!', async function () {
-      //   const priceUSDPerPack = 156;
-      //   const numPacksToBuy = 2;
-      //   const usdRequired = BigNumber.from(numPacksToBuy * priceUSDPerPack);
-      //   const ethRequired = usdRequired.mul(toWei(1)).div(fixtures.ethUsdPrice);
-      //   expect(ethRequired.mul(fixtures.ethUsdPrice)).to.be.gt(
-      //     usdRequired.mul(toWei(1))
-      //   );
-      // });
+
       it('should fail if not enough ETH', async function () {
         const buyer = fixtures.otherUsers[7];
         const to = fixtures.otherUsers[8];

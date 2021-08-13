@@ -45,7 +45,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         uint256[] ids; // ids of the Assets in each pack
         uint256[] amounts; // Amount of each Asset  in each pack
         uint256 sandAmount; // Sands sold with each pack
-        uint256 priceUSD; // Price in USD for each Pack
+        uint256 priceUSD; // Price in USD for each Pack u$s * 1e18 (aka: 1u$s == 1e18 wei)
         uint256 numPacksLeft; // Number of packs left, used for accounting
     }
 
@@ -226,7 +226,8 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
     }
 
     /**
-     * @notice Returns the amount of ETH for a specific amount rounded up
+     * @notice Returns the amount of ETH for a specific amount
+     * @notice This rounds down with a precision of 1wei if usdAmount price is expressed in u$s * 10e18
      * @param usdAmount An amount of USD
      * @return The amount of ETH
      */
