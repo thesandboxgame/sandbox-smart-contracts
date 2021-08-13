@@ -2,8 +2,9 @@
 
 ## Introduction
 
-Users can earn the assets in many ways like discord hunt, unicly contest and so on.
-Here admin lock their earned assets in this contract and users can claim them with matching params.
+Asset Single Giveaway Smart Contract is for distributing earned [assets](https://to the users.
+Users can [earn the assets](https://sandboxgame.gitbook.io/the-sandbox/other/earning-sand-and-nfts#earning-assets) in many ways like discord hunt, unicly contest and so on.
+And they can claim the assets from this contract with require params.
 
 ## Process
 
