@@ -11,7 +11,7 @@ import "./AuthValidator.sol";
 
 /// @title Estate Sale contract with referral
 /// @notice This contract manages the sale of our lands as Estates
-contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
+contract EstateSaleWithAuth is MetaTransactionReceiver, ReferralValidator {
     using SafeMathWithRequire for uint256;
 
     event LandQuadPurchased(
