@@ -7,7 +7,7 @@ import "../common/Interfaces/ERC1155.sol";
 import "../common/Interfaces/ERC20.sol";
 import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../ReferralValidator/ReferralValidator.sol";
-
+import "./AuthValidator.sol";
 
 /// @title Estate Sale contract with referral
 /// @notice This contract manages the sale of our lands as Estates
@@ -42,33 +42,31 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
     }
 
     /// @notice buy Land with SAND using the merkle proof associated with it
-    /// @param buyer address that perform the payment
-    /// @param to address that will own the purchased Land
-    /// @param reserved the reserved address (if any)
+    /// @param addresses [0] address that perform the payment [1] address that will own the purchased Land [2] the reserved address (if any)
     /// @param x x coordinate of the Land
     /// @param y y coordinate of the Land
     /// @param size size of the pack of Land to purchase
     /// @param priceInSand price in SAND to purchase that Land
     /// @param proof merkleProof for that particular Land
     function buyLandWithSand(
-        address buyer,
-        address to,
-        address reserved,
+        /// TODO: review any other workaround for stack too deep
+        address[] calldata addresses,
         uint256 x,
         uint256 y,
         uint256 size,
         uint256 priceInSand,
-        uint256 adjustedPriceInSand,
         bytes32 salt,
         uint256[] calldata assetIds,
         bytes32[] calldata proof,
-        bytes calldata referral
+        bytes calldata referral,
+        bytes calldata signature
     ) external {
-        _checkPrices(priceInSand, adjustedPriceInSand);
-        _checkValidity(buyer, reserved, x, y, size, priceInSand, salt, assetIds, proof);
-        _handleFeeAndReferral(buyer, adjustedPriceInSand, referral);
-        _mint(buyer, to, x, y, size, adjustedPriceInSand, address(_sand), adjustedPriceInSand);
-        _sendAssets(to, assetIds);
+        _checkPrices(priceInSand, priceInSand);
+        _checkValidity2(addresses);
+        _checkValidity(addresses, x, y, size, priceInSand, salt, assetIds, proof, signature);
+        _handleFeeAndReferral(addresses[0], priceInSand, referral);
+        _mint(addresses, x, y, size, priceInSand, priceInSand);
+        _sendAssets(addresses[1], assetIds);
     }
 
     /// @notice Gets the expiry time for the current sale
@@ -129,42 +127,54 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         require(adjustedPriceInSand == priceInSand.mul(_multiplier).div(MULTIPLIER_DECIMALS), "INVALID_PRICE");
     }
 
+    function _checkValidity2(address[] memory addresses) internal view {
+        require(addresses.length == 3, "INVALID_ADDRESSES");
+        /* solium-disable-next-line security/no-block-members */
+        require(block.timestamp < _expiryTime, "SALE_IS_OVER");
+        require(addresses[0] == msg.sender || _metaTransactionContracts[msg.sender], "NOT_AUTHORIZED");
+        require(addresses[2] == address(0) || addresses[2] == addresses[0], "RESERVED_LAND");
+    }
+
     function _checkValidity(
-        address buyer,
-        address reserved,
+        address[] memory addresses,
         uint256 x,
         uint256 y,
         uint256 size,
         uint256 price,
         bytes32 salt,
         uint256[] memory assetIds,
-        bytes32[] memory proof
+        bytes32[] memory proof,
+        bytes memory signature
     ) internal view {
-        /* solium-disable-next-line security/no-block-members */
-        require(block.timestamp < _expiryTime, "SALE_IS_OVER");
-        require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "NOT_AUTHORIZED");
-        require(reserved == address(0) || reserved == buyer, "RESERVED_LAND");
-        bytes32 leaf = _generateLandHash(x, y, size, price, reserved, salt, assetIds);
+        bytes32 hashedData = keccak256(abi.encodePacked(addresses[1], addresses[2], x, y, size, price, salt, assetIds));
+        require(_authValidator.isAuthValid(signature, hashedData), "INVALID_AUTH");
 
+        bytes32 leaf = _generateLandHash(x, y, size, price, addresses[2], salt, assetIds);
         require(_verify(proof, leaf), "INVALID_LAND");
     }
 
     function _mint(
-        address buyer,
-        address to,
+        address[] memory addresses,
         uint256 x,
         uint256 y,
         uint256 size,
         uint256 price,
-        address token,
         uint256 tokenAmount
     ) internal {
         if (size == 1 || _estate == address(0)) {
-            _land.mintQuad(to, size, x, y, "");
+            _land.mintQuad(addresses[1], size, x, y, "");
         } else {
-            _land.mintQuad(_estate, size, x, y, abi.encode(to));
+            _land.mintQuad(_estate, size, x, y, abi.encode(addresses[1]));
         }
-        emit LandQuadPurchased(buyer, to, x + (y * GRID_SIZE), size, price, token, tokenAmount);
+        emit LandQuadPurchased(
+            addresses[0],
+            addresses[1],
+            x + (y * GRID_SIZE),
+            size,
+            price,
+            address(_sand),
+            tokenAmount
+        );
     }
 
     function _generateLandHash(
@@ -222,6 +232,7 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
     address internal immutable _feeDistributor;
 
     address payable internal _wallet;
+    AuthValidator internal _authValidator;
     uint256 internal immutable _expiryTime;
     bytes32 internal immutable _merkleRoot;
 
@@ -242,7 +253,8 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         uint256 initialMaxCommissionRate,
         address estate,
         address asset,
-        address feeDistributor
+        address feeDistributor,
+        address authValidator
     ) public ReferralValidator(initialSigningWallet, initialMaxCommissionRate) {
         _land = LandToken(landAddress);
         _sand = ERC20(sandContractAddress);
@@ -254,5 +266,6 @@ contract EstateSaleWithFee is MetaTransactionReceiver, ReferralValidator {
         _estate = estate;
         _asset = ERC1155(asset);
         _feeDistributor = feeDistributor;
+        _authValidator = AuthValidator(authValidator);
     }
 }
