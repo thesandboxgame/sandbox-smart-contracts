@@ -20,7 +20,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
     uint8 internal constant ADD = 1;
     uint8 internal constant BREAK = 2;
     uint8 internal constant WITHDRAWAL = 3;
-
     uint16 internal constant GRID_SIZE = 408;
 
     uint64 internal _nextId; // max uint64 = 18,446,744,073,709,551,615
@@ -304,7 +303,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
     ) internal {
         // land ids are in the event emitted
         // lands without games will be represented as gameId = 0
-        // todo: length could be manipulated by user
         require(landIdsToAdd.length == gameIds.length, "DIFFERENT_LENGTH_LANDS_GAMES");
         require(landIdsToAdd.length > 0, "EMPTY_LAND_IDS_ARRAY");
         uint256[] memory newLands;
