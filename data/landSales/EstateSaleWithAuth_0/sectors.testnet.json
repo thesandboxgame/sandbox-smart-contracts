@@ -1,0 +1,26 @@
+[
+  {
+    "sector": 0,
+    "lands": [
+      {
+        "coordinateX": 0,
+        "coordinateY": 0,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": 1,
+        "coordinateY": 0,
+        "ownerAddress": "",
+        "bundleId": ""
+      },
+      {
+        "coordinateX": -1,
+        "coordinateY": 0,
+        "ownerAddress": "",
+        "bundleId": ""
+      }
+    ],
+    "estates": []
+  }
+]

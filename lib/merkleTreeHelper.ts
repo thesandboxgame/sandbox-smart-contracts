@@ -16,6 +16,10 @@ export type SaltedSaleLandInfo = SaleLandInfo & {
   salt: string;
 };
 
+export type SaltedProofSaleLandInfo = SaltedSaleLandInfo & {
+  proof: string[];
+};
+
 export type AssetClaim = {
   reservedAddress: string;
   assetIds: Array<string>;
