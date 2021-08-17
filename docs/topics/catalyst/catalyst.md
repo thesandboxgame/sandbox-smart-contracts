@@ -4,27 +4,34 @@
 
 The aim of this document is to explain how Gems & catalysts work and how they are tracked by the smart contracts.
 
-Roughly a **catalyst** is a container for **gems**. The rarer the catalyst, the more gems it may contain. The user can then equip his asset with a catalyst in order to add ability to it. The gems are of different **types** (luck, power...). Depending on their types, the gems will have a different effect in games. One Gem will be able to provide up to 25 **attribute** points of a specific type. 
+Roughly a **catalyst** is a container for **gems**. The rarer the catalyst, the more gems it may contain. The user can then equip his asset with a catalyst in order to add ability to it. The gems are of different **types** (luck, power...). Depending on their types, the gems will have a different effect in games. One Gem will be able to provide up to 25 **attribute** points of a specific type.
 
 From now on we will call gems and catalysts G&C.
 
 G&C in action:
 ![](https://miro.medium.com/max/3600/0*9tVheYzwmmALkJBa)
 
-For more information see: <https://medium.com/sandbox-game/presenting-the-sandbox-gems-catalysts-f017a18ff5fb>
+For more information checkout this [introduction on Gems & Catalysts](https://medium.com/sandbox-game/presenting-the-sandbox-gems-catalysts-f017a18ff5fb).
 
-### Catalyst data
+## Model
+
+### Catalyst
+
+Each catalyst type is a different ERC20 smart contract (ie Catalyst RARE is a smart contract, Catalyst LEGENDARY another...).
 
 Retrieve from [here](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/data/catalysts.ts)
 
-| Id  | Catalyst type | MaxGems |
-| --- | ------------- | ------- |
-| 1   | COMMON        | 1       |
-| 2   | RARE          | 2       |
-| 3   | EPIC          | 3       |
-| 4   | LEGENDARY     | 4       |
+| Id  | Catalyst type | Max Gems |
+| --- | ------------- | -------- |
+| 1   | COMMON        | 1        |
+| 2   | RARE          | 2        |
+| 3   | EPIC          | 3        |
+| 4   | LEGENDARY     | 4        |
 
-### Gem data
+### Gem
+
+Like catalyst, each gem type is a different ERC-20 smart contract (ie Gems Power, Gems Luck...). Internally every contract is identified by the Ids defined in the following table.
+
 Retrieve from [here](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/data/gems.ts)
 
 | Id  | Gem type | Attribute point |
@@ -36,18 +43,24 @@ Retrieve from [here](https://github.com/thesandboxgame/sandbox-smart-contracts/b
 
 More on attribute point logic [here](https://sandboxgame.gitbook.io/the-sandbox/assets/gems-and-catalysts/attributes-and-behaviours)
 
-## Model
+### Registry
 
-G&C are ERC-20. Each catalyst type is a different smart contract (ie Catalyst RARE is a smart contract, Catalyst Legendary another...). Like catalyst, each gem type is a different ERC-20 smart contract (ie GemsPower...). Internally every contract is identified by the Ids defined above.
+The GemsCatalystsRegistry contract manage every G&C contract, it can add new G&C contract, handle Id's, burn differents tokens in one transaction, expose attributes of an asset... It could handle meta-transaction, use admin and super-operator.
 
-The **GemsCatalystsRegistry** contract manage every G&C contract, it can add new G&C contract, handle Id's, burn tokens if needed and expose attributes of an asset...
+This contract store every G&C contracts in open arrays. One could add new G&C types by calling `addGemsAndCatalysts`. The caller of this function has to take care that the contracts Ids match the order in the corresponding array, some require in the code ensure that it fail if not in order. Please note that Ids are 1-based while index in array are 0-based.
 
+| Feature            | Link                                                                                                                                               |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Contract           | [GemsCatalystsRegistry.sol](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/src/solc_0.8/catalyst/GemsCatalystsRegistry.sol) |
+| ERC2771 (Meta-Tx)  | [OpenZeppelin contract](https://docs.openzeppelin.com/contracts/4.x/api/metatx#ERC2771Context)                                                     |
+| WithSuperOperators | Yes                                                                                                                                                |
 
 ### Class diagram
+
 ```plantuml
 title class diagram
 interface IGemsCatalystsRegistry {
-    
+
 }
 
 class GemsCatalystsRegistry #palegreen{
@@ -64,7 +77,7 @@ class GemsCatalystsRegistry #palegreen{
 }
 note top of ERC2771Context : "Meta-transaction handler"
 abstract ERC2771Context {}
-class WithSuperOperators {} 
+class WithSuperOperators {}
 class WithAdmin {}
 class Gem #palegreen{
     + uint16 gemId
@@ -92,6 +105,7 @@ Catalyst o--GemsCatalystsRegistry
 ```
 
 ## Processes
+
 ### Get every attribute of gems on a catalyst in an asset
 
 An asset could fetch all the gems data of a catalyst it's currently owning. It's using GemsCatalystRegistry.GetAttributes. All the Asset part is out of scope, see Asset documentation.
@@ -107,22 +121,25 @@ entity DefaultAttributes
 
 
 note right of GemsCatalystsRegistry
-An asset has to be minted with G&C. 
-A CatalystApplied events are then created. 
+An asset has to be minted with G&C.
+A CatalystApplied events are then created.
 The events param is retrieve from these events.
 end note
 
--> GemsCatalystsRegistry: getAttributes(catalystId, assetId, events[]) 
+-> GemsCatalystsRegistry: getAttributes(catalystId, assetId, events[])
 GemsCatalystsRegistry -> Catalyst: getAttributes(assetId, events[])
 Catalyst -> DefaultAttributes: getAttributes(assetId, events[])
-note over  DefaultAttributes: Random values are calculated using gems data in event[]  
+note over  DefaultAttributes: Random values are calculated using gems data in event[]
 Catalyst <-- DefaultAttributes: values []
 GemsCatalystsRegistry <-- Catalyst: values []
 <--GemsCatalystsRegistry: values []
 
 ```
+
 ### Burn 1 LEGENDARY and 1 EPIC Catalyst in batch
-For this example we assume that an asset want to burn two catalysts in a single tx. All the Asset part is out of scope, see Asset documentation. 
+
+For this example we assume that an asset wants to burn two catalysts in a single tx. All the Asset part is out of scope, see Asset documentation.
+The same can be done for gems with `batchBurnGems`.
 
 ```plantuml
 
@@ -139,4 +156,3 @@ GemsCatalystsRegistry -> GemsCatalystsRegistry: getCatalyst(catalystId=3)
 GemsCatalystsRegistry -> E: burnFor(from, 1)
 
 ```
-
