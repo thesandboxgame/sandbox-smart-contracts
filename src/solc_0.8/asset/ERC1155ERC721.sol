@@ -72,7 +72,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
 
     uint8 internal _chainIndex; // modify this for l2
     uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 32);
-    uint256 private constant CHAIN_INDEX_MASK = 0x0000000000000000000000000000000000000000000007F8000000000000000;
+    uint256 private constant CHAIN_INDEX_MASK = 0x00000000000000000000000000000000000000000000007F8000000000000000;
 
     // solhint-enable max-states-count
 

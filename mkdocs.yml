@@ -22,11 +22,12 @@ nav:
       - Blockchain:
           - Ethereum: topics/blockchain/ethereum.md
           - Features: topics/blockchain/features.md
-      - Sand:
-          - BundeSandSale: topics/sand/bundle-sand-sale.md
-  - Reference:
+      - Solidity:
+          - Guideline: topics/guideline/solidity.md
       - DeFi:
           - Liquidity provider: topics/defi/liquidity-provider/sand-staking.md
+      - Sand:
+          - BundeSandSale: topics/sand/bundle-sand-sale.md
 
 markdown_extensions:
   - admonition
