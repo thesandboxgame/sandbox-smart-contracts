@@ -53,7 +53,7 @@ contract EstateSaleWithAuth is MetaTransactionReceiver, ReferralValidator {
         bytes calldata signature
     ) external {
         _checkAddressesAndExpiryTime(addresses);
-        _checkValidity(addresses, x, y, size, priceInSand, salt, assetIds, proof, signature);
+        _checkAuthAndProofValidity(addresses, x, y, size, priceInSand, salt, assetIds, proof, signature);
         _handleFeeAndReferral(addresses[0], priceInSand, referral);
         _mint(addresses, x, y, size, priceInSand, priceInSand);
         _sendAssets(addresses[1], assetIds);
@@ -113,6 +113,7 @@ contract EstateSaleWithAuth is MetaTransactionReceiver, ReferralValidator {
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
     }
 
+    // NOTE: _checkAddressesAndExpiryTime & _checkAuthAndProofValidity were split due to a stack too deep issue
     function _checkAddressesAndExpiryTime(address[] memory addresses) internal view {
         require(addresses.length == 3, "INVALID_ADDRESSES");
         /* solium-disable-next-line security/no-block-members */
@@ -121,7 +122,8 @@ contract EstateSaleWithAuth is MetaTransactionReceiver, ReferralValidator {
         require(addresses[2] == address(0) || addresses[2] == addresses[0], "RESERVED_LAND");
     }
 
-    function _checkValidity(
+    // NOTE: _checkAddressesAndExpiryTime & _checkAuthAndProofValidity were split due to a stack too deep issue
+    function _checkAuthAndProofValidity(
         address[] memory addresses,
         uint256 x,
         uint256 y,
