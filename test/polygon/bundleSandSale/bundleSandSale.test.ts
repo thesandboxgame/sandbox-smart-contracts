@@ -61,6 +61,11 @@ describe('PolygonBundleSandSale.sol', function () {
         contractWithOtherSigner.setReceivingWallet(fixtures.otherUsers[3])
       ).to.be.revertedWith('ADMIN_ONLY');
     });
+    it('should fail if address is zero', async function () {
+      await expect(
+        fixtures.contract.setReceivingWallet(AddressZero)
+      ).to.be.revertedWith('receiving wallet cannot be zero address');
+    });
     it('admin should success to setReceivingWallet', async function () {
       await fixtures.contract.setReceivingWallet(fixtures.otherUsers[3]);
       // TODO: Need a getter in the contract to be able to check the result.
@@ -391,6 +396,7 @@ describe('PolygonBundleSandSale.sol', function () {
         } = await createPack(fixtures);
         const numPacksToBuy = 3;
 
+        const leftOver = 567;
         const usdRequired = BigNumber.from(numPacksToBuy * priceUSDPerPack);
         const ethRequired = usdRequired.mul(toWei(1)).div(fixtures.ethUsdPrice);
         const contractAsBuyer = await ethers.getContract(
@@ -400,12 +406,20 @@ describe('PolygonBundleSandSale.sol', function () {
         const ethBalancePre = BigNumber.from(
           await ethers.provider.getBalance(fixtures.receivingWallet)
         );
+        const buyerEthBalancePre = BigNumber.from(
+          await ethers.provider.getBalance(buyer)
+        );
 
         // BUY numPacksToBuy!!!
-        await contractAsBuyer.buyBundleWithEther(saleId, numPacksToBuy, to, {
-          value: ethRequired,
-        });
-
+        const tx = await contractAsBuyer.buyBundleWithEther(
+          saleId,
+          numPacksToBuy,
+          to,
+          {
+            value: ethRequired.add(leftOver),
+          }
+        );
+        const receipt = await tx.wait();
         const infoPos = await fixtures.contract.getSaleInfo(saleId);
         const numPacksLeft = numPacks - numPacksToBuy;
         expect(infoPos.numPacksLeft).to.be.equal(numPacksLeft);
@@ -413,6 +427,11 @@ describe('PolygonBundleSandSale.sol', function () {
         expect(
           await ethers.provider.getBalance(fixtures.receivingWallet)
         ).to.be.equal(ethBalancePre.add(ethRequired));
+        expect(await ethers.provider.getBalance(buyer)).to.be.equal(
+          buyerEthBalancePre
+            .sub(ethRequired)
+            .sub(receipt.gasUsed.mul(tx.gasPrice))
+        );
         // Sand balance
         expect(await fixtures.sandContract.balanceOf(to)).to.be.equal(
           sandAmountPerPack * numPacksToBuy
