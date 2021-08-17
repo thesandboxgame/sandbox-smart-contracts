@@ -23,7 +23,7 @@ After that buyers can buy the packs paying in ETH or DAI.
 
 ### Participants
 
-- Seller: The user thats want to sell *packs*
+- Seller: The user that wants to sell *packs*
 - Buyer: Users that want to buy *packs*
 - Admin: The deployer and owner of the contract.
 
@@ -31,21 +31,21 @@ After that buyers can buy the packs paying in ETH or DAI.
 
 - Collectibles: ERC1155ERC721 assets that are NFTs or fungible tokens. This kind of assets represent collectible items
   inside the game.
-- Sand: This is a fungible token (ERC20 compatible) that is used in the platform to pay for ssets and transactions.
-- DAI: This represents a stable coin that is pegged one to one with the U$S dollar.
+- Sand: This is a fungible token (ERC20 compatible) that is used in the platform to pay for assets and transactions.
+- DAI: This represents a stable coin that is pegged one to one with the USD dollar.
 
 ### External agents
 
 - SandSC: This is the ERC20 smart contract that do the accounting of the Sand token.
 - AssetSC: This is the smart contract do the accounting of the ERC1155ERC721 collectibles.
 - DaiSC: This is the ERC20 smart contract that do the accounting of the DAI token.
-- MedianizerSC: A Chainlink compatible smart contract used to get the price relationship between U$S and ETH.
+- MedianizerSC: A Chainlink compatible smart contract used to get the price relationship between USD and ETH.
 
 ### Sale
 
-Each sale in the smart contract represent a set of packs that can be sold. Each pack contains Collectibles and Sand. All
-the packs inside the same Sale are equal but each one can be bought separately until the sale is empty and has no more
-packs.
+Each sale in the smart contract represents a set of packs that can be sold. Each pack contains Collectibles and Sand.
+All the packs inside the same Sale are equal but each one can be bought separately until the sale is empty and has no
+more packs.
 
 ```plantuml
 class Sale {
@@ -98,66 +98,66 @@ In the transfer call the data field must have (abi encoded) three important para
 actor Seller
 participant SandSC
 participant AssetSC
-participant BundleSansSaleSC
+participant BundleSandSaleSC
 collections Packs
 
-"Seller" -> "SandSC": allow the withdrawal of sand to BundleSansSaleSC  
-"Seller" -> "AssetSC": transfer his collectibles to BundleSansSaleSC
-"AssetSC" -> "BundleSansSaleSC": gets the collectibles and a call to onERC1155Received()
-activate BundleSansSaleSC
-"BundleSansSaleSC" -> "SandSC": transferFrom()
-"SandSC" -> "BundleSansSaleSC": send the Sand
-"BundleSansSaleSC" -> "Packs": Packs are created and ready to sell
-deactivate BundleSansSaleSC
+"Seller" -> "SandSC": allow the withdrawal of sand to BundleSandSaleSC  
+"Seller" -> "AssetSC": transfer his collectibles to BundleSandSaleSC
+"AssetSC" -> "BundleSandSaleSC": gets the collectibles and a call to onERC1155Received()
+activate BundleSandSaleSC
+"BundleSandSaleSC" -> "SandSC": transferFrom()
+"SandSC" -> "BundleSandSaleSC": send the Sand
+"BundleSandSaleSC" -> "Packs": Packs are created and ready to sell
+deactivate BundleSandSaleSC
 ```
 
 ### User buys a pack with DAI
 
-To buy packs with DAI a user must start by aproving the transfer of DAI in the *DaiSC* from his wallet to the *
-bundleSandSale smart contract* and then call the `buyBundleWithDai` function choosing which pack to buy with the sellId
+To buy packs with DAI a user must start by approving the transfer of DAI in the *DaiSC* from his wallet to the
+*BundleSandSale smart contract* and then call the `buyBundleWithDai` function choosing which pack to buy with the sellId
 parameter, the quantity of packs and the destination address (a user can buy for somebody else).
 
 ```plantuml
 actor Buyer
 actor Seller
 participant DaiSC
-participant BundleSansSaleSC
+participant BundleSandSaleSC
 collections Packs
 
-"Buyer" -> "DaiSC": allow the withdrawal of DAI to BundleSansSaleSC  
-"Buyer" -> "BundleSansSaleSC": call buyBundleWithDai()
-activate BundleSansSaleSC
-note over BundleSansSaleSC: check availability and balances
-"BundleSansSaleSC" <-> "Packs": Discount the packs
-"BundleSansSaleSC" -> "DaiSC": transferFrom()
+"Buyer" -> "DaiSC": allow the withdrawal of DAI to BundleSandSaleSC  
+"Buyer" -> "BundleSandSaleSC": call buyBundleWithDai()
+activate BundleSandSaleSC
+note over BundleSandSaleSC: check availability and balances
+"BundleSandSaleSC" <-> "Packs": Discount the packs
+"BundleSandSaleSC" -> "DaiSC": transferFrom()
 "DaiSC" -> "Seller": seller gets the DAI
-"BundleSansSaleSC" -> "Buyer": buyer gets his sand and collectibles
-deactivate BundleSansSaleSC
+"BundleSandSaleSC" -> "Buyer": buyer gets his sand and collectibles
+deactivate BundleSandSaleSC
 ```
 
 ### User buys a pack with ETH
 
 The process of buying with ETH is pretty similar to the process of buying with DAI the differences are the buyer sends
-directly the ETH to the *bundle sand sale smart contract* and the price of ETH is converted to u$s using the *
-medianizer*.
+directly the ETH to the *bundle sand sale smart contract* and the price of ETH is converted to usd using the
+*medianizer*.
 
 ```plantuml
 actor Buyer
 actor Seller
 participant DaiSC
 participant Medianizer
-participant BundleSansSaleSC
+participant BundleSandSaleSC
 collections Packs
 
-"Buyer" -> "BundleSansSaleSC": call buyBundleWithETH() sending the ETH in the transaction
-activate BundleSansSaleSC
-"BundleSansSaleSC" -> "Medianizer": Ask for the price of ETH in U$S
-"Medianizer" -> "BundleSansSaleSC": Return the price of ETH in U$S
-note over BundleSansSaleSC: check availability and balances
-"BundleSansSaleSC" <-> "Packs": Discount the packs
-"BundleSansSaleSC" -> "Seller": seller gets the ETH
-"BundleSansSaleSC" -> "Buyer": buyer gets his sand and collectibles
-deactivate BundleSansSaleSC
+"Buyer" -> "BundleSandSaleSC": call buyBundleWithETH() sending the ETH in the transaction
+activate BundleSandSaleSC
+"BundleSandSaleSC" -> "Medianizer": Ask for the price of ETH in USD
+"Medianizer" -> "BundleSandSaleSC": Return the price of ETH in USD
+note over BundleSandSaleSC: check availability and balances
+"BundleSandSaleSC" <-> "Packs": Discount the packs
+"BundleSandSaleSC" -> "Seller": seller gets the ETH
+"BundleSandSaleSC" -> "Buyer": buyer gets his sand and collectibles
+deactivate BundleSandSaleSC
 ```
 
 ### Admin withdrawn
@@ -167,10 +167,10 @@ withdrawn sale can not be sold anymore.
 
 ```plantuml
 actor Admin
-actor SomeDestinatioAddress
-participant BundleSansSaleSC
+actor Recipient
+participant BundleSandSaleSC
 
-"Admin" -> "BundleSansSaleSC": call withdrawSale()
-note over BundleSansSaleSC: check permission and availability
-"BundleSansSaleSC" -> "SomeDestinatioAddress": The destination address gets the Sand and Assets
+"Admin" -> "BundleSandSaleSC": call withdrawSale()
+note over BundleSandSaleSC: check permission and availability
+"BundleSandSaleSC" -> "Recipient": The destination address gets the Sand and Assets
 ```

@@ -27,7 +27,7 @@ nav:
       - DeFi:
           - Liquidity provider: topics/defi/liquidity-provider/sand-staking.md
       - Sand:
-          - BundeSandSale: topics/sand/bundle-sand-sale.md
+          - Bunde Sand Sale: topics/sand/bundle-sand-sale.md
 
 markdown_extensions:
   - admonition
