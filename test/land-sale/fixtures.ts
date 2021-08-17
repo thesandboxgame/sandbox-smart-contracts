@@ -44,7 +44,7 @@ export const setupAuthValidator = deployments.createFixture(async function (
 });
 
 export const setupEstateSale = deployments.createFixture(async function (hre) {
-  await deployments.fixture(['EstateSaleWithAuth', 'AuthValidator', 'Sand']);
+  await deployments.fixture(['EstateSaleWithAuth']);
   const authValidatorContract = await ethers.getContract('AuthValidator');
   const estateSaleWithAuthContract = await ethers.getContract(
     'EstateSaleWithAuth_0_0'
