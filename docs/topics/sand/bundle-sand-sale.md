@@ -5,7 +5,7 @@ description: Bundle Sand Sale contract description
 
 ---
 
-# Bundle Sand Sale
+# [Bundle Sand Sale Smart contract](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/src/solc_0.8/bundleSandSale/PolygonBundleSandSale.sol)
 
 ## Introduction
 
@@ -21,6 +21,12 @@ After that buyers can buy the packs paying in ETH or DAI.
 
 ## Model
 
+|                     Feature | Description                                                                  |
+|----------------------------:|:-----------------------------------------------------------------------------|
+|     ERC-1155 Token Receiver | https://eips.ethereum.org/EIPS/eip-1155#erc-1155-token-receiver              |
+|                 Upgradeable | No                                                                           |
+|                   WithAdmin | [eip-173](https://eips.ethereum.org/EIPS/eip-173) like                       |
+
 ### Participants
 
 - Seller: The user that wants to sell *packs*
@@ -29,17 +35,19 @@ After that buyers can buy the packs paying in ETH or DAI.
 
 ### Assets
 
-- Collectibles: ERC1155ERC721 assets that are NFTs or fungible tokens. This kind of assets represent collectible items
-  inside the game.
-- Sand: This is a fungible token (ERC20 compatible) that is used in the platform to pay for assets and transactions.
+- Collectibles: ERC1155ERC721 ([ERC721](https://eips.ethereum.org/EIPS/eip-721)
+  and [ERC1155](https://eips.ethereum.org/EIPS/eip-1155)) assets that are NFTs or fungible tokens. This kind of assets
+  represent collectible items inside the game.
+- Sand: This is a fungible token ([ERC20](https://eips.ethereum.org/EIPS/eip-20) compatible) that is used in the platform to pay for assets and transactions.
 - DAI: This represents a stable coin that is pegged one to one with the USD dollar.
 
 ### External agents
 
-- SandSC: This is the ERC20 smart contract that do the accounting of the Sand token.
+- SandSC: This is the [ERC20](https://eips.ethereum.org/EIPS/eip-20) smart contract that do the accounting of the Sand token.
 - AssetSC: This is the smart contract do the accounting of the ERC1155ERC721 collectibles.
-- DaiSC: This is the ERC20 smart contract that do the accounting of the DAI token.
-- MedianizerSC: A Chainlink compatible smart contract used to get the price relationship between USD and ETH.
+- DaiSC: This is the [ERC20](https://eips.ethereum.org/EIPS/eip-20) smart contract that do the accounting of the DAI token.
+- MedianizerSC: A [Maker Dao compatible](https://etherscan.io/address/0x729D19f657BD0614b4985Cf1D82531c67569197B#code)
+  smart contract used to get the price relationship between USD and ETH.
 
 ### Sale
 
