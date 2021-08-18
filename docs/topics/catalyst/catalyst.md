@@ -119,7 +119,6 @@ entity GemsCatalystsRegistry
 entity Catalyst
 entity DefaultAttributes
 
-
 note right of GemsCatalystsRegistry
 An asset has to be minted with G&C.
 A CatalystApplied events are then created.
@@ -143,10 +142,13 @@ The same can be done for gems with `batchBurnGems`.
 
 ```plantuml
 
+entity AssetMinter
 entity GemsCatalystsRegistry
 entity "LEGENDARY Catalyst" as L
 entity "EPIC Catalyst" as E
-->GemsCatalystsRegistry: BatchBurnCatalysts(from,  catalystIds[4,3], amounts[1,1])
+
+
+AssetMinter ->GemsCatalystsRegistry: BatchBurnCatalysts(from,  catalystIds[4,3], amounts[1,1])
 note over GemsCatalystsRegistry: retrieve LEGENDARY catalyst contract
 GemsCatalystsRegistry -> GemsCatalystsRegistry: getCatalyst(catalystId=4)
 GemsCatalystsRegistry -> L: burnFor(from, 1)
