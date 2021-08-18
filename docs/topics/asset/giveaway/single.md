@@ -2,9 +2,9 @@
 
 ## Introduction
 
-Asset Single Giveaway Smart Contract is for distributing earned [assets](https://to the users.
+Asset Single Giveaway permits to distribute [asset](https://sandboxgame.gitbook.io/the-sandbox/assets/what-are-assets) rewards to users.
 Users can [earn the assets](https://sandboxgame.gitbook.io/the-sandbox/other/earning-sand-and-nfts#earning-assets) in many ways like discord hunt, unicly contest and so on.
-And they can claim the assets from this contract with require params.
+And they can claim the assets from this contract with require params. You can find more information below.
 
 ## Process
 
@@ -82,6 +82,14 @@ class ERC1155 {
 ClaimERC1155 --|> AssetGiveaway
 ClaimERC1155 o-- ERC1155
 ```
+
+## Feature of the contract
+
+|              Feature | Link                                   |
+| --------------------:|:-------------------------------------- |
+|            `ERC-1155`| [https://eips.ethereum.org/EIPS/eip-1155](https://eips.ethereum.org/EIPS/eip-1155) |
+|        `Merkle Tree` | [https://solidity-by-example.org/app/merkle-tree/](https://solidity-by-example.org/app/merkle-tree/) |
+|          `WithAdmin` | Access Control to the functions  |
 
 ## References
 
