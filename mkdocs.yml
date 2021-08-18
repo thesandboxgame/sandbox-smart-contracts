@@ -25,9 +25,12 @@ nav:
       - Solidity:
           - Guideline: topics/guideline/solidity.md
       - DeFi:
-          - Liquidity provider: topics/defi/liquidity-provider/sand-staking.md
+          - Liquidity provider:
+              - SAND staking: topics/defi/liquidity-provider/sand-staking.md
+      - Catalyst:
+          - Gems & catalysts: topics/catalyst/catalyst.md
       - Sand:
-          - Bunde Sand Sale: topics/sand/bundle-sand-sale.md
+          - Bundle Sand Sale: topics/sand/bundle-sand-sale.md
 
 markdown_extensions:
   - admonition
