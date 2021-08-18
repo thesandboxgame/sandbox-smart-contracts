@@ -1,8 +1,10 @@
-import fs from "fs";
+import fs from "fs-extra";
 import MerkleTree from "../../lib/merkleTree";
 import addresses from "../addresses.json";
-import helpers, {SaleLandInfo, SaltedSaleLandInfo} from "../../lib/merkleTreeHelper";
-const {createDataArray, saltLands} = helpers;
+import helpers, {SaleLandInfo, SaltedSaleLandInfo, SaltedProofSaleLandInfo} from "../../lib/merkleTreeHelper";
+import deadlines from './deadlines';
+import {HardhatRuntimeEnvironment} from "hardhat/types/runtime";
+const {createDataArray, saltLands, calculateLandHash} = helpers;
 
 export type LandSale = {
   sector: number;
@@ -271,4 +273,45 @@ export async function getLandSaleFiles(presale: string, networkName: string): Pr
   const bundles = (await import(bundlesPath)).default;
   const prices = (await import(`./${presale}/prices`)).default;
   return {secret, sectors, bundles, prices}
+}
+
+export function getDeadline(hre: HardhatRuntimeEnvironment, sector: number): number {
+  let deadline = deadlines[sector];
+  if (!deadline) {
+    throw new Error(`no deadline for sector ${sector}`);
+  }
+  if (hre.network.tags.testnet) {
+    hre.deployments.log('increasing deadline by 1 year');
+    deadline += 365 * 24 * 60 * 60; //add 1 year on testnets
+  }
+  return deadline;
+}
+
+export function writeProofs(hre: HardhatRuntimeEnvironment, landSaleName: string, landSale: LandSale): void {
+  if (hre.network.name !== 'hardhat' || landSaleName === "EstateSaleWithAuth_0_0") {
+    const landsWithProof: SaltedProofSaleLandInfo[] = [];
+    for (const land of landSale.saltedLands) {
+      const proof = landSale.tree.getProof(calculateLandHash(land));
+      landsWithProof.push({...land, proof});
+    }
+    const path = `./secret/estate-sale/${hre.network.name}/.proofs_${landSaleName}.json`
+    fs.outputJsonSync(path, landsWithProof);
+  }
+}
+
+export async function setAsLandMinter(hre: HardhatRuntimeEnvironment, address: string): Promise<void> {
+  const {read, execute, catchUnknownSigner} = hre.deployments;
+  const isMinter = await read('Land', 'isMinter', address);
+  if (!isMinter) {
+    const currentLandAdmin = await read('Land', 'getAdmin');
+    await catchUnknownSigner(
+      execute(
+        'Land',
+        {from: currentLandAdmin, log: true},
+        'setMinter',
+        address,
+        true
+      )
+    );
+  }
 }

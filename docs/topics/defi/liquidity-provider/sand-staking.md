@@ -8,7 +8,7 @@ The aim of this document is to explain how the LP token ($SAND-ETH) staking curr
 
 First a brief explanation of how liquidity pool works: <https://www.youtube.com/watch?v=cizLhxSKrAc>
 
-The user who wants to stake his tokens has to follow a some steps outside the sandbox before he can stake.
+The user who wants to stake his tokens has to follow some steps outside the sandbox ecosystem before he can stake.
 He has to go to the Dex (currently uniswap) and provide $SAND **AND** ETH. He receives in exchange some LP tokens that he can stake on <https://staking.sandbox.game>.
 
 ## Staking LP tokens
@@ -41,7 +41,7 @@ Formula : SAND*EARNED (per tick) = POOL_SHARE * POOL*REWARD * TICK_RATE / POOL_D
 ```plantuml
 title sequence diagram
 
-actor user
+actor User
 actor "The Sandbox"
 entity uniswap
 
@@ -50,22 +50,22 @@ entity uniswap
 "The Sandbox" -> "staking contract": notifyRewardAmount(uint256 reward)
 
 == User stake ==
-user -> uniswap: Send ETH **and** $SAND
-uniswap -> user: Received $SAND<>ETH LP tokens
-user -> "staking contract": stake(uint256 amount)
-"staking contract" --> user: emit Staked(msg.sender, amount)
+User -> uniswap: Send ETH **and** $SAND
+uniswap -> User: Received $SAND<>ETH LP tokens
+User -> "staking contract": stake(uint256 amount)
+"staking contract" --> User: emit Staked(msg.sender, amount)
 
 == User get some amount of money back ==
-user -> "staking contract": withdraw(uint256 amount)
-"staking contract" --> user: emit Withdrawn(msg.sender, amount)
+User -> "staking contract": withdraw(uint256 amount)
+"staking contract" --> User: emit Withdrawn(msg.sender, amount)
 == User retrieve reward ==
-user -> "staking contract": getReward()
-"staking contract" --> user: emit RewardPaid(msg.sender, reward)
+User -> "staking contract": getReward()
+"staking contract" --> User: emit RewardPaid(msg.sender, reward)
 
 == User get all money and reward back ==
-user -> "staking contract": exit()
-"staking contract" --> user: emit Withdrawn(msg.sender, balanceOfUser)
-"staking contract" --> user: emit RewardPaid(msg.sender, reward)
+User -> "staking contract": exit()
+"staking contract" --> User: emit Withdrawn(msg.sender, balanceOfUser)
+"staking contract" --> User: emit RewardPaid(msg.sender, reward)
 ```
 
 ```plantuml

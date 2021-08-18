@@ -184,6 +184,14 @@ const config: HardhatUserConfig = {
       rinkeby: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
       goerli: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
     },
+    backendAuthWallet: {
+      // default is computed from private key:
+      // "0x4242424242424242424242424242424242424242424242424242424242424242"
+      default: '0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025',
+      mainnet: '0x3044719d139F866a44c988823513eCB93060bF1b',
+      rinkeby: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
+      goerli: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
+    },
     sandboxAccount: {
       default: 4,
       mainnet: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA',

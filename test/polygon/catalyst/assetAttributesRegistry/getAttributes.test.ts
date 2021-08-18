@@ -1,4 +1,4 @@
-import {ethers} from 'hardhat';
+import {ethers, deployments} from 'hardhat';
 import {Address, Receipt} from 'hardhat-deploy/types';
 import {BigNumber, Contract, Event} from 'ethers';
 import {expect} from '../../../chai-setup';
@@ -81,6 +81,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
   }
 
   beforeEach(async function () {
+    await deployments.fixture();
     ({
       assetAttributesRegistry,
       assetUpgraderAsUser0,
