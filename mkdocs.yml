@@ -38,6 +38,8 @@ nav:
           - Bundle Sand Sale: topics/sand/bundle-sand-sale.md
       - Token:
           - ERC20: topics/token/ERC20.md
+      - Asset:
+          - Asset: topics/asset/asset.md
 
 
 markdown_extensions:
