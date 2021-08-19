@@ -107,7 +107,7 @@ contract AssetMinter is ERC2771Context, IAssetMinter, WithAdmin {
         return assetIds;
     }
 
-    /// @dev Handler for edaling with assets when minting multiple at once.
+    /// @dev Handler for dealing with assets when minting multiple at once.
     /// @param from The original address that signed the transaction.
     /// @param gemsQuantities An array listing the quantity of each type of gem.
     /// @param catalystsQuantities An array listing the quantity of each type of catalyst.
@@ -139,7 +139,7 @@ contract AssetMinter is ERC2771Context, IAssetMinter, WithAdmin {
     /// @dev Validate the quantities of each type of gem passed.
     /// @param gemsQuantities An array of the quantities of each gem type to use for minting assets.
     /// @param gemIds An array of gemIds to use for minting assets.
-    /// @return An array of quantities for aech gem type.
+    /// @return An array of quantities for each gem type.
     function _checkGemsQuantities(uint256[] memory gemsQuantities, uint16[] memory gemIds)
         internal
         pure
