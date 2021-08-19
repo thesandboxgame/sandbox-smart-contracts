@@ -34,7 +34,9 @@ nav:
       - Catalyst:
           - Gems & catalysts: topics/catalyst/catalyst.md
       - Sand:
+          - Sand Token: topics/sand/sand-token.md
           - Bundle Sand Sale: topics/sand/bundle-sand-sale.md
+
 
 markdown_extensions:
   - admonition
