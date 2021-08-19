@@ -1,7 +1,7 @@
 name: CI
 on: push
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
@@ -28,14 +28,30 @@ jobs:
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
+  lint:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Linting
         run: yarn lint
 
+  format:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Formatting
         run: yarn format
 
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Running tests
         run: yarn test
 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
       - name: Deploy contracts
         run: yarn void:deploy
