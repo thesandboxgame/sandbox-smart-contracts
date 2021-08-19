@@ -270,5 +270,42 @@ describe('SandBaseToken.sol', function () {
       expect(receiverAfter).to.equal(receiverBefore.add(TRANSFER));
       expect(receiverAfter).to.equal(TRANSFER);
     });
+
+    it('burn test', async function () {
+      const {SandBaseToken, userWithSand, usersWithoutSand} = await setupTest();
+      const TOTAL_ALLOWANCE = DECIMALS_18.mul(250);
+      const BURN = TOTAL_ALLOWANCE.sub(100);
+
+      const allowanceApprover = userWithSand;
+      const allowanceCarrier = usersWithoutSand[0];
+
+      allowanceApprover.SandBaseToken.approve(
+        allowanceCarrier.address,
+        TOTAL_ALLOWANCE
+      );
+
+      const senderBefore = await SandBaseToken.balanceOf(
+        allowanceApprover.address
+      );
+
+      const allowedBefore = await SandBaseToken.allowance(
+        allowanceApprover.address,
+        allowanceCarrier.address
+      );
+
+      allowanceCarrier.SandBaseToken.burnFor(allowanceApprover.address, BURN);
+
+      const senderAfter = await SandBaseToken.balanceOf(
+        allowanceApprover.address
+      );
+
+      const allowedAfter = await SandBaseToken.allowance(
+        allowanceApprover.address,
+        allowanceCarrier.address
+      );
+
+      expect(senderAfter).to.equal(senderBefore.sub(BURN));
+      expect(allowedBefore).to.equal(BURN.add(allowedAfter));
+    });
   });
 });
