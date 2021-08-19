@@ -39,12 +39,7 @@ describe('EstateSaleWithAuth', function () {
         deployer,
         deployer,
         zeroAddress,
-        [
-          x,
-          y,
-          size,
-          price
-        ],
+        [x, y, size, price],
         salt,
         assetIds,
         proof,
@@ -87,12 +82,7 @@ describe('EstateSaleWithAuth', function () {
         deployer,
         deployer,
         zeroAddress,
-        [
-          x,
-          y,
-          size,
-          price
-        ],
+        [x, y, size, price],
         salt,
         assetIds,
         proof,
@@ -122,31 +112,35 @@ describe('EstateSaleWithAuth', function () {
       assetIds,
       proof
     );
-    const encodedData = estateSaleWithAuthContract.interface.encodeFunctionData("buyLandWithSand", [
-      deployer,
-      deployer,
-      zeroAddress,
+    const encodedData = estateSaleWithAuthContract.interface.encodeFunctionData(
+      'buyLandWithSand',
       [
-        x,
-        y,
-        size,
-        price
-      ],
-      salt,
-      assetIds,
-      proof,
-      '0x',
-      signature
-    ]);
+        deployer,
+        deployer,
+        zeroAddress,
+        [x, y, size, price],
+        salt,
+        assetIds,
+        proof,
+        '0x',
+        signature,
+      ]
+    );
     const contract = await sandContract.connect(
       ethers.provider.getSigner(deployer)
     );
 
     await waitFor(
-      contract.approveAndCall(estateSaleWithAuthContract.address, price, encodedData)
+      contract.approveAndCall(
+        estateSaleWithAuthContract.address,
+        price,
+        encodedData
+      )
     );
 
-    const landQuadPurchasedEvents = await estateSaleWithAuthContract.queryFilter(estateSaleWithAuthContract.filters.LandQuadPurchased());
+    const landQuadPurchasedEvents = await estateSaleWithAuthContract.queryFilter(
+      estateSaleWithAuthContract.filters.LandQuadPurchased()
+    );
     expect(landQuadPurchasedEvents.length).to.eq(1);
   });
 });
