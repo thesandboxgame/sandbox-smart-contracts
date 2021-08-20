@@ -363,7 +363,7 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         uint256 owner1x1 = _owners[id];
 
         if (owner1x1 != 0) {
-            return address(uint160(owner1x1)); // cast to zero
+            return address(uint160(owner1x1)); //we check if the quad exists as an 1x1 quad, then 3x3, and so on
         } else {
             address owner3x3 = address(uint160(_owners[LAYER_3x3 + (x / 3) * 3 + ((y / 3) * 3) * GRID_SIZE]));
             if (owner3x3 != address(0)) {

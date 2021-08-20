@@ -1,6 +1,6 @@
 import {expect} from '../../chai-setup';
 import {ethers, deployments, getUnnamedAccounts} from 'hardhat';
-import {Contract} from 'ethers';
+import {BigNumber, Contract} from 'ethers';
 import {setupUsers, waitFor} from '../../utils';
 
 type User = {
@@ -161,6 +161,86 @@ describe('MockLandWithMint.sol', function () {
       );
 
       expect(num3).to.equal(1);
+    });
+  });
+
+  describe('Mint and transfer all its smaller quads', function () {
+    it('transfering a 1X1 quad from a 3x3', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          3,
+          3,
+          3,
+          bytes
+        )
+      );
+      const num = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[0].address
+      );
+      expect(num).to.equal(9);
+
+      for (let x = 3; x < 6; x++) {
+        for (let y = 3; y < 6; y++) {
+          await waitFor(
+            landOwners[0].MockLandWithMint.transferQuad(
+              landOwners[0].address,
+              landOwners[1].address,
+              1,
+              x,
+              y,
+              bytes
+            )
+          );
+        }
+      }
+
+      //landowner2 will burn all his land
+      for (let x = 3; x < 6; x++) {
+        for (let y = 3; y < 6; y++) {
+          await waitFor(
+            landOwners[1].MockLandWithMint.burn(
+              0x0000000000000000000000000000000000000000000000000000000000000000 +
+                (x + y * 408)
+            )
+          );
+        }
+      }
+
+      /*await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          3,
+          3,
+          3,
+          bytes
+        )
+      );*/
+
+      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[0].address
+      );
+
+      expect(num1).to.equal(0);
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+
+      expect(num2).to.equal(0);
+
+      await expect(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          3,
+          3,
+          3,
+          bytes
+        )
+      ).to.be.revertedWith('Already minted as 3x3');
     });
   });
 
