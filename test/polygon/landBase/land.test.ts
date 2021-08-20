@@ -209,17 +209,6 @@ describe('MockLandWithMint.sol', function () {
         }
       }
 
-      /*await waitFor(
-        landOwners[0].MockLandWithMint.transferQuad(
-          landOwners[0].address,
-          landOwners[1].address,
-          3,
-          3,
-          3,
-          bytes
-        )
-      );*/
-
       const num1 = await landOwners[0].MockLandWithMint.balanceOf(
         landOwners[0].address
       );
