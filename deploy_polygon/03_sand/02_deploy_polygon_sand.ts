@@ -8,16 +8,22 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const CHILD_CHAIN_MANAGER = await deployments.get('CHILD_CHAIN_MANAGER');
 
   await deploy('PolygonSand', {
     from: deployer,
-    args: [CHILD_CHAIN_MANAGER.address, deployer, deployer],
+    args: [
+      CHILD_CHAIN_MANAGER.address,
+      TRUSTED_FORWARDER.address,
+      deployer,
+      deployer,
+    ],
     log: true,
   });
 };
 
 export default func;
 func.tags = ['PolygonSand', 'PolygonSand_deploy'];
-func.dependencies = ['CHILD_CHAIN_MANAGER'];
+func.dependencies = ['CHILD_CHAIN_MANAGER', 'TRUSTED_FORWARDER'];
 func.skip = skipUnlessL2;
