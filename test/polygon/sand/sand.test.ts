@@ -45,7 +45,7 @@ describe('PolygonSand.sol', function () {
 
       // Emulate the ChildChainManager call to deposit
       await waitFor(
-        polygon.childChainManager.callSandDeposit(
+        polygon.ChildChainManager.callSandDeposit(
           polygon.Sand.address,
           polygon.sandBeneficiary.address,
           data
@@ -91,7 +91,7 @@ describe('PolygonSand.sol', function () {
         )
       );
       await waitFor(
-        polygon.childChainManager.callSandDeposit(
+        polygon.ChildChainManager.callSandDeposit(
           polygon.Sand.address,
           mainnet.sandBeneficiary.address,
           data
