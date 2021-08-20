@@ -63,6 +63,7 @@ export const setupEstateSale = deployments.createFixture(async function (hre) {
   return {
     authValidatorContract,
     estateSaleWithAuthContract,
+    sandContract,
     approveSandForEstateSale,
     proofs,
     hre,

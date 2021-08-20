@@ -36,11 +36,10 @@ describe('EstateSaleWithAuth', function () {
 
     const receipt = await waitFor(
       contract.buyLandWithSand(
-        [deployer, deployer, zeroAddress],
-        x,
-        y,
-        size,
-        price,
+        deployer,
+        deployer,
+        zeroAddress,
+        [x, y, size, price],
         salt,
         assetIds,
         proof,
@@ -80,11 +79,10 @@ describe('EstateSaleWithAuth', function () {
 
     await expect(
       contract.buyLandWithSand(
-        [deployer, deployer, zeroAddress],
-        x,
-        y,
-        size,
-        price,
+        deployer,
+        deployer,
+        zeroAddress,
+        [x, y, size, price],
         salt,
         assetIds,
         proof,
@@ -92,5 +90,57 @@ describe('EstateSaleWithAuth', function () {
         signature
       )
     ).to.be.revertedWith(`INVALID_AUTH`);
+  });
+
+  it('should be able to purchase through sand contract', async function () {
+    const {
+      estateSaleWithAuthContract,
+      sandContract,
+      proofs,
+    } = await setupEstateSale();
+    const {deployer} = await getNamedAccounts();
+    const {x, y, size, price, salt, proof, assetIds} = proofs[0];
+    const signature = await signAuthMessageAs(
+      backendAuthWallet,
+      deployer,
+      zeroAddress,
+      x,
+      y,
+      size,
+      price,
+      salt,
+      assetIds,
+      proof
+    );
+    const encodedData = estateSaleWithAuthContract.interface.encodeFunctionData(
+      'buyLandWithSand',
+      [
+        deployer,
+        deployer,
+        zeroAddress,
+        [x, y, size, price],
+        salt,
+        assetIds,
+        proof,
+        '0x',
+        signature,
+      ]
+    );
+    const contract = await sandContract.connect(
+      ethers.provider.getSigner(deployer)
+    );
+
+    await waitFor(
+      contract.approveAndCall(
+        estateSaleWithAuthContract.address,
+        price,
+        encodedData
+      )
+    );
+
+    const landQuadPurchasedEvents = await estateSaleWithAuthContract.queryFilter(
+      estateSaleWithAuthContract.filters.LandQuadPurchased()
+    );
+    expect(landQuadPurchasedEvents.length).to.eq(1);
   });
 });
