@@ -33,30 +33,27 @@ contract EstateSaleWithAuth is MetaTransactionReceiver, ReferralValidator {
     }
 
     /// @notice buy Land with SAND using the merkle proof associated with it
-    /// @param addresses [0] address that perform the payment [1] address that will own the purchased Land [2] the reserved address (if any)
-    /// @param x x coordinate of the Land
-    /// @param y y coordinate of the Land
-    /// @param size size of the pack of Land to purchase
-    /// @param priceInSand price in SAND to purchase that Land
+    /// @param buyer address that perform the payment
+    /// @param to address that will own the purchased Land
+    /// @param reserved the reserved address (if any)
+    /// @param info [X_INDEX=0] x coordinate of the Land [Y_INDEX=1] y coordinate of the Land [SIZE_INDEX=2] size of the pack of Land to purchase [PRICE_INDEX=3] price in SAND to purchase that Land
     /// @param proof merkleProof for that particular Land
     function buyLandWithSand(
-        /// TODO: review any other workaround for stack too deep
-        address[] calldata addresses,
-        uint256 x,
-        uint256 y,
-        uint256 size,
-        uint256 priceInSand,
+        address buyer,
+        address to,
+        address reserved,
+        uint256[] calldata info,
         bytes32 salt,
         uint256[] calldata assetIds,
         bytes32[] calldata proof,
         bytes calldata referral,
         bytes calldata signature
     ) external {
-        _checkAddressesAndExpiryTime(addresses);
-        _checkAuthAndProofValidity(addresses, x, y, size, priceInSand, salt, assetIds, proof, signature);
-        _handleFeeAndReferral(addresses[0], priceInSand, referral);
-        _mint(addresses, x, y, size, priceInSand, priceInSand);
-        _sendAssets(addresses[1], assetIds);
+        _checkAddressesAndExpiryTime(buyer, reserved);
+        _checkAuthAndProofValidity(to, reserved, info, salt, assetIds, proof, signature);
+        _handleFeeAndReferral(buyer, info[PRICE_INDEX], referral);
+        _mint(buyer, to, info);
+        _sendAssets(to, assetIds);
     }
 
     /// @notice Gets the expiry time for the current sale
@@ -114,54 +111,68 @@ contract EstateSaleWithAuth is MetaTransactionReceiver, ReferralValidator {
     }
 
     // NOTE: _checkAddressesAndExpiryTime & _checkAuthAndProofValidity were split due to a stack too deep issue
-    function _checkAddressesAndExpiryTime(address[] memory addresses) internal view {
-        require(addresses.length == 3, "INVALID_ADDRESSES");
+    function _checkAddressesAndExpiryTime(address buyer, address reserved) internal view {
         /* solium-disable-next-line security/no-block-members */
         require(block.timestamp < _expiryTime, "SALE_IS_OVER");
-        require(addresses[0] == msg.sender || _metaTransactionContracts[msg.sender], "NOT_AUTHORIZED");
-        require(addresses[2] == address(0) || addresses[2] == addresses[0], "RESERVED_LAND");
+        require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "NOT_AUTHORIZED");
+        require(reserved == address(0) || reserved == buyer, "RESERVED_LAND");
     }
 
     // NOTE: _checkAddressesAndExpiryTime & _checkAuthAndProofValidity were split due to a stack too deep issue
     function _checkAuthAndProofValidity(
-        address[] memory addresses,
-        uint256 x,
-        uint256 y,
-        uint256 size,
-        uint256 price,
+        address to,
+        address reserved,
+        uint256[] memory info,
         bytes32 salt,
         uint256[] memory assetIds,
         bytes32[] memory proof,
         bytes memory signature
     ) internal view {
-        bytes32 hashedData = keccak256(abi.encodePacked(addresses[1], addresses[2], x, y, size, price, salt, assetIds, proof));
+        bytes32 hashedData = keccak256(
+            abi.encodePacked(
+                to,
+                reserved,
+                info[X_INDEX],
+                info[Y_INDEX],
+                info[SIZE_INDEX],
+                info[PRICE_INDEX],
+                salt,
+                assetIds,
+                proof
+            )
+        );
         require(_authValidator.isAuthValid(signature, hashedData), "INVALID_AUTH");
 
-        bytes32 leaf = _generateLandHash(x, y, size, price, addresses[2], salt, assetIds);
+        bytes32 leaf = _generateLandHash(
+            info[X_INDEX],
+            info[Y_INDEX],
+            info[SIZE_INDEX],
+            info[PRICE_INDEX],
+            reserved,
+            salt,
+            assetIds
+        );
         require(_verify(proof, leaf), "INVALID_LAND");
     }
 
     function _mint(
-        address[] memory addresses,
-        uint256 x,
-        uint256 y,
-        uint256 size,
-        uint256 price,
-        uint256 tokenAmount
+        address buyer,
+        address to,
+        uint256[] memory info
     ) internal {
-        if (size == 1 || _estate == address(0)) {
-            _land.mintQuad(addresses[1], size, x, y, "");
+        if (info[SIZE_INDEX] == 1 || _estate == address(0)) {
+            _land.mintQuad(to, info[SIZE_INDEX], info[X_INDEX], info[Y_INDEX], "");
         } else {
-            _land.mintQuad(_estate, size, x, y, abi.encode(addresses[1]));
+            _land.mintQuad(_estate, info[SIZE_INDEX], info[X_INDEX], info[Y_INDEX], abi.encode(to));
         }
         emit LandQuadPurchased(
-            addresses[0],
-            addresses[1],
-            x + (y * GRID_SIZE),
-            size,
-            price,
+            buyer,
+            to,
+            info[X_INDEX] + (info[Y_INDEX] * GRID_SIZE),
+            info[SIZE_INDEX],
+            info[PRICE_INDEX],
             address(_sand),
-            tokenAmount
+            info[PRICE_INDEX]
         );
     }
 
@@ -225,6 +236,11 @@ contract EstateSaleWithAuth is MetaTransactionReceiver, ReferralValidator {
     bytes32 internal immutable _merkleRoot;
 
     uint256 private constant FEE = 5; // percentage of land sale price to be diverted to a specially configured instance of FeeDistributor, shown as an integer
+    // buyLandWithSand info indexes
+    uint256 private constant X_INDEX = 0;
+    uint256 private constant Y_INDEX = 1;
+    uint256 private constant SIZE_INDEX = 2;
+    uint256 private constant PRICE_INDEX = 3;
 
     constructor(
         address landAddress,
