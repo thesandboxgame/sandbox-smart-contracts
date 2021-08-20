@@ -1,6 +1,6 @@
 import {expect} from '../../chai-setup';
 import {ethers, deployments, getUnnamedAccounts} from 'hardhat';
-import {BigNumber, Contract} from 'ethers';
+import {Contract} from 'ethers';
 import {setupUsers, waitFor} from '../../utils';
 
 type User = {
