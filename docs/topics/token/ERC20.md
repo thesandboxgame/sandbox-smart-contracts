@@ -1,7 +1,7 @@
 ---
 breaks: false
 
-description: Sand contract description
+description: Our ERC20 custom implementation
 
 ---
 
@@ -18,7 +18,7 @@ ERC20 [implementation](https://github.com/OpenZeppelin/openzeppelin-contracts/bl
 with some extensions.
 
 Reading the [ERC20](https://eips.ethereum.org/EIPS/eip-20) documentation is a pre-requisite to read this document, but
-here bellow we explain the most important aspects:
+here below we explain the most important aspects:
 
 1. ERC20 represents a fungible token, each account has an amount related to it.
 2. Amounts can be transferred between accounts.
@@ -126,7 +126,7 @@ participant DestinationSC
 
 "User" -> "SandTokenSC": approve(DestinationSC, someAmount)  
 "User" -> "DestinationSC": execute some operation, for example deposit()
-"DestinationSC" -> "SandTokenSC": calls trasnferFrom(user, DestinationSC)
+"DestinationSC" -> "SandTokenSC": calls transferFrom(user, DestinationSC)
 "SandTokenSC" -> "SandTokenSC": Sand are assigned to DestinationSC
 ```
 
@@ -140,7 +140,7 @@ participant DestinationSC
 activate SandTokenSC
 "SandTokenSC" -> "SandTokenSC": call approve(DestinationSC, someAmount)
 "SandTokenSC" -> "DestinationSC": call deposit()
-"DestinationSC" -> "SandTokenSC": calls trasnferFrom(user, DestinationSC)
+"DestinationSC" -> "SandTokenSC": calls transferFrom(user, DestinationSC)
 "SandTokenSC" -> "SandTokenSC": Sand are assigned to DestinationSC
 deactivate SandTokenSC
 ```
