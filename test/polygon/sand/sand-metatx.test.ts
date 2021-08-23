@@ -185,6 +185,9 @@ describe('PolygonSand.sol Meta TX', function () {
       await fixtures.deployer.Sand.setTrustedForwarder(users[3]);
       expect(await fixtures.sandBeneficiary.Sand.isTrustedForwarder(users[3]))
         .to.be.true;
+      expect(
+        await fixtures.sandBeneficiary.Sand.getTrustedForwarder()
+      ).to.be.equal(users[3]);
     });
   });
 });
