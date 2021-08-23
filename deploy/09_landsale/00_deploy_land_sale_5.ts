@@ -2,12 +2,12 @@ import {getLandSales, LandSale} from '../../data/landSales/getLandSales';
 import deadlines from '../../data/landSales/deadlines';
 import fs from 'fs';
 import helpers, {SaltedSaleLandInfo} from '../../lib/merkleTreeHelper';
-import {isInTags, isTesnet, skipUnlessTest} from '../../utils/network';
+import {isTesnet, skipUnlessTest} from '../../utils/network';
+import {DeployFunction} from 'hardhat-deploy/types';
+
 const {calculateLandHash} = helpers;
 
 const LANDSALE_PREFIX = 'LandPreSale_5';
-
-import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
