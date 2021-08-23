@@ -138,7 +138,7 @@ describe('PolygonSand.sol Meta TX', function () {
     });
   });
 
-  describe(' burn', function () {
+  describe('burn', function () {
     it('without metatx', async function () {
       const amount = 123;
       const preSupply = BigNumber.from(await fixtures.Sand.totalSupply());
@@ -170,6 +170,21 @@ describe('PolygonSand.sol Meta TX', function () {
       expect(await fixtures.Sand.totalSupply()).to.be.equal(
         preSupply.sub(amount)
       );
+    });
+  });
+
+  describe('trusted forwarder', function () {
+    it('should fail to set the trusted forwarder if not owner', async function () {
+      await expect(
+        fixtures.sandBeneficiary.Sand.setTrustedForwarder(users[3])
+      ).to.revertedWith('caller is not the owner');
+    });
+    it('should success to set the trusted forwarder if owner', async function () {
+      expect(await fixtures.sandBeneficiary.Sand.isTrustedForwarder(users[3]))
+        .to.be.false;
+      await fixtures.deployer.Sand.setTrustedForwarder(users[3]);
+      expect(await fixtures.sandBeneficiary.Sand.isTrustedForwarder(users[3]))
+        .to.be.true;
     });
   });
 });

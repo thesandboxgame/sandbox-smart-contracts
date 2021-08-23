@@ -13,6 +13,7 @@ export type Fixtures = {
   Sand: Contract;
   users: User[];
   sandBeneficiary: User;
+  deployer: User;
   ChildChainManager: Contract;
   TrustedForwarder: Contract;
 };
@@ -31,5 +32,16 @@ export const setupSand = deployments.createFixture(async () => {
     Sand,
     TrustedForwarder,
   });
-  return {Sand, users, sandBeneficiary, ChildChainManager, TrustedForwarder};
+  const deployer = await setupUser(accounts.deployer, {
+    Sand,
+    TrustedForwarder,
+  });
+  return {
+    Sand,
+    users,
+    sandBeneficiary,
+    deployer,
+    ChildChainManager,
+    TrustedForwarder,
+  };
 });

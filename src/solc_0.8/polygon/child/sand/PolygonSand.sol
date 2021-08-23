@@ -3,10 +3,10 @@
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
-import "@openzeppelin/contracts-0.8/metatx/ERC2771Context.sol";
+import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "../../../Sand/SandBaseToken.sol";
 
-contract PolygonSand is SandBaseToken, Ownable, ERC2771Context {
+contract PolygonSand is SandBaseToken, Ownable, ERC2771Handler {
     address public childChainManagerProxy;
 
     constructor(
@@ -14,9 +14,10 @@ contract PolygonSand is SandBaseToken, Ownable, ERC2771Context {
         address _trustedForwarder,
         address sandAdmin,
         address executionAdmin
-    ) SandBaseToken(sandAdmin, executionAdmin, address(0), 0) ERC2771Context(_trustedForwarder) {
+    ) SandBaseToken(sandAdmin, executionAdmin, address(0), 0) {
         require(_childChainManagerProxy != address(0), "Bad ChildChainManagerProxy address");
         childChainManagerProxy = _childChainManagerProxy;
+        __ERC2771Handler_initialize(_trustedForwarder);
     }
 
     /// @notice update the ChildChainManager Proxy address
@@ -42,11 +43,15 @@ contract PolygonSand is SandBaseToken, Ownable, ERC2771Context {
         _burn(_msgSender(), amount);
     }
 
-    function _msgSender() internal view override(Context, ERC2771Context) returns (address sender) {
-        return ERC2771Context._msgSender();
+    function setTrustedForwarder(address trustedForwarder) external onlyOwner {
+        _trustedForwarder = trustedForwarder;
     }
 
-    function _msgData() internal view override(Context, ERC2771Context) returns (bytes calldata) {
-        return ERC2771Context._msgData();
+    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
+        return ERC2771Handler._msgSender();
+    }
+
+    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+        return ERC2771Handler._msgData();
     }
 }
