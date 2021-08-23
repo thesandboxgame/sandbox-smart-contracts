@@ -16,6 +16,10 @@ contract ERC2771Handler {
         return forwarder == _trustedForwarder;
     }
 
+    function getTrustedForwarder() external view returns (address trustedForwarder) {
+        return _trustedForwarder;
+    }
+
     function _msgSender() internal view virtual returns (address sender) {
         if (isTrustedForwarder(msg.sender)) {
             // The assembly code is more direct than the Solidity version using `abi.decode`.

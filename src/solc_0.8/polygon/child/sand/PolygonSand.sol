@@ -11,13 +11,13 @@ contract PolygonSand is SandBaseToken, Ownable, ERC2771Handler {
 
     constructor(
         address _childChainManagerProxy,
-        address _trustedForwarder,
+        address trustedForwarder,
         address sandAdmin,
         address executionAdmin
     ) SandBaseToken(sandAdmin, executionAdmin, address(0), 0) {
         require(_childChainManagerProxy != address(0), "Bad ChildChainManagerProxy address");
         childChainManagerProxy = _childChainManagerProxy;
-        __ERC2771Handler_initialize(_trustedForwarder);
+        __ERC2771Handler_initialize(trustedForwarder);
     }
 
     /// @notice update the ChildChainManager Proxy address
@@ -45,10 +45,6 @@ contract PolygonSand is SandBaseToken, Ownable, ERC2771Handler {
 
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
         _trustedForwarder = trustedForwarder;
-    }
-
-    function getTrustedForwarder() external view returns (address trustedForwarder) {
-        return _trustedForwarder;
     }
 
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
