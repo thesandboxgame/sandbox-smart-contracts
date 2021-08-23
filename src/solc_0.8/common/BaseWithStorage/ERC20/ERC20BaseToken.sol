@@ -71,13 +71,6 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     /// @param from The address whose token to burn.
     /// @param amount The number of tokens to burn.
     function burnFor(address from, uint256 amount) external override {
-        if (_msgSender() != from && !_superOperators[_msgSender()] && _msgSender() != _operator) {
-            uint256 currentAllowance = _allowances[from][_msgSender()];
-            if (currentAllowance != ~uint256(0)) {
-                require(currentAllowance >= amount, "NOT_AUTHORIZED_ALLOWANCE");
-                _allowances[from][_msgSender()] = currentAllowance - amount;
-            }
-        }
         _burn(from, amount);
     }
 
@@ -232,9 +225,9 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         require(amount > 0, "BURN_O_TOKENS");
         if (_msgSender() != from && !_superOperators[_msgSender()] && _msgSender() != _operator) {
             uint256 currentAllowance = _allowances[from][_msgSender()];
-            require(currentAllowance >= amount, "INSUFFICIENT_ALLOWANCE");
             if (currentAllowance != ~uint256(0)) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
+                require(currentAllowance >= amount, "INSUFFICIENT_ALLOWANCE");
                 _allowances[from][_msgSender()] = currentAllowance - amount;
             }
         }
