@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+
 export function node_url(networkName: string): string {
   if (networkName) {
     const uri = process.env['ETH_NODE_URI_' + networkName.toUpperCase()];
@@ -52,11 +53,23 @@ export async function skipUnlessTest(
 export async function skipUnlessL1(
   hre: HardhatRuntimeEnvironment
 ): Promise<boolean> {
-  return !hre.network.tags.L1;
+  return !isInTags(hre, 'L1');
 }
 
 export async function skipUnlessL2(
   hre: HardhatRuntimeEnvironment
 ): Promise<boolean> {
-  return !hre.network.tags.L2;
+  return !isInTags(hre, 'L2');
+}
+
+// Helper function to fix a bug in hardhat-deploy for the "hardhat" network.
+export function isInTags(hre: HardhatRuntimeEnvironment, key: string): boolean {
+  return (
+    (hre.network.tags && hre.network.tags[key]) ||
+    (hre.network.config.tags && hre.network.config.tags.includes(key))
+  );
+}
+
+export function isTesnet(hre: HardhatRuntimeEnvironment) {
+  return isInTags(hre, 'testnet');
 }

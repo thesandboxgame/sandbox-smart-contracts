@@ -7,6 +7,7 @@ const {calculateLandHash} = helpers;
 const LANDSALE_NAME = 'LandPreSale_9';
 
 import {DeployFunction} from 'hardhat-deploy/types';
+import {isTesnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
@@ -33,7 +34,7 @@ const func: DeployFunction = async function (hre) {
       throw new Error(`no deadline for sector ${sector}`);
     }
 
-    if (hre.network.tags.testnet) {
+    if (isTesnet(hre)) {
       log('increasing deadline by 1 year');
       deadline += 365 * 24 * 60 * 60; //add 1 year on testnets
     }

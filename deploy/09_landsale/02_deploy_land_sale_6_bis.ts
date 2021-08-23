@@ -2,7 +2,7 @@ import {getLandSales, LandSale} from '../../data/landSales/getLandSales';
 import deadlines from '../../data/landSales/deadlines';
 import fs from 'fs';
 import helpers, {SaltedSaleLandInfo} from '../../lib/merkleTreeHelper';
-import {skipUnlessTest} from '../../utils/network';
+import {isTesnet, skipUnlessTest} from '../../utils/network';
 const {calculateLandHash} = helpers;
 
 const LANDSALE_NAME = 'LandPreSale_6_bis';
@@ -34,7 +34,7 @@ const func: DeployFunction = async function (hre) {
       throw new Error(`no deadline for sector ${sector}`);
     }
 
-    if (hre.network.tags.testnet) {
+    if (isTesnet(hre)) {
       log('increasing deadline by 1 year');
       deadline += 365 * 24 * 60 * 60; //add 1 year on testnets
     }
