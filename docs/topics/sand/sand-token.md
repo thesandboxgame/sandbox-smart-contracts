@@ -10,7 +10,7 @@ description: Sand contract description
 ## Introduction
 
 This contract implements an [ERC20](https://eips.ethereum.org/EIPS/eip-20) compatible smart contract
-using [our custom EFC20 implementation](../token/ERC20.md) that is used to represent the SAND token.
+using [our custom ERC20 implementation](../token/ERC20.md) that is used to represent the SAND token.
 
 The SAND token will be used for:
 
@@ -28,7 +28,7 @@ For a more detailed information see: [about SAND](https://sandboxgame.gitbook.io
 The ERC20 compatibility is implemented in the ERC20BaseToken smart contract. The constructor creates an initial amount
 of ***3e27*** Sand and assign them a beneficiary account.
 
-See [our custom EFC20 implementation](../token/ERC20.md) for more details.
+See [our custom ERC20 implementation](../token/ERC20.md) for more details.
 
 |                     Feature | Description                                                                  |
 |----------------------------:|:-----------------------------------------------------------------------------|
