@@ -356,10 +356,39 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         return ownerOfAll || _owners[quadId] == uint256(uint160(address(from)));
     }
 
+    function _ownerOf(uint256 id) internal view override returns (address) {
+        require(id & LAYER == 0, "Invalid token id");
+        uint256 x = id % GRID_SIZE;
+        uint256 y = id / GRID_SIZE;
+        uint256 owner1x1 = _owners[id];
+
+        if (owner1x1 != 0) {
+            return address(uint160(owner1x1)); //we check if the quad exists as an 1x1 quad, then 3x3, and so on..
+        } else {
+            address owner3x3 = address(uint160(_owners[LAYER_3x3 + (x / 3) * 3 + ((y / 3) * 3) * GRID_SIZE]));
+            if (owner3x3 != address(0)) {
+                return owner3x3;
+            } else {
+                address owner6x6 = address(uint160(_owners[LAYER_6x6 + (x / 6) * 6 + ((y / 6) * 6) * GRID_SIZE]));
+                if (owner6x6 != address(0)) {
+                    return owner6x6;
+                } else {
+                    address owner12x12 =
+                        address(uint160(_owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE]));
+                    if (owner12x12 != address(0)) {
+                        return owner12x12;
+                    } else {
+                        return address(uint160(_owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE]));
+                    }
+                }
+            }
+        }
+    }
+
     function _checkAndClear(address from, uint256 id) internal returns (bool) {
         uint256 owner = _owners[id];
         if (owner != 0) {
-            require(address(bytes20(sha256(abi.encodePacked(owner)))) == from, "not owner");
+            require(address(uint160(owner)) == from, "not owner");
             _owners[id] = 0;
             return true;
         }
