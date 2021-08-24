@@ -8,22 +8,22 @@ import {BigNumber, BigNumberish, PopulatedTransaction} from 'ethers';
 const abiCoder = new AbiCoder();
 
 // The only way to deposit in L2 is via the childChainManager
-async function depositViaCildChainManager(
+async function depositViaChildChainManager(
   fixtures: Fixtures,
   user: string,
   amount: BigNumberish
 ) {
   // Lock tokens on ERC20 predicate contract
-  const pre = BigNumber.from(await fixtures.Sand.balanceOf(user));
+  const pre = BigNumber.from(await fixtures.sand.balanceOf(user));
   const data = abiCoder.encode(['uint256'], [amount.toString()]);
   await waitFor(
-    fixtures.ChildChainManager.callSandDeposit(
-      fixtures.Sand.address,
+    fixtures.childChainManager.callSandDeposit(
+      fixtures.sand.address,
       user,
       data
     )
   );
-  expect(await fixtures.Sand.balanceOf(user)).to.be.equal(pre.add(amount));
+  expect(await fixtures.sand.balanceOf(user)).to.be.equal(pre.add(amount));
 }
 
 async function sendMeta(
@@ -34,13 +34,13 @@ async function sendMeta(
   const {data} = await populatedTx;
   // users[3] pay for the gas, of a message signed by signer.
   const receipt = await sendMetaTx(
-    fixtures.Sand.address,
-    fixtures.users[3].TrustedForwarder,
+    fixtures.sand.address,
+    fixtures.users[3].trustedForwarder,
     data,
     signer
   );
   const event = await expectEventWithArgsFromReceipt(
-    fixtures.TrustedForwarder,
+    fixtures.trustedForwarder,
     receipt,
     'TXResult'
   );
@@ -56,28 +56,28 @@ describe('PolygonSand.sol Meta TX', function () {
     sandBeneficiary = fixtures.sandBeneficiary.address;
     users = fixtures.users.map((x) => x.address);
     const amount = toWei(123);
-    await depositViaCildChainManager(fixtures, sandBeneficiary, amount);
+    await depositViaChildChainManager(fixtures, sandBeneficiary, amount);
   });
   describe('transfer', function () {
     it('without metatx', async function () {
       const amount = 123;
-      const pre = BigNumber.from(await fixtures.Sand.balanceOf(users[0]));
-      await fixtures.sandBeneficiary.Sand.transfer(users[0], amount);
-      expect(await fixtures.Sand.balanceOf(users[0])).to.be.equal(
+      const pre = BigNumber.from(await fixtures.sand.balanceOf(users[0]));
+      await fixtures.sandBeneficiary.sand.transfer(users[0], amount);
+      expect(await fixtures.sand.balanceOf(users[0])).to.be.equal(
         pre.add(amount)
       );
     });
     it('with metatx', async function () {
       const amount = 123;
-      const pre = BigNumber.from(await fixtures.Sand.balanceOf(users[0]));
+      const pre = BigNumber.from(await fixtures.sand.balanceOf(users[0]));
 
       // users[3] pay for the gas, of a message signed by sandBeneficiary.
       await sendMeta(
         fixtures,
         sandBeneficiary,
-        fixtures.Sand.populateTransaction.transfer(users[0], amount)
+        fixtures.sand.populateTransaction.transfer(users[0], amount)
       );
-      expect(await fixtures.Sand.balanceOf(users[0])).to.be.equal(
+      expect(await fixtures.sand.balanceOf(users[0])).to.be.equal(
         pre.add(amount)
       );
     });
@@ -87,38 +87,38 @@ describe('PolygonSand.sol Meta TX', function () {
     it('without metatx', async function () {
       const amount = 123;
       const preBalance = BigNumber.from(
-        await fixtures.Sand.balanceOf(users[0])
+        await fixtures.sand.balanceOf(users[0])
       );
       const preAllowance = BigNumber.from(
-        await fixtures.Sand.allowance(sandBeneficiary, users[0])
+        await fixtures.sand.allowance(sandBeneficiary, users[0])
       );
-      fixtures.sandBeneficiary.Sand.approve(users[0], amount);
+      fixtures.sandBeneficiary.sand.approve(users[0], amount);
       expect(
-        await fixtures.Sand.allowance(
+        await fixtures.sand.allowance(
           fixtures.sandBeneficiary.address,
           users[0]
         )
       ).to.be.equal(preAllowance.add(amount));
-      fixtures.users[0].Sand.transferFrom(sandBeneficiary, users[0], amount);
-      expect(await fixtures.Sand.balanceOf(users[0])).to.be.equal(
+      fixtures.users[0].sand.transferFrom(sandBeneficiary, users[0], amount);
+      expect(await fixtures.sand.balanceOf(users[0])).to.be.equal(
         preBalance.add(amount)
       );
     });
     it('with metatx', async function () {
       const amount = 123;
       const preBalance = BigNumber.from(
-        await fixtures.Sand.balanceOf(users[0])
+        await fixtures.sand.balanceOf(users[0])
       );
       const preAllowance = BigNumber.from(
-        await fixtures.Sand.allowance(sandBeneficiary, users[0])
+        await fixtures.sand.allowance(sandBeneficiary, users[0])
       );
       await sendMeta(
         fixtures,
         sandBeneficiary,
-        fixtures.Sand.populateTransaction.approve(users[0], amount)
+        fixtures.sand.populateTransaction.approve(users[0], amount)
       );
       expect(
-        await fixtures.Sand.allowance(
+        await fixtures.sand.allowance(
           fixtures.sandBeneficiary.address,
           users[0]
         )
@@ -126,13 +126,13 @@ describe('PolygonSand.sol Meta TX', function () {
       await sendMeta(
         fixtures,
         users[0],
-        fixtures.Sand.populateTransaction.transferFrom(
+        fixtures.sand.populateTransaction.transferFrom(
           sandBeneficiary,
           users[0],
           amount
         )
       );
-      expect(await fixtures.Sand.balanceOf(users[0])).to.be.equal(
+      expect(await fixtures.sand.balanceOf(users[0])).to.be.equal(
         preBalance.add(amount)
       );
     });
@@ -141,33 +141,33 @@ describe('PolygonSand.sol Meta TX', function () {
   describe('burn', function () {
     it('without metatx', async function () {
       const amount = 123;
-      const preSupply = BigNumber.from(await fixtures.Sand.totalSupply());
+      const preSupply = BigNumber.from(await fixtures.sand.totalSupply());
       const pre = BigNumber.from(
-        await fixtures.Sand.balanceOf(sandBeneficiary)
+        await fixtures.sand.balanceOf(sandBeneficiary)
       );
-      await fixtures.sandBeneficiary.Sand.burn(amount);
-      expect(await fixtures.Sand.balanceOf(sandBeneficiary)).to.be.equal(
+      await fixtures.sandBeneficiary.sand.burn(amount);
+      expect(await fixtures.sand.balanceOf(sandBeneficiary)).to.be.equal(
         pre.sub(amount)
       );
-      expect(await fixtures.Sand.totalSupply()).to.be.equal(
+      expect(await fixtures.sand.totalSupply()).to.be.equal(
         preSupply.sub(amount)
       );
     });
     it('with metatx', async function () {
       const amount = 123;
-      const preSupply = BigNumber.from(await fixtures.Sand.totalSupply());
+      const preSupply = BigNumber.from(await fixtures.sand.totalSupply());
       const pre = BigNumber.from(
-        await fixtures.Sand.balanceOf(sandBeneficiary)
+        await fixtures.sand.balanceOf(sandBeneficiary)
       );
       await sendMeta(
         fixtures,
         sandBeneficiary,
-        fixtures.Sand.populateTransaction.burn(amount)
+        fixtures.sand.populateTransaction.burn(amount)
       );
-      expect(await fixtures.Sand.balanceOf(sandBeneficiary)).to.be.equal(
+      expect(await fixtures.sand.balanceOf(sandBeneficiary)).to.be.equal(
         pre.sub(amount)
       );
-      expect(await fixtures.Sand.totalSupply()).to.be.equal(
+      expect(await fixtures.sand.totalSupply()).to.be.equal(
         preSupply.sub(amount)
       );
     });
@@ -176,17 +176,17 @@ describe('PolygonSand.sol Meta TX', function () {
   describe('trusted forwarder', function () {
     it('should fail to set the trusted forwarder if not owner', async function () {
       await expect(
-        fixtures.sandBeneficiary.Sand.setTrustedForwarder(users[3])
+        fixtures.sandBeneficiary.sand.setTrustedForwarder(users[3])
       ).to.revertedWith('caller is not the owner');
     });
     it('should success to set the trusted forwarder if owner', async function () {
-      expect(await fixtures.sandBeneficiary.Sand.isTrustedForwarder(users[3]))
+      expect(await fixtures.sandBeneficiary.sand.isTrustedForwarder(users[3]))
         .to.be.false;
-      await fixtures.deployer.Sand.setTrustedForwarder(users[3]);
-      expect(await fixtures.sandBeneficiary.Sand.isTrustedForwarder(users[3]))
+      await fixtures.deployer.sand.setTrustedForwarder(users[3]);
+      expect(await fixtures.sandBeneficiary.sand.isTrustedForwarder(users[3]))
         .to.be.true;
       expect(
-        await fixtures.sandBeneficiary.Sand.getTrustedForwarder()
+        await fixtures.sandBeneficiary.sand.getTrustedForwarder()
       ).to.be.equal(users[3]);
     });
   });
