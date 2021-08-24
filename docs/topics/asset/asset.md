@@ -12,7 +12,7 @@ Each token represents the creations of our players. It is a permission-less impl
 
 It implements both EIP-1155 and EIP-721 so player's creation lives in the same id space and can be treated equivalently by wallets or marketplaces that support both EIP. The ID contains all the data of the current token (Creator, is an NFT, number of token when minted, pack ID...).
 
-The ERC1155ERC721 contract allow all the ERC20 and ERC721 main functions as get balance, get owner, burn, mint, batch burn, batch mint, approval...
+The ERC1155ERC721 contract share same functionalities as ERC20 and ERC721 (ie get balance, get owner, burn, mint, batch burn, batch mint, approval...).
 
 ## Model
 

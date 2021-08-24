@@ -11,7 +11,7 @@ import "../common/interfaces/IERC20Extended.sol";
 import "../common/interfaces/IAssetToken.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
 
-/// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
+/// @notice Allow to mint Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetMinter is ERC2771Handler, IAssetMinter, WithAdmin, Ownable {
     using SafeMath for uint256;
 
