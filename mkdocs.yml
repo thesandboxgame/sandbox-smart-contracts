@@ -42,7 +42,8 @@ nav:
           - Asset: topics/asset/asset.md
           - Asset attributes registry: topics/asset/asset-attributes-registry.md
           - Asset minter: topics/asset/asset-minter.md
-          - Asser upgrader: topics/asset/asset-upgrader.md
+          - Asset upgrader: topics/asset/asset-upgrader.md
+          - ERC1155721: topics/asset/ERC1155721.md
 
 
 markdown_extensions:

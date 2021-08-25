@@ -6,13 +6,14 @@ description: Asset
 
 ## Introduction
 
-ASSET is a smart contract token implementation of both EIP-1155 (for limited editions tokens) and EIP-721 (for non fungible, unique tokens)
+Assets are entities which are designed with the intention to provide content to experiences, such as games. It could be NPC, animals, equipment, wearable, art... [more info](https://sandboxgame.gitbook.io/the-sandbox/assets/what-are-assets)
+
+Assets:
+![](https://miro.medium.com/max/1050/1*v6OhiceA3tFNXXdbcMXd0w.png)
+
+ASSET is a smart contract token implementation of both [EIP-1155](https://eips.ethereum.org/EIPS/eip-1155) (for limited editions tokens) and [EIP-721](https://eips.ethereum.org/EIPS/eip-721) (for non fungible, unique tokens). See [ERC155721](./ERC1155721.md).
 
 Each token represents the creations of our players. It is a permission-less implementation of EIP-1155 and EIP-721 where every user can mint their own token represented via metadata.
-
-It implements both EIP-1155 and EIP-721 so player's creation lives in the same id space and can be treated equivalently by wallets or marketplaces that support both EIP. The ID contains all the data of the current token (Creator, is an NFT, number of token when minted, pack ID...).
-
-The ERC1155ERC721 contract share same functionalities as ERC20 and ERC721 (ie get balance, get owner, burn, mint, batch burn, batch mint, approval...).
 
 ## Model
 

@@ -6,12 +6,14 @@ description: AssetAttributesRegistry
 
 ## Introduction
 
-The primary function of AssetAttributesRegistry is to store links between an asset and gems and catalyst. It has a reference to the GemsCatalystsRegistry in order to handle gems and catalysts part.
+Asset are entities which are designed with the intention to provide content to games (NPC, animals, weapons...) [more info](./asset.md)
+
+The primary function of AssetAttributesRegistry is to store links between an asset and [gems and catalysts](../catalyst/catalyst.md). It has a reference to the GemsCatalystsRegistry in order to handle gems and catalysts part.
 It can add a catalyst and gems or update a list of gems for an asset.
 
-It use a mapping variable called `_records` which used an assetId as index and return a struct with catalyst and an array of gems.
+It uses a mapping variable called `_records` which uses an assetId as index and returns a struct with catalyst and an array of gems.
 
-AssetAttributesRegistry emit **CatalystApplied** or **GemsAdded** events used by GemsCatalystsRegistry to handle attributes. See catalyst doc.
+AssetAttributesRegistry emits **CatalystApplied** or **GemsAdded** events used by GemsCatalystsRegistry to handle attributes. See [catalyst doc](../catalyst/catalyst.md).
 
 ## Model
 
