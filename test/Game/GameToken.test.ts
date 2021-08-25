@@ -1528,7 +1528,6 @@ describe('GameToken', function () {
   describe('GameToken: MetaTransactions', function () {
     let trustedForwarder: Contract;
     let gameId: BigNumber;
-    let randomId: number;
     let gameId2: BigNumber;
     let users: User[];
     let sandContract: Contract;
