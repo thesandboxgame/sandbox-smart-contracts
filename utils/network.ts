@@ -70,6 +70,6 @@ export function isInTags(hre: HardhatRuntimeEnvironment, key: string): boolean {
   );
 }
 
-export function isTesnet(hre: HardhatRuntimeEnvironment): boolean {
+export function isTestnet(hre: HardhatRuntimeEnvironment): boolean {
   return isInTags(hre, 'testnet');
 }

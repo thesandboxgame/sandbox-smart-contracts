@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {isTesnet} from '../../utils/network';
+import {isTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -37,4 +37,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['GenesisBouncer', 'GenesisBouncer_deploy'];
 func.dependencies = ['Asset'];
-func.skip = async (hre) => !isTesnet(hre);
+func.skip = async (hre) => !isTestnet(hre);
