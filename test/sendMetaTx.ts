@@ -19,13 +19,12 @@ export async function sendMetaTx(
     nonce: Number(await forwarder.getNonce(signer)),
     data: data,
   };
-
   const forwardRequestData = await data712(forwarder, message);
   const signedData = await ethers.provider.send('eth_signTypedData_v4', [
     signer,
     forwardRequestData,
   ]);
 
-  const receipt = await forwarder.execute(message, signedData);
-  return receipt;
+  const tx = await forwarder.execute(message, signedData);
+  return tx.wait();
 }

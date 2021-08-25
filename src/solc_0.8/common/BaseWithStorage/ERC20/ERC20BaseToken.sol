@@ -1,11 +1,12 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
+import "@openzeppelin/contracts-0.8/utils/Context.sol";
 import "./extensions/ERC20Internal.sol";
 import "../../interfaces/IERC20Extended.sol";
 import "../WithSuperOperators.sol";
 
-abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, ERC20Internal {
+abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, ERC20Internal, Context {
     bytes32 internal immutable _name; // works only for string that can fit into 32 bytes
     bytes32 internal immutable _symbol; // works only for string that can fit into 32 bytes
     address internal immutable _operator;
@@ -34,7 +35,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     /// @param amount The number of tokens being transfered.
     /// @return success Whether or not the transfer succeeded.
     function transfer(address to, uint256 amount) external override returns (bool success) {
-        _transfer(msg.sender, to, amount);
+        _transfer(_msgSender(), to, amount);
         return true;
     }
 
@@ -48,12 +49,12 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         address to,
         uint256 amount
     ) external override returns (bool success) {
-        if (msg.sender != from && !_superOperators[msg.sender] && msg.sender != _operator) {
-            uint256 currentAllowance = _allowances[from][msg.sender];
+        if (_msgSender() != from && !_superOperators[_msgSender()] && _msgSender() != _operator) {
+            uint256 currentAllowance = _allowances[from][_msgSender()];
             if (currentAllowance != ~uint256(0)) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
                 require(currentAllowance >= amount, "NOT_AUTHORIZED_ALLOWANCE");
-                _allowances[from][msg.sender] = currentAllowance - amount;
+                _allowances[from][_msgSender()] = currentAllowance - amount;
             }
         }
         _transfer(from, to, amount);
@@ -63,7 +64,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     /// @notice Burn `amount` tokens.
     /// @param amount The number of tokens to burn.
     function burn(uint256 amount) external override {
-        _burn(msg.sender, amount);
+        _burn(_msgSender(), amount);
     }
 
     /// @notice Burn `amount` tokens from `owner`.
@@ -78,7 +79,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     /// @param amount The number of tokens allowed.
     /// @return success Whether or not the call succeeded.
     function approve(address spender, uint256 amount) external override returns (bool success) {
-        _approveFor(msg.sender, spender, amount);
+        _approveFor(_msgSender(), spender, amount);
         return true;
     }
 
@@ -133,7 +134,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         address spender,
         uint256 amount
     ) public override returns (bool success) {
-        require(msg.sender == owner || _superOperators[msg.sender] || msg.sender == _operator, "NOT_AUTHORIZED");
+        require(_msgSender() == owner || _superOperators[_msgSender()] || _msgSender() == _operator, "NOT_AUTHORIZED");
         _approveFor(owner, spender, amount);
         return true;
     }
@@ -148,7 +149,7 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         address spender,
         uint256 amountNeeded
     ) public returns (bool success) {
-        require(msg.sender == owner || _superOperators[msg.sender] || msg.sender == _operator, "INVALID_SENDER");
+        require(_msgSender() == owner || _superOperators[_msgSender()] || _msgSender() == _operator, "INVALID_SENDER");
         _addAllowanceIfNeeded(owner, spender, amountNeeded);
         return true;
     }
@@ -222,12 +223,12 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     /// @param amount The number of token to burn.
     function _burn(address from, uint256 amount) internal {
         require(amount > 0, "BURN_O_TOKENS");
-        if (msg.sender != from && !_superOperators[msg.sender] && msg.sender != _operator) {
-            uint256 currentAllowance = _allowances[from][msg.sender];
+        if (_msgSender() != from && !_superOperators[_msgSender()] && _msgSender() != _operator) {
+            uint256 currentAllowance = _allowances[from][_msgSender()];
             if (currentAllowance != ~uint256(0)) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
                 require(currentAllowance >= amount, "INSUFFICIENT_ALLOWANCE");
-                _allowances[from][msg.sender] = currentAllowance - amount;
+                _allowances[from][_msgSender()] = currentAllowance - amount;
             }
         }
 

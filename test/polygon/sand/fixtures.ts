@@ -1,21 +1,47 @@
 import {
-  ethers,
   deployments,
+  ethers,
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
 
-import {setupUsers, setupUser} from '../../utils';
+import {setupUser, setupUsers} from '../../utils';
+import {Contract} from 'ethers';
 
+type User = {address: string; sand: Contract; trustedForwarder: Contract};
+export type Fixtures = {
+  sand: Contract;
+  users: User[];
+  sandBeneficiary: User;
+  deployer: User;
+  childChainManager: Contract;
+  trustedForwarder: Contract;
+};
 export const setupSand = deployments.createFixture(async () => {
   await deployments.fixture('PolygonSand');
-  const Sand = await ethers.getContract('PolygonSand');
+  const sand = await ethers.getContract('PolygonSand');
   const accounts = await getNamedAccounts();
   const unnamedAccounts = await getUnnamedAccounts();
-  const users = await setupUsers(unnamedAccounts, {Sand});
   const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
-  const sandBeneficiary = await setupUser(accounts.sandBeneficiary, {
-    Sand,
+  const trustedForwarder = await ethers.getContract('TRUSTED_FORWARDER');
+  const users = await setupUsers(unnamedAccounts, {
+    sand,
+    trustedForwarder,
   });
-  return {Sand, users, sandBeneficiary, childChainManager};
+  const sandBeneficiary = await setupUser(accounts.sandBeneficiary, {
+    sand,
+    trustedForwarder,
+  });
+  const deployer = await setupUser(accounts.deployer, {
+    sand,
+    trustedForwarder,
+  });
+  return {
+    sand,
+    users,
+    sandBeneficiary,
+    deployer,
+    childChainManager,
+    trustedForwarder,
+  };
 });
