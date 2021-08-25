@@ -1,4 +1,10 @@
-import {getDeadline, getLandSales, LandSale, writeProofs, setAsLandMinter} from '../../data/landSales/getLandSales';
+import {
+  getDeadline,
+  getLandSales,
+  LandSale,
+  writeProofs,
+  setAsLandMinter,
+} from '../../data/landSales/getLandSales';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 const LANDSALE_NAME = 'LandPreSale_10';
