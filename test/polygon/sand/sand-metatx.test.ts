@@ -190,4 +190,84 @@ describe('PolygonSand.sol Meta TX', function () {
       ).to.be.equal(users[3]);
     });
   });
+
+  describe('approveAndCall', function () {
+    it('without metatx', async function () {
+      const amount = 123;
+      const target = fixtures.mockERC20BasicApprovalTarget.address;
+      const pre = BigNumber.from(await fixtures.sand.balanceOf(target));
+      const {
+        data,
+      } = await fixtures.mockERC20BasicApprovalTarget.populateTransaction.transferFrom(
+        fixtures.sandBeneficiary.address,
+        target,
+        amount
+      );
+      await fixtures.sandBeneficiary.sand.approveAndCall(target, amount, data);
+      expect(await fixtures.sand.balanceOf(target)).to.be.equal(
+        pre.add(amount)
+      );
+    });
+    it('with metatx', async function () {
+      const amount = 123;
+      const target = fixtures.mockERC20BasicApprovalTarget.address;
+      const pre = BigNumber.from(await fixtures.sand.balanceOf(target));
+      const {
+        data,
+      } = await fixtures.mockERC20BasicApprovalTarget.populateTransaction.transferFrom(
+        fixtures.sandBeneficiary.address,
+        target,
+        amount
+      );
+      // users[3] pay for the gas, of a message signed by sandBeneficiary.
+      await sendMeta(
+        fixtures,
+        sandBeneficiary,
+        fixtures.sand.populateTransaction.approveAndCall(target, amount, data)
+      );
+      expect(await fixtures.sand.balanceOf(target)).to.be.equal(
+        pre.add(amount)
+      );
+    });
+  });
+
+  describe('paidCall', function () {
+    it('without metatx', async function () {
+      const amount = 123;
+      const target = fixtures.mockERC20BasicApprovalTarget.address;
+      const pre = BigNumber.from(await fixtures.sand.balanceOf(target));
+      const {
+        data,
+      } = await fixtures.mockERC20BasicApprovalTarget.populateTransaction.transferFrom(
+        fixtures.sandBeneficiary.address,
+        target,
+        amount
+      );
+      await fixtures.sandBeneficiary.sand.paidCall(target, amount, data);
+      expect(await fixtures.sand.balanceOf(target)).to.be.equal(
+        pre.add(amount)
+      );
+    });
+    it('with metatx', async function () {
+      const amount = 123;
+      const target = fixtures.mockERC20BasicApprovalTarget.address;
+      const pre = BigNumber.from(await fixtures.sand.balanceOf(target));
+      const {
+        data,
+      } = await fixtures.mockERC20BasicApprovalTarget.populateTransaction.transferFrom(
+        fixtures.sandBeneficiary.address,
+        target,
+        amount
+      );
+      // users[3] pay for the gas, of a message signed by sandBeneficiary.
+      await sendMeta(
+        fixtures,
+        sandBeneficiary,
+        fixtures.sand.populateTransaction.paidCall(target, amount, data)
+      );
+      expect(await fixtures.sand.balanceOf(target)).to.be.equal(
+        pre.add(amount)
+      );
+    });
+  });
 });

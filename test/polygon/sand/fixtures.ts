@@ -16,6 +16,7 @@ export type Fixtures = {
   deployer: User;
   childChainManager: Contract;
   trustedForwarder: Contract;
+  mockERC20BasicApprovalTarget: Contract;
 };
 export const setupSand = deployments.createFixture(async () => {
   await deployments.fixture('PolygonSand');
@@ -36,6 +37,13 @@ export const setupSand = deployments.createFixture(async () => {
     sand,
     trustedForwarder,
   });
+  await deployments.deploy('MockERC20BasicApprovalTarget', {
+    from: accounts.deployer,
+    args: [],
+  });
+  const mockERC20BasicApprovalTarget: Contract = await ethers.getContract(
+    'MockERC20BasicApprovalTarget'
+  );
   return {
     sand,
     users,
@@ -43,5 +51,6 @@ export const setupSand = deployments.createFixture(async () => {
     deployer,
     childChainManager,
     trustedForwarder,
+    mockERC20BasicApprovalTarget,
   };
 });

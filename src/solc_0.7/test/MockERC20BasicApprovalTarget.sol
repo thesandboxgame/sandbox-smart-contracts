@@ -1,6 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.7.5;
 
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+
 contract MockERC20BasicApprovalTarget {
     event LogOnCall(address);
 
@@ -11,5 +13,13 @@ contract MockERC20BasicApprovalTarget {
 
     function revertOnCall() external pure {
         revert("REVERT_ON_CALL");
+    }
+
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external returns (bool) {
+        return IERC20(msg.sender).transferFrom(sender, recipient, amount);
     }
 }
