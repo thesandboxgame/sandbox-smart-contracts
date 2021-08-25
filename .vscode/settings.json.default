@@ -13,7 +13,8 @@
   "solidity.packageDefaultDependenciesDirectory": "node_modules",
   "mochaExplorer.env": {
     "HARDHAT_CONFIG": "hardhat.config.ts",
-    "HARDHAT_COMPILE": "true"
+    "HARDHAT_COMPILE": "true",
+    "NODE_OPTIONS": "--max-old-space-size=4096"
   },
   "mochaExplorer.require": ["ts-node/register/transpile-only"]
 }
