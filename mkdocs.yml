@@ -24,8 +24,8 @@ nav:
           - Features: topics/blockchain/features.md
       - Asset:
           - Giveaway:
-            - Single: topics/asset/giveaway/single.md
-            - Multiple: topics/asset/giveaway/multiple.md
+              - Single: topics/asset/giveaway/single.md
+              - Multiple: topics/asset/giveaway/multiple.md
       - Solidity:
           - Guideline: topics/guideline/solidity.md
       - DeFi:
@@ -34,7 +34,11 @@ nav:
       - Catalyst:
           - Gems & catalysts: topics/catalyst/catalyst.md
       - Sand:
+          - Sand Token: topics/sand/sand-token.md
           - Bundle Sand Sale: topics/sand/bundle-sand-sale.md
+      - Token:
+          - ERC20: topics/token/ERC20.md
+
 
 markdown_extensions:
   - admonition

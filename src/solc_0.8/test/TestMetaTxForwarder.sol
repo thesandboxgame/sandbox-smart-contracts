@@ -9,6 +9,7 @@ import "./TestEIP712.sol";
 // Based on https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/metatx/ERC2771Context.sol
 contract TestMetaTxForwarder is EIP712 {
     using ECDSA for bytes32;
+    event TXResult(bool success, bytes returndata);
 
     struct ForwardRequest {
         address from;
@@ -56,8 +57,8 @@ contract TestMetaTxForwarder is EIP712 {
         // Validate that the relayer has sent enough gas for the call.
         // See https://ronan.eth.link/blog/ethereum-gas-dangers/
         assert(gasleft() > req.gas / 63);
+        emit TXResult(success, returndata);
         // solhint-enable avoid-low-level-calls
-
         return (success, returndata);
     }
 }

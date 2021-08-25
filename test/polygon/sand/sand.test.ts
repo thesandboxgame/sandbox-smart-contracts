@@ -22,7 +22,7 @@ describe('PolygonSand.sol', function () {
         )
       );
       const polygon_balance = BigNumber.from(
-        await polygon.users[0].Sand.balanceOf(polygon.sandBeneficiary.address)
+        await polygon.users[0].sand.balanceOf(polygon.sandBeneficiary.address)
       );
 
       // Grant approval to ERC20 predicate contract
@@ -46,7 +46,7 @@ describe('PolygonSand.sol', function () {
       // Emulate the ChildChainManager call to deposit
       await waitFor(
         polygon.childChainManager.callSandDeposit(
-          polygon.Sand.address,
+          polygon.sand.address,
           polygon.sandBeneficiary.address,
           data
         )
@@ -59,7 +59,7 @@ describe('PolygonSand.sol', function () {
         )
       );
       const updated_polygon_balance = BigNumber.from(
-        await polygon.users[0].Sand.balanceOf(polygon.sandBeneficiary.address)
+        await polygon.users[0].sand.balanceOf(polygon.sandBeneficiary.address)
       );
 
       expect(updated_mainnet_balance).to.be.equal(
@@ -92,7 +92,7 @@ describe('PolygonSand.sol', function () {
       );
       await waitFor(
         polygon.childChainManager.callSandDeposit(
-          polygon.Sand.address,
+          polygon.sand.address,
           mainnet.sandBeneficiary.address,
           data
         )
@@ -104,11 +104,11 @@ describe('PolygonSand.sol', function () {
         )
       );
       const polygon_balance = BigNumber.from(
-        await polygon.users[0].Sand.balanceOf(mainnet.sandBeneficiary.address)
+        await polygon.users[0].sand.balanceOf(mainnet.sandBeneficiary.address)
       );
 
       // Withdraw tokens from PolygonSand
-      await waitFor(polygon.sandBeneficiary.Sand.withdraw(transferAmount));
+      await waitFor(polygon.sandBeneficiary.sand.withdraw(transferAmount));
 
       // Emulate exit token
       await waitFor(
@@ -125,7 +125,7 @@ describe('PolygonSand.sol', function () {
         )
       );
       const updated_polygon_balance = BigNumber.from(
-        await polygon.users[0].Sand.balanceOf(mainnet.sandBeneficiary.address)
+        await polygon.users[0].sand.balanceOf(mainnet.sandBeneficiary.address)
       );
       console.log(mainnet_balance.toString());
       console.log(polygon_balance.toString());
