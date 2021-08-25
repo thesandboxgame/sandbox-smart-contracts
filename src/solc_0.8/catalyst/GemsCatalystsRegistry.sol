@@ -2,22 +2,24 @@
 pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts-0.8/metatx/ERC2771Context.sol";
+import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "./Gem.sol";
 import "./Catalyst.sol";
 import "./interfaces/IGemsCatalystsRegistry.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
+import "../common/BaseWithStorage/ERC2771Handler.sol";
 
 /// @notice Contract managing the Gems and Catalysts
 /// Each Gems and Catalys must be registered here.
 /// Each new Gem get assigned a new id (starting at 1)
 /// Each new Catalyst get assigned a new id (starting at 1)
-contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Context, IGemsCatalystsRegistry {
+contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatalystsRegistry, Ownable {
     Gem[] internal _gems;
     Catalyst[] internal _catalysts;
 
-    constructor(address admin, address trustedForwarder) ERC2771Context(trustedForwarder) {
+    constructor(address admin, address trustedForwarder) {
         _admin = admin;
+        __ERC2771Handler_initialize(trustedForwarder);
     }
 
     /// @notice Returns the values for each gem included in a given asset.
@@ -195,5 +197,19 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Context, IGemsCatal
     /// @param from The original signer of the transaction.
     function _checkAuthorization(address from) internal view {
         require(_msgSender() == from || isSuperOperator(_msgSender()), "AUTH_ACCESS_DENIED");
+    }
+
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyOwner {
+        _trustedForwarder = trustedForwarder;
+    }
+
+    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
+        return ERC2771Handler._msgSender();
+    }
+
+    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+        return ERC2771Handler._msgData();
     }
 }
