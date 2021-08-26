@@ -5,11 +5,35 @@ import {expect} from '../../chai-setup';
 import {ethers} from 'hardhat';
 import {AbiCoder} from 'ethers/lib/utils';
 import {BigNumber} from '@ethersproject/bignumber';
+import {constants} from 'ethers';
 
 const abiCoder = new AbiCoder();
 
 describe('PolygonSand.sol', function () {
   describe('Bridging: L1 <> L2', function () {
+    it('should update the child chain manager', async function () {
+      const polygon = await setupPolygonSand();
+
+      await polygon.deployer.sand.updateChildChainManager(
+        polygon.childChainManager.address
+      );
+    });
+    it('should fail if not owner when updating the child chain manager', async function () {
+      const polygon = await setupPolygonSand();
+
+      await expect(
+        polygon.users[1].sand.updateChildChainManager(polygon.users[1].address)
+      ).to.be.revertedWith('Ownable: caller is not the owner');
+    });
+    it('should fail when updating the child chain manager to address(0)', async function () {
+      const polygon = await setupPolygonSand();
+
+      await expect(
+        polygon.deployer.sand.updateChildChainManager(
+          ethers.utils.getAddress(constants.AddressZero)
+        )
+      ).to.be.revertedWith('Bad ChildChainManagerProxy address');
+    });
     it('should be able to transfer SAND: L1 to L2', async function () {
       const polygon = await setupPolygonSand();
       const mainnet = await setupMainnetSand();

@@ -81,7 +81,7 @@ async function getNewGame(
     }
   }
 
-  return gameId;
+  return {gameId, randomId};
 }
 
 async function getBalances(
@@ -311,7 +311,9 @@ describe('GameToken', function () {
           assets[0]
         );
 
-        gameId = await getNewGame(gameToken, GameOwner, GameOwner, assets, [1]);
+        gameId = (
+          await getNewGame(gameToken, GameOwner, GameOwner, assets, [1])
+        ).gameId;
 
         const balanceAfter = await assetContract['balanceOf(address,uint256)'](
           gameToken.address,
@@ -1112,10 +1114,9 @@ describe('GameToken', function () {
       assets = await supplyAssets(GameOwner.address, [7, 11]);
       await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
 
-      gameId = await getNewGame(gameToken, GameOwner, GameOwner, assets, [
-        7,
-        11,
-      ]);
+      gameId = (
+        await getNewGame(gameToken, GameOwner, GameOwner, assets, [7, 11])
+      ).gameId;
     });
 
     it('fails if "from" != game owner', async function () {
@@ -1240,10 +1241,9 @@ describe('GameToken', function () {
       before(async function () {
         assets = await supplyAssets(GameOwner.address, [7, 11]);
 
-        gameId = await getNewGame(gameToken, GameOwner, GameOwner, assets, [
-          7,
-          11,
-        ]);
+        gameId = (
+          await getNewGame(gameToken, GameOwner, GameOwner, assets, [7, 11])
+        ).gameId;
       });
 
       it('fails to recover if the GAME token has not been burnt', async function () {
@@ -1375,7 +1375,7 @@ describe('GameToken', function () {
         expect(contractBalanceFinal2).to.be.equal(0);
       });
 
-      it('allows asset recovery even when too many assets', async function () {
+      it('allows asset recovery even when too many assets [ @skip-on-coverage ]', async function () {
         const manyQuantities1 = [...Array(150)].map(() => 3);
         const manyQuantities2 = [...Array(150)].map(() => 3);
         const manyAssets1 = await supplyAssets(
@@ -1392,13 +1392,15 @@ describe('GameToken', function () {
           ethers.provider.getSigner(gameTokenAdmin)
         );
 
-        let tooManyAssetsGameId = await getNewGame(
-          gameToken,
-          GameOwner,
-          GameOwner,
-          manyAssets1,
-          manyQuantities1
-        );
+        let tooManyAssetsGameId = (
+          await getNewGame(
+            gameToken,
+            GameOwner,
+            GameOwner,
+            manyAssets1,
+            manyQuantities1
+          )
+        ).gameId;
 
         await gameTokenAsMinter.updateGame(
           GameOwner.address,
@@ -1447,6 +1449,7 @@ describe('GameToken', function () {
     let GameOwner: User;
     let users: User[];
     let gameId: BigNumber;
+    let randomId: number;
     let updatedGameId: BigNumber;
     let assets: BigNumber[];
     let gameAssetsWithOldId: BigNumber[];
@@ -1456,10 +1459,16 @@ describe('GameToken', function () {
       const {gameTokenAdmin} = await getNamedAccounts();
       await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
       assets = await supplyAssets(GameOwner.address, [7, 11]);
-      gameId = await getNewGame(gameToken, GameOwner, GameOwner, assets, [
-        7,
-        11,
-      ]);
+      const newGame = await getNewGame(
+        gameToken,
+        GameOwner,
+        GameOwner,
+        assets,
+        [7, 11]
+      );
+
+      gameId = newGame.gameId;
+      randomId = newGame.randomId;
 
       gameTokenAsMinter = await gameToken.connect(
         ethers.provider.getSigner(gameTokenAdmin)
@@ -1469,10 +1478,12 @@ describe('GameToken', function () {
     it('should store the creator address, subID & version in the gameId', async function () {
       const idAsHex = utils.hexValue(gameId);
       const creator = idAsHex.slice(0, 42);
-      const subId = idAsHex.slice(43, 58);
+      const SUBID_MULTIPLIER = BigNumber.from(2).pow(BigNumber.from(256 - 224));
+      const subId = gameId.div(SUBID_MULTIPLIER).mask(64).toHexString();
       const version = idAsHex.slice(62);
+
       expect(utils.getAddress(creator)).to.be.equal(users[0].address);
-      expect(subId).to.be.equal('00000002eccadc6');
+      expect(subId).to.be.equal(BigNumber.from(randomId).toHexString());
       expect(version).to.be.equal('0001');
     });
 
@@ -1547,10 +1558,9 @@ describe('GameToken', function () {
       await sandAsAdmin.setSuperOperator(gameToken.address, true);
 
       assets = await supplyAssets(GameOwner.address, [10, 8]);
-      gameId = await getNewGame(gameToken, GameOwner, GameOwner, assets, [
-        10,
-        8,
-      ]);
+      gameId = (
+        await getNewGame(gameToken, GameOwner, GameOwner, assets, [10, 8])
+      ).gameId;
     });
 
     it('can get isTrustedForwarder', async function () {
@@ -1624,10 +1634,9 @@ describe('GameToken', function () {
     });
     it('can call burnFrom via metaTx', async function () {
       assets = await supplyAssets(GameOwner.address, [5, 7]);
-      gameId2 = await getNewGame(gameToken, GameOwner, GameOwner, assets, [
-        5,
-        7,
-      ]);
+      gameId2 = (
+        await getNewGame(gameToken, GameOwner, GameOwner, assets, [5, 7])
+      ).gameId;
 
       const {to, data} = await gameToken.populateTransaction.burnFrom(
         GameOwner.address,
