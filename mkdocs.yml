@@ -23,6 +23,10 @@ nav:
           - Ethereum: topics/blockchain/ethereum.md
           - Features: topics/blockchain/features.md
       - Asset:
+          - Asset: topics/asset/asset.md
+          - Asset attributes registry: topics/asset/asset-attributes-registry.md
+          - Asset minter: topics/asset/asset-minter.md
+          - Asset upgrader: topics/asset/asset-upgrader.md
           - Giveaway:
               - Single: topics/asset/giveaway/single.md
               - Multiple: topics/asset/giveaway/multiple.md
@@ -38,13 +42,7 @@ nav:
           - Bundle Sand Sale: topics/sand/bundle-sand-sale.md
       - Token:
           - ERC20: topics/token/ERC20.md
-      - Asset:
-          - Asset: topics/asset/asset.md
-          - Asset attributes registry: topics/asset/asset-attributes-registry.md
-          - Asset minter: topics/asset/asset-minter.md
-          - Asset upgrader: topics/asset/asset-upgrader.md
-          - ERC1155721: topics/asset/ERC1155721.md
-
+          - ERC1155721: topics/token/ERC1155721.md
 
 markdown_extensions:
   - admonition

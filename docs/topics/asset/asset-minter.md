@@ -6,7 +6,7 @@ description: AssetMinter
 
 ## Introduction
 
-The primary function of AssetMinter is to mint a new **asset** with [Gems and a catalyst](../catalyst/catalyst.md) bound to it. It uses the function expose by the AssetAttributesRegistry in order to do it.
+The primary function of AssetMinter is to mint a new **asset** with [Gems and a catalyst](../catalyst/catalyst.md) bound to it. It uses the function expose by the [Asset registry](./asset-attributes-registry.md) in order to do it.
 
 ## Model
 
@@ -46,7 +46,7 @@ Remember catalystId for LEGENDARY catalyst is **4** and gemsId for gem DEFENSE a
 entity AssetMinter
 entity AssetV2
 
-entity Gemscatalystregistry
+entity GemsCatalystsRegistry
 entity AssetAttributesRegistry
 ->AssetMinter:mint(...,catalyst=4, gems=[1, 2],...)
 AssetMinter->AssetV2:mint(metadata, quantity...)

@@ -6,7 +6,7 @@ description: AssetUpgrader
 
 ## Introduction
 
-The primary function of AssetUpgrader is to upgrade an **asset** with new **Gems** and/or a **catalyst**. It could also transfer ownership. It use the function expose by `AssetAttributesRegistry` and `GemsCatalystsRegistry` in order to do it.
+The primary function of the Asset upgrader is to upgrade an **asset** with new **Gems** and/or a **catalyst**. It could also transfer ownership. It uses the function exposed by [AssetAttributesRegistry](./asset-attributes-registry.md) and [GemsCatalystsRegistry](../catalyst/catalyst.md) in order to do it.
 
 ## Model
 
@@ -51,7 +51,7 @@ Remember catalystId for LEGENDARY catalyst is **4** and gemsId for gem DEFENSE a
 entity AssetUpgrader
 entity AssetV2
 entity Sand
-entity Gemscatalystregistry
+entity GemsCatalystsRegistry
 entity AssetAttributesRegistry
 ->AssetUpgrader:extractAndSetCatalyst(...,asset=42,catalyst=4, gems=[1, 2],...)
 AssetUpgrader->AssetV2:extractERC721From(from,42,from)
@@ -76,7 +76,7 @@ Remember id for gem DEFENSE and gem POWER is **1** and **2** respectively. We us
 entity AssetUpgrader
 entity AssetV2
 entity Sand
-entity Gemscatalystregistry
+entity GemsCatalystsRegistry
 entity AssetAttributesRegistry
 ->AssetUpgrader:addGems(...,asset=42,gems=[1, 2],...)
 
