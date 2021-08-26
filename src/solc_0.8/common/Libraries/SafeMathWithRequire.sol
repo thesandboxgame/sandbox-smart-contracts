@@ -64,18 +64,4 @@ library SafeMathWithRequire {
         }
         return c;
     }
-
-    // TODO test
-    function rt6_3(uint256 a) internal pure returns (uint256 c) {
-        a = a.mul(DECIMALS_18);
-        uint256 tmp = a.add(5) / 6;
-        c = a;
-        // tmp cannot be zero unless a = 0 which skip the loop
-        while (tmp < c) {
-            c = tmp;
-            uint256 tmpFive = tmp**5;
-            require(tmpFive > tmp, "overflow");
-            tmp = ((a / tmpFive) + (tmp * 5)) / 6;
-        }
-    }
 }
