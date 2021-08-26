@@ -127,6 +127,12 @@ jobs:
           lcov-file: ./coverage/lcov.info
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Enforce coverage
+        uses: VeryGoodOpenSource/very_good_coverage@v1.1.1
+        with:
+          path: ./coverage/lcov.info
+          min_coverage: 80
+
   deploy:
     runs-on: ubuntu-latest
     steps:
