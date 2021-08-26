@@ -433,4 +433,27 @@ describe('GemsCatalystsRegistry', function () {
       totalSupplyBeforeBurningDefenseGem.sub(burnAmounts[0])
     );
   });
+
+  it('Change trusted forwarder ', async function () {
+    const {
+      gemsCatalystsRegistryAsCataystMinter,
+      gemsCatalystsRegistryAsDeployer,
+      trustedForwarder,
+      powerGem,
+    } = await setupGemsAndCatalysts();
+    const initialTrustedForwarder = await gemsCatalystsRegistryAsDeployer.getTrustedForwarder();
+    expect(initialTrustedForwarder).to.equal(trustedForwarder.address);
+
+    await waitFor(
+      gemsCatalystsRegistryAsDeployer.setTrustedForwarder(powerGem.address)
+    );
+    const newTrustedForwarder = await gemsCatalystsRegistryAsDeployer.getTrustedForwarder();
+    expect(newTrustedForwarder).to.equal(powerGem.address);
+
+    await expect(
+      gemsCatalystsRegistryAsCataystMinter.setTrustedForwarder(
+        trustedForwarder.address
+      )
+    ).to.be.revertedWith('Ownable: caller is not the owner');
+  });
 });

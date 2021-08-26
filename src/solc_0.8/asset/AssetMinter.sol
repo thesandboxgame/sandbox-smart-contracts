@@ -3,7 +3,8 @@ pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts-0.8/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts-0.8/metatx/ERC2771Context.sol";
+import "@openzeppelin/contracts-0.8/access/Ownable.sol";
+import "../common/BaseWithStorage/ERC2771Handler.sol";
 import "../common/interfaces/IAssetMinter.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
 import "../common/interfaces/IERC20Extended.sol";
@@ -11,7 +12,7 @@ import "../common/interfaces/IAssetToken.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
-contract AssetMinter is ERC2771Context, IAssetMinter, WithAdmin {
+contract AssetMinter is ERC2771Handler, IAssetMinter, WithAdmin, Ownable {
     using SafeMath for uint256;
 
     uint256 private constant GEM_UNIT = 1000000000000000000;
@@ -32,11 +33,12 @@ contract AssetMinter is ERC2771Context, IAssetMinter, WithAdmin {
         GemsCatalystsRegistry gemsCatalystsRegistry,
         address admin,
         address trustedForwarder
-    ) ERC2771Context(trustedForwarder) {
+    ) {
         _registry = registry;
         _asset = asset;
         _gemsCatalystsRegistry = gemsCatalystsRegistry;
         _admin = admin;
+        __ERC2771Handler_initialize(trustedForwarder);
     }
 
     /// @notice mint one Asset token.
@@ -226,5 +228,19 @@ contract AssetMinter is ERC2771Context, IAssetMinter, WithAdmin {
             scaled[i] = quantities[i] * GEM_UNIT;
         }
         return scaled;
+    }
+
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyOwner {
+        _trustedForwarder = trustedForwarder;
+    }
+
+    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
+        return ERC2771Handler._msgSender();
+    }
+
+    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+        return ERC2771Handler._msgData();
     }
 }
