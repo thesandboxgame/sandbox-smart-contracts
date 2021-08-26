@@ -108,7 +108,7 @@ Catalyst o--GemsCatalystsRegistry
 
 ### Get every attribute of gems on a catalyst in an asset
 
-An asset could fetch all the gems data of a catalyst it's currently owning. It's using GemsCatalystRegistry.GetAttributes. All the Asset part is out of scope, see Asset documentation.
+An asset can fetch all the gems data of a catalyst it's currently owning by getting the attributes from the Gems & Catalyst registry with `GemsCatalystRegistry.GetAttributes`.
 
 ```plantuml
 
@@ -137,7 +137,7 @@ GemsCatalystsRegistry <-- Catalyst: values []
 
 ### Burn 1 LEGENDARY and 1 EPIC Catalyst in batch
 
-For this example we assume that an asset wants to burn two catalysts in a single tx. All the Asset part is out of scope, see Asset documentation.
+For this example we assume that an asset wants to burn two catalysts in a single tx. All the Asset part is out of scope, see [Asset documentation](../asset/asset.md).
 The same can be done for gems with `batchBurnGems`.
 
 ```plantuml

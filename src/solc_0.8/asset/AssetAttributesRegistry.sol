@@ -112,7 +112,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
         _setCatalyst(assetId, catalystId, gemIds, blockNumber);
     }
 
-    /// @notice adds gems to an existing list of gems of an asset, minter only
+    /// @notice adds gems to an existing list of gems of an asset, upgrader only
     /// @param assetId id of the asset
     /// @param gemIds list of gems ids to set
     function addGems(uint256 assetId, uint16[] calldata gemIds) external virtual override {
