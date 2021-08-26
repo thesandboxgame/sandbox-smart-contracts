@@ -6,7 +6,7 @@ description: AssetMinter
 
 ## Introduction
 
-The primary function of AssetMinter is to mint a new **asset** with [Gems and a catalyst](../catalyst/catalyst.md) bound to it. It uses the function expose by the [Asset registry](./asset-attributes-registry.md) in order to do it.
+The primary function of AssetMinter is to mint a new **asset** with [Gems and a catalyst](../catalyst/catalyst.md) bound to it. It uses the function exposed by the [Asset registry](./asset-attributes-registry.md) in order to do it.
 
 ## Model
 
