@@ -442,7 +442,6 @@ describe('GemsCatalystsRegistry', function () {
       powerGem,
     } = await setupGemsAndCatalysts();
     const initialTrustedForwarder = await gemsCatalystsRegistryAsDeployer.getTrustedForwarder();
-    console.log(initialTrustedForwarder);
     expect(initialTrustedForwarder).to.equal(trustedForwarder.address);
 
     await waitFor(
