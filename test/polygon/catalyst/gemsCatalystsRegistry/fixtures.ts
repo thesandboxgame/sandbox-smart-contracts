@@ -14,6 +14,7 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   const gemsCatalystsRegistry: Contract = await ethers.getContract(
     'GemsCatalystsRegistry'
   );
+  const trustedForwarder = await ethers.getContract('TRUSTED_FORWARDER');
   const sandContract: Contract = await ethers.getContract('Sand');
   const powerGem: Contract = await ethers.getContract('Gem_POWER');
   const defenseGem: Contract = await ethers.getContract('Gem_DEFENSE');
@@ -28,6 +29,7 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   );
   const users = await getUnnamedAccounts();
   const {
+    deployer,
     catalystMinter,
     gemMinter,
     gemsCatalystsRegistryAdmin,
@@ -153,6 +155,10 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
   const gemsCatalystsRegistryAsGemMinter = await gemsCatalystsRegistry.connect(
     ethers.provider.getSigner(gemMinter)
   );
+
+  const gemsCatalystsRegistryAsDeployer = await gemsCatalystsRegistry.connect(
+    ethers.provider.getSigner(deployer)
+  );
   return {
     sandContract,
     gemsCatalystsRegistry,
@@ -182,5 +188,7 @@ export const setupGemsAndCatalysts = deployments.createFixture(async () => {
     gemsCatalystsRegistryAsCataystMinter,
     gemsCatalystsRegistryAsGemOwner,
     gemsCatalystsRegistryAsGemMinter,
+    gemsCatalystsRegistryAsDeployer,
+    trustedForwarder,
   };
 });

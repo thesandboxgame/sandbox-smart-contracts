@@ -2,7 +2,8 @@
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts-0.8/metatx/ERC2771Context.sol";
+import "@openzeppelin/contracts-0.8/access/Ownable.sol";
+import "../common/BaseWithStorage/ERC2771Handler.sol";
 import "../common/interfaces/IAssetAttributesRegistry.sol";
 import "../common/interfaces/IAssetUpgrader.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
@@ -10,7 +11,7 @@ import "../common/interfaces/IERC20Extended.sol";
 import "../common/interfaces/IAssetToken.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
-contract AssetUpgrader is ERC2771Context, IAssetUpgrader {
+contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     using SafeMath for uint256;
 
     address public immutable feeRecipient;
@@ -44,7 +45,7 @@ contract AssetUpgrader is ERC2771Context, IAssetUpgrader {
         uint256 _gemAdditionFee,
         address _feeRecipient,
         address trustedForwarder
-    ) ERC2771Context(trustedForwarder) {
+    ) {
         _registry = registry;
         _sand = sand;
         _asset = asset;
@@ -52,6 +53,7 @@ contract AssetUpgrader is ERC2771Context, IAssetUpgrader {
         upgradeFee = _upgradeFee;
         gemAdditionFee = _gemAdditionFee;
         feeRecipient = _feeRecipient;
+        __ERC2771Handler_initialize(trustedForwarder);
     }
 
     /// @notice associate a catalyst to a fungible Asset token by extracting it as ERC721 first.
@@ -204,5 +206,19 @@ contract AssetUpgrader is ERC2771Context, IAssetUpgrader {
     /// @param catalystId The catalyst type to burn.
     function _burnCatalyst(address from, uint16 catalystId) internal {
         _gemsCatalystsRegistry.burnCatalyst(from, catalystId, CATALYST_UNIT);
+    }
+
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyOwner {
+        _trustedForwarder = trustedForwarder;
+    }
+
+    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
+        return ERC2771Handler._msgSender();
+    }
+
+    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+        return ERC2771Handler._msgData();
     }
 }
