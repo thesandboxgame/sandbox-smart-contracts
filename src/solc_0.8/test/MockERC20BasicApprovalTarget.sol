@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.5;
+pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 
 contract MockERC20BasicApprovalTarget {
     event LogOnCall(address);
