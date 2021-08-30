@@ -22,6 +22,8 @@ nav:
       - Blockchain:
           - Ethereum: topics/blockchain/ethereum.md
           - Features: topics/blockchain/features.md
+      - Polygon:
+          - Polygon at Sandbox: topics/polygon/polygon.md
       - Asset:
           - Asset: topics/asset/asset.md
           - Asset attributes registry: topics/asset/asset-attributes-registry.md
