@@ -6,10 +6,7 @@ description: Land
 
 ## Introduction
 
-A LAND is a digital piece of real-estate in The Sandbox's metaverse. Game designers use LAND to build digital experiences, such as games or dioramas, and also populate it with ASSETs.
-
-<!-- add links to LAND, ASSET -->
-<!-- dioramas ? -->
+A LAND is a digital piece of real-estate in The Sandbox's metaverse. Game designers use LAND to build digital experiences, such as games or dioramas, and also populate it with [ASSETs](../asset/asset.md).
 
 Each LAND is a unique, non-fungible ERC-721 token on the Ethereum blockchain. A total of 166,464 LANDs are available.
 
@@ -21,20 +18,14 @@ The Land token is an ERC721 token, in which the tokens represent pieces of the S
 
 ### Features of the contract
 
-|              Feature | Link                                   |
-| -------------------: | :------------------------------------- |
-|            `ERC-165` | https://eips.ethereum.org/EIPS/eip-165 |
-|            `ERC-721` | https://eips.ethereum.org/EIPS/eip-721 |
-|   `ERC-721 metadata` |                                        |
-|            `ERC2771` |                                        |
-|        `Upgradeable` | No                                     |
-|             `Minter` | Yes                                    |
-| `WithSuperOperators` | Yes                                    |
-|                      |                                        |
-
-<!-- this wasn't finished. i couldn't find the IERC721Metadata in the code -->
-
-<!-- L: I couldn't find it either, this is the 0.5 version-->
+|              Feature | Link                                                                                                                                                           |
+| -------------------: | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|            `ERC-721` | https://eips.ethereum.org/EIPS/eip-721                                                                                                                         |
+|            `ERC2771` | [PRE-ERC2771](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/src/solc_0.5/contracts_common/BaseWithStorage/MetaTransactionReceiver.sol) |
+|        `Upgradeable` | No                                                                                                                                                             |
+|             `Minter` | Yes                                                                                                                                                            |
+| `WithSuperOperators` | Yes                                                                                                                                                            |
+|                      |                                                                                                                                                                |
 
 ### Quads
 
@@ -45,23 +36,25 @@ The contract supports following quad sizes:
 - 24x24; 12x12; 6x6; 3x3; 1x1.
 
 A 24x24 is composed of 4 12x12 quads, which are composed of 4 6x6 and so on, until 1x1 quads.
+
 ![](../../img/TheGreatQuad.png)
 
-A quad in the SandBox's chart by its top left x and y coordiantes as well as its size.
+A quad in the SandBox's chart is recognized by its top left x and y coordiantes as well as its size.
 
 It's important to notice that the users are oblivious of the existence of quads, for them they can only see the 1x1 pieces of land that belong to them.
 
 ### Token id pattern
 
-ERC721 tokens always have an unique ID associated to them, in this Land contract the unique ID registered by the ERC721 contract is called quadId.
+ERC721 tokens always have an unique ID associated to them, in this Land contract the unique ID registered by the ERC721 contract is called `quadId`.
 
-quadIds are calculated in two steps:
+Quad IDs are calculated in two steps:
 
-- First we calculate a base id: uint256 id = x + y \* GRID_SIZE (408);
+- First we calculate a base id: `uint256 id = x + y \* GRID_SIZE (408);`
 - Then according to the size of the quad, we add a layer value, that will help us differentiate the quad ids by size.
-  !!! Layer constants
 
-```shell
+!!! Info "Layer constants"
+
+```solidity
 uint256 internal constant LAYER = 0xFF00000000000000000000000000000000000000000000000000000000000000;
 uint256 internal constant LAYER_1x1 = 0x0000000000000000000000000000000000000000000000000000000000000000;
 uint256 internal constant LAYER_3x3 = 0x0100000000000000000000000000000000000000000000000000000000000000;
@@ -70,29 +63,25 @@ uint256 internal constant LAYER_12x12 = 0x03000000000000000000000000000000000000
 uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
 ```
 
-<!-- if you want to use admonitions, you have to use one of those types (only works on mkdocs)
-https://squidfunk.github.io/mkdocs-material/reference/admonitions/#supported-types
- -->
-
 The first layer is a mask to filter off quads bigger than 1x1.
 
-#### Land id determination:
+#### Land id determination
 
-\_idInPath is a function that calculates the id for each land in the SandBox grid, the function allow us to go through the lands in a quad and recover the id for each land.
+`_idInPath` is a function that calculates the id for each land in the Sandbox grid, the function allow us to go through the lands in a quad and recover the id for each land.
 
-#### Owner of land:
+#### Owner of land
 
-\_ownerOf overrides the ERC721BaseToken function is a function that retrieves the owner address for a 1x1 quad. It will start checking if the 1x1 token exists in the owners map, if it doesn't it will check if the 1x1 quad is present in a bigger quad, 3x3, 6x6, 12x12 and 24x24.
+`_ownerOf` overrides the ERC721BaseToken function is a function that retrieves the owner address for a 1x1 quad. It will start checking if the 1x1 token exists in the owners map, if it doesn't, it will check if the 1x1 quad is present in a bigger quad, 3x3, 6x6, 12x12 and 24x24.
 
 ### Regroup mechanism
 
 The regroup mechanism is a series of functions that regroup smaller quads into bigger ones. The functions are the following:
 
-- \_regroup24x24: will scan the 24x24 quad in 12x12 ones, call \_regroup12x12 for each quad and update \_owners[id12x12] to 0, similarly to \_checkAndClear.
-- \_regroup12x12: Similar to \_regroup24x24, it will scan the 12x12 quad in 6x6 ones, and update \_owners[id6x6] to 0.
-- \_regroup6x6: will scan the 6x6 quad in 3x3 ones, call \_regroup3x3 for each quad and update \_owners[id3x3] to 0.
-- \_regroup3x3: will go through all the path ids of the 3x3 quad, and call the \_checkAndClear function, that will "clear" any independent 1x1 quads;
-- \_regroup: call the regroup function corresponding to the size of the quad being transferred.
+- `_regroup24x24`: will scan the 24x24 quad in 12x12 ones, call `_regroup12x12` for each quad and update `_owners[id12x12]` to 0, similarly to `_checkAndClear`.
+- `_regroup12x12`: Similar to `_regroup24x24`, it will scan the 12x12 quad in 6x6 ones, and update `_owners[id6x6]` to 0.
+- `_regroup6x6`: will scan the 6x6 quad in 3x3 ones, call `_regroup3x3` for each quad and update `_owners[id3x3]` to 0.
+- `_regroup3x3`: will go through all the path ids of the 3x3 quad, and call the `_checkAndClear` function, that will "clear" any independent 1x1 quads;
+- `_regroup`: call the regroup function corresponding to the size of the quad being transferred.
 
 ### Class diagram
 
@@ -169,13 +158,13 @@ LandBaseToken <|-- Land
 
 ## Processes
 
-#### Illustrating how quads work:
+#### Illustrating how quads work
 
 _This is not a user guide, users don't see quads, from their point of view they are only dealing with 1x1 lands_
 
-<!-- you say that but users can call transferQuad with x, y, size so they have to be aware of quads.. -->
+Let's imagine we're minting a 6x6 quad for user A, in the coordinates 0, 0. We'll mint a single token, with an quad id calculated by:
 
-Let's imagine we're minting a 6x6 quad for user A, in the coordinates 0,0. We'll mint a single token, with an quad id calculated by:
+!!! Example "Minting 6x6 quad"
 
 ```
     uint256 internal constant LAYER_6x6 =
@@ -208,6 +197,7 @@ Now, if we try to transfer the 3x3 from which we took one of the 1x1 quads, we'l
 ![](../../img/quadIMG5.png)
 
 If the user A wants to send the rest of these lands, he would need to send the 1x1 quads one by one.
+
 ![](../../img/quadIMG6.png)
 
 ### Mint a quad
@@ -221,12 +211,12 @@ In order to mint multiple lands without the need of multiple transactions, lands
 
 The coordinates `x` and `y`, are the coordinates of the top left point of a quad, they must be multiples of the quad size and should respect the bounds of the land grid.
 
-The function will then calculate a quadId, it starts with a base x + y \* GRID_SIZE;
+The function will then calculate a quadId, it starts with a base `x + y \* GRID_SIZE`.
 The rest of the calculation depends on the size of the Lands being minted.
 
-!!! quadId calculation
+!!! example "quadId calculation"
 
-```shell
+```solidity
 if (size == 1) {
 quadId = id;
 } else if (size == 3) {
@@ -242,25 +232,29 @@ require(false, "Invalid size");
 }
 ```
 
-Once we have the new quadId we'll check if the lands inside this quad don't already exist. First by `shell require(_owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE] == 0, "Already minted as 24x24"); `
-The (x/24) _ 24 and (y/24) _ 24 divisions will push the coordinates into the closest possible 24x24 quad. For example, if we try to mint a 12x12 quad in the coordinates 12, 12, this require will check if a 24x24 quad starting in 0x0 doesn't already exist.
+Once we have the new quadId, we'll check if the lands inside this quad don't already exist. First by `require(_owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE] == 0, "Already minted as 24x24"); `
+The `(x/24) * 24` and ` (y/24) * 24` divisions will push the coordinates into the closest possible 24x24 quad.
+
+For example, if we try to mint a 12x12 quad in the coordinates 12, 12, this require will check if a 24x24 quad starting in 0x0 doesn't already exist.
 
 If we passed this first check we'll then continue verifying if the inner quads don't exist as well.
 
 For 12, 6 and 3, the checks follow the same pattern:
 
-for a `n` size new quad and `v` (v = 12|6|3) size check:
+- `n` <= `v`: check if the closest bigger quad was already minted.
+- else : break the new quad in smaller ones, and go through the smaller quads to see if they were already minted.
 
-- `n` <= `v`: `shell require(_owners[LAYER_vxv + (x/v) * v + ((y/v) * v) * GRID_SIZE] == 0, "Already minted as vxv");`
-- else : we break the new quad in vxv ones and go through the smaller quads to see if they were already minted.
+For example:
 
-For example, for the size 12 check, if the new quad is smaller than 12, the contract will do a similar check as we did for 24x24`shell require( _owners[LAYER_12x12 + (x/12) * 12 + ((y/12) * 12) * GRID_SIZE] == 0, "Already minted as 12x12" );` this will check if our new quad doesn't belong to a bigger 12x12 quad.
+For a 12x12 check, if the new quad is smaller than 12, the contract will do a similar check as we did for 24x24 `require( _owners[LAYER_12x12 + (x/12) * 12 + ((y/12) * 12) * GRID_SIZE] == 0, "Already minted as 12x12" );` this will check if our new quad doesn't belong to the closest 12x12 quad to the coordiantes `x` and `y`.
 
 In the case of the new quad being bigger than 12x12, the contract will break the quad down into the possibles 12x12 quads, and verify if these were already minted.
 
-```shell
+!!! example "Breaking quad into 12x12 ones and verifying if ther were already minted"
+
+```solidity
 for (uint256 x12i = x; x12i < (x + size); x12i += 12) {
-                for (uint256 y12i = y; y12i < (y + size); y12i += 12) { //So weird
+                for (uint256 y12i = y; y12i < (y + size); y12i += 12) {
                     uint256 id12x12 = LAYER_12x12 + x12i + y12i * GRID_SIZE;
                     require(_owners[id12x12] == 0, "Already minted as 12x12");
                 }
@@ -305,29 +299,29 @@ loop size*size times
     LandBaseToken -> Miner: emit transfer(address(0), to, id)
 end
 
-LandBaseToken --> LandBaseToken: update _owners and _numNFTPerAddress
+LandBaseToken --> LandBaseToken: update ownership
 deactivate LandBaseToken
 
 ```
 
 ### Transfer quad
 
-Token owner or account authorized to make the transfer can call this function with the following parameters 'from' current owner of the quad, 'to' destination, 'size' size of the quad, 'x' top left x coordinate of the quad, 'y' top left y coordinate of the quad and 'data' any possible additional data.
+Token owner or account authorized to make the transfer can call this function with the following parameters `from` current owner of the quad, `to` destination, `size` size of the quad, `x` top left x coordinate of the quad, `y` top left y coordinate of the quad and `data` any possible additional data.
 
 Then, according to the quad size:
 
 - size = 1; check the existence of quad as well its ownership and transfer if to new owner;
 - size ≠ 1; we call the function regroup.
 
-There are a couple of regroup functions, \_regroup3x3, \_regroup6x6, \_regroup12x12 and \_regroup24x24, all according to the size of quad being transfered.
+There are a couple of regroup functions, `_regroup3x3`, `_regroup6x6`, `_regroup12x12` and `_regroup24x24`, all according to the size of quad being transfered.
 
-each regroup function will break its quad into smaller ones, and call the size equivalent regroup function. For example, if we are transferring a 12x12 quad, the transfer function will call \_regroup12x12, which will break the 12x12 quad into 4 6x6 ones, and call \_regroup6x6 for each of the 6x6 quads, in turn, \_regroup6x6 will break each 6x6 quad into 4 3x3 and call \_regroup3x3.
+Each regroup function will break its quad into smaller ones, and call the size equivalent regroup function. For example, if we are transferring a 12x12 quad, the transfer function will call `_regroup12x12`, which will break the 12x12 quad into 4 6x6 ones, and call `_regroup6x6` for each of the 6x6 quads, in turn, `_regroup6x6` will break each 6x6 quad into 4 3x3 and call `_regroup3x3`.
 
-regroup 3x3 is the smallest of the regroup functions, it goes through all the lands in the quad and update a bool `ownerOfAll` with the function \_checkAndClear.
+regroup 3x3 is the smallest of the regroup functions, it goes through all the lands in the quad and update a bool `ownerOfAll` with the function `_checkAndClear`.
 
-\_checkAndClear receives the `from` address and an `id` as inputs. The function will then return False if the \_owners[] of `id` is zero, otherwise we'll require that the \_owners[id] equals `from`, if so, we'll update the \_owners[id] to 0, which effectively regrops the quad, and returns true to update the ownerOfAll bool.
+`_checkAndClear` receives the `from` address and an `id` as inputs. The function will then return False if the `_owners[]` of `id` is zero, otherwise we'll require that the `_owners[id]` equals `from`, if so, we'll update the `_owners[id]` to 0, which effectively regrops the quad, and returns true to update the `ownerOfAll` bool.
 
-Once allinternal regroups are done and we are sure that the owner is the rightful owner of all lands, we update the_owners[] table.
+Once all internal regroups are done and we are sure that the owner is the rightful owner of all lands, we update the `_owners[]` table.
 
 ```plantuml
 actor Alice
@@ -335,9 +329,9 @@ entity LandBaseToken
 Alice -> LandBaseToken: transferQuad(from, to, size, x, y, data)
 activate LandBaseToken
 alt size == 1
-    LandBaseToken -> LandBaseToken: check validity and update _owner
+    LandBaseToken -> LandBaseToken: check validity and update owner's table
 else else
-    LandBaseToken -> LandBaseToken: Call function _regroup
+    LandBaseToken -> LandBaseToken: Call regroup function
 end
 loop size*size times
     LandBaseToken -> Alice: emit transfer(from, to, id)
@@ -356,14 +350,10 @@ Alice -> LandBaseToken: transferQuad(from, to, sizes[], xs[], ys[], data)
 activate LandBaseToken
 
 loop sizes.lenght times
-    LandBaseToken -> LandBaseToken: _transferQuad(from, to, size, xs[i], ys[i])
+    LandBaseToken -> LandBaseToken: call function _transferQuad(from, to, size, xs[i], ys[i])
     LandBaseToken -> Alice: emit transfer(from, to, id)
-    LandBaseToken -> LandBaseToken: numTokensTransfered += size * size
+    LandBaseToken -> LandBaseToken: calculate number of Tokens Transfered
 end
-    LandBaseToken -> LandBaseToken: update _numNFTPerAddress
+    LandBaseToken -> LandBaseToken: update table with number of NTFs per address
 deactivate LandBaseToken
 ```
-
-<style>
-img  {width: 400px;}
-</style>
