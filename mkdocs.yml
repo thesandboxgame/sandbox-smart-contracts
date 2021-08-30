@@ -43,6 +43,8 @@ nav:
       - Token:
           - ERC20: topics/token/ERC20.md
           - ERC1155721: topics/token/ERC1155721.md
+      - Land:
+          - Land: topics/land/land.md
 
 markdown_extensions:
   - admonition
