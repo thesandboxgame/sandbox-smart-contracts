@@ -162,3 +162,6 @@ jobs:
 
       - name: Deploy contracts
         run: yarn void:deploy
+
+      - name: Fork Deploy contracts from rinkeby
+        run: yarn fork:deploy rinkeby
