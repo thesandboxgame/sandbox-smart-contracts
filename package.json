@@ -46,7 +46,7 @@
     "fs-extra": "^9.0.1",
     "googleapis": "^66.0.0",
     "graphql": "^15.4.0",
-    "hardhat": "^2.1.2",
+    "hardhat": "^2.6.1",
     "hardhat-contract-sizer": "^2.0.2",
     "hardhat-deploy": "^0.7.5",
     "hardhat-gas-reporter": "^1.0.4",
