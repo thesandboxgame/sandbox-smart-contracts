@@ -1,7 +1,7 @@
 /**
  * How to use:
  *  - yarn execute <NETWORK> ./setup/send_assets_to_giveaway.ts <GIVEAWAY_SUFFIX>
- * 
+ *
  * The suffix of the giveaway comes from the folder, ie: ./data/giveaways/asset_giveaway_6 => 6
  */
 import hre from 'hardhat';
