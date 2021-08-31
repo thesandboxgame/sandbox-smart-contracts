@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessL2, skipUnlessTest} from '../../utils/network';
+import {skipUnlessTestOrL2} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -15,4 +15,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['MockLandWithMint', 'MockLandWithMint_deploy'];
-func.skip = skipUnlessTest || skipUnlessL2;
+func.skip = skipUnlessTestOrL2;

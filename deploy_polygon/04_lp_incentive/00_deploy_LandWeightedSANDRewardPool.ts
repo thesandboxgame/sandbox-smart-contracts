@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessL2, skipUnlessTest} from '../../utils/network';
+import {skipUnlessTestOrL2} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -27,4 +27,4 @@ func.tags = [
   'L2',
 ];
 func.dependencies = ['Land_deploy', 'SandBaseToken_deploy', 'FakeLPSandMatic'];
-func.skip = skipUnlessTest || skipUnlessL2;
+func.skip = skipUnlessTestOrL2;
