@@ -231,7 +231,14 @@ The rest of the calculation depends on the size of the Lands being minted.
     }
     ```
 
-Once we have the new quadId, we'll check if the lands inside this quad don't already exist. First by `require(_owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE] == 0, "Already minted as 24x24"); `
+Once we have the new quadId, we'll check if the lands inside this quad don't already exist. First by the following require:
+
+!!! example "Already minted as 24x24 check"
+    ```solidity
+      require(_owners[LAYER_24x24 + (x/24) * 24 + ((y/24) * 24) * GRID_SIZE] == 0,
+       "Already minted as 24x24");
+    ```
+
 The `(x/24) * 24` and ` (y/24) * 24` divisions will push the coordinates into the closest possible 24x24 quad.
 
 For example, if we try to mint a 12x12 quad in the coordinates 12, 12, this require will check if a 24x24 quad starting in 0x0 doesn't already exist.
@@ -245,7 +252,15 @@ For 12, 6 and 3, the checks follow the same pattern:
 
 For example:
 
-For a 12x12 check, if the new quad is smaller than 12, the contract will do a similar check as we did for 24x24 `require( _owners[LAYER_12x12 + (x/12) * 12 + ((y/12) * 12) * GRID_SIZE] == 0, "Already minted as 12x12" );` this will check if our new quad doesn't belong to the closest 12x12 quad to the coordiantes `x` and `y`.
+For a 12x12 check, if the new quad is smaller than 12, the contract will do a similar check as we did for 24x24.
+
+!!! example "Already minted as 12x12 check"
+    ```solidity
+      require( _owners[LAYER_12x12 + (x/12) * 12 + ((y/12) * 12) * GRID_SIZE] == 0,
+       "Already minted as 12x12" );
+    ```
+
+This will check if our new quad doesn't belong to the closest 12x12 quad to the coordiantes `x` and `y`.
 
 In the case of the new quad being bigger than 12x12, the contract will break the quad down into the possibles 12x12 quads, and verify if these were already minted.
 
@@ -259,7 +274,7 @@ In the case of the new quad being bigger than 12x12, the contract will break the
                 }
     ```
 
-Once these checks are done we'll go through all the land ids of this new quad and emit a `Transfer` event before updating the \_owners and \_numNFTPerAddress tables.
+Once these checks are done we'll go through all the land ids of this new quad and emit a `Transfer` event before updating the ownership table.
 
 ```plantuml
 
@@ -350,6 +365,6 @@ loop sizes.length times
     LandBaseToken -> Alice: emit transfer(from, to, id)
     LandBaseToken -> LandBaseToken: calculate number of Tokens Transfered
 end
-    LandBaseToken -> LandBaseToken: update number of NTFs for **to** and **from**
+    LandBaseToken -> LandBaseToken: update NFTs ownerships
 deactivate LandBaseToken
 ```
