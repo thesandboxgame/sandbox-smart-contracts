@@ -1,21 +1,30 @@
-pragma solidity 0.5.9;
+//SPDX-License-Identifier: MIT
 
-import "../contracts_common/Libraries/SigUtil.sol";
-import "../contracts_common/Libraries/PriceUtil.sol";
-import "../Sand.sol";
-import "../Asset.sol";
-import "../contracts_common/Interfaces/ERC20.sol";
-import "../TheSandbox712.sol";
-import "../contracts_common/BaseWithStorage/MetaTransactionReceiver.sol";
+pragma solidity 0.8.2;
 
-import "../contracts_common/Interfaces/ERC1271.sol";
-import "../contracts_common/Interfaces/ERC1271Constants.sol";
-import "../contracts_common/Interfaces/ERC1654.sol";
-import "../contracts_common/Interfaces/ERC1654Constants.sol";
-import "../contracts_common/Libraries/SafeMathWithRequire.sol";
+import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
+import "../common/Libraries/SigUtil.sol";
+import "../common/Libraries/PriceUtil.sol";
+import "../asset/AssetV2.sol";
+import "../common/Base/TheSandbox712.sol";
+import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
+import "../common/interfaces/ERC1271.sol";
+import "../common/interfaces/ERC1271Constants.sol";
+import "../common/interfaces/ERC1654.sol";
+import "../common/interfaces/ERC1654Constants.sol"; 
 
 contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712, MetaTransactionReceiver {
-    using SafeMathWithRequire for uint256;
+
+    struct ClaimSellerOfferRequest {
+        address buyer;
+        address payable seller;
+        address token;
+        uint256[] purchase;
+        uint256[] auctionData;
+        uint256[] ids;
+        uint256[] amounts;
+        bytes signature;
+    }
 
     enum SignatureType { DIRECT, EIP1654, EIP1271 }
 
@@ -46,13 +55,13 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
 
     mapping(address => mapping(uint256 => uint256)) claimed;
 
-    Asset _asset;
+    AssetV2 _asset;
     uint256 _fee10000th = 0;
     address payable _feeCollector;
 
     event FeeSetup(address feeCollector, uint256 fee10000th);
 
-    constructor(Asset asset, address admin, address initialMetaTx, address payable feeCollector, uint256 fee10000th) public {
+    constructor(AssetV2 asset, address admin, address initialMetaTx, address payable feeCollector, uint256 fee10000th) {
         _asset = asset;
         _feeCollector = feeCollector;
         _fee10000th = fee10000th;
@@ -86,7 +95,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         uint256 amountAlreadyClaimed = claimed[seller][auctionData[AuctionData_OfferId]];
         require(amountAlreadyClaimed != MAX_UINT256, "Auction cancelled");
 
-        uint256 total = amountAlreadyClaimed.add(buyAmount);
+        uint256 total = amountAlreadyClaimed + buyAmount;
         require(total >= amountAlreadyClaimed, "overflow");
         require(total <= auctionData[AuctionData_Packs], "Buy amount exceeds sell amount");
 
@@ -95,249 +104,165 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
             "Auction didn't start yet"
         );
         require(
-            auctionData[AuctionData_StartedAt].add(auctionData[AuctionData_Duration]) > block.timestamp,
+            auctionData[AuctionData_StartedAt] + auctionData[AuctionData_Duration] > block.timestamp,
             "Auction finished"
         );
 
     }
 
     /// @notice claim offer using EIP712
-    /// @param buyer address paying for the offer
-    /// @param seller address of the seller
-    /// @param token token used for payment
-    /// @param purchase buyAmount, maxTokenAmount
-    /// @param auctionData offerId, startingPrice, endingPrice, startedAt, duration, packs
-    /// @param ids ids of the Assets being sold
-    /// @param amounts amounts of Assets per pack
-    /// @param signature signature of seller
+    /// @param input Claim Seller Offer Request
     function claimSellerOffer(
-        address buyer,
-        address payable seller,
-        address token,
-        uint256[] calldata purchase, // buyAmount, maxTokenAmount
-        uint256[] calldata auctionData,
-        uint256[] calldata ids,
-        uint256[] calldata amounts,
-        bytes calldata signature
+        ClaimSellerOfferRequest memory input
     ) external payable {
         _verifyParameters(
-            buyer,
-            seller,
-            token,
-            purchase[0],
-            auctionData,
-            ids,
-            amounts
+            input.buyer,
+            input.seller,
+            input.token,
+            input.purchase[0],
+            input.auctionData,
+            input.ids,
+            input.amounts
         );
-        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.DIRECT, true);
+        _ensureCorrectSigner(input.seller, input.token, input.auctionData, input.ids, input.amounts, input.signature, SignatureType.DIRECT, true);
         _executeDeal(
-            token,
-            purchase,
-            buyer,
-            seller,
-            auctionData,
-            ids,
-            amounts
+            input.token,
+            input.purchase,
+            input.buyer,
+            input.seller,
+            input.auctionData,
+            input.ids,
+            input.amounts
         );
     }
 
     /// @notice claim offer using EIP712 and EIP1271 signature verification scheme
-    /// @param buyer address paying for the offer
-    /// @param seller address of the seller
-    /// @param token token used for payment
-    /// @param purchase buyAmount, maxTokenAmount
-    /// @param auctionData offerId, startingPrice, endingPrice, startedAt, duration, packs
-    /// @param ids ids of the Assets being sold
-    /// @param amounts amounts of Assets per pack
-    /// @param signature signature of seller
+    /// @param input Claim Seller Offer Request
     function claimSellerOfferViaEIP1271(
-        address buyer,
-        address payable seller,
-        address token,
-        uint256[] calldata purchase, // buyAmount, maxTokenAmount
-        uint256[] calldata auctionData,
-        uint256[] calldata ids,
-        uint256[] calldata amounts,
-        bytes calldata signature
+        ClaimSellerOfferRequest memory input
     ) external payable {
         _verifyParameters(
-            buyer,
-            seller,
-            token,
-            purchase[0],
-            auctionData,
-            ids,
-            amounts
+            input.buyer,
+            input.seller,
+            input.token,
+            input.purchase[0],
+            input.auctionData,
+            input.ids,
+            input.amounts
         );
-        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.EIP1271, true);
+        _ensureCorrectSigner(input.seller, input.token, input.auctionData, input.ids, input.amounts, input.signature, SignatureType.EIP1271, true);
         _executeDeal(
-            token,
-            purchase,
-            buyer,
-            seller,
-            auctionData,
-            ids,
-            amounts
+            input.token,
+            input.purchase,
+            input.buyer,
+            input.seller,
+            input.auctionData,
+            input.ids,
+            input.amounts
         );
     }
 
     /// @notice claim offer using EIP712 and EIP1654 signature verification scheme
-    /// @param buyer address paying for the offer
-    /// @param seller address of the seller
-    /// @param token token used for payment
-    /// @param purchase buyAmount, maxTokenAmount
-    /// @param auctionData offerId, startingPrice, endingPrice, startedAt, duration, packs
-    /// @param ids ids of the Assets being sold
-    /// @param amounts amounts of Assets per pack
-    /// @param signature signature of seller
+    /// @param input Claim Seller Offer Request
     function claimSellerOfferViaEIP1654(
-        address buyer,
-        address payable seller,
-        address token,
-        uint256[] calldata purchase, // buyAmount, maxTokenAmount
-        uint256[] calldata auctionData,
-        uint256[] calldata ids,
-        uint256[] calldata amounts,
-        bytes calldata signature
+        ClaimSellerOfferRequest memory input
     ) external payable {
         _verifyParameters(
-            buyer,
-            seller,
-            token,
-            purchase[0],
-            auctionData,
-            ids,
-            amounts
+            input.buyer,
+            input.seller,
+            input.token,
+            input.purchase[0],
+            input.auctionData,
+            input.ids,
+            input.amounts
         );
-        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.EIP1654, true);
+        _ensureCorrectSigner(input.seller, input.token, input.auctionData, input.ids, input.amounts, input.signature, SignatureType.EIP1654, true);
         _executeDeal(
-            token,
-            purchase,
-            buyer,
-            seller,
-            auctionData,
-            ids,
-            amounts
+            input.token,
+            input.purchase,
+            input.buyer,
+            input.seller,
+            input.auctionData,
+            input.ids,
+            input.amounts
         );
     }
 
     /// @notice claim offer using Basic Signature
-    /// @param buyer address paying for the offer
-    /// @param seller address of the seller
-    /// @param token token used for payment
-    /// @param purchase buyAmount, maxTokenAmount
-    /// @param auctionData offerId, startingPrice, endingPrice, startedAt, duration, packs
-    /// @param ids ids of the Assets being sold
-    /// @param amounts amounts of Assets per pack
-    /// @param signature signature of seller
+    /// @param input Claim Seller Offer Request
     function claimSellerOfferUsingBasicSig(
-        address buyer,
-        address payable seller,
-        address token,
-        uint256[] calldata purchase, // buyAmount, maxTokenAmount
-        uint256[] calldata auctionData,
-        uint256[] calldata ids,
-        uint256[] calldata amounts,
-        bytes calldata signature
+        ClaimSellerOfferRequest memory input
     ) external payable {
         _verifyParameters(
-            buyer,
-            seller,
-            token,
-            purchase[0],
-            auctionData,
-            ids,
-            amounts
+            input.buyer,
+            input.seller,
+            input.token,
+            input.purchase[0],
+            input.auctionData,
+            input.ids,
+            input.amounts
         );
-        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.DIRECT, false);
+        _ensureCorrectSigner(input.seller, input.token, input.auctionData, input.ids, input.amounts, input.signature, SignatureType.DIRECT, false);
         _executeDeal(
-            token,
-            purchase,
-            buyer,
-            seller,
-            auctionData,
-            ids,
-            amounts
+            input.token,
+            input.purchase,
+            input.buyer,
+            input.seller,
+            input.auctionData,
+            input.ids,
+            input.amounts
         );
     }
 
     /// @notice claim offer using Basic Signature and EIP1271 signature verification scheme
-    /// @param buyer address paying for the offer
-    /// @param seller address of the seller
-    /// @param token token used for payment
-    /// @param purchase buyAmount, maxTokenAmount
-    /// @param auctionData offerId, startingPrice, endingPrice, startedAt, duration, packs
-    /// @param ids ids of the Assets being sold
-    /// @param amounts amounts of Assets per pack
-    /// @param signature signature of seller
+    /// @param input Claim Seller Offer Request
     function claimSellerOfferUsingBasicSigViaEIP1271(
-        address buyer,
-        address payable seller,
-        address token,
-        uint256[] calldata purchase, // buyAmount, maxTokenAmount
-        uint256[] calldata auctionData,
-        uint256[] calldata ids,
-        uint256[] calldata amounts,
-        bytes calldata signature
+        ClaimSellerOfferRequest memory input
     ) external payable {
         _verifyParameters(
-            buyer,
-            seller,
-            token,
-            purchase[0],
-            auctionData,
-            ids,
-            amounts
+            input.buyer,
+            input.seller,
+            input.token,
+            input.purchase[0],
+            input.auctionData,
+            input.ids,
+            input.amounts
         );
-        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.EIP1271, false);
+        _ensureCorrectSigner(input.seller, input.token, input.auctionData, input.ids, input.amounts, input.signature, SignatureType.EIP1271, false);
         _executeDeal(
-            token,
-            purchase,
-            buyer,
-            seller,
-            auctionData,
-            ids,
-            amounts
+            input.token,
+            input.purchase,
+            input.buyer,
+            input.seller,
+            input.auctionData,
+            input.ids,
+            input.amounts
         );
     }
 
     /// @notice claim offer using Basic Signature and EIP1654 signature verification scheme
-    /// @param buyer address paying for the offer
-    /// @param seller address of the seller
-    /// @param token token used for payment
-    /// @param purchase buyAmount, maxTokenAmount
-    /// @param auctionData offerId, startingPrice, endingPrice, startedAt, duration, packs
-    /// @param ids ids of the Assets being sold
-    /// @param amounts amounts of Assets per pack
-    /// @param signature signature of seller
+    /// @param input Claim Seller Offer Request
     function claimSellerOfferUsingBasicSigViaEIP1654(
-        address buyer,
-        address payable seller,
-        address token,
-        uint256[] calldata purchase, // buyAmount, maxTokenAmount
-        uint256[] calldata auctionData,
-        uint256[] calldata ids,
-        uint256[] calldata amounts,
-        bytes calldata signature
+        ClaimSellerOfferRequest memory input
     ) external payable {
         _verifyParameters(
-            buyer,
-            seller,
-            token,
-            purchase[0],
-            auctionData,
-            ids,
-            amounts
+            input.buyer,
+            input.seller,
+            input.token,
+            input.purchase[0],
+            input.auctionData,
+            input.ids,
+            input.amounts
         );
-        _ensureCorrectSigner(seller, token, auctionData, ids, amounts, signature, SignatureType.EIP1654, false);
+        _ensureCorrectSigner(input.seller, input.token, input.auctionData, input.ids, input.amounts, input.signature, SignatureType.EIP1654, false);
         _executeDeal(
-            token,
-            purchase,
-            buyer,
-            seller,
-            auctionData,
-            ids,
-            amounts
+            input.token,
+            input.purchase,
+            input.buyer,
+            input.seller,
+            input.auctionData,
+            input.ids,
+            input.amounts
         );
     }
 
@@ -354,27 +279,27 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
                 auctionData[AuctionData_StartingPrice],
                 auctionData[AuctionData_EndingPrice],
                 auctionData[AuctionData_Duration],
-                block.timestamp.sub(auctionData[AuctionData_StartedAt])
-            ).mul(purchase[0]);
-        claimed[seller][auctionData[AuctionData_OfferId]] = claimed[seller][auctionData[AuctionData_OfferId]].add(purchase[0]);
+                block.timestamp - auctionData[AuctionData_StartedAt]
+            ) * purchase[0];
+        claimed[seller][auctionData[AuctionData_OfferId]] = claimed[seller][auctionData[AuctionData_OfferId]] + purchase[0];
 
         uint256 fee = 0;
         if(_fee10000th > 0) {
             fee = PriceUtil.calculateFee(offer, _fee10000th);
         }
 
-        uint256 total = offer.add(fee);
+        uint256 total = offer + fee;
         require(total <= purchase[1], "offer exceeds max amount to spend");
 
         if (token != address(0)) {
-            require(ERC20(token).transferFrom(buyer, seller, offer), "failed to transfer token price");
+            require(IERC20(token).transferFrom(buyer, seller, offer), "failed to transfer token price");
             if(fee > 0) {
-                require(ERC20(token).transferFrom(buyer, _feeCollector, fee), "failed to collect fee");
+                require(IERC20(token).transferFrom(buyer, _feeCollector, fee), "failed to collect fee");
             }
         } else {
             require(msg.value >= total, "ETH < offer+fee");
             if(msg.value > total) {
-                msg.sender.transfer(msg.value.sub(total));
+                payable(msg.sender).transfer(msg.value - total);
             }
             seller.transfer(offer);
             if(fee > 0) {
@@ -384,7 +309,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
 
         uint256[] memory packAmounts = new uint256[](amounts.length);
         for (uint256 i = 0; i < packAmounts.length; i++) {
-            packAmounts[i] = amounts[i].mul(purchase[0]);
+            packAmounts[i] = amounts[i] * purchase[0];
         }
         _asset.safeBatchTransferFrom(seller, buyer, ids, packAmounts, "");
         emit OfferClaimed(
@@ -415,6 +340,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         bool eip712
     ) internal view returns (address) {
         bytes memory dataToHash;
+        address signer;
 
         if(eip712) {
             dataToHash = abi.encodePacked(
@@ -437,9 +363,11 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
                 "invalid 1654 signature"
             );
         } else {
-            address signer = SigUtil.recover(keccak256(dataToHash), signature);
+            signer = SigUtil.recover(keccak256(dataToHash), signature);
             require(signer == from, "signer != from");
         }
+
+        return signer;
     }
 
     function _encodeBasicSignatureHash(
