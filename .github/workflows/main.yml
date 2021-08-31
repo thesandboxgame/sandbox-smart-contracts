@@ -165,3 +165,5 @@ jobs:
 
       - name: Fork Deploy contracts from rinkeby
         run: yarn fork:deploy rinkeby
+        env:
+          ETH_NODE_URI_RINKEBY: ${{ secrets.ETH_NODE_URI_RINKEBY }}
