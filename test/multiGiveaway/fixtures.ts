@@ -23,6 +23,7 @@ type Options = {
   sand?: boolean;
   multi?: boolean;
   mintSingleAsset?: number;
+  numberOfAssets?: number;
 };
 
 export const setupTestGiveaway = deployments.createFixture(async function (
@@ -31,7 +32,7 @@ export const setupTestGiveaway = deployments.createFixture(async function (
 ) {
   const {network, getChainId} = hre;
   const chainId = await getChainId();
-  const {mint, sand, multi, mintSingleAsset} = options || {};
+  const {mint, sand, multi, mintSingleAsset, numberOfAssets} = options || {};
   const {
     deployer,
     assetBouncerAdmin,
@@ -230,25 +231,40 @@ export const setupTestGiveaway = deployments.createFixture(async function (
     });
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  function setAssets(dataSet: any, amount: number) {
+    dataSet[0].erc1155[0].ids = [];
+    dataSet[0].erc1155[0].values = [];
+    for (let i = 0; i < amount; i++) {
+      // a big id to avoid collision with other setups
+      dataSet[0].erc1155[0].ids.push(i + 1000);
+      dataSet[0].erc1155[0].values.push(5);
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let dataWithIds0: any = JSON.parse(JSON.stringify(testData0));
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let dataWithIds1: any = JSON.parse(JSON.stringify(testData1));
+
   // To ensure the same address for others[0] for all tests
-  assignReservedAddressToClaim(testData0);
-  assignReservedAddressToClaim(testData1);
+  assignReservedAddressToClaim(dataWithIds0);
+  assignReservedAddressToClaim(dataWithIds1);
 
   // To ensure the claim data works for all developers
-  assignTestContractAddressesToClaim(testData0);
-  assignTestContractAddressesToClaim(testData1);
+  assignTestContractAddressesToClaim(dataWithIds0);
+  assignTestContractAddressesToClaim(dataWithIds1);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let dataWithIds0: any = testData0;
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let dataWithIds1: any = testData1;
+  if (numberOfAssets) {
+    setAssets(dataWithIds0, numberOfAssets);
+  }
 
   if (mint) {
-    const claimsWithAssetIds0 = await mintNewAssetIds(testData0);
+    const claimsWithAssetIds0 = await mintNewAssetIds(dataWithIds0);
     dataWithIds0 = claimsWithAssetIds0;
     if (multi) {
-      const claimsWithAssetIds1 = await mintNewAssetIds(testData1);
+      const claimsWithAssetIds1 = await mintNewAssetIds(dataWithIds1);
       dataWithIds1 = claimsWithAssetIds1;
     }
 
