@@ -1,3 +1,9 @@
+/**
+ * How to use:
+ *  - yarn execute <NETWORK> ./setup/send_assets_to_giveaway.ts <GIVEAWAY_SUFFIX>
+ * 
+ * The suffix of the giveaway comes from the folder, ie: ./data/giveaways/asset_giveaway_6 => 6
+ */
 import hre from 'hardhat';
 import {BigNumber} from '@ethersproject/bignumber';
 import fs from 'fs-extra';
@@ -7,7 +13,7 @@ const {deployments} = hre;
 const {read, execute, catchUnknownSigner} = deployments;
 
 const args = process.argv.slice(2);
-const giveawayPrefix = args[0];
+const giveawaySuffix = args[0];
 
 function getAssets(giveawayName: string, networkName: string): AssetHash {
   const path = `./data/giveaways/${giveawayName}/assets_${networkName}.json`;
@@ -24,7 +30,7 @@ function getAssets(giveawayName: string, networkName: string): AssetHash {
 
 (async () => {
   const networkName = hre.network.name;
-  const giveawayName = `Asset_Giveaway_${giveawayPrefix}`;
+  const giveawayName = `Asset_Giveaway_${giveawaySuffix}`;
   const assetIdsCount = await getAssets(
     giveawayName.toLowerCase(),
     networkName
