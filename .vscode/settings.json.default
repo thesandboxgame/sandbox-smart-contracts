@@ -17,4 +17,7 @@
     "NODE_OPTIONS": "--max-old-space-size=4096"
   },
   "mochaExplorer.require": ["ts-node/register/transpile-only"]
+  "[markdown]": {
+    "editor.formatOnSave": false
+  }
 }
