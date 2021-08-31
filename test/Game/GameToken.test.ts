@@ -3,7 +3,6 @@ import {
   deployments,
   getNamedAccounts,
   getUnnamedAccounts,
-  network,
 } from 'hardhat';
 import {BigNumber, utils, Contract, BytesLike} from 'ethers';
 import Prando from 'prando';
