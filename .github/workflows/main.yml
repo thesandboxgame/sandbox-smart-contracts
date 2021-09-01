@@ -162,3 +162,13 @@ jobs:
 
       - name: Deploy contracts
         run: yarn void:deploy
+
+      - name: Fork Deploy contracts from rinkeby
+        run: yarn fork:deploy rinkeby
+        env:
+          ETH_NODE_URI_RINKEBY: ${{ secrets.ETH_NODE_URI_RINKEBY }}
+
+      - name: Fork Deploy contracts from mainnet
+        run: yarn fork:deploy mainnet
+        env:
+          ETH_NODE_URI_MAINNET: ${{ secrets.ETH_NODE_URI_MAINNET }}
