@@ -20,6 +20,8 @@ export type SaltedProofSaleLandInfo = SaltedSaleLandInfo & {
   proof: string[];
 };
 
+export type AssetHash = {[assetId: string]: number};
+
 export type AssetClaim = {
   reservedAddress: string;
   assetIds: Array<string>;
