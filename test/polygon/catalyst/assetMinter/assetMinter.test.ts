@@ -68,10 +68,6 @@ async function mintGems(mintObjects: MintObj[]): Promise<void> {
 }
 
 describe('AssetMinter', function () {
-  beforeEach(async function () {
-    await deployments.fixture();
-  });
-
   before(async function () {
     mintOptions = {
       from: ethers.constants.AddressZero,

@@ -20,17 +20,19 @@ const func: DeployFunction = async function (
   await deploy('PolygonAsset', {
     from: deployer,
     contract: 'PolygonAssetV2',
-    args: [
-      TRUSTED_FORWARDER.address,
-      assetAdmin,
-      assetBouncerAdmin,
-      CHILD_CHAIN_MANAGER.address,
-      1,
-    ],
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
-      methodName: 'initialize',
+      execute: {
+        methodName: 'initialize',
+        args: [
+          TRUSTED_FORWARDER.address,
+          assetAdmin,
+          assetBouncerAdmin,
+          CHILD_CHAIN_MANAGER.address,
+          1,
+        ],
+      },
       upgradeIndex: 0,
     },
     log: true,
