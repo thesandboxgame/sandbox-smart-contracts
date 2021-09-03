@@ -2,13 +2,16 @@
 pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
+import "@openzeppelin/contracts-0.8/utils/Context.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
 import "../common/BaseWithStorage/WithUpgrader.sol";
 
+import "hardhat/console.sol";
+
 /// @notice Allows setting the gems and catalysts of an asset
-contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRegistry {
+contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRegistry, Context {
     uint256 internal constant MAX_NUM_GEMS = 15;
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
     uint256 private constant NOT_IS_NFT = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF7FFFFFFFFFFFFFFFFFFFFFFF;
@@ -19,6 +22,8 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
 
     // used to allow migration to specify blockNumber when setting catalyst/gems
     address public migrationContract;
+    // used when asset goes from one layer to another
+    address public chainManager;
 
     struct Record {
         uint16 catalystId; // start at 1
@@ -84,6 +89,19 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
         return _gemsCatalystsRegistry.getAttributes(_records[assetId].catalystId, assetId, events);
     }
 
+    /// @notice sets the catalyst and gems when an asset goes over layers
+    /// @param assetId id of the asset
+    /// @param catalystId id of the catalyst to set
+    /// @param gemIds list of gems ids to set
+    function setCatalystWhenDepositOnOtherLayer(
+        uint256 assetId,
+        uint16 catalystId,
+        uint16[] calldata gemIds
+    ) external {
+        // TODO Do we have to add assetV2 as a minter ?
+        _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber(), false);
+    }
+
     /// @notice sets the catalyst and gems for an asset, minter only
     /// @param assetId id of the asset
     /// @param catalystId id of the catalyst to set
@@ -93,8 +111,8 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
         uint16 catalystId,
         uint16[] calldata gemIds
     ) external virtual override {
-        require(msg.sender == _minter || msg.sender == _upgrader, "NOT_AUTHORIZED_MINTER");
-        _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber());
+        require(_msgSender() == _minter || _msgSender() == _upgrader, "NOT_AUTHORIZED_MINTER");
+        _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber(), true);
     }
 
     /// @notice sets the catalyst and gems for an asset for a given block number, migration contract only
@@ -108,15 +126,15 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
         uint16[] calldata gemIds,
         uint64 blockNumber
     ) external override {
-        require(msg.sender == migrationContract, "NOT_AUTHORIZED_MIGRATION");
-        _setCatalyst(assetId, catalystId, gemIds, blockNumber);
+        require(_msgSender() == migrationContract, "NOT_AUTHORIZED_MIGRATION");
+        _setCatalyst(assetId, catalystId, gemIds, blockNumber, true);
     }
 
     /// @notice adds gems to an existing list of gems of an asset, upgrader only
     /// @param assetId id of the asset
     /// @param gemIds list of gems ids to set
     function addGems(uint256 assetId, uint16[] calldata gemIds) external virtual override {
-        require(msg.sender == _upgrader, "NOT_AUTHORIZED_UPGRADER");
+        require(_msgSender() == _upgrader, "NOT_AUTHORIZED_UPGRADER");
         require(assetId & IS_NFT != 0, "INVALID_NOT_NFT");
         require(gemIds.length != 0, "INVALID_GEMS_0");
 
@@ -159,10 +177,10 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
     function setMigrationContract(address _migrationContract) external override {
         address currentMigrationContract = migrationContract;
         if (currentMigrationContract == address(0)) {
-            require(msg.sender == _admin, "NOT_AUTHORIZED");
+            require(_msgSender() == _admin, "NOT_AUTHORIZED");
             migrationContract = _migrationContract;
         } else {
-            require(msg.sender == currentMigrationContract, "NOT_AUTHORIZED_MIGRATION");
+            require(_msgSender() == currentMigrationContract, "NOT_AUTHORIZED_MIGRATION");
             migrationContract = _migrationContract;
         }
     }
@@ -172,22 +190,30 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
     /// @param catalystId The catalyst to set.
     /// @param gemIds The gems to embed in the catalyst.
     /// @param blockNumber The blocknumber to emit in the event.
+    /// @param hasToEmitEvent boolean to indicate if we want to emit an event
     function _setCatalyst(
         uint256 assetId,
         uint16 catalystId,
         uint16[] memory gemIds,
-        uint64 blockNumber
+        uint64 blockNumber,
+        bool hasToEmitEvent
     ) internal virtual {
         require(gemIds.length <= MAX_NUM_GEMS, "GEMS_MAX_REACHED");
         uint8 maxGems = _gemsCatalystsRegistry.getMaxGems(catalystId);
+        console.log("Max Gems: %s", maxGems);
         require(gemIds.length <= maxGems, "GEMS_TOO_MANY");
         uint16[MAX_NUM_GEMS] memory gemIdsToStore;
         for (uint8 i = 0; i < gemIds.length; i++) {
+            console.log("gemsID %s = %s", i, gemIds[i]);
             require(gemIds[i] != 0, "INVALID_GEM_ID");
             gemIdsToStore[i] = gemIds[i];
         }
         _records[assetId] = Record(catalystId, gemIdsToStore);
-        emit CatalystApplied(assetId, catalystId, gemIds, blockNumber);
+
+        if (hasToEmitEvent) {
+            console.log("emit event");
+            emit CatalystApplied(assetId, catalystId, gemIds, blockNumber);
+        }
     }
 
     /// @dev Get the collection Id for an asset.

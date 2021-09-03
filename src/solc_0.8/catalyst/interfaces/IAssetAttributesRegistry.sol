@@ -8,6 +8,12 @@ interface IAssetAttributesRegistry {
         bytes32 blockHash;
     }
 
+    struct AssetGemsCatalystData {
+        uint256 assetId;
+        uint16 catalystContractId;
+        uint16[] gemContractIds;
+    }
+
     function getRecord(uint256 assetId)
         external
         view
@@ -20,6 +26,12 @@ interface IAssetAttributesRegistry {
     function getAttributes(uint256 assetId, GemEvent[] calldata events) external view returns (uint32[] memory values);
 
     function setCatalyst(
+        uint256 assetId,
+        uint16 catalystId,
+        uint16[] calldata gemIds
+    ) external;
+
+    function setCatalystWhenDepositOnOtherLayer(
         uint256 assetId,
         uint16 catalystId,
         uint16[] calldata gemIds

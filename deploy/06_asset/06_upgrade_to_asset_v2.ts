@@ -17,9 +17,16 @@ const func: DeployFunction = async function (
 
   const ERC1155_PREDICATE = await deployments.get('ERC1155_PREDICATE');
 
+  const ERC1155ERC721HelperLib = await deploy('ERC1155ERC721Helper', {
+    from: upgradeAdmin,
+  });
+
   await deploy('Asset', {
     from: upgradeAdmin,
     contract: 'AssetV2',
+    libraries: {
+      ERC1155ERC721Helper: ERC1155ERC721HelperLib.address,
+    },
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',

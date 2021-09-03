@@ -8,6 +8,7 @@ import {
 
 import {setupUsers, waitFor, withSnapshot} from '../../utils';
 import {assetFixtures} from '../../common/fixtures/asset';
+import {Contract} from 'ethers';
 // import asset_regenerate_and_distribute from '../../setup/asset_regenerate_and_distribute';
 
 const polygonAssetFixtures = async function () {
@@ -23,6 +24,7 @@ const polygonAssetFixtures = async function () {
     'PolygonAsset',
     assetBouncerAdmin
   );
+
   await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
   const Asset = await ethers.getContract('PolygonAsset', minter);
   const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
@@ -106,6 +108,20 @@ const polygonAssetFixtures = async function () {
     childChainManager,
   };
 };
+
+export const setupAssetRegistry = deployments.createFixture(async function () {
+  const {assetAttributesRegistryAdmin} = await getNamedAccounts();
+  const assetAttributesRegistry: Contract = await ethers.getContract(
+    'AssetAttributesRegistry'
+  );
+  const assetAttributesRegistryAsRegistryAdmin = await assetAttributesRegistry.connect(
+    ethers.provider.getSigner(assetAttributesRegistryAdmin)
+  );
+
+  return {
+    assetAttributesRegistryAsRegistryAdmin,
+  };
+});
 
 export const setupPolygonAsset = withSnapshot(
   ['PolygonAsset', 'Asset'],

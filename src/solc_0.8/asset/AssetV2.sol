@@ -3,9 +3,16 @@
 pragma solidity 0.8.2;
 
 import "./ERC1155ERC721.sol";
+import "../catalyst/interfaces/IAssetAttributesRegistry.sol";
 
 // solhint-disable-next-line no-empty-blocks
 contract AssetV2 is ERC1155ERC721 {
+    IAssetAttributesRegistry internal _assetRegistry;
+
+    function setAssetRegistry(IAssetAttributesRegistry assetRegistry) external {
+        _assetRegistry = assetRegistry;
+    }
+
     /// @notice called by predicate to mint tokens transferred from L2
     /// @param to address to mint to
     /// @param ids ids to mint
@@ -20,11 +27,11 @@ contract AssetV2 is ERC1155ERC721 {
         require(_msgSender() == _predicate, "!PREDICATE");
         bytes32[] memory hashes = abi.decode(data, (bytes32[]));
         for (uint256 i = 0; i < ids.length; i++) {
-            uint256 uriId = ids[i] & URI_ID;
+            uint256 uriId = ids[i] & ERC1155ERC721Helper.URI_ID;
             _metadataHash[uriId] = hashes[i];
             _rarityPacks[uriId] = "0x00";
             uint16 numNFTs = 0;
-            if ((ids[i] & IS_NFT) > 0) {
+            if ((ids[i] & ERC1155ERC721Helper.IS_NFT) > 0) {
                 numNFTs = 1;
             }
             uint256[] memory singleId = new uint256[](1);

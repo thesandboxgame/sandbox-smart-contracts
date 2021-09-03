@@ -1,5 +1,5 @@
 import {setupMainnetAndPolygonAsset, setupPolygonAsset} from './fixtures';
-import {getAssetChainIndex, setupUser, waitFor} from '../../utils';
+import {waitFor, getAssetChainIndex, setupUser} from '../../utils';
 import {expect} from '../../chai-setup';
 import {sendMetaTx} from '../../sendMetaTx';
 import {AbiCoder} from 'ethers/lib/utils';
@@ -247,7 +247,19 @@ describe('PolygonAsset.sol', function () {
       const ipfsHashes = [
         '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e',
       ];
-      const tokenData = abiCoder.encode(['bytes32[]'], [ipfsHashes]);
+
+      const gemsAndCatalystsdata = [tokenId, 1, [1, 1, 1, 1]];
+
+      // const tokenData = abiCoder.encode(
+      //   ['bytes32[], (uint256, uint256, uint256[4])[]'],
+      //   [[ipfsHashes], [gemsAndCatalystsdata]]
+      // );
+
+      const tokenData = abiCoder.encode(
+        ['bytes32[]', '(uint256, uint16, uint16[])[]'],
+        [ipfsHashes, [gemsAndCatalystsdata]]
+      );
+
       const data = abiCoder.encode(
         ['uint256[]', 'uint256[]', 'bytes'],
         [[tokenId], [balance], tokenData]
@@ -1004,5 +1016,143 @@ describe('PolygonAsset.sol', function () {
       const polygonURI = await polygon.Asset['tokenURI(uint256)'](tokenId);
       expect(mainnetURI).to.be.equal(polygonURI);
     });
+
+    async function executeL1toL2Deposit(
+      gemsAndCatalystsdata: (number | number[])[]
+    ) {
+      const mainnet = await setupMainnetAsset();
+      const polygon = await setupPolygonAsset();
+
+      const tokenId = await mainnet.mintAsset(mainnet.users[0].address, 20);
+
+      const balance = await mainnet.Asset['balanceOf(address,uint256)'](
+        mainnet.users[0].address,
+        tokenId
+      );
+
+      // Approve ERC1155 predicate contarct
+      await waitFor(
+        mainnet.users[0].Asset.setApprovalForAll(
+          mainnet.predicate.address,
+          true
+        )
+      );
+
+      // Generate data to be passed to Polygon
+      const ipfsHashes = [
+        '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e',
+      ];
+
+      gemsAndCatalystsdata[0] = tokenId;
+
+      const tokenData = abiCoder.encode(
+        ['bytes32[]', '(uint256, uint16, uint16[])[]'],
+        [ipfsHashes, [gemsAndCatalystsdata]]
+      );
+
+      const data = abiCoder.encode(
+        ['uint256[]', 'uint256[]', 'bytes'],
+        [[tokenId], [balance], tokenData]
+      );
+
+      // Lock tokens on ERC1155 predicate contract
+      await waitFor(
+        mainnet.predicate.lockTokens(
+          mainnet.users[0].address,
+          [tokenId],
+          [20],
+          data
+        )
+      );
+
+      // Emulate the ChildChainManager call to deposit
+      await waitFor(
+        polygon.childChainManager.callDeposit(mainnet.users[0].address, data)
+      );
+
+      // Ensure balance has been updated on Asset & PolygonAsset
+      const mainnetBalance = await mainnet.Asset['balanceOf(address,uint256)'](
+        mainnet.users[0].address,
+        tokenId
+      );
+      const polygonBalance = await polygon.Asset['balanceOf(address,uint256)'](
+        mainnet.users[0].address,
+        tokenId
+      );
+      expect(polygonBalance).to.be.equal(balance);
+      expect(mainnetBalance).to.be.equal(0);
+
+      // Ensure URI is same
+      const mainnetURI = await mainnet.Asset['tokenURI(uint256)'](tokenId);
+      const polygonURI = await polygon.Asset['tokenURI(uint256)'](tokenId);
+      expect(mainnetURI).to.be.equal(polygonURI);
+    }
+
+    it('Deposit asset from L1 to L2 with 1 catalyst legendary and 4 power gems', async function () {
+      const {
+        assetAttributesRegistryAsRegistryAdmin,
+      } = await setupAssetRegistry();
+
+      const catalystData = [0, 4, [1, 1, 1, 1]];
+      await executeL1toL2Deposit(catalystData);
+      const internalRecordRegistry = await assetAttributesRegistryAsRegistryAdmin.getRecord(
+        catalystData[0]
+      );
+
+      expect(internalRecordRegistry).to.eql([
+        true,
+        4,
+        [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      ]);
+    });
+
+    it('Deposit asset from L1 to L2 with 1 catalyst legendary', async function () {
+      const {
+        assetAttributesRegistryAsRegistryAdmin,
+      } = await setupAssetRegistry();
+
+      const catalystData = [0, 4, []];
+      await executeL1toL2Deposit(catalystData);
+      const internalRecordRegistry = await assetAttributesRegistryAsRegistryAdmin.getRecord(
+        catalystData[0]
+      );
+
+      expect(internalRecordRegistry).to.eql([
+        true,
+        4,
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      ]);
+    });
+
+    it('Deposit asset from L1 to L2 with 1 catalyst legendary 1 gem defense', async function () {
+      const {
+        assetAttributesRegistryAsRegistryAdmin,
+      } = await setupAssetRegistry();
+
+      const catalystData = [0, 4, [2]];
+      await executeL1toL2Deposit(catalystData);
+      const internalRecordRegistry = await assetAttributesRegistryAsRegistryAdmin.getRecord(
+        catalystData[0]
+      );
+
+      expect(internalRecordRegistry).to.eql([
+        true,
+        4,
+        [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      ]);
+    });
+
+    it('Deposit asset from L1 to L2 with 1 catalyst out of bound ', async function () {
+      const catalystData = [0, 5, []];
+      await expect(executeL1toL2Deposit(catalystData)).to.be.reverted;
+    });
+
+    // Asset L1->L2
+    // transfer none G&C
+    //transfer just 1 C
+    //transfer 1C & 1 gem
+    // transfer 1C & 4 gem
+    // transfer 1C & 1 gem OOB
+    // transfer
   });
 });

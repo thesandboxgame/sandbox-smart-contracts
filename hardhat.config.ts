@@ -8,6 +8,7 @@ import 'solidity-coverage';
 import 'hardhat-contract-sizer';
 import '@nomiclabs/hardhat-etherscan';
 import {accounts, node_url} from './utils/network';
+import 'hardhat-contract-sizer';
 
 const config: HardhatUserConfig = {
   gasReporter: {
@@ -65,7 +66,7 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
+            runs: 0,
           },
         },
       },
@@ -285,6 +286,11 @@ const config: HardhatUserConfig = {
   },
   paths: {
     sources: 'src',
+  },
+  contractSizer: {
+    alphaSort: false,
+    runOnCompile: true,
+    disambiguatePaths: false,
   },
 
   external: process.env.HARDHAT_FORK
