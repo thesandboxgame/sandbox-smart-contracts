@@ -59,11 +59,10 @@ describe('Auction', function () {
 
   beforeEach(async function () {
     offerId = new BN(crypto.randomBytes(32), 16).toString(10);
-    startedAt = Math.floor(Date.now() / 1000);
+    startedAt = Math.floor(Date.now() / 1000) - 500;
   });
 
   it('should be able to claim seller offer in ETH', async function () {
-    startedAt = Math.floor(Date.now() / 1000);
     const seller = others[0];
 
     // address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts
