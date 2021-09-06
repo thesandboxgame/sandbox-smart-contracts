@@ -11,10 +11,9 @@ import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../common/interfaces/ERC1271.sol";
 import "../common/interfaces/ERC1271Constants.sol";
 import "../common/interfaces/ERC1654.sol";
-import "../common/interfaces/ERC1654Constants.sol"; 
+import "../common/interfaces/ERC1654Constants.sol";
 
 contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712, MetaTransactionReceiver {
-
     struct ClaimSellerOfferRequest {
         address buyer;
         address payable seller;
@@ -26,11 +25,12 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         bytes signature;
     }
 
-    enum SignatureType { DIRECT, EIP1654, EIP1271 }
+    enum SignatureType {DIRECT, EIP1654, EIP1271}
 
-    bytes32 constant AUCTION_TYPEHASH = keccak256(
-        "Auction(address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)"
-    );
+    bytes32 public constant AUCTION_TYPEHASH =
+        keccak256(
+            "Auction(address from,address token,uint256 offerId,uint256 startingPrice,uint256 endingPrice,uint256 startedAt,uint256 duration,uint256 packs,bytes ids,bytes amounts)"
+        );
 
     event OfferClaimed(
         address indexed seller,
@@ -42,26 +42,32 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
     );
     event OfferCancelled(address indexed seller, uint256 indexed offerId);
 
-    uint256 constant MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+    uint256 public constant MAX_UINT256 = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
 
     // Stack too deep, grouping parameters
     // AuctionData:
-    uint256 constant AuctionData_OfferId = 0;
-    uint256 constant AuctionData_StartingPrice = 1;
-    uint256 constant AuctionData_EndingPrice = 2;
-    uint256 constant AuctionData_StartedAt = 3;
-    uint256 constant AuctionData_Duration = 4;
-    uint256 constant AuctionData_Packs = 5;
+    uint256 public constant AuctionData_OfferId = 0;
+    uint256 public constant AuctionData_StartingPrice = 1;
+    uint256 public constant AuctionData_EndingPrice = 2;
+    uint256 public constant AuctionData_StartedAt = 3;
+    uint256 public constant AuctionData_Duration = 4;
+    uint256 public constant AuctionData_Packs = 5;
 
-    mapping(address => mapping(uint256 => uint256)) claimed;
+    mapping(address => mapping(uint256 => uint256)) public claimed;
 
-    AssetV2 _asset;
-    uint256 _fee10000th = 0;
-    address payable _feeCollector;
+    AssetV2 public _asset;
+    uint256 public _fee10000th = 0;
+    address payable public _feeCollector;
 
     event FeeSetup(address feeCollector, uint256 fee10000th);
 
-    constructor(AssetV2 asset, address admin, address initialMetaTx, address payable feeCollector, uint256 fee10000th) {
+    constructor(
+        AssetV2 asset,
+        address admin,
+        address initialMetaTx,
+        address payable feeCollector,
+        uint256 fee10000th
+    ) {
         _asset = asset;
         _feeCollector = feeCollector;
         _fee10000th = fee10000th;
@@ -91,7 +97,10 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         uint256[] memory amounts
     ) internal view {
         require(ids.length == amounts.length, "ids and amounts length not matching");
-        require(buyer == msg.sender || (token != address(0) && _metaTransactionContracts[msg.sender]), "not authorized");
+        require(
+            buyer == msg.sender || (token != address(0) && _metaTransactionContracts[msg.sender]),
+            "not authorized"
+        );
         uint256 amountAlreadyClaimed = claimed[seller][auctionData[AuctionData_OfferId]];
         require(amountAlreadyClaimed != MAX_UINT256, "Auction cancelled");
 
@@ -99,22 +108,16 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         require(total >= amountAlreadyClaimed, "overflow");
         require(total <= auctionData[AuctionData_Packs], "Buy amount exceeds sell amount");
 
-        require(
-            auctionData[AuctionData_StartedAt] <= block.timestamp,
-            "Auction didn't start yet"
-        );
+        require(auctionData[AuctionData_StartedAt] <= block.timestamp, "Auction didn't start yet");
         require(
             auctionData[AuctionData_StartedAt] + auctionData[AuctionData_Duration] > block.timestamp,
             "Auction finished"
         );
-
     }
 
     /// @notice claim offer using EIP712
     /// @param input Claim Seller Offer Request
-    function claimSellerOffer(
-        ClaimSellerOfferRequest memory input
-    ) external payable {
+    function claimSellerOffer(ClaimSellerOfferRequest memory input) external payable {
         _verifyParameters(
             input.buyer,
             input.seller,
@@ -124,7 +127,16 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
             input.ids,
             input.amounts
         );
-        _ensureCorrectSigner(input.seller, input.token, input.auctionData, input.ids, input.amounts, input.signature, SignatureType.DIRECT, true);
+        _ensureCorrectSigner(
+            input.seller,
+            input.token,
+            input.auctionData,
+            input.ids,
+            input.amounts,
+            input.signature,
+            SignatureType.DIRECT,
+            true
+        );
         _executeDeal(
             input.token,
             input.purchase,
@@ -138,9 +150,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
 
     /// @notice claim offer using EIP712 and EIP1271 signature verification scheme
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferViaEIP1271(
-        ClaimSellerOfferRequest memory input
-    ) external payable {
+    function claimSellerOfferViaEIP1271(ClaimSellerOfferRequest memory input) external payable {
         _verifyParameters(
             input.buyer,
             input.seller,
@@ -150,7 +160,16 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
             input.ids,
             input.amounts
         );
-        _ensureCorrectSigner(input.seller, input.token, input.auctionData, input.ids, input.amounts, input.signature, SignatureType.EIP1271, true);
+        _ensureCorrectSigner(
+            input.seller,
+            input.token,
+            input.auctionData,
+            input.ids,
+            input.amounts,
+            input.signature,
+            SignatureType.EIP1271,
+            true
+        );
         _executeDeal(
             input.token,
             input.purchase,
@@ -164,9 +183,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
 
     /// @notice claim offer using EIP712 and EIP1654 signature verification scheme
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferViaEIP1654(
-        ClaimSellerOfferRequest memory input
-    ) external payable {
+    function claimSellerOfferViaEIP1654(ClaimSellerOfferRequest memory input) external payable {
         _verifyParameters(
             input.buyer,
             input.seller,
@@ -176,7 +193,16 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
             input.ids,
             input.amounts
         );
-        _ensureCorrectSigner(input.seller, input.token, input.auctionData, input.ids, input.amounts, input.signature, SignatureType.EIP1654, true);
+        _ensureCorrectSigner(
+            input.seller,
+            input.token,
+            input.auctionData,
+            input.ids,
+            input.amounts,
+            input.signature,
+            SignatureType.EIP1654,
+            true
+        );
         _executeDeal(
             input.token,
             input.purchase,
@@ -190,9 +216,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
 
     /// @notice claim offer using Basic Signature
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferUsingBasicSig(
-        ClaimSellerOfferRequest memory input
-    ) external payable {
+    function claimSellerOfferUsingBasicSig(ClaimSellerOfferRequest memory input) external payable {
         _verifyParameters(
             input.buyer,
             input.seller,
@@ -202,7 +226,16 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
             input.ids,
             input.amounts
         );
-        _ensureCorrectSigner(input.seller, input.token, input.auctionData, input.ids, input.amounts, input.signature, SignatureType.DIRECT, false);
+        _ensureCorrectSigner(
+            input.seller,
+            input.token,
+            input.auctionData,
+            input.ids,
+            input.amounts,
+            input.signature,
+            SignatureType.DIRECT,
+            false
+        );
         _executeDeal(
             input.token,
             input.purchase,
@@ -216,9 +249,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
 
     /// @notice claim offer using Basic Signature and EIP1271 signature verification scheme
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferUsingBasicSigViaEIP1271(
-        ClaimSellerOfferRequest memory input
-    ) external payable {
+    function claimSellerOfferUsingBasicSigViaEIP1271(ClaimSellerOfferRequest memory input) external payable {
         _verifyParameters(
             input.buyer,
             input.seller,
@@ -228,7 +259,16 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
             input.ids,
             input.amounts
         );
-        _ensureCorrectSigner(input.seller, input.token, input.auctionData, input.ids, input.amounts, input.signature, SignatureType.EIP1271, false);
+        _ensureCorrectSigner(
+            input.seller,
+            input.token,
+            input.auctionData,
+            input.ids,
+            input.amounts,
+            input.signature,
+            SignatureType.EIP1271,
+            false
+        );
         _executeDeal(
             input.token,
             input.purchase,
@@ -242,9 +282,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
 
     /// @notice claim offer using Basic Signature and EIP1654 signature verification scheme
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferUsingBasicSigViaEIP1654(
-        ClaimSellerOfferRequest memory input
-    ) external payable {
+    function claimSellerOfferUsingBasicSigViaEIP1654(ClaimSellerOfferRequest memory input) external payable {
         _verifyParameters(
             input.buyer,
             input.seller,
@@ -254,7 +292,16 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
             input.ids,
             input.amounts
         );
-        _ensureCorrectSigner(input.seller, input.token, input.auctionData, input.ids, input.amounts, input.signature, SignatureType.EIP1654, false);
+        _ensureCorrectSigner(
+            input.seller,
+            input.token,
+            input.auctionData,
+            input.ids,
+            input.amounts,
+            input.signature,
+            SignatureType.EIP1654,
+            false
+        );
         _executeDeal(
             input.token,
             input.purchase,
@@ -275,16 +322,19 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         uint256[] memory ids,
         uint256[] memory amounts
     ) internal {
-        uint256 offer = PriceUtil.calculateCurrentPrice(
+        uint256 offer =
+            PriceUtil.calculateCurrentPrice(
                 auctionData[AuctionData_StartingPrice],
                 auctionData[AuctionData_EndingPrice],
                 auctionData[AuctionData_Duration],
                 block.timestamp - auctionData[AuctionData_StartedAt]
             ) * purchase[0];
-        claimed[seller][auctionData[AuctionData_OfferId]] = claimed[seller][auctionData[AuctionData_OfferId]] + purchase[0];
+        claimed[seller][auctionData[AuctionData_OfferId]] =
+            claimed[seller][auctionData[AuctionData_OfferId]] +
+            purchase[0];
 
         uint256 fee = 0;
-        if(_fee10000th > 0) {
+        if (_fee10000th > 0) {
             fee = PriceUtil.calculateFee(offer, _fee10000th);
         }
 
@@ -293,16 +343,16 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
 
         if (token != address(0)) {
             require(IERC20(token).transferFrom(buyer, seller, offer), "failed to transfer token price");
-            if(fee > 0) {
+            if (fee > 0) {
                 require(IERC20(token).transferFrom(buyer, _feeCollector, fee), "failed to collect fee");
             }
         } else {
             require(msg.value >= total, "ETH < offer+fee");
-            if(msg.value > total) {
+            if (msg.value > total) {
                 payable(msg.sender).transfer(msg.value - total);
             }
             seller.transfer(offer);
-            if(fee > 0) {
+            if (fee > 0) {
                 _feeCollector.transfer(fee);
             }
         }
@@ -312,14 +362,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
             packAmounts[i] = amounts[i] * purchase[0];
         }
         _asset.safeBatchTransferFrom(seller, buyer, ids, packAmounts, "");
-        emit OfferClaimed(
-            seller,
-            buyer,
-            auctionData[AuctionData_OfferId],
-            purchase[0],
-            offer,
-            fee
-        );
+        emit OfferClaimed(seller, buyer, auctionData[AuctionData_OfferId], purchase[0], offer, fee);
     }
 
     /// @notice cancel a offer previously signed, new offer need to use a id not used yet
@@ -342,7 +385,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         bytes memory dataToHash;
         address signer;
 
-        if(eip712) {
+        if (eip712) {
             dataToHash = abi.encodePacked(
                 "\x19\x01",
                 domainSeparator(),
@@ -357,7 +400,7 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
                 ERC1271(from).isValidSignature(dataToHash, signature) == ERC1271_MAGICVALUE,
                 "invalid 1271 signature"
             );
-        } else if(signatureType == SignatureType.EIP1654){
+        } else if (signatureType == SignatureType.EIP1654) {
             require(
                 ERC1654(from).isValidSignature(keccak256(dataToHash), signature) == ERC1654_MAGICVALUE,
                 "invalid 1654 signature"
@@ -377,20 +420,25 @@ contract AssetSignedAuction is ERC1654Constants, ERC1271Constants, TheSandbox712
         uint256[] memory ids,
         uint256[] memory amounts
     ) internal view returns (bytes memory) {
-        return SigUtil.prefixed(keccak256(abi.encodePacked(
-                address(this),
-                AUCTION_TYPEHASH,
-                from,
-                token,
-                auctionData[AuctionData_OfferId],
-                auctionData[AuctionData_StartingPrice],
-                auctionData[AuctionData_EndingPrice],
-                auctionData[AuctionData_StartedAt],
-                auctionData[AuctionData_Duration],
-                auctionData[AuctionData_Packs],
-                keccak256(abi.encodePacked(ids)),
-                keccak256(abi.encodePacked(amounts))
-            )));
+        return
+            SigUtil.prefixed(
+                keccak256(
+                    abi.encodePacked(
+                        address(this),
+                        AUCTION_TYPEHASH,
+                        from,
+                        token,
+                        auctionData[AuctionData_OfferId],
+                        auctionData[AuctionData_StartingPrice],
+                        auctionData[AuctionData_EndingPrice],
+                        auctionData[AuctionData_StartedAt],
+                        auctionData[AuctionData_Duration],
+                        auctionData[AuctionData_Packs],
+                        keccak256(abi.encodePacked(ids)),
+                        keccak256(abi.encodePacked(amounts))
+                    )
+                )
+            );
     }
 
     function _hashAuction(

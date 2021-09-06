@@ -2,8 +2,7 @@ pragma solidity 0.8.2;
 
 import "./Admin.sol";
 
-contract MetaTransactionReceiver is Admin{
-
+contract MetaTransactionReceiver is Admin {
     mapping(address => bool) internal _metaTransactionContracts;
     event MetaTransactionProcessor(address metaTransactionProcessor, bool enabled);
 
@@ -11,10 +10,7 @@ contract MetaTransactionReceiver is Admin{
     /// @param metaTransactionProcessor address that will be given/removed metaTransactionProcessor rights.
     /// @param enabled set whether the metaTransactionProcessor is enabled or disabled.
     function setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) public {
-        require(
-            msg.sender == _admin,
-            "only admin can setup metaTransactionProcessors"
-        );
+        require(msg.sender == _admin, "only admin can setup metaTransactionProcessors");
         _setMetaTransactionProcessor(metaTransactionProcessor, enabled);
     }
 
@@ -26,7 +22,7 @@ contract MetaTransactionReceiver is Admin{
     /// @notice check whether address `who` is given meta-transaction execution rights.
     /// @param who The address to query.
     /// @return whether the address has meta-transaction execution rights.
-    function isMetaTransactionProcessor(address who) external view returns(bool) {
+    function isMetaTransactionProcessor(address who) external view returns (bool) {
         return _metaTransactionContracts[who];
     }
 }

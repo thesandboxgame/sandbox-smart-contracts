@@ -4,20 +4,15 @@ import {
   getUnnamedAccounts,
   getNamedAccounts,
 } from 'hardhat';
-import {expect} from '../chai-setup';
-
-import {expectReceiptEventWithArgs, waitFor} from '../utils';
 
 type Options = {
-    fee10000th?: number;
+  fee10000th?: number;
 };
 
 export const setupTestAuction = deployments.createFixture(async function (
   hre,
   options?: Options
 ) {
-  const {network, getChainId} = hre;
-  const chainId = await getChainId();
   const {fee10000th} = options || {};
   const {deployer, assetAdmin} = await getNamedAccounts();
   const others = await getUnnamedAccounts();
@@ -39,11 +34,13 @@ export const setupTestAuction = deployments.createFixture(async function (
     ],
   });
 
-  const assetSignedAuctionContract = await ethers.getContract('AssetSignedAuction');
+  const assetSignedAuctionContract = await ethers.getContract(
+    'AssetSignedAuction'
+  );
 
   return {
     assetSignedAuctionContract1: assetSignedAuctionContract,
     assetContract1: assetContract,
-    others1: others
+    others1: others,
   };
 });

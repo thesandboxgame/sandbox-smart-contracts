@@ -1,11 +1,7 @@
 pragma solidity 0.8.2;
 
 library SigUtil {
-    function recover(bytes32 hash, bytes memory sig)
-        internal
-        pure
-        returns (address recovered)
-    {
+    function recover(bytes32 hash, bytes memory sig) internal pure returns (address recovered) {
         require(sig.length == 65);
 
         bytes32 r;
@@ -27,11 +23,7 @@ library SigUtil {
         require(recovered != address(0));
     }
 
-    function recoverWithZeroOnFailure(bytes32 hash, bytes memory sig)
-        internal
-        pure
-        returns (address)
-    {
+    function recoverWithZeroOnFailure(bytes32 hash, bytes memory sig) internal pure returns (address) {
         if (sig.length != 65) {
             return (address(0));
         }
