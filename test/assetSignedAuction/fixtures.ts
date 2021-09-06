@@ -23,7 +23,7 @@ export const setupTestAuction = deployments.createFixture(async function (
   const others = await getUnnamedAccounts();
 
   const initialMetaTx = others[0];
-  const feeCollector = others[1];
+  const feeCollector = others[2];
 
   await deployments.fixture(['Asset']);
   const assetContract = await ethers.getContract('Asset');
