@@ -8,8 +8,6 @@ import "../common/BaseWithStorage/WithAdmin.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
 import "../common/BaseWithStorage/WithUpgrader.sol";
 
-import "hardhat/console.sol";
-
 /// @notice Allows setting the gems and catalysts of an asset
 contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRegistry, Context {
     uint256 internal constant MAX_NUM_GEMS = 15;
@@ -200,18 +198,15 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
     ) internal virtual {
         require(gemIds.length <= MAX_NUM_GEMS, "GEMS_MAX_REACHED");
         uint8 maxGems = _gemsCatalystsRegistry.getMaxGems(catalystId);
-        console.log("Max Gems: %s", maxGems);
         require(gemIds.length <= maxGems, "GEMS_TOO_MANY");
         uint16[MAX_NUM_GEMS] memory gemIdsToStore;
         for (uint8 i = 0; i < gemIds.length; i++) {
-            console.log("gemsID %s = %s", i, gemIds[i]);
             require(gemIds[i] != 0, "INVALID_GEM_ID");
             gemIdsToStore[i] = gemIds[i];
         }
         _records[assetId] = Record(catalystId, gemIdsToStore);
 
         if (hasToEmitEvent) {
-            console.log("emit event");
             emit CatalystApplied(assetId, catalystId, gemIds, blockNumber);
         }
     }

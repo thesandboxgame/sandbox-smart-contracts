@@ -429,9 +429,9 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
                 uint256(uint160(creator)) *
                     ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER + // CREATOR
                     uint256(packId) *
-                    ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER + // packId (unique pack) // ERC1155ERC721Helper.URI_ID
+                    ERC1155ERC721Helper.PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // ERC1155ERC721Helper.URI_ID
                     numFTs *
-                    ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER
+                    ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER
             ] != 0;
     }
 
@@ -501,7 +501,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     /// @return the index/order at which the token `id` was minted in a collection.
     function collectionIndexOf(uint256 id) public view returns (uint256) {
         collectionOf(id); // this check if id and collection indeed was ever minted
-        return uint32((id & ERC1155ERC721Helper.NFT_INDEX) >> ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER);
+        return uint32((id & ERC1155ERC721Helper.NFT_INDEX) >> ERC1155ERC721Helper.NFT_INDEX_OFFSET);
     }
 
     function wasEverMinted(uint256 id) public view returns (bool) {
@@ -510,7 +510,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         } else {
             return
                 ((id & ERC1155ERC721Helper.PACK_INDEX) <
-                    ((id & ERC1155ERC721Helper.URI_ID) / ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER)) &&
+                    ((id & ERC1155ERC721Helper.PACK_NUM_FT_TYPES) /
+                        ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
                 _metadataHash[id & ERC1155ERC721Helper.URI_ID] != 0;
         }
     }
@@ -905,11 +906,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         require(to != address(0), "TO==0");
         require(id & ERC1155ERC721Helper.IS_NFT == 0, "!1155");
         uint32 tokenCollectionIndex = _nextCollectionIndex[id];
-        newId =
-            id +
-            ERC1155ERC721Helper.IS_NFT +
-            (tokenCollectionIndex) *
-            2**ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER;
+        newId = id + ERC1155ERC721Helper.IS_NFT + (tokenCollectionIndex) * 2**ERC1155ERC721Helper.NFT_INDEX_OFFSET;
         _nextCollectionIndex[id] = tokenCollectionIndex + 1;
         _burnERC1155(operator, sender, id, 1);
         _mint(_metadataHash[id & ERC1155ERC721Helper.URI_ID], 1, 0, operator, to, newId, "", true);
@@ -1011,9 +1008,9 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
             uint256(_chainIndex) *
             CHAIN_INDEX_OFFSET_MULTIPLIER + // mainnet = 0, polygon = 1
             uint256(packId) *
-            ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER + // packId (unique pack) // ERC1155ERC721Helper.URI_ID
+            ERC1155ERC721Helper.PACK_ID_OFFSET_MULTIPLIER + // packId (unique pack) // ERC1155ERC721Helper.URI_ID
             numFTs *
-            ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER + // number of fungible token in the pack // ERC1155ERC721Helper.URI_ID
+            ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER + // number of fungible token in the pack // ERC1155ERC721Helper.URI_ID
             packIndex; // packIndex (position in the pack) // PACK_INDEX
     }
 

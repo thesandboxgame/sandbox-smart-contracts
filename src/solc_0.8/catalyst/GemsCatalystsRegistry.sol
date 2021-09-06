@@ -9,8 +9,6 @@ import "./interfaces/IGemsCatalystsRegistry.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
 
-import "hardhat/console.sol";
-
 /// @notice Contract managing the Gems and Catalysts
 /// Each Gems and Catalys must be registered here.
 /// Each new Gem get assigned a new id (starting at 1)
@@ -43,7 +41,6 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
     /// @param catalystId catalyst identifier
     function getMaxGems(uint16 catalystId) external view override returns (uint8) {
         Catalyst catalyst = getCatalyst(catalystId);
-        console.log("catalyst @ = %s", address(catalyst));
         require(catalyst != Catalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
         return catalyst.getMaxGems();
     }

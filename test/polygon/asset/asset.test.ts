@@ -248,16 +248,9 @@ describe('PolygonAsset.sol', function () {
         '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e',
       ];
 
-      const gemsAndCatalystsdata = [tokenId, 1, [1, 1, 1, 1]];
-
-      // const tokenData = abiCoder.encode(
-      //   ['bytes32[], (uint256, uint256, uint256[4])[]'],
-      //   [[ipfsHashes], [gemsAndCatalystsdata]]
-      // );
-
       const tokenData = abiCoder.encode(
         ['bytes32[]', '(uint256, uint16, uint16[])[]'],
-        [ipfsHashes, [gemsAndCatalystsdata]]
+        [ipfsHashes, []]
       );
 
       const data = abiCoder.encode(
@@ -375,7 +368,12 @@ describe('PolygonAsset.sol', function () {
       // Generate data to be passed to Polygon
       // @review - is this how we're expecting to pass hash?
       const ipfsHashes = [hash, hash, hash];
-      const tokenData = abiCoder.encode(['bytes32[]'], [ipfsHashes]);
+
+      const tokenData = abiCoder.encode(
+        ['bytes32[]', '(uint256, uint16, uint16[])[]'],
+        [ipfsHashes, []]
+      );
+
       const data = abiCoder.encode(
         ['uint256[]', 'uint256[]', 'bytes'],
         [tokenIds, supplies, tokenData]
@@ -454,7 +452,11 @@ describe('PolygonAsset.sol', function () {
       // Generate data to be passed to Polygon
       // @review - is this how we're expecting to pass hash?
       const ipfsHashes = [hash, hash, hash];
-      const tokenData = abiCoder.encode(['bytes32[]'], [ipfsHashes]);
+
+      const tokenData = abiCoder.encode(
+        ['bytes32[]', '(uint256, uint16, uint16[])[]'],
+        [ipfsHashes, []]
+      );
 
       // Partial Transfer - 01
       let data = abiCoder.encode(
@@ -719,9 +721,14 @@ describe('PolygonAsset.sol', function () {
       // Generate data to be passed to Polygon
       const tokenIds = tokenIds01.concat(tokenIds02);
       const supplies = supplies01.concat(supplies02);
+
       const ipfsHashes = [hash01, hash01, hash01, hash02, hash02];
 
-      const tokenData = abiCoder.encode(['bytes32[]'], [ipfsHashes]);
+      const tokenData = abiCoder.encode(
+        ['bytes32[]', '(uint256, uint16, uint16[])[]'],
+        [ipfsHashes, []]
+      );
+
       const data = abiCoder.encode(
         ['uint256[]', 'uint256[]', 'bytes'],
         [tokenIds, supplies, tokenData]
@@ -874,7 +881,10 @@ describe('PolygonAsset.sol', function () {
       const ipfsHashes = [
         '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e',
       ];
-      let tokenData = abiCoder.encode(['bytes32[]'], [ipfsHashes]);
+      let tokenData = abiCoder.encode(
+        ['bytes32[]', '(uint256, uint16, uint16[])[]'],
+        [ipfsHashes, []]
+      );
       const data = abiCoder.encode(
         ['uint256[]', 'uint256[]', 'bytes'],
         [[tokenId], [balance], tokenData]
@@ -988,7 +998,10 @@ describe('PolygonAsset.sol', function () {
       const ipfsHashes = [
         '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e',
       ];
-      tokenData = abiCoder.encode(['bytes32[]'], [ipfsHashes]);
+      tokenData = abiCoder.encode(
+        ['bytes32[]', '(uint256, uint16, uint16[])[]'],
+        [ipfsHashes, []]
+      );
       const data = abiCoder.encode(
         ['uint256[]', 'uint256[]', 'bytes'],
         [[tokenId], [balance], tokenData]
@@ -1018,7 +1031,7 @@ describe('PolygonAsset.sol', function () {
     });
 
     async function executeL1toL2Deposit(
-      gemsAndCatalystsdata: (number | number[])[]
+      gemsAndCatalystsdata: (number | number[] | void)[]
     ) {
       const mainnet = await setupMainnetAsset();
       const polygon = await setupPolygonAsset();
@@ -1149,10 +1162,81 @@ describe('PolygonAsset.sol', function () {
 
     // Asset L1->L2
     // transfer none G&C
-    //transfer just 1 C
-    //transfer 1C & 1 gem
-    // transfer 1C & 4 gem
-    // transfer 1C & 1 gem OOB
-    // transfer
+    it('Deposit asset from L1 to L2 without catalyst and gems', async function () {
+      const mainnet = await setupMainnetAsset();
+      const polygon = await setupPolygonAsset();
+
+      const {
+        assetAttributesRegistryAsRegistryAdmin,
+      } = await setupAssetRegistry();
+
+      const tokenId = await mainnet.mintAsset(mainnet.users[0].address, 20);
+
+      const balance = await mainnet.Asset['balanceOf(address,uint256)'](
+        mainnet.users[0].address,
+        tokenId
+      );
+
+      // Approve ERC1155 predicate contarct
+      await waitFor(
+        mainnet.users[0].Asset.setApprovalForAll(
+          mainnet.predicate.address,
+          true
+        )
+      );
+
+      // Generate data to be passed to Polygon
+      const ipfsHashes = [
+        '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e',
+      ];
+
+      const tokenData = abiCoder.encode(
+        ['bytes32[]', '(uint256, uint16, uint16[])[]'],
+        [ipfsHashes, []]
+      );
+
+      const data = abiCoder.encode(
+        ['uint256[]', 'uint256[]', 'bytes'],
+        [[tokenId], [balance], tokenData]
+      );
+
+      // Lock tokens on ERC1155 predicate contract
+      await waitFor(
+        mainnet.predicate.lockTokens(
+          mainnet.users[0].address,
+          [tokenId],
+          [20],
+          data
+        )
+      );
+
+      // Emulate the ChildChainManager call to deposit
+      await waitFor(
+        polygon.childChainManager.callDeposit(mainnet.users[0].address, data)
+      );
+
+      // Ensure balance has been updated on Asset & PolygonAsset
+      const mainnetBalance = await mainnet.Asset['balanceOf(address,uint256)'](
+        mainnet.users[0].address,
+        tokenId
+      );
+      const polygonBalance = await polygon.Asset['balanceOf(address,uint256)'](
+        mainnet.users[0].address,
+        tokenId
+      );
+      expect(polygonBalance).to.be.equal(balance);
+      expect(mainnetBalance).to.be.equal(0);
+
+      // Ensure URI is same
+      const mainnetURI = await mainnet.Asset['tokenURI(uint256)'](tokenId);
+      const polygonURI = await polygon.Asset['tokenURI(uint256)'](tokenId);
+      expect(mainnetURI).to.be.equal(polygonURI);
+
+      const internalRecordRegistry = await assetAttributesRegistryAsRegistryAdmin.getRecord(
+        tokenId
+      );
+
+      expect(internalRecordRegistry[0]).to.be.equal(false);
+    });
   });
 });
