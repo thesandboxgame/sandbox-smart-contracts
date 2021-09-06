@@ -20,17 +20,19 @@ const func: DeployFunction = async function (
   await deploy('Asset', {
     from: upgradeAdmin,
     contract: 'AssetV2',
-    args: [
-      TRUSTED_FORWARDER.address,
-      assetAdmin,
-      assetBouncerAdmin,
-      ERC1155_PREDICATE.address,
-      0,
-    ],
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
-      methodName: 'initV2',
+      execute: {
+        methodName: 'initV2',
+        args: [
+          TRUSTED_FORWARDER.address,
+          assetAdmin,
+          assetBouncerAdmin,
+          ERC1155_PREDICATE.address,
+          0,
+        ],
+      },
       upgradeIndex: 1,
     },
     log: true,

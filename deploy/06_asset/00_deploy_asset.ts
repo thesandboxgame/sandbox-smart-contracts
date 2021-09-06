@@ -13,11 +13,13 @@ const func: DeployFunction = async function (
   await deploy('Asset', {
     from: deployer,
     contract: 'Asset',
-    args: [sandContract.address, deployer, deployer],
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
-      methodName: 'init',
+      execute: {
+        methodName: 'init',
+        args: [sandContract.address, deployer, deployer],
+      },
       upgradeIndex: 0,
     },
     log: true,
