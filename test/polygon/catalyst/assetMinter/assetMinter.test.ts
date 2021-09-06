@@ -1,9 +1,4 @@
-import {
-  ethers,
-  getUnnamedAccounts,
-  getNamedAccounts,
-  deployments,
-} from 'hardhat';
+import {ethers, getUnnamedAccounts, getNamedAccounts} from 'hardhat';
 import {Address} from 'hardhat-deploy/types';
 import {BigNumber, Contract} from 'ethers';
 import {expect} from '../../../chai-setup';
