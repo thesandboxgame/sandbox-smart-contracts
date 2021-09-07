@@ -1,6 +1,6 @@
 /**
  * How to use:
- *  - yarn execute <NETWORK> ./scripts/gathering/connected_asset_transfers.ts [TOKEN_ID [TO_WALLET [START_BLOCK]]]
+ *  - yarn execute <NETWORK> ./scripts/gathering/connected_asset_transfers.ts [TOKEN_ID [TO_WALLET [START_BLOCK [END_BLOCK]]]]
  */
 import {Contract, EventFilter} from 'ethers';
 import {BigNumber} from '@ethersproject/bignumber';
@@ -13,6 +13,7 @@ const tokenId =
   '55464657044963196816950587289035428064568320970692304673817341489687899934721';
 const toWallet = args[1] || '0x7a9fe22691c811ea339d9b73150e6911a5343dca';
 const startBlock = args[2] ? parseInt(args[2]) : 12065169;
+const endBlock = args[3] ? parseInt(args[3]) : undefined;
 
 async function queryEvents(
   contract: Contract,
@@ -68,7 +69,8 @@ async function queryEvents(
     await queryEvents(
       Asset,
       Asset.filters.TransferSingle(null, null, toWallet),
-      startBlock
+      startBlock,
+      endBlock
     )
   )
     .map((ev) => {
