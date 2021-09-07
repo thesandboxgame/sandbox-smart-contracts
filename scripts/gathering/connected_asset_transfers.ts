@@ -1,9 +1,18 @@
+/**
+ * How to use:
+ *  - yarn execute <NETWORK> ./scripts/gathering/connected_asset_transfers.ts [TOKEN_ID [TO_WALLET [START_BLOCK]]]
+ */
 import {Contract, EventFilter} from 'ethers';
 import {BigNumber} from '@ethersproject/bignumber';
 import fs from 'fs-extra';
 import {ethers} from 'hardhat';
 
-const startBlock = 12065169;
+const args = process.argv.slice(2);
+const tokenId =
+  args[0] ||
+  '55464657044963196816950587289035428064568320970692304673817341489687899934721';
+const toWallet = args[1] || '0x7a9fe22691c811ea339d9b73150e6911a5343dca';
+const startBlock = args[2] ? parseInt(args[2]) : 12065169;
 
 async function queryEvents(
   contract: Contract,
@@ -58,11 +67,7 @@ async function queryEvents(
   const singleTransferEvents = (
     await queryEvents(
       Asset,
-      Asset.filters.TransferSingle(
-        null,
-        null,
-        '0x7a9fe22691c811ea339d9b73150e6911a5343dca'
-      ),
+      Asset.filters.TransferSingle(null, null, toWallet),
       startBlock
     )
   )
@@ -77,11 +82,7 @@ async function queryEvents(
       }
       return {...ev, args};
     })
-    .filter(
-      (ev) =>
-        ev.args.id ===
-        '55464657044963196816950587289035428064568320970692304673817341489687899934721'
-    );
+    .filter((ev) => ev.args.id === tokenId);
 
   console.log('SINGLE TRANSFERS', singleTransferEvents.length);
 
