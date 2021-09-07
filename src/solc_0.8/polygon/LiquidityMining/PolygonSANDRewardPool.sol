@@ -42,7 +42,7 @@ contract LPTokenWrapper {
     }
 }
 
-contract SANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
+contract PolygonSANDRewardPool is LPTokenWrapper, IRewardDistributionRecipient {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
