@@ -1,4 +1,5 @@
 import {BigNumber} from 'ethers';
+import {AbiCoder} from 'ethers/lib/utils';
 import {deployments, getUnnamedAccounts} from 'hardhat';
 
 export const setupPolygonSandRewardPool = deployments.createFixture(
@@ -26,7 +27,7 @@ export const setupPolygonSandRewardPool = deployments.createFixture(
 
     // Monthly reward 1,500,000 SAND
     const REWARD_AMOUNT = BigNumber.from(1500000).mul('1000000000000000000');
-    const REWARD_TOKEN = 'SandBaseToken';
+    const REWARD_TOKEN = 'PolygonSand';
     const STAKE_TOKEN = 'FakeLPSandMatic';
     const STAKE_AMOUNT = BigNumber.from(10000).mul('1000000000000000000');
     const POOL = 'PolygonSANDRewardPool';
@@ -40,6 +41,9 @@ export const setupPolygonSandRewardPool = deployments.createFixture(
       liquidityRewardProvider
     );
 
+    const childChainManagerContract = await ethers.getContract(
+      'CHILD_CHAIN_MANAGER'
+    );
     const rewardTokenContract = await ethers.getContract(REWARD_TOKEN);
     const stakeTokenContract = await ethers.getContract(STAKE_TOKEN);
     const stakeTokenAsAdmin = stakeTokenContract.connect(
@@ -52,9 +56,14 @@ export const setupPolygonSandRewardPool = deployments.createFixture(
       ethers.provider.getSigner(rewardTokenAdmin)
     );
 
-    await rewardPoolContract
-      .connect(ethers.provider.getSigner(deployer))
-      .SetRewardLPToken(rewardTokenContract.address);
+    const abiCoder = new AbiCoder();
+    const data = abiCoder.encode(['uint256'], [REWARD_AMOUNT]);
+
+    await childChainManagerContract.callSandDeposit(
+      sandContract.address,
+      rewardTokenAdmin,
+      data
+    );
 
     const currentRewardDistribution = await rewardPoolContract
       .connect(ethers.provider.getSigner(deployer))
@@ -68,8 +77,6 @@ export const setupPolygonSandRewardPool = deployments.createFixture(
         .connect(ethers.provider.getSigner(deployer))
         .setRewardDistribution(liquidityRewardAdmin);
     }
-
-    await sandContract.transfer(rewardPool.address, REWARD_AMOUNT);
 
     const receipt = await rewardPoolContract
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
