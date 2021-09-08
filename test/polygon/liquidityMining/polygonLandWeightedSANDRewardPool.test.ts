@@ -1096,18 +1096,6 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
   });
 
-  it(`user earnings for 0 NFT(s) match expected reward with 3 stake(s)`, async function () {
-    const {
-      earned,
-      ACTUAL_REWARD_AMOUNT,
-      precisionLost,
-    } = await multipleUsersEarnings(0, 1, 3, true);
-
-    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
-    expect(precisionLost).to.be.at.least(1);
-    expect(precisionLost).to.be.at.most(1);
-  });
-
   it(`user earnings for 0 NFT(s) match expected reward with 4 stake(s)`, async function () {
     const {
       earned,
@@ -1214,12 +1202,6 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     expect(precisionLost).to.be.at.least(1);
     expect(precisionLost).to.be.at.most(10);
-  });
-
-  it(`Multiple Users' earnings for 0 NFTs match expected reward: 2 users, 1 stake each`, async function () {
-    const {earned, ACTUAL_REWARD_AMOUNT} = await multipleUsersEarnings(0, 2, 1);
-
-    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
   });
 
   it(`Multiple Users' earnings for 0 NFTs match expected reward: 2 users, 10 stake each`, async function () {
