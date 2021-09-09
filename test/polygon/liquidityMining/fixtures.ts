@@ -136,6 +136,7 @@ export const setupPolygonLandWeightedSANDRewardPool = deployments.createFixture(
     const NEW_REWARD_AMOUNT = BigNumber.from(2000000).mul(
       '1000000000000000000'
     );
+    const WRONG_REWARD_AMOUNT = BigNumber.from(1500000);
     const REWARD_TOKEN = 'PolygonSand';
     const STAKE_TOKEN = 'FakeLPSandMatic';
     const STAKE_AMOUNT = BigNumber.from(10000).mul('1000000000000000000');
@@ -196,16 +197,6 @@ export const setupPolygonLandWeightedSANDRewardPool = deployments.createFixture(
         .setRewardDistribution(liquidityRewardAdmin);
     }
 
-    const receipt = await rewardPoolContract
-      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
-      .notifyRewardAmount(REWARD_AMOUNT);
-
-    // Pass the timestamp of notifyRewardAmount to linkedData for accurate testing
-    const latestBlock = await ethers.provider.getBlock(receipt.blockNumber);
-
-    const notifyRewardTimestamp = latestBlock.timestamp;
-
-    await rewardTokenAsAdmin.transfer(rewardPool.address, REWARD_AMOUNT);
     // Give user some stakeTokens
     for (let i = 0; i < 3; i++) {
       await stakeTokenAsAdmin.transfer(others[i], STAKE_AMOUNT.mul(10));
@@ -236,10 +227,12 @@ export const setupPolygonLandWeightedSANDRewardPool = deployments.createFixture(
       ACTUAL_REWARD_AMOUNT,
       NEW_REWARD_AMOUNT,
       ONE_DAY,
-      notifyRewardTimestamp,
       LESS_PRECISE_STAKE_AMOUNT,
       multiplierNFTokenAdmin,
       SMALL_STAKE_AMOUNT,
+      rewardTokenAdmin,
+      rewardTokenAsAdmin,
+      WRONG_REWARD_AMOUNT,
     };
   }
 );

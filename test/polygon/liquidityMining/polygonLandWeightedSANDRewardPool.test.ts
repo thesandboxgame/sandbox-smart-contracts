@@ -25,7 +25,14 @@ async function multipleUsersEarnings(
     multiplierNFTokenContract,
     multiplierNFTokenAdmin,
     SMALL_STAKE_AMOUNT,
+    liquidityRewardAdmin,
+    REWARD_AMOUNT,
+    rewardTokenAsAdmin,
   } = await setupPolygonLandWeightedSANDRewardPool();
+  await rewardPoolContract
+    .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+    .notifyRewardAmount(REWARD_AMOUNT);
+  await rewardTokenAsAdmin.transfer(rewardPoolContract.address, REWARD_AMOUNT);
 
   let stakeAmount: BigNumber;
 
@@ -82,7 +89,17 @@ async function multipleUsersEarnings(
 
 describe('PolygonLandWeightedSANDRewardPool', function () {
   it('last time reward application should match the duration', async function () {
-    const {rewardPoolContract} = await setupPolygonLandWeightedSANDRewardPool();
+    const {
+      rewardPoolContract,
+      liquidityRewardAdmin,
+      REWARD_AMOUNT,
+      rewardTokenAsAdmin,
+      rewardPool,
+    } = await setupPolygonLandWeightedSANDRewardPool();
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(rewardPool.address, REWARD_AMOUNT);
 
     const lastTimeRewardApplicable = await rewardPoolContract.lastTimeRewardApplicable();
     const duration = await rewardPoolContract.duration();
@@ -259,7 +276,18 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
       rewardPoolContract,
       rewardTokenContract,
       others,
+      liquidityRewardAdmin,
+      REWARD_AMOUNT,
+      rewardTokenAsAdmin,
     } = await setupPolygonLandWeightedSANDRewardPool();
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
+
     const stakeAmount = BigNumber.from(10000).mul('1000000000000000000');
 
     await rewardPoolContract
@@ -296,7 +324,18 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
       rewardPoolContract,
       rewardTokenContract,
       others,
+      liquidityRewardAdmin,
+      REWARD_AMOUNT,
+      rewardTokenAsAdmin,
     } = await setupPolygonLandWeightedSANDRewardPool();
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
+
     const stakeAmount = BigNumber.from(10000).mul('1000000000000000000');
 
     await rewardPoolContract
@@ -323,9 +362,19 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
   it('pool contains reward tokens', async function () {
     const {
       rewardPool,
+      rewardPoolContract,
       rewardTokenContract,
       REWARD_AMOUNT,
+      liquidityRewardAdmin,
+      rewardTokenAsAdmin,
     } = await setupPolygonLandWeightedSANDRewardPool();
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
 
     const balance = await rewardTokenContract.balanceOf(rewardPool.address);
 
@@ -341,7 +390,17 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
       REWARD_DURATION,
       ACTUAL_REWARD_AMOUNT,
       others,
+      liquidityRewardAdmin,
+      REWARD_AMOUNT,
+      rewardTokenAsAdmin,
     } = await setupPolygonLandWeightedSANDRewardPool();
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
 
     await rewardPoolContract
       .connect(ethers.provider.getSigner(others[0]))
@@ -442,7 +501,17 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
         ACTUAL_REWARD_AMOUNT,
         ONE_DAY,
         others,
+        liquidityRewardAdmin,
+        REWARD_AMOUNT,
+        rewardTokenAsAdmin,
       } = await setupPolygonLandWeightedSANDRewardPool();
+      await rewardPoolContract
+        .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+        .notifyRewardAmount(REWARD_AMOUNT);
+      await rewardTokenAsAdmin.transfer(
+        rewardPoolContract.address,
+        REWARD_AMOUNT
+      );
 
       await ethers.provider.send('evm_increaseTime', [ONE_DAY * days]);
       await mine();
@@ -470,20 +539,33 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
   it('User with 0 LAND earns correct reward amount', async function () {
     const numNfts = BigNumber.from(0);
     const {
+      rewardPool,
       rewardPoolContract,
       STAKE_AMOUNT,
       REWARD_DURATION,
       REWARD_AMOUNT,
       ACTUAL_REWARD_AMOUNT,
       others,
-      notifyRewardTimestamp,
+      liquidityRewardAdmin,
+      rewardTokenAsAdmin,
     } = await setupPolygonLandWeightedSANDRewardPool();
 
     const receipt = await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+
+    // Pass the timestamp of notifyRewardAmount to linkedData for accurate testing
+    const latestBlock = await ethers.provider.getBlock(receipt.blockNumber);
+
+    const notifyRewardTimestamp = latestBlock.timestamp;
+
+    await rewardTokenAsAdmin.transfer(rewardPool.address, REWARD_AMOUNT);
+
+    const stakeReceipt = await rewardPoolContract
       .connect(ethers.provider.getSigner(others[0]))
       .stake(STAKE_AMOUNT);
 
-    const stakeBlock = await ethers.provider.getBlock(receipt.blockNumber);
+    const stakeBlock = await ethers.provider.getBlock(stakeReceipt.blockNumber);
     const stakeTimestamp = stakeBlock.timestamp;
     const timeDiff = stakeTimestamp - notifyRewardTimestamp;
 
@@ -546,15 +628,28 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
       REWARD_AMOUNT,
       ACTUAL_REWARD_AMOUNT,
       others,
-      notifyRewardTimestamp,
       LESS_PRECISE_STAKE_AMOUNT,
+      liquidityRewardAdmin,
+      rewardPool,
+      rewardTokenAsAdmin,
     } = await setupPolygonLandWeightedSANDRewardPool();
 
     const receipt = await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+
+    // Pass the timestamp of notifyRewardAmount to linkedData for accurate testing
+    const latestBlock = await ethers.provider.getBlock(receipt.blockNumber);
+
+    const notifyRewardTimestamp = latestBlock.timestamp;
+
+    await rewardTokenAsAdmin.transfer(rewardPool.address, REWARD_AMOUNT);
+
+    const stakeReceipt = await rewardPoolContract
       .connect(ethers.provider.getSigner(others[0]))
       .stake(LESS_PRECISE_STAKE_AMOUNT);
 
-    const stakeBlock = await ethers.provider.getBlock(receipt.blockNumber);
+    const stakeBlock = await ethers.provider.getBlock(stakeReceipt.blockNumber);
     const stakeTimestamp = stakeBlock.timestamp;
     const timeDiff = stakeTimestamp - notifyRewardTimestamp;
 
@@ -622,10 +717,23 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
         REWARD_AMOUNT,
         ACTUAL_REWARD_AMOUNT,
         others,
-        notifyRewardTimestamp,
         multiplierNFTokenContract,
         multiplierNFTokenAdmin,
+        liquidityRewardAdmin,
+        rewardPool,
+        rewardTokenAsAdmin,
       } = await setupPolygonLandWeightedSANDRewardPool();
+
+      const receipt = await rewardPoolContract
+        .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+        .notifyRewardAmount(REWARD_AMOUNT);
+
+      // Pass the timestamp of notifyRewardAmount to linkedData for accurate testing
+      const latestBlock = await ethers.provider.getBlock(receipt.blockNumber);
+
+      const notifyRewardTimestamp = latestBlock.timestamp;
+
+      await rewardTokenAsAdmin.transfer(rewardPool.address, REWARD_AMOUNT);
 
       for (let i = 0; i < lands; i++) {
         await multiplierNFTokenContract
@@ -636,11 +744,13 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
 
       expect(landCount).to.equal(numNfts);
 
-      const receipt = await rewardPoolContract
+      const stakeReceipt = await rewardPoolContract
         .connect(ethers.provider.getSigner(others[0]))
         .stake(STAKE_AMOUNT);
 
-      const stakeBlock = await ethers.provider.getBlock(receipt.blockNumber);
+      const stakeBlock = await ethers.provider.getBlock(
+        stakeReceipt.blockNumber
+      );
       const stakeTimestamp = stakeBlock.timestamp;
       const timeDiff = stakeTimestamp - notifyRewardTimestamp;
 
@@ -747,7 +857,16 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
       LESS_PRECISE_STAKE_AMOUNT,
       REWARD_DURATION,
       REWARD_AMOUNT,
+      liquidityRewardAdmin,
+      rewardTokenAsAdmin,
     } = await setupPolygonLandWeightedSANDRewardPool();
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
 
     await rewardPoolContract
       .connect(ethers.provider.getSigner(others[0]))
@@ -796,7 +915,16 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
       REWARD_AMOUNT,
       multiplierNFTokenContract,
       multiplierNFTokenAdmin,
+      liquidityRewardAdmin,
+      rewardTokenAsAdmin,
     } = await setupPolygonLandWeightedSANDRewardPool();
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
 
     for (let i = 0; i < 10; i++) {
       await multiplierNFTokenContract
@@ -846,7 +974,16 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
       REWARD_AMOUNT,
       multiplierNFTokenContract,
       multiplierNFTokenAdmin,
+      liquidityRewardAdmin,
+      rewardTokenAsAdmin,
     } = await setupPolygonLandWeightedSANDRewardPool();
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
 
     for (let i = 0; i < 10; i++) {
       await multiplierNFTokenContract
@@ -899,8 +1036,17 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
       others,
       STAKE_AMOUNT,
       LESS_PRECISE_STAKE_AMOUNT,
+      liquidityRewardAdmin,
+      REWARD_AMOUNT,
+      rewardTokenAsAdmin,
     } = await setupPolygonLandWeightedSANDRewardPool();
-
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
     await rewardPoolContract
       .connect(ethers.provider.getSigner(others[0]))
       .stake(LESS_PRECISE_STAKE_AMOUNT);
@@ -940,7 +1086,17 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
       others,
       STAKE_AMOUNT,
       LESS_PRECISE_STAKE_AMOUNT,
+      liquidityRewardAdmin,
+      REWARD_AMOUNT,
+      rewardTokenAsAdmin,
     } = await setupPolygonLandWeightedSANDRewardPool();
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
 
     await rewardPoolContract
       .connect(ethers.provider.getSigner(others[0]))
@@ -991,7 +1147,17 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
       LESS_PRECISE_STAKE_AMOUNT,
       multiplierNFTokenContract,
       multiplierNFTokenAdmin,
+      liquidityRewardAdmin,
+      REWARD_AMOUNT,
+      rewardTokenAsAdmin,
     } = await setupPolygonLandWeightedSANDRewardPool();
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
 
     for (let i = 0; i < 10; i++) {
       await multiplierNFTokenContract
@@ -1274,5 +1440,562 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     expect(precisionLost).to.be.at.least(1);
     expect(precisionLost).to.be.at.most(2);
+  });
+
+  it('Staking with STAKE_AMOUNT plus an extra amount equivalent to 2 NFTs', async function () {
+    const {
+      stakeTokenContract,
+      rewardPoolContract,
+      others,
+      REWARD_DURATION,
+      ACTUAL_REWARD_AMOUNT,
+      STAKE_AMOUNT,
+      liquidityRewardAdmin,
+      REWARD_AMOUNT,
+      rewardTokenAsAdmin,
+    } = await setupPolygonLandWeightedSANDRewardPool();
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
+
+    const numNfts = 2;
+    const contributionNoNfts = contribution(STAKE_AMOUNT, BigNumber.from(0));
+    const contributionWithNfts = contribution(
+      STAKE_AMOUNT,
+      BigNumber.from(numNfts)
+    );
+    const stakeAmount = STAKE_AMOUNT.add(
+      contributionWithNfts.sub(contributionNoNfts)
+    );
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .stake(stakeAmount);
+    const stakedBalance = await stakeTokenContract.balanceOf(
+      rewardPoolContract.address
+    );
+    expect(stakedBalance).to.equal(stakeAmount);
+
+    const userContribution = await rewardPoolContract.contributionOf(others[0]);
+    expect(userContribution).to.equal(
+      contribution(stakeAmount, BigNumber.from(0))
+    );
+
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+    const earned = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .earned(others[0]);
+
+    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(1);
+    // same precision loss as for 2 NFTs
+  });
+
+  it('Earlier staker gets more rewards with same NFT amount - small NFT number', async function () {
+    const {
+      rewardPoolContract,
+      others,
+      REWARD_DURATION,
+      ACTUAL_REWARD_AMOUNT,
+      STAKE_AMOUNT,
+      multiplierNFTokenContract,
+      multiplierNFTokenAdmin,
+      liquidityRewardAdmin,
+      REWARD_AMOUNT,
+      rewardTokenAsAdmin,
+    } = await setupPolygonLandWeightedSANDRewardPool();
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
+
+    await multiplierNFTokenContract
+      .connect(ethers.provider.getSigner(multiplierNFTokenAdmin))
+      .mintQuad(others[0], 1, 1, 1, '0x');
+
+    await multiplierNFTokenContract
+      .connect(ethers.provider.getSigner(multiplierNFTokenAdmin))
+      .mintQuad(others[1], 1, 2, 2, '0x');
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .stake(STAKE_AMOUNT);
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[1]))
+      .stake(STAKE_AMOUNT);
+
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+
+    const earned0 = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .earned(others[0]);
+
+    const earned1 = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[1]))
+      .earned(others[1]);
+
+    expect(earned0).to.be.gte(earned1);
+
+    const earned = earned0.add(earned1);
+
+    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
+
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
+
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(2);
+  });
+
+  it('Earlier staker gets more rewards with same NFT amount - large NFT number', async function () {
+    const {
+      rewardPoolContract,
+      others,
+      REWARD_DURATION,
+      ACTUAL_REWARD_AMOUNT,
+      STAKE_AMOUNT,
+      multiplierNFTokenContract,
+      multiplierNFTokenAdmin,
+      liquidityRewardAdmin,
+      REWARD_AMOUNT,
+      rewardTokenAsAdmin,
+    } = await setupPolygonLandWeightedSANDRewardPool();
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
+
+    for (let i = 0; i < 2; i++) {
+      for (let j = 0; j < 100; j++) {
+        await multiplierNFTokenContract
+          .connect(ethers.provider.getSigner(multiplierNFTokenAdmin))
+          .mintQuad(others[i], 1, i, i + j, '0x');
+      }
+
+      await rewardPoolContract
+        .connect(ethers.provider.getSigner(others[i]))
+        .stake(STAKE_AMOUNT);
+    }
+
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+    const earned0 = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .earned(others[0]);
+    const earned1 = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[1]))
+      .earned(others[1]);
+    expect(earned0).to.be.gte(earned1);
+    const earned = earned0.add(earned1);
+
+    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(2);
+  });
+
+  it('More lands give more rewards than earlier staker when NFT amounts are smaller', async function () {
+    const {
+      rewardPoolContract,
+      others,
+      REWARD_DURATION,
+      ACTUAL_REWARD_AMOUNT,
+      STAKE_AMOUNT,
+      multiplierNFTokenContract,
+      multiplierNFTokenAdmin,
+      liquidityRewardAdmin,
+      REWARD_AMOUNT,
+      rewardTokenAsAdmin,
+    } = await setupPolygonLandWeightedSANDRewardPool();
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
+
+    await multiplierNFTokenContract
+      .connect(ethers.provider.getSigner(multiplierNFTokenAdmin))
+      .mintQuad(others[0], 1, 1, 1, '0x');
+
+    await multiplierNFTokenContract
+      .connect(ethers.provider.getSigner(multiplierNFTokenAdmin))
+      .mintQuad(others[1], 1, 2, 2, '0x');
+
+    await multiplierNFTokenContract
+      .connect(ethers.provider.getSigner(multiplierNFTokenAdmin))
+      .mintQuad(others[1], 1, 3, 3, '0x');
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .stake(STAKE_AMOUNT);
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[1]))
+      .stake(STAKE_AMOUNT);
+
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+    const earned0 = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .earned(others[0]);
+    const earned1 = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[1]))
+      .earned(others[1]);
+    expect(earned1).to.be.gte(earned0);
+    const earned = earned0.add(earned1);
+
+    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(1);
+  });
+
+  it('More lands do not give more rewards than earlier staker with large NFT amounts', async function () {
+    const {
+      rewardPoolContract,
+      others,
+      REWARD_DURATION,
+      ACTUAL_REWARD_AMOUNT,
+      STAKE_AMOUNT,
+      multiplierNFTokenContract,
+      multiplierNFTokenAdmin,
+      liquidityRewardAdmin,
+      REWARD_AMOUNT,
+      rewardTokenAsAdmin,
+    } = await setupPolygonLandWeightedSANDRewardPool();
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
+
+    for (let i = 0; i < 2; i++) {
+      for (let j = 0; j < 100 + i; j++) {
+        await multiplierNFTokenContract
+          .connect(ethers.provider.getSigner(multiplierNFTokenAdmin))
+          .mintQuad(others[i], 1, i, i + j, '0x');
+      }
+
+      await rewardPoolContract
+        .connect(ethers.provider.getSigner(others[i]))
+        .stake(STAKE_AMOUNT);
+    }
+
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+
+    const earned0 = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .earned(others[0]);
+    const earned1 = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[1]))
+      .earned(others[1]);
+
+    expect(earned0).to.be.gte(earned1);
+
+    const earned = earned0.add(earned1);
+
+    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
+
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
+
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(1);
+  });
+
+  it('rewardToken in pool is more than amount notified', async function () {
+    const {
+      stakeTokenContract,
+      rewardPoolContract,
+      others,
+      REWARD_DURATION,
+      rewardTokenAdmin,
+      SMALL_STAKE_AMOUNT,
+    } = await setupPolygonLandWeightedSANDRewardPool();
+
+    const wrongRewardAmount = BigNumber.from(1400000).mul(
+      '1000000000000000000'
+    );
+    const actualRewardAmount = wrongRewardAmount
+      .div(REWARD_DURATION)
+      .mul(REWARD_DURATION);
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(rewardTokenAdmin))
+      .notifyRewardAmount(wrongRewardAmount);
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .stake(SMALL_STAKE_AMOUNT);
+
+    const stakedBalance = await stakeTokenContract.balanceOf(
+      rewardPoolContract.address
+    );
+
+    expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
+
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+
+    const earned = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .earned(others[0]);
+
+    // expect earnings to be accrued based on amount notified
+    expect(earned).to.equal(actualRewardAmount);
+  });
+
+  it('rewardToken in pool is zero', async function () {
+    const {
+      stakeTokenContract,
+      rewardPoolContract,
+      others,
+      REWARD_DURATION,
+      SMALL_STAKE_AMOUNT,
+      ACTUAL_REWARD_AMOUNT,
+      liquidityRewardAdmin,
+      REWARD_AMOUNT,
+    } = await setupPolygonLandWeightedSANDRewardPool();
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .stake(SMALL_STAKE_AMOUNT);
+
+    const stakedBalance = await stakeTokenContract.balanceOf(
+      rewardPoolContract.address
+    );
+
+    expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
+
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+
+    const earned = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .earned(others[0]);
+
+    // expect earnings to be accrued based on amount notified
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+
+    // expect that user cannot withdraw reward tokens as they have not been provided to the pool
+    await expect(
+      rewardPoolContract
+        .connect(ethers.provider.getSigner(others[0]))
+        .getReward()
+    ).to.be.reverted;
+  });
+
+  it('rewardToken in pool is less than amount notified', async function () {
+    const {
+      stakeTokenContract,
+      rewardTokenContract,
+      rewardPoolContract,
+      others,
+      REWARD_DURATION,
+      SMALL_STAKE_AMOUNT,
+      ACTUAL_REWARD_AMOUNT,
+      liquidityRewardAdmin,
+      REWARD_AMOUNT,
+      WRONG_REWARD_AMOUNT,
+    } = await setupPolygonLandWeightedSANDRewardPool();
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+
+    await rewardTokenContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .transfer(rewardPoolContract.address, WRONG_REWARD_AMOUNT);
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .stake(SMALL_STAKE_AMOUNT);
+
+    const stakedBalance = await stakeTokenContract.balanceOf(
+      rewardPoolContract.address
+    );
+
+    expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
+
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+
+    const earned = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .earned(others[0]);
+
+    // expect earnings to be accrued based on amount notified
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+
+    // expect that user cannot withdraw reward tokens as they have not been provided to the pool
+    await expect(
+      rewardPoolContract
+        .connect(ethers.provider.getSigner(others[0]))
+        .getReward()
+    ).to.be.reverted;
+  });
+
+  it('the call to notifyRewardAmount is made after users first call stake', async function () {
+    const {
+      stakeTokenContract,
+      rewardPoolContract,
+      others,
+      REWARD_DURATION,
+      SMALL_STAKE_AMOUNT,
+      ACTUAL_REWARD_AMOUNT,
+      liquidityRewardAdmin,
+      REWARD_AMOUNT,
+      rewardTokenAsAdmin,
+    } = await setupPolygonLandWeightedSANDRewardPool();
+
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .stake(SMALL_STAKE_AMOUNT);
+
+    await mine();
+    const initialEarnings = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .earned(others[0]);
+
+    expect(initialEarnings).to.equal(0); // pool has not been notified yet
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+
+    const stakedBalance = await stakeTokenContract.balanceOf(
+      rewardPoolContract.address
+    );
+
+    expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
+
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+
+    const earned = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .earned(others[0]);
+
+    // earnings accrue from timestamp of notifyRewardAmount
+    expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
+  });
+
+  it('user is earning rewards and pool is notified for a second time before end of current reward period', async function () {
+    const {
+      stakeTokenContract,
+      rewardPoolContract,
+      others,
+      REWARD_DURATION,
+      SMALL_STAKE_AMOUNT,
+      ACTUAL_REWARD_AMOUNT,
+      liquidityRewardAdmin,
+      REWARD_AMOUNT,
+      rewardTokenAsAdmin,
+    } = await setupPolygonLandWeightedSANDRewardPool();
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .stake(SMALL_STAKE_AMOUNT);
+    await mine();
+
+    const initialEarnings = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .earned(others[0]);
+
+    expect(initialEarnings).to.not.equal(0); // user earns as a result of earlier notifyRewardAmount
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+
+    const stakedBalance = await stakeTokenContract.balanceOf(
+      rewardPoolContract.address
+    );
+
+    expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
+
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+
+    const earned = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .earned(others[0]);
+
+    // double reward tokens available to be earned
+    expect(earned).to.be.above(ACTUAL_REWARD_AMOUNT);
   });
 });
