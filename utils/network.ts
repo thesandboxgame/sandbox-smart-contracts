@@ -68,6 +68,12 @@ export async function skipUnlessTestOrL2(
   return isTest(hre) || !isInTags(hre, 'L2');
 }
 
+export async function skipUnlessTestnet(
+  hre: HardhatRuntimeEnvironment
+): Promise<boolean> {
+  return !isTestnet(hre);
+}
+
 // Helper function to fix a bug in hardhat-deploy for the "hardhat" network.
 export function isInTags(hre: HardhatRuntimeEnvironment, key: string): boolean {
   return (

@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTestOrL2} from '../../utils/network';
+import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -40,6 +40,6 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['PolygonAsset', 'PolygonAsset_deploy'];
+func.tags = ['PolygonAsset', 'PolygonAsset_deploy', 'L2'];
 func.dependencies = ['TRUSTED_FORWARDER', 'CHILD_CHAIN_MANAGER'];
-func.skip = skipUnlessTestOrL2; // TODO: change to skip unless L2
+func.skip = skipUnlessTestnet; // TODO: change to skip unless L2

@@ -85,6 +85,7 @@ const config: HardhatUserConfig = {
       mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+      mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     }, // can add super operators and change admin
 
     upgradeAdmin: 'sandAdmin',
@@ -120,6 +121,7 @@ const config: HardhatUserConfig = {
       mainnet: '0x9695ed5020BB47880738Db356678fe8cBc8FF60b', // TODO use another wallet ?
       rinkeby: '0x60927eB036621b801491B6c5e9A60A8d2dEeD75A',
       goerli: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
+      mumbai: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
     },
 
     Foundation: {
@@ -160,6 +162,7 @@ const config: HardhatUserConfig = {
       mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+      mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     }, // can add super operators and change admin
 
     gemsAndCatalystsAdmin: 'sandAdmin',
@@ -169,6 +172,7 @@ const config: HardhatUserConfig = {
       mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
+      mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
     },
 
     landSaleAdmin: 'sandAdmin', // can enable currencies
@@ -270,6 +274,7 @@ const config: HardhatUserConfig = {
       accounts: accounts('mumbai'),
       tags: ['testnet', 'L2'],
       deploy: ['deploy_polygon'],
+      gasPrice: 1000000000, // TODO: this fixes invalid sender issue
     },
     polygon: {
       url: node_url('polygon'),
