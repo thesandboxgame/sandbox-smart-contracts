@@ -23,10 +23,11 @@ contract FakeCheckpointManager is ICheckpointManager {
     function setCheckpoint(
         bytes32 rootHash,
         uint256 start,
-        uint256 end
+        uint256 end,
+        uint256 createdAt
     ) public {
         HeaderBlock memory headerBlock =
-            HeaderBlock({root: rootHash, start: start, end: end, createdAt: block.timestamp, proposer: msg.sender});
+            HeaderBlock({root: rootHash, start: start, end: end, createdAt: createdAt, proposer: msg.sender});
 
         currentCheckpointNumber = currentCheckpointNumber + 1;
         headerBlocks[currentCheckpointNumber] = headerBlock;

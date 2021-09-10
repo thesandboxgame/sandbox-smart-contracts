@@ -8,6 +8,7 @@ import 'solidity-coverage';
 import 'hardhat-contract-sizer';
 import '@nomiclabs/hardhat-etherscan';
 import {accounts, node_url} from './utils/network';
+import {MochaOptions} from 'mocha';
 
 const config: HardhatUserConfig = {
   gasReporter: {
@@ -19,7 +20,9 @@ const config: HardhatUserConfig = {
   },
   mocha: {
     timeout: 0,
-  },
+    grep: process.env.TEST_GREP ? process.env.TEST_GREP : '@e2e',
+    invert: !process.env.TEST_GREP, // exclude @e2e if nothing is selected
+  } as MochaOptions,
   solidity: {
     compilers: [
       {
@@ -135,7 +138,6 @@ const config: HardhatUserConfig = {
       goerli: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
       mumbai: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
     },
-
     Foundation: {
       default: 5,
       mainnet: '', // TODO
@@ -278,6 +280,19 @@ const config: HardhatUserConfig = {
       url: 'http://localhost:8545',
       accounts: accounts(),
       tags: ['testnet', 'L1', 'L2'],
+      companionNetworks: {
+        l1: 'localL1',
+        l2: 'localhost',
+      },
+    },
+    localL1: {
+      url: 'http://localhost:8546',
+      accounts: accounts(),
+      tags: ['testnet', 'L1', 'L2'],
+      companionNetworks: {
+        l1: 'localL1',
+        l2: 'localhost',
+      },
     },
     rinkeby_test: {
       url: node_url('rinkeby'),
@@ -293,10 +308,10 @@ const config: HardhatUserConfig = {
       url: node_url('goerli'),
       accounts: accounts('goerli'),
       tags: ['testnet', 'L1'],
-      // gasPrice: 600000000000, // Uncomment in case of pending txs, and adjust gas
       companionNetworks: {
         l2: 'mumbai',
       },
+      // gasPrice: 600000000000, // Uncomment in case of pending txs, and adjust gas
     },
     mainnet: {
       url: node_url('mainnet'),

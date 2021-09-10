@@ -7,12 +7,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
 
   const {deployer} = await getNamedAccounts();
-
-  await deploy('CHECKPOINTMANAGER', {
-    from: deployer,
-    contract: 'FakeCheckpointManager',
-    log: true,
-  });
+  let CHECKPOINTMANAGER = await deployments.getOrNull('CHECKPOINTMANAGER');
+  if (!CHECKPOINTMANAGER) {
+    CHECKPOINTMANAGER = await deploy('CHECKPOINTMANAGER', {
+      from: deployer,
+      contract: 'FakeCheckpointManager',
+      log: true,
+    });
+  }
 };
 export default func;
 func.tags = ['CHECKPOINTMANAGER', 'L1'];

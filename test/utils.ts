@@ -12,6 +12,7 @@ import {Result} from 'ethers/lib/utils';
 import {deployments, ethers, network} from 'hardhat';
 import {FixtureFunc} from 'hardhat-deploy/dist/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {FormatTypes, Interface} from '@ethersproject/abi';
 
 export async function sequentially<S, T>(
   arr: Array<S>,
@@ -220,4 +221,24 @@ export function withSnapshot<T, O>(
       return func(env, options);
     }
   );
+}
+
+export function selector(functionList: string[] | string): string {
+  if (!Array.isArray(functionList)) {
+    functionList = [functionList];
+  }
+  const iface = new Interface(
+    functionList.map((x) =>
+      x.trim().startsWith('function') ? x : 'function ' + x
+    )
+  );
+  const ret = iface.fragments.map((x) => ({
+    name: x.format(FormatTypes.minimal),
+    selector: iface.getSighash(x.name),
+  }));
+  const solidityInterface = ret.reduce(
+    (acc, x) => acc.xor(BigNumber.from(x.selector)),
+    BigNumber.from(0)
+  );
+  return solidityInterface.toHexString();
 }

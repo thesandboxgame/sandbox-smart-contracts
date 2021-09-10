@@ -23,11 +23,16 @@ interface IFakeFxChild {
 contract FakeFxRoot {
     address fxChild;
 
+    event SendingMessageToChild(address receiver, bytes data);
+
     function setFxChild(address _fxChild) public {
         fxChild = _fxChild;
     }
 
     function sendMessageToChild(address _receiver, bytes calldata _data) public {
-        IFakeFxChild(fxChild).onStateReceive(0, _receiver, msg.sender, _data);
+        if (fxChild != address(0)) {
+            IFakeFxChild(fxChild).onStateReceive(0, _receiver, msg.sender, _data);
+        }
+        emit SendingMessageToChild(_receiver, _data);
     }
 }

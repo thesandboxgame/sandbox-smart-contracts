@@ -61,7 +61,7 @@ describe('LandOwnerContributionCalculator', function () {
         } = await landOwnerContributionCalculatorSetup();
         const stake = 1000 * numLands;
         for (let i = 0; i < numLands; i++) {
-          await landToken.mint(other, 123 + i);
+          await landToken['mint(address,uint256)'](other, 123 + i);
         }
         expect(await landToken.balanceOf(other)).to.be.equal(numLands);
         expect(await contract.multiplierOf(other)).to.be.equal(numLands);
