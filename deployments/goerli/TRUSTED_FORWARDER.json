@@ -1,0 +1,227 @@
+{
+  "address": "0x96E8789B195713B279c163847A7a0A107CDf6FCf",
+  "abi": [
+    {
+      "inputs": [],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "success",
+          "type": "bool"
+        },
+        {
+          "indexed": false,
+          "internalType": "bytes",
+          "name": "returndata",
+          "type": "bytes"
+        }
+      ],
+      "name": "TXResult",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "gas",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct TestMetaTxForwarder.ForwardRequest",
+          "name": "req",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes",
+          "name": "signature",
+          "type": "bytes"
+        }
+      ],
+      "name": "execute",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "stateMutability": "payable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "from",
+          "type": "address"
+        }
+      ],
+      "name": "getNonce",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "from",
+              "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "to",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "value",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "gas",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "nonce",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bytes",
+              "name": "data",
+              "type": "bytes"
+            }
+          ],
+          "internalType": "struct TestMetaTxForwarder.ForwardRequest",
+          "name": "req",
+          "type": "tuple"
+        },
+        {
+          "internalType": "bytes",
+          "name": "signature",
+          "type": "bytes"
+        }
+      ],
+      "name": "verify",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x81bdf20bd6fa506bbdabd837dacc36a45242c9e3efe7f8173dd5aaa7c681f28a",
+  "receipt": {
+    "to": null,
+    "from": "0xA796AE911621E00809E0E7C8f0AD6BF118E5139e",
+    "contractAddress": "0x96E8789B195713B279c163847A7a0A107CDf6FCf",
+    "transactionIndex": 6,
+    "gasUsed": "611708",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x3b659f3932a48789c83257ad8a393ea1acd055ebf6deb336ff7ed49cb9d2379e",
+    "transactionHash": "0x81bdf20bd6fa506bbdabd837dacc36a45242c9e3efe7f8173dd5aaa7c681f28a",
+    "logs": [],
+    "blockNumber": 5491464,
+    "cumulativeGasUsed": "819158",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [],
+  "solcInputHash": "1dc4e924a4ade2c69fe18859c7c974a9",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.2+commit.661d1103\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"success\",\"type\":\"bool\"},{\"indexed\":false,\"internalType\":\"bytes\",\"name\":\"returndata\",\"type\":\"bytes\"}],\"name\":\"TXResult\",\"type\":\"event\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"gas\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"internalType\":\"struct TestMetaTxForwarder.ForwardRequest\",\"name\":\"req\",\"type\":\"tuple\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"execute\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"stateMutability\":\"payable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"}],\"name\":\"getNonce\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"components\":[{\"internalType\":\"address\",\"name\":\"from\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"value\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"gas\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"nonce\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"data\",\"type\":\"bytes\"}],\"internalType\":\"struct TestMetaTxForwarder.ForwardRequest\",\"name\":\"req\",\"type\":\"tuple\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"verify\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/solc_0.8/test/TestMetaTxForwarder.sol\":\"TestMetaTxForwarder\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":2000},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\n/**\\n * @dev Elliptic Curve Digital Signature Algorithm (ECDSA) operations.\\n *\\n * These functions can be used to verify that a message was signed by the holder\\n * of the private keys of a given address.\\n */\\nlibrary ECDSA {\\n    /**\\n     * @dev Returns the address that signed a hashed message (`hash`) with\\n     * `signature`. This address can then be used for verification purposes.\\n     *\\n     * The `ecrecover` EVM opcode allows for malleable (non-unique) signatures:\\n     * this function rejects them by requiring the `s` value to be in the lower\\n     * half order, and the `v` value to be either 27 or 28.\\n     *\\n     * IMPORTANT: `hash` _must_ be the result of a hash operation for the\\n     * verification to be secure: it is possible to craft signatures that\\n     * recover to arbitrary addresses for non-hashed data. A safe way to ensure\\n     * this is by receiving a hash of the original message (which may otherwise\\n     * be too long), and then calling {toEthSignedMessageHash} on it.\\n     */\\n    function recover(bytes32 hash, bytes memory signature) internal pure returns (address) {\\n        // Check the signature length\\n        if (signature.length != 65) {\\n            revert(\\\"ECDSA: invalid signature length\\\");\\n        }\\n\\n        // Divide the signature in r, s and v variables\\n        bytes32 r;\\n        bytes32 s;\\n        uint8 v;\\n\\n        // ecrecover takes the signature parameters, and the only way to get them\\n        // currently is to use assembly.\\n        // solhint-disable-next-line no-inline-assembly\\n        assembly {\\n            r := mload(add(signature, 0x20))\\n            s := mload(add(signature, 0x40))\\n            v := byte(0, mload(add(signature, 0x60)))\\n        }\\n\\n        return recover(hash, v, r, s);\\n    }\\n\\n    /**\\n     * @dev Overload of {ECDSA-recover} that receives the `v`,\\n     * `r` and `s` signature fields separately.\\n     */\\n    function recover(bytes32 hash, uint8 v, bytes32 r, bytes32 s) internal pure returns (address) {\\n        // EIP-2 still allows signature malleability for ecrecover(). Remove this possibility and make the signature\\n        // unique. Appendix F in the Ethereum Yellow paper (https://ethereum.github.io/yellowpaper/paper.pdf), defines\\n        // the valid range for s in (281): 0 < s < secp256k1n \\u00f7 2 + 1, and for v in (282): v \\u2208 {27, 28}. Most\\n        // signatures from current libraries generate a unique signature with an s-value in the lower half order.\\n        //\\n        // If your library generates malleable signatures, such as s-values in the upper range, calculate a new s-value\\n        // with 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEBAAEDCE6AF48A03BBFD25E8CD0364141 - s1 and flip v from 27 to 28 or\\n        // vice versa. If your library also generates signatures with 0/1 for v instead 27/28, add 27 to v to accept\\n        // these malleable signatures as well.\\n        require(uint256(s) <= 0x7FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF5D576E7357A4501DDFE92F46681B20A0, \\\"ECDSA: invalid signature 's' value\\\");\\n        require(v == 27 || v == 28, \\\"ECDSA: invalid signature 'v' value\\\");\\n\\n        // If the signature is valid (and not malleable), return the signer address\\n        address signer = ecrecover(hash, v, r, s);\\n        require(signer != address(0), \\\"ECDSA: invalid signature\\\");\\n\\n        return signer;\\n    }\\n\\n    /**\\n     * @dev Returns an Ethereum Signed Message, created from a `hash`. This\\n     * produces hash corresponding to the one signed with the\\n     * https://eth.wiki/json-rpc/API#eth_sign[`eth_sign`]\\n     * JSON-RPC method as part of EIP-191.\\n     *\\n     * See {recover}.\\n     */\\n    function toEthSignedMessageHash(bytes32 hash) internal pure returns (bytes32) {\\n        // 32 is the length in bytes of hash,\\n        // enforced by the type signature above\\n        return keccak256(abi.encodePacked(\\\"\\\\x19Ethereum Signed Message:\\\\n32\\\", hash));\\n    }\\n\\n    /**\\n     * @dev Returns an Ethereum Signed Typed Data, created from a\\n     * `domainSeparator` and a `structHash`. This produces hash corresponding\\n     * to the one signed with the\\n     * https://eips.ethereum.org/EIPS/eip-712[`eth_signTypedData`]\\n     * JSON-RPC method as part of EIP-712.\\n     *\\n     * See {recover}.\\n     */\\n    function toTypedDataHash(bytes32 domainSeparator, bytes32 structHash) internal pure returns (bytes32) {\\n        return keccak256(abi.encodePacked(\\\"\\\\x19\\\\x01\\\", domainSeparator, structHash));\\n    }\\n}\\n\",\"keccak256\":\"0x752ac2a89da774de5c98f8ca1adcad306ce00d0ebb547ad7be8ba7e95468aa73\",\"license\":\"MIT\"},\"src/solc_0.8/test/TestEIP712.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n// solhint-disable-next-line compiler-version\\npragma solidity 0.8.2;\\n\\nimport \\\"@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol\\\";\\n\\n/**\\n * @dev https://eips.ethereum.org/EIPS/eip-712[EIP 712] is a standard for hashing and signing of typed structured data.\\n *\\n * The encoding specified in the EIP is very generic, and such a generic implementation in Solidity is not feasible,\\n * thus this contract does not implement the encoding itself. Protocols need to implement the type-specific encoding\\n * they need in their contracts using a combination of `abi.encode` and `keccak256`.\\n *\\n * This contract implements the EIP 712 domain separator ({_domainSeparatorV4}) that is used as part of the encoding\\n * scheme, and the final step of the encoding to obtain the message digest that is then signed via ECDSA\\n * ({_hashTypedDataV4}).\\n *\\n * The implementation of the domain separator was designed to be as efficient as possible while still properly updating\\n * the chain id to protect against replay attacks on an eventual fork of the chain.\\n *\\n * NOTE: This contract implements the version of the encoding known as \\\"v4\\\", as implemented by the JSON RPC method\\n * https://docs.metamask.io/guide/signing-data.html[`eth_signTypedDataV4` in MetaMask].\\n *\\n * _Available since v3.4._\\n */\\nabstract contract EIP712 {\\n    /* solhint-disable var-name-mixedcase */\\n    // Cache the domain separator as an immutable value, but also store the chain id that it corresponds to, in order to\\n    // invalidate the cached domain separator if the chain id changes.\\n    // bytes32 private immutable _CACHED_DOMAIN_SEPARATOR;\\n    // uint256 private immutable _CACHED_CHAIN_ID;\\n\\n    bytes32 private immutable _HASHED_NAME;\\n    bytes32 private immutable _HASHED_VERSION;\\n    bytes32 private immutable _TYPE_HASH;\\n\\n    /* solhint-enable var-name-mixedcase */\\n\\n    /**\\n     * @dev Initializes the domain separator and parameter caches.\\n     *\\n     * The meaning of `name` and `version` is specified in\\n     * https://eips.ethereum.org/EIPS/eip-712#definition-of-domainseparator[EIP 712]:\\n     *\\n     * - `name`: the user readable name of the signing domain, i.e. the name of the DApp or the protocol.\\n     * - `version`: the current major version of the signing domain.\\n     *\\n     * NOTE: These parameters cannot be changed except through a xref:learn::upgrading-smart-contracts.adoc[smart\\n     * contract upgrade].\\n     */\\n    constructor(string memory name, string memory version) {\\n        bytes32 hashedName = keccak256(bytes(name));\\n        bytes32 hashedVersion = keccak256(bytes(version));\\n        bytes32 typeHash = keccak256(\\\"EIP712Domain(string name,string version,address verifyingContract)\\\");\\n        _HASHED_NAME = hashedName;\\n        _HASHED_VERSION = hashedVersion;\\n        // _CACHED_CHAIN_ID = block.chainid;\\n        // _CACHED_DOMAIN_SEPARATOR = _buildDomainSeparator(typeHash, hashedName, hashedVersion);\\n        _TYPE_HASH = typeHash;\\n    }\\n\\n    /**\\n     * @dev Returns the domain separator for the current chain.\\n     */\\n    function _domainSeparatorV4() internal view returns (bytes32) {\\n        // if (block.chainid == _CACHED_CHAIN_ID) {\\n        //     return _CACHED_DOMAIN_SEPARATOR;\\n        // } else {\\n        return _buildDomainSeparator(_TYPE_HASH, _HASHED_NAME, _HASHED_VERSION);\\n        // }\\n    }\\n\\n    function _buildDomainSeparator(\\n        bytes32 typeHash,\\n        bytes32 name,\\n        bytes32 version\\n    ) private view returns (bytes32) {\\n        return keccak256(abi.encode(typeHash, name, version, address(this)));\\n    }\\n\\n    /**\\n     * @dev Given an already https://eips.ethereum.org/EIPS/eip-712#definition-of-hashstruct[hashed struct], this\\n     * function returns the hash of the fully encoded EIP712 message for this domain.\\n     *\\n     * This hash can be used together with {ECDSA-recover} to obtain the signer of a message. For example:\\n     *\\n     * ```solidity\\n     * bytes32 digest = _hashTypedDataV4(keccak256(abi.encode(\\n     *     keccak256(\\\"Mail(address to,string contents)\\\"),\\n     *     mailTo,\\n     *     keccak256(bytes(mailContents))\\n     * )));\\n     * address signer = ECDSA.recover(digest, signature);\\n     * ```\\n     */\\n    function _hashTypedDataV4(bytes32 structHash) internal view virtual returns (bytes32) {\\n        return ECDSA.toTypedDataHash(_domainSeparatorV4(), structHash);\\n    }\\n}\\n\",\"keccak256\":\"0x6c9c77ba66d5b802157aa0aff49941c00f98bae6da8cd2e4b6fde607018e0f61\",\"license\":\"MIT\"},\"src/solc_0.8/test/TestMetaTxForwarder.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\n// solhint-disable-next-line compiler-version\\npragma solidity 0.8.2;\\n\\nimport \\\"@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol\\\";\\nimport \\\"./TestEIP712.sol\\\";\\n\\n// @note !!! For Testing Only !!!\\n// Based on https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/metatx/ERC2771Context.sol\\ncontract TestMetaTxForwarder is EIP712 {\\n    using ECDSA for bytes32;\\n    event TXResult(bool success, bytes returndata);\\n\\n    struct ForwardRequest {\\n        address from;\\n        address to;\\n        uint256 value;\\n        uint256 gas;\\n        uint256 nonce;\\n        bytes data;\\n    }\\n\\n    bytes32 private constant TYPEHASH =\\n        keccak256(\\\"ForwardRequest(address from,address to,uint256 value,uint256 gas,uint256 nonce,bytes data)\\\");\\n\\n    mapping(address => uint256) private _nonces;\\n\\n    // solhint-disable no-empty-blocks\\n    constructor() EIP712(\\\"The Sandbox\\\", \\\"1\\\") {}\\n\\n    // solhint-enable no-empty-blocks\\n\\n    function getNonce(address from) public view returns (uint256) {\\n        return _nonces[from];\\n    }\\n\\n    function verify(ForwardRequest calldata req, bytes calldata signature) public view returns (bool) {\\n        address signer =\\n            _hashTypedDataV4(\\n                keccak256(abi.encode(TYPEHASH, req.from, req.to, req.value, req.gas, req.nonce, keccak256(req.data)))\\n            )\\n                .recover(signature);\\n        return _nonces[req.from] == req.nonce && signer == req.from;\\n    }\\n\\n    function execute(ForwardRequest calldata req, bytes calldata signature)\\n        public\\n        payable\\n        returns (bool, bytes memory)\\n    {\\n        require(verify(req, signature), \\\"MinimalForwarder: signature does not match request\\\");\\n        _nonces[req.from] = req.nonce + 1;\\n\\n        // solhint-disable avoid-low-level-calls\\n        (bool success, bytes memory returndata) =\\n            req.to.call{gas: req.gas, value: req.value}(abi.encodePacked(req.data, req.from));\\n        // Validate that the relayer has sent enough gas for the call.\\n        // See https://ronan.eth.link/blog/ethereum-gas-dangers/\\n        assert(gasleft() > req.gas / 63);\\n        emit TXResult(success, returndata);\\n        // solhint-enable avoid-low-level-calls\\n        return (success, returndata);\\n    }\\n}\\n\",\"keccak256\":\"0xe45694a4af874f73bd82628d63d458d5c43c8712d7fbca4d5d327d3738d229ca\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x60e060405234801561001057600080fd5b50604080518082018252600b81526a0a8d0ca40a6c2dcc8c4def60ab1b6020808301918252835180850190945260018452603160f81b9301929092525190206080527fc89efdaa54c0f20c7adf612882df0950f5a951637e0307cdcb4c672f298b8bc660a0527f91ab3d17e3a50a9d89e63fd30b92be7f5336b03b287bb946787a83a9d62a276660c05260805160a05160c051610a186100c960003960006104500152600061049f0152600061047a0152610a186000f3fe6080604052600436106100345760003560e01c80632d0335ab1461003957806347153f8214610082578063bf5d3bdb146100a3575b600080fd5b34801561004557600080fd5b5061006f61005436600461079a565b6001600160a01b031660009081526020819052604090205490565b6040519081526020015b60405180910390f35b6100956100903660046107c8565b6100d3565b6040516100799291906108c8565b3480156100af57600080fd5b506100c36100be3660046107c8565b6102c4565b6040519015158152602001610079565b600060606100e28585856102c4565b6101595760405162461bcd60e51b815260206004820152603260248201527f4d696e696d616c466f727761726465723a207369676e617475726520646f657360448201527f206e6f74206d617463682072657175657374000000000000000000000000000060648201526084015b60405180910390fd5b6101686080860135600161096e565b600080610178602089018961079a565b6001600160a01b03166001600160a01b03168152602001908152602001600020819055506000808660200160208101906101b2919061079a565b6001600160a01b0316606088013560408901356101d260a08b018b610904565b6101df60208d018d61079a565b6040516020016101f193929190610870565b60408051601f198184030181529082905261020b916108ac565b600060405180830381858888f193505050503d8060008114610249576040519150601f19603f3d011682016040523d82523d6000602084013e61024e565b606091505b509092509050610263603f6060890135610992565b5a1161027f57634e487b7160e01b600052600160045260246000fd5b7fabf1c7590137429c6129ed860c0f582151f95ad396bbbb21cdaaf4c31883524d82826040516102b09291906108c8565b60405180910390a190969095509350505050565b6000806103d784848080601f0160208091040260200160405190810160405280939291908181526020018383808284376000920191909152506103d192507fdd8f4b70b0f4393e889bd39128a30628a78b61816a9eb8199759e7a349657e489150610334905060208a018a61079a565b61034460408b0160208c0161079a565b60408b013560608c013560808d013561036060a08f018f610904565b60405161036e929190610860565b6040805191829003822060208301989098526001600160a01b0396871690820152949093166060850152608084019190915260a083015260c082015260e08101919091526101000160405160208183030381529060405280519060200120610442565b90610549565b905060808501356000806103ee602089018961079a565b6001600160a01b03166001600160a01b03168152602001908152602001600020541480156104395750610424602086018661079a565b6001600160a01b0316816001600160a01b0316145b95945050505050565b60006105436104e7604080517f00000000000000000000000000000000000000000000000000000000000000006020808301919091527f0000000000000000000000000000000000000000000000000000000000000000828401527f00000000000000000000000000000000000000000000000000000000000000006060830152306080808401919091528351808403909101815260a0909201909252805191012090565b836040517f19010000000000000000000000000000000000000000000000000000000000006020820152602281018390526042810182905260009060620160405160208183030381529060405280519060200120905092915050565b92915050565b6000815160411461059c5760405162461bcd60e51b815260206004820152601f60248201527f45434453413a20696e76616c6964207369676e6174757265206c656e677468006044820152606401610150565b60208201516040830151606084015160001a6105ba868285856105c4565b9695505050505050565b60007f7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a082111561065c5760405162461bcd60e51b815260206004820152602260248201527f45434453413a20696e76616c6964207369676e6174757265202773272076616c60448201527f75650000000000000000000000000000000000000000000000000000000000006064820152608401610150565b8360ff16601b148061067157508360ff16601c145b6106e35760405162461bcd60e51b815260206004820152602260248201527f45434453413a20696e76616c6964207369676e6174757265202776272076616c60448201527f75650000000000000000000000000000000000000000000000000000000000006064820152608401610150565b6040805160008082526020820180845288905260ff871692820192909252606081018590526080810184905260019060a0016020604051602081039080840390855afa158015610737573d6000803e3d6000fd5b5050604051601f1901519150506001600160a01b0381166104395760405162461bcd60e51b815260206004820152601860248201527f45434453413a20696e76616c6964207369676e617475726500000000000000006044820152606401610150565b6000602082840312156107ab578081fd5b81356001600160a01b03811681146107c1578182fd5b9392505050565b6000806000604084860312156107dc578182fd5b833567ffffffffffffffff808211156107f3578384fd5b9085019060c08288031215610806578384fd5b9093506020850135908082111561081b578384fd5b818601915086601f83011261082e578384fd5b81358181111561083c578485fd5b87602082850101111561084d578485fd5b6020830194508093505050509250925092565b6000828483379101908152919050565b6000838583375060609190911b7fffffffffffffffffffffffffffffffffffffffff000000000000000000000000169101908152601401919050565b600082516108be8184602087016109b2565b9190910192915050565b600083151582526040602083015282518060408401526108ef8160608501602087016109b2565b601f01601f1916919091016060019392505050565b60008083357fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe1843603018112610938578283fd5b83018035915067ffffffffffffffff821115610952578283fd5b60200191503681900382131561096757600080fd5b9250929050565b6000821982111561098d57634e487b7160e01b81526011600452602481fd5b500190565b6000826109ad57634e487b7160e01b81526012600452602481fd5b500490565b60005b838110156109cd5781810151838201526020016109b5565b838111156109dc576000848401525b5050505056fea2646970667358221220a37217d3181d3571f54221e45fd6cdee8bde1ad18ee55ed8bf2134f6505c437e64736f6c63430008020033",
+  "deployedBytecode": "0x6080604052600436106100345760003560e01c80632d0335ab1461003957806347153f8214610082578063bf5d3bdb146100a3575b600080fd5b34801561004557600080fd5b5061006f61005436600461079a565b6001600160a01b031660009081526020819052604090205490565b6040519081526020015b60405180910390f35b6100956100903660046107c8565b6100d3565b6040516100799291906108c8565b3480156100af57600080fd5b506100c36100be3660046107c8565b6102c4565b6040519015158152602001610079565b600060606100e28585856102c4565b6101595760405162461bcd60e51b815260206004820152603260248201527f4d696e696d616c466f727761726465723a207369676e617475726520646f657360448201527f206e6f74206d617463682072657175657374000000000000000000000000000060648201526084015b60405180910390fd5b6101686080860135600161096e565b600080610178602089018961079a565b6001600160a01b03166001600160a01b03168152602001908152602001600020819055506000808660200160208101906101b2919061079a565b6001600160a01b0316606088013560408901356101d260a08b018b610904565b6101df60208d018d61079a565b6040516020016101f193929190610870565b60408051601f198184030181529082905261020b916108ac565b600060405180830381858888f193505050503d8060008114610249576040519150601f19603f3d011682016040523d82523d6000602084013e61024e565b606091505b509092509050610263603f6060890135610992565b5a1161027f57634e487b7160e01b600052600160045260246000fd5b7fabf1c7590137429c6129ed860c0f582151f95ad396bbbb21cdaaf4c31883524d82826040516102b09291906108c8565b60405180910390a190969095509350505050565b6000806103d784848080601f0160208091040260200160405190810160405280939291908181526020018383808284376000920191909152506103d192507fdd8f4b70b0f4393e889bd39128a30628a78b61816a9eb8199759e7a349657e489150610334905060208a018a61079a565b61034460408b0160208c0161079a565b60408b013560608c013560808d013561036060a08f018f610904565b60405161036e929190610860565b6040805191829003822060208301989098526001600160a01b0396871690820152949093166060850152608084019190915260a083015260c082015260e08101919091526101000160405160208183030381529060405280519060200120610442565b90610549565b905060808501356000806103ee602089018961079a565b6001600160a01b03166001600160a01b03168152602001908152602001600020541480156104395750610424602086018661079a565b6001600160a01b0316816001600160a01b0316145b95945050505050565b60006105436104e7604080517f00000000000000000000000000000000000000000000000000000000000000006020808301919091527f0000000000000000000000000000000000000000000000000000000000000000828401527f00000000000000000000000000000000000000000000000000000000000000006060830152306080808401919091528351808403909101815260a0909201909252805191012090565b836040517f19010000000000000000000000000000000000000000000000000000000000006020820152602281018390526042810182905260009060620160405160208183030381529060405280519060200120905092915050565b92915050565b6000815160411461059c5760405162461bcd60e51b815260206004820152601f60248201527f45434453413a20696e76616c6964207369676e6174757265206c656e677468006044820152606401610150565b60208201516040830151606084015160001a6105ba868285856105c4565b9695505050505050565b60007f7fffffffffffffffffffffffffffffff5d576e7357a4501ddfe92f46681b20a082111561065c5760405162461bcd60e51b815260206004820152602260248201527f45434453413a20696e76616c6964207369676e6174757265202773272076616c60448201527f75650000000000000000000000000000000000000000000000000000000000006064820152608401610150565b8360ff16601b148061067157508360ff16601c145b6106e35760405162461bcd60e51b815260206004820152602260248201527f45434453413a20696e76616c6964207369676e6174757265202776272076616c60448201527f75650000000000000000000000000000000000000000000000000000000000006064820152608401610150565b6040805160008082526020820180845288905260ff871692820192909252606081018590526080810184905260019060a0016020604051602081039080840390855afa158015610737573d6000803e3d6000fd5b5050604051601f1901519150506001600160a01b0381166104395760405162461bcd60e51b815260206004820152601860248201527f45434453413a20696e76616c6964207369676e617475726500000000000000006044820152606401610150565b6000602082840312156107ab578081fd5b81356001600160a01b03811681146107c1578182fd5b9392505050565b6000806000604084860312156107dc578182fd5b833567ffffffffffffffff808211156107f3578384fd5b9085019060c08288031215610806578384fd5b9093506020850135908082111561081b578384fd5b818601915086601f83011261082e578384fd5b81358181111561083c578485fd5b87602082850101111561084d578485fd5b6020830194508093505050509250925092565b6000828483379101908152919050565b6000838583375060609190911b7fffffffffffffffffffffffffffffffffffffffff000000000000000000000000169101908152601401919050565b600082516108be8184602087016109b2565b9190910192915050565b600083151582526040602083015282518060408401526108ef8160608501602087016109b2565b601f01601f1916919091016060019392505050565b60008083357fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe1843603018112610938578283fd5b83018035915067ffffffffffffffff821115610952578283fd5b60200191503681900382131561096757600080fd5b9250929050565b6000821982111561098d57634e487b7160e01b81526011600452602481fd5b500190565b6000826109ad57634e487b7160e01b81526012600452602481fd5b500490565b60005b838110156109cd5781810151838201526020016109b5565b838111156109dc576000848401525b5050505056fea2646970667358221220a37217d3181d3571f54221e45fd6cdee8bde1ad18ee55ed8bf2134f6505c437e64736f6c63430008020033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {},
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 282,
+        "contract": "src/solc_0.8/test/TestMetaTxForwarder.sol:TestMetaTxForwarder",
+        "label": "_nonces",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_mapping(t_address,t_uint256)"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_mapping(t_address,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}
