@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.5;
+pragma solidity 0.8.2;
 
-import "../common/Interfaces/IERC20Extended.sol";
+import "../interfaces/IERC20Extended.sol";
 import "../Base/TheSandbox712.sol";
 
 /// @title Permit contract
