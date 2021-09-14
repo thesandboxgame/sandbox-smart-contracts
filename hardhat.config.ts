@@ -262,7 +262,7 @@ const config: HardhatUserConfig = {
       url: node_url('goerli'),
       accounts: accounts('goerli'),
       tags: ['testnet', 'L1'],
-      gasPrice: 600000000000,
+      // gasPrice: 600000000000, // Uncomment in case of pending txs, and adjust gas
     },
     mainnet: {
       url: node_url('mainnet'),
