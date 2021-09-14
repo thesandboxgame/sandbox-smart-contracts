@@ -137,8 +137,8 @@ contract EstateSaleWithAuth is MetaTransactionReceiver, ReferralValidator {
                 info[SIZE_INDEX],
                 info[PRICE_INDEX],
                 salt,
-                assetIds,
-                proof
+                keccak256(abi.encodePacked(assetIds)),
+                keccak256(abi.encodePacked(proof))
             )
         );
         require(_authValidator.isAuthValid(signature, hashedData), "INVALID_AUTH");

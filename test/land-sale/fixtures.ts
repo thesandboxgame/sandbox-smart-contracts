@@ -23,10 +23,20 @@ export const signAuthMessageAs = async (
       'uint256',
       'uint256',
       'bytes32',
-      'uint256[]',
-      'bytes32[]',
+      'bytes32',
+      'bytes32',
     ],
-    args
+    [
+      ...args.slice(0, args.length - 2),
+      ethers.utils.solidityKeccak256(
+        ['bytes'],
+        [ethers.utils.solidityPack(['uint256[]'], [args[args.length - 2]])]
+      ),
+      ethers.utils.solidityKeccak256(
+        ['bytes'],
+        [ethers.utils.solidityPack(['bytes32[]'], [args[args.length - 1]])]
+      ),
+    ]
   );
   return wallet.signMessage(ethers.utils.arrayify(hashedData));
 };
