@@ -23,7 +23,7 @@ export const setupTestAuction = deployments.createFixture(async function (
   await deployments.fixture(['Asset']);
   const assetContract = await ethers.getContract('Asset');
 
-  await deployments.deploy('AssetSignedAuction', {
+  await deployments.deploy('AssetSignedAuctionAuth', {
     from: deployer,
     args: [
       assetContract.address,
@@ -34,12 +34,12 @@ export const setupTestAuction = deployments.createFixture(async function (
     ],
   });
 
-  const assetSignedAuctionContract = await ethers.getContract(
-    'AssetSignedAuction'
+  const assetSignedAuctionAuthContract = await ethers.getContract(
+    'AssetSignedAuctionAuth'
   );
 
   return {
-    assetSignedAuctionContract1: assetSignedAuctionContract,
+    assetSignedAuctionAuthContract1: assetSignedAuctionAuthContract,
     assetContract1: assetContract,
     others1: others,
   };

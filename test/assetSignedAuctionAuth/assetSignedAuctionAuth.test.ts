@@ -20,10 +20,10 @@ describe('Auction', function () {
   const buyAmount = 1;
   const amounts = [1];
   let tokenId: number;
-  let assetSignedAuctionContract: Contract;
+  let AssetSignedAuctionAuthContract: Contract;
   let assetContract: Contract;
   let others: Array<string>;
-  let assetSignedAuctionContractAsUser: Contract;
+  let AssetSignedAuctionAuthContractAsUser: Contract;
   let sandContract: Contract;
   let sandAsAdmin: Contract;
   let sandAsUser: Contract;
@@ -34,14 +34,14 @@ describe('Auction', function () {
       fee10000th: 200,
     };
     const {
-      assetSignedAuctionContract1,
+      assetSignedAuctionAuthContract1,
       assetContract1,
       others1,
     } = await setupTestAuction(options);
-    assetSignedAuctionContract = assetSignedAuctionContract1;
+    AssetSignedAuctionAuthContract = assetSignedAuctionAuthContract1;
     assetContract = assetContract1;
     others = others1;
-    assetSignedAuctionContractAsUser = await assetSignedAuctionContract.connect(
+    AssetSignedAuctionAuthContractAsUser = await AssetSignedAuctionAuthContract.connect(
       ethers.provider.getSigner(others[1])
     );
 
@@ -101,7 +101,7 @@ describe('Auction', function () {
         domain: {
           name: 'The Sandbox 3D',
           version: '1',
-          verifyingContract: assetSignedAuctionContractAsUser.address,
+          verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
           from: seller,
@@ -127,7 +127,7 @@ describe('Auction', function () {
     ];
 
     await assetContract.setApprovalForAll(
-      assetSignedAuctionContract.address,
+      AssetSignedAuctionAuthContract.address,
       true,
       {from: others[0]}
     );
@@ -138,7 +138,7 @@ describe('Auction', function () {
     );
 
     await waitFor(
-      assetSignedAuctionContractAsUser.claimSellerOffer(
+      AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
         {
           buyer: others[1],
           seller: others[0],
@@ -220,7 +220,7 @@ describe('Auction', function () {
         domain: {
           name: 'The Sandbox',
           version: '1',
-          verifyingContract: assetSignedAuctionContractAsUser.address,
+          verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
           from: seller,
@@ -246,7 +246,7 @@ describe('Auction', function () {
     ];
 
     await assetContract.setApprovalForAll(
-      assetSignedAuctionContract.address,
+      AssetSignedAuctionAuthContract.address,
       true,
       {from: others[0]}
     );
@@ -254,7 +254,7 @@ describe('Auction', function () {
     let thrownError;
     try {
       await waitFor(
-        assetSignedAuctionContractAsUser.claimSellerOffer(
+        AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
           {
             buyer: others[1],
             seller: others[0],
@@ -312,7 +312,7 @@ describe('Auction', function () {
         domain: {
           name: 'The Sandbox 3D',
           version: '1',
-          verifyingContract: assetSignedAuctionContractAsUser.address,
+          verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
           from: seller,
@@ -340,12 +340,12 @@ describe('Auction', function () {
     await sandAsAdmin.transfer(others[1], '5000000000000000000');
 
     await assetContract.setApprovalForAll(
-      assetSignedAuctionContract.address,
+      AssetSignedAuctionAuthContract.address,
       true,
       {from: others[0]}
     );
     await sandAsUser.approve(
-      assetSignedAuctionContract.address,
+      AssetSignedAuctionAuthContract.address,
       '5000000000000000000'
     );
 
@@ -354,7 +354,7 @@ describe('Auction', function () {
     const prevFeeCollectorSandBalance = await sandContract.balanceOf(others[2]);
 
     await waitFor(
-      assetSignedAuctionContractAsUser.claimSellerOffer({
+      AssetSignedAuctionAuthContractAsUser.claimSellerOffer({
         buyer: others[1],
         seller: others[0],
         token: sandContract.address,
@@ -411,7 +411,7 @@ describe('Auction', function () {
         'bytes',
       ],
       [
-        assetSignedAuctionContract.address,
+        AssetSignedAuctionAuthContract.address,
         ethers.utils.solidityKeccak256(
           ['string'],
           [
@@ -447,7 +447,7 @@ describe('Auction', function () {
     ];
 
     await assetContract.setApprovalForAll(
-      assetSignedAuctionContract.address,
+      AssetSignedAuctionAuthContract.address,
       true,
       {from: others[0]}
     );
@@ -455,7 +455,7 @@ describe('Auction', function () {
     const prevSellerEtherBalance = await ethers.provider.getBalance(others[0]);
 
     await waitFor(
-      assetSignedAuctionContractAsUser.claimSellerOfferUsingBasicSig(
+      AssetSignedAuctionAuthContractAsUser.claimSellerOfferUsingBasicSig(
         {
           buyer: others[1],
           seller: others[0],
@@ -490,7 +490,7 @@ describe('Auction', function () {
     );
   });
   it('should be able to cancel offer', async function () {
-    await assetSignedAuctionContract.cancelSellerOffer(offerId, {
+    await AssetSignedAuctionAuthContract.cancelSellerOffer(offerId, {
       from: others[0],
     });
 
@@ -512,7 +512,7 @@ describe('Auction', function () {
         'bytes',
       ],
       [
-        assetSignedAuctionContract.address,
+        AssetSignedAuctionAuthContract.address,
         ethers.utils.solidityKeccak256(
           ['string'],
           [
@@ -548,14 +548,14 @@ describe('Auction', function () {
     ];
 
     await assetContract.setApprovalForAll(
-      assetSignedAuctionContract.address,
+      AssetSignedAuctionAuthContract.address,
       true,
       {from: others[0]}
     );
 
     let thrownError;
     try {
-      await assetSignedAuctionContractAsUser.claimSellerOfferUsingBasicSig(
+      await AssetSignedAuctionAuthContractAsUser.claimSellerOfferUsingBasicSig(
         {
           buyer: others[1],
           seller: others[0],
@@ -593,7 +593,7 @@ describe('Auction', function () {
         'bytes',
       ],
       [
-        assetSignedAuctionContract.address,
+        AssetSignedAuctionAuthContract.address,
         ethers.utils.solidityKeccak256(
           ['string'],
           [
@@ -629,14 +629,14 @@ describe('Auction', function () {
     ];
 
     await assetContract.setApprovalForAll(
-      assetSignedAuctionContract.address,
+      AssetSignedAuctionAuthContract.address,
       true,
       {from: others[0]}
     );
 
     let thrownError;
     try {
-      await assetSignedAuctionContractAsUser.claimSellerOfferUsingBasicSig({
+      await AssetSignedAuctionAuthContractAsUser.claimSellerOfferUsingBasicSig({
         buyer: others[1],
         seller: others[0],
         token: zeroAddress,
@@ -689,7 +689,7 @@ describe('Auction', function () {
         domain: {
           name: 'The Sandbox 3D',
           version: '1',
-          verifyingContract: assetSignedAuctionContractAsUser.address,
+          verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
           from: seller,
@@ -715,12 +715,12 @@ describe('Auction', function () {
     ];
 
     await assetContract.setApprovalForAll(
-      assetSignedAuctionContract.address,
+      AssetSignedAuctionAuthContract.address,
       true,
       {from: others[0]}
     );
     await sandAsUser.approve(
-      assetSignedAuctionContract.address,
+      AssetSignedAuctionAuthContract.address,
       '5000000000000000000'
     );
 
@@ -731,7 +731,7 @@ describe('Auction', function () {
 
     let thrownError;
     try {
-      await assetSignedAuctionContractAsUser.claimSellerOffer({
+      await AssetSignedAuctionAuthContractAsUser.claimSellerOffer({
         buyer: others[1],
         seller: others[0],
         token: sandContract.address,
@@ -787,7 +787,7 @@ describe('Auction', function () {
         domain: {
           name: 'The Sandbox 3D',
           version: '1',
-          verifyingContract: assetSignedAuctionContractAsUser.address,
+          verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
           from: seller,
@@ -813,7 +813,7 @@ describe('Auction', function () {
     ];
 
     await assetContract.setApprovalForAll(
-      assetSignedAuctionContract.address,
+      AssetSignedAuctionAuthContract.address,
       true,
       {from: others[0]}
     );
@@ -821,7 +821,7 @@ describe('Auction', function () {
     let thrownError;
     try {
       await waitFor(
-        assetSignedAuctionContractAsUser.claimSellerOffer(
+        AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
           {
             buyer: others[1],
             seller: others[0],
@@ -880,7 +880,7 @@ describe('Auction', function () {
         domain: {
           name: 'The Sandbox 3D',
           version: '1',
-          verifyingContract: assetSignedAuctionContractAsUser.address,
+          verifyingContract: AssetSignedAuctionAuthContractAsUser.address,
         },
         message: {
           from: seller,
@@ -906,7 +906,7 @@ describe('Auction', function () {
     ];
 
     await assetContract.setApprovalForAll(
-      assetSignedAuctionContract.address,
+      AssetSignedAuctionAuthContract.address,
       true,
       {from: others[0]}
     );
@@ -914,7 +914,7 @@ describe('Auction', function () {
     let thrownError;
     try {
       await waitFor(
-        assetSignedAuctionContractAsUser.claimSellerOffer(
+        AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
           {
             buyer: others[1],
             seller: others[0],
