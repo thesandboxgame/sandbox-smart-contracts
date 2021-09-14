@@ -47,7 +47,7 @@ export function accounts(networkName?: string): {mnemonic: string} {
 export async function skipUnlessTest(
   hre: HardhatRuntimeEnvironment
 ): Promise<boolean> {
-  return isTest(hre);
+  return !isTest(hre);
 }
 
 export async function skipUnlessL1(
@@ -65,7 +65,13 @@ export async function skipUnlessL2(
 export async function skipUnlessTestOrL2(
   hre: HardhatRuntimeEnvironment
 ): Promise<boolean> {
-  return isTest(hre) || !isInTags(hre, 'L2');
+  return !isTest(hre) || !isInTags(hre, 'L2');
+}
+
+export async function skipUnlessTestnet(
+  hre: HardhatRuntimeEnvironment
+): Promise<boolean> {
+  return !isTestnet(hre);
 }
 
 // Helper function to fix a bug in hardhat-deploy for the "hardhat" network.
@@ -81,5 +87,5 @@ export function isTestnet(hre: HardhatRuntimeEnvironment): boolean {
 }
 
 export function isTest(hre: HardhatRuntimeEnvironment): boolean {
-  return hre.network.name !== 'hardhat' || !!process.env.HARDHAT_FORK;
+  return hre.network.name === 'hardhat' || !!process.env.HARDHAT_FORK;
 }
