@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTestOrL2} from '../../utils/network';
+import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -19,6 +19,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['PolygonSANDRewardPool', 'PolygonSANDRewardPool_deploy'];
+func.tags = ['PolygonSANDRewardPool', 'PolygonSANDRewardPool_deploy', 'L2'];
 func.dependencies = ['SandBaseToken_deploy', 'FakeLPSandMatic'];
-func.skip = skipUnlessTestOrL2;
+func.skip = skipUnlessTest;
