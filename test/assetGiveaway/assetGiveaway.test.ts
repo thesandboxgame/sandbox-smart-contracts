@@ -19,7 +19,7 @@ describe('Asset_Giveaway', function () {
     const {giveawayContract, others, tree, assets} = setUp;
     const asset = assets[0];
     const proof = tree.getProof(calculateClaimableAssetHash(asset));
-    const giveawayContractAsUser = await giveawayContract.connect(
+    const giveawayContractAsUser = giveawayContract.connect(
       ethers.provider.getSigner(others[0])
     );
 

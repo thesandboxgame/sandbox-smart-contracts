@@ -4,13 +4,23 @@ pragma solidity 0.8.2;
 
 import "./ERC1155ERC721.sol";
 import "../catalyst/interfaces/IAssetAttributesRegistry.sol";
+import "./libraries/AssetHelper.sol";
 
 // solhint-disable-next-line no-empty-blocks
 contract AssetV2 is ERC1155ERC721 {
-    IAssetAttributesRegistry internal _assetRegistry;
+    AssetHelper.AssetRegistryData private assetRegistryData;
 
-    function setAssetRegistry(IAssetAttributesRegistry assetRegistry) external {
-        _assetRegistry = assetRegistry;
+    /// @notice fulfills the purpose of a constructor in upgradeabale contracts
+    function initialize(
+        address trustedForwarder,
+        address admin,
+        address bouncerAdmin,
+        address predicate,
+        uint8 chainIndex,
+        address assetRegistry
+    ) external {
+        initV2(trustedForwarder, admin, bouncerAdmin, predicate, chainIndex);
+        assetRegistryData.assetRegistry = IAssetAttributesRegistry(assetRegistry);
     }
 
     /// @notice called by predicate to mint tokens transferred from L2
@@ -25,7 +35,7 @@ contract AssetV2 is ERC1155ERC721 {
         bytes calldata data
     ) external {
         require(_msgSender() == _predicate, "!PREDICATE");
-        bytes32[] memory hashes = abi.decode(data, (bytes32[]));
+        bytes32[] memory hashes = AssetHelper.decodeAndSetCatalystDataL2toL1(assetRegistryData, data);
         for (uint256 i = 0; i < ids.length; i++) {
             uint256 uriId = ids[i] & ERC1155ERC721Helper.URI_ID;
             _metadataHash[uriId] = hashes[i];

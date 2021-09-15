@@ -10,28 +10,44 @@ const func: DeployFunction = async function (
     assetBouncerAdmin,
     assetAdmin,
     upgradeAdmin,
+    assetAttributesRegistryAdmin,
   } = await getNamedAccounts();
-  const {deploy} = deployments;
+  const {deploy, execute} = deployments;
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
-
   const ERC1155_PREDICATE = await deployments.get('ERC1155_PREDICATE');
+  const AssetAttributesRegistry = await deployments.get(
+    'AssetAttributesRegistry'
+  );
 
   const ERC1155ERC721HelperLib = await deploy('ERC1155ERC721Helper', {
     from: upgradeAdmin,
   });
 
-  await deploy('Asset', {
+  const assetHelperLib = await deploy('AssetHelper', {
+    from: upgradeAdmin,
+  });
+
+  const asset = await deploy('Asset', {
     from: upgradeAdmin,
     contract: 'AssetV2',
+    args: [
+      TRUSTED_FORWARDER.address,
+      assetAdmin,
+      assetBouncerAdmin,
+      ERC1155_PREDICATE.address,
+      0,
+      AssetAttributesRegistry.address,
+    ],
     libraries: {
       ERC1155ERC721Helper: ERC1155ERC721HelperLib.address,
+      AssetHelper: assetHelperLib.address,
     },
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
-        methodName: 'initV2',
+        methodName: 'initialize',
         args: [
           TRUSTED_FORWARDER.address,
           assetAdmin,
@@ -45,7 +61,12 @@ const func: DeployFunction = async function (
     log: true,
   });
 
-  console.log('Asset upgraded to AssetV2');
+  await execute(
+    'AssetAttributesRegistry',
+    {from: assetAttributesRegistryAdmin, log: true},
+    'setOverLayerDepositor',
+    asset.address
+  );
 };
 
 export default func;
@@ -57,5 +78,6 @@ func.dependencies = [
   'AssetMinter_deploy',
   'TRUSTED_FORWARDER',
   'ERC1155_PREDICATE',
+  'GemsCatalystsRegistry_setup',
 ];
 func.skip = skipUnlessTestnet;

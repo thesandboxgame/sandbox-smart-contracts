@@ -109,31 +109,42 @@ const polygonAssetFixtures = async function () {
   };
 };
 
-export const setupAssetRegistry = deployments.createFixture(async function () {
-  const {assetAttributesRegistryAdmin} = await getNamedAccounts();
-  const assetAttributesRegistry: Contract = await ethers.getContract(
-    'AssetAttributesRegistry'
-  );
-  const assetAttributesRegistryAsRegistryAdmin = await assetAttributesRegistry.connect(
-    ethers.provider.getSigner(assetAttributesRegistryAdmin)
-  );
+export const setupAssetRegistryL2 = deployments.createFixture(
+  async function () {
+    const {assetAttributesRegistryAdmin} = await getNamedAccounts();
+    const assetAttributesRegistryAsRegistryAdmin: Contract = await ethers.getContract(
+      'AssetAttributesRegistry',
+      assetAttributesRegistryAdmin
+    );
 
-  return {
-    assetAttributesRegistryAsRegistryAdmin,
-  };
-});
+    const Asset = await ethers.getContract('PolygonAsset');
 
-export const setupPolygonAsset = withSnapshot(
-  ['PolygonAsset', 'Asset'],
-  polygonAssetFixtures
+    assetAttributesRegistryAsRegistryAdmin.setOverLayerDepositor(Asset.address);
+
+    return {
+      assetAttributesRegistryAsRegistryAdmin,
+    };
+  }
 );
 
-export const setupMainnetAndPolygonAsset = withSnapshot(
-  ['PolygonAsset', 'Asset'],
-  async () => {
+export const setupAssetRegistryL1 = deployments.createFixture(
+  async function () {
+    const {assetAttributesRegistryAdmin} = await getNamedAccounts();
+    const assetAttributesRegistryAsRegistryAdmin: Contract = await ethers.getContract(
+      'AssetAttributesRegistry',
+      assetAttributesRegistryAdmin
+    );
+    const Asset = await ethers.getContract('Asset');
+    const assetAttributesRegistryAsAsset: Contract = await ethers.getContract(
+      'AssetAttributesRegistry',
+      Asset.address
+    );
+
+    assetAttributesRegistryAsRegistryAdmin.setOverLayerDepositor(Asset.address);
+
     return {
-      polygon: await polygonAssetFixtures(),
-      mainnet: await assetFixtures(),
+      assetAttributesRegistryAsRegistryAdmin,
+      assetAttributesRegistryAsAsset,
     };
   }
 );

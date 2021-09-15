@@ -5,7 +5,7 @@ pragma solidity 0.8.2;
 import "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "../../../asset/ERC1155ERC721.sol";
 import "../../../catalyst/interfaces/IAssetAttributesRegistry.sol";
-import "./libraries/AssetHelper.sol";
+import "../../../asset/libraries/AssetHelper.sol";
 
 // solhint-disable-next-line no-empty-blocks
 contract PolygonAssetV2 is ERC1155ERC721 {
@@ -38,7 +38,7 @@ contract PolygonAssetV2 is ERC1155ERC721 {
         require(_msgSender() == _childChainManager, "!DEPOSITOR");
         require(user != address(0), "INVALID_DEPOSIT_USER");
         (uint256[] memory ids, uint256[] memory amounts, bytes32[] memory hashes) =
-            AssetHelper.decodeData(assetRegistryData, depositData);
+            AssetHelper.decodeAndSetCatalystDataL1toL2(assetRegistryData, depositData);
         for (uint256 i = 0; i < ids.length; i++) {
             _metadataHash[ids[i] & ERC1155ERC721Helper.URI_ID] = hashes[i];
             _rarityPacks[ids[i] & ERC1155ERC721Helper.URI_ID] = "0x00";
@@ -61,6 +61,9 @@ contract PolygonAssetV2 is ERC1155ERC721 {
     /// @param amounts amounts to withdraw
     function withdraw(uint256[] calldata ids, uint256[] calldata amounts) external {
         bytes32[] memory hashes = new bytes32[](ids.length);
+        IAssetAttributesRegistry.AssetGemsCatalystData[] memory gemsCatalystDatas =
+            AssetHelper.getGemsAndCatalystData(assetRegistryData, ids);
+
         for (uint256 i = 0; i < ids.length; i++) {
             hashes[i] = _metadataHash[ids[i] & ERC1155ERC721Helper.URI_ID];
         }
@@ -70,6 +73,6 @@ contract PolygonAssetV2 is ERC1155ERC721 {
         } else {
             _burnBatch(_msgSender(), ids, amounts);
         }
-        emit ChainExit(_msgSender(), ids, amounts, abi.encode(hashes));
+        emit ChainExit(_msgSender(), ids, amounts, abi.encode(hashes, gemsCatalystDatas));
     }
 }

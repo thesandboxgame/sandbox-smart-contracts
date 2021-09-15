@@ -20,8 +20,8 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
 
     // used to allow migration to specify blockNumber when setting catalyst/gems
     address public migrationContract;
-    // used when asset goes from one layer to another
-    address public chainManager;
+    // used to to set catalyst without burning actual ERC20 (cross layer deposit)
+    address public overLayerDepositor;
 
     struct Record {
         uint16 catalystId; // start at 1
@@ -96,8 +96,28 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
         uint16 catalystId,
         uint16[] calldata gemIds
     ) external {
-        // TODO Do we have to add assetV2 as a minter ?
-        _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber(), false);
+        require(
+            _msgSender() == overLayerDepositor || _msgSender() == _admin,
+            "AssetAttributesRegistry: not overLayerDepositor"
+        );
+        // We have to ignore all 0 gemid in case of L2 to L1 deposit
+        // In this case we get gems data in a form of an array of MAX_NUM_GEMS padded with 0
+        if (gemIds.length == MAX_NUM_GEMS) {
+            uint256 firstZeroIndex;
+            for (firstZeroIndex = 0; firstZeroIndex < gemIds.length; firstZeroIndex++) {
+                if (gemIds[firstZeroIndex] == 0) {
+                    break;
+                }
+            }
+            uint16[] memory gemIdsWithoutZero = new uint16[](firstZeroIndex);
+            // find first 0
+            for (uint256 i = 0; i < firstZeroIndex; i++) {
+                gemIdsWithoutZero[i] = gemIds[i];
+            }
+            _setCatalyst(assetId, catalystId, gemIdsWithoutZero, _getBlockNumber(), false);
+        } else {
+            _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber(), false);
+        }
     }
 
     /// @notice sets the catalyst and gems for an asset, minter only
@@ -183,6 +203,11 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
         }
     }
 
+    function setOverLayerDepositor(address overLayerDepositor_) external {
+        require(_msgSender() == _admin, "NOT_AUTHORIZED");
+        overLayerDepositor = overLayerDepositor_;
+    }
+
     /// @dev Set a catalyst for the given asset.
     /// @param assetId The asset to set a catalyst on.
     /// @param catalystId The catalyst to set.
@@ -205,7 +230,6 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
             gemIdsToStore[i] = gemIds[i];
         }
         _records[assetId] = Record(catalystId, gemIdsToStore);
-
         if (hasToEmitEvent) {
             emit CatalystApplied(assetId, catalystId, gemIds, blockNumber);
         }

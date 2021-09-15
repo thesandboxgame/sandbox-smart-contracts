@@ -11,8 +11,9 @@ const func: DeployFunction = async function (
     upgradeAdmin,
     assetAdmin,
     assetBouncerAdmin,
+    assetAttributesRegistryAdmin,
   } = await getNamedAccounts();
-  const {deploy} = deployments;
+  const {deploy, execute} = deployments;
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const CHILD_CHAIN_MANAGER = await deployments.get('CHILD_CHAIN_MANAGER');
@@ -28,7 +29,7 @@ const func: DeployFunction = async function (
     from: deployer,
   });
 
-  await deploy('PolygonAsset', {
+  const polygonAsset = await deploy('PolygonAsset', {
     from: deployer,
     contract: 'PolygonAssetV2',
     args: [
@@ -60,6 +61,13 @@ const func: DeployFunction = async function (
     },
     log: true,
   });
+
+  await execute(
+    'AssetAttributesRegistry',
+    {from: assetAttributesRegistryAdmin, log: true},
+    'setOverLayerDepositor',
+    polygonAsset.address
+  );
 };
 
 export default func;
