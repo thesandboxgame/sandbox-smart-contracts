@@ -16,11 +16,13 @@ const func: DeployFunction = async function (
   await deploy('ChildEstateToken', {
     from: deployer,
     contract: 'ChildEstateTokenV1',
-    args: [TRUSTED_FORWARDER.address, landContract.address, chainIndex],
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
-      methodName: 'initV1',
+      execute: {
+        methodName: 'initV1',
+        args: [TRUSTED_FORWARDER.address, landContract.address, chainIndex],
+      },
       upgradeIndex: 0,
     },
     log: true,

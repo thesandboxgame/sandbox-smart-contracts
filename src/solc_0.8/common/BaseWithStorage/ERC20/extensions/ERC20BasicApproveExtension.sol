@@ -2,10 +2,11 @@
 
 pragma solidity 0.8.2;
 
+import "@openzeppelin/contracts-0.8/utils/Context.sol";
 import "./ERC20Internal.sol";
 import "../../../Libraries/BytesUtil.sol";
 
-abstract contract ERC20BasicApproveExtension is ERC20Internal {
+abstract contract ERC20BasicApproveExtension is ERC20Internal, Context {
     /// @notice Approve `target` to spend `amount` and call it with data.
     /// @param target The address to be given rights to transfer and destination of the call.
     /// @param amount The number of tokens allowed.
@@ -16,9 +17,9 @@ abstract contract ERC20BasicApproveExtension is ERC20Internal {
         uint256 amount,
         bytes calldata data
     ) external payable returns (bytes memory) {
-        require(BytesUtil.doFirstParamEqualsAddress(data, msg.sender), "FIRST_PARAM_NOT_SENDER");
+        require(BytesUtil.doFirstParamEqualsAddress(data, _msgSender()), "FIRST_PARAM_NOT_SENDER");
 
-        _approveFor(msg.sender, target, amount);
+        _approveFor(_msgSender(), target, amount);
 
         // solhint-disable-next-line avoid-low-level-calls
         (bool success, bytes memory returnData) = target.call{value: msg.value}(data);
@@ -37,10 +38,10 @@ abstract contract ERC20BasicApproveExtension is ERC20Internal {
         uint256 amount,
         bytes calldata data
     ) external payable returns (bytes memory) {
-        require(BytesUtil.doFirstParamEqualsAddress(data, msg.sender), "FIRST_PARAM_NOT_SENDER");
+        require(BytesUtil.doFirstParamEqualsAddress(data, _msgSender()), "FIRST_PARAM_NOT_SENDER");
 
         if (amount > 0) {
-            _addAllowanceIfNeeded(msg.sender, target, amount);
+            _addAllowanceIfNeeded(_msgSender(), target, amount);
         }
 
         // solhint-disable-next-line avoid-low-level-calls

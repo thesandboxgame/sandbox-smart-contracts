@@ -75,22 +75,25 @@ const func: DeployFunction = async function (hre) {
   let lastFeeEvent: Event | undefined;
   if (feeEvents.length > 0) {
     lastFeeEvent = feeEvents[feeEvents.length - 1];
-    // console.log(JSON.stringify(lastFeeEvent));
   }
-  let feeToSet = false;
+  let isFeeSet;
   if (!lastFeeEvent) {
-    feeToSet = true;
+    isFeeSet = false;
   } else {
     const eventArg = lastFeeEvent.args;
     if (eventArg) {
-      feeToSet = !eventArg[1].eq(fee10000th);
+      isFeeSet =
+        eventArg[0] === assetAuctionFeeCollector && eventArg[1].eq(fee10000th);
     } else {
-      throw new Error(`ínvalid event`);
+      throw new Error(`invalid event`);
     }
   }
 
-  if (feeToSet) {
-    console.log("set AssetSignedAuction's fee to 5%");
+  if (!isFeeSet) {
+    console.log(`set AssetSignedAuction's fee to ${fee10000th / 100}%`);
+    console.log(
+      `set AssetSignedAuction's fee colletor to ${assetAuctionFeeCollector}`
+    );
     const currentAssetAuctionAdmin = await read(
       'AssetSignedAuction',
       'getAdmin'

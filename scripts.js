@@ -106,6 +106,7 @@ function execute(command) {
       blockNumber: 'string',
       'no-impersonation': 'boolean',
     });
+
     await execute(
       `cross-env HARDHAT_DEPLOY_ACCOUNTS_NETWORK=${fixedArgs[1]} HARDHAT_FORK=${
         fixedArgs[1]
@@ -116,7 +117,9 @@ function execute(command) {
           ? `HARDHAT_DEPLOY_NO_IMPERSONATION=true`
           : ''
       } hardhat deploy ${extra.join(' ')}`
-    );
+    ).catch((error) => {
+      process.exit(error);
+    });
   } else if (firstArg === 'fork:test') {
     const {fixedArgs, options, extra} = parseArgs(2, {
       blockNumber: 'string',

@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest} from '../../utils/network';
+import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -20,17 +20,19 @@ const func: DeployFunction = async function (
   await deploy('Asset', {
     from: upgradeAdmin,
     contract: 'AssetV2',
-    args: [
-      TRUSTED_FORWARDER.address,
-      assetAdmin,
-      assetBouncerAdmin,
-      ERC1155_PREDICATE.address,
-      0,
-    ],
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
-      methodName: 'initV2',
+      execute: {
+        methodName: 'initV2',
+        args: [
+          TRUSTED_FORWARDER.address,
+          assetAdmin,
+          assetBouncerAdmin,
+          ERC1155_PREDICATE.address,
+          0,
+        ],
+      },
       upgradeIndex: 1,
     },
     log: true,
@@ -49,4 +51,4 @@ func.dependencies = [
   'TRUSTED_FORWARDER',
   'ERC1155_PREDICATE',
 ];
-func.skip = skipUnlessTest;
+func.skip = skipUnlessTestnet;

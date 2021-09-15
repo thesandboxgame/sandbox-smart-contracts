@@ -1,9 +1,4 @@
-import {
-  ethers,
-  getUnnamedAccounts,
-  getNamedAccounts,
-  deployments,
-} from 'hardhat';
+import {ethers, getUnnamedAccounts, getNamedAccounts} from 'hardhat';
 import {Address} from 'hardhat-deploy/types';
 import {BigNumber, Contract} from 'ethers';
 import {expect} from '../../../chai-setup';
@@ -68,10 +63,6 @@ async function mintGems(mintObjects: MintObj[]): Promise<void> {
 }
 
 describe('AssetMinter', function () {
-  beforeEach(async function () {
-    await deployments.fixture();
-  });
-
   before(async function () {
     mintOptions = {
       from: ethers.constants.AddressZero,

@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest} from '../../utils/network';
+import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -20,17 +20,19 @@ const func: DeployFunction = async function (
   await deploy('PolygonAsset', {
     from: deployer,
     contract: 'PolygonAssetV2',
-    args: [
-      TRUSTED_FORWARDER.address,
-      assetAdmin,
-      assetBouncerAdmin,
-      CHILD_CHAIN_MANAGER.address,
-      1,
-    ],
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
-      methodName: 'initialize',
+      execute: {
+        methodName: 'initialize',
+        args: [
+          TRUSTED_FORWARDER.address,
+          assetAdmin,
+          assetBouncerAdmin,
+          CHILD_CHAIN_MANAGER.address,
+          1,
+        ],
+      },
       upgradeIndex: 0,
     },
     log: true,
@@ -38,6 +40,6 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['PolygonAsset', 'PolygonAsset_deploy'];
+func.tags = ['PolygonAsset', 'PolygonAsset_deploy', 'L2'];
 func.dependencies = ['TRUSTED_FORWARDER', 'CHILD_CHAIN_MANAGER'];
-func.skip = skipUnlessTest; // TODO: change to skip unless L2
+func.skip = skipUnlessTestnet; // TODO: change to skip unless L2

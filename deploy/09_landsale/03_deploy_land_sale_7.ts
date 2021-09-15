@@ -2,12 +2,12 @@ import {getLandSales, LandSale} from '../../data/landSales/getLandSales';
 import deadlines from '../../data/landSales/deadlines';
 import fs from 'fs';
 import helpers, {SaltedSaleLandInfo} from '../../lib/merkleTreeHelper';
-import {skipUnlessTest} from '../../utils/network';
+import {isTestnet, skipUnlessTest} from '../../utils/network';
+import {DeployFunction} from 'hardhat-deploy/types';
+
 const {calculateLandHash} = helpers;
 
 const LANDSALE_NAME = 'LandPreSale_7';
-
-import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
@@ -34,7 +34,7 @@ const func: DeployFunction = async function (hre) {
       throw new Error(`no deadline for sector ${sector}`);
     }
 
-    if (hre.network.tags.testnet) {
+    if (isTestnet(hre)) {
       log('increasing deadline by 1 year');
       deadline += 365 * 24 * 60 * 60; //add 1 year on testnets
     }

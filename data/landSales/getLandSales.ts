@@ -1,9 +1,11 @@
 import fs from "fs-extra";
 import MerkleTree from "../../lib/merkleTree";
 import addresses from "../addresses.json";
-import helpers, {SaleLandInfo, SaltedSaleLandInfo, SaltedProofSaleLandInfo} from "../../lib/merkleTreeHelper";
+import helpers, {SaleLandInfo, SaltedProofSaleLandInfo, SaltedSaleLandInfo} from "../../lib/merkleTreeHelper";
 import deadlines from './deadlines';
 import {HardhatRuntimeEnvironment} from "hardhat/types/runtime";
+import {isTestnet} from "../../utils/network";
+
 const {createDataArray, saltLands, calculateLandHash} = helpers;
 
 export type LandSale = {
@@ -280,7 +282,7 @@ export function getDeadline(hre: HardhatRuntimeEnvironment, sector: number): num
   if (!deadline) {
     throw new Error(`no deadline for sector ${sector}`);
   }
-  if (hre.network.tags.testnet) {
+  if (isTestnet(hre)) {
     hre.deployments.log('increasing deadline by 1 year');
     deadline += 365 * 24 * 60 * 60; //add 1 year on testnets
   }

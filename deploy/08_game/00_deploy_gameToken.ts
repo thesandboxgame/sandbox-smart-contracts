@@ -13,16 +13,18 @@ const func: DeployFunction = async function (hre) {
     from: deployer,
     contract: 'ChildGameTokenV1',
     log: true,
-    args: [
-      TRUSTED_FORWARDER.address,
-      gameTokenAdmin,
-      assetContract.address,
-      chainIndex,
-    ],
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
-      methodName: 'initV1',
+      execute: {
+        methodName: 'initV1',
+        args: [
+          TRUSTED_FORWARDER.address,
+          gameTokenAdmin,
+          assetContract.address,
+          chainIndex,
+        ],
+      },
       upgradeIndex: 0,
     },
     skipIfAlreadyDeployed: true,

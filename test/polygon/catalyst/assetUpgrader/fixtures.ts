@@ -9,6 +9,15 @@ import {waitFor} from '../../../utils';
 import {transferSand} from '../utils';
 
 export const setupAssetUpgrader = deployments.createFixture(async () => {
+  await deployments.fixture([
+    'AssetUpgrader',
+    'Catalysts',
+    'Gems',
+    'AssetUpgraderFeeBurner',
+    'AssetAttributesRegistry',
+    'GemsCatalystsRegistry',
+    'Asset',
+  ]);
   const {assetAttributesRegistryAdmin, assetAdmin} = await getNamedAccounts();
   const users = await getUnnamedAccounts();
   const catalystOwner = users[0];

@@ -1,6 +1,13 @@
 import axios from 'axios';
 
-export type EtherscanTransaction = {hash: string};
+export type EtherscanTransaction = {
+  hash: string;
+  input: string;
+  gasUsed: string;
+  gasPrice: string;
+  from: string;
+  isError: string;
+};
 
 const offset = 1000;
 
@@ -9,17 +16,19 @@ export class Etherscan {
 
   async transactionsFrom(
     contractAddress: string,
-    fromBlockNumber = 0
+    fromBlockNumber = 0,
+    toBlockNumber = 99999999
   ): Promise<EtherscanTransaction[]> {
     const txs = [];
     let page = 1;
     let more = true;
     let startBlock = fromBlockNumber;
+    const endBlock = toBlockNumber;
     let lastTransaction;
     let fromTransactionIndex = 0;
     while (more) {
       const response = await axios.get(
-        `https://api.etherscan.io/api?module=account&action=txlist&address=${contractAddress}&startblock=${startBlock}&endblock=99999999&page=${page}&offset=${offset}&sort=asc&apikey=${this.apiKey}`
+        `https://api.etherscan.io/api?module=account&action=txlist&address=${contractAddress}&startblock=${startBlock}&endblock=${endBlock}&page=${page}&offset=${offset}&sort=asc&apikey=${this.apiKey}`
       );
       const transactions = response.data.result;
       if (transactions) {
