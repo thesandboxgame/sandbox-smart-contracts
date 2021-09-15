@@ -31,14 +31,6 @@ const func: DeployFunction = async function (
   const asset = await deploy('Asset', {
     from: upgradeAdmin,
     contract: 'AssetV2',
-    args: [
-      TRUSTED_FORWARDER.address,
-      assetAdmin,
-      assetBouncerAdmin,
-      ERC1155_PREDICATE.address,
-      0,
-      AssetAttributesRegistry.address,
-    ],
     libraries: {
       ERC1155ERC721Helper: ERC1155ERC721HelperLib.address,
       AssetHelper: assetHelperLib.address,
@@ -54,6 +46,7 @@ const func: DeployFunction = async function (
           assetBouncerAdmin,
           ERC1155_PREDICATE.address,
           0,
+          AssetAttributesRegistry.address,
         ],
       },
       upgradeIndex: 1,

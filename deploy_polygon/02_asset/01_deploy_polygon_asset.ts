@@ -32,14 +32,6 @@ const func: DeployFunction = async function (
   const polygonAsset = await deploy('PolygonAsset', {
     from: deployer,
     contract: 'PolygonAssetV2',
-    args: [
-      TRUSTED_FORWARDER.address,
-      assetAdmin,
-      assetBouncerAdmin,
-      CHILD_CHAIN_MANAGER.address,
-      1,
-      AssetAttributesRegistry.address,
-    ],
     libraries: {
       AssetHelper: assetHelperLib.address,
       ERC1155ERC721Helper: ERC1155ERC721HelperLib.address,
@@ -55,6 +47,7 @@ const func: DeployFunction = async function (
           assetBouncerAdmin,
           CHILD_CHAIN_MANAGER.address,
           1,
+          AssetAttributesRegistry.address,
         ],
       },
       upgradeIndex: 0,
