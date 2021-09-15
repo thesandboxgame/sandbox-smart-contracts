@@ -33,16 +33,22 @@ contract EstateSaleWithAuth is ERC2771Context, ReferralValidator08 {
         _wallet = newWallet;
     }
 
-    /// @notice buy Land with SAND using the merkle proof associated with it
+    // Note: Using struct to avoid the "Stack too deep" issue.
     /// @param buyer address that perform the payment
     /// @param to address that will own the purchased Land
     /// @param reserved the reserved address (if any)
+    struct Addresses {
+        address buyer;
+        address to;
+        address reserved;
+    }
+
+    /// @notice buy Land with SAND using the merkle proof associated with it
+    /// @param addrs struct of addresses. Using struct to avoid "Stack too deep" error
     /// @param info [X_INDEX=0] x coordinate of the Land [Y_INDEX=1] y coordinate of the Land [SIZE_INDEX=2] size of the pack of Land to purchase [PRICE_INDEX=3] price in SAND to purchase that Land
     /// @param proof merkleProof for that particular Land
     function buyLandWithSand(
-        address buyer,
-        address to,
-        address reserved,
+        Addresses calldata addrs,
         uint256[] calldata info,
         bytes32 salt,
         uint256[] calldata assetIds,
@@ -50,11 +56,11 @@ contract EstateSaleWithAuth is ERC2771Context, ReferralValidator08 {
         bytes calldata referral,
         bytes calldata signature
     ) external {
-        _checkAddressesAndExpiryTime(buyer, reserved);
-        _checkAuthAndProofValidity(to, reserved, info, salt, assetIds, proof, signature);
-        _handleFeeAndReferral(buyer, info[PRICE_INDEX], referral);
-        _mint(buyer, to, info);
-        _sendAssets(to, assetIds);
+        _checkAddressesAndExpiryTime(addrs.buyer, addrs.reserved);
+        _checkAuthAndProofValidity(addrs.to, addrs.reserved, info, salt, assetIds, proof, signature);
+        _handleFeeAndReferral(addrs.buyer, info[PRICE_INDEX], referral);
+        _mint(addrs.buyer, addrs.to, info);
+        _sendAssets(addrs.to, assetIds);
     }
 
     /// @notice Gets the expiry time for the current sale
@@ -169,8 +175,6 @@ contract EstateSaleWithAuth is ERC2771Context, ReferralValidator08 {
             _land.mintQuad(_estate, info[SIZE_INDEX], info[X_INDEX], info[Y_INDEX], abi.encode(to));
         }
 
-        uint256 GRID_SIZE = 408; // 408 is the size of the Land
-
         emit LandQuadPurchased(
             buyer,
             to,
@@ -228,7 +232,7 @@ contract EstateSaleWithAuth is ERC2771Context, ReferralValidator08 {
         return priceInSand - feeAmountInSand;
     }
 
-    // uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
+    uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
 
     IERC1155 internal immutable _asset;
     LandToken internal immutable _land;
@@ -242,37 +246,45 @@ contract EstateSaleWithAuth is ERC2771Context, ReferralValidator08 {
     bytes32 internal immutable _merkleRoot;
 
     uint256 private constant FEE = 5; // percentage of land sale price to be diverted to a specially configured instance of FeeDistributor, shown as an integer
+
     // buyLandWithSand info indexes
+
     uint256 private constant X_INDEX = 0;
     uint256 private constant Y_INDEX = 1;
     uint256 private constant SIZE_INDEX = 2;
     uint256 private constant PRICE_INDEX = 3;
 
-    constructor(
-        LandToken landAddress,
-        IERC20 sandContractAddress,
-        address trustedForwarder,
-        address admin,
-        address payable initialWalletAddress,
-        bytes32 merkleRoot,
-        uint256 expiryTime,
-        address initialSigningWallet,
-        uint256 initialMaxCommissionRate,
-        address estate,
-        IERC1155 asset,
-        address feeDistributor,
-        address authValidator
-    ) ERC2771Context(trustedForwarder) ReferralValidator08(initialSigningWallet, initialMaxCommissionRate, admin) {
-        _land = landAddress;
-        _sand = sandContractAddress;
-        // ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
-        _wallet = initialWalletAddress;
-        _merkleRoot = merkleRoot;
-        _expiryTime = expiryTime;
-        _admin = admin;
-        _estate = estate;
-        _asset = asset;
-        _feeDistributor = feeDistributor;
-        _authValidator = AuthValidator(authValidator);
+    // need to use struct to avoid "Stack Too Deep" error. Since there are too many parameters.
+    struct Parameters {
+        IERC1155 asset;
+        LandToken landAddress;
+        IERC20 sandContractAddress;
+        address admin;
+        address estate;
+        address feeDistributor;
+        address payable initialWalletAddress;
+        AuthValidator authValidator;
+        uint256 expiryTime;
+        bytes32 merkleRoot;
+        address trustedForwarder;
+        address initialSigningWallet;
+        uint256 initialMaxCommissionRate;
+    }
+
+    constructor(Parameters memory p)
+        ERC2771Context(p.trustedForwarder)
+        ReferralValidator08(p.initialSigningWallet, p.initialMaxCommissionRate, p.admin)
+    {
+        _asset = p.asset;
+        _land = p.landAddress;
+        _sand = p.sandContractAddress;
+        // // ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
+        _admin = p.admin;
+        _estate = p.estate;
+        _feeDistributor = p.feeDistributor;
+        _wallet = p.initialWalletAddress;
+        _authValidator = p.authValidator;
+        _expiryTime = p.expiryTime;
+        _merkleRoot = p.merkleRoot;
     }
 }
