@@ -5,17 +5,15 @@ import {skipUnlessTestnet} from '../../utils/network';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-
   const {deployer} = await getNamedAccounts();
 
-  let FAKE_LP_MATIC_SAND = await deployments.getOrNull('FakeLPSandMatic');
-  if (!FAKE_LP_MATIC_SAND) {
-    FAKE_LP_MATIC_SAND = await deploy('FakeLPSandMatic', {
-      from: deployer,
-      log: true,
-    });
-  }
+  await deploy('PolygonLand', {
+    from: deployer,
+    contract: 'PolygonLandBaseToken',
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
 };
 export default func;
-func.tags = ['FakeLPSandMatic', 'L2'];
+func.tags = ['PolygonLand', 'PolygonLand_deploy', 'L2'];
 func.skip = skipUnlessTestnet;
