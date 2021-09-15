@@ -118,7 +118,7 @@ const config: HardhatUserConfig = {
 
     sandSaleBeneficiary: {
       default: 3,
-      mainnet: '0x9695ed5020BB47880738Db356678fe8cBc8FF60b', // TODO use another wallet ?
+      mainnet: '0x0EB04462D69B1D267d269377E34f60b9De1c8510', // TODO use another wallet ?
       rinkeby: '0x60927eB036621b801491B6c5e9A60A8d2dEeD75A',
       goerli: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
       mumbai: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
