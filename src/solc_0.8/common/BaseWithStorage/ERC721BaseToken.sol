@@ -1,6 +1,5 @@
 //SPDX-License-Identifier: MIT
 /* solhint-disable func-order, code-complexity */
-// solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/utils/Address.sol";
@@ -28,6 +27,11 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Handler {
     mapping(uint256 => uint256) internal _owners;
     mapping(address => mapping(address => bool)) internal _operatorsForAll;
     mapping(uint256 => address) internal _operators;
+    uint8 internal _chainIndex;
+
+    function __ERC721BaseToken_initialize(uint8 chainIndex) internal {
+        _chainIndex = chainIndex;
+    }
 
     /// @notice Approve an operator to spend tokens on the senders behalf.
     /// @param operator The address receiving the approval.
@@ -231,6 +235,11 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Handler {
         return id == 0x01ffc9a7 || id == 0x80ac58cd;
     }
 
+    function isBurned(uint256 estateId) public view returns (bool) {
+        uint256 storageId = _storageId(estateId);
+        return (_owners[storageId] & BURNED_FLAG) == BURNED_FLAG;
+    }
+
     /// @dev By overriding this function in an implementation which inherits this contract, you can enable versioned tokenIds without the extra overhead of writing to a new storage slot in _owners each time a version is incremented. See GameToken._storageId() for an example, where the storageId is the tokenId minus the version number.
     /// !!! Caution !!! Overriding this function without taking appropriate care could lead to
     /// ownerOf() returning an owner for non-existent tokens. Tests should be written to
@@ -296,8 +305,12 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Handler {
         require(to != address(0), "NOT_TO_ZEROADDRESS");
 
         uint256 numTokens = ids.length;
-        for (uint256 i = 0; i < numTokens; i++) {
+        for (uint256 i = 0; i < ids.length; i++) {
             uint256 id = ids[i];
+            if (id == 0) {
+                numTokens--;
+                continue;
+            }
             (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(id);
             require(owner == from, "BATCHTRANSFERFROM_NOT_OWNER");
             require(authorized || (operatorEnabled && _operators[id] == msgSender), "NOT_AUTHORIZED");
@@ -308,7 +321,6 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Handler {
             _numNFTPerAddress[from] -= numTokens;
             _numNFTPerAddress[to] += numTokens;
         }
-
         if (to.isContract() && (safe || _checkInterfaceWith10000Gas(to, ERC721_MANDATORY_RECEIVER))) {
             require(_checkOnERC721BatchReceived(msgSender, from, to, ids, data), "ERC721_BATCH_TRANSFER_REJECTED");
         }

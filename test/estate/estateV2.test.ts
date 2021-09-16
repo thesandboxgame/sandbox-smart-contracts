@@ -6,6 +6,7 @@ import {supplyAssets} from '../Game/assets';
 import {BigNumber, Contract} from 'ethers';
 import {getNewGame} from './utils';
 import {Address} from 'hardhat-deploy/types';
+import {sendMetaTx} from '../sendMetaTx';
 
 const emptyBytes = Buffer.from('');
 
@@ -204,6 +205,178 @@ describe('EstateV2', function () {
       expect(estateData.landIds).to.be.eql(landIds);
     }
   });
+
+  it('create an estate with 4 lands and games', async function () {
+    const {
+      estateContract,
+      landContractAsMinter,
+      landContractAsUser0,
+      user0,
+      gameToken,
+      gameTokenAsUser0,
+    } = await setupEstate();
+
+    const uri =
+      '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+
+    const mintingData: LandMintingData[] = [
+      {beneficiary: user0, size: 1, x: 1, y: 2},
+      {beneficiary: user0, size: 1, x: 1, y: 1},
+      {beneficiary: user0, size: 1, x: 2, y: 2},
+      {beneficiary: user0, size: 1, x: 2, y: 1},
+    ];
+
+    const landIds = await mintLands(landContractAsMinter, mintingData);
+    const {gameIds} = await mintGames(gameToken, user0, [1, 1, 1, 1], 0);
+
+    /*for (let i = 0; i < landIds.length; i++) {
+      await landContractAsUser0.approve(estateContract.address, landIds[i]);
+      await gameTokenAsUser0.approve(estateContract.address, gameIds[i]);
+    }*/
+    const sizes = [1, 1, 1, 1];
+    const xs = [1, 1, 2, 2];
+    const ys = [2, 1, 2, 1];
+    //sign transactions
+    const {to, data} = await landContractAsUser0.populateTransaction[
+      'batchTransferQuad(address, address, uint256[], uint256[], uint256[], bytes)'
+    ](user0, estateContract.address, sizes, xs, ys, '');
+
+    //await sendMetaTx(to, trustedForwarder, data, users[1].address);
+
+    const sig = '0xdd62ed3e';
+
+    /*function batchTransferQuad(
+      address from,
+      address to,
+      uint256[] calldata sizes,
+      uint256[] calldata xs,
+      uint256[] calldata ys,
+      bytes calldata data
+  ) external*/
+
+    const tx = await estateContract
+      .connect(ethers.provider.getSigner(user0))
+      .createEstateII(user0, user0, {
+        landIds: landIds,
+        gameIds: gameIds,
+        uri,
+        data,
+        sig,
+      });
+
+    const receipt = await tx.wait();
+
+    console.log(receipt.gasUsed.toString() + ' gas used for 4x4');
+
+    const estateCreationEvents = await estateContract.queryFilter(
+      estateContract.filters.EstateTokenUpdated()
+    );
+    const estateCreationEvent = estateCreationEvents.filter(
+      (e) => e.event === 'EstateTokenUpdated'
+    );
+    expect(estateCreationEvent[0].args).not.be.equal(null);
+    if (estateCreationEvent[0].args) {
+      expect(estateCreationEvent[0].args[2].gameIds).to.be.eql(gameIds);
+      expect(estateCreationEvent[0].args[2].landIds).to.be.eql(landIds);
+      expect(estateCreationEvent[0].args[2].uri).to.be.equal(uri);
+      const estateId = estateCreationEvent[0].args[1];
+      const estateData = await estateContract.callStatic.getEstateData(
+        estateId
+      );
+      expect(estateData.gameIds).to.be.eql(gameIds);
+      expect(estateData.landIds).to.be.eql(landIds);
+    }
+  });
+
+  it('500 loop', async function () {
+    const {estateContract, user0, landContractAsUser0} = await setupEstate();
+
+    //const receipt = await waitFor(landContractAsUser0.fiveHundredLoop());
+
+    //const receipt =
+    //const receipt = await waitFor(estateContract.fiveHundredLoop());
+    //const receipt = await landContractAsUser0.fiveHundredLoop(20);
+
+    const receipt = await waitFor(
+      estateContract
+        .connect(ethers.provider.getSigner(user0))
+        .fiveHundredLoop(30)
+    );
+
+    console.log(receipt.gasUsed.toString() + ' 500 loop');
+
+    expect(2).to.be.eql(2);
+  });
+
+  it('create a doughnut shaped estate', async function () {
+    const {
+      estateContract,
+      landContractAsMinter,
+      landContractAsUser0,
+      user0,
+      gameToken,
+      gameTokenAsUser0,
+    } = await setupEstate();
+
+    const uri =
+      '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+
+    const mintingData: LandMintingData[] = [
+      {beneficiary: user0, size: 1, x: 1, y: 1},
+      {beneficiary: user0, size: 1, x: 1, y: 2},
+      {beneficiary: user0, size: 1, x: 1, y: 3},
+      {beneficiary: user0, size: 1, x: 2, y: 1},
+      {beneficiary: user0, size: 1, x: 2, y: 3},
+      {beneficiary: user0, size: 1, x: 3, y: 1},
+      {beneficiary: user0, size: 1, x: 3, y: 2},
+      {beneficiary: user0, size: 1, x: 3, y: 3},
+    ];
+
+    const landIds = await mintLands(landContractAsMinter, mintingData);
+    const {gameIds} = await mintGames(
+      gameToken,
+      user0,
+      [1, 1, 1, 1, 1, 1, 1, 1],
+      0
+    );
+
+    for (let i = 0; i < landIds.length; i++) {
+      await landContractAsUser0.approve(estateContract.address, landIds[i]);
+      await gameTokenAsUser0.approve(estateContract.address, gameIds[i]);
+    }
+
+    const receipt = await waitFor(
+      estateContract
+        .connect(ethers.provider.getSigner(user0))
+        .createEstate(user0, user0, {
+          landIds: landIds,
+          gameIds: gameIds,
+          uri,
+        })
+    );
+
+    console.log(receipt.gasUsed.toString() + ' gas used for doughnut');
+
+    const estateCreationEvents = await estateContract.queryFilter(
+      estateContract.filters.EstateTokenUpdated()
+    );
+    const estateCreationEvent = estateCreationEvents.filter(
+      (e) => e.event === 'EstateTokenUpdated'
+    );
+    expect(estateCreationEvent[0].args).not.be.equal(null);
+    if (estateCreationEvent[0].args) {
+      expect(estateCreationEvent[0].args[2].gameIds).to.be.eql(gameIds);
+      expect(estateCreationEvent[0].args[2].landIds).to.be.eql(landIds);
+      expect(estateCreationEvent[0].args[2].uri).to.be.equal(uri);
+      const estateId = estateCreationEvent[0].args[1];
+      const estateData = await estateContract.callStatic.getEstateData(
+        estateId
+      );
+      expect(estateData.gameIds).to.be.eql(gameIds);
+      expect(estateData.landIds).to.be.eql(landIds);
+    }
+  });
+
   it('create should fail for lands that are not adjacent', async function () {
     const {
       estateContract,
@@ -662,10 +835,21 @@ describe('EstateV2', function () {
     const mintGamesRes = await mintGames(gameToken, user0, [1, 1], 0);
     const {gameIds} = mintGamesRes;
 
+    let gasConsumed = 0;
+    let receipt1;
+    let receiptX;
     for (let i = 0; i < landIds.length; i++) {
-      await landContractAsUser0.approve(estateContract.address, landIds[i]);
-      await gameTokenAsUser0.approve(estateContract.address, gameIds[i]);
+      receipt1 = await waitFor(
+        landContractAsUser0.approve(estateContract.address, landIds[i])
+      );
+      receiptX = await waitFor(
+        gameTokenAsUser0.approve(estateContract.address, gameIds[i])
+      );
+      gasConsumed =
+        gasConsumed + receipt1.gasUsed.toNumber() + receiptX.gasUsed.toNumber();
     }
+
+    console.log('this cost ' + gasConsumed + ' gas');
 
     await waitFor(
       estateContract
