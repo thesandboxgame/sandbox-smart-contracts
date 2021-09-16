@@ -10,18 +10,29 @@ const func: DeployFunction = async function (
   const {deploy} = deployments;
 
   const landContract = await deployments.get('Land');
+  const gameToken = await deployments.get('ChildGameToken');
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const chainIndex = 1; // L2 (Polygon). Use 0 for Ethereum-Mainnet.
-
   await deploy('ChildEstateToken', {
     from: deployer,
     contract: 'ChildEstateTokenV1',
+    /*args: [
+      TRUSTED_FORWARDER.address,
+      landContract.address,
+      gameToken.address,
+      chainIndex,
+    ],*/
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
         methodName: 'initV1',
-        args: [TRUSTED_FORWARDER.address, landContract.address, chainIndex],
+        args: [
+          TRUSTED_FORWARDER.address,
+          landContract.address,
+          gameToken.address,
+          chainIndex,
+        ],
       },
       upgradeIndex: 0,
     },
@@ -32,6 +43,10 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['ChildEstateToken', 'ChildEstateToken_deploy'];
-func.dependencies = ['Land_deploy', 'TRUSTED_FORWARDER'];
+func.dependencies = [
+  'ChildGameToken_setup',
+  'Land_deploy',
+  'TRUSTED_FORWARDER',
+];
 func.skip = skipUnlessTest;
 // TODO: Setup deploy-polygon folder and network.
