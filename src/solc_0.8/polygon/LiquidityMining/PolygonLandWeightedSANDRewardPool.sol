@@ -59,6 +59,7 @@ contract PolygonLandWeightedSANDRewardPool is PolygonLPTokenWrapper, IRewardDist
     event Staked(address indexed user, uint256 amount);
     event Withdrawn(address indexed user, uint256 amount);
     event RewardPaid(address indexed user, uint256 reward);
+    event MultiplierComputed(address indexed user, uint256 multiplier, uint256 contribution);
 
     uint256 public immutable duration;
 
@@ -79,6 +80,7 @@ contract PolygonLandWeightedSANDRewardPool is PolygonLPTokenWrapper, IRewardDist
     IERC721 internal _multiplierNFToken;
 
     uint256 internal _totalContributions;
+    mapping(address => uint256) internal _multipliers;
     mapping(address => uint256) internal _contributions;
 
     constructor(
@@ -98,6 +100,10 @@ contract PolygonLandWeightedSANDRewardPool is PolygonLPTokenWrapper, IRewardDist
 
     function contributionOf(address account) public view returns (uint256) {
         return _contributions[account];
+    }
+
+    function multiplierOf(address account) public view returns (uint256) {
+        return _multipliers[account];
     }
 
     modifier updateReward(address account) {
@@ -146,24 +152,40 @@ contract PolygonLandWeightedSANDRewardPool is PolygonLPTokenWrapper, IRewardDist
         return amountStaked.add(amountStaked.mul(nftContrib).div(DECIMALS_9));
     }
 
+    function updateContribution(address account) internal {
+        _totalContributions = _totalContributions.sub(contributionOf(account));
+        _multipliers[account] = _multiplierNFToken.balanceOf(account);
+
+        uint256 contribution = computeContribution(balanceOf(account), multiplierOf(account));
+
+        _totalContributions = _totalContributions.add(contribution);
+        _contributions[account] = contribution;
+    }
+
+    function computeMultiplier(address account) public updateReward(account) {
+        require(msg.sender == account, "Caller is not reward distribution");
+        updateContribution(account);
+
+        emit MultiplierComputed(account, multiplierOf(account), contributionOf(account));
+    }
+
     function stake(uint256 amount) public override nonReentrant updateReward(msg.sender) {
         require(amount > 0, "Cannot stake 0");
-        uint256 contribution = computeContribution(amount, _multiplierNFToken.balanceOf(msg.sender));
-        _totalContributions = _totalContributions.add(contribution);
-        _contributions[msg.sender] = _contributions[msg.sender].add(contribution);
+
         super.stake(amount);
+
+        updateContribution(msg.sender);
+
         emit Staked(msg.sender, amount);
     }
 
     function withdraw(uint256 amount) public override nonReentrant updateReward(msg.sender) {
         require(amount > 0, "Cannot withdraw 0");
-        uint256 balance = balanceOf(msg.sender);
-        uint256 ratio = amount.mul(DECIMALS_18).div(balance);
-        uint256 currentContribution = contributionOf(msg.sender);
-        uint256 contributionReduction = currentContribution.mul(ratio).div(DECIMALS_18);
-        _contributions[msg.sender] = currentContribution.sub(contributionReduction);
-        _totalContributions = _totalContributions.sub(contributionReduction);
+
         super.withdraw(amount);
+
+        updateContribution(msg.sender);
+
         emit Withdrawn(msg.sender, amount);
     }
 
