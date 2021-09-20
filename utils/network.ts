@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {HARDHAT_NETWORK_NAME} from 'hardhat/plugins';
 
 export function node_url(networkName: string): string {
   if (networkName) {
@@ -87,5 +88,9 @@ export function isTestnet(hre: HardhatRuntimeEnvironment): boolean {
 }
 
 export function isTest(hre: HardhatRuntimeEnvironment): boolean {
-  return hre.network.name === 'hardhat' || !!process.env.HARDHAT_FORK;
+  return (
+    hre.network.name === HARDHAT_NETWORK_NAME ||
+    hre.network.name === 'localhost' ||
+    !!process.env.HARDHAT_FORK
+  );
 }
