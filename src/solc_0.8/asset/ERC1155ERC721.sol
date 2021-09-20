@@ -70,8 +70,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     ) public {
         // one-time init of bitfield's previous versions
         _checkInit(0);
-        _checkInit(1);
-        _checkInit(2);
         _admin = admin;
         _bouncerAdmin = bouncerAdmin;
         _predicate = predicate;

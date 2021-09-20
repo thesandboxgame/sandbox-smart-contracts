@@ -68,6 +68,6 @@ func.tags = ['PolygonAsset', 'PolygonAsset_deploy', 'L2'];
 func.dependencies = [
   'TRUSTED_FORWARDER',
   'CHILD_CHAIN_MANAGER',
-  'GemsCatalystsRegistry_setup',
+  'AssetAttributesRegistry_deploy',
 ];
 func.skip = skipUnlessTestnet; // TODO: change to skip unless L2
