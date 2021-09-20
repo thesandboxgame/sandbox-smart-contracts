@@ -259,14 +259,15 @@ export async function getLandSaleFiles(presale: string, networkName: string): Pr
     mainnet: 'mainnet',
     rinkeby: 'testnet',
     goerli: 'testnet',
-    hardhat: 'testnet'
+    hardhat: 'testnet',
+    localhost: 'testnet'
   }
   const name = networkNameMap[networkName];
   const secretPath = `./secret/.${presale}_${name}_secret`;
   const sectorPath = `./${presale}/sectors.${name}.json`;
   const bundlesPath = `./${presale}/bundles.${name}.json`;
   let secret;
-  if (networkName === 'hardhat') {
+  if (networkName === 'hardhat' || networkName === 'localhost') {
     secret = "0x4467363716526536535425451427798982881775318563547751090997863683";
   } else {
     secret = fs.readFileSync(secretPath).toString();
