@@ -162,8 +162,7 @@ contract PolygonLandWeightedSANDRewardPool is PolygonLPTokenWrapper, IRewardDist
         _contributions[account] = contribution;
     }
 
-    function computeMultiplier(address account) public updateReward(account) {
-        require(msg.sender == account, "Caller is not reward distribution");
+    function computeMultiplier(address account) public onlyRewardDistributionOrAccount(account) updateReward(account) {
         updateContribution(account);
 
         emit MultiplierComputed(account, multiplierOf(account), contributionOf(account));

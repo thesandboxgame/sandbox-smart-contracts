@@ -14,6 +14,14 @@ abstract contract IRewardDistributionRecipient is Ownable {
         _;
     }
 
+    modifier onlyRewardDistributionOrAccount(address account) {
+        require(
+            _msgSender() == rewardDistribution || _msgSender() == account,
+            "Caller is not reward distribution or account"
+        );
+        _;
+    }
+
     function setRewardDistribution(address _rewardDistribution) external onlyOwner {
         rewardDistribution = _rewardDistribution;
     }
