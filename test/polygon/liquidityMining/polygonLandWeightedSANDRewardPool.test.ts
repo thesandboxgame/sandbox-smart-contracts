@@ -1999,7 +1999,7 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
     expect(earned).to.be.above(ACTUAL_REWARD_AMOUNT);
   });
 
-  it('multiplier', async function () {
+  it('Multiplier & reward are correct', async function () {
     const {
       rewardPoolContract,
       others,
@@ -2075,5 +2075,31 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     expect(precisionLost).to.be.at.least(1);
     expect(precisionLost).to.be.at.most(2);
+  });
+
+  it(`Only sender or reward distribution can compute sender's account`, async function () {
+    const {
+      rewardPoolContract,
+      others,
+      liquidityRewardAdmin,
+    } = await setupPolygonLandWeightedSANDRewardPool();
+
+    await expect(
+      rewardPoolContract
+        .connect(ethers.provider.getSigner(others[1]))
+        .computeMultiplier(others[0])
+    ).to.be.revertedWith('Caller is not reward distribution or account');
+
+    await expect(
+      rewardPoolContract
+        .connect(ethers.provider.getSigner(others[0]))
+        .computeMultiplier(others[0])
+    ).to.be.ok;
+
+    await expect(
+      rewardPoolContract
+        .connect(liquidityRewardAdmin)
+        .computeMultiplier(others[0])
+    ).to.be.ok;
   });
 });
