@@ -7,7 +7,7 @@ import '@openzeppelin/hardhat-upgrades';
 import 'solidity-coverage';
 import 'hardhat-contract-sizer';
 import '@nomiclabs/hardhat-etherscan';
-import {node_url, accounts} from './utils/network';
+import {accounts, node_url} from './utils/network';
 
 const config: HardhatUserConfig = {
   gasReporter: {
@@ -242,16 +242,19 @@ const config: HardhatUserConfig = {
         : undefined,
       deploy: ['deploy_polygon', 'deploy'],
       // deploy: ['deploy-for-test', 'deploy'],
+      saveDeployments: false,
     },
     localhost: {
       url: 'http://localhost:8545',
       accounts: accounts(),
       tags: ['testnet', 'L1', 'L2'],
+      saveDeployments: false,
     },
     rinkeby_test: {
       url: node_url('rinkeby'),
       accounts: accounts('rinkeby_test'),
       tags: ['testnet'],
+      saveDeployments: false,
     },
     rinkeby: {
       url: node_url('rinkeby'),
