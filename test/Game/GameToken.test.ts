@@ -227,10 +227,11 @@ describe('GameToken', function () {
       );
     });
 
-    it('can get the chainIndex for a GAME', async function () {
-      const chainIndex = await gameToken.getChainIndex(gameId);
+    /*it('can get the chainIndex for a GAME', async function () {
+      // const idAsHexString = utils.hexValue(gameId);
+      const chainIndex = getImmutableChainIndex(gameId);
       expect(chainIndex).to.be.equal(1);
-    });
+    });*/
 
     it('reverts if non-minter trys to mint Game when _Minter is set', async function () {
       const randomId = await getRandom();
