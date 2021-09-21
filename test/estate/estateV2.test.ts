@@ -204,6 +204,91 @@ describe('EstateV2', function () {
       expect(estateData.landIds).to.be.eql(landIds);
     }
   });
+
+  it('create an estate with two lands and games with meta', async function () {
+    const {
+      estateContract,
+      landContractAsMinter,
+      landContractAsUser0,
+      user0,
+      gameToken,
+      gameTokenAsUser0,
+    } = await setupEstate();
+    const uri =
+      '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+    const mintingData: LandMintingData[] = [
+      {beneficiary: user0, size: 1, x: 6, y: 12},
+      {beneficiary: user0, size: 1, x: 5, y: 12},
+    ];
+    const landIds = await mintLands(landContractAsMinter, mintingData);
+    const {gameIds} = await mintGames(gameToken, user0, [1, 1], 0);
+
+    const encodedABI = await landContractAsUser0.populateTransaction.approve(
+      estateContract.address,
+      landIds[0]
+    ); //how would this work?
+
+    /*for (let i = 0; i < landIds.length; i++) {
+      await landContractAsUser0.approve(estateContract.address, landIds[i]);
+      await gameTokenAsUser0.approve(estateContract.address, gameIds[i]);
+    }*/
+
+    const signature = await ethers.utils
+      .keccak256(
+        landContractAsUser0.approve(estateContract.address, landIds[0])
+      )
+      .substr(0, 10);
+    console.log('HHHHHHHHHHHHHH3' + signature.toString());
+
+    //web3.utils.keccak256("transferFrom(address,address,uint256)").substr(0,10)
+
+    //let fnSignature = await ethers.utils.solidityKeccak256("transferFrom(address,address,uint256)").substr(0,10)
+
+    // encode the function parameters and add them to the call data
+    /*let fnParams = web3.eth.abi.encodeParameters(
+    ["address","address","uint256"],
+    [fromAddr,toAddr,tokenValue]
+    )*/
+
+    /*const wallet = await ethers.getSigner(user0);
+    const signature = await wallet.signMessage(
+      ethers.utils.arrayify(hashedData)
+    );*/
+
+    /*await waitFor(
+      estateContract.connect(ethers.provider.getSigner(user0)).createEstateII(
+        user0,
+        user0,
+        {
+          landIds: landIds,
+          gameIds: gameIds,
+          uri,
+        },
+        encodedABI,
+        signature
+      )
+    );*/
+
+    const estateCreationEvents = await estateContract.queryFilter(
+      estateContract.filters.EstateTokenUpdated()
+    );
+    const estateCreationEvent = estateCreationEvents.filter(
+      (e) => e.event === 'EstateTokenUpdated'
+    );
+    expect(estateCreationEvent[0].args).not.be.equal(null);
+    if (estateCreationEvent[0].args) {
+      expect(estateCreationEvent[0].args[2].gameIds).to.be.eql(gameIds);
+      expect(estateCreationEvent[0].args[2].landIds).to.be.eql(landIds);
+      expect(estateCreationEvent[0].args[2].uri).to.be.equal(uri);
+      const estateId = estateCreationEvent[0].args[1];
+      const estateData = await estateContract.callStatic.getEstateData(
+        estateId
+      );
+      expect(estateData.gameIds).to.be.eql(gameIds);
+      expect(estateData.landIds).to.be.eql(landIds);
+    }
+  });
+
   it('create should fail for lands that are not adjacent', async function () {
     const {
       estateContract,
