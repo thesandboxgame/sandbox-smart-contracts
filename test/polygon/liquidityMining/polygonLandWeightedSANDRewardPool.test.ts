@@ -1998,4 +1998,108 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
     // double reward tokens available to be earned
     expect(earned).to.be.above(ACTUAL_REWARD_AMOUNT);
   });
+
+  it('Multiplier & reward are correct', async function () {
+    const {
+      rewardPoolContract,
+      others,
+      REWARD_DURATION,
+      SMALL_STAKE_AMOUNT,
+      ACTUAL_REWARD_AMOUNT,
+      liquidityRewardAdmin,
+      REWARD_AMOUNT,
+      rewardTokenAsAdmin,
+      multiplierNFTokenContract,
+      multiplierNFTokenAdmin,
+    } = await setupPolygonLandWeightedSANDRewardPool();
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(liquidityRewardAdmin))
+      .notifyRewardAmount(REWARD_AMOUNT);
+    await rewardTokenAsAdmin.transfer(
+      rewardPoolContract.address,
+      REWARD_AMOUNT
+    );
+
+    await multiplierNFTokenContract
+      .connect(ethers.provider.getSigner(multiplierNFTokenAdmin))
+      .mintQuad(others[0], 1, 1, 1, '0x');
+
+    await multiplierNFTokenContract
+      .connect(ethers.provider.getSigner(multiplierNFTokenAdmin))
+      .mintQuad(others[1], 1, 2, 1, '0x');
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .stake(SMALL_STAKE_AMOUNT);
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[1]))
+      .stake(SMALL_STAKE_AMOUNT);
+
+    await mine();
+
+    let multiplier = await rewardPoolContract.multiplierOf(others[0]);
+
+    expect(multiplier).to.be.equal(1);
+
+    await multiplierNFTokenContract
+      .connect(ethers.provider.getSigner(multiplierNFTokenAdmin))
+      .mintQuad(others[0], 1, 1, 2, '0x');
+
+    await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .computeMultiplier(others[0]);
+
+    multiplier = await rewardPoolContract.multiplierOf(others[0]);
+
+    expect(multiplier).to.be.equal(2);
+
+    const latestBlock = await ethers.provider.getBlock('latest');
+    const currentTimestamp = latestBlock.timestamp;
+    await ethers.provider.send('evm_setNextBlockTimestamp', [
+      currentTimestamp + REWARD_DURATION,
+    ]);
+    await mine();
+
+    const earned0 = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[0]))
+      .earned(others[0]);
+
+    const earned1 = await rewardPoolContract
+      .connect(ethers.provider.getSigner(others[1]))
+      .earned(others[1]);
+
+    const earned = earned0.add(earned1);
+    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
+
+    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
+    expect(precisionLost).to.be.at.least(1);
+    expect(precisionLost).to.be.at.most(2);
+  });
+
+  it(`Only sender or reward distribution can compute sender's account`, async function () {
+    const {
+      rewardPoolContract,
+      others,
+      liquidityRewardAdmin,
+    } = await setupPolygonLandWeightedSANDRewardPool();
+
+    await expect(
+      rewardPoolContract
+        .connect(ethers.provider.getSigner(others[1]))
+        .computeMultiplier(others[0])
+    ).to.be.revertedWith('Caller is not reward distribution or account');
+
+    await expect(
+      rewardPoolContract
+        .connect(ethers.provider.getSigner(others[0]))
+        .computeMultiplier(others[0])
+    ).to.be.ok;
+
+    await expect(
+      rewardPoolContract
+        .connect(liquidityRewardAdmin)
+        .computeMultiplier(others[0])
+    ).to.be.ok;
+  });
 });
