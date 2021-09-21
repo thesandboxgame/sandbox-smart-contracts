@@ -3,17 +3,11 @@ pragma solidity 0.8.2;
 
 import "./ERC20BaseToken.sol";
 import "./extensions/ERC20BasicApproveExtension.sol";
-import "../../Base/TheSandbox712.sol";
+import "../WithPermit.sol";
 import "../ERC677/extensions/ERC677Extension.sol";
 import "../../interfaces/IERC677Receiver.sol";
 
-contract ERC20Token is ERC20BasicApproveExtension, ERC677Extension, TheSandbox712, ERC20BaseToken {
-    // //////////////////////// DATA /////////////////////
-
-    bytes32 internal constant PERMIT_TYPEHASH =
-        keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
-
-    mapping(address => uint256) public nonces;
+contract ERC20Token is ERC20BasicApproveExtension, ERC677Extension, WithPermit, ERC20BaseToken {
 
     // /////////////////// CONSTRUCTOR ////////////////////
     constructor(
@@ -46,17 +40,7 @@ contract ERC20Token is ERC20BasicApproveExtension, ERC677Extension, TheSandbox71
         bytes32 r,
         bytes32 s
     ) public {
-        require(deadline >= block.timestamp, "PAST_DEADLINE");
-        bytes32 digest =
-            keccak256(
-                abi.encodePacked(
-                    "\x19\x01",
-                    DOMAIN_SEPARATOR,
-                    keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
-                )
-            );
-        address recoveredAddress = ecrecover(digest, v, r, s);
-        require(recoveredAddress != address(0) && recoveredAddress == owner, "INVALID_SIGNATURE");
+        checkApproveFor(owner, spender, value, deadline, v, r, s);
         _approveFor(owner, spender, value);
     }
 }
