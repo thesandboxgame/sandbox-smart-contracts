@@ -10,10 +10,11 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../common/Libraries/UintToUintMap.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
 import "@openzeppelin/contracts-0.8/utils/structs/EnumerableSet.sol";
+import "@openzeppelin/contracts-0.8/metatx/MinimalForwarder.sol";
 
 /// @dev An updated Estate Token contract using a simplified verison of LAND with no Quads
 
-contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
+contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter, MinimalForwarder {
     using EnumerableMap for EnumerableMap.UintToUintMap;
     using EnumerableSet for EnumerableSet.UintSet;
     uint8 internal constant OWNER = 0;
@@ -78,6 +79,31 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         _addLandsGames(from, storageId, creation.landIds, creation.gameIds, true);
         emit EstateTokenUpdated(0, estateId, creation);
         return estateId;
+    }
+
+    //This is a test, to see if I can recover lands via metatransaction
+    //problem who will pay for this?
+    function createEstateII(
+        address from,
+        address to,
+        EstateCRUDData calldata creation,
+        ForwardRequest calldata req,
+        bytes calldata signature
+    ) external returns (uint256) {
+        _check_authorized(from, ADD);
+        (uint256 estateId, uint256 storageId) = _mintEstate(from, to, _nextId++, 1, true);
+        _metaData[storageId] = creation.uri;
+        //_addLandsGames(from, storageId, creation.landIds, creation.gameIds, true);
+
+        execute(req, signature);
+
+        emit EstateTokenUpdated(0, estateId, creation);
+        return estateId;
+    }
+
+    function giveMeAnOK(uint256[] memory cardinals) external returns (bool) {
+        bool ok = true;
+        return ok;
     }
 
     /// @notice lets the estate owner add lands and/or add/remove games for these lands
@@ -223,7 +249,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
     }*/
 
     // A depth first search implementation
-    function areLandsAdjacent(uint256[] memory landIds, uint256 landIdsSize) public pure returns (bool) {
+    /*function areLandsAdjacent(uint256[] memory landIds, uint256 landIdsSize) public pure returns (bool) {
         if (landIdsSize == 0) {
             return true;
         }
@@ -245,7 +271,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
             visitedLandsSize++;
         }
         return landIdsSize == visitedLandsSize;
-    }
+    }*/
 
     /// @notice Return the name of the token contract.
     /// @return The name of the token contract.
@@ -312,7 +338,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
                 }
             }
         }
-        require(areLandsAdjacent(newLands, newLands.length), "LANDS_ARE_NOT_ADJACENT");
+        //require(areLandsAdjacent(newLands, newLands.length), "LANDS_ARE_NOT_ADJACENT");
         (, uint256[] memory gamesToAdd) = _setGamesOfLands(storageId, landIdsToAdd, gameIds, false);
         _land.batchTransferFrom(sender, address(this), landIdsToAdd, "");
         _gameToken.batchTransferFrom(sender, address(this), gamesToAdd, "");
@@ -334,7 +360,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
                 }
             }
         }
-        require(areLandsAdjacent(ed.landIds, ed.landIds.length - removedLandsCounter), "LANDS_ARE_NOT_ADJACENT");
+        //require(areLandsAdjacent(ed.landIds, ed.landIds.length - removedLandsCounter), "LANDS_ARE_NOT_ADJACENT");
         uint256[] memory gameIdsToRemove = _removeLandsGamesNoAdjacencyCheck(to, estateId, landsToRemove);
         // a game should be removed only if all lands that attached to it are being removed too
         for (uint256 j = 0; j < gameIdsToRemove.length; j++) {
@@ -474,7 +500,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         );
     }
 
-    function _addUnvisitedAdjacentLands(
+    /*function _addUnvisitedAdjacentLands(
         uint16 x1,
         uint16 y1,
         uint256[] memory landIds,
@@ -495,7 +521,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
             }
         }
         return stackSize;
-    }
+    }*/
 
     function isLandVisited(uint256 landId, uint256[] memory visitedLands) internal pure returns (bool) {
         for (uint256 i = 0; i < visitedLands.length; i++) {
