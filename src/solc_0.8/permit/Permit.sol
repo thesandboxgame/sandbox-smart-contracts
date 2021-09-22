@@ -31,6 +31,6 @@ contract Permit is WithPermit {
         bytes32 r,
         bytes32 s
     ) public {
-         permitTransfer(_sand, owner, spender, value, deadline, v, r, s);
+        permitTransfer(_sand, owner, spender, value, deadline, v, r, s);
     }
 }

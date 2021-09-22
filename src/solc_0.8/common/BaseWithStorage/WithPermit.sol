@@ -7,7 +7,6 @@ import "../../common/Base/TheSandbox712.sol";
 /// @title Permit contract
 /// @notice This contract manages approvals of SAND via signature
 contract WithPermit is TheSandbox712 {
-
     mapping(address => uint256) public nonces;
 
     bytes32 public constant PERMIT_TYPEHASH =

@@ -8,7 +8,6 @@ import "../ERC677/extensions/ERC677Extension.sol";
 import "../../interfaces/IERC677Receiver.sol";
 
 contract ERC20Token is ERC20BasicApproveExtension, ERC677Extension, WithPermit, ERC20BaseToken {
-
     // /////////////////// CONSTRUCTOR ////////////////////
     constructor(
         string memory name,
