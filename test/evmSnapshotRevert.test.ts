@@ -26,7 +26,7 @@ const createSnapshotSetup = createSnapshot([], async () => {
   });
   return await ethers.getContract('FakeChildChainManager');
 });
-async function thrown(promise: Promise<any>) {
+async function thrown(promise: Promise<unknown>) {
   try {
     await promise;
     return null;
