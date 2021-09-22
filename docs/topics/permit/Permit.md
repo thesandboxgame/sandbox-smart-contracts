@@ -2,7 +2,7 @@
 description: Permit
 ---
 
-# Permit
+# [Permit]((https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/src/solc_0.8/permit/Permit.sol))
 
 ## Introduction
 
@@ -91,7 +91,10 @@ So we transmit this approval for erc20 extended contract.
 ```plantuml
 @startuml
 EIP712 <|-- TheSandbox712
-TheSandbox712 <|-- Permit
+TheSandbox712 <|-- WithPermit
+WithPermit <|-- Permit
+WithPermit <|-- ERC20BaseToken
+IERC20Extended <|-- ERC20BaseToken
 IERC20 <|-- IERC20Extended
 Permit "many" *-- "1" IERC20Extended : contains
 
@@ -102,9 +105,14 @@ class TheSandbox712 {
   + bytes32 DOMAIN_SEPARATOR
 }
 
+class WithPermit {
+  - mapping(address => uint256) nonces
+  + void permitTransfer(IERC20Extended ierc20Ext, address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+  + void checkApproveFor(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+}
+
 class Permit {
   - IERC20Extended _sand
-  - mapping(address => uint256) nonces
   + void permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
 }
 
