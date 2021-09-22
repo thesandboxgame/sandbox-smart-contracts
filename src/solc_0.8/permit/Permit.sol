@@ -31,6 +31,15 @@ contract Permit is WithPermit {
         bytes32 r,
         bytes32 s
     ) public {
-        permitTransfer(_sand, owner, spender, value, deadline, v, r, s);
+        checkApproveFor(owner, spender, value, deadline, v, r, s);
+        _sand.approveFor(owner, spender, value);
+    }
+
+    function DOMAIN_SEPARATOR() external view returns (bytes32) {
+        return _DOMAIN_SEPARATOR;
+    }
+
+    function nonces(address owner) external view returns (uint256) {
+        return _nonces[owner];
     }
 }

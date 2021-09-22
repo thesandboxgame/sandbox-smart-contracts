@@ -7,13 +7,12 @@ import "../../common/Base/TheSandbox712.sol";
 /// @title Permit contract
 /// @notice This contract manages approvals of SAND via signature
 contract WithPermit is TheSandbox712 {
-    mapping(address => uint256) public nonces;
+    mapping(address => uint256) public _nonces;
 
     bytes32 public constant PERMIT_TYPEHASH =
         keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
     /// @notice Function to permit the expenditure of ERC20 token by a nominated spender
-    /// @param ierc20Ext The IERC20Extended contract
     /// @param owner The owner of the ERC20 tokens
     /// @param spender The nominated spender of the ERC20 tokens
     /// @param value The value (allowance) of the ERC20 tokens that the nominated spender will be allowed to spend
@@ -21,20 +20,6 @@ contract WithPermit is TheSandbox712 {
     /// @param v The final 1 byte of signature
     /// @param r The first 32 bytes of signature
     /// @param s The second 32 bytes of signature
-    function permitTransfer(
-        IERC20Extended ierc20Ext,
-        address owner,
-        address spender,
-        uint256 value,
-        uint256 deadline,
-        uint8 v,
-        bytes32 r,
-        bytes32 s
-    ) public {
-        checkApproveFor(owner, spender, value, deadline, v, r, s);
-        ierc20Ext.approveFor(owner, spender, value);
-    }
-
     function checkApproveFor(
         address owner,
         address spender,
@@ -49,8 +34,8 @@ contract WithPermit is TheSandbox712 {
             keccak256(
                 abi.encodePacked(
                     "\x19\x01",
-                    DOMAIN_SEPARATOR,
-                    keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+                    _DOMAIN_SEPARATOR,
+                    keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, _nonces[owner]++, deadline))
                 )
             );
         address recoveredAddress = ecrecover(digest, v, r, s);

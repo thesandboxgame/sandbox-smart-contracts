@@ -96,6 +96,9 @@ WithPermit <|-- Permit
 WithPermit <|-- ERC20BaseToken
 IERC20Extended <|-- ERC20BaseToken
 IERC20 <|-- IERC20Extended
+ERC20BaseToken <|-- ERC20Token
+IERC20 <|-- ERC20Token
+IERC20Permit <|-- ERC20Token
 Permit "many" *-- "1" IERC20Extended : contains
 
 class EIP712 {
@@ -107,13 +110,14 @@ class TheSandbox712 {
 
 class WithPermit {
   - mapping(address => uint256) nonces
-  + void permitTransfer(IERC20Extended ierc20Ext, address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
   + void checkApproveFor(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
 }
 
 class Permit {
   - IERC20Extended _sand
   + void permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+  + void DOMAIN_SEPARATOR() external view returns (bytes32)
+  + nonces(address owner) external view returns (uint256)
 }
 
 class IERC20 {
@@ -126,6 +130,18 @@ class IERC20 {
 }
 
 class IERC20Extended {
+  + void burnFor(address from, uint256 amount)
+  + void burn(uint256 amount)
+  + bool approveFor(address owner, address spender, uint256 amount)
+}
+
+class IERC20Permit {
+  + void permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+  + void DOMAIN_SEPARATOR() external view returns (bytes32)
+  + nonces(address owner) external view returns (uint256)
+}
+
+class ERC20Token {
   + void burnFor(address from, uint256 amount)
   + void burn(uint256 amount)
   + bool approveFor(address owner, address spender, uint256 amount)
