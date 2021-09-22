@@ -7,8 +7,13 @@ import {
 } from 'hardhat';
 
 import {setupUsers, waitFor, withSnapshot} from '../../utils';
+const {read, execute, deploy} = deployments;
+import {setupUsers, waitFor, withSnapshot} from '../../utils';
 import {assetFixtures} from '../../common/fixtures/asset';
+
 import {Contract} from 'ethers';
+import gems from '../../../data/gems';
+import catalysts from '../../../data/catalysts';
 // import asset_regenerate_and_distribute from '../../setup/asset_regenerate_and_distribute';
 
 const polygonAssetFixtures = async function () {
@@ -111,15 +116,89 @@ const polygonAssetFixtures = async function () {
 
 export const setupAssetRegistryL2 = deployments.createFixture(
   async function () {
-    const {assetAttributesRegistryAdmin} = await getNamedAccounts();
+    const {
+      assetAttributesRegistryAdmin,
+      gemMinter,
+      deployer,
+      catalystAdmin,
+    } = await getNamedAccounts();
+
     const assetAttributesRegistryAsRegistryAdmin: Contract = await ethers.getContract(
-      'AssetAttributesRegistry',
+      'PolygonAssetAttributesRegistry',
       assetAttributesRegistryAdmin
     );
 
-    const Asset = await ethers.getContract('PolygonAsset');
+    const GemsCatalystsRegistry = await deployments.get(
+      'PolygonGemsCatalystsRegistry'
+    );
 
-    assetAttributesRegistryAsRegistryAdmin.setOverLayerDepositor(Asset.address);
+    const DefaultAttributes = await deployments.get('PolygonDefaultAttributes');
+
+    const catalystsToAdd = [];
+    const gemsToAdd = [];
+
+    for (const catalyst of catalysts) {
+      const doesCatalystExist = await read(
+        `PolygonGemsCatalystsRegistry`,
+        'doesCatalystExist',
+        catalyst.catalystId
+      );
+
+      let catalystContract;
+      if (!doesCatalystExist) {
+        catalystContract = await deploy(`PolygonCatalyst_${catalyst.symbol}`, {
+          contract: 'Catalyst',
+          from: deployer,
+          log: true,
+          args: [
+            `Sandbox's ${catalyst.symbol} L2Catalysts`,
+            catalyst.symbol,
+            catalystAdmin,
+            catalyst.maxGems,
+            catalyst.catalystId,
+            DefaultAttributes.address,
+            GemsCatalystsRegistry.address,
+          ],
+          skipIfAlreadyDeployed: true,
+        });
+
+        catalystsToAdd.push(catalystContract.address);
+      }
+    }
+
+    for (const gem of gems) {
+      const doesGemExist = await read(
+        `PolygonGemsCatalystsRegistry`,
+        'doesGemExist',
+        gem.gemId
+      );
+      let gemsContract;
+      if (!doesGemExist) {
+        gemsContract = await deploy(`PolygonGem_${gem.symbol}`, {
+          contract: 'Gem',
+          from: deployer,
+          log: true,
+          args: [
+            `Sandbox's ${gem.symbol} polygonGems`,
+            gem.symbol,
+            gemMinter,
+            gem.gemId,
+            GemsCatalystsRegistry.address,
+          ],
+          skipIfAlreadyDeployed: true,
+        });
+        gemsToAdd.push(gemsContract.address);
+      }
+    }
+
+    const currentAdmin = await read('PolygonGemsCatalystsRegistry', 'getAdmin');
+    await execute(
+      'PolygonGemsCatalystsRegistry',
+      {from: currentAdmin, log: true},
+      'addGemsAndCatalysts',
+      gemsToAdd,
+      catalystsToAdd
+    );
 
     return {
       assetAttributesRegistryAsRegistryAdmin,
@@ -134,17 +213,12 @@ export const setupAssetRegistryL1 = deployments.createFixture(
       'AssetAttributesRegistry',
       assetAttributesRegistryAdmin
     );
-    const Asset = await ethers.getContract('Asset');
-    const assetAttributesRegistryAsAsset: Contract = await ethers.getContract(
-      'AssetAttributesRegistry',
-      Asset.address
-    );
+    // const Asset = await ethers.getContract('Asset');
 
-    assetAttributesRegistryAsRegistryAdmin.setOverLayerDepositor(Asset.address);
+    // assetAttributesRegistryAsRegistryAdmin.setOverLayerDepositor(Asset.address);
 
     return {
       assetAttributesRegistryAsRegistryAdmin,
-      assetAttributesRegistryAsAsset,
     };
   }
 );

@@ -8,17 +8,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
 
   const AssetAttributesRegistry = await deployments.get(
-    'AssetAttributesRegistry'
+    'PolygonAssetAttributesRegistry'
   );
   const Sand = await deployments.get('PolygonSand');
   const Asset = await deployments.get('PolygonAsset');
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
-  const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
+  const GemsCatalystsRegistry = await deployments.get(
+    'PolygonGemsCatalystsRegistry'
+  );
 
   const {deployer, catalystAssetFeeRecipient} = await getNamedAccounts();
 
-  await deploy(`AssetUpgrader`, {
+  await deploy(`PolygonAssetUpgrader`, {
     from: deployer,
     log: true,
     args: [
@@ -31,15 +33,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       catalystAssetFeeRecipient,
       TRUSTED_FORWARDER.address,
     ],
+    contract: `AssetUpgrader`,
   });
 };
 export default func;
-func.tags = ['AssetUpgrader', 'AssetUpgrader_deploy', 'L2'];
+func.tags = ['PolygonAssetUpgrader', 'PolygonAssetUpgrader_deploy', 'L2'];
 func.dependencies = [
-  'AssetAttributesRegistry_deploy',
+  'PolygonAssetAttributesRegistry_deploy',
   'PolygonSand_deploy',
   'PolygonAsset_deploy',
-  'GemsCatalystsRegistry_deploy',
+  'PolygonGemsCatalystsRegistry_deploy',
   'TRUSTED_FORWARDER',
 ];
 func.skip = skipUnlessTest; // disabled for now

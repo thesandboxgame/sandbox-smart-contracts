@@ -8,32 +8,33 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const AssetAttributesRegistry = await deployments.get(
-    'AssetAttributesRegistry'
+    'PolygonAssetAttributesRegistry'
   );
+  const {deployer, assetMinterAdmin} = await getNamedAccounts();
   const Asset = await deployments.get('PolygonAsset');
 
-  const {deployer, assetMinterAdmin} = await getNamedAccounts();
   const assetRegistryData = await read(
-    'Asset',
-    'assetRegistryData.assetRegistry'
+    'PolygonAssetAttributesRegistry',
+    'getCatalystRegistry'
   );
-  console.log(assetRegistryData.address);
-  await deploy(`AssetMinter`, {
+
+  await deploy(`PolygonAssetMinter`, {
     from: deployer,
     log: true,
     args: [
       AssetAttributesRegistry.address,
       Asset.address,
-      assetRegistryData.address,
+      assetRegistryData,
       assetMinterAdmin,
       TRUSTED_FORWARDER.address,
     ],
+    contract: 'AssetMinter',
   });
 };
 export default func;
-func.tags = ['AssetMinter', 'AssetMinter_deploy', 'L2'];
+func.tags = ['PolygonAssetMinter', 'PolygonAssetMinter_deploy', 'L2'];
 func.dependencies = [
-  'AssetAttributesRegistry_deploy',
+  'PolygonAssetAttributesRegistry_deploy',
   'PolygonAsset_deploy',
   'TRUSTED_FORWARDER',
 ];

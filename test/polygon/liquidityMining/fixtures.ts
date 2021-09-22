@@ -110,7 +110,12 @@ export const setupPolygonLandWeightedSANDRewardPool = withSnapshot(
   ],
   async function (hre) {
     const {deployments, getNamedAccounts, ethers} = hre;
-    const {
+    await deployments.fixture([
+      'PolygonLandWeightedSANDRewardPool',
+      'FakeLPSandMatic',
+      'PolygonSand',
+      'Land',
+    ]);    const {
       deployer,
       liquidityRewardAdmin,
       liquidityRewardProvider,
@@ -144,7 +149,7 @@ export const setupPolygonLandWeightedSANDRewardPool = withSnapshot(
       REWARD_DURATION
     );
     const ONE_DAY = 86400;
-    const MULTIPLIER_NFToken = 'Land';
+    const MULTIPLIER_NFToken = 'MockLandWithMint';
 
     const rewardPool = await deployments.get(POOL);
 
@@ -199,10 +204,10 @@ export const setupPolygonLandWeightedSANDRewardPool = withSnapshot(
         .approve(rewardPool.address, STAKE_AMOUNT.mul(10));
     }
 
-    // Enable minting of LANDs
-    await multiplierNFTokenContract
-      .connect(ethers.provider.getSigner(multiplierNFTokenAdmin))
-      .setMinter(landAdmin, true);
+    // // Enable minting of LANDs
+    // await multiplierNFTokenContract
+    //   .connect(ethers.provider.getSigner(multiplierNFTokenAdmin))
+    //   .setMinter(landAdmin, true);
 
     return {
       rewardPool,

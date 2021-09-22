@@ -6,18 +6,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {execute, read} = deployments;
 
-  const AssetMinter = await deployments.get('AssetMinter');
+  const AssetMinter = await deployments.get('PolygonAssetMinter');
   const {gemsCatalystsRegistryAdmin} = await getNamedAccounts();
 
   const isAssetMinterSuperOperator = await read(
-    'GemsCatalystsRegistry',
+    'PolygonGemsCatalystsRegistry',
     'isSuperOperator',
     AssetMinter.address
   );
 
   if (!isAssetMinterSuperOperator) {
     await execute(
-      'GemsCatalystsRegistry',
+      'PolygonGemsCatalystsRegistry',
       {from: gemsCatalystsRegistryAdmin, log: true},
       'setSuperOperator',
       AssetMinter.address,
@@ -27,6 +27,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.runAtTheEnd = true;
-func.tags = ['GemsCatalystsRegistry', 'GemsCatalystsRegistry_setup', 'L2'];
-func.dependencies = ['GemsCatalystsRegistry_deploy', 'AssetMinter_deploy'];
+func.tags = [
+  'PolygonGemsCatalystsRegistry',
+  'PolygonGemsCatalystsRegistry_setup',
+  'L2',
+];
+func.dependencies = [
+  'PolygonGemsCatalystsRegistry_deploy',
+  'PolygonAssetMinter_deploy',
+];
 func.skip = skipUnlessTest; // disabled for now

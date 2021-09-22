@@ -18,7 +18,7 @@ const func: DeployFunction = async function (
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const CHILD_CHAIN_MANAGER = await deployments.get('CHILD_CHAIN_MANAGER');
   const AssetAttributesRegistry = await deployments.get(
-    'AssetAttributesRegistry'
+    'PolygonAssetAttributesRegistry'
   );
 
   const assetHelperLib = await deploy('AssetHelper', {
@@ -56,7 +56,7 @@ const func: DeployFunction = async function (
   });
 
   await execute(
-    'AssetAttributesRegistry',
+    'PolygonAssetAttributesRegistry',
     {from: assetAttributesRegistryAdmin, log: true},
     'setOverLayerDepositor',
     polygonAsset.address
@@ -68,6 +68,8 @@ func.tags = ['PolygonAsset', 'PolygonAsset_deploy', 'L2'];
 func.dependencies = [
   'TRUSTED_FORWARDER',
   'CHILD_CHAIN_MANAGER',
-  'AssetAttributesRegistry_deploy',
+  'PolygonGems_deploy',
+  'PolygonCatalysts_deploy',
+  'PolygonAssetAttributesRegistry_deploy',
 ];
 func.skip = skipUnlessTestnet; // TODO: change to skip unless L2

@@ -6,16 +6,18 @@ import gems from '../../data/gems';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
+  const GemsCatalystsRegistry = await deployments.get(
+    'PolygonGemsCatalystsRegistry'
+  );
 
   const {gemMinter, deployer} = await getNamedAccounts();
   for (const gem of gems) {
-    await deploy(`Gem_${gem.symbol}`, {
+    await deploy(`PolygonGem_${gem.symbol}`, {
       contract: 'Gem',
       from: deployer,
       log: true,
       args: [
-        `Sandbox's ${gem.symbol} Gems`,
+        `Sandbox's ${gem.symbol} polygonGems`,
         gem.symbol,
         gemMinter,
         gem.gemId,
@@ -26,6 +28,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.tags = ['Gems', 'Gems_deploy', 'L2'];
-func.dependencies = ['GemsCatalystsRegistry_deploy'];
+func.tags = ['polygonGems', 'polygonGems_deploy', 'L2'];
+func.dependencies = ['polygonGemsCatalystsRegistry_deploy'];
 func.skip = skipUnlessTest; // disabled for now

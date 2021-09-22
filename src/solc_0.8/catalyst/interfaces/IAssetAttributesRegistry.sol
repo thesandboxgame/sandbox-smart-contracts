@@ -47,4 +47,6 @@ interface IAssetAttributesRegistry {
     function addGems(uint256 assetId, uint16[] calldata gemIds) external;
 
     function setMigrationContract(address _migrationContract) external;
+
+    function getCatalystRegistry() external view returns (address);
 }

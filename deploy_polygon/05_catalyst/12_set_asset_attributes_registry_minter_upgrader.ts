@@ -8,14 +8,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {assetAttributesRegistryAdmin} = await getNamedAccounts();
 
-  const registryMinter = await read('AssetAttributesRegistry', 'getMinter');
-  const registryUpgrader = await read('AssetAttributesRegistry', 'getUpgrader');
-  const AssetMinter = await deployments.get('AssetMinter');
-  const AssetUpgrader = await deployments.get('AssetUpgrader');
+  const registryMinter = await read(
+    'PolygonAssetAttributesRegistry',
+    'getMinter'
+  );
+  const registryUpgrader = await read(
+    'PolygonAssetAttributesRegistry',
+    'getUpgrader'
+  );
+  const AssetMinter = await deployments.get('PolygonAssetMinter');
+  const AssetUpgrader = await deployments.get('PolygonAssetUpgrader');
 
   if (registryMinter !== AssetMinter.address) {
     await execute(
-      'AssetAttributesRegistry',
+      'PolygonAssetAttributesRegistry',
       {from: assetAttributesRegistryAdmin, log: true},
       'changeMinter',
       AssetMinter.address
@@ -24,7 +30,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   if (registryUpgrader !== AssetUpgrader.address) {
     await execute(
-      'AssetAttributesRegistry',
+      'PolygonAssetAttributesRegistry',
       {from: assetAttributesRegistryAdmin, log: true},
       'changeUpgrader',
       AssetUpgrader.address
@@ -32,10 +38,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.tags = ['AssetAttributesRegistry', 'AssetAttributesRegistry_setup', 'L2'];
+func.tags = [
+  'PolygonAssetAttributesRegistry',
+  'PolygonAssetAttributesRegistry_setup',
+  'L2',
+];
 func.dependencies = [
-  'AssetAttributesRegistry_deploy',
-  'AssetMinter_deploy',
-  'AssetUpgrader_deploy',
+  'PolygonAssetAttributesRegistry_deploy',
+  'PolygonAssetMinter_deploy',
+  'PolygonAssetUpgrader_deploy',
 ];
 func.skip = skipUnlessTest; // disabled for now

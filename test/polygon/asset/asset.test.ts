@@ -1249,7 +1249,7 @@ describe('PolygonAsset.sol', function () {
       ) {
         const {
           assetAttributesRegistryAsRegistryAdmin,
-        } = await setupAssetRegistryL1();
+        } = await setupAssetRegistryL2();
 
         const mainnet = await setupMainnetAsset();
         const polygon = await setupPolygonAsset();
@@ -1276,13 +1276,6 @@ describe('PolygonAsset.sol', function () {
           (event: Event) => event.event === 'ChainExit'
         )[0];
         const tokenData = event?.args?.data;
-
-        // As we use the same attribute registry for both layer we change the catalyst with garbage data to check if good data will be refilled
-        assetAttributesRegistryAsRegistryAdmin.setCatalystWhenDepositOnOtherLayer(
-          tokenId,
-          1,
-          [2]
-        );
 
         // Emulate exit call
         await waitFor(

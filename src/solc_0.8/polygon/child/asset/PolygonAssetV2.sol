@@ -7,10 +7,9 @@ import "../../../asset/ERC1155ERC721.sol";
 import "../../../catalyst/interfaces/IAssetAttributesRegistry.sol";
 import "../../../asset/libraries/AssetHelper.sol";
 
-// solhint-disable-next-line no-empty-blocks
 contract PolygonAssetV2 is ERC1155ERC721 {
     address private _childChainManager;
-    AssetHelper.AssetRegistryData public assetRegistryData;
+    AssetHelper.AssetRegistryData private assetRegistryData;
 
     event ChainExit(address indexed to, uint256[] tokenIds, uint256[] amounts, bytes data);
 

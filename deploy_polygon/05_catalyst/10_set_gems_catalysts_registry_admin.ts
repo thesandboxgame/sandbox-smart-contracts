@@ -7,10 +7,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {execute, read} = deployments;
   const {gemsCatalystsRegistryAdmin} = await getNamedAccounts();
 
-  const currentAdmin = await read('GemsCatalystsRegistry', 'getAdmin');
+  const currentAdmin = await read('PolygonGemsCatalystsRegistry', 'getAdmin');
   if (currentAdmin.toLowerCase() !== gemsCatalystsRegistryAdmin.toLowerCase()) {
     await execute(
-      'GemsCatalystsRegistry',
+      'PolygonGemsCatalystsRegistry',
       {from: currentAdmin, log: true},
       'changeAdmin',
       gemsCatalystsRegistryAdmin
@@ -19,6 +19,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.runAtTheEnd = true;
-func.tags = ['GemsCatalystsRegistry', 'GemsCatalystsRegistry_setup', 'L2'];
-func.dependencies = ['GemsCatalystsRegistry_deploy'];
+func.tags = [
+  'PolygonGemsCatalystsRegistry',
+  'PolygonGemsCatalystsRegistry_setup',
+  'L2',
+];
+func.dependencies = ['PolygonGemsCatalystsRegistry_deploy'];
 func.skip = skipUnlessTest; // disabled for now

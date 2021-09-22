@@ -7,13 +7,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
 
   const {deployer} = await getNamedAccounts();
-  await deploy(`DefaultAttributes`, {
+  await deploy(`PolygonDefaultAttributes`, {
     from: deployer,
     log: true,
     skipIfAlreadyDeployed: true,
+    contract: 'DefaultAttributes',
   });
-  console.log('L2');
 };
 export default func;
-func.tags = ['DefaultAttributes', 'DefaultAttributes_deploy', 'L2'];
+func.tags = [
+  'PolygonDefaultAttributes',
+  'PolygonDefaultAttributes_deploy',
+  'L2',
+];
 func.skip = skipUnlessTest; // disabled for now
