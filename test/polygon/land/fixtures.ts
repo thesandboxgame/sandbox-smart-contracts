@@ -14,7 +14,6 @@ export const setupLand = deployments.createFixture(async function () {
     'LandTunnel',
     'FXROOT',
     'FXCHILD',
-    'CHECKPOINTMANAGER',
   ]);
   const PolygonLand = await ethers.getContract('PolygonLand');
   const Land = await ethers.getContract('Land');
@@ -22,7 +21,6 @@ export const setupLand = deployments.createFixture(async function () {
   const LandTunnel = await ethers.getContract('LandTunnel');
   const FxRoot = await ethers.getContract('FXROOT');
   const FxChild = await ethers.getContract('FXCHILD');
-  const CheckpointManager = await ethers.getContract('CHECKPOINTMANAGER');
 
   const namedAccounts = await getNamedAccounts();
   const unnamedAccounts = await getUnnamedAccounts();
@@ -45,12 +43,13 @@ export const setupLand = deployments.createFixture(async function () {
     LandTunnel,
     FxRoot,
     FxChild,
-    CheckpointManager,
   });
   const landAdmin = await setupUser(namedAccounts.landAdmin, {Land});
   const landMinter = await setupUser(minter, {Land});
 
   await deployer.FxRoot.setFxChild(FxChild.address);
+  await deployer.LandTunnel.setFxChildTunnel(PolygonLandTunnel.address);
+  await deployer.PolygonLandTunnel.setFxRootTunnel(LandTunnel.address);
   await deployer.PolygonLand.setPolygonLandTunnel(PolygonLandTunnel.address);
   await landAdmin.Land.setMinter(landMinter.address, true);
 
@@ -65,6 +64,5 @@ export const setupLand = deployments.createFixture(async function () {
     LandTunnel,
     FxRoot,
     FxChild,
-    CheckpointManager,
   };
 });
