@@ -9,7 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   await deploy('PolygonLand', {
     from: deployer,
-    contract: 'PolygonLandBaseToken',
+    contract: 'PolygonLand',
     log: true,
     skipIfAlreadyDeployed: true,
   });
