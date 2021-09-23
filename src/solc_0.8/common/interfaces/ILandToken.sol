@@ -1,7 +1,8 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-interface ILandToken {
+interface LandToken {
+    // @review - shouldn't this be ILandToken?
     function batchTransferQuad(
         address from,
         address to,
