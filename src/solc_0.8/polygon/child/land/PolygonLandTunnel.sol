@@ -5,14 +5,13 @@ import "fx-portal/contracts/tunnel/FxBaseChildTunnel.sol";
 import "../../../common/interfaces/IPolygonLand.sol";
 import "../../../common/interfaces/IERC721TokenReceiver.sol";
 import "./PolygonLandBaseToken.sol";
-import "hardhat/console.sol";
 
 // @todo - natspec comments
 
 contract PolygonLandTunnel is FxBaseChildTunnel, IERC721Receiver {
-    IPolygonLand public childToken;
+    address public childToken;
 
-    constructor(address _fxChild, IPolygonLand _childToken) FxBaseChildTunnel(_fxChild) {
+    constructor(address _fxChild, address _childToken) FxBaseChildTunnel(_fxChild) {
         childToken = _childToken;
     }
 
@@ -23,7 +22,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721Receiver {
         uint256 y,
         bytes memory data
     ) external {
-        childToken.transferQuad(msg.sender, address(this), size, x, y, data);
+        IPolygonLand(childToken).transferQuad(address(this), to, size, x, y, data);
         _sendMessageToRoot(abi.encode(to, size, x, y, data));
     }
 
@@ -38,8 +37,9 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721Receiver {
     function _syncDeposit(bytes memory syncData) internal {
         (address to, uint256 size, uint256 x, uint256 y, bytes memory data) =
             abi.decode(syncData, (address, uint256, uint256, uint256, bytes));
-        if (!childToken.exists(size, x, y)) childToken.mint(to, size, x, y, data);
-        else childToken.transferQuad(address(this), to, size, x, y, data);
+        IPolygonLand childTokenContract = IPolygonLand(childToken);
+        // @review - check if already minted?
+        childTokenContract.mint(to, size, x, y, data);
     }
 
     function onERC721Received(
