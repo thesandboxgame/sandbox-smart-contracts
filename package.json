@@ -44,6 +44,7 @@
     "ethereum-block-by-date": "^1.4.0",
     "ethers": "^5.0.17",
     "fs-extra": "^9.0.1",
+    "fx-portal": "^1.0.2",
     "googleapis": "^66.0.0",
     "graphql": "^15.4.0",
     "hardhat": "^2.6.1",
