@@ -14,7 +14,7 @@
   "mochaExplorer.env": {
     "HARDHAT_CONFIG": "hardhat.config.ts",
     "HARDHAT_COMPILE": "true",
-    "NODE_OPTIONS": "--max-old-space-size=4096"
+    "NODE_OPTIONS": "--max-old-space-size=4096 --unhandled-rejections=strict"
   },
   "mochaExplorer.require": ["ts-node/register/transpile-only"],
   "[markdown]": {

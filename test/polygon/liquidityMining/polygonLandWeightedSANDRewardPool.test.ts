@@ -2098,7 +2098,7 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
 
     await expect(
       rewardPoolContract
-        .connect(liquidityRewardAdmin)
+        .connect(ethers.provider.getSigner(liquidityRewardAdmin))
         .computeMultiplier(others[0])
     ).to.be.ok;
   });
