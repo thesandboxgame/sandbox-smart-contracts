@@ -11,5 +11,9 @@ const deadlines: {[sector: number]: number} =  {
   24: Date.UTC(2021, 6, 29, 13) / 1000, // Thursday, 29 July 2021 13:00:00 GMT+00:00
   25: Date.UTC(2021, 7, 12, 13) / 1000, // Thursday, 12 August 2021 13:00:00 GMT+00:00
   26: Date.UTC(2021, 7, 19, 13) / 1000, // Thursday, 19 August 2021 13:00:00 GMT+00:00
+  27: Date.UTC(2021, 8, 2, 13) / 1000, // Thursday, 2 September 2021 13:00:00 GMT+00:00
+  28: Date.UTC(2021, 8, 9, 13) / 1000, // Thursday, 9 September 2021 13:00:00 GMT+00:00
+  29: Date.UTC(2021, 8, 16, 13) / 1000, // Thursday, 16 September 2021 13:00:00 GMT+00:00
+  30: Date.UTC(2021, 8, 23, 13) / 1000, // Thursday, 23 September 2021 13:00:00 GMT+00:00
 };
 export default deadlines;
