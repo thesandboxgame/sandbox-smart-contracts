@@ -1,14 +1,13 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts-0.8/token/ERC20/extensions/draft-IERC20Permit.sol";
 import "./ERC20BaseToken.sol";
 import "./extensions/ERC20BasicApproveExtension.sol";
 import "../WithPermit.sol";
 import "../ERC677/extensions/ERC677Extension.sol";
 import "../../interfaces/IERC677Receiver.sol";
 
-contract ERC20Token is ERC20BasicApproveExtension, ERC677Extension, WithPermit, IERC20Permit, ERC20BaseToken {
+contract ERC20Token is ERC20BasicApproveExtension, ERC677Extension, WithPermit, ERC20BaseToken {
     // /////////////////// CONSTRUCTOR ////////////////////
     constructor(
         string memory name,
@@ -42,13 +41,5 @@ contract ERC20Token is ERC20BasicApproveExtension, ERC677Extension, WithPermit, 
     ) public override {
         checkApproveFor(owner, spender, value, deadline, v, r, s);
         _approveFor(owner, spender, value);
-    }
-
-    function DOMAIN_SEPARATOR() external view override returns (bytes32) {
-        return _DOMAIN_SEPARATOR;
-    }
-
-    function nonces(address owner) external view override returns (uint256) {
-        return _nonces[owner];
     }
 }

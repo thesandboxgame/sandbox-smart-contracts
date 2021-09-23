@@ -1,12 +1,13 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
+import "@openzeppelin/contracts-0.8/token/ERC20/extensions/draft-IERC20Permit.sol";
 import "../../common/interfaces/IERC20Extended.sol";
 import "../../common/Base/TheSandbox712.sol";
 
 /// @title Permit contract
 /// @notice This contract manages approvals of SAND via signature
-contract WithPermit is TheSandbox712 {
+abstract contract WithPermit is TheSandbox712, IERC20Permit {
     mapping(address => uint256) public _nonces;
 
     bytes32 public constant PERMIT_TYPEHASH =
@@ -40,5 +41,13 @@ contract WithPermit is TheSandbox712 {
             );
         address recoveredAddress = ecrecover(digest, v, r, s);
         require(recoveredAddress != address(0) && recoveredAddress == owner, "INVALID_SIGNATURE");
+    }
+
+    function DOMAIN_SEPARATOR() external view override returns (bytes32) {
+        return _DOMAIN_SEPARATOR;
+    }
+
+    function nonces(address owner) external view override returns (uint256) {
+        return _nonces[owner];
     }
 }

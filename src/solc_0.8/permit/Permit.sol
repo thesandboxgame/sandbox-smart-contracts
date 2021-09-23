@@ -30,16 +30,8 @@ contract Permit is WithPermit {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) public {
+    ) public override {
         checkApproveFor(owner, spender, value, deadline, v, r, s);
         _sand.approveFor(owner, spender, value);
-    }
-
-    function DOMAIN_SEPARATOR() external view returns (bytes32) {
-        return _DOMAIN_SEPARATOR;
-    }
-
-    function nonces(address owner) external view returns (uint256) {
-        return _nonces[owner];
     }
 }

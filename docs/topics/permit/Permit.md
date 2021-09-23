@@ -111,13 +111,13 @@ class TheSandbox712 {
 class WithPermit {
   - mapping(address => uint256) nonces
   + void checkApproveFor(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
+  + void DOMAIN_SEPARATOR() external view returns (bytes32)
+  + nonces(address owner) external view returns (uint256)
 }
 
 class Permit {
   - IERC20Extended _sand
   + void permit(address owner, address spender, uint256 value, uint256 deadline, uint8 v, bytes32 r, bytes32 s)
-  + void DOMAIN_SEPARATOR() external view returns (bytes32)
-  + nonces(address owner) external view returns (uint256)
 }
 
 class IERC20 {
