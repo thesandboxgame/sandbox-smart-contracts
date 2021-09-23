@@ -10,36 +10,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const Land = await deployments.get('Land');
   const FXROOT = await deployments.get('FXROOT');
-  const CHECKPOINTMANAGER = await deployments.get('CHECKPOINTMANAGER');
+  // @todo - Update correct address
+  const CheckpointManager = ethers.constants.AddressZero;
 
-  const LandTunnel = await deploy('LandTunnel', {
+  await deploy('LandTunnel', {
     from: deployer,
     contract: 'LandTunnel',
-    args: [CHECKPOINTMANAGER.address, FXROOT.address, Land.address],
+    args: [CheckpointManager, FXROOT.address, Land.address],
     log: true,
     skipIfAlreadyDeployed: true,
   });
-
-  const PolygonLandTunnel = await hre.companionNetworks[
-    'l2'
-  ].deployments.getOrNull('PolygonLandTunnel');
-  if (PolygonLandTunnel) {
-    await hre.companionNetworks['l2'].deployments.execute(
-      'PolygonLandTunnel',
-      {from: deployer},
-      'setFxRootTunnel',
-      LandTunnel.address
-    );
-    await deployments.execute(
-      'LandTunnel',
-      {from: deployer},
-      'setFxChildTunnel',
-      PolygonLandTunnel.address
-    );
-  }
 };
 
 export default func;
 func.tags = ['LandTunnel', 'LandTunnel_deploy', 'L1'];
-func.dependencies = ['Land', 'FXROOT', 'CHECKPOINTMANAGER'];
+func.dependencies = ['Land', 'FXROOT'];
 func.skip = skipUnlessTestnet;
