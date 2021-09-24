@@ -911,8 +911,71 @@ describe('EstateV2', function () {
     );
 
     console.log(receipt.gasUsed.toString());
-    console.log('HXHXHXHXHHXHXHXHXHXHX');
   });
+
+  it('create an estate with 567 lands and games', async function () {
+    const {
+      estateContract,
+      landContractAsMinter,
+      landContractAsUser0,
+      user0,
+      gameToken,
+      gameTokenAsUser0,
+    } = await setupEstate();
+    const uri =
+      '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+    const mintingData: LandMintingData[] = [];
+    //{beneficiary: user0, size: 1, x: 6, y: 12},
+    //{beneficiary: user0, size: 1, x: 5, y: 12},
+    //];
+
+    const mintingGames = [];
+
+    for (let i = 0; i < 24; i++) {
+      for (let j = 0; j < 24; j++) {
+        mintingData.push({beneficiary: user0, size: 1, x: i, y: j});
+        mintingGames.push(1);
+      }
+    }
+
+    const landIds = await mintLands(landContractAsMinter, mintingData);
+    const {gameIds} = await mintGames(gameToken, user0, mintingGames, 0);
+
+    for (let i = 0; i < landIds.length; i++) {
+      await landContractAsUser0.approve(estateContract.address, landIds[i]);
+      await gameTokenAsUser0.approve(estateContract.address, gameIds[i]);
+    }
+
+    await waitFor(
+      estateContract
+        .connect(ethers.provider.getSigner(user0))
+        .createEstate(user0, user0, {
+          landIds: landIds,
+          gameIds: gameIds,
+          uri,
+        })
+    );
+
+    /*const estateCreationEvents = await estateContract.queryFilter(
+      estateContract.filters.EstateTokenUpdated()
+    );
+    const estateCreationEvent = estateCreationEvents.filter(
+      (e) => e.event === 'EstateTokenUpdated'
+    );
+    expect(estateCreationEvent[0].args).not.be.equal(null);
+    if (estateCreationEvent[0].args) {
+      expect(estateCreationEvent[0].args[2].gameIds).to.be.eql(gameIds);
+      expect(estateCreationEvent[0].args[2].landIds).to.be.eql(landIds);
+      expect(estateCreationEvent[0].args[2].uri).to.be.equal(uri);
+      const estateId = estateCreationEvent[0].args[1];
+      const estateData = await estateContract.callStatic.getEstateData(
+        estateId
+      );
+      expect(estateData.gameIds).to.be.eql(gameIds);
+      expect(estateData.landIds).to.be.eql(landIds);
+    }*/
+  });
+
   it('create should fail for unordered list of lands with the same game', async function () {
     const {
       estateContract,
