@@ -6,14 +6,9 @@ If you haven't done it, follow the [getting started](../intro/index.md) tutorial
 
 ## Prepare your environment
 
-Always on master
+If you deploy on mainnet, checkout master
 ```shell
 git checkout master
-```
-
-Fix format of contracts (optional)
-```shell
-yarn format:fix
 ```
 
 Update dependencies
@@ -51,7 +46,7 @@ The option `--deploy-scripts` is not needed for a real deployment because the de
     yarn deploy mumbai --tags PolygonSand
     ```
 
-Once your contract deployed on the network, a deployment file will be generated in the folder
+Once your contract deployed on the network, a deployment file will be generated in the folder of this network under `deployments`
 
 ```shell
 ./deployments/yournetwork/Contract.json
@@ -87,13 +82,25 @@ For instance, the PolygonSand contract on mumbai located at this address `0xE034
 
 [https://mumbai.polygonscan.com/address/0xE03489D4E90b22c59c5e23d45DFd59Fc0dB8a025]()
 
-Those explorers are useful to interact with your contracts through the interface (tab "Contract" then "Read Contract" or "Write Contract"). But in order for the explorer to be able to interact with the contract, you have to "verify" the contract on the explorer by sending the signature of your contract to the explorer. And this is done with the command `verify` of hardhat.  
-This command needs:
+Those explorers are useful to interact with your contracts through the interface (tab "Contract" then "Read Contract" or "Write Contract"). But in order for the explorer to be able to interact with the contract, you have to "verify" the contract on the explorer by sending the signature of your contract to the explorer. And this is done with the command `verify` of hardhat.
 
-- the path and the name of the contract (required if your contract abi is not unique in your repository)
+This command has multiple arguments:
+
 - the address of the contract
 - the arguments of the constructor
-- the network
+
+And 2 options:
+
+- `--network`: the network 
+- `--contract`: the path and the name of the contract (required if your contract abi is not unique in your repository)
+
+!!! example
+    Run this command to verify a contract
+    ```shell
+    yarn hardhat verify --network yournetwork \
+    --contract /path/to/the/Contract.sol:Contract \
+    address arg1 arg2 arg3
+    ```
 
 Those information can be found in the deployment file of the contract in the right network folder.
 
@@ -112,13 +119,6 @@ Those information can be found in the deployment file of the contract in the rig
       (...)
     }
     ```
-
-Verify the contract on explorer
-```shell
-yarn hardhat verify --network yournetwork \
---contract /path/to/the/Contract.sol:Contract \
-address arg1 arg2 arg3
-```
 
 !!! example 
     Verify the contract PolygonSand on [https://mumbai.polygonscan.com/](https://mumbai.polygonscan.com/)

@@ -82,7 +82,7 @@ ETHERSCAN_API_KEY=xxxxxxxxxxxxxxxx
 
 [Polygonscan](https://polygonscan.com/) is a Block Explorer and Analytics Platform for Polygon, a decentralized smart contracts platform.
 
-- [create an account](https://polygonscan.com/register) on Etherscan
+- [create an account](https://polygonscan.com/register) on Polygonscan
 - [create an API Key](https://polygonscan.com/myapikey)
 - copy your API Key
 - set the ETHERSCAN_API_KEY variable in the `.env` file
