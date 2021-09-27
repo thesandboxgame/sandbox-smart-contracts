@@ -7,11 +7,9 @@ import {
   Event,
   utils,
 } from 'ethers';
-import {FixtureFunc, Receipt} from 'hardhat-deploy/types';
+import {Receipt} from 'hardhat-deploy/types';
 import {Result} from 'ethers/lib/utils';
-import {deployments, ethers} from 'hardhat';
-import {Suite} from 'mocha';
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
+import {deployments, ethers, network} from 'hardhat';
 
 export async function increaseTime(numSec: number): Promise<void> {
   await ethers.provider.send('evm_increaseTime', [numSec]);
@@ -164,54 +162,30 @@ export function getAssetChainIndex(id: BigNumber): number {
   return (slicedId & SLICED_CHAIN_INDEX_MASK) >>> 23;
 }
 
-export async function cleanTestingEnvironment(): Promise<void> {
-  console.log('Revert to initial snapshot');
-  await deployments.fixture([], {
-    fallbackToGlobal: false,
-    keepExistingDeployments: false,
+export async function evmResetState(): Promise<void> {
+  console.log('Revert to initial snapshot, calling reset');
+  // This revert the evm state.
+  await network.provider.request({
+    method: 'hardhat_reset',
+    params: [network.config],
   });
 }
 
-/* eslint-disable
-    mocha/no-setup-in-describe,
-    mocha/no-hooks-for-single-case,
-    mocha/no-skipped-tests,
-    mocha/no-exclusive-tests
-  */
-export const withCleanSnapshot = (title: string, fn?: () => void): Suite =>
-  describe(title, function () {
-    before(cleanTestingEnvironment);
-    if (fn) fn();
-  });
-
-withCleanSnapshot.skip = (
-  title: string,
-  fn: (this: Suite) => void
-): Suite | void => describe.skip(title, fn);
-
-withCleanSnapshot.only = (title: string, fn: () => void): Suite =>
-  describe.only(title, function () {
-    before(cleanTestingEnvironment);
-    if (fn) fn();
-  });
-/* eslint-enable
-  mocha/no-setup-in-describe,
-  mocha/no-hooks-for-single-case,
-  mocha/no-skipped-tests,
-  mocha/no-exclusive-tests
-*/
-
-export function createSnapshot<T, O>(
+export function withSnapshot<T>(
   tags: string | string[] = [],
-  func: FixtureFunc<T, O> = async (): Promise<T> => {
+  func: (...args: any[]) => Promise<T> = async () => {
     return <T>{};
   }
-): (options?: O) => Promise<T> {
-  return deployments.createFixture<T, O>(
-    async (env: HardhatRuntimeEnvironment, options?: O) => {
-      await cleanTestingEnvironment();
-      await deployments.fixture(tags);
-      return func(env, options);
-    }
-  );
+): (...args: any[]) => Promise<T> {
+  return async function (...args: any[]) {
+    const fixtureFunc = deployments.createFixture(async (hre, options) => {
+      await evmResetState();
+      await deployments.fixture(tags, {
+        fallbackToGlobal: false,
+        keepExistingDeployments: false,
+      });
+      return func(options);
+    });
+    return fixtureFunc(...args);
+  };
 }
