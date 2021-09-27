@@ -8,7 +8,10 @@ import {
 import {DeployFunction} from 'hardhat-deploy/types';
 import {skipUnlessTest} from '../../utils/network';
 
-const sales = [{name: 'EstateSaleWithAuth_0', skip: skipUnlessTest}];
+const sales = [
+  {name: 'EstateSaleWithAuth_0', skip: skipUnlessTest},
+  {name: 'LandPreSale_11'},
+];
 
 const func: DeployFunction = async function (hre) {
   const {deployments, getNamedAccounts} = hre;
@@ -61,8 +64,10 @@ const func: DeployFunction = async function (hre) {
   }
 
   for (const sale of sales) {
-    const skip = await sale.skip(hre);
-    if (skip) continue;
+    if (sale.skip) {
+      const skip = await sale.skip(hre);
+      if (skip) continue;
+    }
     const landSales = await getLandSales(
       sale.name,
       hre.network.name,
@@ -82,4 +87,3 @@ func.dependencies = [
   'Asset_deploy',
   'AuthValidator_deploy',
 ];
-func.skip = skipUnlessTest;

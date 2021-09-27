@@ -1,18 +1,13 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.5;
+pragma solidity 0.8.2;
 
-import "../common/Interfaces/IERC20Extended.sol";
-import "../Base/TheSandbox712.sol";
+import "../common/interfaces/IERC20Extended.sol";
+import "../common/BaseWithStorage/WithPermit.sol";
 
 /// @title Permit contract
 /// @notice This contract manages approvals of SAND via signature
-contract Permit is TheSandbox712 {
+contract Permit is WithPermit {
     IERC20Extended internal immutable _sand;
-
-    mapping(address => uint256) public nonces;
-
-    bytes32 public constant PERMIT_TYPEHASH =
-        keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
 
     constructor(IERC20Extended sandContractAddress) {
         _sand = sandContractAddress;
@@ -35,18 +30,8 @@ contract Permit is TheSandbox712 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) public {
-        require(deadline >= block.timestamp, "PAST_DEADLINE");
-        bytes32 digest =
-            keccak256(
-                abi.encodePacked(
-                    "\x19\x01",
-                    DOMAIN_SEPARATOR,
-                    keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
-                )
-            );
-        address recoveredAddress = ecrecover(digest, v, r, s);
-        require(recoveredAddress != address(0) && recoveredAddress == owner, "INVALID_SIGNATURE");
+    ) public override {
+        checkApproveFor(owner, spender, value, deadline, v, r, s);
         _sand.approveFor(owner, spender, value);
     }
 }

@@ -11,6 +11,7 @@ nav:
       - Setting environment variables: intro/setting-environment-variables.md
   - How to:
       - Fixing tests: howto/fixing-tests.md
+      - Deploying contracts: howto/deploying-contracts.md
       - Preparing a LAND sale: howto/preparing-land-sale.md
       - Preparing an ASSET giveaway: howto/preparing-asset-giveaway.md
       - Generating liquidity pool rewards: howto/generating-liquidity-pool-rewards.md
@@ -43,10 +44,13 @@ nav:
           - Sand Token: topics/sand/sand-token.md
           - Bundle Sand Sale: topics/sand/bundle-sand-sale.md
       - Token:
+          - EIP712: topics/token/EIP712.md
           - ERC20: topics/token/ERC20.md
           - ERC1155721: topics/token/ERC1155721.md
       - Land:
           - Land: topics/land/land.md
+      - Permit:
+          - Permit: topics/permit/Permit.md
 
 markdown_extensions:
   - admonition
