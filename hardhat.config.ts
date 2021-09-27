@@ -192,9 +192,9 @@ const config: HardhatUserConfig = {
       // default is computed from private key:
       // "0x4242424242424242424242424242424242424242424242424242424242424242"
       default: '0x17c5185167401eD00cF5F5b2fc97D9BBfDb7D025',
-      mainnet: '0x3044719d139F866a44c988823513eCB93060bF1b',
-      rinkeby: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
-      goerli: '0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e',
+      mainnet: '0x061872DFd0CAC4Ec7a7c87EEE9B950bb1fAD2906',
+      rinkeby: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
+      goerli: '0x0c72f82B46f034025622731c271bdf06B848Ed77',
     },
     sandboxAccount: {
       default: 4,

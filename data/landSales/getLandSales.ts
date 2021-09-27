@@ -5,6 +5,7 @@ import helpers, {SaleLandInfo, SaltedProofSaleLandInfo, SaltedSaleLandInfo} from
 import deadlines from './deadlines';
 import {HardhatRuntimeEnvironment} from "hardhat/types/runtime";
 import {isTestnet} from "../../utils/network";
+import prices from "./prices";
 
 const {createDataArray, saltLands, calculateLandHash} = helpers;
 
@@ -274,7 +275,6 @@ export async function getLandSaleFiles(presale: string, networkName: string): Pr
   }
   const sectors = (await import(sectorPath)).default;
   const bundles = (await import(bundlesPath)).default;
-  const prices = (await import(`./${presale}/prices`)).default;
   return {secret, sectors, bundles, prices}
 }
 
