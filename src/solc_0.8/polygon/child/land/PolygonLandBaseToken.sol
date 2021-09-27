@@ -5,6 +5,7 @@ pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "../../../common/BaseWithStorage/ERC721BaseToken.sol";
+import "hardhat/console.sol";
 
 contract PolygonLandBaseToken is ERC721BaseToken {
     using Address for address;
@@ -230,6 +231,73 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         _numNFTPerAddress[to] += size * size;
 
         _checkBatchReceiverAcceptQuad(metaTx ? from : msg.sender, from, to, size, x, y, data);
+    }
+
+    function exists(
+        uint256 size,
+        uint256 x,
+        uint256 y
+    ) external view returns (bool) {
+        require(x % size == 0 && y % size == 0, "Invalid coordinates");
+        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
+
+        uint256 quadId;
+        uint256 id = x + y * GRID_SIZE;
+
+        if (size == 1) {
+            quadId = id;
+        } else if (size == 3) {
+            quadId = LAYER_3x3 + id;
+        } else if (size == 6) {
+            quadId = LAYER_6x6 + id;
+        } else if (size == 12) {
+            quadId = LAYER_12x12 + id;
+        } else if (size == 24) {
+            quadId = LAYER_24x24 + id;
+        } else {
+            require(false, "Invalid size");
+        }
+
+        if (_owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] != 0) return true;
+        uint256 toX = x + size;
+        uint256 toY = y + size;
+        if (size <= 12) {
+            if (_owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE] != 0) return true;
+        } else {
+            for (uint256 x12i = x; x12i < toX; x12i += 12) {
+                for (uint256 y12i = y; y12i < toY; y12i += 12) {
+                    uint256 id12x12 = LAYER_12x12 + x12i + y12i * GRID_SIZE;
+                    if (_owners[id12x12] != 0) return true;
+                }
+            }
+        }
+
+        if (size <= 6) {
+            if (_owners[LAYER_6x6 + (x / 6) * 6 + ((y / 6) * 6) * GRID_SIZE] != 0) return true;
+        } else {
+            for (uint256 x6i = x; x6i < toX; x6i += 6) {
+                for (uint256 y6i = y; y6i < toY; y6i += 6) {
+                    uint256 id6x6 = LAYER_6x6 + x6i + y6i * GRID_SIZE;
+                    if (_owners[id6x6] != 0) return true;
+                }
+            }
+        }
+
+        if (size <= 3) {
+            if (_owners[LAYER_3x3 + (x / 3) * 3 + ((y / 3) * 3) * GRID_SIZE] != 0) return true;
+        } else {
+            for (uint256 x3i = x; x3i < toX; x3i += 3) {
+                for (uint256 y3i = y; y3i < toY; y3i += 3) {
+                    uint256 id3x3 = LAYER_3x3 + x3i + y3i * GRID_SIZE;
+                    if (_owners[id3x3] != 0) return true;
+                }
+            }
+        }
+
+        for (uint256 i = 0; i < size * size; i++) {
+            if (_owners[id] != 0) return true;
+        }
+        return false;
     }
 
     function _transferQuad(
