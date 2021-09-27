@@ -14,4 +14,10 @@ interface IPolygonLand is LandToken {
 
     // @temp - Will remove once locking mechanism has been tested
     // function exit(uint256 tokenId) external;
+
+    function exists(
+        uint256 size,
+        uint256 x,
+        uint256 y
+    ) external view returns (bool);
 }
