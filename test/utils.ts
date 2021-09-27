@@ -173,19 +173,16 @@ export async function evmResetState(): Promise<void> {
 
 export function withSnapshot<T>(
   tags: string | string[] = [],
-  func: (...args: any[]) => Promise<T> = async () => {
+  func: () => Promise<T> = async () => {
     return <T>{};
   }
-): (...args: any[]) => Promise<T> {
-  return async function (...args: any[]) {
-    const fixtureFunc = deployments.createFixture(async (hre, options) => {
-      await evmResetState();
-      await deployments.fixture(tags, {
-        fallbackToGlobal: false,
-        keepExistingDeployments: false,
-      });
-      return func(options);
+): () => Promise<T> {
+  return deployments.createFixture(async () => {
+    await evmResetState();
+    await deployments.fixture(tags, {
+      fallbackToGlobal: false,
+      keepExistingDeployments: false,
     });
-    return fixtureFunc(...args);
-  };
+    return func();
+  });
 }
