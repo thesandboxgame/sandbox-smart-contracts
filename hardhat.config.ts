@@ -8,20 +8,7 @@ import 'solidity-coverage';
 import 'hardhat-contract-sizer';
 import '@nomiclabs/hardhat-etherscan';
 import {accounts, node_url} from './utils/network';
-import {task} from 'hardhat/config';
-import {TASK_TEST_RUN_MOCHA_TESTS} from 'hardhat/builtin-tasks/task-names';
 
-// Extends the mocha test runner so we take a snapshot before running any test.
-task(TASK_TEST_RUN_MOCHA_TESTS, 'Taking an initial snapshot').setAction(
-  async (args, hre, runSuper) => {
-    console.log('Taking an initial snapshot!!!');
-    await hre.deployments.fixture([], {
-      fallbackToGlobal: false,
-      keepExistingDeployments: true,
-    });
-    return runSuper(args);
-  }
-);
 const config: HardhatUserConfig = {
   gasReporter: {
     currency: 'USD',
