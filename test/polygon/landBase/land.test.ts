@@ -558,6 +558,48 @@ describe('MockLandWithMint.sol', function () {
       expect(num2).to.equal(576);
       console.log('GAS USED ' + gasTotal.toString()); //receipt.gasUsed.toString());
     });
+
+    it('test transfering 576 lands with batchTransferFrom', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      let gasTotal = BigNumber.from('0');
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          24,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const array = [];
+
+      for (let i = 0; i < 24; i++) {
+        for (let j = 0; j < 24; j++) {
+          array.push(i + j * 408);
+        }
+      }
+
+      const receipt = await waitFor(
+        landOwners[0].MockLandWithMint.batchTransferFrom(
+          landOwners[0].address,
+          landOwners[1].address,
+          array,
+          bytes
+        )
+      );
+
+      gasTotal = gasTotal.add(receipt.gasUsed);
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(576);
+      console.log('GAS USED ' + gasTotal.toString()); //receipt.gasUsed.toString());
+    });
   });
 
   describe('GasTest for batch transfer', function () {
@@ -903,6 +945,48 @@ describe('MockLandWithMint.sol', function () {
       expect(num2).to.equal(576);
       console.log('GAS USED 576 ' + gasTotal.toString()); //receipt.gasUsed.toString());
     });
+
+    it('batch transfering FROM 500 lands', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      let gasTotal = BigNumber.from('0');
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          24,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const array = [];
+
+      for (let i = 0; i < 24; i++) {
+        for (let j = 0; j < 24; j++) {
+          array.push(i + j * 408);
+        }
+      }
+
+      const receipt = await waitFor(
+        landOwners[0].MockLandWithMint.batchTransferFrom(
+          landOwners[0].address,
+          landOwners[1].address,
+          array,
+          bytes
+        )
+      );
+
+      gasTotal = gasTotal.add(receipt.gasUsed);
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(576);
+      console.log('GAS USED 576 ' + gasTotal.toString()); //receipt.gasUsed.toString());
+    });
   });
   describe('GasTest for tranfer quad', function () {
     it('batch transfer 576', async function () {
@@ -1168,6 +1252,429 @@ describe('MockLandWithMint.sol', function () {
       expect(num2).to.equal(2880);
 
       console.log('GAS USED for 576 ' + receipt.gasUsed); //receipt.gasUsed.toString());
+    });
+
+    it('batch transfer FROM 5 576', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          24,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          24,
+          24,
+          24,
+          bytes
+        )
+      );
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          24,
+          48,
+          48,
+          bytes
+        )
+      );
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          24,
+          72,
+          72,
+          bytes
+        )
+      );
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          24,
+          96,
+          96,
+          bytes
+        )
+      );
+
+      const array = [];
+      const array2 = [
+        '1809251394333065553493296640760748560207343510400633813116524750123642650624',
+        '1809251394333065553493296640760748560207343510400633813116524750123642660440',
+        '1809251394333065553493296640760748560207343510400633813116524750123642670256',
+        '1809251394333065553493296640760748560207343510400633813116524750123642680072',
+        '1809251394333065553493296640760748560207343510400633813116524750123642689888',
+      ];
+
+      /*for (let j = 0; j < 5; j++) {
+        array.push(
+          0x0400000000000000000000000000000000000000000000000000000000000000 +
+            (24 * j + 24 * j * 408)
+        );
+      }*/
+
+      //console.log(array);
+
+      const receipt = await waitFor(
+        landOwners[0].MockLandWithMint.batchTransferFrom(
+          landOwners[0].address,
+          landOwners[1].address,
+          array2,
+          bytes
+        )
+      );
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      //expect(num2).to.equal(2880);
+
+      console.log('GAS USED for 576 ' + receipt.gasUsed); //receipt.gasUsed.toString());
+    });
+  });
+
+  describe('Gas consumption for 1x1 from each different size of quad', function () {
+    it('transfer quad 1X1', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          1,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const receipt = await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          1,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(1);
+
+      console.log('GAS USED for 1x1 ' + receipt.gasUsed);
+    });
+
+    it('transfer 1x1 quad from 3X3', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          3,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const receipt = await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          1,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(1);
+
+      console.log('GAS USED for 1X1 transfer from  3x3 ' + receipt.gasUsed);
+    });
+
+    it('transfer 1x1 quad from 6X6', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          6,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const receipt = await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          1,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(1);
+
+      console.log('GAS USED for 1X1 from 6x6 ' + receipt.gasUsed);
+    });
+
+    it('transfer 1x1 quad from 12X12', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          12,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const receipt = await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          1,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(1);
+
+      console.log('GAS USED for 1x1 from 12x12 ' + receipt.gasUsed);
+    });
+
+    it('transfer 1x1 quad from 24X24', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          24,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const receipt = await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          1,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(1);
+
+      console.log('GAS USED for 1x1 fom 24x24 ' + receipt.gasUsed);
+    });
+  });
+
+  describe('Gas consumption for each different size of quad', function () {
+    it('transfer quad 1X1', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          1,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const receipt = await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          1,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(1);
+
+      console.log('GAS USED for 1x1 ' + receipt.gasUsed);
+    });
+
+    it('transfer quad 3X3', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          3,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const receipt = await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          3,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(9);
+
+      console.log('GAS USED for 3x3 ' + receipt.gasUsed);
+    });
+
+    it('transfer quad 6X6', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          6,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const receipt = await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          6,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(36);
+
+      console.log('GAS USED for 6x6 ' + receipt.gasUsed);
+    });
+
+    it('transfer quad 12X12', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          12,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const receipt = await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          12,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(144);
+
+      console.log('GAS USED for 12x12 ' + receipt.gasUsed);
+    });
+
+    it('transfer quad 24X24', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          24,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const receipt = await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          24,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(576);
+
+      console.log('GAS USED for 24x24 ' + receipt.gasUsed);
     });
   });
 });
