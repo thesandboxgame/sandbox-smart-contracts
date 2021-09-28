@@ -1,18 +1,19 @@
 /* solhint-disable not-rely-on-time, func-order */
+
+// SPDX-License-Identifier: MIT
+
 pragma solidity 0.8.2;
 
+import "./AuthValidator08.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
-import "./LandToken.sol";
+import "../common/interfaces/ILandToken.sol";
 import "../common/interfaces/IERC1155.sol";
-import "../common/interfaces/IERC20.sol";
+import "../common/BaseWithStorage/WithReferralValidator.sol";
 import "@openzeppelin/contracts-0.8/metatx/ERC2771Context.sol";
-// import "../common/BaseWithStorage/ERC2771Handler.sol";
-import "../ReferralValidator/ReferralValidator08.sol";
-import "./AuthValidator.sol";
 
 /// @title Estate Sale contract with referral
 /// @notice This contract manages the sale of our lands as Estates
-contract EstateSaleWithAuth is ERC2771Context, ReferralValidator08 {
+contract EstateSaleWithAuth08 is ERC2771Context, WithReferralValidator {
     using SafeMathWithRequire for uint256;
 
     event LandQuadPurchased(
@@ -24,6 +25,62 @@ contract EstateSaleWithAuth is ERC2771Context, ReferralValidator08 {
         address token,
         uint256 amountPaid
     );
+
+    uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
+
+    IERC1155 internal immutable _asset;
+    LandToken internal immutable _land;
+    IERC20 internal immutable _sand;
+    address internal immutable _estate;
+    address internal immutable _feeDistributor;
+
+    address payable internal _wallet;
+    AuthValidator08 internal _authValidator;
+    uint256 internal immutable _expiryTime;
+    bytes32 internal immutable _merkleRoot;
+
+    uint256 private constant FEE = 5; // percentage of land sale price to be diverted to a specially configured instance of FeeDistributor, shown as an integer
+
+    // buyLandWithSand info indexes
+
+    uint256 private constant X_INDEX = 0;
+    uint256 private constant Y_INDEX = 1;
+    uint256 private constant SIZE_INDEX = 2;
+    uint256 private constant PRICE_INDEX = 3;
+
+    // need to use struct to avoid "Stack Too Deep" error. Since there are too many parameters.
+    struct Parameters {
+        IERC1155 asset;
+        LandToken landAddress;
+        IERC20 sandContractAddress;
+        address admin;
+        address estate;
+        address feeDistributor;
+        address payable initialWalletAddress;
+        AuthValidator08 authValidator;
+        uint256 expiryTime;
+        bytes32 merkleRoot;
+        address trustedForwarder;
+        address initialSigningWallet;
+        uint256 initialMaxCommissionRate;
+    }
+
+    constructor(Parameters memory p)
+        ERC2771Context(p.trustedForwarder)
+        WithReferralValidator(p.initialSigningWallet, p.initialMaxCommissionRate, p.admin)
+    {
+        _asset = p.asset;
+        _land = p.landAddress;
+        _sand = p.sandContractAddress;
+        // // ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
+        _admin = p.admin;
+        _estate = p.estate;
+        _feeDistributor = p.feeDistributor;
+        _wallet = p.initialWalletAddress;
+        _authValidator = p.authValidator;
+        _expiryTime = p.expiryTime;
+        _merkleRoot = p.merkleRoot;
+    }
 
     /// @notice set the wallet receiving the proceeds
     /// @param newWallet address of the new receiving wallet
@@ -121,7 +178,7 @@ contract EstateSaleWithAuth is ERC2771Context, ReferralValidator08 {
     function _checkAddressesAndExpiryTime(address buyer, address reserved) internal view {
         /* solium-disable-next-line security/no-block-members */
         require(block.timestamp < _expiryTime, "SALE_IS_OVER");
-        // require(buyer == msg.sender || _metaTransactionContracts[msg.sender], "NOT_AUTHORIZED");
+        require(buyer == msg.sender || isTrustedForwarder(msg.sender), "NOT_AUTHORIZED");
         require(reserved == address(0) || reserved == buyer, "RESERVED_LAND");
     }
 
@@ -230,61 +287,5 @@ contract EstateSaleWithAuth is ERC2771Context, ReferralValidator08 {
         uint256 feeAmountInSand = (priceInSand * FEE) / 100;
         require(_sand.transferFrom(buyer, address(_feeDistributor), feeAmountInSand), "FEE_TRANSFER_FAILED");
         return priceInSand - feeAmountInSand;
-    }
-
-    uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
-
-    IERC1155 internal immutable _asset;
-    LandToken internal immutable _land;
-    IERC20 internal immutable _sand;
-    address internal immutable _estate;
-    address internal immutable _feeDistributor;
-
-    address payable internal _wallet;
-    AuthValidator internal _authValidator;
-    uint256 internal immutable _expiryTime;
-    bytes32 internal immutable _merkleRoot;
-
-    uint256 private constant FEE = 5; // percentage of land sale price to be diverted to a specially configured instance of FeeDistributor, shown as an integer
-
-    // buyLandWithSand info indexes
-
-    uint256 private constant X_INDEX = 0;
-    uint256 private constant Y_INDEX = 1;
-    uint256 private constant SIZE_INDEX = 2;
-    uint256 private constant PRICE_INDEX = 3;
-
-    // need to use struct to avoid "Stack Too Deep" error. Since there are too many parameters.
-    struct Parameters {
-        IERC1155 asset;
-        LandToken landAddress;
-        IERC20 sandContractAddress;
-        address admin;
-        address estate;
-        address feeDistributor;
-        address payable initialWalletAddress;
-        AuthValidator authValidator;
-        uint256 expiryTime;
-        bytes32 merkleRoot;
-        address trustedForwarder;
-        address initialSigningWallet;
-        uint256 initialMaxCommissionRate;
-    }
-
-    constructor(Parameters memory p)
-        ERC2771Context(p.trustedForwarder)
-        ReferralValidator08(p.initialSigningWallet, p.initialMaxCommissionRate, p.admin)
-    {
-        _asset = p.asset;
-        _land = p.landAddress;
-        _sand = p.sandContractAddress;
-        // // ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
-        _admin = p.admin;
-        _estate = p.estate;
-        _feeDistributor = p.feeDistributor;
-        _wallet = p.initialWalletAddress;
-        _authValidator = p.authValidator;
-        _expiryTime = p.expiryTime;
-        _merkleRoot = p.merkleRoot;
     }
 }

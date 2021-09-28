@@ -4,18 +4,16 @@
 
 pragma solidity 0.8.2;
 
-import "../common/Libraries/SigUtil.sol";
-import "../common/Libraries/SafeMathWithRequire.sol";
-import "@openzeppelin/contracts-0.8/utils/math/SafeMath.sol";
+import "./WithAdmin.sol";
+import "../Libraries/SafeMathWithRequire.sol";
 import "@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol";
-import "../common/BaseWithStorage/ERC20/ERC20Token.sol";
-import "../common/BaseWithStorage/WithAdmin.sol";
+import "@openzeppelin/contracts-0.8/token/ERC20/ERC20.sol";
 
 /**
  * @title Referral Validator
  * @notice This contract verifies if a referral is valid
  */
-contract ReferralValidator08 is WithAdmin {
+contract WithReferralValidator is WithAdmin {
     address private _signingWallet;
     uint256 private _maxCommissionRate;
 
@@ -111,7 +109,7 @@ contract ReferralValidator08 is WithAdmin {
         address payable destination,
         address tokenAddress
     ) internal {
-        ERC20Token token = ERC20Token(tokenAddress);
+        ERC20 token = ERC20(tokenAddress);
         uint256 amountForDestination = amount;
 
         if (referral.length > 0) {

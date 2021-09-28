@@ -5,7 +5,9 @@ import "../common/Libraries/SigUtil.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
 
-contract AuthValidator is WithAdmin {
+// import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+
+contract AuthValidator08 is WithAdmin {
     address public _signingAuthWallet;
 
     event SigningWallet(address indexed signingWallet);
