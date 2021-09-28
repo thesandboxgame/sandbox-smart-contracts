@@ -41,8 +41,6 @@ contract EstateSaleWithAuth08 is ERC2771Context, WithReferralValidator {
 
     uint256 private constant FEE = 5; // percentage of land sale price to be diverted to a specially configured instance of FeeDistributor, shown as an integer
 
-    // buyLandWithSand info indexes
-
     uint256 private constant X_INDEX = 0;
     uint256 private constant Y_INDEX = 1;
     uint256 private constant SIZE_INDEX = 2;
@@ -90,7 +88,7 @@ contract EstateSaleWithAuth08 is ERC2771Context, WithReferralValidator {
         _wallet = newWallet;
     }
 
-    // Note: Using struct to avoid the "Stack too deep" issue.
+    /// Note: Using struct to avoid the "Stack too deep" issue.
     /// @param buyer address that perform the payment
     /// @param to address that will own the purchased Land
     /// @param reserved the reserved address (if any)
@@ -99,25 +97,34 @@ contract EstateSaleWithAuth08 is ERC2771Context, WithReferralValidator {
         address to;
         address reserved;
     }
-
-    /// @notice buy Land with SAND using the merkle proof associated with it
-    /// @param addrs struct of addresses. Using struct to avoid "Stack too deep" error
+    /// @param addrs struct of addresses.
     /// @param info [X_INDEX=0] x coordinate of the Land [Y_INDEX=1] y coordinate of the Land [SIZE_INDEX=2] size of the pack of Land to purchase [PRICE_INDEX=3] price in SAND to purchase that Land
     /// @param proof merkleProof for that particular Land
-    function buyLandWithSand(
-        Addresses calldata addrs,
-        uint256[] calldata info,
-        bytes32 salt,
-        uint256[] calldata assetIds,
-        bytes32[] calldata proof,
-        bytes calldata referral,
-        bytes calldata signature
-    ) external {
+    struct Arguments {
+        uint256[] info;
+        bytes32 salt;
+        uint256[] assetIds;
+        bytes32[] proof;
+        bytes referral;
+        bytes signature;
+    }
+
+    /// @notice buy Land with SAND using the merkle proof associated with it
+    /// Note: Using structs to avoid "Stack too deep" error
+    function buyLandWithSand(Addresses calldata addrs, Arguments calldata args) external {
         _checkAddressesAndExpiryTime(addrs.buyer, addrs.reserved);
-        _checkAuthAndProofValidity(addrs.to, addrs.reserved, info, salt, assetIds, proof, signature);
-        _handleFeeAndReferral(addrs.buyer, info[PRICE_INDEX], referral);
-        _mint(addrs.buyer, addrs.to, info);
-        _sendAssets(addrs.to, assetIds);
+        _checkAuthAndProofValidity(
+            addrs.to,
+            addrs.reserved,
+            args.info,
+            args.salt,
+            args.assetIds,
+            args.proof,
+            args.signature
+        );
+        _handleFeeAndReferral(addrs.buyer, args.info[PRICE_INDEX], args.referral);
+        _mint(addrs.buyer, addrs.to, args.info);
+        _sendAssets(addrs.to, args.assetIds);
     }
 
     /// @notice Gets the expiry time for the current sale
@@ -142,7 +149,6 @@ contract EstateSaleWithAuth08 is ERC2771Context, WithReferralValidator {
         uint256[] calldata values
     ) external {
         require(msg.sender == _admin, "NOT_AUTHORIZED");
-        // require(block.timestamp > _expiryTime, "SALE_NOT_OVER"); // removed to recover in case of misconfigured sales
         _asset.safeBatchTransferFrom(address(this), to, assetIds, values, "");
     }
 

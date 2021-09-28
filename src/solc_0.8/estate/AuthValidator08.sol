@@ -1,11 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2; // TODO: update once upgrade is complete
 
-import "../common/Libraries/SigUtil.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
-
-// import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
+import "@openzeppelin/contracts-0.8/utils/cryptography/ECDSA.sol";
 
 contract AuthValidator08 is WithAdmin {
     address public _signingAuthWallet;
@@ -28,7 +26,8 @@ contract AuthValidator08 is WithAdmin {
     }
 
     function isAuthValid(bytes memory signature, bytes32 hashedData) public view returns (bool) {
-        address signer = SigUtil.recover(keccak256(SigUtil.prefixed(hashedData)), signature);
+        address signer =
+            ECDSA.recover(keccak256(abi.encodePacked("\x19Ethereum Signed Message:\n32", hashedData)), signature);
         return signer == _signingAuthWallet;
     }
 }
