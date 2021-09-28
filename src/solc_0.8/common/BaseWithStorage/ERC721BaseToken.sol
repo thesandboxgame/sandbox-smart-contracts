@@ -180,8 +180,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Handler {
     /// @return owner The address of the token owner.
     function ownerOf(uint256 id) external view override returns (address owner) {
         owner = _ownerOf(id);
-        // @review - Any concerns with removing this?
-        // require(owner != address(0), "NONEXISTANT_TOKEN");
+        require(owner != address(0), "NONEXISTANT_TOKEN");
     }
 
     /// @notice Get the approved operator for a specific token.
