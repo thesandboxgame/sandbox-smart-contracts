@@ -3,7 +3,7 @@ import {setupLand} from './fixtures';
 
 describe('PolygonLand.sol', function () {
   describe('Land <> PolygonLand: Transfer', function () {
-    describe('L1 to L2', async function () {
+    describe('L1 to L2', function () {
       it('should be able to tranfer 1x1 Land', async function () {
         const {
           Land,
@@ -180,7 +180,7 @@ describe('PolygonLand.sol', function () {
         );
       });
     });
-    describe('L2 to L1', async function () {
+    describe('L2 to L1', function () {
       it('should be able to tranfer 1x1 Land', async function () {
         const {
           Land,
