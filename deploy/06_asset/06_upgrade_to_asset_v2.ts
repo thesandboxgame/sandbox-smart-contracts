@@ -11,6 +11,7 @@ const func: DeployFunction = async function (
     assetAdmin,
     upgradeAdmin,
     assetAttributesRegistryAdmin,
+    deployer,
   } = await getNamedAccounts();
   const {deploy, execute} = deployments;
 
@@ -21,11 +22,11 @@ const func: DeployFunction = async function (
   );
 
   const ERC1155ERC721HelperLib = await deploy('ERC1155ERC721Helper', {
-    from: upgradeAdmin,
+    from: deployer,
   });
 
   const assetHelperLib = await deploy('AssetHelper', {
-    from: upgradeAdmin,
+    from: deployer,
   });
 
   const asset = await deploy('Asset', {
@@ -71,6 +72,6 @@ func.dependencies = [
   'AssetMinter_deploy',
   'TRUSTED_FORWARDER',
   'ERC1155_PREDICATE',
-  'GemsCatalystsRegistry_setup',
+  'AssetAttributesRegistry_deploy',
 ];
 func.skip = skipUnlessTestnet;

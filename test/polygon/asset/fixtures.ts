@@ -14,7 +14,6 @@ import {assetFixtures} from '../../common/fixtures/asset';
 import {Contract} from 'ethers';
 import gems from '../../../data/gems';
 import catalysts from '../../../data/catalysts';
-// import asset_regenerate_and_distribute from '../../setup/asset_regenerate_and_distribute';
 
 const polygonAssetFixtures = async function () {
   // await asset_regenerate_and_distribute(hre);
@@ -114,44 +113,50 @@ const polygonAssetFixtures = async function () {
   };
 };
 
-export const setupAssetRegistryL2 = deployments.createFixture(
-  async function () {
-    const {
-      assetAttributesRegistryAdmin,
-      gemMinter,
-      deployer,
-      catalystAdmin,
-    } = await getNamedAccounts();
+export async function setupGemsAndCatalysts(
+  isSetupForL2: boolean
+): Promise<Contract> {
+  const {
+    assetAttributesRegistryAdmin,
+    gemMinter,
+    deployer,
+    catalystAdmin,
+  } = await getNamedAccounts();
+  const L2Prefix = isSetupForL2 ? 'Polygon' : '';
+  const assetAttributesRegistryAsRegistryAdmin: Contract = await ethers.getContract(
+    L2Prefix + 'AssetAttributesRegistry',
+    assetAttributesRegistryAdmin
+  );
 
-    const assetAttributesRegistryAsRegistryAdmin: Contract = await ethers.getContract(
-      'PolygonAssetAttributesRegistry',
-      assetAttributesRegistryAdmin
+  const GemsCatalystsRegistry = await deployments.get(
+    L2Prefix + 'GemsCatalystsRegistry'
+  );
+
+  const DefaultAttributes = await deployments.deploy(`DefaultAttributes`, {
+    from: deployer,
+    log: true,
+  });
+
+  const catalystsToAdd = [];
+  const gemsToAdd = [];
+
+  for (const catalyst of catalysts) {
+    const doesCatalystExist = await read(
+      L2Prefix + 'GemsCatalystsRegistry',
+      'doesCatalystExist',
+      catalyst.catalystId
     );
 
-    const GemsCatalystsRegistry = await deployments.get(
-      'PolygonGemsCatalystsRegistry'
-    );
-
-    const DefaultAttributes = await deployments.get('PolygonDefaultAttributes');
-
-    const catalystsToAdd = [];
-    const gemsToAdd = [];
-
-    for (const catalyst of catalysts) {
-      const doesCatalystExist = await read(
-        `PolygonGemsCatalystsRegistry`,
-        'doesCatalystExist',
-        catalyst.catalystId
-      );
-
-      let catalystContract;
-      if (!doesCatalystExist) {
-        catalystContract = await deploy(`PolygonCatalyst_${catalyst.symbol}`, {
+    let catalystContract;
+    if (!doesCatalystExist) {
+      catalystContract = await deploy(
+        L2Prefix + `Catalyst_${catalyst.symbol}`,
+        {
           contract: 'Catalyst',
           from: deployer,
           log: true,
           args: [
-            `Sandbox's ${catalyst.symbol} L2Catalysts`,
+            `Sandbox's ${catalyst.symbol} Catalysts`,
             catalyst.symbol,
             catalystAdmin,
             catalyst.maxGems,
@@ -160,65 +165,49 @@ export const setupAssetRegistryL2 = deployments.createFixture(
             GemsCatalystsRegistry.address,
           ],
           skipIfAlreadyDeployed: true,
-        });
-
-        catalystsToAdd.push(catalystContract.address);
-      }
-    }
-
-    for (const gem of gems) {
-      const doesGemExist = await read(
-        `PolygonGemsCatalystsRegistry`,
-        'doesGemExist',
-        gem.gemId
+        }
       );
-      let gemsContract;
-      if (!doesGemExist) {
-        gemsContract = await deploy(`PolygonGem_${gem.symbol}`, {
-          contract: 'Gem',
-          from: deployer,
-          log: true,
-          args: [
-            `Sandbox's ${gem.symbol} polygonGems`,
-            gem.symbol,
-            gemMinter,
-            gem.gemId,
-            GemsCatalystsRegistry.address,
-          ],
-          skipIfAlreadyDeployed: true,
-        });
-        gemsToAdd.push(gemsContract.address);
-      }
+
+      catalystsToAdd.push(catalystContract.address);
     }
-
-    const currentAdmin = await read('PolygonGemsCatalystsRegistry', 'getAdmin');
-    await execute(
-      'PolygonGemsCatalystsRegistry',
-      {from: currentAdmin, log: true},
-      'addGemsAndCatalysts',
-      gemsToAdd,
-      catalystsToAdd
-    );
-
-    return {
-      assetAttributesRegistryAsRegistryAdmin,
-    };
   }
-);
 
-export const setupAssetRegistryL1 = deployments.createFixture(
-  async function () {
-    const {assetAttributesRegistryAdmin} = await getNamedAccounts();
-    const assetAttributesRegistryAsRegistryAdmin: Contract = await ethers.getContract(
-      'AssetAttributesRegistry',
-      assetAttributesRegistryAdmin
+  for (const gem of gems) {
+    const doesGemExist = await read(
+      L2Prefix + 'GemsCatalystsRegistry',
+      'doesGemExist',
+      gem.gemId
     );
-    // const Asset = await ethers.getContract('Asset');
-
-    // assetAttributesRegistryAsRegistryAdmin.setOverLayerDepositor(Asset.address);
-
-    return {
-      assetAttributesRegistryAsRegistryAdmin,
-    };
+    let gemsContract;
+    if (!doesGemExist) {
+      gemsContract = await deploy(L2Prefix + `Gem_${gem.symbol}`, {
+        contract: 'Gem',
+        from: deployer,
+        log: true,
+        args: [
+          `Sandbox's ${gem.symbol} Gems`,
+          gem.symbol,
+          gemMinter,
+          gem.gemId,
+          GemsCatalystsRegistry.address,
+        ],
+        skipIfAlreadyDeployed: true,
+      });
+      gemsToAdd.push(gemsContract.address);
+    }
   }
-);
+
+  const currentAdmin = await read(
+    L2Prefix + 'GemsCatalystsRegistry',
+    'getAdmin'
+  );
+  await execute(
+    L2Prefix + 'GemsCatalystsRegistry',
+    {from: currentAdmin, log: true},
+    'addGemsAndCatalysts',
+    gemsToAdd,
+    catalystsToAdd
+  );
+
+  return assetAttributesRegistryAsRegistryAdmin;
+}

@@ -100,10 +100,10 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
         uint16 catalystId,
         uint16[] calldata gemIds
     ) external {
-        // require(
-        //     _msgSender() == overLayerDepositor || _msgSender() == _admin,
-        //     "AssetAttributesRegistry: not overLayerDepositor"
-        // );
+        require(
+            _msgSender() == overLayerDepositor || _msgSender() == _admin,
+            "AssetAttributesRegistry: not overLayerDepositor"
+        );
         // We have to ignore all 0 gemid in case of L2 to L1 deposit
         // In this case we get gems data in a form of an array of MAX_NUM_GEMS padded with 0
         if (gemIds.length == MAX_NUM_GEMS) {

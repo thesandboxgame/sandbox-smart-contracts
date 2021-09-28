@@ -250,7 +250,6 @@ const config: HardhatUserConfig = {
           }
         : undefined,
       deploy: ['deploy_polygon', 'deploy'],
-      saveDeployments: true,
       // deploy: ['deploy-for-test', 'deploy'],
     },
     localhost: {
@@ -267,7 +266,6 @@ const config: HardhatUserConfig = {
       url: node_url('rinkeby'),
       accounts: accounts('rinkeby'),
       tags: ['testnet', 'L1'],
-      deploy: ['deploy_ETH'],
     },
     goerli: {
       url: node_url('goerli'),

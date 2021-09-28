@@ -204,11 +204,6 @@ export const setupPolygonLandWeightedSANDRewardPool = withSnapshot(
         .approve(rewardPool.address, STAKE_AMOUNT.mul(10));
     }
 
-    // // Enable minting of LANDs
-    // await multiplierNFTokenContract
-    //   .connect(ethers.provider.getSigner(multiplierNFTokenAdmin))
-    //   .setMinter(landAdmin, true);
-
     return {
       rewardPool,
       rewardPoolContract,
