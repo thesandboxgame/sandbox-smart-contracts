@@ -162,7 +162,7 @@ export function getAssetChainIndex(id: BigNumber): number {
   return (slicedId & SLICED_CHAIN_INDEX_MASK) >>> 23;
 }
 
-export async function evmResetState(): Promise<void> {
+export async function evmRevertToInitialState(): Promise<void> {
   console.log('Revert to initial snapshot, calling reset');
   // This revert the evm state.
   await network.provider.request({
@@ -178,7 +178,9 @@ export function withSnapshot<T>(
   }
 ): () => Promise<T> {
   return deployments.createFixture(async () => {
-    await evmResetState();
+    // TODO: This has problems with solidity-coverage, when the fix that we can use it
+    // TODO: We need a way to revert to initial state!!!
+    //  await evmRevertToInitialState();
     await deployments.fixture(tags, {
       fallbackToGlobal: false,
       keepExistingDeployments: false,
