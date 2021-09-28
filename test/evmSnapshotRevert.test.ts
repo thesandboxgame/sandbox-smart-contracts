@@ -27,7 +27,7 @@ describe('use withSnapshot to keep your testing environment clean', function () 
       'CHILD_CHAIN_MANAGER'
     );
     const [src, dst, other] = await getUnnamedAccounts();
-    const initialBalance = await ethers.provider.getBalance(src);
+    // const initialBalance = await ethers.provider.getBalance(src);
 
     const signer = await ethers.getSigner(src);
     await signer.sendTransaction({
@@ -40,6 +40,7 @@ describe('use withSnapshot to keep your testing environment clean', function () 
     expect(await childChainManagerPre.polygonAsset()).to.be.equal(other);
 
     // A clean start...
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const {contract, balance} = await withSnapshotSetup();
     expect(await contract.polygonAsset()).to.be.equal(AddressZero);
     // I don't know exactly the value of initialBalance, it depends on the hardhat config and the other tests.
