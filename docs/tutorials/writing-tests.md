@@ -1,0 +1,170 @@
+---
+breaks: false
+
+description: Writing tests
+
+---
+
+# The tools we use
+
+- [Hardhat](https://hardhat.org/tutorial/): The framework used to run a special Evm used for testing. Read this specific
+  section: [Testing-contracts](https://hardhat.org/tutorial/testing-contracts.html)
+- [ethers-js](https://docs.ethers.io/v5/): A framework used to access the Evm from javascript/typescript and abstract
+  the contracts, so they can be easily called.
+- [Mocha](https://mochajs.org/): The testing framework, you can declare test suites, individual tests and get a report
+  after running them.
+- [Chai](https://www.chaijs.com/): Helpers to make assertions about results inside the tests.
+- [Waffle chai matchers](https://ethereum-waffle.readthedocs.io/en/latest/matchers.html): Some extra chai helpers
+  specific to the blockchain.
+- [Hardhat deploy](https://hardhat.org/guides/deploying.html): This framework let you run some deploy scripts when you
+  run your tests, take snapshots of the Evm and revert to those snapshots when needed.
+
+# Running the tests
+
+There are two different ways to execute the tests and that can generate some confusion. The configuration used by each
+method is different:
+
+1. Hardhat executes mocha: there is a hardhat task that executes mocha and uses the options declared in the mocha
+   section of the `hardhat-config.ts` file.
+2. Mocha executes hardhat: mocha is executed (like in vscode) and when the hardhat library is required an Evm node is
+   run. In this case the configuration is taken from the file `.mocharc.js`
+
+Our project have the two configurations working but some time there can be some differences. You can run a single test
+using your editor, or you can run all the tests by executing `yarn test` in the project root directory.
+
+## A simple test
+
+Check the typical test in: [Testing-contracts](https://hardhat.org/tutorial/testing-contracts.html)
+
+Each test file can contain some related tests, and you can have a lot of files (or test suites) that test different
+contracts.
+
+Something very important to note is: ***the Evm keeps the state between tests***, so each test must do a clean
+deployment of the contracts used.
+
+## Testing with snapshots
+
+Hardhat deploy provide a way to run migration script to do the deployment of the contracts during testing and also the
+`fixture` and `createFixture` function that create a snapshot of the current state of the Evm the first time they are
+called and then revert to that snapshot the second time. This can be used to reuse the deployment of the contracts on
+each test and test suite.
+
+The snapshot/revert functionality has some side effect that must be taken into account:
+
+1. If some set of deployment scripts are executed by a test suite (by calling `fixture(['SOME_DEPLOY_STEP'])`) and then
+   another suite uses the exact same set, the second suite will get the snapshot taken by the first one, and it can
+   include some unexpected stuff.
+2. If the function `createFixture` is used twice in the same test suite the first call get the initial state of the Evm
+   plus the initialization done by the `createFixture` and the second one get both. After that a call to any of those
+   will erase the changes done by the other one.
+3. The calls: `fixture()` and `fixture([])` ***are very different!***. The first one executes all the migration steps
+   and the second one don't execute any. The first version is specially problematic, a test that was working can fail
+   because of a deploy-step added later.
+
+To avoid errors and make the code cleaner we introduce: `withSnapshot(migrationSteps, function)`. This function must be
+called to create a setup function that then is called in each test. The setup function revert to the initial state of
+the Evm ([see: initial state](https://hardhat.org/hardhat-network/reference/#initial-state), executes the given
+migrations, the given function and then save a snapshot of the new Evm state. When called later the function does
+nothing but reverting to the snapshot taken previously. You can declare as many setup functions you want but ***
+must use only one in each test***.
+
+## Recommended style for tests
+
+This is an example of a test that uses `withSnapshot` and our recommendation on how to write tests:
+
+```typescript
+
+// This function can be in some util.ts file or anoter reusable piece. 
+// IS BETTER TO REUSE this kind of functions instead of migration steps when doing unit tests!!!
+async function IWillReuseThisInSomeSetup() {
+    const [user1, user2] = await getUnnamedAccounts();
+    const {deployer, otherUser} = await getNamedAccounts();
+    // Do some extra deploys set values, etc.
+    await deployments.deploy('CHILD_CHAIN_MANAGER', {from: deployer});
+    await deployments.deploy('MOCK1', {from: deployer});
+    // ... 
+    const contract = await ethers.getContract('CHILD_CHAIN_MANAGER');
+    // We can call contract methods to setup values, etc.
+    return {contract, user1, user2, otherUser, deployer, etc};
+}
+
+async function IWillReuseThisInSomeSetup2() {
+// ...
+    return {someOtherContract, etc};
+}
+
+// A typical setup function
+const setup1 = withSnapshot([
+    'MIGRATION1',
+    'MIGRATION2',
+    //...
+], IWillReuseThisInSomeSetup);
+
+// Another setup function that mix some results
+const setup2 = withSnapshot([
+    'MIGRATION1',
+    'OTHER_MIGRATION_MIGRATION2',
+    // ...
+], async () => {
+    const vals1 = await IWillReuseThisInSomeSetup();
+    const vals2 = await IWillReuseThisInSomeSetup1();
+    return {...vals1, ...vals2}
+});
+
+const setup3 = withSnapshot([
+    'MIGRATION1',
+    'MIGRATION2',
+    // ...
+], async function () {
+    // If we don't want to reuse the async func we can write it here directly.
+    return {something}
+});
+
+// withSnapshot can be used without migration steps
+const setup4 = withSnapshot([], async function () {
+    // If we don't want to reuse the async func we can write it here directly.
+    return {something}
+});
+
+describe('Will test some contract', function () {
+    it("should do something", async function () {
+        const {contract, user1} = await setup1();
+        const ret = await contract.someMethod(user1);
+        // Chai and waffle matchers are very nice!!!
+        expect(await token.balanceOf(wallet.address)).to.equal(993);
+        expect(BigNumber.from(100)).to.be.within(BigNumber.from(99), BigNumber.from(101));
+        expect(BigNumber.from(100)).to.be.closeTo(BigNumber.from(101), 10);
+        await expect(token.transfer(walletTo.address, 7))
+            .to.emit(token, 'Transfer')
+            .withArgs(wallet.address, walletTo.address, 7);
+        await expect(token.transfer(walletTo.address, 1007))
+            .to.be.revertedWith('Insufficient funds');
+        // ...
+    });
+    it("should fail to do something", async function () {
+        // Here the snapshot taken by setup1 is reused.
+        const {contract, user1} = await setup1();
+        // ...
+    })
+    it("should do something with different setup", async function () {
+        const {contract, contract2, user2} = await setup2();
+        // ...
+    })
+    it("THIS IS WRONG, DON'T USE TWO SETUPS IN ONE TEST!!!", async function () {
+        const {contract} = await setup1();
+        const {contract2} = await setup2();
+    })
+    it("THIS IS RISKY, WE GET THE EVM STATE THAT THE PREVIOUS TEST LEAVE", async function () {
+    })
+});
+
+```
+
+- ***It is recommended to reuse the async function passed to withSnapshot instead of writing migration steps that are
+  only used for testing***
+- In general when doing unit-tests we don't need to run migration steps. Running migration steps is useful when doing
+  integration tests and when testing migration steps directly.
+- You can nest as many describe blocks as you want.
+
+
+
