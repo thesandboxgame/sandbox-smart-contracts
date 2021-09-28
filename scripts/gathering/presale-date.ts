@@ -1,3 +1,9 @@
+/**
+ * How to use:
+ *  - yarn execute <NETWORK> ./scripts/gathering/presale-date.ts <LAND_PRESALE_NAME>
+ * 
+ * LAND_PRESALE_NAME: ie: Land_PreSale_11_30
+ */
 import hre from 'hardhat';
 import {BigNumber} from '@ethersproject/bignumber';
 
