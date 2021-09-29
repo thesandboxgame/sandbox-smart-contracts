@@ -1,5 +1,5 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.8.2; // TODO: update once upgrade is complete
+pragma solidity 0.8.2;
 
 import "../common/Libraries/SafeMathWithRequire.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";

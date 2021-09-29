@@ -12,7 +12,7 @@ const {read} = deployments;
 
 type User = {
   address: string;
-  ReferralValidator08: Contract;
+  WithReferralValidator: Contract;
 };
 
 type User2 = {
@@ -21,14 +21,18 @@ type User2 = {
 
 const setupTest = deployments.createFixture(
   async (): Promise<{
-    ReferralValidator08: Contract;
+    WithReferralValidator: Contract;
     validators: User[];
   }> => {
-    await deployments.fixture('ReferralValidator08');
-    const ReferralValidator08 = await ethers.getContract('ReferralValidator08');
+    await deployments.fixture('WithReferralValidator');
+    const WithReferralValidator = await ethers.getContract(
+      'WithReferralValidator'
+    );
     const unnamedAccounts = await getUnnamedAccounts();
-    const validators = await setupUsers(unnamedAccounts, {ReferralValidator08});
-    return {ReferralValidator08, validators};
+    const validators = await setupUsers(unnamedAccounts, {
+      WithReferralValidator,
+    });
+    return {WithReferralValidator, validators};
   }
 );
 
@@ -47,17 +51,19 @@ describe('GameToken', function () {
   });
 */
 
-it('ReferralValidator08.sol', function () {
+it('WithReferralValidator.sol', function () {
   before(async function () {
     //const sandAdmin = await getNamedAccounts();
-    const sandAdmin = await read('ReferralValidator08', 'getAdmin');
+    const sandAdmin = await read('WithReferralValidator', 'getAdmin');
     const newSigner = '0xD1Df0BB44804f4Ac75286E9b1AE66c27CBCb5c7C';
     const oldSigningWallet = await read(
-      'ReferralValidator08',
+      'WithReferralValidator',
       'getSigningWallet'
     );
-    await waitFor(sandAdmin.ReferralValidator08.updateSigningWallet(newSigner));
-    const newWallet = await sandAdmin.ReferralValidator08.getSigningWallet();
+    await waitFor(
+      sandAdmin.WithReferralValidator.updateSigningWallet(newSigner)
+    );
+    const newWallet = await sandAdmin.WithReferralValidator.getSigningWallet();
     expect(newWallet).to.equal(newSigner);
   });
 });

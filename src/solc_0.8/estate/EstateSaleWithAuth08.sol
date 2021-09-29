@@ -70,7 +70,6 @@ contract EstateSaleWithAuth08 is ERC2771Context, WithReferralValidator {
         _asset = p.asset;
         _land = p.landAddress;
         _sand = p.sandContractAddress;
-        // // ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
         _admin = p.admin;
         _estate = p.estate;
         _feeDistributor = p.feeDistributor;
