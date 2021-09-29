@@ -65,7 +65,7 @@ export const setupEstateSale = deployments.createFixture(async function (hre) {
   );
   await transferSandToDeployer(proofs);
   const approveSandForEstateSale = async (address: string, price: string) => {
-    const sandContractAsUser = await sandContract.connect(
+    const sandContractAsUser = sandContract.connect(
       ethers.provider.getSigner(address)
     );
     await sandContractAsUser.approve(estateSaleWithAuthContract.address, price);
@@ -84,7 +84,7 @@ export const setupEstateSale = deployments.createFixture(async function (hre) {
 async function transferSandToDeployer(proofs: SaltedProofSaleLandInfo[]) {
   const sandContract = await ethers.getContract('Sand');
   const {deployer, sandBeneficiary} = await getNamedAccounts();
-  const sandContractAsSandBeneficiary = await sandContract.connect(
+  const sandContractAsSandBeneficiary = sandContract.connect(
     ethers.provider.getSigner(sandBeneficiary)
   );
   await sandContractAsSandBeneficiary.transfer(deployer, proofs[0].price);
