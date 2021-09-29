@@ -15,8 +15,18 @@ import "../common/BaseWithStorage/WithAdmin.sol";
 contract AssetMinter is ERC2771Handler, IAssetMinter, WithAdmin, Ownable {
     using SafeMath for uint256;
 
-    uint256 private constant GEM_UNIT = 1000000000000000000;
-    uint256 private constant CATALYST_UNIT = 1000000000000000000;
+    uint256 private constant NFT_SUPPLY = 1;
+
+    uint256 public artQuantity = 1;
+    uint256 public propQuantity = 10000;
+    uint256 public commonQuantity = 1000;
+    uint256 public rareQuantity = 100;
+    uint256 public epicQuantity = 10;
+    uint256 public legendaryQuantity = 1;
+    uint32 public numberOfGemsBurnPerAsset = 1;
+    uint32 public numberOfCatalystBurnPerAsset = 1;
+    uint256 public gemUnitWhenBurning = 1000000000000000000;
+    uint256 public catalystUnitWhenBurning = 1000000000000000000;
 
     IAssetAttributesRegistry internal immutable _registry;
     IAssetToken internal immutable _asset;
@@ -41,55 +51,116 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, WithAdmin, Ownable {
         __ERC2771Handler_initialize(trustedForwarder);
     }
 
-    /// @notice mint one Asset token.
+    function setCommonQuantity(uint256 newQuantity) external onlyOwner {
+        commonQuantity = newQuantity;
+    }
+
+    function setRareQuantity(uint256 newQuantity) external onlyOwner {
+        rareQuantity = newQuantity;
+    }
+
+    function setEpicQuantity(uint256 newQuantity) external onlyOwner {
+        epicQuantity = newQuantity;
+    }
+
+    function setLegendaryQuantity(uint256 newQuantity) external onlyOwner {
+        legendaryQuantity = newQuantity;
+    }
+
+    function setNumberOfGemsBurnPerAsset(uint32 newQuantity) external onlyOwner {
+        numberOfGemsBurnPerAsset = newQuantity;
+    }
+
+    function setNumberOfCatalystBurnPerAsset(uint32 newQuantity) external onlyOwner {
+        numberOfCatalystBurnPerAsset = newQuantity;
+    }
+
+    function setArtQuantity(uint256 newQuantity) external onlyOwner {
+        artQuantity = newQuantity;
+    }
+
+    function setPropQuantity(uint256 newQuantity) external onlyOwner {
+        propQuantity = newQuantity;
+    }
+
+    function setGemUnitWhenBurning(uint256 newQuantity) external onlyOwner {
+        gemUnitWhenBurning = newQuantity;
+    }
+
+    function setCatalystUnitWhenBurning(uint256 newQuantity) external onlyOwner {
+        catalystUnitWhenBurning = newQuantity;
+    }
+
+    /// @notice mint one Asset token with no catalyst.
     /// @param from address creating the Asset, need to be the tx sender or meta tx signer.
     /// @param packId unused packId that will let you predict the resulting tokenId.
     /// @param metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata.
-    /// @param catalystId Id of the Catalyst ERC20 token to burn (1, 2, 3 or 4).
-    /// @param gemIds list of gem ids to burn in the catalyst.
-    /// @param quantity asset supply to mint
-    /// @param rarity rarity power of the token to mint.
     /// @param to destination address receiving the minted tokens.
+    /// @param typeAsset (art or prop) decide how many asset will be minted
     /// @param data extra data.
     /// @return assetId The new token Id.
-    function mint(
+    function mintWithoutCatalyst(
         address from,
         uint40 packId,
         bytes32 metadataHash,
-        uint16 catalystId,
-        uint16[] calldata gemIds,
-        uint32 quantity,
-        uint8 rarity, // TODO remove : rarity is unused so it should be zero, like for mintMultiple
         address to,
+        AssetTypeNoTier typeAsset,
         bytes calldata data
     ) external override returns (uint256 assetId) {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         require(_msgSender() == from, "AUTH_ACCESS_DENIED");
 
-        assetId = _asset.mint(from, packId, metadataHash, quantity, rarity, to, data);
-        if (catalystId != 0) {
-            _setSingleCatalyst(from, assetId, quantity, catalystId, gemIds);
+        uint256 quantity;
+        if (typeAsset == AssetTypeNoTier.art) {
+            quantity = artQuantity;
+        } else if (typeAsset == AssetTypeNoTier.prop) {
+            quantity = propQuantity;
         }
+        return _asset.mint(from, packId, metadataHash, quantity, 0, to, data);
+    }
+
+    /// @notice mint multiple NFT Asset token using one catalyst.
+    /// @param from address creating the Asset, need to be the tx sender or meta tx signer.
+    /// @param packId unused packId that will let you predict the resulting tokenId.
+    /// @param metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata.
+    /// @param catalystId Id of the Catalyst ERC20 token to burn (1, 2, 3 or 4).
+    /// @param gemIds list of gem ids to burn in the catalyst.
+    /// @param to destination address receiving the minted tokens.
+    /// @param data extra data.
+    /// @return assetId The new token Id.
+    function mintWithCatalyst(
+        address from,
+        uint40 packId,
+        bytes32 metadataHash,
+        uint16 catalystId,
+        uint16[] calldata gemIds,
+        address to,
+        bytes calldata data
+    ) external override returns (uint256 assetId) {
+        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
+        require(_msgSender() == from, "AUTH_ACCESS_DENIED");
+        require(catalystId != 0, "AssetMinter: catalystId cannot be 0");
+
+        uint256 quantity = _getQuantityByCatalystId(catalystId);
+
+        _burnCatalyst(from, catalystId, numberOfCatalystBurnPerAsset);
+        _burnGems(from, gemIds, numberOfGemsBurnPerAsset);
+
+        assetId = _asset.mint(from, packId, metadataHash, quantity, 0, to, data);
+        _registry.setCatalyst(assetId, catalystId, gemIds);
+
         return assetId;
     }
 
     /// @notice mint multiple Asset tokens.
-    /// @param from address creating the Asset, need to be the tx sender or meta tx signer.
-    /// @param packId unused packId that will let you predict the resulting tokenId.
-    /// @param metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata.
-    /// @param gemsQuantities quantities of gems to be used for each id in order, ie: [0, 1, 0, 2, 1, 0]
-    /// would be gemId1=1, gemId2=0, gemId3=2, gemId4=1, gemId5=0
-    /// @param catalystsQuantities quantities of catalyst to be used for each id in order, ie: [0, 1, 0, 3, 0]
-    /// would be catalystId1=1, catalystId2=0, catalystId3=3, catalystId4=0,
-    /// @param assets contains the data to associate catalyst and gems to the assets.
+    /// @param data contains (-from address creating the Asset, need to be the tx sender or meta tx signer
+    /// -packId unused packId that will let you predict the resulting tokenId
+    /// -metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata)
+    /// @param assets data (gems and catalyst data)
     /// @param to destination address receiving the minted tokens.
     /// @param data extra data.
-    function mintMultiple(
-        address from,
-        uint40 packId,
-        bytes32 metadataHash,
-        uint256[] memory gemsQuantities,
-        uint256[] memory catalystsQuantities,
+    function mintMultipleWithCatalyst(
+        MintMultipleData memory mintData,
         AssetData[] memory assets,
         address to,
         bytes memory data
@@ -97,61 +168,55 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, WithAdmin, Ownable {
         require(assets.length != 0, "INVALID_0_ASSETS");
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
 
-        require(_msgSender() == from, "AUTH_ACCESS_DENIED");
+        require(_msgSender() == mintData.from, "AUTH_ACCESS_DENIED");
 
-        uint256[] memory supplies = _handleMultipleAssetRequirements(from, gemsQuantities, catalystsQuantities, assets);
-        assetIds = _asset.mintMultiple(from, packId, metadataHash, supplies, "", to, data);
+        uint256[] memory supplies = _handleMultipleAssetRequirements(mintData.from, assets);
+        assetIds = _asset.mintMultiple(mintData.from, mintData.packId, mintData.metadataHash, supplies, "", to, data);
         for (uint256 i = 0; i < assetIds.length; i++) {
-            if (assets[i].catalystId != 0) {
-                _registry.setCatalyst(assetIds[i], assets[i].catalystId, assets[i].gemIds);
-            }
+            require(assets[i].catalystId != 0, "AssetMinter: catalystID can't be 0");
+            _registry.setCatalyst(assetIds[i], assets[i].catalystId, assets[i].gemIds);
         }
         return assetIds;
     }
 
-    /// @dev Handler for dealing with assets when minting multiple at once.
-    /// @param from The original address that signed the transaction.
-    /// @param gemsQuantities An array listing the quantity of each type of gem.
-    /// @param catalystsQuantities An array listing the quantity of each type of catalyst.
-    /// @param assets An array of AssetData structs to define how the total gems and catalysts are to be allocated.
-    /// @return supplies An array of the quantities for each asset being minted.
-    function _handleMultipleAssetRequirements(
-        address from,
-        uint256[] memory gemsQuantities,
-        uint256[] memory catalystsQuantities,
-        AssetData[] memory assets
-    ) internal returns (uint256[] memory supplies) {
-        _batchBurnCatalysts(from, catalystsQuantities);
-        _batchBurnGems(from, gemsQuantities);
-
-        supplies = new uint256[](assets.length);
-
-        for (uint256 i = 0; i < assets.length; i++) {
-            if (assets[i].catalystId != 0) {
-                require(catalystsQuantities[assets[i].catalystId] != 0, "INVALID_CATALYST_NOT_ENOUGH");
-                uint16 maxGems = _gemsCatalystsRegistry.getMaxGems(assets[i].catalystId);
-                require(assets[i].gemIds.length <= maxGems, "INVALID_GEMS_TOO_MANY");
-                catalystsQuantities[assets[i].catalystId] = catalystsQuantities[assets[i].catalystId].sub(1);
-                gemsQuantities = _checkGemsQuantities(gemsQuantities, assets[i].gemIds);
-            }
-            supplies[i] = assets[i].quantity;
-        }
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyOwner {
+        _trustedForwarder = trustedForwarder;
     }
 
-    /// @dev Validate the quantities of each type of gem passed.
-    /// @param gemsQuantities An array of the quantities of each gem type to use for minting assets.
-    /// @param gemIds An array of gemIds to use for minting assets.
-    /// @return An array of quantities for each gem type.
-    function _checkGemsQuantities(uint256[] memory gemsQuantities, uint16[] memory gemIds)
+    /// @dev Handler for dealing with assets when minting multiple at once.
+    /// @param from The original address that signed the transaction.
+    /// @param assets An array of AssetData structs to define how the total gems and catalysts are to be allocated.
+    /// @return supplies An array of the quantities for each asset being minted.
+    function _handleMultipleAssetRequirements(address from, AssetData[] memory assets)
         internal
-        pure
-        returns (uint256[] memory)
+        returns (uint256[] memory supplies)
     {
-        for (uint256 i = 0; i < gemIds.length; i++) {
-            require(gemsQuantities[gemIds[i]] != 0, "INVALID_GEMS_NOT_ENOUGH");
-            gemsQuantities[gemIds[i]] = gemsQuantities[gemIds[i]].sub(1);
+        supplies = new uint256[](assets.length);
+        uint256[] memory catalystsToBurn = new uint256[](_gemsCatalystsRegistry.getNumberOfCatalystContract());
+        uint256[] memory gemsToBurn = new uint256[](_gemsCatalystsRegistry.getNumberOfGemsContract());
+
+        for (uint256 i = 0; i < assets.length; i++) {
+            require(
+                assets[i].catalystId > 0 && assets[i].catalystId <= catalystsToBurn.length,
+                "AssetMinter: catalystID out of bound"
+            );
+            catalystsToBurn[assets[i].catalystId - 1]++;
+            for (uint256 j = 0; j < assets[i].gemIds.length; j++) {
+                require(
+                    assets[i].gemIds[j] > 0 && assets[i].gemIds[j] <= gemsToBurn.length,
+                    "AssetMinter: gemId out of bound"
+                );
+                gemsToBurn[assets[i].gemIds[j] - 1]++;
+            }
+
+            uint16 maxGems = _gemsCatalystsRegistry.getMaxGems(assets[i].catalystId);
+            require(assets[i].gemIds.length <= maxGems, "AssetMinter: too many gems");
+            supplies[i] = _getQuantityByCatalystId(assets[i].catalystId);
         }
-        return gemsQuantities;
+        _batchBurnCatalysts(from, catalystsToBurn);
+        _batchBurnGems(from, gemsToBurn);
     }
 
     /// @dev Burn a batch of catalysts in one tx.
@@ -160,9 +225,9 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, WithAdmin, Ownable {
     function _batchBurnCatalysts(address from, uint256[] memory catalystsQuantities) internal {
         uint16[] memory ids = new uint16[](catalystsQuantities.length);
         for (uint16 i = 0; i < ids.length; i++) {
-            ids[i] = i;
+            ids[i] = i + 1;
         }
-        _gemsCatalystsRegistry.batchBurnCatalysts(from, ids, scaleQuantities(catalystsQuantities));
+        _gemsCatalystsRegistry.batchBurnCatalysts(from, ids, _scaleCatalystQuantities(catalystsQuantities));
     }
 
     /// @dev Burn a batch of gems in one tx.
@@ -171,28 +236,9 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, WithAdmin, Ownable {
     function _batchBurnGems(address from, uint256[] memory gemsQuantities) internal {
         uint16[] memory ids = new uint16[](gemsQuantities.length);
         for (uint16 i = 0; i < ids.length; i++) {
-            ids[i] = i;
+            ids[i] = i + 1;
         }
-        _gemsCatalystsRegistry.batchBurnGems(from, ids, scaleQuantities(gemsQuantities));
-    }
-
-    /// @dev Set a single catalyst for an asset.
-    /// @param from The original address that signed the tx.
-    /// @param assetId The id of the asset to set a catalyst for.
-    /// @param supply The total number of catalysts to be set.
-    /// @param catalystId The type of catalyst to set.
-    /// @param gemIds An array of gems to be embedded.
-    function _setSingleCatalyst(
-        address from,
-        uint256 assetId,
-        uint32 supply,
-        uint16 catalystId,
-        uint16[] memory gemIds
-    ) internal {
-        _burnCatalyst(from, catalystId, supply);
-        _burnGems(from, gemIds, supply);
-
-        _registry.setCatalyst(assetId, catalystId, gemIds);
+        _gemsCatalystsRegistry.batchBurnGems(from, ids, _scaleGemQuantities(gemsQuantities));
     }
 
     /// @dev Burn an array of gems.
@@ -204,7 +250,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, WithAdmin, Ownable {
         uint16[] memory gemIds,
         uint32 numTimes
     ) internal {
-        _gemsCatalystsRegistry.burnDifferentGems(from, gemIds, numTimes * GEM_UNIT);
+        _gemsCatalystsRegistry.burnDifferentGems(from, gemIds, numTimes * gemUnitWhenBurning);
     }
 
     /// @dev Burn a single type of catalyst.
@@ -216,24 +262,35 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, WithAdmin, Ownable {
         uint16 catalystId,
         uint32 numTimes
     ) internal {
-        _gemsCatalystsRegistry.burnCatalyst(from, catalystId, numTimes * CATALYST_UNIT);
+        _gemsCatalystsRegistry.burnCatalyst(from, catalystId, numTimes * catalystUnitWhenBurning);
     }
 
-    /// @dev Scale up each number in an array of quantities by a factor of 1000000000000000000.
+    /// @dev Scale up each number in an array of quantities by a factor of gemsUnits.
     /// @param quantities The array of numbers to scale.
     /// @return scaledQuantities The scaled-up values.
-    function scaleQuantities(uint256[] memory quantities) internal pure returns (uint256[] memory scaledQuantities) {
-        uint256[] memory scaled = new uint256[](quantities.length);
+    function _scaleGemQuantities(uint256[] memory quantities)
+        internal
+        view
+        returns (uint256[] memory scaledQuantities)
+    {
+        scaledQuantities = new uint256[](quantities.length);
         for (uint256 i = 0; i < quantities.length; i++) {
-            scaled[i] = quantities[i] * GEM_UNIT;
+            scaledQuantities[i] = quantities[i] * gemUnitWhenBurning;
         }
-        return scaled;
     }
 
-    /// @dev Change the address of the trusted forwarder for meta-TX
-    /// @param trustedForwarder The new trustedForwarder
-    function setTrustedForwarder(address trustedForwarder) external onlyOwner {
-        _trustedForwarder = trustedForwarder;
+    /// @dev Scale up each number in an array of quantities by a factor of gemsUnits.
+    /// @param quantities The array of numbers to scale.
+    /// @return scaledQuantities The scaled-up values.
+    function _scaleCatalystQuantities(uint256[] memory quantities)
+        internal
+        view
+        returns (uint256[] memory scaledQuantities)
+    {
+        scaledQuantities = new uint256[](quantities.length);
+        for (uint256 i = 0; i < quantities.length; i++) {
+            scaledQuantities[i] = quantities[i] * catalystUnitWhenBurning;
+        }
     }
 
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
@@ -242,5 +299,22 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, WithAdmin, Ownable {
 
     function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
+    }
+
+    function _getQuantityByCatalystId(uint16 catalystId) internal view returns (uint256 quantity) {
+        quantity = 0;
+        if (catalystId == 1) {
+            // common
+            quantity = commonQuantity;
+        } else if (catalystId == 2) {
+            // rare
+            quantity = rareQuantity;
+        } else if (catalystId == 3) {
+            // epic
+            quantity = epicQuantity;
+        } else if (catalystId == 4) {
+            // legendary
+            quantity = legendaryQuantity;
+        }
     }
 }

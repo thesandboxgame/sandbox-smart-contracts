@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "../../catalyst/interfaces/IAssetAttributesRegistry.sol";
+import "../../common/interfaces/IAssetAttributesRegistry.sol";
 
 // used to reduce PolygonAssetV2 contract code size
 library AssetHelper {

@@ -4,7 +4,7 @@ pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "../../../asset/ERC1155ERC721.sol";
-import "../../../catalyst/interfaces/IAssetAttributesRegistry.sol";
+import "../../../common/interfaces/IAssetAttributesRegistry.sol";
 import "../../../asset/libraries/AssetHelper.sol";
 
 contract PolygonAssetV2 is ERC1155ERC721 {

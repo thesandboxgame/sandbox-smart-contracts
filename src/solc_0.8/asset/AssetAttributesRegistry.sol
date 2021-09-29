@@ -47,7 +47,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
         _upgrader = upgrader;
     }
 
-    function getCatalystRegistry() external view returns (address) {
+    function getCatalystRegistry() external view override returns (address) {
         return address(_gemsCatalystsRegistry);
     }
 
@@ -99,7 +99,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
         uint256 assetId,
         uint16 catalystId,
         uint16[] calldata gemIds
-    ) external {
+    ) external override {
         require(
             _msgSender() == overLayerDepositor || _msgSender() == _admin,
             "AssetAttributesRegistry: not overLayerDepositor"

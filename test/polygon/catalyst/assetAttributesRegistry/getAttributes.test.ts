@@ -33,14 +33,12 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     gemIds: number[],
     minter: Contract
   ): Promise<Receipt> {
-    return await minter.mint(
+    return await minter.mintWithCatalyst(
       catalystOwner,
       mintOptions.packId,
       mintOptions.metaDataHash,
       catId,
       gemIds,
-      NFT_SUPPLY,
-      mintOptions.rarity,
       catalystOwner,
       mintOptions.data
     );
@@ -920,7 +918,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
       const {id: assetId, receipt: mintReceipt} = await getAssetId(
         catalystOwner,
         assetAttributesRegistry,
-        3,
+        4,
         [1],
         assetMinterAsUser0
       );

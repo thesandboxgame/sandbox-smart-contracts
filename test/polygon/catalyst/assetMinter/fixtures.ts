@@ -1,13 +1,24 @@
-import {ethers} from 'hardhat';
+import {ethers, getNamedAccounts} from 'hardhat';
 import {gemsAndCatalystsFixtures} from '../../../common/fixtures/gemAndCatalysts';
 import {assetAttributesRegistryFixture} from '../../../common/fixtures/assetAttributesRegistry';
 import {assetUpgraderFixtures} from '../../../common/fixtures/assetUpgrader';
 import {withSnapshot} from '../../../utils';
 
-const assetMinterFixtures = async () => ({
-  assetMinterContract: await ethers.getContract('AssetMinter'),
-  assetContract: await ethers.getContract('Asset'),
-});
+const assetMinterFixtures = async () => {
+  const assetMinterContract = await ethers.getContract('AssetMinter');
+  const assetContract = await ethers.getContract('Asset');
+
+  const {deployer} = await getNamedAccounts();
+
+  const assetMinterContractAsOwner = assetMinterContract.connect(
+    ethers.provider.getSigner(deployer)
+  );
+  return {
+    assetMinterContractAsOwner,
+    assetMinterContract,
+    assetContract,
+  };
+};
 
 export const setupAssetMinter = withSnapshot(
   ['AssetMinter'],
@@ -21,8 +32,8 @@ export const setupAssetMinterGemsAndCatalysts = withSnapshot(
     'GemsCatalystsRegistry_setup', // No Contract deployed with name Gem_POWER
   ],
   async () => ({
-    ...(await assetMinterFixtures()),
     ...(await gemsAndCatalystsFixtures()),
+    ...(await assetMinterFixtures()),
   })
 );
 export const setupAssetMinterAttributesRegistryGemsAndCatalysts = withSnapshot(
@@ -32,9 +43,9 @@ export const setupAssetMinterAttributesRegistryGemsAndCatalysts = withSnapshot(
     'GemsCatalystsRegistry_setup', // No Contract deployed with name Gem_POWER
   ],
   async () => ({
-    ...(await assetMinterFixtures()),
     ...(await gemsAndCatalystsFixtures()),
     ...(await assetAttributesRegistryFixture()),
+    ...(await assetMinterFixtures()),
   })
 );
 
@@ -47,8 +58,8 @@ export const setupAssetMinterUpgraderGemsAndCatalysts = withSnapshot(
     'AssetUpgraderFeeBurner_setup',
   ],
   async () => ({
-    ...(await assetMinterFixtures()),
     ...(await assetUpgraderFixtures()),
     ...(await gemsAndCatalystsFixtures()),
+    ...(await assetMinterFixtures()),
   })
 );

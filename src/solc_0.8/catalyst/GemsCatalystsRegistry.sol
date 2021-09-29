@@ -10,7 +10,7 @@ import "../common/BaseWithStorage/WithSuperOperators.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
 
 /// @notice Contract managing the Gems and Catalysts
-/// Each Gems and Catalys must be registered here.
+/// Each Gems and Catalyst must be registered here.
 /// Each new Gem get assigned a new id (starting at 1)
 /// Each new Catalyst get assigned a new id (starting at 1)
 contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatalystsRegistry, Ownable {
@@ -167,6 +167,14 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
         Gem gem = getGem(gemId);
         require(gem != Gem(address(0)), "GEM_DOES_NOT_EXIST");
         gem.burnFor(from, amount);
+    }
+
+    function getNumberOfCatalystContract() external view returns (uint256 number) {
+        number = _catalysts.length;
+    }
+
+    function getNumberOfGemsContract() external view returns (uint256 number) {
+        number = _gems.length;
     }
 
     // //////////////////// INTERNALS ////////////////////
