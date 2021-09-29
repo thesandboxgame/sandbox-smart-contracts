@@ -44,8 +44,8 @@ deployment of the contracts used.
 
 ## Testing with snapshots
 
-Hardhat deploy provide a way to run migration script to do the deployment of the contracts during testing and also the
-`fixture` and `createFixture` function that create a snapshot of the current state of the Evm the first time they are
+Hardhat deploy provides a way to run migration script to do the deployment of the contracts during testing and also the
+`fixture` and `createFixture` functions that create a snapshot of the current state of the Evm the first time they are
 called and then revert to that snapshot the second time. This can be used to reuse the deployment of the contracts on
 each test and test suite.
 
@@ -53,7 +53,7 @@ The snapshot/revert functionality has some side effect that must be taken into a
 
 1. If some set of deployment scripts are executed by a test suite (by calling `fixture(['SOME_DEPLOY_STEP'])`) and then
    another suite uses the exact same set, the second suite will get the snapshot taken by the first one, and it can
-   include some unexpected stuff.
+   produce an unexpected behaviour.
 2. If the function `createFixture` is used twice in the same test suite the first call get the initial state of the Evm
    plus the initialization done by the `createFixture` and the second one get both. After that a call to any of those
    will erase the changes done by the other one.
