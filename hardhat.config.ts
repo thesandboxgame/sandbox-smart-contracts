@@ -257,6 +257,9 @@ const config: HardhatUserConfig = {
         : undefined,
       deploy: ['deploy_polygon', 'deploy'],
       // deploy: ['deploy-for-test', 'deploy'],
+      companionNetworks: {
+        l2: 'hardhat',
+      },
     },
     localhost: {
       url: 'http://localhost:8545',
@@ -278,18 +281,27 @@ const config: HardhatUserConfig = {
       accounts: accounts('goerli'),
       tags: ['testnet', 'L1'],
       // gasPrice: 600000000000, // Uncomment in case of pending txs, and adjust gas
+      companionNetworks: {
+        l2: 'mumbai',
+      },
     },
     mainnet: {
       url: node_url('mainnet'),
       accounts: accounts('mainnet'),
       tags: ['mainnet', 'L1'],
+      companionNetworks: {
+        l2: 'polygon',
+      },
     },
     mumbai: {
       url: node_url('mumbai'),
       accounts: accounts('mumbai'),
       tags: ['testnet', 'L2'],
       deploy: ['deploy_polygon'],
-      gasPrice: 600000000000, // TODO: this fixes invalid sender issue
+      gasPrice: 1000000000, // TODO: this fixes invalid sender issue
+      companionNetworks: {
+        l1: 'goerli',
+      },
     },
     polygon: {
       url: node_url('polygon'),
@@ -297,6 +309,9 @@ const config: HardhatUserConfig = {
       tags: ['mainnet', 'L2'],
       deploy: ['deploy_polygon'],
       // gasPrice: 30000000000, // TODO: leaving it empty does not work
+      companionNetworks: {
+        l2: 'mainnet',
+      },
     },
   },
   paths: {
