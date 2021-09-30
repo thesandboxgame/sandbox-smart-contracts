@@ -258,7 +258,6 @@ const config: HardhatUserConfig = {
       deploy: ['deploy_polygon', 'deploy'],
       // deploy: ['deploy-for-test', 'deploy'],
       companionNetworks: {
-        l1: 'hardhat',
         l2: 'hardhat',
       },
     },
@@ -309,7 +308,6 @@ const config: HardhatUserConfig = {
       accounts: accounts('polygon'),
       tags: ['mainnet', 'L2'],
       deploy: ['deploy_polygon'],
-      // gasPrice: 30000000000, // TODO: leaving it empty does not work
       companionNetworks: {
         l2: 'mainnet',
       },
