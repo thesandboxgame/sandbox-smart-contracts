@@ -24,7 +24,7 @@ const func: DeployFunction = async function (hre) {
     landSaleAdmin,
   } = await getNamedAccounts();
 
-  const sandContract = await deployments.get('PolygonSand');
+  const sandContract = await deployments.get('Sand');
   const landContract = await deployments.get('Land');
   const assetContract = await deployments.get('PolygonAsset');
   const authValidatorContract = await deployments.get('AuthValidator08');
@@ -84,7 +84,7 @@ const func: DeployFunction = async function (hre) {
 export default func;
 func.tags = ['EstateSaleWithAuth08', 'EstateSaleWithAuth08_deploy'];
 func.dependencies = [
-  'PolygonSand_deploy',
+  'Sand_deploy',
   'Land_deploy',
   'PolygonAsset_deploy',
   'AuthValidator08_deploy',
