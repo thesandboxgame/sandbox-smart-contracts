@@ -1,15 +1,10 @@
-import {
-  ethers,
-  deployments,
-  getNamedAccounts,
-  getUnnamedAccounts,
-} from 'hardhat';
+import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
 import {BigNumber} from 'ethers';
+import {withSnapshot} from '../utils';
 
-export const setupPermit = deployments.createFixture(async function () {
+export const setupPermit = withSnapshot(['Permit'], async function () {
   const {sandAdmin, sandBeneficiary} = await getNamedAccounts();
   const others = await getUnnamedAccounts();
-  await deployments.fixture('Permit');
 
   const sandContract = await ethers.getContract('Sand');
   const permitContract = await ethers.getContract('Permit');
