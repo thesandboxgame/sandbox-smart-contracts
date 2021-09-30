@@ -1,7 +1,7 @@
 import {deployments, ethers} from 'hardhat';
 import {setupFaucet} from './fixtures';
 import {BigNumber, constants} from 'ethers';
-import {splitSignature, _TypedDataEncoder} from 'ethers/lib/utils';
+import {splitSignature} from 'ethers/lib/utils';
 import {expectEventWithArgs, waitFor, setupUser} from '../utils';
 import {expect} from '../chai-setup';
 import {data712} from './data712';
@@ -24,7 +24,6 @@ describe('Faucet', function () {
       faucetContract,
       sandContract,
       sandBeneficiary,
-      others,
       deployer,
       nonce,
       deadline,
@@ -167,7 +166,7 @@ describe('Faucet', function () {
 
   it('Approve function on Faucet function reverts if owner is zeroAddress', async function () {
     const setUp = await setupFaucet();
-    const {faucetContract, others, deployer, nonce, deadline} = setUp;
+    const {faucetContract, deployer, nonce, deadline} = setUp;
 
     const deployerUser = await setupUser(deployer, {
       faucetContract,
