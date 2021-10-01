@@ -258,6 +258,7 @@ const config: HardhatUserConfig = {
       deploy: ['deploy_polygon', 'deploy'],
       // deploy: ['deploy-for-test', 'deploy'],
       companionNetworks: {
+        l1: 'hardhat',
         l2: 'hardhat',
       },
     },
