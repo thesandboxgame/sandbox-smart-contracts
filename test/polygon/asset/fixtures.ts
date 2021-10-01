@@ -6,13 +6,11 @@ import {
   getUnnamedAccounts,
 } from 'hardhat';
 
-import {setupUsers, waitFor} from '../../utils';
+import {setupUsers, waitFor, withSnapshot} from '../../utils';
 import {assetFixtures} from '../../common/fixtures/asset';
 // import asset_regenerate_and_distribute from '../../setup/asset_regenerate_and_distribute';
 
-export const setupMainnetAsset = deployments.createFixture(assetFixtures);
-
-export const setupPolygonAsset = deployments.createFixture(async function () {
+const polygonAssetFixtures = async function () {
   // await asset_regenerate_and_distribute(hre);
   const unnamedAccounts = await getUnnamedAccounts();
   const otherAccounts = [...unnamedAccounts];
@@ -93,9 +91,8 @@ export const setupPolygonAsset = deployments.createFixture(async function () {
       data
     );
     const receipt = await tx.wait();
-    return receipt.events.find(
-      (v: Event) => v.event === 'TransferBatch'
-    ).args[3];
+    return receipt.events.find((v: Event) => v.event === 'TransferBatch')
+      .args[3];
   }
 
   const users = await setupUsers(otherAccounts, {Asset});
@@ -108,4 +105,16 @@ export const setupPolygonAsset = deployments.createFixture(async function () {
     trustedForwarder,
     childChainManager,
   };
-});
+};
+
+export const setupPolygonAsset = withSnapshot(
+  ['PolygonAsset', 'Asset'],
+  polygonAssetFixtures
+);
+
+export const setupMainnetAndPolygonAsset = withSnapshot(
+  ['PolygonAsset', 'Asset'],
+  async () => {
+    return {polygon: await setupPolygonAsset(), mainnet: await assetFixtures()};
+  }
+);
