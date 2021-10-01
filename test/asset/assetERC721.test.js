@@ -1,9 +1,4 @@
-const {
-  ethers,
-  deployments,
-  getNamedAccounts,
-  getUnnamedAccounts,
-} = require('hardhat');
+const {ethers, getNamedAccounts, getUnnamedAccounts} = require('hardhat');
 
 const {
   waitFor,
