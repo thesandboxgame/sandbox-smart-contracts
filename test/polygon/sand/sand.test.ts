@@ -1,5 +1,4 @@
-import {setupSand as setupPolygonSand} from './fixtures';
-import {setupERC20BasicApproveExtension as setupMainnetSand} from '../../sand/fixtures';
+import {setupMainnetSand, setupPolygonSand} from './fixtures';
 import {waitFor} from '../../utils';
 import {expect} from '../../chai-setup';
 import {ethers} from 'hardhat';
