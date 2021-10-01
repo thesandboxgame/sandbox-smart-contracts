@@ -1,11 +1,16 @@
 import {Contract} from 'ethers';
 import {
-  ethers,
   deployments,
+  ethers,
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
-import {waitFor, setupUser} from '../utils';
+import {setupUser, waitFor} from '../utils';
+import {gemsAndCatalystsFixtures} from '../common/fixtures/gemAndCatalysts';
+
+export const setupGemsAndCatalysts = deployments.createFixture(
+  gemsAndCatalystsFixtures
+);
 
 export const setupERC20BasicApproveExtension = deployments.createFixture(
   async function () {
