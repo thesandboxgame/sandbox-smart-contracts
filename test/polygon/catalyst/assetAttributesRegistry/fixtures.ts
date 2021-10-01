@@ -1,16 +1,31 @@
-import {deployments, ethers} from 'hardhat';
+import {ethers} from 'hardhat';
 import {BigNumber, Contract, Event} from 'ethers';
 import {Block} from '@ethersproject/providers';
-import {waitFor} from '../../../utils';
+import {waitFor, withSnapshot} from '../../../utils';
 import {assetAttributesRegistryFixture} from '../../../common/fixtures/assetAttributesRegistry';
 import {gemsAndCatalystsFixtures} from '../../../common/fixtures/gemAndCatalysts';
 
-export const setupAssetAttributesRegistry = deployments.createFixture(
+export const setupAssetAttributesRegistry = withSnapshot(
+  [
+    'Asset_setup', // we need to setup bounce admin.
+    'GemsCatalystsRegistry_setup', // No Contract deployed with name Gem_POWER
+    'AssetAttributesRegistry_setup', // NOT_AUTHORIZED_MINTER
+    'AssetUpgrader_setup', // we need AssetUpgrader_setup to give super permissions
+  ],
   assetAttributesRegistryFixture
 );
 
-export const setupGemsAndCatalysts = deployments.createFixture(
-  gemsAndCatalystsFixtures
+export const setupAssetAttributesRegistryGemsAndCatalysts = withSnapshot(
+  [
+    'AssetMinter_setup', // we need to setup bounce admin.
+    'GemsCatalystsRegistry_setup', // No Contract deployed with name Gem_POWER
+    'AssetAttributesRegistry_setup', // NOT_AUTHORIZED_MINTER
+    'AssetUpgrader_setup', // we need AssetUpgrader_setup to give super permissions
+  ],
+  async () => ({
+    ...(await gemsAndCatalystsFixtures()),
+    ...(await assetAttributesRegistryFixture()),
+  })
 );
 
 export async function setCatalyst(

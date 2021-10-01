@@ -1,24 +1,10 @@
-import {
-  deployments,
-  ethers,
-  getNamedAccounts,
-  getUnnamedAccounts,
-} from 'hardhat';
+import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
 import {BigNumber, Contract} from 'ethers';
 import {waitFor} from '../../utils';
 import {transferSand} from '../../polygon/catalyst/utils';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const assetUpgraderFixtures = async () => {
-  await deployments.fixture([
-    'AssetUpgrader',
-    'Catalysts',
-    'Gems',
-    'AssetUpgraderFeeBurner',
-    'AssetAttributesRegistry',
-    'GemsCatalystsRegistry',
-    'Asset',
-  ]);
   const {assetAttributesRegistryAdmin, assetAdmin} = await getNamedAccounts();
   const users = await getUnnamedAccounts();
   const catalystOwner = users[0];
