@@ -52,6 +52,8 @@ nav:
           - Land: topics/land/land.md
       - Permit:
           - Permit: topics/permit/Permit.md
+      - Faucet:
+          - Faucet: topics/faucet/Faucet.md
 
 markdown_extensions:
   - admonition
