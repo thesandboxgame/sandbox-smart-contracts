@@ -48,8 +48,6 @@ export const setupLand = deployments.createFixture(async function () {
   const landMinter = await setupUser(minter, {Land});
 
   await deployer.FxRoot.setFxChild(FxChild.address);
-  await deployer.LandTunnel.setFxChildTunnel(PolygonLandTunnel.address);
-  await deployer.PolygonLandTunnel.setFxRootTunnel(LandTunnel.address);
   await deployer.PolygonLand.setPolygonLandTunnel(PolygonLandTunnel.address);
   await landAdmin.Land.setMinter(landMinter.address, true);
 
