@@ -1,15 +1,16 @@
-import {ethers, deployments} from 'hardhat';
+import {deployments, ethers} from 'hardhat';
 import {Address} from 'hardhat-deploy/types';
 import {splitSignature} from 'ethers/lib/utils';
-import {BigNumber, Contract, constants} from 'ethers';
+import {BigNumber, constants, Contract} from 'ethers';
 import {expect} from '../chai-setup';
 import {setupGemsAndCatalysts} from '../polygon/catalyst/gemsCatalystsRegistry/fixtures';
 import {expectEventWithArgs, waitFor} from '../utils';
-import {setupPermit} from '../permit/fixtures';
 import {data712} from '../permit/data712';
 
 const zeroAddress = constants.AddressZero;
 const TEST_AMOUNT = BigNumber.from(10).mul('1000000000000000000');
+const nonce = BigNumber.from(0);
+const deadline = BigNumber.from(2582718400);
 
 describe('Gems & Catalysts permit', function () {
   let luckGem: Contract;
@@ -17,8 +18,6 @@ describe('Gems & Catalysts permit', function () {
   let catalystOwner: Address;
   let gemOwner: Address;
   let user3: Address;
-  let nonce: BigNumber;
-  let deadline: BigNumber;
 
   before(async function () {
     await deployments.fixture();
@@ -29,8 +28,6 @@ describe('Gems & Catalysts permit', function () {
       gemOwner,
       user3,
     } = await setupGemsAndCatalysts());
-    const setUp = await setupPermit();
-    ({nonce, deadline} = setUp);
   });
 
   it('user can use permit function to approve Gems via signature', async function () {
