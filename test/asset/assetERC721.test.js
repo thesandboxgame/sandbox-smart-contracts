@@ -5,13 +5,17 @@ const {
   getUnnamedAccounts,
 } = require('hardhat');
 
-const {waitFor, expectEventWithArgsFromReceipt} = require('../utils');
+const {
+  waitFor,
+  expectEventWithArgsFromReceipt,
+  withSnapshot,
+} = require('../utils');
 
 const erc721Tests = require('../erc721')(
-  async () => {
+  withSnapshot(['Asset'], async () => {
     const others = await getUnnamedAccounts();
     const {assetBouncerAdmin} = await getNamedAccounts();
-    await deployments.fixture('Asset');
+
     const minter = others[0];
     const asset = await ethers.getContract('Asset');
     const assetAsMinter = await asset.connect(
@@ -50,7 +54,7 @@ const erc721Tests = require('../erc721')(
       return {receipt, tokenId};
     }
     return {contractAddress: asset.address, users: others, mint};
-  },
+  }),
   {
     batchTransfer: false,
     burn: false,
