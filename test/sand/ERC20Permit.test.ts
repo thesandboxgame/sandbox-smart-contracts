@@ -3,7 +3,7 @@ import {Address} from 'hardhat-deploy/types';
 import {splitSignature} from 'ethers/lib/utils';
 import {BigNumber, constants, Contract} from 'ethers';
 import {expect} from '../chai-setup';
-import {setupGemsAndCatalysts} from '../polygon/catalyst/gemsCatalystsRegistry/fixtures';
+import {setupGemsAndCatalysts} from './fixtures';
 import {expectEventWithArgs, waitFor} from '../utils';
 import {data712} from '../permit/data712';
 

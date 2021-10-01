@@ -1,13 +1,17 @@
-import {ethers, getUnnamedAccounts, getNamedAccounts} from 'hardhat';
+import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
 import {Address} from 'hardhat-deploy/types';
 import {BigNumber, Contract} from 'ethers';
 import {expect} from '../../../chai-setup';
 import catalysts from '../../../../data/catalysts';
 import gems from '../../../../data/gems';
-import {setupGemsAndCatalysts} from '../gemsCatalystsRegistry/fixtures';
-import {setupAssetAttributesRegistry} from '../assetAttributesRegistry/fixtures';
-import {setupAssetMinter, MintOptions, MintMultiOptions} from './fixtures';
-import {setupAssetUpgrader} from '../assetUpgrader/fixtures';
+import {
+  MintMultiOptions,
+  MintOptions,
+  setupAssetAttributesRegistry,
+  setupAssetMinter,
+  setupAssetUpgrader,
+  setupGemsAndCatalysts,
+} from './fixtures';
 import {mintCatalyst, mintGem, transferSand} from '../utils';
 import {expectEventWithArgs, findEvents, waitFor} from '../../../utils';
 
