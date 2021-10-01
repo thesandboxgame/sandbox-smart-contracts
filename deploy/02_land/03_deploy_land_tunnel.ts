@@ -25,11 +25,17 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'l2'
   ].deployments.getOrNull('PolygonLandTunnel');
   if (PolygonLandTunnel) {
-    await hre.companionNetworks['l1'].deployments.execute(
+    await hre.companionNetworks['l2'].deployments.execute(
       'PolygonLandTunnel',
       {from: deployer},
       'setFxRootTunnel',
-      [LandTunnel.address]
+      LandTunnel.address
+    );
+    await deployments.execute(
+      'LandTunnel',
+      {from: deployer},
+      'setFxChildTunnel',
+      PolygonLandTunnel.address
     );
   }
 };
