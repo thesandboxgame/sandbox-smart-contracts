@@ -5,11 +5,12 @@ import {
   getUnnamedAccounts,
 } from 'hardhat';
 
-import {setupUser, setupUsers} from '../../utils';
+import {setupUser, setupUsers, withSnapshot} from '../../utils';
 import {Contract} from 'ethers';
 import {erc20BasicApproveExtensionFixtures} from '../../common/fixtures/erc20BasicApproveExtension';
 
-export const setupMainnetSand = deployments.createFixture(
+export const setupMainnetSand = withSnapshot(
+  ['Land', 'Sand', 'LandPreSale_5', 'ERC20_PREDICATE'],
   erc20BasicApproveExtensionFixtures
 );
 
