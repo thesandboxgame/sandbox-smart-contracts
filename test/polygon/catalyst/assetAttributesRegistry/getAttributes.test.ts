@@ -5,13 +5,12 @@ import {expect} from '../../../chai-setup';
 import catalysts from '../../../../data/catalysts';
 import gems from '../../../../data/gems';
 import {setupAssetAttributesRegistry, setupGemsAndCatalysts} from './fixtures';
-import {MintOptions} from '../assetMinter/fixtures';
 import {findEvents} from '../../../utils';
 import {getReceiptObject, prepareGemEventData, transferSand} from '../utils';
 
 const NFT_SUPPLY = 1;
 
-const mintOptions: MintOptions = {
+const mintOptions = {
   from: ethers.constants.AddressZero,
   packId: BigNumber.from('1'),
   metaDataHash: ethers.utils.keccak256('0x42'),
