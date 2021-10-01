@@ -1,6 +1,5 @@
-import {setupAsset as setupPolygonAsset} from './fixtures';
-import {setupAsset as setupMainnetAsset} from '../../asset/fixtures';
-import {waitFor, getAssetChainIndex, setupUser} from '../../utils';
+import {setupMainnetAsset, setupPolygonAsset} from './fixtures';
+import {getAssetChainIndex, setupUser, waitFor} from '../../utils';
 import {expect} from '../../chai-setup';
 import {sendMetaTx} from '../../sendMetaTx';
 import {AbiCoder} from 'ethers/lib/utils';

@@ -7,6 +7,11 @@ import {
 
 import {setupUser, setupUsers} from '../../utils';
 import {Contract} from 'ethers';
+import {erc20BasicApproveExtensionFixtures} from '../../common/fixtures/erc20BasicApproveExtension';
+
+export const setupMainnetSand = deployments.createFixture(
+  erc20BasicApproveExtensionFixtures
+);
 
 type User = {address: string; sand: Contract; trustedForwarder: Contract};
 export type Fixtures = {
@@ -18,7 +23,7 @@ export type Fixtures = {
   trustedForwarder: Contract;
   mockERC20BasicApprovalTarget: Contract;
 };
-export const setupSand = deployments.createFixture(async () => {
+export const setupPolygonSand = deployments.createFixture(async () => {
   await deployments.fixture('PolygonSand');
   const sand = await ethers.getContract('PolygonSand');
   const accounts = await getNamedAccounts();
