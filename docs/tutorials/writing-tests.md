@@ -45,12 +45,16 @@ account each test suite must do a clean deployment of the contracts used or reve
 
 ## Testing with snapshots
 
-Hardhat deploy provides a way to run migration script to do the deployment of the contracts during testing by using the
-`fixture` and also the `createFixture` functions that create a snapshot of the current state of the hardhat-network the
-first time it is called and then revert to that snapshot after that. This can be used to reuse the deployment of the
-contracts on each test and test suite.
+Hardhat deploy provides two methods of taking snapshots of the hardhat-network state:
 
-The snapshot/revert functionality has some side effect that must be taken into account:
+1. The function `fixture` takes a list of migration script tags. The migration scripts are executed and a snapshot is
+   taken after that. The same snapshot is reused when the function is called with the same list of tags.
+2. `createFixture` is a high order function, it takes a function as argument and return another a function. The first
+   time the returned function is called it executes the given function and takes snapshot of the resulting
+   hardhat-network state. After that when the function is called again it reverts to the snapshot.
+
+Those two methods can be used to control the initial state of the hardhat-network on each test and test suite. They had
+some side effects that must be taken into account:
 
 1. If some set of deployment scripts are executed by a test suite (by calling `fixture(['SOME_DEPLOY_STEP'])`) and then
    another suite uses the exact same set, the second suite will get the snapshot taken by the first one, and it can
