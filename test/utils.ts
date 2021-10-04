@@ -1,15 +1,15 @@
 /* eslint-disable mocha/no-exports */
 import {BigNumber} from '@ethersproject/bignumber';
 import {
-  ContractReceipt,
-  Event,
   Contract,
+  ContractReceipt,
   ContractTransaction,
+  Event,
   utils,
 } from 'ethers';
 import {Receipt} from 'hardhat-deploy/types';
 import {Result} from 'ethers/lib/utils';
-import {ethers} from 'hardhat';
+import {deployments, ethers, network} from 'hardhat';
 
 export async function increaseTime(numSec: number): Promise<void> {
   await ethers.provider.send('evm_increaseTime', [numSec]);
@@ -160,4 +160,31 @@ export function getAssetChainIndex(id: BigNumber): number {
   const slicedId = Number('0x' + idAsHexString.slice(48, 56));
   const SLICED_CHAIN_INDEX_MASK = Number('0x7F800000');
   return (slicedId & SLICED_CHAIN_INDEX_MASK) >>> 23;
+}
+
+export async function evmRevertToInitialState(): Promise<void> {
+  console.log('Revert to initial snapshot, calling reset');
+  // This revert the evm state.
+  await network.provider.request({
+    method: 'hardhat_reset',
+    params: [network.config],
+  });
+}
+
+export function withSnapshot<T>(
+  tags: string | string[] = [],
+  func: () => Promise<T> = async () => {
+    return <T>{};
+  }
+): () => Promise<T> {
+  return deployments.createFixture(async () => {
+    // TODO: This has problems with solidity-coverage, when the fix that we can use it
+    // TODO: We need a way to revert to initial state!!!
+    //  await evmRevertToInitialState();
+    await deployments.fixture(tags, {
+      fallbackToGlobal: false,
+      keepExistingDeployments: false,
+    });
+    return func();
+  });
 }

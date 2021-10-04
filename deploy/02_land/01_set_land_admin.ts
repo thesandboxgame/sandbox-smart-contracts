@@ -3,7 +3,7 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {execute, read} = deployments;
+  const {execute, read, catchUnknownSigner} = deployments;
 
   const {landAdmin} = await getNamedAccounts();
 
@@ -15,16 +15,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
   if (currentAdmin) {
     if (currentAdmin.toLowerCase() !== landAdmin.toLowerCase()) {
-      await execute(
-        'Land',
-        {from: currentAdmin, log: true},
-        'changeAdmin',
-        landAdmin
+      await catchUnknownSigner(
+        execute(
+          'Land',
+          {from: currentAdmin, log: true},
+          'changeAdmin',
+          landAdmin
+        )
       );
     }
   }
 };
 export default func;
 func.runAtTheEnd = true;
-func.tags = ['Land', 'Land_setup'];
+func.tags = ['Land', 'Land_setup', 'LandAdmin'];
 func.dependencies = ['Land_deploy'];

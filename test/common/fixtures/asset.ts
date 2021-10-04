@@ -1,18 +1,14 @@
-import {Event} from '@ethersproject/contracts';
 import {
   deployments,
   ethers,
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
-
 import {setupUsers, waitFor} from '../../utils';
-import {assetFixtures} from '../../common/fixtures/asset';
-// import asset_regenerate_and_distribute from '../../setup/asset_regenerate_and_distribute';
+import {Event} from '@ethersproject/contracts';
 
-export const setupMainnetAsset = deployments.createFixture(assetFixtures);
-
-export const setupPolygonAsset = deployments.createFixture(async function () {
+// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+export const assetFixtures = async function () {
   // await asset_regenerate_and_distribute(hre);
   const unnamedAccounts = await getUnnamedAccounts();
   const otherAccounts = [...unnamedAccounts];
@@ -22,21 +18,21 @@ export const setupPolygonAsset = deployments.createFixture(async function () {
   const {assetBouncerAdmin} = await getNamedAccounts();
 
   const assetContractAsBouncerAdmin = await ethers.getContract(
-    'PolygonAsset',
+    'Asset',
     assetBouncerAdmin
   );
   await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
-  const Asset = await ethers.getContract('PolygonAsset', minter);
-  const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
+  const Asset = await ethers.getContract('Asset', minter);
+  const predicate = await ethers.getContract('ERC1155_PREDICATE');
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const trustedForwarder = await ethers.getContractAt(
     'TestMetaTxForwarder',
     TRUSTED_FORWARDER.address
   );
 
-  // Set childChainManager Asset
+  // Set predicate Asset
   try {
-    await waitFor(childChainManager.setPolygonAsset(Asset.address));
+    await waitFor(predicate.setAsset(Asset.address));
   } catch (e) {
     console.log(e);
   }
@@ -93,9 +89,9 @@ export const setupPolygonAsset = deployments.createFixture(async function () {
       data
     );
     const receipt = await tx.wait();
-    return receipt.events.find(
-      (v: Event) => v.event === 'TransferBatch'
-    ).args[3];
+
+    return receipt.events.find((v: Event) => v.event === 'TransferBatch')
+      .args[3];
   }
 
   const users = await setupUsers(otherAccounts, {Asset});
@@ -106,6 +102,6 @@ export const setupPolygonAsset = deployments.createFixture(async function () {
     mintAsset,
     mintMultiple,
     trustedForwarder,
-    childChainManager,
+    predicate,
   };
-});
+};

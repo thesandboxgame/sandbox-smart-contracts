@@ -7,7 +7,7 @@ import '@openzeppelin/hardhat-upgrades';
 import 'solidity-coverage';
 import 'hardhat-contract-sizer';
 import '@nomiclabs/hardhat-etherscan';
-import {node_url, accounts} from './utils/network';
+import {accounts, node_url} from './utils/network';
 
 const config: HardhatUserConfig = {
   gasReporter: {

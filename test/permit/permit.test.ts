@@ -1,7 +1,7 @@
-import {ethers, deployments} from 'hardhat';
+import {ethers} from 'hardhat';
 import {setupPermit} from './fixtures';
 import {BigNumber, constants} from 'ethers';
-import {splitSignature, _TypedDataEncoder} from 'ethers/lib/utils';
+import {_TypedDataEncoder, splitSignature} from 'ethers/lib/utils';
 import {
   expectEventWithArgs,
   expectReceiptEventWithArgs,
@@ -15,10 +15,6 @@ const TEST_AMOUNT = BigNumber.from(10).mul('1000000000000000000');
 
 describe('Permit', function () {
   // Note: on test network, others[1] is sandAdmin, others[2] is sandBeneficiary
-
-  before(async function () {
-    await deployments.fixture();
-  });
 
   it('ERC20 Approval event is emitted when msg signer == owner', async function () {
     const setUp = await setupPermit();

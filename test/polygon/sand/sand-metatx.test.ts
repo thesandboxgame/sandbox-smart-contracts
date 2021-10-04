@@ -1,5 +1,5 @@
 import {expect} from '../../chai-setup';
-import {Fixtures, setupSand} from './fixtures';
+import {Fixtures, setupPolygonSand} from './fixtures';
 import {AbiCoder} from 'ethers/lib/utils';
 import {sendMetaTx} from '../../sendMetaTx';
 import {expectEventWithArgsFromReceipt, toWei, waitFor} from '../../utils';
@@ -52,7 +52,7 @@ describe('PolygonSand.sol Meta TX', function () {
   let users: string[];
   let sandBeneficiary: string;
   beforeEach(async function () {
-    fixtures = await setupSand();
+    fixtures = await setupPolygonSand();
     sandBeneficiary = fixtures.sandBeneficiary.address;
     users = fixtures.users.map((x) => x.address);
     const amount = toWei(123);

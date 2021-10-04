@@ -1,6 +1,9 @@
-import {ethers, deployments} from 'hardhat';
+import {deployments, ethers} from 'hardhat';
 import {Address} from 'hardhat-deploy/types';
 import {BigNumber, Contract} from 'ethers';
+import {gemsAndCatalystsFixtures} from '../../../common/fixtures/gemAndCatalysts';
+import {assetAttributesRegistryFixture} from '../../../common/fixtures/assetAttributesRegistry';
+import {assetUpgraderFixtures} from '../../../common/fixtures/assetUpgrader';
 
 export interface MintOptions {
   from: Address;
@@ -41,3 +44,15 @@ export const setupAssetMinter = deployments.createFixture(async () => {
     assetContract,
   };
 });
+
+export const setupGemsAndCatalysts = deployments.createFixture(
+  gemsAndCatalystsFixtures
+);
+
+export const setupAssetAttributesRegistry = deployments.createFixture(
+  assetAttributesRegistryFixture
+);
+
+export const setupAssetUpgrader = deployments.createFixture(
+  assetUpgraderFixtures
+);
