@@ -115,6 +115,9 @@ export const setupPolygonAsset = withSnapshot(
 export const setupMainnetAndPolygonAsset = withSnapshot(
   ['PolygonAsset', 'Asset'],
   async () => {
-    return {polygon: await setupPolygonAsset(), mainnet: await assetFixtures()};
+    return {
+      polygon: await polygonAssetFixtures(),
+      mainnet: await assetFixtures(),
+    };
   }
 );
