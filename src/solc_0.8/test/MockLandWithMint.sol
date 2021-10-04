@@ -7,6 +7,23 @@ import "../polygon/child/land/PolygonLandBaseToken.sol";
 contract MockLandWithMint is PolygonLandBaseToken {
     using Address for address;
 
+    function setTF(address trustedForwarder) public {
+        __ERC2771Handler_initialize(trustedForwarder);
+    }
+
+    mapping(address => bool) internal _minters;
+    event Minter(address superOperator, bool enabled);
+
+    //temporary, only for tests
+    /// @notice Enable or disable the ability of `minter` to mint tokens
+    /// @param minter address that will be given/removed minter right.
+    /// @param enabled set whether the minter is enabled or disabled.
+    function setMinter(address minter, bool enabled) external {
+        require(msg.sender == _admin, "only admin is allowed to add minters");
+        _minters[minter] = enabled;
+        emit Minter(minter, enabled);
+    }
+
     /***
      **
      * @notice Mint a new quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
