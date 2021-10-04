@@ -7,30 +7,31 @@ description: Writing tests
 
 # The tools we use
 
-- [Hardhat](https://hardhat.org/tutorial/): The framework used to run a special Evm used for testing. Read this specific
-  section: [Testing-contracts](https://hardhat.org/tutorial/testing-contracts.html)
-- [ethers-js](https://docs.ethers.io/v5/): A framework used to access the Evm from javascript/typescript and abstract
-  the contracts, so they can be easily called.
+- [Hardhat](https://hardhat.org/tutorial/): The framework used to run a special Evm used for testing called
+  hardhat-network. Read this specific section: [Testing-contracts](https://hardhat.org/tutorial/testing-contracts.html)
+- [ethers-js](https://docs.ethers.io/v5/): A framework used to access the hardhat-network from javascript/typescript and
+  abstract the contracts, so they can be easily called.
 - [Mocha](https://mochajs.org/): The testing framework, you can declare test suites, individual tests and get a report
   after running them.
 - [Chai](https://www.chaijs.com/): Helpers to make assertions about results inside the tests.
 - [Waffle chai matchers](https://ethereum-waffle.readthedocs.io/en/latest/matchers.html): Some extra chai helpers
   specific to the blockchain.
-- [Hardhat deploy](https://hardhat.org/guides/deploying.html): This framework let you run some deploy scripts when you
-  run your tests, take snapshots of the Evm and revert to those snapshots when needed.
+- [Hardhat deploy](https://hardhat.org/guides/deploying.html): A framework that lets you run deploy scripts when you run
+  your tests, take snapshots of the hardhat-network and revert to those snapshots when needed.
 
 # Running the tests
 
-There are two different ways to execute the tests and that can generate some confusion. The configuration used by each
-method is different:
+There are two different ways to execute the tests and that can generate some confusion because the configuration used by
+each method is different. The two methods are the following:
 
 1. Hardhat executes mocha: there is a hardhat task that executes mocha and uses the options declared in the mocha
    section of the `hardhat-config.ts` file.
-2. Mocha executes hardhat: mocha is executed (like in vscode) and when the hardhat library is required an Evm node is
-   run. In this case the configuration is taken from the file `.mocharc.js`
+2. Mocha executes hardhat: mocha is executed (in vscode for example) and when the hardhat library is required an
+   hardhat-network is run. In this case the configuration is taken from the file `.mocharc.js`
 
-Our project have the two configurations working but some time there can be some differences. You can run a single test
-using your editor, or you can run all the tests by executing `yarn test` in the project root directory.
+In our project two methods are configured. You can run a single test from your editor in which case the method 2 is
+used, or you can run all the tests by executing `yarn test` in the project root directory in which case the method 1 is
+used.
 
 ## A simple test
 
@@ -39,34 +40,34 @@ Check the typical test in: [Testing-contracts](https://hardhat.org/tutorial/test
 Each test file can contain some related tests, and you can have a lot of files (or test suites) that test different
 contracts.
 
-Something very important to note is: ***the Evm keeps the state between tests***, so each test must do a clean
-deployment of the contracts used.
+Something very important to note is that: ***the hardhat-network keeps the state between tests***, so taking that into
+account each test suite must do a clean deployment of the contracts used or revert the known hardhat-network state.
 
 ## Testing with snapshots
 
-Hardhat deploy provides a way to run migration script to do the deployment of the contracts during testing and also the
-`fixture` and `createFixture` functions that create a snapshot of the current state of the Evm the first time they are
-called and then revert to that snapshot the second time. This can be used to reuse the deployment of the contracts on
-each test and test suite.
+Hardhat deploy provides a way to run migration script to do the deployment of the contracts during testing by using the
+`fixture` and also the `createFixture` functions that create a snapshot of the current state of the hardhat-network the
+first time it is called and then revert to that snapshot after that. This can be used to reuse the deployment of the
+contracts on each test and test suite.
 
 The snapshot/revert functionality has some side effect that must be taken into account:
 
 1. If some set of deployment scripts are executed by a test suite (by calling `fixture(['SOME_DEPLOY_STEP'])`) and then
    another suite uses the exact same set, the second suite will get the snapshot taken by the first one, and it can
    produce an unexpected behaviour.
-2. If the function `createFixture` is used twice in the same test suite the first call get the initial state of the Evm
-   plus the initialization done by the `createFixture` and the second one get both. After that a call to any of those
-   will erase the changes done by the other one.
+2. If the function `createFixture` is used twice in the same test suite the first call get the initial state of the
+   hardhat-network plus the initialization done by the `createFixture` and the second one get both. After that a call to
+   any of those will erase the changes done by the other one.
 3. The calls: `fixture()` and `fixture([])` ***are very different!***. The first one executes all the migration steps
    and the second one don't execute any. The first version is specially problematic, a test that was working can fail
-   because of a deploy-step added later.
+   because of a broken deploy-step added for a completely unrelated set of contracts.
 
 To avoid errors and make the code cleaner we introduce: `withSnapshot(migrationSteps, function)`. This function must be
 called to create a setup function that then is called in each test. The setup function revert to the initial state of
-the Evm ([see: initial state](https://hardhat.org/hardhat-network/reference/#initial-state), executes the given
-migrations, the given function and then save a snapshot of the new Evm state. When called later the function does
-nothing but reverting to the snapshot taken previously. You can declare as many setup functions you want but ***
-must use only one in each test***.
+the hardhat-network ([see: initial state](https://hardhat.org/hardhat-network/reference/#initial-state), executes the
+given migrations, the given function and then save a snapshot of the hardhat-network state. When called later the
+function does nothing but reverting to the snapshot previously taken. ***You can declare as many setup functions you
+want but must use only one in each test***.
 
 ## Recommended style for tests
 
@@ -130,7 +131,7 @@ describe('Will test some contract', function () {
     it("should do something", async function () {
         const {contract, user1} = await setup1();
         const ret = await contract.someMethod(user1);
-        // Chai and waffle matchers are very nice!!!
+        // Chai and waffle matchers are very usefull!!!
         expect(await token.balanceOf(wallet.address)).to.equal(993);
         expect(BigNumber.from(100)).to.be.within(BigNumber.from(99), BigNumber.from(101));
         expect(BigNumber.from(100)).to.be.closeTo(BigNumber.from(101), 10);
@@ -154,7 +155,7 @@ describe('Will test some contract', function () {
         const {contract} = await setup1();
         const {contract2} = await setup2();
     })
-    it("THIS IS RISKY, WE GET THE EVM STATE THAT THE PREVIOUS TEST LEAVE", async function () {
+    it("THIS IS RISKY, WE GET THE HARDHAT-NETWORK STATE THAT THE PREVIOUS TEST LEAVE US!!!", async function () {
     })
 });
 
