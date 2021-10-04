@@ -20,8 +20,8 @@ export const setupEstate = deployments.createFixture(async function () {
     'ChildEstateToken',
     minter
   );
-  const landContract = await ethers.getContract('Land');
-  const landAdmin = await landContract.callStatic.getAdmin();
+  const landContract = await ethers.getContract('MockLandWithMint');
+  //const landAdmin = await landContract.callStatic.getAdmin();
 
   const landContractAsUser0 = await landContract.connect(
     ethers.provider.getSigner(user0)
@@ -37,17 +37,17 @@ export const setupEstate = deployments.createFixture(async function () {
     ethers.provider.getSigner(user0)
   );
 
-  await waitFor(
+  /*await waitFor(
     landContract
       .connect(ethers.provider.getSigner(landAdmin))
       .setMinter(minter, true)
-  );
+  );*/
 
-  await waitFor(
+  /*await waitFor(
     landContract
       .connect(ethers.provider.getSigner(landAdmin))
       .setSuperOperator(estateContract.address, true)
-  );
+  );*/
   await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
   return {
     estateContract,

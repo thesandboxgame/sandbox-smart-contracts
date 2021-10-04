@@ -9,7 +9,7 @@ const func: DeployFunction = async function (
   const {deployer, upgradeAdmin} = await getNamedAccounts();
   const {deploy} = deployments;
 
-  const landContract = await deployments.get('Land');
+  const landContract = await deployments.get('MockLandWithMint');
   const gameToken = await deployments.get('ChildGameToken');
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const chainIndex = 1; // L2 (Polygon). Use 0 for Ethereum-Mainnet.
@@ -47,6 +47,7 @@ func.dependencies = [
   'ChildGameToken_setup',
   'Land_deploy',
   'TRUSTED_FORWARDER',
+  'MockLandWithMint_deploy',
 ];
 func.skip = skipUnlessTest;
 // TODO: Setup deploy-polygon folder and network.
