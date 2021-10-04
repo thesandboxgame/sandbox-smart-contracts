@@ -1,16 +1,17 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest} from '../../utils/network';
 import gems from '../../data/gems';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
+
   const GemsCatalystsRegistry = await deployments.get(
     'PolygonGemsCatalystsRegistry'
   );
 
   const {gemMinter, deployer} = await getNamedAccounts();
+
   for (const gem of gems) {
     await deploy(`PolygonGem_${gem.symbol}`, {
       contract: 'Gem',
@@ -28,6 +29,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.tags = ['polygonGems', 'polygonGems_deploy', 'L2'];
-func.dependencies = ['polygonGemsCatalystsRegistry_deploy'];
-func.skip = skipUnlessTest; // disabled for now
+func.tags = ['PolygonGems', 'PolygonGems_deploy', 'L2'];
+func.dependencies = ['PolygonGemsCatalystsRegistry_deploy'];

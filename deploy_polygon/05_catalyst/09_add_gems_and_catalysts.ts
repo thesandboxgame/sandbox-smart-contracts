@@ -1,6 +1,5 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest} from '../../utils/network';
 import gems from '../../data/gems';
 import catalysts from '../../data/catalysts';
 
@@ -56,4 +55,3 @@ func.dependencies = [
   'PolygonCatalysts',
   'PolygonGems',
 ];
-func.skip = skipUnlessTest; // disabled for now

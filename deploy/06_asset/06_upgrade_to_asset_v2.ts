@@ -1,6 +1,5 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -74,4 +73,3 @@ func.dependencies = [
   'ERC1155_PREDICATE',
   'AssetAttributesRegistry_deploy',
 ];
-func.skip = skipUnlessTestnet;

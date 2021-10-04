@@ -1,6 +1,5 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -72,4 +71,3 @@ func.dependencies = [
   'PolygonCatalysts_deploy',
   'PolygonAssetAttributesRegistry_deploy',
 ];
-func.skip = skipUnlessTestnet; // TODO: change to skip unless L2
