@@ -1,22 +1,22 @@
 import {
-  ethers,
   deployments,
+  ethers,
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
 
 import {Address} from 'hardhat-deploy/types';
 import {Contract} from 'ethers';
+import {withSnapshot} from '../utils';
 
 export interface User {
   address: Address;
   Game: Contract;
 }
 
-export const setupTest = deployments.createFixture(async () => {
+export const setupTest = withSnapshot(['ChildGameToken'], async () => {
   const {gameTokenAdmin} = await getNamedAccounts();
   const others = await getUnnamedAccounts();
-  await deployments.fixture('ChildGameToken');
 
   const gameToken = await ethers.getContract('ChildGameToken');
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
