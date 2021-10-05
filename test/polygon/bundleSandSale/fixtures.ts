@@ -6,7 +6,7 @@ import {
 } from 'hardhat';
 import {BigNumber, BigNumberish, Contract} from 'ethers';
 import {Address} from 'hardhat-deploy/dist/types';
-import {expectEventWithArgs, waitFor} from '../../utils';
+import {expectEventWithArgs, waitFor, withSnapshot} from '../../utils';
 import {defaultAbiCoder, keccak256, toUtf8Bytes} from 'ethers/lib/utils';
 
 export type Fixture = {
@@ -23,74 +23,78 @@ export type Fixture = {
   deployPolygonBundleSandSale: (receivingWallet: Address) => Promise<void>;
   receivingWallet: Address;
 };
-export const setupFixtures = deployments.createFixture(async function () {
-  await deployments.fixture(['DAI', 'Asset', 'Sand']);
-  const {
-    sandBeneficiary,
-    assetBouncerAdmin,
-    deployer,
-  } = await getNamedAccounts();
+export const setupFixtures = withSnapshot(
+  ['DAI', 'Asset', 'Sand'],
+  async function () {
+    const {
+      sandBeneficiary,
+      assetBouncerAdmin,
+      deployer,
+    } = await getNamedAccounts();
 
-  const daiBeneficiary = deployer;
-  const fakeDai = await ethers.getContract('DAI', daiBeneficiary);
+    const daiBeneficiary = deployer;
+    const fakeDai = await ethers.getContract('DAI', daiBeneficiary);
 
-  const fakeMedianizer = await ethers.getContract('DAIMedianizer');
-  const ethUsdPrice = BigNumber.from(await fakeMedianizer.read());
-  const [
-    ethBeneficiary,
-    polygonBundleSandSaleAdmin,
-    ...otherUsers
-  ] = await getUnnamedAccounts();
+    const fakeMedianizer = await ethers.getContract('DAIMedianizer');
+    const ethUsdPrice = BigNumber.from(await fakeMedianizer.read());
+    const [
+      ethBeneficiary,
+      polygonBundleSandSaleAdmin,
+      ...otherUsers
+    ] = await getUnnamedAccounts();
 
-  // ERC20
-  const sandContract = await ethers.getContract('Sand', sandBeneficiary);
-  // ERC1155ERC721
-  const assetContractAsBouncerAdmin = await ethers.getContract(
-    'Asset',
-    assetBouncerAdmin
-  );
-  await waitFor(assetContractAsBouncerAdmin.setBouncer(sandBeneficiary, true));
-  const assetContract = await ethers.getContract('Asset', sandBeneficiary);
+    // ERC20
+    const sandContract = await ethers.getContract('Sand', sandBeneficiary);
+    // ERC1155ERC721
+    const assetContractAsBouncerAdmin = await ethers.getContract(
+      'Asset',
+      assetBouncerAdmin
+    );
+    await waitFor(
+      assetContractAsBouncerAdmin.setBouncer(sandBeneficiary, true)
+    );
+    const assetContract = await ethers.getContract('Asset', sandBeneficiary);
 
-  async function deployPolygonBundleSandSale(
-    receivingWallet: Address
-  ): Promise<void> {
-    await deployments.deploy('PolygonBundleSandSale', {
-      from: deployer,
-      contract: 'PolygonBundleSandSale',
-      args: [
-        sandContract.address,
-        assetContract.address,
-        fakeMedianizer.address,
-        fakeDai.address,
-        polygonBundleSandSaleAdmin,
-        receivingWallet,
-      ],
-    });
+    async function deployPolygonBundleSandSale(
+      receivingWallet: Address
+    ): Promise<void> {
+      await deployments.deploy('PolygonBundleSandSale', {
+        from: deployer,
+        contract: 'PolygonBundleSandSale',
+        args: [
+          sandContract.address,
+          assetContract.address,
+          fakeMedianizer.address,
+          fakeDai.address,
+          polygonBundleSandSaleAdmin,
+          receivingWallet,
+        ],
+      });
+    }
+
+    const receivingWallet = otherUsers[1];
+    await deployPolygonBundleSandSale(receivingWallet);
+    const contract = await ethers.getContract(
+      'PolygonBundleSandSale',
+      polygonBundleSandSaleAdmin
+    );
+
+    return {
+      contract,
+      sandContract,
+      assetContract,
+      daiContract: fakeDai,
+      daiBeneficiary,
+      ethBeneficiary,
+      sandBeneficiary,
+      polygonBundleSandSaleAdmin,
+      otherUsers,
+      ethUsdPrice,
+      deployPolygonBundleSandSale,
+      receivingWallet,
+    };
   }
-
-  const receivingWallet = otherUsers[1];
-  await deployPolygonBundleSandSale(receivingWallet);
-  const contract = await ethers.getContract(
-    'PolygonBundleSandSale',
-    polygonBundleSandSaleAdmin
-  );
-
-  return {
-    contract,
-    sandContract,
-    assetContract,
-    daiContract: fakeDai,
-    daiBeneficiary,
-    ethBeneficiary,
-    sandBeneficiary,
-    polygonBundleSandSaleAdmin,
-    otherUsers,
-    ethUsdPrice,
-    deployPolygonBundleSandSale,
-    receivingWallet,
-  };
-});
+);
 
 // This mints some assets in batch to the sandBeneficiary account, we must then transfer them with some sand
 // to PolygonBundleSandSale to create a bundle.
