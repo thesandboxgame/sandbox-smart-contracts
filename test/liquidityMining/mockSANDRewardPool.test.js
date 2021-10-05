@@ -24,7 +24,7 @@ const STAKE_AMOUNT = BigNumber.from(10000).mul('1000000000000000000');
 const SMALL_STAKE_AMOUNT = BigNumber.from(10).mul('1000000000000000000');
 const createFixture = withSnapshot(
   ['LandWeightedSANDRewardPool'],
-  async (supplyRewardTokens, notifyReward) => {
+  async (hre, {supplyRewardTokens, notifyReward}) => {
     const {
       deployer,
       sandAdmin,
@@ -134,7 +134,10 @@ async function setUpUserWithNfts(multiplierNFTokenAsAdmin, user, min, max) {
 
 describe('MockSANDRewardPool', function () {
   it('Pool contains reward tokens', async function () {
-    const {rewardPool, rewardToken} = await createFixture(true, true);
+    const {rewardPool, rewardToken} = await createFixture({
+      supplyRewardTokens: true,
+      notifyReward: true,
+    });
     await ethers.getContract(POOL);
     let balance = await rewardToken.balanceOf(rewardPool.address);
     expect(balance).to.equal(REWARD_AMOUNT);
@@ -146,7 +149,7 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     let balance = await stakeToken.balanceOf(others[0]);
     expect(balance).to.equal(STAKE_AMOUNT.mul(10));
     const receipt = await rewardPoolAsUser[0]
@@ -171,7 +174,7 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
@@ -191,7 +194,7 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
@@ -211,7 +214,7 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     for (let i = 0; i < 2; i++) {
       await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     }
@@ -233,7 +236,7 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     for (let i = 0; i < 3; i++) {
       await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     }
@@ -255,7 +258,7 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     for (let i = 0; i < 4; i++) {
       await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     }
@@ -281,7 +284,7 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     for (let i = 0; i < 10; i++) {
       await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     }
@@ -311,7 +314,7 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 1);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
@@ -337,7 +340,7 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 1);
     for (let i = 0; i < 10; i++) {
       await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
@@ -365,7 +368,7 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 2);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
@@ -391,7 +394,7 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 3);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
@@ -417,7 +420,7 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 3);
     for (let i = 0; i < 10; i++) {
       await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
@@ -445,7 +448,7 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 89);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
@@ -471,7 +474,7 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 89);
     for (let i = 0; i < 10; i++) {
       await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
@@ -494,7 +497,7 @@ describe('MockSANDRewardPool', function () {
 
   // TODO ?
   // it.skip('User earnings for 500 NFTs match expected reward', async function () {
-  //   await createFixture(true, true);
+  //   await createFixture({supplyRewardTokens:true, notifyReward:true});
   //   await setUpUserWithNfts(multiplierNFTokenAsAdmin,others[0], 0, 500);
   //   await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
   //   const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
@@ -514,7 +517,7 @@ describe('MockSANDRewardPool', function () {
   // });
 
   // it.skip('User earnings for 10000 NFTs match expected reward', async function () {
-  //   await createFixture(true, true);
+  //   await createFixture({supplyRewardTokens:true, notifyReward:true});
   //   await setUpUserWithNfts(multiplierNFTokenAsAdmin,others[0], 0, 10000);
   //   await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
   //   const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
@@ -542,7 +545,7 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
@@ -564,7 +567,7 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     for (let i = 0; i < 10; i++) {
       await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
       await rewardPoolAsUser[1].stake(SMALL_STAKE_AMOUNT);
@@ -593,7 +596,7 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
     await rewardPoolAsUser[2].stake(STAKE_AMOUNT);
@@ -626,7 +629,7 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 1);
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[1], 1, 2);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
@@ -656,7 +659,7 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 1);
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[1], 1, 2);
     for (let i = 0; i < 10; i++) {
@@ -688,7 +691,7 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 3);
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[1], 3, 6);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
@@ -718,7 +721,7 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 100);
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[1], 100, 200);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
@@ -747,7 +750,7 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     const numNfts = 2;
     const contributionNoNfts = contribution(STAKE_AMOUNT, 0);
     const contributionWithNfts = contribution(STAKE_AMOUNT, numNfts);
@@ -781,7 +784,7 @@ describe('MockSANDRewardPool', function () {
       others,
       rewardPoolAsUser,
       multiplierNFTokenAsAdmin,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 1);
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[1], 1, 2);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
@@ -808,7 +811,7 @@ describe('MockSANDRewardPool', function () {
       others,
       rewardPoolAsUser,
       multiplierNFTokenAsAdmin,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 100);
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[1], 100, 200);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
@@ -835,7 +838,7 @@ describe('MockSANDRewardPool', function () {
       others,
       rewardPoolAsUser,
       multiplierNFTokenAsAdmin,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 1);
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[1], 1, 3); // has extra NFT
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
@@ -862,7 +865,7 @@ describe('MockSANDRewardPool', function () {
       others,
       rewardPoolAsUser,
       multiplierNFTokenAsAdmin,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 100);
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[1], 100, 201); // has extra NFT
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
@@ -886,7 +889,7 @@ describe('MockSANDRewardPool', function () {
 
   // TODO ?
   // it.skip("Multiple Users' earnings for 0 NFTs match expected reward: 2 users, 100 stakes each", async function () {
-  //   await createFixture(true, true);
+  //   await createFixture({supplyRewardTokens:true, notifyReward:true});
   //   for (let i = 0; i < 100; i++) {
   //     await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
   //     await rewardPoolAsUser[1].stake(SMALL_STAKE_AMOUNT);
@@ -910,7 +913,7 @@ describe('MockSANDRewardPool', function () {
   // });
 
   // it.skip("Multiple Users' earnings for 100 NFTs match expected reward: 2 users, 100 stakes each", async function () {
-  //   await createFixture(true, true);
+  //   await createFixture({supplyRewardTokens:true, notifyReward:true});
   //   await setUpUserWithNfts(multiplierNFTokenAsAdmin,others[0], 0, 100);
   //   await setUpUserWithNfts(multiplierNFTokenAsAdmin,others[1], 100, 200);
   //   for (let i = 0; i < 100; i++) {
@@ -936,7 +939,7 @@ describe('MockSANDRewardPool', function () {
   // });
 
   // it.skip("Multiple Users' earnings for 100 NFTs match expected reward: 2 users, 1000 stakes each", async function () {
-  //   await createFixture(true, true);
+  //   await createFixture({supplyRewardTokens:true, notifyReward:true});
   //   await setUpUserWithNfts(multiplierNFTokenAsAdmin,others[0], 0, 100);
   //   await setUpUserWithNfts(multiplierNFTokenAsAdmin,others[1], 100, 200);
   //   for (let i = 0; i < 1000; i++) {
@@ -968,7 +971,7 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       rewardPoolAsAdmin,
       stakeToken,
-    } = await createFixture(true, false);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: false});
     const wrongRewardAmount = BigNumber.from(1400000).mul(
       '1000000000000000000'
     );
@@ -997,7 +1000,7 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
-    } = await createFixture(false, true);
+    } = await createFixture({supplyRewardTokens: false, notifyReward: true});
     await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
@@ -1023,7 +1026,7 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       rewardTokenAsAdmin,
-    } = await createFixture(false, true);
+    } = await createFixture({supplyRewardTokens: false, notifyReward: true});
     await rewardTokenAsAdmin.transfer(rewardPool.address, WRONG_REWARD_AMOUNT);
     await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
@@ -1050,7 +1053,7 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       rewardPoolAsAdmin,
       stakeToken,
-    } = await createFixture(true, false);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: false});
     await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     await mine();
     const initialEarnings = await rewardPoolAsUser[0].earned(others[0]);
@@ -1078,7 +1081,7 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       rewardPoolAsAdmin,
       stakeToken,
-    } = await createFixture(true, true);
+    } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     await mine();
     const initialEarnings = await rewardPoolAsUser[0].earned(others[0]);
