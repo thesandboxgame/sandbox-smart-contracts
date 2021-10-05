@@ -75,7 +75,23 @@ want but must use only one in each test***.
 
 ## Recommended style for tests
 
-This is an example of a test that uses `withSnapshot` and our recommendation on how to write tests:
+For the tests we recommend using `withSnapshot` that takes the following arguments:
+
+1. A list of migration script tags.
+2. An async function to execute.
+
+`withSnapshot` does the following:
+
+1. reverts the hardhat-network to his initial state
+2. calls `fixture` with the list of migration tags. The default is an empty list, so `fixture(undefined)` is never used
+3. calls `createFixture` with the given function
+
+This way all the calls to `fixture` and `createFixture` are over a clean hardhat-network state and can be reused with no
+risks. 
+
+***Never use `fixture` or `createFixture` outside `withSnapshot` to avoid any unexpected behaviour*** 
+
+### `withSnapshot` usage example
 
 ```typescript
 
