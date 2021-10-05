@@ -80,7 +80,7 @@ For the tests we recommend using `withSnapshot` that takes the following argumen
 1. A list of migration script tags.
 2. An async function to execute.
 
-`withSnapshot` does the following:
+and does the following:
 
 1. reverts the hardhat-network to his initial state
 2. calls `fixture` with the list of migration tags. The default is an empty list, so `fixture(undefined)` is never used
