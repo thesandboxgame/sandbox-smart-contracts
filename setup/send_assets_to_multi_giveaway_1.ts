@@ -1,7 +1,8 @@
 /**
  * How to use:
- *  - yarn execute <NETWORK> ./setup/send_assets_to_multi_giveaway_1.ts <GIVEAWAY_NAME>
+ *  - yarn execute <NETWORK> ./setup/send_assets_to_multi_giveaway.ts <MULTI_GIVEAWAY_NAME> <GIVEAWAY_NAME>
  *
+ * MULTI_GIVEAWAY_NAME: should be the same as the contract deployment name
  * GIVEAWAY_NAME: from data/giveaways/multi_giveaway_1/detective_letty.json then the giveaway name is: detective_letty
  */
 import fs from 'fs-extra';
@@ -9,15 +10,15 @@ import hre from 'hardhat';
 import {BigNumber} from '@ethersproject/bignumber';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {MultiClaim, AssetHash} from '../lib/merkleTreeHelper';
-const {deployments} = hre;
+const {deployments, getNamedAccounts} = hre;
 const {execute, catchUnknownSigner, read} = deployments;
-const networkName = hre.network.name;
 
 const args = process.argv.slice(2);
-const claimFile = args[0];
+const multiGiveawayName = args[0];
+const claimFile = args[1];
 
-function getAssets(giveawayName: string): AssetHash {
-  const path = `./data/giveaways/multi_giveaway_1/${giveawayName}.json`;
+function getAssets(multiGiveawayName: string, giveawayName: string): AssetHash {
+  const path = `./data/giveaways/${multiGiveawayName.toLowerCase()}/${giveawayName}.json`;
   const json: Array<MultiClaim> = fs.readJSONSync(path);
   const assetIdsCount: AssetHash = {};
   json.forEach((claim) => {
@@ -32,13 +33,9 @@ function getAssets(giveawayName: string): AssetHash {
 }
 
 const func: DeployFunction = async function () {
-  const assetIdsCount = await getAssets(claimFile);
-  const owner =
-    networkName === 'mainnet'
-      ? '0x7A9fe22691c811ea339D9B73150e6911a5343DcA'
-      : '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897';
-  const MultiGiveaway = await deployments.get('Multi_Giveaway_1');
-
+  const assetIdsCount = await getAssets(multiGiveawayName, claimFile);
+  const MultiGiveaway = await deployments.get(multiGiveawayName);
+  const {sandboxAccount: owner} = await getNamedAccounts();
   // Send ERC1155
   const ids = [];
   const values = [];
