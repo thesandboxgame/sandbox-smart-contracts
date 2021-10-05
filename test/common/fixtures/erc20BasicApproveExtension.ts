@@ -9,12 +9,6 @@ import {setupUser, waitFor} from '../../utils';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const erc20BasicApproveExtensionFixtures = async function () {
-  await deployments.fixture([
-    'Land',
-    'Sand',
-    'LandPreSale_5',
-    'ERC20_PREDICATE',
-  ]);
   const accounts = await getNamedAccounts();
   const others = await getUnnamedAccounts();
   const user0 = others[0];
