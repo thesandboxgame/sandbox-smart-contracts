@@ -10,6 +10,8 @@ import {
 import {Receipt} from 'hardhat-deploy/types';
 import {Result} from 'ethers/lib/utils';
 import {deployments, ethers, network} from 'hardhat';
+import {FixtureFunc} from 'hardhat-deploy/dist/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 export async function increaseTime(numSec: number): Promise<void> {
   await ethers.provider.send('evm_increaseTime', [numSec]);
@@ -171,20 +173,22 @@ export async function evmRevertToInitialState(): Promise<void> {
   });
 }
 
-export function withSnapshot<T>(
+export function withSnapshot<T, O>(
   tags: string | string[] = [],
-  func: () => Promise<T> = async () => {
+  func: FixtureFunc<T, O> = async () => {
     return <T>{};
   }
-): () => Promise<T> {
-  return deployments.createFixture(async () => {
-    // TODO: This has problems with solidity-coverage, when the fix that we can use it
-    // TODO: We need a way to revert to initial state!!!
-    //  await evmRevertToInitialState();
-    await deployments.fixture(tags, {
-      fallbackToGlobal: false,
-      keepExistingDeployments: false,
-    });
-    return func();
-  });
+): (options?: O) => Promise<T> {
+  return deployments.createFixture(
+    async (env: HardhatRuntimeEnvironment, options?: O) => {
+      // TODO: This has problems with solidity-coverage, when the fix that we can use it
+      // TODO: We need a way to revert to initial state!!!
+      //  await evmRevertToInitialState();
+      await deployments.fixture(tags, {
+        fallbackToGlobal: false,
+        keepExistingDeployments: false,
+      });
+      return func(env, options);
+    }
+  );
 }
