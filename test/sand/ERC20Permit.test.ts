@@ -1,4 +1,4 @@
-import {deployments, ethers} from 'hardhat';
+import {ethers} from 'hardhat';
 import {Address} from 'hardhat-deploy/types';
 import {splitSignature} from 'ethers/lib/utils';
 import {BigNumber, constants, Contract} from 'ethers';
@@ -20,7 +20,6 @@ describe('Gems & Catalysts permit', function () {
   let user3: Address;
 
   before(async function () {
-    await deployments.fixture();
     ({
       luckGem,
       epicCatalyst,

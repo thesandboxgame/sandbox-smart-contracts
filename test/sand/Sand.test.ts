@@ -1,12 +1,7 @@
 import {expect} from '../chai-setup';
-import {
-  ethers,
-  deployments,
-  getNamedAccounts,
-  getUnnamedAccounts,
-} from 'hardhat';
-import {Contract, BigNumber} from 'ethers';
-import {setupUser, setupUsers, waitFor} from '../utils';
+import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
+import {BigNumber, Contract} from 'ethers';
+import {setupUser, setupUsers, waitFor, withSnapshot} from '../utils';
 
 type User = {
   address: string;
@@ -16,14 +11,14 @@ type User = {
 const DECIMALS_18 = BigNumber.from('1000000000000000000');
 const TOTAL_SUPPLY = DECIMALS_18.mul(3000000000);
 
-const setupTest = deployments.createFixture(
+const setupTest = withSnapshot(
+  ['Sand'],
   async (): Promise<{
     Sand: Contract;
     userWithSand: User;
     sandBeneficiary: User;
     usersWithoutSand: User[];
   }> => {
-    await deployments.fixture('Sand');
     const Sand = await ethers.getContract('Sand');
     const unnamedAccounts = await getUnnamedAccounts();
     let usersWithoutSand = await setupUsers(unnamedAccounts, {Sand});

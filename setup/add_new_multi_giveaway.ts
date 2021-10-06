@@ -1,10 +1,19 @@
-import fs from 'fs';
+/**
+ * How to use:
+ *  - yarn execute <NETWORK> ./setup/add_new_multi_giveaway.ts <GIVEAWAY_NAME>
+ *
+ * GIVEAWAY_NAME: from data/giveaways/multi_giveaway_1/detective_letty.json then the giveaway name is: detective_letty
+ */
+import fs from 'fs-extra';
 import hre from 'hardhat';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 import {createClaimMerkleTree} from '../data/giveaways/multi_giveaway_1/getClaims';
 import helpers, {MultiClaim} from '../lib/merkleTreeHelper';
 const {calculateMultiClaimHash} = helpers;
+
+const args = process.argv.slice(2);
+const claimFile = args[0];
 
 const func: DeployFunction = async function () {
   const {deployments, network, getChainId} = hre;
@@ -13,12 +22,8 @@ const func: DeployFunction = async function () {
 
   let claimData: MultiClaim[];
   try {
-    claimData = JSON.parse(
-      fs
-        .readFileSync(
-          'data/giveaways/multi_giveaway_1/claims_0_hardhat.json' // TODO: update for each claim file
-        )
-        .toString()
+    claimData = fs.readJSONSync(
+      `data/giveaways/multi_giveaway_1/${claimFile}.json`
     );
   } catch (e) {
     console.log('Error', e);
@@ -58,11 +63,13 @@ const func: DeployFunction = async function () {
       proof: tree.getProof(calculateMultiClaimHash(claim)),
     });
   }
-  fs.writeFileSync(
-    `./secret/.multi_claims_proofs_${chainId}.json`,
-    JSON.stringify(claimsWithProofs, null, '  ')
-  );
-  console.log(`Proofs at: ./secret/.multi_claims_proofs_${chainId}.json`);
+  const basePath = `./secret/multi-giveaway/${network.name}`;
+  const proofPath = `${basePath}/.multi_claims_proofs_${claimFile}_${chainId}.json`;
+  const rootHashPath = `${basePath}/.multi_claims_root_hash_${claimFile}_${chainId}.json`;
+  fs.outputJSONSync(proofPath, claimsWithProofs);
+  fs.outputFileSync(rootHashPath, merkleRootHash);
+  console.log(`Proofs at: ${proofPath}`);
+  console.log(`Hash at: ${rootHashPath}`);
 };
 export default func;
 

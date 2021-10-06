@@ -1,17 +1,13 @@
-import {setupMainnetAsset, setupPolygonAsset} from './fixtures';
+import {setupMainnetAndPolygonAsset, setupPolygonAsset} from './fixtures';
 import {getAssetChainIndex, setupUser, waitFor} from '../../utils';
 import {expect} from '../../chai-setup';
 import {sendMetaTx} from '../../sendMetaTx';
 import {AbiCoder} from 'ethers/lib/utils';
 import {Event} from '@ethersproject/contracts';
-import {deployments} from 'hardhat';
 
 const abiCoder = new AbiCoder();
 
 describe('PolygonAsset.sol', function () {
-  beforeEach(async function () {
-    await deployments.fixture(['PolygonAsset', 'Asset']);
-  });
   it('user sending asset to itself keep the same balance', async function () {
     const {Asset, users, mintAsset} = await setupPolygonAsset();
     const tokenId = await mintAsset(users[0].address, 20);
@@ -230,8 +226,8 @@ describe('PolygonAsset.sol', function () {
 
   describe('Asset <> PolygonAsset: Transfer', function () {
     it('can transfer L1 minted assets: L1 to L2', async function () {
-      const mainnet = await setupMainnetAsset();
-      const polygon = await setupPolygonAsset();
+      const {mainnet, polygon} = await setupMainnetAndPolygonAsset();
+
       const tokenId = await mainnet.mintAsset(mainnet.users[0].address, 20);
 
       const balance = await mainnet.Asset['balanceOf(address,uint256)'](
@@ -290,8 +286,8 @@ describe('PolygonAsset.sol', function () {
       expect(mainnetURI).to.be.equal(polygonURI);
     });
     it('can transfer L2 minted assets: L2 to L1', async function () {
-      const mainnet = await setupMainnetAsset();
-      const polygon = await setupPolygonAsset();
+      const {mainnet, polygon} = await setupMainnetAndPolygonAsset();
+
       const tokenId = await polygon.mintAsset(polygon.users[0].address, 20);
 
       const balance = await polygon.Asset['balanceOf(address,uint256)'](
@@ -336,8 +332,8 @@ describe('PolygonAsset.sol', function () {
       expect(mainnetURI).to.be.equal(polygonURI);
     });
     it('can transfer multiple L1 minted assets: L1 to L2', async function () {
-      const mainnet = await setupMainnetAsset();
-      const polygon = await setupPolygonAsset();
+      const {mainnet, polygon} = await setupMainnetAndPolygonAsset();
+
       const hash =
         '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
       const supplies = [20, 5, 10];
@@ -413,8 +409,8 @@ describe('PolygonAsset.sol', function () {
       }
     });
     it('can transfer partial supplies of L1 minted assets: L1 to L2', async function () {
-      const mainnet = await setupMainnetAsset();
-      const polygon = await setupPolygonAsset();
+      const {mainnet, polygon} = await setupMainnetAndPolygonAsset();
+
       const hash =
         '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
       const supplies = [20, 5, 10];
@@ -511,8 +507,8 @@ describe('PolygonAsset.sol', function () {
       }
     });
     it('can transfer multiple L2 minted assets: L2 to L1', async function () {
-      const mainnet = await setupMainnetAsset();
-      const polygon = await setupPolygonAsset();
+      const {mainnet, polygon} = await setupMainnetAndPolygonAsset();
+
       const hash =
         '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
       const supplies = [20, 5, 10];
@@ -575,8 +571,8 @@ describe('PolygonAsset.sol', function () {
       }
     });
     it('can transfer partial supplies of L2 minted assets: L2 to L1', async function () {
-      const mainnet = await setupMainnetAsset();
-      const polygon = await setupPolygonAsset();
+      const {mainnet, polygon} = await setupMainnetAndPolygonAsset();
+
       const hash =
         '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
       const supplies = [20, 5, 10];
@@ -660,8 +656,7 @@ describe('PolygonAsset.sol', function () {
       }
     });
     it('can transfer assets from multiple L1 minted batches: L1 to L2', async function () {
-      const mainnet = await setupMainnetAsset();
-      const polygon = await setupPolygonAsset();
+      const {mainnet, polygon} = await setupMainnetAndPolygonAsset();
       // First batch of tokens
       const hash01 =
         '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
@@ -758,8 +753,7 @@ describe('PolygonAsset.sol', function () {
       }
     });
     it('can transfer assets from multiple L2 minted batches: L2 to L1', async function () {
-      const mainnet = await setupMainnetAsset();
-      const polygon = await setupPolygonAsset();
+      const {mainnet, polygon} = await setupMainnetAndPolygonAsset();
       // First batch of tokens
       const hash01 =
         '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
@@ -847,8 +841,7 @@ describe('PolygonAsset.sol', function () {
       }
     });
     it('can return L1 minted assets: L1 to L2 to L1', async function () {
-      const mainnet = await setupMainnetAsset();
-      const polygon = await setupPolygonAsset();
+      const {mainnet, polygon} = await setupMainnetAndPolygonAsset();
       const tokenId = await mainnet.mintAsset(mainnet.users[0].address, 20);
       const user = await setupUser(mainnet.users[0].address, {
         Asset: mainnet.Asset,
@@ -931,8 +924,8 @@ describe('PolygonAsset.sol', function () {
       expect(mainnetURI).to.be.equal(polygonURI);
     });
     it('can return L2 minted assets: L2 to L1 to L2', async function () {
-      const mainnet = await setupMainnetAsset();
-      const polygon = await setupPolygonAsset();
+      const {mainnet, polygon} = await setupMainnetAndPolygonAsset();
+
       const tokenId = await polygon.mintAsset(mainnet.users[0].address, 20);
       const user = await setupUser(mainnet.users[0].address, {
         Asset: mainnet.Asset,
