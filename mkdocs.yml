@@ -11,7 +11,9 @@ nav:
       - Setting environment variables: intro/setting-environment-variables.md
   - How to:
       - Fixing tests: howto/fixing-tests.md
-      - Deploying contracts: howto/deploying-contracts.md
+      - Deploying contracts:
+          - General: howto/deploying-contracts.md
+          - Deploying asset: howto/deploying-asset.md
       - Preparing a LAND sale: howto/preparing-land-sale.md
       - Preparing an ASSET giveaway: howto/preparing-asset-giveaway.md
       - Generating liquidity pool rewards: howto/generating-liquidity-pool-rewards.md
