@@ -78,6 +78,8 @@ export const setupEstateSale = deployments.createFixture(async function (hre) {
     proofs,
     hre,
     getNamedAccounts,
+    ethers,
+    Wallet,
   };
 });
 

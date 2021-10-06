@@ -30,7 +30,7 @@ describe('EstateSaleWithAuth', function () {
       proof
     );
     await approveSandForEstateSale(deployer, price);
-    const contract = await estateSaleWithAuthContract.connect(
+    const contract = estateSaleWithAuthContract.connect(
       ethers.provider.getSigner(deployer)
     );
 
@@ -73,7 +73,7 @@ describe('EstateSaleWithAuth', function () {
       proof
     );
     await approveSandForEstateSale(deployer, price);
-    const contract = await estateSaleWithAuthContract.connect(
+    const contract = estateSaleWithAuthContract.connect(
       ethers.provider.getSigner(deployer)
     );
 
@@ -126,9 +126,7 @@ describe('EstateSaleWithAuth', function () {
         signature,
       ]
     );
-    const contract = await sandContract.connect(
-      ethers.provider.getSigner(deployer)
-    );
+    const contract = sandContract.connect(ethers.provider.getSigner(deployer));
 
     await waitFor(
       contract.approveAndCall(
