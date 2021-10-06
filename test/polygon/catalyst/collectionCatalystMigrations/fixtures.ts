@@ -1,25 +1,20 @@
-import {
-  ethers,
-  deployments,
-  getUnnamedAccounts,
-  getNamedAccounts,
-} from 'hardhat';
+import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
 import {Contract} from 'ethers';
-import {toWei} from '../../../utils';
+import {toWei, withSnapshot} from '../../../utils';
 import {transferSand} from '../utils';
 
-export const setupCollectionCatalystMigrations = deployments.createFixture(
+export const setupCollectionCatalystMigrations = withSnapshot(
+  [
+    'CollectionCatalystMigrations',
+    'OldCatalystRegistry',
+    'OldCatalystMinter',
+    'AssetAttributesRegistry',
+    'Sand',
+    'OldGems',
+    'OldCatalysts',
+    'GemsCatalystsRegistry',
+  ],
   async () => {
-    await deployments.fixture([
-      'CollectionCatalystMigrations',
-      'OldCatalystRegistry',
-      'OldCatalystMinter',
-      'AssetAttributesRegistry',
-      'Sand',
-      'OldGems',
-      'OldCatalysts',
-      'GemsCatalystsRegistry',
-    ]);
     const {
       collectionCatalystMigrationsAdmin,
       assetAttributesRegistryAdmin,
