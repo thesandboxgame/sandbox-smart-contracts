@@ -5,18 +5,13 @@ import {expect} from '../../../chai-setup';
 import catalysts from '../../../../data/catalysts';
 import gems from '../../../../data/gems';
 import {
-  MintMultiOptions,
-  MintOptions,
-  setupAssetAttributesRegistry,
   setupAssetMinter,
-  setupAssetUpgrader,
-  setupGemsAndCatalysts,
+  setupAssetMinterAttributesRegistryGemsAndCatalysts,
+  setupAssetMinterGemsAndCatalysts,
+  setupAssetMinterUpgraderGemsAndCatalysts,
 } from './fixtures';
 import {mintCatalyst, mintGem, transferSand} from '../utils';
 import {expectEventWithArgs, findEvents, waitFor} from '../../../utils';
-
-let mintOptions: MintOptions;
-let mintMultiOptions: MintMultiOptions;
 
 const packId = BigNumber.from('1');
 const hash = ethers.utils.keccak256('0x42');
@@ -31,6 +26,28 @@ const NFT_SUPPLY = 1;
 const FT_SUPPLY = 7;
 const emptyRecordGemIds = new Array(15).fill(0);
 const oneToken = BigNumber.from(1).mul(gemsCatalystsUnit);
+const mintOptions = {
+  from: ethers.constants.AddressZero,
+  packId: packId,
+  metaDataHash: hash,
+  catalystId: catId,
+  gemIds: ids,
+  quantity: supply,
+  rarity: 0,
+  to: ethers.constants.AddressZero,
+  data: callData,
+};
+
+const mintMultiOptions = {
+  from: ethers.constants.AddressZero,
+  packId: packId,
+  metadataHash: hash,
+  gemsQuantities: [0, 0, 0, 0, 0, 0],
+  catalystsQuantities: [0, 0, 0, 0, 0],
+  assets: [],
+  to: ethers.constants.AddressZero,
+  data: callData,
+};
 
 function bn(x: number): BigNumber {
   return BigNumber.from(x);
@@ -67,31 +84,6 @@ async function mintGems(mintObjects: MintObj[]): Promise<void> {
 }
 
 describe('AssetMinter', function () {
-  before(async function () {
-    mintOptions = {
-      from: ethers.constants.AddressZero,
-      packId: packId,
-      metaDataHash: hash,
-      catalystId: catId,
-      gemIds: ids,
-      quantity: supply,
-      rarity: 0,
-      to: ethers.constants.AddressZero,
-      data: callData,
-    };
-
-    mintMultiOptions = {
-      from: ethers.constants.AddressZero,
-      packId: packId,
-      metadataHash: hash,
-      gemsQuantities: [0, 0, 0, 0, 0, 0],
-      catalystsQuantities: [0, 0, 0, 0, 0],
-      assets: [],
-      to: ethers.constants.AddressZero,
-      data: callData,
-    };
-  });
-
   describe('AssetMinter: Mint', function () {
     it('the assetMInterAdmin is set correctly', async function () {
       const {assetMinterContract} = await setupAssetMinter();
@@ -101,13 +93,13 @@ describe('AssetMinter', function () {
     });
 
     it('Record is created with correct data on minting an NFT', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
       const {
+        assetMinterContract,
         catalystOwner,
         commonCatalyst,
         powerGem,
-      } = await setupGemsAndCatalysts();
-      const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
+        assetAttributesRegistry,
+      } = await setupAssetMinterAttributesRegistryGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -151,13 +143,14 @@ describe('AssetMinter', function () {
     });
 
     it('Transfer event is emitted on minting an NFT', async function () {
-      const {assetMinterContract, assetContract} = await setupAssetMinter();
       const {
+        assetMinterContract,
+        assetContract,
         catalystOwner,
         rareCatalyst,
         powerGem,
         defenseGem,
-      } = await setupGemsAndCatalysts();
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -207,14 +200,14 @@ describe('AssetMinter', function () {
     });
 
     it('CatalystApplied event is emitted on minting an NFT with a catalyst', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
       const {
+        assetMinterContract,
         catalystOwner,
         rareCatalyst,
         powerGem,
         defenseGem,
-      } = await setupGemsAndCatalysts();
-      const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
+        assetAttributesRegistry,
+      } = await setupAssetMinterAttributesRegistryGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -266,15 +259,15 @@ describe('AssetMinter', function () {
     });
 
     it('Catalysts and gems totalSuplies are reduced when added', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
       const {
+        assetMinterContract,
         legendaryCatalyst,
         defenseGem,
         speedGem,
         magicGem,
         powerGem,
         catalystOwner,
-      } = await setupGemsAndCatalysts();
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -360,8 +353,9 @@ describe('AssetMinter', function () {
         catalystOwner,
         powerGem,
         commonCatalyst,
-      } = await setupGemsAndCatalysts();
-      const {assetMinterContract, assetContract} = await setupAssetMinter();
+        assetMinterContract,
+        assetContract,
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -430,8 +424,9 @@ describe('AssetMinter', function () {
         commonCatalyst,
         rareCatalyst,
         epicCatalyst,
-      } = await setupGemsAndCatalysts();
-      const {assetMinterContract, assetContract} = await setupAssetMinter();
+        assetMinterContract,
+        assetContract,
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -524,9 +519,9 @@ describe('AssetMinter', function () {
         commonCatalyst,
         rareCatalyst,
         epicCatalyst,
-      } = await setupGemsAndCatalysts();
-      const {assetMinterContract} = await setupAssetMinter();
-      const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
+        assetMinterContract,
+        assetAttributesRegistry,
+      } = await setupAssetMinterAttributesRegistryGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -623,9 +618,9 @@ describe('AssetMinter', function () {
         luckGem,
         commonCatalyst,
         rareCatalyst,
-      } = await setupGemsAndCatalysts();
-      const {assetMinterContract} = await setupAssetMinter();
-      const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
+        assetMinterContract,
+        assetAttributesRegistry,
+      } = await setupAssetMinterAttributesRegistryGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -712,8 +707,8 @@ describe('AssetMinter', function () {
         luckGem,
         commonCatalyst,
         rareCatalyst,
-      } = await setupGemsAndCatalysts();
-      const {assetMinterContract} = await setupAssetMinter();
+        assetMinterContract,
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -792,9 +787,9 @@ describe('AssetMinter', function () {
         luckGem,
         commonCatalyst,
         rareCatalyst,
-      } = await setupGemsAndCatalysts();
-      const {assetMinterContract} = await setupAssetMinter();
-      const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
+        assetMinterContract,
+        assetAttributesRegistry,
+      } = await setupAssetMinterAttributesRegistryGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -879,14 +874,12 @@ describe('AssetMinter', function () {
 
   describe('AssetMinter: addGems', function () {
     it('Can extract an erc721 & add Gems', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
       const {
+        assetMinterContract,
         assetUpgraderContract,
         assetContract,
         assetAttributesRegistry,
         assetAttributesRegistryAdmin,
-      } = await setupAssetUpgrader();
-      const {
         sandContract,
         legendaryCatalyst,
         defenseGem,
@@ -894,7 +887,7 @@ describe('AssetMinter', function () {
         magicGem,
         powerGem,
         catalystOwner,
-      } = await setupGemsAndCatalysts();
+      } = await setupAssetMinterUpgraderGemsAndCatalysts();
       await transferSand(
         sandContract,
         catalystOwner,
@@ -926,7 +919,6 @@ describe('AssetMinter', function () {
           .connect(ethers.provider.getSigner(assetAttributesRegistryAdmin))
           .changeMinter(assetMinterContract.address)
       );
-
       const assetId = await assetMinterAsCatalystOwner.callStatic.mint(
         catalystOwner,
         mintOptions.packId,
@@ -1002,8 +994,10 @@ describe('AssetMinter', function () {
 
   describe('AssetMinter: Failures', function () {
     it('should fail if "to" == address(0)', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
-      const {catalystOwner} = await setupGemsAndCatalysts();
+      const {
+        assetMinterContract,
+        catalystOwner,
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -1023,8 +1017,10 @@ describe('AssetMinter', function () {
     });
 
     it('should fail if "from" != _msgSender()', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
-      const {catalystOwner} = await setupGemsAndCatalysts();
+      const {
+        assetMinterContract,
+        catalystOwner,
+      } = await setupAssetMinterGemsAndCatalysts();
       const users = await getUnnamedAccounts();
       const assetMinterAsMetaTxProcessor = await assetMinterContract.connect(
         ethers.provider.getSigner(users[9])
@@ -1045,8 +1041,10 @@ describe('AssetMinter', function () {
     });
 
     it('should fail if gem == Gem(0)', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
-      const {catalystOwner} = await setupGemsAndCatalysts();
+      const {
+        assetMinterContract,
+        catalystOwner,
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -1070,8 +1068,8 @@ describe('AssetMinter', function () {
         catalystOwner,
         rareCatalyst,
         luckGem,
-      } = await setupGemsAndCatalysts();
-      const {assetMinterContract} = await setupAssetMinter();
+        assetMinterContract,
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -1099,13 +1097,13 @@ describe('AssetMinter', function () {
     });
 
     it('should fail if gemIds.length > maxGems', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
       const {
+        assetMinterContract,
         catalystOwner,
         commonCatalyst,
         powerGem,
         defenseGem,
-      } = await setupGemsAndCatalysts();
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -1134,8 +1132,10 @@ describe('AssetMinter', function () {
     });
 
     it('mintMultiple should fail if assets.length == 0', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
-      const {catalystOwner} = await setupGemsAndCatalysts();
+      const {
+        assetMinterContract,
+        catalystOwner,
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -1160,8 +1160,8 @@ describe('AssetMinter', function () {
         speedGem,
         commonCatalyst,
         rareCatalyst,
-      } = await setupGemsAndCatalysts();
-      const {assetMinterContract} = await setupAssetMinter();
+        assetMinterContract,
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -1201,8 +1201,10 @@ describe('AssetMinter', function () {
     });
 
     it('mintMultiple should fail if gemsQuantities == 0', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
-      const {catalystOwner} = await setupGemsAndCatalysts();
+      const {
+        assetMinterContract,
+        catalystOwner,
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -1221,8 +1223,10 @@ describe('AssetMinter', function () {
     });
 
     it('mintMultiple should fail if trying to add too many gems', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
-      const {catalystOwner} = await setupGemsAndCatalysts();
+      const {
+        assetMinterContract,
+        catalystOwner,
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -1247,8 +1251,10 @@ describe('AssetMinter', function () {
     });
 
     it('mintMultiple should fail if trying to add too few gems', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
-      const {catalystOwner} = await setupGemsAndCatalysts();
+      const {
+        assetMinterContract,
+        catalystOwner,
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -1273,8 +1279,10 @@ describe('AssetMinter', function () {
     });
 
     it('should fail if gemsQuantities.length != 5', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
-      const {catalystOwner} = await setupGemsAndCatalysts();
+      const {
+        assetMinterContract,
+        catalystOwner,
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -1298,8 +1306,10 @@ describe('AssetMinter', function () {
       ).to.be.reverted; // Error: VM Exception while processing transaction: invalid opcode
     });
     it('should fail if catalystsQuantities.length != 4', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
-      const {catalystOwner} = await setupGemsAndCatalysts();
+      const {
+        assetMinterContract,
+        catalystOwner,
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -1325,8 +1335,10 @@ describe('AssetMinter', function () {
     });
 
     it('should fail if gemsQuantities are out of order', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
-      const {catalystOwner} = await setupGemsAndCatalysts();
+      const {
+        assetMinterContract,
+        catalystOwner,
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -1350,8 +1362,10 @@ describe('AssetMinter', function () {
       ).to.be.revertedWith('INVALID_GEMS_NOT_ENOUGH');
     });
     it('should fail if catalystsQuantities are out of order', async function () {
-      const {assetMinterContract} = await setupAssetMinter();
-      const {catalystOwner} = await setupGemsAndCatalysts();
+      const {
+        assetMinterContract,
+        catalystOwner,
+      } = await setupAssetMinterGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
@@ -1376,13 +1390,14 @@ describe('AssetMinter', function () {
     });
 
     it('mintMultiple should not set catalyst if catalystId == 0', async function () {
-      const {assetMinterContract, assetContract} = await setupAssetMinter();
-      const {assetAttributesRegistry} = await setupAssetAttributesRegistry();
       const {
+        assetMinterContract,
+        assetContract,
+        assetAttributesRegistry,
         commonCatalyst,
         powerGem,
         catalystOwner,
-      } = await setupGemsAndCatalysts();
+      } = await setupAssetMinterAttributesRegistryGemsAndCatalysts();
       const assetMinterAsCatalystOwner = await assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
