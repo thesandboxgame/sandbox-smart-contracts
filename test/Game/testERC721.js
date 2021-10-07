@@ -1,17 +1,13 @@
 // const {ethers, getNamedAccounts, ethereum} = require('@nomiclabs/buidler');
-const {
-  ethers,
-  deployments,
-  getNamedAccounts,
-  getUnnamedAccounts,
-} = require('hardhat');
+const {ethers, getNamedAccounts, getUnnamedAccounts} = require('hardhat');
 const {BigNumber, utils} = require('ethers');
 const Prando = require('prando');
 const {supplyAssets} = require('./assets');
-const {expectEventWithArgs} = require('../utils');
+const {expectEventWithArgs, withSnapshot} = require('../utils');
 const {toUtf8Bytes} = require('ethers/lib/utils');
 
 const rng = new Prando('GameToken ERC721 tests');
+
 async function getRandom() {
   return rng.nextInt(1, 1000000000);
 }
@@ -25,10 +21,9 @@ const creation = {
 };
 
 const erc721Tests = require('../erc721')(
-  async () => {
+  withSnapshot(['ChildGameToken'], async () => {
     const {gameTokenAdmin} = await getNamedAccounts();
     const others = await getUnnamedAccounts();
-    await deployments.fixture(['ChildGameToken']);
 
     const contract = await ethers.getContract('ChildGameToken');
 
@@ -59,8 +54,9 @@ const erc721Tests = require('../erc721')(
       const tokenId = BigNumber.from(updateEvent.args[1]);
       return {receipt, tokenId};
     }
+
     return {contractAddress: contract.address, users: others, mint};
-  },
+  }),
   {
     batchTransfer: true,
     burn: true,
