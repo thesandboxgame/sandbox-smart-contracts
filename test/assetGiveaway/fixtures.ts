@@ -1,20 +1,20 @@
 import {
-  ethers,
   deployments,
-  getUnnamedAccounts,
+  ethers,
   getNamedAccounts,
+  getUnnamedAccounts,
 } from 'hardhat';
 import {expect} from '../chai-setup';
 import MerkleTree from '../../lib/merkleTree';
 import {createAssetClaimMerkleTree} from '../../data/giveaways/asset_giveaway_1/getAssets';
 import helpers from '../../lib/merkleTreeHelper';
-const {createDataArrayClaimableAssets} = helpers;
 import {default as testAssetData} from '../../data/giveaways/asset_giveaway_1/assets_hardhat.json';
+import {expectReceiptEventWithArgs, waitFor, withSnapshot} from '../utils';
+
+const {createDataArrayClaimableAssets} = helpers;
 
 const ipfsHashString =
   '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
-
-import {expectReceiptEventWithArgs, waitFor} from '../utils';
 
 type Options = {
   mint?: boolean;
@@ -22,7 +22,7 @@ type Options = {
   assetsHolder?: boolean;
 };
 
-export const setupTestGiveaway = deployments.createFixture(async function (
+export const setupTestGiveaway = withSnapshot(['Asset'], async function (
   hre,
   options?: Options
 ) {
@@ -32,7 +32,6 @@ export const setupTestGiveaway = deployments.createFixture(async function (
   const {deployer, assetAdmin, assetBouncerAdmin} = await getNamedAccounts();
   const otherAccounts = await getUnnamedAccounts();
 
-  await deployments.fixture(['Asset']);
   const assetContract = await ethers.getContract('Asset');
 
   const emptyBytes32 =
