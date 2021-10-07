@@ -24,8 +24,7 @@ export type Fixtures = {
   trustedForwarder: Contract;
   mockERC20BasicApprovalTarget: Contract;
 };
-export const setupPolygonSand = deployments.createFixture(async () => {
-  await deployments.fixture('PolygonSand');
+export const setupPolygonSand = withSnapshot(['PolygonSand'], async () => {
   const sand = await ethers.getContract('PolygonSand');
   const accounts = await getNamedAccounts();
   const unnamedAccounts = await getUnnamedAccounts();
