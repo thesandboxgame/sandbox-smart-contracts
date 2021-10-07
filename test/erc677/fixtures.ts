@@ -1,9 +1,9 @@
-import {ethers, deployments, getNamedAccounts} from 'hardhat';
+import {deployments, ethers, getNamedAccounts} from 'hardhat';
 
-import {Contract, BigNumber} from 'ethers';
+import {BigNumber, Contract} from 'ethers';
+import {withSnapshot} from '../utils';
 
-export const setupERC677 = deployments.createFixture(async () => {
-  await deployments.fixture('Gems');
+export const setupERC677 = withSnapshot(['Gems'], async () => {
   const accounts = await getNamedAccounts();
   const gemToken: Contract = await ethers.getContract('Gem_POWER');
   await deployments.deploy('MockERC677Receiver', {
