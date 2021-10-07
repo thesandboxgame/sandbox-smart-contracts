@@ -3,7 +3,6 @@
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
-import "../common/Base/TheSandbox712.sol";
 
 contract Faucet {
     IERC20 internal immutable _ierc20;
