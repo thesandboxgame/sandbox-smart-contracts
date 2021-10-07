@@ -1,8 +1,9 @@
-import {ethers, deployments, getNamedAccounts} from 'hardhat';
+import {ethers, getNamedAccounts} from 'hardhat';
 import fs from 'fs-extra';
 import {SaltedProofSaleLandInfo} from '../../lib/merkleTreeHelper';
 import {Wallet} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
+import {withSnapshot} from '../utils';
 
 export const backendAuthWallet = new ethers.Wallet(
   '0x4242424242424242424242424242424242424242424242424242424242424242'
@@ -41,47 +42,52 @@ export const signAuthMessageAs = async (
   return wallet.signMessage(ethers.utils.arrayify(hashedData));
 };
 
-export const setupAuthValidator = deployments.createFixture(async function (
-  hre
-) {
-  await deployments.fixture(['AuthValidator08']);
-  const authValidatorContract = await ethers.getContract('AuthValidator08');
-  return {
-    authValidatorContract,
-    hre,
-    getNamedAccounts,
-  };
-});
+export const setupAuthValidator = withSnapshot(
+  ['AuthValidator08'],
+  async function (hre) {
+    const authValidatorContract = await ethers.getContract('AuthValidator08');
+    return {
+      authValidatorContract,
+      hre,
+      getNamedAccounts,
+    };
+  }
+);
 
-export const setupEstateSale = deployments.createFixture(async function (hre) {
-  await deployments.fixture(['EstateSaleWithAuth08']);
-  const authValidatorContract = await ethers.getContract('AuthValidator08');
-  const estateSaleWithAuthContract = await ethers.getContract(
-    'EstateSaleWithAuth_0_0'
-  );
-  const sandContract = await ethers.getContract('Sand');
-  const proofs: SaltedProofSaleLandInfo[] = fs.readJSONSync(
-    './secret/estate-sale/hardhat/.proofs_EstateSaleWithAuth_0_0.json'
-  );
-  await transferSandToDeployer(proofs);
-  const approveSandForEstateSale = async (address: string, price: string) => {
-    const sandContractAsUser = sandContract.connect(
-      ethers.provider.getSigner(address)
+export const setupEstateSale = withSnapshot(
+  ['EstateSaleWithAuth08'],
+  async function (hre) {
+    const authValidatorContract = await ethers.getContract('AuthValidator08');
+    const estateSaleWithAuthContract = await ethers.getContract(
+      'EstateSaleWithAuth_0_0'
     );
-    await sandContractAsUser.approve(estateSaleWithAuthContract.address, price);
-  };
-  return {
-    authValidatorContract,
-    estateSaleWithAuthContract,
-    sandContract,
-    approveSandForEstateSale,
-    proofs,
-    hre,
-    getNamedAccounts,
-    ethers,
-    Wallet,
-  };
-});
+    const sandContract = await ethers.getContract('Sand');
+    const proofs: SaltedProofSaleLandInfo[] = fs.readJSONSync(
+      './secret/estate-sale/hardhat/.proofs_EstateSaleWithAuth_0_0.json'
+    );
+    await transferSandToDeployer(proofs);
+    const approveSandForEstateSale = async (address: string, price: string) => {
+      const sandContractAsUser = sandContract.connect(
+        ethers.provider.getSigner(address)
+      );
+      await sandContractAsUser.approve(
+        estateSaleWithAuthContract.address,
+        price
+      );
+    };
+    return {
+      authValidatorContract,
+      estateSaleWithAuthContract,
+      sandContract,
+      approveSandForEstateSale,
+      proofs,
+      hre,
+      getNamedAccounts,
+      ethers,
+      Wallet,
+    };
+  }
+);
 
 async function transferSandToDeployer(proofs: SaltedProofSaleLandInfo[]) {
   const sandContract = await ethers.getContract('Sand');
