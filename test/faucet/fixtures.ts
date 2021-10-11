@@ -1,9 +1,4 @@
-import {
-  ethers,
-  deployments,
-  getNamedAccounts,
-  getUnnamedAccounts,
-} from 'hardhat';
+import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
 import {BigNumber} from 'ethers';
 import {withSnapshot} from '../utils';
 
