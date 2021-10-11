@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer} = await getNamedAccounts();
 
   const sand = await deployments.get('Sand');
-  const period = 10000;
+  const period = 30;
   const DECIMALS_18 = BigNumber.from('1000000000000000000');
   const amountLimit = DECIMALS_18.mul(10);
 
@@ -24,4 +24,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['Faucet', 'Faucet_deploy'];
 func.dependencies = ['Sand_deploy'];
-// func.skip = skipUnlessTest; // TODO
+func.skip = skipUnlessTest; // TODO

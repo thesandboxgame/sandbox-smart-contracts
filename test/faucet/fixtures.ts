@@ -10,7 +10,6 @@ export const setupFaucet = deployments.createFixture(async function () {
   const {sandAdmin, sandBeneficiary, deployer} = await getNamedAccounts();
 
   const others = await getUnnamedAccounts();
-  //await deployments.fixture('Sand');
   await deployments.fixture(['Sand', 'Faucet']);
 
   const sandContract = await ethers.getContract('Sand');

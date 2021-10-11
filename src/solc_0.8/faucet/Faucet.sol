@@ -21,7 +21,7 @@ contract Faucet {
         _amountLimit = amountLimit;
     }
 
-    event FSent(address _receiver, uint256 _amountSent);
+    event FaucetSent(address _receiver, uint256 _amountSent);
 
     /// @notice send amount of IERC20 to a receiver.
     /// @param amount The value (allowance) of the ERC20 tokens that the nominated.
@@ -29,19 +29,21 @@ contract Faucet {
     function send(uint256 amount) public {
         address _receiver = msg.sender;
         uint256 amountSent = amount;
-        require(amount < _amountLimit, "Demand should not exceed limit");
+        require(amount < _amountLimit, "Demand should not exceed limit.");
+
+        address contractAddress = address(this);
+        require(_ierc20.balanceOf(contractAddress) > 0, "Insufficient balance on Faucet account.");
         require(
             _lastTimestamps[_receiver] + _period < block.timestamp,
             "Demand not available now. You should wait after each Demand."
         );
         _lastTimestamps[_receiver] = block.timestamp;
 
-        address contractAddress = address(this);
         if (_ierc20.balanceOf(contractAddress) < amount) {
             amountSent = _ierc20.balanceOf(contractAddress);
         }
         _ierc20.transferFrom(contractAddress, _receiver, amountSent);
 
-        emit FSent(_receiver, amountSent);
+        emit FaucetSent(_receiver, amountSent);
     }
 }

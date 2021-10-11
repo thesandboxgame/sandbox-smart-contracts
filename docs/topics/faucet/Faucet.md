@@ -18,11 +18,11 @@ This contract is dealing with sand (or any ERC20 token).
 
 ### Step 1
 
-Sand admin or beneficiary transfer some sand from an address on faucet deployer address.
+Sand admin or beneficiary transfer some sand from an address to the faucet contract address.
 
 ### Step 2
 
-A user ask for an amount Sand (or ERC20 Token) through faucet send method.
+A user ask for an amount Sand (or ERC20 Token) through Faucet send method.
 
 ### Step 3
 
@@ -78,13 +78,16 @@ class IERC20 {
   actor "IERC20 beneficiary"
   actor User
   participant Faucet
-  participant Reject
   participant IERC20
 
   "IERC20 beneficiary" -> "IERC20" : transfer IERC20 token from ierc20 beneficiary address to faucet contract address
   "User" -> "Faucet" : call send with asked amount
-  "Faucet" -> "Reject" : the previous demand was too recent
-  "Faucet" -> "Reject" : the asked amount demand was too recent
+  alt successful case
   "Faucet" -> "IERC20" : transfer funds from faucet deployer address to user address
+  else the previous demand was too recent
+  "Faucet" -> "User" : Reject
+  else the asked amount demand was too recent
+  "Faucet" -> "User" : Reject
+  end
 @enduml
 ```

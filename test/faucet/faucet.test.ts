@@ -8,8 +8,6 @@ const DECIMALS_18 = BigNumber.from('1000000000000000000');
 const TOTAL_SUPPLY = DECIMALS_18.mul(1000000);
 
 describe('Faucet', function () {
-  // Note: on test network, others[1] is sandAdmin, others[2] is sandBeneficiary
-
   before(async function () {
     await deployments.fixture();
   });
@@ -54,24 +52,15 @@ describe('Faucet', function () {
       faucetContract,
     });
 
-    const balanceContractBefore = await sandContract.balanceOf(
-      sandContract.address
-    );
-    console.log(balanceContractBefore.toString());
-
     const transferReceipt = await waitFor(
       sandBeneficiaryUser.sandContract.transfer(
-        sandContract.address,
+        faucetContract.address,
         TOTAL_SUPPLY
       )
     );
 
-    const balanceContractAfter = await sandContract.balanceOf(
-      sandContract.address
-    );
-    console.log(balanceContractAfter.toString());
-
     await expectEventWithArgs(sandContract, transferReceipt, 'Transfer');
+
     const ASKED_AMOUNT = DECIMALS_18.mul(2);
 
     await waitFor(user.faucetContract.send(ASKED_AMOUNT));
@@ -139,8 +128,9 @@ describe('Faucet', function () {
     const receiveEvent = await expectEventWithArgs(
       faucetContract,
       receiveReceipt,
-      'FSent'
+      'FaucetSent'
     );
+
     const balance = await sandContract.balanceOf(user.address);
 
     expect(receiveEvent.args[0]).to.equal(user.address); // receiver
