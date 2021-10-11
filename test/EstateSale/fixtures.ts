@@ -43,9 +43,9 @@ export const signAuthMessageAs = async (
 };
 
 export const setupAuthValidator = withSnapshot(
-  ['AuthValidator08'],
+  ['AuthSigValidator'],
   async function (hre) {
-    const authValidatorContract = await ethers.getContract('AuthValidator08');
+    const authValidatorContract = await ethers.getContract('AuthSigValidator');
     return {
       authValidatorContract,
       hre,
@@ -55,9 +55,9 @@ export const setupAuthValidator = withSnapshot(
 );
 
 export const setupEstateSale = withSnapshot(
-  ['EstateSaleWithAuth08'],
+  ['EstateSaleWithReferral'],
   async function (hre) {
-    const authValidatorContract = await ethers.getContract('AuthValidator08');
+    const authValidatorContract = await ethers.getContract('AuthSigValidator');
     const estateSaleWithAuthContract = await ethers.getContract(
       'EstateSaleWithAuth_0_0'
     );

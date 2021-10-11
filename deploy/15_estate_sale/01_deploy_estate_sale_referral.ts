@@ -27,7 +27,7 @@ const func: DeployFunction = async function (hre) {
   const sandContract = await deployments.get('Sand');
   const landContract = await deployments.get('Land');
   const assetContract = await deployments.get('PolygonAsset');
-  const authValidatorContract = await deployments.get('AuthValidator08');
+  const authValidatorContract = await deployments.get('AuthSigValidator');
 
   async function deployLandSale(name: string, landSale: LandSale) {
     const {lands, merkleRootHash, sector} = landSale;
@@ -54,7 +54,7 @@ const func: DeployFunction = async function (hre) {
     const landSaleDeployment = await deploy(landSaleName, {
       from: deployer,
       linkedData: lands,
-      contract: 'EstateSaleWithAuth08',
+      contract: 'EstateSaleWithReferral',
       args: [args],
       skipIfAlreadyDeployed: true,
       log: true,
@@ -82,10 +82,10 @@ const func: DeployFunction = async function (hre) {
 };
 
 export default func;
-func.tags = ['EstateSaleWithAuth08', 'EstateSaleWithAuth08_deploy'];
+func.tags = ['EstateSaleWithReferral', 'EstateSaleWithReferral_deploy'];
 func.dependencies = [
   'Sand_deploy',
   'Land_deploy',
   'PolygonAsset_deploy',
-  'AuthValidator08_deploy',
+  'AuthSigValidator_deploy',
 ];

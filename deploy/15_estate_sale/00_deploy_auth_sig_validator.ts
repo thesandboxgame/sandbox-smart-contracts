@@ -7,7 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer, sandAdmin, backendAuthWallet} = await getNamedAccounts();
 
-  await deploy('AuthValidator08', {
+  await deploy('AuthSigValidator', {
     from: deployer,
     args: [sandAdmin, backendAuthWallet],
     log: true,
@@ -15,4 +15,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['AuthValidator08', 'AuthValidator08_deploy'];
+func.tags = ['AuthSigValidator', 'AuthSigValidator_deploy'];
