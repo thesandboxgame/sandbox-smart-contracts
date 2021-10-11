@@ -5,12 +5,11 @@ import {
   getUnnamedAccounts,
 } from 'hardhat';
 import {BigNumber} from 'ethers';
+import {withSnapshot} from '../utils';
 
-export const setupFaucet = deployments.createFixture(async function () {
+export const setupFaucet = withSnapshot(['Faucet'], async function () {
   const {sandAdmin, sandBeneficiary, deployer} = await getNamedAccounts();
-
   const others = await getUnnamedAccounts();
-  await deployments.fixture(['Sand', 'Faucet']);
 
   const sandContract = await ethers.getContract('Sand');
   const faucetContract = await ethers.getContract('Faucet');

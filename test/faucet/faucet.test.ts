@@ -1,4 +1,3 @@
-import {deployments} from 'hardhat';
 import {setupFaucet} from './fixtures';
 import {BigNumber} from 'ethers';
 import {expectEventWithArgs, waitFor, setupUser} from '../utils';
@@ -8,10 +7,6 @@ const DECIMALS_18 = BigNumber.from('1000000000000000000');
 const TOTAL_SUPPLY = DECIMALS_18.mul(1000000);
 
 describe('Faucet', function () {
-  before(async function () {
-    await deployments.fixture();
-  });
-
   it('Receive cannot exceed Faucet approved amout', async function () {
     const setUp = await setupFaucet();
     const {faucetContract, sandContract, sandBeneficiary, others} = setUp;

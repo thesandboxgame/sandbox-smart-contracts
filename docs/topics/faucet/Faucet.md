@@ -43,20 +43,11 @@ Amount is the minimun between balanceOf(deployer) and requested amount.
 
 ```plantuml
 @startuml
-EIP712 <|-- TheSandbox712
-TheSandbox712 <|-- Faucet
 IERC20 <|-- Sand
 Faucet "many" *-- "1" IERC20 : contains
 
-class EIP712 {
-}
-
-class TheSandbox712 {
-  + bytes32 DOMAIN_SEPARATOR
-}
-
 class Faucet {
-  - IERC20 _sand
+  - IERC20 _ierc20
   + void send(uint256 amount)
 }
 
