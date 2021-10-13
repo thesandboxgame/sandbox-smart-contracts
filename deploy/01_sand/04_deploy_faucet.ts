@@ -24,4 +24,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['Faucet', 'Faucet_deploy'];
 func.dependencies = ['Sand_deploy'];
-func.skip = skipUnlessTest; // TODO
+func.skip = skipUnlessTest;
