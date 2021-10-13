@@ -616,7 +616,7 @@ describe('MockSANDRewardPool', function () {
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
     const precisionLost = ACTUAL_REWARD_AMOUNT.sub(earned);
     expect(precisionLost).to.be.at.least(1);
-    expect(precisionLost).to.be.at.most(1);
+    expect(precisionLost).to.be.at.most(2);
   });
 
   // Multiple stakers with LANDs receive rewards
