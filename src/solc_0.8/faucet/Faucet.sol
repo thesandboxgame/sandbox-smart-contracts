@@ -5,8 +5,7 @@ pragma solidity 0.8.2;
 import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 
-
-contract Faucet is Ownable{
+contract Faucet is Ownable {
     IERC20 internal immutable _ierc20;
     uint256 internal _period;
     uint256 internal _amountLimit;
