@@ -31,7 +31,7 @@ describe('Faucet', function () {
     const ASKED_AMOUNT = DECIMALS_18.mul(11);
 
     await expect(user.faucetContract.send(ASKED_AMOUNT)).to.be.revertedWith(
-      'Demand should not exceed limit'
+      'Demand must not exceed 10000000000000000000'
     );
   });
 
@@ -61,7 +61,7 @@ describe('Faucet', function () {
     await waitFor(user.faucetContract.send(ASKED_AMOUNT));
 
     await expect(user.faucetContract.send(ASKED_AMOUNT)).to.be.revertedWith(
-      'Demand not available now. You should wait after each Demand.'
+      'After each call you must wait 30 seconds.'
     );
   });
 
@@ -89,7 +89,7 @@ describe('Faucet', function () {
     const ASKED_AMOUNT = DECIMALS_18.mul(11);
 
     await expect(user.faucetContract.send(ASKED_AMOUNT)).to.be.revertedWith(
-      'Demand should not exceed limit'
+      'Demand must not exceed 10000000000000000000'
     );
   });
 
@@ -132,5 +132,44 @@ describe('Faucet', function () {
     expect(receiveEvent.args[1]).to.equal(ASKED_AMOUNT.toString()); // amount
 
     expect(balance.toString()).to.equal(ASKED_AMOUNT.toString()); // amount
+  });
+
+  it('Retrieve succeded for deployer', async function () {
+    const setUp = await setupFaucet();
+    const {faucetContract, deployer, sandContract, sandBeneficiary} = setUp;
+
+    const sandBeneficiaryUser = await setupUser(sandBeneficiary, {
+      sandContract,
+    });
+
+    const faucetDeployer = await setupUser(deployer, {
+      faucetContract,
+    });
+
+    const transferReceipt = await waitFor(
+      sandBeneficiaryUser.sandContract.transfer(
+        faucetContract.address,
+        TOTAL_SUPPLY
+      )
+    );
+
+    await expectEventWithArgs(sandContract, transferReceipt, 'Transfer');
+
+    const receiveReceipt = await waitFor(
+      faucetDeployer.faucetContract.retrieve(faucetDeployer.address)
+    );
+
+    const receiveEvent = await expectEventWithArgs(
+      faucetContract,
+      receiveReceipt,
+      'FaucetRetrieved'
+    );
+
+    const balance = await sandContract.balanceOf(faucetDeployer.address);
+
+    expect(receiveEvent.args[0]).to.equal(faucetDeployer.address); // receiver
+    expect(receiveEvent.args[1]).to.equal(TOTAL_SUPPLY.toString()); // amount
+
+    expect(balance.toString()).to.equal(TOTAL_SUPPLY.toString()); // amount
   });
 });
