@@ -4,8 +4,15 @@ import {
   getNamedAccounts,
   getUnnamedAccounts,
 } from 'hardhat';
-import {setupUsers, waitFor} from '../../utils';
+
+const {read, execute, deploy} = deployments;
 import {Event} from '@ethersproject/contracts';
+
+import {setupUsers, waitFor} from '../../utils';
+
+import {Contract} from 'ethers';
+import catalysts from '../../../data/catalysts';
+import gems from '../../../data/gems';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const assetFixtures = async function () {
@@ -104,4 +111,103 @@ export const assetFixtures = async function () {
     trustedForwarder,
     predicate,
   };
+};
+
+export const gemsAndCatalystsFixture = async function (
+  isSetupForL2: boolean
+): Promise<Contract> {
+  const {
+    assetAttributesRegistryAdmin,
+    gemMinter,
+    deployer,
+    catalystAdmin,
+  } = await getNamedAccounts();
+  const L2Prefix = isSetupForL2 ? 'Polygon' : '';
+  const assetAttributesRegistryAsRegistryAdmin: Contract = await ethers.getContract(
+    L2Prefix + 'AssetAttributesRegistry',
+    assetAttributesRegistryAdmin
+  );
+
+  const GemsCatalystsRegistry = await deployments.get(
+    L2Prefix + 'GemsCatalystsRegistry'
+  );
+
+  const DefaultAttributes = await deployments.deploy(`DefaultAttributes`, {
+    from: deployer,
+    log: true,
+  });
+
+  const catalystsToAdd = [];
+  const gemsToAdd = [];
+
+  for (const catalyst of catalysts) {
+    const doesCatalystExist = await read(
+      L2Prefix + 'GemsCatalystsRegistry',
+      'doesCatalystExist',
+      catalyst.catalystId
+    );
+
+    let catalystContract;
+    if (!doesCatalystExist) {
+      catalystContract = await deploy(
+        L2Prefix + `Catalyst_${catalyst.symbol}`,
+        {
+          contract: 'Catalyst',
+          from: deployer,
+          log: true,
+          args: [
+            `Sandbox's ${catalyst.symbol} Catalysts`,
+            catalyst.symbol,
+            catalystAdmin,
+            catalyst.maxGems,
+            catalyst.catalystId,
+            DefaultAttributes.address,
+            GemsCatalystsRegistry.address,
+          ],
+          skipIfAlreadyDeployed: true,
+        }
+      );
+
+      catalystsToAdd.push(catalystContract.address);
+    }
+  }
+
+  for (const gem of gems) {
+    const doesGemExist = await read(
+      L2Prefix + 'GemsCatalystsRegistry',
+      'doesGemExist',
+      gem.gemId
+    );
+    let gemsContract;
+    if (!doesGemExist) {
+      gemsContract = await deploy(L2Prefix + `Gem_${gem.symbol}`, {
+        contract: 'Gem',
+        from: deployer,
+        log: true,
+        args: [
+          `Sandbox's ${gem.symbol} Gems`,
+          gem.symbol,
+          gemMinter,
+          gem.gemId,
+          GemsCatalystsRegistry.address,
+        ],
+        skipIfAlreadyDeployed: true,
+      });
+      gemsToAdd.push(gemsContract.address);
+    }
+  }
+
+  const currentAdmin = await read(
+    L2Prefix + 'GemsCatalystsRegistry',
+    'getAdmin'
+  );
+  await execute(
+    L2Prefix + 'GemsCatalystsRegistry',
+    {from: currentAdmin, log: true},
+    'addGemsAndCatalysts',
+    gemsToAdd,
+    catalystsToAdd
+  );
+
+  return assetAttributesRegistryAsRegistryAdmin;
 };

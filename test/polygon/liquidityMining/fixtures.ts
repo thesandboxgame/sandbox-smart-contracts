@@ -110,12 +110,7 @@ export const setupPolygonLandWeightedSANDRewardPool = withSnapshot(
   ],
   async function (hre) {
     const {deployments, getNamedAccounts, ethers} = hre;
-    await deployments.fixture([
-      'PolygonLandWeightedSANDRewardPool',
-      'FakeLPSandMatic',
-      'PolygonSand',
-      'Land',
-    ]);    const {
+    const {
       deployer,
       liquidityRewardAdmin,
       liquidityRewardProvider,

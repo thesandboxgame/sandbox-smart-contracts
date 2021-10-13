@@ -1,7 +1,4 @@
 import {setupMainnetAndPolygonAsset, setupPolygonAsset} from './fixtures';
-import {
-  setupGemsAndCatalysts,
-} from './fixtures';
 
 import {waitFor, getAssetChainIndex, setupUser} from '../../utils';
 import {expect} from '../../chai-setup';
@@ -1038,8 +1035,7 @@ describe('PolygonAsset.sol', function () {
       async function executeL1toL2Deposit(
         gemsAndCatalystsdata: (number | number[] | void)[]
       ) {
-        const mainnet = await setupMainnetAsset();
-        const polygon = await setupPolygonAsset();
+        const {mainnet, polygon} = await setupMainnetAndPolygonAsset();
 
         const tokenId = await mainnet.mintAsset(mainnet.users[0].address, 20);
 
@@ -1105,13 +1101,11 @@ describe('PolygonAsset.sol', function () {
       }
 
       it('Deposit asset from L1 to L2 with 1 catalyst legendary and 4 power gems', async function () {
-        const assetAttributesRegistryAsRegistryAdmin = await setupGemsAndCatalysts(
-          true
-        );
+        const {polygonAssetRegistry} = await setupMainnetAndPolygonAsset();
 
         const catalystData = [0, 4, [1, 1, 1, 1]];
         await executeL1toL2Deposit(catalystData);
-        const internalRecordRegistry = await assetAttributesRegistryAsRegistryAdmin.getRecord(
+        const internalRecordRegistry = await polygonAssetRegistry.getRecord(
           catalystData[0]
         );
 
@@ -1123,13 +1117,11 @@ describe('PolygonAsset.sol', function () {
       });
 
       it('Deposit asset from L1 to L2 with 1 catalyst legendary', async function () {
-        const assetAttributesRegistryAsRegistryAdmin = await setupGemsAndCatalysts(
-          true
-        );
+        const {polygonAssetRegistry} = await setupMainnetAndPolygonAsset();
 
         const catalystData = [0, 4, []];
         await executeL1toL2Deposit(catalystData);
-        const internalRecordRegistry = await assetAttributesRegistryAsRegistryAdmin.getRecord(
+        const internalRecordRegistry = await polygonAssetRegistry.getRecord(
           catalystData[0]
         );
 
@@ -1141,13 +1133,11 @@ describe('PolygonAsset.sol', function () {
       });
 
       it('Deposit asset from L1 to L2 with 1 catalyst legendary 1 gem defense', async function () {
-        const assetAttributesRegistryAsRegistryAdmin = await setupGemsAndCatalysts(
-          true
-        );
+        const {polygonAssetRegistry} = await setupMainnetAndPolygonAsset();
 
         const catalystData = [0, 4, [2]];
         await executeL1toL2Deposit(catalystData);
-        const internalRecordRegistry = await assetAttributesRegistryAsRegistryAdmin.getRecord(
+        const internalRecordRegistry = await polygonAssetRegistry.getRecord(
           catalystData[0]
         );
 
@@ -1159,20 +1149,18 @@ describe('PolygonAsset.sol', function () {
       });
 
       it('Deposit asset from L1 to L2 with catalyst or gems out of bound ', async function () {
-        await setupGemsAndCatalysts(true);
+        await setupMainnetAndPolygonAsset();
         const catalystData: (number | number[] | void)[] = [0, 99, []];
         await expect(executeL1toL2Deposit(catalystData)).to.be.revertedWith(
           'CATALYST_DOES_NOT_EXIST'
         );
       });
-
       it('Deposit asset from L1 to L2 without catalyst and gems', async function () {
-        const mainnet = await setupMainnetAsset();
-        const polygon = await setupPolygonAsset();
-
-        const assetAttributesRegistryAsRegistryAdmin = await setupGemsAndCatalysts(
-          true
-        );
+        const {
+          mainnet,
+          polygon,
+          polygonAssetRegistry,
+        } = await setupMainnetAndPolygonAsset();
 
         const tokenId = await mainnet.mintAsset(mainnet.users[0].address, 20);
 
@@ -1234,7 +1222,7 @@ describe('PolygonAsset.sol', function () {
         const polygonURI = await polygon.Asset['tokenURI(uint256)'](tokenId);
         expect(mainnetURI).to.be.equal(polygonURI);
 
-        const internalRecordRegistry = await assetAttributesRegistryAsRegistryAdmin.getRecord(
+        const internalRecordRegistry = await polygonAssetRegistry.getRecord(
           tokenId
         );
 
@@ -1246,12 +1234,12 @@ describe('PolygonAsset.sol', function () {
       async function executeL2toL1Deposit(
         gemsAndCatalystsdata: (number | number[] | void)[]
       ) {
-        const assetAttributesRegistryAsRegistryAdmin = await setupGemsAndCatalysts(
-          true
-        );
+        const {
+          mainnet,
+          polygon,
+          polygonAssetRegistry,
+        } = await setupMainnetAndPolygonAsset();
 
-        const mainnet = await setupMainnetAsset();
-        const polygon = await setupPolygonAsset();
         const tokenId = await polygon.mintAsset(polygon.users[0].address, 20);
 
         const balance = await polygon.Asset['balanceOf(address,uint256)'](
@@ -1261,7 +1249,7 @@ describe('PolygonAsset.sol', function () {
 
         // we use this function because it allows us to add gems and catalyst without having the ERC20 burnt ...
         // it's only for convenience
-        assetAttributesRegistryAsRegistryAdmin.setCatalystWhenDepositOnOtherLayer(
+        polygonAssetRegistry.setCatalystWhenDepositOnOtherLayer(
           tokenId,
           gemsAndCatalystsdata[0],
           gemsAndCatalystsdata[1]
@@ -1304,15 +1292,11 @@ describe('PolygonAsset.sol', function () {
       }
 
       it('Deposit asset from L2 to L1 with 1 catalyst legendary and 4 power gems', async function () {
-        const assetAttributesRegistryAsRegistryAdmin = await setupGemsAndCatalysts(
-          false
-        );
+        const {assetRegistry} = await setupMainnetAndPolygonAsset();
 
         const catalystData = [4, [1, 1, 1, 1]];
         const tokenId = await executeL2toL1Deposit(catalystData);
-        const internalRecordRegistry = await assetAttributesRegistryAsRegistryAdmin.getRecord(
-          tokenId
-        );
+        const internalRecordRegistry = await assetRegistry.getRecord(tokenId);
 
         expect(internalRecordRegistry).to.eql([
           true,
@@ -1322,15 +1306,11 @@ describe('PolygonAsset.sol', function () {
       });
 
       it('Deposit asset from L2 to L1 with 1 catalyst legendary', async function () {
-        const assetAttributesRegistryAsRegistryAdmin = await setupGemsAndCatalysts(
-          false
-        );
+        const {assetRegistry} = await setupMainnetAndPolygonAsset();
 
         const catalystData = [4, []];
         const tokenId = await executeL2toL1Deposit(catalystData);
-        const internalRecordRegistry = await assetAttributesRegistryAsRegistryAdmin.getRecord(
-          tokenId
-        );
+        const internalRecordRegistry = await assetRegistry.getRecord(tokenId);
 
         expect(internalRecordRegistry).to.eql([
           true,
@@ -1340,15 +1320,11 @@ describe('PolygonAsset.sol', function () {
       });
 
       it('Deposit asset from L2 to L1 with 1 catalyst legendary 1 gem defense', async function () {
-        const assetAttributesRegistryAsRegistryAdmin = await setupGemsAndCatalysts(
-          false
-        );
+        const {assetRegistry} = await setupMainnetAndPolygonAsset();
 
         const catalystData = [4, [2]];
         const tokenId = await executeL2toL1Deposit(catalystData);
-        const internalRecordRegistry = await assetAttributesRegistryAsRegistryAdmin.getRecord(
-          tokenId
-        );
+        const internalRecordRegistry = await assetRegistry.getRecord(tokenId);
 
         expect(internalRecordRegistry).to.eql([
           true,
@@ -1358,12 +1334,12 @@ describe('PolygonAsset.sol', function () {
       });
 
       it('Deposit asset from L2 to L1 without catalyst and gems', async function () {
-        const assetAttributesRegistryAsRegistryAdmin = await setupGemsAndCatalysts(
-          false
-        );
+        const {
+          mainnet,
+          polygon,
+          assetRegistry,
+        } = await setupMainnetAndPolygonAsset();
 
-        const mainnet = await setupMainnetAsset();
-        const polygon = await setupPolygonAsset();
         const tokenId = await polygon.mintAsset(polygon.users[0].address, 20);
         const balance = await polygon.Asset['balanceOf(address,uint256)'](
           polygon.users[0].address,
@@ -1404,9 +1380,7 @@ describe('PolygonAsset.sol', function () {
         const polygonURI = await polygon.Asset['tokenURI(uint256)'](tokenId);
         expect(mainnetURI).to.be.equal(polygonURI);
 
-        const internalRecordRegistry = await assetAttributesRegistryAsRegistryAdmin.getRecord(
-          tokenId
-        );
+        const internalRecordRegistry = await assetRegistry.getRecord(tokenId);
 
         expect(internalRecordRegistry[0]).to.be.equal(false);
       });
