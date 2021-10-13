@@ -175,14 +175,20 @@ contract PolygonLandBaseToken is ERC721BaseToken, TheSandbox712 {
                     keccak256(
                         abi.encode(
                             keccak256(
-                                "batchTransferQuadII(address from, address to, uint256[] calldata sizes, uint256[] calldata xs, uint256[] calldata ys, bytes calldata data,)"
+                                //"batchTransferQuadII(address from, address to, uint256[] sizes, uint256[] xs, uint256[] ys, bytes data,)"
+                                "BatchTransferQuadII(address from,address to,bytes sizes,bytes xs,bytes ys,bytes data)"
+                                //, uint256[] calldata sizes, uint256[] calldata xs, uint256[] calldata ys, bytes calldata data,)"
                             ),
                             from,
                             to,
-                            sizes,
-                            xs,
-                            ys,
-                            data /*, _nonces[owner]++, deadline*/
+                            //sizes,
+                            keccak256(abi.encodePacked(sizes)), //The array values are encoded as the keccak256 hash of the concatenated encodeData
+                            //xs,
+                            keccak256(abi.encodePacked(xs)),
+                            //ys,
+                            keccak256(abi.encodePacked(ys)),
+                            keccak256(data) //the dynamic values bytes and string are encoded as a keccak256 hash of their contents.
+                            //data
                         )
                     )
                 )

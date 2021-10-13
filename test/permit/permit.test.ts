@@ -29,10 +29,13 @@ describe('Permit', function () {
     };
 
     const permitData712 = data712(permitContract, approve);
+    console.log(permitData712);
     const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
       others[5],
       permitData712,
     ]);
+    console.log(flatSig);
+
     const sig = splitSignature(flatSig);
 
     const receipt = await waitFor(

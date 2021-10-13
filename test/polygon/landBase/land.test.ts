@@ -2,6 +2,8 @@ import {expect} from '../../chai-setup';
 import {ethers, deployments, getUnnamedAccounts} from 'hardhat';
 import {Contract, BigNumber} from 'ethers';
 import {setupUsers, waitFor} from '../../utils';
+import {data712} from './data712';
+import {splitSignature} from 'ethers/lib/utils';
 
 type User = {
   address: string;
@@ -1712,7 +1714,7 @@ describe('MockLandWithMint.sol', function () {
 
   describe('Test for permit land', function () {
     it('input test with signatures', async function () {
-      const {landOwners} = await setupTest();
+      const {MockLandWithMint, landOwners} = await setupTest();
       const bytes = '0x3333';
 
       await waitFor(
@@ -1725,38 +1727,146 @@ describe('MockLandWithMint.sol', function () {
         )
       );
 
-      const permitData712 = data712(permitContract, approve);
+      const approve = {
+        from: landOwners[0].address,
+        to: landOwners[1].address,
+        sizes: ethers.utils.solidityPack(['uint256[]'], [[1, 1]]),
+        xs: ethers.utils.solidityPack(['uint256[]'], [[1, 2]]),
+        ys: ethers.utils.solidityPack(['uint256[]'], [[1, 2]]),
+        data: '0x3333',
+      };
+
+      const permitData712 = data712(MockLandWithMint, approve);
+
       const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
-        landOwners[0],
+        landOwners[0].address,
         permitData712,
       ]);
 
-      const bytesWithSIg =
-        '0x3333' +
-        '158fda3790dabf824a5a13e1ca27957ffc60980b220e554401422d076e6cc12c2af472903a9edb1377abdfa3d668b685117c85eaa8e29ee20ddf77f3f55760051b'; /*+
-        '158fda3790dabf824a5a13e1ca27957ffc60980b220e554401422d076e6cc12c2af472903a9edb1377abdfa3d668b685117c85eaa8e29ee20ddf77f3f55760051b'*/
-
-      const arraySize = [1, 2];
+      const arraySize = [1, 1];
       const arrayx = [1, 2];
       const arrayy = [1, 2];
 
-      const receipt = await waitFor(
-        landOwners[0].MockLandWithMint.batchTransferQuad(
-          landOwners[0].address,
-          landOwners[1].address,
-          arraySize,
-          arrayx,
-          arrayy,
-          bytesWithSIg
-        )
+      await landOwners[0].MockLandWithMint.batchTransferQuadII(
+        landOwners[0].address,
+        landOwners[1].address,
+        arraySize,
+        arrayx,
+        arrayy,
+        bytes,
+        flatSig
       );
 
       const num2 = await landOwners[0].MockLandWithMint.balanceOf(
         landOwners[1].address
       );
-      expect(num2).to.equal(144);
+      expect(num2).to.equal(2);
+    });
 
-      console.log('GAS USED for 144 1x1 from 24x24 ' + receipt.gasUsed);
+    it('sign transfer normally and then try transfer712 should fail', async function () {
+      const {MockLandWithMint, landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          24,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const approve = {
+        from: landOwners[0].address,
+        to: landOwners[1].address,
+        sizes: ethers.utils.solidityPack(['uint256[]'], [[1, 1]]),
+        xs: ethers.utils.solidityPack(['uint256[]'], [[1, 2]]),
+        ys: ethers.utils.solidityPack(['uint256[]'], [[1, 2]]),
+        data: '0x3333',
+      };
+
+      const permitData712 = data712(MockLandWithMint, approve);
+
+      const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
+        landOwners[0].address,
+        permitData712,
+      ]);
+
+      const arraySize = [1, 1];
+      const arrayx = [1, 2];
+      const arrayy = [1, 2];
+
+      await landOwners[0].MockLandWithMint.batchTransferQuad(
+        landOwners[0].address,
+        landOwners[1].address,
+        arraySize,
+        arrayx,
+        arrayy,
+        bytes
+      );
+
+      await expect(
+        landOwners[0].MockLandWithMint.batchTransferQuadII(
+          landOwners[0].address,
+          landOwners[1].address,
+          arraySize,
+          arrayx,
+          arrayy,
+          bytes,
+          flatSig
+        )
+      ).to.be.revertedWith(`not owner in _transferQuad`);
+    });
+    it('user2 trying to use message signed by user1', async function () {
+      const {MockLandWithMint, landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          24,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const approve = {
+        from: landOwners[0].address,
+        to: landOwners[1].address,
+        sizes: ethers.utils.solidityPack(['uint256[]'], [[1, 1]]),
+        xs: ethers.utils.solidityPack(['uint256[]'], [[1, 2]]),
+        ys: ethers.utils.solidityPack(['uint256[]'], [[1, 2]]),
+        data: '0x3333',
+      };
+
+      const permitData712 = data712(MockLandWithMint, approve);
+
+      const flatSig = await ethers.provider.send('eth_signTypedData_v4', [
+        landOwners[0].address,
+        permitData712,
+      ]);
+
+      const arraySize = [1, 1];
+      const arrayx = [1, 2];
+      const arrayy = [1, 2];
+
+      await /*expect(*/
+      landOwners[1].MockLandWithMint.batchTransferQuadII(
+        landOwners[0].address,
+        landOwners[1].address,
+        arraySize,
+        arrayx,
+        arrayy,
+        bytes,
+        flatSig
+      );
+      /*).to.be.revertedWith(`INVALID_SIGNATURE`)*/
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(2);
     });
   });
 });
