@@ -1,16 +1,12 @@
 import {BigNumber} from 'ethers';
 import {AbiCoder} from 'ethers/lib/utils';
-import {deployments, getUnnamedAccounts} from 'hardhat';
+import {getUnnamedAccounts} from 'hardhat';
+import {withSnapshot} from '../../utils';
 
-export const setupPolygonSandRewardPool = deployments.createFixture(
+export const setupPolygonSandRewardPool = withSnapshot(
+  ['PolygonSANDRewardPool', 'FakeLPSandMatic', 'PolygonSand'],
   async function (hre) {
     const {deployments, getNamedAccounts, ethers} = hre;
-
-    await deployments.fixture([
-      'PolygonSANDRewardPool',
-      'FakeLPSandMatic',
-      'PolygonSand',
-    ]);
 
     const {
       deployer,
@@ -105,17 +101,15 @@ export const setupPolygonSandRewardPool = deployments.createFixture(
   }
 );
 
-export const setupPolygonLandWeightedSANDRewardPool = deployments.createFixture(
+export const setupPolygonLandWeightedSANDRewardPool = withSnapshot(
+  [
+    'PolygonLandWeightedSANDRewardPool',
+    'FakeLPSandMatic',
+    'PolygonSand',
+    'Land',
+  ],
   async function (hre) {
     const {deployments, getNamedAccounts, ethers} = hre;
-
-    await deployments.fixture([
-      'PolygonLandWeightedSANDRewardPool',
-      'FakeLPSandMatic',
-      'PolygonSand',
-      'Land',
-    ]);
-
     const {
       deployer,
       liquidityRewardAdmin,

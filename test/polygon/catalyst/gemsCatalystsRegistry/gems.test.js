@@ -1,18 +1,12 @@
-const {
-  ethers,
-  deployments,
-  getNamedAccounts,
-  getUnnamedAccounts,
-} = require('hardhat');
-const {waitFor, recurseTests} = require('../../../utils');
+const {ethers, getNamedAccounts, getUnnamedAccounts} = require('hardhat');
+const {waitFor, recurseTests, withSnapshot} = require('../../../utils');
 const generateERC20Tests = require('../../../erc20');
 
 function testGem(gemName) {
   const erc20Tests = generateERC20Tests(
-    async () => {
+    withSnapshot(['Gems'], async () => {
       const others = await getUnnamedAccounts();
       const {gemMinter} = await getNamedAccounts();
-      await deployments.fixture('Gems');
       const contract = await ethers.getContract(gemName);
 
       function mint(to, amount) {
@@ -29,7 +23,7 @@ function testGem(gemName) {
         users: others,
         mint,
       };
-    },
+    }),
     {
       EIP717: true,
       burn: false,

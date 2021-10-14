@@ -1,14 +1,14 @@
 import {
-  ethers,
   deployments,
-  getUnnamedAccounts,
+  ethers,
   getNamedAccounts,
+  getUnnamedAccounts,
 } from 'hardhat';
-import {Contract, BigNumber} from 'ethers';
+import {BigNumber, Contract} from 'ethers';
 import {transferSand} from '../catalyst/utils';
+import {withSnapshot} from '../../utils';
 
-export const setupSandPolygonDepositor = deployments.createFixture(async () => {
-  await deployments.fixture('Sand');
+export const setupSandPolygonDepositor = withSnapshot(['Sand'], async () => {
   const sandContract: Contract = await ethers.getContract('Sand');
   const users = await getUnnamedAccounts();
   const {catalystMinter} = await getNamedAccounts();

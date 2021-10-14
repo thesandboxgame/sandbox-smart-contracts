@@ -1,19 +1,19 @@
 import {expect} from '../../chai-setup';
-import {ethers, deployments, getUnnamedAccounts} from 'hardhat';
+import {ethers, getUnnamedAccounts} from 'hardhat';
 import {Contract} from 'ethers';
-import {setupUsers, waitFor} from '../../utils';
+import {setupUsers, waitFor, withSnapshot} from '../../utils';
 
 type User = {
   address: string;
   MockLandWithMint: Contract;
 };
 
-const setupTest = deployments.createFixture(
+const setupTest = withSnapshot(
+  ['MockLandWithMint'],
   async (): Promise<{
     MockLandWithMint: Contract;
     landOwners: User[];
   }> => {
-    await deployments.fixture('MockLandWithMint');
     const MockLandWithMint = await ethers.getContract('MockLandWithMint');
     const unnamedAccounts = await getUnnamedAccounts();
     const landOwners = await setupUsers(unnamedAccounts, {MockLandWithMint});
