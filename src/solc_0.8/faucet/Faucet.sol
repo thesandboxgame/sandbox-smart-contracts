@@ -36,7 +36,7 @@ contract Faucet is Ownable {
     }
 
     /// @notice returns the minimum time delta between 2 calls to Send for an address.
-    function getPeriod() public returns (uint256) {
+    function getPeriod() public view returns (uint256) {
         return _period;
     }
 
@@ -47,14 +47,13 @@ contract Faucet is Ownable {
     }
 
     /// @notice return the maximum IERC20 token amount for an address.
-    function getLimit() public returns (uint256) {
+    function getLimit() public view returns (uint256) {
         return _amountLimit;
     }
 
     /// @notice return the current IERC20 token balance for the contract.
-    function balance() public returns (uint256) {
-        address contractAddress = address(this);
-        return _ierc20.balanceOf(contractAddress);
+    function balance() public view returns (uint256) {
+        return _ierc20.balanceOf(address(this));
     }
 
     /// @notice retrieve all IERC20 token from contract to an address.

@@ -44,11 +44,21 @@ Amount is the minimun between balanceOf(deployer) and requested amount.
 ```plantuml
 @startuml
 IERC20 <|-- Sand
+Ownable <|-- Faucet
 Faucet "many" *-- "1" IERC20 : contains
 
 class Faucet {
   - IERC20 _ierc20
+  + uint256 balance()
+  + uint256 getLimit()
+  + void setLimit(uint256 limit)
+  + uint256 getPeriod()
+  + void setPeriod(uint256 period)
   + void send(uint256 amount)
+  + void retrieve(address receiver);
+}
+
+class Ownable {
 }
 
 class IERC20 {
@@ -61,6 +71,12 @@ class IERC20 {
 }
 @enduml
 ```
+
+## Contracts addresses
+
+Goerli : 0xd910572C4801f4435a2098A55292270743105530
+Rinkeby : 0x8e19Ca559eAB83a5201663E8a70cd0C2A9479663
+Mumbai : 0x44DAAE71eF875d3B587206118E2Ff0071E315f43
 
 ## Sequence diagram
 
@@ -78,6 +94,23 @@ class IERC20 {
   else the previous demand was too recent
   "Faucet" -> "User" : Reject
   else the asked amount demand was too recent
+  "Faucet" -> "User" : Reject
+  end
+@enduml
+```
+
+```plantuml
+@startuml
+  actor "IERC20 beneficiary"
+  actor User
+  participant Faucet
+  participant IERC20
+
+  "IERC20 beneficiary" -> "IERC20" : transfer IERC20 token from ierc20 beneficiary address to faucet contract address
+  "User" -> "Faucet" : call retrieve with an address amount
+  alt successful case
+  "Faucet" -> "IERC20" : transfer funds from faucet deployer address to user address
+  else Ownable: user is not the owner
   "Faucet" -> "User" : Reject
   end
 @enduml
