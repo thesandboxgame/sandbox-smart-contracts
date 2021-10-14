@@ -8,6 +8,12 @@ interface IAssetAttributesRegistry {
         bytes32 blockHash;
     }
 
+    struct AssetGemsCatalystData {
+        uint256 assetId;
+        uint16 catalystContractId;
+        uint16[] gemContractIds;
+    }
+
     function getRecord(uint256 assetId)
         external
         view
@@ -25,6 +31,12 @@ interface IAssetAttributesRegistry {
         uint16[] calldata gemIds
     ) external;
 
+    function setCatalystWhenDepositOnOtherLayer(
+        uint256 assetId,
+        uint16 catalystId,
+        uint16[] calldata gemIds
+    ) external;
+
     function setCatalystWithBlockNumber(
         uint256 assetId,
         uint16 catalystId,
@@ -35,4 +47,6 @@ interface IAssetAttributesRegistry {
     function addGems(uint256 assetId, uint16[] calldata gemIds) external;
 
     function setMigrationContract(address _migrationContract) external;
+
+    function getCatalystRegistry() external view returns (address);
 }

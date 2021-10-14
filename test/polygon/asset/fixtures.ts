@@ -7,8 +7,11 @@ import {
 } from 'hardhat';
 
 import {setupUsers, waitFor, withSnapshot} from '../../utils';
-import {assetFixtures} from '../../common/fixtures/asset';
-// import asset_regenerate_and_distribute from '../../setup/asset_regenerate_and_distribute';
+
+import {
+  assetFixtures,
+  gemsAndCatalystsFixture,
+} from '../../common/fixtures/asset';
 
 const polygonAssetFixtures = async function () {
   // await asset_regenerate_and_distribute(hre);
@@ -23,6 +26,7 @@ const polygonAssetFixtures = async function () {
     'PolygonAsset',
     assetBouncerAdmin
   );
+
   await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
   const Asset = await ethers.getContract('PolygonAsset', minter);
   const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
@@ -107,17 +111,34 @@ const polygonAssetFixtures = async function () {
   };
 };
 
+async function gemsAndCatalystsFixtureL1() {
+  return gemsAndCatalystsFixture(false);
+}
+
+async function gemsAndCatalystsFixtureL2() {
+  return gemsAndCatalystsFixture(true);
+}
+
 export const setupPolygonAsset = withSnapshot(
   ['PolygonAsset', 'Asset'],
   polygonAssetFixtures
 );
 
 export const setupMainnetAndPolygonAsset = withSnapshot(
-  ['PolygonAsset', 'Asset'],
+  [
+    'PolygonAsset',
+    'Asset',
+    'PolygonAssetAttributesRegistry',
+    'PolygonGemsCatalystsRegistry',
+    'AssetAttributesRegistry',
+    'GemsCatalystsRegistry',
+  ],
   async () => {
     return {
       polygon: await polygonAssetFixtures(),
       mainnet: await assetFixtures(),
+      polygonAssetRegistry: await gemsAndCatalystsFixtureL2(),
+      assetRegistry: await gemsAndCatalystsFixtureL1(),
     };
   }
 );

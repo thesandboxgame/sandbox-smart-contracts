@@ -65,7 +65,16 @@ const config: HardhatUserConfig = {
         settings: {
           optimizer: {
             enabled: true,
-            runs: 200,
+            runs: 0,
+          },
+        },
+      },
+      'src/solc_0.8/asset/AssetV2.sol': {
+        version: '0.8.2',
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 100,
           },
         },
       },
@@ -285,6 +294,11 @@ const config: HardhatUserConfig = {
   },
   paths: {
     sources: 'src',
+  },
+  contractSizer: {
+    alphaSort: false,
+    runOnCompile: false,
+    disambiguatePaths: false,
   },
 
   external: process.env.HARDHAT_FORK
