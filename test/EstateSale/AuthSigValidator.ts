@@ -27,4 +27,21 @@ describe('AuthSigValidator', function () {
     const res = await authValidatorContract.isAuthValid(signature, hashedData);
     expect(res).to.equal(false);
   });
+
+  it('should update and validate the signature', async function () {
+    const {authValidatorContract} = await setupAuthValidator();
+    const {deployer, sandAdmin} = await getNamedAccounts();
+    const wallet = await ethers.getSigner(deployer);
+    const hashedData = ethers.utils.solidityKeccak256(['address'], [deployer]);
+    const signature = await wallet.signMessage(
+      ethers.utils.arrayify(hashedData)
+    );
+
+    await authValidatorContract
+      .connect(ethers.provider.getSigner(sandAdmin))
+      .updateSigningAuthWallet(wallet.address);
+
+    const res = await authValidatorContract.isAuthValid(signature, hashedData);
+    expect(res).to.equal(true);
+  });
 });
