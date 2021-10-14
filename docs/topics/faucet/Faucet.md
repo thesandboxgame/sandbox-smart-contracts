@@ -72,7 +72,7 @@ class IERC20 {
 @enduml
 ```
 
-## Contracts addresses
+## Contract addresses
 
 Goerli : 0xd910572C4801f4435a2098A55292270743105530
 Rinkeby : 0x8e19Ca559eAB83a5201663E8a70cd0C2A9479663
