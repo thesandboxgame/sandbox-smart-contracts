@@ -202,6 +202,6 @@ To do this, you must use the associated setters in the writing section.
 
 ### 12 Retrieve all tokens from Faucet Contract.
 
-The contract developer will also be able to recover all of the tokens on any address using the retrieve method in the write section.  
+The contract deployer will also be able to recover all of the tokens on any address using the retrieve method in the write section.  
 
 ![Faucet12](F12.png "Step 12")
