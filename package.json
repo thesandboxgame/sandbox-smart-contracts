@@ -16,6 +16,7 @@
     "websocket": "1.0.32"
   },
   "devDependencies": {
+    "@biconomy/mexa": "^2.0.20",
     "@codechecks/client": "^0.1.10",
     "@ethereum-waffle/chai": "^3.0.2",
     "@ethersproject/wallet": "^5.0.5",

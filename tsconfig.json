@@ -16,6 +16,7 @@
     "./deploy",
     "./deploy_polygon",
     "./test",
-    "./utils"
+    "./utils",
+    "decs.d.ts"
   ]
 }
