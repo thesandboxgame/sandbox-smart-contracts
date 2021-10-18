@@ -1,0 +1,178 @@
+{
+  "address": "0xeAEA666106F39864A40FA60298CF0cBBCfabbd5C",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract IPolygonSand",
+          "name": "polygonSand",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address[]",
+          "name": "holders",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "values",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "batchMint",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0x1d4ef17072601054c81d7fde46572cc090bf5036ba28edd841b8aad38c1ba3e7",
+  "receipt": {
+    "to": null,
+    "from": "0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02",
+    "contractAddress": "0xeAEA666106F39864A40FA60298CF0cBBCfabbd5C",
+    "transactionIndex": 3,
+    "gasUsed": "436214",
+    "logsBloom": "0x00000000000000000000000000000000000000000000000000800000000000000002000000000000000000000000000000008000000010000000000000001000000000000000000000000000000000800001000000000000000100000000004000000000020000000000000000000800000000000000000080000000000000400000000000000000000000000000000000000000000080000000000000200000200000000000000000000000000000000000000000000000000000000000004000008000000000000001000000000000000000000000000000108040000020000000000000000000000000000000000000000000000000000000000000100000",
+    "blockHash": "0x71c627fb3de4491f9031877e2355728066270532120432a648357404dccc497f",
+    "transactionHash": "0x1d4ef17072601054c81d7fde46572cc090bf5036ba28edd841b8aad38c1ba3e7",
+    "logs": [
+      {
+        "transactionIndex": 3,
+        "blockNumber": 20329522,
+        "transactionHash": "0x1d4ef17072601054c81d7fde46572cc090bf5036ba28edd841b8aad38c1ba3e7",
+        "address": "0xeAEA666106F39864A40FA60298CF0cBBCfabbd5C",
+        "topics": [
+          "0x8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0",
+          "0x0000000000000000000000000000000000000000000000000000000000000000",
+          "0x0000000000000000000000005f890c9522dce5670d741d4277bfcc2d9ca8af02"
+        ],
+        "data": "0x",
+        "logIndex": 12,
+        "blockHash": "0x71c627fb3de4491f9031877e2355728066270532120432a648357404dccc497f"
+      },
+      {
+        "transactionIndex": 3,
+        "blockNumber": 20329522,
+        "transactionHash": "0x1d4ef17072601054c81d7fde46572cc090bf5036ba28edd841b8aad38c1ba3e7",
+        "address": "0x0000000000000000000000000000000000001010",
+        "topics": [
+          "0x4dfe1bbbcf077ddc3e01291eea2d5c70c2b422b415d95645b9adcfd678cb1d63",
+          "0x0000000000000000000000000000000000000000000000000000000000001010",
+          "0x0000000000000000000000005f890c9522dce5670d741d4277bfcc2d9ca8af02",
+          "0x000000000000000000000000be188d6641e8b680743a4815dfa0f6208038960f"
+        ],
+        "data": "0x00000000000000000000000000000000000000000000000000018cbbfc841c0000000000000000000000000000000000000000000000000002ce753d33c11e000000000000000000000000000000000000000000000000cde65c01dd13d24afa00000000000000000000000000000000000000000000000002cce881373d02000000000000000000000000000000000000000000000000cde65d8e99105666fa",
+        "logIndex": 13,
+        "blockHash": "0x71c627fb3de4491f9031877e2355728066270532120432a648357404dccc497f"
+      }
+    ],
+    "blockNumber": 20329522,
+    "cumulativeGasUsed": "1122952",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0xE03489D4E90b22c59c5e23d45DFd59Fc0dB8a025"
+  ],
+  "solcInputHash": "1d5cd997742b08979089375cbc4e64fc",
+  "metadata": "{\"compiler\":{\"version\":\"0.8.2+commit.661d1103\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"contract IPolygonSand\",\"name\":\"polygonSand\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"previousOwner\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"OwnershipTransferred\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address[]\",\"name\":\"holders\",\"type\":\"address[]\"},{\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"}],\"name\":\"batchMint\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"owner\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"renounceOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newOwner\",\"type\":\"address\"}],\"name\":\"transferOwnership\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"kind\":\"dev\",\"methods\":{\"owner()\":{\"details\":\"Returns the address of the current owner.\"},\"renounceOwnership()\":{\"details\":\"Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner.\"},\"transferOwnership(address)\":{\"details\":\"Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner.\"}},\"version\":1},\"userdoc\":{\"kind\":\"user\",\"methods\":{},\"version\":1}},\"settings\":{\"compilationTarget\":{\"src/solc_0.8/polygon/root/PolygonSandBatchDeposit.sol\":\"PolygonSandBatchDeposit\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":2000},\"remappings\":[]},\"sources\":{\"@openzeppelin/contracts-0.8/access/Ownable.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\nimport \\\"../utils/Context.sol\\\";\\n/**\\n * @dev Contract module which provides a basic access control mechanism, where\\n * there is an account (an owner) that can be granted exclusive access to\\n * specific functions.\\n *\\n * By default, the owner account will be the one that deploys the contract. This\\n * can later be changed with {transferOwnership}.\\n *\\n * This module is used through inheritance. It will make available the modifier\\n * `onlyOwner`, which can be applied to your functions to restrict their use to\\n * the owner.\\n */\\nabstract contract Ownable is Context {\\n    address private _owner;\\n\\n    event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);\\n\\n    /**\\n     * @dev Initializes the contract setting the deployer as the initial owner.\\n     */\\n    constructor () {\\n        address msgSender = _msgSender();\\n        _owner = msgSender;\\n        emit OwnershipTransferred(address(0), msgSender);\\n    }\\n\\n    /**\\n     * @dev Returns the address of the current owner.\\n     */\\n    function owner() public view virtual returns (address) {\\n        return _owner;\\n    }\\n\\n    /**\\n     * @dev Throws if called by any account other than the owner.\\n     */\\n    modifier onlyOwner() {\\n        require(owner() == _msgSender(), \\\"Ownable: caller is not the owner\\\");\\n        _;\\n    }\\n\\n    /**\\n     * @dev Leaves the contract without owner. It will not be possible to call\\n     * `onlyOwner` functions anymore. Can only be called by the current owner.\\n     *\\n     * NOTE: Renouncing ownership will leave the contract without an owner,\\n     * thereby removing any functionality that is only available to the owner.\\n     */\\n    function renounceOwnership() public virtual onlyOwner {\\n        emit OwnershipTransferred(_owner, address(0));\\n        _owner = address(0);\\n    }\\n\\n    /**\\n     * @dev Transfers ownership of the contract to a new account (`newOwner`).\\n     * Can only be called by the current owner.\\n     */\\n    function transferOwnership(address newOwner) public virtual onlyOwner {\\n        require(newOwner != address(0), \\\"Ownable: new owner is the zero address\\\");\\n        emit OwnershipTransferred(_owner, newOwner);\\n        _owner = newOwner;\\n    }\\n}\\n\",\"keccak256\":\"0x1cae4f85f114ff17b90414f5da67365b1d00337abb5bce9bf944eb78a2c0673c\",\"license\":\"MIT\"},\"@openzeppelin/contracts-0.8/utils/Context.sol\":{\"content\":\"// SPDX-License-Identifier: MIT\\n\\npragma solidity ^0.8.0;\\n\\n/*\\n * @dev Provides information about the current execution context, including the\\n * sender of the transaction and its data. While these are generally available\\n * via msg.sender and msg.data, they should not be accessed in such a direct\\n * manner, since when dealing with meta-transactions the account sending and\\n * paying for execution may not be the actual sender (as far as an application\\n * is concerned).\\n *\\n * This contract is only required for intermediate, library-like contracts.\\n */\\nabstract contract Context {\\n    function _msgSender() internal view virtual returns (address) {\\n        return msg.sender;\\n    }\\n\\n    function _msgData() internal view virtual returns (bytes calldata) {\\n        this; // silence state mutability warning without generating bytecode - see https://github.com/ethereum/solidity/issues/2691\\n        return msg.data;\\n    }\\n}\\n\",\"keccak256\":\"0xf930d2df426bfcfc1f7415be724f04081c96f4fb9ec8d0e3a521c07692dface0\",\"license\":\"MIT\"},\"src/solc_0.8/common/interfaces/polygon/IPolygonSand.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\ninterface IPolygonSand {\\n    /// @notice update the ChildChainManager Proxy address\\n    /// @param newChildChainManagerProxy address of the new childChainManagerProxy\\n    function updateChildChainManager(address newChildChainManagerProxy) external;\\n\\n    /// @notice called when tokens are deposited on root chain\\n    /// @param user user address for whom deposit is being done\\n    /// @param depositData abi encoded amount\\n    function deposit(address user, bytes calldata depositData) external;\\n\\n    /// @notice called when user wants to withdraw tokens back to root chain\\n    /// @dev Should burn user's tokens. This transaction will be verified when exiting on root chain\\n    /// @param amount amount to withdraw\\n    function withdraw(uint256 amount) external;\\n\\n    function setTrustedForwarder(address trustedForwarder) external;\\n}\\n\",\"keccak256\":\"0x40ff8d0f10ee642e889198c49ea0b8cd1a6b10cc61e769bd633f1c1a6c5041a1\",\"license\":\"MIT\"},\"src/solc_0.8/polygon/root/PolygonSandBatchDeposit.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.8.2;\\n\\nimport \\\"@openzeppelin/contracts-0.8/access/Ownable.sol\\\";\\nimport \\\"../../common/interfaces/polygon/IPolygonSand.sol\\\";\\n\\ncontract PolygonSandBatchDeposit is Ownable {\\n    IPolygonSand internal immutable _polygonSand;\\n\\n    constructor(IPolygonSand polygonSand) {\\n        _polygonSand = polygonSand;\\n    }\\n\\n    function batchMint(address[] calldata holders, uint256[] calldata values) external onlyOwner {\\n        require(holders.length == values.length, \\\"Number of holders should be equal to number of values\\\");\\n        for (uint256 i = 0; i < holders.length; i++) {\\n            _polygonSand.deposit(holders[i], abi.encode(values[i]));\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0x0a50066f49e86fbb2a02bbe015c05a38987c7951c6eeb0afb2adf16457e3dd7f\",\"license\":\"MIT\"}},\"version\":1}",
+  "bytecode": "0x60a060405234801561001057600080fd5b5060405161074738038061074783398101604081905261002f91610085565b600080546001600160a01b031916339081178255604051909182917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908290a35060601b6001600160601b0319166080526100b3565b600060208284031215610096578081fd5b81516001600160a01b03811681146100ac578182fd5b9392505050565b60805160601c6106766100d1600039600061018101526106766000f3fe608060405234801561001057600080fd5b506004361061004c5760003560e01c80636857310714610051578063715018a6146100665780638da5cb5b1461006e578063f2fde38b1461008d575b600080fd5b61006461005f366004610510565b6100a0565b005b610064610294565b600054604080516001600160a01b039092168252519081900360200190f35b61006461009b3660046104e2565b610350565b6000546001600160a01b031633146100ff5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064015b60405180910390fd5b8281146101745760405162461bcd60e51b815260206004820152603560248201527f4e756d626572206f6620686f6c646572732073686f756c64206265206571756160448201527f6c20746f206e756d626572206f662076616c756573000000000000000000000060648201526084016100f6565b60005b8381101561028d577f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663cf2c52cb8686848181106101ce57634e487b7160e01b600052603260045260246000fd5b90506020020160208101906101e391906104e2565b85858581811061020357634e487b7160e01b600052603260045260246000fd5b9050602002013560405160200161021c91815260200190565b6040516020818303038152906040526040518363ffffffff1660e01b8152600401610248929190610579565b600060405180830381600087803b15801561026257600080fd5b505af1158015610276573d6000803e3d6000fd5b505050508080610285906105fb565b915050610177565b5050505050565b6000546001600160a01b031633146102ee5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064016100f6565b600080546040516001600160a01b03909116907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908390a3600080547fffffffffffffffffffffffff0000000000000000000000000000000000000000169055565b6000546001600160a01b031633146103aa5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064016100f6565b6001600160a01b0381166104265760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201527f646472657373000000000000000000000000000000000000000000000000000060648201526084016100f6565b600080546040516001600160a01b03808516939216917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e091a3600080547fffffffffffffffffffffffff0000000000000000000000000000000000000000166001600160a01b0392909216919091179055565b60008083601f8401126104aa578182fd5b50813567ffffffffffffffff8111156104c1578182fd5b60208301915083602080830285010111156104db57600080fd5b9250929050565b6000602082840312156104f3578081fd5b81356001600160a01b0381168114610509578182fd5b9392505050565b60008060008060408587031215610525578283fd5b843567ffffffffffffffff8082111561053c578485fd5b61054888838901610499565b90965094506020870135915080821115610560578384fd5b5061056d87828801610499565b95989497509550505050565b60006001600160a01b038416825260206040818401528351806040850152825b818110156105b557858101830151858201606001528201610599565b818111156105c65783606083870101525b50601f017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe01692909201606001949350505050565b60007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff82141561063957634e487b7160e01b81526011600452602481fd5b506001019056fea2646970667358221220583e4763ad114743f9c74c3dd0bfff105052c08212dc25d1e93203f53611fd3b64736f6c63430008020033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061004c5760003560e01c80636857310714610051578063715018a6146100665780638da5cb5b1461006e578063f2fde38b1461008d575b600080fd5b61006461005f366004610510565b6100a0565b005b610064610294565b600054604080516001600160a01b039092168252519081900360200190f35b61006461009b3660046104e2565b610350565b6000546001600160a01b031633146100ff5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064015b60405180910390fd5b8281146101745760405162461bcd60e51b815260206004820152603560248201527f4e756d626572206f6620686f6c646572732073686f756c64206265206571756160448201527f6c20746f206e756d626572206f662076616c756573000000000000000000000060648201526084016100f6565b60005b8381101561028d577f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031663cf2c52cb8686848181106101ce57634e487b7160e01b600052603260045260246000fd5b90506020020160208101906101e391906104e2565b85858581811061020357634e487b7160e01b600052603260045260246000fd5b9050602002013560405160200161021c91815260200190565b6040516020818303038152906040526040518363ffffffff1660e01b8152600401610248929190610579565b600060405180830381600087803b15801561026257600080fd5b505af1158015610276573d6000803e3d6000fd5b505050508080610285906105fb565b915050610177565b5050505050565b6000546001600160a01b031633146102ee5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064016100f6565b600080546040516001600160a01b03909116907f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e0908390a3600080547fffffffffffffffffffffffff0000000000000000000000000000000000000000169055565b6000546001600160a01b031633146103aa5760405162461bcd60e51b815260206004820181905260248201527f4f776e61626c653a2063616c6c6572206973206e6f7420746865206f776e657260448201526064016100f6565b6001600160a01b0381166104265760405162461bcd60e51b815260206004820152602660248201527f4f776e61626c653a206e6577206f776e657220697320746865207a65726f206160448201527f646472657373000000000000000000000000000000000000000000000000000060648201526084016100f6565b600080546040516001600160a01b03808516939216917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e091a3600080547fffffffffffffffffffffffff0000000000000000000000000000000000000000166001600160a01b0392909216919091179055565b60008083601f8401126104aa578182fd5b50813567ffffffffffffffff8111156104c1578182fd5b60208301915083602080830285010111156104db57600080fd5b9250929050565b6000602082840312156104f3578081fd5b81356001600160a01b0381168114610509578182fd5b9392505050565b60008060008060408587031215610525578283fd5b843567ffffffffffffffff8082111561053c578485fd5b61054888838901610499565b90965094506020870135915080821115610560578384fd5b5061056d87828801610499565b95989497509550505050565b60006001600160a01b038416825260206040818401528351806040850152825b818110156105b557858101830151858201606001528201610599565b818111156105c65783606083870101525b50601f017fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe01692909201606001949350505050565b60007fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff82141561063957634e487b7160e01b81526011600452602481fd5b506001019056fea2646970667358221220583e4763ad114743f9c74c3dd0bfff105052c08212dc25d1e93203f53611fd3b64736f6c63430008020033",
+  "devdoc": {
+    "kind": "dev",
+    "methods": {
+      "owner()": {
+        "details": "Returns the address of the current owner."
+      },
+      "renounceOwnership()": {
+        "details": "Leaves the contract without owner. It will not be possible to call `onlyOwner` functions anymore. Can only be called by the current owner. NOTE: Renouncing ownership will leave the contract without an owner, thereby removing any functionality that is only available to the owner."
+      },
+      "transferOwnership(address)": {
+        "details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
+      }
+    },
+    "version": 1
+  },
+  "userdoc": {
+    "kind": "user",
+    "methods": {},
+    "version": 1
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 7,
+        "contract": "src/solc_0.8/polygon/root/PolygonSandBatchDeposit.sol:PolygonSandBatchDeposit",
+        "label": "_owner",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      }
+    }
+  }
+}

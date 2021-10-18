@@ -14,11 +14,12 @@ const args = process.argv.slice(2);
   /*
     Four arguments are required by the script
     1) Path to csv file containing holder details (downloaded from the Fake Sand Contract on etherscan)
-    2) Address of the fake PolygonSand contract
-    3) Address of the our PolygonSand contract
-    4) Blocknumber to reading balance
+    2) Address of the minter contract
+    3) Address of the fake PolygonSand contract
+    4) Address of the our PolygonSand contract
+    5) Blocknumber to reading balance
   */
-  if (args.length != 4) {
+  if (args.length != 5) {
     throw new Error('wrong number of arguments passed');
   }
 
@@ -36,12 +37,14 @@ const args = process.argv.slice(2);
   }
 
   // Fetching other parameters
-  const oldContractAddress = args[1];
-  const newContractAddress = args[2];
-  const blockTag = parseInt(args[3]);
+  const minterContractAddress = args[1];
+  const oldContractAddress = args[2];
+  const newContractAddress = args[3];
+  const blockTag = parseInt(args[4]);
 
   // User for contract interactions
   const {deployer} = await getNamedAccounts();
+  console.log('Running task with signer', deployer);
 
   // Fetching and storing current childProxy locally
   const childChainManagerProxy = await read(
@@ -54,15 +57,20 @@ const args = process.argv.slice(2);
   const oldContract = Contract.attach(oldContractAddress);
   const newContract = Contract.attach(newContractAddress);
 
+  const MinterContract = await ethers.getContractFactory(
+    'PolygonSandBatchDeposit'
+  );
+  const minterContract = MinterContract.attach(minterContractAddress);
+
   // Update childChainManagerProxy to allow deposit on contract
-  if (childChainManagerProxy != deployer) {
+  if (childChainManagerProxy != minterContractAddress) {
     const updateProxyManagerTx = await newContract.updateChildChainManager(
-      deployer
+      minterContractAddress
     );
 
     console.log(
       'Child Chain Manager Proxy changed to',
-      deployer,
+      minterContract.address,
       'with transaction',
       updateProxyManagerTx.hash
     );
@@ -71,16 +79,15 @@ const args = process.argv.slice(2);
   }
 
   // Method to mint sand tokens on new contract
-  const abiCoder = ethers.utils.defaultAbiCoder;
-  const mintSand = async (holder: string, amount: string) => {
-    const encodedAmount = abiCoder.encode(['uint256'], [amount]);
-    const tx = await newContract.deposit(holder, encodedAmount);
+  const mintBatch = async (batch: string[], values: number[]) => {
+    const tx = await minterContract.batchMint(batch, values);
     await tx.wait();
   };
 
-  // Iterating through every holder to fetch balances on both contract and mint the difference on new contract
+  // Iterating through every holder to fetch balances on both contract and mint the difference on new contract batch-wise
+  let batch = [];
+  let values = [];
   for (const holder of holders) {
-    console.log('Minting SAND for holder', holder);
     const balanceOnOldContract = await oldContract.balanceOf(holder, {
       blockTag: blockTag,
     });
@@ -95,9 +102,21 @@ const args = process.argv.slice(2);
     } else if (balanceDifference == 0) {
       console.log('Balance Consistent on both Contracts');
     } else {
-      console.log('Minting', balanceDifference, 'SAND on new contract');
-      await mintSand(holder, balanceDifference.toString());
+      batch.push(holder);
+      values.push(balanceDifference);
     }
+
+    if (batch.length == 2000) {
+      console.log('Minting batch on new contract');
+      await mintBatch(batch, values);
+      batch = [];
+      values = [];
+    }
+  }
+
+  if (batch.length > 0) {
+    console.log('Minting batch on new contract');
+    await mintBatch(batch, values);
   }
 
   // Fetching childChainManagerProxy address
@@ -112,11 +131,11 @@ const args = process.argv.slice(2);
     const resetProxyManagerTx = await newContract.updateChildChainManager(
       childChainManagerProxyAddress
     );
+    await resetProxyManagerTx.wait();
     console.log(
       'Child Proxy Manager reset with transaction',
       resetProxyManagerTx.hash
     );
-    await resetProxyManagerTx.wait();
   } else {
     console.log('ChildChainManagerProxy not set');
   }

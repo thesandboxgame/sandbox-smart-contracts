@@ -1,24 +1,14 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
+import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "../../common/interfaces/polygon/IPolygonSand.sol";
 
-contract PolygonSandBatchDeposit {
+contract PolygonSandBatchDeposit is Ownable {
     IPolygonSand internal immutable _polygonSand;
-    address internal immutable _childChainManagerProxyAddress;
-    address internal _owner;
 
-    event ChildChainManagerProxyReset(address _childChainManagerProxy);
-
-    modifier onlyOwner() {
-        require(msg.sender == _owner, "You are not authorized to perform this action");
-        _;
-    }
-
-    constructor(IPolygonSand polygonSand, address childChainManagerProxyAddress) {
+    constructor(IPolygonSand polygonSand) {
         _polygonSand = polygonSand;
-        _childChainManagerProxyAddress = childChainManagerProxyAddress;
-        _owner = msg.sender;
     }
 
     function batchMint(address[] calldata holders, uint256[] calldata values) external onlyOwner {
@@ -26,10 +16,5 @@ contract PolygonSandBatchDeposit {
         for (uint256 i = 0; i < holders.length; i++) {
             _polygonSand.deposit(holders[i], abi.encode(values[i]));
         }
-    }
-
-    function resetChildChainManagerProxy() external onlyOwner {
-        _polygonSand.updateChildChainManager(_childChainManagerProxyAddress);
-        emit ChildChainManagerProxyReset(_childChainManagerProxyAddress);
     }
 }
