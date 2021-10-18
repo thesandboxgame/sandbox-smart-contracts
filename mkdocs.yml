@@ -18,6 +18,7 @@ nav:
       - Preparing an ASSET giveaway: howto/preparing-asset-giveaway.md
       - Generating liquidity pool rewards: howto/generating-liquidity-pool-rewards.md
       - Running a lottery: howto/running-lottery.md
+      - Use Faucet to get Sand: howto/use-faucet-to-get-sand.md
   - Tutorials:
       - Developing your first feature: tutorials/developing-first-feature.md
       - Writing documentation: tutorials/writing-documentation.md
@@ -54,6 +55,8 @@ nav:
           - Land: topics/land/land.md
       - Permit:
           - Permit: topics/permit/Permit.md
+      - Faucet:
+          - Faucet: topics/faucet/Faucet.md
 
 markdown_extensions:
   - admonition
