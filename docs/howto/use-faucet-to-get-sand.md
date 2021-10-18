@@ -3,7 +3,7 @@
 
 [Faucet contract on Goerli](https://goerli.etherscan.io/address/0xd910572C4801f4435a2098A55292270743105530)  
 [Faucet contract on Rinkeby](https://rinkeby.etherscan.io/address/0x8e19Ca559eAB83a5201663E8a70cd0C2A9479663)  
-[Faucet contract on Mumbai](https://https://mumbai.polygonscan.com/address/0x44DAAE71eF875d3B587206118E2Ff0071E315f43)   
+[Faucet contract on Mumbai](https://mumbai.polygonscan.com/address/0x44DAAE71eF875d3B587206118E2Ff0071E315f43)   
 
 ## How to use Faucet on Goerli
 
@@ -49,7 +49,7 @@ It appears on the button.
 ### 7 Get some Sand.
 
 To obtain tokens you must enter the amount in the send part.  
-Remember to multiply the amount by 10 ^ 8 because the amount is expressed in wei.
+Remember to multiply the amount by 10 ^ 18 because the amount is expressed in wei.
 
 ![Faucet7](../img/faucet/F7.png "Step 7")
 
