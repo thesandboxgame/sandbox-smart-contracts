@@ -1,8 +1,15 @@
 const {expect} = require('../chai-setup');
-const {ethers, deployments} = require('hardhat');
+const {ethers} = require('hardhat');
 const {BigNumber} = require('ethers');
+const {withSnapshot} = require('../utils');
 
 let loopCounter = 0;
+const setupLandWeightedSANDRewardPool = withSnapshot(
+  ['LandWeightedSANDRewardPool'],
+  async () => {
+    return await ethers.getContract('LandWeightedSANDRewardPool');
+  }
+);
 
 function cbrt6(a) {
   loopCounter = 0;
@@ -179,8 +186,7 @@ describe('SafeMathWithRequire', function () {
 
 describe('LandWeightedSANDRewardPool computation', function () {
   it('computing contributions', async function () {
-    await deployments.fixture('LandWeightedSANDRewardPool');
-    const contract = await ethers.getContract('LandWeightedSANDRewardPool');
+    const contract = await setupLandWeightedSANDRewardPool();
     for (const values of valuesToTests) {
       const result = await contract.computeContribution(
         values.amountStaked,
