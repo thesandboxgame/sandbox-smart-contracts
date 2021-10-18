@@ -1,4 +1,5 @@
 import {getNamedAccounts, ethers, network, deployments} from 'hardhat';
+import {BigNumber} from '@ethersproject/bignumber';
 import fs from 'fs-extra';
 import 'dotenv/config';
 
@@ -79,7 +80,7 @@ const args = process.argv.slice(2);
   }
 
   // Method to mint sand tokens on new contract
-  const mintBatch = async (batch: string[], values: number[]) => {
+  const mintBatch = async (batch: string[], values: BigNumber[]) => {
     const tx = await minterContract.batchMint(batch, values);
     await tx.wait();
   };
@@ -95,11 +96,13 @@ const args = process.argv.slice(2);
       blockTag: blockTag,
     });
 
-    const balanceDifference = balanceOnOldContract - balanceOnNewContract;
+    const balanceDifference = BigNumber.from(
+      (balanceOnNewContract - balanceOnOldContract).toString()
+    );
 
-    if (balanceDifference < 0) {
+    if (balanceDifference < BigNumber.from('0')) {
       console.log('Balance Error');
-    } else if (balanceDifference == 0) {
+    } else if (balanceDifference == BigNumber.from('0')) {
       console.log('Balance Consistent on both Contracts');
     } else {
       batch.push(holder);
