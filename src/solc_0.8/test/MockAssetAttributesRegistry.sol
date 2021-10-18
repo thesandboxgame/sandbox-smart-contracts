@@ -26,14 +26,15 @@ contract MockAssetAttributesRegistry is AssetAttributesRegistry {
         uint16[] calldata gemIds
     ) external override {
         // @note access control removed for testing
-        _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber());
+        _setCatalyst(assetId, catalystId, gemIds, _getBlockNumber(), true);
     }
 
     function _setCatalyst(
         uint256 assetId,
         uint16 catalystId,
         uint16[] memory gemIds,
-        uint64 blockNumber
+        uint64 blockNumber,
+        bool hasToEmitEvent
     ) internal override {
         // @note access control removed for testing
         require(gemIds.length <= MAX_NUM_GEMS, "GEMS_MAX_REACHED");
@@ -45,7 +46,9 @@ contract MockAssetAttributesRegistry is AssetAttributesRegistry {
             gemIdsToStore[i] = gemIds[i];
         }
         _records[assetId] = Record(catalystId, gemIdsToStore);
-        emit CatalystApplied(assetId, catalystId, gemIds, blockNumber);
+        if (hasToEmitEvent) {
+            emit CatalystApplied(assetId, catalystId, gemIds, blockNumber);
+        }
     }
 
     function addGems(uint256 assetId, uint16[] calldata gemIds) external override {

@@ -144,7 +144,7 @@ export const setupPolygonLandWeightedSANDRewardPool = withSnapshot(
       REWARD_DURATION
     );
     const ONE_DAY = 86400;
-    const MULTIPLIER_NFToken = 'Land';
+    const MULTIPLIER_NFToken = 'MockLandWithMint';
 
     const rewardPool = await deployments.get(POOL);
 
@@ -198,11 +198,6 @@ export const setupPolygonLandWeightedSANDRewardPool = withSnapshot(
         .connect(ethers.provider.getSigner(others[i]))
         .approve(rewardPool.address, STAKE_AMOUNT.mul(10));
     }
-
-    // Enable minting of LANDs
-    await multiplierNFTokenContract
-      .connect(ethers.provider.getSigner(multiplierNFTokenAdmin))
-      .setMinter(landAdmin, true);
 
     return {
       rewardPool,
