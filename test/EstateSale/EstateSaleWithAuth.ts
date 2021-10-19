@@ -8,7 +8,7 @@ import {
   signAuthMessageAs,
 } from './fixtures';
 
-describe('EstateSaleWithAuth08', function () {
+describe('EstateSaleWithAuth', function () {
   it('should be able to purchase with valid signature', async function () {
     const {
       estateSaleWithAuthContract,

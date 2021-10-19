@@ -2,7 +2,7 @@ import {expect} from 'chai';
 import {ethers, getNamedAccounts} from 'hardhat';
 import {setupAuthValidator, backendAuthWallet} from './fixtures';
 
-describe('AuthSigValidator', function () {
+describe('AuthValidator', function () {
   it('signature should be valid', async function () {
     const {authValidatorContract} = await setupAuthValidator();
     const {deployer} = await getNamedAccounts();

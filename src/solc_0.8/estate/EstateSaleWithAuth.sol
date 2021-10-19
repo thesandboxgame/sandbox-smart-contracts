@@ -4,7 +4,7 @@
 
 pragma solidity 0.8.2;
 
-import "./AuthSigValidator.sol";
+import "./AuthValidator.sol";
 import "../common/Libraries/SafeMathWithRequire.sol";
 import "../common/interfaces/ILandToken.sol";
 import "../common/interfaces/IERC1155.sol";
@@ -13,7 +13,7 @@ import "@openzeppelin/contracts-0.8/metatx/ERC2771Context.sol";
 
 /// @title Estate Sale contract with referral
 /// @notice This contract manages the sale of our lands as Estates
-contract EstateSaleWithReferral is ERC2771Context, WithReferralValidator {
+contract EstateSaleWithAuth is ERC2771Context, WithReferralValidator {
     using SafeMathWithRequire for uint256;
 
     event LandQuadPurchased(
@@ -35,7 +35,7 @@ contract EstateSaleWithReferral is ERC2771Context, WithReferralValidator {
     address internal immutable _feeDistributor;
 
     address payable internal _wallet;
-    AuthSigValidator internal _authValidator;
+    AuthValidator internal _authValidator;
     uint256 internal immutable _expiryTime;
     bytes32 internal immutable _merkleRoot;
 
@@ -55,7 +55,7 @@ contract EstateSaleWithReferral is ERC2771Context, WithReferralValidator {
         address estate;
         address feeDistributor;
         address payable initialWalletAddress;
-        AuthSigValidator authValidator;
+        AuthValidator authValidator;
         uint256 expiryTime;
         bytes32 merkleRoot;
         address trustedForwarder;
