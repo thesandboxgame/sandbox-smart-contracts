@@ -4,6 +4,8 @@ import {setupPolygonSandBatchDeposit} from './fixtures';
 import {waitFor} from '../../utils';
 import {ethers} from 'hardhat';
 
+const mintAmount = BigNumber.from(1).mul(`1000000000000000000`);
+
 describe('PolygonSandBatchDeposit', function () {
   it('mints given amount of tokens to corresponding holder on PolygonSandContract', async function () {
     const {
@@ -13,7 +15,6 @@ describe('PolygonSandBatchDeposit', function () {
       polygonSandBatchDepositContract,
     } = await setupPolygonSandBatchDeposit();
 
-    const mintAmount = BigNumber.from(1).mul(`1000000000000000000`);
     const holders = [deployer, sandAdmin];
     const values = [mintAmount, mintAmount];
 
@@ -41,10 +42,29 @@ describe('PolygonSandBatchDeposit', function () {
     } = await setupPolygonSandBatchDeposit();
 
     const holders = [deployer];
-    const values = [BigNumber.from(1).mul(`1000000000000000000`)];
+    const values = [mintAmount];
 
     await expect(
       polygonSandBatchDepositContract.batchMint(holders, values)
     ).to.be.revertedWith('Ownable: caller is not the owner');
+  });
+
+  it('reverts if holders and values array size is different', async function () {
+    const {
+      deployer,
+      sandAdmin,
+      polygonSandBatchDepositContract,
+    } = await setupPolygonSandBatchDeposit();
+
+    const holders = [deployer, sandAdmin];
+    const values = [mintAmount];
+
+    await expect(
+      polygonSandBatchDepositContract
+        .connect(ethers.provider.getSigner(deployer))
+        .batchMint(holders, values)
+    ).to.be.revertedWith(
+      'Number of holders should be equal to number of values'
+    );
   });
 });
