@@ -109,7 +109,7 @@ const args = process.argv.slice(2);
       values.push(balanceDifference);
     }
 
-    if (batch.length == 1000) {
+    if (batch.length == 500) {
       console.log('Minting batch on new contract');
       await mintBatch(batch, values);
       batch = [];
