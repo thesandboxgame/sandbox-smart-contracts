@@ -67,4 +67,29 @@ describe('PolygonSandBatchDeposit', function () {
       'Number of holders should be equal to number of values'
     );
   });
+
+  describe('Benchmark Tests', function () {
+    // Goes beyond block gas limit for 527 holders
+    it('should run successfully for 526 holders', async function () {
+      const {
+        deployer,
+        polygonSandContract,
+        polygonSandBatchDepositContract,
+      } = await setupPolygonSandBatchDeposit();
+
+      const holders = Array(526).fill(deployer);
+      const values = Array(526).fill(mintAmount);
+
+      await waitFor(
+        polygonSandBatchDepositContract
+          .connect(ethers.provider.getSigner(deployer))
+          .batchMint(holders, values)
+      );
+
+      const userBalanceAfter = await polygonSandContract.balanceOf(deployer);
+      expect(userBalanceAfter).to.be.equal(
+        BigNumber.from('526000000000000000000')
+      );
+    });
+  });
 });
