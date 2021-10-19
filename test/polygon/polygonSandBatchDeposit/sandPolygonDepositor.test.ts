@@ -70,15 +70,15 @@ describe('PolygonSandBatchDeposit', function () {
 
   describe('Benchmark Tests', function () {
     // Goes beyond block gas limit for 527 holders
-    it('should run successfully for 526 holders', async function () {
+    it('should run successfully for 500 holders', async function () {
       const {
         deployer,
         polygonSandContract,
         polygonSandBatchDepositContract,
       } = await setupPolygonSandBatchDeposit();
 
-      const holders = Array(526).fill(deployer);
-      const values = Array(526).fill(mintAmount);
+      const holders = Array(500).fill(deployer);
+      const values = Array(500).fill(mintAmount);
 
       await waitFor(
         polygonSandBatchDepositContract
@@ -88,7 +88,7 @@ describe('PolygonSandBatchDeposit', function () {
 
       const userBalanceAfter = await polygonSandContract.balanceOf(deployer);
       expect(userBalanceAfter).to.be.equal(
-        BigNumber.from('526000000000000000000')
+        BigNumber.from('500000000000000000000')
       );
     });
   });
