@@ -2,7 +2,7 @@
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
-import "../../common/interfaces/polygon/IPolygonSand.sol";
+import "./interfaces/IPolygonSand.sol";
 
 contract PolygonSandBatchDeposit is Ownable {
     IPolygonSand internal immutable _polygonSand;
