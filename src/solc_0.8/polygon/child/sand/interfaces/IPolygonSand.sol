@@ -16,5 +16,10 @@ interface IPolygonSand {
     /// @param amount amount to withdraw
     function withdraw(uint256 amount) external;
 
+    /// @notice called when user wants to transfer tokens to another address
+    /// @param to address to transfer
+    /// @param amount amount to transfer
+    function transfer(address to, uint256 amount) external;
+
     function setTrustedForwarder(address trustedForwarder) external;
 }

@@ -23,6 +23,11 @@ contract PolygonSandBatchDeposit is Ownable {
         }
     }
 
+    /**
+     * @notice Transfers the given value of sand to respective address
+     * @param users Array of user addresses
+     * @param amounts Array of Amount of tokens to be transferred
+     */
     function batchTransfer(address[] calldata users, uint256[] calldata amounts) external onlyOwner {
         require(users.length == amounts.length, "Number of users should be equal to number of amounts");
         for (uint256 i = 0; i < users.length; i++) {
