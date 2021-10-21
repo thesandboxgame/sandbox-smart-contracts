@@ -26,7 +26,7 @@ const func: DeployFunction = async function (hre) {
 
   const sandContract = await deployments.get('Sand');
   const landContract = await deployments.get('Land');
-  const assetContract = await deployments.get('PolygonAsset');
+  const assetContract = await deployments.get('Asset');
   const authValidatorContract = await deployments.get('AuthValidator');
 
   async function deployLandSale(name: string, landSale: LandSale) {
@@ -86,6 +86,6 @@ func.tags = ['EstateSaleWithAuth', 'EstateSaleWithAuth_deploy'];
 func.dependencies = [
   'Sand_deploy',
   'Land_deploy',
-  'PolygonAsset_deploy',
+  'Asset_deploy',
   'AuthValidator_deploy',
 ];
