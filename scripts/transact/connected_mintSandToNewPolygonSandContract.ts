@@ -19,9 +19,10 @@ const args = process.argv.slice(2);
     3) Address of the fake PolygonSand contract
     4) Address of the our PolygonSand contract
     5) Blocknumber to reading balance
-    6) Boolean flag for dry run
+    6) Boolean flag for logging
+    7) Boolean flag for minting
   */
-  if (args.length != 6) {
+  if (args.length != 7) {
     throw new Error('wrong number of arguments passed');
   }
 
@@ -43,7 +44,8 @@ const args = process.argv.slice(2);
   const oldContractAddress = args[2];
   const newContractAddress = args[3];
   const blockTag = parseInt(args[4]);
-  const logOnly = args[5] == 'true' ? true : false;
+  const logBalances = args[5] == 'true' ? true : false;
+  const mintBalances = args[6] == 'true' ? true : false;
 
   // User for contract interactions
   const {deployer} = await getNamedAccounts();
@@ -66,7 +68,7 @@ const args = process.argv.slice(2);
   const minterContract = MinterContract.attach(minterContractAddress);
 
   // Update childChainManagerProxy to allow deposit on contract
-  if (childChainManagerProxy != minterContractAddress && !logOnly) {
+  if (childChainManagerProxy != minterContractAddress && mintBalances) {
     const updateProxyManagerTx = await newContract.updateChildChainManager(
       minterContractAddress
     );
@@ -88,7 +90,7 @@ const args = process.argv.slice(2);
   };
 
   // Printing headers for log
-  if (logOnly) {
+  if (logBalances) {
     console.log('\nLogging Holder Balances:');
     console.log(
       'Holder -',
@@ -101,7 +103,10 @@ const args = process.argv.slice(2);
   // Iterating through every holder to fetch balances on both contract and mint the difference on new contract batch-wise
   let batch = [];
   let values = [];
+  let contractBalance = 0;
   for (const holder of holders) {
+    const bytecode = await ethers.provider.getCode(holder);
+
     const balanceOnOldContract = await oldContract.balanceOf(holder, {
       blockTag: blockTag,
     });
@@ -113,31 +118,37 @@ const args = process.argv.slice(2);
       (balanceOnOldContract - balanceOnNewContract).toString()
     );
 
-    if (balanceDifference < BigNumber.from('0')) {
-      console.log(
-        'Balance Error -',
-        'Holder:',
-        holder,
-        'Balance on Old Contract:',
-        balanceOnOldContract.toString(),
-        'Balance on New Contract:',
-        balanceOnNewContract.toString()
-      );
-    } else if (balanceDifference == BigNumber.from('0')) {
-      console.log('Balance Consistent on both Contracts');
-    } else {
-      batch.push(holder);
-      values.push(balanceDifference);
-    }
-
-    if (logOnly) {
+    if (logBalances) {
       console.log(
         holder,
         balanceOnOldContract.toString(),
         balanceOnNewContract.toString(),
         balanceDifference.toString()
       );
-    } else if (batch.length == 500 && !logOnly) {
+    }
+
+    if (balanceDifference < BigNumber.from('0')) {
+      console.log(
+        '\nBalance Error -',
+        'Holder:',
+        holder,
+        'Balance on Old Contract:',
+        balanceOnOldContract.toString(),
+        'Balance on New Contract:',
+        balanceOnNewContract.toString(),
+        '\n'
+      );
+    } else if (balanceDifference == BigNumber.from('0')) {
+      console.log('Balance Consistent on both Contracts');
+    } else if (bytecode == '0x') {
+      batch.push(holder);
+      values.push(balanceDifference);
+    }
+
+    if (bytecode != '0x') {
+      contractBalance += balanceDifference.toNumber();
+      continue;
+    } else if (batch.length == 500 && mintBalances) {
       console.log('Minting batch on new contract');
       await mintBatch(batch, values);
       batch = [];
@@ -145,20 +156,33 @@ const args = process.argv.slice(2);
     }
   }
 
-  if (batch.length > 0 && !logOnly) {
+  if (batch.length > 0 && mintBalances) {
     console.log('Minting batch on new contract');
     await mintBatch(batch, values);
   }
 
-  // Fetching childChainManagerProxy address
-  const envChildChainManagerProxy =
-    process.env[`CHILD_CHAIN_MANAGER_PROXY_${network.name.toUpperCase()}`];
-  const childChainManagerProxyAddress = envChildChainManagerProxy
-    ? envChildChainManagerProxy
-    : childChainManagerProxy;
+  console.log('\nSum of contract balances', contractBalance);
+  if (contractBalance > 0 && mintBalances) {
+    console.log(
+      '\nMinting',
+      contractBalance,
+      'tokens to PolygonSandBatchDeposit contract'
+    );
+    await mintBatch(
+      [minterContractAddress],
+      [ethers.utils.parseUnits(contractBalance.toString())]
+    );
+  }
 
-  // Reset childChainManagerProxy on the new PolygonSand contract
-  if (!logOnly) {
+  if (mintBalances) {
+    // Fetching childChainManagerProxy address
+    const envChildChainManagerProxy =
+      process.env[`CHILD_CHAIN_MANAGER_PROXY_${network.name.toUpperCase()}`];
+    const childChainManagerProxyAddress = envChildChainManagerProxy
+      ? envChildChainManagerProxy
+      : childChainManagerProxy;
+
+    // Reset childChainManagerProxy on the new PolygonSand contract
     if (deployer != childChainManagerProxyAddress) {
       const resetProxyManagerTx = await newContract.updateChildChainManager(
         childChainManagerProxyAddress

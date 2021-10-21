@@ -22,4 +22,11 @@ contract PolygonSandBatchDeposit is Ownable {
             _polygonSand.deposit(holders[i], abi.encode(values[i]));
         }
     }
+
+    function batchTransfer(address[] calldata users, uint256[] calldata amounts) external onlyOwner {
+        require(users.length == amounts.length, "Number of users should be equal to number of amounts");
+        for (uint256 i = 0; i < users.length; i++) {
+            _polygonSand.transfer(users[i], amounts[i]);
+        }
+    }
 }
