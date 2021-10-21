@@ -36,7 +36,10 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
     /// @param gameId Games added
     /// @param uri ipfs hash (without the prefix, assume cidv1 folder)
     struct EstateCRUDData {
-        uint256[] landIds;
+        //uint256[] landIds;
+        uint256[] landSizes;
+        uint256[] landXs;
+        uint256[] landYs;
         uint256[] gameIds;
         bytes32 uri;
     }
@@ -75,14 +78,14 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         _check_authorized(from, ADD);
         (uint256 estateId, uint256 storageId) = _mintEstate(from, to, _nextId++, 1, true);
         _metaData[storageId] = creation.uri;
-        _addLandsGames(from, storageId, creation.landIds, creation.gameIds, true);
+        _addLandsGames(
+            from,
+            storageId,
+            creation, /*.landIds, creation.gameIds*/
+            true
+        );
         emit EstateTokenUpdated(0, estateId, creation);
         return estateId;
-    }
-
-    function giveMeAnOK(uint256[] memory cardinals) external returns (bool) {
-        bool ok = true;
-        return ok;
     }
 
     /// @notice lets the estate owner add lands and/or add/remove games for these lands
@@ -101,7 +104,12 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         uint256 storageId = _storageId(estateId);
         _metaData[storageId] = update.uri;
         _check_authorized(from, ADD);
-        _addLandsGames(from, estateId, update.landIds, update.gameIds, false);
+        _addLandsGames(
+            from,
+            estateId,
+            update, /*.landIds, update.gameIds*/
+            false
+        );
         uint256 newId = _incrementTokenVersion(to, estateId);
         emit EstateTokenUpdated(estateId, newId, update);
         return newId;
@@ -232,7 +240,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         return gamesToLands[gameId].values();
     }*/
 
-    function areLandsAdjacent(uint256[] memory landIds) public pure returns (bool) {
+    /*function areLandsAdjacent(uint256[] memory landIds) public pure returns (bool) {
         uint256 landIdsSize = landIds.length;
 
         if (landIdsSize == 0) {
@@ -286,14 +294,14 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         }
 
         return landIdsSize == visitedLandsSize;
-    }
+    }*/
 
-    function calculateId(uint256 x, uint256 y) public pure returns (uint256) {
+    /*function calculateId(uint256 x, uint256 y) public pure returns (uint256) {
         uint256 id = x + y * GRID_SIZE;
         return id;
-    }
+    }*/
 
-    function isItInArray(uint256 id, uint256[] memory landIds) public pure returns (bool) {
+    /*function isItInArray(uint256 id, uint256[] memory landIds) public pure returns (bool) {
         uint256 size = landIds.length;
         bool flag = false;
 
@@ -303,9 +311,8 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
                 break;
             }
         }
-
         return flag;
-    }
+    }*/
 
     // A depth first search implementation
     /*function areLandsAdjacent(uint256[] memory landIds, uint256 landIdsSize) public pure returns (bool) {
@@ -373,20 +380,79 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////
 
+    /* uint256 internal constant LAYER = 0xFF00000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_1x1 = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_3x3 = 0x0100000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_6x6 = 0x0200000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_12x12 = 0x0300000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
+
+    uint256 internal constant LAYER_N3x3 = 0xFE00000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_N6x6 = 0xFD00000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_N12x12 = 0xFC00000000000000000000000000000000000000000000000000000000000000;
+    uint256 internal constant LAYER_N24x24 = 0xFB00000000000000000000000000000000000000000000000000000000000000;
+
+    function separateId(uint256[] memory landIds)
+        public
+        returns (
+            uint256[] memory,
+            uint256[] memory,
+            uint256[] memory
+        )
+    {
+        uint256 numLds = landIds.length;
+        uint256[] memory sizes = new uint256[](numLds);
+        uint256[] memory xs = new uint256[](numLds);
+        uint256[] memory ys = new uint256[](numLds);
+
+        for (uint256 i = 0; i < numLds; i++) {
+            if (landIds[i] & LAYER == 0) {
+                sizes[i] = 1;
+                xs[i] = _land.x(landIds[i]);
+                ys[i] = _land.y(landIds[i]);
+            } else if (landIds[i] & LAYER_N3x3 == 0) {
+                sizes[i] = 3;
+                xs[i] = _land.x(landIds[i] - LAYER_3x3);
+                ys[i] = _land.y(landIds[i] - LAYER_3x3);
+            } else if (landIds[i] & LAYER_N6x6 == 0) {
+                sizes[i] = 6;
+                xs[i] = _land.x(landIds[i] - LAYER_6x6);
+                ys[i] = _land.y(landIds[i] - LAYER_6x6);
+            } else if (landIds[i] & LAYER_N12x12 == 0) {
+                sizes[i] = 12;
+                xs[i] = _land.x(landIds[i] - LAYER_12x12);
+                ys[i] = _land.y(landIds[i] - LAYER_12x12);
+            } else if (landIds[i] & LAYER_N24x24 == 0) {
+                sizes[i] = 24;
+                xs[i] = _land.x(landIds[i] - LAYER_24x24);
+                ys[i] = _land.y(landIds[i] - LAYER_24x24);
+            }
+        }
+        return (sizes, xs, ys);
+    } */
+
     function _addLandsGames(
         address sender,
         uint256 estateId,
-        uint256[] memory landIdsToAdd,
-        uint256[] memory gameIds,
+        //uint256[] memory landIdsToAdd,
+        //uint256[] memory gameIds,
+        EstateCRUDData calldata creation,
         bool justCreated
     ) internal {
         uint256 storageId = _storageId(estateId);
-        uint256[] memory newLands;
+        //uint256[] memory newLands;
+        uint256[] memory sizes;
+        uint256[] memory xs;
+        uint256[] memory ys;
+
         if (justCreated) {
-            newLands = landIdsToAdd;
+            sizes = creation.landSizes; //landIdsToAdd;
+            xs = creation.landXs;
+            ys = creation.landYs;
         } else {
             EstateData memory ed = getEstateData(estateId);
             newLands = new uint256[](landIdsToAdd.length + ed.landIds.length);
+
             for (uint256 i = 0; i < newLands.length; i++) {
                 if (i < landIdsToAdd.length) {
                     require(landIdsToAdd[i] != 0, "NO_ZERO_LAND_IDS");
@@ -397,15 +463,18 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
                 }
             }
         }
-        require(
+        /*require(
             areLandsAdjacent(
                 newLands /*, newLands.length*/
-            ),
+        /*),
             "LANDS_ARE_NOT_ADJACENT"
-        );
+        );*/
         (, uint256[] memory gamesToAdd) = _setGamesOfLands(storageId, landIdsToAdd, gameIds, false);
-        _land.batchTransferFrom(sender, address(this), landIdsToAdd, "");
-        //_land.transferQuad(sender, address(this), 1, 6, 12, "");
+        //_land.batchTransferFrom(sender, address(this), landIdsToAdd, "");
+
+        //(uint256[] memory sizes, uint256[] memory xs, uint256[] memory ys) = separateId(landIdsToAdd);
+
+        _land.batchTransferQuad(sender, address(this), sizes, xs, ys, "");
         _gameToken.batchTransferFrom(sender, address(this), gamesToAdd, "");
     }
 

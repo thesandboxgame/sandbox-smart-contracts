@@ -6,7 +6,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {execute, read} = deployments;
 
   const {assetAdmin, assetBouncerAdmin} = await getNamedAccounts();
-
   let currentAdmin;
   try {
     currentAdmin = await read('Asset', 'getAdmin');

@@ -7,10 +7,6 @@ import "../polygon/child/land/PolygonLandBaseToken.sol";
 contract MockLandWithMint is PolygonLandBaseToken {
     using Address for address;
 
-    function setTF(address trustedForwarder) public {
-        __ERC2771Handler_initialize(trustedForwarder);
-    }
-
     mapping(address => bool) internal _minters;
     event Minter(address superOperator, bool enabled);
 

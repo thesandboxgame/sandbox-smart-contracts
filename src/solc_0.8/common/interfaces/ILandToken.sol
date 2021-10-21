@@ -26,4 +26,8 @@ interface LandToken {
         uint256[] calldata ids,
         bytes calldata data
     ) external;
+
+    function x(uint256 id) external returns (uint256);
+
+    function y(uint256 id) external returns (uint256);
 }

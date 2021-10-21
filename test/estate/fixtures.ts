@@ -29,6 +29,7 @@ export const setupEstate = deployments.createFixture(async function () {
   const landContractAsMinter = await landContract.connect(
     ethers.provider.getSigner(minter)
   );
+
   const gameTokenAsAdmin = await ethers.getContract(
     'ChildGameToken',
     gameTokenAdmin
@@ -48,6 +49,7 @@ export const setupEstate = deployments.createFixture(async function () {
       .connect(ethers.provider.getSigner(landAdmin))
       .setSuperOperator(estateContract.address, true)
   );*/
+
   await gameTokenAsAdmin.changeMinter(gameTokenAdmin);
   return {
     estateContract,
