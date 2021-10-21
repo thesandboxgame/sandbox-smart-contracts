@@ -94,9 +94,6 @@ const createFixture = withSnapshot(
       await rewardTokenAsAdmin.transfer(rewardPool.address, REWARD_AMOUNT);
     }
 
-    if (notifyReward === true) {
-      await rewardPoolAsAdmin.notifyRewardAmount(REWARD_AMOUNT);
-    }
     // Give users some stakeTokens
     for (let i = 0; i < 3; i++) {
       await stakeTokenAsAdmin.transfer(others[i], STAKE_AMOUNT.mul(10));
@@ -105,7 +102,13 @@ const createFixture = withSnapshot(
         STAKE_AMOUNT.mul(10)
       );
     }
+
+    const startTime = await getTime();
+    if (notifyReward === true) {
+      await rewardPoolAsAdmin.notifyRewardAmount(REWARD_AMOUNT);
+    }
     return {
+      startTime,
       deployer,
       others,
       sandAdmin,
@@ -132,6 +135,21 @@ async function setUpUserWithNfts(multiplierNFTokenAsAdmin, user, min, max) {
   }
 }
 
+async function getTime() {
+  const latestBlock = await ethers.provider.getBlock('latest');
+  return latestBlock.timestamp;
+}
+
+async function setTime(time) {
+  await ethers.provider.send('evm_setNextBlockTimestamp', [time]);
+  await mine();
+}
+
+async function incTime(delta) {
+  const latestBlock = await ethers.provider.getBlock('latest');
+  const currentTimestamp = latestBlock.timestamp;
+  await setTime(currentTimestamp + delta);
+}
 describe('MockSANDRewardPool', function () {
   it('Pool contains reward tokens', async function () {
     const {rewardPool, rewardToken} = await createFixture({
@@ -178,12 +196,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
   });
@@ -198,12 +211,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
   });
@@ -214,18 +222,15 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     for (let i = 0; i < 2; i++) {
+      await setTime(startTime + 10 * (i + 1));
       await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(2));
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
   });
@@ -236,18 +241,15 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     for (let i = 0; i < 3; i++) {
+      await setTime(startTime + 10 * (i + 1));
       await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(3));
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
   });
@@ -258,18 +260,15 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     for (let i = 0; i < 4; i++) {
+      await setTime(startTime + 10 * (i + 1));
       await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(4));
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -284,18 +283,15 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     for (let i = 0; i < 10; i++) {
+      await setTime(startTime + 10 * (i + 1));
       await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(10));
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -319,12 +315,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -340,19 +331,16 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 1);
     for (let i = 0; i < 10; i++) {
+      await setTime(startTime + 10 * (i + 1));
       await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(10));
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -373,12 +361,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -399,12 +382,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -420,19 +398,16 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 3);
     for (let i = 0; i < 10; i++) {
+      await setTime(startTime + 10 * (i + 1));
       await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(10));
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -453,12 +428,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -474,19 +444,16 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 89);
     for (let i = 0; i < 10; i++) {
+      await setTime(startTime + 100 + 10 * (i + 1));
       await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(10));
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -494,7 +461,6 @@ describe('MockSANDRewardPool', function () {
     expect(precisionLost).to.be.at.least(1);
     expect(precisionLost).to.be.at.most(10);
   });
-
   // TODO ?
   // it.skip('User earnings for 500 NFTs match expected reward', async function () {
   //   await createFixture({supplyRewardTokens:true, notifyReward:true});
@@ -545,17 +511,15 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
+    await setTime(startTime + 10);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await setTime(startTime + 20);
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT.mul(2));
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     expect(earned0.add(earned1)).to.equal(ACTUAL_REWARD_AMOUNT);
@@ -567,19 +531,17 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     for (let i = 0; i < 10; i++) {
+      await setTime(startTime + 10 * (i + 1));
       await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
+      await setTime(startTime + 10 * (i + 1) + 3);
       await rewardPoolAsUser[1].stake(SMALL_STAKE_AMOUNT);
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(20));
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     const earned = earned0.add(earned1);
@@ -596,18 +558,15 @@ describe('MockSANDRewardPool', function () {
       rewardPool,
       rewardPoolAsUser,
       stakeToken,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
+    await setTime(startTime + 10);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
     await rewardPoolAsUser[2].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT.mul(3));
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     const earned2 = await rewardPoolAsUser[2].earned(others[2]);
@@ -629,19 +588,17 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 1);
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[1], 1, 2);
+    await setTime(startTime + 10);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await setTime(startTime + 20);
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT.mul(2));
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     const earned = earned0.add(earned1);
@@ -659,21 +616,19 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 1);
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[1], 1, 2);
     for (let i = 0; i < 10; i++) {
+      await setTime(startTime + 10 * (i + 1));
       await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
+      await setTime(startTime + 10 * (i + 1) + 3);
       await rewardPoolAsUser[1].stake(SMALL_STAKE_AMOUNT);
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(20));
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     const earned = earned0.add(earned1);
@@ -691,19 +646,17 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 3);
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[1], 3, 6);
+    await setTime(startTime + 100);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await setTime(startTime + 110);
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT.mul(2));
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     const earned = earned0.add(earned1);
@@ -721,19 +674,17 @@ describe('MockSANDRewardPool', function () {
       rewardPoolAsUser,
       stakeToken,
       multiplierNFTokenAsAdmin,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 100);
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[1], 100, 200);
+    await setTime(startTime + 1000);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await setTime(startTime + 1010);
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT.mul(2));
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     const earned = earned0.add(earned1);
@@ -764,12 +715,7 @@ describe('MockSANDRewardPool', function () {
     const userContribution = await rewardPool.contributionOf(others[0]);
     expect(userContribution).to.equal(contribution(stakeAmount, 0));
 
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -784,17 +730,15 @@ describe('MockSANDRewardPool', function () {
       others,
       rewardPoolAsUser,
       multiplierNFTokenAsAdmin,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 1);
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[1], 1, 2);
+    await setTime(startTime + 10);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await setTime(startTime + 20);
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     expect(earned0).to.be.gte(earned1);
@@ -811,17 +755,15 @@ describe('MockSANDRewardPool', function () {
       others,
       rewardPoolAsUser,
       multiplierNFTokenAsAdmin,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 100);
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[1], 100, 200);
+    await setTime(startTime + 1000);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await setTime(startTime + 1010);
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     expect(earned0).to.be.gte(earned1);
@@ -838,17 +780,16 @@ describe('MockSANDRewardPool', function () {
       others,
       rewardPoolAsUser,
       multiplierNFTokenAsAdmin,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 1);
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[1], 1, 3); // has extra NFT
+    await setTime(startTime + 10);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await setTime(startTime + 20);
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
+
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     expect(earned1).to.be.gte(earned0);
@@ -865,17 +806,16 @@ describe('MockSANDRewardPool', function () {
       others,
       rewardPoolAsUser,
       multiplierNFTokenAsAdmin,
+      startTime,
     } = await createFixture({supplyRewardTokens: true, notifyReward: true});
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[0], 0, 100);
     await setUpUserWithNfts(multiplierNFTokenAsAdmin, others[1], 100, 201); // has extra NFT
+    await setTime(startTime + 1000);
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
+    await setTime(startTime + 1010);
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
+
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     expect(earned0).to.be.gte(earned1);
@@ -982,12 +922,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     // expect earnings to be accrued based on amount notified
@@ -1004,12 +939,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     // expect earnings to be accrued based on amount notified
@@ -1031,12 +961,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     // expect earnings to be accrued based on amount notified
@@ -1062,12 +987,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsAdmin.notifyRewardAmount(REWARD_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     // earnings accrue from timestamp of notifyRewardAmount
@@ -1090,12 +1010,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsAdmin.notifyRewardAmount(REWARD_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
-    const latestBlock = await ethers.provider.getBlock('latest');
-    const currentTimestamp = latestBlock.timestamp;
-    await ethers.provider.send('evm_setNextBlockTimestamp', [
-      currentTimestamp + REWARD_DURATION,
-    ]);
-    await mine();
+    await incTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     // double reward tokens available to be earned
