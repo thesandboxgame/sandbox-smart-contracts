@@ -39,6 +39,10 @@ const mintOptions = {
   data: callData,
 };
 
+function bn(x: number): BigNumber {
+  return BigNumber.from(x);
+}
+
 const mintMultiOptions = {
   from: ethers.constants.AddressZero,
   packId: packId,
@@ -459,6 +463,49 @@ describe('AssetMinter', function () {
         assetIdProp
       );
       expect(balanceProp).to.equal(await assetMinterContract.propQuantity());
+    });
+
+    it('Mint custom number', async function () {
+      const nbToMint = 1000;
+      const {
+        assetMinterContract,
+        assetContract,
+        legendaryCatalyst,
+      } = await setupAssetMinterAttributesRegistryGemsAndCatalysts();
+      const {assetMinterAdmin} = await getNamedAccounts();
+      const assetMinterAsAdmin = assetMinterContract.connect(
+        ethers.provider.getSigner(assetMinterAdmin)
+      );
+      await mintCats([
+        {contract: legendaryCatalyst, amount: 7, recipient: assetMinterAdmin},
+      ]);
+
+      const assetId = await assetMinterAsAdmin.callStatic.mintCustomNumberWithCatalyst(
+        assetMinterAdmin,
+        packId,
+        mintOptions.metaDataHash,
+        catalystNFT,
+        [],
+        bn(nbToMint),
+        assetMinterAdmin,
+        mintOptions.data
+      );
+
+      await assetMinterAsAdmin.mintCustomNumberWithCatalyst(
+        assetMinterAdmin,
+        packId,
+        mintOptions.metaDataHash,
+        catalystNFT,
+        [],
+        bn(nbToMint),
+        assetMinterAdmin,
+        mintOptions.data
+      );
+
+      const customMintBalance = await assetContract[
+        'balanceOf(address,uint256)'
+      ](assetMinterAdmin, assetId);
+      expect(customMintBalance).to.equal(nbToMint);
     });
   });
 
@@ -977,7 +1024,7 @@ describe('AssetMinter', function () {
         catalystOwner,
         BigNumber.from(100000).mul(`1000000000000000000`)
       );
-      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+      const assetMinterAsCatalystOwner = assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
 
@@ -991,7 +1038,7 @@ describe('AssetMinter', function () {
         {contract: magicGem, amount: 7, recipient: catalystOwner},
       ]);
 
-      const assetUpgraderAsAssetOwner = await assetUpgraderContract.connect(
+      const assetUpgraderAsAssetOwner = assetUpgraderContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
 
@@ -1078,13 +1125,55 @@ describe('AssetMinter', function () {
       ).to.be.revertedWith('INVALID_TO_ZERO_ADDRESS');
     });
 
+    it('custom minting: should fail if not admin', async function () {
+      const {
+        assetMinterContract,
+        catalystOwner,
+      } = await setupAssetMinterGemsAndCatalysts();
+      const assetMinterAsCatalystOwner = assetMinterContract.connect(
+        ethers.provider.getSigner(catalystOwner)
+      );
+      await expect(
+        assetMinterAsCatalystOwner.mintCustomNumberWithCatalyst(
+          catalystOwner,
+          mintOptions.packId,
+          mintOptions.metaDataHash,
+          mintOptions.catalystId,
+          mintOptions.gemIds,
+          bn(0),
+          mintOptions.to,
+          mintOptions.data
+        )
+      ).to.be.revertedWith('ADMIN_ONLY');
+    });
+
+    it('custom minting: should fail if qty = 0', async function () {
+      const {assetMinterContract} = await setupAssetMinterGemsAndCatalysts();
+      const {assetMinterAdmin} = await getNamedAccounts();
+      const assetMinterAsAdmin = assetMinterContract.connect(
+        ethers.provider.getSigner(assetMinterAdmin)
+      );
+      await expect(
+        assetMinterAsAdmin.mintCustomNumberWithCatalyst(
+          assetMinterAdmin,
+          mintOptions.packId,
+          mintOptions.metaDataHash,
+          mintOptions.catalystId,
+          mintOptions.gemIds,
+          bn(0),
+          assetMinterAdmin,
+          mintOptions.data
+        )
+      ).to.be.revertedWith('AssetMinter: quantity cannot be 0');
+    });
+
     it('should fail if "from" != _msgSender()', async function () {
       const {
         assetMinterContract,
         catalystOwner,
       } = await setupAssetMinterGemsAndCatalysts();
       const users = await getUnnamedAccounts();
-      const assetMinterAsMetaTxProcessor = await assetMinterContract.connect(
+      const assetMinterAsMetaTxProcessor = assetMinterContract.connect(
         ethers.provider.getSigner(users[9])
       );
       await expect(

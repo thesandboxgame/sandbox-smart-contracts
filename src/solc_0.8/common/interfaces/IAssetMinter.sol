@@ -43,4 +43,15 @@ interface IAssetMinter {
         address to,
         bytes memory data
     ) external returns (uint256[] memory assetIds);
+
+    function mintCustomNumberWithCatalyst(
+        address from,
+        uint40 packId,
+        bytes32 metadataHash,
+        uint16 catalystId,
+        uint16[] calldata gemIds,
+        uint256 quantity,
+        address to,
+        bytes calldata data
+    ) external returns (uint256 assetId);
 }

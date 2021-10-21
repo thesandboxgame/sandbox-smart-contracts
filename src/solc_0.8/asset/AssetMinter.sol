@@ -91,6 +91,30 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, WithAdmin, Ownable {
         catalystUnitWhenBurning = newQuantity;
     }
 
+    /// @notice mint "quantity" number of Asset token using one catalyst.
+    /// @param from address creating the Asset, need to be the tx sender or meta tx signer.
+    /// @param packId unused packId that will let you predict the resulting tokenId.
+    /// @param metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata.
+    /// @param catalystId Id of the Catalyst ERC20 token to burn (1, 2, 3 or 4).
+    /// @param gemIds list of gem ids to burn in the catalyst.
+    /// @param quantity number of token to mint
+    /// @param to destination address receiving the minted tokens.
+    /// @param data extra data.
+    /// @return assetId The new token Id.
+    function mintCustomNumberWithCatalyst(
+        address from,
+        uint40 packId,
+        bytes32 metadataHash,
+        uint16 catalystId,
+        uint16[] calldata gemIds,
+        uint256 quantity,
+        address to,
+        bytes calldata data
+    ) external override onlyAdmin returns (uint256 assetId) {
+        _mintRequierements(from, catalystId, quantity, to);
+        assetId = _burnAndMint(from, packId, metadataHash, catalystId, gemIds, quantity, to, data);
+    }
+
     /// @notice mint one Asset token with no catalyst.
     /// @param from address creating the Asset, need to be the tx sender or meta tx signer.
     /// @param packId unused packId that will let you predict the resulting tokenId.
@@ -119,7 +143,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, WithAdmin, Ownable {
         return _asset.mint(from, packId, metadataHash, quantity, 0, to, data);
     }
 
-    /// @notice mint multiple NFT Asset token using one catalyst.
+    /// @notice mint multiple Asset tokens using one catalyst.
     /// @param from address creating the Asset, need to be the tx sender or meta tx signer.
     /// @param packId unused packId that will let you predict the resulting tokenId.
     /// @param metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata.
@@ -137,19 +161,10 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, WithAdmin, Ownable {
         address to,
         bytes calldata data
     ) external override returns (uint256 assetId) {
-        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        require(_msgSender() == from, "AUTH_ACCESS_DENIED");
-        require(catalystId != 0, "AssetMinter: catalystId cannot be 0");
-
         uint256 quantity = _getQuantityByCatalystId(catalystId);
 
-        _burnCatalyst(from, catalystId, numberOfCatalystBurnPerAsset);
-        _burnGems(from, gemIds, numberOfGemsBurnPerAsset);
-
-        assetId = _asset.mint(from, packId, metadataHash, quantity, 0, to, data);
-        _registry.setCatalyst(assetId, catalystId, gemIds);
-
-        return assetId;
+        _mintRequierements(from, catalystId, quantity, to);
+        assetId = _burnAndMint(from, packId, metadataHash, catalystId, gemIds, quantity, to, data);
     }
 
     /// @notice mint multiple Asset tokens.
@@ -275,7 +290,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, WithAdmin, Ownable {
     {
         scaledQuantities = new uint256[](quantities.length);
         for (uint256 i = 0; i < quantities.length; i++) {
-            scaledQuantities[i] = quantities[i] * gemUnitWhenBurning;
+            scaledQuantities[i] = quantities[i] * gemUnitWhenBurning * numberOfGemsBurnPerAsset;
         }
     }
 
@@ -289,7 +304,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, WithAdmin, Ownable {
     {
         scaledQuantities = new uint256[](quantities.length);
         for (uint256 i = 0; i < quantities.length; i++) {
-            scaledQuantities[i] = quantities[i] * catalystUnitWhenBurning;
+            scaledQuantities[i] = quantities[i] * catalystUnitWhenBurning * numberOfCatalystBurnPerAsset;
         }
     }
 
@@ -316,5 +331,34 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, WithAdmin, Ownable {
             // legendary
             quantity = legendaryQuantity;
         }
+    }
+
+    function _mintRequierements(
+        address from,
+        uint16 catalystId,
+        uint256 quantity,
+        address to
+    ) internal view {
+        require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
+        require(_msgSender() == from, "AUTH_ACCESS_DENIED");
+        require(catalystId != 0, "AssetMinter: catalystId cannot be 0");
+        require(quantity != 0, "AssetMinter: quantity cannot be 0");
+    }
+
+    function _burnAndMint(
+        address from,
+        uint40 packId,
+        bytes32 metadataHash,
+        uint16 catalystId,
+        uint16[] calldata gemIds,
+        uint256 quantity,
+        address to,
+        bytes calldata data
+    ) internal returns (uint256 assetId) {
+        _burnCatalyst(from, catalystId, numberOfCatalystBurnPerAsset);
+        _burnGems(from, gemIds, numberOfGemsBurnPerAsset);
+
+        assetId = _asset.mint(from, packId, metadataHash, quantity, 0, to, data);
+        _registry.setCatalyst(assetId, catalystId, gemIds);
     }
 }
