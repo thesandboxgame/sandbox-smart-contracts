@@ -6,7 +6,13 @@ const {
 } = require('hardhat');
 const {BigNumber} = require('@ethersproject/bignumber');
 const {expect} = require('../chai-setup');
-const {mine, withSnapshot} = require('../utils');
+const {
+  mine,
+  withSnapshot,
+  getTime,
+  increaseTime,
+  setTime,
+} = require('../utils');
 const {contribution} = require('./contributionEquation.test');
 
 const STAKE_TOKEN = 'UNI_SAND_ETH';
@@ -135,21 +141,6 @@ async function setUpUserWithNfts(multiplierNFTokenAsAdmin, user, min, max) {
   }
 }
 
-async function getTime() {
-  const latestBlock = await ethers.provider.getBlock('latest');
-  return latestBlock.timestamp;
-}
-
-async function setTime(time) {
-  await ethers.provider.send('evm_setNextBlockTimestamp', [time]);
-  await mine();
-}
-
-async function incTime(delta) {
-  const latestBlock = await ethers.provider.getBlock('latest');
-  const currentTimestamp = latestBlock.timestamp;
-  await setTime(currentTimestamp + delta);
-}
 describe('MockSANDRewardPool', function () {
   it('Pool contains reward tokens', async function () {
     const {rewardPool, rewardToken} = await createFixture({
@@ -196,7 +187,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
   });
@@ -211,7 +202,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
   });
@@ -230,7 +221,7 @@ describe('MockSANDRewardPool', function () {
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(2));
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
   });
@@ -249,7 +240,7 @@ describe('MockSANDRewardPool', function () {
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(3));
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
     expect(earned).to.equal(ACTUAL_REWARD_AMOUNT);
   });
@@ -268,7 +259,7 @@ describe('MockSANDRewardPool', function () {
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(4));
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -291,7 +282,7 @@ describe('MockSANDRewardPool', function () {
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(10));
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -315,7 +306,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -340,7 +331,7 @@ describe('MockSANDRewardPool', function () {
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(10));
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -361,7 +352,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -382,7 +373,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -407,7 +398,7 @@ describe('MockSANDRewardPool', function () {
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(10));
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -428,7 +419,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -453,7 +444,7 @@ describe('MockSANDRewardPool', function () {
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(10));
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -519,7 +510,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT.mul(2));
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     expect(earned0.add(earned1)).to.equal(ACTUAL_REWARD_AMOUNT);
@@ -541,7 +532,7 @@ describe('MockSANDRewardPool', function () {
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(20));
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     const earned = earned0.add(earned1);
@@ -566,7 +557,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[2].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT.mul(3));
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     const earned2 = await rewardPoolAsUser[2].earned(others[2]);
@@ -598,7 +589,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT.mul(2));
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     const earned = earned0.add(earned1);
@@ -628,7 +619,7 @@ describe('MockSANDRewardPool', function () {
     }
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT.mul(20));
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     const earned = earned0.add(earned1);
@@ -656,7 +647,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT.mul(2));
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     const earned = earned0.add(earned1);
@@ -684,7 +675,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT.mul(2));
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     const earned = earned0.add(earned1);
@@ -715,7 +706,7 @@ describe('MockSANDRewardPool', function () {
     const userContribution = await rewardPool.contributionOf(others[0]);
     expect(userContribution).to.equal(contribution(stakeAmount, 0));
 
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
@@ -738,7 +729,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     await setTime(startTime + 20);
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     expect(earned0).to.be.gte(earned1);
@@ -763,7 +754,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     await setTime(startTime + 1010);
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
     expect(earned0).to.be.gte(earned1);
@@ -788,7 +779,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     await setTime(startTime + 20);
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
 
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
@@ -814,7 +805,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(STAKE_AMOUNT);
     await setTime(startTime + 1010);
     await rewardPoolAsUser[1].stake(STAKE_AMOUNT);
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
 
     const earned0 = await rewardPoolAsUser[0].earned(others[0]);
     const earned1 = await rewardPoolAsUser[1].earned(others[1]);
@@ -922,7 +913,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     // expect earnings to be accrued based on amount notified
@@ -939,7 +930,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     // expect earnings to be accrued based on amount notified
@@ -961,7 +952,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsUser[0].stake(SMALL_STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     // expect earnings to be accrued based on amount notified
@@ -987,7 +978,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsAdmin.notifyRewardAmount(REWARD_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     // earnings accrue from timestamp of notifyRewardAmount
@@ -1010,7 +1001,7 @@ describe('MockSANDRewardPool', function () {
     await rewardPoolAsAdmin.notifyRewardAmount(REWARD_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(SMALL_STAKE_AMOUNT);
-    await incTime(REWARD_DURATION);
+    await increaseTime(REWARD_DURATION);
     const earned = await rewardPoolAsUser[0].earned(others[0]);
 
     // double reward tokens available to be earned

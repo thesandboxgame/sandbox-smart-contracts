@@ -14,7 +14,19 @@ import {FixtureFunc} from 'hardhat-deploy/dist/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 export async function increaseTime(numSec: number): Promise<void> {
-  await ethers.provider.send('evm_increaseTime', [numSec]);
+  // evm_increaseTime doesn't seems to work right now
+  // await ethers.provider.send('evm_increaseTime', [numSec]);
+  await setTime((await getTime()) + numSec);
+}
+
+export async function getTime(): Promise<number> {
+  const latestBlock = await ethers.provider.getBlock('latest');
+  return latestBlock.timestamp;
+}
+
+export async function setTime(time: number): Promise<void> {
+  await ethers.provider.send('evm_setNextBlockTimestamp', [time]);
+  await mine();
 }
 
 export async function mine(): Promise<void> {
@@ -70,8 +82,7 @@ export async function findEvents(
   blockHash: string
 ): Promise<Event[]> {
   const filter = contract.filters[event]();
-  const events = await contract.queryFilter(filter, blockHash);
-  return events;
+  return await contract.queryFilter(filter, blockHash);
 }
 
 export type EventWithArgs = Event & {args: Result};
