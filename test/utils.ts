@@ -13,10 +13,17 @@ import {deployments, ethers, network} from 'hardhat';
 import {FixtureFunc} from 'hardhat-deploy/dist/types';
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-export async function increaseTime(numSec: number): Promise<void> {
-  // evm_increaseTime doesn't seems to work right now
-  // await ethers.provider.send('evm_increaseTime', [numSec]);
-  await setTime((await getTime()) + numSec);
+export async function mine(): Promise<void> {
+  await ethers.provider.send('evm_mine', []);
+}
+
+export async function increaseTime(
+  numSec: number,
+  callMine = true
+): Promise<void> {
+  // must do something (mine, send a tx) to move the time
+  await ethers.provider.send('evm_increaseTime', [numSec]);
+  if (callMine) await mine();
 }
 
 export async function getTime(): Promise<number> {
@@ -24,13 +31,13 @@ export async function getTime(): Promise<number> {
   return latestBlock.timestamp;
 }
 
-export async function setTime(time: number): Promise<void> {
+export async function setNextBlockTime(
+  time: number,
+  callMine = false
+): Promise<void> {
+  // must do something (mine, send a tx) to move the time
   await ethers.provider.send('evm_setNextBlockTimestamp', [time]);
-  await mine();
-}
-
-export async function mine(): Promise<void> {
-  await ethers.provider.send('evm_mine', []);
+  if (callMine) await mine();
 }
 
 type Test = {
