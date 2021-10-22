@@ -1,56 +1,33 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
+import "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
+import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import "./interfaces/IPolygonSand.sol";
 
-contract PolygonSandClaim is Ownable {
+contract PolygonSandClaim is Ownable, ReentrancyGuard {
     IPolygonSand internal immutable _polygonSand;
-    IPolygonSand internal immutable _fakePolygonSand;
-    uint256 public endOfClaimPeriod;
+    IERC20 internal immutable _fakePolygonSand;
 
     event SandClaimed(address indexed user, uint256 amount);
 
-    constructor(
-        IPolygonSand polygonSand,
-        IPolygonSand fakePolygonSand,
-        uint256 claimDuration
-    ) {
+    constructor(IPolygonSand polygonSand, IERC20 fakePolygonSand) {
         _polygonSand = polygonSand;
         _fakePolygonSand = fakePolygonSand;
-        endOfClaimPeriod = block.timestamp + claimDuration;
     }
 
     /**
      * @notice Swaps fake sand with the new polygonSand
      * @param amount the amount of tokens to be swapped
      */
-    function claim(uint256 amount) external {
-        require(block.timestamp <= endOfClaimPeriod, "Claim period is over");
+    function claim(uint256 amount) external nonReentrant {
         require(unclaimedSand() > amount, "Not enough sand for claim");
         bool success = _fakePolygonSand.transferFrom(msg.sender, address(this), amount);
         if (success) {
             _polygonSand.transfer(msg.sender, amount);
             emit SandClaimed(msg.sender, amount);
         }
-    }
-
-    /**
-     * @notice We don't want minted sand to be locked here forever in case user does not claim it.
-               So the owner can withdraw the remaining sand after a time period of two years.
-     */
-    function withdrawUnclaimed() external onlyOwner {
-        require(block.timestamp > endOfClaimPeriod, "Claim Period is still going on");
-        _polygonSand.transfer(msg.sender, unclaimedSand());
-    }
-
-    /**
-     * @notice Update end of claim period
-     * @param timestamp the time period to increase claim period by
-     */
-    function extendClaimPeriod(uint256 timestamp) external onlyOwner {
-        require(timestamp > 0, "Extension time should be greater than 0");
-        endOfClaimPeriod += timestamp;
     }
 
     // Getters
@@ -65,7 +42,7 @@ contract PolygonSandClaim is Ownable {
     /**
      * @notice Getter for amount of fake Sand swapped
      */
-    function claimedSand() external returns (uint256) {
+    function claimedSand() external view returns (uint256) {
         return _fakePolygonSand.balanceOf(address(this));
     }
 }

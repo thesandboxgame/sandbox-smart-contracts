@@ -13,11 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   await deploy('PolygonSandClaim', {
     from: deployer,
     log: true,
-    args: [
-      polygonSand.address,
-      process.env.FAKE_POLYGON_SAND,
-      process.env.DURATION_OF_CLAIM,
-    ],
+    args: [polygonSand.address, process.env.FAKE_POLYGON_SAND],
     skipIfAlreadyDeployed: true,
   });
 };
