@@ -16,10 +16,27 @@ interface IPolygonSand {
     /// @param amount amount to withdraw
     function withdraw(uint256 amount) external;
 
-    /// @notice called when user wants to transfer tokens to another address
-    /// @param to address to transfer
-    /// @param amount amount to transfer
-    function transfer(address to, uint256 amount) external;
+    /// @notice Get the balance of `owner`.
+    /// @param owner The address to query the balance of.
+    /// @return The amount owned by `owner`.
+    function balanceOf(address owner) external returns (uint256);
+
+    /// @notice transfer tokens to a specific address.
+    /// @param to destination address receiving the tokens.
+    /// @param amount number of tokens to transfer.
+    /// @return success whether the transfer succeeded.
+    function transfer(address to, uint256 amount) external returns (bool success);
+
+    /// @notice transfer tokens from one address to another.
+    /// @param from address tokens will be sent from.
+    /// @param to destination address receiving the tokens.
+    /// @param amount number of tokens to transfer.
+    /// @return success whether the transfer succeeded.
+    function transferFrom(
+        address from,
+        address to,
+        uint256 amount
+    ) external returns (bool success);
 
     function setTrustedForwarder(address trustedForwarder) external;
 }
