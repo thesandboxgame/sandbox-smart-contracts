@@ -22,7 +22,7 @@ contract PolygonSandClaim is Ownable, ReentrancyGuard {
      * @param amount the amount of tokens to be swapped
      */
     function claim(uint256 amount) external nonReentrant {
-        require(unclaimedSand() > amount, "Not enough sand for claim");
+        require(unclaimedSand() >= amount, "Not enough sand for claim");
         bool success = _fakePolygonSand.transferFrom(msg.sender, address(this), amount);
         if (success) {
             _polygonSand.transfer(msg.sender, amount);

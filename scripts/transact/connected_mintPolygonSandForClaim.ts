@@ -12,21 +12,17 @@ const args = process.argv.slice(2);
   }
 
   /*
-    Four arguments are required by the script
-    1) Address of the claim contract
-    2) Address of the fake PolygonSand contract
-    3) Address of the our PolygonSand contract
-    4) Boolean flag for minting
+    Two arguments are required by the script
+    1) Address of the fake PolygonSand contract
+    2) Boolean flag for minting
   */
-  if (args.length != 4) {
+  if (args.length != 2) {
     throw new Error('wrong number of arguments passed');
   }
 
   // Fetching parameters
-  const claimsContractAddress = args[0];
-  const oldSandContractAddress = args[1];
-  const newSandContractAddress = args[2];
-  const mintTokens = args[3] == 'true' ? true : false;
+  const fakeSandContractAddress = args[0];
+  const mintTokens = args[1] == 'true' ? true : false;
 
   // User for contract interactions
   const {deployer} = await getNamedAccounts();
@@ -40,12 +36,14 @@ const args = process.argv.slice(2);
 
   // Get contract instance
   const Contract = await ethers.getContractFactory('PolygonSand');
-  const oldSandContract = Contract.attach(oldSandContractAddress);
-  const newSandContract = Contract.attach(newSandContractAddress);
+  const fakeSandContract = Contract.attach(fakeSandContractAddress);
+
+  const polygonSand = await ethers.getContract('PolygonSand');
+  const claimsContract = await ethers.getContract('PolygonSandClaim');
 
   // Update childChainManagerProxy to allow deposit on contract
   if (childChainManagerProxy != deployer && mintTokens) {
-    const updateProxyManagerTx = await newSandContract.updateChildChainManager(
+    const updateProxyManagerTx = await polygonSand.updateChildChainManager(
       deployer
     );
 
@@ -59,10 +57,11 @@ const args = process.argv.slice(2);
     await updateProxyManagerTx.wait();
   }
 
-  const totalFakeSand = BigNumber.from(await oldSandContract.totalSupply());
+  const totalFakeSand = BigNumber.from(await fakeSandContract.totalSupply());
   console.log('Total Supply of Fake Sand', totalFakeSand.toString());
+
   const balanceOfClaimContract = BigNumber.from(
-    await newSandContract.balanceOf(claimsContractAddress)
+    await polygonSand.balanceOf(claimsContract.address)
   );
   console.log(
     'Sand balance of Claim contract',
@@ -85,26 +84,24 @@ const args = process.argv.slice(2);
     console.log('Minting tokens to PolygonSandClaim contract');
     const abiCoder = ethers.utils.defaultAbiCoder;
     const encodedAmount = abiCoder.encode(['uint256'], [mintAmount.toString()]);
-    const tx = await newSandContract.deposit(
-      claimsContractAddress,
-      encodedAmount
-    );
+    const tx = await polygonSand.deposit(claimsContract.address, encodedAmount);
     await tx.wait();
     console.log('Successfully minted', mintAmount.toString(), 'tokens');
   }
 
   if (mintTokens) {
     // Fetching childChainManagerProxy address
-    const envChildChainManagerProxy =
-      process.env[`CHILD_CHAIN_MANAGER_PROXY_${network.name.toUpperCase()}`];
-    const childChainManagerProxyAddress = envChildChainManagerProxy
-      ? envChildChainManagerProxy
+    const CHILD_CHAIN_MANAGER = await deployments.getOrNull(
+      'CHILD_CHAIN_MANAGER'
+    );
+    const childChainManagerProxyAddress = CHILD_CHAIN_MANAGER?.address
+      ? CHILD_CHAIN_MANAGER?.address
       : childChainManagerProxy;
 
     // Reset childChainManagerProxy on the new PolygonSand contract
     if (deployer != childChainManagerProxyAddress) {
       console.log('Resetting childChainManagerProxy');
-      const resetProxyManagerTx = await newSandContract.updateChildChainManager(
+      const resetProxyManagerTx = await polygonSand.updateChildChainManager(
         childChainManagerProxyAddress
       );
       await resetProxyManagerTx.wait();

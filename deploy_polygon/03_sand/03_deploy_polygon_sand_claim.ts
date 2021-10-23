@@ -10,10 +10,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const polygonSand = await deployments.get('PolygonSand');
 
+  const childChainManager = await deployments.getOrNull('CHILD_CHAIN_MANAGER');
   await deploy('PolygonSandClaim', {
     from: deployer,
     log: true,
-    args: [polygonSand.address, process.env.FAKE_POLYGON_SAND],
+    args: [polygonSand.address, childChainManager?.address],
     skipIfAlreadyDeployed: true,
   });
 };
