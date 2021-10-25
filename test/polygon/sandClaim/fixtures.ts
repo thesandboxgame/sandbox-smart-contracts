@@ -4,63 +4,55 @@ import {withSnapshot} from '../../utils';
 import {waitFor} from '../../utils';
 import {BigNumber} from '@ethersproject/bignumber';
 
-export const setupPolygonSandClaim = withSnapshot(['PolygonSand'], async () => {
-  const {deployer, sandAdmin} = await getNamedAccounts();
-  const polygonSand: Contract = await ethers.getContract('PolygonSand');
-  await deployments.deploy(`FakePolygonSand`, {
-    contract: 'FakePolygonSand',
-    from: deployer,
-    log: true,
-  });
+export const setupPolygonSandClaim = withSnapshot(
+  ['PolygonSand', 'PolygonSandClaim', 'FakePolygonSand'],
+  async () => {
+    const {deployer, sandAdmin} = await getNamedAccounts();
+    const polygonSand: Contract = await ethers.getContract('PolygonSand');
+    const fakePolygonSand: Contract = await ethers.getContract(
+      'FakePolygonSand'
+    );
+    const polygonSandClaim = await ethers.getContract('PolygonSandClaim');
 
-  const fakePolygonSand: Contract = await ethers.getContract('FakePolygonSand');
+    const fakeSandTotal = await fakePolygonSand.totalSupply();
+    await waitFor(
+      fakePolygonSand
+        .connect(ethers.provider.getSigner(deployer))
+        .transfer(sandAdmin, fakeSandTotal.div(BigNumber.from('2')))
+    );
 
-  await deployments.deploy(`PolygonSandClaim`, {
-    contract: 'PolygonSandClaim',
-    from: deployer,
-    log: true,
-    args: [polygonSand.address, fakePolygonSand.address],
-  });
+    await waitFor(
+      fakePolygonSand
+        .connect(ethers.provider.getSigner(sandAdmin))
+        .approve(
+          polygonSandClaim.address,
+          fakeSandTotal.div(BigNumber.from('2'))
+        )
+    );
 
-  const polygonSandClaim: Contract = await ethers.getContract(
-    'PolygonSandClaim'
-  );
+    await waitFor(
+      polygonSand
+        .connect(ethers.provider.getSigner(deployer))
+        .updateChildChainManager(deployer)
+    );
 
-  const fakeSandTotal = await fakePolygonSand.totalSupply();
-  await waitFor(
-    fakePolygonSand
-      .connect(ethers.provider.getSigner(deployer))
-      .transfer(sandAdmin, fakeSandTotal.div(BigNumber.from('2')))
-  );
+    const abiCoder = ethers.utils.defaultAbiCoder;
+    const encodedAmount = abiCoder.encode(
+      ['uint256'],
+      [fakeSandTotal.toString()]
+    );
+    await waitFor(
+      polygonSand
+        .connect(ethers.provider.getSigner(deployer))
+        .deposit(polygonSandClaim.address, encodedAmount)
+    );
 
-  await waitFor(
-    fakePolygonSand
-      .connect(ethers.provider.getSigner(sandAdmin))
-      .approve(polygonSandClaim.address, fakeSandTotal.div(BigNumber.from('2')))
-  );
-
-  await waitFor(
-    polygonSand
-      .connect(ethers.provider.getSigner(deployer))
-      .updateChildChainManager(deployer)
-  );
-
-  const abiCoder = ethers.utils.defaultAbiCoder;
-  const encodedAmount = abiCoder.encode(
-    ['uint256'],
-    [fakeSandTotal.toString()]
-  );
-  await waitFor(
-    polygonSand
-      .connect(ethers.provider.getSigner(deployer))
-      .deposit(polygonSandClaim.address, encodedAmount)
-  );
-
-  return {
-    deployer,
-    sandAdmin,
-    polygonSand,
-    fakePolygonSand,
-    polygonSandClaim,
-  };
-});
+    return {
+      deployer,
+      sandAdmin,
+      polygonSand,
+      fakePolygonSand,
+      polygonSandClaim,
+    };
+  }
+);

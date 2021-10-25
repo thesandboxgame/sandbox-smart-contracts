@@ -16,13 +16,12 @@ const args = process.argv.slice(2);
     1) Address of the fake PolygonSand contract
     2) Boolean flag for minting
   */
-  if (args.length != 2) {
+  if (args.length != 1) {
     throw new Error('wrong number of arguments passed');
   }
 
-  // Fetching parameters
-  const fakeSandContractAddress = args[0];
-  const mintTokens = args[1] == 'true' ? true : false;
+  // Fetching parameter
+  const mintTokens = args[0] == 'true' ? true : false;
 
   // User for contract interactions
   const {deployer} = await getNamedAccounts();
@@ -35,9 +34,7 @@ const args = process.argv.slice(2);
   );
 
   // Get contract instance
-  const Contract = await ethers.getContractFactory('PolygonSand');
-  const fakeSandContract = Contract.attach(fakeSandContractAddress);
-
+  const fakeSandContract = await ethers.getContract('FakePolygonSand');
   const polygonSand = await ethers.getContract('PolygonSand');
   const claimsContract = await ethers.getContract('PolygonSandClaim');
 

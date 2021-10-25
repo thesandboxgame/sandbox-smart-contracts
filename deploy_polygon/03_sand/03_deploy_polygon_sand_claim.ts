@@ -1,6 +1,5 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import 'dotenv/config';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -9,12 +8,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer} = await getNamedAccounts();
 
   const polygonSand = await deployments.get('PolygonSand');
+  const fakePolygonSand = await deployments.get('FakePolygonSand');
 
-  const childChainManager = await deployments.getOrNull('CHILD_CHAIN_MANAGER');
   await deploy('PolygonSandClaim', {
     from: deployer,
     log: true,
-    args: [polygonSand.address, childChainManager?.address],
+    args: [polygonSand.address, fakePolygonSand.address],
     skipIfAlreadyDeployed: true,
   });
 };
