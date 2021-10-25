@@ -80,29 +80,6 @@ describe('PolygonSandClaim', function () {
 
   // Getters
 
-//   it('returns the amount of sand which is still unclaimed', async function () {
-//     const {
-//       deployer,
-//       polygonSand,
-//       polygonSandClaim,
-//     } = await setupPolygonSandClaim();
-
-//     const unclaimedBalance = await polygonSandClaim
-//       .connect(ethers.provider.getSigner(deployer))
-//       .unclaimedSand();
-
-//     const polygonSandBalance = await polygonSand.balanceOf(
-//       polygonSandClaim.address
-//     );
-
-//     console.log(unclaimedBalance);
-//     console.log(polygonSandBalance.toString());
-
-//     // expect(unclaimedBalance).to.be.equal(
-//     //   await polygonSand.balanceOf(polygonSandClaim.address)
-//     // );
-//   });
-
   it('returns the amount of sand which has been claimed', async function () {
     const {
       deployer,
