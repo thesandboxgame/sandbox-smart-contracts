@@ -14,7 +14,11 @@ const args = process.argv.slice(2);
  */
 (async () => {
   // Only for minting tokens through deposit method on Mumbai or Matic network
-  if (network.name !== "hardhat" && network.name !== 'polygon' && network.name !== 'mumbai') {
+  if (
+    network.name !== 'hardhat' &&
+    network.name !== 'polygon' &&
+    network.name !== 'mumbai'
+  ) {
     throw new Error('only for polygon/mumbai');
   }
 
