@@ -5,7 +5,7 @@ import {waitFor} from '../../utils';
 import {BigNumber} from '@ethersproject/bignumber';
 
 export const setupPolygonSandClaim = withSnapshot(
-  ['PolygonSand', 'PolygonSandClaim', 'FakePolygonSand'],
+  ['PolygonSand', 'PolygonSandClaim', 'FAKE_POLYGON_SAND'],
   async () => {
     const {deployer, sandAdmin} = await getNamedAccounts();
     const polygonSand: Contract = await ethers.getContract('PolygonSand');

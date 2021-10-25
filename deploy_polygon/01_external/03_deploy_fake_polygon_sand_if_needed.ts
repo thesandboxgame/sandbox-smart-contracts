@@ -8,14 +8,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  let fakePolygonSand = await deployments.getOrNull('FakePolygonSand');
-  if (!fakePolygonSand) {
-    fakePolygonSand = await deploy('FakePolygonSand', {
+  let FAKE_POLYGON_SAND = await deployments.getOrNull('FakePolygonSand');
+  if (!FAKE_POLYGON_SAND) {
+    FAKE_POLYGON_SAND = await deploy('FakePolygonSand', {
       from: deployer,
       log: true,
     });
   }
 };
 export default func;
-func.tags = ['FakePolygonSand', 'L2'];
+func.tags = ['FAKE_POLYGON_SAND', 'L2'];
 func.skip = skipUnlessTestnet;

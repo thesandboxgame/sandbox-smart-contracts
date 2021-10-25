@@ -8,12 +8,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer} = await getNamedAccounts();
 
   const polygonSand = await deployments.get('PolygonSand');
-  const fakePolygonSand = await deployments.get('FakePolygonSand');
+  const FAKE_POLYGON_SAND = await deployments.get('FakePolygonSand');
 
   await deploy('PolygonSandClaim', {
     from: deployer,
     log: true,
-    args: [polygonSand.address, fakePolygonSand.address],
+    args: [polygonSand.address, FAKE_POLYGON_SAND.address],
     skipIfAlreadyDeployed: true,
   });
 };
