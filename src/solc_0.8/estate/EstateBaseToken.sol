@@ -23,12 +23,19 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
     uint16 internal constant GRID_SIZE = 408;
     uint64 internal _nextId; // max uint64 = 18,446,744,073,709,551,615
     mapping(uint256 => bytes32) internal _metaData;
+
     // estates key = storageId
     // EnumerableMap.UintToUintMap keys = land ids
     // EnumerableMap.UintToUintMap values = game ids
+    //map to a map
     mapping(uint256 => EnumerableMap.UintToUintMap) internal estates;
+
     // gamesToLands key = gameId, value = landIds
     mapping(uint256 => EnumerableSet.UintSet) internal gamesToLands;
+    //yes we can have multiple lands per games
+    //I wonder why use sets
+    //what's the impact on gas
+
     LandToken internal _land;
     GameBaseToken internal _gameToken;
 
@@ -36,10 +43,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
     /// @param gameId Games added
     /// @param uri ipfs hash (without the prefix, assume cidv1 folder)
     struct EstateCRUDData {
-        //uint256[] landIds;
-        uint256[] landSizes;
-        uint256[] landXs;
-        uint256[] landYs;
+        uint256[] landIds;
         uint256[] gameIds;
         bytes32 uri;
     }
@@ -78,12 +82,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         _check_authorized(from, ADD);
         (uint256 estateId, uint256 storageId) = _mintEstate(from, to, _nextId++, 1, true);
         _metaData[storageId] = creation.uri;
-        _addLandsGames(
-            from,
-            storageId,
-            creation, /*.landIds, creation.gameIds*/
-            true
-        );
+        _addLandsGames(from, storageId, creation.landIds, creation.gameIds, true);
         emit EstateTokenUpdated(0, estateId, creation);
         return estateId;
     }
@@ -104,12 +103,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         uint256 storageId = _storageId(estateId);
         _metaData[storageId] = update.uri;
         _check_authorized(from, ADD);
-        _addLandsGames(
-            from,
-            estateId,
-            update, /*.landIds, update.gameIds*/
-            false
-        );
+        _addLandsGames(from, estateId, update.landIds, update.gameIds, false);
         uint256 newId = _incrementTokenVersion(to, estateId);
         emit EstateTokenUpdated(estateId, newId, update);
         return newId;
@@ -236,107 +230,9 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         return EstateData({landIds: landIds, gameIds: gameIds});
     }
 
+    //this was breaking compilation
     /*function getLandsForGame(uint256 gameId) public view returns (uint256[] memory landIds) {
         return gamesToLands[gameId].values();
-    }*/
-
-    /*function areLandsAdjacent(uint256[] memory landIds) public pure returns (bool) {
-        uint256 landIdsSize = landIds.length;
-
-        if (landIdsSize == 0) {
-            return true;
-        }
-
-        uint256[] memory visitedLands = new uint256[](landIds.length);
-        uint256[] memory stack = new uint256[](landIds.length);
-        uint256 stackSize;
-        uint256 visitedLandsSize;
-
-        stack[stackSize] = landIds[stackSize];
-        visitedLands[visitedLandsSize] = landIds[stackSize];
-        stackSize++;
-        visitedLandsSize++;
-
-        while (((stackSize > 0) && (landIdsSize > visitedLandsSize))) {
-            uint16 x = uint16(stack[stackSize - 1] % GRID_SIZE);
-            uint16 y = uint16(stack[stackSize - 1] / GRID_SIZE);
-
-            if (isItInArray(calculateId(x, y - 1), landIds) && (!isItInArray(calculateId(x, y - 1), visitedLands))) {
-                stack[stackSize] = calculateId(x, y - 1);
-                visitedLands[visitedLandsSize] = stack[stackSize];
-                stackSize++;
-                visitedLandsSize++;
-            } else if (
-                isItInArray(calculateId(x, y + 1), landIds) && (!isItInArray(calculateId(x, y + 1), visitedLands))
-            ) {
-                stack[stackSize] = calculateId(x, y + 1);
-                stackSize++;
-                visitedLands[visitedLandsSize] = stack[stackSize - 1];
-                visitedLandsSize++;
-            } else if (
-                isItInArray(calculateId(x - 1, y), landIds) && (!isItInArray(calculateId(x - 1, y), visitedLands))
-            ) {
-                stack[stackSize] = calculateId(x - 1, y);
-                stackSize++;
-                visitedLands[visitedLandsSize] = stack[stackSize - 1];
-                visitedLandsSize++;
-            } else if (
-                isItInArray(calculateId(x + 1, y), landIds) && (!isItInArray(calculateId(x + 1, y), visitedLands))
-            ) {
-                stack[stackSize] = calculateId(x + 1, y);
-                stackSize++;
-                visitedLands[visitedLandsSize] = stack[stackSize - 1];
-                visitedLandsSize++;
-            } else {
-                stack[stackSize - 1] = 0;
-                stackSize--;
-            }
-        }
-
-        return landIdsSize == visitedLandsSize;
-    }*/
-
-    /*function calculateId(uint256 x, uint256 y) public pure returns (uint256) {
-        uint256 id = x + y * GRID_SIZE;
-        return id;
-    }*/
-
-    /*function isItInArray(uint256 id, uint256[] memory landIds) public pure returns (bool) {
-        uint256 size = landIds.length;
-        bool flag = false;
-
-        for (uint256 i = 0; i < size; i++) {
-            if (landIds[i] == id) {
-                flag = true;
-                break;
-            }
-        }
-        return flag;
-    }*/
-
-    // A depth first search implementation
-    /*function areLandsAdjacent(uint256[] memory landIds, uint256 landIdsSize) public pure returns (bool) {
-        if (landIdsSize == 0) {
-            return true;
-        }
-        uint256[] memory visitedLands = new uint256[](landIds.length);
-        uint256[] memory stack = new uint256[](landIds.length);
-        uint256 stackSize;
-        uint256 visitedLandsSize;
-        stack[stackSize] = landIds[stackSize];
-        stackSize++;
-
-        while (stackSize > 0) {
-            uint256 landId = stack[stackSize - 1];
-            stack[stackSize - 1] = 0;
-            stackSize--;
-            uint16 x = uint16(landId % GRID_SIZE);
-            uint16 y = uint16(landId / GRID_SIZE);
-            stackSize = _addUnvisitedAdjacentLands(x, y, landIds, visitedLands, stack, stackSize);
-            visitedLands[visitedLandsSize] = landId;
-            visitedLandsSize++;
-        }
-        return landIdsSize == visitedLandsSize;
     }*/
 
     /// @notice Return the name of the token contract.
@@ -380,19 +276,9 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
 
     // //////////////////////////////////////////////////////////////////////////////////////////////////////
 
-    /* uint256 internal constant LAYER = 0xFF00000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_1x1 = 0x0000000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_3x3 = 0x0100000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_6x6 = 0x0200000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_12x12 = 0x0300000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
-
-    uint256 internal constant LAYER_N3x3 = 0xFE00000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_N6x6 = 0xFD00000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_N12x12 = 0xFC00000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_N24x24 = 0xFB00000000000000000000000000000000000000000000000000000000000000;
-
-    function separateId(uint256[] memory landIds)
+    function separateId(
+        uint256[] memory landIds //sizes are always 1
+    )
         public
         returns (
             uint256[] memory,
@@ -406,49 +292,25 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         uint256[] memory ys = new uint256[](numLds);
 
         for (uint256 i = 0; i < numLds; i++) {
-            if (landIds[i] & LAYER == 0) {
-                sizes[i] = 1;
-                xs[i] = _land.x(landIds[i]);
-                ys[i] = _land.y(landIds[i]);
-            } else if (landIds[i] & LAYER_N3x3 == 0) {
-                sizes[i] = 3;
-                xs[i] = _land.x(landIds[i] - LAYER_3x3);
-                ys[i] = _land.y(landIds[i] - LAYER_3x3);
-            } else if (landIds[i] & LAYER_N6x6 == 0) {
-                sizes[i] = 6;
-                xs[i] = _land.x(landIds[i] - LAYER_6x6);
-                ys[i] = _land.y(landIds[i] - LAYER_6x6);
-            } else if (landIds[i] & LAYER_N12x12 == 0) {
-                sizes[i] = 12;
-                xs[i] = _land.x(landIds[i] - LAYER_12x12);
-                ys[i] = _land.y(landIds[i] - LAYER_12x12);
-            } else if (landIds[i] & LAYER_N24x24 == 0) {
-                sizes[i] = 24;
-                xs[i] = _land.x(landIds[i] - LAYER_24x24);
-                ys[i] = _land.y(landIds[i] - LAYER_24x24);
-            }
+            sizes[i] = 1;
+            xs[i] = _land.x(landIds[i]);
+            ys[i] = _land.y(landIds[i]);
         }
         return (sizes, xs, ys);
-    } */
+    }
 
     function _addLandsGames(
         address sender,
         uint256 estateId,
-        //uint256[] memory landIdsToAdd,
-        //uint256[] memory gameIds,
-        EstateCRUDData calldata creation,
+        uint256[] memory landIdsToAdd,
+        uint256[] memory gameIds,
         bool justCreated
     ) internal {
         uint256 storageId = _storageId(estateId);
-        //uint256[] memory newLands;
-        uint256[] memory sizes;
-        uint256[] memory xs;
-        uint256[] memory ys;
+        uint256[] memory newLands;
 
         if (justCreated) {
-            sizes = creation.landSizes; //landIdsToAdd;
-            xs = creation.landXs;
-            ys = creation.landYs;
+            newLands = landIdsToAdd;
         } else {
             EstateData memory ed = getEstateData(estateId);
             newLands = new uint256[](landIdsToAdd.length + ed.landIds.length);
@@ -472,8 +334,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         (, uint256[] memory gamesToAdd) = _setGamesOfLands(storageId, landIdsToAdd, gameIds, false);
         //_land.batchTransferFrom(sender, address(this), landIdsToAdd, "");
 
-        //(uint256[] memory sizes, uint256[] memory xs, uint256[] memory ys) = separateId(landIdsToAdd);
-
+        (uint256[] memory sizes, uint256[] memory xs, uint256[] memory ys) = separateId(landIdsToAdd);
         _land.batchTransferQuad(sender, address(this), sizes, xs, ys, "");
         _gameToken.batchTransferFrom(sender, address(this), gamesToAdd, "");
     }
@@ -485,7 +346,9 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
     ) internal {
         uint256 storageId = _storageId(estateId);
         EstateData memory ed = getEstateData(storageId);
+
         uint256 removedLandsCounter;
+
         for (uint256 k = 0; k < ed.landIds.length; k++) {
             for (uint256 i = 0; i < landsToRemove.length; i++) {
                 if (ed.landIds[k] == landsToRemove[i]) {
@@ -494,21 +357,27 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
                 }
             }
         }
+
         //require(areLandsAdjacent(ed.landIds, ed.landIds.length - removedLandsCounter), "LANDS_ARE_NOT_ADJACENT");
         uint256[] memory gameIdsToRemove = _removeLandsGamesNoAdjacencyCheck(to, estateId, landsToRemove);
         // a game should be removed only if all lands that attached to it are being removed too
+
         for (uint256 j = 0; j < gameIdsToRemove.length; j++) {
             require(gamesToLands[gameIdsToRemove[j]].length() == 0, "GAME_IS_ATTACHED_TO_OTHER_LANDS");
         }
     }
 
     function _removeLandsGamesNoAdjacencyCheck(
+        //NO NEED FOR THIS ANYMORE
         address to,
         uint256 estateId,
         uint256[] memory landsToRemove
     ) internal returns (uint256[] memory gameIdsToRemove) {
         uint256 storageId = _storageId(estateId);
+
+        //what do we get with this set?
         (gameIdsToRemove, ) = _setGamesOfLands(storageId, landsToRemove, new uint256[](landsToRemove.length), true);
+        //get games to remove
         _land.batchTransferFrom(address(this), to, landsToRemove, "");
         _gameToken.batchTransferFrom(address(this), to, gameIdsToRemove, "");
     }
@@ -524,19 +393,26 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         bool isRemove
     ) internal returns (uint256[] memory gamesToRemove, uint256[] memory gamesToAdd) {
         // lands without games will be represented as gameId = 0
+
         require(landIds.length == gameIds.length, "DIFFERENT_LENGTH_LANDS_GAMES");
+        //this doesn't work we can have more lands than games
         require(landIds.length > 0, "EMPTY_LAND_IDS_ARRAY");
+
         gamesToRemove = new uint256[](gameIds.length);
         gamesToAdd = new uint256[](gameIds.length);
         uint256 prevOldGame;
+
         for (uint256 i = 0; i < landIds.length; i++) {
             uint256 gameId = gameIds[i];
+
             (, uint256 oldGameId) = estates[storageId].tryGet(landIds[i]);
+
             if (isRemove) {
                 require(estates[storageId].remove(landIds[i]), "LAND_DOES_NOT_EXIST");
             } else {
                 estates[storageId].set(landIds[i], gameId);
             }
+
             // skip gameId=0, games duplications, and existing games
             if (oldGameId != 0) {
                 gamesToLands[oldGameId].remove(landIds[i]);
@@ -544,6 +420,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
                     gamesToRemove[i] = oldGameId;
                 }
             }
+
             // skip gameId=0, games duplications, and existing games
             if (gameId != 0) {
                 gamesToLands[gameId].add(landIds[i]);
@@ -551,6 +428,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
                     gamesToAdd[i] = gameId;
                 }
             }
+
             prevOldGame = oldGameId;
         }
     }
@@ -623,8 +501,11 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
 
     function _check_hasOwnerRights(address sender, uint256 estateId) internal view {
         (address owner, bool operatorEnabled) = _ownerAndOperatorEnabledOf(estateId);
+
         require(owner != address(uint160(0)), "TOKEN_DOES_NOT_EXIST");
+
         address msgSender = _msgSender();
+
         require(
             owner == sender ||
                 _superOperators[msgSender] ||
@@ -632,38 +513,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
                 (operatorEnabled && _operators[estateId] == msgSender),
             "NOT_APPROVED"
         );
-    }
-
-    /*function _addUnvisitedAdjacentLands(
-        uint16 x1,
-        uint16 y1,
-        uint256[] memory landIds,
-        uint256[] memory visitedLands,
-        uint256[] memory stack,
-        uint256 stackSize
-    ) internal pure returns (uint256) {
-        // maximum of 4 adjacent lands is possible
-        for (uint256 i = 0; i < landIds.length; i++) {
-            if (landIds[i] == 0) {
-                continue;
-            }
-            uint16 x2 = uint16(landIds[i] % GRID_SIZE);
-            uint16 y2 = uint16(landIds[i] / GRID_SIZE);
-            if (_areAdjacent(x1, y1, x2, y2) && !isLandVisited(landIds[i], visitedLands)) {
-                stack[stackSize] = landIds[i];
-                stackSize++;
-            }
-        }
-        return stackSize;
-    }*/
-
-    function isLandVisited(uint256 landId, uint256[] memory visitedLands) internal pure returns (bool) {
-        for (uint256 i = 0; i < visitedLands.length; i++) {
-            if (visitedLands[i] == landId) {
-                return true;
-            }
-        }
-        return false;
     }
 
     function _encode(
@@ -686,18 +535,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         size = uint8(data / (2**18));
         y = uint16((data % (2**18)) / GRID_SIZE);
         x = uint16(data % GRID_SIZE);
-    }
-
-    function _areAdjacent(
-        uint16 x1,
-        uint16 y1,
-        uint16 x2,
-        uint16 y2
-    ) internal pure returns (bool) {
-        return ((x1 == x2 && y1 == y2 - 1) ||
-            (x1 == x2 && y1 == y2 + 1) ||
-            (x1 == x2 - 1 && y1 == y2) ||
-            (x1 == x2 + 1 && y1 == y2));
     }
 
     /// @dev Get the a full URI string for a given hash + gameId.

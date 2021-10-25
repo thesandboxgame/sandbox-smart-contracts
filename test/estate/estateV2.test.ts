@@ -140,10 +140,7 @@ describe('EstateV2', function () {
       estateContract
         .connect(ethers.provider.getSigner(user0))
         .createEstate(user0, user0, {
-          //landIds: landIds,
-          landSizes: 1,
-          landXs: 6,
-          landYs: 12,
+          landIds: landIds,
           gameIds: gameIds,
           uri,
         })
@@ -290,6 +287,46 @@ describe('EstateV2', function () {
           uri,
         })
     );
+    console.log('gas used for estate creation ' + receipt.gasUsed);
+  });
+
+  it('create a estate with 3x3 quad and try to recover one quad', async function () {
+    const {
+      estateContract,
+      landContractAsMinter,
+      landContractAsUser0,
+      user0,
+      gameToken,
+      gameTokenAsUser0,
+    } = await setupEstate();
+    const uri =
+      '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+    const mintingData: LandMintingData[] = [];
+    const mintingGames = [];
+
+    mintingData.push({beneficiary: user0, size: 3, x: 0, y: 0});
+    mintingGames.push(1);
+
+    const landIds = await mintLands(landContractAsMinter, mintingData);
+    const {gameIds} = await mintGames(gameToken, user0, mintingGames, 0);
+
+    for (let i = 0; i < landIds.length; i++) {
+      await gameTokenAsUser0.approve(estateContract.address, gameIds[i]);
+    }
+
+    await waitFor(landContractAsUser0.setUpTranferRole(estateContract.address));
+
+    const receipt = await waitFor(
+      estateContract
+        .connect(ethers.provider.getSigner(user0))
+        .createEstate(user0, user0, {
+          landIds: landIds,
+          gameIds: gameIds,
+          uri,
+        })
+    );
+
+    //try to recover a part
     console.log('gas used for estate creation ' + receipt.gasUsed);
   });
 
@@ -933,9 +970,11 @@ describe('EstateV2', function () {
     gameIds = [gameIds[0], gameIds[0], gameIds[0]];
 
     for (let i = 0; i < landIds.length; i++) {
-      await landContractAsUser0.approve(estateContract.address, landIds[i]);
+      //await landContractAsUser0.approve(estateContract.address, landIds[i]);
       await gameTokenAsUser0.approve(estateContract.address, gameIds[i]);
     }
+
+    await waitFor(landContractAsUser0.setUpTranferRole(estateContract.address));
 
     await waitFor(
       estateContract
