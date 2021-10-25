@@ -10,7 +10,7 @@ export const setupPolygonSandClaim = withSnapshot(
     const {deployer, sandAdmin} = await getNamedAccounts();
     const polygonSand: Contract = await ethers.getContract('PolygonSand');
     const fakePolygonSand: Contract = await ethers.getContract(
-      'FakePolygonSand'
+      'FAKE_POLYGON_SAND'
     );
     const polygonSandClaim = await ethers.getContract('PolygonSandClaim');
 

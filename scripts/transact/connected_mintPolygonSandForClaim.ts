@@ -5,6 +5,13 @@ import 'dotenv/config';
 const {read} = deployments;
 const args = process.argv.slice(2);
 
+/**
+ * How to use:
+ *  - yarn execute <NETWORK> ./scripts/transact/connected_mintPolygonSandForClaim.ts <MINT_BOOLEAN_FLAG>
+ *
+ * MINT_BOOLEAN_FLAG: true/false
+ * Keeping the MINT_BOOLEAN_FLAG false only logs the balances and does not mint any tokens
+ */
 (async () => {
   // Only for minting tokens through deposit method on Mumbai or Matic network
   if (network.name !== 'polygon' && network.name !== 'mumbai') {
@@ -12,9 +19,8 @@ const args = process.argv.slice(2);
   }
 
   /*
-    Two arguments are required by the script
+    One argument is required by the script
     1) Address of the fake PolygonSand contract
-    2) Boolean flag for minting
   */
   if (args.length != 1) {
     throw new Error('wrong number of arguments passed');
@@ -34,7 +40,7 @@ const args = process.argv.slice(2);
   );
 
   // Get contract instance
-  const fakeSandContract = await ethers.getContract('FakePolygonSand');
+  const fakeSandContract = await ethers.getContract('FAKE_POLYGON_SAND');
   const polygonSand = await ethers.getContract('PolygonSand');
   const claimsContract = await ethers.getContract('PolygonSandClaim');
 

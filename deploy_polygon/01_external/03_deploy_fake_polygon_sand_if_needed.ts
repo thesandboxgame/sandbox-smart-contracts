@@ -8,9 +8,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  let FAKE_POLYGON_SAND = await deployments.getOrNull('FakePolygonSand');
+  let FAKE_POLYGON_SAND = await deployments.getOrNull('FAKE_POLYGON_SAND');
   if (!FAKE_POLYGON_SAND) {
-    FAKE_POLYGON_SAND = await deploy('FakePolygonSand', {
+    FAKE_POLYGON_SAND = await deploy('FAKE_POLYGON_SAND', {
+      contract: 'FakePolygonSand',
       from: deployer,
       log: true,
     });
