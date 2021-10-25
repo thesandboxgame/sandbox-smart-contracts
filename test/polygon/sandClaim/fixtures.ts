@@ -1,4 +1,4 @@
-import {deployments, ethers, getNamedAccounts} from 'hardhat';
+import {ethers, getNamedAccounts} from 'hardhat';
 import {Contract} from 'ethers';
 import {withSnapshot} from '../../utils';
 import {waitFor} from '../../utils';
