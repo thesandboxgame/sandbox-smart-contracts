@@ -8,13 +8,19 @@ const assetMinterFixtures = async () => {
   const assetMinterContract = await ethers.getContract('AssetMinter');
   const assetContract = await ethers.getContract('Asset');
 
-  const {deployer} = await getNamedAccounts();
+  const {assetMinterAdmin, user3} = await getNamedAccounts();
 
   const assetMinterContractAsOwner = assetMinterContract.connect(
-    ethers.provider.getSigner(deployer)
+    ethers.provider.getSigner(assetMinterAdmin)
   );
+
+  const assetMinterContractAsUser3 = assetMinterContract.connect(
+    ethers.provider.getSigner(user3)
+  );
+
   return {
     assetMinterContractAsOwner,
+    assetMinterContractAsUser3,
     assetMinterContract,
     assetContract,
   };

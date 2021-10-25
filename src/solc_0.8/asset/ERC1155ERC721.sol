@@ -820,7 +820,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
 
     function _mintNFTs(
         uint16 offset,
-        uint256 numNFTs,
+        uint16 numNFTs,
         address owner,
         uint256[] memory ids
     ) internal {

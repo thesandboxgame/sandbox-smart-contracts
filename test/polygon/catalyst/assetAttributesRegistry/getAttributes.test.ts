@@ -33,15 +33,15 @@ describe('AssetAttributesRegistry: getAttributes', function () {
     gemIds: number[],
     minter: Contract
   ): Promise<Receipt> {
-    return await minter.mintWithCatalyst(
-      catalystOwner,
-      mintOptions.packId,
-      mintOptions.metaDataHash,
-      catId,
-      gemIds,
-      catalystOwner,
-      mintOptions.data
-    );
+    const mintData = {
+      from: catalystOwner,
+      to: catalystOwner,
+      packId: mintOptions.packId,
+      metadataHash: mintOptions.metaDataHash,
+      data: mintOptions.data,
+    };
+
+    return await minter.mintWithCatalyst(mintData, catId, gemIds);
   }
 
   async function getCatEvents(
@@ -89,6 +89,7 @@ describe('AssetAttributesRegistry: getAttributes', function () {
         assetMinterAsUser0,
         catalystOwner,
       } = await setupAssetAttributesRegistryGemsAndCatalysts();
+
       const {id: assetId, receipt: mintReceipt} = await getAssetId(
         catalystOwner,
         assetAttributesRegistry,

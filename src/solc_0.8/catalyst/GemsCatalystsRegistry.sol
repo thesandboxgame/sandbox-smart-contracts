@@ -169,11 +169,11 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
         gem.burnFor(from, amount);
     }
 
-    function getNumberOfCatalystContract() external view returns (uint256 number) {
+    function getNumberOfCatalystContracts() external view returns (uint256 number) {
         number = _catalysts.length;
     }
 
-    function getNumberOfGemsContract() external view returns (uint256 number) {
+    function getNumberOfGemContracts() external view returns (uint256 number) {
         number = _gems.length;
     }
 

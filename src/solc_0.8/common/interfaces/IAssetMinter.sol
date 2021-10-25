@@ -3,55 +3,52 @@ pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
 interface IAssetMinter {
-    // asset no Catalyst needed for minting
-    enum AssetTypeNoTier {art, prop}
-
     struct AssetData {
         uint16[] gemIds;
         uint16 catalystId;
     }
 
     // use only to fix stack too deep
-    struct MintMultipleData {
+    struct MintData {
         address from;
+        address to;
         uint40 packId;
         bytes32 metadataHash;
+        bytes data;
     }
 
-    function mintWithoutCatalyst(
-        address from,
-        uint40 packId,
-        bytes32 metadataHash,
-        address to,
-        IAssetMinter.AssetTypeNoTier typeAsset,
-        bytes calldata data
-    ) external returns (uint256 assetId);
+    function mintWithoutCatalyst(MintData calldata mintData, uint16 typeAsset1Based) external returns (uint256 assetId);
 
     function mintWithCatalyst(
-        address from,
-        uint40 packId,
-        bytes32 metadataHash,
+        MintData calldata mintData,
         uint16 catalystId,
-        uint16[] calldata gemIds,
-        address to,
-        bytes calldata data
+        uint16[] calldata gemIds
     ) external returns (uint256 assetId);
 
-    function mintMultipleWithCatalyst(
-        MintMultipleData memory mintData,
-        AssetData[] memory assets,
-        address to,
-        bytes memory data
-    ) external returns (uint256[] memory assetIds);
+    function mintMultipleWithCatalyst(MintData calldata mintData, AssetData[] memory assets)
+        external
+        returns (uint256[] memory assetIds);
 
     function mintCustomNumberWithCatalyst(
-        address from,
-        uint40 packId,
-        bytes32 metadataHash,
+        MintData calldata mintData,
         uint16 catalystId,
         uint16[] calldata gemIds,
-        uint256 quantity,
-        address to,
-        bytes calldata data
+        uint256 quantity
     ) external returns (uint256 assetId);
+
+    function addOrReplaceQuantitiesByCatalyst(uint16 catalystId, uint256 newQuantity) external;
+
+    function addOrReplaceQuantitiesWithoutCatalyst(uint16 index1Based, uint256 newQuantity) external;
+
+    function getQuantitiesByCatalyst(uint16 catalystId) external view returns (uint256 quantity);
+
+    function getQuantitiesWithoutCatalyst(uint16 index1Based) external view returns (uint256 quantity);
+
+    function setNumberOfGemsBurnPerAsset(uint32 newQuantity) external;
+
+    function setNumberOfCatalystsBurnPerAsset(uint32 newQuantity) external;
+
+    function setGemsFactor(uint256 newQuantity) external;
+
+    function setCatalystsFactor(uint256 newQuantity) external;
 }
