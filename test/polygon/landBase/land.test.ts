@@ -293,4 +293,49 @@ describe('MockLandWithMint.sol', function () {
       expect(num2).to.equal(765);
     });
   });
+  describe('Test for TRANSFER_ROLE', function () {
+    it('input test with signatures', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+      const transBytes = landOwners[0].MockLandWithMint.TRANSFER_ROLE();
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          24,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const arraySize = [1, 1];
+      const arrayx = [1, 2];
+      const arrayy = [1, 2];
+
+      await landOwners[0].MockLandWithMint.setUpTranferRole(
+        landOwners[3].address
+      );
+      const role = await landOwners[3].MockLandWithMint.hasRole(
+        transBytes,
+        landOwners[3].address
+      );
+      console.log('does it have role? ');
+      console.log(role);
+
+      await landOwners[3].MockLandWithMint.batchTransferQuad(
+        landOwners[0].address,
+        landOwners[1].address,
+        arraySize,
+        arrayx,
+        arrayy,
+        bytes
+      );
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(2);
+    });
+  });
 });

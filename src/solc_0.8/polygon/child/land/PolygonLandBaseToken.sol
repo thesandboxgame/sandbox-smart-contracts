@@ -4,8 +4,9 @@ pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "../../../common/BaseWithStorage/ERC721BaseToken.sol";
+import "@openzeppelin/contracts-0.8/access/AccessControl.sol";
 
-contract PolygonLandBaseToken is ERC721BaseToken {
+contract PolygonLandBaseToken is ERC721BaseToken, AccessControl {
     using Address for address;
 
     uint256 internal constant GRID_SIZE = 408;
@@ -16,6 +17,8 @@ contract PolygonLandBaseToken is ERC721BaseToken {
     uint256 internal constant LAYER_6x6 = 0x0200000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_12x12 = 0x0300000000000000000000000000000000000000000000000000000000000000;
     uint256 internal constant LAYER_24x24 = 0x0400000000000000000000000000000000000000000000000000000000000000;
+
+    bytes32 public constant TRANSFER_ROLE = keccak256("TRANSFER_ROLE");
 
     /**
      * @notice Return the name of the token contract
@@ -31,6 +34,37 @@ contract PolygonLandBaseToken is ERC721BaseToken {
      */
     function symbol() external pure returns (string memory) {
         return "LAND";
+    }
+
+    //necessary to solve conflicts
+    function _msgData() internal view virtual override(ERC2771Handler, Context) returns (bytes calldata) {
+        return ERC2771Handler._msgData();
+    }
+
+    //necessary to solve conflicts
+    function _msgSender() internal view virtual override(ERC2771Handler, Context) returns (address sender) {
+        return ERC2771Handler._msgSender();
+    }
+
+    /// @notice x coordinate of Land token
+    /// @param id tokenId
+    /// @return the x coordinates
+    function x(uint256 id) external returns (uint256) {
+        require(_ownerOf(id) != address(0), "token does not exist");
+        return id % GRID_SIZE;
+    }
+
+    /// @notice y coordinate of Land token
+    /// @param id tokenId
+    /// @return the y coordinates
+    function y(uint256 id) external returns (uint256) {
+        require(_ownerOf(id) != address(0), "token does not exist");
+        return id / GRID_SIZE;
+    }
+
+    function setUpTranferRole(address add) external {
+        //only admin
+        _setupRole(TRANSFER_ROLE, add);
     }
 
     // solium-disable-next-line security/no-assign-params
@@ -74,7 +108,7 @@ contract PolygonLandBaseToken is ERC721BaseToken {
      * @param id The id of the interface
      * @return True if the interface is supported
      */
-    function supportsInterface(bytes4 id) public pure override returns (bool) {
+    function supportsInterface(bytes4 id) public pure override(AccessControl, ERC721BaseToken) returns (bool) {
         return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
     }
 
@@ -89,10 +123,10 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
         require(sizes.length == xs.length && xs.length == ys.length, "invalid data");
-        bool metaTx = msg.sender != from && isTrustedForwarder(msg.sender);
+        bool metaTx = msg.sender != from && (isTrustedForwarder(msg.sender) || hasRole(TRANSFER_ROLE, msg.sender));
         if (msg.sender != from && !metaTx) {
             require(
-                _superOperators[msg.sender] || _operatorsForAll[from][msg.sender],
+                _superOperators[msg.sender] || _operatorsForAll[from][msg.sender] || hasRole(TRANSFER_ROLE, msg.sender),
                 "not authorized to transferMultiQuads"
             );
         }
