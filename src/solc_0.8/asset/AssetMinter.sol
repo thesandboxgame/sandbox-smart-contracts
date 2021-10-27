@@ -180,7 +180,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     /// -metadataHash cidv1 ipfs hash of the folder where 0.json file contains the metadata)
     /// @param assets data (gems and catalyst data)
     function mintMultipleWithCatalyst(MintData calldata mintData, AssetData[] memory assets)
-        public
+        external
         override
         returns (uint256[] memory assetIds)
     {
