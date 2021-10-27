@@ -1,4 +1,4 @@
-import {ethers, getNamedAccounts} from 'hardhat';
+import {ethers, getNamedAccounts, getUnnamedAccounts} from 'hardhat';
 import {gemsAndCatalystsFixtures} from '../../../common/fixtures/gemAndCatalysts';
 import {assetAttributesRegistryFixture} from '../../../common/fixtures/assetAttributesRegistry';
 import {assetUpgraderFixtures} from '../../../common/fixtures/assetUpgrader';
@@ -7,8 +7,8 @@ import {withSnapshot} from '../../../utils';
 const assetMinterFixtures = async () => {
   const assetMinterContract = await ethers.getContract('AssetMinter');
   const assetContract = await ethers.getContract('Asset');
-
-  const {assetMinterAdmin, user3} = await getNamedAccounts();
+  const user3 = (await getUnnamedAccounts())[3];
+  const {assetMinterAdmin} = await getNamedAccounts();
 
   const assetMinterContractAsOwner = assetMinterContract.connect(
     ethers.provider.getSigner(assetMinterAdmin)
@@ -20,9 +20,10 @@ const assetMinterFixtures = async () => {
 
   return {
     assetMinterContractAsOwner,
-    assetMinterContractAsUser3,
     assetMinterContract,
     assetContract,
+    assetMinterContractAsUser3,
+    user3,
   };
 };
 

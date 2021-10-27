@@ -36,13 +36,9 @@ interface IAssetMinter {
         uint256 quantity
     ) external returns (uint256 assetId);
 
-    function addOrReplaceQuantitiesByCatalyst(uint16 catalystId, uint256 newQuantity) external;
+    function addOrReplaceQuantitiyByCatalystId(uint16 catalystId, uint256 newQuantity) external;
 
-    function addOrReplaceQuantitiesWithoutCatalyst(uint16 index1Based, uint256 newQuantity) external;
-
-    function getQuantitiesByCatalyst(uint16 catalystId) external view returns (uint256 quantity);
-
-    function getQuantitiesWithoutCatalyst(uint16 index1Based) external view returns (uint256 quantity);
+    function addOrReplaceAssetTypeQuantity(uint16 index1Based, uint256 newQuantity) external;
 
     function setNumberOfGemsBurnPerAsset(uint32 newQuantity) external;
 
@@ -51,4 +47,6 @@ interface IAssetMinter {
     function setGemsFactor(uint256 newQuantity) external;
 
     function setCatalystsFactor(uint256 newQuantity) external;
+
+    function setCustomMintingAllowance(address addressToModify, bool isAddressAllowed) external;
 }

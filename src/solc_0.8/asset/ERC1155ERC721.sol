@@ -814,7 +814,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         // deal with NFT last. they do not care of balance packing
         if (numNFTs > 0) {
             _mintNFTs(uint16(supplies.length - numNFTs), numNFTs, owner, ids);
-            // event2609 (iddebut, nb, sender)
         }
     }
 
