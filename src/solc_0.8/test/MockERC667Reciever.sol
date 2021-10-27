@@ -1,6 +1,6 @@
 //SPDX-License-Identifier: MIT
-pragma solidity 0.7.5;
-import "../common/Interfaces/IERC677Receiver.sol";
+pragma solidity 0.8.2;
+import "../common/interfaces/IERC677Receiver.sol";
 
 contract MockERC677Receiver is IERC677Receiver {
     event OnTokenTransferEvent(address indexed _sender, uint256 _value, bytes _data);
