@@ -171,8 +171,10 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         require(value > 0, "no Asset transfered");
         require(data.length > 0, "data need to contains the sale data");
 
-        (uint256 numPacks, uint256 sandAmountPerPack, uint256 priceUSDPerPack) =
-            abi.decode(data, (uint256, uint256, uint256));
+        (uint256 numPacks, uint256 sandAmountPerPack, uint256 priceUSDPerPack) = abi.decode(
+            data,
+            (uint256, uint256, uint256)
+        );
 
         uint256 amount = value / numPacks;
         require(amount * numPacks == value, "invalid amounts, not divisible by numPacks");
@@ -200,8 +202,10 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         require(ids.length > 0, "need to contains Asset");
         require(data.length > 0, "data need to contains the sale data");
 
-        (uint256 numPacks, uint256 sandAmountPerPack, uint256 priceUSDPerPack) =
-            abi.decode(data, (uint256, uint256, uint256));
+        (uint256 numPacks, uint256 sandAmountPerPack, uint256 priceUSDPerPack) = abi.decode(
+            data,
+            (uint256, uint256, uint256)
+        );
 
         uint256[] memory amounts = new uint256[](ids.length);
         for (uint256 i = 0; i < amounts.length; i++) {
@@ -256,8 +260,9 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
      * @param from seller address
      * @param sandAmountPerPack the sands that will be sell with the Sale
      * @param numPacks number of packs that this sale contains
-     * @param sandAmountPerPack the sands that will be sell with the Sale
-     * @param sandAmountPerPack the sands that will be sell with the Sale
+     * @param ids list of ids to create bundle from
+     * @param amounts the corresponding amounts of assets to be bundled for sale
+     * @param priceUSDPerPack price in USD per pack
      */
     function _setupBundle(
         address from,
