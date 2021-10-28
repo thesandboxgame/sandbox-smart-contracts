@@ -86,13 +86,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         uint256 numPacks,
         address to
     ) external payable {
-        require(saleId > 0, "invalid saleId");
-        uint256 saleIndex = saleId - 1;
-        uint256 numPacksLeft = sales[saleIndex].numPacksLeft;
-        require(numPacksLeft >= numPacks, "not enough packs on sale");
-        sales[saleIndex].numPacksLeft = numPacksLeft - numPacks;
-
-        uint256 usdRequired = numPacks * sales[saleIndex].priceUSD;
+        (uint256 saleIndex, uint256 usdRequired) = _getSaleAmount(saleId, numPacks);
         uint256 ethRequired = getEtherAmountWithUSD(usdRequired);
         require(msg.value >= ethRequired, "not enough ether sent");
         uint256 leftOver = msg.value - ethRequired;
@@ -117,13 +111,7 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         uint256 numPacks,
         address to
     ) external {
-        require(saleId > 0, "invalid saleId");
-        uint256 saleIndex = saleId - 1;
-        uint256 numPacksLeft = sales[saleIndex].numPacksLeft;
-        require(numPacksLeft >= numPacks, "not enough packs on sale");
-        sales[saleIndex].numPacksLeft = numPacksLeft - numPacks;
-
-        uint256 usdRequired = numPacks * sales[saleIndex].priceUSD;
+        (uint256 saleIndex, uint256 usdRequired) = _getSaleAmount(saleId, numPacks);
         require(dai.transferFrom(msg.sender, receivingWallet, usdRequired), "failed to transfer dai");
         _transferPack(saleIndex, numPacks, to);
 
@@ -291,5 +279,18 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         );
         uint256 saleId = sales.length;
         emit BundleSale(saleId, ids, amounts, sandAmountPerPack, priceUSDPerPack, numPacks);
+    }
+
+    function _getSaleAmount(uint256 saleId, uint256 numPacks)
+        internal
+        returns (uint256 saleIndex, uint256 usdRequired)
+    {
+        require(saleId > 0, "invalid saleId");
+        saleIndex = saleId - 1;
+        uint256 numPacksLeft = sales[saleIndex].numPacksLeft;
+        require(numPacksLeft >= numPacks, "not enough packs on sale");
+        sales[saleIndex].numPacksLeft = numPacksLeft - numPacks;
+
+        usdRequired = numPacks * sales[saleIndex].priceUSD;
     }
 }
