@@ -103,12 +103,24 @@ IGameToken <|-- GameBaseToken
 
 ### Token id pattern
 
-ERC721 tokens always have a unique ID, in the case of GAME, the unique ID is known as `gameId` and is comprised of the concatenation of `creator,subId,chainIndex,version`. the `gameId` is used as an external id, while the `strgId` is used as an internal id. `strgId` is defined as `gameId & STORAGE_ID_MASK` where `STORAGE_ID_MASK` = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000. In practice, `strgId` is a substring of `gameId` that does not include the version field. The reason for having both ids is to solve a potential front-running issue that might occur on 3rd party decentralized exchanges when a GAME seller might trick the buyer to buy a downgraded game by pushing a transaction that downgrades the GAME before the actual `swap` transaction on the decentralized exchange.
+ERC721 tokens always have a unique ID, in the case of GAME, the unique ID is known as `gameId` and is comprised of the concatenation of `creator,subId,chainIndex,version`. the `gameId` is used as an external id, while the `strgId` is used as an internal id. `strgId` is defined as `gameId & STORAGE_ID_MASK` where `STORAGE_ID_MASK` = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000. In practice, `strgId` is a substring of `gameId` that does not include the version field. The reason for having both ids is to solve a potential front-running issue that might occur on 3rd party decentralized exchanges when a GAME seller might trick the buyer to buy a downgraded game by pushing a transaction that downgrades the GAME (removing assets from a game for example) before the actual `swap` transaction on the decentralized exchange.
 
 ## Processes
 
-### Transfer Creatorship
+### Creating a game
 
-When a game is minted, the original creator of the game is stored in the first 20 bytes of the `gameId`.
-The creatorship (of any token ever minted by some account) can be transffered to another account by calling `transferCreatorship`.
+A game minter can call `createGame` to create a game and (optionally) add assets to it.
+
+### Updating a game
+
+A game minter can call `updateGame` to add/remove assets from a game, which will result in the `version` field of the `gameId` incremented by 1. Adding assets means transferring these from the `from` address to the game contract address. Removing assets means transferring these from the game contract to the `from` address.
+
+### Burn a game and recover the deposited assets
+
+A game owner can burn his game token to recover the underlying assets that were attached to it. Recovering an asset means transferring the asset back to the game owner from the game contract.
+
+### Transfer creatorship
+
+When a game is created, the original creator of the game is stored in the first 20 bytes of the `gameId`.
+The creatorship (of any token ever created by some account) can be transffered to another account by calling `transferCreatorship`.
 This function can be called either by the current creator or by a super-operator nominated by him. The current creator of a game can be queried using a call to `creatorOf(uint256 id)`.
