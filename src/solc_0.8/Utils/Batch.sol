@@ -1,8 +1,9 @@
-//SPDX-License-Identifier: MIT
-pragma solidity 0.7.5;
+// SPDX-License-Identifier: MIT
+
+pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts/utils/Address.sol";
+import "@openzeppelin/contracts-0.8/utils/Address.sol";
 
 contract Batch {
     using Address for address;
