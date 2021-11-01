@@ -387,7 +387,7 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
         if (eip712) {
             dataToHash = abi.encodePacked(
                 "\x19\x01",
-                DOMAIN_SEPARATOR,
+                _DOMAIN_SEPARATOR,
                 _hashAuction(from, token, auctionData, ids, amounts)
             );
         } else {
