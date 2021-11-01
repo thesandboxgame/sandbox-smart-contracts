@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest} from '../../utils/network';
+
 import catalysts from '../../data/catalysts';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -35,4 +35,3 @@ func.dependencies = [
   'DefaultAttributes_deploy',
   'GemsCatalystsRegistry_deploy',
 ];
-func.skip = skipUnlessTest; // disabled for now

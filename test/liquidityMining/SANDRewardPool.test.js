@@ -6,7 +6,7 @@ const {
 } = require('hardhat');
 const {BigNumber} = require('@ethersproject/bignumber');
 const {expect} = require('../chai-setup');
-const {mine} = require('../utils');
+const {mine, withSnapshot} = require('../utils');
 const {replicateEarned, replicateRewardPerToken} = require('./_testHelper');
 const {contribution} = require('./contributionEquation.test');
 const setupLandWeightedRewardPool = require('../../setup/send_sand_to_land_weighted_reward_pool')
@@ -29,56 +29,43 @@ const LESS_PRECISE_STAKE_AMOUNT = BigNumber.from(7).mul('1000000000000000000');
 const ONE_DAY = 86400;
 
 let notifyRewardTimestamp;
-
-describe('ActualSANDRewardPool', function () {
-  let deployer;
-  let others;
-  let landAdmin;
-  let rewardPool;
-  let rewardPoolAsUser;
-  let rewardPoolAsAdmin;
-  let stakeToken;
-  let stakeTokenAsUser;
-  let stakeTokenAsAdmin;
-  let rewardToken;
-  let multiplierNFToken;
-  let multiplierNFTokenAsAdmin;
-  let liquidityRewardAdmin;
-
-  async function createFixture() {
-    // TODO use deployments.createFixture()
-    await deployments.fixture([
-      'LandWeightedSANDRewardPool',
-      'UNI_SAND_ETH',
-      'Sand',
-      'Land',
-    ]);
+const createFixture = withSnapshot(
+  ['LandWeightedSANDRewardPool', 'UNI_SAND_ETH', 'Sand', 'Land'],
+  async () => {
     await setupLandWeightedRewardPool();
 
-    ({deployer, liquidityRewardAdmin, landAdmin} = await getNamedAccounts());
+    const {
+      deployer,
+      liquidityRewardAdmin,
+      landAdmin,
+    } = await getNamedAccounts();
 
-    others = await getUnnamedAccounts();
+    const others = await getUnnamedAccounts();
 
     // Define token admins
     const stakeTokenAdmin = deployer;
     const multiplierNFTokenAdmin = landAdmin;
 
     // Contracts
-    rewardToken = await ethers.getContract(REWARD_TOKEN);
-    multiplierNFToken = await ethers.getContract(MULTIPLIER_NFToken);
-    stakeToken = await ethers.getContract(STAKE_TOKEN);
+    const rewardToken = await ethers.getContract(REWARD_TOKEN);
+    const multiplierNFToken = await ethers.getContract(MULTIPLIER_NFToken);
+    const stakeToken = await ethers.getContract(STAKE_TOKEN);
 
     // Get contract roles
-    rewardPool = await ethers.getContract(POOL);
-    rewardPoolAsAdmin = rewardPool.connect(
+    const rewardPool = await ethers.getContract(POOL);
+    const rewardPoolAsAdmin = rewardPool.connect(
       ethers.provider.getSigner(liquidityRewardAdmin)
     );
-    rewardPoolAsUser = rewardPool.connect(ethers.provider.getSigner(others[0]));
-    stakeTokenAsAdmin = stakeToken.connect(
+    const rewardPoolAsUser = rewardPool.connect(
+      ethers.provider.getSigner(others[0])
+    );
+    const stakeTokenAsAdmin = stakeToken.connect(
       ethers.provider.getSigner(stakeTokenAdmin)
     );
-    stakeTokenAsUser = stakeToken.connect(ethers.provider.getSigner(others[0]));
-    multiplierNFTokenAsAdmin = multiplierNFToken.connect(
+    const stakeTokenAsUser = stakeToken.connect(
+      ethers.provider.getSigner(others[0])
+    );
+    const multiplierNFTokenAsAdmin = multiplierNFToken.connect(
       ethers.provider.getSigner(multiplierNFTokenAdmin)
     );
 
@@ -95,29 +82,52 @@ describe('ActualSANDRewardPool', function () {
     const deployedRewardPool = await deployments.get(POOL);
     const linkedData = deployedRewardPool.linkedData;
     notifyRewardTimestamp = parseInt(linkedData);
-  }
 
-  // Provide users with LANDs
-  let counter = 0;
-  async function mintLandQuad(to) {
-    await multiplierNFTokenAsAdmin.mintQuad(to, 1, counter, counter, '0x');
-    counter++;
+    return {
+      deployer,
+      others,
+      landAdmin,
+      rewardPool,
+      rewardPoolAsUser,
+      rewardPoolAsAdmin,
+      stakeToken,
+      stakeTokenAsUser,
+      stakeTokenAsAdmin,
+      rewardToken,
+      multiplierNFToken,
+      multiplierNFTokenAsAdmin,
+      liquidityRewardAdmin,
+    };
   }
+);
+// Provide users with LANDs
+let counter = 0;
 
+async function mintLandQuad(multiplierNFTokenAsAdmin, to) {
+  await multiplierNFTokenAsAdmin.mintQuad(to, 1, counter, counter, '0x');
+  counter++;
+}
+
+describe('ActualSANDRewardPool', function () {
   it('Contract should exist', async function () {
     await createFixture();
     await ethers.getContract(POOL);
   });
 
   it('Pool contains reward tokens', async function () {
-    await createFixture();
+    const {rewardPool, rewardToken} = await createFixture();
     await ethers.getContract(POOL);
     let balance = await rewardToken.balanceOf(rewardPool.address);
     expect(balance).to.equal(REWARD_AMOUNT);
   });
 
   it('User with stakeTokens can stake', async function () {
-    await createFixture();
+    const {
+      others,
+      rewardPool,
+      rewardPoolAsUser,
+      stakeToken,
+    } = await createFixture();
     let balance = await stakeToken.balanceOf(others[0]);
     expect(balance).to.equal(STAKE_AMOUNT);
     const receipt = await rewardPoolAsUser
@@ -134,7 +144,12 @@ describe('ActualSANDRewardPool', function () {
   });
 
   it('User can earn rewardTokens if pool has been notified of reward', async function () {
-    await createFixture();
+    const {
+      others,
+      rewardPool,
+      rewardPoolAsUser,
+      stakeToken,
+    } = await createFixture();
     await rewardPoolAsUser.stake(STAKE_AMOUNT);
     const stakedBalance = await stakeToken.balanceOf(rewardPool.address);
     expect(stakedBalance).to.equal(STAKE_AMOUNT);
@@ -151,7 +166,7 @@ describe('ActualSANDRewardPool', function () {
   });
 
   it('admin can notifyRewardAmount and start a new reward process (without sending more reward tokens)', async function () {
-    await createFixture();
+    const {rewardPool, rewardPoolAsAdmin, rewardToken} = await createFixture();
     const receipt = await rewardPoolAsAdmin
       .notifyRewardAmount(NEW_REWARD_AMOUNT)
       .then((tx) => tx.wait());
@@ -164,7 +179,7 @@ describe('ActualSANDRewardPool', function () {
   });
 
   it('User cannot earn rewardTokens if they stake after the end time', async function () {
-    await createFixture();
+    const {others, rewardPool, rewardPoolAsUser} = await createFixture();
     const latestBlock = await ethers.provider.getBlock('latest');
     const currentTimestamp = latestBlock.timestamp;
     await ethers.provider.send('evm_setNextBlockTimestamp', [
@@ -179,7 +194,12 @@ describe('ActualSANDRewardPool', function () {
   });
 
   it('User earns full reward amount if they are the only staker after 1 day', async function () {
-    await createFixture();
+    const {
+      others,
+      rewardPool,
+      rewardPoolAsUser,
+      stakeToken,
+    } = await createFixture();
     await ethers.provider.send('evm_increaseTime', [ONE_DAY]);
     await mine();
     await rewardPoolAsUser.stake(STAKE_AMOUNT);
@@ -196,7 +216,12 @@ describe('ActualSANDRewardPool', function () {
   });
 
   it('User earns full reward amount if they are the only staker after 29 days', async function () {
-    await createFixture();
+    const {
+      others,
+      rewardPool,
+      rewardPoolAsUser,
+      stakeToken,
+    } = await createFixture();
     await ethers.provider.send('evm_increaseTime', [ONE_DAY * 29]);
     await mine();
     await rewardPoolAsUser.stake(STAKE_AMOUNT);
@@ -216,7 +241,7 @@ describe('ActualSANDRewardPool', function () {
 
   it('User with 0 LAND earns correct reward amount', async function () {
     const numNfts = 0;
-    await createFixture();
+    const {others, rewardPool, rewardPoolAsUser} = await createFixture();
     const receipt = await rewardPoolAsUser
       .stake(STAKE_AMOUNT)
       .then((tx) => tx.wait());
@@ -269,7 +294,7 @@ describe('ActualSANDRewardPool', function () {
 
   it('User with 0 LAND earns correct reward amount - smaller stake', async function () {
     const numNfts = 0;
-    await createFixture();
+    const {others, rewardPool, rewardPoolAsUser} = await createFixture();
     const receipt = await rewardPoolAsUser
       .stake(LESS_PRECISE_STAKE_AMOUNT)
       .then((tx) => tx.wait());
@@ -328,8 +353,14 @@ describe('ActualSANDRewardPool', function () {
 
   it('User with 1 LAND earns correct reward amount', async function () {
     const numNfts = 1;
-    await createFixture();
-    await mintLandQuad(others[0]);
+    const {
+      others,
+      rewardPool,
+      rewardPoolAsUser,
+      multiplierNFToken,
+      multiplierNFTokenAsAdmin,
+    } = await createFixture();
+    await mintLandQuad(multiplierNFTokenAsAdmin, others[0]);
     const landCount = await multiplierNFToken.balanceOf(others[0]);
     expect(landCount).to.equal(numNfts);
     const receipt = await rewardPoolAsUser
@@ -388,9 +419,15 @@ describe('ActualSANDRewardPool', function () {
 
   it('User with 3 LANDs earns correct reward amount', async function () {
     const numNfts = 3;
-    await createFixture();
+    const {
+      others,
+      rewardPool,
+      rewardPoolAsUser,
+      multiplierNFToken,
+      multiplierNFTokenAsAdmin,
+    } = await createFixture();
     for (let i = 0; i < 3; i++) {
-      await mintLandQuad(others[0]);
+      await mintLandQuad(multiplierNFTokenAsAdmin, others[0]);
     }
     const landCount = await multiplierNFToken.balanceOf(others[0]);
     expect(landCount).to.equal(numNfts);
@@ -450,9 +487,15 @@ describe('ActualSANDRewardPool', function () {
 
   it('User with 10 LANDs earns correct reward amount', async function () {
     const numNfts = 10;
-    await createFixture();
+    const {
+      others,
+      rewardPool,
+      rewardPoolAsUser,
+      multiplierNFToken,
+      multiplierNFTokenAsAdmin,
+    } = await createFixture();
     for (let i = 0; i < 10; i++) {
-      await mintLandQuad(others[0]);
+      await mintLandQuad(multiplierNFTokenAsAdmin, others[0]);
     }
     const landCount = await multiplierNFToken.balanceOf(others[0]);
     expect(landCount).to.equal(numNfts);
@@ -511,7 +554,7 @@ describe('ActualSANDRewardPool', function () {
   });
 
   it('User can withdraw some stakeTokens after several amounts have been staked', async function () {
-    await createFixture();
+    const {others, rewardPoolAsUser, stakeToken} = await createFixture();
     await rewardPoolAsUser
       .stake(LESS_PRECISE_STAKE_AMOUNT)
       .then((tx) => tx.wait());
@@ -530,7 +573,12 @@ describe('ActualSANDRewardPool', function () {
   });
 
   it('First user can withdraw their stakeTokens', async function () {
-    await createFixture();
+    const {
+      others,
+      rewardPool,
+      rewardPoolAsUser,
+      stakeToken,
+    } = await createFixture();
     await rewardPoolAsUser
       .stake(LESS_PRECISE_STAKE_AMOUNT)
       .then((tx) => tx.wait());
@@ -550,7 +598,7 @@ describe('ActualSANDRewardPool', function () {
   });
 
   it('User can withdraw all stakeTokens after several amounts have been staked', async function () {
-    await createFixture();
+    const {others, rewardPoolAsUser, stakeToken} = await createFixture();
     await rewardPoolAsUser
       .stake(LESS_PRECISE_STAKE_AMOUNT)
       .then((tx) => tx.wait());
@@ -579,7 +627,12 @@ describe('ActualSANDRewardPool', function () {
   });
 
   it('First user can claim their reward - no NFTs', async function () {
-    await createFixture();
+    const {
+      others,
+      rewardPool,
+      rewardPoolAsUser,
+      rewardToken,
+    } = await createFixture();
     await rewardPoolAsUser
       .stake(LESS_PRECISE_STAKE_AMOUNT)
       .then((tx) => tx.wait());
@@ -605,9 +658,15 @@ describe('ActualSANDRewardPool', function () {
   });
 
   it('First user can claim their reward - has NFTs', async function () {
-    await createFixture();
+    const {
+      others,
+      rewardPool,
+      rewardPoolAsUser,
+      rewardToken,
+      multiplierNFTokenAsAdmin,
+    } = await createFixture();
     for (let i = 0; i < 10; i++) {
-      await mintLandQuad(others[0]);
+      await mintLandQuad(multiplierNFTokenAsAdmin, others[0]);
     }
     await rewardPoolAsUser
       .stake(LESS_PRECISE_STAKE_AMOUNT)
@@ -633,9 +692,15 @@ describe('ActualSANDRewardPool', function () {
   });
 
   it('A user can claim their reward after multiple stakes', async function () {
-    await createFixture();
+    const {
+      others,
+      rewardPool,
+      rewardPoolAsUser,
+      rewardToken,
+      multiplierNFTokenAsAdmin,
+    } = await createFixture();
     for (let i = 0; i < 10; i++) {
-      await mintLandQuad(others[0]);
+      await mintLandQuad(multiplierNFTokenAsAdmin, others[0]);
     }
     await rewardPoolAsUser
       .stake(LESS_PRECISE_STAKE_AMOUNT)
@@ -667,7 +732,12 @@ describe('ActualSANDRewardPool', function () {
   });
 
   it('First user can exit the pool', async function () {
-    await createFixture();
+    const {
+      others,
+      rewardPool,
+      rewardPoolAsUser,
+      stakeToken,
+    } = await createFixture();
     await rewardPoolAsUser
       .stake(LESS_PRECISE_STAKE_AMOUNT)
       .then((tx) => tx.wait());
@@ -693,7 +763,12 @@ describe('ActualSANDRewardPool', function () {
   });
 
   it('A user can exit the pool after multiple stakes', async function () {
-    await createFixture();
+    const {
+      others,
+      rewardPool,
+      rewardPoolAsUser,
+      stakeToken,
+    } = await createFixture();
     await rewardPoolAsUser
       .stake(LESS_PRECISE_STAKE_AMOUNT)
       .then((tx) => tx.wait());
@@ -725,9 +800,15 @@ describe('ActualSANDRewardPool', function () {
   });
 
   it('A user with NFTs can exit the pool after multiple stakes', async function () {
-    await createFixture();
+    const {
+      others,
+      rewardPool,
+      rewardPoolAsUser,
+      stakeToken,
+      multiplierNFTokenAsAdmin,
+    } = await createFixture();
     for (let i = 0; i < 10; i++) {
-      await mintLandQuad(others[0]);
+      await mintLandQuad(multiplierNFTokenAsAdmin, others[0]);
     }
     await rewardPoolAsUser
       .stake(LESS_PRECISE_STAKE_AMOUNT)

@@ -1,14 +1,15 @@
-import {deployments} from 'hardhat';
 import {BigNumber} from '@ethersproject/bignumber';
 import {expect} from '../../../chai-setup';
-import {setupGemsAndCatalysts} from './fixtures';
-import {waitFor} from '../../../utils';
+import {waitFor, withSnapshot} from '../../../utils';
 import catalysts from '../../../../data/catalysts';
-describe('GemsCatalystsRegistry', function () {
-  before(async function () {
-    await deployments.fixture('GemsCatalystsRegistry');
-  });
+import {gemsAndCatalystsFixtures} from '../../../common/fixtures/gemAndCatalysts';
 
+const setupGemsAndCatalysts = withSnapshot(
+  ['GemsCatalystsRegistry'],
+  gemsAndCatalystsFixtures
+);
+
+describe('GemsCatalystsRegistry', function () {
   it('getMaxGems for commonCatalyst should be 1', async function () {
     const {
       gemsCatalystsRegistry,

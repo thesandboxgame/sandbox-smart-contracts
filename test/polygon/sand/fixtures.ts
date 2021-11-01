@@ -5,8 +5,14 @@ import {
   getUnnamedAccounts,
 } from 'hardhat';
 
-import {setupUser, setupUsers} from '../../utils';
+import {setupUser, setupUsers, withSnapshot} from '../../utils';
 import {Contract} from 'ethers';
+import {erc20BasicApproveExtensionFixtures} from '../../common/fixtures/erc20BasicApproveExtension';
+
+export const setupMainnetSand = withSnapshot(
+  ['Land', 'Sand', 'LandPreSale_5', 'ERC20_PREDICATE'],
+  erc20BasicApproveExtensionFixtures
+);
 
 type User = {address: string; sand: Contract; trustedForwarder: Contract};
 export type Fixtures = {
@@ -18,8 +24,7 @@ export type Fixtures = {
   trustedForwarder: Contract;
   mockERC20BasicApprovalTarget: Contract;
 };
-export const setupSand = deployments.createFixture(async () => {
-  await deployments.fixture('PolygonSand');
+export const setupPolygonSand = withSnapshot(['PolygonSand'], async () => {
   const sand = await ethers.getContract('PolygonSand');
   const accounts = await getNamedAccounts();
   const unnamedAccounts = await getUnnamedAccounts();

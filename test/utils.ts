@@ -1,22 +1,43 @@
 /* eslint-disable mocha/no-exports */
 import {BigNumber} from '@ethersproject/bignumber';
 import {
-  ContractReceipt,
-  Event,
   Contract,
+  ContractReceipt,
   ContractTransaction,
+  Event,
   utils,
 } from 'ethers';
 import {Receipt} from 'hardhat-deploy/types';
 import {Result} from 'ethers/lib/utils';
-import {ethers} from 'hardhat';
-
-export async function increaseTime(numSec: number): Promise<void> {
-  await ethers.provider.send('evm_increaseTime', [numSec]);
-}
+import {deployments, ethers, network} from 'hardhat';
+import {FixtureFunc} from 'hardhat-deploy/dist/types';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
 export async function mine(): Promise<void> {
   await ethers.provider.send('evm_mine', []);
+}
+
+export async function increaseTime(
+  numSec: number,
+  callMine = true
+): Promise<void> {
+  // must do something (mine, send a tx) to move the time
+  await ethers.provider.send('evm_increaseTime', [numSec]);
+  if (callMine) await mine();
+}
+
+export async function getTime(): Promise<number> {
+  const latestBlock = await ethers.provider.getBlock('latest');
+  return latestBlock.timestamp;
+}
+
+export async function setNextBlockTime(
+  time: number,
+  callMine = false
+): Promise<void> {
+  // must do something (mine, send a tx) to move the time
+  await ethers.provider.send('evm_setNextBlockTimestamp', [time]);
+  if (callMine) await mine();
 }
 
 type Test = {
@@ -68,8 +89,7 @@ export async function findEvents(
   blockHash: string
 ): Promise<Event[]> {
   const filter = contract.filters[event]();
-  const events = await contract.queryFilter(filter, blockHash);
-  return events;
+  return await contract.queryFilter(filter, blockHash);
 }
 
 export type EventWithArgs = Event & {args: Result};
@@ -160,4 +180,33 @@ export function getAssetChainIndex(id: BigNumber): number {
   const slicedId = Number('0x' + idAsHexString.slice(48, 56));
   const SLICED_CHAIN_INDEX_MASK = Number('0x7F800000');
   return (slicedId & SLICED_CHAIN_INDEX_MASK) >>> 23;
+}
+
+export async function evmRevertToInitialState(): Promise<void> {
+  console.log('Revert to initial snapshot, calling reset');
+  // This revert the evm state.
+  await network.provider.request({
+    method: 'hardhat_reset',
+    params: [network.config],
+  });
+}
+
+export function withSnapshot<T, O>(
+  tags: string | string[] = [],
+  func: FixtureFunc<T, O> = async () => {
+    return <T>{};
+  }
+): (options?: O) => Promise<T> {
+  return deployments.createFixture(
+    async (env: HardhatRuntimeEnvironment, options?: O) => {
+      // TODO: This has problems with solidity-coverage, when the fix that we can use it
+      // TODO: We need a way to revert to initial state!!!
+      //  await evmRevertToInitialState();
+      await deployments.fixture(tags, {
+        fallbackToGlobal: false,
+        keepExistingDeployments: false,
+      });
+      return func(env, options);
+    }
+  );
 }

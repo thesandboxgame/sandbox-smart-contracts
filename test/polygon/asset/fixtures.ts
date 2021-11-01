@@ -1,15 +1,19 @@
 import {Event} from '@ethersproject/contracts';
 import {
-  ethers,
   deployments,
-  getUnnamedAccounts,
+  ethers,
   getNamedAccounts,
+  getUnnamedAccounts,
 } from 'hardhat';
 
-import {waitFor, setupUsers} from '../../utils';
-// import asset_regenerate_and_distribute from '../../setup/asset_regenerate_and_distribute';
+import {setupUsers, waitFor, withSnapshot} from '../../utils';
 
-export const setupAsset = deployments.createFixture(async function () {
+import {
+  assetFixtures,
+  gemsAndCatalystsFixture,
+} from '../../common/fixtures/asset';
+
+const polygonAssetFixtures = async function () {
   // await asset_regenerate_and_distribute(hre);
   const unnamedAccounts = await getUnnamedAccounts();
   const otherAccounts = [...unnamedAccounts];
@@ -22,6 +26,7 @@ export const setupAsset = deployments.createFixture(async function () {
     'PolygonAsset',
     assetBouncerAdmin
   );
+
   await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
   const Asset = await ethers.getContract('PolygonAsset', minter);
   const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
@@ -90,9 +95,8 @@ export const setupAsset = deployments.createFixture(async function () {
       data
     );
     const receipt = await tx.wait();
-    return receipt.events.find(
-      (v: Event) => v.event === 'TransferBatch'
-    ).args[3];
+    return receipt.events.find((v: Event) => v.event === 'TransferBatch')
+      .args[3];
   }
 
   const users = await setupUsers(otherAccounts, {Asset});
@@ -105,4 +109,36 @@ export const setupAsset = deployments.createFixture(async function () {
     trustedForwarder,
     childChainManager,
   };
-});
+};
+
+async function gemsAndCatalystsFixtureL1() {
+  return gemsAndCatalystsFixture(false);
+}
+
+async function gemsAndCatalystsFixtureL2() {
+  return gemsAndCatalystsFixture(true);
+}
+
+export const setupPolygonAsset = withSnapshot(
+  ['PolygonAsset', 'Asset'],
+  polygonAssetFixtures
+);
+
+export const setupMainnetAndPolygonAsset = withSnapshot(
+  [
+    'PolygonAsset',
+    'Asset',
+    'PolygonAssetAttributesRegistry',
+    'PolygonGemsCatalystsRegistry',
+    'AssetAttributesRegistry',
+    'GemsCatalystsRegistry',
+  ],
+  async () => {
+    return {
+      polygon: await polygonAssetFixtures(),
+      mainnet: await assetFixtures(),
+      polygonAssetRegistry: await gemsAndCatalystsFixtureL2(),
+      assetRegistry: await gemsAndCatalystsFixtureL1(),
+    };
+  }
+);

@@ -2,6 +2,7 @@ import {expect} from '../../chai-setup';
 import {deployments, ethers, getNamedAccounts} from 'hardhat';
 import {Address} from 'hardhat-deploy/dist/types';
 import {Contract} from 'ethers';
+import {withSnapshot} from '../../utils';
 
 describe('SafeMathWithRequire.sol library via MockSafeMathWithRequire.sol', function () {
   let fixtures: {
@@ -9,7 +10,7 @@ describe('SafeMathWithRequire.sol library via MockSafeMathWithRequire.sol', func
     mockSafeMathWithRequire: Contract;
   };
   before(async function () {
-    fixtures = await deployments.createFixture(async function () {
+    fixtures = await withSnapshot([], async function () {
       const accounts = await getNamedAccounts();
       await deployments.deploy('MockSafeMathWithRequire', {
         from: accounts.deployer,

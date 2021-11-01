@@ -11,13 +11,18 @@ nav:
       - Setting environment variables: intro/setting-environment-variables.md
   - How to:
       - Fixing tests: howto/fixing-tests.md
+      - Deploying contracts:
+          - General: howto/deploying-contracts.md
+          - Deploying asset: howto/deploying-asset.md
       - Preparing a LAND sale: howto/preparing-land-sale.md
       - Preparing an ASSET giveaway: howto/preparing-asset-giveaway.md
       - Generating liquidity pool rewards: howto/generating-liquidity-pool-rewards.md
       - Running a lottery: howto/running-lottery.md
+      - Use Faucet to get Sand: howto/use-faucet-to-get-sand.md
   - Tutorials:
       - Developing your first feature: tutorials/developing-first-feature.md
       - Writing documentation: tutorials/writing-documentation.md
+      - Writing tests: tutorials/writing-tests.md
   - Topics:
       - Blockchain:
           - Ethereum: topics/blockchain/ethereum.md
@@ -43,10 +48,15 @@ nav:
           - Sand Token: topics/sand/sand-token.md
           - Bundle Sand Sale: topics/sand/bundle-sand-sale.md
       - Token:
+          - EIP712: topics/token/EIP712.md
           - ERC20: topics/token/ERC20.md
           - ERC1155721: topics/token/ERC1155721.md
       - Land:
           - Land: topics/land/land.md
+      - Permit:
+          - Permit: topics/permit/Permit.md
+      - Faucet:
+          - Faucet: topics/faucet/Faucet.md
 
 markdown_extensions:
   - admonition

@@ -1,7 +1,6 @@
 import {BigNumber} from '@ethersproject/bignumber';
 import {expect} from '../../../chai-setup';
-import {setupAssetUpgrader} from './fixtures';
-import {waitFor} from '../../../utils';
+import {waitFor, withSnapshot} from '../../../utils';
 import {
   changeCatalyst,
   mintAsset,
@@ -11,8 +10,22 @@ import {
 } from '../utils';
 import {ethers} from 'hardhat';
 import {upgradeFee} from '../../../../data/assetUpgraderFees';
+import {assetUpgraderFixtures} from '../../../common/fixtures/assetUpgrader';
 
 const GEM_CATALYST_UNIT = BigNumber.from('1000000000000000000');
+const setupAssetUpgrader = withSnapshot(
+  [
+    // taken from assetUpgraderFixtures
+    'AssetUpgrader',
+    'Catalysts',
+    'Gems',
+    'AssetUpgraderFeeBurner',
+    'AssetAttributesRegistry',
+    'GemsCatalystsRegistry',
+    'Asset',
+  ],
+  assetUpgraderFixtures
+);
 
 describe('AssetUpgrader', function () {
   it('extractAndSetCatalyst for FT with rareCatalyst and powerGem, no ownership change', async function () {

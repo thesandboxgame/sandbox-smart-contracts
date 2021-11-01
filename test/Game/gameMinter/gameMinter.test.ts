@@ -1,13 +1,17 @@
 import {
-  ethers,
   deployments,
-  getUnnamedAccounts,
+  ethers,
   getNamedAccounts,
+  getUnnamedAccounts,
 } from 'hardhat';
-import {BigNumber, Contract, BytesLike, utils} from 'ethers';
+import {BigNumber, BytesLike, Contract, utils} from 'ethers';
 import Prando from 'prando';
 import {expect} from '../../chai-setup';
-import {expectEventWithArgs, expectEventWithArgsFromReceipt} from '../../utils';
+import {
+  expectEventWithArgs,
+  expectEventWithArgsFromReceipt,
+  withSnapshot,
+} from '../../utils';
 import {Address} from 'hardhat-deploy/types';
 import {supplyAssets} from '../assets';
 import {toUtf8Bytes} from 'ethers/lib/utils';
@@ -60,12 +64,12 @@ type User = {
   GameMinter: Contract;
 };
 
-const setupTest = deployments.createFixture(
+const setupTest = withSnapshot(
+  ['ChildGameToken', 'GameMinter'],
   async (): Promise<{
     GameMinter: Contract;
     users: User[];
   }> => {
-    await deployments.fixture(['ChildGameToken', 'GameMinter']);
     const users = await getUnnamedAccounts();
     return {
       GameMinter: await ethers.getContract('GameMinter'),

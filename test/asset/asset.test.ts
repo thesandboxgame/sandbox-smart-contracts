@@ -1,14 +1,11 @@
-import {setupAsset} from './fixtures';
-import {waitFor, getAssetChainIndex} from '../utils';
+import {getAssetChainIndex, waitFor, withSnapshot} from '../utils';
 import {expect} from '../chai-setup';
 import {sendMetaTx} from '../sendMetaTx';
-import {deployments} from 'hardhat';
+import {assetFixtures} from '../common/fixtures/asset';
+
+const setupAsset = withSnapshot(['Asset'], assetFixtures);
 
 describe('Asset.sol', function () {
-  beforeEach(async function () {
-    await deployments.fixture(['Asset']);
-  });
-
   it('user sending asset to itself keep the same balance', async function () {
     const {Asset, users, mintAsset} = await setupAsset();
     const tokenId = await mintAsset(users[0].address, 20);
