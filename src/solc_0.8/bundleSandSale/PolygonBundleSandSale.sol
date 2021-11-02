@@ -286,10 +286,10 @@ contract PolygonBundleSandSale is WithAdmin, IERC1155TokenReceiver {
         internal
         returns (uint256 saleIndex, uint256 usdRequired)
     {
-        require(saleId > 0, "invalid saleId");
+        require(saleId > 0, "PolygonBundleSandSale: invalid saleId");
         saleIndex = saleId - 1;
         uint256 numPacksLeft = sales[saleIndex].numPacksLeft;
-        require(numPacksLeft >= numPacks, "not enough packs on sale");
+        require(numPacksLeft >= numPacks, "PolygonBundleSandSale: not enough packs on sale");
         sales[saleIndex].numPacksLeft = numPacksLeft - numPacks;
 
         usdRequired = numPacks * sales[saleIndex].priceUSD;

@@ -7,8 +7,8 @@ library BytesUtil {
     /// @param _address The address to compare to.
     /// @return Whether the first param == _address.
     function doFirstParamEqualsAddress(bytes memory data, address _address) internal pure returns (bool) {
-        if (data.length < 68) {
-            // 68 = 36 + 32
+        uint256 dataMaxLength = 68; // 68 = 36 + 32
+        if (data.length < dataMaxLength) {
             return false;
         }
         uint256 value;
