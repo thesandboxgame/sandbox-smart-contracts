@@ -2,7 +2,7 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-import "./IERC165.sol";
+import "@openzeppelin/contracts-0.8/utils/introspection/IERC165.sol";
 import "./IERC721Events.sol";
 
 /**

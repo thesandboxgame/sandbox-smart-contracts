@@ -2,7 +2,6 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "../../../asset/ERC1155ERC721.sol";
 import "../../../catalyst/interfaces/IAssetAttributesRegistry.sol";
 import "../../../asset/libraries/AssetHelper.sol";

@@ -34,7 +34,7 @@ contract AssetV2 is ERC1155ERC721 {
         uint256[] calldata amounts,
         bytes calldata data
     ) external {
-        require(_msgSender() == _predicate, "!PREDICATE");
+        require(hasRole(PREDICATE_ROLE, _msgSender()), "!PREDICATE");
         bytes32[] memory hashes = AssetHelper.decodeAndSetCatalystDataL2toL1(assetRegistryData, data);
         for (uint256 i = 0; i < ids.length; i++) {
             uint256 uriId = ids[i] & ERC1155ERC721Helper.URI_ID;

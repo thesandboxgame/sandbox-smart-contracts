@@ -9,12 +9,13 @@ import "../common/Libraries/ObjectLib32.sol";
 import "../common/interfaces/IERC721.sol";
 import "../common/interfaces/IERC721TokenReceiver.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
+import "../common/BaseWithStorage/WithBouncer.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
 import "./libraries/ERC1155ERC721Helper.sol";
 
 // solhint-disable max-states-count
 
-contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler {
+contract ERC1155ERC721 is WithSuperOperators, WithBouncer, IERC1155, IERC721, ERC2771Handler {
     using Address for address;
     using ObjectLib32 for ObjectLib32.Operations;
     using ObjectLib32 for uint256;
@@ -23,6 +24,9 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
+
+    bytes32 public constant ADMIN_ROLE = 0xa49807205ce4d355092ef5a8a18f56e8913cf4a201fbe287825b095693c21775;
+    bytes32 public constant PREDICATE_ROLE = 0x12ff340d0cd9c652c747ca35727e68c547d0f0bfa7758d2e77f75acef481b4f2;
 
     mapping(address => uint256) private _numNFTPerAddress; // erc721
     mapping(uint256 => uint256) private _owners; // erc721
@@ -35,11 +39,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
 
     mapping(address => address) private _creatorship; // creatorship transfer
 
-    mapping(address => bool) private _bouncers; // the contracts allowed to mint
     // @note : Deprecated.
     mapping(address => bool) private _metaTransactionContracts;
-
-    address private _bouncerAdmin;
 
     bool internal _init;
 
@@ -55,8 +56,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     uint256[20] private __gap;
     // solhint-enable max-states-count
 
-    event BouncerAdminChanged(address oldBouncerAdmin, address newBouncerAdmin);
-    event Bouncer(address bouncer, bool enabled);
     event MetaTransactionProcessor(address metaTransactionProcessor, bool enabled);
     event CreatorshipTransfer(address indexed original, address indexed from, address indexed to);
     event Extraction(uint256 indexed fromId, uint256 toId);
@@ -71,28 +70,13 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     ) public {
         // one-time init of bitfield's previous versions
         _checkInit(0);
-        _admin = admin;
-        _bouncerAdmin = bouncerAdmin;
-        _predicate = predicate;
+        _setupRole(ADMIN_ROLE, admin);
+        _setupRole(BOUNCER_ADMIN_ROLE, bouncerAdmin);
+        _setupRole(PREDICATE_ROLE, predicate);
+        _setRoleAdmin(BOUNCER_ROLE, BOUNCER_ADMIN_ROLE);
         ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
+        _bouncerAdmin = bouncerAdmin;
         _chainIndex = chainIndex;
-    }
-
-    /// @notice Change the minting administrator to be `newBouncerAdmin`.
-    /// @param newBouncerAdmin address of the new minting administrator.
-    function changeBouncerAdmin(address newBouncerAdmin) external {
-        require(_msgSender() == _bouncerAdmin, "!BOUNCER_ADMIN");
-        emit BouncerAdminChanged(_bouncerAdmin, newBouncerAdmin);
-        _bouncerAdmin = newBouncerAdmin;
-    }
-
-    /// @notice Enable or disable the ability of `bouncer` to mint tokens (minting bouncer rights).
-    /// @param bouncer address that will be given/removed minting bouncer rights.
-    /// @param enabled set whether the address is enabled or disabled as a minting bouncer.
-    function setBouncer(address bouncer, bool enabled) external {
-        require(_msgSender() == _bouncerAdmin, "!BOUNCER_ADMIN");
-        _bouncers[bouncer] = enabled;
-        emit Bouncer(bouncer, enabled);
     }
 
     /// @notice Mint a token type for `creator` on slot `packId`.
@@ -112,9 +96,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         uint8 rarity,
         address owner,
         bytes calldata data
-    ) external returns (uint256 id) {
+    ) external onlyBouncer returns (uint256 id) {
         require(hash != 0, "HASH==0");
-        require(_bouncers[_msgSender()], "!BOUNCER");
         require(owner != address(0), "TO==0");
         id = _generateTokenId(creator, supply, packId, supply == 1 ? 0 : 1, 0);
         _mint(hash, supply, rarity, _msgSender(), owner, id, data, false);
@@ -137,9 +120,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         bytes calldata rarityPack,
         address owner,
         bytes calldata data
-    ) external returns (uint256[] memory ids) {
+    ) external onlyBouncer returns (uint256[] memory ids) {
         require(hash != 0, "HASH==0");
-        require(_bouncers[_msgSender()], "!BOUNCER");
         require(owner != address(0), "TO==0");
         uint16 numNFTs;
         (ids, numNFTs) = _allocateIds(creator, supplies, rarityPack, packId, hash);
@@ -317,9 +299,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         uint8 newRarity,
         address to,
         bytes calldata data
-    ) external returns (uint256) {
+    ) external onlyBouncer returns (uint256) {
         require(hash != 0, "HASH==0");
-        require(_bouncers[_msgSender()], "!BOUNCER");
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
 
@@ -356,7 +337,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     /// @param who The address to query.
     /// @return whether the address has minting rights.
     function isBouncer(address who) external view returns (bool) {
-        return _bouncers[who];
+        return hasRole(BOUNCER_ROLE, who);
     }
 
     /// @notice Get the balance of `owners` for each token type `ids`.
@@ -449,13 +430,14 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     /// @notice Query if a contract implements interface `id`.
     /// @param id the interface identifier, as specified in ERC-165.
     /// @return `true` if the contract implements `id`.
-    function supportsInterface(bytes4 id) external pure override returns (bool) {
+    function supportsInterface(bytes4 id) public pure override(IERC165, AccessControl) returns (bool) {
         return
             id == 0x01ffc9a7 || //ERC165
             id == 0xd9b67a26 || // ERC1155
             id == 0x80ac58cd || // ERC721
             id == 0x5b5e139f || // ERC721 metadata
-            id == 0x0e89341c; // ERC1155 metadata
+            id == 0x0e89341c || // ERC1155 metadata
+            id == 0x7965db0b; // AccessControl
     }
 
     /// @notice Transfers the ownership of an NFT from one address to another address.
@@ -1035,5 +1017,13 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
             ids[i] = _generateTokenId(creator, supplies[i], packId, numFTs, i);
         }
         return (ids, numNFTs);
+    }
+
+    function _msgSender() internal view override(ERC2771Handler, Context) returns (address sender) {
+        return ERC2771Handler._msgSender();
+    }
+
+    function _msgData() internal view override(ERC2771Handler, Context) returns (bytes calldata) {
+        return ERC2771Handler._msgData();
     }
 }
