@@ -162,4 +162,18 @@ describe('PolygonSand.sol', function () {
       );
     });
   });
+
+  describe('Getters', function () {
+    it('gets the correct name of the Sand Token', async function () {
+      const polygon = await setupPolygonSand();
+      const name = await polygon.deployer.sand.name();
+      expect(name).to.equal('SAND');
+    });
+
+    it('gets the correct symbol of the Sand Token', async function () {
+      const polygon = await setupPolygonSand();
+      const symbol = await polygon.deployer.sand.symbol();
+      expect(symbol).to.equal('SAND');
+    });
+  });
 });
