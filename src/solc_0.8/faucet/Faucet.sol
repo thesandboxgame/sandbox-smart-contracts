@@ -17,7 +17,7 @@ contract Faucet is Ownable {
         IERC20 ierc20,
         uint256 period,
         uint256 amountLimit
-    ) public {
+    ) {
         _ierc20 = ierc20;
         _period = period;
         _amountLimit = amountLimit;
@@ -59,11 +59,10 @@ contract Faucet is Ownable {
     /// @notice retrieve all IERC20 token from contract to an address.
     /// @param receiver The address that will receive all IERC20 tokens.
     function retrieve(address receiver) public onlyOwner {
-        address contractAddress = address(this);
-        uint256 balance = _ierc20.balanceOf(contractAddress);
-        _ierc20.transferFrom(contractAddress, receiver, balance);
+        uint256 accountBalance = balance();
+        _ierc20.transferFrom(address(this), receiver, accountBalance);
 
-        emit FaucetRetrieved(receiver, balance);
+        emit FaucetRetrieved(receiver, accountBalance);
     }
 
     /// @notice send amount of IERC20 to a receiver.
@@ -74,12 +73,11 @@ contract Faucet is Ownable {
             string(abi.encodePacked("Demand must not exceed ", Strings.toString(_amountLimit)))
         );
 
-        address contractAddress = address(this);
-        uint256 balance = _ierc20.balanceOf(contractAddress);
+        uint256 accountBalance = balance();
 
         require(
-            balance > 0,
-            string(abi.encodePacked("Insufficient balance on Faucet account: ", Strings.toString(balance)))
+            accountBalance > 0,
+            string(abi.encodePacked("Insufficient balance on Faucet account: ", Strings.toString(accountBalance)))
         );
         require(
             _lastTimestamps[msg.sender] + _period < block.timestamp,
@@ -87,10 +85,10 @@ contract Faucet is Ownable {
         );
         _lastTimestamps[msg.sender] = block.timestamp;
 
-        if (balance < amount) {
-            amount = balance;
+        if (accountBalance < amount) {
+            amount = accountBalance;
         }
-        _ierc20.transferFrom(contractAddress, msg.sender, amount);
+        _ierc20.transferFrom(address(this), msg.sender, amount);
 
         emit FaucetSent(msg.sender, amount);
     }
