@@ -150,10 +150,7 @@ describe('PolygonSand.sol', function () {
       const updated_polygon_balance = BigNumber.from(
         await polygon.users[0].sand.balanceOf(mainnet.sandBeneficiary.address)
       );
-      console.log(mainnet_balance.toString());
-      console.log(polygon_balance.toString());
-      console.log(updated_mainnet_balance.toString());
-      console.log(updated_polygon_balance.toString());
+
       expect(updated_mainnet_balance).to.be.equal(
         mainnet_balance.add(transferAmount)
       );
