@@ -29,7 +29,7 @@ contract EstateSaleWithAuth is ERC2771Context, WithReferralValidator {
     uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land
 
     IERC1155 internal immutable _asset;
-    LandToken internal immutable _land;
+    ILandToken internal immutable _land;
     IERC20 internal immutable _sand;
     address internal immutable _estate;
     address internal immutable _feeDistributor;
@@ -49,7 +49,7 @@ contract EstateSaleWithAuth is ERC2771Context, WithReferralValidator {
     // need to use struct to avoid "Stack Too Deep" error. Since there are too many parameters.
     struct Parameters {
         IERC1155 asset;
-        LandToken landAddress;
+        ILandToken landAddress;
         IERC20 sandContractAddress;
         address admin;
         address estate;
