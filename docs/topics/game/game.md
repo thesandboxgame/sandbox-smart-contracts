@@ -10,14 +10,10 @@ A [GAME]() is a non-fungible ERC-721 token that can be placed on a specific [LAN
 
 Learn more about GAME in The Sandbox Metaverse in this [article]().
 
-## Model
-
-The Land token is an ERC721 token, in which the tokens represent pieces of the Sandbox world map. In total there are 166,464 LANDs, mapped to a 408x408 grid.
-
 ### Class diagram
 
 ```plantuml
-title class diagram
+
 class ERC721BaseToken {
     {field} + _numNFTPerAddress: mapping (address => uint256)
     {field} + _owners: mapping (uint256 => uint256)
@@ -92,8 +88,9 @@ class GameBaseToken{
     + tokenURI(...)
     + supportsInterface(...)
 }
-
-IGameToken <|-- GameBaseToken
+MetaTransactionReceiver <|-- ERC721BaseToken
+ERC721Events <|-- ERC721BaseToken
+SuperOperator <|-- ERC721BaseToken
 ERC721BaseToken <|-- ImmutableERC721
 Initializable <|-- GameBaseToken
 WithMinter <|-- GameBaseToken

@@ -52,6 +52,8 @@ nav:
           - ERC1155721: topics/token/ERC1155721.md
       - Land:
           - Land: topics/land/land.md
+      - Game:
+          - Game: topics/game/game.md
       - Permit:
           - Permit: topics/permit/Permit.md
 
