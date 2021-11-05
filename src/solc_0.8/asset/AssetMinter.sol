@@ -7,7 +7,6 @@ import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
 import "../common/interfaces/IAssetMinter.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
-import "../common/interfaces/IERC20Extended.sol";
 import "../common/interfaces/IAssetToken.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";
 
