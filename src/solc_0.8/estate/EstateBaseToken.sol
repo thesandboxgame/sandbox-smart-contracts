@@ -84,7 +84,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         _metaData[storageId] = creation.uri;
         _addLandsGames(from, storageId, creation.landIds, creation.gameIds, true);
         emit EstateTokenUpdated(0, estateId, creation);
-        return estateId;
+        return 10; //estateId;
     }
 
     /// @notice lets the estate owner add lands and/or add/remove games for these lands
@@ -103,8 +103,10 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         uint256 storageId = _storageId(estateId);
         _metaData[storageId] = update.uri;
         _check_authorized(from, ADD);
+
         _addLandsGames(from, estateId, update.landIds, update.gameIds, false);
         uint256 newId = _incrementTokenVersion(to, estateId);
+
         emit EstateTokenUpdated(estateId, newId, update);
         return newId;
     }
@@ -395,18 +397,14 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         // lands without games will be represented as gameId = 0
 
         require(landIds.length == gameIds.length, "DIFFERENT_LENGTH_LANDS_GAMES");
-        //this doesn't work we can have more lands than games
         require(landIds.length > 0, "EMPTY_LAND_IDS_ARRAY");
-
         gamesToRemove = new uint256[](gameIds.length);
         gamesToAdd = new uint256[](gameIds.length);
         uint256 prevOldGame;
 
         for (uint256 i = 0; i < landIds.length; i++) {
             uint256 gameId = gameIds[i];
-
             (, uint256 oldGameId) = estates[storageId].tryGet(landIds[i]);
-
             if (isRemove) {
                 require(estates[storageId].remove(landIds[i]), "LAND_DOES_NOT_EXIST");
             } else {
@@ -416,6 +414,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
             // skip gameId=0, games duplications, and existing games
             if (oldGameId != 0) {
                 gamesToLands[oldGameId].remove(landIds[i]);
+
                 if (oldGameId != prevOldGame && _gameToken.ownerOf(oldGameId) == address(this)) {
                     gamesToRemove[i] = oldGameId;
                 }
@@ -470,7 +469,9 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         require(to != address(uint160(0)), "CAN'T_SEND_TO_ZERO_ADDRESS");
         uint16 idVersion;
         uint256 estateId;
+
         uint256 strgId;
+
         if (isCreation) {
             idVersion = 1;
             estateId = _generateTokenId(from, subId, _chainIndex, idVersion);
