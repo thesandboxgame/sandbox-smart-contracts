@@ -7,10 +7,13 @@ const args = process.argv.slice(2);
 
 /**
  * How to use:
- *  - yarn execute <NETWORK> ./scripts/transact/connected_mintPolygonSandForClaim.ts <MINT_BOOLEAN_FLAG>
+ *  - yarn execute <NETWORK> ./scripts/transact/connected_mintPolygonSandForClaim.ts <MINT_BOOLEAN_FLAG> <ADDRESS_V2_OWNER>...
  *
  * MINT_BOOLEAN_FLAG: true/false
  * Keeping the MINT_BOOLEAN_FLAG false only logs the balances and does not mint any tokens
+ *
+ * <ADDRESS_V2_OWNER>...: List of owner SAND V2 addresses
+ * The script will refill these addresses with SAND V3
  */
 (async () => {
   // Only for minting tokens through deposit method on Mumbai or Matic network
@@ -20,14 +23,6 @@ const args = process.argv.slice(2);
     network.name !== 'mumbai'
   ) {
     throw new Error('only for polygon/mumbai');
-  }
-
-  /*
-    One argument is required by the script
-    1) Address of the fake PolygonSand contract
-  */
-  if (args.length != 1) {
-    throw new Error('wrong number of arguments passed');
   }
 
   // Fetching parameter
@@ -44,9 +39,10 @@ const args = process.argv.slice(2);
   );
 
   // Get contract instance
+  const sandContractV2 = await ethers.getContract('OldPolygonSand_V2');
   const fakeSandContract = await ethers.getContract('FAKE_POLYGON_SAND');
   const polygonSand = await ethers.getContract('PolygonSand');
-  const claimsContract = await ethers.getContract('PolygonSandClaim');
+  const claimsContract = await ethers.getContract('OldPolygonSandClaim_V2');
 
   // Update childChainManagerProxy to allow deposit on contract
   if (childChainManagerProxy != deployer && mintTokens) {
@@ -95,6 +91,29 @@ const args = process.argv.slice(2);
     await tx.wait();
     console.log('Successfully minted', mintAmount.toString(), 'tokens');
   }
+
+  const argAdresses = args.slice(1);
+  argAdresses.forEach(async (address) => {
+    const balanceOfSandV2 = BigNumber.from(
+      await sandContractV2.balanceOf(address)
+    );
+    console.log(
+      'balance SANDV2 of %s : %s',
+      address,
+      balanceOfSandV2.toString()
+    );
+    if (mintTokens) {
+      console.log('Minting tokens to %s', address);
+      const abiCoder = ethers.utils.defaultAbiCoder;
+      const encodedAmount = abiCoder.encode(
+        ['uint256'],
+        [balanceOfSandV2.toString()]
+      );
+      const tx = await polygonSand.deposit(address, encodedAmount);
+      await tx.wait();
+      console.log('Successfully minted', balanceOfSandV2.toString(), 'tokens');
+    }
+  });
 
   if (mintTokens) {
     // Fetching childChainManagerProxy address
