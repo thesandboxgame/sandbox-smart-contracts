@@ -92,28 +92,34 @@ const args = process.argv.slice(2);
     console.log('Successfully minted', mintAmount.toString(), 'tokens');
   }
 
-  const argAdresses = args.slice(1);
-  argAdresses.forEach(async (address) => {
+  const argAddresses = args.slice(1);
+  for (const index in argAddresses) {
+    const address = argAddresses[index];
     const balanceOfSandV2 = BigNumber.from(
       await sandContractV2.balanceOf(address)
     );
-    console.log(
-      'balance SANDV2 of %s : %s',
-      address,
-      balanceOfSandV2.toString()
+    const balanceOfSandV3 = BigNumber.from(
+      await polygonSand.balanceOf(address)
     );
-    if (mintTokens) {
+
+    const mintAmount = balanceOfSandV2.sub(balanceOfSandV3);
+    if (mintTokens && mintAmount > BigNumber.from('0')) {
+      console.log(
+        'Amount of SandV3 to be minted for %s : %s',
+        address,
+        mintAmount.toString()
+      );
       console.log('Minting tokens to %s', address);
       const abiCoder = ethers.utils.defaultAbiCoder;
       const encodedAmount = abiCoder.encode(
         ['uint256'],
-        [balanceOfSandV2.toString()]
+        [mintAmount.toString()]
       );
       const tx = await polygonSand.deposit(address, encodedAmount);
       await tx.wait();
-      console.log('Successfully minted', balanceOfSandV2.toString(), 'tokens');
+      console.log('Successfully minted', mintAmount.toString(), 'tokens');
     }
-  });
+  }
 
   if (mintTokens) {
     // Fetching childChainManagerProxy address
