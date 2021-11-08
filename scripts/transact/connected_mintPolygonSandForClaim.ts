@@ -42,7 +42,7 @@ const args = process.argv.slice(2);
   const sandContractV2 = await ethers.getContract('OldPolygonSand_V2');
   const fakeSandContract = await ethers.getContract('FAKE_POLYGON_SAND');
   const polygonSand = await ethers.getContract('PolygonSand');
-  const claimsContract = await ethers.getContract('OldPolygonSandClaim_V2');
+  const claimsContract = await ethers.getContract('PolygonSandClaim');
 
   // Update childChainManagerProxy to allow deposit on contract
   if (childChainManagerProxy != deployer && mintTokens) {
