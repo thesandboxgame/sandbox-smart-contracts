@@ -17,7 +17,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       from: deployer,
       log: true,
       args: [
-        `Sandbox's ${catalyst.symbol} Catalysts`,
+        `Sandbox ${catalyst.symbol} Catalysts`,
         catalyst.symbol,
         catalystAdmin,
         catalyst.maxGems,

@@ -3,7 +3,7 @@ pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
 import "./interfaces/IOldCatalystRegistry.sol";
-import "./interfaces/IAssetAttributesRegistry.sol";
+import "../common/interfaces/IAssetAttributesRegistry.sol";
 import "./interfaces/ICollectionCatalystMigrations.sol";
 import "../common/interfaces/IAssetToken.sol";
 import "../common/BaseWithStorage/WithAdmin.sol";

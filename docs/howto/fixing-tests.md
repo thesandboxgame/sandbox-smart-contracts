@@ -9,4 +9,7 @@ A quick fix is to reinstall the packages, clean the cache of hardhat with those 
 
 ```bash
 yarn && yarn hardhat clean && yarn compile && yarn test
+
 ```
+
+Note: On Windows you need at least [Powershell 7](https://github.com/PowerShell/PowerShell#get-powershell) in order to make this command work.
