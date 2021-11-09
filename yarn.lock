@@ -121,7 +121,7 @@
 
 "@ethereumjs/block@^3.5.1":
   version "3.5.1"
-  resolved "https://registry.npmjs.org/@ethereumjs/block/-/block-3.5.1.tgz"
+  resolved "https://registry.yarnpkg.com/@ethereumjs/block/-/block-3.5.1.tgz#59737d393503249aa750c37dfc83896234f4e175"
   integrity sha512-MoY9bHKABOBK6BW0v1N1Oc0Cve4x/giX67M3TtrVBUsKQTj2eznLGKpydoitxWSZ+WgKKSVhfRMzbCGRwk7T5w==
   dependencies:
     "@ethereumjs/common" "^2.5.0"
@@ -154,7 +154,7 @@
 
 "@ethereumjs/common@^2.5.0":
   version "2.5.0"
-  resolved "https://registry.npmjs.org/@ethereumjs/common/-/common-2.5.0.tgz"
+  resolved "https://registry.yarnpkg.com/@ethereumjs/common/-/common-2.5.0.tgz#ec61551b31bef7a69d1dc634d8932468866a4268"
   integrity sha512-DEHjW6e38o+JmB/NO3GZBpW4lpaiBpkFgXF6jLcJ6gETBYpEyaA5nTimsWBUJR3Vmtm/didUEbNjajskugZORg==
   dependencies:
     crc-32 "^1.2.0"
@@ -180,7 +180,7 @@
 
 "@ethereumjs/tx@^3.3.1", "@ethereumjs/tx@^3.3.2":
   version "3.3.2"
-  resolved "https://registry.npmjs.org/@ethereumjs/tx/-/tx-3.3.2.tgz"
+  resolved "https://registry.yarnpkg.com/@ethereumjs/tx/-/tx-3.3.2.tgz#348d4624bf248aaab6c44fec2ae67265efe3db00"
   integrity sha512-6AaJhwg4ucmwTvw/1qLaZUX5miWrwZ4nLOUsKyb/HtzS3BMw/CasKhdi1ims9mBKeK9sOJCH4qGKOBGyJCeeog==
   dependencies:
     "@ethereumjs/common" "^2.5.0"
@@ -4440,7 +4440,7 @@ ethereumjs-util@^7.0.7, ethereumjs-util@^7.1.0:
 
 ethereumjs-util@^7.1.1, ethereumjs-util@^7.1.2, ethereumjs-util@^7.1.3:
   version "7.1.3"
-  resolved "https://registry.npmjs.org/ethereumjs-util/-/ethereumjs-util-7.1.3.tgz"
+  resolved "https://registry.yarnpkg.com/ethereumjs-util/-/ethereumjs-util-7.1.3.tgz#b55d7b64dde3e3e45749e4c41288238edec32d23"
   integrity sha512-y+82tEbyASO0K0X1/SRhbJJoAlfcvq8JbrG4a5cjrOks7HS/36efU/0j2flxCPOUM++HFahk33kr/ZxyC4vNuw==
   dependencies:
     "@types/bn.js" "^5.1.0"
@@ -7138,7 +7138,7 @@ merkle-patricia-tree@^4.2.0:
 
 merkle-patricia-tree@^4.2.1:
   version "4.2.2"
-  resolved "https://registry.npmjs.org/merkle-patricia-tree/-/merkle-patricia-tree-4.2.2.tgz"
+  resolved "https://registry.yarnpkg.com/merkle-patricia-tree/-/merkle-patricia-tree-4.2.2.tgz#6dec17855370172458244c2f42c989dd60b773a3"
   integrity sha512-eqZYNTshcYx9aESkSPr71EqwsR/QmpnObDEV4iLxkt/x/IoLYZYjJvKY72voP/27Vy61iMOrfOG6jrn7ttXD+Q==
   dependencies:
     "@types/levelup" "^4.3.0"
