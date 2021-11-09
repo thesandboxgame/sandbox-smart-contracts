@@ -23,7 +23,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721Receiver {
         uint256 y,
         bytes memory data
     ) external {
-        childToken.transferQuad(address(this), to, size, x, y, data);
+        childToken.transferQuad(msg.sender, address(this), size, x, y, data);
         _sendMessageToRoot(abi.encode(to, size, x, y, data));
     }
 
