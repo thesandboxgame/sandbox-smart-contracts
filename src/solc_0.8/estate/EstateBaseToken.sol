@@ -84,7 +84,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         _metaData[storageId] = creation.uri;
         _addLandsGames(from, storageId, creation.landIds, creation.gameIds, true);
         emit EstateTokenUpdated(0, estateId, creation);
-        return 10; //estateId;
+        return estateId;
     }
 
     /// @notice lets the estate owner add lands and/or add/remove games for these lands
@@ -143,6 +143,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         _check_authorized(from, ADD);
         (uint256[] memory gamesToRemove, uint256[] memory gamesToAdd) =
             _setGamesOfLands(storageId, update.landIds, update.gameIds, false);
+
         for (uint256 j = 0; j < gamesToRemove.length; j++) {
             if (gamesToLands[gamesToRemove[j]].length() != 0) {
                 gamesToRemove[j] = 0;
@@ -232,10 +233,14 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         return EstateData({landIds: landIds, gameIds: gameIds});
     }
 
-    //this was breaking compilation
-    /*function getLandsForGame(uint256 gameId) public view returns (uint256[] memory landIds) {
-        return gamesToLands[gameId].values();
-    }*/
+    function getLandsForGame(uint256 gameId) public view returns (uint256[] memory) {
+        uint256[] memory landIds = new uint256[](gamesToLands[gameId].length());
+        for (uint256 i = 0; i < gamesToLands[gameId].length(); i++) {
+            landIds[i] = gamesToLands[gameId].at(i);
+        }
+
+        return landIds; //gamesToLands[gameId].values();
+    }
 
     /// @notice Return the name of the token contract.
     /// @return The name of the token contract.
@@ -438,16 +443,25 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
     /// @return the version-incremented tokenId.
     function _incrementTokenVersion(address from, uint256 estateId) internal returns (uint256) {
         address originalCreator = address(uint160(estateId / CREATOR_OFFSET_MULTIPLIER));
+
         uint64 subId = uint64(estateId / SUBID_MULTIPLIER);
+
         uint16 version = uint16(estateId);
+
         version++;
+
         address owner = _ownerOf(estateId);
+
         if (from == owner) {
             _burn(from, owner, estateId);
         }
+
         (uint256 newId, ) = _mintEstate(originalCreator, owner, subId, version, false);
+
         address newOwner = _ownerOf(newId);
+
         require(owner == newOwner, "NOT_OWNER");
+
         return newId;
     }
 
