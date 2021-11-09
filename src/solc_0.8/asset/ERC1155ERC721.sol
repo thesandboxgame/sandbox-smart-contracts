@@ -430,14 +430,13 @@ contract ERC1155ERC721 is WithSuperOperators, WithBouncer, IERC1155, IERC721, ER
     /// @notice Query if a contract implements interface `id`.
     /// @param id the interface identifier, as specified in ERC-165.
     /// @return `true` if the contract implements `id`.
-    function supportsInterface(bytes4 id) public pure override(IERC165, AccessControl) returns (bool) {
+    function supportsInterface(bytes4 id) public pure override returns (bool) {
         return
             id == 0x01ffc9a7 || //ERC165
             id == 0xd9b67a26 || // ERC1155
             id == 0x80ac58cd || // ERC721
             id == 0x5b5e139f || // ERC721 metadata
-            id == 0x0e89341c || // ERC1155 metadata
-            id == 0x7965db0b; // AccessControl
+            id == 0x0e89341c; // ERC1155 metadata
     }
 
     /// @notice Transfers the ownership of an NFT from one address to another address.
@@ -1017,13 +1016,5 @@ contract ERC1155ERC721 is WithSuperOperators, WithBouncer, IERC1155, IERC721, ER
             ids[i] = _generateTokenId(creator, supplies[i], packId, numFTs, i);
         }
         return (ids, numNFTs);
-    }
-
-    function _msgSender() internal view override(ERC2771Handler, Context) returns (address sender) {
-        return ERC2771Handler._msgSender();
-    }
-
-    function _msgData() internal view override(ERC2771Handler, Context) returns (bytes calldata) {
-        return ERC2771Handler._msgData();
     }
 }
