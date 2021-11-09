@@ -10,13 +10,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const Land = await deployments.get('Land');
   const FXROOT = await deployments.get('FXROOT');
-  // @todo - Update correct address
-  const CheckpointManager = ethers.constants.AddressZero;
+  const CHECKPOINTMANAGER = await deployments.get('CHECKPOINTMANAGER');
 
   const LandTunnel = await deploy('LandTunnel', {
     from: deployer,
     contract: 'LandTunnel',
-    args: [CheckpointManager, FXROOT.address, Land.address],
+    args: [CHECKPOINTMANAGER.address, FXROOT.address, Land.address],
     log: true,
     skipIfAlreadyDeployed: true,
   });
@@ -42,5 +41,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['LandTunnel', 'LandTunnel_deploy', 'L1'];
-func.dependencies = ['Land', 'FXROOT'];
+func.dependencies = ['Land', 'FXROOT', 'CHECKPOINTMANAGER'];
 func.skip = skipUnlessTestnet;
