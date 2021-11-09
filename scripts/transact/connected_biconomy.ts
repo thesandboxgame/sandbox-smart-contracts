@@ -7,7 +7,7 @@ import * as bico from '@biconomy/mexa';
  * */
 (async () => {
   const biconomy = new bico.Biconomy(ethers.provider, {
-    apiKey: 'TVWVnKizm.0d4d3808-c6ce-4612-bbe1-a6b85f47d892',
+    apiKey: process.env.BICONOMY_API_KEY,
     debug: true,
   });
 
