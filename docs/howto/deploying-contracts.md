@@ -82,7 +82,26 @@ For instance, the PolygonSand contract on mumbai located at this address `0xE034
 
 [https://mumbai.polygonscan.com/address/0xE03489D4E90b22c59c5e23d45DFd59Fc0dB8a025]()
 
-Those explorers are useful to interact with your contracts through the interface (tab "Contract" then "Read Contract" or "Write Contract"). But in order for the explorer to be able to interact with the contract, you have to "verify" the contract on the explorer by sending the signature of your contract to the explorer. And this is done with the command `verify` of hardhat.
+Those explorers are useful to interact with your contracts through the interface (tab "Contract" then "Read Contract" or "Write Contract"). But in order for the explorer to be able to interact with the contract, you have to "verify" the contract on the explorer by sending the signature of your contract to the explorer. 
+
+### Hardhat-deploy etherscan-verify
+HardHat-deploy provides  a command to “batch verify” every contract you deploy on a specific network. If the current contract is already verified, the command logs a warning and ignores this contract.
+
+The command use two arguments:
+
+- `--network`: the network
+- `--api-key`: your api key for the specified network
+
+!!! example
+    Run this command to verify every contract on mumbai
+    ```shell
+    yarn hardhat --network mumbai etherscan-verify --api-key XXXXXXX 
+    ```
+
+### Hardhat verify
+You could also use the command `verify` of hardhat if you want to verify a single smartcontract.
+
+And this is done with the command `verify` of hardhat.
 
 This command has multiple arguments:
 

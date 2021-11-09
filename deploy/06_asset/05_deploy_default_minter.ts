@@ -32,7 +32,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const isBouncer = await read('Asset', 'isBouncer', DefaultMinter.address);
   if (!isBouncer) {
     const bouncerAdmin = await read('Asset', 'getBouncerAdmin');
-    await await catchUnknownSigner(
+    await catchUnknownSigner(
       execute(
         'Asset',
         {from: bouncerAdmin, log: true},
