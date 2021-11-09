@@ -1,4 +1,5 @@
 // SPDX-License-Identifier: MIT
+/* solhint-disable no-empty-blocks */
 
 pragma solidity 0.8.2;
 
@@ -106,13 +107,14 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         require(to != address(0), "can't send to zero address");
         require(sizes.length == xs.length && xs.length == ys.length, "invalid data");
         bool metaTx = msg.sender != from && isTrustedForwarder(msg.sender);
-        if (msg.sender != from && (!metaTx)) {
-            /*require(
+        /* if (msg.sender != from && (!metaTx)) {
+            require(
                 _superOperators[msg.sender] || _operatorsForAll[from][msg.sender],
                 "not authorized to transferMultiQuads"
-            );*/
-            //took this off for estate tests, must be uncomented when transfer role is adde
-        }
+            );
+
+            //has to be uncomented once access conteol is lade
+        } */
         uint256 numTokensTransfered = 0;
         for (uint256 i = 0; i < sizes.length; i++) {
             uint256 size = sizes[i];
@@ -175,42 +177,6 @@ contract PolygonLandBaseToken is ERC721BaseToken {
             );
         }
     }
-
-    /*function calculateDigest(
-        address from,
-        address to,
-        uint256[] calldata sizes,
-        uint256[] calldata xs,
-        uint256[] calldata ys,
-        bytes calldata data
-    ) internal returns (bytes32) {
-        return
-            keccak256(
-                abi.encodePacked(
-                    "\x19\x01",
-                    _DOMAIN_SEPARATOR,
-                    keccak256(
-                        abi.encode(
-                            keccak256(
-                                //"batchTransferQuadII(address from, address to, uint256[] sizes, uint256[] xs, uint256[] ys, bytes data,)"
-                                "BatchTransferQuadII(address from,address to,bytes sizes,bytes xs,bytes ys,bytes data)"
-                                //, uint256[] calldata sizes, uint256[] calldata xs, uint256[] calldata ys, bytes calldata data,)"
-                            ),
-                            from,
-                            to,
-                            //sizes,
-                            keccak256(abi.encodePacked(sizes)), //The array values are encoded as the keccak256 hash of the concatenated encodeData
-                            //xs,
-                            keccak256(abi.encodePacked(xs)),
-                            //ys,
-                            keccak256(abi.encodePacked(ys)),
-                            keccak256(data) //the dynamic values bytes and string are encoded as a keccak256 hash of their contents.
-                            //data
-                        )
-                    )
-                )
-            );
-    }*/
 
     function transferQuad(
         address from,
@@ -502,50 +468,4 @@ contract PolygonLandBaseToken is ERC721BaseToken {
             require(_checkOnERC721BatchReceived(operator, from, to, ids, data), "erc721 batch transfer rejected by to");
         }
     }
-
-    /*uint256 internal constant LAYER_N3x3 = 0xFE00000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_N6x6 = 0xFD00000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_N12x12 = 0xFC00000000000000000000000000000000000000000000000000000000000000;
-    uint256 internal constant LAYER_N24x24 = 0xFB00000000000000000000000000000000000000000000000000000000000000;
-
-    function separate(uint256[] memory landIds)
-        public
-        returns (
-            uint256[] memory,
-            uint256[] memory,
-            uint256[] memory
-        )
-    {
-        uint256 numLds = landIds.length;
-
-        uint256[] memory sizes = new uint256[](numLds);
-        uint256[] memory xs = new uint256[](numLds);
-        uint256[] memory ys = new uint256[](numLds);
-
-        for (uint256 i = 0; i < numLds; i++) {
-            if (landIds[i] & LAYER == 0) {
-                sizes[i] = 1;
-                xs[i] = (landIds[i]) % GRID_SIZE;
-                ys[i] = landIds[i] / GRID_SIZE;
-            } else if (landIds[i] & LAYER_N3x3 == 0) {
-                sizes[i] = 3;
-                xs[i] = (landIds[i] - LAYER_3x3) % GRID_SIZE;
-                ys[i] = (landIds[i] - LAYER_3x3) / GRID_SIZE;
-            } else if (landIds[i] & LAYER_N6x6 == 0) {
-                sizes[i] = 6;
-                xs[i] = (landIds[i] - LAYER_6x6) % GRID_SIZE;
-                ys[i] = (landIds[i] - LAYER_6x6) / GRID_SIZE;
-            } else if (landIds[i] & LAYER_N12x12 == 0) {
-                sizes[i] = 12;
-                xs[i] = (landIds[i] - LAYER_12x12) % GRID_SIZE;
-                ys[i] = (landIds[i] - LAYER_12x12) / GRID_SIZE;
-            } else if (landIds[i] & LAYER_N24x24 == 0) {
-                sizes[i] = 24;
-                xs[i] = (landIds[i] - LAYER_24x24) % GRID_SIZE;
-                ys[i] = (landIds[i] - LAYER_24x24) / GRID_SIZE;
-            }
-        }
-
-        return (sizes, xs, ys);
-    }*/
 }

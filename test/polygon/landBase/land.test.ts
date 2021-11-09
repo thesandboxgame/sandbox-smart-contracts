@@ -1242,7 +1242,7 @@ describe('MockLandWithMint.sol', function () {
       const num2 = await landOwners[0].MockLandWithMint.balanceOf(
         landOwners[1].address
       );
-      expect(num2).to.equal(2880);
+      expect(num2).to.equal(5);
 
       console.log('GAS USED for 576 ' + receipt.gasUsed);
     });
