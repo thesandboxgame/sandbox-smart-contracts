@@ -348,7 +348,7 @@ describe('MockLandWithMint.sol', function () {
         )
       );
       gasTotal = gasTotal.add(receipt.gasUsed);
-      console.log('GAS USED ' + gasTotal.toString()); //receipt.gasUsed.toString());
+      console.log('GAS USED ' + gasTotal.toString());
     });
 
     it('testing transfering 50 lands', async function () {
@@ -439,7 +439,7 @@ describe('MockLandWithMint.sol', function () {
       );
       expect(num2).to.equal(50);
 
-      console.log('GAS USED ' + gasTotal.toString()); //receipt.gasUsed.toString());
+      console.log('GAS USED ' + gasTotal.toString());
     });
 
     it('testing transfering 100 lands', async function () {
@@ -478,7 +478,7 @@ describe('MockLandWithMint.sol', function () {
         landOwners[1].address
       );
       expect(num2).to.equal(100);
-      console.log('GAS USED ' + gasTotal.toString()); //receipt.gasUsed.toString());
+      console.log('GAS USED ' + gasTotal.toString());
     });
 
     it('testing transfering 250 lands', async function () {
@@ -517,7 +517,7 @@ describe('MockLandWithMint.sol', function () {
         landOwners[1].address
       );
       expect(num2).to.equal(250);
-      console.log('GAS USED ' + gasTotal.toString()); //receipt.gasUsed.toString());
+      console.log('GAS USED ' + gasTotal.toString());
     });
 
     it('testing transfering 576 lands', async function () {
@@ -556,41 +556,7 @@ describe('MockLandWithMint.sol', function () {
         landOwners[1].address
       );
       expect(num2).to.equal(576);
-      console.log('GAS USED ' + gasTotal.toString()); //receipt.gasUsed.toString());
-    });
-
-    it('test transfering 576 lands with batchTransferFrom', async function () {
-      const {landOwners} = await setupTest();
-      const bytes = '0x3333';
-
-      const gasTotal = BigNumber.from('0');
-
-      await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
-          landOwners[0].address,
-          24,
-          0,
-          0,
-          bytes
-        )
-      );
-
-      const array = [];
-
-      for (let i = 0; i < 24; i++) {
-        for (let j = 0; j < 24; j++) {
-          array.push(i + j * 408);
-        }
-      }
-      //fails because the tokens were minted inside a 24x24 quad
-      await expect(
-        landOwners[0].MockLandWithMint.batchTransferFrom(
-          landOwners[0].address,
-          landOwners[1].address,
-          array,
-          bytes
-        )
-      ).to.be.revertedWith(`BATCHTRANSFERFROM_NOT_OWNER`);
+      console.log('GAS USED ' + gasTotal.toString());
     });
   });
 
@@ -628,7 +594,7 @@ describe('MockLandWithMint.sol', function () {
         landOwners[1].address
       );
       expect(num2).to.equal(1);
-      console.log('GAS USED for 1 transfer ' + gasTotal.toString()); //receipt.gasUsed.toString());
+      console.log('GAS USED for 1 transfer ' + gasTotal.toString());
     });
 
     it('batch transfering 10 lands', async function () {
@@ -669,7 +635,7 @@ describe('MockLandWithMint.sol', function () {
       );
 
       gasTotal = gasTotal.add(receipt.gasUsed);
-      console.log('GAS USED ' + gasTotal.toString()); //receipt.gasUsed.toString());
+      console.log('GAS USED ' + gasTotal.toString());
     });
 
     it('testing transfering 50 lands', async function () {
@@ -727,8 +693,6 @@ describe('MockLandWithMint.sol', function () {
         }
       }
 
-      //const gasTotal = BigNumber.from('0');
-
       const receipt = await waitFor(
         landOwners[0].MockLandWithMint.batchTransferQuad(
           landOwners[0].address,
@@ -745,7 +709,7 @@ describe('MockLandWithMint.sol', function () {
       );
       expect(num2).to.equal(50);
 
-      console.log('GAS USED ' + receipt.gasUsed.toString()); //receipt.gasUsed.toString());
+      console.log('GAS USED ' + receipt.gasUsed.toString());
     });
 
     it('batch transfering 50 lands not in quads', async function () {
@@ -793,7 +757,7 @@ describe('MockLandWithMint.sol', function () {
         landOwners[1].address
       );
       expect(num2).to.equal(50);
-      console.log('GAS USED ' + gasTotal.toString()); //receipt.gasUsed.toString());
+      console.log('GAS USED ' + gasTotal.toString());
     });
 
     it('batch transfering 100 lands', async function () {
@@ -841,7 +805,7 @@ describe('MockLandWithMint.sol', function () {
         landOwners[1].address
       );
       expect(num2).to.equal(100);
-      console.log('GAS USED ' + gasTotal.toString()); //receipt.gasUsed.toString());
+      console.log('GAS USED ' + gasTotal.toString());
     });
 
     it('batch transfering 250 lands', async function () {
@@ -888,7 +852,7 @@ describe('MockLandWithMint.sol', function () {
         landOwners[1].address
       );
       expect(num2).to.equal(250);
-      console.log('GAS USED for 250 ' + gasTotal.toString()); //receipt.gasUsed.toString());
+      console.log('GAS USED for 250 ' + gasTotal.toString());
     });
 
     it('batch transfering 500 lands', async function () {
@@ -935,42 +899,7 @@ describe('MockLandWithMint.sol', function () {
         landOwners[1].address
       );
       expect(num2).to.equal(576);
-      console.log('GAS USED 576 ' + gasTotal.toString()); //receipt.gasUsed.toString());
-    });
-
-    it('batch transfering FROM 500 lands', async function () {
-      const {landOwners} = await setupTest();
-      const bytes = '0x3333';
-
-      const gasTotal = BigNumber.from('0');
-
-      await waitFor(
-        landOwners[0].MockLandWithMint.mintQuad(
-          landOwners[0].address,
-          24,
-          0,
-          0,
-          bytes
-        )
-      );
-
-      const array = [];
-
-      for (let i = 0; i < 24; i++) {
-        for (let j = 0; j < 24; j++) {
-          array.push(i + j * 408);
-        }
-      }
-
-      //fails because the tokens were minted inside a 24x24 quad
-      await expect(
-        landOwners[0].MockLandWithMint.batchTransferFrom(
-          landOwners[0].address,
-          landOwners[1].address,
-          array,
-          bytes
-        )
-      ).to.be.revertedWith(`BATCHTRANSFERFROM_NOT_OWNER`);
+      console.log('GAS USED 576 ' + gasTotal.toString());
     });
   });
   describe('GasTest for tranfer quad', function () {
@@ -1004,7 +933,7 @@ describe('MockLandWithMint.sol', function () {
       );
       expect(num2).to.equal(144);
 
-      console.log('GAS USED for 144 ' + receipt.gasUsed); //receipt.gasUsed.toString());
+      console.log('GAS USED for 144 ' + receipt.gasUsed);
     });
 
     it('batch transfer 2 576 land quads', async function () {
@@ -1047,7 +976,7 @@ describe('MockLandWithMint.sol', function () {
       );
       expect(num2).to.equal(1152);
 
-      console.log('GAS USED for 2 576 ' + receipt.gasUsed); //receipt.gasUsed.toString());
+      console.log('GAS USED for 2 576 ' + receipt.gasUsed);
     });
 
     it('batch transfer 3 576 land quads', async function () {
@@ -1100,7 +1029,7 @@ describe('MockLandWithMint.sol', function () {
       );
       expect(num2).to.equal(1728);
 
-      console.log('GAS USED for 3 576 ' + receipt.gasUsed); //receipt.gasUsed.toString());
+      console.log('GAS USED for 3 576 ' + receipt.gasUsed);
     });
 
     it('batch transfer 4 576 land quads', async function () {
@@ -1163,7 +1092,7 @@ describe('MockLandWithMint.sol', function () {
       );
       expect(num2).to.equal(2304);
 
-      console.log('GAS USED for 4 576 ' + receipt.gasUsed); //receipt.gasUsed.toString());
+      console.log('GAS USED for 4 576 ' + receipt.gasUsed);
     });
 
     it('batch transfer 5 576 land quads', async function () {
@@ -1236,7 +1165,7 @@ describe('MockLandWithMint.sol', function () {
       );
       expect(num2).to.equal(2880);
 
-      console.log('GAS USED for 576 ' + receipt.gasUsed); //receipt.gasUsed.toString());
+      console.log('GAS USED for 576 ' + receipt.gasUsed);
     });
 
     it('batch transfer FROM 5 576', async function () {
@@ -1293,8 +1222,7 @@ describe('MockLandWithMint.sol', function () {
         )
       );
 
-      const array = [];
-      const array2 = [
+      const array = [
         '1809251394333065553493296640760748560207343510400633813116524750123642650624',
         '1809251394333065553493296640760748560207343510400633813116524750123642660440',
         '1809251394333065553493296640760748560207343510400633813116524750123642670256',
@@ -1302,20 +1230,11 @@ describe('MockLandWithMint.sol', function () {
         '1809251394333065553493296640760748560207343510400633813116524750123642689888',
       ];
 
-      /*for (let j = 0; j < 5; j++) {
-        array.push(
-          0x0400000000000000000000000000000000000000000000000000000000000000 +
-            (24 * j + 24 * j * 408)
-        );
-      }*/
-
-      //console.log(array);
-
       const receipt = await waitFor(
         landOwners[0].MockLandWithMint.batchTransferFrom(
           landOwners[0].address,
           landOwners[1].address,
-          array2,
+          array,
           bytes
         )
       );
@@ -1323,9 +1242,9 @@ describe('MockLandWithMint.sol', function () {
       const num2 = await landOwners[0].MockLandWithMint.balanceOf(
         landOwners[1].address
       );
-      //expect(num2).to.equal(2880);
+      expect(num2).to.equal(2880);
 
-      console.log('GAS USED for 576 ' + receipt.gasUsed); //receipt.gasUsed.toString());
+      console.log('GAS USED for 576 ' + receipt.gasUsed);
     });
   });
 

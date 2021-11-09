@@ -4,7 +4,6 @@ import {
   getUnnamedAccounts,
   getNamedAccounts,
 } from 'hardhat';
-import {waitFor} from '../utils';
 import {EstateTestHelper} from './estateTestHelper';
 
 export const setupEstate = deployments.createFixture(async function () {
