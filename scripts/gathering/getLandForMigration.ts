@@ -2,6 +2,7 @@ import { Event } from 'ethers';
 import BN from 'bn.js';
 import fs from 'fs-extra';
 import { ethers } from 'hardhat';
+import hre from 'hardhat';
 
 const startBlock = 5530851; // This is the block number where the Land contract was deployed in rinkeby network
 const networkName = 'rinkeby';
@@ -69,42 +70,9 @@ function tokenIdToMapCoords(topCornerId: BN): { coordinateX: string, coordinateY
 }
 
 (async () => {
-	const presaleContractNames = [
-		'LandPreSale_1',
-		'LandPreSale_10_27',
-		'LandPreSale_10_28',
-		'LandPreSale_10_29',
-		'LandPreSale_10_30',
-		'LandPreSale_11_31',
-		'LandPreSale_12_32',
-		'LandPreSale_2',
-		'LandPreSale_3',
-		'LandPreSale_3_4',
-		'LandPreSale_3_5',
-		'LandPreSale_3_6',
-		'LandPreSale_3_7',
-		'LandPreSale_3_8',
-		'LandPreSale_3_9',
-		'LandPreSale_4_1',
-		'LandPreSale_4_2_11',
-		'LandPreSale_4_2_12',
-		'LandPreSale_4_2_13',
-		'LandPreSale_4_2_14',
-		'LandPreSale_5_16',
-		'LandPreSale_5_17',
-		'LandPreSale_5_18',
-		'LandPreSale_5_19',
-		'LandPreSale_6_18',
-		'LandPreSale_6_bis_18',
-		'LandPreSale_7_19',
-		'LandPreSale_8_20',
-		'LandPreSale_8_21',
-		'LandPreSale_8_22',
-		'LandPreSale_8_23',
-		'LandPreSale_8_24',
-		'LandPreSale_9_25',
-		'LandPreSale_9_26'
-	];
+	const { deployments } = hre;
+	const allDeployedContracts = await deployments.all();
+	const presaleContractNames = Object.keys(allDeployedContracts).filter(contract => contract.includes('LandPreSale'));
 
 	type Land = {
 		coordinateX: string;
