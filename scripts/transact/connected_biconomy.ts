@@ -1,5 +1,6 @@
 import {getNamedAccounts, ethers} from 'hardhat';
 import * as bico from '@biconomy/mexa';
+import {Transaction} from '@ethersproject/transactions';
 
 /**
  *  Testing Biconomy
@@ -11,7 +12,7 @@ import * as bico from '@biconomy/mexa';
     debug: true,
   });
 
-  const ethersProvider = new ethers.providers.Web3Provider(biconomy);
+  new ethers.providers.Web3Provider(biconomy);
 
   const {deployer, sandAdmin} = await getNamedAccounts();
 
@@ -49,7 +50,7 @@ import * as bico from '@biconomy/mexa';
       console.log('Transaction hash : ', tx);
 
       //event emitter methods
-      provider.once(tx, (transaction: any) => {
+      provider.once(tx, (transaction: Transaction) => {
         // Emitted when the transaction has been mined
         //show success message
         console.log(transaction);
