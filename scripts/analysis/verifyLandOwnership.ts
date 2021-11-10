@@ -1,12 +1,23 @@
+/*
+This scripts requires the following arguments:
+  - sourceNetwork: the network where the lands were originally minted. e.g. 'mainnet'
+
+Executio example:
+yarn execute localhost scripts/analysis/verifyLandOwnership.ts --sourceNetwork rinkeby
+It  will verify if the owners of the land tokens from the source network are the same as the owners of the land tokens in the current network.
+*/
+
 import BN from 'bn.js';
 import fs from 'fs-extra';
 import {ethers} from 'hardhat';
-
-const networkName = 'rinkeby';
-const landOwnersFilePath = `tmp/${networkName}-landOwners.json`;
-const errorFilePath = 'tmp/verificationLandErrors.json';
+import minimist from 'minimist';
 
 (async () => {
+  const argv = minimist(process.argv.slice(2));
+  if (!argv.sourceNetwork) throw new Error('sourceNetwork argument is missing');
+  const sourceNetwork = argv.sourceNetwork;
+  const landOwnersFilePath = `tmp/${sourceNetwork}-landOwners.json`;
+  const errorFilePath = `tmp/${sourceNetwork}-verificationLandErrors.json`;
   const errors = [];
   let succesfulChecks = 0;
   type Land = {
@@ -20,9 +31,7 @@ const errorFilePath = 'tmp/verificationLandErrors.json';
   // read original land owners file
   if (!fs.existsSync(landOwnersFilePath))
     throw new Error(`file ${landOwnersFilePath} does not exist'`);
-  const landOwners: landOwnersMap = JSON.parse(
-    fs.readFileSync(landOwnersFilePath).toString()
-  );
+  const landOwners: landOwnersMap = fs.readJSONSync(landOwnersFilePath);
 
   const LandContract = await ethers.getContract('Land');
 
@@ -53,7 +62,6 @@ const errorFilePath = 'tmp/verificationLandErrors.json';
   console.log(`${succesfulChecks} checks were successful`);
   console.log(`Error count is ${errors.length}`);
   if (errors.length > 0) {
-    fs.ensureDirSync('tmp');
-    fs.writeFileSync(errorFilePath, JSON.stringify(errors));
+    fs.outputJSONSync(errorFilePath, errors);
   }
 })();

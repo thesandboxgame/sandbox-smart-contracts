@@ -4,10 +4,6 @@ import fs from 'fs-extra';
 import {ethers} from 'hardhat';
 import hre from 'hardhat';
 
-const startBlock = 5530851; // This is the block number where the Land contract was deployed in rinkeby network
-const networkName = 'rinkeby';
-const exportFilePath = `tmp/${networkName}-landOwners.json`;
-
 async function queryEvents(
   filterFunc: (startBlock: number, endBlock: number) => Promise<Event[]>,
   startBlock: number,
@@ -72,9 +68,23 @@ function tokenIdToMapCoords(
 (async () => {
   const {deployments} = hre;
   const allDeployedContracts = await deployments.all();
+  let minBlockNumber;
   const presaleContractNames = Object.keys(
     allDeployedContracts
   ).filter((contract) => contract.includes('LandPreSale'));
+
+  for (const presaleContractName of presaleContractNames) {
+    const contract = allDeployedContracts[presaleContractName];
+    const creationBlock =
+      (contract && contract.receipt && contract.receipt.blockNumber) || 0;
+    if (!minBlockNumber || creationBlock < minBlockNumber) {
+      minBlockNumber = creationBlock;
+    }
+  }
+
+  const startBlock = minBlockNumber || 0;
+  const networkName = hre.network.name;
+  const exportFilePath = `tmp/${networkName}-landOwners.json`;
 
   type Land = {
     coordinateX: string;
@@ -120,6 +130,5 @@ function tokenIdToMapCoords(
 
   // write output file
   console.log(`writing output to file ${exportFilePath}`);
-  fs.ensureDirSync('tmp');
-  fs.writeFileSync(exportFilePath, JSON.stringify(landOwnersMap));
+  fs.outputJSONSync(exportFilePath, landOwnersMap);
 })();

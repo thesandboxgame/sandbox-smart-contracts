@@ -1,12 +1,23 @@
+/*
+This scripts requires the following arguments:
+  - sourceNetwork: the network where the lands were originally minted. e.g. 'mainnet'
+
+Executio example:
+yarn execute localhost scripts/transact/mintLandsFromFile.ts --sourceNetwork rinkeby
+(it will mint the lands from the rinkeby output if exists into the localhost-network Land deployment)
+*/
+
 import BN from 'bn.js';
 import fs from 'fs-extra';
 import {ethers, deployments} from 'hardhat';
-
-const networkName = 'rinkeby';
-const filePath = `tmp/${networkName}-landOwners.json`;
-const errorFilePath = 'tmp/mintLandErrors.json';
+import minimist from 'minimist';
 
 (async () => {
+  const argv = minimist(process.argv.slice(2));
+  if (!argv.sourceNetwork) throw new Error('sourceNetwork argument is missing');
+  const sourceNetwork = argv.sourceNetwork;
+  const filePath = `tmp/${sourceNetwork}-landOwners.json`;
+  const errorFilePath = `tmp/${sourceNetwork}-mintLandErrors.json`;
   const {execute} = deployments;
   const errors = [];
   type Land = {
@@ -28,11 +39,13 @@ const errorFilePath = 'tmp/mintLandErrors.json';
   const admin = await LandContract.callStatic.getAdmin();
   console.log(`land admin is: ${admin}`);
 
-  // set contract admin as minter and verify
-  await execute('Land', {from: admin}, 'setMinter', admin, true);
-  const isMinter = await LandContract.callStatic.isMinter(admin);
-  if (!isMinter)
-    throw new Error('admin is not minter even after calling setMinter');
+  const adminWasOriginallyMinter = await LandContract.callStatic.isMinter(
+    admin
+  );
+  if (!adminWasOriginallyMinter) {
+    console.log(`admin ${admin} was not originally a minter`);
+    await execute('Land', {from: admin}, 'setMinter', admin, true);
+  }
 
   for (const landOwner in landOwners) {
     const lands: Land[] = landOwners[landOwner];
@@ -59,10 +72,13 @@ const errorFilePath = 'tmp/mintLandErrors.json';
     }
   }
 
+  if (!adminWasOriginallyMinter) {
+    console.log('restoring admin-minter to original state');
+    await execute('Land', {from: admin}, 'setMinter', admin, false);
+  }
+
   console.log(`Error count is ${errors.length}`);
   if (errors.length > 0) {
-    fs.ensureDirSync('tmp');
-    console.log(`writing errors to ${errorFilePath}`);
-    fs.writeFileSync(errorFilePath, JSON.stringify(errors));
+    fs.outputJSONSync(errorFilePath, errors);
   }
 })();
