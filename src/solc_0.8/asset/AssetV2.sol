@@ -3,14 +3,14 @@
 pragma solidity 0.8.2;
 
 import "./ERC1155ERC721.sol";
-import "../catalyst/interfaces/IAssetAttributesRegistry.sol";
+import "../common/interfaces/IAssetAttributesRegistry.sol";
 import "./libraries/AssetHelper.sol";
 
 // solhint-disable-next-line no-empty-blocks
 contract AssetV2 is ERC1155ERC721 {
     AssetHelper.AssetRegistryData private assetRegistryData;
 
-    /// @notice fulfills the purpose of a constructor in upgradeabale contracts
+    /// @notice fulfills the purpose of a constructor in upgradeable contracts
     function initialize(
         address trustedForwarder,
         address admin,

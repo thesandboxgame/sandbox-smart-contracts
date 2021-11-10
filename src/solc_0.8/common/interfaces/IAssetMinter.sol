@@ -5,30 +5,48 @@ pragma experimental ABIEncoderV2;
 interface IAssetMinter {
     struct AssetData {
         uint16[] gemIds;
-        uint32 quantity;
         uint16 catalystId;
     }
 
-    function mint(
-        address from,
-        uint40 packId,
-        bytes32 metadataHash,
+    // use only to fix stack too deep
+    struct MintData {
+        address from;
+        address to;
+        uint40 packId;
+        bytes32 metadataHash;
+        bytes data;
+    }
+
+    function mintWithoutCatalyst(MintData calldata mintData, uint16 typeAsset1Based) external returns (uint256 assetId);
+
+    function mintWithCatalyst(
+        MintData calldata mintData,
         uint16 catalystId,
-        uint16[] calldata gemIds,
-        uint32 quantity,
-        uint8 rarity,
-        address to,
-        bytes calldata data
+        uint16[] calldata gemIds
     ) external returns (uint256 assetId);
 
-    function mintMultiple(
-        address from,
-        uint40 packId,
-        bytes32 metadataHash,
-        uint256[] memory gemsQuantities,
-        uint256[] memory catalystsQuantities,
-        AssetData[] memory assets,
-        address to,
-        bytes memory data
-    ) external returns (uint256[] memory assetIds);
+    function mintMultipleWithCatalyst(MintData calldata mintData, AssetData[] memory assets)
+        external
+        returns (uint256[] memory assetIds);
+
+    function mintCustomNumberWithCatalyst(
+        MintData calldata mintData,
+        uint16 catalystId,
+        uint16[] calldata gemIds,
+        uint256 quantity
+    ) external returns (uint256 assetId);
+
+    function addOrReplaceQuantitiyByCatalystId(uint16 catalystId, uint256 newQuantity) external;
+
+    function addOrReplaceAssetTypeQuantity(uint16 index1Based, uint256 newQuantity) external;
+
+    function setNumberOfGemsBurnPerAsset(uint32 newQuantity) external;
+
+    function setNumberOfCatalystsBurnPerAsset(uint32 newQuantity) external;
+
+    function setGemsFactor(uint256 newQuantity) external;
+
+    function setCatalystsFactor(uint256 newQuantity) external;
+
+    function setCustomMintingAllowance(address addressToModify, bool isAddressAllowed) external;
 }
