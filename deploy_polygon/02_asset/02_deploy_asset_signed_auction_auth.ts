@@ -13,7 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   } = await getNamedAccounts();
   const others = await getUnnamedAccounts();
 
-  const assetContract = await deployments.get('Asset');
+  const assetContract = await deployments.get('PolygonAsset');
 
   await deploy('PolygonAssetSignedAuctionAuth', {
     from: deployer,

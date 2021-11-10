@@ -1,7 +1,6 @@
 import {ethers, getNamedAccounts} from 'hardhat';
-import {setupTestAuction} from './fixtures';
-import {setupAsset} from '../asset/fixtures';
-import {waitFor} from '../utils';
+import {setupPolygonAsset, setupTestAuction} from './fixtures';
+import {waitFor} from '../../utils';
 import BN from 'bn.js';
 import crypto from 'crypto';
 import {constants, Contract} from 'ethers';
@@ -41,20 +40,16 @@ describe('Auction', function () {
     AssetSignedAuctionAuthContract = assetSignedAuctionAuthContract1;
     assetContract = assetContract1;
     others = others1;
-    AssetSignedAuctionAuthContractAsUser = await AssetSignedAuctionAuthContract.connect(
+    AssetSignedAuctionAuthContractAsUser = AssetSignedAuctionAuthContract.connect(
       ethers.provider.getSigner(others[1])
     );
 
-    const {mintAsset} = await setupAsset();
+    const {mintAsset} = await setupPolygonAsset();
     tokenId = await mintAsset(others[0], 20);
 
     sandContract = await ethers.getContract('Sand');
-    sandAsAdmin = await sandContract.connect(
-      ethers.provider.getSigner(sandAdmin)
-    );
-    sandAsUser = await sandContract.connect(
-      ethers.provider.getSigner(others[1])
-    );
+    sandAsAdmin = sandContract.connect(ethers.provider.getSigner(sandAdmin));
+    sandAsUser = sandContract.connect(ethers.provider.getSigner(others[1]));
 
     offerId = new BN(crypto.randomBytes(32), 16).toString(10);
     startedAt = Math.floor(Date.now() / 1000) - 500;
@@ -343,7 +338,7 @@ describe('Auction', function () {
     const prevBuyerSandBalance = await sandContract.balanceOf(others[1]);
     const prevFeeCollectorSandBalance = await sandContract.balanceOf(others[2]);
 
-    await expect(
+    expect(
       AssetSignedAuctionAuthContractAsUser.claimSellerOffer({
         buyer: others[1],
         seller: others[0],
@@ -565,7 +560,7 @@ describe('Auction', function () {
   it('should NOT be able to claim offer without sending ETH', async function () {
     const seller = others[0];
 
-    const hashedData = await ethers.utils.solidityKeccak256(
+    const hashedData = ethers.utils.solidityKeccak256(
       [
         'address',
         'bytes',
