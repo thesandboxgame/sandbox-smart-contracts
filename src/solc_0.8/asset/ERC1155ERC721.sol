@@ -36,6 +36,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     mapping(address => address) private _creatorship; // creatorship transfer
 
     mapping(address => bool) private _bouncers; // the contracts allowed to mint
+    mapping(address => bool) private _transferAdmins; // the contracts allowed to transfer
     // @note : Deprecated.
     mapping(address => bool) private _metaTransactionContracts;
 
@@ -57,6 +58,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
 
     event BouncerAdminChanged(address oldBouncerAdmin, address newBouncerAdmin);
     event Bouncer(address bouncer, bool enabled);
+    event TransferAdmin(address transferAdmin, bool enabled);
     event MetaTransactionProcessor(address metaTransactionProcessor, bool enabled);
     event CreatorshipTransfer(address indexed original, address indexed from, address indexed to);
     event Extraction(uint256 indexed fromId, uint256 toId);
@@ -93,6 +95,15 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         require(_msgSender() == _bouncerAdmin, "!BOUNCER_ADMIN");
         _bouncers[bouncer] = enabled;
         emit Bouncer(bouncer, enabled);
+    }
+
+    /// @notice Enable or disable the ability of `_transferAdmins`
+    /// @param adminAddress address that will be given/revoked transferAdmin rights.
+    /// @param enabled set whether the address is enabled or disabled as a transferAdmin.
+    function setTransferAdmin(address adminAddress, bool enabled) external {
+        require(_msgSender() == _bouncerAdmin, "!TRANSFER_ADMIN");
+        _transferAdmins[adminAddress] = enabled;
+        emit TransferAdmin(adminAddress, enabled);
     }
 
     /// @notice Mint a token type for `creator` on slot `packId`.
@@ -191,7 +202,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
         bool metaTx = isTrustedForwarder(msg.sender);
-        bool authorized = from == _msgSender() || isApprovedForAll(from, _msgSender());
+        bool authorized = from == _msgSender() || isApprovedForAll(from, _msgSender()) || isTransferAdmin(_msgSender());
 
         _batchTransferFrom(from, to, ids, values, authorized);
         emit TransferBatch(metaTx ? from : _msgSender(), from, to, ids, values);
@@ -557,6 +568,13 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         return _operatorsForAll[owner][operator] || _superOperators[operator];
     }
 
+    /// @notice Queries if an address is transferAdmin.
+    /// @param who the address of the user.
+    /// @return true if the address is transferAdmin.
+    function isTransferAdmin(address who) public view returns (bool) {
+        return _transferAdmins[who];
+    }
+
     function _setApprovalForAll(
         address sender,
         address operator,
@@ -861,7 +879,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         require(from != address(0), "FROM==0");
         address sender = _msgSender();
         metaTx = isTrustedForwarder(msg.sender);
-        bool authorized = from == sender || isApprovedForAll(from, sender);
+        bool authorized = from == sender || isApprovedForAll(from, sender) || isTransferAdmin(_msgSender());
 
         if (id & ERC1155ERC721Helper.IS_NFT > 0) {
             require(authorized || _erc721operators[id] == sender, "OPERATOR_!AUTH");

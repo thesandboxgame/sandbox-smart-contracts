@@ -29,6 +29,7 @@ export const assetFixtures = async function () {
     assetBouncerAdmin
   );
   await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
+  await waitFor(assetContractAsBouncerAdmin.setTransferAdmin(minter, true));
   const Asset = await ethers.getContract('Asset', minter);
   const predicate = await ethers.getContract('ERC1155_PREDICATE');
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');

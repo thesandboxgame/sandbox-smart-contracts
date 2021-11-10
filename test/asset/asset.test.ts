@@ -44,6 +44,43 @@ describe('Asset.sol', function () {
     expect(balance).to.be.equal(10);
   });
 
+  it('cannot transfer assets from user if not set as transferAdmin', async function () {
+    const {users, mintAsset} = await setupAsset();
+    const tokenId = await mintAsset(users[2].address, 11);
+    await expect(
+      users[1].Asset['safeTransferFrom(address,address,uint256,uint256,bytes)'](
+        users[2].address,
+        users[3].address,
+        tokenId,
+        10,
+        '0x'
+      )
+    ).to.be.revertedWith(`OPERATOR_!AUTH`);
+  });
+
+  it('can transfer assets if user is set as Transfer Admin', async function () {
+    const {Asset, users, mintAsset} = await setupAsset();
+    const tokenId = await mintAsset(users[3].address, 11);
+
+    await waitFor(
+      users[0].Asset['setTransferAdmin(address,bool)'](users[2].address, true)
+    );
+    await waitFor(
+      users[2].Asset['safeTransferFrom(address,address,uint256,uint256,bytes)'](
+        users[3].address,
+        users[1].address,
+        tokenId,
+        10,
+        '0x'
+      )
+    );
+    const balance = await Asset['balanceOf(address,uint256)'](
+      users[1].address,
+      tokenId
+    );
+    expect(balance).to.be.equal(10);
+  });
+
   it('user batch sending asset to itself keep the same balance', async function () {
     const {Asset, users, mintAsset} = await setupAsset();
     const tokenId = await mintAsset(users[0].address, 20);
