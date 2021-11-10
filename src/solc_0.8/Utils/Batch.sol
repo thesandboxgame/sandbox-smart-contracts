@@ -35,31 +35,31 @@ contract Batch {
         _;
     }
 
-    function atomicBatchWithETH(ExecutionWithETH[] memory executions) external payable onlyExecutor {
+    function atomicBatchWithETH(ExecutionWithETH[] calldata executions) external payable onlyExecutor {
         for (uint256 i = 0; i < executions.length; i++) {
             executions[i].target.functionCallWithValue(executions[i].callData, executions[i].value);
         }
     }
 
-    function nonAtomicBatchWithETH(ExecutionWithETH[] memory executions) external payable onlyExecutor {
+    function nonAtomicBatchWithETH(ExecutionWithETH[] calldata executions) external payable onlyExecutor {
         for (uint256 i = 0; i < executions.length; i++) {
             _call(executions[i].target, executions[i].callData, executions[i].value);
         }
     }
 
-    function atomicBatch(Execution[] memory executions) external onlyExecutor {
+    function atomicBatch(Execution[] calldata executions) external onlyExecutor {
         for (uint256 i = 0; i < executions.length; i++) {
             executions[i].target.functionCall(executions[i].callData);
         }
     }
 
-    function nonAtomicBatch(Execution[] memory executions) external onlyExecutor {
+    function nonAtomicBatch(Execution[] calldata executions) external onlyExecutor {
         for (uint256 i = 0; i < executions.length; i++) {
             _call(executions[i].target, executions[i].callData, 0);
         }
     }
 
-    function singleTargetAtomicBatchWithETH(address target, SingleTargetExecutionWithETH[] memory executions)
+    function singleTargetAtomicBatchWithETH(address target, SingleTargetExecutionWithETH[] calldata executions)
         external
         payable
         onlyExecutor
@@ -69,7 +69,7 @@ contract Batch {
         }
     }
 
-    function singleTargetNonAtomicBatchWithETH(address target, SingleTargetExecutionWithETH[] memory executions)
+    function singleTargetNonAtomicBatchWithETH(address target, SingleTargetExecutionWithETH[] calldata executions)
         external
         payable
         onlyExecutor
@@ -79,13 +79,13 @@ contract Batch {
         }
     }
 
-    function singleTargetAtomicBatch(address target, bytes[] memory callDatas) external onlyExecutor {
+    function singleTargetAtomicBatch(address target, bytes[] calldata callDatas) external onlyExecutor {
         for (uint256 i = 0; i < callDatas.length; i++) {
             target.functionCall(callDatas[i]);
         }
     }
 
-    function singleTargetNonAtomicBatch(address target, bytes[] memory callDatas) external onlyExecutor {
+    function singleTargetNonAtomicBatch(address target, bytes[] calldata callDatas) external onlyExecutor {
         for (uint256 i = 0; i < callDatas.length; i++) {
             _call(target, callDatas[i], 0);
         }
@@ -93,7 +93,7 @@ contract Batch {
 
     function _call(
         address target,
-        bytes memory data,
+        bytes calldata data,
         uint256 value
     ) internal returns (bool) {
         // solhint-disable-next-line avoid-low-level-calls
@@ -139,7 +139,7 @@ contract Batch {
         address,
         address,
         uint256,
-        bytes memory
+        bytes calldata
     ) external pure returns (bytes4) {
         return ERC721_RECEIVED;
     }

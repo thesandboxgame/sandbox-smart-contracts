@@ -18,7 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       from: deployer,
       log: true,
       args: [
-        `Sandbox's ${gem.symbol} polygonGems`,
+        `Sandbox ${gem.symbol} Gems`,
         gem.symbol,
         gemMinter,
         gem.gemId,

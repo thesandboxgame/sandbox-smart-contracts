@@ -11,6 +11,7 @@ import {skipUnlessTest} from '../../utils/network';
 const sales = [
   {name: 'EstateSaleWithAuth_0', skip: skipUnlessTest},
   {name: 'LandPreSale_11'},
+  {name: 'LandPreSale_12'},
 ];
 
 const func: DeployFunction = async function (hre) {

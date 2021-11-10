@@ -7,8 +7,8 @@ import "../../interfaces/IERC20Extended.sol";
 import "../WithSuperOperators.sol";
 
 abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, ERC20Internal, Context {
-    bytes32 internal immutable _name; // works only for string that can fit into 32 bytes
-    bytes32 internal immutable _symbol; // works only for string that can fit into 32 bytes
+    string internal _name;
+    string internal _symbol;
     address internal immutable _operator;
     uint256 internal _totalSupply;
     mapping(address => uint256) internal _balances;
@@ -20,12 +20,8 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         address admin,
         address operator
     ) {
-        require(bytes(tokenName).length > 0, "INVALID_NAME_REQUIRED");
-        require(bytes(tokenName).length <= 32, "INVALID_NAME_TOO_LONG");
-        _name = _firstBytes32(bytes(tokenName));
-        require(bytes(tokenSymbol).length > 0, "INVALID_SYMBOL_REQUIRED");
-        require(bytes(tokenSymbol).length <= 32, "INVALID_SYMBOL_TOO_LONG");
-        _symbol = _firstBytes32(bytes(tokenSymbol));
+        _name = tokenName;
+        _symbol = tokenSymbol;
         _admin = admin;
         _operator = operator;
     }
@@ -87,14 +83,14 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
     /// @return The name of the token collection.
     function name() external view virtual returns (string memory) {
         //added virtual
-        return string(abi.encodePacked(_name));
+        return _name;
     }
 
     /// @notice Get the symbol for the token collection.
     /// @return The symbol of the token collection.
     function symbol() external view virtual returns (string memory) {
         //added virtual
-        return string(abi.encodePacked(_symbol));
+        return _symbol;
     }
 
     /// @notice Get the total number of tokens in existence.
@@ -152,16 +148,6 @@ abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, 
         require(_msgSender() == owner || _superOperators[_msgSender()] || _msgSender() == _operator, "INVALID_SENDER");
         _addAllowanceIfNeeded(owner, spender, amountNeeded);
         return true;
-    }
-
-    /// @notice Get the first 32 bytes of input `src`.
-    /// @param src The input data
-    /// @return output The first 32 bytes of `src`.
-    function _firstBytes32(bytes memory src) public pure returns (bytes32 output) {
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            output := mload(add(src, 32))
-        }
     }
 
     /// @dev See addAllowanceIfNeeded.

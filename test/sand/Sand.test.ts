@@ -229,4 +229,18 @@ describe('Sand.sol', function () {
       expect(receiverAfter).to.equal(TRANSFER);
     });
   });
+
+  describe('Getters', function () {
+    it('gets the correct name of the Sand Token', async function () {
+      const {Sand} = await setupTest();
+      const name = await Sand.name();
+      expect(name).to.equal('SAND');
+    });
+
+    it('gets the correct symbol of the Sand Token', async function () {
+      const {Sand} = await setupTest();
+      const symbol = await Sand.symbol();
+      expect(symbol).to.equal('SAND');
+    });
+  });
 });
