@@ -3,15 +3,12 @@
 pragma solidity 0.8.2;
 
 import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {Upgradeable} from "../../common/BaseWithStorage/Upgradeable.sol";
 import {EIP712Upgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/draft-EIP712Upgradeable.sol";
 import {IERC20Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC20/IERC20Upgradeable.sol";
-import {IAvatarMinter} from "../../common/interfaces/IAvatarMinter.sol";
 import {ERC2771Handler} from "../../common/BaseWithStorage/ERC2771Handler.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {ECDSAUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {AccessControlUpgradeable} from "@openzeppelin/contracts-0.8/utils/structs/EnumerableSet.sol";
 
 /// @title This contract pays Sand claims when the backend authorize it via message signing.
 /// @dev can be extended to support NFTs, etc.
@@ -22,8 +19,7 @@ contract SignedERC20Giveaway is
     ContextUpgradeable,
     AccessControlUpgradeable,
     EIP712Upgradeable,
-    ERC2771Handler,
-    Upgradeable
+    ERC2771Handler
 {
     bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
     bytes32 public constant CLAIM_TYPEHASH =
