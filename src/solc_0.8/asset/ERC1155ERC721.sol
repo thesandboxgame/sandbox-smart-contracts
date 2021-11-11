@@ -101,7 +101,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     /// @param adminAddress address that will be given/revoked transferAdmin rights.
     /// @param enabled set whether the address is enabled or disabled as a transferAdmin.
     function setTransferAdmin(address adminAddress, bool enabled) external {
-        require(_msgSender() == _bouncerAdmin, "!TRANSFER_ADMIN");
+        require(_msgSender() == _admin, "ERC1155ERC721: !ADMIN");
         _transferAdmins[adminAddress] = enabled;
         emit TransferAdmin(adminAddress, enabled);
     }

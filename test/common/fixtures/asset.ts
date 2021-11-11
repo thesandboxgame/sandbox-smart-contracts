@@ -22,7 +22,7 @@ export const assetFixtures = async function () {
   const minter = otherAccounts[0];
   otherAccounts.splice(0, 1);
 
-  const {assetBouncerAdmin} = await getNamedAccounts();
+  const {assetAdmin, assetBouncerAdmin} = await getNamedAccounts();
 
   const assetContractAsBouncerAdmin = await ethers.getContract(
     'Asset',
@@ -107,6 +107,7 @@ export const assetFixtures = async function () {
   return {
     Asset,
     users,
+    assetAdmin,
     mintAsset,
     mintMultiple,
     trustedForwarder,

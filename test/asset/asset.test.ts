@@ -2,6 +2,7 @@ import {getAssetChainIndex, waitFor, withSnapshot} from '../utils';
 import {expect} from '../chai-setup';
 import {sendMetaTx} from '../sendMetaTx';
 import {assetFixtures} from '../common/fixtures/asset';
+import {ethers} from 'hardhat';
 
 const setupAsset = withSnapshot(['Asset'], assetFixtures);
 
@@ -59,23 +60,24 @@ describe('Asset.sol', function () {
   });
 
   it('can transfer assets if user is set as Transfer Admin', async function () {
-    const {Asset, users, mintAsset} = await setupAsset();
-    const tokenId = await mintAsset(users[3].address, 11);
+    const {Asset, assetAdmin, users, mintAsset} = await setupAsset();
+    const tokenId = await mintAsset(users[2].address, 11);
+    const admin = await ethers.getSigner(assetAdmin);
 
     await waitFor(
-      users[0].Asset['setTransferAdmin(address,bool)'](users[2].address, true)
+      Asset.connect(admin).setTransferAdmin(users[1].address, true)
     );
     await waitFor(
-      users[2].Asset['safeTransferFrom(address,address,uint256,uint256,bytes)'](
+      users[1].Asset['safeTransferFrom(address,address,uint256,uint256,bytes)'](
+        users[2].address,
         users[3].address,
-        users[1].address,
         tokenId,
         10,
         '0x'
       )
     );
     const balance = await Asset['balanceOf(address,uint256)'](
-      users[1].address,
+      users[3].address,
       tokenId
     );
     expect(balance).to.be.equal(10);
