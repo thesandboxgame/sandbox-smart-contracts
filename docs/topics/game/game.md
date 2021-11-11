@@ -100,7 +100,7 @@ IGameToken <|-- GameBaseToken
 
 ### Token id pattern
 
-ERC721 tokens always have a unique ID, in the case of GAME, the unique ID is known as `gameId` and is comprised of the concatenation of `creator,subId,chainIndex,version`. the `gameId` is used as an external id, while the `strgId` is used as an internal id. `strgId` is defined as `gameId & STORAGE_ID_MASK` where `STORAGE_ID_MASK` = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000. In practice, `strgId` is a substring of `gameId` that does not include the version field. The reason for having both ids is to solve a potential front-running issue that might occur on 3rd party decentralized exchanges when a GAME seller might trick the buyer to buy a downgraded game by pushing a transaction that downgrades the GAME (removing assets from a game for example) before the actual `swap` transaction on the decentralized exchange.
+ERC721 tokens always have a unique ID, in the case of GAME, the unique ID is known as `gameId` and is comprised of the concatenation of `creator,subId,chainIndex,version`. the `gameId` is used as an external id, while the `strgId` is used as an internal id. `strgId` is defined as `gameId & STORAGE_ID_MASK` where `STORAGE_ID_MASK` = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000. In practice, `strgId` is a substring of the `gameId` that does not include the version field. The reason for having both ids is to solve a potential front-running issue that might occur on 3rd party decentralized exchanges when a GAME seller might trick the buyer to buy a downgraded game by pushing a transaction that downgrades the GAME (removing assets from a game for example) before the actual `swap` transaction on the decentralized exchange.
 
 ## Processes
 
@@ -119,5 +119,5 @@ A game owner can burn his game token to recover the underlying assets that were 
 ### Transfer creatorship
 
 When a game is created, the original creator of the game is stored in the first 20 bytes of the `gameId`.
-The creatorship (of any token ever created by some account) can be transffered to another account by calling `transferCreatorship`.
+The creatorship (of any token ever created by some account) can be transferred to another account by calling `transferCreatorship`.
 This function can be called either by the current creator or by a super-operator nominated by him. The current creator of a game can be queried using a call to `creatorOf(uint256 id)`.
