@@ -156,7 +156,7 @@ export const gemsAndCatalystsFixture = async function (
           from: deployer,
           log: true,
           args: [
-            `Sandbox's ${catalyst.symbol} Catalysts`,
+            `Sandbox ${catalyst.symbol} Catalysts`,
             catalyst.symbol,
             catalystAdmin,
             catalyst.maxGems,
@@ -185,7 +185,7 @@ export const gemsAndCatalystsFixture = async function (
         from: deployer,
         log: true,
         args: [
-          `Sandbox's ${gem.symbol} Gems`,
+          `Sandbox ${gem.symbol} Gems`,
           gem.symbol,
           gemMinter,
           gem.gemId,

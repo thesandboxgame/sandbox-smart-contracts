@@ -22,6 +22,11 @@ const setupTest = withSnapshot(
 );
 
 describe('MockLandWithMint.sol', function () {
+  it('creation', async function () {
+    const {MockLandWithMint} = await setupTest();
+    expect(await MockLandWithMint.name()).to.be.equal("Sandbox's LANDs");
+    expect(await MockLandWithMint.symbol()).to.be.equal('LAND');
+  });
   describe('Mint and transfer full quad', function () {
     it('testing transferQuad', async function () {
       const {landOwners} = await setupTest();
@@ -61,7 +66,36 @@ describe('MockLandWithMint.sol', function () {
       expect(num2).to.equal(144);
     });
   });
-
+  describe('mint and check URIs', function () {
+    for (const size of [1, 3, 6, 12, 24]) {
+      it(`mint and check URI ${size}`, async function () {
+        const GRID_SIZE = 408;
+        const {landOwners} = await setupTest();
+        const bytes = '0x3333';
+        await waitFor(
+          landOwners[0].MockLandWithMint.mintQuad(
+            landOwners[0].address,
+            size,
+            size,
+            size,
+            bytes
+          )
+        );
+        const tokenId = size + size * GRID_SIZE;
+        expect(
+          await landOwners[0].MockLandWithMint.tokenURI(tokenId)
+        ).to.be.equal(
+          `https://api.sandbox.game/lands/${tokenId}/metadata.json`
+        );
+      });
+    }
+  });
+  it('supported interfaces', async function () {
+    const {MockLandWithMint} = await setupTest();
+    expect(await MockLandWithMint.supportsInterface('0x01ffc9a7')).to.be.true;
+    expect(await MockLandWithMint.supportsInterface('0x80ac58cd')).to.be.true;
+    expect(await MockLandWithMint.supportsInterface('0x5b5e139f')).to.be.true;
+  });
   describe('Mint and transfer a smaller quad', function () {
     it('transfering a 3X3 quad from a 12x12', async function () {
       const {landOwners} = await setupTest();

@@ -17,6 +17,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'getCatalystRegistry'
   );
 
+  const commonQuantity = 1000;
+  const rareQuantity = 100;
+  const epicQuantity = 10;
+  const legendaryQuantity = 1;
+  const artQuantity = 1;
+  const propQuantity = 10000;
+
+  const assetQuantitiesByCatalystId = [
+    commonQuantity,
+    rareQuantity,
+    epicQuantity,
+    legendaryQuantity,
+  ];
+  const assetQuantitiesByTypeId = [artQuantity, propQuantity];
+
   await deploy(`PolygonAssetMinter`, {
     from: deployer,
     log: true,
@@ -26,6 +41,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       assetRegistryData,
       assetMinterAdmin,
       TRUSTED_FORWARDER.address,
+      assetQuantitiesByCatalystId,
+      assetQuantitiesByTypeId,
     ],
     contract: 'AssetMinter',
   });

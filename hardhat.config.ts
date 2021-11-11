@@ -84,6 +84,7 @@ const config: HardhatUserConfig = {
     deployer: {
       default: 1,
       mainnet: '0xe19ae8F9B36Ca43D12741288D0e311396140DF6F',
+      polygon: '0x7074BB056C53ACC0b6091dd3FAe591aa3A4acC88',
       rinkeby: '0x8A0e83DE499d7543CF486974a6196a35B5F573E7',
       goerli: '0xA796AE911621E00809E0E7C8f0AD6BF118E5139e',
       mumbai: '0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02',
@@ -92,6 +93,7 @@ const config: HardhatUserConfig = {
     sandAdmin: {
       default: 2,
       mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
+      polygon: '0xe75Ce341C98400a45F579e32C95fF49681Fc93fa', // TODO: get sand admin multi sig contract
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
@@ -127,7 +129,8 @@ const config: HardhatUserConfig = {
 
     sandSaleBeneficiary: {
       default: 3,
-      mainnet: '0x0EB04462D69B1D267d269377E34f60b9De1c8510', // TODO use another wallet ?
+      mainnet: '0x0EB04462D69B1D267d269377E34f60b9De1c8510',
+      polygon: '0xbc4fE9A8a46442eDaF13Bd5c615D7CFe0953885B', // TODO: get sand admin multi sig contract
       rinkeby: '0x60927eB036621b801491B6c5e9A60A8d2dEeD75A',
       goerli: '0xF22455c7F2a81E197AecD951F588a9B650f5b282',
       mumbai: '0xa5Eb9C9Eb4F4c35B9Be8cFaAA7909F9ebe6Cb609',
@@ -169,6 +172,7 @@ const config: HardhatUserConfig = {
     landAdmin: {
       default: 2,
       mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
+      polygon: '0xe75Ce341C98400a45F579e32C95fF49681Fc93fa', // TODO: get sand admin multi sig contract
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
@@ -179,6 +183,7 @@ const config: HardhatUserConfig = {
     proxyAdminOwner: {
       default: 2,
       mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
+      polygon: '0xe75Ce341C98400a45F579e32C95fF49681Fc93fa', // TODO: get sand admin multi sig contract
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',
@@ -208,6 +213,7 @@ const config: HardhatUserConfig = {
     sandboxAccount: {
       default: 4,
       mainnet: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA',
+      polygon: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA',
       rinkeby: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
       goerli: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
     },
@@ -290,6 +296,7 @@ const config: HardhatUserConfig = {
       accounts: accounts('polygon'),
       tags: ['mainnet', 'L2'],
       deploy: ['deploy_polygon'],
+      // gasPrice: 30000000000, // TODO: leaving it empty does not work
     },
   },
   paths: {

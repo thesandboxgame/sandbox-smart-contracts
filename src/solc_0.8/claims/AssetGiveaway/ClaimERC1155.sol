@@ -51,9 +51,7 @@ contract ClaimERC1155 {
         return keccak256(abi.encodePacked(to, assetIds, assetValues, salt));
     }
 
-    function _verify(bytes32[] memory proof, bytes32 leaf) internal view returns (bool) {
-        bytes32 computedHash = leaf;
-
+    function _verify(bytes32[] memory proof, bytes32 computedHash) internal view returns (bool) {
         for (uint256 i = 0; i < proof.length; i++) {
             bytes32 proofElement = proof[i];
 
