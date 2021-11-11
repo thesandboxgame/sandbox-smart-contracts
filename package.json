@@ -29,6 +29,7 @@
     "@types/chai": "^4.2.11",
     "@types/fs-extra": "^9.0.6",
     "@types/inquirer": "^7.3.1",
+    "@types/minimist": "^1.2.2",
     "@types/mocha": "^8.0.2",
     "@types/node": "^14.10.2",
     "@typescript-eslint/eslint-plugin": "^4.6.0",
