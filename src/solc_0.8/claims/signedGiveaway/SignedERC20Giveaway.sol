@@ -70,7 +70,7 @@ contract SignedERC20Giveaway is
     /// @param token token contract address
     /// @param to destination user
     /// @param amount of ERC20 to transfer
-    function execute(
+    function claim(
         uint8 v,
         bytes32 r,
         bytes32 s,
