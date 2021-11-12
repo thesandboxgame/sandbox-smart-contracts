@@ -48,17 +48,8 @@ class ImmutableERC721 {
     {field} + CHAIN_INDEX_MASK: uint256
     {field} + base32Alphabet: uint256
     {field} + _chainIndex: uint8
-}
-
-class SuperOperator{
-    {field} # _superOperators: mapping (address => bool)
-    + setSuperOperator(superOperator, enabled)
-    + isSuperOperator(who)
-}
-
-class MetaTransactionReceiver{
-    {field} # _metaTransactionContracts: mapping (address => bool)
-    + isMetaTransactionProcessor(who)
+    + getChainIndex(id)
+    + getStorageId(tokenId)
 }
 
 interface IGameToken{
@@ -81,21 +72,22 @@ interface IGameToken{
 }
 
 class GameBaseToken{
-    + address metaTransactionContract
-    + address admin
+    {field} + IAssetToken internal _asset
+    {field} + mapping(uint256 => mapping(uint256 => uint256)) private _gameAssets
+    {field} + mapping(address => address) private _creatorship
+    {field} + mapping(uint256 => bytes32) private _metaData
+    {field} + mapping(address => mapping(address => bool)) private _gameEditors
+    {field} + address metaTransactionContract
+    {field} + address admin
     + name(...)
     + symbol(...)
     + tokenURI(...)
     + supportsInterface(...)
 }
-MetaTransactionReceiver <|-- ERC721BaseToken
-ERC721Events <|-- ERC721BaseToken
-SuperOperator <|-- ERC721BaseToken
 ERC721BaseToken <|-- ImmutableERC721
-Initializable <|-- GameBaseToken
-WithMinter <|-- GameBaseToken
 ImmutableERC721 <|-- GameBaseToken
 IGameToken <|-- GameBaseToken
+GameBaseToken <|-- ChildGameTokenV1
 ```
 
 ### Token id pattern
