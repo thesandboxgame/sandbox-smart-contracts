@@ -132,6 +132,8 @@ export const setupPolygonAsset = withSnapshot(
 
 export const setupMainnetAndPolygonAsset = withSnapshot(
   [
+    'AssetSignedAuctionAuth',
+    'SandBaseToken',
     'PolygonAsset',
     'Asset',
     'PolygonAssetAttributesRegistry',
