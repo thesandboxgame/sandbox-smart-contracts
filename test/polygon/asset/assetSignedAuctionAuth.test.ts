@@ -105,9 +105,6 @@ describe('Auction', function () {
     const prevSellerEtherBalance = await ethers.provider.getBalance(
       users[0].address
     );
-    // const prevFeeCollectorEtherBalance = await ethers.provider.getBalance(
-    //   users[2].address
-    // );
 
     await waitFor(
       AssetSignedAuctionAuthContractAsUser.claimSellerOffer(
@@ -125,12 +122,6 @@ describe('Auction', function () {
       )
     );
 
-    // assert.equal(
-    //   new BN(
-    //     (await ethers.provider.getBalance(users[2].address)).toString()
-    //   ).cmp(new BN(prevFeeCollectorEtherBalance.toString())),
-    //   0
-    // );
     assert.equal(
       new BN(
         (await ethers.provider.getBalance(users[0].address)).toString()
@@ -351,8 +342,6 @@ describe('Auction', function () {
     );
 
     const prevSellerSandBalance = await Sand.balanceOf(users[0].address);
-    const prevBuyerSandBalance = await Sand.balanceOf(users[1].address);
-    const prevFeeCollectorSandBalance = await Sand.balanceOf(users[2].address);
 
     expect(
       AssetSignedAuctionAuthContractAsUser.claimSellerOffer({
@@ -386,20 +375,6 @@ describe('Auction', function () {
       ),
       1
     );
-
-    // assert.equal(
-    //   (await Sand.balanceOf(users[0].address))
-    //     .sub(prevSellerSandBalance)
-    //     .add(
-    //       (await Sand.balanceOf(users[2].address)).sub(
-    //         prevFeeCollectorSandBalance
-    //       )
-    //     )
-    //     .toString(),
-    //   prevBuyerSandBalance
-    //     .sub(await Sand.balanceOf(users[1].address))
-    //     .toString()
-    // );
   });
 
   it('should be able to claim seller offer with basic signature', async function () {
