@@ -15,7 +15,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const assetContract = await deployments.get('PolygonAsset');
 
-  await deploy('PolygonAssetSignedAuctionAuth', {
+  await deploy('AssetSignedAuctionAuth', {
     from: deployer,
     contract: 'AssetSignedAuctionAuth',
     args: [
@@ -30,9 +30,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = [
-  'PolygonAssetSignedAuctionAuth',
-  'PolygonAssetSignedAuctionAuth_deploy',
-];
+func.tags = ['AssetSignedAuctionAuth', 'AssetSignedAuctionAuth_deploy'];
 func.dependencies = ['PolygonAsset_deploy'];
 func.skip = skipUnlessTest;

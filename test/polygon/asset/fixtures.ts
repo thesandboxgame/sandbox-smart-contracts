@@ -28,6 +28,10 @@ const polygonAssetFixtures = async function () {
   );
 
   await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
+  const assetSignedAuctionAuthContract = await ethers.getContract(
+    'AssetSignedAuctionAuth'
+  );
+  const Sand = await ethers.getContract('SandBaseToken');
   const Asset = await ethers.getContract('PolygonAsset', minter);
   const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
@@ -108,6 +112,8 @@ const polygonAssetFixtures = async function () {
     mintMultiple,
     trustedForwarder,
     childChainManager,
+    assetSignedAuctionAuthContract,
+    Sand,
   };
 };
 
@@ -120,7 +126,7 @@ async function gemsAndCatalystsFixtureL2() {
 }
 
 export const setupPolygonAsset = withSnapshot(
-  ['PolygonAsset', 'Asset'],
+  ['PolygonAsset', 'Asset', 'AssetSignedAuctionAuth', 'SandBaseToken'],
   polygonAssetFixtures
 );
 
@@ -139,46 +145,6 @@ export const setupMainnetAndPolygonAsset = withSnapshot(
       mainnet: await assetFixtures(),
       polygonAssetRegistry: await gemsAndCatalystsFixtureL2(),
       assetRegistry: await gemsAndCatalystsFixtureL1(),
-    };
-  }
-);
-
-type Options = {
-  fee10000th?: number;
-};
-
-export const setupTestAuction = withSnapshot(
-  ['PolygonAsset', 'Asset'],
-  async function (hre, options?: Options) {
-    const {fee10000th} = options || {};
-    const {deployer, assetAdmin} = await getNamedAccounts();
-    const others = await getUnnamedAccounts();
-
-    const initialMetaTx = others[0];
-    const feeCollector = others[2];
-
-    // await deployments.fixture(['Asset']);
-    const assetContract = await ethers.getContract('Asset');
-
-    await deployments.deploy('AssetSignedAuctionAuth', {
-      from: deployer,
-      args: [
-        assetContract.address,
-        assetAdmin,
-        initialMetaTx,
-        feeCollector,
-        fee10000th,
-      ],
-    });
-
-    const assetSignedAuctionAuthContract = await ethers.getContract(
-      'AssetSignedAuctionAuth'
-    );
-
-    return {
-      assetSignedAuctionAuthContract1: assetSignedAuctionAuthContract,
-      assetContract1: assetContract,
-      others1: others,
     };
   }
 );
