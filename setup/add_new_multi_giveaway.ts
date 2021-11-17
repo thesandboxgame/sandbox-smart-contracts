@@ -40,15 +40,17 @@ const func: DeployFunction = async function () {
   const addAddress = (address: string) => {
     address = address.toLowerCase();
     if (!contractAddresses.includes(address)) contractAddresses.push(address);
-  }
+  };
   claimData.forEach((claim) => {
-    claim.erc1155.forEach((erc1155) => addAddress(erc1155.contractAddress))
-    claim.erc721.forEach((erc721) => addAddress(erc721.contractAddress))
-    claim.erc20.contractAddresses.forEach((erc20) => addAddress(erc20))
+    claim.erc1155.forEach((erc1155) => addAddress(erc1155.contractAddress));
+    claim.erc721.forEach((erc721) => addAddress(erc721.contractAddress));
+    claim.erc20.contractAddresses.forEach((erc20) => addAddress(erc20));
   });
   const allDeployments = Object.values(await deployments.all());
   for (const contractAddress of contractAddresses) {
-    const deployment = allDeployments.find((d) => d.address.toLowerCase() === contractAddress);
+    const deployment = allDeployments.find(
+      (d) => d.address.toLowerCase() === contractAddress
+    );
     if (!deployment) {
       console.warn(`Contract ${contractAddress} not found`);
     }
