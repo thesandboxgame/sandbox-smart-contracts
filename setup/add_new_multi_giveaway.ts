@@ -36,6 +36,24 @@ const func: DeployFunction = async function () {
     claimData
   );
 
+  const contractAddresses: string[] = [];
+  const addAddress = (address: string) => {
+    address = address.toLowerCase();
+    if (!contractAddresses.includes(address)) contractAddresses.push(address);
+  }
+  claimData.forEach((claim) => {
+    claim.erc1155.forEach((erc1155) => addAddress(erc1155.contractAddress))
+    claim.erc721.forEach((erc721) => addAddress(erc721.contractAddress))
+    claim.erc20.contractAddresses.forEach((erc20) => addAddress(erc20))
+  });
+  const allDeployments = Object.values(await deployments.all());
+  for (const contractAddress of contractAddresses) {
+    const deployment = allDeployments.find((d) => d.address.toLowerCase() === contractAddress);
+    if (!deployment) {
+      console.warn(`Contract ${contractAddress} not found`);
+    }
+  }
+
   const giveawayContract = await deployments.getOrNull('Multi_Giveaway_1');
   if (!giveawayContract) {
     console.log('No Multi_Giveaway_1 deployment');
