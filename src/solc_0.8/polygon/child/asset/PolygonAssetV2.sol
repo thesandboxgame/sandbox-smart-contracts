@@ -52,6 +52,7 @@ contract PolygonAssetV2 is ERC1155ERC721 {
             singleAmount[0] = amounts[i];
             _mintBatches(singleAmount, user, singleId, numNFTs);
         }
+        _completeMultiMint(_msgSender(), user, ids, amounts, depositData);
     }
 
     /// @notice called when user wants to withdraw tokens back to root chain
