@@ -177,6 +177,16 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
         number = _gems.length;
     }
 
+    function setGemsandCatalystsMaxAllowance() external {
+        for (uint256 i = 0; i < _gems.length; i++) {
+            _gems[i].approveFor(_msgSender(), address(this), ~uint256(0));
+        }
+
+        for (uint256 i = 0; i < _catalysts.length; i++) {
+            _catalysts[i].approveFor(_msgSender(), address(this), ~uint256(0));
+        }
+    }
+
     // //////////////////// INTERNALS ////////////////////
 
     /// @dev Get the catalyst contract corresponding to the id.
