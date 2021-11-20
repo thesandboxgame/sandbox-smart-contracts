@@ -185,6 +185,20 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         _burnGame(from, gameId);
     }
 
+    /// @notice Transfer assets from a burnt GAME.
+    /// @param from Previous owner of the burnt game.
+    /// @param to Address that will receive the assets.
+    /// @param gameId Id of the burnt GAME token.
+    /// @param assetIds The assets to recover from the burnt GAME.
+    function recoverAssets(
+        address from,
+        address to,
+        uint256 gameId,
+        uint256[] memory assetIds
+    ) public override {
+        _recoverAssets(from, to, gameId, assetIds);
+    }
+
     /// @notice Get the amount of each assetId in a GAME.
     /// @param gameId The game to query.
     /// @param assetIds The assets to get balances for.
@@ -277,20 +291,6 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
         uint256 id = _storageId(gameId);
         return _toFullURI(_metaData[id]);
-    }
-
-    /// @notice Transfer assets from a burnt GAME.
-    /// @param from Previous owner of the burnt game.
-    /// @param to Address that will receive the assets.
-    /// @param gameId Id of the burnt GAME token.
-    /// @param assetIds The assets to recover from the burnt GAME.
-    function recoverAssets(
-        address from,
-        address to,
-        uint256 gameId,
-        uint256[] memory assetIds
-    ) public override {
-        _recoverAssets(from, to, gameId, assetIds);
     }
 
     /// @notice Check if the contract supports an interface.
