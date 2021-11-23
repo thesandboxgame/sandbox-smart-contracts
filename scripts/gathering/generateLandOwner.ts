@@ -1,8 +1,10 @@
+/**
+ * How to use:
+ *  - yarn execute <NETWORK> ./scripts/gathering/generateLandOwner.ts <blockNumber>
+ */
 import 'dotenv/config';
-import fs from 'fs';
 import 'isomorphic-unfetch';
 import {createClient} from '@urql/core';
-import {write} from '../utils/spreadsheet';
 
 import ObjectsToCsv from 'objects-to-csv';
 
@@ -12,12 +14,12 @@ async function query<T>(
   variables: Record<string, unknown>
 ): Promise<T[]> {
   const first = 1000;
-  let lastId = 0x0;
-  let numEntries = first;
   let entries: T[] = [];
-  while (numEntries === first) {
+  // Max value for x coordinate is 407
+  for (let x_gte = 0; x_gte <= 408; x_gte += 2) {
+    const x_lt = x_gte + 2;
     const result = await client
-      .query(queryString, {first, lastId, ...variables})
+      .query(queryString, {first, x_gte, x_lt, ...variables})
       .toPromise();
     const data = result.data;
     let newEntries = [];
@@ -26,15 +28,6 @@ async function query<T>(
     }
     if (!entries) {
       newEntries = [];
-    }
-    numEntries = newEntries.length;
-    if (numEntries > 0) {
-      const newLastId = newEntries[numEntries - 1].id;
-      if (lastId === newLastId) {
-        console.log('same query, stop');
-        break;
-      }
-      lastId = newLastId;
     }
     entries = entries.concat(newEntries);
   }
@@ -46,18 +39,19 @@ const client = createClient({
 });
 
 const queryString = `
-query($blockNumber: Int! $first: Int! $lastId: ID!) {
-  lands(first: $first where: {id_gt: $lastId} block: {number: $blockNumber} orderBy: id orderDirection: asc){
+query($blockNumber: Int! $first: Int! $x_gte: Int! $x_lt: Int!) {
+  lands(first: $first where: {x_gte: $x_gte, x_lt: $x_lt} block: {number: $blockNumber} orderBy: id orderDirection: asc){
     id
     owner
   }
 }
 `;
 
-const blockNumber = 9664970; // Dec-12-2020 12:59:57 PM +UTC
-//const blockNumber = 9000000; // Dec-12-2020 12:59:57 PM +UTC
+const args = process.argv.slice(2);
+const blockNumber = parseInt(args[0]);
 
 (async () => {
+  console.log('Fetching data..');
   const landOwners: {id: string; owner: string}[] = await query(
     queryString,
     'lands',
@@ -65,8 +59,6 @@ const blockNumber = 9664970; // Dec-12-2020 12:59:57 PM +UTC
       blockNumber,
     }
   );
-  console.log(landOwners.length);
-  console.log(landOwners[5]);
 
   const entries = landOwners.map((landOwner) => ({
     id: landOwner.id,
@@ -76,8 +68,6 @@ const blockNumber = 9664970; // Dec-12-2020 12:59:57 PM +UTC
   const csv = new ObjectsToCsv(entries);
 
   // Save to file:
-  await csv.toDisk('./landIdToOwnerId_9664970.csv');
-
-  // Return the CSV file as string:
-  console.log(await csv.toString());
+  await csv.toDisk('./landIdToOwnerId.csv');
+  console.log('CSV generated: landIdToOwnerId.csv');
 })();
