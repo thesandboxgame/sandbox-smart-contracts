@@ -12,7 +12,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (!FAKE_LP_MATIC_SAND) {
     FAKE_LP_MATIC_SAND = await deploy('SUSHI_SAND_MATIC', {
       from: deployer,
-      contract: "FakeLPSandMatic",
+      contract: 'FakeLPSandMatic',
       log: true,
     });
   }
