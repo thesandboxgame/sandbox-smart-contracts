@@ -1,6 +1,5 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -8,8 +7,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  const stakeToken = await deployments.get('FakeLPSandMatic'); // TODO: Change to Sushiswap once ready
-  const land = await deployments.get('MockLandWithMint'); // TODO: switch to PolygonLand & fix the test (no minting on polygon) when PolygonLand is ready
+  const stakeToken = await deployments.get('SUSHI_SAND_MATIC');
+  let land;
+  if (hre.network.name === 'hardhat') {
+    // workaround for tests
+    land = await deployments.get('MockLandWithMint');
+  } else {
+    land = await deployments.get('PolygonLand');
+  }
   const sand = await deployments.get('PolygonSand');
 
   const durationInSeconds = 30 * 24 * 60 * 60;
@@ -27,8 +32,8 @@ func.tags = [
   'L2',
 ];
 func.dependencies = [
-  'MockLandWithMint_deploy',
-  'PolygonSand_deploy',
-  'FakeLPSandMatic',
+  'MockLandWithMint',
+  'PolygonLand',
+  'PolygonSand',
+  'SUSHI_SAND_MATIC',
 ];
-func.skip = skipUnlessTestnet;
