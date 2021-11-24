@@ -887,6 +887,26 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         }
     }
 
+    /// @dev Use only when you mint from L1 to L2
+    function _mintFTFromAnotherLayer(
+        uint256 supply,
+        address owner,
+        uint256 id
+    ) internal {
+        (uint256 bin, uint256 index) = id.getTokenBinIndex();
+
+        _packedTokenBalance[owner][bin] = _packedTokenBalance[owner][bin].updateTokenBalance(
+            index,
+            supply,
+            ObjectLib32.Operations.ADD
+        );
+    }
+
+    function _mintNFTFromAnotherLayer(address owner, uint256 id) internal {
+        _owners[id] = uint256(uint160(owner));
+        _numNFTPerAddress[owner]++;
+    }
+
     function _transferFrom(
         address from,
         address to,
