@@ -45,7 +45,7 @@ contract PolygonAssetV2 is ERC1155ERC721 {
             if ((ids[i] & ERC1155ERC721Helper.IS_NFT) > 0) {
                 _mintNFTFromAnotherLayer(user, ids[i]);
             } else {
-                _mintFTFromAnotherLayer(amounts[i], user, ids[i], depositData);
+                _mintFTFromAnotherLayer(amounts[i], user, ids[i]);
             }
         }
         _completeMultiMint(_msgSender(), user, ids, amounts, depositData);

@@ -891,8 +891,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     function _mintFTFromAnotherLayer(
         uint256 supply,
         address owner,
-        uint256 id,
-        bytes calldata data
+        uint256 id
     ) internal {
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
 
