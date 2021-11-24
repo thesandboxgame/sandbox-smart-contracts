@@ -272,7 +272,7 @@ describe('AssetMinter', function () {
         defenseGem,
         assetAttributesRegistry,
       } = await setupAssetMinterAttributesRegistryGemsAndCatalysts();
-      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+      const assetMinterAsCatalystOwner = assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
 
@@ -329,7 +329,7 @@ describe('AssetMinter', function () {
         catalystOwner,
         commonCatalyst,
       } = await setupAssetMinterGemsAndCatalysts();
-      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+      const assetMinterAsCatalystOwner = assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
 

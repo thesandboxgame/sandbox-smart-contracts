@@ -350,7 +350,12 @@ export const setupTestGiveaway = withSnapshot(
     const {
       claims: claims0,
       merkleRootHash: merkleRootHash0,
-    } = createClaimMerkleTree(network.live, chainId, dataWithIds0);
+    } = createClaimMerkleTree(
+      network.live,
+      chainId,
+      dataWithIds0,
+      'Multi_Giveaway_1'
+    );
 
     const allMerkleRoots = [];
     const allClaims = [claims0];
@@ -370,7 +375,12 @@ export const setupTestGiveaway = withSnapshot(
       const {
         claims: claims1,
         merkleRootHash: merkleRootHash1,
-      } = createClaimMerkleTree(network.live, chainId, dataWithIds1);
+      } = createClaimMerkleTree(
+        network.live,
+        chainId,
+        dataWithIds1,
+        'Multi_Giveaway_1'
+      );
       allClaims.push(claims1);
       allMerkleRoots.push(merkleRootHash1);
       const hashArray2 = createDataArrayMultiClaim(claims1);

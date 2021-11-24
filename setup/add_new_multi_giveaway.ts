@@ -1,7 +1,8 @@
 /**
  * How to use:
- *  - yarn execute <NETWORK> ./setup/add_new_multi_giveaway.ts <GIVEAWAY_NAME>
+ *  - yarn execute <NETWORK> ./setup/add_new_multi_giveaway.ts <GIVEAWAY_CONTRACT> <GIVEAWAY_NAME>
  *
+ * GIVEAWAY_CONTRACT: from data/giveaways/multi_giveaway_1/detective_letty.json then the giveaway contract is: Multi_Giveaway_1
  * GIVEAWAY_NAME: from data/giveaways/multi_giveaway_1/detective_letty.json then the giveaway name is: detective_letty
  */
 import fs from 'fs-extra';
@@ -13,7 +14,8 @@ import helpers, {MultiClaim} from '../lib/merkleTreeHelper';
 const {calculateMultiClaimHash} = helpers;
 
 const args = process.argv.slice(2);
-const claimFile = args[0];
+const claimContract = args[0];
+const claimFile = args[1];
 
 const func: DeployFunction = async function () {
   const {deployments, network, getChainId} = hre;
@@ -23,7 +25,7 @@ const func: DeployFunction = async function () {
   let claimData: MultiClaim[];
   try {
     claimData = fs.readJSONSync(
-      `data/giveaways/multi_giveaway_1/${claimFile}.json`
+      `data/giveaways/${claimContract.toLowerCase()}/${claimFile}.json`
     );
   } catch (e) {
     console.log('Error', e);
@@ -33,20 +35,41 @@ const func: DeployFunction = async function () {
   const {merkleRootHash, saltedClaims, tree} = createClaimMerkleTree(
     network.live,
     chainId,
-    claimData
+    claimData,
+    claimContract
   );
 
-  const giveawayContract = await deployments.getOrNull('Multi_Giveaway_1');
+  const contractAddresses: string[] = [];
+  const addAddress = (address: string) => {
+    address = address.toLowerCase();
+    if (!contractAddresses.includes(address)) contractAddresses.push(address);
+  };
+  claimData.forEach((claim) => {
+    claim.erc1155.forEach((erc1155) => addAddress(erc1155.contractAddress));
+    claim.erc721.forEach((erc721) => addAddress(erc721.contractAddress));
+    claim.erc20.contractAddresses.forEach((erc20) => addAddress(erc20));
+  });
+  const allDeployments = Object.values(await deployments.all());
+  for (const contractAddress of contractAddresses) {
+    const deployment = allDeployments.find(
+      (d) => d.address.toLowerCase() === contractAddress
+    );
+    if (!deployment) {
+      console.warn(`Contract ${contractAddress} not found`);
+    }
+  }
+
+  const giveawayContract = await deployments.getOrNull(claimContract);
   if (!giveawayContract) {
-    console.log('No Multi_Giveaway_1 deployment');
+    console.log(`No ${claimContract} deployment`);
     return;
   }
 
-  const currentAdmin = await read('Multi_Giveaway_1', 'getAdmin');
+  const currentAdmin = await read(claimContract, 'getAdmin');
 
   await catchUnknownSigner(
     execute(
-      'Multi_Giveaway_1',
+      claimContract,
       {from: currentAdmin, log: true},
       'addNewGiveaway',
       merkleRootHash,

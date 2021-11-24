@@ -11,13 +11,14 @@ const {
 export function createClaimMerkleTree(
   isDeploymentChainId: boolean,
   chainId: string,
-  claimData: Array<MultiClaim>
+  claimData: Array<MultiClaim>,
+  claimContract: string
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): any {
-  let secretPath = './secret/multi-giveaway/.multi_giveaway_1_secret';
+  let secretPath = `./secret/multi-giveaway/.${claimContract.toLowerCase()}_secret`;
   if (BigNumber.from(chainId).toString() === '1') {
     console.log('MAINNET secret');
-    secretPath = './secret/multi-giveaway/.multi_giveaway_1_secret.mainnet';
+    secretPath = `./secret/multi-giveaway/.${claimContract.toLowerCase()}_secret.mainnet`;
   }
 
   let expose = false;
