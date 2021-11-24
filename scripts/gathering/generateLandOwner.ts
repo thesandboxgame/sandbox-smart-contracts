@@ -68,6 +68,6 @@ const blockNumber = parseInt(args[0]);
   const csv = new ObjectsToCsv(entries);
 
   // Save to file:
-  await csv.toDisk('./landIdToOwnerId.csv');
-  console.log('CSV generated: landIdToOwnerId.csv');
+  await csv.toDisk(`./landIdToOwnerId_${blockNumber}.csv`);
+  console.log(`CSV generated: landIdToOwnerId_${blockNumber}.csv`);
 })();

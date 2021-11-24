@@ -55,6 +55,7 @@
     "inquirer": "^7.3.3",
     "isomorphic-unfetch": "^3.1.0",
     "mocha": "^8.1.1",
+    "objects-to-csv": "^1.3.6",
     "prando": "^5.1.2",
     "prettier": "^2.0.5",
     "prettier-plugin-solidity": "1.0.0-beta.10",
@@ -88,8 +89,5 @@
     "fork:dev": "node ./scripts.js fork:dev",
     "fork:test": "node ./scripts.js fork:test",
     "hardhat": "hardhat"
-  },
-  "dependencies": {
-    "objects-to-csv": "^1.3.6"
   }
 }
