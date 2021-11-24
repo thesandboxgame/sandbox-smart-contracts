@@ -16,7 +16,7 @@ async function query<T>(
   const first = 1000;
   let entries: T[] = [];
   // Max value for x coordinate is 407
-  for (let x_gte = 0; x_gte <= 408; x_gte += 2) {
+  for (let x_gte = 0; x_gte < 408; x_gte += 2) {
     const x_lt = x_gte + 2;
     const result = await client
       .query(queryString, {first, x_gte, x_lt, ...variables})
