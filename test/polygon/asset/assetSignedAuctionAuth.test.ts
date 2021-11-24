@@ -1,5 +1,5 @@
 import {ethers} from 'hardhat';
-import {setupPolygonAsset /*, setupTestAuction*/} from './fixtures';
+import {setupPolygonAsset} from './fixtures';
 import {waitFor} from '../../utils';
 import {transferSand} from '../catalyst/utils';
 import BN from 'bn.js';
@@ -10,7 +10,7 @@ import {assert, expect} from 'chai';
 const zeroAddress = constants.AddressZero;
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe('Auction', function () {
+describe('assetSignedAcutionAuth', function () {
   const startingPrice = new BN('1000000000000000000');
   const endingPrice = new BN('5000000000000000000');
   const duration = 1000;
@@ -114,7 +114,7 @@ describe('Auction', function () {
           token: zeroAddress,
           purchase: [buyAmount, '5000000000000000000'],
           auctionData,
-          ids: [tokenId],
+          ids: [tokenId.toString()],
           amounts,
           signature,
         },

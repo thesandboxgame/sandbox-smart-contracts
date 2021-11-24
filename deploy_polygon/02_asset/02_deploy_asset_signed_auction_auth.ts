@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest} from '../../utils/network';
+// import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts, getUnnamedAccounts} = hre;
@@ -32,4 +32,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['AssetSignedAuctionAuth', 'AssetSignedAuctionAuth_deploy'];
 func.dependencies = ['PolygonAsset_deploy'];
-func.skip = skipUnlessTest;
+// func.skip = skipUnlessTest;
