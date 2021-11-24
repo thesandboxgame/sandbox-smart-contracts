@@ -48,6 +48,7 @@ contract PolygonAssetV2 is ERC1155ERC721 {
                 _mintFTFromAnotherLayer(amounts[i], user, ids[i], depositData);
             }
         }
+        _completeMultiMint(_msgSender(), user, ids, amounts, depositData);
     }
 
     /// @notice called when user wants to withdraw tokens back to root chain

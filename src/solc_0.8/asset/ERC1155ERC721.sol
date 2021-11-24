@@ -901,17 +901,11 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
             supply,
             ObjectLib32.Operations.ADD
         );
-        emit TransferSingle(_msgSender(), address(0), owner, id, supply);
-        require(
-            _checkERC1155AndCallSafeTransfer(_msgSender(), address(0), owner, id, supply, data, false, false),
-            "TRANSFER_REJECTED"
-        );
     }
 
     function _mintNFTFromAnotherLayer(address owner, uint256 id) internal {
         _owners[id] = uint256(uint160(owner));
         _numNFTPerAddress[owner]++;
-        emit Transfer(address(0), owner, id);
     }
 
     function _transferFrom(
