@@ -10,7 +10,7 @@ import {assert, expect} from 'chai';
 const zeroAddress = constants.AddressZero;
 
 // eslint-disable-next-line mocha/no-skipped-tests
-describe('assetSignedAcutionAuth', function () {
+describe('assetSignedAuctionAuth', function () {
   const startingPrice = new BN('1000000000000000000');
   const endingPrice = new BN('5000000000000000000');
   const duration = 1000;
