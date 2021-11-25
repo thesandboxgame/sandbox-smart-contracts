@@ -212,4 +212,99 @@ describe('SignedGiveaway.sol', function () {
       );
     });
   });
+  describe('revoke', function () {
+    it('should fail to revoke if not admin', async function () {
+      const fixtures = await setupSignedGiveway();
+      const claimId = BigNumber.from(0x123);
+      // REVOKE a claim
+      await expect(
+        fixtures.contract.revokeClaims([claimId])
+      ).to.be.revertedWith('Only admin');
+    });
+    it('should fail to claim if the id was revoked', async function () {
+      const fixtures = await setupSignedGiveway();
+      const claimId = BigNumber.from(0x123);
+      const amount = toWei(5);
+      await fixtures.mint(amount.mul(10));
+      const contractAsAdmin = await ethers.getContract(
+        'SignedGiveaway',
+        fixtures.adminRole
+      );
+      // REVOKE a claim
+      await contractAsAdmin.revokeClaims([claimId]);
+
+      const {v, r, s} = await signedGiveawaySignature(
+        fixtures.contract,
+        fixtures.signer,
+        claimId,
+        fixtures.sandToken.address,
+        fixtures.dest,
+        amount
+      );
+
+      await expect(
+        fixtures.contract.claim(
+          v,
+          r,
+          s,
+          fixtures.signer,
+          claimId,
+          fixtures.sandToken.address,
+          fixtures.dest,
+          amount
+        )
+      ).to.be.revertedWith('Already claimed');
+    });
+  });
+  describe('pause', function () {
+    it('should fail to pause if not admin', async function () {
+      const fixtures = await setupSignedGiveway();
+      await expect(fixtures.contract.pause()).to.be.revertedWith('Only admin');
+    });
+    it('should fail to unpause if not admin', async function () {
+      const fixtures = await setupSignedGiveway();
+      const contractAsAdmin = await ethers.getContract(
+        'SignedGiveaway',
+        fixtures.adminRole
+      );
+      await contractAsAdmin.pause();
+      await expect(fixtures.contract.unpause()).to.be.revertedWith(
+        'Only admin'
+      );
+    });
+    it('should fail to claim if paused', async function () {
+      const fixtures = await setupSignedGiveway();
+      const claimId = BigNumber.from(0x123);
+      const amount = toWei(5);
+      await fixtures.mint(amount.mul(10));
+      const contractAsAdmin = await ethers.getContract(
+        'SignedGiveaway',
+        fixtures.adminRole
+      );
+      // REVOKE a claim
+      await contractAsAdmin.pause();
+
+      const {v, r, s} = await signedGiveawaySignature(
+        fixtures.contract,
+        fixtures.signer,
+        claimId,
+        fixtures.sandToken.address,
+        fixtures.dest,
+        amount
+      );
+
+      await expect(
+        fixtures.contract.claim(
+          v,
+          r,
+          s,
+          fixtures.signer,
+          claimId,
+          fixtures.sandToken.address,
+          fixtures.dest,
+          amount
+        )
+      ).to.be.revertedWith('Pausable: paused');
+    });
+  });
 });

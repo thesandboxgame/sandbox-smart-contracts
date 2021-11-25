@@ -9,6 +9,7 @@ import {ERC2771Handler} from "../../common/BaseWithStorage/ERC2771Handler.sol";
 import {ContextUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol";
 import {ECDSAUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/cryptography/ECDSAUpgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/security/PausableUpgradeable.sol";
 
 /// @title This contract pays Sand claims when the backend authorize it via message signing.
 /// @dev can be extended to support NFTs, etc.
@@ -19,7 +20,8 @@ contract SignedERC20Giveaway is
     ContextUpgradeable,
     AccessControlUpgradeable,
     EIP712Upgradeable,
-    ERC2771Handler
+    ERC2771Handler,
+    PausableUpgradeable
 {
     bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
     bytes32 public constant CLAIM_TYPEHASH =
@@ -34,7 +36,7 @@ contract SignedERC20Giveaway is
         __AccessControl_init_unchained();
         __EIP712_init_unchained(name, version);
         __ERC2771Handler_initialize(trustedForwarder_);
-
+        __Pausable_init_unchained();
         _setupRole(DEFAULT_ADMIN_ROLE, defaultAdmin_);
     }
 
@@ -79,12 +81,35 @@ contract SignedERC20Giveaway is
         address token,
         address to,
         uint256 amount
-    ) external {
+    ) external whenNotPaused {
         require(_verify(v, r, s, signer, claimId, token, to, amount), "Invalid signature");
         require(hasRole(SIGNER_ROLE, signer), "Invalid signer");
         require(!claimed[claimId], "Already claimed");
         claimed[claimId] = true;
         require(IERC20Upgradeable(token).transfer(to, amount), "Transfer failed");
+    }
+
+    /// @notice let the admin revoke some claims so they cannot be used
+    /// @param claimIds and array of claim Ids to revoke
+    function revokeClaims(uint256[] calldata claimIds) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Only admin");
+        for (uint256 i = 0; i < claimIds.length; i++) {
+            claimed[claimIds[i]] = true;
+        }
+    }
+
+    // @dev Triggers stopped state.
+    // The contract must not be paused.
+    function pause() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Only admin");
+        _pause();
+    }
+
+    // @dev Returns to normal state.
+    // The contract must be paused.
+    function unpause() external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Only admin");
+        _unpause();
     }
 
     function domainSeparator() external view returns (bytes32) {
