@@ -15,7 +15,6 @@
     "constructor-syntax": "error",
     "func-visibility": ["error", {"ignoreConstructors": true}],
     "not-rely-on-time": "off",
-    "no-inline-assembly": "off",
     "reason-string": ["warn", {"maxLength": 64}]
   }
 }
