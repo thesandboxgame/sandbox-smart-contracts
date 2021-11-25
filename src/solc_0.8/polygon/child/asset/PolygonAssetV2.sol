@@ -38,19 +38,15 @@ contract PolygonAssetV2 is ERC1155ERC721 {
         require(user != address(0), "INVALID_DEPOSIT_USER");
         (uint256[] memory ids, uint256[] memory amounts, bytes32[] memory hashes) =
             AssetHelper.decodeAndSetCatalystDataL1toL2(assetRegistryData, depositData);
+
         for (uint256 i = 0; i < ids.length; i++) {
             _metadataHash[ids[i] & ERC1155ERC721Helper.URI_ID] = hashes[i];
             _rarityPacks[ids[i] & ERC1155ERC721Helper.URI_ID] = "0x00";
-            uint16 numNFTs = 0;
             if ((ids[i] & ERC1155ERC721Helper.IS_NFT) > 0) {
-                numNFTs = 1;
+                _mintNFTFromAnotherLayer(user, ids[i]);
+            } else {
+                _mintFTFromAnotherLayer(amounts[i], user, ids[i]);
             }
-
-            uint256[] memory singleId = new uint256[](1);
-            singleId[0] = ids[i];
-            uint256[] memory singleAmount = new uint256[](1);
-            singleAmount[0] = amounts[i];
-            _mintBatches(singleAmount, user, singleId, numNFTs);
         }
         _completeMultiMint(_msgSender(), user, ids, amounts, depositData);
     }
