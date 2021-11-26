@@ -11,6 +11,7 @@ interface IGameToken {
         uint256[] assetIdsToAdd;
         uint256[] assetAmountsToAdd;
         bytes32 uri; // ipfs hash (without the prefix, assume cidv1 folder)
+        uint256 exactNumOfLandsRequired;
     }
 
     function createGame(

@@ -20,7 +20,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
 
     mapping(uint256 => bytes32) private _metaData;
     mapping(address => mapping(address => bool)) private _gameEditors;
-
+    mapping(uint256 => uint256) internal _exactNumOfLandsRequired;
     ///////////////////////////////  Events //////////////////////////////
 
     /// @dev Emits when a game is updated.
@@ -132,6 +132,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         }
 
         _metaData[strgId] = creation.uri;
+        _exactNumOfLandsRequired[strgId] = creation.exactNumOfLandsRequired;
         emit GameTokenUpdated(0, gameId, creation);
         return gameId;
     }
@@ -151,6 +152,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         _addAssets(from, id, update.assetIdsToAdd, update.assetAmountsToAdd);
         _removeAssets(id, update.assetIdsToRemove, update.assetAmountsToRemove, _ownerOf(gameId));
         _metaData[id] = update.uri;
+        _exactNumOfLandsRequired[id] = update.exactNumOfLandsRequired;
         uint256 newId = _bumpGameVersion(from, gameId);
         emit GameTokenUpdated(gameId, newId, update);
         return newId;
@@ -203,6 +205,11 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
             assets[i] = _gameAssets[storageId][assetIds[i]];
         }
         return assets;
+    }
+
+    function getExactNumOfLandsRequired(uint256 gameId) external view returns (uint256) {
+        uint256 storageId = _storageId(gameId);
+        return _exactNumOfLandsRequired[storageId];
     }
 
     /// @notice Get game editor status.
