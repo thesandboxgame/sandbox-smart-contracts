@@ -44,6 +44,7 @@ nav:
               - SAND staking: topics/defi/liquidity-provider/sand-staking.md
       - Catalyst:
           - Gems & catalysts: topics/catalyst/catalyst.md
+          - Old gems & catalysts migration: topics/catalyst/migration-catalyst.md
       - Sand:
           - Sand Token: topics/sand/sand-token.md
           - Bundle Sand Sale: topics/sand/bundle-sand-sale.md
