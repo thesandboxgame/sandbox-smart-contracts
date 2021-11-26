@@ -54,7 +54,7 @@ IAssetToken--CollectionCatalystMigrations
 
 ### Migrate gems and catalyst in an asset
 
-User want to migrate the catalyst and all the gem associated with an asset.
+User wants to migrate the catalyst and all the gems associated with an asset.
 This process can only be done by the **administrator**. The contract has to add one to each index because **all previous index were 0-based and all new are 1-based**.
 
 ```plantuml
