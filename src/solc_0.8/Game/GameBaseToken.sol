@@ -122,6 +122,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         address editor,
         uint64 subId
     ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256 id) {
+        require(creation.exactNumOfLandsRequired > 0, "exactNumOfLandsRequired is zero");
         (uint256 gameId, uint256 strgId) = _mintGame(from, to, subId, 0, true);
 
         if (editor != address(0)) {
@@ -148,6 +149,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         uint256 gameId,
         IGameToken.GameData memory update
     ) external override onlyMinter() returns (uint256) {
+        require(update.exactNumOfLandsRequired > 0, "exactNumOfLandsRequired is zero");
         uint256 id = _storageId(gameId);
         _addAssets(from, id, update.assetIdsToAdd, update.assetAmountsToAdd);
         _removeAssets(id, update.assetIdsToRemove, update.assetAmountsToRemove, _ownerOf(gameId));
@@ -207,7 +209,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         return assets;
     }
 
-    function getExactNumOfLandsRequired(uint256 gameId) external view returns (uint256) {
+    function getExactNumOfLandsRequired(uint256 gameId) external view override returns (uint256) {
         uint256 storageId = _storageId(gameId);
         return _exactNumOfLandsRequired[storageId];
     }

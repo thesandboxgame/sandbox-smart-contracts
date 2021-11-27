@@ -48,6 +48,8 @@ interface IGameToken {
 
     function getAssetBalances(uint256 gameId, uint256[] calldata assetIds) external view returns (uint256[] calldata);
 
+    function getExactNumOfLandsRequired(uint256 gameId) external view returns (uint256);
+
     function setGameEditor(
         address gameCreator,
         address editor,

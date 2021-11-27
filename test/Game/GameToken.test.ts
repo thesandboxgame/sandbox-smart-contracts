@@ -23,6 +23,7 @@ type Update = {
   assetIdsToAdd: BigNumber[];
   assetAmountsToAdd: number[];
   uri: BytesLike;
+  exactNumOfLandsRequired: number;
 };
 
 const update: Update = {
@@ -31,6 +32,7 @@ const update: Update = {
   assetIdsToAdd: [],
   assetAmountsToAdd: [],
   uri: utils.keccak256(ethers.utils.toUtf8Bytes('')),
+  exactNumOfLandsRequired: 1,
 };
 
 // for prod, use maximum uint64 (2^64-1) as upper limit
