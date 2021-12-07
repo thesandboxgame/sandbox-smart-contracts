@@ -10,7 +10,7 @@ description: SignedERC20Giveaway contract
 
 ## Introduction
 
-The signed giveaway contract is used as a hot wallet. The company deposit [SAND](documentation/Sand.md) and then give
+The signed giveaway contract is used as a hot wallet. The company deposits [SAND](documentation/Sand.md) and then gives
 the users signed messages that let them claim part of the deposited SAND as rewards/incentives.
 
 ## Model
