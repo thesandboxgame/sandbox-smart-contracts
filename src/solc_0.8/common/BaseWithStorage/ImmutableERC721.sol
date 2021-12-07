@@ -19,9 +19,11 @@ contract ImmutableERC721 is ERC721BaseToken {
         uint256 packedData = _owners[_storageId(id)];
         uint16 idVersion = uint16(id);
         uint16 storageVersion = uint16((packedData & VERSION_MASK) >> 200);
+
         if (((packedData & BURNED_FLAG) == BURNED_FLAG) || idVersion != storageVersion) {
-            return address(0);
+            return address(0); //should be here
         }
+
         return address(uint160(packedData));
     }
 
