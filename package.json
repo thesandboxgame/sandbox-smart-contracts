@@ -50,7 +50,7 @@
     "ethereumjs-util": "^7.1.3",
     "ethers": "^5.0.17",
     "fs-extra": "^9.0.1",
-    "fx-portal": "^1.0.2",
+    "fx-portal": "^1.0.3",
     "googleapis": "^66.0.0",
     "graphql": "^15.4.0",
     "hardhat": "^2.6.1",
