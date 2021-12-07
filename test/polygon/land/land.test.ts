@@ -2,7 +2,6 @@ import {ethers} from 'hardhat';
 import {expect} from '../../chai-setup';
 import {setupLand} from './fixtures';
 import {bufferToHex, rlp} from 'ethereumjs-util';
-// @ts-ignore
 import MerkleTree from './utils/merkle-tree';
 import {
   getTxBytes,
@@ -10,9 +9,7 @@ import {
   getReceiptProof,
   getTxProof,
   verifyTxProof,
-  // @ts-ignore
 } from './utils/proofs';
-// @ts-ignore
 import {getBlockHeader} from './utils/blocks';
 
 describe('PolygonLand.sol', function () {
@@ -290,10 +287,10 @@ describe('PolygonLand.sol', function () {
 });
 
 let headerNumber = 0;
-export async function build(event: any) {
+async function build(event: any) {
   const blockHeader = getBlockHeader(event.block);
   const tree = new MerkleTree([blockHeader]);
-  const receiptProof = await getReceiptProof(
+  const receiptProof: any = await getReceiptProof(
     event.receipt,
     event.block,
     null /* web3 */,
@@ -307,7 +304,7 @@ export async function build(event: any) {
     blockTxns.push(tx);
   }
   event.block.transactions = blockTxns;
-  const txProof = await getTxProof(event.tx, event.block);
+  const txProof: any = await getTxProof(event.tx, event.block);
   console.log('TX PROOF');
   console.log(txProof);
   expect(verifyTxProof(receiptProof)).to.be.ok;
