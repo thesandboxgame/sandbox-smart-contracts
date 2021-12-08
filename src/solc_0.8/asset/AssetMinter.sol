@@ -26,6 +26,9 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     mapping(uint16 => uint256) public quantitiesByAssetTypeId; // quantities for asset that don't use catalyst to burn (art, prop...)
     mapping(address => bool) public customMinterAllowance;
 
+    event CustomMintingAllowanceChanged(address indexed addressModified, bool indexed isAddressCustomMintingAllowed);
+    event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
+
     /// @notice AssetMinter depends on
     /// @param registry: AssetAttributesRegistry for recording catalyst and gems used
     /// @param asset: Asset Token Contract (dual ERC1155/ERC721)
@@ -84,6 +87,8 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
 
     function setCustomMintingAllowance(address addressToModify, bool isAddressAllowed) external override onlyOwner {
         customMinterAllowance[addressToModify] = isAddressAllowed;
+
+        emit CustomMintingAllowanceChanged(addressToModify, isAddressAllowed);
     }
 
     /// @notice mint "quantity" number of Asset token using one catalyst.
@@ -209,6 +214,8 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
         _trustedForwarder = trustedForwarder;
+
+        emit TrustedForwarderChanged(trustedForwarder);
     }
 
     /// @dev Handler for dealing with assets when minting multiple at once.
