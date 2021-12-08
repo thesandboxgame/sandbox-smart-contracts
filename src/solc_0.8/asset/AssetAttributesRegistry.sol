@@ -194,7 +194,7 @@ contract AssetAttributesRegistry is WithMinter, WithUpgrader, IAssetAttributesRe
         emit GemsAdded(assetId, gemIds, blockNumber);
     }
 
-    /// @notice set the migratcion contract address, admin or migration contract only
+    /// @notice set the migration contract address, admin or migration contract only
     /// @param _migrationContract address of the migration contract
     function setMigrationContract(address _migrationContract) external override {
         address currentMigrationContract = migrationContract;
