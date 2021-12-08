@@ -1403,6 +1403,8 @@ describe('Multi_Giveaway', function () {
       expect(claimedEvent.args[3][1][0]).to.equal(
         claim.erc20.contractAddresses[0]
       );
+
+      expect(claimedEvent.args[4]).to.equal(merkleRoot);
     });
     it('User cannot claim more than once', async function () {
       const options = {

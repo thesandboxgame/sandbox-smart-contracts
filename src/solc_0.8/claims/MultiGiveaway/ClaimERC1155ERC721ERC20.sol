@@ -45,7 +45,14 @@ contract ClaimERC1155ERC721ERC20 {
     /// @param erc1155 The array of ERC1155Claim structs containing the ids, values and ERC1155 contract address.
     /// @param erc721 The array of ERC721Claim structs containing the ids and ERC721 contract address.
     /// @param erc20 The ERC20Claim struct containing the amounts and ERC20 contract addresses.
-    event ClaimedMultipleTokens(address to, ERC1155Claim[] erc1155, ERC721Claim[] erc721, ERC20Claim erc20);
+    /// @param merkleRoot The merkle root hash for the specific set of items being claimed.
+    event ClaimedMultipleTokens(
+        address to,
+        ERC1155Claim[] erc1155,
+        ERC721Claim[] erc721,
+        ERC20Claim erc20,
+        bytes32 merkleRoot
+    );
 
     ///////////////////////////////  Functions ///////////////////////////
 
@@ -70,7 +77,7 @@ contract ClaimERC1155ERC721ERC20 {
             require(claim.erc20.amounts.length == claim.erc20.contractAddresses.length, "INVALID_INPUT");
             _transferERC20(claim.to, claim.erc20.amounts, claim.erc20.contractAddresses);
         }
-        emit ClaimedMultipleTokens(claim.to, claim.erc1155, claim.erc721, claim.erc20);
+        emit ClaimedMultipleTokens(claim.to, claim.erc1155, claim.erc721, claim.erc20, merkleRoot);
     }
 
     /// @dev Private function used to check the validity of a specific claim.
