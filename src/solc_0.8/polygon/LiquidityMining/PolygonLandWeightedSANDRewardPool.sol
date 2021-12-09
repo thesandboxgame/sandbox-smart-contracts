@@ -200,8 +200,6 @@ contract PolygonLandWeightedSANDRewardPool is PolygonLPTokenWrapper, IRewardDist
             _rewardToken.safeTransfer(msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
         }
-
-        updateContribution(msg.sender);
     }
 
     ///@notice to be called after the amount of reward tokens (specified by the reward parameter) has been sent to the contract
