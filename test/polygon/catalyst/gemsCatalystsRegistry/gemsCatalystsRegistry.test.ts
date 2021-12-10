@@ -3,6 +3,7 @@ import {expect} from '../../../chai-setup';
 import {waitFor, withSnapshot} from '../../../utils';
 import catalysts from '../../../../data/catalysts';
 import {gemsAndCatalystsFixtures} from '../../../common/fixtures/gemAndCatalysts';
+import {deployments} from 'hardhat';
 
 const setupGemsAndCatalysts = withSnapshot(
   ['GemsCatalystsRegistry'],
@@ -392,6 +393,36 @@ describe('GemsCatalystsRegistry', function () {
     await expect(
       gemsCatalystsRegistryAsUser3.addGemsAndCatalysts([gemExample.address], [])
     ).to.be.revertedWith('NOT_AUTHORIZED');
+  });
+
+  it('addGemsAndCatalysts should fail if too many G&C', async function () {
+    const {
+      gemsCatalystsRegistry,
+      gemsCatalystsRegistryAsRegAdmin,
+      gemOwner,
+    } = await setupGemsAndCatalysts();
+
+    const addresses = [];
+    for (let i = 6; i < 253; i++) {
+      const result = await deployments.deploy(`Gem_` + i, {
+        contract: 'Gem',
+        from: gemOwner,
+        log: true,
+        args: [
+          `Gem_` + i,
+          `Gem_` + i,
+          gemOwner,
+          i,
+          gemsCatalystsRegistry.address,
+        ],
+      });
+      addresses.push(result.address);
+    }
+    await expect(
+      gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts(addresses, [])
+    ).to.be.revertedWith(
+      'GemsCatalystsRegistry: Too many gem and catalyst contracts'
+    );
   });
 
   it('burnDifferentGems for two different gem tokens', async function () {

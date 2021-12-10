@@ -52,6 +52,7 @@ export const gemsAndCatalystsFixtures = async () => {
       gemsCatalystsRegistry.address,
     ],
   });
+
   const gemExample: Contract = await ethers.getContract('Gem_Example');
 
   await deployments.deploy(`Gem_NotInOrder`, {
