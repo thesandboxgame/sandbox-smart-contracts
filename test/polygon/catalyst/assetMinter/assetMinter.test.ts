@@ -556,6 +556,18 @@ describe('AssetMinter', function () {
 
       await assetMinterAsAdmin.setCustomMintingAllowance(user3, true);
 
+      const setCustomMintingAllowanceEvent = await assetMinterAsAdmin.queryFilter(
+        assetMinterAsAdmin.filters.CustomMintingAllowanceChanged()
+      );
+      const event = setCustomMintingAllowanceEvent.filter(
+        (e) => e.event === 'CustomMintingAllowanceChanged'
+      )[0];
+      expect(event.args).not.to.equal(null || undefined);
+      if (event.args) {
+        expect(event.args[0]).to.equal(user3);
+        expect(event.args[1]).to.equal(true);
+      }
+
       const assetId = await assetMinterContractAsUser3.callStatic.mintCustomNumberWithCatalyst(
         {
           from: user3,

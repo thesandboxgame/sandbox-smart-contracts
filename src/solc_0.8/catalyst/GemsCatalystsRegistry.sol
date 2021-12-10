@@ -15,9 +15,13 @@ import "../common/BaseWithStorage/ERC2771Handler.sol";
 /// Each new Catalyst get assigned a new id (starting at 1)
 contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatalystsRegistry, Ownable {
     uint256 private constant MAX_GEMS_AND_CATALYSTS = 256;
+    uint256 internal constant MAX_UINT256 = ~uint256(0);
+
 
     Gem[] internal _gems;
     Catalyst[] internal _catalysts;
+
+    event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
 
     constructor(address admin, address trustedForwarder) {
         _admin = admin;
@@ -185,17 +189,25 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
         number = _gems.length;
     }
 
-    function setGemsandCatalystsMaxAllowance() external {
-        for (uint256 i = 0; i < _gems.length; i++) {
-            _gems[i].approveFor(_msgSender(), address(this), ~uint256(0));
-        }
+    function revokeGemsandCatalystsMaxAllowance() external {
+        _setGemsAndCatalystsAllowance(0);
+    }
 
-        for (uint256 i = 0; i < _catalysts.length; i++) {
-            _catalysts[i].approveFor(_msgSender(), address(this), ~uint256(0));
-        }
+    function setGemsandCatalystsMaxAllowance() external {
+        _setGemsAndCatalystsAllowance(MAX_UINT256);
     }
 
     // //////////////////// INTERNALS ////////////////////
+
+    function _setGemsAndCatalystsAllowance(uint256 allowanceValue) internal {
+        for (uint256 i = 0; i < _gems.length; i++) {
+            _gems[i].approveFor(_msgSender(), address(this), allowanceValue);
+        }
+
+        for (uint256 i = 0; i < _catalysts.length; i++) {
+            _catalysts[i].approveFor(_msgSender(), address(this), allowanceValue);
+        }
+    }
 
     /// @dev Get the catalyst contract corresponding to the id.
     /// @param catalystId The catalyst id to use to retrieve the contract.
@@ -229,6 +241,8 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
         _trustedForwarder = trustedForwarder;
+
+        emit TrustedForwarderChanged(trustedForwarder);
     }
 
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
