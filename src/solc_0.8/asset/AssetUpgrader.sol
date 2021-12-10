@@ -27,6 +27,8 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     IAssetToken internal immutable _asset;
     GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
 
+    event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
+
     /// @notice AssetUpgrader depends on
     /// @param registry: AssetAttributesRegistry for recording catalyst and gems used
     /// @param sand: ERC20 for fee payment
@@ -212,6 +214,8 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
         _trustedForwarder = trustedForwarder;
+
+        emit TrustedForwarderChanged(trustedForwarder);
     }
 
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {

@@ -17,6 +17,8 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
     Gem[] internal _gems;
     Catalyst[] internal _catalysts;
 
+    event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
+
     constructor(address admin, address trustedForwarder) {
         _admin = admin;
         __ERC2771Handler_initialize(trustedForwarder);
@@ -221,6 +223,8 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
         _trustedForwarder = trustedForwarder;
+
+        emit TrustedForwarderChanged(trustedForwarder);
     }
 
     function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
