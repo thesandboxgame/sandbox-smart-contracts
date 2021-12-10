@@ -136,7 +136,10 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
                 // special address for burn
                 _sand.burnFor(from, sandFee);
             } else {
-                _sand.transferFrom(from, feeRecipient, sandFee);
+                require(
+                    _sand.transferFrom(from, feeRecipient, sandFee),
+                    "AssetUpgrader: ERC20 operation did not succeed"
+                );
             }
         }
     }
