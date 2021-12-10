@@ -17,7 +17,6 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
     uint256 private constant MAX_GEMS_AND_CATALYSTS = 256;
     uint256 internal constant MAX_UINT256 = ~uint256(0);
 
-
     Gem[] internal _gems;
     Catalyst[] internal _catalysts;
 
