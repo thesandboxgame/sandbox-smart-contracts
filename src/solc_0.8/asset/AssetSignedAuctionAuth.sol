@@ -104,7 +104,6 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
         require(amountAlreadyClaimed != MAX_UINT256, "Auction cancelled");
 
         uint256 total = amountAlreadyClaimed + buyAmount;
-        require(total >= amountAlreadyClaimed, "overflow");
         require(total <= auctionData[AuctionData_Packs], "Buy amount exceeds sell amount");
 
         require(auctionData[AuctionData_StartedAt] <= block.timestamp, "Auction didn't start yet");
