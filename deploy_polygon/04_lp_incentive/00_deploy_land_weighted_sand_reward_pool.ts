@@ -7,7 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  const stakeToken = await deployments.get('SUSHI_SAND_MATIC');
+  const stakeToken = await deployments.get('QUICKSWAP_SAND_MATIC');
   let land;
   if (hre.network.name === 'hardhat') {
     // workaround for tests
@@ -35,5 +35,5 @@ func.dependencies = [
   'MockLandWithMint',
   'PolygonLand',
   'PolygonSand',
-  'SUSHI_SAND_MATIC',
+  'QUICKSWAP_SAND_MATIC',
 ];
