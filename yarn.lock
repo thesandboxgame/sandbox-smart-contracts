@@ -1100,11 +1100,6 @@
   resolved "https://registry.npmjs.org/@sindresorhus/is/-/is-0.14.0.tgz"
   integrity sha512-9NET910DNaIPngYnLLPeg+Ogzqsi9uM4mSboU5y6p8S5DzMTVEsJZrawi+BoDNUVBa2DhJqQYUFvMDfgU062LQ==
 
-"@solidity-parser/parser@^0.11.0":
-  version "0.11.1"
-  resolved "https://registry.npmjs.org/@solidity-parser/parser/-/parser-0.11.1.tgz"
-  integrity sha512-H8BSBoKE8EubJa0ONqecA2TviT3TnHeC4NpgnAHSUiuhZoQBfPB4L2P9bs8R6AoTW10Endvh3vc+fomVMIDIYQ==
-
 "@solidity-parser/parser@^0.12.0", "@solidity-parser/parser@^0.12.1":
   version "0.12.2"
   resolved "https://registry.npmjs.org/@solidity-parser/parser/-/parser-0.12.2.tgz"
@@ -5466,10 +5461,10 @@ har-validator@~5.1.3:
     ajv "^6.12.3"
     har-schema "^2.0.0"
 
-hardhat-contract-sizer@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.npmjs.org/hardhat-contract-sizer/-/hardhat-contract-sizer-2.0.2.tgz"
-  integrity sha512-6vDj3OoqPvzuEnURY2lN6veFXH8uIBRgnaIJoN7cpn7ENuciIR3qotNgLtbC6BNp4y0Cn/8FeMfKS6MdAvIdgQ==
+hardhat-contract-sizer@^2.0.3:
+  version "2.1.1"
+  resolved "https://registry.yarnpkg.com/hardhat-contract-sizer/-/hardhat-contract-sizer-2.1.1.tgz#d861bfac8dff00cca859e14c5a4843367dd0f068"
+  integrity sha512-QgfuwdUkKT7Ugn6Zja26Eie7h6OLcBfWBewaaQtYMCzyglNafQPgUIznN2C42/iFmGrlqFPbqv4B98Iev89KSQ==
   dependencies:
     cli-table3 "^0.6.0"
     colors "^1.4.0"
@@ -5521,7 +5516,7 @@ hardhat@^2.6.1:
     "@ethereumjs/vm" "^5.5.2"
     "@ethersproject/abi" "^5.1.2"
     "@sentry/node" "^5.18.1"
-    "@solidity-parser/parser" "^0.14.0"
+    "@solidity-parser/parser" "^0.11.0"
     "@types/bn.js" "^5.1.0"
     "@types/lru-cache" "^5.1.0"
     abort-controller "^3.0.0"
