@@ -1,3 +1,4 @@
+import {AbiCoder} from '@ethersproject/contracts/node_modules/@ethersproject/abi';
 import {expect} from '../../chai-setup';
 import {waitFor} from '../../utils';
 import {setupLand} from './fixtures';
@@ -233,10 +234,11 @@ describe('PolygonLand.sol', function () {
           Land,
           landMinter,
           users,
-          LandTunnel,
+          MockLandTunnel,
           PolygonLand,
-          PolygonLandTunnel,
+          MockPolygonLandTunnel,
         } = await setupLand();
+
         const landHolder = users[0];
         const size = 1;
         const x = 0;
@@ -248,9 +250,16 @@ describe('PolygonLand.sol', function () {
         await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
 
+        // Set Mock PolygonLandTunnel in PolygonLand
+        await deployer.PolygonLand.setPolygonLandTunnel(
+          MockPolygonLandTunnel.address
+        );
+        expect(await PolygonLand.polygonLandTunnel()).to.equal(
+          MockPolygonLandTunnel.address
+        );
         // Transfer to L1 Tunnel
-        await landHolder.Land.setApprovalForAll(LandTunnel.address, true);
-        await landHolder.LandTunnel.batchTransferQuadToL2(
+        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
+        await landHolder.MockLandTunnel.batchTransferQuadToL2(
           landHolder.address,
           [size],
           [x],
@@ -259,17 +268,19 @@ describe('PolygonLand.sol', function () {
         );
 
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
-        expect(await Land.balanceOf(LandTunnel.address)).to.be.equal(plotCount);
+        expect(await Land.balanceOf(MockLandTunnel.address)).to.be.equal(
+          plotCount
+        );
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
           plotCount
         );
 
         // Transfer to L2 Tunnel
         await landHolder.PolygonLand.setApprovalForAll(
-          PolygonLandTunnel.address,
+          MockPolygonLandTunnel.address,
           true
         );
-        const tx = await landHolder.PolygonLandTunnel.transferQuadToL1(
+        const tx = await landHolder.MockPolygonLandTunnel.transferQuadToL1(
           landHolder.address,
           size,
           x,
@@ -281,10 +292,16 @@ describe('PolygonLand.sol', function () {
         console.log('DUMMY CHECKPOINT. moving on...');
 
         // Release on L1
+        const abiCoder = new AbiCoder();
 
-        await deployer.LandTunnel.receiveMessage({});
+        await deployer.MockLandTunnel.receiveMessage(
+          abiCoder.encode(
+            ['address', 'uint256', 'uint256', 'uint256', 'bytes'],
+            [landHolder.address, size, x, y, bytes]
+          )
+        );
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-        expect(await Land.balanceOf(LandTunnel.address)).to.be.equal(0);
+        expect(await Land.balanceOf(MockLandTunnel.address)).to.be.equal(0);
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
       });
     });
