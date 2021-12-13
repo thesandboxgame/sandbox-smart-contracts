@@ -30,22 +30,40 @@ contract LandTunnel is FxBaseRootTunnel, IERC721TokenReceiver {
         return this.onERC721Received.selector;
     }
 
-    function transferQuadToL2(
+    function _transferQuadToL2(
         address to,
         uint256 size,
         uint256 x,
         uint256 y,
         bytes memory data
-    ) public {
+    ) internal {
         LandToken(rootToken).transferQuad(msg.sender, address(this), size, x, y, data);
         bytes memory message = abi.encode(to, size, x, y, data);
         _sendMessageToChild(message);
         emit Deposit(to, size, x, y, data);
     }
 
+    function batchTransferQuadToL2(
+        address to,
+        uint256[] memory sizes,
+        uint256[] memory xs,
+        uint256[] memory ys,
+        bytes memory data
+    ) public {
+        require(sizes.length == xs.length && xs.length == ys.length && ys.length == data.length, "invalid data");
+        LandToken(rootToken).batchTransferQuad(msg.sender, address(this), sizes, xs, ys, data);
+        for (uint256 index = 0; index < sizes.length; index++) {
+            bytes memory message = abi.encode(to, sizes[index], xs[index], ys[index], data);
+            _sendMessageToChild(message);
+            emit Deposit(to, sizes[index], xs[index], ys[index], data);
+        }
+    }
+
     function _processMessageFromChild(bytes memory message) internal override {
-        (address to, uint256 size, uint256 x, uint256 y, bytes memory data) =
-            abi.decode(message, (address, uint256, uint256, uint256, bytes));
+        (address to, uint256 size, uint256 x, uint256 y, bytes memory data) = abi.decode(
+            message,
+            (address, uint256, uint256, uint256, bytes)
+        );
         LandToken(rootToken).transferQuad(address(this), to, size, x, y, data);
         emit Withdraw(to, size, x, y, data);
     }
