@@ -50,7 +50,7 @@ contract LandTunnel is FxBaseRootTunnel, IERC721TokenReceiver {
         uint256[] memory ys,
         bytes memory data
     ) public {
-        require(sizes.length == xs.length && xs.length == ys.length && ys.length == data.length, "invalid data");
+        require(sizes.length == xs.length && xs.length == ys.length, "l2: invalid data");
         LandToken(rootToken).batchTransferQuad(msg.sender, address(this), sizes, xs, ys, data);
         for (uint256 index = 0; index < sizes.length; index++) {
             bytes memory message = abi.encode(to, sizes[index], xs[index], ys[index], data);

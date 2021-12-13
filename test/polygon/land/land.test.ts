@@ -183,6 +183,48 @@ describe('PolygonLand.sol', function () {
           plotCount
         );
       });
+
+      it('should be able to tranfer multiple Lands', async function () {
+        const {
+          Land,
+          landMinter,
+          users,
+          LandTunnel,
+          PolygonLand,
+        } = await setupLand();
+        const landHolder = users[0];
+        const bytes = '0x00';
+        // Mint LAND on L1
+        await waitFor(
+          landMinter.Land.mintQuad(landHolder.address, 24, 0, 0, bytes)
+        );
+        await waitFor(
+          landMinter.Land.mintQuad(landHolder.address, 12, 300, 300, bytes)
+        );
+        await waitFor(
+          landMinter.Land.mintQuad(landHolder.address, 6, 30, 30, bytes)
+        );
+        await waitFor(
+          landMinter.Land.mintQuad(landHolder.address, 3, 24, 24, bytes)
+        );
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(765);
+
+        // Transfer to L1 Tunnel
+        await landHolder.Land.setApprovalForAll(LandTunnel.address, true);
+        await landHolder.LandTunnel.batchTransferQuadToL2(
+          landHolder.address,
+          [24, 12, 6, 3],
+          [0, 300, 30, 24],
+          [0, 300, 30, 24],
+          bytes
+        );
+
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
+        expect(await Land.balanceOf(LandTunnel.address)).to.be.equal(765);
+        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
+          765
+        );
+      });
     });
     describe('L2 to L1', function () {
       it('should be able to tranfer 1x1 Land', async function () {
@@ -194,7 +236,6 @@ describe('PolygonLand.sol', function () {
           LandTunnel,
           PolygonLand,
           PolygonLandTunnel,
-          CheckpointManager,
         } = await setupLand();
         const landHolder = users[0];
         const size = 1;
