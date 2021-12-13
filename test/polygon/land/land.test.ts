@@ -280,11 +280,11 @@ describe('PolygonLand.sol', function () {
           MockPolygonLandTunnel.address,
           true
         );
-        const tx = await landHolder.MockPolygonLandTunnel.transferQuadToL1(
+        const tx = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
           landHolder.address,
-          size,
-          x,
-          y,
+          [size],
+          [x],
+          [y],
           bytes
         );
         await tx.wait();
