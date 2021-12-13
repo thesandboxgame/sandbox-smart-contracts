@@ -29,7 +29,7 @@ describe('PolygonLand.sol', function () {
 
         await waitFor(
           landHolder.LandTunnel.batchTransferQuadToL2(
-            [landHolder.address],
+            landHolder.address,
             [size],
             [x],
             [y],
