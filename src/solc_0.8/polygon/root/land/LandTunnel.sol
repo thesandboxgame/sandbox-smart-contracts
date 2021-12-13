@@ -30,19 +30,6 @@ contract LandTunnel is FxBaseRootTunnel, IERC721TokenReceiver {
         return this.onERC721Received.selector;
     }
 
-    function _transferQuadToL2(
-        address to,
-        uint256 size,
-        uint256 x,
-        uint256 y,
-        bytes memory data
-    ) internal {
-        LandToken(rootToken).transferQuad(msg.sender, address(this), size, x, y, data);
-        bytes memory message = abi.encode(to, size, x, y, data);
-        _sendMessageToChild(message);
-        emit Deposit(to, size, x, y, data);
-    }
-
     function batchTransferQuadToL2(
         address to,
         uint256[] memory sizes,
