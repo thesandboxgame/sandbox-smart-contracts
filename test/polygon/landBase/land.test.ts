@@ -1628,4 +1628,71 @@ describe('MockLandWithMint.sol', function () {
       console.log('GAS USED for 144 1x1 from 24x24 ' + receipt.gasUsed);
     });
   });
+
+  /* it('transferFrom quad 12X12', async function () {
+    const {landOwners} = await setupTest();
+    const bytes = '0x3333';
+
+    await waitFor(
+      landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].address,
+        12,
+        0,
+        0,
+        bytes
+      )
+    );
+
+    /* await waitFor(
+      landOwners[0].MockLandWithMint.mintQuad(
+        landOwners[0].address,
+        1,
+        0,
+        0,
+        bytes
+      )
+    );
+
+    const arraySize = [];
+    const arrayx = [];
+    const arrayy = [];
+
+    for (let i = 0; i < 12; i++) {
+      for (let j = 0; j < 12; j++) {
+        arraySize.push(1);
+        arrayx.push(i);
+        arrayy.push(j);
+      }
+    }
+    //1, 1, 1
+    const receipt = await waitFor(
+      landOwners[0].MockLandWithMint.transferFrom(
+        landOwners[0].address,
+        landOwners[1].address,
+        818
+        /* 1,
+        0, //409
+        0,
+        bytes
+      )
+    );
+
+    /* const receipt2 = await waitFor(
+      landOwners[0].MockLandWithMint.transferQuad(
+        landOwners[0].address,
+        landOwners[1].address,
+        6,
+        6,
+        6,
+        bytes
+      )
+    );
+
+    const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+      landOwners[1].address
+    );
+    expect(num2).to.equal(144);
+
+    //console.log('GAS USED for 144 1x1 from 24x24 ' + receipt.gasUsed);
+  }); */
 });

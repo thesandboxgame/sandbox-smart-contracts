@@ -3765,6 +3765,132 @@ describe('EstateV2', function () {
         console.log('GAS USED ' + receipt.gasUsed);
       });
     });
+    it('gas 100 land and 1 games', async function () {
+      const {
+        estateContract,
+        landContractAsMinter,
+        landContractAsUser0,
+        user0,
+        gameToken,
+        gameTokenAsUser0,
+      } = await setupEstate();
+
+      const uri =
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      const mintingData: LandMintingData[] = [];
+      /*  = [
+        {beneficiary: user0, size: 1, x: 6, y: 12},
+        {beneficiary: user0, size: 1, x: 7, y: 12},
+        {beneficiary: user0, size: 1, x: 8, y: 12},
+        {beneficiary: user0, size: 1, x: 9, y: 12},
+        {beneficiary: user0, size: 1, x: 10, y: 12},
+      ]; */
+
+      const {gameIds} = await mintGames(gameToken, user0, [1], 0);
+      const gameIdsR = [];
+      for (let i = 0; i < 100; i++) {
+        gameIdsR.push(gameIds[0]);
+        mintingData.push({beneficiary: user0, size: 1, x: i, y: 12});
+      }
+
+      const landIds = await mintLands(landContractAsMinter, mintingData);
+
+      for (let i = 0; i < landIds.length; i++) {
+        await landContractAsUser0.approve(estateContract.address, landIds[i]);
+      }
+
+      await gameTokenAsUser0.approve(estateContract.address, gameIds[0]);
+
+      const receipt = await waitFor(
+        estateContract
+          .connect(ethers.provider.getSigner(user0))
+          .createEstate(user0, user0, {
+            landIds: landIds,
+            gameIds: gameIdsR,
+            uri,
+          })
+      );
+
+      const newOwner = await gameToken.ownerOf(gameIds[0]);
+      expect(newOwner).to.be.equal(estateContract.address);
+      const estateCreationEvents = await estateContract.queryFilter(
+        estateContract.filters.EstateTokenUpdated()
+      );
+      const estateCreationEvent = estateCreationEvents.filter(
+        (e) => e.event === 'EstateTokenUpdated'
+      );
+      expect(estateCreationEvent[0].args).not.be.equal(null);
+      if (estateCreationEvent[0].args) {
+        //expect(estateCreationEvent[0].args[2].gameIds).to.be.eql(gameIds);
+        console.log(estateCreationEvent[0].args[2].gameIds);
+        expect(estateCreationEvent[0].args[2].landIds).to.be.eql(landIds);
+        expect(estateCreationEvent[0].args[2].uri).to.be.equal(uri);
+      }
+      console.log('GAS USED ' + receipt.gasUsed);
+    });
+    it('gas 200 land and 1 games', async function () {
+      const {
+        estateContract,
+        landContractAsMinter,
+        landContractAsUser0,
+        user0,
+        gameToken,
+        gameTokenAsUser0,
+      } = await setupEstate();
+
+      const uri =
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      const mintingData: LandMintingData[] = [];
+      /*  = [
+        {beneficiary: user0, size: 1, x: 6, y: 12},
+        {beneficiary: user0, size: 1, x: 7, y: 12},
+        {beneficiary: user0, size: 1, x: 8, y: 12},
+        {beneficiary: user0, size: 1, x: 9, y: 12},
+        {beneficiary: user0, size: 1, x: 10, y: 12},
+      ]; */
+
+      const {gameIds} = await mintGames(gameToken, user0, [1], 0);
+      const gameIdsR = [];
+      for (let i = 0; i < 200; i++) {
+        gameIdsR.push(gameIds[0]);
+        mintingData.push({beneficiary: user0, size: 1, x: i, y: 12});
+      }
+
+      const landIds = await mintLands(landContractAsMinter, mintingData);
+
+      for (let i = 0; i < landIds.length; i++) {
+        await landContractAsUser0.approve(estateContract.address, landIds[i]);
+      }
+
+      await gameTokenAsUser0.approve(estateContract.address, gameIds[0]);
+
+      const receipt = await waitFor(
+        estateContract
+          .connect(ethers.provider.getSigner(user0))
+          .createEstate(user0, user0, {
+            landIds: landIds,
+            gameIds: gameIdsR,
+            uri,
+          })
+      );
+
+      const newOwner = await gameToken.ownerOf(gameIds[0]);
+      expect(newOwner).to.be.equal(estateContract.address);
+      const estateCreationEvents = await estateContract.queryFilter(
+        estateContract.filters.EstateTokenUpdated()
+      );
+      const estateCreationEvent = estateCreationEvents.filter(
+        (e) => e.event === 'EstateTokenUpdated'
+      );
+      expect(estateCreationEvent[0].args).not.be.equal(null);
+      if (estateCreationEvent[0].args) {
+        //expect(estateCreationEvent[0].args[2].gameIds).to.be.eql(gameIds);
+        console.log(estateCreationEvent[0].args[2].gameIds);
+        expect(estateCreationEvent[0].args[2].landIds).to.be.eql(landIds);
+        expect(estateCreationEvent[0].args[2].uri).to.be.equal(uri);
+      }
+      console.log('GAS USED ' + receipt.gasUsed);
+    });
   });
   describe('GasTest for addition', function () {
     it('adding 1 land', async function () {
@@ -4628,6 +4754,763 @@ describe('EstateV2', function () {
           ]); */
       }
       console.log('GAS USED ' + receipt.gasUsed);
+    });
+  });
+  /* describe('GasTest for adding games', function () {
+
+  }); */
+  describe('GasTest for adding lands and games', function () {
+    it('1 game to existing lands ', async function () {
+      const {
+        estateContract,
+        landContractAsMinter,
+        landContractAsUser0,
+        user0,
+        gameToken,
+        gameTokenAsUser0,
+      } = await setupEstate();
+      const uri =
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      const mintingData: LandMintingData[] = [
+        {beneficiary: user0, size: 1, x: 5, y: 12},
+        {beneficiary: user0, size: 1, x: 6, y: 12},
+        {beneficiary: user0, size: 1, x: 7, y: 12},
+        {beneficiary: user0, size: 1, x: 8, y: 12},
+        {beneficiary: user0, size: 1, x: 9, y: 12},
+      ];
+      const landIds = await mintLands(landContractAsMinter, mintingData);
+      let {gameIds} = await mintGames(gameToken, user0, [1], 0);
+
+      gameIds = [gameIds[0], gameIds[0], gameIds[0], gameIds[0], gameIds[0]];
+      //passing the same game ids,
+
+      for (let i = 0; i < landIds.length; i++) {
+        await landContractAsUser0.approve(estateContract.address, landIds[i]);
+      }
+      await gameTokenAsUser0.approve(estateContract.address, gameIds[0]);
+
+      await waitFor(
+        estateContract
+          .connect(ethers.provider.getSigner(user0))
+          .createEstate(user0, user0, {
+            landIds: landIds,
+            gameIds: [0, 0, 0, 0, 0],
+            uri,
+          })
+      );
+
+      const estateCreationEvents = await estateContract.queryFilter(
+        estateContract.filters.EstateTokenUpdated()
+      );
+      const estateCreationEvent = estateCreationEvents.filter(
+        (e) => e.event === 'EstateTokenUpdated'
+      );
+      expect(estateCreationEvent[0].args).not.be.equal(null);
+      let estateId;
+
+      if (estateCreationEvent[0].args) {
+        //expect(estateCreationEvent[0].args[2].gameIds).to.be.eql(gameIds);
+        expect(estateCreationEvent[0].args[2].landIds).to.be.eql(landIds);
+        expect(estateCreationEvent[0].args[2].uri).to.be.equal(uri);
+        estateId = estateCreationEvent[0].args[1];
+        const estateData = await estateContract.callStatic.getEstateData(
+          estateId
+        );
+        //expect(estateData.gameIds).to.be.eql(gameIds);
+        expect(estateData.landIds).to.be.eql(landIds);
+      }
+      const receipt2 = await waitFor(
+        estateContract
+          .connect(ethers.provider.getSigner(user0))
+          .setGamesOfLands(user0, user0, estateId, {
+            landIds: landIds,
+            gameIds: gameIds,
+            uri,
+          })
+      );
+      const event = await expectEventWithArgs(
+        estateContract,
+        receipt2,
+        'EstateTokenUpdated'
+      );
+      expect(event.args).not.be.equal(null);
+      let newId;
+      if (event.args[0]) {
+        newId = event.args[1].toHexString();
+        const newEstateData = await estateContract.callStatic.getEstateData(
+          newId
+        );
+        expect(newEstateData.gameIds).to.eql(gameIds);
+        expect(newEstateData.landIds).to.eql(landIds);
+      }
+
+      console.log('GAS USED ' + receipt2.gasUsed);
+    });
+    it('2 game to existing lands ', async function () {
+      const {
+        estateContract,
+        landContractAsMinter,
+        landContractAsUser0,
+        user0,
+        gameToken,
+        gameTokenAsUser0,
+      } = await setupEstate();
+      const uri =
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      const mintingData: LandMintingData[] = [
+        {beneficiary: user0, size: 1, x: 5, y: 12},
+        {beneficiary: user0, size: 1, x: 6, y: 12},
+        {beneficiary: user0, size: 1, x: 7, y: 12},
+        {beneficiary: user0, size: 1, x: 8, y: 12},
+        {beneficiary: user0, size: 1, x: 9, y: 12},
+      ];
+      const landIds = await mintLands(landContractAsMinter, mintingData);
+      let {gameIds} = await mintGames(gameToken, user0, [1, 1], 0);
+
+      gameIds = [gameIds[0], gameIds[0], gameIds[0], gameIds[1], gameIds[1]];
+      //passing the same game ids,
+
+      for (let i = 0; i < landIds.length; i++) {
+        await landContractAsUser0.approve(estateContract.address, landIds[i]);
+      }
+      await gameTokenAsUser0.approve(estateContract.address, gameIds[0]);
+      await gameTokenAsUser0.approve(estateContract.address, gameIds[4]);
+
+      await waitFor(
+        estateContract
+          .connect(ethers.provider.getSigner(user0))
+          .createEstate(user0, user0, {
+            landIds: landIds,
+            gameIds: [0, 0, 0, 0, 0],
+            uri,
+          })
+      );
+
+      const estateCreationEvents = await estateContract.queryFilter(
+        estateContract.filters.EstateTokenUpdated()
+      );
+      const estateCreationEvent = estateCreationEvents.filter(
+        (e) => e.event === 'EstateTokenUpdated'
+      );
+      expect(estateCreationEvent[0].args).not.be.equal(null);
+      let estateId;
+
+      if (estateCreationEvent[0].args) {
+        //expect(estateCreationEvent[0].args[2].gameIds).to.be.eql(gameIds);
+        expect(estateCreationEvent[0].args[2].landIds).to.be.eql(landIds);
+        expect(estateCreationEvent[0].args[2].uri).to.be.equal(uri);
+        estateId = estateCreationEvent[0].args[1];
+        const estateData = await estateContract.callStatic.getEstateData(
+          estateId
+        );
+        //expect(estateData.gameIds).to.be.eql(gameIds);
+        expect(estateData.landIds).to.be.eql(landIds);
+      }
+      const receipt2 = await waitFor(
+        estateContract
+          .connect(ethers.provider.getSigner(user0))
+          .setGamesOfLands(user0, user0, estateId, {
+            landIds: landIds,
+            gameIds: gameIds,
+            uri,
+          })
+      );
+      const event = await expectEventWithArgs(
+        estateContract,
+        receipt2,
+        'EstateTokenUpdated'
+      );
+      expect(event.args).not.be.equal(null);
+      let newId;
+      if (event.args[0]) {
+        newId = event.args[1].toHexString();
+        const newEstateData = await estateContract.callStatic.getEstateData(
+          newId
+        );
+        expect(newEstateData.gameIds).to.eql(gameIds);
+        expect(newEstateData.landIds).to.eql(landIds);
+      }
+
+      console.log('GAS USED ' + receipt2.gasUsed);
+    });
+    it('3 game to existing lands ', async function () {
+      const {
+        estateContract,
+        landContractAsMinter,
+        landContractAsUser0,
+        user0,
+        gameToken,
+        gameTokenAsUser0,
+      } = await setupEstate();
+      const uri =
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      const mintingData: LandMintingData[] = [
+        {beneficiary: user0, size: 1, x: 5, y: 12},
+        {beneficiary: user0, size: 1, x: 6, y: 12},
+        {beneficiary: user0, size: 1, x: 7, y: 12},
+        {beneficiary: user0, size: 1, x: 8, y: 12},
+        {beneficiary: user0, size: 1, x: 9, y: 12},
+      ];
+      const landIds = await mintLands(landContractAsMinter, mintingData);
+      let {gameIds} = await mintGames(gameToken, user0, [1, 1, 1], 0);
+
+      gameIds = [gameIds[0], gameIds[0], gameIds[1], gameIds[1], gameIds[2]];
+      //passing the same game ids,
+
+      for (let i = 0; i < landIds.length; i++) {
+        await landContractAsUser0.approve(estateContract.address, landIds[i]);
+      }
+      await gameTokenAsUser0.approve(estateContract.address, gameIds[0]);
+      await gameTokenAsUser0.approve(estateContract.address, gameIds[3]);
+      await gameTokenAsUser0.approve(estateContract.address, gameIds[4]);
+
+      await waitFor(
+        estateContract
+          .connect(ethers.provider.getSigner(user0))
+          .createEstate(user0, user0, {
+            landIds: landIds,
+            gameIds: [0, 0, 0, 0, 0],
+            uri,
+          })
+      );
+
+      const estateCreationEvents = await estateContract.queryFilter(
+        estateContract.filters.EstateTokenUpdated()
+      );
+      const estateCreationEvent = estateCreationEvents.filter(
+        (e) => e.event === 'EstateTokenUpdated'
+      );
+      expect(estateCreationEvent[0].args).not.be.equal(null);
+      let estateId;
+
+      if (estateCreationEvent[0].args) {
+        //expect(estateCreationEvent[0].args[2].gameIds).to.be.eql(gameIds);
+        expect(estateCreationEvent[0].args[2].landIds).to.be.eql(landIds);
+        expect(estateCreationEvent[0].args[2].uri).to.be.equal(uri);
+        estateId = estateCreationEvent[0].args[1];
+        const estateData = await estateContract.callStatic.getEstateData(
+          estateId
+        );
+        //expect(estateData.gameIds).to.be.eql(gameIds);
+        expect(estateData.landIds).to.be.eql(landIds);
+      }
+      const receipt2 = await waitFor(
+        estateContract
+          .connect(ethers.provider.getSigner(user0))
+          .setGamesOfLands(user0, user0, estateId, {
+            landIds: landIds,
+            gameIds: gameIds,
+            uri,
+          })
+      );
+      const event = await expectEventWithArgs(
+        estateContract,
+        receipt2,
+        'EstateTokenUpdated'
+      );
+      expect(event.args).not.be.equal(null);
+      let newId;
+      if (event.args[0]) {
+        newId = event.args[1].toHexString();
+        const newEstateData = await estateContract.callStatic.getEstateData(
+          newId
+        );
+        expect(newEstateData.gameIds).to.eql(gameIds);
+        expect(newEstateData.landIds).to.eql(landIds);
+      }
+
+      console.log('GAS USED ' + receipt2.gasUsed);
+    });
+    it('4 game to existing lands ', async function () {
+      const {
+        estateContract,
+        landContractAsMinter,
+        landContractAsUser0,
+        user0,
+        gameToken,
+        gameTokenAsUser0,
+      } = await setupEstate();
+      const uri =
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      const mintingData: LandMintingData[] = [
+        {beneficiary: user0, size: 1, x: 5, y: 12},
+        {beneficiary: user0, size: 1, x: 6, y: 12},
+        {beneficiary: user0, size: 1, x: 7, y: 12},
+        {beneficiary: user0, size: 1, x: 8, y: 12},
+        {beneficiary: user0, size: 1, x: 9, y: 12},
+      ];
+      const landIds = await mintLands(landContractAsMinter, mintingData);
+      let {gameIds} = await mintGames(gameToken, user0, [1, 1, 1, 1], 0);
+
+      gameIds = [gameIds[0], gameIds[0], gameIds[1], gameIds[2], gameIds[3]];
+      //passing the same game ids,
+
+      for (let i = 0; i < landIds.length; i++) {
+        await landContractAsUser0.approve(estateContract.address, landIds[i]);
+      }
+      await gameTokenAsUser0.approve(estateContract.address, gameIds[0]);
+      await gameTokenAsUser0.approve(estateContract.address, gameIds[2]);
+      await gameTokenAsUser0.approve(estateContract.address, gameIds[3]);
+      await gameTokenAsUser0.approve(estateContract.address, gameIds[4]);
+
+      await waitFor(
+        estateContract
+          .connect(ethers.provider.getSigner(user0))
+          .createEstate(user0, user0, {
+            landIds: landIds,
+            gameIds: [0, 0, 0, 0, 0],
+            uri,
+          })
+      );
+
+      const estateCreationEvents = await estateContract.queryFilter(
+        estateContract.filters.EstateTokenUpdated()
+      );
+      const estateCreationEvent = estateCreationEvents.filter(
+        (e) => e.event === 'EstateTokenUpdated'
+      );
+      expect(estateCreationEvent[0].args).not.be.equal(null);
+      let estateId;
+
+      if (estateCreationEvent[0].args) {
+        //expect(estateCreationEvent[0].args[2].gameIds).to.be.eql(gameIds);
+        expect(estateCreationEvent[0].args[2].landIds).to.be.eql(landIds);
+        expect(estateCreationEvent[0].args[2].uri).to.be.equal(uri);
+        estateId = estateCreationEvent[0].args[1];
+        const estateData = await estateContract.callStatic.getEstateData(
+          estateId
+        );
+        //expect(estateData.gameIds).to.be.eql(gameIds);
+        expect(estateData.landIds).to.be.eql(landIds);
+      }
+      const receipt2 = await waitFor(
+        estateContract
+          .connect(ethers.provider.getSigner(user0))
+          .setGamesOfLands(user0, user0, estateId, {
+            landIds: landIds,
+            gameIds: gameIds,
+            uri,
+          })
+      );
+      const event = await expectEventWithArgs(
+        estateContract,
+        receipt2,
+        'EstateTokenUpdated'
+      );
+      expect(event.args).not.be.equal(null);
+      let newId;
+      if (event.args[0]) {
+        newId = event.args[1].toHexString();
+        const newEstateData = await estateContract.callStatic.getEstateData(
+          newId
+        );
+        expect(newEstateData.gameIds).to.eql(gameIds);
+        expect(newEstateData.landIds).to.eql(landIds);
+      }
+
+      console.log('GAS USED ' + receipt2.gasUsed);
+    });
+    it('5 game to existing lands ', async function () {
+      const {
+        estateContract,
+        landContractAsMinter,
+        landContractAsUser0,
+        user0,
+        gameToken,
+        gameTokenAsUser0,
+      } = await setupEstate();
+      const uri =
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      const mintingData: LandMintingData[] = [
+        {beneficiary: user0, size: 1, x: 5, y: 12},
+        {beneficiary: user0, size: 1, x: 6, y: 12},
+        {beneficiary: user0, size: 1, x: 7, y: 12},
+        {beneficiary: user0, size: 1, x: 8, y: 12},
+        {beneficiary: user0, size: 1, x: 9, y: 12},
+      ];
+      const landIds = await mintLands(landContractAsMinter, mintingData);
+      let {gameIds} = await mintGames(gameToken, user0, [1, 1, 1, 1, 1], 0);
+
+      gameIds = [gameIds[0], gameIds[1], gameIds[2], gameIds[3], gameIds[4]];
+      //passing the same game ids,
+
+      for (let i = 0; i < landIds.length; i++) {
+        await landContractAsUser0.approve(estateContract.address, landIds[i]);
+        await gameTokenAsUser0.approve(estateContract.address, gameIds[i]);
+      }
+
+      await waitFor(
+        estateContract
+          .connect(ethers.provider.getSigner(user0))
+          .createEstate(user0, user0, {
+            landIds: landIds,
+            gameIds: [0, 0, 0, 0, 0],
+            uri,
+          })
+      );
+
+      const estateCreationEvents = await estateContract.queryFilter(
+        estateContract.filters.EstateTokenUpdated()
+      );
+      const estateCreationEvent = estateCreationEvents.filter(
+        (e) => e.event === 'EstateTokenUpdated'
+      );
+      expect(estateCreationEvent[0].args).not.be.equal(null);
+      let estateId;
+
+      if (estateCreationEvent[0].args) {
+        //expect(estateCreationEvent[0].args[2].gameIds).to.be.eql(gameIds);
+        expect(estateCreationEvent[0].args[2].landIds).to.be.eql(landIds);
+        expect(estateCreationEvent[0].args[2].uri).to.be.equal(uri);
+        estateId = estateCreationEvent[0].args[1];
+        const estateData = await estateContract.callStatic.getEstateData(
+          estateId
+        );
+        //expect(estateData.gameIds).to.be.eql(gameIds);
+        expect(estateData.landIds).to.be.eql(landIds);
+      }
+      const receipt2 = await waitFor(
+        estateContract
+          .connect(ethers.provider.getSigner(user0))
+          .setGamesOfLands(user0, user0, estateId, {
+            landIds: landIds,
+            gameIds: gameIds,
+            uri,
+          })
+      );
+      const event = await expectEventWithArgs(
+        estateContract,
+        receipt2,
+        'EstateTokenUpdated'
+      );
+      expect(event.args).not.be.equal(null);
+      let newId;
+      if (event.args[0]) {
+        newId = event.args[1].toHexString();
+        const newEstateData = await estateContract.callStatic.getEstateData(
+          newId
+        );
+        expect(newEstateData.gameIds).to.eql(gameIds);
+        expect(newEstateData.landIds).to.eql(landIds);
+      }
+
+      console.log('GAS USED ' + receipt2.gasUsed);
+    });
+  });
+  describe('GasTest for removing games', function () {
+    it('gas 1 land and 1 games', async function () {
+      const {
+        estateContract,
+        landContractAsMinter,
+        landContractAsUser0,
+        user0,
+        gameToken,
+        gameTokenAsUser0,
+      } = await setupEstate();
+
+      const uri =
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      const mintingData: LandMintingData[] = [
+        {beneficiary: user0, size: 1, x: 6, y: 12},
+      ];
+      const landIds = await mintLands(landContractAsMinter, mintingData);
+      const {gameIds} = await mintGames(gameToken, user0, [1], 0);
+
+      for (let i = 0; i < landIds.length; i++) {
+        await landContractAsUser0.approve(estateContract.address, landIds[i]);
+        await gameTokenAsUser0.approve(estateContract.address, gameIds[i]);
+      }
+
+      await waitFor(
+        estateContract
+          .connect(ethers.provider.getSigner(user0))
+          .createEstate(user0, user0, {
+            landIds: landIds,
+            gameIds: gameIds,
+            uri,
+          })
+      );
+
+      const estateCreationEvents = await estateContract.queryFilter(
+        estateContract.filters.EstateTokenUpdated()
+      );
+      const estateCreationEvent = estateCreationEvents.filter(
+        (e) => e.event === 'EstateTokenUpdated'
+      );
+      let estateId;
+      expect(estateCreationEvent[0].args).not.be.equal(null);
+      if (estateCreationEvent[0].args) {
+        //expect(estateCreationEvent[0].args[2].gameIds).to.be.eql(gameIds);
+        expect(estateCreationEvent[0].args[2].landIds).to.be.eql(landIds);
+        expect(estateCreationEvent[0].args[2].uri).to.be.equal(uri);
+        estateId = estateCreationEvent[0].args[1];
+        const receipt = await waitFor(
+          estateContract
+            .connect(ethers.provider.getSigner(user0))
+            .setGamesOfLands(user0, user0, estateId, {
+              landIds: landIds,
+              gameIds: [0],
+              uri,
+            })
+        );
+        console.log('GAS USED ' + receipt.gasUsed);
+      }
+      const newOwner = await gameToken.ownerOf(gameIds[0]);
+      expect(newOwner).to.be.equal(user0);
+    });
+
+    it('gas 2 land and 1 games', async function () {
+      const {
+        estateContract,
+        landContractAsMinter,
+        landContractAsUser0,
+        user0,
+        gameToken,
+        gameTokenAsUser0,
+      } = await setupEstate();
+
+      const uri =
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      const mintingData: LandMintingData[] = [
+        {beneficiary: user0, size: 1, x: 6, y: 12},
+        {beneficiary: user0, size: 1, x: 7, y: 12},
+      ];
+      const landIds = await mintLands(landContractAsMinter, mintingData);
+      const {gameIds} = await mintGames(gameToken, user0, [1, 1], 0);
+
+      for (let i = 0; i < landIds.length; i++) {
+        await landContractAsUser0.approve(estateContract.address, landIds[i]);
+        await gameTokenAsUser0.approve(estateContract.address, gameIds[i]);
+      }
+
+      await waitFor(
+        estateContract
+          .connect(ethers.provider.getSigner(user0))
+          .createEstate(user0, user0, {
+            landIds: landIds,
+            gameIds: gameIds,
+            uri,
+          })
+      );
+
+      const estateCreationEvents = await estateContract.queryFilter(
+        estateContract.filters.EstateTokenUpdated()
+      );
+      const estateCreationEvent = estateCreationEvents.filter(
+        (e) => e.event === 'EstateTokenUpdated'
+      );
+      let estateId;
+      expect(estateCreationEvent[0].args).not.be.equal(null);
+      if (estateCreationEvent[0].args) {
+        //expect(estateCreationEvent[0].args[2].gameIds).to.be.eql(gameIds);
+        expect(estateCreationEvent[0].args[2].landIds).to.be.eql(landIds);
+        expect(estateCreationEvent[0].args[2].uri).to.be.equal(uri);
+        estateId = estateCreationEvent[0].args[1];
+        const receipt = await waitFor(
+          estateContract
+            .connect(ethers.provider.getSigner(user0))
+            .setGamesOfLands(user0, user0, estateId, {
+              landIds: landIds,
+              gameIds: [0, 0],
+              uri,
+            })
+        );
+        console.log('GAS USED ' + receipt.gasUsed);
+      }
+      const newOwner = await gameToken.ownerOf(gameIds[0]);
+      expect(newOwner).to.be.equal(user0);
+    });
+
+    it('gas 3 land and 1 games', async function () {
+      const {
+        estateContract,
+        landContractAsMinter,
+        landContractAsUser0,
+        user0,
+        gameToken,
+        gameTokenAsUser0,
+      } = await setupEstate();
+
+      const uri =
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      const mintingData: LandMintingData[] = [
+        {beneficiary: user0, size: 1, x: 6, y: 12},
+        {beneficiary: user0, size: 1, x: 7, y: 12},
+        {beneficiary: user0, size: 1, x: 8, y: 12},
+      ];
+      const landIds = await mintLands(landContractAsMinter, mintingData);
+      const {gameIds} = await mintGames(gameToken, user0, [1, 1, 1], 0);
+
+      for (let i = 0; i < landIds.length; i++) {
+        await landContractAsUser0.approve(estateContract.address, landIds[i]);
+        await gameTokenAsUser0.approve(estateContract.address, gameIds[i]);
+      }
+
+      await waitFor(
+        estateContract
+          .connect(ethers.provider.getSigner(user0))
+          .createEstate(user0, user0, {
+            landIds: landIds,
+            gameIds: gameIds,
+            uri,
+          })
+      );
+
+      const estateCreationEvents = await estateContract.queryFilter(
+        estateContract.filters.EstateTokenUpdated()
+      );
+      const estateCreationEvent = estateCreationEvents.filter(
+        (e) => e.event === 'EstateTokenUpdated'
+      );
+      let estateId;
+      expect(estateCreationEvent[0].args).not.be.equal(null);
+      if (estateCreationEvent[0].args) {
+        //expect(estateCreationEvent[0].args[2].gameIds).to.be.eql(gameIds);
+        expect(estateCreationEvent[0].args[2].landIds).to.be.eql(landIds);
+        expect(estateCreationEvent[0].args[2].uri).to.be.equal(uri);
+        estateId = estateCreationEvent[0].args[1];
+        const receipt = await waitFor(
+          estateContract
+            .connect(ethers.provider.getSigner(user0))
+            .setGamesOfLands(user0, user0, estateId, {
+              landIds: landIds,
+              gameIds: [0, 0, 0],
+              uri,
+            })
+        );
+        console.log('GAS USED ' + receipt.gasUsed);
+      }
+      const newOwner = await gameToken.ownerOf(gameIds[0]);
+      expect(newOwner).to.be.equal(user0);
+    });
+
+    it('gas 4 land and 4 games', async function () {
+      const {
+        estateContract,
+        landContractAsMinter,
+        landContractAsUser0,
+        user0,
+        gameToken,
+        gameTokenAsUser0,
+      } = await setupEstate();
+
+      const uri =
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      const mintingData: LandMintingData[] = [
+        {beneficiary: user0, size: 1, x: 6, y: 12},
+        {beneficiary: user0, size: 1, x: 7, y: 12},
+        {beneficiary: user0, size: 1, x: 8, y: 12},
+        {beneficiary: user0, size: 1, x: 9, y: 12},
+      ];
+      const landIds = await mintLands(landContractAsMinter, mintingData);
+      const {gameIds} = await mintGames(gameToken, user0, [1, 1, 1, 1], 0);
+
+      for (let i = 0; i < landIds.length; i++) {
+        await landContractAsUser0.approve(estateContract.address, landIds[i]);
+        await gameTokenAsUser0.approve(estateContract.address, gameIds[i]);
+      }
+
+      await waitFor(
+        estateContract
+          .connect(ethers.provider.getSigner(user0))
+          .createEstate(user0, user0, {
+            landIds: landIds,
+            gameIds: gameIds,
+            uri,
+          })
+      );
+
+      const estateCreationEvents = await estateContract.queryFilter(
+        estateContract.filters.EstateTokenUpdated()
+      );
+      const estateCreationEvent = estateCreationEvents.filter(
+        (e) => e.event === 'EstateTokenUpdated'
+      );
+      let estateId;
+      expect(estateCreationEvent[0].args).not.be.equal(null);
+      if (estateCreationEvent[0].args) {
+        //expect(estateCreationEvent[0].args[2].gameIds).to.be.eql(gameIds);
+        expect(estateCreationEvent[0].args[2].landIds).to.be.eql(landIds);
+        expect(estateCreationEvent[0].args[2].uri).to.be.equal(uri);
+        estateId = estateCreationEvent[0].args[1];
+        const receipt = await waitFor(
+          estateContract
+            .connect(ethers.provider.getSigner(user0))
+            .setGamesOfLands(user0, user0, estateId, {
+              landIds: landIds,
+              gameIds: [0, 0, 0, 0],
+              uri,
+            })
+        );
+        console.log('GAS USED ' + receipt.gasUsed);
+      }
+      const newOwner = await gameToken.ownerOf(gameIds[0]);
+      expect(newOwner).to.be.equal(user0);
+    });
+
+    it('gas 5 land and 1 games', async function () {
+      const {
+        estateContract,
+        landContractAsMinter,
+        landContractAsUser0,
+        user0,
+        gameToken,
+        gameTokenAsUser0,
+      } = await setupEstate();
+
+      const uri =
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+      const mintingData: LandMintingData[] = [
+        {beneficiary: user0, size: 1, x: 6, y: 12},
+        {beneficiary: user0, size: 1, x: 7, y: 12},
+        {beneficiary: user0, size: 1, x: 8, y: 12},
+        {beneficiary: user0, size: 1, x: 9, y: 12},
+        {beneficiary: user0, size: 1, x: 10, y: 12},
+      ];
+      const landIds = await mintLands(landContractAsMinter, mintingData);
+      const {gameIds} = await mintGames(gameToken, user0, [1, 1, 1, 1, 1], 0);
+
+      for (let i = 0; i < landIds.length; i++) {
+        await landContractAsUser0.approve(estateContract.address, landIds[i]);
+        await gameTokenAsUser0.approve(estateContract.address, gameIds[i]);
+      }
+
+      await waitFor(
+        estateContract
+          .connect(ethers.provider.getSigner(user0))
+          .createEstate(user0, user0, {
+            landIds: landIds,
+            gameIds: gameIds,
+            uri,
+          })
+      );
+
+      const estateCreationEvents = await estateContract.queryFilter(
+        estateContract.filters.EstateTokenUpdated()
+      );
+      const estateCreationEvent = estateCreationEvents.filter(
+        (e) => e.event === 'EstateTokenUpdated'
+      );
+      let estateId;
+      expect(estateCreationEvent[0].args).not.be.equal(null);
+      if (estateCreationEvent[0].args) {
+        //expect(estateCreationEvent[0].args[2].gameIds).to.be.eql(gameIds);
+        expect(estateCreationEvent[0].args[2].landIds).to.be.eql(landIds);
+        expect(estateCreationEvent[0].args[2].uri).to.be.equal(uri);
+        estateId = estateCreationEvent[0].args[1];
+        const receipt = await waitFor(
+          estateContract
+            .connect(ethers.provider.getSigner(user0))
+            .setGamesOfLands(user0, user0, estateId, {
+              landIds: landIds,
+              gameIds: [0, 0, 0, 0, 0],
+              uri,
+            })
+        );
+        console.log('GAS USED ' + receipt.gasUsed);
+      }
+      const newOwner = await gameToken.ownerOf(gameIds[0]);
+      expect(newOwner).to.be.equal(user0);
     });
   });
 });

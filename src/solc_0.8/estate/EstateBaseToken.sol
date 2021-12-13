@@ -520,6 +520,12 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
             }
         }
 
+        /* if (!isBurned(estateId)) {
+
+                //games to remove are not the same as the games in storage
+                require(gamesToLands[gameIdsToRemove[j]].length() != gameIdsToRemove, "GAME_IS_ATTACHED_TO_OTHER_LANDS");
+        } */
+
         _land.batchTransferFrom(address(this), to, landsToRemove, "");
         _gameToken.batchTransferFrom(address(this), to, gameIdsToRemove, "");
     }
