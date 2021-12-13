@@ -20,9 +20,18 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     skipIfAlreadyDeployed: true,
   });
 
+  const MockLandTunnel = await deploy('MockLandTunnel', {
+    from: deployer,
+    contract: 'MockLandTunnel',
+    args: [CHECKPOINTMANAGER.address, FXROOT.address, Land.address],
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
+
   const PolygonLandTunnel = await hre.companionNetworks[
     'l2'
   ].deployments.getOrNull('PolygonLandTunnel');
+
   if (PolygonLandTunnel) {
     await hre.companionNetworks['l2'].deployments.execute(
       'PolygonLandTunnel',
@@ -35,6 +44,25 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       {from: deployer},
       'setFxChildTunnel',
       PolygonLandTunnel.address
+    );
+  }
+
+  const MockPolygonLandTunnel = await hre.companionNetworks[
+    'l2'
+  ].deployments.getOrNull('MockPolygonLandTunnel');
+
+  if (MockPolygonLandTunnel) {
+    await hre.companionNetworks['l2'].deployments.execute(
+      'MockPolygonLandTunnel',
+      {from: deployer},
+      'setFxRootTunnel',
+      MockLandTunnel.address
+    );
+    await deployments.execute(
+      'MockLandTunnel',
+      {from: deployer},
+      'setFxChildTunnel',
+      MockPolygonLandTunnel.address
     );
   }
 };

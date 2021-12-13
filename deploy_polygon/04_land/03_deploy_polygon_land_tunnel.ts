@@ -18,6 +18,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     skipIfAlreadyDeployed: true,
   });
 
+  const MockPolygonLandTunnel = await deploy('MockPolygonLandTunnel', {
+    from: deployer,
+    contract: 'PolygonLandTunnel',
+    args: [FXCHILD.address, PolygonLand.address],
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
+
   const LandTunnel = await hre.companionNetworks['l1'].deployments.getOrNull(
     'LandTunnel'
   );
@@ -33,6 +41,25 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       {from: deployer},
       'setFxRootTunnel',
       LandTunnel.address
+    );
+  }
+
+  const MockLandTunnel = await hre.companionNetworks[
+    'l1'
+  ].deployments.getOrNull('MockLandTunnel');
+
+  if (MockLandTunnel) {
+    await hre.companionNetworks['l1'].deployments.execute(
+      'MockLandTunnel',
+      {from: deployer},
+      'setFxChildTunnel',
+      MockPolygonLandTunnel.address
+    );
+    await deployments.execute(
+      'MockPolygonLandTunnel',
+      {from: deployer},
+      'setFxRootTunnel',
+      MockLandTunnel.address
     );
   }
 };
