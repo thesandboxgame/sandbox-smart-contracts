@@ -139,7 +139,7 @@ export const setupPolygonLandWeightedSANDRewardPool = withSnapshot(
       '1000000000000000000'
     );
     const POOL = 'PolygonLandWeightedSANDRewardPool';
-    const REWARD_DURATION = 2592000; // 30 days in seconds
+    const REWARD_DURATION = 2419200; // 28 days in seconds
     const ACTUAL_REWARD_AMOUNT = REWARD_AMOUNT.div(REWARD_DURATION).mul(
       REWARD_DURATION
     );
