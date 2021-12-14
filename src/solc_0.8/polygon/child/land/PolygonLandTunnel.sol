@@ -5,7 +5,6 @@ import "fx-portal/contracts/tunnel/FxBaseChildTunnel.sol";
 import "../../../common/interfaces/IPolygonLand.sol";
 import "../../../common/interfaces/IERC721TokenReceiver.sol";
 import "./PolygonLandBaseToken.sol";
-import "hardhat/console.sol";
 
 // @todo - natspec comments
 
