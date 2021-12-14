@@ -15,18 +15,12 @@ const func: DeployFunction = async function () {
     currentRewardDistribution.toLowerCase() !==
     liquidityRewardAdmin.toLowerCase()
   ) {
-    console.log(
-      currentRewardDistribution.toLowerCase(),
-      liquidityRewardAdmin.toLowerCase()
-    );
-    const receipt = await execute(
+    await execute(
       REWARD_NAME,
       {from: deployer, log: true},
       'setRewardDistribution',
       liquidityRewardAdmin
     );
-
-    console.log(receipt);
   }
 };
 export default func;
