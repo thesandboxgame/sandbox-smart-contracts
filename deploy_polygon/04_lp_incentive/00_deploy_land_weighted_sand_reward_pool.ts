@@ -17,7 +17,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
   const sand = await deployments.get('PolygonSand');
 
-  const durationInSeconds = 30 * 24 * 60 * 60;
+  const durationInSeconds = 28 * 24 * 60 * 60;
   await deploy('PolygonLandWeightedSANDRewardPool', {
     from: deployer,
     log: true,
