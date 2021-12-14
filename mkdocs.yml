@@ -34,7 +34,7 @@ nav:
           - Asset attributes registry: topics/asset/asset-attributes-registry.md
           - Asset minter: topics/asset/asset-minter.md
           - Asset upgrader: topics/asset/asset-upgrader.md
-          - Asset Signed Auction: topics/asset/asset-signed-auction.md
+          - Asset signed auction: topics/asset/asset-signed-auction.md
           - Giveaway:
               - Single: topics/asset/giveaway/single.md
               - Multiple: topics/asset/giveaway/multiple.md
