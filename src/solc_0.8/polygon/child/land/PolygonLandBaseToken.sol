@@ -412,4 +412,43 @@ contract PolygonLandBaseToken is ERC721BaseToken {
             require(_checkOnERC721BatchReceived(operator, from, to, ids, data), "erc721 batch transfer rejected by to");
         }
     }
+
+    function _ownerAndOperatorEnabledOf(uint256 id)
+        internal
+        view
+        override
+        returns (address owner, bool operatorEnabled)
+    {
+        require(id & LAYER == 0, "Invalid token id");
+        uint256 x = id % GRID_SIZE;
+        uint256 y = id / GRID_SIZE;
+        uint256 owner1x1 = _owners[id];
+
+        if (owner1x1 != 0) {
+            owner = address(uint160(owner1x1));
+            operatorEnabled = (owner1x1 / 2**255) == 1;
+        } else {
+            address owner3x3 = address(uint160(_owners[LAYER_3x3 + (x / 3) * 3 + ((y / 3) * 3) * GRID_SIZE]));
+            if (owner3x3 != address(uint160(0))) {
+                owner = owner3x3;
+                operatorEnabled = false;
+            } else {
+                address owner6x6 = address(uint160(_owners[LAYER_6x6 + (x / 6) * 6 + ((y / 6) * 6) * GRID_SIZE]));
+                if (owner6x6 != address(uint160(0))) {
+                    owner = owner6x6;
+                    operatorEnabled = false;
+                } else {
+                    address owner12x12 =
+                        address(uint160(_owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE]));
+                    if (owner12x12 != address(uint160(0))) {
+                        owner = owner12x12;
+                        operatorEnabled = false;
+                    } else {
+                        owner = address(uint160(_owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE]));
+                        operatorEnabled = false;
+                    }
+                }
+            }
+        }
+    }
 }
