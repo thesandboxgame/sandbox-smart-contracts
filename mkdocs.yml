@@ -27,6 +27,7 @@ nav:
       - Blockchain:
           - Ethereum: topics/blockchain/ethereum.md
           - Features: topics/blockchain/features.md
+          - Deployment diagram: topics/blockchain/deployment-diagram.md
       - Polygon:
           - Polygon at Sandbox: topics/polygon/polygon.md
       - Asset:
