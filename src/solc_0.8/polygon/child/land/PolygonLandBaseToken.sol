@@ -35,7 +35,7 @@ contract PolygonLandBaseToken is ERC721BaseToken {
 
     /// @notice total width of the map
     /// @return width
-    function width() external view returns (uint256) {
+    function width() external returns (uint256) {
         return GRID_SIZE;
     }
 
