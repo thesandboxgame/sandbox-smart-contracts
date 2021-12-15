@@ -14,6 +14,7 @@ import "../common/BaseWithStorage/ERC2771Handler.sol";
 /// Each new Gem get assigned a new id (starting at 1)
 /// Each new Catalyst get assigned a new id (starting at 1)
 contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatalystsRegistry, Ownable {
+    uint256 private constant MAX_GEMS_AND_CATALYSTS = 256;
     uint256 internal constant MAX_UINT256 = ~uint256(0);
 
     Gem[] internal _gems;
@@ -114,6 +115,12 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
     /// @param catalysts array of catalysts to be added
     function addGemsAndCatalysts(Gem[] calldata gems, Catalyst[] calldata catalysts) external override {
         require(_msgSender() == _admin, "NOT_AUTHORIZED");
+
+        require(
+            uint256(_gems.length + _catalysts.length + gems.length + catalysts.length) < MAX_GEMS_AND_CATALYSTS,
+            "GemsCatalystsRegistry: Too many gem and catalyst contracts"
+        );
+
         for (uint256 i = 0; i < gems.length; i++) {
             Gem gem = gems[i];
             uint16 gemId = gem.gemId();
