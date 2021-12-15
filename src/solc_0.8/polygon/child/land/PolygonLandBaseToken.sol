@@ -33,6 +33,34 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         return "LAND";
     }
 
+    /// @notice total width of the map
+    /// @return width
+    function width() external view returns (uint256) {
+        return GRID_SIZE;
+    }
+
+    /// @notice total height of the map
+    /// @return height
+    function height() external returns (uint256) {
+        return GRID_SIZE;
+    }
+
+    /// @notice x coordinate of Land token
+    /// @param id tokenId
+    /// @return the x coordinates
+    function x(uint256 id) external returns (uint256) {
+        require(_ownerOf(id) != address(0), "token does not exist");
+        return id % GRID_SIZE;
+    }
+
+    /// @notice y coordinate of Land token
+    /// @param id tokenId
+    /// @return the y coordinates
+    function y(uint256 id) external returns (uint256) {
+        require(_ownerOf(id) != address(0), "token does not exist");
+        return id / GRID_SIZE;
+    }
+
     // solium-disable-next-line security/no-assign-params
     function uint2str(uint256 _i) internal pure returns (string memory _uintAsString) {
         if (_i == 0) {
