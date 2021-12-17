@@ -56,7 +56,10 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
     //this is a new struct that I was working for the update
     //landAndGameAssociations would be the landid and the corresponding gameId
     struct UpdateEstateData {
-        uint256[][] landAndGameAssociations;
+        uint256[][] landAndGameAssociationsToAdd;
+        uint256[][] landAndGameAssociationsToRemove;
+        uint256[][] landAndGameAssociationsToUpdate;
+        uint256[] landIdsToAdd;
         uint256[] gameIdsToAdd;
         uint256[] landIdsToRemove;
         uint256[] gameIdsToRemove;
@@ -145,11 +148,12 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
             //(gameIdsToRemove, ) = _setGamesOfLands(storageId, landsToRemove, new uint256[](landsToRemove.length), true);
 
             //if (!isBurned(estateId)) {
-                //for (uint256 j = 0; j < gameIdsToRemove.length; j++) {
-                    //require(gamesToLands[gameIdsToRemove[j]].length() == 0, "GAME_IS_ATTACHED_TO_OTHER_LANDS");
-                //}
+            //for (uint256 j = 0; j < gameIdsToRemove.length; j++) {
+            //require(gamesToLands[gameIdsToRemove[j]].length() == 0, "GAME_IS_ATTACHED_TO_OTHER_LANDS");
+            //}
             //}
 
+            _gameToken.batchTransferFrom(from, address(this), update.gameIdsToAdd, "");
             _land.batchTransferFrom(address(this), from, update.landIdsToRemove, "");
         }
 
@@ -162,86 +166,50 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         return newId;
     } */
 
-    //function to remove games and lands
-    /* function _removeGamesAndLands(
-        uint256 storageId,
-        uint256[] memory landIdsToRemove,
-        uint256[] memory gamesIdsToRemove
-    ) public {
-        console.log("are we entering _removeGamesAndLands");
+    function updateEstateV2(
+        address from,
+        address to,
+        uint256 estateId,
+        UpdateEstateData memory update
+    ) external returns (uint256) {
+        _check_hasOwnerRights(from, estateId);
+        uint256 storageId = _storageId(estateId);
+        _metaData[storageId] = update.uri;
+        _check_authorized(from, ADD);
 
-        uint256[] memory landsFromGames;
-
-        for (uint256 i = 0; i < gamesIdsToRemove.length; i++) {
-            landsFromGames = getLandsForGame(gamesIdsToRemove[i]);
-
-            for (uint256 j = 0; j < landsFromGames.length; j++) {
-                //console.log(landsFromGames[j]);
-                if (isItInArray(landsFromGames[j], landIdsToRemove)) {
-                    //console.log("hihi");
-                }
-            }
-            delete (gamesToLands[gamesIdsToRemove[i]]);
-
-            //use getLandsForGame
-
-            //had to erease from estates as well
-            //estates[storageId].set(landAndGameAssociations[i][0], gameId);
-
-            //check if there are lands, and if they are on lands to remove
-
-            //if they are remove from map
-            //
-
-            //I dont need to take off lands
+        /** add */
+        if (update.landAndGameAssociationsToAdd.length > 0) {
+            _addLandsGames(
+                from,
+                storageId,
+                update.landAndGameAssociationsToAdd[0],
+                update.landAndGameAssociationsToAdd[1],
+                false
+            );
         }
-    } */
+        /** remove */
 
-    // in case of multiple lands associated with a single game, these lands should be ordered by their common game token.
-    // for example, let's assume we have an estate with these lands and games : [L1,L2,L3]
-    // gameIds = [G1,G1,G2] will work,
-    // but gameIds = [G1,G2,G1] will not.
-    /* function compareAndAdd(uint256 storageId, uint256[2][] memory landAndGameAssociations)
-        internal
-        returns (
-            uint256[] memory landsToAdd //, uint256[] memory gamesToAdd
-        )
-    {
-        landsToAdd = new uint256[](landAndGameAssociations.length);
-        //gamesToAdd = new uint256[](landAndGameAssociations.length); //this shoukd be a =/= size
-
-        for (uint256 i = 0; i < landAndGameAssociations.length; i++) {
-            uint256 gameId = landAndGameAssociations[i][1];
-            (bool landInTable, uint256 oldGameId) = estates[storageId].tryGet(landAndGameAssociations[i][0]);
-
-            if (landInTable) {
-                //land in table
-                if (gameId != oldGameId) {
-                    //not the same game game
-
-                    //removing from table
-                    require(estates[storageId].remove(landAndGameAssociations[i][0]), "LAND_DOES_NOT_EXIST");
-                    gamesToLands[oldGameId].remove(landAndGameAssociations[i][0]);
-
-                    //adding
-                    estates[storageId].set(landAndGameAssociations[i][0], gameId);
-                    gamesToLands[gameId].add(landAndGameAssociations[i][0]);
-
-                    //add in tables to add
-                    // gamesToAdd[i] = gameId;
-                }
-            } else {
-                //land not in table
-                //add land and game
-                estates[storageId].set(landAndGameAssociations[i][0], gameId);
-                gamesToLands[gameId].add(landAndGameAssociations[i][0]);
-                //add in tables to add
-                landsToAdd[i] = landAndGameAssociations[i][0];
-                //gamesToAdd[i] = gameId;
+        if (update.landAndGameAssociationsToRemove.length > 0) {
+            //remove lands, should remove games first
+            if (update.landAndGameAssociationsToRemove[1].length > 0) {
+                _removeGamesOfLands(from, storageId, update.landAndGameAssociationsToRemove[1]);
+            }
+            //remove lands
+            if (update.landAndGameAssociationsToRemove[0].length > 0) {
+                _removeLands(from, storageId, update.landAndGameAssociationsToRemove[0]);
             }
         }
+        /** update */
+
+        _gameToken.batchTransferFrom(from, address(this), update.gameIdsToAdd, "");
+        _gameToken.batchTransferFrom(address(this), from, update.gameIdsToRemove, "");
+        _land.batchTransferFrom(from, address(this), update.landIdsToAdd, "");
+        _land.batchTransferFrom(address(this), from, update.landIdsToRemove, "");
+
+        uint256 newId = _incrementTokenVersion(to, estateId);
+        emit EstateTokenUpdatedII(estateId, newId, update);
     }
- */
+
     /// @notice lets the estate owner add lands and/or add/remove games for these lands
     /// @param from The one updating the ESTATE token.
     /// @param to The address to transfer removed GAMES to.
@@ -315,6 +283,33 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         return newId;
     }
 
+    // @notice xxxx
+    /// @param to address that will recieve game tokens.
+    /// @param storageId The estate token that will be updated with the game array.
+    /// @param gamesIdsToRemove new configuration for the estate token
+    function _removeGamesOfLands(
+        address to,
+        uint256 storageId,
+        uint256[] memory gamesIdsToRemove
+    ) internal returns (uint256) {
+        uint256[] memory landsFromGames;
+
+        for (uint256 i = 0; i < gamesIdsToRemove.length; i++) {
+            //delete from mapping
+            //console.log("From this game ");
+            //console.log(gamesIdsToRemove[i]);
+            landsFromGames = getLandsForGame(gamesIdsToRemove[i]);
+            delete (gamesToLands[gamesIdsToRemove[i]]);
+
+            //will need to go through the lands on the mapping and update to 0
+            //could save gas by deleting directly
+            for (uint256 j = 0; j < landsFromGames.length; j++) {
+                //console.log(landsFromGames[j]);
+                estates[storageId].set(landsFromGames[j], 0);
+            }
+        }
+    }
+
     /// @notice Burns token `id`.
     /// @param id The token which will be burnt.
     function burn(uint256 id) public override {
@@ -364,7 +359,6 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         address msgSender = _msgSender();
         require(msgSender == sender || _superOperators[msgSender], "NOT_AUTHORIZED");
         _check_withdrawal_authorized(sender, estateId);
-
         _removeLandsGames(to, estateId, landsToRemove);
     }
 
@@ -477,7 +471,9 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         bool justCreated
     ) internal {
         uint256 storageId = _storageId(estateId);
-        uint256[] memory newLands;
+
+        //heavy could take off
+        /* uint256[] memory newLands;
 
         if (justCreated) {
             newLands = landIdsToAdd;
@@ -496,13 +492,15 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
                     newLands[i] = ed.landIds[i - landIdsToAdd.length];
                 }
             }
-        }
+        }*/
         (, uint256[] memory gamesToAdd) = _setGamesOfLands(storageId, landIdsToAdd, gameIds, false);
         //_land.batchTransferFrom(sender, address(this), landIdsToAdd, "");
 
-        (uint256[] memory sizes, uint256[] memory xs, uint256[] memory ys) = _separateId(landIdsToAdd);
-        _land.batchTransferQuad(sender, address(this), sizes, xs, ys, "");
-        _gameToken.batchTransferFrom(sender, address(this), gamesToAdd, "");
+        if (justCreated) {
+            (uint256[] memory sizes, uint256[] memory xs, uint256[] memory ys) = _separateId(landIdsToAdd);
+            _land.batchTransferQuad(sender, address(this), sizes, xs, ys, "");
+            _gameToken.batchTransferFrom(sender, address(this), gamesToAdd, "");
+        }
     }
 
     function _removeLandsGames(
@@ -520,14 +518,27 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
             }
         }
 
-        /* if (!isBurned(estateId)) {
-
-                //games to remove are not the same as the games in storage
-                require(gamesToLands[gameIdsToRemove[j]].length() != gameIdsToRemove, "GAME_IS_ATTACHED_TO_OTHER_LANDS");
-        } */
-
         _land.batchTransferFrom(address(this), to, landsToRemove, "");
         _gameToken.batchTransferFrom(address(this), to, gameIdsToRemove, "");
+    }
+
+    function _removeLands(
+        address to,
+        uint256 storageId,
+        uint256[] memory landsToRemove
+    ) internal {
+        //uint256 storageId = _storageId(estateId);
+
+        //this is very heavy
+        uint256[] memory gameIdsToRemove;
+        (gameIdsToRemove, ) = _setGamesOfLands(storageId, landsToRemove, new uint256[](landsToRemove.length), true);
+        for (uint256 i = 0; i < gameIdsToRemove.length; i++) {
+            require(gamesToLands[gameIdsToRemove[i]].length() == 0, "GAME_IS_ATTACHED_TO_OTHER_LANDS");
+        }
+
+        /* for (uint256 j = 0; j < landsToRemove.length; j++) {
+            require(estates[storageId].remove(landsToRemove[j]), "LAND_DOES_NOT_EXIST");
+        } */
     }
 
     function _removeLandsGamesNoAdjacencyCheck(
@@ -718,7 +729,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         return string(abi.encodePacked("ipfs://bafybei", hash2base32(hash), "/", "estate.json"));
     }
 
-    /* function isItInArray(uint256 id, uint256[] memory landIds) public pure returns (bool) {
+    function isItInArray(uint256 id, uint256[] memory landIds) public pure returns (bool) {
         uint256 size = landIds.length;
         bool flag = false;
 
@@ -730,7 +741,7 @@ contract EstateBaseToken is ImmutableERC721, Initializable, WithMinter {
         }
 
         return flag;
-    } */
+    }
 
     // solhint-enable code-complexity
 }
