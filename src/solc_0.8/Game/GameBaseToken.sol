@@ -133,7 +133,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
     /// @notice Transfers creatorship of `original` from `sender` to `to`.
     /// @param gameId The current id of the GAME token.
     /// @param sender The address of current registered creator.
-    /// @param to The address which will be given creatorship for all tokens originally minted by `original`.
+    /// @param to
     function transferCreatorship(
         uint256 gameId,
         address sender,
