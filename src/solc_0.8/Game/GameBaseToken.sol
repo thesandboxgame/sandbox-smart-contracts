@@ -122,7 +122,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         address editor,
         uint64 subId
     ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256 id) {
-        require(creation.exactNumOfLandsRequired > 0, "exactNumOfLandsRequired is zero");
+        require(creation.exactNumOfLandsRequired > 0, "EXACT_NUM_OF_LANDS_REQUIRED_ZERO");
         (uint256 gameId, uint256 strgId) = _mintGame(from, to, subId, 0, true);
 
         if (editor != address(0)) {
@@ -149,7 +149,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         uint256 gameId,
         IGameToken.GameData memory update
     ) external override onlyMinter() returns (uint256) {
-        require(update.exactNumOfLandsRequired > 0, "exactNumOfLandsRequired is zero");
+        require(update.exactNumOfLandsRequired > 0, "EXACT_NUM_OF_LANDS_REQUIRED_ZERO");
         uint256 id = _storageId(gameId);
         _addAssets(from, id, update.assetIdsToAdd, update.assetAmountsToAdd);
         _removeAssets(id, update.assetIdsToRemove, update.assetAmountsToRemove, _ownerOf(gameId));
@@ -382,8 +382,8 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         );
 
         delete _metaData[storageId];
+        delete _exactNumOfLandsRequired[storageId];
         _creatorship[creatorOf(gameId)] = address(0);
-        _exactNumOfLandsRequired[storageId] = 0;
         _burn(from, owner, gameId);
     }
 

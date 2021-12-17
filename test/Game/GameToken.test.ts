@@ -183,6 +183,10 @@ describe('GameToken', function () {
       const gameIdFromTransfer = transferEvent.args[2];
       const ownerFromEvent = transferEvent.args[1];
       const ownerFromStorage = await gameToken.ownerOf(gameId);
+      const exactNumOfLandsRequired = await gameToken.getExactNumOfLandsRequired(
+        gameId
+      );
+      expect(exactNumOfLandsRequired).to.be.equal(1);
       expect(gameId).to.be.equal(gameIdFromTransfer);
       expect(ownerFromStorage).to.be.equal(users[4].address);
       expect(ownerFromEvent).to.be.equal(ownerFromStorage);
@@ -247,6 +251,25 @@ describe('GameToken', function () {
       ).to.be.revertedWith('MINTER_ACCESS_DENIED');
     });
 
+    it('reverts for a game with exactNumOfLandsRequired = 0', async function () {
+      const update1: Update = {
+        assetIdsToRemove: [],
+        assetAmountsToRemove: [],
+        assetIdsToAdd: [],
+        assetAmountsToAdd: [],
+        uri: utils.keccak256(ethers.utils.toUtf8Bytes('')),
+        exactNumOfLandsRequired: 0,
+      };
+      await expect(
+        gameTokenAsMinter.createGame(
+          users[2].address,
+          users[2].address,
+          {...update1},
+          ethers.constants.AddressZero,
+          34
+        )
+      ).to.be.revertedWith('EXACT_NUM_OF_LANDS_REQUIRED_ZERO');
+    });
     describe('GameToken: Mint With Assets', function () {
       let assetId: BigNumber;
       let assetId2: BigNumber;
