@@ -327,8 +327,8 @@ describe('MockLandWithMint.sol', function () {
       expect(num2).to.equal(765);
     });
   });
-  describe('testing trasferFrom', function () {
-    it('Mint 1x1 and trasfer it', async function () {
+  describe('testing transferFrom', function () {
+    it('Mint 1x1 and transfer it', async function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await waitFor(
@@ -357,7 +357,7 @@ describe('MockLandWithMint.sol', function () {
       );
       expect(num2).to.equal(1);
     });
-    it('Mint 12x12 and trasfer 1x1 from it', async function () {
+    it('Mint 12x12 and transfer 1x1 from it', async function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await waitFor(
@@ -389,7 +389,7 @@ describe('MockLandWithMint.sol', function () {
   });
 
   describe('testing batchTransferFrom', function () {
-    it('Mint 12x12 and trasfer aff internals 1x1s from it', async function () {
+    it('Mint 12x12 and transfer all internals 1x1s from it', async function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await waitFor(
