@@ -961,6 +961,14 @@ describe('GameToken', function () {
       expect(creatorAfter).to.equal(others[3]);
     });
 
+    it('transfer creatorship should revert for a non existing game', async function () {
+      const others = await getUnnamedAccounts();
+
+      await expect(
+        GameOwner.Game.transferCreatorship(3028, GameOwner.address, others[3])
+      ).to.be.revertedWith('NONEXISTENT_TOKEN');
+    });
+
     it('can transfer creatorship of a GAME back to original creator', async function () {
       const others = await getUnnamedAccounts();
       const creatorBefore = await gameToken.creatorOf(gameId);
@@ -996,6 +1004,17 @@ describe('GameToken', function () {
           gameId
         )
       ).to.be.revertedWith('UNAUTHORIZED_TRANSFER');
+    });
+
+    it('transfer creatorship should revert for a burned game', async function () {
+      const others = await getUnnamedAccounts();
+      const gameTokenAsCurrentOwner = await gameToken.connect(
+        ethers.provider.getSigner(users[7].address)
+      );
+      await gameTokenAsCurrentOwner.burn(gameId);
+      await expect(
+        GameOwner.Game.transferCreatorship(gameId, GameOwner.address, others[3])
+      ).to.be.revertedWith('NONEXISTENT_TOKEN');
     });
   });
 
