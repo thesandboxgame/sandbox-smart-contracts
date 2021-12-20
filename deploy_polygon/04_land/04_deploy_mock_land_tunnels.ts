@@ -18,7 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     skipIfAlreadyDeployed: true,
   });
 
-  // get deployer on l2
+  // get deployer on l1
   const {deployer: deployerOnL1} = await hre.companionNetworks[
     'l2'
   ].getNamedAccounts();
