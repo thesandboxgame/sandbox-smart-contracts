@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTestnet} from '../../utils/network';
+import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -10,7 +10,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const FXCHILD = await deployments.get('FXCHILD');
   const PolygonLand = await deployments.get('PolygonLand');
 
-  const PolygonLandTunnel = await deploy('PolygonLandTunnel', {
+  const MockPolygonLandTunnel = await deploy('MockPolygonLandTunnel', {
     from: deployer,
     contract: 'PolygonLandTunnel',
     args: [FXCHILD.address, PolygonLand.address],
@@ -18,31 +18,32 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     skipIfAlreadyDeployed: true,
   });
 
-  const LandTunnel = await hre.companionNetworks['l1'].deployments.getOrNull(
-    'LandTunnel'
-  );
   // get deployer on l2
   const {deployer: deployerOnL1} = await hre.companionNetworks[
     'l2'
   ].getNamedAccounts();
 
-  if (LandTunnel) {
+  const MockLandTunnel = await hre.companionNetworks[
+    'l1'
+  ].deployments.getOrNull('MockLandTunnel');
+
+  if (MockLandTunnel) {
     await hre.companionNetworks['l1'].deployments.execute(
-      'LandTunnel',
+      'MockLandTunnel',
       {from: deployerOnL1},
       'setFxChildTunnel',
-      PolygonLandTunnel.address
+      MockPolygonLandTunnel.address
     );
     await deployments.execute(
-      'PolygonLandTunnel',
+      'MockPolygonLandTunnel',
       {from: deployer},
       'setFxRootTunnel',
-      LandTunnel.address
+      MockLandTunnel.address
     );
   }
 };
 
 export default func;
-func.tags = ['PolygonLandTunnel', 'PolygonLandTunnel_deploy', 'L2'];
-func.dependencies = ['PolygonLand', 'FXCHILD'];
-func.skip = skipUnlessTestnet;
+func.tags = ['MockPolygonLandTunnel', 'MockPolygonLandTunnel_deploy', 'L2'];
+func.dependencies = ['PolygonLand', 'FXCHILD', 'PolygonLandTunnel'];
+func.skip = skipUnlessTest;
