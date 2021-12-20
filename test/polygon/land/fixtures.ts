@@ -15,6 +15,8 @@ export const setupLand = deployments.createFixture(async function () {
     'FXROOT',
     'FXCHILD',
     'CHECKPOINTMANAGER',
+    'MockPolygonLandTunnel',
+    'MockLandTunnel',
   ]);
   const PolygonLand = await ethers.getContract('PolygonLand');
   const Land = await ethers.getContract('Land');

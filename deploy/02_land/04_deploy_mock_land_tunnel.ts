@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTestnet} from '../../utils/network';
+import {skipUnlessTest} from '../../utils/network';
 import {ethers} from 'hardhat';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -12,40 +12,41 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const FXROOT = await deployments.get('FXROOT');
   const CHECKPOINTMANAGER = await deployments.get('CHECKPOINTMANAGER');
 
-  const LandTunnel = await deploy('LandTunnel', {
+  const MockLandTunnel = await deploy('MockLandTunnel', {
     from: deployer,
-    contract: 'LandTunnel',
+    contract: 'MockLandTunnel',
     args: [CHECKPOINTMANAGER.address, FXROOT.address, Land.address],
     log: true,
     skipIfAlreadyDeployed: true,
   });
 
-  const PolygonLandTunnel = await hre.companionNetworks[
-    'l2'
-  ].deployments.getOrNull('PolygonLandTunnel');
-
-  // get deployer on l1
+  // get deployer on l2
   const {deployer: deployerOnL2} = await hre.companionNetworks[
     'l2'
   ].getNamedAccounts();
 
-  if (PolygonLandTunnel) {
+  const MockPolygonLandTunnel = await hre.companionNetworks[
+    'l2'
+  ].deployments.getOrNull('MockPolygonLandTunnel');
+
+  if (MockPolygonLandTunnel) {
     await hre.companionNetworks['l2'].deployments.execute(
-      'PolygonLandTunnel',
+      'MockPolygonLandTunnel',
       {from: deployerOnL2},
       'setFxRootTunnel',
-      LandTunnel.address
+      MockLandTunnel.address
     );
+
     await deployments.execute(
-      'LandTunnel',
+      'MockLandTunnel',
       {from: deployer},
       'setFxChildTunnel',
-      PolygonLandTunnel.address
+      MockPolygonLandTunnel.address
     );
   }
 };
 
 export default func;
-func.tags = ['LandTunnel', 'LandTunnel_deploy', 'L1'];
-func.dependencies = ['Land', 'FXROOT', 'CHECKPOINTMANAGER'];
-func.skip = skipUnlessTestnet;
+func.tags = ['MockLandTunnel', 'MockLandTunnel_deploy', 'L1'];
+func.dependencies = ['LandTunnel', 'Land', 'FXROOT', 'CHECKPOINTMANAGER'];
+func.skip = skipUnlessTest;
