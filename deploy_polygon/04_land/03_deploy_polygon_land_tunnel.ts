@@ -21,7 +21,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const LandTunnel = await hre.companionNetworks['l1'].deployments.getOrNull(
     'LandTunnel'
   );
-  // get deployer on l2
+  // get deployer on l1
   const {deployer: deployerOnL1} = await hre.companionNetworks[
     'l1'
   ].getNamedAccounts();
