@@ -32,10 +32,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'l2'
   ].deployments.getOrNull('PolygonLandTunnel');
 
+  // get deployer on l1
+  const {deployer: deployerOnL2} = await hre.companionNetworks[
+    'l2'
+  ].getNamedAccounts();
+
   if (PolygonLandTunnel) {
     await hre.companionNetworks['l2'].deployments.execute(
       'PolygonLandTunnel',
-      {from: deployer},
+      {from: deployerOnL2},
       'setFxRootTunnel',
       LandTunnel.address
     );
