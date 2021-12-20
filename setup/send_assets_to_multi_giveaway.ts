@@ -92,7 +92,7 @@ const func: DeployFunction = async function () {
     if (address.toLocaleLowerCase() != sandContract.address.toLocaleLowerCase())
       continue;
     const amount = erc20Hash[address];
-    console.log(address, amount.toString())
+    console.log(address, amount.toString());
     await catchUnknownSigner(
       execute(
         'Sand',
