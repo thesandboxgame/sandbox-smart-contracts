@@ -40,6 +40,20 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       LandTunnel.address
     );
   }
+
+  const polygonLandTunnel = await deployments.read(
+    'PolygonLand',
+    'polygonLandTunnel'
+  );
+
+  if (polygonLandTunnel === hre.ethers.constants.AddressZero) {
+    await deployments.execute(
+      'PolygonLand',
+      {from: deployer},
+      'setPolygonLandTunnel',
+      PolygonLandTunnel.address
+    );
+  }
 };
 
 export default func;
