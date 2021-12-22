@@ -92,17 +92,21 @@ GameBaseToken <|-- ChildGameTokenV1
 
 ### Token id pattern
 
-ERC721 tokens always have a unique ID, in the case of GAME, the unique ID is known as `gameId` and is comprised of the concatenation of `creator,subId,chainIndex,version`. the `gameId` is used as an external id, while the `strgId` is used as an internal id. `strgId` is defined as `gameId & STORAGE_ID_MASK` where `STORAGE_ID_MASK` = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000. In practice, `strgId` is a substring of the `gameId` that does not include the version field. The reason for having both ids is to solve a potential front-running issue that might occur on 3rd party decentralized exchanges when a GAME seller might trick the buyer to buy a downgraded game by pushing a transaction that downgrades the GAME (removing assets from a game for example) before the actual `swap` transaction on the decentralized exchange.
+ERC721 tokens always have a unique ID, in the case of GAME, the unique ID is known as `gameId` and is comprised of the concatenation of `creator,subId,chainIndex,version`. the `gameId` is used as an external id, while the `strgId` is used as an internal id. `strgId` is defined as `gameId & STORAGE_ID_MASK` where `STORAGE_ID_MASK` = 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF00000000. In practice, `strgId` is a substring of the `gameId` that does not include the version field. The reason for having both ids is to solve a potential front-running issue that might occur on 3rd party decentralized exchanges when a GAME seller might trick the buyer to buy a downgraded game by pushing a transaction that downgrades the GAME (removing assets from a game for example) before the actual `swap` transaction on the decentralized exchange. Updating a game will result in a change of the external id (`gameId`).
 
 ## Processes
 
+Creating a game and updating an existing game are restricted only for the `GameMinter` contract. This contract focuses on validating
+the necessary access control checks and charging the fees in SAND. Users that wish to create or update a game should interact with the
+`GameMinter` contract.
+
 ### Creating a game
 
-A game minter can call `createGame` to create a game and (optionally) add assets to it.
+Users can call `GameMinter.createGame` (which in turn will call `GameBaseToken.createGame`) to create a game and (optionally) add assets to it.
 
 ### Updating a game
 
-A game minter can call `updateGame` to add/remove assets from a game, which will result in the `version` field of the `gameId` incremented by 1. Adding assets means transferring these from the `from` address to the game contract address. Removing assets means transferring these from the game contract to the `from` address.
+A game owner can call `GameMinter.updateGame` (which in turn will call `GameBaseToken.updateGame`) to add/remove assets from a game, which will cause the `version` field of the `gameId` to be incremented by 1, and thus also the `gameId` for this specific game will be changed. Adding assets means transferring these from the `from` address to the game contract address. Removing assets means transferring these from the game contract to the `from` address.
 
 ### Burn a game and recover the deposited assets
 
@@ -111,5 +115,5 @@ A game owner can burn his game token to recover the underlying assets that were 
 ### Transfer creatorship
 
 When a game is created, the original creator of the game is stored in the first 20 bytes of the `gameId`.
-The creatorship (of any token ever created by some account) can be transferred to another account by calling `transferCreatorship`.
+The creatorship of a specific game can be transferred to another account by calling `transferCreatorship`.
 This function can be called either by the current creator or by a super-operator nominated by him. The current creator of a game can be queried using a call to `creatorOf(uint256 id)`.
