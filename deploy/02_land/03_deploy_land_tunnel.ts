@@ -1,7 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {skipUnlessTestnet} from '../../utils/network';
-import {ethers} from 'hardhat';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -42,6 +41,25 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       'setFxChildTunnel',
       PolygonLandTunnel.address
     );
+
+    const PolygonLand = await hre.companionNetworks['l2'].deployments.getOrNull(
+      'PolygonLand'
+    );
+    if (PolygonLand) {
+      const polygonLandTunnel = await deployments.read(
+        'PolygonLand',
+        'polygonLandTunnel'
+      );
+
+      if (polygonLandTunnel === hre.ethers.constants.AddressZero) {
+        await deployments.execute(
+          'PolygonLand',
+          {from: deployerOnL2},
+          'setPolygonLandTunnel',
+          PolygonLandTunnel.address
+        );
+      }
+    }
   }
 };
 
