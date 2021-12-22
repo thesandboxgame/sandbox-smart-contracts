@@ -72,6 +72,90 @@ describe('GemsCatalystsRegistry', function () {
     expect(balanceAfterBurning).to.equal(balanceBeforeBurning.sub(burnAmount));
     expect(totalSupplyAfter).to.equal(totalSupplyBefore.sub(burnAmount));
   });
+
+  it('Allow max value allowance for every gems and catalyst', async function () {
+    const {
+      gemsCatalystsRegistryAsUser3,
+      gemsCatalystsRegistry,
+      commonCatalyst,
+      rareCatalyst,
+      epicCatalyst,
+      legendaryCatalyst,
+      powerGem,
+      defenseGem,
+      speedGem,
+      magicGem,
+      luckGem,
+      user3,
+    } = await setupGemsAndCatalysts();
+
+    await gemsCatalystsRegistryAsUser3.setGemsandCatalystsMaxAllowance();
+
+    expect(
+      await commonCatalyst.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(
+      BigNumber.from(
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+      )
+    );
+    expect(
+      await rareCatalyst.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(
+      BigNumber.from(
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+      )
+    );
+    expect(
+      await epicCatalyst.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(
+      BigNumber.from(
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+      )
+    );
+    expect(
+      await legendaryCatalyst.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(
+      BigNumber.from(
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+      )
+    );
+    expect(
+      await powerGem.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(
+      BigNumber.from(
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+      )
+    );
+    expect(
+      await defenseGem.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(
+      BigNumber.from(
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+      )
+    );
+    expect(
+      await speedGem.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(
+      BigNumber.from(
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+      )
+    );
+    expect(
+      await magicGem.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(
+      BigNumber.from(
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+      )
+    );
+    expect(
+      await luckGem.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(
+      BigNumber.from(
+        '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+      )
+    );
+  });
+
   it('burnCatalyst should fail for unauthorized account', async function () {
     const {
       gemsCatalystsRegistryAsUser3,

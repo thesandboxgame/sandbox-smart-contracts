@@ -1,0 +1,266 @@
+left to right direction
+
+title Smart contracts deployment diagram
+
+skinparam component {
+    style rectangle
+}
+skinparam rectangle {
+    BackgroundColor #00FF0050
+}
+
+skinparam linetype ortho
+
+package "L2" {
+    package "POLYGON" as L2Polygon {
+        [ChildChainManagerProxy] as L2ChildChainManagerProxy #732C2C50
+    }
+
+    package "BICONOMY" as L2Biconomy {
+        [BiconomyForwarder] as L2BiconomyForwarder #732C2C50
+    }
+
+    package "SAND" as L2Sand {
+        [PolygonSandV1] as L2PolygonSandV1 #732C2C50
+        [PolygonSandV2] as L2PolygonSandV2 #00FF0050
+        [PolygonSandV3] as L2PolygonSandV3 #00FF0050
+        [PolygonSandClaim] as L2PolygonSandClaim #00FF0050
+        [Faucet] as L2Faucet #0084ff50
+    }
+
+    package "DEFI" as L2DeFi {
+      [QuickswapPool] as L2QuickswapPool
+      [PolygonLandWeightedSANDRewardPool] as L2PolygonLandWeightedSANDRewardPool
+    [SignedERC20Giveaway] as L2SignedERC20Giveaway #0084ff50
+    }
+
+    package "ASSET" as L2Asset {
+      [AssetSignedAuctionAuth] as L2AssetSignedAuctionAuth #0084ff50
+      [PolygonAssetProxy] as L2PolygonAssetProxy #0084ff50
+      [PolygonAsset] as L2PolygonAsset #0084ff50
+      [PolygonAssetAttributesRegistry] as L2PolygonAssetAttributesRegistry #0084ff50
+      [PolygonAssetMinter] as L2PolygonAssetMinter #0084ff50
+      [PolygonAssetUpgrader] as L2PolygonAssetUpgrader #0084ff50
+    }
+
+    package "CATALYST" as L2Catalyst {
+      [PolygonDefaultAttributes] as L2PolygonDefaultAttributes #0084ff50
+      [PolygonCatalyst_COMMON] as L2PolygonCatalyst_COMMON #0084ff50
+      [PolygonCatalyst_EPIC] as L2PolygonCatalyst_EPIC #0084ff50
+      [PolygonCatalyst_LEGENDARY] as L2PolygonCatalyst_LEGENDARY #0084ff50
+      [PolygonCatalyst_RARE] as L2PolygonCatalyst_RARE #0084ff50
+      [PolygonGem_DEFENSE] as L2PolygonGem_DEFENSE #0084ff50
+      [PolygonGem_LUCK] as L2PolygonGem_LUCK #0084ff50
+      [PolygonGem_MAGIC] as L2PolygonGem_MAGIC #0084ff50
+      [PolygonGem_POWER] as L2PolygonGem_POWER #0084ff50
+      [PolygonGem_SPEED] as L2PolygonGem_SPEED #0084ff50
+      [PolygonGemsCatalystsRegistry] as L2PolygonGemsCatalystsRegistry #0084ff50
+    }
+
+    package "LAND" as L2Land {
+      [PolygonLandProxy] as L2PolygonLandProxy #FFC30050
+      [PolygonLand] as L2PolygonLand #FFC30050
+    }
+
+    package "GAME" as L2Game {
+      [PolygonGameProxy] as L2PolygonGameProxy #FFC30050
+      [PolygonGame] as L2PolygonGame #FFC30050
+    }
+
+    package "ESTATE" as L2Estate {
+      [PolygonEstateProxy] as L2PolygonEstateProxy #FFC30050
+      [PolygonEstate] as L2PolygonEstate #FFC30050
+    }
+
+    package "AVATAR" as L2Avatar {
+      [PolygonAvatarProxy] as L2PolygonAvatarProxy #FFC30050
+      [PolygonAvatar] as L2PolygonAvatar #FFC30050
+      [PolygonAvatarSale] as L2PolygonAvatarSale #FFC30050
+    }
+}
+
+package "Polygon" as Polygon {
+    [StateSync] #732C2C50
+}
+
+package "L1" {
+    package "POLYGON" as L1Polygon {
+        [RootChainManagerProxy] as L1RootChainManagerProxy #732C2C50
+        [ChainExitERC1155PredicateProxy] as L1ChainExitERC1155PredicateProxy #732C2C50
+    }
+
+    package "BICONOMY" as L1Biconomy {
+        [BiconomyForwarder] as L1BiconomyForwarder #732C2C50
+    }
+
+    package "SAND" {
+        [Sand] as L1Sand
+        [Faucet] as L1Faucet #0084ff50
+    }
+
+    package "DEFI" as L1DeFi {
+        [UNI_SAND_ETH] as L1UNI_SAND_ETH #732C2C50
+        [LandWeightedSANDRewardPool] as L1LandWeightedSANDRewardPool
+        [DAI] AS L1DAI #732C2C50
+        [DAIMedianizer] AS L1DAIMedianizer #732C2C50
+    }
+
+    package "ASSET" {
+        [AssetProxy] as L1AssetProxy
+        [Asset] as L1Asset
+        [AssetSignedAuction] as L1AssetSignedAuction
+        [AuthValidator] as L1AuthValidator
+        [GenesisBouncer] as L1GenesisBouncer
+        [DefaultMinter] as L1DefaultMinter
+        [StarterPackV1] as L1StarterPackV1
+        [Multi_Giveaway_1] as L1Multi_Giveaway_1
+        [Asset_Giveaway_7] as L1Asset_Giveaway_7
+
+        [AssetV2] as L1AssetV2 #0084ff50
+        [AssetHelper] as L1AssetHelper #0084ff50
+        [AssetAttributesRegistry] as L1AssetAttributesRegistry #0084ff50
+        [AssetMinter] as L1AssetMinter #0084ff50
+        [AssetUpgrader] as L1AssetUpgrader #0084ff50
+    }
+
+    package "CATALYST" {
+      [Catalyst] as L1Catalyst
+      [CatalystMinter] as L1CatalystMinter
+      [CatalystMinterLegendary220] as L1CatalystMinterLegendary220
+      [SandboxMinter] as L1SandboxMinter
+      [CatalystRegistry] as L1CatalystRegistry
+
+      [CommonCatalyst] as L1CommonCatalyst
+      [EpicCatalyst] as L1EpicCatalyst
+      [LegendaryCatalyst] as L1LegendaryCatalyst
+      [RareCatalyst] as L1RareCatalyst
+
+      [Gem] as L1Gem
+      [DefenseGem] as L1Catalyst
+      [LuckGem] as L1LuckGem
+      [MagicGem] as L1MagicGem
+      [PowerGem] as L1PowerGem
+      [SpeedGem] as L1SpeedGem
+
+      [DefaultAttributes] as L1DefaultAttributes #0084ff50
+      [Catalyst_COMMON] as L1Catalyst_COMMON #0084ff50
+      [Catalyst_EPIC] as L1Catalyst_EPIC #0084ff50
+      [Catalyst_LEGENDARY] as L1Catalyst_LEGENDARY #0084ff50
+      [Catalyst_RARE] as L1Catalyst_RARE #0084ff50
+      [Gem_DEFENSE] as L1Gem_DEFENSE #0084ff50
+      [Gem_LUCK] as L1Gem_LUCK #0084ff50
+      [Gem_MAGIC] as L1Gem_MAGIC #0084ff50
+      [Gem_POWER] as L1Gem_POWER #0084ff50
+      [Gem_SPEED] as L1Gem_SPEED #0084ff50
+      [GemsCatalystsRegistry] as L1GemsCatalystsRegistry #0084ff50
+    }
+
+    package "LAND" {
+      [Land] as L1Land
+      [LandGiveaway_1] as L1LandGiveaway_1
+      [LandPreSale_12_32] as L1LandPreSale_12_32
+    }
+}
+
+L2ChildChainManagerProxy --> L2PolygonSandV3
+
+L2BiconomyForwarder --> L2PolygonSandV3
+L2BiconomyForwarder --> L2SignedERC20Giveaway
+
+L2PolygonSandClaim --> L2PolygonSandV3
+L2PolygonSandClaim --> L2PolygonSandV1
+L2QuickswapPool --> L2PolygonSandV3
+L2PolygonLandWeightedSANDRewardPool --> L2PolygonSandV3
+L2PolygonLandWeightedSANDRewardPool --> L2QuickswapPool
+L2PolygonLandWeightedSANDRewardPool --> L2PolygonLandProxy
+L2SignedERC20Giveaway -> L2PolygonSandV3
+L2Faucet -> L2PolygonSandV3
+
+L2PolygonAssetProxy --> L2PolygonAsset
+L2PolygonAsset --> L2BiconomyForwarder
+L2PolygonAsset --> L2ChildChainManagerProxy
+L2PolygonAsset --> L2PolygonAssetAttributesRegistry
+L2PolygonAssetAttributesRegistry --> L2PolygonGemsCatalystsRegistry
+L2PolygonAssetAttributesRegistry --> L2PolygonAssetUpgrader
+L2PolygonAssetMinter --> L2PolygonAssetAttributesRegistry
+L2PolygonAssetMinter --> L2PolygonGemsCatalystsRegistry
+L2PolygonAssetUpgrader --> L2PolygonAssetProxy
+L2PolygonAssetUpgrader --> L2PolygonAssetAttributesRegistry
+L2PolygonAssetUpgrader --> L2PolygonGemsCatalystsRegistry
+L2PolygonAssetUpgrader --> L2PolygonSandV3
+
+L2PolygonGemsCatalystsRegistry --> L2PolygonCatalyst_COMMON
+L2PolygonGemsCatalystsRegistry --> L2PolygonCatalyst_EPIC
+L2PolygonGemsCatalystsRegistry --> L2PolygonCatalyst_LEGENDARY
+L2PolygonGemsCatalystsRegistry --> L2PolygonCatalyst_RARE
+L2PolygonGemsCatalystsRegistry --> L2PolygonGem_DEFENSE
+L2PolygonGemsCatalystsRegistry --> L2PolygonGem_LUCK
+L2PolygonGemsCatalystsRegistry --> L2PolygonGem_MAGIC
+L2PolygonGemsCatalystsRegistry --> L2PolygonGem_POWER
+L2PolygonGemsCatalystsRegistry --> L2PolygonGem_SPEED
+
+L2PolygonLandProxy -> L2PolygonLand
+
+L2PolygonGameProxy --> L2PolygonGame
+L2PolygonGame --> L2PolygonAsset
+
+L2PolygonEstateProxy --> L2PolygonEstate
+L2PolygonEstate --> L2PolygonGameProxy
+L2PolygonEstate --> L2PolygonLandProxy
+
+L2PolygonAvatarProxy --> L2PolygonAvatar
+L2PolygonAvatarSale --> L2PolygonAvatarProxy
+
+L1RootChainManagerProxy --> StateSync
+StateSync --> L2ChildChainManagerProxy
+StateSync --> L1RootChainManagerProxy
+
+L1RootChainManagerProxy --> L1ChainExitERC1155PredicateProxy
+
+L1BiconomyForwarder --> L1Sand
+
+L1RootChainManagerProxy --> L1Sand
+L1UNI_SAND_ETH --> L1Sand
+L1LandWeightedSANDRewardPool --> L1Sand
+L1LandWeightedSANDRewardPool --> L1UNI_SAND_ETH
+L1LandWeightedSANDRewardPool --> L1Land
+L1Faucet -> L1Sand
+
+L1AssetProxy --> L1Asset
+L1AssetV2 --> L1BiconomyForwarder
+L1AssetV2 --> L1ChainExitERC1155PredicateProxy
+L1AssetV2 --> L1AssetAttributesRegistry
+L1AssetAttributesRegistry --> L1GemsCatalystsRegistry
+L1AssetAttributesRegistry --> L1AssetUpgrader
+L1AssetMinter --> L1AssetAttributesRegistry
+L1AssetMinter --> L1GemsCatalystsRegistry
+L1AssetUpgrader --> L1AssetProxy
+L1AssetUpgrader --> L1AssetAttributesRegistry
+L1AssetUpgrader --> L1GemsCatalystsRegistry
+L1AssetUpgrader --> L1Sand
+L1AssetSignedAuction --> L1Sand
+L1AssetSignedAuction --> L1AssetProxy
+L1GenesisBouncer --> L1AssetProxy
+L1DefaultMinter --> L1Sand
+L1DefaultMinter --> L1AssetProxy
+L1StarterPackV1 --> L1Sand
+L1StarterPackV1 --> L1DAI
+L1StarterPackV1 --> L1DAIMedianizer
+
+L1GemsCatalystsRegistry --> L1Catalyst_COMMON
+L1GemsCatalystsRegistry --> L1Catalyst_EPIC
+L1GemsCatalystsRegistry --> L1Catalyst_LEGENDARY
+L1GemsCatalystsRegistry --> L1Catalyst_RARE
+L1GemsCatalystsRegistry --> L1Gem_DEFENSE
+L1GemsCatalystsRegistry --> L1Gem_LUCK
+L1GemsCatalystsRegistry --> L1Gem_MAGIC
+L1GemsCatalystsRegistry --> L1Gem_POWER
+L1GemsCatalystsRegistry --> L1Gem_SPEED
+
+legend right
+    | Color       | Type        |
+    | <#00FF0050> | Mainnet     |
+    | <#0084ff50> | Testnet     |
+    | <#FFC30050> | Dev         |
+    | <#732C2C50> | External    |
+endlegend

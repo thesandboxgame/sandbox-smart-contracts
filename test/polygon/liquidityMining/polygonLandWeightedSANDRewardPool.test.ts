@@ -491,7 +491,7 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
   });
 
   // eslint-disable-next-line mocha/no-setup-in-describe
-  [1, 29].forEach((days) => {
+  [1, 27].forEach((days) => {
     it(`user earns full reward amount if there is only one staker after ${days} day(s)`, async function () {
       const {
         rewardPoolContract,
@@ -698,12 +698,8 @@ describe('PolygonLandWeightedSANDRewardPool', function () {
       contribution(LESS_PRECISE_STAKE_AMOUNT, numNfts),
       expectedRewardPerToken
     );
+    expect(ACTUAL_REWARD_AMOUNT).to.equal(expectedReward);
     expect(earned).to.equal(expectedReward);
-
-    const precisionLost = ACTUAL_REWARD_AMOUNT.sub(expectedReward);
-    expect(ACTUAL_REWARD_AMOUNT).not.to.equal(expectedReward);
-    expect(precisionLost).to.be.at.least(1);
-    expect(precisionLost).to.be.at.most(1);
   });
 
   // eslint-disable-next-line mocha/no-setup-in-describe

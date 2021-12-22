@@ -9,12 +9,13 @@ import "../common/Libraries/ObjectLib32.sol";
 import "../common/interfaces/IERC721.sol";
 import "../common/interfaces/IERC721TokenReceiver.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
-import "../common/BaseWithStorage/ERC2771Handler.sol";
 import "./libraries/ERC1155ERC721Helper.sol";
 
 // solhint-disable max-states-count
-
-contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler {
+// !!! DO NOT ADD MORE INHERITED CLASS !!!
+// This class is used by asset and is upgradable, if you add more INHERITED class, storage will be mixed up
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     using Address for address;
     using ObjectLib32 for ObjectLib32.Operations;
     using ObjectLib32 for uint256;
@@ -52,6 +53,8 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
     uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 32);
     uint256 private constant CHAIN_INDEX_MASK = 0x00000000000000000000000000000000000000000000007F8000000000000000;
 
+    address internal _trustedForwarder;
+
     uint256[20] private __gap;
     // solhint-enable max-states-count
 
@@ -74,7 +77,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         _admin = admin;
         _bouncerAdmin = bouncerAdmin;
         _predicate = predicate;
-        ERC2771Handler.__ERC2771Handler_initialize(trustedForwarder);
+        __ERC2771Handler_initialize(trustedForwarder);
         _chainIndex = chainIndex;
     }
 
@@ -557,6 +560,38 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
         return _operatorsForAll[owner][operator] || _superOperators[operator];
     }
 
+    function __ERC2771Handler_initialize(address forwarder) internal {
+        _trustedForwarder = forwarder;
+    }
+
+    function isTrustedForwarder(address forwarder) public view returns (bool) {
+        return forwarder == _trustedForwarder;
+    }
+
+    function getTrustedForwarder() external view returns (address trustedForwarder) {
+        return _trustedForwarder;
+    }
+
+    function _msgSender() internal view virtual returns (address sender) {
+        if (isTrustedForwarder(msg.sender)) {
+            // The assembly code is more direct than the Solidity version using `abi.decode`.
+            // solhint-disable-next-line no-inline-assembly
+            assembly {
+                sender := shr(96, calldataload(sub(calldatasize(), 20)))
+            }
+        } else {
+            return msg.sender;
+        }
+    }
+
+    function _msgData() internal view virtual returns (bytes calldata) {
+        if (isTrustedForwarder(msg.sender)) {
+            return msg.data[:msg.data.length - 20];
+        } else {
+            return msg.data;
+        }
+    }
+
     function _setApprovalForAll(
         address sender,
         address operator,
@@ -850,6 +885,26 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721, ERC2771Handler 
                 break;
             }
         }
+    }
+
+    /// @dev Use only when you mint from L1 to L2
+    function _mintFTFromAnotherLayer(
+        uint256 supply,
+        address owner,
+        uint256 id
+    ) internal {
+        (uint256 bin, uint256 index) = id.getTokenBinIndex();
+
+        _packedTokenBalance[owner][bin] = _packedTokenBalance[owner][bin].updateTokenBalance(
+            index,
+            supply,
+            ObjectLib32.Operations.ADD
+        );
+    }
+
+    function _mintNFTFromAnotherLayer(address owner, uint256 id) internal {
+        _owners[id] = uint256(uint160(owner));
+        _numNFTPerAddress[owner]++;
     }
 
     function _transferFrom(

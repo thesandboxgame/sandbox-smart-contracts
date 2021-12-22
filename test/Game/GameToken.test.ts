@@ -950,34 +950,49 @@ describe('GameToken', function () {
 
     it('can transfer creatorship of a GAME', async function () {
       const others = await getUnnamedAccounts();
-      const creatorBefore = await gameToken.creatorOf(gameId);
 
       await GameOwner.Game.transferCreatorship(
-        GameOwner.address,
+        gameId,
         GameOwner.address,
         others[3]
       );
 
       const creatorAfter = await gameToken.creatorOf(gameId);
-      expect(creatorAfter).to.not.equal(creatorBefore);
+      expect(creatorAfter).to.equal(others[3]);
+    });
+
+    it('transfer creatorship should revert for a non existing game', async function () {
+      const others = await getUnnamedAccounts();
+
+      await expect(
+        GameOwner.Game.transferCreatorship(3028, GameOwner.address, others[3])
+      ).to.be.revertedWith('NONEXISTENT_TOKEN');
     });
 
     it('can transfer creatorship of a GAME back to original creator', async function () {
       const others = await getUnnamedAccounts();
       const creatorBefore = await gameToken.creatorOf(gameId);
+
+      const gameTokenAsCreator = await gameToken.connect(
+        await ethers.provider.getSigner(creatorBefore)
+      );
+      await gameTokenAsCreator.transferCreatorship(
+        gameId,
+        creatorBefore,
+        others[1]
+      );
+
       const gameTokenAsOther = await gameToken.connect(
-        await ethers.provider.getSigner(others[3])
+        await ethers.provider.getSigner(others[1])
       );
 
       await gameTokenAsOther.transferCreatorship(
-        others[3],
-        GameOwner.address,
-        GameOwner.address
+        gameId,
+        others[1],
+        creatorBefore
       );
-
       const creatorAfter = await gameToken.creatorOf(gameId);
-      expect(creatorAfter).to.not.equal(creatorBefore);
-      expect(creatorAfter).to.equal(GameOwner.address);
+      expect(creatorAfter).to.equal(creatorBefore);
     });
 
     it('should fail if non-owner trys to transfer a GAME', async function () {
@@ -989,6 +1004,17 @@ describe('GameToken', function () {
           gameId
         )
       ).to.be.revertedWith('UNAUTHORIZED_TRANSFER');
+    });
+
+    it('transfer creatorship should revert for a burned game', async function () {
+      const others = await getUnnamedAccounts();
+      const gameTokenAsCurrentOwner = await gameToken.connect(
+        ethers.provider.getSigner(users[7].address)
+      );
+      await gameTokenAsCurrentOwner.burn(gameId);
+      await expect(
+        GameOwner.Game.transferCreatorship(gameId, GameOwner.address, others[3])
+      ).to.be.revertedWith('NONEXISTENT_TOKEN');
     });
   });
 
@@ -1519,54 +1545,6 @@ describe('GameToken', function () {
       ).to.be.equal(true);
     });
 
-    it('can call burnAndRecover via metaTx', async function () {
-      const balancesBefore = await getBalances(
-        assetContract,
-        [GameOwner.address, gameToken.address],
-        assets
-      );
-
-      const ownerBalanceBefore = balancesBefore[0];
-      const ownerBalanceBefore2 = balancesBefore[1];
-      const contractBalanceBefore = balancesBefore[2];
-      const contractBalanceBefore2 = balancesBefore[3];
-
-      expect(ownerBalanceBefore).to.be.equal(0);
-      expect(ownerBalanceBefore2).to.be.equal(0);
-      expect(contractBalanceBefore).to.be.equal(10);
-      expect(contractBalanceBefore2).to.be.equal(8);
-
-      const {to, data} = await gameToken.populateTransaction.burnAndRecover(
-        GameOwner.address,
-        GameOwner.address,
-        gameId,
-        assets
-      );
-
-      await sendMetaTx(
-        to,
-        trustedForwarder,
-        data,
-        GameOwner.address,
-        '1000000'
-      );
-
-      const balancesAfter = await getBalances(
-        assetContract,
-        [GameOwner.address, gameToken.address],
-        assets
-      );
-
-      const ownerBalanceAfter = balancesAfter[0];
-      const ownerBalanceAfter2 = balancesAfter[1];
-      const contractBalanceAfter = balancesAfter[2];
-      const contractBalanceAfter2 = balancesAfter[3];
-
-      expect(ownerBalanceAfter).to.be.equal(10);
-      expect(ownerBalanceAfter2).to.be.equal(8);
-      expect(contractBalanceAfter).to.be.equal(0);
-      expect(contractBalanceAfter2).to.be.equal(0);
-    });
     it('can call burnFrom via metaTx', async function () {
       assets = await supplyAssets(GameOwner.address, [5, 7]);
       gameId2 = (
@@ -1639,13 +1617,14 @@ describe('GameToken', function () {
         to,
         data,
       } = await gameToken.populateTransaction.transferCreatorship(
-        GameOwner.address,
+        gameId,
         GameOwner.address,
         users[2].address
       );
 
       await sendMetaTx(to, trustedForwarder, data, GameOwner.address);
-      expect(await gameToken.creatorOf(gameId)).to.be.equal(users[2].address);
+      const currentCreator = await gameToken.creatorOf(gameId);
+      expect(currentCreator).to.be.equal(users[2].address);
     });
   });
 });
