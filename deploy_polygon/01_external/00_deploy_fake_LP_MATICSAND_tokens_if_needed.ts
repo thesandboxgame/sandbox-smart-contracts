@@ -8,9 +8,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  let FAKE_LP_MATIC_SAND = await deployments.getOrNull('SUSHI_SAND_MATIC');
+  let FAKE_LP_MATIC_SAND = await deployments.getOrNull('QUICKSWAP_SAND_MATIC');
   if (!FAKE_LP_MATIC_SAND) {
-    FAKE_LP_MATIC_SAND = await deploy('SUSHI_SAND_MATIC', {
+    FAKE_LP_MATIC_SAND = await deploy('QUICKSWAP_SAND_MATIC', {
       from: deployer,
       contract: 'FakeLPSandMatic',
       log: true,
@@ -18,5 +18,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.tags = ['SUSHI_SAND_MATIC', 'L2'];
+func.tags = ['QUICKSWAP_SAND_MATIC', 'L2'];
 func.skip = skipUnlessTestnet;

@@ -388,7 +388,12 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Handler {
     /// @param id The token to query.
     /// @return owner The owner of the token.
     /// @return operatorEnabled Whether or not operators are enabled for this token.
-    function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {
+    function _ownerAndOperatorEnabledOf(uint256 id)
+        internal
+        view
+        virtual
+        returns (address owner, bool operatorEnabled)
+    {
         uint256 data = _owners[_storageId(id)];
         if ((data & BURNED_FLAG) == BURNED_FLAG) {
             owner = address(0);

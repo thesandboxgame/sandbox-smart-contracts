@@ -16,7 +16,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
 
     mapping(uint256 => mapping(uint256 => uint256)) private _gameAssets;
-    mapping(address => address) private _creatorship; // creatorship transfer
+    mapping(uint256 => address) private _creatorship; // creatorship transfer
 
     mapping(uint256 => bytes32) private _metaData;
     mapping(address => mapping(address => bool)) private _gameEditors;
@@ -67,45 +67,6 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
     }
 
     ///////////////////////////////  Functions //////////////////////////////
-
-    /// @notice Allow token owner to set game editors.
-    /// @param gameOwner The address of a GAME token creator.
-    /// @param editor The address of the editor to set.
-    /// @param isEditor Add or remove the ability to edit.
-    function setGameEditor(
-        address gameOwner,
-        address editor,
-        bool isEditor
-    ) external override {
-        require(_msgSender() == gameOwner, "EDITOR_ACCESS_DENIED");
-        _setGameEditor(gameOwner, editor, isEditor);
-    }
-
-    /// @notice Transfers creatorship of `original` from `sender` to `to`.
-    /// @param sender The address of current registered creator.
-    /// @param original The address of the original creator whose creation are saved in the ids themselves.
-    /// @param to The address which will be given creatorship for all tokens originally minted by `original`.
-    function transferCreatorship(
-        address sender,
-        address original,
-        address to
-    ) external override notToZero(to) {
-        address msgSender = _msgSender();
-        require(msgSender == sender || _superOperators[msgSender], "TRANSFER_ACCESS_DENIED");
-        require(sender != address(0), "NOT_FROM_ZEROADDRESS");
-        address current = _creatorship[original];
-        if (current == address(0)) {
-            current = original;
-        }
-        require(current != to, "CURRENT_=_TO");
-        require(current == sender, "CURRENT_!=_SENDER");
-        if (to == original) {
-            _creatorship[original] = address(0);
-        } else {
-            _creatorship[original] = to;
-        }
-        emit CreatorshipTransfer(original, current, to);
-    }
 
     /// @notice Create a new GAME token.
     /// @param from The address of the one creating the game (may be different from msg.sender if metaTx).
@@ -160,6 +121,41 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         return newId;
     }
 
+    /// @notice Allow token owner to set game editors.
+    /// @param gameOwner The address of a GAME token creator.
+    /// @param editor The address of the editor to set.
+    /// @param isEditor Add or remove the ability to edit.
+    function setGameEditor(
+        address gameOwner,
+        address editor,
+        bool isEditor
+    ) external override {
+        require(_msgSender() == gameOwner, "EDITOR_ACCESS_DENIED");
+        _setGameEditor(gameOwner, editor, isEditor);
+    }
+
+    /// @notice Transfers creatorship of `original` from `sender` to `to`.
+    /// @param gameId The current id of the GAME token.
+    /// @param sender The address of current registered creator.
+    /// @param to The address to transfer the creatorship to
+    function transferCreatorship(
+        uint256 gameId,
+        address sender,
+        address to
+    ) external override notToZero(to) {
+        require(_ownerOf(gameId) != address(0), "NONEXISTENT_TOKEN");
+        uint256 id = _storageId(gameId);
+        address msgSender = _msgSender();
+        require(msgSender == sender || _superOperators[msgSender], "TRANSFER_ACCESS_DENIED");
+        require(sender != address(0), "NOT_FROM_ZEROADDRESS");
+        address originalCreator = address(uint160(id / CREATOR_OFFSET_MULTIPLIER));
+        address current = creatorOf(gameId);
+        require(current != to, "CURRENT_=_TO");
+        require(current == sender, "CURRENT_!=_SENDER");
+        _creatorship[id] = to;
+        emit CreatorshipTransfer(originalCreator, current, to);
+    }
+
     /// @notice Burn a GAME token and recover assets.
     /// @param from The address of the one destroying the game.
     /// @param to The address to send all GAME assets to.
@@ -199,7 +195,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         returns (uint256[] memory)
     {
         uint256 storageId = _storageId(gameId);
-        require(_ownerOf(gameId) != address(0), "NONEXISTANT_TOKEN");
+        require(_ownerOf(gameId) != address(0), "NONEXISTENT_TOKEN");
         uint256 length = assetIds.length;
         uint256[] memory assets;
         assets = new uint256[](length);
@@ -267,12 +263,13 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
     }
 
     /// @notice Get the creator of the token type `id`.
-    /// @param id The id of the token to get the creator of.
+    /// @param gameId The id of the token to get the creator of.
     /// @return the creator of the token type `id`.
-    function creatorOf(uint256 id) public view override returns (address) {
-        require(id != uint256(0), "GAME_NEVER_MINTED");
+    function creatorOf(uint256 gameId) public view override returns (address) {
+        require(gameId != uint256(0), "GAME_NEVER_MINTED");
+        uint256 id = _storageId(gameId);
         address originalCreator = address(uint160(id / CREATOR_OFFSET_MULTIPLIER));
-        address newCreator = _creatorship[originalCreator];
+        address newCreator = _creatorship[id];
         if (newCreator != address(0)) {
             return newCreator;
         }

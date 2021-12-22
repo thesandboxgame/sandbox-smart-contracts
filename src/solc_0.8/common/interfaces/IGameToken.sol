@@ -61,8 +61,8 @@ interface IGameToken {
     function creatorOf(uint256 id) external view returns (address);
 
     function transferCreatorship(
+        uint256 gameId,
         address sender,
-        address original,
         address to
     ) external;
 

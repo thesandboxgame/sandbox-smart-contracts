@@ -8,7 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer} = await getNamedAccounts();
 
-  const stakeToken = await deployments.get('SUSHI_SAND_MATIC');
+  const stakeToken = await deployments.get('QUICKSWAP_SAND_MATIC');
   const sand = await deployments.get('PolygonSand');
 
   await deploy('PolygonSANDRewardPool', {
@@ -20,5 +20,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['PolygonSANDRewardPool', 'PolygonSANDRewardPool_deploy', 'L2'];
-func.dependencies = ['SandBaseToken_deploy', 'SUSHI_SAND_MATIC'];
+func.dependencies = ['SandBaseToken_deploy', 'QUICKSWAP_SAND_MATIC'];
 func.skip = skipUnlessTest;

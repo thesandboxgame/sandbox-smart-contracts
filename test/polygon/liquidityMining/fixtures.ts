@@ -4,7 +4,7 @@ import {getUnnamedAccounts} from 'hardhat';
 import {withSnapshot} from '../../utils';
 
 export const setupPolygonSandRewardPool = withSnapshot(
-  ['PolygonSANDRewardPool', 'SUSHI_SAND_MATIC', 'PolygonSand'],
+  ['PolygonSANDRewardPool', 'QUICKSWAP_SAND_MATIC', 'PolygonSand'],
   async function (hre) {
     const {deployments, getNamedAccounts, ethers} = hre;
 
@@ -24,7 +24,7 @@ export const setupPolygonSandRewardPool = withSnapshot(
     // Monthly reward 1,500,000 SAND
     const REWARD_AMOUNT = BigNumber.from(1500000).mul('1000000000000000000');
     const REWARD_TOKEN = 'PolygonSand';
-    const STAKE_TOKEN = 'SUSHI_SAND_MATIC';
+    const STAKE_TOKEN = 'QUICKSWAP_SAND_MATIC';
     const STAKE_AMOUNT = BigNumber.from(10000).mul('1000000000000000000');
     const POOL = 'PolygonSANDRewardPool';
 
@@ -104,7 +104,7 @@ export const setupPolygonSandRewardPool = withSnapshot(
 export const setupPolygonLandWeightedSANDRewardPool = withSnapshot(
   [
     'PolygonLandWeightedSANDRewardPool',
-    'SUSHI_SAND_MATIC',
+    'QUICKSWAP_SAND_MATIC',
     'PolygonSand',
     'Land',
   ],
@@ -132,14 +132,14 @@ export const setupPolygonLandWeightedSANDRewardPool = withSnapshot(
     );
     const WRONG_REWARD_AMOUNT = BigNumber.from(1500000);
     const REWARD_TOKEN = 'PolygonSand';
-    const STAKE_TOKEN = 'SUSHI_SAND_MATIC';
+    const STAKE_TOKEN = 'QUICKSWAP_SAND_MATIC';
     const STAKE_AMOUNT = BigNumber.from(10000).mul('1000000000000000000');
     const SMALL_STAKE_AMOUNT = BigNumber.from(10).mul('1000000000000000000');
     const LESS_PRECISE_STAKE_AMOUNT = BigNumber.from(7).mul(
       '1000000000000000000'
     );
     const POOL = 'PolygonLandWeightedSANDRewardPool';
-    const REWARD_DURATION = 2592000; // 30 days in seconds
+    const REWARD_DURATION = 2419200; // 28 days in seconds
     const ACTUAL_REWARD_AMOUNT = REWARD_AMOUNT.div(REWARD_DURATION).mul(
       REWARD_DURATION
     );
