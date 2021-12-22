@@ -130,7 +130,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
 
     function computeMultiplier(address account) external {
         _processReward();
-        _processUserReward(_msgSender());
+        _processUserReward(account);
         _updateContribution(account);
 
         emit MultiplierComputed(account, _multipliers[account], _contributions[account]);
