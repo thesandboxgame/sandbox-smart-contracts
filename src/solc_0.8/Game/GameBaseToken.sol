@@ -380,7 +380,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
 
         delete _metaData[storageId];
         delete _exactNumOfLandsRequired[storageId];
-        _creatorship[creatorOf(gameId)] = address(0);
+        _creatorship[gameId] = address(0);
         _burn(from, owner, gameId);
     }
 
