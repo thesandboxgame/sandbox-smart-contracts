@@ -37,10 +37,27 @@ export const setupSandRewardPool = withSnapshot(
     const land = await deployments.get('MockLandWithMint');
     const sand = await deployments.get('PolygonSand');
     const durationInSeconds = 28 * 24 * 60 * 60;
+
+    // Added
+    await deployments.deploy('ContributionCalculator', {
+      from: deployer,
+      contract: 'LandMemoizedContributionCalculator',
+      args: [land.address],
+      log: true,
+    });
+    const contributionCalculator = await ethers.getContract(
+      'ContributionCalculator'
+    );
+    // Added end
     await deployments.deploy('SandRewardPool', {
       from: deployer,
       log: true,
-      args: [stakeToken.address, sand.address, land.address, durationInSeconds],
+      args: [
+        stakeToken.address,
+        sand.address,
+        contributionCalculator.address,
+        durationInSeconds,
+      ],
       skipIfAlreadyDeployed: true,
     });
 
@@ -129,6 +146,7 @@ export const setupSandRewardPool = withSnapshot(
     }
 
     return {
+      contributionCalculator,
       rewardPool,
       rewardPoolContract,
       rewardTokenContract,

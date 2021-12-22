@@ -12,6 +12,7 @@ import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.so
 import {IERC721} from "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import {StakeTokenWrapper} from "./StakeTokenWrapper.sol";
 import {SafeMathWithRequire} from "../common/Libraries/SafeMathWithRequire.sol";
+import {IContributionCalculator} from "./IContributionCalculator.sol";
 
 contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
     using SafeERC20 for IERC20;
@@ -34,27 +35,20 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
     mapping(address => uint256) public userRewardPerTokenPaid;
     mapping(address => uint256) public rewards;
 
-    uint256 internal constant DECIMALS_9 = 1000000000;
-    uint256 internal constant MIDPOINT_9 = 500000000;
-    uint256 internal constant NFT_FACTOR_6 = 10000;
-    uint256 internal constant NFT_CONSTANT_3 = 9000;
-    uint256 internal constant ROOT3_FACTOR = 697;
-
     IERC20 public rewardToken;
-    IERC721 public multiplierNFToken;
+    IContributionCalculator public contributionCalculator;
 
     uint256 internal _totalContributions;
-    mapping(address => uint256) internal _multipliers;
     mapping(address => uint256) internal _contributions;
 
     constructor(
         IERC20 stakeToken_,
         IERC20 rewardToken_,
-        IERC721 multiplierNFToken_,
+        IContributionCalculator contributionCalculator_,
         uint256 rewardDuration_
     ) StakeTokenWrapper(stakeToken_) {
         rewardToken = rewardToken_;
-        multiplierNFToken = multiplierNFToken_;
+        contributionCalculator = contributionCalculator_;
         duration = rewardDuration_;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
@@ -69,12 +63,6 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
         require(newStakeLPToken.isContract(), "Bad StakeToken address");
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
         _stakeToken = IERC20(newStakeLPToken);
-    }
-
-    function setNFTMultiplierToken(address newNFTMultiplierToken) external {
-        require(newNFTMultiplierToken.isContract(), "Bad NFTMultiplierToken address");
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
-        multiplierNFToken = IERC721(newNFTMultiplierToken);
     }
 
     function totalSupply() external view returns (uint256) {
@@ -94,7 +82,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
     }
 
     function multiplierOf(address account) external view returns (uint256) {
-        return _multipliers[account];
+        return contributionCalculator.multiplierOf(account);
     }
 
     function lastTimeRewardApplicable() public view returns (uint256) {
@@ -116,24 +104,11 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
             rewards[account] + ((rewardPerToken() - userRewardPerTokenPaid[account]) * _contributions[account]) / 1e24;
     }
 
-    function computeContribution(uint256 amountStaked, uint256 numLands) public pure returns (uint256) {
-        if (numLands == 0) {
-            return amountStaked;
-        }
-        uint256 nftContrib =
-            NFT_FACTOR_6 * (NFT_CONSTANT_3 + SafeMathWithRequire.cbrt3((((numLands - 1) * ROOT3_FACTOR) + 1)));
-        if (nftContrib > MIDPOINT_9) {
-            nftContrib = MIDPOINT_9 + (nftContrib - MIDPOINT_9) / 10;
-        }
-        return amountStaked + ((amountStaked * nftContrib) / DECIMALS_9);
-    }
-
     function computeMultiplier(address account) external {
         _processReward();
         _processUserReward(account);
         _updateContribution(account);
-
-        emit MultiplierComputed(account, _multipliers[account], _contributions[account]);
+        emit MultiplierComputed(account, contributionCalculator.multiplierOf(account), _contributions[account]);
     }
 
     function stake(uint256 amount) external nonReentrant {
@@ -184,10 +159,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
 
     function _updateContribution(address account) internal {
         _totalContributions = _totalContributions - _contributions[account];
-        _multipliers[account] = multiplierNFToken.balanceOf(account);
-
-        uint256 contribution = computeContribution(_balances[account], _multipliers[account]);
-
+        uint256 contribution = contributionCalculator.computeContribution(account, _balances[account]);
         _totalContributions = _totalContributions + contribution;
         _contributions[account] = contribution;
     }
