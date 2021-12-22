@@ -93,7 +93,7 @@ const config: HardhatUserConfig = {
     sandAdmin: {
       default: 2,
       mainnet: '0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06',
-      polygon: '0xe75Ce341C98400a45F579e32C95fF49681Fc93fa', // TODO: get sand admin multi sig contract
+      polygon: '0x7A9fe22691c811ea339D9B73150e6911a5343DcA', // TODO: get sand admin multi sig contract
       rinkeby: '0xa4519D601F43D0b8f167842a367465681F652252',
       goerli: '0x39D01ecc951C2c1f20ba0549e62212659c4d1e06',
       mumbai: '0x49c4D4C94829B9c44052C5f5Cb164Fc612181165',

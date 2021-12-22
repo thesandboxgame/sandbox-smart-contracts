@@ -22,7 +22,7 @@ contract PolygonLandBaseToken is ERC721BaseToken {
      * @notice Return the name of the token contract
      * @return The name of the token contract
      */
-    function name() external pure returns (string memory) {
+    function name() public view returns (string memory) {
         return "Sandbox's LANDs";
     }
 
@@ -30,8 +30,36 @@ contract PolygonLandBaseToken is ERC721BaseToken {
      * @notice Return the symbol of the token contract
      * @return The symbol of the token contract
      */
-    function symbol() external pure returns (string memory) {
+    function symbol() public view returns (string memory) {
         return "LAND";
+    }
+
+    /// @notice total width of the map
+    /// @return width
+    function width() public view returns (uint256) {
+        return GRID_SIZE;
+    }
+
+    /// @notice total height of the map
+    /// @return height
+    function height() public view returns (uint256) {
+        return GRID_SIZE;
+    }
+
+    /// @notice x coordinate of Land token
+    /// @param id tokenId
+    /// @return the x coordinates
+    function x(uint256 id) public view returns (uint256) {
+        require(_ownerOf(id) != address(0), "token does not exist");
+        return id % GRID_SIZE;
+    }
+
+    /// @notice y coordinate of Land token
+    /// @param id tokenId
+    /// @return the y coordinates
+    function y(uint256 id) public view returns (uint256) {
+        require(_ownerOf(id) != address(0), "token does not exist");
+        return id / GRID_SIZE;
     }
 
     // solium-disable-next-line security/no-assign-params
@@ -564,6 +592,45 @@ contract PolygonLandBaseToken is ERC721BaseToken {
                 ids[i] = _idInPath(i, size, x, y);
             }
             require(_checkOnERC721BatchReceived(operator, from, to, ids, data), "erc721 batch transfer rejected by to");
+        }
+    }
+
+    function _ownerAndOperatorEnabledOf(uint256 id)
+        internal
+        view
+        override
+        returns (address owner, bool operatorEnabled)
+    {
+        require(id & LAYER == 0, "Invalid token id");
+        uint256 x = id % GRID_SIZE;
+        uint256 y = id / GRID_SIZE;
+        uint256 owner1x1 = _owners[id];
+
+        if (owner1x1 != 0) {
+            owner = address(uint160(owner1x1));
+            operatorEnabled = (owner1x1 / 2**255) == 1;
+        } else {
+            address owner3x3 = address(uint160(_owners[LAYER_3x3 + (x / 3) * 3 + ((y / 3) * 3) * GRID_SIZE]));
+            if (owner3x3 != address(uint160(0))) {
+                owner = owner3x3;
+                operatorEnabled = false;
+            } else {
+                address owner6x6 = address(uint160(_owners[LAYER_6x6 + (x / 6) * 6 + ((y / 6) * 6) * GRID_SIZE]));
+                if (owner6x6 != address(uint160(0))) {
+                    owner = owner6x6;
+                    operatorEnabled = false;
+                } else {
+                    address owner12x12 =
+                        address(uint160(_owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE]));
+                    if (owner12x12 != address(uint160(0))) {
+                        owner = owner12x12;
+                        operatorEnabled = false;
+                    } else {
+                        owner = address(uint160(_owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE]));
+                        operatorEnabled = false;
+                    }
+                }
+            }
         }
     }
 }

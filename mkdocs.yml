@@ -27,6 +27,7 @@ nav:
       - Blockchain:
           - Ethereum: topics/blockchain/ethereum.md
           - Features: topics/blockchain/features.md
+          - Deployment diagram: topics/blockchain/deployment-diagram.md
       - Polygon:
           - Polygon at Sandbox: topics/polygon/polygon.md
       - Asset:
@@ -34,6 +35,7 @@ nav:
           - Asset attributes registry: topics/asset/asset-attributes-registry.md
           - Asset minter: topics/asset/asset-minter.md
           - Asset upgrader: topics/asset/asset-upgrader.md
+          - Asset signed auction: topics/asset/asset-signed-auction.md
           - Giveaway:
               - Single: topics/asset/giveaway/single.md
               - Multiple: topics/asset/giveaway/multiple.md
