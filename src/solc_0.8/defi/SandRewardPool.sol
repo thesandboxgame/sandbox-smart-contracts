@@ -5,52 +5,50 @@ pragma solidity 0.8.2;
 import {SafeERC20} from "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
-import {Math} from "@openzeppelin/contracts-0.8/utils/math/Math.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
 import {IERC721} from "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import {StakeTokenWrapper} from "./StakeTokenWrapper.sol";
-import {SafeMathWithRequire} from "../common/Libraries/SafeMathWithRequire.sol";
 import {IContributionCalculator} from "./IContributionCalculator.sol";
+import {IRewardCalculator} from "./IRewardCalculator.sol";
 
 contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using Address for address;
 
-    event RewardAdded(uint256 reward);
     event Staked(address indexed user, uint256 amount);
     event Withdrawn(address indexed user, uint256 amount);
     event RewardPaid(address indexed user, uint256 reward);
     event ContributionUpdated(address indexed user, uint256 newContribution, uint256 contribution);
 
-    bytes32 public constant REWARD_DISTRIBUTION = keccak256("REWARD_DISTRIBUTION");
-
-    uint256 public immutable duration;
-
-    uint256 public periodFinish = 0;
-    uint256 public rewardRate = 0;
-    uint256 public lastUpdateTime;
     uint256 public rewardPerTokenStored;
     mapping(address => uint256) public userRewardPerTokenPaid;
     mapping(address => uint256) public rewards;
 
     IERC20 public rewardToken;
     IContributionCalculator public contributionCalculator;
+    IRewardCalculator public rewardCalculator;
 
     uint256 internal _totalContributions;
     mapping(address => uint256) internal _contributions;
 
-    constructor(
-        IERC20 stakeToken_,
-        IERC20 rewardToken_,
-        IContributionCalculator contributionCalculator_,
-        uint256 rewardDuration_
-    ) StakeTokenWrapper(stakeToken_) {
+    constructor(IERC20 stakeToken_, IERC20 rewardToken_) StakeTokenWrapper(stakeToken_) {
         rewardToken = rewardToken_;
-        contributionCalculator = contributionCalculator_;
-        duration = rewardDuration_;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        // setContributionCalculator and setRewardCalculator must be called during initialization!!!
+    }
+
+    function setContributionCalculator(address newContributionCalculator) external {
+        require(newContributionCalculator.isContract(), "Bad ContributionCalculator address");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
+        contributionCalculator = IContributionCalculator(newContributionCalculator);
+    }
+
+    function setRewardCalculator(address newRewardCalculator) external {
+        require(newRewardCalculator.isContract(), "Bad RewardCalculator address");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
+        rewardCalculator = IRewardCalculator(newRewardCalculator);
     }
 
     function setRewardToken(address newRewardToken) external {
@@ -81,18 +79,11 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
         return _contributions[account];
     }
 
-    function lastTimeRewardApplicable() public view returns (uint256) {
-        return Math.min(block.timestamp, periodFinish);
-    }
-
     function rewardPerToken() public view returns (uint256) {
         if (_totalContributions == 0) {
             return rewardPerTokenStored;
         }
-        return
-            rewardPerTokenStored +
-            ((lastTimeRewardApplicable() - lastUpdateTime) * rewardRate * 1e24) /
-            _totalContributions;
+        return rewardPerTokenStored + (rewardCalculator.getRewards() * 1e24) / _totalContributions;
     }
 
     function earned(address account) public view returns (uint256) {
@@ -134,24 +125,6 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
         _withdrawRewards();
     }
 
-    ///@notice to be called after the amount of reward tokens (specified by the reward parameter) has been sent to the contract
-    // Note that the reward should be divisible by the duration to avoid reward token lost
-    ///@param reward number of token to be distributed over the duration
-    function notifyRewardAmount(uint256 reward) external {
-        require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "not reward distribution");
-        _processReward();
-        if (block.timestamp >= periodFinish) {
-            rewardRate = reward / duration;
-        } else {
-            uint256 remaining = periodFinish - block.timestamp;
-            uint256 leftover = remaining * rewardRate;
-            rewardRate = (reward + leftover) / duration;
-        }
-        lastUpdateTime = block.timestamp;
-        periodFinish = block.timestamp + duration;
-        emit RewardAdded(reward);
-    }
-
     function _updateContribution(address account) internal {
         uint256 oldContribution = _contributions[account];
         _totalContributions = _totalContributions - oldContribution;
@@ -179,10 +152,8 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
 
     function _processReward() internal {
         rewardPerTokenStored = rewardPerToken();
-        if (block.timestamp >= periodFinish || _totalContributions != 0) {
-            // ensure reward past the first staker do not get lost
-            lastUpdateTime = lastTimeRewardApplicable();
-        }
+        // TODO: which other variables we can pass ?
+        rewardCalculator.updateRewards(_totalContributions);
     }
 
     function _processUserReward(address account) internal {

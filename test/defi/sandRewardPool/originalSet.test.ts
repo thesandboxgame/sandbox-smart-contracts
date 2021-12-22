@@ -16,6 +16,7 @@ async function multipleUsersEarnings(
   smallRewardAmount = false
 ) {
   const {
+    rewardCalculator,
     stakeTokenContract,
     rewardPoolContract,
     others,
@@ -29,7 +30,7 @@ async function multipleUsersEarnings(
     REWARD_AMOUNT,
     rewardTokenAsAdmin,
   } = await setupSandRewardPool();
-  await rewardPoolContract
+  await rewardCalculator
     .connect(ethers.provider.getSigner(liquidityRewardAdmin))
     .notifyRewardAmount(REWARD_AMOUNT);
   await rewardTokenAsAdmin.transfer(rewardPoolContract.address, REWARD_AMOUNT);
@@ -90,19 +91,19 @@ async function multipleUsersEarnings(
 describe('SandRewardPool', function () {
   it('last time reward application should match the duration', async function () {
     const {
-      rewardPoolContract,
+      rewardCalculator,
       liquidityRewardAdmin,
       REWARD_AMOUNT,
       rewardTokenAsAdmin,
       rewardPool,
     } = await setupSandRewardPool();
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(rewardPool.address, REWARD_AMOUNT);
 
-    const lastTimeRewardApplicable = await rewardPoolContract.lastTimeRewardApplicable();
-    const duration = await rewardPoolContract.duration();
+    const lastTimeRewardApplicable = await rewardCalculator.lastTimeRewardApplicable();
+    const duration = await rewardCalculator.duration();
 
     const latestBlock = await ethers.provider.getBlock('latest');
     const periodFinish = latestBlock.timestamp + duration;
@@ -210,7 +211,11 @@ describe('SandRewardPool', function () {
   });
 
   it('reward per token calculation', async function () {
-    const {rewardPoolContract, others} = await setupSandRewardPool();
+    const {
+      rewardCalculator,
+      rewardPoolContract,
+      others,
+    } = await setupSandRewardPool();
     const stakeAmount = BigNumber.from(10000).mul('1000000000000000000');
 
     await rewardPoolContract
@@ -218,11 +223,11 @@ describe('SandRewardPool', function () {
       .stake(BigNumber.from(stakeAmount));
 
     const totalSupply = await rewardPoolContract.totalSupply();
-    const lastTimeRewardApplicable = await rewardPoolContract.lastTimeRewardApplicable();
+    const lastTimeRewardApplicable = await rewardCalculator.lastTimeRewardApplicable();
     const rewardPerTokenStored = await rewardPoolContract.rewardPerTokenStored();
-    const lastUpdateTime = await rewardPoolContract.lastUpdateTime();
+    const lastUpdateTime = await rewardCalculator.lastUpdateTime();
 
-    const rewardRate = await rewardPoolContract.rewardRate();
+    const rewardRate = await rewardCalculator.rewardRate();
 
     const rewardPerToken = await rewardPoolContract.rewardPerToken();
 
@@ -267,6 +272,7 @@ describe('SandRewardPool', function () {
 
   it('get reward should transfer the reward and emit an event', async function () {
     const {
+      rewardCalculator,
       rewardPoolContract,
       rewardTokenContract,
       others,
@@ -274,7 +280,7 @@ describe('SandRewardPool', function () {
       REWARD_AMOUNT,
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(
@@ -314,6 +320,7 @@ describe('SandRewardPool', function () {
 
   it('exiting should withdraw and transfer the reward', async function () {
     const {
+      rewardCalculator,
       rewardPoolContract,
       rewardTokenContract,
       others,
@@ -321,7 +328,7 @@ describe('SandRewardPool', function () {
       REWARD_AMOUNT,
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(
@@ -354,6 +361,7 @@ describe('SandRewardPool', function () {
 
   it('pool contains reward tokens', async function () {
     const {
+      rewardCalculator,
       rewardPool,
       rewardPoolContract,
       rewardTokenContract,
@@ -361,7 +369,7 @@ describe('SandRewardPool', function () {
       liquidityRewardAdmin,
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(
@@ -376,6 +384,7 @@ describe('SandRewardPool', function () {
 
   it('user can earn reward tokens if pool has been notified of reward', async function () {
     const {
+      rewardCalculator,
       rewardPool,
       rewardPoolContract,
       stakeTokenContract,
@@ -387,7 +396,7 @@ describe('SandRewardPool', function () {
       REWARD_AMOUNT,
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(
@@ -426,21 +435,21 @@ describe('SandRewardPool', function () {
 
   it('admin can notify to start a new reward process (without sending more reward tokens)', async function () {
     const {
-      rewardPoolContract,
+      rewardCalculator,
       liquidityRewardAdmin,
       NEW_REWARD_AMOUNT,
     } = await setupSandRewardPool();
 
-    const periodFinish = await rewardPoolContract.periodFinish();
-    const initialRewardRate = await rewardPoolContract.rewardRate();
-    const duration = await rewardPoolContract.duration();
+    const periodFinish = await rewardCalculator.periodFinish();
+    const initialRewardRate = await rewardCalculator.rewardRate();
+    const duration = await rewardCalculator.duration();
 
-    const receipt = await rewardPoolContract
+    const receipt = await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(NEW_REWARD_AMOUNT);
 
     const rewardAddedEvent = await expectEventWithArgs(
-      rewardPoolContract,
+      rewardCalculator,
       receipt,
       'RewardAdded'
     );
@@ -448,7 +457,7 @@ describe('SandRewardPool', function () {
     const block = await ethers.provider.getBlock(receipt.blockHash);
     const remaining = periodFinish.sub(block.timestamp);
     const leftover = remaining.mul(initialRewardRate);
-    const rewardRate = await rewardPoolContract.rewardRate();
+    const rewardRate = await rewardCalculator.rewardRate();
 
     expect(rewardAddedEvent.args[0]).to.equal(NEW_REWARD_AMOUNT);
     expect(rewardRate).to.equal(NEW_REWARD_AMOUNT.add(leftover).div(duration));
@@ -487,6 +496,7 @@ describe('SandRewardPool', function () {
   [1, 27].forEach((days) => {
     it(`user earns full reward amount if there is only one staker after ${days} day(s)`, async function () {
       const {
+        rewardCalculator,
         rewardPoolContract,
         stakeTokenContract,
         STAKE_AMOUNT,
@@ -498,7 +508,7 @@ describe('SandRewardPool', function () {
         REWARD_AMOUNT,
         rewardTokenAsAdmin,
       } = await setupSandRewardPool();
-      await rewardPoolContract
+      await rewardCalculator
         .connect(ethers.provider.getSigner(liquidityRewardAdmin))
         .notifyRewardAmount(REWARD_AMOUNT);
       await rewardTokenAsAdmin.transfer(
@@ -532,6 +542,7 @@ describe('SandRewardPool', function () {
   it('User with 0 LAND earns correct reward amount', async function () {
     const numNfts = BigNumber.from(0);
     const {
+      rewardCalculator,
       rewardPool,
       rewardPoolContract,
       STAKE_AMOUNT,
@@ -543,7 +554,7 @@ describe('SandRewardPool', function () {
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
 
-    const receipt = await rewardPoolContract
+    const receipt = await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
 
@@ -616,6 +627,7 @@ describe('SandRewardPool', function () {
   it('User with 0 LAND earns correct reward amount - smaller stake', async function () {
     const numNfts = BigNumber.from(0);
     const {
+      rewardCalculator,
       rewardPoolContract,
       REWARD_DURATION,
       REWARD_AMOUNT,
@@ -627,7 +639,7 @@ describe('SandRewardPool', function () {
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
 
-    const receipt = await rewardPoolContract
+    const receipt = await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
 
@@ -700,6 +712,7 @@ describe('SandRewardPool', function () {
     it(`User with ${lands} LAND(s) earns correct reward amount`, async function () {
       const numNfts = BigNumber.from(lands);
       const {
+        rewardCalculator,
         rewardPoolContract,
         STAKE_AMOUNT,
         REWARD_DURATION,
@@ -713,7 +726,7 @@ describe('SandRewardPool', function () {
         rewardTokenAsAdmin,
       } = await setupSandRewardPool();
 
-      const receipt = await rewardPoolContract
+      const receipt = await rewardCalculator
         .connect(ethers.provider.getSigner(liquidityRewardAdmin))
         .notifyRewardAmount(REWARD_AMOUNT);
 
@@ -840,6 +853,7 @@ describe('SandRewardPool', function () {
 
   it('First user can claim their reward - no NFTs', async function () {
     const {
+      rewardCalculator,
       rewardTokenContract,
       rewardPoolContract,
       others,
@@ -849,7 +863,7 @@ describe('SandRewardPool', function () {
       liquidityRewardAdmin,
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(
@@ -896,6 +910,7 @@ describe('SandRewardPool', function () {
 
   it('First user can claim their reward - has NFTs', async function () {
     const {
+      rewardCalculator,
       rewardTokenContract,
       rewardPoolContract,
       others,
@@ -907,7 +922,7 @@ describe('SandRewardPool', function () {
       liquidityRewardAdmin,
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(
@@ -955,6 +970,7 @@ describe('SandRewardPool', function () {
 
   it('A user can claim their reward after multiple stakes', async function () {
     const {
+      rewardCalculator,
       rewardTokenContract,
       rewardPoolContract,
       others,
@@ -966,7 +982,7 @@ describe('SandRewardPool', function () {
       liquidityRewardAdmin,
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(
@@ -1020,6 +1036,7 @@ describe('SandRewardPool', function () {
 
   it('First user can exit the pool', async function () {
     const {
+      rewardCalculator,
       stakeTokenContract,
       rewardPoolContract,
       others,
@@ -1029,7 +1046,7 @@ describe('SandRewardPool', function () {
       REWARD_AMOUNT,
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(
@@ -1070,6 +1087,7 @@ describe('SandRewardPool', function () {
 
   it('A user can exit the pool after multiple stakes', async function () {
     const {
+      rewardCalculator,
       stakeTokenContract,
       rewardPoolContract,
       others,
@@ -1079,7 +1097,7 @@ describe('SandRewardPool', function () {
       REWARD_AMOUNT,
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(
@@ -1129,6 +1147,7 @@ describe('SandRewardPool', function () {
 
   it('A user with NFTs can exit the pool after multiple stakes', async function () {
     const {
+      rewardCalculator,
       stakeTokenContract,
       rewardPoolContract,
       others,
@@ -1140,7 +1159,7 @@ describe('SandRewardPool', function () {
       REWARD_AMOUNT,
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(
@@ -1434,6 +1453,7 @@ describe('SandRewardPool', function () {
 
   it('Staking with STAKE_AMOUNT plus an extra amount equivalent to 2 NFTs', async function () {
     const {
+      rewardCalculator,
       stakeTokenContract,
       rewardPoolContract,
       others,
@@ -1444,7 +1464,7 @@ describe('SandRewardPool', function () {
       REWARD_AMOUNT,
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(
@@ -1493,6 +1513,7 @@ describe('SandRewardPool', function () {
 
   it('Earlier staker gets more rewards with same NFT amount - small NFT number', async function () {
     const {
+      rewardCalculator,
       rewardPoolContract,
       others,
       REWARD_DURATION,
@@ -1504,7 +1525,7 @@ describe('SandRewardPool', function () {
       REWARD_AMOUNT,
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(
@@ -1557,6 +1578,7 @@ describe('SandRewardPool', function () {
 
   it('Earlier staker gets more rewards with same NFT amount - large NFT number', async function () {
     const {
+      rewardCalculator,
       rewardPoolContract,
       others,
       REWARD_DURATION,
@@ -1568,7 +1590,7 @@ describe('SandRewardPool', function () {
       REWARD_AMOUNT,
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(
@@ -1611,6 +1633,7 @@ describe('SandRewardPool', function () {
 
   it('More lands give more rewards than earlier staker when NFT amounts are smaller', async function () {
     const {
+      rewardCalculator,
       rewardPoolContract,
       others,
       REWARD_DURATION,
@@ -1622,7 +1645,7 @@ describe('SandRewardPool', function () {
       REWARD_AMOUNT,
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(
@@ -1673,6 +1696,7 @@ describe('SandRewardPool', function () {
 
   it('More lands do not give more rewards than earlier staker with large NFT amounts', async function () {
     const {
+      rewardCalculator,
       rewardPoolContract,
       others,
       REWARD_DURATION,
@@ -1684,7 +1708,7 @@ describe('SandRewardPool', function () {
       REWARD_AMOUNT,
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(
@@ -1732,6 +1756,7 @@ describe('SandRewardPool', function () {
 
   it('rewardToken in pool is more than amount notified', async function () {
     const {
+      rewardCalculator,
       stakeTokenContract,
       rewardPoolContract,
       others,
@@ -1747,7 +1772,7 @@ describe('SandRewardPool', function () {
       .div(REWARD_DURATION)
       .mul(REWARD_DURATION);
 
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(rewardTokenAdmin))
       .notifyRewardAmount(wrongRewardAmount);
 
@@ -1778,6 +1803,7 @@ describe('SandRewardPool', function () {
 
   it('rewardToken in pool is zero', async function () {
     const {
+      rewardCalculator,
       stakeTokenContract,
       rewardPoolContract,
       others,
@@ -1788,7 +1814,7 @@ describe('SandRewardPool', function () {
       REWARD_AMOUNT,
     } = await setupSandRewardPool();
 
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
 
@@ -1826,6 +1852,7 @@ describe('SandRewardPool', function () {
 
   it('rewardToken in pool is less than amount notified', async function () {
     const {
+      rewardCalculator,
       stakeTokenContract,
       rewardTokenContract,
       rewardPoolContract,
@@ -1838,7 +1865,7 @@ describe('SandRewardPool', function () {
       WRONG_REWARD_AMOUNT,
     } = await setupSandRewardPool();
 
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
 
@@ -1880,6 +1907,7 @@ describe('SandRewardPool', function () {
 
   it('the call to notifyRewardAmount is made after users first call stake', async function () {
     const {
+      rewardCalculator,
       stakeTokenContract,
       rewardPoolContract,
       others,
@@ -1907,7 +1935,7 @@ describe('SandRewardPool', function () {
 
     expect(initialEarnings).to.equal(0); // pool has not been notified yet
 
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
 
@@ -1934,6 +1962,7 @@ describe('SandRewardPool', function () {
 
   it('user is earning rewards and pool is notified for a second time before end of current reward period', async function () {
     const {
+      rewardCalculator,
       stakeTokenContract,
       rewardPoolContract,
       others,
@@ -1945,7 +1974,7 @@ describe('SandRewardPool', function () {
       rewardTokenAsAdmin,
     } = await setupSandRewardPool();
 
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(
@@ -1964,7 +1993,7 @@ describe('SandRewardPool', function () {
 
     expect(initialEarnings).to.not.equal(0); // user earns as a result of earlier notifyRewardAmount
 
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
 
@@ -1992,6 +2021,7 @@ describe('SandRewardPool', function () {
   it('Multiplier & reward are correct', async function () {
     const {
       contributionCalculator,
+      rewardCalculator,
       rewardPoolContract,
       others,
       REWARD_DURATION,
@@ -2004,7 +2034,7 @@ describe('SandRewardPool', function () {
       multiplierNFTokenAdmin,
     } = await setupSandRewardPool();
 
-    await rewardPoolContract
+    await rewardCalculator
       .connect(ethers.provider.getSigner(liquidityRewardAdmin))
       .notifyRewardAmount(REWARD_AMOUNT);
     await rewardTokenAsAdmin.transfer(
