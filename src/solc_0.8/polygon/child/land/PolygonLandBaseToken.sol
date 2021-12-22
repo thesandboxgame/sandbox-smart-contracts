@@ -554,9 +554,8 @@ contract PolygonLandBaseToken is ERC721BaseToken {
                 if (owner6x6 != address(0)) {
                     return owner6x6;
                 } else {
-                    address owner12x12 = address(
-                        uint160(_owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE])
-                    );
+                    address owner12x12 =
+                        address(uint160(_owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE]));
                     if (owner12x12 != address(0)) {
                         return owner12x12;
                     } else {
