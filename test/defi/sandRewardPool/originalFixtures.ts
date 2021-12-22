@@ -26,14 +26,11 @@ export const setupSandRewardPool = withSnapshot(
     });
 
     // Taken from 00_deploy_fake_LP_MATICSAND_tokens_if_needed.ts
-    const FAKE_LP_MATIC_SAND = await deployments.deploy(
-      'QUICKSWAP_SAND_MATIC',
-      {
-        from: deployer,
-        contract: 'FakeLPSandMatic',
-        log: true,
-      }
-    );
+    await deployments.deploy('QUICKSWAP_SAND_MATIC', {
+      from: deployer,
+      contract: 'FakeLPSandMatic',
+      log: true,
+    });
 
     // Taken from 00_deploy_land_weighted_sand_reward_pool.ts
     const stakeToken = await deployments.get('QUICKSWAP_SAND_MATIC');

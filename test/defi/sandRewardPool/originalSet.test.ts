@@ -2066,6 +2066,7 @@ describe('SandRewardPool', function () {
     expect(precisionLost).to.be.at.most(2);
   });
 
+  // eslint-disable-next-line mocha/no-skipped-tests
   it.skip(`THIS IS FALSE, EVERYBODY CAN DO IT: Only sender or reward distribution can compute sender's account`, async function () {
     const {
       rewardPoolContract,
