@@ -24,7 +24,7 @@ contract LandMemoizedContributionCalculator is IContributionCalculator, Ownable 
         multiplierNFToken = multiplierNFToken_;
     }
 
-    function multiplierOf(address account) external view override returns (uint256) {
+    function multiplierOf(address account) external view returns (uint256) {
         return _multipliers[account];
     }
 
