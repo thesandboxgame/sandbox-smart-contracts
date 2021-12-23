@@ -3,7 +3,6 @@
 pragma solidity 0.8.2;
 
 interface IContributionCalculator {
-    function multiplierOf(address account) external view returns (uint256);
-
+    // TODO: add other parameters like totalSupply, totalContribution, etc?
     function computeContribution(address account, uint256 amountStaked) external returns (uint256);
 }

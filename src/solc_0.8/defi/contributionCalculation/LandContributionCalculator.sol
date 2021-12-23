@@ -23,7 +23,7 @@ contract LandContributionCalculator is IContributionCalculator, Ownable {
         multiplierNFToken = multiplierNFToken_;
     }
 
-    function multiplierOf(address account) external view override returns (uint256) {
+    function multiplierOf(address account) external view returns (uint256) {
         return multiplierNFToken.balanceOf(account);
     }
 

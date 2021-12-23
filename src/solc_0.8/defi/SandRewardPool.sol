@@ -22,7 +22,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
     event Staked(address indexed user, uint256 amount);
     event Withdrawn(address indexed user, uint256 amount);
     event RewardPaid(address indexed user, uint256 reward);
-    event MultiplierComputed(address indexed user, uint256 multiplier, uint256 contribution);
+    event ContributionUpdated(address indexed user, uint256 newContribution, uint256 contribution);
 
     bytes32 public constant REWARD_DISTRIBUTION = keccak256("REWARD_DISTRIBUTION");
 
@@ -81,10 +81,6 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
         return _contributions[account];
     }
 
-    function multiplierOf(address account) external view returns (uint256) {
-        return contributionCalculator.multiplierOf(account);
-    }
-
     function lastTimeRewardApplicable() public view returns (uint256) {
         return Math.min(block.timestamp, periodFinish);
     }
@@ -108,7 +104,6 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
         _processReward();
         _processUserReward(account);
         _updateContribution(account);
-        emit MultiplierComputed(account, contributionCalculator.multiplierOf(account), _contributions[account]);
     }
 
     function stake(uint256 amount) external nonReentrant {
@@ -158,10 +153,12 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
     }
 
     function _updateContribution(address account) internal {
-        _totalContributions = _totalContributions - _contributions[account];
+        uint256 oldContribution = _contributions[account];
+        _totalContributions = _totalContributions - oldContribution;
         uint256 contribution = contributionCalculator.computeContribution(account, _balances[account]);
         _totalContributions = _totalContributions + contribution;
         _contributions[account] = contribution;
+        emit ContributionUpdated(account, contribution, oldContribution);
     }
 
     function _withdrawStake(uint256 amount) internal {
