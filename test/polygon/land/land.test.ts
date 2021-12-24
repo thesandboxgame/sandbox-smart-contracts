@@ -299,8 +299,8 @@ describe('PolygonLand.sol', function () {
 
         await deployer.MockLandTunnel.receiveMessage(
           abiCoder.encode(
-            ['address', 'uint256', 'uint256', 'uint256', 'bytes'],
-            [landHolder.address, size, x, y, bytes]
+            ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
+            [landHolder.address, [size], [x], [y], bytes]
           )
         );
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
@@ -376,8 +376,8 @@ describe('PolygonLand.sol', function () {
 
         await deployer.MockLandTunnel.receiveMessage(
           abiCoder.encode(
-            ['address', 'uint256', 'uint256', 'uint256', 'bytes'],
-            [landHolder.address, size, x, y, bytes]
+            ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
+            [landHolder.address, [size], [x], [y], bytes]
           )
         );
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
@@ -453,8 +453,8 @@ describe('PolygonLand.sol', function () {
 
         await deployer.MockLandTunnel.receiveMessage(
           abiCoder.encode(
-            ['address', 'uint256', 'uint256', 'uint256', 'bytes'],
-            [landHolder.address, size, x, y, bytes]
+            ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
+            [landHolder.address, [size], [x], [y], bytes]
           )
         );
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
@@ -530,8 +530,8 @@ describe('PolygonLand.sol', function () {
 
         await deployer.MockLandTunnel.receiveMessage(
           abiCoder.encode(
-            ['address', 'uint256', 'uint256', 'uint256', 'bytes'],
-            [landHolder.address, size, x, y, bytes]
+            ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
+            [landHolder.address, [size], [x], [y], bytes]
           )
         );
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
@@ -607,8 +607,8 @@ describe('PolygonLand.sol', function () {
 
         await deployer.MockLandTunnel.receiveMessage(
           abiCoder.encode(
-            ['address', 'uint256', 'uint256', 'uint256', 'bytes'],
-            [landHolder.address, size, x, y, bytes]
+            ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
+            [landHolder.address, [size], [x], [y], bytes]
           )
         );
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
@@ -781,11 +781,6 @@ describe('PolygonLand.sol', function () {
             bytes
           )
         ).to.be.revertedWith('Exceeds gas limit on L1.');
-      });
-
-      it('owner should be able to set limit', async function () {
-        // const {deployer, MockPolygonLandTunnel} = await setupLand();
-        // deployer.MockLandTunnel.set
       });
     });
   });
