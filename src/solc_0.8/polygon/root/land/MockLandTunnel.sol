@@ -16,10 +16,4 @@ contract MockLandTunnel is LandTunnel {
     function receiveMessage(bytes memory message) public virtual override {
         _processMessageFromChild(message);
     }
-
-    function receiveMessageBatch(bytes[] memory messageArr) public virtual override {
-        for (uint256 i = 0; i < messageArr.length; i++) {
-            _processMessageFromChild(messageArr[i]);
-        }
-    }
 }
