@@ -52,4 +52,12 @@ contract LandTunnel is FxBaseRootTunnel, IERC721TokenReceiver {
         LandToken(rootToken).transferQuad(address(this), to, size, x, y, data);
         emit Withdraw(to, size, x, y, data);
     }
+
+    function receiveMessageBatch(bytes[] memory inputDataArr) public virtual {
+        for (uint256 i = 0; i < inputDataArr.length; i++) {
+            bytes memory inputData = inputDataArr[i];
+            bytes memory message = _validateAndExtractMessage(inputData);
+            _processMessageFromChild(message);
+        }
+    }
 }

@@ -2,32 +2,47 @@
 pragma solidity 0.8.2;
 
 import "fx-portal/contracts/tunnel/FxBaseChildTunnel.sol";
+import "@openzeppelin/contracts-0.8/access/Ownable.sol";
+
 import "../../../common/interfaces/IPolygonLand.sol";
 import "../../../common/interfaces/IERC721TokenReceiver.sol";
 import "./PolygonLandBaseToken.sol";
 
 // @todo - natspec comments
 
-contract PolygonLandTunnel is FxBaseChildTunnel, IERC721Receiver {
+contract PolygonLandTunnel is FxBaseChildTunnel, IERC721Receiver, Ownable {
     IPolygonLand public childToken;
     uint32 public maxGasLimitOnL1 = 500;
-    mapping(uint8 => uint16) public gasLimits;
+    mapping(uint8 => uint32) public gasLimits;
 
-    function setLimit(uint8 size, uint16 limit) public {
-        gasLimits[size] = limit;
+    event SetGasLimit(uint8 size, uint32 limit);
+    event SetMaxGasLimit(uint32 maxGasLimit);
+
+    function setMaxLimitOnL1(uint32 _maxGasLimit) external onlyOwner {
+        maxGasLimitOnL1 = _maxGasLimit;
+        emit SetMaxGasLimit(_maxGasLimit);
     }
 
-    function setupLimits(uint16[5] memory limits) public {
-        gasLimits[1] = limits[0];
-        gasLimits[3] = limits[1];
-        gasLimits[6] = limits[2];
-        gasLimits[12] = limits[3];
-        gasLimits[24] = limits[4];
+    function _setLimit(uint8 size, uint32 limit) internal {
+        gasLimits[size] = limit;
+        emit SetGasLimit(size, limit);
+    }
+
+    function setLimit(uint8 size, uint32 limit) external onlyOwner {
+        _setLimit(size, limit);
+    }
+
+    // setupLimits([5, 10, 20, 90, 340]);
+    function setupLimits(uint32[5] calldata limits) external onlyOwner {
+        _setLimit(1, limits[0]);
+        _setLimit(3, limits[1]);
+        _setLimit(6, limits[2]);
+        _setLimit(12, limits[3]);
+        _setLimit(24, limits[4]);
     }
 
     constructor(address _fxChild, IPolygonLand _childToken) FxBaseChildTunnel(_fxChild) {
         childToken = _childToken;
-        setupLimits([5, 10, 20, 90, 340]);
     }
 
     function transferQuadToL1(
@@ -49,11 +64,14 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721Receiver {
         bytes memory data
     ) external {
         require(sizes.length == xs.length && sizes.length == ys.length, "sizes, xs, ys must be same length");
+
         uint32 gasLimit = 0;
         for (uint256 i = 0; i < sizes.length; i++) {
             gasLimit += gasLimits[uint8(sizes[i])];
         }
+
         require(gasLimit < maxGasLimitOnL1, "Exceeds gas limit on L1.");
+
         for (uint256 i = 0; i < sizes.length; i++) {
             transferQuadToL1(to, sizes[i], xs[i], ys[i], data);
         }

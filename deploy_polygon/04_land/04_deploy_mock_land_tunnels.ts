@@ -18,7 +18,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     skipIfAlreadyDeployed: true,
   });
 
+  await deployments.execute(
+    'MockPolygonLandTunnel',
+    {from: deployer},
+    'setupLimits',
+    [5, 10, 20, 90, 340]
+  );
   // get deployer on l1
+
   const {deployer: deployerOnL1} = await hre.companionNetworks[
     'l1'
   ].getNamedAccounts();
