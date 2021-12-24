@@ -616,7 +616,7 @@ describe('PolygonLand.sol', function () {
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
       });
 
-      it('should run on multiple lands', async function () {
+      it('should should be able to tranfer multiple lands', async function () {
         const {
           deployer,
           Land,
@@ -642,8 +642,12 @@ describe('PolygonLand.sol', function () {
           [0, 300, 30, 24],
         ];
 
+        const numberOfLands = mintingData[0].length;
+        const numberOfTokens = mintingData[0]
+          .map((elem) => elem * elem)
+          .reduce((a, b) => a + b, 0);
         await Promise.all(
-          [...Array(4).keys()].map((idx) => {
+          [...Array(numberOfLands).keys()].map((idx) => {
             waitFor(
               landMinter.Land.mintQuad(
                 landHolder.address,
@@ -653,7 +657,9 @@ describe('PolygonLand.sol', function () {
             );
           })
         );
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(765);
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(
+          numberOfTokens
+        );
 
         // Transfer to L1 Tunnel
         await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
@@ -664,9 +670,11 @@ describe('PolygonLand.sol', function () {
         );
 
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
-        expect(await Land.balanceOf(MockLandTunnel.address)).to.be.equal(765);
+        expect(await Land.balanceOf(MockLandTunnel.address)).to.be.equal(
+          numberOfTokens
+        );
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          765
+          numberOfTokens
         );
 
         // Transfer to L2 Tunnel
@@ -685,21 +693,96 @@ describe('PolygonLand.sol', function () {
 
         const abiCoder = new AbiCoder();
 
+        await deployer.MockLandTunnel.receiveMessageBatch(
+          [...Array(numberOfLands).keys()].map((idx) => {
+            return abiCoder.encode(
+              ['address', 'uint256', 'uint256', 'uint256', 'bytes'],
+              [landHolder.address, ...mintingData.map((x) => x[idx]), bytes]
+            );
+          })
+        );
+
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(765);
+        expect(await Land.balanceOf(MockLandTunnel.address)).to.be.equal(0);
+        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
+      });
+
+      it('should not be able to tranfer if exceeds limit', async function () {
+        const {
+          deployer,
+          Land,
+          landMinter,
+          users,
+          MockLandTunnel,
+          PolygonLand,
+          MockPolygonLandTunnel,
+        } = await setupLand();
+        const bytes = '0x00';
+        // Set Mock PolygonLandTunnel in PolygonLand
+        await deployer.PolygonLand.setPolygonLandTunnel(
+          MockPolygonLandTunnel.address
+        );
+        expect(await PolygonLand.polygonLandTunnel()).to.equal(
+          MockPolygonLandTunnel.address
+        );
+
+        const landHolder = users[0];
+        const mintingData = [
+          [24, 24],
+          [0, 240],
+          [0, 240],
+        ];
+
+        const numberOfLands = mintingData[0].length;
+        const numberOfTokens = mintingData[0]
+          .map((elem) => elem * elem)
+          .reduce((a, b) => a + b, 0);
         await Promise.all(
-          [...Array(4).keys()].map((idx) => {
+          [...Array(numberOfLands).keys()].map((idx) => {
             waitFor(
-              deployer.MockLandTunnel.receiveMessage(
-                abiCoder.encode(
-                  ['address', 'uint256', 'uint256', 'uint256', 'bytes'],
-                  [landHolder.address, ...mintingData.map((x) => x[idx]), bytes]
-                )
+              landMinter.Land.mintQuad(
+                landHolder.address,
+                ...mintingData.map((x) => x[idx]),
+                bytes
               )
             );
           })
         );
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(765);
-        expect(await Land.balanceOf(MockLandTunnel.address)).to.be.equal(0);
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(
+          numberOfTokens
+        );
+
+        // Transfer to L1 Tunnel
+        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
+        await landHolder.MockLandTunnel.batchTransferQuadToL2(
+          landHolder.address,
+          ...mintingData,
+          bytes
+        );
+
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
+        expect(await Land.balanceOf(MockLandTunnel.address)).to.be.equal(
+          numberOfTokens
+        );
+        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
+          numberOfTokens
+        );
+
+        // Transfer to L2 Tunnel
+
+        // Check if limit is set
+        expect(await MockPolygonLandTunnel.maxGasLimitOnL1()).to.eq(500);
+        await landHolder.PolygonLand.setApprovalForAll(
+          MockPolygonLandTunnel.address,
+          true
+        );
+        expect(
+          landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
+            landHolder.address,
+            ...mintingData,
+            bytes
+          )
+        ).to.be.revertedWith('Exceeds gas limit on L1.');
       });
     });
   });
