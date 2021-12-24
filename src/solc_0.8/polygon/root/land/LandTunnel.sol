@@ -47,17 +47,11 @@ contract LandTunnel is FxBaseRootTunnel, IERC721TokenReceiver {
     }
 
     function _processMessageFromChild(bytes memory message) internal override {
-        (address to, uint256 size, uint256 x, uint256 y, bytes memory data) =
-            abi.decode(message, (address, uint256, uint256, uint256, bytes));
-        LandToken(rootToken).transferQuad(address(this), to, size, x, y, data);
-        emit Withdraw(to, size, x, y, data);
-    }
-
-    function receiveMessageBatch(bytes[] memory inputDataArr) public virtual {
-        for (uint256 i = 0; i < inputDataArr.length; i++) {
-            bytes memory inputData = inputDataArr[i];
-            bytes memory message = _validateAndExtractMessage(inputData);
-            _processMessageFromChild(message);
+        (address to, uint256[] memory size, uint256[] memory x, uint256[] memory y, bytes memory data) =
+            abi.decode(message, (address, uint256[], uint256[], uint256[], bytes));
+        for (uint256 index = 0; index < x.length; index++) {
+            LandToken(rootToken).transferQuad(address(this), to, size[index], x[index], y[index], data);
+            emit Withdraw(to, size[index], x[index], y[index], data);
         }
     }
 }

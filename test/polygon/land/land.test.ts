@@ -693,13 +693,11 @@ describe('PolygonLand.sol', function () {
 
         const abiCoder = new AbiCoder();
 
-        await deployer.MockLandTunnel.receiveMessageBatch(
-          [...Array(numberOfLands).keys()].map((idx) => {
-            return abiCoder.encode(
-              ['address', 'uint256', 'uint256', 'uint256', 'bytes'],
-              [landHolder.address, ...mintingData.map((x) => x[idx]), bytes]
-            );
-          })
+        await deployer.MockLandTunnel.receiveMessage(
+          abiCoder.encode(
+            ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
+            [landHolder.address, ...mintingData, bytes]
+          )
         );
 
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(765);
@@ -783,6 +781,11 @@ describe('PolygonLand.sol', function () {
             bytes
           )
         ).to.be.revertedWith('Exceeds gas limit on L1.');
+      });
+
+      it('owner should be able to set limit', async function () {
+        // const {deployer, MockPolygonLandTunnel} = await setupLand();
+        // deployer.MockLandTunnel.set
       });
     });
   });

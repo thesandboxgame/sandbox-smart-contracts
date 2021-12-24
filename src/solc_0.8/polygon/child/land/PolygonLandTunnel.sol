@@ -45,17 +45,6 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721Receiver, Ownable {
         childToken = _childToken;
     }
 
-    function transferQuadToL1(
-        address to,
-        uint256 size,
-        uint256 x,
-        uint256 y,
-        bytes memory data
-    ) internal {
-        childToken.transferQuad(msg.sender, address(this), size, x, y, data);
-        _sendMessageToRoot(abi.encode(to, size, x, y, data));
-    }
-
     function batchTransferQuadToL1(
         address to,
         uint256[] calldata sizes,
@@ -73,8 +62,9 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721Receiver, Ownable {
         require(gasLimit < maxGasLimitOnL1, "Exceeds gas limit on L1.");
 
         for (uint256 i = 0; i < sizes.length; i++) {
-            transferQuadToL1(to, sizes[i], xs[i], ys[i], data);
+            childToken.transferQuad(msg.sender, address(this), sizes[i], xs[i], ys[i], data);
         }
+        _sendMessageToRoot(abi.encode(to, sizes, xs, ys, data));
     }
 
     function _processMessageFromRoot(
