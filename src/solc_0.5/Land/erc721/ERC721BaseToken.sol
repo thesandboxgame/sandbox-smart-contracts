@@ -22,10 +22,10 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
     mapping (address => mapping(address => bool)) public _operatorsForAll;
     mapping (uint256 => address) public _operators;
 
-    constructor(
+    function initialize (
         address metaTransactionContract,
         address admin
-    ) internal {
+    ) public {
         _admin = admin;
         _setMetaTransactionProcessor(metaTransactionContract, true);
     }

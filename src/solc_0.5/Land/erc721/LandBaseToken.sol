@@ -36,12 +36,6 @@ contract LandBaseToken is ERC721BaseToken {
         return _minters[who];
     }
 
-    constructor(
-        address metaTransactionContract,
-        address admin
-    ) public ERC721BaseToken(metaTransactionContract, admin) {
-    }
-
     /// @notice total width of the map
     /// @return width
     function width() external returns(uint256) {
