@@ -22,12 +22,20 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
     mapping (address => mapping(address => bool)) public _operatorsForAll;
     mapping (uint256 => address) public _operators;
 
+    bool internal _initialized;
+
+    modifier initializer() {
+        require(!_initialized, "ERC721BaseToken: Contract already initialized");
+        _;
+    }
+
     function initialize (
         address metaTransactionContract,
         address admin
-    ) public {
+    ) public initializer {
         _admin = admin;
         _setMetaTransactionProcessor(metaTransactionContract, true);
+        _initialized = true;
     }
 
     function _transferFrom(address from, address to, uint256 id) internal {
