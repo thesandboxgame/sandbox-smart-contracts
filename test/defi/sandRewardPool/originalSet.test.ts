@@ -1195,6 +1195,7 @@ describe('SandRewardPool', function () {
 
   it('Change externals contracts', async function () {
     const {
+      contributionCalculator,
       rewardTokenContract,
       rewardPoolContract,
       deployer,
@@ -1216,14 +1217,14 @@ describe('SandRewardPool', function () {
     ).to.be.revertedWith('Bad RewardToken address');
 
     await expect(
-      rewardPoolContract
+      contributionCalculator
         .connect(ethers.provider.getSigner(liquidityRewardAdmin))
         .setNFTMultiplierToken(rewardTokenContract.address)
     ).to.be.reverted;
 
     // Change address with another contract in order to see if not reverted
     await expect(
-      rewardPoolContract
+      contributionCalculator
         .connect(ethers.provider.getSigner(deployer))
         .setNFTMultiplierToken(rewardTokenContract.address)
     ).not.to.be.reverted;
@@ -1990,6 +1991,7 @@ describe('SandRewardPool', function () {
 
   it('Multiplier & reward are correct', async function () {
     const {
+      contributionCalculator,
       rewardPoolContract,
       others,
       REWARD_DURATION,
@@ -2027,7 +2029,7 @@ describe('SandRewardPool', function () {
 
     await mine();
 
-    let multiplier = await rewardPoolContract.multiplierOf(others[0]);
+    let multiplier = await contributionCalculator.multiplierOf(others[0]);
 
     expect(multiplier).to.be.equal(1);
 
@@ -2039,7 +2041,7 @@ describe('SandRewardPool', function () {
       .connect(ethers.provider.getSigner(others[0]))
       .computeMultiplier(others[0]);
 
-    multiplier = await rewardPoolContract.multiplierOf(others[0]);
+    multiplier = await contributionCalculator.multiplierOf(others[0]);
 
     expect(multiplier).to.be.equal(2);
 
