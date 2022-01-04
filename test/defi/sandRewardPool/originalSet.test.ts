@@ -1226,14 +1226,14 @@ describe('SandRewardPool', function () {
       rewardPoolContract
         .connect(ethers.provider.getSigner(deployer))
         .setRewardToken(constants.AddressZero)
-    ).to.be.revertedWith('Bad RewardToken address');
+    ).to.be.revertedWith('not a contract');
 
     // use deployer address as not contract address
     await expect(
       rewardPoolContract
         .connect(ethers.provider.getSigner(deployer))
         .setRewardToken(deployer)
-    ).to.be.revertedWith('Bad RewardToken address');
+    ).to.be.revertedWith('not a contract');
 
     await expect(
       contributionCalculator
@@ -2069,7 +2069,7 @@ describe('SandRewardPool', function () {
 
     await rewardPoolContract
       .connect(ethers.provider.getSigner(others[0]))
-      .computeMultiplier(others[0]);
+      .computeContribution(others[0]);
 
     multiplier = await contributionCalculator.multiplierOf(others[0]);
 
