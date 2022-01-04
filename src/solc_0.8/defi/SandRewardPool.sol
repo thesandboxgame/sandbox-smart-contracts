@@ -5,7 +5,6 @@ pragma solidity 0.8.2;
 import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
 import {SafeERC20} from "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
-import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import {Math} from "@openzeppelin/contracts-0.8/utils/math/Math.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
@@ -16,7 +15,7 @@ import {SafeMathWithRequire} from "../common/Libraries/SafeMathWithRequire.sol";
 import {ERC2771Handler} from "../common/BaseWithStorage/ERC2771Handler.sol";
 import {IContributionCalculator} from "./IContributionCalculator.sol";
 
-contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, Ownable, ERC2771Handler {
+contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ERC2771Handler {
     using SafeERC20 for IERC20;
     using Address for address;
 
@@ -138,7 +137,8 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, Ow
         _withdrawRewards();
     }
 
-    function setTrustedForwarder(address trustedForwarder) external onlyOwner {
+    function setTrustedForwarder(address trustedForwarder) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Only admin");
         _trustedForwarder = trustedForwarder;
     }
 
