@@ -5,7 +5,7 @@ import {withSnapshot} from '../../utils';
 
 // TODO: Replace PolygonSand with a mock erc20 like FakeLPSandMatic
 export const setupSandRewardPool = withSnapshot(
-  ['PolygonSand', 'TRUSTED_FORWARDER'],
+  ['PolygonSand'],
   async function (hre) {
     const {deployments, getNamedAccounts, ethers} = hre;
     const {
