@@ -13,6 +13,10 @@ import {StakeTokenWrapper} from "./StakeTokenWrapper.sol";
 import {IContributionCalculator} from "./IContributionCalculator.sol";
 import {IRewardCalculator} from "./IRewardCalculator.sol";
 
+/// @title A pool that distributes rewards between users that stake sand (or any erc20 token)
+/// @dev The contributions are updated passively, an external call to computeContribution is needed.
+/// @dev default behaviour (address(0)) for contributionCalculator is to use the stacked amount as contribution
+/// @dev default behaviour (address(0)) for rewardCalculator is to stop giving rewards
 contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using Address for address;
@@ -36,31 +40,28 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
     constructor(IERC20 stakeToken_, IERC20 rewardToken_) StakeTokenWrapper(stakeToken_) {
         rewardToken = rewardToken_;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
-        // setContributionCalculator and setRewardCalculator must be called during initialization!!!
     }
 
-    function setContributionCalculator(address newContributionCalculator) external {
-        require(newContributionCalculator.isContract(), "Bad ContributionCalculator address");
+    modifier isContractAndAdmin(address contractAddress) {
+        require(contractAddress.isContract(), "not a contract");
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
-        contributionCalculator = IContributionCalculator(newContributionCalculator);
+        _;
     }
 
-    function setRewardCalculator(address newRewardCalculator) external {
-        require(newRewardCalculator.isContract(), "Bad RewardCalculator address");
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
-        rewardCalculator = IRewardCalculator(newRewardCalculator);
+    function setContributionCalculator(address contractAddress) external isContractAndAdmin(contractAddress) {
+        contributionCalculator = IContributionCalculator(contractAddress);
     }
 
-    function setRewardToken(address newRewardToken) external {
-        require(newRewardToken.isContract(), "Bad RewardToken address");
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
-        rewardToken = IERC20(newRewardToken);
+    function setRewardCalculator(address contractAddress) external isContractAndAdmin(contractAddress) {
+        rewardCalculator = IRewardCalculator(contractAddress);
     }
 
-    function setStakeToken(address newStakeLPToken) external {
-        require(newStakeLPToken.isContract(), "Bad StakeToken address");
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
-        _stakeToken = IERC20(newStakeLPToken);
+    function setRewardToken(address contractAddress) external isContractAndAdmin(contractAddress) {
+        rewardToken = IERC20(contractAddress);
+    }
+
+    function setStakeToken(address contractAddress) external isContractAndAdmin(contractAddress) {
+        _stakeToken = IERC20(contractAddress);
     }
 
     function totalSupply() external view returns (uint256) {
@@ -79,59 +80,45 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
         return _contributions[account];
     }
 
-    function rewardPerToken() public view returns (uint256) {
-        if (_totalContributions == 0) {
-            return rewardPerTokenStored;
-        }
-        return rewardPerTokenStored + (rewardCalculator.getRewards() * 1e24) / _totalContributions;
+    // Backward compatibility
+    function rewardPerToken() external view returns (uint256) {
+        return rewardPerTokenStored + _rewardPerToken();
     }
 
-    function earned(address account) public view returns (uint256) {
-        return
-            rewards[account] + ((rewardPerToken() - userRewardPerTokenPaid[account]) * _contributions[account]) / 1e24;
+    function earned(address account) external view returns (uint256) {
+        return rewards[account] + _earned(account);
     }
 
-    function computeMultiplier(address account) external {
-        _processReward();
-        _processUserReward(account);
+    function computeContribution(address account) external {
+        require(account != address(0), "invalid address");
+        // We decide to give the user the accumulated rewards even if he cheated a little bit.
+        _processRewards(account);
         _updateContribution(account);
     }
 
     function stake(uint256 amount) external nonReentrant {
         require(amount > 0, "Cannot stake 0");
-        _processReward();
-        _processUserReward(_msgSender());
+        _processRewards(_msgSender());
         super._stake(amount);
         _updateContribution(_msgSender());
         emit Staked(_msgSender(), amount);
     }
 
-    function withdraw(uint256 amount) public nonReentrant {
-        _processReward();
-        _processUserReward(_msgSender());
+    function withdraw(uint256 amount) external nonReentrant {
+        _processRewards(_msgSender());
         _withdrawStake(amount);
     }
 
-    function exit() external {
-        _processReward();
-        _processUserReward(_msgSender());
+    function exit() external nonReentrant {
+        _processRewards(_msgSender());
         _withdrawStake(_balances[_msgSender()]);
         _withdrawRewards();
     }
 
-    function getReward() public nonReentrant {
-        _processReward();
-        _processUserReward(_msgSender());
+    // Rename ?
+    function getReward() external nonReentrant {
+        _processRewards(_msgSender());
         _withdrawRewards();
-    }
-
-    function _updateContribution(address account) internal {
-        uint256 oldContribution = _contributions[account];
-        _totalContributions = _totalContributions - oldContribution;
-        uint256 contribution = contributionCalculator.computeContribution(account, _balances[account]);
-        _totalContributions = _totalContributions + contribution;
-        _contributions[account] = contribution;
-        emit ContributionUpdated(account, contribution, oldContribution);
     }
 
     function _withdrawStake(uint256 amount) internal {
@@ -150,14 +137,49 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
         }
     }
 
-    function _processReward() internal {
-        rewardPerTokenStored = rewardPerToken();
-        // TODO: which other variables we can pass ?
-        rewardCalculator.updateRewards(_totalContributions);
+    function _updateContribution(address account) internal {
+        uint256 oldContribution = _contributions[account];
+        _totalContributions = _totalContributions - oldContribution;
+        uint256 contribution = _computeContribution(account);
+        _totalContributions = _totalContributions + contribution;
+        _contributions[account] = contribution;
+        emit ContributionUpdated(account, contribution, oldContribution);
     }
 
-    function _processUserReward(address account) internal {
-        rewards[account] = earned(account);
+    function _computeContribution(address account) internal returns (uint256) {
+        if (contributionCalculator == IContributionCalculator(address(0))) {
+            return _balances[account];
+        } else {
+            return contributionCalculator.computeContribution(account, _balances[account]);
+        }
+    }
+
+    // Something changed (stake, withdraw, etc), we distribute current accumulated rewards and start from zero.
+    // Called each time there is a change in contract state (stake, withdraw, etc).
+    function _processRewards(address account) internal {
+        // Distribute the accumulated rewards
+        rewardPerTokenStored = rewardPerTokenStored + _rewardPerToken();
+        // restart rewards so now the rewardCalculator return zero rewards
+        rewardCalculator.restartRewards(_totalContributions);
+        // Update the earnings for this specific user with what he earned until now
+        rewards[account] = rewards[account] + _earned(account);
+        // restart rewards for this specific user, now earned(account) = 0
         userRewardPerTokenPaid[account] = rewardPerTokenStored;
+    }
+
+    function _earned(address account) internal view returns (uint256) {
+        return
+            ((_rewardPerToken() + rewardPerTokenStored - userRewardPerTokenPaid[account]) * _contributions[account]) /
+            1e24;
+    }
+
+    // This function gives the proportion of the total contribution that corresponds to each user from
+    // last restartRewards call.
+    // _rewardsPerToken() * _contributions[account] is the amount of extra rewards gained from last restartRewards.
+    function _rewardPerToken() internal view returns (uint256) {
+        if (rewardCalculator == IRewardCalculator(address(0)) || _totalContributions == 0) {
+            return 0;
+        }
+        return (rewardCalculator.getRewards() * 1e24) / _totalContributions;
     }
 }
