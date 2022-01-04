@@ -5,7 +5,7 @@ import {withSnapshot} from '../../utils';
 
 // TODO: Replace PolygonSand with a mock erc20 like FakeLPSandMatic
 export const setupSandRewardPool = withSnapshot(
-  ['PolygonSand'],
+  ['PolygonSand', 'TRUSTED_FORWARDER'],
   async function (hre) {
     const {deployments, getNamedAccounts, ethers} = hre;
     const {
@@ -38,6 +38,13 @@ export const setupSandRewardPool = withSnapshot(
     const sand = await deployments.get('PolygonSand');
     const durationInSeconds = 28 * 24 * 60 * 60;
 
+    // const trustedForwarder = await ethers.getContract('TRUSTED_FORWARDER');
+    const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+    const trustedForwarder = await ethers.getContractAt(
+      'TestMetaTxForwarder',
+      TRUSTED_FORWARDER.address
+    );
+
     // Added
     await deployments.deploy('ContributionCalculator', {
       from: deployer,
@@ -57,6 +64,7 @@ export const setupSandRewardPool = withSnapshot(
         sand.address,
         contributionCalculator.address,
         durationInSeconds,
+        trustedForwarder.address,
       ],
       skipIfAlreadyDeployed: true,
     });
