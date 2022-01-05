@@ -15,20 +15,21 @@ import {IRewardCalculator} from "../IRewardCalculator.sol";
 contract PeriodicFixedRateRewardCalculator is IRewardCalculator, AccessControl {
     event RewardAdded(uint256 reward);
 
+    // This role is in charge of configuring reward distribution
     bytes32 public constant REWARD_DISTRIBUTION = keccak256("REWARD_DISTRIBUTION");
-    // Each time a parameter that affects the reward distribution is changed the rewards are distributed by the main
-    // this contract must restart the distribution from zero.
+    // Each time a parameter that affects the reward distribution is changed the rewards are distributed by the reward
+    // pool contract this is the restart time.
     uint256 public lastUpdateTime;
-    // This is de end of the period in which rewards are distributed
+    // This is the end of the period in which rewards are distributed
     uint256 public periodFinish;
-    // calculated rate => reward = rewardRate * time
+    // Rewards are distributed at a fixed rate => reward = rewardRate * time
     uint256 public rewardRate;
     // The duration of the distribution period
     uint256 public duration;
     // This variable is only used when a new campaign starts (notifyRewardAmount is called)
     // We need to save the rewards accumulated between the last call to restartRewards and the call to notifyRewardAmount
     uint256 public savedRewards;
-
+    // The address of the reward pool, the only one authorized to restart rewards
     address public rewardPool;
 
     constructor(address rewardPool_, uint256 duration_) {
@@ -45,11 +46,19 @@ contract PeriodicFixedRateRewardCalculator is IRewardCalculator, AccessControl {
     // The main contract has distributed the rewards until this point, this must start from scratch => getRewards() == 0
     function restartRewards(uint256 totalContributions) external override {
         require(msg.sender == rewardPool, "not reward pool");
+        // TODO: this line can be removed and the parameter ?
         if (block.timestamp >= periodFinish || totalContributions != 0) {
             // ensure reward past the first stacker do not get lost
             lastUpdateTime = _lastTimeRewardApplicable();
             savedRewards = 0;
         }
+    }
+
+    // Useful when switching reward calculators to set an initial reward.
+    function setSavedRewards(uint256 reward) external {
+        require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "not reward distribution");
+        savedRewards = reward;
+        lastUpdateTime = block.timestamp;
     }
 
     function lastTimeRewardApplicable() external view returns (uint256) {
@@ -63,6 +72,7 @@ contract PeriodicFixedRateRewardCalculator is IRewardCalculator, AccessControl {
     function notifyRewardAmount(uint256 reward) external {
         require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "not reward distribution");
         savedRewards = _getRewards();
+        lastUpdateTime = block.timestamp;
         if (block.timestamp >= periodFinish) {
             rewardRate = reward / duration;
         } else {
@@ -70,7 +80,6 @@ contract PeriodicFixedRateRewardCalculator is IRewardCalculator, AccessControl {
             uint256 leftover = remaining * rewardRate;
             rewardRate = (reward + leftover) / duration;
         }
-        lastUpdateTime = block.timestamp;
         periodFinish = block.timestamp + duration;
         emit RewardAdded(reward);
     }

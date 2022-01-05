@@ -52,7 +52,8 @@ export const setupSandRewardPool = withSnapshot(
     // Added
     await deployments.deploy('ContributionCalculator', {
       from: deployer,
-      contract: 'LandMemoizedContributionCalculator',
+      // contract: 'LandMemoizedContributionCalculator',
+      contract: 'LandContributionCalculator',
       args: [land.address],
       log: true,
     });
@@ -70,7 +71,10 @@ export const setupSandRewardPool = withSnapshot(
     });
     const rewardCalculator = await ethers.getContract('RewardCalculator');
 
-    await rewardPoolAsDeployer.setRewardCalculator(rewardCalculator.address);
+    await rewardPoolAsDeployer.setRewardCalculator(
+      rewardCalculator.address,
+      false
+    );
     // Added end
 
     // Define token admins

@@ -52,16 +52,39 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
         contributionCalculator = IContributionCalculator(contractAddress);
     }
 
-    function setRewardCalculator(address contractAddress) external isContractAndAdmin(contractAddress) {
-        rewardCalculator = IRewardCalculator(contractAddress);
-    }
-
     function setRewardToken(address contractAddress) external isContractAndAdmin(contractAddress) {
         rewardToken = IERC20(contractAddress);
     }
 
     function setStakeToken(address contractAddress) external isContractAndAdmin(contractAddress) {
         _stakeToken = IERC20(contractAddress);
+    }
+
+    function setRewardCalculator(address contractAddress, bool restartRewards)
+        external
+        isContractAndAdmin(contractAddress)
+    {
+        // We process the rewards of the current reward calculator before the switch.
+        if (restartRewards) {
+            _restartRewards();
+        }
+        rewardCalculator = IRewardCalculator(contractAddress);
+    }
+
+    // TODO: Check if is ok to remove the admin restriction (everybody can call it).
+    function restartRewards(address contractAddress, bool processRewards) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
+        _restartRewards();
+    }
+
+    // TODO: Do we want this one ? This is risky, the admin can steal users funds.
+    // TODO: the admin can set any value into rewardToken, for example rewardToken = _stakeToken ?
+    // TODO: without it some funds can be locked inside the contract (as we use rates for calculation).
+    // TODO: The admin can still use a contribution calculator that give him all the funds + a reward calculator that
+    // TODO: give him the rewards...
+    function recoverFunds(address receiver) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
+        rewardToken.safeTransfer(receiver, rewardToken.balanceOf(address(this)));
     }
 
     function totalSupply() external view returns (uint256) {
@@ -115,7 +138,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
         _withdrawRewards();
     }
 
-    // Rename ?
+    // TODO: Rename ?
     function getReward() external nonReentrant {
         _processRewards(_msgSender());
         _withdrawRewards();
@@ -157,14 +180,25 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
     // Something changed (stake, withdraw, etc), we distribute current accumulated rewards and start from zero.
     // Called each time there is a change in contract state (stake, withdraw, etc).
     function _processRewards(address account) internal {
-        // Distribute the accumulated rewards
-        rewardPerTokenStored = rewardPerTokenStored + _rewardPerToken();
-        // restart rewards so now the rewardCalculator return zero rewards
-        rewardCalculator.restartRewards(_totalContributions);
+        _restartRewards();
         // Update the earnings for this specific user with what he earned until now
         rewards[account] = rewards[account] + _earned(account);
         // restart rewards for this specific user, now earned(account) = 0
         userRewardPerTokenPaid[account] = rewardPerTokenStored;
+    }
+
+    function _restartRewards() internal {
+        // OBS: For the first deposit _totalContributions == 0 => _rewardPerToken return zero and we don't want to
+        // reinitialize rewards (so they are not lost).
+        // The original contract ignore rewards for campaigns in which there where no deposits, aka
+        // totalContributions == 0 during all the campaign.
+        // The original code is: `if (block.timestamp >= periodFinish || _totalContributions != 0)`
+        // our new code distribute the rewards even after the campaign ends.
+        // TODO: Review this part, see (line 99): https://github.com/thesandboxgame/sandbox-smart-contracts/blame/176b862302b5fe4b02f673872ef852007474d024/src/LiquidityMining/LandWeightedSANDRewardPool.sol
+        // Distribute the accumulated rewards
+        rewardPerTokenStored = rewardPerTokenStored + _rewardPerToken();
+        // restart rewards so now the rewardCalculator return zero rewards
+        rewardCalculator.restartRewards(_totalContributions);
     }
 
     function _earned(address account) internal view returns (uint256) {

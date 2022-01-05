@@ -1,9 +1,11 @@
 import {expect} from 'chai';
-import {ethers, getUnnamedAccounts} from 'hardhat';
-import {mine, withSnapshot} from '../../utils';
+import {getUnnamedAccounts} from 'hardhat';
+import {withSnapshot} from '../../utils';
 import {BigNumber} from 'ethers';
+import {doOnNextBlock, setBlockTime} from './utils';
 
 const fixture = withSnapshot([], async function (hre) {
+  const contractName = 'PeriodicFixedRateRewardCalculator';
   const durationInSeconds = 28 * 24 * 60 * 60;
   const {deployments, getNamedAccounts, ethers} = hre;
   const {deployer} = await getNamedAccounts();
@@ -15,24 +17,18 @@ const fixture = withSnapshot([], async function (hre) {
   ] = await getUnnamedAccounts();
 
   // Taken from 01_deploy_mock_land_with_mint.ts
-  await deployments.deploy('PeriodicFixedRateRewardCalculator', {
+  await deployments.deploy(contractName, {
     from: deployer,
     args: [rewardPool, durationInSeconds],
   });
-  const contract = await ethers.getContract(
-    'PeriodicFixedRateRewardCalculator',
-    deployer
-  );
-  const contractAsAdmin = await ethers.getContract(
-    'PeriodicFixedRateRewardCalculator',
-    admin
-  );
+  const contract = await ethers.getContract(contractName, deployer);
+  const contractAsAdmin = await ethers.getContract(contractName, admin);
   const contractAsRewardDistribution = await ethers.getContract(
-    'PeriodicFixedRateRewardCalculator',
+    contractName,
     rewardDistribution
   );
   const contractAsRewardPool = await ethers.getContract(
-    'PeriodicFixedRateRewardCalculator',
+    contractName,
     rewardPool
   );
   const REWARD_DISTRIBUTION = await contract.REWARD_DISTRIBUTION();
@@ -49,21 +45,6 @@ const fixture = withSnapshot([], async function (hre) {
     other,
   };
 });
-
-async function setBlockTime(time: number) {
-  await ethers.provider.send('evm_setNextBlockTimestamp', [time]);
-  await mine();
-}
-
-async function doOnNextBlock(todo: () => Promise<void>, nextTimestamp = 0) {
-  if (!nextTimestamp) {
-    const latestBlock = await ethers.provider.getBlock('latest');
-    nextTimestamp = latestBlock.timestamp + 10;
-  }
-  await ethers.provider.send('evm_setNextBlockTimestamp', [nextTimestamp]);
-  await todo();
-  return nextTimestamp;
-}
 
 describe('PeriodicFixedRateRewardCalculator', function () {
   describe('roles', function () {
@@ -88,6 +69,7 @@ describe('PeriodicFixedRateRewardCalculator', function () {
         contractAsRewardDistribution.restartRewards(0)
       ).to.be.revertedWith('not reward pool');
     });
+
     it('reward distribution should be able to call notifyRewardAmount', async function () {
       const {contractAsRewardDistribution} = await fixture();
       await expect(contractAsRewardDistribution.notifyRewardAmount(12345678))
@@ -106,6 +88,25 @@ describe('PeriodicFixedRateRewardCalculator', function () {
         contractAsRewardPool.notifyRewardAmount(12345678)
       ).to.be.revertedWith('not reward distribution');
     });
+
+    it('reward distribution should be able to call setSavedRewards', async function () {
+      const {contractAsRewardDistribution} = await fixture();
+      await expect(contractAsRewardDistribution.setSavedRewards(12345678)).not
+        .to.be.reverted;
+    });
+    it('other should fail to call setSavedRewards', async function () {
+      const {contract, contractAsAdmin, contractAsRewardPool} = await fixture();
+
+      await expect(contract.setSavedRewards(12345678)).to.be.revertedWith(
+        'not reward distribution'
+      );
+      await expect(
+        contractAsAdmin.setSavedRewards(12345678)
+      ).to.be.revertedWith('not reward distribution');
+      await expect(
+        contractAsRewardPool.setSavedRewards(12345678)
+      ).to.be.revertedWith('not reward distribution');
+    });
   });
 
   describe('should be no rewards on initialization', function () {
@@ -113,7 +114,7 @@ describe('PeriodicFixedRateRewardCalculator', function () {
       const {contract} = await fixture();
       expect(await contract.getRewards()).to.be.equal(0);
     });
-    it('update call', async function () {
+    it('restart call', async function () {
       const {contractAsRewardPool, durationInSeconds} = await fixture();
       await contractAsRewardPool.restartRewards(0);
       expect(await contractAsRewardPool.getRewards()).to.be.equal(0);
@@ -175,7 +176,7 @@ describe('PeriodicFixedRateRewardCalculator', function () {
       await setBlockTime(time + durationInSeconds + 10);
       expect(await contract.getRewards()).to.be.equal(rewards);
     });
-    it('if update rewards is called (with contribution!=0) then rewards starts from zero again', async function () {
+    it('if restart is called (with contribution!=0) then rewards starts from zero again', async function () {
       const {
         contract,
         contractAsRewardDistribution,
@@ -200,22 +201,22 @@ describe('PeriodicFixedRateRewardCalculator', function () {
       expect(await contract.getRewards()).to.be.equal(rate.mul(currentStep));
 
       // This freezes the rewards on step 31
-      const updateStep = (31 * durationInSeconds) / steps;
-      const updateTime = await doOnNextBlock(async () => {
+      const restartStep = (31 * durationInSeconds) / steps;
+      const restartTime = await doOnNextBlock(async () => {
         await contractAsRewardPool.restartRewards(1);
-      }, time + updateStep);
-      expect(await contract.lastUpdateTime()).to.be.equal(updateTime);
+      }, time + restartStep);
+      expect(await contract.lastUpdateTime()).to.be.equal(restartTime);
       expect(await contract.getRewards()).to.be.equal(0);
 
       for (let i = 32; i <= steps; i++) {
         const currentStep = (i * durationInSeconds) / steps;
         await setBlockTime(time + currentStep);
         expect(await contract.getRewards()).to.be.equal(
-          rate.mul(currentStep - updateStep)
+          rate.mul(currentStep - restartStep)
         );
       }
       await setBlockTime(time + durationInSeconds + 10);
-      const firstPartRewards = rate.mul(updateStep);
+      const firstPartRewards = rate.mul(restartStep);
       const currentRewards = await contract.getRewards();
       expect(firstPartRewards.add(currentRewards)).to.be.equal(totalRewards);
     });
@@ -235,19 +236,19 @@ describe('PeriodicFixedRateRewardCalculator', function () {
         await contractAsRewardDistribution.notifyRewardAmount(rewards1);
       });
 
-      const updateStep = (31 * durationInSeconds) / 100;
-      const updateTime = await doOnNextBlock(async () => {
+      const notifyStep = (31 * durationInSeconds) / 100;
+      const notifyTime = await doOnNextBlock(async () => {
         await contractAsRewardDistribution.notifyRewardAmount(rewards2);
-      }, startTime + updateStep);
+      }, startTime + notifyStep);
 
-      const firstPartRewards = rewards1.div(durationInSeconds).mul(updateStep);
+      const firstPartRewards = rewards1.div(durationInSeconds).mul(notifyStep);
       const remaining = rewards1.sub(firstPartRewards);
       const rate2 = rewards2.add(remaining).div(durationInSeconds);
       // This is not always true!!!
       expect(rate2.mul(durationInSeconds)).to.be.equal(rewards2.add(remaining));
-      expect(await contract.lastUpdateTime()).to.be.equal(updateTime);
+      expect(await contract.lastUpdateTime()).to.be.equal(notifyTime);
       expect(await contract.periodFinish()).to.be.equal(
-        updateTime + durationInSeconds
+        notifyTime + durationInSeconds
       );
       expect(await contract.rewardRate()).to.be.equal(rate2);
       expect(await contract.getRewards()).to.be.equal(firstPartRewards);
@@ -255,12 +256,12 @@ describe('PeriodicFixedRateRewardCalculator', function () {
       const steps = 100;
       for (let i = 1; i <= steps; i++) {
         const currentStep = (i * durationInSeconds) / steps;
-        await setBlockTime(updateTime + currentStep);
+        await setBlockTime(notifyTime + currentStep);
         expect(await contract.getRewards()).to.be.equal(
           firstPartRewards.add(rate2.mul(currentStep))
         );
       }
-      await setBlockTime(updateTime + durationInSeconds + 10);
+      await setBlockTime(notifyTime + durationInSeconds + 10);
       expect(await contract.getRewards()).to.be.equal(rewards1.add(rewards2));
     });
     it('calling notifyRewardAmount after the distribution will distribute both amounts', async function () {
@@ -278,14 +279,14 @@ describe('PeriodicFixedRateRewardCalculator', function () {
         await contractAsRewardDistribution.notifyRewardAmount(rewards1);
       });
       // Calling after period finish.
-      const updateTime = await doOnNextBlock(async () => {
+      const notifyTime = await doOnNextBlock(async () => {
         await contractAsRewardDistribution.notifyRewardAmount(rewards2);
       }, time + durationInSeconds + 10);
 
       const rate2 = rewards2.div(durationInSeconds);
-      expect(await contract.lastUpdateTime()).to.be.equal(updateTime);
+      expect(await contract.lastUpdateTime()).to.be.equal(notifyTime);
       expect(await contract.periodFinish()).to.be.equal(
-        updateTime + durationInSeconds
+        notifyTime + durationInSeconds
       );
       expect(await contract.rewardRate()).to.be.equal(rate2);
       expect(await contract.getRewards()).to.be.equal(rewards1);
@@ -293,12 +294,12 @@ describe('PeriodicFixedRateRewardCalculator', function () {
       const steps = 100;
       for (let i = 1; i <= steps; i++) {
         const currentStep = (i * durationInSeconds) / steps;
-        await setBlockTime(updateTime + currentStep);
+        await setBlockTime(notifyTime + currentStep);
         expect(await contract.getRewards()).to.be.equal(
           rewards1.add(rate2.mul(currentStep))
         );
       }
-      await setBlockTime(updateTime + durationInSeconds + 10);
+      await setBlockTime(notifyTime + durationInSeconds + 10);
       expect(await contract.getRewards()).to.be.equal(rewards1.add(rewards2));
     });
   });
