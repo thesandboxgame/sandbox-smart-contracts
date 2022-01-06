@@ -72,7 +72,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
     }
 
     // TODO: Check if is ok to remove the admin restriction (everybody can call it).
-    function restartRewards(address contractAddress, bool processRewards) external {
+    function restartRewards() external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
         _restartRewards();
     }
