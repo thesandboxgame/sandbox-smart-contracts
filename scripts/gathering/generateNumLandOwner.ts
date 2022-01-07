@@ -32,10 +32,6 @@ async function query<T>(
     numEntries = newEntries.length;
     if (numEntries > 0) {
       const newLastId = newEntries[numEntries - 1].id;
-      if (lastId === newLastId) {
-        console.log('same query, stop');
-        break;
-      }
       lastId = newLastId;
     }
     entries = entries.concat(newEntries);
