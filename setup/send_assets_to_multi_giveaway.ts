@@ -87,7 +87,9 @@ const func: DeployFunction = async function () {
     );
   }
   const erc20Hash = getERC20(json);
-  const sandContract = await deployments.get('Sand');
+  const sandContract = await (hre.network.tags.L1
+    ? deployments.get('Sand')
+    : deployments.get('PolygonSand'));
   for (const address in erc20Hash) {
     if (address.toLocaleLowerCase() != sandContract.address.toLocaleLowerCase())
       continue;
