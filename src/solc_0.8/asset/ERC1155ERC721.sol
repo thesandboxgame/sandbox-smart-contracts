@@ -85,6 +85,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     /// @param newBouncerAdmin address of the new minting administrator.
     function changeBouncerAdmin(address newBouncerAdmin) external {
         require(_msgSender() == _bouncerAdmin, "!BOUNCER_ADMIN");
+        require(newBouncerAdmin != address(0), "ERC1155ERC721: new bouncer admin can't be zero address");
         emit BouncerAdminChanged(_bouncerAdmin, newBouncerAdmin);
         _bouncerAdmin = newBouncerAdmin;
     }
