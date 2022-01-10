@@ -1,14 +1,13 @@
 //SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.2;
-
+import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
 import {SafeERC20} from "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
-import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
-import {IERC721} from "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
+import {ERC2771Handler} from "../common/BaseWithStorage/ERC2771Handler.sol";
 import {StakeTokenWrapper} from "./StakeTokenWrapper.sol";
 import {IContributionCalculator} from "./IContributionCalculator.sol";
 import {IRewardCalculator} from "./IRewardCalculator.sol";
@@ -17,7 +16,7 @@ import {IRewardCalculator} from "./IRewardCalculator.sol";
 /// @dev The contributions are updated passively, an external call to computeContribution is needed.
 /// @dev default behaviour (address(0)) for contributionCalculator is to use the stacked amount as contribution
 /// @dev default behaviour (address(0)) for rewardCalculator is to stop giving rewards
-contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
+contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ERC2771Handler {
     using SafeERC20 for IERC20;
     using Address for address;
 
@@ -37,9 +36,14 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
     uint256 internal _totalContributions;
     mapping(address => uint256) internal _contributions;
 
-    constructor(IERC20 stakeToken_, IERC20 rewardToken_) StakeTokenWrapper(stakeToken_) {
+    constructor(
+        IERC20 stakeToken_,
+        IERC20 rewardToken_,
+        address trustedForwarder
+    ) StakeTokenWrapper(stakeToken_) {
         rewardToken = rewardToken_;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        __ERC2771Handler_initialize(trustedForwarder);
     }
 
     modifier isContractAndAdmin(address contractAddress) {
@@ -58,6 +62,11 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
 
     function setStakeToken(address contractAddress) external isContractAndAdmin(contractAddress) {
         _stakeToken = IERC20(contractAddress);
+    }
+
+    function setTrustedForwarder(address trustedForwarder) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Only admin");
+        _trustedForwarder = trustedForwarder;
     }
 
     function setRewardCalculator(address contractAddress, bool restartRewards)
@@ -215,5 +224,13 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
             return 0;
         }
         return (rewardCalculator.getRewards() * 1e24) / _totalContributions;
+    }
+
+    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
+        return ERC2771Handler._msgSender();
+    }
+
+    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+        return ERC2771Handler._msgData();
     }
 }

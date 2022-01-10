@@ -22,9 +22,15 @@ export const setupSandRewardPoolTest = withSnapshot([], async function (hre) {
     args: ['StakeToken', 'STK'],
   });
   const stakeToken = await ethers.getContract('StakeToken', deployer);
+
+  await deployments.deploy('TestMetaTxForwarder', {
+    from: deployer,
+  });
+  const trustedForwarder = await ethers.getContract('TestMetaTxForwarder');
+
   await deployments.deploy('SandRewardPool', {
     from: deployer,
-    args: [stakeToken.address, rewardToken.address],
+    args: [stakeToken.address, rewardToken.address, trustedForwarder.address],
   });
   const contract = await ethers.getContract('SandRewardPool', deployer);
   await contract.setRewardCalculator(rewardCalculatorMock.address, false);

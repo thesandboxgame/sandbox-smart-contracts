@@ -38,10 +38,15 @@ export const setupSandRewardPool = withSnapshot(
     const sand = await deployments.get('PolygonSand');
     const durationInSeconds = 28 * 24 * 60 * 60;
 
+    const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+    const trustedForwarder = await ethers.getContractAt(
+      'TestMetaTxForwarder',
+      TRUSTED_FORWARDER.address
+    );
     await deployments.deploy('SandRewardPool', {
       from: deployer,
       log: true,
-      args: [stakeToken.address, sand.address],
+      args: [stakeToken.address, sand.address, trustedForwarder.address],
       skipIfAlreadyDeployed: true,
     });
     const rewardPoolAsDeployer = await ethers.getContract(
