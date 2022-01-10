@@ -43,30 +43,44 @@ export const setupSandRewardPool = withSnapshot(
       'TestMetaTxForwarder',
       TRUSTED_FORWARDER.address
     );
+    await deployments.deploy('SandRewardPool', {
+      from: deployer,
+      log: true,
+      args: [stakeToken.address, sand.address, trustedForwarder.address],
+      skipIfAlreadyDeployed: true,
+    });
+    const rewardPoolAsDeployer = await ethers.getContract(
+      'SandRewardPool',
+      deployer
+    );
 
     // Added
     await deployments.deploy('ContributionCalculator', {
       from: deployer,
-      contract: 'LandMemoizedContributionCalculator',
+      // contract: 'LandMemoizedContributionCalculator',
+      contract: 'LandContributionCalculator',
       args: [land.address],
       log: true,
     });
     const contributionCalculator = await ethers.getContract(
       'ContributionCalculator'
     );
-    // Added end
-    await deployments.deploy('SandRewardPool', {
+    await rewardPoolAsDeployer.setContributionCalculator(
+      contributionCalculator.address
+    );
+    await deployments.deploy('RewardCalculator', {
       from: deployer,
+      contract: 'PeriodicRewardCalculator',
+      args: [rewardPoolAsDeployer.address, durationInSeconds],
       log: true,
-      args: [
-        stakeToken.address,
-        sand.address,
-        contributionCalculator.address,
-        durationInSeconds,
-        trustedForwarder.address,
-      ],
-      skipIfAlreadyDeployed: true,
     });
+    const rewardCalculator = await ethers.getContract('RewardCalculator');
+
+    await rewardPoolAsDeployer.setRewardCalculator(
+      rewardCalculator.address,
+      false
+    );
+    // Added end
 
     // Define token admins
     const stakeTokenAdmin = deployer;
@@ -127,8 +141,8 @@ export const setupSandRewardPool = withSnapshot(
     );
 
     // TODO: This was removed and replaced, we need specific tests for roles!!!
-    const REWARD_DISTRIBUTION = await rewardPoolContract.REWARD_DISTRIBUTION();
-    await rewardPoolContract
+    const REWARD_DISTRIBUTION = await rewardCalculator.REWARD_DISTRIBUTION();
+    await rewardCalculator
       .connect(ethers.provider.getSigner(deployer))
       .grantRole(REWARD_DISTRIBUTION, liquidityRewardAdmin);
     // const currentRewardDistribution = await rewardPoolContract
@@ -154,6 +168,7 @@ export const setupSandRewardPool = withSnapshot(
 
     return {
       contributionCalculator,
+      rewardCalculator,
       rewardPool,
       rewardPoolContract,
       rewardTokenContract,
