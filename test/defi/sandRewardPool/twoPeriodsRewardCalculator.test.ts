@@ -1,58 +1,22 @@
 import {expect} from 'chai';
-import {getUnnamedAccounts} from 'hardhat';
-import {getTime, withSnapshot} from '../../utils';
+import {getTime} from '../../utils';
 import {BigNumber, Contract} from 'ethers';
 import {doOnNextBlock, setBlockTime} from './utils';
-
-const fixture = withSnapshot([], async function (hre) {
-  const contractName = 'TwoPeriodsFixedRateRewardCalculator';
-  const {deployments, getNamedAccounts, ethers} = hre;
-  const {deployer} = await getNamedAccounts();
-  const [
-    admin,
-    rewardPool,
-    rewardDistribution,
-    other,
-  ] = await getUnnamedAccounts();
-
-  // Taken from 01_deploy_mock_land_with_mint.ts
-  await deployments.deploy(contractName, {
-    from: deployer,
-    args: [rewardPool],
-  });
-  const contract = await ethers.getContract(contractName, deployer);
-  const contractAsAdmin = await ethers.getContract(contractName, admin);
-  const contractAsRewardDistribution = await ethers.getContract(
-    contractName,
-    rewardDistribution
-  );
-  const contractAsRewardPool = await ethers.getContract(
-    contractName,
-    rewardPool
-  );
-  const REWARD_DISTRIBUTION = await contract.REWARD_DISTRIBUTION();
-  await contract.grantRole(REWARD_DISTRIBUTION, rewardDistribution);
-  return {
-    contract,
-    contractAsAdmin,
-    contractAsRewardDistribution,
-    contractAsRewardPool,
-    rewardDistribution,
-    admin,
-    rewardPool,
-    other,
-  };
-});
+import {twoPeriodsSetup} from './rewardCalculator.fixture';
 
 function rewardDistributionRoleCheck(
   method: (contract: Contract) => Promise<void>
 ) {
   it('reward distribution should be able to call ' + method, async function () {
-    const {contractAsRewardDistribution} = await fixture();
+    const {contractAsRewardDistribution} = await twoPeriodsSetup();
     await expect(method(contractAsRewardDistribution)).not.to.be.reverted;
   });
   it('other should fail to call ' + method, async function () {
-    const {contract, contractAsAdmin, contractAsRewardPool} = await fixture();
+    const {
+      contract,
+      contractAsAdmin,
+      contractAsRewardPool,
+    } = await twoPeriodsSetup();
 
     await expect(method(contract)).to.be.revertedWith(
       'not reward distribution'
@@ -86,10 +50,10 @@ async function checkRewards(
   return getTime();
 }
 
-describe('TwoPeriodsFixedRateRewardCalculator', function () {
+describe('TwoPeriodsRewardCalculator', function () {
   describe('roles', function () {
     it('reward pool should be able to call restartRewards', async function () {
-      const {contractAsRewardPool} = await fixture();
+      const {contractAsRewardPool} = await twoPeriodsSetup();
       await expect(contractAsRewardPool.restartRewards(0)).not.to.be.reverted;
     });
     it('others should fail to call restartRewards', async function () {
@@ -97,7 +61,7 @@ describe('TwoPeriodsFixedRateRewardCalculator', function () {
         contract,
         contractAsAdmin,
         contractAsRewardDistribution,
-      } = await fixture();
+      } = await twoPeriodsSetup();
 
       await expect(contract.restartRewards(0)).to.be.revertedWith(
         'not reward pool'
@@ -122,7 +86,7 @@ describe('TwoPeriodsFixedRateRewardCalculator', function () {
   });
 
   it('startup', async function () {
-    const {contract, contractAsRewardPool} = await fixture();
+    const {contract, contractAsRewardPool} = await twoPeriodsSetup();
     expect(await contract.getRewards()).to.be.equal(0);
     expect(await contract.finish1()).to.be.equal(0);
     expect(await contract.rate1()).to.be.equal(0);
@@ -136,7 +100,7 @@ describe('TwoPeriodsFixedRateRewardCalculator', function () {
 
   describe('setup restrictions', function () {
     it('should fail to set initial campaign if campaign is running', async function () {
-      const {contract, contractAsRewardDistribution} = await fixture();
+      const {contract, contractAsRewardDistribution} = await twoPeriodsSetup();
       expect(await contract.isCampaignFinished()).to.be.true;
       expect(await contract.isCampaignRunning()).to.be.false;
       await contractAsRewardDistribution.setInitialCampaign(123, 1234);
@@ -145,7 +109,7 @@ describe('TwoPeriodsFixedRateRewardCalculator', function () {
       ).to.revertedWith('initial campaign running');
     });
     it('should fail to set next campaign if no campaign is running', async function () {
-      const {contract, contractAsRewardDistribution} = await fixture();
+      const {contract, contractAsRewardDistribution} = await twoPeriodsSetup();
       expect(await contract.isCampaignFinished()).to.be.true;
       expect(await contract.isCampaignRunning()).to.be.false;
       await expect(
@@ -153,7 +117,7 @@ describe('TwoPeriodsFixedRateRewardCalculator', function () {
       ).to.revertedWith('initial campaign not running');
     });
     it('should fail to update current campaign if no campaign is running', async function () {
-      const {contract, contractAsRewardDistribution} = await fixture();
+      const {contract, contractAsRewardDistribution} = await twoPeriodsSetup();
       expect(await contract.isCampaignFinished()).to.be.true;
       expect(await contract.isCampaignRunning()).to.be.false;
       await expect(
@@ -161,7 +125,7 @@ describe('TwoPeriodsFixedRateRewardCalculator', function () {
       ).to.revertedWith('initial campaign not running');
     });
     it('run campaign always works', async function () {
-      const {contract, contractAsRewardDistribution} = await fixture();
+      const {contract, contractAsRewardDistribution} = await twoPeriodsSetup();
       expect(await contract.isCampaignRunning()).to.be.false;
       const duration1 = 123;
       const rate1 = 14;
@@ -204,7 +168,7 @@ describe('TwoPeriodsFixedRateRewardCalculator', function () {
   });
   describe('reward distribution', function () {
     it('run an initial campaign alone', async function () {
-      const {contract, contractAsRewardDistribution} = await fixture();
+      const {contract, contractAsRewardDistribution} = await twoPeriodsSetup();
       const durationInSeconds = 28 * 24 * 60 * 60;
       const rewards = BigNumber.from(durationInSeconds * 10000);
       const startTime = await doOnNextBlock(async () => {
@@ -224,7 +188,7 @@ describe('TwoPeriodsFixedRateRewardCalculator', function () {
       expect(await contract.isCampaignRunning()).to.be.false;
     });
     it('run initial and next campaign', async function () {
-      const {contract, contractAsRewardDistribution} = await fixture();
+      const {contract, contractAsRewardDistribution} = await twoPeriodsSetup();
       const duration1 = 28 * 24 * 60 * 60;
       const rate1 = 123;
       // Must be divisible by duration1 !!!
@@ -262,7 +226,7 @@ describe('TwoPeriodsFixedRateRewardCalculator', function () {
       expect(await contract.isCampaignRunning()).to.be.false;
     });
     it('run next campaign after the initial one finished', async function () {
-      const {contractAsRewardDistribution: contract} = await fixture();
+      const {contractAsRewardDistribution: contract} = await twoPeriodsSetup();
       const duration1 = 28 * 24 * 60 * 60;
       const rate1 = 123;
       // Must be divisible by duration1 !!!

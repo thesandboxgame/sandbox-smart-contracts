@@ -1,55 +1,12 @@
 import {expect} from 'chai';
-import {getUnnamedAccounts} from 'hardhat';
-import {withSnapshot} from '../../utils';
 import {BigNumber} from 'ethers';
 import {doOnNextBlock, setBlockTime} from './utils';
+import {periodicSetup} from './rewardCalculator.fixture';
 
-const fixture = withSnapshot([], async function (hre) {
-  const contractName = 'PeriodicFixedRateRewardCalculator';
-  const durationInSeconds = 28 * 24 * 60 * 60;
-  const {deployments, getNamedAccounts, ethers} = hre;
-  const {deployer} = await getNamedAccounts();
-  const [
-    admin,
-    rewardPool,
-    rewardDistribution,
-    other,
-  ] = await getUnnamedAccounts();
-
-  // Taken from 01_deploy_mock_land_with_mint.ts
-  await deployments.deploy(contractName, {
-    from: deployer,
-    args: [rewardPool, durationInSeconds],
-  });
-  const contract = await ethers.getContract(contractName, deployer);
-  const contractAsAdmin = await ethers.getContract(contractName, admin);
-  const contractAsRewardDistribution = await ethers.getContract(
-    contractName,
-    rewardDistribution
-  );
-  const contractAsRewardPool = await ethers.getContract(
-    contractName,
-    rewardPool
-  );
-  const REWARD_DISTRIBUTION = await contract.REWARD_DISTRIBUTION();
-  await contract.grantRole(REWARD_DISTRIBUTION, rewardDistribution);
-  return {
-    durationInSeconds,
-    contract,
-    contractAsAdmin,
-    contractAsRewardDistribution,
-    contractAsRewardPool,
-    rewardDistribution,
-    admin,
-    rewardPool,
-    other,
-  };
-});
-
-describe('PeriodicFixedRateRewardCalculator', function () {
+describe('PeriodicRewardCalculator', function () {
   describe('roles', function () {
     it('reward pool should be able to call restartRewards', async function () {
-      const {contractAsRewardPool} = await fixture();
+      const {contractAsRewardPool} = await periodicSetup();
       await expect(contractAsRewardPool.restartRewards(0)).not.to.be.reverted;
     });
     it('others should fail to call restartRewards', async function () {
@@ -57,7 +14,7 @@ describe('PeriodicFixedRateRewardCalculator', function () {
         contract,
         contractAsAdmin,
         contractAsRewardDistribution,
-      } = await fixture();
+      } = await periodicSetup();
 
       await expect(contract.restartRewards(0)).to.be.revertedWith(
         'not reward pool'
@@ -71,12 +28,16 @@ describe('PeriodicFixedRateRewardCalculator', function () {
     });
 
     it('reward distribution should be able to call notifyRewardAmount', async function () {
-      const {contractAsRewardDistribution} = await fixture();
+      const {contractAsRewardDistribution} = await periodicSetup();
       await expect(contractAsRewardDistribution.notifyRewardAmount(12345678))
         .not.to.be.reverted;
     });
     it('other should fail to call notifyRewardAmount', async function () {
-      const {contract, contractAsAdmin, contractAsRewardPool} = await fixture();
+      const {
+        contract,
+        contractAsAdmin,
+        contractAsRewardPool,
+      } = await periodicSetup();
 
       await expect(contract.notifyRewardAmount(12345678)).to.be.revertedWith(
         'not reward distribution'
@@ -90,12 +51,16 @@ describe('PeriodicFixedRateRewardCalculator', function () {
     });
 
     it('reward distribution should be able to call setSavedRewards', async function () {
-      const {contractAsRewardDistribution} = await fixture();
+      const {contractAsRewardDistribution} = await periodicSetup();
       await expect(contractAsRewardDistribution.setSavedRewards(12345678)).not
         .to.be.reverted;
     });
     it('other should fail to call setSavedRewards', async function () {
-      const {contract, contractAsAdmin, contractAsRewardPool} = await fixture();
+      const {
+        contract,
+        contractAsAdmin,
+        contractAsRewardPool,
+      } = await periodicSetup();
 
       await expect(contract.setSavedRewards(12345678)).to.be.revertedWith(
         'not reward distribution'
@@ -111,11 +76,11 @@ describe('PeriodicFixedRateRewardCalculator', function () {
 
   describe('should be no rewards on initialization', function () {
     it('startup', async function () {
-      const {contract} = await fixture();
+      const {contract} = await periodicSetup();
       expect(await contract.getRewards()).to.be.equal(0);
     });
     it('restart call', async function () {
-      const {contractAsRewardPool, durationInSeconds} = await fixture();
+      const {contractAsRewardPool, durationInSeconds} = await periodicSetup();
       await contractAsRewardPool.restartRewards(0);
       expect(await contractAsRewardPool.getRewards()).to.be.equal(0);
       await contractAsRewardPool.restartRewards(100);
@@ -134,7 +99,7 @@ describe('PeriodicFixedRateRewardCalculator', function () {
         contract,
         contractAsRewardDistribution,
         durationInSeconds,
-      } = await fixture();
+      } = await periodicSetup();
       const rewards = BigNumber.from(12345678);
       const realRewards = rewards.div(durationInSeconds).mul(durationInSeconds);
       expect(await contract.duration()).to.be.equal(durationInSeconds);
@@ -159,7 +124,7 @@ describe('PeriodicFixedRateRewardCalculator', function () {
         contract,
         contractAsRewardDistribution,
         durationInSeconds,
-      } = await fixture();
+      } = await periodicSetup();
       const rewards = BigNumber.from(durationInSeconds * 10000);
       const time = await doOnNextBlock(async () => {
         await contractAsRewardDistribution.notifyRewardAmount(rewards);
@@ -182,7 +147,7 @@ describe('PeriodicFixedRateRewardCalculator', function () {
         contractAsRewardDistribution,
         contractAsRewardPool,
         durationInSeconds,
-      } = await fixture();
+      } = await periodicSetup();
       // OBS: Calling restartRewards before notifyRewardAmount doesn't change anything.
       await doOnNextBlock(async () => {
         await contractAsRewardPool.restartRewards(1);
@@ -226,7 +191,7 @@ describe('PeriodicFixedRateRewardCalculator', function () {
         contract,
         contractAsRewardDistribution,
         durationInSeconds,
-      } = await fixture();
+      } = await periodicSetup();
       const rewards1 = BigNumber.from(
         durationInSeconds * durationInSeconds * 123
       );
@@ -269,7 +234,7 @@ describe('PeriodicFixedRateRewardCalculator', function () {
         contract,
         contractAsRewardDistribution,
         durationInSeconds,
-      } = await fixture();
+      } = await periodicSetup();
       const rewards1 = BigNumber.from(
         durationInSeconds * durationInSeconds * 123
       );

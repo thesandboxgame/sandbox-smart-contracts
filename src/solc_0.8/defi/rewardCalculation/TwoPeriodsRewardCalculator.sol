@@ -6,7 +6,7 @@ import {Math} from "@openzeppelin/contracts-0.8/utils/math/Math.sol";
 import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
 import {IRewardCalculator} from "../IRewardCalculator.sol";
 
-contract TwoPeriodsFixedRateRewardCalculator is IRewardCalculator, AccessControl {
+contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
     event InitialCampaign(
         uint256 reward,
         uint256 duration,

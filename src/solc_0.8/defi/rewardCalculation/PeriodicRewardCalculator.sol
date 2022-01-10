@@ -12,7 +12,7 @@ import {IRewardCalculator} from "../IRewardCalculator.sol";
     restarted (the main contract distribute the rewards at that point in time before calling)
     at the end of the period all the accumulated rewards (including those when restartRewards was called) are given.
 */
-contract PeriodicFixedRateRewardCalculator is IRewardCalculator, AccessControl {
+contract PeriodicRewardCalculator is IRewardCalculator, AccessControl {
     event RewardAdded(uint256 reward);
 
     // This role is in charge of configuring reward distribution

@@ -65,7 +65,7 @@ export const setupSandRewardPool = withSnapshot(
     );
     await deployments.deploy('RewardCalculator', {
       from: deployer,
-      contract: 'PeriodicFixedRateRewardCalculator',
+      contract: 'PeriodicRewardCalculator',
       args: [rewardPoolAsDeployer.address, durationInSeconds],
       log: true,
     });
