@@ -2,9 +2,9 @@
 
 pragma solidity 0.8.2;
 
+import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
 import {SafeERC20} from "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
-import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import {Math} from "@openzeppelin/contracts-0.8/utils/math/Math.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
@@ -12,9 +12,10 @@ import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.so
 import {IERC721} from "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import {StakeTokenWrapper} from "./StakeTokenWrapper.sol";
 import {SafeMathWithRequire} from "../common/Libraries/SafeMathWithRequire.sol";
+import {ERC2771Handler} from "../common/BaseWithStorage/ERC2771Handler.sol";
 import {IContributionCalculator} from "./IContributionCalculator.sol";
 
-contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
+contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ERC2771Handler {
     using SafeERC20 for IERC20;
     using Address for address;
 
@@ -45,12 +46,14 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
         IERC20 stakeToken_,
         IERC20 rewardToken_,
         IContributionCalculator contributionCalculator_,
-        uint256 rewardDuration_
+        uint256 rewardDuration_,
+        address trustedForwarder
     ) StakeTokenWrapper(stakeToken_) {
         rewardToken = rewardToken_;
         contributionCalculator = contributionCalculator_;
         duration = rewardDuration_;
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        __ERC2771Handler_initialize(trustedForwarder);
     }
 
     function setRewardToken(address newRewardToken) external {
@@ -134,6 +137,11 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
         _withdrawRewards();
     }
 
+    function setTrustedForwarder(address trustedForwarder) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Only admin");
+        _trustedForwarder = trustedForwarder;
+    }
+
     ///@notice to be called after the amount of reward tokens (specified by the reward parameter) has been sent to the contract
     // Note that the reward should be divisible by the duration to avoid reward token lost
     ///@param reward number of token to be distributed over the duration
@@ -188,5 +196,13 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
     function _processUserReward(address account) internal {
         rewards[account] = earned(account);
         userRewardPerTokenPaid[account] = rewardPerTokenStored;
+    }
+
+    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
+        return ERC2771Handler._msgSender();
+    }
+
+    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+        return ERC2771Handler._msgData();
     }
 }
