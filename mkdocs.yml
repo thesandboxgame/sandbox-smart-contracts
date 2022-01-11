@@ -24,6 +24,8 @@ nav:
       - Writing documentation: tutorials/writing-documentation.md
       - Writing tests: tutorials/writing-tests.md
   - Topics:
+      - claim:
+          - Erc20 giveaway: topics/claims/signed-erc20-giveaway.md
       - Blockchain:
           - Ethereum: topics/blockchain/ethereum.md
           - Features: topics/blockchain/features.md

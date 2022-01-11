@@ -2,7 +2,7 @@
 description: Faucet
 ---
 
-# [Faucet]((https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/src/solc_0.8/faucet/Faucet.sol))
+# [Faucet](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/src/solc_0.8/faucet/Faucet.sol)
 
 ## Introduction
 
@@ -12,7 +12,7 @@ This contract makes it possible to distribute sand or any ERC20 token to any use
 ## Model
 
 This contract is dealing with sand (or any ERC20 token).  
-[ERC20](https://ethereum.org/en/developers/docs/standards/tokens/erc-20/) is the classic standard to represent fungible token.  
+[ERC20](https://ethereum.org/en/developers/docs/standards/tokens/erc-20/) is the classic standard to represent fungible token.
 
 ## Process
 
@@ -62,7 +62,7 @@ class Ownable {
 }
 
 class IERC20 {
-  + uint256 totalSupply() 
+  + uint256 totalSupply()
   + uint256 balanceOf(address account)
   + bool transfer(address recipient, uint256 amount)
   + uint256 allowance(address owner, address spender)
