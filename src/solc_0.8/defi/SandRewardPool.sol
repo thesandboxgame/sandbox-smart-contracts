@@ -96,12 +96,6 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         rewardToken.safeTransfer(receiver, rewardToken.balanceOf(address(this)));
     }
 
-    // ToDo: check if no campaign is running
-    function setDuration(uint256 newDuration) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
-        duration = newDuration
-    }
-
     function totalSupply() external view returns (uint256) {
         return _totalSupply;
     }
@@ -157,10 +151,6 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     function getReward() external nonReentrant {
         _processRewards(_msgSender());
         _withdrawRewards();
-    }
-
-    function getDuration() external returns (uint256) {
-        return duration;
     }
 
     function _withdrawStake(uint256 amount) internal {
