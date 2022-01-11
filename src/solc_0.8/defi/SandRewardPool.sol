@@ -65,6 +65,12 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
         _stakeToken = IERC20(newStakeLPToken);
     }
 
+    // ToDo: check if no campaign is running
+    function setDuration(uint256 newDuration) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
+        duration = newDuration
+    }
+
     function totalSupply() external view returns (uint256) {
         return _totalSupply;
     }
@@ -132,6 +138,10 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard {
         _processReward();
         _processUserReward(_msgSender());
         _withdrawRewards();
+    }
+
+    function getDuration() external returns (uint256) {
+        return duration;
     }
 
     ///@notice to be called after the amount of reward tokens (specified by the reward parameter) has been sent to the contract
