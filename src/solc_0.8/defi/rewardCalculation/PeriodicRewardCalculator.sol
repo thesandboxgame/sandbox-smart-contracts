@@ -40,8 +40,8 @@ contract PeriodicRewardCalculator is IRewardCalculator, AccessControl {
 
     function setDuration(uint256 newDuration) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
-        if (block.timestamp >= periodFinish){
-            duration = newDuration
+        if (block.timestamp >= periodFinish) {
+            duration = newDuration;
         }
     }
 
