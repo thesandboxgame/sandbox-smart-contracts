@@ -1,0 +1,2617 @@
+{
+  "address": "0xBA6d007575ebD6Bbe4285DbBB21FdcF52F35ee18",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "landAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "sandContractAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "initialMetaTx",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "admin",
+          "type": "address"
+        },
+        {
+          "internalType": "address payable",
+          "name": "initialWalletAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "merkleRoot",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "expiryTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "initialSigningWallet",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "initialMaxCommissionRate",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "estate",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "asset",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "feeDistributor",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "authValidator",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "oldAdmin",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "newAdmin",
+          "type": "address"
+        }
+      ],
+      "name": "AdminChanged",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "buyer",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "topCornerId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "size",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "price",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amountPaid",
+          "type": "uint256"
+        }
+      ],
+      "name": "LandQuadPurchased",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "metaTransactionProcessor",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "bool",
+          "name": "enabled",
+          "type": "bool"
+        }
+      ],
+      "name": "MetaTransactionProcessor",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "referrer",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "referee",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "commission",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "commissionRate",
+          "type": "uint256"
+        }
+      ],
+      "name": "ReferralUsed",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "buyer",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "reserved",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "info",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "salt",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "assetIds",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes32[]",
+          "name": "proof",
+          "type": "bytes32[]"
+        },
+        {
+          "internalType": "bytes",
+          "name": "referral",
+          "type": "bytes"
+        },
+        {
+          "internalType": "bytes",
+          "name": "signature",
+          "type": "bytes"
+        }
+      ],
+      "name": "buyLandWithSand",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newAdmin",
+          "type": "address"
+        }
+      ],
+      "name": "changeAdmin",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "referral",
+          "type": "bytes"
+        }
+      ],
+      "name": "decodeReferral",
+      "outputs": [
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getAdmin",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getExpiryTime",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getMaxCommisionRate",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getMerkleRoot",
+      "outputs": [
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getSigningWallet",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "who",
+          "type": "address"
+        }
+      ],
+      "name": "isMetaTransactionProcessor",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes",
+          "name": "signature",
+          "type": "bytes"
+        },
+        {
+          "internalType": "address",
+          "name": "referrer",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "referee",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "expiryTime",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "commissionRate",
+          "type": "uint256"
+        }
+      ],
+      "name": "isReferralValid",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC1155BatchReceived",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "bytes",
+          "name": "",
+          "type": "bytes"
+        }
+      ],
+      "name": "onERC1155Received",
+      "outputs": [
+        {
+          "internalType": "bytes4",
+          "name": "",
+          "type": "bytes4"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "metaTransactionProcessor",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "enabled",
+          "type": "bool"
+        }
+      ],
+      "name": "setMetaTransactionProcessor",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address payable",
+          "name": "newWallet",
+          "type": "address"
+        }
+      ],
+      "name": "setReceivingWallet",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "newMaxCommissionRate",
+          "type": "uint256"
+        }
+      ],
+      "name": "updateMaxCommissionRate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newSigningWallet",
+          "type": "address"
+        }
+      ],
+      "name": "updateSigningWallet",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "to",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "assetIds",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "values",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "withdrawAssets",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "transactionHash": "0xa7ee41b2603440ada02b2afef35f13f8dddba25305d0dbb2a67b50b21f62eda9",
+  "receipt": {
+    "to": null,
+    "from": "0x8A0e83DE499d7543CF486974a6196a35B5F573E7",
+    "contractAddress": "0xBA6d007575ebD6Bbe4285DbBB21FdcF52F35ee18",
+    "transactionIndex": 19,
+    "gasUsed": "2314529",
+    "logsBloom": "0x00000000000000000000000000000010000000000000000000040000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000008000000000000000000000000000000000000000000000000000000000000000000000000",
+    "blockHash": "0x36be4532d5c84ed6fd74db7277e8f3da7aa6c66744543a0f5fe518a3bbc9981b",
+    "transactionHash": "0xa7ee41b2603440ada02b2afef35f13f8dddba25305d0dbb2a67b50b21f62eda9",
+    "logs": [
+      {
+        "transactionIndex": 19,
+        "blockNumber": 9973364,
+        "transactionHash": "0xa7ee41b2603440ada02b2afef35f13f8dddba25305d0dbb2a67b50b21f62eda9",
+        "address": "0xBA6d007575ebD6Bbe4285DbBB21FdcF52F35ee18",
+        "topics": [
+          "0xb21eb88b4e33b3f1281830a7178d74d8aa73220416215726b68ae23d539515cb"
+        ],
+        "data": "0x000000000000000000000000cc933a862fc15379e441f2a16cb943d385a4695f0000000000000000000000000000000000000000000000000000000000000001",
+        "logIndex": 34,
+        "blockHash": "0x36be4532d5c84ed6fd74db7277e8f3da7aa6c66744543a0f5fe518a3bbc9981b"
+      }
+    ],
+    "blockNumber": 9973364,
+    "cumulativeGasUsed": "4038316",
+    "status": 1,
+    "byzantium": true
+  },
+  "args": [
+    "0xaF40A483bF77AAb7b7D13dB18187E6D62C1EA41b",
+    "0xCc933a862fc15379E441F2A16Cb943D385a4695f",
+    "0xCc933a862fc15379E441F2A16Cb943D385a4695f",
+    "0xa4519D601F43D0b8f167842a367465681F652252",
+    "0x60927eB036621b801491B6c5e9A60A8d2dEeD75A",
+    "0x5e69e17e218d5ed680399d9061eff671c0e29054046b19341e616d013a27bfd1",
+    1673614800,
+    "0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e",
+    2000,
+    "0x0000000000000000000000000000000000000000",
+    "0x8055a2c0f7EB177BeaB357B70E6504402d2b5fF6",
+    "0x5983532A5b9009E05428595b87F19e42068a232B",
+    "0x94cA164E3d7B13700eC356a1540f7Ae7c239A2b3"
+  ],
+  "linkedData": [
+    {
+      "x": 252,
+      "y": 396,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x76f4e618bb5ac513a6e8b86da851f371c7e563da3c4d0759c84a9f5b7cf301b4",
+      "assetIds": []
+    },
+    {
+      "x": 252,
+      "y": 397,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x4d1a782b25962361893a6cf651f47b5da40b2ba2804b82bc1cb72cb4b6cb2d77",
+      "assetIds": []
+    },
+    {
+      "x": 252,
+      "y": 398,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0xb0dfe381110b1ce882253a1cd472f6258a40d74e1ac12b4d47b739b85d942e15",
+      "assetIds": []
+    },
+    {
+      "x": 252,
+      "y": 399,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x523166a23556a4d8847d4443fe133bf9cfead5312fca1318688a772268c8ad7d",
+      "assetIds": []
+    },
+    {
+      "x": 252,
+      "y": 400,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x2296a49765d1a4c3fa9799ad1c9327427509253fdd10a2840518909201a4abf7",
+      "assetIds": []
+    },
+    {
+      "x": 252,
+      "y": 401,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0xbf8a69faa4c43b9a770c68e507e0c8b22cec45344d0f6fe507ef6c755cc09da2",
+      "assetIds": []
+    },
+    {
+      "x": 252,
+      "y": 402,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x438d167cf172fe35d58b5eb1aca8a633a6899181e66df9920617ea0ae1dbaeed",
+      "assetIds": []
+    },
+    {
+      "x": 252,
+      "y": 403,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x2d9710ddecd176a9023fd64a41bbfc727229668ab772de419dbd9b5ac9a6ed41",
+      "assetIds": []
+    },
+    {
+      "x": 252,
+      "y": 404,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x2dcc50b061af4e29ce2159abe9236975b93de44bc3a6c9fe4554df442b43cf78",
+      "assetIds": []
+    },
+    {
+      "x": 252,
+      "y": 405,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x2832fa649a0c0c68f7834d795b17563f0e0abad5174b779582f1ca5112eb3d72",
+      "assetIds": []
+    },
+    {
+      "x": 252,
+      "y": 406,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x166ea8c29810cab70e2d62865d530fe06d6c4c4efc1c3b5019381f3966ddd51b",
+      "assetIds": []
+    },
+    {
+      "x": 252,
+      "y": 407,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0xa6344fbbfca74ee02d5af3f89c4ab350aaa2f42257515253735579ce9771c086",
+      "assetIds": []
+    },
+    {
+      "x": 253,
+      "y": 396,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x2c41b8d115358dd0034fe6fa56fee45eba6faa1d23c836df8a525c8edf38d8d4",
+      "assetIds": []
+    },
+    {
+      "x": 253,
+      "y": 397,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x94b4d0965847fc8ccfa86623e1349b2a0a1b1eba8740470b4a473bf30530fcfd",
+      "assetIds": []
+    },
+    {
+      "x": 253,
+      "y": 398,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x34c788717c2da591b3a658634ae275baf328f6171b10c2fcbc09ee90b2cbdf77",
+      "assetIds": []
+    },
+    {
+      "x": 253,
+      "y": 399,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x36562c1bcf03fbf95ef5d61e0bfee63a00de4e64ead0ff69166cb7fa9bf75e0e",
+      "assetIds": []
+    },
+    {
+      "x": 253,
+      "y": 400,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x66212e64296421c82bd72c08b7f9eb89bfaae908cefc5188907bc1d1bd32154d",
+      "assetIds": []
+    },
+    {
+      "x": 253,
+      "y": 401,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x1326d39e6f9d86d167c2ada4e29a128b1727ec7424d0a07027e7162c5b6f80ae",
+      "assetIds": []
+    },
+    {
+      "x": 253,
+      "y": 402,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x6649d87d296c34cbdefaa163f5cf6fe21c0870032612a50df8302d3260eec2dc",
+      "assetIds": []
+    },
+    {
+      "x": 253,
+      "y": 403,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0xb31d02ea3c0e744e9eb4cdc4da7f802d40fcb8da3df0f7c3cad508705d1653f6",
+      "assetIds": []
+    },
+    {
+      "x": 253,
+      "y": 404,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x9d6e63192e0cec0119b6745798acacb1533ea32c05d3fb0a5fe9d7af1c1c851e",
+      "assetIds": []
+    },
+    {
+      "x": 253,
+      "y": 405,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x37e6513b8fe16dfce78386ae8d425a7a1d6bbab2a396e619f4001d5f1c8ac486",
+      "assetIds": []
+    },
+    {
+      "x": 253,
+      "y": 406,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x7c1d8870a0a8cc41835b78ad7dc7978313821f9151ba82f8b3bcdb2b462da788",
+      "assetIds": []
+    },
+    {
+      "x": 253,
+      "y": 407,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0xcea57ed193f14fa7041fc0e8f18453d102e1507e45ab5ae16fed354a49b8f35f",
+      "assetIds": []
+    },
+    {
+      "x": 254,
+      "y": 396,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0xd88c0343f298a1941263261045681eff5c5f2ec880c30712d5780e13517f169b",
+      "assetIds": []
+    },
+    {
+      "x": 254,
+      "y": 397,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0xfcf018024dbf7416e92fec20f343cf9af6f735086f416e8d0e196a0d0c7f7c12",
+      "assetIds": []
+    },
+    {
+      "x": 254,
+      "y": 398,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x7af4ffa62878fc1d468d26a21a3906dd063120a097c6060cc4e0dd09b6c3fb5d",
+      "assetIds": []
+    },
+    {
+      "x": 254,
+      "y": 399,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x40fd3bd404a1bce23c5a817eeadca8641eb4bea80eceab67044a8918d8cf1d0b",
+      "assetIds": []
+    },
+    {
+      "x": 254,
+      "y": 400,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x2690c38da7ba79e18d6ea0c11756dc54019db515d8a834a49db42325147c17c0",
+      "assetIds": []
+    },
+    {
+      "x": 254,
+      "y": 401,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x16be949e50ab1a2ec3fbafa33b4f02c6ebf4d3cfd7705fdb36fcf7681b594f6f",
+      "assetIds": []
+    },
+    {
+      "x": 254,
+      "y": 402,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x0b7082212a21899a62ab75e19d3644cc487173233d0d79c55246bbc2ebfb0e22",
+      "assetIds": []
+    },
+    {
+      "x": 254,
+      "y": 403,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0xd120601e118bec88e6abe7d0065736ea8e0f9ab2524b730c9bd0fecc407eebb4",
+      "assetIds": []
+    },
+    {
+      "x": 254,
+      "y": 404,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x39e04869f7089151654bc8b7134b9cb359a78724bdb87358866938cc17777779",
+      "assetIds": []
+    },
+    {
+      "x": 254,
+      "y": 405,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x137d7496af7272e89b271994c3f222d0108f5d9f765a86b149be2e12b2c9b692",
+      "assetIds": []
+    },
+    {
+      "x": 254,
+      "y": 406,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0xdc94b6934a62a7de33f8f87953fd2edbc46b07b40c441611ba348fa37ee7f165",
+      "assetIds": []
+    },
+    {
+      "x": 254,
+      "y": 407,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0xdbc37259bfc712b28439a02e4966688b33e8ec7701d60e1214aec6ed3f3efeaa",
+      "assetIds": []
+    },
+    {
+      "x": 255,
+      "y": 399,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x1378ecff426e20226cbb3758158f1b37148150c9f62edfe959fc542140082eb1",
+      "assetIds": []
+    },
+    {
+      "x": 255,
+      "y": 400,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0xbc6110c68e7ed97497a3c19c7d4e071d8c918f6c4bb70b1eb55ad7e261526086",
+      "assetIds": []
+    },
+    {
+      "x": 255,
+      "y": 401,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x5dcb20dc85eeaf9898cdab616720774a41eed66ee77a5ae5ed8d28baf939535f",
+      "assetIds": []
+    },
+    {
+      "x": 255,
+      "y": 405,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0xf4eadba70213d275a7f3aaa14cdc55b1fe0c555aa17d1b4ae7f0b7283c29a48f",
+      "assetIds": []
+    },
+    {
+      "x": 255,
+      "y": 406,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x1ce8a9eae377a5f091c803e6e6c0d5f43f47aa715cc2c130a016228e97a8b4d0",
+      "assetIds": []
+    },
+    {
+      "x": 255,
+      "y": 407,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x6001ead926b16f289ef54ff8e06d66aaf97a071b49bcbd7d06d6a746bbe7c6a3",
+      "assetIds": []
+    },
+    {
+      "x": 256,
+      "y": 399,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x3154f6118111a814fa2e1bfa153695e56e8c0eaf2b8a32e1a8c15a2f163ef257",
+      "assetIds": []
+    },
+    {
+      "x": 256,
+      "y": 400,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x67d08ba9321e0b4286b9521e93d3a25b8036fca50da5636465afb4fad3fbc908",
+      "assetIds": []
+    },
+    {
+      "x": 256,
+      "y": 401,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0xe1aca29ab3dc102287b0a76e19299ec5100f14ded727d2080ee777580eb6b388",
+      "assetIds": []
+    },
+    {
+      "x": 256,
+      "y": 405,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x61b426de8987b6b660ad02b419a9ff4ab1c55d4d097f9ef849763d2241d65329",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 256,
+      "y": 406,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x138c11ae77442cdf686be2cc0850ccd0f4eb36332373eca75b24e8d56ddef6c8",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 256,
+      "y": 407,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xe31c375d1a4e9082e9d07d0115d818eea1db8bcb0bd3feb6de44ed94651ad626",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 257,
+      "y": 399,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x5545e1f5efe866e0d4406f312887312a4dfc74e76fd3c9ad0dc3ba34e3720494",
+      "assetIds": []
+    },
+    {
+      "x": 257,
+      "y": 400,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x174b3bf419b5dbb08b61d4c2e5939e36ca26a05c0b8a87e39e8e416d76e78296",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 257,
+      "y": 401,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xceff3b5f66ca5f4504c298f5b697fcb76bf4c551e0a926c9b778b549aeb29d2a",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 257,
+      "y": 405,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x661b8038bf5f4e1dbd57a442e0b3e894163e3fb4815c0b14e76d0e4cbc439010",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 257,
+      "y": 406,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x8e68cf477daf8368f50a5fc8f616228c372e9b6b999db12ebc10999e27a8f7d2",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 257,
+      "y": 407,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xe99994a35bebc485fef4230ae756c6119709351ebf72ed73b7b907a0fd09f617",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 258,
+      "y": 399,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x275c41dd4bde532c2382c9aad48d33c17092c87fc7cbe96cba214ea6063ac2da",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 258,
+      "y": 400,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x9a42de4be91452205561f8cbff807192eb9e5e021cea38f9bfd6f165d80729d9",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 258,
+      "y": 401,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x8e767953abef9a66d6ba3e6afd204d7da7425f7c63a4bb4fd2bcdd2683f71925",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 259,
+      "y": 399,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xb46fb2613e007952da211e28648b840c2246560b695efad9c8e04d1be342f43a",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 259,
+      "y": 400,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x99b21ab1c7a304ce0bb0424b7af4b9f9aa1231da7dd7b6d8b196020d6b85f6ca",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 259,
+      "y": 401,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xacb63a8c71dd9898193811a4fa1fe73460585ce1ad3b561afaad105ced248e8f",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 260,
+      "y": 399,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x396308680856153fc06c905ce5a64a96ab11264b0e41bbf058658800ea1c20df",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 260,
+      "y": 400,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x2200408d505fd1d62b7434c92b061edfbeb109b176479d7eb54a6fa3eff4f1f7",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 260,
+      "y": 401,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x62db341acbe268680667cdddfdcc911694fc68477d372b3e938493488e7dfb03",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 261,
+      "y": 396,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x9ee674dc704e11cd2926402bbced139431fc414d38564d4bce27a2c111761d97",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 261,
+      "y": 397,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x56e1dd891826e0f7aa7f50fdf054355430e7c39b3855eaadf9e9e7879bfd5e91",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 261,
+      "y": 398,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x13f7f109f5e9fe53cbc75c282da25367d6189ed99831ea1c0b631c787420e255",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 262,
+      "y": 396,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x60f4c97a8ca63eb4654a4138509fc9ad3973e2f9b5038af738c865e3aafa5e46",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 262,
+      "y": 397,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x9eac4345d32670bcea72c31cd1696fdff09cdf76cba0145168e050341906558d",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 262,
+      "y": 398,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xd26cc3ec6875986ea89125bda4b1b193bc87eaf6a6a312adbdb9ebc5c4417668",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 263,
+      "y": 396,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xd51ecc539ff1e425b5837521ab9063619bdfa3e777de24dbb7c27bcc3100e318",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 263,
+      "y": 397,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x8ca9b2718595e21208c29358b32f505a3a6639704d2a4476e8a388060530be9a",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 263,
+      "y": 398,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xa7325e42c0f3d840af2406791b32a3835edcb4ee691dbe8f1711f3b26e5913ef",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 267,
+      "y": 390,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x010f17e202cf8504b2a165824beda258b430191c10a0c04e9efaf38774b232db",
+      "assetIds": []
+    },
+    {
+      "x": 267,
+      "y": 391,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xace11164cc7107240247c0b281c752e531215622bfc0c81fbfd502e7ea17b33a",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 267,
+      "y": 392,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x452f1e21ccbc190896b4069b2d647d26191300e3fc7618ea600bf55238ec77d5",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 268,
+      "y": 390,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x18d1bf031f1228c64462c84a28ad1cca10572e64161e9b77300f909918671687",
+      "assetIds": []
+    },
+    {
+      "x": 268,
+      "y": 391,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xfd996bb52984866b7f0cf0b1eb0cd9b84d14ea9e9a7b9a2eb66606b3cc8025b0",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 268,
+      "y": 392,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x58709b3731688bc06fc382cf97f83e074bf9886529cbc03fa57c45a0580383b3",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 269,
+      "y": 390,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x112f2bb663c1fc0f68e5ba061636e05f98a94c1d4c945009c5490331b47b2a67",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 269,
+      "y": 391,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x10c5c171aabfd284ad097d9e551ee875a7c882bb62188840ae4d83e733da393d",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 269,
+      "y": 392,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x093ec36b5f7dff4b3ac4f4371e04e48fdda70c0f542d7cbef9f4b6fb8a3a2b22",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 270,
+      "y": 390,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x1a6aee104cb6bddb0cb41fdee92aad76df3d8a7777b38fbff0a3166bf40e9b94",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 270,
+      "y": 391,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xd4dda8a227bea7604b99b6238a58f47ff6c0ca4cc048aee5276f00df5774ffa9",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 270,
+      "y": 392,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xa78c74cbac014445728027943ff71ac5604526d3e3eab3c4f8e1699ea4084f32",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 270,
+      "y": 393,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x0333528526204c22de97817e33aa2c82740f75821814b8e0d2ac38c5b73163aa",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 270,
+      "y": 394,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xde09a1691fea9630a3b607380ca902dc69e058c63b39a55e2a55523b39a3e4ed",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 270,
+      "y": 395,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xebd4bee35946bd89385bf253844e1a5e026374ad9f4b7b4b18fcd9e9ab77ec16",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 271,
+      "y": 390,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x141c2b8a44a7655bfa682df8a391af941dcdb3f3b8d7b600f01de169ab15d33d",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 271,
+      "y": 391,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x1b59b3bff25af895a5b0cf2053c3b2ae92b9ff759c6ee0557c3189710329a922",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 271,
+      "y": 392,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x9e49ea4b04d0314d7c272e3eac7ce57b01b9226e4bafa724ca2f7b0591449992",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 271,
+      "y": 393,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x945da7c3b8c2793ee2cd514420d0b81ea3bef0e56669fbaa259a0d2281ed1e70",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 271,
+      "y": 394,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xd2e1a28c929adc5694b2037742d7efb47011c8898dca1102a15b6e4be5743f65",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 271,
+      "y": 395,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x38e05de42d0c9a265b576b16e3a9ae56b63924d7fe048a48536d80b2a4137d2d",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 272,
+      "y": 390,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xb667ebefb19bbb77fc6d41ac1a3b535808a2599e11e0b6b83be6c9e0d0cb082a",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 272,
+      "y": 391,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x6333c9208511eb413a4990a807629af959de8454988426e3e0709313f78f9556",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 272,
+      "y": 392,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x36a31797b29383b5cdb7991181cb88da6cf27ae75816b7b55fb0b07d3c999c98",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 272,
+      "y": 393,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xc233abbdbdaa7d732ffa814f5015823e3e817c909b4b8792f057b917ecdf7d90",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 272,
+      "y": 394,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x138d03af0c2364229eb122831b5f16bcf438224e0db481e33eb7a0b311a96c0b",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 272,
+      "y": 395,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xf71e291f7fa1ea95374efe4b8046a3a497bafc463f844d2d1a6c07cff53b1ba4",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 273,
+      "y": 393,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xb731bc8b1f37866fdbe9fd7b8236b1df5f41596b7dc4fc74cd870a83994be205",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 273,
+      "y": 394,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xb83df26ebdb59033508f15019fd4ee6744075439fc015704bdc4397bd11a65a3",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 273,
+      "y": 395,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x1bfc8d8a62c50f88b781fba79b117f488d01578ac43c79105fc0996b857f99cc",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 274,
+      "y": 393,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x4d63421a965254160589e3538c89b4baafe89882ad80c440582eb8acab42f14f",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 274,
+      "y": 394,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xda7aded765d16fb7768c5dffdf4f5222a83636042ec08eeef21c4e85811f2dff",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 274,
+      "y": 395,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xf5b2811486dfff7b62fd925007054ef81540f91e43a8406e19ef44dad28c10f7",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 275,
+      "y": 393,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xa261af50ec2493abcb996fa7bcffb99aab3b144663f42e931e1aa8d5239cf09f",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 275,
+      "y": 394,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xb6a86662be743236055293dd11da7655e887fb03eb08481852fb66064135f719",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 275,
+      "y": 395,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x90f92a8670111dd3dbd900c3b1804b76cce6f3565f632d7e7fbe79ebf7c904ed",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 276,
+      "y": 390,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xb338950553b21e42cc0dbc57ccd1ab4a4b424445396bf6511ea6ce236ebd3a82",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 276,
+      "y": 391,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xed1efb459cd13449bd4e1c6d791d66740b352fe3b2bcb2adddc0cfa5af498901",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 276,
+      "y": 392,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x0ee1b0b3378cb18a24989ca152de14786875d9b8f94e0cee969371064a5ab041",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 276,
+      "y": 393,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x8812fd0606b77f24fefe814fc7edf932e6e2f12e7546250efc9fb4560e25ae15",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 276,
+      "y": 394,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x8cf09457f019edacaf0e5c43119e4d9d331c61e2617ee5b666d1cd34516a5a50",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 276,
+      "y": 395,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x9d2bd846337f398dfc1bb93f4462db4edef4ceb28ce1e2528a3e8a2fbdaec8ac",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 277,
+      "y": 390,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x1470ee46f9b46ad2983595130c73dc81929009347afbf6e83075e5dfa3d42b56",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 277,
+      "y": 391,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xe649860fbdc937a6e90187be9216b1c1e6edd6b706be874b9153565178a6dfb0",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 277,
+      "y": 392,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xdda75e8550b22aaa96f0ab4b48add2412ae7c0bfb0aecf5c912de7bc63a4b749",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 277,
+      "y": 393,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xb9e5ee6789ddaccabdb2e12ad662474c71c9baf5be9cea80fdf2f02ecb06ca8a",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 277,
+      "y": 394,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x883952a36b1893ac52e48655405d0b0f8fee7465f5a434a4872e27cf454c3a89",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 277,
+      "y": 395,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x8aeecf4b284f61b3382e3623f7a6db2ec8c0557d3e8aced21224d970bd848ea0",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 278,
+      "y": 390,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0xeabeeef4aa7d9c5153532987a85ca501da767891cf6b04f57e24afe28f671319",
+      "assetIds": []
+    },
+    {
+      "x": 278,
+      "y": 391,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xc5a6acf98f8ac9905d0247bd663c72e315768d2b3d0c610ac279e5d5d3d8e246",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 278,
+      "y": 392,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x5befcb6a980f5eb5218f4db07927d2a7ed642f0ddfc339c62309cd868711fe0c",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 278,
+      "y": 393,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x28f846fbc004887c871650ea3c88b7c748b31b4d6bcf95f7cec093ca89d7799f",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 278,
+      "y": 394,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x4b33aa3d8425bf60c5a88be44313b00344b9a60b6052760967accb91823784a8",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 278,
+      "y": 395,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xd82470438c335c4a26a22641b29d0a79638907961512a0719ead9747f2dd6518",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 279,
+      "y": 387,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x3cc74e52784a2f596dc6df6ff25c06a92c190b483120e2f20710edf43543c73a",
+      "assetIds": []
+    },
+    {
+      "x": 279,
+      "y": 388,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0xac9c8b059a7a46fc62afd5563a86c29d7f6e9cb830f06a5feb2824af8cf333e9",
+      "assetIds": []
+    },
+    {
+      "x": 279,
+      "y": 389,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x9fc283083b8aab567b554da2b8556598d55a989050fb80505a9e5b5272d14ee3",
+      "assetIds": []
+    },
+    {
+      "x": 279,
+      "y": 390,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x6b23e7113bc715d1ebd3052052b37fb6aa16eab43353868e09ed794397fee608",
+      "assetIds": []
+    },
+    {
+      "x": 279,
+      "y": 391,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xf82c445d54a2aad18a9c751c9145f4b05c1c8202dd4bf81acad1e22c4424718b",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 279,
+      "y": 392,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x0e0450acc074fb7640b0bfd153a44d9b6ad4f5d71e122fa3e9d331e3df5758df",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 280,
+      "y": 387,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x64b685f48fe984c2cccf29954076174443655bdd2b89151bd49e5704b29d66de",
+      "assetIds": []
+    },
+    {
+      "x": 280,
+      "y": 388,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xff79fd6ac45fec59381d4798e82552c9b30e58929a9fccafb70fe523a41e6aeb",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 280,
+      "y": 389,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xc4a56cc3c7930d50ec75070733f97c890dca506ffab980e4cb937737c4442e01",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 280,
+      "y": 390,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x42fdfcfcb7432650cb41e34b11753b3e6049ecdd0e5a076752ca9668be10b5ec",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 280,
+      "y": 391,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x2d93d1ace595b14501d0f0cf629bbdd7cafa5f6e06fa0672a302bf926b893d54",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 280,
+      "y": 392,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x1b38b1fcecf459e94fd9ddbffa83ce2ea8a817daff60bb1b80d3ee220c23eda8",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 281,
+      "y": 387,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x8b0033cf7d42c9f73f49c4e8b19f04cc8e8cf4e61c87efd634a596d6fbba3cdd",
+      "assetIds": []
+    },
+    {
+      "x": 281,
+      "y": 388,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x5af8733a1a3f15b190cf5a0121001f39195a4215e8da3067b330932691265493",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021187"
+      ]
+    },
+    {
+      "x": 281,
+      "y": 389,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x24591178d8b4d2a074665d14a044aa1aeca5979f4ae2ed8e12f3d3fc21c6dac3",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 281,
+      "y": 390,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x52adf907f8234ceb95cf16db73367d5120cd3c6b518ff7ae1b35a45312f3d133",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021186"
+      ]
+    },
+    {
+      "x": 281,
+      "y": 391,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x7f3bae04b9a28064fa169a1e45d9e25febe4efda90203faddd07c6d0d8909304",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 281,
+      "y": 392,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xf5656ff2d3e2f44c5e77b17f31dae6b0dfa562fd1011a739807d6679f806b076",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 282,
+      "y": 387,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x86c8894f18cc20875956edea727f24f317a4a260b8316f34c93d308bc75c1a7a",
+      "assetIds": []
+    },
+    {
+      "x": 282,
+      "y": 388,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x54591bbc4c29e3395c3fcb1839302b7bd3f2412b1490e388cc65b1efe8c4e8ee",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 282,
+      "y": 389,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x93f5adeab7350bf7a1fb627b44363a819d3d04582f0f41d1592b349cb8130224",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021184"
+      ]
+    },
+    {
+      "x": 283,
+      "y": 387,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x8716271ef20be8bd58b14cbc3fe3c7f78a3957ae7ad8e2c4395dda8283cb51fe",
+      "assetIds": []
+    },
+    {
+      "x": 283,
+      "y": 388,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xb1a8f3f700c04c8ac81377479c9de1f53ea832ac73e3f3459d819815c8df935c",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 283,
+      "y": 389,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x3fc16db72570bc37601778f3aa93e5544bb9f5b8b2f8d9c5b5facc89dbe986f9",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 284,
+      "y": 387,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x66274381d14c17c50824423c3bc7407b867dd07b3e697482f879af5143d373cf",
+      "assetIds": []
+    },
+    {
+      "x": 284,
+      "y": 388,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0x6ff11b57c480c3bbcc67593e237b27532d124823ccaa7fbf9517356329b80382",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021188"
+      ]
+    },
+    {
+      "x": 284,
+      "y": 389,
+      "size": 1,
+      "price": "4683000000000000000000",
+      "reserved": "",
+      "salt": "0xa930d5a66a43ac06ac11d46628b2e4e64fa40c31f6c28d48943ca5aad7f21b1c",
+      "assetIds": [
+        "41506478881403507969696680653240014914910929820314476107906210059990541021185"
+      ]
+    },
+    {
+      "x": 285,
+      "y": 386,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x27a9dab908a85f1ec9d2e7348b343deb4a9b412c184b70b005be6a8ba9991cb2",
+      "assetIds": []
+    },
+    {
+      "x": 286,
+      "y": 386,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0x0d7d85f4f319db088fee87bb78c0c97a77744d9b5b6028646fcbfafa19efdf81",
+      "assetIds": []
+    },
+    {
+      "x": 287,
+      "y": 386,
+      "size": 1,
+      "price": "1011000000000000000000",
+      "reserved": "",
+      "salt": "0xcf8387b486f622dc9dfdb1a8f8c004a44e1e1e5236bb3b6d71c672dcb01e5fc7",
+      "assetIds": []
+    },
+    {
+      "x": 255,
+      "y": 396,
+      "size": 3,
+      "price": "8648000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0xff17b20cad82594ed9f4a12a74cb969fa7b9c8cf4f6112a5d448c91f9dc062d5",
+      "assetIds": []
+    },
+    {
+      "x": 255,
+      "y": 402,
+      "size": 3,
+      "price": "8648000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0x1ac835d5fc63ffb02346bd1c6555a291e5c1a59d6620d8947e738725f1a0ba3d",
+      "assetIds": []
+    },
+    {
+      "x": 258,
+      "y": 396,
+      "size": 3,
+      "price": "8648000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0x99f6914061a4be6caa77382b982376c23061fe5d26a888c1908f97e20bd5b801",
+      "assetIds": []
+    },
+    {
+      "x": 261,
+      "y": 399,
+      "size": 3,
+      "price": "8648000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0xfe7707f2f77b2daa7b7ef43c27508020eec89d7b4b2d302f6f18ec77a8bc6ed7",
+      "assetIds": []
+    },
+    {
+      "x": 267,
+      "y": 387,
+      "size": 3,
+      "price": "8648000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0x0ba7537db10e36b8e791d93def6557adf648bc5513360dd482eeb29d49a65e0e",
+      "assetIds": []
+    },
+    {
+      "x": 267,
+      "y": 393,
+      "size": 3,
+      "price": "8648000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0xd0de14f201a9882e9caf3a25a088e37a60e6d4c1d2df59c9657f6529a204c9b8",
+      "assetIds": []
+    },
+    {
+      "x": 270,
+      "y": 387,
+      "size": 3,
+      "price": "8648000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0xd503b3f373e456a5b7d6c261d6832138fcd28387498a3669f8351d6d39a5cf9c",
+      "assetIds": []
+    },
+    {
+      "x": 273,
+      "y": 387,
+      "size": 3,
+      "price": "8648000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0xfac26d055a5892bb18b074ffed2fd6553af41bf43c1ea8a56877a40d585936ae",
+      "assetIds": []
+    },
+    {
+      "x": 273,
+      "y": 390,
+      "size": 3,
+      "price": "8648000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0xa0e6180800d0ed72d1c4d3708c02d15ec18a0e0d723455581f00d161688eb93d",
+      "assetIds": []
+    },
+    {
+      "x": 276,
+      "y": 387,
+      "size": 3,
+      "price": "8648000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0x76dc49d1a1a3930e9478b574fa8474f2de597bc3b94895ae66ee67946d379e12",
+      "assetIds": []
+    },
+    {
+      "x": 279,
+      "y": 393,
+      "size": 3,
+      "price": "8648000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0x2b6476aedb6cce2335c777363be8cd55b423d057ebde232418a334cd22bfb7a7",
+      "assetIds": []
+    },
+    {
+      "x": 285,
+      "y": 387,
+      "size": 3,
+      "price": "8648000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0xcb10733aa7c945ef4fae6994212dfcb25a6df2e10db9a1adb2a12d12bf31de6a",
+      "assetIds": []
+    },
+    {
+      "x": 258,
+      "y": 402,
+      "size": 6,
+      "price": "32772000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0x70094eae103d93df40db367ea304c53f745420a9234702573c0507ed01df2758",
+      "assetIds": []
+    },
+    {
+      "x": 282,
+      "y": 390,
+      "size": 6,
+      "price": "32772000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0x12de1adace73baa149150e54a6e3deedcad89b74ca12159e74c88b397f591ffe",
+      "assetIds": []
+    },
+    {
+      "x": 264,
+      "y": 396,
+      "size": 12,
+      "price": "123806000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0xde3d0bec7ff28f28eda65bad98cb36126ab15881cfe5f29965405d5994b2f5c4",
+      "assetIds": []
+    },
+    {
+      "x": 276,
+      "y": 396,
+      "size": 12,
+      "price": "123806000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0x85492f854891c7c5176220f5804dbbdd2f38ca81349befd8eae8f7f0a8c8453c",
+      "assetIds": []
+    },
+    {
+      "x": 288,
+      "y": 384,
+      "size": 24,
+      "price": "466102000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0x42634c2dcb3a3249200c33b628704d7b11c6fd1bf33515558650811fef982896",
+      "assetIds": []
+    },
+    {
+      "x": 336,
+      "y": 384,
+      "size": 24,
+      "price": "466102000000000000000000",
+      "reserved": "0x7a9fe22691c811ea339d9b73150e6911a5343dca",
+      "salt": "0x92f4a668cefb78fde91ef2cbe74426d9181845e85592b95ed2d4fd8a4271730f",
+      "assetIds": []
+    }
+  ],
+  "solcInputHash": "e17a5bb930c92aaeeb80a52119ce77b7",
+  "metadata": "{\"compiler\":{\"version\":\"0.6.5+commit.f956cc89\"},\"language\":\"Solidity\",\"output\":{\"abi\":[{\"inputs\":[{\"internalType\":\"address\",\"name\":\"landAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"sandContractAddress\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"initialMetaTx\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"admin\",\"type\":\"address\"},{\"internalType\":\"address payable\",\"name\":\"initialWalletAddress\",\"type\":\"address\"},{\"internalType\":\"bytes32\",\"name\":\"merkleRoot\",\"type\":\"bytes32\"},{\"internalType\":\"uint256\",\"name\":\"expiryTime\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"initialSigningWallet\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"initialMaxCommissionRate\",\"type\":\"uint256\"},{\"internalType\":\"address\",\"name\":\"estate\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"asset\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"feeDistributor\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"authValidator\",\"type\":\"address\"}],\"stateMutability\":\"nonpayable\",\"type\":\"constructor\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"oldAdmin\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"AdminChanged\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"uint256\",\"name\":\"topCornerId\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"size\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"price\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amountPaid\",\"type\":\"uint256\"}],\"name\":\"LandQuadPurchased\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":false,\"internalType\":\"address\",\"name\":\"metaTransactionProcessor\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"bool\",\"name\":\"enabled\",\"type\":\"bool\"}],\"name\":\"MetaTransactionProcessor\",\"type\":\"event\"},{\"anonymous\":false,\"inputs\":[{\"indexed\":true,\"internalType\":\"address\",\"name\":\"referrer\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"referee\",\"type\":\"address\"},{\"indexed\":true,\"internalType\":\"address\",\"name\":\"token\",\"type\":\"address\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"amount\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"commission\",\"type\":\"uint256\"},{\"indexed\":false,\"internalType\":\"uint256\",\"name\":\"commissionRate\",\"type\":\"uint256\"}],\"name\":\"ReferralUsed\",\"type\":\"event\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"buyer\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"reserved\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"info\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes32\",\"name\":\"salt\",\"type\":\"bytes32\"},{\"internalType\":\"uint256[]\",\"name\":\"assetIds\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes32[]\",\"name\":\"proof\",\"type\":\"bytes32[]\"},{\"internalType\":\"bytes\",\"name\":\"referral\",\"type\":\"bytes\"},{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"}],\"name\":\"buyLandWithSand\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newAdmin\",\"type\":\"address\"}],\"name\":\"changeAdmin\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"referral\",\"type\":\"bytes\"}],\"name\":\"decodeReferral\",\"outputs\":[{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getAdmin\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getExpiryTime\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getMaxCommisionRate\",\"outputs\":[{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getMerkleRoot\",\"outputs\":[{\"internalType\":\"bytes32\",\"name\":\"\",\"type\":\"bytes32\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[],\"name\":\"getSigningWallet\",\"outputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"who\",\"type\":\"address\"}],\"name\":\"isMetaTransactionProcessor\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"bytes\",\"name\":\"signature\",\"type\":\"bytes\"},{\"internalType\":\"address\",\"name\":\"referrer\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"referee\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"expiryTime\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"commissionRate\",\"type\":\"uint256\"}],\"name\":\"isReferralValid\",\"outputs\":[{\"internalType\":\"bool\",\"name\":\"\",\"type\":\"bool\"}],\"stateMutability\":\"view\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"\",\"type\":\"uint256[]\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"onERC1155BatchReceived\",\"outputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"address\",\"name\":\"\",\"type\":\"address\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"uint256\",\"name\":\"\",\"type\":\"uint256\"},{\"internalType\":\"bytes\",\"name\":\"\",\"type\":\"bytes\"}],\"name\":\"onERC1155Received\",\"outputs\":[{\"internalType\":\"bytes4\",\"name\":\"\",\"type\":\"bytes4\"}],\"stateMutability\":\"pure\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"metaTransactionProcessor\",\"type\":\"address\"},{\"internalType\":\"bool\",\"name\":\"enabled\",\"type\":\"bool\"}],\"name\":\"setMetaTransactionProcessor\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address payable\",\"name\":\"newWallet\",\"type\":\"address\"}],\"name\":\"setReceivingWallet\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"uint256\",\"name\":\"newMaxCommissionRate\",\"type\":\"uint256\"}],\"name\":\"updateMaxCommissionRate\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"newSigningWallet\",\"type\":\"address\"}],\"name\":\"updateSigningWallet\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"},{\"inputs\":[{\"internalType\":\"address\",\"name\":\"to\",\"type\":\"address\"},{\"internalType\":\"uint256[]\",\"name\":\"assetIds\",\"type\":\"uint256[]\"},{\"internalType\":\"uint256[]\",\"name\":\"values\",\"type\":\"uint256[]\"}],\"name\":\"withdrawAssets\",\"outputs\":[],\"stateMutability\":\"nonpayable\",\"type\":\"function\"}],\"devdoc\":{\"methods\":{\"buyLandWithSand(address,address,address,uint256[],bytes32,uint256[],bytes32[],bytes,bytes)\":{\"params\":{\"buyer\":\"address that perform the payment\",\"info\":\"[X_INDEX=0] x coordinate of the Land [Y_INDEX=1] y coordinate of the Land [SIZE_INDEX=2] size of the pack of Land to purchase [PRICE_INDEX=3] price in SAND to purchase that Land\",\"proof\":\"merkleProof for that particular Land\",\"reserved\":\"the reserved address (if any)\",\"to\":\"address that will own the purchased Land\"}},\"changeAdmin(address)\":{\"details\":\"change the administrator to be `newAdmin`.\",\"params\":{\"newAdmin\":\"address of the new administrator.\"}},\"getAdmin()\":{\"details\":\"gives the current administrator of this contract.\",\"returns\":{\"_0\":\"the current administrator of this contract.\"}},\"getSigningWallet()\":{\"details\":\"signing wallet authorized for referral\",\"returns\":{\"_0\":\"the address of the signing wallet\"}},\"isMetaTransactionProcessor(address)\":{\"details\":\"check whether address `who` is given meta-transaction execution rights.\",\"params\":{\"who\":\"The address to query.\"},\"returns\":{\"_0\":\"whether the address has meta-transaction execution rights.\"}},\"isReferralValid(bytes,address,address,uint256,uint256)\":{\"params\":{\"commissionRate\":\"The commissionRate of the referral\",\"expiryTime\":\"The expiry time of the referral\",\"referee\":\"The address of the referee\",\"referrer\":\"The address of the referrer\",\"signature\":\"The signature to check (signed referral)\"},\"returns\":{\"_0\":\"True if the referral is valid\"}},\"setMetaTransactionProcessor(address,bool)\":{\"details\":\"Enable or disable the ability of `metaTransactionProcessor` to perform meta-tx (metaTransactionProcessor rights).\",\"params\":{\"enabled\":\"set whether the metaTransactionProcessor is enabled or disabled.\",\"metaTransactionProcessor\":\"address that will be given/removed metaTransactionProcessor rights.\"}},\"setReceivingWallet(address)\":{\"params\":{\"newWallet\":\"address of the new receiving wallet\"}},\"updateMaxCommissionRate(uint256)\":{\"details\":\"Update the maximum commission rate\",\"params\":{\"newMaxCommissionRate\":\"The new maximum commission rate\"}},\"updateSigningWallet(address)\":{\"details\":\"Update the signing wallet\",\"params\":{\"newSigningWallet\":\"The new address of the signing wallet\"}},\"withdrawAssets(address,uint256[],uint256[])\":{\"params\":{\"assetIds\":\"the assetIds to be transferred\",\"to\":\"intended recipient of the asset tokens\",\"values\":\"the quantities of the assetIds to be transferred\"}}},\"title\":\"Estate Sale contract with referral\"},\"userdoc\":{\"methods\":{\"buyLandWithSand(address,address,address,uint256[],bytes32,uint256[],bytes32[],bytes,bytes)\":{\"notice\":\"buy Land with SAND using the merkle proof associated with it\"},\"getExpiryTime()\":{\"notice\":\"Gets the expiry time for the current sale\"},\"getMaxCommisionRate()\":{\"notice\":\"the max commision rate\"},\"getMerkleRoot()\":{\"notice\":\"Gets the Merkle root associated with the current sale\"},\"isReferralValid(bytes,address,address,uint256,uint256)\":{\"notice\":\"Check if a referral is valid\"},\"setReceivingWallet(address)\":{\"notice\":\"set the wallet receiving the proceeds\"},\"withdrawAssets(address,uint256[],uint256[])\":{\"notice\":\"enable Admin to withdraw remaining assets from EstateSaleWithFee contract\"}},\"notice\":\"This contract manages the sale of our lands as Estates\"}},\"settings\":{\"compilationTarget\":{\"src/solc_0.6/EstateSale/EstateSaleWithAuth.sol\":\"EstateSaleWithAuth\"},\"evmVersion\":\"istanbul\",\"libraries\":{},\"metadata\":{\"bytecodeHash\":\"ipfs\",\"useLiteralContent\":true},\"optimizer\":{\"enabled\":true,\"runs\":2000},\"remappings\":[]},\"sources\":{\"src/solc_0.6/EstateSale/AuthValidator.sol\":{\"content\":\"//SPDX-License-Identifier: MIT\\npragma solidity 0.6.5; // TODO: update once upgrade is complete\\n\\nimport \\\"../common/Libraries/SigUtil.sol\\\";\\nimport \\\"../common/Libraries/SafeMathWithRequire.sol\\\";\\nimport \\\"../common/BaseWithStorage/Admin.sol\\\";\\n\\ncontract AuthValidator is Admin {\\n    address public _signingAuthWallet;\\n\\n    event SigningWallet(address indexed signingWallet);\\n\\n    constructor(address adminWallet, address initialSigningWallet) public {\\n        _admin = adminWallet;\\n        _updateSigningAuthWallet(initialSigningWallet);\\n    }\\n\\n    function updateSigningAuthWallet(address newSigningWallet) external onlyAdmin {\\n        _updateSigningAuthWallet(newSigningWallet);\\n    }\\n\\n    function _updateSigningAuthWallet(address newSigningWallet) internal {\\n        require(newSigningWallet != address(0), \\\"INVALID_SIGNING_WALLET\\\");\\n        _signingAuthWallet = newSigningWallet;\\n        emit SigningWallet(newSigningWallet);\\n    }\\n\\n    function isAuthValid(bytes memory signature, bytes32 hashedData) public view returns (bool) {\\n        address signer = SigUtil.recover(keccak256(SigUtil.prefixed(hashedData)), signature);\\n        return signer == _signingAuthWallet;\\n    }\\n}\\n\",\"keccak256\":\"0x9d5e05cd6ed81df8e47cb33f650bf814ed9cf56948b02db8789cca72986fa304\"},\"src/solc_0.6/EstateSale/EstateSaleWithAuth.sol\":{\"content\":\"/* solhint-disable not-rely-on-time, func-order */\\npragma solidity 0.6.5;\\n\\nimport \\\"../common/Libraries/SafeMathWithRequire.sol\\\";\\nimport \\\"./LandToken.sol\\\";\\nimport \\\"../common/Interfaces/ERC1155.sol\\\";\\nimport \\\"../common/Interfaces/ERC20.sol\\\";\\nimport \\\"../common/BaseWithStorage/MetaTransactionReceiver.sol\\\";\\nimport \\\"../ReferralValidator/ReferralValidator.sol\\\";\\nimport \\\"./AuthValidator.sol\\\";\\n\\n/// @title Estate Sale contract with referral\\n/// @notice This contract manages the sale of our lands as Estates\\ncontract EstateSaleWithAuth is MetaTransactionReceiver, ReferralValidator {\\n    using SafeMathWithRequire for uint256;\\n\\n    event LandQuadPurchased(\\n        address indexed buyer,\\n        address indexed to,\\n        uint256 indexed topCornerId,\\n        uint256 size,\\n        uint256 price,\\n        address token,\\n        uint256 amountPaid\\n    );\\n\\n    /// @notice set the wallet receiving the proceeds\\n    /// @param newWallet address of the new receiving wallet\\n    function setReceivingWallet(address payable newWallet) external {\\n        require(newWallet != address(0), \\\"ZERO_ADDRESS\\\");\\n        require(msg.sender == _admin, \\\"NOT_AUTHORIZED\\\");\\n        _wallet = newWallet;\\n    }\\n\\n    /// @notice buy Land with SAND using the merkle proof associated with it\\n    /// @param buyer address that perform the payment\\n    /// @param to address that will own the purchased Land\\n    /// @param reserved the reserved address (if any)\\n    /// @param info [X_INDEX=0] x coordinate of the Land [Y_INDEX=1] y coordinate of the Land [SIZE_INDEX=2] size of the pack of Land to purchase [PRICE_INDEX=3] price in SAND to purchase that Land\\n    /// @param proof merkleProof for that particular Land\\n    function buyLandWithSand(\\n        address buyer,\\n        address to,\\n        address reserved,\\n        uint256[] calldata info,\\n        bytes32 salt,\\n        uint256[] calldata assetIds,\\n        bytes32[] calldata proof,\\n        bytes calldata referral,\\n        bytes calldata signature\\n    ) external {\\n        _checkAddressesAndExpiryTime(buyer, reserved);\\n        _checkAuthAndProofValidity(to, reserved, info, salt, assetIds, proof, signature);\\n        _handleFeeAndReferral(buyer, info[PRICE_INDEX], referral);\\n        _mint(buyer, to, info);\\n        _sendAssets(to, assetIds);\\n    }\\n\\n    /// @notice Gets the expiry time for the current sale\\n    /// @return The expiry time, as a unix epoch\\n    function getExpiryTime() external view returns (uint256) {\\n        return _expiryTime;\\n    }\\n\\n    /// @notice Gets the Merkle root associated with the current sale\\n    /// @return The Merkle root, as a bytes32 hash\\n    function getMerkleRoot() external view returns (bytes32) {\\n        return _merkleRoot;\\n    }\\n\\n    /// @notice enable Admin to withdraw remaining assets from EstateSaleWithFee contract\\n    /// @param to intended recipient of the asset tokens\\n    /// @param assetIds the assetIds to be transferred\\n    /// @param values the quantities of the assetIds to be transferred\\n    function withdrawAssets(\\n        address to,\\n        uint256[] calldata assetIds,\\n        uint256[] calldata values\\n    ) external {\\n        require(msg.sender == _admin, \\\"NOT_AUTHORIZED\\\");\\n        // require(block.timestamp > _expiryTime, \\\"SALE_NOT_OVER\\\"); // removed to recover in case of misconfigured sales\\n        _asset.safeBatchTransferFrom(address(this), to, assetIds, values, \\\"\\\");\\n    }\\n\\n    function onERC1155Received(\\n        address, /*operator*/\\n        address, /*from*/\\n        uint256, /*id*/\\n        uint256, /*value*/\\n        bytes calldata /*data*/\\n    ) external pure returns (bytes4) {\\n        return 0xf23a6e61;\\n    }\\n\\n    function onERC1155BatchReceived(\\n        address, /*operator*/\\n        address, /*from*/\\n        uint256[] calldata, /*ids*/\\n        uint256[] calldata, /*values*/\\n        bytes calldata /*data*/\\n    ) external pure returns (bytes4) {\\n        return 0xbc197c81;\\n    }\\n\\n    function _sendAssets(address to, uint256[] memory assetIds) internal {\\n        uint256[] memory values = new uint256[](assetIds.length);\\n        for (uint256 i = 0; i < assetIds.length; i++) {\\n            values[i] = 1;\\n        }\\n        _asset.safeBatchTransferFrom(address(this), to, assetIds, values, \\\"\\\");\\n    }\\n\\n    // NOTE: _checkAddressesAndExpiryTime & _checkAuthAndProofValidity were split due to a stack too deep issue\\n    function _checkAddressesAndExpiryTime(address buyer, address reserved) internal view {\\n        /* solium-disable-next-line security/no-block-members */\\n        require(block.timestamp < _expiryTime, \\\"SALE_IS_OVER\\\");\\n        require(buyer == msg.sender || _metaTransactionContracts[msg.sender], \\\"NOT_AUTHORIZED\\\");\\n        require(reserved == address(0) || reserved == buyer, \\\"RESERVED_LAND\\\");\\n    }\\n\\n    // NOTE: _checkAddressesAndExpiryTime & _checkAuthAndProofValidity were split due to a stack too deep issue\\n    function _checkAuthAndProofValidity(\\n        address to,\\n        address reserved,\\n        uint256[] memory info,\\n        bytes32 salt,\\n        uint256[] memory assetIds,\\n        bytes32[] memory proof,\\n        bytes memory signature\\n    ) internal view {\\n        bytes32 hashedData = keccak256(\\n            abi.encodePacked(\\n                to,\\n                reserved,\\n                info[X_INDEX],\\n                info[Y_INDEX],\\n                info[SIZE_INDEX],\\n                info[PRICE_INDEX],\\n                salt,\\n                keccak256(abi.encodePacked(assetIds)),\\n                keccak256(abi.encodePacked(proof))\\n            )\\n        );\\n        require(_authValidator.isAuthValid(signature, hashedData), \\\"INVALID_AUTH\\\");\\n\\n        bytes32 leaf = _generateLandHash(\\n            info[X_INDEX],\\n            info[Y_INDEX],\\n            info[SIZE_INDEX],\\n            info[PRICE_INDEX],\\n            reserved,\\n            salt,\\n            assetIds\\n        );\\n        require(_verify(proof, leaf), \\\"INVALID_LAND\\\");\\n    }\\n\\n    function _mint(\\n        address buyer,\\n        address to,\\n        uint256[] memory info\\n    ) internal {\\n        if (info[SIZE_INDEX] == 1 || _estate == address(0)) {\\n            _land.mintQuad(to, info[SIZE_INDEX], info[X_INDEX], info[Y_INDEX], \\\"\\\");\\n        } else {\\n            _land.mintQuad(_estate, info[SIZE_INDEX], info[X_INDEX], info[Y_INDEX], abi.encode(to));\\n        }\\n        emit LandQuadPurchased(\\n            buyer,\\n            to,\\n            info[X_INDEX] + (info[Y_INDEX] * GRID_SIZE),\\n            info[SIZE_INDEX],\\n            info[PRICE_INDEX],\\n            address(_sand),\\n            info[PRICE_INDEX]\\n        );\\n    }\\n\\n    function _generateLandHash(\\n        uint256 x,\\n        uint256 y,\\n        uint256 size,\\n        uint256 price,\\n        address reserved,\\n        bytes32 salt,\\n        uint256[] memory assetIds\\n    ) internal pure returns (bytes32) {\\n        return keccak256(abi.encodePacked(x, y, size, price, reserved, salt, assetIds));\\n    }\\n\\n    function _verify(bytes32[] memory proof, bytes32 leaf) internal view returns (bool) {\\n        bytes32 computedHash = leaf;\\n\\n        for (uint256 i = 0; i < proof.length; i++) {\\n            bytes32 proofElement = proof[i];\\n\\n            if (computedHash < proofElement) {\\n                computedHash = keccak256(abi.encodePacked(computedHash, proofElement));\\n            } else {\\n                computedHash = keccak256(abi.encodePacked(proofElement, computedHash));\\n            }\\n        }\\n\\n        return computedHash == _merkleRoot;\\n    }\\n\\n    function _handleFeeAndReferral(\\n        address buyer,\\n        uint256 priceInSand,\\n        bytes memory referral\\n    ) internal {\\n        // send 5% fee to a specially configured instance of FeeDistributor.sol\\n        uint256 remainingAmountInSand = _handleSandFee(buyer, priceInSand);\\n\\n        // calculate referral based on 95% of original priceInSand\\n        handleReferralWithERC20(buyer, remainingAmountInSand, referral, _wallet, address(_sand));\\n    }\\n\\n    function _handleSandFee(address buyer, uint256 priceInSand) internal returns (uint256) {\\n        uint256 feeAmountInSand = priceInSand.mul(FEE).div(100);\\n        require(_sand.transferFrom(buyer, address(_feeDistributor), feeAmountInSand), \\\"FEE_TRANSFER_FAILED\\\");\\n        return priceInSand.sub(feeAmountInSand);\\n    }\\n\\n    uint256 internal constant GRID_SIZE = 408; // 408 is the size of the Land\\n\\n    ERC1155 internal immutable _asset;\\n    LandToken internal immutable _land;\\n    ERC20 internal immutable _sand;\\n    address internal immutable _estate;\\n    address internal immutable _feeDistributor;\\n\\n    address payable internal _wallet;\\n    AuthValidator internal _authValidator;\\n    uint256 internal immutable _expiryTime;\\n    bytes32 internal immutable _merkleRoot;\\n\\n    uint256 private constant FEE = 5; // percentage of land sale price to be diverted to a specially configured instance of FeeDistributor, shown as an integer\\n    // buyLandWithSand info indexes\\n    uint256 private constant X_INDEX = 0;\\n    uint256 private constant Y_INDEX = 1;\\n    uint256 private constant SIZE_INDEX = 2;\\n    uint256 private constant PRICE_INDEX = 3;\\n\\n    constructor(\\n        address landAddress,\\n        address sandContractAddress,\\n        address initialMetaTx,\\n        address admin,\\n        address payable initialWalletAddress,\\n        bytes32 merkleRoot,\\n        uint256 expiryTime,\\n        address initialSigningWallet,\\n        uint256 initialMaxCommissionRate,\\n        address estate,\\n        address asset,\\n        address feeDistributor,\\n        address authValidator\\n    ) public ReferralValidator(initialSigningWallet, initialMaxCommissionRate) {\\n        _land = LandToken(landAddress);\\n        _sand = ERC20(sandContractAddress);\\n        _setMetaTransactionProcessor(initialMetaTx, true);\\n        _wallet = initialWalletAddress;\\n        _merkleRoot = merkleRoot;\\n        _expiryTime = expiryTime;\\n        _admin = admin;\\n        _estate = estate;\\n        _asset = ERC1155(asset);\\n        _feeDistributor = feeDistributor;\\n        _authValidator = AuthValidator(authValidator);\\n    }\\n}\\n\",\"keccak256\":\"0x30e7c5617286c84bf421ce37acfe265f38ec4ff7f58856c1077a714cd551bc6d\"},\"src/solc_0.6/EstateSale/LandToken.sol\":{\"content\":\"pragma solidity 0.6.5;\\n\\n\\ninterface LandToken {\\n    function mintQuad(\\n        address to,\\n        uint256 size,\\n        uint256 x,\\n        uint256 y,\\n        bytes calldata data\\n    ) external;\\n}\\n\",\"keccak256\":\"0x5522cfd266ac2047ca71f1fae6994be8141ce510c15a7ab6ba7f6fc97ad30cb4\"},\"src/solc_0.6/ReferralValidator/ReferralValidator.sol\":{\"content\":\"/* solhint-disable not-rely-on-time, func-order */\\npragma solidity 0.6.5;\\n\\nimport \\\"../common/Libraries/SigUtil.sol\\\";\\nimport \\\"../common/Libraries/SafeMathWithRequire.sol\\\";\\nimport \\\"../common/Interfaces/ERC20.sol\\\";\\nimport \\\"../common/BaseWithStorage/Admin.sol\\\";\\n\\n\\n/// @dev This contract verifies if a referral is valid\\ncontract ReferralValidator is Admin {\\n    address private _signingWallet;\\n    uint256 private _maxCommissionRate;\\n\\n    mapping(address => uint256) private _previousSigningWallets;\\n    uint256 private _previousSigningDelay = 60 * 60 * 24 * 10;\\n\\n    event ReferralUsed(\\n        address indexed referrer,\\n        address indexed referee,\\n        address indexed token,\\n        uint256 amount,\\n        uint256 commission,\\n        uint256 commissionRate\\n    );\\n\\n    constructor(address initialSigningWallet, uint256 initialMaxCommissionRate) public {\\n        _signingWallet = initialSigningWallet;\\n        _maxCommissionRate = initialMaxCommissionRate;\\n    }\\n\\n    /**\\n     * @dev Update the signing wallet\\n     * @param newSigningWallet The new address of the signing wallet\\n     */\\n    function updateSigningWallet(address newSigningWallet) external {\\n        require(_admin == msg.sender, \\\"Sender not admin\\\");\\n        _previousSigningWallets[_signingWallet] = now + _previousSigningDelay;\\n        _signingWallet = newSigningWallet;\\n    }\\n\\n    /**\\n     * @dev signing wallet authorized for referral\\n     * @return the address of the signing wallet\\n     */\\n    function getSigningWallet() external view returns (address) {\\n        return _signingWallet;\\n    }\\n\\n    /**\\n     * @notice the max commision rate\\n     * @return the maximum commision rate that a referral can give\\n     */\\n    function getMaxCommisionRate() external view returns (uint256) {\\n        return _maxCommissionRate;\\n    }\\n\\n    /**\\n     * @dev Update the maximum commission rate\\n     * @param newMaxCommissionRate The new maximum commission rate\\n     */\\n    function updateMaxCommissionRate(uint256 newMaxCommissionRate) external {\\n        require(_admin == msg.sender, \\\"Sender not admin\\\");\\n        _maxCommissionRate = newMaxCommissionRate;\\n    }\\n\\n    function handleReferralWithETH(\\n        uint256 amount,\\n        bytes memory referral,\\n        address payable destination\\n    ) internal {\\n        uint256 amountForDestination = amount;\\n\\n        if (referral.length > 0) {\\n            (bytes memory signature, address referrer, address referee, uint256 expiryTime, uint256 commissionRate) = decodeReferral(referral);\\n\\n            uint256 commission = 0;\\n\\n            if (isReferralValid(signature, referrer, referee, expiryTime, commissionRate)) {\\n                commission = SafeMathWithRequire.div(SafeMathWithRequire.mul(amount, commissionRate), 10000);\\n\\n                emit ReferralUsed(referrer, referee, address(0), amount, commission, commissionRate);\\n                amountForDestination = SafeMathWithRequire.sub(amountForDestination, commission);\\n            }\\n\\n            if (commission > 0) {\\n                payable(referrer).transfer(commission);\\n            }\\n        }\\n\\n        destination.transfer(amountForDestination);\\n    }\\n\\n    function handleReferralWithERC20(\\n        address buyer,\\n        uint256 amount,\\n        bytes memory referral,\\n        address payable destination,\\n        address tokenAddress\\n    ) internal {\\n        ERC20 token = ERC20(tokenAddress);\\n        uint256 amountForDestination = amount;\\n\\n        if (referral.length > 0) {\\n            (bytes memory signature, address referrer, address referee, uint256 expiryTime, uint256 commissionRate) = decodeReferral(referral);\\n\\n            uint256 commission = 0;\\n\\n            if (isReferralValid(signature, referrer, referee, expiryTime, commissionRate)) {\\n                commission = SafeMathWithRequire.div(SafeMathWithRequire.mul(amount, commissionRate), 10000);\\n\\n                emit ReferralUsed(referrer, referee, tokenAddress, amount, commission, commissionRate);\\n                amountForDestination = SafeMathWithRequire.sub(amountForDestination, commission);\\n            }\\n\\n            if (commission > 0) {\\n                require(token.transferFrom(buyer, referrer, commission), \\\"commision transfer failed\\\");\\n            }\\n        }\\n\\n        require(token.transferFrom(buyer, destination, amountForDestination), \\\"payment transfer failed\\\");\\n    }\\n\\n    /**\\n     * @notice Check if a referral is valid\\n     * @param signature The signature to check (signed referral)\\n     * @param referrer The address of the referrer\\n     * @param referee The address of the referee\\n     * @param expiryTime The expiry time of the referral\\n     * @param commissionRate The commissionRate of the referral\\n     * @return True if the referral is valid\\n     */\\n    function isReferralValid(\\n        bytes memory signature,\\n        address referrer,\\n        address referee,\\n        uint256 expiryTime,\\n        uint256 commissionRate\\n    ) public view returns (bool) {\\n        if (commissionRate > _maxCommissionRate || referrer == referee || now > expiryTime) {\\n            return false;\\n        }\\n\\n        bytes32 hashedData = keccak256(abi.encodePacked(referrer, referee, expiryTime, commissionRate));\\n\\n        address signer = SigUtil.recover(keccak256(abi.encodePacked(\\\"\\\\x19Ethereum Signed Message:\\\\n32\\\", hashedData)), signature);\\n\\n        if (_previousSigningWallets[signer] >= now) {\\n            return true;\\n        }\\n\\n        return _signingWallet == signer;\\n    }\\n\\n    function decodeReferral(bytes memory referral)\\n        public\\n        pure\\n        returns (\\n            bytes memory,\\n            address,\\n            address,\\n            uint256,\\n            uint256\\n        )\\n    {\\n        (bytes memory signature, address referrer, address referee, uint256 expiryTime, uint256 commissionRate) = abi.decode(\\n            referral,\\n            (bytes, address, address, uint256, uint256)\\n        );\\n\\n        return (signature, referrer, referee, expiryTime, commissionRate);\\n    }\\n}\\n\",\"keccak256\":\"0xa20586b36bbac3dea0cccffecbb81850fb9458021e9c059133e3e2233d59eaa5\"},\"src/solc_0.6/common/BaseWithStorage/Admin.sol\":{\"content\":\"pragma solidity 0.6.5;\\n\\n\\ncontract Admin {\\n    address internal _admin;\\n\\n    /// @dev emitted when the contract administrator is changed.\\n    /// @param oldAdmin address of the previous administrator.\\n    /// @param newAdmin address of the new administrator.\\n    event AdminChanged(address oldAdmin, address newAdmin);\\n\\n    /// @dev gives the current administrator of this contract.\\n    /// @return the current administrator of this contract.\\n    function getAdmin() external view returns (address) {\\n        return _admin;\\n    }\\n\\n    /// @dev change the administrator to be `newAdmin`.\\n    /// @param newAdmin address of the new administrator.\\n    function changeAdmin(address newAdmin) external {\\n        require(msg.sender == _admin, \\\"only admin can change admin\\\");\\n        emit AdminChanged(_admin, newAdmin);\\n        _admin = newAdmin;\\n    }\\n\\n    modifier onlyAdmin() {\\n        require(msg.sender == _admin, \\\"only admin allowed\\\");\\n        _;\\n    }\\n}\\n\",\"keccak256\":\"0x21ddf217d83b4c1b8c3fa7240ff1d1fcedb902003a65d455d2101b95f40f6db8\"},\"src/solc_0.6/common/BaseWithStorage/MetaTransactionReceiver.sol\":{\"content\":\"pragma solidity 0.6.5;\\n\\nimport \\\"./Admin.sol\\\";\\n\\n\\ncontract MetaTransactionReceiver is Admin {\\n    mapping(address => bool) internal _metaTransactionContracts;\\n\\n    /// @dev emiited when a meta transaction processor is enabled/disabled\\n    /// @param metaTransactionProcessor address that will be given/removed metaTransactionProcessor rights.\\n    /// @param enabled set whether the metaTransactionProcessor is enabled or disabled.\\n    event MetaTransactionProcessor(address metaTransactionProcessor, bool enabled);\\n\\n    /// @dev Enable or disable the ability of `metaTransactionProcessor` to perform meta-tx (metaTransactionProcessor rights).\\n    /// @param metaTransactionProcessor address that will be given/removed metaTransactionProcessor rights.\\n    /// @param enabled set whether the metaTransactionProcessor is enabled or disabled.\\n    function setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) public {\\n        require(msg.sender == _admin, \\\"only admin can setup metaTransactionProcessors\\\");\\n        _setMetaTransactionProcessor(metaTransactionProcessor, enabled);\\n    }\\n\\n    function _setMetaTransactionProcessor(address metaTransactionProcessor, bool enabled) internal {\\n        _metaTransactionContracts[metaTransactionProcessor] = enabled;\\n        emit MetaTransactionProcessor(metaTransactionProcessor, enabled);\\n    }\\n\\n    /// @dev check whether address `who` is given meta-transaction execution rights.\\n    /// @param who The address to query.\\n    /// @return whether the address has meta-transaction execution rights.\\n    function isMetaTransactionProcessor(address who) external view returns (bool) {\\n        return _metaTransactionContracts[who];\\n    }\\n}\\n\",\"keccak256\":\"0x980c70427ff48a30d894b48b0900342020816b057bdc8fa4e258221b809ef670\"},\"src/solc_0.6/common/Interfaces/ERC1155.sol\":{\"content\":\"pragma solidity 0.6.5;\\n\\n\\n/**\\n    @title ERC-1155 Multi Token Standard\\n    @dev See https://eips.ethereum.org/EIPS/eip-1155\\n    Note: The ERC-165 identifier for this interface is 0xd9b67a26.\\n */\\ninterface ERC1155 {\\n    event TransferSingle(address indexed operator, address indexed from, address indexed to, uint256 id, uint256 value);\\n\\n    event TransferBatch(address indexed operator, address indexed from, address indexed to, uint256[] ids, uint256[] values);\\n\\n    event ApprovalForAll(address indexed owner, address indexed operator, bool approved);\\n\\n    event URI(string value, uint256 indexed id);\\n\\n    /**\\n        @notice Transfers `value` amount of an `id` from  `from` to `to`  (with safety call).\\n        @dev Caller must be approved to manage the tokens being transferred out of the `from` account (see \\\"Approval\\\" section of the standard).\\n        MUST revert if `to` is the zero address.\\n        MUST revert if balance of holder for token `id` is lower than the `value` sent.\\n        MUST revert on any other error.\\n        MUST emit the `TransferSingle` event to reflect the balance change (see \\\"Safe Transfer Rules\\\" section of the standard).\\n        After the above conditions are met, this function MUST check if `to` is a smart contract (e.g. code size > 0). If so, it MUST call `onERC1155Received` on `to` and act appropriately (see \\\"Safe Transfer Rules\\\" section of the standard).\\n        @param from    Source address\\n        @param to      Target address\\n        @param id      ID of the token type\\n        @param value   Transfer amount\\n        @param data    Additional data with no specified format, MUST be sent unaltered in call to `onERC1155Received` on `to`\\n    */\\n    function safeTransferFrom(\\n        address from,\\n        address to,\\n        uint256 id,\\n        uint256 value,\\n        bytes calldata data\\n    ) external;\\n\\n    /**\\n        @notice Transfers `values` amount(s) of `ids` from the `from` address to the `to` address specified (with safety call).\\n        @dev Caller must be approved to manage the tokens being transferred out of the `from` account (see \\\"Approval\\\" section of the standard).\\n        MUST revert if `to` is the zero address.\\n        MUST revert if length of `ids` is not the same as length of `values`.\\n        MUST revert if any of the balance(s) of the holder(s) for token(s) in `ids` is lower than the respective amount(s) in `values` sent to the recipient.\\n        MUST revert on any other error.\\n        MUST emit `TransferSingle` or `TransferBatch` event(s) such that all the balance changes are reflected (see \\\"Safe Transfer Rules\\\" section of the standard).\\n        Balance changes and events MUST follow the ordering of the arrays (_ids[0]/_values[0] before _ids[1]/_values[1], etc).\\n        After the above conditions for the transfer(s) in the batch are met, this function MUST check if `to` is a smart contract (e.g. code size > 0). If so, it MUST call the relevant `ERC1155TokenReceiver` hook(s) on `to` and act appropriately (see \\\"Safe Transfer Rules\\\" section of the standard).\\n        @param from    Source address\\n        @param to      Target address\\n        @param ids     IDs of each token type (order and length must match _values array)\\n        @param values  Transfer amounts per token type (order and length must match _ids array)\\n        @param data    Additional data with no specified format, MUST be sent unaltered in call to the `ERC1155TokenReceiver` hook(s) on `to`\\n    */\\n    function safeBatchTransferFrom(\\n        address from,\\n        address to,\\n        uint256[] calldata ids,\\n        uint256[] calldata values,\\n        bytes calldata data\\n    ) external;\\n\\n    /**\\n        @notice Get the balance of an account's tokens.\\n        @param owner  The address of the token holder\\n        @param id     ID of the token\\n        @return        The _owner's balance of the token type requested\\n     */\\n    function balanceOf(address owner, uint256 id) external view returns (uint256);\\n\\n    /**\\n        @notice Get the balance of multiple account/token pairs\\n        @param owners The addresses of the token holders\\n        @param ids    ID of the tokens\\n        @return        The _owner's balance of the token types requested (i.e. balance for each (owner, id) pair)\\n     */\\n    function balanceOfBatch(address[] calldata owners, uint256[] calldata ids) external view returns (uint256[] memory);\\n\\n    /**\\n        @notice Enable or disable approval for a third party (\\\"operator\\\") to manage all of the caller's tokens.\\n        @dev MUST emit the ApprovalForAll event on success.\\n        @param operator  Address to add to the set of authorized operators\\n        @param approved  True if the operator is approved, false to revoke approval\\n    */\\n    function setApprovalForAll(address operator, bool approved) external;\\n\\n    /**\\n        @notice Queries the approval status of an operator for a given owner.\\n        @param owner     The owner of the tokens\\n        @param operator  Address of authorized operator\\n        @return           True if the operator is approved, false if not\\n    */\\n    function isApprovedForAll(address owner, address operator) external view returns (bool);\\n}\\n\",\"keccak256\":\"0x324734020d86f92f40c415afe3199bb0707057e5544bd59422b6b5323d63f038\"},\"src/solc_0.6/common/Interfaces/ERC20.sol\":{\"content\":\"pragma solidity 0.6.5;\\n\\n\\n/// @dev see https://eips.ethereum.org/EIPS/eip-20\\ninterface ERC20 {\\n    /// @notice emitted when tokens are transfered from one address to another.\\n    /// @param from address from which the token are transfered from (zero means tokens are minted).\\n    /// @param to destination address which the token are transfered to (zero means tokens are burnt).\\n    /// @param value amount of tokens transferred.\\n    event Transfer(address indexed from, address indexed to, uint256 value);\\n\\n    /// @notice emitted when owner grant transfer rights to another address\\n    /// @param owner address allowing its token to be transferred.\\n    /// @param spender address allowed to spend on behalf of `owner`\\n    /// @param value amount of tokens allowed.\\n    event Approval(address indexed owner, address indexed spender, uint256 value);\\n\\n    /// @notice return the current total amount of tokens owned by all holders.\\n    /// @return supply total number of tokens held.\\n    function totalSupply() external view returns (uint256 supply);\\n\\n    /// @notice return the number of tokens held by a particular address.\\n    /// @param who address being queried.\\n    /// @return balance number of token held by that address.\\n    function balanceOf(address who) external view returns (uint256 balance);\\n\\n    /// @notice transfer tokens to a specific address.\\n    /// @param to destination address receiving the tokens.\\n    /// @param value number of tokens to transfer.\\n    /// @return success whether the transfer succeeded.\\n    function transfer(address to, uint256 value) external returns (bool success);\\n\\n    /// @notice transfer tokens from one address to another.\\n    /// @param from address tokens will be sent from.\\n    /// @param to destination address receiving the tokens.\\n    /// @param value number of tokens to transfer.\\n    /// @return success whether the transfer succeeded.\\n    function transferFrom(\\n        address from,\\n        address to,\\n        uint256 value\\n    ) external returns (bool success);\\n\\n    /// @notice approve an address to spend on your behalf.\\n    /// @param spender address entitled to transfer on your behalf.\\n    /// @param value amount allowed to be transfered.\\n    /// @param success whether the approval succeeded.\\n    function approve(address spender, uint256 value) external returns (bool success);\\n\\n    /// @notice return the current allowance for a particular owner/spender pair.\\n    /// @param owner address allowing spender.\\n    /// @param spender address allowed to spend.\\n    /// @return amount number of tokens `spender` can spend on behalf of `owner`.\\n    function allowance(address owner, address spender) external view returns (uint256 amount);\\n}\\n\",\"keccak256\":\"0xc5d126e7b0fc8347f01d952e98fae9251abf74fd0fc16d6cbd31a1654f808ff0\"},\"src/solc_0.6/common/Libraries/SafeMathWithRequire.sol\":{\"content\":\"pragma solidity 0.6.5;\\n\\n\\n/**\\n * @title SafeMath\\n * @dev Math operations with safety checks that revert\\n */\\nlibrary SafeMathWithRequire {\\n    using SafeMathWithRequire for uint256;\\n\\n    uint256 constant DECIMALS_18 = 1000000000000000000;\\n    uint256 constant DECIMALS_12 = 1000000000000;\\n    uint256 constant DECIMALS_9 = 1000000000;\\n    uint256 constant DECIMALS_6 = 1000000;\\n\\n    /**\\n     * @dev Multiplies two numbers, throws on overflow.\\n     */\\n    function mul(uint256 a, uint256 b) internal pure returns (uint256 c) {\\n        // Gas optimization: this is cheaper than asserting 'a' not being zero, but the\\n        // benefit is lost if 'b' is also tested.\\n        // See: https://github.com/OpenZeppelin/openzeppelin-solidity/pull/522\\n        if (a == 0) {\\n            return 0;\\n        }\\n\\n        c = a * b;\\n        require(c / a == b, \\\"overflow\\\");\\n        return c;\\n    }\\n\\n    /**\\n     * @dev Integer division of two numbers, truncating the quotient.\\n     */\\n    function div(uint256 a, uint256 b) internal pure returns (uint256) {\\n        require(b != 0, \\\"divbyzero\\\");\\n        // uint256 c = a / b;\\n        // assert(a == b * c + a % b); // There is no case in which this doesn't hold\\n        return a / b;\\n    }\\n\\n    /**\\n     * @dev Subtracts two numbers, throws on overflow (i.e. if subtrahend is greater than minuend).\\n     */\\n    function sub(uint256 a, uint256 b) internal pure returns (uint256) {\\n        require(b <= a, \\\"undeflow\\\");\\n        return a - b;\\n    }\\n\\n    /**\\n     * @dev Adds two numbers, throws on overflow.\\n     */\\n    function add(uint256 a, uint256 b) internal pure returns (uint256 c) {\\n        c = a + b;\\n        require(c >= a, \\\"overflow\\\");\\n        return c;\\n    }\\n\\n    function sqrt6(uint256 a) internal pure returns (uint256 c) {\\n        a = a.mul(DECIMALS_12);\\n        uint256 tmp = a.add(1) / 2;\\n        c = a;\\n        // tmp cannot be zero unless a = 0 which skip the loop\\n        while (tmp < c) {\\n            c = tmp;\\n            tmp = ((a / tmp) + tmp) / 2;\\n        }\\n    }\\n\\n    function sqrt3(uint256 a) internal pure returns (uint256 c) {\\n        a = a.mul(DECIMALS_6);\\n        uint256 tmp = a.add(1) / 2;\\n        c = a;\\n        // tmp cannot be zero unless a = 0 which skip the loop\\n        while (tmp < c) {\\n            c = tmp;\\n            tmp = ((a / tmp) + tmp) / 2;\\n        }\\n    }\\n\\n    function cbrt6(uint256 a) internal pure returns (uint256 c) {\\n        a = a.mul(DECIMALS_18);\\n        uint256 tmp = a.add(2) / 3;\\n        c = a;\\n        // tmp cannot be zero unless a = 0 which skip the loop\\n        while (tmp < c) {\\n            c = tmp;\\n            uint256 tmpSquare = tmp**2;\\n            require(tmpSquare > tmp, \\\"overflow\\\");\\n            tmp = ((a / tmpSquare) + (tmp * 2)) / 3;\\n        }\\n        return c;\\n    }\\n\\n    function cbrt3(uint256 a) internal pure returns (uint256 c) {\\n        a = a.mul(DECIMALS_9);\\n        uint256 tmp = a.add(2) / 3;\\n        c = a;\\n        // tmp cannot be zero unless a = 0 which skip the loop\\n        while (tmp < c) {\\n            c = tmp;\\n            uint256 tmpSquare = tmp**2;\\n            require(tmpSquare > tmp, \\\"overflow\\\");\\n            tmp = ((a / tmpSquare) + (tmp * 2)) / 3;\\n        }\\n        return c;\\n    }\\n\\n    // TODO test\\n    function rt6_3(uint256 a) internal pure returns (uint256 c) {\\n        a = a.mul(DECIMALS_18);\\n        uint256 tmp = a.add(5) / 6;\\n        c = a;\\n        // tmp cannot be zero unless a = 0 which skip the loop\\n        while (tmp < c) {\\n            c = tmp;\\n            uint256 tmpFive = tmp**5;\\n            require(tmpFive > tmp, \\\"overflow\\\");\\n            tmp = ((a / tmpFive) + (tmp * 5)) / 6;\\n        }\\n    }\\n}\\n\",\"keccak256\":\"0xbe4011624c0a2a6c8947fe7759924da4a4ed2c6b97befc3b379d14b8e31570eb\"},\"src/solc_0.6/common/Libraries/SigUtil.sol\":{\"content\":\"pragma solidity 0.6.5;\\n\\n\\nlibrary SigUtil {\\n    function recover(bytes32 hash, bytes memory sig) internal pure returns (address recovered) {\\n        require(sig.length == 65);\\n\\n        bytes32 r;\\n        bytes32 s;\\n        uint8 v;\\n        assembly {\\n            r := mload(add(sig, 32))\\n            s := mload(add(sig, 64))\\n            v := byte(0, mload(add(sig, 96)))\\n        }\\n\\n        // Version of signature should be 27 or 28, but 0 and 1 are also possible versions\\n        if (v < 27) {\\n            v += 27;\\n        }\\n        require(v == 27 || v == 28);\\n\\n        recovered = ecrecover(hash, v, r, s);\\n        require(recovered != address(0));\\n    }\\n\\n    function recoverWithZeroOnFailure(bytes32 hash, bytes memory sig) internal pure returns (address) {\\n        if (sig.length != 65) {\\n            return (address(0));\\n        }\\n\\n        bytes32 r;\\n        bytes32 s;\\n        uint8 v;\\n        assembly {\\n            r := mload(add(sig, 32))\\n            s := mload(add(sig, 64))\\n            v := byte(0, mload(add(sig, 96)))\\n        }\\n\\n        // Version of signature should be 27 or 28, but 0 and 1 are also possible versions\\n        if (v < 27) {\\n            v += 27;\\n        }\\n\\n        if (v != 27 && v != 28) {\\n            return (address(0));\\n        } else {\\n            return ecrecover(hash, v, r, s);\\n        }\\n    }\\n\\n    // Builds a prefixed hash to mimic the behavior of eth_sign.\\n    function prefixed(bytes32 hash) internal pure returns (bytes memory) {\\n        return abi.encodePacked(\\\"\\\\x19Ethereum Signed Message:\\\\n32\\\", hash);\\n    }\\n}\\n\",\"keccak256\":\"0x9a7394d82062e7f036a6f11d32f1a021cf92e667effdefd12a3592c652b1b865\"}},\"version\":1}",
+  "bytecode": "0x610160604052620d2f0060055534801561001857600080fd5b506040516200284d3803806200284d83398181016040526101a081101561003e57600080fd5b50805160208201516040830151606080850151608086015160a08088015160c0808a015160e08b01516101008c01516101208d01516101408e01516101608f0151610180909f0151600280546001600160a01b0319166001600160a01b03871617905560038490558e8c1b6001600160601b03199081169099529a8d901b9097169094529a9b999a98999698959793969195909490939091906100e28b600161015d565b600680546001600160a01b039a8b166001600160a01b031991821617909155610140989098526101209690965260008054998916998816999099179098556001600160601b0319606092831b811660e05290821b811660805296901b909516610100525060078054919093169116179055506101c192505050565b6001600160a01b038216600081815260016020908152604091829020805460ff191685151590811790915582519384529083015280517fb21eb88b4e33b3f1281830a7178d74d8aa73220416215726b68ae23d539515cb9281900390910190a15050565b60805160601c60a05160601c60c05160601c60e05160601c6101005160601c61012051610140516126066200024760003980610b3d528061206c525080610b1952806112ec5250806120da525080611841528061199e5250806117f75280611b9d528061210e525080611872528061196f525080610eb25280611c8952506126066000f3fe608060405234801561001057600080fd5b506004361061011b5760003560e01c80638f283970116100b2578063c10a420811610081578063dc5074af11610066578063dc5074af1461085f578063e56f8a9e14610885578063f23a6e61146108a25761011b565b8063c10a420814610780578063caed3500146108575761011b565b80638f28397014610500578063984d625214610526578063b522ecff146105f8578063bc197c811461061e5761011b565b806365194ce7116100ee57806365194ce7146103485780636e9960c3146104a657806377f1c3ac146104ca5780638a04af6a146104d25761011b565b80631187fd3c1461012057806325cb5bc014610300578063495906571461031a57806358bc294414610322575b600080fd5b6102fe600480360361012081101561013757600080fd5b6001600160a01b038235811692602081013582169260408201359092169181019060808101606082013564010000000081111561017357600080fd5b82018360208201111561018557600080fd5b803590602001918460208302840111640100000000831117156101a757600080fd5b919390928235926040810190602001356401000000008111156101c957600080fd5b8201836020820111156101db57600080fd5b803590602001918460208302840111640100000000831117156101fd57600080fd5b91939092909160208101903564010000000081111561021b57600080fd5b82018360208201111561022d57600080fd5b8035906020019184602083028401116401000000008311171561024f57600080fd5b91939092909160208101903564010000000081111561026d57600080fd5b82018360208201111561027f57600080fd5b803590602001918460018302840111640100000000831117156102a157600080fd5b9193909290916020810190356401000000008111156102bf57600080fd5b8201836020820111156102d157600080fd5b803590602001918460018302840111640100000000831117156102f357600080fd5b509092509050610937565b005b610308610b17565b60408051918252519081900360200190f35b610308610b3b565b6102fe6004803603602081101561033857600080fd5b50356001600160a01b0316610b5f565b6103ee6004803603602081101561035e57600080fd5b81019060208101813564010000000081111561037957600080fd5b82018360208201111561038b57600080fd5b803590602001918460018302840111640100000000831117156103ad57600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600092019190915250929550610c0a945050505050565b6040518080602001866001600160a01b03166001600160a01b03168152602001856001600160a01b03166001600160a01b03168152602001848152602001838152602001828103825287818151815260200191508051906020019080838360005b8381101561046757818101518382015260200161044f565b50505050905090810190601f1680156104945780820380516001836020036101000a031916815260200191505b50965050505050505060405180910390f35b6104ae610d0f565b604080516001600160a01b039092168252519081900360200190f35b610308610d1e565b6102fe600480360360408110156104e857600080fd5b506001600160a01b0381351690602001351515610d24565b6102fe6004803603602081101561051657600080fd5b50356001600160a01b0316610d7b565b6102fe6004803603606081101561053c57600080fd5b6001600160a01b03823516919081019060408101602082013564010000000081111561056757600080fd5b82018360208201111561057957600080fd5b8035906020019184602083028401116401000000008311171561059b57600080fd5b9193909290916020810190356401000000008111156105b957600080fd5b8201836020820111156105cb57600080fd5b803590602001918460208302840111640100000000831117156105ed57600080fd5b509092509050610e51565b6102fe6004803603602081101561060e57600080fd5b50356001600160a01b0316610fdc565b61074b600480360360a081101561063457600080fd5b6001600160a01b03823581169260208101359091169181019060608101604082013564010000000081111561066857600080fd5b82018360208201111561067a57600080fd5b8035906020019184602083028401116401000000008311171561069c57600080fd5b9193909290916020810190356401000000008111156106ba57600080fd5b8201836020820111156106cc57600080fd5b803590602001918460208302840111640100000000831117156106ee57600080fd5b91939092909160208101903564010000000081111561070c57600080fd5b82018360208201111561071e57600080fd5b8035906020019184600183028401116401000000008311171561074057600080fd5b5090925090506110c5565b604080517fffffffff000000000000000000000000000000000000000000000000000000009092168252519081900360200190f35b610843600480360360a081101561079657600080fd5b8101906020810181356401000000008111156107b157600080fd5b8201836020820111156107c357600080fd5b803590602001918460018302840111640100000000831117156107e557600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600092019190915250929550506001600160a01b0383358116945060208401351692604081013592506060013590506110f2565b604080519115158252519081900360200190f35b6104ae61122e565b6108436004803603602081101561087557600080fd5b50356001600160a01b031661123d565b6102fe6004803603602081101561089b57600080fd5b503561125b565b61074b600480360360a08110156108b857600080fd5b6001600160a01b03823581169260208101359091169160408201359160608101359181019060a0810160808201356401000000008111156108f857600080fd5b82018360208201111561090a57600080fd5b8035906020019184600183028401116401000000008311171561092c57600080fd5b5090925090506112bf565b6109418e8d6112ea565b610a388d8d8d8d80806020026020016040519081016040528093929190818152602001838360200280828437600081840152601f19601f820116905080830192505050505050508c8c8c80806020026020016040519081016040528093929190818152602001838360200280828437600081840152601f19601f820116905080830192505050505050508b8b8080602002602001604051908101604052809392919081815260200183836020028082843760009201919091525050604080516020601f8d018190048102820181019092528b815292508b91508a908190840183828082843760009201919091525061144d92505050565b610a8c8e8c8c6003818110610a4957fe5b9050602002013586868080601f0160208091040260200160405190810160405280939291908181526020018383808284376000920191909152506117d092505050565b610aca8e8e8d8d8080602002602001604051908101604052809392919081815260200183836020028082843760009201919091525061182192505050565b610b078d898980806020026020016040519081016040528093929190818152602001838360200280828437600092019190915250611c1292505050565b5050505050505050505050505050565b7f000000000000000000000000000000000000000000000000000000000000000090565b7f000000000000000000000000000000000000000000000000000000000000000090565b6000546001600160a01b03163314610bbe576040805162461bcd60e51b815260206004820152601060248201527f53656e646572206e6f742061646d696e00000000000000000000000000000000604482015290519081900360640190fd5b600554600280546001600160a01b03908116600090815260046020526040902042909301909255805473ffffffffffffffffffffffffffffffffffffffff191692909116919091179055565b606060008060008060606000806000808a80602001905160a0811015610c2f57600080fd5b8101908080516040519392919084640100000000821115610c4f57600080fd5b908301906020820185811115610c6457600080fd5b8251640100000000811182820188101715610c7e57600080fd5b82525081516020918201929091019080838360005b83811015610cab578181015183820152602001610c93565b50505050905090810190601f168015610cd85780820380516001836020036101000a031916815260200191505b5060409081526020820151908201516060830151608090930151959f50909d509b5099509197505050505050505091939590929450565b6000546001600160a01b031690565b60035490565b6000546001600160a01b03163314610d6d5760405162461bcd60e51b815260040180806020018281038252602e8152602001806125a3602e913960400191505060405180910390fd5b610d778282611dd6565b5050565b6000546001600160a01b03163314610dda576040805162461bcd60e51b815260206004820152601b60248201527f6f6e6c792061646d696e2063616e206368616e67652061646d696e0000000000604482015290519081900360640190fd5b600054604080516001600160a01b039283168152918316602083015280517f7e644d79422f17c01e4894b5f4f588d331ebfa28653d42ae832dc59e38c9798f9281900390910190a16000805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b6000546001600160a01b03163314610eb0576040805162461bcd60e51b815260206004820152600e60248201527f4e4f545f415554484f52495a4544000000000000000000000000000000000000604482015290519081900360640190fd5b7f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316632eb2c2d63087878787876040518763ffffffff1660e01b815260040180876001600160a01b03166001600160a01b03168152602001866001600160a01b03166001600160a01b031681526020018060200180602001806020018481038452888882818152602001925060200280828437600083820152601f01601f19169091018581038452868152602090810191508790870280828437600081840152601f19601f8201169050808301925050508481038252600081526020016020019950505050505050505050600060405180830381600087803b158015610fbd57600080fd5b505af1158015610fd1573d6000803e3d6000fd5b505050505050505050565b6001600160a01b038116611037576040805162461bcd60e51b815260206004820152600c60248201527f5a45524f5f414444524553530000000000000000000000000000000000000000604482015290519081900360640190fd5b6000546001600160a01b03163314611096576040805162461bcd60e51b815260206004820152600e60248201527f4e4f545f415554484f52495a4544000000000000000000000000000000000000604482015290519081900360640190fd5b6006805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b7fbc197c810000000000000000000000000000000000000000000000000000000098975050505050505050565b60006003548211806111155750836001600160a01b0316856001600160a01b0316145b8061111f57508242115b1561112c57506000611225565b60408051606087811b7fffffffffffffffffffffffffffffffffffffffff0000000000000000000000009081166020808501919091529188901b166034830152604882018690526068808301869052835180840390910181526088830184528051908201207f19457468657265756d205369676e6564204d6573736167653a0a33320000000060a884015260c48084018290528451808503909101815260e490930190935281519101206000906111e39089611e58565b6001600160a01b038116600090815260046020526040902054909150421161121057600192505050611225565b6002546001600160a01b039081169116149150505b95945050505050565b6002546001600160a01b031690565b6001600160a01b031660009081526001602052604090205460ff1690565b6000546001600160a01b031633146112ba576040805162461bcd60e51b815260206004820152601060248201527f53656e646572206e6f742061646d696e00000000000000000000000000000000604482015290519081900360640190fd5b600355565b7ff23a6e61000000000000000000000000000000000000000000000000000000009695505050505050565b7f0000000000000000000000000000000000000000000000000000000000000000421061135e576040805162461bcd60e51b815260206004820152600c60248201527f53414c455f49535f4f5645520000000000000000000000000000000000000000604482015290519081900360640190fd5b6001600160a01b03821633148061138457503360009081526001602052604090205460ff165b6113d5576040805162461bcd60e51b815260206004820152600e60248201527f4e4f545f415554484f52495a4544000000000000000000000000000000000000604482015290519081900360640190fd5b6001600160a01b03811615806113fc5750816001600160a01b0316816001600160a01b0316145b610d77576040805162461bcd60e51b815260206004820152600d60248201527f52455345525645445f4c414e4400000000000000000000000000000000000000604482015290519081900360640190fd5b600087878760008151811061145e57fe5b60200260200101518860018151811061147357fe5b60200260200101518960028151811061148857fe5b60200260200101518a60038151811061149d57fe5b60200260200101518a8a60405160200180828051906020019060200280838360005b838110156114d75781810151838201526020016114bf565b50505050905001915050604051602081830303815290604052805190602001208a60405160200180828051906020019060200280838360005b83811015611528578181015183820152602001611510565b5050505090500191505060405160208183030381529060405280519060200120604051602001808a6001600160a01b03166001600160a01b031660601b8152601401896001600160a01b03166001600160a01b031660601b81526014018881526020018781526020018681526020018581526020018481526020018381526020018281526020019950505050505050505050604051602081830303815290604052805190602001209050600760009054906101000a90046001600160a01b03166001600160a01b031663012847ed83836040518363ffffffff1660e01b81526004018080602001838152602001828103825284818151815260200191508051906020019080838360005b8381101561164a578181015183820152602001611632565b50505050905090810190601f1680156116775780820380516001836020036101000a031916815260200191505b50935050505060206040518083038186803b15801561169557600080fd5b505afa1580156116a9573d6000803e3d6000fd5b505050506040513d60208110156116bf57600080fd5b5051611712576040805162461bcd60e51b815260206004820152600c60248201527f494e56414c49445f415554480000000000000000000000000000000000000000604482015290519081900360640190fd5b60006117738760008151811061172457fe5b60200260200101518860018151811061173957fe5b60200260200101518960028151811061174e57fe5b60200260200101518a60038151811061176357fe5b60200260200101518c8b8b611f25565b905061177f8482611fca565b610fd1576040805162461bcd60e51b815260206004820152600c60248201527f494e56414c49445f4c414e440000000000000000000000000000000000000000604482015290519081900360640190fd5b60006117dc8484612095565b60065490915061181b908590839085906001600160a01b03167f00000000000000000000000000000000000000000000000000000000000000006121ee565b50505050565b8060028151811061182e57fe5b60200260200101516001148061186b57507f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316155b1561196d577f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316636e1e3bbf83836002815181106118ad57fe5b6020026020010151846000815181106118c257fe5b6020026020010151856001815181106118d757fe5b60200260200101516040518563ffffffff1660e01b815260040180856001600160a01b03166001600160a01b031681526020018481526020018381526020018281526020018060200182810382526000815260200160200195505050505050600060405180830381600087803b15801561195057600080fd5b505af1158015611964573d6000803e3d6000fd5b50505050611b0d565b7f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316636e1e3bbf7f0000000000000000000000000000000000000000000000000000000000000000836002815181106119ca57fe5b6020026020010151846000815181106119df57fe5b6020026020010151856001815181106119f457fe5b60200260200101518760405160200180826001600160a01b03166001600160a01b031681526020019150506040516020818303038152906040526040518663ffffffff1660e01b815260040180866001600160a01b03166001600160a01b0316815260200185815260200184815260200183815260200180602001828103825283818151815260200191508051906020019080838360005b83811015611aa4578181015183820152602001611a8c565b50505050905090810190601f168015611ad15780820380516001836020036101000a031916815260200191505b509650505050505050600060405180830381600087803b158015611af457600080fd5b505af1158015611b08573d6000803e3d6000fd5b505050505b61019881600181518110611b1d57fe5b60200260200101510281600081518110611b3357fe5b602002602001015101826001600160a01b0316846001600160a01b03167fe4dfa6ac11314892f3029b34a25b1a887da3b1cab2bbf8506d87128ba6e3ac0284600281518110611b7e57fe5b602002602001015185600381518110611b9357fe5b60200260200101517f000000000000000000000000000000000000000000000000000000000000000087600381518110611bc957fe5b602002602001015160405180858152602001848152602001836001600160a01b03166001600160a01b0316815260200182815260200194505050505060405180910390a4505050565b6060815167ffffffffffffffff81118015611c2c57600080fd5b50604051908082528060200260200182016040528015611c56578160200160208202803683370190505b50905060005b8251811015611c86576001828281518110611c7357fe5b6020908102919091010152600101611c5c565b507f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316632eb2c2d6308585856040518563ffffffff1660e01b815260040180856001600160a01b03166001600160a01b03168152602001846001600160a01b03166001600160a01b03168152602001806020018060200180602001848103845286818151815260200191508051906020019060200280838360005b83811015611d41578181015183820152602001611d29565b50505050905001848103835285818151815260200191508051906020019060200280838360005b83811015611d80578181015183820152602001611d68565b50505050905001848103825260008152602001602001975050505050505050600060405180830381600087803b158015611db957600080fd5b505af1158015611dcd573d6000803e3d6000fd5b50505050505050565b6001600160a01b03821660008181526001602090815260409182902080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff001685151590811790915582519384529083015280517fb21eb88b4e33b3f1281830a7178d74d8aa73220416215726b68ae23d539515cb9281900390910190a15050565b60008151604114611e6857600080fd5b60208201516040830151606084015160001a601b811015611e8757601b015b8060ff16601b1480611e9c57508060ff16601c145b611ea557600080fd5b6040805160008152602080820180845289905260ff8416828401526060820186905260808201859052915160019260a0808401939192601f1981019281900390910190855afa158015611efc573d6000803e3d6000fd5b5050604051601f1901519450506001600160a01b038416611f1c57600080fd5b50505092915050565b60008787878787878760405160200180888152602001878152602001868152602001858152602001846001600160a01b03166001600160a01b031660601b8152601401838152602001828051906020019060200280838360005b83811015611f97578181015183820152602001611f7f565b50505050905001975050505050505050604051602081830303815290604052805190602001209050979650505050505050565b600081815b8451811015612069576000858281518110611fe657fe5b602002602001015190508083101561202e5782816040516020018083815260200182815260200192505050604051602081830303815290604052805190602001209250612060565b808360405160200180838152602001828152602001925050506040516020818303038152906040528051906020012092505b50600101611fcf565b507f00000000000000000000000000000000000000000000000000000000000000001490505b92915050565b6000806120ba60646120ae85600563ffffffff61247016565b9063ffffffff6124e016565b604080516323b872dd60e01b81526001600160a01b0387811660048301527f0000000000000000000000000000000000000000000000000000000000000000811660248301526044820184905291519293507f0000000000000000000000000000000000000000000000000000000000000000909116916323b872dd916064808201926020929091908290030181600087803b15801561215957600080fd5b505af115801561216d573d6000803e3d6000fd5b505050506040513d602081101561218357600080fd5b50516121d6576040805162461bcd60e51b815260206004820152601360248201527f4645455f5452414e534645525f4641494c454400000000000000000000000000604482015290519081900360640190fd5b6121e6838263ffffffff61254516565b949350505050565b8251819085901561239857606060008060008061220a8a610c0a565b939850919650945092509050600061222586868686866110f2565b156122b35761223f6122378d84612470565b6127106124e0565b9050886001600160a01b0316846001600160a01b0316866001600160a01b03167fac7a699eb95c3c6d390ec4626de17ef9a67b35891efdb197beba7c7fdd45fac48f858760405180848152602001838152602001828152602001935050505060405180910390a46122b08782612545565b96505b801561239157604080516323b872dd60e01b81526001600160a01b038f811660048301528781166024830152604482018490529151918a16916323b872dd916064808201926020929091908290030181600087803b15801561231457600080fd5b505af1158015612328573d6000803e3d6000fd5b505050506040513d602081101561233e57600080fd5b5051612391576040805162461bcd60e51b815260206004820152601960248201527f636f6d6d6973696f6e207472616e73666572206661696c656400000000000000604482015290519081900360640190fd5b5050505050505b604080516323b872dd60e01b81526001600160a01b0389811660048301528681166024830152604482018490529151918416916323b872dd916064808201926020929091908290030181600087803b1580156123f357600080fd5b505af1158015612407573d6000803e3d6000fd5b505050506040513d602081101561241d57600080fd5b5051611dcd576040805162461bcd60e51b815260206004820152601760248201527f7061796d656e74207472616e73666572206661696c6564000000000000000000604482015290519081900360640190fd5b60008261247f5750600061208f565b508181028183828161248d57fe5b041461208f576040805162461bcd60e51b815260206004820152600860248201527f6f766572666c6f77000000000000000000000000000000000000000000000000604482015290519081900360640190fd5b600081612534576040805162461bcd60e51b815260206004820152600960248201527f64697662797a65726f0000000000000000000000000000000000000000000000604482015290519081900360640190fd5b81838161253d57fe5b049392505050565b60008282111561259c576040805162461bcd60e51b815260206004820152600860248201527f756e6465666c6f77000000000000000000000000000000000000000000000000604482015290519081900360640190fd5b5090039056fe6f6e6c792061646d696e2063616e207365747570206d6574615472616e73616374696f6e50726f636573736f7273a2646970667358221220fc9205bafc138c1de206481f144dc3e7818922fbe1a20d2a71392e5e2e413c1a64736f6c63430006050033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061011b5760003560e01c80638f283970116100b2578063c10a420811610081578063dc5074af11610066578063dc5074af1461085f578063e56f8a9e14610885578063f23a6e61146108a25761011b565b8063c10a420814610780578063caed3500146108575761011b565b80638f28397014610500578063984d625214610526578063b522ecff146105f8578063bc197c811461061e5761011b565b806365194ce7116100ee57806365194ce7146103485780636e9960c3146104a657806377f1c3ac146104ca5780638a04af6a146104d25761011b565b80631187fd3c1461012057806325cb5bc014610300578063495906571461031a57806358bc294414610322575b600080fd5b6102fe600480360361012081101561013757600080fd5b6001600160a01b038235811692602081013582169260408201359092169181019060808101606082013564010000000081111561017357600080fd5b82018360208201111561018557600080fd5b803590602001918460208302840111640100000000831117156101a757600080fd5b919390928235926040810190602001356401000000008111156101c957600080fd5b8201836020820111156101db57600080fd5b803590602001918460208302840111640100000000831117156101fd57600080fd5b91939092909160208101903564010000000081111561021b57600080fd5b82018360208201111561022d57600080fd5b8035906020019184602083028401116401000000008311171561024f57600080fd5b91939092909160208101903564010000000081111561026d57600080fd5b82018360208201111561027f57600080fd5b803590602001918460018302840111640100000000831117156102a157600080fd5b9193909290916020810190356401000000008111156102bf57600080fd5b8201836020820111156102d157600080fd5b803590602001918460018302840111640100000000831117156102f357600080fd5b509092509050610937565b005b610308610b17565b60408051918252519081900360200190f35b610308610b3b565b6102fe6004803603602081101561033857600080fd5b50356001600160a01b0316610b5f565b6103ee6004803603602081101561035e57600080fd5b81019060208101813564010000000081111561037957600080fd5b82018360208201111561038b57600080fd5b803590602001918460018302840111640100000000831117156103ad57600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600092019190915250929550610c0a945050505050565b6040518080602001866001600160a01b03166001600160a01b03168152602001856001600160a01b03166001600160a01b03168152602001848152602001838152602001828103825287818151815260200191508051906020019080838360005b8381101561046757818101518382015260200161044f565b50505050905090810190601f1680156104945780820380516001836020036101000a031916815260200191505b50965050505050505060405180910390f35b6104ae610d0f565b604080516001600160a01b039092168252519081900360200190f35b610308610d1e565b6102fe600480360360408110156104e857600080fd5b506001600160a01b0381351690602001351515610d24565b6102fe6004803603602081101561051657600080fd5b50356001600160a01b0316610d7b565b6102fe6004803603606081101561053c57600080fd5b6001600160a01b03823516919081019060408101602082013564010000000081111561056757600080fd5b82018360208201111561057957600080fd5b8035906020019184602083028401116401000000008311171561059b57600080fd5b9193909290916020810190356401000000008111156105b957600080fd5b8201836020820111156105cb57600080fd5b803590602001918460208302840111640100000000831117156105ed57600080fd5b509092509050610e51565b6102fe6004803603602081101561060e57600080fd5b50356001600160a01b0316610fdc565b61074b600480360360a081101561063457600080fd5b6001600160a01b03823581169260208101359091169181019060608101604082013564010000000081111561066857600080fd5b82018360208201111561067a57600080fd5b8035906020019184602083028401116401000000008311171561069c57600080fd5b9193909290916020810190356401000000008111156106ba57600080fd5b8201836020820111156106cc57600080fd5b803590602001918460208302840111640100000000831117156106ee57600080fd5b91939092909160208101903564010000000081111561070c57600080fd5b82018360208201111561071e57600080fd5b8035906020019184600183028401116401000000008311171561074057600080fd5b5090925090506110c5565b604080517fffffffff000000000000000000000000000000000000000000000000000000009092168252519081900360200190f35b610843600480360360a081101561079657600080fd5b8101906020810181356401000000008111156107b157600080fd5b8201836020820111156107c357600080fd5b803590602001918460018302840111640100000000831117156107e557600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600092019190915250929550506001600160a01b0383358116945060208401351692604081013592506060013590506110f2565b604080519115158252519081900360200190f35b6104ae61122e565b6108436004803603602081101561087557600080fd5b50356001600160a01b031661123d565b6102fe6004803603602081101561089b57600080fd5b503561125b565b61074b600480360360a08110156108b857600080fd5b6001600160a01b03823581169260208101359091169160408201359160608101359181019060a0810160808201356401000000008111156108f857600080fd5b82018360208201111561090a57600080fd5b8035906020019184600183028401116401000000008311171561092c57600080fd5b5090925090506112bf565b6109418e8d6112ea565b610a388d8d8d8d80806020026020016040519081016040528093929190818152602001838360200280828437600081840152601f19601f820116905080830192505050505050508c8c8c80806020026020016040519081016040528093929190818152602001838360200280828437600081840152601f19601f820116905080830192505050505050508b8b8080602002602001604051908101604052809392919081815260200183836020028082843760009201919091525050604080516020601f8d018190048102820181019092528b815292508b91508a908190840183828082843760009201919091525061144d92505050565b610a8c8e8c8c6003818110610a4957fe5b9050602002013586868080601f0160208091040260200160405190810160405280939291908181526020018383808284376000920191909152506117d092505050565b610aca8e8e8d8d8080602002602001604051908101604052809392919081815260200183836020028082843760009201919091525061182192505050565b610b078d898980806020026020016040519081016040528093929190818152602001838360200280828437600092019190915250611c1292505050565b5050505050505050505050505050565b7f000000000000000000000000000000000000000000000000000000000000000090565b7f000000000000000000000000000000000000000000000000000000000000000090565b6000546001600160a01b03163314610bbe576040805162461bcd60e51b815260206004820152601060248201527f53656e646572206e6f742061646d696e00000000000000000000000000000000604482015290519081900360640190fd5b600554600280546001600160a01b03908116600090815260046020526040902042909301909255805473ffffffffffffffffffffffffffffffffffffffff191692909116919091179055565b606060008060008060606000806000808a80602001905160a0811015610c2f57600080fd5b8101908080516040519392919084640100000000821115610c4f57600080fd5b908301906020820185811115610c6457600080fd5b8251640100000000811182820188101715610c7e57600080fd5b82525081516020918201929091019080838360005b83811015610cab578181015183820152602001610c93565b50505050905090810190601f168015610cd85780820380516001836020036101000a031916815260200191505b5060409081526020820151908201516060830151608090930151959f50909d509b5099509197505050505050505091939590929450565b6000546001600160a01b031690565b60035490565b6000546001600160a01b03163314610d6d5760405162461bcd60e51b815260040180806020018281038252602e8152602001806125a3602e913960400191505060405180910390fd5b610d778282611dd6565b5050565b6000546001600160a01b03163314610dda576040805162461bcd60e51b815260206004820152601b60248201527f6f6e6c792061646d696e2063616e206368616e67652061646d696e0000000000604482015290519081900360640190fd5b600054604080516001600160a01b039283168152918316602083015280517f7e644d79422f17c01e4894b5f4f588d331ebfa28653d42ae832dc59e38c9798f9281900390910190a16000805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b6000546001600160a01b03163314610eb0576040805162461bcd60e51b815260206004820152600e60248201527f4e4f545f415554484f52495a4544000000000000000000000000000000000000604482015290519081900360640190fd5b7f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316632eb2c2d63087878787876040518763ffffffff1660e01b815260040180876001600160a01b03166001600160a01b03168152602001866001600160a01b03166001600160a01b031681526020018060200180602001806020018481038452888882818152602001925060200280828437600083820152601f01601f19169091018581038452868152602090810191508790870280828437600081840152601f19601f8201169050808301925050508481038252600081526020016020019950505050505050505050600060405180830381600087803b158015610fbd57600080fd5b505af1158015610fd1573d6000803e3d6000fd5b505050505050505050565b6001600160a01b038116611037576040805162461bcd60e51b815260206004820152600c60248201527f5a45524f5f414444524553530000000000000000000000000000000000000000604482015290519081900360640190fd5b6000546001600160a01b03163314611096576040805162461bcd60e51b815260206004820152600e60248201527f4e4f545f415554484f52495a4544000000000000000000000000000000000000604482015290519081900360640190fd5b6006805473ffffffffffffffffffffffffffffffffffffffff19166001600160a01b0392909216919091179055565b7fbc197c810000000000000000000000000000000000000000000000000000000098975050505050505050565b60006003548211806111155750836001600160a01b0316856001600160a01b0316145b8061111f57508242115b1561112c57506000611225565b60408051606087811b7fffffffffffffffffffffffffffffffffffffffff0000000000000000000000009081166020808501919091529188901b166034830152604882018690526068808301869052835180840390910181526088830184528051908201207f19457468657265756d205369676e6564204d6573736167653a0a33320000000060a884015260c48084018290528451808503909101815260e490930190935281519101206000906111e39089611e58565b6001600160a01b038116600090815260046020526040902054909150421161121057600192505050611225565b6002546001600160a01b039081169116149150505b95945050505050565b6002546001600160a01b031690565b6001600160a01b031660009081526001602052604090205460ff1690565b6000546001600160a01b031633146112ba576040805162461bcd60e51b815260206004820152601060248201527f53656e646572206e6f742061646d696e00000000000000000000000000000000604482015290519081900360640190fd5b600355565b7ff23a6e61000000000000000000000000000000000000000000000000000000009695505050505050565b7f0000000000000000000000000000000000000000000000000000000000000000421061135e576040805162461bcd60e51b815260206004820152600c60248201527f53414c455f49535f4f5645520000000000000000000000000000000000000000604482015290519081900360640190fd5b6001600160a01b03821633148061138457503360009081526001602052604090205460ff165b6113d5576040805162461bcd60e51b815260206004820152600e60248201527f4e4f545f415554484f52495a4544000000000000000000000000000000000000604482015290519081900360640190fd5b6001600160a01b03811615806113fc5750816001600160a01b0316816001600160a01b0316145b610d77576040805162461bcd60e51b815260206004820152600d60248201527f52455345525645445f4c414e4400000000000000000000000000000000000000604482015290519081900360640190fd5b600087878760008151811061145e57fe5b60200260200101518860018151811061147357fe5b60200260200101518960028151811061148857fe5b60200260200101518a60038151811061149d57fe5b60200260200101518a8a60405160200180828051906020019060200280838360005b838110156114d75781810151838201526020016114bf565b50505050905001915050604051602081830303815290604052805190602001208a60405160200180828051906020019060200280838360005b83811015611528578181015183820152602001611510565b5050505090500191505060405160208183030381529060405280519060200120604051602001808a6001600160a01b03166001600160a01b031660601b8152601401896001600160a01b03166001600160a01b031660601b81526014018881526020018781526020018681526020018581526020018481526020018381526020018281526020019950505050505050505050604051602081830303815290604052805190602001209050600760009054906101000a90046001600160a01b03166001600160a01b031663012847ed83836040518363ffffffff1660e01b81526004018080602001838152602001828103825284818151815260200191508051906020019080838360005b8381101561164a578181015183820152602001611632565b50505050905090810190601f1680156116775780820380516001836020036101000a031916815260200191505b50935050505060206040518083038186803b15801561169557600080fd5b505afa1580156116a9573d6000803e3d6000fd5b505050506040513d60208110156116bf57600080fd5b5051611712576040805162461bcd60e51b815260206004820152600c60248201527f494e56414c49445f415554480000000000000000000000000000000000000000604482015290519081900360640190fd5b60006117738760008151811061172457fe5b60200260200101518860018151811061173957fe5b60200260200101518960028151811061174e57fe5b60200260200101518a60038151811061176357fe5b60200260200101518c8b8b611f25565b905061177f8482611fca565b610fd1576040805162461bcd60e51b815260206004820152600c60248201527f494e56414c49445f4c414e440000000000000000000000000000000000000000604482015290519081900360640190fd5b60006117dc8484612095565b60065490915061181b908590839085906001600160a01b03167f00000000000000000000000000000000000000000000000000000000000000006121ee565b50505050565b8060028151811061182e57fe5b60200260200101516001148061186b57507f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316155b1561196d577f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316636e1e3bbf83836002815181106118ad57fe5b6020026020010151846000815181106118c257fe5b6020026020010151856001815181106118d757fe5b60200260200101516040518563ffffffff1660e01b815260040180856001600160a01b03166001600160a01b031681526020018481526020018381526020018281526020018060200182810382526000815260200160200195505050505050600060405180830381600087803b15801561195057600080fd5b505af1158015611964573d6000803e3d6000fd5b50505050611b0d565b7f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316636e1e3bbf7f0000000000000000000000000000000000000000000000000000000000000000836002815181106119ca57fe5b6020026020010151846000815181106119df57fe5b6020026020010151856001815181106119f457fe5b60200260200101518760405160200180826001600160a01b03166001600160a01b031681526020019150506040516020818303038152906040526040518663ffffffff1660e01b815260040180866001600160a01b03166001600160a01b0316815260200185815260200184815260200183815260200180602001828103825283818151815260200191508051906020019080838360005b83811015611aa4578181015183820152602001611a8c565b50505050905090810190601f168015611ad15780820380516001836020036101000a031916815260200191505b509650505050505050600060405180830381600087803b158015611af457600080fd5b505af1158015611b08573d6000803e3d6000fd5b505050505b61019881600181518110611b1d57fe5b60200260200101510281600081518110611b3357fe5b602002602001015101826001600160a01b0316846001600160a01b03167fe4dfa6ac11314892f3029b34a25b1a887da3b1cab2bbf8506d87128ba6e3ac0284600281518110611b7e57fe5b602002602001015185600381518110611b9357fe5b60200260200101517f000000000000000000000000000000000000000000000000000000000000000087600381518110611bc957fe5b602002602001015160405180858152602001848152602001836001600160a01b03166001600160a01b0316815260200182815260200194505050505060405180910390a4505050565b6060815167ffffffffffffffff81118015611c2c57600080fd5b50604051908082528060200260200182016040528015611c56578160200160208202803683370190505b50905060005b8251811015611c86576001828281518110611c7357fe5b6020908102919091010152600101611c5c565b507f00000000000000000000000000000000000000000000000000000000000000006001600160a01b0316632eb2c2d6308585856040518563ffffffff1660e01b815260040180856001600160a01b03166001600160a01b03168152602001846001600160a01b03166001600160a01b03168152602001806020018060200180602001848103845286818151815260200191508051906020019060200280838360005b83811015611d41578181015183820152602001611d29565b50505050905001848103835285818151815260200191508051906020019060200280838360005b83811015611d80578181015183820152602001611d68565b50505050905001848103825260008152602001602001975050505050505050600060405180830381600087803b158015611db957600080fd5b505af1158015611dcd573d6000803e3d6000fd5b50505050505050565b6001600160a01b03821660008181526001602090815260409182902080547fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff001685151590811790915582519384529083015280517fb21eb88b4e33b3f1281830a7178d74d8aa73220416215726b68ae23d539515cb9281900390910190a15050565b60008151604114611e6857600080fd5b60208201516040830151606084015160001a601b811015611e8757601b015b8060ff16601b1480611e9c57508060ff16601c145b611ea557600080fd5b6040805160008152602080820180845289905260ff8416828401526060820186905260808201859052915160019260a0808401939192601f1981019281900390910190855afa158015611efc573d6000803e3d6000fd5b5050604051601f1901519450506001600160a01b038416611f1c57600080fd5b50505092915050565b60008787878787878760405160200180888152602001878152602001868152602001858152602001846001600160a01b03166001600160a01b031660601b8152601401838152602001828051906020019060200280838360005b83811015611f97578181015183820152602001611f7f565b50505050905001975050505050505050604051602081830303815290604052805190602001209050979650505050505050565b600081815b8451811015612069576000858281518110611fe657fe5b602002602001015190508083101561202e5782816040516020018083815260200182815260200192505050604051602081830303815290604052805190602001209250612060565b808360405160200180838152602001828152602001925050506040516020818303038152906040528051906020012092505b50600101611fcf565b507f00000000000000000000000000000000000000000000000000000000000000001490505b92915050565b6000806120ba60646120ae85600563ffffffff61247016565b9063ffffffff6124e016565b604080516323b872dd60e01b81526001600160a01b0387811660048301527f0000000000000000000000000000000000000000000000000000000000000000811660248301526044820184905291519293507f0000000000000000000000000000000000000000000000000000000000000000909116916323b872dd916064808201926020929091908290030181600087803b15801561215957600080fd5b505af115801561216d573d6000803e3d6000fd5b505050506040513d602081101561218357600080fd5b50516121d6576040805162461bcd60e51b815260206004820152601360248201527f4645455f5452414e534645525f4641494c454400000000000000000000000000604482015290519081900360640190fd5b6121e6838263ffffffff61254516565b949350505050565b8251819085901561239857606060008060008061220a8a610c0a565b939850919650945092509050600061222586868686866110f2565b156122b35761223f6122378d84612470565b6127106124e0565b9050886001600160a01b0316846001600160a01b0316866001600160a01b03167fac7a699eb95c3c6d390ec4626de17ef9a67b35891efdb197beba7c7fdd45fac48f858760405180848152602001838152602001828152602001935050505060405180910390a46122b08782612545565b96505b801561239157604080516323b872dd60e01b81526001600160a01b038f811660048301528781166024830152604482018490529151918a16916323b872dd916064808201926020929091908290030181600087803b15801561231457600080fd5b505af1158015612328573d6000803e3d6000fd5b505050506040513d602081101561233e57600080fd5b5051612391576040805162461bcd60e51b815260206004820152601960248201527f636f6d6d6973696f6e207472616e73666572206661696c656400000000000000604482015290519081900360640190fd5b5050505050505b604080516323b872dd60e01b81526001600160a01b0389811660048301528681166024830152604482018490529151918416916323b872dd916064808201926020929091908290030181600087803b1580156123f357600080fd5b505af1158015612407573d6000803e3d6000fd5b505050506040513d602081101561241d57600080fd5b5051611dcd576040805162461bcd60e51b815260206004820152601760248201527f7061796d656e74207472616e73666572206661696c6564000000000000000000604482015290519081900360640190fd5b60008261247f5750600061208f565b508181028183828161248d57fe5b041461208f576040805162461bcd60e51b815260206004820152600860248201527f6f766572666c6f77000000000000000000000000000000000000000000000000604482015290519081900360640190fd5b600081612534576040805162461bcd60e51b815260206004820152600960248201527f64697662797a65726f0000000000000000000000000000000000000000000000604482015290519081900360640190fd5b81838161253d57fe5b049392505050565b60008282111561259c576040805162461bcd60e51b815260206004820152600860248201527f756e6465666c6f77000000000000000000000000000000000000000000000000604482015290519081900360640190fd5b5090039056fe6f6e6c792061646d696e2063616e207365747570206d6574615472616e73616374696f6e50726f636573736f7273a2646970667358221220fc9205bafc138c1de206481f144dc3e7818922fbe1a20d2a71392e5e2e413c1a64736f6c63430006050033",
+  "devdoc": {
+    "methods": {
+      "buyLandWithSand(address,address,address,uint256[],bytes32,uint256[],bytes32[],bytes,bytes)": {
+        "params": {
+          "buyer": "address that perform the payment",
+          "info": "[X_INDEX=0] x coordinate of the Land [Y_INDEX=1] y coordinate of the Land [SIZE_INDEX=2] size of the pack of Land to purchase [PRICE_INDEX=3] price in SAND to purchase that Land",
+          "proof": "merkleProof for that particular Land",
+          "reserved": "the reserved address (if any)",
+          "to": "address that will own the purchased Land"
+        }
+      },
+      "changeAdmin(address)": {
+        "details": "change the administrator to be `newAdmin`.",
+        "params": {
+          "newAdmin": "address of the new administrator."
+        }
+      },
+      "getAdmin()": {
+        "details": "gives the current administrator of this contract.",
+        "returns": {
+          "_0": "the current administrator of this contract."
+        }
+      },
+      "getSigningWallet()": {
+        "details": "signing wallet authorized for referral",
+        "returns": {
+          "_0": "the address of the signing wallet"
+        }
+      },
+      "isMetaTransactionProcessor(address)": {
+        "details": "check whether address `who` is given meta-transaction execution rights.",
+        "params": {
+          "who": "The address to query."
+        },
+        "returns": {
+          "_0": "whether the address has meta-transaction execution rights."
+        }
+      },
+      "isReferralValid(bytes,address,address,uint256,uint256)": {
+        "params": {
+          "commissionRate": "The commissionRate of the referral",
+          "expiryTime": "The expiry time of the referral",
+          "referee": "The address of the referee",
+          "referrer": "The address of the referrer",
+          "signature": "The signature to check (signed referral)"
+        },
+        "returns": {
+          "_0": "True if the referral is valid"
+        }
+      },
+      "setMetaTransactionProcessor(address,bool)": {
+        "details": "Enable or disable the ability of `metaTransactionProcessor` to perform meta-tx (metaTransactionProcessor rights).",
+        "params": {
+          "enabled": "set whether the metaTransactionProcessor is enabled or disabled.",
+          "metaTransactionProcessor": "address that will be given/removed metaTransactionProcessor rights."
+        }
+      },
+      "setReceivingWallet(address)": {
+        "params": {
+          "newWallet": "address of the new receiving wallet"
+        }
+      },
+      "updateMaxCommissionRate(uint256)": {
+        "details": "Update the maximum commission rate",
+        "params": {
+          "newMaxCommissionRate": "The new maximum commission rate"
+        }
+      },
+      "updateSigningWallet(address)": {
+        "details": "Update the signing wallet",
+        "params": {
+          "newSigningWallet": "The new address of the signing wallet"
+        }
+      },
+      "withdrawAssets(address,uint256[],uint256[])": {
+        "params": {
+          "assetIds": "the assetIds to be transferred",
+          "to": "intended recipient of the asset tokens",
+          "values": "the quantities of the assetIds to be transferred"
+        }
+      }
+    },
+    "title": "Estate Sale contract with referral"
+  },
+  "userdoc": {
+    "methods": {
+      "buyLandWithSand(address,address,address,uint256[],bytes32,uint256[],bytes32[],bytes,bytes)": {
+        "notice": "buy Land with SAND using the merkle proof associated with it"
+      },
+      "getExpiryTime()": {
+        "notice": "Gets the expiry time for the current sale"
+      },
+      "getMaxCommisionRate()": {
+        "notice": "the max commision rate"
+      },
+      "getMerkleRoot()": {
+        "notice": "Gets the Merkle root associated with the current sale"
+      },
+      "isReferralValid(bytes,address,address,uint256,uint256)": {
+        "notice": "Check if a referral is valid"
+      },
+      "setReceivingWallet(address)": {
+        "notice": "set the wallet receiving the proceeds"
+      },
+      "withdrawAssets(address,uint256[],uint256[])": {
+        "notice": "enable Admin to withdraw remaining assets from EstateSaleWithFee contract"
+      }
+    },
+    "notice": "This contract manages the sale of our lands as Estates"
+  },
+  "storageLayout": {
+    "storage": [
+      {
+        "astId": 13650,
+        "contract": "src/solc_0.6/EstateSale/EstateSaleWithAuth.sol:EstateSaleWithAuth",
+        "label": "_admin",
+        "offset": 0,
+        "slot": "0",
+        "type": "t_address"
+      },
+      {
+        "astId": 13712,
+        "contract": "src/solc_0.6/EstateSale/EstateSaleWithAuth.sol:EstateSaleWithAuth",
+        "label": "_metaTransactionContracts",
+        "offset": 0,
+        "slot": "1",
+        "type": "t_mapping(t_address,t_bool)"
+      },
+      {
+        "astId": 11828,
+        "contract": "src/solc_0.6/EstateSale/EstateSaleWithAuth.sol:EstateSaleWithAuth",
+        "label": "_signingWallet",
+        "offset": 0,
+        "slot": "2",
+        "type": "t_address"
+      },
+      {
+        "astId": 11830,
+        "contract": "src/solc_0.6/EstateSale/EstateSaleWithAuth.sol:EstateSaleWithAuth",
+        "label": "_maxCommissionRate",
+        "offset": 0,
+        "slot": "3",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 11834,
+        "contract": "src/solc_0.6/EstateSale/EstateSaleWithAuth.sol:EstateSaleWithAuth",
+        "label": "_previousSigningWallets",
+        "offset": 0,
+        "slot": "4",
+        "type": "t_mapping(t_address,t_uint256)"
+      },
+      {
+        "astId": 11843,
+        "contract": "src/solc_0.6/EstateSale/EstateSaleWithAuth.sol:EstateSaleWithAuth",
+        "label": "_previousSigningDelay",
+        "offset": 0,
+        "slot": "5",
+        "type": "t_uint256"
+      },
+      {
+        "astId": 7453,
+        "contract": "src/solc_0.6/EstateSale/EstateSaleWithAuth.sol:EstateSaleWithAuth",
+        "label": "_wallet",
+        "offset": 0,
+        "slot": "6",
+        "type": "t_address_payable"
+      },
+      {
+        "astId": 7455,
+        "contract": "src/solc_0.6/EstateSale/EstateSaleWithAuth.sol:EstateSaleWithAuth",
+        "label": "_authValidator",
+        "offset": 0,
+        "slot": "7",
+        "type": "t_contract(AuthValidator)6784"
+      }
+    ],
+    "types": {
+      "t_address": {
+        "encoding": "inplace",
+        "label": "address",
+        "numberOfBytes": "20"
+      },
+      "t_address_payable": {
+        "encoding": "inplace",
+        "label": "address payable",
+        "numberOfBytes": "20"
+      },
+      "t_bool": {
+        "encoding": "inplace",
+        "label": "bool",
+        "numberOfBytes": "1"
+      },
+      "t_contract(AuthValidator)6784": {
+        "encoding": "inplace",
+        "label": "contract AuthValidator",
+        "numberOfBytes": "20"
+      },
+      "t_mapping(t_address,t_bool)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => bool)",
+        "numberOfBytes": "32",
+        "value": "t_bool"
+      },
+      "t_mapping(t_address,t_uint256)": {
+        "encoding": "mapping",
+        "key": "t_address",
+        "label": "mapping(address => uint256)",
+        "numberOfBytes": "32",
+        "value": "t_uint256"
+      },
+      "t_uint256": {
+        "encoding": "inplace",
+        "label": "uint256",
+        "numberOfBytes": "32"
+      }
+    }
+  }
+}
