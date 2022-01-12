@@ -37,6 +37,13 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     uint256 internal _totalContributions;
     mapping(address => uint256) internal _contributions;
 
+    struct AntiCompound {
+        uint256 lockPeriodInSecs;
+        mapping(address => uint256) lastWithdraw;
+    }
+
+    AntiCompound public antiCompound;
+
     constructor(
         IERC20 stakeToken_,
         IERC20 rewardToken_,
@@ -47,10 +54,24 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         __ERC2771Handler_initialize(trustedForwarder);
     }
 
+    modifier antiCompoundCheck(address account) {
+        require(
+            block.timestamp > antiCompound.lastWithdraw[account] + antiCompound.lockPeriodInSecs,
+            "SandRewardPool: must wait"
+        );
+        antiCompound.lastWithdraw[account] = block.timestamp;
+        _;
+    }
+
     modifier isContractAndAdmin(address contractAddress) {
         require(contractAddress.isContract(), "SandRewardPool: not a contract");
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "SandRewardPool: not admin");
         _;
+    }
+
+    function setAntiCompoundLockPeriod(uint256 lockPeriodInSecs) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "SandRewardPool: not admin");
+        antiCompound.lockPeriodInSecs = lockPeriodInSecs;
     }
 
     function setContributionCalculator(address contractAddress) external isContractAndAdmin(contractAddress) {
@@ -66,7 +87,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     }
 
     function setTrustedForwarder(address trustedForwarder) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "SandRewardPool: Only admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "SandRewardPool: not admins");
         _trustedForwarder = trustedForwarder;
     }
 
@@ -178,7 +199,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         emit Withdrawn(account, amount);
     }
 
-    function _withdrawRewards(address account) internal {
+    function _withdrawRewards(address account) internal antiCompoundCheck(account) {
         uint256 reward = rewards[account];
         if (reward > 0) {
             rewards[account] = 0;
