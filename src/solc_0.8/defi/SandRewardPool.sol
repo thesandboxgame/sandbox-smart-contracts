@@ -144,36 +144,36 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
 
     function withdraw(uint256 amount) external nonReentrant {
         _processRewards(_msgSender());
-        _withdrawStake(amount);
+        _withdrawStake(_msgSender(), amount);
         _updateContribution(_msgSender());
     }
 
     function exit() external nonReentrant {
         _processRewards(_msgSender());
-        _withdrawStake(_balances[_msgSender()]);
-        _withdrawRewards();
+        _withdrawStake(_msgSender(), _balances[_msgSender()]);
+        _withdrawRewards(_msgSender());
         _updateContribution(_msgSender());
     }
 
     function getReward() external nonReentrant {
         _processRewards(_msgSender());
-        _withdrawRewards();
+        _withdrawRewards(_msgSender());
         _updateContribution(_msgSender());
     }
 
-    function _withdrawStake(uint256 amount) internal {
+    function _withdrawStake(address account, uint256 amount) internal {
         require(amount > 0, "SandRewardPool: Cannot withdraw 0");
         super._withdraw(amount);
-        _updateContribution(_msgSender());
-        emit Withdrawn(_msgSender(), amount);
+        _updateContribution(account);
+        emit Withdrawn(account, amount);
     }
 
-    function _withdrawRewards() internal {
-        uint256 reward = rewards[_msgSender()];
+    function _withdrawRewards(address account) internal {
+        uint256 reward = rewards[account];
         if (reward > 0) {
-            rewards[_msgSender()] = 0;
-            rewardToken.safeTransfer(_msgSender(), reward);
-            emit RewardPaid(_msgSender(), reward);
+            rewards[account] = 0;
+            rewardToken.safeTransfer(account, reward);
+            emit RewardPaid(account, reward);
         }
     }
 
