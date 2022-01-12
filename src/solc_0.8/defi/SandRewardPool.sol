@@ -136,9 +136,19 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
 
     function stake(uint256 amount) external nonReentrant {
         require(amount > 0, "SandRewardPool: Cannot stake 0");
+
+        uint256 earlierRewards;
+        if (_totalContributions == 0) {
+            earlierRewards = rewardCalculator.getRewards();
+        }
+
         _processRewards(_msgSender());
         super._stake(amount);
         _updateContribution(_msgSender());
+
+        if (earlierRewards != 0) {
+            rewards[_msgSender()] = rewards[_msgSender()] + earlierRewards;
+        }
         emit Staked(_msgSender(), amount);
     }
 
@@ -209,17 +219,10 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     }
 
     function _restartRewards() internal {
-        // OBS: For the first deposit _totalContributions == 0 => _rewardPerToken return zero and we don't want to
-        // reinitialize rewards (so they are not lost).
-        // The original contract ignore rewards for campaigns in which there where no deposits, aka
-        // totalContributions == 0 during all the campaign.
-        // The original code is: `if (block.timestamp >= periodFinish || _totalContributions != 0)`
-        // our new code distribute the rewards even after the campaign ends.
-        // TODO: Review this part, see (line 99): https://github.com/thesandboxgame/sandbox-smart-contracts/blame/176b862302b5fe4b02f673872ef852007474d024/src/LiquidityMining/LandWeightedSANDRewardPool.sol
         // Distribute the accumulated rewards
         rewardPerTokenStored = rewardPerTokenStored + _rewardPerToken();
         // restart rewards so now the rewardCalculator return zero rewards
-        rewardCalculator.restartRewards(_totalContributions);
+        rewardCalculator.restartRewards();
     }
 
     function _earned(address account, uint256 rewardPerToken) internal view returns (uint256) {

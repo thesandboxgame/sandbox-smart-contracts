@@ -80,25 +80,24 @@ describe('new SandRewardPool main contract tests', function () {
 
         const initialBalance = await balances(user.address);
 
-        // TODO: initial 30 goes ???
         await setRewardAndStake(30, user.pool, 1000);
         expect(await contract.earned(user.address)).to.be.equal(30);
 
         await setRewardAndStake(50, user.pool, 1000);
-        expect(await contract.earned(user.address)).to.be.equal(50);
+        expect(await contract.earned(user.address)).to.be.equal(80);
 
         await setRewardAndStake(70, user.pool, 1000);
-        expect(await contract.earned(user.address)).to.be.equal(120);
+        expect(await contract.earned(user.address)).to.be.equal(150);
 
         await setRewardAndStake(20, user.pool, 1000);
-        // TODO: Rounding.... earned = 140
-        expect(await contract.earned(user.address)).to.be.equal(139);
+        // Rounding.... earned = 140
+        expect(await contract.earned(user.address)).to.be.equal(169);
 
         await user.pool.exit();
         expect(await contract.earned(user.address)).to.be.equal(0);
         const deltas = await balances(user.address, initialBalance);
         expect(deltas.stake).to.be.equal(0);
-        expect(deltas.reward).to.be.equal(139);
+        expect(deltas.reward).to.be.equal(169);
       });
       it('stake before rewards', async function () {
         const {
@@ -121,7 +120,7 @@ describe('new SandRewardPool main contract tests', function () {
           await setRewardAndStake(r, user.pool, 1000);
           earned += r;
         }
-        // TODO: Rounding.... earned = 150
+        // Rounding.... earned = 150
         expect(await contract.earned(user.address)).to.be.equal(149);
 
         await user.pool.exit();
@@ -158,6 +157,40 @@ describe('new SandRewardPool main contract tests', function () {
         expect(deltas2.stake).to.be.equal(0);
         expect(deltas2.reward).to.be.equal(80);
       });
+      it('stake->withdraw so total contribution == 0, stake again with some rewards', async function () {
+        const {
+          contract,
+          setRewardAndStake,
+          balances,
+          getUser,
+        } = await setupSandRewardPoolTest();
+        const user = await getUser();
+
+        const initialBalance = await balances(user.address);
+
+        await setRewardAndStake(30, user.pool, 1000);
+        expect(await contract.earned(user.address)).to.be.equal(30);
+
+        await setRewardAndStake(50, user.pool, 1000);
+        expect(await contract.earned(user.address)).to.be.equal(80);
+
+        // We need the check totalContributions != 0 in the reward calculator so the initial user gets his rewards.
+        await user.pool.exit();
+        const deltas = await balances(user.address, initialBalance);
+        expect(deltas.stake).to.be.equal(0);
+        expect(deltas.reward).to.be.equal(80);
+
+        await setRewardAndStake(50, user.pool, 1000);
+        expect(await contract.earned(user.address)).to.be.equal(50);
+
+        await setRewardAndStake(70, user.pool, 1000);
+        expect(await contract.earned(user.address)).to.be.equal(120);
+
+        await user.pool.exit();
+        const deltas2 = await balances(user.address, initialBalance);
+        expect(deltas2.stake).to.be.equal(0);
+        expect(deltas2.reward).to.be.equal(200);
+      });
     });
     describe('two users', function () {
       it('reward before stake', async function () {
@@ -172,19 +205,18 @@ describe('new SandRewardPool main contract tests', function () {
         await setRewardAndStake(30, user1.pool, 1000);
         expect(await getEarnings(users)).to.eql([30, 0]);
 
-        // TODO: initial 30 goes ???
         await setRewardAndStake(50, user2.pool, 1000);
-        expect(await getEarnings(users)).to.eql([50, 0]);
+        expect(await getEarnings(users)).to.eql([80, 0]);
 
         await setRewardAndStake(70, user1.pool, 1000);
         // [ 70 + 60 * (1000/2000), 70 * (1000/2000) ]
-        expect(await getEarnings(users)).to.eql([85, 35]);
-        expect(85 + 35).to.be.equal(50 + 70);
+        expect(await getEarnings(users)).to.eql([115, 35]);
+        expect(115 + 35).to.be.equal(30 + 50 + 70);
 
         await setRewardAndStake(21, user2.pool, 1000);
         // [ 85 + 21 * (2000/3000), 35 + 21 * (1000/3000) ]
-        expect(await getEarnings(users)).to.eql([99, 42]);
-        expect(99 + 42).to.be.equal(50 + 70 + 21);
+        expect(await getEarnings(users)).to.eql([129, 42]);
+        expect(129 + 42).to.be.equal(30 + 50 + 70 + 21);
       });
       it('user1 stake before rewards', async function () {
         const {
@@ -291,11 +323,10 @@ describe('new SandRewardPool main contract tests', function () {
         await setRewardAndStake(30, users[0].pool, 1000);
         expect(await getEarnings(users)).to.eql([30, ...empty.slice(1)]);
 
-        // TODO: initial 30 goes ???
         let data = {
-          rewardSum: 0,
+          rewardSum: 30,
           stakes: [1000, ...empty.slice(1)],
-          earnings: empty,
+          earnings: [30, ...empty.slice(1)],
         };
         const userAndReward = [
           [50, 1],

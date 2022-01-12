@@ -67,12 +67,10 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
     }
 
     // The main contract has distributed the rewards until this point, this must start from scratch => getRewards() == 0
-    function restartRewards(uint256 totalContributions) external override {
+    function restartRewards() external override {
         require(msg.sender == rewardPool, "not reward pool");
-        if (totalContributions != 0) {
-            lastUpdateTime = block.timestamp;
-            savedRewards = 0;
-        }
+        lastUpdateTime = block.timestamp;
+        savedRewards = 0;
     }
 
     // Useful when switching reward calculators to set an initial reward.

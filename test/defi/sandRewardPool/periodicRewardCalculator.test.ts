@@ -7,7 +7,7 @@ describe('PeriodicRewardCalculator', function () {
   describe('roles', function () {
     it('reward pool should be able to call restartRewards', async function () {
       const {contractAsRewardPool} = await periodicSetup();
-      await expect(contractAsRewardPool.restartRewards(0)).not.to.be.reverted;
+      await expect(contractAsRewardPool.restartRewards()).not.to.be.reverted;
     });
     it('others should fail to call restartRewards', async function () {
       const {
@@ -16,14 +16,14 @@ describe('PeriodicRewardCalculator', function () {
         contractAsRewardDistribution,
       } = await periodicSetup();
 
-      await expect(contract.restartRewards(0)).to.be.revertedWith(
+      await expect(contract.restartRewards()).to.be.revertedWith(
         'not reward pool'
       );
-      await expect(contractAsAdmin.restartRewards(0)).to.be.revertedWith(
+      await expect(contractAsAdmin.restartRewards()).to.be.revertedWith(
         'not reward pool'
       );
       await expect(
-        contractAsRewardDistribution.restartRewards(0)
+        contractAsRewardDistribution.restartRewards()
       ).to.be.revertedWith('not reward pool');
     });
 
@@ -81,12 +81,12 @@ describe('PeriodicRewardCalculator', function () {
     });
     it('restart call', async function () {
       const {contractAsRewardPool, durationInSeconds} = await periodicSetup();
-      await contractAsRewardPool.restartRewards(0);
+      await contractAsRewardPool.restartRewards();
       expect(await contractAsRewardPool.getRewards()).to.be.equal(0);
-      await contractAsRewardPool.restartRewards(100);
+      await contractAsRewardPool.restartRewards();
       expect(await contractAsRewardPool.getRewards()).to.be.equal(0);
       const time = await doOnNextBlock(async () => {
-        await contractAsRewardPool.restartRewards(100);
+        await contractAsRewardPool.restartRewards();
       });
       await setBlockTime(time + 2 * durationInSeconds);
       expect(await contractAsRewardPool.getRewards()).to.be.equal(0);
@@ -150,7 +150,7 @@ describe('PeriodicRewardCalculator', function () {
       } = await periodicSetup();
       // OBS: Calling restartRewards before notifyRewardAmount doesn't change anything.
       await doOnNextBlock(async () => {
-        await contractAsRewardPool.restartRewards(1);
+        await contractAsRewardPool.restartRewards();
       });
 
       const totalRewards = BigNumber.from(durationInSeconds * 10000);
@@ -168,7 +168,7 @@ describe('PeriodicRewardCalculator', function () {
       // This freezes the rewards on step 31
       const restartStep = (31 * durationInSeconds) / steps;
       const restartTime = await doOnNextBlock(async () => {
-        await contractAsRewardPool.restartRewards(1);
+        await contractAsRewardPool.restartRewards();
       }, time + restartStep);
       expect(await contract.lastUpdateTime()).to.be.equal(restartTime);
       expect(await contract.getRewards()).to.be.equal(0);

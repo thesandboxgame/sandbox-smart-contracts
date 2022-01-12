@@ -54,7 +54,7 @@ describe('TwoPeriodsRewardCalculator', function () {
   describe('roles', function () {
     it('reward pool should be able to call restartRewards', async function () {
       const {contractAsRewardPool} = await twoPeriodsSetup();
-      await expect(contractAsRewardPool.restartRewards(0)).not.to.be.reverted;
+      await expect(contractAsRewardPool.restartRewards()).not.to.be.reverted;
     });
     it('others should fail to call restartRewards', async function () {
       const {
@@ -63,14 +63,14 @@ describe('TwoPeriodsRewardCalculator', function () {
         contractAsRewardDistribution,
       } = await twoPeriodsSetup();
 
-      await expect(contract.restartRewards(0)).to.be.revertedWith(
+      await expect(contract.restartRewards()).to.be.revertedWith(
         'not reward pool'
       );
-      await expect(contractAsAdmin.restartRewards(0)).to.be.revertedWith(
+      await expect(contractAsAdmin.restartRewards()).to.be.revertedWith(
         'not reward pool'
       );
       await expect(
-        contractAsRewardDistribution.restartRewards(0)
+        contractAsRewardDistribution.restartRewards()
       ).to.be.revertedWith('not reward pool');
     });
 
@@ -92,9 +92,9 @@ describe('TwoPeriodsRewardCalculator', function () {
     expect(await contract.rate1()).to.be.equal(0);
     expect(await contract.finish2()).to.be.equal(0);
     expect(await contract.rate2()).to.be.equal(0);
-    await contractAsRewardPool.restartRewards(0);
+    await contractAsRewardPool.restartRewards();
     expect(await contractAsRewardPool.getRewards()).to.be.equal(0);
-    await contractAsRewardPool.restartRewards(100);
+    await contractAsRewardPool.restartRewards();
     expect(await contractAsRewardPool.getRewards()).to.be.equal(0);
   });
 

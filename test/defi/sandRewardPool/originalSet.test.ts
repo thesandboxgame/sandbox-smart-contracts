@@ -1,4 +1,4 @@
-import {expect} from 'chai';
+import {expect} from '../../chai-setup';
 import {BigNumber, constants} from 'ethers';
 import {ethers} from 'hardhat';
 import {expectEventWithArgs, mine} from '../../utils';
@@ -8,6 +8,9 @@ import {
   setupSandRewardPool,
 } from './originalFixtures';
 import {contribution} from '../../polygon/liquidityMining/contributionEquation.test';
+import {addBigNumberCloseToChai} from '../../chaiBigNumberCloseTo';
+
+addBigNumberCloseToChai();
 
 async function multipleUsersEarnings(
   nfts: number,
@@ -649,11 +652,9 @@ describe('SandRewardPool', function () {
     const notifyRewardTimestamp = latestBlock.timestamp;
 
     await rewardTokenAsAdmin.transfer(rewardPool.address, REWARD_AMOUNT);
-
     const stakeReceipt = await rewardPoolContract
       .connect(ethers.provider.getSigner(others[0]))
       .stake(LESS_PRECISE_STAKE_AMOUNT);
-
     const stakeBlock = await ethers.provider.getBlock(stakeReceipt.blockNumber);
     const stakeTimestamp = stakeBlock.timestamp;
     const timeDiff = stakeTimestamp - notifyRewardTimestamp;
@@ -667,19 +668,7 @@ describe('SandRewardPool', function () {
       contribution(LESS_PRECISE_STAKE_AMOUNT, numNfts)
     );
     const rewardRate = REWARD_AMOUNT.div(REWARD_DURATION);
-
-    const expectedInitialRewardPerToken = replicateRewardPerToken(
-      BigNumber.from(0),
-      BigNumber.from(stakeTimestamp),
-      BigNumber.from(stakeTimestamp - timeDiff),
-      rewardRate,
-      contribution(LESS_PRECISE_STAKE_AMOUNT, numNfts)
-    );
-    const expectedInitialReward = replicateEarned(
-      contribution(LESS_PRECISE_STAKE_AMOUNT, numNfts),
-      expectedInitialRewardPerToken
-    );
-    expect(expectedInitialReward).to.equal(earnedAfterStake);
+    expect(rewardRate.mul(timeDiff)).to.equal(earnedAfterStake);
 
     // fast forward to end of reward period
     await ethers.provider.send('evm_setNextBlockTimestamp', [
@@ -704,7 +693,7 @@ describe('SandRewardPool', function () {
       expectedRewardPerToken
     );
     expect(ACTUAL_REWARD_AMOUNT).to.equal(expectedReward);
-    expect(earned).to.equal(expectedReward);
+    expect(earned).to.be.closeTo(ACTUAL_REWARD_AMOUNT, 1);
   });
 
   // eslint-disable-next-line mocha/no-setup-in-describe
@@ -769,19 +758,7 @@ describe('SandRewardPool', function () {
 
       const rewardRate = REWARD_AMOUNT.div(REWARD_DURATION);
 
-      const expectedInitialRewardPerToken = replicateRewardPerToken(
-        BigNumber.from(0),
-        BigNumber.from(stakeTimestamp),
-        BigNumber.from(stakeTimestamp - timeDiff),
-        rewardRate,
-        contribution(STAKE_AMOUNT, numNfts)
-      );
-      const expectedInitialReward = replicateEarned(
-        contribution(STAKE_AMOUNT, numNfts),
-        expectedInitialRewardPerToken
-      );
-
-      expect(expectedInitialReward).to.equal(earnedAfterStake);
+      expect(rewardRate.mul(timeDiff)).to.equal(earnedAfterStake);
 
       // fast forward to end of reward period
       await ethers.provider.send('evm_setNextBlockTimestamp', [
@@ -793,24 +770,7 @@ describe('SandRewardPool', function () {
         .earned(others[0]);
 
       // total earned over entire reward period
-      const finishTimestamp = stakeTimestamp - timeDiff + REWARD_DURATION;
-      const expectedRewardPerToken = replicateRewardPerToken(
-        BigNumber.from(0),
-        BigNumber.from(finishTimestamp),
-        BigNumber.from(stakeTimestamp - timeDiff),
-        rewardRate,
-        contribution(STAKE_AMOUNT, numNfts)
-      );
-      const expectedReward = replicateEarned(
-        contribution(STAKE_AMOUNT, numNfts),
-        expectedRewardPerToken
-      );
-      expect(earned).to.equal(expectedReward);
-
-      const precisionLost = ACTUAL_REWARD_AMOUNT.sub(expectedReward);
-      expect(ACTUAL_REWARD_AMOUNT).not.to.equal(expectedReward);
-      expect(precisionLost).to.be.at.least(1);
-      expect(precisionLost).to.be.at.most(1);
+      expect(earned).to.be.closeTo(ACTUAL_REWARD_AMOUNT, 1);
     });
   });
 
@@ -1296,15 +1256,9 @@ describe('SandRewardPool', function () {
   });
 
   it(`user earnings for 1 NFT(s) match expected reward with 1 stake(s)`, async function () {
-    const {
-      earned,
-      ACTUAL_REWARD_AMOUNT,
-      precisionLost,
-    } = await multipleUsersEarnings(1, 1, 1);
+    const {earned, ACTUAL_REWARD_AMOUNT} = await multipleUsersEarnings(1, 1, 1);
 
-    expect(earned).not.to.equal(ACTUAL_REWARD_AMOUNT);
-    expect(precisionLost).to.be.at.least(1);
-    expect(precisionLost).to.be.at.most(1);
+    expect(earned).to.be.equal(ACTUAL_REWARD_AMOUNT);
   });
 
   it(`user earnings for 1 NFT(s) match expected reward with 10 stake(s)`, async function () {

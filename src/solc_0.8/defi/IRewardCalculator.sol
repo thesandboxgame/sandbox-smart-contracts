@@ -8,5 +8,5 @@ interface IRewardCalculator {
 
     // The main contract has distributed the rewards (getRewards()) until this point, this must start
     // from scratch => getRewards() == 0
-    function restartRewards(uint256 totalContributions) external;
+    function restartRewards() external;
 }

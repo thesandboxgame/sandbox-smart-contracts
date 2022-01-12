@@ -51,14 +51,11 @@ contract PeriodicRewardCalculator is IRewardCalculator, AccessControl {
     }
 
     // The main contract has distributed the rewards until this point, this must start from scratch => getRewards() == 0
-    function restartRewards(uint256 totalContributions) external override {
+    function restartRewards() external override {
         require(msg.sender == rewardPool, "not reward pool");
-        // TODO: this line can be removed and the parameter ?
-        if (block.timestamp >= periodFinish || totalContributions != 0) {
-            // ensure reward past the first stacker do not get lost
-            lastUpdateTime = _lastTimeRewardApplicable();
-            savedRewards = 0;
-        }
+        // ensure reward past the first stacker do not get lost
+        lastUpdateTime = _lastTimeRewardApplicable();
+        savedRewards = 0;
     }
 
     // Useful when switching reward calculators to set an initial reward.
