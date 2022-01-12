@@ -1,6 +1,7 @@
 //SPDX-License-Identifier: MIT
 
 pragma solidity 0.8.2;
+
 import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
 import {SafeERC20} from "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
 import {IERC20} from "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
@@ -47,8 +48,8 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     }
 
     modifier isContractAndAdmin(address contractAddress) {
-        require(contractAddress.isContract(), "not a contract");
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
+        require(contractAddress.isContract(), "SandRewardPool: not a contract");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "SandRewardPool: not admin");
         _;
     }
 
@@ -65,7 +66,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     }
 
     function setTrustedForwarder(address trustedForwarder) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Only admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "SandRewardPool: Only admin");
         _trustedForwarder = trustedForwarder;
     }
 
@@ -80,19 +81,8 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         rewardCalculator = IRewardCalculator(contractAddress);
     }
 
-    // TODO: Check if is ok to remove the admin restriction (everybody can call it).
-    function restartRewards() external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
-        _restartRewards();
-    }
-
-    // TODO: Do we want this one ? This is risky, the admin can steal users funds.
-    // TODO: the admin can set any value into rewardToken, for example rewardToken = _stakeToken ?
-    // TODO: without it some funds can be locked inside the contract (as we use rates for calculation).
-    // TODO: The admin can still use a contribution calculator that give him all the funds + a reward calculator that
-    // TODO: give him the rewards...
     function recoverFunds(address receiver) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "SandRewardPool: not admin");
         rewardToken.safeTransfer(receiver, rewardToken.balanceOf(address(this)));
     }
 
@@ -112,24 +102,40 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         return _contributions[account];
     }
 
-    // Backward compatibility
     function rewardPerToken() external view returns (uint256) {
         return rewardPerTokenStored + _rewardPerToken();
     }
 
     function earned(address account) external view returns (uint256) {
-        return rewards[account] + _earned(account);
+        return rewards[account] + _earned(account, _rewardPerToken());
+    }
+
+    function restartRewards() external {
+        _restartRewards();
     }
 
     function computeContribution(address account) external {
-        require(account != address(0), "invalid address");
+        require(account != address(0), "SandRewardPool: invalid address");
         // We decide to give the user the accumulated rewards even if he cheated a little bit.
         _processRewards(account);
         _updateContribution(account);
     }
 
+    function computeContributionInBatch(address[] calldata accounts) external {
+        _restartRewards();
+        uint256 rewardPerToken = _rewardPerToken();
+        for (uint256 i = 0; i < accounts.length; i++) {
+            address account = accounts[i];
+            if (account != address(0)) {
+                continue;
+            }
+            _processAccountRewards(account, rewardPerToken);
+            _updateContribution(account);
+        }
+    }
+
     function stake(uint256 amount) external nonReentrant {
-        require(amount > 0, "Cannot stake 0");
+        require(amount > 0, "SandRewardPool: Cannot stake 0");
         _processRewards(_msgSender());
         super._stake(amount);
         _updateContribution(_msgSender());
@@ -138,34 +144,36 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
 
     function withdraw(uint256 amount) external nonReentrant {
         _processRewards(_msgSender());
-        _withdrawStake(amount);
+        _withdrawStake(_msgSender(), amount);
+        _updateContribution(_msgSender());
     }
 
     function exit() external nonReentrant {
         _processRewards(_msgSender());
-        _withdrawStake(_balances[_msgSender()]);
-        _withdrawRewards();
+        _withdrawStake(_msgSender(), _balances[_msgSender()]);
+        _withdrawRewards(_msgSender());
+        _updateContribution(_msgSender());
     }
 
-    // TODO: Rename ?
     function getReward() external nonReentrant {
         _processRewards(_msgSender());
-        _withdrawRewards();
-    }
-
-    function _withdrawStake(uint256 amount) internal {
-        require(amount > 0, "Cannot withdraw 0");
-        super._withdraw(amount);
+        _withdrawRewards(_msgSender());
         _updateContribution(_msgSender());
-        emit Withdrawn(_msgSender(), amount);
     }
 
-    function _withdrawRewards() internal {
-        uint256 reward = rewards[_msgSender()];
+    function _withdrawStake(address account, uint256 amount) internal {
+        require(amount > 0, "SandRewardPool: Cannot withdraw 0");
+        super._withdraw(amount);
+        _updateContribution(account);
+        emit Withdrawn(account, amount);
+    }
+
+    function _withdrawRewards(address account) internal {
+        uint256 reward = rewards[account];
         if (reward > 0) {
-            rewards[_msgSender()] = 0;
-            rewardToken.safeTransfer(_msgSender(), reward);
-            emit RewardPaid(_msgSender(), reward);
+            rewards[account] = 0;
+            rewardToken.safeTransfer(account, reward);
+            emit RewardPaid(account, reward);
         }
     }
 
@@ -190,8 +198,12 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     // Called each time there is a change in contract state (stake, withdraw, etc).
     function _processRewards(address account) internal {
         _restartRewards();
+        _processAccountRewards(account, _rewardPerToken());
+    }
+
+    function _processAccountRewards(address account, uint256 rewardPerToken) internal {
         // Update the earnings for this specific user with what he earned until now
-        rewards[account] = rewards[account] + _earned(account);
+        rewards[account] = rewards[account] + _earned(account, rewardPerToken);
         // restart rewards for this specific user, now earned(account) = 0
         userRewardPerTokenPaid[account] = rewardPerTokenStored;
     }
@@ -210,9 +222,20 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         rewardCalculator.restartRewards(_totalContributions);
     }
 
-    function _earned(address account) internal view returns (uint256) {
+    function _earned(address account, uint256 rewardPerToken) internal view returns (uint256) {
+        // - userRewardPerTokenPaid[account] * _contributions[account]  / _totalContributions is the portion of
+        //      rewards the last time the user changed his contribution and called _restartRewards
+        //      (_totalContributions corresponds to previous value of that moment).
+        // - rewardPerTokenStored * _contributions[account]  / _totalContributions is the share of the user from the
+        //      accumulated rewards (from the start of time until the last call to _restartRewards) with the
+        //      current value of _totalContributions
+        // - _rewardPerToken() * _contributions[account]  / _totalContributions is the share of the user of the
+        //      rewards from the last time anybody called _restartRewards until this moment
+        //
+        // The important thing to note is that at any moment in time _contributions[account] / _totalContributions is
+        // the share of the user even if _totalContributions changes because of other users activity.
         return
-            ((_rewardPerToken() + rewardPerTokenStored - userRewardPerTokenPaid[account]) * _contributions[account]) /
+            ((rewardPerToken + rewardPerTokenStored - userRewardPerTokenPaid[account]) * _contributions[account]) /
             1e24;
     }
 
