@@ -45,10 +45,6 @@ contract PeriodicRewardCalculator is IRewardCalculator, AccessControl {
         }
     }
 
-    function getDuration() external returns (uint256) {
-        return duration;
-    }
-
     // At any point in time this function must return the accumulated rewards from last call to restartRewards
     function getRewards() external view override returns (uint256) {
         return savedRewards + _getRewards();
