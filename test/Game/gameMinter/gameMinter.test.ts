@@ -26,6 +26,7 @@ type Update = {
   assetIdsToAdd: BigNumber[];
   assetAmountsToAdd: number[];
   uri: BytesLike;
+  exactNumOfLandsRequired: number;
 };
 
 const update: Update = {
@@ -34,6 +35,7 @@ const update: Update = {
   assetIdsToAdd: [],
   assetAmountsToAdd: [],
   uri: utils.keccak256(ethers.utils.toUtf8Bytes('')),
+  exactNumOfLandsRequired: 1,
 };
 
 async function getRandom(): Promise<number> {

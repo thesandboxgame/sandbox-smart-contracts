@@ -42,6 +42,7 @@ const erc721Tests = require('../erc721')(
         {
           ...creation,
           assetIdsToAdd: assets,
+          exactNumOfLandsRequired: 1,
         },
         ethers.constants.AddressZero,
         randomId

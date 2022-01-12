@@ -11,6 +11,7 @@ interface IGameToken {
         uint256[] assetIdsToAdd;
         uint256[] assetAmountsToAdd;
         bytes32 uri; // ipfs hash (without the prefix, assume cidv1 folder)
+        uint256 exactNumOfLandsRequired;
     }
 
     function createGame(
@@ -46,6 +47,8 @@ interface IGameToken {
     ) external returns (uint256);
 
     function getAssetBalances(uint256 gameId, uint256[] calldata assetIds) external view returns (uint256[] calldata);
+
+    function getExactNumOfLandsRequired(uint256 gameId) external view returns (uint256);
 
     function setGameEditor(
         address gameCreator,
