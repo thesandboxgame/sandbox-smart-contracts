@@ -24,8 +24,6 @@ nav:
       - Writing documentation: tutorials/writing-documentation.md
       - Writing tests: tutorials/writing-tests.md
   - Topics:
-      - claim:
-          - Erc20 giveaway: topics/claims/signed-erc20-giveaway.md
       - Blockchain:
           - Ethereum: topics/blockchain/ethereum.md
           - Features: topics/blockchain/features.md
@@ -52,6 +50,7 @@ nav:
       - Sand:
           - Sand Token: topics/sand/sand-token.md
           - Bundle Sand Sale: topics/sand/bundle-sand-sale.md
+          - Erc20 giveaway: topics/claims/signed-erc20-giveaway.md
       - Token:
           - EIP712: topics/token/EIP712.md
           - ERC20: topics/token/ERC20.md
