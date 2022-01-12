@@ -1,6 +1,6 @@
 /**
  * How to use:
- *  - yarn execute <NETWORK> ./setup/send_assets_to_multi_giveaway.ts <MULTI_GIVEAWAY_NAME> <GIVEAWAY_NAME>
+ *  - yarn execute <NETWORK> ./setup/send_assets_to_multi_giveaway.ts <MULTI_GIVEAWAY_NAME> <GIVEAWAY_NAME> [ASSET_HOLDER_ADDRESS]
  *
  * MULTI_GIVEAWAY_NAME: should be the same as the contract deployment name
  * GIVEAWAY_NAME: from data/giveaways/multi_giveaway_1/detective_letty.json then the giveaway name is: detective_letty
@@ -16,6 +16,7 @@ const {execute, catchUnknownSigner, read} = deployments;
 const args = process.argv.slice(2);
 const multiGiveawayName = args[0];
 const claimFile = args[1];
+const assetHolder = args[2];
 
 function getAssets(json: Array<MultiClaim>): AssetHash {
   const assetIdsCount: AssetHash = {};
@@ -54,7 +55,8 @@ const func: DeployFunction = async function () {
   const json: Array<MultiClaim> = fs.readJSONSync(path);
   const assetIdsCount = getAssets(json);
   const MultiGiveaway = await deployments.get(multiGiveawayName);
-  const {sandboxAccount: owner, sandAdmin} = await getNamedAccounts();
+  const {sandboxAccount, sandAdmin} = await getNamedAccounts();
+  const owner = assetHolder || sandboxAccount;
   // Send ERC1155
   const ids = [];
   const values = [];
