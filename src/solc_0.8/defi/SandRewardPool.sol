@@ -21,10 +21,11 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     using SafeERC20 for IERC20;
     using Address for address;
 
-    event Staked(address indexed user, uint256 amount);
-    event Withdrawn(address indexed user, uint256 amount);
-    event RewardPaid(address indexed user, uint256 reward);
-    event ContributionUpdated(address indexed user, uint256 newContribution, uint256 contribution);
+    event Staked(address indexed account, uint256 stakeAmount);
+    event Withdrawn(address indexed account, uint256 stakeAmount);
+    event Exit(address indexed account);
+    event RewardPaid(address indexed account, uint256 rewardAmount);
+    event ContributionUpdated(address indexed account, uint256 newContribution, uint256 oldContribution);
 
     uint256 public rewardPerTokenStored;
     mapping(address => uint256) public userRewardPerTokenPaid;
@@ -184,6 +185,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         _withdrawStake(_msgSender(), _balances[_msgSender()]);
         _withdrawRewards(_msgSender());
         _updateContribution(_msgSender());
+        emit Exit(_msgSender());
     }
 
     function getReward() external nonReentrant {
