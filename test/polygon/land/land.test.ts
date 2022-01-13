@@ -1,4 +1,5 @@
 import {AbiCoder} from '@ethersproject/contracts/node_modules/@ethersproject/abi';
+import {ethers} from 'ethers';
 import {expect} from '../../chai-setup';
 import {waitFor} from '../../utils';
 import {setupLand} from './fixtures';
@@ -636,6 +637,15 @@ describe('PolygonLand.sol', function () {
           bytes
         );
         await tx.wait();
+
+        expect(
+          await deployer.MockPolygonLandTunnel.transferredToLandTunnel(
+            size,
+            x,
+            y
+          )
+        ).to.eq(landHolder.address);
+
         await (
           await landHolder.MockPolygonLandTunnel.triggerTransferToL1(
             landHolder.address,
@@ -645,6 +655,14 @@ describe('PolygonLand.sol', function () {
             bytes
           )
         ).wait();
+
+        expect(
+          await deployer.MockPolygonLandTunnel.transferredToLandTunnel(
+            size,
+            x,
+            y
+          )
+        ).to.eq(ethers.constants.AddressZero);
 
         console.log('DUMMY CHECKPOINT. moving on...');
 

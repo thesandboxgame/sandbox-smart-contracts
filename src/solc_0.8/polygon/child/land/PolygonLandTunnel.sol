@@ -25,6 +25,14 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721Receiver, Ownable {
         emit SetMaxGasLimit(_maxGasLimit);
     }
 
+    function transferredToLandTunnel(
+        uint256 _size,
+        uint256 _x,
+        uint256 _y
+    ) external view onlyOwner returns (address) {
+        return _transferredToLandTunnel[_size][_x][_y];
+    }
+
     function _setLimit(uint8 size, uint32 limit) internal {
         gasLimits[size] = limit;
         emit SetGasLimit(size, limit);
