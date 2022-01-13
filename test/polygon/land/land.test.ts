@@ -624,19 +624,21 @@ describe('PolygonLand.sol', function () {
           plotCount
         );
 
+        const abiCoder = new AbiCoder();
+
         // Transfer to L2 Tunnel
         await landHolder.PolygonLand.setApprovalForAll(
           MockPolygonLandTunnel.address,
           true
         );
-        const tx = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
+        const tx_test = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
           landHolder.address,
           [size],
           [x],
           [y],
           bytes
         );
-        await tx.wait();
+        await tx_test.wait();
 
         expect(
           await deployer.MockPolygonLandTunnel.transferredToLandTunnel(
@@ -646,15 +648,22 @@ describe('PolygonLand.sol', function () {
           )
         ).to.eq(landHolder.address);
 
-        await (
-          await landHolder.MockPolygonLandTunnel.triggerTransferToL1(
+        await expect(
+          landHolder.MockPolygonLandTunnel.triggerTransferToL1(
             landHolder.address,
             [size],
             [x],
             [y],
             bytes
           )
-        ).wait();
+        )
+          .to.emit(MockPolygonLandTunnel, 'MessageSent')
+          .withArgs(
+            abiCoder.encode(
+              ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
+              [landHolder.address, [size], [x], [y], bytes]
+            )
+          );
 
         expect(
           await deployer.MockPolygonLandTunnel.transferredToLandTunnel(
@@ -667,7 +676,6 @@ describe('PolygonLand.sol', function () {
         console.log('DUMMY CHECKPOINT. moving on...');
 
         // Release on L1
-        const abiCoder = new AbiCoder();
 
         await deployer.MockLandTunnel.receiveMessage(
           abiCoder.encode(
@@ -680,7 +688,7 @@ describe('PolygonLand.sol', function () {
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
       });
 
-      it('should should be able to tranfer multiple lands', async function () {
+      it('should be able to tranfer multiple lands', async function () {
         const {
           deployer,
           Land,
@@ -741,6 +749,8 @@ describe('PolygonLand.sol', function () {
           numberOfTokens
         );
 
+        const abiCoder = new AbiCoder();
+
         // Transfer to L2 Tunnel
         await landHolder.PolygonLand.setApprovalForAll(
           MockPolygonLandTunnel.address,
@@ -752,17 +762,23 @@ describe('PolygonLand.sol', function () {
           bytes
         );
         await tx.wait();
-        await (
-          await landHolder.MockPolygonLandTunnel.triggerTransferToL1(
+
+        await expect(
+          landHolder.MockPolygonLandTunnel.triggerTransferToL1(
             landHolder.address,
             ...mintingData,
             bytes
           )
-        ).wait();
+        )
+          .to.emit(MockPolygonLandTunnel, 'MessageSent')
+          .withArgs(
+            abiCoder.encode(
+              ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
+              [landHolder.address, ...mintingData, bytes]
+            )
+          );
 
         console.log('DUMMY CHECKPOINT. moving on...');
-
-        const abiCoder = new AbiCoder();
 
         await deployer.MockLandTunnel.receiveMessage(
           abiCoder.encode(
