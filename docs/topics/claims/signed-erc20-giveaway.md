@@ -1,16 +1,14 @@
 ---
-
 breaks: false
 
 description: SignedERC20Giveaway contract
-
 ---
 
 # SignedERC20Giveaway
 
 ## Introduction
 
-The signed giveaway contract is used as a hot wallet. The company deposits [SAND](documentation/Sand.md) and then gives
+The signed giveaway contract is used as a hot wallet. The company deposits [SAND](../sand/sand-token.md) and then gives
 the users signed messages that let them claim part of the deposited SAND as rewards/incentives.
 
 ## Model
@@ -31,15 +29,15 @@ The contract support the following roles:
 - The operation of the contract can be paused by an administrator.
 - The administrator can revoke some specific claimId, so they cannot be claimed anymore.
 
-| Feature            | Link                                                                                                                                                       |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------    |
-| Contract           | [SignedERC20Giveaway.sol](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/src/solc_0.8/claims/signedGiveaway/SignedERC20Giveaway.sol)|
-| EIP721 signatures  | [EIP721](https://eips.ethereum.org/EIPS/eip-712)                                                                                                           |
-| ERC20              | [ERC20](https://eips.ethereum.org/EIPS/eip-20)                                                                                                             |
-| ERC2771 (Meta-Tx)  | [Custom Sandbox contract](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/src/solc_0.8/common/BaseWithStorage/ERC2771Handler.sol)    |
-| Upgradeable        | [Openzeppelin upgradeable](https://docs.openzeppelin.com/upgrades-plugins)                                                                                 | 
-| Access Control     | [Openzeppelin Access control](https://docs.openzeppelin.com/contracts/4.x/access-control)                                                                  |
-| Pausable           | [Openzeppelin Pausable](https://docs.openzeppelin.com/contracts/4.x/api/security#Pausable)                                                                 | 
+| Feature           | Link                                                                                                                                                        |
+| ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Contract          | [SignedERC20Giveaway.sol](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/src/solc_0.8/claims/signedGiveaway/SignedERC20Giveaway.sol) |
+| EIP721 signatures | [EIP721](https://eips.ethereum.org/EIPS/eip-712)                                                                                                            |
+| ERC20             | [ERC20](https://eips.ethereum.org/EIPS/eip-20)                                                                                                              |
+| ERC2771 (Meta-Tx) | [Custom Sandbox contract](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/src/solc_0.8/common/BaseWithStorage/ERC2771Handler.sol)     |
+| Upgradeable       | [Openzeppelin upgradeable](https://docs.openzeppelin.com/upgrades-plugins)                                                                                  |
+| Access Control    | [Openzeppelin Access control](https://docs.openzeppelin.com/contracts/4.x/access-control)                                                                   |
+| Pausable          | [Openzeppelin Pausable](https://docs.openzeppelin.com/contracts/4.x/api/security#Pausable)                                                                  |
 
 ### Claim Message
 
@@ -70,7 +68,7 @@ title class diagram
 class SignedERC20Giveaway {
     claim()
     revokeClaims()
-    pause() 
+    pause()
     upause()
 }
 Initializable <|-- SignedERC20Giveaway

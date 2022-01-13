@@ -50,6 +50,7 @@ nav:
       - Sand:
           - Sand Token: topics/sand/sand-token.md
           - Bundle Sand Sale: topics/sand/bundle-sand-sale.md
+          - ERC20 giveaway: topics/claims/signed-erc20-giveaway.md
       - Token:
           - EIP712: topics/token/EIP712.md
           - ERC20: topics/token/ERC20.md
