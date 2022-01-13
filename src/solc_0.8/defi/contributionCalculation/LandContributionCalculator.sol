@@ -23,16 +23,25 @@ contract LandContributionCalculator is IContributionCalculator, Ownable {
         multiplierNFToken = multiplierNFToken_;
     }
 
-    function multiplierOf(address account) external view returns (uint256) {
+    function multiplierOf(address account) external view virtual returns (uint256) {
         return multiplierNFToken.balanceOf(account);
     }
 
-    function computeContribution(address account, uint256 amountStaked) external override returns (uint256) {
+    function computeContribution(address account, uint256 amountStaked) external view override returns (uint256) {
         uint256 numLands = multiplierNFToken.balanceOf(account);
-        return contribution(amountStaked, numLands);
+        return _contribution(amountStaked, numLands);
     }
 
-    function contribution(uint256 amountStaked, uint256 numLands) public pure returns (uint256) {
+    function contribution(uint256 amountStaked, uint256 numLands) external pure returns (uint256) {
+        return _contribution(amountStaked, numLands);
+    }
+
+    function setNFTMultiplierToken(address newNFTMultiplierToken) external onlyOwner {
+        require(newNFTMultiplierToken.isContract(), "LandContributionCalc: Bad NFTMultiplierToken address");
+        multiplierNFToken = IERC721(newNFTMultiplierToken);
+    }
+
+    function _contribution(uint256 amountStaked, uint256 numLands) internal pure returns (uint256) {
         if (numLands == 0) {
             return amountStaked;
         }
@@ -42,10 +51,5 @@ contract LandContributionCalculator is IContributionCalculator, Ownable {
             nftContrib = MIDPOINT_9 + (nftContrib - MIDPOINT_9) / 10;
         }
         return amountStaked + ((amountStaked * nftContrib) / DECIMALS_9);
-    }
-
-    function setNFTMultiplierToken(address newNFTMultiplierToken) external onlyOwner {
-        require(newNFTMultiplierToken.isContract(), "Bad NFTMultiplierToken address");
-        multiplierNFToken = IERC721(newNFTMultiplierToken);
     }
 }

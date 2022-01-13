@@ -7,7 +7,7 @@ import {
   replicateRewardPerToken,
   setupSandRewardPool,
 } from './originalFixtures';
-import {contribution} from '../../polygon/liquidityMining/contributionEquation.test';
+import {contribution} from '../../common/contributionEquation';
 import {addBigNumberCloseToChai} from '../../chaiBigNumberCloseTo';
 
 addBigNumberCloseToChai();
