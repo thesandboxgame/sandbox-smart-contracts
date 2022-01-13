@@ -291,6 +291,15 @@ describe('PolygonLand.sol', function () {
           bytes
         );
         await tx.wait();
+        await (
+          await landHolder.MockPolygonLandTunnel.triggerTransferToL1(
+            landHolder.address,
+            [size],
+            [x],
+            [y],
+            bytes
+          )
+        ).wait();
 
         console.log('DUMMY CHECKPOINT. moving on...');
 
@@ -369,6 +378,16 @@ describe('PolygonLand.sol', function () {
         );
         await tx.wait();
 
+        await (
+          await landHolder.MockPolygonLandTunnel.triggerTransferToL1(
+            landHolder.address,
+            [size],
+            [x],
+            [y],
+            bytes
+          )
+        ).wait();
+
         console.log('DUMMY CHECKPOINT. moving on...');
 
         // Release on L1
@@ -445,6 +464,15 @@ describe('PolygonLand.sol', function () {
           bytes
         );
         await tx.wait();
+        await (
+          await landHolder.MockPolygonLandTunnel.triggerTransferToL1(
+            landHolder.address,
+            [size],
+            [x],
+            [y],
+            bytes
+          )
+        ).wait();
 
         console.log('DUMMY CHECKPOINT. moving on...');
 
@@ -522,6 +550,15 @@ describe('PolygonLand.sol', function () {
           bytes
         );
         await tx.wait();
+        await (
+          await landHolder.MockPolygonLandTunnel.triggerTransferToL1(
+            landHolder.address,
+            [size],
+            [x],
+            [y],
+            bytes
+          )
+        ).wait();
 
         console.log('DUMMY CHECKPOINT. moving on...');
 
@@ -599,6 +636,15 @@ describe('PolygonLand.sol', function () {
           bytes
         );
         await tx.wait();
+        await (
+          await landHolder.MockPolygonLandTunnel.triggerTransferToL1(
+            landHolder.address,
+            [size],
+            [x],
+            [y],
+            bytes
+          )
+        ).wait();
 
         console.log('DUMMY CHECKPOINT. moving on...');
 
@@ -688,6 +734,13 @@ describe('PolygonLand.sol', function () {
           bytes
         );
         await tx.wait();
+        await (
+          await landHolder.MockPolygonLandTunnel.triggerTransferToL1(
+            landHolder.address,
+            ...mintingData,
+            bytes
+          )
+        ).wait();
 
         console.log('DUMMY CHECKPOINT. moving on...');
 
