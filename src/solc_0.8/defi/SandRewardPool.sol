@@ -148,7 +148,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         uint256 rewardPerToken = _rewardPerToken();
         for (uint256 i = 0; i < accounts.length; i++) {
             address account = accounts[i];
-            if (account != address(0)) {
+            if (account == address(0)) {
                 continue;
             }
             _processAccountRewards(account, rewardPerToken);
