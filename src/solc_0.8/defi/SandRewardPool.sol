@@ -160,7 +160,8 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         require(amount > 0, "SandRewardPool: Cannot stake 0");
 
         uint256 earlierRewards;
-        if (_totalContributions == 0) {
+
+        if (_totalContributions == 0 && rewardCalculator != IRewardCalculator(address(0))) {
             earlierRewards = rewardCalculator.getRewards();
         }
 
@@ -242,10 +243,12 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     }
 
     function _restartRewards() internal {
-        // Distribute the accumulated rewards
-        rewardPerTokenStored = rewardPerTokenStored + _rewardPerToken();
-        // restart rewards so now the rewardCalculator return zero rewards
-        rewardCalculator.restartRewards();
+        if (rewardCalculator != IRewardCalculator(address(0))) {
+            // Distribute the accumulated rewards
+            rewardPerTokenStored = rewardPerTokenStored + _rewardPerToken();
+            // restart rewards so now the rewardCalculator return zero rewards
+            rewardCalculator.restartRewards();
+        }
     }
 
     function _earned(address account, uint256 rewardPerToken) internal view returns (uint256) {
