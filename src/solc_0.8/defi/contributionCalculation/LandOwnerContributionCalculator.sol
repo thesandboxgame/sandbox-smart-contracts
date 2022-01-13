@@ -23,15 +23,12 @@ contract LandOwnersAloneContributionCalculator is IContributionCalculator, Ownab
 
     function computeContribution(address account, uint256 amountStaked) external view override returns (uint256) {
         uint256 numLands = multiplierNFToken.balanceOf(account);
-        require(numLands > 0, "LandOwnersAloneContributionCalculator: no lands");
+        require(numLands > 0, "LandOwnersAloneContributionCalc: no lands");
         return amountStaked;
     }
 
     function setNFTMultiplierToken(address newNFTMultiplierToken) external onlyOwner {
-        require(
-            newNFTMultiplierToken.isContract(),
-            "LandOwnersAloneContributionCalculator: Bad NFTMultiplierToken address"
-        );
+        require(newNFTMultiplierToken.isContract(), "LandOwnersAloneContributionCalc: Bad NFTMultiplierToken address");
         multiplierNFToken = IERC721(newNFTMultiplierToken);
     }
 }
