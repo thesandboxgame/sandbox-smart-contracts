@@ -83,7 +83,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721Receiver, Ownable {
                 _transferredToLandTunnel[sizes[i]][xs[i]][ys[i]] == msg.sender,
                 "Not transferred to this land tunnel by user."
             );
-            _transferredToLandTunnel[sizes[i]][xs[i]][ys[i]] == address(0);
+            _transferredToLandTunnel[sizes[i]][xs[i]][ys[i]] = address(0);
         }
         _sendMessageToRoot(abi.encode(to, sizes, xs, ys, data));
     }
