@@ -15,6 +15,8 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721Receiver, Ownable {
     uint32 public maxGasLimitOnL1 = 500;
     mapping(uint8 => uint32) public gasLimits;
 
+    mapping(uint256 => mapping(uint256 => mapping(uint256 => address))) private _transferredToLandTunnel;
+
     event SetGasLimit(uint8 size, uint32 limit);
     event SetMaxGasLimit(uint32 maxGasLimit);
 
@@ -63,6 +65,25 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721Receiver, Ownable {
 
         for (uint256 i = 0; i < sizes.length; i++) {
             childToken.transferQuad(msg.sender, address(this), sizes[i], xs[i], ys[i], data);
+            _transferredToLandTunnel[sizes[i]][xs[i]][ys[i]] = msg.sender;
+        }
+    }
+
+    function triggerTransferToL1(
+        address to,
+        uint256[] calldata sizes,
+        uint256[] calldata xs,
+        uint256[] calldata ys,
+        bytes memory data
+    ) public {
+        require(sizes.length == xs.length && sizes.length == ys.length, "sizes, xs, ys must be same length");
+
+        for (uint256 i = 0; i < sizes.length; i++) {
+            require(
+                _transferredToLandTunnel[sizes[i]][xs[i]][ys[i]] == msg.sender,
+                "Not transferred to this land tunnel by user."
+            );
+            _transferredToLandTunnel[sizes[i]][xs[i]][ys[i]] == address(0);
         }
         _sendMessageToRoot(abi.encode(to, sizes, xs, ys, data));
     }
