@@ -40,9 +40,9 @@ contract PeriodicRewardCalculator is IRewardCalculator, AccessControl {
 
     function setDuration(uint256 newDuration) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
-        if (block.timestamp >= periodFinish) {
-            duration = newDuration;
-        }
+        require(block.timestamp >= periodFinish, "campaign already started");
+
+        duration = newDuration;
     }
 
     // At any point in time this function must return the accumulated rewards from last call to restartRewards

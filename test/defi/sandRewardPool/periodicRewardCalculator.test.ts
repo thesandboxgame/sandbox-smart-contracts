@@ -268,6 +268,23 @@ describe('PeriodicRewardCalculator', function () {
       expect(await contract.getRewards()).to.be.equal(rewards1.add(rewards2));
     });
   });
+  it('only Admin can call setDuration', async function () {
+    const {
+      contract,
+      durationInSeconds,
+      contractAsRewardDistribution,
+    } = await periodicSetup();
+
+    expect(await contract.duration()).to.be.equal(durationInSeconds);
+
+    const newDuration = 50 * 24 * 60 * 60;
+
+    await expect(
+      contractAsRewardDistribution.setDuration(newDuration)
+    ).to.be.revertedWith('not admin');
+
+    await expect(contract.setDuration(newDuration)).not.to.be.reverted;
+  });
   it('calling setDuration should update campaign duration', async function () {
     const {contract, durationInSeconds} = await periodicSetup();
 
@@ -280,7 +297,7 @@ describe('PeriodicRewardCalculator', function () {
     expect(await contract.duration()).to.be.equal(newDuration);
   });
 
-  it('calling setDuration during the campaing should have no effect', async function () {
+  it('calling setDuration during the campaing should fail', async function () {
     const {
       contractAsRewardDistribution,
       contract,
@@ -293,8 +310,8 @@ describe('PeriodicRewardCalculator', function () {
 
     const newDuration = 50 * 24 * 60 * 60;
 
-    await contract.setDuration(newDuration);
-
-    expect(await contract.duration()).to.be.equal(durationInSeconds);
+    await expect(contract.setDuration(newDuration)).to.be.revertedWith(
+      'campaign already started'
+    );
   });
 });
