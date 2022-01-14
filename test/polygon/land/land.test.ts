@@ -285,7 +285,6 @@ describe('PolygonLand.sol', function () {
           true
         );
         const tx = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
-          landHolder.address,
           [size],
           [x],
           [y],
@@ -371,7 +370,6 @@ describe('PolygonLand.sol', function () {
           true
         );
         const tx = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
-          landHolder.address,
           [size],
           [x],
           [y],
@@ -458,7 +456,6 @@ describe('PolygonLand.sol', function () {
           true
         );
         const tx = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
-          landHolder.address,
           [size],
           [x],
           [y],
@@ -544,7 +541,6 @@ describe('PolygonLand.sol', function () {
           true
         );
         const tx = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
-          landHolder.address,
           [size],
           [x],
           [y],
@@ -632,7 +628,6 @@ describe('PolygonLand.sol', function () {
           true
         );
         const tx_test = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
-          landHolder.address,
           [size],
           [x],
           [y],
@@ -757,7 +752,6 @@ describe('PolygonLand.sol', function () {
           true
         );
         const tx = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
-          landHolder.address,
           ...mintingData,
           bytes
         );
