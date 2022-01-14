@@ -4,52 +4,6 @@ import {BigNumber, Contract} from 'ethers';
 import {doOnNextBlock, setBlockTime} from './utils';
 import {twoPeriodsSetup} from './rewardCalculator.fixture';
 
-function rewardDistributionRoleCheck(
-  method: (contract: Contract) => Promise<void>
-) {
-  it('reward distribution should be able to call ' + method, async function () {
-    const {contractAsRewardDistribution} = await twoPeriodsSetup();
-    await expect(method(contractAsRewardDistribution)).not.to.be.reverted;
-  });
-  it('other should fail to call ' + method, async function () {
-    const {
-      contract,
-      contractAsAdmin,
-      contractAsRewardPool,
-    } = await twoPeriodsSetup();
-
-    await expect(method(contract)).to.be.revertedWith(
-      'not reward distribution'
-    );
-    await expect(method(contractAsAdmin)).to.be.revertedWith(
-      'not reward distribution'
-    );
-    await expect(method(contractAsRewardPool)).to.be.revertedWith(
-      'not reward distribution'
-    );
-  });
-}
-
-async function checkRewards(
-  contract: Contract,
-  startTime: number,
-  durationInSeconds: number,
-  rewards: BigNumber,
-  baseRewards = BigNumber.from(0)
-): Promise<number> {
-  // durationInSeconds must be divisible by steps.
-  const steps = 10;
-  const rate = rewards.div(durationInSeconds);
-  for (let i = 1; i <= steps; i++) {
-    const currentStep = (i * durationInSeconds) / steps;
-    await setBlockTime(startTime + currentStep);
-    expect(await contract.getRewards()).to.be.equal(
-      rate.mul(currentStep).add(baseRewards)
-    );
-  }
-  return getTime();
-}
-
 describe('TwoPeriodsRewardCalculator', function () {
   describe('roles', function () {
     it('reward pool should be able to call restartRewards', async function () {
@@ -73,7 +27,34 @@ describe('TwoPeriodsRewardCalculator', function () {
         contractAsRewardDistribution.restartRewards()
       ).to.be.revertedWith('not reward pool');
     });
+    function rewardDistributionRoleCheck(
+      method: (contract: Contract) => Promise<void>
+    ) {
+      it(
+        'reward distribution should be able to call ' + method,
+        async function () {
+          const {contractAsRewardDistribution} = await twoPeriodsSetup();
+          await expect(method(contractAsRewardDistribution)).not.to.be.reverted;
+        }
+      );
+      it('other should fail to call ' + method, async function () {
+        const {
+          contract,
+          contractAsAdmin,
+          contractAsRewardPool,
+        } = await twoPeriodsSetup();
 
+        await expect(method(contract)).to.be.revertedWith(
+          'not reward distribution'
+        );
+        await expect(method(contractAsAdmin)).to.be.revertedWith(
+          'not reward distribution'
+        );
+        await expect(method(contractAsRewardPool)).to.be.revertedWith(
+          'not reward distribution'
+        );
+      });
+    }
     // eslint-disable-next-line mocha/no-setup-in-describe
     rewardDistributionRoleCheck((c) => c.runCampaign(12345678, 9876));
     // eslint-disable-next-line mocha/no-setup-in-describe
@@ -167,6 +148,25 @@ describe('TwoPeriodsRewardCalculator', function () {
     });
   });
   describe('reward distribution', function () {
+    async function checkRewards(
+      contract: Contract,
+      startTime: number,
+      durationInSeconds: number,
+      rewards: BigNumber,
+      baseRewards = BigNumber.from(0)
+    ): Promise<number> {
+      // durationInSeconds must be divisible by steps.
+      const steps = 10;
+      const rate = rewards.div(durationInSeconds);
+      for (let i = 1; i <= steps; i++) {
+        const currentStep = (i * durationInSeconds) / steps;
+        await setBlockTime(startTime + currentStep);
+        expect(await contract.getRewards()).to.be.equal(
+          rate.mul(currentStep).add(baseRewards)
+        );
+      }
+      return getTime();
+    }
     it('run an initial campaign alone', async function () {
       const {contract, contractAsRewardDistribution} = await twoPeriodsSetup();
       const durationInSeconds = 28 * 24 * 60 * 60;

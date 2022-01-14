@@ -6,14 +6,20 @@ import {doOnNextBlock} from './utils';
 describe('new SandRewardPool anti compound tests', function () {
   describe('roles', function () {
     it('admin should be able to call setAntiCompoundLockPeriod', async function () {
-      const {contract} = await setupSandRewardPoolTest();
+      const {contract, rewardCalculatorMock} = await setupSandRewardPoolTest();
+      await contract.setRewardCalculator(rewardCalculatorMock.address, false);
       expect(await contract.antiCompound()).to.be.equal(0);
       await expect(contract.setAntiCompoundLockPeriod(10000)).not.to.be
         .reverted;
       expect(await contract.antiCompound()).to.be.equal(10000);
     });
     it('other should fail to call setAntiCompoundLockPeriod', async function () {
-      const {getUser} = await setupSandRewardPoolTest();
+      const {
+        getUser,
+        contract,
+        rewardCalculatorMock,
+      } = await setupSandRewardPoolTest();
+      await contract.setRewardCalculator(rewardCalculatorMock.address, false);
       const user = await getUser();
       await expect(
         user.pool.setAntiCompoundLockPeriod(1000)
@@ -27,6 +33,7 @@ describe('new SandRewardPool anti compound tests', function () {
       balances,
       getUser,
     } = await setupSandRewardPoolTest();
+    await contract.setRewardCalculator(rewardCalculatorMock.address, false);
 
     const lockTimeMS = 10 * 1000;
     await contract.setAntiCompoundLockPeriod(lockTimeMS);
