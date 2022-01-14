@@ -39,8 +39,8 @@ contract PeriodicRewardCalculator is IRewardCalculator, AccessControl {
     }
 
     function setDuration(uint256 newDuration) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "not admin");
-        require(block.timestamp >= periodFinish, "campaign already started");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "PeriodicRewardCalculator: not admin");
+        require(block.timestamp >= periodFinish, "PeriodicRewardCalculator: campaign already started");
 
         duration = newDuration;
     }
@@ -52,7 +52,7 @@ contract PeriodicRewardCalculator is IRewardCalculator, AccessControl {
 
     // The main contract has distributed the rewards until this point, this must start from scratch => getRewards() == 0
     function restartRewards() external override {
-        require(msg.sender == rewardPool, "not reward pool");
+        require(msg.sender == rewardPool, "PeriodicRewardCalculator: not reward pool");
         // ensure reward past the first stacker do not get lost
         lastUpdateTime = _lastTimeRewardApplicable();
         savedRewards = 0;
@@ -60,7 +60,7 @@ contract PeriodicRewardCalculator is IRewardCalculator, AccessControl {
 
     // Useful when switching reward calculators to set an initial reward.
     function setSavedRewards(uint256 reward) external {
-        require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "not reward distribution");
+        require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "PeriodicRewardCalculator: not reward distribution");
         savedRewards = reward;
         lastUpdateTime = block.timestamp;
     }
@@ -74,7 +74,7 @@ contract PeriodicRewardCalculator is IRewardCalculator, AccessControl {
     // When calling this function with remaining>0 then reward + leftover must be divisible by duration (which can be problematic)
     ///@param reward number of token to be distributed over the duration
     function notifyRewardAmount(uint256 reward) external {
-        require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "not reward distribution");
+        require(hasRole(REWARD_DISTRIBUTION, _msgSender()), "PeriodicRewardCalculator: not reward distribution");
         savedRewards = _getRewards();
         lastUpdateTime = block.timestamp;
         if (block.timestamp >= periodFinish) {
