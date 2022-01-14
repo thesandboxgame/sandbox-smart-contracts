@@ -145,13 +145,12 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
 
     function computeContributionInBatch(address[] calldata accounts) external {
         _restartRewards();
-        uint256 rewardPerToken = _rewardPerToken();
         for (uint256 i = 0; i < accounts.length; i++) {
             address account = accounts[i];
             if (account == address(0)) {
                 continue;
             }
-            _processAccountRewards(account, rewardPerToken);
+            _processAccountRewards(account);
             _updateContribution(account);
         }
     }
@@ -232,12 +231,14 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     // Called each time there is a change in contract state (stake, withdraw, etc).
     function _processRewards(address account) internal {
         _restartRewards();
-        _processAccountRewards(account, _rewardPerToken());
+        _processAccountRewards(account);
     }
 
-    function _processAccountRewards(address account, uint256 rewardPerToken) internal {
-        // Update the earnings for this specific user with what he earned until now
-        rewards[account] = rewards[account] + _earned(account, rewardPerToken);
+    // Update the earnings for this specific user with what he earned until now
+    function _processAccountRewards(address account) internal {
+        // usually _earned takes _rewardPerToken() but in this method is zero because _restartRewards must be
+        // called before _processAccountRewards
+        rewards[account] = rewards[account] + _earned(account, 0);
         // restart rewards for this specific user, now earned(account) = 0
         userRewardPerTokenPaid[account] = rewardPerTokenStored;
     }
