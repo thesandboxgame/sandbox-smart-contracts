@@ -857,7 +857,6 @@ describe('PolygonLand.sol', function () {
         );
         expect(
           landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
-            landHolder.address,
             ...mintingData,
             bytes
           )
