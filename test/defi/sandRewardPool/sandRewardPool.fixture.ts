@@ -1,6 +1,7 @@
 import {getUnnamedAccounts} from 'hardhat';
 import {setupUsers, toWei, withSnapshot} from '../../utils';
 import {BigNumber, BigNumberish, Contract} from 'ethers';
+import {randomBigNumber} from './utils';
 
 export const setupSandRewardPoolTest = withSnapshot([], async function (hre) {
   const {deployments, getNamedAccounts, ethers} = hre;
@@ -8,6 +9,11 @@ export const setupSandRewardPoolTest = withSnapshot([], async function (hre) {
   await deployments.deploy('RewardCalculatorMock', {from: deployer});
   const rewardCalculatorMock = await ethers.getContract(
     'RewardCalculatorMock',
+    deployer
+  );
+  await deployments.deploy('ContributionCalculatorMock', {from: deployer});
+  const contributionCalculatorMock = await ethers.getContract(
+    'ContributionCalculatorMock',
     deployer
   );
   await deployments.deploy('RewardToken', {
@@ -33,20 +39,32 @@ export const setupSandRewardPoolTest = withSnapshot([], async function (hre) {
     args: [stakeToken.address, rewardToken.address, trustedForwarder.address],
   });
   const contract = await ethers.getContract('SandRewardPool', deployer);
-  await contract.setRewardCalculator(rewardCalculatorMock.address, false);
   const totalRewardMinted = toWei(10000);
   await rewardToken.mint(contract.address, totalRewardMinted);
   const others = await getUnnamedAccounts();
 
-  const getUsers = async (cant: number, initialStake = 1000000) => {
-    const users = await setupUsers(others.slice(0, cant), {
-      reward: rewardToken,
-      stake: stakeToken,
-      pool: contract,
-    });
-    for (const o of users) {
-      await o.stake.mint(o.address, initialStake);
-      await o.stake.approve(contract.address, initialStake);
+  const getUsers = async (
+    cant: number,
+    initialStake: BigNumberish = 1000000
+  ) => {
+    const users = (
+      await setupUsers(others.slice(0, cant), {
+        reward: rewardToken,
+        stake: stakeToken,
+        pool: contract,
+      })
+    ).map((u) => ({
+      ...u,
+      contributed: randomBigNumber(toWei(100)),
+      staked: randomBigNumber(initialStake),
+    }));
+    for (const u of users) {
+      await u.stake.mint(u.address, initialStake);
+      await u.stake.approve(contract.address, initialStake);
+      await contributionCalculatorMock.setContribution(
+        u.address,
+        u.contributed
+      );
     }
     return users;
   };
@@ -57,6 +75,7 @@ export const setupSandRewardPoolTest = withSnapshot([], async function (hre) {
     stakeToken,
     rewardToken,
     rewardCalculatorMock,
+    contributionCalculatorMock,
     deployer,
     setRewardAndStake: async (
       reward: BigNumberish,
@@ -90,3 +109,6 @@ export const setupSandRewardPoolTest = withSnapshot([], async function (hre) {
     },
   };
 });
+
+export const sum = (arr: BigNumberish[]): BigNumber =>
+  arr.reduce((acc: BigNumber, val) => acc.add(val), BigNumber.from(0));

@@ -1,30 +1,35 @@
 import {expect} from '../../chai-setup';
 import {ethers} from 'hardhat';
 import {Contract} from 'ethers';
-import {setupSandRewardPoolTest} from './sandRewardPool.fixture';
-
-function defaultAdminRoleTest(
-  funcName: string,
-  method: (contract: Contract, rewardToken: string) => Promise<void>
-) {
-  it('admin should be able to call ' + funcName, async function () {
-    const {contract, rewardToken} = await setupSandRewardPoolTest();
-    await expect(method(contract, rewardToken.address)).not.to.be.reverted;
-  });
-  it('other should fail to call ' + funcName, async function () {
-    const {rewardToken, contract, getUser} = await setupSandRewardPoolTest();
-    const user = await getUser();
-    const poolAsOther = await contract.connect(
-      await ethers.getSigner(user.address)
-    );
-    await expect(method(poolAsOther, rewardToken.address)).to.be.revertedWith(
-      'not admin'
-    );
-  });
-}
+import {setupSandRewardPoolTest, sum} from './sandRewardPool.fixture';
+import {toWei} from '../../utils';
+import {randomBigNumber} from './utils';
 
 describe('new SandRewardPool main contract tests', function () {
   describe('roles', function () {
+    function defaultAdminRoleTest(
+      funcName: string,
+      method: (contract: Contract, rewardToken: string) => Promise<void>
+    ) {
+      it('admin should be able to call ' + funcName, async function () {
+        const {contract, rewardToken} = await setupSandRewardPoolTest();
+        await expect(method(contract, rewardToken.address)).not.to.be.reverted;
+      });
+      it('other should fail to call ' + funcName, async function () {
+        const {
+          rewardToken,
+          contract,
+          getUser,
+        } = await setupSandRewardPoolTest();
+        const user = await getUser();
+        const poolAsOther = await contract.connect(
+          await ethers.getSigner(user.address)
+        );
+        await expect(
+          method(poolAsOther, rewardToken.address)
+        ).to.be.revertedWith('not admin');
+      });
+    }
     // eslint-disable-next-line mocha/no-setup-in-describe
     defaultAdminRoleTest('setContributionCalculator', (c, rewardToken) =>
       c.setContributionCalculator(rewardToken)
@@ -75,7 +80,9 @@ describe('new SandRewardPool main contract tests', function () {
           setRewardAndStake,
           balances,
           getUser,
+          rewardCalculatorMock,
         } = await setupSandRewardPoolTest();
+        await contract.setRewardCalculator(rewardCalculatorMock.address, false);
         const user = await getUser();
 
         const initialBalance = await balances(user.address);
@@ -105,7 +112,9 @@ describe('new SandRewardPool main contract tests', function () {
           setRewardAndStake,
           balances,
           getUser,
+          rewardCalculatorMock,
         } = await setupSandRewardPoolTest();
+        await contract.setRewardCalculator(rewardCalculatorMock.address, false);
         const user = await getUser();
 
         const initialBalance = await balances(user.address);
@@ -135,7 +144,10 @@ describe('new SandRewardPool main contract tests', function () {
           setRewardAndStake,
           balances,
           getUser,
+          rewardCalculatorMock,
         } = await setupSandRewardPoolTest();
+        await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+
         const user = await getUser();
 
         const initialBalance = await balances(user.address);
@@ -163,7 +175,9 @@ describe('new SandRewardPool main contract tests', function () {
           setRewardAndStake,
           balances,
           getUser,
+          rewardCalculatorMock,
         } = await setupSandRewardPoolTest();
+        await contract.setRewardCalculator(rewardCalculatorMock.address, false);
         const user = await getUser();
 
         const initialBalance = await balances(user.address);
@@ -198,7 +212,10 @@ describe('new SandRewardPool main contract tests', function () {
           setRewardAndStake,
           getEarnings,
           getUsers,
+          rewardCalculatorMock,
+          contract,
         } = await setupSandRewardPoolTest();
+        await contract.setRewardCalculator(rewardCalculatorMock.address, false);
         const users = await getUsers(2);
         const [user1, user2] = users;
 
@@ -223,7 +240,11 @@ describe('new SandRewardPool main contract tests', function () {
           setRewardAndStake,
           getUsers,
           getEarnings,
+          rewardCalculatorMock,
+          contract,
         } = await setupSandRewardPoolTest();
+        await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+
         const users = await getUsers(2);
         const user1 = users[0];
         const user2 = users[1];
@@ -253,7 +274,10 @@ describe('new SandRewardPool main contract tests', function () {
           setRewardAndStake,
           getUsers,
           getEarnings,
+          rewardCalculatorMock,
+          contract,
         } = await setupSandRewardPoolTest();
+        await contract.setRewardCalculator(rewardCalculatorMock.address, false);
         const users = await getUsers(2);
         const user1 = users[0];
         const user2 = users[1];
@@ -286,7 +310,11 @@ describe('new SandRewardPool main contract tests', function () {
           setRewardAndStake,
           getEarnings,
           getUsers,
+          rewardCalculatorMock,
+          contract,
         } = await setupSandRewardPoolTest();
+        await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+
         const users = await getUsers(10);
 
         type Data = {
@@ -295,8 +323,6 @@ describe('new SandRewardPool main contract tests', function () {
           earnings: number[];
         };
 
-        const sum = (arr: number[]) => arr.reduce((acc, val) => acc + val, 0);
-
         async function setRewardAndStakeUser(
           data: Data,
           reward: number,
@@ -304,7 +330,7 @@ describe('new SandRewardPool main contract tests', function () {
           stake: number
         ) {
           await setRewardAndStake(reward, users[userIdx].pool, stake);
-          const totalStakes = sum(data.stakes);
+          const totalStakes = sum(data.stakes).toNumber();
           const ret = {
             ...data,
             stakes: [...data.stakes],
@@ -343,6 +369,370 @@ describe('new SandRewardPool main contract tests', function () {
           expect(sum(data.earnings)).to.be.closeTo(data.rewardSum, 3);
         }
       });
+    });
+  });
+  describe('contribution calculation', function () {
+    it('initial', async function () {
+      const {
+        getUsers,
+        contributionCalculatorMock,
+        contract,
+      } = await setupSandRewardPoolTest();
+      await contract.setContributionCalculator(
+        contributionCalculatorMock.address
+      );
+      const users = await getUsers(4);
+      for (const u of users) {
+        expect(await contract.contributionOf(u.address)).to.be.equal(0);
+        await u.pool.stake(u.staked);
+        expect(await contract.balanceOf(u.address)).to.be.equal(u.staked);
+        expect(await contract.contributionOf(u.address)).to.be.equal(
+          u.contributed
+        );
+      }
+    });
+    it('computeContribution after the user change his contribution', async function () {
+      const {
+        getUsers,
+        contributionCalculatorMock,
+        contract,
+      } = await setupSandRewardPoolTest();
+      await contract.setContributionCalculator(
+        contributionCalculatorMock.address
+      );
+      const users = await getUsers(6);
+      // stake
+      for (const u of users) {
+        await u.pool.stake(u.staked);
+        expect(await contract.contributionOf(u.address)).to.be.equal(
+          u.contributed
+        );
+      }
+      // Change user contribution after stake
+      for (const u of users) {
+        await contributionCalculatorMock.setContribution(
+          u.address,
+          u.contributed.div(2)
+        );
+      }
+      // Still no changes in the contract
+      for (const u of users) {
+        expect(await contract.contributionOf(u.address)).to.be.equal(
+          u.contributed
+        );
+      }
+      // call computeContribution
+      for (const u of users) {
+        await expect(contract.computeContribution(u.address))
+          .to.emit(contract, 'ContributionUpdated')
+          .withArgs(u.address, u.contributed.div(2), u.contributed);
+      }
+      // Now the changes are reflected
+      for (const u of users) {
+        expect(await contract.contributionOf(u.address)).to.be.equal(
+          u.contributed.div(2)
+        );
+      }
+    });
+    it('computeContributionInBatch after the user change his contribution', async function () {
+      const {
+        getUsers,
+        contributionCalculatorMock,
+        contract,
+      } = await setupSandRewardPoolTest();
+      await contract.setContributionCalculator(
+        contributionCalculatorMock.address
+      );
+      const users = await getUsers(6);
+      // stake
+      for (const u of users) {
+        await u.pool.stake(u.staked);
+        expect(await contract.contributionOf(u.address)).to.be.equal(
+          u.contributed
+        );
+      }
+      // Change user contribution after stake
+      for (const u of users) {
+        await contributionCalculatorMock.setContribution(
+          u.address,
+          u.contributed.div(2)
+        );
+      }
+      // Still no changes in the contract
+      for (const u of users) {
+        expect(await contract.contributionOf(u.address)).to.be.equal(
+          u.contributed
+        );
+      }
+      // call computeContributionInBatch
+      const emitPromise = expect(
+        contract.computeContributionInBatch(users.map((u) => u.address))
+      ).to.emit(contract, 'ContributionUpdated');
+      users.forEach((u) =>
+        emitPromise.withArgs(u.address, u.contributed.div(2), u.contributed)
+      );
+      await emitPromise;
+      // Now the changes are reflected
+      for (const u of users) {
+        expect(await contract.contributionOf(u.address)).to.be.equal(
+          u.contributed.div(2)
+        );
+      }
+    });
+  });
+  describe('contribution calculation with rewards', function () {
+    it('initial', async function () {
+      const {
+        getUsers,
+        contributionCalculatorMock,
+        rewardCalculatorMock,
+        contract,
+      } = await setupSandRewardPoolTest();
+      await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+      await contract.setContributionCalculator(
+        contributionCalculatorMock.address
+      );
+      const users = await getUsers(8);
+      for (const u of users) {
+        expect(await contract.contributionOf(u.address)).to.be.equal(0);
+        await u.pool.stake(u.staked);
+        expect(await contract.balanceOf(u.address)).to.be.equal(u.staked);
+        expect(await contract.contributionOf(u.address)).to.be.equal(
+          u.contributed
+        );
+      }
+      expect(await contract.totalContributions()).to.be.equal(
+        sum(users.map((u) => u.contributed))
+      );
+
+      // Give a reward
+      const reward = toWei(123);
+      await rewardCalculatorMock.setReward(reward);
+      await contract.restartRewards();
+
+      // Check users contributions, balances and earned rewards
+      for (const u of users) {
+        expect(await contract.contributionOf(u.address)).to.be.equal(
+          u.contributed
+        );
+        expect(await contract.balanceOf(u.address)).to.be.equal(u.staked);
+        expect(await contract.earned(u.address)).to.be.equal(
+          u.contributed.mul(reward).div(sum(users.map((u) => u.contributed)))
+        );
+      }
+    });
+    it('computeContribution after users change his contribution', async function () {
+      const {
+        getUsers,
+        contributionCalculatorMock,
+        rewardCalculatorMock,
+        contract,
+      } = await setupSandRewardPoolTest();
+      await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+      await contract.setContributionCalculator(
+        contributionCalculatorMock.address
+      );
+      const users = await getUsers(6);
+      // stake
+      for (const u of users) {
+        await u.pool.stake(u.staked);
+        expect(await contract.contributionOf(u.address)).to.be.equal(
+          u.contributed
+        );
+      }
+
+      const usersWithNewContributions = users.map((u) => ({
+        ...u,
+        newContribution: randomBigNumber(1000000),
+        oldContribution: u.contributed,
+      }));
+
+      // Change user contribution after stake
+      for (const u of usersWithNewContributions) {
+        await contributionCalculatorMock.setContribution(
+          u.address,
+          u.newContribution
+        );
+      }
+
+      // Start a campaign without distributing the rewards
+      const reward = toWei(123);
+      await rewardCalculatorMock.setReward(reward);
+
+      const usersWithReward = usersWithNewContributions.map((u) => ({
+        ...u,
+        reward: u.contributed
+          .mul(reward)
+          .div(sum(users.map((u) => u.contributed))),
+      }));
+      // Check users contributions, balances and earned rewards
+      for (const u of usersWithReward) {
+        // Still no changes in the contract
+        expect(await contract.contributionOf(u.address)).to.be.equal(
+          u.oldContribution
+        );
+        // User gets earnings with old contribution
+        expect(await contract.earned(u.address)).to.be.equal(u.reward);
+      }
+
+      // refresh the contribution for each user, order matters but we assume we call quickly.
+      const others = usersWithReward;
+      const processed = [];
+      for (let i = 0; ; i++) {
+        const aUser = others.shift();
+        if (!aUser) break;
+        // call computeContribution for user 0 the others still have their old value
+        await expect(contract.computeContribution(aUser.address))
+          .to.emit(contract, 'ContributionUpdated')
+          .withArgs(
+            aUser.address,
+            aUser.newContribution,
+            aUser.oldContribution
+          );
+
+        // aUser gets the rewards according to the old contributions
+        expect(await contract.earned(aUser.address)).to.be.closeTo(
+          aUser.reward,
+          i
+        );
+        expect(await contract.rewards(aUser.address)).to.be.closeTo(
+          aUser.reward,
+          i
+        );
+        // the contribution of the user is updated.
+        expect(await contract.contributionOf(aUser.address)).to.be.equal(
+          aUser.newContribution
+        );
+
+        // Add to the processed list.
+        processed.push(aUser);
+
+        // Give another reward
+        await rewardCalculatorMock.setReward(reward);
+
+        // others use the old contribution, processed use the new one.
+        const totalContribution = sum(others.map((u) => u.oldContribution)).add(
+          sum(processed.map((u) => u.newContribution))
+        );
+        // Update rewards.
+        for (const u of processed) {
+          u.reward = u.reward.add(
+            u.newContribution.mul(reward).div(totalContribution)
+          );
+          expect(await contract.earned(u.address)).to.be.closeTo(u.reward, i);
+        }
+        for (const u of others) {
+          // Still no changes in the contract
+          expect(await contract.contributionOf(u.address)).to.be.equal(
+            u.oldContribution
+          );
+          u.reward = u.reward.add(
+            u.oldContribution.mul(reward).div(totalContribution)
+          );
+          expect(await contract.earned(u.address)).to.be.closeTo(
+            u.reward,
+            i + 1
+          );
+        }
+      }
+    });
+    it('computeContributionInBatch after the user change his contribution', async function () {
+      const {
+        getUsers,
+        contributionCalculatorMock,
+        rewardCalculatorMock,
+        contract,
+      } = await setupSandRewardPoolTest();
+      await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+      await contract.setContributionCalculator(
+        contributionCalculatorMock.address
+      );
+      const users = await getUsers(6);
+      // stake
+      for (const u of users) {
+        await u.pool.stake(u.staked);
+        expect(await contract.contributionOf(u.address)).to.be.equal(
+          u.contributed
+        );
+      }
+
+      const usersWithNewContributions = users.map((u) => ({
+        ...u,
+        newContribution: randomBigNumber(1000000),
+        oldContribution: u.contributed,
+      }));
+
+      // Change user contribution after stake
+      for (const u of usersWithNewContributions) {
+        await contributionCalculatorMock.setContribution(
+          u.address,
+          u.newContribution
+        );
+      }
+
+      // Start a campaign without distributing the rewards
+      const reward = toWei(123);
+      await rewardCalculatorMock.setReward(reward);
+
+      const usersWithReward = usersWithNewContributions.map((u) => ({
+        ...u,
+        reward: u.contributed
+          .mul(reward)
+          .div(sum(users.map((u) => u.contributed))),
+      }));
+      // Check users contributions, balances and earned rewards
+      for (const u of usersWithReward) {
+        // Still no changes in the contract
+        expect(await contract.contributionOf(u.address)).to.be.equal(
+          u.oldContribution
+        );
+        // Users get the earnings calculated with the oldContribution
+        expect(await contract.earned(u.address)).to.be.equal(u.reward);
+      }
+
+      // call computeContributionInBatch
+      const emitPromise = expect(
+        contract.computeContributionInBatch(
+          usersWithReward.map((u) => u.address)
+        )
+      ).to.emit(contract, 'ContributionUpdated');
+      usersWithReward.forEach((u) =>
+        emitPromise.withArgs(u.address, u.newContribution, u.oldContribution)
+      );
+      await emitPromise;
+
+      // Contributions where updated user got the earnings from old contribution
+      for (const u of usersWithReward) {
+        expect(await contract.contributionOf(u.address)).to.be.equal(
+          u.newContribution
+        );
+        // Users get the earned amount calculated with the oldContribution
+        expect(await contract.earned(u.address)).to.be.equal(
+          u.oldContribution
+            .mul(reward)
+            .div(sum(usersWithReward.map((o) => o.oldContribution)))
+        );
+      }
+
+      // Add another reward
+      await rewardCalculatorMock.setReward(reward);
+      // and distribute it
+      await contract.restartRewards();
+
+      // Now users get their rewards with the new contributions.
+      for (const u of usersWithReward) {
+        expect(await contract.contributionOf(u.address)).to.be.equal(
+          u.newContribution
+        );
+        // Users get the earned amount calculated with the oldContribution
+        expect(await contract.earned(u.address)).to.be.equal(
+          u.reward.add(
+            u.newContribution
+              .mul(reward)
+              .div(sum(usersWithReward.map((o) => o.newContribution)))
+          )
+        );
+      }
     });
   });
 });
