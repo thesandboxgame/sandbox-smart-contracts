@@ -56,7 +56,6 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721Receiver, Ownable {
     }
 
     function batchTransferQuadToL1(
-        address to,
         uint256[] calldata sizes,
         uint256[] calldata xs,
         uint256[] calldata ys,
