@@ -9,17 +9,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const CHILD_CHAIN_MANAGER = await deployments.get('CHILD_CHAIN_MANAGER');
-
-  await deploy('PolygonSand', {
-    from: deployer,
-    args: [
-      CHILD_CHAIN_MANAGER.address,
-      TRUSTED_FORWARDER.address,
-      sandAdmin,
-      sandExecutionAdmin,
-    ],
-    log: true,
-  });
+  const contract = await deployments.getOrNull('PolygonSand');
+  if (contract) {
+    console.warn('reusing PolygonSand', contract.address);
+  } else {
+    await deploy('PolygonSand', {
+      from: deployer,
+      args: [
+        CHILD_CHAIN_MANAGER.address,
+        TRUSTED_FORWARDER.address,
+        sandAdmin,
+        sandExecutionAdmin,
+      ],
+      log: true,
+    });
+  }
 };
 
 export default func;
