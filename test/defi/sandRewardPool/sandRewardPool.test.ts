@@ -4,6 +4,7 @@ import {Contract} from 'ethers';
 import {setupSandRewardPoolTest, sum} from './sandRewardPool.fixture';
 import {toWei} from '../../utils';
 import {randomBigNumber} from './utils';
+import {sendMetaTx} from '../../sendMetaTx';
 
 describe('new SandRewardPool main contract tests', function () {
   describe('roles', function () {
@@ -733,6 +734,14 @@ describe('new SandRewardPool main contract tests', function () {
           )
         );
       }
+    });
+    it('meta-tx', async function () {
+      // const {
+      //   getUsers,
+      //   contributionCalculatorMock,
+      //   rewardCalculatorMock,
+      //   contract,
+      // } = await setupSandRewardPoolTest();
     });
   });
 });
