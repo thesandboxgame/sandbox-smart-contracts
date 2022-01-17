@@ -1,8 +1,8 @@
 import {expect} from 'chai';
-import {getTime} from '../../utils';
+import {getTime} from '../../../utils';
 import {BigNumber, Contract} from 'ethers';
-import {doOnNextBlock, setBlockTime} from './utils';
-import {twoPeriodsSetup} from './rewardCalculator.fixture';
+import {doOnNextBlock, setBlockTime} from '../utils';
+import {twoPeriodsSetup} from '../fixtures/rewardCalculator.fixture';
 
 describe('TwoPeriodsRewardCalculator', function () {
   describe('roles', function () {

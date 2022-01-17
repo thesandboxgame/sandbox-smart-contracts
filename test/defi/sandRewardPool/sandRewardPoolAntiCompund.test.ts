@@ -1,5 +1,5 @@
 import {expect} from '../../chai-setup';
-import {setupSandRewardPoolTest} from './sandRewardPool.fixture';
+import {setupSandRewardPoolTest} from './fixtures/sandRewardPool.fixture';
 import {increaseTime} from '../../utils';
 import {doOnNextBlock} from './utils';
 

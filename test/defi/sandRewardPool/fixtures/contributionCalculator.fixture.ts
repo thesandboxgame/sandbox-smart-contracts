@@ -1,5 +1,5 @@
 import {getUnnamedAccounts} from 'hardhat';
-import {withSnapshot} from '../../utils';
+import {withSnapshot} from '../../../utils';
 
 export const landContributionCalculatorSetup = withSnapshot([], async function (
   hre

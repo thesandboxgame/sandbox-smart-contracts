@@ -1,7 +1,7 @@
-import {expect} from '../../chai-setup';
-import {landContributionCalculatorSetup} from './contributionCalculator.fixture';
+import {expect} from '../../../chai-setup';
+import {landContributionCalculatorSetup} from '../fixtures/contributionCalculator.fixture';
 import {deployments, ethers} from 'hardhat';
-import {contribution} from '../../common/contributionEquation';
+import {contribution} from '../../../common/contributionEquation';
 import {BigNumber} from 'ethers';
 
 describe('LandContributionCalculator', function () {

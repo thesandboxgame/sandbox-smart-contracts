@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {BigNumber} from 'ethers';
-import {doOnNextBlock, setBlockTime} from './utils';
-import {periodicSetup} from './rewardCalculator.fixture';
+import {doOnNextBlock, setBlockTime} from '../utils';
+import {periodicSetup} from '../fixtures/rewardCalculator.fixture';
 
 describe('PeriodicRewardCalculator', function () {
   describe('roles', function () {
