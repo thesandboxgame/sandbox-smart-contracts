@@ -6,7 +6,7 @@ import {
   replicateEarned,
   replicateRewardPerToken,
   setupSandRewardPool,
-} from './originalFixtures';
+} from './fixtures/originalFixtures';
 import {contribution} from '../../common/contributionEquation';
 import {addBigNumberCloseToChai} from '../../chaiBigNumberCloseTo';
 

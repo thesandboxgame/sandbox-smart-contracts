@@ -1,7 +1,7 @@
 import {getUnnamedAccounts} from 'hardhat';
-import {setupUsers, toWei, withSnapshot} from '../../utils';
+import {setupUsers, toWei, withSnapshot} from '../../../utils';
 import {BigNumber, BigNumberish, Contract} from 'ethers';
-import {randomBigNumber} from './utils';
+import {randomBigNumber} from '../utils';
 
 export const setupSandRewardPoolTest = withSnapshot([], async function (hre) {
   const {deployments, getNamedAccounts, ethers} = hre;
