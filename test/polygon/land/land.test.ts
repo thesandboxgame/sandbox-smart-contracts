@@ -6,7 +6,7 @@ import {setupLand} from './fixtures';
 describe('PolygonLand.sol', function () {
   describe('Land <> PolygonLand: Transfer', function () {
     describe('L1 to L2', function () {
-      it('should be able to tranfer 1x1 Land', async function () {
+      it('should be able to transfer 1x1 Land', async function () {
         const {
           Land,
           landMinter,
@@ -44,7 +44,7 @@ describe('PolygonLand.sol', function () {
           plotCount
         );
       });
-      it('should be able to tranfer 3x3 Land', async function () {
+      it('should be able to transfer 3x3 Land', async function () {
         const {
           Land,
           landMinter,
@@ -79,7 +79,7 @@ describe('PolygonLand.sol', function () {
           plotCount
         );
       });
-      it('should be able to tranfer 6x6 Land', async function () {
+      it('should be able to transfer 6x6 Land', async function () {
         const {
           Land,
           landMinter,
@@ -114,7 +114,7 @@ describe('PolygonLand.sol', function () {
           plotCount
         );
       });
-      it('should be able to tranfer 12x12 Land', async function () {
+      it('should be able to transfer 12x12 Land', async function () {
         const {
           Land,
           landMinter,
@@ -149,7 +149,7 @@ describe('PolygonLand.sol', function () {
           plotCount
         );
       });
-      it('should be able to tranfer 24x24 Land', async function () {
+      it('should not be able to transfer 24x24 Land', async function () {
         const {
           Land,
           landMinter,
@@ -170,22 +170,18 @@ describe('PolygonLand.sol', function () {
 
         // Transfer to L1 Tunnel
         await landHolder.Land.setApprovalForAll(LandTunnel.address, true);
-        await landHolder.LandTunnel.batchTransferQuadToL2(
-          landHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
-        );
-
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
-        expect(await Land.balanceOf(LandTunnel.address)).to.be.equal(plotCount);
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          plotCount
-        );
+        await expect(
+          landHolder.LandTunnel.batchTransferQuadToL2(
+            landHolder.address,
+            [size],
+            [x],
+            [y],
+            bytes
+          )
+        ).to.be.revertedWith('Exceeds max allowed quads');
       });
 
-      it('should be able to tranfer multiple Lands', async function () {
+      it('should be able to transfer multiple Lands', async function () {
         const {
           Land,
           landMinter,
@@ -197,11 +193,13 @@ describe('PolygonLand.sol', function () {
         const bytes = '0x00';
         // Mint LAND on L1
         const mintingData = [
-          [24, 12, 6, 3],
-          [0, 300, 30, 24],
-          [0, 300, 30, 24],
+          [6, 3],
+          [30, 24],
+          [30, 24],
         ];
-
+        const plotCount = mintingData[0]
+          .map((size) => size * size)
+          .reduce((a, b) => a + b, 0);
         await Promise.all(
           [...Array(4).keys()].map((idx) => {
             waitFor(
@@ -213,7 +211,7 @@ describe('PolygonLand.sol', function () {
             );
           })
         );
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(765);
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
 
         // Transfer to L1 Tunnel
         await landHolder.Land.setApprovalForAll(LandTunnel.address, true);
@@ -224,14 +222,14 @@ describe('PolygonLand.sol', function () {
         );
 
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
-        expect(await Land.balanceOf(LandTunnel.address)).to.be.equal(765);
+        expect(await Land.balanceOf(LandTunnel.address)).to.be.equal(45);
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          765
+          plotCount
         );
       });
     });
     describe('L2 to L1', function () {
-      it('should be able to tranfer 1x1 Land', async function () {
+      it('should be able to transfer 1x1 Land', async function () {
         const {
           deployer,
           Land,
@@ -308,7 +306,7 @@ describe('PolygonLand.sol', function () {
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
       });
 
-      it('should be able to tranfer 12x12 Land', async function () {
+      it('should be able to transfer 12x12 Land', async function () {
         const {
           deployer,
           Land,
@@ -385,7 +383,7 @@ describe('PolygonLand.sol', function () {
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
       });
 
-      it('should be able to tranfer 24x24 Land', async function () {
+      it('should not be able to transfer 2, 12x12 Land at once', async function () {
         const {
           deployer,
           Land,
@@ -396,15 +394,33 @@ describe('PolygonLand.sol', function () {
           MockPolygonLandTunnel,
         } = await setupLand();
 
-        const landHolder = users[0];
-        const size = 24;
-        const x = 0;
-        const y = 0;
         const bytes = '0x00';
-        const plotCount = size * size;
+
+        const landHolder = users[0];
+        const size_1 = 12;
+        const x_1 = 0;
+        const y_1 = 0;
+
+        const size_2 = 12;
+        const x_2 = 12;
+        const y_2 = 12;
+        const plotCount = size_1 * size_1 + size_1 * size_2;
 
         // Mint LAND on L1
-        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
+        await landMinter.Land.mintQuad(
+          landHolder.address,
+          size_1,
+          x_1,
+          y_1,
+          bytes
+        );
+        await landMinter.Land.mintQuad(
+          landHolder.address,
+          size_2,
+          x_2,
+          y_2,
+          bytes
+        );
         expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
 
         // Set Mock PolygonLandTunnel in PolygonLand
@@ -418,9 +434,16 @@ describe('PolygonLand.sol', function () {
         await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
         await landHolder.MockLandTunnel.batchTransferQuadToL2(
           landHolder.address,
-          [size],
-          [x],
-          [y],
+          [size_1],
+          [x_1],
+          [y_1],
+          bytes
+        );
+        await landHolder.MockLandTunnel.batchTransferQuadToL2(
+          landHolder.address,
+          [size_2],
+          [x_2],
+          [y_2],
           bytes
         );
 
@@ -437,32 +460,18 @@ describe('PolygonLand.sol', function () {
           MockPolygonLandTunnel.address,
           true
         );
-        const tx = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
-          landHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
-        );
-        await tx.wait();
-
-        console.log('DUMMY CHECKPOINT. moving on...');
-
-        // Release on L1
-        const abiCoder = new AbiCoder();
-
-        await deployer.MockLandTunnel.receiveMessage(
-          abiCoder.encode(
-            ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
-            [landHolder.address, [size], [x], [y], bytes]
+        await expect(
+          landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
+            landHolder.address,
+            [size_1, size_2],
+            [x_1, x_2],
+            [y_1, y_2],
+            bytes
           )
-        );
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-        expect(await Land.balanceOf(MockLandTunnel.address)).to.be.equal(0);
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
+        ).to.be.revertedWith('Exceeds max allowed quads.');
       });
 
-      it('should be able to tranfer 3x3 Land', async function () {
+      it('should be able to transfer 3x3 Land', async function () {
         const {
           deployer,
           Land,
@@ -539,7 +548,7 @@ describe('PolygonLand.sol', function () {
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
       });
 
-      it('should be able to tranfer 6x6 Land', async function () {
+      it('should be able to transfer 6x6 Land', async function () {
         const {
           deployer,
           Land,
@@ -616,7 +625,7 @@ describe('PolygonLand.sol', function () {
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
       });
 
-      it('should should be able to tranfer multiple lands', async function () {
+      it('should should be able to transfer multiple lands', async function () {
         const {
           deployer,
           Land,
@@ -637,9 +646,9 @@ describe('PolygonLand.sol', function () {
 
         const landHolder = users[0];
         const mintingData = [
-          [24, 12, 6, 3],
-          [0, 300, 30, 24],
-          [0, 300, 30, 24],
+          [6, 3],
+          [30, 24],
+          [30, 24],
         ];
 
         const numberOfLands = mintingData[0].length;
@@ -700,12 +709,14 @@ describe('PolygonLand.sol', function () {
           )
         );
 
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(765);
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(
+          numberOfTokens
+        );
         expect(await Land.balanceOf(MockLandTunnel.address)).to.be.equal(0);
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
       });
 
-      it('should not be able to tranfer if exceeds limit', async function () {
+      it('should not be able to transfer if exceeds limit', async function () {
         const {
           deployer,
           Land,
@@ -716,6 +727,8 @@ describe('PolygonLand.sol', function () {
           MockPolygonLandTunnel,
         } = await setupLand();
         const bytes = '0x00';
+
+        await deployer.PolygonLandTunnel.setLimit(1, 400);
         // Set Mock PolygonLandTunnel in PolygonLand
         await deployer.PolygonLand.setPolygonLandTunnel(
           MockPolygonLandTunnel.address
@@ -726,7 +739,7 @@ describe('PolygonLand.sol', function () {
 
         const landHolder = users[0];
         const mintingData = [
-          [24, 24],
+          [1, 1],
           [0, 240],
           [0, 240],
         ];

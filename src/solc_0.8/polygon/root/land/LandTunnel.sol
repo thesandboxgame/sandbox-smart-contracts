@@ -12,12 +12,14 @@ contract LandTunnel is FxBaseRootTunnel, IERC721TokenReceiver, Ownable {
     address public rootToken;
     uint32 public maxGasLimitOnL2 = 500;
     mapping(uint8 => uint32) public gasLimits;
+    uint256 public maxAllowedQuads = 144;
 
     event Deposit(address user, uint256 size, uint256 x, uint256 y, bytes data);
     event Withdraw(address user, uint256 size, uint256 x, uint256 y, bytes data);
 
     event SetGasLimit(uint8 size, uint32 limit);
     event SetMaxGasLimit(uint32 maxGasLimit);
+    event SetMaxAllowedQuads(uint256 maxQuads);
 
     function setMaxLimitOnL2(uint32 _maxGasLimit) external onlyOwner {
         maxGasLimitOnL2 = _maxGasLimit;
@@ -31,6 +33,11 @@ contract LandTunnel is FxBaseRootTunnel, IERC721TokenReceiver, Ownable {
 
     function setLimit(uint8 size, uint32 limit) external onlyOwner {
         _setLimit(size, limit);
+    }
+
+    function setMaxAllowedQuads(uint256 _maxAllowedQuads) external onlyOwner {
+        maxAllowedQuads = _maxAllowedQuads;
+        emit SetMaxAllowedQuads(_maxAllowedQuads);
     }
 
     // setupLimits([5, 10, 20, 90, 340]);
@@ -70,10 +77,13 @@ contract LandTunnel is FxBaseRootTunnel, IERC721TokenReceiver, Ownable {
         LandToken(rootToken).batchTransferQuad(msg.sender, address(this), sizes, xs, ys, data);
 
         uint32 gasLimit = 0;
+        uint256 quads = 0;
         for (uint256 i = 0; i < sizes.length; i++) {
             gasLimit += gasLimits[uint8(sizes[i])];
+            quads += sizes[i] * sizes[i];
         }
 
+        require(quads <= maxAllowedQuads, "Exceeds max allowed quads.");
         require(gasLimit < maxGasLimitOnL2, "Exceeds gas limit on L2.");
 
         for (uint256 index = 0; index < sizes.length; index++) {
