@@ -41,13 +41,18 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
     // We need to save the rewards accumulated between the last call to restartRewards and the call to notifyRewardAmount
     uint256 public savedRewards;
     // The reward distribution is divided in two periods with two different rated
-    //             |    **
-    //             |  **
-    //             |**
-    //         ****|
-    //     ****    |
-    // ****        |
-    // <-perido1-> |<-period2->
+    //                   |            |            |************|*
+    //                   |            |          **|            |*
+    //                   |            |        **  |            |*
+    //                   |            |      **    |            |*
+    //                   |            |    **      |            |*
+    //                   |            |  **        |            |*
+    //                   |            |**          |            |*
+    //                   |        ****|            |            |*
+    //                   |    ****    |            |            |*
+    //                   |****        |            |            |*
+    // zero -> **********|            |            |            |********************
+    //                   |<-perido1-> |<-period2-> |<-restart-> |
     uint256 public finish1;
     uint256 public rate1;
     uint256 public finish2;
@@ -178,7 +183,7 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
             return (block.timestamp - lastUpdateTime) * rate1;
         }
         // block.timestamp > finish1
-        uint256 rewards2 = (Math.min(block.timestamp, finish2) - finish1) * rate2;
+        uint256 rewards2 = (Math.min(block.timestamp, finish2) - Math.max(lastUpdateTime, finish1)) * rate2;
         if (lastUpdateTime < finish1) {
             // add reward1 + reward2
             return (finish1 - lastUpdateTime) * rate1 + rewards2;
