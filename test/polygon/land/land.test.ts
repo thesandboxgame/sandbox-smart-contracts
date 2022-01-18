@@ -150,13 +150,7 @@ describe('PolygonLand.sol', function () {
         );
       });
       it('should not be able to transfer 24x24 Land', async function () {
-        const {
-          Land,
-          landMinter,
-          users,
-          LandTunnel,
-          PolygonLand,
-        } = await setupLand();
+        const {Land, landMinter, users, LandTunnel} = await setupLand();
         const landHolder = users[0];
         const size = 24;
         const x = 0;
