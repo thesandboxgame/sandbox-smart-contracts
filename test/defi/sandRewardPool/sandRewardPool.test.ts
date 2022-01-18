@@ -23,7 +23,7 @@ describe('new SandRewardPool main contract tests', function () {
           getUser,
         } = await setupSandRewardPoolTest();
         const user = await getUser();
-        const poolAsOther = await contract.connect(
+        const poolAsOther = contract.connect(
           await ethers.getSigner(user.address)
         );
         await expect(
@@ -735,13 +735,54 @@ describe('new SandRewardPool main contract tests', function () {
         );
       }
     });
-    it('meta-tx', async function () {
-      // const {
-      //   getUsers,
-      //   contributionCalculatorMock,
-      //   rewardCalculatorMock,
-      //   contract,
-      // } = await setupSandRewardPoolTest();
+  });
+  describe('trusted forwarder and meta-tx', function () {
+    it('should fail to set the trusted forwarder if not owner', async function () {
+      const {getUser, contractAsOther} = await setupSandRewardPoolTest();
+      const user = await getUser();
+
+      expect(
+        contractAsOther.setTrustedForwarder(user.address)
+      ).to.be.revertedWith('SandRewardPool: not admins');
+    });
+    it('should success to set the trusted forwarder if owner', async function () {
+      const {getUser, contract} = await setupSandRewardPoolTest();
+
+      const user = await getUser();
+
+      expect(contract.setTrustedForwarder(user.address)).to.be.not.reverted;
+
+      expect(await contract.getTrustedForwarder()).to.be.equal(user.address);
+    });
+    it('stake with meta-tx', async function () {
+      const {
+        contract,
+        balances,
+        getUser,
+        trustedForwarder,
+        rewardCalculatorMock,
+      } = await setupSandRewardPoolTest();
+      await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+
+      const user = await getUser();
+
+      const initialBalance = await balances(user.address);
+
+      const {to, data} = await user.pool.populateTransaction.stake(1000);
+
+      await sendMetaTx(to, trustedForwarder, data, user.address);
+
+      // await user.pool.stake(1000);
+
+      console.log((await balances(user.address)).stake.toString());
+
+      console.log((await contract.balanceOf(user.address)).toString());
+
+      // expect(contract.balanceof());
+
+      // await user.pool.stake(1000);
+
+      // expect(await contract.earned(user.address)).to.be.equal(0);
     });
   });
 });
