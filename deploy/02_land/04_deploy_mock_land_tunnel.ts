@@ -53,5 +53,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['MockLandTunnel', 'MockLandTunnel_deploy', 'L1'];
-func.dependencies = ['LandTunnel', 'Land', 'FXROOT', 'CHECKPOINTMANAGER', 'TRUSTED_FORWARDER'];
+func.dependencies = [
+  'LandTunnel',
+  'Land',
+  'FXROOT',
+  'CHECKPOINTMANAGER',
+  'TRUSTED_FORWARDER',
+];
 func.skip = skipUnlessTest;
