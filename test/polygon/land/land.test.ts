@@ -1,5 +1,4 @@
 import {AbiCoder} from '@ethersproject/contracts/node_modules/@ethersproject/abi';
-import {ethers} from 'ethers';
 import {expect} from '../../chai-setup';
 import {waitFor} from '../../utils';
 import {setupLand} from './fixtures';
@@ -285,21 +284,13 @@ describe('PolygonLand.sol', function () {
           true
         );
         const tx = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
+          landHolder.address,
           [size],
           [x],
           [y],
           bytes
         );
         await tx.wait();
-        await (
-          await landHolder.MockPolygonLandTunnel.triggerTransferToL1(
-            landHolder.address,
-            [size],
-            [x],
-            [y],
-            bytes
-          )
-        ).wait();
 
         console.log('DUMMY CHECKPOINT. moving on...');
 
@@ -370,22 +361,13 @@ describe('PolygonLand.sol', function () {
           true
         );
         const tx = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
+          landHolder.address,
           [size],
           [x],
           [y],
           bytes
         );
         await tx.wait();
-
-        await (
-          await landHolder.MockPolygonLandTunnel.triggerTransferToL1(
-            landHolder.address,
-            [size],
-            [x],
-            [y],
-            bytes
-          )
-        ).wait();
 
         console.log('DUMMY CHECKPOINT. moving on...');
 
@@ -456,21 +438,13 @@ describe('PolygonLand.sol', function () {
           true
         );
         const tx = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
+          landHolder.address,
           [size],
           [x],
           [y],
           bytes
         );
         await tx.wait();
-        await (
-          await landHolder.MockPolygonLandTunnel.triggerTransferToL1(
-            landHolder.address,
-            [size],
-            [x],
-            [y],
-            bytes
-          )
-        ).wait();
 
         console.log('DUMMY CHECKPOINT. moving on...');
 
@@ -541,21 +515,13 @@ describe('PolygonLand.sol', function () {
           true
         );
         const tx = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
+          landHolder.address,
           [size],
           [x],
           [y],
           bytes
         );
         await tx.wait();
-        await (
-          await landHolder.MockPolygonLandTunnel.triggerTransferToL1(
-            landHolder.address,
-            [size],
-            [x],
-            [y],
-            bytes
-          )
-        ).wait();
 
         console.log('DUMMY CHECKPOINT. moving on...');
 
@@ -620,57 +586,24 @@ describe('PolygonLand.sol', function () {
           plotCount
         );
 
-        const abiCoder = new AbiCoder();
-
         // Transfer to L2 Tunnel
         await landHolder.PolygonLand.setApprovalForAll(
           MockPolygonLandTunnel.address,
           true
         );
-        const tx_test = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
+        const tx = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
+          landHolder.address,
           [size],
           [x],
           [y],
           bytes
         );
-        await tx_test.wait();
-
-        expect(
-          await deployer.MockPolygonLandTunnel.transferredToLandTunnel(
-            size,
-            x,
-            y
-          )
-        ).to.eq(landHolder.address);
-
-        await expect(
-          landHolder.MockPolygonLandTunnel.triggerTransferToL1(
-            landHolder.address,
-            [size],
-            [x],
-            [y],
-            bytes
-          )
-        )
-          .to.emit(MockPolygonLandTunnel, 'MessageSent')
-          .withArgs(
-            abiCoder.encode(
-              ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
-              [landHolder.address, [size], [x], [y], bytes]
-            )
-          );
-
-        expect(
-          await deployer.MockPolygonLandTunnel.transferredToLandTunnel(
-            size,
-            x,
-            y
-          )
-        ).to.eq(ethers.constants.AddressZero);
+        await tx.wait();
 
         console.log('DUMMY CHECKPOINT. moving on...');
 
         // Release on L1
+        const abiCoder = new AbiCoder();
 
         await deployer.MockLandTunnel.receiveMessage(
           abiCoder.encode(
@@ -683,7 +616,7 @@ describe('PolygonLand.sol', function () {
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
       });
 
-      it('should be able to tranfer multiple lands', async function () {
+      it('should should be able to tranfer multiple lands', async function () {
         const {
           deployer,
           Land,
@@ -744,35 +677,21 @@ describe('PolygonLand.sol', function () {
           numberOfTokens
         );
 
-        const abiCoder = new AbiCoder();
-
         // Transfer to L2 Tunnel
         await landHolder.PolygonLand.setApprovalForAll(
           MockPolygonLandTunnel.address,
           true
         );
         const tx = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
+          landHolder.address,
           ...mintingData,
           bytes
         );
         await tx.wait();
 
-        await expect(
-          landHolder.MockPolygonLandTunnel.triggerTransferToL1(
-            landHolder.address,
-            ...mintingData,
-            bytes
-          )
-        )
-          .to.emit(MockPolygonLandTunnel, 'MessageSent')
-          .withArgs(
-            abiCoder.encode(
-              ['address', 'uint256[]', 'uint256[]', 'uint256[]', 'bytes'],
-              [landHolder.address, ...mintingData, bytes]
-            )
-          );
-
         console.log('DUMMY CHECKPOINT. moving on...');
+
+        const abiCoder = new AbiCoder();
 
         await deployer.MockLandTunnel.receiveMessage(
           abiCoder.encode(
@@ -857,6 +776,7 @@ describe('PolygonLand.sol', function () {
         );
         expect(
           landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
+            landHolder.address,
             ...mintingData,
             bytes
           )
