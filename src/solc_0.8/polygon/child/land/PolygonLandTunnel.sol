@@ -82,6 +82,12 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
         _sendMessageToRoot(abi.encode(to, sizes, xs, ys, data));
     }
 
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyOwner {
+        _trustedForwarder = trustedForwarder;
+    }
+
     function _processMessageFromRoot(
         uint256, /* stateId */
         address sender,

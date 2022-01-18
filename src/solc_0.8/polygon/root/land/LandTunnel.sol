@@ -64,6 +64,12 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
         }
     }
 
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyOwner {
+        _trustedForwarder = trustedForwarder;
+    }
+
     function _processMessageFromChild(bytes memory message) internal override {
         (address to, uint256[] memory size, uint256[] memory x, uint256[] memory y, bytes memory data) = abi.decode(
             message,
