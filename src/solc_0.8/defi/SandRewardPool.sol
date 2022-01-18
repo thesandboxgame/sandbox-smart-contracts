@@ -116,6 +116,17 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         return _balances[account];
     }
 
+    function stakeToken() external view returns (IERC20) {
+        return _stakeToken;
+    }
+
+    function getRewardsAvailable() external view returns (uint256) {
+        if (address(rewardToken) != address(_stakeToken)) {
+            return rewardToken.balanceOf(address(this));
+        }
+        return _stakeToken.balanceOf(address(this)) - _totalSupply;
+    }
+
     function totalContributions() external view returns (uint256) {
         return _totalContributions;
     }
