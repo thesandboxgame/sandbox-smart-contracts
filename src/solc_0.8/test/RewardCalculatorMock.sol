@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.2;
 
-import "../defi/IRewardCalculator.sol";
+import "../defi/interfaces/IRewardCalculator.sol";
 
 contract RewardCalculatorMock is IRewardCalculator {
     event RewardRestarted();

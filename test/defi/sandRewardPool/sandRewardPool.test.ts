@@ -737,7 +737,7 @@ describe('new SandRewardPool main contract tests', function () {
     });
   });
   describe('trusted forwarder and meta-tx', function () {
-    it('should fail to set the trusted forwarder if not owner', async function () {
+    it('should fail to set the trusted forwarder if not admin', async function () {
       const {getUser, contractAsOther} = await setupSandRewardPoolTest();
       const user = await getUser();
 
@@ -745,7 +745,7 @@ describe('new SandRewardPool main contract tests', function () {
         contractAsOther.setTrustedForwarder(user.address)
       ).to.be.revertedWith('SandRewardPool: not admin');
     });
-    it('should success to set the trusted forwarder if owner', async function () {
+    it('should success to set the trusted forwarder if admin', async function () {
       const {getUser, contract} = await setupSandRewardPoolTest();
 
       const user = await getUser();
@@ -753,6 +753,29 @@ describe('new SandRewardPool main contract tests', function () {
       expect(contract.setTrustedForwarder(user.address)).to.be.not.reverted;
 
       expect(await contract.getTrustedForwarder()).to.be.equal(user.address);
+    });
+    it('setReward with meta-tx', async function () {
+      const {
+        contract,
+        balances,
+        getUser,
+        trustedForwarder,
+        rewardCalculatorMock,
+      } = await setupSandRewardPoolTest();
+      await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+
+      const user = await getUser();
+
+      const {
+        to,
+        data,
+      } = await rewardCalculatorMock.populateTransaction.setReward(22);
+
+      await sendMetaTx(to, trustedForwarder, data, user.address);
+
+      const reward = await rewardCalculatorMock.getRewards();
+
+      expect(reward).to.be.equal(22);
     });
     it('stake with meta-tx', async function () {
       const {
@@ -766,7 +789,7 @@ describe('new SandRewardPool main contract tests', function () {
 
       const user = await getUser();
 
-      const initialBalance = await balances(user.address);
+      // const initialBalance = await balances(user.address);
 
       const {to, data} = await user.pool.populateTransaction.stake(1000);
 
@@ -776,7 +799,7 @@ describe('new SandRewardPool main contract tests', function () {
 
       console.log((await balances(user.address)).stake.toString());
 
-      console.log((await contract.balanceOf(user.address)).toString());
+      console.log((await user.pool.balanceOf(user.address)).toString());
 
       // expect(contract.balanceof());
 
