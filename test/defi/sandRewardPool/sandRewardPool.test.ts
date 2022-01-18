@@ -743,7 +743,7 @@ describe('new SandRewardPool main contract tests', function () {
 
       expect(
         contractAsOther.setTrustedForwarder(user.address)
-      ).to.be.revertedWith('SandRewardPool: not admins');
+      ).to.be.revertedWith('SandRewardPool: not admin');
     });
     it('should success to set the trusted forwarder if owner', async function () {
       const {getUser, contract} = await setupSandRewardPoolTest();
