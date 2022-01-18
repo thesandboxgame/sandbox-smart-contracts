@@ -1,16 +1,14 @@
-import {expect} from '../../chai-setup';
-import {landContributionCalculatorSetup} from './contributionCalculator.fixture';
+import {expect} from '../../../chai-setup';
+import {landOwnerContributionCalculatorSetup} from '../fixtures/contributionCalculator.fixture';
 import {deployments, ethers} from 'hardhat';
-import {contribution} from '../../common/contributionEquation';
-import {BigNumber} from 'ethers';
 
-describe('LandContributionCalculator', function () {
+describe('LandOwnerContributionCalculator', function () {
   describe('roles', function () {
     it('admin should be able to call setNFTMultiplierToken', async function () {
       const {
         deployer,
         contractAsAdmin,
-      } = await landContributionCalculatorSetup();
+      } = await landOwnerContributionCalculatorSetup();
       await deployments.deploy('someOtherContract', {
         from: deployer,
         contract: 'ERC721Mintable',
@@ -26,7 +24,7 @@ describe('LandContributionCalculator', function () {
         deployer,
         contract,
         contractAsOther,
-      } = await landContributionCalculatorSetup();
+      } = await landOwnerContributionCalculatorSetup();
       await deployments.deploy('someOtherContract', {
         from: deployer,
         contract: 'ERC721Mintable',
@@ -43,15 +41,17 @@ describe('LandContributionCalculator', function () {
   });
 
   describe('calculation', function () {
-    it('zero lands', async function () {
+    it('users without lands cannot stake', async function () {
       const {
         contract,
         landToken,
         other,
-      } = await landContributionCalculatorSetup();
+      } = await landOwnerContributionCalculatorSetup();
       expect(await landToken.balanceOf(other)).to.be.equal(0);
       expect(await contract.multiplierOf(other)).to.be.equal(0);
-      expect(await contract.computeContribution(other, 1000)).to.be.equal(1000);
+      await expect(contract.computeContribution(other, 1000)).to.revertedWith(
+        'no lands'
+      );
     });
     // eslint-disable-next-line mocha/no-setup-in-describe
     [1, 2, 3, 4].forEach((numLands) => {
@@ -60,35 +60,17 @@ describe('LandContributionCalculator', function () {
           contract,
           landToken,
           other,
-        } = await landContributionCalculatorSetup();
+        } = await landOwnerContributionCalculatorSetup();
+        const stake = 1000 * numLands;
         for (let i = 0; i < numLands; i++) {
           await landToken.mint(other, 123 + i);
         }
         expect(await landToken.balanceOf(other)).to.be.equal(numLands);
         expect(await contract.multiplierOf(other)).to.be.equal(numLands);
-        expect(await contract.computeContribution(other, 1000)).to.be.equal(
-          contribution(BigNumber.from(1000), BigNumber.from(numLands))
+        expect(await contract.computeContribution(other, stake)).to.be.equal(
+          stake
         );
       });
     });
-    // eslint-disable-next-line mocha/no-setup-in-describe
-    [5, 10, 20, 50, 100, 408, 408 * 408, 408 * 408 * 408].forEach(
-      (numLands) => {
-        it(numLands + ' lands, to high to be minted', async function () {
-          const {
-            contract,
-            landToken,
-            other,
-          } = await landContributionCalculatorSetup();
-          const numLands = 408 * 408;
-          await landToken.setFakeBalance(other, numLands);
-          expect(await landToken.balanceOf(other)).to.be.equal(numLands);
-          expect(await contract.multiplierOf(other)).to.be.equal(numLands);
-          expect(await contract.computeContribution(other, 1000)).to.be.equal(
-            contribution(BigNumber.from(1000), BigNumber.from(numLands))
-          );
-        });
-      }
-    );
   });
 });

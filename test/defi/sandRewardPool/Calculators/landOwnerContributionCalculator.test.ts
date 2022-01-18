@@ -1,5 +1,5 @@
-import {expect} from '../../chai-setup';
-import {landOwnerContributionCalculatorSetup} from './contributionCalculator.fixture';
+import {expect} from '../../../chai-setup';
+import {landOwnerContributionCalculatorSetup} from '../fixtures/contributionCalculator.fixture';
 import {deployments, ethers} from 'hardhat';
 
 describe('LandOwnerContributionCalculator', function () {

@@ -1,7 +1,7 @@
 import {expect} from '../../chai-setup';
 import {ethers} from 'hardhat';
 import {Contract} from 'ethers';
-import {setupSandRewardPoolTest, sum} from './sandRewardPool.fixture';
+import {setupSandRewardPoolTest, sum} from './fixtures/sandRewardPool.fixture';
 import {toWei} from '../../utils';
 import {randomBigNumber} from './utils';
 import {sendMetaTx} from '../../sendMetaTx';

@@ -1,7 +1,7 @@
 import {BigNumber} from 'ethers';
 import {AbiCoder} from 'ethers/lib/utils';
 import {getUnnamedAccounts} from 'hardhat';
-import {withSnapshot} from '../../utils';
+import {withSnapshot} from '../../../utils';
 
 // TODO: Replace PolygonSand with a mock erc20 like FakeLPSandMatic
 export const setupSandRewardPool = withSnapshot(
