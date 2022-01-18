@@ -13,14 +13,21 @@ import "./PolygonLandBaseToken.sol";
 contract PolygonLandTunnel is FxBaseChildTunnel, IERC721Receiver, Ownable {
     IPolygonLand public childToken;
     uint32 public maxGasLimitOnL1 = 500;
+    uint256 public maxAllowedQuads = 144;
     mapping(uint8 => uint32) public gasLimits;
 
     event SetGasLimit(uint8 size, uint32 limit);
     event SetMaxGasLimit(uint32 maxGasLimit);
+    event SetMaxAllowedQuads(uint256 maxQuads);
 
     function setMaxLimitOnL1(uint32 _maxGasLimit) external onlyOwner {
         maxGasLimitOnL1 = _maxGasLimit;
         emit SetMaxGasLimit(_maxGasLimit);
+    }
+
+    function setMaxAllowedQuads(uint256 _maxAllowedQuads) external onlyOwner {
+        maxAllowedQuads = _maxAllowedQuads;
+        emit SetMaxAllowedQuads(_maxAllowedQuads);
     }
 
     function _setLimit(uint8 size, uint32 limit) internal {
@@ -55,12 +62,14 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721Receiver, Ownable {
         require(sizes.length == xs.length && sizes.length == ys.length, "sizes, xs, ys must be same length");
 
         uint32 gasLimit = 0;
+        uint256 quads = 0;
         for (uint256 i = 0; i < sizes.length; i++) {
             gasLimit += gasLimits[uint8(sizes[i])];
+            quads += sizes[i] * sizes[i];
         }
 
+        require(quads <= maxAllowedQuads, "Exceeds max allowed quads.");
         require(gasLimit < maxGasLimitOnL1, "Exceeds gas limit on L1.");
-
         for (uint256 i = 0; i < sizes.length; i++) {
             childToken.transferQuad(msg.sender, address(this), sizes[i], xs[i], ys[i], data);
         }
