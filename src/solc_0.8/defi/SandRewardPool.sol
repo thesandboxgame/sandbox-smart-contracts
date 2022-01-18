@@ -208,7 +208,6 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     function _withdrawStake(address account, uint256 amount) internal {
         require(amount > 0, "SandRewardPool: Cannot withdraw 0");
         super._withdraw(amount);
-        _updateContribution(account);
         emit Withdrawn(account, amount);
     }
 
