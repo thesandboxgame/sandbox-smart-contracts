@@ -27,6 +27,7 @@ describe('TwoPeriodsRewardCalculator', function () {
         contractAsRewardDistribution.restartRewards()
       ).to.be.revertedWith('not reward pool');
     });
+
     function rewardDistributionRoleCheck(
       method: (contract: Contract) => Promise<void>
     ) {
@@ -55,6 +56,7 @@ describe('TwoPeriodsRewardCalculator', function () {
         );
       });
     }
+
     // eslint-disable-next-line mocha/no-setup-in-describe
     rewardDistributionRoleCheck((c) => c.runCampaign(12345678, 9876));
     // eslint-disable-next-line mocha/no-setup-in-describe
@@ -167,6 +169,7 @@ describe('TwoPeriodsRewardCalculator', function () {
       }
       return getTime();
     }
+
     it('run an initial campaign alone', async function () {
       const {contract, contractAsRewardDistribution} = await twoPeriodsSetup();
       const durationInSeconds = 28 * 24 * 60 * 60;
@@ -277,6 +280,206 @@ describe('TwoPeriodsRewardCalculator', function () {
       expect(await contract.getRewards()).to.be.equal(
         rewards1.add(rewards2).add(rewards3)
       );
+      expect(await contract.isCampaignRunning()).to.be.false;
+    });
+  });
+
+  describe('restart reward', function () {
+    it('before everything', async function () {
+      const {
+        contract,
+        contractAsRewardDistribution,
+        contractAsRewardPool,
+      } = await twoPeriodsSetup();
+      const duration1 = 28 * 24 * 60 * 60;
+      const rate1 = 123;
+      // Must be divisible by duration1 !!!
+      const rewards1 = BigNumber.from(duration1 * rate1);
+      const duration2 = 28 * 24 * 60;
+      const rate2 = 456;
+      // Must be divisible by duration2 !!!
+      const rewards2 = BigNumber.from(duration2 * rate2);
+
+      expect(await contract.getRewards()).to.be.equal(0);
+      await contractAsRewardPool.restartRewards();
+      expect(await contract.getRewards()).to.be.equal(0);
+
+      const startTime = await doOnNextBlock(async () => {
+        await contractAsRewardDistribution.setInitialCampaign(
+          rewards1,
+          duration1
+        );
+        await contractAsRewardDistribution.updateNextCampaign(
+          rewards2,
+          duration2
+        );
+      });
+
+      await setBlockTime(startTime + duration1 + duration2 + 10);
+      expect(await contract.getRewards()).to.be.equal(rewards1.add(rewards2));
+      expect(await contract.isCampaignRunning()).to.be.false;
+    });
+
+    it('in middle of the first campaign', async function () {
+      const {
+        contract,
+        contractAsRewardDistribution,
+        contractAsRewardPool,
+      } = await twoPeriodsSetup();
+      const duration1 = 28 * 24 * 60 * 60;
+      const rate1 = 123;
+      // Must be divisible by duration1 !!!
+      const rewards1 = BigNumber.from(duration1 * rate1);
+      const duration2 = 28 * 24 * 60;
+      const delta1 = duration1 / 3;
+      const rate2 = 456;
+      // Must be divisible by duration2 !!!
+      const rewards2 = BigNumber.from(duration2 * rate2);
+
+      const startTime = await doOnNextBlock(async () => {
+        await contractAsRewardDistribution.setInitialCampaign(
+          rewards1,
+          duration1
+        );
+        await contractAsRewardDistribution.updateNextCampaign(
+          rewards2,
+          duration2
+        );
+      });
+
+      await doOnNextBlock(async () => {
+        await contractAsRewardPool.restartRewards();
+      }, startTime + delta1);
+      await setBlockTime(startTime + duration1 + duration2 + 10);
+      expect(await contract.getRewards()).to.be.equal(
+        rewards2.add(rate1 * (duration1 - delta1))
+      );
+      expect(await contract.isCampaignRunning()).to.be.false;
+    });
+
+    it('in middle of the second campaign', async function () {
+      const {
+        contract,
+        contractAsRewardDistribution,
+        contractAsRewardPool,
+      } = await twoPeriodsSetup();
+      const duration1 = 28 * 24 * 60 * 60;
+      const rate1 = 123;
+      // Must be divisible by duration1 !!!
+      const rewards1 = BigNumber.from(duration1 * rate1);
+      const duration2 = 28 * 24 * 60;
+      const delta2 = duration2 / 3;
+      const rate2 = 456;
+      // Must be divisible by duration2 !!!
+      const rewards2 = BigNumber.from(duration2 * rate2);
+
+      const startTime = await doOnNextBlock(async () => {
+        await contractAsRewardDistribution.setInitialCampaign(
+          rewards1,
+          duration1
+        );
+      });
+      await contractAsRewardDistribution.updateNextCampaign(
+        rewards2,
+        duration2
+      );
+      await doOnNextBlock(async () => {
+        await contractAsRewardPool.restartRewards();
+      }, startTime + duration1 + delta2);
+      await setBlockTime(startTime + duration1 + duration2 + 10);
+      expect(await contract.getRewards()).to.be.equal(
+        rate2 * (duration2 - delta2)
+      );
+      expect(await contract.isCampaignRunning()).to.be.false;
+    });
+
+    it('after everything', async function () {
+      const {
+        contract,
+        contractAsRewardDistribution,
+        contractAsRewardPool,
+      } = await twoPeriodsSetup();
+      const duration1 = 28 * 24 * 60 * 60;
+      const rate1 = 123;
+      // Must be divisible by duration1 !!!
+      const rewards1 = BigNumber.from(duration1 * rate1);
+      const duration2 = 28 * 24 * 60;
+      const rate2 = 456;
+      // Must be divisible by duration2 !!!
+      const rewards2 = BigNumber.from(duration2 * rate2);
+
+      const startTime = await doOnNextBlock(async () => {
+        await contractAsRewardDistribution.setInitialCampaign(
+          rewards1,
+          duration1
+        );
+      });
+      await contractAsRewardDistribution.updateNextCampaign(
+        rewards2,
+        duration2
+      );
+
+      await setBlockTime(startTime + duration1 + duration2 + 1000);
+
+      expect(await contract.getRewards()).to.be.equal(rewards1.add(rewards2));
+      await contractAsRewardPool.restartRewards();
+      expect(await contract.getRewards()).to.be.equal(0);
+      expect(await contract.isCampaignRunning()).to.be.false;
+    });
+    it('intermixed', async function () {
+      const {
+        contract,
+        contractAsRewardDistribution,
+        contractAsRewardPool,
+      } = await twoPeriodsSetup();
+      const duration1 = 28 * 24 * 60 * 60;
+      const delta1 = duration1 / 3;
+      const rate1 = 123;
+      // Must be divisible by duration1 !!!
+      const rewards1 = BigNumber.from(duration1 * rate1);
+      const duration2 = 28 * 24 * 60;
+      const delta2 = duration2 / 3;
+      const rate2 = 456;
+      // Must be divisible by duration2 !!!
+      const rewards2 = BigNumber.from(duration2 * rate2);
+
+      const startTime = await doOnNextBlock(async () => {
+        await contractAsRewardDistribution.setInitialCampaign(
+          rewards1,
+          duration1
+        );
+        await contractAsRewardDistribution.updateNextCampaign(
+          rewards2,
+          duration2
+        );
+      });
+
+      await setBlockTime(startTime + delta1);
+      expect(await contract.getRewards()).to.be.equal(delta1 * rate1);
+
+      await doOnNextBlock(async () => {
+        await contractAsRewardPool.restartRewards();
+        expect(await contract.getRewards()).to.be.equal(0);
+      }, startTime + 2 * delta1);
+
+      await setBlockTime(startTime + duration1);
+      expect(await contract.getRewards()).to.be.equal(delta1 * rate1);
+
+      await setBlockTime(startTime + duration1 + delta2);
+      expect(await contract.getRewards()).to.be.equal(
+        delta1 * rate1 + delta2 * rate2
+      );
+
+      await doOnNextBlock(async () => {
+        await contractAsRewardPool.restartRewards();
+        expect(await contract.getRewards()).to.be.equal(0);
+      }, startTime + duration1 + 2 * delta2);
+
+      await setBlockTime(startTime + duration1 + duration2 + 1000);
+      expect(await contract.getRewards()).to.be.equal(delta2 * rate2);
+
+      await contractAsRewardPool.restartRewards();
+      expect(await contract.getRewards()).to.be.equal(0);
       expect(await contract.isCampaignRunning()).to.be.false;
     });
   });
