@@ -14,9 +14,15 @@ import {IContributionCalculator} from "./interfaces/IContributionCalculator.sol"
 import {IRewardCalculator} from "./interfaces/IRewardCalculator.sol";
 
 /// @title A pool that distributes rewards between users that stake sand (or any erc20 token)
-/// @dev The contributions are updated passively, an external call to computeContribution is needed.
-/// @dev default behaviour (address(0)) for contributionCalculator is to use the stacked amount as contribution
-/// @dev default behaviour (address(0)) for rewardCalculator is to stop giving rewards
+/// @notice The contributions are updated passively, an external call to computeContribution from a backend is needed.
+/// @notice After initialization the reward calculator must be set by the admin.
+/// @dev The contract has two plugins that affect the behaviour: contributionCalculator and rewardCalculator
+/// @dev contributionCalculator instead of using the stake directly the result of computeContribution is used
+/// @dev this way some users can get an extra share of the rewards
+/// @dev rewardCalculator is used to manage the rate at which the rewards are distributed.
+/// @dev This way we can build different types of pools by mixing in the plugins we want with this contract.
+/// @dev default behaviour (address(0)) for contributionCalculator is to use the stacked amount as contribution.
+/// @dev default behaviour (address(0)) for rewardCalculator is that no rewards are giving
 contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ERC2771Handler {
     using SafeERC20 for IERC20;
     using Address for address;
@@ -27,8 +33,15 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     event RewardPaid(address indexed account, uint256 rewardAmount);
     event ContributionUpdated(address indexed account, uint256 newContribution, uint256 oldContribution);
 
+    // This value multiplied by the user contribution is the share of accumulated rewards (from the start of time
+    // until the last call to restartRewards) for the user taking into account the value of totalContributions.
     uint256 public rewardPerTokenStored;
+
+    // This value multiplied by the user contribution is the share of reward from the the last time
+    // the user changed his contribution and called restartRewards
     mapping(address => uint256) public userRewardPerTokenPaid;
+
+    // This value is the accumulated rewards won by the user when he called the contract.
     mapping(address => uint256) public rewards;
 
     IERC20 public rewardToken;
@@ -42,7 +55,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         uint256 lockPeriodInSecs;
         mapping(address => uint256) lastWithdraw;
     }
-
+    // This is used to implement a time buffer for reward retrieval, so the used cannot re-stake the rewards too fast.
     AntiCompound public antiCompound;
 
     constructor(
@@ -70,28 +83,41 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         _;
     }
 
+    /// @notice set the lockPeriodInSecs for the anti-compound buffer
+    /// @param lockPeriodInSecs amount of time the user must wait between reward withdrawal
     function setAntiCompoundLockPeriod(uint256 lockPeriodInSecs) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "SandRewardPool: not admin");
         antiCompound.lockPeriodInSecs = lockPeriodInSecs;
     }
 
+    /// @notice set the contribution calculator
+    /// @param contractAddress address of a plugin that calculates the contribution of the user based on his stake
     function setContributionCalculator(address contractAddress) external isContractAndAdmin(contractAddress) {
         contributionCalculator = IContributionCalculator(contractAddress);
     }
 
+    /// @notice set the reward token
+    /// @param contractAddress address token used to pay rewards
     function setRewardToken(address contractAddress) external isContractAndAdmin(contractAddress) {
         rewardToken = IERC20(contractAddress);
     }
 
+    /// @notice set the stake token
+    /// @param contractAddress address token used to stake funds
     function setStakeToken(address contractAddress) external isContractAndAdmin(contractAddress) {
         _stakeToken = IERC20(contractAddress);
     }
 
+    /// @notice set the trusted forwarder
+    /// @param trustedForwarder address of the contract that is enabled to send meta-tx on behalf of the user
     function setTrustedForwarder(address trustedForwarder) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "SandRewardPool: not admin");
         _trustedForwarder = trustedForwarder;
     }
 
+    /// @notice set the reward calculator
+    /// @param contractAddress address of a plugin that calculates absolute rewards at any point in time
+    /// @param restartRewards if true the rewards from the previous calculator are accumulated before changing it
     function setRewardCalculator(address contractAddress, bool restartRewards)
         external
         isContractAndAdmin(contractAddress)
@@ -103,23 +129,38 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         rewardCalculator = IRewardCalculator(contractAddress);
     }
 
+    /// @notice the admin recover is able to recover reward funds
+    /// @param receiver address of the beneficiary of the recovered funds
+    /// @dev this function must be called in an emergency situation only.
+    /// @dev Calling it is risky specially when rewardToken == stakeToken
     function recoverFunds(address receiver) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "SandRewardPool: not admin");
         rewardToken.safeTransfer(receiver, rewardToken.balanceOf(address(this)));
     }
 
+    /// @notice return the total supply of staked tokens
+    /// @return the total supply of staked tokens
     function totalSupply() external view returns (uint256) {
         return _totalSupply;
     }
 
+    /// @notice return the balance of staked tokens for a user
+    /// @param account the address of the account
+    /// @return balance of staked tokens
     function balanceOf(address account) external view returns (uint256) {
         return _balances[account];
     }
 
+    /// @notice return the address of the stake token contract
+    /// @return address of the stake token contract
     function stakeToken() external view returns (IERC20) {
         return _stakeToken;
     }
 
+    /// @notice return the amount of rewards deposited in the contract that can be distributed by different campaigns
+    /// @return the total amount of deposited rewards
+    /// @dev this function can be called by a reward calculator to throw if a campaign doesn't have
+    /// @dev enough rewards to start
     function getRewardsAvailable() external view returns (uint256) {
         if (address(rewardToken) != address(_stakeToken)) {
             return rewardToken.balanceOf(address(this));
@@ -127,26 +168,51 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         return _stakeToken.balanceOf(address(this)) - _totalSupply;
     }
 
+    /// @notice return the sum of the values returned by the contribution calculator
+    /// @return total contributions of the users
+    /// @dev this is the same than the totalSupply only if the contribution calculator
+    /// @dev uses the staked amount as the contribution of the user which is the default behaviour
     function totalContributions() external view returns (uint256) {
         return _totalContributions;
     }
 
+    /// @notice return the contribution of some user
+    /// @param account the address of the account
+    /// @return contribution of the users
+    /// @dev this is the same than the balanceOf only if the contribution calculator
+    /// @dev uses the staked amount as the contribution of the user which is the default behaviour
     function contributionOf(address account) external view returns (uint256) {
         return _contributions[account];
     }
 
+    /// @notice accumulated rewards taking into account the totalContribution (see: rewardPerTokenStored)
+    /// @return the accumulated total rewards
+    /// @dev This value multiplied by the user contribution is the share of accumulated rewards for the user. Taking
+    /// @dev into account the value of totalContributions.
     function rewardPerToken() external view returns (uint256) {
         return rewardPerTokenStored + _rewardPerToken();
     }
 
+    /// @notice available earnings for some user
+    /// @param account the address of the account
+    /// @return the available earnings for the user
     function earned(address account) external view returns (uint256) {
         return rewards[account] + _earned(account, _rewardPerToken());
     }
 
+    /// @notice accumulates the current rewards into rewardPerTokenStored and restart the reward calculator
+    /// @dev calling this function make no difference. It is useful for testing and when the reward calculator
+    /// @dev is changed.
     function restartRewards() external {
         _restartRewards();
     }
 
+    /// @notice update the contribution for a user
+    /// @param account the address of the account
+    /// @dev if the user change his holdings (or any other parameter that affect the contribution calculation),
+    /// @dev he can the reward distribution to his favor. This function must be called by an external agent ASAP to
+    /// @dev update the contribution for the user. We understand the risk but the rewards are distributes slowly so
+    /// @dev the user cannot affect the reward distribution heavily.
     function computeContribution(address account) external {
         require(account != address(0), "SandRewardPool: invalid address");
         // We decide to give the user the accumulated rewards even if he cheated a little bit.
@@ -154,6 +220,9 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         _updateContribution(account);
     }
 
+    /// @notice update the contribution for a sef of users
+    /// @param accounts the addresses of the accounts to update
+    /// @dev see: computeContribution
     function computeContributionInBatch(address[] calldata accounts) external {
         _restartRewards();
         for (uint256 i = 0; i < accounts.length; i++) {
@@ -166,6 +235,9 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         }
     }
 
+    /// @notice stake some amount into the contract
+    /// @param amount the amount of tokens to stake
+    /// @dev the user must approve in the stack token before calling this function
     function stake(uint256 amount) external nonReentrant {
         require(amount > 0, "SandRewardPool: Cannot stake 0");
 
@@ -185,12 +257,16 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         emit Staked(_msgSender(), amount);
     }
 
+    /// @notice withdraw the stake from the contract
+    /// @param amount the amount of tokens to withdraw
+    /// @dev the user can withdraw his stake independently from the rewards
     function withdraw(uint256 amount) external nonReentrant {
         _processRewards(_msgSender());
         _withdrawStake(_msgSender(), amount);
         _updateContribution(_msgSender());
     }
 
+    /// @notice withdraw the stake and the rewards from the contract
     function exit() external nonReentrant {
         _processRewards(_msgSender());
         _withdrawStake(_msgSender(), _balances[_msgSender()]);
@@ -199,6 +275,8 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         emit Exit(_msgSender());
     }
 
+    /// @notice withdraw the rewards from the contract
+    /// @dev the user can withdraw his stake independently from the rewards
     function getReward() external nonReentrant {
         _processRewards(_msgSender());
         _withdrawRewards(_msgSender());
@@ -266,7 +344,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         // - userRewardPerTokenPaid[account] * _contributions[account]  / _totalContributions is the portion of
         //      rewards the last time the user changed his contribution and called _restartRewards
         //      (_totalContributions corresponds to previous value of that moment).
-        // - rewardPerTokenStored * _contributions[account]  / _totalContributions is the share of the user from the
+        // - rewardPerTokenStored * _contributions[account] is the share of the user from the
         //      accumulated rewards (from the start of time until the last call to _restartRewards) with the
         //      current value of _totalContributions
         // - _rewardPerToken() * _contributions[account]  / _totalContributions is the share of the user of the
