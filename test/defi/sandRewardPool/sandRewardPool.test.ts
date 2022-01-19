@@ -757,7 +757,6 @@ describe('new SandRewardPool main contract tests', function () {
     it('setReward with meta-tx', async function () {
       const {
         contract,
-        balances,
         getUser,
         trustedForwarder,
         rewardCalculatorMock,
@@ -780,7 +779,6 @@ describe('new SandRewardPool main contract tests', function () {
     it('stake with meta-tx', async function () {
       const {
         contract,
-        balances,
         getUser,
         trustedForwarder,
         rewardCalculatorMock,
@@ -789,23 +787,34 @@ describe('new SandRewardPool main contract tests', function () {
 
       const user = await getUser();
 
-      // const initialBalance = await balances(user.address);
+      const {to, data} = await contract.populateTransaction.stake(1000);
 
-      const {to, data} = await user.pool.populateTransaction.stake(1000);
+      // increasing the gas to avoid tx failing
+      await sendMetaTx(to, trustedForwarder, data, user.address, '1000000000');
 
-      await sendMetaTx(to, trustedForwarder, data, user.address);
+      expect(await user.pool.balanceOf(user.address)).to.be.equal(1000);
+    });
+    it('withdraw with meta-tx', async function () {
+      const {
+        contract,
+        getUser,
+        trustedForwarder,
+        rewardCalculatorMock,
+      } = await setupSandRewardPoolTest();
+      await contract.setRewardCalculator(rewardCalculatorMock.address, false);
 
-      // await user.pool.stake(1000);
+      const user = await getUser();
 
-      console.log((await balances(user.address)).stake.toString());
+      user.pool.stake(1000);
 
-      console.log((await user.pool.balanceOf(user.address)).toString());
+      expect(await user.pool.balanceOf(user.address)).to.be.equal(1000);
 
-      // expect(contract.balanceof());
+      const {to, data} = await contract.populateTransaction.withdraw(1000);
 
-      // await user.pool.stake(1000);
+      // increasing the gas to avoid tx failing
+      await sendMetaTx(to, trustedForwarder, data, user.address, '1000000000');
 
-      // expect(await contract.earned(user.address)).to.be.equal(0);
+      expect(await user.pool.balanceOf(user.address)).to.be.equal(0);
     });
   });
 });
