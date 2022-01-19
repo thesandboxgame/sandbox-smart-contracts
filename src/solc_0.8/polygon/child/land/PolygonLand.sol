@@ -10,11 +10,17 @@ contract PolygonLand is PolygonLandBaseToken {
     address public polygonLandTunnel;
 
     constructor() {
-        _admin = msg.sender;
+        _admin = _msgSender();
     }
 
     function setPolygonLandTunnel(address _polygonLandTunnel) external onlyAdmin {
         polygonLandTunnel = _polygonLandTunnel;
+    }
+
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyAdmin {
+        _trustedForwarder = trustedForwarder;
     }
 
     function mint(
@@ -24,19 +30,7 @@ contract PolygonLand is PolygonLandBaseToken {
         uint256 y,
         bytes memory data
     ) external {
-        require(msg.sender == polygonLandTunnel, "Invalid sender");
+        require(_msgSender() == polygonLandTunnel, "Invalid sender");
         _mintQuad(user, size, x, y, data);
     }
-
-    // @temp - Will remove once locking mechanism has been tested
-    //
-    // function exit(uint256 tokenId) public override {
-    //     require(msg.sender == polygonLandTunnel, "Invalid sender");
-    //     // @todo - lock
-    //     uint256 storageId = _storageId(tokenId);
-    //     address from = _ownerOf(tokenId);
-    //     _owners[storageId] = (_owners[storageId] & NOT_OPERATOR_FLAG) | BURNED_FLAG; // record as non owner but keep track of last owner
-    //     _numNFTPerAddress[from]--;
-    //     emit Transfer(from, address(0), tokenId);
-    // }
 }
