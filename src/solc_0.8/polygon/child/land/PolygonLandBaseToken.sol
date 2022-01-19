@@ -203,8 +203,7 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
         require(sizes.length == xs.length && xs.length == ys.length, "invalid data");
-        bool metaTx = _msgSender() != from && isTrustedForwarder(_msgSender());
-        if (_msgSender() != from && !metaTx) {
+        if (_msgSender() != from) {
             require(
                 _superOperators[_msgSender()] || _operatorsForAll[from][_msgSender()],
                 "not authorized to transferMultiQuads"
@@ -230,7 +229,7 @@ contract PolygonLandBaseToken is ERC721BaseToken {
                 }
             }
             require(
-                _checkOnERC721BatchReceived(metaTx ? from : _msgSender(), from, to, ids, data),
+                _checkOnERC721BatchReceived(_msgSender(), from, to, ids, data),
                 "erc721 batch transfer rejected by to"
             );
         }
@@ -246,8 +245,7 @@ contract PolygonLandBaseToken is ERC721BaseToken {
     ) external {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
-        bool metaTx = _msgSender() != from && isTrustedForwarder(_msgSender());
-        if (_msgSender() != from && !metaTx) {
+        if (_msgSender() != from) {
             require(
                 _superOperators[_msgSender()] || _operatorsForAll[from][_msgSender()],
                 "not authorized to transferQuad"
@@ -257,7 +255,7 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         _numNFTPerAddress[from] -= size * size;
         _numNFTPerAddress[to] += size * size;
 
-        _checkBatchReceiverAcceptQuad(metaTx ? from : _msgSender(), from, to, size, x, y, data);
+        _checkBatchReceiverAcceptQuad(_msgSender(), from, to, size, x, y, data);
     }
 
     function exists(
