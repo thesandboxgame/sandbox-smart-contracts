@@ -57,7 +57,6 @@ export const setupSandRewardPool = withSnapshot(
     // Added
     await deployments.deploy('ContributionCalculator', {
       from: deployer,
-      // contract: 'LandMemoizedContributionCalculator',
       contract: 'LandContributionCalculator',
       args: [land.address],
       log: true,

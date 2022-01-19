@@ -2,6 +2,38 @@ import {getUnnamedAccounts} from 'hardhat';
 import {setupUsers, toWei, withSnapshot} from '../../../utils';
 import {BigNumber, BigNumberish, Contract} from 'ethers';
 import {randomBigNumber} from '../utils';
+import {AbiCoder} from 'ethers/lib/utils';
+
+export const setupLandOwnersSandRewardPool = withSnapshot(
+  ['LandOwnersSandRewardPool'],
+  async function (hre) {
+    const {getNamedAccounts, ethers} = hre;
+    const {deployer} = await getNamedAccounts();
+    const [other] = await getUnnamedAccounts();
+    const initialBalance = toWei(10);
+    const sandAsOther = await ethers.getContract('PolygonSand', other);
+    const landAsOther = await ethers.getContract('PolygonLand', other);
+
+    const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
+
+    const contractAsOther = await ethers.getContract(
+      'LandOwnersSandRewardPool',
+      other
+    );
+    const abiCoder = new AbiCoder();
+    const data = abiCoder.encode(['uint256'], [initialBalance]);
+    await childChainManager.callSandDeposit(sandAsOther.address, other, data);
+
+    return {
+      deployer,
+      contractAsOther,
+      other,
+      childChainManager,
+      sandAsOther,
+      landAsOther,
+    };
+  }
+);
 
 export const setupSandRewardPoolTest = withSnapshot([], async function (hre) {
   const {deployments, getNamedAccounts, ethers} = hre;
