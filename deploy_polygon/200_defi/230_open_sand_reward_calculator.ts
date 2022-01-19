@@ -26,5 +26,5 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['OpenSandRewardPool', 'OpenSandRewardCalculator_deploy'];
-func.dependencies = [];
+func.dependencies = ['OpenSandRewardPool_deploy'];
 func.skip = async () => !isInTags(hre, 'L2');
