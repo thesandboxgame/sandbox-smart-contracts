@@ -3,12 +3,12 @@ pragma solidity 0.8.2;
 
 import "fx-portal/contracts/tunnel/FxBaseRootTunnel.sol";
 import "../../../common/interfaces/ILandToken.sol";
-import "../../../common/interfaces/IERC721TokenReceiver.sol";
+import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 
 // @todo - natspec comments
 
-contract LandTunnel is FxBaseRootTunnel, IERC721TokenReceiver, Ownable {
+contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, Ownable {
     address public rootToken;
 
     event Deposit(address user, uint256 size, uint256 x, uint256 y, bytes data);
@@ -29,6 +29,19 @@ contract LandTunnel is FxBaseRootTunnel, IERC721TokenReceiver, Ownable {
         bytes calldata /* data */
     ) external pure override returns (bytes4) {
         return this.onERC721Received.selector;
+    }
+
+    function onERC721BatchReceived(
+        address, /* operator */
+        address, /* from */
+        uint256[] calldata, /* ids */
+        bytes calldata /* data */
+    ) external pure override returns (bytes4) {
+        return this.onERC721BatchReceived.selector;
+    }
+
+    function supportsInterface(bytes4 interfaceId) external view returns (bool) {
+        return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
     }
 
     function batchTransferQuadToL2(
