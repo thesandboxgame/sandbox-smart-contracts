@@ -149,8 +149,14 @@ describe('PolygonLand.sol', function () {
           plotCount
         );
       });
-      it('should not be able to transfer 24x24 Land', async function () {
-        const {Land, landMinter, users, LandTunnel} = await setupLand();
+      it('should be able to transfer 24x24 Land', async function () {
+        const {
+          Land,
+          landMinter,
+          users,
+          LandTunnel,
+          PolygonLand,
+        } = await setupLand();
         const landHolder = users[0];
         const size = 24;
         const x = 0;
@@ -164,15 +170,20 @@ describe('PolygonLand.sol', function () {
 
         // Transfer to L1 Tunnel
         await landHolder.Land.setApprovalForAll(LandTunnel.address, true);
-        await expect(
-          landHolder.LandTunnel.batchTransferQuadToL2(
-            landHolder.address,
-            [size],
-            [x],
-            [y],
-            bytes
-          )
-        ).to.be.revertedWith('Exceeds max allowed quads');
+        await // expect
+        landHolder.LandTunnel.batchTransferQuadToL2(
+          landHolder.address,
+          [size],
+          [x],
+          [y],
+          bytes
+        );
+        // .to.be.revertedWith('Exceeds max allowed quads');
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
+        expect(await Land.balanceOf(LandTunnel.address)).to.be.equal(plotCount);
+        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
+          plotCount
+        );
       });
 
       it('should should be able to transfer multiple lands', async function () {
