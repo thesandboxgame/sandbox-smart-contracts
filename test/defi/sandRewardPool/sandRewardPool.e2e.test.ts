@@ -3,7 +3,8 @@ import {toWei} from '../../utils';
 import {setupLandOwnersSandRewardPool} from './fixtures/sandRewardPool.fixture';
 
 describe('LandOwnersSandRewardPool', function () {
-  // TODO: when we have L1 lands
+  // TODO: when we have L2 lands
+  // eslint-disable-next-line mocha/no-skipped-tests
   it.skip('users with land should be able to stake', async function () {
     const {
       other,
