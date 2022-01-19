@@ -77,7 +77,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
         require(quads <= maxAllowedQuads, "Exceeds max allowed quads.");
         require(gasLimit < maxGasLimitOnL1, "Exceeds gas limit on L1.");
         for (uint256 i = 0; i < sizes.length; i++) {
-            childToken.transferQuad(msg.sender, address(this), sizes[i], xs[i], ys[i], data);
+            childToken.transferQuad(_msgSender(), address(this), sizes[i], xs[i], ys[i], data);
         }
         _sendMessageToRoot(abi.encode(to, sizes, xs, ys, data));
     }
