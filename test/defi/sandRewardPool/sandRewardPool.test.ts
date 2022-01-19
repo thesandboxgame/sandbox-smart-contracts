@@ -4,6 +4,7 @@ import {Contract} from 'ethers';
 import {setupSandRewardPoolTest, sum} from './fixtures/sandRewardPool.fixture';
 import {toWei} from '../../utils';
 import {randomBigNumber} from './utils';
+import {sendMetaTx} from '../../sendMetaTx';
 
 describe('new SandRewardPool main contract tests', function () {
   describe('roles', function () {
@@ -22,7 +23,7 @@ describe('new SandRewardPool main contract tests', function () {
           getUser,
         } = await setupSandRewardPoolTest();
         const user = await getUser();
-        const poolAsOther = await contract.connect(
+        const poolAsOther = contract.connect(
           await ethers.getSigner(user.address)
         );
         await expect(
@@ -733,6 +734,87 @@ describe('new SandRewardPool main contract tests', function () {
           )
         );
       }
+    });
+  });
+  describe('trusted forwarder and meta-tx', function () {
+    it('should fail to set the trusted forwarder if not admin', async function () {
+      const {getUser, contractAsOther} = await setupSandRewardPoolTest();
+      const user = await getUser();
+
+      expect(
+        contractAsOther.setTrustedForwarder(user.address)
+      ).to.be.revertedWith('SandRewardPool: not admin');
+    });
+    it('should success to set the trusted forwarder if admin', async function () {
+      const {getUser, contract} = await setupSandRewardPoolTest();
+
+      const user = await getUser();
+
+      expect(contract.setTrustedForwarder(user.address)).to.be.not.reverted;
+
+      expect(await contract.getTrustedForwarder()).to.be.equal(user.address);
+    });
+    it('setReward with meta-tx', async function () {
+      const {
+        contract,
+        getUser,
+        trustedForwarder,
+        rewardCalculatorMock,
+      } = await setupSandRewardPoolTest();
+      await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+
+      const user = await getUser();
+
+      const {
+        to,
+        data,
+      } = await rewardCalculatorMock.populateTransaction.setReward(22);
+
+      await sendMetaTx(to, trustedForwarder, data, user.address);
+
+      const reward = await rewardCalculatorMock.getRewards();
+
+      expect(reward).to.be.equal(22);
+    });
+    it('stake with meta-tx', async function () {
+      const {
+        contract,
+        getUser,
+        trustedForwarder,
+        rewardCalculatorMock,
+      } = await setupSandRewardPoolTest();
+      await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+
+      const user = await getUser();
+
+      const {to, data} = await contract.populateTransaction.stake(1000);
+
+      // increasing the gas to avoid tx failing
+      await sendMetaTx(to, trustedForwarder, data, user.address, '1000000000');
+
+      expect(await user.pool.balanceOf(user.address)).to.be.equal(1000);
+    });
+    it('withdraw with meta-tx', async function () {
+      const {
+        contract,
+        getUser,
+        trustedForwarder,
+        rewardCalculatorMock,
+      } = await setupSandRewardPoolTest();
+      await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+
+      const user = await getUser();
+
+      user.pool.stake(1000);
+
+      expect(await user.pool.balanceOf(user.address)).to.be.equal(1000);
+
+      const {to, data} = await contract.populateTransaction.withdraw(1000);
+
+      // increasing the gas to avoid tx failing
+      await sendMetaTx(to, trustedForwarder, data, user.address, '1000000000');
+
+      expect(await user.pool.balanceOf(user.address)).to.be.equal(0);
     });
   });
 });

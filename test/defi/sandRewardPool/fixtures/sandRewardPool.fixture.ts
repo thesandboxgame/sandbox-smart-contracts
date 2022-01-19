@@ -69,6 +69,8 @@ export const setupSandRewardPoolTest = withSnapshot([], async function (hre) {
     return users;
   };
 
+  const contractAsOther = await ethers.getContract('SandRewardPool', others[1]);
+
   return {
     totalRewardMinted,
     contract,
@@ -77,6 +79,8 @@ export const setupSandRewardPoolTest = withSnapshot([], async function (hre) {
     rewardCalculatorMock,
     contributionCalculatorMock,
     deployer,
+    contractAsOther,
+    trustedForwarder,
     setRewardAndStake: async (
       reward: BigNumberish,
       contract: Contract,

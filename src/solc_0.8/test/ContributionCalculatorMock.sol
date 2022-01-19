@@ -2,7 +2,7 @@
 
 pragma solidity 0.8.2;
 
-import "../defi/IContributionCalculator.sol";
+import "../defi/interfaces/IContributionCalculator.sol";
 
 contract ContributionCalculatorMock is IContributionCalculator {
     mapping(address => uint256) public contribution;

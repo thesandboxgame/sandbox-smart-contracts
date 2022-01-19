@@ -4,7 +4,7 @@ pragma solidity 0.8.2;
 
 import {Math} from "@openzeppelin/contracts-0.8/utils/math/Math.sol";
 import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
-import {IRewardCalculator} from "../IRewardCalculator.sol";
+import {IRewardCalculator} from "../interfaces/IRewardCalculator.sol";
 
 contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
     event InitialCampaign(

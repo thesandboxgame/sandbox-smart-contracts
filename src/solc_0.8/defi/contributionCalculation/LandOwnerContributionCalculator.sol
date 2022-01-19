@@ -6,7 +6,7 @@ import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import {IERC721} from "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import {SafeMathWithRequire} from "../../common/Libraries/SafeMathWithRequire.sol";
-import {IContributionCalculator} from "../IContributionCalculator.sol";
+import {IContributionCalculator} from "../interfaces/IContributionCalculator.sol";
 
 contract LandOwnersAloneContributionCalculator is IContributionCalculator, Ownable {
     using Address for address;

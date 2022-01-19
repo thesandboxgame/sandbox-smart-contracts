@@ -10,8 +10,8 @@ import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
 import {ERC2771Handler} from "../common/BaseWithStorage/ERC2771Handler.sol";
 import {StakeTokenWrapper} from "./StakeTokenWrapper.sol";
-import {IContributionCalculator} from "./IContributionCalculator.sol";
-import {IRewardCalculator} from "./IRewardCalculator.sol";
+import {IContributionCalculator} from "./interfaces/IContributionCalculator.sol";
+import {IRewardCalculator} from "./interfaces/IRewardCalculator.sol";
 
 /// @title A pool that distributes rewards between users that stake sand (or any erc20 token)
 /// @dev The contributions are updated passively, an external call to computeContribution is needed.
