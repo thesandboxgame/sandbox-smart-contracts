@@ -275,7 +275,13 @@ describe('PolygonLand.sol', function () {
           const {to, data} = await landHolder.LandTunnel.populateTransaction[
             'batchTransferQuadToL2(address,uint256[],uint256[],uint256[],bytes)'
           ](landHolder.address, [size], [x], [y], bytes);
-          await sendMetaTx(to, trustedForwarder, data, landHolder.address, "1000000");
+          await sendMetaTx(
+            to,
+            trustedForwarder,
+            data,
+            landHolder.address,
+            '1000000'
+          );
           expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
           expect(await Land.balanceOf(LandTunnel.address)).to.be.equal(
             plotCount
@@ -310,7 +316,13 @@ describe('PolygonLand.sol', function () {
           const {to, data} = await landHolder.LandTunnel.populateTransaction[
             'batchTransferQuadToL2(address,uint256[],uint256[],uint256[],bytes)'
           ](landHolder.address, [size], [x], [y], bytes);
-          await sendMetaTx(to, trustedForwarder, data, landHolder.address, "1000000");
+          await sendMetaTx(
+            to,
+            trustedForwarder,
+            data,
+            landHolder.address,
+            '1000000'
+          );
           expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
           expect(await Land.balanceOf(LandTunnel.address)).to.be.equal(
             plotCount
@@ -345,7 +357,13 @@ describe('PolygonLand.sol', function () {
           const {to, data} = await landHolder.LandTunnel.populateTransaction[
             'batchTransferQuadToL2(address,uint256[],uint256[],uint256[],bytes)'
           ](landHolder.address, [size], [x], [y], bytes);
-          await sendMetaTx(to, trustedForwarder, data, landHolder.address, "1000000");
+          await sendMetaTx(
+            to,
+            trustedForwarder,
+            data,
+            landHolder.address,
+            '1000000'
+          );
           expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
           expect(await Land.balanceOf(LandTunnel.address)).to.be.equal(
             plotCount
@@ -381,7 +399,13 @@ describe('PolygonLand.sol', function () {
           const {to, data} = await landHolder.LandTunnel.populateTransaction[
             'batchTransferQuadToL2(address,uint256[],uint256[],uint256[],bytes)'
           ](landHolder.address, [size], [x], [y], bytes);
-          await sendMetaTx(to, trustedForwarder, data, landHolder.address, "1500000");
+          await sendMetaTx(
+            to,
+            trustedForwarder,
+            data,
+            landHolder.address,
+            '1500000'
+          );
 
           expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
           expect(await Land.balanceOf(LandTunnel.address)).to.be.equal(
@@ -446,7 +470,13 @@ describe('PolygonLand.sol', function () {
           } = await landHolder.MockLandTunnel.populateTransaction[
             'batchTransferQuadToL2(address,uint256[],uint256[],uint256[],bytes)'
           ](landHolder.address, ...mintingData, bytes);
-          await sendMetaTx(to, trustedForwarder, data, landHolder.address, "1000000");
+          await sendMetaTx(
+            to,
+            trustedForwarder,
+            data,
+            landHolder.address,
+            '1000000'
+          );
           expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
           expect(await Land.balanceOf(MockLandTunnel.address)).to.be.equal(
             numberOfTokens
@@ -1087,7 +1117,13 @@ describe('PolygonLand.sol', function () {
           'batchTransferQuadToL1(address,uint256[],uint256[],uint256[],bytes)'
         ](landHolder.address, [size], [x], [y], bytes);
 
-        await sendMetaTx(to, trustedForwarder, data, landHolder.address, "1000000");
+        await sendMetaTx(
+          to,
+          trustedForwarder,
+          data,
+          landHolder.address,
+          '1000000'
+        );
 
         console.log('DUMMY CHECKPOINT. moving on...');
 
@@ -1166,7 +1202,13 @@ describe('PolygonLand.sol', function () {
           'batchTransferQuadToL1(address,uint256[],uint256[],uint256[],bytes)'
         ](landHolder.address, [size], [x], [y], bytes);
 
-        await sendMetaTx(to, trustedForwarder, data, landHolder.address, "1000000");
+        await sendMetaTx(
+          to,
+          trustedForwarder,
+          data,
+          landHolder.address,
+          '1000000'
+        );
 
         console.log('DUMMY CHECKPOINT. moving on...');
 
@@ -1245,7 +1287,13 @@ describe('PolygonLand.sol', function () {
           'batchTransferQuadToL1(address,uint256[],uint256[],uint256[],bytes)'
         ](landHolder.address, [size], [x], [y], bytes);
 
-        await sendMetaTx(to, trustedForwarder, data, landHolder.address, "1000000");
+        await sendMetaTx(
+          to,
+          trustedForwarder,
+          data,
+          landHolder.address,
+          '1000000'
+        );
 
         console.log('DUMMY CHECKPOINT. moving on...');
 
@@ -1324,7 +1372,13 @@ describe('PolygonLand.sol', function () {
           'batchTransferQuadToL1(address,uint256[],uint256[],uint256[],bytes)'
         ](landHolder.address, [size], [x], [y], bytes);
 
-        await sendMetaTx(to, trustedForwarder, data, landHolder.address, "1000000");
+        await sendMetaTx(
+          to,
+          trustedForwarder,
+          data,
+          landHolder.address,
+          '1000000'
+        );
 
         console.log('DUMMY CHECKPOINT. moving on...');
 
