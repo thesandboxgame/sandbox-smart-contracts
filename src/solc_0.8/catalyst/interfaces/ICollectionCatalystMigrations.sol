@@ -9,11 +9,5 @@ interface ICollectionCatalystMigrations {
         uint64 blockNumber;
     }
 
-    function migrate(
-        uint256 assetId,
-        uint16[] calldata gemIds,
-        uint64 blockNumber
-    ) external;
-
     function batchMigrate(Migration[] calldata migrations) external;
 }

@@ -3,6 +3,7 @@ import {expect} from '../../../chai-setup';
 import {waitFor, withSnapshot} from '../../../utils';
 import catalysts from '../../../../data/catalysts';
 import {gemsAndCatalystsFixtures} from '../../../common/fixtures/gemAndCatalysts';
+import {deployments} from 'hardhat';
 
 const setupGemsAndCatalysts = withSnapshot(
   ['GemsCatalystsRegistry'],
@@ -154,6 +155,54 @@ describe('GemsCatalystsRegistry', function () {
         '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
       )
     );
+  });
+
+  it('Allow 0 allowance for every gems and catalyst', async function () {
+    const {
+      gemsCatalystsRegistryAsUser3,
+      gemsCatalystsRegistry,
+      commonCatalyst,
+      rareCatalyst,
+      epicCatalyst,
+      legendaryCatalyst,
+      powerGem,
+      defenseGem,
+      speedGem,
+      magicGem,
+      luckGem,
+      user3,
+    } = await setupGemsAndCatalysts();
+
+    await gemsCatalystsRegistryAsUser3.setGemsandCatalystsMaxAllowance();
+    await gemsCatalystsRegistryAsUser3.revokeGemsandCatalystsMaxAllowance();
+
+    expect(
+      await commonCatalyst.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(BigNumber.from(0));
+    expect(
+      await rareCatalyst.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(BigNumber.from(0));
+    expect(
+      await epicCatalyst.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(BigNumber.from(0));
+    expect(
+      await legendaryCatalyst.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(BigNumber.from(0));
+    expect(
+      await powerGem.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(BigNumber.from(0));
+    expect(
+      await defenseGem.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(BigNumber.from(0));
+    expect(
+      await speedGem.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(BigNumber.from(0));
+    expect(
+      await magicGem.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(BigNumber.from(0));
+    expect(
+      await luckGem.allowance(user3, gemsCatalystsRegistry.address)
+    ).to.equal(BigNumber.from(0));
   });
 
   it('burnCatalyst should fail for unauthorized account', async function () {
@@ -392,6 +441,67 @@ describe('GemsCatalystsRegistry', function () {
     await expect(
       gemsCatalystsRegistryAsUser3.addGemsAndCatalysts([gemExample.address], [])
     ).to.be.revertedWith('NOT_AUTHORIZED');
+  });
+
+  it('addGemsAndCatalysts should fail if too many G&C', async function () {
+    const {
+      gemsCatalystsRegistry,
+      gemsCatalystsRegistryAsRegAdmin,
+      gemOwner,
+    } = await setupGemsAndCatalysts();
+
+    const addresses = [];
+    const result = await deployments.deploy(`Gem_MaxLimit`, {
+      contract: 'Gem',
+      from: gemOwner,
+      log: true,
+      args: [
+        `Gem_MaxLimit`,
+        `Gem_MaxLimit`,
+        gemOwner,
+        255,
+        gemsCatalystsRegistry.address,
+      ],
+    });
+    // In order to speed up test we deploy only one gem contract and try to add max of it
+    for (let i = 6; i < 253; i++) {
+      addresses.push(result.address);
+    }
+    await expect(
+      gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts(addresses, [])
+    ).to.be.revertedWith(
+      'GemsCatalystsRegistry: Too many gem and catalyst contracts'
+    );
+  });
+
+  it('addGemsAndCatalysts pass if max -1 G&C', async function () {
+    const {
+      gemsCatalystsRegistry,
+      gemsCatalystsRegistryAsRegAdmin,
+      gemOwner,
+    } = await setupGemsAndCatalysts();
+
+    const addresses = [];
+    const result = await deployments.deploy(`Gem_MaxLimit`, {
+      contract: 'Gem',
+      from: gemOwner,
+      log: true,
+      args: [
+        `Gem_MaxLimit`,
+        `Gem_MaxLimit`,
+        gemOwner,
+        255,
+        gemsCatalystsRegistry.address,
+      ],
+    });
+    // In order to speed up test we deploy only one gem contract and try to add max -1 of it
+    for (let i = 6; i < 252; i++) {
+      addresses.push(result.address);
+    }
+    // We should expect to pass the max G&C require but as we only deploy one gem contract it should fail on the ID order require
+    await expect(
+      gemsCatalystsRegistryAsRegAdmin.addGemsAndCatalysts(addresses, [])
+    ).to.be.revertedWith('GEM_ID_NOT_IN_ORDER');
   });
 
   it('burnDifferentGems for two different gem tokens', async function () {

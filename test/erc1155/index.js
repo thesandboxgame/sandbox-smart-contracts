@@ -686,6 +686,7 @@ module.exports = (init) => {
         minter,
         deployments,
         receiverAddress,
+        assetContractAsBouncerAdmin,
       } = await init();
 
       // Receiver
@@ -750,6 +751,7 @@ module.exports = (init) => {
       const user0 = users[0];
       const user1 = users[1];
       const user2 = users[2];
+
       const contractAsMinter = contract.connect(
         ethersProvider.getSigner(minter)
       );
@@ -777,6 +779,7 @@ module.exports = (init) => {
         user2,
         tokenIds,
         batchIds,
+        assetContractAsBouncerAdmin,
       });
     };
   }
@@ -788,6 +791,18 @@ module.exports = (init) => {
     });
     tests.push({title, subTests});
   }
+
+  describe(`bouncerAdmin`, function (it) {
+    it(`can't set address 0 to bouncerAdmin`, async function ({
+      assetContractAsBouncerAdmin,
+    }) {
+      await expect(
+        assetContractAsBouncerAdmin.changeBouncerAdmin(zeroAddress)
+      ).to.be.revertedWith(
+        `ERC1155ERC721: new bouncer admin can't be zero address`
+      );
+    });
+  });
 
   describe('mint', function (it) {
     it('minting an item results in a TransferSingle event', async function ({

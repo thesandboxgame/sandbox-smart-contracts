@@ -127,12 +127,12 @@ describe('CollectionCatalystMigrations', function () {
         collectionCatalystMigrationsContract.address
       )
     );
+
+    const migrations = [
+      {assetId: assetId, gemIds: [], blockNumber: blockNumber},
+    ];
     await waitFor(
-      collectionCatalystMigrationsContractAsAdmin.migrate(
-        assetId,
-        [],
-        blockNumber
-      )
+      collectionCatalystMigrationsContractAsAdmin.batchMigrate(migrations)
     );
     await testMigration(
       assetAttributesRegistry,
@@ -179,13 +179,14 @@ describe('CollectionCatalystMigrations', function () {
         collectionCatalystMigrationsContract.address
       )
     );
+
+    const migrations = [
+      {assetId: assetId, gemIds: gemIdsForMigration, blockNumber: blockNumber},
+    ];
     await waitFor(
-      collectionCatalystMigrationsContractAsAdmin.migrate(
-        assetId,
-        gemIdsForMigration,
-        blockNumber
-      )
+      collectionCatalystMigrationsContractAsAdmin.batchMigrate(migrations)
     );
+
     incrementGemIds(gemIdsForMigration);
     await testMigration(
       assetAttributesRegistry,
@@ -233,12 +234,11 @@ describe('CollectionCatalystMigrations', function () {
         collectionCatalystMigrationsContract.address
       )
     );
+    const migrations = [
+      {assetId: assetId, gemIds: gemIdsForMigration, blockNumber: blockNumber},
+    ];
     await waitFor(
-      collectionCatalystMigrationsContractAsAdmin.migrate(
-        assetId,
-        gemIdsForMigration,
-        blockNumber
-      )
+      collectionCatalystMigrationsContractAsAdmin.batchMigrate(migrations)
     );
     incrementGemIds(gemIdsForMigration);
     await testMigration(
@@ -286,13 +286,15 @@ describe('CollectionCatalystMigrations', function () {
       [defenseGemId],
       user0
     );
-
+    const migrations = [
+      {
+        assetId: newAssetId,
+        gemIds: gemIdsForMigration,
+        blockNumber: blockNumber,
+      },
+    ];
     expect(
-      collectionCatalystMigrationsContractAsAdmin.migrate(
-        newAssetId,
-        gemIdsForMigration,
-        blockNumber
-      )
+      collectionCatalystMigrationsContractAsAdmin.batchMigrate(migrations)
     ).to.be.revertedWith('NOT_ORIGINAL_NFT');
   });
   it('migrating assetId not from admin account should fail', async function () {
@@ -304,11 +306,9 @@ describe('CollectionCatalystMigrations', function () {
     );
     const blockNumber = 11874541;
     await expect(
-      collectionCatalystMigrationsContractAsUser0.migrate(
-        assetId,
-        [],
-        blockNumber
-      )
+      collectionCatalystMigrationsContractAsUser0.batchMigrate([
+        {assetId: assetId, gemIds: [], blockNumber: blockNumber},
+      ])
     ).to.be.revertedWith('NOT_AUTHORIZED');
   });
   it('migrating assetId that does not exist in old registry should fail', async function () {
@@ -320,11 +320,9 @@ describe('CollectionCatalystMigrations', function () {
     );
     const blockNumber = 11874541;
     await expect(
-      collectionCatalystMigrationsContractAsAdmin.migrate(
-        assetId,
-        [],
-        blockNumber
-      )
+      collectionCatalystMigrationsContractAsAdmin.batchMigrate([
+        {assetId: assetId, gemIds: [], blockNumber: blockNumber},
+      ])
     ).to.be.revertedWith('OLD_CATALYST_NOT_EXIST');
   });
   it('migrating assetId that has already been migrated should fail', async function () {
@@ -373,18 +371,14 @@ describe('CollectionCatalystMigrations', function () {
       )
     );
     await waitFor(
-      collectionCatalystMigrationsContractAsAdmin.migrate(
-        assetId,
-        [],
-        blockNumber
-      )
+      collectionCatalystMigrationsContractAsAdmin.batchMigrate([
+        {assetId: assetId, gemIds: [], blockNumber: blockNumber},
+      ])
     );
     await expect(
-      collectionCatalystMigrationsContractAsAdmin.migrate(
-        assetId,
-        [],
-        blockNumber
-      )
+      collectionCatalystMigrationsContractAsAdmin.batchMigrate([
+        {assetId: assetId, gemIds: [], blockNumber: blockNumber},
+      ])
     ).to.be.revertedWith('ALREADY_MIGRATED');
   });
   it('batch migrating assetId not from admin account should fail', async function () {
@@ -451,6 +445,20 @@ describe('CollectionCatalystMigrations', function () {
     await waitFor(
       collectionCatalystMigrationsContractAsAdmin.batchMigrate(migrations)
     );
+
+    const batchCatalystMigrationDoneEvent = await collectionCatalystMigrationsContractAsAdmin.queryFilter(
+      collectionCatalystMigrationsContractAsAdmin.filters.BatchCatalystMigrationDone()
+    );
+    expect(batchCatalystMigrationDoneEvent).to.not.equal(undefined);
+
+    const setCustomMintingAllowanceEvent = await collectionCatalystMigrationsContractAsAdmin.queryFilter(
+      collectionCatalystMigrationsContractAsAdmin.filters.BatchCatalystMigrationDone()
+    );
+    const event = setCustomMintingAllowanceEvent.filter(
+      (e) => e.event === 'BatchCatalystMigrationDone'
+    )[0];
+    expect(event.args).not.to.equal(null || undefined);
+
     incrementGemIds(gemIdsForMigration);
     await testMigration(
       assetAttributesRegistry,

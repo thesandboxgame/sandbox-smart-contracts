@@ -3,6 +3,7 @@
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "../common/Libraries/SigUtil.sol";
 import "../common/Libraries/PriceUtil.sol";
 import "../asset/AssetV2.sol";
@@ -104,7 +105,6 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
         require(amountAlreadyClaimed != MAX_UINT256, "Auction cancelled");
 
         uint256 total = amountAlreadyClaimed + buyAmount;
-        require(total >= amountAlreadyClaimed, "overflow");
         require(total <= auctionData[AuctionData_Packs], "Buy amount exceeds sell amount");
 
         require(auctionData[AuctionData_StartedAt] <= block.timestamp, "Auction didn't start yet");
@@ -348,11 +348,11 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
         } else {
             require(msg.value >= total, "ETH < total");
             if (msg.value > total) {
-                payable(msg.sender).transfer(msg.value - total);
+                Address.sendValue(payable(msg.sender), msg.value - total);
             }
-            seller.transfer(offer);
+            Address.sendValue(seller, offer);
             if (fee > 0) {
-                _feeCollector.transfer(fee);
+                Address.sendValue(_feeCollector, fee);
             }
         }
 
