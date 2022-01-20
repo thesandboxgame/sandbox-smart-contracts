@@ -569,7 +569,7 @@ describe('MockLandWithMint.sol', function () {
   });
 
   describe('Meta transactions', function () {
-    describe('transferFrom', function () {
+    describe('transferQuad', function () {
       it('should transfer 1x1 quad', async function () {
         const {
           deployer,
@@ -816,6 +816,71 @@ describe('MockLandWithMint.sol', function () {
         expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
         expect(await PolygonLand.balanceOf(landReceiver.address)).to.be.equal(
           plotCount
+        );
+      });
+    });
+    describe('batchTransferQuad', function () {
+      it('should batch transfer 1x1 quads', async function () {
+        const {
+          deployer,
+          landMinter,
+          users,
+          MockLandTunnel,
+          PolygonLand,
+          MockPolygonLandTunnel,
+          trustedForwarder,
+        } = await setupLand();
+
+        const landHolder = users[0];
+        const landReceiver = users[1];
+        const size = 1;
+        const bytes = '0x00';
+
+        // Mint LAND on L1
+        await landMinter.Land.mintQuad(landHolder.address, size, 0, 0, bytes);
+        await landMinter.Land.mintQuad(landHolder.address, size, 0, 1, bytes);
+
+        // Set Mock PolygonLandTunnel in PolygonLand
+        await deployer.PolygonLand.setPolygonLandTunnel(
+          MockPolygonLandTunnel.address
+        );
+        expect(await PolygonLand.polygonLandTunnel()).to.equal(
+          MockPolygonLandTunnel.address
+        );
+        // Transfer to L1 Tunnel
+        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
+        await landHolder.MockLandTunnel.batchTransferQuadToL2(
+          landHolder.address,
+          [size, size],
+          [0, 0],
+          [0, 1],
+          bytes
+        );
+
+        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(2);
+
+        const {to, data} = await PolygonLand.populateTransaction[
+          'batchTransferQuad(address,address,uint256[],uint256[],uint256[],bytes)'
+        ](
+          landHolder.address,
+          landReceiver.address,
+          [size, size],
+          [0, 0],
+          [0, 1],
+          bytes
+        );
+
+        await sendMetaTx(
+          to,
+          trustedForwarder,
+          data,
+          landHolder.address,
+          '10000000'
+        );
+
+        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
+        expect(await PolygonLand.balanceOf(landReceiver.address)).to.be.equal(
+          2
         );
       });
     });
