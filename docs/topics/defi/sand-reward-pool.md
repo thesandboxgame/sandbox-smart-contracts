@@ -186,4 +186,6 @@ RewardToken -> User: get rewarded tokens
 
 | Feature            | Link                                                                                                                                                       |
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------    |
-| Contract           | [SandRewardPool.sol]()|
+| Contract           | [SandRewardPool.sol](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/src/solc_0.8/defi/SandRewardPool.sol)|
+| ERC2771 (Meta-Tx)  | [Custom Sandbox contract](https://github.com/thesandboxgame/sandbox-smart-contracts/blob/master/src/solc_0.8/common/BaseWithStorage/ERC2771Handler.sol) |
+| AccessControl      | Role-Based Access Control
