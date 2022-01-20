@@ -241,7 +241,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     function stake(uint256 amount) external nonReentrant {
         require(amount > 0, "SandRewardPool: Cannot stake 0");
 
-        uint256 earlierRewards;
+        uint256 earlierRewards = 0;
 
         if (_totalContributions == 0 && rewardCalculator != IRewardCalculator(address(0))) {
             earlierRewards = rewardCalculator.getRewards();
