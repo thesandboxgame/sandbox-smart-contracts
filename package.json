@@ -89,5 +89,8 @@
     "fork:dev": "node ./scripts.js fork:dev",
     "fork:test": "node ./scripts.js fork:test",
     "hardhat": "hardhat"
+  },
+  "dependencies": {
+    "csv-parser": "^3.0.0"
   }
 }
