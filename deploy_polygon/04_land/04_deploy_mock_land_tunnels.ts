@@ -9,12 +9,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const FXCHILD = await deployments.get('FXCHILD');
-  const PolygonLand = await deployments.get('PolygonLand');
+  const PolygonLandV1 = await deployments.get('PolygonLandV1');
 
   const MockPolygonLandTunnel = await deploy('MockPolygonLandTunnel', {
     from: deployer,
     contract: 'PolygonLandTunnel',
-    args: [FXCHILD.address, PolygonLand.address, TRUSTED_FORWARDER.address],
+    args: [FXCHILD.address, PolygonLandV1.address, TRUSTED_FORWARDER.address],
     log: true,
     skipIfAlreadyDeployed: true,
   });
@@ -53,5 +53,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['MockPolygonLandTunnel', 'MockPolygonLandTunnel_deploy', 'L2'];
-func.dependencies = ['PolygonLand', 'FXCHILD', 'PolygonLandTunnel'];
+func.dependencies = ['PolygonLandV1', 'FXCHILD', 'PolygonLandTunnel'];
 func.skip = skipUnlessTest;
