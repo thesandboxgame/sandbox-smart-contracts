@@ -5,9 +5,8 @@ import "../common/BaseWithStorage/ImmutableERC721.sol";
 import "../common/BaseWithStorage/WithMinter.sol";
 import "../common/interfaces/IAssetToken.sol";
 import "../common/interfaces/IGameToken.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken {
+contract GameBaseToken is ImmutableERC721, WithMinter, IGameToken {
     ///////////////////////////////  Data //////////////////////////////
 
     IAssetToken internal _asset;

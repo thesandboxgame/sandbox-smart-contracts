@@ -59,7 +59,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
       if (polygonLandTunnel === hre.ethers.constants.AddressZero) {
         await deployments.execute(
-          'PolygonLandV1',
+          'PolygonLand',
           {from: deployerOnL2},
           'setPolygonLandTunnel',
           PolygonLandTunnel.address
