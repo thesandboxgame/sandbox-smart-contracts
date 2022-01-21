@@ -9,8 +9,16 @@ import "./PolygonLandBaseToken.sol";
 contract PolygonLand is PolygonLandBaseToken {
     address public polygonLandTunnel;
 
-    constructor() {
+    bool internal _initialized;
+
+    modifier initializer() {
+        require(!_initialized, "ERC721BaseToken: Contract already initialized");
+        _;
+    }
+
+    function initialize() external initializer {
         _admin = _msgSender();
+        _initialized = true;
     }
 
     function setPolygonLandTunnel(address _polygonLandTunnel) external onlyAdmin {
@@ -33,4 +41,8 @@ contract PolygonLand is PolygonLandBaseToken {
         require(_msgSender() == polygonLandTunnel, "Invalid sender");
         _mintQuad(user, size, x, y, data);
     }
+
+    // Empty storage space in contracts for future enhancements
+    // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
+    uint256[49] private __gap;
 }
