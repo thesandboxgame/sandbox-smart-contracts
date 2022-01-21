@@ -8,7 +8,7 @@ import {setupUsers, setupUser} from '../../utils';
 
 export const setupLand = deployments.createFixture(async function () {
   await deployments.fixture([
-    'PolygonLandV1',
+    'PolygonLand',
     'Land',
     'PolygonLandTunnel',
     'LandTunnel',
@@ -18,7 +18,7 @@ export const setupLand = deployments.createFixture(async function () {
     'MockPolygonLandTunnel',
     'MockLandTunnel',
   ]);
-  const PolygonLandV1 = await ethers.getContract('PolygonLandV1');
+  const PolygonLand = await ethers.getContract('PolygonLand');
   const Land = await ethers.getContract('Land');
   const PolygonLandTunnel = await ethers.getContract('PolygonLandTunnel');
   const LandTunnel = await ethers.getContract('LandTunnel');
@@ -42,7 +42,7 @@ export const setupLand = deployments.createFixture(async function () {
   otherAccounts.splice(0, 1);
 
   const users = await setupUsers(otherAccounts, {
-    PolygonLandV1,
+    PolygonLand,
     Land,
     PolygonLandTunnel,
     LandTunnel,
@@ -52,7 +52,7 @@ export const setupLand = deployments.createFixture(async function () {
     MockPolygonLandTunnel,
   });
   const deployer = await setupUser(namedAccounts.deployer, {
-    PolygonLandV1,
+    PolygonLand,
     Land,
     PolygonLandTunnel,
     LandTunnel,
@@ -66,8 +66,8 @@ export const setupLand = deployments.createFixture(async function () {
   const landMinter = await setupUser(minter, {Land});
 
   await deployer.FxRoot.setFxChild(FxChild.address);
-  await deployer.PolygonLandV1.setPolygonLandTunnel(PolygonLandTunnel.address);
-  await deployer.PolygonLandV1.setTrustedForwarder(trustedForwarder.address);
+  await deployer.PolygonLand.setPolygonLandTunnel(PolygonLandTunnel.address);
+  await deployer.PolygonLand.setTrustedForwarder(trustedForwarder.address);
   await landAdmin.Land.setMinter(landMinter.address, true);
 
   return {
@@ -75,7 +75,7 @@ export const setupLand = deployments.createFixture(async function () {
     deployer,
     landAdmin,
     landMinter,
-    PolygonLandV1,
+    PolygonLand,
     Land,
     PolygonLandTunnel,
     LandTunnel,

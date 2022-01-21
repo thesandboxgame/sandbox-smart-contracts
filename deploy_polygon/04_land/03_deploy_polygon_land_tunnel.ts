@@ -9,12 +9,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const FXCHILD = await deployments.get('FXCHILD');
-  const PolygonLandV1 = await deployments.get('PolygonLandV1');
+  const PolygonLand = await deployments.get('PolygonLand');
 
   const PolygonLandTunnel = await deploy('PolygonLandTunnel', {
     from: deployer,
     contract: 'PolygonLandTunnel',
-    args: [FXCHILD.address, PolygonLandV1.address, TRUSTED_FORWARDER.address],
+    args: [FXCHILD.address, PolygonLand.address, TRUSTED_FORWARDER.address],
     log: true,
     skipIfAlreadyDeployed: true,
   });
@@ -43,13 +43,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   const polygonLandTunnel = await deployments.read(
-    'PolygonLandV1',
+    'PolygonLand',
     'polygonLandTunnel'
   );
 
   if (polygonLandTunnel === hre.ethers.constants.AddressZero) {
     await deployments.execute(
-      'PolygonLandV1',
+      'PolygonLand',
       {from: deployer},
       'setPolygonLandTunnel',
       PolygonLandTunnel.address
@@ -59,5 +59,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['PolygonLandTunnel', 'PolygonLandTunnel_deploy', 'L2'];
-func.dependencies = ['PolygonLandV1', 'FXCHILD'];
+func.dependencies = ['PolygonLand', 'FXCHILD'];
 func.skip = skipUnlessTestnet;
