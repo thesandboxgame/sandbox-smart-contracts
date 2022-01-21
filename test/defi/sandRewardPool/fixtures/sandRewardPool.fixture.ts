@@ -7,11 +7,12 @@ import {AbiCoder} from 'ethers/lib/utils';
 export const setupLandOwnersSandRewardPool = withSnapshot(
   ['LandOwnersSandRewardPool'],
   async function (hre) {
-    const {getNamedAccounts, ethers} = hre;
+    const {deployments, getNamedAccounts, ethers} = hre;
     const {deployer} = await getNamedAccounts();
-    const [other] = await getUnnamedAccounts();
+    const [other, other2] = await getUnnamedAccounts();
     const initialBalance = toWei(10);
     const sandAsOther = await ethers.getContract('PolygonSand', other);
+    const sandAsOther2 = await ethers.getContract('PolygonSand', other2);
     const landAsOther = await ethers.getContract('PolygonLand', other);
 
     const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
@@ -20,16 +21,46 @@ export const setupLandOwnersSandRewardPool = withSnapshot(
       'LandOwnersSandRewardPool',
       other
     );
+    const contractAsOther2 = await ethers.getContract(
+      'LandOwnersSandRewardPool',
+      other2
+    );
     const abiCoder = new AbiCoder();
     const data = abiCoder.encode(['uint256'], [initialBalance]);
     await childChainManager.callSandDeposit(sandAsOther.address, other, data);
+    await childChainManager.callSandDeposit(sandAsOther.address, other2, data);
 
+    // TODO: Remove it when we have a way to mint L2 Land
+    async function useMockInsteadOfL2Land() {
+      // This changes the land for a mock because we still don't have it...
+      const contributionCalculator = await ethers.getContract(
+        'LandOwnersAloneContributionCalculator',
+        deployer
+      );
+      await deployments.deploy('MockLandWithMint', {from: deployer});
+      const mockLandWithMint = await ethers.getContract(
+        'MockLandWithMint',
+        deployer
+      );
+      const mockLandWithMintAsOther = await ethers.getContract(
+        'MockLandWithMint',
+        other
+      );
+      await contributionCalculator.setNFTMultiplierToken(
+        mockLandWithMint.address
+      );
+      return {mockLandWithMint, mockLandWithMintAsOther};
+    }
     return {
+      useMockInsteadOfL2Land,
       deployer,
       contractAsOther,
+      contractAsOther2,
       other,
+      other2,
       childChainManager,
       sandAsOther,
+      sandAsOther2,
       landAsOther,
     };
   }
