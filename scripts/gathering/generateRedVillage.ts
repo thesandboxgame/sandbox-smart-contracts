@@ -3,23 +3,29 @@ import * as fs from 'fs';
 import * as path from 'path';
 import csv from 'csv-parser';
 
-const NFTIds = [
-  '106914169990095390281037231343508379541260342522117732053367995686304065005572', // barbarian
-  '106914169990095390281037231343508379541260342522117732053367995686304065005571', // druid
-  '106914169990095390281037231343508379541260342522117732053367995686304065005570', // paladin
-  '106914169990095390281037231343508379541260342522117732053367995686304065005569', // ranger
-  '106914169990095390281037231343508379541260342522117732053367995686304065005568', // wizard
-];
+const NFTIds = {
+  barbarian:
+    '106914169990095390281037231343508379541260342522117732053367995686304065005572', // barbarian
+  druid:
+    '106914169990095390281037231343508379541260342522117732053367995686304065005571', // druid
+  paladin:
+    '106914169990095390281037231343508379541260342522117732053367995686304065005570', // paladin
+  ranger:
+    '106914169990095390281037231343508379541260342522117732053367995686304065005569', // ranger
+  wizard:
+    '106914169990095390281037231343508379541260342522117732053367995686304065005568', // wizard
+};
 
 type ERC1155data = {
   ids: string[];
   values: number[];
   contractAddress: string;
 };
+
 (async () => {
   const csvFilePath = path.resolve(
     __dirname,
-    '../../data/giveaways/multi_giveaway_red_village/giveaway_red_village.csv'
+    '../../data/giveaways/multi_giveaway_1/giveaway_red_village.csv'
   );
 
   const assetClaims: {
@@ -36,19 +42,23 @@ type ERC1155data = {
       const amounts: number[] = [];
 
       if (data.Barbarian) {
-        ids.push(NFTIds[0]);
+        ids.push(NFTIds.barbarian);
         amounts.push(parseInt(data.Barbarian, 10));
       }
       if (data.Druid) {
-        ids.push(NFTIds[1]);
+        ids.push(NFTIds.druid);
         amounts.push(parseInt(data.Druid, 10));
       }
       if (data.Paladin) {
-        ids.push(NFTIds[2]);
+        ids.push(NFTIds.paladin);
         amounts.push(parseInt(data.Paladin, 10));
       }
+      if (data.Ranger) {
+        ids.push(NFTIds.ranger);
+        amounts.push(parseInt(data.Ranger, 10));
+      }
       if (data.Wizard) {
-        ids.push(NFTIds[3]);
+        ids.push(NFTIds.wizard);
         amounts.push(parseInt(data.Wizard, 10));
       }
       assetClaims.push({
@@ -69,7 +79,7 @@ type ERC1155data = {
     })
     .on('end', function () {
       fs.writeFileSync(
-        'data/giveaways/multi_giveaway_red_village/assets_mainnet.json',
+        'data/giveaways/multi_giveaway_1/giveaway_red_village.json',
         JSON.stringify(assetClaims, null, '  ')
       );
     });
