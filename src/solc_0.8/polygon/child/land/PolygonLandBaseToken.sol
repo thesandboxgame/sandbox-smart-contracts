@@ -2,10 +2,10 @@
 // solhint-disable code-complexity
 
 pragma solidity 0.8.2;
-
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../../../common/BaseWithStorage/ERC721BaseToken.sol";
 
-contract PolygonLandBaseToken is ERC721BaseToken {
+contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
     using AddressUpgradeable for address;
 
     uint256 internal constant GRID_SIZE = 408;
