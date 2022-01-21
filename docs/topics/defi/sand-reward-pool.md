@@ -45,7 +45,7 @@ To calculate the rewards for each user the contract take into account:
 2. The period in which the user stacked his money: the rewards are proportional to the amount of time the user has
    stacked multiplied by a rate that is calculated by another plugin smart contract.
 
-#### Contribution calculators
+### Contribution calculators
 
 The contribution calculator is a plugin contract that takes the amount stacked and the address of the user and must
 return the absolute share (contribution) that the user will get from the total rewards. The contribution calculators
@@ -62,14 +62,14 @@ We have two implementations:
    where cbrt3 is the cube root. A pool that uses this calculator is open to everybody but gives more rewards to those
    landowners that have more lands.
 
-#### Rate calculators
+### Rate calculators
 
 The rate calculator plugin is a contract that calculates the accumulated absolute rewards that must be distributed for a
 period of time. The period of time depends on the current block timestamp and the users calls to the main contract (eg:
 stacking, withdraw, etc.).
 
-Each time a user call the main contract to change something (stake, withdraw, etc.) the main contract does the
-accounting distributing the current rewards between the all the stackers. Then the reward calculator plugin is restarted
+Each time a user call the main contract to change something (stake, withdraw, etc.), the main contract does the
+accounting distributing the current rewards between all the stackers. Then the reward calculator plugin is restarted
 and when called later calculates the rewards between current timestamp and the restart moment.
 
 The rate calculators must implement the `IRewardCalculator` interface:
