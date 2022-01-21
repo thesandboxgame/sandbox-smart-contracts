@@ -69,10 +69,6 @@ export const setupLand = deployments.createFixture(async function () {
   await deployer.PolygonLand.setPolygonLandTunnel(PolygonLandTunnel.address);
   await deployer.PolygonLand.setTrustedForwarder(trustedForwarder.address);
   await landAdmin.Land.setMinter(landMinter.address, true);
-  await landAdmin.Land.setMetaTransactionProcessor(
-    trustedForwarder.address,
-    true
-  );
 
   return {
     users,
