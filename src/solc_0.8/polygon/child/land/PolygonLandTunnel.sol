@@ -6,11 +6,12 @@ import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 
 import "../../../common/interfaces/IPolygonLand.sol";
 import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
+import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "./PolygonLandBaseToken.sol";
 
 // @todo - natspec comments
 
-contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, Ownable {
+contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable {
     IPolygonLand public childToken;
     uint32 public maxGasLimitOnL1 = 500;
     uint256 public maxAllowedQuads = 144;
@@ -48,8 +49,13 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
         _setLimit(24, limits[4]);
     }
 
-    constructor(address _fxChild, IPolygonLand _childToken) FxBaseChildTunnel(_fxChild) {
+    constructor(
+        address _fxChild,
+        IPolygonLand _childToken,
+        address _trustedForwarder
+    ) FxBaseChildTunnel(_fxChild) {
         childToken = _childToken;
+        __ERC2771Handler_initialize(_trustedForwarder);
     }
 
     function batchTransferQuadToL1(
@@ -71,9 +77,15 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
         require(quads <= maxAllowedQuads, "Exceeds max allowed quads.");
         require(gasLimit < maxGasLimitOnL1, "Exceeds gas limit on L1.");
         for (uint256 i = 0; i < sizes.length; i++) {
-            childToken.transferQuad(msg.sender, address(this), sizes[i], xs[i], ys[i], data);
+            childToken.transferQuad(_msgSender(), address(this), sizes[i], xs[i], ys[i], data);
         }
         _sendMessageToRoot(abi.encode(to, sizes, xs, ys, data));
+    }
+
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyOwner {
+        _trustedForwarder = trustedForwarder;
     }
 
     function _processMessageFromRoot(
@@ -89,6 +101,14 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
             abi.decode(syncData, (address, uint256, uint256, uint256, bytes));
         if (!childToken.exists(size, x, y)) childToken.mint(to, size, x, y, data);
         else childToken.transferQuad(address(this), to, size, x, y, data);
+    }
+
+    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
+        return ERC2771Handler._msgSender();
+    }
+
+    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+        return ERC2771Handler._msgData();
     }
 
     function onERC721Received(

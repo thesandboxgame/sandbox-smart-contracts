@@ -7,8 +7,9 @@ contract MockLandTunnel is LandTunnel {
     constructor(
         address _checkpointManager,
         address _fxRoot,
-        address _rootToken
-    ) LandTunnel(_checkpointManager, _fxRoot, _rootToken) {
+        address _rootToken,
+        address _trustedForwarder
+    ) LandTunnel(_checkpointManager, _fxRoot, _rootToken, _trustedForwarder) {
         checkpointManager = ICheckpointManager(_checkpointManager);
         fxRoot = IFxStateSender(_fxRoot);
     }

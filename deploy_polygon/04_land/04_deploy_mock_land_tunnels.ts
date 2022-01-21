@@ -7,13 +7,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {deployer} = await getNamedAccounts();
 
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const FXCHILD = await deployments.get('FXCHILD');
   const PolygonLand = await deployments.get('PolygonLand');
 
   const MockPolygonLandTunnel = await deploy('MockPolygonLandTunnel', {
     from: deployer,
     contract: 'PolygonLandTunnel',
-    args: [FXCHILD.address, PolygonLand.address],
+    args: [FXCHILD.address, PolygonLand.address, TRUSTED_FORWARDER.address],
     log: true,
     skipIfAlreadyDeployed: true,
   });

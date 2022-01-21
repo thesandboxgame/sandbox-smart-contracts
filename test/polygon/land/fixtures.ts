@@ -29,6 +29,11 @@ export const setupLand = deployments.createFixture(async function () {
   const MockPolygonLandTunnel = await ethers.getContract(
     'MockPolygonLandTunnel'
   );
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+  const trustedForwarder = await ethers.getContractAt(
+    'TestMetaTxForwarder',
+    TRUSTED_FORWARDER.address
+  );
 
   const namedAccounts = await getNamedAccounts();
   const unnamedAccounts = await getUnnamedAccounts();
@@ -62,6 +67,7 @@ export const setupLand = deployments.createFixture(async function () {
 
   await deployer.FxRoot.setFxChild(FxChild.address);
   await deployer.PolygonLand.setPolygonLandTunnel(PolygonLandTunnel.address);
+  await deployer.PolygonLand.setTrustedForwarder(trustedForwarder.address);
   await landAdmin.Land.setMinter(landMinter.address, true);
 
   return {
@@ -78,5 +84,6 @@ export const setupLand = deployments.createFixture(async function () {
     CheckpointManager,
     MockLandTunnel,
     MockPolygonLandTunnel,
+    trustedForwarder,
   };
 });

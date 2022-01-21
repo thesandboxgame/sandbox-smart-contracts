@@ -4,11 +4,12 @@ pragma solidity 0.8.2;
 import "fx-portal/contracts/tunnel/FxBaseRootTunnel.sol";
 import "../../../common/interfaces/ILandToken.sol";
 import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
+import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 
 // @todo - natspec comments
 
-contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, Ownable {
+contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable {
     address public rootToken;
 
     event Deposit(address user, uint256 size, uint256 x, uint256 y, bytes data);
@@ -17,9 +18,11 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, Ownable 
     constructor(
         address _checkpointManager,
         address _fxRoot,
-        address _rootToken
+        address _rootToken,
+        address _trustedForwarder
     ) FxBaseRootTunnel(_checkpointManager, _fxRoot) {
         rootToken = _rootToken;
+        __ERC2771Handler_initialize(_trustedForwarder);
     }
 
     function onERC721Received(
@@ -52,13 +55,19 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, Ownable 
         bytes memory data
     ) public {
         require(sizes.length == xs.length && xs.length == ys.length, "l2: invalid data");
-        LandToken(rootToken).batchTransferQuad(msg.sender, address(this), sizes, xs, ys, data);
+        LandToken(rootToken).batchTransferQuad(_msgSender(), address(this), sizes, xs, ys, data);
 
         for (uint256 index = 0; index < sizes.length; index++) {
             bytes memory message = abi.encode(to, sizes[index], xs[index], ys[index], data);
             _sendMessageToChild(message);
             emit Deposit(to, sizes[index], xs[index], ys[index], data);
         }
+    }
+
+    /// @dev Change the address of the trusted forwarder for meta-TX
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyOwner {
+        _trustedForwarder = trustedForwarder;
     }
 
     function _processMessageFromChild(bytes memory message) internal override {
@@ -68,5 +77,13 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, Ownable 
             LandToken(rootToken).transferQuad(address(this), to, size[index], x[index], y[index], data);
             emit Withdraw(to, size[index], x[index], y[index], data);
         }
+    }
+
+    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
+        return ERC2771Handler._msgSender();
+    }
+
+    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+        return ERC2771Handler._msgData();
     }
 }
