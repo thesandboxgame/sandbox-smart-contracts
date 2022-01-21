@@ -3,11 +3,10 @@
 
 pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "../../../common/BaseWithStorage/ERC721BaseToken.sol";
 
 contract PolygonLandBaseToken is ERC721BaseToken {
-    using Address for address;
+    using AddressUpgradeable for address;
 
     uint256 internal constant GRID_SIZE = 408;
 

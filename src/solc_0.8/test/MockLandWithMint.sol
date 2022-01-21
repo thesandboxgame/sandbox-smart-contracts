@@ -5,7 +5,7 @@ pragma solidity 0.8.2;
 import "../polygon/child/land/PolygonLandBaseToken.sol";
 
 contract MockLandWithMint is PolygonLandBaseToken {
-    using Address for address;
+    using AddressUpgradeable for address;
 
     /***
      **
