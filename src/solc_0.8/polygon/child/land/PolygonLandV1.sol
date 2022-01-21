@@ -6,7 +6,7 @@ import "./PolygonLandBaseToken.sol";
 
 // @todo - natspec comments
 
-contract PolygonLand is PolygonLandBaseToken {
+contract PolygonLandV1 is PolygonLandBaseToken {
     address public polygonLandTunnel;
 
     bool internal _initialized;
@@ -17,8 +17,12 @@ contract PolygonLand is PolygonLandBaseToken {
     }
 
     function initialize() external initializer {
-        _admin = _msgSender();
+        initV1();
         _initialized = true;
+    }
+
+    function initV1() public {
+        _admin = _msgSender();
     }
 
     function setPolygonLandTunnel(address _polygonLandTunnel) external onlyAdmin {
