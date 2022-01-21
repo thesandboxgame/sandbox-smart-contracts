@@ -66,6 +66,16 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
         _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
     }
 
+    // For the UI
+    function getRate() external view returns (uint256) {
+        return rate1;
+    }
+
+    // For the UI
+    function getFinish() external view returns (uint256) {
+        return finish1;
+    }
+
     // At any point in time this function must return the accumulated rewards from last call to restartRewards
     function getRewards() external view override returns (uint256) {
         return savedRewards + _getRewards();
