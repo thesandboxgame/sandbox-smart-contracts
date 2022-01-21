@@ -9,16 +9,8 @@ import "./PolygonLandBaseToken.sol";
 contract PolygonLandV1 is PolygonLandBaseToken {
     address public polygonLandTunnel;
 
-    bool internal _initialized;
-
-    modifier initializer() {
-        require(!_initialized, "PolygonLandV1: Contract already initialized");
-        _;
-    }
-
     function initialize(address trustedForwarder) external initializer {
         _admin = _msgSender();
-        _initialized = true;
         __ERC2771Handler_initialize(trustedForwarder);
     }
 
