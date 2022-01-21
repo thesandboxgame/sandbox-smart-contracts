@@ -23,8 +23,10 @@ contract LandOwnersAloneContributionCalculator is IContributionCalculator, Ownab
 
     function computeContribution(address account, uint256 amountStaked) external view override returns (uint256) {
         uint256 numLands = multiplierNFToken.balanceOf(account);
-        require(numLands > 0, "LandOwnersAloneContributionCalc: no lands");
-        return amountStaked;
+        if (numLands > 0) {
+            return amountStaked;
+        }
+        return 0;
     }
 
     function setNFTMultiplierToken(address newNFTMultiplierToken) external onlyOwner {

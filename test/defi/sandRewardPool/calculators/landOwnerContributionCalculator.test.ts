@@ -41,7 +41,7 @@ describe('LandOwnerContributionCalculator', function () {
   });
 
   describe('calculation', function () {
-    it('users without lands cannot stake', async function () {
+    it('users without lands get zero contributions', async function () {
       const {
         contract,
         landToken,
@@ -49,9 +49,7 @@ describe('LandOwnerContributionCalculator', function () {
       } = await landOwnerContributionCalculatorSetup();
       expect(await landToken.balanceOf(other)).to.be.equal(0);
       expect(await contract.multiplierOf(other)).to.be.equal(0);
-      await expect(contract.computeContribution(other, 1000)).to.revertedWith(
-        'no lands'
-      );
+      expect(await contract.computeContribution(other, 1000)).to.be.equal(0);
     });
     // eslint-disable-next-line mocha/no-setup-in-describe
     [1, 2, 3, 4].forEach((numLands) => {

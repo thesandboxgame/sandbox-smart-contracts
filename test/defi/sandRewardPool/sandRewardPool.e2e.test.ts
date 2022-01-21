@@ -24,6 +24,8 @@ describe('LandOwnersSandRewardPool', function () {
     } = await setupLandOwnersSandRewardPool();
     const cant = toWei(1);
     await sandAsOther.approve(contractAsOther.address, cant);
-    await expect(contractAsOther.stake(cant)).to.be.revertedWith('no lands');
+    await expect(contractAsOther.stake(cant)).to.be.revertedWith(
+      'not enough contributions'
+    );
   });
 });

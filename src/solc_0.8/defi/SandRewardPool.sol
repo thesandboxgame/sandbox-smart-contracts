@@ -250,6 +250,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         _processRewards(_msgSender());
         super._stake(amount);
         _updateContribution(_msgSender());
+        require(_contributions[_msgSender()] > 0, "SandRewardPool: not enough contributions");
 
         if (earlierRewards != 0) {
             rewards[_msgSender()] = rewards[_msgSender()] + earlierRewards;
