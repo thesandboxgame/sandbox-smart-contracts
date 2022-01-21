@@ -12,17 +12,14 @@ contract PolygonLandV1 is PolygonLandBaseToken {
     bool internal _initialized;
 
     modifier initializer() {
-        require(!_initialized, "ERC721BaseToken: Contract already initialized");
+        require(!_initialized, "PolygonLandV1: Contract already initialized");
         _;
     }
 
-    function initialize() external initializer {
-        initV1();
-        _initialized = true;
-    }
-
-    function initV1() public {
+    function initialize(address trustedForwarder) external initializer {
         _admin = _msgSender();
+        _initialized = true;
+        __ERC2771Handler_initialize(trustedForwarder);
     }
 
     function setPolygonLandTunnel(address _polygonLandTunnel) external onlyAdmin {

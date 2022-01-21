@@ -13,7 +13,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     // workaround for tests
     land = await deployments.get('MockLandWithMint');
   } else {
-    land = await deployments.get('PolygonLandV1');
+    land = await deployments.get('PolygonLand');
   }
   const sand = await deployments.get('PolygonSand');
 
@@ -33,7 +33,7 @@ func.tags = [
 ];
 func.dependencies = [
   'MockLandWithMint',
-  'PolygonLandV1',
+  'PolygonLand',
   'PolygonSand',
   'QUICKSWAP_SAND_MATIC',
 ];
