@@ -48,12 +48,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       PolygonLandTunnel.address
     );
 
-    const PolygonLandV1 = await hre.companionNetworks[
-      'l2'
-    ].deployments.getOrNull('PolygonLandV1');
-    if (PolygonLandV1) {
+    const PolygonLand = await hre.companionNetworks['l2'].deployments.getOrNull(
+      'PolygonLand'
+    );
+    if (PolygonLand) {
       const polygonLandTunnel = await deployments.read(
-        'PolygonLandV1',
+        'PolygonLand',
         'polygonLandTunnel'
       );
 

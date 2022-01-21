@@ -6,7 +6,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {deployer, upgradeAdmin} = await getNamedAccounts();
 
-  await deploy('PolygonLandV1', {
+  await deploy('PolygonLand', {
     from: deployer,
     contract: 'PolygonLandV1',
     proxy: {
@@ -22,4 +22,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['PolygonLandV1', 'PolygonLandV1_deploy', 'L2'];
+func.tags = ['PolygonLand', 'PolygonLand_deploy', 'L2'];
