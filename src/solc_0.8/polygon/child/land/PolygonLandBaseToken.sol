@@ -2,12 +2,11 @@
 // solhint-disable code-complexity
 
 pragma solidity 0.8.2;
-
-import "@openzeppelin/contracts-0.8/utils/Address.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../../../common/BaseWithStorage/ERC721BaseToken.sol";
 
-contract PolygonLandBaseToken is ERC721BaseToken {
-    using Address for address;
+contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
+    using AddressUpgradeable for address;
 
     uint256 internal constant GRID_SIZE = 408;
 
@@ -630,4 +629,8 @@ contract PolygonLandBaseToken is ERC721BaseToken {
             }
         }
     }
+
+    // Empty storage space in contracts for future enhancements
+    // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
+    uint256[49] private __gap;
 }

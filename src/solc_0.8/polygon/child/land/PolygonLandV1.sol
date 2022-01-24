@@ -6,11 +6,12 @@ import "./PolygonLandBaseToken.sol";
 
 // @todo - natspec comments
 
-contract PolygonLand is PolygonLandBaseToken {
+contract PolygonLandV1 is PolygonLandBaseToken {
     address public polygonLandTunnel;
 
-    constructor() {
+    function initialize(address trustedForwarder) external initializer {
         _admin = _msgSender();
+        __ERC2771Handler_initialize(trustedForwarder);
     }
 
     function setPolygonLandTunnel(address _polygonLandTunnel) external onlyAdmin {

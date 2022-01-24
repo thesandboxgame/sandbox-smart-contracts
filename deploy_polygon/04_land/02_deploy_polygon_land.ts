@@ -4,13 +4,22 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {deployer} = await getNamedAccounts();
+  const {deployer, upgradeAdmin} = await getNamedAccounts();
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
 
   await deploy('PolygonLand', {
     from: deployer,
-    contract: 'PolygonLand',
+    contract: 'PolygonLandV1',
+    proxy: {
+      owner: upgradeAdmin,
+      proxyContract: 'OpenZeppelinTransparentProxy',
+      execute: {
+        methodName: 'initialize',
+        args: [TRUSTED_FORWARDER.address],
+      },
+      upgradeIndex: 0,
+    },
     log: true,
-    skipIfAlreadyDeployed: true,
   });
 };
 export default func;
