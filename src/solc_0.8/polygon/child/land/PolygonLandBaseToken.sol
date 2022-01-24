@@ -629,4 +629,8 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
             }
         }
     }
+
+    // Empty storage space in contracts for future enhancements
+    // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
+    uint256[49] private __gap;
 }
