@@ -34,8 +34,4 @@ contract PolygonLandV1 is PolygonLandBaseToken {
         require(_msgSender() == polygonLandTunnel, "Invalid sender");
         _mintQuad(user, size, x, y, data);
     }
-
-    // Empty storage space in contracts for future enhancements
-    // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
-    uint256[49] private __gap;
 }
