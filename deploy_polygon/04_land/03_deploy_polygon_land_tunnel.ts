@@ -10,11 +10,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const FXCHILD = await deployments.get('FXCHILD');
   const PolygonLand = await deployments.get('PolygonLand');
+  const maxGasLimit = 500;
+  const maxAllowedQuads = 144;
+  const limits = [5, 10, 20, 90, 340];
 
   const PolygonLandTunnel = await deploy('PolygonLandTunnel', {
     from: deployer,
     contract: 'PolygonLandTunnel',
-    args: [FXCHILD.address, PolygonLand.address, TRUSTED_FORWARDER.address],
+    args: [
+      FXCHILD.address,
+      PolygonLand.address,
+      TRUSTED_FORWARDER.address,
+      maxGasLimit,
+      maxAllowedQuads,
+      limits,
+    ],
     log: true,
     skipIfAlreadyDeployed: true,
   });
