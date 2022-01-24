@@ -19,6 +19,7 @@ nav:
       - Generating liquidity pool rewards: howto/generating-liquidity-pool-rewards.md
       - Running a lottery: howto/running-lottery.md
       - Use Faucet to get Sand: howto/use-faucet-to-get-sand.md
+      - Deploy subgraph: howto/deploy-subgraph/deploying-subgraph.md
   - Tutorials:
       - Developing your first feature: tutorials/developing-first-feature.md
       - Writing documentation: tutorials/writing-documentation.md
@@ -63,10 +64,10 @@ nav:
           - Permit: topics/permit/Permit.md
       - Faucet:
           - Faucet: topics/faucet/Faucet.md
-
 markdown_extensions:
   - admonition
   - pymdownx.superfences
+  - pymdownx.details
   - toc:
       permalink: '#'
   - plantuml_markdown:
