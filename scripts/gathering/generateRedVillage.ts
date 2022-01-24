@@ -2,6 +2,7 @@ import 'dotenv/config';
 import * as fs from 'fs';
 import * as path from 'path';
 import csv from 'csv-parser';
+import {ethers} from 'hardhat';
 
 const NFTIds = {
   barbarian:
@@ -23,6 +24,8 @@ type ERC1155data = {
 };
 
 (async () => {
+  const assetContract = await ethers.getContract('Asset');
+
   const csvFilePath = path.resolve(
     __dirname,
     '../../data/giveaways/multi_giveaway_1/giveaway_red_village.csv'
@@ -67,7 +70,7 @@ type ERC1155data = {
           {
             ids: ids,
             values: amounts,
-            contractAddress: '0xa342f5D851E866E18ff98F351f2c6637f4478dB5',
+            contractAddress: assetContract.address,
           },
         ],
         erc721: [],
