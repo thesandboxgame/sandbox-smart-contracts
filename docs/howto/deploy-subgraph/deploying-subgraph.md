@@ -87,8 +87,6 @@ Is the name of the repository associated with your project. Be aware that it wil
 
 Just choose a folder name for the project associated with your subgraph
 
-![TheGraph2](../../img/thegraph/TheGraph2.png "Step 2")
-
 ### Setting subgraph network  
 
 First we will deploy our subgraph on Rinkeby to test it.  
@@ -106,15 +104,10 @@ And we confirm the contract address
 You will be asked to choose a contract name for ts object that will bind your ethereum contract.  
 You can keep the same name.  
 
-![TheGraph6](../../img/thegraph/TheGraph6.png "Step 6")
-
 ### Project generation  
 
 Project generation of your subgraph is now finished.  
-
-![TheGraph7](../../img/thegraph/TheGraph7.png "Step 7")
-
-Open your folder on visual studio and look at files.
+Open your folder on visual studio and look at files.  
 
 ## Subgraph manifest file  
 
