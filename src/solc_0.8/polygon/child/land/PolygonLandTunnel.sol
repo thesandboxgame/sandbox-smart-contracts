@@ -13,8 +13,8 @@ import "./PolygonLandBaseToken.sol";
 
 contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable {
     IPolygonLand public childToken;
-    uint32 public maxGasLimitOnL1 = 500;
-    uint256 public maxAllowedQuads = 144;
+    uint32 public maxGasLimitOnL1;
+    uint256 public maxAllowedQuads;
     mapping(uint8 => uint32) public gasLimits;
 
     event SetGasLimit(uint8 size, uint32 limit);
@@ -41,7 +41,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     }
 
     // setupLimits([5, 10, 20, 90, 340]);
-    function setupLimits(uint32[5] calldata limits) external onlyOwner {
+    function setupLimits(uint32[5] memory limits) public onlyOwner {
         _setLimit(1, limits[0]);
         _setLimit(3, limits[1]);
         _setLimit(6, limits[2]);
@@ -52,9 +52,15 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     constructor(
         address _fxChild,
         IPolygonLand _childToken,
-        address _trustedForwarder
+        address _trustedForwarder,
+        uint32 _maxGasLimit,
+        uint256 _maxAllowedQuads,
+        uint32[5] memory limits
     ) FxBaseChildTunnel(_fxChild) {
         childToken = _childToken;
+        maxGasLimitOnL1 = _maxGasLimit;
+        maxAllowedQuads = _maxAllowedQuads;
+        setupLimits(limits);
         __ERC2771Handler_initialize(_trustedForwarder);
     }
 
