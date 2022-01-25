@@ -15,6 +15,7 @@ contract PolygonLandV1 is PolygonLandBaseToken {
     }
 
     function setPolygonLandTunnel(address _polygonLandTunnel) external onlyAdmin {
+        require(_polygonLandTunnel != address(0), "PolygonLand: Invalid address");
         polygonLandTunnel = _polygonLandTunnel;
     }
 
