@@ -49,7 +49,7 @@ JSON format:
 ]
 ```
 
-Save your script (if you had to create one) in the repos and add the link to it in the first paragraph of _MultiGiveaway Template_ file.
+Save your script (if you had to create one) in the repos and add the link to it in the first paragraph of the _MultiGiveaway Template_ file.
 Save also your JSON file in the _data/giveaways/multi_giveaway_1_ folder.
 
 ## Execute script to setup and add giveaway
@@ -72,6 +72,6 @@ example:
 
 ### Add reference in the _MultiGiveaway Template_ file
 
-When indicated on the tamplate file, add the root hash add also the resulting Json file name found in the .secret folder. And copy these files in your google folder.
+When indicated on the template file, add the root hash and also the resulting Json file name found in the .secret folder. And copy these files in your google folder.
 
 That's all.
