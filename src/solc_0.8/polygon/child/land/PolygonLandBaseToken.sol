@@ -540,6 +540,10 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         uint256 y = id / GRID_SIZE;
         uint256 owner1x1 = _owners[id];
 
+        if ((owner1x1 & BURNED_FLAG) == BURNED_FLAG) {
+            return address(0);
+        }
+
         if (owner1x1 != 0) {
             return address(uint160(owner1x1)); //we check if the quad exists as an 1x1 quad, then 3x3, and so on..
         } else {

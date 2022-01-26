@@ -34,7 +34,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
     /// @param id The id of the token.
     function approve(address operator, uint256 id) external override {
         uint256 ownerData = _owners[_storageId(id)];
-        address owner = address(uint160(ownerData));
+        address owner = _ownerOf(id);
         address msgSender = _msgSender();
         require(owner != address(0), "NONEXISTENT_TOKEN");
         require(
@@ -271,7 +271,7 @@ contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handl
         address operator,
         uint256 id
     ) internal {
-        address owner = address(uint160(ownerData));
+        address owner = _ownerOf(id);
         if (operator == address(0)) {
             _updateOwnerData(id, ownerData, owner, false);
         } else {
