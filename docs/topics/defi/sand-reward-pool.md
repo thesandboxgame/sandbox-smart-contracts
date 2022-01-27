@@ -10,7 +10,7 @@ description: SignedERC20Giveaway contract
 
 ## Introduction
 
-The sand reward pool is an implementation of the [sand-stacking](./liquidity-provider/sand-staking.md) functionality.
+The sand reward pool is an implementation of the [sand-staking](./liquidity-provider/sand-staking.md) functionality.
 The contract manages two ERC20 compatible tokens:
 
 1. One token is used by the user to stake
@@ -38,7 +38,7 @@ Where:
 
 ### Reward calculation
 
-To calculate the rewards for each user the contract take into account:
+To calculate the rewards for each user the contract takes into account:
 
 1. The contribution of the user: calculated based on the staked amount and other assets that the user owns like: lands,
    game assets, etc. The formula is implemented in a plugin contract separated from the main contract.
@@ -86,7 +86,7 @@ We have two implementations:
 
 2. TwoPeriodsRewardCalculator: This contract has two periods and two corresponding rates and durations. After an initial
    call that sets the first period duration and rate another all can be done to set the duration and rate for the next
-   period. When the first period finishes, the next period became the current one and then the parameters for the future
+   period. When the first period finishes, the next period becomes the current one, and then the parameters for the future
    next period can be set again. This way the rate for the next period can be set at any moment.
 
 ## Model
