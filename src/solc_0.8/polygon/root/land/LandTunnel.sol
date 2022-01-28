@@ -43,7 +43,7 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
         return this.onERC721BatchReceived.selector;
     }
 
-    function supportsInterface(bytes4 interfaceId) external view returns (bool) {
+    function supportsInterface(bytes4 interfaceId) external pure returns (bool) {
         return interfaceId == 0x5e8bf644 || interfaceId == 0x01ffc9a7;
     }
 

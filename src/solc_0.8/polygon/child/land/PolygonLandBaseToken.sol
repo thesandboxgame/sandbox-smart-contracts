@@ -21,7 +21,7 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
      * @notice Return the name of the token contract
      * @return The name of the token contract
      */
-    function name() public view returns (string memory) {
+    function name() public pure returns (string memory) {
         return "Sandbox's LANDs";
     }
 
@@ -29,26 +29,26 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
      * @notice Return the symbol of the token contract
      * @return The symbol of the token contract
      */
-    function symbol() public view returns (string memory) {
+    function symbol() public pure returns (string memory) {
         return "LAND";
     }
 
     /// @notice total width of the map
     /// @return width
-    function width() public view returns (uint256) {
+    function width() public pure returns (uint256) {
         return GRID_SIZE;
     }
 
     /// @notice total height of the map
     /// @return height
-    function height() public view returns (uint256) {
+    function height() public pure returns (uint256) {
         return GRID_SIZE;
     }
 
     /// @notice x coordinate of Land token
     /// @param id tokenId
     /// @return the x coordinates
-    function x(uint256 id) public view returns (uint256) {
+    function getX(uint256 id) external view returns (uint256) {
         require(_ownerOf(id) != address(0), "token does not exist");
         return id % GRID_SIZE;
     }
@@ -56,7 +56,7 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
     /// @notice y coordinate of Land token
     /// @param id tokenId
     /// @return the y coordinates
-    function y(uint256 id) public view returns (uint256) {
+    function getY(uint256 id) external view returns (uint256) {
         require(_ownerOf(id) != address(0), "token does not exist");
         return id / GRID_SIZE;
     }
