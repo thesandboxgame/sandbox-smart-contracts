@@ -1,5 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -9,7 +10,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const sandContract = await deployments.get('Sand');
 
-  await deploy('Land', {
+  const LandOld = await deployments.getOrNull('Land_Old');
+  if (LandOld) return;
+  await deploy('Land_Old', {
     from: deployer,
     contract: 'Land',
     proxy: {
@@ -25,5 +28,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['Land', 'Land_deploy'];
+func.tags = ['Land_Old', 'Land_Old_deploy'];
 func.dependencies = ['Sand_deploy'];
+func.skip = skipUnlessTest;

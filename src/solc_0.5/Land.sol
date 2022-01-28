@@ -5,15 +5,6 @@ pragma solidity 0.5.9;
 import "./Land/erc721/LandBaseToken.sol";
 
 contract Land is LandBaseToken {
-    constructor(
-        address metaTransactionContract,
-        address admin
-    ) public LandBaseToken(
-        metaTransactionContract,
-        admin
-    ) {
-    }
-
     /**
      * @notice Return the name of the token contract
      * @return The name of the token contract

@@ -22,12 +22,20 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
     mapping (address => mapping(address => bool)) public _operatorsForAll;
     mapping (uint256 => address) public _operators;
 
-    constructor(
+    bool internal _initialized;
+
+    modifier initializer() {
+        require(!_initialized, "ERC721BaseToken: Contract already initialized");
+        _;
+    }
+
+    function initialize (
         address metaTransactionContract,
         address admin
-    ) internal {
+    ) public initializer {
         _admin = admin;
         _setMetaTransactionProcessor(metaTransactionContract, true);
+        _initialized = true;
     }
 
     function _transferFrom(address from, address to, uint256 id) internal {
@@ -352,7 +360,7 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         return _operatorsForAll[owner][operator] || _superOperators[operator];
     }
 
-    function _burn(address from, address owner, uint256 id) public {
+    function _burn(address from, address owner, uint256 id) internal {
         require(from == owner, "not owner");
         _owners[id] = 2**160; // cannot mint it again
         _numNFTPerAddress[from]--;
@@ -395,4 +403,8 @@ contract ERC721BaseToken is ERC721Events, SuperOperators, MetaTransactionReceive
         bytes4 retval = ERC721MandatoryTokenReceiver(to).onERC721BatchReceived(operator, from, ids, _data);
         return (retval == _ERC721_BATCH_RECEIVED);
     }
+
+    // Empty storage space in contracts for future enhancements
+    // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
+    uint256[49] private __gap;
 }
