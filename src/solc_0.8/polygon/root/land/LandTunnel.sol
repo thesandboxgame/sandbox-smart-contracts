@@ -7,8 +7,7 @@ import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 
-// @todo - natspec comments
-
+/// @title LAND bridge on L1
 contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable {
     address public rootToken;
 

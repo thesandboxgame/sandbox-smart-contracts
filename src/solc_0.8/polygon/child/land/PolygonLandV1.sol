@@ -4,8 +4,7 @@ pragma solidity 0.8.2;
 
 import "./PolygonLandBaseToken.sol";
 
-// @todo - natspec comments
-
+/// @title LAND token on L2
 contract PolygonLandV1 is PolygonLandBaseToken {
     address public polygonLandTunnel;
 

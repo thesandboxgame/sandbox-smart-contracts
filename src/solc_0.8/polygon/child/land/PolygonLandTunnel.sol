@@ -9,8 +9,7 @@ import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "./PolygonLandBaseToken.sol";
 
-// @todo - natspec comments
-
+/// @title LAND bridge on L2
 contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable {
     IPolygonLand public childToken;
     uint32 public maxGasLimitOnL1;
