@@ -11,7 +11,7 @@ All resources can be found on this [google folder](https://drive.google.com/driv
 What to do first:
 
 - create a new folder with the name of this new giveaway
-- copy the file _MultiGiveaway Template_ in your newly created folder
+- copy the file [_MultiGiveaway Template_](https://docs.google.com/document/d/16bUK3-39qHaVNTAFXeKHmsk7ddelyqhigI676ZHndtE/edit?usp=sharing) in your newly created folder
 - This file will lead you in all step needed to do a multi giveaway
 
 ## Generating JSON file with every asset and associated data
@@ -54,24 +54,22 @@ Save also your JSON file in the _data/giveaways/multi_giveaway_1_ folder.
 
 ## Execute script to setup and add giveaway
 
-###Setup your giveaway
+### Setup your giveaway
 
 `yarn execute mainnet setup/add_new_multi_giveaway.ts Multi_Giveaway_1 <your_json_filename>`
 
 example:
 
-`yarn execute mainnet .\setup\add_new_multi_giveaway.ts Multi_Giveaway_1 multi_giveaway_moon_cats`
+`yarn execute mainnet /setup/add_new_multi_giveaway.ts Multi_Giveaway_1 multi_giveaway_moon_cats`
 
-###send asset
+### send asset
 
 `yarn execute mainnet setup/send_assets_to_multi_giveaway.ts Multi_Giveaway_1 <multi_giveaway_name>`
 
 example:
 
-`yarn execute mainnet .\setup\send_assets_to_multi_giveaway.ts Multi_Giveaway_1 giveaway_red_village`
+`yarn execute mainnet /setup/send_assets_to_multi_giveaway.ts Multi_Giveaway_1 giveaway_red_village`
 
 ### Add reference in the _MultiGiveaway Template_ file
 
 When indicated on the template file, add the root hash and also the resulting Json file name found in the .secret folder. And copy these files in your google folder.
-
-That's all.
