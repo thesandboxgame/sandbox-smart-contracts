@@ -87,10 +87,14 @@ export function isTestnet(hre: HardhatRuntimeEnvironment): boolean {
   return isInTags(hre, 'testnet');
 }
 
+export function isFork(): boolean {
+  return !!process.env.HARDHAT_FORK;
+}
+
 export function isTest(hre: HardhatRuntimeEnvironment): boolean {
   return (
     hre.network.name === HARDHAT_NETWORK_NAME ||
     hre.network.name === 'localhost' ||
-    !!process.env.HARDHAT_FORK
+    isFork()
   );
 }

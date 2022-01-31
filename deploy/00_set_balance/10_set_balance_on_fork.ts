@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest} from '../../utils/network';
+import {isFork} from '../../utils/network';
 import {toWei} from '../../test/utils';
 
 // Set a fake balance for forked networks.
@@ -26,6 +26,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 export default func;
 func.tags = ['SET_BALANCE'];
-func.skip = async (hre) => {
-  return (await skipUnlessTest(hre)) || !process.env.HARDHAT_FORK;
-};
+func.skip = async () => !isFork();
