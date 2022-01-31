@@ -2,6 +2,7 @@ import fs from 'fs';
 import {BigNumber} from 'ethers';
 import MerkleTree from '../../../lib/merkleTree';
 import helpers, {AssetClaim} from '../../../lib/merkleTreeHelper';
+import {isFork} from "../../../utils/network";
 
 const {
   createDataArrayClaimableAssets,
@@ -9,7 +10,7 @@ const {
 } = helpers;
 
 export function createAssetClaimMerkleTree(
-  isDeploymentChainId: boolean,
+  live: boolean,
   chainId: string,
   assetData: Array<AssetClaim>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -19,6 +20,8 @@ export function createAssetClaimMerkleTree(
   saltedAssets: AssetClaim[];
   tree: MerkleTree;
 } {
+  // TODO: Why we change the behaviour for live networks ?
+  const isDeploymentChainId = live && !isFork();
   let secretPath = './secret/.asset_giveaway_1_secret';
   if (BigNumber.from(chainId).toString() === '1') {
     console.log('MAINNET secret');
