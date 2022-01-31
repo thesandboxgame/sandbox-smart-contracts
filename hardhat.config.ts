@@ -9,6 +9,11 @@ import 'hardhat-contract-sizer';
 import '@nomiclabs/hardhat-etherscan';
 import {accounts, node_url} from './utils/network';
 
+// While waiting for hardhat PR: https://github.com/nomiclabs/hardhat/pull/1542
+if (process.env.HARDHAT_FORK) {
+  process.env['HARDHAT_DEPLOY_FORK'] = process.env.HARDHAT_FORK;
+}
+
 const config: HardhatUserConfig = {
   gasReporter: {
     currency: 'USD',
