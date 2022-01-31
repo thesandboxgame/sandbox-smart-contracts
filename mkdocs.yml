@@ -20,6 +20,7 @@ nav:
       - Running a lottery: howto/running-lottery.md
       - Use Faucet to get Sand: howto/use-faucet-to-get-sand.md
       - Deploy subgraph: howto/deploy-subgraph/deploying-subgraph.md
+      - Preparing a multi giveaway: howto/preparing-multi-giveaway.md
   - Tutorials:
       - Developing your first feature: tutorials/developing-first-feature.md
       - Writing documentation: tutorials/writing-documentation.md
