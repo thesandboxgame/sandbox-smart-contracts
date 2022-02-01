@@ -10,17 +10,13 @@ const func: DeployFunction = async function (
   const {deployer} = await getNamedAccounts();
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const Sand = await deployments.get('PolygonSand');
-  const contract = await deployments.getOrNull('LandOwnersSandRewardPool');
-  if (contract) {
-    console.warn('reusing LandOwnersSandRewardPool', contract.address);
-  } else {
-    await deployments.deploy('LandOwnersSandRewardPool', {
-      from: deployer,
-      contract: 'SandRewardPool',
-      args: [Sand.address, Sand.address, TRUSTED_FORWARDER.address],
-      log: true,
-    });
-  }
+  await deployments.deploy('LandOwnersSandRewardPool', {
+    from: deployer,
+    contract: 'SandRewardPool',
+    args: [Sand.address, Sand.address, TRUSTED_FORWARDER.address],
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
 };
 
 export default func;

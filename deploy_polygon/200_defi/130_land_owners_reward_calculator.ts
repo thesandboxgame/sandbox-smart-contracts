@@ -10,20 +10,14 @@ const func: DeployFunction = async function (
   const {deployer} = await getNamedAccounts();
   const Pool = await deployments.get('LandOwnersSandRewardPool');
 
-  const contract = await deployments.getOrNull(
-    'LandOwnersAloneRewardCalculator'
-  );
-  if (contract) {
-    console.warn('reusing LandOwnersAloneRewardCalculator', contract.address);
-  } else {
-    await deployments.deploy('LandOwnersAloneRewardCalculator', {
-      from: deployer,
-      // TODO: Review which one we want.
-      contract: 'TwoPeriodsRewardCalculator',
-      args: [Pool.address],
-      log: true,
-    });
-  }
+  await deployments.deploy('LandOwnersAloneRewardCalculator', {
+    from: deployer,
+    // TODO: Review which one we want.
+    contract: 'TwoPeriodsRewardCalculator',
+    args: [Pool.address],
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
 };
 
 export default func;

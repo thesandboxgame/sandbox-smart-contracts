@@ -9,22 +9,12 @@ const func: DeployFunction = async function (
   const {deployments, getNamedAccounts} = hre;
   const {deployer} = await getNamedAccounts();
   const Land = await deployments.get('PolygonLand');
-
-  const contract = await deployments.getOrNull(
-    'LandOwnersAloneContributionCalculator'
-  );
-  if (contract) {
-    console.warn(
-      'reusing LandOwnersAloneContributionCalculator',
-      contract.address
-    );
-  } else {
-    await deployments.deploy('LandOwnersAloneContributionCalculator', {
-      from: deployer,
-      args: [Land.address],
-      log: true,
-    });
-  }
+  await deployments.deploy('LandOwnersAloneContributionCalculator', {
+    from: deployer,
+    args: [Land.address],
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
 };
 
 export default func;

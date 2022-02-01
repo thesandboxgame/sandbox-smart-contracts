@@ -10,18 +10,14 @@ const func: DeployFunction = async function (
   const {deployer} = await getNamedAccounts();
   const Pool = await deployments.get('OpenSandRewardPool');
 
-  const contract = await deployments.getOrNull('OpenSandRewardCalculator');
-  if (contract) {
-    console.warn('reusing OpenSandRewardCalculator', contract.address);
-  } else {
-    await deployments.deploy('OpenSandRewardCalculator', {
-      from: deployer,
-      // TODO: Review which one we want.
-      contract: 'TwoPeriodsRewardCalculator',
-      args: [Pool.address],
-      log: true,
-    });
-  }
+  await deployments.deploy('OpenSandRewardCalculator', {
+    from: deployer,
+    // TODO: Review which one we want.
+    contract: 'TwoPeriodsRewardCalculator',
+    args: [Pool.address],
+    log: true,
+    skipIfAlreadyDeployed: true,
+  });
 };
 
 export default func;
