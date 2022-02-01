@@ -30,7 +30,121 @@ describe('MockLandWithMint.sol', function () {
     expect(await MockLandWithMint.symbol()).to.be.equal('LAND');
   });
   describe('Mint and transfer full quad', function () {
-    it('testing transferQuad', async function () {
+    it('transfers a 1x1 quad', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          1,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const num = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[0].address
+      );
+      expect(num).to.equal(1);
+      await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          1,
+          0,
+          0,
+          bytes
+        )
+      );
+      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[0].address
+      );
+      expect(num1).to.equal(0);
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(1);
+    });
+
+    it('transfers a 3x3 quad', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          3,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const num = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[0].address
+      );
+      expect(num).to.equal(9);
+      await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          3,
+          0,
+          0,
+          bytes
+        )
+      );
+      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[0].address
+      );
+      expect(num1).to.equal(0);
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(9);
+    });
+
+    it('transfers a 6x6 quad', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          6,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const num = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[0].address
+      );
+      expect(num).to.equal(36);
+      await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          6,
+          0,
+          0,
+          bytes
+        )
+      );
+      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[0].address
+      );
+      expect(num1).to.equal(0);
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(36);
+    });
+
+    it('transfers a 12x12 quad', async function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
 
@@ -67,6 +181,43 @@ describe('MockLandWithMint.sol', function () {
       );
       expect(num2).to.equal(144);
     });
+    it('transfers a 24x24 quad', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          24,
+          0,
+          0,
+          bytes
+        )
+      );
+
+      const num = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[0].address
+      );
+      expect(num).to.equal(576);
+      await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          24,
+          0,
+          0,
+          bytes
+        )
+      );
+      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[0].address
+      );
+      expect(num1).to.equal(0);
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num2).to.equal(576);
+    });
   });
   describe('mint and check URIs', function () {
     for (const size of [1, 3, 6, 12, 24]) {
@@ -99,7 +250,48 @@ describe('MockLandWithMint.sol', function () {
     expect(await MockLandWithMint.supportsInterface('0x5b5e139f')).to.be.true;
   });
   describe('Mint and transfer a smaller quad', function () {
-    it('transfering a 3X3 quad from a 12x12', async function () {
+    it('transferring a 1X1 quad from a 3x3', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          3,
+          3,
+          3,
+          bytes
+        )
+      );
+      const num = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[0].address
+      );
+      expect(num).to.equal(9);
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          1,
+          3,
+          3,
+          bytes
+        )
+      );
+
+      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[0].address
+      );
+
+      expect(num1).to.equal(8);
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+
+      expect(num2).to.equal(1);
+    });
+
+    it('transferring a 1X1 quad from a 12x12', async function () {
       const {landOwners} = await setupTest();
       const bytes = '0x3333';
       await waitFor(
@@ -120,7 +312,7 @@ describe('MockLandWithMint.sol', function () {
         landOwners[0].MockLandWithMint.transferQuad(
           landOwners[0].address,
           landOwners[1].address,
-          3,
+          1,
           12,
           12,
           bytes
@@ -131,13 +323,95 @@ describe('MockLandWithMint.sol', function () {
         landOwners[0].address
       );
 
-      expect(num1).to.equal(135);
+      expect(num1).to.equal(143);
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+
+      expect(num2).to.equal(1);
+    });
+
+    it('transferring a 3X3 quad from a 6x6', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          6,
+          6,
+          6,
+          bytes
+        )
+      );
+      const num = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[0].address
+      );
+      expect(num).to.equal(36);
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          3,
+          6,
+          6,
+          bytes
+        )
+      );
+
+      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[0].address
+      );
+
+      expect(num1).to.equal(27);
 
       const num2 = await landOwners[0].MockLandWithMint.balanceOf(
         landOwners[1].address
       );
 
       expect(num2).to.equal(9);
+    });
+
+    it('transferring a 6X6 quad from a 12x12', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[0].address,
+          12,
+          12,
+          12,
+          bytes
+        )
+      );
+      const num = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[0].address
+      );
+      expect(num).to.equal(144);
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          6,
+          12,
+          12,
+          bytes
+        )
+      );
+
+      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[0].address
+      );
+
+      expect(num1).to.equal(108);
+
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+
+      expect(num2).to.equal(36);
     });
   });
 
