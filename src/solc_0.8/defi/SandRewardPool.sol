@@ -69,11 +69,14 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     }
 
     modifier antiCompoundCheck(address account) {
-        require(
-            block.timestamp > antiCompound.lastWithdraw[account] + antiCompound.lockPeriodInSecs,
-            "SandRewardPool: must wait"
-        );
-        antiCompound.lastWithdraw[account] = block.timestamp;
+        // We use lockPeriodInSecs == 0 to disable this check
+        if (antiCompound.lockPeriodInSecs != 0) {
+            require(
+                block.timestamp > antiCompound.lastWithdraw[account] + antiCompound.lockPeriodInSecs,
+                "SandRewardPool: must wait"
+            );
+            antiCompound.lastWithdraw[account] = block.timestamp;
+        }
         _;
     }
 
@@ -135,6 +138,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     /// @dev Calling it is risky specially when rewardToken == stakeToken
     function recoverFunds(address receiver) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "SandRewardPool: not admin");
+        require(receiver != address(0), "SandRewardPool: invalid receiver");
         rewardToken.safeTransfer(receiver, rewardToken.balanceOf(address(this)));
     }
 

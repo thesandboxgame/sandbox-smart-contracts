@@ -59,7 +59,7 @@ contract TwoPeriodsRewardCalculator is IRewardCalculator, AccessControl {
     uint256 public rate2;
 
     // The address of the reward pool, the only one authorized to restart rewards
-    address public rewardPool;
+    address public immutable rewardPool;
 
     constructor(address rewardPool_) {
         rewardPool = rewardPool_;
