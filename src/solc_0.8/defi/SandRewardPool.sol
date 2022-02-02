@@ -53,7 +53,7 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
 
     struct AntiCompound {
         uint256 lockPeriodInSecs;
-        mapping(address => uint256) lastWithdraw;
+        mapping(address => uint256) lastClaim;
     }
     // This is used to implement a time buffer for reward retrieval, so the used cannot re-stake the rewards too fast.
     AntiCompound public antiCompound;
@@ -72,11 +72,11 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
         // We use lockPeriodInSecs == 0 to disable this check
         if (antiCompound.lockPeriodInSecs != 0) {
             require(
-                block.timestamp > antiCompound.lastWithdraw[account] + antiCompound.lockPeriodInSecs,
+                block.timestamp > antiCompound.lastClaim[account] + antiCompound.lockPeriodInSecs,
                 "SandRewardPool: must wait"
             );
-            antiCompound.lastWithdraw[account] = block.timestamp;
         }
+        antiCompound.lastClaim[account] = block.timestamp;
         _;
     }
 
@@ -244,6 +244,11 @@ contract SandRewardPool is StakeTokenWrapper, AccessControl, ReentrancyGuard, ER
     /// @dev the user must approve in the stack token before calling this function
     function stake(uint256 amount) external nonReentrant {
         require(amount > 0, "SandRewardPool: Cannot stake 0");
+
+        // The first time a user stakes he cannot remove his rewards immediately.
+        if (antiCompound.lastClaim[_msgSender()] == 0) {
+            antiCompound.lastClaim[_msgSender()] = block.timestamp;
+        }
 
         uint256 earlierRewards = 0;
 

@@ -46,6 +46,8 @@ describe('new SandRewardPool anti compound tests', function () {
     await user.pool.stake(1000);
     expect(await contract.earned(user.address)).to.be.equal(30);
 
+    await expect(user.pool.getReward()).to.revertedWith('must wait');
+    await increaseTime(lockTimeMS);
     await doOnNextBlock(async () => {
       await user.pool.getReward();
     });
@@ -66,5 +68,28 @@ describe('new SandRewardPool anti compound tests', function () {
     const deltas2 = await balances(user.address, initialBalance);
     expect(deltas2.stake).to.be.equal(-1000);
     expect(deltas2.reward).to.be.equal(80);
+  });
+  it('we can disable lockTimeMS check by setting it to zero', async function () {
+    const {
+      contract,
+      rewardCalculatorMock,
+      getUser,
+    } = await setupSandRewardPoolTest();
+    await contract.setRewardCalculator(rewardCalculatorMock.address, false);
+
+    const lockTimeMS = 10 * 1000;
+    await contract.setAntiCompoundLockPeriod(lockTimeMS);
+
+    const user = await getUser();
+
+    await rewardCalculatorMock.setReward(30);
+    await user.pool.stake(1000);
+
+    await expect(user.pool.getReward()).to.revertedWith('must wait');
+
+    // Disable the check
+    await contract.setAntiCompoundLockPeriod(0);
+
+    await expect(user.pool.getReward()).not.to.be.reverted;
   });
 });
