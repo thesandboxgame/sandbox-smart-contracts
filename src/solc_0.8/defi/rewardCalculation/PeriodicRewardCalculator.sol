@@ -30,7 +30,7 @@ contract PeriodicRewardCalculator is IRewardCalculator, AccessControl {
     // We need to save the rewards accumulated between the last call to restartRewards and the call to notifyRewardAmount
     uint256 public savedRewards;
     // The address of the reward pool, the only one authorized to restart rewards
-    address public rewardPool;
+    address public immutable rewardPool;
 
     constructor(address rewardPool_, uint256 duration_) {
         rewardPool = rewardPool_;

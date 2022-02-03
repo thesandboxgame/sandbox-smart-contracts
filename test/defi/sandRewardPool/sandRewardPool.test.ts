@@ -5,6 +5,7 @@ import {setupSandRewardPoolTest, sum} from './fixtures/sandRewardPool.fixture';
 import {toWei} from '../../utils';
 import {randomBigNumber} from './utils';
 import {sendMetaTx} from '../../sendMetaTx';
+import {AddressZero} from '@ethersproject/constants';
 
 describe('new SandRewardPool main contract tests', function () {
   describe('roles', function () {
@@ -31,6 +32,7 @@ describe('new SandRewardPool main contract tests', function () {
         ).to.be.revertedWith('not admin');
       });
     }
+
     // eslint-disable-next-line mocha/no-setup-in-describe
     defaultAdminRoleTest('setContributionCalculator', (c, rewardToken) =>
       c.setContributionCalculator(rewardToken)
@@ -70,6 +72,12 @@ describe('new SandRewardPool main contract tests', function () {
       const user = await getUser();
       await expect(user.pool.recoverFunds(user.address)).to.be.revertedWith(
         'not admin'
+      );
+    });
+    it('recoverFunds must fail with address zero', async function () {
+      const {contract} = await setupSandRewardPoolTest();
+      await expect(contract.recoverFunds(AddressZero)).to.be.revertedWith(
+        'invalid receiver'
       );
     });
   });
