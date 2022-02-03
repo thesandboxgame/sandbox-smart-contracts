@@ -1,9 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
+import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
 import {ClaimERC1155ERC721ERC20} from "./ClaimERC1155ERC721ERC20.sol";
-import {WithAdmin} from "../../common/BaseWithStorage/WithAdmin.sol";
-// import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol"; TODO: replace WithAdmin
+import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
 import {ERC2771Handler} from "../../common/BaseWithStorage/ERC2771Handler.sol";
 
 // TODO: reentrancy guard
@@ -11,7 +11,7 @@ import {ERC2771Handler} from "../../common/BaseWithStorage/ERC2771Handler.sol";
 /// @title A Multi Claim contract that enables claims of user rewards in the form of ERC1155, ERC721 and / or ERC20 tokens
 /// @notice This contract manages claims for multiple token types
 /// @dev The contract implements ERC2771 to ensure that users do not pay gas
-contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
+contract GaslessMultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
@@ -22,16 +22,16 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
 
     event NewGiveaway(bytes32 merkleRoot, uint256 expiryTime);
 
-    constructor(address admin, address trustedForwarder) {
-        _admin = admin;
-        // _setupRole(DEFAULT_ADMIN_ROLE, _msgSender()); TODO: implement
+    constructor(address trustedForwarder) {
+        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
         __ERC2771Handler_initialize(trustedForwarder);
     }
 
     /// @notice Function to add a new giveaway.
     /// @param merkleRoot The merkle root hash of the claim data.
     /// @param expiryTime The expiry time for the giveaway.
-    function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime) external onlyAdmin {
+    function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "GaslessMultiGiveaway: not admin");
         _expiryTime[merkleRoot] = expiryTime;
         emit NewGiveaway(merkleRoot, expiryTime);
     }
@@ -85,7 +85,7 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
     /// @notice Set the trusted forwarder.
     /// @param trustedForwarder The address of the contract that is enabled to send meta-tx on behalf of the user.
     function setTrustedForwarder(address trustedForwarder) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "SandRewardPool: not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "GaslessMultiGiveaway: not admin");
         _trustedForwarder = trustedForwarder;
     }
 
