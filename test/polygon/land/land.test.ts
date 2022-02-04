@@ -2942,5 +2942,240 @@ describe('MockLandWithMint.sol', function () {
       expect(await PolygonLand.getX(id)).to.be.equal(x);
       expect(await PolygonLand.getY(id)).to.be.equal(y);
     });
+
+    it('should fetch owner of given 1x1 quad', async function () {
+      const {
+        deployer,
+        Land,
+        landMinter,
+        users,
+        MockLandTunnel,
+        PolygonLand,
+        MockPolygonLandTunnel,
+      } = await setupLand();
+
+      const landHolder = users[0];
+      const size = 12;
+      const x = 0;
+      const y = 0;
+      const bytes = '0x00';
+      const plotCount = size * size;
+
+      // Mint LAND on L1
+      await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
+      expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
+
+      // Set Mock PolygonLandTunnel in PolygonLand
+      await deployer.PolygonLand.setPolygonLandTunnel(
+        MockPolygonLandTunnel.address
+      );
+      expect(await PolygonLand.polygonLandTunnel()).to.equal(
+        MockPolygonLandTunnel.address
+      );
+
+      // Transfer to L1 Tunnel
+      await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
+      await landHolder.MockLandTunnel.batchTransferQuadToL2(
+        landHolder.address,
+        [size],
+        [x],
+        [y],
+        bytes
+      );
+
+      const id =
+        0x0000000000000000000000000000000000000000000000000000000000000000 +
+        (x + y * 408);
+
+      expect(await PolygonLand.ownerOf(id)).to.be.equal(landHolder.address);
+    });
+
+    it('should fetch owner of given 3x3 quad', async function () {
+      const {
+        deployer,
+        Land,
+        landMinter,
+        users,
+        MockLandTunnel,
+        PolygonLand,
+        MockPolygonLandTunnel,
+      } = await setupLand();
+
+      const landHolder = users[0];
+      const size = 3;
+      const x = 0;
+      const y = 0;
+      const bytes = '0x00';
+      const plotCount = size * size;
+
+      // Mint LAND on L1
+      await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
+      expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
+
+      // Set Mock PolygonLandTunnel in PolygonLand
+      await deployer.PolygonLand.setPolygonLandTunnel(
+        MockPolygonLandTunnel.address
+      );
+      expect(await PolygonLand.polygonLandTunnel()).to.equal(
+        MockPolygonLandTunnel.address
+      );
+
+      // Transfer to L1 Tunnel
+      await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
+      await landHolder.MockLandTunnel.batchTransferQuadToL2(
+        landHolder.address,
+        [size],
+        [x],
+        [y],
+        bytes
+      );
+
+      const id =
+        0x0000000000000000000000000000000000000000000000000000000000000000 +
+        (x + y * 408);
+
+      expect(await PolygonLand.ownerOf(id)).to.be.equal(landHolder.address);
+    });
+
+    it('should fetch owner of given 6x6 quad', async function () {
+      const {
+        deployer,
+        Land,
+        landMinter,
+        users,
+        MockLandTunnel,
+        PolygonLand,
+        MockPolygonLandTunnel,
+      } = await setupLand();
+
+      const landHolder = users[0];
+      const size = 6;
+      const x = 0;
+      const y = 0;
+      const bytes = '0x00';
+      const plotCount = size * size;
+
+      // Mint LAND on L1
+      await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
+      expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
+
+      // Set Mock PolygonLandTunnel in PolygonLand
+      await deployer.PolygonLand.setPolygonLandTunnel(
+        MockPolygonLandTunnel.address
+      );
+      expect(await PolygonLand.polygonLandTunnel()).to.equal(
+        MockPolygonLandTunnel.address
+      );
+
+      // Transfer to L1 Tunnel
+      await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
+      await landHolder.MockLandTunnel.batchTransferQuadToL2(
+        landHolder.address,
+        [size],
+        [x],
+        [y],
+        bytes
+      );
+
+      const id =
+        0x0000000000000000000000000000000000000000000000000000000000000000 +
+        (x + y * 408);
+
+      expect(await PolygonLand.ownerOf(id)).to.be.equal(landHolder.address);
+    });
+
+    it('should fetch owner of given 12x12 quad', async function () {
+      const {
+        deployer,
+        Land,
+        landMinter,
+        users,
+        MockLandTunnel,
+        PolygonLand,
+        MockPolygonLandTunnel,
+      } = await setupLand();
+
+      const landHolder = users[0];
+      const size = 12;
+      const x = 0;
+      const y = 0;
+      const bytes = '0x00';
+      const plotCount = size * size;
+
+      // Mint LAND on L1
+      await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
+      expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
+
+      // Set Mock PolygonLandTunnel in PolygonLand
+      await deployer.PolygonLand.setPolygonLandTunnel(
+        MockPolygonLandTunnel.address
+      );
+      expect(await PolygonLand.polygonLandTunnel()).to.equal(
+        MockPolygonLandTunnel.address
+      );
+
+      // Transfer to L1 Tunnel
+      await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
+      await landHolder.MockLandTunnel.batchTransferQuadToL2(
+        landHolder.address,
+        [size],
+        [x],
+        [y],
+        bytes
+      );
+
+      const id =
+        0x0000000000000000000000000000000000000000000000000000000000000000 +
+        (x + y * 408);
+
+      expect(await PolygonLand.ownerOf(id)).to.be.equal(landHolder.address);
+    });
+
+    it('should fetch owner of given 24x24 quad', async function () {
+      const {
+        deployer,
+        Land,
+        landMinter,
+        users,
+        MockLandTunnel,
+        PolygonLand,
+        MockPolygonLandTunnel,
+      } = await setupLand();
+
+      const landHolder = users[0];
+      const size = 24;
+      const x = 24;
+      const y = 48;
+      const bytes = '0x00';
+      const plotCount = size * size;
+
+      // Mint LAND on L1
+      await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
+      expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
+
+      // Set Mock PolygonLandTunnel in PolygonLand
+      await deployer.PolygonLand.setPolygonLandTunnel(
+        MockPolygonLandTunnel.address
+      );
+      expect(await PolygonLand.polygonLandTunnel()).to.equal(
+        MockPolygonLandTunnel.address
+      );
+
+      // Transfer to L1 Tunnel
+      await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
+      await landHolder.MockLandTunnel.batchTransferQuadToL2(
+        landHolder.address,
+        [size],
+        [x],
+        [y],
+        bytes
+      );
+
+      const id =
+        0x0000000000000000000000000000000000000000000000000000000000000000 +
+        (x + y * 408);
+
+      expect(await PolygonLand.ownerOf(id)).to.be.equal(landHolder.address);
+    });
   });
 });
