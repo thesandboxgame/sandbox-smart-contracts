@@ -95,11 +95,11 @@ contract ImmutableERC721 is ERC721BaseToken {
         return
             uint256(uint160(creator)) *
             CREATOR_OFFSET_MULTIPLIER +
-            uint64(subId) *
+            subId *
             SUBID_MULTIPLIER +
             chainIndex *
             CHAIN_INDEX_OFFSET_MULTIPLIER +
-            uint16(version);
+            version;
     }
 
     /// @dev Convert a 32 byte hash to a base 32 string.
