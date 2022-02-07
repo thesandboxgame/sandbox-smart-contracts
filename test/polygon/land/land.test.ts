@@ -29,6 +29,17 @@ describe('MockLandWithMint.sol', function () {
     expect(await MockLandWithMint.name()).to.be.equal("Sandbox's LANDs");
     expect(await MockLandWithMint.symbol()).to.be.equal('LAND');
   });
+
+  it('cannot set polygon Land Tunnel to zero address', async function () {
+    const {deployer} = await setupLand();
+
+    await expect(
+      deployer.PolygonLand.setPolygonLandTunnel(
+        '0x0000000000000000000000000000000000000000'
+      )
+    ).to.be.revertedWith('PolygonLand: Invalid address');
+  });
+
   describe('Mint and transfer full quad', function () {
     describe('With approval', function () {
       it('transfers a 1x1 quad', async function () {
@@ -627,6 +638,38 @@ describe('MockLandWithMint.sol', function () {
   });
 
   describe('Burn and transfer full quad', function () {
+    it('should revert transfer quad from zero address', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await expect(
+        landOwners[0].MockLandWithMint.transferQuad(
+          '0x0000000000000000000000000000000000000000',
+          landOwners[0].address,
+          1,
+          0,
+          0,
+          bytes
+        )
+      ).to.be.revertedWith('from is zero address');
+    });
+
+    it('should revert transfer quad to zero address', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+
+      await expect(
+        landOwners[0].MockLandWithMint.transferQuad(
+          landOwners[0].address,
+          '0x0000000000000000000000000000000000000000',
+          1,
+          0,
+          0,
+          bytes
+        )
+      ).to.be.revertedWith("can't send to zero address");
+    });
+
     describe('With approval', function () {
       it('should not transfer a burned 1x1 quad', async function () {
         const {landOwners} = await setupTest();
@@ -1116,6 +1159,15 @@ describe('MockLandWithMint.sol', function () {
         );
       });
     }
+
+    it(`reverts check URI for non existing token`, async function () {
+      const GRID_SIZE = 408;
+      const {landOwners} = await setupTest();
+      const tokenId = 2 + 2 * GRID_SIZE;
+      await expect(
+        landOwners[0].MockLandWithMint.tokenURI(tokenId)
+      ).to.be.revertedWith('Id does not exist');
+    });
   });
   it('supported interfaces', async function () {
     const {MockLandWithMint} = await setupTest();
@@ -1497,6 +1549,76 @@ describe('MockLandWithMint.sol', function () {
       const bytes = '0x3333';
       await waitFor(
         landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[1].address,
+          24,
+          0,
+          0,
+          bytes
+        )
+      );
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[1].address,
+          12,
+          300,
+          300,
+          bytes
+        )
+      );
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[1].address,
+          6,
+          30,
+          30,
+          bytes
+        )
+      );
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
+          landOwners[1].address,
+          3,
+          24,
+          24,
+          bytes
+        )
+      );
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.connect(
+          ethers.provider.getSigner(landOwners[1].address)
+        ).setApprovalForAllFor(
+          landOwners[1].address,
+          landOwners[0].address,
+          true
+        )
+      );
+
+      await waitFor(
+        landOwners[0].MockLandWithMint.batchTransferQuad(
+          landOwners[1].address,
+          landOwners[0].address,
+          [24, 12, 6, 3],
+          [0, 300, 30, 24],
+          [0, 300, 30, 24],
+          bytes
+        )
+      );
+      const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[1].address
+      );
+      expect(num1).to.equal(0);
+      const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+        landOwners[0].address
+      );
+      expect(num2).to.equal(765);
+    });
+
+    it('transfers batch of quads of different sizes from self', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+      await waitFor(
+        landOwners[0].MockLandWithMint.mintQuad(
           landOwners[0].address,
           24,
           0,
@@ -1550,7 +1672,53 @@ describe('MockLandWithMint.sol', function () {
       );
       expect(num2).to.equal(765);
     });
+
+    it('reverts transfers batch of quads to address zero', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+      await expect(
+        landOwners[0].MockLandWithMint.batchTransferQuad(
+          landOwners[0].address,
+          '0x0000000000000000000000000000000000000000',
+          [24, 12, 6, 3],
+          [0, 300, 30, 24],
+          [0, 300, 30, 24],
+          bytes
+        )
+      ).to.be.revertedWith("can't send to zero address");
+    });
+
+    it('reverts transfers batch of quads from address zero', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+      await expect(
+        landOwners[0].MockLandWithMint.batchTransferQuad(
+          '0x0000000000000000000000000000000000000000',
+          landOwners[1].address,
+          [24, 12, 6, 3],
+          [0, 300, 30, 24],
+          [0, 300, 30, 24],
+          bytes
+        )
+      ).to.be.revertedWith('from is zero address');
+    });
+
+    it('reverts transfers batch of quads for invalid parameters', async function () {
+      const {landOwners} = await setupTest();
+      const bytes = '0x3333';
+      await expect(
+        landOwners[0].MockLandWithMint.batchTransferQuad(
+          landOwners[0].address,
+          landOwners[1].address,
+          [24, 12, 3],
+          [0, 300, 30, 24],
+          [0, 300, 30, 24],
+          bytes
+        )
+      ).to.be.revertedWith('invalid data');
+    });
   });
+
   describe('Testing transferFrom', function () {
     it('Transfer 1x1 without approval', async function () {
       const {landOwners} = await setupTest();
@@ -3232,6 +3400,21 @@ describe('MockLandWithMint.sol', function () {
 
       expect(await PolygonLand.getX(id)).to.be.equal(x);
       expect(await PolygonLand.getY(id)).to.be.equal(y);
+    });
+
+    it('cannot fetch x and y values of given non existing quad id', async function () {
+      const {PolygonLand} = await setupLand();
+
+      const id =
+        0x0000000000000000000000000000000000000000000000000000000000000000 +
+        (3 + 6 * 408);
+
+      await expect(PolygonLand.getX(id)).to.be.revertedWith(
+        'token does not exist'
+      );
+      await expect(PolygonLand.getY(id)).to.be.revertedWith(
+        'token does not exist'
+      );
     });
 
     it('should fetch owner of given 1x1 quad', async function () {
