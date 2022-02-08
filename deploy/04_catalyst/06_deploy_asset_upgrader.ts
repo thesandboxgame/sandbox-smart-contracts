@@ -18,7 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer, catalystAssetFeeRecipient} = await getNamedAccounts();
 
-  await deploy(`AssetUpgrader`, {
+  await deploy('AssetUpgrader', {
     from: deployer,
     log: true,
     args: [
