@@ -4,12 +4,17 @@ import {DeployFunction, DeploymentsExtension} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {landAdmin} = await getNamedAccounts();
-  const sandContract = await deployments.get("Sand");
+  const sandContract = await deployments.get('Sand');
   await disableMetaTx(deployments, landAdmin, 'Land', sandContract.address);
   await disableMetaTx(deployments, landAdmin, 'Land_Old', sandContract.address);
 };
 
-async function disableMetaTx(deployments: DeploymentsExtension, from: string, contractName: string, address: string) {
+async function disableMetaTx(
+  deployments: DeploymentsExtension,
+  from: string,
+  contractName: string,
+  address: string
+) {
   const {execute, read, catchUnknownSigner} = deployments;
   let isMetaTx = false;
   try {
