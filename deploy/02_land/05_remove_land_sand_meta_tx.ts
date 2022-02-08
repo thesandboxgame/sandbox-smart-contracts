@@ -2,16 +2,14 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction, DeploymentsExtension} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
-  const {landAdmin} = await getNamedAccounts();
+  const {deployments} = hre;
   const sandContract = await deployments.get('Sand');
-  await disableMetaTx(deployments, landAdmin, 'Land', sandContract.address);
-  await disableMetaTx(deployments, landAdmin, 'Land_Old', sandContract.address);
+  await disableMetaTx(deployments, 'Land', sandContract.address);
+  await disableMetaTx(deployments, 'Land_Old', sandContract.address);
 };
 
 async function disableMetaTx(
   deployments: DeploymentsExtension,
-  from: string,
   contractName: string,
   address: string
 ) {
@@ -23,10 +21,11 @@ async function disableMetaTx(
     // it's disabled
   }
   if (isMetaTx) {
+    const admin = await read(contractName, 'getAdmin');
     await catchUnknownSigner(
       execute(
         contractName,
-        {from, log: true},
+        {from: admin, log: true},
         'setMetaTransactionProcessor',
         address,
         false
