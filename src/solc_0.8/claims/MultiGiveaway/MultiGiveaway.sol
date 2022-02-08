@@ -29,7 +29,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     /// @param merkleRoot The merkle root hash of the claim data.
     /// @param expiryTime The expiry time for the giveaway.
     function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "GaslessMultiGiveaway: not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "MultiGiveaway: not admin");
         _expiryTime[merkleRoot] = expiryTime;
         emit NewGiveaway(merkleRoot, expiryTime);
     }
