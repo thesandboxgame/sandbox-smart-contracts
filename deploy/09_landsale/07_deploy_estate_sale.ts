@@ -17,6 +17,7 @@ type SaleDeployment = {
   skipSector?: {
     [sector: number]: (env: HardhatRuntimeEnvironment) => Promise<boolean>;
   };
+  setMinterOnNewLand?: number[]; // required for land sales on new land contract
 };
 
 const sales: SaleDeployment[] = [
@@ -25,7 +26,7 @@ const sales: SaleDeployment[] = [
   {name: 'LandPreSale_12'},
   {name: 'LandPreSale_13', skipSector: {35: skipUnlessTest}},
   {name: 'LandPreSale_14'},
-  {name: 'LandPreSale_15'},
+  {name: 'LandPreSale_15', setMinterOnNewLand: [38]},
 ];
 
 const func: DeployFunction = async function (hre) {
@@ -44,7 +45,11 @@ const func: DeployFunction = async function (hre) {
   const assetContract = await deployments.get('Asset');
   const authValidatorContract = await deployments.get('AuthValidator');
 
-  async function deployLandSale(name: string, landSale: LandSale) {
+  async function deployLandSale(
+    name: string,
+    landSale: LandSale,
+    setMinterOnNewLand: number[] = []
+  ) {
     const {lands, merkleRootHash, sector} = landSale;
 
     const landSaleName = `${name}_${sector}`;
@@ -75,7 +80,9 @@ const func: DeployFunction = async function (hre) {
 
     writeProofs(hre, landSaleName, landSale);
 
-    await setAsLandMinter(hre, landSaleDeployment.address);
+    if (setMinterOnNewLand && setMinterOnNewLand.includes(sector)) {
+      await setAsLandMinter(hre, landSaleDeployment.address);
+    }
   }
 
   for (const sale of sales) {
@@ -98,7 +105,7 @@ const func: DeployFunction = async function (hre) {
           continue;
         }
       }
-      await deployLandSale(sale.name, landSale);
+      await deployLandSale(sale.name, landSale, sale.setMinterOnNewLand);
     }
   }
 };
