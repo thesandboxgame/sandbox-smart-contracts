@@ -1,11 +1,11 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
-import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
-import "../../common/interfaces/IERC721Extended.sol";
-import "../../common/Libraries/Verify.sol";
+import {IERC1155} from "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
+import {IERC20} from "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts-0.8/token/ERC20/utils/SafeERC20.sol";
+import {IERC721Extended} from "../../common/interfaces/IERC721Extended.sol";
+import {Verify} from "../../common/Libraries/Verify.sol";
 
 contract ClaimERC1155ERC721ERC20 {
     ///////////////////////////////  Libs //////////////////////////////

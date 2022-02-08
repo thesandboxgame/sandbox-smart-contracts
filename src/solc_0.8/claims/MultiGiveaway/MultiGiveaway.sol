@@ -1,14 +1,15 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "./ClaimERC1155ERC721ERC20.sol";
-import "../../common/BaseWithStorage/WithAdmin.sol";
+import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
+import {ClaimERC1155ERC721ERC20} from "./ClaimERC1155ERC721ERC20.sol";
+import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
+import {ERC2771Handler} from "../../common/BaseWithStorage/ERC2771Handler.sol";
 
-/// @title MultiGiveaway contract.
-/// @notice This contract manages claims for multiple token types.
-contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
-    ///////////////////////////////  Data //////////////////////////////
-
+/// @title A Multi Claim contract that enables claims of user rewards in the form of ERC1155, ERC721 and / or ERC20 tokens
+/// @notice This contract manages claims for multiple token types
+/// @dev The contract implements ERC2771 to ensure that users do not pay gas
+contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler {
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
     bytes4 internal constant ERC721_RECEIVED = 0x150b7a02;
@@ -17,22 +18,18 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
     mapping(address => mapping(bytes32 => bool)) public claimed;
     mapping(bytes32 => uint256) internal _expiryTime;
 
-    ///////////////////////////////  Events //////////////////////////////
-
     event NewGiveaway(bytes32 merkleRoot, uint256 expiryTime);
 
-    ///////////////////////////////  Constructor /////////////////////////
-
-    constructor(address admin) {
-        _admin = admin;
+    constructor(address trustedForwarder) {
+        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+        __ERC2771Handler_initialize(trustedForwarder);
     }
-
-    ///////////////////////////////  Functions ///////////////////////////
 
     /// @notice Function to add a new giveaway.
     /// @param merkleRoot The merkle root hash of the claim data.
     /// @param expiryTime The expiry time for the giveaway.
-    function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime) external onlyAdmin {
+    function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "GaslessMultiGiveaway: not admin");
         _expiryTime[merkleRoot] = expiryTime;
         emit NewGiveaway(merkleRoot, expiryTime);
     }
@@ -119,5 +116,13 @@ contract MultiGiveaway is WithAdmin, ClaimERC1155ERC721ERC20 {
         bytes calldata /*data*/
     ) external pure returns (bytes4) {
         return ERC1155_BATCH_RECEIVED;
+    }
+
+    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
+        return ERC2771Handler._msgSender();
+    }
+
+    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+        return ERC2771Handler._msgData();
     }
 }
