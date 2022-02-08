@@ -20,14 +20,10 @@ describe('Multi_Giveaway', function () {
     it('Admin can add a new giveaway', async function () {
       const options = {};
       const setUp = await setupTestGiveaway(options);
-      const {giveawayContract, nftGiveawayAdmin} = setUp;
-
-      const giveawayContractAsAdmin = await giveawayContract.connect(
-        ethers.provider.getSigner(nftGiveawayAdmin)
-      );
+      const {giveawayContract} = setUp;
 
       const receipt = await waitFor(
-        giveawayContractAsAdmin.addNewGiveaway(
+        giveawayContract.addNewGiveaway(
           emptyBytes32,
           '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF' // does not expire
         )
@@ -54,7 +50,7 @@ describe('Multi_Giveaway', function () {
           emptyBytes32,
           '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
         )
-      ).to.be.revertedWith('ADMIN_ONLY');
+      ).to.be.revertedWith('MultiGiveaway: not admin');
     });
 
     it('User can get their claimed status', async function () {

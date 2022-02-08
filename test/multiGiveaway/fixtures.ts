@@ -41,13 +41,17 @@ export const setupTestGiveaway = withSnapshot(
       gemMinter,
     } = await getNamedAccounts();
     const otherAccounts = await getUnnamedAccounts();
-    const nftGiveawayAdmin = otherAccounts[0];
-    const others = otherAccounts.slice(1);
+    const others = otherAccounts.slice(1); // TODO otherAccounts[0] no longer used for nftGiveaway admin
 
     const sandContract = await ethers.getContract('Sand');
     const assetContract = await ethers.getContract('Asset');
     const speedGemContract = await ethers.getContract('Gem_SPEED');
     const rareCatalystContract = await ethers.getContract('Catalyst_RARE');
+
+    await deployments.deploy('TestMetaTxForwarder', {
+      from: deployer,
+    });
+    const trustedForwarder = await ethers.getContract('TestMetaTxForwarder');
 
     await deployments.deploy('MockLand', {
       from: deployer,
@@ -64,15 +68,12 @@ export const setupTestGiveaway = withSnapshot(
     await deployments.deploy('Test_Multi_Giveaway_1_with_ERC20', {
       from: deployer,
       contract: 'MultiGiveaway',
-      args: [nftGiveawayAdmin],
+      args: [trustedForwarder.address],
     });
 
     const giveawayContract = await ethers.getContract(
-      'Test_Multi_Giveaway_1_with_ERC20'
-    );
-
-    const giveawayContractAsAdmin = await giveawayContract.connect(
-      ethers.provider.getSigner(nftGiveawayAdmin)
+      'Test_Multi_Giveaway_1_with_ERC20',
+      deployer
     );
 
     // Supply SAND
@@ -363,7 +364,7 @@ export const setupTestGiveaway = withSnapshot(
 
     // Single giveaway
     const hashArray = createDataArrayMultiClaim(claims0);
-    await giveawayContractAsAdmin.addNewGiveaway(
+    await giveawayContract.addNewGiveaway(
       merkleRootHash0,
       '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
     ); // no expiry
@@ -385,7 +386,7 @@ export const setupTestGiveaway = withSnapshot(
       allMerkleRoots.push(merkleRootHash1);
       const hashArray2 = createDataArrayMultiClaim(claims1);
       allTrees.push(new MerkleTree(hashArray2));
-      await giveawayContractAsAdmin.addNewGiveaway(
+      await giveawayContract.addNewGiveaway(
         merkleRootHash1,
         '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
       ); // no expiry
@@ -401,8 +402,8 @@ export const setupTestGiveaway = withSnapshot(
       others,
       allTrees,
       allClaims,
-      nftGiveawayAdmin,
       allMerkleRoots,
+      trustedForwarder,
     };
   }
 );
