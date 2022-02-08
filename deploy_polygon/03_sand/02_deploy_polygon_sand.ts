@@ -19,6 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       sandExecutionAdmin,
     ],
     log: true,
+    skipIfAlreadyDeployed: true,
   });
 };
 
