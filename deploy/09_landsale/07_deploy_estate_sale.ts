@@ -25,6 +25,7 @@ const sales: SaleDeployment[] = [
   {name: 'LandPreSale_12'},
   {name: 'LandPreSale_13', skipSector: {35: skipUnlessTest}},
   {name: 'LandPreSale_14'},
+  {name: 'LandPreSale_15'},
 ];
 
 const func: DeployFunction = async function (hre) {
