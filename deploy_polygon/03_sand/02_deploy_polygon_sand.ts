@@ -7,14 +7,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer, sandAdmin, sandExecutionAdmin} = await getNamedAccounts();
 
-  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+  const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
   const CHILD_CHAIN_MANAGER = await deployments.get('CHILD_CHAIN_MANAGER');
 
   await deploy('PolygonSand', {
     from: deployer,
     args: [
       CHILD_CHAIN_MANAGER.address,
-      TRUSTED_FORWARDER.address,
+      TRUSTED_FORWARDER_V2.address,
       sandAdmin,
       sandExecutionAdmin,
     ],
@@ -24,4 +24,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
 export default func;
 func.tags = ['PolygonSand', 'PolygonSand_deploy'];
-func.dependencies = ['CHILD_CHAIN_MANAGER', 'TRUSTED_FORWARDER'];
+func.dependencies = ['CHILD_CHAIN_MANAGER', 'TRUSTED_FORWARDER_V2'];
