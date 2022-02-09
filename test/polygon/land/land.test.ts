@@ -23,6 +23,8 @@ const setupTest = withSnapshot(
   }
 );
 
+const sizes = [1, 3, 6, 12, 24];
+
 describe('MockLandWithMint.sol', function () {
   it('creation', async function () {
     const {MockLandWithMint} = await setupTest();
@@ -42,597 +44,138 @@ describe('MockLandWithMint.sol', function () {
 
   describe('Mint and transfer full quad', function () {
     describe('With approval', function () {
-      it('transfers a 1x1 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
+      it('transfers quads of all sizes', async function () {
+        for (let i = 0; i < sizes.length; i++) {
+          const {landOwners} = await setupTest();
+          const bytes = '0x3333';
+          const size = sizes[i];
+          const plotCount = size * size;
 
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[1].address,
-            1,
-            0,
-            0,
-            bytes
-          )
-        );
+          await waitFor(
+            landOwners[0].MockLandWithMint.mintQuad(
+              landOwners[1].address,
+              size,
+              0,
+              0,
+              bytes
+            )
+          );
 
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num).to.equal(1);
+          const num = await landOwners[0].MockLandWithMint.balanceOf(
+            landOwners[1].address
+          );
+          expect(num).to.equal(plotCount);
 
-        await waitFor(
-          landOwners[0].MockLandWithMint.connect(
-            ethers.provider.getSigner(landOwners[1].address)
-          ).setApprovalForAllFor(
-            landOwners[1].address,
-            landOwners[0].address,
-            true
-          )
-        );
+          await waitFor(
+            landOwners[0].MockLandWithMint.connect(
+              ethers.provider.getSigner(landOwners[1].address)
+            ).setApprovalForAllFor(
+              landOwners[1].address,
+              landOwners[0].address,
+              true
+            )
+          );
 
-        await waitFor(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[1].address,
-            landOwners[0].address,
-            1,
-            0,
-            0,
-            bytes
-          )
-        );
-        const num1 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num1).to.equal(0);
-        const num2 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num2).to.equal(1);
-      });
-
-      it('transfers a 3x3 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[1].address,
-            3,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num).to.equal(9);
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.connect(
-            ethers.provider.getSigner(landOwners[1].address)
-          ).setApprovalForAllFor(
-            landOwners[1].address,
-            landOwners[0].address,
-            true
-          )
-        );
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[1].address,
-            landOwners[0].address,
-            3,
-            0,
-            0,
-            bytes
-          )
-        );
-        const num1 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num1).to.equal(9);
-        const num2 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num2).to.equal(0);
-      });
-
-      it('transfers a 6x6 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[1].address,
-            6,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num).to.equal(36);
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.connect(
-            ethers.provider.getSigner(landOwners[1].address)
-          ).setApprovalForAllFor(
-            landOwners[1].address,
-            landOwners[0].address,
-            true
-          )
-        );
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[1].address,
-            landOwners[0].address,
-            6,
-            0,
-            0,
-            bytes
-          )
-        );
-        const num1 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num1).to.equal(36);
-        const num2 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num2).to.equal(0);
-      });
-
-      it('transfers a 12x12 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[1].address,
-            12,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num).to.equal(144);
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.connect(
-            ethers.provider.getSigner(landOwners[1].address)
-          ).setApprovalForAllFor(
-            landOwners[1].address,
-            landOwners[0].address,
-            true
-          )
-        );
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[1].address,
-            landOwners[0].address,
-            12,
-            0,
-            0,
-            bytes
-          )
-        );
-        const num1 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num1).to.equal(144);
-        const num2 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num2).to.equal(0);
-      });
-
-      it('transfers a 24x24 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[1].address,
-            24,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num).to.equal(576);
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.connect(
-            ethers.provider.getSigner(landOwners[1].address)
-          ).setApprovalForAllFor(
-            landOwners[1].address,
-            landOwners[0].address,
-            true
-          )
-        );
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[1].address,
-            landOwners[0].address,
-            24,
-            0,
-            0,
-            bytes
-          )
-        );
-        const num1 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num1).to.equal(576);
-        const num2 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num2).to.equal(0);
+          await waitFor(
+            landOwners[0].MockLandWithMint.transferQuad(
+              landOwners[1].address,
+              landOwners[0].address,
+              size,
+              0,
+              0,
+              bytes
+            )
+          );
+          const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+            landOwners[1].address
+          );
+          expect(num1).to.equal(0);
+          const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+            landOwners[0].address
+          );
+          expect(num2).to.equal(plotCount);
+        }
       });
     });
 
     describe('Without approval', function () {
-      it('reverts transfers of 1x1 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
+      it('reverts transfers of quads', async function () {
+        for (let i = 0; i < sizes.length; i++) {
+          const {landOwners} = await setupTest();
+          const bytes = '0x3333';
+          const size = sizes[i];
+          const plotCount = size * size;
 
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[1].address,
-            1,
-            0,
-            0,
-            bytes
-          )
-        );
+          await waitFor(
+            landOwners[0].MockLandWithMint.mintQuad(
+              landOwners[1].address,
+              size,
+              0,
+              0,
+              bytes
+            )
+          );
 
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num).to.equal(1);
+          const num = await landOwners[0].MockLandWithMint.balanceOf(
+            landOwners[1].address
+          );
+          expect(num).to.equal(plotCount);
 
-        await expect(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[1].address,
-            landOwners[0].address,
-            1,
-            0,
-            0,
-            bytes
-          )
-        ).to.be.revertedWith('not authorized to transferQuad');
-      });
-
-      it('reverts transfers of 3x3 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[1].address,
-            3,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num).to.equal(9);
-
-        await expect(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[1].address,
-            landOwners[0].address,
-            3,
-            0,
-            0,
-            bytes
-          )
-        ).to.be.revertedWith('not authorized to transferQuad');
-      });
-
-      it('reverts transfers of 6x6 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[1].address,
-            6,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num).to.equal(36);
-
-        await expect(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[1].address,
-            landOwners[0].address,
-            6,
-            0,
-            0,
-            bytes
-          )
-        ).to.be.revertedWith('not authorized to transferQuad');
-      });
-
-      it('reverts transfers of 12x12 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[1].address,
-            12,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num).to.equal(144);
-
-        await expect(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[1].address,
-            landOwners[0].address,
-            12,
-            0,
-            0,
-            bytes
-          )
-        ).to.be.revertedWith('not authorized to transferQuad');
-      });
-
-      it('reverts transfers of 24x24 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[1].address,
-            24,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num).to.equal(576);
-
-        await expect(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[1].address,
-            landOwners[0].address,
-            24,
-            0,
-            0,
-            bytes
-          )
-        ).to.be.revertedWith('not authorized to transferQuad');
+          await expect(
+            landOwners[0].MockLandWithMint.transferQuad(
+              landOwners[1].address,
+              landOwners[0].address,
+              size,
+              0,
+              0,
+              bytes
+            )
+          ).to.be.revertedWith('not authorized to transferQuad');
+        }
       });
     });
 
     describe('From self', function () {
-      it('transfers a 1x1 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
+      it('transfers of quads of all sizes from self', async function () {
+        for (let i = 0; i < sizes.length; i++) {
+          const {landOwners} = await setupTest();
+          const bytes = '0x3333';
+          const size = sizes[i];
+          const plotCount = size * size;
 
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[0].address,
-            1,
-            0,
-            0,
-            bytes
-          )
-        );
+          await waitFor(
+            landOwners[0].MockLandWithMint.mintQuad(
+              landOwners[0].address,
+              size,
+              0,
+              0,
+              bytes
+            )
+          );
 
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num).to.equal(1);
-        await waitFor(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[0].address,
-            landOwners[1].address,
-            1,
-            0,
-            0,
-            bytes
-          )
-        );
-        const num1 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num1).to.equal(0);
-        const num2 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num2).to.equal(1);
-      });
-
-      it('transfers a 3x3 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[0].address,
-            3,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num).to.equal(9);
-        await waitFor(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[0].address,
-            landOwners[1].address,
-            3,
-            0,
-            0,
-            bytes
-          )
-        );
-        const num1 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num1).to.equal(0);
-        const num2 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num2).to.equal(9);
-      });
-
-      it('transfers a 6x6 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[0].address,
-            6,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num).to.equal(36);
-        await waitFor(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[0].address,
-            landOwners[1].address,
-            6,
-            0,
-            0,
-            bytes
-          )
-        );
-        const num1 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num1).to.equal(0);
-        const num2 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num2).to.equal(36);
-      });
-
-      it('transfers a 12x12 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[0].address,
-            12,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num).to.equal(144);
-        await waitFor(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[0].address,
-            landOwners[1].address,
-            12,
-            0,
-            0,
-            bytes
-          )
-        );
-        const num1 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num1).to.equal(0);
-        const num2 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num2).to.equal(144);
-      });
-      it('transfers a 24x24 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[0].address,
-            24,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num).to.equal(576);
-        await waitFor(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[0].address,
-            landOwners[1].address,
-            24,
-            0,
-            0,
-            bytes
-          )
-        );
-        const num1 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num1).to.equal(0);
-        const num2 = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num2).to.equal(576);
+          const num = await landOwners[0].MockLandWithMint.balanceOf(
+            landOwners[0].address
+          );
+          expect(num).to.equal(plotCount);
+          await waitFor(
+            landOwners[0].MockLandWithMint.transferQuad(
+              landOwners[0].address,
+              landOwners[1].address,
+              size,
+              0,
+              0,
+              bytes
+            )
+          );
+          const num1 = await landOwners[0].MockLandWithMint.balanceOf(
+            landOwners[0].address
+          );
+          expect(num1).to.equal(0);
+          const num2 = await landOwners[0].MockLandWithMint.balanceOf(
+            landOwners[1].address
+          );
+          expect(num2).to.equal(plotCount);
+        }
       });
     });
   });
@@ -719,211 +262,60 @@ describe('MockLandWithMint.sol', function () {
         ).to.be.revertedWith('token does not exist');
       });
 
-      it('should not transfer a burned 3x3 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
+      it('should not transfer burned quads', async function () {
+        for (let i = 1; i < sizes.length; i++) {
+          const {landOwners} = await setupTest();
+          const bytes = '0x3333';
+          const size = sizes[i];
+          const plotCount = size * size;
 
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[1].address,
-            3,
-            0,
-            0,
-            bytes
-          )
-        );
+          await waitFor(
+            landOwners[0].MockLandWithMint.mintQuad(
+              landOwners[1].address,
+              size,
+              0,
+              0,
+              bytes
+            )
+          );
 
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num).to.equal(9);
+          const num = await landOwners[0].MockLandWithMint.balanceOf(
+            landOwners[1].address
+          );
+          expect(num).to.equal(plotCount);
 
-        await waitFor(
-          landOwners[0].MockLandWithMint.connect(
-            ethers.provider.getSigner(landOwners[1].address)
-          ).setApprovalForAllFor(
-            landOwners[1].address,
-            landOwners[0].address,
-            true
-          )
-        );
+          await waitFor(
+            landOwners[0].MockLandWithMint.connect(
+              ethers.provider.getSigner(landOwners[1].address)
+            ).setApprovalForAllFor(
+              landOwners[1].address,
+              landOwners[0].address,
+              true
+            )
+          );
 
-        for (let x = 0; x < 3; x++) {
-          for (let y = 0; y < 3; y++) {
-            await waitFor(
-              landOwners[1].MockLandWithMint.burn(
-                0x0000000000000000000000000000000000000000000000000000000000000000 +
-                  (x + y * 408)
-              )
-            );
+          for (let x = 0; x < size; x++) {
+            for (let y = 0; y < size; y++) {
+              await waitFor(
+                landOwners[1].MockLandWithMint.burn(
+                  0x0000000000000000000000000000000000000000000000000000000000000000 +
+                    (x + y * 408)
+                )
+              );
+            }
           }
+
+          await expect(
+            landOwners[0].MockLandWithMint.transferQuad(
+              landOwners[1].address,
+              landOwners[0].address,
+              size,
+              0,
+              0,
+              bytes
+            )
+          ).to.be.revertedWith('not owner');
         }
-
-        await expect(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[1].address,
-            landOwners[0].address,
-            3,
-            0,
-            0,
-            bytes
-          )
-        ).to.be.revertedWith('not owner');
-      });
-
-      it('should not transfer a burned 6x6 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[1].address,
-            6,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num).to.equal(36);
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.connect(
-            ethers.provider.getSigner(landOwners[1].address)
-          ).setApprovalForAllFor(
-            landOwners[1].address,
-            landOwners[0].address,
-            true
-          )
-        );
-
-        for (let x = 0; x < 6; x++) {
-          for (let y = 0; y < 6; y++) {
-            await waitFor(
-              landOwners[1].MockLandWithMint.burn(
-                0x0000000000000000000000000000000000000000000000000000000000000000 +
-                  (x + y * 408)
-              )
-            );
-          }
-        }
-
-        await expect(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[1].address,
-            landOwners[0].address,
-            6,
-            0,
-            0,
-            bytes
-          )
-        ).to.be.revertedWith('not owner');
-      });
-
-      it('should not transfer a burned 12x12 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[1].address,
-            12,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num).to.equal(144);
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.connect(
-            ethers.provider.getSigner(landOwners[1].address)
-          ).setApprovalForAllFor(
-            landOwners[1].address,
-            landOwners[0].address,
-            true
-          )
-        );
-
-        for (let x = 0; x < 12; x++) {
-          for (let y = 0; y < 12; y++) {
-            await waitFor(
-              landOwners[1].MockLandWithMint.burn(
-                0x0000000000000000000000000000000000000000000000000000000000000000 +
-                  (x + y * 408)
-              )
-            );
-          }
-        }
-
-        await expect(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[1].address,
-            landOwners[0].address,
-            12,
-            0,
-            0,
-            bytes
-          )
-        ).to.be.revertedWith('not owner');
-      });
-      it('should not transfer a burned 24x24 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[1].address,
-            24,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[1].address
-        );
-        expect(num).to.equal(576);
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.connect(
-            ethers.provider.getSigner(landOwners[1].address)
-          ).setApprovalForAllFor(
-            landOwners[1].address,
-            landOwners[0].address,
-            true
-          )
-        );
-
-        for (let x = 0; x < 24; x++) {
-          for (let y = 0; y < 24; y++) {
-            await waitFor(
-              landOwners[1].MockLandWithMint.burn(
-                0x0000000000000000000000000000000000000000000000000000000000000000 +
-                  (x + y * 408)
-              )
-            );
-          }
-        }
-
-        await expect(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[1].address,
-            landOwners[0].address,
-            24,
-            0,
-            0,
-            bytes
-          )
-        ).to.be.revertedWith('not owner');
       });
     });
 
@@ -966,172 +358,60 @@ describe('MockLandWithMint.sol', function () {
         ).to.be.revertedWith('token does not exist');
       });
 
-      it('should not transfer a burned 3x3 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
+      it('should not transfer burned quads', async function () {
+        for (let i = 1; i < sizes.length; i++) {
+          const {landOwners} = await setupTest();
+          const bytes = '0x3333';
+          const size = sizes[i];
+          const plotCount = size * size;
 
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[0].address,
-            3,
-            0,
-            0,
-            bytes
-          )
-        );
+          await waitFor(
+            landOwners[0].MockLandWithMint.mintQuad(
+              landOwners[1].address,
+              size,
+              0,
+              0,
+              bytes
+            )
+          );
 
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num).to.equal(9);
+          const num = await landOwners[0].MockLandWithMint.balanceOf(
+            landOwners[1].address
+          );
+          expect(num).to.equal(plotCount);
 
-        for (let x = 0; x < 3; x++) {
-          for (let y = 0; y < 3; y++) {
-            await waitFor(
-              landOwners[0].MockLandWithMint.burn(
-                0x0000000000000000000000000000000000000000000000000000000000000000 +
-                  (x + y * 408)
-              )
-            );
+          await waitFor(
+            landOwners[1].MockLandWithMint.connect(
+              ethers.provider.getSigner(landOwners[1].address)
+            ).setApprovalForAllFor(
+              landOwners[1].address,
+              landOwners[0].address,
+              true
+            )
+          );
+
+          for (let x = 0; x < size; x++) {
+            for (let y = 0; y < size; y++) {
+              await waitFor(
+                landOwners[1].MockLandWithMint.burn(
+                  0x0000000000000000000000000000000000000000000000000000000000000000 +
+                    (x + y * 408)
+                )
+              );
+            }
           }
+
+          await expect(
+            landOwners[1].MockLandWithMint.transferQuad(
+              landOwners[1].address,
+              landOwners[0].address,
+              size,
+              0,
+              0,
+              bytes
+            )
+          ).to.be.revertedWith('not owner');
         }
-
-        await expect(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[0].address,
-            landOwners[1].address,
-            3,
-            0,
-            0,
-            bytes
-          )
-        ).to.be.revertedWith('not owner');
-      });
-
-      it('should not transfer a burned 6x6 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[0].address,
-            6,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num).to.equal(36);
-
-        for (let x = 0; x < 6; x++) {
-          for (let y = 0; y < 6; y++) {
-            await waitFor(
-              landOwners[0].MockLandWithMint.burn(
-                0x0000000000000000000000000000000000000000000000000000000000000000 +
-                  (x + y * 408)
-              )
-            );
-          }
-        }
-
-        await expect(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[0].address,
-            landOwners[1].address,
-            6,
-            0,
-            0,
-            bytes
-          )
-        ).to.be.revertedWith('not owner');
-      });
-
-      it('should not transfer a burned 12x12 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[0].address,
-            12,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num).to.equal(144);
-
-        for (let x = 0; x < 12; x++) {
-          for (let y = 0; y < 12; y++) {
-            await waitFor(
-              landOwners[0].MockLandWithMint.burn(
-                0x0000000000000000000000000000000000000000000000000000000000000000 +
-                  (x + y * 408)
-              )
-            );
-          }
-        }
-
-        await expect(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[0].address,
-            landOwners[1].address,
-            12,
-            0,
-            0,
-            bytes
-          )
-        ).to.be.revertedWith('not owner');
-      });
-
-      it('should not transfer a burned 24x24 quad', async function () {
-        const {landOwners} = await setupTest();
-        const bytes = '0x3333';
-
-        await waitFor(
-          landOwners[0].MockLandWithMint.mintQuad(
-            landOwners[0].address,
-            24,
-            0,
-            0,
-            bytes
-          )
-        );
-
-        const num = await landOwners[0].MockLandWithMint.balanceOf(
-          landOwners[0].address
-        );
-        expect(num).to.equal(576);
-
-        for (let x = 0; x < 24; x++) {
-          for (let y = 0; y < 24; y++) {
-            await waitFor(
-              landOwners[0].MockLandWithMint.burn(
-                0x0000000000000000000000000000000000000000000000000000000000000000 +
-                  (x + y * 408)
-              )
-            );
-          }
-        }
-
-        await expect(
-          landOwners[0].MockLandWithMint.transferQuad(
-            landOwners[0].address,
-            landOwners[1].address,
-            24,
-            0,
-            0,
-            bytes
-          )
-        ).to.be.revertedWith('not owner');
       });
     });
   });
@@ -1959,766 +1239,217 @@ describe('MockLandWithMint.sol', function () {
 
   describe('Meta transactions', function () {
     describe('transferQuad without approval', function () {
-      it('should not transfer 1x1 quad', async function () {
-        const {
-          deployer,
-          Land,
-          landMinter,
-          users,
-          MockLandTunnel,
-          PolygonLand,
-          MockPolygonLandTunnel,
-          trustedForwarder,
-        } = await setupLand();
+      it('should not transfer quads of any size', async function () {
+        for (let i = 0; i < sizes.length; i++) {
+          const {
+            deployer,
+            Land,
+            landMinter,
+            users,
+            MockLandTunnel,
+            PolygonLand,
+            MockPolygonLandTunnel,
+            trustedForwarder,
+          } = await setupLand();
 
-        const landHolder = users[0];
-        const landReceiver = users[1];
-        const size = 1;
-        const x = 0;
-        const y = 0;
-        const bytes = '0x00';
-        const plotCount = size * size;
+          const landHolder = users[0];
+          const landReceiver = users[1];
+          const size = sizes[i];
+          const x = 0;
+          const y = 0;
+          const bytes = '0x00';
+          const plotCount = size * size;
 
-        // Mint LAND on L1
-        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
+          // Mint LAND on L1
+          await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
+          expect(await Land.balanceOf(landHolder.address)).to.be.equal(
+            plotCount
+          );
 
-        // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
-        );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
-        // Transfer to L1 Tunnel
-        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-        await landHolder.MockLandTunnel.batchTransferQuadToL2(
-          landHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
-        );
+          // Set Mock PolygonLandTunnel in PolygonLand
+          await deployer.PolygonLand.setPolygonLandTunnel(
+            MockPolygonLandTunnel.address
+          );
+          expect(await PolygonLand.polygonLandTunnel()).to.equal(
+            MockPolygonLandTunnel.address
+          );
+          // Transfer to L1 Tunnel
+          await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
+          await landHolder.MockLandTunnel.batchTransferQuadToL2(
+            landHolder.address,
+            [size],
+            [x],
+            [y],
+            bytes
+          );
 
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          plotCount
-        );
+          expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
+            plotCount
+          );
 
-        const {to, data} = await PolygonLand.populateTransaction[
-          'transferQuad(address,address,uint256,uint256,uint256,bytes)'
-        ](landHolder.address, landReceiver.address, size, x, y, bytes);
+          const {to, data} = await PolygonLand.populateTransaction[
+            'transferQuad(address,address,uint256,uint256,uint256,bytes)'
+          ](landHolder.address, landReceiver.address, size, x, y, bytes);
 
-        await sendMetaTx(
-          to,
-          trustedForwarder,
-          data,
-          landReceiver.address,
-          '10000000'
-        );
+          await sendMetaTx(
+            to,
+            trustedForwarder,
+            data,
+            landReceiver.address,
+            '10000000'
+          );
 
-        expect(await PolygonLand.balanceOf(landReceiver.address)).to.be.equal(
-          0
-        );
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          plotCount
-        );
-      });
-      it('should not transfer 3x3 quad', async function () {
-        const {
-          deployer,
-          Land,
-          landMinter,
-          users,
-          MockLandTunnel,
-          PolygonLand,
-          MockPolygonLandTunnel,
-          trustedForwarder,
-        } = await setupLand();
-
-        const landHolder = users[0];
-        const landReceiver = users[1];
-        const size = 3;
-        const x = 0;
-        const y = 0;
-        const bytes = '0x00';
-        const plotCount = size * size;
-
-        // Mint LAND on L1
-        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-
-        // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
-        );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
-        // Transfer to L1 Tunnel
-        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-        await landHolder.MockLandTunnel.batchTransferQuadToL2(
-          landHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
-        );
-
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          plotCount
-        );
-
-        const {to, data} = await PolygonLand.populateTransaction[
-          'transferQuad(address,address,uint256,uint256,uint256,bytes)'
-        ](landHolder.address, landReceiver.address, size, x, y, bytes);
-
-        await sendMetaTx(
-          to,
-          trustedForwarder,
-          data,
-          landReceiver.address,
-          '10000000'
-        );
-
-        expect(await PolygonLand.balanceOf(landReceiver.address)).to.be.equal(
-          0
-        );
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          plotCount
-        );
-      });
-
-      it('should not transfer 6x6 quad', async function () {
-        const {
-          deployer,
-          Land,
-          landMinter,
-          users,
-          MockLandTunnel,
-          PolygonLand,
-          MockPolygonLandTunnel,
-          trustedForwarder,
-        } = await setupLand();
-
-        const landHolder = users[0];
-        const landReceiver = users[1];
-        const size = 6;
-        const x = 0;
-        const y = 0;
-        const bytes = '0x00';
-        const plotCount = size * size;
-
-        // Mint LAND on L1
-        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-
-        // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
-        );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
-        // Transfer to L1 Tunnel
-        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-        await landHolder.MockLandTunnel.batchTransferQuadToL2(
-          landHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
-        );
-
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          plotCount
-        );
-
-        const {to, data} = await PolygonLand.populateTransaction[
-          'transferQuad(address,address,uint256,uint256,uint256,bytes)'
-        ](landHolder.address, landReceiver.address, size, x, y, bytes);
-
-        await sendMetaTx(
-          to,
-          trustedForwarder,
-          data,
-          landReceiver.address,
-          '10000000'
-        );
-
-        expect(await PolygonLand.balanceOf(landReceiver.address)).to.be.equal(
-          0
-        );
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          plotCount
-        );
-      });
-
-      it('should not transfer 12x12 quad', async function () {
-        const {
-          deployer,
-          Land,
-          landMinter,
-          users,
-          MockLandTunnel,
-          PolygonLand,
-          MockPolygonLandTunnel,
-          trustedForwarder,
-        } = await setupLand();
-
-        const landHolder = users[0];
-        const landReceiver = users[1];
-        const size = 12;
-        const x = 0;
-        const y = 0;
-        const bytes = '0x00';
-        const plotCount = size * size;
-
-        // Mint LAND on L1
-        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-
-        // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
-        );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
-        // Transfer to L1 Tunnel
-        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-        await landHolder.MockLandTunnel.batchTransferQuadToL2(
-          landHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
-        );
-
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          plotCount
-        );
-
-        const {to, data} = await PolygonLand.populateTransaction[
-          'transferQuad(address,address,uint256,uint256,uint256,bytes)'
-        ](landHolder.address, landReceiver.address, size, x, y, bytes);
-
-        await sendMetaTx(
-          to,
-          trustedForwarder,
-          data,
-          landReceiver.address,
-          '10000000'
-        );
-
-        expect(await PolygonLand.balanceOf(landReceiver.address)).to.be.equal(
-          0
-        );
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          plotCount
-        );
+          expect(await PolygonLand.balanceOf(landReceiver.address)).to.be.equal(
+            0
+          );
+          expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
+            plotCount
+          );
+        }
       });
     });
 
     describe('transferQuad with approval', function () {
-      it('should transfer 1x1 quad', async function () {
-        const {
-          deployer,
-          Land,
-          landMinter,
-          users,
-          MockLandTunnel,
-          PolygonLand,
-          MockPolygonLandTunnel,
-          trustedForwarder,
-        } = await setupLand();
-        const landHolder = users[0];
-        const landReceiver = users[1];
-        const size = 1;
-        const x = 0;
-        const y = 0;
-        const bytes = '0x00';
-        const plotCount = size * size;
-        // Mint LAND on L1
-        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-        // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
-        );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
-        // Transfer to L1 Tunnel
-        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-        await landHolder.MockLandTunnel.batchTransferQuadToL2(
-          landHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
-        );
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          plotCount
-        );
+      it('should transfer quads of any size', async function () {
+        for (let i = 0; i < sizes.length; i++) {
+          const {
+            deployer,
+            Land,
+            landMinter,
+            users,
+            MockLandTunnel,
+            PolygonLand,
+            MockPolygonLandTunnel,
+            trustedForwarder,
+          } = await setupLand();
 
-        const {to, data} = await PolygonLand.populateTransaction[
-          'transferQuad(address,address,uint256,uint256,uint256,bytes)'
-        ](landHolder.address, landReceiver.address, size, x, y, bytes);
+          const landHolder = users[0];
+          const landReceiver = users[1];
+          const size = sizes[i];
+          const x = 0;
+          const y = 0;
+          const bytes = '0x00';
+          const plotCount = size * size;
 
-        await PolygonLand.connect(
-          ethers.provider.getSigner(landHolder.address)
-        ).setApprovalForAll(landReceiver.address, true);
+          // Mint LAND on L1
+          await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
+          expect(await Land.balanceOf(landHolder.address)).to.be.equal(
+            plotCount
+          );
+          // Set Mock PolygonLandTunnel in PolygonLand
+          await deployer.PolygonLand.setPolygonLandTunnel(
+            MockPolygonLandTunnel.address
+          );
+          expect(await PolygonLand.polygonLandTunnel()).to.equal(
+            MockPolygonLandTunnel.address
+          );
+          // Transfer to L1 Tunnel
+          await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
+          await landHolder.MockLandTunnel.batchTransferQuadToL2(
+            landHolder.address,
+            [size],
+            [x],
+            [y],
+            bytes
+          );
+          expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
+            plotCount
+          );
 
-        await sendMetaTx(
-          to,
-          trustedForwarder,
-          data,
-          landHolder.address,
-          '10000000'
-        );
+          const {to, data} = await PolygonLand.populateTransaction[
+            'transferQuad(address,address,uint256,uint256,uint256,bytes)'
+          ](landHolder.address, landReceiver.address, size, x, y, bytes);
 
-        expect(await PolygonLand.balanceOf(landReceiver.address)).to.be.equal(
-          plotCount
-        );
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
-      });
+          await PolygonLand.connect(
+            ethers.provider.getSigner(landHolder.address)
+          ).setApprovalForAll(landReceiver.address, true);
 
-      it('should transfer 3x3 quad', async function () {
-        const {
-          deployer,
-          Land,
-          landMinter,
-          users,
-          MockLandTunnel,
-          PolygonLand,
-          MockPolygonLandTunnel,
-          trustedForwarder,
-        } = await setupLand();
-        const landHolder = users[0];
-        const landReceiver = users[1];
-        const size = 3;
-        const x = 0;
-        const y = 0;
-        const bytes = '0x00';
-        const plotCount = size * size;
-        // Mint LAND on L1
-        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-        // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
-        );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
-        // Transfer to L1 Tunnel
-        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-        await landHolder.MockLandTunnel.batchTransferQuadToL2(
-          landHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
-        );
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          plotCount
-        );
+          await sendMetaTx(
+            to,
+            trustedForwarder,
+            data,
+            landHolder.address,
+            '10000000'
+          );
 
-        const {to, data} = await PolygonLand.populateTransaction[
-          'transferQuad(address,address,uint256,uint256,uint256,bytes)'
-        ](landHolder.address, landReceiver.address, size, x, y, bytes);
-
-        await PolygonLand.connect(
-          ethers.provider.getSigner(landHolder.address)
-        ).setApprovalForAll(landReceiver.address, true);
-
-        await sendMetaTx(
-          to,
-          trustedForwarder,
-          data,
-          landReceiver.address,
-          '10000000'
-        );
-
-        expect(await PolygonLand.balanceOf(landReceiver.address)).to.be.equal(
-          plotCount
-        );
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
-      });
-      it('should transfer 6x6 quad', async function () {
-        const {
-          deployer,
-          Land,
-          landMinter,
-          users,
-          MockLandTunnel,
-          PolygonLand,
-          MockPolygonLandTunnel,
-          trustedForwarder,
-        } = await setupLand();
-        const landHolder = users[0];
-        const landReceiver = users[1];
-        const size = 6;
-        const x = 0;
-        const y = 0;
-        const bytes = '0x00';
-        const plotCount = size * size;
-        // Mint LAND on L1
-        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-        // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
-        );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
-        // Transfer to L1 Tunnel
-        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-        await landHolder.MockLandTunnel.batchTransferQuadToL2(
-          landHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
-        );
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          plotCount
-        );
-
-        const {to, data} = await PolygonLand.populateTransaction[
-          'transferQuad(address,address,uint256,uint256,uint256,bytes)'
-        ](landHolder.address, landReceiver.address, size, x, y, bytes);
-
-        await PolygonLand.connect(
-          ethers.provider.getSigner(landHolder.address)
-        ).setApprovalForAll(landReceiver.address, true);
-
-        await sendMetaTx(
-          to,
-          trustedForwarder,
-          data,
-          landReceiver.address,
-          '10000000'
-        );
-
-        expect(await PolygonLand.balanceOf(landReceiver.address)).to.be.equal(
-          plotCount
-        );
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
-      });
-
-      it('should transfer 12x12 quad', async function () {
-        const {
-          deployer,
-          Land,
-          landMinter,
-          users,
-          MockLandTunnel,
-          PolygonLand,
-          MockPolygonLandTunnel,
-          trustedForwarder,
-        } = await setupLand();
-        const landHolder = users[0];
-        const landReceiver = users[1];
-        const size = 12;
-        const x = 0;
-        const y = 0;
-        const bytes = '0x00';
-        const plotCount = size * size;
-        // Mint LAND on L1
-        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-        // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
-        );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
-        // Transfer to L1 Tunnel
-        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-        await landHolder.MockLandTunnel.batchTransferQuadToL2(
-          landHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
-        );
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          plotCount
-        );
-
-        const {to, data} = await PolygonLand.populateTransaction[
-          'transferQuad(address,address,uint256,uint256,uint256,bytes)'
-        ](landHolder.address, landReceiver.address, size, x, y, bytes);
-
-        await PolygonLand.connect(
-          ethers.provider.getSigner(landHolder.address)
-        ).setApprovalForAll(landReceiver.address, true);
-
-        await sendMetaTx(
-          to,
-          trustedForwarder,
-          data,
-          landReceiver.address,
-          '10000000'
-        );
-        expect(await PolygonLand.balanceOf(landReceiver.address)).to.be.equal(
-          plotCount
-        );
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
+          expect(await PolygonLand.balanceOf(landReceiver.address)).to.be.equal(
+            plotCount
+          );
+          expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
+            0
+          );
+        }
       });
     });
 
     describe('transferQuad from self', function () {
-      it('should transfer 1x1 quad', async function () {
-        const {
-          deployer,
-          Land,
-          landMinter,
-          users,
-          MockLandTunnel,
-          PolygonLand,
-          MockPolygonLandTunnel,
-          trustedForwarder,
-        } = await setupLand();
+      it('should transfer quads of any size', async function () {
+        for (let i = 0; i < sizes.length; i++) {
+          const {
+            deployer,
+            Land,
+            landMinter,
+            users,
+            MockLandTunnel,
+            PolygonLand,
+            MockPolygonLandTunnel,
+            trustedForwarder,
+          } = await setupLand();
 
-        const landHolder = users[0];
-        const landReceiver = users[1];
-        const size = 1;
-        const x = 0;
-        const y = 0;
-        const bytes = '0x00';
-        const plotCount = size * size;
+          const landHolder = users[0];
+          const landReceiver = users[1];
+          const size = sizes[i];
+          const x = 0;
+          const y = 0;
+          const bytes = '0x00';
+          const plotCount = size * size;
 
-        // Mint LAND on L1
-        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
+          // Mint LAND on L1
+          await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
+          expect(await Land.balanceOf(landHolder.address)).to.be.equal(
+            plotCount
+          );
 
-        // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
-        );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
-        // Transfer to L1 Tunnel
-        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-        await landHolder.MockLandTunnel.batchTransferQuadToL2(
-          landHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
-        );
+          // Set Mock PolygonLandTunnel in PolygonLand
+          await deployer.PolygonLand.setPolygonLandTunnel(
+            MockPolygonLandTunnel.address
+          );
+          expect(await PolygonLand.polygonLandTunnel()).to.equal(
+            MockPolygonLandTunnel.address
+          );
+          // Transfer to L1 Tunnel
+          await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
+          await landHolder.MockLandTunnel.batchTransferQuadToL2(
+            landHolder.address,
+            [size],
+            [x],
+            [y],
+            bytes
+          );
 
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          plotCount
-        );
+          expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
+            plotCount
+          );
 
-        const {to, data} = await PolygonLand.populateTransaction[
-          'transferQuad(address,address,uint256,uint256,uint256,bytes)'
-        ](landHolder.address, landReceiver.address, size, x, y, bytes);
+          const {to, data} = await PolygonLand.populateTransaction[
+            'transferQuad(address,address,uint256,uint256,uint256,bytes)'
+          ](landHolder.address, landReceiver.address, size, x, y, bytes);
 
-        await sendMetaTx(
-          to,
-          trustedForwarder,
-          data,
-          landHolder.address,
-          '10000000'
-        );
+          await sendMetaTx(
+            to,
+            trustedForwarder,
+            data,
+            landHolder.address,
+            '10000000'
+          );
 
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
-        expect(await PolygonLand.balanceOf(landReceiver.address)).to.be.equal(
-          plotCount
-        );
-      });
-      it('should transfer 3x3 quad', async function () {
-        const {
-          deployer,
-          Land,
-          landMinter,
-          users,
-          MockLandTunnel,
-          PolygonLand,
-          MockPolygonLandTunnel,
-          trustedForwarder,
-        } = await setupLand();
-
-        const landHolder = users[0];
-        const landReceiver = users[1];
-        const size = 3;
-        const x = 0;
-        const y = 0;
-        const bytes = '0x00';
-        const plotCount = size * size;
-
-        // Mint LAND on L1
-        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-
-        // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
-        );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
-        // Transfer to L1 Tunnel
-        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-        await landHolder.MockLandTunnel.batchTransferQuadToL2(
-          landHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
-        );
-
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          plotCount
-        );
-
-        const {to, data} = await PolygonLand.populateTransaction[
-          'transferQuad(address,address,uint256,uint256,uint256,bytes)'
-        ](landHolder.address, landReceiver.address, size, x, y, bytes);
-
-        await sendMetaTx(
-          to,
-          trustedForwarder,
-          data,
-          landHolder.address,
-          '10000000'
-        );
-
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
-        expect(await PolygonLand.balanceOf(landReceiver.address)).to.be.equal(
-          plotCount
-        );
-      });
-      it('should transfer 6x6 quad', async function () {
-        const {
-          deployer,
-          Land,
-          landMinter,
-          users,
-          MockLandTunnel,
-          PolygonLand,
-          MockPolygonLandTunnel,
-          trustedForwarder,
-        } = await setupLand();
-
-        const landHolder = users[0];
-        const landReceiver = users[1];
-        const size = 6;
-        const x = 0;
-        const y = 0;
-        const bytes = '0x00';
-        const plotCount = size * size;
-
-        // Mint LAND on L1
-        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-
-        // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
-        );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
-        // Transfer to L1 Tunnel
-        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-        await landHolder.MockLandTunnel.batchTransferQuadToL2(
-          landHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
-        );
-
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          plotCount
-        );
-
-        const {to, data} = await PolygonLand.populateTransaction[
-          'transferQuad(address,address,uint256,uint256,uint256,bytes)'
-        ](landHolder.address, landReceiver.address, size, x, y, bytes);
-
-        await sendMetaTx(
-          to,
-          trustedForwarder,
-          data,
-          landHolder.address,
-          '10000000'
-        );
-
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
-        expect(await PolygonLand.balanceOf(landReceiver.address)).to.be.equal(
-          plotCount
-        );
-      });
-      it('should transfer 12x12 quad', async function () {
-        const {
-          deployer,
-          Land,
-          landMinter,
-          users,
-          MockLandTunnel,
-          PolygonLand,
-          MockPolygonLandTunnel,
-          trustedForwarder,
-        } = await setupLand();
-
-        const landHolder = users[0];
-        const landReceiver = users[1];
-        const size = 12;
-        const x = 0;
-        const y = 0;
-        const bytes = '0x00';
-        const plotCount = size * size;
-
-        // Mint LAND on L1
-        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-
-        // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
-        );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
-        // Transfer to L1 Tunnel
-        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-        await landHolder.MockLandTunnel.batchTransferQuadToL2(
-          landHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
-        );
-
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
-          plotCount
-        );
-
-        const {to, data} = await PolygonLand.populateTransaction[
-          'transferQuad(address,address,uint256,uint256,uint256,bytes)'
-        ](landHolder.address, landReceiver.address, size, x, y, bytes);
-
-        await sendMetaTx(
-          to,
-          trustedForwarder,
-          data,
-          landHolder.address,
-          '10000000'
-        );
-
-        expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(0);
-        expect(await PolygonLand.balanceOf(landReceiver.address)).to.be.equal(
-          plotCount
-        );
+          expect(await PolygonLand.balanceOf(landHolder.address)).to.be.equal(
+            0
+          );
+          expect(await PolygonLand.balanceOf(landReceiver.address)).to.be.equal(
+            plotCount
+          );
+        }
       });
     });
 
@@ -2791,220 +1522,80 @@ describe('MockLandWithMint.sol', function () {
         ).to.be.revertedWith('token does not exist');
       });
 
-      it('should revert transfer of 3x3 quad after burn', async function () {
-        const {
-          deployer,
-          Land,
-          landMinter,
-          users,
-          MockLandTunnel,
-          PolygonLand,
-          MockPolygonLandTunnel,
-          trustedForwarder,
-        } = await setupLand();
+      it('should revert transfer of any size quad after burn', async function () {
+        for (let i = 1; i < sizes.length; i++) {
+          const {
+            deployer,
+            Land,
+            landMinter,
+            users,
+            MockLandTunnel,
+            PolygonLand,
+            MockPolygonLandTunnel,
+            trustedForwarder,
+          } = await setupLand();
 
-        const landHolder = users[0];
-        const landReceiver = users[1];
-        const size = 3;
-        const x = 0;
-        const y = 0;
-        const bytes = '0x00';
-        const plotCount = size * size;
+          const landHolder = users[0];
+          const landReceiver = users[1];
+          const size = sizes[i];
+          const x = 0;
+          const y = 0;
+          const bytes = '0x00';
+          const plotCount = size * size;
 
-        // Mint LAND on L1
-        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
+          // Mint LAND on L1
+          await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
+          expect(await Land.balanceOf(landHolder.address)).to.be.equal(
+            plotCount
+          );
 
-        // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
-        );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
-        // Transfer to L1 Tunnel
-        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-        await landHolder.MockLandTunnel.batchTransferQuadToL2(
-          landHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
-        );
-
-        for (let x = 0; x < size; x++) {
-          for (let y = 0; y < size; y++) {
-            const id =
-              0x0000000000000000000000000000000000000000000000000000000000000000 +
-              (x + y * 408);
-            const {to, data} = await PolygonLand.populateTransaction[
-              'burn(uint256)'
-            ](id);
-
-            await sendMetaTx(
-              to,
-              trustedForwarder,
-              data,
-              landHolder.address,
-              '10000000'
-            );
-          }
-        }
-
-        await expect(
-          landHolder.PolygonLand.transferQuad(
+          // Set Mock PolygonLandTunnel in PolygonLand
+          await deployer.PolygonLand.setPolygonLandTunnel(
+            MockPolygonLandTunnel.address
+          );
+          expect(await PolygonLand.polygonLandTunnel()).to.equal(
+            MockPolygonLandTunnel.address
+          );
+          // Transfer to L1 Tunnel
+          await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
+          await landHolder.MockLandTunnel.batchTransferQuadToL2(
             landHolder.address,
-            landReceiver.address,
-            size,
-            x,
-            y,
+            [size],
+            [x],
+            [y],
             bytes
-          )
-        ).to.be.revertedWith('not owner');
-      });
+          );
 
-      it('should revert transfer of 6x6 quad after burn', async function () {
-        const {
-          deployer,
-          Land,
-          landMinter,
-          users,
-          MockLandTunnel,
-          PolygonLand,
-          MockPolygonLandTunnel,
-          trustedForwarder,
-        } = await setupLand();
+          for (let x = 0; x < size; x++) {
+            for (let y = 0; y < size; y++) {
+              const id =
+                0x0000000000000000000000000000000000000000000000000000000000000000 +
+                (x + y * 408);
+              const {to, data} = await PolygonLand.populateTransaction[
+                'burn(uint256)'
+              ](id);
 
-        const landHolder = users[0];
-        const landReceiver = users[1];
-        const size = 6;
-        const x = 0;
-        const y = 0;
-        const bytes = '0x00';
-        const plotCount = size * size;
-
-        // Mint LAND on L1
-        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-
-        // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
-        );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
-        // Transfer to L1 Tunnel
-        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-        await landHolder.MockLandTunnel.batchTransferQuadToL2(
-          landHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
-        );
-
-        for (let x = 0; x < size; x++) {
-          for (let y = 0; y < size; y++) {
-            const id =
-              0x0000000000000000000000000000000000000000000000000000000000000000 +
-              (x + y * 408);
-            const {to, data} = await PolygonLand.populateTransaction[
-              'burn(uint256)'
-            ](id);
-
-            await sendMetaTx(
-              to,
-              trustedForwarder,
-              data,
-              landHolder.address,
-              '10000000'
-            );
+              await sendMetaTx(
+                to,
+                trustedForwarder,
+                data,
+                landHolder.address,
+                '10000000'
+              );
+            }
           }
-        }
 
-        await expect(
-          landHolder.PolygonLand.transferQuad(
-            landHolder.address,
-            landReceiver.address,
-            size,
-            x,
-            y,
-            bytes
-          )
-        ).to.be.revertedWith('not owner');
-      });
-
-      it('should revert transfer of 12x12 quad after burn', async function () {
-        const {
-          deployer,
-          Land,
-          landMinter,
-          users,
-          MockLandTunnel,
-          PolygonLand,
-          MockPolygonLandTunnel,
-          trustedForwarder,
-        } = await setupLand();
-
-        const landHolder = users[0];
-        const landReceiver = users[1];
-        const size = 12;
-        const x = 0;
-        const y = 0;
-        const bytes = '0x00';
-        const plotCount = size * size;
-
-        // Mint LAND on L1
-        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-
-        // Set Mock PolygonLandTunnel in PolygonLand
-        await deployer.PolygonLand.setPolygonLandTunnel(
-          MockPolygonLandTunnel.address
-        );
-        expect(await PolygonLand.polygonLandTunnel()).to.equal(
-          MockPolygonLandTunnel.address
-        );
-        // Transfer to L1 Tunnel
-        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-        await landHolder.MockLandTunnel.batchTransferQuadToL2(
-          landHolder.address,
-          [size],
-          [x],
-          [y],
-          bytes
-        );
-
-        for (let x = 0; x < size; x++) {
-          for (let y = 0; y < size; y++) {
-            const id =
-              0x0000000000000000000000000000000000000000000000000000000000000000 +
-              (x + y * 408);
-            const {to, data} = await PolygonLand.populateTransaction[
-              'burn(uint256)'
-            ](id);
-
-            await sendMetaTx(
-              to,
-              trustedForwarder,
-              data,
+          await expect(
+            landHolder.PolygonLand.transferQuad(
               landHolder.address,
-              '10000000'
-            );
-          }
+              landReceiver.address,
+              size,
+              x,
+              y,
+              bytes
+            )
+          ).to.be.revertedWith('not owner');
         }
-
-        await expect(
-          landHolder.PolygonLand.transferQuad(
-            landHolder.address,
-            landReceiver.address,
-            size,
-            x,
-            y,
-            bytes
-          )
-        ).to.be.revertedWith('not owner');
       });
     });
 
@@ -3162,244 +1753,54 @@ describe('MockLandWithMint.sol', function () {
       expect(await PolygonLand.height()).to.be.equal(408);
     });
 
-    it('should fetch x and y values of given 1x1 quad id', async function () {
-      const {
-        deployer,
-        Land,
-        landMinter,
-        users,
-        MockLandTunnel,
-        PolygonLand,
-        MockPolygonLandTunnel,
-      } = await setupLand();
+    it('should fetch x and y values of given quad id', async function () {
+      for (let i = 1; i < sizes.length; i++) {
+        const {
+          deployer,
+          Land,
+          landMinter,
+          users,
+          MockLandTunnel,
+          PolygonLand,
+          MockPolygonLandTunnel,
+        } = await setupLand();
 
-      const landHolder = users[0];
-      const size = 1;
-      const x = 1;
-      const y = 2;
-      const bytes = '0x00';
-      const plotCount = size * size;
+        const landHolder = users[0];
+        const size = sizes[i];
+        const x = 0;
+        const y = 0;
+        const bytes = '0x00';
+        const plotCount = size * size;
 
-      // Mint LAND on L1
-      await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-      expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
+        // Mint LAND on L1
+        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
 
-      // Set Mock PolygonLandTunnel in PolygonLand
-      await deployer.PolygonLand.setPolygonLandTunnel(
-        MockPolygonLandTunnel.address
-      );
-      expect(await PolygonLand.polygonLandTunnel()).to.equal(
-        MockPolygonLandTunnel.address
-      );
+        // Set Mock PolygonLandTunnel in PolygonLand
+        await deployer.PolygonLand.setPolygonLandTunnel(
+          MockPolygonLandTunnel.address
+        );
+        expect(await PolygonLand.polygonLandTunnel()).to.equal(
+          MockPolygonLandTunnel.address
+        );
 
-      // Transfer to L1 Tunnel
-      await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-      await landHolder.MockLandTunnel.batchTransferQuadToL2(
-        landHolder.address,
-        [size],
-        [x],
-        [y],
-        bytes
-      );
+        // Transfer to L1 Tunnel
+        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
+        await landHolder.MockLandTunnel.batchTransferQuadToL2(
+          landHolder.address,
+          [size],
+          [x],
+          [y],
+          bytes
+        );
 
-      const id =
-        0x0000000000000000000000000000000000000000000000000000000000000000 +
-        (x + y * 408);
+        const id =
+          0x0000000000000000000000000000000000000000000000000000000000000000 +
+          (x + y * 408);
 
-      expect(await PolygonLand.getX(id)).to.be.equal(x);
-      expect(await PolygonLand.getY(id)).to.be.equal(y);
-    });
-
-    it('should fetch x and y values of given 3x3 quad id', async function () {
-      const {
-        deployer,
-        Land,
-        landMinter,
-        users,
-        MockLandTunnel,
-        PolygonLand,
-        MockPolygonLandTunnel,
-      } = await setupLand();
-
-      const landHolder = users[0];
-      const size = 3;
-      const x = 3;
-      const y = 6;
-      const bytes = '0x00';
-      const plotCount = size * size;
-
-      // Mint LAND on L1
-      await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-      expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-
-      // Set Mock PolygonLandTunnel in PolygonLand
-      await deployer.PolygonLand.setPolygonLandTunnel(
-        MockPolygonLandTunnel.address
-      );
-      expect(await PolygonLand.polygonLandTunnel()).to.equal(
-        MockPolygonLandTunnel.address
-      );
-
-      // Transfer to L1 Tunnel
-      await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-      await landHolder.MockLandTunnel.batchTransferQuadToL2(
-        landHolder.address,
-        [size],
-        [x],
-        [y],
-        bytes
-      );
-
-      const id =
-        0x0000000000000000000000000000000000000000000000000000000000000000 +
-        (x + y * 408);
-
-      expect(await PolygonLand.getX(id)).to.be.equal(x);
-      expect(await PolygonLand.getY(id)).to.be.equal(y);
-    });
-
-    it('should fetch x and y values of given 6x6 quad id', async function () {
-      const {
-        deployer,
-        Land,
-        landMinter,
-        users,
-        MockLandTunnel,
-        PolygonLand,
-        MockPolygonLandTunnel,
-      } = await setupLand();
-
-      const landHolder = users[0];
-      const size = 6;
-      const x = 6;
-      const y = 12;
-      const bytes = '0x00';
-      const plotCount = size * size;
-
-      // Mint LAND on L1
-      await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-      expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-
-      // Set Mock PolygonLandTunnel in PolygonLand
-      await deployer.PolygonLand.setPolygonLandTunnel(
-        MockPolygonLandTunnel.address
-      );
-      expect(await PolygonLand.polygonLandTunnel()).to.equal(
-        MockPolygonLandTunnel.address
-      );
-
-      // Transfer to L1 Tunnel
-      await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-      await landHolder.MockLandTunnel.batchTransferQuadToL2(
-        landHolder.address,
-        [size],
-        [x],
-        [y],
-        bytes
-      );
-
-      const id =
-        0x0000000000000000000000000000000000000000000000000000000000000000 +
-        (x + y * 408);
-
-      expect(await PolygonLand.getX(id)).to.be.equal(x);
-      expect(await PolygonLand.getY(id)).to.be.equal(y);
-    });
-
-    it('should fetch x and y values of given 12x12 quad id', async function () {
-      const {
-        deployer,
-        Land,
-        landMinter,
-        users,
-        MockLandTunnel,
-        PolygonLand,
-        MockPolygonLandTunnel,
-      } = await setupLand();
-
-      const landHolder = users[0];
-      const size = 12;
-      const x = 12;
-      const y = 24;
-      const bytes = '0x00';
-      const plotCount = size * size;
-
-      // Mint LAND on L1
-      await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-      expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-
-      // Set Mock PolygonLandTunnel in PolygonLand
-      await deployer.PolygonLand.setPolygonLandTunnel(
-        MockPolygonLandTunnel.address
-      );
-      expect(await PolygonLand.polygonLandTunnel()).to.equal(
-        MockPolygonLandTunnel.address
-      );
-
-      // Transfer to L1 Tunnel
-      await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-      await landHolder.MockLandTunnel.batchTransferQuadToL2(
-        landHolder.address,
-        [size],
-        [x],
-        [y],
-        bytes
-      );
-
-      const id =
-        0x0000000000000000000000000000000000000000000000000000000000000000 +
-        (x + y * 408);
-
-      expect(await PolygonLand.getX(id)).to.be.equal(x);
-      expect(await PolygonLand.getY(id)).to.be.equal(y);
-    });
-
-    it('should fetch x and y values of given 24x24 quad id', async function () {
-      const {
-        deployer,
-        Land,
-        landMinter,
-        users,
-        MockLandTunnel,
-        PolygonLand,
-        MockPolygonLandTunnel,
-      } = await setupLand();
-
-      const landHolder = users[0];
-      const size = 24;
-      const x = 24;
-      const y = 48;
-      const bytes = '0x00';
-      const plotCount = size * size;
-
-      // Mint LAND on L1
-      await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-      expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-
-      // Set Mock PolygonLandTunnel in PolygonLand
-      await deployer.PolygonLand.setPolygonLandTunnel(
-        MockPolygonLandTunnel.address
-      );
-      expect(await PolygonLand.polygonLandTunnel()).to.equal(
-        MockPolygonLandTunnel.address
-      );
-
-      // Transfer to L1 Tunnel
-      await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-      await landHolder.MockLandTunnel.batchTransferQuadToL2(
-        landHolder.address,
-        [size],
-        [x],
-        [y],
-        bytes
-      );
-
-      const id =
-        0x0000000000000000000000000000000000000000000000000000000000000000 +
-        (x + y * 408);
-
-      expect(await PolygonLand.getX(id)).to.be.equal(x);
-      expect(await PolygonLand.getY(id)).to.be.equal(y);
+        expect(await PolygonLand.getX(id)).to.be.equal(x);
+        expect(await PolygonLand.getY(id)).to.be.equal(y);
+      }
     });
 
     it('cannot fetch x and y values of given non existing quad id', async function () {
@@ -3417,239 +1818,53 @@ describe('MockLandWithMint.sol', function () {
       );
     });
 
-    it('should fetch owner of given 1x1 quad', async function () {
-      const {
-        deployer,
-        Land,
-        landMinter,
-        users,
-        MockLandTunnel,
-        PolygonLand,
-        MockPolygonLandTunnel,
-      } = await setupLand();
+    it('should fetch owner of given quad id', async function () {
+      for (let i = 1; i < sizes.length; i++) {
+        const {
+          deployer,
+          Land,
+          landMinter,
+          users,
+          MockLandTunnel,
+          PolygonLand,
+          MockPolygonLandTunnel,
+        } = await setupLand();
 
-      const landHolder = users[0];
-      const size = 12;
-      const x = 0;
-      const y = 0;
-      const bytes = '0x00';
-      const plotCount = size * size;
+        const landHolder = users[0];
+        const size = sizes[i];
+        const x = 0;
+        const y = 0;
+        const bytes = '0x00';
+        const plotCount = size * size;
 
-      // Mint LAND on L1
-      await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-      expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
+        // Mint LAND on L1
+        await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
+        expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
 
-      // Set Mock PolygonLandTunnel in PolygonLand
-      await deployer.PolygonLand.setPolygonLandTunnel(
-        MockPolygonLandTunnel.address
-      );
-      expect(await PolygonLand.polygonLandTunnel()).to.equal(
-        MockPolygonLandTunnel.address
-      );
+        // Set Mock PolygonLandTunnel in PolygonLand
+        await deployer.PolygonLand.setPolygonLandTunnel(
+          MockPolygonLandTunnel.address
+        );
+        expect(await PolygonLand.polygonLandTunnel()).to.equal(
+          MockPolygonLandTunnel.address
+        );
 
-      // Transfer to L1 Tunnel
-      await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-      await landHolder.MockLandTunnel.batchTransferQuadToL2(
-        landHolder.address,
-        [size],
-        [x],
-        [y],
-        bytes
-      );
+        // Transfer to L1 Tunnel
+        await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
+        await landHolder.MockLandTunnel.batchTransferQuadToL2(
+          landHolder.address,
+          [size],
+          [x],
+          [y],
+          bytes
+        );
 
-      const id =
-        0x0000000000000000000000000000000000000000000000000000000000000000 +
-        (x + y * 408);
+        const id =
+          0x0000000000000000000000000000000000000000000000000000000000000000 +
+          (x + y * 408);
 
-      expect(await PolygonLand.ownerOf(id)).to.be.equal(landHolder.address);
-    });
-
-    it('should fetch owner of given 3x3 quad', async function () {
-      const {
-        deployer,
-        Land,
-        landMinter,
-        users,
-        MockLandTunnel,
-        PolygonLand,
-        MockPolygonLandTunnel,
-      } = await setupLand();
-
-      const landHolder = users[0];
-      const size = 3;
-      const x = 0;
-      const y = 0;
-      const bytes = '0x00';
-      const plotCount = size * size;
-
-      // Mint LAND on L1
-      await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-      expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-
-      // Set Mock PolygonLandTunnel in PolygonLand
-      await deployer.PolygonLand.setPolygonLandTunnel(
-        MockPolygonLandTunnel.address
-      );
-      expect(await PolygonLand.polygonLandTunnel()).to.equal(
-        MockPolygonLandTunnel.address
-      );
-
-      // Transfer to L1 Tunnel
-      await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-      await landHolder.MockLandTunnel.batchTransferQuadToL2(
-        landHolder.address,
-        [size],
-        [x],
-        [y],
-        bytes
-      );
-
-      const id =
-        0x0000000000000000000000000000000000000000000000000000000000000000 +
-        (x + y * 408);
-
-      expect(await PolygonLand.ownerOf(id)).to.be.equal(landHolder.address);
-    });
-
-    it('should fetch owner of given 6x6 quad', async function () {
-      const {
-        deployer,
-        Land,
-        landMinter,
-        users,
-        MockLandTunnel,
-        PolygonLand,
-        MockPolygonLandTunnel,
-      } = await setupLand();
-
-      const landHolder = users[0];
-      const size = 6;
-      const x = 0;
-      const y = 0;
-      const bytes = '0x00';
-      const plotCount = size * size;
-
-      // Mint LAND on L1
-      await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-      expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-
-      // Set Mock PolygonLandTunnel in PolygonLand
-      await deployer.PolygonLand.setPolygonLandTunnel(
-        MockPolygonLandTunnel.address
-      );
-      expect(await PolygonLand.polygonLandTunnel()).to.equal(
-        MockPolygonLandTunnel.address
-      );
-
-      // Transfer to L1 Tunnel
-      await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-      await landHolder.MockLandTunnel.batchTransferQuadToL2(
-        landHolder.address,
-        [size],
-        [x],
-        [y],
-        bytes
-      );
-
-      const id =
-        0x0000000000000000000000000000000000000000000000000000000000000000 +
-        (x + y * 408);
-
-      expect(await PolygonLand.ownerOf(id)).to.be.equal(landHolder.address);
-    });
-
-    it('should fetch owner of given 12x12 quad', async function () {
-      const {
-        deployer,
-        Land,
-        landMinter,
-        users,
-        MockLandTunnel,
-        PolygonLand,
-        MockPolygonLandTunnel,
-      } = await setupLand();
-
-      const landHolder = users[0];
-      const size = 12;
-      const x = 0;
-      const y = 0;
-      const bytes = '0x00';
-      const plotCount = size * size;
-
-      // Mint LAND on L1
-      await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-      expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-
-      // Set Mock PolygonLandTunnel in PolygonLand
-      await deployer.PolygonLand.setPolygonLandTunnel(
-        MockPolygonLandTunnel.address
-      );
-      expect(await PolygonLand.polygonLandTunnel()).to.equal(
-        MockPolygonLandTunnel.address
-      );
-
-      // Transfer to L1 Tunnel
-      await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-      await landHolder.MockLandTunnel.batchTransferQuadToL2(
-        landHolder.address,
-        [size],
-        [x],
-        [y],
-        bytes
-      );
-
-      const id =
-        0x0000000000000000000000000000000000000000000000000000000000000000 +
-        (x + y * 408);
-
-      expect(await PolygonLand.ownerOf(id)).to.be.equal(landHolder.address);
-    });
-
-    it('should fetch owner of given 24x24 quad', async function () {
-      const {
-        deployer,
-        Land,
-        landMinter,
-        users,
-        MockLandTunnel,
-        PolygonLand,
-        MockPolygonLandTunnel,
-      } = await setupLand();
-
-      const landHolder = users[0];
-      const size = 24;
-      const x = 24;
-      const y = 48;
-      const bytes = '0x00';
-      const plotCount = size * size;
-
-      // Mint LAND on L1
-      await landMinter.Land.mintQuad(landHolder.address, size, x, y, bytes);
-      expect(await Land.balanceOf(landHolder.address)).to.be.equal(plotCount);
-
-      // Set Mock PolygonLandTunnel in PolygonLand
-      await deployer.PolygonLand.setPolygonLandTunnel(
-        MockPolygonLandTunnel.address
-      );
-      expect(await PolygonLand.polygonLandTunnel()).to.equal(
-        MockPolygonLandTunnel.address
-      );
-
-      // Transfer to L1 Tunnel
-      await landHolder.Land.setApprovalForAll(MockLandTunnel.address, true);
-      await landHolder.MockLandTunnel.batchTransferQuadToL2(
-        landHolder.address,
-        [size],
-        [x],
-        [y],
-        bytes
-      );
-
-      const id =
-        0x0000000000000000000000000000000000000000000000000000000000000000 +
-        (x + y * 408);
-
-      expect(await PolygonLand.ownerOf(id)).to.be.equal(landHolder.address);
+        expect(await PolygonLand.ownerOf(id)).to.be.equal(landHolder.address);
+      }
     });
   });
 });
