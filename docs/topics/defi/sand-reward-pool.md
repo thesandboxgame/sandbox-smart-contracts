@@ -2,7 +2,7 @@
 
 breaks: false
 
-description: SignedERC20Giveaway contract
+description: SandRewardPool contract
 
 ---
 
