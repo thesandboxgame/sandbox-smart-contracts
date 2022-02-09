@@ -21,7 +21,7 @@ type SaleDeployment = {
 };
 
 const sales: SaleDeployment[] = [
-  {name: 'EstateSaleWithAuth_0', skip: skipUnlessTest},
+  {name: 'EstateSaleWithAuth_0', setMinterOnNewLand: [0], skip: skipUnlessTest},
   {name: 'LandPreSale_11'},
   {name: 'LandPreSale_12'},
   {name: 'LandPreSale_13', skipSector: {35: skipUnlessTest}},
