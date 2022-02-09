@@ -9,7 +9,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const CHILD_CHAIN_MANAGER = await deployments.get('CHILD_CHAIN_MANAGER');
-
   await deploy('PolygonSand', {
     from: deployer,
     args: [
@@ -19,6 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       sandExecutionAdmin,
     ],
     log: true,
+    skipIfAlreadyDeployed: true,
   });
 };
 
