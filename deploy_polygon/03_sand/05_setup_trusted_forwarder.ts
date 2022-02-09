@@ -4,7 +4,10 @@ import {DeployFunction} from 'hardhat-deploy/types';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments} = hre;
   const {read, execute, catchUnknownSigner} = deployments;
-  const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
+  const TRUSTED_FORWARDER_V2 = await deployments.getOrNull(
+    'TRUSTED_FORWARDER_V2'
+  );
+  if (!TRUSTED_FORWARDER_V2) return;
   const isTrustedForwarder = await read(
     'PolygonSand',
     'isTrustedForwarder',

@@ -19,12 +19,14 @@ const func: DeployFunction = async function (
     rewardsCalculatorAddress.toLowerCase() !==
     rewardsCalculator.address.toLowerCase()
   ) {
-    await deployments.execute(
-      'OpenSandRewardPool',
-      {from: deployer, log: true},
-      'setRewardCalculator',
-      rewardsCalculator.address,
-      false
+    await deployments.catchUnknownSigner(
+      deployments.execute(
+        'OpenSandRewardPool',
+        {from: deployer, log: true},
+        'setRewardCalculator',
+        rewardsCalculator.address,
+        false
+      )
     );
   }
 };
