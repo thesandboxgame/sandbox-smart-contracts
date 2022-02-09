@@ -9,13 +9,24 @@ const func: DeployFunction = async function (
   const {deployments, getNamedAccounts} = hre;
   const {deployer} = await getNamedAccounts();
   const rewardsCalculator = await deployments.get('OpenSandRewardCalculator');
-  await deployments.execute(
+
+  const rewardsCalculatorAddress = await deployments.read(
     'OpenSandRewardPool',
-    {from: deployer, log: true},
-    'setRewardCalculator',
-    rewardsCalculator.address,
-    false
+    'rewardCalculator'
   );
+
+  if (
+    rewardsCalculatorAddress.toLowerCase() !==
+    rewardsCalculator.address.toLowerCase()
+  ) {
+    await deployments.execute(
+      'OpenSandRewardPool',
+      {from: deployer, log: true},
+      'setRewardCalculator',
+      rewardsCalculator.address,
+      false
+    );
+  }
 };
 
 export default func;
