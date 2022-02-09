@@ -29,7 +29,7 @@ export const setupPolygonSand = withSnapshot(['PolygonSand'], async () => {
   const accounts = await getNamedAccounts();
   const unnamedAccounts = await getUnnamedAccounts();
   const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
-  const trustedForwarder = await ethers.getContract('TRUSTED_FORWARDER');
+  const trustedForwarder = await ethers.getContract('TRUSTED_FORWARDER_V2');
   const users = await setupUsers(unnamedAccounts, {
     sand,
     trustedForwarder,
