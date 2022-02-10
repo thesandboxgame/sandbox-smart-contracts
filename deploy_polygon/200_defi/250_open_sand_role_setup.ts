@@ -20,7 +20,7 @@ const func: DeployFunction = async function (
 
   const rewardCalculator = await ethers.getContract(
     'OpenSandRewardCalculator',
-    currentAdmin.toString()
+    currentAdmin
   );
   const REWARD_DISTRIBUTION = await rewardCalculator.REWARD_DISTRIBUTION();
   await deployments.execute(
