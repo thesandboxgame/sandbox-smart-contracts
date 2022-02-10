@@ -5,20 +5,30 @@ import {BigNumber} from 'ethers';
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
-  const {deployments, getNamedAccounts} = hre;
-  const {deployer} = await getNamedAccounts();
+  const {deployments, getNamedAccounts, ethers} = hre;
+  const {deployer, sandAdmin} = await getNamedAccounts();
+
+  const sandPool = await ethers.getContract('OpenSandRewardPool');
+  const adminRole = await sandPool.DEFAULT_ADMIN_ROLE();
 
   const antiCompound = await deployments.read(
     'OpenSandRewardPool',
     'antiCompound'
   );
 
-  const lockPeriodInSecs = BigNumber.from(300);
+  // check who has Admin role: deployer or sandAdmin
+  const currentAdmin = (await sandPool.hasRole(adminRole, deployer))
+    ? deployer
+    : (await sandPool.hasRole(adminRole, sandAdmin))
+    ? sandAdmin
+    : deployer;
+
+  const lockPeriodInSecs = BigNumber.from(604800); // 7 days
 
   if (!antiCompound.eq(lockPeriodInSecs)) {
     await deployments.execute(
       'OpenSandRewardPool',
-      {from: deployer, log: true},
+      {from: currentAdmin, log: true},
       'setAntiCompoundLockPeriod',
       lockPeriodInSecs
     );

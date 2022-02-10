@@ -5,21 +5,31 @@ const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
   const {deployments, getNamedAccounts, ethers} = hre;
-  const {deployer, liquidityRewardAdmin} = await getNamedAccounts();
+  const {deployer, sandAdmin, liquidityRewardAdmin} = await getNamedAccounts();
+
+  const sandPool = await ethers.getContract('OpenSandRewardPool');
+
+  const adminRole = await sandPool.DEFAULT_ADMIN_ROLE();
+
+  // check who has Admin role: deployer or sandAdmin
+  const currentAdmin = (await sandPool.hasRole(adminRole, deployer))
+    ? deployer
+    : (await sandPool.hasRole(adminRole, sandAdmin))
+    ? sandAdmin
+    : deployer;
+
   const rewardCalculator = await ethers.getContract(
     'OpenSandRewardCalculator',
-    deployer
+    currentAdmin.toString()
   );
   const REWARD_DISTRIBUTION = await rewardCalculator.REWARD_DISTRIBUTION();
   await deployments.execute(
     'OpenSandRewardCalculator',
-    {from: deployer, log: true},
+    {from: currentAdmin, log: true},
     'grantRole',
     REWARD_DISTRIBUTION,
     liquidityRewardAdmin
   );
-
-  await rewardCalculator.grantRole(REWARD_DISTRIBUTION, liquidityRewardAdmin);
 };
 
 export default func;

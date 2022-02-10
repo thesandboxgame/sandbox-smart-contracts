@@ -6,14 +6,24 @@ import hre from 'hardhat';
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
-  const {deployments, getNamedAccounts} = hre;
-  const {deployer} = await getNamedAccounts();
+  const {deployments, getNamedAccounts, ethers} = hre;
+  const {deployer, sandAdmin} = await getNamedAccounts();
   const rewardsCalculator = await deployments.get('OpenSandRewardCalculator');
 
   const rewardsCalculatorAddress = await deployments.read(
     'OpenSandRewardPool',
     'rewardCalculator'
   );
+
+  const sandPool = await ethers.getContract('OpenSandRewardPool');
+  const adminRole = await sandPool.DEFAULT_ADMIN_ROLE();
+
+  // check who has Admin role: deployer or sandAdmin
+  const currentAdmin = (await sandPool.hasRole(adminRole, deployer))
+    ? deployer
+    : (await sandPool.hasRole(adminRole, sandAdmin))
+    ? sandAdmin
+    : deployer;
 
   if (
     rewardsCalculatorAddress.toLowerCase() !==
@@ -22,7 +32,7 @@ const func: DeployFunction = async function (
     await deployments.catchUnknownSigner(
       deployments.execute(
         'OpenSandRewardPool',
-        {from: deployer, log: true},
+        {from: currentAdmin, log: true},
         'setRewardCalculator',
         rewardsCalculator.address,
         false
