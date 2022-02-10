@@ -13,39 +13,47 @@ const func: DeployFunction = async function (
   const ADMIN_ROLE = await sandPool.DEFAULT_ADMIN_ROLE();
 
   if (await sandPool.hasRole(ADMIN_ROLE, deployer)) {
-    await deployments.execute(
-      'OpenSandRewardPool',
-      {from: deployer, log: true},
-      'grantRole',
-      ADMIN_ROLE,
-      sandAdmin
-    );
-
-    await deployments.execute(
-      'OpenSandRewardPool',
-      {from: deployer, log: true},
-      'renounceRole',
-      ADMIN_ROLE,
-      deployer
-    );
+    if (!(await sandPool.hasRole(ADMIN_ROLE, sandAdmin))) {
+      await deployments.execute(
+        'OpenSandRewardPool',
+        {from: deployer, log: true},
+        'grantRole',
+        ADMIN_ROLE,
+        sandAdmin
+      );
+    }
+    // we need to ensure that sandAdmin has role before renounce deployer
+    if (await sandPool.hasRole(ADMIN_ROLE, sandAdmin)) {
+      await deployments.execute(
+        'OpenSandRewardPool',
+        {from: deployer, log: true},
+        'renounceRole',
+        ADMIN_ROLE,
+        deployer
+      );
+    }
   }
 
   if (await rewardCalculator.hasRole(ADMIN_ROLE, deployer)) {
-    await deployments.execute(
-      'OpenSandRewardCalculator',
-      {from: deployer, log: true},
-      'grantRole',
-      ADMIN_ROLE,
-      sandAdmin
-    );
-
-    await deployments.execute(
-      'OpenSandRewardCalculator',
-      {from: deployer, log: true},
-      'renounceRole',
-      ADMIN_ROLE,
-      deployer
-    );
+    if (!(await rewardCalculator.hasRole(ADMIN_ROLE, sandAdmin))) {
+      await deployments.execute(
+        'OpenSandRewardCalculator',
+        {from: deployer, log: true},
+        'grantRole',
+        ADMIN_ROLE,
+        sandAdmin
+      );
+    }
+    // we need to ensure that sandAdmin has role before renounce deployer
+    if (await rewardCalculator.hasRole(ADMIN_ROLE, sandAdmin)) {
+      await deployments.execute(
+        'OpenSandRewardCalculator',
+        {from: deployer, log: true},
+        'renounceRole',
+        ADMIN_ROLE,
+        deployer
+      );
+    }
   }
 };
 
