@@ -29,7 +29,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     /// @param merkleRoot The merkle root hash of the claim data.
     /// @param expiryTime The expiry time for the giveaway.
     function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "MultiGiveaway: not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "MULTIGIVEAWAY_NOT_ADMIN");
         _expiryTime[merkleRoot] = expiryTime;
         emit NewGiveaway(merkleRoot, expiryTime);
     }
@@ -37,7 +37,7 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
     /// @notice set the trusted forwarder
     /// @param trustedForwarder address of the contract that is enabled to send meta-tx on behalf of the user
     function setTrustedForwarder(address trustedForwarder) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "MultiGiveaway: not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "MULTIGIVEAWAY_NOT_ADMIN");
         _trustedForwarder = trustedForwarder;
     }
 
@@ -49,8 +49,8 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         Claim[] memory claims,
         bytes32[][] calldata proofs
     ) external {
-        require(claims.length == rootHashes.length, "INVALID_INPUT");
-        require(claims.length == proofs.length, "INVALID_INPUT");
+        require(claims.length == rootHashes.length, "MULTIGIVEAWAY_INVALID_INPUT");
+        require(claims.length == proofs.length, "MULTIGIVEAWAY_INVALID_INPUT");
         for (uint256 i = 0; i < rootHashes.length; i++) {
             claimMultipleTokens(rootHashes[i], claims[i], proofs[i]);
         }
@@ -78,11 +78,11 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         bytes32[] calldata proof
     ) public {
         uint256 giveawayExpiryTime = _expiryTime[merkleRoot];
-        require(claim.to != address(0), "INVALID_TO_ZERO_ADDRESS");
-        require(claim.to != address(this), "DESTINATION_MULTIGIVEAWAY_CONTRACT");
-        require(giveawayExpiryTime != 0, "GIVEAWAY_DOES_NOT_EXIST");
-        require(block.timestamp < giveawayExpiryTime, "CLAIM_PERIOD_IS_OVER");
-        require(claimed[claim.to][merkleRoot] == false, "DESTINATION_ALREADY_CLAIMED");
+        require(claim.to != address(0), "MULTIGIVEAWAY_INVALID_TO_ZERO_ADDRESS");
+        require(claim.to != address(this), "MULTIGIVEAWAY_DESTINATION_MULTIGIVEAWAY_CONTRACT");
+        require(giveawayExpiryTime != 0, "MULTIGIVEAWAY_DOES_NOT_EXIST");
+        require(block.timestamp < giveawayExpiryTime, "MULTIGIVEAWAY_CLAIM_PERIOD_IS_OVER");
+        require(claimed[claim.to][merkleRoot] == false, "MULTIGIVEAWAY_DESTINATION_ALREADY_CLAIMED");
         claimed[claim.to][merkleRoot] = true;
         _claimERC1155ERC721ERC20(merkleRoot, claim, proof);
     }

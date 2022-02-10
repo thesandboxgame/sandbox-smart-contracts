@@ -59,14 +59,14 @@ contract ClaimERC1155ERC721ERC20 {
     ) internal {
         _checkValidity(merkleRoot, claim, proof);
         for (uint256 i = 0; i < claim.erc1155.length; i++) {
-            require(claim.erc1155[i].ids.length == claim.erc1155[i].values.length, "INVALID_INPUT");
+            require(claim.erc1155[i].ids.length == claim.erc1155[i].values.length, "CLAIM_INVALID_INPUT");
             _transferERC1155(claim.to, claim.erc1155[i].ids, claim.erc1155[i].values, claim.erc1155[i].contractAddress);
         }
         for (uint256 i = 0; i < claim.erc721.length; i++) {
             _transferERC721(claim.to, claim.erc721[i].ids, claim.erc721[i].contractAddress);
         }
         if (claim.erc20.amounts.length != 0) {
-            require(claim.erc20.amounts.length == claim.erc20.contractAddresses.length, "INVALID_INPUT");
+            require(claim.erc20.amounts.length == claim.erc20.contractAddresses.length, "CLAIM_INVALID_INPUT");
             _transferERC20(claim.to, claim.erc20.amounts, claim.erc20.contractAddresses);
         }
         emit ClaimedMultipleTokens(claim.to, claim.erc1155, claim.erc721, claim.erc20, merkleRoot);
@@ -82,7 +82,7 @@ contract ClaimERC1155ERC721ERC20 {
         bytes32[] memory proof
     ) private pure {
         bytes32 leaf = _generateClaimHash(claim);
-        require(Verify.doesComputedHashMatchMerkleRootHash(merkleRoot, proof, leaf), "INVALID_CLAIM");
+        require(Verify.doesComputedHashMatchMerkleRootHash(merkleRoot, proof, leaf), "CLAIM_INVALID_CLAIM");
     }
 
     /// @dev Private function used to generate a hash from an encoded claim.
@@ -102,7 +102,7 @@ contract ClaimERC1155ERC721ERC20 {
         uint256[] memory values,
         address contractAddress
     ) private {
-        require(contractAddress != address(0), "INVALID_CONTRACT_ZERO_ADDRESS");
+        require(contractAddress != address(0), "CLAIM_INVALID_CONTRACT_ZERO_ADDRESS");
         IERC1155(contractAddress).safeBatchTransferFrom(address(this), to, ids, values, "");
     }
 
@@ -115,7 +115,7 @@ contract ClaimERC1155ERC721ERC20 {
         uint256[] memory ids,
         address contractAddress
     ) private {
-        require(contractAddress != address(0), "INVALID_CONTRACT_ZERO_ADDRESS");
+        require(contractAddress != address(0), "CLAIM_INVALID_CONTRACT_ZERO_ADDRESS");
         IERC721Extended(contractAddress).safeBatchTransferFrom(address(this), to, ids, "");
     }
 
@@ -131,7 +131,7 @@ contract ClaimERC1155ERC721ERC20 {
         for (uint256 i = 0; i < amounts.length; i++) {
             address erc20ContractAddress = contractAddresses[i];
             uint256 erc20Amount = amounts[i];
-            require(erc20ContractAddress != address(0), "INVALID_CONTRACT_ZERO_ADDRESS");
+            require(erc20ContractAddress != address(0), "CLAIM_INVALID_CONTRACT_ZERO_ADDRESS");
             IERC20(erc20ContractAddress).safeTransferFrom(address(this), to, erc20Amount);
         }
     }
