@@ -50,7 +50,7 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['OpenSandRewardPool', 'OpenSandRewardPool_setup', 'L2'];
+func.tags = ['OpenSandRewardPoolRole_setup'];
 func.dependencies = [
   'OpenSandRewardPool_deploy',
   'OpenSandRewardCalculator_deploy',
