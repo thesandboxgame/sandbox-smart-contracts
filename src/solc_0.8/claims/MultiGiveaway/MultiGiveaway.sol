@@ -34,16 +34,11 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         emit NewGiveaway(merkleRoot, expiryTime);
     }
 
-    /// @notice Function to check which giveaways have been claimed by a particular user.
-    /// @param user The user (intended token destination) address.
-    /// @param rootHashes The array of giveaway root hashes to check.
-    /// @return claimedGiveaways The array of bools confirming whether or not the giveaways relating to the root hashes provided have been claimed.
-    function getClaimedStatus(address user, bytes32[] calldata rootHashes) external view returns (bool[] memory) {
-        bool[] memory claimedGiveaways = new bool[](rootHashes.length);
-        for (uint256 i = 0; i < rootHashes.length; i++) {
-            claimedGiveaways[i] = claimed[user][rootHashes[i]];
-        }
-        return claimedGiveaways;
+    /// @notice set the trusted forwarder
+    /// @param trustedForwarder address of the contract that is enabled to send meta-tx on behalf of the user
+    function setTrustedForwarder(address trustedForwarder) external {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "MultiGiveaway: not admin");
+        _trustedForwarder = trustedForwarder;
     }
 
     /// @notice Function to permit the claiming of multiple tokens from multiple giveaways to a reserved address.
@@ -59,6 +54,18 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         for (uint256 i = 0; i < rootHashes.length; i++) {
             claimMultipleTokens(rootHashes[i], claims[i], proofs[i]);
         }
+    }
+
+    /// @notice Function to check which giveaways have been claimed by a particular user.
+    /// @param user The user (intended token destination) address.
+    /// @param rootHashes The array of giveaway root hashes to check.
+    /// @return claimedGiveaways The array of bools confirming whether or not the giveaways relating to the root hashes provided have been claimed.
+    function getClaimedStatus(address user, bytes32[] calldata rootHashes) external view returns (bool[] memory) {
+        bool[] memory claimedGiveaways = new bool[](rootHashes.length);
+        for (uint256 i = 0; i < rootHashes.length; i++) {
+            claimedGiveaways[i] = claimed[user][rootHashes[i]];
+        }
+        return claimedGiveaways;
     }
 
     /// @dev Public function used to perform validity checks and progress to claim multiple token types in one claim.
@@ -78,13 +85,6 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
         require(claimed[claim.to][merkleRoot] == false, "DESTINATION_ALREADY_CLAIMED");
         claimed[claim.to][merkleRoot] = true;
         _claimERC1155ERC721ERC20(merkleRoot, claim, proof);
-    }
-
-    /// @notice set the trusted forwarder
-    /// @param trustedForwarder address of the contract that is enabled to send meta-tx on behalf of the user
-    function setTrustedForwarder(address trustedForwarder) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "MultiGiveaway: not admin");
-        _trustedForwarder = trustedForwarder;
     }
 
     function onERC721Received(

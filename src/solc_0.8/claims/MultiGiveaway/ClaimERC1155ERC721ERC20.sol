@@ -8,11 +8,7 @@ import {IERC721Extended} from "../../common/interfaces/IERC721Extended.sol";
 import {Verify} from "../../common/Libraries/Verify.sol";
 
 contract ClaimERC1155ERC721ERC20 {
-    ///////////////////////////////  Libs //////////////////////////////
-
     using SafeERC20 for IERC20;
-
-    ///////////////////////////////  Data //////////////////////////////
 
     struct Claim {
         address to;
@@ -38,8 +34,6 @@ contract ClaimERC1155ERC721ERC20 {
         address[] contractAddresses;
     }
 
-    ///////////////////////////////  Events //////////////////////////////
-
     /// @dev Emits when a successful claim occurs.
     /// @param to The destination address for the claimed ERC1155, ERC721 and ERC20 tokens.
     /// @param erc1155 The array of ERC1155Claim structs containing the ids, values and ERC1155 contract address.
@@ -53,8 +47,6 @@ contract ClaimERC1155ERC721ERC20 {
         ERC20Claim erc20,
         bytes32 merkleRoot
     );
-
-    ///////////////////////////////  Functions ///////////////////////////
 
     /// @dev Internal function used to claim multiple token types in one claim.
     /// @param merkleRoot The merkle root hash for the specific set of items being claimed.
