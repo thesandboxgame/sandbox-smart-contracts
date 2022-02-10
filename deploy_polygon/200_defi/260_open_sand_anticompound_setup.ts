@@ -9,7 +9,7 @@ const func: DeployFunction = async function (
   const {deployer, sandAdmin} = await getNamedAccounts();
 
   const sandPool = await ethers.getContract('OpenSandRewardPool');
-  const adminRole = await sandPool.DEFAULT_ADMIN_ROLE();
+  const ADMIN_ROLE = await sandPool.DEFAULT_ADMIN_ROLE();
 
   const antiCompound = await deployments.read(
     'OpenSandRewardPool',
@@ -17,9 +17,9 @@ const func: DeployFunction = async function (
   );
 
   // check who has Admin role: deployer or sandAdmin
-  const currentAdmin = (await sandPool.hasRole(adminRole, deployer))
+  const currentAdmin = (await sandPool.hasRole(ADMIN_ROLE, deployer))
     ? deployer
-    : (await sandPool.hasRole(adminRole, sandAdmin))
+    : (await sandPool.hasRole(ADMIN_ROLE, sandAdmin))
     ? sandAdmin
     : deployer;
 
