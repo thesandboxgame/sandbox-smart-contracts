@@ -1,7 +1,5 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {isInTags} from '../../utils/network';
-import hre from 'hardhat';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -23,4 +21,3 @@ const func: DeployFunction = async function (
 export default func;
 func.tags = ['OpenSandRewardPool', 'OpenSandRewardPool_deploy'];
 func.dependencies = ['TRUSTED_FORWARDER', 'PolygonSand_deploy'];
-func.skip = async () => !isInTags(hre, 'L2');

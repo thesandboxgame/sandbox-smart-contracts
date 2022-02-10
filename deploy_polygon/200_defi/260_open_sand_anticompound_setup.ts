@@ -26,15 +26,17 @@ const func: DeployFunction = async function (
   const lockPeriodInSecs = BigNumber.from(604800); // 7 days
 
   if (!antiCompound.eq(lockPeriodInSecs)) {
-    await deployments.execute(
-      'OpenSandRewardPool',
-      {from: currentAdmin, log: true},
-      'setAntiCompoundLockPeriod',
-      lockPeriodInSecs
+    await deployments.catchUnknownSigner(
+      deployments.execute(
+        'OpenSandRewardPool',
+        {from: currentAdmin, log: true},
+        'setAntiCompoundLockPeriod',
+        lockPeriodInSecs
+      )
     );
   }
 };
 
 export default func;
-func.tags = ['OpenSandRewardPool', 'OpenSandRewardPool_setup', 'L2'];
+func.tags = ['OpenSandRewardPool', 'OpenSandRewardPool_setup'];
 func.dependencies = ['OpenSandRewardPool_deploy'];
