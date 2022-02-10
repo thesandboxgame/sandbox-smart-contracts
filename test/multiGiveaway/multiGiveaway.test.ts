@@ -6,7 +6,6 @@ import {
   expectReceiptEventWithArgs,
   expectEventWithArgs,
   findEvents,
-  mine,
   expectEventWithArgsFromReceipt,
 } from '../utils';
 import {sendMetaTx} from '../sendMetaTx';
@@ -19,7 +18,7 @@ const zeroAddress = constants.AddressZero;
 const emptyBytes32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 
-describe('Multi_Giveaway', function () {
+describe.only('Multi_Giveaway', function () {
   describe('Multi_Giveaway_common_functionality', function () {
     it('Admin can add a new giveaway', async function () {
       const options = {};
@@ -54,7 +53,7 @@ describe('Multi_Giveaway', function () {
           emptyBytes32,
           '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
         )
-      ).to.be.revertedWith('MultiGiveaway: not admin');
+      ).to.be.revertedWith('MULTIGIVEAWAY_NOT_ADMIN');
     });
 
     it('User can get their claimed status', async function () {
@@ -592,7 +591,7 @@ describe('Multi_Giveaway', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith('INVALID_CLAIM');
+      ).to.be.revertedWith('CLAIM_INVALID');
     });
 
     it('User cannot claim more than once', async function () {
@@ -639,7 +638,7 @@ describe('Multi_Giveaway', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith('DESTINATION_ALREADY_CLAIMED');
+      ).to.be.revertedWith('MULTIGIVEAWAY_DESTINATION_ALREADY_CLAIMED');
     });
 
     it('User cannot claim from Giveaway contract if destination is not the reserved address', async function () {
@@ -678,7 +677,7 @@ describe('Multi_Giveaway', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith('INVALID_CLAIM');
+      ).to.be.revertedWith('CLAIM_INVALID');
     });
 
     it('User cannot claim from Giveaway contract to destination zeroAddress', async function () {
@@ -717,7 +716,7 @@ describe('Multi_Giveaway', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith('INVALID_TO_ZERO_ADDRESS');
+      ).to.be.revertedWith('MULTIGIVEAWAY_INVALID_TO_ZERO_ADDRESS');
     });
 
     // NOT USED BECAUSE NO EXPIRY
@@ -757,7 +756,7 @@ describe('Multi_Giveaway', function () {
     //       userClaims,
     //       userProofs
     //     )
-    //   ).to.be.revertedWith('CLAIM_PERIOD_IS_OVER');
+    //   ).to.be.revertedWith('MULTIGIVEAWAY_CLAIM_PERIOD_IS_OVER');
     // });
   });
 
@@ -1191,7 +1190,7 @@ describe('Multi_Giveaway', function () {
           userClaims,
           userProofs
         )
-      ).to.be.revertedWith(`DESTINATION_ALREADY_CLAIMED`);
+      ).to.be.revertedWith(`MULTIGIVEAWAY_DESTINATION_ALREADY_CLAIMED`);
     });
   });
 
@@ -1434,7 +1433,7 @@ describe('Multi_Giveaway', function () {
       );
       await expect(
         giveawayContractAsUser.claimMultipleTokens(merkleRoot, claim, proof)
-      ).to.be.revertedWith('DESTINATION_ALREADY_CLAIMED');
+      ).to.be.revertedWith('MULTIGIVEAWAY_DESTINATION_ALREADY_CLAIMED');
     });
   });
   describe('trusted forwarder and meta-tx', function () {
@@ -1448,7 +1447,7 @@ describe('Multi_Giveaway', function () {
       );
       expect(
         giveawayContractAsUser.setTrustedForwarder(user)
-      ).to.be.revertedWith('MultiGiveaway: not admin');
+      ).to.be.revertedWith('MULTIGIVEAWAY_NOT_ADMIN');
     });
     it('should succeed in setting the trusted forwarder if admin', async function () {
       const options = {};

@@ -82,7 +82,7 @@ contract ClaimERC1155ERC721ERC20 {
         bytes32[] memory proof
     ) private pure {
         bytes32 leaf = _generateClaimHash(claim);
-        require(Verify.doesComputedHashMatchMerkleRootHash(merkleRoot, proof, leaf), "CLAIM_INVALID_CLAIM");
+        require(Verify.doesComputedHashMatchMerkleRootHash(merkleRoot, proof, leaf), "CLAIM_INVALID");
     }
 
     /// @dev Private function used to generate a hash from an encoded claim.
