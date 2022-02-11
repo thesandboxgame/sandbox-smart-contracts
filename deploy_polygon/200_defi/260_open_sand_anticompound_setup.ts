@@ -1,20 +1,20 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {BigNumber} from 'ethers';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
   const {deployments, getNamedAccounts, ethers} = hre;
   const {deployer, sandAdmin} = await getNamedAccounts();
-  const rewardsCalculator = await deployments.get('OpenSandRewardCalculator');
-
-  const rewardsCalculatorAddress = await deployments.read(
-    'OpenSandRewardPool',
-    'rewardCalculator'
-  );
 
   const sandPool = await ethers.getContract('OpenSandRewardPool');
   const ADMIN_ROLE = await sandPool.DEFAULT_ADMIN_ROLE();
+
+  const antiCompound = await deployments.read(
+    'OpenSandRewardPool',
+    'antiCompound'
+  );
 
   // check who has Admin role: deployer or sandAdmin
   const currentAdmin = (await sandPool.hasRole(ADMIN_ROLE, deployer))
@@ -23,17 +23,15 @@ const func: DeployFunction = async function (
     ? sandAdmin
     : deployer;
 
-  if (
-    rewardsCalculatorAddress.toLowerCase() !==
-    rewardsCalculator.address.toLowerCase()
-  ) {
+  const lockPeriodInSecs = BigNumber.from(604800); // 7 days
+
+  if (!antiCompound.eq(lockPeriodInSecs)) {
     await deployments.catchUnknownSigner(
       deployments.execute(
         'OpenSandRewardPool',
         {from: currentAdmin, log: true},
-        'setRewardCalculator',
-        rewardsCalculator.address,
-        false
+        'setAntiCompoundLockPeriod',
+        lockPeriodInSecs
       )
     );
   }
@@ -41,7 +39,4 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['OpenSandRewardPool', 'OpenSandRewardPool_setup'];
-func.dependencies = [
-  'OpenSandRewardCalculator_deploy',
-  'OpenSandRewardPool_deploy',
-];
+func.dependencies = ['OpenSandRewardPool_deploy'];

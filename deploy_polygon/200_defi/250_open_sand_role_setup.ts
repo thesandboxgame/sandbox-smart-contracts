@@ -5,25 +5,38 @@ const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
   const {deployments, getNamedAccounts, ethers} = hre;
-  const {deployer, liquidityRewardAdmin} = await getNamedAccounts();
-  const rewardCalculator = await ethers.getContract(
-    'OpenSandRewardCalculator',
-    deployer
-  );
-  const REWARD_DISTRIBUTION = await rewardCalculator.REWARD_DISTRIBUTION();
-  await deployments.execute(
-    'OpenSandRewardCalculator',
-    {from: deployer, log: true},
-    'grantRole',
-    REWARD_DISTRIBUTION,
-    liquidityRewardAdmin
-  );
+  const {deployer, sandAdmin, liquidityRewardAdmin} = await getNamedAccounts();
 
-  await rewardCalculator.grantRole(REWARD_DISTRIBUTION, liquidityRewardAdmin);
+  const rewardCalculator = await ethers.getContract('OpenSandRewardCalculator');
+
+  const REWARD_DISTRIBUTION = await rewardCalculator.REWARD_DISTRIBUTION();
+  if (
+    !(await rewardCalculator.hasRole(REWARD_DISTRIBUTION, liquidityRewardAdmin))
+  ) {
+    const ADMIN_ROLE = await rewardCalculator.DEFAULT_ADMIN_ROLE();
+
+    // check who has Admin role: deployer or sandAdmin
+    const currentAdmin = (await rewardCalculator.hasRole(ADMIN_ROLE, deployer))
+      ? deployer
+      : (await rewardCalculator.hasRole(ADMIN_ROLE, sandAdmin))
+      ? sandAdmin
+      : deployer;
+
+    await deployments.catchUnknownSigner(
+      deployments.execute(
+        'OpenSandRewardCalculator',
+        {from: currentAdmin, log: true},
+        'grantRole',
+        REWARD_DISTRIBUTION,
+        liquidityRewardAdmin
+      )
+    );
+  }
 };
 
 export default func;
-func.tags = ['OpenSandRewardPoolRole_setup'];
-func.dependencies = ['OpenSandRewardCalculator_deploy'];
-func.skip = async () =>
-  !process.argv.some((x) => x.includes('OpenSandRewardPoolRole_setup'));
+func.tags = ['OpenSandRewardCalculator', 'OpenSandRewardCalculator_setup'];
+func.dependencies = [
+  'OpenSandRewardPool_deploy',
+  'OpenSandRewardCalculator_deploy',
+];
