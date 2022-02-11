@@ -20,24 +20,22 @@ contract MultiGiveaway is AccessControl, ClaimERC1155ERC721ERC20, ERC2771Handler
 
     event NewGiveaway(bytes32 merkleRoot, uint256 expiryTime);
 
-    constructor(address trustedForwarder) {
-        _setupRole(DEFAULT_ADMIN_ROLE, _msgSender());
+    constructor(address admin, address trustedForwarder) {
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
         __ERC2771Handler_initialize(trustedForwarder);
     }
 
     /// @notice Function to add a new giveaway.
     /// @param merkleRoot The merkle root hash of the claim data.
     /// @param expiryTime The expiry time for the giveaway.
-    function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "MULTIGIVEAWAY_NOT_ADMIN");
+    function addNewGiveaway(bytes32 merkleRoot, uint256 expiryTime) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _expiryTime[merkleRoot] = expiryTime;
         emit NewGiveaway(merkleRoot, expiryTime);
     }
 
     /// @notice set the trusted forwarder
     /// @param trustedForwarder address of the contract that is enabled to send meta-tx on behalf of the user
-    function setTrustedForwarder(address trustedForwarder) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "MULTIGIVEAWAY_NOT_ADMIN");
+    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _trustedForwarder = trustedForwarder;
     }
 
