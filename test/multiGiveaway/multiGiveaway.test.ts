@@ -12,15 +12,13 @@ import {sendMetaTx} from '../sendMetaTx';
 import {expect} from '../chai-setup';
 
 import helpers from '../../lib/merkleTreeHelper';
-import {toUtf8String} from 'ethers/lib/utils';
-import {escape} from 'querystring';
 const {calculateMultiClaimHash} = helpers;
 
 const zeroAddress = constants.AddressZero;
 const emptyBytes32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 
-describe.only('Multi_Giveaway', function () {
+describe('Multi_Giveaway', function () {
   describe('Multi_Giveaway_common_functionality', function () {
     it('Admin can add a new giveaway', async function () {
       const options = {};
