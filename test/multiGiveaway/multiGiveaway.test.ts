@@ -12,21 +12,23 @@ import {sendMetaTx} from '../sendMetaTx';
 import {expect} from '../chai-setup';
 
 import helpers from '../../lib/merkleTreeHelper';
+import {toUtf8String} from 'ethers/lib/utils';
+import {escape} from 'querystring';
 const {calculateMultiClaimHash} = helpers;
 
 const zeroAddress = constants.AddressZero;
 const emptyBytes32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
 
-describe('Multi_Giveaway', function () {
+describe.only('Multi_Giveaway', function () {
   describe('Multi_Giveaway_common_functionality', function () {
     it('Admin can add a new giveaway', async function () {
       const options = {};
       const setUp = await setupTestGiveaway(options);
-      const {giveawayContract} = setUp;
+      const {giveawayContractAsAdmin} = setUp;
 
       const receipt = await waitFor(
-        giveawayContract.addNewGiveaway(
+        giveawayContractAsAdmin.addNewGiveaway(
           emptyBytes32,
           '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF' // does not expire
         )
@@ -53,7 +55,7 @@ describe('Multi_Giveaway', function () {
           emptyBytes32,
           '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
         )
-      ).to.be.revertedWith('MULTIGIVEAWAY_NOT_ADMIN');
+      ).to.be.reverted;
     });
 
     it('User can get their claimed status', async function () {
@@ -1445,19 +1447,20 @@ describe('Multi_Giveaway', function () {
       const giveawayContractAsUser = await giveawayContract.connect(
         ethers.provider.getSigner(user)
       );
-      expect(
-        giveawayContractAsUser.setTrustedForwarder(user)
-      ).to.be.revertedWith('MULTIGIVEAWAY_NOT_ADMIN');
+      expect(giveawayContractAsUser.setTrustedForwarder(user)).to.be.reverted;
     });
     it('should succeed in setting the trusted forwarder if admin', async function () {
       const options = {};
       const setUp = await setupTestGiveaway(options);
-      const {giveawayContract, others} = setUp;
+      const {giveawayContractAsAdmin, others} = setUp;
       const user = others[7];
 
-      expect(giveawayContract.setTrustedForwarder(user)).to.be.not.reverted;
+      expect(giveawayContractAsAdmin.setTrustedForwarder(user)).to.be.not
+        .reverted;
 
-      expect(await giveawayContract.getTrustedForwarder()).to.be.equal(user);
+      expect(await giveawayContractAsAdmin.getTrustedForwarder()).to.be.equal(
+        user
+      );
     });
     it('claim with meta-tx: user claim from single giveaway using single claim function', async function () {
       const options = {

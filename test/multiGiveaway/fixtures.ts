@@ -39,10 +39,10 @@ export const setupTestGiveaway = withSnapshot(
       sandAdmin,
       catalystMinter,
       gemMinter,
+      multiGiveawayAdmin,
     } = await getNamedAccounts();
     const otherAccounts = await getUnnamedAccounts();
-    const others = otherAccounts.slice(1); // TODO otherAccounts[0] no longer used for nftGiveaway admin
-
+    const others = otherAccounts.slice(1); // TODO otherAccounts[0] no longer used for nftGiveawayAdmin
     const sandContract = await ethers.getContract('Sand');
     const assetContract = await ethers.getContract('Asset');
     const speedGemContract = await ethers.getContract('Gem_SPEED');
@@ -68,12 +68,17 @@ export const setupTestGiveaway = withSnapshot(
     await deployments.deploy('Test_Multi_Giveaway_1_with_ERC20', {
       from: deployer,
       contract: 'MultiGiveaway',
-      args: [trustedForwarder.address],
+      args: [multiGiveawayAdmin, trustedForwarder.address],
     });
 
     const giveawayContract = await ethers.getContract(
       'Test_Multi_Giveaway_1_with_ERC20',
       deployer
+    );
+
+    const giveawayContractAsAdmin = await ethers.getContract(
+      'Test_Multi_Giveaway_1_with_ERC20',
+      multiGiveawayAdmin
     );
 
     // Supply SAND
@@ -364,7 +369,7 @@ export const setupTestGiveaway = withSnapshot(
 
     // Single giveaway
     const hashArray = createDataArrayMultiClaim(claims0);
-    await giveawayContract.addNewGiveaway(
+    await giveawayContractAsAdmin.addNewGiveaway(
       merkleRootHash0,
       '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
     ); // no expiry
@@ -386,7 +391,7 @@ export const setupTestGiveaway = withSnapshot(
       allMerkleRoots.push(merkleRootHash1);
       const hashArray2 = createDataArrayMultiClaim(claims1);
       allTrees.push(new MerkleTree(hashArray2));
-      await giveawayContract.addNewGiveaway(
+      await giveawayContractAsAdmin.addNewGiveaway(
         merkleRootHash1,
         '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
       ); // no expiry
@@ -394,6 +399,7 @@ export const setupTestGiveaway = withSnapshot(
 
     return {
       giveawayContract,
+      giveawayContractAsAdmin,
       sandContract,
       assetContract,
       landContract,
