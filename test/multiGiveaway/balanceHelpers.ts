@@ -1,12 +1,24 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import {expect} from '../chai-setup';
+import {Contract} from 'ethers';
+
+type Claim = {
+  to: string;
+  erc1155: ERC1155Claim[];
+  erc721: ERC721Claim[];
+  erc20: ERC20Claim;
+  salt?: string;
+};
+
+type ERC1155Claim = {ids: number[]; values: number[]; contractAddress: string};
+type ERC721Claim = {ids: number[]; contractAddress: string};
+type ERC20Claim = {amounts: number[]; contractAddresses: string[]};
 
 export const testInitialAssetAndLandBalances = async (
-  claim: any,
-  assetContract: any,
-  landContract: any,
-  giveawayContract: any
-) => {
+  claim: Claim,
+  assetContract: Contract,
+  landContract: Contract,
+  giveawayContract: Contract
+): Promise<void> => {
   const initBalanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
     giveawayContract.address,
     claim.erc1155[0].ids[0]
@@ -38,19 +50,19 @@ export const testInitialAssetAndLandBalances = async (
 };
 
 export const testInitialERC20Balance = async (
-  user: any,
-  erc20Contract: any
-) => {
+  user: string,
+  erc20Contract: Contract
+): Promise<void> => {
   const initialErc20Balance = await erc20Contract.balanceOf(user);
   expect(initialErc20Balance).to.equal(0);
 };
 
 export const testFinalAssetAndLandBalances = async (
-  claim: any,
-  user: any,
-  assetContract: any,
-  landContract: any
-) => {
+  claim: Claim,
+  user: string,
+  assetContract: Contract,
+  landContract: Contract
+): Promise<void> => {
   const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
     user,
     claim.erc1155[0].ids[0]
@@ -82,11 +94,11 @@ export const testFinalAssetAndLandBalances = async (
 };
 
 export const testUpdatedERC20Balance = async (
-  claim: any,
-  user: any,
-  erc20Contract: any,
-  order: any
-) => {
+  claim: Claim,
+  user: string,
+  erc20Contract: Contract,
+  order: number
+): Promise<void> => {
   const updatedErc20Balance = await erc20Contract.balanceOf(user);
   expect(updatedErc20Balance).to.equal(claim.erc20.amounts[order]);
 };
