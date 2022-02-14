@@ -19,11 +19,11 @@ const ipfsHashString =
   '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
 
 type Options = {
-  mint?: boolean;
-  sand?: boolean;
-  multi?: boolean;
-  mintSingleAsset?: number;
-  numberOfAssets?: number;
+  mint?: boolean; // supply assets and lands to MultiGiveaway
+  sand?: boolean; // supply sand to MultiGiveaway
+  multi?: boolean; // set up more than one giveaway (ie more than one claim hash)
+  mintSingleAsset?: number; // mint a single asset and add to blank testData for mintSingleAsset number of users
+  numberOfAssets?: number; // specify a given number of assets to mint and test
 };
 
 export const setupTestGiveaway = withSnapshot(
