@@ -14,6 +14,13 @@ import {expect} from '../chai-setup';
 import helpers from '../../lib/merkleTreeHelper';
 const {calculateMultiClaimHash} = helpers;
 
+import {
+  testInitialAssetAndLandBalances,
+  testFinalAssetAndLandBalances,
+  testInitialERC20Balance,
+  testUpdatedERC20Balance,
+} from './balanceHelpers';
+
 const zeroAddress = constants.AddressZero;
 const emptyBytes32 =
   '0x0000000000000000000000000000000000000000000000000000000000000000';
@@ -297,38 +304,20 @@ describe('Multi_Giveaway', function () {
       const userMerkleRoots = [];
       userMerkleRoots.push(allMerkleRoots[0]);
 
+      const user = others[0];
+
       const giveawayContractAsUser = await giveawayContract.connect(
-        ethers.provider.getSigner(others[0])
+        ethers.provider.getSigner(user)
       );
 
-      const initBalanceAssetId1 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[0]);
-      expect(initBalanceAssetId1).to.equal(claim.erc1155[0].values[0]);
-      const initBalanceAssetId2 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[1]);
-      expect(initBalanceAssetId2).to.equal(claim.erc1155[0].values[1]);
-      const initBalanceAssetId3 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[2]);
-      expect(initBalanceAssetId3).to.equal(claim.erc1155[0].values[2]);
+      await testInitialAssetAndLandBalances(
+        claim,
+        assetContract,
+        landContract,
+        giveawayContract
+      );
 
-      const originalOwnerLandId1 = await landContract.ownerOf(0);
-      expect(originalOwnerLandId1).to.equal(giveawayContract.address);
-      const originalOwnerLandId2 = await landContract.ownerOf(1);
-      expect(originalOwnerLandId2).to.equal(giveawayContract.address);
-      const originalOwnerLandId3 = await landContract.ownerOf(2);
-      expect(originalOwnerLandId3).to.equal(giveawayContract.address);
-      const originalOwnerLandId4 = await landContract.ownerOf(3);
-      expect(originalOwnerLandId4).to.equal(giveawayContract.address);
-      const originalOwnerLandId5 = await landContract.ownerOf(4);
-      expect(originalOwnerLandId5).to.equal(giveawayContract.address);
-      const originalOwnerLandId6 = await landContract.ownerOf(5);
-      expect(originalOwnerLandId6).to.equal(giveawayContract.address);
-
-      const initialSandBalance = await sandContract.balanceOf(others[0]);
-      expect(initialSandBalance).to.equal(0);
+      await testInitialERC20Balance(user, sandContract);
 
       await waitFor(
         giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
@@ -338,37 +327,14 @@ describe('Multi_Giveaway', function () {
         )
       );
 
-      const updatedSandBalance = await sandContract.balanceOf(others[0]);
-      expect(updatedSandBalance).to.equal(claim.erc20.amounts[0]);
+      await testFinalAssetAndLandBalances(
+        claim,
+        user,
+        assetContract,
+        landContract
+      );
 
-      const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[0]
-      );
-      expect(balanceAssetId1).to.equal(claim.erc1155[0].values[0]);
-      const balanceAssetId2 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[1]
-      );
-      expect(balanceAssetId2).to.equal(claim.erc1155[0].values[1]);
-      const balanceAssetId3 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[2]
-      );
-      expect(balanceAssetId3).to.equal(claim.erc1155[0].values[2]);
-
-      const ownerLandId1 = await landContract.ownerOf(0);
-      expect(ownerLandId1).to.equal(claim.to);
-      const ownerLandId2 = await landContract.ownerOf(1);
-      expect(ownerLandId2).to.equal(claim.to);
-      const ownerLandId3 = await landContract.ownerOf(2);
-      expect(ownerLandId3).to.equal(claim.to);
-      const ownerLandId4 = await landContract.ownerOf(3);
-      expect(ownerLandId4).to.equal(claim.to);
-      const ownerLandId5 = await landContract.ownerOf(4);
-      expect(ownerLandId5).to.equal(claim.to);
-      const ownerLandId6 = await landContract.ownerOf(5);
-      expect(ownerLandId6).to.equal(claim.to);
+      await testUpdatedERC20Balance(claim, user, sandContract, 0);
     });
 
     it('User can claim allocated 64 tokens from Giveaway contract', async function () {
@@ -534,12 +500,12 @@ describe('Multi_Giveaway', function () {
       }
       const userMerkleRoots = [];
       userMerkleRoots.push(allMerkleRoots[0]);
+      const user = others[0];
       const giveawayContractAsUser = await giveawayContract.connect(
-        ethers.provider.getSigner(others[0])
+        ethers.provider.getSigner(user)
       );
 
-      const initialSandBalance = await sandContract.balanceOf(others[0]);
-      expect(initialSandBalance).to.equal(0);
+      await testInitialERC20Balance(user, sandContract);
 
       await waitFor(
         giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
@@ -549,8 +515,7 @@ describe('Multi_Giveaway', function () {
         )
       );
 
-      const updatedSandBalance = await sandContract.balanceOf(others[0]);
-      expect(updatedSandBalance).to.equal(claim.erc20.amounts[0]);
+      await testUpdatedERC20Balance(claim, user, sandContract, 0);
     });
 
     it('User cannot claim if they claim the wrong amount of ERC20', async function () {
@@ -872,38 +837,19 @@ describe('Multi_Giveaway', function () {
       }
       const userMerkleRoots = [];
       userMerkleRoots.push(allMerkleRoots[0]);
+      const user = others[0];
       const giveawayContractAsUser = await giveawayContract.connect(
-        ethers.provider.getSigner(others[0])
+        ethers.provider.getSigner(user)
       );
 
-      const initBalanceAssetId1 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[0]);
-      expect(initBalanceAssetId1).to.equal(claim.erc1155[0].values[0]);
-      const initBalanceAssetId2 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[1]);
-      expect(initBalanceAssetId2).to.equal(claim.erc1155[0].values[1]);
-      const initBalanceAssetId3 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[2]);
-      expect(initBalanceAssetId3).to.equal(claim.erc1155[0].values[2]);
+      await testInitialAssetAndLandBalances(
+        claim,
+        assetContract,
+        landContract,
+        giveawayContract
+      );
 
-      const originalOwnerLandId1 = await landContract.ownerOf(0);
-      expect(originalOwnerLandId1).to.equal(giveawayContract.address);
-      const originalOwnerLandId2 = await landContract.ownerOf(1);
-      expect(originalOwnerLandId2).to.equal(giveawayContract.address);
-      const originalOwnerLandId3 = await landContract.ownerOf(2);
-      expect(originalOwnerLandId3).to.equal(giveawayContract.address);
-      const originalOwnerLandId4 = await landContract.ownerOf(3);
-      expect(originalOwnerLandId4).to.equal(giveawayContract.address);
-      const originalOwnerLandId5 = await landContract.ownerOf(4);
-      expect(originalOwnerLandId5).to.equal(giveawayContract.address);
-      const originalOwnerLandId6 = await landContract.ownerOf(5);
-      expect(originalOwnerLandId6).to.equal(giveawayContract.address);
-
-      const initialSandBalance = await sandContract.balanceOf(others[0]);
-      expect(initialSandBalance).to.equal(0);
+      await testInitialERC20Balance(user, sandContract);
 
       await waitFor(
         giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
@@ -913,37 +859,14 @@ describe('Multi_Giveaway', function () {
         )
       );
 
-      const updatedSandBalance = await sandContract.balanceOf(others[0]);
-      expect(updatedSandBalance).to.equal(claim.erc20.amounts[0]);
+      await testFinalAssetAndLandBalances(
+        claim,
+        user,
+        assetContract,
+        landContract
+      );
 
-      const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[0]
-      );
-      expect(balanceAssetId1).to.equal(claim.erc1155[0].values[0]);
-      const balanceAssetId2 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[1]
-      );
-      expect(balanceAssetId2).to.equal(claim.erc1155[0].values[1]);
-      const balanceAssetId3 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[2]
-      );
-      expect(balanceAssetId3).to.equal(claim.erc1155[0].values[2]);
-
-      const ownerLandId1 = await landContract.ownerOf(0);
-      expect(ownerLandId1).to.equal(claim.to);
-      const ownerLandId2 = await landContract.ownerOf(1);
-      expect(ownerLandId2).to.equal(claim.to);
-      const ownerLandId3 = await landContract.ownerOf(2);
-      expect(ownerLandId3).to.equal(claim.to);
-      const ownerLandId4 = await landContract.ownerOf(3);
-      expect(ownerLandId4).to.equal(claim.to);
-      const ownerLandId5 = await landContract.ownerOf(4);
-      expect(ownerLandId5).to.equal(claim.to);
-      const ownerLandId6 = await landContract.ownerOf(5);
-      expect(ownerLandId6).to.equal(claim.to);
+      await testUpdatedERC20Balance(claim, user, sandContract, 0);
     });
 
     it('User can claim allocated multiple tokens from Giveaway contract - multiple giveaways, 2 claims', async function () {
@@ -982,77 +905,34 @@ describe('Multi_Giveaway', function () {
       const userMerkleRoots = [];
       userMerkleRoots.push(allMerkleRoots[0]);
       userMerkleRoots.push(allMerkleRoots[1]);
-
+      const user = others[0];
       const giveawayContractAsUser = await giveawayContract.connect(
-        ethers.provider.getSigner(others[0])
+        ethers.provider.getSigner(user)
       );
 
       // ERC20
 
-      const initialSandBalance = await sandContract.balanceOf(others[0]);
-      expect(initialSandBalance).to.equal(0);
-
-      const initialGemBalance = await speedGemContract.balanceOf(others[0]);
-      expect(initialGemBalance).to.equal(0);
-
-      const initialCatBalance = await rareCatalystContract.balanceOf(others[0]);
-      expect(initialCatBalance).to.equal(0);
+      await testInitialERC20Balance(user, sandContract);
+      await testInitialERC20Balance(user, speedGemContract);
+      await testInitialERC20Balance(user, rareCatalystContract);
 
       // Claim 1
 
-      const initBalanceAssetId1 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[0]);
-      expect(initBalanceAssetId1).to.equal(claim.erc1155[0].values[0]);
-      const initBalanceAssetId2 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[1]);
-      expect(initBalanceAssetId2).to.equal(claim.erc1155[0].values[1]);
-      const initBalanceAssetId3 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[2]);
-      expect(initBalanceAssetId3).to.equal(claim.erc1155[0].values[2]);
-
-      const originalOwnerLandId1 = await landContract.ownerOf(0);
-      expect(originalOwnerLandId1).to.equal(giveawayContract.address);
-      const originalOwnerLandId2 = await landContract.ownerOf(1);
-      expect(originalOwnerLandId2).to.equal(giveawayContract.address);
-      const originalOwnerLandId3 = await landContract.ownerOf(2);
-      expect(originalOwnerLandId3).to.equal(giveawayContract.address);
-      const originalOwnerLandId4 = await landContract.ownerOf(3);
-      expect(originalOwnerLandId4).to.equal(giveawayContract.address);
-      const originalOwnerLandId5 = await landContract.ownerOf(4);
-      expect(originalOwnerLandId5).to.equal(giveawayContract.address);
-      const originalOwnerLandId6 = await landContract.ownerOf(5);
-      expect(originalOwnerLandId6).to.equal(giveawayContract.address);
+      await testInitialAssetAndLandBalances(
+        claim,
+        assetContract,
+        landContract,
+        giveawayContract
+      );
 
       // Claim 2
 
-      const initBalanceAssetId7 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[0]);
-      expect(initBalanceAssetId7).to.equal(secondClaim.erc1155[0].values[0]);
-      const initBalanceAssetId8 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[1]);
-      expect(initBalanceAssetId8).to.equal(secondClaim.erc1155[0].values[1]);
-      const initBalanceAssetId9 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[2]);
-      expect(initBalanceAssetId9).to.equal(secondClaim.erc1155[0].values[2]);
-
-      const originalOwnerLandId8 = await landContract.ownerOf(0);
-      expect(originalOwnerLandId8).to.equal(giveawayContract.address);
-      const originalOwnerLandId9 = await landContract.ownerOf(1);
-      expect(originalOwnerLandId9).to.equal(giveawayContract.address);
-      const originalOwnerLandId10 = await landContract.ownerOf(2);
-      expect(originalOwnerLandId10).to.equal(giveawayContract.address);
-      const originalOwnerLandId11 = await landContract.ownerOf(3);
-      expect(originalOwnerLandId11).to.equal(giveawayContract.address);
-      const originalOwnerLandId12 = await landContract.ownerOf(4);
-      expect(originalOwnerLandId12).to.equal(giveawayContract.address);
-      const originalOwnerLandId13 = await landContract.ownerOf(5);
-      expect(originalOwnerLandId13).to.equal(giveawayContract.address);
+      await testInitialAssetAndLandBalances(
+        secondClaim,
+        assetContract,
+        landContract,
+        giveawayContract
+      );
 
       await waitFor(
         giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
@@ -1064,80 +944,32 @@ describe('Multi_Giveaway', function () {
 
       // ERC20
 
-      const updatedSandBalance = await sandContract.balanceOf(others[0]);
+      const updatedSandBalance = await sandContract.balanceOf(user);
       expect(updatedSandBalance).to.equal(
         BigNumber.from(claim.erc20.amounts[0]).add(
           BigNumber.from(secondClaim.erc20.amounts[0])
         )
       );
-
-      const updatedGemBalance = await speedGemContract.balanceOf(others[0]);
-      expect(updatedGemBalance).to.equal(secondClaim.erc20.amounts[1]);
-
-      const updatedCatBalance = await rareCatalystContract.balanceOf(others[0]);
-      expect(updatedCatBalance).to.equal(secondClaim.erc20.amounts[2]);
+      await testUpdatedERC20Balance(secondClaim, user, speedGemContract, 1);
+      await testUpdatedERC20Balance(secondClaim, user, rareCatalystContract, 2);
 
       // Claim 1
 
-      const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[0]
+      await testFinalAssetAndLandBalances(
+        claim,
+        user,
+        assetContract,
+        landContract
       );
-      expect(balanceAssetId1).to.equal(claim.erc1155[0].values[0]);
-      const balanceAssetId2 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[1]
-      );
-      expect(balanceAssetId2).to.equal(claim.erc1155[0].values[1]);
-      const balanceAssetId3 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[2]
-      );
-      expect(balanceAssetId3).to.equal(claim.erc1155[0].values[2]);
-
-      const ownerLandId1 = await landContract.ownerOf(0);
-      expect(ownerLandId1).to.equal(claim.to);
-      const ownerLandId2 = await landContract.ownerOf(1);
-      expect(ownerLandId2).to.equal(claim.to);
-      const ownerLandId3 = await landContract.ownerOf(2);
-      expect(ownerLandId3).to.equal(claim.to);
-      const ownerLandId4 = await landContract.ownerOf(3);
-      expect(ownerLandId4).to.equal(claim.to);
-      const ownerLandId5 = await landContract.ownerOf(4);
-      expect(ownerLandId5).to.equal(claim.to);
-      const ownerLandId6 = await landContract.ownerOf(5);
-      expect(ownerLandId6).to.equal(claim.to);
 
       // Claim 2
 
-      const balanceAssetId7 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        secondClaim.erc1155[0].ids[0]
+      await testFinalAssetAndLandBalances(
+        secondClaim,
+        user,
+        assetContract,
+        landContract
       );
-      expect(balanceAssetId7).to.equal(secondClaim.erc1155[0].values[0]);
-      const balanceAssetId8 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        secondClaim.erc1155[0].ids[1]
-      );
-      expect(balanceAssetId8).to.equal(secondClaim.erc1155[0].values[1]);
-      const balanceAssetId9 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        secondClaim.erc1155[0].ids[2]
-      );
-      expect(balanceAssetId9).to.equal(secondClaim.erc1155[0].values[2]);
-
-      const ownerLandId8 = await landContract.ownerOf(0);
-      expect(ownerLandId8).to.equal(secondClaim.to);
-      const ownerLandId9 = await landContract.ownerOf(1);
-      expect(ownerLandId9).to.equal(secondClaim.to);
-      const ownerLandId10 = await landContract.ownerOf(2);
-      expect(ownerLandId10).to.equal(secondClaim.to);
-      const ownerLandId11 = await landContract.ownerOf(3);
-      expect(ownerLandId11).to.equal(secondClaim.to);
-      const ownerLandId12 = await landContract.ownerOf(4);
-      expect(ownerLandId12).to.equal(secondClaim.to);
-      const ownerLandId13 = await landContract.ownerOf(5);
-      expect(ownerLandId13).to.equal(secondClaim.to);
     });
 
     it('User cannot claim allocated tokens from Giveaway contract more than once - multiple giveaways, 2 claims', async function () {
@@ -1268,75 +1100,30 @@ describe('Multi_Giveaway', function () {
       const claim = allClaims[0][0];
       const proof = tree.getProof(calculateMultiClaimHash(claim));
       const merkleRoot = allMerkleRoots[0];
-
+      const user = others[0];
       const giveawayContractAsUser = await giveawayContract.connect(
-        ethers.provider.getSigner(others[0])
+        ethers.provider.getSigner(user)
       );
 
-      const initBalanceAssetId1 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[0]);
-      expect(initBalanceAssetId1).to.equal(claim.erc1155[0].values[0]);
-      const initBalanceAssetId2 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[1]);
-      expect(initBalanceAssetId2).to.equal(claim.erc1155[0].values[1]);
-      const initBalanceAssetId3 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[2]);
-      expect(initBalanceAssetId3).to.equal(claim.erc1155[0].values[2]);
-
-      const originalOwnerLandId1 = await landContract.ownerOf(0);
-      expect(originalOwnerLandId1).to.equal(giveawayContract.address);
-      const originalOwnerLandId2 = await landContract.ownerOf(1);
-      expect(originalOwnerLandId2).to.equal(giveawayContract.address);
-      const originalOwnerLandId3 = await landContract.ownerOf(2);
-      expect(originalOwnerLandId3).to.equal(giveawayContract.address);
-      const originalOwnerLandId4 = await landContract.ownerOf(3);
-      expect(originalOwnerLandId4).to.equal(giveawayContract.address);
-      const originalOwnerLandId5 = await landContract.ownerOf(4);
-      expect(originalOwnerLandId5).to.equal(giveawayContract.address);
-      const originalOwnerLandId6 = await landContract.ownerOf(5);
-      expect(originalOwnerLandId6).to.equal(giveawayContract.address);
-
-      const initialSandBalance = await sandContract.balanceOf(others[0]);
-      expect(initialSandBalance).to.equal(0);
+      await testInitialAssetAndLandBalances(
+        claim,
+        assetContract,
+        landContract,
+        giveawayContract
+      );
+      await testInitialERC20Balance(user, sandContract);
 
       await waitFor(
         giveawayContractAsUser.claimMultipleTokens(merkleRoot, claim, proof)
       );
 
-      const updatedSandBalance = await sandContract.balanceOf(others[0]);
-      expect(updatedSandBalance).to.equal(claim.erc20.amounts[0]);
-
-      const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[0]
+      await testFinalAssetAndLandBalances(
+        claim,
+        user,
+        assetContract,
+        landContract
       );
-      expect(balanceAssetId1).to.equal(claim.erc1155[0].values[0]);
-      const balanceAssetId2 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[1]
-      );
-      expect(balanceAssetId2).to.equal(claim.erc1155[0].values[1]);
-      const balanceAssetId3 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[2]
-      );
-      expect(balanceAssetId3).to.equal(claim.erc1155[0].values[2]);
-
-      const ownerLandId1 = await landContract.ownerOf(0);
-      expect(ownerLandId1).to.equal(claim.to);
-      const ownerLandId2 = await landContract.ownerOf(1);
-      expect(ownerLandId2).to.equal(claim.to);
-      const ownerLandId3 = await landContract.ownerOf(2);
-      expect(ownerLandId3).to.equal(claim.to);
-      const ownerLandId4 = await landContract.ownerOf(3);
-      expect(ownerLandId4).to.equal(claim.to);
-      const ownerLandId5 = await landContract.ownerOf(4);
-      expect(ownerLandId5).to.equal(claim.to);
-      const ownerLandId6 = await landContract.ownerOf(5);
-      expect(ownerLandId6).to.equal(claim.to);
+      await testUpdatedERC20Balance(claim, user, sandContract, 0);
     });
 
     it('Claimed Event is emitted for successful claim', async function () {
@@ -1488,34 +1275,13 @@ describe('Multi_Giveaway', function () {
         ethers.provider.getSigner(user)
       );
 
-      const initBalanceAssetId1 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[0]);
-      expect(initBalanceAssetId1).to.equal(claim.erc1155[0].values[0]);
-      const initBalanceAssetId2 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[1]);
-      expect(initBalanceAssetId2).to.equal(claim.erc1155[0].values[1]);
-      const initBalanceAssetId3 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[2]);
-      expect(initBalanceAssetId3).to.equal(claim.erc1155[0].values[2]);
-
-      const originalOwnerLandId1 = await landContract.ownerOf(0);
-      expect(originalOwnerLandId1).to.equal(giveawayContract.address);
-      const originalOwnerLandId2 = await landContract.ownerOf(1);
-      expect(originalOwnerLandId2).to.equal(giveawayContract.address);
-      const originalOwnerLandId3 = await landContract.ownerOf(2);
-      expect(originalOwnerLandId3).to.equal(giveawayContract.address);
-      const originalOwnerLandId4 = await landContract.ownerOf(3);
-      expect(originalOwnerLandId4).to.equal(giveawayContract.address);
-      const originalOwnerLandId5 = await landContract.ownerOf(4);
-      expect(originalOwnerLandId5).to.equal(giveawayContract.address);
-      const originalOwnerLandId6 = await landContract.ownerOf(5);
-      expect(originalOwnerLandId6).to.equal(giveawayContract.address);
-
-      const initialSandBalance = await sandContract.balanceOf(others[0]);
-      expect(initialSandBalance).to.equal(0);
+      await testInitialAssetAndLandBalances(
+        claim,
+        assetContract,
+        landContract,
+        giveawayContract
+      );
+      await testInitialERC20Balance(user, sandContract);
 
       // Action the claim metatx
 
@@ -1554,37 +1320,13 @@ describe('Multi_Giveaway', function () {
 
       // Check amounts after claim
 
-      const updatedSandBalance = await sandContract.balanceOf(others[0]);
-      expect(updatedSandBalance).to.equal(claim.erc20.amounts[0]);
-
-      const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[0]
+      await testFinalAssetAndLandBalances(
+        claim,
+        user,
+        assetContract,
+        landContract
       );
-      expect(balanceAssetId1).to.equal(claim.erc1155[0].values[0]);
-      const balanceAssetId2 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[1]
-      );
-      expect(balanceAssetId2).to.equal(claim.erc1155[0].values[1]);
-      const balanceAssetId3 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[2]
-      );
-      expect(balanceAssetId3).to.equal(claim.erc1155[0].values[2]);
-
-      const ownerLandId1 = await landContract.ownerOf(0);
-      expect(ownerLandId1).to.equal(claim.to);
-      const ownerLandId2 = await landContract.ownerOf(1);
-      expect(ownerLandId2).to.equal(claim.to);
-      const ownerLandId3 = await landContract.ownerOf(2);
-      expect(ownerLandId3).to.equal(claim.to);
-      const ownerLandId4 = await landContract.ownerOf(3);
-      expect(ownerLandId4).to.equal(claim.to);
-      const ownerLandId5 = await landContract.ownerOf(4);
-      expect(ownerLandId5).to.equal(claim.to);
-      const ownerLandId6 = await landContract.ownerOf(5);
-      expect(ownerLandId6).to.equal(claim.to);
+      await testUpdatedERC20Balance(claim, user, sandContract, 0);
     });
     it('claim with meta-tx: user claim from single giveaway using multiple claim function', async function () {
       const options = {
@@ -1624,34 +1366,13 @@ describe('Multi_Giveaway', function () {
       const userMerkleRoots = [];
       userMerkleRoots.push(allMerkleRoots[0]);
 
-      const initBalanceAssetId1 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[0]);
-      expect(initBalanceAssetId1).to.equal(claim.erc1155[0].values[0]);
-      const initBalanceAssetId2 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[1]);
-      expect(initBalanceAssetId2).to.equal(claim.erc1155[0].values[1]);
-      const initBalanceAssetId3 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[2]);
-      expect(initBalanceAssetId3).to.equal(claim.erc1155[0].values[2]);
-
-      const originalOwnerLandId1 = await landContract.ownerOf(0);
-      expect(originalOwnerLandId1).to.equal(giveawayContract.address);
-      const originalOwnerLandId2 = await landContract.ownerOf(1);
-      expect(originalOwnerLandId2).to.equal(giveawayContract.address);
-      const originalOwnerLandId3 = await landContract.ownerOf(2);
-      expect(originalOwnerLandId3).to.equal(giveawayContract.address);
-      const originalOwnerLandId4 = await landContract.ownerOf(3);
-      expect(originalOwnerLandId4).to.equal(giveawayContract.address);
-      const originalOwnerLandId5 = await landContract.ownerOf(4);
-      expect(originalOwnerLandId5).to.equal(giveawayContract.address);
-      const originalOwnerLandId6 = await landContract.ownerOf(5);
-      expect(originalOwnerLandId6).to.equal(giveawayContract.address);
-
-      const initialSandBalance = await sandContract.balanceOf(others[0]);
-      expect(initialSandBalance).to.equal(0);
+      await testInitialAssetAndLandBalances(
+        claim,
+        assetContract,
+        landContract,
+        giveawayContract
+      );
+      await testInitialERC20Balance(user, sandContract);
 
       // Action the claim metatx
 
@@ -1690,37 +1411,13 @@ describe('Multi_Giveaway', function () {
 
       // Check amounts after claim
 
-      const updatedSandBalance = await sandContract.balanceOf(others[0]);
-      expect(updatedSandBalance).to.equal(claim.erc20.amounts[0]);
-
-      const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[0]
+      await testFinalAssetAndLandBalances(
+        claim,
+        user,
+        assetContract,
+        landContract
       );
-      expect(balanceAssetId1).to.equal(claim.erc1155[0].values[0]);
-      const balanceAssetId2 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[1]
-      );
-      expect(balanceAssetId2).to.equal(claim.erc1155[0].values[1]);
-      const balanceAssetId3 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[2]
-      );
-      expect(balanceAssetId3).to.equal(claim.erc1155[0].values[2]);
-
-      const ownerLandId1 = await landContract.ownerOf(0);
-      expect(ownerLandId1).to.equal(claim.to);
-      const ownerLandId2 = await landContract.ownerOf(1);
-      expect(ownerLandId2).to.equal(claim.to);
-      const ownerLandId3 = await landContract.ownerOf(2);
-      expect(ownerLandId3).to.equal(claim.to);
-      const ownerLandId4 = await landContract.ownerOf(3);
-      expect(ownerLandId4).to.equal(claim.to);
-      const ownerLandId5 = await landContract.ownerOf(4);
-      expect(ownerLandId5).to.equal(claim.to);
-      const ownerLandId6 = await landContract.ownerOf(5);
-      expect(ownerLandId6).to.equal(claim.to);
+      await testUpdatedERC20Balance(claim, user, sandContract, 0);
     });
     it('claim with meta-tx: user claim from multiple giveaways', async function () {
       const options = {
@@ -1769,70 +1466,27 @@ describe('Multi_Giveaway', function () {
 
       // ERC20
 
-      const initialSandBalance = await sandContract.balanceOf(others[0]);
-      expect(initialSandBalance).to.equal(0);
-
-      const initialGemBalance = await speedGemContract.balanceOf(others[0]);
-      expect(initialGemBalance).to.equal(0);
-
-      const initialCatBalance = await rareCatalystContract.balanceOf(others[0]);
-      expect(initialCatBalance).to.equal(0);
+      await testInitialERC20Balance(user, sandContract);
+      await testInitialERC20Balance(user, speedGemContract);
+      await testInitialERC20Balance(user, rareCatalystContract);
 
       // Claim 1
 
-      const initBalanceAssetId1 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[0]);
-      expect(initBalanceAssetId1).to.equal(claim.erc1155[0].values[0]);
-      const initBalanceAssetId2 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[1]);
-      expect(initBalanceAssetId2).to.equal(claim.erc1155[0].values[1]);
-      const initBalanceAssetId3 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[2]);
-      expect(initBalanceAssetId3).to.equal(claim.erc1155[0].values[2]);
-
-      const originalOwnerLandId1 = await landContract.ownerOf(0);
-      expect(originalOwnerLandId1).to.equal(giveawayContract.address);
-      const originalOwnerLandId2 = await landContract.ownerOf(1);
-      expect(originalOwnerLandId2).to.equal(giveawayContract.address);
-      const originalOwnerLandId3 = await landContract.ownerOf(2);
-      expect(originalOwnerLandId3).to.equal(giveawayContract.address);
-      const originalOwnerLandId4 = await landContract.ownerOf(3);
-      expect(originalOwnerLandId4).to.equal(giveawayContract.address);
-      const originalOwnerLandId5 = await landContract.ownerOf(4);
-      expect(originalOwnerLandId5).to.equal(giveawayContract.address);
-      const originalOwnerLandId6 = await landContract.ownerOf(5);
-      expect(originalOwnerLandId6).to.equal(giveawayContract.address);
+      await testInitialAssetAndLandBalances(
+        claim,
+        assetContract,
+        landContract,
+        giveawayContract
+      );
 
       // Claim 2
 
-      const initBalanceAssetId7 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[0]);
-      expect(initBalanceAssetId7).to.equal(secondClaim.erc1155[0].values[0]);
-      const initBalanceAssetId8 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[1]);
-      expect(initBalanceAssetId8).to.equal(secondClaim.erc1155[0].values[1]);
-      const initBalanceAssetId9 = await assetContract[
-        'balanceOf(address,uint256)'
-      ](giveawayContract.address, claim.erc1155[0].ids[2]);
-      expect(initBalanceAssetId9).to.equal(secondClaim.erc1155[0].values[2]);
-
-      const originalOwnerLandId8 = await landContract.ownerOf(0);
-      expect(originalOwnerLandId8).to.equal(giveawayContract.address);
-      const originalOwnerLandId9 = await landContract.ownerOf(1);
-      expect(originalOwnerLandId9).to.equal(giveawayContract.address);
-      const originalOwnerLandId10 = await landContract.ownerOf(2);
-      expect(originalOwnerLandId10).to.equal(giveawayContract.address);
-      const originalOwnerLandId11 = await landContract.ownerOf(3);
-      expect(originalOwnerLandId11).to.equal(giveawayContract.address);
-      const originalOwnerLandId12 = await landContract.ownerOf(4);
-      expect(originalOwnerLandId12).to.equal(giveawayContract.address);
-      const originalOwnerLandId13 = await landContract.ownerOf(5);
-      expect(originalOwnerLandId13).to.equal(giveawayContract.address);
+      await testInitialAssetAndLandBalances(
+        secondClaim,
+        assetContract,
+        landContract,
+        giveawayContract
+      );
 
       // Action the claim metatx
 
@@ -1870,82 +1524,36 @@ describe('Multi_Giveaway', function () {
       expect(eventsMatching.length).to.be.equal(2);
 
       // Check amounts after claim
+
       // ERC20
 
-      const updatedSandBalance = await sandContract.balanceOf(others[0]);
+      const updatedSandBalance = await sandContract.balanceOf(user);
       expect(updatedSandBalance).to.equal(
         BigNumber.from(claim.erc20.amounts[0]).add(
           BigNumber.from(secondClaim.erc20.amounts[0])
         )
       );
 
-      const updatedGemBalance = await speedGemContract.balanceOf(others[0]);
-      expect(updatedGemBalance).to.equal(secondClaim.erc20.amounts[1]);
-
-      const updatedCatBalance = await rareCatalystContract.balanceOf(others[0]);
-      expect(updatedCatBalance).to.equal(secondClaim.erc20.amounts[2]);
+      await testUpdatedERC20Balance(secondClaim, user, speedGemContract, 1);
+      await testUpdatedERC20Balance(secondClaim, user, rareCatalystContract, 2);
 
       // Claim 1
 
-      const balanceAssetId1 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[0]
+      await testFinalAssetAndLandBalances(
+        claim,
+        user,
+        assetContract,
+        landContract
       );
-      expect(balanceAssetId1).to.equal(claim.erc1155[0].values[0]);
-      const balanceAssetId2 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[1]
-      );
-      expect(balanceAssetId2).to.equal(claim.erc1155[0].values[1]);
-      const balanceAssetId3 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        claim.erc1155[0].ids[2]
-      );
-      expect(balanceAssetId3).to.equal(claim.erc1155[0].values[2]);
-
-      const ownerLandId1 = await landContract.ownerOf(0);
-      expect(ownerLandId1).to.equal(claim.to);
-      const ownerLandId2 = await landContract.ownerOf(1);
-      expect(ownerLandId2).to.equal(claim.to);
-      const ownerLandId3 = await landContract.ownerOf(2);
-      expect(ownerLandId3).to.equal(claim.to);
-      const ownerLandId4 = await landContract.ownerOf(3);
-      expect(ownerLandId4).to.equal(claim.to);
-      const ownerLandId5 = await landContract.ownerOf(4);
-      expect(ownerLandId5).to.equal(claim.to);
-      const ownerLandId6 = await landContract.ownerOf(5);
-      expect(ownerLandId6).to.equal(claim.to);
 
       // Claim 2
 
-      const balanceAssetId7 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        secondClaim.erc1155[0].ids[0]
+      await testFinalAssetAndLandBalances(
+        secondClaim,
+        user,
+        assetContract,
+        landContract
       );
-      expect(balanceAssetId7).to.equal(secondClaim.erc1155[0].values[0]);
-      const balanceAssetId8 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        secondClaim.erc1155[0].ids[1]
-      );
-      expect(balanceAssetId8).to.equal(secondClaim.erc1155[0].values[1]);
-      const balanceAssetId9 = await assetContract['balanceOf(address,uint256)'](
-        others[0],
-        secondClaim.erc1155[0].ids[2]
-      );
-      expect(balanceAssetId9).to.equal(secondClaim.erc1155[0].values[2]);
-
-      const ownerLandId8 = await landContract.ownerOf(0);
-      expect(ownerLandId8).to.equal(secondClaim.to);
-      const ownerLandId9 = await landContract.ownerOf(1);
-      expect(ownerLandId9).to.equal(secondClaim.to);
-      const ownerLandId10 = await landContract.ownerOf(2);
-      expect(ownerLandId10).to.equal(secondClaim.to);
-      const ownerLandId11 = await landContract.ownerOf(3);
-      expect(ownerLandId11).to.equal(secondClaim.to);
-      const ownerLandId12 = await landContract.ownerOf(4);
-      expect(ownerLandId12).to.equal(secondClaim.to);
-      const ownerLandId13 = await landContract.ownerOf(5);
-      expect(ownerLandId13).to.equal(secondClaim.to);
     });
   });
 });
