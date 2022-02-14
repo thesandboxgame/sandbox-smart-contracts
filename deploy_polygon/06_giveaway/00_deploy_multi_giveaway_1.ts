@@ -12,7 +12,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     from: deployer,
     log: true,
     skipIfAlreadyDeployed: true,
-    args: [multiGiveawayAdmin],
+    args: [multiGiveawayAdmin, multiGiveawayAdmin], // admin, trustedForwarder
   });
 };
 export default func;
