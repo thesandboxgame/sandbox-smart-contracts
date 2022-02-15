@@ -200,6 +200,74 @@ describe('Multi_Giveaway', function () {
       expect(statusesAfterClaim[0]).to.equal(false);
       expect(statusesAfterClaim[1]).to.equal(true);
     });
+    it('MultiGiveaway contract returns ERC721 received', async function () {
+      const options = {};
+      const setUp = await setupTestGiveaway(options);
+      const {giveawayContract, multiGiveawayAdmin, landContract} = setUp;
+      const result = await giveawayContract.onERC721Received(
+        multiGiveawayAdmin,
+        landContract.address,
+        0,
+        '0x'
+      );
+      const expectedResult = '0x150b7a02';
+      expect(result).to.equal(expectedResult);
+    });
+    it('MultiGiveaway contract returns ERC721 Batch received', async function () {
+      const options = {};
+      const setUp = await setupTestGiveaway(options);
+      const {giveawayContract, multiGiveawayAdmin, landContract} = setUp;
+      const result = await giveawayContract.onERC721BatchReceived(
+        multiGiveawayAdmin,
+        landContract.address,
+        [0, 1],
+        '0x'
+      );
+      const expectedResult = '0x4b808c46';
+      expect(result).to.equal(expectedResult);
+    });
+    it('MultiGiveaway contract returns ERC1155 received for supply 1', async function () {
+      const options = {};
+      const setUp = await setupTestGiveaway(options);
+      const {giveawayContract, multiGiveawayAdmin, assetContract} = setUp;
+      const result = await giveawayContract.onERC1155Received(
+        multiGiveawayAdmin,
+        assetContract.address,
+        0,
+        1,
+        '0x'
+      );
+      const expectedResult = '0xf23a6e61';
+      expect(result).to.equal(expectedResult);
+    });
+    it('MultiGiveaway contract returns ERC1155 received', async function () {
+      const options = {};
+      const setUp = await setupTestGiveaway(options);
+      const {giveawayContract, multiGiveawayAdmin, assetContract} = setUp;
+      const result = await giveawayContract.onERC1155Received(
+        multiGiveawayAdmin,
+        assetContract.address,
+        0,
+        5,
+        '0x'
+      );
+      const expectedResult = '0xf23a6e61';
+      expect(result).to.equal(expectedResult);
+    });
+    it('MultiGiveaway contract returns ERC1155 Batch received', async function () {
+      const options = {};
+      const setUp = await setupTestGiveaway(options);
+      const {giveawayContract, multiGiveawayAdmin, assetContract} = setUp;
+      const result = await giveawayContract.onERC1155BatchReceived(
+        multiGiveawayAdmin,
+        assetContract.address,
+        [0, 1],
+        [5, 5],
+        '0x'
+      );
+      const expectedResult = '0xbc197c81';
+      expect(result).to.equal(expectedResult);
+    });
   });
   describe('Multi_Giveaway_single_giveaway', function () {
     it('User cannot claim when test contract holds no tokens', async function () {
