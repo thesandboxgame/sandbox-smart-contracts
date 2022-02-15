@@ -27,6 +27,14 @@ const emptyBytes32 =
 
 describe('Multi_Giveaway', function () {
   describe('Multi_Giveaway_common_functionality', function () {
+    it('Admin has the correct role', async function () {
+      const options = {};
+      const setUp = await setupTestGiveaway(options);
+      const {giveawayContract, multiGiveawayAdmin} = setUp;
+      const defaultRole = emptyBytes32;
+      expect(await giveawayContract.hasRole(defaultRole, multiGiveawayAdmin)).to
+        .be.true;
+    });
     it('Admin can add a new giveaway', async function () {
       const options = {};
       const setUp = await setupTestGiveaway(options);
@@ -683,6 +691,135 @@ describe('Multi_Giveaway', function () {
         )
       ).to.be.revertedWith('MULTIGIVEAWAY_INVALID_TO_ZERO_ADDRESS');
     });
+    it('User cannot claim from Giveaway if ERC1155 contract address is zeroAddress', async function () {
+      const options = {
+        mint: true,
+        sand: true,
+        badData: true,
+      };
+      const setUp = await setupTestGiveaway(options);
+      const {
+        giveawayContract,
+        others,
+        allClaims,
+        allTrees,
+        allMerkleRoots,
+      } = setUp;
+
+      // make arrays of claims and proofs relevant to specific user
+      const userProofs = [];
+      const userTrees = [];
+      userTrees.push(allTrees[1]);
+      const userClaims = [];
+      const claim = allClaims[1][3];
+      userClaims.push(claim);
+      for (let i = 0; i < userClaims.length; i++) {
+        userProofs.push(
+          userTrees[i].getProof(calculateMultiClaimHash(userClaims[i]))
+        );
+      }
+      const userMerkleRoots = [];
+      userMerkleRoots.push(allMerkleRoots[1]);
+
+      const user = others[0];
+      const giveawayContractAsUser = await giveawayContract.connect(
+        ethers.provider.getSigner(user)
+      );
+
+      await expect(
+        giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
+          userMerkleRoots,
+          userClaims,
+          userProofs
+        )
+      ).to.be.revertedWith('CLAIM_INVALID_CONTRACT_ZERO_ADDRESS');
+    });
+    it('User cannot claim from Giveaway if ERC721 contract address is zeroAddress', async function () {
+      const options = {
+        mint: true,
+        sand: true,
+        badData: true,
+      };
+      const setUp = await setupTestGiveaway(options);
+      const {
+        giveawayContract,
+        others,
+        allClaims,
+        allTrees,
+        allMerkleRoots,
+      } = setUp;
+
+      // make arrays of claims and proofs relevant to specific user
+      const userProofs = [];
+      const userTrees = [];
+      userTrees.push(allTrees[1]);
+      const userClaims = [];
+      const claim = allClaims[1][2];
+      userClaims.push(claim);
+      for (let i = 0; i < userClaims.length; i++) {
+        userProofs.push(
+          userTrees[i].getProof(calculateMultiClaimHash(userClaims[i]))
+        );
+      }
+      const userMerkleRoots = [];
+      userMerkleRoots.push(allMerkleRoots[1]);
+
+      const user = others[0];
+      const giveawayContractAsUser = await giveawayContract.connect(
+        ethers.provider.getSigner(user)
+      );
+
+      await expect(
+        giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
+          userMerkleRoots,
+          userClaims,
+          userProofs
+        )
+      ).to.be.revertedWith('CLAIM_INVALID_CONTRACT_ZERO_ADDRESS');
+    });
+    it('User cannot claim from Giveaway if ERC20 contract address is zeroAddress', async function () {
+      const options = {
+        mint: true,
+        sand: true,
+        badData: true,
+      };
+      const setUp = await setupTestGiveaway(options);
+      const {
+        giveawayContract,
+        others,
+        allClaims,
+        allTrees,
+        allMerkleRoots,
+      } = setUp;
+
+      // make arrays of claims and proofs relevant to specific user
+      const userProofs = [];
+      const userTrees = [];
+      userTrees.push(allTrees[1]);
+      const userClaims = [];
+      const claim = allClaims[1][4];
+      userClaims.push(claim);
+      for (let i = 0; i < userClaims.length; i++) {
+        userProofs.push(
+          userTrees[i].getProof(calculateMultiClaimHash(userClaims[i]))
+        );
+      }
+      const userMerkleRoots = [];
+      userMerkleRoots.push(allMerkleRoots[1]);
+
+      const user = others[0];
+      const giveawayContractAsUser = await giveawayContract.connect(
+        ethers.provider.getSigner(user)
+      );
+
+      await expect(
+        giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
+          userMerkleRoots,
+          userClaims,
+          userProofs
+        )
+      ).to.be.revertedWith('CLAIM_INVALID_CONTRACT_ZERO_ADDRESS');
+    });
 
     // NOT USED BECAUSE NO EXPIRY
     // it('User cannot claim after the expiryTime', async function () {
@@ -1223,7 +1360,7 @@ describe('Multi_Giveaway', function () {
       ).to.be.revertedWith('MULTIGIVEAWAY_DESTINATION_ALREADY_CLAIMED');
     });
   });
-  describe('trusted forwarder and meta-tx', function () {
+  describe('Trusted_forwarder_and_meta-tx', function () {
     it('should fail to set the trusted forwarder if not admin', async function () {
       const options = {};
       const setUp = await setupTestGiveaway(options);
@@ -1247,7 +1384,7 @@ describe('Multi_Giveaway', function () {
         user
       );
     });
-    it('claim with meta-tx: user claim from single giveaway using single claim function', async function () {
+    it('claim with meta-tx: user can claim from single giveaway using single claim function', async function () {
       const options = {
         mint: true,
         sand: true,
@@ -1328,7 +1465,73 @@ describe('Multi_Giveaway', function () {
       );
       await testUpdatedERC20Balance(claim, user, sandContract, 0);
     });
-    it('claim with meta-tx: user claim from single giveaway using multiple claim function', async function () {
+    it('claim with meta-tx: user cannot claim from single giveaway using single claim function more than once', async function () {
+      const options = {
+        mint: true,
+        sand: true,
+      };
+      const setUp = await setupTestGiveaway(options);
+      const {
+        giveawayContract,
+        others,
+        allTrees,
+        allClaims,
+        allMerkleRoots,
+        trustedForwarder,
+      } = setUp;
+
+      const tree = allTrees[0];
+      const claim = allClaims[0][0];
+      const proof = tree.getProof(calculateMultiClaimHash(claim));
+      const merkleRoot = allMerkleRoots[0];
+
+      const user = others[0];
+      const giveawayContractAsUser = await giveawayContract.connect(
+        ethers.provider.getSigner(user)
+      );
+
+      const {
+        to,
+        data,
+      } = await giveawayContractAsUser.populateTransaction.claimMultipleTokens(
+        merkleRoot,
+        claim,
+        proof
+      );
+
+      const receipt1 = await sendMetaTx(
+        to,
+        trustedForwarder,
+        data,
+        user,
+        '1000000'
+      );
+
+      const txEventGood = await expectEventWithArgsFromReceipt(
+        trustedForwarder,
+        receipt1,
+        'TXResult'
+      );
+
+      expect(txEventGood.args.success).to.be.true;
+
+      const receipt2 = await sendMetaTx(
+        to,
+        trustedForwarder,
+        data,
+        user,
+        '1000000'
+      );
+
+      const txEventBad = await expectEventWithArgsFromReceipt(
+        trustedForwarder,
+        receipt2,
+        'TXResult'
+      );
+
+      expect(txEventBad.args.success).to.be.false;
+    });
+    it('claim with meta-tx: user can claim from single giveaway using multiple claim function', async function () {
       const options = {
         mint: true,
         sand: true,
@@ -1419,7 +1622,83 @@ describe('Multi_Giveaway', function () {
       );
       await testUpdatedERC20Balance(claim, user, sandContract, 0);
     });
-    it('claim with meta-tx: user claim from multiple giveaways', async function () {
+    it('claim with meta-tx: user cannot claim from single giveaway using multiple claim function more than once', async function () {
+      const options = {
+        mint: true,
+        sand: true,
+      };
+      const setUp = await setupTestGiveaway(options);
+      const {
+        giveawayContract,
+        others,
+        allTrees,
+        allClaims,
+        allMerkleRoots,
+        trustedForwarder,
+      } = setUp;
+
+      const user = others[0];
+      const giveawayContractAsUser = await giveawayContract.connect(
+        ethers.provider.getSigner(user)
+      );
+
+      // make arrays of claims and proofs relevant to specific user
+      const userProofs = [];
+      const userTrees = [];
+      userTrees.push(allTrees[0]);
+      const userClaims = [];
+      const claim = allClaims[0][0];
+      userClaims.push(claim);
+      for (let i = 0; i < userClaims.length; i++) {
+        userProofs.push(
+          userTrees[i].getProof(calculateMultiClaimHash(userClaims[i]))
+        );
+      }
+      const userMerkleRoots = [];
+      userMerkleRoots.push(allMerkleRoots[0]);
+
+      const {
+        to,
+        data,
+      } = await giveawayContractAsUser.populateTransaction.claimMultipleTokensFromMultipleMerkleTree(
+        userMerkleRoots,
+        userClaims,
+        userProofs
+      );
+
+      const receipt1 = await sendMetaTx(
+        to,
+        trustedForwarder,
+        data,
+        user,
+        '1000000'
+      );
+
+      const txEventGood = await expectEventWithArgsFromReceipt(
+        trustedForwarder,
+        receipt1,
+        'TXResult'
+      );
+
+      expect(txEventGood.args.success).to.be.true;
+
+      const receipt2 = await sendMetaTx(
+        to,
+        trustedForwarder,
+        data,
+        user,
+        '1000000'
+      );
+
+      const txEventBad = await expectEventWithArgsFromReceipt(
+        trustedForwarder,
+        receipt2,
+        'TXResult'
+      );
+
+      expect(txEventBad.args.success).to.be.false;
+    });
+    it('claim with meta-tx: user can claim from multiple giveaways', async function () {
       const options = {
         mint: true,
         sand: true,
@@ -1554,6 +1833,85 @@ describe('Multi_Giveaway', function () {
         assetContract,
         landContract
       );
+    });
+    it('claim with meta-tx: user cannot claim from multiple giveaways more than once', async function () {
+      const options = {
+        mint: true,
+        sand: true,
+        multi: true,
+      };
+      const setUp = await setupTestGiveaway(options);
+      const {
+        giveawayContract,
+        others,
+        allTrees,
+        allClaims,
+        allMerkleRoots,
+        trustedForwarder,
+      } = setUp;
+
+      const user = others[0];
+      const giveawayContractAsUser = await giveawayContract.connect(
+        ethers.provider.getSigner(user)
+      );
+
+      // ake arrays of claims and proofs relevant to specific user
+      const userProofs = [];
+      const userClaims = [];
+      const claim = allClaims[0][0];
+      const secondClaim = allClaims[1][0];
+      userClaims.push(claim);
+      userClaims.push(secondClaim);
+
+      for (let i = 0; i < userClaims.length; i++) {
+        userProofs.push(
+          allTrees[i].getProof(calculateMultiClaimHash(userClaims[i]))
+        );
+      }
+      const userMerkleRoots = [];
+      userMerkleRoots.push(allMerkleRoots[0]);
+      userMerkleRoots.push(allMerkleRoots[1]);
+
+      const {
+        to,
+        data,
+      } = await giveawayContractAsUser.populateTransaction.claimMultipleTokensFromMultipleMerkleTree(
+        userMerkleRoots,
+        userClaims,
+        userProofs
+      );
+
+      const receipt1 = await sendMetaTx(
+        to,
+        trustedForwarder,
+        data,
+        user,
+        '1000000'
+      );
+
+      const txEventGood = await expectEventWithArgsFromReceipt(
+        trustedForwarder,
+        receipt1,
+        'TXResult'
+      );
+
+      expect(txEventGood.args.success).to.be.true;
+
+      const receipt2 = await sendMetaTx(
+        to,
+        trustedForwarder,
+        data,
+        user,
+        '1000000'
+      );
+
+      const txEventBad = await expectEventWithArgsFromReceipt(
+        trustedForwarder,
+        receipt2,
+        'TXResult'
+      );
+
+      expect(txEventBad.args.success).to.be.false;
     });
   });
 });
