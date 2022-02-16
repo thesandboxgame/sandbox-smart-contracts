@@ -47,7 +47,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         address admin,
         IAssetToken asset,
         uint8 chainIndex
-    ) public initializer() {
+    ) public initializer {
         _admin = admin;
         _asset = asset;
         ImmutableERC721.__ImmutableERC721_initialize(chainIndex);
@@ -82,7 +82,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         GameData calldata creation,
         address editor,
         uint64 subId
-    ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256 id) {
+    ) external override onlyMinter notToZero(to) notToThis(to) returns (uint256 id) {
         require(creation.exactNumOfLandsRequired > 0, "EXACT_NUM_OF_LANDS_REQUIRED_ZERO");
         (uint256 gameId, uint256 strgId) = _mintGame(from, to, subId, 0, true);
 
@@ -109,7 +109,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         address from,
         uint256 gameId,
         IGameToken.GameData memory update
-    ) external override onlyMinter() returns (uint256) {
+    ) external override onlyMinter returns (uint256) {
         require(update.exactNumOfLandsRequired > 0, "EXACT_NUM_OF_LANDS_REQUIRED_ZERO");
         uint256 id = _storageId(gameId);
         _addAssets(from, id, update.assetIdsToAdd, update.assetAmountsToAdd);
@@ -416,17 +416,15 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
     /// @param subId The id to use when generating the new GameId.
     /// @param version The version number part of the gameId.
     /// @param isCreation Whether this is a brand new GAME (as opposed to an update).
-    /// @return id The newly created gameId.
+    /// @return gameId The newly created gameId.
     function _mintGame(
         address from,
         address to,
         uint64 subId,
         uint16 version,
         bool isCreation
-    ) internal returns (uint256 id, uint256 storageId) {
+    ) internal returns (uint256 gameId, uint256 strgId) {
         uint16 idVersion;
-        uint256 gameId;
-        uint256 strgId;
         if (isCreation) {
             idVersion = 1;
             gameId = _generateTokenId(from, subId, _chainIndex, idVersion);
@@ -441,7 +439,6 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         _owners[strgId] = (uint256(idVersion) << 200) + uint256(uint160(to));
         _numNFTPerAddress[to]++;
         emit Transfer(address(0), to, gameId);
-        return (gameId, strgId);
     }
 
     /// @dev Allow token owner to set game editors.
