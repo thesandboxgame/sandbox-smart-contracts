@@ -25,7 +25,7 @@ type Options = {
   multi?: boolean; // set up more than one giveaway (ie more than one claim hash)
   mintSingleAsset?: number; // mint a single asset and add to blank testData for mintSingleAsset number of users
   numberOfAssets?: number; // specify a given number of assets to mint and test
-  badData?: boolean; // set the merkle tree up with bad contract addresses for ERC1155, ERC721 and ERC20 assets
+  badData?: boolean; // set the merkle tree up with bad contract addresses and input values for ERC1155, ERC721 and ERC20 assets
 };
 
 export const setupTestGiveaway = withSnapshot(
@@ -45,7 +45,7 @@ export const setupTestGiveaway = withSnapshot(
       multiGiveawayAdmin,
     } = await getNamedAccounts();
     const otherAccounts = await getUnnamedAccounts();
-    const others = otherAccounts.slice(1); // TODO otherAccounts[0] no longer used for nftGiveawayAdmin
+    const others = otherAccounts;
     const sandContract = await ethers.getContract('Sand');
     const assetContract = await ethers.getContract('Asset');
     const speedGemContract = await ethers.getContract('Gem_SPEED');
@@ -400,8 +400,10 @@ export const setupTestGiveaway = withSnapshot(
       ); // no expiry
     }
 
-    // Set up bad contract addresses in merkle tree data
+    // Set up bad contract addresses and input amounts in merkle tree data and claim
     if (badData) {
+      dataWithIds0[0].erc1155[0].values = [5, 5, 5, 5, 5, 5, 5, 5];
+      dataWithIds0[1].erc20.amounts = [200, 300, 200];
       dataWithIds0[3].erc1155[0].contractAddress = zeroAddress;
       dataWithIds0[2].erc721[0].contractAddress = zeroAddress;
       dataWithIds0[4].erc20.contractAddresses[0] = zeroAddress;

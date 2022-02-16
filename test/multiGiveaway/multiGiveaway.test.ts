@@ -888,6 +888,92 @@ describe('Multi_Giveaway', function () {
         )
       ).to.be.revertedWith('CLAIM_INVALID_CONTRACT_ZERO_ADDRESS');
     });
+    it('User cannot claim from Giveaway if ERC20 contract address array length does not match amounts array length', async function () {
+      const options = {
+        mint: true,
+        sand: true,
+        badData: true,
+      };
+      const setUp = await setupTestGiveaway(options);
+      const {
+        giveawayContract,
+        others,
+        allClaims,
+        allTrees,
+        allMerkleRoots,
+      } = setUp;
+
+      // make arrays of claims and proofs relevant to specific user
+      const userProofs = [];
+      const userTrees = [];
+      userTrees.push(allTrees[1]);
+      const userClaims = [];
+      const claim = allClaims[1][1];
+      userClaims.push(claim);
+      for (let i = 0; i < userClaims.length; i++) {
+        userProofs.push(
+          userTrees[i].getProof(calculateMultiClaimHash(userClaims[i]))
+        );
+      }
+      const userMerkleRoots = [];
+      userMerkleRoots.push(allMerkleRoots[1]);
+
+      const user = others[0];
+      const giveawayContractAsUser = await giveawayContract.connect(
+        ethers.provider.getSigner(user)
+      );
+
+      await expect(
+        giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
+          userMerkleRoots,
+          userClaims,
+          userProofs
+        )
+      ).to.be.revertedWith('CLAIM_INVALID_INPUT');
+    });
+    it('User cannot claim from Giveaway if ERC1155 values array length does not match ids array length', async function () {
+      const options = {
+        mint: true,
+        sand: true,
+        badData: true,
+      };
+      const setUp = await setupTestGiveaway(options);
+      const {
+        giveawayContract,
+        others,
+        allClaims,
+        allTrees,
+        allMerkleRoots,
+      } = setUp;
+
+      // make arrays of claims and proofs relevant to specific user
+      const userProofs = [];
+      const userTrees = [];
+      userTrees.push(allTrees[1]);
+      const userClaims = [];
+      const claim = allClaims[1][0];
+      userClaims.push(claim);
+      for (let i = 0; i < userClaims.length; i++) {
+        userProofs.push(
+          userTrees[i].getProof(calculateMultiClaimHash(userClaims[i]))
+        );
+      }
+      const userMerkleRoots = [];
+      userMerkleRoots.push(allMerkleRoots[1]);
+
+      const user = others[0];
+      const giveawayContractAsUser = await giveawayContract.connect(
+        ethers.provider.getSigner(user)
+      );
+
+      await expect(
+        giveawayContractAsUser.claimMultipleTokensFromMultipleMerkleTree(
+          userMerkleRoots,
+          userClaims,
+          userProofs
+        )
+      ).to.be.revertedWith('CLAIM_INVALID_INPUT');
+    });
 
     // NOT USED BECAUSE NO EXPIRY
     // it('User cannot claim after the expiryTime', async function () {
