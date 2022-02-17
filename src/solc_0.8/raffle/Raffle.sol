@@ -35,9 +35,9 @@ import "@openzeppelin/contracts-0.8/security/ReentrancyGuard.sol";
 //                                                                                                                                                  //
 //                                                                                                                                                  //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+/* solhint-disable max-states-count */
 contract Raffle is ERC721Enumerable, Ownable, ReentrancyGuard {
-    uint256 constant MAX_SUPPLY = 10_000;
+    uint256 public constant MAX_SUPPLY = 10_000;
 
     event TogglePaused(bool _pause);
 
@@ -50,7 +50,7 @@ contract Raffle is ERC721Enumerable, Ownable, ReentrancyGuard {
     uint256 public erc1155Id;
     address public contractAddress;
 
-    mapping(address => mapping(uint256 => uint256)) waveOwnerToClaimedCounts;
+    mapping(address => mapping(uint256 => uint256)) public waveOwnerToClaimedCounts;
     uint256 public indexWave;
     uint256 public paused;
 
@@ -58,7 +58,7 @@ contract Raffle is ERC721Enumerable, Ownable, ReentrancyGuard {
     mapping(uint256 => uint256) private availableIds;
 
     address public allowedToExecuteMint;
-    address sandOwner;
+    address public sandOwner;
     address public signAddress;
     string public baseTokenURI;
 

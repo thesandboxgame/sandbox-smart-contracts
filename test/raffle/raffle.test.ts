@@ -129,7 +129,6 @@ describe.skip('RaffleTheDoggies', function () {
       }
     }
     assert.equal(tokens.length, 10000);
-    console.log('tokens', JSON.stringify(tokens));
   });
 
   it('should be able to mint 10_000 different tokens in 3 waves in 3 txs', async function () {
@@ -185,6 +184,5 @@ describe.skip('RaffleTheDoggies', function () {
       }
     }
     assert.equal(tokens.length, 10000);
-    console.log('tokens', JSON.stringify(tokens));
   });
 });
