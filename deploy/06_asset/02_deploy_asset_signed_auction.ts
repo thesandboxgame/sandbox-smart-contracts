@@ -25,6 +25,7 @@ const func: DeployFunction = async function (hre) {
       assetAuctionFeeCollector,
       fee10000th,
     ],
+    contract: 'AssetSignedAuction',
     log: true,
     skipIfAlreadyDeployed: true,
   });

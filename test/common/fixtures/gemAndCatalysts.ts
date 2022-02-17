@@ -52,6 +52,7 @@ export const gemsAndCatalystsFixtures = async () => {
       gemsCatalystsRegistry.address,
     ],
   });
+
   const gemExample: Contract = await ethers.getContract('Gem_Example');
 
   await deployments.deploy(`Gem_NotInOrder`, {
@@ -129,35 +130,35 @@ export const gemsAndCatalystsFixtures = async () => {
     .connect(ethers.provider.getSigner(gemsCatalystsRegistryAdmin))
     .setSuperOperator(gemsCatalystsRegistrySuperOperator, true);
 
-  const gemsCatalystsRegistryAsCataystOwner = await gemsCatalystsRegistry.connect(
+  const gemsCatalystsRegistryAsCataystOwner = gemsCatalystsRegistry.connect(
     ethers.provider.getSigner(catalystOwner)
   );
 
-  const gemsCatalystsRegistryAsRegistrySuperOperator = await gemsCatalystsRegistry.connect(
+  const gemsCatalystsRegistryAsRegistrySuperOperator = gemsCatalystsRegistry.connect(
     ethers.provider.getSigner(gemsCatalystsRegistrySuperOperator)
   );
 
-  const gemsCatalystsRegistryAsUser3 = await gemsCatalystsRegistry.connect(
+  const gemsCatalystsRegistryAsUser3 = gemsCatalystsRegistry.connect(
     ethers.provider.getSigner(users[3])
   );
 
-  const gemsCatalystsRegistryAsRegAdmin = await gemsCatalystsRegistry.connect(
+  const gemsCatalystsRegistryAsRegAdmin = gemsCatalystsRegistry.connect(
     ethers.provider.getSigner(gemsCatalystsRegistryAdmin)
   );
 
-  const gemsCatalystsRegistryAsCataystMinter = await gemsCatalystsRegistry.connect(
+  const gemsCatalystsRegistryAsCataystMinter = gemsCatalystsRegistry.connect(
     ethers.provider.getSigner(catalystMinter)
   );
 
-  const gemsCatalystsRegistryAsGemOwner = await gemsCatalystsRegistry.connect(
+  const gemsCatalystsRegistryAsGemOwner = gemsCatalystsRegistry.connect(
     ethers.provider.getSigner(gemOwner)
   );
 
-  const gemsCatalystsRegistryAsGemMinter = await gemsCatalystsRegistry.connect(
+  const gemsCatalystsRegistryAsGemMinter = gemsCatalystsRegistry.connect(
     ethers.provider.getSigner(gemMinter)
   );
 
-  const gemsCatalystsRegistryAsDeployer = await gemsCatalystsRegistry.connect(
+  const gemsCatalystsRegistryAsDeployer = gemsCatalystsRegistry.connect(
     ethers.provider.getSigner(deployer)
   );
   return {

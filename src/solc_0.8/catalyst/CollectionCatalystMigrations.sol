@@ -16,6 +16,8 @@ contract CollectionCatalystMigrations is WithAdmin, ICollectionCatalystMigration
     IAssetAttributesRegistry internal immutable _registry;
     IAssetToken internal immutable _asset;
 
+    event BatchCatalystMigrationDone();
+
     /// @notice CollectionCatalystMigrations depends on:
     /// @param asset: Asset Token Contract
     /// @param registry: New AssetAttributesRegistry
@@ -33,19 +35,6 @@ contract CollectionCatalystMigrations is WithAdmin, ICollectionCatalystMigration
         _admin = admin;
     }
 
-    /// @notice Migrate the catalyst for a collection of assets.
-    /// @param assetId The id of the asset for which the catalyst is being migrated.
-    /// @param oldGemIds The gems currently embedded in the catalyst (old gems count starts from 0)
-    /// @param blockNumber The blocknumber to use when setting the catalyst.
-    function migrate(
-        uint256 assetId,
-        uint16[] calldata oldGemIds,
-        uint64 blockNumber
-    ) external override {
-        require(msg.sender == _admin, "NOT_AUTHORIZED");
-        _migrate(assetId, oldGemIds, blockNumber);
-    }
-
     /// @notice Migrate the catalysts for a batch of assets.
     /// @param migrations The data to use for each migration in the batch.
     function batchMigrate(Migration[] calldata migrations) external override {
@@ -53,6 +42,7 @@ contract CollectionCatalystMigrations is WithAdmin, ICollectionCatalystMigration
         for (uint256 i = 0; i < migrations.length; i++) {
             _migrate(migrations[i].assetId, migrations[i].gemIds, migrations[i].blockNumber);
         }
+        emit BatchCatalystMigrationDone();
     }
 
     /// @notice Set the registry migration contract

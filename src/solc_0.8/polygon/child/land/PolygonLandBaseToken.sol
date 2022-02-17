@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
+// solhint-disable code-complexity
 
 pragma solidity 0.8.2;
-
-import "@openzeppelin/contracts-0.8/utils/Address.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "../../../common/BaseWithStorage/ERC721BaseToken.sol";
 
-contract PolygonLandBaseToken is ERC721BaseToken {
-    using Address for address;
+contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
+    using AddressUpgradeable for address;
 
     uint256 internal constant GRID_SIZE = 408;
 
@@ -21,7 +21,7 @@ contract PolygonLandBaseToken is ERC721BaseToken {
      * @notice Return the name of the token contract
      * @return The name of the token contract
      */
-    function name() external pure returns (string memory) {
+    function name() public pure returns (string memory) {
         return "Sandbox's LANDs";
     }
 
@@ -29,8 +29,36 @@ contract PolygonLandBaseToken is ERC721BaseToken {
      * @notice Return the symbol of the token contract
      * @return The symbol of the token contract
      */
-    function symbol() external pure returns (string memory) {
+    function symbol() public pure returns (string memory) {
         return "LAND";
+    }
+
+    /// @notice total width of the map
+    /// @return width
+    function width() public pure returns (uint256) {
+        return GRID_SIZE;
+    }
+
+    /// @notice total height of the map
+    /// @return height
+    function height() public pure returns (uint256) {
+        return GRID_SIZE;
+    }
+
+    /// @notice x coordinate of Land token
+    /// @param id tokenId
+    /// @return the x coordinates
+    function getX(uint256 id) external view returns (uint256) {
+        require(_ownerOf(id) != address(0), "token does not exist");
+        return id % GRID_SIZE;
+    }
+
+    /// @notice y coordinate of Land token
+    /// @param id tokenId
+    /// @return the y coordinates
+    function getY(uint256 id) external view returns (uint256) {
+        require(_ownerOf(id) != address(0), "token does not exist");
+        return id / GRID_SIZE;
     }
 
     // solium-disable-next-line security/no-assign-params
@@ -78,6 +106,91 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         return id == 0x01ffc9a7 || id == 0x80ac58cd || id == 0x5b5e139f;
     }
 
+    /**
+     * @notice Mint a new quad (aligned to a quad tree with size 3, 6, 12 or 24 only)
+     * @param to The recipient of the new quad
+     * @param size The size of the new quad
+     * @param x The top left x coordinate of the new quad
+     * @param y The top left y coordinate of the new quad
+     * @param data extra data to pass to the transfer
+     */
+    function _mintQuad(
+        address to,
+        uint256 size,
+        uint256 x,
+        uint256 y,
+        bytes memory data
+    ) internal {
+        require(to != address(0), "to is zero address");
+        require(x % size == 0 && y % size == 0, "Invalid coordinates");
+        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
+
+        uint256 quadId;
+        uint256 id = x + y * GRID_SIZE;
+
+        if (size == 1) {
+            quadId = id;
+        } else if (size == 3) {
+            quadId = LAYER_3x3 + id;
+        } else if (size == 6) {
+            quadId = LAYER_6x6 + id;
+        } else if (size == 12) {
+            quadId = LAYER_12x12 + id;
+        } else if (size == 24) {
+            quadId = LAYER_24x24 + id;
+        } else {
+            require(false, "Invalid size");
+        }
+
+        require(_owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] == 0, "Already minted as 24x24");
+
+        uint256 toX = x + size;
+        uint256 toY = y + size;
+        if (size <= 12) {
+            require(_owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE] == 0, "Already minted as 12x12");
+        } else {
+            for (uint256 x12i = x; x12i < toX; x12i += 12) {
+                for (uint256 y12i = y; y12i < toY; y12i += 12) {
+                    uint256 id12x12 = LAYER_12x12 + x12i + y12i * GRID_SIZE;
+                    require(_owners[id12x12] == 0, "Already minted as 12x12");
+                }
+            }
+        }
+
+        if (size <= 6) {
+            require(_owners[LAYER_6x6 + (x / 6) * 6 + ((y / 6) * 6) * GRID_SIZE] == 0, "Already minted as 6x6");
+        } else {
+            for (uint256 x6i = x; x6i < toX; x6i += 6) {
+                for (uint256 y6i = y; y6i < toY; y6i += 6) {
+                    uint256 id6x6 = LAYER_6x6 + x6i + y6i * GRID_SIZE;
+                    require(_owners[id6x6] == 0, "Already minted as 6x6");
+                }
+            }
+        }
+
+        if (size <= 3) {
+            require(_owners[LAYER_3x3 + (x / 3) * 3 + ((y / 3) * 3) * GRID_SIZE] == 0, "Already minted as 3x3");
+        } else {
+            for (uint256 x3i = x; x3i < toX; x3i += 3) {
+                for (uint256 y3i = y; y3i < toY; y3i += 3) {
+                    uint256 id3x3 = LAYER_3x3 + x3i + y3i * GRID_SIZE;
+                    require(_owners[id3x3] == 0, "Already minted as 3x3");
+                }
+            }
+        }
+
+        for (uint256 i = 0; i < size * size; i++) {
+            uint256 idPath = _idInPath(i, size, x, y);
+            require(_owners[id] == 0, "Already minted");
+            emit Transfer(address(0), to, idPath);
+        }
+
+        _owners[quadId] = uint256(uint160(address(to)));
+        _numNFTPerAddress[to] += size * size;
+
+        _checkBatchReceiverAcceptQuad(_msgSender(), address(0), to, size, x, y, data);
+    }
+
     function batchTransferQuad(
         address from,
         address to,
@@ -89,10 +202,9 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
         require(sizes.length == xs.length && xs.length == ys.length, "invalid data");
-        bool metaTx = msg.sender != from && isTrustedForwarder(msg.sender);
-        if (msg.sender != from && !metaTx) {
+        if (_msgSender() != from) {
             require(
-                _superOperators[msg.sender] || _operatorsForAll[from][msg.sender],
+                _superOperators[_msgSender()] || _operatorsForAll[from][_msgSender()],
                 "not authorized to transferMultiQuads"
             );
         }
@@ -116,7 +228,7 @@ contract PolygonLandBaseToken is ERC721BaseToken {
                 }
             }
             require(
-                _checkOnERC721BatchReceived(metaTx ? from : msg.sender, from, to, ids, data),
+                _checkOnERC721BatchReceived(_msgSender(), from, to, ids, data),
                 "erc721 batch transfer rejected by to"
             );
         }
@@ -132,10 +244,9 @@ contract PolygonLandBaseToken is ERC721BaseToken {
     ) external {
         require(from != address(0), "from is zero address");
         require(to != address(0), "can't send to zero address");
-        bool metaTx = msg.sender != from && isTrustedForwarder(msg.sender);
-        if (msg.sender != from && !metaTx) {
+        if (_msgSender() != from) {
             require(
-                _superOperators[msg.sender] || _operatorsForAll[from][msg.sender],
+                _superOperators[_msgSender()] || _operatorsForAll[from][_msgSender()],
                 "not authorized to transferQuad"
             );
         }
@@ -143,7 +254,74 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         _numNFTPerAddress[from] -= size * size;
         _numNFTPerAddress[to] += size * size;
 
-        _checkBatchReceiverAcceptQuad(metaTx ? from : msg.sender, from, to, size, x, y, data);
+        _checkBatchReceiverAcceptQuad(_msgSender(), from, to, size, x, y, data);
+    }
+
+    function exists(
+        uint256 size,
+        uint256 x,
+        uint256 y
+    ) external view returns (bool) {
+        require(x % size == 0 && y % size == 0, "Invalid coordinates");
+        require(x <= GRID_SIZE - size && y <= GRID_SIZE - size, "Out of bounds");
+
+        uint256 quadId;
+        uint256 id = x + y * GRID_SIZE;
+
+        if (size == 1) {
+            quadId = id;
+        } else if (size == 3) {
+            quadId = LAYER_3x3 + id;
+        } else if (size == 6) {
+            quadId = LAYER_6x6 + id;
+        } else if (size == 12) {
+            quadId = LAYER_12x12 + id;
+        } else if (size == 24) {
+            quadId = LAYER_24x24 + id;
+        } else {
+            require(false, "Invalid size");
+        }
+
+        if (_owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE] != 0) return true;
+        uint256 toX = x + size;
+        uint256 toY = y + size;
+        if (size <= 12) {
+            if (_owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE] != 0) return true;
+        } else {
+            for (uint256 x12i = x; x12i < toX; x12i += 12) {
+                for (uint256 y12i = y; y12i < toY; y12i += 12) {
+                    uint256 id12x12 = LAYER_12x12 + x12i + y12i * GRID_SIZE;
+                    if (_owners[id12x12] != 0) return true;
+                }
+            }
+        }
+
+        if (size <= 6) {
+            if (_owners[LAYER_6x6 + (x / 6) * 6 + ((y / 6) * 6) * GRID_SIZE] != 0) return true;
+        } else {
+            for (uint256 x6i = x; x6i < toX; x6i += 6) {
+                for (uint256 y6i = y; y6i < toY; y6i += 6) {
+                    uint256 id6x6 = LAYER_6x6 + x6i + y6i * GRID_SIZE;
+                    if (_owners[id6x6] != 0) return true;
+                }
+            }
+        }
+
+        if (size <= 3) {
+            if (_owners[LAYER_3x3 + (x / 3) * 3 + ((y / 3) * 3) * GRID_SIZE] != 0) return true;
+        } else {
+            for (uint256 x3i = x; x3i < toX; x3i += 3) {
+                for (uint256 y3i = y; y3i < toY; y3i += 3) {
+                    uint256 id3x3 = LAYER_3x3 + x3i + y3i * GRID_SIZE;
+                    if (_owners[id3x3] != 0) return true;
+                }
+            }
+        }
+
+        for (uint256 i = 0; i < size * size; i++) {
+            if (_owners[id] != 0) return true;
+        }
+        return false;
     }
 
     function _transferQuad(
@@ -362,6 +540,10 @@ contract PolygonLandBaseToken is ERC721BaseToken {
         uint256 y = id / GRID_SIZE;
         uint256 owner1x1 = _owners[id];
 
+        if ((owner1x1 & BURNED_FLAG) == BURNED_FLAG) {
+            return address(0);
+        }
+
         if (owner1x1 != 0) {
             return address(uint160(owner1x1)); //we check if the quad exists as an 1x1 quad, then 3x3, and so on..
         } else {
@@ -412,4 +594,52 @@ contract PolygonLandBaseToken is ERC721BaseToken {
             require(_checkOnERC721BatchReceived(operator, from, to, ids, data), "erc721 batch transfer rejected by to");
         }
     }
+
+    function _ownerAndOperatorEnabledOf(uint256 id)
+        internal
+        view
+        override
+        returns (address owner, bool operatorEnabled)
+    {
+        require(id & LAYER == 0, "Invalid token id");
+        uint256 x = id % GRID_SIZE;
+        uint256 y = id / GRID_SIZE;
+        uint256 owner1x1 = _owners[id];
+
+        if ((owner1x1 & BURNED_FLAG) == BURNED_FLAG) {
+            owner = address(0);
+            operatorEnabled = (owner1x1 & OPERATOR_FLAG) == OPERATOR_FLAG;
+        }
+
+        if (owner1x1 != 0) {
+            owner = address(uint160(owner1x1));
+            operatorEnabled = (owner1x1 & OPERATOR_FLAG) == OPERATOR_FLAG;
+        } else {
+            address owner3x3 = address(uint160(_owners[LAYER_3x3 + (x / 3) * 3 + ((y / 3) * 3) * GRID_SIZE]));
+            if (owner3x3 != address(uint160(0))) {
+                owner = owner3x3;
+                operatorEnabled = false;
+            } else {
+                address owner6x6 = address(uint160(_owners[LAYER_6x6 + (x / 6) * 6 + ((y / 6) * 6) * GRID_SIZE]));
+                if (owner6x6 != address(uint160(0))) {
+                    owner = owner6x6;
+                    operatorEnabled = false;
+                } else {
+                    address owner12x12 =
+                        address(uint160(_owners[LAYER_12x12 + (x / 12) * 12 + ((y / 12) * 12) * GRID_SIZE]));
+                    if (owner12x12 != address(uint160(0))) {
+                        owner = owner12x12;
+                        operatorEnabled = false;
+                    } else {
+                        owner = address(uint160(_owners[LAYER_24x24 + (x / 24) * 24 + ((y / 24) * 24) * GRID_SIZE]));
+                        operatorEnabled = false;
+                    }
+                }
+            }
+        }
+    }
+
+    // Empty storage space in contracts for future enhancements
+    // ref: https://github.com/OpenZeppelin/openzeppelin-contracts-upgradeable/issues/13)
+    uint256[49] private __gap;
 }

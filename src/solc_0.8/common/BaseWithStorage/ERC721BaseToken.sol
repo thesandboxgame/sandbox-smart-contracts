@@ -3,15 +3,15 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts-0.8/utils/Address.sol";
-import "@openzeppelin/contracts-0.8/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts-upgradeable/utils/AddressUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721ReceiverUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import "./WithSuperOperators.sol";
 import "../interfaces/IERC721MandatoryTokenReceiver.sol";
-import "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import "./ERC2771Handler.sol";
 
-contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Handler {
-    using Address for address;
+contract ERC721BaseToken is IERC721Upgradeable, WithSuperOperators, ERC2771Handler {
+    using AddressUpgradeable for address;
 
     bytes4 internal constant _ERC721_RECEIVED = 0x150b7a02;
     bytes4 internal constant _ERC721_BATCH_RECEIVED = 0x4b808c46;
@@ -34,7 +34,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Handler {
     /// @param id The id of the token.
     function approve(address operator, uint256 id) external override {
         uint256 ownerData = _owners[_storageId(id)];
-        address owner = address(uint160(ownerData));
+        address owner = _ownerOf(id);
         address msgSender = _msgSender();
         require(owner != address(0), "NONEXISTENT_TOKEN");
         require(
@@ -271,7 +271,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Handler {
         address operator,
         uint256 id
     ) internal {
-        address owner = address(uint160(ownerData));
+        address owner = _ownerOf(id);
         if (operator == address(0)) {
             _updateOwnerData(id, ownerData, owner, false);
         } else {
@@ -353,7 +353,7 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Handler {
         uint256 tokenId,
         bytes memory _data
     ) internal returns (bool) {
-        bytes4 retval = IERC721Receiver(to).onERC721Received(operator, from, tokenId, _data);
+        bytes4 retval = IERC721ReceiverUpgradeable(to).onERC721Received(operator, from, tokenId, _data);
         return (retval == _ERC721_RECEIVED);
     }
 
@@ -388,7 +388,12 @@ contract ERC721BaseToken is IERC721, WithSuperOperators, ERC2771Handler {
     /// @param id The token to query.
     /// @return owner The owner of the token.
     /// @return operatorEnabled Whether or not operators are enabled for this token.
-    function _ownerAndOperatorEnabledOf(uint256 id) internal view returns (address owner, bool operatorEnabled) {
+    function _ownerAndOperatorEnabledOf(uint256 id)
+        internal
+        view
+        virtual
+        returns (address owner, bool operatorEnabled)
+    {
         uint256 data = _owners[_storageId(id)];
         if ((data & BURNED_FLAG) == BURNED_FLAG) {
             owner = address(0);

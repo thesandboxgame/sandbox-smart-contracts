@@ -7,11 +7,25 @@ import {
 } from '../../data/landSales/getLandSales';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {skipUnlessTest} from '../../utils/network';
+import {HardhatRuntimeEnvironment} from 'hardhat/types';
 
-const sales = [
+type SaleDeployment = {
+  name: string;
+  // top level skip function for the whole sale data
+  skip?: (env: HardhatRuntimeEnvironment) => Promise<boolean>;
+  // object map of skip function for each individual sector
+  skipSector?: {
+    [sector: number]: (env: HardhatRuntimeEnvironment) => Promise<boolean>;
+  };
+};
+
+const sales: SaleDeployment[] = [
   {name: 'EstateSaleWithAuth_0', skip: skipUnlessTest},
   {name: 'LandPreSale_11'},
   {name: 'LandPreSale_12'},
+  {name: 'LandPreSale_13', skipSector: {35: skipUnlessTest}},
+  {name: 'LandPreSale_14'},
+  {name: 'LandPreSale_15'},
 ];
 
 const func: DeployFunction = async function (hre) {
@@ -63,7 +77,9 @@ const func: DeployFunction = async function (hre) {
 
     writeProofs(hre, landSaleName, landSale);
 
-    await setAsLandMinter(hre, landSaleDeployment.address);
+    const args = landSaleDeployment.args || [];
+    const landName = args.includes(landContract.address) ? 'Land' : 'Land_Old';
+    await setAsLandMinter(hre, landSaleDeployment.address, landName);
   }
 
   for (const sale of sales) {
@@ -76,7 +92,16 @@ const func: DeployFunction = async function (hre) {
       hre.network.name,
       hre.network.live
     );
+    const skipSector = sale.skipSector || {};
+    const sectors = Object.keys(skipSector).map((k) => parseInt(k));
     for (const landSale of landSales) {
+      if (sectors.includes(landSale.sector)) {
+        const skip = await skipSector[landSale.sector](hre);
+        if (skip) {
+          console.log(`Skipping sector ${landSale.sector}`);
+          continue;
+        }
+      }
       await deployLandSale(sale.name, landSale);
     }
   }

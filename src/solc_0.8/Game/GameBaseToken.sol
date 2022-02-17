@@ -16,11 +16,11 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
 
     mapping(uint256 => mapping(uint256 => uint256)) private _gameAssets;
-    mapping(address => address) private _creatorship; // creatorship transfer
+    mapping(uint256 => address) private _creatorship; // creatorship transfer
 
     mapping(uint256 => bytes32) private _metaData;
     mapping(address => mapping(address => bool)) private _gameEditors;
-
+    mapping(uint256 => uint256) internal _exactNumOfLandsRequired;
     ///////////////////////////////  Events //////////////////////////////
 
     /// @dev Emits when a game is updated.
@@ -47,7 +47,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         address admin,
         IAssetToken asset,
         uint8 chainIndex
-    ) public initializer() {
+    ) public initializer {
         _admin = admin;
         _asset = asset;
         ImmutableERC721.__ImmutableERC721_initialize(chainIndex);
@@ -68,45 +68,6 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
 
     ///////////////////////////////  Functions //////////////////////////////
 
-    /// @notice Allow token owner to set game editors.
-    /// @param gameOwner The address of a GAME token creator.
-    /// @param editor The address of the editor to set.
-    /// @param isEditor Add or remove the ability to edit.
-    function setGameEditor(
-        address gameOwner,
-        address editor,
-        bool isEditor
-    ) external override {
-        require(_msgSender() == gameOwner, "EDITOR_ACCESS_DENIED");
-        _setGameEditor(gameOwner, editor, isEditor);
-    }
-
-    /// @notice Transfers creatorship of `original` from `sender` to `to`.
-    /// @param sender The address of current registered creator.
-    /// @param original The address of the original creator whose creation are saved in the ids themselves.
-    /// @param to The address which will be given creatorship for all tokens originally minted by `original`.
-    function transferCreatorship(
-        address sender,
-        address original,
-        address to
-    ) external override notToZero(to) {
-        address msgSender = _msgSender();
-        require(msgSender == sender || _superOperators[msgSender], "TRANSFER_ACCESS_DENIED");
-        require(sender != address(0), "NOT_FROM_ZEROADDRESS");
-        address current = _creatorship[original];
-        if (current == address(0)) {
-            current = original;
-        }
-        require(current != to, "CURRENT_=_TO");
-        require(current == sender, "CURRENT_!=_SENDER");
-        if (to == original) {
-            _creatorship[original] = address(0);
-        } else {
-            _creatorship[original] = to;
-        }
-        emit CreatorshipTransfer(original, current, to);
-    }
-
     /// @notice Create a new GAME token.
     /// @param from The address of the one creating the game (may be different from msg.sender if metaTx).
     /// @param to The address who will be assigned ownership of this game.
@@ -121,7 +82,8 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         GameData calldata creation,
         address editor,
         uint64 subId
-    ) external override onlyMinter() notToZero(to) notToThis(to) returns (uint256 id) {
+    ) external override onlyMinter notToZero(to) notToThis(to) returns (uint256 id) {
+        require(creation.exactNumOfLandsRequired > 0, "EXACT_NUM_OF_LANDS_REQUIRED_ZERO");
         (uint256 gameId, uint256 strgId) = _mintGame(from, to, subId, 0, true);
 
         if (editor != address(0)) {
@@ -132,6 +94,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         }
 
         _metaData[strgId] = creation.uri;
+        _exactNumOfLandsRequired[strgId] = creation.exactNumOfLandsRequired;
         emit GameTokenUpdated(0, gameId, creation);
         return gameId;
     }
@@ -146,14 +109,51 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         address from,
         uint256 gameId,
         IGameToken.GameData memory update
-    ) external override onlyMinter() returns (uint256) {
+    ) external override onlyMinter returns (uint256) {
+        require(update.exactNumOfLandsRequired > 0, "EXACT_NUM_OF_LANDS_REQUIRED_ZERO");
         uint256 id = _storageId(gameId);
         _addAssets(from, id, update.assetIdsToAdd, update.assetAmountsToAdd);
         _removeAssets(id, update.assetIdsToRemove, update.assetAmountsToRemove, _ownerOf(gameId));
         _metaData[id] = update.uri;
+        _exactNumOfLandsRequired[id] = update.exactNumOfLandsRequired;
         uint256 newId = _bumpGameVersion(from, gameId);
         emit GameTokenUpdated(gameId, newId, update);
         return newId;
+    }
+
+    /// @notice Allow token owner to set game editors.
+    /// @param gameOwner The address of a GAME token creator.
+    /// @param editor The address of the editor to set.
+    /// @param isEditor Add or remove the ability to edit.
+    function setGameEditor(
+        address gameOwner,
+        address editor,
+        bool isEditor
+    ) external override {
+        require(_msgSender() == gameOwner, "EDITOR_ACCESS_DENIED");
+        _setGameEditor(gameOwner, editor, isEditor);
+    }
+
+    /// @notice Transfers creatorship of `original` from `sender` to `to`.
+    /// @param gameId The current id of the GAME token.
+    /// @param sender The address of current registered creator.
+    /// @param to The address to transfer the creatorship to
+    function transferCreatorship(
+        uint256 gameId,
+        address sender,
+        address to
+    ) external override notToZero(to) {
+        require(_ownerOf(gameId) != address(0), "NONEXISTENT_TOKEN");
+        uint256 id = _storageId(gameId);
+        address msgSender = _msgSender();
+        require(msgSender == sender || _superOperators[msgSender], "TRANSFER_ACCESS_DENIED");
+        require(sender != address(0), "NOT_FROM_ZEROADDRESS");
+        address originalCreator = address(uint160(id / CREATOR_OFFSET_MULTIPLIER));
+        address current = creatorOf(gameId);
+        require(current != to, "CURRENT_=_TO");
+        require(current == sender, "CURRENT_!=_SENDER");
+        _creatorship[id] = to;
+        emit CreatorshipTransfer(originalCreator, current, to);
     }
 
     /// @notice Burn a GAME token and recover assets.
@@ -185,6 +185,20 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         _burnGame(from, gameId);
     }
 
+    /// @notice Transfer assets from a burnt GAME.
+    /// @param from Previous owner of the burnt game.
+    /// @param to Address that will receive the assets.
+    /// @param gameId Id of the burnt GAME token.
+    /// @param assetIds The assets to recover from the burnt GAME.
+    function recoverAssets(
+        address from,
+        address to,
+        uint256 gameId,
+        uint256[] memory assetIds
+    ) public override {
+        _recoverAssets(from, to, gameId, assetIds);
+    }
+
     /// @notice Get the amount of each assetId in a GAME.
     /// @param gameId The game to query.
     /// @param assetIds The assets to get balances for.
@@ -195,7 +209,7 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         returns (uint256[] memory)
     {
         uint256 storageId = _storageId(gameId);
-        require(_ownerOf(gameId) != address(0), "NONEXISTANT_TOKEN");
+        require(_ownerOf(gameId) != address(0), "NONEXISTENT_TOKEN");
         uint256 length = assetIds.length;
         uint256[] memory assets;
         assets = new uint256[](length);
@@ -203,6 +217,11 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
             assets[i] = _gameAssets[storageId][assetIds[i]];
         }
         return assets;
+    }
+
+    function getExactNumOfLandsRequired(uint256 gameId) external view override returns (uint256) {
+        uint256 storageId = _storageId(gameId);
+        return _exactNumOfLandsRequired[storageId];
     }
 
     /// @notice Get game editor status.
@@ -258,12 +277,13 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
     }
 
     /// @notice Get the creator of the token type `id`.
-    /// @param id The id of the token to get the creator of.
+    /// @param gameId The id of the token to get the creator of.
     /// @return the creator of the token type `id`.
-    function creatorOf(uint256 id) public view override returns (address) {
-        require(id != uint256(0), "GAME_NEVER_MINTED");
+    function creatorOf(uint256 gameId) public view override returns (address) {
+        require(gameId != uint256(0), "GAME_NEVER_MINTED");
+        uint256 id = _storageId(gameId);
         address originalCreator = address(uint160(id / CREATOR_OFFSET_MULTIPLIER));
-        address newCreator = _creatorship[originalCreator];
+        address newCreator = _creatorship[id];
         if (newCreator != address(0)) {
             return newCreator;
         }
@@ -277,20 +297,6 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         require(_ownerOf(gameId) != address(0), "BURNED_OR_NEVER_MINTED");
         uint256 id = _storageId(gameId);
         return _toFullURI(_metaData[id]);
-    }
-
-    /// @notice Transfer assets from a burnt GAME.
-    /// @param from Previous owner of the burnt game.
-    /// @param to Address that will receive the assets.
-    /// @param gameId Id of the burnt GAME token.
-    /// @param assetIds The assets to recover from the burnt GAME.
-    function recoverAssets(
-        address from,
-        address to,
-        uint256 gameId,
-        uint256[] memory assetIds
-    ) public override {
-        _recoverAssets(from, to, gameId, assetIds);
     }
 
     /// @notice Check if the contract supports an interface.
@@ -373,7 +379,8 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         );
 
         delete _metaData[storageId];
-        _creatorship[creatorOf(gameId)] = address(0);
+        delete _exactNumOfLandsRequired[storageId];
+        _creatorship[gameId] = address(0);
         _burn(from, owner, gameId);
     }
 
@@ -409,17 +416,15 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
     /// @param subId The id to use when generating the new GameId.
     /// @param version The version number part of the gameId.
     /// @param isCreation Whether this is a brand new GAME (as opposed to an update).
-    /// @return id The newly created gameId.
+    /// @return gameId The newly created gameId.
     function _mintGame(
         address from,
         address to,
         uint64 subId,
         uint16 version,
         bool isCreation
-    ) internal returns (uint256 id, uint256 storageId) {
+    ) internal returns (uint256 gameId, uint256 strgId) {
         uint16 idVersion;
-        uint256 gameId;
-        uint256 strgId;
         if (isCreation) {
             idVersion = 1;
             gameId = _generateTokenId(from, subId, _chainIndex, idVersion);
@@ -434,7 +439,6 @@ contract GameBaseToken is ImmutableERC721, WithMinter, Initializable, IGameToken
         _owners[strgId] = (uint256(idVersion) << 200) + uint256(uint160(to));
         _numNFTPerAddress[to]++;
         emit Transfer(address(0), to, gameId);
-        return (gameId, strgId);
     }
 
     /// @dev Allow token owner to set game editors.

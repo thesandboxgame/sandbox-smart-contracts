@@ -1,6 +1,6 @@
 /**
  * How to use:
- *  - yarn execute <NETWORK> ./setup/send_assets_to_multi_giveaway.ts <MULTI_GIVEAWAY_NAME> <GIVEAWAY_NAME>
+ *  - yarn execute <NETWORK> ./setup/send_assets_to_multi_giveaway.ts <MULTI_GIVEAWAY_NAME> <GIVEAWAY_NAME> [ASSET_HOLDER_ADDRESS]
  *
  * MULTI_GIVEAWAY_NAME: should be the same as the contract deployment name
  * GIVEAWAY_NAME: from data/giveaways/multi_giveaway_1/detective_letty.json then the giveaway name is: detective_letty
@@ -16,10 +16,9 @@ const {execute, catchUnknownSigner, read} = deployments;
 const args = process.argv.slice(2);
 const multiGiveawayName = args[0];
 const claimFile = args[1];
+const assetHolder = args[2];
 
-function getAssets(multiGiveawayName: string, giveawayName: string): AssetHash {
-  const path = `./data/giveaways/${multiGiveawayName.toLowerCase()}/${giveawayName}.json`;
-  const json: Array<MultiClaim> = fs.readJSONSync(path);
+function getAssets(json: Array<MultiClaim>): AssetHash {
   const assetIdsCount: AssetHash = {};
   json.forEach((claim) => {
     claim.erc1155.forEach(({ids, values}) => {
@@ -32,10 +31,32 @@ function getAssets(multiGiveawayName: string, giveawayName: string): AssetHash {
   return assetIdsCount;
 }
 
+type ERC20Hash = {
+  [address: string]: BigNumber;
+};
+
+function getERC20(json: Array<MultiClaim>): ERC20Hash {
+  const erc20Hash: ERC20Hash = {};
+  json.forEach((claim) => {
+    claim.erc20.contractAddresses.forEach((address, index) => {
+      if (!erc20Hash[address]) {
+        erc20Hash[address] = BigNumber.from(0);
+      }
+      erc20Hash[address] = erc20Hash[address].add(
+        BigNumber.from(claim.erc20.amounts[index])
+      );
+    });
+  });
+  return erc20Hash;
+}
+
 const func: DeployFunction = async function () {
-  const assetIdsCount = await getAssets(multiGiveawayName, claimFile);
+  const path = `./data/giveaways/${multiGiveawayName.toLowerCase()}/${claimFile}.json`;
+  const json: Array<MultiClaim> = fs.readJSONSync(path);
+  const assetIdsCount = getAssets(json);
   const MultiGiveaway = await deployments.get(multiGiveawayName);
-  const {sandboxAccount: owner} = await getNamedAccounts();
+  const {sandboxAccount, sandAdmin} = await getNamedAccounts();
+  const owner = assetHolder || sandboxAccount;
   // Send ERC1155
   const ids = [];
   const values = [];
@@ -64,6 +85,25 @@ const func: DeployFunction = async function () {
         ids,
         values,
         '0x'
+      )
+    );
+  }
+  const erc20Hash = getERC20(json);
+  const sandContract = await (hre.network.tags.L1
+    ? deployments.get('Sand')
+    : deployments.get('PolygonSand'));
+  for (const address in erc20Hash) {
+    if (address.toLocaleLowerCase() != sandContract.address.toLocaleLowerCase())
+      continue;
+    const amount = erc20Hash[address];
+    console.log(address, amount.toString());
+    await catchUnknownSigner(
+      execute(
+        'Sand',
+        {from: sandAdmin, log: true},
+        'transfer',
+        MultiGiveaway.address,
+        amount
       )
     );
   }

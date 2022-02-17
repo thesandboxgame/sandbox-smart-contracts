@@ -126,6 +126,7 @@ function testAsset() {
         minter,
         deployments,
         receiverAddress,
+        assetContractAsBouncerAdmin,
       };
     }),
     {}

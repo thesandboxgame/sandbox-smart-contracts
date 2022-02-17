@@ -140,6 +140,7 @@ function execute(command) {
     );
   } else if (firstArg === 'fork:dev') {
     const {fixedArgs, options, extra} = parseArgs(2, {
+      blockNumber: 'string',
       'no-impersonation': 'boolean',
     });
     await execute(

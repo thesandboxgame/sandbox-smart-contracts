@@ -272,7 +272,7 @@ describe('AssetMinter', function () {
         defenseGem,
         assetAttributesRegistry,
       } = await setupAssetMinterAttributesRegistryGemsAndCatalysts();
-      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+      const assetMinterAsCatalystOwner = assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
 
@@ -329,7 +329,7 @@ describe('AssetMinter', function () {
         catalystOwner,
         commonCatalyst,
       } = await setupAssetMinterGemsAndCatalysts();
-      const assetMinterAsCatalystOwner = await assetMinterContract.connect(
+      const assetMinterAsCatalystOwner = assetMinterContract.connect(
         ethers.provider.getSigner(catalystOwner)
       );
 
@@ -555,6 +555,18 @@ describe('AssetMinter', function () {
       ).to.be.revertedWith('AssetyMinter: custom minting unauthorized');
 
       await assetMinterAsAdmin.setCustomMintingAllowance(user3, true);
+
+      const setCustomMintingAllowanceEvent = await assetMinterAsAdmin.queryFilter(
+        assetMinterAsAdmin.filters.CustomMintingAllowanceChanged()
+      );
+      const event = setCustomMintingAllowanceEvent.filter(
+        (e) => e.event === 'CustomMintingAllowanceChanged'
+      )[0];
+      expect(event.args).not.to.equal(null || undefined);
+      if (event.args) {
+        expect(event.args[0]).to.equal(user3);
+        expect(event.args[1]).to.equal(true);
+      }
 
       const assetId = await assetMinterContractAsUser3.callStatic.mintCustomNumberWithCatalyst(
         {
