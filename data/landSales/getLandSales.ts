@@ -302,14 +302,14 @@ export function writeProofs(hre: HardhatRuntimeEnvironment, landSaleName: string
   }
 }
 
-export async function setAsLandMinter(hre: HardhatRuntimeEnvironment, address: string): Promise<void> {
+export async function setAsLandMinter(hre: HardhatRuntimeEnvironment, address: string, contractName = 'Land'): Promise<void> {
   const {read, execute, catchUnknownSigner} = hre.deployments;
-  const isMinter = await read('Land', 'isMinter', address);
+  const isMinter = await read(contractName, 'isMinter', address);
   if (!isMinter) {
-    const currentLandAdmin = await read('Land', 'getAdmin');
+    const currentLandAdmin = await read(contractName, 'getAdmin');
     await catchUnknownSigner(
       execute(
-        'Land',
+        contractName,
         {from: currentLandAdmin, log: true},
         'setMinter',
         address,

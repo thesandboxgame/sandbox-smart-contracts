@@ -7,7 +7,7 @@ import {
   replicateRewardPerToken,
   setupPolygonLandWeightedSANDRewardPool,
 } from './fixtures';
-import {contribution} from './contributionEquation.test';
+import {contribution} from '../../common/contributionEquation';
 
 async function multipleUsersEarnings(
   nfts: number,

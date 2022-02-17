@@ -3,10 +3,53 @@ import {expect} from '../../chai-setup';
 import {waitFor} from '../../utils';
 import {setupLand} from './fixtures';
 import {sendMetaTx} from '../../sendMetaTx';
+import {BigNumber} from 'ethers';
 
 describe('PolygonLand.sol', function () {
   describe('Land <> PolygonLand: Transfer', function () {
     describe('L1 to L2', function () {
+      it('set Max Limit on L1', async function () {
+        const {deployer} = await setupLand();
+
+        expect(await deployer.PolygonLandTunnel.maxGasLimitOnL1()).to.be.equal(
+          BigNumber.from('500')
+        );
+        await deployer.PolygonLandTunnel.setMaxLimitOnL1(
+          BigNumber.from('100000')
+        );
+        expect(await deployer.PolygonLandTunnel.maxGasLimitOnL1()).to.be.equal(
+          BigNumber.from('100000')
+        );
+      });
+
+      it('cannot set Max Limit on L1 if not owner', async function () {
+        const {PolygonLandTunnel} = await setupLand();
+        await expect(
+          PolygonLandTunnel.setMaxLimitOnL1(BigNumber.from('100000'))
+        ).to.be.revertedWith('Ownable: caller is not the owner');
+      });
+
+      it('set Max Allowed Quads', async function () {
+        const {deployer} = await setupLand();
+
+        expect(await deployer.PolygonLandTunnel.maxAllowedQuads()).to.be.equal(
+          BigNumber.from('144')
+        );
+        await deployer.PolygonLandTunnel.setMaxAllowedQuads(
+          BigNumber.from('500')
+        );
+        expect(await deployer.PolygonLandTunnel.maxAllowedQuads()).to.be.equal(
+          BigNumber.from('500')
+        );
+      });
+
+      it('cannot Max Allowed Quads if not owner', async function () {
+        const {PolygonLandTunnel} = await setupLand();
+        await expect(
+          PolygonLandTunnel.setMaxAllowedQuads(100000)
+        ).to.be.revertedWith('Ownable: caller is not the owner');
+      });
+
       it('should be able to transfer 1x1 Land', async function () {
         const {
           Land,

@@ -20,7 +20,8 @@ const deadlines: {[sector: number]: number} =  {
   33: Date.UTC(2021, 11, 9, 13) / 1000, // Thursday, 9 December 2021 13:00:00 GMT+00:00
   34: Date.UTC(2021, 11, 23, 13) / 1000, // Thursday, 23 December 2021 13:00:00 GMT+00:00
   // TODO: to be determined
-  35: Date.UTC(2022, 1, 24, 13) / 1000, // Thursday, 24 February 2022 13:00:00 GMT+00:00
+  35: Date.UTC(2022, 2, 3, 13) / 1000, // Thursday, 3 March 2022 13:00:00 GMT+00:00
   36: Date.UTC(2022, 0, 20, 13) / 1000, // Thursday, 20 January 2022 13:00:00 GMT+00:00
+  38: Date.UTC(2022, 1, 17, 13) / 1000, // Thursday, 17 February 2022 13:00:00 GMT+00:00
 };
 export default deadlines;

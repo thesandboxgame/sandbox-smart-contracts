@@ -25,6 +25,7 @@ const sales: SaleDeployment[] = [
   {name: 'LandPreSale_12'},
   {name: 'LandPreSale_13', skipSector: {35: skipUnlessTest}},
   {name: 'LandPreSale_14'},
+  {name: 'LandPreSale_15'},
 ];
 
 const func: DeployFunction = async function (hre) {
@@ -74,7 +75,9 @@ const func: DeployFunction = async function (hre) {
 
     writeProofs(hre, landSaleName, landSale);
 
-    await setAsLandMinter(hre, landSaleDeployment.address);
+    const args = landSaleDeployment.args || [];
+    const landName = args.includes(landContract.address) ? 'Land' : 'Land_Old';
+    await setAsLandMinter(hre, landSaleDeployment.address, landName);
   }
 
   for (const sale of sales) {

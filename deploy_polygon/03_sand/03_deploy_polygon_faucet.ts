@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest} from '../../utils/network';
+import {skipUnlessTestnet} from '../../utils/network';
 import {BigNumber} from '@ethersproject/bignumber';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
@@ -24,4 +24,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.tags = ['PolygonFaucet', 'PolygonFaucet_deploy'];
 func.dependencies = ['PolygonSand_deploy'];
-func.skip = skipUnlessTest;
+func.skip = skipUnlessTestnet;
