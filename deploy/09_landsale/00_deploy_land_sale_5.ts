@@ -36,7 +36,7 @@ const func: DeployFunction = async function (hre) {
 
     if (isTestnet(hre)) {
       log('increasing deadline by 1 year');
-      deadline += 365 * 24 * 60 * 60; //add 1 year on testnets
+      deadline += 100 * 365 * 24 * 60 * 60; //add 100 years on testnets
     }
 
     const landSaleDeployment = await deploy(landSaleName, {
