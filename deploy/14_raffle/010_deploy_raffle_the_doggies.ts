@@ -24,21 +24,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     skipIfAlreadyDeployed: true,
   });
-  // Upgradeable setup
-  // await deploy('RaffleTheDoggies', {
-  //   from: deployer,
-  //   contract: 'Raffle',
-  //   proxy: {
-  //     owner: upgradeAdmin,
-  //     proxyContract: 'OpenZeppelinTransparentProxy',
-  //     execute: {
-  //       methodName: 'initialize',
-  //       args: [metadataUrl, "The Doggies", "TD", treasury, raffleSignWallet],
-  //     },
-  //     upgradeIndex: 0,
-  //   },
-  //   log: true,
-  // });
 };
 export default func;
 func.tags = ['RaffleTheDoggies', 'RaffleTheDoggies_deploy'];
