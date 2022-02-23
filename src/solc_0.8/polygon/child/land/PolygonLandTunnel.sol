@@ -20,6 +20,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     event SetMaxGasLimit(uint32 maxGasLimit);
     event SetMaxAllowedQuads(uint256 maxQuads);
     event Deposit(address user, uint256 size, uint256 x, uint256 y, bytes data);
+    event Withdraw(address user, uint256 size, uint256 x, uint256 y, bytes data);
 
     function setMaxLimitOnL1(uint32 _maxGasLimit) external onlyOwner {
         maxGasLimitOnL1 = _maxGasLimit;
@@ -84,7 +85,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
         require(gasLimit < maxGasLimitOnL1, "Exceeds gas limit on L1.");
         for (uint256 i = 0; i < sizes.length; i++) {
             childToken.transferQuad(_msgSender(), address(this), sizes[i], xs[i], ys[i], data);
-            emit Deposit(to, sizes[i], xs[i], ys[i], data);
+            emit Withdraw(to, sizes[i], xs[i], ys[i], data);
         }
         _sendMessageToRoot(abi.encode(to, sizes, xs, ys, data));
     }
@@ -106,6 +107,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     function _syncDeposit(bytes memory syncData) internal {
         (address to, uint256 size, uint256 x, uint256 y, bytes memory data) =
             abi.decode(syncData, (address, uint256, uint256, uint256, bytes));
+        emit Deposit(to, size, x, y, data);
         if (!childToken.exists(size, x, y)) childToken.mint(to, size, x, y, data);
         else childToken.transferQuad(address(this), to, size, x, y, data);
     }
