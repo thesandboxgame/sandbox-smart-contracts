@@ -3,6 +3,7 @@ pragma solidity 0.8.2;
 
 import "fx-portal/contracts/tunnel/FxBaseChildTunnel.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
+import "@openzeppelin/contracts-0.8/security/Pausable.sol";
 
 import "../../../common/interfaces/IPolygonLand.sol";
 import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
@@ -10,7 +11,7 @@ import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "./PolygonLandBaseToken.sol";
 
 /// @title LAND bridge on L2
-contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable {
+contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
     IPolygonLand public childToken;
     uint32 public maxGasLimitOnL1;
     uint256 public maxAllowedQuads;
@@ -69,7 +70,7 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
         uint256[] calldata xs,
         uint256[] calldata ys,
         bytes memory data
-    ) external {
+    ) external whenNotPaused() {
         require(sizes.length == xs.length && sizes.length == ys.length, "sizes, xs, ys must be same length");
 
         uint32 gasLimit = 0;
@@ -91,6 +92,10 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
         _trustedForwarder = trustedForwarder;
+    }
+
+    function togglePauseTransferToL1() external onlyOwner returns (bool) {
+        paused() ? _unpause() : _pause();
     }
 
     function _processMessageFromRoot(
