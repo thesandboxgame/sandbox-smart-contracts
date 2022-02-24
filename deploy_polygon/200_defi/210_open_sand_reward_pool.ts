@@ -6,13 +6,13 @@ const func: DeployFunction = async function (
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
   const {deployer} = await getNamedAccounts();
-  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+  const TRUSTED_FORWARDER_V2 = await deployments.get('TRUSTED_FORWARDER_V2');
   const Sand = await deployments.get('PolygonSand');
 
   await deployments.deploy('OpenSandRewardPool', {
     from: deployer,
     contract: 'SandRewardPool',
-    args: [Sand.address, Sand.address, TRUSTED_FORWARDER.address],
+    args: [Sand.address, Sand.address, TRUSTED_FORWARDER_V2.address],
     log: true,
     skipIfAlreadyDeployed: true,
   });
@@ -20,4 +20,4 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['OpenSandRewardPool', 'OpenSandRewardPool_deploy'];
-func.dependencies = ['TRUSTED_FORWARDER', 'PolygonSand_deploy'];
+func.dependencies = ['TRUSTED_FORWARDER_V2', 'PolygonSand_deploy'];
