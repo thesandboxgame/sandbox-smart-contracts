@@ -12,6 +12,7 @@ import helpers from '../../lib/merkleTreeHelper';
 import {default as testData0} from '../../data/giveaways/multi_giveaway_1/claims_0_hardhat.json';
 import {default as testData1} from '../../data/giveaways/multi_giveaway_1/claims_1_hardhat.json';
 import {expectReceiptEventWithArgs, waitFor, withSnapshot} from '../utils';
+import {zeroAddress} from '../land-sale/fixtures';
 
 const {createDataArrayMultiClaim} = helpers;
 
@@ -19,11 +20,12 @@ const ipfsHashString =
   '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
 
 type Options = {
-  mint?: boolean;
-  sand?: boolean;
-  multi?: boolean;
-  mintSingleAsset?: number;
-  numberOfAssets?: number;
+  mint?: boolean; // supply assets and lands to MultiGiveaway
+  sand?: boolean; // supply sand to MultiGiveaway
+  multi?: boolean; // set up more than one giveaway (ie more than one claim hash)
+  mintSingleAsset?: number; // mint a single asset and add to blank testData for mintSingleAsset number of users
+  numberOfAssets?: number; // specify a given number of assets to mint and test
+  badData?: boolean; // set the merkle tree up with bad contract addresses and input values for ERC1155, ERC721 and ERC20 assets
 };
 
 export const setupTestGiveaway = withSnapshot(
@@ -31,7 +33,8 @@ export const setupTestGiveaway = withSnapshot(
   async function (hre, options?: Options) {
     const {network, getChainId} = hre;
     const chainId = await getChainId();
-    const {mint, sand, multi, mintSingleAsset, numberOfAssets} = options || {};
+    const {mint, sand, multi, mintSingleAsset, numberOfAssets, badData} =
+      options || {};
     const {
       deployer,
       assetBouncerAdmin,
@@ -39,15 +42,19 @@ export const setupTestGiveaway = withSnapshot(
       sandAdmin,
       catalystMinter,
       gemMinter,
+      multiGiveawayAdmin,
     } = await getNamedAccounts();
     const otherAccounts = await getUnnamedAccounts();
-    const nftGiveawayAdmin = otherAccounts[0];
-    const others = otherAccounts.slice(1);
-
+    const others = otherAccounts;
     const sandContract = await ethers.getContract('Sand');
     const assetContract = await ethers.getContract('Asset');
     const speedGemContract = await ethers.getContract('Gem_SPEED');
     const rareCatalystContract = await ethers.getContract('Catalyst_RARE');
+
+    await deployments.deploy('TestMetaTxForwarder', {
+      from: deployer,
+    });
+    const trustedForwarder = await ethers.getContract('TestMetaTxForwarder');
 
     await deployments.deploy('MockLand', {
       from: deployer,
@@ -64,15 +71,17 @@ export const setupTestGiveaway = withSnapshot(
     await deployments.deploy('Test_Multi_Giveaway_1_with_ERC20', {
       from: deployer,
       contract: 'MultiGiveaway',
-      args: [nftGiveawayAdmin],
+      args: [multiGiveawayAdmin, trustedForwarder.address],
     });
 
     const giveawayContract = await ethers.getContract(
-      'Test_Multi_Giveaway_1_with_ERC20'
+      'Test_Multi_Giveaway_1_with_ERC20',
+      deployer
     );
 
-    const giveawayContractAsAdmin = await giveawayContract.connect(
-      ethers.provider.getSigner(nftGiveawayAdmin)
+    const giveawayContractAsAdmin = await ethers.getContract(
+      'Test_Multi_Giveaway_1_with_ERC20',
+      multiGiveawayAdmin
     );
 
     // Supply SAND
@@ -391,8 +400,36 @@ export const setupTestGiveaway = withSnapshot(
       ); // no expiry
     }
 
+    // Set up bad contract addresses and input amounts in merkle tree data and claim
+    if (badData) {
+      dataWithIds0[0].erc1155[0].values = [5, 5, 5, 5, 5, 5, 5, 5];
+      dataWithIds0[1].erc20.amounts = [200, 300, 200];
+      dataWithIds0[3].erc1155[0].contractAddress = zeroAddress;
+      dataWithIds0[2].erc721[0].contractAddress = zeroAddress;
+      dataWithIds0[4].erc20.contractAddresses[0] = zeroAddress;
+
+      const {
+        claims: badClaims0,
+        merkleRootHash: badMerkleRootHash0,
+      } = createClaimMerkleTree(
+        network.live,
+        chainId,
+        dataWithIds0,
+        'Multi_Giveaway_1'
+      );
+      allClaims.push(badClaims0);
+      allMerkleRoots.push(badMerkleRootHash0);
+      const hashArray2 = createDataArrayMultiClaim(badClaims0);
+      allTrees.push(new MerkleTree(hashArray2));
+      await giveawayContractAsAdmin.addNewGiveaway(
+        badMerkleRootHash0,
+        '0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF'
+      ); // no expiry
+    }
+
     return {
       giveawayContract,
+      giveawayContractAsAdmin,
       sandContract,
       assetContract,
       landContract,
@@ -401,8 +438,9 @@ export const setupTestGiveaway = withSnapshot(
       others,
       allTrees,
       allClaims,
-      nftGiveawayAdmin,
       allMerkleRoots,
+      trustedForwarder,
+      multiGiveawayAdmin,
     };
   }
 );
