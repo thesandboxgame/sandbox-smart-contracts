@@ -94,8 +94,14 @@ contract PolygonLandTunnel is FxBaseChildTunnel, IERC721MandatoryTokenReceiver, 
         _trustedForwarder = trustedForwarder;
     }
 
-    function togglePauseTransferToL1() external onlyOwner returns (bool) {
-        paused() ? _unpause() : _pause();
+    /// @dev Pauses all token transfers accross bridge
+    function pause() public virtual {
+        _pause();
+    }
+
+    /// @dev Unpauses all token transfers accross bridge
+    function unpause() public virtual {
+        _unpause();
     }
 
     function _processMessageFromRoot(

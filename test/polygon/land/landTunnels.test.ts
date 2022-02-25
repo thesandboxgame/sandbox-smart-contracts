@@ -72,7 +72,7 @@ describe('PolygonLand.sol', function () {
 
         // Transfer to L1 Tunnel
         await landHolder.Land.setApprovalForAll(LandTunnel.address, true);
-        await deployer.LandTunnel.togglePauseTransferToL2();
+        await deployer.LandTunnel.pause();
 
         await expect(
           landHolder.LandTunnel.batchTransferQuadToL2(
@@ -84,7 +84,7 @@ describe('PolygonLand.sol', function () {
           )
         ).to.be.revertedWith('Pausable: paused');
 
-        await deployer.LandTunnel.togglePauseTransferToL2();
+        await deployer.LandTunnel.unpause();
 
         await waitFor(
           landHolder.LandTunnel.batchTransferQuadToL2(
@@ -636,7 +636,7 @@ describe('PolygonLand.sol', function () {
           MockPolygonLandTunnel.address,
           true
         );
-        await deployer.MockPolygonLandTunnel.togglePauseTransferToL1();
+        await deployer.MockPolygonLandTunnel.pause();
         await expect(
           landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
             landHolder.address,
@@ -647,7 +647,7 @@ describe('PolygonLand.sol', function () {
           )
         ).to.be.revertedWith('Pausable: paused');
 
-        await deployer.MockPolygonLandTunnel.togglePauseTransferToL1();
+        await deployer.MockPolygonLandTunnel.unpause();
 
         const tx = await landHolder.MockPolygonLandTunnel.batchTransferQuadToL1(
           landHolder.address,
