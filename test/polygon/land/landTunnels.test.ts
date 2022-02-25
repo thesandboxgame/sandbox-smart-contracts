@@ -8,6 +8,25 @@ import {BigNumber} from 'ethers';
 describe('PolygonLand.sol', function () {
   describe('Land <> PolygonLand: Transfer', function () {
     describe('L1 to L2', function () {
+      it('only owner can pause tunnels', async function () {
+        const {users} = await setupLand();
+        const landHolder = users[0];
+
+        await expect(landHolder.LandTunnel.pause()).to.be.revertedWith(
+          'Ownable: caller is not the owner'
+        );
+      });
+
+      it('only owner can unpause tunnels', async function () {
+        const {deployer, users} = await setupLand();
+        const landHolder = users[0];
+
+        await deployer.LandTunnel.pause();
+        await expect(landHolder.LandTunnel.unpause()).to.be.revertedWith(
+          'Ownable: caller is not the owner'
+        );
+      });
+
       it('set Max Limit on L1', async function () {
         const {deployer} = await setupLand();
 
@@ -584,6 +603,25 @@ describe('PolygonLand.sol', function () {
       });
     });
     describe('L2 to L1', function () {
+      it('only owner can pause tunnels', async function () {
+        const {users} = await setupLand();
+        const landHolder = users[0];
+
+        await expect(
+          landHolder.MockPolygonLandTunnel.pause()
+        ).to.be.revertedWith('Ownable: caller is not the owner');
+      });
+
+      it('only owner can unpause tunnels', async function () {
+        const {deployer, users} = await setupLand();
+        const landHolder = users[0];
+
+        await deployer.LandTunnel.pause();
+        await expect(
+          landHolder.MockPolygonLandTunnel.unpause()
+        ).to.be.revertedWith('Ownable: caller is not the owner');
+      });
+
       it('should not be able to transfer Land when paused', async function () {
         const {
           deployer,

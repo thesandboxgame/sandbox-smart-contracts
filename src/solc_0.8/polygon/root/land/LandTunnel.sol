@@ -71,12 +71,12 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
     }
 
     /// @dev Pauses all token transfers accross bridge
-    function pause() public virtual {
+    function pause() public onlyOwner {
         _pause();
     }
 
     /// @dev Unpauses all token transfers accross bridge
-    function unpause() public virtual {
+    function unpause() public onlyOwner {
         _unpause();
     }
 
