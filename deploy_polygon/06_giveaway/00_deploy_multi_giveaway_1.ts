@@ -7,12 +7,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {deployer, multiGiveawayAdmin} = await getNamedAccounts();
 
+  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
+
   await deploy('PolygonMulti_Giveaway_1', {
     contract: 'MultiGiveaway',
     from: deployer,
     log: true,
     skipIfAlreadyDeployed: true,
-    args: [multiGiveawayAdmin, multiGiveawayAdmin], // admin, trustedForwarder
+    args: [multiGiveawayAdmin, TRUSTED_FORWARDER.address], // admin, trustedForwarder
   });
 };
 export default func;
