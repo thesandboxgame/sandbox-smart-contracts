@@ -6,9 +6,10 @@ import "../../../common/interfaces/ILandToken.sol";
 import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
+import "@openzeppelin/contracts-0.8/security/Pausable.sol";
 
 /// @title LAND bridge on L1
-contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable {
+contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771Handler, Ownable, Pausable {
     address public rootToken;
 
     event Deposit(address user, uint256 size, uint256 x, uint256 y, bytes data);
@@ -52,7 +53,7 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
         uint256[] memory xs,
         uint256[] memory ys,
         bytes memory data
-    ) public {
+    ) public whenNotPaused() {
         require(sizes.length == xs.length && xs.length == ys.length, "l2: invalid data");
         LandToken(rootToken).batchTransferQuad(_msgSender(), address(this), sizes, xs, ys, data);
 
@@ -67,6 +68,16 @@ contract LandTunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, ERC2771H
     /// @param trustedForwarder The new trustedForwarder
     function setTrustedForwarder(address trustedForwarder) external onlyOwner {
         _trustedForwarder = trustedForwarder;
+    }
+
+    /// @dev Pauses all token transfers across bridge
+    function pause() public onlyOwner {
+        _pause();
+    }
+
+    /// @dev Unpauses all token transfers across bridge
+    function unpause() public onlyOwner {
+        _unpause();
     }
 
     function _processMessageFromChild(bytes memory message) internal override {
