@@ -56,16 +56,26 @@ describe('SignedGiveaway.sol', function () {
         fixtures.dest,
         amount
       );
-      await fixtures.contract.claim(
-        v,
-        r,
-        s,
-        fixtures.signer,
-        claimId,
-        fixtures.sandToken.address,
-        fixtures.dest,
-        amount
-      );
+      await expect(
+        fixtures.contract.claim(
+          v,
+          r,
+          s,
+          fixtures.signer,
+          claimId,
+          fixtures.sandToken.address,
+          fixtures.dest,
+          amount
+        )
+      )
+        .to.emit(fixtures.contract, 'Claimed')
+        .withArgs(
+          fixtures.signer,
+          claimId,
+          fixtures.sandToken.address,
+          fixtures.dest,
+          amount
+        );
       expect(
         await fixtures.sandToken.balanceOf(fixtures.contract.address)
       ).to.be.equal(pre.sub(amount));

@@ -23,6 +23,8 @@ contract SignedERC20Giveaway is
     ERC2771Handler,
     PausableUpgradeable
 {
+    event Claimed(address indexed signer, uint256 claimId, address indexed token, address indexed to, uint256 amount);
+
     bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
     bytes32 public constant CLAIM_TYPEHASH =
         keccak256("Claim(address signer,uint256 claimId,address token,address to,uint256 amount)");
@@ -87,6 +89,7 @@ contract SignedERC20Giveaway is
         require(!claimed[claimId], "Already claimed");
         claimed[claimId] = true;
         require(IERC20Upgradeable(token).transfer(to, amount), "Transfer failed");
+        emit Claimed(signer, claimId, token, to, amount);
     }
 
     /// @notice let the admin revoke some claims so they cannot be used
