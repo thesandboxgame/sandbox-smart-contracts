@@ -19,7 +19,7 @@ contract AssetV3ERC721 is AssetBaseERC721 {
         uint8 chainIndex,
         address assetRegistry
     ) external {
-        initV2(trustedForwarder, admin, bouncerAdmin, predicate, chainIndex);
+        initV3(trustedForwarder, admin, bouncerAdmin, predicate, chainIndex);
         assetRegistryData.assetRegistry = IAssetAttributesRegistry(assetRegistry);
     }
 
