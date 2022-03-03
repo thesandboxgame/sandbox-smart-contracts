@@ -5,17 +5,15 @@ pragma solidity 0.8.2;
 import "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "../common/interfaces/IERC1155.sol";
 import "../common/interfaces/IERC1155TokenReceiver.sol";
-import "../common/Libraries/ObjectLib32.sol";
-import "../common/interfaces/IERC721.sol";
-import "../common/interfaces/IERC721TokenReceiver.sol";
-import "../common/BaseWithStorage/WithSuperOperators.sol";
-import "./libraries/ERC1155ERC721Helper.sol";
+import "../common/Libraries/ObjectLib32.sol"; // TODO: review
+import "../common/BaseWithStorage/WithSuperOperators.sol"; // TODO: use OZ AccessControl?
+import "./libraries/ERC1155ERC721Helper.sol"; // TODO: review
 
 // solhint-disable max-states-count
 // !!! DO NOT ADD MORE INHERITED CLASS !!!
 // This class is used by asset and is upgradable, if you add more INHERITED class, storage will be mixed up
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
+contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     using Address for address;
     using ObjectLib32 for ObjectLib32.Operations;
     using ObjectLib32 for uint256;
@@ -23,7 +21,6 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     bytes4 private constant ERC1155_IS_RECEIVER = 0x4e2312e0;
     bytes4 private constant ERC1155_RECEIVED = 0xf23a6e61;
     bytes4 private constant ERC1155_BATCH_RECEIVED = 0xbc197c81;
-    bytes4 private constant ERC721_RECEIVED = 0x150b7a02;
 
     mapping(address => uint256) private _numNFTPerAddress; // erc721
     mapping(uint256 => uint256) private _owners; // erc721
@@ -37,6 +34,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     mapping(address => address) private _creatorship; // creatorship transfer
 
     mapping(address => bool) private _bouncers; // the contracts allowed to mint
+
     // @note : Deprecated.
     mapping(address => bool) private _metaTransactionContracts;
 
@@ -65,12 +63,15 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     event Extraction(uint256 indexed fromId, uint256 toId);
     event AssetUpdate(uint256 indexed fromId, uint256 toId);
 
-    function initV2(
+    address internal _assetV3BaseERC721;
+
+    function initV3(
         address trustedForwarder,
         address admin,
         address bouncerAdmin,
         address predicate,
-        uint8 chainIndex
+        uint8 chainIndex,
+        address assetV3BaseERC721 // TODO: review whether this is a useful approach or not (needed for extraction)
     ) public {
         // one-time init of bitfield's previous versions
         _checkInit(0);
@@ -79,13 +80,14 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         _predicate = predicate;
         __ERC2771Handler_initialize(trustedForwarder);
         _chainIndex = chainIndex;
+        _assetV3BaseERC721 = assetV3BaseERC721;
     }
 
     /// @notice Change the minting administrator to be `newBouncerAdmin`.
     /// @param newBouncerAdmin address of the new minting administrator.
     function changeBouncerAdmin(address newBouncerAdmin) external {
         require(_msgSender() == _bouncerAdmin, "!BOUNCER_ADMIN");
-        require(newBouncerAdmin != address(0), "ERC1155ERC721: new bouncer admin can't be zero address");
+        require(newBouncerAdmin != address(0), "AssetBaseERC1155: new bouncer admin can't be zero address");
         emit BouncerAdminChanged(_bouncerAdmin, newBouncerAdmin);
         _bouncerAdmin = newBouncerAdmin;
     }
@@ -304,36 +306,36 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         _burn(from, id, amount);
     }
 
-    /// @notice Upgrades an NFT with new metadata and rarity.
-    /// @param from address which own the NFT to be upgraded.
-    /// @param id the NFT that will be burnt to be upgraded.
-    /// @param packId unqiue packId for the token.
-    /// @param hash hash of an IPFS cidv1 folder that contains the metadata of the new token type in the file 0.json.
-    /// @param newRarity rarity power of the new NFT.
-    /// @param to address which will receive the NFT.
-    /// @param data bytes to be transmitted as part of the minted token.
-    /// @return the id of the newly minted NFT.
-    function updateERC721(
-        address from,
-        uint256 id,
-        uint40 packId,
-        bytes32 hash,
-        uint8 newRarity,
-        address to,
-        bytes calldata data
-    ) external returns (uint256) {
-        require(hash != 0, "HASH==0");
-        require(_bouncers[_msgSender()], "!BOUNCER");
-        require(to != address(0), "TO==0");
-        require(from != address(0), "FROM==0");
+    // /// @notice Upgrades an NFT with new metadata and rarity.
+    // /// @param from address which own the NFT to be upgraded.
+    // /// @param id the NFT that will be burnt to be upgraded.
+    // /// @param packId unqiue packId for the token.
+    // /// @param hash hash of an IPFS cidv1 folder that contains the metadata of the new token type in the file 0.json.
+    // /// @param newRarity rarity power of the new NFT.
+    // /// @param to address which will receive the NFT.
+    // /// @param data bytes to be transmitted as part of the minted token.
+    // /// @return the id of the newly minted NFT.
+    // function updateERC721(
+    //     address from,
+    //     uint256 id,
+    //     uint40 packId,
+    //     bytes32 hash,
+    //     uint8 newRarity,
+    //     address to,
+    //     bytes calldata data
+    // ) external returns (uint256) {
+    //     require(hash != 0, "HASH==0");
+    //     require(_bouncers[_msgSender()], "!BOUNCER");
+    //     require(to != address(0), "TO==0");
+    //     require(from != address(0), "FROM==0");
 
-        _burnERC721(_msgSender(), from, id);
+    //     _burnERC721(_msgSender(), from, id);
 
-        uint256 newId = _generateTokenId(from, 1, packId, 0, 0);
-        _mint(hash, 1, newRarity, _msgSender(), to, newId, data, false);
-        emit AssetUpdate(id, newId);
-        return newId;
-    }
+    //     uint256 newId = _generateTokenId(from, 1, packId, 0, 0);
+    //     _mint(hash, 1, newRarity, _msgSender(), to, newId, data, false);
+    //     emit AssetUpdate(id, newId);
+    //     return newId;
+    // }
 
     /// @notice Extracts an EIP-721 NFT from an EIP-1155 token.
     /// @param sender address which own the token to be extracted.
@@ -393,28 +395,28 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         return address(uint160(id / ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER));
     }
 
-    /// @notice Count all NFTs assigned to `owner`.
-    /// @param owner address for whom to query the balance.
-    /// @return balance the number of NFTs owned by `owner`, possibly zero.
-    function balanceOf(address owner) external view override returns (uint256 balance) {
-        require(owner != address(0), "OWNER==0");
-        return _numNFTPerAddress[owner];
-    }
+    // /// @notice Count all NFTs assigned to `owner`.
+    // /// @param owner address for whom to query the balance.
+    // /// @return balance the number of NFTs owned by `owner`, possibly zero.
+    // function balanceOf(address owner) external view override returns (uint256 balance) {
+    //     require(owner != address(0), "OWNER==0");
+    //     return _numNFTPerAddress[owner];
+    // }
 
-    /// @notice Find the owner of an NFT.
-    /// @param id the identifier for an NFT.
-    /// @return owner the address of the owner of the NFT.
-    function ownerOf(uint256 id) external view override returns (address owner) {
-        owner = _ownerOf(id);
-        require(owner != address(0), "NFT_!EXIST");
-    }
+    // /// @notice Find the owner of an NFT.
+    // /// @param id the identifier for an NFT.
+    // /// @return owner the address of the owner of the NFT.
+    // function ownerOf(uint256 id) external view override returns (address owner) {
+    //     owner = _ownerOf(id);
+    //     require(owner != address(0), "NFT_!EXIST");
+    // }
 
-    /// @notice Get the approved address for a single NFT.
-    /// @param id the NFT to find the approved address for.
-    /// @return operator the approved address for this NFT, or the zero address if there is none.
-    function getApproved(uint256 id) external view override returns (address operator) {
-        require(_ownerOf(id) != address(0), "NFT_!EXIST");
-        return _erc721operators[id];
+    // /// @notice Get the approved address for a single NFT.
+    // /// @param id the NFT to find the approved address for.
+    // /// @return operator the approved address for this NFT, or the zero address if there is none.
+    // function getApproved(uint256 id) external view override returns (address operator) {
+    //     require(_ownerOf(id) != address(0), "NFT_!EXIST");
+    //     return _erc721operators[id];
     }
 
     /// @notice check whether a packId/numFT tupple has been used
@@ -553,7 +555,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     function isApprovedForAll(address owner, address operator)
         public
         view
-        override(IERC1155, IERC721)
+        override(IERC1155)
         returns (bool isOperator)
     {
         require(owner != address(0), "OWNER==0");
@@ -699,11 +701,12 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         }
         if (erc721) {
             if (!_checkIsERC1155Receiver(to)) {
-                if (erc721Safe) {
-                    return _checkERC721AndCallSafeTransfer(operator, from, to, id, data);
-                } else {
-                    return true;
-                }
+                // TODO: review
+                // if (erc721Safe) {
+                //     return _checkERC721AndCallSafeTransfer(operator, from, to, id, data);
+                // } else {
+                //     return true;
+                // }
             }
         }
         return IERC1155TokenReceiver(to).onERC1155Received(operator, from, id, value, data) == ERC1155_RECEIVED;
@@ -724,19 +727,19 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         return (retval == ERC1155_BATCH_RECEIVED);
     }
 
-    function _checkERC721AndCallSafeTransfer(
-        address operator,
-        address from,
-        address to,
-        uint256 id,
-        bytes memory data
-    ) internal returns (bool) {
-        // following not required as this function is always called as part of ERC1155 checks that include such check already
-        // if (!to.isContract()) {
-        //     return true;
-        // }
-        return (IERC721TokenReceiver(to).onERC721Received(operator, from, id, data) == ERC721_RECEIVED);
-    }
+    // function _checkERC721AndCallSafeTransfer(
+    //     address operator,
+    //     address from,
+    //     address to,
+    //     uint256 id,
+    //     bytes memory data
+    // ) internal returns (bool) {
+    //     // following not required as this function is always called as part of ERC1155 checks that include such check already
+    //     // if (!to.isContract()) {
+    //     //     return true;
+    //     // }
+    //     return (IERC721TokenReceiver(to).onERC721Received(operator, from, id, data) == ERC721_RECEIVED);
+    // }
 
     function _burnERC1155(
         address operator,
@@ -753,17 +756,17 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         emit TransferSingle(operator, from, address(0), id, amount);
     }
 
-    function _burnERC721(
-        address operator,
-        address from,
-        uint256 id
-    ) internal {
-        require(from == _ownerOf(id), "OWNER!=FROM");
-        _owners[id] = 2**160; // equivalent to zero address when casted but ensure we track minted status
-        _numNFTPerAddress[from]--;
-        emit Transfer(from, address(0), id);
-        emit TransferSingle(operator, from, address(0), id, 1);
-    }
+    // function _burnERC721(
+    //     address operator,
+    //     address from,
+    //     uint256 id
+    // ) internal {
+    //     require(from == _ownerOf(id), "OWNER!=FROM");
+    //     _owners[id] = 2**160; // equivalent to zero address when casted but ensure we track minted status
+    //     _numNFTPerAddress[from]--;
+    //     emit Transfer(from, address(0), id);
+    //     emit TransferSingle(operator, from, address(0), id, 1);
+    // }
 
     function _burn(
         address from,
@@ -773,6 +776,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         address sender = _msgSender();
         if ((id & ERC1155ERC721Helper.IS_NFT) > 0) {
             require(amount == 1, "AMOUNT!=1");
+            TODO: review
             _burnERC721(isTrustedForwarder(msg.sender) ? from : sender, from, id);
         } else {
             require(amount > 0 && amount <= ERC1155ERC721Helper.MAX_SUPPLY, "INVALID_AMOUNT");
@@ -965,7 +969,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         newId = id + ERC1155ERC721Helper.IS_NFT + (tokenCollectionIndex) * 2**ERC1155ERC721Helper.NFT_INDEX_OFFSET;
         _nextCollectionIndex[id] = tokenCollectionIndex + 1;
         _burnERC1155(operator, sender, id, 1);
-        _mint(_metadataHash[id & ERC1155ERC721Helper.URI_ID], 1, 0, operator, to, newId, "", true);
+        _mint(_metadataHash[id & ERC1155ERC721Helper.URI_ID], 1, 0, operator, to, newId, "", true); // TODO: move this mint to ERC721
         emit Extraction(id, newId);
     }
 
@@ -989,10 +993,16 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
             _rarityPacks[uriId] = pack;
         }
         if (supply == 1) {
-            // ERC721
-            _numNFTPerAddress[owner]++;
-            _owners[id] = uint256(uint160(owner));
-            emit Transfer(address(0), owner, id);
+            // _numNFTPerAddress[owner]++; // TODO: review whether to keep
+            // _owners[id] = uint256(uint160(owner));
+            // emit Transfer(address(0), owner, id);
+
+            (uint256 bin, uint256 index) = id.getTokenBinIndex();
+            _packedTokenBalance[owner][bin] = _packedTokenBalance[owner][bin].updateTokenBalance(
+                index,
+                1,
+                ObjectLib32.Operations.REPLACE
+            );
         } else {
             (uint256 bin, uint256 index) = id.getTokenBinIndex();
             _packedTokenBalance[owner][bin] = _packedTokenBalance[owner][bin].updateTokenBalance(
@@ -1060,7 +1070,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
         return
             uint256(uint160(creator)) *
             ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER + // CREATOR
-            (supply == 1 ? uint256(1) * ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT(1)|FT(0) // ERC1155ERC721Helper.IS_NFT
+            (supply == 1 ? uint256(1) * ERC1155ERC721Helper.IS_NFT_OFFSET_MULTIPLIER : 0) + // minted as NFT(1)|FT(0) // ERC1155ERC721Helper.IS_NFT // TODO: review
             uint256(_chainIndex) *
             CHAIN_INDEX_OFFSET_MULTIPLIER + // mainnet = 0, polygon = 1
             uint256(packId) *

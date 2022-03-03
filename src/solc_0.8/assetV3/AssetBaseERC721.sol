@@ -15,7 +15,7 @@ import "./libraries/ERC1155ERC721Helper.sol";
 // !!! DO NOT ADD MORE INHERITED CLASS !!!
 // This class is used by asset and is upgradable, if you add more INHERITED class, storage will be mixed up
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
+contract AssetBaseERC721 is WithSuperOperators, IERC1155, IERC721 {
     using Address for address;
     using ObjectLib32 for ObjectLib32.Operations;
     using ObjectLib32 for uint256;
@@ -65,7 +65,7 @@ contract ERC1155ERC721 is WithSuperOperators, IERC1155, IERC721 {
     event Extraction(uint256 indexed fromId, uint256 toId);
     event AssetUpdate(uint256 indexed fromId, uint256 toId);
 
-    function initV2(
+    function initV3(
         address trustedForwarder,
         address admin,
         address bouncerAdmin,
