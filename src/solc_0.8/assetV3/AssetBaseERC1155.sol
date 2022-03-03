@@ -13,7 +13,7 @@ import "./libraries/ERC1155ERC721Helper.sol"; // TODO: review
 // !!! DO NOT ADD MORE INHERITED CLASS !!!
 // This class is used by asset and is upgradable, if you add more INHERITED class, storage will be mixed up
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
+contract AssetBaseERC1155 is WithSuperOperators, IERC1155 { // TODO: IERC721 has been deleted - tidying needed
     using Address for address;
     using ObjectLib32 for ObjectLib32.Operations;
     using ObjectLib32 for uint256;
@@ -71,7 +71,7 @@ contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         address bouncerAdmin,
         address predicate,
         uint8 chainIndex,
-        address assetV3BaseERC721 // TODO: review whether this is a useful approach or not (needed for extraction)
+        address assetV3BaseERC721 // TODO: review whether this is a useful approach or not (erc721 is needed only for extraction)
     ) public {
         // one-time init of bitfield's previous versions
         _checkInit(0);
@@ -395,6 +395,7 @@ contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         return address(uint160(id / ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER));
     }
 
+    // TODO: review which of these might be needed
     // /// @notice Count all NFTs assigned to `owner`.
     // /// @param owner address for whom to query the balance.
     // /// @return balance the number of NFTs owned by `owner`, possibly zero.
