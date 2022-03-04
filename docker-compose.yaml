@@ -1,0 +1,56 @@
+version: "3.3"
+services:
+  mainnet:
+    profiles:
+      - mainnet
+    image: trufflesuite/ganache:latest
+    ports:
+      - "18545:18545"
+    command:
+        "-p 18545
+        -v
+        -f ${ETH_NODE_URI_MAINNET}
+        --chain.chainId 1
+        --chain.networkId 1
+        -u 0xe19ae8F9B36Ca43D12741288D0e311396140DF6F
+        -u 0xeaa0993e1d21c2103e4f172a20d29371fbaf6d06
+        -u 0x8FFA64FB50559c3Ff09a1022b84B2c5233ed8068
+        -u 0x0EB04462D69B1D267d269377E34f60b9De1c8510
+        -u 0x4489590a116618B506F0EfE885432F6A8ED998E9
+        -u 0x3044719d139F866a44c988823513eCB93060bF1b
+        -u 0x061872DFd0CAC4Ec7a7c87EEE9B950bb1fAD2906
+        -u 0x11466Dae62B8A20Ba2D5FB810917561E2E8528FB
+        -u 0x7A9fe22691c811ea339D9B73150e6911a5343DcA"
+  goerli:
+    profiles:
+      - testnet
+    image: trufflesuite/ganache:latest
+    ports:
+      - "18545:18545"
+    command:
+        "-p 18545
+        -v
+        -f ${ETH_NODE_URI_GOERLI}@6479865
+        --chain.chainId 5
+        --chain.networkId 5
+        -u 0xA796AE911621E00809E0E7C8f0AD6BF118E5139e
+        -u 0x39D01ecc951C2c1f20ba0549e62212659c4d1e06
+        -u 0xF22455c7F2a81E197AecD951F588a9B650f5b282
+        -u 0xB7060D3FeCAC3AE1F0A0AA416E3e8E472257950e
+        -u 0x0c72f82B46f034025622731c271bdf06B848Ed77
+        -u 0x5BC3D5A39a50BE2348b9C529f81aE79f00945897"
+  mumbai:
+    profiles:
+      - testnet
+    image: trufflesuite/ganache:latest
+    ports:
+      - "28545:28545"
+    command:
+      "-p 28545
+        -v
+        -f ${ETH_NODE_URI_MUMBAI}@25378474
+        --chain.chainId 80001
+        --chain.networkId 80001
+        -u 0x5F890c9522dCE5670d741D4277BFCC2d9cA8Af02
+        -u 0x49c4D4C94829B9c44052C5f5Cb164Fc612181165
+        -u 0x5fEBCc49557FDE2B536326e0dFAb17093E8f6F6f"
