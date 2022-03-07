@@ -74,8 +74,8 @@ abstract contract AssetBaseERC721 is AccessControlUpgradeable, ERC721Upgradeable
     {
         return
             id == 0x01ffc9a7 || //ERC165
-            id == 0x80ac58cd; // ERC721
-        // TODO: ERC721 metadata interface
+            id == 0x80ac58cd || // ERC721
+            id == 0x5b5e139f; // ERC721 metadata
     }
 
     function __ERC2771Handler_initialize(address forwarder) internal {
