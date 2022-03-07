@@ -24,6 +24,7 @@ contract SignedERC20Giveaway is
     PausableUpgradeable
 {
     event Claimed(address indexed signer, uint256 claimId, address indexed token, address indexed to, uint256 amount);
+    event RevokedClaims(uint256[] claimIds);
 
     bytes32 public constant SIGNER_ROLE = keccak256("SIGNER_ROLE");
     bytes32 public constant CLAIM_TYPEHASH =
@@ -99,6 +100,7 @@ contract SignedERC20Giveaway is
         for (uint256 i = 0; i < claimIds.length; i++) {
             claimed[claimIds[i]] = true;
         }
+        emit RevokedClaims(claimIds);
     }
 
     // @dev Triggers stopped state.
