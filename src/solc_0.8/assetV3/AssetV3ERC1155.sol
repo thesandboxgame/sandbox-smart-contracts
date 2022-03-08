@@ -18,7 +18,7 @@ contract AssetV3ERC1155 is AssetBaseERC1155 {
         address predicate,
         uint8 chainIndex,
         address assetRegistry,
-        address assetV3BaseERC721
+        address asetV3BaseERC721
     ) external {
         initV3(trustedForwarder, admin, bouncerAdmin, predicate, chainIndex, asetV3BaseERC721);
         assetRegistryData.assetRegistry = IAssetAttributesRegistry(assetRegistry);
