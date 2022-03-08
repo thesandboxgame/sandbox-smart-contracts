@@ -1,6 +1,11 @@
 import {ethers} from 'hardhat';
 import {expect} from 'chai';
-import {solidityPack} from 'ethers/lib/utils';
+import {
+  defaultAbiCoder,
+  keccak256,
+  solidityPack,
+  toUtf8Bytes,
+} from 'ethers/lib/utils';
 import {setupSignedGiveway} from './fixtures';
 import {BigNumber} from 'ethers';
 import {toWei} from '../../utils';
@@ -371,6 +376,63 @@ describe('SignedGiveaway.sol', function () {
       ).to.be.equal(pre.sub(amount));
       expect(await fixtures.sandToken.balanceOf(fixtures.dest)).to.be.equal(
         preDest.add(amount)
+      );
+    });
+  });
+
+  describe('coverage', function () {
+    it('a valid signature must verify correctly', async function () {
+      const fixtures = await setupSignedGiveway();
+      const claimId = BigNumber.from(0x123);
+      const amount = toWei(5);
+      await fixtures.mint(amount.mul(10));
+      const {v, r, s} = await signedGiveawaySignature(
+        fixtures.contract,
+        fixtures.signer,
+        claimId,
+        fixtures.sandToken.address,
+        fixtures.dest,
+        amount
+      );
+      expect(
+        await fixtures.contract.verify(
+          v,
+          r,
+          s,
+          fixtures.signer,
+          claimId,
+          fixtures.sandToken.address,
+          fixtures.dest,
+          amount
+        )
+      ).to.equal(true);
+    });
+    it('check the domain separator', async function () {
+      const fixtures = await setupSignedGiveway();
+      const typeHash = keccak256(
+        toUtf8Bytes(
+          'EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)'
+        )
+      );
+      const hashedName = ethers.utils.keccak256(
+        toUtf8Bytes('Sandbox SignedERC20Giveaway')
+      );
+      const versionHash = ethers.utils.keccak256(toUtf8Bytes('1.0'));
+      const network = await fixtures.contract.provider.getNetwork();
+      const domainSeparator = ethers.utils.keccak256(
+        defaultAbiCoder.encode(
+          ['bytes32', 'bytes32', 'bytes32', 'uint256', 'address'],
+          [
+            typeHash,
+            hashedName,
+            versionHash,
+            network.chainId,
+            fixtures.contract.address,
+          ]
+        )
+      );
+      expect(await fixtures.contract.domainSeparator()).to.be.equal(
+        domainSeparator
       );
     });
   });
