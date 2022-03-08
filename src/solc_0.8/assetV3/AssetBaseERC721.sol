@@ -45,7 +45,7 @@ abstract contract AssetBaseERC721 is AccessControlUpgradeable, ERC721Upgradeable
     /// @param from address whose token is to be burnt.
     /// @param id token which will be burnt.
     function burnFrom(address from, uint256 id) external {
-        require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
+        require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED"); // TODO: do we want a burner role?
         _burn(id);
     }
 
