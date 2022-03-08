@@ -10,10 +10,9 @@ contract AssetV3ERC721 is AssetBaseERC721 {
     function initialize(
         address trustedForwarder,
         address admin, // contract admin
-        address minterAdmin, // manages MINTER role
         address predicate,
         uint8 chainIndex
     ) external {
-        initV3(trustedForwarder, admin, minterAdmin, predicate, chainIndex);
+        initV3(trustedForwarder, admin, predicate, chainIndex);
     }
 }

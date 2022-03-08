@@ -17,10 +17,11 @@ abstract contract AssetBaseERC721 is AccessControlUpgradeable, ERC721Upgradeable
 
     address internal _trustedForwarder;
 
+    bytes32 public constant MINTER = keccak256("MINTER");
+
     function initV3(
         address trustedForwarder,
         address admin,
-        address minterAdmin, // TODO:
         address predicate,
         uint8 chainIndex
     ) public {
@@ -31,29 +32,14 @@ abstract contract AssetBaseERC721 is AccessControlUpgradeable, ERC721Upgradeable
         __ERC721_init("Sandbox's Assets", "ASSET");
     }
 
-    // TODO: add MINTER role
-
     /// @notice Mint an ERC721 Asset with the provided id.
     /// @param id ERC721 id to be used.
     /// @param owner address that will receive the token.
-    function mint(uint256 id, address owner) external {
-        // TODO: MINTER role requirement
+    function mint(uint256 id, address owner) external onlyRole(MINTER) {
         _safeMint(owner, id);
     }
 
-    /// @notice Enable or disable approval for an `operator` to manage all `sender`'s tokens.
-    /// @dev used for Meta Transaction (from metaTransactionContract).
-    /// @param sender address which grant approval.
-    /// @param operator address which will be granted rights to transfer all token owned by `sender`.
-    /// @param approved whether to approve or revoke.
-    function setApprovalForAllFor(
-        address sender,
-        address operator,
-        bool approved
-    ) external {
-        require(sender == _msgSender(), "!AUTHORIZED");
-        _setApprovalForAll(sender, operator, approved);
-    }
+    // TODO: look at setApprovalForAllFrom
 
     /// @notice Burns token with given `id`.
     /// @param from address whose token is to be burnt.
