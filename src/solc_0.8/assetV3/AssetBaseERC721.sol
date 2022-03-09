@@ -9,7 +9,6 @@ abstract contract AssetBaseERC721 is AccessControlUpgradeable, ERC721Upgradeable
     bool internal _init;
     uint256 internal _initBits;
 
-    // TODO: approach to layer 2
     address internal _predicate; // used in place of polygon's `PREDICATE_ROLE`
     uint8 internal _chainIndex; // modify this for l2
     // uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 32);
