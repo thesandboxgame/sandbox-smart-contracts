@@ -179,6 +179,7 @@ jobs:
         continue-on-error: true
         id: slither
         with:
+          node-version: 12.22.1
           sarif: results.sarif
 
       - name: Upload SARIF file
