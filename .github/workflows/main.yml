@@ -182,7 +182,6 @@ jobs:
         continue-on-error: true
         id: slither
         with:
-          target: './src/solc_0.8/'
           node-version: 16
           sarif: results.sarif
 
