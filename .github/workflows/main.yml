@@ -167,3 +167,26 @@ jobs:
         run: yarn fork:deploy rinkeby
         env:
           ETH_NODE_URI_RINKEBY: ${{ secrets.ETH_NODE_URI_RINKEBY }}
+
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.1.0
+        continue-on-error: true
+        id: slither
+        with:
+          target: 'src/solc_0.8/'
+          node-version: 16
+          sarif: results.sarif
+
+      - name: Upload SARIF file
+        uses: github/codeql-action/upload-sarif@v1
+        with:
+          sarif_file: ${{ steps.slither.outputs.sarif }}
