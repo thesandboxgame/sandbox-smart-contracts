@@ -194,6 +194,9 @@ jobs:
       - name: Installing dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Create symbolic links
+        run: ln -s ./node_modules/@openzeppelin/ "@openzeppelin"
+
       - name: Run Slither
         uses: crytic/slither-action@v0.1.0
         continue-on-error: true
