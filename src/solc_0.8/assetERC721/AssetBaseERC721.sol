@@ -15,7 +15,7 @@ abstract contract AssetBaseERC721 is AccessControlUpgradeable, ERC721Upgradeable
     function init(address trustedForwarder, address admin) public initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _trustedForwarder = trustedForwarder;
-        // __ERC721_init("Sandbox's Assets", "ASSET");
+        __ERC721_init("Sandbox's Assets", "ASSET");
     }
 
     /// @notice Mint an ERC721 Asset with the provided id.
