@@ -12,15 +12,15 @@ abstract contract AssetBaseERC721 is AccessControlUpgradeable, ERC721Upgradeable
 
     bytes32 public constant MINTER = keccak256("MINTER");
 
-    function initV3(address trustedForwarder, address admin) public {
+    function init(address trustedForwarder, address admin) public initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
-        __ERC2771Handler_initialize(trustedForwarder);
-        __ERC721_init("Sandbox's Assets", "ASSET");
+        _trustedForwarder = trustedForwarder;
+        // __ERC721_init("Sandbox's Assets", "ASSET");
     }
 
     /// @notice Mint an ERC721 Asset with the provided id.
     /// @dev Should be callable only by MintableERC721Predicate on L1.
-    /// @param to address that will receive the token.
+    /// @param to Address that will receive the token.
     /// @param id ERC721 id to be used.
     function mint(address to, uint256 id)
         external
@@ -34,7 +34,7 @@ abstract contract AssetBaseERC721 is AccessControlUpgradeable, ERC721Upgradeable
     /// @notice Mint an ERC721 Asset with the provided id.
     /// @dev Should be callable only by MintableERC721Predicate on L1.
     /// @dev If you want to retain token metadata from L2 to L1 during exit, you must implement this method.
-    /// @param to address that will receive the token.
+    /// @param to Address that will receive the token.
     /// @param id ERC721 id to be used.
     /// @param metaData Associated token metadata, to be decoded & set using `setTokenMetadata`.
     function mint(
@@ -84,10 +84,6 @@ abstract contract AssetBaseERC721 is AccessControlUpgradeable, ERC721Upgradeable
         returns (bool)
     {
         return super.supportsInterface(id);
-    }
-
-    function __ERC2771Handler_initialize(address forwarder) internal {
-        _trustedForwarder = forwarder;
     }
 
     function isTrustedForwarder(address forwarder) public view returns (bool) {

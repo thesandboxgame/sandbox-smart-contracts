@@ -8,10 +8,10 @@ import {IChildToken} from "../../../common/interfaces/@maticnetwork/pos-portal/c
 /// @title This contract is for AssetERC721 which can be minted by a minter role.
 /// @dev This contract supports meta transactions.
 /// @dev This contract is final, don't inherit from it.
-contract AssetERC721 is AssetBaseERC721, IChildToken {
+contract PolygonAssetERC721 is AssetBaseERC721, IChildToken {
     /// @notice fulfills the purpose of a constructor in upgradeable contracts
     function initialize(address trustedForwarder, address admin) external {
-        initV3(trustedForwarder, admin);
+        init(trustedForwarder, admin);
     }
 
     function deposit(address user, bytes calldata depositData) external override {}

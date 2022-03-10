@@ -11,7 +11,7 @@ import {IRootERC721} from "../../../common/interfaces/@maticnetwork/pos-portal/r
 contract AssetERC721 is AssetBaseERC721, IRootERC721 {
     /// @notice fulfills the purpose of a constructor in upgradeable contracts
     function initialize(address trustedForwarder, address admin) external {
-        initV3(trustedForwarder, admin);
+        init(trustedForwarder, admin);
     }
 
     /// @dev Decode metadata obtained from L2 and attempt to set it for this `tokenId`
