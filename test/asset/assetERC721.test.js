@@ -12,30 +12,32 @@ const erc721Tests = require('../erc721')(
     const {assetAdmin} = await getNamedAccounts();
 
     const asset = await ethers.getContract('AssetERC721');
-    console.log(asset, 'asset');
-    const assetContractAsAssetAdmin = await ethers.getContract(
-      'AssetERC721',
-      assetAdmin
+    const assetContractAsAssetAdmin = await asset.connect(
+      ethers.provider.getSigner(assetAdmin)
     );
 
-    let id = 0;
+    // Setup roles
+    // Add assetAdmin as a MINTER for testing purposes only
+    const MINTER_ROLE = await asset.MINTER();
+    await assetContractAsAssetAdmin.grantRole(MINTER_ROLE, assetAdmin);
 
+    // Mint
+    let id = 0;
     async function mint(to) {
-      const creator = to;
       id = ++id;
       const data = '0x';
 
       const receipt = await waitFor(
-        assetContractAsAssetAdmin.mint(creator, id, data)
+        // assetContractAsAssetAdmin.mint(to, id, data)
+        assetContractAsAssetAdmin['mint(address,uint256,bytes)'](to, id, data)
       );
 
       const event = await expectEventWithArgsFromReceipt(
         asset,
         receipt,
-        'TransferSingle'
+        'Transfer'
       );
-      console.log(event.args, 'args');
-      const tokenId = event.args[3];
+      const tokenId = event.args[2];
       return {receipt, tokenId};
     }
     return {contractAddress: asset.address, users: others, mint};
