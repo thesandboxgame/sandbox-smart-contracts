@@ -7,37 +7,26 @@ const {
 } = require('../utils');
 
 const erc721Tests = require('../erc721')(
-  withSnapshot(['Asset'], async () => {
+  withSnapshot(['AssetERC721'], async () => {
     const others = await getUnnamedAccounts();
-    const {assetBouncerAdmin} = await getNamedAccounts();
+    const {assetAdmin} = await getNamedAccounts();
 
-    const minter = others[0];
-    const asset = await ethers.getContract('Asset');
-    const assetAsMinter = await asset.connect(
-      ethers.provider.getSigner(minter)
+    const asset = await ethers.getContract('AssetERC721');
+    console.log(asset, 'asset');
+    const assetContractAsAssetAdmin = await ethers.getContract(
+      'AssetERC721',
+      assetAdmin
     );
-    const assetContractAsBouncerAdmin = await ethers.getContract(
-      'Asset',
-      assetBouncerAdmin
-    );
-
-    await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
 
     let id = 0;
-    const ipfsHashString =
-      '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
 
     async function mint(to) {
       const creator = to;
-      const packId = ++id;
-      const hash = ipfsHashString;
-      const supply = 1;
-      const rarity = 0;
-      const owner = to;
+      id = ++id;
       const data = '0x';
 
       const receipt = await waitFor(
-        assetAsMinter.mint(creator, packId, hash, supply, rarity, owner, data)
+        assetContractAsAssetAdmin.mint(creator, id, data)
       );
 
       const event = await expectEventWithArgsFromReceipt(
@@ -45,6 +34,7 @@ const erc721Tests = require('../erc721')(
         receipt,
         'TransferSingle'
       );
+      console.log(event.args, 'args');
       const tokenId = event.args[3];
       return {receipt, tokenId};
     }
@@ -73,7 +63,7 @@ function recurse(test) {
   }
 }
 
-describe('Asset:ERC721', function () {
+describe.only('Asset:ERC721', function () {
   for (const test of erc721Tests) {
     // eslint-disable-next-line mocha/no-setup-in-describe
     recurse(test);
