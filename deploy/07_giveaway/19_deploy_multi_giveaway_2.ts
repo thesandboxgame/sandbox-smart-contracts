@@ -6,15 +6,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {deployer, multiGiveawayAdmin} = await getNamedAccounts();
 
-  await deploy('Multi_Giveaway_1', {
+  const TRUSTED_FORWARDER_V2 = await deployments.getOrNull(
+    'TRUSTED_FORWARDER_V2'
+  );
+
+  await deploy('Multi_Giveaway_2', {
     contract: 'MultiGiveaway',
     from: deployer,
     log: true,
     skipIfAlreadyDeployed: true,
-    args: [multiGiveawayAdmin, multiGiveawayAdmin], // admin, trustedForwarder
+    args: [
+      multiGiveawayAdmin,
+      TRUSTED_FORWARDER_V2?.address || multiGiveawayAdmin,
+    ], // admin, trustedForwarder
   });
 };
 export default func;
-func.tags = ['Multi_Giveaway_1', 'Multi_Giveaway_1_deploy'];
+func.tags = ['Multi_Giveaway_2', 'Multi_Giveaway_2_deploy'];
 func.dependencies = [];
-func.skip = async () => true;

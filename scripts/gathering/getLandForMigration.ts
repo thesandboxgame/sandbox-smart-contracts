@@ -1,8 +1,16 @@
-import {Event} from 'ethers';
+import {Contract, Event} from 'ethers';
 import BN from 'bn.js';
 import fs from 'fs-extra';
-import {ethers} from 'hardhat';
 import hre from 'hardhat';
+import {Deployment} from 'hardhat-deploy/types';
+const {ethers} = hre;
+
+type Land = {
+  coordinateX: string;
+  coordinateY: string;
+  size: BN;
+  tokenId: string;
+};
 
 async function queryEvents(
   filterFunc: (startBlock: number, endBlock: number) => Promise<Event[]>,
@@ -22,14 +30,12 @@ async function queryEvents(
   while (fromBlock <= endBlock) {
     try {
       const moreEvents = await filterFunc(fromBlock, toBlock);
-      console.log({fromBlock, toBlock, numEvents: moreEvents.length});
       successes[blockRange] = true;
       consecutiveSuccess++;
       if (consecutiveSuccess > 6) {
         const newBlockRange = blockRange * 2;
         if (!failures[newBlockRange] || successes[newBlockRange]) {
           blockRange = newBlockRange;
-          console.log({blockRange});
         }
       }
 
@@ -65,69 +71,117 @@ function tokenIdToMapCoords(
   return {coordinateX, coordinateY};
 }
 
-(async () => {
+async function getLandPreSales(): Promise<{[name: string]: Deployment}> {
   const {deployments} = hre;
   const allDeployedContracts = await deployments.all();
-  let minBlockNumber;
-  const presaleContractNames = Object.keys(
-    allDeployedContracts
-  ).filter((contract) => contract.includes('LandPreSale'));
+  const contracts: {[name: string]: Deployment} = {};
+  Object.keys(allDeployedContracts).forEach((contractName) => {
+    if (contractName.includes('LandPreSale')) {
+      contracts[contractName] = allDeployedContracts[contractName];
+    }
+  });
+  return contracts;
+}
 
-  for (const presaleContractName of presaleContractNames) {
-    const contract = allDeployedContracts[presaleContractName];
-    const creationBlock =
-      (contract && contract.receipt && contract.receipt.blockNumber) || 0;
-    if (!minBlockNumber || creationBlock < minBlockNumber) {
-      minBlockNumber = creationBlock;
+async function getPreSaleLandQuadPurchasedEvents(
+  presaleDeploymentName: string,
+  presaleDeployment: Deployment
+) {
+  const presaleContract = await ethers.getContract(presaleDeploymentName);
+  return queryEvents(
+    presaleContract.queryFilter.bind(
+      presaleContract,
+      presaleContract.filters.LandQuadPurchased()
+    ),
+    presaleDeployment.receipt?.blockNumber || 0
+  );
+}
+
+async function setLandOwners(
+  landContracts: Contract[],
+  events: Event[],
+  landOwnersMap: {[owner: string]: Land[]}
+) {
+  let promises = [];
+  for (const event of events) {
+    promises.push(setLandOwner(landContracts, event, landOwnersMap));
+    if (promises.length >= 50) {
+      await Promise.all(promises);
+      promises = [];
     }
   }
+  if (promises.length > 0) await Promise.all(promises);
+}
 
-  const startBlock = minBlockNumber || 0;
+async function setLandOwner(
+  landContracts: Contract[],
+  event: Event,
+  landOwnersMap: {[owner: string]: Land[]}
+) {
+  const topCornerId: BN = event.args && event.args.topCornerId;
+  const {coordinateX, coordinateY} = tokenIdToMapCoords(topCornerId);
+  const size = new BN(event.args && event.args.size.toString());
+  const currentLandOwner = await getOwner(landContracts, event);
+  const land: Land = {
+    coordinateX,
+    coordinateY,
+    size,
+    tokenId: topCornerId.toString(),
+  };
+  if (currentLandOwner) {
+    if (!landOwnersMap[currentLandOwner]) landOwnersMap[currentLandOwner] = [];
+    landOwnersMap[currentLandOwner].push(land);
+  }
+}
+
+async function getOwner(landContracts: Contract[], event: Event) {
+  const topCornerId: BN = event.args && event.args.topCornerId;
+  let currentLandOwner;
+  for (const landContract of landContracts) {
+    currentLandOwner = await landContract.callStatic
+      .ownerOf(topCornerId)
+      .catch(() => null);
+    if (currentLandOwner) break;
+  }
+  return currentLandOwner || '0x0000000000000000000000000000000000000000';
+}
+
+(async () => {
+  const presaleDeployments = await getLandPreSales();
   const networkName = hre.network.name;
   const exportFilePath = `tmp/${networkName}-landOwners.json`;
-
-  type Land = {
-    coordinateX: string;
-    coordinateY: string;
-    size: BN;
-    tokenId: string;
-  };
   const landOwnersMap: {[owner: string]: Land[]} = {};
-
   const LandContract = await ethers.getContract('Land');
-
-  for (const presaleContractName of presaleContractNames) {
-    const presaleContract = await ethers.getContract(presaleContractName);
-    if (!presaleContract)
-      console.log(`No contract found for presale: ${presaleContractName}`);
-    const landQuadPurchasedEvents = await queryEvents(
-      presaleContract.queryFilter.bind(
-        presaleContract,
-        presaleContract.filters.LandQuadPurchased()
-      ),
-      startBlock
+  const LandOldContract = await ethers.getContract('Land_Old');
+  const promises = [];
+  for (const presaleDeploymentName in presaleDeployments) {
+    const presaleDeployment = presaleDeployments[presaleDeploymentName];
+    promises.push(
+      (async () => {
+        console.log(
+          'Getting land quad purchased events for',
+          presaleDeploymentName
+        );
+        const landQuadPurchasedEvents = await getPreSaleLandQuadPurchasedEvents(
+          presaleDeploymentName,
+          presaleDeployment
+        );
+        console.log(
+          'Setting land owners for',
+          presaleDeploymentName,
+          'with events',
+          landQuadPurchasedEvents.length
+        );
+        await setLandOwners(
+          [LandContract, LandOldContract],
+          landQuadPurchasedEvents,
+          landOwnersMap
+        );
+        console.log('Done setting land owners for', presaleDeploymentName);
+      })()
     );
-
-    for (const event of landQuadPurchasedEvents) {
-      const topCornerId: BN = event.args && event.args.topCornerId;
-      const {coordinateX, coordinateY} = tokenIdToMapCoords(topCornerId);
-      const size = new BN(event.args && event.args.size.toString());
-      const currentLandOwner = await LandContract.callStatic.ownerOf(
-        topCornerId
-      );
-      const land: Land = {
-        coordinateX,
-        coordinateY,
-        size,
-        tokenId: topCornerId.toString(),
-      };
-      if (currentLandOwner) {
-        landOwnersMap[currentLandOwner] = landOwnersMap[currentLandOwner] || [];
-        landOwnersMap[currentLandOwner].push(land);
-      }
-    }
   }
-
+  await Promise.all(promises);
   // write output file
   console.log(`writing output to file ${exportFilePath}`);
   fs.outputJSONSync(exportFilePath, landOwnersMap);
