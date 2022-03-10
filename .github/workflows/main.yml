@@ -204,7 +204,6 @@ jobs:
         with:
           node-version: 12.22.1
           sarif: results.sarif
-          target: './src'
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v1
