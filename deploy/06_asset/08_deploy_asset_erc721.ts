@@ -10,7 +10,7 @@ const func: DeployFunction = async function (
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
 
-  await deploy('Asset', {
+  await deploy('AssetERC721', {
     from: upgradeAdmin,
     contract: 'AssetERC721',
     libraries: {},
@@ -28,6 +28,6 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['Asset', 'AssetERC721', 'AssetERC721_deploy'];
+func.tags = ['AssetERC721', 'AssetERC721_deploy'];
 func.runAtTheEnd = true;
 func.dependencies = ['TRUSTED_FORWARDER', 'MINTABLE_ERC721_PREDICATE'];
