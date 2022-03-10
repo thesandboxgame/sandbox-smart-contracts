@@ -205,6 +205,7 @@ jobs:
           node-version: 12.22.1
           sarif: results.sarif
           slither-config: ./slither.config.json
+          target: 'src/solc_0.8/'
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v1
