@@ -94,6 +94,8 @@
     "fork:deploy": "node ./scripts.js fork:deploy",
     "fork:dev": "node ./scripts.js fork:dev",
     "fork:test": "node ./scripts.js fork:test",
+    "claim:add": "yarn execute mainnet ./setup/add_new_multi_giveaway.ts Multi_Giveaway_1",
+    "claim:send": "yarn execute mainnet ./setup/send_assets_to_multi_giveaway.ts Multi_Giveaway_1",
     "hardhat": "hardhat"
   }
 }
