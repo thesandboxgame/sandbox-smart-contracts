@@ -1,5 +1,5 @@
 /**
- * Verify a single contract running: yarn verify <network> ./scripts/verify.ts <contract>
+ * Verify a single contract running: yarn execute <network> ./scripts/verify.ts <contract>
  */
 import hre from 'hardhat';
 const args = process.argv.slice(2);
