@@ -13,7 +13,6 @@ const func: DeployFunction = async function (
   await deploy('AssetERC721', {
     from: upgradeAdmin,
     contract: 'AssetERC721',
-    libraries: {},
     proxy: {
       owner: upgradeAdmin,
       proxyContract: 'OpenZeppelinTransparentProxy',
@@ -29,5 +28,4 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['AssetERC721', 'AssetERC721_deploy'];
-func.runAtTheEnd = true;
 func.dependencies = ['TRUSTED_FORWARDER', 'MINTABLE_ERC721_PREDICATE'];
