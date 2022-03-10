@@ -339,7 +339,13 @@ const config: HardhatUserConfig = {
       }
     : undefined,
   etherscan: {
-    apiKey: process.env.ETHERSCAN_API_KEY || '',
+    apiKey: {
+      mainnet: process.env.ETHERSCAN_API_KEY_MAINNET || '',
+      rinkeby: process.env.ETHERSCAN_API_KEY_RINKEBY || '',
+      goerli: process.env.ETHERSCAN_API_KEY_GOERLI || '',
+      polygon: process.env.ETHERSCAN_API_KEY_POLYGON || '',
+      polygonMumbai: process.env.ETHERSCAN_API_KEY_MUMBAI || '',
+    },
   },
 };
 
