@@ -29,9 +29,17 @@ const landSalePrefix = args[0];
       }
     }
     const ids = [];
-    const values = []
+    const values = [];
     for (const id of Object.keys(assetIds)) {
-      const balance = (await read('Asset', {}, 'balanceOf(address,uint256)', LandSale.address, id)).toNumber();
+      const balance = (
+        await read(
+          'Asset',
+          {},
+          'balanceOf(address,uint256)',
+          LandSale.address,
+          id
+        )
+      ).toNumber();
       if (balance > 0) {
         ids.push(id);
         values.push(balance);
