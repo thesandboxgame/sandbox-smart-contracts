@@ -9,7 +9,6 @@ const func: DeployFunction = async function (
   const {deploy} = deployments;
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
-  const ERC721_PREDICATE = await deployments.get('MINTABLE_ERC721_PREDICATE');
 
   await deploy('Asset', {
     from: upgradeAdmin,
@@ -20,14 +19,9 @@ const func: DeployFunction = async function (
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
         methodName: 'initialize',
-        args: [
-          TRUSTED_FORWARDER.address,
-          assetAdmin,
-          ERC721_PREDICATE.address,
-          0,
-        ],
+        args: [TRUSTED_FORWARDER.address, assetAdmin],
       },
-      upgradeIndex: 1,
+      upgradeIndex: 0,
     },
     log: true,
   });
