@@ -7,7 +7,8 @@ import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
 import "../common/interfaces/IAssetMinter.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
-import "../common/interfaces/IAssetToken.sol";
+import "../common/interfaces/IAssetERC1155Token.sol";
+import "../common/interfaces/IAssetERC721Token.sol";
 
 /// @notice Allow to mint Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
@@ -19,7 +20,8 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     uint256 public catalystsFactor = 1000000000000000000;
 
     IAssetAttributesRegistry internal immutable _registry;
-    IAssetToken internal immutable _asset;
+    IAssetERC1155Token internal immutable _assetERC1155;
+    IAssetERC721Token internal immutable _assetERC721;
     GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
 
     mapping(uint16 => uint256) public quantitiesByCatalystId;
@@ -36,7 +38,8 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     /// @param trustedForwarder: address of the trusted forwarder (used for metaTX)
     constructor(
         IAssetAttributesRegistry registry,
-        IAssetToken asset,
+        IAssetERC721Token assetERC721,
+        IAssetERC1155Token assetERC1155,
         GemsCatalystsRegistry gemsCatalystsRegistry,
         address admin,
         address trustedForwarder,
@@ -44,7 +47,8 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         uint256[] memory quantitiesByAssetTypeId_
     ) {
         _registry = registry;
-        _asset = asset;
+        _assetERC721 = assetERC721;
+        _assetERC1155 = assetERC1155;
         _gemsCatalystsRegistry = gemsCatalystsRegistry;
         transferOwnership(admin);
         __ERC2771Handler_initialize(trustedForwarder);
@@ -139,7 +143,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         uint256 quantity = quantitiesByAssetTypeId[typeAsset1Based];
 
         _mintRequirements(mintData.from, quantity, mintData.to);
-        assetId = _asset.mint(
+        assetId = _assetERC1155.mint(
             mintData.from,
             mintData.packId,
             mintData.metadataHash,
@@ -194,7 +198,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         require(_msgSender() == mintData.from, "AUTH_ACCESS_DENIED");
 
         uint256[] memory supplies = _handleMultipleAssetRequirements(mintData.from, assets);
-        assetIds = _asset.mintMultiple(
+        assetIds = _assetERC1155.mintMultiple(
             mintData.from,
             mintData.packId,
             mintData.metadataHash,
@@ -209,6 +213,8 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         }
         return assetIds;
     }
+
+    /// TODO: Add extraction logic
 
     /// @dev Change the address of the trusted forwarder for meta-TX
     /// @param trustedForwarder The new trustedForwarder
@@ -359,7 +365,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
         _burnCatalyst(from, catalystId, numberOfCatalystBurnPerAsset);
         _burnGems(from, gemIds, numberOfGemsBurnPerAsset);
 
-        assetId = _asset.mint(from, packId, metadataHash, quantity, 0, to, data);
+        assetId = _assetERC1155.mint(from, packId, metadataHash, quantity, 0, to, data);
         _registry.setCatalyst(assetId, catalystId, gemIds);
     }
 }
