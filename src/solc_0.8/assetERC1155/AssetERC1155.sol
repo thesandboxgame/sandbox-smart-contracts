@@ -2,27 +2,26 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-import "./AssetBaseERC1155.sol";
 import "../common/interfaces/IAssetAttributesRegistry.sol";
+import "./AssetBaseERC1155.sol";
 import "../asset/libraries/AssetHelper.sol";
 
 // solhint-disable-next-line no-empty-blocks
-abstract contract AssetV3ERC1155 is AssetBaseERC1155 {
+abstract contract AssetERC1155 is AssetBaseERC1155 {
     AssetHelper.AssetRegistryData private assetRegistryData;
 
-    // /// @notice fulfills the purpose of a constructor in upgradeable contracts
-    // function initialize(
-    //     address trustedForwarder,
-    //     address admin,
-    //     address bouncerAdmin,
-    //     address predicate,
-    //     uint8 chainIndex,
-    //     address assetRegistry,
-    //     address asetV3BaseERC721
-    // ) external {
-    //     init(trustedForwarder, admin, bouncerAdmin, predicate, chainIndex, asetV3BaseERC721);
-    //     assetRegistryData.assetRegistry = IAssetAttributesRegistry(assetRegistry);
-    // }
+    /// @notice fulfills the purpose of a constructor in upgradeable contracts
+    function initialize(
+        address trustedForwarder,
+        address admin,
+        address bouncerAdmin,
+        address predicate,
+        uint8 chainIndex,
+        address assetRegistry
+    ) external {
+        init(trustedForwarder, admin, bouncerAdmin, predicate, chainIndex);
+        assetRegistryData.assetRegistry = IAssetAttributesRegistry(assetRegistry);
+    }
 
     // /// @notice called by predicate to mint tokens transferred from L2
     // /// @param to address to mint to
