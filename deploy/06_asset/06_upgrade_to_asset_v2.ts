@@ -30,7 +30,7 @@ const func: DeployFunction = async function (
 
   const asset = await deploy('Asset', {
     from: upgradeAdmin,
-    contract: 'AssetV2',
+    contract: 'AssetERC1155',
     libraries: {
       ERC1155ERC721Helper: ERC1155ERC721HelperLib.address,
       AssetHelper: assetHelperLib.address,
@@ -63,7 +63,7 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['Asset', 'AssetV2', 'AssetV2_deploy'];
+func.tags = ['Asset', 'AssetERC1155', 'AssetERC1155_deploy'];
 func.runAtTheEnd = true;
 func.dependencies = [
   'Asset_deploy',
