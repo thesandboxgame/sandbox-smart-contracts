@@ -6,8 +6,15 @@ import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC72
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {IMintableERC721} from "../common/interfaces/@maticnetwork/pos-portal/root/RootToken/IMintableERC721.sol";
 import {IERC721Token} from "../common/interfaces/IERC721Token.sol";
+import {IERC721Minter} from "../common/interfaces/IERC721Minter.sol";
 
-abstract contract BaseERC721 is AccessControlUpgradeable, ERC721Upgradeable, IMintableERC721, IERC721Token {
+abstract contract BaseERC721 is
+    AccessControlUpgradeable,
+    ERC721Upgradeable,
+    IMintableERC721,
+    IERC721Token,
+    IERC721Minter
+{
     address internal _trustedForwarder;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -19,7 +26,7 @@ abstract contract BaseERC721 is AccessControlUpgradeable, ERC721Upgradeable, IMi
     function mint(address to, uint256 id)
         external
         virtual
-        override(IMintableERC721, IERC721Token)
+        override(IMintableERC721, IERC721Token, IERC721Minter)
         onlyRole(MINTER_ROLE)
     {
         _safeMint(to, id);
@@ -35,7 +42,7 @@ abstract contract BaseERC721 is AccessControlUpgradeable, ERC721Upgradeable, IMi
         address to,
         uint256 id,
         bytes calldata metaData
-    ) external virtual override(IMintableERC721, IERC721Token) onlyRole(MINTER_ROLE) {
+    ) external virtual override(IMintableERC721, IERC721Token, IERC721Minter) onlyRole(MINTER_ROLE) {
         _safeMint(to, id, metaData);
     }
 

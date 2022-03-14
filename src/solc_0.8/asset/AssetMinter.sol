@@ -33,7 +33,8 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
 
     /// @notice AssetMinter depends on
     /// @param registry: AssetAttributesRegistry for recording catalyst and gems used
-    /// @param asset: Asset Token Contract (dual ERC1155/ERC721)
+    /// @param assetERC721: Asset Token ERC721 Contract (dual ERC1155/ERC721)
+    /// @param assetERC1155: Asset Token ERC1155 Contract (dual ERC1155/ERC721)
     /// @param gemsCatalystsRegistry: that track the canonical catalyst and gems and provide batch burning facility
     /// @param trustedForwarder: address of the trusted forwarder (used for metaTX)
     constructor(
