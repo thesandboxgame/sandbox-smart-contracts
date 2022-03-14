@@ -15,12 +15,4 @@ contract AssetERC721 is BaseERC721, IRootERC721 {
         _trustedForwarder = trustedForwarder;
         __ERC721_init("Sandbox's Assets", "ASSET");
     }
-
-    /// @dev Decode metadata obtained from L2 and attempt to set it for this `tokenId`
-    /// @dev pos-portal default implementation
-    function setTokenMetadata(uint256 tokenId, bytes memory data) external override {
-        // TODO: role
-        string memory uri = abi.decode(data, (string));
-        // TODO: _setTokenURI(tokenId, uri);
-    }
 }
