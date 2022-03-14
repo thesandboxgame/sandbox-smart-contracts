@@ -2,7 +2,7 @@
 pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
-interface IAssetERC721Minter {
+interface IERC721Minter {
     function mint(address to, uint256 id) external;
 
     function mint(
