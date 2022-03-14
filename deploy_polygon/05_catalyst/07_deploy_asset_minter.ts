@@ -37,7 +37,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     args: [
       AssetAttributesRegistry.address,
-      Asset.address,
+      Asset.address, //TODO: fix
+      Asset.address, // TODO: fix
       assetRegistryData,
       assetMinterAdmin,
       TRUSTED_FORWARDER.address,
