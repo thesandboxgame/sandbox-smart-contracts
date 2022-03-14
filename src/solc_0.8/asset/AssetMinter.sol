@@ -8,7 +8,7 @@ import "../common/BaseWithStorage/ERC2771Handler.sol";
 import "../common/interfaces/IAssetMinter.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
 import "../common/interfaces/IAssetERC1155Token.sol";
-import "../common/interfaces/IAssetERC721Token.sol";
+import "../common/interfaces/IERC721Token.sol";
 
 /// @notice Allow to mint Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
@@ -21,7 +21,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
 
     IAssetAttributesRegistry internal immutable _registry;
     IAssetERC1155Token internal immutable _assetERC1155;
-    IAssetERC721Token internal immutable _assetERC721;
+    IERC721Token internal immutable _assetERC721;
     GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
 
     mapping(uint16 => uint256) public quantitiesByCatalystId;
@@ -38,7 +38,7 @@ contract AssetMinter is ERC2771Handler, IAssetMinter, Ownable {
     /// @param trustedForwarder: address of the trusted forwarder (used for metaTX)
     constructor(
         IAssetAttributesRegistry registry,
-        IAssetERC721Token assetERC721,
+        IERC721Token assetERC721,
         IAssetERC1155Token assetERC1155,
         GemsCatalystsRegistry gemsCatalystsRegistry,
         address admin,

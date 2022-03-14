@@ -5,8 +5,9 @@ pragma solidity 0.8.2;
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {IMintableERC721} from "../common/interfaces/@maticnetwork/pos-portal/root/RootToken/IMintableERC721.sol";
+import {IERC721Token} from "../common/interfaces/IERC721Token.sol";
 
-abstract contract BaseERC721 is AccessControlUpgradeable, ERC721Upgradeable, IMintableERC721 {
+abstract contract BaseERC721 is AccessControlUpgradeable, ERC721Upgradeable, IMintableERC721, IERC721Token {
     address internal _trustedForwarder;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
@@ -15,7 +16,12 @@ abstract contract BaseERC721 is AccessControlUpgradeable, ERC721Upgradeable, IMi
     /// @dev Should be callable only by MintableERC721Predicate on L1.
     /// @param to Address that will receive the token.
     /// @param id ERC721 id to be used.
-    function mint(address to, uint256 id) external virtual override(IMintableERC721) onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 id)
+        external
+        virtual
+        override(IMintableERC721, IERC721Token)
+        onlyRole(MINTER_ROLE)
+    {
         _safeMint(to, id);
     }
 
@@ -29,7 +35,7 @@ abstract contract BaseERC721 is AccessControlUpgradeable, ERC721Upgradeable, IMi
         address to,
         uint256 id,
         bytes calldata metaData
-    ) external virtual override(IMintableERC721) onlyRole(MINTER_ROLE) {
+    ) external virtual override(IMintableERC721, IERC721Token) onlyRole(MINTER_ROLE) {
         _safeMint(to, id, metaData);
     }
 
@@ -38,7 +44,7 @@ abstract contract BaseERC721 is AccessControlUpgradeable, ERC721Upgradeable, IMi
     /// @notice Burns token with given `id`.
     /// @param from Address whose token is to be burned.
     /// @param id Token id which will be burned.
-    function burnFrom(address from, uint256 id) external {
+    function burnFrom(address from, uint256 id) external override {
         require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
         _burn(id);
     }
@@ -52,13 +58,13 @@ abstract contract BaseERC721 is AccessControlUpgradeable, ERC721Upgradeable, IMi
         address from,
         address to,
         uint256 tokenId
-    ) public override(ERC721Upgradeable, IMintableERC721) {
+    ) public override(ERC721Upgradeable, IMintableERC721, IERC721Token) {
         ERC721Upgradeable.safeTransferFrom(from, to, tokenId);
     }
 
     /// @notice Query if a token id exists.
     /// @param tokenId Token id to be queried.
-    function exists(uint256 tokenId) external view override returns (bool) {
+    function exists(uint256 tokenId) external view override(IMintableERC721, IERC721Token) returns (bool) {
         return _exists(tokenId);
     }
 

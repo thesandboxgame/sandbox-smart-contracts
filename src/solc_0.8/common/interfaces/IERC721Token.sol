@@ -2,7 +2,7 @@
 // solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
-interface IAssetERC721Token {
+interface IERC721Token {
     function mint(address to, uint256 id) external;
 
     function mint(
@@ -17,7 +17,7 @@ interface IAssetERC721Token {
         address from,
         address to,
         uint256 tokenId
-    ) public;
+    ) external;
 
-    function exists(uint256 tokenId) external view override returns (bool);
+    function exists(uint256 tokenId) external view returns (bool);
 }
