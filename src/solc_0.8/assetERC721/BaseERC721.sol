@@ -5,29 +5,17 @@ pragma solidity 0.8.2;
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {IMintableERC721} from "../common/interfaces/@maticnetwork/pos-portal/root/RootToken/IMintableERC721.sol";
-import {IAssetERC721Minter} from "../common/interfaces/IAssetERC721Minter.sol";
 
-abstract contract AssetBaseERC721 is AccessControlUpgradeable, ERC721Upgradeable, IMintableERC721, IAssetERC721Minter {
+abstract contract BaseERC721 is AccessControlUpgradeable, ERC721Upgradeable, IMintableERC721 {
     address internal _trustedForwarder;
 
-    bytes32 public constant MINTER = keccak256("MINTER");
-
-    function init(address trustedForwarder, address admin) public initializer {
-        _setupRole(DEFAULT_ADMIN_ROLE, admin);
-        _trustedForwarder = trustedForwarder;
-        __ERC721_init("Sandbox's Assets", "ASSET");
-    }
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     /// @notice Mint an ERC721 Asset with the provided id.
     /// @dev Should be callable only by MintableERC721Predicate on L1.
     /// @param to Address that will receive the token.
     /// @param id ERC721 id to be used.
-    function mint(address to, uint256 id)
-        external
-        virtual
-        override(IMintableERC721, IAssetERC721Minter)
-        onlyRole(MINTER)
-    {
+    function mint(address to, uint256 id) external virtual override(IMintableERC721) onlyRole(MINTER_ROLE) {
         _safeMint(to, id);
     }
 
@@ -41,7 +29,7 @@ abstract contract AssetBaseERC721 is AccessControlUpgradeable, ERC721Upgradeable
         address to,
         uint256 id,
         bytes calldata metaData
-    ) external virtual override(IMintableERC721, IAssetERC721Minter) onlyRole(MINTER) {
+    ) external virtual override(IMintableERC721) onlyRole(MINTER_ROLE) {
         _safeMint(to, id, metaData);
     }
 
