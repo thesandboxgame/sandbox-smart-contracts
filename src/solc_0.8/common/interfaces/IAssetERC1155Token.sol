@@ -78,15 +78,7 @@ interface IAssetERC1155Token {
 
     function creatorOf(uint256 id) external view returns (address);
 
-    function collectionOf(uint256 id) public view returns (uint256);
-
-    function isCollection(uint256 id) public view returns (bool);
-
-    function collectionIndexOf(uint256 id) public view returns (uint256);
-
-    function wasEverMinted(uint256 id) public view returns (bool);
-
-    function balanceOf(address owner, uint256 id) public view override returns (uint256);
+    function wasEverMinted(uint256 id) external view returns (bool);
 
     function isSuperOperator(address who) external view returns (bool);
 }
