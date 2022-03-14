@@ -18,7 +18,7 @@ const erc721Tests = require('../erc721')(
 
     // Setup roles
     // Add assetAdmin as a MINTER for testing purposes only
-    const MINTER_ROLE = await asset.MINTER();
+    const MINTER_ROLE = await asset.MINTER_ROLE();
     await assetContractAsAssetAdmin.grantRole(MINTER_ROLE, assetAdmin);
 
     // Mint
@@ -65,7 +65,7 @@ function recurse(test) {
   }
 }
 
-describe('Asset:ERC721', function () {
+describe.only('Asset:ERC721', function () {
   for (const test of erc721Tests) {
     // eslint-disable-next-line mocha/no-setup-in-describe
     recurse(test);
