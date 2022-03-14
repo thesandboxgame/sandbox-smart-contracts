@@ -16,6 +16,7 @@ abstract contract BaseERC721 is
     IERC721Minter
 {
     address internal _trustedForwarder;
+    string public baseTokenURI;
 
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
@@ -99,6 +100,18 @@ abstract contract BaseERC721 is
         return super.supportsInterface(id);
     }
 
+    /// @notice Change the address of the trusted forwarder for meta-transactions
+    /// @param trustedForwarder The new trustedForwarder
+    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        _trustedForwarder = trustedForwarder;
+    }
+
+    /// @notice Change the base uri for token metadata
+    /// @param baseUri The new base uri.
+    function setBaseUri(string calldata baseUri) external onlyRole(DEFAULT_ADMIN_ROLE) {
+        baseTokenURI = baseUri;
+    }
+
     function isTrustedForwarder(address forwarder) public view returns (bool) {
         return forwarder == _trustedForwarder;
     }
@@ -125,6 +138,10 @@ abstract contract BaseERC721 is
         } else {
             return msg.data;
         }
+    }
+
+    function _baseURI() internal view override returns (string memory) {
+        return baseTokenURI;
     }
 
     uint256[50] private __gap;
