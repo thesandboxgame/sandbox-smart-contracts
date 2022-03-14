@@ -46,7 +46,19 @@ abstract contract BaseERC721 is
         _safeMint(to, id, metaData);
     }
 
-    // TODO: look at setApprovalForAllFrom
+    /// @notice Set the approval for an operator to manage all the tokens of the sender.
+    /// @param from The address giving the approval.
+    /// @param operator The address receiving the approval.
+    /// @param approved The determination of the approval.
+    function setApprovalForAllFor(
+        address from,
+        address operator,
+        bool approved
+    ) external {
+        require(from != address(0), "ZERO_ADDRESS");
+        require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
+        _setApprovalForAll(from, operator, approved);
+    }
 
     /// @notice Burns token with given `id`.
     /// @param from Address whose token is to be burned.
