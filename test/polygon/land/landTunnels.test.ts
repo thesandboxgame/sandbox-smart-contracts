@@ -590,7 +590,7 @@ describe('PolygonLand.sol', function () {
             trustedForwarder,
             data,
             landHolder.address,
-            '1000000'
+            '2000000'
           );
           expect(await Land.balanceOf(landHolder.address)).to.be.equal(0);
           expect(await Land.balanceOf(MockLandTunnel.address)).to.be.equal(
