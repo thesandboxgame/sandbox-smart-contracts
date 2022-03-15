@@ -9,20 +9,20 @@ const generateERC1155Tests = require('../erc1155');
 
 function testAsset() {
   const erc1155Tests = generateERC1155Tests(
-    withSnapshot(['Asset'], async () => {
+    withSnapshot(['AssetERC1155'], async () => {
       const {deployer, assetBouncerAdmin} = await getNamedAccounts();
       const otherAccounts = await getUnnamedAccounts();
       const minter = otherAccounts[0];
       const users = otherAccounts.slice(1);
 
       const assetContractAsBouncerAdmin = await ethers.getContract(
-        'Asset',
+        'AssetERC1155',
         assetBouncerAdmin
       );
 
       await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
 
-      const Asset = await ethers.getContract('Asset', minter);
+      const Asset = await ethers.getContract('AssetERC1155', minter);
 
       const receiverAddress = Asset.address;
 
