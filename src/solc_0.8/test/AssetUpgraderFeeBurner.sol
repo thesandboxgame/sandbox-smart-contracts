@@ -7,7 +7,8 @@ import "../asset/AssetUpgrader.sol";
 contract AssetUpgraderFeeBurner is AssetUpgrader {
     constructor(
         IAssetAttributesRegistry registry,
-        IERC20Extended sand,
+        /* IERC20Extended */
+        IERC20 sand,
         IAssetToken asset,
         GemsCatalystsRegistry gemsCatalystsRegistry,
         uint256 _upgradeFee,
