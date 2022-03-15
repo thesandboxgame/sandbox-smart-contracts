@@ -1,5 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -31,8 +32,17 @@ const func: DeployFunction = async function (
     },
     log: true,
   });
+
+  // Set baseUri
+  await deployments.execute(
+    'PolygonAssetERC721',
+    {from: assetAdmin, log: true},
+    'setBaseUri',
+    'http://sandbox.asset.erc721' // TODO: confirm desired baseUri
+  );
 };
 
 export default func;
 func.tags = ['PolygonAssetERC721', 'PolygonAssetERC721_deploy', 'L2'];
 func.dependencies = ['TRUSTED_FORWARDER'];
+func.skip = skipUnlessTestnet;

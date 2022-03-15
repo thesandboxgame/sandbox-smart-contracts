@@ -6,8 +6,7 @@ const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
-  const {sandAdmin} = await getNamedAccounts();
-  const adminRole = sandAdmin;
+  const {assetAdmin} = await getNamedAccounts();
   const CHILD_CHAIN_MANAGER = await deployments.get('CHILD_CHAIN_MANAGER');
   // Grant roles.
   const childChainManagerRole = await deployments.read(
@@ -17,7 +16,7 @@ const func: DeployFunction = async function (
   // Admin role need enough balance!!!
   await deployments.execute(
     'PolygonAssetERC721',
-    {from: adminRole, log: true},
+    {from: assetAdmin, log: true}, // DEFAULT_ADMIN_ROLE
     'grantRole',
     childChainManagerRole,
     CHILD_CHAIN_MANAGER.address
