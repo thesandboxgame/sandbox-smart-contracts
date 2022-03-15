@@ -8,7 +8,7 @@ import "../common/interfaces/IAssetAttributesRegistry.sol";
 import "../common/interfaces/IAssetUpgrader.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
 import "../common/interfaces/IERC20Extended.sol";
-import "../common/interfaces/IAssetToken.sol";
+import "../common/interfaces/IAssetERC1155Token.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
@@ -24,7 +24,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
 
     IERC20Extended internal immutable _sand;
     IAssetAttributesRegistry internal immutable _registry;
-    IAssetToken internal immutable _asset;
+    IAssetERC1155Token internal immutable _assetERC1155;
     GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
 
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
@@ -32,7 +32,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     /// @notice AssetUpgrader depends on
     /// @param registry: AssetAttributesRegistry for recording catalyst and gems used
     /// @param sand: ERC20 for fee payment
-    /// @param asset: Asset Token Contract (dual ERC1155/ERC721)
+    /// @param assetERC1155: ERC1155 Asset Token Contract
     /// @param gemsCatalystsRegistry: that track the canonical catalyst and gems and provide batch burning facility
     /// @param _upgradeFee: the fee in Sand paid for an upgrade (setting or replacing a catalyst)
     /// @param _gemAdditionFee: the fee in Sand paid for adding gems
@@ -41,7 +41,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     constructor(
         IAssetAttributesRegistry registry,
         IERC20Extended sand,
-        IAssetToken asset,
+        IAssetERC1155Token assetERC1155,
         GemsCatalystsRegistry gemsCatalystsRegistry,
         uint256 _upgradeFee,
         uint256 _gemAdditionFee,
@@ -50,7 +50,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     ) {
         _registry = registry;
         _sand = sand;
-        _asset = asset;
+        _assetERC1155 = assetERC1155;
         _gemsCatalystsRegistry = gemsCatalystsRegistry;
         upgradeFee = _upgradeFee;
         gemAdditionFee = _gemAdditionFee;
@@ -74,7 +74,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     ) external override returns (uint256 tokenId) {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         require(_msgSender() == from, "AUTH_ACCESS_DENIED");
-        tokenId = _asset.extractERC721From(from, assetId, from);
+        tokenId = _assetERC1155.extractERC721From(from, assetId, from);
         _changeCatalyst(from, tokenId, catalystId, gemIds, to);
     }
 
@@ -192,10 +192,11 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
         address to,
         uint256 assetId
     ) internal {
+        // TODO: ensure always assetERC1155?
         if (from != to) {
-            _asset.safeTransferFrom(from, to, assetId);
+            _assetERC1155.safeTransferFrom(from, to, assetId, 1, "");
         } else {
-            require(_asset.balanceOf(from, assetId) > 0, "NOT_AUTHORIZED_ASSET_OWNER");
+            require(_assetERC1155.balanceOf(from, assetId) > 0, "NOT_AUTHORIZED_ASSET_OWNER");
         }
     }
 

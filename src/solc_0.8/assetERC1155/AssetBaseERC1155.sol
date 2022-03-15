@@ -3,17 +3,14 @@
 pragma solidity 0.8.2;
 
 import "@openzeppelin/contracts-0.8/utils/Address.sol";
-import "../common/interfaces/IERC1155.sol";
-import "../common/interfaces/IERC1155TokenReceiver.sol";
+import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
+import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155Receiver.sol";
 import "../common/Libraries/ObjectLib32.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
 import "../asset/libraries/ERC1155ERC721Helper.sol";
 
 // solhint-disable max-states-count
-abstract contract AssetBaseERC1155 is
-    WithSuperOperators,
-    IERC1155
-{
+abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     using Address for address;
     using ObjectLib32 for ObjectLib32.Operations;
     using ObjectLib32 for uint256;
@@ -58,10 +55,8 @@ abstract contract AssetBaseERC1155 is
 
     event BouncerAdminChanged(address oldBouncerAdmin, address newBouncerAdmin);
     event Bouncer(address bouncer, bool enabled);
-    event MetaTransactionProcessor(address metaTransactionProcessor, bool enabled);
     event CreatorshipTransfer(address indexed original, address indexed from, address indexed to);
     event Extraction(uint256 indexed fromId, uint256 toId);
-    event AssetUpdate(uint256 indexed fromId, uint256 toId);
 
     function init(
         address trustedForwarder,
@@ -71,7 +66,7 @@ abstract contract AssetBaseERC1155 is
         uint8 chainIndex
     ) public {
         // one-time init of bitfield's previous versions
-        _checkInit(0);
+        _checkInit(1);
         _admin = admin;
         _bouncerAdmin = bouncerAdmin;
         _predicate = predicate;
@@ -162,14 +157,22 @@ abstract contract AssetBaseERC1155 is
         uint256 value,
         bytes calldata data
     ) external override {
-        if (id & ERC1155ERC721Helper.IS_NFT > 0) {
-            require(_ownerOf(id) == from, "OWNER!=FROM");
+        require(to != address(0), "TO==0");
+        require(from != address(0), "FROM==0");
+        bool success = _transferFrom(from, to, id, value);
+        if (success) {
+            require(
+                _checkERC1155AndCallSafeTransfer(
+                    isTrustedForwarder(msg.sender) ? from : msg.sender,
+                    from,
+                    to,
+                    id,
+                    value,
+                    data
+                ),
+                "1155_TRANSFER_REJECTED"
+            );
         }
-        bool metaTx = _transferFrom(from, to, id, value);
-        require(
-            _checkERC1155AndCallSafeTransfer(metaTx ? from : msg.sender, from, to, id, value, data),
-            "1155_TRANSFER_REJECTED"
-        );
     }
 
     /// @notice Transfers `values` tokens of type `ids` from  `from` to `to` (with safety call).
@@ -186,9 +189,6 @@ abstract contract AssetBaseERC1155 is
         uint256[] calldata values,
         bytes calldata data
     ) external override {
-        // @review should we also check the length of data.URIs[] if we use something like that?
-        // not sure if we want to try to set/update all URIs at once(both for newly-minted tokens & unlock tokens? Or do we rely on a second TX to update URIs for tokens that were locked in the predicate and may have new metaData from L2 to be set?)
-        // metadataHash updates only applicable to erc721 tokens
         require(ids.length == values.length, "MISMATCHED_ARR_LEN");
         require(to != address(0), "TO==0");
         require(from != address(0), "FROM==0");
@@ -276,6 +276,21 @@ abstract contract AssetBaseERC1155 is
         return _bouncers[who];
     }
 
+    /// @notice Extracts an EIP-721 NFT from an EIP-1155 token.
+    /// @param sender address which own the token to be extracted.
+    /// @param id the token type to extract from.
+    /// @param to address which will receive the token.
+    /// @return newId the id of the newly minted NFT.
+    function extractERC721From(
+        address sender,
+        uint256 id,
+        address to
+    ) external returns (uint256 newId) {
+        bool metaTx = isTrustedForwarder(msg.sender);
+        require(sender == _msgSender() || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
+        return _extractERC721From(metaTx ? sender : _msgSender(), sender, id, to);
+    }
+
     /// @notice Get the balance of `owners` for each token type `ids`.
     /// @param owners the addresses of the token holders queried.
     /// @param ids ids of each token type to query.
@@ -298,7 +313,7 @@ abstract contract AssetBaseERC1155 is
     /// @param id the id of the token to get the creator of.
     /// @return the creator of the token type `id`.
     function creatorOf(uint256 id) external view returns (address) {
-        // require(wasEverMinted(id), "TOKEN_!MINTED");
+        require(wasEverMinted(id), "TOKEN_!MINTED");
         address newCreator = _creatorship[address(uint160(id / ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER))];
         if (newCreator != address(0)) {
             return newCreator;
@@ -309,19 +324,19 @@ abstract contract AssetBaseERC1155 is
     /// @notice A descriptive name for the collection of tokens in this contract.
     /// @return _name the name of the tokens.
     function name() external pure returns (string memory _name) {
-        return "Sandbox's ASSETs 1155";
+        return "Sandbox's ASSETs ERC1155";
     }
 
     /// @notice An abbreviated name for the collection of tokens in this contract.
     /// @return _symbol the symbol of the tokens.
     function symbol() external pure returns (string memory _symbol) {
-        return "ASSET1155";
+        return "ASSETERC1155";
     }
 
     /// @notice Query if a contract implements interface `id`.
     /// @param id the interface identifier, as specified in ERC-165.
     /// @return `true` if the contract implements `id`.
-    function supportsInterface(bytes4 id) external pure returns (bool) {
+    function supportsInterface(bytes4 id) external pure override returns (bool) {
         return
             id == 0x01ffc9a7 || //ERC165
             id == 0xd9b67a26 || // ERC1155
@@ -534,7 +549,7 @@ abstract contract AssetBaseERC1155 is
             return true;
         }
 
-        return IERC1155TokenReceiver(to).onERC1155Received(operator, from, id, value, data) == ERC1155_RECEIVED;
+        return IERC1155Receiver(to).onERC1155Received(operator, from, id, value, data) == ERC1155_RECEIVED;
     }
 
     function _checkERC1155AndCallSafeBatchTransfer(
@@ -548,7 +563,7 @@ abstract contract AssetBaseERC1155 is
         if (!to.isContract()) {
             return true;
         }
-        bytes4 retval = IERC1155TokenReceiver(to).onERC1155BatchReceived(operator, from, ids, values, data);
+        bytes4 retval = IERC1155Receiver(to).onERC1155BatchReceived(operator, from, ids, values, data);
         return (retval == ERC1155_BATCH_RECEIVED);
     }
 
@@ -557,7 +572,6 @@ abstract contract AssetBaseERC1155 is
         uint256 id,
         uint256 amount
     ) internal {
-        address sender = _msgSender();
         if ((id & ERC1155ERC721Helper.IS_NFT) > 0) {
             require(amount == 1, "AMOUNT!=1");
             _burnNFT(from, id);
@@ -584,7 +598,7 @@ abstract contract AssetBaseERC1155 is
                 _burnFT(from, ids[i], uint32(amounts[i]));
             }
         }
-        emit TransferBatch(_msgSender(), from, address(0), ids, amounts);
+        emit TransferBatch(operator, from, address(0), ids, amounts);
     }
 
     function _burnFT(
@@ -600,10 +614,7 @@ abstract contract AssetBaseERC1155 is
         );
     }
 
-    function _burnNFT(
-        address from,
-        uint256 id
-    ) internal {
+    function _burnNFT(address from, uint256 id) internal {
         _owners[id] = 2**160;
         _numNFTPerAddress[from]--;
     }
@@ -694,16 +705,14 @@ abstract contract AssetBaseERC1155 is
         address to,
         uint256 id,
         uint256 value
-    ) internal returns (bool metaTx) {
-        require(to != address(0), "TO==0");
-        require(from != address(0), "FROM==0");
+    ) internal returns (bool) {
         address sender = _msgSender();
-        metaTx = isTrustedForwarder(msg.sender);
         bool authorized = from == sender || isApprovedForAll(from, sender);
 
         require(authorized, "OPERATOR_!AUTH");
         if (id & ERC1155ERC721Helper.IS_NFT > 0) {
             require(value == 1, "NFT!=1");
+            require(_ownerOf(id) == from, "OWNER!=FROM");
             _numNFTPerAddress[from]--;
             _numNFTPerAddress[to]++;
             _owners[id] = uint256(uint160(to));
@@ -721,7 +730,8 @@ abstract contract AssetBaseERC1155 is
             );
         }
 
-        emit TransferSingle(metaTx ? from : sender, from, to, id, value);
+        emit TransferSingle(isTrustedForwarder(msg.sender) ? from : sender, from, to, id, value);
+        return true;
     }
 
     function _mint(
@@ -760,6 +770,22 @@ abstract contract AssetBaseERC1155 is
         require(_checkERC1155AndCallSafeTransfer(operator, address(0), owner, id, supply, data), "TRANSFER_REJECTED");
     }
 
+    function _extractERC721From(
+        address operator,
+        address sender,
+        uint256 id,
+        address to
+    ) internal returns (uint256 newId) {
+        require(to != address(0), "TO==0");
+        require(id & ERC1155ERC721Helper.IS_NFT == 0, "!1155");
+        uint32 tokenCollectionIndex = _nextCollectionIndex[id];
+        newId = id + ERC1155ERC721Helper.IS_NFT + (tokenCollectionIndex) * 2**ERC1155ERC721Helper.NFT_INDEX_OFFSET;
+        _nextCollectionIndex[id] = tokenCollectionIndex + 1;
+        _burnFT(sender, id, 1);
+        _mint(_metadataHash[id & ERC1155ERC721Helper.URI_ID], 1, 0, operator, to, newId, "", true);
+        emit Extraction(id, newId);
+    }
+
     /// @dev Allows the use of a bitfield to track the initialized status of the version `v` passed in as an arg.
     /// If the bit at the index corresponding to the given version is already set, revert.
     /// Otherwise, set the bit and return.
@@ -767,24 +793,6 @@ abstract contract AssetBaseERC1155 is
     function _checkInit(uint256 v) internal {
         require((_initBits >> v) & uint256(1) != 1, "ALREADY_INITIALISED");
         _initBits = _initBits | (uint256(1) << v);
-    }
-
-    function _checkIsERC1155Receiver(address _contract) internal view returns (bool) {
-        bool success;
-        bool result;
-        bytes memory callData = abi.encodeWithSelector(ERC165ID, ERC1155_IS_RECEIVER);
-        // solhint-disable-next-line no-inline-assembly
-        assembly {
-            let call_ptr := add(0x20, callData)
-            let call_size := mload(callData)
-            let output := mload(0x40) // Find empty storage location using "free memory pointer"
-            mstore(output, 0x0)
-            success := staticcall(10000, _contract, call_ptr, call_size, output, 0x20) // 32 bytes
-            result := mload(output)
-        }
-        // (10000 / 63) "not enough for supportsInterface(...)" // consume all gas, so caller can potentially know that there was not enough gas
-        assert(gasleft() > 158);
-        return success && result;
     }
 
     function _checkEnoughBalance(

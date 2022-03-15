@@ -8,7 +8,7 @@ contract AssetUpgraderFeeBurner is AssetUpgrader {
     constructor(
         IAssetAttributesRegistry registry,
         IERC20Extended sand,
-        IAssetToken asset,
+        IAssetERC1155Token assetERC1155,
         GemsCatalystsRegistry gemsCatalystsRegistry,
         uint256 _upgradeFee,
         uint256 _gemAdditionFee,
@@ -18,7 +18,7 @@ contract AssetUpgraderFeeBurner is AssetUpgrader {
         AssetUpgrader(
             registry,
             sand,
-            asset,
+            assetERC1155,
             gemsCatalystsRegistry,
             _upgradeFee,
             _gemAdditionFee,
