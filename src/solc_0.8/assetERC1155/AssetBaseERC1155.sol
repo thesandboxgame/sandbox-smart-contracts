@@ -276,6 +276,21 @@ abstract contract AssetBaseERC1155 is
         return _bouncers[who];
     }
 
+    /// @notice Extracts an EIP-721 NFT from an EIP-1155 token.
+    /// @param sender address which own the token to be extracted.
+    /// @param id the token type to extract from.
+    /// @param to address which will receive the token.
+    /// @return newId the id of the newly minted NFT.
+    function extractERC721From(
+        address sender,
+        uint256 id,
+        address to
+    ) external returns (uint256 newId) {
+        bool metaTx = isTrustedForwarder(msg.sender);
+        require(sender == _msgSender() || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
+        return _extractERC721From(metaTx ? sender : _msgSender(), sender, id, to);
+    }
+
     /// @notice Get the balance of `owners` for each token type `ids`.
     /// @param owners the addresses of the token holders queried.
     /// @param ids ids of each token type to query.
@@ -557,7 +572,6 @@ abstract contract AssetBaseERC1155 is
         uint256 id,
         uint256 amount
     ) internal {
-        address sender = _msgSender();
         if ((id & ERC1155ERC721Helper.IS_NFT) > 0) {
             require(amount == 1, "AMOUNT!=1");
             _burnNFT(from, id);
@@ -584,7 +598,7 @@ abstract contract AssetBaseERC1155 is
                 _burnFT(from, ids[i], uint32(amounts[i]));
             }
         }
-        emit TransferBatch(_msgSender(), from, address(0), ids, amounts);
+        emit TransferBatch(operator, from, address(0), ids, amounts);
     }
 
     function _burnFT(
@@ -758,6 +772,22 @@ abstract contract AssetBaseERC1155 is
 
         emit TransferSingle(operator, address(0), owner, id, supply);
         require(_checkERC1155AndCallSafeTransfer(operator, address(0), owner, id, supply, data), "TRANSFER_REJECTED");
+    }
+
+    function _extractERC721From(
+        address operator,
+        address sender,
+        uint256 id,
+        address to
+    ) internal returns (uint256 newId) {
+        require(to != address(0), "TO==0");
+        require(id & ERC1155ERC721Helper.IS_NFT == 0, "!1155");
+        uint32 tokenCollectionIndex = _nextCollectionIndex[id];
+        newId = id + ERC1155ERC721Helper.IS_NFT + (tokenCollectionIndex) * 2**ERC1155ERC721Helper.NFT_INDEX_OFFSET;
+        _nextCollectionIndex[id] = tokenCollectionIndex + 1;
+        _burnFT(sender, id, 1);
+        _mint(_metadataHash[id & ERC1155ERC721Helper.URI_ID], 1, 0, operator, to, newId, "", true);
+        emit Extraction(id, newId);
     }
 
     /// @dev Allows the use of a bitfield to track the initialized status of the version `v` passed in as an arg.
