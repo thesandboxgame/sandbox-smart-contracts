@@ -13,7 +13,6 @@ const func: DeployFunction = async function (
   const TRUSTED_FORWARDER_V2 = await deployments.getOrNull(
     'TRUSTED_FORWARDER_V2'
   );
-  const CHILD_CHAIN_MANAGER = await deployments.get('CHILD_CHAIN_MANAGER');
 
   await deploy('PolygonAssetERC721', {
     from: deployer,
@@ -24,10 +23,8 @@ const func: DeployFunction = async function (
       execute: {
         methodName: 'initialize',
         args: [
-          TRUSTED_FORWARDER_V2?.address || TRUSTED_FORWARDER.address,
+          TRUSTED_FORWARDER_V2?.address || TRUSTED_FORWARDER.address, // TODO:
           assetAdmin,
-          // CHILD_CHAIN_MANAGER.address,
-          // 1,
         ],
       },
       upgradeIndex: 0,
@@ -38,4 +35,4 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['PolygonAssetERC721', 'PolygonAssetERC721_deploy', 'L2'];
-func.dependencies = ['TRUSTED_FORWARDER', 'CHILD_CHAIN_MANAGER'];
+func.dependencies = ['TRUSTED_FORWARDER'];
