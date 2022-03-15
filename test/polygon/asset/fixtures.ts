@@ -23,7 +23,7 @@ const polygonAssetFixtures = async function () {
   const {assetBouncerAdmin} = await getNamedAccounts();
 
   const assetContractAsBouncerAdmin = await ethers.getContract(
-    'PolygonAsset',
+    'PolygonAssetERC1155',
     assetBouncerAdmin
   );
 
@@ -32,7 +32,7 @@ const polygonAssetFixtures = async function () {
     'AssetSignedAuctionAuth'
   );
   const Sand = await ethers.getContract('SandBaseToken');
-  const Asset = await ethers.getContract('PolygonAsset', minter);
+  const Asset = await ethers.getContract('PolygonAssetERC1155', minter);
   const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const trustedForwarder = await ethers.getContractAt(
@@ -126,7 +126,7 @@ async function gemsAndCatalystsFixtureL2() {
 }
 
 export const setupPolygonAsset = withSnapshot(
-  ['PolygonAsset', 'Asset', 'AssetSignedAuctionAuth', 'SandBaseToken'],
+  ['PolygonAssetERC1155', 'Asset', 'AssetSignedAuctionAuth', 'SandBaseToken'],
   polygonAssetFixtures
 );
 
