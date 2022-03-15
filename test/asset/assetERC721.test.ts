@@ -1,7 +1,7 @@
 import {ethers} from 'hardhat';
 import {expect} from 'chai';
 import {solidityPack} from 'ethers/lib/utils';
-import {addMinter, setupAssetERC721Test} from './fixtures';
+import {setupAssetERC721Test} from './fixtures';
 
 describe('AssetERC721.sol', function () {
   describe('initialization', function () {
@@ -92,7 +92,7 @@ describe('AssetERC721.sol', function () {
           fixtures.assetERC721['mint(address,uint256)'](fixtures.other, 123)
         ).to.be.reverted;
 
-        await addMinter(
+        await fixtures.addMinter(
           fixtures.adminRole,
           fixtures.assetERC721,
           fixtures.minter
@@ -134,7 +134,7 @@ describe('AssetERC721.sol', function () {
           )
         ).to.be.reverted;
 
-        await addMinter(
+        await fixtures.addMinter(
           fixtures.adminRole,
           fixtures.assetERC721,
           fixtures.minter
@@ -165,7 +165,7 @@ describe('AssetERC721.sol', function () {
     });
     it('metaTX trusted forwarder', async function () {
       const fixtures = await setupAssetERC721Test();
-      await addMinter(
+      await fixtures.addMinter(
         fixtures.adminRole,
         fixtures.assetERC721,
         fixtures.minter
