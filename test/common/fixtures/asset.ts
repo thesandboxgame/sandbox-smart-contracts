@@ -25,7 +25,7 @@ export const assetFixtures = async function () {
   const {assetBouncerAdmin} = await getNamedAccounts();
 
   const assetContractAsBouncerAdmin = await ethers.getContract(
-    'Asset',
+    'AssetERC1155',
     assetBouncerAdmin
   );
   await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
