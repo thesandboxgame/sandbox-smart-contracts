@@ -9,7 +9,6 @@ import "../common/interfaces/IAssetUpgrader.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
 import "../common/interfaces/IERC20Extended.sol";
 import "../common/interfaces/IAssetERC1155Token.sol";
-import "../common/interfaces/IAssetERC721Token.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
 contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
@@ -25,7 +24,6 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
 
     IERC20Extended internal immutable _sand;
     IAssetAttributesRegistry internal immutable _registry;
-    // IAssetERC721Token internal immutable _assetERC721;
     IAssetERC1155Token internal immutable _assetERC1155;
     GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
 
@@ -43,7 +41,6 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     constructor(
         IAssetAttributesRegistry registry,
         IERC20Extended sand,
-        // IAssetERC721Token assetERC721,
         IAssetERC1155Token assetERC1155,
         GemsCatalystsRegistry gemsCatalystsRegistry,
         uint256 _upgradeFee,
@@ -53,7 +50,6 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     ) {
         _registry = registry;
         _sand = sand;
-        // _assetERC721 = assetERC721;
         _assetERC1155 = assetERC1155;
         _gemsCatalystsRegistry = gemsCatalystsRegistry;
         upgradeFee = _upgradeFee;
