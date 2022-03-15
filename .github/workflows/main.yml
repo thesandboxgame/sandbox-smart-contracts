@@ -203,11 +203,121 @@ jobs:
         id: slither
         with:
           node-version: 12.22.1
-          sarif: results.sarif
+          sarif: asset.sarif
           slither-config: ./slither.config.json
           target: 'src/solc_0.8/asset'
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.1.0
+        continue-on-error: true
+        id: slither
+        with:
+          node-version: 12.22.1
+          sarif: bundleSandSale.sarif
+          slither-config: ./slither.config.json
+          target: 'src/solc_0.8/bundleSandSale'
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.1.0
+        continue-on-error: true
+        id: slither
+        with:
+          node-version: 12.22.1
+          sarif: catalyst.sarif
+          slither-config: ./slither.config.json
+          target: 'src/solc_0.8/catalyst'
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.1.0
+        continue-on-error: true
+        id: slither
+        with:
+          node-version: 12.22.1
+          sarif: defi.sarif
+          slither-config: ./slither.config.json
+          target: 'src/solc_0.8/defi'
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.1.0
+        continue-on-error: true
+        id: slither
+        with:
+          node-version: 12.22.1
+          sarif: faucet.sarif
+          slither-config: ./slither.config.json
+          target: 'src/solc_0.8/faucet'
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.1.0
+        continue-on-error: true
+        id: slither
+        with:
+          node-version: 12.22.1
+          sarif: game.sarif
+          slither-config: ./slither.config.json
+          target: 'src/solc_0.8/Game'
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.1.0
+        continue-on-error: true
+        id: slither
+        with:
+          node-version: 12.22.1
+          sarif: permit.sarif
+          slither-config: ./slither.config.json
+          target: 'src/solc_0.8/permit'
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.1.0
+        continue-on-error: true
+        id: slither
+        with:
+          node-version: 12.22.1
+          sarif: child.sarif
+          slither-config: ./slither.config.json
+          target: 'src/solc_0.8/polygon/child'
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.1.0
+        continue-on-error: true
+        id: slither
+        with:
+          node-version: 12.22.1
+          sarif: root.sarif
+          slither-config: ./slither.config.json
+          target: 'src/solc_0.8/polygon/root'
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.1.0
+        continue-on-error: true
+        id: slither
+        with:
+          node-version: 12.22.1
+          sarif: raffle.sarif
+          slither-config: ./slither.config.json
+          target: 'src/solc_0.8/raffle'
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.1.0
+        continue-on-error: true
+        id: slither
+        with:
+          node-version: 12.22.1
+          sarif: sand.sarif
+          slither-config: ./slither.config.json
+          target: 'src/solc_0.8/Sand'
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.1.0
+        continue-on-error: true
+        id: slither
+        with:
+          node-version: 12.22.1
+          sarif: utils.sarif
+          slither-config: ./slither.config.json
+          target: 'src/solc_0.8/Utils'
 
       - name: Upload SARIF file
         uses: github/codeql-action/upload-sarif@v1
         with:
-          sarif_file: ${{ steps.slither.outputs.sarif }}
+          sarif_file: ./
