@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTest} from '../../utils/network';
+import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -25,9 +25,17 @@ const func: DeployFunction = async function (
     },
     log: true,
   });
+
+  // Set baseUri
+  await deployments.execute(
+    'AssetERC721',
+    {from: assetAdmin, log: true}, // DEFAULT_ADMIN_ROLE
+    'setBaseUri',
+    'http://sandbox.asset.erc721' // TODO: confirm desired baseUri
+  );
 };
 
 export default func;
 func.tags = ['AssetERC721', 'AssetERC721_deploy'];
-func.dependencies = ['TRUSTED_FORWARDER', 'MINTABLE_ERC721_PREDICATE'];
-func.skip = skipUnlessTest;
+func.dependencies = ['TRUSTED_FORWARDER'];
+func.skip = skipUnlessTestnet;
