@@ -8,7 +8,6 @@ import "../asset/libraries/AssetHelper.sol";
 
 // solhint-disable-next-line no-empty-blocks
 abstract contract AssetERC1155 is AssetBaseERC1155 {
-    AssetHelper.AssetRegistryData private assetRegistryData;
 
     /// @notice fulfills the purpose of a constructor in upgradeable contracts
     function initialize(
@@ -16,11 +15,9 @@ abstract contract AssetERC1155 is AssetBaseERC1155 {
         address admin,
         address bouncerAdmin,
         address predicate,
-        uint8 chainIndex,
-        address assetRegistry
+        uint8 chainIndex
     ) external {
         init(trustedForwarder, admin, bouncerAdmin, predicate, chainIndex);
-        assetRegistryData.assetRegistry = IAssetAttributesRegistry(assetRegistry);
     }
 
     // /// @notice called by predicate to mint tokens transferred from L2
