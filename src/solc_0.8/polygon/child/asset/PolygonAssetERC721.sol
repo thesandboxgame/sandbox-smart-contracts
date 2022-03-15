@@ -25,7 +25,7 @@ contract PolygonAssetERC721 is BaseERC721, IChildToken {
     function initialize(address trustedForwarder, address admin) public initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _trustedForwarder = trustedForwarder;
-        __ERC721_init("Sandbox's Assets", "ASSET");
+        __ERC721_init("Sandbox's ASSETs ERC1155", "ASSETERC721");
     }
 
     /// @notice called when token is deposited on root chain
