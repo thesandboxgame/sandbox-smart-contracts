@@ -214,13 +214,11 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
 
     function _setGemsAndCatalystsAllowance(uint256 allowanceValue) internal {
         for (uint256 i = 0; i < _gems.length; i++) {
-            //_gems[i].approveFor(_msgSender(), address(this), allowanceValue);
-            _gems[i].approve(address(this), allowanceValue);
+            _gems[i].approveFor(_msgSender(), address(this), allowanceValue);
         }
 
         for (uint256 i = 0; i < _catalysts.length; i++) {
-            //_catalysts[i].approveFor(_msgSender(), address(this), allowanceValue);
-            _catalysts[i].approve(address(this), allowanceValue);
+            _catalysts[i].approveFor(_msgSender(), address(this), allowanceValue);
         }
     }
 
