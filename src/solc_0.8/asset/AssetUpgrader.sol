@@ -7,7 +7,7 @@ import "../common/BaseWithStorage/ERC2771Handler.sol";
 import "../common/interfaces/IAssetAttributesRegistry.sol";
 import "../common/interfaces/IAssetUpgrader.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
-//import "../common/interfaces/IERC20Extended.sol";
+import "../common/interfaces/IERC20Extended.sol";
 import "../common/interfaces/IAssetToken.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
@@ -22,8 +22,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     uint256 private constant IS_NFT = 0x0000000000000000000000000000000000000000800000000000000000000000;
     address private constant BURN_ADDRESS = 0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF;
 
-    /* IERC20Extended */
-    IERC20 internal immutable _sand;
+    IERC20Extended internal immutable _sand;
     IAssetAttributesRegistry internal immutable _registry;
     IAssetToken internal immutable _asset;
     GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
@@ -41,8 +40,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     /// @param trustedForwarder: address of the trusted forwarder (used for metaTX)
     constructor(
         IAssetAttributesRegistry registry,
-        /* IERC20Extended */
-        IERC20 sand,
+        IERC20Extended sand,
         IAssetToken asset,
         GemsCatalystsRegistry gemsCatalystsRegistry,
         uint256 _upgradeFee,
@@ -136,7 +134,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
         if (feeRecipient != address(0) && sandFee != 0) {
             if (feeRecipient == address(BURN_ADDRESS)) {
                 // special address for burn
-                _sand.burnFrom(from, sandFee);
+                _sand.burnFor(from, sandFee);
             } else {
                 require(
                     _sand.transferFrom(from, feeRecipient, sandFee),
