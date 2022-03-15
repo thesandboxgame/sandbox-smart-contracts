@@ -3,13 +3,10 @@ pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
 import "../common/interfaces/IAssetAttributesRegistry.sol";
-import "@openzeppelin/contracts-0.8/access/AccessControl.sol";
-//import "../common/BaseWithStorage/ERC20/ERC20Token.sol";
-//import "@openzeppelin/contracts-0.8/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts-0.8/token/ERC20/extensions/ERC20Burnable.sol";
+import "../common/BaseWithStorage/ERC20/ERC20Token.sol";
 import "../common/interfaces/IAttributes.sol";
 
-contract Catalyst is ERC20Burnable, IAttributes, AccessControl {
+contract Catalyst is ERC20Token, IAttributes {
     uint16 public immutable catalystId;
     uint8 internal immutable _maxGems;
 
@@ -23,13 +20,7 @@ contract Catalyst is ERC20Burnable, IAttributes, AccessControl {
         uint16 _catalystId,
         IAttributes attributes,
         address operator
-    )
-        ERC20(
-            name,
-            symbol /* , admin, operator */
-        )
-    {
-        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+    ) ERC20Token(name, symbol, admin, operator) {
         _maxGems = maxGems;
         catalystId = _catalystId;
         _attributes = attributes;
@@ -37,10 +28,7 @@ contract Catalyst is ERC20Burnable, IAttributes, AccessControl {
 
     /// @notice Used by Admin to update the attributes contract.
     /// @param attributes The new attributes contract.
-    function changeAttributes(
-        IAttributes attributes /* onlyAdmin */
-    ) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NOT_AUTHORIZED");
+    function changeAttributes(IAttributes attributes) external onlyAdmin {
         _attributes = attributes;
     }
 
