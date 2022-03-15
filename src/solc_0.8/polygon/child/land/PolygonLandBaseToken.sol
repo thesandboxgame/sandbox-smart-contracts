@@ -142,8 +142,7 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         }
 
         for (uint256 i = 0; i < size * size; i++) {
-            uint256 id = _idInPath(i, size, x, y);
-            emit Transfer(address(0), to, id);
+            emit Transfer(address(0), to, _idInPath(i, size, x, y));
         }
 
         _owners[quadId] = uint256(uint160(address(to)));
@@ -263,8 +262,7 @@ contract PolygonLandBaseToken is Initializable, ERC721BaseToken {
         }
 
         for (uint256 i = 0; i < size * size; i++) {
-            uint256 id = _idInPath(i, size, x, y);
-            if (_owners[id] != 0) return true;
+            if (_owners[_idInPath(i, size, x, y)] != 0) return true;
         }
 
         return false;
