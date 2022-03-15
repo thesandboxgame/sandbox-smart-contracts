@@ -6,24 +6,36 @@ import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "./Gem.sol";
 import "./Catalyst.sol";
 import "./interfaces/IGemsCatalystsRegistry.sol";
-import "../common/BaseWithStorage/WithSuperOperators.sol";
+//import "../common/BaseWithStorage/WithSuperOperators.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
+import "@openzeppelin/contracts-0.8/access/AccessControl.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 /// @notice Contract managing the Gems and Catalysts
 /// Each Gems and Catalyst must be registered here.
 /// Each new Gem get assigned a new id (starting at 1)
 /// Each new Catalyst get assigned a new id (starting at 1)
-contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatalystsRegistry, Ownable {
+/* WithSuperOperators, */
+contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownable, AccessControl, Initializable {
     uint256 private constant MAX_GEMS_AND_CATALYSTS = 256;
     uint256 internal constant MAX_UINT256 = ~uint256(0);
+    bytes32 public constant TRUSTED_FORWARDER_ROLE = keccak256("TRUSTED_FORWARDER_ROLE");
 
     Gem[] internal _gems;
     Catalyst[] internal _catalysts;
 
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
 
-    constructor(address admin, address trustedForwarder) {
-        _admin = admin;
+    /* constructor(address admin, address trustedForwarder) {
+        //_admin = admin;
+        //__ERC2771Handler_initialize(trustedForwarder);
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+        _setupRole(TRUSTED_FORWARDER_ROLE, trustedForwarder);
+    } */
+
+    function initV1(address trustedForwarder, address admin) public initializer {
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+        _setupRole(TRUSTED_FORWARDER_ROLE, trustedForwarder);
         __ERC2771Handler_initialize(trustedForwarder);
     }
 
@@ -114,7 +126,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
     /// @param gems array of gems to be added
     /// @param catalysts array of catalysts to be added
     function addGemsAndCatalysts(Gem[] calldata gems, Catalyst[] calldata catalysts) external override {
-        require(_msgSender() == _admin, "NOT_AUTHORIZED");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NOT_AUTHORIZED");
 
         require(
             uint256(_gems.length + _catalysts.length + gems.length + catalysts.length) < MAX_GEMS_AND_CATALYSTS,
@@ -162,7 +174,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
         _checkAuthorization(from);
         Catalyst catalyst = getCatalyst(catalystId);
         require(catalyst != Catalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
-        catalyst.burnFor(from, amount);
+        catalyst.burnFrom(from, amount);
     }
 
     /// @notice Burn a gem.
@@ -177,7 +189,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
         _checkAuthorization(from);
         Gem gem = getGem(gemId);
         require(gem != Gem(address(0)), "GEM_DOES_NOT_EXIST");
-        gem.burnFor(from, amount);
+        gem.burnFrom(from, amount);
     }
 
     function getNumberOfCatalystContracts() external view returns (uint256 number) {
@@ -200,11 +212,13 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
 
     function _setGemsAndCatalystsAllowance(uint256 allowanceValue) internal {
         for (uint256 i = 0; i < _gems.length; i++) {
-            _gems[i].approveFor(_msgSender(), address(this), allowanceValue);
+            //_gems[i].approveFor(_msgSender(), address(this), allowanceValue);
+            _gems[i].approve(address(this), allowanceValue);
         }
 
         for (uint256 i = 0; i < _catalysts.length; i++) {
-            _catalysts[i].approveFor(_msgSender(), address(this), allowanceValue);
+            //_catalysts[i].approveFor(_msgSender(), address(this), allowanceValue);
+            _catalysts[i].approve(address(this), allowanceValue);
         }
     }
 
@@ -233,7 +247,7 @@ contract GemsCatalystsRegistry is WithSuperOperators, ERC2771Handler, IGemsCatal
     /// @dev verify that the caller is authorized for this function call.
     /// @param from The original signer of the transaction.
     function _checkAuthorization(address from) internal view {
-        require(_msgSender() == from || isSuperOperator(_msgSender()), "AUTH_ACCESS_DENIED");
+        require(hasRole(TRUSTED_FORWARDER_ROLE, _msgSender()), "AUTH_ACCESS_DENIED");
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
