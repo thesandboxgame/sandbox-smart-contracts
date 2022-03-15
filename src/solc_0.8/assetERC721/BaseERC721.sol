@@ -15,6 +15,8 @@ abstract contract BaseERC721 is
     IERC721Token,
     IERC721Minter
 {
+    uint256[50] private __gap1; // In case
+
     address internal _trustedForwarder;
     string public baseTokenURI;
 
@@ -144,5 +146,5 @@ abstract contract BaseERC721 is
         return baseTokenURI;
     }
 
-    uint256[50] private __gap;
+    uint256[50] private __gap2; // In case
 }
