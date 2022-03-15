@@ -3,9 +3,9 @@ import {expect} from '../chai-setup';
 import {sendMetaTx} from '../sendMetaTx';
 import {assetFixtures} from '../common/fixtures/asset';
 
-const setupAsset = withSnapshot(['Asset'], assetFixtures);
+const setupAsset = withSnapshot(['AssetERC1155'], assetFixtures);
 
-describe('Asset.sol', function () {
+describe('AssetERC1155.sol', function () {
   it('user sending asset to itself keep the same balance', async function () {
     const {Asset, users, mintAsset} = await setupAsset();
     const tokenId = await mintAsset(users[0].address, 20);
@@ -163,7 +163,7 @@ describe('Asset.sol', function () {
     expect(balance).to.be.equal(0);
   });
 
-  describe('Asset: MetaTransactions', function () {
+  describe('AssetERC1155: MetaTransactions', function () {
     it('can transfer by metaTx', async function () {
       const {Asset, users, mintAsset, trustedForwarder} = await setupAsset();
       const tokenId = await mintAsset(users[1].address, 11);
