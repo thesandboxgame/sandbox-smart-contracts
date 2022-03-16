@@ -37,7 +37,7 @@ contract ContributionRules is Ownable {
         multiplierERC1155 = _multiplierERC1155;
     }
 
-    function computeMultiplier() external view returns (uint256) {
+    function computeMultiplier(address account, uint256 amountStaked) external view returns (uint256) {
         //TODO: compute the multiplier
         //TODO: calculate all the multipliers - update all the user contribution
     }
@@ -86,7 +86,19 @@ contract ContributionRules is Ownable {
         // uint256 numNFT = multiplierERC721.balanceOf(account);
     }
 
-    function _calcMultiplierListERC1155(address contractERC1155) internal pure returns (uint256) {
+    function _calcMultiplierListERC1155(address contractERC1155, address account) internal view returns (uint256) {
+        uint256 multiplier = 0;
+        IERC1155 refContract = IERC1155(contractERC1155);
         // uint256 numAssets = multiplierERC1155.balanceOf(account, id); //check for each item of the list and apply multiplier
+        for (uint256 x = 0; x > _listERC1155[refContract].ids.length; x++) {
+            uint256 bal = refContract.balanceOf(account, _listERC1155[refContract].ids[x]);
+
+            //TODO: If the user has more, sum the multipliers? Apply the highest one?
+            if (bal > 0) {
+                multiplier = _listERC1155[refContract].multiplier[x];
+            }
+        }
+
+        return multiplier;
     }
 }

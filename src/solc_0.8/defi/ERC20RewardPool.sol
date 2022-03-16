@@ -10,7 +10,7 @@ import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import {AccessControl} from "@openzeppelin/contracts-0.8/access/AccessControl.sol";
 import {ERC2771Handler} from "../common/BaseWithStorage/ERC2771Handler.sol";
 import {StakeTokenWrapper} from "./StakeTokenWrapper.sol";
-import {IContributionCalculator} from "./interfaces/IContributionCalculator.sol";
+import {IContributionRules} from "./interfaces/IContributionRules.sol";
 import {IRewardCalculator} from "./interfaces/IRewardCalculator.sol";
 import {LockRules} from "./rules/LockRules.sol";
 import {RequirementsRules} from "./rules/RequirementsRules.sol";
@@ -47,13 +47,8 @@ contract ERC20RewardPool is
     // until the last call to restartRewards) for the user taking into account the value of totalContributions.
     uint256 public rewardPerTokenStored;
 
-    //TODO change address to interfaces when ready
-    address public contributionRules;
-    address public requirementRules;
-    address public lockRules;
-
     IERC20 public rewardToken;
-    IContributionCalculator public contributionCalculator;
+    IContributionRules public contributionRules;
     IRewardCalculator public rewardCalculator;
 
     // This value multiplied by the user contribution is the share of reward from the the last time
@@ -77,33 +72,33 @@ contract ERC20RewardPool is
     }
 
     modifier isContractAndAdmin(address contractAddress) {
-        require(contractAddress.isContract(), "MultiStakingPool: not a contract");
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "MultiStakingPool: not admin");
+        require(contractAddress.isContract(), "ERC20RewardPool: not a contract");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
         _;
     }
 
     /// @notice set the lockPeriodInSecs for the anti-compound buffer
     /// @param lockPeriodInSecs amount of time the user must wait between reward withdrawal
     function setAntiCompoundLockPeriod(uint256 lockPeriodInSecs) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "MultiStakingPool: not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
 
         antiCompound.lockPeriodInSecs = lockPeriodInSecs;
     }
 
     function setTimelockDeposit(uint256 newTimeDeposit) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "MultiStakingPool: not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
 
         lockDeposit.lockPeriodInSecs = newTimeDeposit;
     }
 
     function setTimeLockWithdraw(uint256 newTimeWithdraw) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "MultiStakingPool: not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
 
         lockWithdraw.lockPeriodInSecs = newTimeWithdraw;
     }
 
     function setAmountLockClaim(uint256 newAmountLockClaim, bool enabled) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "MultiStakingPool: not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
 
         lockClaim.amount = newAmountLockClaim;
         lockClaim.claimLockEnabled = enabled;
@@ -131,7 +126,7 @@ contract ERC20RewardPool is
     /// @notice set the trusted forwarder
     /// @param trustedForwarder address of the contract that is enabled to send meta-tx on behalf of the user
     function setTrustedForwarder(address trustedForwarder) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "MultiStakingPool: not admin");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
         _trustedForwarder = trustedForwarder;
     }
 
@@ -178,8 +173,8 @@ contract ERC20RewardPool is
     /// @dev this function must be called in an emergency situation only.
     /// @dev Calling it is risky specially when rewardToken == stakeToken
     function recoverFunds(address receiver) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "MultiStakingPool: not admin");
-        require(receiver != address(0), "MultiStakingPool: invalid receiver");
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
+        require(receiver != address(0), "ERC20RewardPool: invalid receiver");
         rewardToken.safeTransfer(receiver, rewardToken.balanceOf(address(this)));
     }
 
@@ -259,7 +254,7 @@ contract ERC20RewardPool is
     /// @dev update the contribution for the user. We understand the risk but the rewards are distributes slowly so
     /// @dev the user cannot affect the reward distribution heavily.
     function computeContribution(address account) external {
-        require(account != address(0), "MultiStakingPool: invalid address");
+        require(account != address(0), "ERC20RewardPool: invalid address");
         // We decide to give the user the accumulated rewards even if he cheated a little bit.
         _processRewards(account);
         _updateContribution(account);
@@ -289,7 +284,7 @@ contract ERC20RewardPool is
         antiDepositCheck(_msgSender())
         checkRequirement(_msgSender(), amount)
     {
-        require(amount > 0, "MultiStakingPool: Cannot stake 0");
+        require(amount > 0, "ERC20RewardPool: Cannot stake 0");
 
         // The first time a user stakes he cannot remove his rewards immediately.
         if (antiCompound.lastClaim[_msgSender()] == 0) {
@@ -307,7 +302,7 @@ contract ERC20RewardPool is
         _processRewards(_msgSender());
         super._stake(amount);
         _updateContribution(_msgSender());
-        require(_contributions[_msgSender()] > 0, "MultiStakingPool: not enough contributions");
+        require(_contributions[_msgSender()] > 0, "ERC20RewardPool: not enough contributions");
 
         if (earlierRewards != 0) {
             rewards[_msgSender()] = rewards[_msgSender()] + earlierRewards;
@@ -342,7 +337,7 @@ contract ERC20RewardPool is
     }
 
     function _withdrawStake(address account, uint256 amount) internal antiWithdrawCheck(_msgSender()) {
-        require(amount > 0, "MultiStakingPool: Cannot withdraw 0");
+        require(amount > 0, "ERC20RewardPool: Cannot withdraw 0");
         super._withdraw(amount);
         lockWithdraw.lastWithdraw[_msgSender()] = block.timestamp;
         emit Withdrawn(account, amount);
@@ -367,10 +362,10 @@ contract ERC20RewardPool is
     }
 
     function _computeContribution(address account) internal returns (uint256) {
-        if (contributionCalculator == IContributionCalculator(address(0))) {
+        if (contributionRules == IContributionRules(address(0))) {
             return _balances[account];
         } else {
-            return contributionCalculator.computeContribution(account, _balances[account]);
+            return contributionRules.computeMultiplier(account, _balances[account]);
         }
     }
 
