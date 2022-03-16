@@ -686,7 +686,7 @@ describe('MockLandWithMint.sol', function () {
           3,
           bytes
         )
-      ).to.be.revertedWith('Already minted as 3x3');
+      ).to.be.revertedWith('Already minted');
     });
 
     it('transferring all 1X1 quad from a 6x6', async function () {
@@ -753,7 +753,7 @@ describe('MockLandWithMint.sol', function () {
           6,
           bytes
         )
-      ).to.be.revertedWith('Already minted as 6x6');
+      ).to.be.revertedWith('Already minted');
     });
 
     it('transferring all 1X1 quad from a 12x12', async function () {
@@ -819,7 +819,7 @@ describe('MockLandWithMint.sol', function () {
           12,
           bytes
         )
-      ).to.be.revertedWith('Already minted as 12x12');
+      ).to.be.revertedWith('Already minted');
     });
   });
 
