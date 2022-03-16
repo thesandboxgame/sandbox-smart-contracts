@@ -97,11 +97,11 @@ contract ERC20RewardPool is
         lockWithdraw.lockPeriodInSecs = newTimeWithdraw;
     }
 
-    function setAmountLockClaim(uint256 newAmountLockClaim, bool enabled) external {
+    function setAmountLockClaim(uint256 newAmountLockClaim, bool isEnabled) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
 
         lockClaim.amount = newAmountLockClaim;
-        lockClaim.claimLockEnabled = enabled;
+        lockClaim.claimLockEnabled = isEnabled;
     }
 
     /// TODO: PROBABLY REMOVE THIS FUNCTION - replaced by setContributionRules
@@ -132,14 +132,7 @@ contract ERC20RewardPool is
 
     /// @notice set contract that contains all the contribution rules
     function setContributionRules(address contractAddress) external isContractAndAdmin(contractAddress) {
-        //TODO change address to interfaces when ready
-        contributionRules = contractAddress;
-    }
-
-    /// @notice set contract that contains all the requirement rules
-    function setRequirementRules(address contractAddress) external isContractAndAdmin(contractAddress) {
-        //TODO change address to interfaces when ready
-        requirementRules = contractAddress;
+        contributionRules = IContributionRules(contractAddress);
     }
 
     function getRemainingTimelockClaim() external view returns (uint256) {
@@ -346,6 +339,7 @@ contract ERC20RewardPool is
     function _withdrawRewards(address account) internal antiCompoundCheck(account) {
         uint256 reward = rewards[account];
         if (reward > 0) {
+            if (lockClaim.claimLockEnabled == true && lockClaim.amount > 0) {}
             rewards[account] = 0;
             rewardToken.safeTransfer(account, reward);
             emit RewardPaid(account, reward);
