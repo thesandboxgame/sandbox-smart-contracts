@@ -8,7 +8,6 @@ import "../asset/libraries/AssetHelper.sol";
 
 // solhint-disable-next-line no-empty-blocks
 abstract contract AssetERC1155 is AssetBaseERC1155 {
-
     /// @notice fulfills the purpose of a constructor in upgradeable contracts
     function initialize(
         address trustedForwarder,
