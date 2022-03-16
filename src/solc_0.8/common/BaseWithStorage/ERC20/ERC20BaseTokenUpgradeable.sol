@@ -1,37 +1,37 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "@openzeppelin/contracts-0.8/utils/Context.sol";
+import "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "./extensions/ERC20Internal.sol";
 import "../../interfaces/IERC20Extended.sol";
-import "../WithSuperOperators.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-abstract contract ERC20UpgradableBaseToken is
-    WithSuperOperators,
+abstract contract ERC20BaseTokenUpgradeable is
     IERC20,
     IERC20Extended,
     ERC20Internal,
-    Context,
+    ERC2771ContextUpgradeable,
+    AccessControlUpgradeable,
     Initializable
 {
     string internal _name;
     string internal _symbol;
-    address internal _operator;
     uint256 internal _totalSupply;
     mapping(address => uint256) internal _balances;
     mapping(address => mapping(address => uint256)) internal _allowances;
 
-    function initV1(
+    function __ERC20BaseTokenUpgradeable_init(
         string memory tokenName,
         string memory tokenSymbol,
-        address admin,
-        address operator
-    ) public initializer {
+        address trustedForwarder,
+        address admin
+    ) internal initializer{
         _name = tokenName;
         _symbol = tokenSymbol;
-        _admin = admin;
-        _operator = operator;
+        __AccessControl_init();
+        _setupRole(DEFAULT_ADMIN_ROLE, admin);
+        __ERC2771Context_init(trustedForwarder);
     }
 
     /// @notice Transfer `amount` tokens to `to`.
@@ -53,7 +53,7 @@ abstract contract ERC20UpgradableBaseToken is
         address to,
         uint256 amount
     ) external override returns (bool success) {
-        if (_msgSender() != from && !_superOperators[_msgSender()] && _msgSender() != _operator) {
+        if (_msgSender() != from && !hasRole(SUPER_OPERATOR_ROLE, _msgSender())) {
             uint256 currentAllowance = _allowances[from][_msgSender()];
             if (currentAllowance != ~uint256(0)) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
@@ -138,7 +138,7 @@ abstract contract ERC20UpgradableBaseToken is
         address spender,
         uint256 amount
     ) public override returns (bool success) {
-        require(_msgSender() == owner || _superOperators[_msgSender()] || _msgSender() == _operator, "NOT_AUTHORIZED");
+        require(_msgSender() == owner || hasRole(SUPER_OPERATOR_ROLE, _msgSender()), "NOT_AUTHORIZED");
         _approveFor(owner, spender, amount);
         return true;
     }
@@ -153,7 +153,7 @@ abstract contract ERC20UpgradableBaseToken is
         address spender,
         uint256 amountNeeded
     ) public returns (bool success) {
-        require(_msgSender() == owner || _superOperators[_msgSender()] || _msgSender() == _operator, "INVALID_SENDER");
+        require(_msgSender() == owner || hasRole(SUPER_OPERATOR_ROLE, _msgSender()), "INVALID_SENDER");
         _addAllowanceIfNeeded(owner, spender, amountNeeded);
         return true;
     }
@@ -164,7 +164,7 @@ abstract contract ERC20UpgradableBaseToken is
         address spender,
         uint256 amountNeeded /*(ERC20Internal, ERC20ExecuteExtension, ERC20BasicApproveExtension)*/
     ) internal virtual override {
-        if (amountNeeded > 0 && !isSuperOperator(spender) && spender != _operator) {
+        if (amountNeeded > 0 && !hasRole(SUPER_OPERATOR_ROLE, _msgSender())) {
             uint256 currentAllowance = _allowances[owner][spender];
             if (currentAllowance < amountNeeded) {
                 _approveFor(owner, spender, amountNeeded);
@@ -217,7 +217,7 @@ abstract contract ERC20UpgradableBaseToken is
     /// @param amount The number of token to burn.
     function _burn(address from, uint256 amount) internal {
         require(amount > 0, "BURN_O_TOKENS");
-        if (_msgSender() != from && !_superOperators[_msgSender()] && _msgSender() != _operator) {
+        if (_msgSender() != from && !hasRole(SUPER_OPERATOR_ROLE, _msgSender())) {
             uint256 currentAllowance = _allowances[from][_msgSender()];
             if (currentAllowance != ~uint256(0)) {
                 // save gas when allowance is maximal by not reducing it (see https://github.com/ethereum/EIPs/issues/717)
@@ -231,5 +231,18 @@ abstract contract ERC20UpgradableBaseToken is
         _balances[from] = currentBalance - amount;
         _totalSupply -= amount;
         emit Transfer(from, address(0), amount);
+    }
+
+    function _msgSender()
+        internal
+        view
+        override(ContextUpgradeable, ERC2771ContextUpgradeable)
+        returns (address sender)
+    {
+        return ERC2771ContextUpgradeable._msgSender();
+    }
+
+    function _msgData() internal view override(ContextUpgradeable, ERC2771ContextUpgradeable) returns (bytes calldata) {
+        return ERC2771ContextUpgradeable._msgData();
     }
 }
