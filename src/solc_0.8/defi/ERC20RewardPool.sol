@@ -109,7 +109,7 @@ contract ERC20RewardPool is
         lockClaim.claimLockEnabled = enabled;
     }
 
-    /// TODO: PROBABLY REMOVE THIS FUNCTION
+    /// TODO: PROBABLY REMOVE THIS FUNCTION - replaced by setContributionRules
     // /// @notice set the contribution calculator
     // /// @param contractAddress address of a plugin that calculates the contribution of the user based on his stake
     // function setContributionCalculator(address contractAddress) external isContractAndAdmin(contractAddress) {
