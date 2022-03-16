@@ -107,14 +107,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         bool success = _transferFrom(from, to, id, value);
         if (success) {
             require(
-                _checkOnERC1155Received(
-                    isTrustedForwarder(msg.sender) ? from : msg.sender,
-                    from,
-                    to,
-                    id,
-                    value,
-                    data
-                ),
+                _checkOnERC1155Received(isTrustedForwarder(msg.sender) ? from : msg.sender, from, to, id, value, data),
                 "1155_TRANSFER_REJECTED"
             );
         }
@@ -233,7 +226,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     ) external returns (uint256 newId) {
         bool metaTx = isTrustedForwarder(msg.sender);
         require(sender == _msgSender() || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
-        return _extractERC721From(metaTx ? sender : _msgSender(), sender, id, to);
+        // return _extractERC721From(metaTx ? sender : _msgSender(), sender, id, to);
     }
 
     /// @notice Get the balance of `owners` for each token type `ids`.
@@ -574,33 +567,42 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
             pack[0] = bytes1(rarity * 64);
             _rarityPacks[uriId] = pack;
         }
+        _mint(operator, owner, id, supply, data);
+    }
 
+    function _mint(
+        address operator,
+        address account,
+        uint256 id,
+        uint256 amount,
+        bytes memory data
+    ) internal {
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
-        _packedTokenBalance[owner][bin] = _packedTokenBalance[owner][bin].updateTokenBalance(
+        _packedTokenBalance[account][bin] = _packedTokenBalance[account][bin].updateTokenBalance(
             index,
-            supply,
+            amount,
             ObjectLib32.Operations.REPLACE
         );
 
-        emit TransferSingle(operator, address(0), owner, id, supply);
-        require(_checkOnERC1155Received(operator, address(0), owner, id, supply, data), "TRANSFER_REJECTED");
+        emit TransferSingle(operator, address(0), account, id, amount);
+        require(_checkOnERC1155Received(operator, address(0), account, id, amount, data), "TRANSFER_REJECTED");
     }
 
-    function _extractERC721From(
-        address operator,
-        address sender,
-        uint256 id,
-        address to
-    ) internal returns (uint256 newId) {
-        require(to != address(0), "TO==0");
-        require(id & ERC1155ERC721Helper.IS_NFT == 0, "!1155");
-        uint32 tokenCollectionIndex = _nextCollectionIndex[id];
-        newId = id + ERC1155ERC721Helper.IS_NFT + (tokenCollectionIndex) * 2**ERC1155ERC721Helper.NFT_INDEX_OFFSET;
-        _nextCollectionIndex[id] = tokenCollectionIndex + 1;
-        _burnFT(sender, id, 1);
-        _mint(_metadataHash[id & ERC1155ERC721Helper.URI_ID], 1, 0, operator, to, newId, "", true);
-        emit Extraction(id, newId);
-    }
+    // function _extractERC721From(
+    //     address operator,
+    //     address sender,
+    //     uint256 id,
+    //     address to
+    // ) internal returns (uint256 newId) {
+    //     require(to != address(0), "TO==0");
+    //     require(id & ERC1155ERC721Helper.IS_NFT == 0, "!1155");
+    //     uint32 tokenCollectionIndex = _nextCollectionIndex[id];
+    //     newId = id + ERC1155ERC721Helper.IS_NFT + (tokenCollectionIndex) * 2**ERC1155ERC721Helper.NFT_INDEX_OFFSET;
+    //     _nextCollectionIndex[id] = tokenCollectionIndex + 1;
+    //     _burnFT(sender, id, 1);
+    //     _mint(_metadataHash[id & ERC1155ERC721Helper.URI_ID], 1, 0, operator, to, newId, "", true);
+    //     emit Extraction(id, newId);
+    // }
 
     /// @dev Allows the use of a bitfield to track the initialized status of the version `v` passed in as an arg.
     /// If the bit at the index corresponding to the given version is already set, revert.
@@ -619,10 +621,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         bytes memory data
     ) internal {
         emit TransferBatch(operator, address(0), owner, ids, supplies);
-        require(
-            _checkOnERC1155BatchReceived(operator, address(0), owner, ids, supplies, data),
-            "TRANSFER_REJECTED"
-        );
+        require(_checkOnERC1155BatchReceived(operator, address(0), owner, ids, supplies, data), "TRANSFER_REJECTED");
     }
 
     function _checkEnoughBalance(
