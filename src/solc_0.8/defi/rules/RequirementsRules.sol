@@ -75,7 +75,6 @@ contract RequirementsRules is Ownable {
         coeffERC1155 = coeff;
     }
 
-    // Depending on the logic, we can merge the functions below
     function setRequireERC721List(address contractERC721, uint256 amount) external onlyOwner {
         require(contractERC721 != address(0), "RequirementsRules: invalid address");
 
@@ -110,7 +109,4 @@ contract RequirementsRules is Ownable {
         }
         return totalBal;
     }
-
-    // Not needed
-    // function requireAvatarList() external {}
 }
