@@ -38,7 +38,7 @@ contract LockRules {
         if (antiCompound.lockPeriodInSecs != 0) {
             require(
                 block.timestamp > antiCompound.lastClaim[account] + antiCompound.lockPeriodInSecs,
-                "MultiStakingPool: Claim must wait"
+                "LockRules: Claim must wait"
             );
         }
         antiCompound.lastClaim[account] = block.timestamp;
@@ -50,7 +50,7 @@ contract LockRules {
         if (lockWithdraw.lockPeriodInSecs != 0) {
             require(
                 block.timestamp > lockWithdraw.lastWithdraw[account] + lockWithdraw.lockPeriodInSecs,
-                "MultiStakingPool: Withdraw must wait"
+                "LockRules: Withdraw must wait"
             );
         }
         lockWithdraw.lastWithdraw[account] = block.timestamp;
@@ -62,7 +62,7 @@ contract LockRules {
         if (lockDeposit.lockPeriodInSecs != 0) {
             require(
                 block.timestamp > lockDeposit.lastDeposit[account] + lockDeposit.lockPeriodInSecs,
-                "MultiStakingPool: Deposit must wait"
+                "LockRules: Deposit must wait"
             );
         }
         lockDeposit.lastDeposit[account] = block.timestamp;

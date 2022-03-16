@@ -66,7 +66,7 @@ contract ContributionRules is Ownable {
         _listERC721[IERC721(contractERC721)].multiplier = multiplier;
     }
 
-    function multiplierBalanceOfERC721(address account, uint256 amountStaked) external view returns (uint256) {
+    function multiplierBalanceOfLand(address account, uint256 amountStaked) external view returns (uint256) {
         uint256 numNFT = multiplierERC721.balanceOf(account);
         if (numNFT == 0) {
             return amountStaked;
