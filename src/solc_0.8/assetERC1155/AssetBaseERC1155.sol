@@ -45,8 +45,6 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     address internal _predicate; // used in place of polygon's `PREDICATE_ROLE`
 
     uint8 internal _chainIndex; // modify this for l2
-    uint256 private constant CHAIN_INDEX_OFFSET_MULTIPLIER = uint256(2)**(256 - 160 - 1 - 32);
-    uint256 private constant CHAIN_INDEX_MASK = 0x00000000000000000000000000000000000000000000007F8000000000000000;
 
     address internal _trustedForwarder;
 
@@ -220,7 +218,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     /// @notice check whether address `who` is given minting bouncer rights.
     /// @param who The address to query.
     /// @return whether the address has minting rights.
-    function isBouncer(address who) external view returns (bool) {
+    function isBouncer(address who) public view returns (bool) {
         return _bouncers[who];
     }
 
@@ -367,7 +365,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         return forwarder == _trustedForwarder;
     }
 
-    function getTrustedForwarder() external view returns (address trustedForwarder) {
+    function getTrustedForwarder() external view returns (address) {
         return _trustedForwarder;
     }
 
@@ -548,14 +546,12 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         (uint256 bin, uint256 index) = ids[offset].getTokenBinIndex();
         for (uint256 i = 0; i < 8 && offset + i < supplies.length; i++) {
             uint256 j = offset + i;
-            if (supplies[j] > 1) {
+            if (supplies[j] > 0) {
                 _packedTokenBalance[owner][bin] = _packedTokenBalance[owner][bin].updateTokenBalance(
                     index + i,
                     supplies[j],
                     ObjectLib32.Operations.ADD
                 );
-            } else {
-                break; // Why break?
             }
         }
     }
