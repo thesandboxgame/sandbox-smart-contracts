@@ -283,7 +283,12 @@ contract ERC20RewardPool is
     /// @notice stake some amount into the contract
     /// @param amount the amount of tokens to stake
     /// @dev the user must approve in the stack token before calling this function
-    function stake(uint256 amount) external nonReentrant antiDepositCheck(_msgSender()) checkRequirement(_msgSender()) {
+    function stake(uint256 amount)
+        external
+        nonReentrant
+        antiDepositCheck(_msgSender())
+        checkRequirement(_msgSender(), amount)
+    {
         require(amount > 0, "MultiStakingPool: Cannot stake 0");
 
         // The first time a user stakes he cannot remove his rewards immediately.

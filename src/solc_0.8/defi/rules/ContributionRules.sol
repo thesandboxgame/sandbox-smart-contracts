@@ -29,8 +29,8 @@ contract ContributionRules is Ownable {
         uint256[] multiplier;
     }
 
-    mapping(address => MultiplierERC721) private _listERC721;
-    mapping(address => MultiplierERC1155) private _listERC1155;
+    mapping(IERC721 => MultiplierERC721) private _listERC721;
+    mapping(IERC1155 => MultiplierERC1155) private _listERC1155;
 
     constructor(IERC721 _multiplierERC721, IERC1155 _multiplierERC1155) {
         multiplierERC721 = _multiplierERC721;
@@ -51,8 +51,8 @@ contract ContributionRules is Ownable {
     ) external onlyOwner {
         require(contractERC1155 != address(0), "ContributionRules: invalid address");
 
-        _listERC721[contractERC1155].ids = ids;
-        _listERC721[contractERC1155].multiplier = multiplier;
+        _listERC1155[IERC1155(contractERC1155)].ids = ids;
+        _listERC1155[IERC1155(contractERC1155)].multiplier = multiplier;
     }
 
     function setERC721MultiplierList(
@@ -62,8 +62,8 @@ contract ContributionRules is Ownable {
     ) external onlyOwner {
         require(contractERC721 != address(0), "ContributionRules: invalid address");
 
-        _listERC721[contractERC721].ids = ids;
-        _listERC721[contractERC721].multiplier = multiplier;
+        _listERC721[IERC721(contractERC721)].ids = ids;
+        _listERC721[IERC721(contractERC721)].multiplier = multiplier;
     }
 
     function multiplierBalanceOfERC721(address account, uint256 amountStaked) external view returns (uint256) {
