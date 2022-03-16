@@ -77,8 +77,7 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         require(isBouncer(_msgSender()), "!BOUNCER");
         require(owner != address(0), "TO==0");
         ids = _allocateIds(creator, supplies, rarityPack, packId, hash);
-        _mintBatches(supplies, owner, ids);
-        _completeMultiMint(_msgSender(), owner, ids, supplies, data);
+        _mintBatch(owner, ids, supplies, data);
     }
 
     /// @notice called when token is deposited to root chain
@@ -94,8 +93,7 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
             abi.decode(depositData, (uint256[], uint256[], bytes));
         require(user != address(0x0), "PolygonAssetERC1155: INVALID_DEPOSIT_USER");
 
-        _mintBatches(amounts, user, ids);
-        _completeMultiMint(_msgSender(), user, ids, amounts, data);
+        _mintBatch(user, ids, amounts, data);
     }
 
     /**
@@ -116,20 +114,6 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
      */
     function withdrawBatch(uint256[] calldata ids, uint256[] calldata amounts) external {
         _burnBatch(_msgSender(), ids, amounts);
-    }
-
-    function _completeMultiMint(
-        address operator,
-        address owner,
-        uint256[] memory ids,
-        uint256[] memory supplies,
-        bytes memory data
-    ) internal {
-        emit TransferBatch(operator, address(0), owner, ids, supplies);
-        require(
-            _checkERC1155AndCallSafeBatchTransfer(operator, address(0), owner, ids, supplies, data),
-            "TRANSFER_REJECTED"
-        );
     }
 
     function _allocateIds(

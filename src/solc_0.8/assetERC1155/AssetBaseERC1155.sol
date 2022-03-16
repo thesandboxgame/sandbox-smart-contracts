@@ -107,7 +107,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         bool success = _transferFrom(from, to, id, value);
         if (success) {
             require(
-                _checkERC1155AndCallSafeTransfer(
+                _checkOnERC1155Received(
                     isTrustedForwarder(msg.sender) ? from : msg.sender,
                     from,
                     to,
@@ -143,7 +143,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         _batchTransferFrom(from, to, ids, values, authorized);
         emit TransferBatch(metaTx ? from : _msgSender(), from, to, ids, values);
         require(
-            _checkERC1155AndCallSafeBatchTransfer(metaTx ? from : _msgSender(), from, to, ids, values, data),
+            _checkOnERC1155BatchReceived(metaTx ? from : _msgSender(), from, to, ids, values, data),
             "1155_TRANSFER_REJECTED"
         );
     }
@@ -458,36 +458,6 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         }
     }
 
-    function _checkERC1155AndCallSafeTransfer(
-        address operator,
-        address from,
-        address to,
-        uint256 id,
-        uint256 value,
-        bytes memory data
-    ) internal returns (bool) {
-        if (!to.isContract()) {
-            return true;
-        }
-
-        return IERC1155Receiver(to).onERC1155Received(operator, from, id, value, data) == ERC1155_RECEIVED;
-    }
-
-    function _checkERC1155AndCallSafeBatchTransfer(
-        address operator,
-        address from,
-        address to,
-        uint256[] memory ids,
-        uint256[] memory values,
-        bytes memory data
-    ) internal returns (bool) {
-        if (!to.isContract()) {
-            return true;
-        }
-        bytes4 retval = IERC1155Receiver(to).onERC1155BatchReceived(operator, from, ids, values, data);
-        return (retval == ERC1155_BATCH_RECEIVED);
-    }
-
     function _burn(
         address from,
         uint256 id,
@@ -524,19 +494,21 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         );
     }
 
-    function _mintBatches(
-        uint256[] memory supplies,
-        address owner,
-        uint256[] memory ids
+    function _mintBatch(
+        address to,
+        uint256[] memory ids,
+        uint256[] memory amounts,
+        bytes memory data
     ) internal {
         uint16 offset = 0;
-        while (offset < supplies.length) {
-            _mintBatch(offset, supplies, owner, ids);
+        while (offset < amounts.length) {
+            _mintPack(offset, amounts, to, ids);
             offset += 8;
         }
+        _completeBatchMint(_msgSender(), to, ids, amounts, data);
     }
 
-    function _mintBatch(
+    function _mintPack(
         uint16 offset,
         uint256[] memory supplies,
         address owner,
@@ -611,7 +583,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         );
 
         emit TransferSingle(operator, address(0), owner, id, supply);
-        require(_checkERC1155AndCallSafeTransfer(operator, address(0), owner, id, supply, data), "TRANSFER_REJECTED");
+        require(_checkOnERC1155Received(operator, address(0), owner, id, supply, data), "TRANSFER_REJECTED");
     }
 
     function _extractERC721From(
@@ -639,6 +611,20 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         _initBits = _initBits | (uint256(1) << v);
     }
 
+    function _completeBatchMint(
+        address operator,
+        address owner,
+        uint256[] memory ids,
+        uint256[] memory supplies,
+        bytes memory data
+    ) internal {
+        emit TransferBatch(operator, address(0), owner, ids, supplies);
+        require(
+            _checkOnERC1155BatchReceived(operator, address(0), owner, ids, supplies, data),
+            "TRANSFER_REJECTED"
+        );
+    }
+
     function _checkEnoughBalance(
         address from,
         uint256 id,
@@ -646,5 +632,35 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     ) internal view {
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         require(_packedTokenBalance[from][bin].getValueInBin(index) >= value, "BALANCE_TOO_LOW");
+    }
+
+    function _checkOnERC1155Received(
+        address operator,
+        address from,
+        address to,
+        uint256 id,
+        uint256 value,
+        bytes memory data
+    ) internal returns (bool) {
+        if (!to.isContract()) {
+            return true;
+        }
+
+        return IERC1155Receiver(to).onERC1155Received(operator, from, id, value, data) == ERC1155_RECEIVED;
+    }
+
+    function _checkOnERC1155BatchReceived(
+        address operator,
+        address from,
+        address to,
+        uint256[] memory ids,
+        uint256[] memory values,
+        bytes memory data
+    ) internal returns (bool) {
+        if (!to.isContract()) {
+            return true;
+        }
+        bytes4 retval = IERC1155Receiver(to).onERC1155BatchReceived(operator, from, ids, values, data);
+        return (retval == ERC1155_BATCH_RECEIVED);
     }
 }
