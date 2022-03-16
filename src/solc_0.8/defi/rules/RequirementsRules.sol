@@ -2,13 +2,17 @@
 
 pragma solidity 0.8.2;
 
+import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
+import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import {IERC721} from "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 
-contract RequirementsRules {
+contract RequirementsRules is Ownable {
+    using Address for address;
+
     uint128 public coeffERC721;
     uint128 public coeffERC1155;
 
-    address public _requirementTokenERC721;
+    IERC721 public _requirementTokenERC721;
 
     struct RequireERC721 {
         uint256[] ids;
@@ -41,27 +45,27 @@ contract RequirementsRules {
         _;
     }
 
-    function setERC721RequirementToken(address requirementToken) external {
-        require(requirementToken != address(0), "RequirementsRules: invalid address");
-        _requirementTokenERC721 = requirementToken;
+    function setERC721RequirementToken(address requirementToken) external onlyOwner {
+        require(requirementToken.isContract(), "LandContributionCalc: Bad NFTMultiplierToken address");
+        _requirementTokenERC721 = IERC721(requirementToken);
     }
 
     // TODO: check if really needed
     // function setERC1155RequirementToken(address token) external {}
 
-    function setMaxRequirement(uint256 amount, uint256 maxStake) external {
+    function setMaxRequirement(uint256 amount, uint256 maxStake) external onlyOwner {
         maxRequirements.amount = amount;
         maxRequirements.maxStake = maxStake;
     }
 
     // set ERC20 coefficient for the requirement list
-    function setERC721CoeffRequirement(uint128 coeff) external {
+    function setERC721CoeffRequirement(uint128 coeff) external onlyOwner {
         require(coeff > 0, "RequirementsRules: Coefficient > 0");
         coeffERC721 = coeff;
     }
 
     // set ERC20 coefficient for the requirement list
-    function setERC1155CoeffRequirement(uint128 coeff) external {
+    function setERC1155CoeffRequirement(uint128 coeff) external onlyOwner {
         require(coeff > 0, "RequirementsRules: Coefficient > 0");
         coeffERC1155 = coeff;
     }
@@ -71,7 +75,7 @@ contract RequirementsRules {
         address contractERC721,
         uint256[] memory ids,
         uint256 amount
-    ) external {
+    ) external onlyOwner {
         require(contractERC721 != address(0), "RequirementsRules: invalid address");
 
         _listERC721[contractERC721].ids = ids;
@@ -82,7 +86,7 @@ contract RequirementsRules {
         address contractERC1155,
         uint256[] memory ids,
         uint256 amount
-    ) external {
+    ) external onlyOwner {
         require(contractERC1155 != address(0), "RequirementsRules: invalid address");
 
         _listERC1155[contractERC1155].ids = ids;
@@ -90,7 +94,7 @@ contract RequirementsRules {
     }
 
     // right now, the only possible way to go through the list, is iterating the vector
-    // we shouldn't have huge list to avoid issues and high gas fees
+    // we shouldn't have huge lists to avoid issues and high gas fees
     // TODO: think on other solutions to look for the ids
     function _checkERC721List(address account) internal pure returns (uint256) {
         uint256 prev = 200;

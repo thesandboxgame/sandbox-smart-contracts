@@ -2,11 +2,14 @@
 
 pragma solidity 0.8.2;
 
+import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
+import {Address} from "@openzeppelin/contracts-0.8/utils/Address.sol";
 import {SafeMathWithRequire} from "../../common/Libraries/SafeMathWithRequire.sol";
 import {IERC721} from "@openzeppelin/contracts-0.8/token/ERC721/IERC721.sol";
 import {IERC1155} from "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 
-contract ContributionRules {
+contract ContributionRules is Ownable {
+    using Address for address;
     uint256 internal constant DECIMALS_9 = 1000000000;
     uint256 internal constant MIDPOINT_9 = 500000000;
     uint256 internal constant NFT_FACTOR_6 = 10000;
@@ -36,7 +39,6 @@ contract ContributionRules {
 
     function computeMultiplier() external view returns (uint256) {
         //TODO: compute the multiplier
-        //TODO: QUESTION think about how it's going to work - how we gonna compute all the multipliers? sum up?
         //TODO: calculate all the multipliers - update all the user contribution
     }
 
@@ -46,7 +48,7 @@ contract ContributionRules {
         address contractERC1155,
         uint256[] memory ids,
         uint256[] memory multiplier
-    ) external {
+    ) external onlyOwner {
         require(contractERC1155 != address(0), "ContributionRules: invalid address");
 
         _listERC721[contractERC1155].ids = ids;
@@ -57,7 +59,7 @@ contract ContributionRules {
         address contractERC721,
         uint256[] memory ids,
         uint256[] memory multiplier
-    ) external {
+    ) external onlyOwner {
         require(contractERC721 != address(0), "ContributionRules: invalid address");
 
         _listERC721[contractERC721].ids = ids;
@@ -78,7 +80,7 @@ contract ContributionRules {
     }
 
     // right now, the only possible way to go through the list, is iterating the vector
-    // we shouldn't have huge list to avoid issues and high gas fees
+    // we shouldn't have huge lists to avoid issues and high gas fees
     // TODO: think on other solutions to look for the ids/multipliers
     function _calcMultiplierListERC721(address account) internal pure returns (uint256) {
         // uint256 numNFT = multiplierERC721.balanceOf(account);
