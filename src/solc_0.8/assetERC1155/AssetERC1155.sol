@@ -32,12 +32,11 @@ contract AssetERC1155 is AssetBaseERC1155, IMintableERC1155 {
         address account,
         uint256 id,
         uint256 amount,
-        bytes calldata data
+        bytes calldata metaDataHash
     ) external override {
         require(_msgSender() == _predicate, "!PREDICATE");
         uint256 uriId = id & ERC1155ERC721Helper.URI_ID;
-        // _metadataHash[uriId] = hashes[i];  // TODO
-        _rarityPacks[uriId] = "0x00";
+        _metadataHash[uriId] = metaDataHash;  // To Review
         _mint(_msgSender(), account, id, amount, data);
     }
 
@@ -50,13 +49,12 @@ contract AssetERC1155 is AssetBaseERC1155, IMintableERC1155 {
         address to,
         uint256[] calldata ids,
         uint256[] calldata amounts,
-        bytes calldata data
+        bytes calldata metaDataHash
     ) external override {
         require(_msgSender() == _predicate, "!PREDICATE");
         for (uint256 i = 0; i < ids.length; i++) {
             uint256 uriId = ids[i] & ERC1155ERC721Helper.URI_ID;
-            // _metadataHash[uriId] = hashes[i];  // TODO
-            _rarityPacks[uriId] = "0x00";
+            _metadataHash[uriId] = metaDataHash[i];  // To Review
         }
         _mintBatch(to, ids, amounts, data);
     }
