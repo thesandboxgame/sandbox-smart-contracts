@@ -16,8 +16,8 @@ contract ContributionRules is Ownable {
     uint256 internal constant NFT_CONSTANT_3 = 9000;
     uint256 internal constant ROOT3_FACTOR = 697;
 
-    IERC721 public multiplierERC721;
-    IERC1155 public multiplierERC1155;
+    IERC721 public multiplierERC721Contract;
+    IERC1155 public multiplierERC1155Contract;
 
     struct MultiplierERC721 {
         uint256[] ids;
@@ -25,6 +25,7 @@ contract ContributionRules is Ownable {
     }
 
     struct MultiplierERC1155 {
+        IERC1155 assetContract;
         uint256[] ids;
         uint256[] multiplier;
     }
@@ -32,14 +33,18 @@ contract ContributionRules is Ownable {
     mapping(IERC721 => MultiplierERC721) private _listERC721;
     mapping(IERC1155 => MultiplierERC1155) private _listERC1155;
 
-    constructor(IERC721 _multiplierERC721, IERC1155 _multiplierERC1155) {
-        multiplierERC721 = _multiplierERC721;
-        multiplierERC1155 = _multiplierERC1155;
+    constructor(IERC721 _multiplierERC721Contract, IERC1155 _multiplierERC1155Contract) {
+        multiplierERC721Contract = _multiplierERC721Contract;
+        multiplierERC1155Contract = _multiplierERC1155Contract;
     }
 
+    //TODO: compute the multiplier - if a user has many multipliers, what is the case?
+    // more than 1 asset in the list?
     function computeMultiplier(address account, uint256 amountStaked) external view returns (uint256) {
-        //TODO: compute the multiplier
-        //TODO: calculate all the multipliers - update all the user contribution
+        uint256 landMultiplier = _multiplierBalanceOfERC721(account, amountStaked);
+        uint256 assetMultiplier = _multiplierBalanceOfERC1155(account);
+
+        return landMultiplier * assetMultiplier;
     }
 
     function multiplierBalanceOfERC1155(uint256 amount) external {}
@@ -66,8 +71,8 @@ contract ContributionRules is Ownable {
         _listERC721[IERC721(contractERC721)].multiplier = multiplier;
     }
 
-    function multiplierBalanceOfLand(address account, uint256 amountStaked) external view returns (uint256) {
-        uint256 numNFT = multiplierERC721.balanceOf(account);
+    function _multiplierBalanceOfERC721(address account, uint256 amountStaked) internal view returns (uint256) {
+        uint256 numNFT = multiplierERC721Contract.balanceOf(account);
         if (numNFT == 0) {
             return amountStaked;
         }
@@ -82,23 +87,23 @@ contract ContributionRules is Ownable {
     // right now, the only possible way to go through the list, is iterating the vector
     // we shouldn't have huge lists to avoid issues and high gas fees
     // TODO: think on other solutions to look for the ids/multipliers
-    function _calcMultiplierListERC721(address account) internal pure returns (uint256) {
-        // uint256 numNFT = multiplierERC721.balanceOf(account);
-    }
-
-    function _calcMultiplierListERC1155(address contractERC1155, address account) internal view returns (uint256) {
+    // not possible to make it too generic - many different contracts - too many iterations
+    function _multiplierBalanceOfERC1155(address account) internal view returns (uint256) {
         uint256 multiplier = 0;
-        IERC1155 refContract = IERC1155(contractERC1155);
         // uint256 numAssets = multiplierERC1155.balanceOf(account, id); //check for each item of the list and apply multiplier
-        for (uint256 x = 0; x > _listERC1155[refContract].ids.length; x++) {
-            uint256 bal = refContract.balanceOf(account, _listERC1155[refContract].ids[x]);
+        for (uint256 x = 0; x > _listERC1155[multiplierERC1155Contract].ids.length; x++) {
+            uint256 bal = multiplierERC1155Contract.balanceOf(account, _listERC1155[multiplierERC1155Contract].ids[x]);
 
             //TODO: If the user has more, sum the multipliers? Apply the highest one?
             if (bal > 0) {
-                multiplier = _listERC1155[refContract].multiplier[x];
+                multiplier = _listERC1155[multiplierERC1155Contract].multiplier[x];
             }
         }
 
         return multiplier;
     }
+
+    // function _calcMultiplierListERC721(address account) internal pure returns (uint256) {
+    //     // uint256 numNFT = multiplierERC721.balanceOf(account);
+    // }
 }
