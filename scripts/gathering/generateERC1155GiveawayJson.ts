@@ -27,7 +27,7 @@ if (!resultFilename || resultFilename === '') {
 console.log('file: ', csvFile);
 console.log('filename:', resultFilename);
 
-const assetsByAdress = new Map<string, ERC1155data>();
+const assetsByAddress = new Map<string, ERC1155data>();
 
 (async () => {
   const assetContract = await ethers.getContract('Asset');
@@ -40,22 +40,22 @@ const assetsByAdress = new Map<string, ERC1155data>();
     .pipe(csv())
     .on('data', function (data) {
       const uppercaseAddress = data.Address.toLowerCase();
-      if (!assetsByAdress.has(uppercaseAddress)) {
+      if (!assetsByAddress.has(uppercaseAddress)) {
         const erc1155data: ERC1155data = {
           ids: [data.TokenID],
           values: [Number(data.Amount)],
           contractAddress: assetContract.address,
         };
-        assetsByAdress.set(uppercaseAddress, erc1155data);
+        assetsByAddress.set(uppercaseAddress, erc1155data);
       } else {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const erc1155data: ERC1155data = assetsByAdress.get(uppercaseAddress)!;
+        const erc1155data: ERC1155data = assetsByAddress.get(uppercaseAddress)!;
         erc1155data.ids.push(data.TokenID);
         erc1155data.values.push(Number(data.Amount));
       }
     })
     .on('end', function () {
-      for (const data of assetsByAdress.entries()) {
+      for (const data of assetsByAddress.entries()) {
         assetClaims.push({
           to: data[0],
           erc1155: [data[1]],
