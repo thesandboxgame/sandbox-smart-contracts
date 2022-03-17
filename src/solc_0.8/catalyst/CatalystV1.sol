@@ -12,16 +12,16 @@ contract CatalystV1 is ICatalyst, ERC20UpgradableToken {
 
     IAttributes internal _attributes;
 
-    function initialize(
+    function __CatalystV1_init(
         string memory name,
         string memory symbol,
+        address trustedForwarder,
         address admin,
         uint8 maxGems,
         uint16 _catalystId,
-        IAttributes attributes,
-        address operator
+        IAttributes attributes
     ) public initializer {
-        initV1(name, symbol, admin, operator);
+        __ERC20UpgradableToken_init(name, symbol, trustedForwarder, admin);
         _maxGems = maxGems;
         catalystId = _catalystId;
         _attributes = attributes;
