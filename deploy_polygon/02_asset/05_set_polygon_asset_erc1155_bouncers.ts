@@ -8,7 +8,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const assetMinter = await deployments.get('PolygonAssetMinter');
 
   const isAssetMinterBouncer = await read(
-    'PolygonAsset',
+    'PolygonAssetERC1155',
     'isBouncer',
     assetMinter.address
   );
