@@ -13,7 +13,7 @@ contract AssetERC721 is BaseERC721, IRootERC721 {
     function initialize(address trustedForwarder, address admin) public initializer {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _trustedForwarder = trustedForwarder;
-        __ERC721_init("Sandbox's ASSETs ERC1155", "ASSETERC721");
+        __ERC721_init("Sandbox's ASSETs ERC721", "ASSETERC721");
     }
 
     /// @dev Decode metadata obtained from L2 and attempt to set it for this `tokenId`
