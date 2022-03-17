@@ -5,7 +5,10 @@ import "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "./extensions/ERC20Internal.sol";
 import "../../interfaces/IERC20Extended.sol";
+<<<<<<< HEAD
 import "hardhat/console.sol";
+=======
+>>>>>>> 2 review
 
 abstract contract ERC20BaseTokenUpgradeable is
     IERC20,
@@ -25,8 +28,6 @@ abstract contract ERC20BaseTokenUpgradeable is
     uint256[50] private __gap;
 
     modifier onlyAdmin {
-        console.log("inside only admin");
-        console.log(_msgSender());
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Only admin action");
         _;
     }
@@ -37,8 +38,11 @@ abstract contract ERC20BaseTokenUpgradeable is
         address trustedForwarder,
         address admin
     ) internal initializer {
+<<<<<<< HEAD
         console.log("seting up admin");
         console.log(admin);
+=======
+>>>>>>> 2 review
         _name = tokenName;
         _symbol = tokenSymbol;
         __AccessControl_init();
