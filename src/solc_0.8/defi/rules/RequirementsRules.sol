@@ -38,6 +38,7 @@ contract RequirementsRules is Ownable {
     mapping(IERC1155 => RequireERC1155) public _listERC1155;
 
     modifier checkRequirement(address account, uint256 amount) {
+        //TODO: Apply coeff
         uint256 maxStakeNFT = _checkERC721List(account);
         require(amount > maxStakeNFT, "RequirementsRules: maxStake");
 
@@ -47,15 +48,15 @@ contract RequirementsRules is Ownable {
         _;
     }
 
-    function setERC721RequirementToken(address requirementToken) external onlyOwner {
-        require(requirementToken.isContract(), "RequirementsRules: Bad requirementToken address");
-        _requirementTokenERC721 = IERC721(requirementToken);
+    function setERC721RequirementContract(address requirementContract) external onlyOwner {
+        require(requirementContract.isContract(), "RequirementsRules: Bad requirementToken address");
+        _requirementTokenERC721 = IERC721(requirementContract);
     }
 
     // TODO: check if really needed
-    function setERC1155RequirementToken(address requirementToken) external {
-        require(requirementToken.isContract(), "RequirementsRules: Bad requirementToken address");
-        _requirementTokenERC1155 = IERC1155(requirementToken);
+    function setERC1155RequirementContract(address requirementContract) external {
+        require(requirementContract.isContract(), "RequirementsRules: Bad requirementToken address");
+        _requirementTokenERC1155 = IERC1155(requirementContract);
     }
 
     function setMaxRequirement(uint256 amount, uint256 maxStake) external onlyOwner {
@@ -75,21 +76,21 @@ contract RequirementsRules is Ownable {
         coeffERC1155 = coeff;
     }
 
-    function setRequireERC721List(address contractERC721, uint256 amount) external onlyOwner {
+    function setRequireERC721List(address contractERC721, uint256 maxAmount) external onlyOwner {
         require(contractERC721 != address(0), "RequirementsRules: invalid address");
 
-        _listERC721[IERC721(contractERC721)] = amount;
+        _listERC721[IERC721(contractERC721)] = maxAmount;
     }
 
     function setRequireERC1155List(
         address contractERC1155,
         uint256[] memory ids,
-        uint256 amount
+        uint256 maxAmount
     ) external onlyOwner {
         require(contractERC1155 != address(0), "RequirementsRules: invalid address");
 
         _listERC1155[IERC1155(contractERC1155)].ids = ids;
-        _listERC1155[IERC1155(contractERC1155)].amount = amount;
+        _listERC1155[IERC1155(contractERC1155)].amount = maxAmount;
     }
 
     function _checkERC721List(address account) internal view returns (uint256) {
