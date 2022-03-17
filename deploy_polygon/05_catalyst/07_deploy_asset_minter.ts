@@ -10,7 +10,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'PolygonAssetAttributesRegistry'
   );
   const {deployer, assetMinterAdmin} = await getNamedAccounts();
-  const Asset = await deployments.get('PolygonAsset');
+  const AssetERC1155 = await deployments.get('PolygonAssetERC1155');
+  const AssetERC721 = await deployments.get('PolygonAssetERC721');
 
   const assetRegistryData = await read(
     'PolygonAssetAttributesRegistry',
@@ -37,8 +38,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     log: true,
     args: [
       AssetAttributesRegistry.address,
-      Asset.address, //TODO: fix
-      Asset.address, // TODO: fix
+      AssetERC721.address,
+      AssetERC1155.address,
       assetRegistryData,
       assetMinterAdmin,
       TRUSTED_FORWARDER.address,

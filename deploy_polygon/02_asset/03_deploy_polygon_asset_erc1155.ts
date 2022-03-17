@@ -1,5 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
+import {skipUnlessTestnet} from '../../utils/network';
 
 const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
@@ -10,15 +11,12 @@ const func: DeployFunction = async function (
     upgradeAdmin,
     assetAdmin,
     assetBouncerAdmin,
-    assetAttributesRegistryAdmin,
   } = await getNamedAccounts();
-  const {deploy, execute} = deployments;
+  const {deploy} = deployments;
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const CHILD_CHAIN_MANAGER = await deployments.get('CHILD_CHAIN_MANAGER');
-  const AssetAttributesRegistry = await deployments.get(
-    'PolygonAssetAttributesRegistry'
-  );
+  const polygonAssetERC721 = await deployments.get('PolygonAssetERC721');
 
   const assetHelperLib = await deploy('AssetHelper', {
     from: deployer,
@@ -28,9 +26,9 @@ const func: DeployFunction = async function (
     from: deployer,
   });
 
-  const polygonAsset = await deploy('PolygonAsset', {
+  await deploy('PolygonAssetERC1155', {
     from: deployer,
-    contract: 'PolygonAssetV2',
+    contract: 'PolygonAssetERC1155',
     libraries: {
       AssetHelper: assetHelperLib.address,
       ERC1155ERC721Helper: ERC1155ERC721HelperLib.address,
@@ -44,30 +42,23 @@ const func: DeployFunction = async function (
           TRUSTED_FORWARDER.address,
           assetAdmin,
           assetBouncerAdmin,
+          assetAdmin,
+          polygonAssetERC721.address,
           CHILD_CHAIN_MANAGER.address,
           1,
-          AssetAttributesRegistry.address,
         ],
       },
       upgradeIndex: 0,
     },
     log: true,
   });
-
-  await execute(
-    'PolygonAssetAttributesRegistry',
-    {from: assetAttributesRegistryAdmin, log: true},
-    'setOverLayerDepositor',
-    polygonAsset.address
-  );
 };
 
 export default func;
-func.tags = ['PolygonAsset', 'PolygonAsset_deploy', 'L2'];
+func.tags = ['PolygonAssetERC1155', 'PolygonAssetERC1155_deploy', 'L2'];
 func.dependencies = [
   'TRUSTED_FORWARDER',
   'CHILD_CHAIN_MANAGER',
-  'PolygonGems_deploy',
-  'PolygonCatalysts_deploy',
-  'PolygonAssetAttributesRegistry_deploy',
+  'PolygonAssetERC721',
 ];
+func.skip = skipUnlessTestnet;
