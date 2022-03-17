@@ -42,4 +42,6 @@ contract ERC20UpgradableToken is ERC677Extension, WithPermit, ERC20UpgradableBas
         checkApproveFor(owner, spender, value, deadline, v, r, s);
         _approveFor(owner, spender, value);
     }
+
+    uint256[50] private __gap;
 }
