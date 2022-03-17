@@ -5,21 +5,29 @@ import "@openzeppelin/contracts-0.8/utils/Context.sol";
 import "./extensions/ERC20Internal.sol";
 import "../../interfaces/IERC20Extended.sol";
 import "../WithSuperOperators.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
-abstract contract ERC20BaseToken is WithSuperOperators, IERC20, IERC20Extended, ERC20Internal, Context {
+abstract contract ERC20UpgradableBaseToken is
+    WithSuperOperators,
+    IERC20,
+    IERC20Extended,
+    ERC20Internal,
+    Context,
+    Initializable
+{
     string internal _name;
     string internal _symbol;
-    address internal immutable _operator;
+    address internal _operator;
     uint256 internal _totalSupply;
     mapping(address => uint256) internal _balances;
     mapping(address => mapping(address => uint256)) internal _allowances;
 
-    constructor(
+    function initV1(
         string memory tokenName,
         string memory tokenSymbol,
         address admin,
         address operator
-    ) {
+    ) public initializer {
         _name = tokenName;
         _symbol = tokenSymbol;
         _admin = admin;

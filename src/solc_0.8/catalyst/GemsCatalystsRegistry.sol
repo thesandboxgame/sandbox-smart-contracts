@@ -3,9 +3,11 @@ pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
-import "./Gem.sol";
-import "./Catalyst.sol";
+/* import "./GemV1.sol";
+import "./CatalystV1.sol"; */
+import "../common/interfaces/IERC20Extended.sol";
 import "./interfaces/IGemsCatalystsRegistry.sol";
+import "./interfaces/ICatalyst.sol";
 //import "../common/BaseWithStorage/WithSuperOperators.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
 import "@openzeppelin/contracts-0.8/access/AccessControl.sol";
@@ -21,8 +23,8 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
     uint256 internal constant MAX_UINT256 = ~uint256(0);
     bytes32 public constant TRUSTED_FORWARDER_ROLE = keccak256("TRUSTED_FORWARDER_ROLE");
 
-    Gem[] internal _gems;
-    Catalyst[] internal _catalysts;
+    IGem[] internal _gems;
+    ICatalyst[] internal _catalysts;
 
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
 
@@ -49,16 +51,16 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         uint256 assetId,
         IAssetAttributesRegistry.GemEvent[] calldata events
     ) external view override returns (uint32[] memory values) {
-        Catalyst catalyst = getCatalyst(catalystId);
-        require(catalyst != Catalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
+        ICatalyst catalyst = getCatalyst(catalystId);
+        require(catalyst != ICatalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
         return catalyst.getAttributes(assetId, events);
     }
 
     /// @notice Returns the maximum number of gems for a given catalyst
     /// @param catalystId catalyst identifier
     function getMaxGems(uint16 catalystId) external view override returns (uint8) {
-        Catalyst catalyst = getCatalyst(catalystId);
-        require(catalyst != Catalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
+        ICatalyst catalyst = getCatalyst(catalystId);
+        require(catalyst != ICatalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
         return catalyst.getMaxGems();
     }
 
@@ -125,7 +127,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
     /// @notice Adds both arrays of gems and catalysts to registry
     /// @param gems array of gems to be added
     /// @param catalysts array of catalysts to be added
-    function addGemsAndCatalysts(Gem[] calldata gems, Catalyst[] calldata catalysts) external override {
+    function addGemsAndCatalysts(IGem[] calldata gems, ICatalyst[] calldata catalysts) external override {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "NOT_AUTHORIZED");
 
         require(
@@ -134,14 +136,14 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         );
 
         for (uint256 i = 0; i < gems.length; i++) {
-            Gem gem = gems[i];
+            IGem gem = gems[i];
             uint16 gemId = gem.gemId();
             require(gemId == _gems.length + 1, "GEM_ID_NOT_IN_ORDER");
             _gems.push(gem);
         }
 
         for (uint256 i = 0; i < catalysts.length; i++) {
-            Catalyst catalyst = catalysts[i];
+            ICatalyst catalyst = catalysts[i];
             uint16 catalystId = catalyst.catalystId();
             require(catalystId == _catalysts.length + 1, "CATALYST_ID_NOT_IN_ORDER");
             _catalysts.push(catalyst);
@@ -152,14 +154,14 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
     /// @param gemId The gem being queried.
     /// @return Whether the gem exists.
     function doesGemExist(uint16 gemId) external view override returns (bool) {
-        return getGem(gemId) != Gem(address(0));
+        return getGem(gemId) != IGem(address(0));
     }
 
     /// @notice Query whether a giving catalyst exists.
     /// @param catalystId The catalyst being queried.
     /// @return Whether the catalyst exists.
     function doesCatalystExist(uint16 catalystId) external view returns (bool) {
-        return getCatalyst(catalystId) != Catalyst(address(0));
+        return getCatalyst(catalystId) != ICatalyst(address(0));
     }
 
     /// @notice Burn a catalyst.
@@ -172,8 +174,8 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         uint256 amount
     ) public override {
         _checkAuthorization(from);
-        Catalyst catalyst = getCatalyst(catalystId);
-        require(catalyst != Catalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
+        ICatalyst catalyst = getCatalyst(catalystId);
+        require(catalyst != ICatalyst(address(0)), "CATALYST_DOES_NOT_EXIST");
         catalyst.burnFor(from, amount);
     }
 
@@ -187,8 +189,8 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         uint256 amount
     ) public override {
         _checkAuthorization(from);
-        Gem gem = getGem(gemId);
-        require(gem != Gem(address(0)), "GEM_DOES_NOT_EXIST");
+        IGem gem = getGem(gemId);
+        require(gem != IGem(address(0)), "GEM_DOES_NOT_EXIST");
         gem.burnFor(from, amount);
     }
 
@@ -223,22 +225,22 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
     /// @dev Get the catalyst contract corresponding to the id.
     /// @param catalystId The catalyst id to use to retrieve the contract.
     /// @return The requested Catalyst contract.
-    function getCatalyst(uint16 catalystId) internal view returns (Catalyst) {
+    function getCatalyst(uint16 catalystId) internal view returns (ICatalyst) {
         if (catalystId > 0 && catalystId <= _catalysts.length) {
             return _catalysts[catalystId - 1];
         } else {
-            return Catalyst(address(0));
+            return ICatalyst(address(0));
         }
     }
 
     /// @dev Get the gem contract corresponding to the id.
     /// @param gemId The gem id to use to retrieve the contract.
     /// @return The requested Gem contract.
-    function getGem(uint16 gemId) internal view returns (Gem) {
+    function getGem(uint16 gemId) internal view returns (IGem) {
         if (gemId > 0 && gemId <= _gems.length) {
             return _gems[gemId - 1];
         } else {
-            return Gem(address(0));
+            return IGem(address(0));
         }
     }
 
