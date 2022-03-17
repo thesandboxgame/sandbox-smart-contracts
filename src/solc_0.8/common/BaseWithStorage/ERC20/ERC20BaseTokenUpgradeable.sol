@@ -5,7 +5,6 @@ import "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "./extensions/ERC20Internal.sol";
 import "../../interfaces/IERC20Extended.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 abstract contract ERC20BaseTokenUpgradeable is
     IERC20,
