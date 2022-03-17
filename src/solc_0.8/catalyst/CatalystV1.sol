@@ -1,18 +1,18 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
-pragma experimental ABIEncoderV2;
 
 import "../common/interfaces/IAssetAttributesRegistry.sol";
-import "../common/BaseWithStorage/ERC20/ERC20Token.sol";
-import "../common/interfaces/IAttributes.sol";
+//import "../common/BaseWithStorage/ERC20/ERC20Token.sol";
+import "../common/BaseWithStorage/ERC20/ERC20UpgradableToken.sol";
+import "./interfaces//ICatalyst.sol";
 
-contract Catalyst is ERC20Token, IAttributes {
-    uint16 public immutable catalystId;
-    uint8 internal immutable _maxGems;
+contract CatalystV1 is ICatalyst, ERC20UpgradableToken {
+    uint16 public override catalystId;
+    uint8 internal _maxGems;
 
     IAttributes internal _attributes;
 
-    constructor(
+    function initialize(
         string memory name,
         string memory symbol,
         address admin,
@@ -20,7 +20,8 @@ contract Catalyst is ERC20Token, IAttributes {
         uint16 _catalystId,
         IAttributes attributes,
         address operator
-    ) ERC20Token(name, symbol, admin, operator) {
+    ) public initializer {
+        initV1(name, symbol, admin, operator);
         _maxGems = maxGems;
         catalystId = _catalystId;
         _attributes = attributes;
@@ -28,13 +29,13 @@ contract Catalyst is ERC20Token, IAttributes {
 
     /// @notice Used by Admin to update the attributes contract.
     /// @param attributes The new attributes contract.
-    function changeAttributes(IAttributes attributes) external onlyAdmin {
+    function changeAttributes(IAttributes attributes) external override onlyAdmin {
         _attributes = attributes;
     }
 
     /// @notice Get the value of _maxGems(the max number of gems that can be embeded in this type of catalyst).
     /// @return The value of _maxGems.
-    function getMaxGems() external view returns (uint8) {
+    function getMaxGems() external view override returns (uint8) {
         return _maxGems;
     }
 
