@@ -5,28 +5,35 @@ import "@openzeppelin/contracts-upgradeable/metatx/ERC2771ContextUpgradeable.sol
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import "./extensions/ERC20Internal.sol";
 import "../../interfaces/IERC20Extended.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
 abstract contract ERC20BaseTokenUpgradeable is
     IERC20,
     IERC20Extended,
     ERC20Internal,
     ERC2771ContextUpgradeable,
-    AccessControlUpgradeable,
-    Initializable
+    AccessControlUpgradeable
 {
+    bytes32 public constant SUPER_OPERATOR_ROLE = keccak256("SUPER_OPERATOR_ROLE");
+
     string internal _name;
     string internal _symbol;
     uint256 internal _totalSupply;
     mapping(address => uint256) internal _balances;
     mapping(address => mapping(address => uint256)) internal _allowances;
 
+    uint256[50] private __gap;
+
+    modifier onlyAdmin {
+        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "Only admin action");
+        _;
+    }
+
     function __ERC20BaseTokenUpgradeable_init(
         string memory tokenName,
         string memory tokenSymbol,
         address trustedForwarder,
         address admin
-    ) internal initializer{
+    ) internal initializer {
         _name = tokenName;
         _symbol = tokenSymbol;
         __AccessControl_init();
