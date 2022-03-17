@@ -14,9 +14,10 @@ contract AssetERC1155 is AssetBaseERC1155, IMintableERC1155 {
         address admin,
         address bouncerAdmin,
         address predicate,
+        IMintableERC721 assetERC721,
         uint8 chainIndex
     ) external {
-        init(trustedForwarder, admin, bouncerAdmin, predicate, chainIndex);
+        init(trustedForwarder, admin, bouncerAdmin, predicate, assetERC721, chainIndex);
     }
 
     /**
@@ -32,11 +33,11 @@ contract AssetERC1155 is AssetBaseERC1155, IMintableERC1155 {
         address account,
         uint256 id,
         uint256 amount,
-        bytes calldata metaDataHash
+        bytes calldata data
     ) external override {
         require(_msgSender() == _predicate, "!PREDICATE");
         uint256 uriId = id & ERC1155ERC721Helper.URI_ID;
-        _metadataHash[uriId] = metaDataHash;  // To Review
+        _metadataHash[uriId] = abi.decode(data, (bytes32)); // To Review
         _mint(_msgSender(), account, id, amount, data);
     }
 
@@ -49,12 +50,13 @@ contract AssetERC1155 is AssetBaseERC1155, IMintableERC1155 {
         address to,
         uint256[] calldata ids,
         uint256[] calldata amounts,
-        bytes calldata metaDataHash
+        bytes calldata data
     ) external override {
         require(_msgSender() == _predicate, "!PREDICATE");
+        bytes32[] memory hashes = abi.decode(data, (bytes32[]));
         for (uint256 i = 0; i < ids.length; i++) {
             uint256 uriId = ids[i] & ERC1155ERC721Helper.URI_ID;
-            _metadataHash[uriId] = metaDataHash[i];  // To Review
+            _metadataHash[uriId] = hashes[i]; // To Review
         }
         _mintBatch(to, ids, amounts, data);
     }

@@ -4,6 +4,7 @@ pragma solidity 0.8.2;
 import "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155Receiver.sol";
+import "../common/interfaces/@maticnetwork/pos-portal/root/RootToken/IMintableERC721.sol";
 import "../common/Libraries/ObjectLib32.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
 import "../asset/libraries/ERC1155ERC721Helper.sol";
@@ -47,19 +48,22 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
 
     address internal _trustedForwarder;
 
+    IMintableERC721 internal _assetERC721;
+
     uint256[20] private __gap;
     // solhint-enable max-states-count
 
     event BouncerAdminChanged(address oldBouncerAdmin, address newBouncerAdmin);
     event Bouncer(address bouncer, bool enabled);
     event CreatorshipTransfer(address indexed original, address indexed from, address indexed to);
-    event Extraction(uint256 indexed fromId, uint256 toId);
+    event Extraction(uint256 indexed id);
 
     function init(
         address trustedForwarder,
         address admin,
         address bouncerAdmin,
         address predicate,
+        IMintableERC721 assetERC721,
         uint8 chainIndex
     ) public {
         // one-time init of bitfield's previous versions
@@ -67,6 +71,7 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         _admin = admin;
         _bouncerAdmin = bouncerAdmin;
         _predicate = predicate;
+        _assetERC721 = assetERC721;
         __ERC2771Handler_initialize(trustedForwarder);
         _chainIndex = chainIndex;
     }
@@ -224,9 +229,8 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         uint256 id,
         address to
     ) external returns (uint256 newId) {
-        bool metaTx = isTrustedForwarder(msg.sender);
         require(sender == _msgSender() || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
-        // return _extractERC721From(metaTx ? sender : _msgSender(), sender, id, to);
+        return _extractERC721From(sender, id, to);
     }
 
     /// @notice Get the balance of `owners` for each token type `ids`.
@@ -588,21 +592,20 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         require(_checkOnERC1155Received(operator, address(0), account, id, amount, data), "TRANSFER_REJECTED");
     }
 
-    // function _extractERC721From(
-    //     address operator,
-    //     address sender,
-    //     uint256 id,
-    //     address to
-    // ) internal returns (uint256 newId) {
-    //     require(to != address(0), "TO==0");
-    //     require(id & ERC1155ERC721Helper.IS_NFT == 0, "!1155");
-    //     uint32 tokenCollectionIndex = _nextCollectionIndex[id];
-    //     newId = id + ERC1155ERC721Helper.IS_NFT + (tokenCollectionIndex) * 2**ERC1155ERC721Helper.NFT_INDEX_OFFSET;
-    //     _nextCollectionIndex[id] = tokenCollectionIndex + 1;
-    //     _burnFT(sender, id, 1);
-    //     _mint(_metadataHash[id & ERC1155ERC721Helper.URI_ID], 1, 0, operator, to, newId, "", true);
-    //     emit Extraction(id, newId);
-    // }
+    function _extractERC721From(
+        address sender,
+        uint256 id,
+        address to
+    ) internal returns (uint256 newId) {
+        require(to != address(0), "TO==0");
+        require(balanceOf(to, id) == 1, "!NFT");
+        uint32 tokenCollectionIndex = _nextCollectionIndex[id];
+        bytes32 metaData = _metadataHash[id & ERC1155ERC721Helper.URI_ID];
+        _nextCollectionIndex[id] = tokenCollectionIndex + 1;
+        _burnFT(sender, id, 1);
+        _assetERC721.mint(to, id, bytes(abi.encode(metaData)));
+        emit Extraction(id);
+    }
 
     /// @dev Allows the use of a bitfield to track the initialized status of the version `v` passed in as an arg.
     /// If the bit at the index corresponding to the given version is already set, revert.
