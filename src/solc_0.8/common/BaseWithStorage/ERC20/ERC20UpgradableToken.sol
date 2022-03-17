@@ -1,21 +1,19 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "./ERC20UpgradableBaseToken.sol";
+import "./ERC20BaseTokenUpgradeable.sol";
 import "../WithPermit.sol";
 import "../ERC677/extensions/ERC677Extension.sol";
 import "../../interfaces/IERC677Receiver.sol";
 
-contract ERC20UpgradableToken is ERC677Extension, WithPermit, ERC20UpgradableBaseToken {
-    // /////////////////// CONSTRUCTOR ////////////////////
-
-    function initialize(
+contract ERC20UpgradableToken is ERC677Extension, WithPermit, ERC20BaseTokenUpgradeable {
+    function __ERC20UpgradableToken_init(
         string memory name,
         string memory symbol,
-        address admin,
-        address operator
+        address trustedForwarder,
+        address admin
     ) public initializer {
-        initV1(name, symbol, admin, operator);
+        __ERC20BaseTokenUpgradeable_init(name, symbol, trustedForwarder, admin);
     }
 
     function mint(address to, uint256 amount) external onlyAdmin {
