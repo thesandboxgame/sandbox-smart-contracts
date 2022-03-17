@@ -29,7 +29,7 @@ contract CatalystV1 is ICatalyst, ERC20UpgradableToken {
 
     /// @notice Used by Admin to update the attributes contract.
     /// @param attributes The new attributes contract.
-    function changeAttributes(IAttributes attributes) external onlyAdmin {
+    function changeAttributes(IAttributes attributes) external override onlyAdmin {
         _attributes = attributes;
     }
 
