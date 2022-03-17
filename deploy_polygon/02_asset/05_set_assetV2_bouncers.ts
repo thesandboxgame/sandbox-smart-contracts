@@ -15,7 +15,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   if (!isAssetMinterBouncer) {
     await execute(
-      'PolygonAsset',
+      'PolygonAssetERC1155',
       {from: assetBouncerAdmin, log: true},
       'setBouncer',
       assetMinter.address,
@@ -26,4 +26,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 export default func;
 func.runAtTheEnd = true;
 func.tags = ['PolygonAssetMinter', 'PolygonAssetMinter_setup'];
-func.dependencies = ['PolygonAsset'];
+func.dependencies = ['PolygonAssetERC1155'];

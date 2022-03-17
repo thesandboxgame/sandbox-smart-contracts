@@ -1,5 +1,4 @@
 //SPDX-License-Identifier: MIT
-// solhint-disable-next-line compiler-version
 pragma solidity 0.8.2;
 
 import {BaseERC721} from "../../../assetERC721/BaseERC721.sol";
@@ -87,7 +86,7 @@ contract PolygonAssetERC721 is BaseERC721, IChildToken {
     /// @param user The address for deposit
     /// @param tokenId The tokenId to mint to user's account
     function _deposit(address user, uint256 tokenId) internal {
-        // We only accept tokens that were minted on L1, withdrawn and now came from L1
+        // We only accept tokens that were minted on L2, withdrawn and now came from L1
         require(withdrawnTokens[tokenId], "TOKEN_NOT_EXISTS_ON_ROOT_CHAIN");
         withdrawnTokens[tokenId] = false;
         _safeMint(user, tokenId);
