@@ -43,6 +43,8 @@ contract ERC20RewardPool is
     event RewardPaid(address indexed account, uint256 rewardAmount);
     event ContributionUpdated(address indexed account, uint256 newContribution, uint256 oldContribution);
 
+    uint256 internal constant DECIMALS_18 = 1000000000000000000;
+
     // This value multiplied by the user contribution is the share of accumulated rewards (from the start of time
     // until the last call to restartRewards) for the user taking into account the value of totalContributions.
     uint256 public rewardPerTokenStored;
@@ -339,7 +341,10 @@ contract ERC20RewardPool is
     function _withdrawRewards(address account) internal antiCompoundCheck(account) {
         uint256 reward = rewards[account];
         if (reward > 0) {
-            if (lockClaim.claimLockEnabled == true && lockClaim.amount > 0) {}
+            if (lockClaim.claimLockEnabled == true && lockClaim.amount > 0) {
+                require(lockClaim.amount > reward, "ERC20RewardPool: Cannot withdraw - lockClaim.amount > reward");
+                //TODO: consider only the integer part (keep decimals in the pool)
+            }
             rewards[account] = 0;
             rewardToken.safeTransfer(account, reward);
             emit RewardPaid(account, reward);
