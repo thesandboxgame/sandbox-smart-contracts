@@ -9,8 +9,6 @@ const func: DeployFunction = async function (
   const {deployer, upgradeAdmin, assetAdmin} = await getNamedAccounts();
   const {deploy} = deployments;
 
-  const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
-
   const TRUSTED_FORWARDER_V2 = await deployments.getOrNull(
     'TRUSTED_FORWARDER_V2'
   );
@@ -23,10 +21,7 @@ const func: DeployFunction = async function (
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
         methodName: 'initialize',
-        args: [
-          TRUSTED_FORWARDER_V2?.address || TRUSTED_FORWARDER.address, // TODO:
-          assetAdmin,
-        ],
+        args: [TRUSTED_FORWARDER_V2?.address, assetAdmin],
       },
       upgradeIndex: 0,
     },
@@ -38,7 +33,7 @@ const func: DeployFunction = async function (
     'PolygonAssetERC721',
     {from: assetAdmin, log: true},
     'setBaseUri',
-    'http://sandbox.asset.erc721' // TODO: confirm desired baseUri
+    'http://sandbox.asset.erc721' // TODO: reviewing metadata
   );
 };
 
