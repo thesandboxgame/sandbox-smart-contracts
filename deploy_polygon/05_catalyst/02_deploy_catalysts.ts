@@ -5,6 +5,7 @@ import catalysts from '../../data/catalysts';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
+  const {upgradeAdmin} = await getNamedAccounts();
 
   const DefaultAttributes = await deployments.get('PolygonDefaultAttributes');
   const GemsCatalystsRegistry = await deployments.get(
@@ -14,18 +15,27 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {catalystAdmin, deployer} = await getNamedAccounts();
   for (const catalyst of catalysts) {
     await deploy(`PolygonCatalyst_${catalyst.symbol}`, {
-      contract: 'Catalyst',
+      contract: 'CatalystV1',
       from: deployer,
       log: true,
-      args: [
-        `Sandbox ${catalyst.symbol} Catalysts`,
-        catalyst.symbol,
-        catalystAdmin,
-        catalyst.maxGems,
-        catalyst.catalystId,
-        DefaultAttributes.address,
-        GemsCatalystsRegistry.address,
-      ],
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OpenZeppelinTransparentProxy',
+        execute: {
+          methodName: '__CatalystV1_init',
+          args: [
+            `Sandbox ${catalyst.symbol} Catalysts`,
+            catalyst.symbol,
+            catalystAdmin,
+            catalyst.maxGems,
+            catalyst.catalystId,
+            DefaultAttributes.address,
+            GemsCatalystsRegistry.address,
+          ],
+        },
+        upgradeIndex: 0,
+      },
+
       skipIfAlreadyDeployed: true,
     });
   }
