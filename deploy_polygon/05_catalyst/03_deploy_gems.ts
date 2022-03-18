@@ -5,6 +5,7 @@ import gems from '../../data/gems';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
+  const {upgradeAdmin} = await getNamedAccounts();
 
   const GemsCatalystsRegistry = await deployments.get(
     'PolygonGemsCatalystsRegistry'
@@ -14,16 +15,24 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   for (const gem of gems) {
     await deploy(`PolygonGem_${gem.symbol}`, {
-      contract: 'Gem',
+      contract: 'GemV1',
       from: deployer,
       log: true,
-      args: [
-        `Sandbox ${gem.symbol} Gems`,
-        gem.symbol,
-        gemMinter,
-        gem.gemId,
-        GemsCatalystsRegistry.address,
-      ],
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OpenZeppelinTransparentProxy',
+        execute: {
+          methodName: '__GemV1_init',
+          args: [
+            `Sandbox ${gem.symbol} Gems`,
+            gem.symbol,
+            gemMinter,
+            gem.gemId,
+            GemsCatalystsRegistry.address,
+          ],
+        },
+        upgradeIndex: 0,
+      },
       skipIfAlreadyDeployed: true,
     });
   }
