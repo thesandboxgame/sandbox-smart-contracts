@@ -81,10 +81,10 @@ contract ERC20RewardPool is
 
     /// @notice set the lockPeriodInSecs for the anti-compound buffer
     /// @param lockPeriodInSecs amount of time the user must wait between reward withdrawal
-    function setAntiCompoundLockPeriod(uint256 lockPeriodInSecs) external {
+    function setTimelockClaim(uint256 lockPeriodInSecs) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
 
-        antiCompound.lockPeriodInSecs = lockPeriodInSecs;
+        timeLockClaim.lockPeriodInSecs = lockPeriodInSecs;
     }
 
     function setTimelockDeposit(uint256 newTimeDeposit) external {
@@ -102,8 +102,8 @@ contract ERC20RewardPool is
     function setAmountLockClaim(uint256 newAmountLockClaim, bool isEnabled) external {
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
 
-        lockClaim.amount = newAmountLockClaim;
-        lockClaim.claimLockEnabled = isEnabled;
+        amountLockClaim.amount = newAmountLockClaim;
+        amountLockClaim.claimLockEnabled = isEnabled;
     }
 
     /// TODO: PROBABLY REMOVE THIS FUNCTION - replaced by setContributionRules
@@ -138,7 +138,7 @@ contract ERC20RewardPool is
     }
 
     function getRemainingTimelockClaim() external view returns (uint256) {
-        return block.timestamp - (antiCompound.lastClaim[_msgSender()] + antiCompound.lockPeriodInSecs);
+        return block.timestamp - (timeLockClaim.lastClaim[_msgSender()] + timeLockClaim.lockPeriodInSecs);
     }
 
     function getRemainingTimelockWithdraw() external view returns (uint256) {
@@ -273,6 +273,7 @@ contract ERC20RewardPool is
     /// @notice stake some amount into the contract
     /// @param amount the amount of tokens to stake
     /// @dev the user must approve in the stack token before calling this function
+    //TODO: add back checkRequirement
     function stake(uint256 amount)
         external
         nonReentrant
@@ -282,8 +283,8 @@ contract ERC20RewardPool is
         require(amount > 0, "ERC20RewardPool: Cannot stake 0");
 
         // The first time a user stakes he cannot remove his rewards immediately.
-        if (antiCompound.lastClaim[_msgSender()] == 0) {
-            antiCompound.lastClaim[_msgSender()] = block.timestamp;
+        if (timeLockClaim.lastClaim[_msgSender()] == 0) {
+            timeLockClaim.lastClaim[_msgSender()] = block.timestamp;
         }
 
         lockDeposit.lastDeposit[_msgSender()] = block.timestamp;
@@ -338,11 +339,14 @@ contract ERC20RewardPool is
         emit Withdrawn(account, amount);
     }
 
-    function _withdrawRewards(address account) internal antiCompoundCheck(account) {
+    function _withdrawRewards(address account) internal timeLockCheck(account) {
         uint256 reward = rewards[account];
         if (reward > 0) {
-            if (lockClaim.claimLockEnabled == true && lockClaim.amount > 0) {
-                require(lockClaim.amount > reward, "ERC20RewardPool: Cannot withdraw - lockClaim.amount > reward");
+            if (amountLockClaim.claimLockEnabled == true && amountLockClaim.amount > 0) {
+                require(
+                    amountLockClaim.amount > reward,
+                    "ERC20RewardPool: Cannot withdraw - lockClaim.amount > reward"
+                );
                 //TODO: consider only the integer part (keep decimals in the pool)
             }
             rewards[account] = 0;
