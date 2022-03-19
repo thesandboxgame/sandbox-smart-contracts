@@ -3,13 +3,13 @@
 pragma solidity 0.8.2;
 
 contract LockRules {
-    struct AntiCompound {
+    struct TimeLockClaim {
         uint256 lockPeriodInSecs;
         mapping(address => uint256) lastClaim;
     }
 
     //TODO missing this modifier -> together with AntiCompound?
-    struct LockClaim {
+    struct AmountLockClaim {
         uint256 amount;
         bool claimLockEnabled;
     }
@@ -25,23 +25,20 @@ contract LockRules {
     }
 
     // This is used to implement a time buffer for reward retrieval, so the used cannot re-stake the rewards too fast.
-    AntiCompound public antiCompound;
-    LockClaim public lockClaim;
+    TimeLockClaim public timeLockClaim;
+    AmountLockClaim public amountLockClaim;
     LockWithdraw public lockWithdraw;
     LockDeposit public lockDeposit;
 
-    // TODO: same as setAntiCompoundLockPeriod()
-    // function setTimeLockClaim(uint256 newTimeLock) external{}
-
-    modifier antiCompoundCheck(address account) {
+    modifier timeLockCheck(address account) {
         // We use lockPeriodInSecs == 0 to disable this check
-        if (antiCompound.lockPeriodInSecs != 0) {
+        if (timeLockClaim.lockPeriodInSecs != 0) {
             require(
-                block.timestamp > antiCompound.lastClaim[account] + antiCompound.lockPeriodInSecs,
+                block.timestamp > timeLockClaim.lastClaim[account] + timeLockClaim.lockPeriodInSecs,
                 "LockRules: Claim must wait"
             );
         }
-        antiCompound.lastClaim[account] = block.timestamp;
+        timeLockClaim.lastClaim[account] = block.timestamp;
         _;
     }
 

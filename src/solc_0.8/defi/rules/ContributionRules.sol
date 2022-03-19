@@ -47,8 +47,6 @@ contract ContributionRules is Ownable {
         return landMultiplier * assetMultiplier;
     }
 
-    function multiplierBalanceOfERC1155(uint256 amount) external {}
-
     function setERC1155MultiplierList(
         address contractERC1155,
         uint256[] memory ids,
@@ -76,12 +74,13 @@ contract ContributionRules is Ownable {
         if (numNFT == 0) {
             return amountStaked;
         }
-        uint256 nftContrib =
+        uint256 nftMultiplier =
             NFT_FACTOR_6 * (NFT_CONSTANT_3 + SafeMathWithRequire.cbrt3((((numNFT - 1) * ROOT3_FACTOR) + 1)));
-        if (nftContrib > MIDPOINT_9) {
-            nftContrib = MIDPOINT_9 + (nftContrib - MIDPOINT_9) / 10;
+        if (nftMultiplier > MIDPOINT_9) {
+            nftMultiplier = MIDPOINT_9 + (nftMultiplier - MIDPOINT_9) / 10;
         }
-        return amountStaked + ((amountStaked * nftContrib) / DECIMALS_9);
+        // return amountStaked + ((amountStaked * nftMultiplier) / DECIMALS_9);
+        return nftMultiplier;
     }
 
     // right now, the only possible way to go through the list, is iterating the vector
@@ -100,7 +99,7 @@ contract ContributionRules is Ownable {
             }
         }
 
-        return multiplier;
+        return multiplier / 100;
     }
 
     // function _calcMultiplierListERC721(address account) internal pure returns (uint256) {
