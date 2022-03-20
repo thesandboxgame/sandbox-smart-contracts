@@ -25,4 +25,10 @@ interface IAssetUpgrader {
         uint16[] calldata gemIds,
         address to
     ) external;
+
+    function extractERC721From(
+        address sender,
+        uint256 id,
+        address to
+    ) external returns (uint256 newId);
 }
