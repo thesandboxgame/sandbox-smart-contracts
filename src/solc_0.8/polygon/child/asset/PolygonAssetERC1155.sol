@@ -92,7 +92,6 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         require(user != address(0x0), "PolygonAssetERC1155: !CHILD_CHAIN_MANAGER");
         (uint256[] memory ids, uint256[] memory amounts, bytes memory data) =
             abi.decode(depositData, (uint256[], uint256[], bytes));
-        require(user != address(0x0), "PolygonAssetERC1155: INVALID_DEPOSIT_USER");
 
         _mintBatch(user, ids, amounts, data);
     }

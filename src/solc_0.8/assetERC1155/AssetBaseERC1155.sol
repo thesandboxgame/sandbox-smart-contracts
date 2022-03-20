@@ -28,7 +28,8 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     mapping(uint256 => bytes) internal _rarityPacks; // rarity configuration per packs (2 bits per Asset)
     mapping(uint256 => uint32) private _nextCollectionIndex; // extraction
 
-    mapping(address => address) private _creatorship; // creatorship transfer
+    // @note : Deprecated
+    mapping(address => address) private _creatorship; // creatorship transfer // deprecated
 
     mapping(address => bool) private _bouncers; // the contracts allowed to mint
 
@@ -55,7 +56,6 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
 
     event BouncerAdminChanged(address oldBouncerAdmin, address newBouncerAdmin);
     event Bouncer(address bouncer, bool enabled);
-    event CreatorshipTransfer(address indexed original, address indexed from, address indexed to);
     event Extraction(uint256 indexed id);
 
     function init(
@@ -146,32 +146,6 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         );
     }
 
-    /// @notice Transfers creatorship of `original` from `sender` to `to`.
-    /// @param sender address of current registered creator.
-    /// @param original address of the original creator whose creation are saved in the ids themselves.
-    /// @param to address which will be given creatorship for all tokens originally minted by `original`.
-    function transferCreatorship(
-        address sender,
-        address original,
-        address to
-    ) external {
-        require(sender == _msgSender() || _superOperators[_msgSender()], "!AUTHORIZED");
-        require(sender != address(0), "SENDER==0");
-        require(to != address(0), "TO==0");
-        address current = _creatorship[original];
-        if (current == address(0)) {
-            current = original;
-        }
-        require(current != to, "CURRENT==TO");
-        require(current == sender, "CURRENT!=SENDER");
-        if (to == original) {
-            _creatorship[original] = address(0);
-        } else {
-            _creatorship[original] = to;
-        }
-        emit CreatorshipTransfer(original, current, to);
-    }
-
     /// @notice Enable or disable approval for `operator` to manage all `sender`'s tokens.
     /// @dev used for Meta Transaction (from metaTransactionContract).
     /// @param sender address which grant approval.
@@ -249,18 +223,6 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
             balances[i] = balanceOf(owners[i], ids[i]);
         }
         return balances;
-    }
-
-    /// @notice Get the creator of the token type `id`.
-    /// @param id the id of the token to get the creator of.
-    /// @return the creator of the token type `id`.
-    function creatorOf(uint256 id) external view returns (address) {
-        require(wasEverMinted(id), "TOKEN_!MINTED");
-        address newCreator = _creatorship[address(uint160(id / ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER))];
-        if (newCreator != address(0)) {
-            return newCreator;
-        }
-        return address(uint160(id / ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER));
     }
 
     /// @notice A descriptive name for the collection of tokens in this contract.
