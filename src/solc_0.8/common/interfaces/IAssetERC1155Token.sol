@@ -71,13 +71,13 @@ interface IAssetERC1155Token {
         uint256 amount
     ) external;
 
-    function extractERC721From(
+    function getBouncerAdmin() external view returns (address);
+
+    function prepareForExtract(
         address sender,
         uint256 id,
         address to
-    ) external returns (uint256 newId);
-
-    function getBouncerAdmin() external view returns (address);
+    ) external view returns (uint256 newId, string memory metaData);
 
     function isBouncer(address who) external view returns (bool);
 
@@ -86,4 +86,6 @@ interface IAssetERC1155Token {
     function wasEverMinted(uint256 id) external view returns (bool);
 
     function isSuperOperator(address who) external view returns (bool);
+
+    function isApprovedForAll(address owner, address operator) external view returns (bool isOperator);
 }

@@ -8,6 +8,7 @@ import "../common/interfaces/IAssetAttributesRegistry.sol";
 import "../common/interfaces/IAssetUpgrader.sol";
 import "../catalyst/GemsCatalystsRegistry.sol";
 import "../common/interfaces/IERC20Extended.sol";
+import "../common/interfaces/IAssetERC721Token.sol";
 import "../common/interfaces/IAssetERC1155Token.sol";
 
 /// @notice Allow to upgrade Asset with Catalyst, Gems and Sand, giving the assets attributes through AssetAttributeRegistry
@@ -24,10 +25,12 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
 
     IERC20Extended internal immutable _sand;
     IAssetAttributesRegistry internal immutable _registry;
+    IAssetERC721Token internal immutable _assetERC721;
     IAssetERC1155Token internal immutable _assetERC1155;
     GemsCatalystsRegistry internal immutable _gemsCatalystsRegistry;
 
     event TrustedForwarderChanged(address indexed newTrustedForwarderAddress);
+    event Extraction(uint256 indexed id, uint256 indexed newId);
 
     /// @notice AssetUpgrader depends on
     /// @param registry: AssetAttributesRegistry for recording catalyst and gems used
@@ -41,6 +44,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     constructor(
         IAssetAttributesRegistry registry,
         IERC20Extended sand,
+        IAssetERC721Token assetERC721,
         IAssetERC1155Token assetERC1155,
         GemsCatalystsRegistry gemsCatalystsRegistry,
         uint256 _upgradeFee,
@@ -50,6 +54,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     ) {
         _registry = registry;
         _sand = sand;
+        _assetERC721 = assetERC721;
         _assetERC1155 = assetERC1155;
         _gemsCatalystsRegistry = gemsCatalystsRegistry;
         upgradeFee = _upgradeFee;
@@ -74,7 +79,7 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
     ) external override returns (uint256 tokenId) {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         require(_msgSender() == from, "AUTH_ACCESS_DENIED");
-        tokenId = _assetERC1155.extractERC721From(from, assetId, from);
+        tokenId = extractERC721From(from, assetId, from);
         _changeCatalyst(from, tokenId, catalystId, gemIds, to);
     }
 
@@ -125,6 +130,24 @@ contract AssetUpgrader is Ownable, ERC2771Handler, IAssetUpgrader {
         require(to != address(0), "INVALID_TO_ZERO_ADDRESS");
         require(_msgSender() == from, "AUTH_ACCESS_DENIED");
         _addGems(from, assetId, gemIds, to);
+    }
+
+    /// @notice Extracts an EIP-721 NFT from an EIP-1155 token.
+    /// @param sender address which own the token to be extracted.
+    /// @param id the token type to extract from.
+    /// @param to address which will receive the token.
+    /// @return newId the id of the newly minted NFT.
+    function extractERC721From(
+        address sender,
+        uint256 id,
+        address to
+    ) public override returns (uint256) {
+        require(sender == _msgSender() || _assetERC1155.isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
+        require(to != address(0), "TO==0");
+        (uint256 newId, string memory metaData) = _assetERC1155.prepareForExtract(sender, id, to);
+        _assetERC721.mint(to, newId, bytes(abi.encode(metaData)));
+        emit Extraction(id, newId);
+        return newId;
     }
 
     /// @dev Collect a fee in SAND tokens
