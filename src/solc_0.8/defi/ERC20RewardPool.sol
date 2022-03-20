@@ -266,7 +266,6 @@ contract ERC20RewardPool is
     /// @notice stake some amount into the contract
     /// @param amount the amount of tokens to stake
     /// @dev the user must approve in the stack token before calling this function
-    //TODO: add back checkRequirement
     function stake(uint256 amount)
         external
         nonReentrant
@@ -336,11 +335,13 @@ contract ERC20RewardPool is
         uint256 reward = rewards[account];
         if (reward > 0) {
             if (amountLockClaim.claimLockEnabled == true && amountLockClaim.amount > 0) {
+                // constrain the reward amount to the integer allowed
+                uint256 mod = reward % DECIMALS_18;
+                reward = reward - mod;
                 require(
                     amountLockClaim.amount > reward,
                     "ERC20RewardPool: Cannot withdraw - lockClaim.amount > reward"
                 );
-                //TODO: consider only the integer part (keep decimals in the pool)
             }
             rewards[account] = 0;
             rewardToken.safeTransfer(account, reward);

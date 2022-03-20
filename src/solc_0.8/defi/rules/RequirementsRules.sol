@@ -51,7 +51,7 @@ contract RequirementsRules is Ownable {
         _;
     }
 
-    // Keep that function -> if user has not erc721 or erc1155
+    // if user has not erc721 or erc1155
     function setMaxStake(uint256 newMaxStake) external onlyOwner {
         maxStake = newMaxStake;
     }
@@ -108,14 +108,17 @@ contract RequirementsRules is Ownable {
     }
 
     function getRequireERC721List(address reqContract) external view returns (RequireERC721 memory) {
+        require(reqContract != address(0), "RequirementsRules: invalid address");
         return _listERC721[IERC721(reqContract)];
     }
 
     function getRequireERC1155List(address reqContract) external view returns (RequireERC1155 memory) {
+        require(reqContract != address(0), "RequirementsRules: invalid address");
         return _listERC1155[IERC1155(reqContract)];
     }
 
     function delRequireERC721fromList(IERC721 reqContract) external onlyOwner {
+        require(reqContract != IERC721(address(0)), "RequirementsRules: invalid address");
         require(_islistERC721Member(reqContract), "RequirementsRules: contract is not in the list");
         uint256 indexToDelete = _listERC721[reqContract].index;
         IERC721 addrToMove = _listERC721Index[_listERC721Index.length - 1];
@@ -125,6 +128,7 @@ contract RequirementsRules is Ownable {
     }
 
     function delRequireERC1155fromList(IERC1155 reqContract) external onlyOwner {
+        require(reqContract != IERC1155(address(0)), "RequirementsRules: invalid address");
         require(_islistERC1155Member(reqContract), "RequirementsRules: contract is not in the list");
         uint256 indexToDelete = _listERC1155[reqContract].index;
         IERC1155 addrToMove = _listERC1155Index[_listERC1155Index.length - 1];
