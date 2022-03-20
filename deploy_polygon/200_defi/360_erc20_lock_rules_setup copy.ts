@@ -13,7 +13,7 @@ const func: DeployFunction = async function (
 
   const antiCompound = await deployments.read(
     'ERC20RewardPool',
-    'antiCompound'
+    'timeLockClaim'
   );
 
   // check who has Admin role: deployer or sandAdmin
@@ -32,7 +32,7 @@ const func: DeployFunction = async function (
       deployments.execute(
         'ERC20RewardPool',
         {from: currentAdmin, log: true},
-        'setAntiCompoundLockPeriod',
+        'setTimelockClaim',
         lockPeriodInSecs
       )
     );
