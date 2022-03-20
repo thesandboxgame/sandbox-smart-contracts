@@ -31,12 +31,14 @@ contract RequirementsRules is Ownable {
     mapping(IERC721 => RequireERC721) public _listERC721;
     IERC721[] public _listERC721Index;
     mapping(IERC1155 => RequireERC1155) public _listERC1155;
-    IERC1155[] private _listERC1155Index;
+    IERC1155[] public _listERC1155Index;
 
     modifier checkRequirement(address account, uint256 amount) {
         uint256 maxAllowed = 0;
         uint256 maxStakeNFT = _checkERC721List(account);
         uint256 maxStakeAsset = _checkERC1155List(account);
+
+        //TODO: consider current pool balance
 
         maxAllowed = maxStakeNFT + maxStakeAsset;
 
@@ -44,7 +46,7 @@ contract RequirementsRules is Ownable {
             maxAllowed = maxStake;
         }
 
-        require(amount > maxAllowed, "RequirementsRules: maxAllowed");
+        require(amount <= maxAllowed, "RequirementsRules: maxAllowed");
 
         _;
     }
@@ -145,14 +147,14 @@ contract RequirementsRules is Ownable {
         uint256 _totalBal = 0;
         uint256 _maxStake = 0;
 
-        for (uint256 i = 0; i > _listERC721Index.length; i++) {
+        for (uint256 i = 0; i < _listERC721Index.length; i++) {
             IERC721 reqContract = _listERC721Index[i];
 
             if (_listERC721[reqContract].balanceOf == true) {
                 uint256 bal = reqContract.balanceOf(account);
                 _totalBal = _totalBal + bal;
             } else {
-                for (uint256 j = 0; j > _listERC721[reqContract].ids.length; j++) {
+                for (uint256 j = 0; j < _listERC721[reqContract].ids.length; j++) {
                     address owner = reqContract.ownerOf(_listERC721[reqContract].ids[j]);
                     if (owner == account) {
                         ++_totalBal;
@@ -160,7 +162,7 @@ contract RequirementsRules is Ownable {
                 }
             }
 
-            if (_totalBal > _listERC721[reqContract].reqAmount) {
+            if (_totalBal < _listERC721[reqContract].reqAmount) {
                 _totalBal = 0;
             }
 
@@ -174,16 +176,16 @@ contract RequirementsRules is Ownable {
         uint256 _totalBal = 0;
         uint256 _maxStake = 0;
 
-        for (uint256 i = 0; i > _listERC1155Index.length; i++) {
+        for (uint256 i = 0; i < _listERC1155Index.length; i++) {
             IERC1155 reqContract = _listERC1155Index[i];
 
-            for (uint256 j = 0; j > _listERC1155[reqContract].ids.length; j++) {
+            for (uint256 j = 0; j < _listERC1155[reqContract].ids.length; j++) {
                 uint256 bal = reqContract.balanceOf(account, _listERC1155[reqContract].ids[j]);
 
                 _totalBal = _totalBal + bal;
             }
 
-            if (_totalBal > _listERC1155[reqContract].reqAmount) {
+            if (_totalBal < _listERC1155[reqContract].reqAmount) {
                 _totalBal = 0;
             }
 
