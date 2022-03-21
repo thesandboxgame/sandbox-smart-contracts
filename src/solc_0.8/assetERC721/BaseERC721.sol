@@ -18,16 +18,20 @@ abstract contract BaseERC721 is
     uint256[50] private __gap1; // In case
 
     address internal _trustedForwarder;
+
     string public baseTokenURI;
 
+    mapping(uint256 => bytes32) public metadataHashes;
+
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant BURNER_ROLE = keccak256("BURNER_ROLE");
 
     /// @notice Mint an ERC721 Asset with the provided id.
-    /// @dev Should be callable only by MintableERC721Predicate on L1.
+    /// @dev Should be callable only by the designated predicate on L1.
     /// @param to Address that will receive the token.
     /// @param id ERC721 id to be used.
     function mint(address to, uint256 id)
-        external
+        public
         virtual
         override(IMintableERC721, IERC721Token, IERC721Minter)
         onlyRole(MINTER_ROLE)
@@ -36,17 +40,18 @@ abstract contract BaseERC721 is
     }
 
     /// @notice Mint an ERC721 Asset with the provided id.
-    /// @dev Should be callable only by MintableERC721Predicate on L1.
+    /// @dev Should be callable only by the designated predicate on L1.
     /// @dev If you want to retain token metadata from L2 to L1 during exit, you must implement this method.
     /// @param to Address that will receive the token.
     /// @param id ERC721 id to be used.
-    /// @param metaData Associated token metadata, to be decoded & set using `setTokenMetadata`.
+    /// @param data Associated token metadata, which is decoded & used to set the token's metadata hash.
     function mint(
         address to,
         uint256 id,
-        bytes calldata metaData
-    ) external virtual override(IMintableERC721, IERC721Token, IERC721Minter) onlyRole(MINTER_ROLE) {
-        _safeMint(to, id, metaData);
+        bytes calldata data
+    ) public virtual override(IMintableERC721, IERC721Token, IERC721Minter) onlyRole(MINTER_ROLE) {
+        _setTokenMetadataHash(id, data);
+        _safeMint(to, id, data);
     }
 
     /// @notice Set the approval for an operator to manage all the tokens of the sender.
@@ -68,6 +73,13 @@ abstract contract BaseERC721 is
     /// @param id Token id which will be burned.
     function burnFrom(address from, uint256 id) external override {
         require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
+        _burn(id);
+    }
+
+    /// @notice Burns token with given `id`.
+    /// @dev Used by default fx-portal tunnel which burns rather than locks.
+    /// @param id The id of the token to be burned.
+    function burn(uint256 id) external onlyRole(BURNER_ROLE) {
         _burn(id);
     }
 
@@ -108,18 +120,16 @@ abstract contract BaseERC721 is
         _trustedForwarder = trustedForwarder;
     }
 
-    /// @notice Change the base uri for token metadata
-    /// @param baseUri The new base uri.
-    function setBaseUri(string calldata baseUri) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        baseTokenURI = baseUri;
-    }
-
     function isTrustedForwarder(address forwarder) public view returns (bool) {
         return forwarder == _trustedForwarder;
     }
 
     function getTrustedForwarder() external view returns (address trustedForwarder) {
         return _trustedForwarder;
+    }
+
+    function _setTokenMetadataHash(uint256 id, bytes memory data) internal {
+        metadataHashes[id] = abi.decode(data, (bytes32));
     }
 
     function _msgSender() internal view virtual override returns (address sender) {
