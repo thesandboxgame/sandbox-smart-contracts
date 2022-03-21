@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import "../common/interfaces/@maticnetwork/pos-portal/root/RootToken/IMintableERC721.sol";
+import "../common/interfaces/IMintableERC721.sol";
 import "../common/interfaces/IERC721TokenReceiver.sol";
 
 /// @dev based on: @maticnetwork/pos-portal/contracts/root/TokenPredicates/MintableERC721Predicate.sol

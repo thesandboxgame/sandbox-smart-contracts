@@ -3,7 +3,7 @@
 pragma solidity 0.8.2;
 
 import {BaseERC721} from "../../../assetERC721/BaseERC721.sol";
-import {IRootERC721} from "../../../common/interfaces/@maticnetwork/pos-portal/root/RootToken/IRootERC721.sol";
+import {IRootERC721} from "../../../common/interfaces/pos-portal/root/IRootERC721.sol";
 
 /// @title This contract is for AssetERC721 which can be minted by a minter role.
 /// @dev This contract supports meta transactions.
