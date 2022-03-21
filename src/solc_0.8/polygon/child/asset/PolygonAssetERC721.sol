@@ -40,12 +40,12 @@ contract PolygonAssetERC721 is BaseERC721, IChildToken {
         require(user != address(0x0), "INVALID_USER");
         if (depositData.length == 32) {
             // deposit single
-            uint256 tokenId = abi.decode(depositData, (uint256));
+            uint256 tokenId = abi.decode(depositData, (uint256)); // TODO: update for data
             _deposit(user, tokenId);
             emit Deposit(user, tokenId);
         } else {
             // deposit batch
-            uint256[] memory tokenIds = abi.decode(depositData, (uint256[]));
+            uint256[] memory tokenIds = abi.decode(depositData, (uint256[])); // TODO: update for data
             for (uint256 i; i < tokenIds.length; i++) {
                 _deposit(user, tokenIds[i]);
             }
@@ -64,7 +64,7 @@ contract PolygonAssetERC721 is BaseERC721, IChildToken {
     /// @dev Should burn user's tokens. This transaction will be verified when exiting on root chain
     /// @param tokenIds tokenId list to withdraw
     function withdrawBatch(uint256[] calldata tokenIds) external {
-        // Iteratively burn ERC721 tokens, for performing batch withdraw
+        // Iteratively burn ERC721 tokens, for performing batch withdraw // TODO: update for tunnel so they are locked not burned
         for (uint256 i; i < tokenIds.length; i++) {
             _withdraw(tokenIds[i]);
         }
@@ -131,7 +131,7 @@ contract PolygonAssetERC721 is BaseERC721, IChildToken {
         // We only accept tokens that were minted on L2, withdrawn and now came from L1
         require(withdrawnTokens[tokenId], "TOKEN_NOT_EXISTS_ON_ROOT_CHAIN");
         withdrawnTokens[tokenId] = false;
-        _safeMint(user, tokenId);
+        _safeMint(user, tokenId); // TODO: update for data
     }
 
     /// @notice Withdraw tokens
@@ -139,7 +139,7 @@ contract PolygonAssetERC721 is BaseERC721, IChildToken {
     function _withdraw(uint256 tokenId) internal {
         require(ownerOf(tokenId) == _msgSender(), "NOT_OWNER");
         withdrawnTokens[tokenId] = true;
-        _burn(tokenId);
+        _burn(tokenId); // TODO: update for tunnel so they are locked not burned
     }
 
     /// @dev Helper functions to obtain full tokenURI found below
