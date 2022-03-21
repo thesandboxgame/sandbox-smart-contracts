@@ -2,13 +2,12 @@
 pragma solidity 0.8.2;
 
 import {BaseERC721} from "../../../assetERC721/BaseERC721.sol";
-import {IChildToken} from "../../../common/interfaces/pos-portal/child/IChildToken.sol";
 
 /// @title This contract is for AssetERC721 which can be minted by a minter role.
 /// @dev AssetERC721 will be minted only on L2 and can be transferred to L1 but not minted on L1.
 /// @dev This contract supports meta transactions.
 /// @dev This contract is final, don't inherit from it.
-contract PolygonAssetERC721 is BaseERC721, IChildToken {
+contract PolygonAssetERC721 is BaseERC721 {
     event Deposit(address indexed from, uint256 tokenId);
     event DepositBatch(address indexed from, uint256[] tokenIds);
     event WithdrawnBatch(address indexed user, uint256[] tokenIds);
@@ -27,51 +26,6 @@ contract PolygonAssetERC721 is BaseERC721, IChildToken {
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _trustedForwarder = trustedForwarder;
         __ERC721_init("Sandbox's ASSETs ERC721", "ASSETERC721");
-    }
-
-    /// @notice called when token is deposited on root chain
-    /// @dev Should be callable only by ChildChainManager
-    /// @dev Should handle deposit by minting the required tokenId(s) for user
-    /// @dev Should set `withdrawnTokens` mapping to `false` for the tokenId being deposited
-    /// @dev Minting can also be done by other functions
-    /// @param user user address for whom deposit is being done
-    /// @param depositData abi encoded tokenIds. Batch deposit also supported.
-    function deposit(address user, bytes calldata depositData) external override onlyRole(CHILD_MANAGER_ROLE) {
-        require(user != address(0x0), "INVALID_USER");
-        if (depositData.length == 32) {
-            // deposit single
-            uint256 tokenId = abi.decode(depositData, (uint256)); // TODO: update for data
-            _deposit(user, tokenId);
-            emit Deposit(user, tokenId);
-        } else {
-            // deposit batch
-            uint256[] memory tokenIds = abi.decode(depositData, (uint256[])); // TODO: update for data
-            for (uint256 i; i < tokenIds.length; i++) {
-                _deposit(user, tokenIds[i]);
-            }
-            emit DepositBatch(user, tokenIds);
-        }
-    }
-
-    /// @notice Withdraw tokens
-    /// @param tokenId tokenId of the token to be withdrawn
-    function withdraw(uint256 tokenId) public {
-        _withdraw(tokenId);
-        emit Withdrawn(_msgSender(), tokenId);
-    }
-
-    /// @notice called when user wants to withdraw multiple tokens back to root chain
-    /// @dev Should burn user's tokens. This transaction will be verified when exiting on root chain
-    /// @param tokenIds tokenId list to withdraw
-    function withdrawBatch(uint256[] calldata tokenIds) external {
-        // Iteratively burn ERC721 tokens, for performing batch withdraw // TODO: update for tunnel so they are locked not burned
-        for (uint256 i; i < tokenIds.length; i++) {
-            _withdraw(tokenIds[i]);
-        }
-        // At last emit this event, which will be used
-        // in MintableERC721 predicate contract on L1
-        // while verifying burn proof
-        emit WithdrawnBatch(_msgSender(), tokenIds);
     }
 
     /// @notice Creates a new token for `to`
@@ -122,24 +76,6 @@ contract PolygonAssetERC721 is BaseERC721, IChildToken {
                     ".json"
                 )
             );
-    }
-
-    /// @notice Deposit tokens
-    /// @param user The address for deposit
-    /// @param tokenId The tokenId to mint to user's account
-    function _deposit(address user, uint256 tokenId) internal {
-        // We only accept tokens that were minted on L2, withdrawn and now came from L1
-        require(withdrawnTokens[tokenId], "TOKEN_NOT_EXISTS_ON_ROOT_CHAIN");
-        withdrawnTokens[tokenId] = false;
-        _safeMint(user, tokenId); // TODO: update for data
-    }
-
-    /// @notice Withdraw tokens
-    /// @param tokenId The tokenId of the token to be withdrawn
-    function _withdraw(uint256 tokenId) internal {
-        require(ownerOf(tokenId) == _msgSender(), "NOT_OWNER");
-        withdrawnTokens[tokenId] = true;
-        _burn(tokenId); // TODO: update for tunnel so they are locked not burned
     }
 
     /// @dev Helper functions to obtain full tokenURI found below
