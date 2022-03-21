@@ -36,7 +36,6 @@ contract ERC20RewardPool is
     using SafeERC20 for IERC20;
     using Address for address;
 
-    // ToDO: Any other Events?
     event Staked(address indexed account, uint256 stakeAmount);
     event Withdrawn(address indexed account, uint256 stakeAmount);
     event Exit(address indexed account);
