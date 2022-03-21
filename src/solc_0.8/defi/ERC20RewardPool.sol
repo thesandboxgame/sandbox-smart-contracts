@@ -270,7 +270,7 @@ contract ERC20RewardPool is
         external
         nonReentrant
         antiDepositCheck(_msgSender())
-        checkRequirement(_msgSender(), amount, _balances[_msgSender()])
+        checkRequirements(_msgSender(), amount, _balances[_msgSender()])
     {
         require(amount > 0, "ERC20RewardPool: Cannot stake 0");
 
@@ -331,19 +331,20 @@ contract ERC20RewardPool is
         emit Withdrawn(account, amount);
     }
 
-    function _withdrawRewards(address account) internal timeLockCheck(account) {
+    function _withdrawRewards(address account) internal timeLockClaimCheck(account) {
         uint256 reward = rewards[account];
+        uint256 mod = 0;
         if (reward > 0) {
-            if (amountLockClaim.claimLockEnabled == true && amountLockClaim.amount > 0) {
+            if (amountLockClaim.claimLockEnabled == true) {
                 // constrain the reward amount to the integer allowed
-                uint256 mod = reward % DECIMALS_18;
+                mod = reward % DECIMALS_18;
                 reward = reward - mod;
                 require(
-                    amountLockClaim.amount > reward,
-                    "ERC20RewardPool: Cannot withdraw - lockClaim.amount > reward"
+                    amountLockClaim.amount <= reward,
+                    "ERC20RewardPool: Cannot withdraw - lockClaim.amount < reward"
                 );
             }
-            rewards[account] = 0;
+            rewards[account] = mod;
             rewardToken.safeTransfer(account, reward);
             emit RewardPaid(account, reward);
         }
