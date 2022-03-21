@@ -84,6 +84,14 @@ contract PolygonAssetERC721 is BaseERC721, IChildToken {
         emit Minted(to, id);
     }
 
+    /// @notice Set the metadatahash for a given token id.
+    /// @dev The metadata hash for the ERC721 may need to be manually set or overridden.
+    /// @param id The token id.
+    /// @param data The metadatahash to be used for the token id.
+    function setTokenMetadata(uint256 id, bytes memory data) external override onlyRole(METADATA_ROLE) {
+        _setTokenMetadataHash(id, data);
+    }
+
     /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
     /// @param id The token to get the uri of.
     /// @return URI The token's URI string.
