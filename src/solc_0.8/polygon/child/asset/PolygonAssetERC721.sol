@@ -2,7 +2,7 @@
 pragma solidity 0.8.2;
 
 import {BaseERC721} from "../../../assetERC721/BaseERC721.sol";
-import {IChildToken} from "../../../common/interfaces/@maticnetwork/pos-portal/child/ChildToken/IChildToken.sol";
+import {IChildToken} from "../../../common/interfaces/pos-portal/child/IChildToken.sol";
 
 /// @title This contract is for AssetERC721 which can be minted by a minter role.
 /// @dev AssetERC721 will be minted only on L2 and can be transferred to L1 but not minted on L1.

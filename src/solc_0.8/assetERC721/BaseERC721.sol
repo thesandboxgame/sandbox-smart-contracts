@@ -4,7 +4,7 @@ pragma solidity 0.8.2;
 
 import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/ERC721Upgradeable.sol";
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import {IMintableERC721} from "../common/interfaces/@maticnetwork/pos-portal/root/RootToken/IMintableERC721.sol";
+import {IMintableERC721} from "../common/interfaces/IMintableERC721.sol";
 import {IERC721Token} from "../common/interfaces/IERC721Token.sol";
 import {IERC721Minter} from "../common/interfaces/IERC721Minter.sol";
 
