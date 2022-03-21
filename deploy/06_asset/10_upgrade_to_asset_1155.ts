@@ -9,7 +9,7 @@ const func: DeployFunction = async function (
   const {deployer, upgradeAdmin} = await getNamedAccounts();
   const {deploy} = deployments;
 
-  const ERC1155_PREDICATE = await deployments.getOrNull('ERC1155_PREDICATE');
+  const ERC1155_PREDICATE = await deployments.get('ERC1155_PREDICATE');
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
 
   const ERC1155ERC721HelperLib = await deploy('ERC1155ERC721Helper', {
@@ -36,7 +36,7 @@ const func: DeployFunction = async function (
           TRUSTED_FORWARDER.address,
           deployer,
           deployer,
-          ERC1155_PREDICATE?.address,
+          ERC1155_PREDICATE.address,
           0,
         ],
       },
@@ -48,5 +48,11 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['AssetERC1155', 'AssetERC1155_deploy'];
-func.dependencies = ['Asset', 'Sand', 'Sand_deploy'];
+func.dependencies = [
+  'Asset',
+  'Sand',
+  'TRUSTED_FORWARDER',
+  'ERC1155_PREDICATE',
+  'Sand_deploy',
+];
 func.skip = skipUnlessTestnet;
