@@ -43,6 +43,7 @@ contract PolygonAssetERC721 is BaseERC721 {
         emit Minted(to, id);
     }
 
+    /// TODO: remove as mint without data not needed?
     /// @notice Creates a new token for `to`
     /// @param to The address that will receive a new token
     /// @dev Minting is only permitted to MINTER_ROLE
