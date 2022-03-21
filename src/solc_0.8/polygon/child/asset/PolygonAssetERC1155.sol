@@ -2,7 +2,7 @@
 pragma solidity 0.8.2;
 
 import "../../../assetERC1155/AssetBaseERC1155.sol";
-import "../../../common/interfaces/@maticnetwork/pos-portal/child/ChildToken/IChildToken.sol";
+import "../../../common/interfaces/pos-portal/child/IChildToken.sol";
 
 /// @title This contract is for AssetERC1155 which can be minted by a minter role.
 /// @dev AssetERC1155 will be minted only on L2 and can be transferred to L1 and not minted on L1.
@@ -21,11 +21,10 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         address admin,
         address bouncerAdmin,
         address predicate,
-        IMintableERC721 assetERC721,
         address childChainManager,
         uint8 chainIndex
     ) external {
-        init(trustedForwarder, admin, bouncerAdmin, predicate, assetERC721, chainIndex);
+        init(trustedForwarder, admin, bouncerAdmin, predicate, chainIndex);
         _childChainManager = childChainManager;
     }
 
@@ -92,7 +91,6 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         require(user != address(0x0), "PolygonAssetERC1155: !CHILD_CHAIN_MANAGER");
         (uint256[] memory ids, uint256[] memory amounts, bytes memory data) =
             abi.decode(depositData, (uint256[], uint256[], bytes));
-        require(user != address(0x0), "PolygonAssetERC1155: INVALID_DEPOSIT_USER");
 
         _mintBatch(user, ids, amounts, data);
     }

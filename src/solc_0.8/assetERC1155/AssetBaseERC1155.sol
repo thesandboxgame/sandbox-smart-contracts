@@ -4,7 +4,6 @@ pragma solidity 0.8.2;
 import "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 import "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155Receiver.sol";
-import "../common/interfaces/@maticnetwork/pos-portal/root/RootToken/IMintableERC721.sol";
 import "../common/Libraries/ObjectLib32.sol";
 import "../common/BaseWithStorage/WithSuperOperators.sol";
 import "../asset/libraries/ERC1155ERC721Helper.sol";
@@ -28,7 +27,8 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     mapping(uint256 => bytes) internal _rarityPacks; // rarity configuration per packs (2 bits per Asset)
     mapping(uint256 => uint32) private _nextCollectionIndex; // extraction
 
-    mapping(address => address) private _creatorship; // creatorship transfer
+    // @note : Deprecated.
+    mapping(address => address) private _creatorship; // creatorship transfer // deprecated
 
     mapping(address => bool) private _bouncers; // the contracts allowed to mint
 
@@ -48,22 +48,17 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
 
     address internal _trustedForwarder;
 
-    IMintableERC721 internal _assetERC721;
-
     uint256[20] private __gap;
     // solhint-enable max-states-count
 
     event BouncerAdminChanged(address oldBouncerAdmin, address newBouncerAdmin);
     event Bouncer(address bouncer, bool enabled);
-    event CreatorshipTransfer(address indexed original, address indexed from, address indexed to);
-    event Extraction(uint256 indexed id);
 
     function init(
         address trustedForwarder,
         address admin,
         address bouncerAdmin,
         address predicate,
-        IMintableERC721 assetERC721,
         uint8 chainIndex
     ) public {
         // one-time init of bitfield's previous versions
@@ -71,7 +66,6 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         _admin = admin;
         _bouncerAdmin = bouncerAdmin;
         _predicate = predicate;
-        _assetERC721 = assetERC721;
         __ERC2771Handler_initialize(trustedForwarder);
         _chainIndex = chainIndex;
     }
@@ -146,32 +140,6 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         );
     }
 
-    /// @notice Transfers creatorship of `original` from `sender` to `to`.
-    /// @param sender address of current registered creator.
-    /// @param original address of the original creator whose creation are saved in the ids themselves.
-    /// @param to address which will be given creatorship for all tokens originally minted by `original`.
-    function transferCreatorship(
-        address sender,
-        address original,
-        address to
-    ) external {
-        require(sender == _msgSender() || _superOperators[_msgSender()], "!AUTHORIZED");
-        require(sender != address(0), "SENDER==0");
-        require(to != address(0), "TO==0");
-        address current = _creatorship[original];
-        if (current == address(0)) {
-            current = original;
-        }
-        require(current != to, "CURRENT==TO");
-        require(current == sender, "CURRENT!=SENDER");
-        if (to == original) {
-            _creatorship[original] = address(0);
-        } else {
-            _creatorship[original] = to;
-        }
-        emit CreatorshipTransfer(original, current, to);
-    }
-
     /// @notice Enable or disable approval for `operator` to manage all `sender`'s tokens.
     /// @dev used for Meta Transaction (from metaTransactionContract).
     /// @param sender address which grant approval.
@@ -219,20 +187,6 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         return _bouncers[who];
     }
 
-    /// @notice Extracts an EIP-721 NFT from an EIP-1155 token.
-    /// @param sender address which own the token to be extracted.
-    /// @param id the token type to extract from.
-    /// @param to address which will receive the token.
-    /// @return newId the id of the newly minted NFT.
-    function extractERC721From(
-        address sender,
-        uint256 id,
-        address to
-    ) external returns (uint256 newId) {
-        require(sender == _msgSender() || isApprovedForAll(sender, _msgSender()), "!AUTHORIZED");
-        return _extractERC721From(sender, id, to);
-    }
-
     /// @notice Get the balance of `owners` for each token type `ids`.
     /// @param owners the addresses of the token holders queried.
     /// @param ids ids of each token type to query.
@@ -249,18 +203,6 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
             balances[i] = balanceOf(owners[i], ids[i]);
         }
         return balances;
-    }
-
-    /// @notice Get the creator of the token type `id`.
-    /// @param id the id of the token to get the creator of.
-    /// @return the creator of the token type `id`.
-    function creatorOf(uint256 id) external view returns (address) {
-        require(wasEverMinted(id), "TOKEN_!MINTED");
-        address newCreator = _creatorship[address(uint160(id / ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER))];
-        if (newCreator != address(0)) {
-            return newCreator;
-        }
-        return address(uint160(id / ERC1155ERC721Helper.CREATOR_OFFSET_MULTIPLIER));
     }
 
     /// @notice A descriptive name for the collection of tokens in this contract.
@@ -336,6 +278,24 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         require(wasEverMinted(id), "token was never minted");
         (uint256 bin, uint256 index) = id.getTokenBinIndex();
         return _packedTokenBalance[owner][bin].getValueInBin(index);
+    }
+
+    /// @notice Call to perform all AssetERC1155 operations before minting to AssetERC721.
+    /// @param id the token id for which the next collection index is fetched.
+    /// @return newId generated after extraction
+    /// @return metaData required for minting on AssetERC721.
+    function prepareForExtract(
+        address sender,
+        uint256 id,
+        address to
+    ) external returns (uint256 newId, string memory metaData) {
+        require(_bouncers[msg.sender], "!BOUNCER"); // TODO: should we limit this call to asset upgrader?
+        require(balanceOf(to, id) == 1, "!NFT");
+        uint32 tokenCollectionIndex = _nextCollectionIndex[id];
+        metaData = tokenURI(id);
+        newId = id + ERC1155ERC721Helper.IS_NFT + (tokenCollectionIndex) * 2**ERC1155ERC721Helper.NFT_INDEX_OFFSET; // TODO: To review
+        _nextCollectionIndex[id] = tokenCollectionIndex + 1;
+        _burnFT(sender, id, 1);
     }
 
     /// @notice Queries the approval status of `operator` for owner `owner`.
@@ -590,21 +550,6 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
 
         emit TransferSingle(operator, address(0), account, id, amount);
         require(_checkOnERC1155Received(operator, address(0), account, id, amount, data), "TRANSFER_REJECTED");
-    }
-
-    function _extractERC721From(
-        address sender,
-        uint256 id,
-        address to
-    ) internal returns (uint256 newId) {
-        require(to != address(0), "TO==0");
-        require(balanceOf(to, id) == 1, "!NFT");
-        uint32 tokenCollectionIndex = _nextCollectionIndex[id];
-        bytes32 metaData = _metadataHash[id & ERC1155ERC721Helper.URI_ID];
-        _nextCollectionIndex[id] = tokenCollectionIndex + 1;
-        _burnFT(sender, id, 1);
-        _assetERC721.mint(to, id, bytes(abi.encode(metaData)));
-        emit Extraction(id);
     }
 
     /// @dev Allows the use of a bitfield to track the initialized status of the version `v` passed in as an arg.
