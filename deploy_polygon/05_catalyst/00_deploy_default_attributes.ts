@@ -6,7 +6,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
 
   const {deployer} = await getNamedAccounts();
-  await deploy(`PolygonDefaultAttributes`, {
+  await deploy(`DefaultAttributes`, {
     from: deployer,
     log: true,
     skipIfAlreadyDeployed: true,
@@ -14,8 +14,4 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = [
-  'PolygonDefaultAttributes',
-  'PolygonDefaultAttributes_deploy',
-  'L2',
-];
+func.tags = ['DefaultAttributes', 'DefaultAttributes_deploy', 'L2'];
