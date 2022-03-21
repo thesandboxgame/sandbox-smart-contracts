@@ -18,7 +18,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer, catalystAssetFeeRecipient} = await getNamedAccounts();
 
-  await deploy('AssetUpgrader', {
+  await deploy(`AssetUpgrader`, {
     from: deployer,
     log: true,
     args: [
@@ -31,10 +31,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       catalystAssetFeeRecipient,
       TRUSTED_FORWARDER.address,
     ],
+    contract: `AssetUpgrader`,
   });
 };
 export default func;
-func.tags = ['AssetUpgrader', 'AssetUpgrader_deploy'];
+func.tags = ['AssetUpgrader', 'AssetUpgrader_deploy', 'L2'];
 func.dependencies = [
   'AssetAttributesRegistry_deploy',
   'Sand_deploy',

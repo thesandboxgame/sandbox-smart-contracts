@@ -9,7 +9,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
 
   const {deployer} = await getNamedAccounts();
-  await deploy(`PolygonGemsCatalystsRegistry`, {
+  await deploy(`GemsCatalystsRegistry`, {
     from: deployer,
     log: true,
     contract: `GemsCatalystsRegistry`,
@@ -26,9 +26,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = [
-  'PolygonGemsCatalystsRegistry',
-  'PolygonGemsCatalystsRegistry_deploy',
-  'L2',
-];
+func.tags = ['GemsCatalystsRegistry', 'GemsCatalystsRegistry_deploy', 'L2'];
 func.dependencies = ['TRUSTED_FORWARDER'];
