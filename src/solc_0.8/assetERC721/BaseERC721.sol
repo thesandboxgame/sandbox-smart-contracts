@@ -28,14 +28,10 @@ abstract contract BaseERC721 is
 
     /// @notice Mint an ERC721 Asset with the provided id.
     /// @dev Should be callable only by the designated predicate on L1.
+    /// @dev Do not use this mint method if you want to retain metadata.
     /// @param to Address that will receive the token.
     /// @param id ERC721 id to be used.
-    function mint(address to, uint256 id)
-        public
-        virtual
-        override(IMintableERC721, IERC721Token, IERC721Minter)
-        onlyRole(MINTER_ROLE)
-    {
+    function mint(address to, uint256 id) public virtual override(IMintableERC721, IERC721Token, IERC721Minter) {
         _safeMint(to, id);
     }
 
@@ -49,7 +45,7 @@ abstract contract BaseERC721 is
         address to,
         uint256 id,
         bytes calldata data
-    ) public virtual override(IMintableERC721, IERC721Token, IERC721Minter) onlyRole(MINTER_ROLE) {
+    ) public virtual override(IMintableERC721, IERC721Token, IERC721Minter) {
         _setTokenMetadataHash(id, data);
         _safeMint(to, id, data);
     }
