@@ -78,6 +78,12 @@ contract ERC20RewardPool is
         _;
     }
 
+    modifier isValidAddress(address account) {
+        require(account != address(0), "ERC20RewardPool: invalid address");
+
+        _;
+    }
+
     /// @notice set the lockPeriodInSecs for the anti-compound buffer
     /// @param lockPeriodInSecs amount of time the user must wait between reward withdrawal
     function setTimelockClaim(uint256 lockPeriodInSecs) external onlyRole(DEFAULT_ADMIN_ROLE) {
@@ -150,8 +156,7 @@ contract ERC20RewardPool is
     /// @param receiver address of the beneficiary of the recovered funds
     /// @dev this function must be called in an emergency situation only.
     /// @dev Calling it is risky specially when rewardToken == stakeToken
-    function recoverFunds(address receiver) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        require(receiver != address(0), "ERC20RewardPool: invalid receiver");
+    function recoverFunds(address receiver) external onlyRole(DEFAULT_ADMIN_ROLE) isValidAddress(receiver) {
         rewardToken.safeTransfer(receiver, rewardToken.balanceOf(address(this)));
     }
 
@@ -230,8 +235,7 @@ contract ERC20RewardPool is
     /// @dev he can the reward distribution to his favor. This function must be called by an external agent ASAP to
     /// @dev update the contribution for the user. We understand the risk but the rewards are distributes slowly so
     /// @dev the user cannot affect the reward distribution heavily.
-    function computeContribution(address account) external {
-        require(account != address(0), "ERC20RewardPool: invalid address");
+    function computeContribution(address account) external isValidAddress(account) {
         // We decide to give the user the accumulated rewards even if he cheated a little bit.
         _processRewards(account);
         _updateContribution(account);
