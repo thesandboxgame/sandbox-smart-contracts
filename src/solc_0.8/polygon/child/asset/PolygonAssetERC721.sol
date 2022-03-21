@@ -88,7 +88,7 @@ contract PolygonAssetERC721 is BaseERC721, IChildToken {
     /// @dev The metadata hash for the ERC721 may need to be manually set or overridden.
     /// @param id The token id.
     /// @param data The metadatahash to be used for the token id.
-    function setTokenMetadata(uint256 id, bytes memory data) external override onlyRole(METADATA_ROLE) {
+    function setTokenMetadata(uint256 id, bytes memory data) external onlyRole(METADATA_ROLE) {
         _setTokenMetadataHash(id, data);
     }
 
