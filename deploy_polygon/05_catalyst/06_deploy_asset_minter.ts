@@ -3,16 +3,19 @@ import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
-  const {deploy} = deployments;
+  const {deploy, read} = deployments;
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const AssetAttributesRegistry = await deployments.get(
-    'AssetAttributesRegistry'
+    'PolygonAssetAttributesRegistry'
   );
-  const Asset = await deployments.get('Asset');
-  const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
-
   const {deployer, assetMinterAdmin} = await getNamedAccounts();
+  const Asset = await deployments.get('PolygonAsset');
+
+  const assetRegistryData = await read(
+    'PolygonAssetAttributesRegistry',
+    'getCatalystRegistry'
+  );
 
   const commonQuantity = 1000;
   const rareQuantity = 100;
@@ -35,19 +38,19 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     args: [
       AssetAttributesRegistry.address,
       Asset.address,
-      GemsCatalystsRegistry.address,
+      assetRegistryData,
       assetMinterAdmin,
       TRUSTED_FORWARDER.address,
       assetQuantitiesByCatalystId,
       assetQuantitiesByTypeId,
     ],
+    contract: 'AssetMinter',
   });
 };
 export default func;
-func.tags = ['AssetMinter', 'AssetMinter_deploy'];
+func.tags = ['AssetMinter', 'AssetMinter_deploy', 'L2'];
 func.dependencies = [
   'AssetAttributesRegistry_deploy',
   'Asset_deploy',
-  'GemsCatalystsRegistry_deploy',
   'TRUSTED_FORWARDER',
 ];
