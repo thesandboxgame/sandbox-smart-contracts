@@ -29,9 +29,9 @@ contract RequirementsRules is Ownable {
     }
 
     mapping(IERC721 => RequireERC721) public _listERC721;
-    IERC721[] public _listERC721Index;
     mapping(IERC1155 => RequireERC1155) public _listERC1155;
-    IERC1155[] public _listERC1155Index;
+    IERC721[] internal _listERC721Index;
+    IERC1155[] internal _listERC1155Index;
 
     modifier checkRequirement(
         address account,

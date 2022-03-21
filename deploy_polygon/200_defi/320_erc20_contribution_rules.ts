@@ -7,12 +7,11 @@ const func: DeployFunction = async function (
   const {deployments, getNamedAccounts} = hre;
   const {deployer} = await getNamedAccounts();
   const Land = await deployments.get('PolygonLand');
-  const Asset = await deployments.get('PolygonAsset');
 
   await deployments.deploy('ContributionRules', {
     from: deployer,
     contract: 'ContributionRules',
-    args: [Land.address, Asset.address],
+    args: [Land.address],
     log: true,
     skipIfAlreadyDeployed: true,
   });
