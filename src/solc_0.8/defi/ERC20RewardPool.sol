@@ -80,27 +80,19 @@ contract ERC20RewardPool is
 
     /// @notice set the lockPeriodInSecs for the anti-compound buffer
     /// @param lockPeriodInSecs amount of time the user must wait between reward withdrawal
-    function setTimelockClaim(uint256 lockPeriodInSecs) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
-
+    function setTimelockClaim(uint256 lockPeriodInSecs) external onlyRole(DEFAULT_ADMIN_ROLE) {
         timeLockClaim.lockPeriodInSecs = lockPeriodInSecs;
     }
 
-    function setTimelockDeposit(uint256 newTimeDeposit) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
-
+    function setTimelockDeposit(uint256 newTimeDeposit) external onlyRole(DEFAULT_ADMIN_ROLE) {
         lockDeposit.lockPeriodInSecs = newTimeDeposit;
     }
 
-    function setTimeLockWithdraw(uint256 newTimeWithdraw) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
-
+    function setTimeLockWithdraw(uint256 newTimeWithdraw) external onlyRole(DEFAULT_ADMIN_ROLE) {
         lockWithdraw.lockPeriodInSecs = newTimeWithdraw;
     }
 
-    function setAmountLockClaim(uint256 newAmountLockClaim, bool isEnabled) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
-
+    function setAmountLockClaim(uint256 newAmountLockClaim, bool isEnabled) external onlyRole(DEFAULT_ADMIN_ROLE) {
         amountLockClaim.amount = newAmountLockClaim;
         amountLockClaim.claimLockEnabled = isEnabled;
     }
@@ -119,8 +111,7 @@ contract ERC20RewardPool is
 
     /// @notice set the trusted forwarder
     /// @param trustedForwarder address of the contract that is enabled to send meta-tx on behalf of the user
-    function setTrustedForwarder(address trustedForwarder) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
+    function setTrustedForwarder(address trustedForwarder) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _trustedForwarder = trustedForwarder;
     }
 
@@ -159,8 +150,7 @@ contract ERC20RewardPool is
     /// @param receiver address of the beneficiary of the recovered funds
     /// @dev this function must be called in an emergency situation only.
     /// @dev Calling it is risky specially when rewardToken == stakeToken
-    function recoverFunds(address receiver) external {
-        require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
+    function recoverFunds(address receiver) external onlyRole(DEFAULT_ADMIN_ROLE) {
         require(receiver != address(0), "ERC20RewardPool: invalid receiver");
         rewardToken.safeTransfer(receiver, rewardToken.balanceOf(address(this)));
     }
