@@ -16,6 +16,8 @@ contract PolygonAssetERC721 is BaseERC721, IChildToken {
     event Minted(address indexed user, uint256 tokenId);
 
     bytes32 public constant CHILD_MANAGER_ROLE = keccak256("CHILD_MANAGER_ROLE");
+    bytes32 public constant METADATA_ROLE = keccak256("METADATA_ROLE");
+    uint256 public constant PACK_INDEX = 0x00000000000000000000000000000000000000000000000000000000000007FF;
 
     // We only mint on L2, so we track tokens transferred to L1 to avoid minting them twice.
     mapping(uint256 => bool) public withdrawnTokens;
@@ -76,10 +78,27 @@ contract PolygonAssetERC721 is BaseERC721, IChildToken {
     /// @param to The address that will receive a new token
     /// @dev Minting is only permitted to MINTER_ROLE
     /// @param id The id of the new token
-    function mint(address to, uint256 id) external override onlyRole(MINTER_ROLE) {
+    function mint(address to, uint256 id) public override onlyRole(MINTER_ROLE) {
         require(!withdrawnTokens[id], "TOKEN_EXISTS_ON_ROOT_CHAIN");
-        _safeMint(to, id);
+        BaseERC721.mint(to, id); // TODO: does this need data?
         emit Minted(to, id);
+    }
+
+    /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.
+    /// @param id The token to get the uri of.
+    /// @return URI The token's URI string.
+    function tokenURI(uint256 id) public view override returns (string memory) {
+        require(ownerOf(id) != address(0), "ZERO_ADDRESS");
+        return
+            string(
+                abi.encodePacked(
+                    "ipfs://bafybei",
+                    hash2base32(metadataHashes[id]),
+                    "/",
+                    uint2str(id & PACK_INDEX),
+                    ".json"
+                )
+            );
     }
 
     /// @notice Deposit tokens
@@ -98,5 +117,46 @@ contract PolygonAssetERC721 is BaseERC721, IChildToken {
         require(ownerOf(tokenId) == _msgSender(), "NOT_OWNER");
         withdrawnTokens[tokenId] = true;
         _burn(tokenId);
+    }
+
+    /// @dev Helper functions to obtain full tokenURI found below
+
+    bytes32 private constant base32Alphabet = 0x6162636465666768696A6B6C6D6E6F707172737475767778797A323334353637;
+
+    // solium-disable-next-line security/no-assign-params
+    function hash2base32(bytes32 hash) private pure returns (string memory _uintAsString) {
+        uint256 _i = uint256(hash);
+        uint256 k = 52;
+        bytes memory bstr = new bytes(k);
+        bstr[--k] = base32Alphabet[uint8((_i % 8) << 2)]; // uint8 s = uint8((256 - skip) % 5);  // (_i % (2**s)) << (5-s)
+        _i /= 8;
+        while (k > 0) {
+            bstr[--k] = base32Alphabet[_i % 32];
+            _i /= 32;
+        }
+        return string(bstr);
+    }
+
+    // solium-disable-next-line security/no-assign-params
+    function uint2str(uint256 _i) public pure returns (string memory _uintAsString) {
+        if (_i == 0) {
+            return "0";
+        }
+
+        uint256 j = _i;
+        uint256 len;
+        while (j != 0) {
+            len++;
+            j /= 10;
+        }
+
+        bytes memory bstr = new bytes(len);
+        uint256 k = len;
+        while (_i != 0) {
+            bstr[--k] = bytes1(uint8(48 + uint8(_i % 10)));
+            _i /= 10;
+        }
+
+        return string(bstr);
     }
 }
