@@ -28,8 +28,8 @@ contract PolygonAssetERC721 is BaseERC721 {
     }
 
     /// @notice Creates a new token for `to`
-    /// @param to The address that will receive a new token
     /// @dev Minting is only permitted to MINTER_ROLE
+    /// @param to The address that will receive a new token
     /// @param id The id of the new token
     function mint(address to, uint256 id) public override(BaseERC721) onlyRole(MINTER_ROLE) {
         require(!withdrawnTokens[id], "TOKEN_EXISTS_ON_ROOT_CHAIN");
@@ -38,9 +38,9 @@ contract PolygonAssetERC721 is BaseERC721 {
     }
 
     /// @notice Creates a new token for `to`
-    /// @param to The address that will receive a new token
     /// @dev Minting is only permitted to MINTER_ROLE
     /// @dev Use this function to retain metadata
+    /// @param to The address that will receive a new token
     /// @param id The id of the new token
     /// @param data Associated token metadata, which is decoded & used to set the token's metadata hash.
     function mint(
