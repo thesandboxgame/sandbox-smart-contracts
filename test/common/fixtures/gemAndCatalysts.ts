@@ -47,11 +47,7 @@ export const gemsAndCatalystsFixtures = async () => {
   const gemsCatalystsRegistrySuperOperator = users[1];
   const user3 = users[3];
 
-<<<<<<< HEAD
   await deployments.deploy(`PolygonGem_Example`, {
-=======
-  await deployments.deploy(`Gem_Example`, {
->>>>>>> fixes in deployments
     contract: 'GemV1',
     from: gemOwner,
     log: true, //put initializer
@@ -74,11 +70,7 @@ export const gemsAndCatalystsFixtures = async () => {
 
   const gemExample: Contract = await ethers.getContract('PolygonGem_Example');
 
-<<<<<<< HEAD
   await deployments.deploy(`PolygonGem_NotInOrder`, {
-=======
-  await deployments.deploy(`Gem_NotInOrder`, {
->>>>>>> fixes in deployments
     contract: 'GemV1',
     from: gemOwner,
     log: true,
@@ -104,11 +96,7 @@ export const gemsAndCatalystsFixtures = async () => {
 
   const DefaultAttributes = await deployments.get(`PolygonDefaultAttributes`);
 
-<<<<<<< HEAD
   await deployments.deploy(`PolygonCatalyst_Example`, {
-=======
-  await deployments.deploy(`Catalyst_Example`, {
->>>>>>> fixes in deployments
     contract: 'CatalystV1',
     from: catalystOwner,
     proxy: {
@@ -130,12 +118,9 @@ export const gemsAndCatalystsFixtures = async () => {
     },
   });
 
-<<<<<<< HEAD
   console.log('catalyst minter address in fixtures');
   console.log(catalystMinter);
 
-=======
->>>>>>> fixes in deployments
   const catalystExample: Contract = await ethers.getContract(
     'PolygonCatalyst_Example'
   );
