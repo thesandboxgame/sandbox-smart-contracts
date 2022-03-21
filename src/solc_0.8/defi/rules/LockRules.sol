@@ -13,12 +13,12 @@ contract LockRules {
         bool claimLockEnabled;
     }
 
-    struct LockWithdraw {
+    struct TimeLockWithdraw {
         uint256 lockPeriodInSecs;
         mapping(address => uint256) lastWithdraw;
     }
 
-    struct LockDeposit {
+    struct TimeLockDeposit {
         uint256 lockPeriodInSecs;
         mapping(address => uint256) lastDeposit;
     }
@@ -26,10 +26,10 @@ contract LockRules {
     // This is used to implement a time buffer for reward retrieval, so the used cannot re-stake the rewards too fast.
     TimeLockClaim public timeLockClaim;
     AmountLockClaim public amountLockClaim;
-    LockWithdraw public lockWithdraw;
-    LockDeposit public lockDeposit;
+    TimeLockWithdraw public lockWithdraw;
+    TimeLockDeposit public lockDeposit;
 
-    modifier timeLockCheck(address account) {
+    modifier timeLockClaimCheck(address account) {
         // We use lockPeriodInSecs == 0 to disable this check
         if (timeLockClaim.lockPeriodInSecs != 0) {
             require(
