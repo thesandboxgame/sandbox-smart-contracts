@@ -7,14 +7,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {upgradeAdmin} = await getNamedAccounts();
 
-  const DefaultAttributes = await deployments.get('PolygonDefaultAttributes');
-  const GemsCatalystsRegistry = await deployments.get(
-    'PolygonGemsCatalystsRegistry'
-  );
+  const DefaultAttributes = await deployments.get('DefaultAttributes');
+  const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
 
   const {catalystAdmin, deployer} = await getNamedAccounts();
   for (const catalyst of catalysts) {
-    await deploy(`PolygonCatalyst_${catalyst.symbol}`, {
+    console.log('is it working here');
+    await deploy(`Catalyst_${catalyst.symbol}`, {
       contract: 'CatalystV1',
       from: deployer,
       log: true,
@@ -41,8 +40,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.tags = ['PolygonCatalysts', 'PolygonCatalysts_deploy', 'L2'];
+func.tags = ['Catalysts', 'Catalysts_deploy', 'L2'];
 func.dependencies = [
-  'PolygonDefaultAttributes_deploy',
-  'PolygonGemsCatalystsRegistry_deploy',
+  'DefaultAttributes_deploy',
+  'GemsCatalystsRegistry_deploy',
 ];

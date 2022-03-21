@@ -41,7 +41,7 @@ export const gemsAndCatalystsFixtures = async () => {
   const user3 = users[3];
 
   await deployments.deploy(`Gem_Example`, {
-    contract: 'Gem',
+    contract: 'GemV1',
     from: gemOwner,
     log: true,
     args: [
@@ -56,7 +56,7 @@ export const gemsAndCatalystsFixtures = async () => {
   const gemExample: Contract = await ethers.getContract('Gem_Example');
 
   await deployments.deploy(`Gem_NotInOrder`, {
-    contract: 'Gem',
+    contract: 'GemV1',
     from: gemOwner,
     args: [
       'Gem_NotInOrder',
@@ -71,7 +71,7 @@ export const gemsAndCatalystsFixtures = async () => {
   const DefaultAttributes = await deployments.get(`DefaultAttributes`);
 
   await deployments.deploy(`Catalyst_Example`, {
-    contract: 'Catalyst',
+    contract: 'CatalystV1',
     from: catalystOwner,
     args: [
       'Catalyst_Example',
@@ -83,6 +83,7 @@ export const gemsAndCatalystsFixtures = async () => {
       gemsCatalystsRegistry.address,
     ],
   });
+
   const catalystExample: Contract = await ethers.getContract(
     'Catalyst_Example'
   );
