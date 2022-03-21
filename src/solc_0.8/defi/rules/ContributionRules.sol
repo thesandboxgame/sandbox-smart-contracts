@@ -46,7 +46,7 @@ contract ContributionRules is Ownable {
         uint256 assetMultiplier = _multiplierBalanceOfERC1155(account);
         uint256 landMultiplier = _multiplierBalanceOfLand(account);
 
-        return amountStaked + ((amountStaked * (100 + nftMultiplier + assetMultiplier + landMultiplier)) / 100);
+        return amountStaked + ((amountStaked * (nftMultiplier + assetMultiplier + landMultiplier)) / 100);
     }
 
     function setLandMultiplierContract(address newLandContract) external onlyOwner {
