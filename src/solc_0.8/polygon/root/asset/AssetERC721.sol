@@ -19,6 +19,28 @@ contract AssetERC721 is BaseERC721, IRootERC721 {
         __ERC721_init("Sandbox's ASSETs ERC721", "ASSETERC721");
     }
 
+    /// @notice Mint an ERC721 Asset with the provided id.
+    /// @dev Should be callable only by the AssetTunnel on L1 via MINTER_ROLE.
+    /// @param to Address that will receive the token.
+    /// @param id ERC721 id to be used.
+    function mint(address to, uint256 id) public override(BaseERC721) onlyRole(MINTER_ROLE) {
+        BaseERC721.mint(to, id);
+    }
+
+    /// @notice Mint an ERC721 Asset with the provided id.
+    /// @dev Should be callable only by the AssetTunnel on L1.
+    /// @dev If you want to retain token metadata from L2 to L1 during exit, you must implement this method.
+    /// @param to Address that will receive the token.
+    /// @param id ERC721 id to be used.
+    /// @param data Associated token metadata, which is decoded & used to set the token's metadata hash.
+    function mint(
+        address to,
+        uint256 id,
+        bytes calldata data
+    ) public override(BaseERC721) onlyRole(MINTER_ROLE) {
+        BaseERC721.mint(to, id, data);
+    }
+
     /// @notice Set the metadatahash for a given token id.
     /// @dev The metadata hash for the ERC721 may need to be manually set or overridden.
     /// @param id The token id.
