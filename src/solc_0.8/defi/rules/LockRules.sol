@@ -8,7 +8,6 @@ contract LockRules {
         mapping(address => uint256) lastClaim;
     }
 
-    //TODO missing this modifier -> together with AntiCompound?
     struct AmountLockClaim {
         uint256 amount;
         bool claimLockEnabled;

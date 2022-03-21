@@ -144,13 +144,13 @@ contract ERC20RewardPool is
 
     /// @notice set the reward calculator
     /// @param contractAddress address of a plugin that calculates absolute rewards at any point in time
-    /// @param restartRewards if true the rewards from the previous calculator are accumulated before changing it
-    function setRewardCalculator(address contractAddress, bool restartRewards)
+    /// @param restartRewards_ if true the rewards from the previous calculator are accumulated before changing it
+    function setRewardCalculator(address contractAddress, bool restartRewards_)
         external
         isContractAndAdmin(contractAddress)
     {
         // We process the rewards of the current reward calculator before the switch.
-        if (restartRewards) {
+        if (restartRewards_) {
             _restartRewards();
         }
         rewardCalculator = IRewardCalculator(contractAddress);
@@ -270,7 +270,7 @@ contract ERC20RewardPool is
         external
         nonReentrant
         antiDepositCheck(_msgSender())
-        checkRequirement(_msgSender(), amount)
+        checkRequirement(_msgSender(), amount, _balances[_msgSender()])
     {
         require(amount > 0, "ERC20RewardPool: Cannot stake 0");
 
@@ -391,7 +391,7 @@ contract ERC20RewardPool is
         }
     }
 
-    function _earned(address account, uint256 rewardPerToken) internal view returns (uint256) {
+    function _earned(address account, uint256 rewardPerToken_) internal view returns (uint256) {
         // - userRewardPerTokenPaid[account] * _contributions[account]  / _totalContributions is the portion of
         //      rewards the last time the user changed his contribution and called _restartRewards
         //      (_totalContributions corresponds to previous value of that moment).
@@ -404,7 +404,7 @@ contract ERC20RewardPool is
         // The important thing to note is that at any moment in time _contributions[account] / _totalContributions is
         // the share of the user even if _totalContributions changes because of other users activity.
         return
-            ((rewardPerToken + rewardPerTokenStored - userRewardPerTokenPaid[account]) * _contributions[account]) /
+            ((rewardPerToken_ + rewardPerTokenStored - userRewardPerTokenPaid[account]) * _contributions[account]) /
             1e24;
     }
 

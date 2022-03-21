@@ -33,12 +33,14 @@ contract RequirementsRules is Ownable {
     mapping(IERC1155 => RequireERC1155) public _listERC1155;
     IERC1155[] public _listERC1155Index;
 
-    modifier checkRequirement(address account, uint256 amount) {
+    modifier checkRequirement(
+        address account,
+        uint256 amount,
+        uint256 balanceOf
+    ) {
         uint256 maxAllowed = 0;
         uint256 maxStakeNFT = _checkERC721List(account);
         uint256 maxStakeAsset = _checkERC1155List(account);
-
-        //TODO: consider current pool balance
 
         maxAllowed = maxStakeNFT + maxStakeAsset;
 
@@ -46,7 +48,8 @@ contract RequirementsRules is Ownable {
             maxAllowed = maxStake;
         }
 
-        require(amount <= maxAllowed, "RequirementsRules: maxAllowed");
+        // check if amount + current staked balance don't exceed maxAllowed
+        require(amount + balanceOf <= maxAllowed, "RequirementsRules: maxAllowed");
 
         _;
     }
