@@ -78,9 +78,24 @@ contract PolygonAssetERC721 is BaseERC721, IChildToken {
     /// @param to The address that will receive a new token
     /// @dev Minting is only permitted to MINTER_ROLE
     /// @param id The id of the new token
+    /// @param data Associated token metadata, which is decoded & used to set the token's metadata hash.
+    function mint(
+        address to,
+        uint256 id,
+        bytes calldata data
+    ) public override onlyRole(MINTER_ROLE) {
+        require(!withdrawnTokens[id], "TOKEN_EXISTS_ON_ROOT_CHAIN");
+        BaseERC721.mint(to, id, data);
+        emit Minted(to, id);
+    }
+
+    /// @notice Creates a new token for `to`
+    /// @param to The address that will receive a new token
+    /// @dev Minting is only permitted to MINTER_ROLE
+    /// @param id The id of the new token
     function mint(address to, uint256 id) public override onlyRole(MINTER_ROLE) {
         require(!withdrawnTokens[id], "TOKEN_EXISTS_ON_ROOT_CHAIN");
-        BaseERC721.mint(to, id); // TODO: does this need data?
+        BaseERC721.mint(to, id);
         emit Minted(to, id);
     }
 
