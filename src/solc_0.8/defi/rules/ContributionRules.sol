@@ -41,8 +41,6 @@ contract ContributionRules is Ownable {
         landMultiplierContract = _landMultiplierContract;
     }
 
-    //TODO: compute the multiplier - if a user has many multipliers, what is the case?
-    // more than 1 asset in the list?
     function computeMultiplier(address account, uint256 amountStaked) external view returns (uint256) {
         uint256 nftMultiplier = _multiplierBalanceOfERC721(account);
         uint256 assetMultiplier = _multiplierBalanceOfERC1155(account);
