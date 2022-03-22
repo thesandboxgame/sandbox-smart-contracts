@@ -36,7 +36,7 @@ contract RequirementsRules is Ownable {
     IERC721[] internal _listERC721Index;
     IERC1155[] internal _listERC1155Index;
 
-    event ERC11551ListRequirementSet(
+    event ERC1155ListRequirementSet(
         address indexed contractERC1155,
         uint256[] ids,
         uint256 minAmountId,
@@ -156,7 +156,7 @@ contract RequirementsRules is Ownable {
             _listERC1155[newContract].index = _listERC1155Index.length - 1;
         }
 
-        emit ERC11551ListRequirementSet(contractERC1155, ids, minAmountId, maxAmountId);
+        emit ERC1155ListRequirementSet(contractERC1155, ids, minAmountId, maxAmountId);
     }
 
     function getERC721ListRequirement(address contractERC721)
