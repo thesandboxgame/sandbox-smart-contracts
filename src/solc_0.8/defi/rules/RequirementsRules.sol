@@ -313,7 +313,9 @@ contract RequirementsRules is Ownable {
         uint256 balanceOfId = 0;
 
         for (uint256 j = 0; j < _listERC1155[reqContract].ids.length; j++) {
-            balanceOfId = reqContract.balanceOf(account, _listERC1155[reqContract].ids[j]);
+            uint256 bal = reqContract.balanceOf(account, _listERC1155[reqContract].ids[j]);
+
+            balanceOfId = balanceOfId + bal;
         }
 
         return (balanceOfId);
