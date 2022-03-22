@@ -124,11 +124,13 @@ contract ContributionRules is Ownable {
 
     function _islistERC721Member(IERC721 reqContract) internal view returns (bool) {
         if (_listERC721Index.length == 0) return false;
+
         return (_listERC721Index[_listERC721[reqContract].index] == reqContract);
     }
 
     function _islistERC1155Member(IERC1155 reqContract) internal view returns (bool) {
-        if (_listERC721Index.length == 0) return false;
+        if (_listERC1155Index.length == 0) return false;
+
         return (_listERC1155Index[_listERC1155[reqContract].index] == reqContract);
     }
 
