@@ -10,6 +10,7 @@ import {IERC1155} from "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 
 contract ContributionRules is Ownable {
     using Address for address;
+
     uint256 internal constant DECIMALS_7 = 10000000;
     uint256 internal constant MIDPOINT_9 = 500000000;
     uint256 internal constant NFT_FACTOR_6 = 10000;
@@ -23,8 +24,8 @@ contract ContributionRules is Ownable {
         uint256 index;
     }
 
-    mapping(IERC721 => MultiplierRule) private _listERC721;
-    mapping(IERC1155 => MultiplierRule) private _listERC1155;
+    mapping(IERC721 => MultiplierRule) internal _listERC721;
+    mapping(IERC1155 => MultiplierRule) internal _listERC1155;
     IERC721[] internal _listERC721Index;
     IERC1155[] internal _listERC1155Index;
 
@@ -32,6 +33,12 @@ contract ContributionRules is Ownable {
     event ERC721MultiplierAdded(address indexed contractERC721, uint256[] multipliers, uint256[] ids, bool balanceOf);
     event ERC1155MultiplierDeleted(address indexed contractERC1155);
     event ERC721MultiplierDeleted(address indexed contractERC721);
+
+    modifier _isContract(address account) {
+        require(account.isContract(), "ContributionRules: invalid address");
+
+        _;
+    }
 
     function computeMultiplier(address account, uint256 amountStaked) external view returns (uint256) {
         uint256 multiplierERC721 = _multiplierBalanceOfERC721(account);
@@ -44,10 +51,9 @@ contract ContributionRules is Ownable {
         address contractERC1155,
         uint256[] memory ids,
         uint256[] memory multipliers
-    ) external onlyOwner {
-        require(contractERC1155.isContract(), "ContributionRules: invalid contract address");
-        require(ids.length > 0, "ContributionRules: invalid ids array");
-        require(multipliers.length > 0, "ContributionRules: invalid multiplier array");
+    ) external onlyOwner _isContract(contractERC1155) {
+        require(ids.length > 0, "ContributionRules: invalid array of ids");
+        require(multipliers.length > 0, "ContributionRules: invalid array of multipliers");
 
         IERC1155 multContract = IERC1155(contractERC1155);
 
@@ -55,6 +61,7 @@ contract ContributionRules is Ownable {
         _listERC1155[multContract].multipliers = multipliers;
         _listERC1155[multContract].balanceOf = false;
 
+        // if it's a new member create a new registry, instead, only update
         if (_islistERC1155Member(multContract) == false) {
             _listERC1155Index.push(multContract);
             _listERC1155[multContract].index = _listERC1155Index.length - 1;
@@ -68,18 +75,14 @@ contract ContributionRules is Ownable {
         uint256[] memory multipliers,
         uint256[] memory ids,
         bool balanceOf
-    ) external onlyOwner {
-        require(contractERC721.isContract(), "ContributionRules: invalid contract address");
-
+    ) external onlyOwner _isContract(contractERC721) {
         IERC721 multContract = IERC721(contractERC721);
 
         _listERC721[multContract].multipliers = multipliers;
         _listERC721[multContract].balanceOf = balanceOf;
+        _listERC721[multContract].ids = ids;
 
-        if (ids.length < 0) {
-            _listERC721[multContract].ids = ids;
-        }
-
+        // if it's a new member create a new registry, instead, only update
         if (_islistERC721Member(multContract) == false) {
             _listERC721Index.push(multContract);
             _listERC721[multContract].index = _listERC721Index.length - 1;
@@ -88,18 +91,27 @@ contract ContributionRules is Ownable {
         ERC721MultiplierAdded(contractERC721, multipliers, ids, balanceOf);
     }
 
-    function getMultiplierERC721List(address reqContract) external view returns (MultiplierRule memory) {
-        require(reqContract.isContract(), "ContributionRules: invalid contract address");
+    function getMultiplierERC721List(address reqContract)
+        external
+        view
+        _isContract(reqContract)
+        returns (MultiplierRule memory)
+    {
+        require(_islistERC721Member(IERC721(reqContract)), "ContributionRules: contract is not in the list");
         return _listERC721[IERC721(reqContract)];
     }
 
-    function getMultiplierERC1155List(address reqContract) external view returns (MultiplierRule memory) {
-        require(reqContract.isContract(), "ContributionRules: invalid contract address");
+    function getMultiplierERC1155List(address reqContract)
+        external
+        view
+        _isContract(reqContract)
+        returns (MultiplierRule memory)
+    {
+        require(_islistERC1155Member(IERC1155(reqContract)), "ContributionRules: contract is not in the list");
         return _listERC1155[IERC1155(reqContract)];
     }
 
-    function deleteMultiplierERC721fromList(IERC721 reqContract) external onlyOwner {
-        require(reqContract != IERC721(address(0)), "ContributionRules: invalid contract address");
+    function deleteMultiplierERC721fromList(IERC721 reqContract) external _isContract(address(reqContract)) onlyOwner {
         require(_islistERC721Member(reqContract), "ContributionRules: contract is not in the list");
         uint256 indexToDelete = _listERC721[reqContract].index;
         IERC721 addrToMove = _listERC721Index[_listERC721Index.length - 1];
@@ -110,8 +122,11 @@ contract ContributionRules is Ownable {
         emit ERC721MultiplierDeleted(address(reqContract));
     }
 
-    function deleteMultiplierERC1155fromList(IERC1155 reqContract) external onlyOwner {
-        require(reqContract != IERC1155(address(0)), "ContributionRules: invalid contract address");
+    function deleteMultiplierERC1155fromList(IERC1155 reqContract)
+        external
+        _isContract(address(reqContract))
+        onlyOwner
+    {
         require(_islistERC1155Member(reqContract), "ContributionRules: contract is not in the list");
         uint256 indexToDelete = _listERC1155[reqContract].index;
         IERC1155 addrToMove = _listERC1155Index[_listERC1155Index.length - 1];
@@ -143,12 +158,11 @@ contract ContributionRules is Ownable {
             if (_listERC721[reqContract].balanceOf == true) {
                 _multiplier = _multiplier + _multiplierLogarithm(account, reqContract);
             }
-            if (_listERC721[reqContract].ids.length != 0) {
-                for (uint256 j = 0; j < _listERC721[reqContract].ids.length; j++) {
-                    address owner = reqContract.ownerOf(_listERC721[reqContract].ids[j]);
-                    if (owner == account) {
-                        _multiplier = _multiplier + _listERC721[reqContract].multipliers[j];
-                    }
+
+            for (uint256 j = 0; j < _listERC721[reqContract].ids.length; j++) {
+                address owner = reqContract.ownerOf(_listERC721[reqContract].ids[j]);
+                if (owner == account) {
+                    _multiplier = _multiplier + _listERC721[reqContract].multipliers[j];
                 }
             }
         }

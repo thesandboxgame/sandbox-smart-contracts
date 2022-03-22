@@ -31,8 +31,8 @@ contract RequirementsRules is Ownable {
         uint256 index;
     }
 
-    mapping(IERC721 => RequirementRuleERC721) public _listERC721;
-    mapping(IERC1155 => RequirementRuleERC1155) public _listERC1155;
+    mapping(IERC721 => RequirementRuleERC721) internal _listERC721;
+    mapping(IERC1155 => RequirementRuleERC1155) internal _listERC1155;
     IERC721[] internal _listERC721Index;
     IERC1155[] internal _listERC1155Index;
 
@@ -54,6 +54,12 @@ contract RequirementsRules is Ownable {
     event MaxStakeOverallSet(uint256 newMaxStake, uint256 oldMaxStake);
     event ERC1155RequirementDeleted(address indexed contractERC1155);
     event ERC721RequirementDeleted(address indexed contractERC721);
+
+    modifier _isContract(address account) {
+        require(account.isContract(), "RequirementsRules: invalid address");
+
+        _;
+    }
 
     modifier checkRequirements(
         address account,
@@ -91,9 +97,7 @@ contract RequirementsRules is Ownable {
         uint256 maxAmountBalanceOf,
         uint256 reqAmountId,
         uint256 maxAmountId
-    ) external onlyOwner {
-        require(contractERC721 != address(0), "RequirementsRules: invalid address");
-
+    ) external onlyOwner _isContract(contractERC721) {
         IERC721 newContract = IERC721(contractERC721);
 
         if (ids.length != 0) {
@@ -105,7 +109,7 @@ contract RequirementsRules is Ownable {
         _listERC721[newContract].maxAmountId = maxAmountId;
         _listERC721[newContract].balanceOf = balanceOf;
 
-        // if it's a new member create a new register, instead, only update
+        // if it's a new member create a new registry, instead, only update
         if (_islistERC721Member(newContract) == false) {
             _listERC721Index.push(newContract);
             _listERC721[newContract].index = _listERC721Index.length - 1;
@@ -127,14 +131,13 @@ contract RequirementsRules is Ownable {
         uint256[] memory ids,
         uint256 reqAmountId,
         uint256 maxAmountId
-    ) external onlyOwner {
-        require(contractERC1155 != address(0), "RequirementsRules: invalid address");
-
+    ) external onlyOwner _isContract(contractERC1155) {
         IERC1155 newContract = IERC1155(contractERC1155);
         _listERC1155[newContract].ids = ids;
         _listERC1155[newContract].reqAmountId = reqAmountId;
         _listERC1155[newContract].maxAmountId = maxAmountId;
 
+        // if it's a new member create a new registry, instead, only update
         if (_islistERC1155Member(newContract) == false) {
             _listERC1155Index.push(newContract);
             _listERC1155[newContract].index = _listERC1155Index.length - 1;
@@ -143,18 +146,31 @@ contract RequirementsRules is Ownable {
         emit ERC1155RequirementAdded(contractERC1155, ids, reqAmountId, maxAmountId);
     }
 
-    function getERC721ListRequirement(address contractERC721) external view returns (RequirementRuleERC721 memory) {
-        require(contractERC721 != address(0), "RequirementsRules: invalid address");
+    function getERC721ListRequirement(address contractERC721)
+        external
+        view
+        _isContract(contractERC721)
+        returns (RequirementRuleERC721 memory)
+    {
+        require(_islistERC721Member(IERC721(contractERC721)), "RequirementsRules: contract is not in the list");
         return _listERC721[IERC721(contractERC721)];
     }
 
-    function getERC1155ListRequirement(address contractERC1155) external view returns (RequirementRuleERC1155 memory) {
-        require(contractERC1155 != address(0), "RequirementsRules: invalid address");
+    function getERC1155ListRequirement(address contractERC1155)
+        external
+        view
+        _isContract(contractERC1155)
+        returns (RequirementRuleERC1155 memory)
+    {
+        require(_islistERC1155Member(IERC1155(contractERC1155)), "RequirementsRules: contract is not in the list");
         return _listERC1155[IERC1155(contractERC1155)];
     }
 
-    function deleteERC721fromListRequirement(IERC721 contractERC721) external onlyOwner {
-        require(contractERC721 != IERC721(address(0)), "RequirementsRules: invalid address");
+    function deleteERC721fromListRequirement(IERC721 contractERC721)
+        external
+        onlyOwner
+        _isContract(address(contractERC721))
+    {
         require(_islistERC721Member(contractERC721), "RequirementsRules: contract is not in the list");
         uint256 indexToDelete = _listERC721[contractERC721].index;
         IERC721 addrToMove = _listERC721Index[_listERC721Index.length - 1];
@@ -165,8 +181,11 @@ contract RequirementsRules is Ownable {
         emit ERC721RequirementDeleted(address(contractERC721));
     }
 
-    function deleteERC1155fromListRequirement(IERC1155 contractERC1155) external onlyOwner {
-        require(contractERC1155 != IERC1155(address(0)), "RequirementsRules: invalid address");
+    function deleteERC1155fromListRequirement(IERC1155 contractERC1155)
+        external
+        onlyOwner
+        _isContract(address(contractERC1155))
+    {
         require(_islistERC1155Member(contractERC1155), "RequirementsRules: contract is not in the list");
         uint256 indexToDelete = _listERC1155[contractERC1155].index;
         IERC1155 addrToMove = _listERC1155Index[_listERC1155Index.length - 1];
@@ -227,10 +246,10 @@ contract RequirementsRules is Ownable {
     }
 
     function _checkERC1155Requirements(address account) internal view returns (uint256) {
-        uint256 _totalBal = 0;
         uint256 _maxStake = 0;
 
         for (uint256 i = 0; i < _listERC1155Index.length; i++) {
+            uint256 _totalBal = 0;
             IERC1155 reqContract = _listERC1155Index[i];
 
             for (uint256 j = 0; j < _listERC1155[reqContract].ids.length; j++) {
