@@ -56,24 +56,6 @@ describe('AssetERC721.sol', function () {
         await expect(fixtures.assetERC721.setTrustedForwarder(fixtures.other))
           .to.be.reverted;
       });
-      // it('admin can set the baseUri', async function () {
-      //   const fixtures = await setupAssetERC721Test();
-
-      //   const assetERC721AsAdmin = await ethers.getContract(
-      //     'AssetERC721',
-      //     fixtures.adminRole
-      //   );
-      //   expect(await fixtures.assetERC721.baseTokenURI()).to.be.equal(
-      //     fixtures.baseUri
-      //   );
-      //   const otherUri = 'http://somethingelse';
-      //   await assetERC721AsAdmin.setBaseUri(otherUri);
-      //   expect(await fixtures.assetERC721.baseTokenURI()).to.be.equal(otherUri);
-      // });
-      // it('other should fail to set the baseUri', async function () {
-      //   const fixtures = await setupAssetERC721Test();
-      //   await expect(fixtures.assetERC721.setBaseUri('test')).to.be.reverted;
-      // });
     });
     describe('minter', function () {
       it('mint', async function () {
