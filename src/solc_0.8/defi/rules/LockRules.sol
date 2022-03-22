@@ -2,7 +2,10 @@
 
 pragma solidity 0.8.2;
 
-contract LockRules {
+import {Context} from "@openzeppelin/contracts-0.8/utils/Context.sol";
+import {Ownable} from "@openzeppelin/contracts-0.8/access/Ownable.sol";
+
+contract LockRules is Context, Ownable {
     struct TimeLockClaim {
         uint256 lockPeriodInSecs;
         mapping(address => uint256) lastClaim;
@@ -63,5 +66,36 @@ contract LockRules {
         }
         lockDeposit.lastDeposit[account] = block.timestamp;
         _;
+    }
+
+    /// @notice set the lockPeriodInSecs for the anti-compound buffer
+    /// @param lockPeriodInSecs amount of time the user must wait between reward withdrawal
+    function setTimelockClaim(uint256 lockPeriodInSecs) external onlyOwner {
+        timeLockClaim.lockPeriodInSecs = lockPeriodInSecs;
+    }
+
+    function setTimelockDeposit(uint256 newTimeDeposit) external onlyOwner {
+        lockDeposit.lockPeriodInSecs = newTimeDeposit;
+    }
+
+    function setTimeLockWithdraw(uint256 newTimeWithdraw) external onlyOwner {
+        lockWithdraw.lockPeriodInSecs = newTimeWithdraw;
+    }
+
+    function setAmountLockClaim(uint256 newAmountLockClaim, bool isEnabled) external onlyOwner {
+        amountLockClaim.amount = newAmountLockClaim;
+        amountLockClaim.claimLockEnabled = isEnabled;
+    }
+
+    function getRemainingTimelockClaim() external view returns (uint256) {
+        return block.timestamp - (timeLockClaim.lastClaim[_msgSender()] + timeLockClaim.lockPeriodInSecs);
+    }
+
+    function getRemainingTimelockWithdraw() external view returns (uint256) {
+        return block.timestamp - (lockWithdraw.lastWithdraw[_msgSender()] + lockWithdraw.lockPeriodInSecs);
+    }
+
+    function getRemainingTimelockDeposit() external view returns (uint256) {
+        return block.timestamp - (lockDeposit.lastDeposit[_msgSender()] + lockDeposit.lockPeriodInSecs);
     }
 }
