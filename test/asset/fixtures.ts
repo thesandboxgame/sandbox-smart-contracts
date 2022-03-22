@@ -7,9 +7,9 @@ import {
 import {Contract} from 'ethers';
 import {withSnapshot} from '../utils';
 
-const name = `Sandbox's Assets`;
-const symbol = 'ASSET';
-const baseUri = 'http://sandbox.testAsset.erc721';
+const name = `Sandbox's ASSETs ERC721`;
+const symbol = 'ASSETERC721';
+
 export const setupAssetERC721Test = withSnapshot([], async function () {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {deployer, upgradeAdmin} = await getNamedAccounts();
@@ -34,8 +34,6 @@ export const setupAssetERC721Test = withSnapshot([], async function () {
   });
 
   const assetERC721AsAdmin = await ethers.getContract('AssetERC721', adminRole);
-  // Set baseUri
-  await assetERC721AsAdmin.setBaseUri(baseUri);
 
   const addMinter = async function (
     adminRole: string,
@@ -48,7 +46,6 @@ export const setupAssetERC721Test = withSnapshot([], async function () {
 
   const assetERC721 = await ethers.getContract('AssetERC721', deployer);
   return {
-    baseUri,
     symbol,
     name,
     assetERC721,
