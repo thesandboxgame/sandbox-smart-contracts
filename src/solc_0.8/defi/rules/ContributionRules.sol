@@ -82,7 +82,7 @@ contract ContributionRules is Ownable {
 
         if (_islistERC721Member(multContract) == false) {
             _listERC721Index.push(multContract);
-            _listERC721[multContract].index = _listERC1155Index.length - 1;
+            _listERC721[multContract].index = _listERC721Index.length - 1;
         }
 
         ERC721MultiplierAdded(contractERC721, multipliers, ids, balanceOf);
