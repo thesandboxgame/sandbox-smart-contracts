@@ -27,14 +27,6 @@ const func: DeployFunction = async function (
     },
     log: true,
   });
-
-  // Set baseUri
-  await deployments.execute(
-    'PolygonAssetERC721',
-    {from: assetAdmin, log: true},
-    'setBaseUri',
-    'http://sandbox.asset.erc721' // TODO: reviewing metadata
-  );
 };
 
 export default func;
