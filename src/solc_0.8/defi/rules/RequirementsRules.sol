@@ -105,6 +105,7 @@ contract RequirementsRules is Ownable {
         _listERC721[newContract].maxAmountId = maxAmountId;
         _listERC721[newContract].balanceOf = balanceOf;
 
+        // if it's a new member create a new register, instead, only update
         if (_islistERC721Member(newContract) == false) {
             _listERC721Index.push(newContract);
             _listERC721[newContract].index = _listERC721Index.length - 1;
@@ -178,11 +179,13 @@ contract RequirementsRules is Ownable {
 
     function _islistERC721Member(IERC721 reqContract) internal view returns (bool) {
         if (_listERC721Index.length == 0) return false;
+
         return (_listERC721Index[_listERC721[reqContract].index] == reqContract);
     }
 
     function _islistERC1155Member(IERC1155 reqContract) internal view returns (bool) {
-        if (_listERC721Index.length == 0) return false;
+        if (_listERC1155Index.length == 0) return false;
+
         return (_listERC1155Index[_listERC1155[reqContract].index] == reqContract);
     }
 
