@@ -1,26 +1,25 @@
-import {HardhatRuntimeEnvironment} from 'hardhat/types';
+// import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {skipUnlessTestnet} from '../../utils/network';
 
-const func: DeployFunction = async function (
-  hre: HardhatRuntimeEnvironment
-): Promise<void> {
-  const {deployments, getNamedAccounts} = hre;
-  const {assetAdmin} = await getNamedAccounts();
-  const CHILD_CHAIN_MANAGER = await deployments.get('CHILD_CHAIN_MANAGER');
-  // Grant roles.
-  const childChainManagerRole = await deployments.read(
-    'PolygonAssetERC721',
-    'CHILD_MANAGER_ROLE'
-  );
-  // Admin role need enough balance!!!
-  await deployments.execute(
-    'PolygonAssetERC721',
-    {from: assetAdmin, log: true}, // DEFAULT_ADMIN_ROLE
-    'grantRole',
-    childChainManagerRole,
-    CHILD_CHAIN_MANAGER.address
-  );
+const func: DeployFunction = async function (): // hre: HardhatRuntimeEnvironment
+Promise<void> {
+  // const {deployments, getNamedAccounts} = hre;
+  // const {assetAdmin} = await getNamedAccounts();
+  // const CHILD_CHAIN_MANAGER = await deployments.get('CHILD_CHAIN_MANAGER');
+  // // Grant roles.
+  // const childChainManagerRole = await deployments.read(
+  //   'PolygonAssetERC721',
+  //   'CHILD_MANAGER_ROLE'
+  // );
+  // // Admin role need enough balance!!!
+  // await deployments.execute(
+  //   'PolygonAssetERC721',
+  //   {from: assetAdmin, log: true}, // DEFAULT_ADMIN_ROLE
+  //   'grantRole',
+  //   childChainManagerRole,
+  //   CHILD_CHAIN_MANAGER.address
+  // );
 };
 
 export default func;
