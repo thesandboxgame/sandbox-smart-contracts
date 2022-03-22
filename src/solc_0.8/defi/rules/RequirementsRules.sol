@@ -318,6 +318,6 @@ contract RequirementsRules is Ownable {
             balanceOfId = balanceOfId + bal;
         }
 
-        return (balanceOfId);
+        return balanceOfId;
     }
 }
