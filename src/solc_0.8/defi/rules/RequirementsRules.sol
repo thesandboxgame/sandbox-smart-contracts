@@ -266,9 +266,11 @@ contract RequirementsRules is Ownable {
         for (uint256 i = 0; i < _listERC1155Index.length; i++) {
             IERC1155 reqContract = _listERC1155Index[i];
 
-            balanceId = getERC1155BalanceId(reqContract, account);
+            if (_listERC1155[reqContract].ids.length > 0) {
+                balanceId = getERC1155BalanceId(reqContract, account);
 
-            require(balanceId >= _listERC1155[reqContract].minAmountId, "RequirementsRules: balanceId");
+                require(balanceId >= _listERC1155[reqContract].minAmountId, "RequirementsRules: balanceId");
+            }
         }
     }
 
