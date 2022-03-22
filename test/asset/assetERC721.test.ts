@@ -1,6 +1,6 @@
 import {ethers} from 'hardhat';
 import {expect} from 'chai';
-import {solidityPack} from 'ethers/lib/utils';
+import {solidityPack, AbiCoder} from 'ethers/lib/utils';
 import {setupAssetERC721Test} from './fixtures';
 
 describe('AssetERC721.sol', function () {
@@ -9,9 +9,6 @@ describe('AssetERC721.sol', function () {
       const fixtures = await setupAssetERC721Test();
       expect(await fixtures.assetERC721.name()).to.be.equal(fixtures.name);
       expect(await fixtures.assetERC721.symbol()).to.be.equal(fixtures.symbol);
-      expect(await fixtures.assetERC721.baseTokenURI()).to.be.equal(
-        fixtures.baseUri
-      );
     });
 
     it('interfaces', async function () {
@@ -59,24 +56,24 @@ describe('AssetERC721.sol', function () {
         await expect(fixtures.assetERC721.setTrustedForwarder(fixtures.other))
           .to.be.reverted;
       });
-      it('admin can set the baseUri', async function () {
-        const fixtures = await setupAssetERC721Test();
+      // it('admin can set the baseUri', async function () {
+      //   const fixtures = await setupAssetERC721Test();
 
-        const assetERC721AsAdmin = await ethers.getContract(
-          'AssetERC721',
-          fixtures.adminRole
-        );
-        expect(await fixtures.assetERC721.baseTokenURI()).to.be.equal(
-          fixtures.baseUri
-        );
-        const otherUri = 'http://somethingelse';
-        await assetERC721AsAdmin.setBaseUri(otherUri);
-        expect(await fixtures.assetERC721.baseTokenURI()).to.be.equal(otherUri);
-      });
-      it('other should fail to set the baseUri', async function () {
-        const fixtures = await setupAssetERC721Test();
-        await expect(fixtures.assetERC721.setBaseUri('test')).to.be.reverted;
-      });
+      //   const assetERC721AsAdmin = await ethers.getContract(
+      //     'AssetERC721',
+      //     fixtures.adminRole
+      //   );
+      //   expect(await fixtures.assetERC721.baseTokenURI()).to.be.equal(
+      //     fixtures.baseUri
+      //   );
+      //   const otherUri = 'http://somethingelse';
+      //   await assetERC721AsAdmin.setBaseUri(otherUri);
+      //   expect(await fixtures.assetERC721.baseTokenURI()).to.be.equal(otherUri);
+      // });
+      // it('other should fail to set the baseUri', async function () {
+      //   const fixtures = await setupAssetERC721Test();
+      //   await expect(fixtures.assetERC721.setBaseUri('test')).to.be.reverted;
+      // });
     });
     describe('minter', function () {
       it('mint', async function () {
@@ -114,7 +111,12 @@ describe('AssetERC721.sol', function () {
       });
       it('mint with metadata', async function () {
         const fixtures = await setupAssetERC721Test();
-        const metadata = ethers.utils.toUtf8Bytes('metadata');
+
+        const abiCoder = new AbiCoder();
+        const dummyMetadataHash = ethers.utils.keccak256('0x42');
+        const metadata = abiCoder.encode(['bytes32'], [dummyMetadataHash]);
+
+        // const metadata = ethers.utils.toUtf8Bytes('metadata');
         const assetERC721AsMinter = await ethers.getContract(
           'AssetERC721',
           fixtures.minter
