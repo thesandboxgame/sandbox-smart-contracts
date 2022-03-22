@@ -52,8 +52,8 @@ contract RequirementsRules is Ownable {
         uint256 maxAmountId
     );
     event MaxStakeOverallSet(uint256 newMaxStake, uint256 oldMaxStake);
-    event ERC1155RequirementDeleted(address indexed contractERC1155);
-    event ERC721RequirementDeleted(address indexed contractERC721);
+    event ERC11551ListRequirementDeleted(address indexed contractERC1155);
+    event ERC721ListRequirementDeleted(address indexed contractERC721);
 
     modifier isContract(address account) {
         require(account.isContract(), "RequirementsRules: is not contract");
@@ -192,7 +192,7 @@ contract RequirementsRules is Ownable {
         _listERC721[addrToMove].index = indexToDelete;
         _listERC721Index.pop();
 
-        emit ERC721RequirementDeleted(address(contractERC721));
+        emit ERC721ListRequirementDeleted(contractERC721);
     }
 
     function deleteERC1155ListRequirement(address contractERC1155)
@@ -208,7 +208,7 @@ contract RequirementsRules is Ownable {
         _listERC1155[addrToMove].index = indexToDelete;
         _listERC1155Index.pop();
 
-        emit ERC1155RequirementDeleted(contractERC1155);
+        emit ERC11551ListRequirementDeleted(contractERC1155);
     }
 
     function isERC721MemberRequirementList(IERC721 reqContract) public view returns (bool) {
