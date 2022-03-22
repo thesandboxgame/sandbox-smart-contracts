@@ -25,14 +25,6 @@ const func: DeployFunction = async function (
     },
     log: true,
   });
-
-  // Set baseUri
-  await deployments.execute(
-    'AssetERC721',
-    {from: assetAdmin, log: true}, // DEFAULT_ADMIN_ROLE
-    'setBaseUri',
-    'http://sandbox.asset.erc721' // TODO: confirm desired baseUri
-  );
 };
 
 export default func;
