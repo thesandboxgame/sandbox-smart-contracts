@@ -73,13 +73,13 @@ contract ERC20RewardPool is
     }
 
     modifier isContractAndAdmin(address contractAddress) {
-        require(contractAddress.isContract(), "ERC20RewardPool: not a contract");
+        require(contractAddress.isContract(), "ERC20RewardPool: is not a contract");
         require(hasRole(DEFAULT_ADMIN_ROLE, _msgSender()), "ERC20RewardPool: not admin");
         _;
     }
 
     modifier isValidAddress(address account) {
-        require(account != address(0), "ERC20RewardPool: invalid address");
+        require(account != address(0), "ERC20RewardPool: is not contract");
 
         _;
     }

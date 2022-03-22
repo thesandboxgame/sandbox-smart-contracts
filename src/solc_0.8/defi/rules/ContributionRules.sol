@@ -11,7 +11,7 @@ import {IERC1155} from "@openzeppelin/contracts-0.8/token/ERC1155/IERC1155.sol";
 contract ContributionRules is Ownable {
     using Address for address;
 
-    uint256 internal constant DECIMALS_7 = 10000000;
+    uint256 internal constant DECIMALS_9 = 1000000000;
     uint256 internal constant MIDPOINT_9 = 500000000;
     uint256 internal constant NFT_FACTOR_6 = 10000;
     uint256 internal constant NFT_CONSTANT_3 = 9000;
@@ -29,13 +29,13 @@ contract ContributionRules is Ownable {
     IERC721[] internal _listERC721Index;
     IERC1155[] internal _listERC1155Index;
 
-    event ERC1155MultiplierAdded(address indexed contractERC1155, uint256[] multipliers, uint256[] ids);
-    event ERC721MultiplierAdded(address indexed contractERC721, uint256[] multipliers, uint256[] ids, bool balanceOf);
+    event ERC1155MultiplierSet(address indexed contractERC1155, uint256[] multipliers, uint256[] ids);
+    event ERC721MultiplierSet(address indexed contractERC721, uint256[] multipliers, uint256[] ids, bool balanceOf);
     event ERC1155MultiplierDeleted(address indexed contractERC1155);
     event ERC721MultiplierDeleted(address indexed contractERC721);
 
     modifier isContract(address account) {
-        require(account.isContract(), "ContributionRules: invalid address");
+        require(account.isContract(), "ContributionRules: is not contract");
 
         _;
     }
@@ -83,7 +83,7 @@ contract ContributionRules is Ownable {
             _listERC1155[multContract].index = _listERC1155Index.length - 1;
         }
 
-        emit ERC1155MultiplierAdded(contractERC1155, multipliers, ids);
+        emit ERC1155MultiplierSet(contractERC1155, multipliers, ids);
     }
 
     function setERC721MultiplierList(
@@ -104,7 +104,7 @@ contract ContributionRules is Ownable {
             _listERC721[multContract].index = _listERC721Index.length - 1;
         }
 
-        ERC721MultiplierAdded(contractERC721, multipliers, ids, balanceOf);
+        ERC721MultiplierSet(contractERC721, multipliers, ids, balanceOf);
     }
 
     function getERC721MultiplierList(address reqContract)
@@ -127,12 +127,13 @@ contract ContributionRules is Ownable {
         return _listERC1155[IERC1155(reqContract)];
     }
 
-    function deleteERC721MultiplierList(IERC721 reqContract)
+    function deleteERC721MultiplierList(address contractERC721)
         external
-        isContract(address(reqContract))
-        isERC721MemberList(address(reqContract))
+        isContract(contractERC721)
+        isERC721MemberList(contractERC721)
         onlyOwner
     {
+        IERC721 reqContract = IERC721(contractERC721);
         uint256 indexToDelete = _listERC721[reqContract].index;
         IERC721 addrToMove = _listERC721Index[_listERC721Index.length - 1];
         _listERC721Index[indexToDelete] = addrToMove;
@@ -142,12 +143,13 @@ contract ContributionRules is Ownable {
         emit ERC721MultiplierDeleted(address(reqContract));
     }
 
-    function deleteERC1155MultiplierList(IERC1155 reqContract)
+    function deleteERC1155MultiplierList(address contractERC1155)
         external
-        isContract(address(reqContract))
-        isContract(address(reqContract))
+        isContract(contractERC1155)
+        isContract(contractERC1155)
         onlyOwner
     {
+        IERC1155 reqContract = IERC1155(contractERC1155);
         uint256 indexToDelete = _listERC1155[reqContract].index;
         IERC1155 addrToMove = _listERC1155Index[_listERC1155Index.length - 1];
         _listERC1155Index[indexToDelete] = addrToMove;
@@ -220,6 +222,6 @@ contract ContributionRules is Ownable {
             _multiplierERC721 = MIDPOINT_9 + (_multiplierERC721 - MIDPOINT_9) / 10;
         }
 
-        return _multiplierERC721 / DECIMALS_7;
+        return _multiplierERC721 / DECIMALS_9;
     }
 }
