@@ -29,10 +29,10 @@ contract ContributionRules is Ownable {
     IERC721[] internal _listERC721Index;
     IERC1155[] internal _listERC1155Index;
 
-    event ERC1155ListMultiplierSet(address indexed contractERC1155, uint256[] multipliers, uint256[] ids);
-    event ERC721ListMultiplierSet(address indexed contractERC721, uint256[] multipliers, uint256[] ids, bool balanceOf);
-    event ERC1155ListMultiplierDeleted(address indexed contractERC1155);
-    event ERC721ListMultiplierDeleted(address indexed contractERC721);
+    event ERC1155MultiplierListSet(address indexed contractERC1155, uint256[] multipliers, uint256[] ids);
+    event ERC721MultiplierListSet(address indexed contractERC721, uint256[] multipliers, uint256[] ids, bool balanceOf);
+    event ERC1155MultiplierListDeleted(address indexed contractERC1155);
+    event ERC721MultiplierListDeleted(address indexed contractERC721);
 
     modifier isContract(address account) {
         require(account.isContract(), "ContributionRules: is not contract");
@@ -83,7 +83,7 @@ contract ContributionRules is Ownable {
             _listERC1155[multContract].index = _listERC1155Index.length - 1;
         }
 
-        emit ERC1155ListMultiplierSet(contractERC1155, multipliers, ids);
+        emit ERC1155MultiplierListSet(contractERC1155, multipliers, ids);
     }
 
     function setERC721MultiplierList(
@@ -104,7 +104,7 @@ contract ContributionRules is Ownable {
             _listERC721[multContract].index = _listERC721Index.length - 1;
         }
 
-        ERC721ListMultiplierSet(contractERC721, multipliers, ids, balanceOf);
+        ERC721MultiplierListSet(contractERC721, multipliers, ids, balanceOf);
     }
 
     function getERC721MultiplierList(address reqContract)
@@ -140,7 +140,7 @@ contract ContributionRules is Ownable {
         _listERC721[addrToMove].index = indexToDelete;
         _listERC721Index.pop();
 
-        emit ERC721ListMultiplierDeleted(address(reqContract));
+        emit ERC721MultiplierListDeleted(address(reqContract));
     }
 
     function deleteERC1155MultiplierList(address contractERC1155)
@@ -156,7 +156,7 @@ contract ContributionRules is Ownable {
         _listERC1155[addrToMove].index = indexToDelete;
         _listERC1155Index.pop();
 
-        emit ERC1155ListMultiplierDeleted(address(reqContract));
+        emit ERC1155MultiplierListDeleted(address(reqContract));
     }
 
     function isERC721MemberMultiplierList(IERC721 reqContract) public view returns (bool) {
@@ -164,9 +164,7 @@ contract ContributionRules is Ownable {
     }
 
     function isERC1155MemberMultiplierList(IERC1155 reqContract) public view returns (bool) {
-        if (_listERC1155Index.length == 0) return false;
-
-        return (_listERC1155Index[_listERC1155[reqContract].index] == reqContract);
+        return (_listERC1155Index.length == 0) && (_listERC1155Index[_listERC1155[reqContract].index] == reqContract);
     }
 
     function multiplierBalanceOfERC721(address account) public view returns (uint256) {
