@@ -36,13 +36,13 @@ contract RequirementsRules is Ownable {
     IERC721[] internal _listERC721Index;
     IERC1155[] internal _listERC1155Index;
 
-    event ERC1155ListRequirementSet(
+    event ERC1155RequirementListSet(
         address indexed contractERC1155,
         uint256[] ids,
         uint256 minAmountId,
         uint256 maxAmountId
     );
-    event ERC721ListRequirementSet(
+    event ERC721RequirementListSet(
         address indexed contractERC721,
         uint256[] ids,
         bool balanceOf,
@@ -52,8 +52,8 @@ contract RequirementsRules is Ownable {
         uint256 maxAmountId
     );
     event MaxStakeOverallSet(uint256 newMaxStake, uint256 oldMaxStake);
-    event ERC11551ListRequirementDeleted(address indexed contractERC1155);
-    event ERC721ListRequirementDeleted(address indexed contractERC721);
+    event ERC11551RequirementListDeleted(address indexed contractERC1155);
+    event ERC721RequirementListDeleted(address indexed contractERC721);
 
     modifier isContract(address account) {
         require(account.isContract(), "RequirementsRules: is not contract");
@@ -102,7 +102,7 @@ contract RequirementsRules is Ownable {
         emit MaxStakeOverallSet(newMaxStake, oldMaxStake);
     }
 
-    function setERC721ListRequirement(
+    function setERC721tRequirementList(
         address contractERC721,
         uint256[] memory ids,
         bool balanceOf,
@@ -128,7 +128,7 @@ contract RequirementsRules is Ownable {
             _listERC721[newContract].index = _listERC721Index.length - 1;
         }
 
-        emit ERC721ListRequirementSet(
+        emit ERC721RequirementListSet(
             contractERC721,
             ids,
             balanceOf,
@@ -139,7 +139,7 @@ contract RequirementsRules is Ownable {
         );
     }
 
-    function setERC1155ListRequirement(
+    function setERC1155RequirementList(
         address contractERC1155,
         uint256[] memory ids,
         uint256 minAmountId,
@@ -156,10 +156,10 @@ contract RequirementsRules is Ownable {
             _listERC1155[newContract].index = _listERC1155Index.length - 1;
         }
 
-        emit ERC1155ListRequirementSet(contractERC1155, ids, minAmountId, maxAmountId);
+        emit ERC1155RequirementListSet(contractERC1155, ids, minAmountId, maxAmountId);
     }
 
-    function getERC721ListRequirement(address contractERC721)
+    function getERC721RequirementList(address contractERC721)
         external
         view
         isContract(contractERC721)
@@ -169,7 +169,7 @@ contract RequirementsRules is Ownable {
         return _listERC721[IERC721(contractERC721)];
     }
 
-    function getERC1155ListRequirement(address contractERC1155)
+    function getERC1155RequirementList(address contractERC1155)
         external
         view
         isContract(contractERC1155)
@@ -179,7 +179,7 @@ contract RequirementsRules is Ownable {
         return _listERC1155[IERC1155(contractERC1155)];
     }
 
-    function deleteERC721ListRequirement(address contractERC721)
+    function deleteERC721RequirementList(address contractERC721)
         external
         onlyOwner
         isContract(contractERC721)
@@ -192,10 +192,10 @@ contract RequirementsRules is Ownable {
         _listERC721[addrToMove].index = indexToDelete;
         _listERC721Index.pop();
 
-        emit ERC721ListRequirementDeleted(contractERC721);
+        emit ERC721RequirementListDeleted(contractERC721);
     }
 
-    function deleteERC1155ListRequirement(address contractERC1155)
+    function deleteERC1155RequirementList(address contractERC1155)
         external
         onlyOwner
         isContract(contractERC1155)
@@ -208,19 +208,15 @@ contract RequirementsRules is Ownable {
         _listERC1155[addrToMove].index = indexToDelete;
         _listERC1155Index.pop();
 
-        emit ERC11551ListRequirementDeleted(contractERC1155);
+        emit ERC11551RequirementListDeleted(contractERC1155);
     }
 
     function isERC721MemberRequirementList(IERC721 reqContract) public view returns (bool) {
-        if (_listERC721Index.length == 0) return false;
-
-        return (_listERC721Index[_listERC721[reqContract].index] == reqContract);
+        return (_listERC721Index.length == 0) && (_listERC721Index[_listERC721[reqContract].index] == reqContract);
     }
 
     function isERC1155MemberRequirementList(IERC1155 reqContract) public view returns (bool) {
-        if (_listERC1155Index.length == 0) return false;
-
-        return (_listERC1155Index[_listERC1155[reqContract].index] == reqContract);
+        return (_listERC1155Index.length == 0) && (_listERC1155Index[_listERC1155[reqContract].index] == reqContract);
     }
 
     function getERC721MaxStake(address account) public view returns (uint256) {
