@@ -25,5 +25,5 @@ const func: DeployFunction = async function (
 
 export default func;
 func.tags = ['AssetERC721', 'AssetERC721_setup'];
-func.dependencies = ['AssetERC721_deploy', 'MINTABLE_ERC721_PREDICATE'];
+func.dependencies = ['AssetERC721_deploy', 'MINTABLE_ERC721_PREDICATE']; // TODO change to tunnel
 func.skip = skipUnlessTestnet;
