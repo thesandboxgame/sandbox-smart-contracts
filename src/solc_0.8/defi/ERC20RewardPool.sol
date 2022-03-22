@@ -84,25 +84,6 @@ contract ERC20RewardPool is
         _;
     }
 
-    /// @notice set the lockPeriodInSecs for the anti-compound buffer
-    /// @param lockPeriodInSecs amount of time the user must wait between reward withdrawal
-    function setTimelockClaim(uint256 lockPeriodInSecs) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        timeLockClaim.lockPeriodInSecs = lockPeriodInSecs;
-    }
-
-    function setTimelockDeposit(uint256 newTimeDeposit) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        lockDeposit.lockPeriodInSecs = newTimeDeposit;
-    }
-
-    function setTimeLockWithdraw(uint256 newTimeWithdraw) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        lockWithdraw.lockPeriodInSecs = newTimeWithdraw;
-    }
-
-    function setAmountLockClaim(uint256 newAmountLockClaim, bool isEnabled) external onlyRole(DEFAULT_ADMIN_ROLE) {
-        amountLockClaim.amount = newAmountLockClaim;
-        amountLockClaim.claimLockEnabled = isEnabled;
-    }
-
     /// @notice set the reward token
     /// @param contractAddress address token used to pay rewards
     function setRewardToken(address contractAddress) external isContractAndAdmin(contractAddress) {
@@ -124,18 +105,6 @@ contract ERC20RewardPool is
     /// @notice set contract that contains all the contribution rules
     function setContributionRules(address contractAddress) external isContractAndAdmin(contractAddress) {
         contributionRules = IContributionRules(contractAddress);
-    }
-
-    function getRemainingTimelockClaim() external view returns (uint256) {
-        return block.timestamp - (timeLockClaim.lastClaim[_msgSender()] + timeLockClaim.lockPeriodInSecs);
-    }
-
-    function getRemainingTimelockWithdraw() external view returns (uint256) {
-        return block.timestamp - (lockWithdraw.lastWithdraw[_msgSender()] + lockWithdraw.lockPeriodInSecs);
-    }
-
-    function getRemainingTimelockDeposit() external view returns (uint256) {
-        return block.timestamp - (lockDeposit.lastDeposit[_msgSender()] + lockDeposit.lockPeriodInSecs);
     }
 
     /// @notice set the reward calculator
