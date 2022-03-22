@@ -17,16 +17,16 @@ contract RequirementsRules is Ownable {
     struct RequirementRuleERC721 {
         uint256[] ids;
         bool balanceOf;
-        uint256 reqAmountBalanceOf;
+        uint256 minAmountBalanceOf;
         uint256 maxAmountBalanceOf;
-        uint256 reqAmountId;
+        uint256 minAmountId;
         uint256 maxAmountId;
         uint256 index;
     }
 
     struct RequirementRuleERC1155 {
         uint256[] ids;
-        uint256 reqAmountId;
+        uint256 minAmountId;
         uint256 maxAmountId;
         uint256 index;
     }
@@ -39,16 +39,16 @@ contract RequirementsRules is Ownable {
     event ERC1155RequirementAdded(
         address indexed contractERC1155,
         uint256[] ids,
-        uint256 reqAmountId,
+        uint256 minAmountId,
         uint256 maxAmountId
     );
     event ERC721RequirementAdded(
         address indexed contractERC721,
         uint256[] ids,
         bool balanceOf,
-        uint256 reqAmountBalanceOf,
+        uint256 minAmountBalanceOf,
         uint256 maxAmountBalanceOf,
-        uint256 reqAmountId,
+        uint256 minAmountId,
         uint256 maxAmountId
     );
     event MaxStakeOverallSet(uint256 newMaxStake, uint256 oldMaxStake);
@@ -93,9 +93,9 @@ contract RequirementsRules is Ownable {
         address contractERC721,
         uint256[] memory ids,
         bool balanceOf,
-        uint256 reqAmountBalanceOf,
+        uint256 minAmountBalanceOf,
         uint256 maxAmountBalanceOf,
-        uint256 reqAmountId,
+        uint256 minAmountId,
         uint256 maxAmountId
     ) external onlyOwner _isContract(contractERC721) {
         IERC721 newContract = IERC721(contractERC721);
@@ -103,9 +103,9 @@ contract RequirementsRules is Ownable {
         if (ids.length != 0) {
             _listERC721[newContract].ids = ids;
         }
-        _listERC721[newContract].reqAmountBalanceOf = reqAmountBalanceOf;
+        _listERC721[newContract].minAmountBalanceOf = minAmountBalanceOf;
         _listERC721[newContract].maxAmountBalanceOf = maxAmountBalanceOf;
-        _listERC721[newContract].reqAmountId = reqAmountId;
+        _listERC721[newContract].minAmountId = minAmountId;
         _listERC721[newContract].maxAmountId = maxAmountId;
         _listERC721[newContract].balanceOf = balanceOf;
 
@@ -119,9 +119,9 @@ contract RequirementsRules is Ownable {
             contractERC721,
             ids,
             balanceOf,
-            reqAmountBalanceOf,
+            minAmountBalanceOf,
             maxAmountBalanceOf,
-            reqAmountId,
+            minAmountId,
             maxAmountId
         );
     }
@@ -129,12 +129,12 @@ contract RequirementsRules is Ownable {
     function setERC1155ListRequirement(
         address contractERC1155,
         uint256[] memory ids,
-        uint256 reqAmountId,
+        uint256 minAmountId,
         uint256 maxAmountId
     ) external onlyOwner _isContract(contractERC1155) {
         IERC1155 newContract = IERC1155(contractERC1155);
         _listERC1155[newContract].ids = ids;
-        _listERC1155[newContract].reqAmountId = reqAmountId;
+        _listERC1155[newContract].minAmountId = minAmountId;
         _listERC1155[newContract].maxAmountId = maxAmountId;
 
         // if it's a new member create a new registry, instead, only update
@@ -143,7 +143,7 @@ contract RequirementsRules is Ownable {
             _listERC1155[newContract].index = _listERC1155Index.length - 1;
         }
 
-        emit ERC1155RequirementAdded(contractERC1155, ids, reqAmountId, maxAmountId);
+        emit ERC1155RequirementAdded(contractERC1155, ids, minAmountId, maxAmountId);
     }
 
     function getERC721ListRequirement(address contractERC721)
@@ -226,11 +226,11 @@ contract RequirementsRules is Ownable {
                 }
             }
 
-            if (balanceOf < _listERC721[reqContract].reqAmountBalanceOf) {
+            if (balanceOf < _listERC721[reqContract].minAmountBalanceOf) {
                 balanceOf = 0;
             }
 
-            if (balanceOfId < _listERC721[reqContract].reqAmountId) {
+            if (balanceOfId < _listERC721[reqContract].minAmountId) {
                 balanceOfId = 0;
             }
 
@@ -258,7 +258,7 @@ contract RequirementsRules is Ownable {
                 _totalBal = _totalBal + bal;
             }
 
-            if (_totalBal < _listERC1155[reqContract].reqAmountId) {
+            if (_totalBal < _listERC1155[reqContract].minAmountId) {
                 _totalBal = 0;
             }
 
