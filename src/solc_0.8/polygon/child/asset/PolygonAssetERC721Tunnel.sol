@@ -5,11 +5,11 @@ import "fx-portal/contracts/tunnel/FxBaseChildTunnel.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "@openzeppelin/contracts-0.8/security/Pausable.sol";
 
-// import "../../../common/interfaces/IPolygonAssetERC721.sol"; // TODO:
+import "../../../common/interfaces/IPolygonAssetERC721.sol"; // TODO:
 import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 
-// import "./PolygonAssetERC721BaseToken.sol"; // TODO:
+import "./PolygonAssetERC721.sol";
 
 /// @title ASSETERC721 bridge on L2
 contract PolygonAssetERC721Tunnel is
@@ -64,18 +64,33 @@ contract PolygonAssetERC721Tunnel is
         __ERC2771Handler_initialize(_trustedForwarder);
     }
 
-    function batchTransferAssetERC721ToL1(
+    function withdrawToRoot(
+        address to,
+        uint256 id,
+        bytes memory data
+    ) external whenNotPaused() {
+        uint32 gasLimit = 0;
+        gasLimit += gasLimits[uint8(id)];
+        require(gasLimit < maxGasLimitOnL1, "Exceeds gas limit on L1.");
+        // lock the child token in this contract
+        childToken.safeTransferFrom(_msgSender(), address(this), id, data); // TODO: data format
+        emit Withdraw(to, id, data);
+        _sendMessageToRoot(abi.encode(to, id, data));
+    }
+
+    function batchWithdrawToRoot(
         address to,
         uint256[] calldata ids,
         bytes memory data
     ) external whenNotPaused() {
         uint32 gasLimit = 0;
         for (uint256 i = 0; i < ids.length; i++) {
-            gasLimit += gasLimits[uint8(sizes[i])];
+            gasLimit += gasLimits[uint8(ids[i])];
         }
         require(gasLimit < maxGasLimitOnL1, "Exceeds gas limit on L1.");
         for (uint256 i = 0; i < ids.length; i++) {
-            childToken.transfer(_msgSender(), address(this), ids[i], data);
+            // lock the child tokens in this contract
+            childToken.safeTransferFrom(_msgSender(), address(this), ids[i], data); // TODO: data format
             emit Withdraw(to, ids[i], data);
         }
         _sendMessageToRoot(abi.encode(to, ids, data));
@@ -108,7 +123,7 @@ contract PolygonAssetERC721Tunnel is
     function _syncDeposit(bytes memory syncData) internal {
         (address to, uint256 id, bytes memory data) = abi.decode(syncData, (address, uint256, bytes));
         if (!childToken.exists(id)) childToken.mint(to, id, data);
-        else childToken.transfer(address(this), to, id, data);
+        else childToken.safeTransferFrom(address(this), to, id, data);
         emit Deposit(to, id, data);
     }
 
