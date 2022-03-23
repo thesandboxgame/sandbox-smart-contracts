@@ -7,14 +7,13 @@ import {
 import {withSnapshot} from '../../utils';
 import {Contract} from 'ethers';
 
-const name = `The Sandbox's Assets`;
-const symbol = 'ASSET';
-const baseUri = 'http://sandbox.testPolygonAsset.erc721';
+const name = `The Sandbox's ASSETs ERC721`;
+const symbol = 'ASSETERC721';
+
 export const setupAssetERC721Test = withSnapshot([], async function () {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {deployer, upgradeAdmin} = await getNamedAccounts();
   const [
-    childChainManager,
     trustedForwarder,
     adminRole,
     minter,
@@ -42,15 +41,7 @@ export const setupAssetERC721Test = withSnapshot([], async function () {
     adminRole
   );
 
-  // Set baseUri
-  await polygonAssetERC721AsAdmin.setBaseUri(baseUri);
-
   // Grant roles
-  const childChainManagerRole = await polygonAssetERC721.CHILD_MANAGER_ROLE();
-  await polygonAssetERC721AsAdmin.grantRole(
-    childChainManagerRole,
-    childChainManager
-  );
   const minterRole = await polygonAssetERC721.MINTER_ROLE();
   await polygonAssetERC721AsAdmin.grantRole(minterRole, minter);
   const polygonAssetERC721AsMinter = await ethers.getContract(
@@ -80,9 +71,6 @@ export const setupAssetERC721Test = withSnapshot([], async function () {
   };
 
   return {
-    childChainManager,
-    childChainManagerRole,
-    baseUri,
     symbol,
     name,
     polygonAssetERC721,
