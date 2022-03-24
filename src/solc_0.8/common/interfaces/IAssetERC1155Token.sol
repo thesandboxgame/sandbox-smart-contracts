@@ -16,6 +16,20 @@ interface IAssetERC1155Token {
         bytes calldata data
     ) external returns (uint256 id);
 
+    function mint(
+        address account,
+        uint256 id,
+        uint256 amount,
+        bytes calldata data
+    ) external;
+
+    function mintBatch(
+        address to,
+        uint256[] calldata ids,
+        uint256[] calldata amounts,
+        bytes calldata data
+    ) external;
+
     function mintMultiple(
         address creator,
         uint40 packId,
@@ -41,13 +55,6 @@ interface IAssetERC1155Token {
         address to,
         uint256 id,
         uint256 value,
-        bytes calldata data
-    ) external;
-
-    function safeBatchTransferFrom(
-        address from,
-        address to,
-        uint256[] calldata ids,
         bytes calldata data
     ) external;
 
