@@ -58,39 +58,6 @@ describe('AssetERC721.sol', function () {
       });
     });
     describe('minter', function () {
-      it('mint', async function () {
-        const fixtures = await setupAssetERC721Test();
-        const assetERC721AsMinter = await ethers.getContract(
-          'AssetERC721',
-          fixtures.minter
-        );
-        await expect(
-          assetERC721AsMinter['mint(address,uint256)'](fixtures.other, 123)
-        ).to.be.reverted;
-        await expect(
-          fixtures.assetERC721['mint(address,uint256)'](fixtures.other, 123)
-        ).to.be.reverted;
-
-        await fixtures.addMinter(
-          fixtures.adminRole,
-          fixtures.assetERC721,
-          fixtures.minter
-        );
-        const minterRole = await fixtures.assetERC721.MINTER_ROLE();
-        expect(await fixtures.assetERC721.hasRole(minterRole, fixtures.minter))
-          .to.be.true;
-        await expect(fixtures.assetERC721.ownerOf(123)).to.revertedWith(
-          'ERC721: owner query for nonexistent token'
-        );
-        await assetERC721AsMinter['mint(address,uint256)'](fixtures.other, 123);
-        expect(await fixtures.assetERC721.ownerOf(123)).to.be.equal(
-          fixtures.other
-        );
-        expect(await fixtures.assetERC721.exists(123)).to.be.true;
-        await expect(
-          assetERC721AsMinter['mint(address,uint256)'](fixtures.other, 123)
-        ).to.revertedWith('ERC721: token already minted');
-      });
       it('mint with metadata', async function () {
         const fixtures = await setupAssetERC721Test();
 
@@ -98,7 +65,6 @@ describe('AssetERC721.sol', function () {
         const dummyMetadataHash = ethers.utils.keccak256('0x42');
         const metadata = abiCoder.encode(['bytes32'], [dummyMetadataHash]);
 
-        // const metadata = ethers.utils.toUtf8Bytes('metadata');
         const assetERC721AsMinter = await ethers.getContract(
           'AssetERC721',
           fixtures.minter
@@ -145,7 +111,43 @@ describe('AssetERC721.sol', function () {
             metadata
           )
         ).to.revertedWith('ERC721: token already minted');
+        expect(await fixtures.assetERC721.metadataHashes(123)).to.be.equal(
+          dummyMetadataHash
+        );
       });
+    });
+    it('Can mint without metadata (although this is not the expected implementation)', async function () {
+      const fixtures = await setupAssetERC721Test();
+      const assetERC721AsMinter = await ethers.getContract(
+        'AssetERC721',
+        fixtures.minter
+      );
+      await expect(
+        assetERC721AsMinter['mint(address,uint256)'](fixtures.other, 123)
+      ).to.be.reverted;
+      await expect(
+        fixtures.assetERC721['mint(address,uint256)'](fixtures.other, 123)
+      ).to.be.reverted;
+
+      await fixtures.addMinter(
+        fixtures.adminRole,
+        fixtures.assetERC721,
+        fixtures.minter
+      );
+      const minterRole = await fixtures.assetERC721.MINTER_ROLE();
+      expect(await fixtures.assetERC721.hasRole(minterRole, fixtures.minter)).to
+        .be.true;
+      await expect(fixtures.assetERC721.ownerOf(123)).to.revertedWith(
+        'ERC721: owner query for nonexistent token'
+      );
+      await assetERC721AsMinter['mint(address,uint256)'](fixtures.other, 123);
+      expect(await fixtures.assetERC721.ownerOf(123)).to.be.equal(
+        fixtures.other
+      );
+      expect(await fixtures.assetERC721.exists(123)).to.be.true;
+      await expect(
+        assetERC721AsMinter['mint(address,uint256)'](fixtures.other, 123)
+      ).to.revertedWith('ERC721: token already minted');
     });
     it('metaTX trusted forwarder', async function () {
       const fixtures = await setupAssetERC721Test();
@@ -196,5 +198,15 @@ describe('AssetERC721.sol', function () {
         fixtures.dest
       );
     });
+    // TODO:
+    // Token exists
+    // setTokenMetadata - METADATA_ROLE only
+    // tokenURI
+
+    // BaseERC721 tests:
+    // Generic ERC721 test review
+    // Extended functions
+    // burnFrom
+    // burn - check BURNER_ROLE only
   });
 });
