@@ -22,6 +22,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
     uint256 private constant MAX_GEMS_AND_CATALYSTS = 256;
     uint256 internal constant MAX_UINT256 = ~uint256(0);
     bytes32 public constant TRUSTED_FORWARDER_ROLE = keccak256("TRUSTED_FORWARDER_ROLE");
+    bytes32 public constant SUPER_OPERATOR_ROLE = keccak256("SUPER_OPERATOR_ROLE");
 
     IGem[] internal _gems;
     ICatalyst[] internal _catalysts;
@@ -247,7 +248,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
     /// @dev verify that the caller is authorized for this function call.
     /// @param from The original signer of the transaction.
     function _checkAuthorization(address from) internal view {
-        require(hasRole(TRUSTED_FORWARDER_ROLE, _msgSender()), "AUTH_ACCESS_DENIED");
+        require(_msgSender() == from || hasRole(SUPER_OPERATOR_ROLE, _msgSender()), "AUTH_ACCESS_DENIED");
     }
 
     /// @dev Change the address of the trusted forwarder for meta-TX
