@@ -3,14 +3,26 @@ import {expect} from '../../../chai-setup';
 import {waitFor, withSnapshot} from '../../../utils';
 import catalysts from '../../../../data/catalysts';
 import {gemsAndCatalystsFixtures} from '../../../common/fixtures/gemAndCatalysts';
-import {deployments} from 'hardhat';
+import {deployments, ethers} from 'hardhat';
 
 const setupGemsAndCatalysts = withSnapshot(
-  ['GemsCatalystsRegistry'],
+  ['PolygonGemsCatalystsRegistry', 'PolygonCatalysts'],
   gemsAndCatalystsFixtures
 );
 
-describe('GemsCatalystsRegistry', function () {
+describe('GemsCatalystsRegistry0', function () {
+  it('getMaxGems for commonCatalyst should be 1', async function () {
+    const {
+      gemsCatalystsRegistry,
+      commonCatalyst,
+    } = await setupGemsAndCatalysts();
+    const catalystId = await commonCatalyst.catalystId();
+    const maxGems = await gemsCatalystsRegistry.getMaxGems(catalystId);
+    expect(maxGems).to.equal(catalysts[0].maxGems);
+  });
+});
+
+/* describe('GemsCatalystsRegistry', function () {
   it('getMaxGems for commonCatalyst should be 1', async function () {
     const {
       gemsCatalystsRegistry,
@@ -651,4 +663,4 @@ describe('GemsCatalystsRegistry', function () {
       )
     ).to.be.revertedWith('Ownable: caller is not the owner');
   });
-});
+}); */

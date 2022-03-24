@@ -16,7 +16,7 @@ contract ERC20UpgradableToken is ERC677Extension, WithPermit, ERC20BaseTokenUpgr
         __ERC20BaseTokenUpgradeable_init(name, symbol, trustedForwarder, admin);
     }
 
-    function mint(address to, uint256 amount) external onlyAdmin {
+    function mint(address to, uint256 amount) external onlyRole(DEFAULT_ADMIN_ROLE) {
         _mint(to, amount);
     }
 

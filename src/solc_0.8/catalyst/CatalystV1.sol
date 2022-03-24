@@ -4,7 +4,7 @@ pragma solidity 0.8.2;
 import "../common/interfaces/IAssetAttributesRegistry.sol";
 //import "../common/BaseWithStorage/ERC20/ERC20Token.sol";
 import "../common/BaseWithStorage/ERC20/ERC20UpgradableToken.sol";
-import "./interfaces//ICatalyst.sol";
+import "./interfaces/ICatalyst.sol";
 
 contract CatalystV1 is ICatalyst, ERC20UpgradableToken {
     uint16 public override catalystId;
