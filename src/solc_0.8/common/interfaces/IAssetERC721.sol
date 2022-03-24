@@ -1,12 +1,9 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-import {IERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC721/IERC721Upgradeable.sol";
 import {IERC721Base} from "./IERC721Base.sol";
 
-interface IPolygonAssetERC721 is IERC721Base {
-    event Minted(address indexed user, uint256 tokenId);
-
+interface IAssetERC721 is IERC721Base {
     function mint(address to, uint256 id) external override;
 
     function mint(
