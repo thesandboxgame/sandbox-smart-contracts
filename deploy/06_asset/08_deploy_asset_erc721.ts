@@ -16,7 +16,7 @@ const func: DeployFunction = async function (
     contract: 'AssetERC721',
     proxy: {
       owner: upgradeAdmin,
-      proxyContract: 'OpenZeppelinTransparentProxy',
+      proxyContract: 'OptimizedTransparentProxy',
       execute: {
         methodName: 'initialize',
         args: [TRUSTED_FORWARDER.address, assetAdmin],
