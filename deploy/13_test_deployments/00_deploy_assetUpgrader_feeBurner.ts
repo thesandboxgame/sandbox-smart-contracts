@@ -38,7 +38,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       args: [
         MockAssetAttributesRegistry.address,
         Sand.address,
-        Asset.address,
+        Asset.address, // TODO: asset contract split
+        Asset.address, // TODO: asset contract split
         GemsCatalystsRegistry.address,
         upgradeFee,
         gemAdditionFee,
