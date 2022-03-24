@@ -13,20 +13,26 @@ const exampleCatalystId = 5;
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const gemsAndCatalystsFixtures = async () => {
   const gemsCatalystsRegistry: Contract = await ethers.getContract(
-    'GemsCatalystsRegistry'
+    'PolygonGemsCatalystsRegistry'
   );
   const trustedForwarder = await ethers.getContract('TRUSTED_FORWARDER');
-  const sandContract: Contract = await ethers.getContract('Sand');
-  const powerGem: Contract = await ethers.getContract('Gem_POWER');
-  const defenseGem: Contract = await ethers.getContract('Gem_DEFENSE');
-  const speedGem: Contract = await ethers.getContract('Gem_SPEED');
-  const magicGem: Contract = await ethers.getContract('Gem_MAGIC');
-  const luckGem: Contract = await ethers.getContract('Gem_LUCK');
-  const commonCatalyst: Contract = await ethers.getContract('Catalyst_COMMON');
-  const rareCatalyst: Contract = await ethers.getContract('Catalyst_RARE');
-  const epicCatalyst: Contract = await ethers.getContract('Catalyst_EPIC');
+  //const sandContract: Contract = await ethers.getContract('PolygonSand');
+  const powerGem: Contract = await ethers.getContract('PolygonGem_POWER');
+  const defenseGem: Contract = await ethers.getContract('PolygonGem_DEFENSE');
+  const speedGem: Contract = await ethers.getContract('PolygonGem_SPEED');
+  const magicGem: Contract = await ethers.getContract('PolygonGem_MAGIC');
+  const luckGem: Contract = await ethers.getContract('PolygonGem_LUCK');
+  const commonCatalyst: Contract = await ethers.getContract(
+    'PolygonCatalyst_COMMON'
+  );
+  const rareCatalyst: Contract = await ethers.getContract(
+    'PolygonCatalyst_RARE'
+  );
+  const epicCatalyst: Contract = await ethers.getContract(
+    'PolygonCatalyst_EPIC'
+  );
   const legendaryCatalyst: Contract = await ethers.getContract(
-    'Catalyst_LEGENDARY'
+    'PolygonCatalyst_LEGENDARY'
   );
   const users = await getUnnamedAccounts();
   const {
@@ -34,74 +40,119 @@ export const gemsAndCatalystsFixtures = async () => {
     catalystMinter,
     gemMinter,
     gemsCatalystsRegistryAdmin,
+    upgradeAdmin,
   } = await getNamedAccounts();
   const catalystOwner = users[0];
   const gemOwner = users[0];
   const gemsCatalystsRegistrySuperOperator = users[1];
   const user3 = users[3];
 
-  await deployments.deploy(`Gem_Example`, {
+  await deployments.deploy(`PolygonGem_Example`, {
+    contract: 'GemV1',
+    from: gemOwner,
+    log: true, //put initializer
+    proxy: {
+      owner: upgradeAdmin,
+      proxyContract: 'OptimizedTransparentProxy',
+      execute: {
+        methodName: '__GemV1_init',
+        args: [
+          'Gem_Example',
+          'Gem_Example',
+          gemOwner,
+          gemOwner,
+          exampleGemId,
+          //gemsCatalystsRegistry.address,
+        ],
+      },
+    },
+  });
+
+  const gemExample: Contract = await ethers.getContract('PolygonGem_Example');
+
+  await deployments.deploy(`PolygonGem_NotInOrder`, {
     contract: 'GemV1',
     from: gemOwner,
     log: true,
-    args: [
-      'Gem_Example',
-      'Gem_Example',
-      gemOwner,
-      exampleGemId,
-      gemsCatalystsRegistry.address,
-    ],
+    proxy: {
+      owner: upgradeAdmin,
+      proxyContract: 'OptimizedTransparentProxy',
+      execute: {
+        methodName: '__GemV1_init',
+        args: [
+          'Gem_NotInOrder',
+          'Gem_NotInOrder',
+          gemOwner,
+          gemOwner,
+          notInOrderGemId,
+          //gemsCatalystsRegistry.address,
+        ],
+      },
+    },
   });
+  const gemNotInOrder: Contract = await ethers.getContract(
+    'PolygonGem_NotInOrder'
+  );
 
-  const gemExample: Contract = await ethers.getContract('Gem_Example');
+  const DefaultAttributes = await deployments.get(`PolygonDefaultAttributes`);
 
-  await deployments.deploy(`Gem_NotInOrder`, {
-    contract: 'GemV1',
-    from: gemOwner,
-    args: [
-      'Gem_NotInOrder',
-      'Gem_NotInOrder',
-      gemOwner,
-      notInOrderGemId,
-      gemsCatalystsRegistry.address,
-    ],
-  });
-  const gemNotInOrder: Contract = await ethers.getContract('Gem_NotInOrder');
-
-  const DefaultAttributes = await deployments.get(`DefaultAttributes`);
-
-  await deployments.deploy(`Catalyst_Example`, {
+  await deployments.deploy(`PolygonCatalyst_Example`, {
     contract: 'CatalystV1',
     from: catalystOwner,
-    args: [
-      'Catalyst_Example',
-      'Catalyst_Example',
-      catalystOwner,
-      5,
-      exampleCatalystId,
-      DefaultAttributes.address,
-      gemsCatalystsRegistry.address,
-    ],
+    proxy: {
+      owner: upgradeAdmin,
+      proxyContract: 'OptimizedTransparentProxy',
+      execute: {
+        methodName: '__CatalystV1_init',
+        args: [
+          'Gem_NotInOrder', //name
+          'Gem_NotInOrder', //symbol
+          catalystOwner, //trustedForwarder
+          /* gemsCatalystsRegistry.address, */
+          catalystMinter, //admin
+          5, //maxGems
+          exampleCatalystId, //catalystId
+          DefaultAttributes.address, //attributes
+        ],
+      },
+    },
   });
 
+  console.log('catalyst minter address in fixtures');
+  console.log(catalystMinter);
+
   const catalystExample: Contract = await ethers.getContract(
-    'Catalyst_Example'
+    'PolygonCatalyst_Example'
   );
+
   const gemsCatalystsUnit = '1000000000000000000';
   const mintingAmount = BigNumber.from('8').mul(
     BigNumber.from(gemsCatalystsUnit)
   );
+
+  console.log('CommonCat');
+
+  const adminRole = await commonCatalyst.DEFAULT_ADMIN_ROLE();
+  const boolRole = await commonCatalyst.hasRole(adminRole, catalystMinter);
+  console.log(boolRole);
+
   await commonCatalyst
     .connect(ethers.provider.getSigner(catalystMinter))
     .mint(catalystOwner, mintingAmount);
+
+  console.log('RareCat');
 
   await rareCatalyst
     .connect(ethers.provider.getSigner(catalystMinter))
     .mint(catalystOwner, mintingAmount);
 
+  console.log('EpicCat');
+
   await epicCatalyst
     .connect(ethers.provider.getSigner(catalystMinter))
     .mint(catalystOwner, mintingAmount);
+
+  console.log('LegCat');
 
   await legendaryCatalyst
     .connect(ethers.provider.getSigner(catalystMinter))
@@ -163,7 +214,7 @@ export const gemsAndCatalystsFixtures = async () => {
     ethers.provider.getSigner(deployer)
   );
   return {
-    sandContract,
+    //sandContract,
     gemsCatalystsRegistry,
     gemsCatalystsRegistrySuperOperator,
     powerGem,

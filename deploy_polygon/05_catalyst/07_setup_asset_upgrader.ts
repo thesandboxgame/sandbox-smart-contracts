@@ -5,10 +5,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments} = hre;
   const {execute, read} = deployments;
 
-  const AssetUpgrader = await deployments.get('AssetUpgrader');
+  const AssetUpgrader = await deployments.get('PolygonAssetUpgrader');
 
   const isAssetUpgraderSandSuperOperator = await read(
-    'Sand',
+    'PolygonSand',
     'isSuperOperator',
     AssetUpgrader.address
   );
@@ -16,7 +16,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   if (!isAssetUpgraderSandSuperOperator) {
     const currentAdmin = await read('Sand', 'getAdmin');
     await execute(
-      'Sand',
+      'PolygonSand',
       {from: currentAdmin, log: true},
       'setSuperOperator',
       AssetUpgrader.address,
@@ -25,15 +25,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 
   const isAssetUpgraderGemsCatalystsRegistrySuperOperator = await read(
-    'GemsCatalystsRegistry',
+    'PolygonGemsCatalystsRegistry',
     'isSuperOperator',
     AssetUpgrader.address
   );
 
   if (!isAssetUpgraderGemsCatalystsRegistrySuperOperator) {
-    const currentAdmin = await read('GemsCatalystsRegistry', 'getAdmin');
+    const currentAdmin = await read('PolygonGemsCatalystsRegistry', 'getAdmin');
     await execute(
-      'GemsCatalystsRegistry',
+      'PolygonGemsCatalystsRegistry',
       {from: currentAdmin, log: true},
       'setSuperOperator',
       AssetUpgrader.address,
@@ -42,9 +42,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.tags = ['AssetUpgrader', 'AssetUpgrader_setup', 'L2'];
+func.tags = ['PolygonAssetUpgrader', 'PolygonAssetUpgrader_setup', 'L2'];
 func.dependencies = [
-  'AssetUpgrader_deploy',
-  'Sand_deploy',
-  'GemsCatalystsRegistry_deploy',
+  'PolygonAssetUpgrader_deploy',
+  'PolygonSand_deploy',
+  'PolygonGemsCatalystsRegistry_deploy',
 ];

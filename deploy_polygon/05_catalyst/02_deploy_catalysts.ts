@@ -5,43 +5,46 @@ import catalysts from '../../data/catalysts';
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
-  const {upgradeAdmin} = await getNamedAccounts();
+  const {upgradeAdmin, catalystMinter} = await getNamedAccounts();
 
-  const DefaultAttributes = await deployments.get('DefaultAttributes');
-  const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
+  const DefaultAttributes = await deployments.get('PolygonDefaultAttributes');
+  const GemsCatalystsRegistry = await deployments.get(
+    'PolygonGemsCatalystsRegistry'
+  );
 
   const {catalystAdmin, deployer} = await getNamedAccounts();
+
   for (const catalyst of catalysts) {
-    console.log('is it working here');
-    await deploy(`Catalyst_${catalyst.symbol}`, {
-      contract: 'CatalystV1',
+    console.log(`deploying ${catalyst.symbol}`);
+    await deploy(`PolygonCatalyst_${catalyst.symbol}`, {
       from: deployer,
-      log: true,
+      contract: 'CatalystV1',
       proxy: {
         owner: upgradeAdmin,
         proxyContract: 'OpenZeppelinTransparentProxy',
         execute: {
           methodName: '__CatalystV1_init',
           args: [
-            `Sandbox ${catalyst.symbol} Catalysts`,
-            catalyst.symbol,
-            catalystAdmin,
-            catalyst.maxGems,
-            catalyst.catalystId,
-            DefaultAttributes.address,
-            GemsCatalystsRegistry.address,
+            `Sandbox ${catalyst.symbol} Catalysts`, //name
+            catalyst.symbol, //symbol
+            catalystAdmin, //trusted forwarder
+            catalystMinter, //admin
+            catalyst.maxGems, //maxGems
+            catalyst.catalystId, //catalystId
+            DefaultAttributes.address, //attributes
+            //GemsCatalystsRegistry.address,
           ],
         },
         upgradeIndex: 0,
       },
-
-      skipIfAlreadyDeployed: true,
+      log: true,
+      //skipIfAlreadyDeployed: true,
     });
   }
 };
 export default func;
-func.tags = ['Catalysts', 'Catalysts_deploy', 'L2'];
+func.tags = ['PolygonCatalysts', 'PolygonCatalysts_deploy', 'L2'];
 func.dependencies = [
-  'DefaultAttributes_deploy',
-  'GemsCatalystsRegistry_deploy',
+  'PolygonDefaultAttributes_deploy',
+  'PolygonGemsCatalystsRegistry_deploy',
 ];
