@@ -8,13 +8,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
 
   const AssetAttributesRegistry = await deployments.get(
-    'AssetAttributesRegistry'
+    'PolygonAssetAttributesRegistry'
   );
-<<<<<<< HEAD
   const Sand = await deployments.get('PolygonSand');
-=======
-  const Sand = await deployments.get('Sand');
->>>>>>> fixes in deployments
+
   const Asset = await deployments.get('Asset');
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
@@ -22,11 +19,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const {deployer, catalystAssetFeeRecipient} = await getNamedAccounts();
 
-<<<<<<< HEAD
   await deploy(`PolygonAssetUpgrader`, {
-=======
-  await deploy(`AssetUpgrader`, {
->>>>>>> fixes in deployments
     from: deployer,
     log: true,
     args: [
