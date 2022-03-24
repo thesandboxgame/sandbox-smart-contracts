@@ -8,15 +8,16 @@ import "../common/interfaces/IMintableERC1155.sol";
 
 // solhint-disable-next-line no-empty-blocks
 contract AssetERC1155 is AssetBaseERC1155, IMintableERC1155 {
+    event PredicateSet(address predicate);
+
     /// @notice fulfills the purpose of a constructor in upgradeable contracts
     function initialize(
         address trustedForwarder,
         address admin,
         address bouncerAdmin,
-        address predicate,
         uint8 chainIndex
     ) external {
-        init(trustedForwarder, admin, bouncerAdmin, predicate, chainIndex);
+        init(trustedForwarder, admin, bouncerAdmin, chainIndex);
     }
 
     /**
@@ -36,7 +37,7 @@ contract AssetERC1155 is AssetBaseERC1155, IMintableERC1155 {
     ) external override {
         require(_msgSender() == _predicate, "!PREDICATE");
         uint256 uriId = id & ERC1155ERC721Helper.URI_ID;
-        _metadataHash[uriId] = abi.decode(data, (bytes32)); // To Review
+        _metadataHash[uriId] = abi.decode(data, (bytes32));
         _mint(_msgSender(), account, id, amount, data);
     }
 
@@ -58,5 +59,13 @@ contract AssetERC1155 is AssetBaseERC1155, IMintableERC1155 {
             _metadataHash[uriId] = hashes[i]; // To Review
         }
         _mintBatch(to, ids, amounts, data);
+    }
+
+    /// @notice Set address which will have minting privelages on L1 which is currently limited to tunnels.
+    /// @param predicate address that will be given minting rights for L1.
+    function setPredicate(address predicate) external {
+        require(_msgSender() == _admin, "!ADMIN");
+        _predicate = predicate;
+        emit PredicateSet(predicate);
     }
 }

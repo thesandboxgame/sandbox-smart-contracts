@@ -41,7 +41,6 @@ const func: DeployFunction = async function (
           TRUSTED_FORWARDER.address,
           assetAdmin,
           assetBouncerAdmin,
-          assetAdmin,
           CHILD_CHAIN_MANAGER.address,
           1,
         ],

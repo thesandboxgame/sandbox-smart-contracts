@@ -58,14 +58,12 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         address trustedForwarder,
         address admin,
         address bouncerAdmin,
-        address predicate,
         uint8 chainIndex
     ) public {
         // one-time init of bitfield's previous versions
         _checkInit(1);
         _admin = admin;
         _bouncerAdmin = bouncerAdmin;
-        _predicate = predicate;
         __ERC2771Handler_initialize(trustedForwarder);
         _chainIndex = chainIndex;
     }
