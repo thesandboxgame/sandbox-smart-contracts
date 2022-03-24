@@ -13,14 +13,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {gemsCatalystsRegistryAdmin} = await getNamedAccounts();
 
   const isAssetMinterSuperOperator = await read(
-    'GemsCatalystsRegistry',
+    'PolygonGemsCatalystsRegistry',
     'isSuperOperator',
     AssetMinter.address
   );
 
   if (!isAssetMinterSuperOperator) {
     await execute(
-      'GemsCatalystsRegistry',
+      'PolygonGemsCatalystsRegistry',
       {from: gemsCatalystsRegistryAdmin, log: true},
       'setSuperOperator',
       AssetMinter.address,

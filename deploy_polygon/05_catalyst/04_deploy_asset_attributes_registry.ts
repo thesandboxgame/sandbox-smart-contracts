@@ -5,10 +5,12 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
-  const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
+  const GemsCatalystsRegistry = await deployments.get(
+    'PolygonGemsCatalystsRegistry'
+  );
 
   const {deployer, assetAttributesRegistryAdmin} = await getNamedAccounts();
-  await deploy(`AssetAttributesRegistry`, {
+  await deploy(`PolygonAssetAttributesRegistry`, {
     from: deployer,
     log: true,
     args: [
@@ -21,5 +23,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['AssetAttributesRegistry', 'AssetAttributesRegistry_deploy', 'L2'];
-func.dependencies = ['GemsCatalystsRegistry_deploy'];
+func.tags = [
+  'PolygonAssetAttributesRegistry',
+  'PolygonAssetAttributesRegistry_deploy',
+  'L2',
+];
+func.dependencies = ['PolygonGemsCatalystsRegistry_deploy'];
