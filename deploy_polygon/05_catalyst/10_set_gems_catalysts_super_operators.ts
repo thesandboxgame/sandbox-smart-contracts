@@ -12,9 +12,15 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 >>>>>>> fixes in deployments
   const {gemsCatalystsRegistryAdmin} = await getNamedAccounts();
 
+  const superOperatorRole = await read(
+    'PolygonGemsCatalystsRegistry',
+    'SUPER_OPERATOR_ROLE'
+  );
+
   const isAssetMinterSuperOperator = await read(
     'PolygonGemsCatalystsRegistry',
-    'isSuperOperator',
+    'hasRole',
+    superOperatorRole,
     AssetMinter.address
   );
 
@@ -22,9 +28,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     await execute(
       'PolygonGemsCatalystsRegistry',
       {from: gemsCatalystsRegistryAdmin, log: true},
-      'setSuperOperator',
-      AssetMinter.address,
-      true
+      'grantRole',
+      superOperatorRole,
+      AssetMinter.address
     );
   }
 };
