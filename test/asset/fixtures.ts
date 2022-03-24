@@ -25,7 +25,7 @@ export const setupAssetERC721Test = withSnapshot([], async function () {
     from: deployer,
     proxy: {
       owner: upgradeAdmin,
-      proxyContract: 'OpenZeppelinTransparentProxy',
+      proxyContract: 'OptimizedTransparentProxy',
       execute: {
         methodName: 'initialize',
         args: [trustedForwarder, adminRole],
