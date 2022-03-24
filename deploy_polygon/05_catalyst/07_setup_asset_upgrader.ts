@@ -5,23 +5,16 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments} = hre;
   const {execute, read} = deployments;
 
-<<<<<<< HEAD
   const AssetUpgrader = await deployments.get('PolygonAssetUpgrader');
 
   const isAssetUpgraderSandSuperOperator = await read(
     'PolygonSand',
-=======
-  const AssetUpgrader = await deployments.get('AssetUpgrader');
-
-  const isAssetUpgraderSandSuperOperator = await read(
-    'Sand',
->>>>>>> e1ae78b592945b1030300697087b4af58128b48f
     'isSuperOperator',
     AssetUpgrader.address
   );
 
   if (!isAssetUpgraderSandSuperOperator) {
-    const currentAdmin = await read('Sand', 'getAdmin');
+    const currentAdmin = await read('PolygonSand', 'getAdmin');
     await execute(
       'PolygonSand',
       {from: currentAdmin, log: true},

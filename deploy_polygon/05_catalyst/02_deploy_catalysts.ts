@@ -7,8 +7,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {upgradeAdmin, catalystMinter} = await getNamedAccounts();
 
-  const DefaultAttributes = await deployments.get('DefaultAttributes');
-  const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
+  const DefaultAttributes = await deployments.get('PolygonDefaultAttributes');
+  const GemsCatalystsRegistry = await deployments.get(
+    'PolygonGemsCatalystsRegistry'
+  );
 
   const {catalystAdmin, deployer} = await getNamedAccounts();
 
@@ -41,8 +43,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.tags = ['Catalysts', 'Catalysts_deploy', 'L2'];
+func.tags = ['PolygonCatalysts', 'PolygonCatalysts_deploy', 'L2'];
 func.dependencies = [
-  'DefaultAttributes_deploy',
-  'GemsCatalystsRegistry_deploy',
+  'PolygonDefaultAttributes_deploy',
+  'PolygonGemsCatalystsRegistry_deploy',
 ];

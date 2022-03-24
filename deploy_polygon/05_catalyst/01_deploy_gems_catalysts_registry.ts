@@ -26,5 +26,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['GemsCatalystsRegistry', 'GemsCatalystsRegistry_deploy', 'L2'];
+func.tags = [
+  'PolygonGemsCatalystsRegistry',
+  'PolygonGemsCatalystsRegistry_deploy',
+  'L2',
+];
 func.dependencies = ['TRUSTED_FORWARDER'];
