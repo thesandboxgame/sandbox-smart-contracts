@@ -9,7 +9,6 @@ const func: DeployFunction = async function (
   const {deployer, upgradeAdmin} = await getNamedAccounts();
   const {deploy} = deployments;
 
-  const ERC1155_PREDICATE = await deployments.get('ERC1155_PREDICATE');
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
 
   const ERC1155ERC721HelperLib = await deploy('ERC1155ERC721Helper', {
@@ -36,7 +35,6 @@ const func: DeployFunction = async function (
           TRUSTED_FORWARDER.address,
           deployer,
           deployer,
-          ERC1155_PREDICATE.address,
           0,
         ],
       },
