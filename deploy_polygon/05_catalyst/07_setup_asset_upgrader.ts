@@ -15,6 +15,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   );
 
   if (!isAssetUpgraderSandSuperOperator) {
+<<<<<<< HEAD
+=======
+    const currentAdmin = await read('PolygonSand', 'getAdmin');
+>>>>>>> fixing deployments
     await execute(
       'PolygonSand',
       {from: deployer, log: true},
