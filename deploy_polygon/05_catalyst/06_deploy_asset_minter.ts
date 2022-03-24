@@ -10,10 +10,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     'PolygonAssetAttributesRegistry'
   );
   const {deployer, assetMinterAdmin} = await getNamedAccounts();
-  const Asset = await deployments.get('PolygonAsset');
+  const AssetERC1155 = await deployments.get('PolygonAssetERC1155');
+  const AssetERC721 = await deployments.get('PolygonAssetERC721');
 
   const assetRegistryData = await read(
-    'PolygonAssetAttributesRegistry',
+    'AssetAttributesRegistry',
     'getCatalystRegistry'
   );
 
@@ -32,12 +33,13 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   ];
   const assetQuantitiesByTypeId = [artQuantity, propQuantity];
 
-  await deploy(`AssetMinter`, {
+  await deploy(`PolygonAssetMinter`, {
     from: deployer,
     log: true,
     args: [
       AssetAttributesRegistry.address,
-      Asset.address,
+      AssetERC721.address,
+      AssetERC1155.address,
       assetRegistryData,
       assetMinterAdmin,
       TRUSTED_FORWARDER.address,
@@ -48,9 +50,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['AssetMinter', 'AssetMinter_deploy', 'L2'];
+func.tags = ['PolygonAssetMinter', 'PolygonAssetMinter_deploy', 'L2'];
 func.dependencies = [
-  'AssetAttributesRegistry_deploy',
-  'Asset_deploy',
+  'PolygonAssetAttributesRegistry_deploy',
+  'PolygonAsset_deploy',
   'TRUSTED_FORWARDER',
 ];
