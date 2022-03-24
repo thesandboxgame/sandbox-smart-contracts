@@ -1,7 +1,7 @@
 import {expect} from 'chai';
 import {setupAssetERC721Test} from './fixtures';
 import {BigNumber} from 'ethers';
-describe.only('PolygonAssetERC721.sol differences with AssetERC721.sol', function () {
+describe('PolygonAssetERC721.sol differences with AssetERC721.sol', function () {
   describe('roles', function () {
     describe('admin', function () {
       it('admin role is set', async function () {
