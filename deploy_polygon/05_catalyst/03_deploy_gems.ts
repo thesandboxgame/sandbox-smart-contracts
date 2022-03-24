@@ -7,9 +7,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deploy} = deployments;
   const {upgradeAdmin} = await getNamedAccounts();
 
-  const GemsCatalystsRegistry = await deployments.get(
-    'PolygonGemsCatalystsRegistry'
-  );
+  const GemsCatalystsRegistry = await deployments.get('GemsCatalystsRegistry');
 
   const {gemMinter, deployer} = await getNamedAccounts();
 
@@ -39,5 +37,5 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   }
 };
 export default func;
-func.tags = ['PolygonGems', 'PolygonGems_deploy', 'L2'];
-func.dependencies = ['PolygonGemsCatalystsRegistry_deploy'];
+func.tags = ['Gems', 'Gems_deploy', 'L2'];
+func.dependencies = ['GemsCatalystsRegistry_deploy'];

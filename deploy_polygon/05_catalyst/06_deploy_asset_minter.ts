@@ -33,7 +33,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   ];
   const assetQuantitiesByTypeId = [artQuantity, propQuantity];
 
-  await deploy(`PolygonAssetMinter`, {
+  await deploy(`AssetMinter`, {
     from: deployer,
     log: true,
     args: [
@@ -50,9 +50,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   });
 };
 export default func;
-func.tags = ['PolygonAssetMinter', 'PolygonAssetMinter_deploy', 'L2'];
+func.tags = ['AssetMinter', 'AssetMinter_deploy', 'L2'];
 func.dependencies = [
-  'PolygonAssetAttributesRegistry_deploy',
-  'PolygonAsset_deploy',
+  'AssetAttributesRegistry_deploy',
+  'Asset_deploy',
   'TRUSTED_FORWARDER',
 ];

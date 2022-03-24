@@ -10,7 +10,11 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const AssetAttributesRegistry = await deployments.get(
     'AssetAttributesRegistry'
   );
+<<<<<<< HEAD
   const Sand = await deployments.get('PolygonSand');
+=======
+  const Sand = await deployments.get('Sand');
+>>>>>>> e1ae78b592945b1030300697087b4af58128b48f
   const Asset = await deployments.get('Asset');
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
