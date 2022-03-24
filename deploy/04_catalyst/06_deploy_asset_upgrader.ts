@@ -24,7 +24,8 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     args: [
       AssetAttributesRegistry.address,
       Sand.address,
-      Asset.address,
+      Asset.address, // TODO: change to 721 contract address; need to change deploy script order
+      Asset.address, // TODO: change to 1155 contract address; need to change deploy script order
       GemsCatalystsRegistry.address,
       upgradeFee,
       gemAdditionFee,
