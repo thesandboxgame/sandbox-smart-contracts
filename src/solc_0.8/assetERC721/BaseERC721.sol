@@ -6,6 +6,7 @@ import {ERC721Upgradeable} from "@openzeppelin/contracts-upgradeable/token/ERC72
 import {AccessControlUpgradeable} from "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
 import {IMintableERC721} from "../common/interfaces/IMintableERC721.sol";
 import {IERC721Token} from "../common/interfaces/IERC721Token.sol";
+import {IERC721ExtendedToken} from "../common/interfaces/IERC721ExtendedToken.sol";
 import {IERC721Minter} from "../common/interfaces/IERC721Minter.sol";
 
 abstract contract BaseERC721 is
@@ -13,6 +14,7 @@ abstract contract BaseERC721 is
     ERC721Upgradeable,
     IMintableERC721,
     IERC721Token,
+    IERC721ExtendedToken,
     IERC721Minter
 {
     uint256[50] private __gap1; // In case
@@ -50,6 +52,20 @@ abstract contract BaseERC721 is
         _safeMint(to, id, data);
     }
 
+    /// @notice Approve an operator to operate tokens on the sender's behalf.
+    /// @param from The address giving the approval.
+    /// @param operator The address receiving the approval.
+    /// @param id The id of the token.
+    function approveFor(
+        address from,
+        address operator,
+        uint256 id
+    ) external override(IERC721ExtendedToken) {
+        require(from != address(0), "ZERO_ADDRESS");
+        require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
+        approve(operator, id);
+    }
+
     /// @notice Set the approval for an operator to manage all the tokens of the sender.
     /// @param from The address giving the approval.
     /// @param operator The address receiving the approval.
@@ -58,7 +74,7 @@ abstract contract BaseERC721 is
         address from,
         address operator,
         bool approved
-    ) external {
+    ) external override(IERC721ExtendedToken) {
         require(from != address(0), "ZERO_ADDRESS");
         require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
         _setApprovalForAll(from, operator, approved);
@@ -67,20 +83,20 @@ abstract contract BaseERC721 is
     /// @notice Burns token with given `id`.
     /// @param from Address whose token is to be burned.
     /// @param id Token id which will be burned.
-    function burnFrom(address from, uint256 id) external override {
+    function burnFrom(address from, uint256 id) external override(IERC721ExtendedToken, IERC721Token) {
         require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
+        require(from == ERC721Upgradeable.ownerOf(id), "NOT_OWNER");
         _burn(id);
     }
 
     /// @notice Burns token with given `id`.
     /// @dev Used by default fx-portal tunnel which burns rather than locks.
     /// @param id The id of the token to be burned.
-    function burn(uint256 id) external onlyRole(BURNER_ROLE) {
+    function burn(uint256 id) external override(IERC721ExtendedToken) onlyRole(BURNER_ROLE) {
         _burn(id);
     }
 
-    /// @notice Transfer token with given id.
-    /// @dev Required by IMintableERC721.
+    /// @notice Transfer tokens with given ids ensuring the receiving contract has a receiver method.
     /// @param from Address whose token is to be transferred.
     /// @param to Recipient.
     /// @param tokenId The token id to be transferred.
@@ -90,6 +106,39 @@ abstract contract BaseERC721 is
         uint256 tokenId
     ) public override(ERC721Upgradeable, IMintableERC721, IERC721Token) {
         ERC721Upgradeable.safeTransferFrom(from, to, tokenId);
+    }
+
+    /// @param from The sender of the tokens.
+    /// @param to The recipient of the tokens.
+    /// @param ids The ids of the tokens to be transferred.
+    function batchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids
+    ) public override(IERC721ExtendedToken) {
+        uint256 numTokens = ids.length;
+        for (uint256 i = 0; i < numTokens; i++) {
+            uint256 id = ids[i];
+            ERC721Upgradeable.transferFrom(from, to, id);
+        }
+    }
+
+    /// @notice Transfer tokens with given ids ensuring the receiving contract has a receiver method.
+    /// @param from The sender of the tokens.
+    /// @param to The recipient of the tokens.
+    /// @param ids The ids of the tokens to be transferred.
+    /// @param data Additional data.
+    function safeBatchTransferFrom(
+        address from,
+        address to,
+        uint256[] calldata ids,
+        bytes calldata data
+    ) public override(IERC721ExtendedToken) {
+        uint256 numTokens = ids.length;
+        for (uint256 i = 0; i < numTokens; i++) {
+            uint256 id = ids[i];
+            ERC721Upgradeable.safeTransferFrom(from, to, id, data);
+        }
     }
 
     /// @notice Query if a token id exists.
