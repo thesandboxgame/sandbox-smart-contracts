@@ -10,6 +10,12 @@ import {Contract} from 'ethers';
 const name = `The Sandbox's ASSETs ERC721`;
 const symbol = 'ASSETERC721';
 
+// PolygonAssetERC721 enables minting via MINTER_ROLE only; MINTER_ROLE intended to be granted to:
+// Admin (migration), PolygonAssetERC721Tunnel (bridging) and AssetUpgrader contract (extraction).
+// Custom tunnel has been selected for several reasons: we need to lock the tokens rather than burn.
+// We also want to be able to have batch transfer functionality.
+// Minting with metadata must be implemented to retain the metadata hash.
+
 export const setupAssetERC721Test = withSnapshot([], async function () {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {deployer, upgradeAdmin} = await getNamedAccounts();
@@ -25,7 +31,7 @@ export const setupAssetERC721Test = withSnapshot([], async function () {
     from: deployer,
     proxy: {
       owner: upgradeAdmin,
-      proxyContract: 'OpenZeppelinTransparentProxy',
+      proxyContract: 'OptimizedTransparentProxy',
       execute: {
         methodName: 'initialize',
         args: [trustedForwarder, adminRole],

@@ -8,10 +8,6 @@ import {BaseERC721} from "../../../assetERC721/BaseERC721.sol";
 /// @dev This contract supports meta transactions.
 /// @dev This contract is final, don't inherit from it.
 contract PolygonAssetERC721 is BaseERC721 {
-    event Deposit(address indexed from, uint256 tokenId);
-    event DepositBatch(address indexed from, uint256[] tokenIds);
-    event WithdrawnBatch(address indexed user, uint256[] tokenIds);
-    event Withdrawn(address indexed user, uint256 tokenId);
     event Minted(address indexed user, uint256 tokenId);
 
     bytes32 public constant METADATA_ROLE = keccak256("METADATA_ROLE");
