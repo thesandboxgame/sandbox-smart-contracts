@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: MIT
 pragma solidity 0.8.2;
 
-interface IAssetERC1155Token {
+interface IAssetERC1155 {
     function changeBouncerAdmin(address newBouncerAdmin) external;
 
     function setBouncer(address bouncer, bool enabled) external;
