@@ -50,9 +50,9 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
     function batchTransferToL2(
         address to,
         uint256[] memory ids,
-        bytes memory data // TODO: check data format
+        bytes memory data // TODO: test data format
     ) public whenNotPaused() {
-        IAssetERC721(rootToken).batchTransferFrom(_msgSender(), address(this), ids); // TODO: check vs land tunnel
+        IAssetERC721(rootToken).safeBatchTransferFrom(_msgSender(), address(this), ids, data);
 
         for (uint256 index = 0; index < ids.length; index++) {
             bytes memory message = abi.encode(to, ids[index], data);
@@ -80,7 +80,7 @@ contract AssetERC721Tunnel is FxBaseRootTunnel, IERC721MandatoryTokenReceiver, E
     function _processMessageFromChild(bytes memory message) internal override {
         (address to, uint256[] memory ids, bytes memory data) = abi.decode(message, (address, uint256[], bytes));
         for (uint256 index = 0; index < ids.length; index++) {
-            IAssetERC721(rootToken).safeTransferFrom(address(this), to, ids[index], data); // TODO: check data format
+            IAssetERC721(rootToken).safeTransferFrom(address(this), to, ids[index], data); // TODO: test data format
             emit Withdraw(to, ids[index], data);
         }
     }

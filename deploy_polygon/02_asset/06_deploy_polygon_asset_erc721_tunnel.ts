@@ -49,8 +49,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       AssetERC721Tunnel.address
     );
   }
-
-  // TODO: add MINTER_ROLE on L2
 };
 
 export default func;
