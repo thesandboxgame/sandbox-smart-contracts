@@ -2,7 +2,7 @@
 pragma solidity 0.8.2;
 
 import "fx-portal/contracts/tunnel/FxBaseRootTunnel.sol";
-import "../../../common/interfaces/IAssetERC721.sol"; // TODO:
+import "../../../common/interfaces/IAssetERC721.sol";
 import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";

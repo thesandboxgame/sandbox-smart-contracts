@@ -2,7 +2,7 @@
 pragma solidity 0.8.2;
 
 import "fx-portal/contracts/tunnel/FxBaseRootTunnel.sol";
-import "../../../common/interfaces/IAssetERC1155Token.sol";
+import "../../../common/interfaces/IAssetERC1155.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 import "../../common/ERC1155Receiver.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
@@ -10,7 +10,7 @@ import "@openzeppelin/contracts-0.8/security/Pausable.sol";
 
 /// @title ASSETERC1155 bridge on L1
 contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler, Ownable, Pausable {
-    IAssetERC1155Token public rootToken;
+    IAssetERC1155 public rootToken;
 
     event Deposit(address user, uint256 id, uint256 value, bytes data);
     event Withdraw(address user, uint256 id, uint256 value, bytes data);
@@ -18,7 +18,7 @@ contract AssetERC1155Tunnel is FxBaseRootTunnel, ERC1155Receiver, ERC2771Handler
     constructor(
         address _checkpointManager,
         address _fxRoot,
-        IAssetERC1155Token _rootToken,
+        IAssetERC1155 _rootToken,
         address _trustedForwarder
     ) FxBaseRootTunnel(_checkpointManager, _fxRoot) {
         rootToken = _rootToken;

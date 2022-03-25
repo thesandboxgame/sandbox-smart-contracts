@@ -4,7 +4,7 @@ pragma solidity 0.8.2;
 import "fx-portal/contracts/tunnel/FxBaseChildTunnel.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "@openzeppelin/contracts-0.8/security/Pausable.sol";
-import "../../../common/interfaces/IAssetERC1155Token.sol";
+import "../../../common/interfaces/IAssetERC1155.sol";
 import "../../common/ERC1155Receiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 
@@ -12,7 +12,7 @@ import "./PolygonAssetERC1155.sol";
 
 /// @title ASSETERC1155 bridge on L2
 contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC2771Handler, Ownable, Pausable {
-    IAssetERC1155Token public childToken;
+    IAssetERC1155 public childToken;
 
     // still needed?
     // uint256 public maxGasLimitOnL1;
@@ -23,7 +23,7 @@ contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC277
 
     constructor(
         address _fxChild,
-        IAssetERC1155Token _childToken,
+        IAssetERC1155 _childToken,
         address _trustedForwarder
     ) FxBaseChildTunnel(_fxChild) {
         childToken = _childToken;
