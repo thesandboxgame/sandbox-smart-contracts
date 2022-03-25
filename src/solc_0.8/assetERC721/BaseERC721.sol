@@ -174,6 +174,7 @@ abstract contract BaseERC721 is
     }
 
     function _setTokenMetadataHash(uint256 id, bytes memory data) internal {
+        require(data.length > 0, "DATA_MISSING_METADATAHASH");
         metadataHashes[id] = abi.decode(data, (bytes32));
     }
 
