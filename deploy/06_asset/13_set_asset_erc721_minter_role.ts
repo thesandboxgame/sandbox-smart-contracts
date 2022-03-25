@@ -7,16 +7,15 @@ const func: DeployFunction = async function (
   hre: HardhatRuntimeEnvironment
 ): Promise<void> {
   const {deployments, getNamedAccounts} = hre;
-  const {sandAdmin} = await getNamedAccounts();
-  const adminRole = sandAdmin;
+  const {assetAdmin} = await getNamedAccounts();
 
-  const predicate = await deployments.get('MINTABLE_ERC721_PREDICATE');
+  const predicate = await deployments.get('AssetERC721Tunnel');
 
   // Grant roles.
   const minterRole = await deployments.read('AssetERC721', 'MINTER_ROLE');
   await deployments.execute(
     'AssetERC721',
-    {from: adminRole, log: true},
+    {from: assetAdmin, log: true},
     'grantRole',
     minterRole,
     predicate.address
@@ -24,6 +23,6 @@ const func: DeployFunction = async function (
 };
 
 export default func;
-func.tags = ['AssetERC721', 'AssetERC721_setup'];
-func.dependencies = ['AssetERC721_deploy', 'MINTABLE_ERC721_PREDICATE']; // TODO: change to tunnel
+func.tags = ['AssetERC721_setup'];
+func.dependencies = ['AssetERC721_deploy', 'AssetERC721Tunnel_deploy'];
 func.skip = skipUnlessTestnet;
