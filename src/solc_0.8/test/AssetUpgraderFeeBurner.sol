@@ -9,7 +9,7 @@ contract AssetUpgraderFeeBurner is AssetUpgrader {
         IAssetAttributesRegistry registry,
         IERC20Extended sand,
         IAssetERC721 assetERC721,
-        IAssetERC1155Token assetERC1155,
+        IAssetERC1155 assetERC1155,
         GemsCatalystsRegistry gemsCatalystsRegistry,
         uint256 _upgradeFee,
         uint256 _gemAdditionFee,
