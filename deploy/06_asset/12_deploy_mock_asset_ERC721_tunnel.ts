@@ -1,6 +1,6 @@
 import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
-import {skipUnlessTestnet} from '../../utils/network';
+import {skipUnlessTest} from '../../utils/network';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployments, getNamedAccounts} = hre;
@@ -12,9 +12,9 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const CHECKPOINTMANAGER = await deployments.get('CHECKPOINTMANAGER');
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
 
-  const AssetERC721Tunnel = await deploy('AssetERC721Tunnel', {
+  const MockAssetERC721Tunnel = await deploy('MockAssetERC721Tunnel', {
     from: deployer,
-    contract: 'AssetERC721Tunnel',
+    contract: 'MockAssetERC721Tunnel',
     args: [
       CHECKPOINTMANAGER.address,
       FXROOT.address,
@@ -25,37 +25,39 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     skipIfAlreadyDeployed: true,
   });
 
-  const PolygonAssetERC721Tunnel = await hre.companionNetworks[
-    'l2'
-  ].deployments.getOrNull('PolygonAssetERC721Tunnel');
-
   // get deployer on l2
   const {deployer: deployerOnL2} = await hre.companionNetworks[
     'l2'
   ].getNamedAccounts();
 
-  if (PolygonAssetERC721Tunnel) {
+  const MockPolygonAssetERC721Tunnel = await hre.companionNetworks[
+    'l2'
+  ].deployments.getOrNull('MockPolygonAssetERC721Tunnel');
+
+  if (MockPolygonAssetERC721Tunnel) {
     await hre.companionNetworks['l2'].deployments.execute(
-      'PolygonAssetERC721Tunnel',
+      'MockPolygonAssetERC721Tunnel',
       {from: deployerOnL2},
       'setFxRootTunnel',
-      AssetERC721Tunnel.address
+      MockAssetERC721Tunnel.address
     );
+
     await deployments.execute(
-      'AssetERC721Tunnel',
+      'MockAssetERC721Tunnel',
       {from: deployer},
       'setFxChildTunnel',
-      PolygonAssetERC721Tunnel.address
+      MockPolygonAssetERC721Tunnel.address
     );
   }
 };
 
 export default func;
-func.tags = ['AssetERC721Tunnel', 'AssetERC721Tunnel_deploy', 'L1'];
+func.tags = ['MockAssetERC721Tunnel', 'MockAssetERC721Tunnel_deploy', 'L1'];
 func.dependencies = [
+  'AssetERC721Tunnel',
   'AssetERC721',
   'FXROOT',
   'CHECKPOINTMANAGER',
   'TRUSTED_FORWARDER',
 ];
-func.skip = skipUnlessTestnet;
+func.skip = skipUnlessTest;

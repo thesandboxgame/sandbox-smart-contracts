@@ -5,7 +5,7 @@ import "fx-portal/contracts/tunnel/FxBaseChildTunnel.sol";
 import "@openzeppelin/contracts-0.8/access/Ownable.sol";
 import "@openzeppelin/contracts-0.8/security/Pausable.sol";
 
-import "../../../common/interfaces/IPolygonAssetERC721.sol"; // TODO:
+import "../../../common/interfaces/IPolygonAssetERC721.sol";
 import "../../../common/interfaces/IERC721MandatoryTokenReceiver.sol";
 import "../../../common/BaseWithStorage/ERC2771Handler.sol";
 
@@ -73,12 +73,12 @@ contract PolygonAssetERC721Tunnel is
         gasLimit += gasLimits[uint8(id)];
         require(gasLimit < maxGasLimitOnL1, "Exceeds gas limit on L1.");
         // lock the child token in this contract
-        childToken.safeTransferFrom(_msgSender(), address(this), id, data); // TODO: data format
+        childToken.safeTransferFrom(_msgSender(), address(this), id, data); // TODO: test data format
         emit Withdraw(to, id, data);
         _sendMessageToRoot(abi.encode(to, id, data));
     }
 
-    function batchWithdrawToRoot(
+    function batchWithdrawToL1(
         address to,
         uint256[] calldata ids,
         bytes memory data
@@ -90,7 +90,7 @@ contract PolygonAssetERC721Tunnel is
         require(gasLimit < maxGasLimitOnL1, "Exceeds gas limit on L1.");
         for (uint256 i = 0; i < ids.length; i++) {
             // lock the child tokens in this contract
-            childToken.safeTransferFrom(_msgSender(), address(this), ids[i], data); // TODO: data format
+            childToken.safeTransferFrom(_msgSender(), address(this), ids[i], data); // TODO: test data format
             emit Withdraw(to, ids[i], data);
         }
         _sendMessageToRoot(abi.encode(to, ids, data));
