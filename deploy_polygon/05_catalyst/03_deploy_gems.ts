@@ -14,7 +14,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {gemMinter, deployer} = await getNamedAccounts();
 
   for (const gem of gems) {
-    await deploy(`Gem_${gem.symbol}`, {
+    await deploy(`PolygonGem_${gem.symbol}`, {
       contract: 'GemV1',
       from: deployer,
       log: true,
