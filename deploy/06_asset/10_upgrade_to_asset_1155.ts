@@ -31,12 +31,7 @@ const func: DeployFunction = async function (
       proxyContract: 'OpenZeppelinTransparentProxy',
       execute: {
         methodName: 'initialize',
-        args: [
-          TRUSTED_FORWARDER.address,
-          deployer,
-          deployer,
-          0,
-        ],
+        args: [TRUSTED_FORWARDER.address, deployer, deployer, 0],
       },
       upgradeIndex: 1,
     },
