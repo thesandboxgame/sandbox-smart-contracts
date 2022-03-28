@@ -55,4 +55,6 @@ func.dependencies = [
   'PolygonAssetAttributesRegistry_deploy',
   'PolygonAssetERC1155',
   'TRUSTED_FORWARDER',
+  'PolygonAssetERC1155_deploy',
+  'PolygonAssetERC721',
 ];

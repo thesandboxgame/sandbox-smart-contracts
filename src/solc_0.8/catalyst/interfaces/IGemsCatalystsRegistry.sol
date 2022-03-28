@@ -3,8 +3,8 @@ pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
 import "../../common/interfaces/IAssetAttributesRegistry.sol";
-import "../Gem.sol";
-import "../Catalyst.sol";
+import "./IGem.sol";
+import "./ICatalyst.sol";
 
 interface IGemsCatalystsRegistry {
     function getAttributes(
@@ -39,7 +39,7 @@ interface IGemsCatalystsRegistry {
         uint256[] calldata amounts
     ) external;
 
-    function addGemsAndCatalysts(Gem[] calldata gems, Catalyst[] calldata catalysts) external;
+    function addGemsAndCatalysts(IGem[] calldata gems, ICatalyst[] calldata catalysts) external;
 
     function doesGemExist(uint16 gemId) external view returns (bool);
 

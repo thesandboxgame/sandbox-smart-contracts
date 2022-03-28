@@ -7,12 +7,21 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
 
-  const {deployer} = await getNamedAccounts();
+  const {deployer, upgradeAdmin} = await getNamedAccounts();
   await deploy(`PolygonGemsCatalystsRegistry`, {
     from: deployer,
     log: true,
-    args: [deployer, TRUSTED_FORWARDER.address],
     contract: `GemsCatalystsRegistry`,
+    proxy: {
+      owner: upgradeAdmin,
+      proxyContract: 'OpenZeppelinTransparentProxy',
+      execute: {
+        methodName: 'initV1',
+        args: [TRUSTED_FORWARDER.address, deployer],
+      },
+      upgradeIndex: 0,
+    },
+    skipIfAlreadyDeployed: true,
   });
 };
 export default func;
