@@ -4,11 +4,13 @@ import gems from '../../data/gems';
 import catalysts from '../../data/catalysts';
 
 const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
-  const {deployments} = hre;
+  const {deployments, getNamedAccounts} = hre;
   const {execute, read} = deployments;
 
   const catalystsToAdd = [];
   const gemsToAdd = [];
+
+  const {deployer} = await getNamedAccounts();
 
   for (const catalyst of catalysts) {
     const doesCatalystExist = await read(
@@ -35,10 +37,10 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
       gemsToAdd.push(address);
     }
   }
-  const currentAdmin = await read('PolygonGemsCatalystsRegistry', 'getAdmin');
+
   await execute(
     'PolygonGemsCatalystsRegistry',
-    {from: currentAdmin, log: true},
+    {from: deployer, log: true},
     'addGemsAndCatalysts',
     gemsToAdd,
     catalystsToAdd

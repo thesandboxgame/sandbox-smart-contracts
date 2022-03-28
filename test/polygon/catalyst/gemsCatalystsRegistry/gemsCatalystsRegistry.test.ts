@@ -6,7 +6,7 @@ import {gemsAndCatalystsFixtures} from '../../../common/fixtures/gemAndCatalysts
 import {deployments} from 'hardhat';
 
 const setupGemsAndCatalysts = withSnapshot(
-  ['GemsCatalystsRegistry'],
+  ['PolygonGemsCatalystsRegistry', 'PolygonCatalysts', 'PolygonSand'],
   gemsAndCatalystsFixtures
 );
 
@@ -37,14 +37,19 @@ describe('GemsCatalystsRegistry', function () {
     const catalystId = await commonCatalyst.catalystId();
     const totalSupplyBefore = await commonCatalyst.totalSupply();
     const balanceBeforeBurning = await commonCatalyst.balanceOf(catalystOwner);
+    console.log('the owner in test is');
+    console.log(catalystOwner);
+    console.log('balance before burning');
+    console.log(balanceBeforeBurning);
     const burnAmount = BigNumber.from('2');
-    await waitFor(
+    const receipt = await waitFor(
       gemsCatalystsRegistryAsCataystOwner.burnCatalyst(
         catalystOwner,
         catalystId,
         burnAmount
       )
     );
+    console.log(receipt);
     const totalSupplyAfter = await commonCatalyst.totalSupply();
     const balanceAfterBurning = await commonCatalyst.balanceOf(catalystOwner);
     expect(balanceAfterBurning).to.equal(balanceBeforeBurning.sub(burnAmount));
