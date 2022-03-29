@@ -6,6 +6,8 @@ interface IAssetERC1155 {
 
     function setBouncer(address bouncer, bool enabled) external;
 
+    function setPredicate(address predicate) external;
+
     function mint(
         address creator,
         uint40 packId,
