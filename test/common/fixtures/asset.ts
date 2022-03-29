@@ -10,12 +10,7 @@ import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-
 
 const {read, execute, deploy} = deployments;
 
-import {
-  setupUsers,
-  waitFor,
-  expectEventWithArgs,
-  findEvents,
-} from '../../utils';
+import {setupUsers, waitFor, expectEventWithArgs} from '../../utils';
 
 import {Contract} from 'ethers';
 import catalysts from '../../../data/catalysts';
@@ -47,6 +42,9 @@ export const assetFixtures = async function () {
     'TestMetaTxForwarder',
     TRUSTED_FORWARDER.address
   );
+
+  const MOCK_DATA =
+    '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000084e42535759334450000000000000000000000000000000000000000000000000';
 
   let id = 0;
   const ipfsHashString =
@@ -81,6 +79,20 @@ export const assetFixtures = async function () {
     await polygonAssetTunnel
       .connect(ethers.provider.getSigner(to))
       .batchTransferToL1(to, [tokenId], [value], '0x00');
+
+    // For Tests only
+    // TODO: mint only on L2 for tests
+
+    const admin = await Asset.getAdmin();
+    await Asset.connect(ethers.provider.getSigner(admin)).setPredicate(minter);
+    await waitFor(
+      Asset.connect(ethers.provider.getSigner(minter)).mint(
+        to,
+        tokenId,
+        value,
+        MOCK_DATA
+      )
+    );
 
     return tokenId;
   }
