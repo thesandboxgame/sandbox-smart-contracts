@@ -53,6 +53,6 @@ export default func;
 func.tags = ['PolygonAssetMinter', 'PolygonAssetMinter_deploy', 'L2'];
 func.dependencies = [
   'PolygonAssetAttributesRegistry_deploy',
-  'PolygonAsset_deploy',
+  'PolygonAssetERC1155',
   'TRUSTED_FORWARDER',
 ];
