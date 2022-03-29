@@ -42,7 +42,7 @@ func.tags = ['PolygonAssetUpgrader', 'PolygonAssetUpgrader_deploy', 'L2'];
 func.dependencies = [
   'PolygonAssetAttributesRegistry_deploy',
   'PolygonSand_deploy',
-  'PolygonAsset_deploy',
+  'PolygonAssetERC1155',
   'PolygonGemsCatalystsRegistry_deploy',
   'TRUSTED_FORWARDER',
 ];
