@@ -16,13 +16,13 @@ function testAsset() {
       const users = otherAccounts.slice(1);
 
       const assetContractAsBouncerAdmin = await ethers.getContract(
-        'AssetERC1155',
+        'Asset',
         assetBouncerAdmin
       );
 
       await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
 
-      const Asset = await ethers.getContract('AssetERC1155', minter);
+      const Asset = await ethers.getContract('Asset', minter);
 
       const receiverAddress = Asset.address;
 
