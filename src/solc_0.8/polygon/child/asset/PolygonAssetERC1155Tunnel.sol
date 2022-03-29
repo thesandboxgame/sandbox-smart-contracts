@@ -14,7 +14,7 @@ import "./PolygonAssetERC1155.sol";
 contract PolygonAssetERC1155Tunnel is FxBaseChildTunnel, ERC1155Receiver, ERC2771Handler, Ownable, Pausable {
     IAssetERC1155 public childToken;
 
-    // still needed?
+    // TODO
     // uint256 public maxGasLimitOnL1;
     // uint256 public maxGasLimitOnL2;
 

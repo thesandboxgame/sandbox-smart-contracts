@@ -52,33 +52,38 @@ export const assetFixtures = async function () {
   const ipfsHashString =
     '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
 
+  async function mintAsset(to: string, value: number, hash = ipfsHashString) {
+    // Asset to be minted
+    const creator = to;
+    const packId = ++id;
+    const supply = value;
+    const rarity = 0;
+    const owner = to;
+    const data = '0x';
 
+    const receipt = await waitFor(
+      polygonAssetERC1155
+        .connect(ethers.provider.getSigner(minter))
+        .mint(creator, packId, hash, supply, rarity, owner, data)
+    );
 
-  // async function mintMultiple(
-  //   to: string,
-  //   supplies: number[],
-  //   hash = ipfsHashString
-  // ): Promise<number[]> {
-  //   const creator = to;
-  //   const packId = ++id;
-  //   const rarity = 0;
-  //   const owner = to;
-  //   const data = '0x';
+    const transferEvent = await expectEventWithArgs(
+      polygonAssetERC1155,
+      receipt,
+      'TransferSingle'
+    );
+    const tokenId = transferEvent.args[3];
 
-  //   const tx = await Asset.mintMultiple(
-  //     creator,
-  //     packId,
-  //     hash,
-  //     supplies,
-  //     rarity,
-  //     owner,
-  //     data
-  //   );
-  //   const receipt = await tx.wait();
+    await polygonAssetERC1155
+      .connect(ethers.provider.getSigner(to))
+      .setApprovalForAll(polygonAssetTunnel.address, true);
 
-  //   return receipt.events.find((v: Event) => v.event === 'TransferBatch')
-  //     .args[3];
-  // }
+    await polygonAssetTunnel
+      .connect(ethers.provider.getSigner(to))
+      .batchTransferToL1(to, [tokenId], [value], '0x00');
+
+    return tokenId;
+  }
 
   const users = await setupUsers(otherAccounts, {Asset});
 
@@ -86,7 +91,7 @@ export const assetFixtures = async function () {
     Asset,
     users,
     minter,
-    // mintAsset,
+    mintAsset,
     assetTunnel,
     trustedForwarder,
   };
