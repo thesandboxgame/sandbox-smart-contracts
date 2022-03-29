@@ -8,14 +8,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const {deployer} = await getNamedAccounts();
 
   const PolygonAssetERC1155 = await deployments.get('PolygonAssetERC1155');
-  const FXROOT = await deployments.get('FXROOT');
+  const FXCHILD = await deployments.get('FXCHILD');
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
 
   const PolygonAssetERC1155Tunnel = await deploy('PolygonAssetERC1155Tunnel', {
     from: deployer,
     contract: 'PolygonAssetERC1155Tunnel',
     args: [
-      FXROOT.address,
+      FXCHILD.address,
       PolygonAssetERC1155.address,
       TRUSTED_FORWARDER.address,
     ],
@@ -49,10 +49,14 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 };
 
 export default func;
-func.tags = ['PolygonAssetERC1155Tunnel', 'PolygonAssetERC1155Tunnel_deploy', 'L1'];
+func.tags = [
+  'PolygonAssetERC1155Tunnel',
+  'PolygonAssetERC1155Tunnel_deploy',
+  'L1',
+];
 func.dependencies = [
   'PolygonAssetERC1155',
-  'FXROOT',
+  'FXCHILD',
   'CHECKPOINTMANAGER',
   'TRUSTED_FORWARDER',
 ];
