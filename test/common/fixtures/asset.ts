@@ -9,9 +9,13 @@ import {Wallet} from 'ethers';
 import {SignerWithAddress} from '@nomiclabs/hardhat-ethers/dist/src/signer-with-address';
 
 const {read, execute, deploy} = deployments;
-import {Event} from '@ethersproject/contracts';
 
-import {setupUsers, waitFor} from '../../utils';
+import {
+  setupUsers,
+  waitFor,
+  expectEventWithArgs,
+  findEvents,
+} from '../../utils';
 
 import {Contract} from 'ethers';
 import catalysts from '../../../data/catalysts';
@@ -27,92 +31,64 @@ export const assetFixtures = async function () {
 
   const {assetBouncerAdmin} = await getNamedAccounts();
 
-  const assetContractAsBouncerAdmin = await ethers.getContract(
-    'AssetERC1155',
+  const polygonAssetERC1155 = await ethers.getContract(
+    'PolygonAssetERC1155',
     assetBouncerAdmin
   );
-  await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
-  const Asset = await ethers.getContract('AssetERC1155', minter);
-  const predicate = await ethers.getContract('ERC1155_PREDICATE');
+  await waitFor(polygonAssetERC1155.setBouncer(minter, true));
+
+  const Asset = await ethers.getContract('Asset', minter);
+  const assetTunnel = await ethers.getContract('AssetERC1155Tunnel');
+  const polygonAssetTunnel = await ethers.getContract(
+    'PolygonAssetERC1155Tunnel'
+  );
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const trustedForwarder = await ethers.getContractAt(
     'TestMetaTxForwarder',
     TRUSTED_FORWARDER.address
   );
 
-  // Set predicate Asset
-  try {
-    await waitFor(predicate.setAsset(Asset.address));
-  } catch (e) {
-    console.log(e);
-  }
-
   let id = 0;
   const ipfsHashString =
     '0x78b9f42c22c3c8b260b781578da3151e8200c741c6b7437bafaff5a9df9b403e';
 
-  async function mintAsset(to: string, value: number, hash = ipfsHashString) {
-    // Asset to be minted
-    const creator = to;
-    const packId = ++id;
-    const supply = value;
-    const rarity = 0;
-    const owner = to;
-    const data = '0x';
 
-    let receipt;
-    try {
-      receipt = await waitFor(
-        Asset.mint(creator, packId, hash, supply, rarity, owner, data)
-      );
-    } catch (e) {
-      console.log(e);
-    }
 
-    const event = receipt?.events?.filter(
-      (event: Event) => event.event === 'TransferSingle'
-    )[0];
-    if (!event) {
-      throw new Error('no TransferSingle event after mint single');
-    }
-    return event.args?.id;
-  }
+  // async function mintMultiple(
+  //   to: string,
+  //   supplies: number[],
+  //   hash = ipfsHashString
+  // ): Promise<number[]> {
+  //   const creator = to;
+  //   const packId = ++id;
+  //   const rarity = 0;
+  //   const owner = to;
+  //   const data = '0x';
 
-  async function mintMultiple(
-    to: string,
-    supplies: number[],
-    hash = ipfsHashString
-  ): Promise<number[]> {
-    const creator = to;
-    const packId = ++id;
-    const rarity = 0;
-    const owner = to;
-    const data = '0x';
+  //   const tx = await Asset.mintMultiple(
+  //     creator,
+  //     packId,
+  //     hash,
+  //     supplies,
+  //     rarity,
+  //     owner,
+  //     data
+  //   );
+  //   const receipt = await tx.wait();
 
-    const tx = await Asset.mintMultiple(
-      creator,
-      packId,
-      hash,
-      supplies,
-      rarity,
-      owner,
-      data
-    );
-    const receipt = await tx.wait();
-
-    return receipt.events.find((v: Event) => v.event === 'TransferBatch')
-      .args[3];
-  }
+  //   return receipt.events.find((v: Event) => v.event === 'TransferBatch')
+  //     .args[3];
+  // }
 
   const users = await setupUsers(otherAccounts, {Asset});
 
   return {
     Asset,
     users,
-    mintAsset,
-    mintMultiple,
+    minter,
+    // mintAsset,
+    assetTunnel,
     trustedForwarder,
-    predicate,
   };
 };
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
