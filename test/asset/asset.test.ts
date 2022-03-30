@@ -112,14 +112,14 @@ describe('AssetERC1155.sol', function () {
     expect(chainIndex).to.be.equal(1);
   });
 
-  // it('can get the URI for an NFT', async function () {
-  //   const {Asset, users, mintAsset} = await setupAsset();
-  //   const tokenId = await mintAsset(users[1].address, 1);
-  //   const URI = await Asset.callStatic.tokenURI(tokenId);
-  //   expect(URI).to.be.equal(
-  //     'ipfs://bafybeidyxh2cyiwdzczgbn4bk6g2gfi6qiamoqogw5bxxl5p6wu57g2ahy/0.json'
-  //   );
-  // });
+  it('can get the URI for an asset of amount 1', async function () {
+    const {Asset, users, mintAsset} = await setupAsset();
+    const tokenId = await mintAsset(users[1].address, 1);
+    const URI = await Asset.callStatic.tokenURI(tokenId);
+    expect(URI).to.be.equal(
+      'ipfs://bafybeiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaea/0.json'
+    );
+  });
 
   it('can get the URI for a FT', async function () {
     const {Asset, users, mintAsset} = await setupAsset();
@@ -137,40 +137,6 @@ describe('AssetERC1155.sol', function () {
       'NFT_!EXIST_||_FT_!MINTED'
     );
   });
-
-  it('can burn ERC1155 asset', async function () {
-    const {Asset, users, mintAsset} = await setupAsset();
-    const tokenId = await mintAsset(users[0].address, 20);
-    await waitFor(
-      users[0].Asset['burnFrom(address,uint256,uint256)'](
-        users[0].address,
-        tokenId,
-        10
-      )
-    );
-    const balance = await Asset['balanceOf(address,uint256)'](
-      users[0].address,
-      tokenId
-    );
-    expect(balance).to.be.equal(10);
-  });
-
-  // it('can burn ERC721 asset', async function () {
-  //   const {Asset, users, mintAsset} = await setupAsset();
-  //   const tokenId = await mintAsset(users[0].address, 1);
-  //   await waitFor(
-  //     users[0].Asset['burnFrom(address,uint256,uint256)'](
-  //       users[0].address,
-  //       tokenId,
-  //       1
-  //     )
-  //   );
-  //   const balance = await Asset['balanceOf(address,uint256)'](
-  //     users[0].address,
-  //     tokenId
-  //   );
-  //   expect(balance).to.be.equal(0);
-  // });
 
   describe('AssetERC1155: MetaTransactions', function () {
     it('can transfer by metaTx', async function () {

@@ -90,7 +90,7 @@ describe('PolygonAsset.sol', function () {
     expect(chainIndex).to.be.equal(1);
   });
 
-  it('can get the URI for an NFT', async function () {
+  it('can get the URI for an asset with amount 1', async function () {
     const {PolygonAssetERC1155, users, mintAsset} = await setupPolygonAsset();
     const tokenId = await mintAsset(users[1].address, 1);
     const URI = await PolygonAssetERC1155.callStatic.tokenURI(tokenId);
