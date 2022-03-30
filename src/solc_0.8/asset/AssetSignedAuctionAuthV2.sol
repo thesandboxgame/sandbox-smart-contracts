@@ -167,7 +167,14 @@ contract AssetSignedAuctionAuthV2 is ERC1654Constants, ERC1271Constants, TheSand
 
     /// @notice claim offer using EIP712 and EIP1271 signature verification scheme
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferViaEIP1271(ClaimSellerOfferRequest memory input) external payable {
+    function claimSellerOfferViaEIP1271(ClaimSellerOfferRequest memory input)
+        external
+        payable
+        isAuthValid(
+            input.backendSignature,
+            _hashAuction(input.seller, input.token, input.auctionData, input.ids, input.amounts)
+        )
+    {
         _verifyParameters(
             input.buyer,
             input.seller,
