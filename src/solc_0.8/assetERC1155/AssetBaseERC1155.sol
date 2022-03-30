@@ -159,19 +159,6 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
         _setApprovalForAll(_msgSender(), operator, approved);
     }
 
-    /// @notice Burns `amount` tokens of type `id` from `from`.
-    /// @param from address whose token is to be burnt.
-    /// @param id token type which will be burnt.
-    /// @param amount amount of token to burn.
-    function burnFrom(
-        address from,
-        uint256 id,
-        uint256 amount
-    ) external {
-        require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
-        _burn(from, id, amount);
-    }
-
     /// @notice Returns the current administrator in charge of minting rights.
     /// @return the current minting administrator in charge of minting rights.
     function getBouncerAdmin() external view returns (address) {
@@ -253,11 +240,11 @@ abstract contract AssetBaseERC1155 is WithSuperOperators, IERC1155 {
     }
 
     function wasEverMinted(uint256 id) public view returns (bool) {
-        return
-            ((id & ERC1155ERC721Helper.PACK_INDEX) <
-                ((id & ERC1155ERC721Helper.PACK_NUM_FT_TYPES) /
-                    ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
-            _metadataHash[id & ERC1155ERC721Helper.URI_ID] != 0;
+        // TODO: discuss
+        // ((id & ERC1155ERC721Helper.PACK_INDEX) <
+        //     ((id & ERC1155ERC721Helper.PACK_NUM_FT_TYPES) /
+        //         ERC1155ERC721Helper.PACK_NUM_FT_TYPES_OFFSET_MULTIPLIER)) &&
+        return _metadataHash[id & ERC1155ERC721Helper.URI_ID] != 0;
     }
 
     /// @notice A distinct Uniform Resource Identifier (URI) for a given asset.

@@ -15,7 +15,6 @@ import gems from '../../../data/gems';
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export const assetFixtures = async function () {
-  // await asset_regenerate_and_distribute(hre);
   const unnamedAccounts = await getUnnamedAccounts();
   const otherAccounts = [...unnamedAccounts];
   const minter = otherAccounts[0];

@@ -6,7 +6,12 @@ import {
   getUnnamedAccounts,
 } from 'hardhat';
 
-import {setupUsers, waitFor, withSnapshot} from '../../utils';
+import {
+  setupUsers,
+  waitFor,
+  withSnapshot,
+  expectEventWithArgs,
+} from '../../utils';
 
 import {
   assetFixtures,
@@ -14,7 +19,6 @@ import {
 } from '../../common/fixtures/asset';
 
 const polygonAssetFixtures = async function () {
-  // await asset_regenerate_and_distribute(hre);
   const unnamedAccounts = await getUnnamedAccounts();
   const otherAccounts = [...unnamedAccounts];
   const minter = otherAccounts[0];
@@ -22,30 +26,23 @@ const polygonAssetFixtures = async function () {
 
   const {assetBouncerAdmin} = await getNamedAccounts();
 
-  const assetContractAsBouncerAdmin = await ethers.getContract(
+  const PolygonAssetERC1155 = await ethers.getContract(
     'PolygonAssetERC1155',
     assetBouncerAdmin
   );
+  await waitFor(PolygonAssetERC1155.setBouncer(minter, true));
 
-  await waitFor(assetContractAsBouncerAdmin.setBouncer(minter, true));
-  const assetSignedAuctionAuthContract = await ethers.getContract(
-    'AssetSignedAuctionAuth'
-  );
-  const Sand = await ethers.getContract('SandBaseToken');
-  const Asset = await ethers.getContract('PolygonAssetERC1155', minter);
-  const childChainManager = await ethers.getContract('CHILD_CHAIN_MANAGER');
+  const Asset = await ethers.getContract('Asset', minter);
+  const assetTunnel = await ethers.getContract('AssetERC1155Tunnel');
+
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const trustedForwarder = await ethers.getContractAt(
     'TestMetaTxForwarder',
     TRUSTED_FORWARDER.address
   );
 
-  // Set childChainManager Asset
-  try {
-    await waitFor(childChainManager.setPolygonAsset(Asset.address));
-  } catch (e) {
-    console.log(e);
-  }
+  const MOCK_DATA =
+    '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000084e42535759334450000000000000000000000000000000000000000000000000';
 
   let id = 0;
   const ipfsHashString =
@@ -60,60 +57,38 @@ const polygonAssetFixtures = async function () {
     const owner = to;
     const data = '0x';
 
-    let receipt;
-    try {
-      receipt = await waitFor(
-        Asset.mint(creator, packId, hash, supply, rarity, owner, data)
-      );
-    } catch (e) {
-      console.log(e);
-    }
-
-    const event = receipt?.events?.filter(
-      (event: Event) => event.event === 'TransferSingle'
-    )[0];
-    if (!event) {
-      throw new Error('no TransferSingle event after mint single');
-    }
-    return event.args?.id;
-  }
-
-  async function mintMultiple(
-    to: string,
-    supplies: number[],
-    hash = ipfsHashString
-  ): Promise<number[]> {
-    const creator = to;
-    const packId = ++id;
-    const rarity = 0;
-    const owner = to;
-    const data = '0x';
-
-    const tx = await Asset.mintMultiple(
-      creator,
-      packId,
-      hash,
-      supplies,
-      rarity,
-      owner,
-      data
+    const receipt = await waitFor(
+      PolygonAssetERC1155.connect(ethers.provider.getSigner(minter)).mint(
+        creator,
+        packId,
+        hash,
+        supply,
+        rarity,
+        owner,
+        data
+      )
     );
-    const receipt = await tx.wait();
-    return receipt.events.find((v: Event) => v.event === 'TransferBatch')
-      .args[3];
+
+    const transferEvent = await expectEventWithArgs(
+      PolygonAssetERC1155,
+      receipt,
+      'TransferSingle'
+    );
+    const tokenId = transferEvent.args[3];
+
+    return tokenId;
   }
 
   const users = await setupUsers(otherAccounts, {Asset});
 
   return {
     Asset,
+    PolygonAssetERC1155,
     users,
+    minter,
     mintAsset,
-    mintMultiple,
+    assetTunnel,
     trustedForwarder,
-    childChainManager,
-    assetSignedAuctionAuthContract,
-    Sand,
   };
 };
 
@@ -126,7 +101,13 @@ async function gemsAndCatalystsFixtureL2() {
 }
 
 export const setupPolygonAsset = withSnapshot(
-  ['PolygonAssetERC1155', 'Asset', 'AssetSignedAuctionAuth', 'SandBaseToken'],
+  [
+    'PolygonAssetERC1155',
+    'Asset',
+    'AssetERC1155Tunnel',
+    'AssetSignedAuctionAuth',
+    'SandBaseToken',
+  ],
   polygonAssetFixtures
 );
 
