@@ -79,6 +79,19 @@ contract PolygonAssetERC1155 is AssetBaseERC1155, IChildToken {
         _mintBatch(owner, ids, supplies, data);
     }
 
+    /// @notice Burns `amount` tokens of type `id` from `from`.
+    /// @param from address whose token is to be burnt.
+    /// @param id token type which will be burnt.
+    /// @param amount amount of token to burn.
+    function burnFrom(
+        address from,
+        uint256 id,
+        uint256 amount
+    ) external {
+        require(from == _msgSender() || isApprovedForAll(from, _msgSender()), "!AUTHORIZED");
+        _burn(from, id, amount);
+    }
+
     /// @notice called when token is deposited to root chain
     /// @dev Should be callable only by ChildChainManager
     /// @dev Should handle deposit by minting the required tokenId(s) for user
