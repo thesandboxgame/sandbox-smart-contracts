@@ -11,7 +11,7 @@ import {BigNumber} from '@ethersproject/bignumber';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {MultiClaim, AssetHash} from '../lib/merkleTreeHelper';
 const {deployments, getNamedAccounts} = hre;
-const {execute, catchUnknownSigner, read} = deployments;
+const {execute, catchUnknownSigner} = deployments;
 
 const args = process.argv.slice(2);
 const multiGiveawayName = args[0];
@@ -61,18 +61,12 @@ const func: DeployFunction = async function () {
   const ids = [];
   const values = [];
   for (const assetId in assetIdsCount) {
-    const balance: BigNumber = await read(
-      'Asset',
-      'balanceOf(address,uint256)',
-      MultiGiveaway.address,
-      assetId
-    );
     const assetCount = BigNumber.from(assetIdsCount[assetId]);
-    if (balance.lt(assetCount)) {
-      ids.push(assetId);
-      values.push(assetCount.sub(balance).toNumber());
-    }
+
+    ids.push(assetId);
+    values.push(assetCount.toNumber());
   }
+
   if (ids.length > 0) {
     console.log(claimFile, JSON.stringify(assetIdsCount, null, '  '));
     await catchUnknownSigner(
