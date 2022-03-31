@@ -1,4 +1,4 @@
-import {Event} from '@ethersproject/contracts';
+// import {Event} from '@ethersproject/contracts';
 import {
   deployments,
   ethers,
@@ -11,6 +11,7 @@ import {
   waitFor,
   withSnapshot,
   expectEventWithArgs,
+  setupUser,
 } from '../../utils';
 
 import {
@@ -19,6 +20,7 @@ import {
 } from '../../common/fixtures/asset';
 
 const polygonAssetFixtures = async function () {
+  const {deployer} = await getNamedAccounts();
   const unnamedAccounts = await getUnnamedAccounts();
   const otherAccounts = [...unnamedAccounts];
   const minter = otherAccounts[0];
@@ -34,12 +36,31 @@ const polygonAssetFixtures = async function () {
 
   const Asset = await ethers.getContract('Asset', minter);
   const assetTunnel = await ethers.getContract('AssetERC1155Tunnel');
-
+  const polygonAssetTunnel = await ethers.getContract(
+    'PolygonAssetERC1155Tunnel'
+  );
+  const FxRoot = await ethers.getContract('FXROOT');
+  const FxChild = await ethers.getContract('FXCHILD');
+  const CheckpointManager = await ethers.getContract('CHECKPOINTMANAGER');
   const TRUSTED_FORWARDER = await deployments.get('TRUSTED_FORWARDER');
   const trustedForwarder = await ethers.getContractAt(
     'TestMetaTxForwarder',
     TRUSTED_FORWARDER.address
   );
+
+  const deployerAccount = await setupUser(deployer, {
+    PolygonAssetERC1155,
+    Asset,
+    FxRoot,
+    FxChild,
+    CheckpointManager,
+    polygonAssetTunnel,
+    assetTunnel,
+  });
+
+  await deployerAccount.FxRoot.setFxChild(FxChild.address);
+  await deployerAccount.PolygonAssetERC1155.setPolygonLandTunnel(polygonAssetTunnel.address);
+  await deployerAccount.PolygonAssetERC1155.setTrustedForwarder(trustedForwarder.address);
 
   const MOCK_DATA =
     '0x000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000084e42535759334450000000000000000000000000000000000000000000000000';
