@@ -30,7 +30,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             catalyst.maxGems, //maxGems
             catalyst.catalystId, //catalystId
             DefaultAttributes.address, //attributes
-            //GemsCatalystsRegistry.address,
+            GemsCatalystsRegistry.address,
           ],
         },
         upgradeIndex: 0,
