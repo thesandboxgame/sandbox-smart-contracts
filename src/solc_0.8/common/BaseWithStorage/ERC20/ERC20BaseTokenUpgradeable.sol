@@ -140,7 +140,7 @@ abstract contract ERC20BaseTokenUpgradeable is
         address owner,
         address spender,
         uint256 amount
-    ) public override returns (bool success) {
+    ) public virtual override returns (bool success) {
         require(_msgSender() == owner || hasRole(SUPER_OPERATOR_ROLE, _msgSender()), "NOT_AUTHORIZED");
         _approveFor(owner, spender, amount);
         return true;

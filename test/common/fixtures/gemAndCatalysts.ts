@@ -63,7 +63,7 @@ export const gemsAndCatalystsFixtures = async () => {
           deployer,
           gemMinter, //trusted forwarder
           exampleGemId,
-          //gemsCatalystsRegistry.address,
+          gemsCatalystsRegistry.address,
         ],
       },
     },
@@ -86,7 +86,7 @@ export const gemsAndCatalystsFixtures = async () => {
           deployer,
           gemMinter,
           notInOrderGemId,
-          //gemsCatalystsRegistry.address,
+          gemsCatalystsRegistry.address,
         ],
       },
     },
@@ -109,11 +109,11 @@ export const gemsAndCatalystsFixtures = async () => {
           'Gem_NotInOrder', //name
           'Gem_NotInOrder', //symbol
           deployer, //trustedForwarder
-          /* gemsCatalystsRegistry.address, */
           catalystAdmin, //admin
           5, //maxGems
           exampleCatalystId, //catalystId
           DefaultAttributes.address, //attributes
+          gemsCatalystsRegistry.address,
         ],
       },
     },
@@ -232,5 +232,7 @@ export const gemsAndCatalystsFixtures = async () => {
     gemsCatalystsRegistryAsGemMinter,
     gemsCatalystsRegistryAsDeployer,
     trustedForwarder,
+    deployer,
+    upgradeAdmin,
   };
 };

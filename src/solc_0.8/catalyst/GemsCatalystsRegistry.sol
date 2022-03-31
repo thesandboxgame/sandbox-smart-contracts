@@ -2,21 +2,29 @@
 pragma solidity 0.8.2;
 pragma experimental ABIEncoderV2;
 
-import "@openzeppelin/contracts-0.8/access/Ownable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol"; //Ownable.sol;
 import "./interfaces/IGem.sol";
 import "./interfaces/ICatalyst.sol";
 import "../common/interfaces/IERC20Extended.sol";
 import "./interfaces/IGemsCatalystsRegistry.sol";
 import "../common/BaseWithStorage/ERC2771Handler.sol";
-import "@openzeppelin/contracts-0.8/access/AccessControl.sol";
-import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
+//import "@openzeppelin/contracts-0.8/access/AccessControl.sol";
+//import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "hardhat/console.sol";
 
 /// @notice Contract managing the Gems and Catalysts
 /// Each Gems and Catalyst must be registered here.
 /// Each new Gem get assigned a new id (starting at 1)
 /// Each new Catalyst get assigned a new id (starting at 1)
-contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownable, AccessControl, Initializable {
+contract GemsCatalystsRegistry is
+    ERC2771Handler,
+    IGemsCatalystsRegistry,
+    OwnableUpgradeable,
+    AccessControlUpgradeable
+    /* AccessControl
+    Initializable */
+{
     uint256 private constant MAX_GEMS_AND_CATALYSTS = 256;
     uint256 internal constant MAX_UINT256 = ~uint256(0);
     bytes32 public constant TRUSTED_FORWARDER_ROLE = keccak256("TRUSTED_FORWARDER_ROLE");
@@ -31,6 +39,7 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         _setupRole(DEFAULT_ADMIN_ROLE, admin);
         _setupRole(TRUSTED_FORWARDER_ROLE, trustedForwarder);
         __ERC2771Handler_initialize(trustedForwarder);
+        __Ownable_init();
     }
 
     /// @notice Returns the values for each gem included in a given asset.
@@ -211,11 +220,11 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
 
     function _setGemsAndCatalystsAllowance(uint256 allowanceValue) internal {
         for (uint256 i = 0; i < _gems.length; i++) {
-            _gems[i].approve(address(this), allowanceValue);
+            _gems[i].approveFor(_msgSender(), address(this), allowanceValue);
         }
 
         for (uint256 i = 0; i < _catalysts.length; i++) {
-            _catalysts[i].approve(address(this), allowanceValue);
+            _catalysts[i].approveFor(_msgSender(), address(this), allowanceValue);
         }
     }
 
@@ -255,11 +264,11 @@ contract GemsCatalystsRegistry is ERC2771Handler, IGemsCatalystsRegistry, Ownabl
         emit TrustedForwarderChanged(trustedForwarder);
     }
 
-    function _msgSender() internal view override(Context, ERC2771Handler) returns (address sender) {
+    function _msgSender() internal view override(ContextUpgradeable, ERC2771Handler) returns (address sender) {
         return ERC2771Handler._msgSender();
     }
 
-    function _msgData() internal view override(Context, ERC2771Handler) returns (bytes calldata) {
+    function _msgData() internal view override(ContextUpgradeable, ERC2771Handler) returns (bytes calldata) {
         return ERC2771Handler._msgData();
     }
 }

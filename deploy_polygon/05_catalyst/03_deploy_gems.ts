@@ -28,7 +28,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
             deployer, //trustedforwarder
             gemMinter,
             gem.gemId,
-            /* GemsCatalystsRegistry.address, */ //MAYBE IS ADMIN
+            GemsCatalystsRegistry.address,
           ],
         },
         upgradeIndex: 0,
