@@ -95,6 +95,10 @@ describe('GemsCatalystsRegistry', function () {
       user3,
     } = await setupGemsAndCatalysts();
 
+    console.log(gemsCatalystsRegistryAsUser3.address);
+    console.log(user3);
+    console.log(gemsCatalystsRegistry.address);
+
     await gemsCatalystsRegistryAsUser3.setGemsandCatalystsMaxAllowance();
 
     expect(
@@ -453,20 +457,31 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry,
       gemsCatalystsRegistryAsRegAdmin,
       gemOwner,
+      deployer,
+      upgradeAdmin,
     } = await setupGemsAndCatalysts();
 
     const addresses = [];
     const result = await deployments.deploy(`Gem_MaxLimit`, {
-      contract: 'Gem',
+      contract: 'GemV1',
       from: gemOwner,
       log: true,
-      args: [
-        `Gem_MaxLimit`,
-        `Gem_MaxLimit`,
-        gemOwner,
-        255,
-        gemsCatalystsRegistry.address,
-      ],
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OpenZeppelinTransparentProxy',
+        execute: {
+          methodName: '__GemV1_init',
+          args: [
+            `Gem_MaxLimit`,
+            `Gem_MaxLimit`,
+            deployer, //trustedforwarder
+            gemOwner,
+            255,
+            gemsCatalystsRegistry.address,
+          ],
+        },
+        upgradeIndex: 0,
+      },
     });
     // In order to speed up test we deploy only one gem contract and try to add max of it
     for (let i = 6; i < 253; i++) {
@@ -484,20 +499,31 @@ describe('GemsCatalystsRegistry', function () {
       gemsCatalystsRegistry,
       gemsCatalystsRegistryAsRegAdmin,
       gemOwner,
+      deployer,
+      upgradeAdmin,
     } = await setupGemsAndCatalysts();
 
     const addresses = [];
     const result = await deployments.deploy(`Gem_MaxLimit`, {
-      contract: 'Gem',
+      contract: 'GemV1',
       from: gemOwner,
       log: true,
-      args: [
-        `Gem_MaxLimit`,
-        `Gem_MaxLimit`,
-        gemOwner,
-        255,
-        gemsCatalystsRegistry.address,
-      ],
+      proxy: {
+        owner: upgradeAdmin,
+        proxyContract: 'OpenZeppelinTransparentProxy',
+        execute: {
+          methodName: '__GemV1_init',
+          args: [
+            `Gem_MaxLimit`,
+            `Gem_MaxLimit`,
+            deployer, //trustedforwarder
+            gemOwner,
+            255,
+            gemsCatalystsRegistry.address,
+          ],
+        },
+        upgradeIndex: 0,
+      },
     });
     // In order to speed up test we deploy only one gem contract and try to add max -1 of it
     for (let i = 6; i < 252; i++) {
@@ -643,12 +669,15 @@ describe('GemsCatalystsRegistry', function () {
     } = await setupGemsAndCatalysts();
     const initialTrustedForwarder = await gemsCatalystsRegistryAsDeployer.getTrustedForwarder();
     expect(initialTrustedForwarder).to.equal(trustedForwarder.address);
+    console.log('initial forwarder ' + initialTrustedForwarder);
 
     await waitFor(
       gemsCatalystsRegistryAsDeployer.setTrustedForwarder(powerGem.address)
     );
+
     const newTrustedForwarder = await gemsCatalystsRegistryAsDeployer.getTrustedForwarder();
     expect(newTrustedForwarder).to.equal(powerGem.address);
+    console.log('new forwarder ' + newTrustedForwarder);
 
     await expect(
       gemsCatalystsRegistryAsCataystMinter.setTrustedForwarder(
