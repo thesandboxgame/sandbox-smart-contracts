@@ -6,15 +6,16 @@ import "@openzeppelin/contracts-0.8/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-0.8/utils/Address.sol";
 import "../common/Libraries/SigUtil.sol";
 import "../common/Libraries/PriceUtil.sol";
-import "../asset/AssetV2.sol";
 import "../common/Base/TheSandbox712.sol";
 import "../common/BaseWithStorage/MetaTransactionReceiver.sol";
 import "../common/interfaces/ERC1271.sol";
 import "../common/interfaces/ERC1271Constants.sol";
 import "../common/interfaces/ERC1654.sol";
 import "../common/interfaces/ERC1654Constants.sol";
+import "../common/interfaces/IAuthValidator.sol";
+import "../common/interfaces/IERC1155.sol";
 
-contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbox712, MetaTransactionReceiver {
+contract AssetSignedAuctionAuthV2 is ERC1654Constants, ERC1271Constants, TheSandbox712, MetaTransactionReceiver {
     struct ClaimSellerOfferRequest {
         address buyer;
         address payable seller;
@@ -24,6 +25,7 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
         uint256[] ids;
         uint256[] amounts;
         bytes signature;
+        bytes backendSignature;
     }
 
     enum SignatureType {DIRECT, EIP1654, EIP1271}
@@ -56,18 +58,20 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
 
     mapping(address => mapping(uint256 => uint256)) public claimed;
 
-    AssetV2 public _asset;
+    IAuthValidator internal _authValidator;
+    IERC1155 public _asset;
     uint256 public _fee10000th = 0;
     address payable public _feeCollector;
 
     event FeeSetup(address feeCollector, uint256 fee10000th);
 
     constructor(
-        AssetV2 asset,
+        IERC1155 asset,
         address admin,
         address initialMetaTx,
         address payable feeCollector,
-        uint256 fee10000th
+        uint256 fee10000th,
+        address authValidator
     ) TheSandbox712() {
         _asset = asset;
         _feeCollector = feeCollector;
@@ -75,6 +79,13 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
         emit FeeSetup(feeCollector, fee10000th);
         _admin = admin;
         _setMetaTransactionProcessor(initialMetaTx, true);
+        _authValidator = IAuthValidator(authValidator);
+    }
+
+    // check backend signature to avoid front-running
+    modifier isAuthValid(bytes memory signature, bytes32 hashedData) {
+        require(_authValidator.isAuthValid(signature, hashedData), "INVALID_AUTH");
+        _;
     }
 
     /// @notice set fee parameters
@@ -116,7 +127,14 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
 
     /// @notice claim offer using EIP712
     /// @param input Claim Seller Offer Request
-    function claimSellerOffer(ClaimSellerOfferRequest memory input) external payable {
+    function claimSellerOffer(ClaimSellerOfferRequest memory input)
+        external
+        payable
+        isAuthValid(
+            input.backendSignature,
+            _hashAuction(input.seller, input.token, input.auctionData, input.ids, input.amounts)
+        )
+    {
         _verifyParameters(
             input.buyer,
             input.seller,
@@ -149,7 +167,14 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
 
     /// @notice claim offer using EIP712 and EIP1271 signature verification scheme
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferViaEIP1271(ClaimSellerOfferRequest memory input) external payable {
+    function claimSellerOfferViaEIP1271(ClaimSellerOfferRequest memory input)
+        external
+        payable
+        isAuthValid(
+            input.backendSignature,
+            _hashAuction(input.seller, input.token, input.auctionData, input.ids, input.amounts)
+        )
+    {
         _verifyParameters(
             input.buyer,
             input.seller,
@@ -182,7 +207,14 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
 
     /// @notice claim offer using EIP712 and EIP1654 signature verification scheme
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferViaEIP1654(ClaimSellerOfferRequest memory input) external payable {
+    function claimSellerOfferViaEIP1654(ClaimSellerOfferRequest memory input)
+        external
+        payable
+        isAuthValid(
+            input.backendSignature,
+            _hashAuction(input.seller, input.token, input.auctionData, input.ids, input.amounts)
+        )
+    {
         _verifyParameters(
             input.buyer,
             input.seller,
@@ -215,7 +247,14 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
 
     /// @notice claim offer using Basic Signature
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferUsingBasicSig(ClaimSellerOfferRequest memory input) external payable {
+    function claimSellerOfferUsingBasicSig(ClaimSellerOfferRequest memory input)
+        external
+        payable
+        isAuthValid(
+            input.backendSignature,
+            _hashAuction(input.seller, input.token, input.auctionData, input.ids, input.amounts)
+        )
+    {
         _verifyParameters(
             input.buyer,
             input.seller,
@@ -248,7 +287,14 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
 
     /// @notice claim offer using Basic Signature and EIP1271 signature verification scheme
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferUsingBasicSigViaEIP1271(ClaimSellerOfferRequest memory input) external payable {
+    function claimSellerOfferUsingBasicSigViaEIP1271(ClaimSellerOfferRequest memory input)
+        external
+        payable
+        isAuthValid(
+            input.backendSignature,
+            _hashAuction(input.seller, input.token, input.auctionData, input.ids, input.amounts)
+        )
+    {
         _verifyParameters(
             input.buyer,
             input.seller,
@@ -281,7 +327,14 @@ contract AssetSignedAuctionAuth is ERC1654Constants, ERC1271Constants, TheSandbo
 
     /// @notice claim offer using Basic Signature and EIP1654 signature verification scheme
     /// @param input Claim Seller Offer Request
-    function claimSellerOfferUsingBasicSigViaEIP1654(ClaimSellerOfferRequest memory input) external payable {
+    function claimSellerOfferUsingBasicSigViaEIP1654(ClaimSellerOfferRequest memory input)
+        external
+        payable
+        isAuthValid(
+            input.backendSignature,
+            _hashAuction(input.seller, input.token, input.auctionData, input.ids, input.amounts)
+        )
+    {
         _verifyParameters(
             input.buyer,
             input.seller,
