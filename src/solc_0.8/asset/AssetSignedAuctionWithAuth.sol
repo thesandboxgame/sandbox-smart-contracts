@@ -15,7 +15,7 @@ import "../common/interfaces/ERC1654Constants.sol";
 import "../common/interfaces/IAuthValidator.sol";
 import "../common/interfaces/IERC1155.sol";
 
-contract AssetSignedAuctionAuthV2 is ERC1654Constants, ERC1271Constants, TheSandbox712, MetaTransactionReceiver {
+contract AssetSignedAuctionWithAuth is ERC1654Constants, ERC1271Constants, TheSandbox712, MetaTransactionReceiver {
     struct ClaimSellerOfferRequest {
         address buyer;
         address payable seller;
