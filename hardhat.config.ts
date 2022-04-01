@@ -223,6 +223,10 @@ const config: HardhatUserConfig = {
       rinkeby: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
       goerli: '0x5BC3D5A39a50BE2348b9C529f81aE79f00945897', // Leon account on demo.sandbox
     },
+    sandboxFoundation: {
+      default: 4,
+      mainnet: '0x8FFA64FB50559c3Ff09a1022b84B2c5233ed8068',
+    },
     extraCatalystAndGemMinter: {
       default: null,
       mainnet: null,

@@ -11,7 +11,7 @@ import {BigNumber} from '@ethersproject/bignumber';
 import {DeployFunction} from 'hardhat-deploy/types';
 import {MultiClaim, AssetHash} from '../lib/merkleTreeHelper';
 const {deployments, getNamedAccounts} = hre;
-const {execute, catchUnknownSigner} = deployments;
+const {execute, catchUnknownSigner, read} = deployments;
 
 const args = process.argv.slice(2);
 const multiGiveawayName = args[0];
@@ -55,7 +55,7 @@ const func: DeployFunction = async function () {
   const json: Array<MultiClaim> = fs.readJSONSync(path);
   const assetIdsCount = getAssets(json);
   const MultiGiveaway = await deployments.get(multiGiveawayName);
-  const {sandboxAccount, sandSaleBeneficiary} = await getNamedAccounts();
+  const {sandboxAccount, sandboxFoundation} = await getNamedAccounts();
   const owner = assetHolder || sandboxAccount;
   // Send ERC1155
   const ids = [];
@@ -90,11 +90,14 @@ const func: DeployFunction = async function () {
     if (address.toLocaleLowerCase() != sandContract.address.toLocaleLowerCase())
       continue;
     const amount = erc20Hash[address];
-    console.log(address, amount.toString());
+    console.log('sand rewards');
+    console.log(amount.toString());
+    console.log('foundation balance');
+    console.log((await read('Sand', {}, 'balanceOf', sandboxFoundation)).toString());
     await catchUnknownSigner(
       execute(
         'Sand',
-        {from: sandSaleBeneficiary, log: true},
+        {from: sandboxFoundation, log: true},
         'transfer',
         MultiGiveaway.address,
         amount
