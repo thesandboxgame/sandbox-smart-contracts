@@ -93,7 +93,9 @@ const func: DeployFunction = async function () {
     console.log('sand rewards');
     console.log(amount.toString());
     console.log('foundation balance');
-    console.log((await read('Sand', {}, 'balanceOf', sandboxFoundation)).toString());
+    console.log(
+      (await read('Sand', {}, 'balanceOf', sandboxFoundation)).toString()
+    );
     await catchUnknownSigner(
       execute(
         'Sand',
